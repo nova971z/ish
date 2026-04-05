@@ -416,12 +416,24 @@
     }
 
     if (dom.pdpTitle) dom.pdpTitle.textContent = product.title;
-    if (dom.pdpTag) dom.pdpTag.textContent = product.brand + (product.tag ? ' • ' + product.tag : '');
+    if (dom.pdpTag) dom.pdpTag.textContent = product.brand + (product.tag ? ' \u00B7 ' + product.tag : '');
     if (dom.pdpDesc) dom.pdpDesc.textContent = product.description || product.desc || '';
     if (dom.pdpImg) {
       dom.pdpImg.src = product.img || 'images/placeholder.svg';
       dom.pdpImg.alt = product.title;
     }
+
+    // 3D model viewer
+    var viewer = document.getElementById('pdp3d');
+    if (viewer) {
+      var modelSrc = product.model || 'models/dewalt-optimized.glb';
+      viewer.setAttribute('src', modelSrc);
+      viewer.setAttribute('alt', product.title);
+      if (product.img) viewer.setAttribute('poster', product.img);
+    }
+
+    // Scroll animation for landing sections
+    initPdpScrollAnimations();
 
     // Price (TTC + HT)
     if (dom.pdpPrice) {
@@ -487,6 +499,47 @@
       } else {
         dom.pdpRelated.innerHTML = '';
       }
+    }
+  }
+
+  // ── PDP scroll animations (Apple-style fade-up) ────────────
+
+  var pdpObserver = null;
+
+  function initPdpScrollAnimations() {
+    // Clean up previous observer
+    if (pdpObserver) { pdpObserver.disconnect(); pdpObserver = null; }
+
+    // Reset all sections to hidden
+    var sections = document.querySelectorAll('.pdp-section[data-animate]');
+    sections.forEach(function (s) { s.classList.remove('visible'); });
+
+    // Hide scroll hint on scroll
+    var scrollHint = document.getElementById('pdpScrollHint');
+    var hintHidden = false;
+    function hideHint() {
+      if (!hintHidden && scrollHint) {
+        scrollHint.style.opacity = '0';
+        scrollHint.style.transition = 'opacity .4s ease';
+        hintHidden = true;
+      }
+    }
+
+    // IntersectionObserver for fade-up
+    if ('IntersectionObserver' in window) {
+      pdpObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            hideHint();
+          }
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+
+      sections.forEach(function (s) { pdpObserver.observe(s); });
+    } else {
+      // Fallback: show all
+      sections.forEach(function (s) { s.classList.add('visible'); });
     }
   }
 

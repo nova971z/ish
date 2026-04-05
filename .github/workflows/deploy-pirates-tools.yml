@@ -41,6 +41,7 @@ jobs:
           cp pirates-tools/.nojekyll _site/
           cp -r pirates-tools/icons _site/
           cp -r pirates-tools/images _site/
+          cp -r pirates-tools/models _site/
           echo "--- Files in _site ---"
           find _site -type f | sort
 
