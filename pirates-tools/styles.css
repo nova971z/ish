@@ -428,19 +428,20 @@ body.menu-open { overflow: hidden; }
     overflow: visible;
 }
 
-/* Glow behind the logo — on the hero section, NOT the container that scales */
+/* Glow behind the logo — tightly contained, not visible on background */
 #hero::before, .hero-full::before {
     content: '';
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 70vmin;
-    height: 70vmin;
+    width: 38vmin;
+    height: 38vmin;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(212,175,55,.20) 0%, rgba(212,175,55,.08) 40%, transparent 70%);
+    background: radial-gradient(circle, rgba(212,175,55,.25) 0%, rgba(212,175,55,.12) 30%, rgba(212,175,55,.04) 55%, transparent 70%);
     z-index: 0;
     pointer-events: none;
+    filter: blur(8px);
 }
 
 /* Smooth transition from hero to content */
@@ -1954,40 +1955,41 @@ position: relative;
 width: 92px;
 height: 92px;
 border-radius: 50%;
-display: block;
+display: flex;
+align-items: center;
+justify-content: center;
 overflow: hidden;
 background: rgba(255,255,255,.08);
-border: 1px solid var(--border);
+border: 2px solid rgba(255,255,255,.10);
 -webkit-backdrop-filter: blur(8px);
 backdrop-filter: blur(8px);
 box-shadow: 0 8px 22px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.12);
-transition: transform .16s ease, box-shadow .16s ease, background .16s ease, border-color .16s ease;
+transition: transform .2s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease;
 -webkit-mask-image: -webkit-radial-gradient(white, black);
 mask-image: radial-gradient(white, white);
 }
 
 .brand__bubble img, .brand__img, .brand__logo {
 position: absolute;
-inset: 0;
-width: 100%;
-height: 100%;
+inset: 4px;
+width: calc(100% - 8px);
+height: calc(100% - 8px);
 display: block;
 max-width: none;
 max-height: none;
 object-fit: cover;
 object-position: center;
+border-radius: 50%;
 image-rendering: -webkit-optimize-contrast;
 filter: drop-shadow(0 1px 2px rgba(0,0,0,.3));
 }
 
 .brand:focus-visible .brand__bubble,
 .brand:hover .brand__bubble {
-outline: 2px solid var(--brand);
-outline-offset: 2px;
-transform: translateY(-2px) scale(1.03);
-background: rgba(255,255,255,.14);
-border-color: rgba(25,211,255,.45);
-box-shadow: 0 0 16px 6px rgba(25,211,255,.22), 0 12px 26px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.18);
+transform: translateY(-2px) scale(1.05);
+background: rgba(255,255,255,.10);
+border-color: rgba(139,92,246,.6);
+box-shadow: 0 0 14px 4px rgba(139,92,246,.35), 0 0 6px 1px rgba(139,92,246,.2), 0 10px 22px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.15);
 outline: none;
 }
 
@@ -2036,14 +2038,15 @@ mask-image: radial-gradient(white, white);
 
 #brandGrid .brand__bubble img, #brandGrid .brand__img, #brandGrid .brand__logo {
 position: absolute;
-inset: 0;
-width: 100%;
-height: 100%;
+inset: 4px;
+width: calc(100% - 8px);
+height: calc(100% - 8px);
 display: block !important;
 max-width: none;
 max-height: none;
 object-fit: cover;
 object-position: center;
+border-radius: 50%;
 image-rendering: -webkit-optimize-contrast;
 filter: drop-shadow(0 1px 2px rgba(0,0,0,.3));
 }

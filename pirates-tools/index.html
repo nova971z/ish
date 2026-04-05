@@ -35,8 +35,8 @@
     @media (min-width:680px){ .brand-grid{ grid-template-columns:repeat(3,minmax(0,1fr))!important; } }
     .brand{ background:transparent!important; border:0!important; padding:0!important; }
     .brand__bubble{ width:92px; height:92px; border-radius:50%; overflow:hidden;
-      background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); display:block; }
-    .brand__bubble img,.brand__logo{ width:100%; height:100%; object-fit:cover; }
+      background:rgba(255,255,255,.06); border:2px solid rgba(255,255,255,.10); display:flex; align-items:center; justify-content:center; }
+    .brand__bubble img,.brand__logo{ width:calc(100% - 8px); height:calc(100% - 8px); object-fit:cover; border-radius:50%; }
   </style>
 
   <!-- Hero : animation de scroll integree -->
@@ -186,9 +186,8 @@
   <main id="app" role="main">
 
     <!-- HOME -->
-    <section id="view-home" class="view" data-route="/" role="region" aria-labelledby="home-h1">
+    <section id="view-home" class="view" data-route="/" role="region">
       <div class="container">
-        <h1 id="home-h1" tabindex="-1">Bienvenue</h1>
         <ul class="brand-grid" data-home-brands></ul>
         <p style="margin:0 0 1rem;color:#9fb4c5">Choisissez une marque ou explorez le catalogue.</p>
         <div id="brandGrid" class="brand-grid brand-grid--3col" role="list" data-bind="brands"></div>
@@ -480,4 +479,4 @@
   <script defer src="app.js"></script>
 </body>
 </html>
-<!-- deployed 20260405124417 -->
+<!-- deployed 20260405130500 -->
