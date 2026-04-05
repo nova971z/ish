@@ -402,6 +402,64 @@
     }).join('');
   }
 
+  // ── Scroll passthrough : laisse scroller la page quand le 3D est au zoom min ──
+
+  function setupModelViewerScrollPassthrough(mv) {
+    if (!mv) return;
+    // Retire un éventuel ancien listener
+    if (mv._wheelPassthrough) {
+      mv.removeEventListener('wheel', mv._wheelPassthrough);
+    }
+
+    mv._wheelPassthrough = function (e) {
+      // Si l'utilisateur scroll vers le bas (deltaY > 0) = dézoom
+      // On vérifie si le model-viewer est déjà au champ de vision max (zoom min)
+      try {
+        var fov = mv.getFieldOfView();            // renvoie le FOV actuel en degrés
+        var maxFov = parseFloat(mv.getAttribute('max-field-of-view')) || 50;
+        // Tolérance de 0.5 degré pour éviter les flottants
+        if (e.deltaY > 0 && fov >= maxFov - 0.5) {
+          // Zoom déjà au minimum → on laisse passer le scroll à la page
+          // On ne fait rien (pas de preventDefault), le navigateur scrolle la page
+          return;
+        }
+        // Si l'utilisateur scroll vers le haut (deltaY < 0) = zoom in
+        var minFov = parseFloat(mv.getAttribute('min-field-of-view')) || 15;
+        if (e.deltaY < 0 && fov <= minFov + 0.5) {
+          // Zoom déjà au maximum → on laisse passer le scroll à la page
+          return;
+        }
+      } catch (_) {
+        // getFieldOfView pas encore dispo (modèle pas chargé) → laisser passer
+        return;
+      }
+      // Sinon le model-viewer gère le zoom normalement (pas besoin d'intervenir)
+    };
+
+    // Le listener doit être passif pour ne pas bloquer le scroll natif
+    // Mais on doit aussi empêcher model-viewer de capturer le wheel quand on veut passer
+    // → On intercepte en phase capture, et on désactive camera-controls temporairement
+    mv._wheelCapture = function (e) {
+      try {
+        var fov = mv.getFieldOfView();
+        var maxFov = parseFloat(mv.getAttribute('max-field-of-view')) || 50;
+        var minFov = parseFloat(mv.getAttribute('min-field-of-view')) || 15;
+        var atMin = (e.deltaY > 0 && fov >= maxFov - 0.5);
+        var atMax = (e.deltaY < 0 && fov <= minFov + 0.5);
+        if (atMin || atMax) {
+          // Désactive temporairement le zoom du model-viewer
+          // pour que le wheel event atteigne le scroll de la page
+          mv.style.pointerEvents = 'none';
+          requestAnimationFrame(function () {
+            mv.style.pointerEvents = '';
+          });
+        }
+      } catch (_) {}
+    };
+
+    mv.addEventListener('wheel', mv._wheelCapture, { capture: true, passive: true });
+  }
+
   // ── PDP (Product Detail Page) ──────────────────────────────
 
   function renderPDP(slug) {
@@ -440,6 +498,10 @@
       viewer2.setAttribute('alt', product.title + ' - vue detail');
       if (product.img) viewer2.setAttribute('poster', product.img);
     }
+
+    // ── Scroll passthrough quand zoom 3D au minimum ──
+    setupModelViewerScrollPassthrough(viewer);
+    setupModelViewerScrollPassthrough(viewer2);
 
     // Scroll animation for landing sections
     initPdpScrollAnimations();
