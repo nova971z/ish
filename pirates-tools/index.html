@@ -189,7 +189,7 @@
     <section id="view-home" class="view" data-route="/" role="region">
       <div class="container">
         <ul class="brand-grid" data-home-brands></ul>
-        <p style="margin:0 0 1rem;color:#9fb4c5">Choisissez une marque ou explorez le catalogue.</p>
+        <p style="margin:2rem 0 1.2rem;color:#9fb4c5">Choisissez une marque ou explorez le catalogue.</p>
         <div id="brandGrid" class="brand-grid brand-grid--3col" role="list" data-bind="brands"></div>
 
         <!-- Banniere outils 3D -->
@@ -208,6 +208,15 @@
           </div>
         </section>
       </div>
+
+      <!-- Bandeau scroll produits — pleine largeur -->
+      <section class="home-products-strip">
+        <h2 class="home-products-strip__title">Nos produits</h2>
+        <div class="home-products-strip__track" id="homeProductsTrack">
+          <p class="no-results">Chargement...</p>
+        </div>
+      </section>
+
     </section>
 
     <!-- CATALOGUE -->
@@ -482,4 +491,4 @@
   <script defer src="app.js"></script>
 </body>
 </html>
-<!-- deployed 20260405135500 -->
+<!-- deployed 20260405140500 -->

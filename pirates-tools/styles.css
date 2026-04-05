@@ -1004,11 +1004,63 @@ z-index: 20;
   }
 }
 
+/* ========== 10b) BANDEAU SCROLL PRODUITS (accueil) ========== */
+.home-products-strip {
+    width: 100%;
+    margin: 3rem 0 2rem;
+    padding: 2rem 0;
+    position: relative;
+    overflow: hidden;
+    border-top: 1px solid rgba(139, 92, 246, 0.15);
+    border-bottom: 1px solid rgba(139, 92, 246, 0.15);
+    background: linear-gradient(180deg, rgba(139,92,246,.03) 0%, transparent 40%, transparent 60%, rgba(139,92,246,.03) 100%);
+}
+
+.home-products-strip__title {
+    text-align: center;
+    margin: 0 0 1.5rem;
+    font-size: clamp(1.2rem, 1rem + 1vw, 1.6rem);
+    font-weight: 900;
+    color: #e6edf5;
+    text-shadow: 0 0 16px rgba(139, 92, 246, 0.5);
+}
+
+.home-products-strip__track {
+    display: flex;
+    gap: 1.2rem;
+    padding: 0 1.5rem;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+.home-products-strip__track::-webkit-scrollbar { display: none; }
+
+.home-products-strip .product-card {
+    flex: 0 0 220px;
+    min-width: 220px;
+}
+
+.home-products-strip .product-card__img-wrap {
+    aspect-ratio: 1 / 1;
+}
+
+@media (max-width: 480px) {
+    .home-products-strip .product-card {
+        flex: 0 0 170px;
+        min-width: 170px;
+    }
+    .home-products-strip__track {
+        gap: .8rem;
+        padding: 0 1rem;
+    }
+}
+
 /* ========== 11) BANNIÈRE OUTILS 3D ========== */
 
 .tools-banner {
 width: min(800px, 88vw);
-margin: 2rem auto 3rem;
+margin: 3rem auto 2rem;
 position: relative;
 z-index: 15;
 }

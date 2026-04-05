@@ -378,6 +378,30 @@
     });
   }
 
+  // ── Home products scroll strip ─────────────────────────────
+
+  function renderHomeProducts() {
+    var track = document.getElementById('homeProductsTrack');
+    if (!track) return;
+    if (products.length === 0) {
+      track.innerHTML = '<p class="no-results">Aucun produit pour le moment.</p>';
+      return;
+    }
+    track.innerHTML = products.map(function (p) {
+      return '<a class="product-card" href="#/produit/' + escapeHTML(p.slug || p.id) + '">'
+        + '<div class="product-card__img-wrap">'
+        + '<img src="' + escapeHTML(p.img || 'images/placeholder.svg') + '" alt="' + escapeHTML(p.title) + '" loading="lazy">'
+        + (p.tag ? '<span class="product-card__tag">' + escapeHTML(p.tag) + '</span>' : '')
+        + '</div>'
+        + '<div class="product-card__body">'
+        + '<span class="product-card__brand">' + escapeHTML(p.brand) + '</span>'
+        + '<h3 class="product-card__title">' + escapeHTML(p.title) + '</h3>'
+        + '<span class="product-card__price">' + formatPrice(p.price) + '</span>'
+        + '</div>'
+        + '</a>';
+    }).join('');
+  }
+
   // ── PDP (Product Detail Page) ──────────────────────────────
 
   function renderPDP(slug) {
@@ -522,6 +546,7 @@
     switch (route) {
       case '/':
         renderBrandGrid();
+        renderHomeProducts();
         break;
       case '/catalogue':
         renderCategoryChips();
