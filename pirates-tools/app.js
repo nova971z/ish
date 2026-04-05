@@ -537,30 +537,28 @@
     }
   }
 
-  // ── PDP scroll animations (Apple-style immersive) ────────────
+  // ── PDP scroll animations (Apple-style immersive — lerp-based) ──
 
   var pdpObserver = null;
-  var pdpScrollHandler = null;
+  var pdpRAF = null;
   var pdpResizeHandler = null;
 
-  // Easing helper (ease-out cubic)
+  // Math helpers
   function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
-  // Clamp helper
   function clamp(v, min, max) { return v < min ? min : v > max ? max : v; }
+  // Lerp: smoothly interpolate current → target each frame
+  function lerp(current, target, speed) { return current + (target - current) * speed; }
 
   function initPdpScrollAnimations() {
-    // Clean up previous
+    // ── Cleanup ──
     if (pdpObserver) { pdpObserver.disconnect(); pdpObserver = null; }
-    if (pdpScrollHandler) {
-      window.removeEventListener('scroll', pdpScrollHandler);
-      pdpScrollHandler = null;
-    }
+    if (pdpRAF) { cancelAnimationFrame(pdpRAF); pdpRAF = null; }
     if (pdpResizeHandler) {
       window.removeEventListener('resize', pdpResizeHandler);
       pdpResizeHandler = null;
     }
 
-    // Reset all sections to hidden
+    // Reset sections
     var sections = document.querySelectorAll('.pdp-section[data-animate]');
     sections.forEach(function (s) { s.classList.remove('visible'); s.style.cssText = ''; });
 
@@ -575,23 +573,49 @@
       }
     }
 
-    // Cache references
+    // ── Cache DOM refs ──
     var pdpHero = document.getElementById('pdpHero');
     var heroInfo = pdpHero ? pdpHero.querySelector('.pdp-hero__info') : null;
     var heroGradient = pdpHero ? pdpHero.querySelector('.pdp-hero__gradient') : null;
     var viewer3d = document.getElementById('pdp3d');
+    var viewer2 = document.getElementById('pdp3dSecondary');
     var discoverHeading = document.getElementById('pdpDiscoverHeading');
     var discoverDesc = document.getElementById('pdpDesc');
     var splitViewer = document.querySelector('.pdp-split__viewer');
     var splitSpecs = document.querySelector('.pdp-split__specs');
     var mediaImg = document.querySelector('.pdp-landing__media');
     var ctaHeading = document.querySelector('.pdp-cta__heading');
+    var featureCards = document.querySelectorAll('.pdp-feature');
+    var kitItems = document.querySelectorAll('.pdp-kit li');
+    var specRows = document.querySelectorAll('.pdp-specs-table tr');
+    var ctaButtons = document.querySelectorAll('.pdp-section--cta .btn--lg');
     var winH = window.innerHeight;
 
     pdpResizeHandler = function () { winH = window.innerHeight; };
     window.addEventListener('resize', pdpResizeHandler, { passive: true });
 
-    // Get element's position relative to scroll
+    // ── Smooth state: current lerped values ──
+    var LERP_SPEED = 0.08; // lower = smoother/slower (Apple feel)
+    var state = {
+      heroScale: 1, heroTY: 0, heroOp: 1, heroBlur: 0,
+      infoTY: 0, infoOp: 1, infoScale: 1,
+      discHeadScale: 0.6, discHeadTY: 40, discHeadOp: 0, discHeadBlur: 12,
+      discDescTY: 60, discDescOp: 0, discDescBlur: 8,
+      splitVX: -80, splitVScale: 0.85, splitVOp: 0,
+      splitSX: 80, splitSOp: 0,
+      mediaScale: 0.8, mediaTY: 50, mediaOp: 0, mediaBlur: 6,
+      ctaScale: 0.5, ctaTY: 60, ctaOp: 0, ctaBlur: 10,
+      camOrbit: 25, camPitch: 72,
+      cam2Orbit: 120
+    };
+
+    // Per-element reveal progress (for features, kit, specs, buttons)
+    var featureProgress = []; for (var fi = 0; fi < featureCards.length; fi++) featureProgress.push(0);
+    var kitProgress = []; for (var ki = 0; ki < kitItems.length; ki++) kitProgress.push(0);
+    var specProgress = []; for (var si = 0; si < specRows.length; si++) specProgress.push(0);
+    var btnProgress = []; for (var bi = 0; bi < ctaButtons.length; bi++) btnProgress.push(0);
+
+    // Get element's scroll progress (0 = not visible, 1 = fully in view)
     function getProgress(el, offset) {
       if (!el) return -1;
       var rect = el.getBoundingClientRect();
@@ -602,154 +626,276 @@
       return clamp(-start / range, 0, 1);
     }
 
-    var ticking = false;
-    var revealed = {};
+    // Apply style only when value changed (perf)
+    function applyTransform(el, transform, opacity, filter) {
+      if (!el) return;
+      el.style.transform = transform;
+      el.style.opacity = String(Math.max(0, opacity));
+      if (filter !== undefined) el.style.filter = filter;
+    }
 
-    pdpScrollHandler = function () {
-      if (!ticking) {
-        requestAnimationFrame(function () {
-          var scrollY = window.scrollY || window.pageYOffset;
+    // ── Main animation loop (runs every frame, lerps toward targets) ──
+    var running = true;
+    var lastCamOrbit = -1;
+    var lastCam2Orbit = -1;
 
-          // Hide scroll hint
-          if (scrollY > 50) hideHint();
+    function tick() {
+      if (!running) return;
+      pdpRAF = requestAnimationFrame(tick);
 
-          // ═══ HERO PARALLAX — dramatic zoom + fade + blur ═══
-          if (pdpHero) {
-            var heroH = pdpHero.offsetHeight;
-            var hp = clamp(scrollY / heroH, 0, 1);
-            var hpEased = easeOut(hp);
+      var scrollY = window.scrollY || window.pageYOffset;
+      if (scrollY > 50) hideHint();
 
-            if (viewer3d) {
-              var scale = 1 + hpEased * 0.25;
-              var ty = hpEased * -60;
-              viewer3d.style.transform = 'scale(' + scale + ') translateY(' + ty + 'px)';
-              viewer3d.style.opacity = String(1 - hpEased * 0.6);
-              viewer3d.style.filter = 'blur(' + (hpEased * 8) + 'px)';
-            }
-            if (heroInfo) {
-              heroInfo.style.transform = 'translateY(' + (hpEased * -80) + 'px) scale(' + (1 - hpEased * 0.1) + ')';
-              heroInfo.style.opacity = String(1 - hpEased * 1.2);
-            }
-            if (heroGradient) {
-              heroGradient.style.opacity = String(1 + hpEased * 0.5);
-            }
-          }
+      var L = LERP_SPEED;
 
-          // ═══ DISCOVER SECTION — text scale + blur reveal ═══
-          if (discoverHeading) {
-            var dp = getProgress(discoverHeading, 100);
-            if (dp > 0) {
-              var ds = 0.6 + dp * 0.4;
-              var dblur = Math.max(0, (1 - dp) * 12);
-              var dop = clamp(dp * 1.5, 0, 1);
-              discoverHeading.style.transform = 'scale(' + ds + ') translateY(' + ((1 - dp) * 40) + 'px)';
-              discoverHeading.style.opacity = String(dop);
-              discoverHeading.style.filter = 'blur(' + dblur + 'px)';
-            }
-          }
-          if (discoverDesc) {
-            var ddp = getProgress(discoverDesc, 60);
-            if (ddp > 0) {
-              var ddop = clamp((ddp - 0.1) * 2, 0, 1);
-              discoverDesc.style.transform = 'translateY(' + ((1 - ddp) * 60) + 'px)';
-              discoverDesc.style.opacity = String(ddop);
-              discoverDesc.style.filter = 'blur(' + Math.max(0, (1 - ddp) * 8) + 'px)';
-            }
-          }
+      // ═══ 1. HERO ═══
+      if (pdpHero) {
+        var heroH = pdpHero.offsetHeight || winH;
+        var hp = easeOut(clamp(scrollY / heroH, 0, 1));
 
-          // ═══ SPLIT SECTION — viewer slides from left, specs from right ═══
-          if (splitViewer) {
-            var svp = getProgress(splitViewer, 80);
-            if (svp > 0) {
-              var svEased = easeOut(clamp(svp * 1.3, 0, 1));
-              splitViewer.style.transform = 'translateX(' + ((1 - svEased) * -80) + 'px) scale(' + (0.85 + svEased * 0.15) + ')';
-              splitViewer.style.opacity = String(svEased);
-            }
-          }
-          if (splitSpecs) {
-            var ssp = getProgress(splitSpecs, 80);
-            if (ssp > 0) {
-              var ssEased = easeOut(clamp((ssp - 0.05) * 1.3, 0, 1));
-              splitSpecs.style.transform = 'translateX(' + ((1 - ssEased) * 80) + 'px)';
-              splitSpecs.style.opacity = String(ssEased);
-            }
-          }
+        // Target values
+        var tScale = 1 + hp * 0.25;
+        var tTY = hp * -60;
+        var tOp = 1 - hp * 0.7;
+        var tBlur = hp * 10;
+        var tInfoTY = hp * -100;
+        var tInfoOp = 1 - hp * 1.5;
+        var tInfoScale = 1 - hp * 0.15;
 
-          // ═══ MEDIA IMAGE — zoom parallax ═══
-          if (mediaImg) {
-            var mp = getProgress(mediaImg, 50);
-            if (mp > 0) {
-              var mEased = easeOut(clamp(mp * 1.5, 0, 1));
-              var mScale = 0.8 + mEased * 0.2;
-              mediaImg.style.transform = 'scale(' + mScale + ') translateY(' + ((1 - mEased) * 50) + 'px)';
-              mediaImg.style.opacity = String(mEased);
-              mediaImg.style.filter = 'blur(' + Math.max(0, (1 - mEased) * 6) + 'px)';
-            }
-          }
+        // Lerp toward targets
+        state.heroScale = lerp(state.heroScale, tScale, L);
+        state.heroTY = lerp(state.heroTY, tTY, L);
+        state.heroOp = lerp(state.heroOp, tOp, L);
+        state.heroBlur = lerp(state.heroBlur, tBlur, L);
+        state.infoTY = lerp(state.infoTY, tInfoTY, L);
+        state.infoOp = lerp(state.infoOp, tInfoOp, L);
+        state.infoScale = lerp(state.infoScale, tInfoScale, L);
 
-          // ═══ CTA HEADING — dramatic scale reveal ═══
-          if (ctaHeading) {
-            var cp = getProgress(ctaHeading, 80);
-            if (cp > 0) {
-              var cEased = easeOut(clamp(cp * 1.4, 0, 1));
-              ctaHeading.style.transform = 'scale(' + (0.5 + cEased * 0.5) + ') translateY(' + ((1 - cEased) * 60) + 'px)';
-              ctaHeading.style.opacity = String(cEased);
-              ctaHeading.style.filter = 'blur(' + Math.max(0, (1 - cEased) * 10) + 'px)';
-            }
-          }
+        applyTransform(viewer3d,
+          'scale(' + state.heroScale.toFixed(4) + ') translateY(' + state.heroTY.toFixed(2) + 'px)',
+          state.heroOp,
+          'blur(' + state.heroBlur.toFixed(2) + 'px)'
+        );
+        applyTransform(heroInfo,
+          'translateY(' + state.infoTY.toFixed(2) + 'px) scale(' + state.infoScale.toFixed(4) + ')',
+          state.infoOp
+        );
+        if (heroGradient) heroGradient.style.opacity = String(clamp(1 + hp * 0.5, 0, 1.5));
 
-          // ═══ 3D MODEL CAMERA — rotate on scroll for immersion ═══
-          if (viewer3d && pdpHero) {
-            var camP = clamp(scrollY / (pdpHero.offsetHeight * 0.8), 0, 1);
-            var orbitDeg = 25 + camP * 40;
-            var pitchDeg = 72 + camP * 10;
-            viewer3d.setAttribute('camera-orbit', orbitDeg + 'deg ' + pitchDeg + 'deg auto');
-          }
-
-          // ═══ SECONDARY 3D — rotate when in view ═══
-          var viewer2 = document.getElementById('pdp3dSecondary');
-          if (viewer2 && splitViewer) {
-            var v2p = getProgress(splitViewer, 0);
-            if (v2p > 0) {
-              var v2orbit = 120 + v2p * 60;
-              viewer2.setAttribute('camera-orbit', v2orbit + 'deg 55deg auto');
-            }
-          }
-
-          ticking = false;
-        });
-        ticking = true;
+        // Camera orbit (smooth)
+        var tCamOrbit = 25 + clamp(scrollY / (heroH * 0.8), 0, 1) * 45;
+        var tCamPitch = 72 + clamp(scrollY / (heroH * 0.8), 0, 1) * 12;
+        state.camOrbit = lerp(state.camOrbit, tCamOrbit, L * 0.6);
+        state.camPitch = lerp(state.camPitch, tCamPitch, L * 0.6);
+        var roundedOrbit = Math.round(state.camOrbit * 10) / 10;
+        if (viewer3d && Math.abs(roundedOrbit - lastCamOrbit) > 0.3) {
+          viewer3d.setAttribute('camera-orbit', roundedOrbit + 'deg ' + (Math.round(state.camPitch * 10) / 10) + 'deg auto');
+          lastCamOrbit = roundedOrbit;
+        }
       }
-    };
 
-    window.addEventListener('scroll', pdpScrollHandler, { passive: true });
+      // ═══ 2. DISCOVER HEADING ═══
+      if (discoverHeading) {
+        var dp = getProgress(discoverHeading, 100);
+        if (dp > 0) {
+          var tds = 0.6 + easeOut(dp) * 0.4;
+          var tdop = clamp(dp * 1.8, 0, 1);
+          var tdblur = Math.max(0, (1 - dp) * 14);
+          var tdty = (1 - easeOut(dp)) * 50;
+          state.discHeadScale = lerp(state.discHeadScale, tds, L);
+          state.discHeadTY = lerp(state.discHeadTY, tdty, L);
+          state.discHeadOp = lerp(state.discHeadOp, tdop, L);
+          state.discHeadBlur = lerp(state.discHeadBlur, tdblur, L);
+          applyTransform(discoverHeading,
+            'scale(' + state.discHeadScale.toFixed(4) + ') translateY(' + state.discHeadTY.toFixed(2) + 'px)',
+            state.discHeadOp,
+            'blur(' + state.discHeadBlur.toFixed(2) + 'px)'
+          );
+        }
+      }
 
-    // ═══ IntersectionObserver — triggers .visible for stagger children ═══
+      // ═══ 3. DISCOVER DESC ═══
+      if (discoverDesc) {
+        var ddp = getProgress(discoverDesc, 60);
+        if (ddp > 0) {
+          var tddop = clamp((ddp - 0.05) * 2.2, 0, 1);
+          var tddty = (1 - easeOut(ddp)) * 70;
+          var tddblur = Math.max(0, (1 - ddp) * 10);
+          state.discDescTY = lerp(state.discDescTY, tddty, L);
+          state.discDescOp = lerp(state.discDescOp, tddop, L);
+          state.discDescBlur = lerp(state.discDescBlur, tddblur, L);
+          applyTransform(discoverDesc,
+            'translateY(' + state.discDescTY.toFixed(2) + 'px)',
+            state.discDescOp,
+            'blur(' + state.discDescBlur.toFixed(2) + 'px)'
+          );
+        }
+      }
+
+      // ═══ 4. SPLIT — viewer & specs ═══
+      if (splitViewer) {
+        var svp = easeOut(clamp(getProgress(splitViewer, 80) * 1.4, 0, 1));
+        state.splitVX = lerp(state.splitVX, (1 - svp) * -100, L);
+        state.splitVScale = lerp(state.splitVScale, 0.85 + svp * 0.15, L);
+        state.splitVOp = lerp(state.splitVOp, svp, L);
+        applyTransform(splitViewer,
+          'translateX(' + state.splitVX.toFixed(2) + 'px) scale(' + state.splitVScale.toFixed(4) + ')',
+          state.splitVOp
+        );
+      }
+      if (splitSpecs) {
+        var ssp = easeOut(clamp((getProgress(splitSpecs, 80) - 0.05) * 1.4, 0, 1));
+        state.splitSX = lerp(state.splitSX, (1 - ssp) * 100, L);
+        state.splitSOp = lerp(state.splitSOp, ssp, L);
+        applyTransform(splitSpecs,
+          'translateX(' + state.splitSX.toFixed(2) + 'px)',
+          state.splitSOp
+        );
+      }
+
+      // Secondary 3D camera
+      if (viewer2 && splitViewer) {
+        var v2p = getProgress(splitViewer, 0);
+        if (v2p > 0) {
+          state.cam2Orbit = lerp(state.cam2Orbit, 120 + v2p * 70, L * 0.5);
+          var r2 = Math.round(state.cam2Orbit * 10) / 10;
+          if (Math.abs(r2 - lastCam2Orbit) > 0.3) {
+            viewer2.setAttribute('camera-orbit', r2 + 'deg 55deg auto');
+            lastCam2Orbit = r2;
+          }
+        }
+      }
+
+      // ═══ 5. MEDIA IMAGE ═══
+      if (mediaImg) {
+        var mp = easeOut(clamp(getProgress(mediaImg, 50) * 1.6, 0, 1));
+        state.mediaScale = lerp(state.mediaScale, 0.8 + mp * 0.2, L);
+        state.mediaTY = lerp(state.mediaTY, (1 - mp) * 60, L);
+        state.mediaOp = lerp(state.mediaOp, mp, L);
+        state.mediaBlur = lerp(state.mediaBlur, Math.max(0, (1 - mp) * 8), L);
+        applyTransform(mediaImg,
+          'scale(' + state.mediaScale.toFixed(4) + ') translateY(' + state.mediaTY.toFixed(2) + 'px)',
+          state.mediaOp,
+          'blur(' + state.mediaBlur.toFixed(2) + 'px)'
+        );
+      }
+
+      // ═══ 6. CTA HEADING ═══
+      if (ctaHeading) {
+        var cp = easeOut(clamp(getProgress(ctaHeading, 80) * 1.5, 0, 1));
+        state.ctaScale = lerp(state.ctaScale, 0.5 + cp * 0.5, L);
+        state.ctaTY = lerp(state.ctaTY, (1 - cp) * 70, L);
+        state.ctaOp = lerp(state.ctaOp, cp, L);
+        state.ctaBlur = lerp(state.ctaBlur, Math.max(0, (1 - cp) * 12), L);
+        applyTransform(ctaHeading,
+          'scale(' + state.ctaScale.toFixed(4) + ') translateY(' + state.ctaTY.toFixed(2) + 'px)',
+          state.ctaOp,
+          'blur(' + state.ctaBlur.toFixed(2) + 'px)'
+        );
+      }
+
+      // ═══ 7. FEATURES — scroll-driven stagger per card ═══
+      if (featureCards.length > 0) {
+        var featParent = featureCards[0].parentElement;
+        var baseP = getProgress(featParent, 60);
+        for (var i = 0; i < featureCards.length; i++) {
+          var delay = i * 0.06;
+          var raw = clamp((baseP - delay) * 2.5, 0, 1);
+          var target = easeOut(raw);
+          featureProgress[i] = lerp(featureProgress[i], target, L);
+          var fp = featureProgress[i];
+          var fty = (1 - fp) * 50;
+          var fscale = 0.85 + fp * 0.15;
+          var fblur = (1 - fp) * 5;
+          applyTransform(featureCards[i],
+            'translateY(' + fty.toFixed(2) + 'px) scale(' + fscale.toFixed(4) + ')',
+            fp,
+            'blur(' + fblur.toFixed(2) + 'px)'
+          );
+        }
+      }
+
+      // ═══ 8. KIT ITEMS — scroll-driven stagger ═══
+      if (kitItems.length > 0) {
+        var kitParent = kitItems[0].parentElement;
+        var kitBase = getProgress(kitParent, 60);
+        for (var ki2 = 0; ki2 < kitItems.length; ki2++) {
+          var kdelay = ki2 * 0.05;
+          var kraw = clamp((kitBase - kdelay) * 2.5, 0, 1);
+          var ktarget = easeOut(kraw);
+          kitProgress[ki2] = lerp(kitProgress[ki2], ktarget, L);
+          var kp = kitProgress[ki2];
+          var ktx = (1 - kp) * -60;
+          var kblur = (1 - kp) * 4;
+          applyTransform(kitItems[ki2],
+            'translateX(' + ktx.toFixed(2) + 'px)',
+            kp,
+            'blur(' + kblur.toFixed(2) + 'px)'
+          );
+        }
+      }
+
+      // ═══ 9. SPEC ROWS — scroll-driven stagger ═══
+      if (specRows.length > 0) {
+        var specParent = specRows[0] && specRows[0].closest('.pdp-specs-table');
+        var specBase = specParent ? getProgress(specParent, 60) : 0;
+        for (var sri = 0; sri < specRows.length; sri++) {
+          var sdelay = sri * 0.04;
+          var sraw = clamp((specBase - sdelay) * 2.5, 0, 1);
+          var starget = easeOut(sraw);
+          specProgress[sri] = lerp(specProgress[sri], starget, L);
+          var sp = specProgress[sri];
+          applyTransform(specRows[sri],
+            'translateX(' + ((1 - sp) * -30).toFixed(2) + 'px)',
+            sp,
+            'blur(' + ((1 - sp) * 3).toFixed(2) + 'px)'
+          );
+        }
+      }
+
+      // ═══ 10. CTA BUTTONS — scroll-driven stagger ═══
+      if (ctaButtons.length > 0) {
+        var btnParent = ctaButtons[0].closest('.pdp-section--cta');
+        var btnBase = btnParent ? getProgress(btnParent, 60) : 0;
+        for (var bti = 0; bti < ctaButtons.length; bti++) {
+          var bdelay = bti * 0.06;
+          var braw = clamp((btnBase - 0.15 - bdelay) * 2.5, 0, 1);
+          var btarget = easeOut(braw);
+          btnProgress[bti] = lerp(btnProgress[bti], btarget, L);
+          var bp = btnProgress[bti];
+          applyTransform(ctaButtons[bti],
+            'translateY(' + ((1 - bp) * 40).toFixed(2) + 'px) scale(' + (0.9 + bp * 0.1).toFixed(4) + ')',
+            bp,
+            'blur(' + ((1 - bp) * 5).toFixed(2) + 'px)'
+          );
+        }
+      }
+    }
+
+    // ── IntersectionObserver (for .visible class — glow dividers + ::after) ──
     if ('IntersectionObserver' in window) {
       pdpObserver = new IntersectionObserver(function (entries) {
         entries.forEach(function (entry) {
           if (entry.isIntersecting) {
             entry.target.classList.add('visible');
             hideHint();
-
-            // Animate number counters in specs
-            var specVals = entry.target.querySelectorAll('.pdp-spec-value[data-val]');
-            specVals.forEach(function (el) {
-              animateCounter(el, el.getAttribute('data-val'));
-            });
-
             pdpObserver.unobserve(entry.target);
           }
         });
-      }, { threshold: 0.08, rootMargin: '0px 0px -50px 0px' });
-
+      }, { threshold: 0.05, rootMargin: '0px 0px -30px 0px' });
       sections.forEach(function (s) { pdpObserver.observe(s); });
     } else {
       sections.forEach(function (s) { s.classList.add('visible'); });
     }
 
-    // Trigger initial frame
-    pdpScrollHandler();
+    // ── Start animation loop ──
+    tick();
+
+    // Store cleanup fn on the handler ref for the router to call
+    pdpScrollHandler = function cleanup() {
+      running = false;
+      if (pdpRAF) { cancelAnimationFrame(pdpRAF); pdpRAF = null; }
+    };
   }
 
   // ── Counter animation for spec numeric values ──
@@ -795,16 +941,20 @@
     if (route === '/compte' && !loggedIn) { location.hash = '#/auth'; return; }
     if (route === '/auth' && loggedIn) { location.hash = '#/compte'; return; }
 
-    // Cleanup PDP scroll handler when leaving product page
+    // Cleanup PDP animation loop when leaving product page
     if (route !== '/produit') {
       if (pdpObserver) { pdpObserver.disconnect(); pdpObserver = null; }
       if (pdpScrollHandler) {
-        window.removeEventListener('scroll', pdpScrollHandler);
+        pdpScrollHandler(); // calls the cleanup fn (stops rAF loop)
         pdpScrollHandler = null;
+      }
+      if (pdpResizeHandler) {
+        window.removeEventListener('resize', pdpResizeHandler);
+        pdpResizeHandler = null;
       }
       // Reset hero parallax transforms
       var pdpViewer = document.getElementById('pdp3d');
-      if (pdpViewer) { pdpViewer.style.transform = ''; pdpViewer.style.opacity = ''; }
+      if (pdpViewer) { pdpViewer.style.transform = ''; pdpViewer.style.opacity = ''; pdpViewer.style.filter = ''; }
     }
 
     // Show matching view, hide all others
