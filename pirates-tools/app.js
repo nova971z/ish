@@ -541,20 +541,30 @@
 
   var pdpObserver = null;
   var pdpScrollHandler = null;
+  var pdpResizeHandler = null;
+
+  // Easing helper (ease-out cubic)
+  function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+  // Clamp helper
+  function clamp(v, min, max) { return v < min ? min : v > max ? max : v; }
 
   function initPdpScrollAnimations() {
-    // Clean up previous observer & scroll handler
+    // Clean up previous
     if (pdpObserver) { pdpObserver.disconnect(); pdpObserver = null; }
     if (pdpScrollHandler) {
       window.removeEventListener('scroll', pdpScrollHandler);
       pdpScrollHandler = null;
     }
+    if (pdpResizeHandler) {
+      window.removeEventListener('resize', pdpResizeHandler);
+      pdpResizeHandler = null;
+    }
 
     // Reset all sections to hidden
     var sections = document.querySelectorAll('.pdp-section[data-animate]');
-    sections.forEach(function (s) { s.classList.remove('visible'); });
+    sections.forEach(function (s) { s.classList.remove('visible'); s.style.cssText = ''; });
 
-    // Scroll hint — hide on first scroll
+    // Scroll hint
     var scrollHint = document.getElementById('pdpScrollHint');
     if (scrollHint) scrollHint.classList.remove('hidden-hint');
     var hintHidden = false;
@@ -565,31 +575,144 @@
       }
     }
 
-    // Parallax effect on hero model-viewer during scroll
+    // Cache references
     var pdpHero = document.getElementById('pdpHero');
     var heroInfo = pdpHero ? pdpHero.querySelector('.pdp-hero__info') : null;
+    var heroGradient = pdpHero ? pdpHero.querySelector('.pdp-hero__gradient') : null;
+    var viewer3d = document.getElementById('pdp3d');
+    var discoverHeading = document.getElementById('pdpDiscoverHeading');
+    var discoverDesc = document.getElementById('pdpDesc');
+    var splitViewer = document.querySelector('.pdp-split__viewer');
+    var splitSpecs = document.querySelector('.pdp-split__specs');
+    var mediaImg = document.querySelector('.pdp-landing__media');
+    var ctaHeading = document.querySelector('.pdp-cta__heading');
+    var winH = window.innerHeight;
+
+    pdpResizeHandler = function () { winH = window.innerHeight; };
+    window.addEventListener('resize', pdpResizeHandler, { passive: true });
+
+    // Get element's position relative to scroll
+    function getProgress(el, offset) {
+      if (!el) return -1;
+      var rect = el.getBoundingClientRect();
+      var start = rect.top - winH + (offset || 0);
+      var end = rect.bottom;
+      var range = end - start;
+      if (range <= 0) return 0;
+      return clamp(-start / range, 0, 1);
+    }
+
     var ticking = false;
+    var revealed = {};
 
     pdpScrollHandler = function () {
       if (!ticking) {
         requestAnimationFrame(function () {
           var scrollY = window.scrollY || window.pageYOffset;
 
-          // Hide scroll hint after 50px
+          // Hide scroll hint
           if (scrollY > 50) hideHint();
 
-          // Parallax on hero: subtle scale + opacity fade as user scrolls down
+          // ═══ HERO PARALLAX — dramatic zoom + fade + blur ═══
           if (pdpHero) {
             var heroH = pdpHero.offsetHeight;
-            var progress = Math.min(scrollY / heroH, 1);
-            var viewer = document.getElementById('pdp3d');
-            if (viewer) {
-              viewer.style.transform = 'scale(' + (1 + progress * 0.15) + ') translateY(' + (progress * -30) + 'px)';
-              viewer.style.opacity = String(1 - progress * 0.4);
+            var hp = clamp(scrollY / heroH, 0, 1);
+            var hpEased = easeOut(hp);
+
+            if (viewer3d) {
+              var scale = 1 + hpEased * 0.25;
+              var ty = hpEased * -60;
+              viewer3d.style.transform = 'scale(' + scale + ') translateY(' + ty + 'px)';
+              viewer3d.style.opacity = String(1 - hpEased * 0.6);
+              viewer3d.style.filter = 'blur(' + (hpEased * 8) + 'px)';
             }
             if (heroInfo) {
-              heroInfo.style.transform = 'translateY(' + (progress * -50) + 'px)';
-              heroInfo.style.opacity = String(1 - progress * 0.8);
+              heroInfo.style.transform = 'translateY(' + (hpEased * -80) + 'px) scale(' + (1 - hpEased * 0.1) + ')';
+              heroInfo.style.opacity = String(1 - hpEased * 1.2);
+            }
+            if (heroGradient) {
+              heroGradient.style.opacity = String(1 + hpEased * 0.5);
+            }
+          }
+
+          // ═══ DISCOVER SECTION — text scale + blur reveal ═══
+          if (discoverHeading) {
+            var dp = getProgress(discoverHeading, 100);
+            if (dp > 0) {
+              var ds = 0.6 + dp * 0.4;
+              var dblur = Math.max(0, (1 - dp) * 12);
+              var dop = clamp(dp * 1.5, 0, 1);
+              discoverHeading.style.transform = 'scale(' + ds + ') translateY(' + ((1 - dp) * 40) + 'px)';
+              discoverHeading.style.opacity = String(dop);
+              discoverHeading.style.filter = 'blur(' + dblur + 'px)';
+            }
+          }
+          if (discoverDesc) {
+            var ddp = getProgress(discoverDesc, 60);
+            if (ddp > 0) {
+              var ddop = clamp((ddp - 0.1) * 2, 0, 1);
+              discoverDesc.style.transform = 'translateY(' + ((1 - ddp) * 60) + 'px)';
+              discoverDesc.style.opacity = String(ddop);
+              discoverDesc.style.filter = 'blur(' + Math.max(0, (1 - ddp) * 8) + 'px)';
+            }
+          }
+
+          // ═══ SPLIT SECTION — viewer slides from left, specs from right ═══
+          if (splitViewer) {
+            var svp = getProgress(splitViewer, 80);
+            if (svp > 0) {
+              var svEased = easeOut(clamp(svp * 1.3, 0, 1));
+              splitViewer.style.transform = 'translateX(' + ((1 - svEased) * -80) + 'px) scale(' + (0.85 + svEased * 0.15) + ')';
+              splitViewer.style.opacity = String(svEased);
+            }
+          }
+          if (splitSpecs) {
+            var ssp = getProgress(splitSpecs, 80);
+            if (ssp > 0) {
+              var ssEased = easeOut(clamp((ssp - 0.05) * 1.3, 0, 1));
+              splitSpecs.style.transform = 'translateX(' + ((1 - ssEased) * 80) + 'px)';
+              splitSpecs.style.opacity = String(ssEased);
+            }
+          }
+
+          // ═══ MEDIA IMAGE — zoom parallax ═══
+          if (mediaImg) {
+            var mp = getProgress(mediaImg, 50);
+            if (mp > 0) {
+              var mEased = easeOut(clamp(mp * 1.5, 0, 1));
+              var mScale = 0.8 + mEased * 0.2;
+              mediaImg.style.transform = 'scale(' + mScale + ') translateY(' + ((1 - mEased) * 50) + 'px)';
+              mediaImg.style.opacity = String(mEased);
+              mediaImg.style.filter = 'blur(' + Math.max(0, (1 - mEased) * 6) + 'px)';
+            }
+          }
+
+          // ═══ CTA HEADING — dramatic scale reveal ═══
+          if (ctaHeading) {
+            var cp = getProgress(ctaHeading, 80);
+            if (cp > 0) {
+              var cEased = easeOut(clamp(cp * 1.4, 0, 1));
+              ctaHeading.style.transform = 'scale(' + (0.5 + cEased * 0.5) + ') translateY(' + ((1 - cEased) * 60) + 'px)';
+              ctaHeading.style.opacity = String(cEased);
+              ctaHeading.style.filter = 'blur(' + Math.max(0, (1 - cEased) * 10) + 'px)';
+            }
+          }
+
+          // ═══ 3D MODEL CAMERA — rotate on scroll for immersion ═══
+          if (viewer3d && pdpHero) {
+            var camP = clamp(scrollY / (pdpHero.offsetHeight * 0.8), 0, 1);
+            var orbitDeg = 25 + camP * 40;
+            var pitchDeg = 72 + camP * 10;
+            viewer3d.setAttribute('camera-orbit', orbitDeg + 'deg ' + pitchDeg + 'deg auto');
+          }
+
+          // ═══ SECONDARY 3D — rotate when in view ═══
+          var viewer2 = document.getElementById('pdp3dSecondary');
+          if (viewer2 && splitViewer) {
+            var v2p = getProgress(splitViewer, 0);
+            if (v2p > 0) {
+              var v2orbit = 120 + v2p * 60;
+              viewer2.setAttribute('camera-orbit', v2orbit + 'deg 55deg auto');
             }
           }
 
@@ -601,24 +724,53 @@
 
     window.addEventListener('scroll', pdpScrollHandler, { passive: true });
 
-    // IntersectionObserver for section reveal animations
+    // ═══ IntersectionObserver — triggers .visible for stagger children ═══
     if ('IntersectionObserver' in window) {
       pdpObserver = new IntersectionObserver(function (entries) {
         entries.forEach(function (entry) {
           if (entry.isIntersecting) {
             entry.target.classList.add('visible');
             hideHint();
-            // Unobserve after reveal to avoid re-triggering
+
+            // Animate number counters in specs
+            var specVals = entry.target.querySelectorAll('.pdp-spec-value[data-val]');
+            specVals.forEach(function (el) {
+              animateCounter(el, el.getAttribute('data-val'));
+            });
+
             pdpObserver.unobserve(entry.target);
           }
         });
-      }, { threshold: 0.1, rootMargin: '0px 0px -80px 0px' });
+      }, { threshold: 0.08, rootMargin: '0px 0px -50px 0px' });
 
       sections.forEach(function (s) { pdpObserver.observe(s); });
     } else {
-      // Fallback: show all immediately
       sections.forEach(function (s) { s.classList.add('visible'); });
     }
+
+    // Trigger initial frame
+    pdpScrollHandler();
+  }
+
+  // ── Counter animation for spec numeric values ──
+  function animateCounter(el, val) {
+    var num = parseFloat(val);
+    if (isNaN(num)) { el.textContent = val; return; }
+    var suffix = val.replace(/[\d.,\-+]/g, '').trim();
+    var isFloat = val.indexOf('.') !== -1 || val.indexOf(',') !== -1;
+    var decimals = isFloat ? (val.split(/[.,]/)[1] || '').length : 0;
+    var start = 0;
+    var duration = 1200;
+    var startTime = null;
+    function step(ts) {
+      if (!startTime) startTime = ts;
+      var p = Math.min((ts - startTime) / duration, 1);
+      var eased = 1 - Math.pow(1 - p, 3);
+      var current = start + (num - start) * eased;
+      el.textContent = (decimals > 0 ? current.toFixed(decimals) : Math.round(current)) + (suffix ? ' ' + suffix : '');
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
   }
 
   // ── Router (hash-based SPA) ────────────────────────────────
