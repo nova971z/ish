@@ -213,12 +213,15 @@
     <!-- CATALOGUE -->
     <section id="view-catalogue" class="view hidden" data-route="/catalogue" role="region" aria-labelledby="catalogue-h1">
       <div class="container">
-        <h1 id="catalogue-h1" tabindex="-1">Catalogue</h1>
+        <div class="catalogue-header">
+          <h1 id="catalogue-h1" class="catalogue-title" tabindex="-1">Catalogue</h1>
+          <p class="catalogue-subtitle">Outillage professionnel — livraison Antilles</p>
+        </div>
 
         <div class="toolbar">
           <input id="q" class="search" type="search" placeholder="Rechercher (marque, ref, description...)" autocomplete="off" data-bind="search" />
           <select id="tag" class="select" aria-label="Filtrer par categorie" data-bind="tag">
-            <option value="">Tous</option>
+            <option value="">Toutes categories</option>
           </select>
         </div>
 
@@ -479,4 +482,4 @@
   <script defer src="app.js"></script>
 </body>
 </html>
-<!-- deployed 20260405134000 -->
+<!-- deployed 20260405135500 -->
