@@ -25,10 +25,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Prepare site
+        run: |
+          mkdir _site
+          cp pirates-tools/index.html _site/
+          cp pirates-tools/404.html _site/
+          cp pirates-tools/styles.css _site/
+          cp pirates-tools/app.js _site/
+          cp pirates-tools/sw.js _site/
+          cp pirates-tools/manifest.webmanifest _site/
+          cp pirates-tools/products.json _site/
+          cp pirates-tools/robots.txt _site/
+          cp pirates-tools/sitemap.xml _site/
+          cp pirates-tools/.nojekyll _site/
+          cp -r pirates-tools/icons _site/
+          cp -r pirates-tools/images _site/
+          echo "--- Files in _site ---"
+          find _site -type f | sort
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: pirates-tools
+          path: _site
 
       - name: Deploy to GitHub Pages
         id: deployment
