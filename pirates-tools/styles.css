@@ -1011,9 +1011,7 @@ z-index: 20;
     padding: 2rem 0;
     position: relative;
     overflow: hidden;
-    border-top: 1px solid rgba(139, 92, 246, 0.15);
-    border-bottom: 1px solid rgba(139, 92, 246, 0.15);
-    background: linear-gradient(180deg, rgba(139,92,246,.03) 0%, transparent 40%, transparent 60%, rgba(139,92,246,.03) 100%);
+    background: transparent;
 }
 
 .home-products-strip__title {
