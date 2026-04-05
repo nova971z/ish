@@ -419,7 +419,7 @@ body.menu-open { overflow: hidden; }
     pointer-events: none;
     background: transparent;
     z-index: 10;
-    overflow: hidden;
+    overflow: visible;
 
 }
 
@@ -437,12 +437,13 @@ body.menu-open { overflow: hidden; }
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: clamp(250px, 55vmin, 560px);
-    height: clamp(250px, 55vmin, 560px);
+    width: clamp(500px, 120vmin, 1200px);
+    height: clamp(500px, 120vmin, 1200px);
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(212,175,55,.35) 0%, rgba(212,175,55,.15) 35%, rgba(212,175,55,.05) 55%, transparent 70%);
+    background: radial-gradient(circle, rgba(212,175,55,.25) 0%, rgba(212,175,55,.12) 20%, rgba(212,175,55,.04) 40%, transparent 60%);
     z-index: 0;
     pointer-events: none;
+    filter: blur(30px);
 }
 
 .hero-full.hero-out, #hero.hero-out {
@@ -520,8 +521,8 @@ opacity: 1 !important;
 
 /* ========== 07) ACCUEIL — ESPACEMENT ========== */
 #view-home .container {
-    margin-top: var(--listGap, 4vh);
-    transition: margin-top 0.22s ease-out;
+    margin-top: 0;
+    padding-top: 1rem;
 }
 
 /* ========== 08) TOOLBAR & CHAMPS ========== */
