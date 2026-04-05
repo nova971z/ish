@@ -1,5 +1,5 @@
 /* sw.js — Pirates Tools (PWA) */
-const VERSION        = 'pt-v220';                    // version du SW (logique SW)
+const VERSION        = 'pt-v221';                    // version du SW (logique SW)
 const STATIC_CACHE   = `pt-static-${VERSION}`;
 const RUNTIME_CACHE  = `pt-runtime-${VERSION}`;
 const IMG_CACHE      = `pt-img-${VERSION}`;
@@ -7,7 +7,7 @@ const DATA_CACHE     = `pt-data-${VERSION}`;
 const ORIGIN         = self.location.origin;
 
 // Aligner avec le HTML (cache-busting des assets)
-const ASSET_VER      = '210';
+const ASSET_VER      = '211';
 
 // IMPORTANT : le site tourne sous /ish/ (GitHub Pages).
 // On reste en chemins relatifs (./) pour que le SW fonctionne en local et en prod.

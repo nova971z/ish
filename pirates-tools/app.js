@@ -638,7 +638,7 @@
 
     // ── Cache DOM refs ──
     var pdpHero = document.getElementById('pdpHero');
-    var heroInfo = pdpHero ? pdpHero.querySelector('.pdp-hero__info') : null;
+    var heroInfo = document.getElementById('pdpHeroInfo');
     var heroGradient = pdpHero ? pdpHero.querySelector('.pdp-hero__gradient') : null;
     var viewer3d = document.getElementById('pdp3d');
     var viewer2 = document.getElementById('pdp3dSecondary');
@@ -660,7 +660,7 @@
     // ── Smooth state: current lerped values ──
     var LERP_SPEED = 0.08; // lower = smoother/slower (Apple feel)
     var state = {
-      heroScale: 1, heroTY: 0, heroOp: 1, heroBlur: 0,
+      heroScale: 1, heroTY: 0, heroOp: 1, heroBlur: 6,
       infoTY: 0, infoOp: 1, infoScale: 1,
       discHeadScale: 0.6, discHeadTY: 40, discHeadOp: 0, discHeadBlur: 12,
       discDescTY: 60, discDescOp: 0, discDescBlur: 8,
@@ -712,18 +712,22 @@
       var L = LERP_SPEED;
 
       // ═══ 1. HERO ═══
+      // Titre+prix en haut : se réduit au scroll
+      // Modèle 3D derrière : flouté au départ, se défloute au scroll
       if (pdpHero) {
         var heroH = pdpHero.offsetHeight || winH;
         var hp = easeOut(clamp(scrollY / heroH, 0, 1));
 
-        // Target values
-        var tScale = 1 + hp * 0.25;
-        var tTY = hp * -60;
-        var tOp = 1 - hp * 0.7;
-        var tBlur = hp * 10;
-        var tInfoTY = hp * -100;
-        var tInfoOp = 1 - hp * 1.5;
-        var tInfoScale = 1 - hp * 0.15;
+        // 3D model: defloute progressivement (blur 6→0), léger zoom, léger fade
+        var tScale = 1 + hp * 0.15;
+        var tTY = hp * -40;
+        var tOp = 1 - hp * 0.5;
+        var tBlur = 6 * (1 - hp);  // 6px → 0px au scroll
+
+        // Titre: se réduit et remonte au scroll
+        var tInfoTY = hp * -60;
+        var tInfoOp = 1 - hp * 1.2;
+        var tInfoScale = 1 - hp * 0.3;   // 1 → 0.7
 
         // Lerp toward targets
         state.heroScale = lerp(state.heroScale, tScale, L);
@@ -743,7 +747,8 @@
           'translateY(' + state.infoTY.toFixed(2) + 'px) scale(' + state.infoScale.toFixed(4) + ')',
           state.infoOp
         );
-        if (heroGradient) heroGradient.style.opacity = String(clamp(1 + hp * 0.5, 0, 1.5));
+        // Gradient s'estompe au scroll (le 3D se révèle)
+        if (heroGradient) heroGradient.style.opacity = String(clamp(1 - hp * 0.8, 0, 1));
 
         // Camera orbit (smooth)
         var tCamOrbit = 25 + clamp(scrollY / (heroH * 0.8), 0, 1) * 45;
@@ -1018,6 +1023,8 @@
       // Reset hero parallax transforms
       var pdpViewer = document.getElementById('pdp3d');
       if (pdpViewer) { pdpViewer.style.transform = ''; pdpViewer.style.opacity = ''; pdpViewer.style.filter = ''; }
+      var pdpInfo = document.getElementById('pdpHeroInfo');
+      if (pdpInfo) { pdpInfo.style.transform = ''; pdpInfo.style.opacity = ''; }
     }
 
     // Show matching view, hide all others

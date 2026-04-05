@@ -250,8 +250,17 @@
         <a class="pdp-back" href="#/catalogue" data-nav="/catalogue">&#8592; Retour</a>
       </div>
 
-      <!-- HERO : model-viewer plein ecran -->
+      <!-- HERO : model-viewer plein ecran, titre en haut -->
       <div class="pdp-hero" id="pdpHero">
+        <!-- Info en haut (titre + prix) -->
+        <div class="pdp-hero__info" id="pdpHeroInfo">
+          <h1 id="pdpTitle" class="pdp-hero__title" tabindex="-1">Produit</h1>
+          <div id="pdpTag" class="pdp-hero__tag"></div>
+          <div id="pdpPrice" class="pdp-hero__price"></div>
+        </div>
+        <!-- Gradient haut pour lisibilite du texte -->
+        <div class="pdp-hero__gradient"></div>
+        <!-- 3D viewer derriere, floute au depart -->
         <model-viewer
           id="pdp3d"
           alt="Modele 3D"
@@ -274,12 +283,7 @@
           bounds="tight"
           interpolation-decay="100"
         ></model-viewer>
-        <div class="pdp-hero__gradient"></div>
-        <div class="pdp-hero__info">
-          <h1 id="pdpTitle" class="pdp-hero__title" tabindex="-1">Produit</h1>
-          <div id="pdpTag" class="pdp-hero__tag"></div>
-          <div id="pdpPrice" class="pdp-hero__price"></div>
-        </div>
+        <!-- Scroll hint -->
         <div class="pdp-hero__scroll-hint" id="pdpScrollHint">
           <span>Decouvrir</span>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
