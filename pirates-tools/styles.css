@@ -107,7 +107,7 @@ z-index: 10;
 box-sizing: border-box;
 }
 #view-home .container { z-index: 1; }
-.empty { opacity: .6; text-align: center; padding: 2rem 0; }
+.empty { opacity: .6; text-align: center; padding: 2rem 0; width: 100%; }
 
 /* Titres */
 h1, h2, h3 { font-weight: 900; letter-spacing: .2px; }
@@ -866,6 +866,8 @@ padding: 0 2rem;
 overflow-x: auto;
 scroll-behavior: smooth;
 -webkit-overflow-scrolling: touch;
+align-items: center;
+justify-content: center;
 scrollbar-width: none;
 -ms-overflow-style: none;
 }
