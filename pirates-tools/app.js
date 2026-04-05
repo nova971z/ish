@@ -423,13 +423,22 @@
       dom.pdpImg.alt = product.title;
     }
 
-    // 3D model viewer
+    // 3D model viewer — hero (plein ecran)
     var viewer = document.getElementById('pdp3d');
     if (viewer) {
       var modelSrc = product.model || 'models/dewalt-optimized.glb';
       viewer.setAttribute('src', modelSrc);
       viewer.setAttribute('alt', product.title);
       if (product.img) viewer.setAttribute('poster', product.img);
+    }
+
+    // 3D model viewer — secondary (angle different : vue de dessus/profil)
+    var viewer2 = document.getElementById('pdp3dSecondary');
+    if (viewer2) {
+      var modelSrc2 = product.model || 'models/dewalt-optimized.glb';
+      viewer2.setAttribute('src', modelSrc2);
+      viewer2.setAttribute('alt', product.title + ' - vue detail');
+      if (product.img) viewer2.setAttribute('poster', product.img);
     }
 
     // Scroll animation for landing sections
@@ -528,43 +537,86 @@
     }
   }
 
-  // ── PDP scroll animations (Apple-style fade-up) ────────────
+  // ── PDP scroll animations (Apple-style immersive) ────────────
 
   var pdpObserver = null;
+  var pdpScrollHandler = null;
 
   function initPdpScrollAnimations() {
-    // Clean up previous observer
+    // Clean up previous observer & scroll handler
     if (pdpObserver) { pdpObserver.disconnect(); pdpObserver = null; }
+    if (pdpScrollHandler) {
+      window.removeEventListener('scroll', pdpScrollHandler);
+      pdpScrollHandler = null;
+    }
 
     // Reset all sections to hidden
     var sections = document.querySelectorAll('.pdp-section[data-animate]');
     sections.forEach(function (s) { s.classList.remove('visible'); });
 
-    // Hide scroll hint on scroll
+    // Scroll hint — hide on first scroll
     var scrollHint = document.getElementById('pdpScrollHint');
+    if (scrollHint) scrollHint.classList.remove('hidden-hint');
     var hintHidden = false;
     function hideHint() {
       if (!hintHidden && scrollHint) {
-        scrollHint.style.opacity = '0';
-        scrollHint.style.transition = 'opacity .4s ease';
+        scrollHint.classList.add('hidden-hint');
         hintHidden = true;
       }
     }
 
-    // IntersectionObserver for fade-up
+    // Parallax effect on hero model-viewer during scroll
+    var pdpHero = document.getElementById('pdpHero');
+    var heroInfo = pdpHero ? pdpHero.querySelector('.pdp-hero__info') : null;
+    var ticking = false;
+
+    pdpScrollHandler = function () {
+      if (!ticking) {
+        requestAnimationFrame(function () {
+          var scrollY = window.scrollY || window.pageYOffset;
+
+          // Hide scroll hint after 50px
+          if (scrollY > 50) hideHint();
+
+          // Parallax on hero: subtle scale + opacity fade as user scrolls down
+          if (pdpHero) {
+            var heroH = pdpHero.offsetHeight;
+            var progress = Math.min(scrollY / heroH, 1);
+            var viewer = document.getElementById('pdp3d');
+            if (viewer) {
+              viewer.style.transform = 'scale(' + (1 + progress * 0.15) + ') translateY(' + (progress * -30) + 'px)';
+              viewer.style.opacity = String(1 - progress * 0.4);
+            }
+            if (heroInfo) {
+              heroInfo.style.transform = 'translateY(' + (progress * -50) + 'px)';
+              heroInfo.style.opacity = String(1 - progress * 0.8);
+            }
+          }
+
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', pdpScrollHandler, { passive: true });
+
+    // IntersectionObserver for section reveal animations
     if ('IntersectionObserver' in window) {
       pdpObserver = new IntersectionObserver(function (entries) {
         entries.forEach(function (entry) {
           if (entry.isIntersecting) {
             entry.target.classList.add('visible');
             hideHint();
+            // Unobserve after reveal to avoid re-triggering
+            pdpObserver.unobserve(entry.target);
           }
         });
-      }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+      }, { threshold: 0.1, rootMargin: '0px 0px -80px 0px' });
 
       sections.forEach(function (s) { pdpObserver.observe(s); });
     } else {
-      // Fallback: show all
+      // Fallback: show all immediately
       sections.forEach(function (s) { s.classList.add('visible'); });
     }
   }
@@ -590,6 +642,18 @@
     var loggedIn = !!localStorage.getItem('pt_auth');
     if (route === '/compte' && !loggedIn) { location.hash = '#/auth'; return; }
     if (route === '/auth' && loggedIn) { location.hash = '#/compte'; return; }
+
+    // Cleanup PDP scroll handler when leaving product page
+    if (route !== '/produit') {
+      if (pdpObserver) { pdpObserver.disconnect(); pdpObserver = null; }
+      if (pdpScrollHandler) {
+        window.removeEventListener('scroll', pdpScrollHandler);
+        pdpScrollHandler = null;
+      }
+      // Reset hero parallax transforms
+      var pdpViewer = document.getElementById('pdp3d');
+      if (pdpViewer) { pdpViewer.style.transform = ''; pdpViewer.style.opacity = ''; }
+    }
 
     // Show matching view, hide all others
     $$('.view[data-route]').forEach(function (v) {
