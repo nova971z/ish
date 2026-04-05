@@ -166,7 +166,11 @@
     if (!dom.devisList) return;
     var items = getCart();
     if (items.length === 0) {
-      dom.devisList.innerHTML = '<p class="devis-empty">Votre panier est vide.</p>';
+      dom.devisList.innerHTML = '<div class="empty" style="padding:2rem;text-align:center">'
+        + '<p><strong>Votre panier est vide</strong></p>'
+        + '<p style="opacity:.7;margin:.5rem 0 1rem">Decouvrez nos produits et ajoutez-les a votre panier</p>'
+        + '<a class="btn primary" href="#/catalogue">Voir le catalogue</a>'
+        + '</div>';
       return;
     }
     var total = 0;
@@ -549,16 +553,16 @@
     var maxScroll = 400;
 
     if (y < threshold) {
-      dom.heroLogoContainer.className = 'initial';
+      dom.heroLogoContainer.className = 'hero-logo-container initial';
       dom.heroLogoContainer.style.setProperty('--scale-factor', '1');
       dom.heroLogoContainer.style.setProperty('--opacity-factor', '1');
     } else if (y >= maxScroll) {
-      dom.heroLogoContainer.className = 'hidden';
+      dom.heroLogoContainer.className = 'hero-logo-container hidden';
       dom.heroLogoContainer.style.setProperty('--scale-factor', '6');
       dom.heroLogoContainer.style.setProperty('--opacity-factor', '0');
     } else {
       var progress = (y - threshold) / (maxScroll - threshold);
-      dom.heroLogoContainer.className = 'scaling';
+      dom.heroLogoContainer.className = 'hero-logo-container scaling';
       dom.heroLogoContainer.style.setProperty('--scale-factor', String(1 + progress * 5));
       dom.heroLogoContainer.style.setProperty('--opacity-factor', String(1 - progress));
     }

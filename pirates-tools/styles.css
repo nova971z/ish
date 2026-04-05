@@ -718,9 +718,7 @@ white-space: nowrap;
 
 /* Corrections pour la visibilité des produits devis */
 body.page-devis #devisList,
-body.page-devis .list,
-#view-devis .list,
-#view-devis #devisList {
+body.page-devis .list {
 display: grid !important;
 visibility: visible !important;
 opacity: 1 !important;
@@ -810,15 +808,18 @@ backdrop-filter: blur(8px);
 -webkit-backdrop-filter: blur(8px);
 }
 
-#view-devis,
-body.page-devis #view-devis,
-#devisList,
-body.page-devis #devisList {
+body.page-devis #view-devis {
 display: block !important;
 visibility: visible !important;
 opacity: 1 !important;
 position: relative;
 z-index: 15;
+}
+
+body.page-devis #devisList {
+display: grid !important;
+visibility: visible !important;
+opacity: 1 !important;
 }
 
 #view-devis .container {
@@ -840,7 +841,7 @@ z-index: 20;
 /* ========== 11) BANNIÈRE OUTILS 3D ========== */
 
 .tools-banner {
-width: min(var(--container-w), 92vw);
+width: min(800px, 88vw);
 margin: 2rem auto 3rem;
 position: relative;
 z-index: 15;
@@ -858,7 +859,8 @@ text-shadow: 0 0 20px rgba(139, 92, 246, 0.6);
 .tools-scroll-container {
 position: relative;
 overflow: hidden;
-padding: 1rem 0;
+padding: 2rem 0;
+min-height: 180px;
 background: rgba(139, 92, 246, 0.05);
 border: 2px solid rgba(139, 92, 246, 0.3);
 border-radius: 20px;
@@ -2159,6 +2161,67 @@ flex-direction: column;
 width: 100%;
 }
 
+}
+
+/* ========== 30) FOOTER ========== */
+.site-footer {
+  background: rgba(10, 15, 20, 0.95);
+  border-top: 1px solid rgba(139, 92, 246, 0.2);
+  padding: 3rem 0 calc(var(--dockH) + var(--safe-bottom) + 2rem);
+  margin-top: 4rem;
+  position: relative;
+  z-index: 10;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.footer-col h4 {
+  color: #8B5CF6;
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 .8rem;
+  text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+}
+
+.footer-col p {
+  color: var(--muted);
+  font-size: .9rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.footer-col nav {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+
+.footer-col a {
+  color: var(--muted);
+  font-size: .9rem;
+  transition: color .2s;
+}
+
+.footer-col a:hover {
+  color: var(--brand);
+}
+
+.footer-bottom {
+  border-top: 1px solid var(--border);
+  padding-top: 1.5rem;
+  text-align: center;
+}
+
+.footer-bottom p {
+  color: var(--muted);
+  font-size: .8rem;
+  margin: 0;
+  opacity: .7;
 }
 
 /* ========== 31) PATCHES & ANCRAGES ========== */
