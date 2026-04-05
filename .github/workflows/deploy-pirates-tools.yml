@@ -5,6 +5,7 @@ on:
     branches: ['claude/pirates-tools-rebuild-zWc1b']
     paths:
       - 'pirates-tools/**'
+      - '.github/workflows/deploy-pirates-tools.yml'
   workflow_dispatch:
 
 permissions:
