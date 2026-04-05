@@ -1,17 +1,485 @@
 <!doctype html>
 <html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#0A0E1A" />
-    <meta name="description" content="Pirates Tools — Outillage professionnel pour les Antilles. DeWALT, Milwaukee, Makita, Festool et plus." />
-    <link rel="manifest" href="/manifest.json" />
-    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
-    <title>Pirates Tools — Outillage Pro Antilles</title>
-  </head>
-  <body class="bg-[#0A0E1A] text-white antialiased">
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Pirates Tools - Outillage pro (PWA)</title>
+  <meta name="description" content="Pirates Tools — Visseuses a chocs DeWALT, dispo Antilles. PWA rapide, contact immediat (telephone & WhatsApp)." />
+
+  <base href="/Pirates-tools-app1/">
+  <link rel="canonical" href="https://nova971z.github.io/Pirates-tools-app1/">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- PWA -->
+  <meta name="theme-color" content="#0a0f14" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Pirates Tools" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icons/icon-192.png" sizes="192x192" />
+  <link rel="apple-touch-icon" href="icons/icon-180.png" sizes="180x180" />
+
+  <!-- Patch UI : haut non tronque + dock centre + bulles -->
+  <style id="pt-fix">
+    :root{ --safe-top:70px; --dock-bottom:14px; }
+    #app{ padding-top: calc(var(--safe-top) + 10px); }
+    #dock{ position:fixed!important; left:50%!important; right:auto!important;
+      bottom: calc(var(--dock-bottom) + var(--safe-bottom,0px))!important;
+      transform:translateX(-50%)!important; width:auto!important; padding:0!important; z-index:999; }
+    #dock.dock--visible{ transform:translateX(-50%)!important; }
+    .brand-grid{ display:grid!important; grid-template-columns:repeat(2,minmax(0,1fr))!important; gap:.8rem!important; justify-items:center!important; }
+    @media (min-width:680px){ .brand-grid{ grid-template-columns:repeat(3,minmax(0,1fr))!important; } }
+    .brand{ background:transparent!important; border:0!important; padding:0!important; }
+    .brand__bubble{ width:92px; height:92px; border-radius:50%; overflow:hidden;
+      background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); display:block; }
+    .brand__bubble img,.brand__logo{ width:100%; height:100%; object-fit:cover; }
+  </style>
+
+  <!-- Hero : animation de scroll integree -->
+  <style id="hero-scroll-animation">
+    .hero-full {
+      height: 50vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-logo-container {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 500;
+      transition: transform 0.1s ease-out;
+    }
+
+    .hero-logo {
+      position: relative;
+      border-radius: 50%;
+      box-shadow:
+        0 0 30px rgba(212, 175, 55, 0.6),
+        0 0 60px rgba(212, 175, 55, 0.3);
+      transition: all 0.1s ease-out;
+    }
+
+    .hero-logo-container.initial {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .hero-logo-container.scaling {
+      transform: translate(-50%, -50%) scale(var(--scale-factor));
+      opacity: var(--opacity-factor);
+    }
+
+    .hero-logo-container.hidden {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(6);
+      pointer-events: none;
+      visibility: hidden;
+    }
+
+    @media (max-width: 768px) {
+      .hero-logo {
+        width: 90vw !important;
+        height: 90vw !important;
+        max-width: 90vw !important;
+        max-height: 90vw !important;
+      }
+    }
+  </style>
+
+  <!-- Micro-styles UI complementaires -->
+  <style id="pt-ui">
+    .hero-full.hero-out{
+      z-index: -1;
+      height: 0 !important;
+      min-height: 0 !important;
+      display: none !important;
+      pointer-events: none !important;
+    }
+    .list{ margin-top: var(--listGap, 22vh); }
+
+    .brand-grid--3col{
+      display:grid; gap:.8rem;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+    @media (min-width:680px){ .brand-grid--3col{ grid-template-columns:repeat(3,minmax(0,1fr)); } }
+    .brand{ display:flex; flex-direction:column; align-items:center; gap:.4rem; background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.06); border-radius:12px; padding:.8rem; cursor:pointer; }
+    .brand__bubble{ width:90px; height:90px; display:grid; place-items:center; }
+    .brand__logo{ max-width:100%; max-height:100%; }
+
+    .chips{ display:flex; flex-wrap:wrap; gap:.4rem; }
+    .chip{ border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.04); border-radius:999px; padding:.35rem .7rem; }
+    .chip--on{ background:rgba(255,255,255,.14); }
+
+    #toasts{ position:fixed; right:.8rem; bottom:calc(var(--safe-bottom,0px) + 1rem);
+      display:grid; gap:.4rem; z-index:10000; }
+    .toast{ background:rgba(0,0,0,.8); color:#fff; border-radius:8px; padding:.6rem .8rem; }
+    .toast--success{ background:rgba(23,135,44,.9); }
+    .toast--info{ background:rgba(39,96,201,.9); }
+    @keyframes toast-out{ to{ opacity:0; transform:translateY(8px); } }
+
+    .sr-only{ position:absolute !important; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,1px); white-space:nowrap; border:0; }
+    .pt-root{ z-index:2147483000; }
+
+    /* Drawer (menu lateral) */
+    .drawer{
+      position:fixed; top:0; bottom:0; left:0; right:auto;
+      width:min(86vw,360px); max-width:92vw; box-sizing:border-box;
+      background:rgba(0,0,0,.9);
+      -webkit-backdrop-filter:saturate(120%) blur(8px); backdrop-filter:saturate(120%) blur(8px);
+      transform:translate3d(-102%,0,0); transition:transform .25s ease; z-index:1001;
+      padding:90px 0 28px 18px; display:grid; grid-auto-rows:min-content; gap:28px;
+      align-content:start; justify-items:start;
+    }
+    .drawer.open{ transform:translate3d(0,0,0); }
+    .menu-open #side-menu{ transform:translate3d(0,0,0); }
+    .menu-open #menuBackdrop{ display:block; }
+
+    .backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:1000; }
+    .backdrop.hidden{ display:none; }
+    [hidden]{ display:none !important; }
+
+    .view.hidden{ display:none !important; }
+
+    #dock.dock--visible{ opacity:1; transform:translateX(-50%) translateY(0) }
+    #dock .dock__shell{ pointer-events:auto }
+
+    #dock.dock--pulse{ animation:dockPulse .46s ease }
+    @keyframes dockPulse{
+      0%   { transform:translateX(-50%) translateY(0) scale(1) }
+      40%  { transform:translateX(-50%) translateY(0) scale(1.03) }
+      100% { transform:translateX(-50%) translateY(0) scale(1) }
+    }
+
+    .pdp__tag{ opacity:.8; margin:.2rem 0 .6rem; }
+    .pdp__price{ font-size:1.25rem; font-weight:700; }
+    .pdp__price-ht{ opacity:.8; }
+
+    /* Force menu states */
+    #side-menu.open,
+    .menu-open #side-menu { transform: translateX(0) !important; }
+
+    #menuBackdrop:not(.hidden),
+    .menu-open #menuBackdrop {
+      opacity: 1 !important; visibility: visible !important; display: block !important;
+    }
+
+    #menu-toggle { pointer-events: auto !important; z-index: 1002 !important; }
+  </style>
+</head>
+
+<body>
+  <!-- =================== TOPBAR =================== -->
+  <header class="topbar" role="banner">
+    <div class="topbar-left">
+      <button id="menu-toggle" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="side-menu">
+        <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+      </button>
+
+      <a id="homeLink" class="topbar-logo-link" href="#/" data-nav="/">
+        <img
+          id="topbarLogo"
+          class="topbar-logo"
+          src="icons/icon-512.png"
+          alt="Pirates Tools"
+          width="140" height="40"
+          decoding="async" loading="eager" fetchpriority="high" referrerpolicy="no-referrer" />
+      </a>
+    </div>
+
+    <div class="cta">
+      <a id="callBtn" class="btn btn-call" href="tel:+33774230195" data-action="call">📞 <strong>07 74 23 01 95</strong></a>
+      <a id="waBtn" class="btn btn-wa" href="https://wa.me/33774230195" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" data-action="open-wa">💬</a>
+    </div>
+  </header>
+
+  <!-- =================== HERO =================== -->
+  <section id="hero" class="hero-full" aria-hidden="true">
+    <div class="hero-logo-container initial" id="heroLogoContainer">
+      <img id="heroLogo" class="hero-logo on" alt="Pirates Tools"
+        src="icons/icon-512.png"
+        srcset="icons/icon-256.png 256w, icons/icon-384.png 384w, icons/icon-512.png 512w"
+        sizes="(max-width: 768px) 90vw, 60vw"
+        width="600" height="600"
+        decoding="async" loading="eager" fetchpriority="high" />
+    </div>
+  </section>
+
+  <!-- =================== VUES (SPA) =================== -->
+  <main id="app" role="main">
+
+    <!-- HOME -->
+    <section id="view-home" class="view" data-route="/" role="region" aria-labelledby="home-h1">
+      <div class="container">
+        <h1 id="home-h1" tabindex="-1">Bienvenue</h1>
+        <ul class="brand-grid" data-home-brands></ul>
+        <p style="margin:0 0 1rem;color:#9fb4c5">Choisissez une marque ou explorez le catalogue.</p>
+        <div id="brandGrid" class="brand-grid brand-grid--3col" role="list" data-bind="brands"></div>
+
+        <!-- Banniere outils 3D -->
+        <section id="tools-banner" class="tools-banner">
+          <h2>Decouvrez nos Outils en 3D</h2>
+          <div class="tools-scroll-container">
+            <button class="scroll-indicator scroll-left" aria-label="Defiler vers la gauche">
+              &#8249;
+            </button>
+            <div class="tools-grid">
+              <div class="empty">Bientot disponible</div>
+            </div>
+            <button class="scroll-indicator scroll-right" aria-label="Defiler vers la droite">
+              &#8250;
+            </button>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <!-- CATALOGUE -->
+    <section id="view-catalogue" class="view hidden" data-route="/catalogue" role="region" aria-labelledby="catalogue-h1">
+      <div class="container">
+        <h1 id="catalogue-h1" tabindex="-1">Catalogue</h1>
+
+        <div class="toolbar">
+          <input id="q" class="search" type="search" placeholder="Rechercher (marque, ref, description...)" autocomplete="off" data-bind="search" />
+          <select id="tag" class="select" aria-label="Filtrer par categorie" data-bind="tag">
+            <option value="">Tous</option>
+          </select>
+        </div>
+
+        <div id="catList" class="cat-list" aria-label="Categories" data-bind="cats"></div>
+        <div id="list" class="list" aria-live="polite" aria-busy="false" data-bind="results"></div>
+      </div>
+    </section>
+
+    <!-- PRODUIT (PDP) -->
+    <section id="view-produit" class="view hidden" data-route="/produit" role="region" aria-labelledby="pdpTitle">
+      <div class="container pdp" id="pdp">
+        <a class="chip chip--back" href="#/catalogue" data-nav="/catalogue" aria-label="Retour au catalogue">&#8592; Retour</a>
+
+        <div class="pdp__grid">
+          <div class="pdp__media">
+            <img id="pdpImg" alt="" />
+          </div>
+
+          <div class="pdp__info">
+            <h1 id="pdpTitle" class="pdp__title" tabindex="-1" aria-describedby="pdpTag">Produit</h1>
+            <div id="pdpTag" class="pdp__tag"></div>
+            <p id="pdpDesc" class="pdp__desc"></p>
+            <div class="pdp__price" id="pdpPrice"></div>
+            <ul id="pdpSpecs" class="pdp__specs"></ul>
+
+            <div class="actions">
+              <button id="pdpQuote" class="btn primary" type="button" data-action="add-to-cart">Ajouter au panier</button>
+              <a id="pdpWa" class="btn btn-wa" href="https://wa.me/33774230195" target="_blank" rel="noopener noreferrer" aria-label="Partager sur WhatsApp" data-action="share-wa">WhatsApp</a>
+              <button id="pdpShare" class="btn" type="button" data-action="share">Partager</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="pdp__related" id="pdpRelated" data-bind="related"></div>
+      </div>
+    </section>
+
+    <!-- DEVIS (panier) -->
+    <section id="view-devis" class="view hidden" data-route="/devis" role="region" aria-labelledby="devis-h1">
+      <div class="container">
+        <h1 id="devis-h1" tabindex="-1">Mon devis</h1>
+
+        <div class="card">
+          <div class="head"><h3 class="title">Articles</h3><span class="badge">Panier</span></div>
+          <div id="devisList" class="specs" style="display:grid;gap:.8rem" data-bind="cart"></div>
+          <div class="actions">
+            <button id="devisSend" class="btn primary" type="button" data-action="send-quote">Envoyer le devis (WhatsApp)</button>
+            <button id="devisClear" class="btn" type="button" data-action="clear-cart">Vider</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- COMPTE -->
+    <section id="view-compte" class="view hidden" data-route="/compte" role="region" aria-labelledby="compte-h1">
+      <div class="container">
+        <h1 id="compte-h1" tabindex="-1">Mon compte</h1>
+
+        <div class="card">
+          <div class="head"><h3 class="title">Creer / Mettre a jour</h3><span class="badge">Demo</span></div>
+          <div class="specs">
+
+            <!-- Avatar -->
+            <div style="display:flex;gap:1rem;align-items:center;margin-bottom:.75rem">
+              <img id="accAvatarImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" alt="Avatar" width="64" height="64" style="border-radius:50%;border:1px solid rgba(255,255,255,.16);object-fit:cover"/>
+              <label class="chip" style="cursor:pointer">
+                <input id="accAvatar" type="file" accept="image/*" hidden />
+                Ajouter une photo de profil
+              </label>
+            </div>
+
+            <form id="accountForm" style="display:grid;gap:.6rem;max-width:520px">
+              <label>Nom
+                <input id="accName" type="text" class="search" placeholder="Votre nom" autocomplete="name" />
+              </label>
+              <label>Email
+                <input id="accEmail" type="email" class="search" placeholder="vous@exemple.com" autocomplete="email" />
+              </label>
+              <div class="actions">
+                <button id="accSave" class="btn primary" type="button" data-action="account-save">Enregistrer</button>
+              </div>
+            </form>
+
+            <!-- Mini recap panier -->
+            <div class="card" style="margin-top:1rem;max-width:520px">
+              <div class="head"><h3 class="title">Votre panier</h3><span class="badge">Resume</span></div>
+              <div id="accCartMini" class="specs">
+                <p id="accCartMiniTxt" style="opacity:.9">0 article — total 0 &#8364;</p>
+                <div class="actions"><a class="btn" href="#/devis" data-nav="/devis">Voir le panier</a></div>
+              </div>
+            </div>
+
+            <!-- Jauge fidelite -->
+            <div class="meter" style="max-width:520px;margin-top:1rem">
+              <div class="meter__rail">
+                <div id="accFill" class="meter__fill"></div>
+                <div id="accCursor" class="meter__cursor" style="left:0%"></div>
+              </div>
+              <div class="meter__scale"><span>0%</span><span>100%</span></div>
+              <input id="accSlider" type="range" min="0" max="1000" step="10" value="0" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- AUTH -->
+    <section id="view-auth" class="view hidden" data-route="/auth" role="region" aria-labelledby="auth-h1">
+      <div class="container">
+        <h1 id="auth-h1" tabindex="-1">Compte</h1>
+        <div class="card">
+          <div class="head"><h3 class="title">Bienvenue</h3><span class="badge">Compte</span></div>
+
+          <div class="specs" style="display:block">
+            <div class="auth-switch" role="tablist" aria-label="Choix de formulaire" style="display:flex;gap:.5rem;margin:.5rem 0 1rem">
+              <button id="authLoginTab" class="chip" role="tab" aria-controls="authLogin" aria-selected="true">Connexion</button>
+              <button id="authRegisterTab" class="chip" role="tab" aria-controls="authRegister" aria-selected="false">Inscription</button>
+            </div>
+
+            <div id="authLogin" role="tabpanel" aria-labelledby="authLoginTab">
+              <form id="loginForm" style="display:grid;gap:.6rem;max-width:420px">
+                <label>Email
+                  <input id="loginEmail" type="email" class="search" placeholder="vous@exemple.com" autocomplete="email" required />
+                </label>
+                <label>Mot de passe
+                  <input id="loginPwd" type="password" class="search" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" autocomplete="current-password" required />
+                </label>
+                <div class="actions">
+                  <button id="loginSubmit" class="btn primary" type="submit" data-action="login">Connexion</button>
+                </div>
+              </form>
+            </div>
+
+            <div id="authRegister" role="tabpanel" aria-labelledby="authRegisterTab" hidden>
+              <form id="registerForm" style="display:grid;gap:.6rem;max-width:420px">
+                <label>Nom complet
+                  <input id="regName" type="text" class="search" placeholder="Jean Dupont" autocomplete="name" required />
+                </label>
+                <label>Email
+                  <input id="regEmail" type="email" class="search" placeholder="vous@exemple.com" autocomplete="email" required />
+                </label>
+                <label>Mot de passe
+                  <input id="regPwd" type="password" class="search" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" minlength="6" autocomplete="new-password" required />
+                </label>
+                <div class="actions">
+                  <button id="regSubmit" class="btn primary" type="submit" data-action="register">Creer le compte</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- =================== DOCK =================== -->
+  <nav id="dock" class="dock" aria-label="Barre d'action">
+    <div class="dock__shell">
+      <button id="dockHomeBtn" class="dock__btn dock__btn--home" type="button" aria-label="Accueil" data-nav="/">🏠</button>
+      <button id="dockQuoteBtn" class="dock__btn dock__btn--tools" type="button" aria-label="Catalogue" data-nav="/catalogue">🛠️</button>
+      <button id="dockCartBtn" class="dock__btn dock__btn--cart" type="button" aria-label="Voir le panier" data-nav="/devis">
+        🛒
+        <span id="dockCount" class="dock__badge">0</span>
+      </button>
+      <a class="dock__btn dock__btn--call" href="tel:+33774230195" aria-label="Appeler">📞</a>
+      <a class="dock__btn dock__btn--wa" href="https://wa.me/33774230195" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">💬</a>
+    </div>
+  </nav>
+
+  <!-- =================== OVERLAY + MENU LATERAL =================== -->
+  <div id="menuBackdrop" class="backdrop hidden" aria-hidden="true" hidden></div>
+
+  <aside id="side-menu" class="drawer" role="dialog" aria-modal="true"
+         aria-labelledby="menuTitle" aria-hidden="true" tabindex="-1">
+    <h2 id="menuTitle" class="menu-title">Menu</h2>
+
+    <nav class="menu" aria-label="Navigation principale">
+      <a href="#/" data-route="#/">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3 10.5L12 3l9 7.5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M5 10.5V21h5v-6h4v6h5v-10.5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Accueil</span>
+      </a>
+
+      <a href="#/catalogue" data-route="#/catalogue">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="3" y="7" width="18" height="12" rx="3" ry="3" fill="none" stroke="currentColor" stroke-width="2.5"/>
+          <path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" fill="none" stroke="currentColor" stroke-width="2.5"/>
+          <path d="M3 12h18" fill="none" stroke="currentColor" stroke-width="2.5"/>
+        </svg>
+        <span>Catalogue</span>
+      </a>
+
+      <a href="#/devis" data-route="#/devis">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3 4h2l2.4 10.2a2 2 0 0 0 2 1.6h6.8a2 2 0 0 0 2-1.6L20 8H7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M7 8l1 4" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M12 8l1 4" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+        <span>Devis</span>
+      </a>
+
+      <a href="#/compte" data-route="#/compte">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="8" r="4.5" fill="none" stroke="currentColor" stroke-width="2.5"/>
+          <path d="M4 21a8 8 0 0 1 16 0" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+        <span>Compte</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- =================== TOASTS + A11y =================== -->
+  <div id="toasts" aria-live="polite"></div>
+  <div id="sr-live" class="sr-only" aria-live="polite" role="status"></div>
+
+  <!-- Bouton d'installation PWA -->
+  <button id="installBtn" class="chip hidden" hidden data-action="install">Installer l'app</button>
+
+  <noscript>
+    <div style="padding:1rem;margin:1rem;border:1px solid #22303b;border-radius:8px;background:#121b24;color:#e6edf5">
+      Cette application necessite JavaScript.
+    </div>
+  </noscript>
+
+  <!-- =================== JS =================== -->
+  <script defer src="app.js"></script>
+</body>
 </html>
