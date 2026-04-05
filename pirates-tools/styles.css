@@ -200,11 +200,6 @@ image-rendering: -webkit-optimize-contrast;
 backface-visibility: hidden;
 -webkit-backface-visibility: hidden;
 transform: translateZ(0);
-content: url('pirates-tools-logo.png');
-background-image: url('pirates-tools-logo.png');
-background-size: contain;
-background-repeat: no-repeat;
-background-position: center;
 }
 
 /* FORCER la visibilité du logo sur toutes les pages */
@@ -1010,7 +1005,7 @@ z-index: 20;
     margin: 3rem 0 2rem;
     padding: 2rem 0;
     position: relative;
-    overflow: hidden;
+    overflow: visible;
     background: transparent;
 }
 
