@@ -428,20 +428,9 @@ body.menu-open { overflow: hidden; }
     overflow: visible;
 }
 
-/* Glow behind the logo — tightly contained, not visible on background */
+/* Glow removed from hero — light is now on the logo image itself */
 #hero::before, .hero-full::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 38vmin;
-    height: 38vmin;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(212,175,55,.25) 0%, rgba(212,175,55,.12) 30%, rgba(212,175,55,.04) 55%, transparent 70%);
-    z-index: 0;
-    pointer-events: none;
-    filter: blur(8px);
+    display: none;
 }
 
 /* Smooth transition from hero to content */
@@ -496,6 +485,7 @@ display: none !important;
     will-change: transform, opacity;
     opacity: 0;
     transform: scale(0.95) translateY(20px);
+    filter: drop-shadow(0 0 18px rgba(212,175,55,.45)) drop-shadow(0 0 6px rgba(212,175,55,.3));
 }
 
 #heroLogo.on, .hero-logo.on {
