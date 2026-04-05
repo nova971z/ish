@@ -442,9 +442,22 @@
         + '<span class="pdp-price__ht">' + formatPrice(ht) + ' HT</span>';
     }
 
+    // Features (points forts)
+    var featuresEl = document.getElementById('pdpFeatures');
+    if (featuresEl && product.features && product.features.length > 0) {
+      featuresEl.innerHTML = product.features.map(function (f) {
+        return '<div class="pdp-feature">'
+          + '<div class="pdp-feature__icon">\u2713</div>'
+          + '<span>' + escapeHTML(f) + '</span>'
+          + '</div>';
+      }).join('');
+    } else if (featuresEl) {
+      featuresEl.innerHTML = '';
+    }
+
     // Specs table
     if (dom.pdpSpecs && product.specs) {
-      var specsHtml = '<table class="pdp-specs">';
+      var specsHtml = '<table>';
       Object.keys(product.specs).forEach(function (k) {
         specsHtml += '<tr><td>' + escapeHTML(k) + '</td><td>' + escapeHTML(product.specs[k]) + '</td></tr>';
       });
@@ -452,6 +465,19 @@
       dom.pdpSpecs.innerHTML = specsHtml;
     } else if (dom.pdpSpecs) {
       dom.pdpSpecs.innerHTML = '';
+    }
+
+    // Kit
+    var kitSection = document.getElementById('pdpKitSection');
+    var kitEl = document.getElementById('pdpKit');
+    if (kitEl && product.kit && product.kit.length > 0) {
+      if (kitSection) kitSection.style.display = '';
+      kitEl.innerHTML = product.kit.map(function (item) {
+        return '<li>' + escapeHTML(item) + '</li>';
+      }).join('');
+    } else {
+      if (kitSection) kitSection.style.display = 'none';
+      if (kitEl) kitEl.innerHTML = '';
     }
 
     // Add to cart — stays on page, no redirect

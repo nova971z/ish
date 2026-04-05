@@ -242,76 +242,101 @@
       </div>
     </section>
 
-    <!-- PRODUIT (PDP) — Landing interactive style Apple -->
+    <!-- PRODUIT (PDP) — Landing interactive -->
     <section id="view-produit" class="view hidden" data-route="/produit" role="region" aria-labelledby="pdpTitle">
 
-      <!-- Hero 3D plein écran -->
-      <div class="pdp-hero" id="pdpHero">
+      <!-- Navigation retour -->
+      <div class="pdp-nav">
         <a class="pdp-back" href="#/catalogue" data-nav="/catalogue">&#8592; Retour</a>
-        <model-viewer
-          id="pdp3d"
-          alt="Modèle 3D du produit"
-          auto-rotate
-          camera-controls
-          touch-action="pan-y"
-          interaction-prompt="auto"
-          shadow-intensity="0.4"
-          exposure="1"
-          camera-orbit="45deg 65deg 105%"
-          min-camera-orbit="auto auto 80%"
-          max-camera-orbit="auto auto 200%"
-          style="width:100%;height:100%;background:transparent;"
-        ></model-viewer>
-        <div class="pdp-hero__fade"></div>
+      </div>
+
+      <!-- BLOC 1 : Hero — Modele 3D + Nom + Prix -->
+      <div class="pdp-hero" id="pdpHero">
+        <div class="pdp-hero__viewer">
+          <model-viewer
+            id="pdp3d"
+            alt="Modele 3D"
+            auto-rotate
+            camera-controls
+            touch-action="pan-y"
+            interaction-prompt="auto"
+            shadow-intensity="0.6"
+            exposure="1.1"
+            camera-orbit="30deg 70deg 105%"
+            min-camera-orbit="auto auto 60%"
+            max-camera-orbit="auto auto 250%"
+            style="width:100%;height:100%;background:transparent;"
+          ></model-viewer>
+        </div>
+        <div class="pdp-hero__info">
+          <h1 id="pdpTitle" class="pdp-hero__title" tabindex="-1">Produit</h1>
+          <div id="pdpTag" class="pdp-hero__tag"></div>
+          <div id="pdpPrice" class="pdp-hero__price"></div>
+        </div>
         <div class="pdp-hero__scroll-hint" id="pdpScrollHint">
-          <span>Scroll</span>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+          <span>Decouvrir</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
         </div>
       </div>
 
-      <!-- Sections qui apparaissent au scroll -->
-      <div class="pdp-landing" id="pdpLanding">
-
-        <!-- Section titre + prix -->
-        <div class="pdp-section pdp-section--intro" data-animate="fade-up">
-          <h1 id="pdpTitle" class="pdp-landing__title" tabindex="-1">Produit</h1>
-          <div id="pdpTag" class="pdp-landing__tag"></div>
-          <div class="pdp__price pdp-landing__price" id="pdpPrice"></div>
-        </div>
-
-        <!-- Section description -->
-        <div class="pdp-section" data-animate="fade-up">
+      <!-- BLOC 2 : Description -->
+      <div class="pdp-section" data-animate="fade-up">
+        <div class="pdp-section__inner">
           <p id="pdpDesc" class="pdp-landing__desc"></p>
         </div>
+      </div>
 
-        <!-- Section image produit -->
-        <div class="pdp-section pdp-section--media" data-animate="fade-up">
+      <!-- BLOC 3 : Photo produit -->
+      <div class="pdp-section pdp-section--media" data-animate="fade-up">
+        <div class="pdp-section__inner">
           <div class="pdp-landing__media">
             <img id="pdpImg" alt="" />
           </div>
         </div>
+      </div>
 
-        <!-- Section specs -->
-        <div class="pdp-section" data-animate="fade-up">
-          <h2 class="pdp-section__heading">Caracteristiques</h2>
-          <ul id="pdpSpecs" class="pdp__specs"></ul>
+      <!-- BLOC 4 : Points forts -->
+      <div class="pdp-section" data-animate="fade-up">
+        <div class="pdp-section__inner">
+          <h2 class="pdp-section__heading">Points forts</h2>
+          <div id="pdpFeatures" class="pdp-features"></div>
         </div>
+      </div>
 
-        <!-- Section actions -->
-        <div class="pdp-section pdp-section--actions" data-animate="fade-up">
+      <!-- BLOC 5 : Caracteristiques techniques -->
+      <div class="pdp-section" data-animate="fade-up">
+        <div class="pdp-section__inner">
+          <h2 class="pdp-section__heading">Caracteristiques</h2>
+          <div id="pdpSpecs" class="pdp-specs-table"></div>
+        </div>
+      </div>
+
+      <!-- BLOC 6 : Contenu du kit -->
+      <div class="pdp-section" id="pdpKitSection" data-animate="fade-up" style="display:none">
+        <div class="pdp-section__inner">
+          <h2 class="pdp-section__heading">Contenu du kit</h2>
+          <ul id="pdpKit" class="pdp-kit"></ul>
+        </div>
+      </div>
+
+      <!-- BLOC 7 : Actions -->
+      <div class="pdp-section pdp-section--actions" data-animate="fade-up">
+        <div class="pdp-section__inner">
           <div class="pdp-landing__actions">
             <button id="pdpQuote" class="btn primary btn--lg" type="button" data-action="add-to-cart">Ajouter au panier</button>
-            <a id="pdpWa" class="btn btn-wa btn--lg" href="https://wa.me/33774230195" target="_blank" rel="noopener noreferrer" aria-label="Partager sur WhatsApp" data-action="share-wa">WhatsApp</a>
+            <a id="pdpWa" class="btn btn-wa btn--lg" href="https://wa.me/33774230195" target="_blank" rel="noopener noreferrer" data-action="share-wa">WhatsApp</a>
             <button id="pdpShare" class="btn btn--lg" type="button" data-action="share">Partager</button>
           </div>
         </div>
-
-        <!-- Produits similaires -->
-        <div class="pdp-section" data-animate="fade-up">
-          <div class="pdp__related" id="pdpRelated" data-bind="related"></div>
-        </div>
-
       </div>
+
+      <!-- BLOC 8 : Produits similaires -->
+      <div class="pdp-section" data-animate="fade-up">
+        <div class="pdp-section__inner">
+          <div id="pdpRelated" data-bind="related"></div>
+        </div>
+      </div>
+
     </section>
 
     <!-- DEVIS (panier) -->
@@ -537,4 +562,4 @@
   <script defer src="app.js"></script>
 </body>
 </html>
-<!-- deployed 20260405151500 -->
+<!-- deployed 20260405160000 -->
