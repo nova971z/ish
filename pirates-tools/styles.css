@@ -1584,8 +1584,8 @@ transform: translateY(-2px);
 }
 
 .pdp-hero__viewer {
-    width: min(500px, 80vw);
-    height: min(400px, 50vh);
+    width: min(600px, 90vw);
+    height: min(450px, 55vh);
     flex-shrink: 0;
 }
 
