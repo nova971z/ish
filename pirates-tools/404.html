@@ -23,10 +23,10 @@
       document.head.querySelector('base'));
     var root = base ? new URL(base.getAttribute('href'), location.origin).pathname : '/';
 
-    // Chemin demandé (ex: /Pirates-tools-app1/produit/xyz)
-    var path = location.pathname.replace(root, '').replace(/^\/+/, '');
+    // Chemin demandé (ex: /ish/produit/xyz)
+    var path = location.pathname.replace(root, ‘’).replace(/^\/+/, ‘’);
 
-    // Construit l’URL hash de la SPA (ex: /Pirates-tools-app1/#/produit/xyz)
+    // Construit l’URL hash de la SPA (ex: /ish/#/produit/xyz)
     var dest = root + '#/' + path + (location.search || '') + (location.hash || '');
 
     // Met à jour le lien visible (fallback) puis redirige

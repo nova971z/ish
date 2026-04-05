@@ -9,7 +9,7 @@ const ORIGIN         = self.location.origin;
 // Aligner avec le HTML (cache-busting des assets)
 const ASSET_VER      = '43';
 
-// IMPORTANT : le site tourne sous /Pirates-tools-app1/ (GitHub Pages).
+// IMPORTANT : le site tourne sous /ish/ (GitHub Pages).
 // On reste en chemins relatifs (./) pour que le SW fonctionne en local et en prod.
 const APP_SHELL = [
   './',
