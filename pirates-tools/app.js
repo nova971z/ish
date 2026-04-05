@@ -602,6 +602,7 @@
   // ── PDP scroll animations (Apple-style immersive — lerp-based) ──
 
   var pdpObserver = null;
+  var pdpScrollHandler = null;
   var pdpRAF = null;
   var pdpResizeHandler = null;
 
