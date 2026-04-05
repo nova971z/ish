@@ -355,13 +355,11 @@
 
   function renderBrandGrid() {
     if (!dom.brandGrid) return;
-    dom.brandGrid.innerHTML = allBrands.map(function (b) {
+    var brandNames = Object.keys(BRAND_IMAGES);
+    dom.brandGrid.innerHTML = brandNames.map(function (b) {
       var img = BRAND_IMAGES[b];
-      var inner = img
-        ? '<div class="brand__bubble"><img class="brand__logo" src="' + escapeHTML(img) + '" alt="' + escapeHTML(b) + '" loading="lazy"></div>'
-        : '<div class="brand__bubble"><span style="font-size:.8rem;text-align:center">' + escapeHTML(b) + '</span></div>';
       return '<button class="brand" data-brand="' + escapeHTML(b) + '">'
-        + inner
+        + '<div class="brand__bubble"><img class="brand__logo" src="' + escapeHTML(img) + '" alt="' + escapeHTML(b) + '" loading="lazy"></div>'
         + '<span class="brand__label">' + escapeHTML(b) + '</span>'
         + '</button>';
     }).join('');
