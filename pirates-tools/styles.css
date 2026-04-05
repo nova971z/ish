@@ -436,10 +436,13 @@ body.menu-open { overflow: hidden; }
     z-index: 10;
     overflow: hidden;
 
+}
 
-
-
-
+.hero-logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
 }
 
 .hero-full.hero-out, #hero.hero-out {

@@ -358,12 +358,15 @@
     dom.brandGrid.innerHTML = allBrands.map(function (b) {
       var img = BRAND_IMAGES[b];
       var inner = img
-        ? '<img src="' + escapeHTML(img) + '" alt="' + escapeHTML(b) + '" loading="lazy">'
-        : '<span class="brand-bubble__text">' + escapeHTML(b) + '</span>';
-      return '<button class="brand-bubble" data-brand="' + escapeHTML(b) + '">' + inner + '</button>';
+        ? '<div class="brand__bubble"><img class="brand__logo" src="' + escapeHTML(img) + '" alt="' + escapeHTML(b) + '" loading="lazy"></div>'
+        : '<div class="brand__bubble"><span style="font-size:.8rem;text-align:center">' + escapeHTML(b) + '</span></div>';
+      return '<button class="brand" data-brand="' + escapeHTML(b) + '">'
+        + inner
+        + '<span class="brand__label">' + escapeHTML(b) + '</span>'
+        + '</button>';
     }).join('');
 
-    $$('.brand-bubble', dom.brandGrid).forEach(function (btn) {
+    $$('.brand', dom.brandGrid).forEach(function (btn) {
       btn.addEventListener('click', function () {
         var brand = btn.dataset.brand;
         location.hash = '#/catalogue';
