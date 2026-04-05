@@ -1021,7 +1021,7 @@ z-index: 20;
 .home-products-strip__track {
     display: flex;
     gap: 1.2rem;
-    padding: 0 1.5rem;
+    padding: 10px 1.5rem;
     overflow-x: auto;
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
