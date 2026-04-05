@@ -242,7 +242,7 @@
       </div>
     </section>
 
-    <!-- PRODUIT (PDP) — Landing interactive -->
+    <!-- PRODUIT (PDP) — Landing interactive Apple-style -->
     <section id="view-produit" class="view hidden" data-route="/produit" role="region" aria-labelledby="pdpTitle">
 
       <!-- Navigation retour -->
@@ -250,33 +250,31 @@
         <a class="pdp-back" href="#/catalogue" data-nav="/catalogue">&#8592; Retour</a>
       </div>
 
-      <!-- BLOC 1 : Hero — Modele 3D + Nom + Prix -->
+      <!-- HERO : model-viewer plein ecran -->
       <div class="pdp-hero" id="pdpHero">
-        <div class="pdp-hero__viewer">
-          <model-viewer
-            id="pdp3d"
-            alt="Modele 3D"
-            auto-rotate
-            auto-rotate-delay="0"
-            rotation-per-second="25deg"
-            camera-controls
-            touch-action="pan-y"
-            interaction-prompt="none"
-            shadow-intensity="1"
-            shadow-softness="0.8"
-            exposure="1.2"
-            environment-image="neutral"
-            camera-orbit="25deg 72deg auto"
-            min-camera-orbit="auto auto auto"
-            max-camera-orbit="auto auto auto"
-            field-of-view="30deg"
-            min-field-of-view="15deg"
-            max-field-of-view="50deg"
-            bounds="tight"
-            interpolation-decay="100"
-            style="width:100%;height:100%;background:transparent;--poster-color:transparent;"
-          ></model-viewer>
-        </div>
+        <model-viewer
+          id="pdp3d"
+          alt="Modele 3D"
+          auto-rotate
+          auto-rotate-delay="0"
+          rotation-per-second="25deg"
+          camera-controls
+          touch-action="pan-y"
+          interaction-prompt="none"
+          shadow-intensity="1.2"
+          shadow-softness="1"
+          exposure="1.3"
+          environment-image="neutral"
+          camera-orbit="25deg 72deg auto"
+          min-camera-orbit="auto auto auto"
+          max-camera-orbit="auto auto auto"
+          field-of-view="28deg"
+          min-field-of-view="15deg"
+          max-field-of-view="50deg"
+          bounds="tight"
+          interpolation-decay="100"
+        ></model-viewer>
+        <div class="pdp-hero__gradient"></div>
         <div class="pdp-hero__info">
           <h1 id="pdpTitle" class="pdp-hero__title" tabindex="-1">Produit</h1>
           <div id="pdpTag" class="pdp-hero__tag"></div>
@@ -284,19 +282,50 @@
         </div>
         <div class="pdp-hero__scroll-hint" id="pdpScrollHint">
           <span>Decouvrir</span>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
         </div>
       </div>
 
-      <!-- BLOC 2 : Description -->
-      <div class="pdp-section" data-animate="fade-up">
-        <div class="pdp-section__inner">
-          <p id="pdpDesc" class="pdp-landing__desc"></p>
+      <!-- SECTION : Decouvrir — description immersive -->
+      <div class="pdp-section pdp-section--discover" data-animate="scale-up">
+        <div class="pdp-section__inner pdp-section__inner--wide">
+          <h2 class="pdp-discover__heading" id="pdpDiscoverHeading">Concu pour performer.</h2>
+          <p id="pdpDesc" class="pdp-discover__desc"></p>
         </div>
       </div>
 
-      <!-- BLOC 3 : Photo produit -->
-      <div class="pdp-section pdp-section--media" data-animate="fade-up">
+      <!-- SECTION : Split 3D + Specs -->
+      <div class="pdp-section pdp-section--split" data-animate="fade-up">
+        <div class="pdp-split">
+          <div class="pdp-split__viewer">
+            <model-viewer
+              id="pdp3dSecondary"
+              alt="Modele 3D vue detail"
+              auto-rotate
+              auto-rotate-delay="0"
+              rotation-per-second="15deg"
+              camera-controls
+              touch-action="pan-y"
+              interaction-prompt="none"
+              shadow-intensity="0.8"
+              shadow-softness="0.6"
+              exposure="1.1"
+              environment-image="neutral"
+              camera-orbit="120deg 55deg auto"
+              field-of-view="32deg"
+              bounds="tight"
+              interpolation-decay="100"
+            ></model-viewer>
+          </div>
+          <div class="pdp-split__specs">
+            <h2 class="pdp-section__heading">Caracteristiques</h2>
+            <div id="pdpSpecs" class="pdp-specs-table"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION : Photo produit -->
+      <div class="pdp-section pdp-section--media" data-animate="parallax">
         <div class="pdp-section__inner">
           <div class="pdp-landing__media">
             <img id="pdpImg" alt="" />
@@ -304,44 +333,37 @@
         </div>
       </div>
 
-      <!-- BLOC 4 : Points forts -->
-      <div class="pdp-section" data-animate="fade-up">
-        <div class="pdp-section__inner">
-          <h2 class="pdp-section__heading">Points forts</h2>
+      <!-- SECTION : Points forts -->
+      <div class="pdp-section pdp-section--features" data-animate="stagger">
+        <div class="pdp-section__inner pdp-section__inner--wide">
+          <h2 class="pdp-section__heading pdp-section__heading--big">Points forts</h2>
           <div id="pdpFeatures" class="pdp-features"></div>
         </div>
       </div>
 
-      <!-- BLOC 5 : Caracteristiques techniques -->
-      <div class="pdp-section" data-animate="fade-up">
-        <div class="pdp-section__inner">
-          <h2 class="pdp-section__heading">Caracteristiques</h2>
-          <div id="pdpSpecs" class="pdp-specs-table"></div>
-        </div>
-      </div>
-
-      <!-- BLOC 6 : Contenu du kit -->
-      <div class="pdp-section" id="pdpKitSection" data-animate="fade-up" style="display:none">
+      <!-- SECTION : Kit -->
+      <div class="pdp-section pdp-section--kit" id="pdpKitSection" data-animate="stagger" style="display:none">
         <div class="pdp-section__inner">
           <h2 class="pdp-section__heading">Contenu du kit</h2>
           <ul id="pdpKit" class="pdp-kit"></ul>
         </div>
       </div>
 
-      <!-- BLOC 7 : Actions -->
-      <div class="pdp-section pdp-section--actions" data-animate="fade-up">
+      <!-- SECTION : CTA -->
+      <div class="pdp-section pdp-section--cta" data-animate="scale-up">
         <div class="pdp-section__inner">
+          <h2 class="pdp-cta__heading">Pret a passer a l'action ?</h2>
           <div class="pdp-landing__actions">
-            <button id="pdpQuote" class="btn primary btn--lg" type="button" data-action="add-to-cart">Ajouter au panier</button>
+            <button id="pdpQuote" class="btn primary btn--lg btn--glow" type="button" data-action="add-to-cart">Ajouter au panier</button>
             <a id="pdpWa" class="btn btn-wa btn--lg" href="https://wa.me/33774230195" target="_blank" rel="noopener noreferrer" data-action="share-wa">WhatsApp</a>
             <button id="pdpShare" class="btn btn--lg" type="button" data-action="share">Partager</button>
           </div>
         </div>
       </div>
 
-      <!-- BLOC 8 : Produits similaires -->
+      <!-- SECTION : Produits similaires -->
       <div class="pdp-section" data-animate="fade-up">
-        <div class="pdp-section__inner">
+        <div class="pdp-section__inner pdp-section__inner--wide">
           <div id="pdpRelated" data-bind="related"></div>
         </div>
       </div>
@@ -571,4 +593,4 @@
   <script defer src="app.js"></script>
 </body>
 </html>
-<!-- deployed 20260406010000 -->
+<!-- deployed 20260406013000 -->
