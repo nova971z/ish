@@ -487,6 +487,7 @@
     $$('.view[data-route]').forEach(function (v) {
       var match = (v.dataset.route === route);
       v.classList.toggle('view--active', match);
+      v.classList.toggle('hidden', !match);
       v.style.display = match ? '' : 'none';
     });
 

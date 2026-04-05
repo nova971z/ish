@@ -41,57 +41,25 @@
 
   <!-- Hero : animation de scroll integree -->
   <style id="hero-scroll-animation">
-    .hero-full {
-      height: 50vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      overflow: hidden;
-    }
-
     .hero-logo-container {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 500;
-      transition: transform 0.1s ease-out;
-    }
-
-    .hero-logo {
-      position: relative;
-      border-radius: 50%;
-      box-shadow:
-        0 0 30px rgba(212, 175, 55, 0.6),
-        0 0 60px rgba(212, 175, 55, 0.3);
-      transition: all 0.1s ease-out;
+      transition: transform 0.1s ease-out, opacity 0.1s ease-out;
     }
 
     .hero-logo-container.initial {
       opacity: 1;
-      transform: translate(-50%, -50%) scale(1);
+      transform: scale(1);
     }
 
     .hero-logo-container.scaling {
-      transform: translate(-50%, -50%) scale(var(--scale-factor));
+      transform: scale(var(--scale-factor));
       opacity: var(--opacity-factor);
     }
 
     .hero-logo-container.hidden {
       opacity: 0;
-      transform: translate(-50%, -50%) scale(6);
+      transform: scale(6);
       pointer-events: none;
       visibility: hidden;
-    }
-
-    @media (max-width: 768px) {
-      .hero-logo {
-        width: 90vw !important;
-        height: 90vw !important;
-        max-width: 90vw !important;
-        max-height: 90vw !important;
-      }
     }
   </style>
 

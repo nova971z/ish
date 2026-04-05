@@ -110,8 +110,10 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .container {
 width: min(var(--container-w), 92vw);
 margin: 0 auto;
+padding: 0 1rem;
 position: relative;
 z-index: 10;
+box-sizing: border-box;
 }
 #view-home .container { z-index: 1; }
 .empty { opacity: .6; text-align: center; padding: 2rem 0; }
@@ -423,15 +425,21 @@ body.menu-open { overflow: hidden; }
 
 /* ========== 06) HÉRO ========== */
 #hero, .hero-full {
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    display: grid;
-    place-items: center;
-    pointer-events: none;
-    background: transparent;
-    z-index: 10;
-    overflow: visible;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    background: transparent;
+    z-index: 10;
+    overflow: hidden;
+
+
+
+
+
 }
 
 .hero-full.hero-out, #hero.hero-out {
@@ -451,25 +459,26 @@ display: none !important;
 }
 
 #heroLogo, .hero-logo {
-    position: relative;
-    z-index: 11;
-    display: block;
-    margin: 0 auto;
-    width: clamp(256px, 60vmin, 800px);
-    max-width: min(90vw, 800px);
-    height: auto;
-    aspect-ratio: 1 / 1;
-    object-fit: contain;
-    transform-origin: 50% 50%;
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
-    will-change: transform, opacity;
-    opacity: 0;
-    transform: scale(0.95) translateY(20px);
+    position: relative;
+    z-index: 11;
+    display: block;
+    width: clamp(200px, 50vmin, 500px);
+    max-width: 80vw;
+    height: auto;
+    aspect-ratio: 1 / 1;
+    object-fit: contain;
+    border-radius: 50%;
+    box-shadow: 0 0 30px rgba(212,175,55,.6), 0 0 60px rgba(212,175,55,.3);
+    transform-origin: 50% 50%;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+    will-change: transform, opacity;
+    opacity: 0;
+    transform: scale(0.95) translateY(20px);
 }
 
 #heroLogo.on, .hero-logo.on {
-    opacity: 1;
-    transform: scale(1) translateY(0);
+    opacity: 1;
+    transform: scale(1) translateY(0);
 }
 
 /* Masquer le hero sur toutes les pages sauf accueil */
@@ -534,8 +543,8 @@ opacity: 1 !important;
 
 /* ========== 07) ACCUEIL — ESPACEMENT ========== */
 #view-home .container {
-    margin-top: var(--listGap, 4vh);
-    transition: margin-top 0.22s ease-out;
+    margin-top: var(--listGap, 4vh);
+    transition: margin-top 0.22s ease-out;
 }
 
 /* ========== 08) TOOLBAR & CHAMPS ========== */
@@ -785,7 +794,7 @@ position: relative;
 z-index: 2;
 margin: 0 4px 0 0;
 border: 2px solid transparent;
-box-shadow: 
+box-shadow: 
 0 4px 12px rgba(0, 191, 255, 0.4),
 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
