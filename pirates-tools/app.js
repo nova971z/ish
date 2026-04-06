@@ -836,267 +836,183 @@
   function setupPlans() {
     var canvas = document.getElementById('plansCanvas');
     var amountEl = document.getElementById('plansAmount');
-    var detailEl = document.getElementById('plansDetail');
-    var bubbles = document.querySelectorAll('.plan-bubble');
-    if (!canvas || !bubbles.length) return;
+    var labelEl = document.getElementById('plansLabel');
+    var detailEl = document.getElementById('planDetail');
+    var orbs = document.querySelectorAll('.plan-orb');
+    if (!canvas || !orbs.length) return;
 
-    // HiDPI fix — square chart
+    // HiDPI — landscape chart
     var dpr = window.devicePixelRatio || 1;
-    var rect = canvas.parentElement.getBoundingClientRect();
-    var size = Math.round(rect.width) || 300;
-    canvas.width = Math.round(size * dpr);
-    canvas.height = Math.round(size * dpr);
-    canvas.style.width = size + 'px';
-    canvas.style.height = size + 'px';
+    var wrap = canvas.parentElement;
+    var cssW = Math.round(wrap.getBoundingClientRect().width) || 340;
+    var cssH = 180;
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    canvas.style.width = cssW + 'px';
+    canvas.style.height = cssH + 'px';
     var ctx = canvas.getContext('2d');
     ctx.scale(dpr, dpr);
-    var W = size;
-    var H = size;
-    var PAD = { top: 28, right: 14, bottom: 30, left: 42 };
+    var W = cssW;
+    var H = cssH;
+    var PAD = { top: 16, right: 10, bottom: 22, left: 34 };
     var gW = W - PAD.left - PAD.right;
     var gH = H - PAD.top - PAD.bottom;
 
-    function smoothPath(pts) {
-      if (pts.length < 2) return;
-      ctx.moveTo(pts[0].x, pts[0].y);
-      for (var i = 0; i < pts.length - 1; i++) {
-        var cx = (pts[i].x + pts[i + 1].x) / 2;
-        var cy = (pts[i].y + pts[i + 1].y) / 2;
-        ctx.quadraticCurveTo(pts[i].x, pts[i].y, cx, cy);
-      }
-      var last = pts[pts.length - 1];
-      ctx.lineTo(last.x, last.y);
-    }
+    var maxY = 6000;
+    // Realistic monthly multipliers (not constant — seasonal variation)
+    var storeMulti  = [0.9, 0.7, 1.0, 1.1, 1.3, 0.8, 0.6, 0.7, 1.2, 1.1, 1.0, 1.6];
+    var pirateMulti = [0.8, 0.6, 1.1, 1.0, 1.4, 0.7, 0.5, 0.8, 1.3, 1.0, 0.9, 1.5];
 
-    function makePoints(saving, months) {
-      var pts = [];
-      for (var m = 0; m < months; m++) {
-        var x = PAD.left + (m / (months - 1)) * gW;
-        var cumul = (saving / months) * (m + 1);
-        var y = PAD.top + gH - (cumul / saving) * gH;
+    var PLAN_INFO = {
+      com: { name: 'Communication Premium', desc: 'Site vitrine, reseaux sociaux, contenu photo/video, flyers et branding complet pour artisans.' },
+      pro: { name: 'Compte Pro', desc: 'Remises -25%, paiement differe 30j, conseiller dedie, acces prioritaire promotions.' },
+      fidelite: { name: 'Fidelite+', desc: 'Points x3, ventes privees, cadeaux anniversaire, livraison gratuite sans minimum.' },
+      black: { name: 'Black Metal Service', desc: 'Communication + Compte Pro + Fidelite+ reunis. Tous nos services, un seul abonnement, -30%.' }
+    };
+
+    function buildCumul(monthly, multi) {
+      var pts = []; var sum = 0;
+      for (var m = 0; m < 12; m++) {
+        sum += monthly * multi[m];
+        var x = PAD.left + (m / 11) * gW;
+        var y = PAD.top + gH - (sum / maxY) * gH;
         pts.push({ x: x, y: y });
       }
       return pts;
     }
 
-    var maxY = 6000; // store yearly ref
+    function drawLine(pts, color, width) {
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, pts[0].y);
+      for (var i = 1; i < pts.length; i++) { ctx.lineTo(pts[i].x, pts[i].y); }
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.lineJoin = 'round';
+      ctx.lineCap = 'round';
+      ctx.stroke();
+    }
+
+    function fillArea(pts, color) {
+      var grad = ctx.createLinearGradient(0, PAD.top, 0, PAD.top + gH);
+      grad.addColorStop(0, color);
+      grad.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, PAD.top + gH);
+      for (var i = 0; i < pts.length; i++) { ctx.lineTo(pts[i].x, pts[i].y); }
+      ctx.lineTo(pts[pts.length - 1].x, PAD.top + gH);
+      ctx.closePath();
+      ctx.fillStyle = grad;
+      ctx.fill();
+    }
 
     function drawChart(saving) {
       ctx.clearRect(0, 0, W, H);
+      var fs = Math.max(8, Math.round(W * 0.025));
 
-      var fontSize = Math.max(10, Math.round(W * 0.035));
-      var fontSmall = Math.max(9, Math.round(W * 0.03));
-
-      // Y-axis labels & grid
-      ctx.font = fontSmall + 'px -apple-system, system-ui, sans-serif';
-      ctx.textAlign = 'right';
-      ctx.textBaseline = 'middle';
-      var ySteps = [0, 1500, 3000, 4500, 6000];
-      ySteps.forEach(function (v) {
+      // Grid
+      ctx.font = fs + 'px -apple-system, system-ui, sans-serif';
+      [0, 2000, 4000, 6000].forEach(function (v) {
         var y = PAD.top + gH - (v / maxY) * gH;
         ctx.strokeStyle = 'rgba(139,92,246,.06)';
         ctx.lineWidth = 1;
-        ctx.setLineDash([2, 4]);
-        ctx.beginPath();
-        ctx.moveTo(PAD.left, y);
-        ctx.lineTo(W - PAD.right, y);
-        ctx.stroke();
+        ctx.setLineDash([2, 3]);
+        ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(W - PAD.right, y); ctx.stroke();
         ctx.setLineDash([]);
-        ctx.fillStyle = 'rgba(159,180,197,.4)';
-        ctx.fillText(v === 0 ? '0' : (v / 1000).toFixed(1) + 'k', PAD.left - 6, y);
+        ctx.fillStyle = 'rgba(159,180,197,.35)';
+        ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+        ctx.fillText(v === 0 ? '0' : (v / 1000) + 'k', PAD.left - 4, y);
       });
 
-      // X-axis month labels
-      ctx.font = fontSmall + 'px -apple-system, system-ui, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'top';
-      ctx.fillStyle = 'rgba(159,180,197,.35)';
-      var mLabels = ['Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aou', 'Sep', 'Oct', 'Nov', 'Dec'];
-      for (var mi = 0; mi < 12; mi++) {
-        var mx = PAD.left + (mi / 11) * gW;
-        ctx.fillText(mLabels[mi], mx, PAD.top + gH + 8);
-      }
-
-      // Axes
-      ctx.strokeStyle = 'rgba(139,92,246,.1)';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(PAD.left, PAD.top);
-      ctx.lineTo(PAD.left, PAD.top + gH);
-      ctx.lineTo(W - PAD.right, PAD.top + gH);
-      ctx.stroke();
+      // Month labels (abbreviated)
+      ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      ctx.fillStyle = 'rgba(159,180,197,.3)';
+      ['J','F','M','A','M','J','J','A','S','O','N','D'].forEach(function (l, i) {
+        ctx.fillText(l, PAD.left + (i / 11) * gW, PAD.top + gH + 4);
+      });
 
       if (saving === 0) {
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = 'rgba(159,180,197,.2)';
-        ctx.font = fontSize + 'px -apple-system, system-ui, sans-serif';
-        ctx.fillText('Selectionnez un service', W / 2, H / 2);
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillStyle = 'rgba(159,180,197,.15)';
+        ctx.font = (fs + 2) + 'px -apple-system, system-ui, sans-serif';
+        ctx.fillText('Touchez un service ci-dessus', W / 2, H / 2 - 6);
         return;
       }
 
-      // Store line (reference: 500€/mois = 6000/an)
-      var storePts = makePoints(maxY, 12);
-      // Area store
-      var storeGrad = ctx.createLinearGradient(0, PAD.top, 0, PAD.top + gH);
-      storeGrad.addColorStop(0, 'rgba(239,68,68,.1)');
-      storeGrad.addColorStop(1, 'rgba(239,68,68,.01)');
-      ctx.beginPath();
-      ctx.moveTo(PAD.left, PAD.top + gH);
-      smoothPath(storePts);
-      ctx.lineTo(storePts[storePts.length - 1].x, PAD.top + gH);
-      ctx.closePath();
-      ctx.fillStyle = storeGrad;
-      ctx.fill();
-      // Store curve
-      ctx.beginPath();
-      smoothPath(storePts);
-      ctx.strokeStyle = 'rgba(239,68,68,.4)';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
+      // Store spending (500€/mois base)
+      var storePts = buildCumul(500, storeMulti);
+      // Pirate spending (store - saving spread across months)
+      var pirateMonthly = (maxY - saving) / 12;
+      var piratePts = buildCumul(pirateMonthly, pirateMulti);
 
-      // Pirates line (store - saving)
-      var pirateTotal = maxY - saving;
-      if (pirateTotal < 0) pirateTotal = 0;
-      var piratePts = [];
-      for (var p = 0; p < 12; p++) {
-        var px = PAD.left + (p / 11) * gW;
-        var pCumul = (pirateTotal / 12) * (p + 1);
-        var py = PAD.top + gH - (pCumul / maxY) * gH;
-        piratePts.push({ x: px, y: py });
-      }
-
-      // Savings zone between curves
+      // Fill difference zone
       ctx.beginPath();
-      smoothPath(storePts);
-      var revPirate = piratePts.slice().reverse();
-      ctx.lineTo(revPirate[0].x, revPirate[0].y);
-      for (var r = 0; r < revPirate.length - 1; r++) {
-        var rcx = (revPirate[r].x + revPirate[r + 1].x) / 2;
-        var rcy = (revPirate[r].y + revPirate[r + 1].y) / 2;
-        ctx.quadraticCurveTo(revPirate[r].x, revPirate[r].y, rcx, rcy);
-      }
-      ctx.lineTo(revPirate[revPirate.length - 1].x, revPirate[revPirate.length - 1].y);
+      for (var i = 0; i < storePts.length; i++) { ctx.lineTo(storePts[i].x, storePts[i].y); }
+      for (var j = piratePts.length - 1; j >= 0; j--) { ctx.lineTo(piratePts[j].x, piratePts[j].y); }
       ctx.closePath();
-      var diffGrad = ctx.createLinearGradient(0, PAD.top, 0, PAD.top + gH);
-      diffGrad.addColorStop(0, 'rgba(52,211,153,.15)');
-      diffGrad.addColorStop(1, 'rgba(52,211,153,.03)');
-      ctx.fillStyle = diffGrad;
+      ctx.fillStyle = 'rgba(52,211,153,.08)';
       ctx.fill();
 
-      // Pirate area
-      var pirGrad = ctx.createLinearGradient(0, PAD.top, 0, PAD.top + gH);
-      pirGrad.addColorStop(0, 'rgba(139,92,246,.18)');
-      pirGrad.addColorStop(1, 'rgba(139,92,246,.01)');
-      ctx.beginPath();
-      ctx.moveTo(PAD.left, PAD.top + gH);
-      smoothPath(piratePts);
-      ctx.lineTo(piratePts[piratePts.length - 1].x, PAD.top + gH);
-      ctx.closePath();
-      ctx.fillStyle = pirGrad;
-      ctx.fill();
+      // Areas
+      fillArea(storePts, 'rgba(239,68,68,.08)');
+      fillArea(piratePts, 'rgba(139,92,246,.12)');
 
-      // Pirate curve with glow
-      ctx.shadowColor = 'rgba(139,92,246,.4)';
-      ctx.shadowBlur = 8;
-      ctx.beginPath();
-      smoothPath(piratePts);
-      ctx.strokeStyle = '#8B5CF6';
-      ctx.lineWidth = 2;
-      ctx.stroke();
+      // Lines
+      drawLine(storePts, 'rgba(239,68,68,.35)', 1.5);
+      ctx.shadowColor = 'rgba(139,92,246,.35)';
+      ctx.shadowBlur = 6;
+      drawLine(piratePts, '#8B5CF6', 2);
       ctx.shadowBlur = 0;
 
       // End dots
-      var stLast = storePts[storePts.length - 1];
-      var piLast = piratePts[piratePts.length - 1];
+      var sl = storePts[11], pl = piratePts[11];
+      ctx.beginPath(); ctx.arc(sl.x, sl.y, 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#ef4444'; ctx.fill();
+      ctx.beginPath(); ctx.arc(pl.x, pl.y, 3, 0, Math.PI * 2);
+      ctx.fillStyle = '#8B5CF6'; ctx.fill();
 
-      ctx.beginPath();
-      ctx.arc(stLast.x, stLast.y, 3, 0, Math.PI * 2);
-      ctx.fillStyle = '#ef4444';
-      ctx.fill();
-
-      ctx.shadowColor = 'rgba(139,92,246,.5)';
-      ctx.shadowBlur = 6;
-      ctx.beginPath();
-      ctx.arc(piLast.x, piLast.y, 3.5, 0, Math.PI * 2);
-      ctx.fillStyle = '#8B5CF6';
-      ctx.fill();
-      ctx.shadowBlur = 0;
-
-      // End labels
-      ctx.font = 'bold ' + fontSize + 'px -apple-system, system-ui, sans-serif';
+      // End values
+      ctx.font = 'bold ' + fs + 'px -apple-system, system-ui, sans-serif';
       ctx.textAlign = 'right';
-      ctx.textBaseline = 'bottom';
-      ctx.fillStyle = 'rgba(239,68,68,.55)';
-      ctx.fillText(maxY.toLocaleString('fr-FR') + ' \u20ac', stLast.x - 8, stLast.y - 4);
-      ctx.fillStyle = '#A855F7';
-      ctx.textBaseline = 'top';
-      ctx.fillText(pirateTotal.toLocaleString('fr-FR') + ' \u20ac', piLast.x - 8, piLast.y + 6);
-
-      // Savings badge between curves
-      var midY = (stLast.y + piLast.y) / 2;
-      var badgeW = Math.round(W * 0.28);
-      var badgeH = Math.round(W * 0.08);
-      var badgeX = stLast.x - badgeW - 10;
-      var badgeY = midY - badgeH / 2;
-
-      // Badge background (roundRect polyfill for older Safari)
-      ctx.beginPath();
-      var br = badgeH / 2;
-      if (ctx.roundRect) {
-        ctx.roundRect(badgeX, badgeY, badgeW, badgeH, br);
-      } else {
-        ctx.moveTo(badgeX + br, badgeY);
-        ctx.lineTo(badgeX + badgeW - br, badgeY);
-        ctx.arcTo(badgeX + badgeW, badgeY, badgeX + badgeW, badgeY + br, br);
-        ctx.lineTo(badgeX + badgeW, badgeY + badgeH - br);
-        ctx.arcTo(badgeX + badgeW, badgeY + badgeH, badgeX + badgeW - br, badgeY + badgeH, br);
-        ctx.lineTo(badgeX + br, badgeY + badgeH);
-        ctx.arcTo(badgeX, badgeY + badgeH, badgeX, badgeY + badgeH - br, br);
-        ctx.lineTo(badgeX, badgeY + br);
-        ctx.arcTo(badgeX, badgeY, badgeX + br, badgeY, br);
-      }
-      ctx.closePath();
-      ctx.fillStyle = 'rgba(52,211,153,.12)';
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(52,211,153,.25)';
-      ctx.lineWidth = 1;
-      ctx.stroke();
-
-      // Badge text
-      ctx.font = 'bold ' + Math.max(10, Math.round(W * 0.032)) + 'px -apple-system, system-ui, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillStyle = '#34d399';
-      ctx.fillText('-' + saving.toLocaleString('fr-FR') + ' \u20ac/an', badgeX + badgeW / 2, midY + 1);
+      var stTotal = Math.round(storePts.reduce(function (a, _, i) { return a + 500 * storeMulti[i]; }, 0));
+      var piTotal = Math.round(maxY - saving);
+      ctx.fillStyle = 'rgba(239,68,68,.5)'; ctx.textBaseline = 'bottom';
+      ctx.fillText(stTotal.toLocaleString('fr-FR') + '\u20ac', sl.x - 5, sl.y - 3);
+      ctx.fillStyle = '#A855F7'; ctx.textBaseline = 'top';
+      ctx.fillText(piTotal.toLocaleString('fr-FR') + '\u20ac', pl.x - 5, pl.y + 4);
     }
 
-    // Initial empty state
     drawChart(0);
 
-    bubbles.forEach(function (bubble) {
-      bubble.addEventListener('click', function () {
-        var wasActive = bubble.classList.contains('is-active');
-        bubbles.forEach(function (b) { b.classList.remove('is-active'); });
+    orbs.forEach(function (orb) {
+      orb.addEventListener('click', function () {
+        var wasActive = orb.classList.contains('is-active');
+        orbs.forEach(function (o) { o.classList.remove('is-active'); });
 
         if (wasActive) {
           drawChart(0);
-          if (amountEl) amountEl.textContent = '0 \u20ac';
-          if (detailEl) detailEl.innerHTML = '<span class="plans-chart__detail-label">Cliquez sur un service</span>';
+          if (amountEl) amountEl.textContent = '';
+          if (labelEl) labelEl.textContent = 'Selectionnez un service';
+          if (detailEl) { detailEl.classList.remove('is-open'); detailEl.innerHTML = ''; }
           return;
         }
 
-        bubble.classList.add('is-active');
-        var saving = parseInt(bubble.dataset.saving) || 0;
-        var price = bubble.dataset.price || '0';
-        var name = bubble.querySelector('.plan-bubble__name').textContent;
+        orb.classList.add('is-active');
+        var saving = parseInt(orb.dataset.saving) || 0;
+        var price = orb.dataset.price || '0';
+        var plan = orb.dataset.plan || '';
+        var info = PLAN_INFO[plan] || {};
 
         drawChart(saving);
 
-        if (amountEl) amountEl.textContent = saving.toLocaleString('fr-FR') + ' \u20ac';
-        if (detailEl) {
-          detailEl.innerHTML = '<span class="plans-chart__detail-name">' + name + '</span>'
-            + '<span class="plans-chart__detail-sub">' + price + ' \u20ac/mois \u2192 ' + saving.toLocaleString('fr-FR') + ' \u20ac economises/an</span>';
+        if (amountEl) amountEl.textContent = '-' + saving.toLocaleString('fr-FR') + ' \u20ac/an';
+        if (labelEl) labelEl.textContent = (info.name || '') + ' \u2022 ' + price + '\u20ac/mois';
+        if (detailEl && info.desc) {
+          detailEl.innerHTML = '<div class="plan-detail__inner">'
+            + '<div class="plan-detail__name">' + (info.name || '') + '</div>'
+            + '<div class="plan-detail__desc">' + info.desc + '</div>'
+            + '<span class="plan-detail__saving">' + price + ' \u20ac/mois \u2192 ' + saving.toLocaleString('fr-FR') + ' \u20ac economises/an</span>'
+            + '</div>';
+          detailEl.classList.add('is-open');
         }
       });
     });

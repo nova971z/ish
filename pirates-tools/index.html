@@ -203,111 +203,65 @@
           <div class="plans-header">
             <span class="plans-header__badge">Services Premium</span>
             <h2 class="plans-header__title">Nos Abonnements</h2>
-            <p class="plans-header__sub">Selectionnez un service pour voir vos economies</p>
+            <p class="plans-header__sub">Touchez un service pour voir vos economies</p>
           </div>
 
-          <div class="plans-layout" id="plansLayout">
+          <!-- Round service orbs -->
+          <div class="plan-orbs" id="planOrbs">
 
-            <!-- LEFT: Interactive chart -->
-            <div class="plans-chart">
-              <div class="plans-chart__top">
-                <span class="plans-chart__label">Economies / an</span>
-                <span class="plans-chart__amount" id="plansAmount">0 &euro;</span>
+            <button class="plan-orb" data-plan="com" data-price="79" data-saving="2400">
+              <div class="plan-orb__circle">
+                <span class="plan-orb__emoji">📡</span>
               </div>
-              <div class="plans-chart__graph" id="plansChartGraph">
-                <canvas id="plansCanvas"></canvas>
+              <span class="plan-orb__name">Communication</span>
+              <span class="plan-orb__price">79&euro;/m</span>
+            </button>
+
+            <button class="plan-orb" data-plan="pro" data-price="39" data-saving="960">
+              <div class="plan-orb__circle">
+                <span class="plan-orb__emoji">🏗️</span>
               </div>
-              <div class="plans-chart__legend">
-                <span class="plans-chart__leg"><span class="plans-chart__dot plans-chart__dot--store"></span>Magasin</span>
-                <span class="plans-chart__leg"><span class="plans-chart__dot plans-chart__dot--pirate"></span>Pirates Tools</span>
-                <span class="plans-chart__leg"><span class="plans-chart__dot plans-chart__dot--save"></span>Economies</span>
+              <span class="plan-orb__name">Compte Pro</span>
+              <span class="plan-orb__price">39&euro;/m</span>
+            </button>
+
+            <button class="plan-orb" data-plan="fidelite" data-price="19" data-saving="480">
+              <div class="plan-orb__circle">
+                <span class="plan-orb__emoji">💎</span>
               </div>
-              <div class="plans-chart__detail" id="plansDetail">
-                <span class="plans-chart__detail-label">Cliquez sur un service</span>
+              <span class="plan-orb__name">Fidelite+</span>
+              <span class="plan-orb__price">19&euro;/m</span>
+            </button>
+
+            <button class="plan-orb plan-orb--black" data-plan="black" data-price="99" data-saving="3840">
+              <div class="plan-orb__circle">
+                <span class="plan-orb__emoji">🖤</span>
               </div>
-            </div>
-
-            <!-- RIGHT: Service bubbles -->
-            <div class="plans-bubbles">
-
-              <button class="plan-bubble" data-plan="express" data-price="49" data-saving="1200">
-                <div class="plan-bubble__icon">⚡</div>
-                <div class="plan-bubble__info">
-                  <span class="plan-bubble__name">Express Chantier</span>
-                  <span class="plan-bubble__desc">Livraison &lt;3h sur site</span>
-                </div>
-                <span class="plan-bubble__price">49&euro;<small>/mois</small></span>
-                <div class="plan-bubble__expand">
-                  <p>Livraison prioritaire de vos outils et materiaux directement sur votre chantier en moins de 3 heures, partout en Guadeloupe et Martinique. Nombre illimite de livraisons.</p>
-                </div>
-              </button>
-
-              <button class="plan-bubble" data-plan="com" data-price="79" data-saving="2400">
-                <div class="plan-bubble__icon">📡</div>
-                <div class="plan-bubble__info">
-                  <span class="plan-bubble__name">Communication Premium</span>
-                  <span class="plan-bubble__desc">Visibilite &amp; branding pro</span>
-                </div>
-                <span class="plan-bubble__price">79&euro;<small>/mois</small></span>
-                <div class="plan-bubble__expand">
-                  <p>Site vitrine, gestion reseaux sociaux, creation de contenu photo/video pour vos chantiers, flyers et cartes de visite. Boostez votre image de professionnel.</p>
-                </div>
-              </button>
-
-              <button class="plan-bubble" data-plan="sav" data-price="29" data-saving="600">
-                <div class="plan-bubble__icon">🔧</div>
-                <div class="plan-bubble__info">
-                  <span class="plan-bubble__name">SAV Prioritaire</span>
-                  <span class="plan-bubble__desc">Garantie etendue + remplacement</span>
-                </div>
-                <span class="plan-bubble__price">29&euro;<small>/mois</small></span>
-                <div class="plan-bubble__expand">
-                  <p>Extension de garantie 3 ans sur tous vos achats, remplacement sous 24h en cas de panne, et pret de materiel pendant la reparation.</p>
-                </div>
-              </button>
-
-              <button class="plan-bubble" data-plan="pro" data-price="39" data-saving="960">
-                <div class="plan-bubble__icon">🏗️</div>
-                <div class="plan-bubble__info">
-                  <span class="plan-bubble__name">Compte Pro</span>
-                  <span class="plan-bubble__desc">Tarifs pro &amp; paiement 30j</span>
-                </div>
-                <span class="plan-bubble__price">39&euro;<small>/mois</small></span>
-                <div class="plan-bubble__expand">
-                  <p>Remises exclusives jusqu'a -25%, paiement differe 30 jours, conseiller dedie, et acces prioritaire aux nouveautes et promotions.</p>
-                </div>
-              </button>
-
-              <button class="plan-bubble" data-plan="fidelite" data-price="19" data-saving="480">
-                <div class="plan-bubble__icon">💎</div>
-                <div class="plan-bubble__info">
-                  <span class="plan-bubble__name">Fidelite+</span>
-                  <span class="plan-bubble__desc">Points x3 &amp; ventes privees</span>
-                </div>
-                <span class="plan-bubble__price">19&euro;<small>/mois</small></span>
-                <div class="plan-bubble__expand">
-                  <p>Multiplicateur x3 sur les points fidelite, acces aux ventes privees, cadeaux d'anniversaire, et livraison gratuite sans minimum.</p>
-                </div>
-              </button>
-
-              <!-- BLACK METAL SERVICE -->
-              <button class="plan-bubble plan-bubble--black" data-plan="black" data-price="149" data-saving="5640">
-                <div class="plan-bubble__icon">🖤</div>
-                <div class="plan-bubble__info">
-                  <span class="plan-bubble__name">Black Metal Service</span>
-                  <span class="plan-bubble__desc">Tous les services reunis</span>
-                </div>
-                <span class="plan-bubble__price">149&euro;<small>/mois</small></span>
-                <span class="plan-bubble__tag">Tout inclus</span>
-                <div class="plan-bubble__expand">
-                  <p>Le package ultime : Express Chantier + Communication Premium + SAV Prioritaire + Compte Pro + Fidelite+. Tous nos services reunis en un seul abonnement avec une remise de 40% par rapport aux services individuels.</p>
-                  <span class="plan-bubble__save-tag">Economisez 66&euro;/mois vs achat separe</span>
-                </div>
-              </button>
-
-            </div>
+              <span class="plan-orb__name">Black Metal</span>
+              <span class="plan-orb__price">99&euro;/m</span>
+              <span class="plan-orb__tag">All-in</span>
+            </button>
 
           </div>
+
+          <!-- Compact chart -->
+          <div class="plans-chart" id="plansChartWrap">
+            <div class="plans-chart__bar">
+              <span class="plans-chart__label" id="plansLabel">Selectionnez un service</span>
+              <span class="plans-chart__amount" id="plansAmount"></span>
+            </div>
+            <div class="plans-chart__canvas-wrap" id="plansChartGraph">
+              <canvas id="plansCanvas"></canvas>
+            </div>
+            <div class="plans-chart__legend">
+              <span class="plans-chart__leg"><span class="plans-chart__dot plans-chart__dot--store"></span>Magasin</span>
+              <span class="plans-chart__leg"><span class="plans-chart__dot plans-chart__dot--pirate"></span>Pirates Tools</span>
+            </div>
+          </div>
+
+          <!-- Expandable detail -->
+          <div class="plan-detail" id="planDetail"></div>
+
         </div>
       </section>
 
