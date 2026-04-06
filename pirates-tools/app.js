@@ -841,29 +841,32 @@
     var orbs = document.querySelectorAll('.plan-orb');
     if (!canvas || !orbs.length) return;
 
-    // Canvas state — initialized by initCanvas()
+    // Canvas state
     var ctx, W, H, PAD, gW, gH;
     var canvasReady = false;
+    var currentSaving = 0;
+    var lastStorePts = null, lastPiratePts = null;
+    var hoverMonth = -1;
+    var MONTHS = ['Jan','Fev','Mar','Avr','Mai','Jun','Jul','Aou','Sep','Oct','Nov','Dec'];
 
     function initCanvas() {
       var dpr = window.devicePixelRatio || 1;
       var wrap = document.getElementById('plansChartGraph');
       if (!wrap) return;
       var rect = wrap.getBoundingClientRect();
-      if (rect.width < 10) return; // not laid out yet
+      if (rect.width < 10) return;
       W = Math.round(rect.width);
       H = Math.round(rect.height);
       canvas.width  = W * dpr;
       canvas.height = H * dpr;
       ctx = canvas.getContext('2d');
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      PAD = { top: 8, right: 32, bottom: 14, left: 22 };
+      PAD = { top: 10, right: 32, bottom: 16, left: 22 };
       gW = W - PAD.left - PAD.right;
       gH = H - PAD.top - PAD.bottom;
       canvasReady = true;
     }
 
-    // Init after layout is stable
     requestAnimationFrame(function () {
       requestAnimationFrame(function () {
         initCanvas();
@@ -978,15 +981,23 @@
       ctx.fill();
     }
 
-    function drawChart(saving) {
+    // Cumulative values for tooltip (not just points)
+    function buildCumulValues(monthly, multi) {
+      var vals = []; var sum = 0;
+      for (var m = 0; m < 12; m++) { sum += monthly * multi[m]; vals.push(Math.round(sum)); }
+      return vals;
+    }
+
+    function drawChart(saving, hovIdx) {
       if (!canvasReady) { initCanvas(); }
       if (!canvasReady) return;
+      currentSaving = saving;
       ctx.clearRect(0, 0, W, H);
 
       var fnt = '-apple-system,system-ui,sans-serif';
       var baseY = PAD.top + gH;
 
-      // Grid — 3 faint horizontal lines + Y labels
+      // Grid
       [2000, 4000, 6000].forEach(function (v) {
         var y = PAD.top + gH - (v / maxY) * gH;
         ctx.strokeStyle = 'rgba(255,255,255,.035)';
@@ -1007,12 +1018,16 @@
       // Month labels
       ctx.textAlign = 'center'; ctx.textBaseline = 'top';
       ctx.font = '500 5.5px ' + fnt;
-      ctx.fillStyle = 'rgba(255,255,255,.14)';
       ['J','F','M','A','M','J','J','A','S','O','N','D'].forEach(function (l, i) {
+        var isHov = (hovIdx === i && saving > 0);
+        ctx.fillStyle = isHov ? 'rgba(255,255,255,.5)' : 'rgba(255,255,255,.14)';
+        if (isHov) ctx.font = '700 6px ' + fnt;
         ctx.fillText(l, PAD.left + (i / 11) * gW, baseY + 3);
+        if (isHov) ctx.font = '500 5.5px ' + fnt;
       });
 
       if (saving === 0) {
+        lastStorePts = null; lastPiratePts = null;
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         ctx.fillStyle = 'rgba(255,255,255,.07)';
         ctx.font = '500 7px ' + fnt;
@@ -1023,8 +1038,10 @@
       var storePts = buildCumul(500, storeMulti);
       var pirateMonthly = (maxY - saving) / 12;
       var piratePts = buildCumul(pirateMonthly, pirateMulti);
+      lastStorePts = storePts;
+      lastPiratePts = piratePts;
 
-      // Savings zone between curves
+      // Savings zone
       ctx.beginPath();
       bezierPath(storePts);
       ctx.lineTo(piratePts[piratePts.length - 1].x, piratePts[piratePts.length - 1].y);
@@ -1047,7 +1064,7 @@
       drawSmooth(storePts, 'rgba(239,68,68,.3)', 1);
       drawSmooth(piratePts, '#8B5CF6', 1.2, 'rgba(139,92,246,.25)');
 
-      // End dots — small
+      // End dots
       var sl = storePts[11], pl = piratePts[11];
       ctx.beginPath(); ctx.arc(sl.x, sl.y, 1.5, 0, Math.PI * 2);
       ctx.fillStyle = 'rgba(239,68,68,.5)'; ctx.fill();
@@ -1056,7 +1073,7 @@
       ctx.fillStyle = '#8B5CF6'; ctx.fill();
       ctx.shadowBlur = 0;
 
-      // End values — tiny, positioned right of dots inside PAD.right zone
+      // End values
       var stTotal = Math.round(storePts.reduce(function (a, _, i) { return a + 500 * storeMulti[i]; }, 0));
       var piTotal = Math.round(maxY - saving);
       ctx.font = '600 6px ' + fnt;
@@ -1065,6 +1082,82 @@
       ctx.fillText(stTotal.toLocaleString('fr-FR') + '\u20ac', sl.x + 4, sl.y);
       ctx.fillStyle = 'rgba(139,92,246,.7)';
       ctx.fillText(piTotal.toLocaleString('fr-FR') + '\u20ac', pl.x + 4, pl.y);
+
+      // ── Interactive cursor overlay ──
+      if (typeof hovIdx === 'number' && hovIdx >= 0 && hovIdx < 12) {
+        var hx = storePts[hovIdx].x;
+        var sy = storePts[hovIdx].y;
+        var py = piratePts[hovIdx].y;
+        var storeVals = buildCumulValues(500, storeMulti);
+        var pirateVals = buildCumulValues(pirateMonthly, pirateMulti);
+        var sv = storeVals[hovIdx];
+        var pv = pirateVals[hovIdx];
+        var diff = sv - pv;
+
+        // Vertical line — dashed, subtle
+        ctx.setLineDash([2, 2]);
+        ctx.strokeStyle = 'rgba(255,255,255,.12)';
+        ctx.lineWidth = .5;
+        ctx.beginPath(); ctx.moveTo(hx, PAD.top); ctx.lineTo(hx, baseY); ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Dots on curves
+        ctx.beginPath(); ctx.arc(hx, sy, 2.5, 0, Math.PI * 2);
+        ctx.fillStyle = '#ef4444'; ctx.fill();
+        ctx.strokeStyle = 'rgba(0,0,0,.3)'; ctx.lineWidth = .5; ctx.stroke();
+
+        ctx.shadowColor = 'rgba(139,92,246,.4)'; ctx.shadowBlur = 4;
+        ctx.beginPath(); ctx.arc(hx, py, 3, 0, Math.PI * 2);
+        ctx.fillStyle = '#8B5CF6'; ctx.fill();
+        ctx.strokeStyle = 'rgba(0,0,0,.3)'; ctx.lineWidth = .5; ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // Tooltip bubble
+        var tipW = 58, tipH = 30;
+        var tipX = hx - tipW / 2;
+        var tipY = Math.min(sy, py) - tipH - 6;
+        // Keep inside canvas
+        if (tipX < 2) tipX = 2;
+        if (tipX + tipW > W - 2) tipX = W - tipW - 2;
+        if (tipY < 2) tipY = 2;
+
+        // Bubble background
+        ctx.beginPath();
+        var r = 4;
+        ctx.moveTo(tipX + r, tipY);
+        ctx.lineTo(tipX + tipW - r, tipY);
+        ctx.quadraticCurveTo(tipX + tipW, tipY, tipX + tipW, tipY + r);
+        ctx.lineTo(tipX + tipW, tipY + tipH - r);
+        ctx.quadraticCurveTo(tipX + tipW, tipY + tipH, tipX + tipW - r, tipY + tipH);
+        ctx.lineTo(tipX + r, tipY + tipH);
+        ctx.quadraticCurveTo(tipX, tipY + tipH, tipX, tipY + tipH - r);
+        ctx.lineTo(tipX, tipY + r);
+        ctx.quadraticCurveTo(tipX, tipY, tipX + r, tipY);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(15,12,25,.88)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(139,92,246,.2)';
+        ctx.lineWidth = .5;
+        ctx.stroke();
+
+        // Tooltip text
+        var cx = tipX + tipW / 2;
+        ctx.textAlign = 'center';
+        ctx.font = '700 5.5px ' + fnt;
+        ctx.fillStyle = 'rgba(255,255,255,.5)';
+        ctx.textBaseline = 'top';
+        ctx.fillText(MONTHS[hovIdx], cx, tipY + 3);
+
+        ctx.font = '600 5px ' + fnt;
+        ctx.fillStyle = 'rgba(239,68,68,.6)';
+        ctx.fillText(sv.toLocaleString('fr-FR') + '\u20ac', cx, tipY + 11);
+
+        ctx.fillStyle = '#8B5CF6';
+        ctx.fillText(pv.toLocaleString('fr-FR') + '\u20ac', cx, tipY + 17.5);
+
+        ctx.fillStyle = '#34d399';
+        ctx.fillText('-' + diff.toLocaleString('fr-FR') + '\u20ac', cx, tipY + 24);
+      }
     }
 
     orbs.forEach(function (orb) {
@@ -1108,6 +1201,54 @@
             + '</div>';
         }
       });
+    });
+
+    // ── Interactive cursor (touch + mouse) ──
+    function getMonthFromX(clientX) {
+      var rect = canvas.getBoundingClientRect();
+      var x = clientX - rect.left;
+      // Scale from display coords to canvas CSS coords
+      var scale = W / rect.width;
+      var cx = x * scale;
+      // Find nearest month
+      var idx = Math.round(((cx - PAD.left) / gW) * 11);
+      return Math.max(0, Math.min(11, idx));
+    }
+
+    function handleHover(clientX) {
+      if (currentSaving <= 0) return;
+      var m = getMonthFromX(clientX);
+      if (m !== hoverMonth) {
+        hoverMonth = m;
+        drawChart(currentSaving, hoverMonth);
+      }
+    }
+
+    function handleLeave() {
+      if (hoverMonth >= 0) {
+        hoverMonth = -1;
+        drawChart(currentSaving);
+      }
+    }
+
+    // Mouse
+    canvas.addEventListener('mousemove', function (e) { handleHover(e.clientX); });
+    canvas.addEventListener('mouseleave', handleLeave);
+
+    // Touch — slide finger across chart
+    canvas.addEventListener('touchstart', function (e) {
+      if (currentSaving <= 0) return;
+      e.preventDefault();
+      handleHover(e.touches[0].clientX);
+    }, { passive: false });
+    canvas.addEventListener('touchmove', function (e) {
+      if (currentSaving <= 0) return;
+      e.preventDefault();
+      handleHover(e.touches[0].clientX);
+    }, { passive: false });
+    canvas.addEventListener('touchend', function () {
+      // Keep tooltip visible for 1.5s then fade
+      setTimeout(handleLeave, 1500);
     });
   }
 

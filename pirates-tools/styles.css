@@ -1651,7 +1651,7 @@ body.page-devis #view-devis {
 
 .plans-chart__canvas-wrap {
   position: relative;
-  height: 110px;
+  height: 135px;
   overflow: hidden;
 }
 
@@ -1659,6 +1659,8 @@ body.page-devis #view-devis {
   display: block;
   width: 100%;
   height: 100%;
+  cursor: crosshair;
+  touch-action: none;
 }
 
 /* ── Detail panel ── */
