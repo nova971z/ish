@@ -429,8 +429,10 @@ body.menu-open { overflow: hidden; }
 
 /* ========== 06) HÉRO ========== */
 #hero, .hero-full {
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
+    right: 0;
     height: 100vh;
     display: flex;
     align-items: center;
@@ -441,6 +443,12 @@ body.menu-open { overflow: hidden; }
     overflow: visible;
     padding-top: var(--safe-top, 70px);
     box-sizing: border-box;
+}
+
+/* Spacer to push content below the fixed hero */
+.hero-spacer {
+    height: 100vh;
+    pointer-events: none;
 }
 
 /* Glow removed from hero — light is now on the logo image itself */
@@ -477,6 +485,11 @@ min-height: 0 !important;
 display: none !important;
 pointer-events: none !important;
 }
+.hero-full.hero-out ~ .hero-spacer,
+#hero.hero-out ~ .hero-spacer {
+display: none !important;
+height: 0 !important;
+}
 
 body.after-hero #hero {
 z-index: -1;
@@ -484,6 +497,10 @@ pointer-events: none;
 height: 0 !important;
 min-height: 0 !important;
 display: none !important;
+}
+body.after-hero .hero-spacer {
+display: none !important;
+height: 0 !important;
 }
 
 #heroLogo, .hero-logo {
@@ -510,16 +527,17 @@ display: none !important;
 
 /* Masquer le hero sur toutes les pages sauf accueil */
 body:not(.page-home) #hero,
-body:not(.page-home) #heroLogo {
+body:not(.page-home) #heroLogo,
+body:not(.page-home) .hero-spacer {
 display: none !important;
 visibility: hidden !important;
 }
 
-body.page-catalogue #hero, body.page-catalogue #heroLogo,
-body.page-devis #hero, body.page-devis #heroLogo,
-body.page-compte #hero, body.page-compte #heroLogo,
-body.page-produit #hero, body.page-produit #heroLogo,
-body.page-auth #hero, body.page-auth #heroLogo {
+body.page-catalogue #hero, body.page-catalogue #heroLogo, body.page-catalogue .hero-spacer,
+body.page-devis #hero, body.page-devis #heroLogo, body.page-devis .hero-spacer,
+body.page-compte #hero, body.page-compte #heroLogo, body.page-compte .hero-spacer,
+body.page-produit #hero, body.page-produit #heroLogo, body.page-produit .hero-spacer,
+body.page-auth #hero, body.page-auth #heroLogo, body.page-auth .hero-spacer {
 display: none !important;
 visibility: hidden !important;
 }
