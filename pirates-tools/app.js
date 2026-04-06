@@ -711,25 +711,36 @@
 
       var L = LERP_SPEED;
 
-      // ═══ 1. HERO ═══
-      // Titre+prix en haut : se réduit au scroll
-      // Modèle 3D derrière : flouté au départ, se défloute au scroll
+      // ═══ 1. HERO — 2 phases ═══
+      // Phase 1 : titre descend, 3D se défloute, scroll libre (pas de zoom 3D)
+      // Phase 2 : titre sorti → zoom 3D activé, scroll passe quand aux limites
       if (pdpHero) {
         var heroH = pdpHero.offsetHeight || winH;
-        var hp = easeOut(clamp(scrollY / heroH, 0, 1));
+        var hp = clamp(scrollY / heroH, 0, 1);
+        var hpE = easeOut(hp);
 
-        // 3D model: defloute progressivement (blur 6→0), léger zoom, léger fade
-        var tScale = 1 + hp * 0.15;
-        var tTY = hp * -40;
-        var tOp = 1 - hp * 0.5;
-        var tBlur = 6 * (1 - hp);  // 6px → 0px au scroll
+        // ── Titre : descend vers le bas du hero ──
+        // translateY va de 0 → ~80% de la hauteur du hero (descente)
+        var titleTravel = winH * 0.75;
+        var tInfoTY = hpE * titleTravel;
+        var tInfoOp = clamp(1 - hp * 1.4, 0, 1);       // fade après ~70%
+        var tInfoScale = 1 - hpE * 0.25;                // 1 → 0.75
 
-        // Titre: se réduit et remonte au scroll
-        var tInfoTY = hp * -60;
-        var tInfoOp = 1 - hp * 1.2;
-        var tInfoScale = 1 - hp * 0.3;   // 1 → 0.7
+        // ── 3D model : défloute progressivement ──
+        var tBlur = 6 * (1 - hpE);                      // 6px → 0
+        var tScale = 1 + hpE * 0.08;
+        var tTY = 0;
+        var tOp = 1;
 
-        // Lerp toward targets
+        // ── Phase control : activer/désactiver le zoom 3D ──
+        var titleGone = hp > 0.7;
+        if (viewer3d) {
+          // Phase 1 : pointer-events off → wheel = scroll page
+          // Phase 2 : pointer-events on  → wheel = zoom 3D
+          viewer3d.style.pointerEvents = titleGone ? '' : 'none';
+        }
+
+        // Lerp
         state.heroScale = lerp(state.heroScale, tScale, L);
         state.heroTY = lerp(state.heroTY, tTY, L);
         state.heroOp = lerp(state.heroOp, tOp, L);
@@ -747,10 +758,10 @@
           'translateY(' + state.infoTY.toFixed(2) + 'px) scale(' + state.infoScale.toFixed(4) + ')',
           state.infoOp
         );
-        // Gradient s'estompe au scroll (le 3D se révèle)
-        if (heroGradient) heroGradient.style.opacity = String(clamp(1 - hp * 0.8, 0, 1));
+        // Gradient s'estompe au scroll (révèle le 3D net)
+        if (heroGradient) heroGradient.style.opacity = String(clamp(1 - hpE * 0.9, 0, 1));
 
-        // Camera orbit (smooth)
+        // Camera orbit (smooth rotation au scroll)
         var tCamOrbit = 25 + clamp(scrollY / (heroH * 0.8), 0, 1) * 45;
         var tCamPitch = 72 + clamp(scrollY / (heroH * 0.8), 0, 1) * 12;
         state.camOrbit = lerp(state.camOrbit, tCamOrbit, L * 0.6);
