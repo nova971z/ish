@@ -637,7 +637,6 @@
     }
 
     // ── Cache DOM refs ──
-    var pdpHeroPin = document.getElementById('pdpHeroPin');
     var pdpHero = document.getElementById('pdpHero');
     var heroInfo = document.getElementById('pdpHeroInfo');
     var heroGradient = pdpHero ? pdpHero.querySelector('.pdp-hero__gradient') : null;
@@ -712,68 +711,46 @@
 
       var L = LERP_SPEED;
 
-      // ═══ 1. HERO (fixed pendant animation, docked après) ═══
-      if (pdpHeroPin && pdpHero) {
-        var heroH = winH;
-        var pinH = pdpHeroPin.offsetHeight;
-        var scrollTravel = pinH - heroH; // 200vh - 100vh = 100vh
-        // Offset absolu du wrapper dans le document
-        var pinOffsetTop = 0;
-        var el = pdpHeroPin; while (el) { pinOffsetTop += el.offsetTop; el = el.offsetParent; }
-        var scrolledInPin = scrollY - pinOffsetTop;
-        // hp = progression 0→1 dans la zone d'animation
-        var hp = clamp(scrolledInPin / Math.max(scrollTravel, 1), 0, 1);
+      // ═══ 1. HERO — titre en bas, parallax immersif au scroll ═══
+      if (pdpHero) {
+        var heroH = pdpHero.offsetHeight || winH;
+        // hp = 0 quand en haut, 1 quand hero a scrollé hors écran
+        var hp = clamp(scrollY / heroH, 0, 1);
         var hpE = easeOut(hp);
 
-        // ── Position du hero : fixed pendant l'anim, docked après ──
-        if (scrolledInPin >= scrollTravel) {
-          // Animation terminée → hero collé en bas du wrapper (scroll normal)
-          if (!pdpHero.classList.contains('pdp-hero--docked')) {
-            pdpHero.classList.add('pdp-hero--docked');
-          }
-        } else {
-          // Animation en cours → hero fixé à l'écran
-          if (pdpHero.classList.contains('pdp-hero--docked')) {
-            pdpHero.classList.remove('pdp-hero--docked');
-          }
-        }
+        // ── 3D model : zoom progressif + monte légèrement + fade ──
+        var tScale = 1 + hpE * 0.2;
+        var tModelTY = hpE * -50;
+        var tModelOp = 1 - hpE * 0.5;
 
-        // ── Titre : descend du haut vers le bas ──
-        var titleTravel = heroH * 0.75;
-        var tInfoTY = hpE * titleTravel;
-        var tInfoOp = clamp(1 - hp * 1.4, 0, 1);
-        var tInfoScale = 1 - hpE * 0.2;
+        // ── Titre en bas : monte + rétrécit + fade out ──
+        var tInfoTY = hpE * -80;
+        var tInfoOp = 1 - hpE * 1.3;
+        var tInfoScale = 1 - hpE * 0.15;
 
-        // ── 3D : défloute progressivement ──
-        var tBlur = 6 * (1 - hpE);
-        var tScale = 1 + hpE * 0.06;
-
-        // ── Activer interaction 3D quand titre est sorti ──
-        if (viewer3d) {
-          viewer3d.style.pointerEvents = hp > 0.85 ? '' : 'none';
-        }
-
-        // Lerp
+        // Lerp tout
         state.heroScale = lerp(state.heroScale, tScale, L);
-        state.heroBlur = lerp(state.heroBlur, tBlur, L);
+        state.heroTY = lerp(state.heroTY, tModelTY, L);
+        state.heroOp = lerp(state.heroOp, tModelOp, L);
+        state.heroBlur = lerp(state.heroBlur, 0, L); // pas de blur
         state.infoTY = lerp(state.infoTY, tInfoTY, L);
         state.infoOp = lerp(state.infoOp, tInfoOp, L);
         state.infoScale = lerp(state.infoScale, tInfoScale, L);
 
         applyTransform(viewer3d,
-          'scale(' + state.heroScale.toFixed(4) + ')',
-          1,
-          'blur(' + state.heroBlur.toFixed(2) + 'px)'
+          'scale(' + state.heroScale.toFixed(4) + ') translateY(' + state.heroTY.toFixed(2) + 'px)',
+          state.heroOp
         );
         applyTransform(heroInfo,
           'translateY(' + state.infoTY.toFixed(2) + 'px) scale(' + state.infoScale.toFixed(4) + ')',
           state.infoOp
         );
-        if (heroGradient) heroGradient.style.opacity = String(clamp(1 - hpE * 0.95, 0, 1));
+        // Gradient fade
+        if (heroGradient) heroGradient.style.opacity = String(clamp(1 - hpE * 0.6, 0, 1));
 
-        // Camera rotation
-        var tCamOrbit = 25 + hpE * 35;
-        var tCamPitch = 72 + hpE * 8;
+        // Camera rotation douce au scroll
+        var tCamOrbit = 25 + hpE * 40;
+        var tCamPitch = 72 + hpE * 10;
         state.camOrbit = lerp(state.camOrbit, tCamOrbit, L * 0.6);
         state.camPitch = lerp(state.camPitch, tCamPitch, L * 0.6);
         var roundedOrbit = Math.round(state.camOrbit * 10) / 10;
@@ -1041,11 +1018,9 @@
         window.removeEventListener('resize', pdpResizeHandler);
         pdpResizeHandler = null;
       }
-      // Reset hero transforms and position
+      // Reset hero transforms
       var pdpViewer = document.getElementById('pdp3d');
-      if (pdpViewer) { pdpViewer.style.transform = ''; pdpViewer.style.opacity = ''; pdpViewer.style.filter = ''; pdpViewer.style.pointerEvents = ''; }
-      var pdpHeroEl = document.getElementById('pdpHero');
-      if (pdpHeroEl) pdpHeroEl.classList.remove('pdp-hero--docked');
+      if (pdpViewer) { pdpViewer.style.transform = ''; pdpViewer.style.opacity = ''; pdpViewer.style.filter = ''; }
       var pdpInfo = document.getElementById('pdpHeroInfo');
       if (pdpInfo) { pdpInfo.style.transform = ''; pdpInfo.style.opacity = ''; }
     }
