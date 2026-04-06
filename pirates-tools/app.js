@@ -637,6 +637,7 @@
     }
 
     // ── Cache DOM refs ──
+    var pdpHeroPin = document.getElementById('pdpHeroPin');
     var pdpHero = document.getElementById('pdpHero');
     var heroInfo = document.getElementById('pdpHeroInfo');
     var heroGradient = pdpHero ? pdpHero.querySelector('.pdp-hero__gradient') : null;
@@ -711,38 +712,39 @@
 
       var L = LERP_SPEED;
 
-      // ═══ 1. HERO — 2 phases ═══
-      // Phase 1 : titre descend, 3D se défloute, scroll libre (pas de zoom 3D)
-      // Phase 2 : titre sorti → zoom 3D activé, scroll passe quand aux limites
-      if (pdpHero) {
+      // ═══ 1. HERO (sticky dans un wrapper 200vh) ═══
+      // Le scroll dans le wrapper pilote l'animation :
+      //   0%  → titre en haut, 3D flouté
+      //   100% → titre sorti en bas, 3D net + interactif
+      // Puis le scroll continue normalement vers le reste de la page
+      if (pdpHeroPin && pdpHero) {
+        var pinRect = pdpHeroPin.getBoundingClientRect();
         var heroH = pdpHero.offsetHeight || winH;
-        var hp = clamp(scrollY / heroH, 0, 1);
+        // scrollTravel = espace de scroll dans le wrapper (200vh - 100vh = 100vh)
+        var scrollTravel = pdpHeroPin.offsetHeight - heroH;
+        // hp = progression dans le wrapper (0 = debut, 1 = fin de l'animation)
+        var hp = clamp(-pinRect.top / Math.max(scrollTravel, 1), 0, 1);
         var hpE = easeOut(hp);
 
-        // ── Titre : descend vers le bas du hero ──
-        // translateY va de 0 → ~80% de la hauteur du hero (descente)
-        var titleTravel = winH * 0.75;
+        // ── Titre : descend depuis le haut vers le bas ──
+        var titleTravel = heroH * 0.7;
         var tInfoTY = hpE * titleTravel;
-        var tInfoOp = clamp(1 - hp * 1.4, 0, 1);       // fade après ~70%
-        var tInfoScale = 1 - hpE * 0.25;                // 1 → 0.75
+        var tInfoOp = clamp(1 - hp * 1.3, 0, 1);
+        var tInfoScale = 1 - hpE * 0.2;
 
-        // ── 3D model : défloute progressivement ──
-        var tBlur = 6 * (1 - hpE);                      // 6px → 0
-        var tScale = 1 + hpE * 0.08;
-        var tTY = 0;
+        // ── 3D model : défloute au scroll ──
+        var tBlur = 6 * (1 - hpE);
+        var tScale = 1 + hpE * 0.06;
         var tOp = 1;
 
-        // ── Phase control : activer/désactiver le zoom 3D ──
-        var titleGone = hp > 0.7;
+        // ── Activer interaction 3D quand titre est sorti ──
         if (viewer3d) {
-          // Phase 1 : pointer-events off → wheel = scroll page
-          // Phase 2 : pointer-events on  → wheel = zoom 3D
-          viewer3d.style.pointerEvents = titleGone ? '' : 'none';
+          viewer3d.style.pointerEvents = hp > 0.85 ? '' : 'none';
         }
 
         // Lerp
         state.heroScale = lerp(state.heroScale, tScale, L);
-        state.heroTY = lerp(state.heroTY, tTY, L);
+        state.heroTY = lerp(state.heroTY, 0, L);
         state.heroOp = lerp(state.heroOp, tOp, L);
         state.heroBlur = lerp(state.heroBlur, tBlur, L);
         state.infoTY = lerp(state.infoTY, tInfoTY, L);
@@ -750,7 +752,7 @@
         state.infoScale = lerp(state.infoScale, tInfoScale, L);
 
         applyTransform(viewer3d,
-          'scale(' + state.heroScale.toFixed(4) + ') translateY(' + state.heroTY.toFixed(2) + 'px)',
+          'scale(' + state.heroScale.toFixed(4) + ')',
           state.heroOp,
           'blur(' + state.heroBlur.toFixed(2) + 'px)'
         );
@@ -758,12 +760,11 @@
           'translateY(' + state.infoTY.toFixed(2) + 'px) scale(' + state.infoScale.toFixed(4) + ')',
           state.infoOp
         );
-        // Gradient s'estompe au scroll (révèle le 3D net)
-        if (heroGradient) heroGradient.style.opacity = String(clamp(1 - hpE * 0.9, 0, 1));
+        if (heroGradient) heroGradient.style.opacity = String(clamp(1 - hpE * 0.95, 0, 1));
 
-        // Camera orbit (smooth rotation au scroll)
-        var tCamOrbit = 25 + clamp(scrollY / (heroH * 0.8), 0, 1) * 45;
-        var tCamPitch = 72 + clamp(scrollY / (heroH * 0.8), 0, 1) * 12;
+        // Camera rotation douce au scroll
+        var tCamOrbit = 25 + hpE * 35;
+        var tCamPitch = 72 + hpE * 8;
         state.camOrbit = lerp(state.camOrbit, tCamOrbit, L * 0.6);
         state.camPitch = lerp(state.camPitch, tCamPitch, L * 0.6);
         var roundedOrbit = Math.round(state.camOrbit * 10) / 10;
