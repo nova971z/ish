@@ -439,6 +439,8 @@ body.menu-open { overflow: hidden; }
     background: #0a0f14;
     z-index: 10;
     overflow: visible;
+    padding-top: var(--safe-top, 70px);
+    box-sizing: border-box;
 }
 
 /* Glow removed from hero — light is now on the logo image itself */
@@ -488,8 +490,8 @@ display: none !important;
     position: relative;
     z-index: 11;
     display: block;
-    width: clamp(200px, 50vmin, 500px);
-    max-width: 80vw;
+    width: clamp(180px, 42vmin, 420px);
+    max-width: 75vw;
     height: auto;
     aspect-ratio: 1 / 1;
     object-fit: contain;
