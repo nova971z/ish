@@ -713,7 +713,7 @@
       var L = LERP_SPEED;
 
       // ═══ 1. HERO — parallax multi-couche ultra immersif ═══
-      if (pdpHero) {
+      if (pdpHero && heroLerpReady) {
         var heroH = pdpHero.offsetHeight || winH;
         var hp = clamp(scrollY / heroH, 0, 1);
         // Deux easings : rapide pour le début, lent pour la fin
@@ -961,12 +961,12 @@
       sections.forEach(function (s) { s.classList.add('visible'); });
     }
 
-    // ── Start animation loop after CSS entry animations complete ──
-    // pdpModelAppear = 1.2s + 0.1s delay = 1.3s total
-    // pdpInfoAppear  = 1.0s + 0.5s delay = 1.5s total
-    // Wait for the longest one, then strip CSS animations and let lerp take over
+    // ── Start animation loop immediately, but defer hero lerp ──
+    // CSS entry animations handle the hero for the first 1.5s
+    var heroLerpReady = false;
     setTimeout(function () {
       if (!running) return;
+      heroLerpReady = true;
       if (viewer3d) {
         viewer3d.style.animation = 'none';
         viewer3d.style.opacity = '1';
@@ -979,8 +979,8 @@
         heroInfo.style.transform = 'translateY(0) scale(1)';
         heroInfo.style.filter = 'blur(0)';
       }
-      tick();
     }, 1550);
+    tick();
 
     // Store cleanup fn on the handler ref for the router to call
     pdpScrollHandler = function cleanup() {

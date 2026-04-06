@@ -2130,7 +2130,6 @@ transform: translateY(-2px);
     font-size: 1.05rem;
     font-weight: 700;
     border-radius: 14px;
-    opacity: 0;
     will-change: transform, opacity, filter;
     transition: box-shadow .25s;
 }
