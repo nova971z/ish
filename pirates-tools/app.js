@@ -1050,8 +1050,15 @@
       if (route === '/') {
         dom.hero.classList.remove('hero-out');
         dom.hero.style.display = '';
-        if (dom.heroLogoContainer) dom.heroLogoContainer.style.display = '';
+        if (dom.heroLogoContainer) {
+          dom.heroLogoContainer.style.display = '';
+          dom.heroLogoContainer.style.transform = 'scale(1)';
+          dom.heroLogoContainer.style.opacity = '1';
+          dom.heroLogoContainer.style.visibility = '';
+        }
+        startHeroLoop();
       } else {
+        stopHeroLoop();
         dom.hero.classList.add('hero-out');
         dom.hero.style.display = 'none';
         if (dom.heroLogoContainer) dom.heroLogoContainer.style.display = 'none';
@@ -1090,29 +1097,75 @@
     }
   }
 
-  // ── Hero logo scroll animation ─────────────────────────────
+  // ── Hero logo scroll animation (lerp 60fps) ────────────────
 
-  function handleHeroScroll() {
-    if (!dom.heroLogo || !dom.heroLogoContainer) return;
-    if (parseHash().route !== '/') return;
+  var heroLerp = { scale: 1, opacity: 1 };
+  var heroRAF = null;
+  var HERO_LERP_SPEED = 0.1;
+
+  function heroTick() {
+    if (!dom.heroLogoContainer) return;
+    if (parseHash().route !== '/') {
+      heroRAF = null;
+      return;
+    }
 
     var y = window.scrollY;
-    var threshold = 100;
-    var maxScroll = 400;
+    var threshold = 80;
+    var maxScroll = 450;
 
-    if (y < threshold) {
-      dom.heroLogoContainer.className = 'hero-logo-container initial';
-      dom.heroLogoContainer.style.setProperty('--scale-factor', '1');
-      dom.heroLogoContainer.style.setProperty('--opacity-factor', '1');
+    // Target values
+    var tScale, tOpacity;
+    if (y <= threshold) {
+      tScale = 1;
+      tOpacity = 1;
     } else if (y >= maxScroll) {
-      dom.heroLogoContainer.className = 'hero-logo-container hidden';
-      dom.heroLogoContainer.style.setProperty('--scale-factor', '6');
-      dom.heroLogoContainer.style.setProperty('--opacity-factor', '0');
+      tScale = 6;
+      tOpacity = 0;
     } else {
-      var progress = (y - threshold) / (maxScroll - threshold);
-      dom.heroLogoContainer.className = 'hero-logo-container scaling';
-      dom.heroLogoContainer.style.setProperty('--scale-factor', String(1 + progress * 5));
-      dom.heroLogoContainer.style.setProperty('--opacity-factor', String(1 - progress));
+      var p = (y - threshold) / (maxScroll - threshold);
+      // Ease-out cubic for smoother feel
+      var pE = 1 - Math.pow(1 - p, 3);
+      tScale = 1 + pE * 5;
+      tOpacity = 1 - pE;
+    }
+
+    // Lerp toward targets
+    heroLerp.scale += (tScale - heroLerp.scale) * HERO_LERP_SPEED;
+    heroLerp.opacity += (tOpacity - heroLerp.opacity) * HERO_LERP_SPEED;
+
+    // Snap when close enough
+    if (Math.abs(heroLerp.scale - tScale) < 0.001) heroLerp.scale = tScale;
+    if (Math.abs(heroLerp.opacity - tOpacity) < 0.001) heroLerp.opacity = tOpacity;
+
+    // Apply directly — no CSS transitions, pure GPU
+    dom.heroLogoContainer.style.transform = 'scale(' + heroLerp.scale.toFixed(4) + ')';
+    dom.heroLogoContainer.style.opacity = heroLerp.opacity.toFixed(4);
+
+    // Toggle visibility when fully hidden
+    if (heroLerp.opacity <= 0.001) {
+      dom.heroLogoContainer.style.visibility = 'hidden';
+      dom.heroLogoContainer.style.pointerEvents = 'none';
+    } else {
+      dom.heroLogoContainer.style.visibility = '';
+      dom.heroLogoContainer.style.pointerEvents = '';
+    }
+
+    heroRAF = requestAnimationFrame(heroTick);
+  }
+
+  function startHeroLoop() {
+    if (!heroRAF) {
+      heroLerp.scale = 1;
+      heroLerp.opacity = 1;
+      heroRAF = requestAnimationFrame(heroTick);
+    }
+  }
+
+  function stopHeroLoop() {
+    if (heroRAF) {
+      cancelAnimationFrame(heroRAF);
+      heroRAF = null;
     }
   }
 
@@ -1326,17 +1379,8 @@
     // Hash-based router (single listener)
     window.addEventListener('hashchange', onRouteChange);
 
-    // Scroll for hero animation (throttled via rAF)
-    var scrollTicking = false;
-    window.addEventListener('scroll', function () {
-      if (!scrollTicking) {
-        requestAnimationFrame(function () {
-          handleHeroScroll();
-          scrollTicking = false;
-        });
-        scrollTicking = true;
-      }
-    }, { passive: true });
+    // Hero logo lerp animation loop
+    startHeroLoop();
 
     // Menu toggle
     if (dom.menuToggle) dom.menuToggle.addEventListener('click', toggleMenu);

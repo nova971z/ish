@@ -45,24 +45,7 @@
   <!-- Hero : animation de scroll integree -->
   <style id="hero-scroll-animation">
     .hero-logo-container {
-      transition: transform 0.1s ease-out, opacity 0.1s ease-out;
-    }
-
-    .hero-logo-container.initial {
-      opacity: 1;
-      transform: scale(1);
-    }
-
-    .hero-logo-container.scaling {
-      transform: scale(var(--scale-factor));
-      opacity: var(--opacity-factor);
-    }
-
-    .hero-logo-container.hidden {
-      opacity: 0;
-      transform: scale(6);
-      pointer-events: none;
-      visibility: hidden;
+      will-change: transform, opacity;
     }
   </style>
 
