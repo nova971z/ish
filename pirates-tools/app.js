@@ -711,48 +711,54 @@
 
       var L = LERP_SPEED;
 
-      // ═══ 1. HERO — titre en bas, parallax immersif au scroll ═══
+      // ═══ 1. HERO — parallax multi-couche ultra immersif ═══
       if (pdpHero) {
         var heroH = pdpHero.offsetHeight || winH;
-        // hp = 0 quand en haut, 1 quand hero a scrollé hors écran
         var hp = clamp(scrollY / heroH, 0, 1);
+        // Deux easings : rapide pour le début, lent pour la fin
         var hpE = easeOut(hp);
+        var hpFast = easeOut(clamp(hp * 1.5, 0, 1)); // le titre part plus vite
 
-        // ── 3D model : zoom progressif + monte légèrement + fade ──
-        var tScale = 1 + hpE * 0.2;
-        var tModelTY = hpE * -50;
-        var tModelOp = 1 - hpE * 0.5;
+        // ── 3D model : monte doucement + léger zoom + fade subtil ──
+        var tScale = 1 + hpE * 0.18;
+        var tModelTY = hpE * -35;             // monte un peu
+        var tModelOp = 1 - hpE * 0.4;
+        var tModelBlur = hpE * 3;             // léger blur en sortie
 
-        // ── Titre en bas : monte + rétrécit + fade out ──
-        var tInfoTY = hpE * -80;
-        var tInfoOp = 1 - hpE * 1.3;
-        var tInfoScale = 1 - hpE * 0.15;
+        // ── Titre : vitesse 1.5x → part plus vite que le modèle ──
+        var tInfoTY = hpFast * -120;          // monte plus vite et plus loin
+        var tInfoOp = 1 - hpFast * 1.5;
+        var tInfoScale = 1 - hpFast * 0.2;
 
-        // Lerp tout
+        // ── Glow arrière-plan : pulse plus fort au début ──
+        var glowEl = pdpHero.querySelector('.pdp-hero::after');
+
+        // Lerp
         state.heroScale = lerp(state.heroScale, tScale, L);
         state.heroTY = lerp(state.heroTY, tModelTY, L);
         state.heroOp = lerp(state.heroOp, tModelOp, L);
-        state.heroBlur = lerp(state.heroBlur, 0, L); // pas de blur
+        state.heroBlur = lerp(state.heroBlur, tModelBlur, L);
         state.infoTY = lerp(state.infoTY, tInfoTY, L);
         state.infoOp = lerp(state.infoOp, tInfoOp, L);
         state.infoScale = lerp(state.infoScale, tInfoScale, L);
 
         applyTransform(viewer3d,
           'scale(' + state.heroScale.toFixed(4) + ') translateY(' + state.heroTY.toFixed(2) + 'px)',
-          state.heroOp
+          state.heroOp,
+          'blur(' + state.heroBlur.toFixed(2) + 'px)'
         );
         applyTransform(heroInfo,
           'translateY(' + state.infoTY.toFixed(2) + 'px) scale(' + state.infoScale.toFixed(4) + ')',
           state.infoOp
         );
-        // Gradient fade
-        if (heroGradient) heroGradient.style.opacity = String(clamp(1 - hpE * 0.6, 0, 1));
+        // Gradient : s'estompe au scroll pour révéler le 3D
+        if (heroGradient) heroGradient.style.opacity = String(clamp(1 - hpE * 0.7, 0, 1));
 
-        // Camera rotation douce au scroll
-        var tCamOrbit = 25 + hpE * 40;
-        var tCamPitch = 72 + hpE * 10;
-        state.camOrbit = lerp(state.camOrbit, tCamOrbit, L * 0.6);
-        state.camPitch = lerp(state.camPitch, tCamPitch, L * 0.6);
+        // Camera : rotation + plongée pour un effet cinématique
+        var tCamOrbit = 25 + hpE * 50;
+        var tCamPitch = 72 + hpE * 15;
+        state.camOrbit = lerp(state.camOrbit, tCamOrbit, L * 0.5);
+        state.camPitch = lerp(state.camPitch, tCamPitch, L * 0.5);
         var roundedOrbit = Math.round(state.camOrbit * 10) / 10;
         if (viewer3d && Math.abs(roundedOrbit - lastCamOrbit) > 0.3) {
           viewer3d.setAttribute('camera-orbit', roundedOrbit + 'deg ' + (Math.round(state.camPitch * 10) / 10) + 'deg auto');
