@@ -712,32 +712,41 @@
 
       var L = LERP_SPEED;
 
-      // ═══ 1. HERO (sticky dans un wrapper 200vh) ═══
-      // Le scroll dans le wrapper pilote l'animation :
-      //   0%  → titre en haut, 3D flouté
-      //   100% → titre sorti en bas, 3D net + interactif
-      // Puis le scroll continue normalement vers le reste de la page
+      // ═══ 1. HERO (fixed pendant animation, docked après) ═══
       if (pdpHeroPin && pdpHero) {
-        var heroH = pdpHero.offsetHeight || winH;
-        // scrollTravel = espace de scroll bonus dans le wrapper (200vh - 100vh)
-        var scrollTravel = pdpHeroPin.offsetHeight - heroH;
-        // Distance scrollée depuis le haut du wrapper
-        var pinTop = pdpHeroPin.offsetTop;
-        var scrolledInPin = scrollY - pinTop;
-        // hp = progression dans la zone d'animation (0→1)
+        var heroH = winH;
+        var pinH = pdpHeroPin.offsetHeight;
+        var scrollTravel = pinH - heroH; // 200vh - 100vh = 100vh
+        // Offset absolu du wrapper dans le document
+        var pinOffsetTop = 0;
+        var el = pdpHeroPin; while (el) { pinOffsetTop += el.offsetTop; el = el.offsetParent; }
+        var scrolledInPin = scrollY - pinOffsetTop;
+        // hp = progression 0→1 dans la zone d'animation
         var hp = clamp(scrolledInPin / Math.max(scrollTravel, 1), 0, 1);
         var hpE = easeOut(hp);
 
-        // ── Titre : descend depuis le haut vers le bas ──
-        var titleTravel = heroH * 0.7;
+        // ── Position du hero : fixed pendant l'anim, docked après ──
+        if (scrolledInPin >= scrollTravel) {
+          // Animation terminée → hero collé en bas du wrapper (scroll normal)
+          if (!pdpHero.classList.contains('pdp-hero--docked')) {
+            pdpHero.classList.add('pdp-hero--docked');
+          }
+        } else {
+          // Animation en cours → hero fixé à l'écran
+          if (pdpHero.classList.contains('pdp-hero--docked')) {
+            pdpHero.classList.remove('pdp-hero--docked');
+          }
+        }
+
+        // ── Titre : descend du haut vers le bas ──
+        var titleTravel = heroH * 0.75;
         var tInfoTY = hpE * titleTravel;
-        var tInfoOp = clamp(1 - hp * 1.3, 0, 1);
+        var tInfoOp = clamp(1 - hp * 1.4, 0, 1);
         var tInfoScale = 1 - hpE * 0.2;
 
-        // ── 3D model : défloute au scroll ──
+        // ── 3D : défloute progressivement ──
         var tBlur = 6 * (1 - hpE);
         var tScale = 1 + hpE * 0.06;
-        var tOp = 1;
 
         // ── Activer interaction 3D quand titre est sorti ──
         if (viewer3d) {
@@ -746,8 +755,6 @@
 
         // Lerp
         state.heroScale = lerp(state.heroScale, tScale, L);
-        state.heroTY = lerp(state.heroTY, 0, L);
-        state.heroOp = lerp(state.heroOp, tOp, L);
         state.heroBlur = lerp(state.heroBlur, tBlur, L);
         state.infoTY = lerp(state.infoTY, tInfoTY, L);
         state.infoOp = lerp(state.infoOp, tInfoOp, L);
@@ -755,7 +762,7 @@
 
         applyTransform(viewer3d,
           'scale(' + state.heroScale.toFixed(4) + ')',
-          state.heroOp,
+          1,
           'blur(' + state.heroBlur.toFixed(2) + 'px)'
         );
         applyTransform(heroInfo,
@@ -764,7 +771,7 @@
         );
         if (heroGradient) heroGradient.style.opacity = String(clamp(1 - hpE * 0.95, 0, 1));
 
-        // Camera rotation douce au scroll
+        // Camera rotation
         var tCamOrbit = 25 + hpE * 35;
         var tCamPitch = 72 + hpE * 8;
         state.camOrbit = lerp(state.camOrbit, tCamOrbit, L * 0.6);
@@ -1034,9 +1041,11 @@
         window.removeEventListener('resize', pdpResizeHandler);
         pdpResizeHandler = null;
       }
-      // Reset hero parallax transforms
+      // Reset hero transforms and position
       var pdpViewer = document.getElementById('pdp3d');
-      if (pdpViewer) { pdpViewer.style.transform = ''; pdpViewer.style.opacity = ''; pdpViewer.style.filter = ''; }
+      if (pdpViewer) { pdpViewer.style.transform = ''; pdpViewer.style.opacity = ''; pdpViewer.style.filter = ''; pdpViewer.style.pointerEvents = ''; }
+      var pdpHeroEl = document.getElementById('pdpHero');
+      if (pdpHeroEl) pdpHeroEl.classList.remove('pdp-hero--docked');
       var pdpInfo = document.getElementById('pdpHeroInfo');
       if (pdpInfo) { pdpInfo.style.transform = ''; pdpInfo.style.opacity = ''; }
     }
