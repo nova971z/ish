@@ -15,7 +15,8 @@
     "vat": 0.20,
     "price_ht": 307.50,
     "stock_status": "in_stock",
-    "stock_label": "En stock"
+    "stock_label": "En stock",
+    "model": "models/products/dcf894n.glb"
   },
   {
     "id": "dewalt-dcf894n",
@@ -33,7 +34,8 @@
     "vat": 0.20,
     "price_ht": 157.50,
     "stock_status": "in_stock",
-    "stock_label": "En stock"
+    "stock_label": "En stock",
+    "model": "models/products/dcf894n.glb"
   },
   {
     "id": "dewalt-dcf887p2",
@@ -51,7 +53,8 @@
     "vat": 0.20,
     "price_ht": 272.13,
     "stock_status": "in_stock",
-    "stock_label": "En stock"
+    "stock_label": "En stock",
+    "model": "models/products/dcf887.glb"
   },
   {
     "id": "dewalt-dcf887n",
@@ -69,7 +72,8 @@
     "vat": 0.20,
     "price_ht": 107.50,
     "stock_status": "in_stock",
-    "stock_label": "En stock"
+    "stock_label": "En stock",
+    "model": "models/products/dcf887.glb"
   },
   {
     "id": "dewalt-dcf850p2t",
@@ -88,7 +92,8 @@
     "vat": 0.20,
     "price_ht": 290.83,
     "stock_status": "in_stock",
-    "stock_label": "En stock"
+    "stock_label": "En stock",
+    "model": "models/products/dcf850.glb"
   },
   {
     "id": "dewalt-dcf850n",
@@ -107,7 +112,8 @@
     "vat": 0.20,
     "price_ht": 140.83,
     "stock_status": "in_stock",
-    "stock_label": "En stock"
+    "stock_label": "En stock",
+    "model": "models/products/dcf850.glb"
   },
   {
     "id": "makita-dtw300z",
@@ -143,7 +149,8 @@
     "vat": 0.20,
     "price_ht": 132.50,
     "stock_status": "in_stock",
-    "stock_label": "En stock"
+    "stock_label": "En stock",
+    "model": "models/products/dtd172z.glb"
   },
   {
     "id": "makita-ddf487z",
@@ -161,7 +168,8 @@
     "vat": 0.20,
     "price_ht": 99.17,
     "stock_status": "in_stock",
-    "stock_label": "En stock"
+    "stock_label": "En stock",
+    "model": "models/products/ddf487z.glb"
   },
   {
     "id": "makita-dga504z",
@@ -179,7 +187,8 @@
     "vat": 0.20,
     "price_ht": 115.83,
     "stock_status": "in_stock",
-    "stock_label": "En stock"
+    "stock_label": "En stock",
+    "model": "models/products/dga504z.glb"
   },
   {
     "id": "makita-dhs680z",
@@ -251,7 +260,8 @@
     "vat": 0.20,
     "price_ht": 907.50,
     "stock_status": "in_stock",
-    "stock_label": "En stock"
+    "stock_label": "En stock",
+    "model": "models/products/tsc55.glb"
   },
   {
     "id": "flex-fw1-2-502",
@@ -377,7 +387,8 @@
     "vat": 0.20,
     "price_ht": 45.75,
     "stock_status": "in_stock",
-    "stock_label": "En stock"
+    "stock_label": "En stock",
+    "model": "models/products/kraftform-kompakt.glb"
   },
   {
     "id": "wera-zyklop-speed",
@@ -395,7 +406,8 @@
     "vat": 0.20,
     "price_ht": 99.17,
     "stock_status": "in_stock",
-    "stock_label": "En stock"
+    "stock_label": "En stock",
+    "model": "models/products/zyklop-speed.glb"
   },
   {
     "id": "dewalt-dcd796p2",
@@ -413,7 +425,8 @@
     "vat": 0.20,
     "price_ht": 249.17,
     "stock_status": "in_stock",
-    "stock_label": "En stock"
+    "stock_label": "En stock",
+    "model": "models/products/dcd796.glb"
   },
   {
     "id": "dewalt-dcs391n",
@@ -431,7 +444,8 @@
     "vat": 0.20,
     "price_ht": 140.83,
     "stock_status": "in_stock",
-    "stock_label": "En stock"
+    "stock_label": "En stock",
+    "model": "models/products/dcs391n.glb"
   },
   {
     "id": "dewalt-dcg405n",
@@ -449,7 +463,8 @@
     "vat": 0.20,
     "price_ht": 132.50,
     "stock_status": "in_stock",
-    "stock_label": "En stock"
+    "stock_label": "En stock",
+    "model": "models/products/dcg405n.glb"
   },
   {
     "id": "makita-dlx2220jx2",
