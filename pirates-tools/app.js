@@ -1251,8 +1251,8 @@
     // Build model list from products that have a "model" field
     if (_3dModels.length === 0 && products.length > 0) {
       var seen = {};
-      for (var i = 0; i < _products.length; i++) {
-        var p = _products[i];
+      for (var i = 0; i < products.length; i++) {
+        var p = products[i];
         if (p.model && !seen[p.model]) {
           seen[p.model] = true;
           _3dModels.push({ src: p.model, brand: p.brand, name: p.name, slug: p.slug });
