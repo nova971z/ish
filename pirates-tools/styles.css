@@ -2125,23 +2125,53 @@ transform: translateY(-2px);
     gap: 1rem;
     justify-content: center;
 }
-.btn--lg {
-    padding: .9rem 2rem;
+/* PDP CTA buttons — override .btn base styles for product page theme */
+.pdp-landing__actions .btn--lg {
+    padding: 1rem 2.2rem;
     font-size: 1.05rem;
     font-weight: 700;
     border-radius: 14px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
     will-change: transform, opacity, filter;
-    transition: box-shadow .25s;
+    transition: transform .2s ease, box-shadow .25s ease;
 }
-.btn--lg:hover {
+.pdp-landing__actions .btn--lg:hover {
     transform: translateY(-3px);
-    box-shadow: 0 10px 30px rgba(0,0,0,.3);
 }
-.btn--glow {
-    box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+/* Primary — violet gradient */
+.pdp-landing__actions .btn--lg.primary {
+    background: linear-gradient(135deg, #8B5CF6, #A855F7) !important;
+    color: #fff !important;
+    box-shadow: 0 0 24px rgba(139, 92, 246, 0.4), 0 4px 16px rgba(0,0,0,.3) !important;
 }
-.btn--glow:hover {
-    box-shadow: 0 0 40px rgba(139, 92, 246, 0.5), 0 10px 30px rgba(0,0,0,.3);
+.pdp-landing__actions .btn--lg.primary:hover {
+    box-shadow: 0 0 40px rgba(139, 92, 246, 0.6), 0 8px 24px rgba(0,0,0,.4) !important;
+}
+/* WhatsApp — green */
+.pdp-landing__actions .btn--lg.btn-wa {
+    background: linear-gradient(135deg, #25d366, #128c7e) !important;
+    color: #fff !important;
+    box-shadow: 0 0 20px rgba(37, 211, 102, 0.3), 0 4px 16px rgba(0,0,0,.3) !important;
+}
+.pdp-landing__actions .btn--lg.btn-wa:hover {
+    box-shadow: 0 0 36px rgba(37, 211, 102, 0.5), 0 8px 24px rgba(0,0,0,.4) !important;
+}
+/* Share — outline style */
+.pdp-landing__actions .btn--lg:not(.primary):not(.btn-wa) {
+    background: rgba(255,255,255,.06) !important;
+    color: #e6edf5 !important;
+    border: 1.5px solid rgba(139, 92, 246, 0.4) !important;
+    box-shadow: 0 0 12px rgba(139, 92, 246, 0.15), 0 4px 12px rgba(0,0,0,.2) !important;
+}
+.pdp-landing__actions .btn--lg:not(.primary):not(.btn-wa):hover {
+    background: rgba(139, 92, 246, 0.1) !important;
+    border-color: rgba(139, 92, 246, 0.6) !important;
+    box-shadow: 0 0 28px rgba(139, 92, 246, 0.3), 0 8px 24px rgba(0,0,0,.3) !important;
 }
 
 /* ── RESPONSIVE PDP ── */
