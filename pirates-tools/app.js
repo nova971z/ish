@@ -839,71 +839,206 @@
     var detailEl = document.getElementById('plansDetail');
     var bubbles = document.querySelectorAll('.plan-bubble');
     if (!canvas || !bubbles.length) return;
+
+    // HiDPI fix
+    var dpr = window.devicePixelRatio || 1;
+    var rect = canvas.parentElement.getBoundingClientRect();
+    var cssW = rect.width || 280;
+    var cssH = 160;
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    canvas.style.width = cssW + 'px';
+    canvas.style.height = cssH + 'px';
     var ctx = canvas.getContext('2d');
-    var W = canvas.width;
-    var H = canvas.height;
+    ctx.scale(dpr, dpr);
+    var W = cssW;
+    var H = cssH;
+    var PAD = { top: 18, right: 8, bottom: 22, left: 38 };
+    var gW = W - PAD.left - PAD.right;
+    var gH = H - PAD.top - PAD.bottom;
 
-    function drawChart(saving, color) {
-      ctx.clearRect(0, 0, W, H);
-
-      // Grid lines
-      ctx.strokeStyle = 'rgba(139,92,246,.1)';
-      ctx.lineWidth = 1;
-      for (var g = 1; g <= 3; g++) {
-        var gy = H - (g / 4) * H;
-        ctx.beginPath();
-        ctx.setLineDash([3, 3]);
-        ctx.moveTo(0, gy);
-        ctx.lineTo(W, gy);
-        ctx.stroke();
+    function smoothPath(pts) {
+      if (pts.length < 2) return;
+      ctx.moveTo(pts[0].x, pts[0].y);
+      for (var i = 0; i < pts.length - 1; i++) {
+        var cx = (pts[i].x + pts[i + 1].x) / 2;
+        var cy = (pts[i].y + pts[i + 1].y) / 2;
+        ctx.quadraticCurveTo(pts[i].x, pts[i].y, cx, cy);
       }
-      ctx.setLineDash([]);
+      var last = pts[pts.length - 1];
+      ctx.lineTo(last.x, last.y);
+    }
 
-      if (saving === 0) return;
-
-      // Curve points (12 months, cumulative)
+    function makePoints(saving, months) {
       var pts = [];
-      for (var m = 0; m <= 11; m++) {
-        var x = (m / 11) * W;
-        var cumul = (saving / 12) * (m + 1);
-        var y = H - (cumul / saving) * (H - 10);
+      for (var m = 0; m < months; m++) {
+        var x = PAD.left + (m / (months - 1)) * gW;
+        var cumul = (saving / months) * (m + 1);
+        var y = PAD.top + gH - (cumul / saving) * gH;
         pts.push({ x: x, y: y });
       }
+      return pts;
+    }
 
-      // Area fill
-      var grad = ctx.createLinearGradient(0, 0, 0, H);
-      grad.addColorStop(0, color || 'rgba(139,92,246,.3)');
-      grad.addColorStop(1, 'rgba(139,92,246,.02)');
-      ctx.beginPath();
-      ctx.moveTo(0, H);
-      pts.forEach(function (p) { ctx.lineTo(p.x, p.y); });
-      ctx.lineTo(W, H);
-      ctx.closePath();
-      ctx.fillStyle = grad;
-      ctx.fill();
+    var maxY = 6000; // store yearly ref
 
-      // Line
-      ctx.beginPath();
-      ctx.moveTo(pts[0].x, pts[0].y);
-      for (var i = 1; i < pts.length; i++) {
-        ctx.lineTo(pts[i].x, pts[i].y);
+    function drawChart(saving) {
+      ctx.clearRect(0, 0, W, H);
+
+      // Y-axis labels
+      ctx.font = '9px -apple-system, sans-serif';
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      var ySteps = [0, 2000, 4000, 6000];
+      ySteps.forEach(function (v) {
+        var y = PAD.top + gH - (v / maxY) * gH;
+        // grid line
+        ctx.strokeStyle = 'rgba(139,92,246,.08)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([2, 3]);
+        ctx.beginPath();
+        ctx.moveTo(PAD.left, y);
+        ctx.lineTo(W - PAD.right, y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        // label
+        ctx.fillStyle = 'rgba(159,180,197,.45)';
+        ctx.fillText(v === 0 ? '0' : (v / 1000) + 'k', PAD.left - 5, y);
+      });
+
+      // X-axis month labels
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillStyle = 'rgba(159,180,197,.4)';
+      var mLabels = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
+      for (var mi = 0; mi < 12; mi++) {
+        var mx = PAD.left + (mi / 11) * gW;
+        ctx.fillText(mLabels[mi], mx, PAD.top + gH + 5);
       }
-      ctx.strokeStyle = color ? color.replace(/[\d.]+\)$/, '1)') : '#8B5CF6';
-      ctx.lineWidth = 2.5;
-      ctx.lineJoin = 'round';
-      ctx.lineCap = 'round';
+
+      // Baseline axis
+      ctx.strokeStyle = 'rgba(139,92,246,.12)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(PAD.left, PAD.top + gH);
+      ctx.lineTo(W - PAD.right, PAD.top + gH);
       ctx.stroke();
 
-      // End dot
-      var last = pts[pts.length - 1];
+      if (saving === 0) {
+        // Placeholder text
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = 'rgba(159,180,197,.25)';
+        ctx.font = '11px -apple-system, sans-serif';
+        ctx.fillText('Selectionnez un service', W / 2, H / 2 - 4);
+        return;
+      }
+
+      // Store line (reference: 500€/mois = 6000/an)
+      var storePts = makePoints(maxY, 12);
+      // Area store
+      var storeGrad = ctx.createLinearGradient(0, PAD.top, 0, PAD.top + gH);
+      storeGrad.addColorStop(0, 'rgba(239,68,68,.1)');
+      storeGrad.addColorStop(1, 'rgba(239,68,68,.01)');
       ctx.beginPath();
-      ctx.arc(last.x, last.y, 4, 0, Math.PI * 2);
-      ctx.fillStyle = '#fff';
+      ctx.moveTo(PAD.left, PAD.top + gH);
+      smoothPath(storePts);
+      ctx.lineTo(storePts[storePts.length - 1].x, PAD.top + gH);
+      ctx.closePath();
+      ctx.fillStyle = storeGrad;
       ctx.fill();
+      // Store curve
       ctx.beginPath();
-      ctx.arc(last.x, last.y, 2.5, 0, Math.PI * 2);
-      ctx.fillStyle = color ? color.replace(/[\d.]+\)$/, '1)') : '#8B5CF6';
+      smoothPath(storePts);
+      ctx.strokeStyle = 'rgba(239,68,68,.4)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Pirates line (store - saving)
+      var pirateTotal = maxY - saving;
+      if (pirateTotal < 0) pirateTotal = 0;
+      var piratePts = [];
+      for (var p = 0; p < 12; p++) {
+        var px = PAD.left + (p / 11) * gW;
+        var pCumul = (pirateTotal / 12) * (p + 1);
+        var py = PAD.top + gH - (pCumul / maxY) * gH;
+        piratePts.push({ x: px, y: py });
+      }
+
+      // Savings zone between curves
+      ctx.beginPath();
+      smoothPath(storePts);
+      var revPirate = piratePts.slice().reverse();
+      ctx.lineTo(revPirate[0].x, revPirate[0].y);
+      for (var r = 0; r < revPirate.length - 1; r++) {
+        var rcx = (revPirate[r].x + revPirate[r + 1].x) / 2;
+        var rcy = (revPirate[r].y + revPirate[r + 1].y) / 2;
+        ctx.quadraticCurveTo(revPirate[r].x, revPirate[r].y, rcx, rcy);
+      }
+      ctx.lineTo(revPirate[revPirate.length - 1].x, revPirate[revPirate.length - 1].y);
+      ctx.closePath();
+      var diffGrad = ctx.createLinearGradient(0, PAD.top, 0, PAD.top + gH);
+      diffGrad.addColorStop(0, 'rgba(52,211,153,.15)');
+      diffGrad.addColorStop(1, 'rgba(52,211,153,.03)');
+      ctx.fillStyle = diffGrad;
       ctx.fill();
+
+      // Pirate area
+      var pirGrad = ctx.createLinearGradient(0, PAD.top, 0, PAD.top + gH);
+      pirGrad.addColorStop(0, 'rgba(139,92,246,.18)');
+      pirGrad.addColorStop(1, 'rgba(139,92,246,.01)');
+      ctx.beginPath();
+      ctx.moveTo(PAD.left, PAD.top + gH);
+      smoothPath(piratePts);
+      ctx.lineTo(piratePts[piratePts.length - 1].x, PAD.top + gH);
+      ctx.closePath();
+      ctx.fillStyle = pirGrad;
+      ctx.fill();
+
+      // Pirate curve with glow
+      ctx.shadowColor = 'rgba(139,92,246,.4)';
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+      smoothPath(piratePts);
+      ctx.strokeStyle = '#8B5CF6';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      // End dots
+      var stLast = storePts[storePts.length - 1];
+      var piLast = piratePts[piratePts.length - 1];
+
+      ctx.beginPath();
+      ctx.arc(stLast.x, stLast.y, 3, 0, Math.PI * 2);
+      ctx.fillStyle = '#ef4444';
+      ctx.fill();
+
+      ctx.shadowColor = 'rgba(139,92,246,.5)';
+      ctx.shadowBlur = 6;
+      ctx.beginPath();
+      ctx.arc(piLast.x, piLast.y, 3.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#8B5CF6';
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // End labels
+      ctx.font = 'bold 9px -apple-system, sans-serif';
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'bottom';
+      ctx.fillStyle = 'rgba(239,68,68,.6)';
+      ctx.fillText(maxY.toLocaleString('fr-FR') + ' \u20ac', stLast.x - 6, stLast.y - 2);
+      ctx.fillStyle = '#A855F7';
+      ctx.textBaseline = 'top';
+      ctx.fillText(pirateTotal.toLocaleString('fr-FR') + ' \u20ac', piLast.x - 6, piLast.y + 4);
+
+      // Saving annotation
+      var midY = (stLast.y + piLast.y) / 2;
+      ctx.font = 'bold 10px -apple-system, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#34d399';
+      ctx.fillText('-' + saving.toLocaleString('fr-FR') + ' \u20ac', stLast.x - 28, midY);
     }
 
     // Initial empty state
@@ -912,12 +1047,9 @@
     bubbles.forEach(function (bubble) {
       bubble.addEventListener('click', function () {
         var wasActive = bubble.classList.contains('is-active');
-
-        // Close all
         bubbles.forEach(function (b) { b.classList.remove('is-active'); });
 
         if (wasActive) {
-          // Deselect
           drawChart(0);
           if (amountEl) amountEl.textContent = '0 \u20ac';
           if (detailEl) detailEl.innerHTML = '<span class="plans-chart__detail-label">Cliquez sur un service</span>';
@@ -928,10 +1060,8 @@
         var saving = parseInt(bubble.dataset.saving) || 0;
         var price = bubble.dataset.price || '0';
         var name = bubble.querySelector('.plan-bubble__name').textContent;
-        var isBlack = bubble.classList.contains('plan-bubble--black');
-        var color = isBlack ? 'rgba(168,85,247,.35)' : 'rgba(139,92,246,.3)';
 
-        drawChart(saving, color);
+        drawChart(saving);
 
         if (amountEl) amountEl.textContent = saving.toLocaleString('fr-FR') + ' \u20ac';
         if (detailEl) {
