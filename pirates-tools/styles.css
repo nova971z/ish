@@ -1583,43 +1583,76 @@ body.page-devis #view-devis {
   border: 1px solid rgba(192,132,252,.25);
 }
 
-/* ── Compact Chart ── */
+/* ── Chart — Modern Glassmorphism ── */
 .plans-chart {
-  border-radius: 14px;
-  border: 1px solid rgba(139,92,246,.15);
-  background: rgba(139,92,246,.03);
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.06);
+  background: rgba(10,10,20,.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   overflow: hidden;
-  margin-bottom: .6rem;
-  max-width: 92%;
-  margin-left: auto;
-  margin-right: auto;
+  margin: 0 auto .8rem;
+  max-width: 88%;
+  box-shadow: 0 4px 24px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.04);
 }
 
-.plans-chart__bar {
+.plans-chart__header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: .5rem .8rem;
+  align-items: flex-start;
+  padding: .55rem .7rem .3rem;
 }
 
-.plans-chart__label {
-  font-size: .7rem;
-  color: var(--muted);
+.plans-chart__header-left {
+  display: flex;
+  flex-direction: column;
+  gap: .2rem;
+}
+
+.plans-chart__title {
+  font-size: .62rem;
   font-weight: 600;
+  color: rgba(255,255,255,.5);
+  letter-spacing: .02em;
 }
 
-.plans-chart__amount {
-  font-size: 1rem;
+.plans-chart__saving {
+  font-size: .72rem;
   font-weight: 800;
   color: #34d399;
-  text-shadow: 0 0 10px rgba(52,211,153,.25);
+  text-shadow: 0 0 8px rgba(52,211,153,.2);
   transition: all .4s ease;
+  white-space: nowrap;
 }
+
+.plans-chart__legend {
+  display: flex;
+  gap: .55rem;
+}
+
+.plans-chart__leg {
+  display: flex;
+  align-items: center;
+  gap: .18rem;
+  font-size: .5rem;
+  color: rgba(159,180,197,.4);
+  letter-spacing: .01em;
+}
+
+.plans-chart__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.plans-chart__dot--store { background: rgba(239,68,68,.5); }
+.plans-chart__dot--pirate { background: #8B5CF6; }
 
 .plans-chart__canvas-wrap {
   position: relative;
-  height: 160px;
-  background: rgba(0,0,0,.15);
+  height: 120px;
+  padding: 0 2px 2px;
 }
 
 .plans-chart__canvas-wrap canvas {
@@ -1627,31 +1660,6 @@ body.page-devis #view-devis {
   position: absolute;
   inset: 0;
 }
-
-.plans-chart__legend {
-  display: flex;
-  gap: .8rem;
-  justify-content: center;
-  padding: .4rem 0;
-}
-
-.plans-chart__leg {
-  display: flex;
-  align-items: center;
-  gap: .25rem;
-  font-size: .6rem;
-  color: rgba(159,180,197,.5);
-}
-
-.plans-chart__dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.plans-chart__dot--store { background: rgba(239,68,68,.45); }
-.plans-chart__dot--pirate { background: #8B5CF6; }
 
 /* ── Detail panel ── */
 .plan-detail {

@@ -252,16 +252,18 @@
 
           <!-- Compact chart -->
           <div class="plans-chart" id="plansChartWrap">
-            <div class="plans-chart__bar">
-              <span class="plans-chart__label" id="plansLabel">Selectionnez un service</span>
-              <span class="plans-chart__amount" id="plansAmount"></span>
+            <div class="plans-chart__header">
+              <div class="plans-chart__header-left">
+                <span class="plans-chart__title" id="plansLabel">Comparaison annuelle</span>
+                <div class="plans-chart__legend">
+                  <span class="plans-chart__leg"><span class="plans-chart__dot plans-chart__dot--store"></span>Magasin</span>
+                  <span class="plans-chart__leg"><span class="plans-chart__dot plans-chart__dot--pirate"></span>Pirates Tools</span>
+                </div>
+              </div>
+              <span class="plans-chart__saving" id="plansAmount"></span>
             </div>
             <div class="plans-chart__canvas-wrap" id="plansChartGraph">
               <canvas id="plansCanvas"></canvas>
-            </div>
-            <div class="plans-chart__legend">
-              <span class="plans-chart__leg"><span class="plans-chart__dot plans-chart__dot--store"></span>Magasin</span>
-              <span class="plans-chart__leg"><span class="plans-chart__dot plans-chart__dot--pirate"></span>Pirates Tools</span>
             </div>
           </div>
 

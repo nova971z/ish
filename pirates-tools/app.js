@@ -844,8 +844,8 @@
     // HiDPI — landscape chart
     var dpr = window.devicePixelRatio || 1;
     var wrap = canvas.parentElement;
-    var cssW = Math.round(wrap.getBoundingClientRect().width) || 340;
-    var cssH = 160;
+    var cssW = Math.round(wrap.getBoundingClientRect().width) || 320;
+    var cssH = 120;
     canvas.width = Math.round(cssW * dpr);
     canvas.height = Math.round(cssH * dpr);
     canvas.style.width = cssW + 'px';
@@ -854,12 +854,11 @@
     ctx.scale(dpr, dpr);
     var W = cssW;
     var H = cssH;
-    var PAD = { top: 18, right: 14, bottom: 24, left: 36 };
+    var PAD = { top: 10, right: 40, bottom: 18, left: 28 };
     var gW = W - PAD.left - PAD.right;
     var gH = H - PAD.top - PAD.bottom;
 
     var maxY = 6000;
-    // Realistic monthly multipliers (not constant — seasonal variation)
     var storeMulti  = [0.9, 0.7, 1.0, 1.1, 1.3, 0.8, 0.6, 0.7, 1.2, 1.1, 1.0, 1.6];
     var pirateMulti = [0.8, 0.6, 1.1, 1.0, 1.4, 0.7, 0.5, 0.8, 1.3, 1.0, 0.9, 1.5];
 
@@ -930,24 +929,36 @@
       return pts;
     }
 
-    function drawLine(pts, color, width) {
-      ctx.beginPath();
+    // Smooth bezier through points
+    function bezierPath(pts) {
       ctx.moveTo(pts[0].x, pts[0].y);
-      for (var i = 1; i < pts.length; i++) { ctx.lineTo(pts[i].x, pts[i].y); }
+      for (var i = 0; i < pts.length - 1; i++) {
+        var x0 = pts[i].x, y0 = pts[i].y;
+        var x1 = pts[i + 1].x, y1 = pts[i + 1].y;
+        var cpx = (x0 + x1) / 2;
+        ctx.bezierCurveTo(cpx, y0, cpx, y1, x1, y1);
+      }
+    }
+
+    function drawSmooth(pts, color, width, glow) {
+      if (glow) { ctx.shadowColor = glow; ctx.shadowBlur = 4; }
+      ctx.beginPath();
+      bezierPath(pts);
       ctx.strokeStyle = color;
       ctx.lineWidth = width;
       ctx.lineJoin = 'round';
       ctx.lineCap = 'round';
       ctx.stroke();
+      ctx.shadowBlur = 0;
     }
 
-    function fillArea(pts, color) {
+    function fillSmooth(pts, colorTop, colorBot) {
       var grad = ctx.createLinearGradient(0, PAD.top, 0, PAD.top + gH);
-      grad.addColorStop(0, color);
-      grad.addColorStop(1, 'rgba(0,0,0,0)');
+      grad.addColorStop(0, colorTop);
+      grad.addColorStop(1, colorBot || 'rgba(0,0,0,0)');
       ctx.beginPath();
       ctx.moveTo(pts[0].x, PAD.top + gH);
-      for (var i = 0; i < pts.length; i++) { ctx.lineTo(pts[i].x, pts[i].y); }
+      bezierPath(pts);
       ctx.lineTo(pts[pts.length - 1].x, PAD.top + gH);
       ctx.closePath();
       ctx.fillStyle = grad;
@@ -956,78 +967,93 @@
 
     function drawChart(saving) {
       ctx.clearRect(0, 0, W, H);
-      var fs = Math.max(8, Math.round(W * 0.025));
 
-      // Grid
-      ctx.font = fs + 'px -apple-system, system-ui, sans-serif';
-      [0, 2000, 4000, 6000].forEach(function (v) {
+      // Subtle grid — only 3 horizontal lines
+      [2000, 4000, 6000].forEach(function (v) {
         var y = PAD.top + gH - (v / maxY) * gH;
-        ctx.strokeStyle = 'rgba(139,92,246,.06)';
-        ctx.lineWidth = 1;
-        ctx.setLineDash([2, 3]);
-        ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(W - PAD.right, y); ctx.stroke();
+        ctx.strokeStyle = 'rgba(255,255,255,.03)';
+        ctx.lineWidth = .5;
         ctx.setLineDash([]);
-        ctx.fillStyle = 'rgba(159,180,197,.35)';
+        ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(W - PAD.right, y); ctx.stroke();
+        // Y labels — tiny
+        ctx.font = '500 7px -apple-system, system-ui, sans-serif';
+        ctx.fillStyle = 'rgba(255,255,255,.15)';
         ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
-        ctx.fillText(v === 0 ? '0' : (v / 1000) + 'k', PAD.left - 4, y);
+        ctx.fillText((v / 1000) + 'k', PAD.left - 5, y);
       });
 
-      // Month labels (abbreviated)
+      // Bottom axis line
+      var baseY = PAD.top + gH;
+      ctx.strokeStyle = 'rgba(255,255,255,.04)';
+      ctx.lineWidth = .5;
+      ctx.beginPath(); ctx.moveTo(PAD.left, baseY); ctx.lineTo(W - PAD.right, baseY); ctx.stroke();
+
+      // Month labels — tiny
       ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-      ctx.fillStyle = 'rgba(159,180,197,.3)';
+      ctx.font = '500 6px -apple-system, system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(255,255,255,.12)';
       ['J','F','M','A','M','J','J','A','S','O','N','D'].forEach(function (l, i) {
-        ctx.fillText(l, PAD.left + (i / 11) * gW, PAD.top + gH + 4);
+        ctx.fillText(l, PAD.left + (i / 11) * gW, baseY + 4);
       });
 
       if (saving === 0) {
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillStyle = 'rgba(159,180,197,.15)';
-        ctx.font = (fs + 2) + 'px -apple-system, system-ui, sans-serif';
-        ctx.fillText('Touchez un service ci-dessus', W / 2, H / 2 - 6);
+        ctx.fillStyle = 'rgba(255,255,255,.08)';
+        ctx.font = '500 8px -apple-system, system-ui, sans-serif';
+        ctx.fillText('Selectionnez un service', W / 2, H / 2 - 2);
         return;
       }
 
-      // Store spending (500€/mois base)
       var storePts = buildCumul(500, storeMulti);
-      // Pirate spending (store - saving spread across months)
       var pirateMonthly = (maxY - saving) / 12;
       var piratePts = buildCumul(pirateMonthly, pirateMulti);
 
-      // Fill difference zone
+      // Savings zone between curves
       ctx.beginPath();
-      for (var i = 0; i < storePts.length; i++) { ctx.lineTo(storePts[i].x, storePts[i].y); }
-      for (var j = piratePts.length - 1; j >= 0; j--) { ctx.lineTo(piratePts[j].x, piratePts[j].y); }
+      bezierPath(storePts);
+      // reverse pirate path
+      ctx.lineTo(piratePts[piratePts.length - 1].x, piratePts[piratePts.length - 1].y);
+      for (var j = piratePts.length - 1; j > 0; j--) {
+        var x0 = piratePts[j].x, y0 = piratePts[j].y;
+        var x1 = piratePts[j - 1].x, y1 = piratePts[j - 1].y;
+        var cpx = (x0 + x1) / 2;
+        ctx.bezierCurveTo(cpx, y0, cpx, y1, x1, y1);
+      }
       ctx.closePath();
-      ctx.fillStyle = 'rgba(52,211,153,.08)';
+      var diffGrad = ctx.createLinearGradient(0, PAD.top, 0, baseY);
+      diffGrad.addColorStop(0, 'rgba(52,211,153,.06)');
+      diffGrad.addColorStop(1, 'rgba(52,211,153,.01)');
+      ctx.fillStyle = diffGrad;
       ctx.fill();
 
-      // Areas
-      fillArea(storePts, 'rgba(239,68,68,.08)');
-      fillArea(piratePts, 'rgba(139,92,246,.12)');
+      // Area fills
+      fillSmooth(storePts, 'rgba(239,68,68,.05)', 'rgba(239,68,68,0)');
+      fillSmooth(piratePts, 'rgba(139,92,246,.1)', 'rgba(139,92,246,0)');
 
       // Lines
-      drawLine(storePts, 'rgba(239,68,68,.35)', 1.5);
-      ctx.shadowColor = 'rgba(139,92,246,.35)';
-      ctx.shadowBlur = 6;
-      drawLine(piratePts, '#8B5CF6', 2);
-      ctx.shadowBlur = 0;
+      drawSmooth(storePts, 'rgba(239,68,68,.3)', 1);
+      drawSmooth(piratePts, '#8B5CF6', 1.5, 'rgba(139,92,246,.3)');
 
       // End dots
       var sl = storePts[11], pl = piratePts[11];
-      ctx.beginPath(); ctx.arc(sl.x, sl.y, 2.5, 0, Math.PI * 2);
-      ctx.fillStyle = '#ef4444'; ctx.fill();
-      ctx.beginPath(); ctx.arc(pl.x, pl.y, 3, 0, Math.PI * 2);
+      // Store dot
+      ctx.beginPath(); ctx.arc(sl.x, sl.y, 2, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(239,68,68,.5)'; ctx.fill();
+      // Pirate dot with glow
+      ctx.shadowColor = 'rgba(139,92,246,.4)'; ctx.shadowBlur = 4;
+      ctx.beginPath(); ctx.arc(pl.x, pl.y, 2.5, 0, Math.PI * 2);
       ctx.fillStyle = '#8B5CF6'; ctx.fill();
+      ctx.shadowBlur = 0;
 
-      // End values
-      ctx.font = 'bold ' + fs + 'px -apple-system, system-ui, sans-serif';
-      ctx.textAlign = 'right';
+      // End value labels — small, right-aligned outside chart area
       var stTotal = Math.round(storePts.reduce(function (a, _, i) { return a + 500 * storeMulti[i]; }, 0));
       var piTotal = Math.round(maxY - saving);
-      ctx.fillStyle = 'rgba(239,68,68,.5)'; ctx.textBaseline = 'bottom';
-      ctx.fillText(stTotal.toLocaleString('fr-FR') + '\u20ac', sl.x - 5, sl.y - 3);
-      ctx.fillStyle = '#A855F7'; ctx.textBaseline = 'top';
-      ctx.fillText(piTotal.toLocaleString('fr-FR') + '\u20ac', pl.x - 5, pl.y + 4);
+      ctx.font = '700 7px -apple-system, system-ui, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillStyle = 'rgba(239,68,68,.4)'; ctx.textBaseline = 'middle';
+      ctx.fillText(stTotal.toLocaleString('fr-FR') + '\u20ac', sl.x + 5, sl.y);
+      ctx.fillStyle = 'rgba(139,92,246,.8)'; ctx.textBaseline = 'middle';
+      ctx.fillText(piTotal.toLocaleString('fr-FR') + '\u20ac', pl.x + 5, pl.y);
     }
 
     drawChart(0);
@@ -1040,7 +1066,7 @@
         if (wasActive) {
           drawChart(0);
           if (amountEl) amountEl.textContent = '';
-          if (labelEl) labelEl.textContent = 'Selectionnez un service';
+          if (labelEl) labelEl.textContent = 'Comparaison annuelle';
           if (detailEl) { detailEl.className = 'plan-detail'; detailEl.innerHTML = ''; }
           return;
         }
