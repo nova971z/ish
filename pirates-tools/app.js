@@ -1198,6 +1198,7 @@
             + '<div class="plan-detail__desc">' + info.desc + '</div>'
             + featHtml
             + '<span class="plan-detail__saving">' + price + ' \u20ac/mois \u2192 ' + saving.toLocaleString('fr-FR') + ' \u20ac economises/an</span>'
+            + '<a href="#/abonnement/' + plan + '" class="plan-detail__cta plan-detail__cta--' + (info.color || plan) + '">Choisir ' + (info.name || '') + '</a>'
             + '</div>';
         }
       });
@@ -1735,14 +1736,126 @@
     requestAnimationFrame(step);
   }
 
+  // ── Abonnement Page ──────────────────────────────────────────
+
+  var ABO_DATA = {
+    basique: {
+      name: 'Basique',
+      price: '9',
+      tagline: 'L\'essentiel pour bien demarrer',
+      desc: 'Accedez a notre catalogue en ligne avec des tarifs reduits. L\'abonnement ideal pour decouvrir l\'univers Pirates Tools sans engagement.',
+      features: [
+        { icon: '🏷️', text: 'Remise de 10% sur tout le catalogue', detail: 'Applicable sur chaque commande, sans minimum d\'achat.' },
+        { icon: '📦', text: 'Livraison standard offerte des 80\u20ac', detail: 'Livraison sous 3-5 jours ouvrés partout en France.' },
+        { icon: '📧', text: 'Support par email prioritaire', detail: 'Reponse garantie sous 24h les jours ouvrés.' },
+        { icon: '📋', text: 'Acces au catalogue complet', detail: 'Toutes nos references disponibles en ligne 24h/24.' }
+      ],
+      theme: 'basique'
+    },
+    pro: {
+      name: 'Pro',
+      price: '29',
+      tagline: 'Le choix des professionnels exigeants',
+      desc: 'Des remises significatives, un paiement flexible et un conseiller dedie pour optimiser chaque commande. Concu pour les artisans et les pros du batiment.',
+      features: [
+        { icon: '🏷️', text: 'Remise de 25% sur tout le catalogue', detail: 'La meilleure remise pour les professionnels reguliers.' },
+        { icon: '💳', text: 'Paiement differe a 30 jours', detail: 'Payez vos commandes a 30 jours fin de mois.' },
+        { icon: '👤', text: 'Conseiller dedie personnel', detail: 'Un interlocuteur unique qui connait vos besoins.' },
+        { icon: '🚚', text: 'Livraison express J+1', detail: 'Recevez vos commandes des le lendemain avant 13h.' },
+        { icon: '📊', text: 'Dashboard commandes', detail: 'Suivez vos commandes, factures et historique en temps reel.' }
+      ],
+      theme: 'pro'
+    },
+    gold: {
+      name: 'Gold',
+      price: '59',
+      tagline: 'L\'experience premium sans compromis',
+      desc: 'Tous les avantages Pro amplifies, avec la communication digitale integree et un programme de fidelite renforce. Pour ceux qui veulent le meilleur.',
+      features: [
+        { icon: '🏷️', text: 'Remise de 30% sur tout le catalogue', detail: 'Le meilleur rapport qualite-prix du marche.' },
+        { icon: '💳', text: 'Paiement differe a 60 jours', detail: 'Une tresorerie plus souple pour votre activite.' },
+        { icon: '👤', text: 'Conseiller prioritaire VIP', detail: 'Ligne directe, disponible 6j/7 de 7h a 20h.' },
+        { icon: '🚚', text: 'Livraison gratuite illimitee', detail: 'Sans minimum d\'achat, partout en France et DOM-TOM.' },
+        { icon: '💎', text: 'Points fidelite x3', detail: 'Cumulez 3x plus de points a chaque commande.' },
+        { icon: '📱', text: 'Gestion reseaux sociaux', detail: 'Nous gerons vos reseaux sociaux professionnels.' },
+        { icon: '🎁', text: 'Acces ventes privees', detail: 'Des offres exclusives reservees aux membres Gold.' }
+      ],
+      theme: 'gold'
+    },
+    black: {
+      name: 'Black Metal',
+      price: '99',
+      tagline: 'Le summum absolu. Tout inclus.',
+      desc: 'Tous nos services reunis en un seul abonnement. Remises maximales, communication 360°, site web offert et acces VIP illimite. L\'excellence totale.',
+      features: [
+        { icon: '🏷️', text: 'Remise de 40% sur tout le catalogue', detail: 'La remise la plus elevee, reservee a l\'elite.' },
+        { icon: '💳', text: 'Paiement differe a 90 jours', detail: 'La flexibilite maximale pour votre tresorerie.' },
+        { icon: '👤', text: 'Account manager VIP dedie', detail: 'Un expert attitré, joignable 7j/7.' },
+        { icon: '🚚', text: 'Livraison J+1 gratuite illimitee', detail: 'Express gratuit sans minimum, priorite absolue.' },
+        { icon: '💎', text: 'Points fidelite x5', detail: 'Le taux de cumul le plus genereux.' },
+        { icon: '📱', text: 'Communication 360\u00b0 complete', detail: 'Reseaux sociaux, contenu photo/video, branding.' },
+        { icon: '🌐', text: 'Site vitrine professionnel offert', detail: 'Votre site web cle en main, heberge et maintenu.' },
+        { icon: '📸', text: 'Contenu photo & video', detail: 'Shooting professionnel pour vos realisations.' },
+        { icon: '🎁', text: 'Ventes privees exclusives', detail: 'Acces prioritaire aux ventes flash et nouveautes.' },
+        { icon: '🔥', text: 'Acces beta nouveautes', detail: 'Testez les nouveaux produits avant tout le monde.' }
+      ],
+      theme: 'black'
+    }
+  };
+
+  function renderAbonnement(slug) {
+    var data = ABO_DATA[slug];
+    var el = document.getElementById('aboContent');
+    if (!el || !data) { location.hash = '#/'; return; }
+
+    var featRows = '';
+    data.features.forEach(function (f, i) {
+      featRows += '<div class="abo-feat" style="animation-delay:' + (i * .07) + 's">'
+        + '<div class="abo-feat__icon">' + f.icon + '</div>'
+        + '<div class="abo-feat__body">'
+        + '<div class="abo-feat__title">' + f.text + '</div>'
+        + '<div class="abo-feat__detail">' + f.detail + '</div>'
+        + '</div></div>';
+    });
+
+    el.innerHTML = '<div class="abo-page abo-page--' + data.theme + '">'
+      // Back link
+      + '<a href="#/" class="abo-back">\u2190 Retour</a>'
+
+      // Hero header
+      + '<div class="abo-hero">'
+      + '<div class="abo-hero__glow"></div>'
+      + '<div class="abo-hero__badge">' + data.name + '</div>'
+      + '<h1 class="abo-hero__title" id="abo-h1">' + data.tagline + '</h1>'
+      + '<p class="abo-hero__desc">' + data.desc + '</p>'
+      + '<div class="abo-hero__price"><span class="abo-hero__amount">' + data.price + '\u20ac</span><span class="abo-hero__period">/mois</span></div>'
+      + '</div>'
+
+      // Features
+      + '<div class="abo-features">'
+      + '<h2 class="abo-features__title">Tout ce qui est inclus</h2>'
+      + featRows
+      + '</div>'
+
+      // CTA
+      + '<div class="abo-cta-wrap">'
+      + '<button class="abo-cta abo-cta--' + data.theme + '">Souscrire a ' + data.name + ' \u2014 ' + data.price + '\u20ac/mois</button>'
+      + '<p class="abo-cta-note">Sans engagement \u2022 Annulation a tout moment</p>'
+      + '</div>'
+      + '</div>';
+  }
+
   // ── Router (hash-based SPA) ────────────────────────────────
 
-  var ROUTES = ['/', '/catalogue', '/produit', '/devis', '/compte', '/auth'];
+  var ROUTES = ['/', '/catalogue', '/produit', '/devis', '/compte', '/auth', '/abonnement'];
 
   function parseHash() {
     var hash = location.hash.replace(/^#/, '') || '/';
     if (hash.indexOf('/produit/') === 0) {
       return { route: '/produit', slug: hash.replace('/produit/', '') };
+    }
+    if (hash.indexOf('/abonnement/') === 0) {
+      return { route: '/abonnement', slug: hash.replace('/abonnement/', '') };
     }
     if (ROUTES.indexOf(hash) === -1) return { route: '/', slug: null };
     return { route: hash, slug: null };
@@ -1838,6 +1951,9 @@
         break;
       case '/auth':
         showAuthTab('login');
+        break;
+      case '/abonnement':
+        if (parsed.slug) renderAbonnement(parsed.slug);
         break;
     }
   }
