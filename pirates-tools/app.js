@@ -1534,8 +1534,14 @@
   }
 
   function showAuthTab(tab) {
-    if (dom.authLoginTab) dom.authLoginTab.classList.toggle('active', tab === 'login');
-    if (dom.authRegisterTab) dom.authRegisterTab.classList.toggle('active', tab === 'register');
+    if (dom.authLoginTab) {
+      dom.authLoginTab.classList.toggle('active', tab === 'login');
+      dom.authLoginTab.setAttribute('aria-selected', tab === 'login' ? 'true' : 'false');
+    }
+    if (dom.authRegisterTab) {
+      dom.authRegisterTab.classList.toggle('active', tab === 'register');
+      dom.authRegisterTab.setAttribute('aria-selected', tab === 'register' ? 'true' : 'false');
+    }
     if (dom.authLogin) dom.authLogin.style.display = tab === 'login' ? '' : 'none';
     if (dom.authRegister) dom.authRegister.style.display = tab === 'register' ? '' : 'none';
   }
