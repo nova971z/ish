@@ -174,16 +174,25 @@
         <!-- Banniere outils 3D -->
         <section id="tools-banner" class="tools-banner">
           <h2>Decouvrez nos Outils en 3D</h2>
-          <div class="tools-scroll-container">
-            <button class="scroll-indicator scroll-left" aria-label="Defiler vers la gauche">
-              &#8249;
-            </button>
-            <div class="tools-grid">
-              <div class="empty">Bientot disponible</div>
+          <div class="tools-3d-viewer">
+            <button class="tools-3d-arrow tools-3d-prev" aria-label="Precedent">&#8249;</button>
+            <div class="tools-3d-stage">
+              <model-viewer id="carousel3dViewer"
+                camera-controls touch-action="pan-y"
+                auto-rotate auto-rotate-delay="1500"
+                shadow-intensity="0.8"
+                exposure="1.1"
+                interaction-prompt="none"
+                style="width:100%;height:100%;">
+              </model-viewer>
+              <div class="tools-3d-label">
+                <span class="tools-3d-brand" id="carousel3dBrand"></span>
+                <span class="tools-3d-name" id="carousel3dName"></span>
+              </div>
+              <div class="tools-3d-counter" id="carousel3dCounter"></div>
             </div>
-            <button class="scroll-indicator scroll-right" aria-label="Defiler vers la droite">
-              &#8250;
-            </button>
+            <button class="tools-3d-arrow tools-3d-next" aria-label="Suivant">&#8250;</button>
+            <div class="tools-3d-dots" id="carousel3dDots"></div>
           </div>
         </section>
       </div>

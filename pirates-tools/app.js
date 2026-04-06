@@ -1213,6 +1213,125 @@
     renderList();
   }
 
+  // ── 3D Carousel on homepage ──
+
+  var _3dCarouselBound = false;
+  var _3dIdx = 0;
+  var _3dModels = [];
+
+  function _3dShow(idx) {
+    var viewer = document.getElementById('carousel3dViewer');
+    var brandEl = document.getElementById('carousel3dBrand');
+    var nameEl = document.getElementById('carousel3dName');
+    var counterEl = document.getElementById('carousel3dCounter');
+    var dotsEl = document.getElementById('carousel3dDots');
+    if (!viewer || _3dModels.length === 0) return;
+
+    if (idx < 0) idx = _3dModels.length - 1;
+    if (idx >= _3dModels.length) idx = 0;
+    _3dIdx = idx;
+    var m = _3dModels[idx];
+    viewer.setAttribute('src', m.src);
+    if (brandEl) brandEl.textContent = m.brand;
+    if (nameEl) nameEl.textContent = m.name;
+    if (counterEl) counterEl.textContent = (idx + 1) + ' / ' + _3dModels.length;
+    if (dotsEl) {
+      var dots = dotsEl.querySelectorAll('.tools-3d-dot');
+      for (var i = 0; i < dots.length; i++) {
+        dots[i].classList.toggle('active', i === idx);
+      }
+    }
+  }
+
+  function setup3DCarousel() {
+    var viewer = document.getElementById('carousel3dViewer');
+    var dotsEl = document.getElementById('carousel3dDots');
+    if (!viewer || !dotsEl) return;
+
+    // Build model list from products that have a "model" field
+    if (_3dModels.length === 0 && products.length > 0) {
+      var seen = {};
+      for (var i = 0; i < _products.length; i++) {
+        var p = _products[i];
+        if (p.model && !seen[p.model]) {
+          seen[p.model] = true;
+          _3dModels.push({ src: p.model, brand: p.brand, name: p.name, slug: p.slug });
+        }
+      }
+    }
+
+    if (_3dModels.length === 0) return;
+
+    // Build dots
+    dotsEl.innerHTML = '';
+    for (var d = 0; d < _3dModels.length; d++) {
+      var dot = document.createElement('button');
+      dot.className = 'tools-3d-dot' + (d === _3dIdx ? ' active' : '');
+      dot.setAttribute('aria-label', 'Modele ' + (d + 1));
+      dot.dataset.idx = d;
+      dotsEl.appendChild(dot);
+    }
+
+    // Show current model
+    _3dShow(_3dIdx);
+
+    if (!_3dCarouselBound) {
+      _3dCarouselBound = true;
+
+      // Arrow + dot clicks via delegation
+      var banner = document.getElementById('tools-banner');
+      if (banner) {
+        banner.addEventListener('click', function (e) {
+          if (e.target.closest('.tools-3d-prev')) {
+            _3dShow(_3dIdx - 1);
+          } else if (e.target.closest('.tools-3d-next')) {
+            _3dShow(_3dIdx + 1);
+          } else {
+            var dot = e.target.closest('.tools-3d-dot');
+            if (dot && dot.dataset.idx !== undefined) {
+              _3dShow(parseInt(dot.dataset.idx, 10));
+            }
+          }
+        });
+      }
+
+      // Swipe support on touch devices
+      var stage = document.querySelector('.tools-3d-stage');
+      if (stage) {
+        var startX = 0, startY = 0, tracking = false;
+        stage.addEventListener('touchstart', function (e) {
+          if (e.touches.length === 1) {
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+            tracking = true;
+          }
+        }, { passive: true });
+        stage.addEventListener('touchend', function (e) {
+          if (!tracking) return;
+          tracking = false;
+          var dx = e.changedTouches[0].clientX - startX;
+          var dy = e.changedTouches[0].clientY - startY;
+          if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+            if (dx < 0) _3dShow(_3dIdx + 1);
+            else _3dShow(_3dIdx - 1);
+          }
+        }, { passive: true });
+      }
+
+      // Keyboard navigation when carousel is visible
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+          var v = document.getElementById('carousel3dViewer');
+          if (!v) return;
+          var rect = v.getBoundingClientRect();
+          if (rect.top < window.innerHeight && rect.bottom > 0) {
+            _3dShow(_3dIdx + (e.key === 'ArrowLeft' ? -1 : 1));
+          }
+        }
+      });
+    }
+  }
+
   // ── PDP scroll animations (Apple-style immersive — lerp-based) ──
 
   var pdpObserver = null;
@@ -1821,6 +1940,7 @@
         renderHomeProducts();
         setupPlans();
         setupHomeReviews();
+        setup3DCarousel();
         break;
       case '/catalogue':
         renderCategoryChips();
