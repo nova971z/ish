@@ -840,20 +840,19 @@
     var bubbles = document.querySelectorAll('.plan-bubble');
     if (!canvas || !bubbles.length) return;
 
-    // HiDPI fix
+    // HiDPI fix — square chart
     var dpr = window.devicePixelRatio || 1;
     var rect = canvas.parentElement.getBoundingClientRect();
-    var cssW = rect.width || 280;
-    var cssH = 160;
-    canvas.width = Math.round(cssW * dpr);
-    canvas.height = Math.round(cssH * dpr);
-    canvas.style.width = cssW + 'px';
-    canvas.style.height = cssH + 'px';
+    var size = Math.round(rect.width) || 300;
+    canvas.width = Math.round(size * dpr);
+    canvas.height = Math.round(size * dpr);
+    canvas.style.width = size + 'px';
+    canvas.style.height = size + 'px';
     var ctx = canvas.getContext('2d');
     ctx.scale(dpr, dpr);
-    var W = cssW;
-    var H = cssH;
-    var PAD = { top: 18, right: 8, bottom: 22, left: 38 };
+    var W = size;
+    var H = size;
+    var PAD = { top: 28, right: 14, bottom: 30, left: 42 };
     var gW = W - PAD.left - PAD.right;
     var gH = H - PAD.top - PAD.bottom;
 
@@ -885,52 +884,54 @@
     function drawChart(saving) {
       ctx.clearRect(0, 0, W, H);
 
-      // Y-axis labels
-      ctx.font = '9px -apple-system, sans-serif';
+      var fontSize = Math.max(10, Math.round(W * 0.035));
+      var fontSmall = Math.max(9, Math.round(W * 0.03));
+
+      // Y-axis labels & grid
+      ctx.font = fontSmall + 'px -apple-system, system-ui, sans-serif';
       ctx.textAlign = 'right';
       ctx.textBaseline = 'middle';
-      var ySteps = [0, 2000, 4000, 6000];
+      var ySteps = [0, 1500, 3000, 4500, 6000];
       ySteps.forEach(function (v) {
         var y = PAD.top + gH - (v / maxY) * gH;
-        // grid line
-        ctx.strokeStyle = 'rgba(139,92,246,.08)';
+        ctx.strokeStyle = 'rgba(139,92,246,.06)';
         ctx.lineWidth = 1;
-        ctx.setLineDash([2, 3]);
+        ctx.setLineDash([2, 4]);
         ctx.beginPath();
         ctx.moveTo(PAD.left, y);
         ctx.lineTo(W - PAD.right, y);
         ctx.stroke();
         ctx.setLineDash([]);
-        // label
-        ctx.fillStyle = 'rgba(159,180,197,.45)';
-        ctx.fillText(v === 0 ? '0' : (v / 1000) + 'k', PAD.left - 5, y);
+        ctx.fillStyle = 'rgba(159,180,197,.4)';
+        ctx.fillText(v === 0 ? '0' : (v / 1000).toFixed(1) + 'k', PAD.left - 6, y);
       });
 
       // X-axis month labels
+      ctx.font = fontSmall + 'px -apple-system, system-ui, sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
-      ctx.fillStyle = 'rgba(159,180,197,.4)';
-      var mLabels = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
+      ctx.fillStyle = 'rgba(159,180,197,.35)';
+      var mLabels = ['Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aou', 'Sep', 'Oct', 'Nov', 'Dec'];
       for (var mi = 0; mi < 12; mi++) {
         var mx = PAD.left + (mi / 11) * gW;
-        ctx.fillText(mLabels[mi], mx, PAD.top + gH + 5);
+        ctx.fillText(mLabels[mi], mx, PAD.top + gH + 8);
       }
 
-      // Baseline axis
-      ctx.strokeStyle = 'rgba(139,92,246,.12)';
+      // Axes
+      ctx.strokeStyle = 'rgba(139,92,246,.1)';
       ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.moveTo(PAD.left, PAD.top + gH);
+      ctx.moveTo(PAD.left, PAD.top);
+      ctx.lineTo(PAD.left, PAD.top + gH);
       ctx.lineTo(W - PAD.right, PAD.top + gH);
       ctx.stroke();
 
       if (saving === 0) {
-        // Placeholder text
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillStyle = 'rgba(159,180,197,.25)';
-        ctx.font = '11px -apple-system, sans-serif';
-        ctx.fillText('Selectionnez un service', W / 2, H / 2 - 4);
+        ctx.fillStyle = 'rgba(159,180,197,.2)';
+        ctx.font = fontSize + 'px -apple-system, system-ui, sans-serif';
+        ctx.fillText('Selectionnez un service', W / 2, H / 2);
         return;
       }
 
@@ -1023,22 +1024,51 @@
       ctx.shadowBlur = 0;
 
       // End labels
-      ctx.font = 'bold 9px -apple-system, sans-serif';
+      ctx.font = 'bold ' + fontSize + 'px -apple-system, system-ui, sans-serif';
       ctx.textAlign = 'right';
       ctx.textBaseline = 'bottom';
-      ctx.fillStyle = 'rgba(239,68,68,.6)';
-      ctx.fillText(maxY.toLocaleString('fr-FR') + ' \u20ac', stLast.x - 6, stLast.y - 2);
+      ctx.fillStyle = 'rgba(239,68,68,.55)';
+      ctx.fillText(maxY.toLocaleString('fr-FR') + ' \u20ac', stLast.x - 8, stLast.y - 4);
       ctx.fillStyle = '#A855F7';
       ctx.textBaseline = 'top';
-      ctx.fillText(pirateTotal.toLocaleString('fr-FR') + ' \u20ac', piLast.x - 6, piLast.y + 4);
+      ctx.fillText(pirateTotal.toLocaleString('fr-FR') + ' \u20ac', piLast.x - 8, piLast.y + 6);
 
-      // Saving annotation
+      // Savings badge between curves
       var midY = (stLast.y + piLast.y) / 2;
-      ctx.font = 'bold 10px -apple-system, sans-serif';
+      var badgeW = Math.round(W * 0.28);
+      var badgeH = Math.round(W * 0.08);
+      var badgeX = stLast.x - badgeW - 10;
+      var badgeY = midY - badgeH / 2;
+
+      // Badge background (roundRect polyfill for older Safari)
+      ctx.beginPath();
+      var br = badgeH / 2;
+      if (ctx.roundRect) {
+        ctx.roundRect(badgeX, badgeY, badgeW, badgeH, br);
+      } else {
+        ctx.moveTo(badgeX + br, badgeY);
+        ctx.lineTo(badgeX + badgeW - br, badgeY);
+        ctx.arcTo(badgeX + badgeW, badgeY, badgeX + badgeW, badgeY + br, br);
+        ctx.lineTo(badgeX + badgeW, badgeY + badgeH - br);
+        ctx.arcTo(badgeX + badgeW, badgeY + badgeH, badgeX + badgeW - br, badgeY + badgeH, br);
+        ctx.lineTo(badgeX + br, badgeY + badgeH);
+        ctx.arcTo(badgeX, badgeY + badgeH, badgeX, badgeY + badgeH - br, br);
+        ctx.lineTo(badgeX, badgeY + br);
+        ctx.arcTo(badgeX, badgeY, badgeX + br, badgeY, br);
+      }
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(52,211,153,.12)';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(52,211,153,.25)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // Badge text
+      ctx.font = 'bold ' + Math.max(10, Math.round(W * 0.032)) + 'px -apple-system, system-ui, sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillStyle = '#34d399';
-      ctx.fillText('-' + saving.toLocaleString('fr-FR') + ' \u20ac', stLast.x - 28, midY);
+      ctx.fillText('-' + saving.toLocaleString('fr-FR') + ' \u20ac/an', badgeX + badgeW / 2, midY + 1);
     }
 
     // Initial empty state
