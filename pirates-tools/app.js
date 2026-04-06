@@ -841,22 +841,35 @@
     var orbs = document.querySelectorAll('.plan-orb');
     if (!canvas || !orbs.length) return;
 
-    // HiDPI — landscape chart
-    var dpr = window.devicePixelRatio || 1;
-    var wrap = canvas.parentElement;
-    var cssW = Math.round(wrap.getBoundingClientRect().width) || 320;
-    var cssH = 120;
-    canvas.width = Math.round(cssW * dpr);
-    canvas.height = Math.round(cssH * dpr);
-    canvas.style.width = cssW + 'px';
-    canvas.style.height = cssH + 'px';
-    var ctx = canvas.getContext('2d');
-    ctx.scale(dpr, dpr);
-    var W = cssW;
-    var H = cssH;
-    var PAD = { top: 10, right: 40, bottom: 18, left: 28 };
-    var gW = W - PAD.left - PAD.right;
-    var gH = H - PAD.top - PAD.bottom;
+    // Canvas state — initialized by initCanvas()
+    var ctx, W, H, PAD, gW, gH;
+    var canvasReady = false;
+
+    function initCanvas() {
+      var dpr = window.devicePixelRatio || 1;
+      var wrap = document.getElementById('plansChartGraph');
+      if (!wrap) return;
+      var rect = wrap.getBoundingClientRect();
+      if (rect.width < 10) return; // not laid out yet
+      W = Math.round(rect.width);
+      H = Math.round(rect.height);
+      canvas.width  = W * dpr;
+      canvas.height = H * dpr;
+      ctx = canvas.getContext('2d');
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      PAD = { top: 8, right: 32, bottom: 14, left: 22 };
+      gW = W - PAD.left - PAD.right;
+      gH = H - PAD.top - PAD.bottom;
+      canvasReady = true;
+    }
+
+    // Init after layout is stable
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        initCanvas();
+        drawChart(0);
+      });
+    });
 
     var maxY = 6000;
     var storeMulti  = [0.9, 0.7, 1.0, 1.1, 1.3, 0.8, 0.6, 0.7, 1.2, 1.1, 1.0, 1.6];
@@ -966,40 +979,43 @@
     }
 
     function drawChart(saving) {
+      if (!canvasReady) { initCanvas(); }
+      if (!canvasReady) return;
       ctx.clearRect(0, 0, W, H);
 
-      // Subtle grid — only 3 horizontal lines
+      var fnt = '-apple-system,system-ui,sans-serif';
+      var baseY = PAD.top + gH;
+
+      // Grid — 3 faint horizontal lines + Y labels
       [2000, 4000, 6000].forEach(function (v) {
         var y = PAD.top + gH - (v / maxY) * gH;
-        ctx.strokeStyle = 'rgba(255,255,255,.03)';
+        ctx.strokeStyle = 'rgba(255,255,255,.035)';
         ctx.lineWidth = .5;
         ctx.setLineDash([]);
         ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(W - PAD.right, y); ctx.stroke();
-        // Y labels — tiny
-        ctx.font = '500 7px -apple-system, system-ui, sans-serif';
-        ctx.fillStyle = 'rgba(255,255,255,.15)';
+        ctx.font = '500 6.5px ' + fnt;
+        ctx.fillStyle = 'rgba(255,255,255,.18)';
         ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
-        ctx.fillText((v / 1000) + 'k', PAD.left - 5, y);
+        ctx.fillText((v / 1000) + 'k', PAD.left - 4, y);
       });
 
-      // Bottom axis line
-      var baseY = PAD.top + gH;
+      // Bottom axis
       ctx.strokeStyle = 'rgba(255,255,255,.04)';
       ctx.lineWidth = .5;
       ctx.beginPath(); ctx.moveTo(PAD.left, baseY); ctx.lineTo(W - PAD.right, baseY); ctx.stroke();
 
-      // Month labels — tiny
+      // Month labels
       ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-      ctx.font = '500 6px -apple-system, system-ui, sans-serif';
-      ctx.fillStyle = 'rgba(255,255,255,.12)';
+      ctx.font = '500 5.5px ' + fnt;
+      ctx.fillStyle = 'rgba(255,255,255,.14)';
       ['J','F','M','A','M','J','J','A','S','O','N','D'].forEach(function (l, i) {
-        ctx.fillText(l, PAD.left + (i / 11) * gW, baseY + 4);
+        ctx.fillText(l, PAD.left + (i / 11) * gW, baseY + 3);
       });
 
       if (saving === 0) {
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillStyle = 'rgba(255,255,255,.08)';
-        ctx.font = '500 8px -apple-system, system-ui, sans-serif';
+        ctx.fillStyle = 'rgba(255,255,255,.07)';
+        ctx.font = '500 7px ' + fnt;
         ctx.fillText('Selectionnez un service', W / 2, H / 2 - 2);
         return;
       }
@@ -1011,52 +1027,45 @@
       // Savings zone between curves
       ctx.beginPath();
       bezierPath(storePts);
-      // reverse pirate path
       ctx.lineTo(piratePts[piratePts.length - 1].x, piratePts[piratePts.length - 1].y);
       for (var j = piratePts.length - 1; j > 0; j--) {
-        var x0 = piratePts[j].x, y0 = piratePts[j].y;
-        var x1 = piratePts[j - 1].x, y1 = piratePts[j - 1].y;
-        var cpx = (x0 + x1) / 2;
-        ctx.bezierCurveTo(cpx, y0, cpx, y1, x1, y1);
+        var cpx = (piratePts[j].x + piratePts[j - 1].x) / 2;
+        ctx.bezierCurveTo(cpx, piratePts[j].y, cpx, piratePts[j - 1].y, piratePts[j - 1].x, piratePts[j - 1].y);
       }
       ctx.closePath();
       var diffGrad = ctx.createLinearGradient(0, PAD.top, 0, baseY);
-      diffGrad.addColorStop(0, 'rgba(52,211,153,.06)');
+      diffGrad.addColorStop(0, 'rgba(52,211,153,.05)');
       diffGrad.addColorStop(1, 'rgba(52,211,153,.01)');
       ctx.fillStyle = diffGrad;
       ctx.fill();
 
       // Area fills
-      fillSmooth(storePts, 'rgba(239,68,68,.05)', 'rgba(239,68,68,0)');
-      fillSmooth(piratePts, 'rgba(139,92,246,.1)', 'rgba(139,92,246,0)');
+      fillSmooth(storePts, 'rgba(239,68,68,.04)', 'rgba(239,68,68,0)');
+      fillSmooth(piratePts, 'rgba(139,92,246,.08)', 'rgba(139,92,246,0)');
 
       // Lines
       drawSmooth(storePts, 'rgba(239,68,68,.3)', 1);
-      drawSmooth(piratePts, '#8B5CF6', 1.5, 'rgba(139,92,246,.3)');
+      drawSmooth(piratePts, '#8B5CF6', 1.2, 'rgba(139,92,246,.25)');
 
-      // End dots
+      // End dots — small
       var sl = storePts[11], pl = piratePts[11];
-      // Store dot
-      ctx.beginPath(); ctx.arc(sl.x, sl.y, 2, 0, Math.PI * 2);
+      ctx.beginPath(); ctx.arc(sl.x, sl.y, 1.5, 0, Math.PI * 2);
       ctx.fillStyle = 'rgba(239,68,68,.5)'; ctx.fill();
-      // Pirate dot with glow
-      ctx.shadowColor = 'rgba(139,92,246,.4)'; ctx.shadowBlur = 4;
-      ctx.beginPath(); ctx.arc(pl.x, pl.y, 2.5, 0, Math.PI * 2);
+      ctx.shadowColor = 'rgba(139,92,246,.35)'; ctx.shadowBlur = 3;
+      ctx.beginPath(); ctx.arc(pl.x, pl.y, 2, 0, Math.PI * 2);
       ctx.fillStyle = '#8B5CF6'; ctx.fill();
       ctx.shadowBlur = 0;
 
-      // End value labels — small, right-aligned outside chart area
+      // End values — tiny, positioned right of dots inside PAD.right zone
       var stTotal = Math.round(storePts.reduce(function (a, _, i) { return a + 500 * storeMulti[i]; }, 0));
       var piTotal = Math.round(maxY - saving);
-      ctx.font = '700 7px -apple-system, system-ui, sans-serif';
-      ctx.textAlign = 'left';
-      ctx.fillStyle = 'rgba(239,68,68,.4)'; ctx.textBaseline = 'middle';
-      ctx.fillText(stTotal.toLocaleString('fr-FR') + '\u20ac', sl.x + 5, sl.y);
-      ctx.fillStyle = 'rgba(139,92,246,.8)'; ctx.textBaseline = 'middle';
-      ctx.fillText(piTotal.toLocaleString('fr-FR') + '\u20ac', pl.x + 5, pl.y);
+      ctx.font = '600 6px ' + fnt;
+      ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = 'rgba(239,68,68,.35)';
+      ctx.fillText(stTotal.toLocaleString('fr-FR') + '\u20ac', sl.x + 4, sl.y);
+      ctx.fillStyle = 'rgba(139,92,246,.7)';
+      ctx.fillText(piTotal.toLocaleString('fr-FR') + '\u20ac', pl.x + 4, pl.y);
     }
-
-    drawChart(0);
 
     orbs.forEach(function (orb) {
       orb.addEventListener('click', function () {
