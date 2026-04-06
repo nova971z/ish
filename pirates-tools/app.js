@@ -45,9 +45,10 @@
       'authLoginTab','authRegisterTab','authLogin','authRegister',
       'loginForm','registerForm','loginEmail','loginPwd',
       'regName','regEmail','regPwd',
-      'accountForm','accSave','accName','accEmail',
-      'accAvatar','accAvatarImg','accCartMiniTxt',
+      'accountForm','accSave','accName','accEmail','accPhone','accAddress',
+      'accAvatar','accAvatarImg','accCartMiniTxt','accLogout','accHistory','accLoyaltyTxt',
       'accSlider','accFill','accCursor',
+      'pwdChangeForm','pwdCurrent','pwdNew','pwdConfirm',
       'toasts','installBtn'
     ];
     ids.forEach(function (id) {
@@ -223,6 +224,23 @@
     lines.push('\n*Total TTC : ' + formatPrice(total) + '*');
     var url = 'https://wa.me/' + WA_PHONE + '?text=' + encodeURIComponent(lines.join('\n'));
     window.open(url, '_blank');
+
+    // Save to order history
+    var email = localStorage.getItem('pt_auth');
+    if (email) {
+      var key = 'pt_orders_' + email;
+      var orders = [];
+      try { orders = JSON.parse(localStorage.getItem(key) || '[]'); } catch (e) {}
+      orders.unshift({ date: Date.now(), items: items.length, total: total });
+      localStorage.setItem(key, JSON.stringify(orders));
+
+      // Add loyalty points (1 point per euro)
+      var users = getUsers();
+      if (users[email]) {
+        users[email].loyalty = (users[email].loyalty || 0) + Math.round(total);
+        saveUsers(users);
+      }
+    }
   }
 
   // ── Products ───────────────────────────────────────────────
@@ -1533,16 +1551,45 @@
 
     if (dom.accName) dom.accName.value = user.name || '';
     if (dom.accEmail) dom.accEmail.value = user.email || email;
+    if (dom.accPhone) dom.accPhone.value = user.phone || '';
+    if (dom.accAddress) dom.accAddress.value = user.address || '';
     if (user.avatar && dom.accAvatarImg) dom.accAvatarImg.src = user.avatar;
 
     updateCartUI();
 
-    // Loyalty meter
-    if (dom.accSlider) {
-      var loyalty = user.loyalty || 0;
-      dom.accSlider.value = loyalty;
-      updateLoyaltyBar(loyalty);
+    // Loyalty
+    var loyalty = user.loyalty || 0;
+    var pct = Math.min(loyalty / 10, 100);
+    updateLoyaltyBar(pct);
+    if (dom.accLoyaltyTxt) dom.accLoyaltyTxt.textContent = loyalty + ' points';
+
+    // Order history
+    renderOrderHistory(email);
+  }
+
+  function renderOrderHistory(email) {
+    if (!dom.accHistory) return;
+    var key = 'pt_orders_' + email;
+    var orders = [];
+    try { orders = JSON.parse(localStorage.getItem(key) || '[]'); } catch (e) {}
+
+    if (orders.length === 0) {
+      dom.accHistory.innerHTML = '<p style="opacity:.6;text-align:center;padding:.5rem 0">Aucun devis envoye pour le moment.</p>';
+      return;
     }
+
+    var html = '';
+    for (var i = 0; i < orders.length; i++) {
+      var o = orders[i];
+      html += '<div style="background:rgba(139,92,246,.04);border:1px solid rgba(139,92,246,.12);border-radius:12px;padding:.8rem 1rem">'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem">'
+        + '<strong style="font-size:.9rem">Devis #' + (orders.length - i) + '</strong>'
+        + '<span style="font-size:.78rem;color:var(--muted)">' + formatReviewDate(o.date) + '</span>'
+        + '</div>'
+        + '<p style="font-size:.85rem;opacity:.8;margin:0">' + o.items + ' article' + (o.items > 1 ? 's' : '') + ' — ' + formatPrice(o.total) + '</p>'
+        + '</div>';
+    }
+    dom.accHistory.innerHTML = html;
   }
 
   function updateLoyaltyBar(val) {
@@ -1558,6 +1605,9 @@
     if (!users[email]) return;
 
     users[email].name = (dom.accName ? dom.accName.value : '').trim();
+    users[email].phone = (dom.accPhone ? dom.accPhone.value : '').trim();
+    users[email].address = (dom.accAddress ? dom.accAddress.value : '').trim();
+
     var newEmail = (dom.accEmail ? dom.accEmail.value : '').trim().toLowerCase();
     if (newEmail && newEmail !== email) {
       users[newEmail] = users[email];
@@ -1567,6 +1617,46 @@
     }
     saveUsers(users);
     toast('Profil enregistré', 'success');
+  }
+
+  function handlePasswordChange(e) {
+    e.preventDefault();
+    var email = localStorage.getItem('pt_auth');
+    if (!email) return;
+    var users = getUsers();
+    if (!users[email]) return;
+
+    var current = dom.pwdCurrent ? dom.pwdCurrent.value : '';
+    var newPwd = dom.pwdNew ? dom.pwdNew.value : '';
+    var confirm = dom.pwdConfirm ? dom.pwdConfirm.value : '';
+
+    if (!current || !newPwd || !confirm) { toast('Remplissez tous les champs', 'error'); return; }
+    if (newPwd.length < 6) { toast('Min. 6 caractères', 'error'); return; }
+    if (newPwd !== confirm) { toast('Les mots de passe ne correspondent pas', 'error'); return; }
+
+    var user = users[email];
+    sha256(user.salt + current).then(function (hash) {
+      if (hash !== user.hash) { toast('Mot de passe actuel incorrect', 'error'); return; }
+
+      var newSalt = crypto.getRandomValues(new Uint8Array(16));
+      var newSaltHex = Array.from(newSalt).map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
+
+      sha256(newSaltHex + newPwd).then(function (newHash) {
+        users[email].salt = newSaltHex;
+        users[email].hash = newHash;
+        saveUsers(users);
+        if (dom.pwdCurrent) dom.pwdCurrent.value = '';
+        if (dom.pwdNew) dom.pwdNew.value = '';
+        if (dom.pwdConfirm) dom.pwdConfirm.value = '';
+        toast('Mot de passe modifié', 'success');
+      });
+    });
+  }
+
+  function handleLogout() {
+    localStorage.removeItem('pt_auth');
+    toast('Déconnecté', 'success');
+    location.hash = '#/auth';
   }
 
   function handleAvatarChange(e) {
@@ -1716,12 +1806,11 @@
     // Avatar upload preview
     if (dom.accAvatar) dom.accAvatar.addEventListener('change', handleAvatarChange);
 
-    // Loyalty slider
-    if (dom.accSlider) {
-      dom.accSlider.addEventListener('input', function () {
-        updateLoyaltyBar(Number(this.value));
-      });
-    }
+    // Password change
+    if (dom.pwdChangeForm) dom.pwdChangeForm.addEventListener('submit', handlePasswordChange);
+
+    // Logout
+    if (dom.accLogout) dom.accLogout.addEventListener('click', handleLogout);
   }
 
   // ── Bootstrap ──────────────────────────────────────────────

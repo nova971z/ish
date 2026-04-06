@@ -441,8 +441,9 @@
       <div class="container">
         <h1 id="compte-h1" tabindex="-1">Mon compte</h1>
 
+        <!-- Profil -->
         <div class="card">
-          <div class="head"><h3 class="title">Creer / Mettre a jour</h3><span class="badge">Demo</span></div>
+          <div class="head"><h3 class="title">Mon profil</h3><span class="badge">Infos</span></div>
           <div class="specs">
 
             <!-- Avatar -->
@@ -450,42 +451,90 @@
               <img id="accAvatarImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" alt="Avatar" width="64" height="64" style="border-radius:50%;border:1px solid rgba(255,255,255,.16);object-fit:cover"/>
               <label class="chip" style="cursor:pointer">
                 <input id="accAvatar" type="file" accept="image/*" hidden />
-                Ajouter une photo de profil
+                Changer la photo
               </label>
             </div>
 
             <form id="accountForm" style="display:grid;gap:.6rem;max-width:520px">
-              <label>Nom
+              <label>Nom complet
                 <input id="accName" type="text" class="search" placeholder="Votre nom" autocomplete="name" />
               </label>
               <label>Email
                 <input id="accEmail" type="email" class="search" placeholder="vous@exemple.com" autocomplete="email" />
               </label>
+              <label>Telephone
+                <input id="accPhone" type="tel" class="search" placeholder="06 90 00 00 00" autocomplete="tel" />
+              </label>
+              <label>Adresse
+                <input id="accAddress" type="text" class="search" placeholder="Rue, ville, code postal" autocomplete="street-address" />
+              </label>
               <div class="actions">
                 <button id="accSave" class="btn primary" type="button" data-action="account-save">Enregistrer</button>
               </div>
             </form>
+          </div>
+        </div>
 
-            <!-- Mini recap panier -->
-            <div class="card" style="margin-top:1rem;max-width:520px">
-              <div class="head"><h3 class="title">Votre panier</h3><span class="badge">Resume</span></div>
-              <div id="accCartMini" class="specs">
-                <p id="accCartMiniTxt" style="opacity:.9">0 article — total 0 &#8364;</p>
-                <div class="actions"><a class="btn" href="#/devis" data-nav="/devis">Voir le panier</a></div>
+        <!-- Changer mot de passe -->
+        <div class="card" style="margin-top:1.2rem">
+          <div class="head"><h3 class="title">Securite</h3><span class="badge">Mot de passe</span></div>
+          <div class="specs">
+            <form id="pwdChangeForm" style="display:grid;gap:.6rem;max-width:520px">
+              <label>Mot de passe actuel
+                <input id="pwdCurrent" type="password" class="search" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" autocomplete="current-password" required />
+              </label>
+              <label>Nouveau mot de passe
+                <input id="pwdNew" type="password" class="search" placeholder="Min. 6 caracteres" minlength="6" autocomplete="new-password" required />
+              </label>
+              <label>Confirmer le nouveau mot de passe
+                <input id="pwdConfirm" type="password" class="search" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" autocomplete="new-password" required />
+              </label>
+              <div class="actions">
+                <button class="btn primary" type="submit">Changer le mot de passe</button>
               </div>
-            </div>
+            </form>
+          </div>
+        </div>
 
-            <!-- Jauge fidelite -->
-            <div class="meter" style="max-width:520px;margin-top:1rem">
+        <!-- Panier recap -->
+        <div class="card" style="margin-top:1.2rem">
+          <div class="head"><h3 class="title">Mon panier</h3><span class="badge">Resume</span></div>
+          <div class="specs">
+            <p id="accCartMiniTxt" style="opacity:.9">0 article — total 0 &#8364;</p>
+            <div class="actions"><a class="btn" href="#/devis" data-nav="/devis">Voir le panier</a></div>
+          </div>
+        </div>
+
+        <!-- Historique commandes -->
+        <div class="card" style="margin-top:1.2rem">
+          <div class="head"><h3 class="title">Historique</h3><span class="badge">Devis envoyes</span></div>
+          <div class="specs">
+            <div id="accHistory" style="display:grid;gap:.6rem">
+              <p style="opacity:.6;text-align:center;padding:.5rem 0">Aucun devis envoye pour le moment.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fidélité -->
+        <div class="card" style="margin-top:1.2rem">
+          <div class="head"><h3 class="title">Fidelite</h3><span class="badge">Points</span></div>
+          <div class="specs">
+            <p id="accLoyaltyTxt" style="opacity:.9;margin-bottom:.5rem">0 points</p>
+            <div class="meter" style="max-width:520px">
               <div class="meter__rail">
                 <div id="accFill" class="meter__fill"></div>
                 <div id="accCursor" class="meter__cursor" style="left:0%"></div>
               </div>
-              <div class="meter__scale"><span>0%</span><span>100%</span></div>
-              <input id="accSlider" type="range" min="0" max="1000" step="10" value="0" />
+              <div class="meter__scale"><span>0</span><span>1000 pts</span></div>
             </div>
           </div>
         </div>
+
+        <!-- Déconnexion -->
+        <div style="text-align:center;margin:2rem 0 1rem">
+          <button id="accLogout" class="btn" type="button" style="background:rgba(244,67,54,.15) !important;color:#f44 !important;border:1px solid rgba(244,67,54,.3) !important">Se deconnecter</button>
+        </div>
+
       </div>
     </section>
 
