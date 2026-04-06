@@ -580,6 +580,9 @@
       };
     }
 
+    // ── Reviews system ──
+    setupReviews(product.id);
+
     // Related products (same brand or category)
     if (dom.pdpRelated) {
       var related = products.filter(function (rp) {
@@ -598,6 +601,147 @@
         dom.pdpRelated.innerHTML = '';
       }
     }
+  }
+
+  // ── Reviews system (localStorage-based) ────────────────────
+
+  var REVIEWS_KEY = 'pt_reviews';
+
+  function getReviews(productId) {
+    try {
+      var all = JSON.parse(localStorage.getItem(REVIEWS_KEY) || '{}');
+      return all[productId] || [];
+    } catch (e) { return []; }
+  }
+
+  function saveReview(productId, review) {
+    try {
+      var all = JSON.parse(localStorage.getItem(REVIEWS_KEY) || '{}');
+      if (!all[productId]) all[productId] = [];
+      all[productId].unshift(review);
+      localStorage.setItem(REVIEWS_KEY, JSON.stringify(all));
+    } catch (e) { /* silent */ }
+  }
+
+  function renderStars(rating) {
+    var html = '';
+    for (var i = 1; i <= 5; i++) {
+      html += '<span style="color:' + (i <= rating ? '#FFD700' : 'rgba(255,255,255,.12)') + '">&#9733;</span>';
+    }
+    return html;
+  }
+
+  function formatReviewDate(ts) {
+    var d = new Date(ts);
+    var months = ['jan', 'fev', 'mar', 'avr', 'mai', 'jun', 'jul', 'aou', 'sep', 'oct', 'nov', 'dec'];
+    return d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+  }
+
+  function setupReviews(productId) {
+    var listEl = document.getElementById('pdpReviewsList');
+    var avgEl = document.getElementById('pdpAvgRating');
+    var starsEl = document.getElementById('pdpAvgStars');
+    var countEl = document.getElementById('pdpReviewCount');
+    var form = document.getElementById('pdpReviewForm');
+    var starsSelect = document.getElementById('pdpStarsSelect');
+    if (!listEl || !form) return;
+
+    var selectedRating = 0;
+
+    // Star selection
+    var starBtns = starsSelect ? starsSelect.querySelectorAll('.pdp-reviews__star-btn') : [];
+    for (var si = 0; si < starBtns.length; si++) {
+      (function (btn, idx) {
+        btn.addEventListener('click', function () {
+          selectedRating = idx + 1;
+          for (var j = 0; j < starBtns.length; j++) {
+            starBtns[j].classList.toggle('active', j <= idx);
+          }
+        });
+        btn.addEventListener('mouseenter', function () {
+          for (var j = 0; j < starBtns.length; j++) {
+            starBtns[j].style.color = j <= idx ? '#FFD700' : '';
+          }
+        });
+        btn.addEventListener('mouseleave', function () {
+          for (var j = 0; j < starBtns.length; j++) {
+            starBtns[j].style.color = '';
+          }
+        });
+      })(starBtns[si], si);
+    }
+
+    function renderReviewsList() {
+      var reviews = getReviews(productId);
+
+      // Summary
+      if (reviews.length === 0) {
+        if (avgEl) avgEl.textContent = '—';
+        if (starsEl) starsEl.innerHTML = renderStars(0);
+        if (countEl) countEl.textContent = 'Aucun avis — soyez le premier !';
+        listEl.innerHTML = '<div class="pdp-reviews__empty">Pas encore d\'avis pour ce produit.</div>';
+        return;
+      }
+
+      var total = 0;
+      for (var i = 0; i < reviews.length; i++) total += reviews[i].rating;
+      var avg = total / reviews.length;
+
+      if (avgEl) avgEl.textContent = avg.toFixed(1);
+      if (starsEl) starsEl.innerHTML = renderStars(Math.round(avg));
+      if (countEl) countEl.textContent = reviews.length + ' avis';
+
+      var html = '';
+      for (var ri = 0; ri < reviews.length; ri++) {
+        var r = reviews[ri];
+        var initial = (r.name || '?').charAt(0).toUpperCase();
+        html += '<div class="pdp-review-card">'
+          + '<div class="pdp-review-card__header">'
+          + '<div class="pdp-review-card__author">'
+          + '<div class="pdp-review-card__avatar">' + escapeHTML(initial) + '</div>'
+          + '<div>'
+          + '<div class="pdp-review-card__name">' + escapeHTML(r.name) + '</div>'
+          + '<div class="pdp-review-card__date">' + formatReviewDate(r.date) + '</div>'
+          + '</div>'
+          + '</div>'
+          + '<div class="pdp-review-card__stars">' + renderStars(r.rating) + '</div>'
+          + '</div>'
+          + '<p class="pdp-review-card__text">' + escapeHTML(r.text) + '</p>'
+          + '</div>';
+      }
+      listEl.innerHTML = html;
+    }
+
+    // Form submit
+    form.onsubmit = function (e) {
+      e.preventDefault();
+      var nameInput = document.getElementById('pdpReviewName');
+      var textInput = document.getElementById('pdpReviewText');
+      var name = (nameInput.value || '').trim();
+      var text = (textInput.value || '').trim();
+
+      if (!name) { toast('Entrez votre prénom', 'error'); nameInput.focus(); return; }
+      if (selectedRating === 0) { toast('Sélectionnez une note', 'error'); return; }
+      if (!text) { toast('Écrivez votre avis', 'error'); textInput.focus(); return; }
+
+      saveReview(productId, {
+        name: name,
+        rating: selectedRating,
+        text: text,
+        date: Date.now()
+      });
+
+      // Reset form
+      nameInput.value = '';
+      textInput.value = '';
+      selectedRating = 0;
+      for (var j = 0; j < starBtns.length; j++) starBtns[j].classList.remove('active');
+
+      toast('Merci pour votre avis !', 'success');
+      renderReviewsList();
+    };
+
+    renderReviewsList();
   }
 
   // ── PDP scroll animations (Apple-style immersive — lerp-based) ──

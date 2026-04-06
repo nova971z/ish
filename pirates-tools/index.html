@@ -344,6 +344,46 @@
         </div>
       </div>
 
+      <!-- SECTION : Avis clients -->
+      <div class="pdp-section" data-animate="fade-up">
+        <div class="pdp-section__inner">
+          <h2 class="pdp-section__heading">Avis clients</h2>
+          <div class="pdp-reviews">
+            <!-- Résumé note moyenne -->
+            <div class="pdp-reviews__summary" id="pdpReviewsSummary">
+              <div class="pdp-reviews__avg">
+                <span class="pdp-reviews__avg-num" id="pdpAvgRating">—</span>
+                <div class="pdp-reviews__avg-stars" id="pdpAvgStars"></div>
+                <span class="pdp-reviews__avg-count" id="pdpReviewCount">Aucun avis</span>
+              </div>
+            </div>
+
+            <!-- Liste des avis -->
+            <div class="pdp-reviews__list" id="pdpReviewsList"></div>
+
+            <!-- Formulaire de dépôt -->
+            <div class="pdp-reviews__form-wrapper">
+              <h3 class="pdp-reviews__form-title">Donner votre avis</h3>
+              <form id="pdpReviewForm" class="pdp-reviews__form" autocomplete="off">
+                <div class="pdp-reviews__stars-input">
+                  <span class="pdp-reviews__stars-label">Votre note</span>
+                  <div class="pdp-reviews__stars-select" id="pdpStarsSelect">
+                    <button type="button" class="pdp-reviews__star-btn" data-star="1" aria-label="1 etoile">&#9733;</button>
+                    <button type="button" class="pdp-reviews__star-btn" data-star="2" aria-label="2 etoiles">&#9733;</button>
+                    <button type="button" class="pdp-reviews__star-btn" data-star="3" aria-label="3 etoiles">&#9733;</button>
+                    <button type="button" class="pdp-reviews__star-btn" data-star="4" aria-label="4 etoiles">&#9733;</button>
+                    <button type="button" class="pdp-reviews__star-btn" data-star="5" aria-label="5 etoiles">&#9733;</button>
+                  </div>
+                </div>
+                <input id="pdpReviewName" type="text" class="pdp-reviews__input" placeholder="Votre prenom" required maxlength="40" />
+                <textarea id="pdpReviewText" class="pdp-reviews__textarea" placeholder="Votre avis sur ce produit..." required maxlength="500" rows="3"></textarea>
+                <button type="submit" class="btn primary btn--lg btn--glow pdp-reviews__submit">Publier mon avis</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- SECTION : Produits similaires -->
       <div class="pdp-section" data-animate="fade-up">
         <div class="pdp-section__inner pdp-section__inner--wide">
