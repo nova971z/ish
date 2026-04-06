@@ -845,7 +845,7 @@
     var dpr = window.devicePixelRatio || 1;
     var wrap = canvas.parentElement;
     var cssW = Math.round(wrap.getBoundingClientRect().width) || 340;
-    var cssH = 180;
+    var cssH = 160;
     canvas.width = Math.round(cssW * dpr);
     canvas.height = Math.round(cssH * dpr);
     canvas.style.width = cssW + 'px';
@@ -854,7 +854,7 @@
     ctx.scale(dpr, dpr);
     var W = cssW;
     var H = cssH;
-    var PAD = { top: 16, right: 10, bottom: 22, left: 34 };
+    var PAD = { top: 18, right: 14, bottom: 24, left: 36 };
     var gW = W - PAD.left - PAD.right;
     var gH = H - PAD.top - PAD.bottom;
 
@@ -864,10 +864,59 @@
     var pirateMulti = [0.8, 0.6, 1.1, 1.0, 1.4, 0.7, 0.5, 0.8, 1.3, 1.0, 0.9, 1.5];
 
     var PLAN_INFO = {
-      com: { name: 'Communication Premium', desc: 'Site vitrine, reseaux sociaux, contenu photo/video, flyers et branding complet pour artisans.' },
-      pro: { name: 'Compte Pro', desc: 'Remises -25%, paiement differe 30j, conseiller dedie, acces prioritaire promotions.' },
-      fidelite: { name: 'Fidelite+', desc: 'Points x3, ventes privees, cadeaux anniversaire, livraison gratuite sans minimum.' },
-      black: { name: 'Black Metal Service', desc: 'Communication + Compte Pro + Fidelite+ reunis. Tous nos services, un seul abonnement, -30%.' }
+      basique: {
+        name: 'Basique',
+        desc: 'L\'essentiel pour demarrer. Acces a notre catalogue en ligne et tarifs reduits sur vos premieres commandes.',
+        features: [
+          { icon: '🏷️', text: '-10% sur le catalogue' },
+          { icon: '📦', text: 'Livraison standard' },
+          { icon: '📧', text: 'Support par email' }
+        ],
+        color: 'basique'
+      },
+      pro: {
+        name: 'Pro',
+        desc: 'Le choix des professionnels. Remises significatives, paiement flexible et conseiller dedie pour optimiser vos achats.',
+        features: [
+          { icon: '🏷️', text: '-25% sur le catalogue' },
+          { icon: '💳', text: 'Paiement differe 30j' },
+          { icon: '👤', text: 'Conseiller dedie' },
+          { icon: '🚚', text: 'Livraison express' },
+          { icon: '📊', text: 'Dashboard commandes' }
+        ],
+        color: 'pro'
+      },
+      gold: {
+        name: 'Gold',
+        desc: 'L\'experience premium. Tous les avantages Pro + communication digitale et fidelite renforcee pour booster votre activite.',
+        features: [
+          { icon: '🏷️', text: '-30% sur le catalogue' },
+          { icon: '💳', text: 'Paiement differe 60j' },
+          { icon: '👤', text: 'Conseiller prioritaire' },
+          { icon: '🚚', text: 'Livraison gratuite' },
+          { icon: '💎', text: 'Points fidelite x3' },
+          { icon: '📱', text: 'Reseaux sociaux inclus' },
+          { icon: '🎁', text: 'Ventes privees' }
+        ],
+        color: 'gold'
+      },
+      black: {
+        name: 'Black Metal',
+        desc: 'Le summum absolu. Tous nos services reunis, remises maximales, communication complete et acces VIP illimite.',
+        features: [
+          { icon: '🏷️', text: '-40% sur le catalogue' },
+          { icon: '💳', text: 'Paiement differe 90j' },
+          { icon: '👤', text: 'Account manager VIP' },
+          { icon: '🚚', text: 'Livraison J+1 gratuite' },
+          { icon: '💎', text: 'Points fidelite x5' },
+          { icon: '📱', text: 'Communication 360\u00b0' },
+          { icon: '🎁', text: 'Ventes privees exclusives' },
+          { icon: '🌐', text: 'Site vitrine offert' },
+          { icon: '📸', text: 'Contenu photo/video' },
+          { icon: '🔥', text: 'Acces beta nouveautes' }
+        ],
+        color: 'black'
+      }
     };
 
     function buildCumul(monthly, multi) {
@@ -992,7 +1041,7 @@
           drawChart(0);
           if (amountEl) amountEl.textContent = '';
           if (labelEl) labelEl.textContent = 'Selectionnez un service';
-          if (detailEl) { detailEl.classList.remove('is-open'); detailEl.innerHTML = ''; }
+          if (detailEl) { detailEl.className = 'plan-detail'; detailEl.innerHTML = ''; }
           return;
         }
 
@@ -1007,12 +1056,21 @@
         if (amountEl) amountEl.textContent = '-' + saving.toLocaleString('fr-FR') + ' \u20ac/an';
         if (labelEl) labelEl.textContent = (info.name || '') + ' \u2022 ' + price + '\u20ac/mois';
         if (detailEl && info.desc) {
+          var featHtml = '';
+          if (info.features && info.features.length) {
+            featHtml = '<div class="plan-detail__features">';
+            info.features.forEach(function(f) {
+              featHtml += '<span class="plan-detail__feat"><span class="plan-detail__feat-icon">' + f.icon + '</span>' + f.text + '</span>';
+            });
+            featHtml += '</div>';
+          }
+          detailEl.className = 'plan-detail is-open plan-detail--' + (info.color || plan);
           detailEl.innerHTML = '<div class="plan-detail__inner">'
             + '<div class="plan-detail__name">' + (info.name || '') + '</div>'
             + '<div class="plan-detail__desc">' + info.desc + '</div>'
+            + featHtml
             + '<span class="plan-detail__saving">' + price + ' \u20ac/mois \u2192 ' + saving.toLocaleString('fr-FR') + ' \u20ac economises/an</span>'
             + '</div>';
-          detailEl.classList.add('is-open');
         }
       });
     });
