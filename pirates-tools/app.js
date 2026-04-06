@@ -833,46 +833,62 @@
 
   // ── Plans / Services interactif ────────────────────────────
 
-  function setupPlans() {
+  // Plans state — shared across calls, setup only once
+  var plansInitialized = false;
+  var plansCtx, plansW, plansH, plansPAD, plansgW, plansgH;
+  var plansCanvasReady = false;
+  var plansCurrentSaving = 0;
+  var plansLastStorePts = null, plansLastPiratePts = null;
+  var plansHoverMonth = -1;
+  var PLANS_MONTHS = ['Jan','Fev','Mar','Avr','Mai','Jun','Jul','Aou','Sep','Oct','Nov','Dec'];
+
+  function plansInitCanvas() {
     var canvas = document.getElementById('plansCanvas');
+    var wrap = document.getElementById('plansChartGraph');
+    if (!canvas || !wrap) return;
+    var dpr = window.devicePixelRatio || 1;
+    var rect = wrap.getBoundingClientRect();
+    if (rect.width < 10) return;
+    plansW = Math.round(rect.width);
+    plansH = Math.round(rect.height);
+    canvas.width  = plansW * dpr;
+    canvas.height = plansH * dpr;
+    plansCtx = canvas.getContext('2d');
+    plansCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    plansPAD = { top: 10, right: 32, bottom: 16, left: 22 };
+    plansgW = plansW - plansPAD.left - plansPAD.right;
+    plansgH = plansH - plansPAD.top - plansPAD.bottom;
+    plansCanvasReady = true;
+  }
+
+  function setupPlans() {
+    // Re-init canvas each time (view may have been hidden/resized)
+    plansCanvasReady = false;
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        plansInitCanvas();
+        plansDrawChart(0);
+      });
+    });
+
+    // Reset UI state
+    plansCurrentSaving = 0;
+    plansHoverMonth = -1;
     var amountEl = document.getElementById('plansAmount');
     var labelEl = document.getElementById('plansLabel');
     var detailEl = document.getElementById('planDetail');
     var orbs = document.querySelectorAll('.plan-orb');
+    if (amountEl) amountEl.textContent = '';
+    if (labelEl) labelEl.textContent = 'Comparaison annuelle';
+    if (detailEl) { detailEl.className = 'plan-detail'; detailEl.innerHTML = ''; }
+    orbs.forEach(function (o) { o.classList.remove('is-active'); });
+
+    // Only bind events once
+    if (plansInitialized) return;
+    plansInitialized = true;
+
+    var canvas = document.getElementById('plansCanvas');
     if (!canvas || !orbs.length) return;
-
-    // Canvas state
-    var ctx, W, H, PAD, gW, gH;
-    var canvasReady = false;
-    var currentSaving = 0;
-    var lastStorePts = null, lastPiratePts = null;
-    var hoverMonth = -1;
-    var MONTHS = ['Jan','Fev','Mar','Avr','Mai','Jun','Jul','Aou','Sep','Oct','Nov','Dec'];
-
-    function initCanvas() {
-      var dpr = window.devicePixelRatio || 1;
-      var wrap = document.getElementById('plansChartGraph');
-      if (!wrap) return;
-      var rect = wrap.getBoundingClientRect();
-      if (rect.width < 10) return;
-      W = Math.round(rect.width);
-      H = Math.round(rect.height);
-      canvas.width  = W * dpr;
-      canvas.height = H * dpr;
-      ctx = canvas.getContext('2d');
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      PAD = { top: 10, right: 32, bottom: 16, left: 22 };
-      gW = W - PAD.left - PAD.right;
-      gH = H - PAD.top - PAD.bottom;
-      canvasReady = true;
-    }
-
-    requestAnimationFrame(function () {
-      requestAnimationFrame(function () {
-        initCanvas();
-        drawChart(0);
-      });
-    });
 
     var maxY = 6000;
     var storeMulti  = [0.9, 0.7, 1.0, 1.1, 1.3, 0.8, 0.6, 0.7, 1.2, 1.1, 1.0, 1.6];
@@ -934,65 +950,62 @@
       }
     };
 
-    function buildCumul(monthly, multi) {
+    function plansBuildCumul(monthly, multi) {
       var pts = []; var sum = 0;
       for (var m = 0; m < 12; m++) {
         sum += monthly * multi[m];
-        var x = PAD.left + (m / 11) * gW;
-        var y = PAD.top + gH - (sum / maxY) * gH;
+        var x = plansPAD.left + (m / 11) * plansgW;
+        var y = plansPAD.top + plansgH - (sum / maxY) * plansgH;
         pts.push({ x: x, y: y });
       }
       return pts;
     }
 
-    // Smooth bezier through points
-    function bezierPath(pts) {
-      ctx.moveTo(pts[0].x, pts[0].y);
+    function plansBezierPath(pts) {
+      plansCtx.moveTo(pts[0].x, pts[0].y);
       for (var i = 0; i < pts.length - 1; i++) {
-        var x0 = pts[i].x, y0 = pts[i].y;
-        var x1 = pts[i + 1].x, y1 = pts[i + 1].y;
-        var cpx = (x0 + x1) / 2;
-        ctx.bezierCurveTo(cpx, y0, cpx, y1, x1, y1);
+        var cpx = (pts[i].x + pts[i + 1].x) / 2;
+        plansCtx.bezierCurveTo(cpx, pts[i].y, cpx, pts[i + 1].y, pts[i + 1].x, pts[i + 1].y);
       }
     }
 
-    function drawSmooth(pts, color, width, glow) {
-      if (glow) { ctx.shadowColor = glow; ctx.shadowBlur = 4; }
-      ctx.beginPath();
-      bezierPath(pts);
-      ctx.strokeStyle = color;
-      ctx.lineWidth = width;
-      ctx.lineJoin = 'round';
-      ctx.lineCap = 'round';
-      ctx.stroke();
-      ctx.shadowBlur = 0;
+    function plansDrawSmooth(pts, color, width, glow) {
+      if (glow) { plansCtx.shadowColor = glow; plansCtx.shadowBlur = 4; }
+      plansCtx.beginPath();
+      plansBezierPath(pts);
+      plansCtx.strokeStyle = color;
+      plansCtx.lineWidth = width;
+      plansCtx.lineJoin = 'round';
+      plansCtx.lineCap = 'round';
+      plansCtx.stroke();
+      plansCtx.shadowBlur = 0;
     }
 
-    function fillSmooth(pts, colorTop, colorBot) {
-      var grad = ctx.createLinearGradient(0, PAD.top, 0, PAD.top + gH);
+    function plansFillSmooth(pts, colorTop, colorBot) {
+      var grad = plansCtx.createLinearGradient(0, plansPAD.top, 0, plansPAD.top + plansgH);
       grad.addColorStop(0, colorTop);
       grad.addColorStop(1, colorBot || 'rgba(0,0,0,0)');
-      ctx.beginPath();
-      ctx.moveTo(pts[0].x, PAD.top + gH);
-      bezierPath(pts);
-      ctx.lineTo(pts[pts.length - 1].x, PAD.top + gH);
-      ctx.closePath();
-      ctx.fillStyle = grad;
-      ctx.fill();
+      plansCtx.beginPath();
+      plansCtx.moveTo(pts[0].x, plansPAD.top + plansgH);
+      plansBezierPath(pts);
+      plansCtx.lineTo(pts[pts.length - 1].x, plansPAD.top + plansgH);
+      plansCtx.closePath();
+      plansCtx.fillStyle = grad;
+      plansCtx.fill();
     }
 
-    // Cumulative values for tooltip (not just points)
-    function buildCumulValues(monthly, multi) {
+    function plansBuildCumulValues(monthly, multi) {
       var vals = []; var sum = 0;
       for (var m = 0; m < 12; m++) { sum += monthly * multi[m]; vals.push(Math.round(sum)); }
       return vals;
     }
 
-    function drawChart(saving, hovIdx) {
-      if (!canvasReady) { initCanvas(); }
-      if (!canvasReady) return;
-      currentSaving = saving;
-      ctx.clearRect(0, 0, W, H);
+    function plansDrawChart(saving, hovIdx) {
+      if (!plansCanvasReady) { plansInitCanvas(); }
+      if (!plansCanvasReady) return;
+      plansCurrentSaving = saving;
+      var c = plansCtx, W = plansW, H = plansH, PAD = plansPAD, gW = plansgW, gH = plansgH;
+      c.clearRect(0, 0, W, H);
 
       var fnt = '-apple-system,system-ui,sans-serif';
       var baseY = PAD.top + gH;
@@ -1000,176 +1013,168 @@
       // Grid
       [2000, 4000, 6000].forEach(function (v) {
         var y = PAD.top + gH - (v / maxY) * gH;
-        ctx.strokeStyle = 'rgba(255,255,255,.035)';
-        ctx.lineWidth = .5;
-        ctx.setLineDash([]);
-        ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(W - PAD.right, y); ctx.stroke();
-        ctx.font = '500 6.5px ' + fnt;
-        ctx.fillStyle = 'rgba(255,255,255,.18)';
-        ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
-        ctx.fillText((v / 1000) + 'k', PAD.left - 4, y);
+        c.strokeStyle = 'rgba(255,255,255,.035)';
+        c.lineWidth = .5;
+        c.setLineDash([]);
+        c.beginPath(); c.moveTo(PAD.left, y); c.lineTo(W - PAD.right, y); c.stroke();
+        c.font = '500 6.5px ' + fnt;
+        c.fillStyle = 'rgba(255,255,255,.18)';
+        c.textAlign = 'right'; c.textBaseline = 'middle';
+        c.fillText((v / 1000) + 'k', PAD.left - 4, y);
       });
 
-      // Bottom axis
-      ctx.strokeStyle = 'rgba(255,255,255,.04)';
-      ctx.lineWidth = .5;
-      ctx.beginPath(); ctx.moveTo(PAD.left, baseY); ctx.lineTo(W - PAD.right, baseY); ctx.stroke();
+      c.strokeStyle = 'rgba(255,255,255,.04)';
+      c.lineWidth = .5;
+      c.beginPath(); c.moveTo(PAD.left, baseY); c.lineTo(W - PAD.right, baseY); c.stroke();
 
-      // Month labels
-      ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-      ctx.font = '500 5.5px ' + fnt;
+      c.textAlign = 'center'; c.textBaseline = 'top';
+      c.font = '500 5.5px ' + fnt;
       ['J','F','M','A','M','J','J','A','S','O','N','D'].forEach(function (l, i) {
         var isHov = (hovIdx === i && saving > 0);
-        ctx.fillStyle = isHov ? 'rgba(255,255,255,.5)' : 'rgba(255,255,255,.14)';
-        if (isHov) ctx.font = '700 6px ' + fnt;
-        ctx.fillText(l, PAD.left + (i / 11) * gW, baseY + 3);
-        if (isHov) ctx.font = '500 5.5px ' + fnt;
+        c.fillStyle = isHov ? 'rgba(255,255,255,.5)' : 'rgba(255,255,255,.14)';
+        if (isHov) c.font = '700 6px ' + fnt;
+        c.fillText(l, PAD.left + (i / 11) * gW, baseY + 3);
+        if (isHov) c.font = '500 5.5px ' + fnt;
       });
 
       if (saving === 0) {
-        lastStorePts = null; lastPiratePts = null;
-        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillStyle = 'rgba(255,255,255,.07)';
-        ctx.font = '500 7px ' + fnt;
-        ctx.fillText('Selectionnez un service', W / 2, H / 2 - 2);
+        plansLastStorePts = null; plansLastPiratePts = null;
+        c.textAlign = 'center'; c.textBaseline = 'middle';
+        c.fillStyle = 'rgba(255,255,255,.07)';
+        c.font = '500 7px ' + fnt;
+        c.fillText('Selectionnez un service', W / 2, H / 2 - 2);
         return;
       }
 
-      var storePts = buildCumul(500, storeMulti);
+      var storePts = plansBuildCumul(500, storeMulti);
       var pirateMonthly = (maxY - saving) / 12;
-      var piratePts = buildCumul(pirateMonthly, pirateMulti);
-      lastStorePts = storePts;
-      lastPiratePts = piratePts;
+      var piratePts = plansBuildCumul(pirateMonthly, pirateMulti);
+      plansLastStorePts = storePts;
+      plansLastPiratePts = piratePts;
 
       // Savings zone
-      ctx.beginPath();
-      bezierPath(storePts);
-      ctx.lineTo(piratePts[piratePts.length - 1].x, piratePts[piratePts.length - 1].y);
+      c.beginPath();
+      plansBezierPath(storePts);
+      c.lineTo(piratePts[piratePts.length - 1].x, piratePts[piratePts.length - 1].y);
       for (var j = piratePts.length - 1; j > 0; j--) {
         var cpx = (piratePts[j].x + piratePts[j - 1].x) / 2;
-        ctx.bezierCurveTo(cpx, piratePts[j].y, cpx, piratePts[j - 1].y, piratePts[j - 1].x, piratePts[j - 1].y);
+        c.bezierCurveTo(cpx, piratePts[j].y, cpx, piratePts[j - 1].y, piratePts[j - 1].x, piratePts[j - 1].y);
       }
-      ctx.closePath();
-      var diffGrad = ctx.createLinearGradient(0, PAD.top, 0, baseY);
+      c.closePath();
+      var diffGrad = c.createLinearGradient(0, PAD.top, 0, baseY);
       diffGrad.addColorStop(0, 'rgba(52,211,153,.05)');
       diffGrad.addColorStop(1, 'rgba(52,211,153,.01)');
-      ctx.fillStyle = diffGrad;
-      ctx.fill();
+      c.fillStyle = diffGrad;
+      c.fill();
 
-      // Area fills
-      fillSmooth(storePts, 'rgba(239,68,68,.04)', 'rgba(239,68,68,0)');
-      fillSmooth(piratePts, 'rgba(139,92,246,.08)', 'rgba(139,92,246,0)');
+      plansFillSmooth(storePts, 'rgba(239,68,68,.04)', 'rgba(239,68,68,0)');
+      plansFillSmooth(piratePts, 'rgba(139,92,246,.08)', 'rgba(139,92,246,0)');
 
-      // Lines
-      drawSmooth(storePts, 'rgba(239,68,68,.3)', 1);
-      drawSmooth(piratePts, '#8B5CF6', 1.2, 'rgba(139,92,246,.25)');
+      plansDrawSmooth(storePts, 'rgba(239,68,68,.3)', 1);
+      plansDrawSmooth(piratePts, '#8B5CF6', 1.2, 'rgba(139,92,246,.25)');
 
-      // End dots
       var sl = storePts[11], pl = piratePts[11];
-      ctx.beginPath(); ctx.arc(sl.x, sl.y, 1.5, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(239,68,68,.5)'; ctx.fill();
-      ctx.shadowColor = 'rgba(139,92,246,.35)'; ctx.shadowBlur = 3;
-      ctx.beginPath(); ctx.arc(pl.x, pl.y, 2, 0, Math.PI * 2);
-      ctx.fillStyle = '#8B5CF6'; ctx.fill();
-      ctx.shadowBlur = 0;
+      c.beginPath(); c.arc(sl.x, sl.y, 1.5, 0, Math.PI * 2);
+      c.fillStyle = 'rgba(239,68,68,.5)'; c.fill();
+      c.shadowColor = 'rgba(139,92,246,.35)'; c.shadowBlur = 3;
+      c.beginPath(); c.arc(pl.x, pl.y, 2, 0, Math.PI * 2);
+      c.fillStyle = '#8B5CF6'; c.fill();
+      c.shadowBlur = 0;
 
-      // End values
       var stTotal = Math.round(storePts.reduce(function (a, _, i) { return a + 500 * storeMulti[i]; }, 0));
       var piTotal = Math.round(maxY - saving);
-      ctx.font = '600 6px ' + fnt;
-      ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-      ctx.fillStyle = 'rgba(239,68,68,.35)';
-      ctx.fillText(stTotal.toLocaleString('fr-FR') + '\u20ac', sl.x + 4, sl.y);
-      ctx.fillStyle = 'rgba(139,92,246,.7)';
-      ctx.fillText(piTotal.toLocaleString('fr-FR') + '\u20ac', pl.x + 4, pl.y);
+      c.font = '600 6px ' + fnt;
+      c.textAlign = 'left'; c.textBaseline = 'middle';
+      c.fillStyle = 'rgba(239,68,68,.35)';
+      c.fillText(stTotal.toLocaleString('fr-FR') + '\u20ac', sl.x + 4, sl.y);
+      c.fillStyle = 'rgba(139,92,246,.7)';
+      c.fillText(piTotal.toLocaleString('fr-FR') + '\u20ac', pl.x + 4, pl.y);
 
-      // ── Interactive cursor overlay ──
+      // Interactive cursor overlay
       if (typeof hovIdx === 'number' && hovIdx >= 0 && hovIdx < 12) {
         var hx = storePts[hovIdx].x;
         var sy = storePts[hovIdx].y;
         var py = piratePts[hovIdx].y;
-        var storeVals = buildCumulValues(500, storeMulti);
-        var pirateVals = buildCumulValues(pirateMonthly, pirateMulti);
+        var storeVals = plansBuildCumulValues(500, storeMulti);
+        var pirateVals = plansBuildCumulValues(pirateMonthly, pirateMulti);
         var sv = storeVals[hovIdx];
         var pv = pirateVals[hovIdx];
         var diff = sv - pv;
 
-        // Vertical line — dashed, subtle
-        ctx.setLineDash([2, 2]);
-        ctx.strokeStyle = 'rgba(255,255,255,.12)';
-        ctx.lineWidth = .5;
-        ctx.beginPath(); ctx.moveTo(hx, PAD.top); ctx.lineTo(hx, baseY); ctx.stroke();
-        ctx.setLineDash([]);
+        c.setLineDash([2, 2]);
+        c.strokeStyle = 'rgba(255,255,255,.12)';
+        c.lineWidth = .5;
+        c.beginPath(); c.moveTo(hx, PAD.top); c.lineTo(hx, baseY); c.stroke();
+        c.setLineDash([]);
 
-        // Dots on curves
-        ctx.beginPath(); ctx.arc(hx, sy, 2.5, 0, Math.PI * 2);
-        ctx.fillStyle = '#ef4444'; ctx.fill();
-        ctx.strokeStyle = 'rgba(0,0,0,.3)'; ctx.lineWidth = .5; ctx.stroke();
+        c.beginPath(); c.arc(hx, sy, 2.5, 0, Math.PI * 2);
+        c.fillStyle = '#ef4444'; c.fill();
+        c.strokeStyle = 'rgba(0,0,0,.3)'; c.lineWidth = .5; c.stroke();
 
-        ctx.shadowColor = 'rgba(139,92,246,.4)'; ctx.shadowBlur = 4;
-        ctx.beginPath(); ctx.arc(hx, py, 3, 0, Math.PI * 2);
-        ctx.fillStyle = '#8B5CF6'; ctx.fill();
-        ctx.strokeStyle = 'rgba(0,0,0,.3)'; ctx.lineWidth = .5; ctx.stroke();
-        ctx.shadowBlur = 0;
+        c.shadowColor = 'rgba(139,92,246,.4)'; c.shadowBlur = 4;
+        c.beginPath(); c.arc(hx, py, 3, 0, Math.PI * 2);
+        c.fillStyle = '#8B5CF6'; c.fill();
+        c.strokeStyle = 'rgba(0,0,0,.3)'; c.lineWidth = .5; c.stroke();
+        c.shadowBlur = 0;
 
-        // Tooltip bubble
         var tipW = 58, tipH = 30;
         var tipX = hx - tipW / 2;
         var tipY = Math.min(sy, py) - tipH - 6;
-        // Keep inside canvas
         if (tipX < 2) tipX = 2;
         if (tipX + tipW > W - 2) tipX = W - tipW - 2;
         if (tipY < 2) tipY = 2;
 
-        // Bubble background
-        ctx.beginPath();
+        c.beginPath();
         var r = 4;
-        ctx.moveTo(tipX + r, tipY);
-        ctx.lineTo(tipX + tipW - r, tipY);
-        ctx.quadraticCurveTo(tipX + tipW, tipY, tipX + tipW, tipY + r);
-        ctx.lineTo(tipX + tipW, tipY + tipH - r);
-        ctx.quadraticCurveTo(tipX + tipW, tipY + tipH, tipX + tipW - r, tipY + tipH);
-        ctx.lineTo(tipX + r, tipY + tipH);
-        ctx.quadraticCurveTo(tipX, tipY + tipH, tipX, tipY + tipH - r);
-        ctx.lineTo(tipX, tipY + r);
-        ctx.quadraticCurveTo(tipX, tipY, tipX + r, tipY);
-        ctx.closePath();
-        ctx.fillStyle = 'rgba(15,12,25,.88)';
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(139,92,246,.2)';
-        ctx.lineWidth = .5;
-        ctx.stroke();
+        c.moveTo(tipX + r, tipY);
+        c.lineTo(tipX + tipW - r, tipY);
+        c.quadraticCurveTo(tipX + tipW, tipY, tipX + tipW, tipY + r);
+        c.lineTo(tipX + tipW, tipY + tipH - r);
+        c.quadraticCurveTo(tipX + tipW, tipY + tipH, tipX + tipW - r, tipY + tipH);
+        c.lineTo(tipX + r, tipY + tipH);
+        c.quadraticCurveTo(tipX, tipY + tipH, tipX, tipY + tipH - r);
+        c.lineTo(tipX, tipY + r);
+        c.quadraticCurveTo(tipX, tipY, tipX + r, tipY);
+        c.closePath();
+        c.fillStyle = 'rgba(15,12,25,.88)';
+        c.fill();
+        c.strokeStyle = 'rgba(139,92,246,.2)';
+        c.lineWidth = .5;
+        c.stroke();
 
-        // Tooltip text
         var cx = tipX + tipW / 2;
-        ctx.textAlign = 'center';
-        ctx.font = '700 5.5px ' + fnt;
-        ctx.fillStyle = 'rgba(255,255,255,.5)';
-        ctx.textBaseline = 'top';
-        ctx.fillText(MONTHS[hovIdx], cx, tipY + 3);
+        c.textAlign = 'center';
+        c.font = '700 5.5px ' + fnt;
+        c.fillStyle = 'rgba(255,255,255,.5)';
+        c.textBaseline = 'top';
+        c.fillText(PLANS_MONTHS[hovIdx], cx, tipY + 3);
 
-        ctx.font = '600 5px ' + fnt;
-        ctx.fillStyle = 'rgba(239,68,68,.6)';
-        ctx.fillText(sv.toLocaleString('fr-FR') + '\u20ac', cx, tipY + 11);
+        c.font = '600 5px ' + fnt;
+        c.fillStyle = 'rgba(239,68,68,.6)';
+        c.fillText(sv.toLocaleString('fr-FR') + '\u20ac', cx, tipY + 11);
 
-        ctx.fillStyle = '#8B5CF6';
-        ctx.fillText(pv.toLocaleString('fr-FR') + '\u20ac', cx, tipY + 17.5);
+        c.fillStyle = '#8B5CF6';
+        c.fillText(pv.toLocaleString('fr-FR') + '\u20ac', cx, tipY + 17.5);
 
-        ctx.fillStyle = '#34d399';
-        ctx.fillText('-' + diff.toLocaleString('fr-FR') + '\u20ac', cx, tipY + 24);
+        c.fillStyle = '#34d399';
+        c.fillText('-' + diff.toLocaleString('fr-FR') + '\u20ac', cx, tipY + 24);
       }
     }
 
     orbs.forEach(function (orb) {
       orb.addEventListener('click', function () {
+        var amtEl = document.getElementById('plansAmount');
+        var lblEl = document.getElementById('plansLabel');
+        var dtlEl = document.getElementById('planDetail');
+        var allOrbs = document.querySelectorAll('.plan-orb');
         var wasActive = orb.classList.contains('is-active');
-        orbs.forEach(function (o) { o.classList.remove('is-active'); });
+        allOrbs.forEach(function (o) { o.classList.remove('is-active'); });
 
         if (wasActive) {
-          drawChart(0);
-          if (amountEl) amountEl.textContent = '';
-          if (labelEl) labelEl.textContent = 'Comparaison annuelle';
-          if (detailEl) { detailEl.className = 'plan-detail'; detailEl.innerHTML = ''; }
+          plansDrawChart(0);
+          if (amtEl) amtEl.textContent = '';
+          if (lblEl) lblEl.textContent = 'Comparaison annuelle';
+          if (dtlEl) { dtlEl.className = 'plan-detail'; dtlEl.innerHTML = ''; }
           return;
         }
 
@@ -1179,11 +1184,11 @@
         var plan = orb.dataset.plan || '';
         var info = PLAN_INFO[plan] || {};
 
-        drawChart(saving);
+        plansDrawChart(saving);
 
-        if (amountEl) amountEl.textContent = '-' + saving.toLocaleString('fr-FR') + ' \u20ac/an';
-        if (labelEl) labelEl.textContent = (info.name || '') + ' \u2022 ' + price + '\u20ac/mois';
-        if (detailEl && info.desc) {
+        if (amtEl) amtEl.textContent = '-' + saving.toLocaleString('fr-FR') + ' \u20ac/an';
+        if (lblEl) lblEl.textContent = (info.name || '') + ' \u2022 ' + price + '\u20ac/mois';
+        if (dtlEl && info.desc) {
           var featHtml = '';
           if (info.features && info.features.length) {
             featHtml = '<div class="plan-detail__features">';
@@ -1192,8 +1197,8 @@
             });
             featHtml += '</div>';
           }
-          detailEl.className = 'plan-detail is-open plan-detail--' + (info.color || plan);
-          detailEl.innerHTML = '<div class="plan-detail__inner">'
+          dtlEl.className = 'plan-detail is-open plan-detail--' + (info.color || plan);
+          dtlEl.innerHTML = '<div class="plan-detail__inner">'
             + '<div class="plan-detail__name">' + (info.name || '') + '</div>'
             + '<div class="plan-detail__desc">' + info.desc + '</div>'
             + featHtml
@@ -1204,52 +1209,46 @@
       });
     });
 
-    // ── Interactive cursor (touch + mouse) ──
-    function getMonthFromX(clientX) {
+    // ── Interactive cursor (touch + mouse) — bound once ──
+    function plansGetMonth(clientX) {
       var rect = canvas.getBoundingClientRect();
       var x = clientX - rect.left;
-      // Scale from display coords to canvas CSS coords
-      var scale = W / rect.width;
+      var scale = plansW / rect.width;
       var cx = x * scale;
-      // Find nearest month
-      var idx = Math.round(((cx - PAD.left) / gW) * 11);
+      var idx = Math.round(((cx - plansPAD.left) / plansgW) * 11);
       return Math.max(0, Math.min(11, idx));
     }
 
-    function handleHover(clientX) {
-      if (currentSaving <= 0) return;
-      var m = getMonthFromX(clientX);
-      if (m !== hoverMonth) {
-        hoverMonth = m;
-        drawChart(currentSaving, hoverMonth);
+    function plansHandleHover(clientX) {
+      if (plansCurrentSaving <= 0) return;
+      var m = plansGetMonth(clientX);
+      if (m !== plansHoverMonth) {
+        plansHoverMonth = m;
+        plansDrawChart(plansCurrentSaving, plansHoverMonth);
       }
     }
 
-    function handleLeave() {
-      if (hoverMonth >= 0) {
-        hoverMonth = -1;
-        drawChart(currentSaving);
+    function plansHandleLeave() {
+      if (plansHoverMonth >= 0) {
+        plansHoverMonth = -1;
+        plansDrawChart(plansCurrentSaving);
       }
     }
 
-    // Mouse
-    canvas.addEventListener('mousemove', function (e) { handleHover(e.clientX); });
-    canvas.addEventListener('mouseleave', handleLeave);
-
-    // Touch — slide finger across chart
+    canvas.addEventListener('mousemove', function (e) { plansHandleHover(e.clientX); });
+    canvas.addEventListener('mouseleave', plansHandleLeave);
     canvas.addEventListener('touchstart', function (e) {
-      if (currentSaving <= 0) return;
+      if (plansCurrentSaving <= 0) return;
       e.preventDefault();
-      handleHover(e.touches[0].clientX);
+      plansHandleHover(e.touches[0].clientX);
     }, { passive: false });
     canvas.addEventListener('touchmove', function (e) {
-      if (currentSaving <= 0) return;
+      if (plansCurrentSaving <= 0) return;
       e.preventDefault();
-      handleHover(e.touches[0].clientX);
+      plansHandleHover(e.touches[0].clientX);
     }, { passive: false });
     canvas.addEventListener('touchend', function () {
-      // Keep tooltip visible for 1.5s then fade
-      setTimeout(handleLeave, 1500);
+      setTimeout(plansHandleLeave, 1500);
     });
   }
 
