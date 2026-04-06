@@ -718,12 +718,14 @@
       //   100% → titre sorti en bas, 3D net + interactif
       // Puis le scroll continue normalement vers le reste de la page
       if (pdpHeroPin && pdpHero) {
-        var pinRect = pdpHeroPin.getBoundingClientRect();
         var heroH = pdpHero.offsetHeight || winH;
-        // scrollTravel = espace de scroll dans le wrapper (200vh - 100vh = 100vh)
+        // scrollTravel = espace de scroll bonus dans le wrapper (200vh - 100vh)
         var scrollTravel = pdpHeroPin.offsetHeight - heroH;
-        // hp = progression dans le wrapper (0 = debut, 1 = fin de l'animation)
-        var hp = clamp(-pinRect.top / Math.max(scrollTravel, 1), 0, 1);
+        // Distance scrollée depuis le haut du wrapper
+        var pinTop = pdpHeroPin.offsetTop;
+        var scrolledInPin = scrollY - pinTop;
+        // hp = progression dans la zone d'animation (0→1)
+        var hp = clamp(scrolledInPin / Math.max(scrollTravel, 1), 0, 1);
         var hpE = easeOut(hp);
 
         // ── Titre : descend depuis le haut vers le bas ──

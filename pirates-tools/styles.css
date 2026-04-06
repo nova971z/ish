@@ -2532,6 +2532,16 @@ content-visibility: auto;
 contain-intrinsic-size: 800px 600px;
 }
 
+/* Vue produit : pleine largeur, pas de content-visibility (casse sticky) */
+#view-produit {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    content-visibility: visible;
+    contain-intrinsic-size: auto;
+    overflow: visible;
+}
+
 .view.hidden { display: none !important; }
 
 /* ========== 25) TOASTS ========== */
