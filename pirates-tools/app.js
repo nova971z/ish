@@ -833,423 +833,311 @@
 
   // ── Plans / Services interactif ────────────────────────────
 
-  // Plans state — shared across calls, setup only once
-  var plansInitialized = false;
-  var plansCtx, plansW, plansH, plansPAD, plansgW, plansgH;
-  var plansCanvasReady = false;
-  var plansCurrentSaving = 0;
-  var plansLastStorePts = null, plansLastPiratePts = null;
-  var plansHoverMonth = -1;
-  var PLANS_MONTHS = ['Jan','Fev','Mar','Avr','Mai','Jun','Jul','Aou','Sep','Oct','Nov','Dec'];
+  // ── Plans — all state & functions at module scope ──────────
 
-  function plansInitCanvas() {
+  var _plansEvtBound = false;
+  var _pCtx, _pW, _pH, _pPAD, _pgW, _pgH;
+  var _pReady = false;
+  var _pSaving = 0;
+  var _pHover = -1;
+  var _pMaxY = 6000;
+  var _pStoreM  = [0.9, 0.7, 1.0, 1.1, 1.3, 0.8, 0.6, 0.7, 1.2, 1.1, 1.0, 1.6];
+  var _pPirateM = [0.8, 0.6, 1.1, 1.0, 1.4, 0.7, 0.5, 0.8, 1.3, 1.0, 0.9, 1.5];
+  var _pMonths = ['Jan','Fev','Mar','Avr','Mai','Jun','Jul','Aou','Sep','Oct','Nov','Dec'];
+
+  var PLAN_INFO = {
+    basique: { name: 'Basique', desc: 'L\'essentiel pour demarrer. Acces a notre catalogue en ligne et tarifs reduits sur vos premieres commandes.',
+      features: [{icon:'🏷️',text:'-10% sur le catalogue'},{icon:'📦',text:'Livraison standard'},{icon:'📧',text:'Support par email'}], color:'basique' },
+    pro: { name: 'Pro', desc: 'Le choix des professionnels. Remises significatives, paiement flexible et conseiller dedie pour optimiser vos achats.',
+      features: [{icon:'🏷️',text:'-25% sur le catalogue'},{icon:'💳',text:'Paiement differe 30j'},{icon:'👤',text:'Conseiller dedie'},{icon:'🚚',text:'Livraison express'},{icon:'📊',text:'Dashboard commandes'}], color:'pro' },
+    gold: { name: 'Gold', desc: 'L\'experience premium. Tous les avantages Pro + communication digitale et fidelite renforcee pour booster votre activite.',
+      features: [{icon:'🏷️',text:'-30% sur le catalogue'},{icon:'💳',text:'Paiement differe 60j'},{icon:'👤',text:'Conseiller prioritaire'},{icon:'🚚',text:'Livraison gratuite'},{icon:'💎',text:'Points fidelite x3'},{icon:'📱',text:'Reseaux sociaux inclus'},{icon:'🎁',text:'Ventes privees'}], color:'gold' },
+    black: { name: 'Black Metal', desc: 'Le summum absolu. Tous nos services reunis, remises maximales, communication complete et acces VIP illimite.',
+      features: [{icon:'🏷️',text:'-40% sur le catalogue'},{icon:'💳',text:'Paiement differe 90j'},{icon:'👤',text:'Account manager VIP'},{icon:'🚚',text:'Livraison J+1 gratuite'},{icon:'💎',text:'Points fidelite x5'},{icon:'📱',text:'Communication 360\u00b0'},{icon:'🎁',text:'Ventes privees exclusives'},{icon:'🌐',text:'Site vitrine offert'},{icon:'📸',text:'Contenu photo/video'},{icon:'🔥',text:'Acces beta nouveautes'}], color:'black' }
+  };
+
+  function _pInitCanvas() {
     var canvas = document.getElementById('plansCanvas');
     var wrap = document.getElementById('plansChartGraph');
     if (!canvas || !wrap) return;
     var dpr = window.devicePixelRatio || 1;
     var rect = wrap.getBoundingClientRect();
     if (rect.width < 10) return;
-    plansW = Math.round(rect.width);
-    plansH = Math.round(rect.height);
-    canvas.width  = plansW * dpr;
-    canvas.height = plansH * dpr;
-    plansCtx = canvas.getContext('2d');
-    plansCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    plansPAD = { top: 10, right: 32, bottom: 16, left: 22 };
-    plansgW = plansW - plansPAD.left - plansPAD.right;
-    plansgH = plansH - plansPAD.top - plansPAD.bottom;
-    plansCanvasReady = true;
+    _pW = Math.round(rect.width);
+    _pH = Math.round(rect.height);
+    canvas.width  = _pW * dpr;
+    canvas.height = _pH * dpr;
+    _pCtx = canvas.getContext('2d');
+    _pCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    _pPAD = { top: 10, right: 32, bottom: 16, left: 22 };
+    _pgW = _pW - _pPAD.left - _pPAD.right;
+    _pgH = _pH - _pPAD.top - _pPAD.bottom;
+    _pReady = true;
   }
 
+  // ── Chart drawing helpers (module scope) ──
+
+  function _pBuildCumul(monthly, multi) {
+    var pts = []; var sum = 0;
+    for (var m = 0; m < 12; m++) {
+      sum += monthly * multi[m];
+      pts.push({ x: _pPAD.left + (m / 11) * _pgW, y: _pPAD.top + _pgH - (sum / _pMaxY) * _pgH });
+    }
+    return pts;
+  }
+
+  function _pBezier(pts) {
+    _pCtx.moveTo(pts[0].x, pts[0].y);
+    for (var i = 0; i < pts.length - 1; i++) {
+      var cpx = (pts[i].x + pts[i + 1].x) / 2;
+      _pCtx.bezierCurveTo(cpx, pts[i].y, cpx, pts[i + 1].y, pts[i + 1].x, pts[i + 1].y);
+    }
+  }
+
+  function _pLine(pts, color, w, glow) {
+    if (glow) { _pCtx.shadowColor = glow; _pCtx.shadowBlur = 4; }
+    _pCtx.beginPath(); _pBezier(pts);
+    _pCtx.strokeStyle = color; _pCtx.lineWidth = w;
+    _pCtx.lineJoin = 'round'; _pCtx.lineCap = 'round'; _pCtx.stroke();
+    _pCtx.shadowBlur = 0;
+  }
+
+  function _pFill(pts, cTop, cBot) {
+    var g = _pCtx.createLinearGradient(0, _pPAD.top, 0, _pPAD.top + _pgH);
+    g.addColorStop(0, cTop); g.addColorStop(1, cBot || 'rgba(0,0,0,0)');
+    _pCtx.beginPath(); _pCtx.moveTo(pts[0].x, _pPAD.top + _pgH);
+    _pBezier(pts); _pCtx.lineTo(pts[pts.length - 1].x, _pPAD.top + _pgH);
+    _pCtx.closePath(); _pCtx.fillStyle = g; _pCtx.fill();
+  }
+
+  function _pCumulVals(monthly, multi) {
+    var v = []; var s = 0;
+    for (var m = 0; m < 12; m++) { s += monthly * multi[m]; v.push(Math.round(s)); }
+    return v;
+  }
+
+  function _pDraw(saving, hovIdx) {
+    if (!_pReady) _pInitCanvas();
+    if (!_pReady) return;
+    _pSaving = saving;
+    var c = _pCtx, W = _pW, H = _pH, PAD = _pPAD, gW = _pgW, gH = _pgH;
+    c.clearRect(0, 0, W, H);
+    var fnt = '-apple-system,system-ui,sans-serif';
+    var baseY = PAD.top + gH;
+
+    [2000, 4000, 6000].forEach(function (v) {
+      var y = PAD.top + gH - (v / _pMaxY) * gH;
+      c.strokeStyle = 'rgba(255,255,255,.035)'; c.lineWidth = .5; c.setLineDash([]);
+      c.beginPath(); c.moveTo(PAD.left, y); c.lineTo(W - PAD.right, y); c.stroke();
+      c.font = '500 6.5px ' + fnt; c.fillStyle = 'rgba(255,255,255,.18)';
+      c.textAlign = 'right'; c.textBaseline = 'middle';
+      c.fillText((v / 1000) + 'k', PAD.left - 4, y);
+    });
+
+    c.strokeStyle = 'rgba(255,255,255,.04)'; c.lineWidth = .5;
+    c.beginPath(); c.moveTo(PAD.left, baseY); c.lineTo(W - PAD.right, baseY); c.stroke();
+    c.textAlign = 'center'; c.textBaseline = 'top'; c.font = '500 5.5px ' + fnt;
+    ['J','F','M','A','M','J','J','A','S','O','N','D'].forEach(function (l, i) {
+      var isH = (hovIdx === i && saving > 0);
+      c.fillStyle = isH ? 'rgba(255,255,255,.5)' : 'rgba(255,255,255,.14)';
+      if (isH) c.font = '700 6px ' + fnt;
+      c.fillText(l, PAD.left + (i / 11) * gW, baseY + 3);
+      if (isH) c.font = '500 5.5px ' + fnt;
+    });
+
+    if (saving === 0) {
+      c.textAlign = 'center'; c.textBaseline = 'middle';
+      c.fillStyle = 'rgba(255,255,255,.07)'; c.font = '500 7px ' + fnt;
+      c.fillText('Selectionnez un service', W / 2, H / 2 - 2);
+      return;
+    }
+
+    var storePts = _pBuildCumul(500, _pStoreM);
+    var pirateMonthly = (_pMaxY - saving) / 12;
+    var piratePts = _pBuildCumul(pirateMonthly, _pPirateM);
+
+    c.beginPath(); _pBezier(storePts);
+    c.lineTo(piratePts[piratePts.length - 1].x, piratePts[piratePts.length - 1].y);
+    for (var j = piratePts.length - 1; j > 0; j--) {
+      var cpx = (piratePts[j].x + piratePts[j - 1].x) / 2;
+      c.bezierCurveTo(cpx, piratePts[j].y, cpx, piratePts[j - 1].y, piratePts[j - 1].x, piratePts[j - 1].y);
+    }
+    c.closePath();
+    var dg = c.createLinearGradient(0, PAD.top, 0, baseY);
+    dg.addColorStop(0, 'rgba(52,211,153,.05)'); dg.addColorStop(1, 'rgba(52,211,153,.01)');
+    c.fillStyle = dg; c.fill();
+
+    _pFill(storePts, 'rgba(239,68,68,.04)', 'rgba(239,68,68,0)');
+    _pFill(piratePts, 'rgba(139,92,246,.08)', 'rgba(139,92,246,0)');
+    _pLine(storePts, 'rgba(239,68,68,.3)', 1);
+    _pLine(piratePts, '#8B5CF6', 1.2, 'rgba(139,92,246,.25)');
+
+    var sl = storePts[11], pl = piratePts[11];
+    c.beginPath(); c.arc(sl.x, sl.y, 1.5, 0, Math.PI * 2); c.fillStyle = 'rgba(239,68,68,.5)'; c.fill();
+    c.shadowColor = 'rgba(139,92,246,.35)'; c.shadowBlur = 3;
+    c.beginPath(); c.arc(pl.x, pl.y, 2, 0, Math.PI * 2); c.fillStyle = '#8B5CF6'; c.fill(); c.shadowBlur = 0;
+
+    var stTotal = Math.round(storePts.reduce(function (a, _, i) { return a + 500 * _pStoreM[i]; }, 0));
+    var piTotal = Math.round(_pMaxY - saving);
+    c.font = '600 6px ' + fnt; c.textAlign = 'left'; c.textBaseline = 'middle';
+    c.fillStyle = 'rgba(239,68,68,.35)'; c.fillText(stTotal.toLocaleString('fr-FR') + '\u20ac', sl.x + 4, sl.y);
+    c.fillStyle = 'rgba(139,92,246,.7)'; c.fillText(piTotal.toLocaleString('fr-FR') + '\u20ac', pl.x + 4, pl.y);
+
+    // Cursor tooltip
+    if (typeof hovIdx === 'number' && hovIdx >= 0 && hovIdx < 12) {
+      var hx = storePts[hovIdx].x, sy = storePts[hovIdx].y, py = piratePts[hovIdx].y;
+      var sv = _pCumulVals(500, _pStoreM)[hovIdx];
+      var pv = _pCumulVals(pirateMonthly, _pPirateM)[hovIdx];
+      var diff = sv - pv;
+      c.setLineDash([2, 2]); c.strokeStyle = 'rgba(255,255,255,.12)'; c.lineWidth = .5;
+      c.beginPath(); c.moveTo(hx, PAD.top); c.lineTo(hx, baseY); c.stroke(); c.setLineDash([]);
+      c.beginPath(); c.arc(hx, sy, 2.5, 0, Math.PI * 2); c.fillStyle = '#ef4444'; c.fill();
+      c.strokeStyle = 'rgba(0,0,0,.3)'; c.lineWidth = .5; c.stroke();
+      c.shadowColor = 'rgba(139,92,246,.4)'; c.shadowBlur = 4;
+      c.beginPath(); c.arc(hx, py, 3, 0, Math.PI * 2); c.fillStyle = '#8B5CF6'; c.fill();
+      c.strokeStyle = 'rgba(0,0,0,.3)'; c.lineWidth = .5; c.stroke(); c.shadowBlur = 0;
+      var tipW = 58, tipH = 30, tipX = hx - tipW / 2, tipY = Math.min(sy, py) - tipH - 6;
+      if (tipX < 2) tipX = 2; if (tipX + tipW > W - 2) tipX = W - tipW - 2; if (tipY < 2) tipY = 2;
+      c.beginPath(); var r = 4;
+      c.moveTo(tipX + r, tipY); c.lineTo(tipX + tipW - r, tipY);
+      c.quadraticCurveTo(tipX + tipW, tipY, tipX + tipW, tipY + r);
+      c.lineTo(tipX + tipW, tipY + tipH - r);
+      c.quadraticCurveTo(tipX + tipW, tipY + tipH, tipX + tipW - r, tipY + tipH);
+      c.lineTo(tipX + r, tipY + tipH);
+      c.quadraticCurveTo(tipX, tipY + tipH, tipX, tipY + tipH - r);
+      c.lineTo(tipX, tipY + r);
+      c.quadraticCurveTo(tipX, tipY, tipX + r, tipY);
+      c.closePath(); c.fillStyle = 'rgba(15,12,25,.88)'; c.fill();
+      c.strokeStyle = 'rgba(139,92,246,.2)'; c.lineWidth = .5; c.stroke();
+      var cx = tipX + tipW / 2; c.textAlign = 'center'; c.textBaseline = 'top';
+      c.font = '700 5.5px ' + fnt; c.fillStyle = 'rgba(255,255,255,.5)';
+      c.fillText(_pMonths[hovIdx], cx, tipY + 3);
+      c.font = '600 5px ' + fnt;
+      c.fillStyle = 'rgba(239,68,68,.6)'; c.fillText(sv.toLocaleString('fr-FR') + '\u20ac', cx, tipY + 11);
+      c.fillStyle = '#8B5CF6'; c.fillText(pv.toLocaleString('fr-FR') + '\u20ac', cx, tipY + 17.5);
+      c.fillStyle = '#34d399'; c.fillText('-' + diff.toLocaleString('fr-FR') + '\u20ac', cx, tipY + 24);
+    }
+  }
+
+  // ── Orb click handler (module scope, uses event delegation) ──
+
+  function _pHandleOrbClick(orb) {
+    var amtEl = document.getElementById('plansAmount');
+    var lblEl = document.getElementById('plansLabel');
+    var dtlEl = document.getElementById('planDetail');
+    var allOrbs = document.querySelectorAll('.plan-orb');
+    var wasActive = orb.classList.contains('is-active');
+    allOrbs.forEach(function (o) { o.classList.remove('is-active'); });
+
+    if (wasActive) {
+      _pDraw(0);
+      if (amtEl) amtEl.textContent = '';
+      if (lblEl) lblEl.textContent = 'Comparaison annuelle';
+      if (dtlEl) { dtlEl.className = 'plan-detail'; dtlEl.innerHTML = ''; }
+      return;
+    }
+
+    orb.classList.add('is-active');
+    var saving = parseInt(orb.dataset.saving) || 0;
+    var price = orb.dataset.price || '0';
+    var plan = orb.dataset.plan || '';
+    var info = PLAN_INFO[plan] || {};
+
+    _pDraw(saving);
+
+    if (amtEl) amtEl.textContent = '-' + saving.toLocaleString('fr-FR') + ' \u20ac/an';
+    if (lblEl) lblEl.textContent = (info.name || '') + ' \u2022 ' + price + '\u20ac/mois';
+    if (dtlEl && info.desc) {
+      var featHtml = '';
+      if (info.features && info.features.length) {
+        featHtml = '<div class="plan-detail__features">';
+        info.features.forEach(function(f) {
+          featHtml += '<span class="plan-detail__feat"><span class="plan-detail__feat-icon">' + f.icon + '</span>' + f.text + '</span>';
+        });
+        featHtml += '</div>';
+      }
+      dtlEl.className = 'plan-detail is-open plan-detail--' + (info.color || plan);
+      dtlEl.innerHTML = '<div class="plan-detail__inner">'
+        + '<div class="plan-detail__name">' + (info.name || '') + '</div>'
+        + '<div class="plan-detail__desc">' + info.desc + '</div>'
+        + featHtml
+        + '<span class="plan-detail__saving">' + price + ' \u20ac/mois \u2192 ' + saving.toLocaleString('fr-FR') + ' \u20ac economises/an</span>'
+        + '<a href="#/abonnement/' + plan + '" class="plan-detail__cta plan-detail__cta--' + (info.color || plan) + '">Choisir ' + (info.name || '') + '</a>'
+        + '</div>';
+    }
+  }
+
+  // ── Cursor helpers (module scope) ──
+
+  function _pGetMonth(clientX) {
+    var canvas = document.getElementById('plansCanvas');
+    if (!canvas) return -1;
+    var rect = canvas.getBoundingClientRect();
+    if (rect.width < 1) return -1;
+    var scale = _pW / rect.width;
+    var cx = (clientX - rect.left) * scale;
+    return Math.max(0, Math.min(11, Math.round(((cx - _pPAD.left) / _pgW) * 11)));
+  }
+
+  function _pOnHover(clientX) {
+    if (_pSaving <= 0) return;
+    var m = _pGetMonth(clientX);
+    if (m !== _pHover) { _pHover = m; _pDraw(_pSaving, _pHover); }
+  }
+
+  function _pOnLeave() {
+    if (_pHover >= 0) { _pHover = -1; _pDraw(_pSaving); }
+  }
+
+  // ── setupPlans: just resets UI + reinits canvas; events via delegation ──
+
   function setupPlans() {
-    // Re-init canvas each time (view may have been hidden/resized)
-    plansCanvasReady = false;
+    // Reset UI
+    _pReady = false;
+    _pSaving = 0;
+    _pHover = -1;
+    var amtEl = document.getElementById('plansAmount');
+    var lblEl = document.getElementById('plansLabel');
+    var dtlEl = document.getElementById('planDetail');
+    if (amtEl) amtEl.textContent = '';
+    if (lblEl) lblEl.textContent = 'Comparaison annuelle';
+    if (dtlEl) { dtlEl.className = 'plan-detail'; dtlEl.innerHTML = ''; }
+    document.querySelectorAll('.plan-orb').forEach(function (o) { o.classList.remove('is-active'); });
+
+    // Re-init canvas after layout
     requestAnimationFrame(function () {
       requestAnimationFrame(function () {
-        plansInitCanvas();
-        plansDrawChart(0);
+        _pInitCanvas();
+        _pDraw(0);
       });
     });
 
-    // Reset UI state
-    plansCurrentSaving = 0;
-    plansHoverMonth = -1;
-    var amountEl = document.getElementById('plansAmount');
-    var labelEl = document.getElementById('plansLabel');
-    var detailEl = document.getElementById('planDetail');
-    var orbs = document.querySelectorAll('.plan-orb');
-    if (amountEl) amountEl.textContent = '';
-    if (labelEl) labelEl.textContent = 'Comparaison annuelle';
-    if (detailEl) { detailEl.className = 'plan-detail'; detailEl.innerHTML = ''; }
-    orbs.forEach(function (o) { o.classList.remove('is-active'); });
+    // Bind events only once via delegation
+    if (_plansEvtBound) return;
+    _plansEvtBound = true;
 
-    // Only bind events once
-    if (plansInitialized) return;
-    plansInitialized = true;
+    var orbsContainer = document.getElementById('planOrbs');
+    if (orbsContainer) {
+      orbsContainer.addEventListener('click', function (e) {
+        var orb = e.target.closest('.plan-orb');
+        if (orb) _pHandleOrbClick(orb);
+      });
+    }
 
     var canvas = document.getElementById('plansCanvas');
-    if (!canvas || !orbs.length) return;
-
-    var maxY = 6000;
-    var storeMulti  = [0.9, 0.7, 1.0, 1.1, 1.3, 0.8, 0.6, 0.7, 1.2, 1.1, 1.0, 1.6];
-    var pirateMulti = [0.8, 0.6, 1.1, 1.0, 1.4, 0.7, 0.5, 0.8, 1.3, 1.0, 0.9, 1.5];
-
-    var PLAN_INFO = {
-      basique: {
-        name: 'Basique',
-        desc: 'L\'essentiel pour demarrer. Acces a notre catalogue en ligne et tarifs reduits sur vos premieres commandes.',
-        features: [
-          { icon: '🏷️', text: '-10% sur le catalogue' },
-          { icon: '📦', text: 'Livraison standard' },
-          { icon: '📧', text: 'Support par email' }
-        ],
-        color: 'basique'
-      },
-      pro: {
-        name: 'Pro',
-        desc: 'Le choix des professionnels. Remises significatives, paiement flexible et conseiller dedie pour optimiser vos achats.',
-        features: [
-          { icon: '🏷️', text: '-25% sur le catalogue' },
-          { icon: '💳', text: 'Paiement differe 30j' },
-          { icon: '👤', text: 'Conseiller dedie' },
-          { icon: '🚚', text: 'Livraison express' },
-          { icon: '📊', text: 'Dashboard commandes' }
-        ],
-        color: 'pro'
-      },
-      gold: {
-        name: 'Gold',
-        desc: 'L\'experience premium. Tous les avantages Pro + communication digitale et fidelite renforcee pour booster votre activite.',
-        features: [
-          { icon: '🏷️', text: '-30% sur le catalogue' },
-          { icon: '💳', text: 'Paiement differe 60j' },
-          { icon: '👤', text: 'Conseiller prioritaire' },
-          { icon: '🚚', text: 'Livraison gratuite' },
-          { icon: '💎', text: 'Points fidelite x3' },
-          { icon: '📱', text: 'Reseaux sociaux inclus' },
-          { icon: '🎁', text: 'Ventes privees' }
-        ],
-        color: 'gold'
-      },
-      black: {
-        name: 'Black Metal',
-        desc: 'Le summum absolu. Tous nos services reunis, remises maximales, communication complete et acces VIP illimite.',
-        features: [
-          { icon: '🏷️', text: '-40% sur le catalogue' },
-          { icon: '💳', text: 'Paiement differe 90j' },
-          { icon: '👤', text: 'Account manager VIP' },
-          { icon: '🚚', text: 'Livraison J+1 gratuite' },
-          { icon: '💎', text: 'Points fidelite x5' },
-          { icon: '📱', text: 'Communication 360\u00b0' },
-          { icon: '🎁', text: 'Ventes privees exclusives' },
-          { icon: '🌐', text: 'Site vitrine offert' },
-          { icon: '📸', text: 'Contenu photo/video' },
-          { icon: '🔥', text: 'Acces beta nouveautes' }
-        ],
-        color: 'black'
-      }
-    };
-
-    function plansBuildCumul(monthly, multi) {
-      var pts = []; var sum = 0;
-      for (var m = 0; m < 12; m++) {
-        sum += monthly * multi[m];
-        var x = plansPAD.left + (m / 11) * plansgW;
-        var y = plansPAD.top + plansgH - (sum / maxY) * plansgH;
-        pts.push({ x: x, y: y });
-      }
-      return pts;
+    if (canvas) {
+      canvas.addEventListener('mousemove', function (e) { _pOnHover(e.clientX); });
+      canvas.addEventListener('mouseleave', _pOnLeave);
+      canvas.addEventListener('touchstart', function (e) {
+        if (_pSaving <= 0) return;
+        e.preventDefault(); _pOnHover(e.touches[0].clientX);
+      }, { passive: false });
+      canvas.addEventListener('touchmove', function (e) {
+        if (_pSaving <= 0) return;
+        e.preventDefault(); _pOnHover(e.touches[0].clientX);
+      }, { passive: false });
+      canvas.addEventListener('touchend', function () { setTimeout(_pOnLeave, 1500); });
     }
-
-    function plansBezierPath(pts) {
-      plansCtx.moveTo(pts[0].x, pts[0].y);
-      for (var i = 0; i < pts.length - 1; i++) {
-        var cpx = (pts[i].x + pts[i + 1].x) / 2;
-        plansCtx.bezierCurveTo(cpx, pts[i].y, cpx, pts[i + 1].y, pts[i + 1].x, pts[i + 1].y);
-      }
-    }
-
-    function plansDrawSmooth(pts, color, width, glow) {
-      if (glow) { plansCtx.shadowColor = glow; plansCtx.shadowBlur = 4; }
-      plansCtx.beginPath();
-      plansBezierPath(pts);
-      plansCtx.strokeStyle = color;
-      plansCtx.lineWidth = width;
-      plansCtx.lineJoin = 'round';
-      plansCtx.lineCap = 'round';
-      plansCtx.stroke();
-      plansCtx.shadowBlur = 0;
-    }
-
-    function plansFillSmooth(pts, colorTop, colorBot) {
-      var grad = plansCtx.createLinearGradient(0, plansPAD.top, 0, plansPAD.top + plansgH);
-      grad.addColorStop(0, colorTop);
-      grad.addColorStop(1, colorBot || 'rgba(0,0,0,0)');
-      plansCtx.beginPath();
-      plansCtx.moveTo(pts[0].x, plansPAD.top + plansgH);
-      plansBezierPath(pts);
-      plansCtx.lineTo(pts[pts.length - 1].x, plansPAD.top + plansgH);
-      plansCtx.closePath();
-      plansCtx.fillStyle = grad;
-      plansCtx.fill();
-    }
-
-    function plansBuildCumulValues(monthly, multi) {
-      var vals = []; var sum = 0;
-      for (var m = 0; m < 12; m++) { sum += monthly * multi[m]; vals.push(Math.round(sum)); }
-      return vals;
-    }
-
-    function plansDrawChart(saving, hovIdx) {
-      if (!plansCanvasReady) { plansInitCanvas(); }
-      if (!plansCanvasReady) return;
-      plansCurrentSaving = saving;
-      var c = plansCtx, W = plansW, H = plansH, PAD = plansPAD, gW = plansgW, gH = plansgH;
-      c.clearRect(0, 0, W, H);
-
-      var fnt = '-apple-system,system-ui,sans-serif';
-      var baseY = PAD.top + gH;
-
-      // Grid
-      [2000, 4000, 6000].forEach(function (v) {
-        var y = PAD.top + gH - (v / maxY) * gH;
-        c.strokeStyle = 'rgba(255,255,255,.035)';
-        c.lineWidth = .5;
-        c.setLineDash([]);
-        c.beginPath(); c.moveTo(PAD.left, y); c.lineTo(W - PAD.right, y); c.stroke();
-        c.font = '500 6.5px ' + fnt;
-        c.fillStyle = 'rgba(255,255,255,.18)';
-        c.textAlign = 'right'; c.textBaseline = 'middle';
-        c.fillText((v / 1000) + 'k', PAD.left - 4, y);
-      });
-
-      c.strokeStyle = 'rgba(255,255,255,.04)';
-      c.lineWidth = .5;
-      c.beginPath(); c.moveTo(PAD.left, baseY); c.lineTo(W - PAD.right, baseY); c.stroke();
-
-      c.textAlign = 'center'; c.textBaseline = 'top';
-      c.font = '500 5.5px ' + fnt;
-      ['J','F','M','A','M','J','J','A','S','O','N','D'].forEach(function (l, i) {
-        var isHov = (hovIdx === i && saving > 0);
-        c.fillStyle = isHov ? 'rgba(255,255,255,.5)' : 'rgba(255,255,255,.14)';
-        if (isHov) c.font = '700 6px ' + fnt;
-        c.fillText(l, PAD.left + (i / 11) * gW, baseY + 3);
-        if (isHov) c.font = '500 5.5px ' + fnt;
-      });
-
-      if (saving === 0) {
-        plansLastStorePts = null; plansLastPiratePts = null;
-        c.textAlign = 'center'; c.textBaseline = 'middle';
-        c.fillStyle = 'rgba(255,255,255,.07)';
-        c.font = '500 7px ' + fnt;
-        c.fillText('Selectionnez un service', W / 2, H / 2 - 2);
-        return;
-      }
-
-      var storePts = plansBuildCumul(500, storeMulti);
-      var pirateMonthly = (maxY - saving) / 12;
-      var piratePts = plansBuildCumul(pirateMonthly, pirateMulti);
-      plansLastStorePts = storePts;
-      plansLastPiratePts = piratePts;
-
-      // Savings zone
-      c.beginPath();
-      plansBezierPath(storePts);
-      c.lineTo(piratePts[piratePts.length - 1].x, piratePts[piratePts.length - 1].y);
-      for (var j = piratePts.length - 1; j > 0; j--) {
-        var cpx = (piratePts[j].x + piratePts[j - 1].x) / 2;
-        c.bezierCurveTo(cpx, piratePts[j].y, cpx, piratePts[j - 1].y, piratePts[j - 1].x, piratePts[j - 1].y);
-      }
-      c.closePath();
-      var diffGrad = c.createLinearGradient(0, PAD.top, 0, baseY);
-      diffGrad.addColorStop(0, 'rgba(52,211,153,.05)');
-      diffGrad.addColorStop(1, 'rgba(52,211,153,.01)');
-      c.fillStyle = diffGrad;
-      c.fill();
-
-      plansFillSmooth(storePts, 'rgba(239,68,68,.04)', 'rgba(239,68,68,0)');
-      plansFillSmooth(piratePts, 'rgba(139,92,246,.08)', 'rgba(139,92,246,0)');
-
-      plansDrawSmooth(storePts, 'rgba(239,68,68,.3)', 1);
-      plansDrawSmooth(piratePts, '#8B5CF6', 1.2, 'rgba(139,92,246,.25)');
-
-      var sl = storePts[11], pl = piratePts[11];
-      c.beginPath(); c.arc(sl.x, sl.y, 1.5, 0, Math.PI * 2);
-      c.fillStyle = 'rgba(239,68,68,.5)'; c.fill();
-      c.shadowColor = 'rgba(139,92,246,.35)'; c.shadowBlur = 3;
-      c.beginPath(); c.arc(pl.x, pl.y, 2, 0, Math.PI * 2);
-      c.fillStyle = '#8B5CF6'; c.fill();
-      c.shadowBlur = 0;
-
-      var stTotal = Math.round(storePts.reduce(function (a, _, i) { return a + 500 * storeMulti[i]; }, 0));
-      var piTotal = Math.round(maxY - saving);
-      c.font = '600 6px ' + fnt;
-      c.textAlign = 'left'; c.textBaseline = 'middle';
-      c.fillStyle = 'rgba(239,68,68,.35)';
-      c.fillText(stTotal.toLocaleString('fr-FR') + '\u20ac', sl.x + 4, sl.y);
-      c.fillStyle = 'rgba(139,92,246,.7)';
-      c.fillText(piTotal.toLocaleString('fr-FR') + '\u20ac', pl.x + 4, pl.y);
-
-      // Interactive cursor overlay
-      if (typeof hovIdx === 'number' && hovIdx >= 0 && hovIdx < 12) {
-        var hx = storePts[hovIdx].x;
-        var sy = storePts[hovIdx].y;
-        var py = piratePts[hovIdx].y;
-        var storeVals = plansBuildCumulValues(500, storeMulti);
-        var pirateVals = plansBuildCumulValues(pirateMonthly, pirateMulti);
-        var sv = storeVals[hovIdx];
-        var pv = pirateVals[hovIdx];
-        var diff = sv - pv;
-
-        c.setLineDash([2, 2]);
-        c.strokeStyle = 'rgba(255,255,255,.12)';
-        c.lineWidth = .5;
-        c.beginPath(); c.moveTo(hx, PAD.top); c.lineTo(hx, baseY); c.stroke();
-        c.setLineDash([]);
-
-        c.beginPath(); c.arc(hx, sy, 2.5, 0, Math.PI * 2);
-        c.fillStyle = '#ef4444'; c.fill();
-        c.strokeStyle = 'rgba(0,0,0,.3)'; c.lineWidth = .5; c.stroke();
-
-        c.shadowColor = 'rgba(139,92,246,.4)'; c.shadowBlur = 4;
-        c.beginPath(); c.arc(hx, py, 3, 0, Math.PI * 2);
-        c.fillStyle = '#8B5CF6'; c.fill();
-        c.strokeStyle = 'rgba(0,0,0,.3)'; c.lineWidth = .5; c.stroke();
-        c.shadowBlur = 0;
-
-        var tipW = 58, tipH = 30;
-        var tipX = hx - tipW / 2;
-        var tipY = Math.min(sy, py) - tipH - 6;
-        if (tipX < 2) tipX = 2;
-        if (tipX + tipW > W - 2) tipX = W - tipW - 2;
-        if (tipY < 2) tipY = 2;
-
-        c.beginPath();
-        var r = 4;
-        c.moveTo(tipX + r, tipY);
-        c.lineTo(tipX + tipW - r, tipY);
-        c.quadraticCurveTo(tipX + tipW, tipY, tipX + tipW, tipY + r);
-        c.lineTo(tipX + tipW, tipY + tipH - r);
-        c.quadraticCurveTo(tipX + tipW, tipY + tipH, tipX + tipW - r, tipY + tipH);
-        c.lineTo(tipX + r, tipY + tipH);
-        c.quadraticCurveTo(tipX, tipY + tipH, tipX, tipY + tipH - r);
-        c.lineTo(tipX, tipY + r);
-        c.quadraticCurveTo(tipX, tipY, tipX + r, tipY);
-        c.closePath();
-        c.fillStyle = 'rgba(15,12,25,.88)';
-        c.fill();
-        c.strokeStyle = 'rgba(139,92,246,.2)';
-        c.lineWidth = .5;
-        c.stroke();
-
-        var cx = tipX + tipW / 2;
-        c.textAlign = 'center';
-        c.font = '700 5.5px ' + fnt;
-        c.fillStyle = 'rgba(255,255,255,.5)';
-        c.textBaseline = 'top';
-        c.fillText(PLANS_MONTHS[hovIdx], cx, tipY + 3);
-
-        c.font = '600 5px ' + fnt;
-        c.fillStyle = 'rgba(239,68,68,.6)';
-        c.fillText(sv.toLocaleString('fr-FR') + '\u20ac', cx, tipY + 11);
-
-        c.fillStyle = '#8B5CF6';
-        c.fillText(pv.toLocaleString('fr-FR') + '\u20ac', cx, tipY + 17.5);
-
-        c.fillStyle = '#34d399';
-        c.fillText('-' + diff.toLocaleString('fr-FR') + '\u20ac', cx, tipY + 24);
-      }
-    }
-
-    orbs.forEach(function (orb) {
-      orb.addEventListener('click', function () {
-        var amtEl = document.getElementById('plansAmount');
-        var lblEl = document.getElementById('plansLabel');
-        var dtlEl = document.getElementById('planDetail');
-        var allOrbs = document.querySelectorAll('.plan-orb');
-        var wasActive = orb.classList.contains('is-active');
-        allOrbs.forEach(function (o) { o.classList.remove('is-active'); });
-
-        if (wasActive) {
-          plansDrawChart(0);
-          if (amtEl) amtEl.textContent = '';
-          if (lblEl) lblEl.textContent = 'Comparaison annuelle';
-          if (dtlEl) { dtlEl.className = 'plan-detail'; dtlEl.innerHTML = ''; }
-          return;
-        }
-
-        orb.classList.add('is-active');
-        var saving = parseInt(orb.dataset.saving) || 0;
-        var price = orb.dataset.price || '0';
-        var plan = orb.dataset.plan || '';
-        var info = PLAN_INFO[plan] || {};
-
-        plansDrawChart(saving);
-
-        if (amtEl) amtEl.textContent = '-' + saving.toLocaleString('fr-FR') + ' \u20ac/an';
-        if (lblEl) lblEl.textContent = (info.name || '') + ' \u2022 ' + price + '\u20ac/mois';
-        if (dtlEl && info.desc) {
-          var featHtml = '';
-          if (info.features && info.features.length) {
-            featHtml = '<div class="plan-detail__features">';
-            info.features.forEach(function(f) {
-              featHtml += '<span class="plan-detail__feat"><span class="plan-detail__feat-icon">' + f.icon + '</span>' + f.text + '</span>';
-            });
-            featHtml += '</div>';
-          }
-          dtlEl.className = 'plan-detail is-open plan-detail--' + (info.color || plan);
-          dtlEl.innerHTML = '<div class="plan-detail__inner">'
-            + '<div class="plan-detail__name">' + (info.name || '') + '</div>'
-            + '<div class="plan-detail__desc">' + info.desc + '</div>'
-            + featHtml
-            + '<span class="plan-detail__saving">' + price + ' \u20ac/mois \u2192 ' + saving.toLocaleString('fr-FR') + ' \u20ac economises/an</span>'
-            + '<a href="#/abonnement/' + plan + '" class="plan-detail__cta plan-detail__cta--' + (info.color || plan) + '">Choisir ' + (info.name || '') + '</a>'
-            + '</div>';
-        }
-      });
-    });
-
-    // ── Interactive cursor (touch + mouse) — bound once ──
-    function plansGetMonth(clientX) {
-      var rect = canvas.getBoundingClientRect();
-      var x = clientX - rect.left;
-      var scale = plansW / rect.width;
-      var cx = x * scale;
-      var idx = Math.round(((cx - plansPAD.left) / plansgW) * 11);
-      return Math.max(0, Math.min(11, idx));
-    }
-
-    function plansHandleHover(clientX) {
-      if (plansCurrentSaving <= 0) return;
-      var m = plansGetMonth(clientX);
-      if (m !== plansHoverMonth) {
-        plansHoverMonth = m;
-        plansDrawChart(plansCurrentSaving, plansHoverMonth);
-      }
-    }
-
-    function plansHandleLeave() {
-      if (plansHoverMonth >= 0) {
-        plansHoverMonth = -1;
-        plansDrawChart(plansCurrentSaving);
-      }
-    }
-
-    canvas.addEventListener('mousemove', function (e) { plansHandleHover(e.clientX); });
-    canvas.addEventListener('mouseleave', plansHandleLeave);
-    canvas.addEventListener('touchstart', function (e) {
-      if (plansCurrentSaving <= 0) return;
-      e.preventDefault();
-      plansHandleHover(e.touches[0].clientX);
-    }, { passive: false });
-    canvas.addEventListener('touchmove', function (e) {
-      if (plansCurrentSaving <= 0) return;
-      e.preventDefault();
-      plansHandleHover(e.touches[0].clientX);
-    }, { passive: false });
-    canvas.addEventListener('touchend', function () {
-      setTimeout(plansHandleLeave, 1500);
-    });
   }
 
   function setupHomeReviews() {
