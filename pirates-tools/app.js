@@ -424,15 +424,19 @@
   function renderBrandGrid() {
     if (!dom.brandGrid) return;
     var brandNames = Object.keys(BRAND_IMAGES);
-    dom.brandGrid.innerHTML = brandNames.map(function (b) {
+    dom.brandGrid.innerHTML = brandNames.map(function (b, i) {
       var img = BRAND_IMAGES[b];
-      return '<button class="brand" data-brand="' + escapeHTML(b) + '">'
-        + '<div class="brand__bubble"><img class="brand__logo" src="' + escapeHTML(img) + '" alt="' + escapeHTML(b) + '" loading="lazy"></div>'
-        + '<span class="brand__label">' + escapeHTML(b) + '</span>'
+      return '<button class="brand-card" data-brand="' + escapeHTML(b) + '" style="animation-delay:' + (i * 70) + 'ms">'
+        + '<div class="brand-card__ring">'
+        + '<div class="brand-card__bubble">'
+        + '<img class="brand-card__logo" src="' + escapeHTML(img) + '" alt="' + escapeHTML(b) + '" loading="lazy">'
+        + '</div>'
+        + '</div>'
+        + '<span class="brand-card__name">' + escapeHTML(b) + '</span>'
         + '</button>';
     }).join('');
 
-    $$('.brand', dom.brandGrid).forEach(function (btn) {
+    $$('.brand-card', dom.brandGrid).forEach(function (btn) {
       btn.addEventListener('click', function () {
         var brand = btn.dataset.brand;
         location.hash = '#/catalogue';

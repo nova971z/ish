@@ -34,12 +34,7 @@
       bottom: calc(var(--dock-bottom) + var(--safe-bottom,0px))!important;
       transform:translateX(-50%)!important; width:auto!important; padding:0!important; z-index:999; }
     #dock.dock--visible{ transform:translateX(-50%)!important; }
-    .brand-grid{ display:grid!important; grid-template-columns:repeat(2,minmax(0,1fr))!important; gap:.8rem!important; justify-items:center!important; }
-    @media (min-width:680px){ .brand-grid{ grid-template-columns:repeat(3,minmax(0,1fr))!important; } }
-    .brand{ background:transparent!important; border:0!important; padding:0!important; }
-    .brand__bubble{ width:92px; height:92px; border-radius:50%; overflow:hidden;
-      background:rgba(255,255,255,.06); border:2px solid rgba(255,255,255,.10); display:flex; align-items:center; justify-content:center; }
-    .brand__bubble img,.brand__logo{ width:calc(100% - 8px); height:calc(100% - 8px); object-fit:cover; border-radius:50%; }
+    /* brand styles now in styles.css */
   </style>
 
   <!-- Hero : animation de scroll integree -->
@@ -60,15 +55,7 @@
     }
     .list{ margin-top: 1rem; }
 
-    .brand-grid--3col{
-      display:grid; gap:.8rem;
-      grid-template-columns:repeat(2,minmax(0,1fr));
-    }
-    @media (min-width:680px){ .brand-grid--3col{ grid-template-columns:repeat(3,minmax(0,1fr)); } }
-    .brand{ display:flex; flex-direction:column; align-items:center; gap:.4rem; background:rgba(255,255,255,.04);
-      border:1px solid rgba(255,255,255,.06); border-radius:12px; padding:.8rem; cursor:pointer; }
-    .brand__bubble{ width:90px; height:90px; display:grid; place-items:center; }
-    .brand__logo{ max-width:100%; max-height:100%; }
+    /* brand grid styles now in styles.css */
 
     .chips{ display:flex; flex-wrap:wrap; gap:.4rem; }
     .chip{ border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.04); border-radius:999px; padding:.35rem .7rem; }
@@ -174,9 +161,15 @@
     <!-- HOME -->
     <section id="view-home" class="view" data-route="/" role="region">
       <div class="container">
-        <ul class="brand-grid" data-home-brands></ul>
-        <p style="margin:2rem 0 1.2rem;color:#9fb4c5">Choisissez une marque ou explorez le catalogue.</p>
-        <div id="brandGrid" class="brand-grid brand-grid--3col" role="list" data-bind="brands"></div>
+
+        <!-- Section Marques -->
+        <div class="brands-section">
+          <div class="brands-section__header">
+            <h2 class="brands-section__title">Nos Marques</h2>
+            <p class="brands-section__subtitle">Les leaders de l'outillage professionnel</p>
+          </div>
+          <div id="brandGrid" class="brands-showcase" role="list" data-bind="brands"></div>
+        </div>
 
         <!-- Banniere outils 3D -->
         <section id="tools-banner" class="tools-banner">
