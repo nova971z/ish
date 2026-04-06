@@ -203,6 +203,33 @@
         </div>
       </section>
 
+      <!-- Avis clients — page accueil -->
+      <section class="home-reviews">
+        <div class="container">
+          <h2 class="home-reviews__title">Ce que disent nos clients</h2>
+          <div class="home-reviews__list" id="homeReviewsList"></div>
+
+          <div class="home-reviews__form-wrapper">
+            <h3 class="home-reviews__form-heading">Laissez votre avis</h3>
+            <form id="homeReviewForm" class="pdp-reviews__form" autocomplete="off">
+              <div class="pdp-reviews__stars-input">
+                <span class="pdp-reviews__stars-label">Votre note</span>
+                <div class="pdp-reviews__stars-select" id="homeStarsSelect">
+                  <button type="button" class="pdp-reviews__star-btn" data-star="1" aria-label="1 etoile">&#9733;</button>
+                  <button type="button" class="pdp-reviews__star-btn" data-star="2" aria-label="2 etoiles">&#9733;</button>
+                  <button type="button" class="pdp-reviews__star-btn" data-star="3" aria-label="3 etoiles">&#9733;</button>
+                  <button type="button" class="pdp-reviews__star-btn" data-star="4" aria-label="4 etoiles">&#9733;</button>
+                  <button type="button" class="pdp-reviews__star-btn" data-star="5" aria-label="5 etoiles">&#9733;</button>
+                </div>
+              </div>
+              <input id="homeReviewName" type="text" class="pdp-reviews__input" placeholder="Votre prenom" required maxlength="40" />
+              <textarea id="homeReviewText" class="pdp-reviews__textarea" placeholder="Partagez votre experience avec Pirates Tools..." required maxlength="500" rows="3"></textarea>
+              <button type="submit" class="pdp-reviews__submit">Publier mon avis</button>
+            </form>
+          </div>
+        </div>
+      </section>
+
     </section>
 
     <!-- CATALOGUE -->
