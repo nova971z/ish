@@ -547,7 +547,7 @@
 
           <div class="specs" style="display:block">
             <div class="auth-switch" role="tablist" aria-label="Choix de formulaire" style="display:flex;gap:.5rem;margin:.5rem 0 1rem">
-              <button id="authLoginTab" class="chip" role="tab" aria-controls="authLogin" aria-selected="true">Connexion</button>
+              <button id="authLoginTab" class="chip active" role="tab" aria-controls="authLogin" aria-selected="true">Connexion</button>
               <button id="authRegisterTab" class="chip" role="tab" aria-controls="authRegister" aria-selected="false">Inscription</button>
             </div>
 
@@ -565,7 +565,7 @@
               </form>
             </div>
 
-            <div id="authRegister" role="tabpanel" aria-labelledby="authRegisterTab" hidden>
+            <div id="authRegister" role="tabpanel" aria-labelledby="authRegisterTab" style="display:none">
               <form id="registerForm" style="display:grid;gap:.6rem;max-width:420px">
                 <label>Nom complet
                   <input id="regName" type="text" class="search" placeholder="Jean Dupont" autocomplete="name" required />
