@@ -661,7 +661,7 @@
     // ── Smooth state: current lerped values ──
     var LERP_SPEED = 0.08; // lower = smoother/slower (Apple feel)
     var state = {
-      heroScale: 1, heroTY: 0, heroOp: 1, heroBlur: 6,
+      heroScale: 1, heroTY: 0, heroOp: 1, heroBlur: 0,
       infoTY: 0, infoOp: 1, infoScale: 1,
       discHeadScale: 0.6, discHeadTY: 40, discHeadOp: 0, discHeadBlur: 12,
       discDescTY: 60, discDescOp: 0, discDescBlur: 8,
@@ -961,8 +961,26 @@
       sections.forEach(function (s) { s.classList.add('visible'); });
     }
 
-    // ── Start animation loop ──
-    tick();
+    // ── Start animation loop after CSS entry animations complete ──
+    // pdpModelAppear = 1.2s + 0.1s delay = 1.3s total
+    // pdpInfoAppear  = 1.0s + 0.5s delay = 1.5s total
+    // Wait for the longest one, then strip CSS animations and let lerp take over
+    setTimeout(function () {
+      if (!running) return;
+      if (viewer3d) {
+        viewer3d.style.animation = 'none';
+        viewer3d.style.opacity = '1';
+        viewer3d.style.transform = 'scale(1) translateY(0)';
+        viewer3d.style.filter = 'blur(0)';
+      }
+      if (heroInfo) {
+        heroInfo.style.animation = 'none';
+        heroInfo.style.opacity = '1';
+        heroInfo.style.transform = 'translateY(0) scale(1)';
+        heroInfo.style.filter = 'blur(0)';
+      }
+      tick();
+    }, 1550);
 
     // Store cleanup fn on the handler ref for the router to call
     pdpScrollHandler = function cleanup() {
