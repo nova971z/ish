@@ -831,6 +831,117 @@
     localStorage.setItem(HOME_REVIEWS_KEY, JSON.stringify(reviews));
   }
 
+  // ── Plans / Services interactif ────────────────────────────
+
+  function setupPlans() {
+    var canvas = document.getElementById('plansCanvas');
+    var amountEl = document.getElementById('plansAmount');
+    var detailEl = document.getElementById('plansDetail');
+    var bubbles = document.querySelectorAll('.plan-bubble');
+    if (!canvas || !bubbles.length) return;
+    var ctx = canvas.getContext('2d');
+    var W = canvas.width;
+    var H = canvas.height;
+
+    function drawChart(saving, color) {
+      ctx.clearRect(0, 0, W, H);
+
+      // Grid lines
+      ctx.strokeStyle = 'rgba(139,92,246,.1)';
+      ctx.lineWidth = 1;
+      for (var g = 1; g <= 3; g++) {
+        var gy = H - (g / 4) * H;
+        ctx.beginPath();
+        ctx.setLineDash([3, 3]);
+        ctx.moveTo(0, gy);
+        ctx.lineTo(W, gy);
+        ctx.stroke();
+      }
+      ctx.setLineDash([]);
+
+      if (saving === 0) return;
+
+      // Curve points (12 months, cumulative)
+      var pts = [];
+      for (var m = 0; m <= 11; m++) {
+        var x = (m / 11) * W;
+        var cumul = (saving / 12) * (m + 1);
+        var y = H - (cumul / saving) * (H - 10);
+        pts.push({ x: x, y: y });
+      }
+
+      // Area fill
+      var grad = ctx.createLinearGradient(0, 0, 0, H);
+      grad.addColorStop(0, color || 'rgba(139,92,246,.3)');
+      grad.addColorStop(1, 'rgba(139,92,246,.02)');
+      ctx.beginPath();
+      ctx.moveTo(0, H);
+      pts.forEach(function (p) { ctx.lineTo(p.x, p.y); });
+      ctx.lineTo(W, H);
+      ctx.closePath();
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Line
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, pts[0].y);
+      for (var i = 1; i < pts.length; i++) {
+        ctx.lineTo(pts[i].x, pts[i].y);
+      }
+      ctx.strokeStyle = color ? color.replace(/[\d.]+\)$/, '1)') : '#8B5CF6';
+      ctx.lineWidth = 2.5;
+      ctx.lineJoin = 'round';
+      ctx.lineCap = 'round';
+      ctx.stroke();
+
+      // End dot
+      var last = pts[pts.length - 1];
+      ctx.beginPath();
+      ctx.arc(last.x, last.y, 4, 0, Math.PI * 2);
+      ctx.fillStyle = '#fff';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(last.x, last.y, 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = color ? color.replace(/[\d.]+\)$/, '1)') : '#8B5CF6';
+      ctx.fill();
+    }
+
+    // Initial empty state
+    drawChart(0);
+
+    bubbles.forEach(function (bubble) {
+      bubble.addEventListener('click', function () {
+        var wasActive = bubble.classList.contains('is-active');
+
+        // Close all
+        bubbles.forEach(function (b) { b.classList.remove('is-active'); });
+
+        if (wasActive) {
+          // Deselect
+          drawChart(0);
+          if (amountEl) amountEl.textContent = '0 \u20ac';
+          if (detailEl) detailEl.innerHTML = '<span class="plans-chart__detail-label">Cliquez sur un service</span>';
+          return;
+        }
+
+        bubble.classList.add('is-active');
+        var saving = parseInt(bubble.dataset.saving) || 0;
+        var price = bubble.dataset.price || '0';
+        var name = bubble.querySelector('.plan-bubble__name').textContent;
+        var isBlack = bubble.classList.contains('plan-bubble--black');
+        var color = isBlack ? 'rgba(168,85,247,.35)' : 'rgba(139,92,246,.3)';
+
+        drawChart(saving, color);
+
+        if (amountEl) amountEl.textContent = saving.toLocaleString('fr-FR') + ' \u20ac';
+        if (detailEl) {
+          detailEl.innerHTML = '<span class="plans-chart__detail-name">' + name + '</span>'
+            + '<span class="plans-chart__detail-sub">' + price + ' \u20ac/mois \u2192 ' + saving.toLocaleString('fr-FR') + ' \u20ac economises/an</span>';
+        }
+      });
+    });
+  }
+
   function setupHomeReviews() {
     var listEl = document.getElementById('homeReviewsList');
     var form = document.getElementById('homeReviewForm');
@@ -1398,6 +1509,7 @@
       case '/':
         renderBrandGrid();
         renderHomeProducts();
+        setupPlans();
         setupHomeReviews();
         break;
       case '/catalogue':

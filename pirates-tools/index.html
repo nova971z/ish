@@ -196,123 +196,116 @@
         </div>
       </section>
 
-      <!-- =================== ECONOMIES & SERVICES =================== -->
-      <section class="savings-section">
+      <!-- =================== ABONNEMENTS & SERVICES =================== -->
+      <section class="plans-section">
         <div class="container">
 
-          <!-- Header -->
-          <div class="savings-header">
-            <span class="savings-header__badge">Exclusif Antilles</span>
-            <h2 class="savings-header__title">Economisez jusqu'a <span class="savings-highlight">40%</span></h2>
-            <p class="savings-header__subtitle">Par rapport aux prix en magasin en Guadeloupe et Martinique</p>
+          <div class="plans-header">
+            <span class="plans-header__badge">Services Premium</span>
+            <h2 class="plans-header__title">Nos Abonnements</h2>
+            <p class="plans-header__sub">Selectionnez un service pour voir vos economies</p>
           </div>
 
-          <!-- Unified savings dashboard -->
-          <div class="savings-dash">
+          <div class="plans-layout" id="plansLayout">
 
-            <!-- Left: Price face-off -->
-            <div class="savings-dash__versus">
-              <div class="savings-vs__row">
-                <span class="savings-vs__label">🏪 Magasin</span>
-                <span class="savings-vs__bar savings-vs__bar--store"><span class="savings-vs__fill savings-vs__fill--store"></span></span>
-                <span class="savings-vs__amount savings-vs__amount--store">1 450 &euro;</span>
+            <!-- LEFT: Interactive chart -->
+            <div class="plans-chart">
+              <div class="plans-chart__top">
+                <span class="plans-chart__label">Economies / an</span>
+                <span class="plans-chart__amount" id="plansAmount">0 &euro;</span>
               </div>
-              <div class="savings-vs__row">
-                <span class="savings-vs__label">🏴‍☠️ Pirates</span>
-                <span class="savings-vs__bar savings-vs__bar--pirates"><span class="savings-vs__fill savings-vs__fill--pirates"></span></span>
-                <span class="savings-vs__amount savings-vs__amount--pirates">870 &euro;</span>
+              <div class="plans-chart__graph">
+                <canvas id="plansCanvas" width="280" height="140"></canvas>
               </div>
-              <div class="savings-vs__result">
-                <span class="savings-vs__saved">-580 &euro;</span> d'economie par commande
+              <div class="plans-chart__months">
+                <span>Jan</span><span>Mar</span><span>Jun</span><span>Sep</span><span>Dec</span>
+              </div>
+              <div class="plans-chart__detail" id="plansDetail">
+                <span class="plans-chart__detail-label">Cliquez sur un service</span>
               </div>
             </div>
 
-            <!-- Right: Mini sparkline chart -->
-            <div class="savings-dash__chart">
-              <div class="savings-mini__header">
-                <span class="savings-mini__label">Economies cumulees / 12 mois</span>
-                <span class="savings-mini__amount">2 520 &euro;</span>
-              </div>
-              <svg class="savings-mini__svg" viewBox="0 0 240 64" preserveAspectRatio="none">
-                <defs>
-                  <linearGradient id="miniGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="rgba(139,92,246,.35)"/>
-                    <stop offset="100%" stop-color="rgba(139,92,246,.0)"/>
-                  </linearGradient>
-                </defs>
-                <path d="M0,62 L20,58 L40,52 L60,46 L80,39 L100,32 L120,26 L140,20 L160,15 L180,10 L200,6 L220,3 L240,0 L240,64 L0,64 Z" fill="url(#miniGrad)" class="savings-mini__area"/>
-                <polyline points="0,62 20,58 40,52 60,46 80,39 100,32 120,26 140,20 160,15 180,10 200,6 220,3 240,0" fill="none" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="savings-mini__line"/>
-              </svg>
-              <div class="savings-mini__months">
-                <span>Jan</span><span>Avr</span><span>Jul</span><span>Oct</span><span>Dec</span>
-              </div>
+            <!-- RIGHT: Service bubbles -->
+            <div class="plans-bubbles">
+
+              <button class="plan-bubble" data-plan="express" data-price="49" data-saving="1200">
+                <div class="plan-bubble__icon">⚡</div>
+                <div class="plan-bubble__info">
+                  <span class="plan-bubble__name">Express Chantier</span>
+                  <span class="plan-bubble__desc">Livraison &lt;3h sur site</span>
+                </div>
+                <span class="plan-bubble__price">49&euro;<small>/mois</small></span>
+                <div class="plan-bubble__expand">
+                  <p>Livraison prioritaire de vos outils et materiaux directement sur votre chantier en moins de 3 heures, partout en Guadeloupe et Martinique. Nombre illimite de livraisons.</p>
+                </div>
+              </button>
+
+              <button class="plan-bubble" data-plan="com" data-price="79" data-saving="2400">
+                <div class="plan-bubble__icon">📡</div>
+                <div class="plan-bubble__info">
+                  <span class="plan-bubble__name">Communication Premium</span>
+                  <span class="plan-bubble__desc">Visibilite &amp; branding pro</span>
+                </div>
+                <span class="plan-bubble__price">79&euro;<small>/mois</small></span>
+                <div class="plan-bubble__expand">
+                  <p>Site vitrine, gestion reseaux sociaux, creation de contenu photo/video pour vos chantiers, flyers et cartes de visite. Boostez votre image de professionnel.</p>
+                </div>
+              </button>
+
+              <button class="plan-bubble" data-plan="sav" data-price="29" data-saving="600">
+                <div class="plan-bubble__icon">🔧</div>
+                <div class="plan-bubble__info">
+                  <span class="plan-bubble__name">SAV Prioritaire</span>
+                  <span class="plan-bubble__desc">Garantie etendue + remplacement</span>
+                </div>
+                <span class="plan-bubble__price">29&euro;<small>/mois</small></span>
+                <div class="plan-bubble__expand">
+                  <p>Extension de garantie 3 ans sur tous vos achats, remplacement sous 24h en cas de panne, et pret de materiel pendant la reparation.</p>
+                </div>
+              </button>
+
+              <button class="plan-bubble" data-plan="pro" data-price="39" data-saving="960">
+                <div class="plan-bubble__icon">🏗️</div>
+                <div class="plan-bubble__info">
+                  <span class="plan-bubble__name">Compte Pro</span>
+                  <span class="plan-bubble__desc">Tarifs pro &amp; paiement 30j</span>
+                </div>
+                <span class="plan-bubble__price">39&euro;<small>/mois</small></span>
+                <div class="plan-bubble__expand">
+                  <p>Remises exclusives jusqu'a -25%, paiement differe 30 jours, conseiller dedie, et acces prioritaire aux nouveautes et promotions.</p>
+                </div>
+              </button>
+
+              <button class="plan-bubble" data-plan="fidelite" data-price="19" data-saving="480">
+                <div class="plan-bubble__icon">💎</div>
+                <div class="plan-bubble__info">
+                  <span class="plan-bubble__name">Fidelite+</span>
+                  <span class="plan-bubble__desc">Points x3 &amp; ventes privees</span>
+                </div>
+                <span class="plan-bubble__price">19&euro;<small>/mois</small></span>
+                <div class="plan-bubble__expand">
+                  <p>Multiplicateur x3 sur les points fidelite, acces aux ventes privees, cadeaux d'anniversaire, et livraison gratuite sans minimum.</p>
+                </div>
+              </button>
+
+              <!-- BLACK METAL SERVICE -->
+              <button class="plan-bubble plan-bubble--black" data-plan="black" data-price="149" data-saving="5640">
+                <div class="plan-bubble__icon">🖤</div>
+                <div class="plan-bubble__info">
+                  <span class="plan-bubble__name">Black Metal Service</span>
+                  <span class="plan-bubble__desc">Tous les services reunis</span>
+                </div>
+                <span class="plan-bubble__price">149&euro;<small>/mois</small></span>
+                <span class="plan-bubble__tag">Tout inclus</span>
+                <div class="plan-bubble__expand">
+                  <p>Le package ultime : Express Chantier + Communication Premium + SAV Prioritaire + Compte Pro + Fidelite+. Tous nos services reunis en un seul abonnement avec une remise de 40% par rapport aux services individuels.</p>
+                  <span class="plan-bubble__save-tag">Economisez 66&euro;/mois vs achat separe</span>
+                </div>
+              </button>
+
             </div>
 
           </div>
-
-          <!-- Services Premium — scroll horizontal -->
-          <div class="services-strip">
-            <h3 class="services-strip__title">Nos Services</h3>
-            <div class="services-strip__track">
-
-              <div class="svc-pill svc-pill--hero">
-                <div class="svc-pill__icon">⚡</div>
-                <div class="svc-pill__body">
-                  <h4 class="svc-pill__title">Express Chantier</h4>
-                  <p class="svc-pill__text">Livre sur site en <strong>&lt;3h</strong></p>
-                </div>
-                <span class="svc-pill__badge">Top</span>
-              </div>
-
-              <div class="svc-pill">
-                <div class="svc-pill__icon">🚚</div>
-                <div class="svc-pill__body">
-                  <h4 class="svc-pill__title">Livraison Offerte</h4>
-                  <p class="svc-pill__text">Des 150 &euro; d'achat</p>
-                </div>
-              </div>
-
-              <div class="svc-pill">
-                <div class="svc-pill__icon">🔧</div>
-                <div class="svc-pill__body">
-                  <h4 class="svc-pill__title">SAV Local</h4>
-                  <p class="svc-pill__text">Garantie &amp; reparation</p>
-                </div>
-              </div>
-
-              <div class="svc-pill">
-                <div class="svc-pill__icon">📱</div>
-                <div class="svc-pill__body">
-                  <h4 class="svc-pill__title">Devis WhatsApp</h4>
-                  <p class="svc-pill__text">Reponse en 30 min</p>
-                </div>
-              </div>
-
-              <div class="svc-pill">
-                <div class="svc-pill__icon">💎</div>
-                <div class="svc-pill__body">
-                  <h4 class="svc-pill__title">Fidelite</h4>
-                  <p class="svc-pill__text">1 &euro; = 1 point</p>
-                </div>
-              </div>
-
-              <div class="svc-pill">
-                <div class="svc-pill__icon">🏗️</div>
-                <div class="svc-pill__body">
-                  <h4 class="svc-pill__title">Compte Pro</h4>
-                  <p class="svc-pill__text">Paiement 30j, tarifs pro</p>
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-          <!-- CTA compact -->
-          <a href="#/catalogue" class="savings-cta">
-            <span>Decouvrir nos prix</span>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-          </a>
-
         </div>
       </section>
 

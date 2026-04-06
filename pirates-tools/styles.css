@@ -1314,354 +1314,296 @@ body.page-devis #view-devis {
     }
 }
 
-/* ========== 10c) ECONOMIES & SERVICES — ACCUEIL ========== */
+/* ========== 10c) ABONNEMENTS & SERVICES ========== */
 
-.savings-section {
+.plans-section {
   position: relative;
   padding: 2rem 0 1.5rem;
 }
 
-.savings-section::before {
+.plans-section::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
+  top: 0; left: 0; right: 0;
   height: 1px;
   background: linear-gradient(90deg, transparent, rgba(139,92,246,.4), transparent);
 }
 
-/* ── Header ── */
-.savings-header {
+.plans-header {
   text-align: center;
   margin-bottom: 1.2rem;
 }
 
-.savings-header__badge {
+.plans-header__badge {
   display: inline-block;
-  padding: .25rem .7rem;
+  padding: .22rem .65rem;
   border-radius: 20px;
-  font-size: .65rem;
+  font-size: .6rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .08em;
   color: #c4b5fd;
   background: rgba(139,92,246,.12);
   border: 1px solid rgba(139,92,246,.25);
-  margin-bottom: .5rem;
+  margin-bottom: .4rem;
 }
 
-.savings-header__title {
-  font-size: 1.3rem;
+.plans-header__title {
+  font-size: 1.2rem;
   font-weight: 800;
   color: #fff;
-  margin: 0 0 .25rem;
-  line-height: 1.2;
+  margin: 0 0 .2rem;
 }
 
-.savings-highlight {
-  background: linear-gradient(135deg, #8B5CF6, #c084fc);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.savings-header__subtitle {
-  font-size: .78rem;
+.plans-header__sub {
+  font-size: .75rem;
   color: var(--muted);
   margin: 0;
 }
 
-/* ── Dashboard (versus + chart side by side) ── */
-.savings-dash {
+/* ── Layout: chart left, bubbles right ── */
+.plans-layout {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 10px;
-  margin-bottom: 1.5rem;
+  gap: 14px;
 }
 
-@media (min-width: 560px) {
-  .savings-dash { grid-template-columns: 1fr 1fr; }
+@media (min-width: 600px) {
+  .plans-layout {
+    grid-template-columns: 5fr 7fr;
+    align-items: start;
+  }
 }
 
-/* ── Versus bars ── */
-.savings-dash__versus {
-  padding: 1rem;
+/* ── Chart Card ── */
+.plans-chart {
+  padding: .8rem;
   border-radius: 14px;
   border: 1px solid rgba(139,92,246,.18);
   background: rgba(139,92,246,.04);
-  display: flex;
-  flex-direction: column;
-  gap: .6rem;
 }
 
-.savings-vs__row {
-  display: grid;
-  grid-template-columns: 72px 1fr auto;
-  align-items: center;
-  gap: .5rem;
-}
-
-.savings-vs__label {
-  font-size: .72rem;
-  font-weight: 600;
-  color: var(--muted);
-  white-space: nowrap;
-}
-
-.savings-vs__bar {
-  height: 22px;
-  border-radius: 6px;
-  background: rgba(255,255,255,.04);
-  overflow: hidden;
-  position: relative;
-}
-
-.savings-vs__fill {
-  position: absolute;
-  inset: 0;
-  border-radius: 6px;
-  transform-origin: left;
-  animation: barGrow .8s ease-out both;
-}
-
-.savings-vs__fill--store {
-  background: linear-gradient(90deg, rgba(239,68,68,.5), rgba(239,68,68,.2));
-  width: 100%;
-  animation-delay: .1s;
-}
-
-.savings-vs__fill--pirates {
-  background: linear-gradient(90deg, rgba(139,92,246,.6), rgba(139,92,246,.2));
-  width: 60%;
-  animation-delay: .3s;
-}
-
-@keyframes barGrow {
-  from { transform: scaleX(0); }
-  to   { transform: scaleX(1); }
-}
-
-.savings-vs__amount {
-  font-size: .85rem;
-  font-weight: 800;
-  min-width: 52px;
-  text-align: right;
-}
-
-.savings-vs__amount--store {
-  color: #ef4444;
-  text-decoration: line-through;
-  text-decoration-color: rgba(239,68,68,.35);
-}
-
-.savings-vs__amount--pirates {
-  color: #A855F7;
-  text-shadow: 0 0 12px rgba(168,85,247,.3);
-}
-
-.savings-vs__result {
-  text-align: center;
-  font-size: .72rem;
-  color: var(--muted);
-  padding-top: .3rem;
-  border-top: 1px solid rgba(139,92,246,.1);
-}
-
-.savings-vs__saved {
-  font-weight: 800;
-  color: #34d399;
-  font-size: .82rem;
-}
-
-/* ── Mini Sparkline Chart ── */
-.savings-dash__chart {
-  padding: 1rem;
-  border-radius: 14px;
-  border: 1px solid rgba(139,92,246,.18);
-  background: rgba(139,92,246,.04);
-  display: flex;
-  flex-direction: column;
-}
-
-.savings-mini__header {
+.plans-chart__top {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  margin-bottom: .5rem;
+  margin-bottom: .4rem;
 }
 
-.savings-mini__label {
-  font-size: .68rem;
+.plans-chart__label {
+  font-size: .65rem;
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: .04em;
 }
 
-.savings-mini__amount {
-  font-size: 1.1rem;
+.plans-chart__amount {
+  font-size: 1.15rem;
   font-weight: 800;
   color: #34d399;
-  text-shadow: 0 0 12px rgba(52,211,153,.3);
+  text-shadow: 0 0 10px rgba(52,211,153,.25);
+  transition: all .4s ease;
 }
 
-.savings-mini__svg {
-  flex: 1;
-  min-height: 52px;
+.plans-chart__graph {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(0,0,0,.15);
+}
+
+.plans-chart__graph canvas {
+  display: block;
   width: 100%;
+  height: auto;
+}
+
+.plans-chart__months {
+  display: flex;
+  justify-content: space-between;
+  margin-top: .25rem;
+  padding: 0 2px;
+  font-size: .55rem;
+  color: rgba(159,180,197,.4);
+}
+
+.plans-chart__detail {
+  margin-top: .5rem;
+  padding-top: .4rem;
+  border-top: 1px solid rgba(139,92,246,.1);
+  text-align: center;
+  min-height: 1.5em;
+}
+
+.plans-chart__detail-label {
+  font-size: .68rem;
+  color: var(--muted);
+}
+
+.plans-chart__detail-name {
+  font-size: .72rem;
+  font-weight: 700;
+  color: #c4b5fd;
+}
+
+.plans-chart__detail-sub {
+  font-size: .65rem;
+  color: var(--muted);
   display: block;
 }
 
-.savings-mini__line {
-  stroke-dasharray: 400;
-  stroke-dashoffset: 400;
-  animation: chartDraw 1.5s ease-out forwards;
-  animation-delay: .4s;
-}
-
-.savings-mini__area {
-  opacity: 0;
-  animation: chartFadeIn .6s ease forwards;
-  animation-delay: 1.2s;
-}
-
-@keyframes chartDraw {
-  to { stroke-dashoffset: 0; }
-}
-
-@keyframes chartFadeIn {
-  to { opacity: 1; }
-}
-
-.savings-mini__months {
-  display: flex;
-  justify-content: space-between;
-  margin-top: .3rem;
-  font-size: .6rem;
-  color: rgba(159,180,197,.5);
-}
-
-/* ── Services Strip (horizontal scroll) ── */
-.services-strip {
-  margin-bottom: 1.2rem;
-}
-
-.services-strip__title {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #fff;
-  margin: 0 0 .7rem;
-}
-
-.services-strip__track {
-  display: flex;
-  gap: 10px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  padding-bottom: 4px;
-}
-
-.services-strip__track::-webkit-scrollbar { display: none; }
-
-/* ── Service Pill ── */
-.svc-pill {
-  flex: 0 0 auto;
-  width: 150px;
-  scroll-snap-align: start;
+/* ── Service Bubbles ── */
+.plans-bubbles {
   display: flex;
   flex-direction: column;
-  gap: .3rem;
-  padding: .8rem;
-  border-radius: 14px;
-  border: 1px solid rgba(139,92,246,.15);
-  background: rgba(139,92,246,.04);
-  transition: all .3s ease;
+  gap: 6px;
+}
+
+.plan-bubble {
+  display: grid;
+  grid-template-columns: 32px 1fr auto;
+  grid-template-rows: auto auto;
+  align-items: center;
+  gap: 0 .55rem;
+  padding: .55rem .7rem;
+  border-radius: 12px;
+  border: 1px solid rgba(139,92,246,.12);
+  background: rgba(139,92,246,.03);
+  cursor: pointer;
+  text-align: left;
+  transition: all .3s cubic-bezier(.4,0,.2,1);
+  -webkit-tap-highlight-color: transparent;
   position: relative;
 }
 
-.svc-pill:hover {
-  border-color: rgba(139,92,246,.35);
-  background: rgba(139,92,246,.08);
-  transform: translateY(-2px);
-}
-
-.svc-pill--hero {
-  width: 170px;
+.plan-bubble:hover {
   border-color: rgba(139,92,246,.3);
-  background: linear-gradient(145deg, rgba(139,92,246,.1), rgba(14,21,28,.95));
-  box-shadow: 0 0 16px rgba(139,92,246,.1);
+  background: rgba(139,92,246,.06);
 }
 
-.svc-pill__icon {
-  font-size: 1.3rem;
-  filter: drop-shadow(0 0 6px rgba(139,92,246,.25));
+.plan-bubble.is-active {
+  border-color: rgba(139,92,246,.5);
+  background: rgba(139,92,246,.1);
+  box-shadow: 0 0 16px rgba(139,92,246,.12);
 }
 
-.svc-pill__body { flex: 1; }
+.plan-bubble__icon {
+  grid-row: 1;
+  font-size: 1.15rem;
+  line-height: 1;
+}
 
-.svc-pill__title {
+.plan-bubble__info {
+  grid-row: 1;
+  grid-column: 2;
+  min-width: 0;
+}
+
+.plan-bubble__name {
+  display: block;
   font-size: .78rem;
   font-weight: 700;
   color: #fff;
-  margin: 0 0 .15rem;
+  line-height: 1.2;
 }
 
-.svc-pill__text {
-  font-size: .68rem;
+.plan-bubble__desc {
+  display: block;
+  font-size: .62rem;
   color: var(--muted);
-  margin: 0;
-  line-height: 1.4;
+  line-height: 1.3;
 }
 
-.svc-pill__text strong { color: #c4b5fd; }
+.plan-bubble__price {
+  grid-row: 1;
+  grid-column: 3;
+  font-size: .82rem;
+  font-weight: 800;
+  color: #A855F7;
+  white-space: nowrap;
+}
 
-.svc-pill__badge {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  padding: .12rem .4rem;
-  border-radius: 8px;
+.plan-bubble__price small {
   font-size: .55rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.plan-bubble__tag {
+  position: absolute;
+  top: -1px; right: 10px;
+  padding: .1rem .45rem;
+  border-radius: 0 0 6px 6px;
+  font-size: .5rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .05em;
   color: #fbbf24;
-  background: rgba(251,191,36,.12);
-  border: 1px solid rgba(251,191,36,.25);
+  background: rgba(251,191,36,.15);
+  border: 1px solid rgba(251,191,36,.2);
+  border-top: 0;
 }
 
-/* ── CTA ── */
-.savings-cta {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: .5rem;
-  width: 100%;
-  padding: .7rem 1.2rem;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+/* Expand panel */
+.plan-bubble__expand {
+  grid-column: 1 / -1;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height .35s ease, opacity .25s ease, margin .3s ease;
+  margin-top: 0;
+}
+
+.plan-bubble.is-active .plan-bubble__expand {
+  max-height: 200px;
+  opacity: 1;
+  margin-top: .5rem;
+}
+
+.plan-bubble__expand p {
+  font-size: .68rem;
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 0;
+  padding-top: .4rem;
+  border-top: 1px solid rgba(139,92,246,.12);
+}
+
+.plan-bubble__save-tag {
+  display: inline-block;
+  margin-top: .35rem;
+  padding: .15rem .5rem;
+  border-radius: 8px;
+  font-size: .58rem;
+  font-weight: 700;
+  color: #34d399;
+  background: rgba(52,211,153,.08);
+  border: 1px solid rgba(52,211,153,.2);
+}
+
+/* ── Black Metal Service ── */
+.plan-bubble--black {
+  border-color: rgba(255,255,255,.15);
+  background: linear-gradient(135deg, rgba(20,20,25,.95) 0%, rgba(40,20,60,.3) 100%);
+  margin-top: 4px;
+}
+
+.plan-bubble--black .plan-bubble__name {
+  background: linear-gradient(135deg, #fff, #c4b5fd);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.plan-bubble--black .plan-bubble__price {
   color: #fff;
-  font-size: .9rem;
-  font-weight: 600;
-  text-decoration: none;
-  box-shadow: 0 4px 16px rgba(139,92,246,.3);
-  transition: all .3s cubic-bezier(.4,0,.2,1);
-  -webkit-tap-highlight-color: transparent;
 }
 
-.savings-cta:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 24px rgba(139,92,246,.4);
-}
-
-.savings-cta svg {
-  transition: transform .3s ease;
-}
-
-.savings-cta:hover svg {
-  transform: translateX(3px);
+.plan-bubble--black.is-active {
+  border-color: rgba(168,85,247,.5);
+  box-shadow:
+    0 0 20px rgba(139,92,246,.15),
+    0 0 40px rgba(139,92,246,.08);
 }
 
 /* ========== 10b) AVIS CLIENTS — ACCUEIL ========== */
