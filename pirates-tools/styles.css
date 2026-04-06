@@ -1651,7 +1651,7 @@ body.page-devis #view-devis {
 
 .plans-chart__canvas-wrap {
   position: relative;
-  height: 135px;
+  height: 200px;
   overflow: hidden;
 }
 
