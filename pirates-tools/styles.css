@@ -2538,10 +2538,10 @@ transition: transform .15s ease;
 .dock__btn--tools,
 .dock__btn--account,
 .dock__btn--cart {
-background: #505050 !important;
-color: #ffffff !important;
-box-shadow: none !important;
-border: none !important;
+background: rgba(255,255,255,.06) !important;
+color: #e6edf5 !important;
+border: 1.5px solid rgba(139, 92, 246, 0.35) !important;
+box-shadow: 0 0 10px rgba(139, 92, 246, 0.12) !important;
 }
 
 .dock__btn--cart {
@@ -2549,13 +2549,17 @@ position: relative;
 }
 
 .dock__btn--call {
-background: #00bfff !important;
-color: #ffffff !important;
+background: linear-gradient(135deg, #8B5CF6, #A855F7) !important;
+color: #fff !important;
+border: none !important;
+box-shadow: 0 0 16px rgba(139, 92, 246, 0.35) !important;
 }
 
 .dock__btn--wa {
-background: #25d366 !important;
-color: #ffffff !important;
+background: linear-gradient(135deg, #25d366, #128c7e) !important;
+color: #fff !important;
+border: none !important;
+box-shadow: 0 0 16px rgba(37, 211, 102, 0.3) !important;
 }
 
 .dock__badge {
