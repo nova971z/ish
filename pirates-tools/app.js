@@ -166,38 +166,84 @@
   function renderDevis() {
     if (!dom.devisList) return;
     var items = getCart();
+    var footer = document.getElementById('devisFooter');
+    var statItems = document.getElementById('devisStatItems');
+    var statTotal = document.getElementById('devisStatTotal');
+    var footerTotal = document.getElementById('devisFooterTotal');
+
     if (items.length === 0) {
-      dom.devisList.innerHTML = '<div class="empty" style="padding:2rem;text-align:center">'
-        + '<p><strong>Votre panier est vide</strong></p>'
-        + '<p style="opacity:.7;margin:.5rem 0 1rem">Decouvrez nos produits et ajoutez-les a votre panier</p>'
-        + '<a class="btn primary" href="#/catalogue">Voir le catalogue</a>'
+      dom.devisList.innerHTML =
+        '<div class="devis-empty">'
+        + '<div class="devis-empty__icon">🛒</div>'
+        + '<h3 class="devis-empty__title">Votre panier est vide</h3>'
+        + '<p class="devis-empty__text">Parcourez notre catalogue et ajoutez vos outils preferes</p>'
+        + '<a class="devis-btn devis-btn--browse" href="#/catalogue">'
+        + '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>'
+        + '<span>Decouvrir le catalogue</span>'
+        + '</a>'
         + '</div>';
+      if (footer) footer.style.display = 'none';
+      if (statItems) statItems.textContent = '0';
+      if (statTotal) statTotal.innerHTML = '0 &euro;';
+      if (footerTotal) footerTotal.innerHTML = '0 &euro;';
       return;
     }
+
+    if (footer) footer.style.display = '';
     var total = 0;
+    var totalQty = 0;
     var html = items.map(function (item, idx) {
-      var sub = (item.price || 0) * (item.qty || 1);
+      var qty = item.qty || 1;
+      var sub = (item.price || 0) * qty;
       total += sub;
-      return '<div class="devis-item" data-idx="' + idx + '">'
+      totalQty += qty;
+      return '<div class="devis-item" data-idx="' + idx + '" style="animation-delay:' + (idx * 60) + 'ms">'
+        + '<div class="devis-item__img-wrap">'
         + '<img src="' + escapeHTML(item.image || 'images/placeholder.svg') + '" alt="" class="devis-item__img" loading="lazy">'
-        + '<div class="devis-item__info">'
-        + '<strong>' + escapeHTML(item.title) + '</strong>'
-        + '<span class="devis-item__brand">' + escapeHTML(item.brand) + '</span>'
-        + '<span class="devis-item__price">' + formatPrice(item.price) + '</span>'
         + '</div>'
-        + '<div class="devis-item__actions">'
-        + '<input type="number" class="devis-qty" min="1" value="' + (item.qty || 1) + '" data-idx="' + idx + '">'
-        + '<button class="devis-remove" data-idx="' + idx + '" aria-label="Supprimer">&times;</button>'
+        + '<div class="devis-item__body">'
+        + '<div class="devis-item__info">'
+        + '<strong class="devis-item__name">' + escapeHTML(item.title) + '</strong>'
+        + '<span class="devis-item__brand">' + escapeHTML(item.brand || '') + '</span>'
+        + '</div>'
+        + '<div class="devis-item__bottom">'
+        + '<div class="devis-item__qty-wrap">'
+        + '<button class="devis-qty-btn devis-qty-minus" data-idx="' + idx + '" aria-label="Moins">−</button>'
+        + '<span class="devis-qty-value">' + qty + '</span>'
+        + '<button class="devis-qty-btn devis-qty-plus" data-idx="' + idx + '" aria-label="Plus">+</button>'
+        + '</div>'
+        + '<span class="devis-item__subtotal">' + formatPrice(sub) + '</span>'
+        + '<button class="devis-remove" data-idx="' + idx + '" aria-label="Supprimer">'
+        + '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>'
+        + '</button>'
+        + '</div>'
         + '</div>'
         + '</div>';
     }).join('');
-    html += '<div class="devis-total"><strong>Total TTC :</strong> ' + formatPrice(total) + '</div>';
+
     dom.devisList.innerHTML = html;
 
-    // Qty change handlers
-    $$('.devis-qty', dom.devisList).forEach(function (inp) {
-      inp.addEventListener('change', function () {
-        updateQty(Number(this.dataset.idx), Number(this.value));
+    // Update stats
+    if (statItems) statItems.textContent = totalQty;
+    if (statTotal) statTotal.textContent = formatPrice(total);
+    if (footerTotal) footerTotal.textContent = formatPrice(total);
+
+    // Qty +/- handlers
+    $$('.devis-qty-minus', dom.devisList).forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var i = Number(this.dataset.idx);
+        var c = getCart();
+        var newQty = Math.max(1, (c[i].qty || 1) - 1);
+        updateQty(i, newQty);
+        renderDevis();
+      });
+    });
+    $$('.devis-qty-plus', dom.devisList).forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var i = Number(this.dataset.idx);
+        var c = getCart();
+        var newQty = (c[i].qty || 1) + 1;
+        updateQty(i, newQty);
         renderDevis();
       });
     });
@@ -205,8 +251,12 @@
     // Remove handlers
     $$('.devis-remove', dom.devisList).forEach(function (btn) {
       btn.addEventListener('click', function () {
-        removeFromCart(Number(this.dataset.idx));
-        renderDevis();
+        var el = this.closest('.devis-item');
+        if (el) { el.classList.add('devis-item--removing'); }
+        setTimeout(function () {
+          removeFromCart(Number(btn.dataset.idx));
+          renderDevis();
+        }, 300);
       });
     });
   }
