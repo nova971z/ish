@@ -1050,9 +1050,11 @@
       if (route === '/') {
         dom.hero.classList.remove('hero-out');
         dom.hero.style.display = '';
+        if (dom.heroLogoContainer) dom.heroLogoContainer.style.display = '';
       } else {
         dom.hero.classList.add('hero-out');
         dom.hero.style.display = 'none';
+        if (dom.heroLogoContainer) dom.heroLogoContainer.style.display = 'none';
       }
     }
 
