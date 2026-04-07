@@ -3054,6 +3054,53 @@
     observeReveals(document);
   }
 
+  // ── Top loading bar ─────────────────────────────────────────
+  // Indeterminate slide while booting / returning to home, then
+  // ramps to 100% and fades out. Pure CSS-driven, no deps.
+  var _ptLoadEl = null, _ptLoadHide = 0;
+  function ptLoadBar() {
+    if (_ptLoadEl) return _ptLoadEl;
+    _ptLoadEl = document.getElementById('pt-loadbar');
+    return _ptLoadEl;
+  }
+  function ptLoadStart() {
+    var el = ptLoadBar(); if (!el) return;
+    clearTimeout(_ptLoadHide);
+    el.classList.remove('is-done');
+    el.classList.add('is-on', 'is-indet');
+    var bar = el.firstElementChild;
+    if (bar) bar.style.width = '';
+  }
+  function ptLoadDone() {
+    var el = ptLoadBar(); if (!el) return;
+    el.classList.remove('is-indet');
+    var bar = el.firstElementChild;
+    if (bar) { bar.style.width = '100%'; }
+    clearTimeout(_ptLoadHide);
+    _ptLoadHide = setTimeout(function(){
+      el.classList.remove('is-on');
+      if (bar) bar.style.width = '0%';
+    }, 360);
+  }
+  // Boot: show until window load (or 4s safety)
+  ptLoadStart();
+  var _ptBootDone = false;
+  function ptBootFinish(){ if (_ptBootDone) return; _ptBootDone = true; ptLoadDone(); }
+  if (document.readyState === 'complete') {
+    setTimeout(ptBootFinish, 250);
+  } else {
+    window.addEventListener('load', function(){ setTimeout(ptBootFinish, 200); }, { once:true });
+    setTimeout(ptBootFinish, 4000);
+  }
+  // Re-show on every navigation back to the home route
+  window.addEventListener('hashchange', function(){
+    var h = (location.hash || '').replace(/^#/, '') || '/';
+    if (h === '/' || h === '' || h === '/home') {
+      ptLoadStart();
+      setTimeout(ptLoadDone, 700);
+    }
+  });
+
   // ── <model-viewer> hover-rotate (product cards) ────────────
   // Cards stay still by default; auto-rotate only while hovered
   // (or focused via keyboard). Saves CPU/GPU on long lists.
@@ -3076,8 +3123,7 @@
   document.addEventListener('error', function (e) {
     var t = e.target;
     if (t && t.tagName === 'MODEL-VIEWER') {
-      try { console.error('[model-viewer error]', t.id || t.className, t.src, e); } catch (_) {}
-      try { toast('3D : ' + (t.id || 'modèle') + ' échec chargement', 'error'); } catch (_) {}
+      try { console.error('[model-viewer error]', t.id || t.className, t.src); } catch (_) {}
     }
   }, true);
 
