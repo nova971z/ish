@@ -5100,6 +5100,156 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 }
 .pay-modal__powered strong { color: #635bff; }
 
+/* ── Onglets de paiement ─────────────────────────────────────── */
+.pay-tabs{
+  display:flex; gap:.5rem;
+  padding: 0 1.4rem;
+  margin-top:.4rem;
+}
+.pay-tab{
+  flex:1; cursor:pointer;
+  background:rgba(255,255,255,.04);
+  color:var(--muted);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:12px;
+  padding:.7rem .8rem;
+  font-weight:600; font-size:.92rem;
+  display:inline-flex; align-items:center; justify-content:center; gap:.45rem;
+  transition: all .2s ease;
+}
+.pay-tab:hover{ background:rgba(255,255,255,.07); color:#fff; }
+.pay-tab.is-active{
+  background: linear-gradient(135deg, rgba(99,91,255,.22), rgba(139,92,246,.22));
+  border-color: rgba(139,92,246,.55);
+  color:#fff;
+  box-shadow: 0 0 18px rgba(139,92,246,.25);
+}
+.pay-tab__icon{ font-size:1.05rem; }
+
+.pay-pane{ display:none; }
+.pay-pane.is-active{ display:block; }
+
+/* ── Portail crypto ──────────────────────────────────────────── */
+.cryptopay{ display:flex; flex-direction:column; gap:.9rem; }
+.cryptopay__intro{
+  margin:0; font-size:.85rem; line-height:1.45;
+  color:var(--muted);
+}
+.cryptopay__intro strong{ color:#fff; }
+
+.cryptopay__nets{
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px,1fr));
+  gap:.5rem;
+}
+.cryptopay-net{
+  cursor:pointer;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:12px;
+  padding:.65rem .7rem;
+  display:flex; flex-direction:column; gap:.15rem;
+  text-align:left;
+  transition: all .18s ease;
+}
+.cryptopay-net:hover{ background:rgba(255,255,255,.08); border-color:rgba(139,92,246,.5); }
+.cryptopay-net.is-on{
+  background:linear-gradient(135deg, rgba(99,91,255,.22), rgba(139,92,246,.22));
+  border-color:rgba(139,92,246,.7);
+  box-shadow: 0 0 14px rgba(139,92,246,.25);
+}
+.cryptopay-net__label{ color:#fff; font-weight:700; font-size:.92rem; }
+.cryptopay-net__chain{ color:var(--muted); font-size:.72rem; }
+
+.cryptopay__detail{
+  display:grid;
+  grid-template-columns: 150px 1fr;
+  gap: 1rem;
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:14px;
+  padding: .9rem;
+}
+@media (max-width: 520px){
+  .cryptopay__detail{ grid-template-columns: 1fr; }
+  .cryptopay__qr{ justify-self:center; }
+}
+.cryptopay__qr{
+  background:#fff; padding:8px; border-radius:10px;
+  width:150px; height:150px;
+  display:flex; align-items:center; justify-content:center;
+}
+.cryptopay__qr img{ width:100%; height:100%; image-rendering:pixelated; display:block; }
+
+.cryptopay__info{ display:flex; flex-direction:column; gap:.35rem; min-width:0; }
+.cryptopay__label{
+  color:var(--muted); font-size:.7rem; text-transform:uppercase;
+  letter-spacing:.06em; margin-top:.25rem;
+}
+.cryptopay__chain{ color:#fff; font-weight:600; font-size:.92rem; }
+
+.cryptopay__amount{
+  display:flex; align-items:baseline; gap:.4rem;
+  color:#fff; font-weight:800; font-size:1.25rem;
+  word-break: break-all;
+}
+.cryptopay__amount-sym{ font-size:.85rem; color:var(--muted); font-weight:600; }
+.cryptopay__rate{ color:var(--muted); font-size:.72rem; }
+
+.cryptopay__addr{
+  display:flex; align-items:center; gap:.4rem;
+  background:rgba(0,0,0,.35);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:9px;
+  padding:.45rem .55rem;
+  min-width:0;
+}
+.cryptopay__addr code{
+  flex:1; min-width:0;
+  color:#ffd66b; font-size:.78rem;
+  word-break: break-all;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.cryptopay__copy{
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.14);
+  color:#fff; border-radius:8px;
+  padding:.35rem .5rem; cursor:pointer;
+  flex: 0 0 auto;
+}
+.cryptopay__copy:hover{ background:rgba(255,255,255,.16); }
+.cryptopay__copy-amount{
+  margin-top:.4rem;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.12);
+  color:#fff;
+  border-radius:9px; padding:.5rem .7rem;
+  cursor:pointer; font-weight:600; font-size:.82rem;
+}
+.cryptopay__copy-amount:hover{ background:rgba(255,255,255,.12); }
+
+.cryptopay__card-onramp{
+  display:flex; flex-direction:column; gap:.35rem;
+  padding-top:.6rem;
+  border-top:1px dashed rgba(255,255,255,.10);
+}
+.cryptopay__card-btn{
+  background: linear-gradient(135deg, #1e7c4a, #34c77a);
+  color:#fff; border:none; border-radius:12px;
+  padding:.75rem 1rem; font-weight:700; cursor:pointer;
+  display:inline-flex; align-items:center; justify-content:center; gap:.5rem;
+}
+.cryptopay__card-btn:hover{ filter:brightness(1.08); }
+.cryptopay__card-onramp small{ color:var(--muted); font-size:.72rem; text-align:center; }
+
+.cryptopay__warn{
+  margin:.2rem 0 0;
+  font-size:.72rem; color:#ffb86b;
+  background:rgba(255,184,107,.08);
+  border:1px solid rgba(255,184,107,.25);
+  border-radius:9px; padding:.5rem .7rem;
+}
+
 /* Devis "Payer" button per line */
 .devis-buy {
   background: linear-gradient(135deg, #635bff, #8B5CF6);

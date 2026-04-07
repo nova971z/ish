@@ -22,6 +22,9 @@
   <!-- Firebase (auth + firestore) -->
   <script type="module" src="firebase-init.js"></script>
 
+  <!-- Crypto payment config (édite tes adresses dans ce fichier) -->
+  <script src="crypto-config.js"></script>
+
   <!-- PWA -->
   <meta name="theme-color" content="#0a0f14" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -849,35 +852,114 @@
       <div class="pay-modal__header">
         <div class="pay-modal__icon">🔒</div>
         <h2 id="payModalTitle">Finaliser ma commande</h2>
-        <p class="pay-modal__sub">Paiement sécurisé via Stripe</p>
+        <p class="pay-modal__sub">Choisis ton mode de paiement</p>
       </div>
+
+      <!-- Onglets : Carte / Crypto -->
+      <div class="pay-tabs" role="tablist" aria-label="Modes de paiement">
+        <button class="pay-tab is-active" type="button" role="tab"
+                data-pay-tab="card" aria-selected="true">
+          <span class="pay-tab__icon">💳</span> Carte bancaire
+        </button>
+        <button class="pay-tab" type="button" role="tab"
+                data-pay-tab="crypto" aria-selected="false">
+          <span class="pay-tab__icon">🪙</span> Cryptomonnaie
+        </button>
+      </div>
+
       <div class="pay-modal__body">
         <div id="payModalItems" class="pay-modal__items"></div>
         <div class="pay-modal__total">
           <span>Total TTC</span>
           <strong id="payModalTotal">0,00 €</strong>
         </div>
-        <div class="pay-modal__trust">
-          <div class="pay-modal__trust-row">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            <span>Connexion chiffrée SSL</span>
+
+        <!-- ── Panneau CARTE (Stripe) ── -->
+        <div class="pay-pane is-active" data-pay-pane="card">
+          <div class="pay-modal__trust">
+            <div class="pay-modal__trust-row">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <span>Connexion chiffrée SSL</span>
+            </div>
+            <div class="pay-modal__trust-row">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <span>Protection PCI-DSS niveau 1</span>
+            </div>
+            <div class="pay-modal__trust-row">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Cartes, Apple Pay, Google Pay acceptés</span>
+            </div>
           </div>
-          <div class="pay-modal__trust-row">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            <span>Protection PCI-DSS niveau 1</span>
-          </div>
-          <div class="pay-modal__trust-row">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            <span>Cartes, Apple Pay, Google Pay acceptés</span>
+        </div>
+
+        <!-- ── Panneau CRYPTO ── -->
+        <div class="pay-pane" data-pay-pane="crypto" hidden>
+          <div class="cryptopay">
+            <p class="cryptopay__intro">
+              Paie directement en cryptomonnaie sur le réseau de ton choix.
+              Le total est converti automatiquement au taux du marché.
+              Tu peux aussi <strong>payer par carte</strong> via notre portail
+              partenaire qui convertira ta carte en crypto.
+            </p>
+
+            <!-- Sélection du réseau -->
+            <div class="cryptopay__nets" id="cryptopayNets" role="radiogroup" aria-label="Réseau crypto"></div>
+
+            <!-- Détails (QR + adresse + montant) -->
+            <div class="cryptopay__detail" id="cryptopayDetail" hidden>
+              <div class="cryptopay__qr">
+                <img id="cryptopayQR" alt="QR de paiement" />
+              </div>
+              <div class="cryptopay__info">
+                <label class="cryptopay__label">Réseau</label>
+                <div class="cryptopay__chain" id="cryptopayChain">—</div>
+
+                <label class="cryptopay__label">Montant à envoyer</label>
+                <div class="cryptopay__amount">
+                  <span id="cryptopayAmount">—</span>
+                  <span id="cryptopayAmountSymbol" class="cryptopay__amount-sym">—</span>
+                </div>
+                <small class="cryptopay__rate" id="cryptopayRate">Calcul du taux…</small>
+
+                <label class="cryptopay__label">Adresse de réception</label>
+                <div class="cryptopay__addr">
+                  <code id="cryptopayAddr">—</code>
+                  <button type="button" class="cryptopay__copy" id="cryptopayCopyAddr"
+                          aria-label="Copier l'adresse">📋</button>
+                </div>
+
+                <button type="button" class="cryptopay__copy-amount" id="cryptopayCopyAmount">
+                  📋 Copier le montant
+                </button>
+              </div>
+            </div>
+
+            <!-- Carte bancaire → crypto -->
+            <div class="cryptopay__card-onramp">
+              <button type="button" id="cryptopayCardBtn" class="btn cryptopay__card-btn">
+                💳 Payer par carte (via portail partenaire)
+              </button>
+              <small>Tu paies en EUR par carte, le marchand reçoit la crypto.</small>
+            </div>
+
+            <p class="cryptopay__warn">
+              ⚠️ Vérifie toujours le réseau avant d'envoyer. Un transfert
+              sur un mauvais réseau est <strong>irréversible</strong>.
+            </p>
           </div>
         </div>
       </div>
+
       <div class="pay-modal__footer">
         <button id="payModalConfirm" class="btn primary btn--lg btn--glow" type="button">
           <span class="pay-modal__btn-icon">💳</span>
           Payer en toute sécurité
         </button>
-        <p class="pay-modal__powered">Propulsé par <strong>Stripe</strong> — leader mondial du paiement en ligne</p>
+        <button id="payModalCryptoConfirm" class="btn primary btn--lg btn--glow" type="button" hidden>
+          <span class="pay-modal__btn-icon">✅</span>
+          J'ai effectué le paiement
+        </button>
+        <p class="pay-modal__powered" id="payModalPowered">Propulsé par <strong>Stripe</strong> — leader mondial du paiement en ligne</p>
       </div>
     </div>
   </div>

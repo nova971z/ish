@@ -2952,10 +2952,229 @@
   // ── Stripe Payment Modal ───────────────────────────────────
   var _payItems = null;
 
+  // ── Crypto pay state ───────────────────────────────────────
+  var _cryptoSelected = null; // network object from PT_CRYPTO_CONFIG
+  var _cryptoRates = {};      // coingeckoId -> EUR price
+  var _cryptoTotalEur = 0;
+
+  function ptCryptoCfg(){ return (window.PT_CRYPTO_CONFIG || { networks: [], cardCheckout: {} }); }
+
+  function cryptoFormatAmount(eurTotal, net) {
+    var rate = _cryptoRates[net.coingeckoId];
+    if (!rate || rate <= 0) return null;
+    var amt = eurTotal / rate;
+    return amt.toFixed(net.decimals || 6).replace(/\.?0+$/,'');
+  }
+
+  function cryptoBuildUri(net, amount) {
+    if (!net.uriScheme) return net.address;
+    // BIP21-ish: scheme:address?amount=...
+    var u = net.uriScheme + net.address;
+    if (amount) u += '?amount=' + amount;
+    return u;
+  }
+
+  function cryptoQRUrl(payload) {
+    return 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=0&data='
+      + encodeURIComponent(payload);
+  }
+
+  function cryptoFetchRates() {
+    var cfg = ptCryptoCfg();
+    var ids = (cfg.networks || []).map(function(n){ return n.coingeckoId; })
+      .filter(function(v,i,a){ return v && a.indexOf(v) === i; });
+    if (!ids.length) return Promise.resolve({});
+    var url = 'https://api.coingecko.com/api/v3/simple/price?vs_currencies=eur&ids=' + ids.join(',');
+    return fetch(url).then(function(r){ return r.json(); }).then(function(j){
+      var out = {};
+      Object.keys(j || {}).forEach(function(k){ if (j[k] && j[k].eur) out[k] = j[k].eur; });
+      _cryptoRates = out;
+      return out;
+    }).catch(function(){ return {}; });
+  }
+
+  function cryptoRenderNets() {
+    var wrap = document.getElementById('cryptopayNets');
+    if (!wrap) return;
+    var cfg = ptCryptoCfg();
+    wrap.innerHTML = (cfg.networks || []).map(function(n){
+      return '<button type="button" class="cryptopay-net" role="radio" '
+        + 'aria-checked="false" data-net-id="' + n.id + '">'
+        + '<span class="cryptopay-net__label">' + n.label + '</span>'
+        + '<span class="cryptopay-net__chain">' + n.chain + '</span>'
+        + '</button>';
+    }).join('');
+    wrap.querySelectorAll('.cryptopay-net').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var id = btn.getAttribute('data-net-id');
+        var net = (cfg.networks || []).find(function(x){ return x.id === id; });
+        if (net) cryptoSelectNet(net);
+      });
+    });
+  }
+
+  function cryptoSelectNet(net) {
+    _cryptoSelected = net;
+    var wrap = document.getElementById('cryptopayNets');
+    if (wrap) {
+      wrap.querySelectorAll('.cryptopay-net').forEach(function(b){
+        var on = b.getAttribute('data-net-id') === net.id;
+        b.classList.toggle('is-on', on);
+        b.setAttribute('aria-checked', on ? 'true' : 'false');
+      });
+    }
+    var detail = document.getElementById('cryptopayDetail');
+    if (detail) detail.hidden = false;
+    document.getElementById('cryptopayChain').textContent = net.chain;
+    document.getElementById('cryptopayAddr').textContent = net.address || '—';
+
+    var amountEl = document.getElementById('cryptopayAmount');
+    var symEl    = document.getElementById('cryptopayAmountSymbol');
+    var rateEl   = document.getElementById('cryptopayRate');
+
+    var addrLooksUnset = !net.address || /^REMPLACE_/i.test(net.address);
+    var amt = cryptoFormatAmount(_cryptoTotalEur, net);
+    if (amt) {
+      amountEl.textContent = amt;
+      symEl.textContent = net.symbol;
+      rateEl.textContent = '1 ' + net.symbol + ' ≈ ' + (_cryptoRates[net.coingeckoId]).toFixed(2) + ' €';
+    } else {
+      amountEl.textContent = '—';
+      symEl.textContent = net.symbol;
+      rateEl.textContent = 'Taux indisponible (réessaie dans un instant).';
+    }
+
+    var qr = document.getElementById('cryptopayQR');
+    if (qr) {
+      if (addrLooksUnset) {
+        qr.removeAttribute('src');
+        qr.alt = 'Adresse non configurée';
+      } else {
+        qr.src = cryptoQRUrl(cryptoBuildUri(net, amt || ''));
+        qr.alt = 'QR ' + net.label;
+      }
+    }
+  }
+
+  function cryptoCopy(text, btn) {
+    if (!text) return;
+    var done = function(){
+      if (!btn) return;
+      var prev = btn.textContent;
+      btn.textContent = '✓ Copié';
+      setTimeout(function(){ btn.textContent = prev; }, 1400);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function(){});
+    } else {
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = text; document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta); done();
+      } catch(_){}
+    }
+  }
+
+  function cryptoOpenCardOnramp() {
+    var cfg = ptCryptoCfg();
+    var co  = cfg.cardCheckout || {};
+    if (co.url) {
+      window.open(co.url, '_blank', 'noopener');
+      return;
+    }
+    if (co.nowpaymentsApiKey) {
+      // Crée dynamiquement une invoice NOWPayments avec le total panier.
+      var body = {
+        price_amount: Number(_cryptoTotalEur.toFixed(2)),
+        price_currency: 'eur',
+        pay_currency: co.nowpaymentsPayCurrency || 'usdttrc20',
+        order_description: 'Pirates Tools — commande',
+        success_url: location.origin + location.pathname + '#/merci',
+        cancel_url:  location.origin + location.pathname + '#/checkout'
+      };
+      fetch('https://api.nowpayments.io/v1/invoice', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json', 'x-api-key': co.nowpaymentsApiKey },
+        body: JSON.stringify(body)
+      }).then(function(r){ return r.json(); }).then(function(j){
+        if (j && j.invoice_url) window.open(j.invoice_url, '_blank', 'noopener');
+        else toast("Impossible de créer l'invoice NOWPayments.", 'error');
+      }).catch(function(){
+        toast("Erreur réseau NOWPayments.", 'error');
+      });
+      return;
+    }
+    toast("Le paiement par carte n'est pas encore configuré. Édite crypto-config.js.", 'info');
+  }
+
+  function cryptoConfirmPaid() {
+    if (!_cryptoSelected) {
+      toast('Choisis d\'abord un réseau crypto.', 'info');
+      return;
+    }
+    var cfg = ptCryptoCfg();
+    var amt = cryptoFormatAmount(_cryptoTotalEur, _cryptoSelected) || '?';
+    var msg = 'Bonjour, j\'ai effectué un paiement crypto :\n'
+      + '• Réseau : ' + _cryptoSelected.chain + '\n'
+      + '• Montant : ' + amt + ' ' + _cryptoSelected.symbol + ' (~' + _cryptoTotalEur.toFixed(2) + ' €)\n'
+      + '• Adresse : ' + _cryptoSelected.address + '\n'
+      + 'Voici mon TXID : ';
+    var num = (cfg.whatsappNumber || '').replace(/[^0-9]/g,'');
+    var url = num
+      ? ('https://wa.me/' + num + '?text=' + encodeURIComponent(msg))
+      : ('https://wa.me/?text=' + encodeURIComponent(msg));
+    // sauvegarde l'intention de commande pour /merci
+    try {
+      localStorage.setItem('pt_pending_order', JSON.stringify({
+        items: (_payItems || []).map(function(it){ return { title: it.title, price: it.price, qty: it.qty }; }),
+        total: _cryptoTotalEur,
+        method: 'crypto:' + _cryptoSelected.id,
+        ts: Date.now()
+      }));
+    } catch(_){}
+    window.open(url, '_blank', 'noopener');
+  }
+
+  function cryptoSwitchTab(tab) {
+    var card = document.querySelector('[data-pay-pane="card"]');
+    var crypto = document.querySelector('[data-pay-pane="crypto"]');
+    var btnCard   = document.getElementById('payModalConfirm');
+    var btnCrypto = document.getElementById('payModalCryptoConfirm');
+    var powered   = document.getElementById('payModalPowered');
+    document.querySelectorAll('.pay-tab').forEach(function(b){
+      var on = b.getAttribute('data-pay-tab') === tab;
+      b.classList.toggle('is-active', on);
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    if (tab === 'crypto') {
+      if (card) { card.classList.remove('is-active'); card.hidden = true; }
+      if (crypto) { crypto.classList.add('is-active'); crypto.hidden = false; }
+      if (btnCard)   btnCard.hidden = true;
+      if (btnCrypto) btnCrypto.hidden = false;
+      if (powered)   powered.innerHTML = 'Paiements crypto directs — sans intermédiaire';
+      // lazy fetch des taux la 1ère fois
+      cryptoFetchRates().then(function(){
+        if (_cryptoSelected) cryptoSelectNet(_cryptoSelected);
+      });
+    } else {
+      if (crypto) { crypto.classList.remove('is-active'); crypto.hidden = true; }
+      if (card) { card.classList.add('is-active'); card.hidden = false; }
+      if (btnCrypto) btnCrypto.hidden = true;
+      if (btnCard)   btnCard.hidden = false;
+      if (powered)   powered.innerHTML = 'Propulsé par <strong>Stripe</strong> — leader mondial du paiement en ligne';
+    }
+  }
+
   function openPayModal(items) {
     var modal = document.getElementById('payModal');
     if (!modal || !items || !items.length) return;
     _payItems = items;
+    _cryptoTotalEur = items.reduce(function(s,it){ return s + (it.price||0)*(it.qty||1); }, 0);
+    cryptoSwitchTab('card');
+    cryptoRenderNets();
+    var detail = document.getElementById('cryptopayDetail');
+    if (detail) detail.hidden = true;
+    _cryptoSelected = null;
 
     var itemsEl = document.getElementById('payModalItems');
     var totalEl = document.getElementById('payModalTotal');
@@ -3025,6 +3244,29 @@
     });
     var confirm = document.getElementById('payModalConfirm');
     if (confirm) confirm.addEventListener('click', confirmPayment);
+
+    // Onglets
+    modal.querySelectorAll('.pay-tab').forEach(function(b){
+      b.addEventListener('click', function(){
+        cryptoSwitchTab(b.getAttribute('data-pay-tab'));
+      });
+    });
+
+    // Boutons crypto
+    var copyAddr = document.getElementById('cryptopayCopyAddr');
+    if (copyAddr) copyAddr.addEventListener('click', function(){
+      var a = document.getElementById('cryptopayAddr');
+      cryptoCopy(a ? a.textContent : '', copyAddr);
+    });
+    var copyAmt = document.getElementById('cryptopayCopyAmount');
+    if (copyAmt) copyAmt.addEventListener('click', function(){
+      var a = document.getElementById('cryptopayAmount');
+      cryptoCopy(a ? a.textContent : '', copyAmt);
+    });
+    var cardBtn = document.getElementById('cryptopayCardBtn');
+    if (cardBtn) cardBtn.addEventListener('click', cryptoOpenCardOnramp);
+    var cryptoConf = document.getElementById('payModalCryptoConfirm');
+    if (cryptoConf) cryptoConf.addEventListener('click', cryptoConfirmPaid);
   }
 
   function handleMerciPage() {
