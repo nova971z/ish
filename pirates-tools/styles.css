@@ -5242,6 +5242,60 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .cryptopay__card-btn:hover{ filter:brightness(1.08); }
 .cryptopay__card-onramp small{ color:var(--muted); font-size:.72rem; text-align:center; }
 
+/* ── Tuto paiement (4 étapes) ─────────────────────────── */
+.paytuto{
+  background: linear-gradient(135deg, rgba(99,91,255,.10), rgba(139,92,246,.10));
+  border:1px solid rgba(139,92,246,.30);
+  border-radius:12px;
+  padding:.6rem .8rem;
+  margin-bottom:.9rem;
+}
+.paytuto[open]{ padding-bottom:.9rem; }
+.paytuto summary{
+  list-style:none; cursor:pointer;
+  display:flex; align-items:center; justify-content:space-between;
+  gap:.5rem; user-select:none;
+}
+.paytuto summary::-webkit-details-marker{ display:none; }
+.paytuto__title{ color:#fff; font-weight:700; font-size:.88rem; }
+.paytuto__chev{
+  color:#a78bfa; font-size:.9rem;
+  transition: transform .2s ease;
+}
+.paytuto[open] .paytuto__chev{ transform: rotate(180deg); }
+
+.paytuto__steps{
+  list-style:none; padding:0; margin:.7rem 0 0;
+  display:flex; flex-direction:column; gap:.55rem;
+}
+.paytuto__steps > li{
+  display:flex; align-items:flex-start; gap:.6rem;
+}
+.paytuto__num{
+  flex:0 0 auto;
+  width:24px; height:24px;
+  display:inline-flex; align-items:center; justify-content:center;
+  background:linear-gradient(135deg, #635bff, #8B5CF6);
+  color:#fff; font-weight:800; font-size:.78rem;
+  border-radius:50%;
+  box-shadow: 0 0 10px rgba(139,92,246,.35);
+}
+.paytuto__steps strong{ color:#fff; font-size:.85rem; display:block; }
+.paytuto__steps p{
+  margin:.15rem 0 0; color:var(--muted);
+  font-size:.76rem; line-height:1.4;
+}
+.paytuto__tips{
+  margin-top:.7rem;
+  background:rgba(255,255,255,.04);
+  border-left:3px solid #34c77a;
+  border-radius:6px;
+  padding:.5rem .7rem;
+}
+.paytuto__tips p{ margin:0; font-size:.76rem; color:var(--muted); line-height:1.4; }
+.paytuto__tips strong{ color:#fff; }
+.paytuto--mini{ margin-bottom: .8rem; }
+
 .cryptopay__warn{
   margin:.2rem 0 0;
   font-size:.72rem; color:#ffb86b;

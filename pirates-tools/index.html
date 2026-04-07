@@ -876,6 +876,17 @@
 
         <!-- ── Panneau CARTE (Stripe) ── -->
         <div class="pay-pane is-active" data-pay-pane="card">
+          <details class="paytuto paytuto--mini" open>
+            <summary>
+              <span class="paytuto__title">📘 Comment ça se passe</span>
+              <span class="paytuto__chev">▾</span>
+            </summary>
+            <ol class="paytuto__steps">
+              <li><span class="paytuto__num">1</span><div><strong>Clique sur « Payer en toute sécurité »</strong><p>Tu es redirigé vers la page sécurisée Stripe.</p></div></li>
+              <li><span class="paytuto__num">2</span><div><strong>Renseigne ta carte</strong><p>Carte bancaire, Apple Pay ou Google Pay acceptés.</p></div></li>
+              <li><span class="paytuto__num">3</span><div><strong>Reviens sur le site</strong><p>Ta commande est confirmée automatiquement.</p></div></li>
+            </ol>
+          </details>
           <div class="pay-modal__trust">
             <div class="pay-modal__trust-row">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
@@ -901,6 +912,47 @@
               Tu peux aussi <strong>payer par carte</strong> via notre portail
               partenaire qui convertira ta carte en crypto.
             </p>
+
+            <!-- ── Tuto 4 étapes ── -->
+            <details class="paytuto" open>
+              <summary>
+                <span class="paytuto__title">📘 Comment payer — 4 étapes simples</span>
+                <span class="paytuto__chev">▾</span>
+              </summary>
+              <ol class="paytuto__steps">
+                <li>
+                  <span class="paytuto__num">1</span>
+                  <div>
+                    <strong>Choisis ton réseau</strong>
+                    <p>Sélectionne la crypto et la chaîne que tu possèdes (BTC, ETH, USDC sur Arbitrum, SOL…). Le réseau doit correspondre <em>exactement</em> à celui de ton wallet.</p>
+                  </div>
+                </li>
+                <li>
+                  <span class="paytuto__num">2</span>
+                  <div>
+                    <strong>Scanne le QR ou copie l'adresse</strong>
+                    <p>Ouvre ton appli wallet, scanne le QR, ou utilise le bouton 📋 pour copier l'adresse de réception.</p>
+                  </div>
+                </li>
+                <li>
+                  <span class="paytuto__num">3</span>
+                  <div>
+                    <strong>Envoie le montant exact</strong>
+                    <p>Copie le montant en crypto avec le bouton « Copier le montant ». Le total est calculé en temps réel à partir du cours EUR.</p>
+                  </div>
+                </li>
+                <li>
+                  <span class="paytuto__num">4</span>
+                  <div>
+                    <strong>Confirme ton paiement</strong>
+                    <p>Une fois la transaction envoyée, clique sur « J'ai effectué le paiement » : WhatsApp s'ouvre, colle ton TXID et envoie. On valide ta commande sous 24 h.</p>
+                  </div>
+                </li>
+              </ol>
+              <div class="paytuto__tips">
+                <p>💡 <strong>Pas de wallet ?</strong> Utilise le bouton vert en bas de page « Payer par carte » : ton paiement carte est automatiquement converti en crypto par notre partenaire — aucune connaissance technique requise.</p>
+              </div>
+            </details>
 
             <!-- Sélection du réseau -->
             <div class="cryptopay__nets" id="cryptopayNets" role="radiogroup" aria-label="Réseau crypto"></div>
