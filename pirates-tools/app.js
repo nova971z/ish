@@ -455,18 +455,46 @@
   };
   var _brandScenes = [];
 
-  function buildBrandTexture(logoSrc, bgColor, cb) {
+  function sampleLogoEdgeColor(img) {
+    // Sample many perimeter pixels of the source PNG; average all opaque ones.
+    // This gives the actual background color around the logo subject.
+    var c = document.createElement('canvas');
+    c.width = img.width; c.height = img.height;
+    var cx = c.getContext('2d');
+    cx.drawImage(img, 0, 0);
+    var W = img.width, H = img.height;
+    var step = Math.max(1, Math.floor(Math.min(W, H) / 40));
+    var data;
+    try { data = cx.getImageData(0, 0, W, H).data; }
+    catch (e) { return null; }
+    var r = 0, g = 0, b = 0, n = 0;
+    function sample(x, y) {
+      var i = (y * W + x) * 4;
+      if (data[i + 3] > 220) { r += data[i]; g += data[i+1]; b += data[i+2]; n++; }
+    }
+    for (var x = 0; x < W; x += step) { sample(x, 0); sample(x, H - 1); }
+    for (var y = 0; y < H; y += step) { sample(0, y); sample(W - 1, y); }
+    // Also sample a ring just inside (in case PNG has a transparent border)
+    var inset = Math.floor(Math.min(W, H) * 0.05);
+    for (var x2 = inset; x2 < W - inset; x2 += step) { sample(x2, inset); sample(x2, H - 1 - inset); }
+    for (var y2 = inset; y2 < H - inset; y2 += step) { sample(inset, y2); sample(W - 1 - inset, y2); }
+    if (n < 6) return null;
+    return 'rgb(' + Math.round(r / n) + ',' + Math.round(g / n) + ',' + Math.round(b / n) + ')';
+  }
+
+  function buildBrandTexture(logoSrc, fallbackColor, cb) {
     var SIZE = 1024;
     var canvas = document.createElement('canvas');
     canvas.width = SIZE * 2;
     canvas.height = SIZE;
     var ctx = canvas.getContext('2d');
-    ctx.fillStyle = bgColor;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     var img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = function () {
+      var bg = sampleLogoEdgeColor(img) || fallbackColor;
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
       var maxW = SIZE * 1.1;
       var maxH = SIZE * 0.7;
       var ratio = Math.min(maxW / img.width, maxH / img.height);
@@ -477,7 +505,11 @@
       ctx.drawImage(img, x, y, w, h);
       cb(canvas);
     };
-    img.onerror = function () { cb(canvas); };
+    img.onerror = function () {
+      ctx.fillStyle = fallbackColor;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      cb(canvas);
+    };
     img.src = logoSrc;
   }
 
@@ -558,23 +590,21 @@
   }
 
   var _brandScrollBound = false;
-  var _brandTargetRot = 0;
-  var _brandCurrentRot = 0;
   function bindBrandScroll() {
     if (_brandScrollBound) return;
     _brandScrollBound = true;
-    function onScroll() {
-      _brandTargetRot = (window.scrollY || 0) * 0.004;
-    }
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
     function tick() {
-      // Smooth lerp toward target
-      _brandCurrentRot += (_brandTargetRot - _brandCurrentRot) * 0.12;
+      var vh = window.innerHeight || 1;
       for (var i = 0; i < _brandScenes.length; i++) {
         var s = _brandScenes[i];
         if (!s.visible) continue;
-        s.sphere.rotation.y = _brandCurrentRot;
+        var rect = s.container.getBoundingClientRect();
+        var center = rect.top + rect.height / 2;
+        // -1 (sphere above viewport center) → +1 (below)
+        var rel = (center - vh / 2) / (vh / 2);
+        rel = Math.max(-1.5, Math.min(1.5, rel));
+        var targetY = -rel * 0.35;
+        s.sphere.position.y += (targetY - s.sphere.position.y) * 0.12;
         s.renderer.render(s.scene, s.camera);
       }
       requestAnimationFrame(tick);
