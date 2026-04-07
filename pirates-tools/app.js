@@ -97,26 +97,25 @@
   function getCart() { return loadCartData(); }
 
   function productCardVisual(p) {
-    var img = '<img src="' + escapeHTML(p.img || 'images/placeholder.svg') + '" alt="' + escapeHTML(p.title) + '" loading="lazy" class="product-card__img">';
+    var imgSrc = escapeHTML(p.img || 'images/placeholder.svg');
+    var alt = escapeHTML(p.title);
     if (p.model) {
       return '<model-viewer class="product-card__model"'
         + ' src="' + escapeHTML(p.model) + '"'
-        + ' alt="' + escapeHTML(p.title) + '"'
+        + ' alt="' + alt + '"'
         + ' loading="lazy"'
         + ' reveal="auto"'
         + ' auto-rotate'
-        + ' rotation-per-second="20deg"'
-        + ' camera-orbit="0deg 75deg 105%"'
+        + ' rotation-per-second="25deg"'
         + ' interaction-prompt="none"'
         + ' disable-zoom'
         + ' disable-tap'
         + ' disable-pan'
-        + ' touch-action="pan-y"'
-        + ' shadow-intensity="0.6"'
-        + ' exposure="1"'
-        + '>' + img + '</model-viewer>';
+        + ' shadow-intensity="0.4"'
+        + ' exposure="1.1"'
+        + '><img slot="poster" src="' + imgSrc + '" alt="' + alt + '" loading="lazy" /></model-viewer>';
     }
-    return img;
+    return '<img src="' + imgSrc + '" alt="' + alt + '" loading="lazy" class="product-card__img">';
   }
 
   function addToCart(item) {
