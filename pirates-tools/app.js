@@ -591,21 +591,29 @@
   }
 
   var _brandScrollBound = false;
+  var _brandLastScroll = 0;
+  var _brandRotVel = 0;
+  var _brandRotX = 0;
   function bindBrandScroll() {
     if (_brandScrollBound) return;
     _brandScrollBound = true;
+    _brandLastScroll = window.scrollY || 0;
     function tick() {
-      var vh = window.innerHeight || 1;
+      var sy = window.scrollY || 0;
+      var delta = sy - _brandLastScroll;
+      _brandLastScroll = sy;
+      // Add scroll delta as angular impulse
+      _brandRotVel += delta * 0.0015;
+      // Spring back to rest (rotation tries to return to 0)
+      var spring = -_brandRotX * 0.06;
+      _brandRotVel += spring;
+      // Damping (water resistance)
+      _brandRotVel *= 0.86;
+      _brandRotX += _brandRotVel;
       for (var i = 0; i < _brandScenes.length; i++) {
         var s = _brandScenes[i];
         if (!s.visible) continue;
-        var rect = s.container.getBoundingClientRect();
-        var center = rect.top + rect.height / 2;
-        // -1 (sphere above viewport center) → +1 (below)
-        var rel = (center - vh / 2) / (vh / 2);
-        rel = Math.max(-1.5, Math.min(1.5, rel));
-        var targetY = -rel * 0.35;
-        s.sphere.position.y += (targetY - s.sphere.position.y) * 0.12;
+        s.sphere.rotation.x = _brandRotX;
         s.renderer.render(s.scene, s.camera);
       }
       requestAnimationFrame(tick);
