@@ -112,7 +112,8 @@
         brand: item.brand || '',
         price: Number(item.price) || 0,
         qty: 1,
-        image: item.img || item.image || ''
+        image: item.img || item.image || '',
+        paymentLink: item.paymentLink || ''
       });
     }
     saveCart(items);
@@ -214,6 +215,7 @@
         + '<button class="devis-qty-btn devis-qty-plus" data-idx="' + idx + '" aria-label="Plus">+</button>'
         + '</div>'
         + '<span class="devis-item__subtotal">' + formatPrice(sub) + '</span>'
+        + (item.paymentLink ? '<button class="devis-buy" data-idx="' + idx + '" aria-label="Acheter">💳 Payer</button>' : '')
         + '<button class="devis-remove" data-idx="' + idx + '" aria-label="Supprimer">'
         + '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>'
         + '</button>'
@@ -246,6 +248,17 @@
         var newQty = (c[i].qty || 1) + 1;
         updateQty(i, newQty);
         renderDevis();
+      });
+    });
+
+    // Buy line handlers
+    $$('.devis-buy', dom.devisList).forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var i = Number(this.dataset.idx);
+        var c = getCart();
+        var it = c[i];
+        if (!it) return;
+        openPayModal([{ title: it.title, price: it.price, qty: it.qty || 1, paymentLink: it.paymentLink }]);
       });
     });
 
@@ -616,6 +629,19 @@
       dom.pdpQuote.onclick = function () {
         addToCart(product);
       };
+    }
+
+    // Buy now (Stripe Payment Link)
+    var pdpBuy = document.getElementById('pdpBuy');
+    if (pdpBuy) {
+      if (product.paymentLink) {
+        pdpBuy.hidden = false;
+        pdpBuy.onclick = function () {
+          openPayModal([{ title: product.title, price: product.price, qty: 1, paymentLink: product.paymentLink }]);
+        };
+      } else {
+        pdpBuy.hidden = true;
+      }
     }
 
     // WhatsApp link
@@ -1949,6 +1975,9 @@
       case '/abonnement':
         if (parsed.slug) renderAbonnement(parsed.slug);
         break;
+      case '/merci':
+        handleMerciPage();
+        break;
     }
   }
 
@@ -2626,6 +2655,106 @@
 
   // ── Bootstrap ──────────────────────────────────────────────
 
+  // ── Stripe Payment Modal ───────────────────────────────────
+  var _payItems = null;
+
+  function openPayModal(items) {
+    var modal = document.getElementById('payModal');
+    if (!modal || !items || !items.length) return;
+    _payItems = items;
+
+    var itemsEl = document.getElementById('payModalItems');
+    var totalEl = document.getElementById('payModalTotal');
+    var total = 0;
+    var html = '';
+    items.forEach(function (it) {
+      var line = (it.price || 0) * (it.qty || 1);
+      total += line;
+      html += '<div class="pay-modal__line">'
+        + '<div class="pay-modal__line-info">'
+        +   '<span class="pay-modal__line-title">' + (it.title || 'Produit') + '</span>'
+        +   '<span class="pay-modal__line-qty">x' + (it.qty || 1) + '</span>'
+        + '</div>'
+        + '<span class="pay-modal__line-price">' + formatPrice(line) + '</span>'
+        + '</div>';
+    });
+    if (itemsEl) itemsEl.innerHTML = html;
+    if (totalEl) totalEl.textContent = formatPrice(total);
+
+    modal.hidden = false;
+    modal.setAttribute('aria-hidden', 'false');
+    requestAnimationFrame(function () { modal.classList.add('is-open'); });
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closePayModal() {
+    var modal = document.getElementById('payModal');
+    if (!modal) return;
+    modal.classList.remove('is-open');
+    setTimeout(function () {
+      modal.hidden = true;
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }, 250);
+  }
+
+  function confirmPayment() {
+    if (!_payItems || !_payItems.length) return;
+    // For Payment Links, we open the first item's link.
+    // Multi-item carts: each item has its own link, we open the first and warn.
+    var first = _payItems[0];
+    if (!first.paymentLink) {
+      alert('Lien de paiement non configuré pour ce produit. Contacte le support.');
+      return;
+    }
+    // Save pending order intent in localStorage so #/merci can record it
+    try {
+      var total = _payItems.reduce(function (s, it) { return s + (it.price || 0) * (it.qty || 1); }, 0);
+      localStorage.setItem('pt_pending_order', JSON.stringify({
+        items: _payItems.map(function (it) { return { title: it.title, price: it.price, qty: it.qty }; }),
+        total: total,
+        ts: Date.now()
+      }));
+    } catch (e) {}
+    window.open(first.paymentLink, '_blank', 'noopener');
+    closePayModal();
+  }
+
+  function setupPayModal() {
+    var modal = document.getElementById('payModal');
+    if (!modal) return;
+    modal.addEventListener('click', function (e) {
+      if (e.target.hasAttribute('data-pay-close')) closePayModal();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !modal.hidden) closePayModal();
+    });
+    var confirm = document.getElementById('payModalConfirm');
+    if (confirm) confirm.addEventListener('click', confirmPayment);
+  }
+
+  function handleMerciPage() {
+    // Called when route changes to /merci
+    var pending = null;
+    try { pending = JSON.parse(localStorage.getItem('pt_pending_order') || 'null'); } catch (e) {}
+    if (pending && _currentUser && _fb) {
+      // Save to Firestore
+      var ordersRef = _fb.collection(_fb.db, 'users', _currentUser.uid, 'orders');
+      _fb.addDoc(ordersRef, {
+        items: pending.items,
+        total: pending.total,
+        date: _fb.serverTimestamp(),
+        status: 'paid',
+        method: 'stripe'
+      }).then(function () {
+        localStorage.removeItem('pt_pending_order');
+      }).catch(function () {});
+    }
+  }
+
+  // Expose openPayModal for cart buttons
+  window.openPayModal = openPayModal;
+
   function setupAccountTabs() {
     var tabs = document.querySelectorAll('.acc-tab');
     var panes = document.querySelectorAll('.acc-pane');
@@ -2650,6 +2779,7 @@
     cacheDom();
     bindEvents();
     setupAccountTabs();
+    setupPayModal();
     initAuth();
     initPWA();
     updateCartUI();
