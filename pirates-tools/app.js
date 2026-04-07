@@ -455,28 +455,41 @@
   };
   var _brandScenes = [];
 
-  function buildBrandTexture(logoSrc, bgColor, cb) {
+  function sampleLogoBg(img) {
+    // Sample 4 corner pixels and average them — they're virtually always
+    // the logo's background color since logos are centered.
+    var c = document.createElement('canvas');
+    c.width = img.width; c.height = img.height;
+    var cx = c.getContext('2d');
+    cx.drawImage(img, 0, 0);
+    var pts = [[1,1],[img.width-2,1],[1,img.height-2],[img.width-2,img.height-2]];
+    var r=0,g=0,b=0,n=0;
+    for (var i=0;i<pts.length;i++){
+      try {
+        var d = cx.getImageData(pts[i][0],pts[i][1],1,1).data;
+        if (d[3] > 200) { r+=d[0]; g+=d[1]; b+=d[2]; n++; }
+      } catch(e){}
+    }
+    if (!n) return null;
+    return 'rgb(' + Math.round(r/n) + ',' + Math.round(g/n) + ',' + Math.round(b/n) + ')';
+  }
+
+  function buildBrandTexture(logoSrc, fallbackColor, cb) {
     var SIZE = 1024;
     var canvas = document.createElement('canvas');
     canvas.width = SIZE * 2;
     canvas.height = SIZE;
     var ctx = canvas.getContext('2d');
-    // Background gradient
-    var grd = ctx.createLinearGradient(0, 0, 0, SIZE);
-    grd.addColorStop(0, bgColor);
-    grd.addColorStop(1, shadeColor(bgColor, -25));
-    ctx.fillStyle = grd;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    // Subtle highlight band
-    ctx.fillStyle = 'rgba(255,255,255,.07)';
-    ctx.fillRect(0, SIZE * 0.3, canvas.width, SIZE * 0.15);
 
     var img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = function () {
-      // Draw the logo centered (covers the front-facing hemisphere when wrapped)
-      var maxW = SIZE * 1.0;
-      var maxH = SIZE * 0.55;
+      var bg = sampleLogoBg(img) || fallbackColor;
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // Draw the logo centered, large enough to cover the front-facing hemisphere
+      var maxW = SIZE * 1.1;
+      var maxH = SIZE * 0.7;
       var ratio = Math.min(maxW / img.width, maxH / img.height);
       var w = img.width * ratio;
       var h = img.height * ratio;
@@ -485,7 +498,11 @@
       ctx.drawImage(img, x, y, w, h);
       cb(canvas);
     };
-    img.onerror = function () { cb(canvas); };
+    img.onerror = function () {
+      ctx.fillStyle = fallbackColor;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      cb(canvas);
+    };
     img.src = logoSrc;
   }
 

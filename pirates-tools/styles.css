@@ -4463,18 +4463,15 @@ html { scroll-behavior: auto; }
 
 /* ── Grid ── */
 .brands-showcase {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  justify-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px 24px;
 }
+.brands-showcase .brand-card { flex: 0 0 auto; }
 
 @media (min-width: 600px) {
-  .brands-showcase { grid-template-columns: repeat(4, 1fr); gap: 20px; }
-}
-
-@media (min-width: 900px) {
-  .brands-showcase { grid-template-columns: repeat(5, 1fr); }
+  .brands-showcase { gap: 20px 32px; }
 }
 
 /* ── Single Brand Card ── */
