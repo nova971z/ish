@@ -21,14 +21,14 @@
  * IMPORTANT : double-vérifie chaque adresse avant publication. Une faute = fonds perdus.
  */
 window.PT_CRYPTO_CONFIG = {
-  // Adresse(s) de réception. Remplace les "REMPLACE_…" par tes vraies adresses.
+  // Adresse(s) de réception (MetaMask multi-chaînes).
   networks: [
     {
       id: 'btc',
       label: 'Bitcoin',
       symbol: 'BTC',
       chain: 'Bitcoin',
-      address: 'REMPLACE_PAR_TON_ADRESSE_BTC',
+      address: 'bc1qfh9zdgq598xc3vgsrnyp2v38pefcxz827kwxwx',
       coingeckoId: 'bitcoin',
       decimals: 8,
       uriScheme: 'bitcoin:'
@@ -37,39 +37,39 @@ window.PT_CRYPTO_CONFIG = {
       id: 'eth',
       label: 'Ethereum',
       symbol: 'ETH',
-      chain: 'Ethereum (ERC-20)',
-      address: 'REMPLACE_PAR_TON_ADRESSE_ETH',
+      chain: 'Ethereum (mainnet)',
+      address: '0xbF61CB5850754c3A87bEb696E3f0607718ad6b08',
       coingeckoId: 'ethereum',
       decimals: 6,
       uriScheme: 'ethereum:'
     },
     {
-      id: 'usdt-erc20',
-      label: 'USDT (Ethereum)',
-      symbol: 'USDT',
-      chain: 'Ethereum (ERC-20)',
-      address: 'REMPLACE_PAR_TON_ADRESSE_USDT_ERC20',
-      coingeckoId: 'tether',
-      decimals: 2,
+      id: 'arb-eth',
+      label: 'ETH (Arbitrum)',
+      symbol: 'ETH',
+      chain: 'Arbitrum One',
+      address: '0xbF61CB5850754c3A87bEb696E3f0607718ad6b08',
+      coingeckoId: 'ethereum',
+      decimals: 6,
       uriScheme: ''
     },
     {
-      id: 'usdt-trc20',
-      label: 'USDT (Tron)',
-      symbol: 'USDT',
-      chain: 'Tron (TRC-20)',
-      address: 'REMPLACE_PAR_TON_ADRESSE_USDT_TRC20',
-      coingeckoId: 'tether',
-      decimals: 2,
-      uriScheme: ''
-    },
-    {
-      id: 'usdc',
-      label: 'USDC (Ethereum)',
+      id: 'arb-usdc',
+      label: 'USDC (Arbitrum)',
       symbol: 'USDC',
-      chain: 'Ethereum (ERC-20)',
-      address: 'REMPLACE_PAR_TON_ADRESSE_USDC',
+      chain: 'Arbitrum One',
+      address: '0xbF61CB5850754c3A87bEb696E3f0607718ad6b08',
       coingeckoId: 'usd-coin',
+      decimals: 2,
+      uriScheme: ''
+    },
+    {
+      id: 'arb-usdt',
+      label: 'USDT (Arbitrum)',
+      symbol: 'USDT',
+      chain: 'Arbitrum One',
+      address: '0xbF61CB5850754c3A87bEb696E3f0607718ad6b08',
+      coingeckoId: 'tether',
       decimals: 2,
       uriScheme: ''
     },
@@ -78,20 +78,10 @@ window.PT_CRYPTO_CONFIG = {
       label: 'Solana',
       symbol: 'SOL',
       chain: 'Solana',
-      address: 'REMPLACE_PAR_TON_ADRESSE_SOL',
+      address: 'GKVmgduLmvVtqvds8oXsH4UFxmkbAVT2om4bXBo2eQbu',
       coingeckoId: 'solana',
       decimals: 4,
       uriScheme: 'solana:'
-    },
-    {
-      id: 'bnb',
-      label: 'BNB',
-      symbol: 'BNB',
-      chain: 'BNB Smart Chain (BEP-20)',
-      address: 'REMPLACE_PAR_TON_ADRESSE_BNB',
-      coingeckoId: 'binancecoin',
-      decimals: 6,
-      uriScheme: ''
     }
   ],
 
