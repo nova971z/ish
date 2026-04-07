@@ -4809,3 +4809,133 @@ width: 100%;
 #list, #contact, #pdp, #view-catalogue, #view-devis, #view-compte {
 scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 }
+
+/* ============================================================
+   ACCOUNT — Refonte (hero + onglets)
+   ============================================================ */
+.acc-hero {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 1.4rem 1.6rem;
+  background: linear-gradient(135deg, rgba(139,92,246,.14), rgba(168,85,247,.06));
+  border: 1px solid rgba(139,92,246,.25);
+  margin-bottom: 1.2rem;
+}
+.acc-hero__avatar-wrap {
+  position: relative;
+  flex: 0 0 auto;
+}
+.acc-hero__avatar {
+  width: 86px;
+  height: 86px;
+  border-radius: 50%;
+  border: 2px solid rgba(168,85,247,.5);
+  object-fit: cover;
+  background: rgba(255,255,255,.04);
+}
+.acc-hero__avatar-edit {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #8B5CF6, #A855F7);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 2px solid #0a0a0f;
+  transition: transform .2s ease;
+}
+.acc-hero__avatar-edit:hover { transform: scale(1.1); }
+.acc-hero__info { flex: 1; min-width: 0; }
+.acc-hero__name {
+  margin: 0 0 .15rem;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #fff;
+}
+.acc-hero__email {
+  margin: 0 0 .6rem;
+  font-size: .88rem;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.acc-hero__loyalty {
+  margin: 0 0 .35rem;
+  font-size: .82rem;
+  color: #A855F7;
+  font-weight: 600;
+}
+.acc-hero__meter { max-width: 320px; }
+
+/* Tabs */
+.acc-tabs {
+  display: flex;
+  gap: .35rem;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 14px;
+  padding: .35rem;
+  margin-bottom: 1.2rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.acc-tabs::-webkit-scrollbar { display: none; }
+.acc-tab {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+  padding: .7rem 1rem;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  color: var(--muted);
+  font-size: .92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .25s ease;
+  white-space: nowrap;
+}
+.acc-tab svg { flex: 0 0 auto; }
+.acc-tab:hover { color: #fff; background: rgba(139,92,246,.08); }
+.acc-tab.active {
+  background: linear-gradient(135deg, rgba(139,92,246,.25), rgba(168,85,247,.18));
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(139,92,246,.25);
+}
+
+.acc-pane { animation: acc-fade .3s ease; }
+.acc-pane[hidden] { display: none; }
+@keyframes acc-fade {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Danger card */
+.acc-danger { border-color: rgba(244,67,54,.25); }
+.acc-logout-btn {
+  background: rgba(244,67,54,.15) !important;
+  color: #f44 !important;
+  border: 1px solid rgba(244,67,54,.3) !important;
+}
+.acc-logout-btn:hover {
+  background: rgba(244,67,54,.25) !important;
+}
+
+@media (max-width: 560px) {
+  .acc-hero { flex-direction: column; text-align: center; padding: 1.2rem; }
+  .acc-hero__email { white-space: normal; }
+  .acc-hero__meter { margin: 0 auto; }
+  .acc-tab span { display: none; }
+  .acc-tab { padding: .8rem; }
+  .acc-tab svg { width: 20px; height: 20px; }
+}

@@ -2284,6 +2284,12 @@
     updateLoyaltyBar(pct);
     if (dom.accLoyaltyTxt) dom.accLoyaltyTxt.textContent = loyalty + ' points';
 
+    // Hero header
+    var heroName = document.getElementById('accHeroName');
+    var heroEmail = document.getElementById('accHeroEmail');
+    if (heroName) heroName.textContent = p.name || _currentUser.displayName || 'Pirate';
+    if (heroEmail) heroEmail.textContent = p.email || _currentUser.email || '';
+
     // Email verification banner
     if (dom.accVerifyBanner) {
       dom.accVerifyBanner.hidden = !!_currentUser.emailVerified;
@@ -2620,9 +2626,30 @@
 
   // ── Bootstrap ──────────────────────────────────────────────
 
+  function setupAccountTabs() {
+    var tabs = document.querySelectorAll('.acc-tab');
+    var panes = document.querySelectorAll('.acc-pane');
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        var target = tab.getAttribute('data-acc-tab');
+        tabs.forEach(function (t) {
+          var active = t === tab;
+          t.classList.toggle('active', active);
+          t.setAttribute('aria-selected', active ? 'true' : 'false');
+        });
+        panes.forEach(function (p) {
+          var active = p.getAttribute('data-acc-pane') === target;
+          p.classList.toggle('active', active);
+          p.hidden = !active;
+        });
+      });
+    });
+  }
+
   function init() {
     cacheDom();
     bindEvents();
+    setupAccountTabs();
     initAuth();
     initPWA();
     updateCartUI();

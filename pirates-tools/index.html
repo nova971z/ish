@@ -562,86 +562,20 @@
           <button id="accResendVerify" type="button" class="acc-verify-banner__btn">Renvoyer le lien</button>
         </div>
 
-        <!-- Profil -->
-        <div class="card">
-          <div class="head"><h3 class="title">Mon profil</h3><span class="badge">Infos</span></div>
-          <div class="specs">
-
-            <!-- Avatar -->
-            <div style="display:flex;gap:1rem;align-items:center;margin-bottom:.75rem">
-              <img id="accAvatarImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" alt="Avatar" width="64" height="64" style="border-radius:50%;border:1px solid rgba(255,255,255,.16);object-fit:cover"/>
-              <label class="chip" style="cursor:pointer">
-                <input id="accAvatar" type="file" accept="image/*" hidden />
-                Changer la photo
-              </label>
-            </div>
-
-            <form id="accountForm" style="display:grid;gap:.6rem;max-width:520px">
-              <label>Nom complet
-                <input id="accName" type="text" class="search" placeholder="Votre nom" autocomplete="name" />
-              </label>
-              <label>Email
-                <input id="accEmail" type="email" class="search" placeholder="vous@exemple.com" autocomplete="email" />
-              </label>
-              <label>Telephone
-                <input id="accPhone" type="tel" class="search" placeholder="06 90 00 00 00" autocomplete="tel" />
-              </label>
-              <label>Adresse
-                <input id="accAddress" type="text" class="search" placeholder="Rue, ville, code postal" autocomplete="street-address" />
-              </label>
-              <div class="actions">
-                <button id="accSave" class="btn primary" type="button" data-action="account-save">Enregistrer</button>
-              </div>
-            </form>
+        <!-- Header utilisateur (avatar + identite) -->
+        <div class="acc-hero card">
+          <div class="acc-hero__avatar-wrap">
+            <img id="accAvatarImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" alt="Avatar" class="acc-hero__avatar"/>
+            <label class="acc-hero__avatar-edit" title="Changer la photo">
+              <input id="accAvatar" type="file" accept="image/*" hidden />
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            </label>
           </div>
-        </div>
-
-        <!-- Changer mot de passe -->
-        <div class="card" style="margin-top:1.2rem">
-          <div class="head"><h3 class="title">Securite</h3><span class="badge">Mot de passe</span></div>
-          <div class="specs">
-            <form id="pwdChangeForm" style="display:grid;gap:.6rem;max-width:520px">
-              <label>Mot de passe actuel
-                <input id="pwdCurrent" type="password" class="search" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" autocomplete="current-password" required />
-              </label>
-              <label>Nouveau mot de passe
-                <input id="pwdNew" type="password" class="search" placeholder="Min. 6 caracteres" minlength="6" autocomplete="new-password" required />
-              </label>
-              <label>Confirmer le nouveau mot de passe
-                <input id="pwdConfirm" type="password" class="search" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" autocomplete="new-password" required />
-              </label>
-              <div class="actions">
-                <button class="btn primary" type="submit">Changer le mot de passe</button>
-              </div>
-            </form>
-          </div>
-        </div>
-
-        <!-- Panier recap -->
-        <div class="card" style="margin-top:1.2rem">
-          <div class="head"><h3 class="title">Mon panier</h3><span class="badge">Resume</span></div>
-          <div class="specs">
-            <p id="accCartMiniTxt" style="opacity:.9">0 article — total 0 &#8364;</p>
-            <div class="actions"><a class="btn" href="#/devis" data-nav="/devis">Voir le panier</a></div>
-          </div>
-        </div>
-
-        <!-- Historique commandes -->
-        <div class="card" style="margin-top:1.2rem">
-          <div class="head"><h3 class="title">Historique</h3><span class="badge">Devis envoyes</span></div>
-          <div class="specs">
-            <div id="accHistory" style="display:grid;gap:.6rem">
-              <p style="opacity:.6;text-align:center;padding:.5rem 0">Aucun devis envoye pour le moment.</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Fidélité -->
-        <div class="card" style="margin-top:1.2rem">
-          <div class="head"><h3 class="title">Fidelite</h3><span class="badge">Points</span></div>
-          <div class="specs">
-            <p id="accLoyaltyTxt" style="opacity:.9;margin-bottom:.5rem">0 points</p>
-            <div class="meter" style="max-width:520px">
+          <div class="acc-hero__info">
+            <h2 id="accHeroName" class="acc-hero__name">Pirate</h2>
+            <p id="accHeroEmail" class="acc-hero__email">—</p>
+            <p id="accLoyaltyTxt" class="acc-hero__loyalty">0 points</p>
+            <div class="meter acc-hero__meter">
               <div class="meter__rail">
                 <div id="accFill" class="meter__fill"></div>
                 <div id="accCursor" class="meter__cursor" style="left:0%"></div>
@@ -651,9 +585,100 @@
           </div>
         </div>
 
-        <!-- Déconnexion -->
-        <div style="text-align:center;margin:2rem 0 1rem">
-          <button id="accLogout" class="btn" type="button" style="background:rgba(244,67,54,.15) !important;color:#f44 !important;border:1px solid rgba(244,67,54,.3) !important">Se deconnecter</button>
+        <!-- Navigation par onglets -->
+        <div class="acc-tabs" role="tablist" aria-label="Sections du compte">
+          <button class="acc-tab active" role="tab" data-acc-tab="profile" aria-selected="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span>Profil</span>
+          </button>
+          <button class="acc-tab" role="tab" data-acc-tab="orders" aria-selected="false">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+            <span>Commandes</span>
+          </button>
+          <button class="acc-tab" role="tab" data-acc-tab="settings" aria-selected="false">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <span>Paramètres</span>
+          </button>
+        </div>
+
+        <!-- Onglet Profil -->
+        <div class="acc-pane active" data-acc-pane="profile">
+          <div class="card">
+            <div class="head"><h3 class="title">Informations personnelles</h3><span class="badge">Profil</span></div>
+            <div class="specs">
+              <form id="accountForm" style="display:grid;gap:.6rem;max-width:520px">
+                <label>Nom complet
+                  <input id="accName" type="text" class="search" placeholder="Votre nom" autocomplete="name" />
+                </label>
+                <label>Email
+                  <input id="accEmail" type="email" class="search" placeholder="vous@exemple.com" autocomplete="email" />
+                </label>
+                <label>Telephone
+                  <input id="accPhone" type="tel" class="search" placeholder="06 90 00 00 00" autocomplete="tel" />
+                </label>
+                <label>Adresse
+                  <input id="accAddress" type="text" class="search" placeholder="Rue, ville, code postal" autocomplete="street-address" />
+                </label>
+                <div class="actions">
+                  <button id="accSave" class="btn primary" type="button" data-action="account-save">Enregistrer</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:1.2rem">
+            <div class="head"><h3 class="title">Mon panier</h3><span class="badge">Resume</span></div>
+            <div class="specs">
+              <p id="accCartMiniTxt" style="opacity:.9">0 article — total 0 &#8364;</p>
+              <div class="actions"><a class="btn" href="#/devis" data-nav="/devis">Voir le panier</a></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Onglet Commandes -->
+        <div class="acc-pane" data-acc-pane="orders" hidden>
+          <div class="card">
+            <div class="head"><h3 class="title">Historique des devis</h3><span class="badge">Commandes</span></div>
+            <div class="specs">
+              <div id="accHistory" style="display:grid;gap:.6rem">
+                <p style="opacity:.6;text-align:center;padding:.5rem 0">Aucun devis envoye pour le moment.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Onglet Parametres -->
+        <div class="acc-pane" data-acc-pane="settings" hidden>
+          <div class="card">
+            <div class="head"><h3 class="title">Securite</h3><span class="badge">Mot de passe</span></div>
+            <div class="specs">
+              <p style="opacity:.75;margin:0 0 .8rem;font-size:.9rem">Modifie ton mot de passe regulierement pour garder ton compte en securite.</p>
+              <form id="pwdChangeForm" style="display:grid;gap:.6rem;max-width:520px">
+                <label>Mot de passe actuel
+                  <input id="pwdCurrent" type="password" class="search" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" autocomplete="current-password" required />
+                </label>
+                <label>Nouveau mot de passe
+                  <input id="pwdNew" type="password" class="search" placeholder="Min. 6 caracteres" minlength="6" autocomplete="new-password" required />
+                </label>
+                <label>Confirmer le nouveau mot de passe
+                  <input id="pwdConfirm" type="password" class="search" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" autocomplete="new-password" required />
+                </label>
+                <div class="actions">
+                  <button class="btn primary" type="submit">Changer le mot de passe</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="card acc-danger" style="margin-top:1.2rem">
+            <div class="head"><h3 class="title">Session</h3><span class="badge">Compte</span></div>
+            <div class="specs">
+              <p style="opacity:.75;margin:0 0 .8rem;font-size:.9rem">Deconnecte-toi de cet appareil. Tu pourras te reconnecter a tout moment.</p>
+              <div class="actions">
+                <button id="accLogout" class="btn acc-logout-btn" type="button">Se deconnecter</button>
+              </div>
+            </div>
+          </div>
         </div>
 
       </div>
