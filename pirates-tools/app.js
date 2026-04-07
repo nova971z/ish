@@ -105,7 +105,6 @@
         + ' alt="' + alt + '"'
         + ' loading="eager"'
         + ' reveal="auto"'
-        + ' auto-rotate'
         + ' rotation-per-second="25deg"'
         + ' interaction-prompt="none"'
         + ' disable-zoom'
@@ -3054,6 +3053,22 @@
   function setupRevealAnimations() {
     observeReveals(document);
   }
+
+  // ── <model-viewer> hover-rotate (product cards) ────────────
+  // Cards stay still by default; auto-rotate only while hovered
+  // (or focused via keyboard). Saves CPU/GPU on long lists.
+  document.addEventListener('pointerenter', function (e) {
+    var t = e.target;
+    if (t && t.nodeType === 1 && t.classList && t.classList.contains('product-card__model')) {
+      t.setAttribute('auto-rotate', '');
+    }
+  }, true);
+  document.addEventListener('pointerleave', function (e) {
+    var t = e.target;
+    if (t && t.nodeType === 1 && t.classList && t.classList.contains('product-card__model')) {
+      t.removeAttribute('auto-rotate');
+    }
+  }, true);
 
   // ── <model-viewer> error surfacing ─────────────────────────
   // Listen for failed model loads at the document level so we can
