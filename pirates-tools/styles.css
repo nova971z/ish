@@ -1216,6 +1216,18 @@ body.page-devis #view-devis {
   text-decoration: none;
 }
 
+.devis-btn--pay {
+  flex: 2;
+  background: linear-gradient(135deg, #635bff, #8B5CF6);
+  color: #fff;
+  box-shadow: 0 4px 18px rgba(139,92,246,.35);
+}
+.devis-btn--pay:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(139,92,246,.5);
+  filter: brightness(1.07);
+}
+
 .devis-btn--wa {
   flex: 2;
   background: linear-gradient(135deg, #25d366, #128c7e);

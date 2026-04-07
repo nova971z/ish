@@ -40,7 +40,7 @@
       'q','tag','catList','list','brandGrid',
       'pdpTitle','pdpTag','pdpDesc','pdpPrice','pdpSpecs','pdpImg',
       'pdpQuote','pdpWa','pdpShare','pdpRelated',
-      'devisList','devisSend','devisClear',
+      'devisList','devisSend','devisClear','devisPay',
       'dock','dockCartBtn','dockCount','dockHomeBtn','dockQuoteBtn',
       'authLoginTab','authRegisterTab','authLogin','authRegister',
       'loginForm','registerForm','loginEmail','loginPwd','loginSubmit','regSubmit',
@@ -236,7 +236,7 @@
         + '<button class="devis-qty-btn devis-qty-plus" data-idx="' + idx + '" aria-label="Plus">+</button>'
         + '</div>'
         + '<span class="devis-item__subtotal">' + formatPrice(sub) + '</span>'
-        + (item.paymentLink ? '<button class="devis-buy" data-idx="' + idx + '" aria-label="Acheter">💳 Payer</button>' : '')
+        + '<button class="devis-buy" data-idx="' + idx + '" aria-label="Payer cette ligne">💳 Payer</button>'
         + '<button class="devis-remove" data-idx="' + idx + '" aria-label="Supprimer">'
         + '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>'
         + '</button>'
@@ -914,17 +914,13 @@
       };
     }
 
-    // Buy now (Stripe Payment Link)
+    // Buy now — toujours visible, ouvre la modale (Carte/Crypto)
     var pdpBuy = document.getElementById('pdpBuy');
     if (pdpBuy) {
-      if (product.paymentLink) {
-        pdpBuy.hidden = false;
-        pdpBuy.onclick = function () {
-          openPayModal([{ title: product.title, price: product.price, qty: 1, paymentLink: product.paymentLink }]);
-        };
-      } else {
-        pdpBuy.hidden = true;
-      }
+      pdpBuy.hidden = false;
+      pdpBuy.onclick = function () {
+        openPayModal([{ title: product.title, price: product.price, qty: 1, paymentLink: product.paymentLink || '' }]);
+      };
     }
 
     // WhatsApp link
@@ -2886,6 +2882,13 @@
 
     // Devis page actions
     if (dom.devisSend) dom.devisSend.addEventListener('click', sendDevisWhatsApp);
+    if (dom.devisPay) dom.devisPay.addEventListener('click', function () {
+      var items = getCart();
+      if (!items.length) { toast('Panier vide', 'error'); return; }
+      openPayModal(items.map(function (it) {
+        return { title: it.title, price: it.price, qty: it.qty || 1, paymentLink: it.paymentLink || '' };
+      }));
+    });
     if (dom.devisClear) {
       dom.devisClear.addEventListener('click', function () {
         clearCart();
@@ -3217,7 +3220,10 @@
     // Multi-item carts: each item has its own link, we open the first and warn.
     var first = _payItems[0];
     if (!first.paymentLink) {
-      alert('Lien de paiement non configuré pour ce produit. Contacte le support.');
+      // Pas de lien Stripe configuré → bascule sur l'onglet crypto
+      // (qui propose aussi un on-ramp carte via NOWPayments).
+      toast('Paiement carte non configuré — bascule sur Crypto.', 'info');
+      cryptoSwitchTab('crypto');
       return;
     }
     // Save pending order intent in localStorage so #/merci can record it
