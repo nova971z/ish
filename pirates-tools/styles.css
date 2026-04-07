@@ -3874,6 +3874,169 @@ color: #e6f7ff;
   transform: translateX(3px);
 }
 
+/* Loading state on auth submit buttons */
+.auth-submit__spinner {
+  display: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255,255,255,.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: auth-spin .8s linear infinite;
+}
+@keyframes auth-spin {
+  to { transform: rotate(360deg); }
+}
+.auth-submit.is-loading {
+  pointer-events: none;
+  opacity: .85;
+}
+.auth-submit.is-loading .auth-submit__label,
+.auth-submit.is-loading .auth-submit__icon {
+  display: none;
+}
+.auth-submit.is-loading .auth-submit__spinner {
+  display: inline-block;
+}
+
+/* Forgot password row + link */
+.auth-forgot-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -.3rem;
+}
+.auth-forgot-link {
+  background: none;
+  border: none;
+  color: #c4b5fd;
+  font-size: .8rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: .2rem .1rem;
+  transition: color .25s ease;
+  text-decoration: none;
+}
+.auth-forgot-link:hover {
+  color: #fff;
+  text-shadow: 0 0 12px rgba(139,92,246,.6);
+}
+
+/* Forgot password panel (slides in over login form) */
+.auth-forgot-panel {
+  margin-top: 1rem;
+  padding: 1.2rem 1.1rem 1rem;
+  background: linear-gradient(160deg, rgba(139,92,246,.1) 0%, rgba(14,21,28,.85) 100%);
+  border: 1.5px solid rgba(139,92,246,.4);
+  border-radius: 14px;
+  box-shadow: 0 0 24px rgba(139,92,246,.18), inset 0 1px 0 rgba(255,255,255,.06);
+  animation: auth-forgot-in .35s cubic-bezier(.4,0,.2,1);
+}
+@keyframes auth-forgot-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.auth-forgot-panel[hidden] {
+  display: none;
+}
+.auth-forgot-panel__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: .4rem;
+}
+.auth-forgot-panel__head h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+}
+.auth-forgot-close {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 .3rem;
+  transition: color .2s ease;
+}
+.auth-forgot-close:hover {
+  color: #fff;
+}
+.auth-forgot-panel__desc {
+  margin: 0 0 .9rem;
+  font-size: .82rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+/* Email verification banner on the account page */
+.acc-verify-banner {
+  display: flex;
+  align-items: center;
+  gap: .9rem;
+  padding: .9rem 1.1rem;
+  margin: 0 auto 1.2rem;
+  max-width: 720px;
+  background: linear-gradient(135deg, rgba(251,191,36,.12) 0%, rgba(245,158,11,.08) 100%);
+  border: 1.5px solid rgba(251,191,36,.4);
+  border-radius: 14px;
+  box-shadow: 0 0 18px rgba(251,191,36,.15), inset 0 1px 0 rgba(255,255,255,.05);
+}
+.acc-verify-banner[hidden] {
+  display: none;
+}
+.acc-verify-banner__icon {
+  font-size: 1.6rem;
+  color: #fbbf24;
+  filter: drop-shadow(0 0 8px rgba(251,191,36,.5));
+  flex-shrink: 0;
+}
+.acc-verify-banner__text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.acc-verify-banner__text strong {
+  color: #fff;
+  font-size: .92rem;
+  font-weight: 700;
+}
+.acc-verify-banner__text span {
+  color: var(--muted);
+  font-size: .8rem;
+}
+.acc-verify-banner__btn {
+  flex-shrink: 0;
+  background: rgba(251,191,36,.18);
+  color: #fbbf24;
+  border: 1px solid rgba(251,191,36,.5);
+  border-radius: 10px;
+  padding: .5rem .9rem;
+  font-size: .82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .25s ease;
+}
+.acc-verify-banner__btn:hover {
+  background: rgba(251,191,36,.3);
+  box-shadow: 0 0 14px rgba(251,191,36,.35);
+}
+@media (max-width: 540px) {
+  .acc-verify-banner {
+    flex-wrap: wrap;
+    text-align: center;
+  }
+  .acc-verify-banner__text {
+    flex: 1 1 100%;
+    text-align: center;
+  }
+  .acc-verify-banner__btn {
+    margin: 0 auto;
+  }
+}
+
 /* ========== 19) AVIS ========== */
 .ratings {
 margin: 2rem auto 1rem;

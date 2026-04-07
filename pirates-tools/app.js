@@ -43,11 +43,12 @@
       'devisList','devisSend','devisClear',
       'dock','dockCartBtn','dockCount','dockHomeBtn','dockQuoteBtn',
       'authLoginTab','authRegisterTab','authLogin','authRegister',
-      'loginForm','registerForm','loginEmail','loginPwd',
+      'loginForm','registerForm','loginEmail','loginPwd','loginSubmit','regSubmit',
       'regName','regEmail','regPwd',
+      'authForgotBtn','authForgotPanel','authForgotClose','forgotForm','forgotEmail','forgotSubmit',
       'accountForm','accSave','accName','accEmail','accPhone','accAddress',
       'accAvatar','accAvatarImg','accCartMiniTxt','accLogout','accHistory','accLoyaltyTxt',
-      'accSlider','accFill','accCursor',
+      'accSlider','accFill','accCursor','accVerifyBanner','accResendVerify',
       'pwdChangeForm','pwdCurrent','pwdNew','pwdConfirm',
       'toasts','installBtn'
     ];
@@ -275,22 +276,8 @@
     var url = 'https://wa.me/' + WA_PHONE + '?text=' + encodeURIComponent(lines.join('\n'));
     window.open(url, '_blank');
 
-    // Save to order history
-    var email = localStorage.getItem('pt_auth');
-    if (email) {
-      var key = 'pt_orders_' + email;
-      var orders = [];
-      try { orders = JSON.parse(localStorage.getItem(key) || '[]'); } catch (e) {}
-      orders.unshift({ date: Date.now(), items: items.length, total: total });
-      localStorage.setItem(key, JSON.stringify(orders));
-
-      // Add loyalty points (1 point per euro)
-      var users = getUsers();
-      if (users[email]) {
-        users[email].loyalty = (users[email].loyalty || 0) + Math.round(total);
-        saveUsers(users);
-      }
-    }
+    // Save to Firestore order history (if authenticated)
+    saveOrderToFirestore(items.length, total);
   }
 
   // ── Products ───────────────────────────────────────────────
@@ -1872,7 +1859,7 @@
     var route = parsed.route;
 
     // Auth guards
-    var loggedIn = !!localStorage.getItem('pt_auth');
+    var loggedIn = !!_currentUser;
     if (route === '/compte' && !loggedIn) { location.hash = '#/auth'; return; }
     if (route === '/auth' && loggedIn) { location.hash = '#/compte'; return; }
 
@@ -2069,28 +2056,114 @@
     menuOpen ? closeMenu() : openMenu();
   }
 
-  // ── Auth (localStorage-based) ──────────────────────────────
+  // ── Auth (Firebase) ────────────────────────────────────────
 
-  function getUsers() {
-    try { return JSON.parse(localStorage.getItem('pt_users') || '{}'); }
-    catch (_) { return {}; }
+  // Module-scope state
+  var _fb = null;                 // Firebase API namespace (window.PT_FIREBASE)
+  var _currentUser = null;        // Firebase Auth user (or null)
+  var _userProfile = null;        // Cached Firestore profile doc
+  var _authReady = false;         // True after first onAuthStateChanged callback
+
+  // Map Firebase error codes -> French user messages
+  function fbErrorMessage(err) {
+    var code = (err && err.code) || '';
+    var map = {
+      'auth/email-already-in-use': 'Cet email est deja utilise',
+      'auth/invalid-email': 'Email invalide',
+      'auth/weak-password': 'Mot de passe trop faible (min. 6 caracteres)',
+      'auth/user-not-found': 'Aucun compte avec cet email',
+      'auth/wrong-password': 'Mot de passe incorrect',
+      'auth/invalid-credential': 'Email ou mot de passe incorrect',
+      'auth/too-many-requests': 'Trop de tentatives. Reessaie plus tard',
+      'auth/network-request-failed': 'Probleme de reseau',
+      'auth/requires-recent-login': 'Reconnecte-toi pour effectuer cette action',
+      'auth/missing-password': 'Mot de passe requis',
+      'auth/popup-closed-by-user': 'Fenetre fermee'
+    };
+    return map[code] || (err && err.message) || 'Une erreur est survenue';
   }
 
-  function saveUsers(users) {
-    localStorage.setItem('pt_users', JSON.stringify(users));
+  // Loading state on a submit button
+  function setBtnLoading(btn, loading) {
+    if (!btn) return;
+    if (loading) {
+      btn.classList.add('is-loading');
+      btn.disabled = true;
+    } else {
+      btn.classList.remove('is-loading');
+      btn.disabled = false;
+    }
   }
 
-  function sha256(message) {
-    var data = new TextEncoder().encode(message);
-    return crypto.subtle.digest('SHA-256', data).then(function (buf) {
-      return Array.from(new Uint8Array(buf))
-        .map(function (b) { return b.toString(16).padStart(2, '0'); })
-        .join('');
+  // Wait for the firebase-init.js module to expose window.PT_FIREBASE
+  function whenFirebaseReady(cb) {
+    if (window.PT_FIREBASE) { cb(window.PT_FIREBASE); return; }
+    window.addEventListener('pt-firebase-ready', function () {
+      cb(window.PT_FIREBASE);
+    }, { once: true });
+  }
+
+  function initAuth() {
+    whenFirebaseReady(function (fb) {
+      _fb = fb;
+      if (!fb.configured) {
+        // Firebase not yet configured by site owner — keep app usable
+        _authReady = true;
+        return;
+      }
+      // Listen to auth state changes
+      fb.onAuthStateChanged(fb.auth, function (user) {
+        _currentUser = user || null;
+        _authReady = true;
+        if (user) {
+          // Load Firestore profile in background
+          loadUserProfile().then(function () {
+            // Re-render account if currently visible
+            if (location.hash === '#/compte') renderAccount();
+          });
+        } else {
+          _userProfile = null;
+        }
+        // If we're on a guarded route, re-evaluate
+        if (location.hash === '#/compte' && !user) {
+          location.hash = '#/auth';
+        } else if (location.hash === '#/auth' && user) {
+          location.hash = '#/compte';
+        }
+      });
     });
   }
 
+  // Read user profile from Firestore (creates default if missing)
+  function loadUserProfile() {
+    if (!_fb || !_currentUser) return Promise.resolve(null);
+    var ref = _fb.doc(_fb.db, 'users', _currentUser.uid);
+    return _fb.getDoc(ref).then(function (snap) {
+      if (snap.exists()) {
+        _userProfile = snap.data();
+      } else {
+        _userProfile = {
+          name: _currentUser.displayName || '',
+          email: _currentUser.email || '',
+          phone: '',
+          address: '',
+          avatar: '',
+          loyalty: 0,
+          createdAt: _fb.serverTimestamp()
+        };
+        return _fb.setDoc(ref, _userProfile);
+      }
+    }).catch(function (err) {
+      console.warn('[Auth] loadUserProfile failed:', err);
+    });
+  }
+
+  // ── Handlers ───────────────────────────────────────────────
+
   function handleRegister(e) {
     e.preventDefault();
+    if (!_fb || !_fb.configured) { toast('Authentification non configuree', 'error'); return; }
+
     var name = (dom.regName ? dom.regName.value : '').trim();
     var email = (dom.regEmail ? dom.regEmail.value : '').trim().toLowerCase();
     var pwd = dom.regPwd ? dom.regPwd.value : '';
@@ -2098,38 +2171,82 @@
     if (!name || !email || !pwd) { toast('Remplissez tous les champs', 'error'); return; }
     if (pwd.length < 6) { toast('Mot de passe trop court (min. 6)', 'error'); return; }
 
-    var users = getUsers();
-    if (users[email]) { toast('Cet email est déjà utilisé', 'error'); return; }
-
-    var salt = crypto.getRandomValues(new Uint8Array(16));
-    var saltHex = Array.from(salt).map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
-
-    sha256(saltHex + pwd).then(function (hash) {
-      users[email] = { name: name, email: email, salt: saltHex, hash: hash };
-      saveUsers(users);
-      localStorage.setItem('pt_auth', email);
-      toast('Compte créé', 'success');
-      location.hash = '#/compte';
-    });
+    setBtnLoading(dom.regSubmit, true);
+    _fb.createUserWithEmailAndPassword(_fb.auth, email, pwd)
+      .then(function (cred) {
+        // Set displayName on auth profile
+        return _fb.updateProfile(cred.user, { displayName: name }).then(function () { return cred.user; });
+      })
+      .then(function (user) {
+        // Create Firestore profile
+        var ref = _fb.doc(_fb.db, 'users', user.uid);
+        _userProfile = {
+          name: name,
+          email: email,
+          phone: '',
+          address: '',
+          avatar: '',
+          loyalty: 0,
+          createdAt: _fb.serverTimestamp()
+        };
+        return _fb.setDoc(ref, _userProfile).then(function () { return user; });
+      })
+      .then(function (user) {
+        // Send verification email (non-blocking)
+        _fb.sendEmailVerification(user).catch(function (e) { console.warn('verify email:', e); });
+        toast('Compte cree, bienvenue ' + name + ' !', 'success');
+        location.hash = '#/compte';
+      })
+      .catch(function (err) {
+        toast(fbErrorMessage(err), 'error');
+      })
+      .finally(function () {
+        setBtnLoading(dom.regSubmit, false);
+      });
   }
 
   function handleLogin(e) {
     e.preventDefault();
+    if (!_fb || !_fb.configured) { toast('Authentification non configuree', 'error'); return; }
+
     var email = (dom.loginEmail ? dom.loginEmail.value : '').trim().toLowerCase();
     var pwd = dom.loginPwd ? dom.loginPwd.value : '';
-
     if (!email || !pwd) { toast('Remplissez tous les champs', 'error'); return; }
 
-    var users = getUsers();
-    var user = users[email];
-    if (!user) { toast('Email inconnu', 'error'); return; }
+    setBtnLoading(dom.loginSubmit, true);
+    _fb.signInWithEmailAndPassword(_fb.auth, email, pwd)
+      .then(function (cred) {
+        toast('Bienvenue, ' + (cred.user.displayName || cred.user.email), 'success');
+        location.hash = '#/compte';
+      })
+      .catch(function (err) {
+        toast(fbErrorMessage(err), 'error');
+      })
+      .finally(function () {
+        setBtnLoading(dom.loginSubmit, false);
+      });
+  }
 
-    sha256(user.salt + pwd).then(function (hash) {
-      if (hash !== user.hash) { toast('Mot de passe incorrect', 'error'); return; }
-      localStorage.setItem('pt_auth', email);
-      toast('Bienvenue, ' + user.name, 'success');
-      location.hash = '#/compte';
-    });
+  function handleForgotPassword(e) {
+    e.preventDefault();
+    if (!_fb || !_fb.configured) { toast('Authentification non configuree', 'error'); return; }
+
+    var email = (dom.forgotEmail ? dom.forgotEmail.value : '').trim().toLowerCase();
+    if (!email) { toast('Entre ton email', 'error'); return; }
+
+    setBtnLoading(dom.forgotSubmit, true);
+    _fb.sendPasswordResetEmail(_fb.auth, email)
+      .then(function () {
+        toast('Email de reinitialisation envoye', 'success');
+        if (dom.authForgotPanel) dom.authForgotPanel.hidden = true;
+        if (dom.forgotEmail) dom.forgotEmail.value = '';
+      })
+      .catch(function (err) {
+        toast(fbErrorMessage(err), 'error');
+      })
+      .finally(function () {
+        setBtnLoading(dom.forgotSubmit, false);
+      });
   }
 
   function showAuthTab(tab) {
@@ -2143,58 +2260,71 @@
     }
     if (dom.authLogin) dom.authLogin.style.display = tab === 'login' ? '' : 'none';
     if (dom.authRegister) dom.authRegister.style.display = tab === 'register' ? '' : 'none';
+    // Always close forgot panel on tab switch
+    if (dom.authForgotPanel) dom.authForgotPanel.hidden = true;
   }
 
   // ── Account page ───────────────────────────────────────────
 
   function renderAccount() {
-    var email = localStorage.getItem('pt_auth');
-    if (!email) return;
-    var users = getUsers();
-    var user = users[email];
-    if (!user) return;
+    if (!_currentUser) return;
+    var p = _userProfile || {};
 
-    if (dom.accName) dom.accName.value = user.name || '';
-    if (dom.accEmail) dom.accEmail.value = user.email || email;
-    if (dom.accPhone) dom.accPhone.value = user.phone || '';
-    if (dom.accAddress) dom.accAddress.value = user.address || '';
-    if (user.avatar && dom.accAvatarImg) dom.accAvatarImg.src = user.avatar;
+    if (dom.accName) dom.accName.value = p.name || _currentUser.displayName || '';
+    if (dom.accEmail) dom.accEmail.value = p.email || _currentUser.email || '';
+    if (dom.accPhone) dom.accPhone.value = p.phone || '';
+    if (dom.accAddress) dom.accAddress.value = p.address || '';
+    if (p.avatar && dom.accAvatarImg) dom.accAvatarImg.src = p.avatar;
 
     updateCartUI();
 
     // Loyalty
-    var loyalty = user.loyalty || 0;
+    var loyalty = p.loyalty || 0;
     var pct = Math.min(loyalty / 10, 100);
     updateLoyaltyBar(pct);
     if (dom.accLoyaltyTxt) dom.accLoyaltyTxt.textContent = loyalty + ' points';
 
-    // Order history
-    renderOrderHistory(email);
+    // Email verification banner
+    if (dom.accVerifyBanner) {
+      dom.accVerifyBanner.hidden = !!_currentUser.emailVerified;
+    }
+
+    // Order history (async)
+    renderOrderHistory();
   }
 
-  function renderOrderHistory(email) {
-    if (!dom.accHistory) return;
-    var key = 'pt_orders_' + email;
-    var orders = [];
-    try { orders = JSON.parse(localStorage.getItem(key) || '[]'); } catch (e) {}
+  function renderOrderHistory() {
+    if (!dom.accHistory || !_fb || !_currentUser) return;
+    dom.accHistory.innerHTML = '<p style="opacity:.5;text-align:center;padding:.5rem 0">Chargement...</p>';
 
-    if (orders.length === 0) {
-      dom.accHistory.innerHTML = '<p style="opacity:.6;text-align:center;padding:.5rem 0">Aucun devis envoye pour le moment.</p>';
-      return;
-    }
+    var ordersRef = _fb.collection(_fb.db, 'users', _currentUser.uid, 'orders');
+    var q = _fb.query(ordersRef, _fb.orderBy('date', 'desc'), _fb.limit(20));
 
-    var html = '';
-    for (var i = 0; i < orders.length; i++) {
-      var o = orders[i];
-      html += '<div style="background:rgba(139,92,246,.04);border:1px solid rgba(139,92,246,.12);border-radius:12px;padding:.8rem 1rem">'
-        + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem">'
-        + '<strong style="font-size:.9rem">Devis #' + (orders.length - i) + '</strong>'
-        + '<span style="font-size:.78rem;color:var(--muted)">' + formatReviewDate(o.date) + '</span>'
-        + '</div>'
-        + '<p style="font-size:.85rem;opacity:.8;margin:0">' + o.items + ' article' + (o.items > 1 ? 's' : '') + ' — ' + formatPrice(o.total) + '</p>'
-        + '</div>';
-    }
-    dom.accHistory.innerHTML = html;
+    _fb.getDocs(q).then(function (snap) {
+      if (snap.empty) {
+        dom.accHistory.innerHTML = '<p style="opacity:.6;text-align:center;padding:.5rem 0">Aucun devis envoye pour le moment.</p>';
+        return;
+      }
+      var html = '';
+      var idx = 0;
+      var total = snap.size;
+      snap.forEach(function (docSnap) {
+        var o = docSnap.data();
+        var dateMs = o.date && o.date.toMillis ? o.date.toMillis() : (o.date || Date.now());
+        html += '<div style="background:rgba(139,92,246,.04);border:1px solid rgba(139,92,246,.12);border-radius:12px;padding:.8rem 1rem">'
+          + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem">'
+          + '<strong style="font-size:.9rem">Devis #' + (total - idx) + '</strong>'
+          + '<span style="font-size:.78rem;color:var(--muted)">' + formatReviewDate(dateMs) + '</span>'
+          + '</div>'
+          + '<p style="font-size:.85rem;opacity:.8;margin:0">' + o.items + ' article' + (o.items > 1 ? 's' : '') + ' — ' + formatPrice(o.total) + '</p>'
+          + '</div>';
+        idx++;
+      });
+      dom.accHistory.innerHTML = html;
+    }).catch(function (err) {
+      console.warn('[Auth] order history failed:', err);
+      dom.accHistory.innerHTML = '<p style="opacity:.6;text-align:center;padding:.5rem 0;color:#f88">Erreur de chargement.</p>';
+    });
   }
 
   function updateLoyaltyBar(val) {
@@ -2203,83 +2333,133 @@
   }
 
   function handleAccountSave(e) {
-    e.preventDefault();
-    var email = localStorage.getItem('pt_auth');
-    if (!email) return;
-    var users = getUsers();
-    if (!users[email]) return;
+    if (e && e.preventDefault) e.preventDefault();
+    if (!_fb || !_currentUser) return;
 
-    users[email].name = (dom.accName ? dom.accName.value : '').trim();
-    users[email].phone = (dom.accPhone ? dom.accPhone.value : '').trim();
-    users[email].address = (dom.accAddress ? dom.accAddress.value : '').trim();
-
+    var name = (dom.accName ? dom.accName.value : '').trim();
     var newEmail = (dom.accEmail ? dom.accEmail.value : '').trim().toLowerCase();
-    if (newEmail && newEmail !== email) {
-      users[newEmail] = users[email];
-      users[newEmail].email = newEmail;
-      delete users[email];
-      localStorage.setItem('pt_auth', newEmail);
+    var phone = (dom.accPhone ? dom.accPhone.value : '').trim();
+    var address = (dom.accAddress ? dom.accAddress.value : '').trim();
+
+    var updates = { name: name, phone: phone, address: address };
+    if (newEmail && newEmail !== _currentUser.email) updates.email = newEmail;
+
+    var ref = _fb.doc(_fb.db, 'users', _currentUser.uid);
+    var p = _fb.updateDoc(ref, updates);
+
+    // Also update displayName on auth profile
+    if (name && name !== _currentUser.displayName) {
+      p = p.then(function () { return _fb.updateProfile(_fb.auth.currentUser, { displayName: name }); });
     }
-    saveUsers(users);
-    toast('Profil enregistré', 'success');
+    // Email change requires reauth in Firebase — best handled separately
+    if (newEmail && newEmail !== _currentUser.email) {
+      p = p.then(function () { return _fb.updateEmail(_fb.auth.currentUser, newEmail); });
+    }
+
+    p.then(function () {
+      _userProfile = Object.assign({}, _userProfile || {}, updates);
+      toast('Profil enregistre', 'success');
+    }).catch(function (err) {
+      toast(fbErrorMessage(err), 'error');
+    });
   }
 
   function handlePasswordChange(e) {
     e.preventDefault();
-    var email = localStorage.getItem('pt_auth');
-    if (!email) return;
-    var users = getUsers();
-    if (!users[email]) return;
+    if (!_fb || !_currentUser) return;
 
     var current = dom.pwdCurrent ? dom.pwdCurrent.value : '';
     var newPwd = dom.pwdNew ? dom.pwdNew.value : '';
     var confirm = dom.pwdConfirm ? dom.pwdConfirm.value : '';
 
     if (!current || !newPwd || !confirm) { toast('Remplissez tous les champs', 'error'); return; }
-    if (newPwd.length < 6) { toast('Min. 6 caractères', 'error'); return; }
+    if (newPwd.length < 6) { toast('Min. 6 caracteres', 'error'); return; }
     if (newPwd !== confirm) { toast('Les mots de passe ne correspondent pas', 'error'); return; }
 
-    var user = users[email];
-    sha256(user.salt + current).then(function (hash) {
-      if (hash !== user.hash) { toast('Mot de passe actuel incorrect', 'error'); return; }
-
-      var newSalt = crypto.getRandomValues(new Uint8Array(16));
-      var newSaltHex = Array.from(newSalt).map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
-
-      sha256(newSaltHex + newPwd).then(function (newHash) {
-        users[email].salt = newSaltHex;
-        users[email].hash = newHash;
-        saveUsers(users);
+    var cred = _fb.EmailAuthProvider.credential(_currentUser.email, current);
+    _fb.reauthenticateWithCredential(_currentUser, cred)
+      .then(function () { return _fb.updatePassword(_currentUser, newPwd); })
+      .then(function () {
         if (dom.pwdCurrent) dom.pwdCurrent.value = '';
         if (dom.pwdNew) dom.pwdNew.value = '';
         if (dom.pwdConfirm) dom.pwdConfirm.value = '';
-        toast('Mot de passe modifié', 'success');
+        toast('Mot de passe modifie', 'success');
+      })
+      .catch(function (err) {
+        toast(fbErrorMessage(err), 'error');
       });
-    });
   }
 
   function handleLogout() {
-    localStorage.removeItem('pt_auth');
-    toast('Déconnecté', 'success');
-    location.hash = '#/auth';
+    if (!_fb || !_fb.configured) { location.hash = '#/auth'; return; }
+    _fb.signOut(_fb.auth).then(function () {
+      _currentUser = null;
+      _userProfile = null;
+      toast('Deconnecte', 'success');
+      location.hash = '#/auth';
+    }).catch(function (err) {
+      toast(fbErrorMessage(err), 'error');
+    });
+  }
+
+  function handleResendVerification() {
+    if (!_currentUser || !_fb) return;
+    _fb.sendEmailVerification(_currentUser).then(function () {
+      toast('Email de verification renvoye', 'success');
+    }).catch(function (err) {
+      toast(fbErrorMessage(err), 'error');
+    });
   }
 
   function handleAvatarChange(e) {
     var file = e.target.files && e.target.files[0];
-    if (!file) return;
-    var reader = new FileReader();
-    reader.onload = function (ev) {
-      if (dom.accAvatarImg) dom.accAvatarImg.src = ev.target.result;
-      var email = localStorage.getItem('pt_auth');
-      if (email) {
-        var users = getUsers();
-        if (users[email]) {
-          users[email].avatar = ev.target.result;
-          saveUsers(users);
-        }
-      }
+    if (!file || !_fb || !_currentUser) return;
+
+    // Resize/compress to ~256x256 to keep Firestore doc small
+    var img = new Image();
+    var url = URL.createObjectURL(file);
+    img.onload = function () {
+      URL.revokeObjectURL(url);
+      var max = 256;
+      var w = img.width, h = img.height;
+      if (w > h) { if (w > max) { h = h * max / w; w = max; } }
+      else { if (h > max) { w = w * max / h; h = max; } }
+      var canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      var dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+
+      if (dom.accAvatarImg) dom.accAvatarImg.src = dataUrl;
+
+      var ref = _fb.doc(_fb.db, 'users', _currentUser.uid);
+      _fb.updateDoc(ref, { avatar: dataUrl }).then(function () {
+        if (_userProfile) _userProfile.avatar = dataUrl;
+        toast('Photo mise a jour', 'success');
+      }).catch(function (err) {
+        toast(fbErrorMessage(err), 'error');
+      });
     };
-    reader.readAsDataURL(file);
+    img.src = url;
+  }
+
+  // Save a quote/order to Firestore (called from sendDevisWhatsApp)
+  function saveOrderToFirestore(itemCount, total) {
+    if (!_fb || !_fb.configured || !_currentUser) return;
+    var ordersRef = _fb.collection(_fb.db, 'users', _currentUser.uid, 'orders');
+    _fb.addDoc(ordersRef, {
+      date: _fb.serverTimestamp(),
+      items: itemCount,
+      total: total
+    }).then(function () {
+      // Add loyalty points (1 point per euro)
+      var newLoyalty = ((_userProfile && _userProfile.loyalty) || 0) + Math.round(total);
+      var ref = _fb.doc(_fb.db, 'users', _currentUser.uid);
+      return _fb.updateDoc(ref, { loyalty: newLoyalty }).then(function () {
+        if (_userProfile) _userProfile.loyalty = newLoyalty;
+      });
+    }).catch(function (err) {
+      console.warn('[Auth] saveOrder failed:', err);
+    });
   }
 
   // ── PWA install + service worker ───────────────────────────
@@ -2399,6 +2579,23 @@
     if (dom.loginForm) dom.loginForm.addEventListener('submit', handleLogin);
     if (dom.registerForm) dom.registerForm.addEventListener('submit', handleRegister);
 
+    // Forgot password
+    if (dom.authForgotBtn) {
+      dom.authForgotBtn.addEventListener('click', function () {
+        if (dom.authForgotPanel) dom.authForgotPanel.hidden = false;
+        if (dom.forgotEmail) {
+          dom.forgotEmail.value = (dom.loginEmail && dom.loginEmail.value) || '';
+          dom.forgotEmail.focus();
+        }
+      });
+    }
+    if (dom.authForgotClose) {
+      dom.authForgotClose.addEventListener('click', function () {
+        if (dom.authForgotPanel) dom.authForgotPanel.hidden = true;
+      });
+    }
+    if (dom.forgotForm) dom.forgotForm.addEventListener('submit', handleForgotPassword);
+
     // Account save
     if (dom.accountForm) dom.accountForm.addEventListener('submit', handleAccountSave);
     if (dom.accSave) {
@@ -2416,6 +2613,9 @@
 
     // Logout
     if (dom.accLogout) dom.accLogout.addEventListener('click', handleLogout);
+
+    // Resend email verification
+    if (dom.accResendVerify) dom.accResendVerify.addEventListener('click', handleResendVerification);
   }
 
   // ── Bootstrap ──────────────────────────────────────────────
@@ -2423,6 +2623,7 @@
   function init() {
     cacheDom();
     bindEvents();
+    initAuth();
     initPWA();
     updateCartUI();
     loadProducts();

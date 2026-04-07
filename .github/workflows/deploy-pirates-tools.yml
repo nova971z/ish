@@ -33,6 +33,7 @@ jobs:
           cp pirates-tools/404.html _site/
           cp pirates-tools/styles.css _site/
           cp pirates-tools/app.js _site/
+          cp pirates-tools/firebase-init.js _site/
           cp pirates-tools/sw.js _site/
           cp pirates-tools/manifest.webmanifest _site/
           cp pirates-tools/products.json _site/
