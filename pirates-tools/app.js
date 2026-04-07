@@ -3000,9 +3000,15 @@
     var wrap = document.getElementById('cryptopayNets');
     if (!wrap) return;
     var cfg = ptCryptoCfg();
-    wrap.innerHTML = (cfg.networks || []).map(function(n){
+    var nets = cfg.networks || [];
+    if (!nets.length) {
+      wrap.innerHTML = '<div class="cryptopay__empty">⚠️ Aucun réseau crypto configuré.<br>Édite <code>crypto-config.js</code>.</div>';
+      return;
+    }
+    wrap.innerHTML = nets.map(function(n){
       return '<button type="button" class="cryptopay-net" role="radio" '
         + 'aria-checked="false" data-net-id="' + n.id + '">'
+        + '<span class="cryptopay-net__sym">' + n.symbol + '</span>'
         + '<span class="cryptopay-net__label">' + n.label + '</span>'
         + '<span class="cryptopay-net__chain">' + n.chain + '</span>'
         + '</button>';
@@ -3010,7 +3016,7 @@
     wrap.querySelectorAll('.cryptopay-net').forEach(function(btn){
       btn.addEventListener('click', function(){
         var id = btn.getAttribute('data-net-id');
-        var net = (cfg.networks || []).find(function(x){ return x.id === id; });
+        var net = nets.find(function(x){ return x.id === id; });
         if (net) cryptoSelectNet(net);
       });
     });
@@ -3026,8 +3032,6 @@
         b.setAttribute('aria-checked', on ? 'true' : 'false');
       });
     }
-    var detail = document.getElementById('cryptopayDetail');
-    if (detail) detail.hidden = false;
     document.getElementById('cryptopayChain').textContent = net.chain;
     document.getElementById('cryptopayAddr').textContent = net.address || '—';
 
@@ -3040,32 +3044,39 @@
     if (amt) {
       amountEl.textContent = amt;
       symEl.textContent = net.symbol;
-      rateEl.textContent = '1 ' + net.symbol + ' ≈ ' + (_cryptoRates[net.coingeckoId]).toFixed(2) + ' €';
+      rateEl.textContent = '1 ' + net.symbol + ' ≈ ' + (_cryptoRates[net.coingeckoId]).toFixed(2) + ' € (taux temps réel)';
     } else {
-      amountEl.textContent = '—';
+      amountEl.textContent = '…';
       symEl.textContent = net.symbol;
-      rateEl.textContent = 'Taux indisponible (réessaie dans un instant).';
+      rateEl.textContent = 'Récupération du taux en cours…';
     }
 
     var qr = document.getElementById('cryptopayQR');
+    var qrWrap = qr ? qr.parentElement : null;
     if (qr) {
       if (addrLooksUnset) {
         qr.removeAttribute('src');
         qr.alt = 'Adresse non configurée';
+        if (qrWrap) qrWrap.classList.remove('is-ready');
       } else {
         qr.src = cryptoQRUrl(cryptoBuildUri(net, amt || ''));
         qr.alt = 'QR ' + net.label;
+        if (qrWrap) qrWrap.classList.add('is-ready');
       }
     }
   }
 
   function cryptoCopy(text, btn) {
-    if (!text) return;
+    if (!text || text === '—' || text === '…') return;
     var done = function(){
       if (!btn) return;
-      var prev = btn.textContent;
-      btn.textContent = '✓ Copié';
-      setTimeout(function(){ btn.textContent = prev; }, 1400);
+      var prev = btn.innerHTML;
+      btn.innerHTML = '✓ Copié !';
+      btn.classList.add('is-copied');
+      setTimeout(function(){
+        btn.innerHTML = prev;
+        btn.classList.remove('is-copied');
+      }, 1500);
     };
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(done, function(){});
@@ -3155,9 +3166,17 @@
       if (btnCard)   btnCard.hidden = true;
       if (btnCrypto) btnCrypto.hidden = false;
       if (powered)   powered.innerHTML = 'Paiements crypto directs — sans intermédiaire';
-      // lazy fetch des taux la 1ère fois
+      // (re)render des réseaux à chaque ouverture pour rester défensif
+      cryptoRenderNets();
+      // lazy fetch des taux puis auto-select du premier réseau
       cryptoFetchRates().then(function(){
-        if (_cryptoSelected) cryptoSelectNet(_cryptoSelected);
+        var cfg = ptCryptoCfg();
+        var first = (cfg.networks || [])[0];
+        if (_cryptoSelected) {
+          cryptoSelectNet(_cryptoSelected);
+        } else if (first) {
+          cryptoSelectNet(first);
+        }
       });
     } else {
       if (crypto) { crypto.classList.remove('is-active'); crypto.hidden = true; }
@@ -3173,11 +3192,9 @@
     if (!modal || !items || !items.length) return;
     _payItems = items;
     _cryptoTotalEur = items.reduce(function(s,it){ return s + (it.price||0)*(it.qty||1); }, 0);
-    cryptoSwitchTab('card');
-    cryptoRenderNets();
-    var detail = document.getElementById('cryptopayDetail');
-    if (detail) detail.hidden = true;
     _cryptoSelected = null;
+    cryptoRenderNets();
+    cryptoSwitchTab('card');
 
     var itemsEl = document.getElementById('payModalItems');
     var totalEl = document.getElementById('payModalTotal');

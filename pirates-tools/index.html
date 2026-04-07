@@ -11,7 +11,7 @@
   <link rel="canonical" href="https://nova971z.github.io/ish/">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=265">
 
   <!-- 3D model viewer -->
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
@@ -23,7 +23,7 @@
   <script type="module" src="firebase-init.js"></script>
 
   <!-- Crypto payment config (édite tes adresses dans ce fichier) -->
-  <script src="crypto-config.js"></script>
+  <script src="crypto-config.js?v=265"></script>
 
   <!-- PWA -->
   <meta name="theme-color" content="#0a0f14" />
@@ -910,98 +910,104 @@
         <!-- ── Panneau CRYPTO ── -->
         <div class="pay-pane" data-pay-pane="crypto" hidden>
           <div class="cryptopay">
-            <p class="cryptopay__intro">
-              Paie directement en cryptomonnaie sur le réseau de ton choix.
-              Le total est converti automatiquement au taux du marché.
-              Tu peux aussi <strong>payer par carte</strong> via notre portail
-              partenaire qui convertira ta carte en crypto.
-            </p>
 
-            <!-- ── Tuto 4 étapes ── -->
-            <details class="paytuto" open>
-              <summary>
-                <span class="paytuto__title">📘 Comment payer — 4 étapes simples</span>
-                <span class="paytuto__chev">▾</span>
-              </summary>
-              <ol class="paytuto__steps">
-                <li>
-                  <span class="paytuto__num">1</span>
-                  <div>
-                    <strong>Choisis ton réseau</strong>
-                    <p>Sélectionne la crypto et la chaîne que tu possèdes (BTC, ETH, USDC sur Arbitrum, SOL…). Le réseau doit correspondre <em>exactement</em> à celui de ton wallet.</p>
-                  </div>
-                </li>
-                <li>
-                  <span class="paytuto__num">2</span>
-                  <div>
-                    <strong>Scanne le QR ou copie l'adresse</strong>
-                    <p>Ouvre ton appli wallet, scanne le QR, ou utilise le bouton 📋 pour copier l'adresse de réception.</p>
-                  </div>
-                </li>
-                <li>
-                  <span class="paytuto__num">3</span>
-                  <div>
-                    <strong>Envoie le montant exact</strong>
-                    <p>Copie le montant en crypto avec le bouton « Copier le montant ». Le total est calculé en temps réel à partir du cours EUR.</p>
-                  </div>
-                </li>
-                <li>
-                  <span class="paytuto__num">4</span>
-                  <div>
-                    <strong>Confirme ton paiement</strong>
-                    <p>Une fois la transaction envoyée, clique sur « J'ai effectué le paiement » : WhatsApp s'ouvre, colle ton TXID et envoie. On valide ta commande sous 24 h.</p>
-                  </div>
-                </li>
-              </ol>
-              <div class="paytuto__tips">
-                <p>💡 <strong>Pas de wallet ?</strong> Utilise le bouton vert en bas de page « Payer par carte » : ton paiement carte est automatiquement converti en crypto par notre partenaire — aucune connaissance technique requise.</p>
-              </div>
-            </details>
-
-            <!-- Sélection du réseau -->
-            <div class="cryptopay__nets" id="cryptopayNets" role="radiogroup" aria-label="Réseau crypto"></div>
-
-            <!-- Détails (QR + adresse + montant) -->
-            <div class="cryptopay__detail" id="cryptopayDetail" hidden>
-              <div class="cryptopay__qr">
-                <img id="cryptopayQR" alt="QR de paiement" />
-              </div>
-              <div class="cryptopay__info">
-                <label class="cryptopay__label">Réseau</label>
-                <div class="cryptopay__chain" id="cryptopayChain">—</div>
-
-                <label class="cryptopay__label">Montant à envoyer</label>
-                <div class="cryptopay__amount">
-                  <span id="cryptopayAmount">—</span>
-                  <span id="cryptopayAmountSymbol" class="cryptopay__amount-sym">—</span>
+            <!-- ÉTAPE 1 — Choisir le réseau -->
+            <section class="cryptostep">
+              <header class="cryptostep__head">
+                <span class="cryptostep__num">1</span>
+                <div>
+                  <h3 class="cryptostep__title">Choisis ton réseau</h3>
+                  <p class="cryptostep__sub">Sélectionne la crypto que tu veux envoyer.</p>
                 </div>
-                <small class="cryptopay__rate" id="cryptopayRate">Calcul du taux…</small>
-
-                <label class="cryptopay__label">Adresse de réception</label>
-                <div class="cryptopay__addr">
-                  <code id="cryptopayAddr">—</code>
-                  <button type="button" class="cryptopay__copy" id="cryptopayCopyAddr"
-                          aria-label="Copier l'adresse">📋</button>
-                </div>
-
-                <button type="button" class="cryptopay__copy-amount" id="cryptopayCopyAmount">
-                  📋 Copier le montant
-                </button>
+              </header>
+              <div class="cryptopay__nets" id="cryptopayNets" role="radiogroup" aria-label="Réseau crypto">
+                <!-- rendu dynamiquement par app.js -->
+                <div class="cryptopay__empty">Chargement des réseaux…</div>
               </div>
-            </div>
+            </section>
 
-            <!-- Carte bancaire → crypto -->
-            <div class="cryptopay__card-onramp">
-              <button type="button" id="cryptopayCardBtn" class="btn cryptopay__card-btn">
-                💳 Payer par carte (via portail partenaire)
+            <!-- ÉTAPE 2 — Envoyer le paiement -->
+            <section class="cryptostep" id="cryptostep2">
+              <header class="cryptostep__head">
+                <span class="cryptostep__num">2</span>
+                <div>
+                  <h3 class="cryptostep__title">Envoie le paiement</h3>
+                  <p class="cryptostep__sub">Scanne le QR ou copie l'adresse + le montant.</p>
+                </div>
+              </header>
+
+              <div class="cryptopay__detail" id="cryptopayDetail">
+                <div class="cryptopay__qr">
+                  <img id="cryptopayQR" alt="Sélectionne d'abord un réseau" />
+                  <div class="cryptopay__qr-placeholder" id="cryptopayQRPlaceholder">
+                    <div>👆</div>
+                    <span>Choisis un réseau</span>
+                  </div>
+                </div>
+                <div class="cryptopay__info">
+                  <div class="cryptopay__row">
+                    <span class="cryptopay__label">Réseau</span>
+                    <span class="cryptopay__chain" id="cryptopayChain">—</span>
+                  </div>
+
+                  <div class="cryptopay__row cryptopay__row--amount">
+                    <span class="cryptopay__label">Montant exact</span>
+                    <div class="cryptopay__amount-box">
+                      <div class="cryptopay__amount">
+                        <span id="cryptopayAmount">—</span>
+                        <span id="cryptopayAmountSymbol" class="cryptopay__amount-sym">—</span>
+                      </div>
+                      <button type="button" class="cryptopay__mini-copy" id="cryptopayCopyAmount" aria-label="Copier le montant">📋 Copier</button>
+                    </div>
+                    <small class="cryptopay__rate" id="cryptopayRate">Sélectionne un réseau pour voir le taux.</small>
+                  </div>
+
+                  <div class="cryptopay__row">
+                    <span class="cryptopay__label">Adresse de réception</span>
+                    <div class="cryptopay__addr">
+                      <code id="cryptopayAddr">—</code>
+                      <button type="button" class="cryptopay__mini-copy" id="cryptopayCopyAddr" aria-label="Copier l'adresse">📋 Copier</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <p class="cryptopay__warn">
+                ⚠️ Vérifie toujours le réseau avant d'envoyer. Un transfert
+                sur un mauvais réseau est <strong>irréversible</strong>.
+              </p>
+            </section>
+
+            <!-- ÉTAPE 3 — Confirmer -->
+            <section class="cryptostep">
+              <header class="cryptostep__head">
+                <span class="cryptostep__num">3</span>
+                <div>
+                  <h3 class="cryptostep__title">Confirme ta commande</h3>
+                  <p class="cryptostep__sub">Une fois la crypto envoyée, on valide sous 24 h.</p>
+                </div>
+              </header>
+              <p class="cryptostep__hint">
+                👉 Utilise le gros bouton <strong>« J'ai effectué le paiement »</strong> en bas
+                pour nous transmettre ton TXID via WhatsApp.
+              </p>
+            </section>
+
+            <!-- Alternative carte -->
+            <section class="cryptostep cryptostep--alt">
+              <header class="cryptostep__head">
+                <span class="cryptostep__num cryptostep__num--alt">★</span>
+                <div>
+                  <h3 class="cryptostep__title">Pas de wallet ? Paie par carte</h3>
+                  <p class="cryptostep__sub">Notre partenaire convertit ta CB en crypto automatiquement.</p>
+                </div>
+              </header>
+              <button type="button" id="cryptopayCardBtn" class="cryptopay__card-btn">
+                💳 Payer par carte bancaire
               </button>
-              <small>Tu paies en EUR par carte, le marchand reçoit la crypto.</small>
-            </div>
+              <small class="cryptopay__card-hint">Tu paies en EUR, le marchand reçoit la crypto. Aucune connaissance technique requise.</small>
+            </section>
 
-            <p class="cryptopay__warn">
-              ⚠️ Vérifie toujours le réseau avant d'envoyer. Un transfert
-              sur un mauvais réseau est <strong>irréversible</strong>.
-            </p>
           </div>
         </div>
       </div>
@@ -1203,7 +1209,7 @@
     document.getElementById('dbgClose').addEventListener('click',function(){panel.style.display='none'});
   })();
   </script>
-  <script defer src="app.js"></script>
+  <script defer src="app.js?v=265"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->
