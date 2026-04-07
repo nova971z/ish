@@ -5187,3 +5187,16 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   padding: 1rem;
   background: transparent;
 }
+
+/* 3D brand spheres */
+.brand-card__bubble { position: relative; }
+.brand-card__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+.brand-card__logo--fallback {
+  transition: opacity .4s ease;
+}

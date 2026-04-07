@@ -443,6 +443,168 @@
     'Wera': 'images/brands/wera.png'
   };
 
+  // ── 3D Brand spheres (Three.js) ────────────────────────────
+  var BRAND_COLORS = {
+    'DeWALT':  '#FEBD17',
+    'Facom':   '#E30613',
+    'Festool': '#0E7C3A',
+    'Flex':    '#D40000',
+    'Makita':  '#00A1E4',
+    'Stanley': '#FFCB05',
+    'Wera':    '#1B1B1B'
+  };
+  var _brandScenes = [];
+
+  function buildBrandTexture(logoSrc, bgColor, cb) {
+    var SIZE = 1024;
+    var canvas = document.createElement('canvas');
+    canvas.width = SIZE * 2;
+    canvas.height = SIZE;
+    var ctx = canvas.getContext('2d');
+    // Background gradient
+    var grd = ctx.createLinearGradient(0, 0, 0, SIZE);
+    grd.addColorStop(0, bgColor);
+    grd.addColorStop(1, shadeColor(bgColor, -25));
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Subtle highlight band
+    ctx.fillStyle = 'rgba(255,255,255,.07)';
+    ctx.fillRect(0, SIZE * 0.3, canvas.width, SIZE * 0.15);
+
+    var img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = function () {
+      // Draw the logo centered (covers the front-facing hemisphere when wrapped)
+      var maxW = SIZE * 1.0;
+      var maxH = SIZE * 0.55;
+      var ratio = Math.min(maxW / img.width, maxH / img.height);
+      var w = img.width * ratio;
+      var h = img.height * ratio;
+      var x = (canvas.width - w) / 2;
+      var y = (canvas.height - h) / 2;
+      ctx.drawImage(img, x, y, w, h);
+      cb(canvas);
+    };
+    img.onerror = function () { cb(canvas); };
+    img.src = logoSrc;
+  }
+
+  function shadeColor(hex, percent) {
+    var num = parseInt(hex.replace('#', ''), 16);
+    var r = (num >> 16) + percent;
+    var g = ((num >> 8) & 0xff) + percent;
+    var b = (num & 0xff) + percent;
+    r = Math.max(0, Math.min(255, r));
+    g = Math.max(0, Math.min(255, g));
+    b = Math.max(0, Math.min(255, b));
+    return '#' + ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0');
+  }
+
+  function createBrandSphere(container, brand, logoSrc) {
+    if (typeof THREE === 'undefined') return;
+    if (container.dataset.sphereReady === '1') return;
+    container.dataset.sphereReady = '1';
+
+    var w = container.clientWidth || 120;
+    var h = container.clientHeight || 120;
+    var renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setSize(w, h);
+    renderer.setClearColor(0x000000, 0);
+    renderer.domElement.className = 'brand-card__canvas';
+    container.appendChild(renderer.domElement);
+
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera(40, w / h, 0.1, 100);
+    camera.position.z = 3.4;
+
+    var ambient = new THREE.AmbientLight(0xffffff, 0.85);
+    scene.add(ambient);
+    var key = new THREE.DirectionalLight(0xffffff, 0.9);
+    key.position.set(2, 2, 4);
+    scene.add(key);
+    var rim = new THREE.DirectionalLight(0xa78bfa, 0.5);
+    rim.position.set(-2, -1, -2);
+    scene.add(rim);
+
+    var geom = new THREE.SphereGeometry(1, 64, 64);
+    var mat = new THREE.MeshStandardMaterial({
+      color: 0xffffff,
+      roughness: 0.45,
+      metalness: 0.15
+    });
+    var sphere = new THREE.Mesh(geom, mat);
+    scene.add(sphere);
+
+    buildBrandTexture(logoSrc, BRAND_COLORS[brand] || '#8B5CF6', function (canvas) {
+      var tex = new THREE.CanvasTexture(canvas);
+      tex.colorSpace = THREE.SRGBColorSpace || tex.colorSpace;
+      tex.anisotropy = 8;
+      mat.map = tex;
+      mat.needsUpdate = true;
+      // Hide fallback img once texture loaded
+      var fb = container.querySelector('.brand-card__logo--fallback');
+      if (fb) fb.style.opacity = '0';
+    });
+
+    var entry = { renderer: renderer, scene: scene, camera: camera, sphere: sphere, container: container, visible: true };
+    _brandScenes.push(entry);
+
+    // Resize observer
+    if (typeof ResizeObserver !== 'undefined') {
+      var ro = new ResizeObserver(function () {
+        var nw = container.clientWidth, nh = container.clientHeight;
+        if (nw && nh) {
+          renderer.setSize(nw, nh);
+          camera.aspect = nw / nh;
+          camera.updateProjectionMatrix();
+        }
+      });
+      ro.observe(container);
+    }
+  }
+
+  var _brandRafStarted = false;
+  function startBrandRaf() {
+    if (_brandRafStarted) return;
+    _brandRafStarted = true;
+    var last = performance.now();
+    function tick(now) {
+      var dt = (now - last) / 1000;
+      last = now;
+      for (var i = 0; i < _brandScenes.length; i++) {
+        var s = _brandScenes[i];
+        if (!s.visible) continue;
+        s.sphere.rotation.y += dt * 0.6;
+        s.renderer.render(s.scene, s.camera);
+      }
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  function initBrandSpheres() {
+    if (typeof THREE === 'undefined') return;
+    var bubbles = document.querySelectorAll('[data-brand-sphere]');
+    if (!bubbles.length) return;
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        var el = e.target;
+        var brand = el.getAttribute('data-brand-sphere');
+        var logo = el.getAttribute('data-logo');
+        if (e.isIntersecting) {
+          createBrandSphere(el, brand, logo);
+          // Mark visibility
+          _brandScenes.forEach(function (s) { if (s.container === el) s.visible = true; });
+        } else {
+          _brandScenes.forEach(function (s) { if (s.container === el) s.visible = false; });
+        }
+      });
+      startBrandRaf();
+    }, { rootMargin: '100px' });
+    bubbles.forEach(function (b) { io.observe(b); });
+  }
+
   function renderBrandGrid() {
     if (!dom.brandGrid) return;
     var brandNames = Object.keys(BRAND_IMAGES);
@@ -450,13 +612,15 @@
       var img = BRAND_IMAGES[b];
       return '<button class="brand-card" data-brand="' + escapeHTML(b) + '" style="animation-delay:' + (i * 70) + 'ms">'
         + '<div class="brand-card__ring">'
-        + '<div class="brand-card__bubble">'
-        + '<img class="brand-card__logo" src="' + escapeHTML(img) + '" alt="' + escapeHTML(b) + '" loading="lazy">'
+        + '<div class="brand-card__bubble" data-brand-sphere="' + escapeHTML(b) + '" data-logo="' + escapeHTML(img) + '">'
+        + '<img class="brand-card__logo brand-card__logo--fallback" src="' + escapeHTML(img) + '" alt="' + escapeHTML(b) + '" loading="lazy">'
         + '</div>'
         + '</div>'
         + '<span class="brand-card__name">' + escapeHTML(b) + '</span>'
         + '</button>';
     }).join('');
+
+    initBrandSpheres();
 
     $$('.brand-card', dom.brandGrid).forEach(function (btn) {
       btn.addEventListener('click', function () {
