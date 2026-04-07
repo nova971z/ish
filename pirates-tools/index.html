@@ -15,7 +15,9 @@
 
   <!-- 3D model viewer -->
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+  <!-- Three.js is lazy-loaded on demand by app.js (brand spheres only)
+       to avoid the "Multiple instances of Three.js" race that breaks
+       model-viewer on Safari iPad. -->
 
   <!-- Firebase (auth + firestore) -->
   <script type="module" src="firebase-init.js"></script>

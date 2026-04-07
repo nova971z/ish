@@ -524,9 +524,33 @@
     return '#' + ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0');
   }
 
+  // Lazy-load Three.js once, on demand. Prevents the "multiple
+  // instances of Three.js" race with model-viewer at boot, which
+  // was breaking GLB rendering on Safari iPad.
+  var _threePromise = null;
+  function ensureThree() {
+    if (typeof window.THREE !== 'undefined') return Promise.resolve(window.THREE);
+    if (_threePromise) return _threePromise;
+    _threePromise = new Promise(function (resolve, reject) {
+      var s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js';
+      s.async = true;
+      s.onload = function () { resolve(window.THREE); };
+      s.onerror = function () { _threePromise = null; reject(new Error('three load failed')); };
+      document.head.appendChild(s);
+    });
+    return _threePromise;
+  }
+
   function createBrandSphere(container, brand, logoSrc) {
-    if (typeof THREE === 'undefined') return;
     if (container.dataset.sphereReady === '1') return;
+    if (typeof window.THREE === 'undefined') {
+      // Defer until Three is ready, then re-enter once.
+      ensureThree().then(function () {
+        createBrandSphere(container, brand, logoSrc);
+      }).catch(function () { /* keep CSS fallback */ });
+      return;
+    }
     container.dataset.sphereReady = '1';
 
     var w = container.clientWidth || 120;
