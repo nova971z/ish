@@ -5248,3 +5248,23 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
     filter: none !important;
   }
 }
+
+/* Brand bubbles entrance — disable initial auto-anim, replay on reveal */
+.brands-showcase .brand-card { animation: none; opacity: 0; transform: translateY(50px) scale(.5); }
+.brands-showcase.is-visible .brand-card {
+  animation: brandBubbleIn .9s cubic-bezier(.18,1.25,.4,1.05) both;
+}
+@keyframes brandBubbleIn {
+  0%   { opacity: 0; transform: translateY(60px) scale(.4) rotate(-12deg); filter: blur(8px); }
+  60%  { opacity: 1; transform: translateY(-8px) scale(1.08) rotate(3deg); filter: blur(0); }
+  80%  { transform: translateY(2px) scale(.96) rotate(-1deg); }
+  100% { opacity: 1; transform: translateY(0) scale(1) rotate(0); filter: blur(0); }
+}
+.brands-showcase.is-visible .brand-card__ring {
+  animation: brandRingPulse 1.2s ease-out .3s both;
+}
+@keyframes brandRingPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(139,92,246,.6); }
+  60%  { box-shadow: 0 0 0 14px rgba(139,92,246,0); }
+  100% { box-shadow: 0 0 0 0 rgba(139,92,246,0); }
+}
