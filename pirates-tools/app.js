@@ -3008,9 +3008,8 @@
     wrap.innerHTML = nets.map(function(n){
       return '<button type="button" class="cryptopay-net" role="radio" '
         + 'aria-checked="false" data-net-id="' + n.id + '">'
-        + '<span class="cryptopay-net__sym">' + n.symbol + '</span>'
-        + '<span class="cryptopay-net__label">' + n.label + '</span>'
         + '<span class="cryptopay-net__chain">' + n.chain + '</span>'
+        + '<span class="cryptopay-net__token">' + n.symbol + '</span>'
         + '</button>';
     }).join('');
     wrap.querySelectorAll('.cryptopay-net').forEach(function(btn){
