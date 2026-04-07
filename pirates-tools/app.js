@@ -429,6 +429,7 @@
         + '</div>'
         + '</a>';
     }).join('');
+    preloadModelViewers(dom.list);
   }
 
   // ── Brand grid (home page) ─────────────────────────────────
@@ -730,6 +731,7 @@
         + '</div>'
         + '</a>';
     }).join('');
+    preloadModelViewers(track);
   }
 
   // ── Scroll passthrough : page scroll quand le 3D est au zoom min/max ──
@@ -3051,6 +3053,34 @@
 
   function setupRevealAnimations() {
     observeReveals(document);
+  }
+
+  // ── <model-viewer> preloader ───────────────────────────────
+  // Upgrades loading="lazy" → "eager" as soon as a viewer is within
+  // ~700px of the viewport, so models are ready by the time the user
+  // scrolls to them. Single shared IO, survives DOM re-renders.
+  var _mvPreloadIO = null;
+  function getMvPreloadIO() {
+    if (_mvPreloadIO || !('IntersectionObserver' in window)) return _mvPreloadIO;
+    _mvPreloadIO = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        var mv = e.target;
+        mv.setAttribute('loading', 'eager');
+        _mvPreloadIO.unobserve(mv);
+      });
+    }, { rootMargin: '700px 0px 700px 0px' });
+    return _mvPreloadIO;
+  }
+  function preloadModelViewers(root) {
+    var io = getMvPreloadIO();
+    var scope = root || document;
+    var list = scope.querySelectorAll('model-viewer[loading="lazy"]');
+    if (!io) {
+      list.forEach(function (mv) { mv.setAttribute('loading', 'eager'); });
+      return;
+    }
+    list.forEach(function (mv) { io.observe(mv); });
   }
 
   function setupAccountTabs() {
