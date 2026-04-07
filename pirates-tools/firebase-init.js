@@ -30,12 +30,13 @@
 // ============================================================
 
 const firebaseConfig = {
-  apiKey: "REPLACE_WITH_YOUR_API_KEY",
-  authDomain: "your-project.firebaseapp.com",
-  projectId: "your-project-id",
-  storageBucket: "your-project.firebasestorage.app",
-  messagingSenderId: "000000000000",
-  appId: "1:000000000000:web:0000000000000000000000"
+  apiKey: "AIzaSyA4E5dMO7j5MMYoBupAedeR-CUCSb1bNyk",
+  authDomain: "pirates-tools.firebaseapp.com",
+  projectId: "pirates-tools",
+  storageBucket: "pirates-tools.firebasestorage.app",
+  messagingSenderId: "573379176641",
+  appId: "1:573379176641:web:1360d109e2ff791282cc40",
+  measurementId: "G-PHN6KHQWD2"
 };
 
 // ============================================================
