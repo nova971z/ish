@@ -455,39 +455,18 @@
   };
   var _brandScenes = [];
 
-  function sampleLogoBg(img) {
-    // Sample 4 corner pixels and average them — they're virtually always
-    // the logo's background color since logos are centered.
-    var c = document.createElement('canvas');
-    c.width = img.width; c.height = img.height;
-    var cx = c.getContext('2d');
-    cx.drawImage(img, 0, 0);
-    var pts = [[1,1],[img.width-2,1],[1,img.height-2],[img.width-2,img.height-2]];
-    var r=0,g=0,b=0,n=0;
-    for (var i=0;i<pts.length;i++){
-      try {
-        var d = cx.getImageData(pts[i][0],pts[i][1],1,1).data;
-        if (d[3] > 200) { r+=d[0]; g+=d[1]; b+=d[2]; n++; }
-      } catch(e){}
-    }
-    if (!n) return null;
-    return 'rgb(' + Math.round(r/n) + ',' + Math.round(g/n) + ',' + Math.round(b/n) + ')';
-  }
-
-  function buildBrandTexture(logoSrc, fallbackColor, cb) {
+  function buildBrandTexture(logoSrc, bgColor, cb) {
     var SIZE = 1024;
     var canvas = document.createElement('canvas');
     canvas.width = SIZE * 2;
     canvas.height = SIZE;
     var ctx = canvas.getContext('2d');
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     var img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = function () {
-      var bg = sampleLogoBg(img) || fallbackColor;
-      ctx.fillStyle = bg;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      // Draw the logo centered, large enough to cover the front-facing hemisphere
       var maxW = SIZE * 1.1;
       var maxH = SIZE * 0.7;
       var ratio = Math.min(maxW / img.width, maxH / img.height);
@@ -498,11 +477,7 @@
       ctx.drawImage(img, x, y, w, h);
       cb(canvas);
     };
-    img.onerror = function () {
-      ctx.fillStyle = fallbackColor;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      cb(canvas);
-    };
+    img.onerror = function () { cb(canvas); };
     img.src = logoSrc;
   }
 
@@ -559,10 +534,11 @@
       tex.anisotropy = 8;
       mat.map = tex;
       mat.needsUpdate = true;
-      // Hide fallback img once texture loaded
+      renderer.render(scene, camera);
       var fb = container.querySelector('.brand-card__logo--fallback');
       if (fb) fb.style.opacity = '0';
     });
+    renderer.render(scene, camera);
 
     var entry = { renderer: renderer, scene: scene, camera: camera, sphere: sphere, container: container, visible: true };
     _brandScenes.push(entry);
@@ -581,24 +557,31 @@
     }
   }
 
-  var _brandRafStarted = false;
-  function startBrandRaf() {
-    if (_brandRafStarted) return;
-    _brandRafStarted = true;
-    var last = performance.now();
-    function tick(now) {
-      var dt = (now - last) / 1000;
-      last = now;
+  var _brandScrollBound = false;
+  var _brandTargetRot = 0;
+  var _brandCurrentRot = 0;
+  function bindBrandScroll() {
+    if (_brandScrollBound) return;
+    _brandScrollBound = true;
+    function onScroll() {
+      _brandTargetRot = (window.scrollY || 0) * 0.004;
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    function tick() {
+      // Smooth lerp toward target
+      _brandCurrentRot += (_brandTargetRot - _brandCurrentRot) * 0.12;
       for (var i = 0; i < _brandScenes.length; i++) {
         var s = _brandScenes[i];
         if (!s.visible) continue;
-        s.sphere.rotation.y += dt * 0.6;
+        s.sphere.rotation.y = _brandCurrentRot;
         s.renderer.render(s.scene, s.camera);
       }
       requestAnimationFrame(tick);
     }
     requestAnimationFrame(tick);
   }
+  function startBrandRaf() { bindBrandScroll(); }
 
   function initBrandSpheres() {
     if (typeof THREE === 'undefined') return;
