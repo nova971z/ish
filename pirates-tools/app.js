@@ -103,7 +103,7 @@
       return '<model-viewer class="product-card__model"'
         + ' src="' + escapeHTML(p.model) + '"'
         + ' alt="' + alt + '"'
-        + ' loading="lazy"'
+        + ' loading="eager"'
         + ' reveal="auto"'
         + ' auto-rotate'
         + ' rotation-per-second="25deg"'
