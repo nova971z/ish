@@ -558,7 +558,7 @@
       metalness: 0.15
     });
     var sphere = new THREE.Mesh(geom, mat);
-    sphere.rotation.y = Math.PI / 4 + Math.PI;
+    sphere.rotation.y = -Math.PI / 2;
     scene.add(sphere);
 
     buildBrandTexture(logoSrc, BRAND_COLORS[brand] || '#8B5CF6', function (canvas) {
