@@ -637,25 +637,41 @@
     }
   }, { passive: true });
 
+  function disposeBrandScenes() {
+    _brandScenes.forEach(function (s) {
+      try { s.renderer.dispose(); } catch (_) {}
+      try {
+        if (s.renderer.domElement && s.renderer.domElement.parentNode) {
+          s.renderer.domElement.parentNode.removeChild(s.renderer.domElement);
+        }
+      } catch (_) {}
+    });
+    _brandScenes.length = 0;
+  }
+
   function initBrandSpheres() {
     if (typeof THREE === 'undefined') return;
+    // Drop stale scenes from a previous home render (detached DOM).
+    disposeBrandScenes();
     var bubbles = document.querySelectorAll('[data-brand-sphere]');
     if (!bubbles.length) return;
+    // Eager creation: build all spheres immediately so logos are ready
+    // by the time the CSS entrance animation plays.
+    bubbles.forEach(function (el) {
+      var brand = el.getAttribute('data-brand-sphere');
+      var logo = el.getAttribute('data-logo');
+      createBrandSphere(el, brand, logo);
+    });
+    // Visibility is driven by an IO so we don't render off-screen scenes.
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
         var el = e.target;
-        var brand = el.getAttribute('data-brand-sphere');
-        var logo = el.getAttribute('data-logo');
-        if (e.isIntersecting) {
-          createBrandSphere(el, brand, logo);
-          // Mark visibility
-          _brandScenes.forEach(function (s) { if (s.container === el) s.visible = true; });
-        } else {
-          _brandScenes.forEach(function (s) { if (s.container === el) s.visible = false; });
-        }
+        _brandScenes.forEach(function (s) {
+          if (s.container === el) s.visible = e.isIntersecting;
+        });
       });
       startBrandRaf();
-    }, { rootMargin: '100px' });
+    }, { rootMargin: '200px' });
     bubbles.forEach(function (b) { io.observe(b); });
   }
 
@@ -675,6 +691,8 @@
     }).join('');
 
     initBrandSpheres();
+    // Re-observe newly inserted reveal targets (brands grid + section).
+    observeReveals(dom.brandGrid.closest('.view') || document);
 
     $$('.brand-card', dom.brandGrid).forEach(function (btn) {
       btn.addEventListener('click', function () {
@@ -3006,27 +3024,33 @@
   // Expose openPayModal for cart buttons
   window.openPayModal = openPayModal;
 
-  function setupRevealAnimations() {
+  var _revealIO = null;
+  function observeReveals(root) {
+    var scope = root || document;
     if (!('IntersectionObserver' in window)) {
-      document.querySelectorAll('[data-reveal], [data-reveal-stagger]').forEach(function (el) {
+      scope.querySelectorAll('[data-reveal], [data-reveal-stagger]').forEach(function (el) {
         el.classList.add('is-visible');
       });
       return;
     }
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (e) {
-        if (e.isIntersecting) {
-          e.target.classList.add('is-visible');
-        } else if (e.boundingClientRect.top > 0) {
-          // Only reset when leaving by scrolling back up past it
-          e.target.classList.remove('is-visible');
-        }
-      });
-    }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
-
-    document.querySelectorAll('[data-reveal], [data-reveal-stagger]').forEach(function (el) {
-      io.observe(el);
+    if (!_revealIO) {
+      _revealIO = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) {
+            e.target.classList.add('is-visible');
+          } else if (e.boundingClientRect.top > 0) {
+            e.target.classList.remove('is-visible');
+          }
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+    }
+    scope.querySelectorAll('[data-reveal], [data-reveal-stagger]').forEach(function (el) {
+      _revealIO.observe(el);
     });
+  }
+
+  function setupRevealAnimations() {
+    observeReveals(document);
   }
 
   function setupAccountTabs() {
