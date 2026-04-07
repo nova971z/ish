@@ -96,6 +96,29 @@
 
   function getCart() { return loadCartData(); }
 
+  function productCardVisual(p) {
+    var img = '<img src="' + escapeHTML(p.img || 'images/placeholder.svg') + '" alt="' + escapeHTML(p.title) + '" loading="lazy" class="product-card__img">';
+    if (p.model) {
+      return '<model-viewer class="product-card__model"'
+        + ' src="' + escapeHTML(p.model) + '"'
+        + ' alt="' + escapeHTML(p.title) + '"'
+        + ' loading="lazy"'
+        + ' reveal="auto"'
+        + ' auto-rotate'
+        + ' rotation-per-second="20deg"'
+        + ' camera-orbit="0deg 75deg 105%"'
+        + ' interaction-prompt="none"'
+        + ' disable-zoom'
+        + ' disable-tap'
+        + ' disable-pan'
+        + ' touch-action="pan-y"'
+        + ' shadow-intensity="0.6"'
+        + ' exposure="1"'
+        + '>' + img + '</model-viewer>';
+    }
+    return img;
+  }
+
   function addToCart(item) {
     var items = getCart();
     var key = item.key || item.id || item.slug;
@@ -397,7 +420,7 @@
     dom.list.innerHTML = filtered.map(function (p) {
       return '<a class="product-card" href="#/produit/' + escapeHTML(p.slug || p.id) + '">'
         + '<div class="product-card__img-wrap">'
-        + '<img src="' + escapeHTML(p.img || 'images/placeholder.svg') + '" alt="' + escapeHTML(p.title) + '" loading="lazy">'
+        + productCardVisual(p)
         + (p.tag ? '<span class="product-card__tag">' + escapeHTML(p.tag) + '</span>' : '')
         + '</div>'
         + '<div class="product-card__body">'
@@ -462,7 +485,7 @@
     track.innerHTML = products.map(function (p) {
       return '<a class="product-card" href="#/produit/' + escapeHTML(p.slug || p.id) + '">'
         + '<div class="product-card__img-wrap">'
-        + '<img src="' + escapeHTML(p.img || 'images/placeholder.svg') + '" alt="' + escapeHTML(p.title) + '" loading="lazy">'
+        + productCardVisual(p)
         + (p.tag ? '<span class="product-card__tag">' + escapeHTML(p.tag) + '</span>' : '')
         + '</div>'
         + '<div class="product-card__body">'

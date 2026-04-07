@@ -5168,3 +5168,14 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   justify-content: center;
   flex-wrap: wrap;
 }
+
+/* 3D model on product cards */
+.product-card__model {
+  width: 100%;
+  height: 100%;
+  display: block;
+  background: transparent;
+  --poster-color: transparent;
+  pointer-events: none;
+}
+.product-card__img-wrap { position: relative; overflow: hidden; }
