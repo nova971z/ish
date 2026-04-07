@@ -11,7 +11,7 @@
   <link rel="canonical" href="https://nova971z.github.io/ish/">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=266">
+  <link rel="stylesheet" href="styles.css?v=267">
 
   <!-- 3D model viewer -->
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
@@ -22,8 +22,34 @@
   <!-- Firebase (auth + firestore) -->
   <script type="module" src="firebase-init.js"></script>
 
-  <!-- Crypto payment config (édite tes adresses dans ce fichier) -->
-  <script src="crypto-config.js?v=266"></script>
+  <!-- Crypto payment config (inlined pour éviter tout problème de cache/SW)
+       Édite tes adresses dans crypto-config.js ET ici si tu changes. -->
+  <script>
+  window.PT_CRYPTO_CONFIG = {
+    networks: [
+      { id:'btc',       label:'Bitcoin',         symbol:'BTC',  chain:'Bitcoin',
+        address:'bc1qfh9zdgq598xc3vgsrnyp2v38pefcxz827kwxwx',
+        coingeckoId:'bitcoin',  decimals:8, uriScheme:'bitcoin:' },
+      { id:'eth',       label:'Ethereum',        symbol:'ETH',  chain:'Ethereum (mainnet)',
+        address:'0xbF61CB5850754c3A87bEb696E3f0607718ad6b08',
+        coingeckoId:'ethereum', decimals:6, uriScheme:'ethereum:' },
+      { id:'arb-eth',   label:'ETH (Arbitrum)',  symbol:'ETH',  chain:'Arbitrum One',
+        address:'0xbF61CB5850754c3A87bEb696E3f0607718ad6b08',
+        coingeckoId:'ethereum', decimals:6, uriScheme:'' },
+      { id:'arb-usdc',  label:'USDC (Arbitrum)', symbol:'USDC', chain:'Arbitrum One',
+        address:'0xbF61CB5850754c3A87bEb696E3f0607718ad6b08',
+        coingeckoId:'usd-coin', decimals:2, uriScheme:'' },
+      { id:'arb-usdt',  label:'USDT (Arbitrum)', symbol:'USDT', chain:'Arbitrum One',
+        address:'0xbF61CB5850754c3A87bEb696E3f0607718ad6b08',
+        coingeckoId:'tether',   decimals:2, uriScheme:'' },
+      { id:'sol',       label:'Solana',          symbol:'SOL',  chain:'Solana',
+        address:'GKVmgduLmvVtqvds8oXsH4UFxmkbAVT2om4bXBo2eQbu',
+        coingeckoId:'solana',   decimals:4, uriScheme:'solana:' }
+    ],
+    cardCheckout: { url:'', nowpaymentsApiKey:'', nowpaymentsPayCurrency:'usdttrc20' },
+    whatsappNumber: '590774230195'
+  };
+  </script>
 
   <!-- PWA -->
   <meta name="theme-color" content="#0a0f14" />
@@ -1209,7 +1235,7 @@
     document.getElementById('dbgClose').addEventListener('click',function(){panel.style.display='none'});
   })();
   </script>
-  <script defer src="app.js?v=266"></script>
+  <script defer src="app.js?v=267"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->
