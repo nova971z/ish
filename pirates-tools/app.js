@@ -1793,12 +1793,13 @@
 
       // ═══ 2. DISCOVER HEADING ═══
       if (discoverHeading) {
-        var dp = getProgress(discoverHeading, 100);
+        var dp = getProgress(discoverHeading, 320);
         if (dp > 0) {
-          var tds = 0.6 + easeOut(dp) * 0.4;
-          var tdop = clamp(dp * 1.8, 0, 1);
-          var tdblur = Math.max(0, (1 - dp) * 14);
-          var tdty = (1 - easeOut(dp)) * 50;
+          var dpFast = clamp(dp * 2.2, 0, 1);
+          var tds = 0.6 + easeOut(dpFast) * 0.4;
+          var tdop = clamp(dp * 3, 0, 1);
+          var tdblur = Math.max(0, (1 - dpFast) * 14);
+          var tdty = (1 - easeOut(dpFast)) * 50;
           state.discHeadScale = lerp(state.discHeadScale, tds, L);
           state.discHeadTY = lerp(state.discHeadTY, tdty, L);
           state.discHeadOp = lerp(state.discHeadOp, tdop, L);
