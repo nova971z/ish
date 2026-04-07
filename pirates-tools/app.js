@@ -3055,6 +3055,17 @@
     observeReveals(document);
   }
 
+  // ── <model-viewer> error surfacing ─────────────────────────
+  // Listen for failed model loads at the document level so we can
+  // tell the user (and ourselves) what's wrong.
+  document.addEventListener('error', function (e) {
+    var t = e.target;
+    if (t && t.tagName === 'MODEL-VIEWER') {
+      try { console.error('[model-viewer error]', t.id || t.className, t.src, e); } catch (_) {}
+      try { toast('3D : ' + (t.id || 'modèle') + ' échec chargement', 'error'); } catch (_) {}
+    }
+  }, true);
+
   // ── <model-viewer> preloader ───────────────────────────────
   // Upgrades loading="lazy" → "eager" as soon as a viewer is within
   // ~700px of the viewport, so models are ready by the time the user
