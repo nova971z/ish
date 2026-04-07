@@ -3166,18 +3166,27 @@
       if (btnCard)   btnCard.hidden = true;
       if (btnCrypto) btnCrypto.hidden = false;
       if (powered)   powered.innerHTML = 'Paiements crypto directs — sans intermédiaire';
+
       // (re)render des réseaux à chaque ouverture pour rester défensif
       cryptoRenderNets();
-      // lazy fetch des taux puis auto-select du premier réseau
+
+      // Auto-select IMMÉDIAT du premier réseau (avant l'appel API),
+      // pour qu'on voie tout de suite QR + adresse + sélection visuelle.
+      var cfg = ptCryptoCfg();
+      var first = (cfg.networks || [])[0];
+      if (!_cryptoSelected && first) cryptoSelectNet(first);
+
+      // Puis on rafraîchit les taux et on recalcule le montant.
       cryptoFetchRates().then(function(){
-        var cfg = ptCryptoCfg();
-        var first = (cfg.networks || [])[0];
-        if (_cryptoSelected) {
-          cryptoSelectNet(_cryptoSelected);
-        } else if (first) {
-          cryptoSelectNet(first);
-        }
+        if (_cryptoSelected) cryptoSelectNet(_cryptoSelected);
       });
+
+      // Remonter le scroll de la modale au tout début pour que
+      // l'étape 1 (« Choisis ton réseau ») soit immédiatement visible.
+      var body = document.querySelector('#payModal .pay-modal__body');
+      if (body) body.scrollTop = 0;
+      var dlg = document.querySelector('#payModal .pay-modal__dialog');
+      if (dlg) dlg.scrollTop = 0;
     } else {
       if (crypto) { crypto.classList.remove('is-active'); crypto.hidden = true; }
       if (card) { card.classList.add('is-active'); card.hidden = false; }
