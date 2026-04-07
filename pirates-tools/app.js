@@ -591,36 +591,51 @@
   }
 
   var _brandScrollBound = false;
+  var _brandRafId = null;
   var _brandLastScroll = 0;
   var _brandRotVel = 0;
   var _brandRotX = 0;
   function bindBrandScroll() {
     if (_brandScrollBound) return;
     _brandScrollBound = true;
-    _brandLastScroll = window.scrollY || 0;
     function tick() {
-      var sy = window.scrollY || 0;
-      var delta = sy - _brandLastScroll;
-      _brandLastScroll = sy;
-      // Add scroll delta as angular impulse
-      _brandRotVel += delta * 0.0015;
-      // Spring back to rest (rotation tries to return to 0)
       var spring = -_brandRotX * 0.06;
       _brandRotVel += spring;
-      // Damping (water resistance)
       _brandRotVel *= 0.86;
       _brandRotX += _brandRotVel;
+
+      var anyVisible = false;
       for (var i = 0; i < _brandScenes.length; i++) {
         var s = _brandScenes[i];
         if (!s.visible) continue;
+        anyVisible = true;
         s.sphere.rotation.x = _brandRotX;
         s.renderer.render(s.scene, s.camera);
       }
-      requestAnimationFrame(tick);
+
+      // Idle detection: stop the loop when nothing visible AND motion settled.
+      var settled = Math.abs(_brandRotVel) < 0.0005 && Math.abs(_brandRotX) < 0.0005;
+      if (!anyVisible || settled) {
+        _brandRafId = null;
+        _brandScrollBound = false;
+        return;
+      }
+      _brandRafId = requestAnimationFrame(tick);
     }
-    requestAnimationFrame(tick);
+    _brandRafId = requestAnimationFrame(tick);
   }
   function startBrandRaf() { bindBrandScroll(); }
+
+  // Wake brand RAF on scroll (loop self-stops when idle)
+  window.addEventListener('scroll', function () {
+    var sy = window.scrollY || 0;
+    var d = sy - _brandLastScroll;
+    _brandLastScroll = sy;
+    _brandRotVel += d * 0.0015;
+    if (!_brandScrollBound && _brandScenes.some(function (s) { return s.visible; })) {
+      bindBrandScroll();
+    }
+  }, { passive: true });
 
   function initBrandSpheres() {
     if (typeof THREE === 'undefined') return;
@@ -2210,7 +2225,7 @@
 
   var heroLerp = { scale: 1, opacity: 1 };
   var heroRAF = null;
-  var HERO_LERP_SPEED = 0.1;
+  var HERO_LERP_SPEED = 0.35;
 
   function heroTick() {
     if (!dom.heroLogoContainer) return;
@@ -2239,17 +2254,19 @@
       tOpacity = 1 - pE;
     }
 
-    // Lerp toward targets
-    heroLerp.scale += (tScale - heroLerp.scale) * HERO_LERP_SPEED;
-    heroLerp.opacity += (tOpacity - heroLerp.opacity) * HERO_LERP_SPEED;
+    var dS = tScale - heroLerp.scale;
+    var dO = tOpacity - heroLerp.opacity;
+    var settled = Math.abs(dS) < 0.001 && Math.abs(dO) < 0.001;
 
-    // Snap when close enough
-    if (Math.abs(heroLerp.scale - tScale) < 0.001) heroLerp.scale = tScale;
-    if (Math.abs(heroLerp.opacity - tOpacity) < 0.001) heroLerp.opacity = tOpacity;
-
-    // Apply directly — no CSS transitions, pure GPU
-    dom.heroLogoContainer.style.transform = 'scale(' + heroLerp.scale.toFixed(4) + ')';
-    dom.heroLogoContainer.style.opacity = heroLerp.opacity.toFixed(4);
+    if (settled) {
+      heroLerp.scale = tScale;
+      heroLerp.opacity = tOpacity;
+    } else {
+      heroLerp.scale += dS * HERO_LERP_SPEED;
+      heroLerp.opacity += dO * HERO_LERP_SPEED;
+      dom.heroLogoContainer.style.transform = 'scale(' + heroLerp.scale.toFixed(4) + ')';
+      dom.heroLogoContainer.style.opacity = heroLerp.opacity.toFixed(4);
+    }
 
     // Toggle visibility when fully hidden
     if (heroLerp.opacity <= 0.001) {
@@ -2260,16 +2277,25 @@
       dom.heroLogoContainer.style.pointerEvents = '';
     }
 
+    if (settled) {
+      heroRAF = null;
+      return;
+    }
     heroRAF = requestAnimationFrame(heroTick);
   }
 
   function startHeroLoop() {
     if (!heroRAF) {
-      heroLerp.scale = 1;
-      heroLerp.opacity = 1;
       heroRAF = requestAnimationFrame(heroTick);
     }
   }
+
+  // Wake hero loop on scroll
+  window.addEventListener('scroll', function () {
+    if (!heroRAF && parseHash().route === '/') {
+      heroRAF = requestAnimationFrame(heroTick);
+    }
+  }, { passive: true });
 
   function stopHeroLoop() {
     if (heroRAF) {
