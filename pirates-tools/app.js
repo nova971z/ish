@@ -2980,6 +2980,29 @@
   // Expose openPayModal for cart buttons
   window.openPayModal = openPayModal;
 
+  function setupRevealAnimations() {
+    if (!('IntersectionObserver' in window)) {
+      document.querySelectorAll('[data-reveal], [data-reveal-stagger]').forEach(function (el) {
+        el.classList.add('is-visible');
+      });
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          e.target.classList.add('is-visible');
+        } else if (e.boundingClientRect.top > 0) {
+          // Only reset when leaving by scrolling back up past it
+          e.target.classList.remove('is-visible');
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+
+    document.querySelectorAll('[data-reveal], [data-reveal-stagger]').forEach(function (el) {
+      io.observe(el);
+    });
+  }
+
   function setupAccountTabs() {
     var tabs = document.querySelectorAll('.acc-tab');
     var panes = document.querySelectorAll('.acc-pane');
@@ -3004,6 +3027,7 @@
     cacheDom();
     bindEvents();
     setupAccountTabs();
+    setupRevealAnimations();
     setupPayModal();
     initAuth();
     initPWA();
