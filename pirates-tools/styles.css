@@ -5243,6 +5243,34 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   color:#a78bfa; font-weight:700; font-size:.72rem;
   letter-spacing:.05em; text-transform:uppercase;
 }
+.cryptopay__tokens-wrap{ margin-top:.75rem; }
+.cryptopay__tokens-label{
+  color:var(--muted); font-size:.78rem; font-weight:700;
+  text-transform:uppercase; letter-spacing:.04em; margin-bottom:.4rem;
+}
+.cryptopay__tokens{
+  display:flex; flex-wrap:wrap; gap:.5rem;
+}
+.cryptopay-token{
+  cursor:pointer;
+  display:inline-flex; align-items:center; gap:.4rem;
+  background: rgba(255,255,255,.04);
+  border:2px solid rgba(255,255,255,.10);
+  border-radius:10px;
+  padding:.5rem .75rem;
+  font:inherit; color:#fff;
+}
+.cryptopay-token:hover{
+  background: rgba(255,255,255,.08);
+  border-color: rgba(139,92,246,.55);
+}
+.cryptopay-token.is-on{
+  background: linear-gradient(135deg, rgba(99,91,255,.28), rgba(139,92,246,.28));
+  border-color:#8B5CF6;
+  box-shadow: 0 0 0 3px rgba(139,92,246,.18);
+}
+.cryptopay-token__sym{ font-weight:800; font-size:.85rem; color:#a78bfa; letter-spacing:.04em; }
+.cryptopay-token__name{ font-weight:600; font-size:.78rem; color:rgba(255,255,255,.78); }
 
 /* Détail (QR + adresse + montant) */
 .cryptopay__detail{

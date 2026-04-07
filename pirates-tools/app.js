@@ -2996,29 +2996,70 @@
     }).catch(function(){ return {}; });
   }
 
+  function cryptoChains() {
+    var nets = (ptCryptoCfg().networks || []);
+    var seen = {}, out = [];
+    nets.forEach(function(n){
+      if (seen[n.chain]) return;
+      seen[n.chain] = true;
+      out.push({ chain: n.chain, tokens: nets.filter(function(x){ return x.chain === n.chain; }) });
+    });
+    return out;
+  }
+
   function cryptoRenderNets() {
     var wrap = document.getElementById('cryptopayNets');
     if (!wrap) return;
-    var cfg = ptCryptoCfg();
-    var nets = cfg.networks || [];
-    if (!nets.length) {
-      wrap.innerHTML = '<div class="cryptopay__empty">⚠️ Aucun réseau crypto configuré.<br>Édite <code>crypto-config.js</code>.</div>';
+    var chains = cryptoChains();
+    if (!chains.length) {
+      wrap.innerHTML = '<div class="cryptopay__empty">⚠️ Aucun réseau crypto configuré.</div>';
       return;
     }
-    wrap.innerHTML = nets.map(function(n){
+    wrap.innerHTML = chains.map(function(c){
+      var tokens = c.tokens.map(function(t){ return t.symbol; }).join(' · ');
       return '<button type="button" class="cryptopay-net" role="radio" '
-        + 'aria-checked="false" data-net-id="' + n.id + '">'
-        + '<span class="cryptopay-net__chain">' + n.chain + '</span>'
-        + '<span class="cryptopay-net__token">' + n.symbol + '</span>'
+        + 'aria-checked="false" data-chain="' + c.chain.replace(/"/g,'&quot;') + '">'
+        + '<span class="cryptopay-net__chain">' + c.chain + '</span>'
+        + '<span class="cryptopay-net__token">' + tokens + '</span>'
         + '</button>';
     }).join('');
     wrap.querySelectorAll('.cryptopay-net').forEach(function(btn){
       btn.addEventListener('click', function(){
+        cryptoSelectChain(btn.getAttribute('data-chain'));
+      });
+    });
+  }
+
+  function cryptoSelectChain(chain) {
+    var wrap = document.getElementById('cryptopayNets');
+    if (wrap) {
+      wrap.querySelectorAll('.cryptopay-net').forEach(function(b){
+        var on = b.getAttribute('data-chain') === chain;
+        b.classList.toggle('is-on', on);
+        b.setAttribute('aria-checked', on ? 'true' : 'false');
+      });
+    }
+    var tokensWrap = document.getElementById('cryptopayTokensWrap');
+    var tokensEl   = document.getElementById('cryptopayTokens');
+    var entry = cryptoChains().find(function(c){ return c.chain === chain; });
+    if (!entry || !tokensEl) return;
+    if (tokensWrap) tokensWrap.hidden = false;
+    tokensEl.innerHTML = entry.tokens.map(function(t){
+      return '<button type="button" class="cryptopay-token" role="radio" '
+        + 'aria-checked="false" data-net-id="' + t.id + '">'
+        + '<span class="cryptopay-token__sym">' + t.symbol + '</span>'
+        + '<span class="cryptopay-token__name">' + t.label + '</span>'
+        + '</button>';
+    }).join('');
+    tokensEl.querySelectorAll('.cryptopay-token').forEach(function(btn){
+      btn.addEventListener('click', function(){
         var id = btn.getAttribute('data-net-id');
-        var net = nets.find(function(x){ return x.id === id; });
+        var net = entry.tokens.find(function(x){ return x.id === id; });
         if (net) cryptoSelectNet(net);
       });
     });
+    // auto-select first compatible token
+    if (entry.tokens[0]) cryptoSelectNet(entry.tokens[0]);
   }
 
   function cryptoSelectNet(net) {
@@ -3026,6 +3067,14 @@
     var wrap = document.getElementById('cryptopayNets');
     if (wrap) {
       wrap.querySelectorAll('.cryptopay-net').forEach(function(b){
+        var on = b.getAttribute('data-chain') === net.chain;
+        b.classList.toggle('is-on', on);
+        b.setAttribute('aria-checked', on ? 'true' : 'false');
+      });
+    }
+    var tokensEl = document.getElementById('cryptopayTokens');
+    if (tokensEl) {
+      tokensEl.querySelectorAll('.cryptopay-token').forEach(function(b){
         var on = b.getAttribute('data-net-id') === net.id;
         b.classList.toggle('is-on', on);
         b.setAttribute('aria-checked', on ? 'true' : 'false');
@@ -3171,9 +3220,8 @@
 
       // Auto-select IMMÉDIAT du premier réseau (avant l'appel API),
       // pour qu'on voie tout de suite QR + adresse + sélection visuelle.
-      var cfg = ptCryptoCfg();
-      var first = (cfg.networks || [])[0];
-      if (!_cryptoSelected && first) cryptoSelectNet(first);
+      var firstChain = cryptoChains()[0];
+      if (!_cryptoSelected && firstChain) cryptoSelectChain(firstChain.chain);
 
       // Puis on rafraîchit les taux et on recalcule le montant.
       cryptoFetchRates().then(function(){

@@ -11,7 +11,7 @@
   <link rel="canonical" href="https://nova971z.github.io/ish/">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=268">
+  <link rel="stylesheet" href="styles.css?v=269">
 
   <!-- 3D model viewer -->
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
@@ -946,9 +946,13 @@
                   <p class="cryptostep__sub">Sélectionne la crypto que tu veux envoyer.</p>
                 </div>
               </header>
-              <div class="cryptopay__nets" id="cryptopayNets" role="radiogroup" aria-label="Réseau crypto">
+              <div class="cryptopay__nets" id="cryptopayNets" role="radiogroup" aria-label="Réseau blockchain">
                 <!-- rendu dynamiquement par app.js -->
                 <div class="cryptopay__empty">Chargement des réseaux…</div>
+              </div>
+              <div class="cryptopay__tokens-wrap" id="cryptopayTokensWrap" hidden>
+                <div class="cryptopay__tokens-label">2. Choisis la crypto compatible</div>
+                <div class="cryptopay__tokens" id="cryptopayTokens" role="radiogroup" aria-label="Crypto compatible"></div>
               </div>
             </section>
 
@@ -1235,7 +1239,7 @@
     document.getElementById('dbgClose').addEventListener('click',function(){panel.style.display='none'});
   })();
   </script>
-  <script defer src="app.js?v=268"></script>
+  <script defer src="app.js?v=269"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->
