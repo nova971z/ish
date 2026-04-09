@@ -674,18 +674,18 @@
   }
 
   function initBrandSpheres() {
-    if (typeof THREE === 'undefined') return;
     // Drop stale scenes from a previous home render (detached DOM).
     disposeBrandScenes();
     var bubbles = document.querySelectorAll('[data-brand-sphere]');
     if (!bubbles.length) return;
-    // Eager creation: build all spheres immediately so logos are ready
-    // by the time the CSS entrance animation plays.
-    bubbles.forEach(function (el) {
-      var brand = el.getAttribute('data-brand-sphere');
-      var logo = el.getAttribute('data-logo');
-      createBrandSphere(el, brand, logo);
-    });
+    // Ensure Three.js is available then create all spheres
+    ensureThree().then(function () {
+      bubbles.forEach(function (el) {
+        var brand = el.getAttribute('data-brand-sphere');
+        var logo = el.getAttribute('data-logo');
+        createBrandSphere(el, brand, logo);
+      });
+    }).catch(function () { /* fallback logos stay visible */ });
     // Visibility is driven by an IO so we don't render off-screen scenes.
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
