@@ -1,10 +1,15 @@
 {
-  "name": "pirates-tools-app1",
-  "version": "0.0.0",
+  "name": "pirates-tools",
+  "version": "1.0.0",
   "private": true,
-  "description": "Static PWA for Pirates Tools. CI runs `node scripts/ci.js` to validate anchors/assets.",
+  "description": "Pirates Tools — PWA e-commerce with serverless API (Vercel + Firebase + Stripe)",
   "scripts": {
-    "test": "node scripts/ci.js"
+    "test": "node scripts/ci.js",
+    "dev": "npx vercel dev --listen 3000"
+  },
+  "dependencies": {
+    "stripe": "^14.0.0",
+    "firebase-admin": "^12.0.0"
   },
   "engines": {
     "node": ">=18.18.0"

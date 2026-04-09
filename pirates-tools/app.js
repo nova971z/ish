@@ -3281,25 +3281,59 @@
 
   function confirmPayment() {
     if (!_payItems || !_payItems.length) return;
-    // For Payment Links, we open the first item's link.
-    // Multi-item carts: each item has its own link, we open the first and warn.
+    var total = _payItems.reduce(function (s, it) { return s + (it.price || 0) * (it.qty || 1); }, 0);
+
+    // Server-side Stripe Checkout (when API is configured)
+    var apiBase = window.PT_API_BASE || '';
+    if (apiBase) {
+      var btn = document.getElementById('payModalConfirm');
+      if (btn) { btn.disabled = true; btn.textContent = 'Redirection…'; }
+
+      fetch(apiBase + '/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: _payItems.map(function (it) {
+            return { title: it.title, price: it.price, qty: it.qty || 1 };
+          }),
+          customerEmail: (_currentUser && _currentUser.email) || undefined
+        })
+      })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data.ok && data.url) {
+          try {
+            localStorage.setItem('pt_pending_order', JSON.stringify({
+              items: _payItems.map(function (it) { return { title: it.title, price: it.price, qty: it.qty }; }),
+              total: total, sessionId: data.sessionId, ts: Date.now()
+            }));
+          } catch (_) {}
+          window.location.href = data.url;
+        } else {
+          toast(data.error || 'Erreur paiement', 'error');
+          if (btn) { btn.disabled = false; btn.textContent = 'Payer par carte'; }
+        }
+      })
+      .catch(function () {
+        toast('Erreur réseau — réessayez', 'error');
+        if (btn) { btn.disabled = false; btn.textContent = 'Payer par carte'; }
+      });
+      return;
+    }
+
+    // Fallback: legacy Payment Links (if no API configured)
     var first = _payItems[0];
     if (!first.paymentLink) {
-      // Pas de lien Stripe configuré → bascule sur l'onglet crypto
-      // (qui propose aussi un on-ramp carte via NOWPayments).
       toast('Paiement carte non configuré — bascule sur Crypto.', 'info');
       cryptoSwitchTab('crypto');
       return;
     }
-    // Save pending order intent in localStorage so #/merci can record it
     try {
-      var total = _payItems.reduce(function (s, it) { return s + (it.price || 0) * (it.qty || 1); }, 0);
       localStorage.setItem('pt_pending_order', JSON.stringify({
         items: _payItems.map(function (it) { return { title: it.title, price: it.price, qty: it.qty }; }),
-        total: total,
-        ts: Date.now()
+        total: total, ts: Date.now()
       }));
-    } catch (e) {}
+    } catch (_) {}
     window.open(first.paymentLink, '_blank', 'noopener');
     closePayModal();
   }
