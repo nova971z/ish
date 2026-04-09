@@ -79,10 +79,10 @@ module.exports = async function(){
   }
 
   // Vérif assets principaux (<link>/<script>) — accepte ./, / ou sans préfixe
-  if (!/<link\b[^>]*href=["']\.?\/?styles\.css["'][^>]*>/i.test(html)) {
+  if (!/<link\b[^>]*href=["']\.?\/?styles\.css([?#][^"']*)?\s*["'][^>]*>/i.test(html)) {
     errs.push('index.html: <link href="styles.css"> manquant (rel="stylesheet").');
   }
-  if (!/<script\b[^>]*src=["']\.?\/?app\.js["'][^>]*>/i.test(html)) {
+  if (!/<script\b[^>]*src=["']\.?\/?app\.js([?#][^"']*)?\s*["'][^>]*>/i.test(html)) {
     errs.push('index.html: <script src="app.js"> manquant.');
   }
 
