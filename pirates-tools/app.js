@@ -251,49 +251,6 @@
     if (statItems) statItems.textContent = totalQty;
     if (statTotal) statTotal.textContent = formatPrice(total);
     if (footerTotal) footerTotal.textContent = formatPrice(total);
-
-    // Qty +/- handlers
-    $$('.devis-qty-minus', dom.devisList).forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var i = Number(this.dataset.idx);
-        var c = getCart();
-        var newQty = Math.max(1, (c[i].qty || 1) - 1);
-        updateQty(i, newQty);
-        renderDevis();
-      });
-    });
-    $$('.devis-qty-plus', dom.devisList).forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var i = Number(this.dataset.idx);
-        var c = getCart();
-        var newQty = (c[i].qty || 1) + 1;
-        updateQty(i, newQty);
-        renderDevis();
-      });
-    });
-
-    // Buy line handlers
-    $$('.devis-buy', dom.devisList).forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var i = Number(this.dataset.idx);
-        var c = getCart();
-        var it = c[i];
-        if (!it) return;
-        openPayModal([{ title: it.title, price: it.price, qty: it.qty || 1, paymentLink: it.paymentLink }]);
-      });
-    });
-
-    // Remove handlers
-    $$('.devis-remove', dom.devisList).forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var el = this.closest('.devis-item');
-        if (el) { el.classList.add('devis-item--removing'); }
-        setTimeout(function () {
-          removeFromCart(Number(btn.dataset.idx));
-          renderDevis();
-        }, 300);
-      });
-    });
   }
 
   function sendDevisWhatsApp() {
@@ -369,14 +326,6 @@
       html += '<button class="cat-chip" data-cat="' + escapeHTML(c) + '">' + escapeHTML(c) + '</button>';
     });
     dom.catList.innerHTML = html;
-
-    $$('.cat-chip', dom.catList).forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        currentFilter.category = this.dataset.cat;
-        syncFilters();
-        renderProductList();
-      });
-    });
   }
 
   function renderCategorySelect() {
@@ -597,12 +546,12 @@
     });
     renderer.render(scene, camera);
 
-    var entry = { renderer: renderer, scene: scene, camera: camera, sphere: sphere, container: container, visible: true };
+    var entry = { renderer: renderer, scene: scene, camera: camera, sphere: sphere, container: container, visible: true, ro: null };
     _brandScenes.push(entry);
 
-    // Resize observer
+    // Resize observer (stored in entry for cleanup)
     if (typeof ResizeObserver !== 'undefined') {
-      var ro = new ResizeObserver(function () {
+      entry.ro = new ResizeObserver(function () {
         var nw = container.clientWidth, nh = container.clientHeight;
         if (nw && nh) {
           renderer.setSize(nw, nh);
@@ -610,7 +559,7 @@
           camera.updateProjectionMatrix();
         }
       });
-      ro.observe(container);
+      entry.ro.observe(container);
     }
   }
 
@@ -661,8 +610,11 @@
     }
   }, { passive: true });
 
+  var _brandIO = null;
   function disposeBrandScenes() {
+    if (_brandIO) { _brandIO.disconnect(); _brandIO = null; }
     _brandScenes.forEach(function (s) {
+      try { if (s.ro) s.ro.disconnect(); } catch (_) {}
       try { s.renderer.dispose(); } catch (_) {}
       try {
         if (s.renderer.domElement && s.renderer.domElement.parentNode) {
@@ -687,7 +639,7 @@
       });
     }).catch(function () { /* fallback logos stay visible */ });
     // Visibility is driven by an IO so we don't render off-screen scenes.
-    var io = new IntersectionObserver(function (entries) {
+    _brandIO = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
         var el = e.target;
         _brandScenes.forEach(function (s) {
@@ -696,7 +648,7 @@
       });
       startBrandRaf();
     }, { rootMargin: '200px' });
-    bubbles.forEach(function (b) { io.observe(b); });
+    bubbles.forEach(function (b) { _brandIO.observe(b); });
   }
 
   function renderBrandGrid() {
@@ -2423,7 +2375,10 @@
     }, { once: true });
   }
 
+  var _authInited = false;
   function initAuth() {
+    if (_authInited) return;
+    _authInited = true;
     whenFirebaseReady(function (fb) {
       _fb = fb;
       if (!fb.configured) {
@@ -2872,6 +2827,17 @@
       }, 300));
     }
 
+    // Category chips — event delegation
+    if (dom.catList) {
+      dom.catList.addEventListener('click', function (e) {
+        var btn = e.target.closest('.cat-chip');
+        if (!btn) return;
+        currentFilter.category = btn.dataset.cat || '';
+        syncFilters();
+        renderProductList();
+      });
+    }
+
     // Category select
     if (dom.tag) {
       dom.tag.addEventListener('change', function () {
@@ -2881,7 +2847,29 @@
       });
     }
 
-    // Devis page actions
+    // Devis page actions — event delegation (single listener, never re-added)
+    if (dom.devisList) {
+      dom.devisList.addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-idx]');
+        if (!btn) return;
+        var i = Number(btn.dataset.idx);
+        var c = getCart();
+        if (btn.classList.contains('devis-qty-minus')) {
+          updateQty(i, Math.max(1, (c[i].qty || 1) - 1));
+          renderDevis();
+        } else if (btn.classList.contains('devis-qty-plus')) {
+          updateQty(i, (c[i].qty || 1) + 1);
+          renderDevis();
+        } else if (btn.classList.contains('devis-buy')) {
+          var it = c[i]; if (!it) return;
+          openPayModal([{ title: it.title, price: it.price, qty: it.qty || 1, paymentLink: it.paymentLink }]);
+        } else if (btn.closest('.devis-remove')) {
+          var el = btn.closest('.devis-item');
+          if (el) el.classList.add('devis-item--removing');
+          setTimeout(function () { removeFromCart(i); renderDevis(); }, 300);
+        }
+      });
+    }
     if (dom.devisSend) dom.devisSend.addEventListener('click', sendDevisWhatsApp);
     if (dom.devisPay) dom.devisPay.addEventListener('click', function () {
       var items = getCart();
@@ -3081,23 +3069,26 @@
         b.setAttribute('aria-checked', on ? 'true' : 'false');
       });
     }
-    document.getElementById('cryptopayChain').textContent = net.chain;
-    document.getElementById('cryptopayAddr').textContent = net.address || '—';
-
+    var chainEl  = document.getElementById('cryptopayChain');
+    var addrEl   = document.getElementById('cryptopayAddr');
     var amountEl = document.getElementById('cryptopayAmount');
     var symEl    = document.getElementById('cryptopayAmountSymbol');
     var rateEl   = document.getElementById('cryptopayRate');
 
+    if (chainEl) chainEl.textContent = net.chain;
+    if (addrEl)  addrEl.textContent = net.address || '—';
+
     var addrLooksUnset = !net.address || /^REMPLACE_/i.test(net.address);
     var amt = cryptoFormatAmount(_cryptoTotalEur, net);
-    if (amt) {
-      amountEl.textContent = amt;
-      symEl.textContent = net.symbol;
-      rateEl.textContent = '1 ' + net.symbol + ' ≈ ' + (_cryptoRates[net.coingeckoId]).toFixed(2) + ' € (taux temps réel)';
+    var rate = _cryptoRates[net.coingeckoId];
+    if (amt && rate) {
+      if (amountEl) amountEl.textContent = amt;
+      if (symEl) symEl.textContent = net.symbol;
+      if (rateEl) rateEl.textContent = '1 ' + net.symbol + ' ≈ ' + rate.toFixed(2) + ' € (taux temps réel)';
     } else {
-      amountEl.textContent = '…';
-      symEl.textContent = net.symbol;
-      rateEl.textContent = 'Récupération du taux en cours…';
+      if (amountEl) amountEl.textContent = '…';
+      if (symEl) symEl.textContent = net.symbol;
+      if (rateEl) rateEl.textContent = 'Récupération du taux en cours…';
     }
 
     var qr = document.getElementById('cryptopayQR');

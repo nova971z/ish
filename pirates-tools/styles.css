@@ -5624,3 +5624,13 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   60%  { box-shadow: 0 0 0 14px rgba(139,92,246,0); }
   100% { box-shadow: 0 0 0 0 rgba(139,92,246,0); }
 }
+
+/* ========== ACCESSIBILITÉ : reduced-motion global ========== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

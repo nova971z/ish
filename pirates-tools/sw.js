@@ -1,5 +1,5 @@
 /* sw.js — Pirates Tools (PWA) */
-const VERSION        = 'pt-v271';                    // version du SW (logique SW)
+const VERSION        = 'pt-v272';                    // version du SW (logique SW)
 const STATIC_CACHE   = `pt-static-${VERSION}`;
 const RUNTIME_CACHE  = `pt-runtime-${VERSION}`;
 const IMG_CACHE      = `pt-img-${VERSION}`;
@@ -7,7 +7,7 @@ const DATA_CACHE     = `pt-data-${VERSION}`;
 const ORIGIN         = self.location.origin;
 
 // Aligner avec le HTML (cache-busting des assets)
-const ASSET_VER      = '271';
+const ASSET_VER      = '272';
 
 // IMPORTANT : le site tourne sous /ish/ (GitHub Pages).
 // On reste en chemins relatifs (./) pour que le SW fonctionne en local et en prod.
@@ -40,7 +40,7 @@ async function precacheShell() {
     try {
       const r = await fetch(u, { cache:'no-store' });
       if (r && r.ok) await c.put(u, r.clone());
-    } catch(_){ /* ignore */ }
+    } catch(e){ console.warn('[SW] precache skip:', u, e.message); }
   }));
 }
 

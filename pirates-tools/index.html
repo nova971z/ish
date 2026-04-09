@@ -7,11 +7,21 @@
   <title>Pirates Tools - Outillage pro (PWA)</title>
   <meta name="description" content="Pirates Tools — Visseuses a chocs DeWALT, dispo Antilles. PWA rapide, contact immediat (telephone & WhatsApp)." />
 
+  <!-- Open Graph / Social -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Pirates Tools — Outillage professionnel">
+  <meta property="og:description" content="Visseuses, boulonneuses DeWALT, Makita, Festool. Livraison Antilles.">
+  <meta property="og:image" content="https://nova971z.github.io/ish/icons/icon-512.png">
+  <meta property="og:url" content="https://nova971z.github.io/ish/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Pirates Tools — Outillage professionnel">
+  <meta name="twitter:image" content="https://nova971z.github.io/ish/icons/icon-512.png">
+
   <base href="/ish/">
   <link rel="canonical" href="https://nova971z.github.io/ish/">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=271">
+  <link rel="stylesheet" href="styles.css?v=272">
 
   <!-- 3D model viewer -->
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
@@ -107,7 +117,7 @@
     .pt-loadbar{
       position:fixed; left:0; right:0;
       top: var(--safe-top, 0px);
-      height:3px; z-index:2147483600;
+      height:3px; z-index:10000;
       background:transparent; pointer-events:none;
       opacity:0; transition: opacity .25s ease;
     }
@@ -133,7 +143,7 @@
     }
 
     .sr-only{ position:absolute !important; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,1px); white-space:nowrap; border:0; }
-    .pt-root{ z-index:2147483000; }
+    .pt-root{ z-index:1; }
 
     /* Drawer (menu lateral) */
     .drawer{
@@ -1240,7 +1250,7 @@
     document.getElementById('dbgClose').addEventListener('click',function(){panel.style.display='none'});
   })();
   </script>
-  <script defer src="app.js?v=271"></script>
+  <script defer src="app.js?v=272"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->
