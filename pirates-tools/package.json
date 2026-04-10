@@ -1,0 +1,18 @@
+{
+  "name": "pirates-tools",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pirates Tools — PWA e-commerce with serverless API (Vercel + Firebase + Stripe)",
+  "scripts": {
+    "test": "node scripts/ci.js",
+    "dev": "npx vercel dev --listen 3000"
+  },
+  "dependencies": {
+    "stripe": "^14.0.0",
+    "firebase-admin": "^12.0.0"
+  },
+  "engines": {
+    "node": ">=18.18.0"
+  },
+  "license": "UNLICENSED"
+}
