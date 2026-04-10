@@ -964,27 +964,38 @@
 
     var selectedRating = 0;
 
-    // Star selection
-    var starBtns = starsSelect ? starsSelect.querySelectorAll('.pdp-reviews__star-btn') : [];
-    for (var si = 0; si < starBtns.length; si++) {
-      (function (btn, idx) {
-        btn.addEventListener('click', function () {
-          selectedRating = idx + 1;
-          for (var j = 0; j < starBtns.length; j++) {
-            starBtns[j].classList.toggle('active', j <= idx);
-          }
-        });
-        btn.addEventListener('mouseenter', function () {
-          for (var j = 0; j < starBtns.length; j++) {
-            starBtns[j].style.color = j <= idx ? '#FFD700' : '';
-          }
-        });
-        btn.addEventListener('mouseleave', function () {
-          for (var j = 0; j < starBtns.length; j++) {
-            starBtns[j].style.color = '';
-          }
-        });
-      })(starBtns[si], si);
+    // Star selection — event delegation on container (no per-button listeners)
+    if (starsSelect && !starsSelect._ptDelegated) {
+      starsSelect._ptDelegated = true;
+      starsSelect.addEventListener('click', function (e) {
+        var btn = e.target.closest('.pdp-reviews__star-btn');
+        if (!btn) return;
+        var allBtns = starsSelect.querySelectorAll('.pdp-reviews__star-btn');
+        var idx = Array.prototype.indexOf.call(allBtns, btn);
+        if (idx < 0) return;
+        selectedRating = idx + 1;
+        for (var j = 0; j < allBtns.length; j++) {
+          allBtns[j].classList.toggle('active', j <= idx);
+        }
+      });
+      starsSelect.addEventListener('mouseenter', function (e) {
+        var btn = e.target.closest('.pdp-reviews__star-btn');
+        if (!btn) return;
+        var allBtns = starsSelect.querySelectorAll('.pdp-reviews__star-btn');
+        var idx = Array.prototype.indexOf.call(allBtns, btn);
+        if (idx < 0) return;
+        for (var j = 0; j < allBtns.length; j++) {
+          allBtns[j].style.color = j <= idx ? '#FFD700' : '';
+        }
+      }, true);
+      starsSelect.addEventListener('mouseleave', function (e) {
+        var btn = e.target.closest('.pdp-reviews__star-btn');
+        if (!btn) return;
+        var allBtns = starsSelect.querySelectorAll('.pdp-reviews__star-btn');
+        for (var j = 0; j < allBtns.length; j++) {
+          allBtns[j].style.color = '';
+        }
+      }, true);
     }
 
     function renderReviewsList() {
@@ -1392,17 +1403,20 @@
 
     var selectedRating = 0;
 
-    // Star selection
-    var starBtns = starsSelect ? starsSelect.querySelectorAll('.pdp-reviews__star-btn') : [];
-    for (var si = 0; si < starBtns.length; si++) {
-      (function (btn, idx) {
-        btn.addEventListener('click', function () {
-          selectedRating = idx + 1;
-          for (var j = 0; j < starBtns.length; j++) {
-            starBtns[j].classList.toggle('active', j <= idx);
-          }
-        });
-      })(starBtns[si], si);
+    // Star selection — event delegation on container (no per-button listeners)
+    if (starsSelect && !starsSelect._ptDelegated) {
+      starsSelect._ptDelegated = true;
+      starsSelect.addEventListener('click', function (e) {
+        var btn = e.target.closest('.pdp-reviews__star-btn');
+        if (!btn) return;
+        var allBtns = starsSelect.querySelectorAll('.pdp-reviews__star-btn');
+        var idx = Array.prototype.indexOf.call(allBtns, btn);
+        if (idx < 0) return;
+        selectedRating = idx + 1;
+        for (var j = 0; j < allBtns.length; j++) {
+          allBtns[j].classList.toggle('active', j <= idx);
+        }
+      });
     }
 
     function renderList() {
@@ -1573,7 +1587,7 @@
           }
         }
       });
-    }
+    } // end _3dCarouselBound guard
   }
 
   // ── PDP scroll animations (Apple-style immersive — lerp-based) ──
@@ -2376,6 +2390,7 @@
   }
 
   var _authInited = false;
+  var _authUnsub = null;
   function initAuth() {
     if (_authInited) return;
     _authInited = true;
@@ -2386,8 +2401,9 @@
         _authReady = true;
         return;
       }
-      // Listen to auth state changes
-      fb.onAuthStateChanged(fb.auth, function (user) {
+      // Listen to auth state changes (store unsubscribe for cleanup)
+      if (_authUnsub) _authUnsub();
+      _authUnsub = fb.onAuthStateChanged(fb.auth, function (user) {
         _currentUser = user || null;
         _authReady = true;
         if (user) {
@@ -3153,7 +3169,8 @@
       }).then(function(r){ return r.json(); }).then(function(j){
         if (j && j.invoice_url) window.open(j.invoice_url, '_blank', 'noopener');
         else toast("Impossible de créer l'invoice NOWPayments.", 'error');
-      }).catch(function(){
+      }).catch(function(err){
+        console.error('NOWPayments:', err);
         toast("Erreur réseau NOWPayments.", 'error');
       });
       return;
