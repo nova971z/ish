@@ -4265,7 +4265,7 @@ contain-intrinsic-size: 800px 600px;
 /* ========== 25) TOASTS ========== */
 #toasts {
 position: fixed;
-z-index: 120;
+z-index: 9500;
 right: 12px;
 bottom: calc(var(--dock-bottom) + var(--safe-bottom) + 62px);
 display: grid;
