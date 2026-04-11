@@ -291,15 +291,46 @@
       }
     } catch (_) { /* ignore */ }
 
-    // Fetch fresh copy
-    fetch('products.json')
-      .then(function (r) { return r.json(); })
+    // Prefer the serverless API when available (Vercel), fallback to
+    // static products.json (GitHub Pages / offline). The API returns
+    // { ok, count, products: [...] } while the static file is a raw array.
+    var apiConfigured = typeof window.PT_API_BASE === 'string';
+    var apiBase = window.PT_API_BASE || '';
+    var primaryUrl = apiConfigured ? (apiBase + '/api/products') : 'products.json';
+    var fallbackUrl = 'products.json';
+
+    function extractProducts(data) {
+      if (Array.isArray(data)) return data;
+      if (data && Array.isArray(data.products)) return data.products;
+      return null;
+    }
+
+    function tryFetch(url) {
+      return fetch(url, { cache: 'no-store' })
+        .then(function (r) {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.json();
+        })
+        .then(function (data) {
+          var arr = extractProducts(data);
+          if (!arr) throw new Error('Invalid response shape');
+          return arr;
+        });
+    }
+
+    tryFetch(primaryUrl)
+      .catch(function (err) {
+        console.warn('[products] primary fetch failed (' + primaryUrl + '):', err.message);
+        if (primaryUrl === fallbackUrl) throw err;
+        return tryFetch(fallbackUrl);
+      })
       .then(function (arr) {
-        localStorage.setItem(PRODUCTS_CACHE_KEY, JSON.stringify(arr));
+        try { localStorage.setItem(PRODUCTS_CACHE_KEY, JSON.stringify(arr)); } catch (_) {}
         setProducts(arr);
         onRouteChange();
       })
-      .catch(function () {
+      .catch(function (err) {
+        console.error('[products] all fetches failed:', err && err.message);
         if (products.length === 0) toast('Impossible de charger les produits', 'error');
       });
   }
@@ -3300,9 +3331,12 @@
     if (!_payItems || !_payItems.length) return;
     var total = _payItems.reduce(function (s, it) { return s + (it.price || 0) * (it.qty || 1); }, 0);
 
-    // Server-side Stripe Checkout (when API is configured)
+    // Server-side Stripe Checkout (when API is configured). An empty
+    // string is a valid value meaning "same origin", so we explicitly
+    // check for the presence of PT_API_BASE instead of truthiness.
+    var apiConfigured = typeof window.PT_API_BASE === 'string';
     var apiBase = window.PT_API_BASE || '';
-    if (apiBase) {
+    if (apiConfigured) {
       var btn = document.getElementById('payModalConfirm');
       if (btn) { btn.disabled = true; btn.textContent = 'Redirection…'; }
 

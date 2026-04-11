@@ -31,6 +31,13 @@
   <!-- Firebase (auth + firestore) -->
   <script type="module" src="firebase-init.js"></script>
 
+  <!-- Serverless API base. Empty string = same origin (Vercel prod/preview).
+       Leave unset (remove the line) to fall back to the static products.json
+       and the legacy Payment Links flow (useful on GitHub Pages / offline). -->
+  <script>
+  window.PT_API_BASE = '';
+  </script>
+
   <!-- Crypto payment config (inlined pour éviter tout problème de cache/SW)
        Édite tes adresses dans crypto-config.js ET ici si tu changes. -->
   <script>
@@ -378,8 +385,8 @@
                   <button type="button" class="pdp-reviews__star-btn" data-star="5" aria-label="5 etoiles">&#9733;</button>
                 </div>
               </div>
-              <input id="homeReviewName" type="text" class="pdp-reviews__input" placeholder="Votre prenom" required maxlength="40" />
-              <textarea id="homeReviewText" class="pdp-reviews__textarea" placeholder="Partagez votre experience avec Pirates Tools..." required maxlength="500" rows="3"></textarea>
+              <input id="homeReviewName" type="text" class="pdp-reviews__input" placeholder="Votre prenom" aria-label="Votre prenom" required maxlength="40" />
+              <textarea id="homeReviewText" class="pdp-reviews__textarea" placeholder="Partagez votre experience avec Pirates Tools..." aria-label="Votre avis" required maxlength="500" rows="3"></textarea>
               <button type="submit" class="pdp-reviews__submit">Publier mon avis</button>
             </form>
           </div>
@@ -397,7 +404,7 @@
         </div>
 
         <div class="toolbar">
-          <input id="q" class="search" type="search" placeholder="Rechercher (marque, ref, description...)" autocomplete="off" data-bind="search" />
+          <input id="q" class="search" type="search" placeholder="Rechercher (marque, ref, description...)" aria-label="Rechercher un produit" autocomplete="off" data-bind="search" />
           <select id="tag" class="select" aria-label="Filtrer par categorie" data-bind="tag">
             <option value="">Toutes categories</option>
           </select>
@@ -562,8 +569,8 @@
                     <button type="button" class="pdp-reviews__star-btn" data-star="5" aria-label="5 etoiles">&#9733;</button>
                   </div>
                 </div>
-                <input id="pdpReviewName" type="text" class="pdp-reviews__input" placeholder="Votre prenom" required maxlength="40" />
-                <textarea id="pdpReviewText" class="pdp-reviews__textarea" placeholder="Votre avis sur ce produit..." required maxlength="500" rows="3"></textarea>
+                <input id="pdpReviewName" type="text" class="pdp-reviews__input" placeholder="Votre prenom" aria-label="Votre prenom" required maxlength="40" />
+                <textarea id="pdpReviewText" class="pdp-reviews__textarea" placeholder="Votre avis sur ce produit..." aria-label="Votre avis sur ce produit" required maxlength="500" rows="3"></textarea>
                 <button type="submit" class="btn primary btn--lg btn--glow pdp-reviews__submit">Publier mon avis</button>
               </form>
             </div>
