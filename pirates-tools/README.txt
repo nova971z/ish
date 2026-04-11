@@ -5,8 +5,9 @@
 URL prod : https://ish-ebon.vercel.app/ (Vercel) — legacy : https://nova971z.github.io/ish/
 Langue   : Français (fr-FR)
 Thème    : Dark (#0a0f14) · Accent violet (#8B5CF6)
-Version  : pt-v276 (Service Worker + ASSET_VER)
-Backend  : Vercel serverless functions (api/products, api/checkout, api/webhook, api/orders, api/admin, api/health)
+Version  : pt-v277 (Service Worker + ASSET_VER)
+Backend  : Vercel serverless functions (api/products, api/checkout, api/webhook, api/orders,
+           api/admin, api/health, api/contact, api/newsletter, api/test-email)
 
 ───────────────────────────────────────────────────────────────────
   ARCHITECTURE
@@ -42,6 +43,8 @@ Routing SPA via hash (#/).
   #/checkout           Checkout
   #/paiement/success   Confirmation paiement
   #/paiement/annule    Annulation paiement
+  #/contact            Formulaire de contact (envoie email via Resend)
+  #/favoris            Liste de favoris (wishlist, localStorage)
   #/admin              Admin panel (édition stock + prix) — ADMIN_SECRET requis
 
 ───────────────────────────────────────────────────────────────────
@@ -161,6 +164,46 @@ Routing SPA via hash (#/).
     - Providers : Resend REST API (pas de SDK)
     - Feature flag : n'envoie rien si RESEND_API_KEY absent
     - Env vars : RESEND_API_KEY, RESEND_FROM, OWNER_EMAIL
+    - Endpoint de test admin : POST /api/test-email (gated ADMIN_SECRET)
+
+14. FORMULAIRE DE CONTACT (/contact)
+    - Page dédiée #/contact avec formulaire validé client + serveur
+    - POST /api/contact → envoie un email à OWNER_EMAIL via Resend
+    - Anti-spam : honeypot + validation longueur/email
+    - Reply-to = email client, pour réponse directe
+
+15. NEWSLETTER (/api/newsletter)
+    - Widget sur la page d'accueil (section home-newsletter)
+    - POST /api/newsletter :
+      a) Si RESEND_AUDIENCE_ID est set → ajout auto au Resend Audience
+      b) Sinon → fallback : email à OWNER_EMAIL avec l'inscription
+    - Anti-spam : honeypot + validation
+    - Env vars : RESEND_API_KEY + (RESEND_AUDIENCE_ID ou OWNER_EMAIL)
+
+16. WISHLIST / FAVORIS
+    - Bouton cœur sur chaque carte produit (catalogue, home, favoris)
+    - Stockage : localStorage clé `pt_wishlist` (tableau d'IDs)
+    - Route #/favoris : grille des produits favoris avec empty state
+    - Toast feedback à chaque ajout/retrait
+
+17. RÉCEMMENT CONSULTÉS
+    - Track les 8 derniers produits vus (localStorage `pt_recently_viewed`)
+    - Affiché sur la home en dessous du strip "Nos produits"
+    - Section cachée si aucun produit vu
+
+18. SEO (JSON-LD + meta dynamiques)
+    - JSON-LD `Organization` injecté sur toutes les pages
+    - JSON-LD `Product` injecté sur PDP avec stock availability
+    - <title> et <meta description> mis à jour à chaque route change
+    - Availability mappée depuis stock_status (InStock, OutOfStock, etc.)
+
+19. ADMIN PANEL (3 onglets)
+    - Onglet Produits : édition stock + prix (déjà documenté en §12)
+    - Onglet Commandes : lecture des 50 dernières commandes depuis
+      Firestore collectionGroup('orders') (ordre desc par createdAt)
+    - Onglet Outils :
+      • Test email via Resend (vérifie la config)
+      • Health check /api/health (affiche quelles env vars sont set)
 
 ───────────────────────────────────────────────────────────────────
   ARBORESCENCE COMPLÈTE
@@ -259,8 +302,8 @@ Aucune dépendance npm en production. Zéro framework. Zéro bundler.
   Images externes       → Cache-first (safe)
   Requêtes cross-origin → Pass-through (pas de cache)
 
-  Versionning : VERSION = 'pt-v276', ASSET_VER = '276'
-  → Incrémenter les deux + query strings (?v=276) à chaque déploiement.
+  Versionning : VERSION = 'pt-v277', ASSET_VER = '277'
+  → Incrémenter les deux + query strings (?v=277) à chaque déploiement.
 
 ───────────────────────────────────────────────────────────────────
   LANCEMENT LOCAL

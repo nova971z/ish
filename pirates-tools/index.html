@@ -20,7 +20,7 @@
   <link rel="canonical" href="https://nova971z.github.io/ish/">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=276">
+  <link rel="stylesheet" href="styles.css?v=277">
 
   <!-- 3D model viewer -->
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
@@ -210,7 +210,7 @@
         <img
           id="topbarLogo"
           class="topbar-logo"
-          src="icons/icon-192.png?v=276"
+          src="icons/icon-192.png?v=277"
           alt="Pirates Tools"
           width="40" height="40"
           decoding="async" loading="eager" fetchpriority="high" />
@@ -227,8 +227,8 @@
   <section id="hero" class="hero-full" aria-hidden="true">
     <div class="hero-logo-container initial" id="heroLogoContainer">
       <img id="heroLogo" class="hero-logo on" alt="Pirates Tools"
-        src="icons/icon-512.png?v=276"
-        srcset="icons/icon-256.png?v=276 256w, icons/icon-384.png?v=276 384w, icons/icon-512.png?v=276 512w"
+        src="icons/icon-512.png?v=277"
+        srcset="icons/icon-256.png?v=277 256w, icons/icon-384.png?v=277 384w, icons/icon-512.png?v=277 512w"
         sizes="(max-width: 768px) 90vw, 60vw"
         width="600" height="600"
         decoding="async" loading="eager" fetchpriority="high" />
@@ -287,6 +287,12 @@
         <div class="home-products-strip__track" id="homeProductsTrack">
           <p class="no-results">Chargement...</p>
         </div>
+      </section>
+
+      <!-- Recently viewed — caché si aucun produit vu -->
+      <section class="home-products-strip home-products-strip--recent" id="recentlyViewedSection" hidden>
+        <h2 class="home-products-strip__title">Récemment consultés</h2>
+        <div class="home-products-strip__track" id="recentlyViewedTrack"></div>
       </section>
 
       <!-- =================== ABONNEMENTS & SERVICES =================== -->
@@ -389,6 +395,24 @@
               <textarea id="homeReviewText" class="pdp-reviews__textarea" placeholder="Partagez votre experience avec Pirates Tools..." aria-label="Votre avis" required maxlength="500" rows="3"></textarea>
               <button type="submit" class="pdp-reviews__submit">Publier mon avis</button>
             </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- Newsletter signup -->
+      <section class="home-newsletter" data-reveal="fade-up">
+        <div class="container">
+          <div class="home-newsletter__card">
+            <div class="home-newsletter__icon" aria-hidden="true">&#9993;</div>
+            <h2 class="home-newsletter__title">Reste au courant des nouveautés</h2>
+            <p class="home-newsletter__sub">Nouveaux produits, promos exclusives et conseils pros. Zéro spam, désinscription en un clic.</p>
+            <form id="newsletterForm" class="home-newsletter__form" autocomplete="off" novalidate>
+              <label class="sr-only" for="newsletterEmail">Adresse email</label>
+              <input id="newsletterEmail" type="email" required maxlength="200" placeholder="ton@email.com" autocomplete="email">
+              <input type="text" name="website" class="home-newsletter__honeypot" tabindex="-1" aria-hidden="true" autocomplete="off">
+              <button type="submit" class="home-newsletter__submit">S'inscrire</button>
+            </form>
+            <p id="newsletterStatus" class="home-newsletter__status" aria-live="polite"></p>
           </div>
         </div>
       </section>
@@ -871,6 +895,93 @@
       <div id="aboContent"></div>
     </section>
 
+    <!-- CONTACT -->
+    <section id="view-contact" class="view hidden" data-route="/contact" role="region" aria-labelledby="contact-h1">
+      <div class="container">
+        <div class="contact-wrap">
+          <header class="contact-header">
+            <h1 id="contact-h1" tabindex="-1">Contactez-nous</h1>
+            <p class="contact-subtitle">Une question sur un produit, une demande de devis, un besoin particulier ? On te répond rapidement.</p>
+          </header>
+
+          <div class="contact-grid">
+            <aside class="contact-info">
+              <div class="contact-info__card">
+                <span class="contact-info__icon" aria-hidden="true">&#9742;</span>
+                <div>
+                  <strong>Téléphone</strong>
+                  <a href="tel:+33774230195">07 74 23 01 95</a>
+                </div>
+              </div>
+              <div class="contact-info__card">
+                <span class="contact-info__icon" aria-hidden="true">&#128172;</span>
+                <div>
+                  <strong>WhatsApp</strong>
+                  <a href="https://wa.me/33774230195" target="_blank" rel="noopener">wa.me/33774230195</a>
+                </div>
+              </div>
+              <div class="contact-info__card">
+                <span class="contact-info__icon" aria-hidden="true">&#9200;</span>
+                <div>
+                  <strong>Disponibilité</strong>
+                  <span>Lun–Sam, 8h–19h</span>
+                </div>
+              </div>
+              <div class="contact-info__card">
+                <span class="contact-info__icon" aria-hidden="true">&#128205;</span>
+                <div>
+                  <strong>Livraison</strong>
+                  <span>Antilles françaises</span>
+                </div>
+              </div>
+            </aside>
+
+            <form id="contactForm" class="contact-form" autocomplete="on" novalidate>
+              <div class="contact-form__row">
+                <label class="contact-field">
+                  <span>Nom <em aria-hidden="true">*</em></span>
+                  <input id="contactName" name="name" type="text" required maxlength="100" autocomplete="name">
+                </label>
+                <label class="contact-field">
+                  <span>Email <em aria-hidden="true">*</em></span>
+                  <input id="contactEmail" name="email" type="email" required maxlength="200" autocomplete="email">
+                </label>
+              </div>
+              <label class="contact-field">
+                <span>Téléphone (optionnel)</span>
+                <input id="contactPhone" name="phone" type="tel" maxlength="30" autocomplete="tel">
+              </label>
+              <label class="contact-field">
+                <span>Sujet</span>
+                <input id="contactSubject" name="subject" type="text" maxlength="200" placeholder="Demande de devis, question produit…">
+              </label>
+              <label class="contact-field">
+                <span>Message <em aria-hidden="true">*</em></span>
+                <textarea id="contactMessage" name="message" required minlength="10" maxlength="5000" rows="6"></textarea>
+              </label>
+              <!-- Honeypot (hidden from users, bots fill it) -->
+              <input type="text" name="website" id="contactHoneypot" class="contact-form__honeypot" tabindex="-1" aria-hidden="true" autocomplete="off">
+              <div class="contact-form__actions">
+                <button type="submit" class="btn btn--primary" id="contactSubmit">Envoyer le message</button>
+                <span id="contactStatus" class="contact-form__status" aria-live="polite"></span>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WISHLIST (favoris) -->
+    <section id="view-wishlist" class="view hidden" data-route="/favoris" role="region" aria-labelledby="wishlist-h1">
+      <div class="container">
+        <header class="wishlist-header">
+          <h1 id="wishlist-h1" tabindex="-1">Mes favoris</h1>
+          <p class="wishlist-subtitle">Tes produits préférés, accessibles en un clic.</p>
+        </header>
+        <div id="wishlistList" class="wishlist-list"></div>
+      </div>
+    </section>
+
     <!-- ADMIN (Stock + prix, derrière ADMIN_SECRET) -->
     <section id="view-admin" class="view hidden" data-route="/admin" role="region" aria-labelledby="admin-h1">
       <h1 id="admin-h1" class="sr-only">Administration</h1>
@@ -1156,12 +1267,27 @@
         <span>Devis</span>
       </a>
 
+      <a href="#/favoris" data-route="#/favoris">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 21s-7.5-4.35-10-9.2C.6 8.3 2.7 4.5 6.5 4.5c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.9 3.8 4.5 7.3C19.5 16.65 12 21 12 21z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Favoris</span>
+      </a>
+
       <a href="#/compte" data-route="#/compte">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <circle cx="12" cy="8" r="4.5" fill="none" stroke="currentColor" stroke-width="2.5"/>
           <path d="M4 21a8 8 0 0 1 16 0" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
         </svg>
         <span>Compte</span>
+      </a>
+
+      <a href="#/contact" data-route="#/contact">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3 6l9 7 9-7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="3" y="5" width="18" height="14" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="2.5"/>
+        </svg>
+        <span>Contact</span>
       </a>
     </nav>
   </aside>
@@ -1262,7 +1388,7 @@
     document.getElementById('dbgClose').addEventListener('click',function(){panel.style.display='none'});
   })();
   </script>
-  <script defer src="app.js?v=276"></script>
+  <script defer src="app.js?v=277"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

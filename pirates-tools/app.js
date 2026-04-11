@@ -437,6 +437,7 @@
         + productCardVisual(p)
         + (p.tag ? '<span class="product-card__tag">' + escapeHTML(p.tag) + '</span>' : '')
         + stockBadge(p)
+        + wishlistButton(p)
         + '</div>'
         + '<div class="product-card__body">'
         + '<span class="product-card__brand">' + escapeHTML(p.brand) + '</span>'
@@ -768,6 +769,7 @@
         + productCardVisual(p)
         + (p.tag ? '<span class="product-card__tag">' + escapeHTML(p.tag) + '</span>' : '')
         + stockBadge(p)
+        + wishlistButton(p)
         + '</div>'
         + '<div class="product-card__body">'
         + '<span class="product-card__brand">' + escapeHTML(p.brand) + '</span>'
@@ -858,6 +860,14 @@
       dom.pdpImg.src = product.img || 'images/placeholder.svg';
       dom.pdpImg.alt = product.title;
     }
+
+    // SEO : update title + description + JSON-LD for this product
+    setDocMeta(
+      product.title + ' — ' + BASE_TITLE,
+      (product.description || product.desc || BASE_DESC).slice(0, 160)
+    );
+    injectProductJsonLd(product);
+    addRecentlyViewed(product.id);
 
     // 3D model viewer — hero (plein ecran)
     var viewer = document.getElementById('pdp3d');
@@ -2283,9 +2293,11 @@
       case '/':
         renderBrandGrid();
         renderHomeProducts();
+        renderRecentlyViewed();
         setupPlans();
         setupHomeReviews();
         setup3DCarousel();
+        setupNewsletterForm();
         break;
       case '/catalogue':
         renderCategoryChips();
@@ -2313,7 +2325,16 @@
       case '/admin':
         renderAdmin();
         break;
+      case '/contact':
+        setupContactForm();
+        break;
+      case '/favoris':
+        renderWishlist();
+        break;
     }
+
+    // Update <title> + meta description for SEO
+    updateRouteMeta(route, parsed);
   }
 
   // ── Hero logo scroll animation (lerp 60fps) ────────────────
@@ -3696,8 +3717,42 @@
       + '<h1>Administration — Pirates Tools</h1>'
       + '<button type="button" class="btn btn--ghost" id="adminLogoutBtn">Déconnexion</button>'
       + '</header>'
+
+      + '<nav class="admin-tabs" role="tablist">'
+      + '<button type="button" class="admin-tab is-active" data-admin-tab="products" role="tab" aria-selected="true">Produits</button>'
+      + '<button type="button" class="admin-tab" data-admin-tab="orders" role="tab" aria-selected="false">Commandes</button>'
+      + '<button type="button" class="admin-tab" data-admin-tab="tools" role="tab" aria-selected="false">Outils</button>'
+      + '</nav>'
+
+      + '<div class="admin-pane is-active" data-admin-pane="products">'
       + '<p class="admin-hint">Édite le stock et le prix de chaque produit. Les modifications sont enregistrées dans Firestore et visibles en production après rafraîchissement du cache (≤30 s).</p>'
       + '<div id="adminProductList" class="admin-list"><p class="admin-loading">Chargement…</p></div>'
+      + '</div>'
+
+      + '<div class="admin-pane" data-admin-pane="orders" hidden>'
+      + '<p class="admin-hint">Dernières commandes payées (lecture seule). Nécessite <code>FIREBASE_SERVICE_ACCOUNT</code>.</p>'
+      + '<div id="adminOrdersList" class="admin-list"><p class="admin-loading">Clique sur "Rafraîchir" pour charger les commandes.</p></div>'
+      + '<button type="button" class="btn btn--ghost" id="adminOrdersRefresh">Rafraîchir</button>'
+      + '</div>'
+
+      + '<div class="admin-pane" data-admin-pane="tools" hidden>'
+      + '<h2 class="admin-subtitle">Email Resend</h2>'
+      + '<p class="admin-hint">Envoie un email de test pour vérifier que <code>RESEND_API_KEY</code>, <code>RESEND_FROM</code> et <code>OWNER_EMAIL</code> sont correctement configurés.</p>'
+      + '<form id="adminTestEmailForm" class="admin-tools-form">'
+      + '<label class="admin-field">'
+      + '<span>Destinataire (vide = OWNER_EMAIL)</span>'
+      + '<input type="email" id="adminTestEmailTo" placeholder="test@example.com">'
+      + '</label>'
+      + '<button type="submit" class="btn btn--primary">Envoyer un email de test</button>'
+      + '<span id="adminTestEmailStatus" class="admin-row__status" aria-live="polite"></span>'
+      + '</form>'
+
+      + '<h2 class="admin-subtitle">Environnement</h2>'
+      + '<p class="admin-hint">Vérifie que les variables serverless sont bien configurées sur Vercel.</p>'
+      + '<button type="button" class="btn btn--ghost" id="adminHealthBtn">Vérifier /api/health</button>'
+      + '<pre id="adminHealthOutput" class="admin-health-output" hidden></pre>'
+      + '</div>'
+
       + '</div>';
 
     var logoutBtn = document.getElementById('adminLogoutBtn');
@@ -3706,7 +3761,147 @@
       renderAdmin();
     };
 
+    // Tab delegation
+    var tabs = view.querySelectorAll('.admin-tab');
+    var panes = view.querySelectorAll('.admin-pane');
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        var target = tab.getAttribute('data-admin-tab');
+        tabs.forEach(function (t) {
+          var active = t === tab;
+          t.classList.toggle('is-active', active);
+          t.setAttribute('aria-selected', active ? 'true' : 'false');
+        });
+        panes.forEach(function (p) {
+          var active = p.getAttribute('data-admin-pane') === target;
+          p.classList.toggle('is-active', active);
+          p.hidden = !active;
+        });
+        if (target === 'orders') loadAdminOrders();
+      });
+    });
+
+    // Test email form
+    var testForm = document.getElementById('adminTestEmailForm');
+    if (testForm) {
+      testForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var toInput = document.getElementById('adminTestEmailTo');
+        var statusEl = document.getElementById('adminTestEmailStatus');
+        var submit = testForm.querySelector('button[type="submit"]');
+        var to = (toInput.value || '').trim();
+
+        submit.disabled = true;
+        if (statusEl) {
+          statusEl.textContent = 'Envoi…';
+          statusEl.className = 'admin-row__status';
+        }
+
+        var apiBase = (typeof window.PT_API_BASE === 'string') ? (window.PT_API_BASE || '') : '';
+        fetch(apiBase + '/api/test-email', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Admin-Secret': getAdminSecret()
+          },
+          body: JSON.stringify(to ? { to: to } : {})
+        })
+        .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, data: j }; }); })
+        .then(function (res) {
+          submit.disabled = false;
+          if (res.ok && res.data.ok) {
+            if (statusEl) {
+              statusEl.textContent = '✓ Envoyé à ' + res.data.to;
+              statusEl.className = 'admin-row__status admin-row__status--ok';
+            }
+          } else {
+            if (statusEl) {
+              statusEl.textContent = '✗ ' + ((res.data && res.data.error) || 'Erreur inconnue');
+              statusEl.className = 'admin-row__status admin-row__status--err';
+            }
+          }
+        })
+        .catch(function (err) {
+          submit.disabled = false;
+          if (statusEl) {
+            statusEl.textContent = '✗ Réseau : ' + err.message;
+            statusEl.className = 'admin-row__status admin-row__status--err';
+          }
+        });
+      });
+    }
+
+    // Health check
+    var healthBtn = document.getElementById('adminHealthBtn');
+    if (healthBtn) {
+      healthBtn.addEventListener('click', function () {
+        var out = document.getElementById('adminHealthOutput');
+        var apiBase = (typeof window.PT_API_BASE === 'string') ? (window.PT_API_BASE || '') : '';
+        healthBtn.disabled = true;
+        fetch(apiBase + '/api/health')
+          .then(function (r) { return r.json().catch(function () { return { ok: false, error: 'Invalid response' }; }); })
+          .then(function (data) {
+            healthBtn.disabled = false;
+            if (out) {
+              out.hidden = false;
+              out.textContent = JSON.stringify(data, null, 2);
+            }
+          })
+          .catch(function (err) {
+            healthBtn.disabled = false;
+            if (out) {
+              out.hidden = false;
+              out.textContent = 'Erreur : ' + err.message;
+            }
+          });
+      });
+    }
+
+    // Orders refresh button
+    var refreshBtn = document.getElementById('adminOrdersRefresh');
+    if (refreshBtn) refreshBtn.addEventListener('click', loadAdminOrders);
+
     renderAdminList();
+  }
+
+  function loadAdminOrders() {
+    var listEl = document.getElementById('adminOrdersList');
+    if (!listEl) return;
+    listEl.innerHTML = '<p class="admin-loading">Chargement des commandes…</p>';
+
+    var apiBase = (typeof window.PT_API_BASE === 'string') ? (window.PT_API_BASE || '') : '';
+    fetch(apiBase + '/api/admin?type=orders', {
+      headers: { 'X-Admin-Secret': getAdminSecret() }
+    })
+    .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, data: j }; }); })
+    .then(function (res) {
+      if (!res.ok || !res.data.ok) {
+        listEl.innerHTML = '<p class="admin-loading">Erreur : ' + escapeHTML((res.data && res.data.error) || 'Inconnue') + '</p>';
+        return;
+      }
+      var orders = res.data.orders || [];
+      if (orders.length === 0) {
+        listEl.innerHTML = '<p class="admin-loading">Aucune commande pour l\'instant.</p>';
+        return;
+      }
+      listEl.innerHTML = orders.map(function (o) {
+        var status = o.status || 'pending';
+        var when = o.createdAt ? new Date(o.createdAt).toLocaleString('fr-FR') : '—';
+        var total = typeof o.total === 'number' ? formatPrice(o.total) : '—';
+        return '<div class="admin-row">'
+          + '<div class="admin-row__head">'
+          + '<div class="admin-row__info">'
+          + '<span class="admin-row__brand">Commande ' + escapeHTML(String(o.id || '').slice(-8).toUpperCase()) + '</span>'
+          + '<strong class="admin-row__title">' + escapeHTML(o.customerEmail || 'Client anonyme') + '</strong>'
+          + '<span class="admin-row__id">' + escapeHTML(when) + ' · ' + escapeHTML(total) + ' · ' + escapeHTML(status) + '</span>'
+          + '</div>'
+          + '</div>'
+          + '</div>';
+      }).join('');
+    })
+    .catch(function (err) {
+      listEl.innerHTML = '<p class="admin-loading">Erreur réseau : ' + escapeHTML(err.message) + '</p>';
+    });
   }
 
   function renderAdminList() {
@@ -3825,6 +4020,420 @@
       + '</div>';
   }
 
+  // ── Contact form (/contact) ────────────────────────────────
+
+  var _contactBound = false;
+  function setupContactForm() {
+    var form = document.getElementById('contactForm');
+    if (!form || _contactBound) return;
+    _contactBound = true;
+
+    var status = document.getElementById('contactStatus');
+    var submit = document.getElementById('contactSubmit');
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (status) { status.textContent = ''; status.className = 'contact-form__status'; }
+
+      var data = {
+        name: (document.getElementById('contactName').value || '').trim(),
+        email: (document.getElementById('contactEmail').value || '').trim(),
+        phone: (document.getElementById('contactPhone').value || '').trim(),
+        subject: (document.getElementById('contactSubject').value || '').trim(),
+        message: (document.getElementById('contactMessage').value || '').trim(),
+        website: (document.getElementById('contactHoneypot').value || '')
+      };
+
+      // Client-side validation
+      if (data.name.length < 2) { return contactError('Nom trop court'); }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) { return contactError('Email invalide'); }
+      if (data.message.length < 10) { return contactError('Message trop court (min. 10 caractères)'); }
+
+      submit.disabled = true;
+      if (status) { status.textContent = 'Envoi…'; status.className = 'contact-form__status'; }
+
+      var apiBase = (typeof window.PT_API_BASE === 'string') ? (window.PT_API_BASE || '') : '';
+      fetch(apiBase + '/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, data: j }; }); })
+      .then(function (res) {
+        submit.disabled = false;
+        if (res.ok && res.data && res.data.ok) {
+          form.reset();
+          if (status) {
+            status.textContent = 'Message envoyé. On te répond sous peu.';
+            status.className = 'contact-form__status contact-form__status--ok';
+          }
+          toast('Message envoyé', 'success');
+        } else {
+          var msg = (res.data && res.data.error) || 'Envoi impossible';
+          contactError(msg);
+        }
+      })
+      .catch(function (err) {
+        submit.disabled = false;
+        contactError('Erreur réseau : ' + err.message);
+      });
+
+      function contactError(msg) {
+        submit.disabled = false;
+        if (status) {
+          status.textContent = msg;
+          status.className = 'contact-form__status contact-form__status--err';
+        }
+      }
+    });
+  }
+
+  // ── Newsletter signup (home) ───────────────────────────────
+
+  var _newsletterBound = false;
+  function setupNewsletterForm() {
+    var form = document.getElementById('newsletterForm');
+    if (!form || _newsletterBound) return;
+    _newsletterBound = true;
+
+    var input = document.getElementById('newsletterEmail');
+    var status = document.getElementById('newsletterStatus');
+    var honeypot = form.querySelector('.home-newsletter__honeypot');
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var email = (input.value || '').trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        if (status) {
+          status.textContent = 'Email invalide';
+          status.className = 'home-newsletter__status home-newsletter__status--err';
+        }
+        return;
+      }
+
+      var submit = form.querySelector('button[type="submit"]');
+      if (submit) submit.disabled = true;
+      if (status) {
+        status.textContent = 'Inscription…';
+        status.className = 'home-newsletter__status';
+      }
+
+      var apiBase = (typeof window.PT_API_BASE === 'string') ? (window.PT_API_BASE || '') : '';
+      fetch(apiBase + '/api/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email,
+          website: honeypot ? honeypot.value : ''
+        })
+      })
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, data: j }; }); })
+      .then(function (res) {
+        if (submit) submit.disabled = false;
+        if (res.ok && res.data && res.data.ok) {
+          input.value = '';
+          if (status) {
+            status.textContent = 'Merci ! Inscription confirmée.';
+            status.className = 'home-newsletter__status home-newsletter__status--ok';
+          }
+        } else {
+          if (status) {
+            status.textContent = (res.data && res.data.error) || 'Inscription impossible';
+            status.className = 'home-newsletter__status home-newsletter__status--err';
+          }
+        }
+      })
+      .catch(function () {
+        if (submit) submit.disabled = false;
+        if (status) {
+          status.textContent = 'Erreur réseau';
+          status.className = 'home-newsletter__status home-newsletter__status--err';
+        }
+      });
+    });
+  }
+
+  // ── Wishlist (favoris) ─────────────────────────────────────
+
+  var WISHLIST_KEY = 'pt_wishlist';
+
+  function getWishlist() {
+    try { return JSON.parse(localStorage.getItem(WISHLIST_KEY) || '[]'); }
+    catch (e) { return []; }
+  }
+  function saveWishlist(list) {
+    try { localStorage.setItem(WISHLIST_KEY, JSON.stringify(list)); } catch (e) { /* silent */ }
+    updateWishlistUI();
+  }
+  function isInWishlist(id) {
+    return getWishlist().indexOf(id) !== -1;
+  }
+  function toggleWishlist(id) {
+    var list = getWishlist();
+    var idx = list.indexOf(id);
+    if (idx === -1) {
+      list.push(id);
+      toast('Ajouté aux favoris', 'success');
+    } else {
+      list.splice(idx, 1);
+      toast('Retiré des favoris', 'info');
+    }
+    saveWishlist(list);
+  }
+  function updateWishlistUI() {
+    // Sync all wishlist buttons in the DOM
+    var list = getWishlist();
+    document.querySelectorAll('[data-wishlist-id]').forEach(function (btn) {
+      var id = btn.getAttribute('data-wishlist-id');
+      var active = list.indexOf(id) !== -1;
+      btn.classList.toggle('is-active', active);
+      btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+      btn.setAttribute('aria-label', active ? 'Retirer des favoris' : 'Ajouter aux favoris');
+    });
+    // Update wishlist count badge if present
+    var countEl = document.getElementById('wishlistCount');
+    if (countEl) {
+      countEl.textContent = list.length;
+      countEl.hidden = list.length === 0;
+    }
+  }
+
+  function wishlistButton(product) {
+    var id = product.id;
+    var active = isInWishlist(id);
+    return '<button type="button" class="wishlist-btn' + (active ? ' is-active' : '') + '" '
+      + 'data-wishlist-id="' + escapeHTML(id) + '" '
+      + 'aria-pressed="' + (active ? 'true' : 'false') + '" '
+      + 'aria-label="' + (active ? 'Retirer des favoris' : 'Ajouter aux favoris') + '" '
+      + 'title="' + (active ? 'Retirer des favoris' : 'Ajouter aux favoris') + '">'
+      + '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">'
+      + '<path fill="currentColor" d="M12 21s-7.5-4.35-10-9.2C.6 8.3 2.7 4.5 6.5 4.5c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.9 3.8 4.5 7.3C19.5 16.65 12 21 12 21z"/>'
+      + '</svg>'
+      + '</button>';
+  }
+
+  function renderWishlist() {
+    var listEl = document.getElementById('wishlistList');
+    if (!listEl) return;
+
+    var ids = getWishlist();
+    if (ids.length === 0) {
+      listEl.innerHTML = '<div class="wishlist-empty">'
+        + '<svg viewBox="0 0 24 24" width="56" height="56" aria-hidden="true"><path fill="currentColor" opacity=".3" d="M12 21s-7.5-4.35-10-9.2C.6 8.3 2.7 4.5 6.5 4.5c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.9 3.8 4.5 7.3C19.5 16.65 12 21 12 21z"/></svg>'
+        + '<h2>Aucun favori pour l\'instant</h2>'
+        + '<p>Clique sur le cœur d\'un produit pour l\'ajouter ici.</p>'
+        + '<a class="btn btn--primary" href="#/catalogue">Voir le catalogue</a>'
+        + '</div>';
+      return;
+    }
+
+    var favs = products.filter(function (p) { return ids.indexOf(p.id) !== -1; });
+
+    listEl.innerHTML = favs.map(function (p) {
+      var out = isOutOfStock(p);
+      return '<a class="product-card' + (out ? ' product-card--out' : '') + '" href="#/produit/' + escapeHTML(p.slug || p.id) + '">'
+        + '<div class="product-card__img-wrap">'
+        + productCardVisual(p)
+        + (p.tag ? '<span class="product-card__tag">' + escapeHTML(p.tag) + '</span>' : '')
+        + stockBadge(p)
+        + wishlistButton(p)
+        + '</div>'
+        + '<div class="product-card__body">'
+        + '<span class="product-card__brand">' + escapeHTML(p.brand) + '</span>'
+        + '<h3 class="product-card__title">' + escapeHTML(p.title) + '</h3>'
+        + '<span class="product-card__price">' + formatPrice(p.price) + '</span>'
+        + '</div>'
+        + '</a>';
+    }).join('');
+    preloadModelViewers(listEl);
+  }
+
+  // Global delegation for wishlist clicks (attached once in init)
+  function bindWishlistDelegation() {
+    document.body.addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-wishlist-id]');
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      toggleWishlist(btn.getAttribute('data-wishlist-id'));
+    });
+  }
+
+  // ── Recently viewed products (localStorage) ────────────────
+
+  var RECENT_KEY = 'pt_recently_viewed';
+  var RECENT_MAX = 8;
+
+  function addRecentlyViewed(id) {
+    if (!id) return;
+    try {
+      var list = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
+      list = list.filter(function (x) { return x !== id; });
+      list.unshift(id);
+      if (list.length > RECENT_MAX) list.length = RECENT_MAX;
+      localStorage.setItem(RECENT_KEY, JSON.stringify(list));
+    } catch (e) { /* silent */ }
+  }
+  function getRecentlyViewed() {
+    try { return JSON.parse(localStorage.getItem(RECENT_KEY) || '[]'); }
+    catch (e) { return []; }
+  }
+  function renderRecentlyViewed() {
+    var track = document.getElementById('recentlyViewedTrack');
+    var section = document.getElementById('recentlyViewedSection');
+    if (!track || !section) return;
+
+    var ids = getRecentlyViewed();
+    var items = ids
+      .map(function (id) {
+        for (var i = 0; i < products.length; i++) {
+          if (products[i].id === id) return products[i];
+        }
+        return null;
+      })
+      .filter(Boolean);
+
+    if (items.length === 0) {
+      section.hidden = true;
+      return;
+    }
+    section.hidden = false;
+
+    track.innerHTML = items.map(function (p) {
+      var out = isOutOfStock(p);
+      return '<a class="product-card' + (out ? ' product-card--out' : '') + '" href="#/produit/' + escapeHTML(p.slug || p.id) + '">'
+        + '<div class="product-card__img-wrap">'
+        + productCardVisual(p)
+        + stockBadge(p)
+        + '</div>'
+        + '<div class="product-card__body">'
+        + '<span class="product-card__brand">' + escapeHTML(p.brand) + '</span>'
+        + '<h3 class="product-card__title">' + escapeHTML(p.title) + '</h3>'
+        + '<span class="product-card__price">' + formatPrice(p.price) + '</span>'
+        + '</div>'
+        + '</a>';
+    }).join('');
+    preloadModelViewers(track);
+  }
+
+  // ── SEO : JSON-LD structured data ──────────────────────────
+
+  function injectProductJsonLd(product) {
+    removeJsonLd('product');
+    if (!product) return;
+    var data = {
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      'name': product.title,
+      'description': product.description || product.desc || '',
+      'brand': { '@type': 'Brand', 'name': product.brand || '' },
+      'sku': product.sku || product.id,
+      'image': product.img ? [new URL(product.img, location.href).href] : [],
+      'offers': {
+        '@type': 'Offer',
+        'priceCurrency': product.currency || 'EUR',
+        'price': Number(product.price).toFixed(2),
+        'availability': ldAvailability(product.stock_status),
+        'url': location.href
+      }
+    };
+    var script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.setAttribute('data-jsonld', 'product');
+    script.textContent = JSON.stringify(data);
+    document.head.appendChild(script);
+  }
+
+  function ldAvailability(status) {
+    switch (String(status || '').toLowerCase()) {
+      case 'out_of_stock': return 'https://schema.org/OutOfStock';
+      case 'preorder': return 'https://schema.org/PreOrder';
+      case 'low_stock': return 'https://schema.org/LimitedAvailability';
+      default: return 'https://schema.org/InStock';
+    }
+  }
+
+  function removeJsonLd(kind) {
+    var old = document.head.querySelector('script[data-jsonld="' + kind + '"]');
+    if (old) old.parentNode.removeChild(old);
+  }
+
+  function injectOrganizationJsonLd() {
+    if (document.head.querySelector('script[data-jsonld="org"]')) return;
+    var data = {
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
+      'name': 'Pirates Tools',
+      'url': location.origin,
+      'logo': location.origin + '/icons/icon-512.png',
+      'telephone': '+33774230195',
+      'areaServed': 'FR',
+      'description': 'Outillage professionnel DeWALT, Makita, Festool, Flex, Facom, Stanley, Wera — livraison Antilles françaises.',
+      'sameAs': []
+    };
+    var script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.setAttribute('data-jsonld', 'org');
+    script.textContent = JSON.stringify(data);
+    document.head.appendChild(script);
+  }
+
+  // ── Dynamic route meta (title + description) ──────────────
+
+  var BASE_TITLE = 'Pirates Tools — Outillage professionnel';
+  var BASE_DESC = 'Visseuses, boulonneuses, meuleuses DeWALT, Makita, Festool, Flex, Facom, Stanley, Wera. Livraison Antilles françaises.';
+
+  function setDocMeta(title, desc) {
+    if (title) document.title = title;
+    if (desc) {
+      var m = document.head.querySelector('meta[name="description"]');
+      if (m) m.setAttribute('content', desc);
+    }
+  }
+
+  function updateRouteMeta(route, parsed) {
+    switch (route) {
+      case '/':
+        setDocMeta(BASE_TITLE, BASE_DESC);
+        removeJsonLd('product');
+        break;
+      case '/catalogue':
+        setDocMeta('Catalogue — ' + BASE_TITLE, 'Découvre notre catalogue d\'outillage professionnel : ' + products.length + ' produits, 7 marques. ' + BASE_DESC);
+        removeJsonLd('product');
+        break;
+      case '/produit':
+        // product meta is set in renderPDP once we know which product
+        break;
+      case '/devis':
+        setDocMeta('Panier / devis — ' + BASE_TITLE, 'Finalise ton devis et passe commande chez Pirates Tools.');
+        removeJsonLd('product');
+        break;
+      case '/compte':
+        setDocMeta('Mon compte — ' + BASE_TITLE, 'Espace client Pirates Tools.');
+        removeJsonLd('product');
+        break;
+      case '/auth':
+        setDocMeta('Connexion — ' + BASE_TITLE, 'Connexion et inscription au compte client Pirates Tools.');
+        removeJsonLd('product');
+        break;
+      case '/contact':
+        setDocMeta('Contact — ' + BASE_TITLE, 'Contacte Pirates Tools par email, téléphone ou WhatsApp.');
+        removeJsonLd('product');
+        break;
+      case '/favoris':
+        setDocMeta('Mes favoris — ' + BASE_TITLE, 'Tes produits favoris sur Pirates Tools.');
+        removeJsonLd('product');
+        break;
+      case '/admin':
+        setDocMeta('Administration — ' + BASE_TITLE, '');
+        removeJsonLd('product');
+        break;
+      default:
+        setDocMeta(BASE_TITLE, BASE_DESC);
+        removeJsonLd('product');
+    }
+  }
+
   function setupAccountTabs() {
     var tabs = document.querySelectorAll('.acc-tab');
     var panes = document.querySelectorAll('.acc-pane');
@@ -3855,6 +4464,9 @@
     initPWA();
     updateCartUI();
     loadProducts();
+    bindWishlistDelegation();
+    updateWishlistUI();
+    injectOrganizationJsonLd();
     onRouteChange();
   }
 

@@ -42,16 +42,43 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ ok: false, error: 'Firestore init failed' });
   }
 
-  // ── GET : list all overrides ──────────────────────────────
+  // ── GET : list overrides OR recent orders ────────────────
   if (req.method === 'GET') {
+    const type = (req.query && req.query.type) || 'overrides';
     try {
+      if (type === 'orders') {
+        // Read last 50 orders from collectionGroup('orders')
+        const ordersSnap = await db.collectionGroup('orders')
+          .orderBy('createdAt', 'desc')
+          .limit(50)
+          .get();
+        const orders = [];
+        ordersSnap.forEach((doc) => {
+          const d = doc.data();
+          orders.push({
+            id: doc.id,
+            status: d.status || 'pending',
+            customerEmail: d.customerEmail || d.email || '',
+            total: typeof d.total === 'number' ? d.total : (typeof d.amount === 'number' ? d.amount : null),
+            createdAt: d.createdAt && d.createdAt.toMillis ? d.createdAt.toMillis() : (d.createdAt || null),
+            stripeSessionId: d.stripeSessionId || ''
+          });
+        });
+        return res.status(200).json({ ok: true, orders: orders });
+      }
+
+      // Default: list all overrides
       const snap = await db.collection('product_overrides').get();
       const overrides = {};
       snap.forEach((doc) => { overrides[doc.id] = doc.data(); });
       return res.status(200).json({ ok: true, overrides: overrides });
     } catch (err) {
       console.error('[api/admin] GET failed:', err.message);
-      return res.status(500).json({ ok: false, error: 'Failed to load overrides' });
+      // collectionGroup index errors: return an empty list instead of 500
+      if (String(err.message).indexOf('index') !== -1) {
+        return res.status(200).json({ ok: true, orders: [], hint: 'Firestore index required — check console' });
+      }
+      return res.status(500).json({ ok: false, error: 'Failed to load' });
     }
   }
 
