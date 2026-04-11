@@ -1558,7 +1558,10 @@
       nameInput.value = '';
       textInput.value = '';
       selectedRating = 0;
-      for (var j = 0; j < starBtns.length; j++) starBtns[j].classList.remove('active');
+      if (starsSelect) {
+        var resetBtns = starsSelect.querySelectorAll('.pdp-reviews__star-btn');
+        for (var j = 0; j < resetBtns.length; j++) resetBtns[j].classList.remove('active');
+      }
 
       toast('Merci pour votre avis !', 'success');
       renderList();

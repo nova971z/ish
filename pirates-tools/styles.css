@@ -6454,3 +6454,33 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .home-products-strip--recent {
   padding-top: 2rem;
 }
+
+/* ========================================================================
+   GLOBAL A11Y : reduced-motion + hover guards
+   -------------------------------------------
+   Last-word rules so respect for user preferences wins everywhere.
+   ======================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Protect translate/scale hover effects from sticky touch-highlights on
+   devices without a real hover. Disables the "lift" only (no functionality
+   lost). Targets high-traffic interactive cards. */
+@media (hover: none) {
+  .product-card:hover,
+  .brand-card:hover,
+  .pdp-review-card:hover,
+  .home-newsletter__submit:hover,
+  .wishlist-btn:hover,
+  .cat-chip:hover {
+    transform: none !important;
+  }
+}
