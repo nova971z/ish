@@ -24,7 +24,7 @@
     var root = base ? new URL(base.getAttribute('href'), location.origin).pathname : '/';
 
     // Chemin demandé (ex: /ish/produit/xyz)
-    var path = location.pathname.replace(root, ‘’).replace(/^\/+/, ‘’);
+    var path = location.pathname.replace(root, '').replace(/^\/+/, '');
 
     // Construit l’URL hash de la SPA (ex: /ish/#/produit/xyz)
     var dest = root + '#/' + path + (location.search || '') + (location.hash || '');

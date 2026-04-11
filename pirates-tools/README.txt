@@ -2,10 +2,11 @@
   PIRATES TOOLS — PWA E-Commerce (Vanilla HTML / CSS / JS)
 ═══════════════════════════════════════════════════════════════════
 
-URL prod : https://nova971z.github.io/ish/
+URL prod : https://ish-ebon.vercel.app/ (Vercel) — legacy : https://nova971z.github.io/ish/
 Langue   : Français (fr-FR)
 Thème    : Dark (#0a0f14) · Accent violet (#8B5CF6)
-Version  : pt-v271 (Service Worker + ASSET_VER)
+Version  : pt-v275 (Service Worker + ASSET_VER)
+Backend  : Vercel serverless functions (api/products, api/checkout, api/webhook, api/orders, api/health)
 
 ───────────────────────────────────────────────────────────────────
   ARCHITECTURE
@@ -238,7 +239,7 @@ Aucune dépendance npm en production. Zéro framework. Zéro bundler.
   Images externes       → Cache-first (safe)
   Requêtes cross-origin → Pass-through (pas de cache)
 
-  Versionning : VERSION = 'pt-v271', ASSET_VER = '271'
+  Versionning : VERSION = 'pt-v275', ASSET_VER = '275'
   → Incrémenter les deux + query strings (?v=271) à chaque déploiement.
 
 ───────────────────────────────────────────────────────────────────

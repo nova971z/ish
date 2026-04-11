@@ -5632,3 +5632,21 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
     scroll-behavior: auto !important;
   }
 }
+
+/* ========== TOUCH : neutraliser les hover sticky ==========
+   Sur iPad / mobile, un :hover reste collé après un tap jusqu'au
+   prochain tap ailleurs, provoquant des transforms/scale persistants.
+   On retire les transforms de hover pour les éléments interactifs
+   principaux — les :active/focus gèrent le feedback tactile. */
+@media (hover: none) {
+  .product-card:hover,
+  .brand-card:hover,
+  .cat-chip:hover,
+  .dock__btn:hover,
+  .btn:hover,
+  .pdp-related__card:hover,
+  .tool-card:hover,
+  .devis-item:hover {
+    transform: none;
+  }
+}
