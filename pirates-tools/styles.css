@@ -5650,3 +5650,333 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
     transform: none;
   }
 }
+
+/* ========== STOCK BADGES ==========
+   Shown on product cards (top-right of image) and inline on PDP price block.
+   Statuses : in_stock (green), low_stock (orange), out_of_stock (red), preorder (blue). */
+.stock-badge {
+  position: absolute;
+  top: .6rem;
+  right: .6rem;
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .25rem .55rem;
+  border-radius: 999px;
+  font-size: .68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: #fff;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  background: rgba(15, 22, 32, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.stock-badge__dot {
+  width: .45rem;
+  height: .45rem;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 6px currentColor;
+}
+
+.stock-badge--in {
+  color: #4ade80;
+  border-color: rgba(74, 222, 128, 0.35);
+}
+
+.stock-badge--low {
+  color: #fb923c;
+  border-color: rgba(251, 146, 60, 0.38);
+  animation: stockPulse 2.4s ease-in-out infinite;
+}
+
+.stock-badge--out {
+  color: #f87171;
+  border-color: rgba(248, 113, 113, 0.42);
+}
+
+.stock-badge--preorder {
+  color: #60a5fa;
+  border-color: rgba(96, 165, 250, 0.4);
+}
+
+@keyframes stockPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .72; }
+}
+
+/* Out-of-stock card : dim the image so users feel the unavailability */
+.product-card--out .product-card__img-wrap img,
+.product-card--out .product-card__img-wrap model-viewer {
+  filter: grayscale(0.7) brightness(0.75);
+}
+
+.product-card--out .product-card__price {
+  text-decoration: line-through;
+  opacity: .65;
+}
+
+/* Inline badge in PDP price block — not absolute, flows with text */
+.pdp-price .stock-badge,
+#pdpPrice .stock-badge {
+  position: static;
+  margin-left: .75rem;
+  vertical-align: middle;
+}
+
+/* Disabled buy/quote buttons when stock_status = out_of_stock */
+#pdpQuote[disabled],
+#pdpBuy[disabled],
+#pdpQuote[aria-disabled="true"],
+#pdpBuy[aria-disabled="true"] {
+  opacity: .5;
+  cursor: not-allowed;
+  filter: grayscale(0.4);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stock-badge--low { animation: none; }
+}
+
+/* ========== ADMIN PANEL (#/admin) ========== */
+#view-admin {
+  padding: 2rem 1rem 6rem;
+  min-height: 100vh;
+}
+
+.admin-wrap {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.admin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.5rem 0;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.admin-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #fff;
+}
+
+.admin-hint {
+  color: rgba(230, 237, 245, 0.6);
+  font-size: .88rem;
+  margin: 0 0 1.5rem;
+  line-height: 1.5;
+}
+
+.admin-loading {
+  color: rgba(230, 237, 245, 0.5);
+  text-align: center;
+  padding: 2rem;
+}
+
+.admin-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.admin-row {
+  background: rgba(15, 23, 32, 0.6);
+  border: 1px solid rgba(139, 92, 246, 0.15);
+  border-radius: 14px;
+  padding: 1rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.admin-row__head {
+  display: flex;
+  align-items: center;
+  gap: .9rem;
+}
+
+.admin-row__img {
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.admin-row__info {
+  display: flex;
+  flex-direction: column;
+  gap: .1rem;
+  min-width: 0;
+}
+
+.admin-row__brand {
+  font-size: .7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: #8B5CF6;
+}
+
+.admin-row__title {
+  color: #e6edf5;
+  font-size: .95rem;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-row__id {
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: .72rem;
+  color: rgba(230, 237, 245, 0.4);
+}
+
+.admin-row__fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: .75rem;
+}
+
+@media (max-width: 640px) {
+  .admin-row__fields { grid-template-columns: 1fr; }
+}
+
+.admin-field {
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+}
+
+.admin-field span {
+  font-size: .72rem;
+  color: rgba(230, 237, 245, 0.55);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  font-weight: 600;
+}
+
+.admin-field input,
+.admin-field select {
+  background: rgba(10, 15, 20, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #e6edf5;
+  padding: .65rem .75rem;
+  border-radius: 8px;
+  font-size: .9rem;
+  font-family: inherit;
+}
+
+.admin-field input:focus,
+.admin-field select:focus {
+  outline: none;
+  border-color: #8B5CF6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+}
+
+.admin-row__actions {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  flex-wrap: wrap;
+}
+
+.admin-row__status {
+  font-size: .82rem;
+  color: rgba(230, 237, 245, 0.55);
+}
+
+.admin-row__status--ok { color: #4ade80; }
+.admin-row__status--err { color: #f87171; }
+
+/* Admin login gate */
+.admin-login {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.admin-login__card {
+  max-width: 420px;
+  width: 100%;
+  background: rgba(15, 23, 32, 0.8);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 18px;
+  padding: 2rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+.admin-login__card h1 {
+  margin: 0 0 .5rem;
+  color: #fff;
+  font-size: 1.4rem;
+}
+
+.admin-login__card p {
+  color: rgba(230, 237, 245, 0.6);
+  font-size: .9rem;
+  margin: 0 0 1.2rem;
+}
+
+.admin-login__card label {
+  display: block;
+  font-size: .75rem;
+  color: rgba(230, 237, 245, 0.55);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  font-weight: 600;
+  margin-bottom: .4rem;
+}
+
+.admin-login__card input {
+  width: 100%;
+  background: rgba(10, 15, 20, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #e6edf5;
+  padding: .75rem .9rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-family: inherit;
+  box-sizing: border-box;
+  margin-bottom: 1rem;
+}
+
+.admin-login__card input:focus {
+  outline: none;
+  border-color: #8B5CF6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+}
+
+.admin-login__card button {
+  width: 100%;
+}
+
+.admin-login__hint {
+  margin-top: 1rem !important;
+  font-size: .78rem !important;
+  color: rgba(230, 237, 245, 0.45) !important;
+}
+
+.admin-login__hint code {
+  background: rgba(139, 92, 246, 0.15);
+  color: #c4b5fd;
+  padding: .1rem .35rem;
+  border-radius: 4px;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: .85em;
+}

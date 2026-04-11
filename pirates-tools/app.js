@@ -26,6 +26,41 @@
     return Number(n).toFixed(2).replace('.', ',') + ' €';
   }
 
+  // Stock badge helper — renders a colored pill based on product.stock_status.
+  // Statuses: in_stock (green), low_stock (orange), out_of_stock (red), preorder (blue).
+  // Empty string if no status set, so existing products render unchanged.
+  function stockBadge(p) {
+    if (!p || !p.stock_status) return '';
+    var status = String(p.stock_status).toLowerCase();
+    var label = p.stock_label || '';
+    var mod = '';
+    var text = '';
+    switch (status) {
+      case 'in_stock':
+        mod = 'in'; text = label || 'En stock';
+        break;
+      case 'low_stock':
+        mod = 'low'; text = label || 'Stock limité';
+        break;
+      case 'out_of_stock':
+        mod = 'out'; text = label || 'Rupture';
+        break;
+      case 'preorder':
+        mod = 'preorder'; text = label || 'Précommande';
+        break;
+      default:
+        return '';
+    }
+    return '<span class="stock-badge stock-badge--' + mod + '">'
+      + '<span class="stock-badge__dot" aria-hidden="true"></span>'
+      + escapeHTML(text)
+      + '</span>';
+  }
+
+  function isOutOfStock(p) {
+    return p && String(p.stock_status || '').toLowerCase() === 'out_of_stock';
+  }
+
   function $(sel, ctx) { return (ctx || document).querySelector(sel); }
   function $$(sel, ctx) { return Array.from((ctx || document).querySelectorAll(sel)); }
 
@@ -396,10 +431,12 @@
       return;
     }
     dom.list.innerHTML = filtered.map(function (p) {
-      return '<a class="product-card" href="#/produit/' + escapeHTML(p.slug || p.id) + '">'
+      var out = isOutOfStock(p);
+      return '<a class="product-card' + (out ? ' product-card--out' : '') + '" href="#/produit/' + escapeHTML(p.slug || p.id) + '">'
         + '<div class="product-card__img-wrap">'
         + productCardVisual(p)
         + (p.tag ? '<span class="product-card__tag">' + escapeHTML(p.tag) + '</span>' : '')
+        + stockBadge(p)
         + '</div>'
         + '<div class="product-card__body">'
         + '<span class="product-card__brand">' + escapeHTML(p.brand) + '</span>'
@@ -725,10 +762,12 @@
       return;
     }
     track.innerHTML = products.map(function (p) {
-      return '<a class="product-card" href="#/produit/' + escapeHTML(p.slug || p.id) + '">'
+      var out = isOutOfStock(p);
+      return '<a class="product-card' + (out ? ' product-card--out' : '') + '" href="#/produit/' + escapeHTML(p.slug || p.id) + '">'
         + '<div class="product-card__img-wrap">'
         + productCardVisual(p)
         + (p.tag ? '<span class="product-card__tag">' + escapeHTML(p.tag) + '</span>' : '')
+        + stockBadge(p)
         + '</div>'
         + '<div class="product-card__body">'
         + '<span class="product-card__brand">' + escapeHTML(p.brand) + '</span>'
@@ -845,11 +884,12 @@
     // Scroll animation for landing sections
     initPdpScrollAnimations();
 
-    // Price (TTC + HT)
+    // Price (TTC + HT) + stock badge
     if (dom.pdpPrice) {
       var ht = product.price_ht || (product.price / (1 + (product.vat || 0.2)));
       dom.pdpPrice.innerHTML = '<span class="pdp-price__ttc">' + formatPrice(product.price) + ' TTC</span>'
-        + '<span class="pdp-price__ht">' + formatPrice(ht) + ' HT</span>';
+        + '<span class="pdp-price__ht">' + formatPrice(ht) + ' HT</span>'
+        + stockBadge(product);
     }
 
     // Features (points forts)
@@ -891,8 +931,16 @@
     }
 
     // Add to cart — stays on page, no redirect
+    var pdpOut = isOutOfStock(product);
     if (dom.pdpQuote) {
+      dom.pdpQuote.disabled = pdpOut;
+      if (pdpOut) dom.pdpQuote.setAttribute('aria-disabled', 'true');
+      else dom.pdpQuote.removeAttribute('aria-disabled');
       dom.pdpQuote.onclick = function () {
+        if (isOutOfStock(product)) {
+          toast('Produit en rupture de stock', 'error');
+          return;
+        }
         addToCart(product);
       };
     }
@@ -901,7 +949,14 @@
     var pdpBuy = document.getElementById('pdpBuy');
     if (pdpBuy) {
       pdpBuy.hidden = false;
+      pdpBuy.disabled = pdpOut;
+      if (pdpOut) pdpBuy.setAttribute('aria-disabled', 'true');
+      else pdpBuy.removeAttribute('aria-disabled');
       pdpBuy.onclick = function () {
+        if (isOutOfStock(product)) {
+          toast('Produit en rupture de stock', 'error');
+          return;
+        }
         openPayModal([{ title: product.title, price: product.price, qty: 1, paymentLink: product.paymentLink || '' }]);
       };
     }
@@ -2255,6 +2310,9 @@
       case '/merci':
         handleMerciPage();
         break;
+      case '/admin':
+        renderAdmin();
+        break;
     }
   }
 
@@ -3575,6 +3633,196 @@
       return;
     }
     list.forEach(function (mv) { io.observe(mv); });
+  }
+
+  // ── Admin panel (#/admin) ──────────────────────────────────
+  // Stock + price editing backed by POST /api/admin.
+  // Auth : user enters ADMIN_SECRET — stored only in sessionStorage.
+
+  var ADMIN_SECRET_KEY = 'pt_admin_secret';
+
+  function getAdminSecret() {
+    try { return sessionStorage.getItem(ADMIN_SECRET_KEY) || ''; }
+    catch (e) { return ''; }
+  }
+  function setAdminSecret(val) {
+    try {
+      if (val) sessionStorage.setItem(ADMIN_SECRET_KEY, val);
+      else sessionStorage.removeItem(ADMIN_SECRET_KEY);
+    } catch (e) { /* silent */ }
+  }
+
+  function adminFetch(method, body) {
+    var apiBase = (typeof window.PT_API_BASE === 'string') ? (window.PT_API_BASE || '') : '';
+    var opts = {
+      method: method,
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Admin-Secret': getAdminSecret()
+      }
+    };
+    if (body) opts.body = JSON.stringify(body);
+    return fetch(apiBase + '/api/admin', opts).then(function (r) {
+      return r.json().then(function (data) {
+        if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
+        return data;
+      });
+    });
+  }
+
+  function renderAdmin() {
+    var view = document.getElementById('adminView');
+    if (!view) return;
+
+    var secret = getAdminSecret();
+    if (!secret) {
+      view.innerHTML = adminLoginTemplate();
+      var form = document.getElementById('adminLoginForm');
+      var input = document.getElementById('adminSecretInput');
+      if (form && input) {
+        form.onsubmit = function (e) {
+          e.preventDefault();
+          var val = (input.value || '').trim();
+          if (!val) return;
+          setAdminSecret(val);
+          renderAdmin();
+        };
+      }
+      return;
+    }
+
+    view.innerHTML = '<div class="admin-wrap">'
+      + '<header class="admin-header">'
+      + '<h1>Administration — Pirates Tools</h1>'
+      + '<button type="button" class="btn btn--ghost" id="adminLogoutBtn">Déconnexion</button>'
+      + '</header>'
+      + '<p class="admin-hint">Édite le stock et le prix de chaque produit. Les modifications sont enregistrées dans Firestore et visibles en production après rafraîchissement du cache (≤30 s).</p>'
+      + '<div id="adminProductList" class="admin-list"><p class="admin-loading">Chargement…</p></div>'
+      + '</div>';
+
+    var logoutBtn = document.getElementById('adminLogoutBtn');
+    if (logoutBtn) logoutBtn.onclick = function () {
+      setAdminSecret('');
+      renderAdmin();
+    };
+
+    renderAdminList();
+  }
+
+  function renderAdminList() {
+    var listEl = document.getElementById('adminProductList');
+    if (!listEl) return;
+
+    if (!products || products.length === 0) {
+      listEl.innerHTML = '<p class="admin-loading">Catalogue vide — attends que les produits soient chargés.</p>';
+      return;
+    }
+
+    listEl.innerHTML = products.map(function (p) {
+      var id = escapeHTML(p.id);
+      var status = (p.stock_status || 'in_stock');
+      var label = (p.stock_label || '');
+      var price = Number(p.price || 0).toFixed(2);
+      return '<div class="admin-row" data-product-id="' + id + '">'
+        + '<div class="admin-row__head">'
+        + '<img src="' + escapeHTML(p.img || 'images/placeholder.svg') + '" alt="" class="admin-row__img" loading="lazy">'
+        + '<div class="admin-row__info">'
+        + '<span class="admin-row__brand">' + escapeHTML(p.brand || '') + '</span>'
+        + '<strong class="admin-row__title">' + escapeHTML(p.title || '') + '</strong>'
+        + '<span class="admin-row__id">' + id + '</span>'
+        + '</div>'
+        + '</div>'
+        + '<div class="admin-row__fields">'
+        + '<label class="admin-field">'
+        + '<span>Statut stock</span>'
+        + '<select data-admin-field="stock_status">'
+        + adminOption(status, 'in_stock', 'En stock')
+        + adminOption(status, 'low_stock', 'Stock limité')
+        + adminOption(status, 'out_of_stock', 'Rupture')
+        + adminOption(status, 'preorder', 'Précommande')
+        + '</select>'
+        + '</label>'
+        + '<label class="admin-field">'
+        + '<span>Libellé affiché</span>'
+        + '<input type="text" data-admin-field="stock_label" value="' + escapeHTML(label) + '" placeholder="En stock">'
+        + '</label>'
+        + '<label class="admin-field">'
+        + '<span>Prix TTC (€)</span>'
+        + '<input type="number" step="0.01" min="0" data-admin-field="price" value="' + price + '">'
+        + '</label>'
+        + '</div>'
+        + '<div class="admin-row__actions">'
+        + '<button type="button" class="btn btn--primary" data-admin-action="save">Enregistrer</button>'
+        + '<button type="button" class="btn btn--ghost" data-admin-action="reset">Annuler</button>'
+        + '<span class="admin-row__status" aria-live="polite"></span>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+
+    // Event delegation : save / reset buttons
+    listEl.onclick = function (e) {
+      var btn = e.target.closest('[data-admin-action]');
+      if (!btn) return;
+      var row = btn.closest('.admin-row');
+      if (!row) return;
+      var action = btn.getAttribute('data-admin-action');
+      var id = row.getAttribute('data-product-id');
+      var statusEl = row.querySelector('.admin-row__status');
+
+      if (action === 'save') {
+        var patch = {};
+        row.querySelectorAll('[data-admin-field]').forEach(function (el) {
+          var f = el.getAttribute('data-admin-field');
+          var v = el.value;
+          if (f === 'price') v = Number(v);
+          patch[f] = v;
+        });
+        patch.id = id;
+        btn.disabled = true;
+        if (statusEl) { statusEl.textContent = 'Envoi…'; statusEl.className = 'admin-row__status'; }
+        adminFetch('POST', patch).then(function () {
+          if (statusEl) { statusEl.textContent = 'Enregistré'; statusEl.className = 'admin-row__status admin-row__status--ok'; }
+          // Patch the in-memory product so other views reflect the change
+          for (var i = 0; i < products.length; i++) {
+            if (products[i].id === id) {
+              Object.assign(products[i], patch);
+              break;
+            }
+          }
+          toast('Produit mis à jour', 'success');
+        }).catch(function (err) {
+          if (statusEl) { statusEl.textContent = 'Erreur : ' + err.message; statusEl.className = 'admin-row__status admin-row__status--err'; }
+          if (String(err.message).toLowerCase().indexOf('invalid admin') !== -1) {
+            setAdminSecret('');
+            renderAdmin();
+          }
+        }).then(function () {
+          btn.disabled = false;
+        });
+      } else if (action === 'reset') {
+        renderAdminList();
+      }
+    };
+  }
+
+  function adminOption(current, value, label) {
+    var sel = (current === value) ? ' selected' : '';
+    return '<option value="' + value + '"' + sel + '>' + label + '</option>';
+  }
+
+  function adminLoginTemplate() {
+    return '<div class="admin-login">'
+      + '<div class="admin-login__card">'
+      + '<h1>Administration</h1>'
+      + '<p>Entre ta clé admin pour gérer le catalogue.</p>'
+      + '<form id="adminLoginForm">'
+      + '<label for="adminSecretInput">Clé admin</label>'
+      + '<input type="password" id="adminSecretInput" autocomplete="current-password" required>'
+      + '<button type="submit" class="btn btn--primary">Se connecter</button>'
+      + '</form>'
+      + '<p class="admin-login__hint">La clé doit correspondre à la variable <code>ADMIN_SECRET</code> sur Vercel.</p>'
+      + '</div>'
+      + '</div>';
   }
 
   function setupAccountTabs() {

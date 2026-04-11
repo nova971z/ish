@@ -5,8 +5,8 @@
 URL prod : https://ish-ebon.vercel.app/ (Vercel) — legacy : https://nova971z.github.io/ish/
 Langue   : Français (fr-FR)
 Thème    : Dark (#0a0f14) · Accent violet (#8B5CF6)
-Version  : pt-v275 (Service Worker + ASSET_VER)
-Backend  : Vercel serverless functions (api/products, api/checkout, api/webhook, api/orders, api/health)
+Version  : pt-v276 (Service Worker + ASSET_VER)
+Backend  : Vercel serverless functions (api/products, api/checkout, api/webhook, api/orders, api/admin, api/health)
 
 ───────────────────────────────────────────────────────────────────
   ARCHITECTURE
@@ -42,6 +42,7 @@ Routing SPA via hash (#/).
   #/checkout           Checkout
   #/paiement/success   Confirmation paiement
   #/paiement/annule    Annulation paiement
+  #/admin              Admin panel (édition stock + prix) — ADMIN_SECRET requis
 
 ───────────────────────────────────────────────────────────────────
   FONCTIONNALITÉS PRINCIPALES
@@ -53,6 +54,9 @@ Routing SPA via hash (#/).
    - Catégories : boulonneuses, visseuses, scies, meuleuses, jeux d'outils, tournevis
    - Filtres par marque (bulles) → par type (sous-catégories) → liste produits
    - Badges : Promo, Nouveau, Best-seller, Compact, Nu (sans batterie)
+   - Badges stock : in_stock / low_stock / out_of_stock / preorder
+     (pill colorée en haut-droite de la carte, grise-out quand en rupture,
+     bloque add-to-cart et buy-now côté PDP)
    - Prix TTC / HT, TVA 20 %, ancien prix barré
 
 2. MODÈLES 3D
@@ -141,6 +145,22 @@ Routing SPA via hash (#/).
     - Téléphone : 07 74 23 01 95 (bouton sticky en haut)
     - WhatsApp : wa.me/33774230195 (devis, confirmation paiement)
     - Chat flottant (bouton vert)
+
+12. ADMIN PANEL (#/admin)
+    - Authentification par clé simple (env ADMIN_SECRET sur Vercel)
+    - La clé est stockée uniquement en sessionStorage (jamais persistée)
+    - Édition en ligne : stock_status, stock_label, prix
+    - Backend : POST /api/admin → Firestore `product_overrides/{id}`
+    - Merge côté /api/products : overrides Firestore ont la priorité sur products.json
+    - Cache 30 s pour refléter les modifs en prod
+
+13. EMAILS TRANSACTIONNELS (Resend)
+    - Webhook Stripe `/api/webhook` envoie 2 emails après paiement :
+      a) Client : confirmation de commande (template HTML dark/violet)
+      b) Propriétaire : notification de nouvelle commande payée
+    - Providers : Resend REST API (pas de SDK)
+    - Feature flag : n'envoie rien si RESEND_API_KEY absent
+    - Env vars : RESEND_API_KEY, RESEND_FROM, OWNER_EMAIL
 
 ───────────────────────────────────────────────────────────────────
   ARBORESCENCE COMPLÈTE
@@ -239,8 +259,8 @@ Aucune dépendance npm en production. Zéro framework. Zéro bundler.
   Images externes       → Cache-first (safe)
   Requêtes cross-origin → Pass-through (pas de cache)
 
-  Versionning : VERSION = 'pt-v275', ASSET_VER = '275'
-  → Incrémenter les deux + query strings (?v=271) à chaque déploiement.
+  Versionning : VERSION = 'pt-v276', ASSET_VER = '276'
+  → Incrémenter les deux + query strings (?v=276) à chaque déploiement.
 
 ───────────────────────────────────────────────────────────────────
   LANCEMENT LOCAL
