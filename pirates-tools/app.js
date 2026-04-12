@@ -231,6 +231,73 @@
     return ht * 1.60;
   }
 
+  // ── Loyalty tiers ──────────────────────────────────────────
+  //
+  // Cumulated spend (in €) drives the tier and the discount applied on every
+  // future order. Persisted in localStorage so it survives sessions; real-world
+  // deployments would move this server-side.
+  var LOYALTY_KEY = 'pt:loyalty';
+  var LOYALTY_TIERS = [
+    { key:'bronze',  label:'Bronze',  icon:'🥉', min:0,    discountPct:0 },
+    { key:'argent',  label:'Argent',  icon:'🥈', min:500,  discountPct:2 },
+    { key:'or',      label:'Or',      icon:'🥇', min:2000, discountPct:5 },
+    { key:'platine', label:'Platine', icon:'💎', min:5000, discountPct:8 }
+  ];
+
+  function loadLoyalty() {
+    try {
+      var raw = localStorage.getItem(LOYALTY_KEY);
+      if (!raw) return { totalSpent: 0 };
+      var parsed = JSON.parse(raw);
+      if (parsed && typeof parsed.totalSpent === 'number') return parsed;
+    } catch (_) {}
+    return { totalSpent: 0 };
+  }
+
+  function saveLoyalty(state) {
+    try { localStorage.setItem(LOYALTY_KEY, JSON.stringify(state)); } catch (_) {}
+  }
+
+  function tierForSpend(spent) {
+    var current = LOYALTY_TIERS[0];
+    for (var i = 0; i < LOYALTY_TIERS.length; i++) {
+      if (spent >= LOYALTY_TIERS[i].min) current = LOYALTY_TIERS[i];
+    }
+    return current;
+  }
+
+  function nextTier(currentKey) {
+    for (var i = 0; i < LOYALTY_TIERS.length - 1; i++) {
+      if (LOYALTY_TIERS[i].key === currentKey) return LOYALTY_TIERS[i + 1];
+    }
+    return null;
+  }
+
+  // Computes discount+tier info for the devis footer.
+  function getLoyaltyState(currentCartTotal) {
+    var state = loadLoyalty();
+    var tier = tierForSpend(state.totalSpent || 0);
+    var next = nextTier(tier.key);
+    var discount = (currentCartTotal || 0) * (tier.discountPct / 100);
+    return {
+      tierKey: tier.key,
+      tierLabel: tier.label,
+      tierIcon: tier.icon,
+      discountPct: tier.discountPct,
+      discountedTotal: (currentCartTotal || 0) - discount,
+      nextTierAt: next ? next.min : tier.min,
+      totalSpent: state.totalSpent || 0
+    };
+  }
+
+  // Called once an order completes (success page or PSP webhook confirmation).
+  function addLoyaltyPurchase(amount) {
+    if (!(amount > 0)) return;
+    var state = loadLoyalty();
+    state.totalSpent = (state.totalSpent || 0) + amount;
+    saveLoyalty(state);
+  }
+
   // ── WhatsApp helpers ───────────────────────────────────────
   function waLink(msg) {
     return 'https://wa.me/' + WA_PHONE + '?text=' + encodeURIComponent(msg || '');
@@ -3044,11 +3111,17 @@
 
     updateCartUI();
 
-    // Loyalty
+    // Loyalty — merge server-side points with local tier progression.
     var loyalty = p.loyalty || 0;
     var pct = Math.min(loyalty / 10, 100);
     updateLoyaltyBar(pct);
-    if (dom.accLoyaltyTxt) dom.accLoyaltyTxt.textContent = loyalty + ' points';
+    var lstate = getLoyaltyState(0);
+    if (dom.accLoyaltyTxt) {
+      dom.accLoyaltyTxt.innerHTML = lstate.tierIcon + ' ' + escapeHTML(lstate.tierLabel)
+        + ' · ' + formatPrice(lstate.totalSpent) + ' cumulés'
+        + (lstate.discountPct > 0 ? ' · −' + lstate.discountPct + ' %' : '')
+        + (loyalty ? ' · ' + loyalty + ' pts' : '');
+    }
 
     // Hero header
     var heroName = document.getElementById('accHeroName');
@@ -3873,6 +3946,11 @@
     // Called when route changes to /merci
     var pending = null;
     try { pending = JSON.parse(localStorage.getItem('pt_pending_order') || 'null'); } catch (e) {}
+    if (pending) {
+      // Local loyalty accrual — runs regardless of Firestore availability
+      addLoyaltyPurchase(Number(pending.total) || 0);
+      if (typeof track === 'function') track('purchase', { value: pending.total });
+    }
     if (pending && _currentUser && _fb) {
       // Save to Firestore
       var ordersRef = _fb.collection(_fb.db, 'users', _currentUser.uid, 'orders');
