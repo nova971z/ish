@@ -25,9 +25,11 @@
   <link rel="dns-prefetch" href="https://ajax.googleapis.com">
   <link rel="preconnect" href="https://wa.me">
   <link rel="dns-prefetch" href="https://wa.me">
+  <link rel="preconnect" href="https://js.stripe.com" crossorigin>
+  <link rel="dns-prefetch" href="https://js.stripe.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=282">
+  <link rel="stylesheet" href="styles.css?v=283">
 
   <!-- 3D model viewer -->
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
@@ -43,6 +45,7 @@
        and the legacy Payment Links flow (useful on GitHub Pages / offline). -->
   <script>
   window.PT_API_BASE = '';
+  window.PT_STRIPE_PK = ''; // Stripe publishable key (pk_live_... or pk_test_...)
   </script>
 
   <!-- Crypto payment config (inlined pour éviter tout problème de cache/SW)
@@ -217,7 +220,7 @@
         <img
           id="topbarLogo"
           class="topbar-logo"
-          src="icons/icon-192.png?v=282"
+          src="icons/icon-192.png?v=283"
           alt="Pirates Tools"
           width="40" height="40"
           decoding="async" loading="eager" fetchpriority="high" />
@@ -244,8 +247,8 @@
   <section id="hero" class="hero-full" aria-hidden="true">
     <div class="hero-logo-container initial" id="heroLogoContainer">
       <img id="heroLogo" class="hero-logo on" alt="Pirates Tools"
-        src="icons/icon-512.png?v=282"
-        srcset="icons/icon-256.png?v=282 256w, icons/icon-384.png?v=282 384w, icons/icon-512.png?v=282 512w"
+        src="icons/icon-512.png?v=283"
+        srcset="icons/icon-256.png?v=283 256w, icons/icon-384.png?v=283 384w, icons/icon-512.png?v=283 512w"
         sizes="(max-width: 768px) 90vw, 60vw"
         width="600" height="600"
         decoding="async" loading="eager" fetchpriority="high" />
@@ -1097,19 +1100,15 @@
           <strong id="payModalTotal">0,00 €</strong>
         </div>
 
-        <!-- ── Panneau CARTE (Stripe) ── -->
+        <!-- ── Panneau CARTE (Stripe Elements) ── -->
         <div class="pay-pane is-active" data-pay-pane="card">
-          <details class="paytuto paytuto--mini" open>
-            <summary>
-              <span class="paytuto__title">📘 Comment ça se passe</span>
-              <span class="paytuto__chev">▾</span>
-            </summary>
-            <ol class="paytuto__steps">
-              <li><span class="paytuto__num">1</span><div><strong>Clique sur « Payer en toute sécurité »</strong><p>Tu es redirigé vers la page sécurisée Stripe.</p></div></li>
-              <li><span class="paytuto__num">2</span><div><strong>Renseigne ta carte</strong><p>Carte bancaire, Apple Pay ou Google Pay acceptés.</p></div></li>
-              <li><span class="paytuto__num">3</span><div><strong>Reviens sur le site</strong><p>Ta commande est confirmée automatiquement.</p></div></li>
-            </ol>
-          </details>
+          <!-- Stripe Payment Element mount point -->
+          <div id="stripeElementsWrap" class="stripe-elements-wrap">
+            <div id="stripePaymentElement" class="stripe-payment-element">
+              <!-- Stripe Elements will mount here -->
+            </div>
+            <div id="stripeCardError" class="stripe-card-error" role="alert" hidden></div>
+          </div>
           <div class="pay-modal__trust">
             <div class="pay-modal__trust-row">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
@@ -1487,7 +1486,9 @@
     document.getElementById('dbgClose').addEventListener('click',function(){panel.style.display='none'});
   })();
   </script>
-  <script defer src="app.js?v=282"></script>
+  <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
+  <script src="https://js.stripe.com/v3/" async></script>
+  <script defer src="app.js?v=283"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

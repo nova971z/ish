@@ -3974,6 +3974,12 @@
     modal.setAttribute('aria-hidden', 'false');
     requestAnimationFrame(function () { modal.classList.add('is-open'); });
     document.body.style.overflow = 'hidden';
+
+    // Initialize Stripe Elements (creates PaymentIntent + mounts form)
+    _stripeReady = false;
+    _stripeClientSecret = null;
+    initStripeElements(total);
+
     // Analytics
     if (typeof track === 'function') {
       track('begin_checkout', {
@@ -3996,18 +4002,238 @@
     }, 250);
   }
 
+  // ── Stripe Elements integration ─────────────────────────────
+  //
+  // Flow:
+  // 1. openPayModal → initStripeElements() creates PaymentIntent via API
+  // 2. Stripe Payment Element mounts in #stripePaymentElement
+  // 3. User fills card details inside the embedded form
+  // 4. confirmPayment() calls stripe.confirmPayment() client-side
+  // 5. On success → inline redirect to /merci (no external redirect)
+
+  var _stripe = null;       // Stripe instance
+  var _stripeElements = null; // Stripe Elements instance
+  var _stripeClientSecret = null;
+  var _stripeReady = false;
+
+  // Appearance matching Pirates Tools dark theme
+  var STRIPE_APPEARANCE = {
+    theme: 'night',
+    variables: {
+      colorPrimary: '#8B5CF6',
+      colorBackground: '#0f1722',
+      colorText: '#e6edf5',
+      colorDanger: '#ef4444',
+      fontFamily: '"Inter", system-ui, -apple-system, sans-serif',
+      borderRadius: '10px',
+      spacingUnit: '4px'
+    },
+    rules: {
+      '.Input': {
+        backgroundColor: '#1a2332',
+        border: '1px solid rgba(255, 255, 255, 0.12)',
+        boxShadow: 'none',
+        color: '#e6edf5',
+        padding: '12px'
+      },
+      '.Input:focus': {
+        border: '1px solid #8B5CF6',
+        boxShadow: '0 0 0 2px rgba(139, 92, 246, 0.25)'
+      },
+      '.Label': {
+        color: '#cdd6e0',
+        fontSize: '13px',
+        fontWeight: '600'
+      },
+      '.Tab': {
+        backgroundColor: '#1a2332',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
+        color: '#cdd6e0'
+      },
+      '.Tab--selected': {
+        backgroundColor: '#8B5CF6',
+        border: '1px solid #8B5CF6',
+        color: '#fff'
+      },
+      '.Tab:hover': {
+        color: '#fff'
+      }
+    }
+  };
+
+  function getStripe() {
+    if (_stripe) return _stripe;
+    var pk = window.PT_STRIPE_PK;
+    if (!pk || typeof window.Stripe !== 'function') return null;
+    _stripe = window.Stripe(pk);
+    return _stripe;
+  }
+
+  // Create PaymentIntent and mount Elements
+  function initStripeElements(total) {
+    var stripe = getStripe();
+    var container = document.getElementById('stripePaymentElement');
+    var errorEl = document.getElementById('stripeCardError');
+    if (errorEl) { errorEl.hidden = true; errorEl.textContent = ''; }
+
+    if (!stripe) {
+      // Stripe not configured — show fallback message
+      if (container) {
+        container.innerHTML = '<div class="stripe-fallback">'
+          + '<p>Le paiement par carte sera bientôt disponible.</p>'
+          + '<p>En attendant, utilisez <strong>WhatsApp</strong> ou <strong>Crypto</strong> pour commander.</p>'
+          + '</div>';
+      }
+      _stripeReady = false;
+      return;
+    }
+
+    // Show loading state
+    if (container) {
+      container.innerHTML = '<div class="stripe-loading">'
+        + '<div class="stripe-loading__spinner"></div>'
+        + '<span>Chargement du formulaire de paiement…</span>'
+        + '</div>';
+    }
+
+    var apiBase = window.PT_API_BASE || '';
+    fetch(apiBase + '/api/create-payment-intent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        items: _payItems.map(function (it) {
+          return { title: it.title, price: it.price, qty: it.qty || 1 };
+        }),
+        customerEmail: (_currentUser && _currentUser.email) || undefined,
+        territory: _currentTerritory
+      })
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      if (!data.ok || !data.clientSecret) {
+        throw new Error(data.error || 'Erreur création du paiement');
+      }
+      _stripeClientSecret = data.clientSecret;
+
+      // Unmount previous elements if any
+      if (_stripeElements) {
+        try { _stripeElements.getElement('payment').destroy(); } catch (_) {}
+      }
+
+      _stripeElements = stripe.elements({
+        clientSecret: _stripeClientSecret,
+        appearance: STRIPE_APPEARANCE,
+        locale: 'fr'
+      });
+
+      var paymentElement = _stripeElements.create('payment', {
+        layout: {
+          type: 'tabs',
+          defaultCollapsed: false
+        }
+      });
+
+      if (container) container.innerHTML = '';
+      paymentElement.mount('#stripePaymentElement');
+
+      paymentElement.on('ready', function () {
+        _stripeReady = true;
+      });
+
+      paymentElement.on('change', function (ev) {
+        if (errorEl) {
+          if (ev.error) {
+            errorEl.textContent = ev.error.message;
+            errorEl.hidden = false;
+          } else {
+            errorEl.hidden = true;
+            errorEl.textContent = '';
+          }
+        }
+      });
+    })
+    .catch(function (err) {
+      _stripeReady = false;
+      if (container) {
+        container.innerHTML = '<div class="stripe-fallback">'
+          + '<p>Impossible de charger le formulaire de paiement.</p>'
+          + '<p>' + escapeHTML(err.message || 'Erreur réseau') + '</p>'
+          + '<p>Utilisez <strong>WhatsApp</strong> ou <strong>Crypto</strong> pour commander.</p>'
+          + '</div>';
+      }
+    });
+  }
+
   function confirmPayment() {
     if (!_payItems || !_payItems.length) return;
     var total = _payItems.reduce(function (s, it) { return s + (it.price || 0) * (it.qty || 1); }, 0);
+    var stripe = getStripe();
+    var errorEl = document.getElementById('stripeCardError');
 
-    // Server-side Stripe Checkout (when API is configured). An empty
-    // string is a valid value meaning "same origin", so we explicitly
-    // check for the presence of PT_API_BASE instead of truthiness.
+    // ── Stripe Elements flow (embedded card form) ──
+    if (stripe && _stripeElements && _stripeClientSecret) {
+      var btn = document.getElementById('payModalConfirm');
+      if (btn) { btn.disabled = true; btn.innerHTML = '<span class="pay-modal__btn-icon">⏳</span> Traitement en cours…'; }
+      if (errorEl) { errorEl.hidden = true; }
+
+      // Save pending order before confirming
+      try {
+        localStorage.setItem('pt_pending_order', JSON.stringify({
+          items: _payItems.map(function (it) { return { title: it.title, price: it.price, qty: it.qty }; }),
+          total: total, ts: Date.now()
+        }));
+      } catch (_) {}
+
+      stripe.confirmPayment({
+        elements: _stripeElements,
+        confirmParams: {
+          return_url: location.origin + location.pathname + '#/merci'
+        },
+        redirect: 'if_required'
+      })
+      .then(function (result) {
+        if (result.error) {
+          // Payment failed — show error
+          if (errorEl) {
+            errorEl.textContent = result.error.message || 'Le paiement a échoué.';
+            errorEl.hidden = false;
+          }
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<span class="pay-modal__btn-icon">💳</span> Payer en toute sécurité';
+          }
+          toast(result.error.message || 'Le paiement a échoué', 'error');
+        } else {
+          // Payment succeeded (or requires redirect handled by Stripe)
+          var pi = result.paymentIntent;
+          if (pi && pi.status === 'succeeded') {
+            // Update pending order with payment intent ID
+            try {
+              var pending = JSON.parse(localStorage.getItem('pt_pending_order') || '{}');
+              pending.paymentIntentId = pi.id;
+              pending.method = 'stripe_elements';
+              localStorage.setItem('pt_pending_order', JSON.stringify(pending));
+            } catch (_) {}
+
+            if (typeof track === 'function') {
+              track('payment_success', { value: total, method: 'card', paymentIntentId: pi.id });
+            }
+
+            closePayModal();
+            toast('Paiement réussi !', 'success');
+            location.hash = '#/merci';
+          }
+        }
+      });
+      return;
+    }
+
+    // ── Fallback: server-side Stripe Checkout (redirect) ──
     var apiConfigured = typeof window.PT_API_BASE === 'string';
     var apiBase = window.PT_API_BASE || '';
-    if (apiConfigured) {
-      var btn = document.getElementById('payModalConfirm');
-      if (btn) { btn.disabled = true; btn.textContent = 'Redirection…'; }
+    if (apiConfigured && !stripe) {
+      var btn2 = document.getElementById('payModalConfirm');
+      if (btn2) { btn2.disabled = true; btn2.textContent = 'Redirection…'; }
 
       fetch(apiBase + '/api/checkout', {
         method: 'POST',
@@ -4031,19 +4257,19 @@
           window.location.href = data.url;
         } else {
           toast(data.error || 'Erreur paiement', 'error');
-          if (btn) { btn.disabled = false; btn.textContent = 'Payer par carte'; }
+          if (btn2) { btn2.disabled = false; btn2.textContent = 'Payer par carte'; }
         }
       })
       .catch(function () {
         toast('Erreur réseau — réessayez', 'error');
-        if (btn) { btn.disabled = false; btn.textContent = 'Payer par carte'; }
+        if (btn2) { btn2.disabled = false; btn2.textContent = 'Payer par carte'; }
       });
       return;
     }
 
-    // Fallback: legacy Payment Links (if no API configured)
+    // ── Fallback: legacy Payment Links ──
     var first = _payItems[0];
-    if (!first.paymentLink) {
+    if (!first || !first.paymentLink) {
       toast('Paiement carte non configuré — bascule sur Crypto.', 'info');
       cryptoSwitchTab('crypto');
       return;
@@ -4111,10 +4337,14 @@
         total: pending.total,
         date: _fb.serverTimestamp(),
         status: 'paid',
-        method: 'stripe'
+        method: pending.method || 'stripe',
+        paymentIntentId: pending.paymentIntentId || null
       }).then(function () {
         localStorage.removeItem('pt_pending_order');
       }).catch(function () {});
+    } else if (pending) {
+      // No Firestore but payment processed — clean up
+      try { localStorage.removeItem('pt_pending_order'); } catch (_) {}
     }
   }
 

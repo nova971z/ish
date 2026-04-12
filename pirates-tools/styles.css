@@ -6926,3 +6926,49 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   color: #22c55e;
   font-weight: 700;
 }
+
+/* ========== 40) STRIPE ELEMENTS ========== */
+.stripe-elements-wrap {
+  margin-bottom: 16px;
+}
+.stripe-payment-element {
+  min-height: 120px;
+  padding: 4px 0;
+}
+.stripe-card-error {
+  color: #ef4444;
+  font-size: 13px;
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+}
+.stripe-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 32px 16px;
+  color: #cdd6e0;
+  font-size: 14px;
+}
+.stripe-loading__spinner {
+  width: 22px;
+  height: 22px;
+  border: 2px solid rgba(139, 92, 246, 0.25);
+  border-top-color: #8B5CF6;
+  border-radius: 50%;
+  animation: stripe-spin .7s linear infinite;
+}
+@keyframes stripe-spin {
+  to { transform: rotate(360deg); }
+}
+.stripe-fallback {
+  text-align: center;
+  padding: 24px 16px;
+  color: #cdd6e0;
+  line-height: 1.6;
+}
+.stripe-fallback p { margin: 4px 0; }
+.stripe-fallback strong { color: #fff; }
