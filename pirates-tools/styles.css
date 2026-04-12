@@ -4174,12 +4174,13 @@ transform: translateX(-50%) translateY(0);
 z-index: 1000;
 opacity: 1;
 pointer-events: auto;
-transition: opacity .4s ease, transform .4s ease;
+will-change: transform, opacity;
+transition: opacity .45s cubic-bezier(.25,.46,.45,.94), transform .45s cubic-bezier(.25,.46,.45,.94);
 }
 #dock.dock--hidden, .dock.dock--hidden {
 opacity: 0;
 pointer-events: none;
-transform: translateX(-50%) translateY(20px);
+transform: translateX(-50%) translateY(24px);
 }
 
 #dock .dock__shell, .dock .dock__shell {

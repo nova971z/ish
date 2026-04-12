@@ -2342,9 +2342,6 @@
         var tInfoOp = 1 - hpFast * 1.5;
         var tInfoScale = 1 - hpFast * 0.2;
 
-        // ── Glow arrière-plan : pulse plus fort au début ──
-        var glowEl = pdpHero.querySelector('.pdp-hero::after');
-
         // Lerp
         state.heroScale = lerp(state.heroScale, tScale, L);
         state.heroTY = lerp(state.heroTY, tModelTY, L);
@@ -2380,8 +2377,8 @@
 
       // ═══ DOCK: hide during hero, show after scrolling past ═══
       if (dockEl && pdpHero) {
-        var heroBottom = pdpHero.getBoundingClientRect().bottom;
-        if (heroBottom < winH * 0.3) {
+        var heroThreshold = (pdpHero.offsetHeight || winH) * 0.7;
+        if (scrollY > heroThreshold) {
           dockEl.classList.remove('dock--hidden');
         } else {
           dockEl.classList.add('dock--hidden');
