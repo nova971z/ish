@@ -416,6 +416,8 @@
     });
     lines.push('');
     lines.push('*Total TTC : ' + formatPrice(total) + '*');
+    var est = shippingEstimateFor(t.code);
+    lines.push('Livraison estimée : ' + est.days + ' (à partir de ' + formatPrice(est.price) + ')');
     lines.push('\nMerci de confirmer la disponibilité et le délai de livraison.');
     return lines.join('\n');
   }
@@ -912,7 +914,7 @@
         + '<div class="product-card__body">'
         + '<span class="product-card__brand">' + escapeHTML(p.brand) + '</span>'
         + '<h3 class="product-card__title">' + escapeHTML(p.title) + '</h3>'
-        + '<span class="product-card__price">' + formatPrice(price.ttc) + '</span>'
+        + '<span class="product-card__price">' + formatPrice(price.ttc) + ' <small>TTC</small></span>'
         + '</div>'
         + '</a>';
     }).join('');
@@ -1246,7 +1248,7 @@
         + '<div class="product-card__body">'
         + '<span class="product-card__brand">' + escapeHTML(p.brand) + '</span>'
         + '<h3 class="product-card__title">' + escapeHTML(p.title) + '</h3>'
-        + '<span class="product-card__price">' + formatPrice(price.ttc) + '</span>'
+        + '<span class="product-card__price">' + formatPrice(price.ttc) + ' <small>TTC</small></span>'
         + '</div>'
         + '</a>';
     }).join('');
@@ -1494,6 +1496,9 @@
     if (dom.pdpShare) {
       dom.pdpShare.onclick = function () {
         var url = location.href;
+        if (typeof track === 'function') {
+          track('share', { id: product.id, name: product.title, method: navigator.share ? 'web_share' : 'clipboard' });
+        }
         if (navigator.share) {
           navigator.share({ title: product.title, text: product.desc || '', url: url });
         } else {
@@ -1519,7 +1524,7 @@
             return '<a class="product-card product-card--sm" href="#/produit/' + escapeHTML(rp.slug || rp.id) + '">'
               + '<img src="' + escapeHTML(rp.img || 'images/placeholder.svg') + '" alt="' + escapeHTML(rp.title) + '" loading="lazy" decoding="async">'
               + '<span>' + escapeHTML(rp.title) + '</span>'
-              + '<span class="product-card__price">' + formatPrice(rpPrice.ttc) + '</span>'
+              + '<span class="product-card__price">' + formatPrice(rpPrice.ttc) + ' <small>TTC</small></span>'
               + '</a>';
           }).join('') + '</div>';
       } else {
@@ -3506,6 +3511,21 @@
       });
     }
 
+    // Track product card clicks (select_item) via event delegation on <main>
+    var mainEl = document.querySelector('main');
+    if (mainEl) {
+      mainEl.addEventListener('click', function (e) {
+        var card = e.target.closest('.product-card[href]');
+        if (!card) return;
+        var href = card.getAttribute('href') || '';
+        var slug = href.replace('#/produit/', '');
+        var p = findProductByKey(slug);
+        if (p && typeof track === 'function') {
+          track('select_item', { id: p.id, name: p.title, brand: p.brand });
+        }
+      });
+    }
+
     // Search input (debounced 300ms)
     if (dom.q) {
       dom.q.addEventListener('input', debounce(function () {
@@ -4983,6 +5003,44 @@
     if (old) old.parentNode.removeChild(old);
   }
 
+  // ItemList JSON-LD for catalogue page — enriches search results with product list.
+  function injectItemListLd() {
+    removeJsonLd('itemlist');
+    if (!products || !products.length) return;
+    var base = location.origin + location.pathname;
+    var items = products.slice(0, 50).map(function (p, i) {
+      var price = calcPrice(p, _currentTerritory);
+      return {
+        '@type': 'ListItem',
+        'position': i + 1,
+        'item': {
+          '@type': 'Product',
+          'name': p.title,
+          'url': base + '#/produit/' + (p.slug || p.id),
+          'image': p.img ? new URL(p.img, location.href).href : '',
+          'offers': {
+            '@type': 'Offer',
+            'priceCurrency': 'EUR',
+            'price': price.ttc.toFixed(2),
+            'availability': ldAvailability(p.stock_status)
+          }
+        }
+      };
+    });
+    var data = {
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      'name': 'Catalogue Pirates Tools',
+      'numberOfItems': products.length,
+      'itemListElement': items
+    };
+    var script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.setAttribute('data-jsonld', 'itemlist');
+    script.textContent = JSON.stringify(data);
+    document.head.appendChild(script);
+  }
+
   function injectOrganizationJsonLd() {
     if (document.head.querySelector('script[data-jsonld="org"]')) return;
     var data = {
@@ -5019,8 +5077,8 @@
 
   // ── Dynamic route meta (title + description) ──────────────
 
-  var BASE_TITLE = 'Pirates Tools — Outillage professionnel';
-  var BASE_DESC = 'Visseuses, boulonneuses, meuleuses DeWALT, Makita, Festool, Flex, Facom, Stanley, Wera. Livraison Antilles françaises.';
+  var BASE_TITLE = 'Pirates Tools — Outillage professionnel DOM-TOM';
+  var BASE_DESC = 'Outillage pro DeWALT, Makita, Festool, Flex, Facom, Stanley, Wera livré en Guadeloupe, Martinique, Guyane, Réunion et Mayotte. Octroi de mer et TVA inclus.';
 
   function setDocMeta(title, desc) {
     if (title) document.title = title;
@@ -5235,7 +5293,7 @@
           + '<div class="product-card__body">'
           + '<span class="product-card__brand">' + escapeHTML(p.brand) + '</span>'
           + '<h3 class="product-card__title">' + escapeHTML(p.title) + '</h3>'
-          + '<span class="product-card__price">' + formatPrice(pr.ttc) + '</span>'
+          + '<span class="product-card__price">' + formatPrice(pr.ttc) + ' <small>TTC</small></span>'
           + '</div>'
           + '</a>';
       }).join('');
@@ -5295,6 +5353,7 @@
     removeJsonLd('shipping');
     removeJsonLd('faq');
     removeJsonLd('breadcrumb');
+    removeJsonLd('itemlist');
     setCanonical(location.origin + location.pathname);
     setHeadMeta('og:url', location.origin + location.pathname, 'property');
     setHeadMeta('og:title', BASE_TITLE, 'property');
@@ -5312,6 +5371,11 @@
       case '/catalogue':
         setDocMeta('Catalogue — ' + BASE_TITLE, 'Découvre notre catalogue d\'outillage professionnel : ' + products.length + ' produits, 7 marques. ' + BASE_DESC);
         removeJsonLd('product');
+        injectBreadcrumbLd([
+          { name: 'Accueil', hash: '/' },
+          { name: 'Catalogue', hash: '/catalogue' }
+        ]);
+        injectItemListLd();
         break;
       case '/produit':
         // product meta is set in renderPDP once we know which product
