@@ -204,17 +204,21 @@
   // localPriceComparison() injects a "local price" simulator on the PDP.
   // Defining them up front keeps render functions safe even if those phases
   // haven't been loaded yet.
-  function productBadges(p) {
+  function productBadgeItems(p) {
     if (!p || !Array.isArray(p.tags)) return '';
     var out = [];
     if (p.tags.indexOf('tropical_ready') !== -1)
-      out.push('<span class="pt-badge pt-badge--tropical" title="Adapté aux climats tropicaux">🌴</span>');
+      out.push('<span class="pt-badge pt-badge--tropical" title="Adapté aux climats tropicaux">🌴 <span class="pt-badge__txt">Tropical</span></span>');
     if (p.tags.indexOf('cordless') !== -1)
-      out.push('<span class="pt-badge pt-badge--cordless" title="Sans fil">🔋</span>');
+      out.push('<span class="pt-badge pt-badge--cordless" title="Sans fil">🔋 <span class="pt-badge__txt">Sans fil</span></span>');
     if (p.tags.indexOf('mayotte_project') !== -1)
-      out.push('<span class="pt-badge pt-badge--mayotte" title="Idéal chantier Mayotte">🏗️</span>');
-    if (!out.length) return '';
-    return '<div class="pt-badges">' + out.join('') + '</div>';
+      out.push('<span class="pt-badge pt-badge--mayotte" title="Idéal chantier Mayotte">🏗️ <span class="pt-badge__txt">Chantier Mayotte</span></span>');
+    return out.join('');
+  }
+  function productBadges(p) {
+    var inner = productBadgeItems(p);
+    if (!inner) return '';
+    return '<div class="pt-badges">' + inner + '</div>';
   }
 
   // calcLocalPrice — estimation du prix local moyen (revendeurs DOM-TOM)
@@ -1154,6 +1158,25 @@
     if (dom.pdpImg) {
       dom.pdpImg.src = product.img || 'images/placeholder.svg';
       dom.pdpImg.alt = product.title;
+    }
+
+    // Long description (DOM-TOM enriched) + DOM-TOM badges
+    var pdpBadges = document.getElementById('pdpBadges');
+    if (pdpBadges) {
+      var items = productBadgeItems(product);
+      pdpBadges.innerHTML = items;
+      pdpBadges.hidden = !items;
+    }
+    var pdpMore = document.getElementById('pdpMore');
+    var pdpDescLong = document.getElementById('pdpDescLong');
+    if (pdpMore && pdpDescLong) {
+      if (product.description_long) {
+        pdpDescLong.textContent = product.description_long;
+        pdpMore.hidden = false;
+      } else {
+        pdpMore.hidden = true;
+        pdpDescLong.textContent = '';
+      }
     }
 
     // SEO : update title + description + JSON-LD for this product
