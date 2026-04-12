@@ -2260,7 +2260,11 @@
     var kitItems = document.querySelectorAll('.pdp-kit li');
     var specRows = document.querySelectorAll('.pdp-specs-table tr');
     var ctaButtons = document.querySelectorAll('.pdp-section--cta .btn--lg');
+    var dockEl = document.getElementById('dock');
     var winH = window.innerHeight;
+
+    // Hide dock initially on PDP (hero visible)
+    if (dockEl) dockEl.classList.add('dock--hidden');
 
     pdpResizeHandler = function () { winH = window.innerHeight; };
     window.addEventListener('resize', pdpResizeHandler, { passive: true });
@@ -2374,6 +2378,16 @@
         }
       }
 
+      // ═══ DOCK: hide during hero, show after scrolling past ═══
+      if (dockEl && pdpHero) {
+        var heroBottom = pdpHero.getBoundingClientRect().bottom;
+        if (heroBottom < winH * 0.3) {
+          dockEl.classList.remove('dock--hidden');
+        } else {
+          dockEl.classList.add('dock--hidden');
+        }
+      }
+
       // ═══ 2. DISCOVER HEADING ═══
       if (discoverHeading) {
         var dp = getProgress(discoverHeading, 320);
@@ -2397,11 +2411,12 @@
 
       // ═══ 3. DISCOVER DESC ═══
       if (discoverDesc) {
-        var ddp = getProgress(discoverDesc, 60);
+        var ddp = getProgress(discoverDesc, 200);
         if (ddp > 0) {
-          var tddop = clamp((ddp - 0.05) * 2.2, 0, 1);
-          var tddty = (1 - easeOut(ddp)) * 70;
-          var tddblur = Math.max(0, (1 - ddp) * 10);
+          var ddpFast = clamp(ddp * 2.5, 0, 1);
+          var tddop = clamp(ddp * 3, 0, 1);
+          var tddty = (1 - easeOut(ddpFast)) * 40;
+          var tddblur = Math.max(0, (1 - ddpFast) * 6);
           state.discDescTY = lerp(state.discDescTY, tddty, L);
           state.discDescOp = lerp(state.discDescOp, tddop, L);
           state.discDescBlur = lerp(state.discDescBlur, tddblur, L);
@@ -2594,6 +2609,9 @@
     pdpScrollHandler = function cleanup() {
       running = false;
       if (pdpRAF) { cancelAnimationFrame(pdpRAF); pdpRAF = null; }
+      // Restore dock visibility when leaving PDP
+      var d = document.getElementById('dock');
+      if (d) d.classList.remove('dock--hidden');
     };
   }
 

@@ -4193,10 +4193,16 @@ gap: .75rem;
 position: fixed;
 left: 50%;
 bottom: calc(var(--dock-bottom, 14px) + max(env(safe-area-inset-bottom, 0px), var(--safe-bottom, 0px)));
-transform: translateX(-50%);
+transform: translateX(-50%) translateY(0);
 z-index: 1000;
 opacity: 1;
 pointer-events: auto;
+transition: opacity .4s ease, transform .4s ease;
+}
+#dock.dock--hidden, .dock.dock--hidden {
+opacity: 0;
+pointer-events: none;
+transform: translateX(-50%) translateY(20px);
 }
 
 #dock .dock__shell, .dock .dock__shell {
