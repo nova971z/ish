@@ -19,8 +19,14 @@
 
   <link rel="canonical" href="https://nova971z.github.io/ish/">
 
+  <!-- Preconnect critical third-party origins -->
+  <link rel="preconnect" href="https://ajax.googleapis.com" crossorigin>
+  <link rel="dns-prefetch" href="https://ajax.googleapis.com">
+  <link rel="preconnect" href="https://wa.me">
+  <link rel="dns-prefetch" href="https://wa.me">
+
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=280">
+  <link rel="stylesheet" href="styles.css?v=281">
 
   <!-- 3D model viewer -->
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
@@ -210,7 +216,7 @@
         <img
           id="topbarLogo"
           class="topbar-logo"
-          src="icons/icon-192.png?v=280"
+          src="icons/icon-192.png?v=281"
           alt="Pirates Tools"
           width="40" height="40"
           decoding="async" loading="eager" fetchpriority="high" />
@@ -237,8 +243,8 @@
   <section id="hero" class="hero-full" aria-hidden="true">
     <div class="hero-logo-container initial" id="heroLogoContainer">
       <img id="heroLogo" class="hero-logo on" alt="Pirates Tools"
-        src="icons/icon-512.png?v=280"
-        srcset="icons/icon-256.png?v=280 256w, icons/icon-384.png?v=280 384w, icons/icon-512.png?v=280 512w"
+        src="icons/icon-512.png?v=281"
+        srcset="icons/icon-256.png?v=281 256w, icons/icon-384.png?v=281 384w, icons/icon-512.png?v=281 512w"
         sizes="(max-width: 768px) 90vw, 60vw"
         width="600" height="600"
         decoding="async" loading="eager" fetchpriority="high" />
@@ -543,7 +549,7 @@
       <div class="pdp-section pdp-section--media" data-animate="parallax">
         <div class="pdp-section__inner">
           <div class="pdp-landing__media">
-            <img id="pdpImg" alt="" />
+            <img id="pdpImg" alt="" decoding="async" loading="eager" fetchpriority="high" />
           </div>
         </div>
       </div>
@@ -649,6 +655,9 @@
 
         <!-- Cart items -->
         <div id="devisList" class="devis-list"></div>
+
+        <!-- Shipping estimate (territory-aware) -->
+        <div id="devisShipping" class="devis-shipping" hidden></div>
 
         <!-- Loyalty banner (Phase 4) -->
         <div id="devisLoyalty" class="devis-loyalty" hidden></div>
@@ -1278,12 +1287,14 @@
 
   <!-- =================== CONSENT BAR =================== -->
   <div id="consentBar" class="consent-bar" role="dialog" aria-label="Consentement analytics" hidden>
-    <p class="consent-bar__text">
-      Nous utilisons des cookies pour mesurer l'audience et améliorer l'expérience. Aucun cookie n'est déposé sans votre accord.
-    </p>
-    <div class="consent-bar__actions">
-      <button type="button" class="btn" data-consent="deny">Refuser</button>
-      <button type="button" class="btn primary" data-consent="accept">Accepter</button>
+    <div class="consent-bar__inner">
+      <p class="consent-bar__text">
+        <strong>Respect de votre vie privée</strong> — Nous utilisons des cookies analytiques (GA4, Meta Pixel) pour mesurer l'audience et améliorer votre expérience d'achat. Aucune donnée personnelle n'est partagée à des fins publicitaires. Vous pouvez changer d'avis à tout moment.
+      </p>
+      <div class="consent-bar__actions">
+        <button type="button" class="btn consent-bar__deny" data-consent="deny">Refuser</button>
+        <button type="button" class="btn primary consent-bar__accept" data-consent="accept">Accepter les cookies</button>
+      </div>
     </div>
   </div>
 
@@ -1456,7 +1467,7 @@
     document.getElementById('dbgClose').addEventListener('click',function(){panel.style.display='none'});
   })();
   </script>
-  <script defer src="app.js?v=280"></script>
+  <script defer src="app.js?v=281"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

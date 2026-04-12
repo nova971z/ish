@@ -6622,6 +6622,7 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .pt-badge--tropical { background: rgba(34, 197, 94, 0.22); border-color: rgba(34, 197, 94, 0.5); }
 .pt-badge--cordless { background: rgba(59, 130, 246, 0.22); border-color: rgba(59, 130, 246, 0.5); }
 .pt-badge--mayotte  { background: rgba(251, 146, 60, 0.22); border-color: rgba(251, 146, 60, 0.5); }
+.pt-badge--stock    { background: rgba(250, 204, 21, 0.22); border-color: rgba(250, 204, 21, 0.5); }
 
 /* Flow variant on PDP discover section — show label text */
 .pt-badges--pdp {
@@ -6745,28 +6746,33 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   right: 16px;
   bottom: calc(16px + env(safe-area-inset-bottom, 0));
   z-index: 9700;
-  display: flex;
-  gap: 14px;
-  align-items: center;
-  padding: 14px 18px;
   background: #0f1722;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 16px;
   box-shadow: 0 18px 42px rgba(0, 0, 0, 0.5);
   color: #e6edf5;
   font-size: 13px;
-  flex-wrap: wrap;
 }
 .consent-bar[hidden] { display: none; }
-.consent-bar__text { flex: 1; min-width: 220px; margin: 0; line-height: 1.45; }
-.consent-bar__actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.consent-bar__inner {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding: 14px 18px;
+  flex-wrap: wrap;
+}
+.consent-bar__text { flex: 1; min-width: 220px; margin: 0; line-height: 1.5; }
+.consent-bar__text strong { color: #fff; display: block; margin-bottom: 4px; font-size: 14px; }
+.consent-bar__actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .consent-bar .btn { padding: 8px 16px; font-size: 13px; }
+.consent-bar__deny { opacity: 0.7; }
+.consent-bar__deny:hover { opacity: 1; }
 
 @media (max-width: 640px) {
   .consent-bar {
     bottom: calc(96px + env(safe-area-inset-bottom, 0));
-    padding: 12px 14px;
   }
+  .consent-bar__inner { padding: 12px 14px; }
 }
 
 /* ========== 36) WHATSAPP FLOATING BUTTON ========== */
@@ -6828,6 +6834,38 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   font-weight: 700;
 }
 .devis-loyalty__hint { color: #cdd6e0; font-size: 13px; }
+.devis-loyalty__bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+.devis-loyalty__fill {
+  height: 100%;
+  background: linear-gradient(90deg, #8B5CF6, #22c55e);
+  border-radius: 999px;
+  transition: width .4s ease;
+}
+
+/* ========== 39) DEVIS SHIPPING ESTIMATE ========== */
+.devis-shipping {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 18px;
+  margin: 12px 0 4px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  font-size: 13px;
+  flex-wrap: wrap;
+}
+.devis-shipping__label { font-weight: 600; color: #fff; }
+.devis-shipping__value { color: #8B5CF6; font-weight: 700; }
+.devis-shipping__delay { color: #cdd6e0; font-size: 12px; }
 
 /* ========== 34) LOCAL PRICE COMPARE ========== */
 .pt-local-compare {

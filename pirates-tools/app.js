@@ -206,14 +206,18 @@
   // Defining them up front keeps render functions safe even if those phases
   // haven't been loaded yet.
   function productBadgeItems(p) {
-    if (!p || !Array.isArray(p.tags)) return '';
+    if (!p) return '';
     var out = [];
-    if (p.tags.indexOf('tropical_ready') !== -1)
-      out.push('<span class="pt-badge pt-badge--tropical" title="Adapté aux climats tropicaux">🌴 <span class="pt-badge__txt">Tropical</span></span>');
-    if (p.tags.indexOf('cordless') !== -1)
-      out.push('<span class="pt-badge pt-badge--cordless" title="Sans fil">🔋 <span class="pt-badge__txt">Sans fil</span></span>');
-    if (p.tags.indexOf('mayotte_project') !== -1)
-      out.push('<span class="pt-badge pt-badge--mayotte" title="Idéal chantier Mayotte">🏗️ <span class="pt-badge__txt">Chantier Mayotte</span></span>');
+    if (Array.isArray(p.tags)) {
+      if (p.tags.indexOf('tropical_ready') !== -1)
+        out.push('<span class="pt-badge pt-badge--tropical" title="Adapté aux climats tropicaux">🌴 <span class="pt-badge__txt">Tropical</span></span>');
+      if (p.tags.indexOf('cordless') !== -1)
+        out.push('<span class="pt-badge pt-badge--cordless" title="Sans fil">🔋 <span class="pt-badge__txt">Sans fil</span></span>');
+      if (p.tags.indexOf('mayotte_project') !== -1)
+        out.push('<span class="pt-badge pt-badge--mayotte" title="Idéal chantier Mayotte">🏗️ <span class="pt-badge__txt">Chantier Mayotte</span></span>');
+    }
+    if (p.stock_status === 'in_stock')
+      out.push('<span class="pt-badge pt-badge--stock" title="En stock, expédition rapide">⚡ <span class="pt-badge__txt">Stock local</span></span>');
     return out.join('');
   }
   function productBadges(p) {
@@ -252,6 +256,11 @@
   }
   function hasConsent() { return _consent === 'granted'; }
 
+  function forwardToProviders(eventName, params) {
+    try { if (typeof window.gtag === 'function') window.gtag('event', eventName, params || {}); } catch (_) {}
+    try { if (typeof window.fbq === 'function') window.fbq('trackCustom', eventName, params || {}); } catch (_) {}
+  }
+
   function track(eventName, params) {
     var payload = { event: eventName };
     if (params && typeof params === 'object') {
@@ -264,10 +273,18 @@
       window.dataLayer.push(payload);
     } catch (_) {}
     if (!hasConsent()) return;
-    // GA4 via gtag if a tag is installed
-    try { if (typeof window.gtag === 'function') window.gtag('event', eventName, params || {}); } catch (_) {}
-    // Meta Pixel
-    try { if (typeof window.fbq === 'function') window.fbq('trackCustom', eventName, params || {}); } catch (_) {}
+    forwardToProviders(eventName, params);
+  }
+
+  // Replay buffered events to providers when consent is granted after page load
+  function flushAnalyticsQueue() {
+    if (!hasConsent()) return;
+    _analyticsQueue.forEach(function (payload) {
+      var ev = payload.event;
+      var params = {};
+      for (var k in payload) if (k !== 'event') params[k] = payload[k];
+      forwardToProviders(ev, params);
+    });
   }
 
   function setupWaFloat() {
@@ -291,6 +308,7 @@
       saveConsent(value === 'accept' ? 'granted' : 'denied');
       bar.hidden = true;
       if (value === 'accept') {
+        flushAnalyticsQueue();
         track('consent_granted', { timestamp: Date.now() });
       }
     });
@@ -693,26 +711,46 @@
     var loyalty = getLoyaltyState ? getLoyaltyState(total) : null;
     var grand = loyalty ? loyalty.discountedTotal : total;
 
+    // Estimated shipping for current territory
+    var terrInfo = getTerritory() || getTerritory(DEFAULT_TERRITORY);
+    var shipping = shippingEstimateFor(terrInfo.code);
+
     // Update stats
     if (statItems) statItems.textContent = totalQty;
     if (statTotal) statTotal.textContent = formatPrice(grand);
     if (footerTotal) footerTotal.textContent = formatPrice(grand);
 
+    // Shipping estimate line
+    var shippingEl = document.getElementById('devisShipping');
+    if (shippingEl) {
+      shippingEl.hidden = false;
+      shippingEl.innerHTML = '<span class="devis-shipping__label">🚢 Livraison ' + escapeHTML(terrInfo.name) + '</span>'
+        + '<span class="devis-shipping__value">à partir de ' + formatPrice(shipping.price) + '</span>'
+        + '<span class="devis-shipping__delay">' + shipping.days + '</span>';
+    }
+
     // Loyalty line in the footer (if we have a tier banner slot)
     var loyaltyEl = document.getElementById('devisLoyalty');
     if (loyaltyEl) {
       if (loyalty && loyalty.discountPct > 0) {
+        var pct = loyalty.totalSpent > 0
+          ? Math.min(100, Math.round((loyalty.totalSpent / (loyalty.nextTierAt || loyalty.totalSpent)) * 100))
+          : 0;
         loyaltyEl.hidden = false;
         loyaltyEl.innerHTML = '<span class="devis-loyalty__tier">' + loyalty.tierIcon + ' '
           + escapeHTML(loyalty.tierLabel) + '</span>'
           + '<span class="devis-loyalty__save">−' + loyalty.discountPct + ' % ('
-          + formatPrice(total - grand) + ')</span>';
+          + formatPrice(total - grand) + ')</span>'
+          + '<div class="devis-loyalty__bar"><div class="devis-loyalty__fill" style="width:' + pct + '%"></div></div>';
       } else if (loyalty) {
+        var nextMin = loyalty.nextTierAt || 500;
+        var pctNext = Math.min(100, Math.round(((loyalty.totalSpent || 0) / nextMin) * 100));
         loyaltyEl.hidden = false;
         loyaltyEl.innerHTML = '<span class="devis-loyalty__tier">' + loyalty.tierIcon + ' '
           + escapeHTML(loyalty.tierLabel) + '</span>'
-          + '<span class="devis-loyalty__hint">Ajoutez ' + formatPrice(Math.max(0, loyalty.nextTierAt - total))
-          + ' pour atteindre le palier suivant</span>';
+          + '<span class="devis-loyalty__hint">Encore ' + formatPrice(Math.max(0, nextMin - (loyalty.totalSpent || 0)))
+          + ' pour le palier suivant</span>'
+          + '<div class="devis-loyalty__bar"><div class="devis-loyalty__fill" style="width:' + pctNext + '%"></div></div>';
       } else {
         loyaltyEl.hidden = true;
       }
@@ -1320,6 +1358,11 @@
       (product.description || product.desc || BASE_DESC).slice(0, 160)
     );
     injectProductJsonLd(product);
+    injectBreadcrumbLd([
+      { name: 'Accueil', hash: '/' },
+      { name: 'Catalogue', hash: '/catalogue' },
+      { name: product.title, hash: '/produit/' + (product.slug || product.id) }
+    ]);
     addRecentlyViewed(product.id);
     if (typeof track === 'function') {
       track('view_item', { id: product.id, name: product.title, brand: product.brand, price: product.price });
@@ -1472,10 +1515,11 @@
       if (related.length > 0) {
         dom.pdpRelated.innerHTML = '<h3>Produits similaires</h3><div class="related-grid">'
           + related.map(function (rp) {
+            var rpPrice = calcPrice(rp, _currentTerritory);
             return '<a class="product-card product-card--sm" href="#/produit/' + escapeHTML(rp.slug || rp.id) + '">'
               + '<img src="' + escapeHTML(rp.img || 'images/placeholder.svg') + '" alt="' + escapeHTML(rp.title) + '" loading="lazy" decoding="async">'
               + '<span>' + escapeHTML(rp.title) + '</span>'
-              + '<span class="product-card__price">' + formatPrice(rp.price) + '</span>'
+              + '<span class="product-card__price">' + formatPrice(rpPrice.ttc) + '</span>'
               + '</a>';
           }).join('') + '</div>';
       } else {
@@ -3910,6 +3954,15 @@
     modal.setAttribute('aria-hidden', 'false');
     requestAnimationFrame(function () { modal.classList.add('is-open'); });
     document.body.style.overflow = 'hidden';
+    // Analytics
+    if (typeof track === 'function') {
+      track('begin_checkout', {
+        value: total,
+        currency: 'EUR',
+        items_count: items.length,
+        territory: _currentTerritory
+      });
+    }
   }
 
   function closePayModal() {
@@ -4843,22 +4896,47 @@
   function injectProductJsonLd(product) {
     removeJsonLd('product');
     if (!product) return;
+    var price = calcPrice(product, _currentTerritory);
+    var terr = getTerritory() || getTerritory(DEFAULT_TERRITORY);
+    var est = shippingEstimateFor(terr.code);
     var data = {
       '@context': 'https://schema.org',
       '@type': 'Product',
       'name': product.title,
-      'description': product.description || product.desc || '',
+      'description': product.description_long || product.description || product.desc || '',
       'brand': { '@type': 'Brand', 'name': product.brand || '' },
       'sku': product.sku || product.id,
       'image': product.img ? [new URL(product.img, location.href).href] : [],
+      'weight': product.weight_kg ? { '@type': 'QuantitativeValue', 'value': product.weight_kg, 'unitCode': 'KGM' } : undefined,
       'offers': {
         '@type': 'Offer',
-        'priceCurrency': product.currency || 'EUR',
-        'price': Number(product.price).toFixed(2),
+        'priceCurrency': 'EUR',
+        'price': price.ttc.toFixed(2),
         'availability': ldAvailability(product.stock_status),
-        'url': location.href
+        'url': location.href,
+        'priceValidUntil': new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
+        'shippingDetails': {
+          '@type': 'OfferShippingDetails',
+          'shippingDestination': {
+            '@type': 'DefinedRegion',
+            'addressCountry': 'FR',
+            'addressRegion': terr.name
+          },
+          'shippingRate': {
+            '@type': 'MonetaryAmount',
+            'value': est.price.toFixed(2),
+            'currency': 'EUR'
+          },
+          'deliveryTime': {
+            '@type': 'ShippingDeliveryTime',
+            'handlingTime': { '@type': 'QuantitativeValue', 'minValue': 1, 'maxValue': 3, 'unitCode': 'DAY' },
+            'transitTime':  { '@type': 'QuantitativeValue', 'minValue': est.from, 'maxValue': est.to, 'unitCode': 'DAY' }
+          }
+        }
       }
     };
+    // Clean undefined fields
+    if (!data.weight) delete data.weight;
     var script = document.createElement('script');
     script.type = 'application/ld+json';
     script.setAttribute('data-jsonld', 'product');
@@ -4875,6 +4953,31 @@
     }
   }
 
+  // Breadcrumb JSON-LD — injected on product and territory pages for SEO.
+  function injectBreadcrumbLd(crumbs) {
+    removeJsonLd('breadcrumb');
+    if (!crumbs || !crumbs.length) return;
+    var base = location.origin + location.pathname;
+    var items = crumbs.map(function (c, i) {
+      return {
+        '@type': 'ListItem',
+        'position': i + 1,
+        'name': c.name,
+        'item': c.hash ? (base + '#' + c.hash) : (base)
+      };
+    });
+    var data = {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      'itemListElement': items
+    };
+    var script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.setAttribute('data-jsonld', 'breadcrumb');
+    script.textContent = JSON.stringify(data);
+    document.head.appendChild(script);
+  }
+
   function removeJsonLd(kind) {
     var old = document.head.querySelector('script[data-jsonld="' + kind + '"]');
     if (old) old.parentNode.removeChild(old);
@@ -4889,8 +4992,22 @@
       'url': location.origin,
       'logo': location.origin + '/icons/icon-512.png',
       'telephone': '+33744776598',
-      'areaServed': 'FR',
-      'description': 'Outillage professionnel DeWALT, Makita, Festool, Flex, Facom, Stanley, Wera — livraison Antilles françaises.',
+      'areaServed': [
+        { '@type': 'AdministrativeArea', 'name': 'France' },
+        { '@type': 'AdministrativeArea', 'name': 'Guadeloupe' },
+        { '@type': 'AdministrativeArea', 'name': 'Martinique' },
+        { '@type': 'AdministrativeArea', 'name': 'Guyane française' },
+        { '@type': 'AdministrativeArea', 'name': 'La Réunion' },
+        { '@type': 'AdministrativeArea', 'name': 'Mayotte' }
+      ],
+      'description': 'Outillage professionnel DeWALT, Makita, Festool, Flex, Facom, Stanley, Wera — livraison DOM-TOM (Guadeloupe, Martinique, Guyane, Réunion, Mayotte). Octroi de mer inclus.',
+      'contactPoint': {
+        '@type': 'ContactPoint',
+        'telephone': '+33744776598',
+        'contactType': 'customer service',
+        'availableLanguage': 'French',
+        'areaServed': 'FR'
+      },
       'sameAs': []
     };
     var script = document.createElement('script');
@@ -5157,6 +5274,10 @@
     // Structured data + meta
     injectShippingDetailsLd(code);
     injectFaqLd(faq);
+    injectBreadcrumbLd([
+      { name: 'Accueil', hash: '/' },
+      { name: t.name, hash: '/' + slug }
+    ]);
     var title = 'Outillage pro en ' + t.name + ' — ' + BASE_TITLE;
     var desc  = 'Achetez votre outillage professionnel livré en ' + t.name
       + '. Octroi de mer, TVA et délais inclus. ' + BASE_DESC;
@@ -5173,6 +5294,7 @@
     removeJsonLd('product');
     removeJsonLd('shipping');
     removeJsonLd('faq');
+    removeJsonLd('breadcrumb');
     setCanonical(location.origin + location.pathname);
     setHeadMeta('og:url', location.origin + location.pathname, 'property');
     setHeadMeta('og:title', BASE_TITLE, 'property');
