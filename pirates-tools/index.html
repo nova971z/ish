@@ -998,6 +998,37 @@
       <div id="adminView"></div>
     </section>
 
+    <!-- TERRITOIRE DOM-TOM (Guadeloupe, Martinique, Guyane, Réunion, Mayotte) -->
+    <section id="view-territoire" class="view hidden" data-route="/territoire" role="region" aria-labelledby="terrView-h1">
+      <div class="container terr-view">
+        <header class="terr-view__hero">
+          <span class="terr-view__flag" id="terrViewFlag" aria-hidden="true">🏝️</span>
+          <h1 id="terrView-h1" tabindex="-1">Outillage pro en <span id="terrViewName">Outre-mer</span></h1>
+          <p class="terr-view__lead" id="terrViewLead">Livraison rapide, octroi de mer calculé automatiquement, garantie constructeur et SAV local.</p>
+          <div class="terr-view__rates" id="terrViewRates"></div>
+          <div class="terr-view__cta">
+            <a class="btn primary" href="#/catalogue" data-nav="/catalogue">Voir le catalogue</a>
+            <a class="btn btn-wa" id="terrViewWa" href="#" target="_blank" rel="noopener noreferrer">💬 Devis WhatsApp</a>
+          </div>
+        </header>
+
+        <section class="terr-view__section">
+          <h2>Produits phares pour votre chantier</h2>
+          <div id="terrViewProducts" class="product-grid"></div>
+        </section>
+
+        <section class="terr-view__section">
+          <h2>Livraison & délais</h2>
+          <div id="terrViewShipping" class="terr-view__shipping"></div>
+        </section>
+
+        <section class="terr-view__section">
+          <h2>Questions fréquentes</h2>
+          <div id="terrViewFaq" class="faq-list"></div>
+        </section>
+      </div>
+    </section>
+
     <!-- MERCI / Confirmation paiement -->
     <section id="view-merci" class="view hidden" data-route="/merci" role="region" aria-labelledby="merci-h1">
       <div class="container" style="text-align:center;padding:3rem 1rem">

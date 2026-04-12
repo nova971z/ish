@@ -6622,6 +6622,84 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .pt-badge--cordless { background: rgba(59, 130, 246, 0.22); border-color: rgba(59, 130, 246, 0.5); }
 .pt-badge--mayotte  { background: rgba(251, 146, 60, 0.22); border-color: rgba(251, 146, 60, 0.5); }
 
+/* ========== 35) TERRITORY LANDING VIEW ========== */
+.terr-view { padding: 24px 16px 60px; }
+.terr-view__hero {
+  text-align: center;
+  padding: 40px 20px 32px;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.12), rgba(34, 197, 94, 0.08));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  margin-bottom: 40px;
+}
+.terr-view__flag { font-size: 56px; line-height: 1; display: block; margin-bottom: 12px; }
+.terr-view__hero h1 { font-size: clamp(26px, 4.5vw, 40px); margin: 0 0 12px; }
+.terr-view__hero h1 span { color: #8B5CF6; }
+.terr-view__lead { max-width: 680px; margin: 0 auto 20px; color: #cdd6e0; line-height: 1.55; }
+.terr-view__rates {
+  display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 24px;
+}
+.terr-view__rate {
+  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  font-size: 13px;
+}
+.terr-view__rate strong { color: #8B5CF6; margin-right: 4px; }
+.terr-view__cta { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+.terr-view__section { margin-top: 44px; }
+.terr-view__section h2 {
+  font-size: 22px;
+  margin: 0 0 18px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.terr-view__shipping {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+.terr-ship-card {
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+}
+.terr-ship-card__icon { font-size: 28px; }
+.terr-ship-card strong { color: #fff; }
+.terr-ship-card p { margin: 2px 0 0; color: #cdd6e0; font-size: 13px; }
+
+/* FAQ list (used on territory view and anywhere .faq-list appears) */
+.faq-list { display: flex; flex-direction: column; gap: 10px; }
+.faq-item {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 14px 18px;
+}
+.faq-item summary {
+  cursor: pointer;
+  color: #fff;
+  font-weight: 600;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::after {
+  content: '+';
+  color: #8B5CF6;
+  font-size: 22px;
+  line-height: 1;
+  transition: transform .2s ease;
+}
+.faq-item[open] summary::after { transform: rotate(45deg); }
+.faq-item p { margin: 10px 0 0; color: #cdd6e0; line-height: 1.55; }
+
 /* ========== 34) LOCAL PRICE COMPARE ========== */
 .pt-local-compare {
   display: flex;

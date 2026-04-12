@@ -2443,6 +2443,29 @@
 
   var ROUTES = ['/', '/catalogue', '/produit', '/devis', '/compte', '/auth', '/abonnement'];
 
+  // Territory landing slugs (keys) → territory codes (values).
+  // Used to expose SEO-friendly routes like #/guadeloupe.
+  var TERRITORY_SLUGS = {
+    'guadeloupe': '971',
+    'martinique': '972',
+    'guyane':     '973',
+    'reunion':    '974',
+    'mayotte':    '976'
+  };
+
+  function territoryCodeFromSlug(slug) {
+    return Object.prototype.hasOwnProperty.call(TERRITORY_SLUGS, slug)
+      ? TERRITORY_SLUGS[slug]
+      : null;
+  }
+
+  function territorySlugFromCode(code) {
+    for (var k in TERRITORY_SLUGS) {
+      if (TERRITORY_SLUGS[k] === code) return k;
+    }
+    return null;
+  }
+
   function parseHash() {
     var hash = location.hash.replace(/^#/, '') || '/';
     if (hash.indexOf('/produit/') === 0) {
@@ -2450,6 +2473,11 @@
     }
     if (hash.indexOf('/abonnement/') === 0) {
       return { route: '/abonnement', slug: hash.replace('/abonnement/', '') };
+    }
+    // Territory landings: /guadeloupe, /martinique, /guyane, /reunion, /mayotte
+    var terrSlug = hash.replace(/^\//, '');
+    if (territoryCodeFromSlug(terrSlug)) {
+      return { route: '/territoire', slug: terrSlug };
     }
     if (ROUTES.indexOf(hash) === -1) return { route: '/', slug: null };
     return { route: hash, slug: null };
@@ -2551,6 +2579,9 @@
         break;
       case '/abonnement':
         if (parsed.slug) renderAbonnement(parsed.slug);
+        break;
+      case '/territoire':
+        if (parsed.slug) handleTerritoryRoute(parsed.slug);
         break;
       case '/merci':
         handleMerciPage();
@@ -4624,11 +4655,279 @@
     }
   }
 
+  // Update/insert meta tags for OG, Twitter, canonical
+  function setHeadMeta(name, value, attr) {
+    if (!value) return;
+    attr = attr || 'name';
+    var sel = 'meta[' + attr + '="' + name + '"]';
+    var el = document.head.querySelector(sel);
+    if (!el) {
+      el = document.createElement('meta');
+      el.setAttribute(attr, name);
+      document.head.appendChild(el);
+    }
+    el.setAttribute('content', value);
+  }
+
+  function setCanonical(url) {
+    if (!url) return;
+    var el = document.head.querySelector('link[rel="canonical"]');
+    if (!el) {
+      el = document.createElement('link');
+      el.setAttribute('rel', 'canonical');
+      document.head.appendChild(el);
+    }
+    el.setAttribute('href', url);
+  }
+
+  // ── Territory landing page ─────────────────────────────────
+  //
+  // SEO FAQ per territory. The entries feed both the visible FAQ and the
+  // schema.org FAQPage JSON-LD so Google can render rich results.
+  var TERR_FAQ = {
+    '971': [
+      { q: "Quels sont les délais de livraison en Guadeloupe ?",
+        a: "Généralement 5 à 10 jours ouvrés depuis la métropole, transit maritime + livraison à domicile sur toute l'île (Basse-Terre, Grande-Terre, Marie-Galante)." },
+      { q: "L'octroi de mer est-il inclus dans le prix affiché ?",
+        a: "Oui. Le prix TTC affiché intègre l'octroi de mer externe, l'octroi régional et la TVA applicable à la Guadeloupe (8,5 %)." },
+      { q: "Puis-je bénéficier de la garantie constructeur en Guadeloupe ?",
+        a: "Oui, toutes nos machines DeWALT, Makita, Festool, Flex et Facom sont couvertes par la garantie constructeur officielle. Pirates Tools assure la prise en charge SAV." },
+      { q: "Comment payer depuis la Guadeloupe ?",
+        a: "Carte bancaire, virement ou crypto. Nous acceptons aussi les paiements en plusieurs fois sur demande via WhatsApp." }
+    ],
+    '972': [
+      { q: "Quels sont les délais de livraison en Martinique ?",
+        a: "Généralement 5 à 10 jours ouvrés depuis la métropole jusqu'à Fort-de-France, Le Lamentin et le reste de l'île." },
+      { q: "Livrez-vous dans le Sud de la Martinique ?",
+        a: "Oui, toute l'île est couverte (Sainte-Anne, Le Marin, Trinité, Saint-Pierre…)." },
+      { q: "Octroi de mer et TVA ?",
+        a: "TVA 8,5 % + octroi de mer Martinique inclus dans le prix TTC affiché automatiquement." },
+      { q: "Les outils sont-ils adaptés au climat tropical ?",
+        a: "Nous sélectionnons des gammes pro (XR, LXT, Festool, Flex) avec protection IP élevée et traitements anti-corrosion." }
+    ],
+    '973': [
+      { q: "Livrez-vous en Guyane ?",
+        a: "Oui, livraison vers Cayenne, Kourou, Saint-Laurent-du-Maroni et plus. Délais 7 à 15 jours ouvrés." },
+      { q: "Particularités fiscales de la Guyane ?",
+        a: "La Guyane bénéficie d'un régime TVA 0 %. Seul l'octroi de mer s'applique, déjà inclus dans le prix TTC." },
+      { q: "Comment gérer la douane depuis la Guyane ?",
+        a: "Pirates Tools s'occupe de tout. Vous recevez le produit à domicile, taxes incluses." },
+      { q: "Y a-t-il une assistance locale ?",
+        a: "Support WhatsApp 6j/7 pour toute question technique, devis ou SAV." }
+    ],
+    '974': [
+      { q: "Quels délais pour La Réunion ?",
+        a: "Environ 7 à 14 jours ouvrés selon le mode d'expédition. Livraison vers Saint-Denis, Saint-Pierre, Saint-Paul et toute l'île." },
+      { q: "Octroi de mer à La Réunion ?",
+        a: "TVA 8,5 % + octroi de mer inclus. Le détail HT/Octroi/TVA/TTC est visible sur chaque fiche produit." },
+      { q: "Garantie sur les batteries Li-Ion ?",
+        a: "Garantie constructeur + extension Pirates Tools possible. Support local via WhatsApp." },
+      { q: "Comment payer depuis La Réunion ?",
+        a: "CB, virement SEPA, crypto (BTC/ETH/USDT/SOL) et paiement en plusieurs fois sur demande." }
+    ],
+    '976': [
+      { q: "Livrez-vous à Mayotte ?",
+        a: "Oui, toute l'île est desservie. Délais 10 à 20 jours ouvrés selon la zone." },
+      { q: "TVA et octroi à Mayotte ?",
+        a: "Mayotte est en franchise de TVA (0 %) et actuellement sans octroi de mer sur l'outillage pro. Le prix TTC affiché correspond au prix HT métropole." },
+      { q: "Quels outils choisir pour les chantiers mahorais ?",
+        a: "Nos packs combos DeWALT XR et Makita LXT sont recommandés : robustesse, autonomie terrain, IP54." },
+      { q: "Assistance technique à Mayotte ?",
+        a: "Équipe Pirates Tools joignable par WhatsApp pour conseil, devis ou intervention SAV." }
+    ]
+  };
+
+  function shippingEstimateFor(code) {
+    switch (code) {
+      case '971': return { days:'5–10 jours ouvrés', from:5,  to:10, price:29.90 };
+      case '972': return { days:'5–10 jours ouvrés', from:5,  to:10, price:29.90 };
+      case '973': return { days:'7–15 jours ouvrés', from:7,  to:15, price:39.90 };
+      case '974': return { days:'7–14 jours ouvrés', from:7,  to:14, price:34.90 };
+      case '976': return { days:'10–20 jours ouvrés',from:10, to:20, price:49.90 };
+      default:    return { days:'5–10 jours ouvrés', from:5,  to:10, price:29.90 };
+    }
+  }
+
+  function injectShippingDetailsLd(terrCode) {
+    removeJsonLd('shipping');
+    var t = getTerritory(terrCode);
+    if (!t) return;
+    var est = shippingEstimateFor(terrCode);
+    var data = {
+      '@context': 'https://schema.org',
+      '@type': 'OfferShippingDetails',
+      'shippingDestination': {
+        '@type': 'DefinedRegion',
+        'addressCountry': 'FR',
+        'addressRegion': t.name
+      },
+      'shippingRate': {
+        '@type': 'MonetaryAmount',
+        'value': est.price.toFixed(2),
+        'currency': 'EUR'
+      },
+      'deliveryTime': {
+        '@type': 'ShippingDeliveryTime',
+        'handlingTime': { '@type': 'QuantitativeValue', 'minValue': 1, 'maxValue': 3, 'unitCode': 'DAY' },
+        'transitTime':  { '@type': 'QuantitativeValue', 'minValue': est.from, 'maxValue': est.to, 'unitCode': 'DAY' }
+      }
+    };
+    var script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.setAttribute('data-jsonld', 'shipping');
+    script.textContent = JSON.stringify(data);
+    document.head.appendChild(script);
+  }
+
+  function injectFaqLd(qaList) {
+    removeJsonLd('faq');
+    if (!Array.isArray(qaList) || !qaList.length) return;
+    var data = {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      'mainEntity': qaList.map(function (qa) {
+        return {
+          '@type': 'Question',
+          'name': qa.q,
+          'acceptedAnswer': { '@type': 'Answer', 'text': qa.a }
+        };
+      })
+    };
+    var script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.setAttribute('data-jsonld', 'faq');
+    script.textContent = JSON.stringify(data);
+    document.head.appendChild(script);
+  }
+
+  function handleTerritoryRoute(slug) {
+    var code = territoryCodeFromSlug(slug);
+    if (!code) { location.hash = '#/'; return; }
+
+    // Switching territory re-runs onRouteChange which would recurse; so we
+    // mutate state directly without calling setTerritory's re-render.
+    if (_currentTerritory !== code) {
+      _currentTerritory = code;
+      try { localStorage.setItem(TERRITORY_KEY, code); } catch (_) {}
+      updateTerritoryLabels();
+      try { document.dispatchEvent(new CustomEvent('pt:territory-change', { detail:{ code: code } })); } catch (_) {}
+    }
+
+    var t = getTerritory(code);
+    var est = shippingEstimateFor(code);
+
+    // Header elements
+    var flagEl = document.getElementById('terrViewFlag');
+    var nameEl = document.getElementById('terrViewName');
+    var leadEl = document.getElementById('terrViewLead');
+    var ratesEl = document.getElementById('terrViewRates');
+    var waEl = document.getElementById('terrViewWa');
+    if (flagEl) flagEl.textContent = t.flag;
+    if (nameEl) nameEl.textContent = t.name;
+    if (leadEl) {
+      leadEl.textContent = 'Outillage professionnel DeWALT, Makita, Festool, Flex et Facom livré en ' + t.name
+        + ' sous ' + est.days + '. Octroi de mer calculé automatiquement.';
+    }
+    if (ratesEl) {
+      var tva = (t.tvaRate * 100).toFixed(1).replace('.', ',');
+      var oex = ((t.octroiExterne + t.octroiRegional) * 100).toFixed(1).replace('.', ',');
+      ratesEl.innerHTML = '<span class="terr-view__rate"><strong>TVA</strong> ' + tva + ' %</span>'
+        + '<span class="terr-view__rate"><strong>Octroi de mer</strong> ' + oex + ' %</span>'
+        + '<span class="terr-view__rate"><strong>Code</strong> ' + t.code + '</span>';
+    }
+    if (waEl) {
+      var waMsg = 'Bonjour Pirates Tools, je suis en ' + t.name + ' (' + t.code + '). J\'aimerais un devis.';
+      waEl.href = 'https://wa.me/' + WA_PHONE + '?text=' + encodeURIComponent(waMsg);
+    }
+
+    // Featured products: pick 8 with tropical_ready or highest stock
+    var prodEl = document.getElementById('terrViewProducts');
+    if (prodEl) {
+      var featured = products.filter(function (p) {
+        return Array.isArray(p.tags) && p.tags.indexOf('tropical_ready') !== -1;
+      }).slice(0, 8);
+      if (!featured.length) featured = products.slice(0, 8);
+      prodEl.innerHTML = featured.map(function (p) {
+        var out = isOutOfStock(p);
+        var pr = calcPrice(p, code);
+        return '<a class="product-card' + (out ? ' product-card--out' : '') + '" href="#/produit/' + escapeHTML(p.slug || p.id) + '">'
+          + '<div class="product-card__img-wrap">'
+          + productCardVisual(p)
+          + (p.tag ? '<span class="product-card__tag">' + escapeHTML(p.tag) + '</span>' : '')
+          + stockBadge(p)
+          + productBadges(p)
+          + '</div>'
+          + '<div class="product-card__body">'
+          + '<span class="product-card__brand">' + escapeHTML(p.brand) + '</span>'
+          + '<h3 class="product-card__title">' + escapeHTML(p.title) + '</h3>'
+          + '<span class="product-card__price">' + formatPrice(pr.ttc) + '</span>'
+          + '</div>'
+          + '</a>';
+      }).join('');
+      preloadModelViewers(prodEl);
+    }
+
+    // Shipping card
+    var shipEl = document.getElementById('terrViewShipping');
+    if (shipEl) {
+      shipEl.innerHTML = '<div class="terr-ship-card">'
+        + '<div class="terr-ship-card__icon" aria-hidden="true">🚢</div>'
+        + '<div><strong>Délai moyen</strong><p>' + est.days + '</p></div>'
+        + '</div>'
+        + '<div class="terr-ship-card">'
+        + '<div class="terr-ship-card__icon" aria-hidden="true">📦</div>'
+        + '<div><strong>Frais de port estimés</strong><p>à partir de ' + formatPrice(est.price) + '</p></div>'
+        + '</div>'
+        + '<div class="terr-ship-card">'
+        + '<div class="terr-ship-card__icon" aria-hidden="true">🛡️</div>'
+        + '<div><strong>Garantie</strong><p>Constructeur + SAV Pirates Tools</p></div>'
+        + '</div>';
+    }
+
+    // FAQ
+    var faqEl = document.getElementById('terrViewFaq');
+    var faq = TERR_FAQ[code] || [];
+    if (faqEl) {
+      faqEl.innerHTML = faq.map(function (qa) {
+        return '<details class="faq-item">'
+          + '<summary>' + escapeHTML(qa.q) + '</summary>'
+          + '<p>' + escapeHTML(qa.a) + '</p>'
+          + '</details>';
+      }).join('');
+    }
+
+    // Structured data + meta
+    injectShippingDetailsLd(code);
+    injectFaqLd(faq);
+    var title = 'Outillage pro en ' + t.name + ' — ' + BASE_TITLE;
+    var desc  = 'Achetez votre outillage professionnel livré en ' + t.name
+      + '. Octroi de mer, TVA et délais inclus. ' + BASE_DESC;
+    setDocMeta(title, desc);
+    setHeadMeta('og:title', title, 'property');
+    setHeadMeta('og:description', desc, 'property');
+    setHeadMeta('og:url', location.href, 'property');
+    setHeadMeta('twitter:title', title);
+    setHeadMeta('twitter:description', desc);
+    setCanonical(location.origin + location.pathname + '#/' + slug);
+  }
+
+  function resetSeoExtras() {
+    removeJsonLd('product');
+    removeJsonLd('shipping');
+    removeJsonLd('faq');
+    setCanonical(location.origin + location.pathname);
+    setHeadMeta('og:url', location.origin + location.pathname, 'property');
+    setHeadMeta('og:title', BASE_TITLE, 'property');
+    setHeadMeta('og:description', BASE_DESC, 'property');
+    setHeadMeta('twitter:title', BASE_TITLE);
+    setHeadMeta('twitter:description', BASE_DESC);
+  }
+
   function updateRouteMeta(route, parsed) {
     switch (route) {
       case '/':
         setDocMeta(BASE_TITLE, BASE_DESC);
-        removeJsonLd('product');
+        resetSeoExtras();
         break;
       case '/catalogue':
         setDocMeta('Catalogue — ' + BASE_TITLE, 'Découvre notre catalogue d\'outillage professionnel : ' + products.length + ' produits, 7 marques. ' + BASE_DESC);
@@ -4660,6 +4959,9 @@
       case '/admin':
         setDocMeta('Administration — ' + BASE_TITLE, '');
         removeJsonLd('product');
+        break;
+      case '/territoire':
+        // handleTerritoryRoute() already set title/desc/OG/canonical/JSON-LD
         break;
       default:
         setDocMeta(BASE_TITLE, BASE_DESC);
