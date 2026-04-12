@@ -6700,6 +6700,66 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .faq-item[open] summary::after { transform: rotate(45deg); }
 .faq-item p { margin: 10px 0 0; color: #cdd6e0; line-height: 1.55; }
 
+/* ========== 36) WHATSAPP FLOATING BUTTON ========== */
+.wa-float {
+  position: fixed;
+  right: 18px;
+  bottom: calc(18px + env(safe-area-inset-bottom, 0));
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 18px;
+  background: #25D366;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 999px;
+  box-shadow: 0 10px 28px rgba(37, 211, 102, 0.4);
+  font-weight: 700;
+  font-size: 14px;
+  z-index: 9500;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.wa-float__icon { font-size: 18px; line-height: 1; }
+.wa-float__label { font-family: inherit; }
+
+@media (hover: hover) {
+  .wa-float:hover {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 16px 38px rgba(37, 211, 102, 0.55);
+  }
+}
+@media (max-width: 640px) {
+  .wa-float {
+    bottom: calc(90px + env(safe-area-inset-bottom, 0));
+  }
+  .wa-float__label { display: none; }
+  .wa-float { padding: 12px 14px; }
+}
+
+/* ========== 37) DEVIS LOYALTY BANNER ========== */
+.devis-loyalty {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 18px;
+  margin: 16px 0;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.14), rgba(34, 197, 94, 0.10));
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  border-radius: 14px;
+  font-size: 14px;
+  flex-wrap: wrap;
+}
+.devis-loyalty__tier { font-weight: 700; color: #fff; }
+.devis-loyalty__save {
+  padding: 4px 10px;
+  background: rgba(34, 197, 94, 0.22);
+  color: #22c55e;
+  border-radius: 999px;
+  font-weight: 700;
+}
+.devis-loyalty__hint { color: #cdd6e0; font-size: 13px; }
+
 /* ========== 34) LOCAL PRICE COMPARE ========== */
 .pt-local-compare {
   display: flex;

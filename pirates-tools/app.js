@@ -227,6 +227,55 @@
     return ht * 1.60;
   }
 
+  // ── WhatsApp helpers ───────────────────────────────────────
+  function waLink(msg) {
+    return 'https://wa.me/' + WA_PHONE + '?text=' + encodeURIComponent(msg || '');
+  }
+
+  function waProductMessage(product, territoryCode) {
+    if (!product) return '';
+    var t = getTerritory(territoryCode) || getTerritory(DEFAULT_TERRITORY);
+    var price = calcPrice(product, t.code);
+    var url = location.origin + location.pathname + '#/produit/' + (product.slug || product.id);
+    return 'Bonjour Pirates Tools, je suis intéressé(e) par : '
+      + product.title + ' (' + (product.brand || '') + ')\n'
+      + 'Prix TTC : ' + formatPrice(price.ttc) + '\n'
+      + 'Territoire : ' + t.flag + ' ' + t.name + ' (' + t.code + ')\n'
+      + 'Lien : ' + url + '\n\n'
+      + 'Pouvez-vous confirmer la disponibilité et le délai de livraison ?';
+  }
+
+  function waCartMessage(items, territoryCode) {
+    if (!items || !items.length) return '';
+    var t = getTerritory(territoryCode) || getTerritory(DEFAULT_TERRITORY);
+    var lines = ['*Demande de devis — Pirates Tools*\n'];
+    lines.push('Territoire : ' + t.flag + ' ' + t.name + ' (' + t.code + ')');
+    lines.push('');
+    var total = 0;
+    items.forEach(function (item) {
+      var p = findProductByKey(item.key);
+      var unit = p ? calcPrice(p, t.code).ttc : Number(item.price) || 0;
+      var qty = item.qty || 1;
+      var sub = unit * qty;
+      total += sub;
+      lines.push('• ' + item.title + ' ×' + qty + ' — ' + formatPrice(sub));
+    });
+    lines.push('');
+    lines.push('*Total TTC : ' + formatPrice(total) + '*');
+    lines.push('\nMerci de confirmer la disponibilité et le délai de livraison.');
+    return lines.join('\n');
+  }
+
+  // Find a product in memory by its cart key (id/slug/sku)
+  function findProductByKey(key) {
+    if (!key || !products) return null;
+    for (var i = 0; i < products.length; i++) {
+      var p = products[i];
+      if (p.id === key || p.slug === key || p.sku === key) return p;
+    }
+    return null;
+  }
+
   function localPriceComparison(product, price, container) {
     if (!product || !price || !container) return;
     var local = calcLocalPrice(product);
@@ -467,7 +516,11 @@
     var totalQty = 0;
     var html = items.map(function (item, idx) {
       var qty = item.qty || 1;
-      var sub = (item.price || 0) * qty;
+      // Recompute unit price from the live product (territory-aware),
+      // falling back to the stored item.price for historical cart entries.
+      var p = findProductByKey(item.key);
+      var unit = p ? calcPrice(p, _currentTerritory).ttc : Number(item.price) || 0;
+      var sub = unit * qty;
       total += sub;
       totalQty += qty;
       return '<div class="devis-item" data-idx="' + idx + '" style="animation-delay:' + (idx * 60) + 'ms">'
@@ -497,28 +550,51 @@
 
     dom.devisList.innerHTML = html;
 
+    // Loyalty discount (Phase 4) applied on top of the items total
+    var loyalty = getLoyaltyState ? getLoyaltyState(total) : null;
+    var grand = loyalty ? loyalty.discountedTotal : total;
+
     // Update stats
     if (statItems) statItems.textContent = totalQty;
-    if (statTotal) statTotal.textContent = formatPrice(total);
-    if (footerTotal) footerTotal.textContent = formatPrice(total);
+    if (statTotal) statTotal.textContent = formatPrice(grand);
+    if (footerTotal) footerTotal.textContent = formatPrice(grand);
+
+    // Loyalty line in the footer (if we have a tier banner slot)
+    var loyaltyEl = document.getElementById('devisLoyalty');
+    if (loyaltyEl) {
+      if (loyalty && loyalty.discountPct > 0) {
+        loyaltyEl.hidden = false;
+        loyaltyEl.innerHTML = '<span class="devis-loyalty__tier">' + loyalty.tierIcon + ' '
+          + escapeHTML(loyalty.tierLabel) + '</span>'
+          + '<span class="devis-loyalty__save">−' + loyalty.discountPct + ' % ('
+          + formatPrice(total - grand) + ')</span>';
+      } else if (loyalty) {
+        loyaltyEl.hidden = false;
+        loyaltyEl.innerHTML = '<span class="devis-loyalty__tier">' + loyalty.tierIcon + ' '
+          + escapeHTML(loyalty.tierLabel) + '</span>'
+          + '<span class="devis-loyalty__hint">Ajoutez ' + formatPrice(Math.max(0, loyalty.nextTierAt - total))
+          + ' pour atteindre le palier suivant</span>';
+      } else {
+        loyaltyEl.hidden = true;
+      }
+    }
   }
 
   function sendDevisWhatsApp() {
     var items = getCart();
     if (items.length === 0) { toast('Panier vide', 'error'); return; }
-    var total = 0;
-    var lines = ['*Demande de devis — Pirates Tools*\n'];
-    items.forEach(function (item) {
-      var sub = (item.price || 0) * (item.qty || 1);
-      total += sub;
-      lines.push('• ' + item.title + ' ×' + item.qty + ' — ' + formatPrice(sub));
-    });
-    lines.push('\n*Total TTC : ' + formatPrice(total) + '*');
-    var url = 'https://wa.me/' + WA_PHONE + '?text=' + encodeURIComponent(lines.join('\n'));
-    window.open(url, '_blank');
+    var msg = waCartMessage(items, _currentTerritory);
+    window.open(waLink(msg), '_blank');
 
     // Save to Firestore order history (if authenticated)
+    var total = 0;
+    items.forEach(function (item) {
+      var p = findProductByKey(item.key);
+      var unit = p ? calcPrice(p, _currentTerritory).ttc : Number(item.price) || 0;
+      total += unit * (item.qty || 1);
+    });
     saveOrderToFirestore(items.length, total);
+    if (typeof track === 'function') track('whatsapp_click', { source: 'devis' });
   }
 
   // ── Products ───────────────────────────────────────────────
@@ -1201,11 +1277,13 @@
       };
     }
 
-    // WhatsApp link
+    // WhatsApp link — territory-aware message
     if (dom.pdpWa) {
-      var waMsg = 'Bonjour, je suis intéressé(e) par : ' + product.title + ' (' + formatPrice(product.price) + ')';
-      dom.pdpWa.href = 'https://wa.me/' + WA_PHONE + '?text=' + encodeURIComponent(waMsg);
+      dom.pdpWa.href = waLink(waProductMessage(product, _currentTerritory));
       dom.pdpWa.target = '_blank';
+      dom.pdpWa.addEventListener('click', function () {
+        if (typeof track === 'function') track('whatsapp_click', { source: 'pdp', id: product.id });
+      }, { once: true });
     }
 
     // Share button (Web Share API with clipboard fallback)
