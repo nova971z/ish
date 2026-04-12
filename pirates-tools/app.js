@@ -26,6 +26,221 @@
     return Number(n).toFixed(2).replace('.', ',') + ' €';
   }
 
+  // ── Territory taxation engine (TVA + Octroi de mer DOM-TOM) ──
+  // Rates are baseline public references; they can be adjusted per NC category
+  // via TAX_RULES_BY_NC below. Numbers are *additive* on the HT price:
+  // prixTTC = prixHT × (1 + octroiExterne + octroiRegional) × (1 + tva)
+  var TERRITORIES = [
+    { code:'971', name:'Guadeloupe',  flag:'🇬🇵', tvaRate:0.085, octroiExterne:0.07,  octroiRegional:0.025 },
+    { code:'972', name:'Martinique',  flag:'🇲🇶', tvaRate:0.085, octroiExterne:0.07,  octroiRegional:0.025 },
+    { code:'973', name:'Guyane',      flag:'🇬🇫', tvaRate:0.0,   octroiExterne:0.075, octroiRegional:0.025 },
+    { code:'974', name:'La Réunion',  flag:'🇷🇪', tvaRate:0.085, octroiExterne:0.05,  octroiRegional:0.025 },
+    { code:'976', name:'Mayotte',     flag:'🇾🇹', tvaRate:0.0,   octroiExterne:0.0,   octroiRegional:0.0  }
+  ];
+
+  // Adjustments per Nomenclature Combinée (NC) category.
+  // If a category is listed here, its octroi rates override the territory defaults.
+  // power_tool → outillage électroportatif NC 8467 (baseline)
+  // hand_tool  → outillage à main NC 8205/8207 (baseline, lower external)
+  // accessory / consumable → léger, taxes moindres
+  var TAX_RULES_BY_NC = {
+    power_tool: {}, // uses territory defaults
+    hand_tool:  {
+      '971': { octroiExterne:0.05, octroiRegional:0.025 },
+      '972': { octroiExterne:0.05, octroiRegional:0.025 },
+      '973': { octroiExterne:0.05, octroiRegional:0.025 },
+      '974': { octroiExterne:0.035,octroiRegional:0.025 },
+      '976': { octroiExterne:0.0,  octroiRegional:0.0 }
+    },
+    accessory: {
+      '971': { octroiExterne:0.04, octroiRegional:0.02 },
+      '972': { octroiExterne:0.04, octroiRegional:0.02 },
+      '973': { octroiExterne:0.04, octroiRegional:0.02 },
+      '974': { octroiExterne:0.03, octroiRegional:0.02 },
+      '976': { octroiExterne:0.0,  octroiRegional:0.0 }
+    },
+    consumable: {
+      '971': { octroiExterne:0.03, octroiRegional:0.015 },
+      '972': { octroiExterne:0.03, octroiRegional:0.015 },
+      '973': { octroiExterne:0.03, octroiRegional:0.015 },
+      '974': { octroiExterne:0.02, octroiRegional:0.015 },
+      '976': { octroiExterne:0.0,  octroiRegional:0.0 }
+    }
+  };
+
+  var TERRITORY_KEY = 'pt:territory';
+  var DEFAULT_TERRITORY = '971';
+  var _currentTerritory = DEFAULT_TERRITORY;
+
+  function loadTerritory() {
+    try {
+      var saved = localStorage.getItem(TERRITORY_KEY);
+      if (saved && getTerritory(saved)) { _currentTerritory = saved; return; }
+    } catch (_) { /* privacy mode */ }
+    _currentTerritory = DEFAULT_TERRITORY;
+  }
+
+  function getTerritory(code) {
+    code = code || _currentTerritory;
+    for (var i = 0; i < TERRITORIES.length; i++) {
+      if (TERRITORIES[i].code === code) return TERRITORIES[i];
+    }
+    return null;
+  }
+
+  function taxRatesFor(product, territoryCode) {
+    var t = getTerritory(territoryCode) || getTerritory(DEFAULT_TERRITORY);
+    var nc = (product && product.ncCategory) || 'power_tool';
+    var override = (TAX_RULES_BY_NC[nc] && TAX_RULES_BY_NC[nc][t.code]) || null;
+    return {
+      tva: t.tvaRate,
+      octroiExterne: override ? override.octroiExterne : t.octroiExterne,
+      octroiRegional: override ? override.octroiRegional : t.octroiRegional
+    };
+  }
+
+  function calcPrice(product, territoryCode) {
+    if (!product) return { ht:0, octroi:0, tva:0, ttc:0, rates:null };
+    var ht = Number(product.price_ht != null
+      ? product.price_ht
+      : (product.price / (1 + (product.vat || 0.2))));
+    var r = taxRatesFor(product, territoryCode);
+    var afterOctroi = ht * (1 + r.octroiExterne + r.octroiRegional);
+    var octroi = afterOctroi - ht;
+    var ttc = afterOctroi * (1 + r.tva);
+    var tva = ttc - afterOctroi;
+    return {
+      ht: ht,
+      octroi: octroi,
+      tva: tva,
+      ttc: ttc,
+      rates: r
+    };
+  }
+
+  function setTerritory(code, opts) {
+    if (!getTerritory(code)) return;
+    if (code === _currentTerritory && !(opts && opts.force)) return;
+    _currentTerritory = code;
+    try { localStorage.setItem(TERRITORY_KEY, code); } catch (_) {}
+    updateTerritoryLabels();
+    // Re-render current route so all prices update
+    if (typeof onRouteChange === 'function') {
+      try { onRouteChange(); } catch (_) {}
+    }
+    try {
+      document.dispatchEvent(new CustomEvent('pt:territory-change', { detail:{ code: code } }));
+    } catch (_) {}
+  }
+
+  function updateTerritoryLabels() {
+    var t = getTerritory() || getTerritory(DEFAULT_TERRITORY);
+    var labels = document.querySelectorAll('[data-terr-label]');
+    labels.forEach(function (el) {
+      el.textContent = t.flag + ' ' + t.name;
+    });
+    // Highlight active item in the popover
+    var items = document.querySelectorAll('#terrMenu [data-terr-code]');
+    items.forEach(function (el) {
+      el.classList.toggle('is-active', el.getAttribute('data-terr-code') === t.code);
+    });
+  }
+
+  // Render + wire up the territory selector (topbar popover).
+  // The topbar <button id="terrBtn"> and <ul id="terrMenu"> live in index.html.
+  // If the menu is empty, populate it from TERRITORIES.
+  function setupTerritorySelector() {
+    var btn = document.getElementById('terrBtn');
+    var menu = document.getElementById('terrMenu');
+    if (!btn || !menu) return;
+
+    if (!menu.childElementCount) {
+      menu.innerHTML = TERRITORIES.map(function (t) {
+        return '<li role="none"><button type="button" role="menuitemradio" '
+          + 'class="terr-menu__item" data-terr-code="' + t.code + '" aria-checked="false">'
+          + '<span class="terr-menu__flag" aria-hidden="true">' + t.flag + '</span>'
+          + '<span class="terr-menu__name">' + escapeHTML(t.name) + '</span>'
+          + '<span class="terr-menu__code">(' + t.code + ')</span>'
+          + '</button></li>';
+      }).join('');
+    }
+
+    function closeMenu() {
+      menu.hidden = true;
+      btn.setAttribute('aria-expanded', 'false');
+    }
+    function openMenu() {
+      menu.hidden = false;
+      btn.setAttribute('aria-expanded', 'true');
+      var first = menu.querySelector('.terr-menu__item');
+      if (first) first.focus();
+    }
+
+    if (!btn._bound) {
+      btn._bound = true;
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (menu.hidden) openMenu(); else closeMenu();
+      });
+      document.addEventListener('click', function (e) {
+        if (!menu.hidden && !menu.contains(e.target) && e.target !== btn) closeMenu();
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && !menu.hidden) { closeMenu(); btn.focus(); }
+      });
+      menu.addEventListener('click', function (e) {
+        var item = e.target.closest('[data-terr-code]');
+        if (!item) return;
+        setTerritory(item.getAttribute('data-terr-code'));
+        closeMenu();
+      });
+    }
+
+    updateTerritoryLabels();
+  }
+
+  // ── Stubs filled in by Phase 4 / Phase 5 ───────────────────
+  // productBadges() renders DOM-TOM-specific pills (tropical, cordless, mayotte, stock).
+  // localPriceComparison() injects a "local price" simulator on the PDP.
+  // Defining them up front keeps render functions safe even if those phases
+  // haven't been loaded yet.
+  function productBadges(p) {
+    if (!p || !Array.isArray(p.tags)) return '';
+    var out = [];
+    if (p.tags.indexOf('tropical_ready') !== -1)
+      out.push('<span class="pt-badge pt-badge--tropical" title="Adapté aux climats tropicaux">🌴</span>');
+    if (p.tags.indexOf('cordless') !== -1)
+      out.push('<span class="pt-badge pt-badge--cordless" title="Sans fil">🔋</span>');
+    if (p.tags.indexOf('mayotte_project') !== -1)
+      out.push('<span class="pt-badge pt-badge--mayotte" title="Idéal chantier Mayotte">🏗️</span>');
+    if (!out.length) return '';
+    return '<div class="pt-badges">' + out.join('') + '</div>';
+  }
+
+  // calcLocalPrice — estimation du prix local moyen (revendeurs DOM-TOM)
+  // Ratio 1.60 sur le prix HT (marge + taxes + transport typiques).
+  function calcLocalPrice(product) {
+    if (!product) return 0;
+    var ht = Number(product.price_ht != null
+      ? product.price_ht
+      : (product.price / (1 + (product.vat || 0.2))));
+    return ht * 1.60;
+  }
+
+  function localPriceComparison(product, price, container) {
+    if (!product || !price || !container) return;
+    var local = calcLocalPrice(product);
+    if (!(local > 0) || !(price.ttc > 0)) return;
+    if (price.ttc >= local) return; // no saving to show
+    var saving = Math.round(((local - price.ttc) / local) * 100);
+    var html = '<div class="pt-local-compare">'
+      + '<span class="pt-local-compare__label">Prix moyen local</span>'
+      + '<span class="pt-local-compare__value">' + formatPrice(local) + '</span>'
+      + '<span class="pt-local-compare__saving">Économisez ' + saving + ' %</span>'
+      + '</div>';
+    container.insertAdjacentHTML('beforeend', html);
+  }
+
   // Stock badge helper — renders a colored pill based on product.stock_status.
   // Statuses: in_stock (green), low_stock (orange), out_of_stock (red), preorder (blue).
   // Empty string if no status set, so existing products render unchanged.
@@ -111,7 +326,7 @@
   // ── Cart (single source of truth) ──────────────────────────
 
   var CART_KEY = 'pt_cart';
-  var WA_PHONE = '33774230195';
+  var WA_PHONE = '33744776598';
 
   function loadCartData() {
     try {
@@ -432,17 +647,19 @@
     }
     dom.list.innerHTML = filtered.map(function (p) {
       var out = isOutOfStock(p);
+      var price = calcPrice(p, _currentTerritory);
       return '<a class="product-card' + (out ? ' product-card--out' : '') + '" href="#/produit/' + escapeHTML(p.slug || p.id) + '">'
         + '<div class="product-card__img-wrap">'
         + productCardVisual(p)
         + (p.tag ? '<span class="product-card__tag">' + escapeHTML(p.tag) + '</span>' : '')
         + stockBadge(p)
+        + productBadges(p)
         + wishlistButton(p)
         + '</div>'
         + '<div class="product-card__body">'
         + '<span class="product-card__brand">' + escapeHTML(p.brand) + '</span>'
         + '<h3 class="product-card__title">' + escapeHTML(p.title) + '</h3>'
-        + '<span class="product-card__price">' + formatPrice(p.price) + '</span>'
+        + '<span class="product-card__price">' + formatPrice(price.ttc) + '</span>'
         + '</div>'
         + '</a>';
     }).join('');
@@ -764,17 +981,19 @@
     }
     track.innerHTML = products.map(function (p) {
       var out = isOutOfStock(p);
+      var price = calcPrice(p, _currentTerritory);
       return '<a class="product-card' + (out ? ' product-card--out' : '') + '" href="#/produit/' + escapeHTML(p.slug || p.id) + '">'
         + '<div class="product-card__img-wrap">'
         + productCardVisual(p)
         + (p.tag ? '<span class="product-card__tag">' + escapeHTML(p.tag) + '</span>' : '')
         + stockBadge(p)
+        + productBadges(p)
         + wishlistButton(p)
         + '</div>'
         + '<div class="product-card__body">'
         + '<span class="product-card__brand">' + escapeHTML(p.brand) + '</span>'
         + '<h3 class="product-card__title">' + escapeHTML(p.title) + '</h3>'
-        + '<span class="product-card__price">' + formatPrice(p.price) + '</span>'
+        + '<span class="product-card__price">' + formatPrice(price.ttc) + '</span>'
         + '</div>'
         + '</a>';
     }).join('');
@@ -894,12 +1113,23 @@
     // Scroll animation for landing sections
     initPdpScrollAnimations();
 
-    // Price (TTC + HT) + stock badge
+    // Price (TTC + HT + octroi de mer breakdown for the selected territory) + stock badge
     if (dom.pdpPrice) {
-      var ht = product.price_ht || (product.price / (1 + (product.vat || 0.2)));
-      dom.pdpPrice.innerHTML = '<span class="pdp-price__ttc">' + formatPrice(product.price) + ' TTC</span>'
-        + '<span class="pdp-price__ht">' + formatPrice(ht) + ' HT</span>'
+      var price = calcPrice(product, _currentTerritory);
+      var terr = getTerritory() || getTerritory(DEFAULT_TERRITORY);
+      dom.pdpPrice.innerHTML = '<span class="pdp-price__ttc">' + formatPrice(price.ttc) + ' TTC</span>'
+        + '<span class="pdp-price__ht">' + formatPrice(price.ht) + ' HT</span>'
+        + '<details class="pdp-price__breakdown">'
+        +   '<summary>Détail ' + terr.flag + ' ' + escapeHTML(terr.name) + '</summary>'
+        +   '<ul>'
+        +     '<li><span>Prix HT</span><strong>' + formatPrice(price.ht) + '</strong></li>'
+        +     '<li><span>Octroi de mer</span><strong>' + formatPrice(price.octroi) + '</strong></li>'
+        +     '<li><span>TVA</span><strong>' + formatPrice(price.tva) + '</strong></li>'
+        +     '<li class="pdp-price__total"><span>Total TTC</span><strong>' + formatPrice(price.ttc) + '</strong></li>'
+        +   '</ul>'
+        + '</details>'
         + stockBadge(product);
+      localPriceComparison(product, price, dom.pdpPrice);
     }
 
     // Features (points forts)
@@ -4369,7 +4599,7 @@
       'name': 'Pirates Tools',
       'url': location.origin,
       'logo': location.origin + '/icons/icon-512.png',
-      'telephone': '+33774230195',
+      'telephone': '+33744776598',
       'areaServed': 'FR',
       'description': 'Outillage professionnel DeWALT, Makita, Festool, Flex, Facom, Stanley, Wera — livraison Antilles françaises.',
       'sameAs': []
@@ -4459,6 +4689,8 @@
 
   function init() {
     cacheDom();
+    loadTerritory();
+    setupTerritorySelector();
     bindEvents();
     setupAccountTabs();
     setupRevealAnimations();

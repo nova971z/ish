@@ -6484,3 +6484,164 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
     transform: none !important;
   }
 }
+
+/* ========== 31) TERRITORY SELECTOR (DOM-TOM) ========== */
+.terr-wrap { position: relative; display: inline-flex; }
+.terr-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  color: #e6edf5;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .18s ease, border-color .18s ease;
+  max-width: 220px;
+}
+.terr-btn:hover { background: rgba(139, 92, 246, 0.14); border-color: rgba(139, 92, 246, 0.35); }
+.terr-btn:focus-visible { outline: 2px solid #8B5CF6; outline-offset: 2px; }
+.terr-btn__icon { font-size: 15px; line-height: 1; }
+.terr-btn__label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.terr-btn__chev { font-size: 10px; opacity: .7; }
+.terr-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 240px;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: #0f1722;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.45);
+  z-index: 9600;
+}
+.terr-menu[hidden] { display: none; }
+.terr-menu__item {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  background: transparent;
+  border: 0;
+  border-radius: 10px;
+  color: #e6edf5;
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+.terr-menu__item:hover,
+.terr-menu__item:focus-visible {
+  background: rgba(139, 92, 246, 0.16);
+  outline: none;
+}
+.terr-menu__item.is-active {
+  background: rgba(139, 92, 246, 0.24);
+  color: #fff;
+}
+.terr-menu__flag { font-size: 20px; line-height: 1; }
+.terr-menu__name { flex: 1; font-weight: 600; }
+.terr-menu__code { opacity: .6; font-size: 12px; }
+
+@media (max-width: 640px) {
+  .terr-btn { padding: 6px 10px; font-size: 12px; max-width: 150px; }
+  .terr-btn__label { max-width: 90px; }
+}
+
+/* ========== 32) PDP PRICE BREAKDOWN ========== */
+.pdp-price__breakdown {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #cdd6e0;
+}
+.pdp-price__breakdown summary {
+  cursor: pointer;
+  color: #8B5CF6;
+  font-weight: 600;
+  list-style: none;
+  padding: 4px 0;
+}
+.pdp-price__breakdown summary::-webkit-details-marker { display: none; }
+.pdp-price__breakdown summary::before {
+  content: '▸ ';
+  display: inline-block;
+  transition: transform .18s ease;
+}
+.pdp-price__breakdown[open] summary::before { transform: rotate(90deg); }
+.pdp-price__breakdown ul {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+}
+.pdp-price__breakdown li {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+.pdp-price__breakdown .pdp-price__total {
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-weight: 700;
+}
+
+/* ========== 33) PRODUCT DOM-TOM BADGES ========== */
+.pt-badges {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  z-index: 2;
+  pointer-events: none;
+}
+.pt-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  font-size: 14px;
+  line-height: 1;
+  background: rgba(15, 23, 34, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.pt-badge--tropical { background: rgba(34, 197, 94, 0.22); border-color: rgba(34, 197, 94, 0.5); }
+.pt-badge--cordless { background: rgba(59, 130, 246, 0.22); border-color: rgba(59, 130, 246, 0.5); }
+.pt-badge--mayotte  { background: rgba(251, 146, 60, 0.22); border-color: rgba(251, 146, 60, 0.5); }
+
+/* ========== 34) LOCAL PRICE COMPARE ========== */
+.pt-local-compare {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.12), rgba(139, 92, 246, 0.08));
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  border-radius: 12px;
+  font-size: 13px;
+}
+.pt-local-compare__label { opacity: .75; }
+.pt-local-compare__value { text-decoration: line-through; color: #f59e0b; font-weight: 700; }
+.pt-local-compare__saving {
+  margin-left: auto;
+  padding: 4px 10px;
+  background: rgba(34, 197, 94, 0.22);
+  border-radius: 999px;
+  color: #22c55e;
+  font-weight: 700;
+}

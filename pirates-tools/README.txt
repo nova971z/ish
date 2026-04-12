@@ -145,8 +145,8 @@ Routing SPA via hash (#/).
     - Fallback offline vers index.html
 
 11. CONTACT
-    - Téléphone : 07 74 23 01 95 (bouton sticky en haut)
-    - WhatsApp : wa.me/33774230195 (devis, confirmation paiement)
+    - Téléphone : 07 44 77 65 98 (bouton sticky en haut)
+    - WhatsApp : wa.me/33744776598 (devis, confirmation paiement)
     - Chat flottant (bouton vert)
 
 12. ADMIN PANEL (#/admin)
