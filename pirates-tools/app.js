@@ -2261,10 +2261,12 @@
     var specRows = document.querySelectorAll('.pdp-specs-table tr');
     var ctaButtons = document.querySelectorAll('.pdp-section--cta .btn--lg');
     var dockEl = document.getElementById('dock');
+    var waFloatEl = document.getElementById('waFloat');
     var winH = window.innerHeight;
 
-    // Hide dock initially on PDP (hero visible)
+    // Hide dock + WA float initially on PDP (hero visible)
     if (dockEl) dockEl.classList.add('dock--hidden');
+    if (waFloatEl) waFloatEl.classList.add('wa-float--hidden');
 
     pdpResizeHandler = function () { winH = window.innerHeight; };
     window.addEventListener('resize', pdpResizeHandler, { passive: true });
@@ -2375,13 +2377,15 @@
         }
       }
 
-      // ═══ DOCK: hide during hero, show after scrolling past ═══
-      if (dockEl && pdpHero) {
+      // ═══ DOCK + WA FLOAT: hide during hero, show after scrolling past ═══
+      if (pdpHero) {
         var heroThreshold = (pdpHero.offsetHeight || winH) * 0.7;
         if (scrollY > heroThreshold) {
-          dockEl.classList.remove('dock--hidden');
+          if (dockEl) dockEl.classList.remove('dock--hidden');
+          if (waFloatEl) waFloatEl.classList.remove('wa-float--hidden');
         } else {
-          dockEl.classList.add('dock--hidden');
+          if (dockEl) dockEl.classList.add('dock--hidden');
+          if (waFloatEl) waFloatEl.classList.add('wa-float--hidden');
         }
       }
 
@@ -2606,9 +2610,11 @@
     pdpScrollHandler = function cleanup() {
       running = false;
       if (pdpRAF) { cancelAnimationFrame(pdpRAF); pdpRAF = null; }
-      // Restore dock visibility when leaving PDP
+      // Restore dock + WA float visibility when leaving PDP
       var d = document.getElementById('dock');
+      var w = document.getElementById('waFloat');
       if (d) d.classList.remove('dock--hidden');
+      if (w) w.classList.remove('wa-float--hidden');
     };
   }
 
