@@ -29,7 +29,7 @@
   <link rel="dns-prefetch" href="https://js.stripe.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=286">
+  <link rel="stylesheet" href="styles.css?v=287">
 
   <!-- 3D model viewer -->
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
@@ -220,7 +220,7 @@
         <img
           id="topbarLogo"
           class="topbar-logo"
-          src="icons/icon-192.png?v=286"
+          src="icons/icon-192.png?v=287"
           alt="Pirates Tools"
           width="40" height="40"
           decoding="async" loading="eager" fetchpriority="high" />
@@ -251,8 +251,8 @@
   <section id="hero" class="hero-full" aria-hidden="true">
     <div class="hero-logo-container initial" id="heroLogoContainer">
       <img id="heroLogo" class="hero-logo on" alt="Pirates Tools"
-        src="icons/icon-512.png?v=286"
-        srcset="icons/icon-256.png?v=286 256w, icons/icon-384.png?v=286 384w, icons/icon-512.png?v=286 512w"
+        src="icons/icon-512.png?v=287"
+        srcset="icons/icon-256.png?v=287 256w, icons/icon-384.png?v=287 384w, icons/icon-512.png?v=287 512w"
         sizes="(max-width: 768px) 90vw, 60vw"
         width="600" height="600"
         decoding="async" loading="eager" fetchpriority="high" />
@@ -332,7 +332,7 @@
           <!-- Round service orbs -->
           <div class="plan-orbs" id="planOrbs">
 
-            <button class="plan-orb plan-orb--basique" data-plan="basique" data-price="9" data-saving="220">
+            <button class="plan-orb plan-orb--basique" data-plan="basique" data-price="9" data-saving="220" aria-label="Plan Basique a 9 euros par mois">
               <div class="plan-orb__circle">
                 <div class="plan-orb__pulse"></div>
                 <span class="plan-orb__emoji">🛡️</span>
@@ -341,7 +341,7 @@
               <span class="plan-orb__price">9&euro;/m</span>
             </button>
 
-            <button class="plan-orb plan-orb--pro" data-plan="pro" data-price="29" data-saving="720">
+            <button class="plan-orb plan-orb--pro" data-plan="pro" data-price="29" data-saving="720" aria-label="Plan Pro a 29 euros par mois">
               <div class="plan-orb__circle">
                 <div class="plan-orb__pulse"></div>
                 <span class="plan-orb__emoji">⚡</span>
@@ -351,7 +351,7 @@
               <span class="plan-orb__tag plan-orb__tag--pro">Populaire</span>
             </button>
 
-            <button class="plan-orb plan-orb--gold" data-plan="gold" data-price="59" data-saving="1440">
+            <button class="plan-orb plan-orb--gold" data-plan="gold" data-price="59" data-saving="1440" aria-label="Plan Gold a 59 euros par mois">
               <div class="plan-orb__circle">
                 <div class="plan-orb__pulse"></div>
                 <span class="plan-orb__emoji">👑</span>
@@ -361,7 +361,7 @@
               <span class="plan-orb__tag plan-orb__tag--gold">Premium</span>
             </button>
 
-            <button class="plan-orb plan-orb--black" data-plan="black" data-price="99" data-saving="3840">
+            <button class="plan-orb plan-orb--black" data-plan="black" data-price="99" data-saving="3840" aria-label="Plan Black Metal a 99 euros par mois">
               <div class="plan-orb__circle">
                 <div class="plan-orb__pulse"></div>
                 <span class="plan-orb__emoji">🖤</span>
@@ -434,7 +434,7 @@
               <label class="sr-only" for="newsletterEmail">Adresse email</label>
               <input id="newsletterEmail" type="email" required maxlength="200" placeholder="ton@email.com" autocomplete="email">
               <input type="text" name="website" class="home-newsletter__honeypot" tabindex="-1" aria-hidden="true" autocomplete="off">
-              <button type="submit" class="home-newsletter__submit">S'inscrire</button>
+              <button type="submit" class="home-newsletter__submit" aria-label="S'inscrire a la newsletter">S'inscrire</button>
             </form>
             <p id="newsletterStatus" class="home-newsletter__status" aria-live="polite"></p>
           </div>
@@ -583,10 +583,10 @@
         <div class="pdp-section__inner">
           <h2 class="pdp-cta__heading">Pret a passer a l'action ?</h2>
           <div class="pdp-landing__actions">
-            <button id="pdpBuy" class="btn primary btn--lg btn--glow" type="button" data-action="buy-now">💳 Acheter maintenant</button>
-            <button id="pdpQuote" class="btn btn--lg" type="button" data-action="add-to-cart">Ajouter au panier</button>
+            <button id="pdpBuy" class="btn primary btn--lg btn--glow" type="button" data-action="buy-now" aria-label="Acheter maintenant">💳 Acheter maintenant</button>
+            <button id="pdpQuote" class="btn btn--lg" type="button" data-action="add-to-cart" aria-label="Ajouter au panier">Ajouter au panier</button>
             <a id="pdpWa" class="btn btn-wa btn--lg" href="https://wa.me/33744776598" target="_blank" rel="noopener noreferrer" data-action="share-wa">WhatsApp</a>
-            <button id="pdpShare" class="btn btn--lg" type="button" data-action="share">Partager</button>
+            <button id="pdpShare" class="btn btn--lg" type="button" data-action="share" aria-label="Partager ce produit">Partager</button>
           </div>
         </div>
       </div>
@@ -677,15 +677,15 @@
             <strong id="devisFooterTotal">0 &euro;</strong>
           </div>
           <div class="devis-footer__actions">
-            <button id="devisPay" class="devis-btn devis-btn--pay" type="button">
+            <button id="devisPay" class="devis-btn devis-btn--pay" type="button" aria-label="Payer maintenant">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
               <span>Payer maintenant</span>
             </button>
-            <button id="devisSend" class="devis-btn devis-btn--wa" type="button">
+            <button id="devisSend" class="devis-btn devis-btn--wa" type="button" aria-label="Envoyer le devis par WhatsApp">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.553 4.106 1.52 5.833L0 24l6.336-1.495A11.952 11.952 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.82c-1.97 0-3.867-.528-5.526-1.525l-.396-.235-3.763.888.948-3.671-.26-.412A9.776 9.776 0 012.18 12c0-5.422 4.398-9.82 9.82-9.82 5.422 0 9.82 4.398 9.82 9.82 0 5.422-4.398 9.82-9.82 9.82z"/></svg>
               <span>Envoyer le devis</span>
             </button>
-            <button id="devisClear" class="devis-btn devis-btn--clear" type="button">
+            <button id="devisClear" class="devis-btn devis-btn--clear" type="button" aria-label="Vider le panier">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
               <span>Vider</span>
             </button>
@@ -735,15 +735,15 @@
 
         <!-- Navigation par onglets -->
         <div class="acc-tabs" role="tablist" aria-label="Sections du compte">
-          <button class="acc-tab active" role="tab" data-acc-tab="profile" aria-selected="true">
+          <button class="acc-tab active" role="tab" data-acc-tab="profile" aria-selected="true" aria-label="Profil">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             <span>Profil</span>
           </button>
-          <button class="acc-tab" role="tab" data-acc-tab="orders" aria-selected="false">
+          <button class="acc-tab" role="tab" data-acc-tab="orders" aria-selected="false" aria-label="Commandes">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
             <span>Commandes</span>
           </button>
-          <button class="acc-tab" role="tab" data-acc-tab="settings" aria-selected="false">
+          <button class="acc-tab" role="tab" data-acc-tab="settings" aria-selected="false" aria-label="Parametres">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             <span>Paramètres</span>
           </button>
@@ -848,10 +848,10 @@
           </div>
 
           <div class="auth-tabs" role="tablist" aria-label="Choix de formulaire">
-            <button id="authLoginTab" class="auth-tab active" role="tab" aria-controls="authLogin" aria-selected="true">
+            <button id="authLoginTab" class="auth-tab active" role="tab" aria-controls="authLogin" aria-selected="true" aria-label="Connexion">
               <span class="auth-tab__icon">🔑</span> Connexion
             </button>
-            <button id="authRegisterTab" class="auth-tab" role="tab" aria-controls="authRegister" aria-selected="false">
+            <button id="authRegisterTab" class="auth-tab" role="tab" aria-controls="authRegister" aria-selected="false" aria-label="Inscription">
               <span class="auth-tab__icon">⚓</span> Inscription
             </button>
             <div class="auth-tabs__indicator"></div>
@@ -1088,11 +1088,11 @@
       <!-- Onglets : Carte / Crypto -->
       <div class="pay-tabs" role="tablist" aria-label="Modes de paiement">
         <button class="pay-tab is-active" type="button" role="tab"
-                data-pay-tab="card" aria-selected="true">
+                data-pay-tab="card" aria-selected="true" aria-label="Paiement par carte bancaire">
           <span class="pay-tab__icon">💳</span> Carte bancaire
         </button>
         <button class="pay-tab" type="button" role="tab"
-                data-pay-tab="crypto" aria-selected="false">
+                data-pay-tab="crypto" aria-selected="false" aria-label="Paiement en cryptomonnaie">
           <span class="pay-tab__icon">🪙</span> Cryptomonnaie
         </button>
       </div>
@@ -1239,11 +1239,11 @@
       </div>
 
       <div class="pay-modal__footer">
-        <button id="payModalConfirm" class="btn primary btn--lg btn--glow" type="button">
+        <button id="payModalConfirm" class="btn primary btn--lg btn--glow" type="button" aria-label="Payer en toute securite">
           <span class="pay-modal__btn-icon">💳</span>
           Payer en toute sécurité
         </button>
-        <button id="payModalCryptoConfirm" class="btn primary btn--lg btn--glow" type="button" hidden>
+        <button id="payModalCryptoConfirm" class="btn primary btn--lg btn--glow" type="button" hidden aria-label="Confirmer le paiement crypto">
           <span class="pay-modal__btn-icon">✅</span>
           J'ai effectué le paiement
         </button>
@@ -1509,7 +1509,7 @@
   </script>
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=286"></script>
+  <script defer src="app.js?v=287"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

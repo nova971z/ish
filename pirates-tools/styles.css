@@ -182,7 +182,7 @@ transition: .25s;
 
 /* LOGO TOPBAR */
 .topbar-logo-link {
-display: inline-flex !important;
+display: inline-flex;
 align-items: center;
 margin-left: .5rem;
 -webkit-tap-highlight-color: transparent;
@@ -190,7 +190,7 @@ cursor: pointer;
 }
 
 .topbar-logo {
-display: block !important;
+display: block;
 height: 28px;
 width: auto;
 object-fit: contain;
@@ -206,9 +206,9 @@ body.page-devis .topbar-logo-link,
 body.page-compte .topbar-logo-link,
 body.page-produit .topbar-logo-link,
 body.page-auth .topbar-logo-link {
-display: inline-flex !important;
-visibility: visible !important;
-opacity: 1 !important;
+display: inline-flex;
+visibility: visible;
+opacity: 1;
 }
 
 .cta {
@@ -231,9 +231,9 @@ border-radius: 12px;
 font-weight: 700;
 border: 0;
 cursor: pointer;
-background: linear-gradient(90deg, #00bfff, #0099cc) !important;
-color: #ffffff !important;
-box-shadow: 0 4px 12px rgba(0, 191, 255, 0.4) !important;
+background: linear-gradient(90deg, #00bfff, #0099cc);
+color: #ffffff;
+box-shadow: 0 4px 12px rgba(0, 191, 255, 0.4);
 transition: transform .15s ease;
 }
 .btn:active { transform: translateY(1px); }
@@ -253,23 +253,23 @@ transition: transform .2s ease, box-shadow .2s ease;
 .btn.btn-social svg { width: 20px; height: 20px; }
 
 .btn.btn-fb {
-background: #1877F2 !important;
-color: #fff !important;
-box-shadow: 0 4px 12px rgba(24, 119, 242, .35) !important;
+background: #1877F2;
+color: #fff;
+box-shadow: 0 4px 12px rgba(24, 119, 242, .35);
 }
 .btn.btn-ig {
-background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888) !important;
-color: #fff !important;
-box-shadow: 0 4px 12px rgba(225, 48, 108, .35) !important;
+background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+color: #fff;
+box-shadow: 0 4px 12px rgba(225, 48, 108, .35);
 }
 
 .btn.primary {
-background: linear-gradient(90deg, var(--brand) 0%, var(--brand-2) 100%) !important;
-color: #001018 !important;
+background: linear-gradient(90deg, var(--brand) 0%, var(--brand-2) 100%);
+color: #001018;
 font-weight: 800;
 padding: .7rem .95rem;
 border-radius: 12px;
-box-shadow: 0 4px 12px rgba(25, 211, 255, 0.4) !important;
+box-shadow: 0 4px 12px rgba(25, 211, 255, 0.4);
 }
 
 @media (max-width: 360px) {
@@ -878,10 +878,10 @@ flex-wrap: wrap;
 .actions .btn {
 min-width: 0;
 flex: 0 1 auto;
-background: linear-gradient(90deg, #00bfff, #0099cc) !important;
-color: #ffffff !important;
-border: none !important;
-box-shadow: 0 4px 12px rgba(0, 191, 255, 0.4) !important;
+background: linear-gradient(90deg, #00bfff, #0099cc);
+color: #ffffff;
+border: none;
+box-shadow: 0 4px 12px rgba(0, 191, 255, 0.4);
 }
 
 @media (max-width: 560px) {
@@ -3156,7 +3156,7 @@ transform: translateY(-2px);
 .pdp-feature:hover {
     border-color: rgba(139, 92, 246, 0.6);
     box-shadow: 0 0 30px rgba(139, 92, 246, 0.25), 0 8px 30px rgba(0,0,0,.3);
-    transform: translateY(-4px) scale(1.03) !important;
+    transform: translateY(-4px) scale(1.03);
 }
 .pdp-feature__icon {
     flex-shrink: 0;
@@ -3251,33 +3251,33 @@ transform: translateY(-2px);
 }
 /* Primary — violet gradient */
 .pdp-landing__actions .btn--lg.primary {
-    background: linear-gradient(135deg, #8B5CF6, #A855F7) !important;
-    color: #fff !important;
-    box-shadow: 0 0 24px rgba(139, 92, 246, 0.4), 0 4px 16px rgba(0,0,0,.3) !important;
+    background: linear-gradient(135deg, #8B5CF6, #A855F7);
+    color: #fff;
+    box-shadow: 0 0 24px rgba(139, 92, 246, 0.4), 0 4px 16px rgba(0,0,0,.3);
 }
 .pdp-landing__actions .btn--lg.primary:hover {
-    box-shadow: 0 0 40px rgba(139, 92, 246, 0.6), 0 8px 24px rgba(0,0,0,.4) !important;
+    box-shadow: 0 0 40px rgba(139, 92, 246, 0.6), 0 8px 24px rgba(0,0,0,.4);
 }
 /* WhatsApp — green */
 .pdp-landing__actions .btn--lg.btn-wa {
-    background: linear-gradient(135deg, #25d366, #128c7e) !important;
-    color: #fff !important;
-    box-shadow: 0 0 20px rgba(37, 211, 102, 0.3), 0 4px 16px rgba(0,0,0,.3) !important;
+    background: linear-gradient(135deg, #25d366, #128c7e);
+    color: #fff;
+    box-shadow: 0 0 20px rgba(37, 211, 102, 0.3), 0 4px 16px rgba(0,0,0,.3);
 }
 .pdp-landing__actions .btn--lg.btn-wa:hover {
-    box-shadow: 0 0 36px rgba(37, 211, 102, 0.5), 0 8px 24px rgba(0,0,0,.4) !important;
+    box-shadow: 0 0 36px rgba(37, 211, 102, 0.5), 0 8px 24px rgba(0,0,0,.4);
 }
 /* Share — outline style */
 .pdp-landing__actions .btn--lg:not(.primary):not(.btn-wa) {
-    background: rgba(255,255,255,.06) !important;
-    color: #e6edf5 !important;
-    border: 1.5px solid rgba(139, 92, 246, 0.4) !important;
-    box-shadow: 0 0 12px rgba(139, 92, 246, 0.15), 0 4px 12px rgba(0,0,0,.2) !important;
+    background: rgba(255,255,255,.06);
+    color: #e6edf5;
+    border: 1.5px solid rgba(139, 92, 246, 0.4);
+    box-shadow: 0 0 12px rgba(139, 92, 246, 0.15), 0 4px 12px rgba(0,0,0,.2);
 }
 .pdp-landing__actions .btn--lg:not(.primary):not(.btn-wa):hover {
-    background: rgba(139, 92, 246, 0.1) !important;
-    border-color: rgba(139, 92, 246, 0.6) !important;
-    box-shadow: 0 0 28px rgba(139, 92, 246, 0.3), 0 8px 24px rgba(0,0,0,.3) !important;
+    background: rgba(139, 92, 246, 0.1);
+    border-color: rgba(139, 92, 246, 0.6);
+    box-shadow: 0 0 28px rgba(139, 92, 246, 0.3), 0 8px 24px rgba(0,0,0,.3);
 }
 
 /* ── AVIS CLIENTS ── */
@@ -3462,11 +3462,11 @@ transform: translateY(-2px);
 }
 .pdp-reviews__submit {
     align-self: flex-start;
-    background: linear-gradient(135deg, #8B5CF6, #A855F7) !important;
-    color: #fff !important;
-    box-shadow: 0 0 24px rgba(139, 92, 246, 0.4), 0 4px 16px rgba(0,0,0,.3) !important;
-    padding: .85rem 2rem !important;
-    border: none !important;
+    background: linear-gradient(135deg, #8B5CF6, #A855F7);
+    color: #fff;
+    box-shadow: 0 0 24px rgba(139, 92, 246, 0.4), 0 4px 16px rgba(0,0,0,.3);
+    padding: .85rem 2rem;
+    border: none;
     border-radius: 14px;
     font-size: 1rem;
     font-weight: 700;
@@ -3475,7 +3475,7 @@ transform: translateY(-2px);
 }
 .pdp-reviews__submit:hover {
     transform: translateY(-2px);
-    box-shadow: 0 0 40px rgba(139, 92, 246, 0.6), 0 8px 24px rgba(0,0,0,.4) !important;
+    box-shadow: 0 0 40px rgba(139, 92, 246, 0.6), 0 8px 24px rgba(0,0,0,.4);
 }
 .pdp-reviews__empty {
     text-align: center;
@@ -4216,10 +4216,10 @@ transition: transform .15s ease;
 .dock__btn--tools,
 .dock__btn--account,
 .dock__btn--cart {
-background: rgba(255,255,255,.06) !important;
-color: #e6edf5 !important;
-border: 1.5px solid rgba(139, 92, 246, 0.35) !important;
-box-shadow: 0 0 10px rgba(139, 92, 246, 0.12) !important;
+background: rgba(255,255,255,.06);
+color: #e6edf5;
+border: 1.5px solid rgba(139, 92, 246, 0.35);
+box-shadow: 0 0 10px rgba(139, 92, 246, 0.12);
 }
 
 .dock__btn--cart {
@@ -4227,17 +4227,17 @@ position: relative;
 }
 
 .dock__btn--call {
-background: linear-gradient(135deg, #8B5CF6, #A855F7) !important;
-color: #fff !important;
-border: none !important;
-box-shadow: 0 0 16px rgba(139, 92, 246, 0.35) !important;
+background: linear-gradient(135deg, #8B5CF6, #A855F7);
+color: #fff;
+border: none;
+box-shadow: 0 0 16px rgba(139, 92, 246, 0.35);
 }
 
 .dock__btn--wa {
-background: linear-gradient(135deg, #25d366, #128c7e) !important;
-color: #fff !important;
-border: none !important;
-box-shadow: 0 0 16px rgba(37, 211, 102, 0.3) !important;
+background: linear-gradient(135deg, #25d366, #128c7e);
+color: #fff;
+border: none;
+box-shadow: 0 0 16px rgba(37, 211, 102, 0.3);
 }
 
 .dock__badge {
@@ -4769,7 +4769,7 @@ width: 100%;
 
 }
 
-/* ========== 30) FOOTER ========== */
+/* ========== 31) FOOTER ========== */
 .site-footer {
   background: #0a0f14;
   border-top: 1px solid rgba(139, 92, 246, 0.2);
@@ -4884,7 +4884,7 @@ width: 100%;
   opacity: .7;
 }
 
-/* ========== 31) PATCHES & ANCRAGES ========== */
+/* ========== 32) PATCHES & ANCRAGES ========== */
 #a2hsTip { pointer-events: auto; z-index: 125; }
 #a2hsTip, #a2hsTriangle { bottom: calc(96px + var(--safe-bottom)); }
 #list, #contact, #pdp, #view-catalogue, #view-devis, #view-compte {
@@ -5004,12 +5004,12 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 /* Danger card */
 .acc-danger { border-color: rgba(244,67,54,.25); }
 .acc-logout-btn {
-  background: rgba(244,67,54,.15) !important;
-  color: #f44 !important;
-  border: 1px solid rgba(244,67,54,.3) !important;
+  background: rgba(244,67,54,.15);
+  color: #f44;
+  border: 1px solid rgba(244,67,54,.3);
 }
 .acc-logout-btn:hover {
-  background: rgba(244,67,54,.25) !important;
+  background: rgba(244,67,54,.25);
 }
 
 @media (max-width: 560px) {
@@ -6041,9 +6041,9 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 }
 
 .admin-login__hint {
-  margin-top: 1rem !important;
-  font-size: .78rem !important;
-  color: rgba(230, 237, 245, 0.45) !important;
+  margin-top: 1rem;
+  font-size: .78rem;
+  color: rgba(230, 237, 245, 0.45);
 }
 
 .admin-login__hint code {
@@ -6559,7 +6559,7 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   }
 }
 
-/* ========== 31) TERRITORY SELECTOR (DOM-TOM) ========== */
+/* ========== 33) TERRITORY SELECTOR (DOM-TOM) ========== */
 .terr-wrap { position: relative; display: inline-flex; }
 .terr-btn {
   display: inline-flex; align-items: center; gap: 6px;
@@ -6626,7 +6626,7 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   .terr-btn__label { max-width: 90px; }
 }
 
-/* ========== 32) PDP PRICE BREAKDOWN ========== */
+/* ========== 34) PDP PRICE BREAKDOWN ========== */
 .pdp-price__breakdown {
   margin-top: 10px;
   font-size: 13px;
@@ -6667,7 +6667,7 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   font-weight: 700;
 }
 
-/* ========== 33) PRODUCT DOM-TOM BADGES ========== */
+/* ========== 35) PRODUCT DOM-TOM BADGES ========== */
 .pt-badges {
   position: absolute;
   top: 10px;
@@ -6735,7 +6735,7 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .pdp-more[open] summary::before { transform: rotate(90deg); }
 .pdp-more p { margin: 12px 0 0; color: #cdd6e0; line-height: 1.6; }
 
-/* ========== 35) TERRITORY LANDING VIEW ========== */
+/* ========== 36) TERRITORY LANDING VIEW ========== */
 .terr-view { padding: 24px 16px 60px; }
 .terr-view__hero {
   text-align: center;
@@ -6813,7 +6813,7 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .faq-item[open] summary::after { transform: rotate(45deg); }
 .faq-item p { margin: 10px 0 0; color: #cdd6e0; line-height: 1.55; }
 
-/* ========== 38) CONSENT BAR ========== */
+/* ========== 37) CONSENT BAR ========== */
 .consent-bar {
   position: fixed;
   left: 16px;
@@ -6849,7 +6849,7 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   .consent-bar__inner { padding: 12px 14px; }
 }
 
-/* ========== 36) WHATSAPP FLOATING BUTTON ========== */
+/* ========== 38) WHATSAPP FLOTTANT ========== */
 .wa-float {
   position: fixed;
   right: 18px;
@@ -6885,7 +6885,7 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   .wa-float { padding: 12px 14px; }
 }
 
-/* ========== 37) DEVIS LOYALTY BANNER ========== */
+/* ========== 39) DEVIS FIDÉLITÉ ========== */
 .devis-loyalty {
   display: flex;
   align-items: center;
@@ -6923,7 +6923,7 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   transition: width .4s ease;
 }
 
-/* ========== 39) DEVIS SHIPPING ESTIMATE ========== */
+/* ========== 40) DEVIS LIVRAISON ========== */
 .devis-shipping {
   display: flex;
   align-items: center;
@@ -6941,7 +6941,7 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .devis-shipping__value { color: #8B5CF6; font-weight: 700; }
 .devis-shipping__delay { color: #cdd6e0; font-size: 12px; }
 
-/* ========== 34) LOCAL PRICE COMPARE ========== */
+/* ========== 41) COMPARATEUR PRIX LOCAL ========== */
 .pt-local-compare {
   display: flex;
   align-items: center;
@@ -6965,7 +6965,7 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   font-weight: 700;
 }
 
-/* ========== 40) STRIPE ELEMENTS ========== */
+/* ========== 42) STRIPE ELEMENTS ========== */
 .stripe-elements-wrap {
   margin-bottom: 16px;
 }
