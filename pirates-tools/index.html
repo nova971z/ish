@@ -20,7 +20,7 @@
   <link rel="canonical" href="https://nova971z.github.io/ish/">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=279">
+  <link rel="stylesheet" href="styles.css?v=280">
 
   <!-- 3D model viewer -->
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
@@ -210,7 +210,7 @@
         <img
           id="topbarLogo"
           class="topbar-logo"
-          src="icons/icon-192.png?v=279"
+          src="icons/icon-192.png?v=280"
           alt="Pirates Tools"
           width="40" height="40"
           decoding="async" loading="eager" fetchpriority="high" />
@@ -237,8 +237,8 @@
   <section id="hero" class="hero-full" aria-hidden="true">
     <div class="hero-logo-container initial" id="heroLogoContainer">
       <img id="heroLogo" class="hero-logo on" alt="Pirates Tools"
-        src="icons/icon-512.png?v=279"
-        srcset="icons/icon-256.png?v=279 256w, icons/icon-384.png?v=279 384w, icons/icon-512.png?v=279 512w"
+        src="icons/icon-512.png?v=280"
+        srcset="icons/icon-256.png?v=280 256w, icons/icon-384.png?v=280 384w, icons/icon-512.png?v=280 512w"
         sizes="(max-width: 768px) 90vw, 60vw"
         width="600" height="600"
         decoding="async" loading="eager" fetchpriority="high" />
@@ -1270,10 +1270,22 @@
 
   <!-- =================== FLOATING WHATSAPP =================== -->
   <a id="waFloat" class="wa-float" href="https://wa.me/33744776598"
-     target="_blank" rel="noopener noreferrer" aria-label="Contacter sur WhatsApp">
+     target="_blank" rel="noopener noreferrer" aria-label="Contacter sur WhatsApp"
+     data-action="wa-float">
     <span class="wa-float__icon" aria-hidden="true">💬</span>
     <span class="wa-float__label">WhatsApp</span>
   </a>
+
+  <!-- =================== CONSENT BAR =================== -->
+  <div id="consentBar" class="consent-bar" role="dialog" aria-label="Consentement analytics" hidden>
+    <p class="consent-bar__text">
+      Nous utilisons des cookies pour mesurer l'audience et améliorer l'expérience. Aucun cookie n'est déposé sans votre accord.
+    </p>
+    <div class="consent-bar__actions">
+      <button type="button" class="btn" data-consent="deny">Refuser</button>
+      <button type="button" class="btn primary" data-consent="accept">Accepter</button>
+    </div>
+  </div>
 
   <!-- =================== DOCK =================== -->
   <nav id="dock" class="dock" aria-label="Barre d'action">
@@ -1444,7 +1456,7 @@
     document.getElementById('dbgClose').addEventListener('click',function(){panel.style.display='none'});
   })();
   </script>
-  <script defer src="app.js?v=279"></script>
+  <script defer src="app.js?v=280"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

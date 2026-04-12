@@ -6738,6 +6738,37 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .faq-item[open] summary::after { transform: rotate(45deg); }
 .faq-item p { margin: 10px 0 0; color: #cdd6e0; line-height: 1.55; }
 
+/* ========== 38) CONSENT BAR ========== */
+.consent-bar {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0));
+  z-index: 9700;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding: 14px 18px;
+  background: #0f1722;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 16px;
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.5);
+  color: #e6edf5;
+  font-size: 13px;
+  flex-wrap: wrap;
+}
+.consent-bar[hidden] { display: none; }
+.consent-bar__text { flex: 1; min-width: 220px; margin: 0; line-height: 1.45; }
+.consent-bar__actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.consent-bar .btn { padding: 8px 16px; font-size: 13px; }
+
+@media (max-width: 640px) {
+  .consent-bar {
+    bottom: calc(96px + env(safe-area-inset-bottom, 0));
+    padding: 12px 14px;
+  }
+}
+
 /* ========== 36) WHATSAPP FLOATING BUTTON ========== */
 .wa-float {
   position: fixed;

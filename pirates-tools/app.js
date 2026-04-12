@@ -131,6 +131,7 @@
     try {
       document.dispatchEvent(new CustomEvent('pt:territory-change', { detail:{ code: code } }));
     } catch (_) {}
+    if (typeof track === 'function') track('territory_change', { code: code });
   }
 
   function updateTerritoryLabels() {
@@ -229,6 +230,70 @@
       ? product.price_ht
       : (product.price / (1 + (product.vat || 0.2))));
     return ht * 1.60;
+  }
+
+  // ── Analytics (GA4 / Meta Pixel) + consent ─────────────────
+  //
+  // We load nothing third-party until the visitor explicitly accepts. Until
+  // then, events are buffered in-memory (and mirrored in dataLayer in case a
+  // tag manager is already present on the page).
+  var ANALYTICS = { ga4Id: '', metaPixelId: '' };
+  var ANALYTICS_CONSENT_KEY = 'pt:analytics-consent';
+  var _consent = null;
+  var _analyticsQueue = [];
+
+  function loadConsent() {
+    try { _consent = localStorage.getItem(ANALYTICS_CONSENT_KEY); }
+    catch (_) { _consent = null; }
+  }
+  function saveConsent(value) {
+    try { localStorage.setItem(ANALYTICS_CONSENT_KEY, value); } catch (_) {}
+    _consent = value;
+  }
+  function hasConsent() { return _consent === 'granted'; }
+
+  function track(eventName, params) {
+    var payload = { event: eventName };
+    if (params && typeof params === 'object') {
+      for (var k in params) if (Object.prototype.hasOwnProperty.call(params, k)) payload[k] = params[k];
+    }
+    // Always buffer + dataLayer (cheap and dev-useful)
+    _analyticsQueue.push(payload);
+    try {
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push(payload);
+    } catch (_) {}
+    if (!hasConsent()) return;
+    // GA4 via gtag if a tag is installed
+    try { if (typeof window.gtag === 'function') window.gtag('event', eventName, params || {}); } catch (_) {}
+    // Meta Pixel
+    try { if (typeof window.fbq === 'function') window.fbq('trackCustom', eventName, params || {}); } catch (_) {}
+  }
+
+  function setupWaFloat() {
+    var el = document.getElementById('waFloat');
+    if (!el || el._bound) return;
+    el._bound = true;
+    el.addEventListener('click', function () {
+      track('whatsapp_click', { source: 'float' });
+    });
+  }
+
+  function setupConsentBar() {
+    if (_consent) return; // already decided
+    var bar = document.getElementById('consentBar');
+    if (!bar) return;
+    bar.hidden = false;
+    bar.addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-consent]');
+      if (!btn) return;
+      var value = btn.getAttribute('data-consent');
+      saveConsent(value === 'accept' ? 'granted' : 'denied');
+      bar.hidden = true;
+      if (value === 'accept') {
+        track('consent_granted', { timestamp: Date.now() });
+      }
+    });
   }
 
   // ── Loyalty tiers ──────────────────────────────────────────
@@ -484,7 +549,7 @@
         + ' exposure="1.1"'
         + '><img slot="poster" src="' + imgSrc + '" alt="' + alt + '" loading="lazy" /></model-viewer>';
     }
-    return '<img src="' + imgSrc + '" alt="' + alt + '" loading="lazy" class="product-card__img">';
+    return '<img src="' + imgSrc + '" alt="' + alt + '" loading="lazy" decoding="async" class="product-card__img">';
   }
 
   function addToCart(item) {
@@ -510,6 +575,9 @@
     saveCart(items);
     pulseDock();
     toast('Ajouté au panier', 'success');
+    if (typeof track === 'function') {
+      track('add_to_quote', { id: item.id || item.slug, name: item.title, price: item.price });
+    }
   }
 
   function removeFromCart(index) {
@@ -596,7 +664,7 @@
       totalQty += qty;
       return '<div class="devis-item" data-idx="' + idx + '" style="animation-delay:' + (idx * 60) + 'ms">'
         + '<div class="devis-item__img-wrap">'
-        + '<img src="' + escapeHTML(item.image || 'images/placeholder.svg') + '" alt="" class="devis-item__img" loading="lazy">'
+        + '<img src="' + escapeHTML(item.image || 'images/placeholder.svg') + '" alt="" class="devis-item__img" loading="lazy" decoding="async">'
         + '</div>'
         + '<div class="devis-item__body">'
         + '<div class="devis-item__info">'
@@ -1092,7 +1160,7 @@
       return '<button class="brand-card" data-brand="' + escapeHTML(b) + '" style="animation-delay:' + (i * 70) + 'ms">'
         + '<div class="brand-card__ring">'
         + '<div class="brand-card__bubble" data-brand-sphere="' + escapeHTML(b) + '" data-logo="' + escapeHTML(img) + '">'
-        + '<img class="brand-card__logo brand-card__logo--fallback" src="' + escapeHTML(img) + '" alt="' + escapeHTML(b) + '" loading="lazy">'
+        + '<img class="brand-card__logo brand-card__logo--fallback" src="' + escapeHTML(img) + '" alt="' + escapeHTML(b) + '" loading="lazy" decoding="async">'
         + '</div>'
         + '</div>'
         + '<span class="brand-card__name">' + escapeHTML(b) + '</span>'
@@ -1253,6 +1321,9 @@
     );
     injectProductJsonLd(product);
     addRecentlyViewed(product.id);
+    if (typeof track === 'function') {
+      track('view_item', { id: product.id, name: product.title, brand: product.brand, price: product.price });
+    }
 
     // 3D model viewer — hero (plein ecran)
     var viewer = document.getElementById('pdp3d');
@@ -1402,7 +1473,7 @@
         dom.pdpRelated.innerHTML = '<h3>Produits similaires</h3><div class="related-grid">'
           + related.map(function (rp) {
             return '<a class="product-card product-card--sm" href="#/produit/' + escapeHTML(rp.slug || rp.id) + '">'
-              + '<img src="' + escapeHTML(rp.img || 'images/placeholder.svg') + '" alt="' + escapeHTML(rp.title) + '" loading="lazy">'
+              + '<img src="' + escapeHTML(rp.img || 'images/placeholder.svg') + '" alt="' + escapeHTML(rp.title) + '" loading="lazy" decoding="async">'
               + '<span>' + escapeHTML(rp.title) + '</span>'
               + '<span class="product-card__price">' + formatPrice(rp.price) + '</span>'
               + '</a>';
@@ -2767,6 +2838,14 @@
 
     // Update <title> + meta description for SEO
     updateRouteMeta(route, parsed);
+
+    // Analytics : page view + territory view
+    if (typeof track === 'function') {
+      track('page_view', { route: route, slug: parsed.slug || null });
+      if (route === '/territoire' && parsed.slug) {
+        track('view_territory', { code: territoryCodeFromSlug(parsed.slug) });
+      }
+    }
   }
 
   // ── Hero logo scroll animation (lerp 60fps) ────────────────
@@ -4363,7 +4442,7 @@
       var price = Number(p.price || 0).toFixed(2);
       return '<div class="admin-row" data-product-id="' + id + '">'
         + '<div class="admin-row__head">'
-        + '<img src="' + escapeHTML(p.img || 'images/placeholder.svg') + '" alt="" class="admin-row__img" loading="lazy">'
+        + '<img src="' + escapeHTML(p.img || 'images/placeholder.svg') + '" alt="" class="admin-row__img" loading="lazy" decoding="async">'
         + '<div class="admin-row__info">'
         + '<span class="admin-row__brand">' + escapeHTML(p.brand || '') + '</span>'
         + '<strong class="admin-row__title">' + escapeHTML(p.title || '') + '</strong>'
@@ -5171,7 +5250,10 @@
   function init() {
     cacheDom();
     loadTerritory();
+    loadConsent();
     setupTerritorySelector();
+    setupConsentBar();
+    setupWaFloat();
     bindEvents();
     setupAccountTabs();
     setupRevealAnimations();
