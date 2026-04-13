@@ -4568,6 +4568,7 @@
       + '<button type="button" class="admin-tab is-active" data-admin-tab="products" role="tab" aria-selected="true">Produits</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="orders" role="tab" aria-selected="false">Commandes</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="tools" role="tab" aria-selected="false">Outils</button>'
+      + '<button type="button" class="admin-tab" data-admin-tab="instagram" role="tab" aria-selected="false">Instagram</button>'
       + '</nav>'
 
       + '<div class="admin-pane is-active" data-admin-pane="products">'
@@ -4599,6 +4600,83 @@
       + '<pre id="adminHealthOutput" class="admin-health-output" hidden></pre>'
       + '</div>'
 
+      + '<div class="admin-pane" data-admin-pane="instagram" hidden>'
+
+      + '<div class="ig-admin">'
+
+      // ─ Account info section
+      + '<div class="ig-section ig-account">'
+      + '<h2 class="admin-subtitle">Compte Instagram</h2>'
+      + '<p class="admin-hint">Informations du compte Instagram Business lié.</p>'
+      + '<button type="button" class="btn btn--primary" id="igLoadAccount" aria-label="Charger le compte Instagram">Charger le compte</button>'
+      + '<div id="igAccountInfo" class="ig-account-info" hidden></div>'
+      + '</div>'
+
+      // ─ Token management
+      + '<div class="ig-section ig-token">'
+      + '<h2 class="admin-subtitle">Token d\'accès</h2>'
+      + '<p class="admin-hint">Échange le token court (1h) contre un token longue durée (60 jours). Après l\'échange, copie le nouveau token et mets-le à jour dans Vercel → Environment Variables → META_ACCESS_TOKEN.</p>'
+      + '<button type="button" class="btn btn--ghost" id="igExchangeToken" aria-label="Échanger le token">Échanger pour token 60 jours</button>'
+      + '<div id="igTokenResult" class="ig-token-result" hidden></div>'
+      + '</div>'
+
+      // ─ Posts gallery
+      + '<div class="ig-section ig-media">'
+      + '<h2 class="admin-subtitle">Publications</h2>'
+      + '<p class="admin-hint">Dernières publications Instagram. Clique sur un post pour voir les commentaires.</p>'
+      + '<button type="button" class="btn btn--ghost" id="igLoadMedia" aria-label="Charger les publications">Charger les posts</button>'
+      + '<div id="igMediaGrid" class="ig-media-grid"></div>'
+      + '</div>'
+
+      // ─ New post (draft + publish)
+      + '<div class="ig-section ig-publish">'
+      + '<h2 class="admin-subtitle">Nouveau post</h2>'
+      + '<p class="admin-hint">Crée un post Instagram. L\'image doit être une URL publique (hébergée en ligne). Le post sera d\'abord créé en brouillon — tu devras confirmer la publication.</p>'
+      + '<form id="igPublishForm" class="ig-publish-form">'
+      + '<label class="admin-field"><span>URL de l\'image</span>'
+      + '<input type="url" id="igImageUrl" placeholder="https://example.com/image.jpg" required></label>'
+      + '<label class="admin-field"><span>Légende / Caption</span>'
+      + '<textarea id="igCaption" rows="4" placeholder="Nouvelle offre Pirates Tools ! 🏴‍☠️&#10;#PiratesTools #Guadeloupe #Outillage"></textarea></label>'
+      + '<div class="ig-publish-preview" id="igPreview" hidden>'
+      + '<img id="igPreviewImg" src="" alt="Aperçu" class="ig-preview-img">'
+      + '<p id="igPreviewCaption" class="ig-preview-caption"></p>'
+      + '</div>'
+      + '<div class="ig-publish-actions">'
+      + '<button type="button" class="btn btn--ghost" id="igPreviewBtn">Aperçu</button>'
+      + '<button type="submit" class="btn btn--primary" id="igPublishBtn" disabled>Créer le brouillon</button>'
+      + '</div>'
+      + '<span id="igPublishStatus" class="admin-row__status" aria-live="polite"></span>'
+      + '</form>'
+      + '<div id="igDraftConfirm" class="ig-draft-confirm" hidden>'
+      + '<p class="ig-draft-msg">Brouillon créé ! Confirme la publication :</p>'
+      + '<button type="button" class="btn btn--primary" id="igConfirmPublish" aria-label="Confirmer la publication">Publier maintenant</button>'
+      + '<button type="button" class="btn btn--ghost" id="igCancelPublish">Annuler</button>'
+      + '<span id="igConfirmStatus" class="admin-row__status" aria-live="polite"></span>'
+      + '</div>'
+      + '</div>'
+
+      // ─ Comments viewer
+      + '<div class="ig-section ig-comments">'
+      + '<h2 class="admin-subtitle">Commentaires</h2>'
+      + '<p class="admin-hint">Sélectionne un post ci-dessus pour voir ses commentaires, ou entre un Media ID manuellement.</p>'
+      + '<div class="ig-comments-lookup">'
+      + '<input type="text" id="igMediaIdInput" placeholder="Media ID" class="ig-media-id-input">'
+      + '<button type="button" class="btn btn--ghost" id="igLoadComments" aria-label="Charger les commentaires">Charger</button>'
+      + '</div>'
+      + '<div id="igCommentsList" class="ig-comments-list"></div>'
+      + '</div>'
+
+      // ─ Insights
+      + '<div class="ig-section ig-insights">'
+      + '<h2 class="admin-subtitle">Statistiques</h2>'
+      + '<p class="admin-hint">Impressions, portée et visites profil (derniers 30 jours).</p>'
+      + '<button type="button" class="btn btn--ghost" id="igLoadInsights" aria-label="Charger les statistiques">Charger les stats</button>'
+      + '<div id="igInsightsData" class="ig-insights-data"></div>'
+      + '</div>'
+
+      + '</div>' // .ig-admin
+      + '</div>' // admin-pane instagram
+
       + '</div>';
 
     var logoutBtn = document.getElementById('adminLogoutBtn');
@@ -4624,6 +4702,7 @@
           p.hidden = !active;
         });
         if (target === 'orders') loadAdminOrders();
+        if (target === 'instagram') initAdminInstagram();
       });
     });
 
@@ -4864,6 +4943,385 @@
       + '<p class="admin-login__hint">La clé doit correspondre à la variable <code>ADMIN_SECRET</code> sur Vercel.</p>'
       + '</div>'
       + '</div>';
+  }
+
+  // ── Instagram Admin ──────────────────────────────────────────
+  var _igDraftCreationId = null;
+
+  function igApiFetch(action, method, body) {
+    var apiBase = (typeof window.PT_API_BASE === 'string') ? (window.PT_API_BASE || '') : '';
+    var url = apiBase + '/api/instagram?action=' + encodeURIComponent(action);
+    var opts = {
+      method: method || 'GET',
+      headers: { 'X-Admin-Secret': getAdminSecret() }
+    };
+    if (body && method === 'POST') {
+      opts.headers['Content-Type'] = 'application/json';
+      opts.body = JSON.stringify(body);
+    }
+    return fetch(url, opts)
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, data: j }; }); });
+  }
+
+  function initAdminInstagram() {
+    // ─ Account info
+    var loadAccBtn = document.getElementById('igLoadAccount');
+    if (loadAccBtn && !loadAccBtn._igBound) {
+      loadAccBtn._igBound = true;
+      loadAccBtn.addEventListener('click', function () {
+        loadAccBtn.disabled = true;
+        loadAccBtn.textContent = 'Chargement…';
+        igApiFetch('account', 'GET').then(function (res) {
+          loadAccBtn.disabled = false;
+          loadAccBtn.textContent = 'Charger le compte';
+          var infoEl = document.getElementById('igAccountInfo');
+          if (!infoEl) return;
+          if (!res.ok || !res.data.ok) {
+            infoEl.hidden = false;
+            infoEl.innerHTML = '<p class="ig-error">' + escapeHTML(res.data.error || 'Erreur') + '</p>';
+            return;
+          }
+          var a = res.data.account;
+          infoEl.hidden = false;
+          infoEl.innerHTML = '<div class="ig-account-card">'
+            + (a.profile_picture_url ? '<img src="' + escapeHTML(a.profile_picture_url) + '" alt="Photo de profil" class="ig-avatar">' : '')
+            + '<div class="ig-account-details">'
+            + '<strong class="ig-username">@' + escapeHTML(a.username || '') + '</strong>'
+            + (a.name ? '<span class="ig-name">' + escapeHTML(a.name) + '</span>' : '')
+            + '<div class="ig-stats">'
+            + '<span>' + (a.followers_count || 0) + ' abonnés</span>'
+            + '<span>' + (a.follows_count || 0) + ' abonnements</span>'
+            + '<span>' + (a.media_count || 0) + ' publications</span>'
+            + '</div>'
+            + (a.biography ? '<p class="ig-bio">' + escapeHTML(a.biography) + '</p>' : '')
+            + '</div></div>';
+        }).catch(function (err) {
+          loadAccBtn.disabled = false;
+          loadAccBtn.textContent = 'Charger le compte';
+          var infoEl = document.getElementById('igAccountInfo');
+          if (infoEl) { infoEl.hidden = false; infoEl.innerHTML = '<p class="ig-error">Réseau : ' + escapeHTML(err.message) + '</p>'; }
+        });
+      });
+    }
+
+    // ─ Token exchange
+    var exchangeBtn = document.getElementById('igExchangeToken');
+    if (exchangeBtn && !exchangeBtn._igBound) {
+      exchangeBtn._igBound = true;
+      exchangeBtn.addEventListener('click', function () {
+        exchangeBtn.disabled = true;
+        exchangeBtn.textContent = 'Échange en cours…';
+        igApiFetch('exchange-token', 'GET').then(function (res) {
+          exchangeBtn.disabled = false;
+          exchangeBtn.textContent = 'Échanger pour token 60 jours';
+          var resultEl = document.getElementById('igTokenResult');
+          if (!resultEl) return;
+          resultEl.hidden = false;
+          if (!res.ok || !res.data.ok) {
+            resultEl.innerHTML = '<p class="ig-error">' + escapeHTML(res.data.error || 'Erreur') + '</p>';
+            return;
+          }
+          resultEl.innerHTML = '<div class="ig-token-card">'
+            + '<p class="ig-token-success">Token longue durée généré (' + (res.data.expires_in_days || '?') + ' jours)</p>'
+            + '<p class="admin-hint">Copie ce token et mets-le à jour sur Vercel :</p>'
+            + '<textarea class="ig-token-textarea" rows="3" readonly onclick="this.select()">' + escapeHTML(res.data.access_token || '') + '</textarea>'
+            + '<p class="admin-hint">Vercel → Settings → Environment Variables → META_ACCESS_TOKEN → Edit → Colle → Save</p>'
+            + '</div>';
+        }).catch(function (err) {
+          exchangeBtn.disabled = false;
+          exchangeBtn.textContent = 'Échanger pour token 60 jours';
+          var resultEl = document.getElementById('igTokenResult');
+          if (resultEl) { resultEl.hidden = false; resultEl.innerHTML = '<p class="ig-error">Réseau : ' + escapeHTML(err.message) + '</p>'; }
+        });
+      });
+    }
+
+    // ─ Load media
+    var loadMediaBtn = document.getElementById('igLoadMedia');
+    if (loadMediaBtn && !loadMediaBtn._igBound) {
+      loadMediaBtn._igBound = true;
+      loadMediaBtn.addEventListener('click', igLoadMedia);
+    }
+
+    // ─ Publish form: preview
+    var previewBtn = document.getElementById('igPreviewBtn');
+    var publishBtn = document.getElementById('igPublishBtn');
+    if (previewBtn && !previewBtn._igBound) {
+      previewBtn._igBound = true;
+      previewBtn.addEventListener('click', function () {
+        var imgUrl = (document.getElementById('igImageUrl').value || '').trim();
+        var caption = (document.getElementById('igCaption').value || '').trim();
+        var previewEl = document.getElementById('igPreview');
+        var previewImg = document.getElementById('igPreviewImg');
+        var previewCap = document.getElementById('igPreviewCaption');
+        if (!imgUrl) { toast('Ajoute une URL d\'image', 'error'); return; }
+        if (previewEl) previewEl.hidden = false;
+        if (previewImg) previewImg.src = imgUrl;
+        if (previewCap) previewCap.textContent = caption || '(pas de légende)';
+        if (publishBtn) publishBtn.disabled = false;
+      });
+    }
+
+    // ─ Publish form: create draft
+    var publishForm = document.getElementById('igPublishForm');
+    if (publishForm && !publishForm._igBound) {
+      publishForm._igBound = true;
+      publishForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var imgUrl = (document.getElementById('igImageUrl').value || '').trim();
+        var caption = (document.getElementById('igCaption').value || '').trim();
+        var statusEl = document.getElementById('igPublishStatus');
+        if (!imgUrl) return;
+        if (publishBtn) publishBtn.disabled = true;
+        if (statusEl) { statusEl.textContent = 'Création du brouillon…'; statusEl.className = 'admin-row__status'; }
+
+        igApiFetch('publish-start', 'POST', { image_url: imgUrl, caption: caption })
+          .then(function (res) {
+            if (!res.ok || !res.data.ok) {
+              if (statusEl) { statusEl.textContent = 'Erreur : ' + (res.data.error || 'Inconnue'); statusEl.className = 'admin-row__status admin-row__status--err'; }
+              if (publishBtn) publishBtn.disabled = false;
+              return;
+            }
+            _igDraftCreationId = res.data.creation_id;
+            if (statusEl) { statusEl.textContent = 'Brouillon prêt !'; statusEl.className = 'admin-row__status admin-row__status--ok'; }
+            var draftEl = document.getElementById('igDraftConfirm');
+            if (draftEl) draftEl.hidden = false;
+          })
+          .catch(function (err) {
+            if (statusEl) { statusEl.textContent = 'Réseau : ' + err.message; statusEl.className = 'admin-row__status admin-row__status--err'; }
+            if (publishBtn) publishBtn.disabled = false;
+          });
+      });
+    }
+
+    // ─ Confirm publish
+    var confirmBtn = document.getElementById('igConfirmPublish');
+    if (confirmBtn && !confirmBtn._igBound) {
+      confirmBtn._igBound = true;
+      confirmBtn.addEventListener('click', function () {
+        if (!_igDraftCreationId) return;
+        confirmBtn.disabled = true;
+        var statusEl = document.getElementById('igConfirmStatus');
+        if (statusEl) { statusEl.textContent = 'Publication…'; statusEl.className = 'admin-row__status'; }
+
+        igApiFetch('publish-finish', 'POST', { creation_id: _igDraftCreationId })
+          .then(function (res) {
+            confirmBtn.disabled = false;
+            if (!res.ok || !res.data.ok) {
+              if (statusEl) { statusEl.textContent = 'Erreur : ' + (res.data.error || 'Inconnue'); statusEl.className = 'admin-row__status admin-row__status--err'; }
+              return;
+            }
+            if (statusEl) { statusEl.textContent = 'Publié !'; statusEl.className = 'admin-row__status admin-row__status--ok'; }
+            toast('Post Instagram publié !', 'success');
+            _igDraftCreationId = null;
+            // Reset form
+            var form = document.getElementById('igPublishForm');
+            if (form) form.reset();
+            var previewEl = document.getElementById('igPreview');
+            if (previewEl) previewEl.hidden = true;
+            var draftEl = document.getElementById('igDraftConfirm');
+            if (draftEl) draftEl.hidden = true;
+            if (publishBtn) publishBtn.disabled = true;
+            // Refresh media
+            igLoadMedia();
+          })
+          .catch(function (err) {
+            confirmBtn.disabled = false;
+            if (statusEl) { statusEl.textContent = 'Réseau : ' + err.message; statusEl.className = 'admin-row__status admin-row__status--err'; }
+          });
+      });
+    }
+
+    // ─ Cancel publish
+    var cancelBtn = document.getElementById('igCancelPublish');
+    if (cancelBtn && !cancelBtn._igBound) {
+      cancelBtn._igBound = true;
+      cancelBtn.addEventListener('click', function () {
+        _igDraftCreationId = null;
+        var draftEl = document.getElementById('igDraftConfirm');
+        if (draftEl) draftEl.hidden = true;
+        if (publishBtn) publishBtn.disabled = false;
+        var statusEl = document.getElementById('igPublishStatus');
+        if (statusEl) statusEl.textContent = '';
+      });
+    }
+
+    // ─ Load comments
+    var loadCommBtn = document.getElementById('igLoadComments');
+    if (loadCommBtn && !loadCommBtn._igBound) {
+      loadCommBtn._igBound = true;
+      loadCommBtn.addEventListener('click', function () {
+        var mediaId = (document.getElementById('igMediaIdInput').value || '').trim();
+        if (!mediaId) { toast('Entre un Media ID', 'error'); return; }
+        igLoadComments(mediaId);
+      });
+    }
+
+    // ─ Load insights
+    var insightsBtn = document.getElementById('igLoadInsights');
+    if (insightsBtn && !insightsBtn._igBound) {
+      insightsBtn._igBound = true;
+      insightsBtn.addEventListener('click', function () {
+        insightsBtn.disabled = true;
+        insightsBtn.textContent = 'Chargement…';
+        igApiFetch('insights', 'GET').then(function (res) {
+          insightsBtn.disabled = false;
+          insightsBtn.textContent = 'Charger les stats';
+          var dataEl = document.getElementById('igInsightsData');
+          if (!dataEl) return;
+          if (!res.ok || !res.data.ok) {
+            dataEl.innerHTML = '<p class="ig-error">' + escapeHTML(res.data.error || 'Erreur') + '</p>';
+            return;
+          }
+          if (res.data.warning) {
+            dataEl.innerHTML = '<p class="admin-hint">' + escapeHTML(res.data.warning) + '</p>';
+            return;
+          }
+          var insights = res.data.insights || [];
+          if (insights.length === 0) {
+            dataEl.innerHTML = '<p class="admin-hint">Pas encore de données disponibles.</p>';
+            return;
+          }
+          dataEl.innerHTML = '<div class="ig-insights-grid">' + insights.map(function (m) {
+            var val = (m.values && m.values.length) ? m.values[m.values.length - 1].value : '—';
+            return '<div class="ig-insight-card">'
+              + '<span class="ig-insight-label">' + escapeHTML(m.title || m.name || '') + '</span>'
+              + '<strong class="ig-insight-value">' + escapeHTML(String(val)) + '</strong>'
+              + (m.description ? '<small class="ig-insight-desc">' + escapeHTML(m.description) + '</small>' : '')
+              + '</div>';
+          }).join('') + '</div>';
+        }).catch(function (err) {
+          insightsBtn.disabled = false;
+          insightsBtn.textContent = 'Charger les stats';
+          var dataEl = document.getElementById('igInsightsData');
+          if (dataEl) dataEl.innerHTML = '<p class="ig-error">Réseau : ' + escapeHTML(err.message) + '</p>';
+        });
+      });
+    }
+  }
+
+  function igLoadMedia() {
+    var gridEl = document.getElementById('igMediaGrid');
+    if (!gridEl) return;
+    gridEl.innerHTML = '<p class="admin-loading">Chargement des posts…</p>';
+    var loadBtn = document.getElementById('igLoadMedia');
+    if (loadBtn) loadBtn.disabled = true;
+
+    igApiFetch('media', 'GET').then(function (res) {
+      if (loadBtn) loadBtn.disabled = false;
+      if (!res.ok || !res.data.ok) {
+        gridEl.innerHTML = '<p class="ig-error">' + escapeHTML(res.data.error || 'Erreur') + '</p>';
+        return;
+      }
+      var media = res.data.media || [];
+      if (media.length === 0) {
+        gridEl.innerHTML = '<p class="admin-hint">Aucune publication pour l\'instant.</p>';
+        return;
+      }
+      gridEl.innerHTML = media.map(function (m) {
+        var thumb = m.thumbnail_url || m.media_url || '';
+        var date = m.timestamp ? new Date(m.timestamp).toLocaleDateString('fr-FR') : '';
+        var caption = (m.caption || '').substring(0, 80);
+        return '<div class="ig-media-card" data-media-id="' + escapeHTML(m.id) + '">'
+          + (thumb ? '<img src="' + escapeHTML(thumb) + '" alt="Post Instagram" class="ig-media-thumb" loading="lazy" decoding="async">' : '<div class="ig-media-nothumb">Pas d\'image</div>')
+          + '<div class="ig-media-info">'
+          + '<span class="ig-media-date">' + escapeHTML(date) + '</span>'
+          + '<span class="ig-media-type">' + escapeHTML(m.media_type || '') + '</span>'
+          + '<p class="ig-media-caption">' + escapeHTML(caption) + (caption.length >= 80 ? '…' : '') + '</p>'
+          + '<div class="ig-media-stats">'
+          + '<span>' + (m.like_count || 0) + ' likes</span>'
+          + '<span>' + (m.comments_count || 0) + ' commentaires</span>'
+          + '</div>'
+          + '</div></div>';
+      }).join('');
+
+      // Click to load comments
+      gridEl.onclick = function (e) {
+        var card = e.target.closest('.ig-media-card');
+        if (!card) return;
+        var mediaId = card.getAttribute('data-media-id');
+        if (!mediaId) return;
+        var input = document.getElementById('igMediaIdInput');
+        if (input) input.value = mediaId;
+        igLoadComments(mediaId);
+        // Scroll to comments section
+        var commSection = document.querySelector('.ig-comments');
+        if (commSection) commSection.scrollIntoView({ behavior: 'smooth' });
+      };
+    }).catch(function (err) {
+      if (loadBtn) loadBtn.disabled = false;
+      gridEl.innerHTML = '<p class="ig-error">Réseau : ' + escapeHTML(err.message) + '</p>';
+    });
+  }
+
+  function igLoadComments(mediaId) {
+    var listEl = document.getElementById('igCommentsList');
+    if (!listEl) return;
+    listEl.innerHTML = '<p class="admin-loading">Chargement des commentaires…</p>';
+
+    igApiFetch('comments&media_id=' + encodeURIComponent(mediaId), 'GET').then(function (res) {
+      if (!res.ok || !res.data.ok) {
+        listEl.innerHTML = '<p class="ig-error">' + escapeHTML(res.data.error || 'Erreur') + '</p>';
+        return;
+      }
+      var comments = res.data.comments || [];
+      if (comments.length === 0) {
+        listEl.innerHTML = '<p class="admin-hint">Aucun commentaire sur ce post.</p>';
+        return;
+      }
+      listEl.innerHTML = comments.map(function (c) {
+        var date = c.timestamp ? new Date(c.timestamp).toLocaleString('fr-FR') : '';
+        var replies = (c.replies && c.replies.data) || [];
+        return '<div class="ig-comment" data-comment-id="' + escapeHTML(c.id) + '">'
+          + '<div class="ig-comment-header">'
+          + '<strong>@' + escapeHTML(c.username || '') + '</strong>'
+          + '<span class="ig-comment-date">' + escapeHTML(date) + '</span>'
+          + '</div>'
+          + '<p class="ig-comment-text">' + escapeHTML(c.text || '') + '</p>'
+          + (replies.length ? '<div class="ig-replies">' + replies.map(function (r) {
+            return '<div class="ig-reply">'
+              + '<strong>@' + escapeHTML(r.username || '') + '</strong> '
+              + '<span>' + escapeHTML(r.text || '') + '</span>'
+              + '</div>';
+          }).join('') + '</div>' : '')
+          + '<div class="ig-comment-actions">'
+          + '<input type="text" class="ig-reply-input" placeholder="Répondre…">'
+          + '<button type="button" class="btn btn--ghost ig-reply-btn" aria-label="Répondre au commentaire">Répondre</button>'
+          + '</div>'
+          + '</div>';
+      }).join('');
+
+      // Reply delegation
+      listEl.onclick = function (e) {
+        var replyBtn = e.target.closest('.ig-reply-btn');
+        if (!replyBtn) return;
+        var commentEl = replyBtn.closest('.ig-comment');
+        if (!commentEl) return;
+        var commentId = commentEl.getAttribute('data-comment-id');
+        var input = commentEl.querySelector('.ig-reply-input');
+        var message = (input && input.value || '').trim();
+        if (!message) { toast('Écris une réponse', 'error'); return; }
+        replyBtn.disabled = true;
+        igApiFetch('reply', 'POST', { comment_id: commentId, message: message })
+          .then(function (res) {
+            replyBtn.disabled = false;
+            if (res.ok && res.data.ok) {
+              toast('Réponse envoyée', 'success');
+              input.value = '';
+              // Reload comments
+              igLoadComments(mediaId);
+            } else {
+              toast('Erreur : ' + (res.data.error || 'Inconnue'), 'error');
+            }
+          })
+          .catch(function (err) {
+            replyBtn.disabled = false;
+            toast('Réseau : ' + err.message, 'error');
+          });
+      };
+    }).catch(function (err) {
+      listEl.innerHTML = '<p class="ig-error">Réseau : ' + escapeHTML(err.message) + '</p>';
+    });
   }
 
   // ── Contact form (/contact) ────────────────────────────────

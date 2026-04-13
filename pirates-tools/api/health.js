@@ -19,7 +19,11 @@ module.exports = function handler(req, res) {
       resendAudience: !!process.env.RESEND_AUDIENCE_ID,
       ownerEmail: !!process.env.OWNER_EMAIL,
       // Admin
-      adminSecret: !!process.env.ADMIN_SECRET
+      adminSecret: !!process.env.ADMIN_SECRET,
+      // Meta / Instagram
+      metaAppId: !!process.env.META_APP_ID,
+      metaAppSecret: !!process.env.META_APP_SECRET,
+      metaAccessToken: !!process.env.META_ACCESS_TOKEN
     }
   });
 };
