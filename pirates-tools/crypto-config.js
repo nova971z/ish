@@ -119,5 +119,5 @@ window.PT_CRYPTO_CONFIG = {
 
   // Numéro WhatsApp (international, sans +, ni espace) pour confirmer
   // un paiement crypto effectué (envoi du txid). Ex: '590690123456'
-  whatsappNumber: '590774230195'
+  whatsappNumber: '33744776598'
 };

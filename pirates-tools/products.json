@@ -10,14 +10,23 @@
     "tag": "Promo",
     "desc": "Compacte, couple 447 Nm, 3 vitesses, kit 2x5Ah.",
     "img": "images/products/dewalt-dcf894p2/main.jpg",
-    "price": 369.0,
+    "price": 369,
     "currency": "EUR",
     "vat": 0.2,
     "price_ht": 307.5,
     "stock_status": "in_stock",
     "stock_label": "En stock",
     "model": "models/products/dcf894n.glb",
-    "paymentLink": ""
+    "paymentLink": "",
+    "weight_kg": 2.4,
+    "ncCategory": "power_tool",
+    "productType": "pro",
+    "tags": [
+      "cordless",
+      "tropical_ready",
+      "mayotte_project"
+    ],
+    "description_long": "Compacte, couple 447 Nm, 3 vitesses, kit 2x5Ah. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil DeWALT : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
   },
   {
     "id": "dewalt-dcf894n",
@@ -30,14 +39,23 @@
     "tag": "Compact",
     "desc": "Meme machine que DCF894P2, sans batteries.",
     "img": "images/products/dewalt-dcf894n/main.jpg",
-    "price": 189.0,
+    "price": 189,
     "currency": "EUR",
     "vat": 0.2,
     "price_ht": 157.5,
     "stock_status": "in_stock",
     "stock_label": "En stock",
     "model": "models/products/dcf894n.glb",
-    "paymentLink": ""
+    "paymentLink": "",
+    "weight_kg": 2.4,
+    "ncCategory": "power_tool",
+    "productType": "pro",
+    "tags": [
+      "cordless",
+      "tropical_ready",
+      "mayotte_project"
+    ],
+    "description_long": "Meme machine que DCF894P2, sans batteries. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil DeWALT : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
   },
   {
     "id": "dewalt-dcf887p2",
@@ -57,7 +75,16 @@
     "stock_status": "in_stock",
     "stock_label": "En stock",
     "model": "models/products/dcf887.glb",
-    "paymentLink": ""
+    "paymentLink": "",
+    "weight_kg": 1.6,
+    "ncCategory": "power_tool",
+    "productType": "pro",
+    "tags": [
+      "cordless",
+      "tropical_ready",
+      "bestseller"
+    ],
+    "description_long": "Classique reputee, 205 Nm, 3 vitesses. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil DeWALT : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
   },
   {
     "id": "dewalt-dcf887n",
@@ -70,14 +97,22 @@
     "tag": "Nu",
     "desc": "Version sans batteries/chargeur.",
     "img": "images/products/dewalt-dcf887n/main.jpg",
-    "price": 129.0,
+    "price": 129,
     "currency": "EUR",
     "vat": 0.2,
     "price_ht": 107.5,
     "stock_status": "in_stock",
     "stock_label": "En stock",
     "model": "models/products/dcf887.glb",
-    "paymentLink": ""
+    "paymentLink": "",
+    "weight_kg": 1.6,
+    "ncCategory": "power_tool",
+    "productType": "pro",
+    "tags": [
+      "cordless",
+      "tropical_ready"
+    ],
+    "description_long": "Version sans batteries/chargeur. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil DeWALT : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
   },
   {
     "id": "dewalt-dcf850p2t",
@@ -91,14 +126,22 @@
     "new": true,
     "desc": "Ultra-compacte 100 mm, 205 Nm, autonomie XL.",
     "img": "images/products/dewalt-dcf850p2t/main.jpg",
-    "price": 349.0,
+    "price": 349,
     "currency": "EUR",
     "vat": 0.2,
     "price_ht": 290.83,
     "stock_status": "in_stock",
     "stock_label": "En stock",
     "model": "models/products/dcf850.glb",
-    "paymentLink": ""
+    "paymentLink": "",
+    "weight_kg": 1.6,
+    "ncCategory": "power_tool",
+    "productType": "pro",
+    "tags": [
+      "cordless",
+      "tropical_ready"
+    ],
+    "description_long": "Ultra-compacte 100 mm, 205 Nm, autonomie XL. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil DeWALT : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
   },
   {
     "id": "dewalt-dcf850n",
@@ -112,14 +155,22 @@
     "new": true,
     "desc": "Ultra-compacte 100 mm, sans batterie/chargeur.",
     "img": "images/products/dewalt-dcf850n/main.jpg",
-    "price": 169.0,
+    "price": 169,
     "currency": "EUR",
     "vat": 0.2,
     "price_ht": 140.83,
     "stock_status": "in_stock",
     "stock_label": "En stock",
     "model": "models/products/dcf850.glb",
-    "paymentLink": ""
+    "paymentLink": "",
+    "weight_kg": 1.6,
+    "ncCategory": "power_tool",
+    "productType": "pro",
+    "tags": [
+      "cordless",
+      "tropical_ready"
+    ],
+    "description_long": "Ultra-compacte 100 mm, sans batterie/chargeur. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil DeWALT : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
   },
   {
     "id": "makita-dtw300z",
@@ -132,13 +183,22 @@
     "tag": "Compact",
     "desc": "330 Nm, compacte, moteur brushless.",
     "img": "images/products/makita-dtw300z/main.jpg",
-    "price": 179.0,
+    "price": 179,
     "currency": "EUR",
     "vat": 0.2,
     "price_ht": 149.17,
     "stock_status": "in_stock",
     "stock_label": "En stock",
-    "paymentLink": ""
+    "paymentLink": "",
+    "weight_kg": 2.4,
+    "ncCategory": "power_tool",
+    "productType": "pro",
+    "tags": [
+      "cordless",
+      "tropical_ready",
+      "mayotte_project"
+    ],
+    "description_long": "330 Nm, compacte, moteur brushless. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Makita : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
   },
   {
     "id": "makita-dtd172z",
@@ -151,14 +211,23 @@
     "tag": "Best-seller",
     "desc": "180 Nm, 4 vitesses, ultra-legere.",
     "img": "images/products/makita-dtd172z/main.jpg",
-    "price": 159.0,
+    "price": 159,
     "currency": "EUR",
     "vat": 0.2,
     "price_ht": 132.5,
     "stock_status": "in_stock",
     "stock_label": "En stock",
     "model": "models/products/dtd172z.glb",
-    "paymentLink": ""
+    "paymentLink": "",
+    "weight_kg": 1.6,
+    "ncCategory": "power_tool",
+    "productType": "pro",
+    "tags": [
+      "cordless",
+      "tropical_ready",
+      "bestseller"
+    ],
+    "description_long": "180 Nm, 4 vitesses, ultra-legere. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Makita : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
   },
   {
     "id": "makita-ddf487z",
@@ -171,14 +240,22 @@
     "tag": "Nu",
     "desc": "40 Nm, 2 vitesses, mandrin 13 mm.",
     "img": "images/products/makita-ddf487z/main.jpg",
-    "price": 119.0,
+    "price": 119,
     "currency": "EUR",
     "vat": 0.2,
     "price_ht": 99.17,
     "stock_status": "in_stock",
     "stock_label": "En stock",
     "model": "models/products/ddf487z.glb",
-    "paymentLink": ""
+    "paymentLink": "",
+    "weight_kg": 1.8,
+    "ncCategory": "power_tool",
+    "productType": "pro",
+    "tags": [
+      "cordless",
+      "tropical_ready"
+    ],
+    "description_long": "40 Nm, 2 vitesses, mandrin 13 mm. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Makita : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
   },
   {
     "id": "makita-dga504z",
@@ -191,14 +268,23 @@
     "tag": "Pro",
     "desc": "Meuleuse 125 mm sans fil, 8500 tr/min.",
     "img": "images/products/makita-dga504z/main.jpg",
-    "price": 139.0,
+    "price": 139,
     "currency": "EUR",
     "vat": 0.2,
     "price_ht": 115.83,
     "stock_status": "in_stock",
     "stock_label": "En stock",
     "model": "models/products/dga504z.glb",
-    "paymentLink": ""
+    "paymentLink": "",
+    "weight_kg": 2.2,
+    "ncCategory": "power_tool",
+    "productType": "pro",
+    "tags": [
+      "cordless",
+      "tropical_ready",
+      "mayotte_project"
+    ],
+    "description_long": "Meuleuse 125 mm sans fil, 8500 tr/min. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Makita : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
   },
   {
     "id": "makita-dhs680z",
@@ -211,13 +297,22 @@
     "tag": "Pro",
     "desc": "Scie circulaire 165 mm, profondeur 57 mm.",
     "img": "images/products/makita-dhs680z/main.jpg",
-    "price": 199.0,
+    "price": 199,
     "currency": "EUR",
     "vat": 0.2,
     "price_ht": 165.83,
     "stock_status": "in_stock",
     "stock_label": "En stock",
-    "paymentLink": ""
+    "paymentLink": "",
+    "weight_kg": 3.5,
+    "ncCategory": "power_tool",
+    "productType": "pro",
+    "tags": [
+      "cordless",
+      "tropical_ready",
+      "mayotte_project"
+    ],
+    "description_long": "Scie circulaire 165 mm, profondeur 57 mm. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Makita : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
   },
   {
     "id": "festool-ti-18",
@@ -230,13 +325,21 @@
     "tag": "Premium",
     "desc": "170 Nm, Systainer, garantie 3 ans.",
     "img": "images/products/festool-ti-18/main.jpg",
-    "price": 549.0,
+    "price": 549,
     "currency": "EUR",
     "vat": 0.2,
     "price_ht": 457.5,
     "stock_status": "in_stock",
     "stock_label": "En stock",
-    "paymentLink": ""
+    "paymentLink": "",
+    "weight_kg": 1.6,
+    "ncCategory": "power_tool",
+    "productType": "pro",
+    "tags": [
+      "cordless",
+      "tropical_ready"
+    ],
+    "description_long": "170 Nm, Systainer, garantie 3 ans. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Festool : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
   },
   {
     "id": "festool-tpc-18",
@@ -249,13 +352,21 @@
     "tag": "Premium",
     "desc": "60 Nm, 4 vitesses, FastFix, Systainer.",
     "img": "images/products/festool-tpc-18/main.jpg",
-    "price": 629.0,
+    "price": 629,
     "currency": "EUR",
     "vat": 0.2,
     "price_ht": 524.17,
     "stock_status": "in_stock",
     "stock_label": "En stock",
-    "paymentLink": ""
+    "paymentLink": "",
+    "weight_kg": 1.8,
+    "ncCategory": "power_tool",
+    "productType": "pro",
+    "tags": [
+      "cordless",
+      "tropical_ready"
+    ],
+    "description_long": "60 Nm, 4 vitesses, FastFix, Systainer. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Festool : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
   },
   {
     "id": "festool-tsc55",
@@ -268,14 +379,23 @@
     "tag": "Premium",
     "desc": "Scie plongeante 160 mm, kickback stop, rail inclus.",
     "img": "images/products/festool-tsc55/main.jpg",
-    "price": 1089.0,
+    "price": 1089,
     "currency": "EUR",
     "vat": 0.2,
     "price_ht": 907.5,
     "stock_status": "in_stock",
     "stock_label": "En stock",
     "model": "models/products/tsc55.glb",
-    "paymentLink": ""
+    "paymentLink": "",
+    "weight_kg": 3.5,
+    "ncCategory": "power_tool",
+    "productType": "pro",
+    "tags": [
+      "cordless",
+      "tropical_ready",
+      "mayotte_project"
+    ],
+    "description_long": "Scie plongeante 160 mm, kickback stop, rail inclus. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Festool : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
   },
   {
     "id": "flex-fw1-2-502",
@@ -288,13 +408,22 @@
     "tag": "Pack",
     "desc": "600 Nm, 3 vitesses, LED.",
     "img": "images/products/flex-fw1-2/main.jpg",
-    "price": 399.0,
+    "price": 399,
     "currency": "EUR",
     "vat": 0.2,
     "price_ht": 332.5,
     "stock_status": "in_stock",
     "stock_label": "En stock",
-    "paymentLink": ""
+    "paymentLink": "",
+    "weight_kg": 2.4,
+    "ncCategory": "power_tool",
+    "productType": "pro",
+    "tags": [
+      "cordless",
+      "tropical_ready",
+      "mayotte_project"
+    ],
+    "description_long": "600 Nm, 3 vitesses, LED. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Flex : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
   },
   {
     "id": "flex-id-1-4",
@@ -307,13 +436,21 @@
     "tag": "Nu",
     "desc": "220 Nm, compacte, brushless.",
     "img": "images/products/flex-id-1-4/main.jpg",
-    "price": 149.0,
+    "price": 149,
     "currency": "EUR",
     "vat": 0.2,
     "price_ht": 124.17,
     "stock_status": "in_stock",
     "stock_label": "En stock",
-    "paymentLink": ""
+    "paymentLink": "",
+    "weight_kg": 1.6,
+    "ncCategory": "power_tool",
+    "productType": "pro",
+    "tags": [
+      "cordless",
+      "tropical_ready"
+    ],
+    "description_long": "220 Nm, compacte, brushless. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Flex : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
   },
   {
     "id": "facom-cl3-c18sp",
@@ -326,13 +463,22 @@
     "tag": "Pro",
     "desc": "950 Nm, 4 vitesses, pro.",
     "img": "images/products/facom-cl3/main.jpg",
-    "price": 689.0,
+    "price": 689,
     "currency": "EUR",
     "vat": 0.2,
     "price_ht": 574.17,
     "stock_status": "in_stock",
     "stock_label": "En stock",
-    "paymentLink": ""
+    "paymentLink": "",
+    "weight_kg": 2.4,
+    "ncCategory": "power_tool",
+    "productType": "pro",
+    "tags": [
+      "cordless",
+      "tropical_ready",
+      "mayotte_project"
+    ],
+    "description_long": "950 Nm, 4 vitesses, pro. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Facom : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
   },
   {
     "id": "facom-cl2-c18s",
@@ -345,13 +491,21 @@
     "tag": "Pro",
     "desc": "200 Nm, moteur brushless, coffret PRO.",
     "img": "images/products/facom-cl2/main.jpg",
-    "price": 489.0,
+    "price": 489,
     "currency": "EUR",
     "vat": 0.2,
     "price_ht": 407.5,
     "stock_status": "in_stock",
     "stock_label": "En stock",
-    "paymentLink": ""
+    "paymentLink": "",
+    "weight_kg": 1.6,
+    "ncCategory": "power_tool",
+    "productType": "pro",
+    "tags": [
+      "cordless",
+      "tropical_ready"
+    ],
+    "description_long": "200 Nm, moteur brushless, coffret PRO. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Facom : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
   },
   {
     "id": "stanley-fmc645d2",
@@ -364,13 +518,21 @@
     "tag": "Pack",
     "desc": "Scie sauteuse pendulaire, 4 positions.",
     "img": "images/products/stanley-fmc645/main.jpg",
-    "price": 189.0,
+    "price": 189,
     "currency": "EUR",
     "vat": 0.2,
     "price_ht": 157.5,
     "stock_status": "in_stock",
     "stock_label": "En stock",
-    "paymentLink": ""
+    "paymentLink": "",
+    "weight_kg": 3.5,
+    "ncCategory": "power_tool",
+    "productType": "pro",
+    "tags": [
+      "cordless",
+      "mayotte_project"
+    ],
+    "description_long": "Scie sauteuse pendulaire, 4 positions. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Stanley : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
   },
   {
     "id": "stanley-fmc688l2",
@@ -383,13 +545,20 @@
     "tag": "Pack",
     "desc": "Perceuse a percussion 2 vitesses, 65 Nm.",
     "img": "images/products/stanley-fmc688/main.jpg",
-    "price": 219.0,
+    "price": 219,
     "currency": "EUR",
     "vat": 0.2,
     "price_ht": 182.5,
     "stock_status": "in_stock",
     "stock_label": "En stock",
-    "paymentLink": ""
+    "paymentLink": "",
+    "weight_kg": 1.8,
+    "ncCategory": "power_tool",
+    "productType": "pro",
+    "tags": [
+      "cordless"
+    ],
+    "description_long": "Perceuse a percussion 2 vitesses, 65 Nm. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Stanley : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
   },
   {
     "id": "wera-kraftform-kompakt",
@@ -409,7 +578,14 @@
     "stock_status": "in_stock",
     "stock_label": "En stock",
     "model": "models/products/kraftform-kompakt.glb",
-    "paymentLink": ""
+    "paymentLink": "",
+    "weight_kg": 0.8,
+    "ncCategory": "hand_tool",
+    "productType": "pro",
+    "tags": [
+      "bestseller"
+    ],
+    "description_long": "Set tournevis magnetique 17 pcs, manche Rapidaptor. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Outillage à main Wera conçu pour durer : aciers traités, finitions anti-corrosion. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
   },
   {
     "id": "wera-zyklop-speed",
@@ -422,14 +598,19 @@
     "tag": "Premium",
     "desc": "Cliquet 1/4\" a retournement rapide, 28 pcs.",
     "img": "images/products/wera-zyklop/main.jpg",
-    "price": 119.0,
+    "price": 119,
     "currency": "EUR",
     "vat": 0.2,
     "price_ht": 99.17,
     "stock_status": "in_stock",
     "stock_label": "En stock",
     "model": "models/products/zyklop-speed.glb",
-    "paymentLink": ""
+    "paymentLink": "",
+    "weight_kg": 0.8,
+    "ncCategory": "hand_tool",
+    "productType": "pro",
+    "tags": [],
+    "description_long": "Cliquet 1/4\" a retournement rapide, 28 pcs. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Outillage à main Wera conçu pour durer : aciers traités, finitions anti-corrosion. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
   },
   {
     "id": "dewalt-dcd796p2",
@@ -442,14 +623,23 @@
     "tag": "Best-seller",
     "desc": "70 Nm, 2 vitesses, LED, mandrin 13 mm metal.",
     "img": "images/products/dewalt-dcd796p2/main.jpg",
-    "price": 299.0,
+    "price": 299,
     "currency": "EUR",
     "vat": 0.2,
     "price_ht": 249.17,
     "stock_status": "in_stock",
     "stock_label": "En stock",
     "model": "models/products/dcd796.glb",
-    "paymentLink": ""
+    "paymentLink": "",
+    "weight_kg": 1.8,
+    "ncCategory": "power_tool",
+    "productType": "pro",
+    "tags": [
+      "cordless",
+      "tropical_ready",
+      "bestseller"
+    ],
+    "description_long": "70 Nm, 2 vitesses, LED, mandrin 13 mm metal. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil DeWALT : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
   },
   {
     "id": "dewalt-dcs391n",
@@ -462,14 +652,23 @@
     "tag": "Nu",
     "desc": "Scie circulaire 165 mm, profondeur 55 mm.",
     "img": "images/products/dewalt-dcs391n/main.jpg",
-    "price": 169.0,
+    "price": 169,
     "currency": "EUR",
     "vat": 0.2,
     "price_ht": 140.83,
     "stock_status": "in_stock",
     "stock_label": "En stock",
     "model": "models/products/dcs391n.glb",
-    "paymentLink": ""
+    "paymentLink": "",
+    "weight_kg": 3.5,
+    "ncCategory": "power_tool",
+    "productType": "pro",
+    "tags": [
+      "cordless",
+      "tropical_ready",
+      "mayotte_project"
+    ],
+    "description_long": "Scie circulaire 165 mm, profondeur 55 mm. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil DeWALT : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
   },
   {
     "id": "dewalt-dcg405n",
@@ -482,14 +681,23 @@
     "tag": "Pro",
     "desc": "Meuleuse compacte 125 mm, 9000 tr/min, frein.",
     "img": "images/products/dewalt-dcg405n/main.jpg",
-    "price": 159.0,
+    "price": 159,
     "currency": "EUR",
     "vat": 0.2,
     "price_ht": 132.5,
     "stock_status": "in_stock",
     "stock_label": "En stock",
     "model": "models/products/dcg405n.glb",
-    "paymentLink": ""
+    "paymentLink": "",
+    "weight_kg": 2.2,
+    "ncCategory": "power_tool",
+    "productType": "pro",
+    "tags": [
+      "cordless",
+      "tropical_ready",
+      "mayotte_project"
+    ],
+    "description_long": "Meuleuse compacte 125 mm, 9000 tr/min, frein. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil DeWALT : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
   },
   {
     "id": "makita-dlx2220jx2",
@@ -502,12 +710,21 @@
     "tag": "Pack",
     "desc": "Perceuse DDF483 + visseuse DTD155, 2x3Ah.",
     "img": "images/products/makita-dlx2220/main.jpg",
-    "price": 349.0,
+    "price": 349,
     "currency": "EUR",
     "vat": 0.2,
     "price_ht": 290.83,
     "stock_status": "in_stock",
     "stock_label": "En stock",
-    "paymentLink": ""
+    "paymentLink": "",
+    "weight_kg": 5.8,
+    "ncCategory": "power_tool",
+    "productType": "pro",
+    "tags": [
+      "cordless",
+      "tropical_ready",
+      "mayotte_project"
+    ],
+    "description_long": "Perceuse DDF483 + visseuse DTD155, 2x3Ah. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Makita : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
   }
 ]

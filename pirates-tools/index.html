@@ -4,23 +4,32 @@
   <meta charset="utf-8" />
   <meta http-equiv="x-ua-compatible" content="ie=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Pirates Tools - Outillage pro (PWA)</title>
-  <meta name="description" content="Pirates Tools — Visseuses a chocs DeWALT, dispo Antilles. PWA rapide, contact immediat (telephone & WhatsApp)." />
+  <title>Pirates Tools — Outillage professionnel DOM-TOM</title>
+  <meta name="description" content="Outillage pro DeWALT, Makita, Festool, Flex, Facom, Stanley, Wera livré en Guadeloupe, Martinique, Guyane, Réunion et Mayotte. Octroi de mer et TVA inclus." />
 
   <!-- Open Graph / Social -->
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Pirates Tools — Outillage professionnel">
-  <meta property="og:description" content="Visseuses, boulonneuses DeWALT, Makita, Festool. Livraison Antilles.">
+  <meta property="og:title" content="Pirates Tools — Outillage professionnel DOM-TOM">
+  <meta property="og:description" content="Outillage pro livré en Guadeloupe, Martinique, Guyane, Réunion et Mayotte. Octroi de mer et TVA inclus. DeWALT, Makita, Festool, Flex, Facom.">
   <meta property="og:image" content="https://nova971z.github.io/ish/icons/icon-512.png">
   <meta property="og:url" content="https://nova971z.github.io/ish/">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Pirates Tools — Outillage professionnel">
+  <meta name="twitter:title" content="Pirates Tools — Outillage professionnel DOM-TOM">
+  <meta name="twitter:description" content="Outillage pro livré en Guadeloupe, Martinique, Guyane, Réunion et Mayotte. Octroi de mer et TVA inclus.">
   <meta name="twitter:image" content="https://nova971z.github.io/ish/icons/icon-512.png">
 
   <link rel="canonical" href="https://nova971z.github.io/ish/">
 
+  <!-- Preconnect critical third-party origins -->
+  <link rel="preconnect" href="https://ajax.googleapis.com" crossorigin>
+  <link rel="dns-prefetch" href="https://ajax.googleapis.com">
+  <link rel="preconnect" href="https://wa.me">
+  <link rel="dns-prefetch" href="https://wa.me">
+  <link rel="preconnect" href="https://js.stripe.com" crossorigin>
+  <link rel="dns-prefetch" href="https://js.stripe.com">
+
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=275">
+  <link rel="stylesheet" href="styles.css?v=289">
 
   <!-- 3D model viewer -->
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
@@ -36,6 +45,7 @@
        and the legacy Payment Links flow (useful on GitHub Pages / offline). -->
   <script>
   window.PT_API_BASE = '';
+  window.PT_STRIPE_PK = 'pk_live_51TJYJVPynqHG9OETsHfRsfZbs8NWjeo4RO1sVltr9LVqvbL1IsAI13Wgw3YFglVYGQD6kBFOw5pKBPCUovdJ9OV300rHNF9ppi';
   </script>
 
   <!-- Crypto payment config (inlined pour éviter tout problème de cache/SW)
@@ -63,7 +73,7 @@
         coingeckoId:'solana',   decimals:4, uriScheme:'solana:' }
     ],
     cardCheckout: { url:'', nowpaymentsApiKey:'', nowpaymentsPayCurrency:'usdttrc20' },
-    whatsappNumber: '590774230195'
+    whatsappNumber: '33744776598'
   };
   </script>
 
@@ -210,7 +220,7 @@
         <img
           id="topbarLogo"
           class="topbar-logo"
-          src="icons/icon-192.png?v=275"
+          src="icons/icon-192.png?v=289"
           alt="Pirates Tools"
           width="40" height="40"
           decoding="async" loading="eager" fetchpriority="high" />
@@ -218,8 +228,22 @@
     </div>
 
     <div class="cta">
-      <a id="callBtn" class="btn btn-call" href="tel:+33774230195" data-action="call">📞 <strong>07 74 23 01 95</strong></a>
-      <a id="waBtn" class="btn btn-wa" href="https://wa.me/33774230195" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" data-action="open-wa">💬</a>
+      <div class="terr-wrap">
+        <button id="terrBtn" class="terr-btn" type="button"
+          aria-haspopup="true" aria-expanded="false" aria-controls="terrMenu"
+          aria-label="Choisir votre territoire">
+          <span class="terr-btn__icon" aria-hidden="true">🏝️</span>
+          <span class="terr-btn__label" data-terr-label>🇬🇵 Guadeloupe</span>
+          <span class="terr-btn__chev" aria-hidden="true">▾</span>
+        </button>
+        <ul id="terrMenu" class="terr-menu" role="menu" hidden></ul>
+      </div>
+      <a id="fbBtn" class="btn btn-social btn-fb" href="https://facebook.com/piratestools" target="_blank" rel="noopener noreferrer" aria-label="Facebook" data-action="social-fb">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+      </a>
+      <a id="igBtn" class="btn btn-social btn-ig" href="https://www.instagram.com/pirates_tools_971" target="_blank" rel="noopener noreferrer" aria-label="Instagram" data-action="social-ig">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+      </a>
     </div>
   </header>
 
@@ -227,8 +251,8 @@
   <section id="hero" class="hero-full" aria-hidden="true">
     <div class="hero-logo-container initial" id="heroLogoContainer">
       <img id="heroLogo" class="hero-logo on" alt="Pirates Tools"
-        src="icons/icon-512.png?v=275"
-        srcset="icons/icon-256.png?v=275 256w, icons/icon-384.png?v=275 384w, icons/icon-512.png?v=275 512w"
+        src="icons/icon-512.png?v=289"
+        srcset="icons/icon-256.png?v=289 256w, icons/icon-384.png?v=289 384w, icons/icon-512.png?v=289 512w"
         sizes="(max-width: 768px) 90vw, 60vw"
         width="600" height="600"
         decoding="async" loading="eager" fetchpriority="high" />
@@ -289,6 +313,12 @@
         </div>
       </section>
 
+      <!-- Recently viewed — caché si aucun produit vu -->
+      <section class="home-products-strip home-products-strip--recent" id="recentlyViewedSection" hidden>
+        <h2 class="home-products-strip__title">Récemment consultés</h2>
+        <div class="home-products-strip__track" id="recentlyViewedTrack"></div>
+      </section>
+
       <!-- =================== ABONNEMENTS & SERVICES =================== -->
       <section class="plans-section" data-reveal="fade-up">
         <div class="container">
@@ -302,7 +332,7 @@
           <!-- Round service orbs -->
           <div class="plan-orbs" id="planOrbs">
 
-            <button class="plan-orb plan-orb--basique" data-plan="basique" data-price="9" data-saving="220">
+            <button class="plan-orb plan-orb--basique" data-plan="basique" data-price="9" data-saving="220" aria-label="Plan Basique a 9 euros par mois">
               <div class="plan-orb__circle">
                 <div class="plan-orb__pulse"></div>
                 <span class="plan-orb__emoji">🛡️</span>
@@ -311,7 +341,7 @@
               <span class="plan-orb__price">9&euro;/m</span>
             </button>
 
-            <button class="plan-orb plan-orb--pro" data-plan="pro" data-price="29" data-saving="720">
+            <button class="plan-orb plan-orb--pro" data-plan="pro" data-price="29" data-saving="720" aria-label="Plan Pro a 29 euros par mois">
               <div class="plan-orb__circle">
                 <div class="plan-orb__pulse"></div>
                 <span class="plan-orb__emoji">⚡</span>
@@ -321,7 +351,7 @@
               <span class="plan-orb__tag plan-orb__tag--pro">Populaire</span>
             </button>
 
-            <button class="plan-orb plan-orb--gold" data-plan="gold" data-price="59" data-saving="1440">
+            <button class="plan-orb plan-orb--gold" data-plan="gold" data-price="59" data-saving="1440" aria-label="Plan Gold a 59 euros par mois">
               <div class="plan-orb__circle">
                 <div class="plan-orb__pulse"></div>
                 <span class="plan-orb__emoji">👑</span>
@@ -331,7 +361,7 @@
               <span class="plan-orb__tag plan-orb__tag--gold">Premium</span>
             </button>
 
-            <button class="plan-orb plan-orb--black" data-plan="black" data-price="99" data-saving="3840">
+            <button class="plan-orb plan-orb--black" data-plan="black" data-price="99" data-saving="3840" aria-label="Plan Black Metal a 99 euros par mois">
               <div class="plan-orb__circle">
                 <div class="plan-orb__pulse"></div>
                 <span class="plan-orb__emoji">🖤</span>
@@ -389,6 +419,24 @@
               <textarea id="homeReviewText" class="pdp-reviews__textarea" placeholder="Partagez votre experience avec Pirates Tools..." aria-label="Votre avis" required maxlength="500" rows="3"></textarea>
               <button type="submit" class="pdp-reviews__submit">Publier mon avis</button>
             </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- Newsletter signup -->
+      <section class="home-newsletter" data-reveal="fade-up">
+        <div class="container">
+          <div class="home-newsletter__card">
+            <div class="home-newsletter__icon" aria-hidden="true">&#9993;</div>
+            <h2 class="home-newsletter__title">Reste au courant des nouveautés</h2>
+            <p class="home-newsletter__sub">Nouveaux produits, promos exclusives et conseils pros. Zéro spam, désinscription en un clic.</p>
+            <form id="newsletterForm" class="home-newsletter__form" autocomplete="off" novalidate>
+              <label class="sr-only" for="newsletterEmail">Adresse email</label>
+              <input id="newsletterEmail" type="email" required maxlength="200" placeholder="ton@email.com" autocomplete="email">
+              <input type="text" name="website" class="home-newsletter__honeypot" tabindex="-1" aria-hidden="true" autocomplete="off">
+              <button type="submit" class="home-newsletter__submit" aria-label="S'inscrire a la newsletter">S'inscrire</button>
+            </form>
+            <p id="newsletterStatus" class="home-newsletter__status" aria-live="polite"></p>
           </div>
         </div>
       </section>
@@ -466,6 +514,11 @@
         <div class="pdp-section__inner pdp-section__inner--wide">
           <h2 class="pdp-discover__heading" id="pdpDiscoverHeading">Concu pour performer.</h2>
           <p id="pdpDesc" class="pdp-discover__desc"></p>
+          <div id="pdpBadges" class="pt-badges pt-badges--pdp"></div>
+          <details id="pdpMore" class="pdp-more" hidden>
+            <summary>En savoir plus</summary>
+            <p id="pdpDescLong"></p>
+          </details>
         </div>
       </div>
 
@@ -504,7 +557,7 @@
       <div class="pdp-section pdp-section--media" data-animate="parallax">
         <div class="pdp-section__inner">
           <div class="pdp-landing__media">
-            <img id="pdpImg" alt="" />
+            <img id="pdpImg" alt="" decoding="async" loading="eager" fetchpriority="high" />
           </div>
         </div>
       </div>
@@ -530,10 +583,10 @@
         <div class="pdp-section__inner">
           <h2 class="pdp-cta__heading">Pret a passer a l'action ?</h2>
           <div class="pdp-landing__actions">
-            <button id="pdpBuy" class="btn primary btn--lg btn--glow" type="button" data-action="buy-now">💳 Acheter maintenant</button>
-            <button id="pdpQuote" class="btn btn--lg" type="button" data-action="add-to-cart">Ajouter au panier</button>
-            <a id="pdpWa" class="btn btn-wa btn--lg" href="https://wa.me/33774230195" target="_blank" rel="noopener noreferrer" data-action="share-wa">WhatsApp</a>
-            <button id="pdpShare" class="btn btn--lg" type="button" data-action="share">Partager</button>
+            <button id="pdpBuy" class="btn primary btn--lg btn--glow" type="button" data-action="buy-now" aria-label="Acheter maintenant">💳 Acheter maintenant</button>
+            <button id="pdpQuote" class="btn btn--lg" type="button" data-action="add-to-cart" aria-label="Ajouter au panier">Ajouter au panier</button>
+            <a id="pdpWa" class="btn btn-wa btn--lg" href="https://wa.me/33744776598" target="_blank" rel="noopener noreferrer" data-action="share-wa">WhatsApp</a>
+            <button id="pdpShare" class="btn btn--lg" type="button" data-action="share" aria-label="Partager ce produit">Partager</button>
           </div>
         </div>
       </div>
@@ -611,6 +664,12 @@
         <!-- Cart items -->
         <div id="devisList" class="devis-list"></div>
 
+        <!-- Shipping estimate (territory-aware) -->
+        <div id="devisShipping" class="devis-shipping" hidden></div>
+
+        <!-- Loyalty banner (Phase 4) -->
+        <div id="devisLoyalty" class="devis-loyalty" hidden></div>
+
         <!-- Sticky total + actions -->
         <div class="devis-footer" id="devisFooter">
           <div class="devis-footer__total">
@@ -618,15 +677,15 @@
             <strong id="devisFooterTotal">0 &euro;</strong>
           </div>
           <div class="devis-footer__actions">
-            <button id="devisPay" class="devis-btn devis-btn--pay" type="button">
+            <button id="devisPay" class="devis-btn devis-btn--pay" type="button" aria-label="Payer maintenant">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
               <span>Payer maintenant</span>
             </button>
-            <button id="devisSend" class="devis-btn devis-btn--wa" type="button">
+            <button id="devisSend" class="devis-btn devis-btn--wa" type="button" aria-label="Envoyer le devis par WhatsApp">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.553 4.106 1.52 5.833L0 24l6.336-1.495A11.952 11.952 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.82c-1.97 0-3.867-.528-5.526-1.525l-.396-.235-3.763.888.948-3.671-.26-.412A9.776 9.776 0 012.18 12c0-5.422 4.398-9.82 9.82-9.82 5.422 0 9.82 4.398 9.82 9.82 0 5.422-4.398 9.82-9.82 9.82z"/></svg>
               <span>Envoyer le devis</span>
             </button>
-            <button id="devisClear" class="devis-btn devis-btn--clear" type="button">
+            <button id="devisClear" class="devis-btn devis-btn--clear" type="button" aria-label="Vider le panier">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
               <span>Vider</span>
             </button>
@@ -676,15 +735,15 @@
 
         <!-- Navigation par onglets -->
         <div class="acc-tabs" role="tablist" aria-label="Sections du compte">
-          <button class="acc-tab active" role="tab" data-acc-tab="profile" aria-selected="true">
+          <button class="acc-tab active" role="tab" data-acc-tab="profile" aria-selected="true" aria-label="Profil">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             <span>Profil</span>
           </button>
-          <button class="acc-tab" role="tab" data-acc-tab="orders" aria-selected="false">
+          <button class="acc-tab" role="tab" data-acc-tab="orders" aria-selected="false" aria-label="Commandes">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
             <span>Commandes</span>
           </button>
-          <button class="acc-tab" role="tab" data-acc-tab="settings" aria-selected="false">
+          <button class="acc-tab" role="tab" data-acc-tab="settings" aria-selected="false" aria-label="Parametres">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             <span>Paramètres</span>
           </button>
@@ -789,10 +848,10 @@
           </div>
 
           <div class="auth-tabs" role="tablist" aria-label="Choix de formulaire">
-            <button id="authLoginTab" class="auth-tab active" role="tab" aria-controls="authLogin" aria-selected="true">
+            <button id="authLoginTab" class="auth-tab active" role="tab" aria-controls="authLogin" aria-selected="true" aria-label="Connexion">
               <span class="auth-tab__icon">🔑</span> Connexion
             </button>
-            <button id="authRegisterTab" class="auth-tab" role="tab" aria-controls="authRegister" aria-selected="false">
+            <button id="authRegisterTab" class="auth-tab" role="tab" aria-controls="authRegister" aria-selected="false" aria-label="Inscription">
               <span class="auth-tab__icon">⚓</span> Inscription
             </button>
             <div class="auth-tabs__indicator"></div>
@@ -871,6 +930,130 @@
       <div id="aboContent"></div>
     </section>
 
+    <!-- CONTACT -->
+    <section id="view-contact" class="view hidden" data-route="/contact" role="region" aria-labelledby="contact-h1">
+      <div class="container">
+        <div class="contact-wrap">
+          <header class="contact-header">
+            <h1 id="contact-h1" tabindex="-1">Contactez-nous</h1>
+            <p class="contact-subtitle">Une question sur un produit, une demande de devis, un besoin particulier ? On te répond rapidement.</p>
+          </header>
+
+          <div class="contact-grid">
+            <aside class="contact-info">
+              <div class="contact-info__card">
+                <span class="contact-info__icon" aria-hidden="true">&#9742;</span>
+                <div>
+                  <strong>Téléphone</strong>
+                  <a href="tel:+33744776598">07 44 77 65 98</a>
+                </div>
+              </div>
+              <div class="contact-info__card">
+                <span class="contact-info__icon" aria-hidden="true">&#128172;</span>
+                <div>
+                  <strong>WhatsApp</strong>
+                  <a href="https://wa.me/33744776598" target="_blank" rel="noopener">wa.me/33744776598</a>
+                </div>
+              </div>
+              <div class="contact-info__card">
+                <span class="contact-info__icon" aria-hidden="true">&#9200;</span>
+                <div>
+                  <strong>Disponibilité</strong>
+                  <span>Lun–Sam, 8h–19h</span>
+                </div>
+              </div>
+              <div class="contact-info__card">
+                <span class="contact-info__icon" aria-hidden="true">&#128205;</span>
+                <div>
+                  <strong>Livraison</strong>
+                  <span>Antilles françaises</span>
+                </div>
+              </div>
+            </aside>
+
+            <form id="contactForm" class="contact-form" autocomplete="on" novalidate>
+              <div class="contact-form__row">
+                <label class="contact-field">
+                  <span>Nom <em aria-hidden="true">*</em></span>
+                  <input id="contactName" name="name" type="text" required maxlength="100" autocomplete="name">
+                </label>
+                <label class="contact-field">
+                  <span>Email <em aria-hidden="true">*</em></span>
+                  <input id="contactEmail" name="email" type="email" required maxlength="200" autocomplete="email">
+                </label>
+              </div>
+              <label class="contact-field">
+                <span>Téléphone (optionnel)</span>
+                <input id="contactPhone" name="phone" type="tel" maxlength="30" autocomplete="tel">
+              </label>
+              <label class="contact-field">
+                <span>Sujet</span>
+                <input id="contactSubject" name="subject" type="text" maxlength="200" placeholder="Demande de devis, question produit…">
+              </label>
+              <label class="contact-field">
+                <span>Message <em aria-hidden="true">*</em></span>
+                <textarea id="contactMessage" name="message" required minlength="10" maxlength="5000" rows="6"></textarea>
+              </label>
+              <!-- Honeypot (hidden from users, bots fill it) -->
+              <input type="text" name="website" id="contactHoneypot" class="contact-form__honeypot" tabindex="-1" aria-hidden="true" autocomplete="off">
+              <div class="contact-form__actions">
+                <button type="submit" class="btn btn--primary" id="contactSubmit">Envoyer le message</button>
+                <span id="contactStatus" class="contact-form__status" aria-live="polite"></span>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WISHLIST (favoris) -->
+    <section id="view-wishlist" class="view hidden" data-route="/favoris" role="region" aria-labelledby="wishlist-h1">
+      <div class="container">
+        <header class="wishlist-header">
+          <h1 id="wishlist-h1" tabindex="-1">Mes favoris</h1>
+          <p class="wishlist-subtitle">Tes produits préférés, accessibles en un clic.</p>
+        </header>
+        <div id="wishlistList" class="wishlist-list"></div>
+      </div>
+    </section>
+
+    <!-- ADMIN (Stock + prix, derrière ADMIN_SECRET) -->
+    <section id="view-admin" class="view hidden" data-route="/admin" role="region" aria-labelledby="admin-h1">
+      <h1 id="admin-h1" class="sr-only">Administration</h1>
+      <div id="adminView"></div>
+    </section>
+
+    <!-- TERRITOIRE DOM-TOM (Guadeloupe, Martinique, Guyane, Réunion, Mayotte) -->
+    <section id="view-territoire" class="view hidden" data-route="/territoire" role="region" aria-labelledby="terrView-h1">
+      <div class="container terr-view">
+        <header class="terr-view__hero">
+          <span class="terr-view__flag" id="terrViewFlag" aria-hidden="true">🏝️</span>
+          <h1 id="terrView-h1" tabindex="-1">Outillage pro en <span id="terrViewName">Outre-mer</span></h1>
+          <p class="terr-view__lead" id="terrViewLead">Livraison rapide, octroi de mer calculé automatiquement, garantie constructeur et SAV local.</p>
+          <div class="terr-view__rates" id="terrViewRates"></div>
+          <div class="terr-view__cta">
+            <a class="btn primary" href="#/catalogue" data-nav="/catalogue">Voir le catalogue</a>
+            <a class="btn btn-wa" id="terrViewWa" href="#" target="_blank" rel="noopener noreferrer">💬 Devis WhatsApp</a>
+          </div>
+        </header>
+
+        <section class="terr-view__section">
+          <h2>Produits phares pour votre chantier</h2>
+          <div id="terrViewProducts" class="product-grid"></div>
+        </section>
+
+        <section class="terr-view__section">
+          <h2>Livraison & délais</h2>
+          <div id="terrViewShipping" class="terr-view__shipping"></div>
+        </section>
+
+        <section class="terr-view__section">
+          <h2>Questions fréquentes</h2>
+          <div id="terrViewFaq" class="faq-list"></div>
+        </section>
+      </div>
+    </section>
+
     <!-- MERCI / Confirmation paiement -->
     <section id="view-merci" class="view hidden" data-route="/merci" role="region" aria-labelledby="merci-h1">
       <div class="container" style="text-align:center;padding:3rem 1rem">
@@ -905,11 +1088,11 @@
       <!-- Onglets : Carte / Crypto -->
       <div class="pay-tabs" role="tablist" aria-label="Modes de paiement">
         <button class="pay-tab is-active" type="button" role="tab"
-                data-pay-tab="card" aria-selected="true">
+                data-pay-tab="card" aria-selected="true" aria-label="Paiement par carte bancaire">
           <span class="pay-tab__icon">💳</span> Carte bancaire
         </button>
         <button class="pay-tab" type="button" role="tab"
-                data-pay-tab="crypto" aria-selected="false">
+                data-pay-tab="crypto" aria-selected="false" aria-label="Paiement en cryptomonnaie">
           <span class="pay-tab__icon">🪙</span> Cryptomonnaie
         </button>
       </div>
@@ -921,19 +1104,15 @@
           <strong id="payModalTotal">0,00 €</strong>
         </div>
 
-        <!-- ── Panneau CARTE (Stripe) ── -->
+        <!-- ── Panneau CARTE (Stripe Elements) ── -->
         <div class="pay-pane is-active" data-pay-pane="card">
-          <details class="paytuto paytuto--mini" open>
-            <summary>
-              <span class="paytuto__title">📘 Comment ça se passe</span>
-              <span class="paytuto__chev">▾</span>
-            </summary>
-            <ol class="paytuto__steps">
-              <li><span class="paytuto__num">1</span><div><strong>Clique sur « Payer en toute sécurité »</strong><p>Tu es redirigé vers la page sécurisée Stripe.</p></div></li>
-              <li><span class="paytuto__num">2</span><div><strong>Renseigne ta carte</strong><p>Carte bancaire, Apple Pay ou Google Pay acceptés.</p></div></li>
-              <li><span class="paytuto__num">3</span><div><strong>Reviens sur le site</strong><p>Ta commande est confirmée automatiquement.</p></div></li>
-            </ol>
-          </details>
+          <!-- Stripe Payment Element mount point -->
+          <div id="stripeElementsWrap" class="stripe-elements-wrap">
+            <div id="stripePaymentElement" class="stripe-payment-element">
+              <!-- Stripe Elements will mount here -->
+            </div>
+            <div id="stripeCardError" class="stripe-card-error" role="alert" hidden></div>
+          </div>
           <div class="pay-modal__trust">
             <div class="pay-modal__trust-row">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
@@ -1060,11 +1239,11 @@
       </div>
 
       <div class="pay-modal__footer">
-        <button id="payModalConfirm" class="btn primary btn--lg btn--glow" type="button">
+        <button id="payModalConfirm" class="btn primary btn--lg btn--glow" type="button" aria-label="Payer en toute securite">
           <span class="pay-modal__btn-icon">💳</span>
           Payer en toute sécurité
         </button>
-        <button id="payModalCryptoConfirm" class="btn primary btn--lg btn--glow" type="button" hidden>
+        <button id="payModalCryptoConfirm" class="btn primary btn--lg btn--glow" type="button" hidden aria-label="Confirmer le paiement crypto">
           <span class="pay-modal__btn-icon">✅</span>
           J'ai effectué le paiement
         </button>
@@ -1079,7 +1258,7 @@
       <div class="footer-grid">
         <div class="footer-col">
           <h4>Pirates Tools</h4>
-          <p>Outillage professionnel pour les Antilles. DeWALT, Milwaukee, Makita et plus.</p>
+          <p>Outillage professionnel livré dans les DOM-TOM. DeWALT, Makita, Festool, Flex, Facom et plus. Octroi de mer et TVA inclus.</p>
         </div>
         <div class="footer-col">
           <h4>Navigation</h4>
@@ -1088,12 +1267,40 @@
             <a href="#/catalogue">Catalogue</a>
             <a href="#/devis">Mon devis</a>
             <a href="#/compte">Mon compte</a>
+            <a href="#/contact">Contact</a>
+          </nav>
+        </div>
+        <div class="footer-col">
+          <h4>Livraison DOM-TOM</h4>
+          <nav class="footer-territories">
+            <a href="#/guadeloupe">Guadeloupe (971)</a>
+            <a href="#/martinique">Martinique (972)</a>
+            <a href="#/guyane">Guyane (973)</a>
+            <a href="#/reunion">La Réunion (974)</a>
+            <a href="#/mayotte">Mayotte (976)</a>
           </nav>
         </div>
         <div class="footer-col">
           <h4>Contact</h4>
-          <a href="tel:+33774230195">07 74 23 01 95</a>
-          <a href="https://wa.me/33774230195" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+          <a href="tel:+33744776598">07 44 77 65 98</a>
+          <a href="https://wa.me/33744776598" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+        </div>
+      </div>
+      <div class="footer-social">
+        <h4>Suivez-nous</h4>
+        <div class="footer-social__links">
+          <a href="https://facebook.com/piratestools" target="_blank" rel="noopener noreferrer" aria-label="Facebook" class="footer-social__link footer-social__link--fb">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            <span>Facebook</span>
+          </a>
+          <a href="https://www.instagram.com/pirates_tools_971" target="_blank" rel="noopener noreferrer" aria-label="Instagram" class="footer-social__link footer-social__link--ig">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+            <span>Instagram</span>
+          </a>
+          <a href="https://wa.me/33744776598" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" class="footer-social__link footer-social__link--wa">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            <span>WhatsApp</span>
+          </a>
         </div>
       </div>
       <div class="footer-bottom">
@@ -1101,6 +1308,27 @@
       </div>
     </div>
   </footer>
+
+  <!-- =================== FLOATING WHATSAPP =================== -->
+  <a id="waFloat" class="wa-float" href="https://wa.me/33744776598"
+     target="_blank" rel="noopener noreferrer" aria-label="Contacter sur WhatsApp"
+     data-action="wa-float">
+    <span class="wa-float__icon" aria-hidden="true">💬</span>
+    <span class="wa-float__label">WhatsApp</span>
+  </a>
+
+  <!-- =================== CONSENT BAR =================== -->
+  <div id="consentBar" class="consent-bar" role="dialog" aria-label="Consentement analytics" hidden>
+    <div class="consent-bar__inner">
+      <p class="consent-bar__text">
+        <strong>Respect de votre vie privée</strong> — Nous utilisons des cookies analytiques (GA4, Meta Pixel) pour mesurer l'audience et améliorer votre expérience d'achat. Aucune donnée personnelle n'est partagée à des fins publicitaires. Vous pouvez changer d'avis à tout moment.
+      </p>
+      <div class="consent-bar__actions">
+        <button type="button" class="btn consent-bar__deny" data-consent="deny">Refuser</button>
+        <button type="button" class="btn primary consent-bar__accept" data-consent="accept">Accepter les cookies</button>
+      </div>
+    </div>
+  </div>
 
   <!-- =================== DOCK =================== -->
   <nav id="dock" class="dock" aria-label="Barre d'action">
@@ -1111,8 +1339,8 @@
         🛒
         <span id="dockCount" class="dock__badge">0</span>
       </button>
-      <a class="dock__btn dock__btn--call" href="tel:+33774230195" aria-label="Appeler">📞</a>
-      <a class="dock__btn dock__btn--wa" href="https://wa.me/33774230195" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">💬</a>
+      <a class="dock__btn dock__btn--call" href="tel:+33744776598" aria-label="Appeler">📞</a>
+      <a class="dock__btn dock__btn--wa" href="https://wa.me/33744776598" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">💬</a>
     </div>
   </nav>
 
@@ -1150,12 +1378,44 @@
         <span>Devis</span>
       </a>
 
+      <a href="#/favoris" data-route="#/favoris">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 21s-7.5-4.35-10-9.2C.6 8.3 2.7 4.5 6.5 4.5c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.9 3.8 4.5 7.3C19.5 16.65 12 21 12 21z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Favoris</span>
+      </a>
+
       <a href="#/compte" data-route="#/compte">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <circle cx="12" cy="8" r="4.5" fill="none" stroke="currentColor" stroke-width="2.5"/>
           <path d="M4 21a8 8 0 0 1 16 0" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
         </svg>
         <span>Compte</span>
+      </a>
+
+      <a href="#/contact" data-route="#/contact">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3 6l9 7 9-7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="3" y="5" width="18" height="14" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="2.5"/>
+        </svg>
+        <span>Contact</span>
+      </a>
+
+      <hr class="menu-divider">
+      <span class="menu-section-label">Livraison DOM-TOM</span>
+      <a href="#/guadeloupe" class="menu-terr-link">🇬🇵 Guadeloupe</a>
+      <a href="#/martinique" class="menu-terr-link">🇲🇶 Martinique</a>
+      <a href="#/guyane" class="menu-terr-link">🇬🇫 Guyane</a>
+      <a href="#/reunion" class="menu-terr-link">🇷🇪 La Réunion</a>
+      <a href="#/mayotte" class="menu-terr-link">🇾🇹 Mayotte</a>
+
+      <hr class="menu-divider">
+      <a href="#/admin" data-route="#/admin">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7z" fill="none" stroke="currentColor" stroke-width="2.5"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" fill="none" stroke="currentColor" stroke-width="2.5"/>
+        </svg>
+        <span>Administration</span>
       </a>
     </nav>
   </aside>
@@ -1256,7 +1516,9 @@
     document.getElementById('dbgClose').addEventListener('click',function(){panel.style.display='none'});
   })();
   </script>
-  <script defer src="app.js?v=275"></script>
+  <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
+  <script src="https://js.stripe.com/v3/" async></script>
+  <script defer src="app.js?v=289"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->
