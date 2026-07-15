@@ -193,6 +193,40 @@ NOTE : le flux checkout (repli sans Stripe.js) collecte l'adresse via Stripe
 (shipping_address_collection) — la remise y passe par coupon, le territoire y
 reste déclaré+détectif (pas de CP pré-session ; acceptable, flux secondaire).
 
+## Session tableau C — C1 à C8 (15/07/2026, SW v312, mergé master)
+Audit résiduel soldé, 8/8, 1 commit chacun, régression complète rejouée en fin
+de batch (2 tests périmés réalignés, zéro régression produit) :
+- ✅ C1 .btn--primary (jamais définie, 8 réfs) → unifiée sur .btn.primary.
+- ✅ C2 accents : 94+8+35 remplacements en 3 passes CONTEXTUELLES (succes=type
+  toast, detail=<details> → jamais de sed aveugle) ; plans/abonnements inclus ;
+  products.json exclu (données). Corollaire : skip-link top -42→-80px (liseré
+  blanc détecté par analyse de pixels du coin haut-gauche).
+- ✅ C3 preload 3D : cartes loading="lazy" (l'IO ~700px upgrade + charge le
+  script) — accès direct #/catalogue fonctionnel (15 cartes, 8 upgradées,
+  1 injection) + bonus perf (GLB sous le fold non chargés).
+- ✅ C4 fork inline FUSIONNÉ : 3 blocs <style> déplacés VERBATIM en fin de
+  styles.css (§45) — cascade équivalente par construction ; 0 <style> dans le
+  HTML ; échelle z-index corrigée aux valeurs EFFECTIVES (backdrop 1000,
+  drawer 1001, toasts 10000). Vérifié : styles calculés identiques + diff
+  pixels 0,000 % + drawer/toast/dock réels. Dédoublonnage NON fait (étape
+  suivante possible, sans urgence).
+- ✅ C5 updateEmail : Auth D'ABORD → Firestore ENSUITE ; échec Auth = zéro
+  divergence (doc intact, champ restauré, message précis) ; profil enregistré
+  indépendamment. Prouvé par stub PT_FIREBASE journalisant l'ordre des appels.
+- ✅ C6 a11y : trapFocus réel (Tab/Shift+Tab confinés, restauration au
+  déclencheur — getClientRects car offsetParent null sous fixed) sur payModal
+  + drawer ; focus du h1 de vue à chaque VRAI changement de route (clé
+  route|slug — onRouteChange re-tire sur la même route au boot, piège détecté
+  par harnais) ; skip-link réel (activation JS, pas de hash routeur).
+  9/9 assertions clavier.
+- ✅ C7 tokens : --accent/--accent-rgb/-deep/-dark/-soft ; 313 littéraux violets
+  → 0 dans styles.css ; canvas + emails serveur exclus (documenté) ; diff
+  pixels avant/après = 0,000 %.
+- ✅ C8 fidélité : plus AUCUN point sur envoi de devis (doc tracé status:
+  'quote') ; compte affiché depuis la dépense vérifiée (cache pt:loyalty
+  synchronisé serveur) ; champ profil `loyalty` legacy (ni incrémenté ni
+  affiché) ; barre = progression réelle vers le palier suivant.
+
 ## Vérification standard
 `cd pirates-tools && node scripts/ci.js` doit rester vert après chaque étape.
 Bump SW (`sw.js` VERSION + ASSET_VER) et `?v=` dans `index.html` à chaque changement d'asset.
