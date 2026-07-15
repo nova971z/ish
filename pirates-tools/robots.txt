@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /api/
 
-Sitemap: https://ish-ebon.vercel.app/sitemap.xml
+Sitemap: https://pirates-tools.com/sitemap.xml

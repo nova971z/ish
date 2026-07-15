@@ -2,7 +2,7 @@
   PIRATES TOOLS — PWA E-Commerce (Vanilla HTML / CSS / JS)
 ═══════════════════════════════════════════════════════════════════
 
-URL prod : https://ish-ebon.vercel.app/ (Vercel) — legacy : https://nova971z.github.io/ish/
+URL prod : https://pirates-tools.com/ (domaine perso sur Vercel)
 Langue   : Français (fr-FR)
 Thème    : Dark (#0a0f14) · Accent violet (#8B5CF6)
 Version  : pt-v277 (Service Worker + ASSET_VER)

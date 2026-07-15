@@ -23,7 +23,7 @@
 //      }
 //
 // 6. Va dans Authentication -> Settings -> Authorized domains
-//    Ajoute le domaine de PRODUCTION : ish-ebon.vercel.app
+//    Ajoute le domaine de PRODUCTION : pirates-tools.com
 //    (+ les domaines de preview Vercel *.vercel.app si tu testes dessus,
 //     et localhost pour les tests locaux).
 //    ⚠️ Sans ce domaine autorisé, la connexion/inscription Firebase échoue.

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   Pirates Tools is a hash-routed single-page app (routes look like
-  https://ish-ebon.vercel.app/#/produit/…). Search engines strip everything
+  https://pirates-tools.com/#/produit/…). Search engines strip everything
   after the "#", so every hash route collapses to the same base URL: listing
   them here would only register duplicates of the homepage. This sitemap
   therefore declares the single crawlable URL — the app renders the rest
@@ -10,7 +10,7 @@
 -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://ish-ebon.vercel.app/</loc>
+    <loc>https://pirates-tools.com/</loc>
     <lastmod>2026-07-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>

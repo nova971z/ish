@@ -112,7 +112,7 @@ On ne touche pas au CSS mort tant qu'un client peut payer 1 centime un produit.
 
 ## Étape 5 — Cohérence de déploiement (paiement cassé sur le domaine livré)
 
-- **Décision préalable à acter** : **la production est Vercel** (`ish-ebon.vercel.app`), car le paiement carte a besoin de `/api/*` que GitHub Pages n'a pas.
+- **Décision préalable à acter** : **la production est Vercel**, domaine perso `pirates-tools.com`, car le paiement carte a besoin de `/api/*` que GitHub Pages n'a pas.
 - **5a — `PT_API_BASE`** (`index.html:47-48`) : confirmer `''` (même origine) et **retirer** l'auto-déploiement GitHub Pages, ou pointer `PT_API_BASE` vers l'origine Vercel si Pages doit rester une vitrine sans paiement.
 - **5b — Canonical / OG** (`index.html:14, 21`) : remplacer `https://nova971z.github.io/ish/` par l'URL Vercel de production.
 - **5c — `sitemap.xml`** : les 32 URLs en fragment `#/…` sont ignorées des crawlers. Décision : soit assumer le SPA (sitemap = page d'accueil seule + `robots`), soit mettre en place un rendu de routes réelles. À court terme : corriger le domaine et documenter la limite.

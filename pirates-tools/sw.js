@@ -1,5 +1,5 @@
 /* sw.js — Pirates Tools (PWA) */
-const VERSION        = 'pt-v293';                    // version du SW (logique SW)
+const VERSION        = 'pt-v294';                    // version du SW (logique SW)
 const STATIC_CACHE   = `pt-static-${VERSION}`;
 const RUNTIME_CACHE  = `pt-runtime-${VERSION}`;
 const IMG_CACHE      = `pt-img-${VERSION}`;
@@ -7,9 +7,9 @@ const DATA_CACHE     = `pt-data-${VERSION}`;
 const ORIGIN         = self.location.origin;
 
 // Aligner avec le HTML (cache-busting des assets)
-const ASSET_VER      = '293';
+const ASSET_VER      = '294';
 
-// Production = Vercel (ish-ebon.vercel.app), servi à la racine (/).
+// Production = Vercel (pirates-tools.com), servi à la racine (/).
 // On garde des chemins relatifs (./) pour que le SW fonctionne à l'identique
 // en local, en preview Vercel et en production.
 const APP_SHELL = [
