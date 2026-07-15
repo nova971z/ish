@@ -218,6 +218,10 @@
 </head>
 
 <body>
+  <!-- Lien d'evitement (WCAG 2.4.1) : premier element focusable, revele au
+       focus clavier (.skip-link:focus). Gere en JS (preventDefault + focus)
+       pour ne pas polluer le hash du routeur SPA. -->
+  <a class="skip-link" href="#app" id="skipLink">Aller au contenu</a>
   <!-- =================== TOPBAR =================== -->
   <header class="topbar" role="banner">
     <div class="topbar-left">
@@ -272,7 +276,7 @@
   <div id="pt-loadbar" class="pt-loadbar" aria-hidden="true"><span></span></div>
 
   <!-- =================== VUES (SPA) =================== -->
-  <main id="app" role="main">
+  <main id="app" role="main" tabindex="-1">
 
     <!-- HOME -->
     <section id="view-home" class="view" data-route="/" role="region" aria-labelledby="home-h1">

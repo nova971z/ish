@@ -2890,6 +2890,8 @@
     return { route: hash, slug: null };
   }
 
+  var _lastRouteKey = null;
+
   function onRouteChange() {
     var parsed = parseHash();
     var route = parsed.route;
@@ -3018,6 +3020,25 @@
     // Update <title> + meta description for SEO
     updateRouteMeta(route, parsed);
 
+    // A11y (WCAG 2.4.3) : focus sur le titre de la vue affichée. Sans lui, le
+    // lecteur d'écran n'annonce jamais la « nouvelle page » d'une SPA et le
+    // focus clavier reste sur le lien cliqué — les h1[tabindex="-1"] des vues
+    // existaient précisément pour ça mais n'étaient jamais focus.
+    // UNIQUEMENT quand la route change réellement : onRouteChange est re-invoqué
+    // sur la même route au boot (produits chargés, auth restaurée) et voler le
+    // focus à ces moments-là casserait la tabulation initiale (skip-link).
+    // preventScroll : scrollTopNow gère déjà le défilement.
+    var routeKey = route + '|' + (parsed.slug || '');
+    if (_lastRouteKey !== null && routeKey !== _lastRouteKey) {
+      var activeView = document.querySelector('.view:not(.hidden)');
+      var viewTitle = activeView ? activeView.querySelector('h1') : null;
+      if (viewTitle) {
+        if (!viewTitle.hasAttribute('tabindex')) viewTitle.setAttribute('tabindex', '-1');
+        try { viewTitle.focus({ preventScroll: true }); } catch (_) { viewTitle.focus(); }
+      }
+    }
+    _lastRouteKey = routeKey;
+
     // Analytics : page view + territory view
     if (typeof track === 'function') {
       track('page_view', { route: route, slug: parsed.slug || null });
@@ -3110,9 +3131,49 @@
     }
   }
 
+  // ── Piège de focus (a11y, WCAG 2.4.3) ──────────────────────
+  // aria-modal="true" promet que la tabulation reste confinée au dialogue et
+  // que le focus revient au déclencheur à la fermeture — c'est ce que ce
+  // utilitaire implémente réellement (modale de paiement + menu latéral).
+  // Retourne une fonction release() : retire le handler et restaure le focus.
+  function trapFocus(container) {
+    var previous = document.activeElement;
+    function focusables() {
+      var sel = 'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])';
+      return Array.prototype.filter.call(container.querySelectorAll(sel), function (el) {
+        // getClientRects : vrai test de visibilité (offsetParent est null pour
+        // les descendants de position:fixed → inutilisable ici).
+        return !el.disabled && el.getClientRects().length > 0;
+      });
+    }
+    function onKeydown(e) {
+      if (e.key !== 'Tab') return;
+      var els = focusables();
+      if (!els.length) return;
+      var first = els[0];
+      var last = els[els.length - 1];
+      var inside = container.contains(document.activeElement);
+      if (e.shiftKey && (document.activeElement === first || !inside)) {
+        e.preventDefault(); last.focus();
+      } else if (!e.shiftKey && (document.activeElement === last || !inside)) {
+        e.preventDefault(); first.focus();
+      }
+    }
+    document.addEventListener('keydown', onKeydown, true);
+    var target = focusables()[0] || container;
+    try { target.focus({ preventScroll: true }); } catch (_) { target.focus(); }
+    return function release() {
+      document.removeEventListener('keydown', onKeydown, true);
+      if (previous && typeof previous.focus === 'function') {
+        try { previous.focus({ preventScroll: true }); } catch (_) {}
+      }
+    };
+  }
+
   // ── Sidebar menu ───────────────────────────────────────────
 
   var menuOpen = false;
+  var _menuTrapRelease = null;
 
   function openMenu() {
     if (menuOpen) return;
@@ -3124,6 +3185,7 @@
     if (dom.menuBackdrop) dom.menuBackdrop.style.display = 'block';
     if (dom.menuToggle) dom.menuToggle.setAttribute('aria-expanded', 'true');
     document.body.classList.add('menu-open');
+    if (dom.sideMenu) _menuTrapRelease = trapFocus(dom.sideMenu);
   }
 
   function closeMenu() {
@@ -3136,6 +3198,7 @@
     if (dom.menuBackdrop) dom.menuBackdrop.style.display = 'none';
     if (dom.menuToggle) dom.menuToggle.setAttribute('aria-expanded', 'false');
     document.body.classList.remove('menu-open');
+    if (_menuTrapRelease) { _menuTrapRelease(); _menuTrapRelease = null; }
   }
 
   function toggleMenu() {
@@ -4167,6 +4230,11 @@
     requestAnimationFrame(function () { modal.classList.add('is-open'); });
     document.body.style.overflow = 'hidden';
 
+    // Confinement clavier réel (promis par aria-modal) + restauration du
+    // focus au déclencheur à la fermeture.
+    if (_payTrapRelease) _payTrapRelease();
+    _payTrapRelease = trapFocus(modal);
+
     // Adresse d'abord : le formulaire carte (et le PaymentIntent) ne sont
     // créés qu'après une adresse de livraison valide — le code postal fixe le
     // territoire fiscal côté serveur (préventif A1).
@@ -4187,9 +4255,12 @@
     }
   }
 
+  var _payTrapRelease = null;
+
   function closePayModal() {
     var modal = document.getElementById('payModal');
     if (!modal) return;
+    if (_payTrapRelease) { _payTrapRelease(); _payTrapRelease = null; }
     modal.classList.remove('is-open');
     setTimeout(function () {
       modal.hidden = true;
@@ -6581,6 +6652,16 @@
 
   function init() {
     cacheDom();
+    // Skip-link : focus programmatique du <main> (preventDefault — un vrai
+    // saut #app passerait par le routeur hash et re-rendrait l'accueil).
+    var skipLink = document.getElementById('skipLink');
+    if (skipLink) {
+      skipLink.addEventListener('click', function (e) {
+        e.preventDefault();
+        var main = document.getElementById('app');
+        if (main) { try { main.focus({ preventScroll: false }); } catch (_) { main.focus(); } }
+      });
+    }
     loadTerritory();
     loadConsent();
     setupTerritorySelector();
