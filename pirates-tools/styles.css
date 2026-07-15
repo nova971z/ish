@@ -1141,6 +1141,11 @@ body.page-devis #view-devis {
   align-items: center;
   gap: .6rem;
   margin-top: .3rem;
+  /* wrap : sur mobile étroit, sous-total + boutons Payer/Supprimer débordaient
+     SUR le stepper quantité (subtotal nowrap + margin-left:auto) et avalaient
+     les taps +/− — détecté par hit-test audit. Avec wrap, la ligne se replie
+     proprement ; aucun effet desktop (l'espace suffit). */
+  flex-wrap: wrap;
 }
 
 /* ── Qty Stepper ── */
@@ -2448,6 +2453,22 @@ flex-wrap: wrap;
 gap: .6rem;
 margin: 0 0 1rem;
 padding: 0;
+}
+
+/* Mobile : RANGÉE UNIQUE défilante (pattern e-commerce standard). En wrap,
+   les 8 chips s'empilaient sur 4 rangées jusqu'au bas de l'écran — la
+   dernière tombait sous le bandeau cookies qui avalait les taps (bug
+   « les boutons catégorie ne marchent pas »). */
+@media (max-width: 640px) {
+  .cat-list {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+  }
+  .cat-list::-webkit-scrollbar { display: none; }
+  .cat-list .cat-chip { flex: 0 0 auto; white-space: nowrap; }
 }
 
 .cat-card {
@@ -6534,16 +6555,40 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 }
 .consent-bar__text { flex: 1; min-width: 220px; margin: 0; line-height: 1.5; }
 .consent-bar__text strong { color: #fff; display: block; margin-bottom: 4px; font-size: 14px; }
+.consent-bar__link { color: var(--accent-soft); text-decoration: underline; }
 .consent-bar__actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .consent-bar .btn { padding: 8px 16px; font-size: 13px; }
 .consent-bar__deny { opacity: 0.7; }
 .consent-bar__deny:hover { opacity: 1; }
 
 @media (max-width: 640px) {
+  /* BUG corrigé : remonté de 96px (dock) + texte long empilé sur ~8 lignes,
+     le bandeau formait un pavé ~350px qui recouvrait les filtres du catalogue
+     et AVALAIT les taps (fixed, z 9700) tant que l'utilisateur n'avait pas
+     répondu — soit à chaque session en navigation privée. Version compacte :
+     typo réduite + garde-fou max-height à défilement interne. Le bandeau ne
+     peut plus manger que ~le quart bas de l'écran. */
   .consent-bar {
-    bottom: calc(96px + env(safe-area-inset-bottom, 0));
+    /* Tout en bas (8px), PAS remonté au-dessus du dock : la remontée de 96px
+       plaçait le pavé pile sur les filtres du catalogue (viewport ~664px).
+       Le bandeau peut recouvrir le dock TEMPORAIREMENT (z 9700 > dock 999) —
+       on lui répond une fois et il disparaît ; le contenu de la page, lui,
+       doit rester tapable en permanence. */
+    left: 8px;
+    right: 8px;
+    bottom: calc(8px + env(safe-area-inset-bottom, 0));
+    font-size: 12px;
+    max-height: 30vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
-  .consent-bar__inner { padding: 12px 14px; }
+  /* Pile verticale : texte pleine largeur (2 lignes) puis boutons — sinon les
+     boutons écrasaient le texte en colonne étroite de ~8 lignes. */
+  .consent-bar__inner { padding: 8px 10px; gap: 6px; flex-direction: column; align-items: stretch; }
+  .consent-bar__text { line-height: 1.35; min-width: 0; }
+  .consent-bar__text strong { display: inline; font-size: 12px; margin: 0 4px 0 0; }
+  .consent-bar__actions { justify-content: flex-end; }
+  .consent-bar .btn { padding: 6px 10px; font-size: 12px; }
 }
 
 /* ========== 38) WHATSAPP FLOTTANT ========== */
