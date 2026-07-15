@@ -242,6 +242,21 @@ behavior:'instant' — OBLIGATOIRE, le smooth global fausse les lectures) +
 volet B fonctionnel (chips, recherche, select, PDP, panier, modale, menu,
 territoire, carrousel, auth, contact, footer, dock). Résultat final : 0 défaut.
 
+## Session résilience écran noir (15/07/2026, SW v314, mergé master)
+Bug iPad intermittent : page noire (vues .hidden), seuls topbar/dock/WhatsApp
+statiques affichés. Cause : après un déploiement (8 bumps ce jour-là), app.js
+?v=NOUVEAU absent du cache SW + hoquet réseau → handleStatic rendait 504 VIDE
+→ app jamais exécutée, aucune relance. Introuvable en harnais SANS SW —
+reproduit avec page contrôlée par SW + serveur coupé. Défense en 2 étages :
+- sw.js fromCacheAnyVersion : dernier recours = même chemin en cache,
+  ignoreSearch (app périmée fonctionnelle > page morte ; SWR rafraîchit après).
+- index.html watchdog inline #ptBootWatchdog : PT_BOOTED (fin d'init app.js)
+  absent après 7 s → message + bouton Recharger. Plus JAMAIS d'écran noir muet.
+Vérifié 5/5 : app.js coupé→watchdog ; boot normal→pas de watchdog ; SW
+contrôle ; serveur coupé + ?v=inconnu → 200 depuis le cache (273 Ko).
+PIÈGE TEST : querySelector('div[role=alert]') matche #stripeCardError en
+premier — cibler #ptBootWatchdog.
+
 ## Vérification standard
 `cd pirates-tools && node scripts/ci.js` doit rester vert après chaque étape.
 Bump SW (`sw.js` VERSION + ASSET_VER) et `?v=` dans `index.html` à chaque changement d'asset.
