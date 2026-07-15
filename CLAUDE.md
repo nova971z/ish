@@ -51,7 +51,14 @@ Règle : **1 étape = 1 problème = 1 commit = 1 vérification verte**. Jamais d
        7e APP_SHELL nettoyé (pt.js inexistant retiré, clé shell unique ./index.html, fin du triple stockage + staleness clé versionnée).
        7f handleProducts : réponse non-ok → fallback cache. 7g branches opaque mortes supprimées.
        favicon/manifest/apple-touch-icon versionnés dans index.html (90-92) pour matcher le précache.
-- [ ] 8. Bugs runtime app.js (starBtns, storage guards, confirmPayment catch, NOWPayments)
+- [x] 8. Bugs runtime app.js ✅ commit, SW v296
+       8a starBtns → reset via starsSelect.querySelectorAll (fin du ReferenceError à l'envoi d'avis).
+       8b saveCart + saveHomeReview : try/catch sur setItem (Safari privé/quota).
+       8c confirmPayment : .catch (bouton réactivé si réseau coupe, plus de rejection non gérée).
+       8d NOWPayments : suppression du chemin client x-api-key (fuite clé de compte) ; config cardCheckout réduite à {url:''}. co.url (lien pré-généré) reste. Dynamique → futur endpoint serverless.
+       8f fuites listeners : setupModelViewerScrollPassthrough retire mouseleave/touchstart ; pdpWa → onclick (plus d'empilement).
+       8g garde auth : redirection /compte↔/auth seulement si _authReady (fin double-flicker au reload).
+       8e QR crypto tiers (qrserver) : MITIGÉ (avertissement → l'adresse texte fait foi, pas le QR). REPORTÉ : génération QR locale (lib complète ~1000 l. ; blob invérifiable ou encodeur maison risqué refusés). À traiter comme tâche dédiée révisée avant lancement crypto.
 - [ ] 9. Assainir CSS/HTML (fork inline, CSS mort, z-index, h1)
        À INCLURE : lumière dorée derrière le logo hero manquante en prod (signalé user 15/07) — restaurer le glow.
 - [ ] 10. Qualité structurelle & CI (helpers partagés, carte produit unique, docs)

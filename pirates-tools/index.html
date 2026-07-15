@@ -31,7 +31,7 @@
   <link rel="dns-prefetch" href="https://js.stripe.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=295">
+  <link rel="stylesheet" href="styles.css?v=296">
 
   <!-- 3D model viewer -->
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
@@ -76,7 +76,10 @@
         address:'GKVmgduLmvVtqvds8oXsH4UFxmkbAVT2om4bXBo2eQbu',
         coingeckoId:'solana',   decimals:4, uriScheme:'solana:' }
     ],
-    cardCheckout: { url:'', nowpaymentsApiKey:'', nowpaymentsPayCurrency:'usdttrc20' },
+    // url = lien de paiement pré-généré (sûr). NE PAS mettre de clé API
+    // NOWPayments ici : une clé de compte côté client fuiterait à chaque
+    // visiteur. Pour du crypto dynamique, passer par un endpoint serverless.
+    cardCheckout: { url:'' },
     whatsappNumber: '33744776598'
   };
   </script>
@@ -87,9 +90,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Pirates Tools" />
-  <link rel="manifest" href="manifest.webmanifest?v=295" />
-  <link rel="icon" href="icons/icon-192.png?v=295" sizes="192x192" />
-  <link rel="apple-touch-icon" href="icons/icon-180.png?v=295" sizes="180x180" />
+  <link rel="manifest" href="manifest.webmanifest?v=296" />
+  <link rel="icon" href="icons/icon-192.png?v=296" sizes="192x192" />
+  <link rel="apple-touch-icon" href="icons/icon-180.png?v=296" sizes="180x180" />
 
   <!-- Patch UI : haut non tronque + dock centre + bulles -->
   <style id="pt-fix">
@@ -224,7 +227,7 @@
         <img
           id="topbarLogo"
           class="topbar-logo"
-          src="icons/icon-192.png?v=295"
+          src="icons/icon-192.png?v=296"
           alt="Pirates Tools"
           width="40" height="40"
           decoding="async" loading="eager" fetchpriority="high" />
@@ -255,8 +258,8 @@
   <section id="hero" class="hero-full" aria-hidden="true">
     <div class="hero-logo-container initial" id="heroLogoContainer">
       <img id="heroLogo" class="hero-logo on" alt="Pirates Tools"
-        src="icons/icon-512.png?v=295"
-        srcset="icons/icon-256.png?v=295 256w, icons/icon-384.png?v=295 384w, icons/icon-512.png?v=295 512w"
+        src="icons/icon-512.png?v=296"
+        srcset="icons/icon-256.png?v=296 256w, icons/icon-384.png?v=296 384w, icons/icon-512.png?v=296 512w"
         sizes="(max-width: 768px) 90vw, 60vw"
         width="600" height="600"
         decoding="async" loading="eager" fetchpriority="high" />
@@ -1203,8 +1206,10 @@
               </div>
 
               <p class="cryptopay__warn">
-                ⚠️ Vérifie toujours le réseau avant d'envoyer. Un transfert
-                sur un mauvais réseau est <strong>irréversible</strong>.
+                ⚠️ Vérifie toujours le réseau <strong>et l'adresse affichée
+                ci-dessus</strong> avant d'envoyer — c'est l'adresse en texte qui
+                fait foi, pas le QR code. Un transfert sur un mauvais réseau ou
+                une mauvaise adresse est <strong>irréversible</strong>.
               </p>
             </section>
 
@@ -1522,7 +1527,7 @@
   </script>
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=295"></script>
+  <script defer src="app.js?v=296"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

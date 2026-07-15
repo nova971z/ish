@@ -210,7 +210,7 @@ On ne touche pas au CSS mort tant qu'un client peut payer 1 centime un produit.
 | 5 | Cohérence de déploiement | Déploiement | ✅ |
 | 6 | Webhook Stripe (raw body + idempotence) | Paiement | ✅ |
 | 7 | Bugs Service Worker | Résilience | ✅ |
-| 8 | Bugs runtime app.js | Résilience | ☐ |
+| 8 | Bugs runtime app.js | Résilience | ✅ (8e QR local reporté) |
 | 9 | Assainissement CSS/HTML | Structure | ☐ |
 | 10 | Qualité structurelle & CI | Structure | ☐ |
 

@@ -555,7 +555,9 @@
   }
 
   function saveCart(items) {
-    localStorage.setItem(CART_KEY, JSON.stringify({ version: '1', items: items }));
+    try {
+      localStorage.setItem(CART_KEY, JSON.stringify({ version: '1', items: items }));
+    } catch (e) { /* Safari privé / quota plein — n'interrompt pas l'ajout au panier */ }
     updateCartUI();
   }
 
@@ -1270,10 +1272,12 @@
   function setupModelViewerScrollPassthrough(mv) {
     if (!mv) return;
 
-    // Cleanup ancien listener
-    if (mv._wheelHandler) {
-      mv.removeEventListener('wheel', mv._wheelHandler, true);
-    }
+    // Cleanup des anciens listeners. mv (#pdp3d / #pdp3dSecondary) persiste entre
+    // les rendus PDP : sans retirer mouseleave/touchstart, ils s'accumulent à
+    // chaque renderPDP.
+    if (mv._wheelHandler)      mv.removeEventListener('wheel', mv._wheelHandler, true);
+    if (mv._mouseLeaveHandler) mv.removeEventListener('mouseleave', mv._mouseLeaveHandler);
+    if (mv._touchHandler)      mv.removeEventListener('touchstart', mv._touchHandler);
 
     var passActive = false;
 
@@ -1497,9 +1501,12 @@
     if (dom.pdpWa) {
       dom.pdpWa.href = waLink(waProductMessage(product, _currentTerritory));
       dom.pdpWa.target = '_blank';
-      dom.pdpWa.addEventListener('click', function () {
+      // onclick (et non addEventListener) : remplace le handler à chaque
+      // renderPDP au lieu d'en empiler un par produit visité (sinon N events
+      // whatsapp_click au premier clic, avec N id différents).
+      dom.pdpWa.onclick = function () {
         if (typeof track === 'function') track('whatsapp_click', { source: 'pdp', id: product.id });
-      }, { once: true });
+      };
     }
 
     // Share button (Web Share API with clipboard fallback)
@@ -1686,7 +1693,10 @@
       nameInput.value = '';
       textInput.value = '';
       selectedRating = 0;
-      for (var j = 0; j < starBtns.length; j++) starBtns[j].classList.remove('active');
+      if (starsSelect) {
+        var resetBtns = starsSelect.querySelectorAll('.pdp-reviews__star-btn');
+        for (var j = 0; j < resetBtns.length; j++) resetBtns[j].classList.remove('active');
+      }
 
       toast('Merci pour votre avis !', 'success');
       renderReviewsList();
@@ -1707,7 +1717,9 @@
   function saveHomeReview(review) {
     var reviews = getHomeReviews();
     reviews.unshift(review);
-    localStorage.setItem(HOME_REVIEWS_KEY, JSON.stringify(reviews));
+    try {
+      localStorage.setItem(HOME_REVIEWS_KEY, JSON.stringify(reviews));
+    } catch (e) { /* Safari privé / quota plein */ }
   }
 
   // ── Plans / Services interactif ────────────────────────────
@@ -2811,10 +2823,13 @@
     var parsed = parseHash();
     var route = parsed.route;
 
-    // Auth guards
-    var loggedIn = !!_currentUser;
-    if (route === '/compte' && !loggedIn) { location.hash = '#/auth'; return; }
-    if (route === '/auth' && loggedIn) { location.hash = '#/compte'; return; }
+    // Auth guards — n'appliquer la redirection qu'une fois la session Firebase
+    // restaurée (_authReady). Sinon un utilisateur connecté qui recharge sur
+    // #/compte est renvoyé vers #/auth puis ramené (double navigation/flicker).
+    // renderAccount() no-op tant que _currentUser est null ; onAuthStateChanged
+    // relance onRouteChange dès que l'auth est prête.
+    if (route === '/compte' && _authReady && !_currentUser) { location.hash = '#/auth'; return; }
+    if (route === '/auth' && _authReady && _currentUser) { location.hash = '#/compte'; return; }
 
     // Cleanup PDP animation loop when leaving product page
     if (route !== '/produit') {
@@ -3879,30 +3894,13 @@
       window.open(co.url, '_blank', 'noopener');
       return;
     }
-    if (co.nowpaymentsApiKey) {
-      // Crée dynamiquement une invoice NOWPayments avec le total panier.
-      var body = {
-        price_amount: Number(_cryptoTotalEur.toFixed(2)),
-        price_currency: 'eur',
-        pay_currency: co.nowpaymentsPayCurrency || 'usdttrc20',
-        order_description: 'Pirates Tools — commande',
-        success_url: location.origin + location.pathname + '#/merci',
-        cancel_url:  location.origin + location.pathname + '#/devis'
-      };
-      fetch('https://api.nowpayments.io/v1/invoice', {
-        method:'POST',
-        headers:{ 'Content-Type':'application/json', 'x-api-key': co.nowpaymentsApiKey },
-        body: JSON.stringify(body)
-      }).then(function(r){ return r.json(); }).then(function(j){
-        if (j && j.invoice_url) window.open(j.invoice_url, '_blank', 'noopener');
-        else toast("Impossible de créer l'invoice NOWPayments.", 'error');
-      }).catch(function(err){
-        console.error('NOWPayments:', err);
-        toast("Erreur réseau NOWPayments.", 'error');
-      });
-      return;
-    }
-    toast("Le paiement par carte n'est pas encore configuré. Édite crypto-config.js.", 'info');
+    // SÉCURITÉ : la création dynamique d'invoice NOWPayments a été RETIRÉE du
+    // client. Elle envoyait la clé API de compte (x-api-key) à chaque visiteur —
+    // n'importe qui pouvait l'extraire et créer des factures sur le compte
+    // marchand. Pour réactiver NOWPayments, passer par un endpoint serverless
+    // (/api/nowpayments) qui garde la clé côté serveur, comme pour Stripe.
+    // Le lien de paiement pré-généré (co.url) ci-dessus reste, lui, sûr.
+    toast("Le paiement crypto dynamique n'est pas encore disponible.", 'info');
   }
 
   function cryptoConfirmPaid() {
@@ -4278,6 +4276,20 @@
             location.hash = '#/merci';
           }
         }
+      })
+      .catch(function (err) {
+        // Réseau coupé / SDK Stripe en erreur : réactiver le bouton, sinon il
+        // reste bloqué sur « Traitement en cours… » avec une rejection non gérée.
+        console.error('[confirmPayment]', err && err.message);
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<span class="pay-modal__btn-icon">💳</span> Payer en toute sécurité';
+        }
+        if (errorEl) {
+          errorEl.textContent = 'Le paiement n\'a pas pu aboutir. Vérifiez votre connexion et réessayez.';
+          errorEl.hidden = false;
+        }
+        toast('Erreur réseau — paiement non abouti', 'error');
       });
       return;
     }
