@@ -161,12 +161,37 @@ Correctifs paiement, 1 commit chacun, tests unitaires + Playwright :
   refresh) ; périmé >2h purgé ; items=nombre + lines[] (fix affichage compte) ;
   stripeSessionId écrit (webhook peut confirmer) ; URL Stripe nettoyée
   (replaceState). 9 scénarios Playwright verts.
-NOTE OPS : les requêtes collectionGroup('orders') du webhook exigent des index
-Firestore collection-group sur stripeSessionId et paymentIntentId (le webhook
-logue l'URL de création au premier FAILED_PRECONDITION — à créer en 1 clic).
 Restent de l'audit (hors argent) : C1 .btn--primary jamais définie, C2 accents
 manquants, C3 preload 3D no-op catalogue, C5 updateEmail ordre, C6 a11y modales
-/focus/skip-link, C7 tokens couleur, C8 double fidélité.
+/focus/skip-link, C7 tokens couleur, C8 double fidélité (atténué : le local est
+désormais un cache synchronisé sur le serveur à chaque devis de paiement).
+
+## Session pré-C (15/07/2026, SW v311, mergé master) — suites A1-A5
+- ✅ Index Firestore RÉSOLU À LA RACINE : uid client → metadata Stripe (sanitisé
+  [A-Za-z0-9_-]{1,128}, jamais un droit) → webhook matche users/{uid}/orders en
+  CHEMIN DIRECT (index automatiques, rien à créer). collectionGroup = repli
+  (anciens paiements) couvert par firestore.indexes.json versionné
+  (`firebase deploy --only firestore:indexes` ou URL 1-clic loguée).
+  payments/ journalise l'uid (succeeded + failed).
+- ✅ REMISE FIDÉLITÉ RÉELLE (décision produit tranchée : oui) : _lib/loyalty.js,
+  dépense vérifiée = somme des payments 'succeeded' de l'uid (webhook-only →
+  infalsifiable). create-payment-intent débite brut−remise (metadata gross/pct/
+  discount, tronquée si <50c) ; checkout via coupon Stripe once ; webhook ajoute
+  la ligne négative « Remise fidélité −X % » (intégrité au centime conservée,
+  metadata mensongère→fallback) ; la modale se réaligne sur la réponse serveur
+  (total + ligne remise) et synchronise le cache local pt:loyalty ;
+  scripts/check-loyalty.js en CI (parité paliers app.js ↔ serveur).
+- ✅ ADRESSE AVANT PAIEMENT (décision produit tranchée : oui) : formulaire
+  adresse NATIF dans la modale carte (choix délibéré vs Address Element :
+  pas de refonte du flux confirm, pas de perte de saisie, testable). Le
+  formulaire carte n'apparaît qu'à adresse valide ; le CP fixe le territoire
+  (serveur re-dérive via _lib/postal.js = AUTORITAIRE ; hors DOM → 400) ;
+  changement de CP → PI re-créé au bon taux ; adresse attachée au PI ;
+  webhook détectif sur pi.shipping en priorité. 6 scénarios Playwright verts
+  + tests serveur (75001 refusé, 97110 prime, rétrocompat sans CP).
+NOTE : le flux checkout (repli sans Stripe.js) collecte l'adresse via Stripe
+(shipping_address_collection) — la remise y passe par coupon, le territoire y
+reste déclaré+détectif (pas de CP pré-session ; acceptable, flux secondaire).
 
 ## Vérification standard
 `cd pirates-tools && node scripts/ci.js` doit rester vert après chaque étape.
