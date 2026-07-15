@@ -3444,27 +3444,46 @@
     var phone = (dom.accPhone ? dom.accPhone.value : '').trim();
     var address = (dom.accAddress ? dom.accAddress.value : '').trim();
 
-    var updates = { name: name, phone: phone, address: address };
-    if (newEmail && newEmail !== _currentUser.email) updates.email = newEmail;
+    // C5 — ORDRE STRICT pour l'email : Auth D'ABORD, Firestore ENSUITE.
+    // L'ancienne version écrivait le nouvel email dans Firestore puis appelait
+    // updateEmail : si Auth refusait (cas courant auth/requires-recent-login),
+    // le document affichait durablement un email qui n'était PAS l'identité de
+    // connexion. Désormais le doc n'est mis à jour qu'après succès Auth, et un
+    // échec email n'annule pas l'enregistrement du reste du profil (feedback
+    // distinct pour chaque issue).
+    var profileUpdates = { name: name, phone: phone, address: address };
+    var emailChanged = !!(newEmail && newEmail !== _currentUser.email);
 
     var ref = _fb.doc(_fb.db, 'users', _currentUser.uid);
-    var p = _fb.updateDoc(ref, updates);
-
-    // Also update displayName on auth profile
-    if (name && name !== _currentUser.displayName) {
-      p = p.then(function () { return _fb.updateProfile(_fb.auth.currentUser, { displayName: name }); });
-    }
-    // Email change requires reauth in Firebase — best handled separately
-    if (newEmail && newEmail !== _currentUser.email) {
-      p = p.then(function () { return _fb.updateEmail(_fb.auth.currentUser, newEmail); });
-    }
-
-    p.then(function () {
-      _userProfile = Object.assign({}, _userProfile || {}, updates);
-      toast('Profil enregistre', 'success');
-    }).catch(function (err) {
-      toast(fbErrorMessage(err), 'error');
-    });
+    _fb.updateDoc(ref, profileUpdates)
+      .then(function () {
+        if (name && name !== _currentUser.displayName) {
+          return _fb.updateProfile(_fb.auth.currentUser, { displayName: name });
+        }
+      })
+      .then(function () {
+        _userProfile = Object.assign({}, _userProfile || {}, profileUpdates);
+        if (!emailChanged) {
+          toast('Profil enregistre', 'success');
+          return;
+        }
+        return _fb.updateEmail(_fb.auth.currentUser, newEmail)
+          .then(function () { return _fb.updateDoc(ref, { email: newEmail }); })
+          .then(function () {
+            _userProfile = Object.assign({}, _userProfile || {}, { email: newEmail });
+            toast('Profil et email mis a jour', 'success');
+          })
+          .catch(function (err) {
+            // Profil déjà enregistré ; l'email, lui, n'a PAS changé (ni en
+            // Auth ni en Firestore — cohérence garantie). Remet le champ sur
+            // la vraie valeur pour ne pas afficher un email non appliqué.
+            if (dom.accEmail) dom.accEmail.value = _currentUser.email || '';
+            toast('Profil enregistre, mais email non modifie : ' + fbErrorMessage(err), 'error');
+          });
+      })
+      .catch(function (err) {
+        toast(fbErrorMessage(err), 'error');
+      });
   }
 
   function handlePasswordChange(e) {
