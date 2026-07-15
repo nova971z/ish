@@ -6679,6 +6679,9 @@
     updateWishlistUI();
     injectOrganizationJsonLd();
     onRouteChange();
+    // Signal pour le watchdog de boot (index.html) : l'app a démarré et le
+    // routeur a affiché une vue — pas d'écran « chargement incomplet ».
+    window.PT_BOOTED = true;
   }
 
   if (document.readyState === 'loading') {
