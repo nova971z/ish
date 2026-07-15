@@ -148,6 +148,8 @@ async function handleSessionCompleted(stripe, fb, sessionLite) {
     || (fullSession.customer_details && fullSession.customer_details.address) || null;
   var tax = taxCheck(declaredTerritory, shipAddr);
 
+  var sessionUid = (fullSession.metadata && fullSession.metadata.uid) || null;
+
   // A2 — journal serveur : la trace existe même sans document client.
   await logPayment(fb, fullSession.id, {
     kind: 'checkout_session',
@@ -156,6 +158,7 @@ async function handleSessionCompleted(stripe, fb, sessionLite) {
     currency: (fullSession.currency || 'eur').toUpperCase(),
     customerEmail: (fullSession.customer_details && fullSession.customer_details.email) || fullSession.customer_email || null,
     paymentIntentId: typeof fullSession.payment_intent === 'string' ? fullSession.payment_intent : null,
+    uid: sessionUid,
     territoryDeclared: declaredTerritory,
     territoryFromAddress: tax.expectedTerritory,
     postalCode: tax.postalCode,
@@ -164,7 +167,7 @@ async function handleSessionCompleted(stripe, fb, sessionLite) {
 
   // Mark the matching Firestore order as paid (idempotent update).
   // Le champ stripeSessionId est écrit par le client sur /merci (étape A5).
-  await updateOrderWhere(fb, 'stripeSessionId', fullSession.id, {
+  await updateOrderWhere(fb, sessionUid, 'stripeSessionId', fullSession.id, {
     status: 'paid',
     stripePaymentIntent: typeof fullSession.payment_intent === 'string' ? fullSession.payment_intent : null
   });
@@ -212,6 +215,7 @@ async function handleIntentSucceeded(stripe, fb, pi) {
   var rebuilt = await rebuildLines(pi, declaredTerritory);
 
   var customerEmail = pi.receipt_email || billing.email || null;
+  var piUid = pi.metadata.uid || null;
 
   await logPayment(fb, pi.id, {
     kind: 'payment_intent',
@@ -220,6 +224,7 @@ async function handleIntentSucceeded(stripe, fb, pi) {
     currency: (pi.currency || 'eur').toUpperCase(),
     customerEmail: customerEmail,
     paymentIntentId: pi.id,
+    uid: piUid,
     territoryDeclared: declaredTerritory,
     territoryFromAddress: tax.expectedTerritory,
     postalCode: tax.postalCode,
@@ -230,7 +235,7 @@ async function handleIntentSucceeded(stripe, fb, pi) {
   // Le client écrit sa commande avec paymentIntentId sur /merci (A5). Selon la
   // course client/webhook le doc peut ne pas encore exister — le journal
   // payments/ ci-dessus reste la trace autoritaire dans tous les cas.
-  await updateOrderWhere(fb, 'paymentIntentId', pi.id, {
+  await updateOrderWhere(fb, piUid, 'paymentIntentId', pi.id, {
     status: 'paid',
     confirmedByWebhook: true
   });
@@ -254,6 +259,7 @@ async function handleIntentFailed(fb, pi) {
     currency: (pi.currency || 'eur').toUpperCase(),
     customerEmail: pi.receipt_email || null,
     paymentIntentId: pi.id,
+    uid: (pi.metadata && pi.metadata.uid) || null,
     territoryDeclared: (pi.metadata && pi.metadata.territory) || null,
     failureMessage: lastErr
   });
@@ -295,23 +301,27 @@ async function logPayment(fb, stripeId, data) {
   }
 }
 
-// Met à jour la commande client correspondante (collectionGroup users/*/orders).
-// Best-effort : requiert un index collection-group sur le champ interrogé —
-// en son absence Firestore renvoie FAILED_PRECONDITION avec l'URL de création.
-async function updateOrderWhere(fb, field, value, patch) {
+// Met à jour la commande client correspondante.
+// Chemin PRIVILÉGIÉ : users/{uid}/orders (uid depuis la metadata Stripe) —
+// requête de collection simple couverte par les index AUTOMATIQUES Firestore,
+// aucun index à créer. REPLI (uid absent — anciens paiements) : collectionGroup,
+// qui exige un index collection-group sur le champ interrogé (défini dans
+// firestore.indexes.json ; sans lui Firestore log FAILED_PRECONDITION avec
+// l'URL de création en 1 clic).
+async function updateOrderWhere(fb, uid, field, value, patch) {
   if (!fb.db || !value) return;
   try {
-    var snap = await fb.db.collectionGroup('orders')
-      .where(field, '==', value)
-      .limit(1)
-      .get();
+    var query = uid
+      ? fb.db.collection('users').doc(uid).collection('orders').where(field, '==', value)
+      : fb.db.collectionGroup('orders').where(field, '==', value);
+    var snap = await query.limit(1).get();
     if (!snap.empty) {
       await snap.docs[0].ref.update(Object.assign({}, patch, {
         paidAt: fb.admin.firestore.FieldValue.serverTimestamp()
       }));
-      console.log('[webhook] Order updated via', field, ':', snap.docs[0].id);
+      console.log('[webhook] Order updated via', (uid ? 'users/' + uid + '/orders.' : 'collectionGroup.') + field, ':', snap.docs[0].id);
     } else {
-      console.log('[webhook] No order matches', field, '=', value, '(client doc absent ou pas encore écrit)');
+      console.log('[webhook] No order matches', field, '=', value, uid ? '(uid ' + uid + ')' : '(sans uid)', '— client doc absent ou pas encore écrit');
     }
   } catch (fbErr) {
     console.error('[webhook] Firestore order update failed (' + field + '):', fbErr.message);
@@ -554,5 +564,6 @@ module.exports._internals = {
   buildTaxWarnings: buildTaxWarnings,
   rebuildLines: rebuildLines,
   modelFromSession: modelFromSession,
-  modelFromIntent: modelFromIntent
+  modelFromIntent: modelFromIntent,
+  updateOrderWhere: updateOrderWhere
 };

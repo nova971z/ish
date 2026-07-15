@@ -40,6 +40,11 @@ module.exports = async function handler(req, res) {
     var items = body.items;
     var customerEmail = body.customerEmail;
 
+    // uid Firebase (déclaratif — voir create-payment-intent.js) : matching
+    // commande + journal payments/ côté webhook. Sanitisé, jamais un droit.
+    var uid = typeof body.uid === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(body.uid)
+      ? body.uid : null;
+
     // Territoire STRICT (A1) : absent → défaut ; fourni mais inconnu → 400.
     // Même règle que create-payment-intent — le webhook confronte ensuite ce
     // code à l'adresse de livraison collectée ci-dessous.
@@ -106,11 +111,11 @@ module.exports = async function handler(req, res) {
       },
       success_url: baseUrl + '/#/merci?session_id={CHECKOUT_SESSION_ID}',
       cancel_url: baseUrl + '/#/devis',
-      metadata: {
+      metadata: Object.assign({
         source: 'pirates-tools',
         territory: String(territory),
         itemCount: String(items.length)
-      }
+      }, uid ? { uid: uid } : {})
     });
 
     return res.status(200).json({ ok: true, sessionId: session.id, url: session.url });

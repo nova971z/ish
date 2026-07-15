@@ -43,6 +43,14 @@ module.exports = async function handler(req, res) {
     var items = body.items;
     var customerEmail = body.customerEmail;
 
+    // uid Firebase (déclaratif) : uniquement pour retrouver la commande du
+    // client côté webhook (chemin users/{uid}/orders) et lier le journal
+    // payments/. Un uid forgé ne donne AUCUN droit : il ne fait que pointer
+    // vers une sous-collection où seul le vrai titulaire peut écrire (règles
+    // Firestore) — le matching échoue simplement. Sanitisé par prudence.
+    var uid = typeof body.uid === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(body.uid)
+      ? body.uid : null;
+
     // Territoire STRICT (A1) : absent → défaut ; fourni mais inconnu → 400.
     // Avant, un code invalide retombait silencieusement sur le défaut, ce qui
     // masquait toute tentative de manipulation du taux de taxe. Le code validé
@@ -105,7 +113,7 @@ module.exports = async function handler(req, res) {
         territory: String(territory),
         itemCount: String(validatedLines.length),
         serverTotalEur: (totalCents / 100).toFixed(2)
-      }, itemsMeta)
+      }, uid ? { uid: uid } : {}, itemsMeta)
     };
     if (customerEmail) intentParams.receipt_email = customerEmail;
 

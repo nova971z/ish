@@ -4271,7 +4271,11 @@
           return { key: it.key, title: it.title, qty: it.qty || 1 };
         }),
         customerEmail: (_currentUser && _currentUser.email) || undefined,
-        territory: _currentTerritory
+        territory: _currentTerritory,
+        // uid → metadata Stripe : permet au webhook de retrouver la commande
+        // par chemin direct users/{uid}/orders (aucun index Firestore requis)
+        // et de lier le journal payments/ au compte client.
+        uid: (_currentUser && _currentUser.uid) || undefined
       })
     })
     .then(function (r) { return r.json(); })
@@ -4424,7 +4428,8 @@
             return { key: it.key, title: it.title, qty: it.qty || 1 };
           }),
           customerEmail: (_currentUser && _currentUser.email) || undefined,
-          territory: _currentTerritory
+          territory: _currentTerritory,
+          uid: (_currentUser && _currentUser.uid) || undefined
         })
       })
       .then(function (r) { return r.json(); })
