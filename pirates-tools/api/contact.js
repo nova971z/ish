@@ -1,6 +1,8 @@
 // POST /api/contact — Public contact form, forwards to OWNER_EMAIL via Resend.
 // Body : { name, email, phone?, subject?, message, honeypot? }
-// Anti-spam : simple honeypot field + basic length/email validation.
+// Anti-spam : honeypot field + IP rate limiting + length/email validation.
+
+const rl = require('./_lib/ratelimit');
 
 module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(204).end();
@@ -24,6 +26,11 @@ module.exports = async function handler(req, res) {
   // Honeypot — if filled, it's a bot. Return 200 silently so the bot thinks it worked.
   if (body.honeypot || body.website) {
     return res.status(200).json({ ok: true, filtered: true });
+  }
+
+  // Rate limit: 5 messages / hour / IP.
+  if (!(await rl.allow('contact', rl.clientIp(req), 5, 3600))) {
+    return res.status(429).json({ ok: false, error: 'Trop de messages envoyés. Réessayez dans une heure.' });
   }
 
   const name = String(body.name || '').trim();

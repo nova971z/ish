@@ -5,19 +5,19 @@
 // Auth : header "x-admin-secret" must match env ADMIN_SECRET.
 // Body : { to?: "email@example.com" }  — defaults to OWNER_EMAIL.
 
+const auth = require('./_lib/auth');
+const http = require('./_lib/http');
+
 module.exports = async function handler(req, res) {
+  http.applyCors(req, res);
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') {
     return res.status(405).json({ ok: false, error: 'Method not allowed' });
   }
 
-  const expected = process.env.ADMIN_SECRET;
-  if (!expected) {
-    return res.status(503).json({ ok: false, error: 'ADMIN_SECRET not set' });
-  }
-  if ((req.headers['x-admin-secret'] || '') !== expected) {
-    return res.status(401).json({ ok: false, error: 'Invalid admin secret' });
-  }
+  // ── Auth (constant-time admin secret) ─────────────────────
+  const denied = auth.requireAdmin(req);
+  if (denied) return res.status(denied.status).json({ ok: false, error: denied.error });
 
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.RESEND_FROM || 'Pirates Tools <onboarding@resend.dev>';
@@ -77,7 +77,10 @@ module.exports = async function handler(req, res) {
     });
     const data = await r.json().catch(function () { return {}; });
     if (!r.ok) {
-      return res.status(r.status).json({ ok: false, error: 'Resend ' + r.status, details: data });
+      // Log the full provider response server-side; return a concise message.
+      console.error('[api/test-email] Resend error', r.status, JSON.stringify(data));
+      var msg = (data && data.message) ? data.message : ('Resend ' + r.status);
+      return res.status(r.status).json({ ok: false, error: msg });
     }
     return res.status(200).json({ ok: true, id: data.id || null, to: to, from: from });
   } catch (err) {

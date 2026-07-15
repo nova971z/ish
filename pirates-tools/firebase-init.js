@@ -23,7 +23,10 @@
 //      }
 //
 // 6. Va dans Authentication -> Settings -> Authorized domains
-//    Ajoute : nova971z.github.io  (et localhost pour les tests)
+//    Ajoute le domaine de PRODUCTION : pirates-tools.com
+//    (+ les domaines de preview Vercel *.vercel.app si tu testes dessus,
+//     et localhost pour les tests locaux).
+//    ⚠️ Sans ce domaine autorisé, la connexion/inscription Firebase échoue.
 // 7. Project Settings (engrenage) -> General -> Your apps -> Web app (icone </>)
 //    Donne un nom et copie l'objet firebaseConfig ci-dessous.
 //

@@ -1,0 +1,28 @@
+name: Pirates Tools CI
+
+# Runs the project's own check suite (scripts/ci.js): required DOM ids,
+# image-path existence, products.json schema/price validation, and the
+# server/client pricing-parity guard. Enforced on every push and PR that
+# touches pirates-tools/**, so a regression is caught before it reaches
+# the Vercel production deploy.
+on:
+  push:
+    paths:
+      - 'pirates-tools/**'
+      - '.github/workflows/pirates-tools-ci.yml'
+  pull_request:
+    paths:
+      - 'pirates-tools/**'
+  workflow_dispatch:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run checks
+        working-directory: pirates-tools
+        run: node scripts/ci.js

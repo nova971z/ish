@@ -7,10 +7,22 @@
 
   // ── Helpers ──────────────────────────────────────────────────
 
+  // Escape for safe interpolation into HTML — both element content AND
+  // double-quoted attributes. The previous textNode implementation did NOT
+  // escape quotes, so any value containing " could break out of an attribute
+  // (e.g. alt="…" src="…" value="…") and inject markup. Escaping the five
+  // OWASP characters closes that systemically. Pure (no DOM), so it is safe to
+  // call before the document is ready and faster in tight render loops.
+  var _HTML_ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
   function escapeHTML(str) {
-    var d = document.createElement('div');
-    d.appendChild(document.createTextNode(str));
-    return d.innerHTML;
+    if (str == null) return '';
+    return String(str).replace(/[&<>"']/g, function (ch) { return _HTML_ESCAPES[ch]; });
+  }
+
+  // Base de l'API serverless. window.PT_API_BASE = '' → même origine (Vercel).
+  // Source unique : remplace les ~11 résolutions dupliquées auparavant en ligne.
+  function apiBaseUrl() {
+    return (typeof window.PT_API_BASE === 'string') ? window.PT_API_BASE : '';
   }
 
   function debounce(fn, ms) {
@@ -27,6 +39,10 @@
   }
 
   // ── Territory taxation engine (TVA + Octroi de mer DOM-TOM) ──
+  // ⚠️ MIRRORED SERVER-SIDE in api/_lib/pricing.js (authoritative for charges).
+  // Keep the rates and formula below byte-for-byte identical to that module —
+  // any divergence makes the displayed price differ from the charged price.
+  // Guarded by scripts/check-pricing.js.
   // Rates are baseline public references; they can be adjusted per NC category
   // via TAX_RULES_BY_NC below. Numbers are *additive* on the HT price:
   // prixTTC = prixHT × (1 + octroiExterne + octroiRegional) × (1 + tva)
@@ -216,8 +232,8 @@
       if (p.tags.indexOf('mayotte_project') !== -1)
         out.push('<span class="pt-badge pt-badge--mayotte" title="Idéal chantier Mayotte">🏗️ <span class="pt-badge__txt">Chantier Mayotte</span></span>');
     }
-    if (p.stock_status === 'in_stock')
-      out.push('<span class="pt-badge pt-badge--stock" title="En stock, expédition rapide">⚡ <span class="pt-badge__txt">Stock local</span></span>');
+    // Note : le badge "⚡ Stock local" a été retiré — il faisait doublon avec la
+    // pastille "EN STOCK" (stockBadge). On évite la redondance visuelle.
     return out.join('');
   }
   function productBadges(p) {
@@ -545,7 +561,9 @@
   }
 
   function saveCart(items) {
-    localStorage.setItem(CART_KEY, JSON.stringify({ version: '1', items: items }));
+    try {
+      localStorage.setItem(CART_KEY, JSON.stringify({ version: '1', items: items }));
+    } catch (e) { /* Safari privé / quota plein — n'interrompt pas l'ajout au panier */ }
     updateCartUI();
   }
 
@@ -800,7 +818,7 @@
     // static products.json (GitHub Pages / offline). The API returns
     // { ok, count, products: [...] } while the static file is a raw array.
     var apiConfigured = typeof window.PT_API_BASE === 'string';
-    var apiBase = window.PT_API_BASE || '';
+    var apiBase = apiBaseUrl();
     var primaryUrl = apiConfigured ? (apiBase + '/api/products') : 'products.json';
     var fallbackUrl = 'products.json';
 
@@ -1260,10 +1278,12 @@
   function setupModelViewerScrollPassthrough(mv) {
     if (!mv) return;
 
-    // Cleanup ancien listener
-    if (mv._wheelHandler) {
-      mv.removeEventListener('wheel', mv._wheelHandler, true);
-    }
+    // Cleanup des anciens listeners. mv (#pdp3d / #pdp3dSecondary) persiste entre
+    // les rendus PDP : sans retirer mouseleave/touchstart, ils s'accumulent à
+    // chaque renderPDP.
+    if (mv._wheelHandler)      mv.removeEventListener('wheel', mv._wheelHandler, true);
+    if (mv._mouseLeaveHandler) mv.removeEventListener('mouseleave', mv._mouseLeaveHandler);
+    if (mv._touchHandler)      mv.removeEventListener('touchstart', mv._touchHandler);
 
     var passActive = false;
 
@@ -1479,7 +1499,7 @@
           toast('Produit en rupture de stock', 'error');
           return;
         }
-        openPayModal([{ title: product.title, price: product.price, qty: 1, paymentLink: product.paymentLink || '' }]);
+        openPayModal([{ key: product.id || product.slug, title: product.title, price: product.price, qty: 1, paymentLink: product.paymentLink || '' }]);
       };
     }
 
@@ -1487,9 +1507,12 @@
     if (dom.pdpWa) {
       dom.pdpWa.href = waLink(waProductMessage(product, _currentTerritory));
       dom.pdpWa.target = '_blank';
-      dom.pdpWa.addEventListener('click', function () {
+      // onclick (et non addEventListener) : remplace le handler à chaque
+      // renderPDP au lieu d'en empiler un par produit visité (sinon N events
+      // whatsapp_click au premier clic, avec N id différents).
+      dom.pdpWa.onclick = function () {
         if (typeof track === 'function') track('whatsapp_click', { source: 'pdp', id: product.id });
-      }, { once: true });
+      };
     }
 
     // Share button (Web Share API with clipboard fallback)
@@ -1676,7 +1699,10 @@
       nameInput.value = '';
       textInput.value = '';
       selectedRating = 0;
-      for (var j = 0; j < starBtns.length; j++) starBtns[j].classList.remove('active');
+      if (starsSelect) {
+        var resetBtns = starsSelect.querySelectorAll('.pdp-reviews__star-btn');
+        for (var j = 0; j < resetBtns.length; j++) resetBtns[j].classList.remove('active');
+      }
 
       toast('Merci pour votre avis !', 'success');
       renderReviewsList();
@@ -1697,7 +1723,9 @@
   function saveHomeReview(review) {
     var reviews = getHomeReviews();
     reviews.unshift(review);
-    localStorage.setItem(HOME_REVIEWS_KEY, JSON.stringify(reviews));
+    try {
+      localStorage.setItem(HOME_REVIEWS_KEY, JSON.stringify(reviews));
+    } catch (e) { /* Safari privé / quota plein */ }
   }
 
   // ── Plans / Services interactif ────────────────────────────
@@ -1921,17 +1949,17 @@
       if (info.features && info.features.length) {
         featHtml = '<div class="plan-detail__features">';
         info.features.forEach(function(f) {
-          featHtml += '<span class="plan-detail__feat"><span class="plan-detail__feat-icon">' + f.icon + '</span>' + f.text + '</span>';
+          featHtml += '<span class="plan-detail__feat"><span class="plan-detail__feat-icon">' + escapeHTML(f.icon) + '</span>' + escapeHTML(f.text) + '</span>';
         });
         featHtml += '</div>';
       }
-      dtlEl.className = 'plan-detail is-open plan-detail--' + (info.color || plan);
+      dtlEl.className = 'plan-detail is-open plan-detail--' + escapeHTML(info.color || plan);
       dtlEl.innerHTML = '<div class="plan-detail__inner">'
-        + '<div class="plan-detail__name">' + (info.name || '') + '</div>'
-        + '<div class="plan-detail__desc">' + info.desc + '</div>'
+        + '<div class="plan-detail__name">' + escapeHTML(info.name || '') + '</div>'
+        + '<div class="plan-detail__desc">' + escapeHTML(info.desc) + '</div>'
         + featHtml
         + '<span class="plan-detail__saving">' + price + ' \u20ac/mois \u2192 ' + saving.toLocaleString('fr-FR') + ' \u20ac economises/an</span>'
-        + '<a href="#/abonnement/' + plan + '" class="plan-detail__cta plan-detail__cta--' + (info.color || plan) + '">Choisir ' + (info.name || '') + '</a>'
+        + '<a href="#/abonnement/' + encodeURIComponent(plan) + '" class="plan-detail__cta plan-detail__cta--' + escapeHTML(info.color || plan) + '">Choisir ' + escapeHTML(info.name || '') + '</a>'
         + '</div>';
     }
   }
@@ -2714,23 +2742,23 @@
     var featRows = '';
     data.features.forEach(function (f, i) {
       featRows += '<div class="abo-feat" style="animation-delay:' + (i * .07) + 's">'
-        + '<div class="abo-feat__icon">' + f.icon + '</div>'
+        + '<div class="abo-feat__icon">' + escapeHTML(f.icon) + '</div>'
         + '<div class="abo-feat__body">'
-        + '<div class="abo-feat__title">' + f.text + '</div>'
-        + '<div class="abo-feat__detail">' + f.detail + '</div>'
+        + '<div class="abo-feat__title">' + escapeHTML(f.text) + '</div>'
+        + '<div class="abo-feat__detail">' + escapeHTML(f.detail) + '</div>'
         + '</div></div>';
     });
 
-    el.innerHTML = '<div class="abo-page abo-page--' + data.theme + '">'
+    el.innerHTML = '<div class="abo-page abo-page--' + escapeHTML(data.theme) + '">'
       // Back link
       + '<a href="#/" class="abo-back">\u2190 Retour</a>'
 
       // Hero header
       + '<div class="abo-hero">'
       + '<div class="abo-hero__glow"></div>'
-      + '<div class="abo-hero__badge">' + data.name + '</div>'
-      + '<h1 class="abo-hero__title" id="abo-h1">' + data.tagline + '</h1>'
-      + '<p class="abo-hero__desc">' + data.desc + '</p>'
+      + '<div class="abo-hero__badge">' + escapeHTML(data.name) + '</div>'
+      + '<h1 class="abo-hero__title" id="abo-h1">' + escapeHTML(data.tagline) + '</h1>'
+      + '<p class="abo-hero__desc">' + escapeHTML(data.desc) + '</p>'
       + '<div class="abo-hero__price"><span class="abo-hero__amount">' + data.price + '\u20ac</span><span class="abo-hero__period">/mois</span></div>'
       + '</div>'
 
@@ -2742,7 +2770,7 @@
 
       // CTA
       + '<div class="abo-cta-wrap">'
-      + '<button class="abo-cta abo-cta--' + data.theme + '">Souscrire a ' + data.name + ' \u2014 ' + data.price + '\u20ac/mois</button>'
+      + '<button class="abo-cta abo-cta--' + escapeHTML(data.theme) + '">Souscrire a ' + escapeHTML(data.name) + ' \u2014 ' + data.price + '\u20ac/mois</button>'
       + '<p class="abo-cta-note">Sans engagement \u2022 Annulation a tout moment</p>'
       + '</div>'
       + '</div>';
@@ -2750,7 +2778,9 @@
 
   // ── Router (hash-based SPA) ────────────────────────────────
 
-  var ROUTES = ['/', '/catalogue', '/produit', '/devis', '/compte', '/auth', '/abonnement'];
+  var ROUTES = ['/', '/catalogue', '/produit', '/devis', '/compte', '/auth', '/abonnement',
+                '/admin', '/merci', '/contact', '/favoris',
+                '/mentions-legales', '/confidentialite', '/cgv'];
 
   // Territory landing slugs (keys) → territory codes (values).
   // Used to expose SEO-friendly routes like #/guadeloupe.
@@ -2777,6 +2807,10 @@
 
   function parseHash() {
     var hash = location.hash.replace(/^#/, '') || '/';
+    // Strip any query string carried in the hash (e.g. Stripe Checkout returns
+    // to #/merci?session_id=…) so it doesn't break the exact ROUTES match.
+    var qIndex = hash.indexOf('?');
+    if (qIndex !== -1) hash = hash.substring(0, qIndex) || '/';
     if (hash.indexOf('/produit/') === 0) {
       return { route: '/produit', slug: hash.replace('/produit/', '') };
     }
@@ -2796,10 +2830,13 @@
     var parsed = parseHash();
     var route = parsed.route;
 
-    // Auth guards
-    var loggedIn = !!_currentUser;
-    if (route === '/compte' && !loggedIn) { location.hash = '#/auth'; return; }
-    if (route === '/auth' && loggedIn) { location.hash = '#/compte'; return; }
+    // Auth guards — n'appliquer la redirection qu'une fois la session Firebase
+    // restaurée (_authReady). Sinon un utilisateur connecté qui recharge sur
+    // #/compte est renvoyé vers #/auth puis ramené (double navigation/flicker).
+    // renderAccount() no-op tant que _currentUser est null ; onAuthStateChanged
+    // relance onRouteChange dès que l'auth est prête.
+    if (route === '/compte' && _authReady && !_currentUser) { location.hash = '#/auth'; return; }
+    if (route === '/auth' && _authReady && _currentUser) { location.hash = '#/compte'; return; }
 
     // Cleanup PDP animation loop when leaving product page
     if (route !== '/produit') {
@@ -3590,7 +3627,7 @@
           renderDevis();
         } else if (btn.classList.contains('devis-buy')) {
           var it = c[i]; if (!it) return;
-          openPayModal([{ title: it.title, price: it.price, qty: it.qty || 1, paymentLink: it.paymentLink }]);
+          openPayModal([{ key: it.key, title: it.title, price: it.price, qty: it.qty || 1, paymentLink: it.paymentLink }]);
         } else if (btn.closest('.devis-remove')) {
           var el = btn.closest('.devis-item');
           if (el) el.classList.add('devis-item--removing');
@@ -3603,7 +3640,7 @@
       var items = getCart();
       if (!items.length) { toast('Panier vide', 'error'); return; }
       openPayModal(items.map(function (it) {
-        return { title: it.title, price: it.price, qty: it.qty || 1, paymentLink: it.paymentLink || '' };
+        return { key: it.key, title: it.title, price: it.price, qty: it.qty || 1, paymentLink: it.paymentLink || '' };
       }));
     });
     if (dom.devisClear) {
@@ -3694,9 +3731,35 @@
     return u;
   }
 
-  function cryptoQRUrl(payload) {
-    return 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=0&data='
-      + encodeURIComponent(payload);
+  // QR de paiement crypto : génération 100 % LOCALE (bibliothèque qrcode.js
+  // vendue, licence MIT, vérifiée par aller-retour). Aucun service tiers → une
+  // adresse crypto ne peut plus être substituée ni fuitée. Chargée à la demande.
+  var _qrLibPromise = null;
+  function ensureQRLib() {
+    if (typeof window.qrcode === 'function') return Promise.resolve(window.qrcode);
+    if (_qrLibPromise) return _qrLibPromise;
+    _qrLibPromise = new Promise(function (resolve, reject) {
+      var s = document.createElement('script');
+      s.src = 'qrcode.js';
+      s.async = true;
+      s.onload = function () { resolve(window.qrcode); };
+      s.onerror = function () { _qrLibPromise = null; reject(new Error('qr lib load failed')); };
+      document.head.appendChild(s);
+    });
+    return _qrLibPromise;
+  }
+
+  function cryptoLocalQR(payload) {
+    if (typeof window.qrcode !== 'function') return null;
+    try {
+      var qr = window.qrcode(0, 'M'); // version auto, correction d'erreur M (15 %)
+      qr.addData(payload);
+      qr.make();
+      return qr.createDataURL(6, 4); // 6 px/module, marge 4 modules (norme QR)
+    } catch (e) {
+      console.error('[cryptoLocalQR]', e && e.message);
+      return null;
+    }
   }
 
   function cryptoFetchRates() {
@@ -3827,9 +3890,24 @@
         qr.alt = 'Adresse non configurée';
         if (qrWrap) qrWrap.classList.remove('is-ready');
       } else {
-        qr.src = cryptoQRUrl(cryptoBuildUri(net, amt || ''));
-        qr.alt = 'QR ' + net.label;
-        if (qrWrap) qrWrap.classList.add('is-ready');
+        var payload = cryptoBuildUri(net, amt || '');
+        var label = net.label;
+        ensureQRLib().then(function () {
+          var cur = document.getElementById('cryptopayQR');
+          if (!cur) return; // modal fermé entre-temps
+          var dataUrl = cryptoLocalQR(payload);
+          if (dataUrl) {
+            cur.src = dataUrl;
+            cur.alt = 'QR ' + label;
+            if (cur.parentElement) cur.parentElement.classList.add('is-ready');
+          }
+        }).catch(function () {
+          // Échec de chargement de la lib : on NE retombe PAS sur un service
+          // tiers. L'adresse en texte (copiable, avec avertissement) fait foi.
+          var cur = document.getElementById('cryptopayQR');
+          if (cur) { cur.removeAttribute('src'); cur.alt = 'QR indisponible — utilisez l\'adresse ci-dessous'; }
+          if (qrWrap) qrWrap.classList.remove('is-ready');
+        });
       }
     }
   }
@@ -3864,30 +3942,13 @@
       window.open(co.url, '_blank', 'noopener');
       return;
     }
-    if (co.nowpaymentsApiKey) {
-      // Crée dynamiquement une invoice NOWPayments avec le total panier.
-      var body = {
-        price_amount: Number(_cryptoTotalEur.toFixed(2)),
-        price_currency: 'eur',
-        pay_currency: co.nowpaymentsPayCurrency || 'usdttrc20',
-        order_description: 'Pirates Tools — commande',
-        success_url: location.origin + location.pathname + '#/merci',
-        cancel_url:  location.origin + location.pathname + '#/checkout'
-      };
-      fetch('https://api.nowpayments.io/v1/invoice', {
-        method:'POST',
-        headers:{ 'Content-Type':'application/json', 'x-api-key': co.nowpaymentsApiKey },
-        body: JSON.stringify(body)
-      }).then(function(r){ return r.json(); }).then(function(j){
-        if (j && j.invoice_url) window.open(j.invoice_url, '_blank', 'noopener');
-        else toast("Impossible de créer l'invoice NOWPayments.", 'error');
-      }).catch(function(err){
-        console.error('NOWPayments:', err);
-        toast("Erreur réseau NOWPayments.", 'error');
-      });
-      return;
-    }
-    toast("Le paiement par carte n'est pas encore configuré. Édite crypto-config.js.", 'info');
+    // SÉCURITÉ : la création dynamique d'invoice NOWPayments a été RETIRÉE du
+    // client. Elle envoyait la clé API de compte (x-api-key) à chaque visiteur —
+    // n'importe qui pouvait l'extraire et créer des factures sur le compte
+    // marchand. Pour réactiver NOWPayments, passer par un endpoint serverless
+    // (/api/nowpayments) qui garde la clé côté serveur, comme pour Stripe.
+    // Le lien de paiement pré-généré (co.url) ci-dessus reste, lui, sûr.
+    toast("Le paiement crypto dynamique n'est pas encore disponible.", 'info');
   }
 
   function cryptoConfirmPaid() {
@@ -3909,7 +3970,7 @@
     // sauvegarde l'intention de commande pour /merci
     try {
       localStorage.setItem('pt_pending_order', JSON.stringify({
-        items: (_payItems || []).map(function(it){ return { title: it.title, price: it.price, qty: it.qty }; }),
+        items: (_payItems || []).map(function(it){ return { key: it.key, title: it.title, price: payUnitCents(it) / 100, qty: it.qty }; }),
         total: _cryptoTotalEur,
         method: 'crypto:' + _cryptoSelected.id,
         ts: Date.now()
@@ -3964,30 +4025,47 @@
     }
   }
 
+  // Territory-aware unit price in integer cents. Mirrors api/_lib/pricing.js
+  // (same per-unit rounding) so the amount shown here equals the amount the
+  // server will charge. Falls back to the stored metropolitan price only for
+  // legacy cart entries whose product is no longer in the live catalogue.
+  function payUnitCents(it) {
+    var p = findProductByKey(it && it.key);
+    var ttc = p ? calcPrice(p, _currentTerritory).ttc : (Number(it && it.price) || 0);
+    return Math.round(ttc * 100);
+  }
+
+  function payTotalCents(items) {
+    return (items || []).reduce(function (s, it) {
+      return s + payUnitCents(it) * (it.qty || 1);
+    }, 0);
+  }
+
   function openPayModal(items) {
     var modal = document.getElementById('payModal');
     if (!modal || !items || !items.length) return;
     _payItems = items;
-    _cryptoTotalEur = items.reduce(function(s,it){ return s + (it.price||0)*(it.qty||1); }, 0);
+    _cryptoTotalEur = payTotalCents(items) / 100;
     _cryptoSelected = null;
     cryptoRenderNets();
     cryptoSwitchTab('card');
 
     var itemsEl = document.getElementById('payModalItems');
     var totalEl = document.getElementById('payModalTotal');
-    var total = 0;
+    var totalCents = 0;
     var html = '';
     items.forEach(function (it) {
-      var line = (it.price || 0) * (it.qty || 1);
-      total += line;
+      var lineCents = payUnitCents(it) * (it.qty || 1);
+      totalCents += lineCents;
       html += '<div class="pay-modal__line">'
         + '<div class="pay-modal__line-info">'
-        +   '<span class="pay-modal__line-title">' + (it.title || 'Produit') + '</span>'
+        +   '<span class="pay-modal__line-title">' + escapeHTML(it.title || 'Produit') + '</span>'
         +   '<span class="pay-modal__line-qty">x' + (it.qty || 1) + '</span>'
         + '</div>'
-        + '<span class="pay-modal__line-price">' + formatPrice(line) + '</span>'
+        + '<span class="pay-modal__line-price">' + formatPrice(lineCents / 100) + '</span>'
         + '</div>';
     });
+    var total = totalCents / 100;
     if (itemsEl) itemsEl.innerHTML = html;
     if (totalEl) totalEl.textContent = formatPrice(total);
 
@@ -4117,13 +4195,14 @@
         + '</div>';
     }
 
-    var apiBase = window.PT_API_BASE || '';
+    var apiBase = apiBaseUrl();
     fetch(apiBase + '/api/create-payment-intent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        // Server resolves prices from the catalogue by key — no price is sent.
         items: _payItems.map(function (it) {
-          return { title: it.title, price: it.price, qty: it.qty || 1 };
+          return { key: it.key, title: it.title, qty: it.qty || 1 };
         }),
         customerEmail: (_currentUser && _currentUser.email) || undefined,
         territory: _currentTerritory
@@ -4187,7 +4266,7 @@
 
   function confirmPayment() {
     if (!_payItems || !_payItems.length) return;
-    var total = _payItems.reduce(function (s, it) { return s + (it.price || 0) * (it.qty || 1); }, 0);
+    var total = payTotalCents(_payItems) / 100;
     var stripe = getStripe();
     var errorEl = document.getElementById('stripeCardError');
 
@@ -4200,7 +4279,7 @@
       // Save pending order before confirming
       try {
         localStorage.setItem('pt_pending_order', JSON.stringify({
-          items: _payItems.map(function (it) { return { title: it.title, price: it.price, qty: it.qty }; }),
+          items: _payItems.map(function (it) { return { key: it.key, title: it.title, price: payUnitCents(it) / 100, qty: it.qty }; }),
           total: total, ts: Date.now()
         }));
       } catch (_) {}
@@ -4245,13 +4324,27 @@
             location.hash = '#/merci';
           }
         }
+      })
+      .catch(function (err) {
+        // Réseau coupé / SDK Stripe en erreur : réactiver le bouton, sinon il
+        // reste bloqué sur « Traitement en cours… » avec une rejection non gérée.
+        console.error('[confirmPayment]', err && err.message);
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<span class="pay-modal__btn-icon">💳</span> Payer en toute sécurité';
+        }
+        if (errorEl) {
+          errorEl.textContent = 'Le paiement n\'a pas pu aboutir. Vérifiez votre connexion et réessayez.';
+          errorEl.hidden = false;
+        }
+        toast('Erreur réseau — paiement non abouti', 'error');
       });
       return;
     }
 
     // ── Fallback: server-side Stripe Checkout (redirect) ──
     var apiConfigured = typeof window.PT_API_BASE === 'string';
-    var apiBase = window.PT_API_BASE || '';
+    var apiBase = apiBaseUrl();
     if (apiConfigured && !stripe) {
       var btn2 = document.getElementById('payModalConfirm');
       if (btn2) { btn2.disabled = true; btn2.textContent = 'Redirection…'; }
@@ -4260,10 +4353,12 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          // Server resolves prices from the catalogue by key — no price is sent.
           items: _payItems.map(function (it) {
-            return { title: it.title, price: it.price, qty: it.qty || 1 };
+            return { key: it.key, title: it.title, qty: it.qty || 1 };
           }),
-          customerEmail: (_currentUser && _currentUser.email) || undefined
+          customerEmail: (_currentUser && _currentUser.email) || undefined,
+          territory: _currentTerritory
         })
       })
       .then(function (r) { return r.json(); })
@@ -4271,7 +4366,7 @@
         if (data.ok && data.url) {
           try {
             localStorage.setItem('pt_pending_order', JSON.stringify({
-              items: _payItems.map(function (it) { return { title: it.title, price: it.price, qty: it.qty }; }),
+              items: _payItems.map(function (it) { return { key: it.key, title: it.title, price: payUnitCents(it) / 100, qty: it.qty }; }),
               total: total, sessionId: data.sessionId, ts: Date.now()
             }));
           } catch (_) {}
@@ -4297,7 +4392,7 @@
     }
     try {
       localStorage.setItem('pt_pending_order', JSON.stringify({
-        items: _payItems.map(function (it) { return { title: it.title, price: it.price, qty: it.qty }; }),
+        items: _payItems.map(function (it) { return { key: it.key, title: it.title, price: payUnitCents(it) / 100, qty: it.qty }; }),
         total: total, ts: Date.now()
       }));
     } catch (_) {}
@@ -4520,7 +4615,7 @@
   }
 
   function adminFetch(method, body) {
-    var apiBase = (typeof window.PT_API_BASE === 'string') ? (window.PT_API_BASE || '') : '';
+    var apiBase = apiBaseUrl();
     var opts = {
       method: method,
       headers: {
@@ -4722,7 +4817,7 @@
           statusEl.className = 'admin-row__status';
         }
 
-        var apiBase = (typeof window.PT_API_BASE === 'string') ? (window.PT_API_BASE || '') : '';
+        var apiBase = apiBaseUrl();
         fetch(apiBase + '/api/test-email', {
           method: 'POST',
           headers: {
@@ -4761,7 +4856,7 @@
     if (healthBtn) {
       healthBtn.addEventListener('click', function () {
         var out = document.getElementById('adminHealthOutput');
-        var apiBase = (typeof window.PT_API_BASE === 'string') ? (window.PT_API_BASE || '') : '';
+        var apiBase = apiBaseUrl();
         healthBtn.disabled = true;
         fetch(apiBase + '/api/health')
           .then(function (r) { return r.json().catch(function () { return { ok: false, error: 'Invalid response' }; }); })
@@ -4794,7 +4889,7 @@
     if (!listEl) return;
     listEl.innerHTML = '<p class="admin-loading">Chargement des commandes…</p>';
 
-    var apiBase = (typeof window.PT_API_BASE === 'string') ? (window.PT_API_BASE || '') : '';
+    var apiBase = apiBaseUrl();
     fetch(apiBase + '/api/admin?type=orders', {
       headers: { 'X-Admin-Secret': getAdminSecret() }
     })
@@ -4949,7 +5044,7 @@
   var _igDraftCreationId = null;
 
   function igApiFetch(action, method, body) {
-    var apiBase = (typeof window.PT_API_BASE === 'string') ? (window.PT_API_BASE || '') : '';
+    var apiBase = apiBaseUrl();
     var url = apiBase + '/api/instagram?action=' + encodeURIComponent(action);
     var opts = {
       method: method || 'GET',
@@ -5356,7 +5451,7 @@
       submit.disabled = true;
       if (status) { status.textContent = 'Envoi…'; status.className = 'contact-form__status'; }
 
-      var apiBase = (typeof window.PT_API_BASE === 'string') ? (window.PT_API_BASE || '') : '';
+      var apiBase = apiBaseUrl();
       fetch(apiBase + '/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -5422,7 +5517,7 @@
         status.className = 'home-newsletter__status';
       }
 
-      var apiBase = (typeof window.PT_API_BASE === 'string') ? (window.PT_API_BASE || '') : '';
+      var apiBase = apiBaseUrl();
       fetch(apiBase + '/api/newsletter', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -5545,7 +5640,7 @@
         + '<div class="product-card__body">'
         + '<span class="product-card__brand">' + escapeHTML(p.brand) + '</span>'
         + '<h3 class="product-card__title">' + escapeHTML(p.title) + '</h3>'
-        + '<span class="product-card__price">' + formatPrice(p.price) + '</span>'
+        + '<span class="product-card__price">' + formatPrice(calcPrice(p, _currentTerritory).ttc) + '</span>'
         + '</div>'
         + '</a>';
     }).join('');
@@ -5613,7 +5708,7 @@
         + '<div class="product-card__body">'
         + '<span class="product-card__brand">' + escapeHTML(p.brand) + '</span>'
         + '<h3 class="product-card__title">' + escapeHTML(p.title) + '</h3>'
-        + '<span class="product-card__price">' + formatPrice(p.price) + '</span>'
+        + '<span class="product-card__price">' + formatPrice(calcPrice(p, _currentTerritory).ttc) + '</span>'
         + '</div>'
         + '</a>';
     }).join('');
@@ -6111,6 +6206,18 @@
         break;
       case '/admin':
         setDocMeta('Administration — ' + BASE_TITLE, '');
+        removeJsonLd('product');
+        break;
+      case '/mentions-legales':
+        setDocMeta('Mentions légales — ' + BASE_TITLE, 'Mentions légales du site Pirates Tools : éditeur, hébergeur, médiation.');
+        removeJsonLd('product');
+        break;
+      case '/confidentialite':
+        setDocMeta('Politique de confidentialité — ' + BASE_TITLE, 'Comment Pirates Tools protège vos données personnelles (RGPD).');
+        removeJsonLd('product');
+        break;
+      case '/cgv':
+        setDocMeta('Conditions Générales de Vente — ' + BASE_TITLE, 'CGV Pirates Tools : commande, paiement, livraison DOM-TOM, rétractation, garanties.');
         removeJsonLd('product');
         break;
       case '/territoire':

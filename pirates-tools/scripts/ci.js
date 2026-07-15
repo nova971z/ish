@@ -27,6 +27,7 @@ function asArray(x){
 var reqIds      = safeRequire('./check-required-ids', 'check-required-ids');
 var reqPaths    = safeRequire('./check-paths',       'check-paths');
 var reqProducts = safeRequire('./check-products-json','check-products-json');
+var reqPricing  = safeRequire('./check-pricing',     'check-pricing');
 
 // Détection d’un linter produits local (ajouté plus tôt)
 var LINT_FILE = path.resolve(__dirname, './lint-products.js');
@@ -61,6 +62,7 @@ function runLintProducts(){
   await runOne(reqIds,      'check-required-ids');
   await runOne(reqPaths,    'check-paths');
   await runOne(reqProducts, 'check-products-json');
+  await runOne(reqPricing,  'check-pricing');
 
   // Linter produits optionnel
   var lintRes = runLintProducts();

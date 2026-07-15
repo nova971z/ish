@@ -1,5 +1,27 @@
 # Changelog - Réparation et Harmonisation du Script Web
 
+## Version 2.1.0 (2026-07-15) — Plan de remédiation (10 étapes)
+
+Refonte qualité « niveau institutionnel », ordre : argent → sécurité → fonctionnel → structure.
+Suivi détaillé : `docs/PLAN-REMEDIATION.md`.
+
+### 🔴 Argent & sécurité
+*   **Intégrité des prix** : le serveur recalcule chaque montant depuis le catalogue (`api/_lib/pricing.js`) ; le prix envoyé par le client est ignoré (fin du « payer 1 centime »). Prix affiché == prix débité (arrondi identique client/serveur, garde-fou CI `check-pricing.js`).
+*   **API verrouillée** : `orders.js` passé en admin-only ; secret admin comparé en temps constant (`crypto.timingSafeEqual`) ; CORS refusé par défaut + allowlist `ALLOWED_ORIGINS`.
+*   **XSS** : `escapeHTML` échappe les 5 caractères OWASP (dont les guillemets) → fin de l'injection d'attribut systémique.
+*   **Webhook Stripe** : corps brut vérifié (signature) + idempotence sur `event.id` (fin des emails en double).
+*   **Fuite de clé** : suppression du chemin NOWPayments côté client (clé de compte exposée).
+
+### 🐛 Fonctionnel & résilience
+*   **Routeur** : `/admin`, `/merci`, `/contact`, `/favoris` déclarées → l'admin fonctionne et les commandes payées sont enregistrées.
+*   **Bugs runtime** : crash à l'envoi d'avis (`starBtns`), gardes `localStorage` (Safari privé), `confirmPayment` avec `.catch`, fuites d'écouteurs PDP, garde d'auth (`_authReady`).
+*   **Service Worker** : empoisonnement du cache corrigé, fallback hors-ligne réparé, cycle de vie propre (v297).
+
+### 🏗️ Structure
+*   **Déploiement** : Vercel = production unique, domaine `pirates-tools.com` ; canonical/OG/sitemap alignés ; CI (`scripts/ci.js`) exécutée sur chaque push/PR.
+*   **Helpers serverless partagés** : `_lib/{pricing,catalog,auth,http,firebase,ratelimit}.js` (init Firebase unique, prix, auth, CORS, rate-limit).
+*   **Divers** : rate limiting IP sur contact/newsletter, helper client `apiBaseUrl()`, correction dérive de prix favoris/récents, CSS mort retiré (315 l.), lumière dorée du hero restaurée, `<h1>` d'accueil.
+
 ## Version 2.0.1 (2025-09-29)
 
 ### 🐛 Corrections de Bugs

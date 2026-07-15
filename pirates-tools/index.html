@@ -9,16 +9,18 @@
 
   <!-- Open Graph / Social -->
   <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Pirates Tools">
+  <meta property="og:locale" content="fr_FR">
   <meta property="og:title" content="Pirates Tools — Outillage professionnel DOM-TOM">
   <meta property="og:description" content="Outillage pro livré en Guadeloupe, Martinique, Guyane, Réunion et Mayotte. Octroi de mer et TVA inclus. DeWALT, Makita, Festool, Flex, Facom.">
-  <meta property="og:image" content="https://nova971z.github.io/ish/icons/icon-512.png">
-  <meta property="og:url" content="https://nova971z.github.io/ish/">
+  <meta property="og:image" content="https://pirates-tools.com/icons/icon-512.png">
+  <meta property="og:url" content="https://pirates-tools.com/">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Pirates Tools — Outillage professionnel DOM-TOM">
   <meta name="twitter:description" content="Outillage pro livré en Guadeloupe, Martinique, Guyane, Réunion et Mayotte. Octroi de mer et TVA inclus.">
-  <meta name="twitter:image" content="https://nova971z.github.io/ish/icons/icon-512.png">
+  <meta name="twitter:image" content="https://pirates-tools.com/icons/icon-512.png">
 
-  <link rel="canonical" href="https://nova971z.github.io/ish/">
+  <link rel="canonical" href="https://pirates-tools.com/">
 
   <!-- Preconnect critical third-party origins -->
   <link rel="preconnect" href="https://ajax.googleapis.com" crossorigin>
@@ -29,7 +31,7 @@
   <link rel="dns-prefetch" href="https://js.stripe.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=289">
+  <link rel="stylesheet" href="styles.css?v=302">
 
   <!-- 3D model viewer -->
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
@@ -40,9 +42,11 @@
   <!-- Firebase (auth + firestore) -->
   <script type="module" src="firebase-init.js"></script>
 
-  <!-- Serverless API base. Empty string = same origin (Vercel prod/preview).
-       Leave unset (remove the line) to fall back to the static products.json
-       and the legacy Payment Links flow (useful on GitHub Pages / offline). -->
+  <!-- Serverless API base. Empty string = same origin.
+       Production is Vercel (pirates-tools.com): the site and its /api/*
+       serverless functions are served from the same origin, so '' is correct.
+       Card checkout REQUIRES this same-origin API — do not host on a static-only
+       origin (e.g. GitHub Pages) where /api/* does not exist. -->
   <script>
   window.PT_API_BASE = '';
   window.PT_STRIPE_PK = 'pk_live_51TJYJVPynqHG9OETsHfRsfZbs8NWjeo4RO1sVltr9LVqvbL1IsAI13Wgw3YFglVYGQD6kBFOw5pKBPCUovdJ9OV300rHNF9ppi';
@@ -72,7 +76,10 @@
         address:'GKVmgduLmvVtqvds8oXsH4UFxmkbAVT2om4bXBo2eQbu',
         coingeckoId:'solana',   decimals:4, uriScheme:'solana:' }
     ],
-    cardCheckout: { url:'', nowpaymentsApiKey:'', nowpaymentsPayCurrency:'usdttrc20' },
+    // url = lien de paiement pré-généré (sûr). NE PAS mettre de clé API
+    // NOWPayments ici : une clé de compte côté client fuiterait à chaque
+    // visiteur. Pour du crypto dynamique, passer par un endpoint serverless.
+    cardCheckout: { url:'' },
     whatsappNumber: '33744776598'
   };
   </script>
@@ -83,9 +90,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Pirates Tools" />
-  <link rel="manifest" href="manifest.webmanifest" />
-  <link rel="icon" href="icons/icon-192.png" sizes="192x192" />
-  <link rel="apple-touch-icon" href="icons/icon-180.png" sizes="180x180" />
+  <link rel="manifest" href="manifest.webmanifest?v=302" />
+  <link rel="icon" href="icons/icon-192.png?v=302" sizes="192x192" />
+  <link rel="apple-touch-icon" href="icons/icon-180.png?v=302" sizes="180x180" />
 
   <!-- Patch UI : haut non tronque + dock centre + bulles -->
   <style id="pt-fix">
@@ -220,7 +227,7 @@
         <img
           id="topbarLogo"
           class="topbar-logo"
-          src="icons/icon-192.png?v=289"
+          src="icons/icon-192.png?v=302"
           alt="Pirates Tools"
           width="40" height="40"
           decoding="async" loading="eager" fetchpriority="high" />
@@ -251,8 +258,8 @@
   <section id="hero" class="hero-full" aria-hidden="true">
     <div class="hero-logo-container initial" id="heroLogoContainer">
       <img id="heroLogo" class="hero-logo on" alt="Pirates Tools"
-        src="icons/icon-512.png?v=289"
-        srcset="icons/icon-256.png?v=289 256w, icons/icon-384.png?v=289 384w, icons/icon-512.png?v=289 512w"
+        src="icons/icon-512.png?v=302"
+        srcset="icons/icon-256.png?v=302 256w, icons/icon-384.png?v=302 384w, icons/icon-512.png?v=302 512w"
         sizes="(max-width: 768px) 90vw, 60vw"
         width="600" height="600"
         decoding="async" loading="eager" fetchpriority="high" />
@@ -266,8 +273,10 @@
   <main id="app" role="main">
 
     <!-- HOME -->
-    <section id="view-home" class="view" data-route="/" role="region">
+    <section id="view-home" class="view" data-route="/" role="region" aria-labelledby="home-h1">
       <div class="container">
+
+        <h1 id="home-h1" class="sr-only">Pirates Tools — outillage professionnel livré en Guadeloupe, Martinique, Guyane, Réunion et Mayotte (octroi de mer et TVA inclus)</h1>
 
         <!-- Section Marques -->
         <div class="brands-section" data-reveal="fade-up">
@@ -1072,6 +1081,211 @@
       </div>
     </section>
 
+    <!-- MENTIONS LÉGALES -->
+    <section id="view-mentions" class="view legal-page hidden" data-route="/mentions-legales" role="region" aria-labelledby="ml-h1">
+      <div class="container legal-container">
+        <h1 id="ml-h1" tabindex="-1">Mentions légales</h1>
+        <p class="legal-updated">Dernière mise à jour : 15 juillet 2026</p>
+
+        <p class="legal-note">⚠️ Les champs marqués <strong>[À COMPLÉTER]</strong> doivent être renseignés avec les informations réelles de l'entreprise avant la mise en ligne définitive. En cas de doute, faites relire ces mentions par un professionnel du droit.</p>
+
+        <h2>1. Éditeur du site</h2>
+        <p>Le site <strong>pirates-tools.com</strong> est édité par :</p>
+        <ul>
+          <li><strong>Dénomination / Exploitant :</strong> [À COMPLÉTER : nom-prénom ou raison sociale]</li>
+          <li><strong>Forme juridique :</strong> [À COMPLÉTER : ex. entrepreneur individuel / auto-entrepreneur / EURL / SASU / SARL]</li>
+          <li><strong>Capital social :</strong> [À COMPLÉTER : montant — uniquement si société]</li>
+          <li><strong>Siège social :</strong> [À COMPLÉTER : adresse complète]</li>
+          <li><strong>SIRET :</strong> [À COMPLÉTER : n° SIRET à 14 chiffres]</li>
+          <li><strong>Immatriculation :</strong> [À COMPLÉTER : RCS ou Répertoire des Métiers + ville]</li>
+          <li><strong>N° TVA intracommunautaire :</strong> [À COMPLÉTER : si assujetti à la TVA]</li>
+          <li><strong>Email :</strong> [À COMPLÉTER : email de contact professionnel]</li>
+          <li><strong>Téléphone :</strong> <a href="tel:+33744776598">07 44 77 65 98</a></li>
+        </ul>
+
+        <h2>2. Directeur de la publication</h2>
+        <p>[À COMPLÉTER : nom du directeur / de la directrice de la publication] — généralement le représentant légal de l'entreprise.</p>
+
+        <h2>3. Hébergeur</h2>
+        <p>Le site est hébergé par :</p>
+        <ul>
+          <li><strong>Vercel Inc.</strong></li>
+          <li>340 S Lemon Ave #4133, Walnut, CA 91789, États-Unis <em>(adresse à confirmer sur vercel.com/legal)</em></li>
+          <li>Site : <a href="https://vercel.com" target="_blank" rel="noopener noreferrer">vercel.com</a></li>
+        </ul>
+        <p>La base de données et l'authentification sont opérées via <strong>Google Firebase</strong> (Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irlande).</p>
+
+        <h2>4. Activité</h2>
+        <p>Pirates Tools est un site de vente en ligne d'outillage professionnel, avec livraison dans les départements et régions d'outre-mer (Guadeloupe, Martinique, Guyane, La Réunion, Mayotte). Les prix affichés incluent la TVA applicable et l'octroi de mer selon le territoire de livraison.</p>
+
+        <h2>5. Médiation de la consommation</h2>
+        <p>Conformément aux articles L.612-1 et suivants du Code de la consommation, tout consommateur a le droit de recourir gratuitement à un médiateur de la consommation en vue de la résolution amiable d'un litige.</p>
+        <p><strong>Médiateur désigné :</strong> [À COMPLÉTER : nom et coordonnées du médiateur de la consommation — obligatoire pour la vente aux particuliers]</p>
+        <p>Plateforme européenne de règlement en ligne des litiges : <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer">ec.europa.eu/consumers/odr</a></p>
+
+        <h2>6. Propriété intellectuelle</h2>
+        <p>L'ensemble des contenus du site (textes, visuels, logo, code, structure) est protégé par le droit de la propriété intellectuelle. Toute reproduction, représentation ou exploitation, totale ou partielle, sans autorisation écrite préalable, est interdite. Les marques citées (DeWALT, Makita, Festool, Flex, Facom, Stanley, Wera, etc.) restent la propriété de leurs titulaires respectifs.</p>
+
+        <h2>7. Responsabilité</h2>
+        <p>L'éditeur s'efforce d'assurer l'exactitude des informations publiées mais ne saurait être tenu responsable des erreurs, omissions ou d'une indisponibilité temporaire du service. Les liens vers des sites tiers n'engagent pas la responsabilité de l'éditeur quant à leur contenu.</p>
+
+        <h2>8. Droit applicable</h2>
+        <p>Les présentes mentions sont régies par le droit français. Tout litige relève, à défaut de résolution amiable, de la compétence des tribunaux français.</p>
+
+        <p class="legal-links"><a href="#/confidentialite">→ Politique de confidentialité</a></p>
+      </div>
+    </section>
+
+    <!-- POLITIQUE DE CONFIDENTIALITÉ -->
+    <section id="view-confidentialite" class="view legal-page hidden" data-route="/confidentialite" role="region" aria-labelledby="pc-h1">
+      <div class="container legal-container">
+        <h1 id="pc-h1" tabindex="-1">Politique de confidentialité</h1>
+        <p class="legal-updated">Dernière mise à jour : 15 juillet 2026</p>
+
+        <p>La présente politique explique quelles données personnelles sont collectées sur <strong>pirates-tools.com</strong>, pourquoi, et quels sont vos droits, conformément au Règlement Général sur la Protection des Données (RGPD, UE 2016/679) et à la loi française « Informatique et Libertés ». Le RGPD s'applique pleinement dans les DOM-TOM.</p>
+
+        <h2>1. Responsable du traitement</h2>
+        <p>Le responsable du traitement des données est l'éditeur du site (voir <a href="#/mentions-legales">Mentions légales</a>) : [À COMPLÉTER : nom / raison sociale], joignable à l'adresse [À COMPLÉTER : email de contact].</p>
+
+        <h2>2. Données collectées</h2>
+        <ul>
+          <li><strong>Compte client :</strong> nom, adresse email, téléphone, adresse de livraison.</li>
+          <li><strong>Commandes :</strong> produits commandés, montants, historique.</li>
+          <li><strong>Paiement :</strong> traité directement par Stripe. <strong>Aucune donnée de carte bancaire n'est stockée sur nos serveurs.</strong></li>
+          <li><strong>Formulaire de contact / newsletter :</strong> nom, email, message.</li>
+          <li><strong>Navigation :</strong> cookies de mesure d'audience (Google Analytics 4) et publicitaires (Meta Pixel), <strong>uniquement après votre consentement</strong>.</li>
+          <li><strong>Paiement crypto :</strong> seule une adresse publique de portefeuille est affichée ; aucune donnée personnelle n'est traitée.</li>
+        </ul>
+
+        <h2>3. Finalités et bases légales</h2>
+        <ul>
+          <li><strong>Gérer votre compte et vos commandes</strong> — exécution du contrat.</li>
+          <li><strong>Vous envoyer la confirmation et le suivi de commande</strong> — exécution du contrat.</li>
+          <li><strong>Facturation et comptabilité</strong> — obligation légale.</li>
+          <li><strong>Newsletter et prospection</strong> — votre consentement.</li>
+          <li><strong>Mesure d'audience et publicité</strong> — votre consentement (bannière cookies).</li>
+          <li><strong>Sécurité et prévention de la fraude</strong> — intérêt légitime.</li>
+        </ul>
+
+        <h2>4. Destinataires et sous-traitants</h2>
+        <p>Vos données ne sont jamais vendues. Elles sont partagées uniquement avec les prestataires nécessaires au fonctionnement du service :</p>
+        <ul>
+          <li><strong>Google / Firebase</strong> — authentification et base de données (Google Ireland Limited).</li>
+          <li><strong>Stripe</strong> — paiement par carte (Stripe Payments Europe Ltd, Irlande).</li>
+          <li><strong>Resend</strong> — envoi des emails transactionnels (Resend Inc., États-Unis).</li>
+          <li><strong>Vercel</strong> — hébergement (Vercel Inc., États-Unis).</li>
+          <li><strong>Meta</strong> — Instagram et Meta Pixel, si vous acceptez les cookies (Meta Platforms Ireland Ltd).</li>
+          <li><strong>CoinGecko</strong> — taux de change crypto (appel public, sans donnée personnelle).</li>
+        </ul>
+
+        <h2>5. Transferts hors Union européenne</h2>
+        <p>Certains prestataires (Google, Stripe, Resend, Vercel, Meta) peuvent traiter des données aux États-Unis. Ces transferts sont encadrés par les <strong>Clauses Contractuelles Types</strong> de la Commission européenne et/ou par le <strong>EU-US Data Privacy Framework</strong>, garantissant un niveau de protection adéquat.</p>
+
+        <h2>6. Durées de conservation</h2>
+        <ul>
+          <li><strong>Compte client :</strong> pendant toute la durée de la relation, puis supprimé sur demande.</li>
+          <li><strong>Factures et commandes :</strong> 10 ans (obligation comptable légale).</li>
+          <li><strong>Prospection / newsletter :</strong> jusqu'au retrait du consentement, et au plus 3 ans après le dernier contact.</li>
+          <li><strong>Messages de contact :</strong> 3 ans après le dernier échange.</li>
+          <li><strong>Cookies :</strong> 13 mois maximum.</li>
+        </ul>
+
+        <h2>7. Vos droits</h2>
+        <p>Conformément aux articles 15 à 22 du RGPD, vous disposez des droits suivants : <strong>accès</strong>, <strong>rectification</strong>, <strong>effacement</strong>, <strong>limitation</strong>, <strong>portabilité</strong>, <strong>opposition</strong>, et <strong>retrait de votre consentement</strong> à tout moment. Vous pouvez aussi définir des directives sur le sort de vos données après votre décès.</p>
+        <p>Pour exercer ces droits, écrivez à : [À COMPLÉTER : email de contact]. Une réponse vous sera apportée dans un délai maximum d'un mois.</p>
+        <p>Si vous estimez que vos droits ne sont pas respectés, vous pouvez saisir la <strong>CNIL</strong> : 3 Place de Fontenoy, TSA 80715, 75334 Paris Cedex 07 — <a href="https://www.cnil.fr" target="_blank" rel="noopener noreferrer">cnil.fr</a>.</p>
+
+        <h2>8. Cookies</h2>
+        <p>Le site utilise deux catégories de cookies :</p>
+        <ul>
+          <li><strong>Cookies essentiels</strong> (fonctionnement du site, panier, session) : nécessaires, sans consentement requis.</li>
+          <li><strong>Cookies de mesure d'audience et publicitaires</strong> (Google Analytics 4, Meta Pixel) : déposés <strong>uniquement si vous les acceptez</strong> via la bannière de consentement. Vous pouvez modifier votre choix à tout moment.</li>
+        </ul>
+
+        <h2>9. Sécurité</h2>
+        <p>Nous mettons en œuvre des mesures techniques et organisationnelles pour protéger vos données : connexions chiffrées (HTTPS), accès restreints, prix calculés côté serveur, et prestataires de paiement certifiés (Stripe, conforme PCI-DSS).</p>
+
+        <h2>10. Contact</h2>
+        <p>Pour toute question relative à cette politique : [À COMPLÉTER : email de contact] ou via <a href="https://wa.me/33744776598" target="_blank" rel="noopener noreferrer">WhatsApp</a>.</p>
+
+        <p class="legal-links"><a href="#/mentions-legales">→ Mentions légales</a></p>
+      </div>
+    </section>
+
+    <!-- CONDITIONS GÉNÉRALES DE VENTE -->
+    <section id="view-cgv" class="view legal-page hidden" data-route="/cgv" role="region" aria-labelledby="cgv-h1">
+      <div class="container legal-container">
+        <h1 id="cgv-h1" tabindex="-1">Conditions Générales de Vente</h1>
+        <p class="legal-updated">Dernière mise à jour : 15 juillet 2026</p>
+
+        <p class="legal-note">⚠️ Les champs <strong>[À COMPLÉTER]</strong> (identité du vendeur, frais et délais de livraison, adresse de retour, médiateur) doivent être renseignés avant la mise en ligne. Une relecture par un professionnel du droit est fortement recommandée.</p>
+
+        <h2>1. Objet et champ d'application</h2>
+        <p>Les présentes Conditions Générales de Vente (CGV) régissent les ventes de produits d'outillage réalisées sur le site <strong>pirates-tools.com</strong> par [À COMPLÉTER : nom / raison sociale du vendeur] (ci-après « le Vendeur ») à tout acheteur (ci-après « le Client »). Toute commande implique l'acceptation sans réserve des présentes CGV. Le Vendeur se réserve le droit de les modifier ; les CGV applicables sont celles en vigueur à la date de la commande.</p>
+
+        <h2>2. Produits</h2>
+        <p>Les produits proposés sont décrits avec la plus grande exactitude possible (caractéristiques, marque, visuels). Les photographies et modèles 3D n'ont pas de valeur contractuelle. Les offres sont valables dans la limite des stocks disponibles ; en cas d'indisponibilité après commande, le Client en est informé et remboursé le cas échéant.</p>
+
+        <h2>3. Prix</h2>
+        <p>Les prix sont indiqués en euros, <strong>toutes taxes comprises</strong> (TVA et octroi de mer applicables selon le territoire de livraison DOM-TOM), hors frais de livraison indiqués séparément avant la validation de la commande. Le Vendeur se réserve le droit de modifier ses prix à tout moment ; le produit est facturé sur la base du tarif en vigueur au moment de la commande. <strong>Le prix débité est toujours calculé et vérifié côté serveur</strong>, à partir du catalogue officiel.</p>
+
+        <h2>4. Commande</h2>
+        <p>Le Client sélectionne ses produits, vérifie le récapitulatif (produits, quantités, prix, territoire de livraison) puis valide sa commande. La vente est définitive après confirmation du paiement. Un email de confirmation récapitulant la commande est envoyé au Client.</p>
+
+        <h2>5. Paiement</h2>
+        <p>Le paiement s'effectue :</p>
+        <ul>
+          <li><strong>Par carte bancaire</strong> via <strong>Stripe</strong>, prestataire certifié PCI-DSS. Aucune donnée de carte n'est stockée par le Vendeur.</li>
+          <li><strong>En crypto-monnaie</strong> (Bitcoin, Ethereum, USDC, USDT, Solana), le cas échéant, par virement vers l'adresse affichée. Les transferts en crypto sont irréversibles : le Client doit vérifier le réseau et l'adresse avant tout envoi.</li>
+        </ul>
+        <p>La commande n'est traitée qu'après encaissement effectif du paiement.</p>
+
+        <h2>6. Livraison</h2>
+        <p>Les produits sont livrés dans les zones desservies : Guadeloupe (971), Martinique (972), Guyane (973), La Réunion (974), Mayotte (976)[À COMPLÉTER : ajouter/retirer les zones réellement desservies].</p>
+        <ul>
+          <li><strong>Délais :</strong> [À COMPLÉTER : délais de livraison estimés par territoire].</li>
+          <li><strong>Frais :</strong> [À COMPLÉTER : grille des frais de livraison].</li>
+        </ul>
+        <p>Les délais sont donnés à titre indicatif. Le transfert des risques (perte, dommage) intervient à la remise du produit au Client. En cas de colis endommagé, le Client doit émettre des réserves auprès du transporteur et en informer le Vendeur.</p>
+
+        <h2>7. Droit de rétractation</h2>
+        <p>Conformément aux articles L.221-18 et suivants du Code de la consommation, le Client particulier dispose d'un délai de <strong>14 jours</strong> à compter de la réception du produit pour exercer son droit de rétractation, sans avoir à motiver sa décision.</p>
+        <p>Pour l'exercer, le Client notifie sa décision par une déclaration dénuée d'ambiguïté (email à [À COMPLÉTER : email de contact] ou courrier à [À COMPLÉTER : adresse de retour]), en utilisant éventuellement le formulaire type ci-dessous. Le produit doit être retourné neuf, complet et dans son emballage d'origine sous 14 jours. <strong>Les frais de retour sont à la charge du Client</strong>, sauf mention contraire.</p>
+        <p>Le Vendeur rembourse l'intégralité des sommes versées (hors frais de retour) au plus tard 14 jours après récupération du produit ou preuve de son expédition.</p>
+        <p><strong>Exceptions</strong> (art. L.221-28) : le droit de rétractation ne s'applique pas, notamment, aux produits nettement personnalisés ou aux produits descellés ne pouvant être renvoyés pour des raisons d'hygiène ou de sécurité.</p>
+        <div class="legal-form">
+          <p><strong>Formulaire type de rétractation</strong> (à compléter et renvoyer uniquement en cas de rétractation) :</p>
+          <p>À l'attention de [À COMPLÉTER : nom et adresse du Vendeur] :<br>
+          Je/nous vous notifie/notifions ma/notre rétractation du contrat portant sur la commande n° ____ passée le ____, reçue le ____.<br>
+          Nom du/des consommateur(s) : ____<br>
+          Adresse : ____<br>
+          Date : ____ — Signature (si papier) : ____</p>
+        </div>
+
+        <h2>8. Garanties</h2>
+        <p>Tous les produits bénéficient de plein droit et sans supplément des garanties légales :</p>
+        <ul>
+          <li><strong>Garantie légale de conformité</strong> (art. L.217-3 et suivants du Code de la consommation) : 2 ans à compter de la délivrance.</li>
+          <li><strong>Garantie des vices cachés</strong> (art. 1641 et suivants du Code civil).</li>
+        </ul>
+        <p>Ces garanties s'appliquent indépendamment de toute garantie commerciale du constructeur (DeWALT, Makita, Festool, etc.). Pour toute mise en œuvre : [À COMPLÉTER : email de contact].</p>
+
+        <h2>9. Réclamations et médiation</h2>
+        <p>Toute réclamation peut être adressée à [À COMPLÉTER : email de contact] ou via <a href="https://wa.me/33744776598" target="_blank" rel="noopener noreferrer">WhatsApp</a>. En cas de litige non résolu, le Client peut recourir gratuitement au médiateur de la consommation (voir <a href="#/mentions-legales">Mentions légales</a>) ou à la plateforme européenne de règlement en ligne des litiges : <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer">ec.europa.eu/consumers/odr</a>.</p>
+
+        <h2>10. Données personnelles</h2>
+        <p>Les données du Client sont traitées conformément à notre <a href="#/confidentialite">Politique de confidentialité</a>.</p>
+
+        <h2>11. Propriété intellectuelle</h2>
+        <p>Tous les éléments du site restent la propriété du Vendeur ou de leurs titulaires respectifs. Toute reproduction non autorisée est interdite.</p>
+
+        <h2>12. Force majeure — Droit applicable</h2>
+        <p>La responsabilité du Vendeur ne saurait être engagée en cas de force majeure. Les présentes CGV sont soumises au droit français. À défaut de résolution amiable, tout litige relève des tribunaux français compétents.</p>
+
+        <p class="legal-links"><a href="#/mentions-legales">→ Mentions légales</a> · <a href="#/confidentialite">→ Confidentialité</a></p>
+      </div>
+    </section>
+
   </main>
 
   <!-- =================== MODALE DE PAIEMENT =================== -->
@@ -1199,8 +1413,10 @@
               </div>
 
               <p class="cryptopay__warn">
-                ⚠️ Vérifie toujours le réseau avant d'envoyer. Un transfert
-                sur un mauvais réseau est <strong>irréversible</strong>.
+                ⚠️ Vérifie toujours le <strong>réseau et l'adresse</strong> avant
+                d'envoyer. Le QR est généré <strong>sur ton appareil</strong>
+                (aucun service tiers). Un transfert sur un mauvais réseau ou une
+                mauvaise adresse est <strong>irréversible</strong>.
               </p>
             </section>
 
@@ -1304,7 +1520,14 @@
         </div>
       </div>
       <div class="footer-bottom">
-        <p>&copy; 2026 Pirates Tools — Tous droits reserves</p>
+        <nav class="footer-legal" aria-label="Informations légales">
+          <a href="#/mentions-legales">Mentions légales</a>
+          <span aria-hidden="true">·</span>
+          <a href="#/confidentialite">Politique de confidentialité</a>
+          <span aria-hidden="true">·</span>
+          <a href="#/cgv">CGV</a>
+        </nav>
+        <p>&copy; 2026 Pirates Tools — Tous droits réservés</p>
       </div>
     </div>
   </footer>
@@ -1434,91 +1657,9 @@
   </noscript>
 
   <!-- =================== JS =================== -->
-  <!-- Mini console debug (iPad) — activer: appui long sur le logo topbar -->
-  <script>
-  (function(){
-    var panel=document.createElement('div');
-    panel.id='dbg';
-    panel.style.cssText='display:none;position:fixed;bottom:0;left:0;right:0;max-height:40vh;'+
-      'background:rgba(0,0,0,.92);color:#0f0;font:12px/1.5 monospace;z-index:99999;'+
-      'overflow-y:auto;padding:8px 10px 60px;border-top:2px solid #0f0;-webkit-overflow-scrolling:touch;';
-    var toolbar=document.createElement('div');
-    toolbar.style.cssText='position:sticky;top:0;display:flex;gap:6px;padding:0 0 6px;background:rgba(0,0,0,.92);z-index:1;';
-    toolbar.innerHTML='<button id="dbgClear" style="background:#222;color:#0f0;border:1px solid #0f0;border-radius:4px;padding:2px 10px;font:12px monospace;cursor:pointer">Clear</button>'+
-      '<button id="dbgCopy" style="background:#222;color:#0f0;border:1px solid #0f0;border-radius:4px;padding:2px 10px;font:12px monospace;cursor:pointer">Copy</button>'+
-      '<button id="dbgClose" style="background:#222;color:#f44;border:1px solid #f44;border-radius:4px;padding:2px 10px;font:12px monospace;cursor:pointer">X</button>';
-    var logs=document.createElement('div');
-    logs.id='dbgLogs';
-    panel.appendChild(toolbar);
-    panel.appendChild(logs);
-    document.body.appendChild(panel);
-
-    var MAX=200,count=0;
-    function ts(){return new Date().toLocaleTimeString('fr-FR',{hour12:false})}
-    function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')}
-    function add(type,args){
-      if(panel.style.display==='none') return;
-      var parts=[];
-      for(var i=0;i<args.length;i++){
-        try{parts.push(typeof args[i]==='object'?JSON.stringify(args[i],null,1):String(args[i]))}
-        catch(e){parts.push(String(args[i]))}
-      }
-      var colors={log:'#0f0',warn:'#ff0',error:'#f44',info:'#4af'};
-      var line=document.createElement('div');
-      line.style.cssText='border-bottom:1px solid #222;padding:2px 0;word-break:break-all;color:'+(colors[type]||'#0f0');
-      line.innerHTML='<span style="color:#888">'+ts()+'</span> <b>['+type.toUpperCase()+']</b> '+esc(parts.join(' '));
-      logs.appendChild(line);
-      if(++count>MAX) logs.removeChild(logs.firstChild);
-      panel.scrollTop=panel.scrollHeight;
-    }
-
-    // Intercept console
-    var orig={log:console.log,warn:console.warn,error:console.error,info:console.info};
-    console.log=function(){orig.log.apply(console,arguments);add('log',arguments)};
-    console.warn=function(){orig.warn.apply(console,arguments);add('warn',arguments)};
-    console.error=function(){orig.error.apply(console,arguments);add('error',arguments)};
-    console.info=function(){orig.info.apply(console,arguments);add('info',arguments)};
-
-    // Catch uncaught errors
-    window.addEventListener('error',function(e){
-      add('error',['UNCAUGHT: '+e.message+' ('+e.filename+':'+e.lineno+')']);
-    });
-    window.addEventListener('unhandledrejection',function(e){
-      add('error',['PROMISE: '+String(e.reason)]);
-    });
-
-    // Toggle: long press on topbar logo
-    var logo=document.getElementById('topbarLogo');
-    var timer=null;
-    if(logo){
-      logo.addEventListener('touchstart',function(e){
-        timer=setTimeout(function(){
-          panel.style.display=panel.style.display==='none'?'block':'none';
-          if(panel.style.display==='block') add('info',['Console debug activée — Pirates Tools']);
-        },800);
-      },{passive:true});
-      logo.addEventListener('touchend',function(){clearTimeout(timer)});
-      logo.addEventListener('touchmove',function(){clearTimeout(timer)});
-      // Desktop: double-click
-      logo.addEventListener('dblclick',function(){
-        panel.style.display=panel.style.display==='none'?'block':'none';
-        if(panel.style.display==='block') add('info',['Console debug activée — Pirates Tools']);
-      });
-    }
-
-    // Toolbar actions
-    document.getElementById('dbgClear').addEventListener('click',function(){logs.innerHTML='';count=0});
-    document.getElementById('dbgCopy').addEventListener('click',function(){
-      var text='';
-      for(var i=0;i<logs.children.length;i++) text+=logs.children[i].textContent+'\n';
-      if(navigator.clipboard) navigator.clipboard.writeText(text).then(function(){add('info',['Copié !'])});
-    });
-    document.getElementById('dbgClose').addEventListener('click',function(){panel.style.display='none'});
-  })();
-  </script>
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=289"></script>
+  <script defer src="app.js?v=302"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

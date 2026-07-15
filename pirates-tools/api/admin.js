@@ -3,43 +3,25 @@
 // Storage : Firestore collection `product_overrides/{id}`.
 // Without Firebase configured, returns 503 with a helpful message.
 
+const auth = require('./_lib/auth');
+const http = require('./_lib/http');
+const firebase = require('./_lib/firebase');
+
 module.exports = async function handler(req, res) {
+  http.applyCors(req, res);
   if (req.method === 'OPTIONS') return res.status(204).end();
 
-  // ── Auth ──────────────────────────────────────────────────
-  const expected = process.env.ADMIN_SECRET;
-  if (!expected) {
-    return res.status(503).json({
-      ok: false,
-      error: 'Admin not configured. Set ADMIN_SECRET env var on Vercel.'
-    });
-  }
-  const provided = req.headers['x-admin-secret'] || '';
-  if (provided !== expected) {
-    return res.status(401).json({ ok: false, error: 'Invalid admin secret' });
-  }
+  // ── Auth (constant-time admin secret) ─────────────────────
+  const denied = auth.requireAdmin(req);
+  if (denied) return res.status(denied.status).json({ ok: false, error: denied.error });
 
-  // ── Firestore ─────────────────────────────────────────────
-  const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT;
-  if (!serviceAccount) {
+  // ── Firestore (shared initializer) ────────────────────────
+  const { admin, db } = firebase.getFirebase();
+  if (!db) {
     return res.status(503).json({
       ok: false,
       error: 'Firestore not configured. Set FIREBASE_SERVICE_ACCOUNT env var.'
     });
-  }
-
-  let admin, db;
-  try {
-    admin = require('firebase-admin');
-    if (!admin.apps.length) {
-      admin.initializeApp({
-        credential: admin.credential.cert(JSON.parse(serviceAccount))
-      });
-    }
-    db = admin.firestore();
-  } catch (err) {
-    console.error('[api/admin] Firebase init failed:', err.message);
-    return res.status(500).json({ ok: false, error: 'Firestore init failed' });
   }
 
   // ── GET : list overrides OR recent orders ────────────────

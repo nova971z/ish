@@ -1,28 +1,29 @@
-// GET  /api/orders?uid=xxx     — List orders for a user
-// POST /api/orders             — Create a new order
-// Backed by Firebase Admin SDK (requires FIREBASE_SERVICE_ACCOUNT env var)
+// GET  /api/orders?uid=xxx  — List a user's orders (ADMIN ONLY)
+// POST /api/orders          — Create an order (ADMIN ONLY)
+//
+// AUTH: requires the admin secret (header "x-admin-secret"). This endpoint uses
+// the Firebase Admin SDK, which bypasses Firestore security rules, so it must
+// never be exposed to end users. The customer-facing app does NOT use it — it
+// reads/writes its own orders through the Firebase *client* SDK under per-user
+// Firestore rules. This endpoint is an admin/support tool only.
 
-let _admin = null;
-let _db = null;
+'use strict';
 
-function initFirebase() {
-  if (_admin) return;
-  const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT;
-  if (!serviceAccount) return;
-  _admin = require('firebase-admin');
-  if (!_admin.apps.length) {
-    _admin.initializeApp({
-      credential: _admin.credential.cert(JSON.parse(serviceAccount))
-    });
-  }
-  _db = _admin.firestore();
-}
+var auth = require('./_lib/auth');
+var http = require('./_lib/http');
+var firebase = require('./_lib/firebase');
 
 module.exports = async function handler(req, res) {
+  http.applyCors(req, res);
   if (req.method === 'OPTIONS') return res.status(204).end();
 
-  initFirebase();
-  if (!_db) {
+  // ── Auth (admin only) ──
+  var denied = auth.requireAdmin(req);
+  if (denied) return res.status(denied.status).json({ ok: false, error: denied.error });
+
+  var fb = firebase.getFirebase();
+  var admin = fb.admin, db = fb.db;
+  if (!db) {
     return res.status(503).json({
       ok: false,
       error: 'Firebase Admin not configured. Add FIREBASE_SERVICE_ACCOUNT in Vercel environment variables.'
@@ -31,30 +32,32 @@ module.exports = async function handler(req, res) {
 
   // ── GET: list orders for a user ──
   if (req.method === 'GET') {
-    const { uid } = req.query || {};
-    if (!uid) return res.status(400).json({ ok: false, error: 'Missing uid parameter' });
+    var uid = (req.query && req.query.uid) || '';
+    if (!uid || typeof uid !== 'string') {
+      return res.status(400).json({ ok: false, error: 'Missing uid parameter' });
+    }
 
     try {
-      const snap = await _db
+      var snap = await db
         .collection('users').doc(uid)
         .collection('orders')
         .orderBy('date', 'desc')
         .limit(50)
         .get();
 
-      const orders = [];
-      snap.forEach(doc => {
-        const d = doc.data();
+      var orders = [];
+      snap.forEach(function (doc) {
+        var d = doc.data();
         orders.push({
           id: doc.id,
           items: d.items || d.itemCount || 0,
-          total: d.total || 0,
+          total: typeof d.total === 'number' ? d.total : 0,
           status: d.status || 'pending',
-          date: d.date ? d.date.toMillis() : null
+          date: d.date && d.date.toMillis ? d.date.toMillis() : null
         });
       });
 
-      return res.status(200).json({ ok: true, orders });
+      return res.status(200).json({ ok: true, orders: orders });
     } catch (err) {
       console.error('[api/orders] GET error:', err.message);
       return res.status(500).json({ ok: false, error: 'Failed to fetch orders' });
@@ -63,29 +66,36 @@ module.exports = async function handler(req, res) {
 
   // ── POST: create a new order ──
   if (req.method === 'POST') {
-    const { uid, items, total, paymentMethod, sessionId } = req.body || {};
-    if (!uid || !items || !total) {
-      return res.status(400).json({ ok: false, error: 'Missing required fields: uid, items, total' });
+    var body = req.body || {};
+    var uid = body.uid;
+    var items = body.items;
+    var total = Number(body.total);
+
+    if (!uid || typeof uid !== 'string') {
+      return res.status(400).json({ ok: false, error: 'Missing or invalid uid' });
+    }
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ ok: false, error: 'Missing or invalid items' });
+    }
+    if (!isFinite(total) || total < 0) {
+      return res.status(400).json({ ok: false, error: 'Missing or invalid total' });
     }
 
     try {
-      const orderRef = await _db
+      var orderRef = await db
         .collection('users').doc(uid)
         .collection('orders')
         .add({
           items: items,
-          total: Number(total),
-          itemCount: Array.isArray(items) ? items.length : 0,
-          paymentMethod: paymentMethod || 'card',
-          stripeSessionId: sessionId || null,
+          total: total,
+          itemCount: items.length,
+          paymentMethod: body.paymentMethod || 'card',
+          stripeSessionId: body.sessionId || null,
           status: 'confirmed',
-          date: _admin.firestore.FieldValue.serverTimestamp()
+          date: admin.firestore.FieldValue.serverTimestamp()
         });
 
-      return res.status(201).json({
-        ok: true,
-        orderId: orderRef.id
-      });
+      return res.status(201).json({ ok: true, orderId: orderRef.id });
     } catch (err) {
       console.error('[api/orders] POST error:', err.message);
       return res.status(500).json({ ok: false, error: 'Failed to create order' });

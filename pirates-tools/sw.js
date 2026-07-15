@@ -1,5 +1,5 @@
 /* sw.js — Pirates Tools (PWA) */
-const VERSION        = 'pt-v289';                    // version du SW (logique SW)
+const VERSION        = 'pt-v302';                    // version du SW (logique SW)
 const STATIC_CACHE   = `pt-static-${VERSION}`;
 const RUNTIME_CACHE  = `pt-runtime-${VERSION}`;
 const IMG_CACHE      = `pt-img-${VERSION}`;
@@ -7,24 +7,23 @@ const DATA_CACHE     = `pt-data-${VERSION}`;
 const ORIGIN         = self.location.origin;
 
 // Aligner avec le HTML (cache-busting des assets)
-const ASSET_VER      = '289';
+const ASSET_VER      = '302';
 
-// IMPORTANT : le site tourne sous /ish/ (GitHub Pages).
-// On reste en chemins relatifs (./) pour que le SW fonctionne en local et en prod.
+// Production = Vercel (pirates-tools.com), servi à la racine (/).
+// On garde des chemins relatifs (./) pour que le SW fonctionne à l'identique
+// en local, en preview Vercel et en production.
 const APP_SHELL = [
-  './',
-  `./index.html?v=${ASSET_VER}`,  // versionné (même que le HTML)
-  './index.html',                 // non versionné (fallback nav/offline)
+  './',                           // racine (navigation)
+  './index.html',                 // clé canonique unique du shell (fallback offline)
   `./styles.css?v=${ASSET_VER}`,
-  `./app.js?v=${ASSET_VER}`,      // fichier principal
-  `./pt.js?v=${ASSET_VER}`,       // optionnel si présent
+  `./app.js?v=${ASSET_VER}`,
   `./manifest.webmanifest?v=${ASSET_VER}`,
   `./icons/icon-180.png?v=${ASSET_VER}`,
   `./icons/icon-192.png?v=${ASSET_VER}`,
   `./icons/icon-256.png?v=${ASSET_VER}`,
   `./icons/icon-384.png?v=${ASSET_VER}`,
   `./icons/icon-512.png?v=${ASSET_VER}`,
-  `./images/pirates-tools-logo.png?v=${ASSET_VER}`   // optionnel
+  `./images/pirates-tools-logo.png?v=${ASSET_VER}`
 ];
 
 // Utilitaires
@@ -47,9 +46,6 @@ async function precacheShell() {
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {
     try {
-      if ('navigationPreload' in self.registration) {
-        try { await self.registration.navigationPreload.enable(); } catch(_){}
-      }
       await precacheShell();
       await self.skipWaiting();
     } catch(_){}
@@ -58,6 +54,11 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
+    // navigationPreload doit être activé à l'ACTIVATE (à l'install, aucun worker
+    // actif → l'appel n'a pas d'effet et peut rejeter).
+    if ('navigationPreload' in self.registration) {
+      try { await self.registration.navigationPreload.enable(); } catch(_){}
+    }
     // Supprime les anciens caches
     const keep = new Set([STATIC_CACHE, RUNTIME_CACHE, IMG_CACHE, DATA_CACHE]);
     const names = await caches.keys();
@@ -87,50 +88,58 @@ function timeout(ms, promise){
 
 // Stratégies
 async function handleNavigate(event){
-  // Navigation : utilise preload/network, sinon fallback index.html en cache
+  // Navigation : preload/réseau, sinon fallback index.html en cache.
+  // IMPORTANT : seul le shell racine (/ ou /index.html) a le droit de rafraîchir
+  // la clé './index.html'. Toute autre navigation (docs/, page 404…) ne doit
+  // JAMAIS écraser le shell hors-ligne (sinon empoisonnement du cache).
+  const url = new URL(event.request.url);
+  const isShell = url.pathname === '/' || url.pathname === '/index.html';
+
   try {
     const pre = await event.preloadResponse;
-    if (pre) return pre;
+    if (pre) {
+      if (isShell && pre.ok) putCache(STATIC_CACHE, './index.html', pre.clone());
+      return pre;
+    }
   } catch(_){}
 
   try {
     const net = await fetch(event.request);
-    // rafraîchit index.html en cache si on a la ressource
-    if (net && net.ok) { putCache(STATIC_CACHE, './index.html', net.clone()); }
+    if (isShell && net && net.ok) putCache(STATIC_CACHE, './index.html', net.clone());
     return net;
   } catch(_){
-    // Fallback : d'abord la versionnée, puis la non-versionnée
-    const cachedV = await fromCache(STATIC_CACHE, `./index.html?v=${ASSET_VER}`);
-    if (cachedV) return cachedV;
     const cached = await fromCache(STATIC_CACHE, './index.html');
     if (cached) return cached;
-    // dernier recours
-    return Response.redirect('./', 302);
+    return Response.redirect('./', 302); // dernier recours
   }
 }
 
 async function handleProducts(request){
-  // Network-first (avec timeout) + fallback cache pour data/products.json ou products.json
+  // Network-first (avec timeout). Sur succès on met en cache ; sur erreur réseau
+  // OU réponse non-ok (404/500), on bascule sur le cache — un 500 transitoire ne
+  // doit pas battre une bonne copie en cache.
   try {
     const net = await timeout(4000, fetch(request));
-    if (net && net.ok) { putCache(DATA_CACHE, request, net.clone()); }
-    return net;
-  } catch(_){
-    const cached = await fromCache(DATA_CACHE, request);
-    if (cached) return cached;
-    // Essaie l'autre chemin en fallback (data/ <-> racine)
+    if (net && net.ok) { putCache(DATA_CACHE, request, net.clone()); return net; }
+    // non-ok → tombe dans le fallback cache ci-dessous
+  } catch(_){ /* erreur réseau → fallback cache */ }
+
+  const cached = await fromCache(DATA_CACHE, request);
+  if (cached) return cached;
+
+  // Essaie l'autre chemin (data/ <-> racine)
+  try {
     const url = new URL(request.url);
     const twin = url.pathname.endsWith('/products.json')
       ? url.pathname.replace('/products.json','/data/products.json')
       : url.pathname.replace('/data/products.json','/products.json');
-    try {
-      const altReq = new Request(`${url.origin}${twin}${url.search}`, { method:'GET' });
-      const altCached = await fromCache(DATA_CACHE, altReq);
-      if (altCached) return altCached;
-    } catch(_){}
-    // Rien en cache
-    return new Response('[]', { status:200, headers:{ 'Content-Type':'application/json' } });
-  }
+    const altReq = new Request(`${url.origin}${twin}${url.search}`, { method:'GET' });
+    const altCached = await fromCache(DATA_CACHE, altReq);
+    if (altCached) return altCached;
+  } catch(_){}
+
+  // Rien en cache : catalogue vide (l'app a son propre fallback statique)
+  return new Response('[]', { status:200, headers:{ 'Content-Type':'application/json' } });
 }
 
 async function handleStatic(event, request){
@@ -139,7 +148,7 @@ async function handleStatic(event, request){
   const fetching = (async ()=>{
     try {
       const net = await fetch(request);
-      if (net && (net.ok || net.type === 'opaque')) {
+      if (net && net.ok) {
         await putCache(STATIC_CACHE, request, net.clone());
       }
     } catch(_){}
@@ -162,15 +171,18 @@ async function handleImage(request){
   if (cached) return cached;
   try {
     const net = await fetch(request);
-    if (net && (net.ok || net.type === 'opaque')) {
+    if (net && net.ok) {
       putCache(IMG_CACHE, request, net.clone());
     }
     return net;
   } catch(_){
-    // Fallback icône
-    return fromCache(STATIC_CACHE, `./icons/icon-256.png?v=${ASSET_VER}`) ||
-           fromCache(STATIC_CACHE, './icons/icon-256.png') ||
-           new Response('', { status:504 });
+    // Fallback icône — fromCache est async : il faut AWAIT chaque lookup,
+    // sinon le `||` renvoie une Promise (toujours truthy) → respondWith(null).
+    const c1 = await fromCache(STATIC_CACHE, `./icons/icon-256.png?v=${ASSET_VER}`);
+    if (c1) return c1;
+    const c2 = await fromCache(STATIC_CACHE, './icons/icon-256.png');
+    if (c2) return c2;
+    return new Response('', { status:504 });
   }
 }
 
@@ -232,10 +244,12 @@ self.addEventListener('message', (e) => {
     self.skipWaiting();
   }
   if (data === 'CLEAR_OLD_CACHES' || (data && data.type) === 'CLEAR_OLD_CACHES') {
-    (async ()=> {
+    // e.waitUntil : garde le SW en vie jusqu'à la fin du nettoyage (sinon il peut
+    // être terminé au milieu des suppressions).
+    e.waitUntil((async ()=> {
       const keep = new Set([STATIC_CACHE, RUNTIME_CACHE, IMG_CACHE, DATA_CACHE]);
       const names = await caches.keys();
       await Promise.all(names.map(n => keep.has(n) ? null : caches.delete(n)));
-    })();
+    })());
   }
 });

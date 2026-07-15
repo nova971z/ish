@@ -2,10 +2,10 @@
   PIRATES TOOLS — PWA E-Commerce (Vanilla HTML / CSS / JS)
 ═══════════════════════════════════════════════════════════════════
 
-URL prod : https://ish-ebon.vercel.app/ (Vercel) — legacy : https://nova971z.github.io/ish/
+URL prod : https://pirates-tools.com/ (domaine perso sur Vercel)
 Langue   : Français (fr-FR)
 Thème    : Dark (#0a0f14) · Accent violet (#8B5CF6)
-Version  : pt-v277 (Service Worker + ASSET_VER)
+Version  : pt-v297 (Service Worker + ASSET_VER)
 Backend  : Vercel serverless functions (api/products, api/checkout, api/webhook, api/orders,
            api/admin, api/health, api/contact, api/newsletter, api/test-email)
 
@@ -17,8 +17,8 @@ PWA mono-fichier sans framework, sans bundler.
 Routing SPA via hash (#/).
 
   index.html         Point d'entrée, crypto config inlinée (PT_CRYPTO_CONFIG)
-  styles.css         ~5 600 lignes — design system dark/glassmorphism/neon
-  app.js             ~3 500 lignes — logique complète (IIFE)
+  styles.css         ~7 000 lignes — design system dark/glassmorphism/neon
+  app.js             ~6 200 lignes — logique complète (IIFE)
   sw.js              Service Worker multi-cache
   products.json      Catalogue produits (26 articles, 7 marques)
   firebase-init.js   Init Firebase Auth + Firestore
@@ -108,7 +108,8 @@ Routing SPA via hash (#/).
       - Taux temps réel EUR→crypto (CoinGecko API)
       - Copie adresse + montant en un clic
       - Tutoriel intégré en 3 étapes numérotées
-      - Option achat crypto par carte (NOWPayments on-ramp)
+      - (NOWPayments dynamique retiré du client — clé de compte à ne jamais
+        exposer ; à réactiver via un endpoint serverless si besoin)
 
    Adresses de réception (MetaMask) :
      BTC : bc1qfh9zdgq598xc3vgsrnyp2v38pefcxz827kwxwx
@@ -244,7 +245,7 @@ pirates-tools/
 │   │   ├── stanley.svg
 │   │   ├── wera.svg
 │   │   └── facom.svg
-│   └── products/          (25 images produit)
+│   └── products/          (26 images produit)
 │
 ├── models/
 │   ├── dewalt-optimized.glb
@@ -302,7 +303,7 @@ Aucune dépendance npm en production. Zéro framework. Zéro bundler.
   Images externes       → Cache-first (safe)
   Requêtes cross-origin → Pass-through (pas de cache)
 
-  Versionning : VERSION = 'pt-v277', ASSET_VER = '277'
+  Versionning : VERSION = 'pt-v297', ASSET_VER = '297'
   → Incrémenter les deux + query strings (?v=277) à chaque déploiement.
 
 ───────────────────────────────────────────────────────────────────

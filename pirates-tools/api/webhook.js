@@ -1,45 +1,80 @@
 // POST /api/webhook — Stripe webhook for payment confirmation
 // Requires STRIPE_SECRET_KEY + STRIPE_WEBHOOK_SECRET env vars.
 // Optional: RESEND_API_KEY + RESEND_FROM + OWNER_EMAIL for transactional email.
+//
+// Two correctness requirements handled here:
+//  1. RAW BODY — Stripe signs the exact request bytes. Vercel's default parser
+//     would turn the body into an object; re-stringifying it does NOT reproduce
+//     the signed bytes and breaks (or masks) signature verification. We disable
+//     the body parser (config below) and read the raw stream ourselves.
+//  2. IDEMPOTENCY — Stripe delivers each event at-least-once. We claim each
+//     event.id in Firestore before processing so a redelivery is acknowledged
+//     without re-sending confirmation emails.
 
-module.exports = async function handler(req, res) {
+'use strict';
+
+var getFirebase = require('./_lib/firebase').getFirebase;
+
+// Read the raw request body as a Buffer (parser is disabled — see config).
+async function readRawBody(req) {
+  var chunks = [];
+  for await (var chunk of req) {
+    chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
+  }
+  return Buffer.concat(chunks);
+}
+
+async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ ok: false, error: 'Method not allowed' });
   }
 
-  const stripeKey = process.env.STRIPE_SECRET_KEY;
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  var stripeKey = process.env.STRIPE_SECRET_KEY;
+  var webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!stripeKey || !webhookSecret) {
     return res.status(503).json({ ok: false, error: 'Stripe webhook not configured' });
   }
 
   try {
-    const stripe = require('stripe')(stripeKey);
+    var stripe = require('stripe')(stripeKey);
 
-    // Verify signature
-    const sig = req.headers['stripe-signature'];
-    const rawBody = req.body; // Vercel passes raw body for webhooks
-    let event;
-
+    // ── 1) Verify signature against the RAW body ──
+    var sig = req.headers['stripe-signature'];
+    var rawBody = await readRawBody(req);
+    var event;
     try {
-      event = stripe.webhooks.constructEvent(
-        typeof rawBody === 'string' ? rawBody : JSON.stringify(rawBody),
-        sig,
-        webhookSecret
-      );
+      event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
     } catch (err) {
       console.error('[webhook] Signature verification failed:', err.message);
       return res.status(400).json({ ok: false, error: 'Invalid signature' });
     }
 
-    // Handle the event
+    // ── 2) Idempotency: claim the event.id before doing any side effects ──
+    var fb = getFirebase();
+    if (fb.db) {
+      var eventRef = fb.db.collection('stripe_events').doc(event.id);
+      try {
+        // create() is atomic and fails if the doc already exists → duplicate.
+        await eventRef.create({
+          type: event.type,
+          receivedAt: fb.admin.firestore.FieldValue.serverTimestamp()
+        });
+      } catch (dupErr) {
+        console.log('[webhook] Duplicate event ignored:', event.id);
+        return res.status(200).json({ ok: true, received: true, duplicate: true });
+      }
+    } else {
+      console.warn('[webhook] Firestore not configured — idempotency disabled for', event.id);
+    }
+
+    // ── 3) Process the event ──
     switch (event.type) {
       case 'checkout.session.completed': {
-        const sessionLite = event.data.object;
+        var sessionLite = event.data.object;
         console.log('[webhook] Payment confirmed:', sessionLite.id, 'Amount:', sessionLite.amount_total);
 
-        // Retrieve the full session with line items and customer details for email
-        let fullSession = sessionLite;
+        // Retrieve the full session with line items + customer details for email
+        var fullSession = sessionLite;
         try {
           fullSession = await stripe.checkout.sessions.retrieve(sessionLite.id, {
             expand: ['line_items', 'line_items.data.price.product', 'customer_details']
@@ -48,29 +83,18 @@ module.exports = async function handler(req, res) {
           console.error('[webhook] Could not retrieve session:', retrieveErr.message);
         }
 
-        // Update Firestore order status if Firebase Admin is configured
-        const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT;
-        if (serviceAccount) {
+        // Mark the matching Firestore order as paid (idempotent update)
+        if (fb.db) {
           try {
-            const admin = require('firebase-admin');
-            if (!admin.apps.length) {
-              admin.initializeApp({
-                credential: admin.credential.cert(JSON.parse(serviceAccount))
-              });
-            }
-            const db = admin.firestore();
-
-            // Find and update order by Stripe session ID
-            const usersSnap = await db.collectionGroup('orders')
+            var usersSnap = await fb.db.collectionGroup('orders')
               .where('stripeSessionId', '==', sessionLite.id)
               .limit(1)
               .get();
-
             if (!usersSnap.empty) {
-              const orderDoc = usersSnap.docs[0];
+              var orderDoc = usersSnap.docs[0];
               await orderDoc.ref.update({
                 status: 'paid',
-                paidAt: admin.firestore.FieldValue.serverTimestamp(),
+                paidAt: fb.admin.firestore.FieldValue.serverTimestamp(),
                 stripePaymentIntent: sessionLite.payment_intent
               });
               console.log('[webhook] Order updated:', orderDoc.id);
@@ -80,7 +104,7 @@ module.exports = async function handler(req, res) {
           }
         }
 
-        // Send confirmation emails via Resend (optional)
+        // Send confirmation emails via Resend (best-effort; never fail the hook)
         try {
           await sendOrderEmails(fullSession);
         } catch (mailErr) {
@@ -98,12 +122,18 @@ module.exports = async function handler(req, res) {
         console.log('[webhook] Unhandled event type:', event.type);
     }
 
-    return res.status(200).json({ received: true });
+    return res.status(200).json({ ok: true, received: true });
   } catch (err) {
     console.error('[webhook] Error:', err.message);
     return res.status(500).json({ ok: false, error: 'Webhook processing failed' });
   }
-};
+}
+
+// Disable Vercel's automatic body parsing so we receive the raw bytes Stripe
+// signed (required for constructEvent). CommonJS equivalent of
+// `export const config = { api: { bodyParser: false } }`.
+module.exports = handler;
+module.exports.config = { api: { bodyParser: false } };
 
 // ── Resend transactional email (HTTP, no SDK) ──────────────────
 async function sendOrderEmails(session) {
