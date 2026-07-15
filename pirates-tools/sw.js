@@ -1,5 +1,5 @@
 /* sw.js — Pirates Tools (PWA) */
-const VERSION        = 'pt-v313';                    // version du SW (logique SW)
+const VERSION        = 'pt-v314';                    // version du SW (logique SW)
 const STATIC_CACHE   = `pt-static-${VERSION}`;
 const RUNTIME_CACHE  = `pt-runtime-${VERSION}`;
 const IMG_CACHE      = `pt-img-${VERSION}`;
@@ -7,7 +7,7 @@ const DATA_CACHE     = `pt-data-${VERSION}`;
 const ORIGIN         = self.location.origin;
 
 // Aligner avec le HTML (cache-busting des assets)
-const ASSET_VER      = '313';
+const ASSET_VER      = '314';
 
 // Production = Vercel (pirates-tools.com), servi à la racine (/).
 // On garde des chemins relatifs (./) pour que le SW fonctionne à l'identique
@@ -142,6 +142,19 @@ async function handleProducts(request){
   return new Response('[]', { status:200, headers:{ 'Content-Type':'application/json' } });
 }
 
+// Dernier recours : une version en cache du MÊME chemin, en ignorant ?v=.
+// Après un déploiement, app.js?v=NOUVEAU n'est pas encore en cache ; si le
+// réseau hoquette à cet instant, renvoyer 504 = app.js jamais exécuté = page
+// noire figée (vues .hidden, seul le HTML statique s'affiche). Une version
+// légèrement périmée mais FONCTIONNELLE vaut toujours mieux qu'une page morte.
+async function fromCacheAnyVersion(cacheName, request) {
+  try {
+    const c = await caches.open(cacheName);
+    const m = await c.match(request, { ignoreVary:true, ignoreSearch:true });
+    return m || null;
+  } catch(_){ return null; }
+}
+
 async function handleStatic(event, request){
   // CSS/JS/Manifest/JSON (non data) -> stale-while-revalidate
   const cached = await fromCache(STATIC_CACHE, request);
@@ -161,7 +174,8 @@ async function handleStatic(event, request){
     if (net && net.ok) { putCache(STATIC_CACHE, request, net.clone()); }
     return net;
   } catch(_){
-    return cached || new Response('', { status:504 });
+    const anyVersion = await fromCacheAnyVersion(STATIC_CACHE, request);
+    return cached || anyVersion || new Response('', { status:504 });
   }
 }
 
