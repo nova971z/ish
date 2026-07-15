@@ -5828,8 +5828,9 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 /* ========== WISHLIST (heart button on cards) ========== */
 .wishlist-btn {
   position: absolute;
-  top: .55rem;
-  left: .55rem;
+  /* Bas-droite : coin dédié au cœur favori (le tag promo occupe le haut-gauche). */
+  bottom: .55rem;
+  right: .55rem;
   width: 34px;
   height: 34px;
   border-radius: 50%;
@@ -6366,11 +6367,15 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 /* ========== 35) PRODUCT DOM-TOM BADGES ========== */
 .pt-badges {
   position: absolute;
-  top: 10px;
-  left: 10px;
+  /* Bas-gauche de l'image : coin dédié aux badges DOM-TOM. Le tag promo est en
+     haut-gauche, EN STOCK en haut-droite, le cœur favori en bas-droite → 4 zones
+     distinctes, aucune superposition possible. */
+  bottom: 0.6rem;
+  left: 0.6rem;
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 5px;
+  max-width: 62%;
   z-index: 2;
   pointer-events: none;
 }

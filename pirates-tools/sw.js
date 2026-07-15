@@ -1,5 +1,5 @@
 /* sw.js — Pirates Tools (PWA) */
-const VERSION        = 'pt-v301';                    // version du SW (logique SW)
+const VERSION        = 'pt-v302';                    // version du SW (logique SW)
 const STATIC_CACHE   = `pt-static-${VERSION}`;
 const RUNTIME_CACHE  = `pt-runtime-${VERSION}`;
 const IMG_CACHE      = `pt-img-${VERSION}`;
@@ -7,7 +7,7 @@ const DATA_CACHE     = `pt-data-${VERSION}`;
 const ORIGIN         = self.location.origin;
 
 // Aligner avec le HTML (cache-busting des assets)
-const ASSET_VER      = '301';
+const ASSET_VER      = '302';
 
 // Production = Vercel (pirates-tools.com), servi à la racine (/).
 // On garde des chemins relatifs (./) pour que le SW fonctionne à l'identique

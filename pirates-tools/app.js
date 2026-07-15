@@ -232,8 +232,8 @@
       if (p.tags.indexOf('mayotte_project') !== -1)
         out.push('<span class="pt-badge pt-badge--mayotte" title="Idéal chantier Mayotte">🏗️ <span class="pt-badge__txt">Chantier Mayotte</span></span>');
     }
-    if (p.stock_status === 'in_stock')
-      out.push('<span class="pt-badge pt-badge--stock" title="En stock, expédition rapide">⚡ <span class="pt-badge__txt">Stock local</span></span>');
+    // Note : le badge "⚡ Stock local" a été retiré — il faisait doublon avec la
+    // pastille "EN STOCK" (stockBadge). On évite la redondance visuelle.
     return out.join('');
   }
   function productBadges(p) {
