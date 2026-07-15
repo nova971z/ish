@@ -5,6 +5,25 @@
 (function () {
   'use strict';
 
+  // Restauration du scroll pilotée par NOUS, pas par le navigateur.
+  // En 'auto' (défaut), le navigateur ré-applique la position de défilement
+  // mémorisée pour une URL APRÈS le hashchange → il écrasait notre
+  // window.scrollTo(0,0) du routeur : rouvrir une vue déjà visitée (ex. une 2e
+  // bulle de marque après avoir scrollé la 1re puis fait « retour ») ramenait
+  // en bas de page. En 'manual', c'est le routeur qui décide → toujours en haut.
+  if ('scrollRestoration' in history) {
+    try { history.scrollRestoration = 'manual'; } catch (_) {}
+  }
+
+  // Saut instantané en haut de page. behavior:'instant' passe outre le
+  // `html{scroll-behavior:smooth}` global (sinon un reset de scroll s'anime et
+  // peut être interrompu par le re-rendu de la vue). Repli two-arg pour tout
+  // navigateur qui ne connaîtrait pas la forme à options.
+  function scrollTopNow() {
+    try { window.scrollTo({ top: 0, left: 0, behavior: 'instant' }); }
+    catch (_) { window.scrollTo(0, 0); }
+  }
+
   // ── Helpers ──────────────────────────────────────────────────
 
   // Escape for safe interpolation into HTML — both element content AND
@@ -2923,8 +2942,16 @@
     // Close sidebar on any navigation
     closeMenu();
 
-    // Scroll to top
-    window.scrollTo(0, 0);
+    // Retour en HAUT à chaque navigation. On réinitialise tout de suite (avant
+    // le rendu de la vue) PUIS après le prochain paint via rAF : plusieurs vues
+    // peignent leur contenu de façon asynchrone (filtre marque à +50 ms,
+    // animations reveal, 3D paresseux) et un décalage de mise en page laissait
+    // sinon un résidu de défilement (on n'atterrissait pas pile en haut).
+    // behavior:'instant' FORCE le saut immédiat malgré `html{scroll-behavior:
+    // smooth}` (sinon le défilement s'anime et le re-rendu de la vue interrompt
+    // l'animation en cours de route → on n'atterrissait pas pile en haut).
+    scrollTopNow();
+    requestAnimationFrame(scrollTopNow);
 
     // Route-specific rendering
     switch (route) {
