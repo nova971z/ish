@@ -694,10 +694,10 @@
         '<div class="devis-empty">'
         + '<div class="devis-empty__icon">🛒</div>'
         + '<h3 class="devis-empty__title">Votre panier est vide</h3>'
-        + '<p class="devis-empty__text">Parcourez notre catalogue et ajoutez vos outils preferes</p>'
+        + '<p class="devis-empty__text">Parcourez notre catalogue et ajoutez vos outils préférés</p>'
         + '<a class="devis-btn devis-btn--browse" href="#/catalogue">'
         + '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>'
-        + '<span>Decouvrir le catalogue</span>'
+        + '<span>Découvrir le catalogue</span>'
         + '</a>'
         + '</div>';
       if (footer) footer.style.display = 'none';
@@ -1801,14 +1801,14 @@
   var _pMonths = ['Jan','Fev','Mar','Avr','Mai','Jun','Jul','Aou','Sep','Oct','Nov','Dec'];
 
   var PLAN_INFO = {
-    basique: { name: 'Basique', desc: 'L\'essentiel pour demarrer. Acces a notre catalogue en ligne et tarifs reduits sur vos premieres commandes.',
+    basique: { name: 'Basique', desc: 'L\'essentiel pour démarrer. Accès à notre catalogue en ligne et tarifs réduits sur vos premières commandes.',
       features: [{icon:'🏷️',text:'-10% sur le catalogue'},{icon:'📦',text:'Livraison standard'},{icon:'📧',text:'Support par email'}], color:'basique' },
-    pro: { name: 'Pro', desc: 'Le choix des professionnels. Remises significatives, paiement flexible et conseiller dedie pour optimiser vos achats.',
-      features: [{icon:'🏷️',text:'-25% sur le catalogue'},{icon:'💳',text:'Paiement differe 30j'},{icon:'👤',text:'Conseiller dedie'},{icon:'🚚',text:'Livraison express'},{icon:'📊',text:'Dashboard commandes'}], color:'pro' },
-    gold: { name: 'Gold', desc: 'L\'experience premium. Tous les avantages Pro + communication digitale et fidelite renforcee pour booster votre activite.',
-      features: [{icon:'🏷️',text:'-30% sur le catalogue'},{icon:'💳',text:'Paiement differe 60j'},{icon:'👤',text:'Conseiller prioritaire'},{icon:'🚚',text:'Livraison gratuite'},{icon:'💎',text:'Points fidelite x3'},{icon:'📱',text:'Reseaux sociaux inclus'},{icon:'🎁',text:'Ventes privees'}], color:'gold' },
-    black: { name: 'Black Metal', desc: 'Le summum absolu. Tous nos services reunis, remises maximales, communication complete et acces VIP illimite.',
-      features: [{icon:'🏷️',text:'-40% sur le catalogue'},{icon:'💳',text:'Paiement differe 90j'},{icon:'👤',text:'Account manager VIP'},{icon:'🚚',text:'Livraison J+1 gratuite'},{icon:'💎',text:'Points fidelite x5'},{icon:'📱',text:'Communication 360\u00b0'},{icon:'🎁',text:'Ventes privees exclusives'},{icon:'🌐',text:'Site vitrine offert'},{icon:'📸',text:'Contenu photo/video'},{icon:'🔥',text:'Acces beta nouveautes'}], color:'black' }
+    pro: { name: 'Pro', desc: 'Le choix des professionnels. Remises significatives, paiement flexible et conseiller dédié pour optimiser vos achats.',
+      features: [{icon:'🏷️',text:'-25% sur le catalogue'},{icon:'💳',text:'Paiement différé 30j'},{icon:'👤',text:'Conseiller dédié'},{icon:'🚚',text:'Livraison express'},{icon:'📊',text:'Dashboard commandes'}], color:'pro' },
+    gold: { name: 'Gold', desc: 'L\'expérience premium. Tous les avantages Pro + communication digitale et fidélité renforcée pour booster votre activité.',
+      features: [{icon:'🏷️',text:'-30% sur le catalogue'},{icon:'💳',text:'Paiement différé 60j'},{icon:'👤',text:'Conseiller prioritaire'},{icon:'🚚',text:'Livraison gratuite'},{icon:'💎',text:'Points fidélité x3'},{icon:'📱',text:'Réseaux sociaux inclus'},{icon:'🎁',text:'Ventes privées'}], color:'gold' },
+    black: { name: 'Black Metal', desc: 'Le summum absolu. Tous nos services réunis, remises maximales, communication complète et accès VIP illimité.',
+      features: [{icon:'🏷️',text:'-40% sur le catalogue'},{icon:'💳',text:'Paiement différé 90j'},{icon:'👤',text:'Account manager VIP'},{icon:'🚚',text:'Livraison J+1 gratuite'},{icon:'💎',text:'Points fidélité x5'},{icon:'📱',text:'Communication 360\u00b0'},{icon:'🎁',text:'Ventes privées exclusives'},{icon:'🌐',text:'Site vitrine offert'},{icon:'📸',text:'Contenu photo/vidéo'},{icon:'🔥',text:'Accès bêta nouveautés'}], color:'black' }
   };
 
   function _pInitCanvas() {
@@ -2737,13 +2737,13 @@
     basique: {
       name: 'Basique',
       price: '9',
-      tagline: 'L\'essentiel pour bien demarrer',
-      desc: 'Accedez a notre catalogue en ligne avec des tarifs reduits. L\'abonnement ideal pour decouvrir l\'univers Pirates Tools sans engagement.',
+      tagline: 'L\'essentiel pour bien démarrer',
+      desc: 'Accédez à notre catalogue en ligne avec des tarifs réduits. L\'abonnement idéal pour découvrir l\'univers Pirates Tools sans engagement.',
       features: [
         { icon: '🏷️', text: 'Remise de 10% sur tout le catalogue', detail: 'Applicable sur chaque commande, sans minimum d\'achat.' },
-        { icon: '📦', text: 'Livraison standard offerte des 80\u20ac', detail: 'Livraison sous 3-5 jours ouvrés partout en France.' },
-        { icon: '📧', text: 'Support par email prioritaire', detail: 'Reponse garantie sous 24h les jours ouvrés.' },
-        { icon: '📋', text: 'Acces au catalogue complet', detail: 'Toutes nos references disponibles en ligne 24h/24.' }
+        { icon: '📦', text: 'Livraison standard offerte dès 80\u20ac', detail: 'Livraison sous 3-5 jours ouvrés partout en France.' },
+        { icon: '📧', text: 'Support par email prioritaire', detail: 'Réponse garantie sous 24h les jours ouvrés.' },
+        { icon: '📋', text: 'Accès au catalogue complet', detail: 'Toutes nos références disponibles en ligne 24h/24.' }
       ],
       theme: 'basique'
     },
@@ -2751,29 +2751,29 @@
       name: 'Pro',
       price: '29',
       tagline: 'Le choix des professionnels exigeants',
-      desc: 'Des remises significatives, un paiement flexible et un conseiller dedie pour optimiser chaque commande. Concu pour les artisans et les pros du batiment.',
+      desc: 'Des remises significatives, un paiement flexible et un conseiller dédié pour optimiser chaque commande. Conçu pour les artisans et les pros du bâtiment.',
       features: [
-        { icon: '🏷️', text: 'Remise de 25% sur tout le catalogue', detail: 'La meilleure remise pour les professionnels reguliers.' },
-        { icon: '💳', text: 'Paiement differe a 30 jours', detail: 'Payez vos commandes a 30 jours fin de mois.' },
-        { icon: '👤', text: 'Conseiller dedie personnel', detail: 'Un interlocuteur unique qui connait vos besoins.' },
-        { icon: '🚚', text: 'Livraison express J+1', detail: 'Recevez vos commandes des le lendemain avant 13h.' },
-        { icon: '📊', text: 'Dashboard commandes', detail: 'Suivez vos commandes, factures et historique en temps reel.' }
+        { icon: '🏷️', text: 'Remise de 25% sur tout le catalogue', detail: 'La meilleure remise pour les professionnels réguliers.' },
+        { icon: '💳', text: 'Paiement différé à 30 jours', detail: 'Payez vos commandes à 30 jours fin de mois.' },
+        { icon: '👤', text: 'Conseiller dédié personnel', detail: 'Un interlocuteur unique qui connaît vos besoins.' },
+        { icon: '🚚', text: 'Livraison express J+1', detail: 'Recevez vos commandes dès le lendemain avant 13h.' },
+        { icon: '📊', text: 'Dashboard commandes', detail: 'Suivez vos commandes, factures et historique en temps réel.' }
       ],
       theme: 'pro'
     },
     gold: {
       name: 'Gold',
       price: '59',
-      tagline: 'L\'experience premium sans compromis',
-      desc: 'Tous les avantages Pro amplifies, avec la communication digitale integree et un programme de fidelite renforce. Pour ceux qui veulent le meilleur.',
+      tagline: 'L\'expérience premium sans compromis',
+      desc: 'Tous les avantages Pro amplifiés, avec la communication digitale intégrée et un programme de fidélité renforcé. Pour ceux qui veulent le meilleur.',
       features: [
-        { icon: '🏷️', text: 'Remise de 30% sur tout le catalogue', detail: 'Le meilleur rapport qualite-prix du marche.' },
-        { icon: '💳', text: 'Paiement differe a 60 jours', detail: 'Une tresorerie plus souple pour votre activite.' },
-        { icon: '👤', text: 'Conseiller prioritaire VIP', detail: 'Ligne directe, disponible 6j/7 de 7h a 20h.' },
-        { icon: '🚚', text: 'Livraison gratuite illimitee', detail: 'Sans minimum d\'achat, partout en France et DOM-TOM.' },
-        { icon: '💎', text: 'Points fidelite x3', detail: 'Cumulez 3x plus de points a chaque commande.' },
-        { icon: '📱', text: 'Gestion reseaux sociaux', detail: 'Nous gerons vos reseaux sociaux professionnels.' },
-        { icon: '🎁', text: 'Acces ventes privees', detail: 'Des offres exclusives reservees aux membres Gold.' }
+        { icon: '🏷️', text: 'Remise de 30% sur tout le catalogue', detail: 'Le meilleur rapport qualité-prix du marché.' },
+        { icon: '💳', text: 'Paiement différé à 60 jours', detail: 'Une trésorerie plus souple pour votre activité.' },
+        { icon: '👤', text: 'Conseiller prioritaire VIP', detail: 'Ligne directe, disponible 6j/7 de 7h à 20h.' },
+        { icon: '🚚', text: 'Livraison gratuite illimitée', detail: 'Sans minimum d\'achat, partout en France et DOM-TOM.' },
+        { icon: '💎', text: 'Points fidélité x3', detail: 'Cumulez 3x plus de points à chaque commande.' },
+        { icon: '📱', text: 'Gestion réseaux sociaux', detail: 'Nous gérons vos réseaux sociaux professionnels.' },
+        { icon: '🎁', text: 'Accès ventes privées', detail: 'Des offres exclusives réservées aux membres Gold.' }
       ],
       theme: 'gold'
     },
@@ -2781,18 +2781,18 @@
       name: 'Black Metal',
       price: '99',
       tagline: 'Le summum absolu. Tout inclus.',
-      desc: 'Tous nos services reunis en un seul abonnement. Remises maximales, communication 360°, site web offert et acces VIP illimite. L\'excellence totale.',
+      desc: 'Tous nos services réunis en un seul abonnement. Remises maximales, communication 360°, site web offert et accès VIP illimité. L\'excellence totale.',
       features: [
-        { icon: '🏷️', text: 'Remise de 40% sur tout le catalogue', detail: 'La remise la plus elevee, reservee a l\'elite.' },
-        { icon: '💳', text: 'Paiement differe a 90 jours', detail: 'La flexibilite maximale pour votre tresorerie.' },
-        { icon: '👤', text: 'Account manager VIP dedie', detail: 'Un expert attitré, joignable 7j/7.' },
-        { icon: '🚚', text: 'Livraison J+1 gratuite illimitee', detail: 'Express gratuit sans minimum, priorite absolue.' },
-        { icon: '💎', text: 'Points fidelite x5', detail: 'Le taux de cumul le plus genereux.' },
-        { icon: '📱', text: 'Communication 360\u00b0 complete', detail: 'Reseaux sociaux, contenu photo/video, branding.' },
-        { icon: '🌐', text: 'Site vitrine professionnel offert', detail: 'Votre site web cle en main, heberge et maintenu.' },
-        { icon: '📸', text: 'Contenu photo & video', detail: 'Shooting professionnel pour vos realisations.' },
-        { icon: '🎁', text: 'Ventes privees exclusives', detail: 'Acces prioritaire aux ventes flash et nouveautes.' },
-        { icon: '🔥', text: 'Acces beta nouveautes', detail: 'Testez les nouveaux produits avant tout le monde.' }
+        { icon: '🏷️', text: 'Remise de 40% sur tout le catalogue', detail: 'La remise la plus élevée, réservée à l\'élite.' },
+        { icon: '💳', text: 'Paiement différé à 90 jours', detail: 'La flexibilité maximale pour votre trésorerie.' },
+        { icon: '👤', text: 'Account manager VIP dédié', detail: 'Un expert attitré, joignable 7j/7.' },
+        { icon: '🚚', text: 'Livraison J+1 gratuite illimitée', detail: 'Express gratuit sans minimum, priorité absolue.' },
+        { icon: '💎', text: 'Points fidélité x5', detail: 'Le taux de cumul le plus généreux.' },
+        { icon: '📱', text: 'Communication 360\u00b0 complète', detail: 'Réseaux sociaux, contenu photo/vidéo, branding.' },
+        { icon: '🌐', text: 'Site vitrine professionnel offert', detail: 'Votre site web clé en main, hébergé et maintenu.' },
+        { icon: '📸', text: 'Contenu photo & vidéo', detail: 'Shooting professionnel pour vos réalisations.' },
+        { icon: '🎁', text: 'Ventes privées exclusives', detail: 'Accès prioritaire aux ventes flash et nouveautés.' },
+        { icon: '🔥', text: 'Accès bêta nouveautés', detail: 'Testez les nouveaux produits avant tout le monde.' }
       ],
       theme: 'black'
     }
@@ -3217,17 +3217,17 @@
   function fbErrorMessage(err) {
     var code = (err && err.code) || '';
     var map = {
-      'auth/email-already-in-use': 'Cet email est deja utilise',
+      'auth/email-already-in-use': 'Cet email est déjà utilisé',
       'auth/invalid-email': 'Email invalide',
-      'auth/weak-password': 'Mot de passe trop faible (min. 6 caracteres)',
+      'auth/weak-password': 'Mot de passe trop faible (min. 6 caractères)',
       'auth/user-not-found': 'Aucun compte avec cet email',
       'auth/wrong-password': 'Mot de passe incorrect',
       'auth/invalid-credential': 'Email ou mot de passe incorrect',
-      'auth/too-many-requests': 'Trop de tentatives. Reessaie plus tard',
-      'auth/network-request-failed': 'Probleme de reseau',
+      'auth/too-many-requests': 'Trop de tentatives. Réessaie plus tard',
+      'auth/network-request-failed': 'Problème de réseau',
       'auth/requires-recent-login': 'Reconnecte-toi pour effectuer cette action',
       'auth/missing-password': 'Mot de passe requis',
-      'auth/popup-closed-by-user': 'Fenetre fermee'
+      'auth/popup-closed-by-user': 'Fenêtre fermée'
     };
     return map[code] || (err && err.message) || 'Une erreur est survenue';
   }
@@ -3348,7 +3348,7 @@
       .then(function (user) {
         // Send verification email (non-blocking)
         _fb.sendEmailVerification(user).catch(function (e) { console.warn('verify email:', e); });
-        toast('Compte cree, bienvenue ' + name + ' !', 'success');
+        toast('Compte créé, bienvenue ' + name + ' !', 'success');
         location.hash = '#/compte';
       })
       .catch(function (err) {
@@ -3391,7 +3391,7 @@
     setBtnLoading(dom.forgotSubmit, true);
     _fb.sendPasswordResetEmail(_fb.auth, email)
       .then(function () {
-        toast('Email de reinitialisation envoye', 'success');
+        toast('Email de réinitialisation envoyé', 'success');
         if (dom.authForgotPanel) dom.authForgotPanel.hidden = true;
         if (dom.forgotEmail) dom.forgotEmail.value = '';
       })
@@ -3470,7 +3470,7 @@
 
     _fb.getDocs(q).then(function (snap) {
       if (snap.empty) {
-        dom.accHistory.innerHTML = '<p style="opacity:.6;text-align:center;padding:.5rem 0">Aucun devis envoye pour le moment.</p>';
+        dom.accHistory.innerHTML = '<p style="opacity:.6;text-align:center;padding:.5rem 0">Aucun devis envoyé pour le moment.</p>';
         return;
       }
       var html = '';
@@ -3529,21 +3529,21 @@
       .then(function () {
         _userProfile = Object.assign({}, _userProfile || {}, profileUpdates);
         if (!emailChanged) {
-          toast('Profil enregistre', 'success');
+          toast('Profil enregistré', 'success');
           return;
         }
         return _fb.updateEmail(_fb.auth.currentUser, newEmail)
           .then(function () { return _fb.updateDoc(ref, { email: newEmail }); })
           .then(function () {
             _userProfile = Object.assign({}, _userProfile || {}, { email: newEmail });
-            toast('Profil et email mis a jour', 'success');
+            toast('Profil et email mis à jour', 'success');
           })
           .catch(function (err) {
             // Profil déjà enregistré ; l'email, lui, n'a PAS changé (ni en
             // Auth ni en Firestore — cohérence garantie). Remet le champ sur
             // la vraie valeur pour ne pas afficher un email non appliqué.
             if (dom.accEmail) dom.accEmail.value = _currentUser.email || '';
-            toast('Profil enregistre, mais email non modifie : ' + fbErrorMessage(err), 'error');
+            toast('Profil enregistré, mais email non modifié : ' + fbErrorMessage(err), 'error');
           });
       })
       .catch(function (err) {
@@ -3560,7 +3560,7 @@
     var confirm = dom.pwdConfirm ? dom.pwdConfirm.value : '';
 
     if (!current || !newPwd || !confirm) { toast('Remplissez tous les champs', 'error'); return; }
-    if (newPwd.length < 6) { toast('Min. 6 caracteres', 'error'); return; }
+    if (newPwd.length < 6) { toast('Min. 6 caractères', 'error'); return; }
     if (newPwd !== confirm) { toast('Les mots de passe ne correspondent pas', 'error'); return; }
 
     var cred = _fb.EmailAuthProvider.credential(_currentUser.email, current);
@@ -3570,7 +3570,7 @@
         if (dom.pwdCurrent) dom.pwdCurrent.value = '';
         if (dom.pwdNew) dom.pwdNew.value = '';
         if (dom.pwdConfirm) dom.pwdConfirm.value = '';
-        toast('Mot de passe modifie', 'success');
+        toast('Mot de passe modifié', 'success');
       })
       .catch(function (err) {
         toast(fbErrorMessage(err), 'error');
@@ -3592,7 +3592,7 @@
   function handleResendVerification() {
     if (!_currentUser || !_fb) return;
     _fb.sendEmailVerification(_currentUser).then(function () {
-      toast('Email de verification renvoye', 'success');
+      toast('Email de vérification renvoyé', 'success');
     }).catch(function (err) {
       toast(fbErrorMessage(err), 'error');
     });

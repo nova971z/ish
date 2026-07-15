@@ -4084,7 +4084,9 @@ border: 0;
 .skip-link {
 position: fixed;
 left: 8px;
-top: -42px;
+/* -80px : entièrement hors écran, ombre comprise (à -42px le bas de la boîte
+   + box-shadow dépassait en haut de page — liseré blanc visible). */
+top: -80px;
 z-index: 10000;
 padding: .5rem .7rem;
 border-radius: 8px;
