@@ -2779,7 +2779,8 @@
   // ── Router (hash-based SPA) ────────────────────────────────
 
   var ROUTES = ['/', '/catalogue', '/produit', '/devis', '/compte', '/auth', '/abonnement',
-                '/admin', '/merci', '/contact', '/favoris'];
+                '/admin', '/merci', '/contact', '/favoris',
+                '/mentions-legales', '/confidentialite'];
 
   // Territory landing slugs (keys) → territory codes (values).
   // Used to expose SEO-friendly routes like #/guadeloupe.
@@ -6205,6 +6206,14 @@
         break;
       case '/admin':
         setDocMeta('Administration — ' + BASE_TITLE, '');
+        removeJsonLd('product');
+        break;
+      case '/mentions-legales':
+        setDocMeta('Mentions légales — ' + BASE_TITLE, 'Mentions légales du site Pirates Tools : éditeur, hébergeur, médiation.');
+        removeJsonLd('product');
+        break;
+      case '/confidentialite':
+        setDocMeta('Politique de confidentialité — ' + BASE_TITLE, 'Comment Pirates Tools protège vos données personnelles (RGPD).');
         removeJsonLd('product');
         break;
       case '/territoire':
