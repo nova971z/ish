@@ -678,8 +678,16 @@ gap: .5rem;
 
 .product-card__tag {
     position: absolute;
-    top: .6rem;
+    /* Bas-gauche (était haut-gauche) : sur cartes étroites, un tag long
+       (BEST-SELLER, ULTRA-COMPACT) en haut chevauchait "EN STOCK" (haut-droite).
+       En bas-gauche, EN STOCK reste seul en haut ; le plafond de largeur + ellipsis
+       garantit qu'il ne rejoint jamais le cœur favori (bas-droite). */
+    bottom: .6rem;
     left: .6rem;
+    max-width: calc(100% - 3.5rem);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     background: rgba(139, 92, 246, 0.85);
     color: #fff;
     font-size: .7rem;
