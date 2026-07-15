@@ -103,7 +103,35 @@ Règle : **1 étape = 1 problème = 1 commit = 1 vérification verte**. Jamais d
        10g CI déjà branchée (étape 5). 10h docs : CHANGELOG v2.1.0 + README (version, tailles, NOWPayments).
        REPORTÉ 10d : découpe des fonctions XXL (renderAdmin/initPdpScrollAnimations/renderPDP) — refactor cosmétique risqué, pas de valeur fonctionnelle, à faire avec tests.
 
-═══ PLAN DE REMÉDIATION TERMINÉ (10/10 étapes) + QR crypto local (8e) fait. Reste : refactors CSS risqués (9 reporté), split XXL (10d reporté). ═══
+═══ PLAN DE REMÉDIATION TERMINÉ (10/10 étapes) + QR crypto local (8e) fait. ═══
+
+## Session dette technique post-remédiation (15/07/2026, SW v308, mergé master)
+Méthode : vérif visuelle RÉELLE via harness Playwright (serveur statique local +
+captures avant/après + assertions DOM), pas de sweep à l'aveugle.
+- ✅ Halo doré RÉ-ANCRÉ : #hero::before (position:fixed, bavait sur le fond) →
+  .hero-logo-container::before (cercle or localisé, centré sur le logo, corrigé
+  du padding-top/2 ; z-index 0 < logo 11). Disparaît avec le hero. Vérifié :
+  présent accueil, ABSENT catalogue.
+- ✅ 3D À LA DEMANDE (perf) : model-viewer retiré du <head> → ensureModelViewer()
+  (miroir ensureThree), déclenché PDP à l'ouverture + carrousel/cartes via l'IO
+  ~700px. .catch sur chaque appel (échec CDN → poster, pas de rejet nu). wa.me
+  preconnect retiré. Vérifié : page sans 3D = 0 injection.
+- ✅ IMAGES : facom.png 383 Ko (logo sur fond métal PHOTO, PNG inadapté) →
+  facom.webp 62 Ko (-84 %, q88, visuellement identique, réf app.js:940). Logo
+  mort 1,35 Mo (0-réf) → images/_originals/ + .vercelignore (exclut les HD du
+  déploiement). images/ servi 3,0→1,3 Mo. Posters produits laissés JPEG (~30 Ko,
+  lazy, gain marginal + poster model-viewer ne gère pas <picture>).
+- ✅ CSS mort purgé : #a2hsTip/#a2hsTriangle/.a2hs-tip__*/@keyframes a2hs-in +
+  #netBanner (tous 0-réf vérifiés). Échelle z-index documentée en tête de
+  styles.css (couches -1→10000).
+REPORTÉ (inchangé, risque cascade réel / valeur nulle, à faire AVEC tests) :
+- fork inline index.html/styles.css (.drawer/#dock/#toasts/.toast/.backdrop…
+  dupliqués, l'inline gagne) : fusion touche tous les états interactifs, 0 gain.
+- purge !important (échelle z-index désormais documentée pour aider).
+- 10d découpe XXL : initPdpScrollAnimations (397 l., moteur rAF à état partagé —
+  split = risque timing non vérifiable en statique), renderAdmin (251 l., CRUD
+  admin non exerçable ici), renderPDP (225 l.). Décision étayée : pas de gain
+  utilisateur, refactor pré-lancement écarté.
 
 ## Vérification standard
 `cd pirates-tools && node scripts/ci.js` doit rester vert après chaque étape.
