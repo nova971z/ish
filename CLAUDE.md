@@ -39,10 +39,15 @@ Règle : **1 étape = 1 problème = 1 commit = 1 vérification verte**. Jamais d
        Workflows morts supprimés (pirates-tools/.github/workflows/*). Nouvelle CI racine .github/workflows/pirates-tools-ci.yml exécute scripts/ci.js sur push/PR.
        Domaine perso = pirates-tools.com (repointé partout : canonical/og/twitter/robots/sitemap/README/firebase-init/sw). SW v294.
        ACTION USER REQUISE : Firebase Console → Auth → Authorized domains → ajouter pirates-tools.com (sinon login échoue).
-- [ ] 6. Webhook Stripe (raw body + idempotence)
+- [x] 6. Webhook Stripe ✅ commit (server-only, pas de bump SW)
+       Corps brut : bodyParser désactivé (module.exports.config) + readRawBody (stream→Buffer) → constructEvent sur les octets exacts signés.
+       Idempotence : api/_lib/firebase.js (getFirebase partagé) + claim atomique event.id dans Firestore `stripe_events` (create() échoue si doublon → 200 skip, pas de 2e email).
+       Réponses uniformisées {ok:true,received:true}. Order update via db partagé.
+       NOTE : dedup gated sur Firebase (nécessaire pour store persistant serverless).
 - [ ] 7. Bugs Service Worker (empoisonnement cache, fallback offline)
 - [ ] 8. Bugs runtime app.js (starBtns, storage guards, confirmPayment catch, NOWPayments)
 - [ ] 9. Assainir CSS/HTML (fork inline, CSS mort, z-index, h1)
+       À INCLURE : lumière dorée derrière le logo hero manquante en prod (signalé user 15/07) — restaurer le glow.
 - [ ] 10. Qualité structurelle & CI (helpers partagés, carte produit unique, docs)
 
 ## Vérification standard
