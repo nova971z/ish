@@ -32,7 +32,12 @@ Règle : **1 étape = 1 problème = 1 commit = 1 vérification verte**. Jamais d
        escapeHTML réécrit (pur, échappe & < > " ' — les 5 caractères OWASP) → ferme l'injection d'attribut systémique.
        Vérifié : escapeHTML jamais utilisé avec textContent/.value (donc &quot; jamais affiché). Descriptions produit rendues via textContent (immunisées).
        openPayModal it.title déjà échappé (étape 2). Templates plans/abonnements : toutes interpolations innerHTML échappées (défense en profondeur). href via encodeURIComponent.
-- [ ] 5. Cohérence déploiement (Vercel prod, canonical, sitemap, CI master)
+- [x] 5. Cohérence déploiement ✅ commit, SW v293
+       Prod unique = Vercel (ish-ebon.vercel.app). canonical/og/twitter/robots/sitemap repointés vers Vercel.
+       sitemap réduit à l'URL racine indexable (SPA hash → fragments ignorés des crawlers) + og:site_name/og:locale ajoutés.
+       Auto-déploiement GitHub Pages DÉSACTIVÉ (deploy-pirates-tools.yml → workflow_dispatch only, non supprimé).
+       Workflows morts supprimés (pirates-tools/.github/workflows/*). Nouvelle CI racine .github/workflows/pirates-tools-ci.yml exécute scripts/ci.js sur push/PR.
+       ACTION USER REQUISE : Firebase Console → Auth → Authorized domains → ajouter ish-ebon.vercel.app (sinon login échoue). firebase-init.js commentaire mis à jour.
 - [ ] 6. Webhook Stripe (raw body + idempotence)
 - [ ] 7. Bugs Service Worker (empoisonnement cache, fallback offline)
 - [ ] 8. Bugs runtime app.js (starBtns, storage guards, confirmPayment catch, NOWPayments)

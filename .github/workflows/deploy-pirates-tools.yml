@@ -1,11 +1,12 @@
-name: Deploy Pirates Tools
+name: Deploy Pirates Tools (legacy GitHub Pages — manual only)
 
+# Production is Vercel (ish-ebon.vercel.app), which serves the site AND its
+# /api/* serverless functions from one origin and auto-deploys from git.
+# GitHub Pages cannot host /api/*, so a Pages deployment has BROKEN card
+# checkout and would create duplicate content under a different canonical.
+# Auto-deploy is therefore disabled: this workflow is manual-dispatch only,
+# kept solely as an optional static-preview escape hatch.
 on:
-  push:
-    branches: ['claude/pirates-tools-rebuild-zWc1b']
-    paths:
-      - 'pirates-tools/**'
-      - '.github/workflows/deploy-pirates-tools.yml'
   workflow_dispatch:
 
 permissions:

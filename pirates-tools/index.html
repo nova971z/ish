@@ -9,16 +9,18 @@
 
   <!-- Open Graph / Social -->
   <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Pirates Tools">
+  <meta property="og:locale" content="fr_FR">
   <meta property="og:title" content="Pirates Tools — Outillage professionnel DOM-TOM">
   <meta property="og:description" content="Outillage pro livré en Guadeloupe, Martinique, Guyane, Réunion et Mayotte. Octroi de mer et TVA inclus. DeWALT, Makita, Festool, Flex, Facom.">
-  <meta property="og:image" content="https://nova971z.github.io/ish/icons/icon-512.png">
-  <meta property="og:url" content="https://nova971z.github.io/ish/">
+  <meta property="og:image" content="https://ish-ebon.vercel.app/icons/icon-512.png">
+  <meta property="og:url" content="https://ish-ebon.vercel.app/">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Pirates Tools — Outillage professionnel DOM-TOM">
   <meta name="twitter:description" content="Outillage pro livré en Guadeloupe, Martinique, Guyane, Réunion et Mayotte. Octroi de mer et TVA inclus.">
-  <meta name="twitter:image" content="https://nova971z.github.io/ish/icons/icon-512.png">
+  <meta name="twitter:image" content="https://ish-ebon.vercel.app/icons/icon-512.png">
 
-  <link rel="canonical" href="https://nova971z.github.io/ish/">
+  <link rel="canonical" href="https://ish-ebon.vercel.app/">
 
   <!-- Preconnect critical third-party origins -->
   <link rel="preconnect" href="https://ajax.googleapis.com" crossorigin>
@@ -29,7 +31,7 @@
   <link rel="dns-prefetch" href="https://js.stripe.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=292">
+  <link rel="stylesheet" href="styles.css?v=293">
 
   <!-- 3D model viewer -->
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
@@ -40,9 +42,11 @@
   <!-- Firebase (auth + firestore) -->
   <script type="module" src="firebase-init.js"></script>
 
-  <!-- Serverless API base. Empty string = same origin (Vercel prod/preview).
-       Leave unset (remove the line) to fall back to the static products.json
-       and the legacy Payment Links flow (useful on GitHub Pages / offline). -->
+  <!-- Serverless API base. Empty string = same origin.
+       Production is Vercel (ish-ebon.vercel.app): the site and its /api/*
+       serverless functions are served from the same origin, so '' is correct.
+       Card checkout REQUIRES this same-origin API — do not host on a static-only
+       origin (e.g. GitHub Pages) where /api/* does not exist. -->
   <script>
   window.PT_API_BASE = '';
   window.PT_STRIPE_PK = 'pk_live_51TJYJVPynqHG9OETsHfRsfZbs8NWjeo4RO1sVltr9LVqvbL1IsAI13Wgw3YFglVYGQD6kBFOw5pKBPCUovdJ9OV300rHNF9ppi';
@@ -220,7 +224,7 @@
         <img
           id="topbarLogo"
           class="topbar-logo"
-          src="icons/icon-192.png?v=292"
+          src="icons/icon-192.png?v=293"
           alt="Pirates Tools"
           width="40" height="40"
           decoding="async" loading="eager" fetchpriority="high" />
@@ -251,8 +255,8 @@
   <section id="hero" class="hero-full" aria-hidden="true">
     <div class="hero-logo-container initial" id="heroLogoContainer">
       <img id="heroLogo" class="hero-logo on" alt="Pirates Tools"
-        src="icons/icon-512.png?v=292"
-        srcset="icons/icon-256.png?v=292 256w, icons/icon-384.png?v=292 384w, icons/icon-512.png?v=292 512w"
+        src="icons/icon-512.png?v=293"
+        srcset="icons/icon-256.png?v=293 256w, icons/icon-384.png?v=293 384w, icons/icon-512.png?v=293 512w"
         sizes="(max-width: 768px) 90vw, 60vw"
         width="600" height="600"
         decoding="async" loading="eager" fetchpriority="high" />
@@ -1518,7 +1522,7 @@
   </script>
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=292"></script>
+  <script defer src="app.js?v=293"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->
