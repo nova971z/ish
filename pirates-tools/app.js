@@ -7,10 +7,16 @@
 
   // ── Helpers ──────────────────────────────────────────────────
 
+  // Escape for safe interpolation into HTML — both element content AND
+  // double-quoted attributes. The previous textNode implementation did NOT
+  // escape quotes, so any value containing " could break out of an attribute
+  // (e.g. alt="…" src="…" value="…") and inject markup. Escaping the five
+  // OWASP characters closes that systemically. Pure (no DOM), so it is safe to
+  // call before the document is ready and faster in tight render loops.
+  var _HTML_ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
   function escapeHTML(str) {
-    var d = document.createElement('div');
-    d.appendChild(document.createTextNode(str));
-    return d.innerHTML;
+    if (str == null) return '';
+    return String(str).replace(/[&<>"']/g, function (ch) { return _HTML_ESCAPES[ch]; });
   }
 
   function debounce(fn, ms) {
@@ -1925,17 +1931,17 @@
       if (info.features && info.features.length) {
         featHtml = '<div class="plan-detail__features">';
         info.features.forEach(function(f) {
-          featHtml += '<span class="plan-detail__feat"><span class="plan-detail__feat-icon">' + f.icon + '</span>' + f.text + '</span>';
+          featHtml += '<span class="plan-detail__feat"><span class="plan-detail__feat-icon">' + escapeHTML(f.icon) + '</span>' + escapeHTML(f.text) + '</span>';
         });
         featHtml += '</div>';
       }
-      dtlEl.className = 'plan-detail is-open plan-detail--' + (info.color || plan);
+      dtlEl.className = 'plan-detail is-open plan-detail--' + escapeHTML(info.color || plan);
       dtlEl.innerHTML = '<div class="plan-detail__inner">'
-        + '<div class="plan-detail__name">' + (info.name || '') + '</div>'
-        + '<div class="plan-detail__desc">' + info.desc + '</div>'
+        + '<div class="plan-detail__name">' + escapeHTML(info.name || '') + '</div>'
+        + '<div class="plan-detail__desc">' + escapeHTML(info.desc) + '</div>'
         + featHtml
         + '<span class="plan-detail__saving">' + price + ' \u20ac/mois \u2192 ' + saving.toLocaleString('fr-FR') + ' \u20ac economises/an</span>'
-        + '<a href="#/abonnement/' + plan + '" class="plan-detail__cta plan-detail__cta--' + (info.color || plan) + '">Choisir ' + (info.name || '') + '</a>'
+        + '<a href="#/abonnement/' + encodeURIComponent(plan) + '" class="plan-detail__cta plan-detail__cta--' + escapeHTML(info.color || plan) + '">Choisir ' + escapeHTML(info.name || '') + '</a>'
         + '</div>';
     }
   }
@@ -2718,23 +2724,23 @@
     var featRows = '';
     data.features.forEach(function (f, i) {
       featRows += '<div class="abo-feat" style="animation-delay:' + (i * .07) + 's">'
-        + '<div class="abo-feat__icon">' + f.icon + '</div>'
+        + '<div class="abo-feat__icon">' + escapeHTML(f.icon) + '</div>'
         + '<div class="abo-feat__body">'
-        + '<div class="abo-feat__title">' + f.text + '</div>'
-        + '<div class="abo-feat__detail">' + f.detail + '</div>'
+        + '<div class="abo-feat__title">' + escapeHTML(f.text) + '</div>'
+        + '<div class="abo-feat__detail">' + escapeHTML(f.detail) + '</div>'
         + '</div></div>';
     });
 
-    el.innerHTML = '<div class="abo-page abo-page--' + data.theme + '">'
+    el.innerHTML = '<div class="abo-page abo-page--' + escapeHTML(data.theme) + '">'
       // Back link
       + '<a href="#/" class="abo-back">\u2190 Retour</a>'
 
       // Hero header
       + '<div class="abo-hero">'
       + '<div class="abo-hero__glow"></div>'
-      + '<div class="abo-hero__badge">' + data.name + '</div>'
-      + '<h1 class="abo-hero__title" id="abo-h1">' + data.tagline + '</h1>'
-      + '<p class="abo-hero__desc">' + data.desc + '</p>'
+      + '<div class="abo-hero__badge">' + escapeHTML(data.name) + '</div>'
+      + '<h1 class="abo-hero__title" id="abo-h1">' + escapeHTML(data.tagline) + '</h1>'
+      + '<p class="abo-hero__desc">' + escapeHTML(data.desc) + '</p>'
       + '<div class="abo-hero__price"><span class="abo-hero__amount">' + data.price + '\u20ac</span><span class="abo-hero__period">/mois</span></div>'
       + '</div>'
 
@@ -2746,7 +2752,7 @@
 
       // CTA
       + '<div class="abo-cta-wrap">'
-      + '<button class="abo-cta abo-cta--' + data.theme + '">Souscrire a ' + data.name + ' \u2014 ' + data.price + '\u20ac/mois</button>'
+      + '<button class="abo-cta abo-cta--' + escapeHTML(data.theme) + '">Souscrire a ' + escapeHTML(data.name) + ' \u2014 ' + data.price + '\u20ac/mois</button>'
       + '<p class="abo-cta-note">Sans engagement \u2022 Annulation a tout moment</p>'
       + '</div>'
       + '</div>';

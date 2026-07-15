@@ -28,7 +28,10 @@ Règle : **1 étape = 1 problème = 1 commit = 1 vérification verte**. Jamais d
        admin.js / instagram.js / test-email.js : auth timing-safe partagée + applyCors.
        vercel.json : suppression du CORS wildcard /api + ajout X-Content-Type-Options nosniff.
        health.js expose allowedOrigins. Pour activer un cross-origin : définir ALLOWED_ORIGINS sur Vercel.
-- [ ] 4. Failles XSS (escapeHTML guillemets + openPayModal)
+- [x] 4. Failles XSS ✅ commit, SW v292
+       escapeHTML réécrit (pur, échappe & < > " ' — les 5 caractères OWASP) → ferme l'injection d'attribut systémique.
+       Vérifié : escapeHTML jamais utilisé avec textContent/.value (donc &quot; jamais affiché). Descriptions produit rendues via textContent (immunisées).
+       openPayModal it.title déjà échappé (étape 2). Templates plans/abonnements : toutes interpolations innerHTML échappées (défense en profondeur). href via encodeURIComponent.
 - [ ] 5. Cohérence déploiement (Vercel prod, canonical, sitemap, CI master)
 - [ ] 6. Webhook Stripe (raw body + idempotence)
 - [ ] 7. Bugs Service Worker (empoisonnement cache, fallback offline)
