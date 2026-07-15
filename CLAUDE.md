@@ -44,7 +44,13 @@ Règle : **1 étape = 1 problème = 1 commit = 1 vérification verte**. Jamais d
        Idempotence : api/_lib/firebase.js (getFirebase partagé) + claim atomique event.id dans Firestore `stripe_events` (create() échoue si doublon → 200 skip, pas de 2e email).
        Réponses uniformisées {ok:true,received:true}. Order update via db partagé.
        NOTE : dedup gated sur Firebase (nécessaire pour store persistant serverless).
-- [ ] 7. Bugs Service Worker (empoisonnement cache, fallback offline)
+- [x] 7. Bugs Service Worker ✅ commit, SW v295
+       7a empoisonnement : handleNavigate guard isShell (seul / ou /index.html rafraîchit la clé ./index.html).
+       7b fallback image mort : await chaque fromCache (Promise toujours truthy → respondWith(null)).
+       7c navigationPreload déplacé install→activate. 7d CLEAR_OLD_CACHES dans e.waitUntil.
+       7e APP_SHELL nettoyé (pt.js inexistant retiré, clé shell unique ./index.html, fin du triple stockage + staleness clé versionnée).
+       7f handleProducts : réponse non-ok → fallback cache. 7g branches opaque mortes supprimées.
+       favicon/manifest/apple-touch-icon versionnés dans index.html (90-92) pour matcher le précache.
 - [ ] 8. Bugs runtime app.js (starBtns, storage guards, confirmPayment catch, NOWPayments)
 - [ ] 9. Assainir CSS/HTML (fork inline, CSS mort, z-index, h1)
        À INCLURE : lumière dorée derrière le logo hero manquante en prod (signalé user 15/07) — restaurer le glow.

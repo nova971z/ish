@@ -209,7 +209,7 @@ On ne touche pas au CSS mort tant qu'un client peut payer 1 centime un produit.
 | 4 | Failles XSS | Sécurité | ✅ |
 | 5 | Cohérence de déploiement | Déploiement | ✅ |
 | 6 | Webhook Stripe (raw body + idempotence) | Paiement | ✅ |
-| 7 | Bugs Service Worker | Résilience | ☐ |
+| 7 | Bugs Service Worker | Résilience | ✅ |
 | 8 | Bugs runtime app.js | Résilience | ☐ |
 | 9 | Assainissement CSS/HTML | Structure | ☐ |
 | 10 | Qualité structurelle & CI | Structure | ☐ |
