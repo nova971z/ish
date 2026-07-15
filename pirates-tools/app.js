@@ -3369,16 +3369,18 @@
 
     updateCartUI();
 
-    // Loyalty — merge server-side points with local tier progression.
-    var loyalty = p.loyalty || 0;
-    var pct = Math.min(loyalty / 10, 100);
-    updateLoyaltyBar(pct);
+    // Fidélité — SOURCE UNIQUE : la dépense vérifiée (pt:loyalty = cache
+    // synchronisé sur le serveur à chaque devis de paiement). L'ancien champ
+    // profil `loyalty` (points crédités sur simple devis WhatsApp) est legacy
+    // et n'est plus affiché : deux compteurs contradictoires = zéro confiance.
     var lstate = getLoyaltyState(0);
+    var nextAt = lstate.nextTierAt || 0;
+    var pct = nextAt > 0 ? Math.min(100, Math.round((lstate.totalSpent / nextAt) * 100)) : 100;
+    updateLoyaltyBar(pct);
     if (dom.accLoyaltyTxt) {
       dom.accLoyaltyTxt.innerHTML = lstate.tierIcon + ' ' + escapeHTML(lstate.tierLabel)
         + ' · ' + formatPrice(lstate.totalSpent) + ' cumulés'
-        + (lstate.discountPct > 0 ? ' · −' + lstate.discountPct + ' %' : '')
-        + (loyalty ? ' · ' + loyalty + ' pts' : '');
+        + (lstate.discountPct > 0 ? ' · −' + lstate.discountPct + ' % au paiement carte' : '');
     }
 
     // Hero header
@@ -3565,20 +3567,20 @@
   }
 
   // Save a quote/order to Firestore (called from sendDevisWhatsApp)
+  // Trace le DEVIS WhatsApp dans l'historique du compte. C8 : n'octroie PLUS
+  // de « points » — un devis envoyé n'est pas un achat. La fidélité a une
+  // source unique : la dépense VÉRIFIÉE serveur (journal payments/ alimenté
+  // par le webhook), dont pt:loyalty est le cache d'affichage synchronisé.
+  // L'ancien champ profil `loyalty` (points par devis) est legacy : ni
+  // incrémenté ni affiché désormais.
   function saveOrderToFirestore(itemCount, total) {
     if (!_fb || !_fb.configured || !_currentUser) return;
     var ordersRef = _fb.collection(_fb.db, 'users', _currentUser.uid, 'orders');
     _fb.addDoc(ordersRef, {
       date: _fb.serverTimestamp(),
       items: itemCount,
-      total: total
-    }).then(function () {
-      // Add loyalty points (1 point per euro)
-      var newLoyalty = ((_userProfile && _userProfile.loyalty) || 0) + Math.round(total);
-      var ref = _fb.doc(_fb.db, 'users', _currentUser.uid);
-      return _fb.updateDoc(ref, { loyalty: newLoyalty }).then(function () {
-        if (_userProfile) _userProfile.loyalty = newLoyalty;
-      });
+      total: total,
+      status: 'quote'
     }).catch(function (err) {
       console.warn('[Auth] saveOrder failed:', err);
     });
