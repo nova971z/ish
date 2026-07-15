@@ -133,6 +133,41 @@ REPORTÉ (inchangé, risque cascade réel / valeur nulle, à faire AVEC tests) :
   admin non exerçable ici), renderPDP (225 l.). Décision étayée : pas de gain
   utilisateur, refactor pré-lancement écarté.
 
+## Session « argent & confiance » A1-A5 (15/07/2026, SW v310, mergé master)
+Suite à l'audit complet 4 axes (rapports : API/sécu, CSS/HTML, app.js, PWA/SEO/a11y).
+Correctifs paiement, 1 commit chacun, tests unitaires + Playwright :
+- ✅ A1 territoire fiscal : validation stricte (400 si code inconnu) sur les 2
+  endpoints ; Checkout collecte l'adresse de livraison (GP/MQ/GF/RE/YT/FR) ;
+  _lib/postal.js (CP → territoire, 22 tests). Contrôle DÉTECTIF branché au
+  webhook : divergence territoire déclaré ↔ CP réel = ⚠ email owner + journal.
+  Limite documentée : flux Elements sans adresse pré-paiement (préventif
+  intégral = Address Element, décision produit).
+- ✅ A2 webhook : payment_intent.succeeded/failed traités (filtre
+  metadata.source='pirates-tools' → pas de double email avec les sessions) ;
+  lignes {key,qty} chunkées dans la metadata PI (_lib/stripe-meta.js, limites
+  Stripe testées 50 lignes) ; reconstruction serveur du détail avec contrôle
+  d'intégrité au centime (dérive → repli ligne unique) ; journal Firestore
+  payments/{stripeId} = trace serveur systématique ; matching commande par
+  stripeSessionId ET paymentIntentId ; 17 assertions unitaires (_internals).
+- ✅ A3 : total panier affiché = montant réellement débité (plein tarif). La
+  remise fidélité N'EST PAS débitable (état localStorage falsifiable) → bloc
+  « Avantage −X % — non déduit ici, à faire valoir sur devis WhatsApp ».
+  Remise réelle = fidélité serveur par uid (décision produit, non fait).
+- ✅ A4 : rate limit seau PARTAGÉ 'payment' 20/h/IP sur create-payment-intent
+  + checkout (429), après les gardes method/config, fail-open documenté.
+- ✅ A5 : /merci exige une PREUVE (paymentIntentId inline / redirect_status=
+  succeeded / session_id correspondant) sinon rien n'est écrit ; crypto →
+  statut 'declared', 0 point ; pending consommé AVANT effets (anti-double au
+  refresh) ; périmé >2h purgé ; items=nombre + lines[] (fix affichage compte) ;
+  stripeSessionId écrit (webhook peut confirmer) ; URL Stripe nettoyée
+  (replaceState). 9 scénarios Playwright verts.
+NOTE OPS : les requêtes collectionGroup('orders') du webhook exigent des index
+Firestore collection-group sur stripeSessionId et paymentIntentId (le webhook
+logue l'URL de création au premier FAILED_PRECONDITION — à créer en 1 clic).
+Restent de l'audit (hors argent) : C1 .btn--primary jamais définie, C2 accents
+manquants, C3 preload 3D no-op catalogue, C5 updateEmail ordre, C6 a11y modales
+/focus/skip-link, C7 tokens couleur, C8 double fidélité.
+
 ## Vérification standard
 `cd pirates-tools && node scripts/ci.js` doit rester vert après chaque étape.
 Bump SW (`sw.js` VERSION + ASSET_VER) et `?v=` dans `index.html` à chaque changement d'asset.

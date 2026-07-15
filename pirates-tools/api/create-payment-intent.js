@@ -10,6 +10,8 @@
 
 var catalog = require('./_lib/catalog');
 var pricing = require('./_lib/pricing');
+var stripeMeta = require('./_lib/stripe-meta');
+var rl = require('./_lib/ratelimit');
 
 var MAX_QTY_PER_LINE = 99;
 var MAX_LINES = 50;
@@ -28,12 +30,30 @@ module.exports = async function handler(req, res) {
     });
   }
 
+  // A4 — endpoint public : borne la création d'objets Stripe (pollution
+  // dashboard, alertes fraude). 20/h/IP = généreux pour un client légitime
+  // qui re-essaie sa carte ; fail-open si Firestore indisponible (documenté).
+  if (!(await rl.allow('payment', rl.clientIp(req), 20, 3600))) {
+    return res.status(429).json({ ok: false, error: 'Trop de tentatives. Réessayez dans une heure.' });
+  }
+
   try {
     var stripe = require('stripe')(stripeKey);
     var body = req.body || {};
     var items = body.items;
     var customerEmail = body.customerEmail;
-    var territory = body.territory || pricing.DEFAULT_TERRITORY;
+
+    // Territoire STRICT (A1) : absent → défaut ; fourni mais inconnu → 400.
+    // Avant, un code invalide retombait silencieusement sur le défaut, ce qui
+    // masquait toute tentative de manipulation du taux de taxe. Le code validé
+    // est ensuite confronté à l'adresse réelle par le webhook (contrôle
+    // détectif — voir api/_lib/postal.js).
+    var territory = body.territory == null || body.territory === ''
+      ? pricing.DEFAULT_TERRITORY
+      : String(body.territory);
+    if (!pricing.getTerritory(territory)) {
+      return res.status(400).json({ ok: false, error: 'Territoire inconnu' });
+    }
 
     if (!Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ ok: false, error: 'Cart is empty' });
@@ -46,6 +66,7 @@ module.exports = async function handler(req, res) {
     var products = await catalog.loadCatalog();
     var totalCents = 0;
     var description = [];
+    var validatedLines = []; // lignes {key, qty} VALIDÉES (clé résolue, qty bornée)
 
     for (var i = 0; i < items.length; i++) {
       var raw = items[i] || {};
@@ -61,23 +82,30 @@ module.exports = async function handler(req, res) {
 
       totalCents += pricing.unitCents(product, territory) * qty;
       description.push((product.title || 'Produit') + ' x' + qty);
+      validatedLines.push({ key: product.slug || product.id || String(key), qty: qty });
     }
 
     if (totalCents < 50) {
       return res.status(400).json({ ok: false, error: 'Montant minimum : 0,50 €' });
     }
 
+    // A2 : les lignes {key, qty} voyagent dans la metadata (chunkées — limite
+    // Stripe 500 car./valeur). Le webhook payment_intent.succeeded les relit
+    // pour reconstruire la commande côté serveur (email détaillé + journal),
+    // ce qu'un PaymentIntent ne permet pas nativement (pas de line_items).
+    var itemsMeta = stripeMeta.chunkItems(validatedLines) || {};
+
     var intentParams = {
       amount: totalCents,
       currency: 'eur',
       automatic_payment_methods: { enabled: true },
       description: description.join(', ').substring(0, 500),
-      metadata: {
+      metadata: Object.assign({
         source: 'pirates-tools',
         territory: String(territory),
-        itemCount: String(items.length),
+        itemCount: String(validatedLines.length),
         serverTotalEur: (totalCents / 100).toFixed(2)
-      }
+      }, itemsMeta)
     };
     if (customerEmail) intentParams.receipt_email = customerEmail;
 

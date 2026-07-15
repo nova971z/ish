@@ -9,6 +9,7 @@
 
 var catalog = require('./_lib/catalog');
 var pricing = require('./_lib/pricing');
+var rl = require('./_lib/ratelimit');
 
 var MAX_QTY_PER_LINE = 99;
 var MAX_LINES = 50;
@@ -27,12 +28,27 @@ module.exports = async function handler(req, res) {
     });
   }
 
+  // A4 — même limiteur que create-payment-intent : SEAU PARTAGÉ 'payment'
+  // (une IP ne peut pas cumuler 20+20 en alternant les deux endpoints).
+  if (!(await rl.allow('payment', rl.clientIp(req), 20, 3600))) {
+    return res.status(429).json({ ok: false, error: 'Trop de tentatives. Réessayez dans une heure.' });
+  }
+
   try {
     var stripe = require('stripe')(stripeKey);
     var body = req.body || {};
     var items = body.items;
     var customerEmail = body.customerEmail;
-    var territory = body.territory || pricing.DEFAULT_TERRITORY;
+
+    // Territoire STRICT (A1) : absent → défaut ; fourni mais inconnu → 400.
+    // Même règle que create-payment-intent — le webhook confronte ensuite ce
+    // code à l'adresse de livraison collectée ci-dessous.
+    var territory = body.territory == null || body.territory === ''
+      ? pricing.DEFAULT_TERRITORY
+      : String(body.territory);
+    if (!pricing.getTerritory(territory)) {
+      return res.status(400).json({ ok: false, error: 'Territoire inconnu' });
+    }
 
     if (!Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ ok: false, error: 'Cart is empty' });
@@ -79,6 +95,15 @@ module.exports = async function handler(req, res) {
       mode: 'payment',
       line_items: lineItems,
       ...(customerEmail ? { customer_email: customerEmail } : {}),
+      // A1 : adresse de livraison OBLIGATOIRE. C'est la donnée non-déclarative
+      // qui permet au webhook de vérifier que le territoire facturé correspond
+      // au lieu de livraison réel (code postal 97x → territoire, _lib/postal.js).
+      // Les DOM ont leurs codes ISO propres (GP/MQ/GF/RE/YT) mais une adresse
+      // DOM est aussi couramment saisie sous FR — les deux sont acceptés, le
+      // code postal fait foi.
+      shipping_address_collection: {
+        allowed_countries: ['GP', 'MQ', 'GF', 'RE', 'YT', 'FR']
+      },
       success_url: baseUrl + '/#/merci?session_id={CHECKOUT_SESSION_ID}',
       cancel_url: baseUrl + '/#/devis',
       metadata: {
