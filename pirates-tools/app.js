@@ -937,7 +937,7 @@
 
   var BRAND_IMAGES = {
     'DeWALT': 'images/brands/dewalt.png',
-    'Facom': 'images/brands/facom.png',
+    'Facom': 'images/brands/facom.webp',
     'Festool': 'images/brands/festool.png',
     'Flex': 'images/brands/flex.png',
     'Makita': 'images/brands/makita.png',
