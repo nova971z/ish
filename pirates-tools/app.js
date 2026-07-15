@@ -2750,7 +2750,8 @@
 
   // ── Router (hash-based SPA) ────────────────────────────────
 
-  var ROUTES = ['/', '/catalogue', '/produit', '/devis', '/compte', '/auth', '/abonnement'];
+  var ROUTES = ['/', '/catalogue', '/produit', '/devis', '/compte', '/auth', '/abonnement',
+                '/admin', '/merci', '/contact', '/favoris'];
 
   // Territory landing slugs (keys) → territory codes (values).
   // Used to expose SEO-friendly routes like #/guadeloupe.
