@@ -3730,9 +3730,35 @@
     return u;
   }
 
-  function cryptoQRUrl(payload) {
-    return 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=0&data='
-      + encodeURIComponent(payload);
+  // QR de paiement crypto : génération 100 % LOCALE (bibliothèque qrcode.js
+  // vendue, licence MIT, vérifiée par aller-retour). Aucun service tiers → une
+  // adresse crypto ne peut plus être substituée ni fuitée. Chargée à la demande.
+  var _qrLibPromise = null;
+  function ensureQRLib() {
+    if (typeof window.qrcode === 'function') return Promise.resolve(window.qrcode);
+    if (_qrLibPromise) return _qrLibPromise;
+    _qrLibPromise = new Promise(function (resolve, reject) {
+      var s = document.createElement('script');
+      s.src = 'qrcode.js';
+      s.async = true;
+      s.onload = function () { resolve(window.qrcode); };
+      s.onerror = function () { _qrLibPromise = null; reject(new Error('qr lib load failed')); };
+      document.head.appendChild(s);
+    });
+    return _qrLibPromise;
+  }
+
+  function cryptoLocalQR(payload) {
+    if (typeof window.qrcode !== 'function') return null;
+    try {
+      var qr = window.qrcode(0, 'M'); // version auto, correction d'erreur M (15 %)
+      qr.addData(payload);
+      qr.make();
+      return qr.createDataURL(6, 4); // 6 px/module, marge 4 modules (norme QR)
+    } catch (e) {
+      console.error('[cryptoLocalQR]', e && e.message);
+      return null;
+    }
   }
 
   function cryptoFetchRates() {
@@ -3863,9 +3889,24 @@
         qr.alt = 'Adresse non configurée';
         if (qrWrap) qrWrap.classList.remove('is-ready');
       } else {
-        qr.src = cryptoQRUrl(cryptoBuildUri(net, amt || ''));
-        qr.alt = 'QR ' + net.label;
-        if (qrWrap) qrWrap.classList.add('is-ready');
+        var payload = cryptoBuildUri(net, amt || '');
+        var label = net.label;
+        ensureQRLib().then(function () {
+          var cur = document.getElementById('cryptopayQR');
+          if (!cur) return; // modal fermé entre-temps
+          var dataUrl = cryptoLocalQR(payload);
+          if (dataUrl) {
+            cur.src = dataUrl;
+            cur.alt = 'QR ' + label;
+            if (cur.parentElement) cur.parentElement.classList.add('is-ready');
+          }
+        }).catch(function () {
+          // Échec de chargement de la lib : on NE retombe PAS sur un service
+          // tiers. L'adresse en texte (copiable, avec avertissement) fait foi.
+          var cur = document.getElementById('cryptopayQR');
+          if (cur) { cur.removeAttribute('src'); cur.alt = 'QR indisponible — utilisez l\'adresse ci-dessous'; }
+          if (qrWrap) qrWrap.classList.remove('is-ready');
+        });
       }
     }
   }

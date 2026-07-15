@@ -58,7 +58,7 @@ Règle : **1 étape = 1 problème = 1 commit = 1 vérification verte**. Jamais d
        8d NOWPayments : suppression du chemin client x-api-key (fuite clé de compte) ; config cardCheckout réduite à {url:''}. co.url (lien pré-généré) reste. Dynamique → futur endpoint serverless.
        8f fuites listeners : setupModelViewerScrollPassthrough retire mouseleave/touchstart ; pdpWa → onclick (plus d'empilement).
        8g garde auth : redirection /compte↔/auth seulement si _authReady (fin double-flicker au reload).
-       8e QR crypto tiers (qrserver) : MITIGÉ (avertissement → l'adresse texte fait foi, pas le QR). REPORTÉ : génération QR locale (lib complète ~1000 l. ; blob invérifiable ou encodeur maison risqué refusés). À traiter comme tâche dédiée révisée avant lancement crypto.
+       8e QR crypto tiers : ✅ RÉSOLU (SW v299). qrserver retiré → génération 100 % locale via qrcode.js vendu (qrcode-generator v2.0.4, MIT, lisible). Lazy-load (ensureQRLib, mirror ensureThree) + cryptoLocalQR (createDataURL). Vérifié par aller-retour encode→décodage jsqr indépendant→adresse identique (6 cas réels). Repli sûr : jamais de tiers, l'adresse texte fait foi. Reste : scan par l'user avec vrai wallet avant ouverture crypto.
 - [~] 9. Assainir CSS/HTML — SOUS-ENSEMBLE SÛR FAIT ✅ commit, SW v297 ; refactors risqués REPORTÉS.
        FAIT : (1) lumière dorée restaurée (#hero::before halo radial or, styles.css:444) ; (2) console debug retirée de la prod (~82 l., index.html) ; (3) <h1> sr-only sur l'accueil (SEO/a11y) ; (4) CSS mort retiré (315 l. : section 12 modal 3D + sections 21-22 site-links/footer mort — TOUS sélecteurs vérifiés 0-réf ; vrai footer .footer-social/.site-footer intact).
        REPORTÉ (nécessite vérif visuelle par-règle, refusé de sweeper à l'aveugle = « aucun hasard ») :
@@ -76,7 +76,7 @@ Règle : **1 étape = 1 problème = 1 commit = 1 vérification verte**. Jamais d
        10g CI déjà branchée (étape 5). 10h docs : CHANGELOG v2.1.0 + README (version, tailles, NOWPayments).
        REPORTÉ 10d : découpe des fonctions XXL (renderAdmin/initPdpScrollAnimations/renderPDP) — refactor cosmétique risqué, pas de valeur fonctionnelle, à faire avec tests.
 
-═══ PLAN DE REMÉDIATION TERMINÉ (10/10 étapes). Reste : QR crypto local (8e reporté), refactors CSS risqués (9 reporté), split XXL (10d reporté). ═══
+═══ PLAN DE REMÉDIATION TERMINÉ (10/10 étapes) + QR crypto local (8e) fait. Reste : refactors CSS risqués (9 reporté), split XXL (10d reporté). ═══
 
 ## Vérification standard
 `cd pirates-tools && node scripts/ci.js` doit rester vert après chaque étape.
