@@ -444,17 +444,11 @@ body.menu-open { overflow: hidden; }
 /* Halo doré derrière le logo hero (accueil uniquement). Plein écran, fixe,
    centré sous le logo. z-index 1 < container (2) < logo (11) → reste derrière.
    Disparaît automatiquement quand #hero passe en display:none (scroll / autre page). */
+/* Halo doré désactivé (temporaire) : en position:fixed il restait collé au fond
+   de la fenêtre au lieu de suivre le logo. À réactiver proprement plus tard
+   (ancré au conteneur du logo, pas au viewport). */
 #hero::before, .hero-full::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    z-index: 1;
-    pointer-events: none;
-    background: radial-gradient(circle at 50% 47%,
-        rgba(212, 175, 55, 0.22) 0%,
-        rgba(212, 175, 55, 0.10) 20%,
-        rgba(212, 175, 55, 0.03) 38%,
-        transparent 58%);
+    display: none;
 }
 
 /* Smooth transition from hero to content */
