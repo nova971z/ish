@@ -227,6 +227,21 @@ de batch (2 tests périmés réalignés, zéro régression produit) :
   synchronisé serveur) ; champ profil `loyalty` legacy (ni incrémenté ni
   affiché) ; barre = progression réelle vers le palier suivant.
 
+## Session audit boutons (15/07/2026, SW v313, mergé master)
+Bug signalé (« les chips catégories ne marchent pas ») → cause prouvée par
+hit-test : le BANDEAU COOKIES mobile (fixed z9700, +96px au-dessus du dock,
+texte ~8 lignes = pavé ~350px) recouvrait les chips et avalait les taps à
+chaque session en navigation privée. Correctifs : bandeau au vrai bas (peut
+couvrir le dock temporairement) + texte court avec lien politique + pile
+verticale mobile + max-height 30vh ; chips catalogue = rangée unique
+défilante sur mobile ; devis +/− recouverts par le sous-total → flex-wrap.
+OUTIL AJOUTÉ : scratchpad audit-buttons.js — volet A hit-test de tous les
+boutons/liens visibles (11 routes × desktop/iPhone × bandeau affiché ; barres
+de nav fixes = non-défaut ; pointer-events:none exclus ; retry scrollIntoView
+behavior:'instant' — OBLIGATOIRE, le smooth global fausse les lectures) +
+volet B fonctionnel (chips, recherche, select, PDP, panier, modale, menu,
+territoire, carrousel, auth, contact, footer, dock). Résultat final : 0 défaut.
+
 ## Vérification standard
 `cd pirates-tools && node scripts/ci.js` doit rester vert après chaque étape.
 Bump SW (`sw.js` VERSION + ASSET_VER) et `?v=` dans `index.html` à chaque changement d'asset.
