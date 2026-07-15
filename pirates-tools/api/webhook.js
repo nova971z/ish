@@ -148,6 +148,8 @@ async function handleSessionCompleted(stripe, fb, sessionLite) {
     || (fullSession.customer_details && fullSession.customer_details.address) || null;
   var tax = taxCheck(declaredTerritory, shipAddr);
 
+  var sessionUid = (fullSession.metadata && fullSession.metadata.uid) || null;
+
   // A2 — journal serveur : la trace existe même sans document client.
   await logPayment(fb, fullSession.id, {
     kind: 'checkout_session',
@@ -156,6 +158,7 @@ async function handleSessionCompleted(stripe, fb, sessionLite) {
     currency: (fullSession.currency || 'eur').toUpperCase(),
     customerEmail: (fullSession.customer_details && fullSession.customer_details.email) || fullSession.customer_email || null,
     paymentIntentId: typeof fullSession.payment_intent === 'string' ? fullSession.payment_intent : null,
+    uid: sessionUid,
     territoryDeclared: declaredTerritory,
     territoryFromAddress: tax.expectedTerritory,
     postalCode: tax.postalCode,
@@ -164,7 +167,7 @@ async function handleSessionCompleted(stripe, fb, sessionLite) {
 
   // Mark the matching Firestore order as paid (idempotent update).
   // Le champ stripeSessionId est écrit par le client sur /merci (étape A5).
-  await updateOrderWhere(fb, 'stripeSessionId', fullSession.id, {
+  await updateOrderWhere(fb, sessionUid, 'stripeSessionId', fullSession.id, {
     status: 'paid',
     stripePaymentIntent: typeof fullSession.payment_intent === 'string' ? fullSession.payment_intent : null
   });
@@ -203,7 +206,10 @@ async function handleIntentSucceeded(stripe, fb, pi) {
   }
   var billing = (charge && charge.billing_details) || {};
   var declaredTerritory = pi.metadata.territory || null;
-  var tax = taxCheck(declaredTerritory, billing.address || null);
+  // Adresse de LIVRAISON attachée au PI (formulaire adresse de la modale) en
+  // priorité ; repli facturation carte (anciens paiements sans adresse).
+  var piShipAddr = (pi.shipping && pi.shipping.address) || null;
+  var tax = taxCheck(declaredTerritory, piShipAddr || billing.address || null);
 
   // Reconstruit les lignes depuis la metadata (source serveur : catalogue +
   // moteur de prix). Contrôle d'intégrité : la somme doit valoir pi.amount —
@@ -212,6 +218,7 @@ async function handleIntentSucceeded(stripe, fb, pi) {
   var rebuilt = await rebuildLines(pi, declaredTerritory);
 
   var customerEmail = pi.receipt_email || billing.email || null;
+  var piUid = pi.metadata.uid || null;
 
   await logPayment(fb, pi.id, {
     kind: 'payment_intent',
@@ -220,6 +227,7 @@ async function handleIntentSucceeded(stripe, fb, pi) {
     currency: (pi.currency || 'eur').toUpperCase(),
     customerEmail: customerEmail,
     paymentIntentId: pi.id,
+    uid: piUid,
     territoryDeclared: declaredTerritory,
     territoryFromAddress: tax.expectedTerritory,
     postalCode: tax.postalCode,
@@ -230,7 +238,7 @@ async function handleIntentSucceeded(stripe, fb, pi) {
   // Le client écrit sa commande avec paymentIntentId sur /merci (A5). Selon la
   // course client/webhook le doc peut ne pas encore exister — le journal
   // payments/ ci-dessus reste la trace autoritaire dans tous les cas.
-  await updateOrderWhere(fb, 'paymentIntentId', pi.id, {
+  await updateOrderWhere(fb, piUid, 'paymentIntentId', pi.id, {
     status: 'paid',
     confirmedByWebhook: true
   });
@@ -254,6 +262,7 @@ async function handleIntentFailed(fb, pi) {
     currency: (pi.currency || 'eur').toUpperCase(),
     customerEmail: pi.receipt_email || null,
     paymentIntentId: pi.id,
+    uid: (pi.metadata && pi.metadata.uid) || null,
     territoryDeclared: (pi.metadata && pi.metadata.territory) || null,
     failureMessage: lastErr
   });
@@ -295,23 +304,27 @@ async function logPayment(fb, stripeId, data) {
   }
 }
 
-// Met à jour la commande client correspondante (collectionGroup users/*/orders).
-// Best-effort : requiert un index collection-group sur le champ interrogé —
-// en son absence Firestore renvoie FAILED_PRECONDITION avec l'URL de création.
-async function updateOrderWhere(fb, field, value, patch) {
+// Met à jour la commande client correspondante.
+// Chemin PRIVILÉGIÉ : users/{uid}/orders (uid depuis la metadata Stripe) —
+// requête de collection simple couverte par les index AUTOMATIQUES Firestore,
+// aucun index à créer. REPLI (uid absent — anciens paiements) : collectionGroup,
+// qui exige un index collection-group sur le champ interrogé (défini dans
+// firestore.indexes.json ; sans lui Firestore log FAILED_PRECONDITION avec
+// l'URL de création en 1 clic).
+async function updateOrderWhere(fb, uid, field, value, patch) {
   if (!fb.db || !value) return;
   try {
-    var snap = await fb.db.collectionGroup('orders')
-      .where(field, '==', value)
-      .limit(1)
-      .get();
+    var query = uid
+      ? fb.db.collection('users').doc(uid).collection('orders').where(field, '==', value)
+      : fb.db.collectionGroup('orders').where(field, '==', value);
+    var snap = await query.limit(1).get();
     if (!snap.empty) {
       await snap.docs[0].ref.update(Object.assign({}, patch, {
         paidAt: fb.admin.firestore.FieldValue.serverTimestamp()
       }));
-      console.log('[webhook] Order updated via', field, ':', snap.docs[0].id);
+      console.log('[webhook] Order updated via', (uid ? 'users/' + uid + '/orders.' : 'collectionGroup.') + field, ':', snap.docs[0].id);
     } else {
-      console.log('[webhook] No order matches', field, '=', value, '(client doc absent ou pas encore écrit)');
+      console.log('[webhook] No order matches', field, '=', value, uid ? '(uid ' + uid + ')' : '(sans uid)', '— client doc absent ou pas encore écrit');
     }
   } catch (fbErr) {
     console.error('[webhook] Firestore order update failed (' + field + '):', fbErr.message);
@@ -319,7 +332,7 @@ async function updateOrderWhere(fb, field, value, patch) {
 }
 
 // Reconstruit les lignes {name, qty, unitCents, subCents} d'un PaymentIntent
-// depuis metadata items_* + catalogue + moteur de prix. { ok, lines, verified }
+// depuis metadata items_* + catalogue + moteur de prix. { ok, lines }
 async function rebuildLines(pi, territory) {
   var fallback = {
     ok: false,
@@ -343,6 +356,20 @@ async function rebuildLines(pi, territory) {
       var unit = pricing.unitCents(product, territory || pricing.DEFAULT_TERRITORY);
       sum += unit * qty;
       lines.push({ name: product.title || 'Produit', qty: qty, unitCents: unit, subCents: unit * qty });
+    }
+    // Remise fidélité serveur (create-payment-intent) : pi.amount = brut −
+    // remise. On la matérialise en ligne négative pour que le détail somme
+    // exactement au montant débité.
+    var discountCents = parseInt((pi.metadata && pi.metadata.loyaltyDiscountCents) || '0', 10);
+    if (isFinite(discountCents) && discountCents > 0) {
+      var pct = (pi.metadata && pi.metadata.loyaltyPct) || '';
+      lines.push({
+        name: 'Remise fidélité' + (pct ? ' −' + pct + ' %' : ''),
+        qty: 1,
+        unitCents: -discountCents,
+        subCents: -discountCents
+      });
+      sum -= discountCents;
     }
     // Intégrité : le détail reconstruit doit valoir exactement le montant
     // débité. Un prix catalogue modifié entre paiement et webhook → dégradation
@@ -554,5 +581,6 @@ module.exports._internals = {
   buildTaxWarnings: buildTaxWarnings,
   rebuildLines: rebuildLines,
   modelFromSession: modelFromSession,
-  modelFromIntent: modelFromIntent
+  modelFromIntent: modelFromIntent,
+  updateOrderWhere: updateOrderWhere
 };

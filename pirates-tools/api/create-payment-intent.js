@@ -12,6 +12,9 @@ var catalog = require('./_lib/catalog');
 var pricing = require('./_lib/pricing');
 var stripeMeta = require('./_lib/stripe-meta');
 var rl = require('./_lib/ratelimit');
+var loyalty = require('./_lib/loyalty');
+var postal = require('./_lib/postal');
+var getFirebase = require('./_lib/firebase').getFirebase;
 
 var MAX_QTY_PER_LINE = 99;
 var MAX_LINES = 50;
@@ -43,6 +46,14 @@ module.exports = async function handler(req, res) {
     var items = body.items;
     var customerEmail = body.customerEmail;
 
+    // uid Firebase (déclaratif) : uniquement pour retrouver la commande du
+    // client côté webhook (chemin users/{uid}/orders) et lier le journal
+    // payments/. Un uid forgé ne donne AUCUN droit : il ne fait que pointer
+    // vers une sous-collection où seul le vrai titulaire peut écrire (règles
+    // Firestore) — le matching échoue simplement. Sanitisé par prudence.
+    var uid = typeof body.uid === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(body.uid)
+      ? body.uid : null;
+
     // Territoire STRICT (A1) : absent → défaut ; fourni mais inconnu → 400.
     // Avant, un code invalide retombait silencieusement sur le défaut, ce qui
     // masquait toute tentative de manipulation du taux de taxe. Le code validé
@@ -53,6 +64,42 @@ module.exports = async function handler(req, res) {
       : String(body.territory);
     if (!pricing.getTerritory(territory)) {
       return res.status(400).json({ ok: false, error: 'Territoire inconnu' });
+    }
+
+    // Blindage fiscal PRÉVENTIF : quand le client fournit le code postal de
+    // livraison, c'est LUI qui fixe le territoire de taxation — la déclaration
+    // ci-dessus n'est qu'un repli (anciens clients / flux sans adresse). Un CP
+    // hors DOM desservis est refusé net.
+    var postalCode = typeof body.postalCode === 'string' ? body.postalCode.trim().slice(0, 12) : '';
+    var territorySource = 'declared';
+    if (postalCode) {
+      var derived = postal.territoryFromPostal(postalCode);
+      if (!derived) {
+        return res.status(400).json({
+          ok: false,
+          error: 'Livraison uniquement en Guadeloupe, Martinique, Guyane, La Réunion et Mayotte (code postal 971xx–976xx).'
+        });
+      }
+      territory = derived;
+      territorySource = 'postal';
+    }
+
+    // Adresse de livraison (facultative côté API, envoyée par la modale) :
+    // attachée au PaymentIntent (visible Stripe/antifraude, relue par le
+    // webhook pour le contrôle détectif). Chaînes bornées, jamais bloquant.
+    function cleanStr(s, max) { return typeof s === 'string' ? s.trim().slice(0, max) : ''; }
+    var shipIn = body.shipping || {};
+    var shipping = null;
+    if (postalCode && cleanStr(shipIn.line1, 200)) {
+      shipping = {
+        name: cleanStr(shipIn.name, 120) || 'Client Pirates Tools',
+        address: {
+          line1: cleanStr(shipIn.line1, 200),
+          city: cleanStr(shipIn.city, 120),
+          postal_code: postalCode,
+          country: 'FR'
+        }
+      };
     }
 
     if (!Array.isArray(items) || items.length === 0) {
@@ -89,6 +136,21 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ ok: false, error: 'Montant minimum : 0,50 €' });
     }
 
+    // Remise fidélité SERVEUR : calculée depuis le journal payments/ (écrit
+    // uniquement par le webhook — infalsifiable côté client), jamais depuis un
+    // état client. Fail-open 0 % (un souci de fidélité ne bloque pas la vente).
+    var fb = getFirebase();
+    var loyaltyQuote = uid && fb.db
+      ? await loyalty.quote(fb.db, uid, totalCents)
+      : { pct: 0, discountCents: 0, verifiedSpendCents: 0, tierKey: 'bronze', tierLabel: 'Bronze' };
+    var amountCents = totalCents - loyaltyQuote.discountCents;
+    if (amountCents < 50) {
+      // Remise ramenant sous le minimum Stripe : on la tronque plutôt que
+      // d'échouer un paiement légitime.
+      loyaltyQuote = { pct: 0, discountCents: 0, verifiedSpendCents: loyaltyQuote.verifiedSpendCents, tierKey: loyaltyQuote.tierKey, tierLabel: loyaltyQuote.tierLabel };
+      amountCents = totalCents;
+    }
+
     // A2 : les lignes {key, qty} voyagent dans la metadata (chunkées — limite
     // Stripe 500 car./valeur). Le webhook payment_intent.succeeded les relit
     // pour reconstruire la commande côté serveur (email détaillé + journal),
@@ -96,18 +158,24 @@ module.exports = async function handler(req, res) {
     var itemsMeta = stripeMeta.chunkItems(validatedLines) || {};
 
     var intentParams = {
-      amount: totalCents,
+      amount: amountCents,
       currency: 'eur',
       automatic_payment_methods: { enabled: true },
       description: description.join(', ').substring(0, 500),
       metadata: Object.assign({
         source: 'pirates-tools',
         territory: String(territory),
+        territorySource: territorySource,
+        postalCode: postalCode,
         itemCount: String(validatedLines.length),
-        serverTotalEur: (totalCents / 100).toFixed(2)
-      }, itemsMeta)
+        serverTotalEur: (amountCents / 100).toFixed(2),
+        grossTotalEur: (totalCents / 100).toFixed(2),
+        loyaltyPct: String(loyaltyQuote.pct),
+        loyaltyDiscountCents: String(loyaltyQuote.discountCents)
+      }, uid ? { uid: uid } : {}, itemsMeta)
     };
     if (customerEmail) intentParams.receipt_email = customerEmail;
+    if (shipping) intentParams.shipping = shipping;
 
     var paymentIntent = await stripe.paymentIntents.create(intentParams);
 
@@ -115,7 +183,15 @@ module.exports = async function handler(req, res) {
       ok: true,
       clientSecret: paymentIntent.client_secret,
       paymentIntentId: paymentIntent.id,
-      amount: totalCents // authoritative amount, for optional client reconciliation
+      amount: amountCents,   // montant DÉBITÉ (remise déduite) — le client DOIT afficher celui-ci
+      gross: totalCents,     // total plein tarif avant remise
+      loyalty: {
+        pct: loyaltyQuote.pct,
+        discountCents: loyaltyQuote.discountCents,
+        verifiedSpendCents: loyaltyQuote.verifiedSpendCents,
+        tierKey: loyaltyQuote.tierKey,
+        tierLabel: loyaltyQuote.tierLabel
+      }
     });
   } catch (err) {
     console.error('[api/create-payment-intent] Stripe error:', err.message);

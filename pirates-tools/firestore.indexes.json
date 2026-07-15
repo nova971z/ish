@@ -1,0 +1,26 @@
+{
+  "//": "Index Firestore versionnés. Déploiement : `firebase deploy --only firestore:indexes` (ou création 1-clic via l'URL loguée par le webhook au premier FAILED_PRECONDITION). Nécessaires UNIQUEMENT pour le REPLI collectionGroup du webhook (paiements sans uid en metadata — anciens paiements) : le chemin normal users/{uid}/orders est couvert par les index automatiques. Un fieldOverride REMPLACE l'indexation par défaut du champ : les entrées COLLECTION ci-dessous la conservent à l'identique, on ne fait qu'AJOUTER la portée COLLECTION_GROUP.",
+  "indexes": [],
+  "fieldOverrides": [
+    {
+      "collectionGroup": "orders",
+      "fieldPath": "stripeSessionId",
+      "indexes": [
+        { "order": "ASCENDING", "queryScope": "COLLECTION" },
+        { "order": "DESCENDING", "queryScope": "COLLECTION" },
+        { "arrayConfig": "CONTAINS", "queryScope": "COLLECTION" },
+        { "order": "ASCENDING", "queryScope": "COLLECTION_GROUP" }
+      ]
+    },
+    {
+      "collectionGroup": "orders",
+      "fieldPath": "paymentIntentId",
+      "indexes": [
+        { "order": "ASCENDING", "queryScope": "COLLECTION" },
+        { "order": "DESCENDING", "queryScope": "COLLECTION" },
+        { "arrayConfig": "CONTAINS", "queryScope": "COLLECTION" },
+        { "order": "ASCENDING", "queryScope": "COLLECTION_GROUP" }
+      ]
+    }
+  ]
+}

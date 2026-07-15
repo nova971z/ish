@@ -775,14 +775,15 @@
         var pct = loyalty.totalSpent > 0
           ? Math.min(100, Math.round((loyalty.totalSpent / (loyalty.nextTierAt || loyalty.totalSpent)) * 100))
           : 0;
-        // Libellé factuel : l'avantage n'est PAS déduit du total ci-dessus —
-        // il se fait valoir sur devis WhatsApp (validation humaine, pas de
-        // remise auto-attribuée via un localStorage modifiable).
+        // Libellé factuel : le total ci-dessus reste le plein tarif ; la
+        // remise est déduite AU PAIEMENT CARTE, calculée par le serveur depuis
+        // l'historique d'achats VÉRIFIÉ (journal webhook — le palier local
+        // n'est qu'un cache d'affichage synchronisé à chaque paiement).
         loyaltyEl.hidden = false;
         loyaltyEl.innerHTML = '<span class="devis-loyalty__tier">' + loyalty.tierIcon + ' '
           + escapeHTML(loyalty.tierLabel) + '</span>'
           + '<span class="devis-loyalty__save">Avantage −' + loyalty.discountPct + ' % ('
-          + formatPrice(total - loyalty.discountedTotal) + ') — non déduit ici, à faire valoir sur devis WhatsApp</span>'
+          + formatPrice(total - loyalty.discountedTotal) + ') — déduit au paiement carte selon votre historique vérifié</span>'
           + '<div class="devis-loyalty__bar"><div class="devis-loyalty__fill" style="width:' + pct + '%"></div></div>';
       } else if (loyalty) {
         var nextMin = loyalty.nextTierAt || 500;
@@ -4140,10 +4141,14 @@
     requestAnimationFrame(function () { modal.classList.add('is-open'); });
     document.body.style.overflow = 'hidden';
 
-    // Initialize Stripe Elements (creates PaymentIntent + mounts form)
+    // Adresse d'abord : le formulaire carte (et le PaymentIntent) ne sont
+    // créés qu'après une adresse de livraison valide — le code postal fixe le
+    // territoire fiscal côté serveur (préventif A1).
     _stripeReady = false;
     _stripeClientSecret = null;
-    initStripeElements(total);
+    _quoteTerritory = null;
+    setupPayAddressForm();
+    handlePayAddressChange();
 
     // Analytics
     if (typeof track === 'function') {
@@ -4180,6 +4185,85 @@
   var _stripeElements = null; // Stripe Elements instance
   var _stripeClientSecret = null;
   var _stripeReady = false;
+  var _quoteTerritory = null;   // territoire du PaymentIntent en cours (dérivé du CP)
+  var _payAddressBound = false; // listeners du formulaire adresse posés une seule fois
+  var _payAddrDebounce = null;
+
+  // ── Adresse de livraison (blindage fiscal préventif) ────────
+  // Miroir client de api/_lib/postal.js : code postal → territoire desservi.
+  // Le serveur re-dérive lui-même depuis postalCode (autoritaire) — cette
+  // copie ne sert qu'à l'UX (recalcul immédiat, message d'erreur).
+  function territoryFromPostalClient(pc) {
+    var d = String(pc || '').replace(/\D/g, '');
+    if (d.length < 3) return null;
+    var p = d.slice(0, 3);
+    return (p === '971' || p === '972' || p === '973' || p === '974' || p === '976') ? p : null;
+  }
+
+  function readPayAddress() {
+    function val(id) {
+      var el = document.getElementById(id);
+      return el ? el.value.trim() : '';
+    }
+    return { name: val('payAddrName'), line1: val('payAddrLine1'), postal: val('payAddrPostal'), city: val('payAddrCity') };
+  }
+
+  // Valide le formulaire, met à jour les hints/classes. Retourne
+  // { valid, territory, addr } — territory null tant que CP hors DOM.
+  function validatePayAddress() {
+    var addr = readPayAddress();
+    var hint = document.getElementById('payAddrHint');
+    var postalEl = document.getElementById('payAddrPostal');
+    var terr = territoryFromPostalClient(addr.postal);
+    var postalFilled = addr.postal.length >= 5;
+    var complete = !!(addr.name && addr.line1 && addr.city && postalFilled);
+
+    if (postalEl) postalEl.classList.toggle('is-invalid', postalFilled && !terr);
+    if (hint) {
+      if (postalFilled && !terr) {
+        hint.textContent = 'Code postal hors zone : nous livrons uniquement les DOM (971xx à 976xx).';
+        hint.classList.add('is-error');
+      } else if (terr && complete) {
+        var t = getTerritory(terr);
+        hint.textContent = 'Livraison ' + (t ? t.flag + ' ' + t.name : terr) + ' — prix TTC calculés pour ce territoire.';
+        hint.classList.remove('is-error');
+      } else {
+        hint.textContent = 'Nous livrons en Guadeloupe, Martinique, Guyane, La Réunion et Mayotte (code postal 971xx–976xx).';
+        hint.classList.remove('is-error');
+      }
+    }
+    return { valid: !!(complete && terr), territory: terr, addr: addr };
+  }
+
+  function setupPayAddressForm() {
+    if (_payAddressBound) return;
+    var form = document.getElementById('payAddress');
+    if (!form) return;
+    _payAddressBound = true;
+    form.addEventListener('submit', function (e) { e.preventDefault(); });
+    form.addEventListener('input', function () {
+      if (_payAddrDebounce) clearTimeout(_payAddrDebounce);
+      _payAddrDebounce = setTimeout(handlePayAddressChange, 350);
+    });
+  }
+
+  // (Re)crée le PaymentIntent quand l'adresse devient valide ou que le CP
+  // change de territoire. Idempotent : rien à faire si le PI courant est déjà
+  // au bon territoire.
+  function handlePayAddressChange() {
+    var v = validatePayAddress();
+    var container = document.getElementById('stripePaymentElement');
+    if (!v.valid) {
+      if (!_stripeClientSecret && container) {
+        container.innerHTML = '<div class="stripe-fallback">'
+          + '<p>Renseignez votre adresse de livraison ci-dessus pour afficher le paiement par carte.</p>'
+          + '</div>';
+      }
+      return;
+    }
+    if (_stripeClientSecret && v.territory === _quoteTerritory) return;
+    initStripeElements();
+  }
 
   // Appearance matching Pirates Tools dark theme
   var STRIPE_APPEARANCE = {
@@ -4234,12 +4318,18 @@
     return _stripe;
   }
 
-  // Create PaymentIntent and mount Elements
-  function initStripeElements(total) {
+  // Create PaymentIntent and mount Elements.
+  // Pré-requis : adresse de livraison valide (handlePayAddressChange est le
+  // seul appelant). Le territoire fiscal envoyé est DÉRIVÉ du code postal —
+  // et le serveur le re-dérive lui-même depuis postalCode (autoritaire).
+  function initStripeElements() {
+    var ship = validatePayAddress();
+    if (!ship.valid) return;
     var stripe = getStripe();
     var container = document.getElementById('stripePaymentElement');
     var errorEl = document.getElementById('stripeCardError');
     if (errorEl) { errorEl.hidden = true; errorEl.textContent = ''; }
+    _quoteTerritory = ship.territory;
 
     if (!stripe) {
       // Stripe not configured — show fallback message
@@ -4271,7 +4361,15 @@
           return { key: it.key, title: it.title, qty: it.qty || 1 };
         }),
         customerEmail: (_currentUser && _currentUser.email) || undefined,
-        territory: _currentTerritory
+        // Territoire dérivé du CP de livraison ; le serveur re-dérive depuis
+        // postalCode (source autoritaire) — celui-ci prime toujours.
+        territory: ship.territory,
+        postalCode: ship.addr.postal,
+        shipping: { name: ship.addr.name, line1: ship.addr.line1, city: ship.addr.city },
+        // uid → metadata Stripe : permet au webhook de retrouver la commande
+        // par chemin direct users/{uid}/orders (aucun index Firestore requis)
+        // et de lier le journal payments/ au compte client.
+        uid: (_currentUser && _currentUser.uid) || undefined
       })
     })
     .then(function (r) { return r.json(); })
@@ -4280,6 +4378,12 @@
         throw new Error(data.error || 'Erreur création du paiement');
       }
       _stripeClientSecret = data.clientSecret;
+
+      // Le serveur est la SEULE vérité du montant débité : il applique la
+      // remise fidélité vérifiée (journal payments/, infalsifiable). On
+      // réaligne l'affichage de la modale sur sa réponse (total + ligne
+      // remise) — jamais l'inverse.
+      renderServerQuote(data);
 
       // Unmount previous elements if any
       if (_stripeElements) {
@@ -4328,6 +4432,35 @@
           + '</div>';
       }
     });
+  }
+
+  // Réaligne la modale de paiement sur la réponse serveur : total débité
+  // (remise fidélité déduite) + ligne de remise + synchronisation du cache
+  // fidélité local (l'affichage panier/compte suit la vérité serveur).
+  function renderServerQuote(data) {
+    if (!data) return;
+    var itemsEl = document.getElementById('payModalItems');
+    var totalEl = document.getElementById('payModalTotal');
+    if (itemsEl) {
+      var old = itemsEl.querySelector('.pay-modal__line--loyalty');
+      if (old) old.parentNode.removeChild(old);
+      if (data.loyalty && data.loyalty.discountCents > 0) {
+        var div = document.createElement('div');
+        div.className = 'pay-modal__line pay-modal__line--loyalty';
+        div.innerHTML = '<div class="pay-modal__line-info">'
+          + '<span class="pay-modal__line-title">Remise fidélité '
+          + escapeHTML(data.loyalty.tierLabel || '') + ' −' + data.loyalty.pct + ' %</span>'
+          + '</div>'
+          + '<span class="pay-modal__line-price">−' + formatPrice(data.loyalty.discountCents / 100) + '</span>';
+        itemsEl.appendChild(div);
+      }
+    }
+    if (totalEl && typeof data.amount === 'number') {
+      totalEl.textContent = formatPrice(data.amount / 100);
+    }
+    if (data.loyalty && typeof data.loyalty.verifiedSpendCents === 'number') {
+      saveLoyalty({ totalSpent: data.loyalty.verifiedSpendCents / 100 });
+    }
   }
 
   function confirmPayment() {
@@ -4408,6 +4541,24 @@
       return;
     }
 
+    // Stripe est chargé mais aucun PaymentIntent : l'adresse de livraison
+    // n'est pas (encore) valide — guider l'utilisateur au lieu de basculer
+    // silencieusement sur un autre moyen de paiement.
+    if (stripe && !_stripeClientSecret) {
+      var shipCheck = validatePayAddress();
+      if (errorEl) {
+        errorEl.textContent = shipCheck.valid
+          ? 'Le formulaire de paiement se charge — patientez un instant puis réessayez.'
+          : 'Renseignez d\'abord votre adresse de livraison (code postal 971xx–976xx).';
+        errorEl.hidden = false;
+      }
+      var firstEmpty = ['payAddrName', 'payAddrLine1', 'payAddrPostal', 'payAddrCity'].map(function (id) {
+        return document.getElementById(id);
+      }).filter(function (el) { return el && !el.value.trim(); })[0];
+      if (firstEmpty) firstEmpty.focus();
+      return;
+    }
+
     // ── Fallback: server-side Stripe Checkout (redirect) ──
     var apiConfigured = typeof window.PT_API_BASE === 'string';
     var apiBase = apiBaseUrl();
@@ -4424,7 +4575,8 @@
             return { key: it.key, title: it.title, qty: it.qty || 1 };
           }),
           customerEmail: (_currentUser && _currentUser.email) || undefined,
-          territory: _currentTerritory
+          territory: _currentTerritory,
+          uid: (_currentUser && _currentUser.uid) || undefined
         })
       })
       .then(function (r) { return r.json(); })

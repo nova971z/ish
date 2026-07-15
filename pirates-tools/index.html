@@ -33,7 +33,7 @@
   <link rel="dns-prefetch" href="https://js.stripe.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=310">
+  <link rel="stylesheet" href="styles.css?v=311">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -92,9 +92,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Pirates Tools" />
-  <link rel="manifest" href="manifest.webmanifest?v=310" />
-  <link rel="icon" href="icons/icon-192.png?v=310" sizes="192x192" />
-  <link rel="apple-touch-icon" href="icons/icon-180.png?v=310" sizes="180x180" />
+  <link rel="manifest" href="manifest.webmanifest?v=311" />
+  <link rel="icon" href="icons/icon-192.png?v=311" sizes="192x192" />
+  <link rel="apple-touch-icon" href="icons/icon-180.png?v=311" sizes="180x180" />
 
   <!-- Patch UI : haut non tronque + dock centre + bulles -->
   <style id="pt-fix">
@@ -229,7 +229,7 @@
         <img
           id="topbarLogo"
           class="topbar-logo"
-          src="icons/icon-192.png?v=310"
+          src="icons/icon-192.png?v=311"
           alt="Pirates Tools"
           width="40" height="40"
           decoding="async" loading="eager" fetchpriority="high" />
@@ -260,8 +260,8 @@
   <section id="hero" class="hero-full" aria-hidden="true">
     <div class="hero-logo-container initial" id="heroLogoContainer">
       <img id="heroLogo" class="hero-logo on" alt="Pirates Tools"
-        src="icons/icon-512.png?v=310"
-        srcset="icons/icon-256.png?v=310 256w, icons/icon-384.png?v=310 384w, icons/icon-512.png?v=310 512w"
+        src="icons/icon-512.png?v=311"
+        srcset="icons/icon-256.png?v=311 256w, icons/icon-384.png?v=311 384w, icons/icon-512.png?v=311 512w"
         sizes="(max-width: 768px) 90vw, 60vw"
         width="600" height="600"
         decoding="async" loading="eager" fetchpriority="high" />
@@ -1322,6 +1322,31 @@
 
         <!-- ── Panneau CARTE (Stripe Elements) ── -->
         <div class="pay-pane is-active" data-pay-pane="card">
+          <!-- Adresse de livraison AVANT paiement : le code postal fixe le
+               territoire fiscal cote serveur (971xx-976xx). Le formulaire
+               carte n'apparait qu'apres adresse valide. -->
+          <form id="payAddress" class="pay-address" autocomplete="on" novalidate>
+            <h4 class="pay-address__title">Adresse de livraison</h4>
+            <div class="pay-address__grid">
+              <label class="pay-address__field pay-address__field--full">
+                <span>Nom complet</span>
+                <input id="payAddrName" name="name" type="text" autocomplete="name" required maxlength="120" placeholder="Pr&eacute;nom Nom">
+              </label>
+              <label class="pay-address__field pay-address__field--full">
+                <span>Adresse</span>
+                <input id="payAddrLine1" name="address-line1" type="text" autocomplete="address-line1" required maxlength="200" placeholder="N&deg; et voie, lieu-dit&hellip;">
+              </label>
+              <label class="pay-address__field">
+                <span>Code postal</span>
+                <input id="payAddrPostal" name="postal-code" type="text" inputmode="numeric" autocomplete="postal-code" required pattern="97[1-6][0-9][0-9]" maxlength="5" placeholder="971xx">
+              </label>
+              <label class="pay-address__field">
+                <span>Ville</span>
+                <input id="payAddrCity" name="city" type="text" autocomplete="address-level2" required maxlength="120" placeholder="Ville">
+              </label>
+            </div>
+            <p id="payAddrHint" class="pay-address__hint" role="status">Nous livrons en Guadeloupe, Martinique, Guyane, La R&eacute;union et Mayotte (code postal 971xx&ndash;976xx).</p>
+          </form>
           <!-- Stripe Payment Element mount point -->
           <div id="stripeElementsWrap" class="stripe-elements-wrap">
             <div id="stripePaymentElement" class="stripe-payment-element">
@@ -1661,7 +1686,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=310"></script>
+  <script defer src="app.js?v=311"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->
