@@ -9,6 +9,7 @@
 
 var catalog = require('./_lib/catalog');
 var pricing = require('./_lib/pricing');
+var rl = require('./_lib/ratelimit');
 
 var MAX_QTY_PER_LINE = 99;
 var MAX_LINES = 50;
@@ -25,6 +26,12 @@ module.exports = async function handler(req, res) {
       ok: false,
       error: 'Stripe not configured. Add STRIPE_SECRET_KEY in Vercel environment variables.'
     });
+  }
+
+  // A4 — même limiteur que create-payment-intent : SEAU PARTAGÉ 'payment'
+  // (une IP ne peut pas cumuler 20+20 en alternant les deux endpoints).
+  if (!(await rl.allow('payment', rl.clientIp(req), 20, 3600))) {
+    return res.status(429).json({ ok: false, error: 'Trop de tentatives. Réessayez dans une heure.' });
   }
 
   try {

@@ -11,6 +11,7 @@
 var catalog = require('./_lib/catalog');
 var pricing = require('./_lib/pricing');
 var stripeMeta = require('./_lib/stripe-meta');
+var rl = require('./_lib/ratelimit');
 
 var MAX_QTY_PER_LINE = 99;
 var MAX_LINES = 50;
@@ -27,6 +28,13 @@ module.exports = async function handler(req, res) {
       ok: false,
       error: 'Stripe not configured. Add STRIPE_SECRET_KEY in Vercel environment variables.'
     });
+  }
+
+  // A4 — endpoint public : borne la création d'objets Stripe (pollution
+  // dashboard, alertes fraude). 20/h/IP = généreux pour un client légitime
+  // qui re-essaie sa carte ; fail-open si Firestore indisponible (documenté).
+  if (!(await rl.allow('payment', rl.clientIp(req), 20, 3600))) {
+    return res.status(429).json({ ok: false, error: 'Trop de tentatives. Réessayez dans une heure.' });
   }
 
   try {
