@@ -1,0 +1,5 @@
+# Fichiers présents dans le repo mais JAMAIS déployés sur Vercel.
+# images/_originals : sauvegardes haute résolution des assets (logos, icônes)
+# conservées dans git pour réversibilité — non servies aux visiteurs, elles ne
+# doivent pas alourdir le déploiement.
+images/_originals/

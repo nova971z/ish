@@ -2,6 +2,27 @@
 Pirates Tools — styles.css (HARMONISÉ v8 - FINAL)
 • Correction animation et espacement du logo
 • Suppression du logo de fond global
+=========================================================
+
+ÉCHELLE Z-INDEX (référence — relevé du code, à respecter pour tout ajout)
+Couches, du plus bas au plus haut :
+  -1 .......... hero masqué (hero-out / after-hero) — passe derrière le contenu
+  0–2 ......... halo hero, conteneur logo, fonds de section
+  10–11 ....... #hero (fond) puis #heroLogo (logo au-dessus du halo)
+  15–25 ....... éléments flottants intra-contenu (flèches carrousel, etc.)
+  100–130 ..... petites UI flottantes (badges, toasts d'astuce)
+  998 ......... .backdrop (voile sous le drawer)
+  999 ......... #dock (barre d'action flottante)
+  1000 ........ .topbar / .backdrop drawer
+  1001 ........ .drawer (menu latéral)
+  1002 ........ #menu-toggle (toujours cliquable au-dessus du drawer)
+  9000 ........ .pay-modal (paiement)
+  9500 ........ .terr-menu (sélecteur de territoire) / overlays plein écran
+  9600 ........ .consent-bar (bandeau cookies)
+  9700 ........ .wa-float (bouton WhatsApp)
+  10000 ....... #toasts, .pt-loadbar, .skip-link (feedback tout en haut)
+Règle : ne pas introduire de valeur « magique » hors de ces paliers ; réutiliser
+le palier de la couche concernée.
 ========================================================= */
 
 /* ========== 01) THÈME & VARIABLES GLOBALES ========== */
@@ -441,12 +462,12 @@ body.menu-open { overflow: hidden; }
     overflow: visible;
 }
 
-/* Halo doré derrière le logo hero (accueil uniquement). Plein écran, fixe,
-   centré sous le logo. z-index 1 < container (2) < logo (11) → reste derrière.
-   Disparaît automatiquement quand #hero passe en display:none (scroll / autre page). */
-/* Halo doré désactivé (temporaire) : en position:fixed il restait collé au fond
-   de la fenêtre au lieu de suivre le logo. À réactiver proprement plus tard
-   (ancré au conteneur du logo, pas au viewport). */
+/* Halo doré derrière le logo hero (accueil uniquement).
+   Ancré au CONTENEUR du logo (.hero-logo-container), pas au viewport : il suit
+   donc exactement le logo et disparaît avec le hero (les règles display:none sur
+   .hero-logo-container hors accueil / au scroll l'emportent avec lui).
+   Localisé (cercle ~logo, pas plein écran) → lit comme une lueur, pas un fond.
+   Voir .hero-logo-container::before plus bas. */
 #hero::before, .hero-full::before {
     display: none;
 }
@@ -477,6 +498,35 @@ body.menu-open { overflow: hidden; }
     pointer-events: none;
     padding-top: var(--safe-top, 70px);
     box-sizing: border-box;
+}
+
+/* Lueur dorée localisée, pile derrière le logo. Positionnée au centre du
+   conteneur avec la même correction verticale que le flex-centrage (le
+   padding-top décale le logo vers le bas de safe-top/2) → reste centrée sur le
+   logo à toutes tailles. z-index 0 < #heroLogo (11) → toujours derrière. */
+.hero-logo-container::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, calc(-50% + var(--safe-top, 70px) / 2));
+    width: min(78vmin, 600px);
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 50%,
+        rgba(212, 175, 55, 0.32) 0%,
+        rgba(212, 175, 55, 0.16) 30%,
+        rgba(212, 175, 55, 0.05) 52%,
+        transparent 70%);
+    filter: blur(4px);
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0;
+    animation: heroGlowIn 1.2s ease 0.35s forwards;
+}
+@keyframes heroGlowIn { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+    .hero-logo-container::before { animation: none; opacity: 1; }
 }
 
 .hero-full.hero-out, #hero.hero-out {
@@ -4062,81 +4112,10 @@ z-index: 130;
 box-shadow: var(--shadow);
 }
 
-#a2hsTip {
-position: fixed;
-left: 50%;
-transform: translateX(-50%);
-bottom: calc(96px + var(--safe-bottom));
-z-index: 125;
-background: rgba(10,15,20,.92);
-color: var(--fg);
-border: 1px solid var(--border);
-border-radius: 12px;
-padding: .55rem .75rem;
-box-shadow: var(--shadow);
-display: flex;
-align-items: center;
-gap: .6rem;
-max-width: min(92vw, 520px);
-animation: a2hs-in .18s ease-out both;
-pointer-events: auto;
-}
-
-#a2hsTip.out { animation: toast-out .18s ease-in both; }
-
-.a2hs-tip__icon {
-display: inline-block;
-padding: .18rem .38rem;
-border-radius: 8px;
-background: rgba(255,255,255,.06);
-border: 1px solid var(--border);
-margin: 0 .2rem;
-}
-
-#a2hsTip .a2hs-tip__close {
-background: transparent;
-border: 0;
-color: #9fb4c5;
-cursor: pointer;
-font-size: 16px;
-padding: .25rem;
-border-radius: 6px;
-}
-
-@keyframes a2hs-in { from { transform: translateX(-50%) translateY(6px); opacity: 0; } to { transform: translateX(-50%) translateY(0); opacity: 1; } }
-
-#a2hsTriangle {
-position: fixed;
-left: 50%;
-transform: translateX(-50%);
-bottom: calc(96px + var(--safe-bottom));
-z-index: 126;
-border: 1px solid var(--border);
-background: rgba(10,15,20,.92);
-color: #e6edf5;
-font-weight: 900;
-line-height: 1;
-border-radius: 999px;
-padding: .2rem .5rem;
-cursor: pointer;
-box-shadow: var(--shadow);
-}
-
-#netBanner {
-position: fixed;
-left: 50%;
-transform: translateX(-50%);
-bottom: calc(72px + var(--safe-bottom));
-background: rgba(10,15,20,.88);
-border: 1px solid var(--border);
-padding: .5rem .8rem;
-border-radius: 10px;
-z-index: 120;
-box-shadow: var(--shadow);
-font: 600 14px/1.2 system-ui, -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Arial, sans-serif;
-color: #e6edf5;
-display: none;
-}
+/* CSS mort retiré (item 12) : #a2hsTip / #a2hsTriangle / .a2hs-tip__* +
+   @keyframes a2hs-in (astuce « Ajouter à l'écran d'accueil ») et #netBanner
+   (bannière hors-ligne). Aucun de ces id/classes n'est référencé dans le HTML,
+   app.js, sw.js ni les autres scripts servis — vérifié à 0 référence. */
 
 /* ========== 28) ANIMATIONS ========== */
 @keyframes exitLeft { to { transform: translateX(-60px); opacity: 0; filter: blur(2px); } }
@@ -4583,8 +4562,7 @@ width: 100%;
 }
 
 /* ========== 32) PATCHES & ANCRAGES ========== */
-#a2hsTip { pointer-events: auto; z-index: 125; }
-#a2hsTip, #a2hsTriangle { bottom: calc(96px + var(--safe-bottom)); }
+/* (overrides #a2hsTip/#a2hsTriangle retirés — CSS mort, voir item 12 plus haut) */
 #list, #contact, #pdp, #view-catalogue, #view-devis, #view-compte {
 scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 }
