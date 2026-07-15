@@ -1044,6 +1044,32 @@
     return _threePromise;
   }
 
+  // Lazy-load <model-viewer> (Google, ~200 Ko) UNIQUEMENT quand un modèle 3D
+  // doit s'afficher — plus dans le <head>, donc hors du chemin critique du 1er
+  // paint. Idempotent. Un <model-viewer> déjà présent dans le DOM s'upgrade
+  // tout seul dès que le custom element est défini (ses attributs src/
+  // camera-controls sont relus à l'upgrade) → l'ordre « src d'abord, script
+  // ensuite » est sûr. On résout sur whenDefined (signal fiable de définition)
+  // et on rejette sur l'échec réseau du script.
+  var _mvPromise = null;
+  function ensureModelViewer() {
+    if (window.customElements && customElements.get('model-viewer')) return Promise.resolve();
+    if (_mvPromise) return _mvPromise;
+    _mvPromise = new Promise(function (resolve, reject) {
+      var s = document.createElement('script');
+      s.type = 'module';
+      s.src = 'https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js';
+      s.onerror = function () { _mvPromise = null; reject(new Error('model-viewer load failed')); };
+      document.head.appendChild(s);
+      if (window.customElements && customElements.whenDefined) {
+        customElements.whenDefined('model-viewer').then(function () { resolve(); });
+      } else {
+        s.onload = function () { resolve(); };
+      }
+    });
+    return _mvPromise;
+  }
+
   function createBrandSphere(container, brand, logoSrc) {
     if (container.dataset.sphereReady === '1') return;
     if (typeof window.THREE === 'undefined') {
@@ -1400,6 +1426,12 @@
       viewer2.setAttribute('alt', product.title + ' - vue detail');
       if (product.img) viewer2.setAttribute('poster', product.img);
     }
+
+    // L'utilisateur ouvre une fiche produit → il veut voir le modèle 3D :
+    // on charge <model-viewer> immédiatement (idempotent). Les viewers ci-dessus
+    // ont déjà leur src ; ils s'upgradent dès que le custom element est défini.
+    // .catch : échec CDN → le poster reste affiché, aucun rejet non géré.
+    if (viewer || viewer2) ensureModelViewer().catch(function () {});
 
     // ── Scroll passthrough quand zoom 3D au minimum ──
     setupModelViewerScrollPassthrough(viewer);
@@ -2170,6 +2202,12 @@
 
     // Show current model
     _3dShow(_3dIdx);
+
+    // Le carrousel est sous la ligne de flottaison : on charge <model-viewer>
+    // seulement quand il approche du viewport (même IO ~700px que les autres
+    // viewers). Repli : si IntersectionObserver absent, charge tout de suite.
+    var io = getMvPreloadIO();
+    if (io) io.observe(viewer); else ensureModelViewer().catch(function () {});
 
     if (!_3dCarouselBound) {
       _3dCarouselBound = true;
@@ -4573,6 +4611,10 @@
       entries.forEach(function (e) {
         if (!e.isIntersecting) return;
         var mv = e.target;
+        // Un <model-viewer> approche du viewport → charge le script à la demande
+        // (idempotent) puis marque-le eager. L'élément s'upgrade dès définition.
+        // .catch : si le CDN tombe, on garde le poster/fallback, pas de rejet nu.
+        ensureModelViewer().catch(function () {});
         mv.setAttribute('loading', 'eager');
         _mvPreloadIO.unobserve(mv);
       });

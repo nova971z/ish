@@ -23,21 +23,23 @@
   <link rel="canonical" href="https://pirates-tools.com/">
 
   <!-- Preconnect critical third-party origins -->
+  <!-- ajax.googleapis : origine du <model-viewer> chargé À LA DEMANDE (voir
+       app.js › ensureModelViewer). Le preconnect réchauffe la connexion sans
+       télécharger le script au boot. wa.me retiré : jamais sollicité au 1er
+       paint (WhatsApp n'est ouvert que sur clic utilisateur). -->
   <link rel="preconnect" href="https://ajax.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://ajax.googleapis.com">
-  <link rel="preconnect" href="https://wa.me">
-  <link rel="dns-prefetch" href="https://wa.me">
   <link rel="preconnect" href="https://js.stripe.com" crossorigin>
   <link rel="dns-prefetch" href="https://js.stripe.com">
 
   <!-- CSS -->
   <link rel="stylesheet" href="styles.css?v=307">
 
-  <!-- 3D model viewer -->
-  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
-  <!-- Three.js is lazy-loaded on demand by app.js (brand spheres only)
-       to avoid the "Multiple instances of Three.js" race that breaks
-       model-viewer on Safari iPad. -->
+  <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
+       (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
+       donc hors du chemin critique du 1er paint. Le chargement paresseux évite
+       aussi la course "Multiple instances of Three.js" qui cassait le rendu GLB
+       sur Safari iPad. -->
 
   <!-- Firebase (auth + firestore) -->
   <script type="module" src="firebase-init.js"></script>
