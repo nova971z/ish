@@ -4,6 +4,8 @@
 //
 // Body : { email, name?, honeypot? }
 
+const rl = require('./_lib/ratelimit');
+
 module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') {
@@ -18,6 +20,11 @@ module.exports = async function handler(req, res) {
   const body = req.body || {};
   if (body.honeypot || body.website) {
     return res.status(200).json({ ok: true, filtered: true });
+  }
+
+  // Rate limit: 5 signups / hour / IP.
+  if (!(await rl.allow('newsletter', rl.clientIp(req), 5, 3600))) {
+    return res.status(429).json({ ok: false, error: 'Trop de tentatives. Réessayez plus tard.' });
   }
 
   const email = String(body.email || '').trim();

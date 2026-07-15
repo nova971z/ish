@@ -67,7 +67,16 @@ Règle : **1 étape = 1 problème = 1 commit = 1 vérification verte**. Jamais d
         - échelle z-index documentée : réordonner l'empilement → test visuel requis.
         - #a2hsTip mort mais éparpillé (styles.css 4367+, 4888) → suppression ciblée.
         - renumérotation sections CSS (doublon 10b, sections 32+ non numérotées).
-- [ ] 10. Qualité structurelle & CI (helpers partagés, carte produit unique, docs)
+- [x] 10. Qualité structurelle & CI ✅ commit, SW v298
+       10a helper apiBaseUrl() → factorise les 11 résolutions PT_API_BASE dupliquées.
+       10b dérive de prix corrigée : favoris/récents affichaient formatPrice(p.price) métropole → calcPrice().ttc territorial (comme partout).
+       10c init Firebase UNIQUE : _lib/firebase.js seul require('firebase-admin') ; admin.js/orders.js/catalog.js migrés vers getFirebase.
+       10e rate limiting Firestore (_lib/ratelimit.js, fenêtre fixe, fail-open) : contact 5/h/IP, newsletter 5/h/IP.
+       10f test-email.js : plus d'écho de la réponse brute Resend (loggé serveur). instagram.js gardé (admin-only, utile au diagnostic — décision documentée).
+       10g CI déjà branchée (étape 5). 10h docs : CHANGELOG v2.1.0 + README (version, tailles, NOWPayments).
+       REPORTÉ 10d : découpe des fonctions XXL (renderAdmin/initPdpScrollAnimations/renderPDP) — refactor cosmétique risqué, pas de valeur fonctionnelle, à faire avec tests.
+
+═══ PLAN DE REMÉDIATION TERMINÉ (10/10 étapes). Reste : QR crypto local (8e reporté), refactors CSS risqués (9 reporté), split XXL (10d reporté). ═══
 
 ## Vérification standard
 `cd pirates-tools && node scripts/ci.js` doit rester vert après chaque étape.

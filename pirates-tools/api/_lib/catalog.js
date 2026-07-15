@@ -40,13 +40,8 @@ async function loadOverrides() {
   }
 
   try {
-    var admin = require('firebase-admin');
-    if (!admin.apps.length) {
-      admin.initializeApp({
-        credential: admin.credential.cert(JSON.parse(serviceAccount))
-      });
-    }
-    var db = admin.firestore();
+    var db = require('./firebase').getFirebase().db;
+    if (!db) return _overridesCache || {};
     var snap = await db.collection('product_overrides').get();
     var map = {};
     snap.forEach(function (doc) {

@@ -77,7 +77,10 @@ module.exports = async function handler(req, res) {
     });
     const data = await r.json().catch(function () { return {}; });
     if (!r.ok) {
-      return res.status(r.status).json({ ok: false, error: 'Resend ' + r.status, details: data });
+      // Log the full provider response server-side; return a concise message.
+      console.error('[api/test-email] Resend error', r.status, JSON.stringify(data));
+      var msg = (data && data.message) ? data.message : ('Resend ' + r.status);
+      return res.status(r.status).json({ ok: false, error: msg });
     }
     return res.status(200).json({ ok: true, id: data.id || null, to: to, from: from });
   } catch (err) {

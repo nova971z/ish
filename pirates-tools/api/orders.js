@@ -11,22 +11,7 @@
 
 var auth = require('./_lib/auth');
 var http = require('./_lib/http');
-
-var _admin = null;
-var _db = null;
-
-function initFirebase() {
-  if (_admin) return;
-  var serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT;
-  if (!serviceAccount) return;
-  _admin = require('firebase-admin');
-  if (!_admin.apps.length) {
-    _admin.initializeApp({
-      credential: _admin.credential.cert(JSON.parse(serviceAccount))
-    });
-  }
-  _db = _admin.firestore();
-}
+var firebase = require('./_lib/firebase');
 
 module.exports = async function handler(req, res) {
   http.applyCors(req, res);
@@ -36,8 +21,9 @@ module.exports = async function handler(req, res) {
   var denied = auth.requireAdmin(req);
   if (denied) return res.status(denied.status).json({ ok: false, error: denied.error });
 
-  initFirebase();
-  if (!_db) {
+  var fb = firebase.getFirebase();
+  var admin = fb.admin, db = fb.db;
+  if (!db) {
     return res.status(503).json({
       ok: false,
       error: 'Firebase Admin not configured. Add FIREBASE_SERVICE_ACCOUNT in Vercel environment variables.'
@@ -52,7 +38,7 @@ module.exports = async function handler(req, res) {
     }
 
     try {
-      var snap = await _db
+      var snap = await db
         .collection('users').doc(uid)
         .collection('orders')
         .orderBy('date', 'desc')
@@ -96,7 +82,7 @@ module.exports = async function handler(req, res) {
     }
 
     try {
-      var orderRef = await _db
+      var orderRef = await db
         .collection('users').doc(uid)
         .collection('orders')
         .add({
@@ -106,7 +92,7 @@ module.exports = async function handler(req, res) {
           paymentMethod: body.paymentMethod || 'card',
           stripeSessionId: body.sessionId || null,
           status: 'confirmed',
-          date: _admin.firestore.FieldValue.serverTimestamp()
+          date: admin.firestore.FieldValue.serverTimestamp()
         });
 
       return res.status(201).json({ ok: true, orderId: orderRef.id });

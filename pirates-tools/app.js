@@ -19,6 +19,12 @@
     return String(str).replace(/[&<>"']/g, function (ch) { return _HTML_ESCAPES[ch]; });
   }
 
+  // Base de l'API serverless. window.PT_API_BASE = '' → même origine (Vercel).
+  // Source unique : remplace les ~11 résolutions dupliquées auparavant en ligne.
+  function apiBaseUrl() {
+    return (typeof window.PT_API_BASE === 'string') ? window.PT_API_BASE : '';
+  }
+
   function debounce(fn, ms) {
     var t;
     return function () {
@@ -812,7 +818,7 @@
     // static products.json (GitHub Pages / offline). The API returns
     // { ok, count, products: [...] } while the static file is a raw array.
     var apiConfigured = typeof window.PT_API_BASE === 'string';
-    var apiBase = window.PT_API_BASE || '';
+    var apiBase = apiBaseUrl();
     var primaryUrl = apiConfigured ? (apiBase + '/api/products') : 'products.json';
     var fallbackUrl = 'products.json';
 
@@ -4147,7 +4153,7 @@
         + '</div>';
     }
 
-    var apiBase = window.PT_API_BASE || '';
+    var apiBase = apiBaseUrl();
     fetch(apiBase + '/api/create-payment-intent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -4296,7 +4302,7 @@
 
     // ── Fallback: server-side Stripe Checkout (redirect) ──
     var apiConfigured = typeof window.PT_API_BASE === 'string';
-    var apiBase = window.PT_API_BASE || '';
+    var apiBase = apiBaseUrl();
     if (apiConfigured && !stripe) {
       var btn2 = document.getElementById('payModalConfirm');
       if (btn2) { btn2.disabled = true; btn2.textContent = 'Redirection…'; }
@@ -4567,7 +4573,7 @@
   }
 
   function adminFetch(method, body) {
-    var apiBase = (typeof window.PT_API_BASE === 'string') ? (window.PT_API_BASE || '') : '';
+    var apiBase = apiBaseUrl();
     var opts = {
       method: method,
       headers: {
@@ -4769,7 +4775,7 @@
           statusEl.className = 'admin-row__status';
         }
 
-        var apiBase = (typeof window.PT_API_BASE === 'string') ? (window.PT_API_BASE || '') : '';
+        var apiBase = apiBaseUrl();
         fetch(apiBase + '/api/test-email', {
           method: 'POST',
           headers: {
@@ -4808,7 +4814,7 @@
     if (healthBtn) {
       healthBtn.addEventListener('click', function () {
         var out = document.getElementById('adminHealthOutput');
-        var apiBase = (typeof window.PT_API_BASE === 'string') ? (window.PT_API_BASE || '') : '';
+        var apiBase = apiBaseUrl();
         healthBtn.disabled = true;
         fetch(apiBase + '/api/health')
           .then(function (r) { return r.json().catch(function () { return { ok: false, error: 'Invalid response' }; }); })
@@ -4841,7 +4847,7 @@
     if (!listEl) return;
     listEl.innerHTML = '<p class="admin-loading">Chargement des commandes…</p>';
 
-    var apiBase = (typeof window.PT_API_BASE === 'string') ? (window.PT_API_BASE || '') : '';
+    var apiBase = apiBaseUrl();
     fetch(apiBase + '/api/admin?type=orders', {
       headers: { 'X-Admin-Secret': getAdminSecret() }
     })
@@ -4996,7 +5002,7 @@
   var _igDraftCreationId = null;
 
   function igApiFetch(action, method, body) {
-    var apiBase = (typeof window.PT_API_BASE === 'string') ? (window.PT_API_BASE || '') : '';
+    var apiBase = apiBaseUrl();
     var url = apiBase + '/api/instagram?action=' + encodeURIComponent(action);
     var opts = {
       method: method || 'GET',
@@ -5403,7 +5409,7 @@
       submit.disabled = true;
       if (status) { status.textContent = 'Envoi…'; status.className = 'contact-form__status'; }
 
-      var apiBase = (typeof window.PT_API_BASE === 'string') ? (window.PT_API_BASE || '') : '';
+      var apiBase = apiBaseUrl();
       fetch(apiBase + '/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -5469,7 +5475,7 @@
         status.className = 'home-newsletter__status';
       }
 
-      var apiBase = (typeof window.PT_API_BASE === 'string') ? (window.PT_API_BASE || '') : '';
+      var apiBase = apiBaseUrl();
       fetch(apiBase + '/api/newsletter', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -5592,7 +5598,7 @@
         + '<div class="product-card__body">'
         + '<span class="product-card__brand">' + escapeHTML(p.brand) + '</span>'
         + '<h3 class="product-card__title">' + escapeHTML(p.title) + '</h3>'
-        + '<span class="product-card__price">' + formatPrice(p.price) + '</span>'
+        + '<span class="product-card__price">' + formatPrice(calcPrice(p, _currentTerritory).ttc) + '</span>'
         + '</div>'
         + '</a>';
     }).join('');
@@ -5660,7 +5666,7 @@
         + '<div class="product-card__body">'
         + '<span class="product-card__brand">' + escapeHTML(p.brand) + '</span>'
         + '<h3 class="product-card__title">' + escapeHTML(p.title) + '</h3>'
-        + '<span class="product-card__price">' + formatPrice(p.price) + '</span>'
+        + '<span class="product-card__price">' + formatPrice(calcPrice(p, _currentTerritory).ttc) + '</span>'
         + '</div>'
         + '</a>';
     }).join('');
