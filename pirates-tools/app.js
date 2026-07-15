@@ -590,7 +590,12 @@
       return '<model-viewer class="product-card__model"'
         + ' src="' + escapeHTML(p.model) + '"'
         + ' alt="' + alt + '"'
-        + ' loading="eager"'
+        // lazy est REQUIS : preloadModelViewers ne cible que
+        // model-viewer[loading="lazy"] — c'est son IO (~700px) qui upgrade en
+        // eager ET charge le script 3D (ensureModelViewer). En eager le
+        // sélecteur ne matchait rien → sur un accès direct #/catalogue le 3D
+        // des cartes ne se chargeait jamais (posters figés).
+        + ' loading="lazy"'
         + ' reveal="auto"'
         + ' rotation-per-second="25deg"'
         + ' interaction-prompt="none"'
