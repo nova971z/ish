@@ -211,7 +211,7 @@ On ne touche pas au CSS mort tant qu'un client peut payer 1 centime un produit.
 | 6 | Webhook Stripe (raw body + idempotence) | Paiement | ✅ |
 | 7 | Bugs Service Worker | Résilience | ✅ |
 | 8 | Bugs runtime app.js | Résilience | ✅ (8e QR local reporté) |
-| 9 | Assainissement CSS/HTML | Structure | ☐ |
+| 9 | Assainissement CSS/HTML | Structure | ~ (sûr fait ; fork inline / !important / z-index reportés) |
 | 10 | Qualité structurelle & CI | Structure | ☐ |
 
 **Règle de fin d'étape** : commit dédié + vérification verte + case cochée. Aucune étape n'est

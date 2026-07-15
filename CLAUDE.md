@@ -59,8 +59,14 @@ Règle : **1 étape = 1 problème = 1 commit = 1 vérification verte**. Jamais d
        8f fuites listeners : setupModelViewerScrollPassthrough retire mouseleave/touchstart ; pdpWa → onclick (plus d'empilement).
        8g garde auth : redirection /compte↔/auth seulement si _authReady (fin double-flicker au reload).
        8e QR crypto tiers (qrserver) : MITIGÉ (avertissement → l'adresse texte fait foi, pas le QR). REPORTÉ : génération QR locale (lib complète ~1000 l. ; blob invérifiable ou encodeur maison risqué refusés). À traiter comme tâche dédiée révisée avant lancement crypto.
-- [ ] 9. Assainir CSS/HTML (fork inline, CSS mort, z-index, h1)
-       À INCLURE : lumière dorée derrière le logo hero manquante en prod (signalé user 15/07) — restaurer le glow.
+- [~] 9. Assainir CSS/HTML — SOUS-ENSEMBLE SÛR FAIT ✅ commit, SW v297 ; refactors risqués REPORTÉS.
+       FAIT : (1) lumière dorée restaurée (#hero::before halo radial or, styles.css:444) ; (2) console debug retirée de la prod (~82 l., index.html) ; (3) <h1> sr-only sur l'accueil (SEO/a11y) ; (4) CSS mort retiré (315 l. : section 12 modal 3D + sections 21-22 site-links/footer mort — TOUS sélecteurs vérifiés 0-réf ; vrai footer .footer-social/.site-footer intact).
+       REPORTÉ (nécessite vérif visuelle par-règle, refusé de sweeper à l'aveugle = « aucun hasard ») :
+        - fork inline styles.css vs index.html (.drawer/#toasts/.toast/#dock) : déplacer verbatim en fin de styles.css (ordre cascade préservé) — à faire prudemment.
+        - purge !important (71→moins) : chaque retrait change la cascade → test visuel requis.
+        - échelle z-index documentée : réordonner l'empilement → test visuel requis.
+        - #a2hsTip mort mais éparpillé (styles.css 4367+, 4888) → suppression ciblée.
+        - renumérotation sections CSS (doublon 10b, sections 32+ non numérotées).
 - [ ] 10. Qualité structurelle & CI (helpers partagés, carte produit unique, docs)
 
 ## Vérification standard
