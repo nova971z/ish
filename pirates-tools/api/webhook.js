@@ -206,7 +206,10 @@ async function handleIntentSucceeded(stripe, fb, pi) {
   }
   var billing = (charge && charge.billing_details) || {};
   var declaredTerritory = pi.metadata.territory || null;
-  var tax = taxCheck(declaredTerritory, billing.address || null);
+  // Adresse de LIVRAISON attachée au PI (formulaire adresse de la modale) en
+  // priorité ; repli facturation carte (anciens paiements sans adresse).
+  var piShipAddr = (pi.shipping && pi.shipping.address) || null;
+  var tax = taxCheck(declaredTerritory, piShipAddr || billing.address || null);
 
   // Reconstruit les lignes depuis la metadata (source serveur : catalogue +
   // moteur de prix). Contrôle d'intégrité : la somme doit valoir pi.amount —

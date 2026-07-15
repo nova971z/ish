@@ -13,6 +13,7 @@ var pricing = require('./_lib/pricing');
 var stripeMeta = require('./_lib/stripe-meta');
 var rl = require('./_lib/ratelimit');
 var loyalty = require('./_lib/loyalty');
+var postal = require('./_lib/postal');
 var getFirebase = require('./_lib/firebase').getFirebase;
 
 var MAX_QTY_PER_LINE = 99;
@@ -63,6 +64,42 @@ module.exports = async function handler(req, res) {
       : String(body.territory);
     if (!pricing.getTerritory(territory)) {
       return res.status(400).json({ ok: false, error: 'Territoire inconnu' });
+    }
+
+    // Blindage fiscal PRÉVENTIF : quand le client fournit le code postal de
+    // livraison, c'est LUI qui fixe le territoire de taxation — la déclaration
+    // ci-dessus n'est qu'un repli (anciens clients / flux sans adresse). Un CP
+    // hors DOM desservis est refusé net.
+    var postalCode = typeof body.postalCode === 'string' ? body.postalCode.trim().slice(0, 12) : '';
+    var territorySource = 'declared';
+    if (postalCode) {
+      var derived = postal.territoryFromPostal(postalCode);
+      if (!derived) {
+        return res.status(400).json({
+          ok: false,
+          error: 'Livraison uniquement en Guadeloupe, Martinique, Guyane, La Réunion et Mayotte (code postal 971xx–976xx).'
+        });
+      }
+      territory = derived;
+      territorySource = 'postal';
+    }
+
+    // Adresse de livraison (facultative côté API, envoyée par la modale) :
+    // attachée au PaymentIntent (visible Stripe/antifraude, relue par le
+    // webhook pour le contrôle détectif). Chaînes bornées, jamais bloquant.
+    function cleanStr(s, max) { return typeof s === 'string' ? s.trim().slice(0, max) : ''; }
+    var shipIn = body.shipping || {};
+    var shipping = null;
+    if (postalCode && cleanStr(shipIn.line1, 200)) {
+      shipping = {
+        name: cleanStr(shipIn.name, 120) || 'Client Pirates Tools',
+        address: {
+          line1: cleanStr(shipIn.line1, 200),
+          city: cleanStr(shipIn.city, 120),
+          postal_code: postalCode,
+          country: 'FR'
+        }
+      };
     }
 
     if (!Array.isArray(items) || items.length === 0) {
@@ -128,6 +165,8 @@ module.exports = async function handler(req, res) {
       metadata: Object.assign({
         source: 'pirates-tools',
         territory: String(territory),
+        territorySource: territorySource,
+        postalCode: postalCode,
         itemCount: String(validatedLines.length),
         serverTotalEur: (amountCents / 100).toFixed(2),
         grossTotalEur: (totalCents / 100).toFixed(2),
@@ -136,6 +175,7 @@ module.exports = async function handler(req, res) {
       }, uid ? { uid: uid } : {}, itemsMeta)
     };
     if (customerEmail) intentParams.receipt_email = customerEmail;
+    if (shipping) intentParams.shipping = shipping;
 
     var paymentIntent = await stripe.paymentIntents.create(intentParams);
 

@@ -6653,6 +6653,70 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 }
 
 /* ========== 42) STRIPE ELEMENTS ========== */
+
+/* Adresse de livraison (avant le formulaire carte). Style aligné sur
+   l'apparence Stripe Elements (fond #1a2332, focus violet) pour une
+   continuité visuelle dans la modale. */
+.pay-address {
+  margin: 0 0 16px;
+  padding: 14px;
+  background: #0f1722;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+}
+.pay-address__title {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #cdd6e0;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+.pay-address__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.pay-address__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.pay-address__field--full { grid-column: 1 / -1; }
+.pay-address__field span {
+  font-size: 13px;
+  font-weight: 600;
+  color: #cdd6e0;
+}
+.pay-address__field input {
+  background: #1a2332;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  color: #e6edf5;
+  padding: 12px;
+  font-size: 15px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.pay-address__field input:focus {
+  outline: none;
+  border-color: #8B5CF6;
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.25);
+}
+.pay-address__field input.is-invalid {
+  border-color: rgba(239, 68, 68, 0.65);
+}
+.pay-address__hint {
+  margin: 10px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #9aa4b2;
+}
+.pay-address__hint.is-error { color: #f87171; }
+@media (max-width: 480px) {
+  .pay-address__grid { grid-template-columns: 1fr; }
+}
+
 .stripe-elements-wrap {
   margin-bottom: 16px;
 }
