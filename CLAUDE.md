@@ -21,7 +21,13 @@ Règle : **1 étape = 1 problème = 1 commit = 1 vérification verte**. Jamais d
        Client envoie {key,qty}, affiche le TTC territorial (payUnitCents, arrondi identique serveur).
        Parité garantie par scripts/check-pricing.js (dans ci.js). parseHash tolère ?query. cancel_url #/checkout→#/devis.
        NOTE : remise fidélité volontairement PAS répercutée sur le montant débité (éviterait un nouveau trou de confiance client) — à décider avec l'utilisateur si on veut l'appliquer (nécessiterait vérif serveur).
-- [ ] 3. Verrouiller API (auth orders.js, CORS allowlist, secret timing-safe)
+- [x] 3. Verrouiller API ✅ commit (server-only, pas de bump SW)
+       api/_lib/auth.js (requireAdmin + timingSafeEqualStr via crypto.timingSafeEqual).
+       api/_lib/http.js (applyCors : refus par défaut, allowlist via env ALLOWED_ORIGINS).
+       orders.js verrouillé admin-only (le client ne l'utilise PAS — il passe par le SDK Firebase sous règles Firestore).
+       admin.js / instagram.js / test-email.js : auth timing-safe partagée + applyCors.
+       vercel.json : suppression du CORS wildcard /api + ajout X-Content-Type-Options nosniff.
+       health.js expose allowedOrigins. Pour activer un cross-origin : définir ALLOWED_ORIGINS sur Vercel.
 - [ ] 4. Failles XSS (escapeHTML guillemets + openPayModal)
 - [ ] 5. Cohérence déploiement (Vercel prod, canonical, sitemap, CI master)
 - [ ] 6. Webhook Stripe (raw body + idempotence)

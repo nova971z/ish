@@ -23,7 +23,9 @@ module.exports = function handler(req, res) {
       // Meta / Instagram
       metaAppId: !!process.env.META_APP_ID,
       metaAppSecret: !!process.env.META_APP_SECRET,
-      metaAccessToken: !!process.env.META_ACCESS_TOKEN
+      metaAccessToken: !!process.env.META_ACCESS_TOKEN,
+      // CORS allowlist (empty = same-origin only, the secure default)
+      allowedOrigins: !!process.env.ALLOWED_ORIGINS
     }
   });
 };

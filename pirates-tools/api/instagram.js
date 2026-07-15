@@ -14,18 +14,16 @@
 
 const GRAPH_API = 'https://graph.facebook.com/v21.0';
 
+const auth = require('./_lib/auth');
+const http = require('./_lib/http');
+
 module.exports = async function handler(req, res) {
+  http.applyCors(req, res);
   if (req.method === 'OPTIONS') return res.status(204).end();
 
-  // ── Auth ──────────────────────────────────────────────────
-  const expected = process.env.ADMIN_SECRET;
-  if (!expected) {
-    return res.status(503).json({ ok: false, error: 'Admin not configured. Set ADMIN_SECRET env var.' });
-  }
-  const provided = req.headers['x-admin-secret'] || '';
-  if (provided !== expected) {
-    return res.status(401).json({ ok: false, error: 'Invalid admin secret' });
-  }
+  // ── Auth (constant-time admin secret) ─────────────────────
+  const denied = auth.requireAdmin(req);
+  if (denied) return res.status(denied.status).json({ ok: false, error: denied.error });
 
   // ── Env check ─────────────────────────────────────────────
   const accessToken = process.env.META_ACCESS_TOKEN;
