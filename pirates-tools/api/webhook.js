@@ -329,7 +329,7 @@ async function updateOrderWhere(fb, uid, field, value, patch) {
 }
 
 // Reconstruit les lignes {name, qty, unitCents, subCents} d'un PaymentIntent
-// depuis metadata items_* + catalogue + moteur de prix. { ok, lines, verified }
+// depuis metadata items_* + catalogue + moteur de prix. { ok, lines }
 async function rebuildLines(pi, territory) {
   var fallback = {
     ok: false,
@@ -353,6 +353,20 @@ async function rebuildLines(pi, territory) {
       var unit = pricing.unitCents(product, territory || pricing.DEFAULT_TERRITORY);
       sum += unit * qty;
       lines.push({ name: product.title || 'Produit', qty: qty, unitCents: unit, subCents: unit * qty });
+    }
+    // Remise fidélité serveur (create-payment-intent) : pi.amount = brut −
+    // remise. On la matérialise en ligne négative pour que le détail somme
+    // exactement au montant débité.
+    var discountCents = parseInt((pi.metadata && pi.metadata.loyaltyDiscountCents) || '0', 10);
+    if (isFinite(discountCents) && discountCents > 0) {
+      var pct = (pi.metadata && pi.metadata.loyaltyPct) || '';
+      lines.push({
+        name: 'Remise fidélité' + (pct ? ' −' + pct + ' %' : ''),
+        qty: 1,
+        unitCents: -discountCents,
+        subCents: -discountCents
+      });
+      sum -= discountCents;
     }
     // Intégrité : le détail reconstruit doit valoir exactement le montant
     // débité. Un prix catalogue modifié entre paiement et webhook → dégradation

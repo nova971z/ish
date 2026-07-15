@@ -12,6 +12,8 @@ var catalog = require('./_lib/catalog');
 var pricing = require('./_lib/pricing');
 var stripeMeta = require('./_lib/stripe-meta');
 var rl = require('./_lib/ratelimit');
+var loyalty = require('./_lib/loyalty');
+var getFirebase = require('./_lib/firebase').getFirebase;
 
 var MAX_QTY_PER_LINE = 99;
 var MAX_LINES = 50;
@@ -97,6 +99,21 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ ok: false, error: 'Montant minimum : 0,50 €' });
     }
 
+    // Remise fidélité SERVEUR : calculée depuis le journal payments/ (écrit
+    // uniquement par le webhook — infalsifiable côté client), jamais depuis un
+    // état client. Fail-open 0 % (un souci de fidélité ne bloque pas la vente).
+    var fb = getFirebase();
+    var loyaltyQuote = uid && fb.db
+      ? await loyalty.quote(fb.db, uid, totalCents)
+      : { pct: 0, discountCents: 0, verifiedSpendCents: 0, tierKey: 'bronze', tierLabel: 'Bronze' };
+    var amountCents = totalCents - loyaltyQuote.discountCents;
+    if (amountCents < 50) {
+      // Remise ramenant sous le minimum Stripe : on la tronque plutôt que
+      // d'échouer un paiement légitime.
+      loyaltyQuote = { pct: 0, discountCents: 0, verifiedSpendCents: loyaltyQuote.verifiedSpendCents, tierKey: loyaltyQuote.tierKey, tierLabel: loyaltyQuote.tierLabel };
+      amountCents = totalCents;
+    }
+
     // A2 : les lignes {key, qty} voyagent dans la metadata (chunkées — limite
     // Stripe 500 car./valeur). Le webhook payment_intent.succeeded les relit
     // pour reconstruire la commande côté serveur (email détaillé + journal),
@@ -104,7 +121,7 @@ module.exports = async function handler(req, res) {
     var itemsMeta = stripeMeta.chunkItems(validatedLines) || {};
 
     var intentParams = {
-      amount: totalCents,
+      amount: amountCents,
       currency: 'eur',
       automatic_payment_methods: { enabled: true },
       description: description.join(', ').substring(0, 500),
@@ -112,7 +129,10 @@ module.exports = async function handler(req, res) {
         source: 'pirates-tools',
         territory: String(territory),
         itemCount: String(validatedLines.length),
-        serverTotalEur: (totalCents / 100).toFixed(2)
+        serverTotalEur: (amountCents / 100).toFixed(2),
+        grossTotalEur: (totalCents / 100).toFixed(2),
+        loyaltyPct: String(loyaltyQuote.pct),
+        loyaltyDiscountCents: String(loyaltyQuote.discountCents)
       }, uid ? { uid: uid } : {}, itemsMeta)
     };
     if (customerEmail) intentParams.receipt_email = customerEmail;
@@ -123,7 +143,15 @@ module.exports = async function handler(req, res) {
       ok: true,
       clientSecret: paymentIntent.client_secret,
       paymentIntentId: paymentIntent.id,
-      amount: totalCents // authoritative amount, for optional client reconciliation
+      amount: amountCents,   // montant DÉBITÉ (remise déduite) — le client DOIT afficher celui-ci
+      gross: totalCents,     // total plein tarif avant remise
+      loyalty: {
+        pct: loyaltyQuote.pct,
+        discountCents: loyaltyQuote.discountCents,
+        verifiedSpendCents: loyaltyQuote.verifiedSpendCents,
+        tierKey: loyaltyQuote.tierKey,
+        tierLabel: loyaltyQuote.tierLabel
+      }
     });
   } catch (err) {
     console.error('[api/create-payment-intent] Stripe error:', err.message);

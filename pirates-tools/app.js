@@ -775,14 +775,15 @@
         var pct = loyalty.totalSpent > 0
           ? Math.min(100, Math.round((loyalty.totalSpent / (loyalty.nextTierAt || loyalty.totalSpent)) * 100))
           : 0;
-        // Libellé factuel : l'avantage n'est PAS déduit du total ci-dessus —
-        // il se fait valoir sur devis WhatsApp (validation humaine, pas de
-        // remise auto-attribuée via un localStorage modifiable).
+        // Libellé factuel : le total ci-dessus reste le plein tarif ; la
+        // remise est déduite AU PAIEMENT CARTE, calculée par le serveur depuis
+        // l'historique d'achats VÉRIFIÉ (journal webhook — le palier local
+        // n'est qu'un cache d'affichage synchronisé à chaque paiement).
         loyaltyEl.hidden = false;
         loyaltyEl.innerHTML = '<span class="devis-loyalty__tier">' + loyalty.tierIcon + ' '
           + escapeHTML(loyalty.tierLabel) + '</span>'
           + '<span class="devis-loyalty__save">Avantage −' + loyalty.discountPct + ' % ('
-          + formatPrice(total - loyalty.discountedTotal) + ') — non déduit ici, à faire valoir sur devis WhatsApp</span>'
+          + formatPrice(total - loyalty.discountedTotal) + ') — déduit au paiement carte selon votre historique vérifié</span>'
           + '<div class="devis-loyalty__bar"><div class="devis-loyalty__fill" style="width:' + pct + '%"></div></div>';
       } else if (loyalty) {
         var nextMin = loyalty.nextTierAt || 500;
@@ -4285,6 +4286,12 @@
       }
       _stripeClientSecret = data.clientSecret;
 
+      // Le serveur est la SEULE vérité du montant débité : il applique la
+      // remise fidélité vérifiée (journal payments/, infalsifiable). On
+      // réaligne l'affichage de la modale sur sa réponse (total + ligne
+      // remise) — jamais l'inverse.
+      renderServerQuote(data);
+
       // Unmount previous elements if any
       if (_stripeElements) {
         try { _stripeElements.getElement('payment').destroy(); } catch (_) {}
@@ -4332,6 +4339,35 @@
           + '</div>';
       }
     });
+  }
+
+  // Réaligne la modale de paiement sur la réponse serveur : total débité
+  // (remise fidélité déduite) + ligne de remise + synchronisation du cache
+  // fidélité local (l'affichage panier/compte suit la vérité serveur).
+  function renderServerQuote(data) {
+    if (!data) return;
+    var itemsEl = document.getElementById('payModalItems');
+    var totalEl = document.getElementById('payModalTotal');
+    if (itemsEl) {
+      var old = itemsEl.querySelector('.pay-modal__line--loyalty');
+      if (old) old.parentNode.removeChild(old);
+      if (data.loyalty && data.loyalty.discountCents > 0) {
+        var div = document.createElement('div');
+        div.className = 'pay-modal__line pay-modal__line--loyalty';
+        div.innerHTML = '<div class="pay-modal__line-info">'
+          + '<span class="pay-modal__line-title">Remise fidélité '
+          + escapeHTML(data.loyalty.tierLabel || '') + ' −' + data.loyalty.pct + ' %</span>'
+          + '</div>'
+          + '<span class="pay-modal__line-price">−' + formatPrice(data.loyalty.discountCents / 100) + '</span>';
+        itemsEl.appendChild(div);
+      }
+    }
+    if (totalEl && typeof data.amount === 'number') {
+      totalEl.textContent = formatPrice(data.amount / 100);
+    }
+    if (data.loyalty && typeof data.loyalty.verifiedSpendCents === 'number') {
+      saveLoyalty({ totalSpent: data.loyalty.verifiedSpendCents / 100 });
+    }
   }
 
   function confirmPayment() {

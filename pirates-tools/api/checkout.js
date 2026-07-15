@@ -10,6 +10,8 @@
 var catalog = require('./_lib/catalog');
 var pricing = require('./_lib/pricing');
 var rl = require('./_lib/ratelimit');
+var loyalty = require('./_lib/loyalty');
+var getFirebase = require('./_lib/firebase').getFirebase;
 
 var MAX_QTY_PER_LINE = 99;
 var MAX_LINES = 50;
@@ -95,6 +97,27 @@ module.exports = async function handler(req, res) {
     var origin = req.headers.origin || req.headers.referer || '';
     var baseUrl = origin.replace(/\/$/, '');
 
+    // Remise fidélité serveur (même source que create-payment-intent : journal
+    // payments/, infalsifiable). Stripe Checkout n'accepte pas de ligne
+    // négative → coupon à usage unique au montant exact.
+    var grossCents = lineItems.reduce(function (s, li) {
+      return s + li.price_data.unit_amount * li.quantity;
+    }, 0);
+    var fb = getFirebase();
+    var loyaltyQuote = uid && fb.db
+      ? await loyalty.quote(fb.db, uid, grossCents)
+      : { pct: 0, discountCents: 0 };
+    var discounts = [];
+    if (loyaltyQuote.discountCents > 0 && grossCents - loyaltyQuote.discountCents >= 50) {
+      var coupon = await stripe.coupons.create({
+        amount_off: loyaltyQuote.discountCents,
+        currency: 'eur',
+        duration: 'once',
+        name: 'Fidélité −' + loyaltyQuote.pct + ' %'
+      });
+      discounts = [{ coupon: coupon.id }];
+    }
+
     var session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'payment',
@@ -109,12 +132,15 @@ module.exports = async function handler(req, res) {
       shipping_address_collection: {
         allowed_countries: ['GP', 'MQ', 'GF', 'RE', 'YT', 'FR']
       },
+      ...(discounts.length ? { discounts: discounts } : {}),
       success_url: baseUrl + '/#/merci?session_id={CHECKOUT_SESSION_ID}',
       cancel_url: baseUrl + '/#/devis',
       metadata: Object.assign({
         source: 'pirates-tools',
         territory: String(territory),
-        itemCount: String(items.length)
+        itemCount: String(items.length),
+        loyaltyPct: String(loyaltyQuote.pct),
+        loyaltyDiscountCents: String(loyaltyQuote.discountCents)
       }, uid ? { uid: uid } : {})
     });
 
