@@ -204,7 +204,7 @@ On ne touche pas au CSS mort tant qu'un client peut payer 1 centime un produit.
 | Étape | Titre | Bloc | Statut |
 |------:|-------|------|:------:|
 | 1 | Routeur (pages mortes + commandes) | Fonctionnel | ✅ |
-| 2 | Intégrité des prix | Argent | ☐ |
+| 2 | Intégrité des prix | Argent | ✅ |
 | 3 | Verrouillage API (auth, CORS, secret) | Sécurité | ☐ |
 | 4 | Failles XSS | Sécurité | ☐ |
 | 5 | Cohérence de déploiement | Déploiement | ☐ |

@@ -15,7 +15,12 @@ Règle : **1 étape = 1 problème = 1 commit = 1 vérification verte**. Jamais d
 ### Suivi des étapes
 - [x] 1. Routeur : ajouter /admin /merci /contact /favoris à ROUTES (app.js:2753) ✅ commit, SW v290
        Note : cancel_url '#/checkout' (app.js:3876) pointe vers une route fantôme → à traiter étape 2 (le repointer vers #/devis).
-- [ ] 2. Intégrité des prix (serveur recalcule ; affiché == débité)
+- [x] 2. Intégrité des prix ✅ commit, SW v291
+       Serveur autoritaire : api/_lib/pricing.js (port exact de calcPrice) + api/_lib/catalog.js.
+       create-payment-intent.js & checkout.js recalculent depuis le catalogue par `key`, ignorent le prix client.
+       Client envoie {key,qty}, affiche le TTC territorial (payUnitCents, arrondi identique serveur).
+       Parité garantie par scripts/check-pricing.js (dans ci.js). parseHash tolère ?query. cancel_url #/checkout→#/devis.
+       NOTE : remise fidélité volontairement PAS répercutée sur le montant débité (éviterait un nouveau trou de confiance client) — à décider avec l'utilisateur si on veut l'appliquer (nécessiterait vérif serveur).
 - [ ] 3. Verrouiller API (auth orders.js, CORS allowlist, secret timing-safe)
 - [ ] 4. Failles XSS (escapeHTML guillemets + openPayModal)
 - [ ] 5. Cohérence déploiement (Vercel prod, canonical, sitemap, CI master)

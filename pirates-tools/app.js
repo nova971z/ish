@@ -27,6 +27,10 @@
   }
 
   // ── Territory taxation engine (TVA + Octroi de mer DOM-TOM) ──
+  // ⚠️ MIRRORED SERVER-SIDE in api/_lib/pricing.js (authoritative for charges).
+  // Keep the rates and formula below byte-for-byte identical to that module —
+  // any divergence makes the displayed price differ from the charged price.
+  // Guarded by scripts/check-pricing.js.
   // Rates are baseline public references; they can be adjusted per NC category
   // via TAX_RULES_BY_NC below. Numbers are *additive* on the HT price:
   // prixTTC = prixHT × (1 + octroiExterne + octroiRegional) × (1 + tva)
@@ -1479,7 +1483,7 @@
           toast('Produit en rupture de stock', 'error');
           return;
         }
-        openPayModal([{ title: product.title, price: product.price, qty: 1, paymentLink: product.paymentLink || '' }]);
+        openPayModal([{ key: product.id || product.slug, title: product.title, price: product.price, qty: 1, paymentLink: product.paymentLink || '' }]);
       };
     }
 
@@ -2778,6 +2782,10 @@
 
   function parseHash() {
     var hash = location.hash.replace(/^#/, '') || '/';
+    // Strip any query string carried in the hash (e.g. Stripe Checkout returns
+    // to #/merci?session_id=…) so it doesn't break the exact ROUTES match.
+    var qIndex = hash.indexOf('?');
+    if (qIndex !== -1) hash = hash.substring(0, qIndex) || '/';
     if (hash.indexOf('/produit/') === 0) {
       return { route: '/produit', slug: hash.replace('/produit/', '') };
     }
@@ -3591,7 +3599,7 @@
           renderDevis();
         } else if (btn.classList.contains('devis-buy')) {
           var it = c[i]; if (!it) return;
-          openPayModal([{ title: it.title, price: it.price, qty: it.qty || 1, paymentLink: it.paymentLink }]);
+          openPayModal([{ key: it.key, title: it.title, price: it.price, qty: it.qty || 1, paymentLink: it.paymentLink }]);
         } else if (btn.closest('.devis-remove')) {
           var el = btn.closest('.devis-item');
           if (el) el.classList.add('devis-item--removing');
@@ -3604,7 +3612,7 @@
       var items = getCart();
       if (!items.length) { toast('Panier vide', 'error'); return; }
       openPayModal(items.map(function (it) {
-        return { title: it.title, price: it.price, qty: it.qty || 1, paymentLink: it.paymentLink || '' };
+        return { key: it.key, title: it.title, price: it.price, qty: it.qty || 1, paymentLink: it.paymentLink || '' };
       }));
     });
     if (dom.devisClear) {
@@ -3873,7 +3881,7 @@
         pay_currency: co.nowpaymentsPayCurrency || 'usdttrc20',
         order_description: 'Pirates Tools — commande',
         success_url: location.origin + location.pathname + '#/merci',
-        cancel_url:  location.origin + location.pathname + '#/checkout'
+        cancel_url:  location.origin + location.pathname + '#/devis'
       };
       fetch('https://api.nowpayments.io/v1/invoice', {
         method:'POST',
@@ -3910,7 +3918,7 @@
     // sauvegarde l'intention de commande pour /merci
     try {
       localStorage.setItem('pt_pending_order', JSON.stringify({
-        items: (_payItems || []).map(function(it){ return { title: it.title, price: it.price, qty: it.qty }; }),
+        items: (_payItems || []).map(function(it){ return { key: it.key, title: it.title, price: payUnitCents(it) / 100, qty: it.qty }; }),
         total: _cryptoTotalEur,
         method: 'crypto:' + _cryptoSelected.id,
         ts: Date.now()
@@ -3965,30 +3973,47 @@
     }
   }
 
+  // Territory-aware unit price in integer cents. Mirrors api/_lib/pricing.js
+  // (same per-unit rounding) so the amount shown here equals the amount the
+  // server will charge. Falls back to the stored metropolitan price only for
+  // legacy cart entries whose product is no longer in the live catalogue.
+  function payUnitCents(it) {
+    var p = findProductByKey(it && it.key);
+    var ttc = p ? calcPrice(p, _currentTerritory).ttc : (Number(it && it.price) || 0);
+    return Math.round(ttc * 100);
+  }
+
+  function payTotalCents(items) {
+    return (items || []).reduce(function (s, it) {
+      return s + payUnitCents(it) * (it.qty || 1);
+    }, 0);
+  }
+
   function openPayModal(items) {
     var modal = document.getElementById('payModal');
     if (!modal || !items || !items.length) return;
     _payItems = items;
-    _cryptoTotalEur = items.reduce(function(s,it){ return s + (it.price||0)*(it.qty||1); }, 0);
+    _cryptoTotalEur = payTotalCents(items) / 100;
     _cryptoSelected = null;
     cryptoRenderNets();
     cryptoSwitchTab('card');
 
     var itemsEl = document.getElementById('payModalItems');
     var totalEl = document.getElementById('payModalTotal');
-    var total = 0;
+    var totalCents = 0;
     var html = '';
     items.forEach(function (it) {
-      var line = (it.price || 0) * (it.qty || 1);
-      total += line;
+      var lineCents = payUnitCents(it) * (it.qty || 1);
+      totalCents += lineCents;
       html += '<div class="pay-modal__line">'
         + '<div class="pay-modal__line-info">'
-        +   '<span class="pay-modal__line-title">' + (it.title || 'Produit') + '</span>'
+        +   '<span class="pay-modal__line-title">' + escapeHTML(it.title || 'Produit') + '</span>'
         +   '<span class="pay-modal__line-qty">x' + (it.qty || 1) + '</span>'
         + '</div>'
-        + '<span class="pay-modal__line-price">' + formatPrice(line) + '</span>'
+        + '<span class="pay-modal__line-price">' + formatPrice(lineCents / 100) + '</span>'
         + '</div>';
     });
+    var total = totalCents / 100;
     if (itemsEl) itemsEl.innerHTML = html;
     if (totalEl) totalEl.textContent = formatPrice(total);
 
@@ -4123,8 +4148,9 @@
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        // Server resolves prices from the catalogue by key — no price is sent.
         items: _payItems.map(function (it) {
-          return { title: it.title, price: it.price, qty: it.qty || 1 };
+          return { key: it.key, title: it.title, qty: it.qty || 1 };
         }),
         customerEmail: (_currentUser && _currentUser.email) || undefined,
         territory: _currentTerritory
@@ -4188,7 +4214,7 @@
 
   function confirmPayment() {
     if (!_payItems || !_payItems.length) return;
-    var total = _payItems.reduce(function (s, it) { return s + (it.price || 0) * (it.qty || 1); }, 0);
+    var total = payTotalCents(_payItems) / 100;
     var stripe = getStripe();
     var errorEl = document.getElementById('stripeCardError');
 
@@ -4201,7 +4227,7 @@
       // Save pending order before confirming
       try {
         localStorage.setItem('pt_pending_order', JSON.stringify({
-          items: _payItems.map(function (it) { return { title: it.title, price: it.price, qty: it.qty }; }),
+          items: _payItems.map(function (it) { return { key: it.key, title: it.title, price: payUnitCents(it) / 100, qty: it.qty }; }),
           total: total, ts: Date.now()
         }));
       } catch (_) {}
@@ -4261,10 +4287,12 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          // Server resolves prices from the catalogue by key — no price is sent.
           items: _payItems.map(function (it) {
-            return { title: it.title, price: it.price, qty: it.qty || 1 };
+            return { key: it.key, title: it.title, qty: it.qty || 1 };
           }),
-          customerEmail: (_currentUser && _currentUser.email) || undefined
+          customerEmail: (_currentUser && _currentUser.email) || undefined,
+          territory: _currentTerritory
         })
       })
       .then(function (r) { return r.json(); })
@@ -4272,7 +4300,7 @@
         if (data.ok && data.url) {
           try {
             localStorage.setItem('pt_pending_order', JSON.stringify({
-              items: _payItems.map(function (it) { return { title: it.title, price: it.price, qty: it.qty }; }),
+              items: _payItems.map(function (it) { return { key: it.key, title: it.title, price: payUnitCents(it) / 100, qty: it.qty }; }),
               total: total, sessionId: data.sessionId, ts: Date.now()
             }));
           } catch (_) {}
@@ -4298,7 +4326,7 @@
     }
     try {
       localStorage.setItem('pt_pending_order', JSON.stringify({
-        items: _payItems.map(function (it) { return { title: it.title, price: it.price, qty: it.qty }; }),
+        items: _payItems.map(function (it) { return { key: it.key, title: it.title, price: payUnitCents(it) / 100, qty: it.qty }; }),
         total: total, ts: Date.now()
       }));
     } catch (_) {}
