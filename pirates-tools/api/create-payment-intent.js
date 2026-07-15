@@ -33,7 +33,18 @@ module.exports = async function handler(req, res) {
     var body = req.body || {};
     var items = body.items;
     var customerEmail = body.customerEmail;
-    var territory = body.territory || pricing.DEFAULT_TERRITORY;
+
+    // Territoire STRICT (A1) : absent → défaut ; fourni mais inconnu → 400.
+    // Avant, un code invalide retombait silencieusement sur le défaut, ce qui
+    // masquait toute tentative de manipulation du taux de taxe. Le code validé
+    // est ensuite confronté à l'adresse réelle par le webhook (contrôle
+    // détectif — voir api/_lib/postal.js).
+    var territory = body.territory == null || body.territory === ''
+      ? pricing.DEFAULT_TERRITORY
+      : String(body.territory);
+    if (!pricing.getTerritory(territory)) {
+      return res.status(400).json({ ok: false, error: 'Territoire inconnu' });
+    }
 
     if (!Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ ok: false, error: 'Cart is empty' });
