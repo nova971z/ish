@@ -216,11 +216,11 @@
     updateTerritoryLabels();
   }
 
-  // ── Stubs filled in by Phase 4 / Phase 5 ───────────────────
-  // productBadges() renders DOM-TOM-specific pills (tropical, cordless, mayotte, stock).
-  // localPriceComparison() injects a "local price" simulator on the PDP.
-  // Defining them up front keeps render functions safe even if those phases
-  // haven't been loaded yet.
+  // ── DOM-TOM feature badges ─────────────────────────────────
+  // productBadgeItems() builds the tropical/cordless/mayotte badge spans.
+  // Utilisé UNIQUEMENT sur la fiche produit (PDP, section découverte) : les
+  // cartes catalogue ne les affichent plus (retirés à la demande — ils
+  // encombraient le coin bas-gauche des cartes).
   function productBadgeItems(p) {
     if (!p) return '';
     var out = [];
@@ -235,11 +235,6 @@
     // Note : le badge "⚡ Stock local" a été retiré — il faisait doublon avec la
     // pastille "EN STOCK" (stockBadge). On évite la redondance visuelle.
     return out.join('');
-  }
-  function productBadges(p) {
-    var inner = productBadgeItems(p);
-    if (!inner) return '';
-    return '<div class="pt-badges">' + inner + '</div>';
   }
 
   // calcLocalPrice — estimation du prix local moyen (revendeurs DOM-TOM)
@@ -926,7 +921,6 @@
         + productCardVisual(p)
         + (p.tag ? '<span class="product-card__tag">' + escapeHTML(p.tag) + '</span>' : '')
         + stockBadge(p)
-        + productBadges(p)
         + wishlistButton(p)
         + '</div>'
         + '<div class="product-card__body">'
@@ -1260,7 +1254,6 @@
         + productCardVisual(p)
         + (p.tag ? '<span class="product-card__tag">' + escapeHTML(p.tag) + '</span>' : '')
         + stockBadge(p)
-        + productBadges(p)
         + wishlistButton(p)
         + '</div>'
         + '<div class="product-card__body">'
@@ -6092,7 +6085,6 @@
           + productCardVisual(p)
           + (p.tag ? '<span class="product-card__tag">' + escapeHTML(p.tag) + '</span>' : '')
           + stockBadge(p)
-          + productBadges(p)
           + '</div>'
           + '<div class="product-card__body">'
           + '<span class="product-card__brand">' + escapeHTML(p.brand) + '</span>'
