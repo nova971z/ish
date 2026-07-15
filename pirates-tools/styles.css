@@ -441,12 +441,12 @@ body.menu-open { overflow: hidden; }
     overflow: visible;
 }
 
-/* Halo doré derrière le logo hero (accueil uniquement). Plein écran, fixe,
-   centré sous le logo. z-index 1 < container (2) < logo (11) → reste derrière.
-   Disparaît automatiquement quand #hero passe en display:none (scroll / autre page). */
-/* Halo doré désactivé (temporaire) : en position:fixed il restait collé au fond
-   de la fenêtre au lieu de suivre le logo. À réactiver proprement plus tard
-   (ancré au conteneur du logo, pas au viewport). */
+/* Halo doré derrière le logo hero (accueil uniquement).
+   Ancré au CONTENEUR du logo (.hero-logo-container), pas au viewport : il suit
+   donc exactement le logo et disparaît avec le hero (les règles display:none sur
+   .hero-logo-container hors accueil / au scroll l'emportent avec lui).
+   Localisé (cercle ~logo, pas plein écran) → lit comme une lueur, pas un fond.
+   Voir .hero-logo-container::before plus bas. */
 #hero::before, .hero-full::before {
     display: none;
 }
@@ -477,6 +477,35 @@ body.menu-open { overflow: hidden; }
     pointer-events: none;
     padding-top: var(--safe-top, 70px);
     box-sizing: border-box;
+}
+
+/* Lueur dorée localisée, pile derrière le logo. Positionnée au centre du
+   conteneur avec la même correction verticale que le flex-centrage (le
+   padding-top décale le logo vers le bas de safe-top/2) → reste centrée sur le
+   logo à toutes tailles. z-index 0 < #heroLogo (11) → toujours derrière. */
+.hero-logo-container::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, calc(-50% + var(--safe-top, 70px) / 2));
+    width: min(78vmin, 600px);
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 50%,
+        rgba(212, 175, 55, 0.32) 0%,
+        rgba(212, 175, 55, 0.16) 30%,
+        rgba(212, 175, 55, 0.05) 52%,
+        transparent 70%);
+    filter: blur(4px);
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0;
+    animation: heroGlowIn 1.2s ease 0.35s forwards;
+}
+@keyframes heroGlowIn { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+    .hero-logo-container::before { animation: none; opacity: 1; }
 }
 
 .hero-full.hero-out, #hero.hero-out {
