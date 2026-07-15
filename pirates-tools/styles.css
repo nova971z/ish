@@ -7100,3 +7100,14 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .footer-legal a { color: #9fb4c5; text-decoration: none; font-size: .9rem; }
 .footer-legal a:hover { color: #e6edf5; text-decoration: underline; }
 .footer-legal span { color: #4b5563; }
+
+/* Encadré formulaire type de rétractation (CGV) */
+.legal-form {
+  background: rgba(255, 255, 255, .03);
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin: 1rem 0 1.5rem;
+  font-size: .92rem;
+}
+.legal-form p { margin: 0 0 .6rem; }

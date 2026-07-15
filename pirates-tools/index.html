@@ -31,7 +31,7 @@
   <link rel="dns-prefetch" href="https://js.stripe.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=300">
+  <link rel="stylesheet" href="styles.css?v=301">
 
   <!-- 3D model viewer -->
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
@@ -90,9 +90,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Pirates Tools" />
-  <link rel="manifest" href="manifest.webmanifest?v=300" />
-  <link rel="icon" href="icons/icon-192.png?v=300" sizes="192x192" />
-  <link rel="apple-touch-icon" href="icons/icon-180.png?v=300" sizes="180x180" />
+  <link rel="manifest" href="manifest.webmanifest?v=301" />
+  <link rel="icon" href="icons/icon-192.png?v=301" sizes="192x192" />
+  <link rel="apple-touch-icon" href="icons/icon-180.png?v=301" sizes="180x180" />
 
   <!-- Patch UI : haut non tronque + dock centre + bulles -->
   <style id="pt-fix">
@@ -227,7 +227,7 @@
         <img
           id="topbarLogo"
           class="topbar-logo"
-          src="icons/icon-192.png?v=300"
+          src="icons/icon-192.png?v=301"
           alt="Pirates Tools"
           width="40" height="40"
           decoding="async" loading="eager" fetchpriority="high" />
@@ -258,8 +258,8 @@
   <section id="hero" class="hero-full" aria-hidden="true">
     <div class="hero-logo-container initial" id="heroLogoContainer">
       <img id="heroLogo" class="hero-logo on" alt="Pirates Tools"
-        src="icons/icon-512.png?v=300"
-        srcset="icons/icon-256.png?v=300 256w, icons/icon-384.png?v=300 384w, icons/icon-512.png?v=300 512w"
+        src="icons/icon-512.png?v=301"
+        srcset="icons/icon-256.png?v=301 256w, icons/icon-384.png?v=301 384w, icons/icon-512.png?v=301 512w"
         sizes="(max-width: 768px) 90vw, 60vw"
         width="600" height="600"
         decoding="async" loading="eager" fetchpriority="high" />
@@ -1212,6 +1212,80 @@
       </div>
     </section>
 
+    <!-- CONDITIONS GÉNÉRALES DE VENTE -->
+    <section id="view-cgv" class="view legal-page hidden" data-route="/cgv" role="region" aria-labelledby="cgv-h1">
+      <div class="container legal-container">
+        <h1 id="cgv-h1" tabindex="-1">Conditions Générales de Vente</h1>
+        <p class="legal-updated">Dernière mise à jour : 15 juillet 2026</p>
+
+        <p class="legal-note">⚠️ Les champs <strong>[À COMPLÉTER]</strong> (identité du vendeur, frais et délais de livraison, adresse de retour, médiateur) doivent être renseignés avant la mise en ligne. Une relecture par un professionnel du droit est fortement recommandée.</p>
+
+        <h2>1. Objet et champ d'application</h2>
+        <p>Les présentes Conditions Générales de Vente (CGV) régissent les ventes de produits d'outillage réalisées sur le site <strong>pirates-tools.com</strong> par [À COMPLÉTER : nom / raison sociale du vendeur] (ci-après « le Vendeur ») à tout acheteur (ci-après « le Client »). Toute commande implique l'acceptation sans réserve des présentes CGV. Le Vendeur se réserve le droit de les modifier ; les CGV applicables sont celles en vigueur à la date de la commande.</p>
+
+        <h2>2. Produits</h2>
+        <p>Les produits proposés sont décrits avec la plus grande exactitude possible (caractéristiques, marque, visuels). Les photographies et modèles 3D n'ont pas de valeur contractuelle. Les offres sont valables dans la limite des stocks disponibles ; en cas d'indisponibilité après commande, le Client en est informé et remboursé le cas échéant.</p>
+
+        <h2>3. Prix</h2>
+        <p>Les prix sont indiqués en euros, <strong>toutes taxes comprises</strong> (TVA et octroi de mer applicables selon le territoire de livraison DOM-TOM), hors frais de livraison indiqués séparément avant la validation de la commande. Le Vendeur se réserve le droit de modifier ses prix à tout moment ; le produit est facturé sur la base du tarif en vigueur au moment de la commande. <strong>Le prix débité est toujours calculé et vérifié côté serveur</strong>, à partir du catalogue officiel.</p>
+
+        <h2>4. Commande</h2>
+        <p>Le Client sélectionne ses produits, vérifie le récapitulatif (produits, quantités, prix, territoire de livraison) puis valide sa commande. La vente est définitive après confirmation du paiement. Un email de confirmation récapitulant la commande est envoyé au Client.</p>
+
+        <h2>5. Paiement</h2>
+        <p>Le paiement s'effectue :</p>
+        <ul>
+          <li><strong>Par carte bancaire</strong> via <strong>Stripe</strong>, prestataire certifié PCI-DSS. Aucune donnée de carte n'est stockée par le Vendeur.</li>
+          <li><strong>En crypto-monnaie</strong> (Bitcoin, Ethereum, USDC, USDT, Solana), le cas échéant, par virement vers l'adresse affichée. Les transferts en crypto sont irréversibles : le Client doit vérifier le réseau et l'adresse avant tout envoi.</li>
+        </ul>
+        <p>La commande n'est traitée qu'après encaissement effectif du paiement.</p>
+
+        <h2>6. Livraison</h2>
+        <p>Les produits sont livrés dans les zones desservies : Guadeloupe (971), Martinique (972), Guyane (973), La Réunion (974), Mayotte (976)[À COMPLÉTER : ajouter/retirer les zones réellement desservies].</p>
+        <ul>
+          <li><strong>Délais :</strong> [À COMPLÉTER : délais de livraison estimés par territoire].</li>
+          <li><strong>Frais :</strong> [À COMPLÉTER : grille des frais de livraison].</li>
+        </ul>
+        <p>Les délais sont donnés à titre indicatif. Le transfert des risques (perte, dommage) intervient à la remise du produit au Client. En cas de colis endommagé, le Client doit émettre des réserves auprès du transporteur et en informer le Vendeur.</p>
+
+        <h2>7. Droit de rétractation</h2>
+        <p>Conformément aux articles L.221-18 et suivants du Code de la consommation, le Client particulier dispose d'un délai de <strong>14 jours</strong> à compter de la réception du produit pour exercer son droit de rétractation, sans avoir à motiver sa décision.</p>
+        <p>Pour l'exercer, le Client notifie sa décision par une déclaration dénuée d'ambiguïté (email à [À COMPLÉTER : email de contact] ou courrier à [À COMPLÉTER : adresse de retour]), en utilisant éventuellement le formulaire type ci-dessous. Le produit doit être retourné neuf, complet et dans son emballage d'origine sous 14 jours. <strong>Les frais de retour sont à la charge du Client</strong>, sauf mention contraire.</p>
+        <p>Le Vendeur rembourse l'intégralité des sommes versées (hors frais de retour) au plus tard 14 jours après récupération du produit ou preuve de son expédition.</p>
+        <p><strong>Exceptions</strong> (art. L.221-28) : le droit de rétractation ne s'applique pas, notamment, aux produits nettement personnalisés ou aux produits descellés ne pouvant être renvoyés pour des raisons d'hygiène ou de sécurité.</p>
+        <div class="legal-form">
+          <p><strong>Formulaire type de rétractation</strong> (à compléter et renvoyer uniquement en cas de rétractation) :</p>
+          <p>À l'attention de [À COMPLÉTER : nom et adresse du Vendeur] :<br>
+          Je/nous vous notifie/notifions ma/notre rétractation du contrat portant sur la commande n° ____ passée le ____, reçue le ____.<br>
+          Nom du/des consommateur(s) : ____<br>
+          Adresse : ____<br>
+          Date : ____ — Signature (si papier) : ____</p>
+        </div>
+
+        <h2>8. Garanties</h2>
+        <p>Tous les produits bénéficient de plein droit et sans supplément des garanties légales :</p>
+        <ul>
+          <li><strong>Garantie légale de conformité</strong> (art. L.217-3 et suivants du Code de la consommation) : 2 ans à compter de la délivrance.</li>
+          <li><strong>Garantie des vices cachés</strong> (art. 1641 et suivants du Code civil).</li>
+        </ul>
+        <p>Ces garanties s'appliquent indépendamment de toute garantie commerciale du constructeur (DeWALT, Makita, Festool, etc.). Pour toute mise en œuvre : [À COMPLÉTER : email de contact].</p>
+
+        <h2>9. Réclamations et médiation</h2>
+        <p>Toute réclamation peut être adressée à [À COMPLÉTER : email de contact] ou via <a href="https://wa.me/33744776598" target="_blank" rel="noopener noreferrer">WhatsApp</a>. En cas de litige non résolu, le Client peut recourir gratuitement au médiateur de la consommation (voir <a href="#/mentions-legales">Mentions légales</a>) ou à la plateforme européenne de règlement en ligne des litiges : <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer">ec.europa.eu/consumers/odr</a>.</p>
+
+        <h2>10. Données personnelles</h2>
+        <p>Les données du Client sont traitées conformément à notre <a href="#/confidentialite">Politique de confidentialité</a>.</p>
+
+        <h2>11. Propriété intellectuelle</h2>
+        <p>Tous les éléments du site restent la propriété du Vendeur ou de leurs titulaires respectifs. Toute reproduction non autorisée est interdite.</p>
+
+        <h2>12. Force majeure — Droit applicable</h2>
+        <p>La responsabilité du Vendeur ne saurait être engagée en cas de force majeure. Les présentes CGV sont soumises au droit français. À défaut de résolution amiable, tout litige relève des tribunaux français compétents.</p>
+
+        <p class="legal-links"><a href="#/mentions-legales">→ Mentions légales</a> · <a href="#/confidentialite">→ Confidentialité</a></p>
+      </div>
+    </section>
+
   </main>
 
   <!-- =================== MODALE DE PAIEMENT =================== -->
@@ -1450,6 +1524,8 @@
           <a href="#/mentions-legales">Mentions légales</a>
           <span aria-hidden="true">·</span>
           <a href="#/confidentialite">Politique de confidentialité</a>
+          <span aria-hidden="true">·</span>
+          <a href="#/cgv">CGV</a>
         </nav>
         <p>&copy; 2026 Pirates Tools — Tous droits réservés</p>
       </div>
@@ -1583,7 +1659,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=300"></script>
+  <script defer src="app.js?v=301"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

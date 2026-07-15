@@ -7,6 +7,33 @@ Branche de dev : `claude/pirates-tools-rebuild-zWc1b`. Prod = Vercel, domaine pe
 Code de niveau ingénieur web senior, standard des grandes institutions e-commerce.
 Aucun hasard, aucun bullshit. Chaque correction est vérifiée dans le code avant d'être livrée.
 
+## ⚠️ CHECKLIST PRÉ-LANCEMENT — à dérouler quand l'user demande « est-ce qu'on est prêt à lancer »
+Le site N'EST PAS lancé (décidé le 15/07/2026). Ne rien ouvrir au public tant que ces points bloquants ne sont pas faits. Quand l'user pose la question, PARCOURIR cette liste et donner l'état point par point.
+
+### 🔴 BLOQUANT (légal — sinon illégal de vendre en B2C)
+- [ ] Remplir les champs `[À COMPLÉTER]` des 3 pages : mentions légales, confidentialité, CGV (identité entreprise : raison sociale, statut, SIRET, RCS, adresse, TVA, capital, directeur publication, email pro).
+- [ ] Adhérer à un **médiateur de la consommation** agréé (CM2C, Medicys… ~50-100€/an) et mettre ses coordonnées dans mentions + CGV. OBLIGATOIRE pour vendre aux particuliers.
+- [ ] Faire relire les 3 documents légaux par un juriste (recommandé fort).
+- [ ] Email pro `contact@pirates-tools.com` (pas le gmail perso) pour les mentions/CGV.
+
+### 🔴 BLOQUANT (paiement carte)
+- [ ] Activer le compte Stripe (infos entreprise + RIB) pour encaisser en LIVE.
+- [ ] Créer le webhook Stripe → URL `https://pirates-tools.com/api/webhook`, copier le `whsec_...` dans Vercel comme `STRIPE_WEBHOOK_SECRET`.
+- [ ] Vérifier toutes les env vars Vercel : STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, FIREBASE_SERVICE_ACCOUNT, RESEND_API_KEY, RESEND_FROM, OWNER_EMAIL, ADMIN_SECRET, META_APP_ID/SECRET/ACCESS_TOKEN. (ALLOWED_ORIGINS optionnel.)
+
+### 🟠 AVANT D'OUVRIR LE CRYPTO (si tu actives ce canal)
+- [ ] Scanner le QR crypto local avec un VRAI wallet (Metamask…) et confirmer qu'il affiche la bonne adresse. Preuve finale avant tout paiement crypto réel.
+
+### 🟢 MISE EN PROD
+- [ ] Merger `claude/pirates-tools-rebuild-zWc1b` → `master` (Vercel auto-déploie).
+- [ ] Vérifier `pirates-tools.com/api/health?test` renvoie du JSON (API branchée).
+
+### ✅ DÉJÀ FAIT
+- Firebase Authorized domains (pirates-tools.com + www) ✅. Domaine sur Vercel ✅. Plan remédiation 10/10 + QR local ✅.
+
+### ⚪ NON BLOQUANT (dette technique reportée, cosmétique)
+- Refactors CSS risqués (étape 9 : fork inline, !important, z-index). Split fonctions XXL (10d). Peuvent attendre après le lancement.
+
 ## Plan de remédiation en cours
 Document maître : `pirates-tools/docs/PLAN-REMEDIATION.md` (10 étapes, versionné).
 Ordre non négociable : argent → sécurité → fonctionnel → structure → polish.

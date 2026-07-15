@@ -2780,7 +2780,7 @@
 
   var ROUTES = ['/', '/catalogue', '/produit', '/devis', '/compte', '/auth', '/abonnement',
                 '/admin', '/merci', '/contact', '/favoris',
-                '/mentions-legales', '/confidentialite'];
+                '/mentions-legales', '/confidentialite', '/cgv'];
 
   // Territory landing slugs (keys) → territory codes (values).
   // Used to expose SEO-friendly routes like #/guadeloupe.
@@ -6214,6 +6214,10 @@
         break;
       case '/confidentialite':
         setDocMeta('Politique de confidentialité — ' + BASE_TITLE, 'Comment Pirates Tools protège vos données personnelles (RGPD).');
+        removeJsonLd('product');
+        break;
+      case '/cgv':
+        setDocMeta('Conditions Générales de Vente — ' + BASE_TITLE, 'CGV Pirates Tools : commande, paiement, livraison DOM-TOM, rétractation, garanties.');
         removeJsonLd('product');
         break;
       case '/territoire':
