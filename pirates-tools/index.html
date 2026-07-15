@@ -31,7 +31,7 @@
   <link rel="dns-prefetch" href="https://js.stripe.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=306">
+  <link rel="stylesheet" href="styles.css?v=307">
 
   <!-- 3D model viewer -->
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
@@ -90,9 +90,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Pirates Tools" />
-  <link rel="manifest" href="manifest.webmanifest?v=306" />
-  <link rel="icon" href="icons/icon-192.png?v=306" sizes="192x192" />
-  <link rel="apple-touch-icon" href="icons/icon-180.png?v=306" sizes="180x180" />
+  <link rel="manifest" href="manifest.webmanifest?v=307" />
+  <link rel="icon" href="icons/icon-192.png?v=307" sizes="192x192" />
+  <link rel="apple-touch-icon" href="icons/icon-180.png?v=307" sizes="180x180" />
 
   <!-- Patch UI : haut non tronque + dock centre + bulles -->
   <style id="pt-fix">
@@ -227,7 +227,7 @@
         <img
           id="topbarLogo"
           class="topbar-logo"
-          src="icons/icon-192.png?v=306"
+          src="icons/icon-192.png?v=307"
           alt="Pirates Tools"
           width="40" height="40"
           decoding="async" loading="eager" fetchpriority="high" />
@@ -258,8 +258,8 @@
   <section id="hero" class="hero-full" aria-hidden="true">
     <div class="hero-logo-container initial" id="heroLogoContainer">
       <img id="heroLogo" class="hero-logo on" alt="Pirates Tools"
-        src="icons/icon-512.png?v=306"
-        srcset="icons/icon-256.png?v=306 256w, icons/icon-384.png?v=306 384w, icons/icon-512.png?v=306 512w"
+        src="icons/icon-512.png?v=307"
+        srcset="icons/icon-256.png?v=307 256w, icons/icon-384.png?v=307 384w, icons/icon-512.png?v=307 512w"
         sizes="(max-width: 768px) 90vw, 60vw"
         width="600" height="600"
         decoding="async" loading="eager" fetchpriority="high" />
@@ -295,7 +295,7 @@
             <div class="tools-3d-stage">
               <model-viewer id="carousel3dViewer"
                 loading="eager"
-                camera-controls touch-action="pan-y"
+                camera-controls disable-zoom touch-action="pan-y"
                 auto-rotate auto-rotate-delay="1500"
                 shadow-intensity="0.8"
                 exposure="1.1"
@@ -1659,7 +1659,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=306"></script>
+  <script defer src="app.js?v=307"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->
