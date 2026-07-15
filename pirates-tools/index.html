@@ -33,7 +33,7 @@
   <link rel="dns-prefetch" href="https://js.stripe.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=312">
+  <link rel="stylesheet" href="styles.css?v=313">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -92,9 +92,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Pirates Tools" />
-  <link rel="manifest" href="manifest.webmanifest?v=312" />
-  <link rel="icon" href="icons/icon-192.png?v=312" sizes="192x192" />
-  <link rel="apple-touch-icon" href="icons/icon-180.png?v=312" sizes="180x180" />
+  <link rel="manifest" href="manifest.webmanifest?v=313" />
+  <link rel="icon" href="icons/icon-192.png?v=313" sizes="192x192" />
+  <link rel="apple-touch-icon" href="icons/icon-180.png?v=313" sizes="180x180" />
 
 
 
@@ -116,7 +116,7 @@
         <img
           id="topbarLogo"
           class="topbar-logo"
-          src="icons/icon-192.png?v=312"
+          src="icons/icon-192.png?v=313"
           alt="Pirates Tools"
           width="40" height="40"
           decoding="async" loading="eager" fetchpriority="high" />
@@ -147,8 +147,8 @@
   <section id="hero" class="hero-full" aria-hidden="true">
     <div class="hero-logo-container initial" id="heroLogoContainer">
       <img id="heroLogo" class="hero-logo on" alt="Pirates Tools"
-        src="icons/icon-512.png?v=312"
-        srcset="icons/icon-256.png?v=312 256w, icons/icon-384.png?v=312 384w, icons/icon-512.png?v=312 512w"
+        src="icons/icon-512.png?v=313"
+        srcset="icons/icon-256.png?v=313 256w, icons/icon-384.png?v=313 384w, icons/icon-512.png?v=313 512w"
         sizes="(max-width: 768px) 90vw, 60vw"
         width="600" height="600"
         decoding="async" loading="eager" fetchpriority="high" />
@@ -1457,8 +1457,11 @@
   <!-- =================== CONSENT BAR =================== -->
   <div id="consentBar" class="consent-bar" role="dialog" aria-label="Consentement analytics" hidden>
     <div class="consent-bar__inner">
+      <!-- Texte court : l'ancienne version (~260 car.) empilait ~8 lignes sur
+           mobile et le bandeau recouvrait les filtres du catalogue (taps
+           avalés). L'information complète vit dans la politique, liée ici. -->
       <p class="consent-bar__text">
-        <strong>Respect de votre vie privée</strong> — Nous utilisons des cookies analytiques (GA4, Meta Pixel) pour mesurer l'audience et améliorer votre expérience d'achat. Aucune donnée personnelle n'est partagée à des fins publicitaires. Vous pouvez changer d'avis à tout moment.
+        <strong>Cookies</strong> — Mesure d'audience (GA4, Meta Pixel), uniquement si vous acceptez. Modifiable à tout moment. <a href="#/confidentialite" class="consent-bar__link">En savoir plus</a>
       </p>
       <div class="consent-bar__actions">
         <button type="button" class="btn consent-bar__deny" data-consent="deny">Refuser</button>
@@ -1573,7 +1576,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=312"></script>
+  <script defer src="app.js?v=313"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->
