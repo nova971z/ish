@@ -1,5 +1,5 @@
 /* sw.js — Pirates Tools (PWA) */
-const VERSION        = 'pt-v304';                    // version du SW (logique SW)
+const VERSION        = 'pt-v305';                    // version du SW (logique SW)
 const STATIC_CACHE   = `pt-static-${VERSION}`;
 const RUNTIME_CACHE  = `pt-runtime-${VERSION}`;
 const IMG_CACHE      = `pt-img-${VERSION}`;
@@ -7,7 +7,7 @@ const DATA_CACHE     = `pt-data-${VERSION}`;
 const ORIGIN         = self.location.origin;
 
 // Aligner avec le HTML (cache-busting des assets)
-const ASSET_VER      = '304';
+const ASSET_VER      = '305';
 
 // Production = Vercel (pirates-tools.com), servi à la racine (/).
 // On garde des chemins relatifs (./) pour que le SW fonctionne à l'identique
@@ -22,8 +22,8 @@ const APP_SHELL = [
   `./icons/icon-192.png?v=${ASSET_VER}`,
   `./icons/icon-256.png?v=${ASSET_VER}`,
   `./icons/icon-384.png?v=${ASSET_VER}`,
-  `./icons/icon-512.png?v=${ASSET_VER}`,
-  `./images/pirates-tools-logo.png?v=${ASSET_VER}`
+  `./icons/icon-512.png?v=${ASSET_VER}`
+  // pirates-tools-logo.png retiré du précache : jamais affiché (poids mort).
 ];
 
 // Utilitaires
