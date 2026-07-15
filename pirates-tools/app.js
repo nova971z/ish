@@ -741,9 +741,14 @@
 
     dom.devisList.innerHTML = html;
 
-    // Loyalty discount (Phase 4) applied on top of the items total
+    // A3 — le total affiché EST le montant débité au paiement carte (plein
+    // tarif, recalculé serveur). L'ancienne version affichait ici le total
+    // remisé fidélité alors que la modale de paiement débitait le plein tarif :
+    // prix affiché ≠ prix payé, inacceptable en B2C. La remise fidélité n'est
+    // PAS appliquée au débit car son état vit en localStorage (falsifiable
+    // côté client, invérifiable serveur) — elle reste affichée comme avantage
+    // à faire valoir sur devis WhatsApp (bloc fidélité ci-dessous).
     var loyalty = getLoyaltyState ? getLoyaltyState(total) : null;
-    var grand = loyalty ? loyalty.discountedTotal : total;
 
     // Estimated shipping for current territory
     var terrInfo = getTerritory() || getTerritory(DEFAULT_TERRITORY);
@@ -751,8 +756,8 @@
 
     // Update stats
     if (statItems) statItems.textContent = totalQty;
-    if (statTotal) statTotal.textContent = formatPrice(grand);
-    if (footerTotal) footerTotal.textContent = formatPrice(grand);
+    if (statTotal) statTotal.textContent = formatPrice(total);
+    if (footerTotal) footerTotal.textContent = formatPrice(total);
 
     // Shipping estimate line
     var shippingEl = document.getElementById('devisShipping');
@@ -770,11 +775,14 @@
         var pct = loyalty.totalSpent > 0
           ? Math.min(100, Math.round((loyalty.totalSpent / (loyalty.nextTierAt || loyalty.totalSpent)) * 100))
           : 0;
+        // Libellé factuel : l'avantage n'est PAS déduit du total ci-dessus —
+        // il se fait valoir sur devis WhatsApp (validation humaine, pas de
+        // remise auto-attribuée via un localStorage modifiable).
         loyaltyEl.hidden = false;
         loyaltyEl.innerHTML = '<span class="devis-loyalty__tier">' + loyalty.tierIcon + ' '
           + escapeHTML(loyalty.tierLabel) + '</span>'
-          + '<span class="devis-loyalty__save">−' + loyalty.discountPct + ' % ('
-          + formatPrice(total - grand) + ')</span>'
+          + '<span class="devis-loyalty__save">Avantage −' + loyalty.discountPct + ' % ('
+          + formatPrice(total - loyalty.discountedTotal) + ') — non déduit ici, à faire valoir sur devis WhatsApp</span>'
           + '<div class="devis-loyalty__bar"><div class="devis-loyalty__fill" style="width:' + pct + '%"></div></div>';
       } else if (loyalty) {
         var nextMin = loyalty.nextTierAt || 500;
