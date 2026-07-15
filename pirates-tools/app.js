@@ -4502,31 +4502,114 @@
     if (cryptoConf) cryptoConf.addEventListener('click', cryptoConfirmPaid);
   }
 
+  // Extrait un paramètre d'une query string ('?a=1&b=2' ou 'a=1&b=2').
+  function qsParam(qs, name) {
+    if (!qs) return null;
+    var m = String(qs).replace(/^\?/, '').match(new RegExp('(?:^|&)' + name + '=([^&]*)'));
+    return m ? decodeURIComponent(m[1].replace(/\+/g, ' ')) : null;
+  }
+
+  // A5 — preuve de paiement pour /merci. AVANT : l'existence d'un
+  // pt_pending_order suffisait à écrire une commande « paid » + créditer la
+  // fidélité — or le pending est posé AVANT la confirmation Stripe (paiement
+  // abandonné → pending fantôme) et une simple déclaration crypto WhatsApp
+  // finissait aussi en « paid ». Trois preuves acceptées :
+  //  1. inline  : pending.paymentIntentId — écrit UNIQUEMENT dans la branche
+  //     pi.status === 'succeeded' de confirmPayment ;
+  //  2. redirect: ?redirect_status=succeeded&payment_intent=pi_… posé par
+  //     Stripe AVANT le hash au retour 3DS (location.search) ;
+  //  3. session : #/merci?session_id=cs_… (Stripe Checkout ne redirige vers
+  //     success_url qu'après paiement) ET correspondance avec le sessionId
+  //     mémorisé au départ vers Stripe.
+  // La déclaration crypto n'est PAS une preuve : commande 'declared' (à
+  // vérifier via TXID), zéro point fidélité.
+  function merciPaymentProof(pending) {
+    var redirectStatus = qsParam(location.search, 'redirect_status');
+    if (redirectStatus && redirectStatus !== 'succeeded') {
+      return { ok: false, reason: 'redirect_' + redirectStatus };
+    }
+    if (pending.paymentIntentId) {
+      return { ok: true, kind: 'card', paymentIntentId: pending.paymentIntentId };
+    }
+    if (redirectStatus === 'succeeded') {
+      return { ok: true, kind: 'card', paymentIntentId: qsParam(location.search, 'payment_intent') || null };
+    }
+    var hashQ = location.hash.indexOf('?') !== -1 ? location.hash.slice(location.hash.indexOf('?')) : '';
+    var sessionId = qsParam(hashQ, 'session_id');
+    if (sessionId && pending.sessionId && sessionId === pending.sessionId) {
+      return { ok: true, kind: 'card', sessionId: sessionId };
+    }
+    if (String(pending.method || '').indexOf('crypto:') === 0) {
+      return { ok: true, kind: 'crypto' };
+    }
+    return { ok: false, reason: 'no_proof' };
+  }
+
   function handleMerciPage() {
     // Called when route changes to /merci
     var pending = null;
     try { pending = JSON.parse(localStorage.getItem('pt_pending_order') || 'null'); } catch (e) {}
-    if (pending) {
-      // Local loyalty accrual — runs regardless of Firestore availability
-      addLoyaltyPurchase(Number(pending.total) || 0);
-      if (typeof track === 'function') track('purchase', { value: pending.total });
+    if (!pending) return;
+
+    // Pending périmé (>2 h) : reliquat d'un paiement abandonné — on le purge
+    // sans rien écrire.
+    var MAX_PENDING_AGE = 2 * 3600 * 1000;
+    if (!pending.ts || (Date.now() - pending.ts) > MAX_PENDING_AGE) {
+      try { localStorage.removeItem('pt_pending_order'); } catch (_) {}
+      return;
     }
-    if (pending && _currentUser && _fb) {
-      // Save to Firestore
+
+    var proof = merciPaymentProof(pending);
+    if (!proof.ok) {
+      // Échec explicite du retour 3DS → purge (le paiement n'a pas eu lieu).
+      // Sans preuve du tout : on laisse le pending en place (un retour
+      // redirect légitime peut encore arriver), la garde 2 h le purgera.
+      if (String(proof.reason).indexOf('redirect_') === 0) {
+        try { localStorage.removeItem('pt_pending_order'); } catch (_) {}
+      }
+      return;
+    }
+
+    // Preuve obtenue : consommer le pending AVANT tout effet — un refresh de
+    // /merci ne peut plus recréditer la fidélité ni dupliquer la commande.
+    try { localStorage.removeItem('pt_pending_order'); } catch (_) {}
+
+    var isCrypto = proof.kind === 'crypto';
+    var lines = Array.isArray(pending.items) ? pending.items : [];
+    var totalNum = Number(pending.total) || 0;
+
+    if (!isCrypto) {
+      // Fidélité locale : uniquement sur paiement carte prouvé. La déclaration
+      // crypto sera valorisée après vérification humaine du TXID.
+      addLoyaltyPurchase(totalNum);
+      if (typeof track === 'function') track('purchase', { value: totalNum });
+    }
+
+    if (_currentUser && _fb) {
       var ordersRef = _fb.collection(_fb.db, 'users', _currentUser.uid, 'orders');
       _fb.addDoc(ordersRef, {
-        items: pending.items,
-        total: pending.total,
+        // items = NOMBRE de lignes (l'historique du compte affiche
+        // « N articles ») ; le détail vit dans `lines`.
+        items: lines.length,
+        lines: lines,
+        total: totalNum,
         date: _fb.serverTimestamp(),
-        status: 'paid',
+        status: isCrypto ? 'declared' : 'paid',
         method: pending.method || 'stripe',
-        paymentIntentId: pending.paymentIntentId || null
-      }).then(function () {
-        localStorage.removeItem('pt_pending_order');
-      }).catch(function () {});
-    } else if (pending) {
-      // No Firestore but payment processed — clean up
-      try { localStorage.removeItem('pt_pending_order'); } catch (_) {}
+        paymentIntentId: proof.paymentIntentId || pending.paymentIntentId || null,
+        // Permet au webhook checkout.session.completed de retrouver et
+        // confirmer cette commande (updateOrderWhere stripeSessionId).
+        stripeSessionId: proof.sessionId || pending.sessionId || null
+      }).catch(function (err) {
+        console.warn('[merci] order save failed:', err && err.message);
+      });
+    }
+
+    // Nettoie les paramètres de retour Stripe de l'URL (?payment_intent=…) :
+    // évite tout retraitement au refresh et n'expose pas le client_secret
+    // dans l'historique/partage d'URL.
+    if (location.search) {
+      try { history.replaceState(null, '', location.pathname + location.hash); } catch (_) {}
     }
   }
 
