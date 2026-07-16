@@ -34,10 +34,22 @@ async function allow(bucket, key, max, windowSec) {
   }
 }
 
-// Best-effort client IP from proxy headers (Vercel sets x-forwarded-for).
+// IP client depuis les en-têtes proxy.
+// SÉCURITÉ (H2) : on privilégie `x-real-ip`, que Vercel POSE lui-même à l'IP
+// réelle de connexion et écrase — non falsifiable par le client. L'ancienne
+// version prenait le PREMIER token de `x-forwarded-for`, c'est-à-dire la valeur
+// la plus à gauche, potentiellement injectée par le client : un attaquant
+// changeait d'`X-Forwarded-For` à chaque requête → clé de compteur différente
+// → tous les plafonds (contact, newsletter, paiement) contournés.
+// Repli si x-real-ip absent (autre hébergeur) : DERNIER token de XFF, celui
+// ajouté par le proxy de confiance le plus proche du serveur — pas le premier.
 function clientIp(req) {
-  var xff = String((req.headers && req.headers['x-forwarded-for']) || '').split(',')[0].trim();
-  return xff || (req.headers && req.headers['x-real-ip']) || 'unknown';
+  var h = (req && req.headers) || {};
+  var realIp = String(h['x-real-ip'] || '').trim();
+  if (realIp) return realIp;
+  var parts = String(h['x-forwarded-for'] || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+  if (parts.length) return parts[parts.length - 1];
+  return 'unknown';
 }
 
 module.exports = { allow: allow, clientIp: clientIp };
