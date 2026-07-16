@@ -257,6 +257,36 @@ contrôle ; serveur coupé + ?v=inconnu → 200 depuis le cache (273 Ko).
 PIÈGE TEST : querySelector('div[role=alert]') matche #stripeCardError en
 premier — cibler #ptBootWatchdog.
 
+## Session cybersécurité S1-S3 (15/07/2026, SW v315, mergé master)
+Suite à un audit sécurité complet 4 axes (API, Firebase, client/XSS, RGPD).
+Verdict : socle solide (0 XSS exploitable, prix/fidélité serveur, QR local, SW
+sain, pas de carte touchée). 3 failles critiques traitées :
+- ✅ S1 RÈGLES FIRESTORE (le trou racine) : AUCUN firestore.rules n'était
+  versionné → la seule barrière protégeant les données clients était inconnue.
+  Créé firestore.rules (DEFAULT-DENY) + firebase.json : users/{uid} self-only +
+  allowlist de champs ; orders création client 'quote'/'pending'/'declared'
+  seulement (jamais 'paid') ; payments/stripe_events/rate_limits/
+  product_overrides fermées au client ; catch-all final if false. PROUVÉ par
+  scripts/test-rules.js (27 assertions) contre l'ÉMULATEUR Firestore réel
+  (firebase-tools installé en dev). NON branché à la CI (émulateur requis).
+- ✅ S3 (fermé par S1) : le client ne peut plus forger status:'paid' (règle) ;
+  /merci écrit 'pending', le webhook Admin SDK confirme en 'paid'.
+- ✅ S2 IDOR uid : create-payment-intent/checkout faisaient confiance à
+  body.uid → un attaquant lisait la dépense/fidélité d'autrui + volait sa
+  remise. Corrigé : _lib/firebase.verifyUid(req) vérifie l'ID token Firebase
+  (Authorization Bearer) ; uid dérivé UNIQUEMENT du token vérifié, body.uid
+  ignoré. Client : jsonAuthHeaders() joint getIdToken aux 2 POST.
+⚠️ ACTIONS USER AVANT LANCEMENT :
+  1. DÉPLOYER LES RÈGLES : `cd pirates-tools && npx firebase deploy --only
+     firestore:rules` — TANT QUE CE N'EST PAS FAIT, la protection des données
+     clients reste théorique (règles réelles sur le projet = inconnues).
+  2. Vérifier FIREBASE_SERVICE_ACCOUNT sur Vercel (verifyIdToken en dépend ;
+     sans lui, uid=null → aucune remise mais paiement OK).
+Restent de l'audit sécu (🟠, non bloquants, à faire) : en-têtes CSP+HSTS+
+Permissions-Policy (vercel.json) ; rate-limit x-real-ip au lieu de xff ;
+territoire fiscal CP obligatoire côté API ; énumération de comptes ;
+verifyBeforeUpdateEmail ; GA4/Meta Pixel sur-déclarés dans les textes.
+
 ## Vérification standard
 `cd pirates-tools && node scripts/ci.js` doit rester vert après chaque étape.
 Bump SW (`sw.js` VERSION + ASSET_VER) et `?v=` dans `index.html` à chaque changement d'asset.
