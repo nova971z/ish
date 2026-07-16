@@ -291,10 +291,6 @@
   // tag manager is already present on the page).
   var ANALYTICS = { ga4Id: '', metaPixelId: '' };
   var ANALYTICS_CONSENT_KEY = 'pt:analytics-consent';
-  // Accusé de réception de l'INFORMATION cookies techniques (cas sans traceur).
-  // Distinct du consentement analytics : ce n'est pas un consentement (les
-  // cookies techniques n'en requièrent pas), juste une info affichée une fois.
-  var COOKIE_NOTICE_KEY = 'pt:cookie-notice';
   var _consent = null;
   var _analyticsQueue = [];
 
@@ -354,63 +350,44 @@
   }
 
   function setupConsentBar() {
+    if (_consent) return; // choix Accepter/Refuser déjà exprimé
     var bar = document.getElementById('consentBar');
     if (!bar) return;
 
-    // ── Cas 1 : un traceur soumis à consentement EST configuré ────────────
-    // (GA4 / Meta Pixel). Vrai bandeau de consentement Accepter/Refuser qui
-    // gouverne le chargement analytics. Mécanisme d'origine, inchangé.
-    if (analyticsConfigured()) {
-      if (_consent) return; // déjà décidé
-      bar.hidden = false;
-      bar.addEventListener('click', function (e) {
-        var btn = e.target.closest('[data-consent]');
-        if (!btn) return;
-        var value = btn.getAttribute('data-consent');
-        if (value !== 'accept' && value !== 'deny') return;
-        saveConsent(value === 'accept' ? 'granted' : 'denied');
-        bar.hidden = true;
-        if (value === 'accept') {
-          flushAnalyticsQueue();
-          track('consent_granted', { timestamp: Date.now() });
-        }
-      });
-      return;
+    // Schéma standard (décision produit 16/07) : les cookies TECHNIQUES sont
+    // toujours actifs (indispensables — panier, session, territoire ; le
+    // RGPD/ePrivacy n'exige aucun consentement pour eux, on l'ANNONCE dans le
+    // texte, pas de case à cocher). Le CLIENT garde le choix Accepter/Refuser
+    // pour la mesure d'audience. Honnêteté : aucun traceur n'étant branché
+    // aujourd'hui (IDs GA4/Meta vides), le texte dit « pourra être activée »
+    // — et le choix est RÉELLEMENT enregistré (pt:analytics-consent) : c'est
+    // la clé qui gouvernera le chargement GA4/Meta le jour où un ID sera
+    // renseigné. Refuser = aucun traçage, même après activation. CNIL :
+    // Refuser aussi accessible qu'Accepter (deux boutons côte à côte).
+    if (!analyticsConfigured()) {
+      var textEl = bar.querySelector('.consent-bar__text');
+      // Texte court volontairement (cf. v313 : un texte long empilait ~8
+      // lignes sur mobile et recouvrait les filtres du catalogue).
+      if (textEl) {
+        textEl.innerHTML = '<strong>Cookies</strong> — Les cookies techniques nécessaires '
+          + 'au fonctionnement (panier, session, territoire) sont toujours actifs. '
+          + 'Avec votre accord, une mesure d’audience anonyme pourra être activée. '
+          + '<a href="#/confidentialite" class="consent-bar__link">En savoir plus</a>';
+      }
     }
 
-    // ── Cas 2 : AUCUN traceur (état actuel) ───────────────────────────────
-    // Le RGPD/ePrivacy n'impose PAS de consentement pour les cookies
-    // strictement techniques (panier, session, territoire). Mais on affiche
-    // une INFORMATION honnête et rassurante — sans mentir sur un traceur qui
-    // n'existe pas. Bouton unique « J'ai compris » = accusé de réception (pas
-    // un consentement), mémorisé pour ne pas réapparaître. En navigation
-    // privée, le stockage est vidé à la fermeture → le bandeau se remontre à
-    // chaque nouvelle session privée (comportement attendu par l'utilisateur).
-    var acked = null;
-    try { acked = localStorage.getItem(COOKIE_NOTICE_KEY); } catch (_) { acked = null; }
-    if (acked) return;
-
-    var textEl = bar.querySelector('.consent-bar__text');
-    var actionsEl = bar.querySelector('.consent-bar__actions');
-    // Texte court volontairement (cf. session boutons v313 : un texte long
-    // empilait ~8 lignes et recouvrait les filtres du catalogue sur mobile).
-    if (textEl) {
-      textEl.innerHTML = '<strong>Cookies</strong> — Ce site n’utilise que des cookies '
-        + 'techniques nécessaires à son fonctionnement (panier, session, territoire). '
-        + 'Aucun traceur publicitaire, aucune mesure d’audience. '
-        + '<a href="#/confidentialite" class="consent-bar__link">En savoir plus</a>';
-    }
-    if (actionsEl) {
-      actionsEl.innerHTML = '<button type="button" class="btn primary consent-bar__accept" '
-        + 'data-consent="ack">J’ai compris</button>';
-    }
-    bar.setAttribute('aria-label', 'Information cookies');
     bar.hidden = false;
     bar.addEventListener('click', function (e) {
       var btn = e.target.closest('[data-consent]');
       if (!btn) return;
-      try { localStorage.setItem(COOKIE_NOTICE_KEY, '1'); } catch (_) {}
+      var value = btn.getAttribute('data-consent');
+      if (value !== 'accept' && value !== 'deny') return;
+      saveConsent(value === 'accept' ? 'granted' : 'denied');
       bar.hidden = true;
+      if (value === 'accept' && analyticsConfigured()) {
+        flushAnalyticsQueue();
+        track('consent_granted', { timestamp: Date.now() });
+      }
     });
   }
 
