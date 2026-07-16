@@ -4843,7 +4843,12 @@
         lines: lines,
         total: totalNum,
         date: _fb.serverTimestamp(),
-        status: isCrypto ? 'declared' : 'paid',
+        // S3 : le client N'ÉCRIT JAMAIS 'paid'. 'pending' = paiement carte
+        // initié (le webhook Stripe le confirmera en 'paid' via l'Admin SDK,
+        // seule source autoritaire) ; 'declared' = crypto à vérifier. Ainsi
+        // un utilisateur ne peut plus forger une fausse commande « payée »
+        // dans le tableau de bord admin (règle Firestore l'interdit aussi).
+        status: isCrypto ? 'declared' : 'pending',
         method: pending.method || 'stripe',
         paymentIntentId: proof.paymentIntentId || pending.paymentIntentId || null,
         // Permet au webhook checkout.session.completed de retrouver et
