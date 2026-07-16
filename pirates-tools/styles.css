@@ -873,8 +873,7 @@ box-shadow:
 0 0 30px rgba(var(--accent-rgb), 0.1),
 inset 0 1px 0 rgba(var(--accent-rgb), 0.2);
 transition: all 0.3s ease;
-content-visibility: auto;
-contain-intrinsic-size: 320px;
+/* content-visibility:auto retiré (même bug de peinture skip iOS que .view). */
 }
 
 .card:hover {
@@ -2483,8 +2482,7 @@ box-shadow:
 0 0 30px rgba(var(--accent-rgb), 0.1),
 inset 0 1px 0 rgba(var(--accent-rgb), 0.2);
 transition: all 0.3s ease;
-content-visibility: auto;
-contain-intrinsic-size: 320px;
+/* content-visibility:auto retiré (même bug de peinture skip iOS que .view). */
 }
 
 .cat-card:hover {
@@ -4049,8 +4047,12 @@ box-shadow: 0 0 16px rgba(37, 211, 102, 0.3);
 .view {
 width: min(var(--container-w), 92vw);
 margin: 0 auto 1.2rem;
-content-visibility: auto;
-contain-intrinsic-size: 800px 600px;
+/* content-visibility:auto RETIRÉ (bug page vide iOS Safari) : sur iPad, une vue
+   dont le sous-arbre est remplacé (re-render #list au clic d'une catégorie) ou
+   révélée via bascule display restait « skipped » → seul le placeholder
+   contain-intrinsic-size (≈800×600) était peint = zone noire, topbar/dock fixes
+   visibles, mais AUCUN contenu de vue (ni barre de recherche, ni chips). Gain
+   perf nul ici (SPA = une seule vue affichée, les autres sont display:none). */
 }
 
 /* Vue produit : pleine largeur, pas de content-visibility (casse sticky) */
