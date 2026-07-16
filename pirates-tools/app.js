@@ -291,6 +291,10 @@
   // tag manager is already present on the page).
   var ANALYTICS = { ga4Id: '', metaPixelId: '' };
   var ANALYTICS_CONSENT_KEY = 'pt:analytics-consent';
+  // Accusé de réception de l'INFORMATION cookies techniques (cas sans traceur).
+  // Distinct du consentement analytics : ce n'est pas un consentement (les
+  // cookies techniques n'en requièrent pas), juste une info affichée une fois.
+  var COOKIE_NOTICE_KEY = 'pt:cookie-notice';
   var _consent = null;
   var _analyticsQueue = [];
 
@@ -350,27 +354,63 @@
   }
 
   function setupConsentBar() {
-    if (_consent) return; // already decided
-    // M1 — n'AFFICHER le bandeau que si un traceur soumis à consentement est
-    // réellement en place. Aujourd'hui GA4/Meta Pixel ne sont PAS branchés
-    // (IDs vides) → aucun cookie non essentiel n'est déposé → pas de bandeau
-    // (RGPD/ePrivacy : le consentement ne se demande que pour de vrais
-    // traceurs). Dès qu'un ID est renseigné, le bandeau réapparaît et le
-    // consentement gouverne le chargement (mécanisme inchangé).
-    if (!analyticsConfigured()) return;
     var bar = document.getElementById('consentBar');
     if (!bar) return;
+
+    // ── Cas 1 : un traceur soumis à consentement EST configuré ────────────
+    // (GA4 / Meta Pixel). Vrai bandeau de consentement Accepter/Refuser qui
+    // gouverne le chargement analytics. Mécanisme d'origine, inchangé.
+    if (analyticsConfigured()) {
+      if (_consent) return; // déjà décidé
+      bar.hidden = false;
+      bar.addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-consent]');
+        if (!btn) return;
+        var value = btn.getAttribute('data-consent');
+        if (value !== 'accept' && value !== 'deny') return;
+        saveConsent(value === 'accept' ? 'granted' : 'denied');
+        bar.hidden = true;
+        if (value === 'accept') {
+          flushAnalyticsQueue();
+          track('consent_granted', { timestamp: Date.now() });
+        }
+      });
+      return;
+    }
+
+    // ── Cas 2 : AUCUN traceur (état actuel) ───────────────────────────────
+    // Le RGPD/ePrivacy n'impose PAS de consentement pour les cookies
+    // strictement techniques (panier, session, territoire). Mais on affiche
+    // une INFORMATION honnête et rassurante — sans mentir sur un traceur qui
+    // n'existe pas. Bouton unique « J'ai compris » = accusé de réception (pas
+    // un consentement), mémorisé pour ne pas réapparaître. En navigation
+    // privée, le stockage est vidé à la fermeture → le bandeau se remontre à
+    // chaque nouvelle session privée (comportement attendu par l'utilisateur).
+    var acked = null;
+    try { acked = localStorage.getItem(COOKIE_NOTICE_KEY); } catch (_) { acked = null; }
+    if (acked) return;
+
+    var textEl = bar.querySelector('.consent-bar__text');
+    var actionsEl = bar.querySelector('.consent-bar__actions');
+    // Texte court volontairement (cf. session boutons v313 : un texte long
+    // empilait ~8 lignes et recouvrait les filtres du catalogue sur mobile).
+    if (textEl) {
+      textEl.innerHTML = '<strong>Cookies</strong> — Ce site n’utilise que des cookies '
+        + 'techniques nécessaires à son fonctionnement (panier, session, territoire). '
+        + 'Aucun traceur publicitaire, aucune mesure d’audience. '
+        + '<a href="#/confidentialite" class="consent-bar__link">En savoir plus</a>';
+    }
+    if (actionsEl) {
+      actionsEl.innerHTML = '<button type="button" class="btn primary consent-bar__accept" '
+        + 'data-consent="ack">J’ai compris</button>';
+    }
+    bar.setAttribute('aria-label', 'Information cookies');
     bar.hidden = false;
     bar.addEventListener('click', function (e) {
       var btn = e.target.closest('[data-consent]');
       if (!btn) return;
-      var value = btn.getAttribute('data-consent');
-      saveConsent(value === 'accept' ? 'granted' : 'denied');
+      try { localStorage.setItem(COOKIE_NOTICE_KEY, '1'); } catch (_) {}
       bar.hidden = true;
-      if (value === 'accept') {
-        flushAnalyticsQueue();
-        track('consent_granted', { timestamp: Date.now() });
-      }
     });
   }
 

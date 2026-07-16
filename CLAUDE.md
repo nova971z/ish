@@ -357,6 +357,43 @@ confirmation user sur le live.
 NOTE : bandeau cookies masqué au démarrage = VOULU (M1, aucun traceur configuré)
 — pas un bug ; peut être ré-affiché si un jour un ID GA4/Meta est renseigné.
 
+## Session 3 bugs post-sécurité (16/07/2026, SW v320, branche non mergée)
+Retours user (captures iPad, navigation privée) : (a) textures 3D blanches,
+(b) page vide intermittente au clic catégorie, (c) bandeau cookies absent.
+Méthode : reproduction Playwright sous la CSP RÉELLE + model-viewer vendu en
+local (mv.js téléchargé), + capture analysée finement (la 5e capture a corrigé
+mon diagnostic initial).
+- ✅ TEXTURES BLANCHES (v319) : les GLB embarquent leurs textures en
+  EXT_texture_webp (image/webp). three.js les décode en créant un blob: URL
+  chargé via fetch() → gouverné par connect-src. La CSP (H1) n'autorisait blob:
+  ni dans img-src ni dans connect-src → « Refused to connect blob: — connect-src »
+  → « THREE.GLTFLoader: Couldn't load texture » → surface blanche (géométrie
+  DRACO OK depuis v318). Correctif : blob: ajouté à img-src ET connect-src
+  (blob = same-origin URL.createObjectURL, sûr). Reproduit + 0 violation après
+  fix. LEÇON : site 3D avec textures embarquées webp/png → la CSP DOIT autoriser
+  blob: dans connect-src (fetch du blob) ET img-src (voie Image/TextureLoader).
+- ✅ PAGE VIDE (v320) : la capture montrait topbar+dock fixes MAIS ni barre de
+  recherche ni chips ni liste = VUE entière non peinte (pas « #list vidé »).
+  Cause : `.view { content-visibility:auto; contain-intrinsic-size:800px 600px }`.
+  Sur iOS Safari, une vue dont le sous-arbre est remplacé (re-render #list au
+  clic catégorie) ou révélée via bascule display reste « skipped » → seul le
+  placeholder ~800×600 est peint = rectangle noir. Présent AVANT v314 → explique
+  que la résilience SW n'ait rien changé (mauvaise cause à l'époque). Indice :
+  l'auteur avait déjà neutralisé content-visibility sur #view-produit (« casse
+  sticky »). Correctif : retiré de .view/.card/.cat-card (gain perf nul : SPA =
+  1 vue affichée, listes 26 items). #view-produit reste content-visibility:
+  visible. Écarté par test : PAS l'épuisement WebGL (model-viewer 3.x =
+  renderer partagé unique, testé 26→2 ×8 = 0 fuite) ni la mémoire (aurait blanchi
+  les modèles, pas la barre de recherche). Confirmation non-blank iPad = user.
+- ✅ BANDEAU COOKIES (v320) : M1 le masquait (aucun traceur = pas de consentement
+  requis). User le veut visible sans mentir. setupConsentBar gère 2 cas :
+  traceur configuré → consentement Accepter/Refuser (inchangé) ; AUCUN traceur
+  (actuel) → INFO honnête « cookies techniques uniquement, aucun traceur » +
+  bouton unique « J'ai compris » (accusé, pas consentement ; clé pt:cookie-notice,
+  vidée en navigation privée → se remontre à chaque session). Vérifié Playwright.
+REVERSAL DOC : la NOTE M1 ci-dessus (« bandeau masqué = voulu ») est désormais
+caduque — remplacée par le bandeau info honnête.
+
 ## Vérification standard
 `cd pirates-tools && node scripts/ci.js` doit rester vert après chaque étape.
 Bump SW (`sw.js` VERSION + ASSET_VER) et `?v=` dans `index.html` à chaque changement d'asset.
