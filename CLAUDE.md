@@ -320,6 +320,27 @@ Playwright + émulateur.
 firebase-tools + émulateur Firestore installés en dev (non committés) pour
 tester règles (S1) — restent dispo pour re-tester.
 
+## Session RGPD/mineurs M1-M5 (15/07/2026, SW v317, mergé master)
+Derniers 🟢 de l'audit sécurité soldés :
+- ✅ M1 fin sur-déclaration GA4/Meta Pixel : bandeau consentement affiché
+  UNIQUEMENT si un traceur est configuré (IDs vides → pas de bandeau, conforme
+  ePrivacy) ; politique reformulée (aucun traceur actif à ce jour). Mécanisme
+  prêt : dès qu'un ID est renseigné, bandeau + consentement réapparaissent.
+- ✅ M2 IP hachée (sha256 tronqué) dans rate_limits/ au lieu d'en clair.
+  Rappel owner : activer policy TTL Firestore sur rate_limits.expiresAt.
+- ✅ M3 pas de PII dans les logs : webhook logue orderRef, plus l'email ;
+  contact/newsletter loguent status+message d'erreur, plus l'objet complet.
+- ✅ M4 droit à l'oubli : rules owner-delete (users/{uid} + orders ; payments/
+  conservé comptable) ; UI Paramètres « Supprimer mon compte » ; flux réauth
+  mot de passe → purge orders+profil → deleteUser → nettoyage. test-rules.js
+  29/29 (owner supprime SES données, pas celles d'autrui). Playwright OK.
+- ✅ M5a noopener sur window.open WhatsApp (app.js). M5b SRI sha384 sur
+  model-viewer 3.5.0 (hash calculé sur le fichier réel ajax.googleapis).
+  three.js : SRI reporté (fichier jsdelivr injoignable via proxy pour hasher ;
+  protégé par restriction d'origine CSP).
+firestore.rules : delete désormais autorisé au titulaire (M4) — test-rules.js
+à jour (29 assertions).
+
 ## Vérification standard
 `cd pirates-tools && node scripts/ci.js` doit rester vert après chaque étape.
 Bump SW (`sw.js` VERSION + ASSET_VER) et `?v=` dans `index.html` à chaque changement d'asset.
