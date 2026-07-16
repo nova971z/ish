@@ -33,4 +33,24 @@ function getFirebase() {
   }
 }
 
-module.exports = { getFirebase: getFirebase };
+// Vérifie un ID token Firebase présenté en `Authorization: Bearer <token>`.
+// Retourne l'uid AUTHENTIFIÉ (signé par Firebase, infalsifiable) ou null si
+// absent/invalide/expiré, ou si l'Admin SDK n'est pas configuré. Ne jette
+// jamais → l'appelant dégrade proprement (pas de remise, pas de matching par
+// uid). C'est la brique de S2 : on ne fait plus confiance à un uid déclaratif.
+async function verifyUid(req) {
+  try {
+    var h = (req.headers && (req.headers.authorization || req.headers.Authorization)) || '';
+    var m = /^Bearer\s+(.+)$/i.exec(String(h).trim());
+    if (!m) return null;
+    var fb = getFirebase();
+    if (!fb.admin) return null;
+    var decoded = await fb.admin.auth().verifyIdToken(m[1]);
+    return (decoded && decoded.uid) || null;
+  } catch (e) {
+    // token invalide/expiré/révoqué → traité comme non authentifié
+    return null;
+  }
+}
+
+module.exports = { getFirebase: getFirebase, verifyUid: verifyUid };

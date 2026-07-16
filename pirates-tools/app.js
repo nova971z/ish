@@ -44,6 +44,24 @@
     return (typeof window.PT_API_BASE === 'string') ? window.PT_API_BASE : '';
   }
 
+  // En-têtes d'un POST JSON authentifié (S2). Si l'utilisateur est connecté, on
+  // joint son ID token Firebase en `Authorization: Bearer` : le serveur en
+  // dérive l'uid VÉRIFIÉ (la remise fidélité et le matching de commande ne
+  // reposent plus sur un uid déclaratif falsifiable). Résout toujours (jamais
+  // de rejet) : sans session ou si getIdToken échoue, on part sans en-tête auth
+  // (le serveur traite alors la requête comme anonyme = pas de remise).
+  function jsonAuthHeaders() {
+    var base = { 'Content-Type': 'application/json' };
+    var user = _currentUser;
+    if (user && typeof user.getIdToken === 'function') {
+      return user.getIdToken().then(function (tok) {
+        base['Authorization'] = 'Bearer ' + tok;
+        return base;
+      }).catch(function () { return base; });
+    }
+    return Promise.resolve(base);
+  }
+
   function debounce(fn, ms) {
     var t;
     return function () {
@@ -4449,25 +4467,24 @@
     }
 
     var apiBase = apiBaseUrl();
-    fetch(apiBase + '/api/create-payment-intent', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        // Server resolves prices from the catalogue by key — no price is sent.
-        items: _payItems.map(function (it) {
-          return { key: it.key, title: it.title, qty: it.qty || 1 };
-        }),
-        customerEmail: (_currentUser && _currentUser.email) || undefined,
-        // Territoire dérivé du CP de livraison ; le serveur re-dérive depuis
-        // postalCode (source autoritaire) — celui-ci prime toujours.
-        territory: ship.territory,
-        postalCode: ship.addr.postal,
-        shipping: { name: ship.addr.name, line1: ship.addr.line1, city: ship.addr.city },
-        // uid → metadata Stripe : permet au webhook de retrouver la commande
-        // par chemin direct users/{uid}/orders (aucun index Firestore requis)
-        // et de lier le journal payments/ au compte client.
-        uid: (_currentUser && _currentUser.uid) || undefined
-      })
+    var piBody = JSON.stringify({
+      // Server resolves prices from the catalogue by key — no price is sent.
+      items: _payItems.map(function (it) {
+        return { key: it.key, title: it.title, qty: it.qty || 1 };
+      }),
+      customerEmail: (_currentUser && _currentUser.email) || undefined,
+      // Territoire dérivé du CP de livraison ; le serveur re-dérive depuis
+      // postalCode (source autoritaire) — celui-ci prime toujours.
+      territory: ship.territory,
+      postalCode: ship.addr.postal,
+      shipping: { name: ship.addr.name, line1: ship.addr.line1, city: ship.addr.city }
+      // uid retiré du corps (S2) : le serveur le dérive de l'ID token vérifié
+      // (en-tête Authorization), il n'est plus déclaratif.
+    });
+    jsonAuthHeaders().then(function (headers) {
+      return fetch(apiBase + '/api/create-payment-intent', {
+        method: 'POST', headers: headers, body: piBody
+      });
     })
     .then(function (r) { return r.json(); })
     .then(function (data) {
@@ -4663,18 +4680,17 @@
       var btn2 = document.getElementById('payModalConfirm');
       if (btn2) { btn2.disabled = true; btn2.textContent = 'Redirection…'; }
 
-      fetch(apiBase + '/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          // Server resolves prices from the catalogue by key — no price is sent.
-          items: _payItems.map(function (it) {
-            return { key: it.key, title: it.title, qty: it.qty || 1 };
-          }),
-          customerEmail: (_currentUser && _currentUser.email) || undefined,
-          territory: _currentTerritory,
-          uid: (_currentUser && _currentUser.uid) || undefined
-        })
+      var coBody = JSON.stringify({
+        // Server resolves prices from the catalogue by key — no price is sent.
+        items: _payItems.map(function (it) {
+          return { key: it.key, title: it.title, qty: it.qty || 1 };
+        }),
+        customerEmail: (_currentUser && _currentUser.email) || undefined,
+        territory: _currentTerritory
+        // uid retiré du corps (S2) : dérivé de l'ID token vérifié côté serveur.
+      });
+      jsonAuthHeaders().then(function (headers) {
+        return fetch(apiBase + '/api/checkout', { method: 'POST', headers: headers, body: coBody });
       })
       .then(function (r) { return r.json(); })
       .then(function (data) {

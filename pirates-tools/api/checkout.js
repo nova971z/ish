@@ -11,7 +11,8 @@ var catalog = require('./_lib/catalog');
 var pricing = require('./_lib/pricing');
 var rl = require('./_lib/ratelimit');
 var loyalty = require('./_lib/loyalty');
-var getFirebase = require('./_lib/firebase').getFirebase;
+var fbLib = require('./_lib/firebase');
+var getFirebase = fbLib.getFirebase;
 
 var MAX_QTY_PER_LINE = 99;
 var MAX_LINES = 50;
@@ -42,10 +43,10 @@ module.exports = async function handler(req, res) {
     var items = body.items;
     var customerEmail = body.customerEmail;
 
-    // uid Firebase (déclaratif — voir create-payment-intent.js) : matching
-    // commande + journal payments/ côté webhook. Sanitisé, jamais un droit.
-    var uid = typeof body.uid === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(body.uid)
-      ? body.uid : null;
+    // uid AUTHENTIFIÉ (S2) : vérifié depuis l'ID token Firebase du header
+    // Authorization (jamais le corps). Absent/invalide → null. Voir
+    // create-payment-intent.js pour le détail.
+    var uid = await fbLib.verifyUid(req);
 
     // Territoire STRICT (A1) : absent → défaut ; fourni mais inconnu → 400.
     // Même règle que create-payment-intent — le webhook confronte ensuite ce
