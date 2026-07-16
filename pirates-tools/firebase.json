@@ -1,0 +1,12 @@
+{
+  "//": "Config de déploiement Firebase versionnée (S1). Déploiement des règles + index : `firebase deploy --only firestore`. Les règles (firestore.rules) sont la SEULE barrière protégeant les données clients de tout accès direct via le SDK client — elles doivent être déployées et tenues à jour avec le code.",
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "emulators": {
+    "firestore": { "port": 8080 },
+    "ui": { "enabled": false },
+    "singleProjectMode": true
+  }
+}

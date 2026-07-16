@@ -1,0 +1,87 @@
+rules_version = '2';
+
+// ============================================================================
+// Pirates Tools — Règles de sécurité Firestore (S1)
+// ============================================================================
+//
+// MODÈLE DE CONFIANCE
+//   • Le SDK client (navigateur) est SOUMIS à ces règles.
+//   • L'Admin SDK serveur (api/_lib/firebase.js, webhook) les CONTOURNE
+//     totalement — c'est lui, et lui seul, qui écrit les données autoritaires
+//     (statut 'paid', journal des paiements, idempotence, overrides catalogue).
+//
+// PRINCIPE : DEFAULT-DENY. Toute collection non couverte par un `match`
+// explicite ci-dessous est refusée en lecture ET écriture (règle finale
+// catch-all). On n'ouvre QUE ce qui est strictement nécessaire au client.
+//
+// Déploiement : `firebase deploy --only firestore:rules`
+// Test : `firebase emulators:exec --only firestore "node scripts/test-rules.js"`
+// ============================================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---- Helpers -----------------------------------------------------------
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // ---- users/{uid} : profil client, self-only ---------------------------
+    // Un utilisateur ne peut lire/écrire QUE son propre document. Les champs
+    // sont restreints à une allowlist (anti mass-assignment) : impossible
+    // d'injecter un champ arbitraire (ex. un rôle, un privilège). Le champ
+    // `loyalty` reste toléré mais est INERTE côté sécurité — la remise réelle
+    // est calculée serveur depuis la collection `payments/` (webhook-only),
+    // jamais depuis ce champ.
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create, update: if isOwner(userId)
+        && request.resource.data.keys().hasOnly(
+             ['name', 'email', 'phone', 'address', 'avatar', 'loyalty', 'createdAt']);
+      // Suppression de compte : via un flux dédié (Auth deleteUser + purge
+      // serveur), jamais une suppression directe de document par le client.
+      allow delete: if false;
+
+      // ---- users/{uid}/orders : commandes du client -----------------------
+      // Le client peut CRÉER ses propres lignes de commande, mais UNIQUEMENT
+      // avec un statut non-payé ('quote' = devis WhatsApp, 'pending' =
+      // paiement initié, 'declared' = crypto déclaré à vérifier). Il ne peut
+      // JAMAIS écrire 'paid' ni les tampons serveur (confirmedByWebhook,
+      // paidAt…) : seul le webhook (Admin SDK) confirme un paiement. Il ne
+      // peut ni modifier ni supprimer une commande existante.
+      match /orders/{orderId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId)
+          && request.resource.data.status in ['quote', 'pending', 'declared']
+          && !request.resource.data.keys().hasAny(
+               ['confirmedByWebhook', 'paidAt', 'stripePaymentIntent'])
+          && request.resource.data.keys().hasOnly(
+               ['date', 'items', 'lines', 'total', 'status',
+                'method', 'paymentIntentId', 'stripeSessionId'])
+          && (!('total' in request.resource.data) || request.resource.data.total is number)
+          && (!('items' in request.resource.data) || request.resource.data.items is number);
+        // Confirmation/mise à jour/annulation = Admin SDK serveur uniquement.
+        allow update, delete: if false;
+      }
+    }
+
+    // ---- Collections SERVEUR UNIQUEMENT (Admin SDK, contourne les règles) --
+    // Aucune de ces collections n'est jamais lue ni écrite par le client.
+    // Les fermer explicitement documente l'intention (et double le catch-all).
+    match /payments/{paymentId}        { allow read, write: if false; } // journal paiements (email/CP/montants)
+    match /stripe_events/{eventId}     { allow read, write: if false; } // idempotence webhook
+    match /rate_limits/{bucketId}      { allow read, write: if false; } // compteurs anti-abus (IP)
+    match /product_overrides/{prodId}  { allow read, write: if false; } // prix/stock admin
+
+    // ---- DEFAULT-DENY final : tout le reste est refusé --------------------
+    // Une requête n'est autorisée que si AU MOINS une règle ci-dessus l'accorde.
+    // Ce catch-all ne peut donc pas rouvrir un accès ; il verrouille toute
+    // collection future oubliée. À NE PAS retirer.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -14,7 +14,8 @@ var stripeMeta = require('./_lib/stripe-meta');
 var rl = require('./_lib/ratelimit');
 var loyalty = require('./_lib/loyalty');
 var postal = require('./_lib/postal');
-var getFirebase = require('./_lib/firebase').getFirebase;
+var fbLib = require('./_lib/firebase');
+var getFirebase = fbLib.getFirebase;
 
 var MAX_QTY_PER_LINE = 99;
 var MAX_LINES = 50;
@@ -46,13 +47,12 @@ module.exports = async function handler(req, res) {
     var items = body.items;
     var customerEmail = body.customerEmail;
 
-    // uid Firebase (déclaratif) : uniquement pour retrouver la commande du
-    // client côté webhook (chemin users/{uid}/orders) et lier le journal
-    // payments/. Un uid forgé ne donne AUCUN droit : il ne fait que pointer
-    // vers une sous-collection où seul le vrai titulaire peut écrire (règles
-    // Firestore) — le matching échoue simplement. Sanitisé par prudence.
-    var uid = typeof body.uid === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(body.uid)
-      ? body.uid : null;
+    // uid AUTHENTIFIÉ (S2) : vérifié depuis l'ID token Firebase du header
+    // Authorization, jamais depuis le corps de la requête. C'est ce qui empêche
+    // un attaquant de réclamer la remise fidélité d'autrui ou de polluer son
+    // historique en envoyant un uid arbitraire. Absent/invalide → null (aucune
+    // remise, aucun matching par uid). Le body.uid éventuel est IGNORÉ.
+    var uid = await fbLib.verifyUid(req);
 
     // Territoire STRICT (A1) : absent → défaut ; fourni mais inconnu → 400.
     // Avant, un code invalide retombait silencieusement sur le défaut, ce qui
