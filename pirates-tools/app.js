@@ -344,8 +344,20 @@
     });
   }
 
+  // Un traceur soumis à consentement est-il RÉELLEMENT configuré ?
+  function analyticsConfigured() {
+    return !!(ANALYTICS && (ANALYTICS.ga4Id || ANALYTICS.metaPixelId));
+  }
+
   function setupConsentBar() {
     if (_consent) return; // already decided
+    // M1 — n'AFFICHER le bandeau que si un traceur soumis à consentement est
+    // réellement en place. Aujourd'hui GA4/Meta Pixel ne sont PAS branchés
+    // (IDs vides) → aucun cookie non essentiel n'est déposé → pas de bandeau
+    // (RGPD/ePrivacy : le consentement ne se demande que pour de vrais
+    // traceurs). Dès qu'un ID est renseigné, le bandeau réapparaît et le
+    // consentement gouverne le chargement (mécanisme inchangé).
+    if (!analyticsConfigured()) return;
     var bar = document.getElementById('consentBar');
     if (!bar) return;
     bar.hidden = false;
@@ -827,7 +839,9 @@
     var items = getCart();
     if (items.length === 0) { toast('Panier vide', 'error'); return; }
     var msg = waCartMessage(items, _currentTerritory);
-    window.open(waLink(msg), '_blank');
+    // noopener : la page ouverte ne reçoit pas window.opener (anti-tabnabbing),
+    // cohérent avec les autres window.open du fichier.
+    window.open(waLink(msg), '_blank', 'noopener');
 
     // Save to Firestore order history (if authenticated)
     var total = 0;
@@ -1110,6 +1124,12 @@
       var s = document.createElement('script');
       s.type = 'module';
       s.src = 'https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js';
+      // SRI (M5) : le navigateur refuse d'exécuter le script si son empreinte
+      // ne correspond pas EXACTEMENT — un CDN compromis ou un MITM ne peut plus
+      // injecter de code. Hash calculé sur la version FIGÉE 3.5.0 servie par
+      // ajax.googleapis.com ; crossOrigin requis pour que le SRI s'applique.
+      s.crossOrigin = 'anonymous';
+      s.integrity = 'sha384-Ftcjj/GNLxPvzNDftO/oryXB9aGxsGZY9JGqsXG0uUKgQDl9RfDgsx9NJ/4IVNPe';
       s.onerror = function () { _mvPromise = null; reject(new Error('model-viewer load failed')); };
       document.head.appendChild(s);
       if (window.customElements && customElements.whenDefined) {
@@ -3645,6 +3665,68 @@
     });
   }
 
+  // Droit à l'oubli (M4). Supprime DÉFINITIVEMENT le compte : réauth par mot de
+  // passe (preuve de propriété — pas juste une session ouverte), puis purge des
+  // commandes + du profil (règles Firestore owner-delete), puis suppression du
+  // compte Auth. Le journal payments/ (server-only) est conservé au titre des
+  // obligations comptables. Ordre choisi : Firestore d'ABORD (tant que le
+  // compte existe, les règles autorisent la suppression), Auth EN DERNIER.
+  function handleDeleteAccount(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    if (!_fb || !_currentUser) return;
+    var pwdEl = document.getElementById('deleteAccountPwd');
+    var btn = document.getElementById('deleteAccountBtn');
+    var pwd = pwdEl ? pwdEl.value : '';
+    if (!pwd) { toast('Confirme ton mot de passe', 'error'); return; }
+    if (!window.confirm('Cette action est IRRÉVERSIBLE : ton compte, ton profil et ton historique seront supprimés définitivement. Continuer ?')) return;
+
+    if (btn) { btn.disabled = true; btn.textContent = 'Suppression…'; }
+    var user = _fb.auth.currentUser;
+    var uid = user.uid;
+    var cred = _fb.EmailAuthProvider.credential(user.email, pwd);
+
+    _fb.reauthenticateWithCredential(user, cred)
+      .then(function () {
+        // Purge les commandes du client (chacune supprimée par le titulaire).
+        var ordersRef = _fb.collection(_fb.db, 'users', uid, 'orders');
+        return _fb.getDocs(ordersRef).then(function (snap) {
+          var dels = [];
+          snap.forEach(function (d) { dels.push(_fb.deleteDoc(d.ref)); });
+          return Promise.all(dels);
+        });
+      })
+      .then(function () {
+        // Supprime le document profil.
+        return _fb.deleteDoc(_fb.doc(_fb.db, 'users', uid));
+      })
+      .then(function () {
+        // Supprime le compte Auth (en dernier).
+        return _fb.deleteUser(user);
+      })
+      .then(function () {
+        // Nettoyage local (caches non essentiels liés à l'identité).
+        try {
+          localStorage.removeItem('pt:loyalty');
+          localStorage.removeItem('pt_pending_order');
+        } catch (_) {}
+        _currentUser = null;
+        _userProfile = null;
+        toast('Ton compte et tes données ont été supprimés.', 'success');
+        location.hash = '#/';
+      })
+      .catch(function (err) {
+        if (btn) { btn.disabled = false; btn.textContent = 'Supprimer définitivement mon compte'; }
+        var code = (err && err.code) || '';
+        if (code === 'auth/wrong-password' || code === 'auth/invalid-credential') {
+          toast('Mot de passe incorrect.', 'error');
+        } else if (code === 'auth/requires-recent-login') {
+          toast('Reconnecte-toi puis réessaie la suppression.', 'error');
+        } else {
+          toast('Suppression impossible : ' + fbErrorMessage(err), 'error');
+        }
+      });
+  }
+
   function handleResendVerification() {
     if (!_currentUser || !_fb) return;
     _fb.sendEmailVerification(_currentUser).then(function () {
@@ -3911,6 +3993,8 @@
 
     // Logout
     if (dom.accLogout) dom.accLogout.addEventListener('click', handleLogout);
+    var delForm = document.getElementById('deleteAccountForm');
+    if (delForm) delForm.addEventListener('submit', handleDeleteAccount);
 
     // Resend email verification
     if (dom.accResendVerify) dom.accResendVerify.addEventListener('click', handleResendVerification);

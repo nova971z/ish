@@ -33,7 +33,7 @@
   <link rel="dns-prefetch" href="https://js.stripe.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=316">
+  <link rel="stylesheet" href="styles.css?v=317">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -118,9 +118,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Pirates Tools" />
-  <link rel="manifest" href="manifest.webmanifest?v=316" />
-  <link rel="icon" href="icons/icon-192.png?v=316" sizes="192x192" />
-  <link rel="apple-touch-icon" href="icons/icon-180.png?v=316" sizes="180x180" />
+  <link rel="manifest" href="manifest.webmanifest?v=317" />
+  <link rel="icon" href="icons/icon-192.png?v=317" sizes="192x192" />
+  <link rel="apple-touch-icon" href="icons/icon-180.png?v=317" sizes="180x180" />
 
 
 
@@ -142,7 +142,7 @@
         <img
           id="topbarLogo"
           class="topbar-logo"
-          src="icons/icon-192.png?v=316"
+          src="icons/icon-192.png?v=317"
           alt="Pirates Tools"
           width="40" height="40"
           decoding="async" loading="eager" fetchpriority="high" />
@@ -173,8 +173,8 @@
   <section id="hero" class="hero-full" aria-hidden="true">
     <div class="hero-logo-container initial" id="heroLogoContainer">
       <img id="heroLogo" class="hero-logo on" alt="Pirates Tools"
-        src="icons/icon-512.png?v=316"
-        srcset="icons/icon-256.png?v=316 256w, icons/icon-384.png?v=316 384w, icons/icon-512.png?v=316 512w"
+        src="icons/icon-512.png?v=317"
+        srcset="icons/icon-256.png?v=317 256w, icons/icon-384.png?v=317 384w, icons/icon-512.png?v=317 512w"
         sizes="(max-width: 768px) 90vw, 60vw"
         width="600" height="600"
         decoding="async" loading="eager" fetchpriority="high" />
@@ -751,6 +751,22 @@
               </div>
             </div>
           </div>
+
+          <!-- Droit à l'oubli (RGPD) : suppression définitive du compte. -->
+          <div class="card acc-danger" style="margin-top:1.2rem;border-color:rgba(239,68,68,.35)">
+            <div class="head"><h3 class="title">Supprimer mon compte</h3><span class="badge" style="background:rgba(239,68,68,.15);color:#f87171">Irréversible</span></div>
+            <div class="specs">
+              <p style="opacity:.8;margin:0 0 .8rem;font-size:.9rem">Supprime <strong>définitivement</strong> ton compte, ton profil et ton historique de commandes. Les justificatifs de paiement légalement obligatoires sont conservés de façon dissociée. <strong>Action irréversible.</strong></p>
+              <form id="deleteAccountForm" class="acc-form" autocomplete="off" novalidate>
+                <label>Confirme ton mot de passe
+                  <input id="deleteAccountPwd" type="password" class="search" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" autocomplete="current-password" required />
+                </label>
+                <div class="actions">
+                  <button id="deleteAccountBtn" class="btn" type="submit" style="background:#ef4444;color:#fff">Supprimer définitivement mon compte</button>
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
 
       </div>
@@ -1068,7 +1084,7 @@
           <li><strong>Commandes :</strong> produits commandés, montants, historique.</li>
           <li><strong>Paiement :</strong> traité directement par Stripe. <strong>Aucune donnée de carte bancaire n'est stockée sur nos serveurs.</strong></li>
           <li><strong>Formulaire de contact / newsletter :</strong> nom, email, message.</li>
-          <li><strong>Navigation :</strong> cookies de mesure d'audience (Google Analytics 4) et publicitaires (Meta Pixel), <strong>uniquement après votre consentement</strong>.</li>
+          <li><strong>Navigation :</strong> le site n'utilise <strong>actuellement aucun cookie de mesure d'audience ni publicitaire</strong>. Seules des données <strong>fonctionnelles</strong> (panier, préférences, session de connexion) sont stockées localement sur votre appareil. Si une mesure d'audience (Google Analytics&nbsp;4) ou publicitaire (Meta&nbsp;Pixel) venait à être activée, elle ne le serait <strong>qu'après votre consentement</strong>, via un bandeau dédié.</li>
           <li><strong>Paiement crypto :</strong> seule une adresse publique de portefeuille est affichée ; aucune donnée personnelle n'est traitée.</li>
         </ul>
 
@@ -1089,7 +1105,7 @@
           <li><strong>Stripe</strong> — paiement par carte (Stripe Payments Europe Ltd, Irlande).</li>
           <li><strong>Resend</strong> — envoi des emails transactionnels (Resend Inc., États-Unis).</li>
           <li><strong>Vercel</strong> — hébergement (Vercel Inc., États-Unis).</li>
-          <li><strong>Meta</strong> — Instagram et Meta Pixel, si vous acceptez les cookies (Meta Platforms Ireland Ltd).</li>
+          <li><strong>Meta</strong> — liens vers notre compte Instagram (Meta Platforms Ireland Ltd). Le Meta&nbsp;Pixel n'est <strong>pas déployé actuellement</strong> ; il ne le serait que sous votre consentement.</li>
           <li><strong>CoinGecko</strong> — taux de change crypto (appel public, sans donnée personnelle).</li>
         </ul>
 
@@ -1108,13 +1124,14 @@
         <h2>7. Vos droits</h2>
         <p>Conformément aux articles 15 à 22 du RGPD, vous disposez des droits suivants : <strong>accès</strong>, <strong>rectification</strong>, <strong>effacement</strong>, <strong>limitation</strong>, <strong>portabilité</strong>, <strong>opposition</strong>, et <strong>retrait de votre consentement</strong> à tout moment. Vous pouvez aussi définir des directives sur le sort de vos données après votre décès.</p>
         <p>Pour exercer ces droits, écrivez à : [À COMPLÉTER : email de contact]. Une réponse vous sera apportée dans un délai maximum d'un mois.</p>
+        <p><strong>Suppression directe :</strong> vous pouvez supprimer vous-même votre compte et vos données (profil, historique de commandes) depuis <strong>Mon compte → Paramètres → « Supprimer mon compte »</strong>. Seuls les justificatifs de paiement que la loi impose de conserver (obligations comptables et fiscales) sont conservés de façon dissociée pendant la durée légale.</p>
         <p>Si vous estimez que vos droits ne sont pas respectés, vous pouvez saisir la <strong>CNIL</strong> : 3 Place de Fontenoy, TSA 80715, 75334 Paris Cedex 07 — <a href="https://www.cnil.fr" target="_blank" rel="noopener noreferrer">cnil.fr</a>.</p>
 
         <h2>8. Cookies</h2>
         <p>Le site utilise deux catégories de cookies :</p>
         <ul>
           <li><strong>Cookies essentiels</strong> (fonctionnement du site, panier, session) : nécessaires, sans consentement requis.</li>
-          <li><strong>Cookies de mesure d'audience et publicitaires</strong> (Google Analytics 4, Meta Pixel) : déposés <strong>uniquement si vous les acceptez</strong> via la bannière de consentement. Vous pouvez modifier votre choix à tout moment.</li>
+          <li><strong>Mesure d'audience et publicité</strong> (Google Analytics&nbsp;4, Meta&nbsp;Pixel) : <strong>non actives à ce jour</strong> — aucun cookie de ce type n'est déposé. Si elles étaient activées, elles ne le seraient <strong>qu'après votre consentement</strong> via la bannière dédiée, et vous pourriez modifier votre choix à tout moment.</li>
         </ul>
 
         <h2>9. Sécurité</h2>
@@ -1602,7 +1619,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=316"></script>
+  <script defer src="app.js?v=317"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

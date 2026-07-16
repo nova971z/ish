@@ -67,7 +67,7 @@ async function check(label, promise) {
   await check('Alice met à jour son profil (champs valides)', assertSucceeds(updateDoc(doc(alice, 'users/alice'), { phone: '0690', address: 'GP' })));
   await check('Alice NE peut PAS injecter un champ hors allowlist (role)', assertFails(updateDoc(doc(alice, 'users/alice'), { role: 'admin' })));
   await check('Alice NE peut PAS écrire le profil de Bob', assertFails(setDoc(doc(alice, 'users/bob'), { name: 'hack', email: '', phone: '', address: '', avatar: '', loyalty: 0, createdAt: 1 })));
-  await check('Alice NE peut PAS supprimer son profil', assertFails(deleteDoc(doc(alice, 'users/alice'))));
+  await check('Alice NE peut PAS supprimer le profil de Bob', assertFails(deleteDoc(doc(alice, 'users/bob'))));
 
   console.log('\n── Commandes : statut ──');
   await check('Alice crée une commande quote', assertSucceeds(addDoc(collection(alice, 'users/alice/orders'), { status: 'quote', total: 20, items: 1, date: 1 })));
@@ -79,8 +79,12 @@ async function check(label, promise) {
   await check('Alice NE peut PAS mettre un total non-numérique', assertFails(addDoc(collection(alice, 'users/alice/orders'), { status: 'pending', total: 'gratuit', items: 1, date: 1 })));
   await check('Alice NE peut PAS ajouter un champ hors allowlist à une commande', assertFails(addDoc(collection(alice, 'users/alice/orders'), { status: 'quote', total: 20, hacked: true })));
   await check('Alice NE peut PAS modifier une commande existante', assertFails(updateDoc(doc(alice, 'users/alice/orders/o1'), { status: 'paid' })));
-  await check('Alice NE peut PAS supprimer une commande', assertFails(deleteDoc(doc(alice, 'users/alice/orders/o1'))));
   await check('Bob NE peut PAS écrire dans les commandes d\'Alice', assertFails(addDoc(collection(bob, 'users/alice/orders'), { status: 'quote', total: 1, items: 1, date: 1 })));
+  await check('Bob NE peut PAS supprimer une commande d\'Alice', assertFails(deleteDoc(doc(bob, 'users/alice/orders/o1'))));
+
+  console.log('\n── Droit à l\'oubli (M4) : le titulaire supprime ses données ──');
+  await check('Alice PEUT supprimer sa propre commande', assertSucceeds(deleteDoc(doc(alice, 'users/alice/orders/o1'))));
+  await check('Alice PEUT supprimer son propre profil', assertSucceeds(deleteDoc(doc(alice, 'users/alice'))));
 
   console.log('\n── Collections serveur : fermées au client ──');
   await check('Alice NE lit PAS payments/', assertFails(getDoc(doc(alice, 'payments/pay1'))));

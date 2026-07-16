@@ -7,6 +7,7 @@
 
 'use strict';
 
+var crypto = require('crypto');
 var getFirebase = require('./firebase').getFirebase;
 
 // Returns true if the request is allowed, false if the limit is exceeded.
@@ -16,8 +17,14 @@ async function allow(bucket, key, max, windowSec) {
   if (!fb.db) return true; // no persistent store → cannot limit; allow
 
   var win = Math.floor(Date.now() / (windowSec * 1000));
-  var safeKey = String(key).replace(/[^a-zA-Z0-9.:_-]/g, '').slice(0, 64) || 'unknown';
-  var ref = fb.db.collection('rate_limits').doc(bucket + '_' + safeKey + '_' + win);
+  // MINIMISATION RGPD (M2) : l'IP ne doit PAS être stockée en clair comme
+  // identifiant de document. On la HACHE (sha256, tronqué) : une même IP
+  // produit toujours la même empreinte (le rate-limiting fonctionne à
+  // l'identique), mais l'IP réelle n'est jamais persistée ni corrélable
+  // depuis Firestore. La policy TTL Firestore sur `expiresAt` (action owner)
+  // purge de toute façon ces documents.
+  var keyHash = crypto.createHash('sha256').update(String(key)).digest('hex').slice(0, 32);
+  var ref = fb.db.collection('rate_limits').doc(bucket + '_' + keyHash + '_' + win);
 
   try {
     var count = await fb.db.runTransaction(async function (tx) {
