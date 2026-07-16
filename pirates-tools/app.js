@@ -3250,6 +3250,23 @@
     return map[code] || (err && err.message) || 'Une erreur est survenue';
   }
 
+  // H4 — anti-énumération de comptes. À la CONNEXION, ne jamais distinguer
+  // « aucun compte » de « mot de passe incorrect » : sinon un attaquant sait
+  // quels emails sont clients (base de phishing / credential-stuffing). Tous
+  // les échecs d'identification renvoient le même message générique ; seules
+  // les erreurs non liées à l'existence du compte (réseau, quota) restent
+  // explicites. Complément recommandé : activer « Email Enumeration
+  // Protection » dans la console Firebase.
+  function authLoginError(err) {
+    var code = (err && err.code) || '';
+    if (code === 'auth/user-not-found' || code === 'auth/wrong-password'
+        || code === 'auth/invalid-credential' || code === 'auth/invalid-email'
+        || code === 'auth/missing-password' || code === 'auth/missing-email') {
+      return 'Email ou mot de passe incorrect';
+    }
+    return fbErrorMessage(err);
+  }
+
   // Loading state on a submit button
   function setBtnLoading(btn, loading) {
     if (!btn) return;
@@ -3392,7 +3409,7 @@
         location.hash = '#/compte';
       })
       .catch(function (err) {
-        toast(fbErrorMessage(err), 'error');
+        toast(authLoginError(err), 'error'); // message générique (anti-énumération)
       })
       .finally(function () {
         setBtnLoading(dom.loginSubmit, false);
@@ -3406,14 +3423,23 @@
     var email = (dom.forgotEmail ? dom.forgotEmail.value : '').trim().toLowerCase();
     if (!email) { toast('Entre ton email', 'error'); return; }
 
+    // H4 — anti-énumération : on affiche le MÊME message que l'email existe ou
+    // non. Le succès et l'erreur user-not-found aboutissent à un message neutre
+    // (« si un compte existe… ») ; on ne révèle jamais l'existence d'un compte.
+    var neutralMsg = 'Si un compte est associé à cet email, un lien de réinitialisation vient d\'être envoyé.';
+    function forgotDone() {
+      toast(neutralMsg, 'success');
+      if (dom.authForgotPanel) dom.authForgotPanel.hidden = true;
+      if (dom.forgotEmail) dom.forgotEmail.value = '';
+    }
     setBtnLoading(dom.forgotSubmit, true);
     _fb.sendPasswordResetEmail(_fb.auth, email)
-      .then(function () {
-        toast('Email de réinitialisation envoyé', 'success');
-        if (dom.authForgotPanel) dom.authForgotPanel.hidden = true;
-        if (dom.forgotEmail) dom.forgotEmail.value = '';
-      })
+      .then(forgotDone)
       .catch(function (err) {
+        var code = (err && err.code) || '';
+        // user-not-found → traité comme un succès neutre (pas de fuite).
+        if (code === 'auth/user-not-found') { forgotDone(); return; }
+        // Erreurs non révélatrices (format, réseau, quota) : message explicite.
         toast(fbErrorMessage(err), 'error');
       })
       .finally(function () {
@@ -3550,16 +3576,28 @@
           toast('Profil enregistré', 'success');
           return;
         }
-        return _fb.updateEmail(_fb.auth.currentUser, newEmail)
-          .then(function () { return _fb.updateDoc(ref, { email: newEmail }); })
+        // H5 — verifyBeforeUpdateEmail (au lieu d'updateEmail). Firebase envoie
+        // un lien de confirmation au NOUVEL email ; le changement d'identité ne
+        // prend effet QU'APRÈS que l'utilisateur a cliqué ce lien — impossible
+        // donc de s'attribuer une adresse qu'on ne contrôle pas. Firebase exige
+        // aussi une connexion récente (auth/requires-recent-login) → réauth de
+        // fait pour une opération d'identité sensible.
+        // On N'ÉCRIT PAS l'email en Firestore ici : il n'est pas encore
+        // confirmé. Le champ profil se resynchronisera sur la vraie identité au
+        // prochain login avec la nouvelle adresse (loadUserProfile).
+        var applyEmail = _fb.verifyBeforeUpdateEmail
+          ? _fb.verifyBeforeUpdateEmail(_fb.auth.currentUser, newEmail)
+          : _fb.updateEmail(_fb.auth.currentUser, newEmail); // repli SDK ancien
+        return applyEmail
           .then(function () {
-            _userProfile = Object.assign({}, _userProfile || {}, { email: newEmail });
-            toast('Profil et email mis à jour', 'success');
+            // Le changement est EN ATTENTE : l'ancien email reste actif tant que
+            // le lien n'est pas cliqué. On remet le champ sur l'email courant.
+            if (dom.accEmail) dom.accEmail.value = _currentUser.email || '';
+            toast('Profil enregistré. Un lien de confirmation a été envoyé à ' + newEmail
+              + ' — clique-le pour valider ton nouvel email.', 'success');
           })
           .catch(function (err) {
-            // Profil déjà enregistré ; l'email, lui, n'a PAS changé (ni en
-            // Auth ni en Firestore — cohérence garantie). Remet le champ sur
-            // la vraie valeur pour ne pas afficher un email non appliqué.
+            // Profil déjà enregistré ; l'email n'a PAS changé. Champ restauré.
             if (dom.accEmail) dom.accEmail.value = _currentUser.email || '';
             toast('Profil enregistré, mais email non modifié : ' + fbErrorMessage(err), 'error');
           });
@@ -5037,17 +5075,30 @@
     } catch (e) { /* silent */ }
   }
 
+  // En-têtes d'une requête admin (H6). Toujours X-Admin-Secret (voie
+  // transitoire) ; on AJOUTE Authorization: Bearer si un compte Firebase est
+  // connecté (voie claim admin, à privilégier). Le serveur accepte l'une OU
+  // l'autre — migration sans coupure, et le secret peut être retiré une fois
+  // le claim vérifié. Résout toujours (jamais de rejet).
+  function adminAuthHeaders(extra) {
+    var headers = Object.assign({ 'X-Admin-Secret': getAdminSecret() }, extra || {});
+    var user = _currentUser;
+    if (user && typeof user.getIdToken === 'function') {
+      return user.getIdToken().then(function (tok) {
+        headers['Authorization'] = 'Bearer ' + tok;
+        return headers;
+      }).catch(function () { return headers; });
+    }
+    return Promise.resolve(headers);
+  }
+
   function adminFetch(method, body) {
     var apiBase = apiBaseUrl();
-    var opts = {
-      method: method,
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Admin-Secret': getAdminSecret()
-      }
-    };
-    if (body) opts.body = JSON.stringify(body);
-    return fetch(apiBase + '/api/admin', opts).then(function (r) {
+    return adminAuthHeaders({ 'Content-Type': 'application/json' }).then(function (headers) {
+      var opts = { method: method, headers: headers };
+      if (body) opts.body = JSON.stringify(body);
+      return fetch(apiBase + '/api/admin', opts);
+    }).then(function (r) {
       return r.json().then(function (data) {
         if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
         return data;
@@ -5241,13 +5292,12 @@
         }
 
         var apiBase = apiBaseUrl();
-        fetch(apiBase + '/api/test-email', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Admin-Secret': getAdminSecret()
-          },
-          body: JSON.stringify(to ? { to: to } : {})
+        adminAuthHeaders({ 'Content-Type': 'application/json' }).then(function (headers) {
+          return fetch(apiBase + '/api/test-email', {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(to ? { to: to } : {})
+          });
         })
         .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, data: j }; }); })
         .then(function (res) {
@@ -5313,8 +5363,8 @@
     listEl.innerHTML = '<p class="admin-loading">Chargement des commandes…</p>';
 
     var apiBase = apiBaseUrl();
-    fetch(apiBase + '/api/admin?type=orders', {
-      headers: { 'X-Admin-Secret': getAdminSecret() }
+    adminAuthHeaders().then(function (headers) {
+      return fetch(apiBase + '/api/admin?type=orders', { headers: headers });
     })
     .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, data: j }; }); })
     .then(function (res) {
@@ -5469,15 +5519,12 @@
   function igApiFetch(action, method, body) {
     var apiBase = apiBaseUrl();
     var url = apiBase + '/api/instagram?action=' + encodeURIComponent(action);
-    var opts = {
-      method: method || 'GET',
-      headers: { 'X-Admin-Secret': getAdminSecret() }
-    };
-    if (body && method === 'POST') {
-      opts.headers['Content-Type'] = 'application/json';
-      opts.body = JSON.stringify(body);
-    }
-    return fetch(url, opts)
+    var extra = (body && method === 'POST') ? { 'Content-Type': 'application/json' } : null;
+    return adminAuthHeaders(extra).then(function (headers) {
+      var opts = { method: method || 'GET', headers: headers };
+      if (body && method === 'POST') opts.body = JSON.stringify(body);
+      return fetch(url, opts);
+    })
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, data: j }; }); });
   }
 

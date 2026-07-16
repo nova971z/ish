@@ -6,6 +6,7 @@
 'use strict';
 
 var crypto = require('crypto');
+var fbLib = require('./firebase');
 
 // Constant-time string comparison. crypto.timingSafeEqual throws if the two
 // buffers differ in length, which would itself leak length via an early error,
@@ -22,18 +23,30 @@ function timingSafeEqualStr(a, b) {
   return crypto.timingSafeEqual(ba, bb);
 }
 
-// Verify the admin secret from the "x-admin-secret" request header.
-// Returns null when authorized, or { status, error } to return to the client.
-function requireAdmin(req) {
+// Autorise une requête admin. Deux voies (H6) :
+//   1. RECOMMANDÉE — jeton Firebase d'un compte à claim `admin:true`
+//      (Authorization: Bearer). Identité forte, révocable, sans secret rejouable.
+//   2. TRANSITOIRE — secret partagé `x-admin-secret` (comparaison temps constant).
+//      À retirer (supprimer ADMIN_SECRET sur Vercel) une fois la voie 1 vérifiée.
+// Retourne null si autorisé, sinon { status, error }. ASYNC (verifyIdToken).
+async function requireAdmin(req) {
+  // Voie 1 : claim admin.
+  if (await fbLib.verifyAdmin(req)) return null;
+
+  // Voie 2 : secret partagé (si configuré).
   var expected = process.env.ADMIN_SECRET;
-  if (!expected) {
-    return { status: 503, error: 'Admin not configured. Set ADMIN_SECRET env var on Vercel.' };
+  if (expected) {
+    var provided = (req && req.headers && req.headers['x-admin-secret']) || '';
+    if (timingSafeEqualStr(provided, expected)) return null;
+    return { status: 401, error: 'Invalid admin credentials' };
   }
-  var provided = (req && req.headers && req.headers['x-admin-secret']) || '';
-  if (!timingSafeEqualStr(provided, expected)) {
-    return { status: 401, error: 'Invalid admin secret' };
+
+  // Ni claim valide, ni secret configuré.
+  if (fbLib.getFirebase().admin) {
+    // Firebase dispo → mode claim-only : requête simplement non autorisée.
+    return { status: 401, error: 'Invalid admin credentials' };
   }
-  return null;
+  return { status: 503, error: 'Admin not configured. Set ADMIN_SECRET or a Firebase admin claim.' };
 }
 
 module.exports = {

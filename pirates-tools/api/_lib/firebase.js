@@ -53,4 +53,24 @@ async function verifyUid(req) {
   }
 }
 
-module.exports = { getFirebase: getFirebase, verifyUid: verifyUid };
+// Vérifie que la requête porte un ID token Firebase d'un compte ADMIN (custom
+// claim `admin: true`, posé une fois via scripts/set-admin-claim.js). Base de
+// H6 : remplacer le secret admin partagé (rejouable, stocké en sessionStorage)
+// par une identité Firebase à privilège. Retourne true SEULEMENT si le token
+// est valide ET porte le claim. Ne jette jamais → l'appelant retombe sur la
+// voie secret (transition sans coupure).
+async function verifyAdmin(req) {
+  try {
+    var h = (req.headers && (req.headers.authorization || req.headers.Authorization)) || '';
+    var m = /^Bearer\s+(.+)$/i.exec(String(h).trim());
+    if (!m) return false;
+    var fb = getFirebase();
+    if (!fb.admin) return false;
+    var decoded = await fb.admin.auth().verifyIdToken(m[1]);
+    return !!(decoded && decoded.admin === true);
+  } catch (e) {
+    return false;
+  }
+}
+
+module.exports = { getFirebase: getFirebase, verifyUid: verifyUid, verifyAdmin: verifyAdmin };

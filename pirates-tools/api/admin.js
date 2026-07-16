@@ -12,7 +12,7 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(204).end();
 
   // ── Auth (constant-time admin secret) ─────────────────────
-  const denied = auth.requireAdmin(req);
+  const denied = await auth.requireAdmin(req);
   if (denied) return res.status(denied.status).json({ ok: false, error: denied.error });
 
   // ── Firestore (shared initializer) ────────────────────────
