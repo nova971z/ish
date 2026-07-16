@@ -523,7 +523,9 @@ async function sendOrderEmails(model) {
       subject: 'Confirmation de commande #' + orderRef + ' — Pirates Tools',
       html: baseHtml('Merci pour votre commande !', intro, false)
     });
-    console.log('[webhook] Customer email sent to', model.customerEmail);
+    // Pas de PII en clair dans les logs (RGPD/minimisation) : on journalise la
+    // référence de commande, jamais l'email du client.
+    console.log('[webhook] Customer email sent (order ' + orderRef + ')');
   }
 
   // Owner notification email (avec les alertes taxe/intégrité)
@@ -538,7 +540,7 @@ async function sendOrderEmails(model) {
       html: baseHtml('Nouvelle commande reçue', intro, true),
       reply_to: model.customerEmail || undefined
     });
-    console.log('[webhook] Owner email sent to', ownerEmail);
+    console.log('[webhook] Owner email sent (order ' + orderRef + ')');
   }
 }
 

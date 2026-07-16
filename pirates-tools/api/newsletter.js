@@ -58,7 +58,7 @@ module.exports = async function handler(req, res) {
       // Resend returns 201 on create, but if the contact already exists it may 422.
       // We treat "already in audience" as a success from the user's perspective.
       if (!r.ok && r.status !== 409 && r.status !== 422) {
-        console.error('[api/newsletter] Resend audience error:', data);
+        console.error('[api/newsletter] Resend audience error:', r.status, (data && (data.message || data.name)) || '');
         return res.status(502).json({ ok: false, error: 'Inscription impossible' });
       }
       return res.status(200).json({ ok: true, audience: true });
@@ -94,7 +94,7 @@ module.exports = async function handler(req, res) {
     });
     if (!r.ok) {
       const data = await r.json().catch(function () { return {}; });
-      console.error('[api/newsletter] Fallback mail error:', data);
+      console.error('[api/newsletter] Fallback mail error:', r.status, (data && (data.message || data.name)) || '');
       return res.status(502).json({ ok: false, error: 'Inscription impossible' });
     }
     return res.status(200).json({ ok: true, audience: false });

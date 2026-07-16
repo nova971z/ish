@@ -827,7 +827,9 @@
     var items = getCart();
     if (items.length === 0) { toast('Panier vide', 'error'); return; }
     var msg = waCartMessage(items, _currentTerritory);
-    window.open(waLink(msg), '_blank');
+    // noopener : la page ouverte ne reçoit pas window.opener (anti-tabnabbing),
+    // cohérent avec les autres window.open du fichier.
+    window.open(waLink(msg), '_blank', 'noopener');
 
     // Save to Firestore order history (if authenticated)
     var total = 0;

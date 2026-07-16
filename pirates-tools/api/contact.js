@@ -104,7 +104,9 @@ module.exports = async function handler(req, res) {
     });
     const data = await r.json().catch(function () { return {}; });
     if (!r.ok) {
-      console.error('[api/contact] Resend error:', data);
+      // Ne pas dumper l'objet complet (peut contenir des champs du message) :
+      // status + message d'erreur Resend suffisent au diagnostic.
+      console.error('[api/contact] Resend error:', r.status, (data && (data.message || data.name)) || '');
       return res.status(502).json({ ok: false, error: 'Envoi impossible, réessaie plus tard' });
     }
     return res.status(200).json({ ok: true, id: data.id || null });
