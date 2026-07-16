@@ -287,6 +287,39 @@ Permissions-Policy (vercel.json) ; rate-limit x-real-ip au lieu de xff ;
 territoire fiscal CP obligatoire côté API ; énumération de comptes ;
 verifyBeforeUpdateEmail ; GA4/Meta Pixel sur-déclarés dans les textes.
 
+## Session renforcements sécu H1-H6 (15/07/2026, SW v316, mergé master)
+Suite aux 🟠 de l'audit cybersécurité. 1 commit chacun, tests unitaires +
+Playwright + émulateur.
+- ✅ H1 CSP + HSTS + Permissions-Policy (vercel.json) : CSP STRICTE sans
+  'unsafe-inline' pour scripts → 3 scripts inline autorisés par EMPREINTE
+  sha256 (restent frais avec le HTML). Whitelist Stripe/Firebase/CDN 3D/
+  CoinGecko. HSTS 2 ans preload. Permissions-Policy (geoloc/cam/micro coupés,
+  payment=self+stripe). COOP same-origin-allow-popups. GARDE-FOU CI :
+  scripts/check-csp.js recalcule les hashes depuis index.html (dérive = CI
+  rouge). Vérifié Chromium : 0 violation sur le code propre. NOTE : le ?v=
+  bump ne change PAS les scripts inline → hashes stables.
+- ✅ H2 rate-limit x-real-ip (Vercel, non spoofable) au lieu du 1er
+  x-forwarded-for (falsifiable). Repli = DERNIER token XFF.
+- ✅ H3 code postal OBLIGATOIRE sur create-payment-intent → territoire dérivé
+  du CP seul (fin du taux Mayotte forçable par appel API direct). checkout
+  (repli) reste déclaré+détectif.
+- ✅ H4 anti-énumération : login → message générique unique ; reset password →
+  message neutre même si compte inexistant. + activer Email Enumeration
+  Protection console.
+- ✅ H5 verifyBeforeUpdateEmail (au lieu d'updateEmail) : le nouvel email doit
+  être vérifié ; email non écrit en Firestore avant confirmation ; s'appuie sur
+  requires-recent-login (réauth de fait).
+- ✅ H6 auth admin par CLAIM Firebase (rétrocompat secret) : verifyAdmin
+  (claim admin===true) ; requireAdmin async accepte claim OU secret (aucun
+  faux positif, échec fermé) ; client envoie X-Admin-Secret + Bearer si
+  connecté ; scripts/set-admin-claim.js.
+⚠️ ACTIONS USER (notées) :
+  - H6 : `node scripts/set-admin-claim.js <email>` → reconnexion → vérifier
+    /admin connecté sans secret → SUPPRIMER ADMIN_SECRET sur Vercel.
+  - H4 : activer « Email Enumeration Protection » (console Firebase Auth).
+firebase-tools + émulateur Firestore installés en dev (non committés) pour
+tester règles (S1) — restent dispo pour re-tester.
+
 ## Vérification standard
 `cd pirates-tools && node scripts/ci.js` doit rester vert après chaque étape.
 Bump SW (`sw.js` VERSION + ASSET_VER) et `?v=` dans `index.html` à chaque changement d'asset.
