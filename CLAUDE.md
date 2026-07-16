@@ -341,6 +341,22 @@ Derniers 🟢 de l'audit sécurité soldés :
 firestore.rules : delete désormais autorisé au titulaire (M4) — test-rules.js
 à jour (29 assertions).
 
+## Régression 3D post-sécurité (16/07/2026, SW v318, mergé master)
+Bug : outils 3D ne s'affichent plus (après H1/M5b). Cause PROUVÉE : tous les
+.glb produits sont KHR_draco_mesh_compression → model-viewer décode via un Web
+Worker créé depuis un blob: + WASM (draco/basis depuis gstatic). La CSP H1
+avait worker-src 'self' (bloque blob:) et pas de 'wasm-unsafe-eval' (bloque
+WASM) → décodage impossible → 0 modèle rendu. Correctifs vercel.json :
+worker-src 'self' blob: + child-src 'self' blob: + script-src 'wasm-unsafe-eval'
+('wasm-unsafe-eval' ≠ 'unsafe-eval' → check-csp reste vert). SRI model-viewer
+(M5b) RETIRÉ : crossOrigin+integrity exigeaient CORS + octets identiques au bit,
+invérifiable en sandbox et 2e facteur de blocage ; protection = restriction
+d'origine CSP. LEÇON : toute CSP sur un site 3D DOIT autoriser worker-src blob:
++ wasm-unsafe-eval. Rendu 3D réel non testable en sandbox (pas de réseau CDN) →
+confirmation user sur le live.
+NOTE : bandeau cookies masqué au démarrage = VOULU (M1, aucun traceur configuré)
+— pas un bug ; peut être ré-affiché si un jour un ID GA4/Meta est renseigné.
+
 ## Vérification standard
 `cd pirates-tools && node scripts/ci.js` doit rester vert après chaque étape.
 Bump SW (`sw.js` VERSION + ASSET_VER) et `?v=` dans `index.html` à chaque changement d'asset.
