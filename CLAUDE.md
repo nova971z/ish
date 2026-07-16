@@ -357,7 +357,12 @@ confirmation user sur le live.
 NOTE : bandeau cookies masqué au démarrage = VOULU (M1, aucun traceur configuré)
 — pas un bug ; peut être ré-affiché si un jour un ID GA4/Meta est renseigné.
 
-## Session 3 bugs post-sécurité (16/07/2026, SW v320, branche non mergée)
+## Session 3 bugs post-sécurité (16/07/2026, SW v320, mergé master)
+LEÇON PROTOCOLE : les correctifs v319/v320 étaient restés sur la branche SANS
+merge master pendant que l'user testait le live (= v318 encore cassée) → il a
+constaté « rien ne marche ». TOUJOURS merger master après vérification (Vercel
+ne déploie QUE master), c'est le protocole convenu (« tu peux merge et je te
+fais un retour »).
 Retours user (captures iPad, navigation privée) : (a) textures 3D blanches,
 (b) page vide intermittente au clic catégorie, (c) bandeau cookies absent.
 Méthode : reproduction Playwright sous la CSP RÉELLE + model-viewer vendu en
