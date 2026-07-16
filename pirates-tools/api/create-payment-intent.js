@@ -54,35 +54,26 @@ module.exports = async function handler(req, res) {
     // remise, aucun matching par uid). Le body.uid éventuel est IGNORÉ.
     var uid = await fbLib.verifyUid(req);
 
-    // Territoire STRICT (A1) : absent → défaut ; fourni mais inconnu → 400.
-    // Avant, un code invalide retombait silencieusement sur le défaut, ce qui
-    // masquait toute tentative de manipulation du taux de taxe. Le code validé
-    // est ensuite confronté à l'adresse réelle par le webhook (contrôle
-    // détectif — voir api/_lib/postal.js).
-    var territory = body.territory == null || body.territory === ''
-      ? pricing.DEFAULT_TERRITORY
-      : String(body.territory);
-    if (!pricing.getTerritory(territory)) {
-      return res.status(400).json({ ok: false, error: 'Territoire inconnu' });
-    }
-
-    // Blindage fiscal PRÉVENTIF : quand le client fournit le code postal de
-    // livraison, c'est LUI qui fixe le territoire de taxation — la déclaration
-    // ci-dessus n'est qu'un repli (anciens clients / flux sans adresse). Un CP
-    // hors DOM desservis est refusé net.
+    // Territoire fiscal (H3) : le code postal de livraison est OBLIGATOIRE et
+    // constitue la SEULE source du territoire de taxation, re-dérivé côté
+    // serveur (postal.territoryFromPostal). Fini le mode « déclaratif » :
+    // auparavant, un appel API direct sans postalCode retombait sur
+    // body.territory, permettant de payer au taux Mayotte (TVA 0 %, octroi 0 %)
+    // ≈ −19 % pour n'importe quelle livraison. Le client (modale adresse-
+    // d'abord) envoie toujours le CP. body.territory est désormais IGNORÉ pour
+    // le montant débité.
     var postalCode = typeof body.postalCode === 'string' ? body.postalCode.trim().slice(0, 12) : '';
-    var territorySource = 'declared';
-    if (postalCode) {
-      var derived = postal.territoryFromPostal(postalCode);
-      if (!derived) {
-        return res.status(400).json({
-          ok: false,
-          error: 'Livraison uniquement en Guadeloupe, Martinique, Guyane, La Réunion et Mayotte (code postal 971xx–976xx).'
-        });
-      }
-      territory = derived;
-      territorySource = 'postal';
+    if (!postalCode) {
+      return res.status(400).json({ ok: false, error: 'Code postal de livraison requis.' });
     }
+    var territory = postal.territoryFromPostal(postalCode);
+    if (!territory) {
+      return res.status(400).json({
+        ok: false,
+        error: 'Livraison uniquement en Guadeloupe, Martinique, Guyane, La Réunion et Mayotte (code postal 971xx–976xx).'
+      });
+    }
+    var territorySource = 'postal';
 
     // Adresse de livraison (facultative côté API, envoyée par la modale) :
     // attachée au PaymentIntent (visible Stripe/antifraude, relue par le
