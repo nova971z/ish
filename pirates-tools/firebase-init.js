@@ -62,7 +62,8 @@ import {
   EmailAuthProvider,
   reauthenticateWithCredential,
   sendPasswordResetEmail,
-  sendEmailVerification
+  sendEmailVerification,
+  deleteUser
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 import {
   getFirestore,
@@ -70,6 +71,7 @@ import {
   getDoc,
   setDoc,
   updateDoc,
+  deleteDoc,
   collection,
   addDoc,
   getDocs,
@@ -115,11 +117,13 @@ if (!isConfigured) {
     reauthenticateWithCredential: reauthenticateWithCredential,
     sendPasswordResetEmail: sendPasswordResetEmail,
     sendEmailVerification: sendEmailVerification,
+    deleteUser: deleteUser,
     // Firestore methods
     doc: doc,
     getDoc: getDoc,
     setDoc: setDoc,
     updateDoc: updateDoc,
+    deleteDoc: deleteDoc,
     collection: collection,
     addDoc: addDoc,
     getDocs: getDocs,

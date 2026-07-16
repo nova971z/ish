@@ -751,6 +751,22 @@
               </div>
             </div>
           </div>
+
+          <!-- Droit à l'oubli (RGPD) : suppression définitive du compte. -->
+          <div class="card acc-danger" style="margin-top:1.2rem;border-color:rgba(239,68,68,.35)">
+            <div class="head"><h3 class="title">Supprimer mon compte</h3><span class="badge" style="background:rgba(239,68,68,.15);color:#f87171">Irréversible</span></div>
+            <div class="specs">
+              <p style="opacity:.8;margin:0 0 .8rem;font-size:.9rem">Supprime <strong>définitivement</strong> ton compte, ton profil et ton historique de commandes. Les justificatifs de paiement légalement obligatoires sont conservés de façon dissociée. <strong>Action irréversible.</strong></p>
+              <form id="deleteAccountForm" class="acc-form" autocomplete="off" novalidate>
+                <label>Confirme ton mot de passe
+                  <input id="deleteAccountPwd" type="password" class="search" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" autocomplete="current-password" required />
+                </label>
+                <div class="actions">
+                  <button id="deleteAccountBtn" class="btn" type="submit" style="background:#ef4444;color:#fff">Supprimer définitivement mon compte</button>
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
 
       </div>
@@ -1108,6 +1124,7 @@
         <h2>7. Vos droits</h2>
         <p>Conformément aux articles 15 à 22 du RGPD, vous disposez des droits suivants : <strong>accès</strong>, <strong>rectification</strong>, <strong>effacement</strong>, <strong>limitation</strong>, <strong>portabilité</strong>, <strong>opposition</strong>, et <strong>retrait de votre consentement</strong> à tout moment. Vous pouvez aussi définir des directives sur le sort de vos données après votre décès.</p>
         <p>Pour exercer ces droits, écrivez à : [À COMPLÉTER : email de contact]. Une réponse vous sera apportée dans un délai maximum d'un mois.</p>
+        <p><strong>Suppression directe :</strong> vous pouvez supprimer vous-même votre compte et vos données (profil, historique de commandes) depuis <strong>Mon compte → Paramètres → « Supprimer mon compte »</strong>. Seuls les justificatifs de paiement que la loi impose de conserver (obligations comptables et fiscales) sont conservés de façon dissociée pendant la durée légale.</p>
         <p>Si vous estimez que vos droits ne sont pas respectés, vous pouvez saisir la <strong>CNIL</strong> : 3 Place de Fontenoy, TSA 80715, 75334 Paris Cedex 07 — <a href="https://www.cnil.fr" target="_blank" rel="noopener noreferrer">cnil.fr</a>.</p>
 
         <h2>8. Cookies</h2>
