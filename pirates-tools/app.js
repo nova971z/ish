@@ -1112,6 +1112,12 @@
       var s = document.createElement('script');
       s.type = 'module';
       s.src = 'https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js';
+      // SRI (M5) : le navigateur refuse d'exécuter le script si son empreinte
+      // ne correspond pas EXACTEMENT — un CDN compromis ou un MITM ne peut plus
+      // injecter de code. Hash calculé sur la version FIGÉE 3.5.0 servie par
+      // ajax.googleapis.com ; crossOrigin requis pour que le SRI s'applique.
+      s.crossOrigin = 'anonymous';
+      s.integrity = 'sha384-Ftcjj/GNLxPvzNDftO/oryXB9aGxsGZY9JGqsXG0uUKgQDl9RfDgsx9NJ/4IVNPe';
       s.onerror = function () { _mvPromise = null; reject(new Error('model-viewer load failed')); };
       document.head.appendChild(s);
       if (window.customElements && customElements.whenDefined) {
