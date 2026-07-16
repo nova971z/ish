@@ -12,7 +12,7 @@
         { "key": "Cross-Origin-Opener-Policy", "value": "same-origin-allow-popups" },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self' 'sha256-6rXjoF0j0uu4G1Ma4iNVi0RooMzJ+jLjWK3RzETYAE4=' 'sha256-zBvQn+CPOQuvKC7j8aCwEdSA1g+VoL8kobjand+HXx0=' 'sha256-ySOec7vYFBASTu8O+R1NKmMoUvXxi+evr/2lkM12/74=' https://js.stripe.com https://www.gstatic.com https://ajax.googleapis.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.stripe.com https://*.googleapis.com wss://*.googleapis.com https://*.firebaseio.com https://api.coingecko.com https://www.gstatic.com; frame-src https://js.stripe.com https://hooks.stripe.com; worker-src 'self'; manifest-src 'self'; form-action 'self'; upgrade-insecure-requests"
+          "value": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self' 'wasm-unsafe-eval' 'sha256-6rXjoF0j0uu4G1Ma4iNVi0RooMzJ+jLjWK3RzETYAE4=' 'sha256-zBvQn+CPOQuvKC7j8aCwEdSA1g+VoL8kobjand+HXx0=' 'sha256-ySOec7vYFBASTu8O+R1NKmMoUvXxi+evr/2lkM12/74=' https://js.stripe.com https://www.gstatic.com https://ajax.googleapis.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.stripe.com https://*.googleapis.com wss://*.googleapis.com https://*.firebaseio.com https://api.coingecko.com https://www.gstatic.com; frame-src https://js.stripe.com https://hooks.stripe.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'; form-action 'self'; upgrade-insecure-requests"
         }
       ]
     }
