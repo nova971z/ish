@@ -390,12 +390,17 @@ mon diagnostic initial).
   visible. Écarté par test : PAS l'épuisement WebGL (model-viewer 3.x =
   renderer partagé unique, testé 26→2 ×8 = 0 fuite) ni la mémoire (aurait blanchi
   les modèles, pas la barre de recherche). Confirmation non-blank iPad = user.
-- ✅ BANDEAU COOKIES (v320) : M1 le masquait (aucun traceur = pas de consentement
-  requis). User le veut visible sans mentir. setupConsentBar gère 2 cas :
-  traceur configuré → consentement Accepter/Refuser (inchangé) ; AUCUN traceur
-  (actuel) → INFO honnête « cookies techniques uniquement, aucun traceur » +
-  bouton unique « J'ai compris » (accusé, pas consentement ; clé pt:cookie-notice,
-  vidée en navigation privée → se remontre à chaque session). Vérifié Playwright.
+- ✅ BANDEAU COOKIES (v320, REMPLACÉ en v321) : M1 le masquait (aucun traceur =
+  pas de consentement requis). User le veut visible sans mentir. v320 = info +
+  « J'ai compris » (bouton unique). RETOUR USER : pas de choix = « pas
+  respectable » → v321 = schéma standard : cookies techniques TOUJOURS actifs
+  (annoncés dans le texte, pas de case) + choix RÉEL Accepter/Refuser pour la
+  mesure d'audience. Honnêteté : « pourra être activée » (aucun traceur branché) ;
+  le choix est enregistré dans pt:analytics-consent = LA clé qui gouvernera
+  GA4/Meta le jour d'un ID renseigné (Refuser = jamais de traçage, même après
+  activation). CNIL : Refuser aussi accessible qu'Accepter. pt:cookie-notice
+  supprimée. 10/10 assertions Playwright (refus/accept/persistance/reload/
+  session privée/lien politique).
 REVERSAL DOC : la NOTE M1 ci-dessus (« bandeau masqué = voulu ») est désormais
 caduque — remplacée par le bandeau info honnête.
 
