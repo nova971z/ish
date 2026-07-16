@@ -18,7 +18,7 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(204).end();
 
   // ── Auth (admin only) ──
-  var denied = auth.requireAdmin(req);
+  var denied = await auth.requireAdmin(req);
   if (denied) return res.status(denied.status).json({ ok: false, error: denied.error });
 
   var fb = firebase.getFirebase();

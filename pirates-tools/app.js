@@ -5075,17 +5075,30 @@
     } catch (e) { /* silent */ }
   }
 
+  // En-têtes d'une requête admin (H6). Toujours X-Admin-Secret (voie
+  // transitoire) ; on AJOUTE Authorization: Bearer si un compte Firebase est
+  // connecté (voie claim admin, à privilégier). Le serveur accepte l'une OU
+  // l'autre — migration sans coupure, et le secret peut être retiré une fois
+  // le claim vérifié. Résout toujours (jamais de rejet).
+  function adminAuthHeaders(extra) {
+    var headers = Object.assign({ 'X-Admin-Secret': getAdminSecret() }, extra || {});
+    var user = _currentUser;
+    if (user && typeof user.getIdToken === 'function') {
+      return user.getIdToken().then(function (tok) {
+        headers['Authorization'] = 'Bearer ' + tok;
+        return headers;
+      }).catch(function () { return headers; });
+    }
+    return Promise.resolve(headers);
+  }
+
   function adminFetch(method, body) {
     var apiBase = apiBaseUrl();
-    var opts = {
-      method: method,
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Admin-Secret': getAdminSecret()
-      }
-    };
-    if (body) opts.body = JSON.stringify(body);
-    return fetch(apiBase + '/api/admin', opts).then(function (r) {
+    return adminAuthHeaders({ 'Content-Type': 'application/json' }).then(function (headers) {
+      var opts = { method: method, headers: headers };
+      if (body) opts.body = JSON.stringify(body);
+      return fetch(apiBase + '/api/admin', opts);
+    }).then(function (r) {
       return r.json().then(function (data) {
         if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
         return data;
@@ -5279,13 +5292,12 @@
         }
 
         var apiBase = apiBaseUrl();
-        fetch(apiBase + '/api/test-email', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Admin-Secret': getAdminSecret()
-          },
-          body: JSON.stringify(to ? { to: to } : {})
+        adminAuthHeaders({ 'Content-Type': 'application/json' }).then(function (headers) {
+          return fetch(apiBase + '/api/test-email', {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(to ? { to: to } : {})
+          });
         })
         .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, data: j }; }); })
         .then(function (res) {
@@ -5351,8 +5363,8 @@
     listEl.innerHTML = '<p class="admin-loading">Chargement des commandes…</p>';
 
     var apiBase = apiBaseUrl();
-    fetch(apiBase + '/api/admin?type=orders', {
-      headers: { 'X-Admin-Secret': getAdminSecret() }
+    adminAuthHeaders().then(function (headers) {
+      return fetch(apiBase + '/api/admin?type=orders', { headers: headers });
     })
     .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, data: j }; }); })
     .then(function (res) {
@@ -5507,15 +5519,12 @@
   function igApiFetch(action, method, body) {
     var apiBase = apiBaseUrl();
     var url = apiBase + '/api/instagram?action=' + encodeURIComponent(action);
-    var opts = {
-      method: method || 'GET',
-      headers: { 'X-Admin-Secret': getAdminSecret() }
-    };
-    if (body && method === 'POST') {
-      opts.headers['Content-Type'] = 'application/json';
-      opts.body = JSON.stringify(body);
-    }
-    return fetch(url, opts)
+    var extra = (body && method === 'POST') ? { 'Content-Type': 'application/json' } : null;
+    return adminAuthHeaders(extra).then(function (headers) {
+      var opts = { method: method || 'GET', headers: headers };
+      if (body && method === 'POST') opts.body = JSON.stringify(body);
+      return fetch(url, opts);
+    })
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, data: j }; }); });
   }
 
