@@ -344,8 +344,20 @@
     });
   }
 
+  // Un traceur soumis à consentement est-il RÉELLEMENT configuré ?
+  function analyticsConfigured() {
+    return !!(ANALYTICS && (ANALYTICS.ga4Id || ANALYTICS.metaPixelId));
+  }
+
   function setupConsentBar() {
     if (_consent) return; // already decided
+    // M1 — n'AFFICHER le bandeau que si un traceur soumis à consentement est
+    // réellement en place. Aujourd'hui GA4/Meta Pixel ne sont PAS branchés
+    // (IDs vides) → aucun cookie non essentiel n'est déposé → pas de bandeau
+    // (RGPD/ePrivacy : le consentement ne se demande que pour de vrais
+    // traceurs). Dès qu'un ID est renseigné, le bandeau réapparaît et le
+    // consentement gouverne le chargement (mécanisme inchangé).
+    if (!analyticsConfigured()) return;
     var bar = document.getElementById('consentBar');
     if (!bar) return;
     bar.hidden = false;
