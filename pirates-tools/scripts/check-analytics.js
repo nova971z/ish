@@ -97,6 +97,20 @@ module.exports = function checkAnalytics() {
   ok(sum.clicks[0].label === 'chip:Meuleuses' && sum.clicks[0].count === 14, 'clics triés desc');
   ok(sum.geo[0].country === 'FR' && sum.geo[0].count === 8, 'géo triée desc');
 
+  // ── Rapport mensuel + purge ─────────────────────────────────────────────────
+  var now = Date.UTC(2026, 6, 17); // 17/07/2026
+  var rep = A.buildReport(sum, now);
+  ok(rep.period === 'juillet 2026', 'période FR: ' + rep.period);
+  ok(rep.periodKey === '2026-07', 'clé période: ' + rep.periodKey);
+  ok(A.reportFilename(rep) === 'pirates-tools-analytics-2026-07.json', 'nom de fichier JSON');
+  ok(rep.totals.sessions === 12 && Array.isArray(rep.topProducts), 'rapport porte totaux + top produits');
+  var html = A.renderReportHtml(rep);
+  ok(/Rapport d'audience/.test(html) && /juillet 2026/.test(html), 'HTML rapport rendu');
+  ok(html.indexOf('<script') === -1, 'HTML rapport sans script');
+  var cut = A.purgeCutoffs(now);
+  ok(cut.dailyBefore === '2025-05-17', 'seuil purge daily = 14 mois avant (' + cut.dailyBefore + ')');
+  ok(cut.visitorLastSeenBefore < now && (now - cut.visitorLastSeenBefore) > 300 * 24 * 3600 * 1000, 'seuil visiteurs ~13 mois');
+
   return errors;
 };
 

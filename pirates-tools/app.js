@@ -5694,6 +5694,34 @@
     }).catch(function () { /* CDN three KO → la liste par pays reste affichée */ });
   }
 
+  // Déclenche l'envoi du rapport mensuel maintenant (test manuel). POST
+  // authentifié /api/cron-report → mail Resend + purge. Résout côté serveur.
+  function sendAdminReport() {
+    var btn = document.getElementById('adminReportBtn');
+    var status = document.getElementById('adminReportStatus');
+    if (btn) btn.disabled = true;
+    if (status) { status.textContent = 'Envoi…'; status.className = 'admin-row__status'; }
+    var apiBase = apiBaseUrl();
+    adminAuthHeaders({ 'Content-Type': 'application/json' }).then(function (headers) {
+      return fetch(apiBase + '/api/cron-report', { method: 'POST', headers: headers, body: '{}' });
+    }).then(function (r) {
+      return r.json().then(function (j) { return { ok: r.ok, data: j }; });
+    }).then(function (res) {
+      if (btn) btn.disabled = false;
+      if (!status) return;
+      if (res.ok && res.data.ok && res.data.sent) {
+        status.textContent = '✓ Rapport envoyé (' + res.data.period + ')';
+        status.className = 'admin-row__status admin-row__status--ok';
+      } else {
+        status.textContent = '✗ ' + ((res.data && (res.data.mailError || res.data.error)) || 'Échec');
+        status.className = 'admin-row__status admin-row__status--err';
+      }
+    }).catch(function (e) {
+      if (btn) btn.disabled = false;
+      if (status) { status.textContent = '✗ ' + e.message; status.className = 'admin-row__status admin-row__status--err'; }
+    });
+  }
+
   // ── Dashboard : Clients ────────────────────────────────────
   var _adminClientsLoaded = false;
   function loadAdminClients(force) {
@@ -5891,7 +5919,11 @@
       + '<div class="admin-pane" data-admin-pane="stats" hidden>'
       + '<p class="admin-hint">Mesure d\'audience maison (première partie, sans traceur publicitaire). Données agrégées, IP jamais stockée. Le globe des visiteurs arrive à l\'étape suivante.</p>'
       + '<div id="adminStats" class="admin-stats"><p class="admin-loading">Chargement…</p></div>'
+      + '<div class="admin-stats-actions">'
       + '<button type="button" class="btn btn--ghost" id="adminStatsRefresh">Rafraîchir</button>'
+      + '<button type="button" class="btn primary" id="adminReportBtn">Recevoir le rapport par mail</button>'
+      + '<span id="adminReportStatus" class="admin-row__status" aria-live="polite"></span>'
+      + '</div>'
       + '</div>'
 
       // ── Clients (comptes créés) ────────────────────────────────
@@ -5935,6 +5967,8 @@
 
     var statsRefresh = document.getElementById('adminStatsRefresh');
     if (statsRefresh) statsRefresh.onclick = function () { loadAdminStats(true); };
+    var reportBtn = document.getElementById('adminReportBtn');
+    if (reportBtn) reportBtn.onclick = sendAdminReport;
     var clientsRefresh = document.getElementById('adminClientsRefresh');
     if (clientsRefresh) clientsRefresh.onclick = function () { loadAdminClients(true); };
 
