@@ -79,6 +79,9 @@ function sanitizeEvent(raw) {
   if (name === 'page_view' && typeof raw.route === 'string') {
     out.route = safeToken(raw.route.split('?')[0], 48);
   }
+  // nouveau visiteur (session_start, consenti) : le client déclare s'il vient
+  // de créer son identifiant persistant (nv=true) ou s'il existait déjà.
+  if (name === 'session_start' && typeof raw.nv === 'boolean') out.nv = raw.nv;
   // source de trafic (referrer classifié côté client : 'google'/'instagram'/'direct'…)
   if (raw.src != null) { var s = safeToken(String(raw.src), 24); if (s) out.src = s; }
   return out;
@@ -147,6 +150,12 @@ function planWrites(input) {
       daily.inc.sessions = (daily.inc.sessions || 0) + 1;
       if (device) daily.inc['device.' + device] = (daily.inc['device.' + device] || 0) + 1;
       if (source) daily.inc['source.' + source] = (daily.inc['source.' + source] || 0) + 1;
+      // Nouveau vs récurrent : compté seulement pour un visiteur CONSENTI
+      // (l'anonyme n'a pas d'identifiant persistant → indistinguable, à raison).
+      if (consent && visitorId && typeof ev.nv === 'boolean') {
+        daily.inc[ev.nv ? 'newVisitors' : 'returningVisitors'] =
+          (daily.inc[ev.nv ? 'newVisitors' : 'returningVisitors'] || 0) + 1;
+      }
     }
     if (ev.name === 'page_view') {
       daily.inc.pageViews = (daily.inc.pageViews || 0) + 1;

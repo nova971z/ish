@@ -66,6 +66,17 @@ module.exports = function checkAnalytics() {
   ok(vis && vis.firstSeenIfNew === 42, 'firstSeen prêt pour création');
   ok(vis && vis.inc.visits === 1, 'visite comptée sur le profil');
 
+  // Nouveau vs récurrent : compté seulement sous consentement + flag nv.
+  var opsNew = A.planWrites({ events: [ { name: 'session_start', nv: true } ], consent: true, visitorId: 'v-9', nowMs: 1 });
+  var dNew = opsNew.find(function (o) { return o.coll === 'analytics_daily'; });
+  ok(dNew && dNew.inc.newVisitors === 1 && dNew.inc.returningVisitors === undefined, 'nouveau visiteur compté');
+  var opsRet = A.planWrites({ events: [ { name: 'session_start', nv: false } ], consent: true, visitorId: 'v-9', nowMs: 1 });
+  var dRet = opsRet.find(function (o) { return o.coll === 'analytics_daily'; });
+  ok(dRet && dRet.inc.returningVisitors === 1, 'visiteur récurrent compté');
+  var opsAnon = A.planWrites({ events: [ { name: 'session_start', nv: true } ], consent: false, visitorId: 'v-9', nowMs: 1 });
+  var dAnon = opsAnon.find(function (o) { return o.coll === 'analytics_daily'; });
+  ok(dAnon && dAnon.inc.newVisitors === undefined && dAnon.inc.returningVisitors === undefined, 'anonyme : pas de nouveau/récurrent');
+
   return errors;
 };
 
