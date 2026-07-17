@@ -209,8 +209,54 @@ function planWrites(input) {
   return ops;
 }
 
+// ── Synthèse pour le dashboard (PURE, testable) ─────────────────────────────
+// Combine les documents agrégés Firestore en un objet prêt pour l'UI admin.
+function num(x) { return typeof x === 'number' && isFinite(x) ? x : 0; }
+function mergeCounts(target, map) {
+  if (!map || typeof map !== 'object') return;
+  Object.keys(map).forEach(function (k) { target[k] = (target[k] || 0) + num(map[k]); });
+}
+
+function summarize(daily, products, clicks, geo) {
+  var totals = { sessions: 0, pageViews: 0, clicks: 0, newVisitors: 0, returningVisitors: 0 };
+  var devices = {}, sources = {};
+  var series = [];
+  (daily || []).forEach(function (d) {
+    totals.sessions += num(d.sessions);
+    totals.pageViews += num(d.pageViews);
+    totals.clicks += num(d.clicks);
+    totals.newVisitors += num(d.newVisitors);
+    totals.returningVisitors += num(d.returningVisitors);
+    mergeCounts(devices, d.device);
+    mergeCounts(sources, d.source);
+    series.push({ date: d.date || d.id, sessions: num(d.sessions), pageViews: num(d.pageViews), clicks: num(d.clicks) });
+  });
+  series.sort(function (a, b) { return a.date < b.date ? -1 : (a.date > b.date ? 1 : 0); });
+
+  var prod = (products || []).map(function (p) {
+    var samples = num(p.timeSamples);
+    return {
+      productId: p.productId || p.id,
+      views: num(p.views), selects: num(p.selects),
+      addToCart: num(p.addToCart), purchases: num(p.purchases),
+      avgTimeMs: samples ? Math.round(num(p.timeMsTotal) / samples) : 0
+    };
+  }).sort(function (a, b) { return b.views - a.views; });
+
+  var clk = (clicks || []).map(function (c) {
+    return { label: c.label || c.id, count: num(c.count) };
+  }).sort(function (a, b) { return b.count - a.count; });
+
+  var g = (geo || []).map(function (x) {
+    return { country: x.country || x.id, count: num(x.count), lat: x.lat, lng: x.lng };
+  }).sort(function (a, b) { return b.count - a.count; });
+
+  return { totals: totals, devices: devices, sources: sources, daily: series, products: prod, clicks: clk, geo: g };
+}
+
 module.exports = {
   EVENT_ALLOWLIST: EVENT_ALLOWLIST,
+  summarize: summarize,
   AFFINITY_WEIGHT: AFFINITY_WEIGHT,
   MAX_EVENTS_PER_BATCH: MAX_EVENTS_PER_BATCH,
   sanitizeEvent: sanitizeEvent,
