@@ -254,9 +254,97 @@ function summarize(daily, products, clicks, geo) {
   return { totals: totals, devices: devices, sources: sources, daily: series, products: prod, clicks: clk, geo: g };
 }
 
+// ── Rapport mensuel + purge (PUR, testable) ─────────────────────────────────
+var MONTHS_FR = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet',
+  'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+
+function monthsAgoKey(nowMs, months) {
+  var d = new Date(nowMs);
+  d.setUTCMonth(d.getUTCMonth() - months);
+  return dateKey(d.getTime());
+}
+
+// Seuils de purge (rétention) : daily/events > 14 mois, visiteurs inactifs > 13 mois.
+function purgeCutoffs(nowMs) {
+  return {
+    dailyBefore: monthsAgoKey(nowMs, 14),                       // clé YYYY-MM-DD
+    visitorLastSeenBefore: nowMs - 13 * 30 * 24 * 3600 * 1000   // timestamp ms
+  };
+}
+
+// Modèle de rapport (JSON analysable) à partir de la synthèse.
+function buildReport(summary, nowMs) {
+  var d = new Date(nowMs);
+  var period = MONTHS_FR[d.getUTCMonth()] + ' ' + d.getUTCFullYear();
+  return {
+    site: 'pirates-tools',
+    generatedAt: nowMs,
+    period: period,
+    periodKey: dateKey(nowMs).slice(0, 7),
+    totals: summary.totals || {},
+    devices: summary.devices || {},
+    sources: summary.sources || {},
+    topProducts: (summary.products || []).slice(0, 20),
+    topClicks: (summary.clicks || []).slice(0, 30),
+    geo: summary.geo || [],
+    dailySeries: summary.daily || []
+  };
+}
+
+function reportFilename(report) {
+  return 'pirates-tools-analytics-' + (report.periodKey || 'export') + '.json';
+}
+
+// HTML lisible du rapport (email). Échappement minimal (données maison, pas de
+// saisie libre visiteur ici, mais on reste prudent sur les libellés).
+function esc(s) {
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+function renderReportHtml(report) {
+  var t = report.totals || {};
+  function kvBars(map) {
+    var e = Object.keys(map || {}).map(function (k) { return [k, map[k]]; }).sort(function (a, b) { return b[1] - a[1]; });
+    if (!e.length) return '<p style="color:#888">—</p>';
+    return e.map(function (x) { return '<div>' + esc(x[0]) + ' : <b>' + esc(x[1]) + '</b></div>'; }).join('');
+  }
+  var prodRows = (report.topProducts || []).slice(0, 15).map(function (p) {
+    return '<tr><td>' + esc(p.productId) + '</td><td align="right">' + (p.views || 0)
+      + '</td><td align="right">' + (p.addToCart || 0) + '</td><td align="right">' + (p.purchases || 0)
+      + '</td><td align="right">' + Math.round((p.avgTimeMs || 0) / 1000) + ' s</td></tr>';
+  }).join('') || '<tr><td colspan="5" style="color:#888">Aucune donnée</td></tr>';
+  var clickRows = (report.topClicks || []).slice(0, 15).map(function (c) {
+    return '<div>' + esc(c.label) + ' : <b>' + esc(c.count) + '</b></div>';
+  }).join('') || '<p style="color:#888">—</p>';
+  var geoRows = (report.geo || []).slice(0, 15).map(function (g) {
+    return '<div>' + esc(g.country) + ' : <b>' + esc(g.count) + '</b></div>';
+  }).join('') || '<p style="color:#888">—</p>';
+
+  return '<div style="font-family:Arial,sans-serif;max-width:640px;margin:auto;color:#1a1a1a">'
+    + '<h1 style="color:#6d28d9">Pirates Tools — Rapport d\'audience</h1>'
+    + '<p style="color:#555">Période : <b>' + esc(report.period) + '</b>. Mesure d\'audience maison (première partie, sans traceur publicitaire).</p>'
+    + '<h2>Vue d\'ensemble</h2>'
+    + '<div>Visites : <b>' + (t.sessions || 0) + '</b> · Pages vues : <b>' + (t.pageViews || 0) + '</b> · Clics : <b>' + (t.clicks || 0) + '</b></div>'
+    + '<div>Nouveaux : <b>' + (t.newVisitors || 0) + '</b> · Récurrents : <b>' + (t.returningVisitors || 0) + '</b></div>'
+    + '<h2>Appareils</h2>' + kvBars(report.devices)
+    + '<h2>Sources</h2>' + kvBars(report.sources)
+    + '<h2>Produits les plus consultés</h2>'
+    + '<table style="width:100%;border-collapse:collapse" cellpadding="6"><thead><tr style="text-align:left;border-bottom:1px solid #ddd">'
+    + '<th>Produit</th><th>Vues</th><th>Panier</th><th>Achats</th><th>Temps moy.</th></tr></thead><tbody>' + prodRows + '</tbody></table>'
+    + '<h2>Clics</h2>' + clickRows
+    + '<h2>Provenance</h2>' + geoRows
+    + '<hr><p style="color:#888;font-size:12px">Le fichier JSON joint contient toutes les données détaillées (analysable). '
+    + 'Les données du site de plus de 14 mois sont purgées automatiquement — ce mail en est l\'archive.</p>'
+    + '</div>';
+}
+
 module.exports = {
   EVENT_ALLOWLIST: EVENT_ALLOWLIST,
   summarize: summarize,
+  buildReport: buildReport,
+  renderReportHtml: renderReportHtml,
+  reportFilename: reportFilename,
+  purgeCutoffs: purgeCutoffs,
+  monthsAgoKey: monthsAgoKey,
   AFFINITY_WEIGHT: AFFINITY_WEIGHT,
   MAX_EVENTS_PER_BATCH: MAX_EVENTS_PER_BATCH,
   sanitizeEvent: sanitizeEvent,

@@ -432,6 +432,38 @@ règles DÉPLOYÉES (`firebase deploy --only firestore:rules`). Textes CGV/confi
 mentionnant le crypto laissés en place (« le cas échéant » = conditionnel, non
 trompeur ; à retirer si suppression définitive un jour).
 
+## Tableau de bord admin — Analytics maison (17/07/2026, SW v326, mergé master)
+Fiche + plan : `pirates-tools/docs/PLAN-DASHBOARD-ADMIN.md`. Mesure d'audience
+PREMIÈRE PARTIE (pas de GA4/traceur pub), agrégats (pas de log brut), IP jamais
+stockée. 6 étapes, 1 commit chacune, tout vérifié (Playwright + émulateur +
+unitaires check-analytics en CI).
+- ✅ É1 socle serveur : api/events.js (POST public, rate-limit, validation anti-PII,
+  géo en-têtes Vercel) → agrégats Firestore via api/_lib/analytics.js (logique
+  PURE). Collections analytics_* server-only (rules). 34/34 émulateur.
+- ✅ É2 émission client : beacon sendBeacon branché sur track(). 2 niveaux CNIL :
+  ANONYME (sessionStorage, exempté) + CONSENTI (localStorage 13 mois → nouveau/
+  récurrent + affinité produit). Bandeau reformulé (perso = avec accord). Temps/
+  article (view_item→pagehide), clics data-track (dock/chips/WhatsApp). 16/16.
+- ✅ É3 API admin : GET /api/admin?type=stats|clients (requireAdmin). summarize()
+  pure. Clients = users/ + count() commandes.
+- ✅ É4 UI : onglets admin Statistiques (compteurs, appareils/sources, top
+  produits+temps, clics, provenance) + Clients (cartes). 16/16.
+- ✅ É5 globe 3D : three.js (ensureThree, aucune texture externe), points par
+  pays (repli COUNTRY_LATLNG DOM-TOM), surcouche non bloquante, destroy propre
+  (0 fuite WebGL). 11/11 (THREE mocké + dégradation).
+- ✅ É6 rapport mensuel : api/cron-report.js (Vercel Cron 1er du mois, auth
+  CRON_SECRET OU admin) → mail Resend (résumé HTML + PIÈCE JOINTE JSON
+  analysable) + purge daily>14 mois / visiteurs>13 mois. Bouton admin « recevoir
+  maintenant ». 12/12 (Firestore mocké + Resend intercepté).
+⚠️ ACTIONS USER (Vercel) pour activer pleinement :
+  - `CRON_SECRET` (env) sinon le cron mensuel refuse (401) et n'envoie rien.
+  - `FIREBASE_SERVICE_ACCOUNT` (déjà là), `RESEND_API_KEY`/`RESEND_FROM`/
+    `OWNER_EMAIL` (déjà là) pour le mail.
+  - Déployer firestore.rules (analytics_* fermées) — même action S1 en attente.
+NOTE consentement : la couche ANONYME tourne sans consentement (exemption CNIL
+mesure d'audience 1re partie) ; le profil persistant/affinité + nouveau/récurrent
+n'existe QUE si l'utilisateur accepte. Refuser = pas de localStorage pt:vid.
+
 ## Vérification standard
 `cd pirates-tools && node scripts/ci.js` doit rester vert après chaque étape.
 Bump SW (`sw.js` VERSION + ASSET_VER) et `?v=` dans `index.html` à chaque changement d'asset.

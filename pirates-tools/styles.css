@@ -5802,6 +5802,7 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .admin-pane.is-active { display: block; }
 
 /* ── Dashboard analytics (Statistiques + Clients) ───────────────────── */
+.admin-stats-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .7rem; margin-top: 1rem; }
 .admin-empty, .admin-error, .admin-count { color: rgba(255,255,255,.6); font-size: .9rem; margin: .4rem 0; }
 .admin-error { color: #ff8a8a; }
 .stat-grid {
