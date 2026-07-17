@@ -5405,6 +5405,184 @@
     });
   }
 
+  // GET /api/admin?type=… (authentifié). Renvoie le JSON validé.
+  function adminGet(type) {
+    var apiBase = apiBaseUrl();
+    return adminAuthHeaders().then(function (headers) {
+      return fetch(apiBase + '/api/admin?type=' + encodeURIComponent(type), { method: 'GET', headers: headers });
+    }).then(function (r) {
+      return r.json().then(function (data) {
+        if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
+        return data;
+      });
+    });
+  }
+
+  // ── Dashboard : Statistiques ───────────────────────────────
+  var _adminStatsLoaded = false;
+  function loadAdminStats(force) {
+    var el = document.getElementById('adminStats');
+    if (!el) return;
+    if (_adminStatsLoaded && !force) return;
+    _adminStatsLoaded = true;
+    el.innerHTML = '<p class="admin-loading">Chargement…</p>';
+    adminGet('stats').then(function (data) {
+      renderAdminStats(el, data.stats || {});
+    }).catch(function (e) {
+      el.innerHTML = '<p class="admin-error">Erreur : ' + escapeHTML(e.message) + '</p>';
+    });
+  }
+
+  function statCard(label, value, sub) {
+    return '<div class="stat-card">'
+      + '<span class="stat-card__value">' + escapeHTML(String(value)) + '</span>'
+      + '<span class="stat-card__label">' + escapeHTML(label) + '</span>'
+      + (sub ? '<span class="stat-card__sub">' + escapeHTML(sub) + '</span>' : '')
+      + '</div>';
+  }
+
+  function fmtDuration(ms) {
+    ms = Number(ms) || 0;
+    var s = Math.round(ms / 1000);
+    if (s < 60) return s + ' s';
+    var m = Math.floor(s / 60); var r = s % 60;
+    return m + ' min ' + (r < 10 ? '0' + r : r) + ' s';
+  }
+
+  function barRows(map, opts) {
+    var entries = Object.keys(map || {}).map(function (k) { return [k, Number(map[k]) || 0]; });
+    if (!entries.length) return '<p class="admin-empty">Aucune donnée pour le moment.</p>';
+    entries.sort(function (a, b) { return b[1] - a[1]; });
+    if (opts && opts.limit) entries = entries.slice(0, opts.limit);
+    var max = entries[0][1] || 1;
+    return '<div class="stat-bars">' + entries.map(function (e) {
+      var pct = Math.round((e[1] / max) * 100);
+      return '<div class="stat-bar">'
+        + '<span class="stat-bar__label">' + escapeHTML(e[0]) + '</span>'
+        + '<span class="stat-bar__track"><span class="stat-bar__fill" style="width:' + pct + '%"></span></span>'
+        + '<span class="stat-bar__val">' + e[1] + '</span>'
+        + '</div>';
+    }).join('') + '</div>';
+  }
+
+  function productTitleByKey(key) {
+    var p = findProductByKey(key);
+    return p ? (p.brand + ' — ' + p.title) : key;
+  }
+
+  function renderAdminStats(el, s) {
+    var t = s.totals || {};
+    var totalVisitors = (t.newVisitors || 0) + (t.returningVisitors || 0);
+    var html = '';
+
+    // Compteurs principaux.
+    html += '<div class="stat-grid">'
+      + statCard('Visites', t.sessions || 0)
+      + statCard('Pages vues', t.pageViews || 0)
+      + statCard('Clics', t.clicks || 0)
+      + statCard('Visiteurs identifiés', totalVisitors, 'consentis')
+      + statCard('Nouveaux', t.newVisitors || 0)
+      + statCard('Récurrents', t.returningVisitors || 0)
+      + '</div>';
+
+    // Appareils + sources.
+    html += '<div class="stat-cols">'
+      + '<section class="stat-block"><h3 class="stat-block__title">Appareils</h3>' + barRows(s.devices) + '</section>'
+      + '<section class="stat-block"><h3 class="stat-block__title">Sources de trafic</h3>' + barRows(s.sources) + '</section>'
+      + '</div>';
+
+    // Produits les plus consultés (+ temps moyen).
+    html += '<section class="stat-block"><h3 class="stat-block__title">Produits les plus consultés</h3>';
+    var prods = (s.products || []).filter(function (p) { return p.views || p.selects || p.addToCart; }).slice(0, 15);
+    if (!prods.length) {
+      html += '<p class="admin-empty">Aucune consultation enregistrée pour le moment.</p>';
+    } else {
+      html += '<table class="stat-table"><thead><tr><th>Produit</th><th>Vues</th><th>Clics</th><th>Panier</th><th>Achats</th><th>Temps moy.</th></tr></thead><tbody>';
+      prods.forEach(function (p) {
+        html += '<tr>'
+          + '<td>' + escapeHTML(productTitleByKey(p.productId)) + '</td>'
+          + '<td>' + (p.views || 0) + '</td>'
+          + '<td>' + (p.selects || 0) + '</td>'
+          + '<td>' + (p.addToCart || 0) + '</td>'
+          + '<td>' + (p.purchases || 0) + '</td>'
+          + '<td>' + fmtDuration(p.avgTimeMs) + '</td>'
+          + '</tr>';
+      });
+      html += '</tbody></table>';
+    }
+    html += '</section>';
+
+    // Clics ultra-précis.
+    html += '<section class="stat-block"><h3 class="stat-block__title">Clics — sur quoi et combien de fois</h3>';
+    var clicks = (s.clicks || []).slice(0, 20);
+    if (!clicks.length) {
+      html += '<p class="admin-empty">Aucun clic instrumenté pour le moment.</p>';
+    } else {
+      var cmap = {};
+      clicks.forEach(function (c) { cmap[c.label] = c.count; });
+      html += barRows(cmap, { limit: 20 });
+    }
+    html += '</section>';
+
+    // Provenance (liste ; le globe 3D arrive à l'étape 5).
+    html += '<section class="stat-block"><h3 class="stat-block__title">Provenance des visiteurs</h3>';
+    var geo = (s.geo || []).slice(0, 15);
+    if (!geo.length) {
+      html += '<p class="admin-empty">Aucune donnée géographique pour le moment.</p>';
+    } else {
+      var gmap = {};
+      geo.forEach(function (g) { gmap[g.country] = g.count; });
+      html += barRows(gmap, { limit: 15 });
+    }
+    html += '</section>';
+
+    el.innerHTML = html;
+  }
+
+  // ── Dashboard : Clients ────────────────────────────────────
+  var _adminClientsLoaded = false;
+  function loadAdminClients(force) {
+    var el = document.getElementById('adminClients');
+    if (!el) return;
+    if (_adminClientsLoaded && !force) return;
+    _adminClientsLoaded = true;
+    el.innerHTML = '<p class="admin-loading">Chargement…</p>';
+    adminGet('clients').then(function (data) {
+      renderAdminClients(el, data.clients || []);
+    }).catch(function (e) {
+      el.innerHTML = '<p class="admin-error">Erreur : ' + escapeHTML(e.message) + '</p>';
+    });
+  }
+
+  function renderAdminClients(el, clients) {
+    if (!clients.length) {
+      el.innerHTML = '<p class="admin-empty">Aucun compte client pour le moment.</p>';
+      return;
+    }
+    el.innerHTML = '<p class="admin-count">' + clients.length + ' client' + (clients.length > 1 ? 's' : '') + '</p>'
+      + '<div class="client-cards">' + clients.map(function (c) {
+        var initial = (c.name || c.email || '?').charAt(0).toUpperCase();
+        var tier = (c.loyalty && c.loyalty.tier) ? c.loyalty.tier : '';
+        var rows = '';
+        if (c.email) rows += '<div class="client-card__row"><span>✉️</span> ' + escapeHTML(c.email) + '</div>';
+        if (c.phone) rows += '<div class="client-card__row"><span>📞</span> ' + escapeHTML(c.phone) + '</div>';
+        if (c.address) rows += '<div class="client-card__row"><span>📍</span> ' + escapeHTML(c.address) + '</div>';
+        return '<article class="client-card">'
+          + '<div class="client-card__head">'
+          + '<span class="client-card__avatar">' + escapeHTML(initial) + '</span>'
+          + '<div class="client-card__id">'
+          + '<span class="client-card__name">' + escapeHTML(c.name || 'Sans nom') + '</span>'
+          + (tier ? '<span class="client-card__tier">' + escapeHTML(tier) + '</span>' : '')
+          + '</div></div>'
+          + '<div class="client-card__body">' + rows + '</div>'
+          + '<div class="client-card__foot">'
+          + '<span>' + (c.orderCount || 0) + ' commande' + ((c.orderCount || 0) > 1 ? 's' : '') + '</span>'
+          + (c.createdAt ? '<span>Inscrit le ' + escapeHTML(new Date(c.createdAt).toLocaleDateString('fr-FR')) + '</span>' : '')
+          + '</div>'
+          + '</article>';
+      }).join('') + '</div>';
+  }
+
   function renderAdmin() {
     var view = document.getElementById('adminView');
     if (!view) return;
@@ -5434,6 +5612,8 @@
 
       + '<nav class="admin-tabs" role="tablist">'
       + '<button type="button" class="admin-tab is-active" data-admin-tab="products" role="tab" aria-selected="true">Produits</button>'
+      + '<button type="button" class="admin-tab" data-admin-tab="stats" role="tab" aria-selected="false">Statistiques</button>'
+      + '<button type="button" class="admin-tab" data-admin-tab="clients" role="tab" aria-selected="false">Clients</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="orders" role="tab" aria-selected="false">Commandes</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="tools" role="tab" aria-selected="false">Outils</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="instagram" role="tab" aria-selected="false">Instagram</button>'
@@ -5545,6 +5725,20 @@
       + '</div>' // .ig-admin
       + '</div>' // admin-pane instagram
 
+      // ── Statistiques (dashboard analytics maison) ──────────────
+      + '<div class="admin-pane" data-admin-pane="stats" hidden>'
+      + '<p class="admin-hint">Mesure d\'audience maison (première partie, sans traceur publicitaire). Données agrégées, IP jamais stockée. Le globe des visiteurs arrive à l\'étape suivante.</p>'
+      + '<div id="adminStats" class="admin-stats"><p class="admin-loading">Chargement…</p></div>'
+      + '<button type="button" class="btn btn--ghost" id="adminStatsRefresh">Rafraîchir</button>'
+      + '</div>'
+
+      // ── Clients (comptes créés) ────────────────────────────────
+      + '<div class="admin-pane" data-admin-pane="clients" hidden>'
+      + '<p class="admin-hint">Fiches des clients ayant créé un compte (données fournies volontairement à l\'inscription).</p>'
+      + '<div id="adminClients" class="admin-clients"><p class="admin-loading">Chargement…</p></div>'
+      + '<button type="button" class="btn btn--ghost" id="adminClientsRefresh">Rafraîchir</button>'
+      + '</div>'
+
       + '</div>';
 
     var logoutBtn = document.getElementById('adminLogoutBtn');
@@ -5571,8 +5765,15 @@
         });
         if (target === 'orders') loadAdminOrders();
         if (target === 'instagram') initAdminInstagram();
+        if (target === 'stats') loadAdminStats();
+        if (target === 'clients') loadAdminClients();
       });
     });
+
+    var statsRefresh = document.getElementById('adminStatsRefresh');
+    if (statsRefresh) statsRefresh.onclick = function () { loadAdminStats(true); };
+    var clientsRefresh = document.getElementById('adminClientsRefresh');
+    if (clientsRefresh) clientsRefresh.onclick = function () { loadAdminClients(true); };
 
     // Test email form
     var testForm = document.getElementById('adminTestEmailForm');
