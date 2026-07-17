@@ -65,6 +65,7 @@ Collections (toutes **server-only** — écriture Admin SDK, lecture via API adm
 | `analytics_clicks/{cibleHash}` | libellé cible + compteur (clic ultra-précis) | 1 doc/cible |
 | `analytics_geo/{countryCode}` | pays, compteur, lat/long représentatifs (globe) | 1 doc/pays |
 | `analytics_events_recent/{autoId}` | ring-buffer borné (≤500) des events bruts récents (détail/debug), purgé | court |
+| `analytics_visitors/{visitorId}` | **consenti uniquement** : 1er/dernier vu (nouveau/récurrent), affinité catégorie/produit (scores) | 1 doc/visiteur consenti, TTL 13 mois |
 
 ### 3.2 Flux de données
 ```
@@ -108,19 +109,43 @@ authentifiée (jamais exposées au public). Droit à l'oubli déjà géré (M4).
 
 ---
 
-## 4. Décisions produit à trancher AVANT de coder (impact archi)
+## 4. Décisions ARRÊTÉES (validées avec l'user le 17/07/2026)
 
-1. **Identifiant visiteur** (compteur « visiteurs uniques ») :
-   - (A) `sessionStorage` = 1 visite/session, **pas de suivi longue durée** →
-     100 % exempté CNIL, le plus respectueux. « Visiteurs » = visites.
-   - (B) `localStorage` avec durée 13 mois (limite CNIL) → distingue
-     nouveaux/récurrents, mais plus proche du seuil consentement.
-   - _Reco : (A) pour rester carré RGPD ; on affiche « visites » + « visiteurs
-     uniques approx./jour »._
-2. **Périmètre du clic ultra-précis** : tous les éléments `data-track` (boutons,
-   cartes, liens) → j'annote le HTML. OK d'ajouter des attributs `data-track` ?
-3. **Rétention** : purge des agrégats > N mois ? (reco : daily gardé 14 mois,
-   events_recent purgés en continu.)
+1. **Nouveau vs récurrent = OUI, en mode CONSENTI.** On veut distinguer les
+   visiteurs nouveaux/récurrents ET bâtir une **affinité produit** par visiteur
+   pour proposer des **promotions pertinentes** (sur les produits que la personne
+   aime, pas des promos génériques). Ceci nécessite un identifiant persistant →
+   **hors exemption CNIL → consentement requis**. On l'obtient de la manière la
+   plus pro : le bandeau (déjà Accepter/Refuser, v321) explique clairement que
+   ces données servent **uniquement à améliorer l'expérience** et à proposer des
+   **offres pertinentes**. → **modèle à 2 niveaux** :
+   - **Sans consentement** (exempté CNIL) : comptage **agrégé anonyme** de
+     session — visites, géo, clics, temps. Pas d'ID persistant. Le site
+     fonctionne comme aujourd'hui, rien à consentir pour cette couche.
+   - **Avec consentement** : `visitorId` **persistant** (localStorage, 13 mois
+     max CNIL) → nouveau/récurrent + **profil d'affinité** (catégories/produits
+     appréciés) → moteur de promotions personnalisées.
+2. **Clic ultra-précis** : j'annote le HTML avec des attributs `data-track`
+   (choix pro : déclaratif, pas de couplage JS fragile). _(décision déléguée →
+   retenue.)_
+3. **Rétention = 14 mois puis purge auto** + **RAPPORT MENSUEL PAR MAIL** à
+   l'owner (Resend, déjà configuré). ✅ **Ton instinct est correct** : garder des
+   millions d'events bruts dans Firestore coûte cher et ralentit les lectures ;
+   les **agrégats** restent légers, et un **export mensuel envoyé par mail**
+   t'archive l'historique complet **hors du site**. Le mail contient un **résumé
+   lisible + une pièce jointe JSON structurée** (analysable) — format pensé pour
+   que tu le déposes dans un **projet Claude** et qu'on l'analyse au niveau
+   institutionnel. Puis les données > 14 mois sont purgées côté site.
+
+### 4bis. Moteur de promotions personnalisées (nouveau — suite décision 1)
+- Par `visitorId` consenti : compteurs d'affinité `catégorie → score`,
+  `produit → score` (vue = +1, clic = +2, ajout panier = +5, achat = +10 —
+  pondération type « institutionnel », ajustable).
+- L'admin voit, par segment, les produits/catégories les plus aimés → cible ses
+  promos dessus. (Sous-fonction future possible : afficher au visiteur consenti
+  des offres sur SES produits favoris — hors périmètre initial, noté.)
+- RGPD : profil lié à un ID pseudonyme, effaçable (droit à l'oubli), finalité
+  déclarée (amélioration UX + offres pertinentes), **jamais** de revente/partage.
 
 ---
 
@@ -185,6 +210,19 @@ authentifiée (jamais exposées au public). Droit à l'oubli déjà géré (M4).
   régression complète, bump SW + `?v=`, merge master.
 - **MÉMO** : réutiliser `ensureThree` ; `.catch` sur chargement ; détruire la
   scène à la sortie d'onglet (pas de fuite) ; globe = confort, jamais bloquant.
+
+### Étape 6 — Rapport mensuel par mail + purge auto (Vercel Cron)
+- `api/cron-report.js` : protégé (secret cron), déclenché par **Vercel Cron**
+  (mensuel). Compile les agrégats → **mail Resend** à `OWNER_EMAIL` : résumé
+  lisible + **pièce jointe JSON structurée** (analysable dans un projet Claude).
+  Puis **purge** `analytics_daily`/`events_recent` > 14 mois et
+  `analytics_visitors` inactifs > 13 mois.
+- **Vérif** : exécution simulée (mail formé, JSON valide, purge ne touche que le
+  périmètre daté) ; le cron exige le secret ; 0 PII d'un visiteur anonyme dans
+  le rapport (agrégats + clients consentis only).
+- **MÉMO** : format JSON = clé de l'analyse ultérieure → schéma stable et
+  documenté ; `vercel.json` → section `crons` ; idempotent (rejouable sans
+  double compte).
 
 ---
 
