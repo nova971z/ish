@@ -7,6 +7,21 @@ Branche de dev : `claude/pirates-tools-rebuild-zWc1b`. Prod = Vercel, domaine pe
 Code de niveau ingénieur web senior, standard des grandes institutions e-commerce.
 Aucun hasard, aucun bullshit. Chaque correction est vérifiée dans le code avant d'être livrée.
 
+## 📌 À FAIRE PLUS TARD (en attente, décidé avec l'user — à traiter ensemble)
+- [ ] **Déployer les règles Firestore** (verrou anti-fraude S1 + crypto désactivé
+      v322 : le fichier firestore.rules est à jour, mais PAS déployé sur le
+      projet). Voie simple iPad = console.firebase.google.com → Firestore →
+      Règles → coller le contenu de firestore.rules → Publier. (CLI impossible
+      côté Claude : pas d'accès au compte Google de l'user, c'est voulu.)
+- [ ] **Auth admin mot de passe fort + Google Authenticator (TOTP)** : demandé.
+      Nécessite d'activer Identity Platform (console Firebase) + méthode TOTP,
+      puis code : écran login admin (email+MDP+défi TOTP+enrôlement QR) et
+      serveur exigeant claim admin ET 2e facteur, puis retrait d'ADMIN_SECRET.
+      Le socle claim admin existe déjà (H6, set-admin-claim.js).
+- [ ] **Tableau de bord admin — stats de visite/clics** : demandé (voir réponse
+      donnée). À cadrer : reco = collecte maison (events → Firestore) OU GA4.
+      Décision produit + périmètre à trancher avec l'user avant de coder.
+
 ## ⚠️ CHECKLIST PRÉ-LANCEMENT — à dérouler quand l'user demande « est-ce qu'on est prêt à lancer »
 Le site N'EST PAS lancé (décidé le 15/07/2026). Ne rien ouvrir au public tant que ces points bloquants ne sont pas faits. Quand l'user pose la question, PARCOURIR cette liste et donner l'état point par point.
 
