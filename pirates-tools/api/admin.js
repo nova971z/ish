@@ -6,6 +6,7 @@
 const auth = require('./_lib/auth');
 const http = require('./_lib/http');
 const firebase = require('./_lib/firebase');
+const analytics = require('./_lib/analytics');
 
 module.exports = async function handler(req, res) {
   http.applyCors(req, res);
@@ -47,6 +48,53 @@ module.exports = async function handler(req, res) {
           });
         });
         return res.status(200).json({ ok: true, orders: orders });
+      }
+
+      // ── Statistiques (dashboard analytics maison) ──────────────
+      if (type === 'stats') {
+        const readAll = async (coll, opts) => {
+          let q = db.collection(coll);
+          if (opts && opts.orderDesc) q = q.orderBy(admin.firestore.FieldPath.documentId(), 'desc');
+          if (opts && opts.limit) q = q.limit(opts.limit);
+          const s = await q.get();
+          const out = [];
+          s.forEach((d) => out.push(Object.assign({ id: d.id }, d.data())));
+          return out;
+        };
+        // Daily borné (les YYYY-MM-DD trient chronologiquement) ; le reste est
+        // naturellement borné (1 doc/produit, /cible, /pays).
+        const daily = await readAll('analytics_daily', { orderDesc: true, limit: 60 });
+        const products = await readAll('analytics_products');
+        const clicks = await readAll('analytics_clicks');
+        const geo = await readAll('analytics_geo');
+        return res.status(200).json({ ok: true, stats: analytics.summarize(daily, products, clicks, geo) });
+      }
+
+      // ── Cartes client (comptes créés) ──────────────────────────
+      if (type === 'clients') {
+        const usersSnap = await db.collection('users').limit(200).get();
+        const clients = [];
+        for (const u of usersSnap.docs) {
+          const d = u.data() || {};
+          let orderCount = 0;
+          try {
+            const agg = await db.collection('users/' + u.id + '/orders').count().get();
+            orderCount = agg.data().count;
+          } catch (_) { orderCount = 0; }
+          clients.push({
+            uid: u.id,
+            name: d.name || '',
+            email: d.email || '',
+            phone: d.phone || '',
+            address: d.address || '',
+            avatar: d.avatar || '',
+            loyalty: (d.loyalty && typeof d.loyalty === 'object') ? d.loyalty : null,
+            orderCount: orderCount,
+            createdAt: d.createdAt && d.createdAt.toMillis ? d.createdAt.toMillis() : (d.createdAt || null)
+          });
+        }
+        clients.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+        return res.status(200).json({ ok: true, clients: clients, total: clients.length });
       }
 
       // Default: list all overrides

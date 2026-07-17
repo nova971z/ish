@@ -77,6 +77,26 @@ module.exports = function checkAnalytics() {
   var dAnon = opsAnon.find(function (o) { return o.coll === 'analytics_daily'; });
   ok(dAnon && dAnon.inc.newVisitors === undefined && dAnon.inc.returningVisitors === undefined, 'anonyme : pas de nouveau/récurrent');
 
+  // ── summarize (synthèse dashboard) ─────────────────────────────────────────
+  var sum = A.summarize(
+    [ { id: '2026-07-16', sessions: 5, pageViews: 12, clicks: 8, newVisitors: 3, returningVisitors: 2, device: { mobile: 4, desktop: 1 }, source: { google: 2, direct: 3 } },
+      { id: '2026-07-17', sessions: 7, pageViews: 20, clicks: 10, newVisitors: 4, returningVisitors: 3, device: { mobile: 6, desktop: 1 }, source: { instagram: 5, direct: 2 } } ],
+    [ { id: 'p1', views: 10, selects: 4, addToCart: 2, purchases: 1, timeMsTotal: 30000, timeSamples: 10 },
+      { id: 'p2', views: 25, selects: 8, addToCart: 3, purchases: 0, timeMsTotal: 0, timeSamples: 0 } ],
+    [ { id: 'c1', label: 'dock:panier', count: 9 }, { id: 'c2', label: 'chip:Meuleuses', count: 14 } ],
+    [ { id: 'FR', country: 'FR', count: 8, lat: 46, lng: 2 }, { id: 'US', country: 'US', count: 3, lat: 38, lng: -97 } ]
+  );
+  ok(sum.totals.sessions === 12 && sum.totals.pageViews === 32, 'totaux sessions/pages cumulés');
+  ok(sum.totals.newVisitors === 7 && sum.totals.returningVisitors === 5, 'nouveaux/récurrents cumulés');
+  ok(sum.devices.mobile === 10 && sum.devices.desktop === 2, 'répartition appareils fusionnée');
+  ok(sum.sources.direct === 5 && sum.sources.instagram === 5, 'sources fusionnées');
+  ok(sum.daily[0].date === '2026-07-16' && sum.daily[1].date === '2026-07-17', 'série triée par date');
+  ok(sum.products[0].productId === 'p2' && sum.products[0].views === 25, 'produits triés par vues');
+  ok(sum.products[1].avgTimeMs === 3000, 'temps moyen = total/échantillons');
+  ok(sum.products.find(function (p) { return p.productId === 'p2'; }).avgTimeMs === 0, 'temps moyen 0 si aucun échantillon (pas de division par zéro)');
+  ok(sum.clicks[0].label === 'chip:Meuleuses' && sum.clicks[0].count === 14, 'clics triés desc');
+  ok(sum.geo[0].country === 'FR' && sum.geo[0].count === 8, 'géo triée desc');
+
   return errors;
 };
 
