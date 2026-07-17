@@ -404,6 +404,19 @@ mon diagnostic initial).
 REVERSAL DOC : la NOTE M1 ci-dessus (« bandeau masqué = voulu ») est désormais
 caduque — remplacée par le bandeau info honnête.
 
+## Canal crypto DÉSACTIVÉ (17/07/2026, SW v322, mergé master)
+Décision produit : le paiement crypto (flux déclaratif non vérifié serveur =
+risque fraude) est masqué au lancement, SANS effacer le code. Interrupteur
+`PT_CRYPTO_ENABLED=false` (app.js) + 3 couches : UI (onglet + barre d'onglets
+masqués via applyCryptoVisibility), logique (cryptoSwitchTab force 'card',
+init crypto off), et firestore.rules ('declared' retiré de la liste blanche
+create = vrai verrou anti-fraude). Réactiver = flag true + 'declared' remis
+dans les règles (commentaires croisés). Vérifié : Playwright 7/7 + émulateur
+29/29 (« Alice NE peut PAS créer declared »). ⚠️ le verrou serveur suppose les
+règles DÉPLOYÉES (`firebase deploy --only firestore:rules`). Textes CGV/confid.
+mentionnant le crypto laissés en place (« le cas échéant » = conditionnel, non
+trompeur ; à retirer si suppression définitive un jour).
+
 ## Vérification standard
 `cd pirates-tools && node scripts/ci.js` doit rester vert après chaque étape.
 Bump SW (`sw.js` VERSION + ASSET_VER) et `?v=` dans `index.html` à chaque changement d'asset.

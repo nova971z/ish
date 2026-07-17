@@ -4027,6 +4027,18 @@
   var _cryptoRates = {};      // coingeckoId -> EUR price
   var _cryptoTotalEur = 0;
 
+  // ── INTERRUPTEUR canal crypto ──────────────────────────────
+  // Décision 16/07/2026 : le paiement crypto est un flux DÉCLARATIF (le client
+  // annonce « j'ai payé » → commande 'declared' à vérifier à la main sur la
+  // blockchain), non vérifiable par le serveur comme l'est la carte via Stripe.
+  // Risque de fraude au lancement → on le fait DISPARAÎTRE sans rien effacer :
+  // tout le code crypto ci-dessous RESTE intact, mais l'onglet et le chemin
+  // 'declared' sont neutralisés. RÉACTIVER = passer ce flag à true ICI **et**
+  // réautoriser 'declared' dans firestore.rules (users/{uid}/orders → create).
+  // Aucune autre modification requise.
+  var PT_CRYPTO_ENABLED = false;
+  function cryptoEnabled(){ return PT_CRYPTO_ENABLED === true; }
+
   function ptCryptoCfg(){ return (window.PT_CRYPTO_CONFIG || { networks: [], cardCheckout: {} }); }
 
   function cryptoFormatAmount(eurTotal, net) {
@@ -4292,7 +4304,23 @@
     window.open(url, '_blank', 'noopener');
   }
 
+  // Masque/affiche l'onglet crypto et la barre d'onglets selon l'interrupteur.
+  // Canal désactivé → seule la carte reste : la barre d'onglets (2 choix) n'a
+  // plus de raison d'être, on la masque et le panneau crypto est neutralisé.
+  function applyCryptoVisibility(modal) {
+    var root = modal || document;
+    var on = cryptoEnabled();
+    var cryptoTab = root.querySelector('.pay-tab[data-pay-tab="crypto"]');
+    var tabs = root.querySelector('.pay-tabs');
+    var cryptoPane = root.querySelector('[data-pay-pane="crypto"]');
+    if (cryptoTab) cryptoTab.hidden = !on;
+    if (tabs) tabs.hidden = !on;
+    if (cryptoPane && !on) { cryptoPane.hidden = true; cryptoPane.classList.remove('is-active'); }
+  }
+
   function cryptoSwitchTab(tab) {
+    // Défense en profondeur : impossible de basculer sur crypto si désactivé.
+    if (tab === 'crypto' && !cryptoEnabled()) tab = 'card';
     var card = document.querySelector('[data-pay-pane="card"]');
     var crypto = document.querySelector('[data-pay-pane="crypto"]');
     var btnCard   = document.getElementById('payModalConfirm');
@@ -4360,7 +4388,8 @@
     _payItems = items;
     _cryptoTotalEur = payTotalCents(items) / 100;
     _cryptoSelected = null;
-    cryptoRenderNets();
+    applyCryptoVisibility(modal);        // masque l'onglet crypto si désactivé
+    if (cryptoEnabled()) cryptoRenderNets();
     cryptoSwitchTab('card');
 
     var itemsEl = document.getElementById('payModalItems');
