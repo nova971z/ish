@@ -54,10 +54,16 @@ service cloud.firestore {
       // JAMAIS écrire 'paid' ni les tampons serveur (confirmedByWebhook,
       // paidAt…) : seul le webhook (Admin SDK) confirme un paiement. Il ne
       // peut ni modifier ni supprimer une commande existante.
+      //
+      // NOTE canal crypto DÉSACTIVÉ (16/07/2026) : 'declared' (commande crypto
+      // annoncée par le client, à vérifier à la main) est RETIRÉ de la liste
+      // blanche → même en forçant le SDK, personne ne peut fabriquer une
+      // commande crypto. RÉACTIVER = remettre 'declared' ci-dessous ET
+      // PT_CRYPTO_ENABLED=true dans app.js.
       match /orders/{orderId} {
         allow read: if isOwner(userId);
         allow create: if isOwner(userId)
-          && request.resource.data.status in ['quote', 'pending', 'declared']
+          && request.resource.data.status in ['quote', 'pending']
           && !request.resource.data.keys().hasAny(
                ['confirmedByWebhook', 'paidAt', 'stripePaymentIntent'])
           && request.resource.data.keys().hasOnly(

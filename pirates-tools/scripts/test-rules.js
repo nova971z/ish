@@ -72,7 +72,7 @@ async function check(label, promise) {
   console.log('\n── Commandes : statut ──');
   await check('Alice crée une commande quote', assertSucceeds(addDoc(collection(alice, 'users/alice/orders'), { status: 'quote', total: 20, items: 1, date: 1 })));
   await check('Alice crée une commande pending (paiement carte initié)', assertSucceeds(addDoc(collection(alice, 'users/alice/orders'), { status: 'pending', total: 20, items: 1, date: 1, method: 'stripe', paymentIntentId: 'pi_1', stripeSessionId: null, lines: [] })));
-  await check('Alice crée une commande declared (crypto)', assertSucceeds(addDoc(collection(alice, 'users/alice/orders'), { status: 'declared', total: 20, items: 1, date: 1, method: 'crypto:eth' })));
+  await check('Alice NE peut PAS créer une commande declared (canal crypto désactivé 16/07)', assertFails(addDoc(collection(alice, 'users/alice/orders'), { status: 'declared', total: 20, items: 1, date: 1, method: 'crypto:eth' })));
   await check('Alice NE peut PAS forger une commande paid', assertFails(addDoc(collection(alice, 'users/alice/orders'), { status: 'paid', total: 9999, items: 1, date: 1 })));
   await check('Alice NE peut PAS poser confirmedByWebhook', assertFails(addDoc(collection(alice, 'users/alice/orders'), { status: 'pending', total: 20, items: 1, date: 1, confirmedByWebhook: true })));
   await check('Alice NE peut PAS poser paidAt', assertFails(addDoc(collection(alice, 'users/alice/orders'), { status: 'pending', total: 20, items: 1, date: 1, paidAt: 1 })));
