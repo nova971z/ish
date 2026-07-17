@@ -33,7 +33,7 @@
   <link rel="dns-prefetch" href="https://js.stripe.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=322">
+  <link rel="stylesheet" href="styles.css?v=323">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -118,9 +118,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Pirates Tools" />
-  <link rel="manifest" href="manifest.webmanifest?v=322" />
-  <link rel="icon" href="icons/icon-192.png?v=322" sizes="192x192" />
-  <link rel="apple-touch-icon" href="icons/icon-180.png?v=322" sizes="180x180" />
+  <link rel="manifest" href="manifest.webmanifest?v=323" />
+  <link rel="icon" href="icons/icon-192.png?v=323" sizes="192x192" />
+  <link rel="apple-touch-icon" href="icons/icon-180.png?v=323" sizes="180x180" />
 
 
 
@@ -142,7 +142,7 @@
         <img
           id="topbarLogo"
           class="topbar-logo"
-          src="icons/icon-192.png?v=322"
+          src="icons/icon-192.png?v=323"
           alt="Pirates Tools"
           width="40" height="40"
           decoding="async" loading="eager" fetchpriority="high" />
@@ -173,8 +173,8 @@
   <section id="hero" class="hero-full" aria-hidden="true">
     <div class="hero-logo-container initial" id="heroLogoContainer">
       <img id="heroLogo" class="hero-logo on" alt="Pirates Tools"
-        src="icons/icon-512.png?v=322"
-        srcset="icons/icon-256.png?v=322 256w, icons/icon-384.png?v=322 384w, icons/icon-512.png?v=322 512w"
+        src="icons/icon-512.png?v=323"
+        srcset="icons/icon-256.png?v=323 256w, icons/icon-384.png?v=323 384w, icons/icon-512.png?v=323 512w"
         sizes="(max-width: 768px) 90vw, 60vw"
         width="600" height="600"
         decoding="async" loading="eager" fetchpriority="high" />
@@ -1490,7 +1490,7 @@
   </footer>
 
   <!-- =================== FLOATING WHATSAPP =================== -->
-  <a id="waFloat" class="wa-float" href="https://wa.me/33744776598"
+  <a id="waFloat" class="wa-float" data-track="wa:float" href="https://wa.me/33744776598"
      target="_blank" rel="noopener noreferrer" aria-label="Contacter sur WhatsApp"
      data-action="wa-float">
     <span class="wa-float__icon" aria-hidden="true">💬</span>
@@ -1516,14 +1516,14 @@
   <!-- =================== DOCK =================== -->
   <nav id="dock" class="dock" aria-label="Barre d'action">
     <div class="dock__shell">
-      <button id="dockHomeBtn" class="dock__btn dock__btn--home" type="button" aria-label="Accueil" data-nav="/">🏠</button>
-      <button id="dockQuoteBtn" class="dock__btn dock__btn--tools" type="button" aria-label="Catalogue" data-nav="/catalogue">🛠️</button>
-      <button id="dockCartBtn" class="dock__btn dock__btn--cart" type="button" aria-label="Voir le panier" data-nav="/devis">
+      <button id="dockHomeBtn" class="dock__btn dock__btn--home" type="button" aria-label="Accueil" data-nav="/" data-track="dock:accueil">🏠</button>
+      <button id="dockQuoteBtn" class="dock__btn dock__btn--tools" type="button" aria-label="Catalogue" data-nav="/catalogue" data-track="dock:catalogue">🛠️</button>
+      <button id="dockCartBtn" class="dock__btn dock__btn--cart" type="button" aria-label="Voir le panier" data-nav="/devis" data-track="dock:panier">
         🛒
         <span id="dockCount" class="dock__badge">0</span>
       </button>
-      <a class="dock__btn dock__btn--call" href="tel:+33744776598" aria-label="Appeler">📞</a>
-      <a class="dock__btn dock__btn--wa" href="https://wa.me/33744776598" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">💬</a>
+      <a class="dock__btn dock__btn--call" href="tel:+33744776598" aria-label="Appeler" data-track="dock:appel">📞</a>
+      <a class="dock__btn dock__btn--wa" href="https://wa.me/33744776598" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" data-track="dock:whatsapp">💬</a>
     </div>
   </nav>
 
@@ -1619,7 +1619,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=322"></script>
+  <script defer src="app.js?v=323"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

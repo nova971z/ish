@@ -87,6 +87,18 @@ service cloud.firestore {
     match /rate_limits/{bucketId}      { allow read, write: if false; } // compteurs anti-abus (IP)
     match /product_overrides/{prodId}  { allow read, write: if false; } // prix/stock admin
 
+    // Mesure d'audience maison : écrite par l'Admin SDK (api/events.js), lue
+    // UNIQUEMENT par l'API admin authentifiée (api/admin?type=stats). Jamais
+    // par le client → fermé ici (double le catch-all, documente l'intention).
+    // analytics_visitors contient le profil d'affinité des visiteurs CONSENTIS
+    // (pseudonyme), effaçable au titre du droit à l'oubli.
+    match /analytics_daily/{day}         { allow read, write: if false; }
+    match /analytics_products/{prodId}   { allow read, write: if false; }
+    match /analytics_clicks/{targetId}   { allow read, write: if false; }
+    match /analytics_geo/{country}       { allow read, write: if false; }
+    match /analytics_visitors/{visitorId}{ allow read, write: if false; }
+    match /analytics_events_recent/{id}  { allow read, write: if false; }
+
     // ---- DEFAULT-DENY final : tout le reste est refusé --------------------
     // Une requête n'est autorisée que si AU MOINS une règle ci-dessus l'accorde.
     // Ce catch-all ne peut donc pas rouvrir un accès ; il verrouille toute

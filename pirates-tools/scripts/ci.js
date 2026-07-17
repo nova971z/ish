@@ -30,6 +30,7 @@ var reqProducts = safeRequire('./check-products-json','check-products-json');
 var reqPricing  = safeRequire('./check-pricing',     'check-pricing');
 var reqLoyalty  = safeRequire('./check-loyalty',     'check-loyalty');
 var reqCsp      = safeRequire('./check-csp',         'check-csp');
+var reqAnalytics= safeRequire('./check-analytics',   'check-analytics');
 
 // Détection d’un linter produits local (ajouté plus tôt)
 var LINT_FILE = path.resolve(__dirname, './lint-products.js');
@@ -67,6 +68,7 @@ function runLintProducts(){
   await runOne(reqPricing,  'check-pricing');
   await runOne(reqLoyalty,  'check-loyalty');
   await runOne(reqCsp,      'check-csp');
+  await runOne(reqAnalytics,'check-analytics');
 
   // Linter produits optionnel
   var lintRes = runLintProducts();

@@ -93,6 +93,13 @@ async function check(label, promise) {
   await check('Alice NE lit PAS stripe_events/', assertFails(getDoc(doc(alice, 'stripe_events/e1'))));
   await check('Alice NE lit PAS rate_limits/', assertFails(getDoc(doc(alice, 'rate_limits/r1'))));
 
+  console.log('\n── Mesure d\'audience : fermée au client (lecture + écriture) ──');
+  await check('Alice NE lit PAS analytics_daily/', assertFails(getDoc(doc(alice, 'analytics_daily/2026-07-17'))));
+  await check('Alice NE écrit PAS analytics_daily/ (gonfler les compteurs)', assertFails(setDoc(doc(alice, 'analytics_daily/2026-07-17'), { pageViews: 9999 })));
+  await check('Alice NE lit PAS analytics_products/', assertFails(getDoc(doc(alice, 'analytics_products/p1'))));
+  await check('Alice NE lit PAS analytics_visitors/ (profil d\'affinité d\'autrui)', assertFails(getDoc(doc(alice, 'analytics_visitors/v1'))));
+  await check('Alice NE écrit PAS analytics_geo/', assertFails(setDoc(doc(alice, 'analytics_geo/FR'), { count: 1 })));
+
   console.log('\n── Default-deny : collection inconnue ──');
   await check('Alice NE lit PAS une collection non prévue', assertFails(getDoc(doc(alice, 'secret_stuff/x'))));
   await check('Alice NE écrit PAS une collection non prévue', assertFails(setDoc(doc(alice, 'secret_stuff/x'), { a: 1 })));

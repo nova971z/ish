@@ -320,6 +320,10 @@
       window.dataLayer = window.dataLayer || [];
       window.dataLayer.push(payload);
     } catch (_) {}
+    // Mesure d'audience maison (beacon → /api/events). Émise TOUJOURS : la
+    // couche anonyme (agrégats) est exemptée de consentement (CNIL) ; le
+    // consentement ne gouverne QUE le profil persistant/affinité (aTrack le gère).
+    try { aTrack(eventName, params); } catch (_) {}
     if (!hasConsent()) return;
     forwardToProviders(eventName, params);
   }
@@ -333,6 +337,165 @@
       for (var k in payload) if (k !== 'event') params[k] = payload[k];
       forwardToProviders(ev, params);
     });
+  }
+
+  // ══ Mesure d'audience maison (beacon → /api/events) ════════════════════════
+  // Couche STRICTEMENT additive, alignée RGPD/CNIL. Deux niveaux :
+  //  • ANONYME (exempté de consentement) : identifiant de SESSION éphémère
+  //    (sessionStorage), agrégats seulement, IP jamais envoyée/stockée.
+  //  • CONSENTI : identifiant PERSISTANT (localStorage, ~13 mois) → nouveau vs
+  //    récurrent + profil d'affinité (offres pertinentes). Créé à l'acceptation,
+  //    supprimé au refus. Émission via navigator.sendBeacon (non bloquant,
+  //    survit à la navigation). Ne casse JAMAIS l'app (tout est try/catch).
+  var PT_A_SID = 'pt:sid';       // session anonyme
+  var PT_A_VID = 'pt:vid';       // visiteur persistant (consenti)
+  var PT_A_VID_TS = 'pt:vid_ts'; // horodatage création (purge 13 mois)
+  var A_VID_MAX_MS = 13 * 30 * 24 * 3600 * 1000;
+  var _aQueue = [];
+  var _aFlushTimer = null;
+  var _aSessionStarted = false;
+  var _aItemTimer = null; // { id, start }
+
+  function aRandId() {
+    try {
+      if (window.crypto && crypto.getRandomValues) {
+        var b = new Uint8Array(16); crypto.getRandomValues(b);
+        return Array.prototype.map.call(b, function (x) { return ('0' + x.toString(16)).slice(-2); }).join('');
+      }
+    } catch (_) {}
+    return 'r' + Math.abs((Date.now() ^ (Math.random() * 1e9)) | 0).toString(36);
+  }
+
+  function aGetSessionId() {
+    try {
+      var s = sessionStorage.getItem(PT_A_SID);
+      if (!s) { s = aRandId(); sessionStorage.setItem(PT_A_SID, s); }
+      return s;
+    } catch (_) { return null; }
+  }
+
+  // Visiteur persistant : UNIQUEMENT sous consentement. { id, isNew } ou null.
+  function aGetVisitor() {
+    if (!hasConsent()) return null;
+    try {
+      var ts = parseInt(localStorage.getItem(PT_A_VID_TS) || '0', 10);
+      var id = localStorage.getItem(PT_A_VID);
+      if (id && ts && (Date.now() - ts) > A_VID_MAX_MS) { id = null; } // périmé
+      var isNew = false;
+      if (!id) {
+        id = aRandId();
+        localStorage.setItem(PT_A_VID, id);
+        localStorage.setItem(PT_A_VID_TS, String(Date.now()));
+        isNew = true;
+      }
+      return { id: id, isNew: isNew };
+    } catch (_) { return null; }
+  }
+  function aClearVisitor() {
+    try { localStorage.removeItem(PT_A_VID); localStorage.removeItem(PT_A_VID_TS); } catch (_) {}
+  }
+
+  function aDevice() {
+    return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '') ? 'mobile' : 'desktop';
+  }
+  function aSource() {
+    try {
+      var r = document.referrer || '';
+      if (!r) return 'direct';
+      var host = new URL(r).hostname.replace(/^www\./, '');
+      if (host === location.hostname) return 'internal';
+      if (/google\./.test(host)) return 'google';
+      if (/instagram\./.test(host)) return 'instagram';
+      if (/facebook\.|fb\./.test(host)) return 'facebook';
+      if (/bing\./.test(host)) return 'bing';
+      return 'other';
+    } catch (_) { return 'direct'; }
+  }
+
+  function aEnqueue(name, params) {
+    var ev = { event: name };
+    if (params) for (var k in params) if (Object.prototype.hasOwnProperty.call(params, k)) ev[k] = params[k];
+    _aQueue.push(ev);
+    if (_aQueue.length >= 15) aFlush();
+    else if (!_aFlushTimer) { _aFlushTimer = setTimeout(function () { _aFlushTimer = null; aFlush(); }, 4000); }
+  }
+
+  function aFlush() {
+    if (_aFlushTimer) { clearTimeout(_aFlushTimer); _aFlushTimer = null; }
+    if (!_aQueue.length) return;
+    var events = _aQueue.splice(0, 20);
+    var consent = hasConsent();
+    var vis = consent ? aGetVisitor() : null;
+    var payload = { events: events, consent: consent, device: aDevice(), source: aSource() };
+    if (vis) payload.visitorId = vis.id;
+    try {
+      var url = apiBaseUrl() + '/api/events';
+      var body = JSON.stringify(payload);
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(url, new Blob([body], { type: 'application/json' }));
+      } else {
+        fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: body, keepalive: true }).catch(function () {});
+      }
+    } catch (_) { /* la mesure d'audience ne casse jamais l'app */ }
+  }
+
+  // Forward MINIMAL d'un événement track() vers le beacon (minimisation :
+  // jamais de nom produit / prix / PII — seulement id, catégorie, route, ms).
+  function aTrack(name, params) {
+    params = params || {};
+    var out = {};
+    if (params.id != null) out.id = String(params.id);
+    if (params.category != null) out.category = String(params.category);
+    if (name === 'page_view' && params.route) out.route = String(params.route);
+    if (name === 'view_item' && out.id) aStartItemTimer(out.id);
+    aEnqueue(name, out);
+  }
+
+  // Chrono « temps passé sur un article » : démarré à l'ouverture de la fiche,
+  // vidé au départ (changement de route) ou à la fermeture de l'onglet.
+  function aStartItemTimer(id) { aFlushItemTime(); _aItemTimer = { id: id, start: Date.now() }; }
+  function aFlushItemTime() {
+    if (!_aItemTimer) return;
+    var ms = Date.now() - _aItemTimer.start;
+    var id = _aItemTimer.id;
+    _aItemTimer = null;
+    if (id && ms > 0) aEnqueue('time_on_item', { id: id, ms: ms });
+  }
+
+  function aStartSession() {
+    if (_aSessionStarted) return;
+    _aSessionStarted = true;
+    aGetSessionId();
+    var params = {};
+    if (hasConsent()) { var v = aGetVisitor(); if (v) params.nv = v.isNew; }
+    aEnqueue('session_start', params);
+  }
+
+  // Clics « ultra-précis » : capture déclarative via l'attribut data-track
+  // (nommé, contrôlé, jamais de PII). Délégation globale unique.
+  function aSetupClicks() {
+    document.addEventListener('click', function (e) {
+      var el = e.target && e.target.closest ? e.target.closest('[data-track]') : null;
+      if (!el) return;
+      var label = el.getAttribute('data-track');
+      if (label) aEnqueue('click', { t: label });
+    }, true);
+  }
+
+  function aSetupLifecycle() {
+    var flushAll = function () { aFlushItemTime(); aFlush(); };
+    window.addEventListener('pagehide', flushAll);
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'hidden') flushAll();
+    });
+  }
+
+  function aInit() {
+    try {
+      aSetupClicks();
+      aSetupLifecycle();
+      aStartSession();
+    } catch (_) { /* jamais bloquant */ }
   }
 
   function setupWaFloat() {
@@ -354,26 +517,24 @@
     var bar = document.getElementById('consentBar');
     if (!bar) return;
 
-    // Schéma standard (décision produit 16/07) : les cookies TECHNIQUES sont
-    // toujours actifs (indispensables — panier, session, territoire ; le
-    // RGPD/ePrivacy n'exige aucun consentement pour eux, on l'ANNONCE dans le
-    // texte, pas de case à cocher). Le CLIENT garde le choix Accepter/Refuser
-    // pour la mesure d'audience. Honnêteté : aucun traceur n'étant branché
-    // aujourd'hui (IDs GA4/Meta vides), le texte dit « pourra être activée »
-    // — et le choix est RÉELLEMENT enregistré (pt:analytics-consent) : c'est
-    // la clé qui gouvernera le chargement GA4/Meta le jour où un ID sera
-    // renseigné. Refuser = aucun traçage, même après activation. CNIL :
-    // Refuser aussi accessible qu'Accepter (deux boutons côte à côte).
-    if (!analyticsConfigured()) {
-      var textEl = bar.querySelector('.consent-bar__text');
-      // Texte court volontairement (cf. v313 : un texte long empilait ~8
-      // lignes sur mobile et recouvrait les filtres du catalogue).
-      if (textEl) {
-        textEl.innerHTML = '<strong>Cookies</strong> — Les cookies techniques nécessaires '
-          + 'au fonctionnement (panier, session, territoire) sont toujours actifs. '
-          + 'Avec votre accord, une mesure d’audience anonyme pourra être activée. '
-          + '<a href="#/confidentialite" class="consent-bar__link">En savoir plus</a>';
-      }
+    // Schéma standard e-commerce (décision produit 16-17/07) :
+    //  • Cookies TECHNIQUES (panier, session, territoire) : toujours actifs,
+    //    annoncés dans le texte (le RGPD/ePrivacy n'exige aucun consentement).
+    //  • Mesure d'audience ANONYME (notre beacon maison, sans cookie
+    //    publicitaire, IP non stockée) : exemptée CNIL → tourne sans
+    //    consentement, annoncée honnêtement.
+    //  • PERSONNALISATION (nouveau/récurrent + affinité produit → offres
+    //    pertinentes) : nécessite un identifiant persistant → CONSENTEMENT.
+    //    C'est ce que gouverne le choix Accepter/Refuser (pt:analytics-consent).
+    // Refuser = aucun profil persistant (aucun localStorage pt:vid), la mesure
+    // reste purement anonyme. CNIL : Refuser aussi accessible qu'Accepter.
+    var textEl = bar.querySelector('.consent-bar__text');
+    if (textEl) {
+      textEl.innerHTML = '<strong>Cookies</strong> — Cookies techniques (panier, session, '
+        + 'territoire) toujours actifs. Nous mesurons l’audience de façon <strong>anonyme</strong>. '
+        + 'Avec votre accord, nous <strong>personnalisons nos offres</strong> selon vos préférences '
+        + 'pour améliorer votre expérience — jamais de publicité ni de revente. '
+        + '<a href="#/confidentialite" class="consent-bar__link">En savoir plus</a>';
     }
 
     bar.hidden = false;
@@ -384,9 +545,15 @@
       if (value !== 'accept' && value !== 'deny') return;
       saveConsent(value === 'accept' ? 'granted' : 'denied');
       bar.hidden = true;
-      if (value === 'accept' && analyticsConfigured()) {
-        flushAnalyticsQueue();
+      if (value === 'accept') {
+        // Personnalisation acceptée : crée l'identifiant persistant (affinité)
+        // et pousse les événements en attente avec le consentement.
+        try { aGetVisitor(); aFlush(); } catch (_) {}
+        if (analyticsConfigured()) flushAnalyticsQueue();
         track('consent_granted', { timestamp: Date.now() });
+      } else {
+        // Refus : aucun profil persistant. Purge tout identifiant existant.
+        try { aClearVisitor(); } catch (_) {}
       }
     });
   }
@@ -952,9 +1119,9 @@
 
   function renderCategoryChips() {
     if (!dom.catList) return;
-    var html = '<button class="cat-chip active" data-cat="">Tout</button>';
+    var html = '<button class="cat-chip active" data-cat="" data-track="chip:Tout">Tout</button>';
     allCategories.forEach(function (c) {
-      html += '<button class="cat-chip" data-cat="' + escapeHTML(c) + '">' + escapeHTML(c) + '</button>';
+      html += '<button class="cat-chip" data-cat="' + escapeHTML(c) + '" data-track="chip:' + escapeHTML(c) + '">' + escapeHTML(c) + '</button>';
     });
     dom.catList.innerHTML = html;
   }
@@ -2948,6 +3115,8 @@
   var _lastRouteKey = null;
 
   function onRouteChange() {
+    // Clôt le chrono « temps sur l'article » si on quittait une fiche produit.
+    try { aFlushItemTime(); } catch (_) {}
     var parsed = parseHash();
     var route = parsed.route;
 
@@ -6876,6 +7045,7 @@
     bindWishlistDelegation();
     updateWishlistUI();
     injectOrganizationJsonLd();
+    aInit(); // mesure d'audience maison (clics data-track, cycle de vie, session)
     onRouteChange();
     // Signal pour le watchdog de boot (index.html) : l'app a démarré et le
     // routeur a affiché une vue — pas d'écran « chargement incomplet ».
