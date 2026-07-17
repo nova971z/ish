@@ -3120,6 +3120,9 @@
     var parsed = parseHash();
     var route = parsed.route;
 
+    // Quitte l'admin → libère le globe 3D (contexte WebGL, rAF).
+    if (route !== '/admin') { try { destroyAdminGlobe(); } catch (_) {} }
+
     // Auth guards — n'appliquer la redirection qu'une fois la session Firebase
     // restaurée (_authReady). Sinon un utilisateur connecté qui recharge sur
     // #/compte est renvoyé vers #/auth puis ramené (double navigation/flicker).
@@ -5524,19 +5527,171 @@
     }
     html += '</section>';
 
-    // Provenance (liste ; le globe 3D arrive à l'étape 5).
+    // Provenance : globe 3D (si des coordonnées existent) + liste par pays.
     html += '<section class="stat-block"><h3 class="stat-block__title">Provenance des visiteurs</h3>';
-    var geo = (s.geo || []).slice(0, 15);
+    var geo = (s.geo || []);
     if (!geo.length) {
       html += '<p class="admin-empty">Aucune donnée géographique pour le moment.</p>';
     } else {
+      html += '<div id="adminGlobe" class="admin-globe" aria-hidden="true"></div>';
       var gmap = {};
-      geo.forEach(function (g) { gmap[g.country] = g.count; });
+      geo.slice(0, 15).forEach(function (g) { gmap[g.country] = g.count; });
       html += barRows(gmap, { limit: 15 });
     }
     html += '</section>';
 
     el.innerHTML = html;
+
+    // Globe 3D (lazy, three.js déjà utilisé pour les sphères de marque). En cas
+    // d'échec (CDN/WebGL), la liste par pays ci-dessus reste la source fiable.
+    destroyAdminGlobe();
+    if (geo.length) {
+      var container = document.getElementById('adminGlobe');
+      if (container) buildAdminGlobe(container, geo);
+    }
+  }
+
+  // ── Globe 3D de provenance (three.js, sans texture externe) ────────────────
+  // Coordonnées de repli pour les pays fréquents / DOM-TOM quand un document géo
+  // ne porte pas de lat/lng (les en-têtes Vercel en fournissent la plupart).
+  var COUNTRY_LATLNG = {
+    FR:[46.6,2.2], GP:[16.25,-61.58], MQ:[14.64,-61.02], GF:[3.93,-53.13],
+    RE:[-21.11,55.53], YT:[-12.82,45.17], US:[38,-97], GB:[54,-2], DE:[51,10],
+    BE:[50.5,4.5], ES:[40,-4], IT:[42,12], CA:[56,-106], NL:[52,5], CH:[47,8],
+    PT:[39,-8], LU:[49.8,6.1], MA:[32,-6], SN:[14.5,-14.5], CI:[7.5,-5.5]
+  };
+  var _adminGlobe = null;
+
+  function destroyAdminGlobe() {
+    if (!_adminGlobe) return;
+    try {
+      if (_adminGlobe.raf) cancelAnimationFrame(_adminGlobe.raf);
+      if (_adminGlobe.ro) _adminGlobe.ro.disconnect();
+      if (_adminGlobe.renderer) {
+        _adminGlobe.renderer.dispose();
+        var c = _adminGlobe.renderer.domElement;
+        if (c && c.parentNode) c.parentNode.removeChild(c);
+      }
+      (_adminGlobe.disposables || []).forEach(function (d) { try { d.dispose(); } catch (_) {} });
+    } catch (_) {}
+    _adminGlobe = null;
+  }
+
+  function latLngToVec3(THREE, lat, lng, r) {
+    var phi = (90 - lat) * Math.PI / 180;
+    var theta = (lng + 180) * Math.PI / 180;
+    return new THREE.Vector3(
+      -r * Math.sin(phi) * Math.cos(theta),
+       r * Math.cos(phi),
+       r * Math.sin(phi) * Math.sin(theta)
+    );
+  }
+
+  function buildAdminGlobe(container, geo) {
+    // Points géolocalisables (coord fournie OU repli connu).
+    var pts = [];
+    geo.forEach(function (g) {
+      var lat = (typeof g.lat === 'number') ? g.lat : (COUNTRY_LATLNG[g.country] && COUNTRY_LATLNG[g.country][0]);
+      var lng = (typeof g.lng === 'number') ? g.lng : (COUNTRY_LATLNG[g.country] && COUNTRY_LATLNG[g.country][1]);
+      if (typeof lat === 'number' && typeof lng === 'number') pts.push({ lat: lat, lng: lng, count: g.count || 1 });
+    });
+    if (!pts.length) return; // rien à placer → on garde la liste seule
+
+    ensureThree().then(function (THREE) {
+      if (!document.body.contains(container)) return; // onglet déjà quitté
+      destroyAdminGlobe();
+      var w = container.clientWidth || 320;
+      var h = container.clientHeight || 320;
+
+      var renderer;
+      try { renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true }); }
+      catch (_) { return; } // WebGL indisponible → liste seule
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.setSize(w, h);
+      renderer.setClearColor(0x000000, 0);
+      container.appendChild(renderer.domElement);
+
+      var scene = new THREE.Scene();
+      var camera = new THREE.PerspectiveCamera(42, w / h, 0.1, 100);
+      camera.position.z = 3.15;
+      var group = new THREE.Group();
+      scene.add(group);
+
+      var disposables = [];
+      var R = 1;
+
+      // Sphère de base translucide (accent violet sombre).
+      var sphereGeo = new THREE.SphereGeometry(R, 48, 48);
+      var sphereMat = new THREE.MeshBasicMaterial({ color: 0x1a1030, transparent: true, opacity: 0.55 });
+      group.add(new THREE.Mesh(sphereGeo, sphereMat));
+      disposables.push(sphereGeo, sphereMat);
+
+      // Graticule (parallèles + méridiens) en violet discret.
+      var gratMat = new THREE.LineBasicMaterial({ color: 0x8b5cf6, transparent: true, opacity: 0.28 });
+      disposables.push(gratMat);
+      function addRing(points) {
+        var g = new THREE.BufferGeometry().setFromPoints(points);
+        disposables.push(g);
+        group.add(new THREE.LineLoop(g, gratMat));
+      }
+      var lat, lng, ring, i;
+      for (lat = -60; lat <= 60; lat += 30) {
+        ring = [];
+        for (i = 0; i <= 64; i++) ring.push(latLngToVec3(THREE, lat, (i / 64) * 360 - 180, R * 1.001));
+        addRing(ring);
+      }
+      for (lng = -180; lng < 180; lng += 30) {
+        ring = [];
+        for (i = 0; i <= 64; i++) ring.push(latLngToVec3(THREE, (i / 64) * 180 - 90, lng, R * 1.001));
+        var g2 = new THREE.BufferGeometry().setFromPoints(ring);
+        disposables.push(g2);
+        group.add(new THREE.Line(g2, gratMat));
+      }
+
+      // Points visiteurs : taille ∝ √(count), lueur violette claire.
+      var maxCount = pts.reduce(function (m, p) { return Math.max(m, p.count); }, 1);
+      var markGeo = new THREE.SphereGeometry(1, 12, 12);
+      var markMat = new THREE.MeshBasicMaterial({ color: 0xc4b5fd });
+      disposables.push(markGeo, markMat);
+      pts.forEach(function (p) {
+        var scale = 0.018 + 0.05 * Math.sqrt(p.count / maxCount);
+        var v = latLngToVec3(THREE, p.lat, p.lng, R * 1.02);
+        var m = new THREE.Mesh(markGeo, markMat);
+        m.position.copy(v);
+        m.scale.setScalar(scale);
+        group.add(m);
+        // halo
+        var halo = new THREE.Mesh(markGeo, new THREE.MeshBasicMaterial({ color: 0x8b5cf6, transparent: true, opacity: 0.3 }));
+        halo.position.copy(v);
+        halo.scale.setScalar(scale * 2.2);
+        group.add(halo);
+        disposables.push(halo.material);
+      });
+
+      // Oriente l'Europe/France vers l'avant, légère inclinaison.
+      group.rotation.x = 0.35;
+      group.rotation.y = -Math.PI * 0.55;
+
+      var raf = null;
+      function animate() {
+        group.rotation.y += 0.0022;
+        renderer.render(scene, camera);
+        raf = requestAnimationFrame(animate);
+        if (_adminGlobe) _adminGlobe.raf = raf;
+      }
+
+      var ro = null;
+      if (typeof ResizeObserver !== 'undefined') {
+        ro = new ResizeObserver(function () {
+          var nw = container.clientWidth, nh = container.clientHeight;
+          if (nw && nh) { renderer.setSize(nw, nh); camera.aspect = nw / nh; camera.updateProjectionMatrix(); }
+        });
+        ro.observe(container);
+      }
+
+      _adminGlobe = { renderer: renderer, ro: ro, disposables: disposables, raf: null };
+      animate();
+    }).catch(function () { /* CDN three KO → la liste par pays reste affichée */ });
   }
 
   // ── Dashboard : Clients ────────────────────────────────────
@@ -5603,6 +5758,13 @@
       }
       return;
     }
+
+    // Re-rendu de l'admin : réinitialise les drapeaux de chargement paresseux
+    // (sinon, en ré-entrant dans l'admin, les onglets resteraient sur
+    // « Chargement… ») et libère un éventuel globe orphelin.
+    _adminStatsLoaded = false;
+    _adminClientsLoaded = false;
+    destroyAdminGlobe();
 
     view.innerHTML = '<div class="admin-wrap">'
       + '<header class="admin-header">'
@@ -5767,6 +5929,7 @@
         if (target === 'instagram') initAdminInstagram();
         if (target === 'stats') loadAdminStats();
         if (target === 'clients') loadAdminClients();
+        if (target !== 'stats') destroyAdminGlobe(); // libère le contexte WebGL
       });
     });
 
