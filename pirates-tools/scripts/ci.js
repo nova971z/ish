@@ -32,6 +32,7 @@ var reqLoyalty  = safeRequire('./check-loyalty',     'check-loyalty');
 var reqCsp      = safeRequire('./check-csp',         'check-csp');
 var reqAnalytics= safeRequire('./check-analytics',   'check-analytics');
 var reqFns      = safeRequire('./check-functions',   'check-functions');
+var reqFsQ      = safeRequire('./check-firestore-queries','check-firestore-queries');
 
 // Détection d’un linter produits local (ajouté plus tôt)
 var LINT_FILE = path.resolve(__dirname, './lint-products.js');
@@ -71,6 +72,7 @@ function runLintProducts(){
   await runOne(reqCsp,      'check-csp');
   await runOne(reqAnalytics,'check-analytics');
   await runOne(reqFns,      'check-functions');
+  await runOne(reqFsQ,      'check-firestore-queries');
 
   // Linter produits optionnel
   var lintRes = runLintProducts();
