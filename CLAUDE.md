@@ -21,6 +21,20 @@ Aucun hasard, aucun bullshit. Chaque correction est vérifiée dans le code avan
 - [ ] **Tableau de bord admin — stats de visite/clics** : demandé (voir réponse
       donnée). À cadrer : reco = collecte maison (events → Firestore) OU GA4.
       Décision produit + périmètre à trancher avec l'user avant de coder.
+- [ ] **⚠️ USER À VÉRIFIER — 2 fiches produits au SKU imprécis** (décidé le
+      18/07/2026 : « laisse comme ça pour l'instant, mais garde ces valeurs et
+      note qu'il faut que j'aille vérifier »). Ces 2 produits d'origine ont un
+      SKU qui n'existe pas tel quel au catalogue constructeur ; leurs specs ont
+      été remplies à partir du VRAI modèle équivalent (recherche web) mais
+      RESTENT À CONFIRMER par l'user avant lancement :
+        • Facom `CL3.C18SP` → vraie réf. probable **CL3.CH18SP2** (boulonneuse
+          à chocs 1/2" 18V brushless, 950 Nm, kit 2×5 Ah + coffret ToughSystem).
+        • Flex `FW1/2-502` → vraie réf. probable **Flex IW 1/2" 18.0-EC**
+          (boulonneuse à chocs 1/2", 250 Nm ; « FW » n'existe pas chez Flex).
+      Action user : confirmer que ce sont bien ces modèles vendus → alors
+      corriger SKU/titre/id pour être exact ; sinon les retirer. (3 autres
+      fiches fantômes DÉJÀ SUPPRIMÉES le 18/07 : Stanley FMC645D2, FMC688L2,
+      Facom CL2.C18S.)
 
 ## ⚠️ CHECKLIST PRÉ-LANCEMENT — à dérouler quand l'user demande « est-ce qu'on est prêt à lancer »
 Le site N'EST PAS lancé (décidé le 15/07/2026). Ne rien ouvrir au public tant que ces points bloquants ne sont pas faits. Quand l'user pose la question, PARCOURIR cette liste et donner l'état point par point.
@@ -472,3 +486,33 @@ Bump SW (`sw.js` VERSION + ASSET_VER) et `?v=` dans `index.html` à chaque chang
 - app.js = un seul IIFE (~6172 lignes), style ES5 var/function.
 - Cache-busting : VERSION + ASSET_VER + ?v= doivent être alignés.
 - Ne jamais commiter de secret serveur côté client (clés publishable Stripe OK).
+
+## Session catalogue produits (18/07/2026, SW v336, mergé master)
+Peuplement du catalogue à partir de captures Cotébrico/Screwfix (l'user envoie
+par lots de 5). Modèle de prix TRANCHÉ : `price_ht` = coût HT fournisseur × 1,15
+(marge 15 %, PROMOS IGNORÉES) ; `price` = price_ht × 1,20 (TTC métropole
+d'affichage). Le serveur re-dérive le TTC territorial (octroi + TVA DOM via
+calcPrice/pricing.js). Libellés stock laissés « En stock » (décision user :
+délais affichés au paiement, pas via le badge — futur chantier frais de port).
+- Lot 1 (session précédente) : 5 DeWALT (packs/rabot/souffleur/aspi).
+- Lot 2 : +4 DeWALT (DCK266P2T + 3 packs énergie FLEXVOLT) ; DCF887N existant
+  réaligné 129€→94€ (marge ~88 %→15 %) + specs enrichies. Catégorie
+  « Batteries et chargeurs » créée.
+- Lot 3 : +5 DeWALT (2 perforateurs FILAIRES tag corded, batterie DCB184,
+  DCD996P2, visseuse placo DCF620 moteur À CHARBONS). Catégorie
+  « Perforateurs » créée.
+- BUG specs INVISIBLES corrigé (v334) : `.pdp-specs-table tr` en opacity:0
+  révélé au scroll, mais initPdpScrollAnimations() était appelé AVANT
+  l'injection features/specs/kit → nouvelles lignes jamais animées (bloquées
+  invisibles). Fix : appel APRÈS injection. Latent jusqu'ici car les 26
+  produits d'origine avaient une table vide. + bloc « Caractéristiques » masqué
+  quand aucune spec (v333, grille 3D recentrée .pdp-split--solo).
+- SPECS ANCIENS PRODUITS (v335) : 22/25 remplies via recherche web fiches
+  constructeur (4 agents // : DeWALT/Makita/Festool+Flex/Facom+Stanley+Wera).
+  Corrigés fidèlement : DCS391N = À CHARBONS (pas brushless), TSC55 = bi-tension
+  36 V. Voir specs-*.json dans scratchpad si re-run nécessaire.
+- 3 fiches FANTÔMES SUPPRIMÉES (v336, validé user) : Stanley FMC645D2 (réf. =
+  visseuse à chocs, pas scie sauteuse), FMC688L2 (réf. = batterie, pas
+  perceuse), Facom CL2.C18S (SKU inexistant). Catalogue 40→37, TOUS avec specs.
+- 2 fiches SKU-imprécis GARDÉES à vérifier par l'user → voir « À FAIRE PLUS
+  TARD » (Facom CL3.C18SP, Flex FW1/2-502).
