@@ -61,17 +61,20 @@ module.exports = async function handler(req, res) {
   var fb = firebase.getFirebase();
   if (!fb.db) return res.status(204).end(); // pas de store → on ignore silencieusement
 
-  var ops = A.planWrites({
-    events: events,
-    geo: A.deriveGeo(req.headers),
-    device: body.device,
-    source: body.source,
-    consent: body.consent === true,
-    visitorId: body.visitorId,
-    nowMs: Date.now()
-  });
-
   try {
+    // Construction du plan d'écriture DANS le try : deriveGeo/planWrites ne
+    // doivent JAMAIS pouvoir faire planter le handler en 500 (sinon aucun
+    // événement enregistré). En cas de pépin → 204, on n'écrit juste rien.
+    var ops = A.planWrites({
+      events: events,
+      geo: A.deriveGeo(req.headers),
+      device: body.device,
+      source: body.source,
+      consent: body.consent === true,
+      visitorId: body.visitorId,
+      nowMs: Date.now()
+    });
+
     var batch = fb.db.batch();
     var visitorOps = [];
     ops.forEach(function (op) {

@@ -30,6 +30,14 @@ module.exports = function checkAnalytics() {
   ok(geo && geo.lat === 16.24 && geo.lng === -61.53, 'lat/lng parsés');
   ok(JSON.stringify(geo).indexOf('1.2.3.4') === -1, "l'IP n'apparaît JAMAIS dans la géo");
   ok(A.deriveGeo({}) === null, 'sans pays → pas de géo');
+  // RÉGRESSION : une ville avec un %encodage malformé ne doit PAS faire planter
+  // deriveGeo (sinon /api/events → 500 → plus aucun événement enregistré).
+  var geoBad;
+  var threw = false;
+  try { geoBad = A.deriveGeo({ 'x-vercel-ip-country': 'gp', 'x-vercel-ip-city': 'Pointe-%E0-Pitre%' }); }
+  catch (_) { threw = true; }
+  ok(!threw, 'deriveGeo ne jette JAMAIS, même sur ville %malformée');
+  ok(geoBad && geoBad.country === 'GP', 'pays conservé malgré la ville invalide');
 
   // ── planWrites ─────────────────────────────────────────────────────────────
   var day = A.dateKey(Date.UTC(2026, 6, 17)); // 2026-07-17
