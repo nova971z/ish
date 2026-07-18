@@ -5587,6 +5587,18 @@
     );
   }
 
+  // Côtes du monde (contours continents) — chargées à la demande, en cache, et
+  // UNIQUEMENT par le globe admin (fichier same-origin, jamais sur les pages
+  // publiques). Échec → [] (le globe se dessine sans les continents).
+  var _coastlineCache = null;
+  function loadCoastline() {
+    if (_coastlineCache) return Promise.resolve(_coastlineCache);
+    return fetch('world-coastline.json')
+      .then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (j) { _coastlineCache = Array.isArray(j) ? j : []; return _coastlineCache; })
+      .catch(function () { _coastlineCache = []; return _coastlineCache; });
+  }
+
   function buildAdminGlobe(container, geo) {
     // Points géolocalisables (coord fournie OU repli connu).
     var pts = [];
@@ -5597,7 +5609,8 @@
     });
     if (!pts.length) return; // rien à placer → on garde la liste seule
 
-    ensureThree().then(function (THREE) {
+    Promise.all([ensureThree(), loadCoastline()]).then(function (r) {
+      var THREE = r[0]; var coast = r[1] || [];
       if (!document.body.contains(container)) return; // onglet déjà quitté
       destroyAdminGlobe();
       var w = container.clientWidth || 320;
@@ -5620,61 +5633,68 @@
       var disposables = [];
       var R = 1;
 
-      // Sphère de base translucide (accent violet sombre).
+      // Sphère OPAQUE sombre : occulte (depth-test) les côtes et points de la
+      // face arrière → on ne voit que l'hémisphère visible = zone précise.
       var sphereGeo = new THREE.SphereGeometry(R, 48, 48);
-      var sphereMat = new THREE.MeshBasicMaterial({ color: 0x1a1030, transparent: true, opacity: 0.55 });
+      var sphereMat = new THREE.MeshBasicMaterial({ color: 0x140a26 });
       group.add(new THREE.Mesh(sphereGeo, sphereMat));
       disposables.push(sphereGeo, sphereMat);
 
-      // Graticule (parallèles + méridiens) en violet discret.
-      var gratMat = new THREE.LineBasicMaterial({ color: 0x8b5cf6, transparent: true, opacity: 0.28 });
-      disposables.push(gratMat);
-      function addRing(points) {
-        var g = new THREE.BufferGeometry().setFromPoints(points);
-        disposables.push(g);
-        group.add(new THREE.LineLoop(g, gratMat));
+      // Contours des continents (côtes simplifiées) en violet clair.
+      if (coast.length) {
+        var coastMat = new THREE.LineBasicMaterial({ color: 0xa78bfa, transparent: true, opacity: 0.6 });
+        disposables.push(coastMat);
+        coast.forEach(function (line) {
+          var v = [];
+          for (var k = 0; k < line.length; k++) v.push(latLngToVec3(THREE, line[k][1], line[k][0], R * 1.004));
+          var g = new THREE.BufferGeometry().setFromPoints(v);
+          disposables.push(g);
+          group.add(new THREE.Line(g, coastMat));
+        });
       }
+
+      // Quadrillage TRÈS discret (juste pour la lecture du globe).
+      var gratMat = new THREE.LineBasicMaterial({ color: 0x6d5b9e, transparent: true, opacity: 0.10 });
+      disposables.push(gratMat);
       var lat, lng, ring, i;
       for (lat = -60; lat <= 60; lat += 30) {
         ring = [];
         for (i = 0; i <= 64; i++) ring.push(latLngToVec3(THREE, lat, (i / 64) * 360 - 180, R * 1.001));
-        addRing(ring);
+        var gr = new THREE.BufferGeometry().setFromPoints(ring); disposables.push(gr);
+        group.add(new THREE.LineLoop(gr, gratMat));
       }
-      for (lng = -180; lng < 180; lng += 30) {
+      for (lng = -150; lng < 180; lng += 30) {
         ring = [];
         for (i = 0; i <= 64; i++) ring.push(latLngToVec3(THREE, (i / 64) * 180 - 90, lng, R * 1.001));
-        var g2 = new THREE.BufferGeometry().setFromPoints(ring);
-        disposables.push(g2);
-        group.add(new THREE.Line(g2, gratMat));
+        var gm = new THREE.BufferGeometry().setFromPoints(ring); disposables.push(gm);
+        group.add(new THREE.Line(gm, gratMat));
       }
 
-      // Points visiteurs : taille ∝ √(count), lueur violette claire.
+      // Points visiteurs : PETITS et précis (zone exacte), légère variation de
+      // taille selon le volume, halo discret. Occultés en face arrière.
       var maxCount = pts.reduce(function (m, p) { return Math.max(m, p.count); }, 1);
       var markGeo = new THREE.SphereGeometry(1, 12, 12);
-      var markMat = new THREE.MeshBasicMaterial({ color: 0xc4b5fd });
+      var markMat = new THREE.MeshBasicMaterial({ color: 0xf0abfc });
       disposables.push(markGeo, markMat);
       pts.forEach(function (p) {
-        var scale = 0.018 + 0.05 * Math.sqrt(p.count / maxCount);
-        var v = latLngToVec3(THREE, p.lat, p.lng, R * 1.02);
+        var scale = 0.006 + 0.010 * Math.sqrt(p.count / maxCount); // beaucoup plus petit
+        var v = latLngToVec3(THREE, p.lat, p.lng, R * 1.008);
         var m = new THREE.Mesh(markGeo, markMat);
-        m.position.copy(v);
-        m.scale.setScalar(scale);
+        m.position.copy(v); m.scale.setScalar(scale);
         group.add(m);
-        // halo
-        var halo = new THREE.Mesh(markGeo, new THREE.MeshBasicMaterial({ color: 0x8b5cf6, transparent: true, opacity: 0.3 }));
-        halo.position.copy(v);
-        halo.scale.setScalar(scale * 2.2);
+        var halo = new THREE.Mesh(markGeo, new THREE.MeshBasicMaterial({ color: 0xf0abfc, transparent: true, opacity: 0.25 }));
+        halo.position.copy(v); halo.scale.setScalar(scale * 2.4);
         group.add(halo);
         disposables.push(halo.material);
       });
 
-      // Oriente l'Europe/France vers l'avant, légère inclinaison.
+      // Oriente l'Atlantique/Europe-Afrique vers l'avant, légère inclinaison.
       group.rotation.x = 0.35;
-      group.rotation.y = -Math.PI * 0.55;
+      group.rotation.y = -Math.PI * 0.5;
 
       var raf = null;
       function animate() {
-        group.rotation.y += 0.0022;
+        group.rotation.y += 0.0018;
         renderer.render(scene, camera);
         raf = requestAnimationFrame(animate);
         if (_adminGlobe) _adminGlobe.raf = raf;
@@ -5691,7 +5711,7 @@
 
       _adminGlobe = { renderer: renderer, ro: ro, disposables: disposables, raf: null };
       animate();
-    }).catch(function () { /* CDN three KO → la liste par pays reste affichée */ });
+    }).catch(function () { /* three/côtes KO → la liste par pays reste affichée */ });
   }
 
   // Déclenche l'envoi du rapport mensuel maintenant (test manuel). POST
