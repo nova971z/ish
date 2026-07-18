@@ -491,6 +491,10 @@
   }
 
   function aInit() {
+    // Garde anti-automatisation : navigator.webdriver === true sous Selenium/
+    // Playwright/Puppeteer & Cie (même si le bot falsifie son User-Agent). On
+    // n'émet alors AUCUN événement — complète le filtrage serveur par UA.
+    try { if (navigator.webdriver === true) return; } catch (_) {}
     try {
       aSetupClicks();
       aSetupLifecycle();

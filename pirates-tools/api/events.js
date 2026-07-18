@@ -40,6 +40,13 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'Method not allowed' });
 
+  // FILTRAGE BOTS : robots/crawlers/scrapers/headless écartés AVANT toute
+  // écriture (même pas de compteur anti-abus consommé) → les stats ne comptent
+  // que des humains. 204 silencieux (aucun signal exploitable par un bot).
+  if (A.isBot(req.headers && (req.headers['user-agent'] || req.headers['User-Agent']))) {
+    return res.status(204).end();
+  }
+
   // Anti-abus : un client honnête envoie quelques lots/min. 60/min/IP borne les
   // bots sans gêner un usage réel. Fail-open (ratelimit.js) si le store est down.
   if (!(await rl.allow('events', rl.clientIp(req), 60, 60))) {

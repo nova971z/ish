@@ -23,6 +23,33 @@ module.exports = function checkAnalytics() {
   ok(t && t.ms === 1800000, 'ms borné à 30 min');
   ok(A.sanitizeEvent({ event: 'time_on_item', id: 'p1', ms: -5 }).ms === 0, 'ms négatif ramené à 0');
 
+  // ── isBot (filtrage robots) ─────────────────────────────────────────────────
+  var HUMANS = [
+    'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15',
+    'Mozilla/5.0 (Linux; Android 13; SM-S911B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0 Mobile Safari/537.36',
+    'Mozilla/5.0 (X11; Linux x86_64; rv:127.0) Gecko/20100101 Firefox/127.0',
+    'Mozilla/5.0 (Linux; Android 10; CUBOT_X20_PRO) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Mobile Safari/537.36' // Cubot = VRAI tel
+  ];
+  HUMANS.forEach(function (ua, i) { ok(A.isBot(ua) === false, 'humain #' + i + ' non filtré (' + ua.slice(0, 24) + '…)'); });
+
+  var BOTS = [
+    'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+    'Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)',
+    'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)',
+    'Mozilla/5.0 (compatible; AhrefsBot/7.0; +http://ahrefs.com/robot/)',
+    'Mozilla/5.0 (compatible; SemrushBot/7~bl; +http://www.semrush.com/bot.html)',
+    'Mozilla/5.0 (compatible; PetalBot;+https://webmaster.petalsearch.com/site/petalbot)',
+    'python-requests/2.31.0', 'curl/8.4.0', 'Wget/1.21.3',
+    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/126.0 Safari/537.36',
+    'WhatsApp/2.23.20.0', 'node-fetch/1.0 (+https://github.com/bitinn/node-fetch)',
+    'Go-http-client/2.0', 'Chrome-Lighthouse'
+  ];
+  BOTS.forEach(function (ua, i) { ok(A.isBot(ua) === true, 'bot #' + i + ' filtré (' + ua.slice(0, 24) + '…)'); });
+  ok(A.isBot('') === true, 'UA vide = bot');
+  ok(A.isBot(null) === true, 'UA absent = bot');
+
   // ── deriveGeo (jamais d'IP) ────────────────────────────────────────────────
   var geo = A.deriveGeo({ 'x-vercel-ip-country': 'fr', 'x-vercel-ip-city': 'Pointe-%C3%A0-Pitre',
     'x-vercel-ip-latitude': '16.24', 'x-vercel-ip-longitude': '-61.53', 'x-real-ip': '1.2.3.4' });
