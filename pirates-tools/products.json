@@ -26,7 +26,31 @@
       "tropical_ready",
       "mayotte_project"
     ],
-    "description_long": "Compacte, couple 447 Nm, 3 vitesses, kit 2x5Ah. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil DeWALT : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
+    "description_long": "Compacte, couple 447 Nm, 3 vitesses, kit 2x5Ah. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil DeWALT : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire.",
+    "specs": {
+      "Marque": "DeWALT",
+      "Type": "Boulonneuse à chocs 1/2\" XR compacte (kit)",
+      "Tension": "18 V XR",
+      "Moteur": "Brushless (sans charbon)",
+      "Emmanchement": "Carré 1/2\" avec goupille d'arrêt",
+      "Couple de serrage max.": "447 Nm",
+      "Couple de desserrage max.": "≈ 812 Nm",
+      "Nombre de vitesses": "3 modes (dont Precision Wrench)",
+      "Vitesse à vide max.": "1900 tr/min",
+      "Cadence de frappe max.": "3100 cps/min",
+      "Longueur": "178 mm",
+      "Poids (avec batterie 5,0 Ah)": "≈ 2,2 kg",
+      "Batteries": "2 × 18 V XR 5,0 Ah Li-Ion",
+      "Chargeur": "Chargeur Li-Ion inclus",
+      "Coffret": "TSTAK"
+    },
+    "features": [
+      "Moteur brushless : 447 Nm de couple dans un corps compact de 178 mm",
+      "3 modes dont Precision Wrench pour ne pas trop serrer ni éjecter l'écrou",
+      "Couple de desserrage jusqu'à ≈ 812 Nm pour les boulons grippés",
+      "Bague LED pour éclairer la zone de travail",
+      "Kit complet : 2 batteries 5,0 Ah + chargeur + coffret TSTAK"
+    ]
   },
   {
     "id": "dewalt-dcf894n",
@@ -55,7 +79,29 @@
       "tropical_ready",
       "mayotte_project"
     ],
-    "description_long": "Meme machine que DCF894P2, sans batteries. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil DeWALT : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
+    "description_long": "Meme machine que DCF894P2, sans batteries. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil DeWALT : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire.",
+    "specs": {
+      "Marque": "DeWALT",
+      "Type": "Boulonneuse à chocs 1/2\" XR compacte (machine nue)",
+      "Tension": "18 V XR",
+      "Moteur": "Brushless (sans charbon)",
+      "Emmanchement": "Carré 1/2\" avec goupille d'arrêt",
+      "Couple de serrage max.": "447 Nm",
+      "Couple de desserrage max.": "≈ 812 Nm",
+      "Nombre de vitesses": "3 modes (dont Precision Wrench)",
+      "Vitesse à vide max.": "1900 tr/min",
+      "Cadence de frappe max.": "3100 cps/min",
+      "Longueur": "178 mm",
+      "Poids net EPTA": "1,5 kg",
+      "Batterie / chargeur": "Non inclus"
+    },
+    "features": [
+      "Machine identique à la DCF894P2, livrée nue",
+      "Moteur brushless : 447 Nm dans un corps compact de 178 mm",
+      "3 modes dont Precision Wrench pour un serrage maîtrisé",
+      "Couple de desserrage jusqu'à ≈ 812 Nm",
+      "Machine nue (batterie et chargeur non inclus, gamme 18V XR)"
+    ]
   },
   {
     "id": "dewalt-dcf887p2",
@@ -84,7 +130,30 @@
       "tropical_ready",
       "bestseller"
     ],
-    "description_long": "Classique reputee, 205 Nm, 3 vitesses. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil DeWALT : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
+    "description_long": "Classique reputee, 205 Nm, 3 vitesses. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil DeWALT : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire.",
+    "specs": {
+      "Marque": "DeWALT",
+      "Type": "Visseuse à chocs 1/4\" XR (kit)",
+      "Tension": "18 V XR",
+      "Moteur": "Brushless (sans charbon)",
+      "Porte-embout": "1/4\" (6,35 mm) hexagonal",
+      "Couple max.": "205 Nm",
+      "Nombre de vitesses": "3",
+      "Vitesse à vide": "0–1000 / 0–2800 / 0–3250 tr/min",
+      "Cadence de frappe max.": "3800 cps/min",
+      "Longueur": "134 mm",
+      "Poids (avec batterie)": "1,56 kg",
+      "Batteries": "2 × 18 V XR 5,0 Ah Li-Ion",
+      "Chargeur": "Chargeur Li-Ion inclus",
+      "Coffret": "TSTAK"
+    },
+    "features": [
+      "Moteur brushless : 205 Nm de couple, longueur réduite à 134 mm",
+      "3 vitesses dont mode précision pour démarrer les vis sans les abîmer",
+      "Cadence jusqu'à 3800 coups/min pour un vissage rapide",
+      "3 LED annulaires supprimant les ombres portées",
+      "Kit complet : 2 batteries 5,0 Ah + chargeur + coffret TSTAK"
+    ]
   },
   {
     "id": "dewalt-dcf887n",
@@ -166,7 +235,30 @@
       "cordless",
       "tropical_ready"
     ],
-    "description_long": "Ultra-compacte 100 mm, 205 Nm, autonomie XL. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil DeWALT : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
+    "description_long": "Ultra-compacte 100 mm, 205 Nm, autonomie XL. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil DeWALT : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire.",
+    "specs": {
+      "Marque": "DeWALT",
+      "Type": "Visseuse à chocs 1/4\" XR ultra-compacte (kit)",
+      "Tension": "18 V XR",
+      "Moteur": "Brushless (sans charbon)",
+      "Porte-embout": "1/4\" (6,35 mm) hexagonal",
+      "Couple max.": "205 Nm",
+      "Nombre de vitesses": "3",
+      "Vitesse à vide": "0–1000 / 0–2800 / 0–3250 tr/min",
+      "Cadence de frappe max.": "3800 cps/min",
+      "Longueur": "101 mm",
+      "Poids net EPTA (nu)": "0,9 kg",
+      "Batteries": "2 × 18 V XR 5,0 Ah Li-Ion",
+      "Chargeur": "Chargeur Li-Ion inclus",
+      "Coffret": "TSTAK"
+    },
+    "features": [
+      "Format ultra-compact 101 mm : idéal dans les espaces confinés",
+      "Moteur brushless : 205 Nm malgré la compacité",
+      "3 modes dont mode Précision pour préserver vis et matériau",
+      "Bague LED pour éclairer les zones sombres",
+      "Kit complet : 2 batteries 5,0 Ah + chargeur + coffret TSTAK"
+    ]
   },
   {
     "id": "dewalt-dcf850n",
@@ -195,7 +287,28 @@
       "cordless",
       "tropical_ready"
     ],
-    "description_long": "Ultra-compacte 100 mm, sans batterie/chargeur. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil DeWALT : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
+    "description_long": "Ultra-compacte 100 mm, sans batterie/chargeur. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil DeWALT : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire.",
+    "specs": {
+      "Marque": "DeWALT",
+      "Type": "Visseuse à chocs 1/4\" XR ultra-compacte (machine nue)",
+      "Tension": "18 V XR",
+      "Moteur": "Brushless (sans charbon)",
+      "Porte-embout": "1/4\" (6,35 mm) hexagonal",
+      "Couple max.": "205 Nm",
+      "Nombre de vitesses": "3",
+      "Vitesse à vide": "0–1000 / 0–2800 / 0–3250 tr/min",
+      "Cadence de frappe max.": "3800 cps/min",
+      "Longueur": "101 mm",
+      "Poids net EPTA": "0,9 kg",
+      "Batterie / chargeur": "Non inclus"
+    },
+    "features": [
+      "Machine identique à la DCF850P2T, livrée nue",
+      "Format ultra-compact 101 mm pour les espaces confinés",
+      "Moteur brushless : 205 Nm de couple",
+      "3 modes dont mode Précision",
+      "Machine nue (batterie et chargeur non inclus, gamme 18V XR)"
+    ]
   },
   {
     "id": "makita-dtw300z",
@@ -223,7 +336,29 @@
       "tropical_ready",
       "mayotte_project"
     ],
-    "description_long": "330 Nm, compacte, moteur brushless. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Makita : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
+    "description_long": "330 Nm, compacte, moteur brushless. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Makita : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire.",
+    "specs": {
+      "Marque": "Makita",
+      "Type": "Boulonneuse à chocs sans fil 18V LXT Brushless (machine nue)",
+      "Tension": "18 V LXT",
+      "Moteur": "Brushless (sans charbon)",
+      "Emmanchement": "Carré 1/2\"",
+      "Couple de serrage max.": "330 Nm",
+      "Couple de desserrage max.": "580 Nm",
+      "Capacité boulon": "M10 – M20",
+      "Nombre de vitesses": "4 modes de couple",
+      "Vitesse à vide": "0–1000 / 1800 / 2600 / 3200 tr/min",
+      "Cadence de frappe max.": "0–1800 / 2600 / 3400 / 4000 cps/min",
+      "Poids (avec batterie)": "1,8 kg",
+      "Batterie / chargeur": "Non inclus"
+    },
+    "features": [
+      "Moteur brushless durable et puissant : couple de serrage jusqu'à 330 Nm",
+      "4 modes de couple + vitesse variable à la gâchette pour tout maîtriser",
+      "Technologie XPT résistante à la poussière et à l'eau, éclairage LED",
+      "Format compact malgré la puissance, idéal en usage intensif",
+      "Machine nue (batterie et chargeur non inclus, gamme 18V LXT)"
+    ]
   },
   {
     "id": "makita-dtd172z",
@@ -252,7 +387,27 @@
       "tropical_ready",
       "bestseller"
     ],
-    "description_long": "180 Nm, 4 vitesses, ultra-legere. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Makita : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
+    "description_long": "180 Nm, 4 vitesses, ultra-legere. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Makita : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire.",
+    "specs": {
+      "Marque": "Makita",
+      "Type": "Visseuse à chocs sans fil 18V LXT Brushless (machine nue)",
+      "Tension": "18 V LXT",
+      "Moteur": "Brushless (sans charbon)",
+      "Porte-embout": "1/4\" hexagonal",
+      "Couple max.": "180 Nm",
+      "Modes": "4 vitesses + modes assistés (bois/boulon)",
+      "Vitesse à vide": "0–1100 / 2100 / 3200 / 3600 tr/min",
+      "Cadence de frappe max.": "0–1100 / 2600 / 3600 / 3800 cps/min",
+      "Poids net (machine nue)": "0,85 kg",
+      "Batterie / chargeur": "Non inclus"
+    },
+    "features": [
+      "Couple élevé de 180 Nm dans un corps ultra-compact",
+      "4 vitesses + modes assistés (démarrage doux bois, mode boulon)",
+      "Moteur brushless, double éclairage LED, technologie XPT",
+      "Fonction mémoire des réglages pour retrouver ton mode favori",
+      "Machine nue (batterie et chargeur non inclus, gamme 18V LXT)"
+    ]
   },
   {
     "id": "makita-ddf487z",
@@ -280,7 +435,29 @@
       "cordless",
       "tropical_ready"
     ],
-    "description_long": "40 Nm, 2 vitesses, mandrin 13 mm. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Makita : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
+    "description_long": "40 Nm, 2 vitesses, mandrin 13 mm. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Makita : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire.",
+    "specs": {
+      "Marque": "Makita",
+      "Type": "Perceuse-visseuse sans fil 18V LXT Brushless (machine nue)",
+      "Tension": "18 V LXT",
+      "Moteur": "Brushless (sans charbon) avec frein moteur",
+      "Nombre de vitesses": "2",
+      "Vitesse à vide": "0–500 / 1700 tr/min",
+      "Couple max. (dur/tendre)": "40 / 25 Nm",
+      "Réglages de couple": "20 positions + perçage",
+      "Mandrin": "Auto-serrant 1,5–13 mm",
+      "Ø max. bois": "36 mm",
+      "Ø max. métal": "13 mm",
+      "Poids": "1,6 kg",
+      "Batterie / chargeur": "Non inclus"
+    },
+    "features": [
+      "Moteur brushless compact avec frein moteur électronique",
+      "Mandrin auto-serrant 13 mm et 20 réglages de couple + perçage",
+      "Perce jusqu'à 36 mm dans le bois et 13 mm dans le métal",
+      "Double LED avec rémanence, technologie XPT",
+      "Machine nue (batterie et chargeur non inclus, gamme 18V LXT)"
+    ]
   },
   {
     "id": "makita-dga504z",
@@ -309,7 +486,27 @@
       "tropical_ready",
       "mayotte_project"
     ],
-    "description_long": "Meuleuse 125 mm sans fil, 8500 tr/min. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Makita : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
+    "description_long": "Meuleuse 125 mm sans fil, 8500 tr/min. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Makita : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire.",
+    "specs": {
+      "Marque": "Makita",
+      "Type": "Meuleuse d'angle sans fil 18V LXT Brushless (machine nue)",
+      "Tension": "18 V LXT",
+      "Moteur": "Brushless (sans charbon)",
+      "Ø disque": "125 mm",
+      "Alésage disque": "22,23 mm",
+      "Filetage de broche": "M14",
+      "Vitesse à vide": "8500 tr/min",
+      "Frein électronique": "Oui",
+      "Poids (avec batterie)": "≈ 2,3 kg",
+      "Batterie / chargeur": "Non inclus"
+    },
+    "features": [
+      "Moteur brushless avec contrôle automatique de la vitesse en charge",
+      "Démarrage progressif et frein électronique de sécurité",
+      "Protection électronique contre les surcharges moteur et batterie",
+      "Ø disque 125 mm, broche M14, technologie XPT",
+      "Machine nue (batterie et chargeur non inclus, gamme 18V LXT)"
+    ]
   },
   {
     "id": "makita-dhs680z",
@@ -337,7 +534,27 @@
       "tropical_ready",
       "mayotte_project"
     ],
-    "description_long": "Scie circulaire 165 mm, profondeur 57 mm. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Makita : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
+    "description_long": "Scie circulaire 165 mm, profondeur 57 mm. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Makita : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire.",
+    "specs": {
+      "Marque": "Makita",
+      "Type": "Scie circulaire sans fil 18V LXT Brushless (machine nue)",
+      "Tension": "18 V LXT",
+      "Moteur": "Brushless (sans charbon)",
+      "Ø lame": "165 mm",
+      "Alésage": "20 mm",
+      "Profondeur de coupe à 90°": "57 mm",
+      "Profondeur de coupe à 45°": "41 mm",
+      "Vitesse à vide": "5000 tr/min",
+      "Poids (avec batterie)": "3,3 kg",
+      "Batterie / chargeur": "Non inclus"
+    },
+    "features": [
+      "Moteur brushless avec contrôle automatique de la vitesse selon la charge",
+      "Frein électrique d'arrêt rapide et éclairage LED intégré",
+      "Carter en magnésium léger, coupe inclinable jusqu'à 50°",
+      "Profondeur de coupe 57 mm à 90°, lame 165 mm",
+      "Machine nue (batterie et chargeur non inclus, gamme 18V LXT)"
+    ]
   },
   {
     "id": "festool-ti-18",
@@ -364,7 +581,26 @@
       "cordless",
       "tropical_ready"
     ],
-    "description_long": "170 Nm, Systainer, garantie 3 ans. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Festool : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
+    "description_long": "170 Nm, Systainer, garantie 3 ans. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Festool : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire.",
+    "specs": {
+      "Marque": "Festool",
+      "Type": "Visseuse à chocs sans fil",
+      "Tension": "18 V",
+      "Moteur": "Brushless EC-TEC (sans charbon)",
+      "Porte-embout": "Six pans creux 1/4\"",
+      "Couple max.": "180 Nm",
+      "Modes": "3 vitesses + T-Mode intelligent",
+      "Vitesse à vide": "0–1200 / 0–2000 / 0–3200 tr/min",
+      "Cadence de frappe max.": "4500 cps/min",
+      "Poids": "1,5 kg"
+    },
+    "features": [
+      "Moteur brushless EC-TEC pour rendement et longévité",
+      "T-Mode : adaptation automatique de la vitesse au matériau et à la vis",
+      "3 vitesses pour doser la puissance du vissage délicat au serrage lourd",
+      "Porte-embout 1/4\" à changement rapide, éclairage LED",
+      "Fournie en set avec 2 batteries 5,2 Ah"
+    ]
   },
   {
     "id": "festool-tpc-18",
@@ -391,7 +627,28 @@
       "cordless",
       "tropical_ready"
     ],
-    "description_long": "60 Nm, 4 vitesses, FastFix, Systainer. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Festool : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
+    "description_long": "60 Nm, 4 vitesses, FastFix, Systainer. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Festool : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire.",
+    "specs": {
+      "Marque": "Festool",
+      "Type": "Perceuse-visseuse à percussion sans fil QUADRIVE",
+      "Tension": "18 V",
+      "Moteur": "Brushless EC-TEC (sans charbon)",
+      "Nombre de vitesses": "4 (boîte QUADRIVE)",
+      "Vitesse à vide": "0–500 / 0–800 / 0–2350 / 0–3600 tr/min",
+      "Couple max.": "75 Nm (acier) / 50 Nm (bois)",
+      "Mandrin": "CENTROTEC 1,5–13 mm",
+      "Ø max. bois": "70 mm",
+      "Ø max. métal": "13 mm",
+      "Ø max. maçonnerie": "10 mm",
+      "Poids": "1,7 kg"
+    },
+    "features": [
+      "Boîte à 4 vitesses QUADRIVE : du perçage fin au gros diamètre",
+      "Mandrin CENTROTEC à changement rapide + fonction percussion",
+      "Réglage de couple précis de 2 à 20 Nm en position vissage",
+      "Perce jusqu'à 70 mm dans le bois, moteur brushless EC-TEC",
+      "Fournie en set avec 2 batteries 5,2 Ah + Systainer"
+    ]
   },
   {
     "id": "festool-tsc55",
@@ -420,7 +677,27 @@
       "tropical_ready",
       "mayotte_project"
     ],
-    "description_long": "Scie plongeante 160 mm, kickback stop, rail inclus. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Festool : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
+    "description_long": "Scie plongeante 160 mm, kickback stop, rail inclus. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Festool : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire.",
+    "specs": {
+      "Marque": "Festool",
+      "Type": "Scie plongeante sans fil (sur rail), bi-tension",
+      "Tension": "36 V (2 × 18 V)",
+      "Moteur": "Brushless EC-TEC",
+      "Ø lame": "160 mm",
+      "Alésage": "20 mm",
+      "Profondeur de coupe à 90°": "0–55 mm",
+      "Profondeur de coupe à 45°": "0–43 mm",
+      "Vitesse à vide": "2650–5200 tr/min",
+      "Compatible rail": "Oui (rail de guidage FS Festool)",
+      "Poids": "4,6 kg"
+    },
+    "features": [
+      "Fonctionne en 36 V grâce à 2 batteries 18 V (bi-tension)",
+      "Sécurité KickbackStop : blocage anti-rebond de la lame",
+      "Coupe de précision sur rail de guidage FS, double échelle de profondeur",
+      "Lame 160 mm, profondeur 55 mm à 90°, inclinable jusqu'à 45°",
+      "Fournie en set avec 2 batteries 5,2 Ah + rail FS 1400"
+    ]
   },
   {
     "id": "flex-fw1-2-502",
@@ -448,7 +725,25 @@
       "tropical_ready",
       "mayotte_project"
     ],
-    "description_long": "600 Nm, 3 vitesses, LED. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Flex : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
+    "description_long": "600 Nm, 3 vitesses, LED. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Flex : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire.",
+    "specs": {
+      "Marque": "Flex",
+      "Type": "Boulonneuse à chocs sans fil 1/2\"",
+      "Tension": "18 V",
+      "Moteur": "Brushless (EC)",
+      "Emmanchement": "Carré 1/2\"",
+      "Couple de serrage max.": "250 Nm (3 niveaux : 140 / 170 / 250 Nm)",
+      "Vitesse à vide": "0–2500 tr/min",
+      "Cadence de frappe max.": "3300 cps/min",
+      "Poids (sans batterie)": "1,1 kg"
+    },
+    "features": [
+      "Réglage électronique du couple sur 3 niveaux (140 / 170 / 250 Nm)",
+      "Gestion électronique EMS : protection moteur et longévité",
+      "Compatible toutes batteries Flex 18 V, éclairage LED",
+      "Emmanchement carré 1/2\" pour douilles à chocs",
+      "Fournie en kit avec 2 batteries 5,0 Ah + chargeur"
+    ]
   },
   {
     "id": "flex-id-1-4",
@@ -475,7 +770,27 @@
       "cordless",
       "tropical_ready"
     ],
-    "description_long": "220 Nm, compacte, brushless. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Flex : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
+    "description_long": "220 Nm, compacte, brushless. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Flex : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire.",
+    "specs": {
+      "Marque": "Flex",
+      "Type": "Visseuse à chocs sans fil 1/4\" Brushless (machine nue)",
+      "Tension": "18 V",
+      "Moteur": "Brushless (EC)",
+      "Porte-embout": "Six pans creux 1/4\"",
+      "Couple max.": "225 Nm",
+      "Modes": "3 positions (vitesse + contrôle des impacts)",
+      "Vitesse à vide": "0–1500 / 0–2000 / 0–2500 tr/min",
+      "Cadence de frappe max.": "0–1300 / 0–2800 / 0–3300 cps/min",
+      "Poids": "1,1 kg",
+      "Batterie / chargeur": "Non inclus"
+    },
+    "features": [
+      "Système EMS + frein électronique rapide",
+      "3 plages de vitesse et contrôle des impacts pour un vissage précis",
+      "Éclairage LED + affichage LED de la capacité batterie",
+      "Couple élevé de 225 Nm dans un format compact",
+      "Machine nue (batterie et chargeur non inclus, gamme Flex 18 V)"
+    ]
   },
   {
     "id": "facom-cl3-c18sp",
@@ -503,7 +818,29 @@
       "tropical_ready",
       "mayotte_project"
     ],
-    "description_long": "950 Nm, 4 vitesses, pro. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Facom : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
+    "description_long": "950 Nm, 4 vitesses, pro. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Facom : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire.",
+    "specs": {
+      "Marque": "Facom",
+      "Type": "Boulonneuse à chocs 1/2\" sans fil (kit)",
+      "Tension": "18 V",
+      "Moteur": "Brushless (sans charbon)",
+      "Emmanchement": "Carré conducteur 1/2\"",
+      "Couple de serrage max.": "950 Nm",
+      "Couple de décollement": "1625 Nm",
+      "Nombre de vitesses": "3",
+      "Vitesse à vide": "400 / 1200 / 1900 tr/min",
+      "Cadence de frappe max.": "2400 cps/min",
+      "Batteries": "2 × 18 V 5,0 Ah Li-Ion",
+      "Chargeur": "Chargeur inclus",
+      "Coffret": "ToughSystem"
+    },
+    "features": [
+      "Moteur brushless sans charbon : couple de serrage jusqu'à 950 Nm",
+      "3 vitesses + gâchette à variateur pour un contrôle progressif",
+      "Couple de décollement 1625 Nm pour débloquer les boulons grippés",
+      "LED intégrée à extinction différée, corps résistant acides/solvants",
+      "Kit complet : 2 batteries 5,0 Ah + chargeur + coffret ToughSystem"
+    ]
   },
   {
     "id": "facom-cl2-c18s",
@@ -610,7 +947,24 @@
     "tags": [
       "bestseller"
     ],
-    "description_long": "Set tournevis magnetique 17 pcs, manche Rapidaptor. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Outillage à main Wera conçu pour durer : aciers traités, finitions anti-corrosion. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
+    "description_long": "Set tournevis magnetique 17 pcs, manche Rapidaptor. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Outillage à main Wera conçu pour durer : aciers traités, finitions anti-corrosion. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire.",
+    "specs": {
+      "Marque": "Wera",
+      "Type": "Jeu de tournevis porte-embouts Kraftform Kompakt (manuel)",
+      "Nombre de pièces": "17",
+      "Porte-embout": "Kraftform 816 R, mandrin rapide Rapidaptor 1/4\"",
+      "Embouts fournis (16)": "Fente 5,5 ; Six pans 3/4/5/6 ; PH1–PH3 ; PZ1–PZ3 ; TX10–TX30",
+      "Longueur des embouts": "89 mm",
+      "Rangement": "Pochette textile repliable",
+      "Système": "Manche multi-composants Kraftform + Rapidaptor"
+    },
+    "features": [
+      "Manche Kraftform : zones dures pour la vitesse, souples pour le couple",
+      "Mandrin Rapidaptor : changement d'embout d'une seule main",
+      "16 embouts 89 mm couvrant fente, six pans, PH, PZ et Torx",
+      "Pochette textile repliable, compacte à emporter partout",
+      "Usage manuel et sur visseuse (embouts standard 1/4\")"
+    ]
   },
   {
     "id": "wera-zyklop-speed",
@@ -635,7 +989,24 @@
     "ncCategory": "hand_tool",
     "productType": "pro",
     "tags": [],
-    "description_long": "Cliquet 1/4\" a retournement rapide, 28 pcs. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Outillage à main Wera conçu pour durer : aciers traités, finitions anti-corrosion. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
+    "description_long": "Cliquet 1/4\" a retournement rapide, 28 pcs. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Outillage à main Wera conçu pour durer : aciers traités, finitions anti-corrosion. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire.",
+    "specs": {
+      "Marque": "Wera",
+      "Type": "Coffret cliquet Zyklop Speed (manuel)",
+      "Entraînement": "1/4\" (6,3 mm)",
+      "Nombre de pièces": "28",
+      "Denture": "72 dents (angle de retour 5°)",
+      "Tête": "Articulée, 5 positions préréglées",
+      "Douilles fournies": "9 douilles métriques (5 à 13 mm)",
+      "Accessoires": "2 rallonges (150 mm + cardan) + adaptateur porte-embout + 15 embouts"
+    },
+    "features": [
+      "Cliquet Zyklop Speed multifonction : tête libre à 5 positions",
+      "Denture fine 72 dents, faible angle de retour 5° pour espaces exigus",
+      "Entraînement rapide en bout de manche pour visser vite",
+      "Repérage 'Take it easy' par code couleur selon la taille de douille",
+      "Coffret complet 28 pièces : cliquet + douilles + rallonges + embouts"
+    ]
   },
   {
     "id": "dewalt-dcd796p2",
@@ -664,7 +1035,33 @@
       "tropical_ready",
       "bestseller"
     ],
-    "description_long": "70 Nm, 2 vitesses, LED, mandrin 13 mm metal. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil DeWALT : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
+    "description_long": "70 Nm, 2 vitesses, LED, mandrin 13 mm metal. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil DeWALT : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire.",
+    "specs": {
+      "Marque": "DeWALT",
+      "Type": "Perceuse à percussion compacte XR (kit)",
+      "Tension": "18 V XR",
+      "Moteur": "Brushless (sans charbon)",
+      "Nombre de vitesses": "2",
+      "Vitesse à vide": "0–550 / 0–2000 tr/min",
+      "Cadence de frappe max.": "34 000 cps/min",
+      "Couple de serrage max.": "70 Nm",
+      "Réglages de couple": "15 positions",
+      "Mandrin": "Auto-serrant tout métal 13 mm",
+      "Ø max. bois": "40 mm",
+      "Ø max. métal": "13 mm",
+      "Ø max. béton": "13 mm",
+      "Poids (avec batterie 5,0 Ah)": "≈ 1,8 kg",
+      "Batteries": "2 × 18 V XR 5,0 Ah Li-Ion",
+      "Chargeur": "Chargeur Li-Ion inclus",
+      "Coffret": "TSTAK"
+    },
+    "features": [
+      "Moteur brushless compact : 70 Nm de couple, mandrin métal 13 mm",
+      "2 vitesses (0–550 / 0–2000 tr/min) + 15 positions d'embrayage",
+      "Mode percussion jusqu'à 34 000 coups/min pour brique et parpaing",
+      "Lampe LED 3 positions",
+      "Kit complet : 2 batteries 5,0 Ah + chargeur + coffret TSTAK"
+    ]
   },
   {
     "id": "dewalt-dcs391n",
@@ -693,7 +1090,28 @@
       "tropical_ready",
       "mayotte_project"
     ],
-    "description_long": "Scie circulaire 165 mm, profondeur 55 mm. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil DeWALT : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
+    "description_long": "Scie circulaire 165 mm, profondeur 55 mm. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil DeWALT : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire.",
+    "specs": {
+      "Marque": "DeWALT",
+      "Type": "Scie circulaire 165 mm XR (machine nue)",
+      "Tension": "18 V XR",
+      "Moteur": "À charbons — 460 W",
+      "Ø lame": "165 mm",
+      "Alésage": "20 mm",
+      "Profondeur de coupe à 90°": "55 mm",
+      "Profondeur de coupe à 45°": "42 mm",
+      "Inclinaison max.": "50°",
+      "Vitesse à vide": "3700 tr/min",
+      "Poids": "≈ 3,8 kg",
+      "Batterie / chargeur": "Non inclus"
+    },
+    "features": [
+      "Semelle en alliage de magnésium pour des coupes précises et répétées",
+      "Profondeur de coupe 55 mm à 90°, inclinaison jusqu'à 50°",
+      "Frein électronique de lame",
+      "Blocage d'arbre pour un changement de lame rapide",
+      "Machine nue (batterie et chargeur non inclus, gamme 18V XR)"
+    ]
   },
   {
     "id": "dewalt-dcg405n",
@@ -722,7 +1140,26 @@
       "tropical_ready",
       "mayotte_project"
     ],
-    "description_long": "Meuleuse compacte 125 mm, 9000 tr/min, frein. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil DeWALT : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
+    "description_long": "Meuleuse compacte 125 mm, 9000 tr/min, frein. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil DeWALT : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire.",
+    "specs": {
+      "Marque": "DeWALT",
+      "Type": "Meuleuse d'angle 125 mm XR (machine nue)",
+      "Tension": "18 V XR",
+      "Moteur": "Brushless (sans charbon)",
+      "Ø disque": "125 mm",
+      "Filetage de broche": "M14",
+      "Vitesse à vide": "9000 tr/min",
+      "Frein électronique": "Oui (arrêt du disque en moins de 2 s)",
+      "Poids (nu)": "1,75 kg",
+      "Batterie / chargeur": "Non inclus"
+    },
+    "features": [
+      "Moteur brushless 125 mm, vitesse à vide 9000 tr/min",
+      "Frein électronique : arrêt du disque en moins de 2 secondes",
+      "Embrayage électronique anti-rebond en cas de blocage du disque",
+      "Poignée latérale 2 positions et grille anti-poussière moteur",
+      "Machine nue (batterie et chargeur non inclus, gamme 18V XR)"
+    ]
   },
   {
     "id": "makita-dlx2220jx2",
@@ -750,7 +1187,25 @@
       "tropical_ready",
       "mayotte_project"
     ],
-    "description_long": "Perceuse DDF483 + visseuse DTD155, 2x3Ah. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Makita : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire."
+    "description_long": "Perceuse DDF483 + visseuse DTD155, 2x3Ah. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Makita : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire.",
+    "specs": {
+      "Marque": "Makita",
+      "Type": "Combo 2 machines sans fil 18V LXT Brushless (kit)",
+      "Tension": "18 V LXT",
+      "Contenu": "Perceuse à percussion DHP482 + visseuse à chocs DTD152",
+      "Perceuse à percussion": "DHP482 — 62/36 Nm, 2 vitesses (0–600 / 1900 tr/min), mandrin 1,5–13 mm, 21 réglages de couple",
+      "Visseuse à chocs": "DTD152 — 165 Nm, porte-embout 1/4\", 0–2900 tr/min, 0–3500 cps/min",
+      "Batteries": "2 × 18 V LXT 3,0 Ah Li-Ion",
+      "Chargeur": "DC18RC charge rapide",
+      "Coffret": "Makpac connectable"
+    },
+    "features": [
+      "Duo perceuse à percussion DHP482 (62 Nm) + visseuse à chocs DTD152 (165 Nm)",
+      "Les deux machines à moteur brushless, technologie XPT et double LED",
+      "Livré complet : 2 batteries 3,0 Ah + chargeur rapide DC18RC + Makpac",
+      "Un seul système de batteries pour percer, visser et serrer",
+      "Idéal pour démarrer un parc d'outils 18V LXT"
+    ]
   },
   {
     "id": "dewalt-ppack0001",
@@ -774,7 +1229,11 @@
     "weight_kg": 7.5,
     "ncCategory": "power_tool",
     "productType": "pro",
-    "tags": ["cordless", "tropical_ready", "kit"],
+    "tags": [
+      "cordless",
+      "tropical_ready",
+      "kit"
+    ],
     "features": [
       "Visseuse à chocs DCF887 sans charbon : 205 Nm de couple, 3 vitesses pour tout visser et dévisser",
       "Meuleuse d'angle DCG405 Ø125 mm avec frein électronique et embrayage anti-recul",
@@ -814,10 +1273,14 @@
     "stock_label": "Disponible",
     "model": "",
     "paymentLink": "",
-    "weight_kg": 8.0,
+    "weight_kg": 8,
     "ncCategory": "power_tool",
     "productType": "pro",
-    "tags": ["cordless", "tropical_ready", "kit"],
+    "tags": [
+      "cordless",
+      "tropical_ready",
+      "kit"
+    ],
     "features": [
       "Visseuse à chocs DCF887 sans charbon : 205 Nm, 3 vitesses, mode Precision Drive",
       "Perforateur burineur DCH273 SDS-Plus pour percer le béton, la brique et les matériaux durs",
@@ -861,7 +1324,11 @@
     "weight_kg": 2.6,
     "ncCategory": "power_tool",
     "productType": "pro",
-    "tags": ["cordless", "tropical_ready", "bare_tool"],
+    "tags": [
+      "cordless",
+      "tropical_ready",
+      "bare_tool"
+    ],
     "features": [
       "Moteur brushless : rabotage lisse et grande autonomie",
       "Largeur de rabotage 82 mm, profondeur réglable de 0 à 2 mm",
@@ -907,7 +1374,11 @@
     "weight_kg": 1.5,
     "ncCategory": "power_tool",
     "productType": "pro",
-    "tags": ["cordless", "tropical_ready", "bare_tool"],
+    "tags": [
+      "cordless",
+      "tropical_ready",
+      "bare_tool"
+    ],
     "features": [
       "Ultra-compact et léger : se manie facilement d'une seule main",
       "Vitesse d'air jusqu'à 80 m/s, débit 2,8 m³/min",
@@ -943,7 +1414,7 @@
     "tag": "Nouveau",
     "desc": "Aspirateur eau et poussière, filaire ou batterie 18/54V FLEXVOLT, cuve 7,5 L, classe L.",
     "img": "images/placeholder.svg",
-    "price": 294.40,
+    "price": 294.4,
     "currency": "EUR",
     "vat": 0.2,
     "price_ht": 245.33,
@@ -951,10 +1422,14 @@
     "stock_label": "Disponible",
     "model": "",
     "paymentLink": "",
-    "weight_kg": 6.0,
+    "weight_kg": 6,
     "ncCategory": "power_tool",
     "productType": "pro",
-    "tags": ["cordless", "corded", "tropical_ready"],
+    "tags": [
+      "cordless",
+      "corded",
+      "tropical_ready"
+    ],
     "features": [
       "Fonctionne sur secteur OU batterie 18/54V FLEXVOLT : liberté totale sur le chantier",
       "Aspiration eau et poussière, cuve de 7,5 L",
@@ -987,7 +1462,7 @@
     "price": 344.88,
     "currency": "EUR",
     "vat": 0.2,
-    "price_ht": 287.40,
+    "price_ht": 287.4,
     "stock_status": "in_stock",
     "stock_label": "En stock",
     "model": "",
@@ -995,7 +1470,11 @@
     "weight_kg": 8.5,
     "ncCategory": "power_tool",
     "productType": "pro",
-    "tags": ["cordless", "tropical_ready", "kit"],
+    "tags": [
+      "cordless",
+      "tropical_ready",
+      "kit"
+    ],
     "features": [
       "Perceuse à percussion DCD796 sans charbon : 2 vitesses et 15 réglages de couple",
       "Visseuse à chocs DCF887 : 205 Nm, 3 vitesses, mode Precision Drive",
@@ -1039,7 +1518,11 @@
     "weight_kg": 2.6,
     "ncCategory": "power_tool",
     "productType": "pro",
-    "tags": ["cordless", "tropical_ready", "kit"],
+    "tags": [
+      "cordless",
+      "tropical_ready",
+      "kit"
+    ],
     "features": [
       "2 batteries XR FLEXVOLT qui basculent automatiquement entre 18 V et 54 V",
       "Grande autonomie 9,0 Ah (162 Wh) pour les outils les plus gourmands",
@@ -1084,7 +1567,11 @@
     "weight_kg": 3.5,
     "ncCategory": "power_tool",
     "productType": "pro",
-    "tags": ["cordless", "tropical_ready", "kit"],
+    "tags": [
+      "cordless",
+      "tropical_ready",
+      "kit"
+    ],
     "features": [
       "2 batteries XR FLEXVOLT haute capacité 12,0 Ah qui basculent 18 V / 54 V",
       "Autonomie maximale pour les outils 54V les plus exigeants (scies, meuleuses)",
@@ -1121,7 +1608,7 @@
     "price": 709.32,
     "currency": "EUR",
     "vat": 0.2,
-    "price_ht": 591.10,
+    "price_ht": 591.1,
     "stock_status": "in_stock",
     "stock_label": "En stock",
     "model": "",
@@ -1129,7 +1616,11 @@
     "weight_kg": 4.6,
     "ncCategory": "power_tool",
     "productType": "pro",
-    "tags": ["cordless", "tropical_ready", "kit"],
+    "tags": [
+      "cordless",
+      "tropical_ready",
+      "kit"
+    ],
     "features": [
       "3 batteries XR FLEXVOLT 12,0 Ah : de quoi équiper tout un parc d'outils",
       "Bascule automatique 18 V / 54 V selon l'outil branché",
@@ -1174,7 +1665,10 @@
     "weight_kg": 3.5,
     "ncCategory": "power_tool",
     "productType": "pro",
-    "tags": ["corded", "tropical_ready"],
+    "tags": [
+      "corded",
+      "tropical_ready"
+    ],
     "features": [
       "Perforateur burineur filaire 710 W, emmanchement SDS-Plus",
       "Perce jusqu'à 22 mm dans le béton, 30 mm dans le bois, 13 mm dans le métal",
@@ -1223,7 +1717,10 @@
     "weight_kg": 4.5,
     "ncCategory": "power_tool",
     "productType": "pro",
-    "tags": ["corded", "tropical_ready"],
+    "tags": [
+      "corded",
+      "tropical_ready"
+    ],
     "features": [
       "Perforateur burineur filaire 800 W, emmanchement SDS-Plus",
       "Puissance de frappe 2,8 J : perce jusqu'à 26 mm dans le béton",
@@ -1274,7 +1771,9 @@
     "weight_kg": 0.7,
     "ncCategory": "power_tool",
     "productType": "pro",
-    "tags": ["tropical_ready"],
+    "tags": [
+      "tropical_ready"
+    ],
     "features": [
       "Batterie XR 18V Li-Ion de 5,0 Ah pour une belle autonomie",
       "Témoin de charge à LED : autonomie restante d'un coup d'œil",
@@ -1316,7 +1815,11 @@
     "weight_kg": 4.5,
     "ncCategory": "power_tool",
     "productType": "pro",
-    "tags": ["cordless", "tropical_ready", "kit"],
+    "tags": [
+      "cordless",
+      "tropical_ready",
+      "kit"
+    ],
     "features": [
       "Moteur brushless sans charbon : jusqu'à 95 Nm de couple",
       "3 vitesses mécaniques + mode percussion (béton jusqu'à 13 mm)",
@@ -1364,10 +1867,14 @@
     "stock_label": "En stock",
     "model": "",
     "paymentLink": "",
-    "weight_kg": 2.0,
+    "weight_kg": 2,
     "ncCategory": "power_tool",
     "productType": "pro",
-    "tags": ["cordless", "tropical_ready", "bare_tool"],
+    "tags": [
+      "cordless",
+      "tropical_ready",
+      "bare_tool"
+    ],
     "features": [
       "Spécialisée pose de plaques de plâtre : vissage rapide et régulier",
       "4400 tr/min avec butée de profondeur pour ne jamais déchirer le placo",
