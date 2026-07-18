@@ -43,11 +43,10 @@ module.exports = async function handler(req, res) {
   if (!db) return res.status(503).json({ ok: false, error: 'Firestore not configured' });
 
   // ── 1) Synthèse ───────────────────────────────────────────────────────────
-  var readAll = async function (coll, opts) {
-    var q = db.collection(coll);
-    if (opts && opts.orderDesc) q = q.orderBy(admin.firestore.FieldPath.documentId(), 'desc');
-    if (opts && opts.limit) q = q.limit(opts.limit);
-    var s = await q.get();
+  // Lecture simple sans tri : Firestore refuse orderBy(documentId, 'desc').
+  // summarize() trie ; les collections sont bornées (purge > 14 mois).
+  var readAll = async function (coll) {
+    var s = await db.collection(coll).get();
     var out = [];
     s.forEach(function (d) { out.push(Object.assign({ id: d.id }, d.data())); });
     return out;
@@ -55,7 +54,7 @@ module.exports = async function handler(req, res) {
 
   var summary, report, json;
   try {
-    var daily = await readAll('analytics_daily', { orderDesc: true, limit: 420 });
+    var daily = await readAll('analytics_daily');
     var products = await readAll('analytics_products');
     var clicks = await readAll('analytics_clicks');
     var geo = await readAll('analytics_geo');

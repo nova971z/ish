@@ -52,18 +52,19 @@ module.exports = async function handler(req, res) {
 
       // ── Statistiques (dashboard analytics maison) ──────────────
       if (type === 'stats') {
-        const readAll = async (coll, opts) => {
-          let q = db.collection(coll);
-          if (opts && opts.orderDesc) q = q.orderBy(admin.firestore.FieldPath.documentId(), 'desc');
-          if (opts && opts.limit) q = q.limit(opts.limit);
-          const s = await q.get();
+        // Lecture simple sans tri : Firestore N'AUTORISE PAS orderBy(documentId,
+        // 'desc') (« does not support descending key scans ») → ça faisait
+        // planter la requête, et le dashboard affichait 0 alors que les données
+        // existaient. summarize() somme et trie côté serveur ; toutes ces
+        // collections sont naturellement bornées (analytics_daily = 1 doc/jour,
+        // purgé > 14 mois ; le reste 1 doc/produit, /cible, /pays).
+        const readAll = async (coll) => {
+          const s = await db.collection(coll).get();
           const out = [];
           s.forEach((d) => out.push(Object.assign({ id: d.id }, d.data())));
           return out;
         };
-        // Daily borné (les YYYY-MM-DD trient chronologiquement) ; le reste est
-        // naturellement borné (1 doc/produit, /cible, /pays).
-        const daily = await readAll('analytics_daily', { orderDesc: true, limit: 60 });
+        const daily = await readAll('analytics_daily');
         const products = await readAll('analytics_products');
         const clicks = await readAll('analytics_clicks');
         const geo = await readAll('analytics_geo');
