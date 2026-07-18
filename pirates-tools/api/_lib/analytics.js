@@ -42,6 +42,41 @@ var AFFINITY_WEIGHT = {
   purchase: 10
 };
 
+// ── Détection de robots (bot filtering) ─────────────────────────────────────
+// But : que les statistiques reflètent des HUMAINS. On filtre à l'ingestion les
+// crawlers/scrapers/monitoring/librairies HTTP/navigateurs headless d'après le
+// User-Agent. Un vrai navigateur envoie TOUJOURS un User-Agent → un UA
+// absent/vide est traité comme suspect.
+//
+// Le token générique « bot » attrape déjà la majorité (Googlebot, bingbot,
+// SemrushBot, AhrefsBot, PetalBot, TwitterBot, etc.). On ajoute les robots qui
+// n'ont pas « bot » dans leur nom, + les librairies/outils d'automatisation.
+var BOT_RE = new RegExp([
+  'bot', 'crawl', 'spider', 'slurp',                                   // génériques
+  'mediapartners', 'baiduspider', 'sogou', 'yisou',                    // moteurs sans « bot »
+  'facebookexternalhit', 'facebookcatalog', 'whatsapp', 'embedly',     // aperçus sociaux
+  'quora', 'skypeuripreview', 'vkshare', 'w3c_validator', 'flipboard',
+  'semrush', 'ahrefs', 'screaming', 'dataforseo', 'serpstat', 'sistrix', // SEO
+  'headless', 'phantom', 'puppeteer', 'playwright', 'selenium', 'cypress', // automation
+  'python-requests', 'python-urllib', 'aiohttp', 'httpx', '\\bcurl\\b',    // libs HTTP
+  '\\bwget\\b', 'go-http-client', 'okhttp', 'java/', 'libwww',
+  'apache-httpclient', 'guzzle', 'scrapy', 'node-fetch', 'axios', 'jsdom',
+  'pingdom', 'statuscake', 'gtmetrix', 'lighthouse', 'pagespeed',       // monitoring/audit
+  'datadog', 'newrelic', 'site24x7', 'uptime',
+  'masscan', 'zgrab', 'sqlmap', 'nikto', 'nuclei',                      // scanners
+  'archive\\.org', '\\bnutch\\b', 'heritrix', 'prerender'
+].join('|'), 'i');
+
+// Faux positifs connus : appareils/marques dont l'UA contient « bot » mais qui
+// sont de VRAIS navigateurs → jamais filtrés (ex. téléphones Cubot).
+var NOT_BOT_RE = /cubot|\babot\b/i;
+
+function isBot(ua) {
+  if (typeof ua !== 'string' || !ua.trim()) return true; // pas d'UA = suspect
+  if (NOT_BOT_RE.test(ua)) return false;                 // vrai appareil « ...bot... »
+  return BOT_RE.test(ua);
+}
+
 var MAX_EVENTS_PER_BATCH = 20;      // borne anti-abus (1 requête = 1 session tick)
 var MAX_STR = 80;                    // longueur max d'un champ texte accepté
 var PII_RE = /@|\+?\d[\d\s().-]{6,}/; // grossier : emails / numéros → rejet du champ
@@ -345,6 +380,7 @@ function renderReportHtml(report) {
 
 module.exports = {
   EVENT_ALLOWLIST: EVENT_ALLOWLIST,
+  isBot: isBot,
   summarize: summarize,
   buildReport: buildReport,
   renderReportHtml: renderReportHtml,
