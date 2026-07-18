@@ -5692,9 +5692,36 @@
       group.rotation.x = 0.35;
       group.rotation.y = -Math.PI * 0.5;
 
+      // ── Interaction : faire tourner le globe au doigt / à la souris ────────
+      // Pointer Events (souris + tactile iPad unifiés) + setPointerCapture pour
+      // suivre le geste hors du canvas. Les écouteurs sont sur le CANVAS → ils
+      // disparaissent avec lui au nettoyage (aucune fuite). touch-action:none
+      // empêche la page de défiler pendant qu'on manipule le globe.
+      var dragging = false, lastX = 0, lastY = 0;
+      var canvas = renderer.domElement;
+      canvas.style.cursor = 'grab';
+      canvas.style.touchAction = 'none';
+      canvas.addEventListener('pointerdown', function (e) {
+        dragging = true; lastX = e.clientX; lastY = e.clientY;
+        canvas.style.cursor = 'grabbing';
+        try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+      });
+      canvas.addEventListener('pointermove', function (e) {
+        if (!dragging) return;
+        var dx = e.clientX - lastX, dy = e.clientY - lastY;
+        lastX = e.clientX; lastY = e.clientY;
+        group.rotation.y += dx * 0.006;
+        // Inclinaison bornée (on ne bascule pas par-dessus les pôles).
+        group.rotation.x = Math.max(-1.2, Math.min(1.2, group.rotation.x + dy * 0.006));
+      });
+      function endDrag() { dragging = false; canvas.style.cursor = 'grab'; }
+      canvas.addEventListener('pointerup', endDrag);
+      canvas.addEventListener('pointercancel', endDrag);
+
       var raf = null;
       function animate() {
-        group.rotation.y += 0.0018;
+        // Auto-rotation douce quand l'utilisateur ne manipule pas le globe.
+        if (!dragging) group.rotation.y += 0.0018;
         renderer.render(scene, camera);
         raf = requestAnimationFrame(animate);
         if (_adminGlobe) _adminGlobe.raf = raf;
