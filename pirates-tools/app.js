@@ -1696,8 +1696,9 @@
     setupModelViewerScrollPassthrough(viewer);
     setupModelViewerScrollPassthrough(viewer2);
 
-    // Scroll animation for landing sections
-    initPdpScrollAnimations();
+    // NB : l'animation de scroll (initPdpScrollAnimations) est initialisée PLUS BAS,
+    // une fois que features/specs/kit sont injectés dans le DOM. Sinon elle capture
+    // des <tr>/<li> périmés et le nouveau contenu reste bloqué à opacity:0 (invisible).
 
     // Price (TTC + HT + octroi de mer breakdown for the selected territory) + stock badge
     if (dom.pdpPrice) {
@@ -1766,6 +1767,11 @@
       if (kitSection) kitSection.style.display = 'none';
       if (kitEl) kitEl.innerHTML = '';
     }
+
+    // Scroll animation for landing sections — APRÈS l'injection de features/specs/kit
+    // pour que les nouveaux <tr>/<li>/cartes soient bien captés et révélés (sinon
+    // ils restent à opacity:0). C'était la cause du texte de caractéristiques invisible.
+    initPdpScrollAnimations();
 
     // Add to cart — stays on page, no redirect
     var pdpOut = isOutOfStock(product);
