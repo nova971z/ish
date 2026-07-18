@@ -2895,6 +2895,12 @@ transform: translateY(-2px);
     text-align: left;
     margin-bottom: 1.5rem;
 }
+/* Produit sans caractéristiques : le bloc specs est masqué (JS) et la 3D se
+   recentre en colonne unique au lieu de laisser une moitié droite vide. */
+.pdp-split--solo {
+    grid-template-columns: minmax(0, 620px);
+    justify-content: center;
+}
 
 /* ── SPECS TABLE ── */
 .pdp-specs-table {

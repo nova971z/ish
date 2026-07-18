@@ -1731,16 +1731,27 @@
       featuresEl.innerHTML = '';
     }
 
-    // Specs table
-    if (dom.pdpSpecs && product.specs) {
-      var specsHtml = '<table>';
-      Object.keys(product.specs).forEach(function (k) {
-        specsHtml += '<tr><td>' + escapeHTML(k) + '</td><td>' + escapeHTML(product.specs[k]) + '</td></tr>';
-      });
-      specsHtml += '</table>';
-      dom.pdpSpecs.innerHTML = specsHtml;
-    } else if (dom.pdpSpecs) {
-      dom.pdpSpecs.innerHTML = '';
+    // Specs table — masque le bloc « Caractéristiques » (titre inclus) quand le
+    // produit n'a AUCUNE caractéristique, sinon la fiche affiche un titre vide.
+    // Dans ce cas la grille 3D+specs passe en colonne unique centrée.
+    if (dom.pdpSpecs) {
+      var specKeys = product.specs ? Object.keys(product.specs) : [];
+      var specsBlock = dom.pdpSpecs.closest('.pdp-split__specs');
+      var splitGrid = dom.pdpSpecs.closest('.pdp-split');
+      if (specKeys.length > 0) {
+        var specsHtml = '<table>';
+        specKeys.forEach(function (k) {
+          specsHtml += '<tr><td>' + escapeHTML(k) + '</td><td>' + escapeHTML(product.specs[k]) + '</td></tr>';
+        });
+        specsHtml += '</table>';
+        dom.pdpSpecs.innerHTML = specsHtml;
+        if (specsBlock) specsBlock.hidden = false;
+        if (splitGrid) splitGrid.classList.remove('pdp-split--solo');
+      } else {
+        dom.pdpSpecs.innerHTML = '';
+        if (specsBlock) specsBlock.hidden = true;
+        if (splitGrid) splitGrid.classList.add('pdp-split--solo');
+      }
     }
 
     // Kit
