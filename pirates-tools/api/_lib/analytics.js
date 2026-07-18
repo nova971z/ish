@@ -98,7 +98,13 @@ function deriveGeo(headers) {
   if (!country) return null;
   var lat = parseFloat(h['x-vercel-ip-latitude']);
   var lng = parseFloat(h['x-vercel-ip-longitude']);
-  var city = safeToken(decodeURIComponent(String(h['x-vercel-ip-city'] || '')), 48);
+  // decodeURIComponent JETTE une URIError si l'en-tête ville contient un
+  // encodage %malformé → NE JAMAIS laisser remonter (sinon /api/events plante
+  // en 500 et plus AUCUN événement n'est enregistré). Repli = valeur brute.
+  var rawCity = String(h['x-vercel-ip-city'] || '');
+  var city;
+  try { city = safeToken(decodeURIComponent(rawCity), 48); }
+  catch (_) { city = safeToken(rawCity, 48); }
   var geo = { country: country };
   if (city) geo.city = city;
   if (isFiniteNum(lat) && isFiniteNum(lng)) { geo.lat = lat; geo.lng = lng; }
