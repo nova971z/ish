@@ -507,6 +507,13 @@ dans `scratchpad/_gltftools/pack-build.mjs` (builder paramétré).
    touche un accessoire (clairance < 8 mm). Interdiction formelle de livrer un
    pack où deux objets se chevauchent. Vérif finale par rendu three.js.
 Refaire un pack = `node pack-build.mjs <toolFile> <toolMax_mm> <rotYdeg> <out>`.
+4. POSTER 2D (image de la CARTE) = collage `scratchpad/collage-pack.js`. MÊME
+   principe : coffret + chargeur + 2 batteries (images objs/*.png + slots RECTS)
+   INCHANGÉS, on ne swappe QUE l'image de l'outil. L'outil est rendu à la caméra
+   poster (0.8,0.42,0.7) + la MÊME rotY que le pack (chuck gauche, logo face) via
+   `scratchpad/_tools_poster.js`, puis dimensionné à la HAUTEUR de réf (502px,
+   base y=721, centré x=560) pour une présence identique quel que soit l'outil.
+   Sortie images/posters/<sku>.webp, branché sur products.json .img.
 
 ## Vérification standard
 `cd pirates-tools && node scripts/ci.js` doit rester vert après chaque étape.
