@@ -802,28 +802,15 @@
   function getCart() { return loadCartData(); }
 
   function productCardVisual(p) {
+    // PERF (cascade de chargement fluide) : les vignettes du catalogue
+    // n'affichent QUE l'image légère (poster). Le modèle 3D (lourd, ~2 Mo/pièce)
+    // ne se charge PLUS sur la grille — uniquement sur la fiche produit (PDP).
+    // Avant : chaque carte avec un modèle téléchargeait son GLB dès l'ouverture
+    // du catalogue (~10 cartes × 2 Mo = 20 Mo d'un coup) → catalogue très lent.
+    // Désormais le catalogue s'ouvre instantanément ; la 3D interactive reste
+    // sur la page produit, là où l'utilisateur veut réellement l'examiner.
     var imgSrc = escapeHTML(p.img || 'images/placeholder.svg');
     var alt = escapeHTML(p.title);
-    if (p.model) {
-      return '<model-viewer class="product-card__model"'
-        + ' src="' + escapeHTML(p.model) + '"'
-        + ' alt="' + alt + '"'
-        // lazy est REQUIS : preloadModelViewers ne cible que
-        // model-viewer[loading="lazy"] — c'est son IO (~700px) qui upgrade en
-        // eager ET charge le script 3D (ensureModelViewer). En eager le
-        // sélecteur ne matchait rien → sur un accès direct #/catalogue le 3D
-        // des cartes ne se chargeait jamais (posters figés).
-        + ' loading="lazy"'
-        + ' reveal="auto"'
-        + ' rotation-per-second="25deg"'
-        + ' interaction-prompt="none"'
-        + ' disable-zoom'
-        + ' disable-tap'
-        + ' disable-pan'
-        + ' shadow-intensity="0.4"'
-        + ' exposure="1.1"'
-        + '><img slot="poster" src="' + imgSrc + '" alt="' + alt + '" loading="lazy" /></model-viewer>';
-    }
     return '<img src="' + imgSrc + '" alt="' + alt + '" loading="lazy" decoding="async" class="product-card__img">';
   }
 
