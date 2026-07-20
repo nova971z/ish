@@ -278,7 +278,7 @@
     "price_ht": 140.83,
     "stock_status": "in_stock",
     "stock_label": "En stock",
-    "model": "models/products/dcf850.glb",
+    "model": "models/products/dcf850n.glb",
     "paymentLink": "",
     "weight_kg": 1.6,
     "ncCategory": "power_tool",
