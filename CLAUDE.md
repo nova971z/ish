@@ -566,3 +566,10 @@ compresser « un tout petit peu » si trop lourd.
   (chuck gauche, logo DEWALT face) ; TSTAK de face = rotY 0.
 - Les 3 autres kits (DCF894P2, DCF850P2T, DCD796P2 + gros packs) suivront la
   MÊME recette quand l'user enverra leurs composants GLB + photo de référence.
+- 🗺️ GABARIT VERSIONNÉ (idée user « quadrillage map au sol pour se souvenir des
+  positions ») : `docs/PACK-3D-LAYOUT.md` + `docs/pack-3d-layout-map.svg`
+  (carte quadrillée mm, vue de dessus, extraite AUTO du pipeline via
+  pack-layout.json). Contient repère caméra, règle héros, coordonnées validées
+  (cx/cz/emprise par composant) ET les formules paramétriques relatives au
+  coffret → à réappliquer tel quel pour les prochains packs. Vérif orientation
+  d'un GLB : `scratchpad/_orient.js` (4 vues à 90°).
