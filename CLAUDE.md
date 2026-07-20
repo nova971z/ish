@@ -487,18 +487,22 @@ dans `scratchpad/_gltftools/pack-build.mjs` (builder paramétré).
    JAMAIS le dos, JAMAIS un logo miroir. La bonne rotationY DÉPEND de chaque GLB
    (orientation native différente) → OBLIGATION de rendre l'outil seul en 4×90°
    depuis la caméra fiche (`scratchpad/_orient.js <glb>`) et de CHOISIR à l'œil
-   la vue qui matche la référence AVANT de composer. Valeurs trouvées :
-     • DCF887N → rotY 0   (réf.)      • DCF894N → rotY 0
-     • DCF850N → rotY 90              • DCD796 → rotY 180 (EXCEPTION : chuck à
-       DROITE, car ce GLB a le logo EN MIROIR sur le flanc gauche → chuck-gauche
-       afficherait « EEWALL ». Logo correct > sens du chuck. Documenté.)
+   la vue qui matche la référence AVANT de composer. Valeurs VALIDÉES PAR L'USER
+   (il a entouré la bonne vue sur la grille _orient — toutes = chuck haut-gauche,
+   logo DEWALT face, debout) :
+     • DCF887N → rotY 0 (réf.)        • DCF894N → rotY 90
+     • DCF850N → rotY 0               • DCD796  → rotY 90
+   (NB : à rotY 0 le DCD796 montre un logo EN MIROIR sur le flanc gauche ; rotY 90
+   règle ça ET garde le chuck à gauche = sens homogène. Le sens homogène prime,
+   l'user tranche à l'œil sur la grille 4×90.)
 2. MAPPING AU SOL VERROUILLÉ : chargeur + 2 batteries + coffret sont les MÊMES
    objets sur tous les packs → placés aux COORDONNÉES EXACTES du mapping validé
    DCF887P2 (docs/PACK-3D-LAYOUT.md), JAMAIS recalculés. Constantes MAP dans le
    builder : case(-40,-122) charger(-80,157) bat1(8,168) bat2(84,162)
-   tool(168,209 par défaut). Seul l'OUTIL héros peut se décaler — vers la DROITE,
-   au STRICT MINIMUM (auto-nudge 1 mm/pas) — s'il est plus gros et chevaucherait
-   un accessoire. Décalages appliqués : DCF894 +34mm, DCD796 +51mm, DCF850 +0mm.
+   tool(168,209). Principe user : « copier le pack, ne changer QUE l'outil ».
+   Avec les bonnes orientations, les 3 outils tiennent à la position mapping
+   EXACTE (décalage 0 mm). Le décalage droite auto (1 mm/pas) n'est qu'un filet
+   de sécurité si un outil futur, plus gros, chevauchait un accessoire.
 3. ANTI-CHEVAUCHEMENT : le builder PLANTE (exit 2) si l'emprise XZ de l'outil
    touche un accessoire (clairance < 8 mm). Interdiction formelle de livrer un
    pack où deux objets se chevauchent. Vérif finale par rendu three.js.
