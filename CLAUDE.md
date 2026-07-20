@@ -516,9 +516,10 @@ délais affichés au paiement, pas via le badge — futur chantier frais de port
   perceuse), Facom CL2.C18S (SKU inexistant). Catalogue 40→37, TOUS avec specs.
 - 2 fiches SKU-imprécis GARDÉES à vérifier par l'user → voir « À FAIRE PLUS
   TARD » (Facom CL3.C18SP, Flex FW1/2-502).
-- ⚠️ PRIX À RÉALIGNER : DCG405FN-XJ (meuleuse tête plate, lot ~20/07) a son
-  prix dérivé d'AMAZON (176,24€ TTC → HT 146,87 × 1,15) et non de Cotébrico —
-  Cotébrico souvent moins cher. Réaligner si l'user fournit le tarif Cotébrico.
+- DCG405FN-XJ (meuleuse tête plate, ~20/07) : prix dérivé d'AMAZON (176,24€
+  TTC → HT 146,87 × 1,15) car INTROUVABLE sur Cotébrico. Prix VALIDÉ par l'user
+  (« on s'aligne sur ce prix pour l'instant ») — PAS une erreur. À ajuster
+  seulement SI l'user trouve moins cher un jour (il préviendra).
 - 3D branchée aux fiches par lots (GLB uploadés par l'user sur master, nommés
   par SKU). Règle : rendu outil-seul UNIQUEMENT sur versions nues ; kits P2/P2T/
   D2K = modèles composés (fournis plus tard) → GLB seul retiré des kits
