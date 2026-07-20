@@ -1655,23 +1655,26 @@
       track('view_item', { id: product.id, name: product.title, brand: product.brand, price: product.price });
     }
 
-    // 3D model viewer — hero (plein ecran)
+    // 3D model viewers (hero + secondaire). Si le produit a un VRAI modèle 3D,
+    // on le charge. Sinon (ex. pack composé, ou produit sans GLB), on affiche SON
+    // poster/image — surtout PAS de modèle 3D générique, qui affichait une
+    // visseuse « fantôme » à la place du vrai visuel du produit en scrollant.
+    function setPdpViewer(v, alt) {
+      if (!v) return;
+      v.setAttribute('alt', alt);
+      if (product.img) v.setAttribute('poster', product.img);
+      if (product.model) {
+        v.removeAttribute('reveal');            // reveal auto → charge la 3D interactive
+        v.setAttribute('src', product.model);
+      } else {
+        v.removeAttribute('src');               // aucun modèle → aucune 3D
+        v.setAttribute('reveal', 'manual');     // reste figé sur le poster (image produit)
+      }
+    }
     var viewer = document.getElementById('pdp3d');
-    if (viewer) {
-      var modelSrc = product.model || 'models/dewalt-optimized.glb';
-      viewer.setAttribute('src', modelSrc);
-      viewer.setAttribute('alt', product.title);
-      if (product.img) viewer.setAttribute('poster', product.img);
-    }
-
-    // 3D model viewer — secondary (angle different : vue de dessus/profil)
     var viewer2 = document.getElementById('pdp3dSecondary');
-    if (viewer2) {
-      var modelSrc2 = product.model || 'models/dewalt-optimized.glb';
-      viewer2.setAttribute('src', modelSrc2);
-      viewer2.setAttribute('alt', product.title + ' - vue detail');
-      if (product.img) viewer2.setAttribute('poster', product.img);
-    }
+    setPdpViewer(viewer, product.title);
+    setPdpViewer(viewer2, product.title + ' - vue detail');
 
     // L'utilisateur ouvre une fiche produit → il veut voir le modèle 3D :
     // on charge <model-viewer> immédiatement (idempotent). Les viewers ci-dessus
