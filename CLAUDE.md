@@ -478,6 +478,43 @@ NOTE consentement : la couche ANONYME tourne sans consentement (exemption CNIL
 mesure d'audience 1re partie) ; le profil persistant/affinité + nouveau/récurrent
 n'existe QUE si l'utilisateur accepte. Refuser = pas de localStorage pt:vid.
 
+## 🔒 RÈGLES PACKS 3D — GRAVÉES (ne JAMAIS y déroger, vérifié par l'user)
+Deux exigences NON NÉGOCIABLES pour composer un pack (fusion outil + chargeur +
+2 batteries + coffret). Erreurs déjà commises et reprochées → garde-fous codés
+dans `scratchpad/_gltftools/pack-build.mjs` (builder paramétré).
+1. ORIENTATION DE L'OUTIL = MÊME SENS QUE DCF887P2 (référence approuvée) :
+   chuck/enclume à GAUCHE, logo DEWALT FACE caméra, outil DEBOUT sur sa batterie.
+   JAMAIS le dos, JAMAIS un logo miroir. La bonne rotationY DÉPEND de chaque GLB
+   (orientation native différente) → OBLIGATION de rendre l'outil seul en 4×90°
+   depuis la caméra fiche (`scratchpad/_orient.js <glb>`) et de CHOISIR à l'œil
+   la vue qui matche la référence AVANT de composer. Valeurs VALIDÉES PAR L'USER
+   (il a entouré la bonne vue sur la grille _orient — toutes = chuck haut-gauche,
+   logo DEWALT face, debout) :
+     • DCF887N → rotY 0 (réf.)        • DCF894N → rotY 90
+     • DCF850N → rotY 0               • DCD796  → rotY 90
+   (NB : à rotY 0 le DCD796 montre un logo EN MIROIR sur le flanc gauche ; rotY 90
+   règle ça ET garde le chuck à gauche = sens homogène. Le sens homogène prime,
+   l'user tranche à l'œil sur la grille 4×90.)
+2. MAPPING AU SOL VERROUILLÉ : chargeur + 2 batteries + coffret sont les MÊMES
+   objets sur tous les packs → placés aux COORDONNÉES EXACTES du mapping validé
+   DCF887P2 (docs/PACK-3D-LAYOUT.md), JAMAIS recalculés. Constantes MAP dans le
+   builder : case(-40,-122) charger(-80,157) bat1(8,168) bat2(84,162)
+   tool(168,209). Principe user : « copier le pack, ne changer QUE l'outil ».
+   Avec les bonnes orientations, les 3 outils tiennent à la position mapping
+   EXACTE (décalage 0 mm). Le décalage droite auto (1 mm/pas) n'est qu'un filet
+   de sécurité si un outil futur, plus gros, chevauchait un accessoire.
+3. ANTI-CHEVAUCHEMENT : le builder PLANTE (exit 2) si l'emprise XZ de l'outil
+   touche un accessoire (clairance < 8 mm). Interdiction formelle de livrer un
+   pack où deux objets se chevauchent. Vérif finale par rendu three.js.
+Refaire un pack = `node pack-build.mjs <toolFile> <toolMax_mm> <rotYdeg> <out>`.
+4. POSTER 2D (image de la CARTE) = collage `scratchpad/collage-pack.js`. MÊME
+   principe : coffret + chargeur + 2 batteries (images objs/*.png + slots RECTS)
+   INCHANGÉS, on ne swappe QUE l'image de l'outil. L'outil est rendu à la caméra
+   poster (0.8,0.42,0.7) + la MÊME rotY que le pack (chuck gauche, logo face) via
+   `scratchpad/_tools_poster.js`, puis dimensionné à la HAUTEUR de réf (502px,
+   base y=721, centré x=560) pour une présence identique quel que soit l'outil.
+   Sortie images/posters/<sku>.webp, branché sur products.json .img.
+
 ## Vérification standard
 `cd pirates-tools && node scripts/ci.js` doit rester vert après chaque étape.
 Bump SW (`sw.js` VERSION + ASSET_VER) et `?v=` dans `index.html` à chaque changement d'asset.
@@ -564,8 +601,17 @@ compresser « un tout petit peu » si trop lourd.
   face reculé (-Z) décalé gauche, accessoires en rangée avant étalée en X.
   Orientations vérifiées par rendu 4×90° (_orient.js) : DCF887N héros = rotY 0
   (chuck gauche, logo DEWALT face) ; TSTAK de face = rotY 0.
-- Les 3 autres kits (DCF894P2, DCF850P2T, DCD796P2 + gros packs) suivront la
-  MÊME recette quand l'user enverra leurs composants GLB + photo de référence.
+- 3 AUTRES PACKS COMPOSÉS (20/07, SW v352) via `scratchpad/_gltftools/
+  pack-build.mjs` (builder paramétré : MÊME layout gabarit, on ne change que
+  l'outil héros — args toolFile/toolMax/rotYdeg/out). Outils de base déjà
+  présents (aucun upload user requis) ; chargeur/batterie/coffret partagés.
+  Orientation héros trouvée par _orient.js (logo DEWALT face caméra) :
+    • DCF894P2 → dcf894n.glb, realMax 190, rotY 0° → dcf894p2-pack.glb (2,57 Mo)
+    • DCD796P2 → dcd796.glb, realMax 195, rotY 180° → dcd796p2-pack.glb (2,76 Mo)
+    • DCF850P2T → DCF850N.glb (BARE ; dcf850.glb = scène kit éparpillée,
+      inutilisable), realMax 165, rotY 180° → dcf850p2t-pack.glb (2,54 Mo)
+  products.json .model branché pour les 3. Rendus three.js vérifiés à l'angle
+  fiche. RESTE À MODÉLISER par l'user : DCD996 (pack DCD996P2-QW ; ≠ DCD796).
 - 🗺️ GABARIT VERSIONNÉ (idée user « quadrillage map au sol pour se souvenir des
   positions ») : `docs/PACK-3D-LAYOUT.md` + `docs/pack-3d-layout-map.svg`
   (carte quadrillée mm, vue de dessus, extraite AUTO du pipeline via
