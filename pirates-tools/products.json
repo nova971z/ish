@@ -2734,5 +2734,57 @@
       "Batterie / chargeur": "Non inclus"
     },
     "description_long": "La visseuse à chocs DeWALT DCF809N appartient à la gamme ultra-compacte XR : à peine 0,96 kg et une tête très courte pour travailler dans les espaces les plus réduits. Malgré sa taille, son moteur brushless délivre jusqu'à 190 Nm de couple pour visser et dévisser efficacement. Son porte-embout 1/4'' se recharge d'une main et l'éclairage LED illumine la zone de travail. Un excellent compromis entre compacité, légèreté et performance, idéal pour un usage quotidien. Machine seule pour rejoindre ton parc de batteries 18V XR. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+  },
+  {
+    "id": "dewalt-dcg405fn-xj",
+    "slug": "dewalt-dcg405fn-xj-meuleuse-125mm-18v-xr-tete-plate-solo",
+    "sku": "DCG405FN-XJ",
+    "title": "DeWALT DCG405FN-XJ — Meuleuse d'angle 125 mm 18V XR Brushless à tête plate (machine seule)",
+    "name": "DCG405FN-XJ",
+    "brand": "DeWALT",
+    "category": "Meuleuses",
+    "tag": "Nouveau",
+    "desc": "Meuleuse 125 mm XR 18V brushless à TÊTE PLATE (espaces restreints), 9000 tr/min, frein électronique. Machine seule.",
+    "img": "images/placeholder.svg",
+    "price": 202.68,
+    "currency": "EUR",
+    "vat": 0.2,
+    "price_ht": 168.9,
+    "stock_status": "in_stock",
+    "stock_label": "En stock",
+    "model": "models/products/dcg405fn.glb",
+    "paymentLink": "",
+    "weight_kg": 2,
+    "ncCategory": "power_tool",
+    "productType": "pro",
+    "tags": [
+      "cordless",
+      "tropical_ready",
+      "bare_tool"
+    ],
+    "features": [
+      "Meuleuse 125 mm à TÊTE PLATE : accède aux espaces confinés et difficiles",
+      "Moteur brushless : puissance constante en meulage, découpe et ponçage",
+      "Embrayage électronique anti-retour + frein électronique d'arrêt rapide",
+      "Poignée latérale anti-vibration réglable sur 2 positions",
+      "Machine seule (batterie et chargeur non inclus), gamme 18V XR"
+    ],
+    "specs": {
+      "Marque": "DeWALT",
+      "Type": "Meuleuse d'angle sans fil à tête plate (machine seule)",
+      "Tension": "18 V XR",
+      "Moteur": "Brushless (sans charbon)",
+      "Ø disque": "125 mm",
+      "Filetage de broche": "M14",
+      "Vitesse à vide": "9000 tr/min",
+      "Puissance équivalente": "1000 W",
+      "Embrayage électronique": "Oui (anti-retour de couple)",
+      "Frein électronique": "Oui",
+      "Poignée latérale": "Anti-vibration, 2 positions",
+      "Poids net": "1,75 kg",
+      "Dimensions": "380 × 160 × 140 mm",
+      "Batterie / chargeur": "Non inclus"
+    },
+    "description_long": "La meuleuse d'angle DeWALT DCG405FN-XJ se distingue par sa tête plate : un profil bas qui lui permet d'accéder aux espaces confinés et difficiles là où une meuleuse classique ne passe pas. Son moteur brushless délivre une puissance constante pour le meulage, la découpe et le ponçage, sans perte de régime sous charge. L'embrayage électronique limite les retours de couple en cas de blocage du disque, et le frein électronique arrête le disque net dès que tu relâches la gâchette. La poignée latérale anti-vibration se règle sur deux positions pour un travail confortable. Disque de 125 mm, broche M14 standard. Machine seule (1,75 kg) pour rejoindre ton parc de batteries 18V XR. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
   }
 ]
