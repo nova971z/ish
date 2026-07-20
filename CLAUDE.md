@@ -564,8 +564,17 @@ compresser « un tout petit peu » si trop lourd.
   face reculé (-Z) décalé gauche, accessoires en rangée avant étalée en X.
   Orientations vérifiées par rendu 4×90° (_orient.js) : DCF887N héros = rotY 0
   (chuck gauche, logo DEWALT face) ; TSTAK de face = rotY 0.
-- Les 3 autres kits (DCF894P2, DCF850P2T, DCD796P2 + gros packs) suivront la
-  MÊME recette quand l'user enverra leurs composants GLB + photo de référence.
+- 3 AUTRES PACKS COMPOSÉS (20/07, SW v352) via `scratchpad/_gltftools/
+  pack-build.mjs` (builder paramétré : MÊME layout gabarit, on ne change que
+  l'outil héros — args toolFile/toolMax/rotYdeg/out). Outils de base déjà
+  présents (aucun upload user requis) ; chargeur/batterie/coffret partagés.
+  Orientation héros trouvée par _orient.js (logo DEWALT face caméra) :
+    • DCF894P2 → dcf894n.glb, realMax 190, rotY 0° → dcf894p2-pack.glb (2,57 Mo)
+    • DCD796P2 → dcd796.glb, realMax 195, rotY 180° → dcd796p2-pack.glb (2,76 Mo)
+    • DCF850P2T → DCF850N.glb (BARE ; dcf850.glb = scène kit éparpillée,
+      inutilisable), realMax 165, rotY 180° → dcf850p2t-pack.glb (2,54 Mo)
+  products.json .model branché pour les 3. Rendus three.js vérifiés à l'angle
+  fiche. RESTE À MODÉLISER par l'user : DCD996 (pack DCD996P2-QW ; ≠ DCD796).
 - 🗺️ GABARIT VERSIONNÉ (idée user « quadrillage map au sol pour se souvenir des
   positions ») : `docs/PACK-3D-LAYOUT.md` + `docs/pack-3d-layout-map.svg`
   (carte quadrillée mm, vue de dessus, extraite AUTO du pipeline via
