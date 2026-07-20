@@ -524,3 +524,36 @@ délais affichés au paiement, pas via le badge — futur chantier frais de port
   par SKU). Règle : rendu outil-seul UNIQUEMENT sur versions nues ; kits P2/P2T/
   D2K = modèles composés (fournis plus tard) → GLB seul retiré des kits
   DCF894P2/DCF887P2/DCF850P2T/DCD796P2. Poids GLB cible ≤1,5 Mo (2,5 max).
+
+## Session packs 3D — modèle interactif fusionné (20/07/2026, SW v351, branche, PAS ENCORE mergé)
+EXIGENCE USER NON NÉGOCIABLE : « toutes les fiches produits doivent contenir le
+modèle qui tourne et pas le poster ». Pour les kits (P2/P2T/D2K = plusieurs
+objets), il faut donc FUSIONNER les composants GLB en UN seul modèle, et
+compresser « un tout petit peu » si trop lourd.
+- ✅ DCF887P2 (1er pack) : fusion de 5 composants (visseuse DCF887N + chargeur
+  DCB1104 + 2× batterie DCB184 orientées bat_r90 = Math.PI/2 + coffret TSTAK)
+  en `models/products/dcf887p2-pack.glb`. Proportions RÉELLES (outil 180 mm,
+  chargeur 150 mm, batterie 85 mm, coffret 430 mm). Disposition compacte :
+  coffret centre-fond, outil à droite, chargeur + 2 batteries devant, aucun
+  chevauchement. products.json DCF887P2.model branché. Le poster 2D (collage
+  images/posters/dcf887p2.webp) RESTE l'image de la CARTE (catalogue rapide,
+  0 GLB) ; la 3D ne se charge qu'à l'ouverture de la fiche (setPdpViewer, déjà
+  en place). Orbite par défaut model-viewer 25/72 cadre le pack de face-droite.
+- PIPELINE (réutilisable pour les autres packs) : `scratchpad/_gltftools/
+  pack-merge.mjs` (gltf-transform). mergeDocuments(target,source) — PAS
+  doc.merge ; reparent des enfants de scène sous un node wrapper ; getBounds →
+  scale sur realMax ; rotationY via quaternion ; layout `pos` compact ; UN SEUL
+  buffer (contrainte GLB, consolidation des accessors). Compression : dedup +
+  weld + **simplify meshopt ratio 0.3 (erreur 0,1 %)** + draco + textureCompress
+  WebP 512². Le maillage était l'ennemi (1,19 M verts → 6 Mo avant décimation),
+  PAS les textures (0,4 Mo). Résultat 2,54 Mo (bande acceptable, < plafond 3 Mo).
+  meshoptimizer présent dans _gltftools/node_modules (MeshoptSimplifier.ready).
+  LEÇON : GLTFExporter three.js DÉCOMPRESSE les textures (→103 Mo, inutilisable) ;
+  gltf-transform les garde compressées → seule voie viable.
+- VÉRIF : rendu three.js headless (SwiftShader) du GLB décimé à l'angle de
+  référence → coffret/outil/chargeur/batteries + logos NETS, 0 perte visible.
+- ⚠️ EN ATTENTE RETOUR USER : commit sur branche + poussé, PAS mergé master.
+  Protocole « tu peux merge et je te fais un retour » → attendre le feu vert
+  user (ou validation de l'angle) avant merge. Les 3 autres kits (DCF894P2,
+  DCF850P2T, DCD796P2 + gros packs) suivront la MÊME recette quand l'user
+  enverra leurs composants GLB + photo de référence.
