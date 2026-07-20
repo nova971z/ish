@@ -478,6 +478,32 @@ NOTE consentement : la couche ANONYME tourne sans consentement (exemption CNIL
 mesure d'audience 1re partie) ; le profil persistant/affinité + nouveau/récurrent
 n'existe QUE si l'utilisateur accepte. Refuser = pas de localStorage pt:vid.
 
+## 🔒 RÈGLES PACKS 3D — GRAVÉES (ne JAMAIS y déroger, vérifié par l'user)
+Deux exigences NON NÉGOCIABLES pour composer un pack (fusion outil + chargeur +
+2 batteries + coffret). Erreurs déjà commises et reprochées → garde-fous codés
+dans `scratchpad/_gltftools/pack-build.mjs` (builder paramétré).
+1. ORIENTATION DE L'OUTIL = MÊME SENS QUE DCF887P2 (référence approuvée) :
+   chuck/enclume à GAUCHE, logo DEWALT FACE caméra, outil DEBOUT sur sa batterie.
+   JAMAIS le dos, JAMAIS un logo miroir. La bonne rotationY DÉPEND de chaque GLB
+   (orientation native différente) → OBLIGATION de rendre l'outil seul en 4×90°
+   depuis la caméra fiche (`scratchpad/_orient.js <glb>`) et de CHOISIR à l'œil
+   la vue qui matche la référence AVANT de composer. Valeurs trouvées :
+     • DCF887N → rotY 0   (réf.)      • DCF894N → rotY 0
+     • DCF850N → rotY 90              • DCD796 → rotY 180 (EXCEPTION : chuck à
+       DROITE, car ce GLB a le logo EN MIROIR sur le flanc gauche → chuck-gauche
+       afficherait « EEWALL ». Logo correct > sens du chuck. Documenté.)
+2. MAPPING AU SOL VERROUILLÉ : chargeur + 2 batteries + coffret sont les MÊMES
+   objets sur tous les packs → placés aux COORDONNÉES EXACTES du mapping validé
+   DCF887P2 (docs/PACK-3D-LAYOUT.md), JAMAIS recalculés. Constantes MAP dans le
+   builder : case(-40,-122) charger(-80,157) bat1(8,168) bat2(84,162)
+   tool(168,209 par défaut). Seul l'OUTIL héros peut se décaler — vers la DROITE,
+   au STRICT MINIMUM (auto-nudge 1 mm/pas) — s'il est plus gros et chevaucherait
+   un accessoire. Décalages appliqués : DCF894 +34mm, DCD796 +51mm, DCF850 +0mm.
+3. ANTI-CHEVAUCHEMENT : le builder PLANTE (exit 2) si l'emprise XZ de l'outil
+   touche un accessoire (clairance < 8 mm). Interdiction formelle de livrer un
+   pack où deux objets se chevauchent. Vérif finale par rendu three.js.
+Refaire un pack = `node pack-build.mjs <toolFile> <toolMax_mm> <rotYdeg> <out>`.
+
 ## Vérification standard
 `cd pirates-tools && node scripts/ci.js` doit rester vert après chaque étape.
 Bump SW (`sw.js` VERSION + ASSET_VER) et `?v=` dans `index.html` à chaque changement d'asset.
