@@ -525,7 +525,7 @@ délais affichés au paiement, pas via le badge — futur chantier frais de port
   D2K = modèles composés (fournis plus tard) → GLB seul retiré des kits
   DCF894P2/DCF887P2/DCF850P2T/DCD796P2. Poids GLB cible ≤1,5 Mo (2,5 max).
 
-## Session packs 3D — modèle interactif fusionné (20/07/2026, SW v351, branche, PAS ENCORE mergé)
+## Session packs 3D — modèle interactif fusionné (20/07/2026, SW v351, mergé master)
 EXIGENCE USER NON NÉGOCIABLE : « toutes les fiches produits doivent contenir le
 modèle qui tourne et pas le poster ». Pour les kits (P2/P2T/D2K = plusieurs
 objets), il faut donc FUSIONNER les composants GLB en UN seul modèle, et
@@ -552,8 +552,17 @@ compresser « un tout petit peu » si trop lourd.
   gltf-transform les garde compressées → seule voie viable.
 - VÉRIF : rendu three.js headless (SwiftShader) du GLB décimé à l'angle de
   référence → coffret/outil/chargeur/batteries + logos NETS, 0 perte visible.
-- ⚠️ EN ATTENTE RETOUR USER : commit sur branche + poussé, PAS mergé master.
-  Protocole « tu peux merge et je te fais un retour » → attendre le feu vert
-  user (ou validation de l'angle) avant merge. Les 3 autres kits (DCF894P2,
-  DCF850P2T, DCD796P2 + gros packs) suivront la MÊME recette quand l'user
-  enverra leurs composants GLB + photo de référence.
+- COMPOSITION affinée en 2 retours user puis VALIDÉE (« nickel tu peux
+  envoyer ») → mergé master : (1) visseuse = HÉROS au premier plan avant-droit
+  (produit principal, doit être le plus visible) ; coffret tourné rotationY
+  -90°→0° = DE FACE (loquets/étiquette vers caméra ; -90° montrait le côté =
+  « de travers ») ; chargeur+batteries en rangée avant sans occlusion.
+  (2) chargeur+2 batteries RAPPROCHÉS de la visseuse (rangée décalée droite +
+  resserrée) ; coffret réduit 430→400 mm. RECETTE COMPO (à réutiliser) : caméra
+  PDP fixe ≈ azimut 25°/polar 72° (+Z vers caméra, +X à droite) → placer le
+  produit principal en +Z/+X (premier plan = héros par perspective), coffret de
+  face reculé (-Z) décalé gauche, accessoires en rangée avant étalée en X.
+  Orientations vérifiées par rendu 4×90° (_orient.js) : DCF887N héros = rotY 0
+  (chuck gauche, logo DEWALT face) ; TSTAK de face = rotY 0.
+- Les 3 autres kits (DCF894P2, DCF850P2T, DCD796P2 + gros packs) suivront la
+  MÊME recette quand l'user enverra leurs composants GLB + photo de référence.
