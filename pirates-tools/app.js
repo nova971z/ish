@@ -2420,6 +2420,17 @@
   var _3dIdx = 0;
   var _3dModels = [];
   var _3dScriptIO = null;   // IO dédié : précharge le script 3D SANS forcer le GLB
+  var _3dPrefetched = {};   // GLB déjà préchargés (fetch → cache HTTP, jamais 2 fois)
+
+  // Précharge un GLB en arrière-plan : le fetch remplit le cache HTTP du
+  // navigateur ; quand model-viewer demande ensuite ce src, c'est un HIT disque
+  // → affichage quasi immédiat. Silencieux en cas d'échec (le chargement normal
+  // de model-viewer reprend la main).
+  function _3dPrefetch(url) {
+    if (!url || _3dPrefetched[url]) return;
+    _3dPrefetched[url] = 1;
+    try { fetch(url, { credentials: 'same-origin' }).catch(function () {}); } catch (_) {}
+  }
 
   function _3dShow(idx) {
     var viewer = document.getElementById('carousel3dViewer');
@@ -2505,6 +2516,13 @@
           entries.forEach(function (en) {
             if (!en.isIntersecting) return;
             ensureModelViewer().catch(function () {});
+            // Départ anticipé : l'utilisateur scrolle VERS le carrousel →
+            // loading=eager MAINTENANT : dès que le script est prêt, model-viewer
+            // télécharge le GLB courant (téléchargeur UNIQUE — jamais de double
+            // téléchargement, contrairement à un fetch-prefetch parallèle qui
+            // dépendrait du cache HTTP). Marge 200px = petite avance, sans
+            // jamais se déclencher à l'ouverture de la page (défaut du 700px).
+            en.target.setAttribute('loading', 'eager');
             _3dScriptIO.unobserve(en.target);
           });
         }, { rootMargin: '200px 0px 200px 0px' });
@@ -2516,6 +2534,15 @@
 
     if (!_3dCarouselBound) {
       _3dCarouselBound = true;
+
+      // Le modèle affiché a fini de charger → précharge le SUIVANT en
+      // arrière-plan : le premier swipe devient quasi instantané. Un seul
+      // modèle d'avance (jamais toute la liste), déduplication _3dPrefetched.
+      viewer.addEventListener('load', function () {
+        if (_3dModels.length > 1) {
+          _3dPrefetch(_3dModels[(_3dIdx + 1) % _3dModels.length].src);
+        }
+      });
 
       // Arrow + dot clicks via delegation
       var banner = document.getElementById('tools-banner');
