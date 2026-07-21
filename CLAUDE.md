@@ -487,14 +487,27 @@ dans `scratchpad/_gltftools/pack-build.mjs` (builder paramétré).
    JAMAIS le dos, JAMAIS un logo miroir. La bonne rotationY DÉPEND de chaque GLB
    (orientation native différente) → OBLIGATION de rendre l'outil seul en 4×90°
    depuis la caméra fiche (`scratchpad/_orient.js <glb>`) et de CHOISIR à l'œil
-   la vue qui matche la référence AVANT de composer. Valeurs VALIDÉES PAR L'USER
-   (il a entouré la bonne vue sur la grille _orient — toutes = chuck haut-gauche,
-   logo DEWALT face, debout) :
-     • DCF887N → rotY 0 (réf.)        • DCF894N → rotY 90
-     • DCF850N → rotY 0               • DCD796  → rotY 90
-   (NB : à rotY 0 le DCD796 montre un logo EN MIROIR sur le flanc gauche ; rotY 90
-   règle ça ET garde le chuck à gauche = sens homogène. Le sens homogène prime,
-   l'user tranche à l'œil sur la grille 4×90.)
+   la vue qui matche la référence AVANT de composer.
+   ⛔ RÈGLE ABSOLUE (l'user l'a répété, ne PLUS la violer) : une orientation
+   validée est GRAVÉE ici. On NE la re-choisit JAMAIS, on NE la re-derive JAMAIS
+   à l'œil. On lit ce REGISTRE d'abord ; si l'outil y est, on prend la valeur
+   telle quelle. Nouvel outil seulement → grille 4×90, l'user tranche, ON L'ÉCRIT
+   ICI IMMÉDIATEMENT.
+   ┌─ REGISTRE ORIENTATIONS VALIDÉES (rotationY sauf mention) ──────────────────
+   │  DCF887N (dcf887n.glb) ............ rotY 0   (réf. « chuck gauche/logo face »)
+   │  DCF894N (dcf894n.glb) ............ rotY 90
+   │  DCF850N (DCF850N.glb) ............ rotY 0
+   │  DCD796  (dcd796.glb) ............. rotY 90  (rotY 0 = logo MIROIR → non)
+   │  DCH273  (DCH273.glb, perfo) ...... rotY 0
+   │  DCG405N (dcg405n.glb, meuleuse) .. rotX 90 + rotY 270  (DEBOUT sur batterie)
+   │  DTW300Z (DTW300Z.glb, boul. Makita) rotY 90  (poster solo)
+   │  DCF899NT (DCF899NT.glb, boulonneuse) rotY 90  ⬅ validé user 21/07 (PAS rotY 0)
+   │  DCD996  (DCD996.glb) ............. quaternion figé [0.1349,0.6941,-0.1349,
+   │        0.6941] (pose « redressée » validée ; baké via bake-rot.mjs). Ce n'est
+   │        PAS un simple rotY — c'est la pose exacte choisie sur la planche _lean.
+   └────────────────────────────────────────────────────────────────────────────
+   NB DCD796 : à rotY 0 logo miroir. Le sens homogène (chuck gauche, logo face)
+   prime. Les boulonneuses (DCF894, DCF899, DTW300Z) = rotY 90.
 2. MAPPING AU SOL VERROUILLÉ : chargeur + 2 batteries + coffret sont les MÊMES
    objets sur tous les packs → placés aux COORDONNÉES EXACTES du mapping validé
    DCF887P2 (docs/PACK-3D-LAYOUT.md), JAMAIS recalculés. Constantes MAP dans le
