@@ -2419,18 +2419,6 @@
   var _3dCarouselBound = false;
   var _3dIdx = 0;
   var _3dModels = [];
-  var _3dScriptIO = null;   // IO dédié : précharge le script 3D SANS forcer le GLB
-  var _3dPrefetched = {};   // GLB déjà préchargés (fetch → cache HTTP, jamais 2 fois)
-
-  // Précharge un GLB en arrière-plan : le fetch remplit le cache HTTP du
-  // navigateur ; quand model-viewer demande ensuite ce src, c'est un HIT disque
-  // → affichage quasi immédiat. Silencieux en cas d'échec (le chargement normal
-  // de model-viewer reprend la main).
-  function _3dPrefetch(url) {
-    if (!url || _3dPrefetched[url]) return;
-    _3dPrefetched[url] = 1;
-    try { fetch(url, { credentials: 'same-origin' }).catch(function () {}); } catch (_) {}
-  }
 
   function _3dShow(idx) {
     var viewer = document.getElementById('carousel3dViewer');
@@ -2444,10 +2432,6 @@
     if (idx >= _3dModels.length) idx = 0;
     _3dIdx = idx;
     var m = _3dModels[idx];
-    // Poster = image produit affichée INSTANTANÉMENT pendant que le GLB
-    // (~1,5-2,5 Mo) se télécharge — jamais de cadre vide au swipe.
-    if (m.poster) viewer.setAttribute('poster', m.poster);
-    else viewer.removeAttribute('poster');
     viewer.setAttribute('src', m.src);
     if (brandEl) brandEl.textContent = m.brand;
     if (nameEl) nameEl.textContent = m.name;
@@ -2466,12 +2450,10 @@
     if (!viewer || !dotsEl) return;
 
     // Build model list from products that have a "model" field.
-    // CAP À 10 (décision produit 21/07) : vitrine, pas catalogue exhaustif —
-    // 35 modèles ne servent à rien ici et chaque swipe coûte ~1,5-2,5 Mo.
+    // CAP À 10 (décision produit 21/07) : vitrine, pas catalogue exhaustif.
     // PRODUITS SEULS UNIQUEMENT (décision produit 21/07) : les packs composés
-    // (fusion outil+chargeur+batteries+coffret, convention *-pack.glb du
-    // builder) sont visuellement moins bons que les scans d'outils seuls —
-    // et plus lourds (~2,5 Mo vs ~1,5-2 Mo). La vitrine ne montre que le meilleur.
+    // (*-pack.glb) sont visuellement moins bons que les scans d'outils seuls —
+    // la vitrine ne montre que le meilleur.
     var CAROUSEL_MAX = 10;
     if (_3dModels.length === 0 && products.length > 0) {
       var seen = {};
@@ -2479,7 +2461,7 @@
         var p = products[i];
         if (p.model && !seen[p.model] && !/-pack\.glb$/i.test(p.model)) {
           seen[p.model] = true;
-          _3dModels.push({ src: p.model, poster: p.img || '', brand: p.brand, name: p.name, slug: p.slug });
+          _3dModels.push({ src: p.model, brand: p.brand, name: p.name, slug: p.slug });
         }
       }
     }
@@ -2499,50 +2481,19 @@
     // Show current model
     _3dShow(_3dIdx);
 
-    // PERF ACCUEIL : deux étages découplés.
-    //  1) À ~200px du carrousel → précharge le SCRIPT model-viewer seul (léger).
-    //     On n'utilise PLUS getMvPreloadIO ici : son callback basculait l'élément
-    //     en loading="eager" avec un rootMargin de 700px — or le carrousel est à
-    //     ~1200-1400px du haut, DANS la marge dès l'ouverture → l'accueil
-    //     téléchargeait script + GLB (~2,75 Mo, 1er pack) À CHAQUE visite, sans
-    //     même scroller. 200px : rien ne part tant qu'on ne scrolle pas vers lui.
-    //  2) Le GLB ne part que quand le carrousel est RÉELLEMENT à l'écran :
-    //     loading="lazy" natif de model-viewer (même mécanisme, prouvé en prod,
-    //     que le carré 3D de la fiche) + poster produit affiché instantanément.
-    // Repli : si IntersectionObserver absent, comportement d'avant (tout de suite).
-    if ('IntersectionObserver' in window) {
-      if (!_3dScriptIO) {
-        _3dScriptIO = new IntersectionObserver(function (entries) {
-          entries.forEach(function (en) {
-            if (!en.isIntersecting) return;
-            ensureModelViewer().catch(function () {});
-            // Départ anticipé : l'utilisateur scrolle VERS le carrousel →
-            // loading=eager MAINTENANT : dès que le script est prêt, model-viewer
-            // télécharge le GLB courant (téléchargeur UNIQUE — jamais de double
-            // téléchargement, contrairement à un fetch-prefetch parallèle qui
-            // dépendrait du cache HTTP). Marge 200px = petite avance, sans
-            // jamais se déclencher à l'ouverture de la page (défaut du 700px).
-            en.target.setAttribute('loading', 'eager');
-            _3dScriptIO.unobserve(en.target);
-          });
-        }, { rootMargin: '200px 0px 200px 0px' });
-      }
-      _3dScriptIO.observe(viewer);
-    } else {
-      ensureModelViewer().catch(function () {});
-    }
+    // Chargement v372 restauré (le plus rapide à l'usage) : le carrousel est à
+    // ~1184px du haut = DANS la marge 700px de getMvPreloadIO dès l'ouverture →
+    // ensureModelViewer + eager immédiats → le 1er GLB (outil seul ~1,9 Mo) se
+    // télécharge EN ARRIÈRE-PLAN, sans bloquer l'accueil ni le bandeau de cartes
+    // (images légères). Le temps de descendre, le modèle est prêt et s'affiche
+    // direct — model-viewer révèle la 3D sans poster (auto-reveal).
+    // LEÇON : un GLB de fond ne ralentit PAS l'accueil ; le rendre lazy retardait
+    // juste l'apparition du 3D (régression). Repli : IO absent → charge tout de suite.
+    var io = getMvPreloadIO();
+    if (io) io.observe(viewer); else ensureModelViewer().catch(function () {});
 
     if (!_3dCarouselBound) {
       _3dCarouselBound = true;
-
-      // Le modèle affiché a fini de charger → précharge le SUIVANT en
-      // arrière-plan : le premier swipe devient quasi instantané. Un seul
-      // modèle d'avance (jamais toute la liste), déduplication _3dPrefetched.
-      viewer.addEventListener('load', function () {
-        if (_3dModels.length > 1) {
-          _3dPrefetch(_3dModels[(_3dIdx + 1) % _3dModels.length].src);
-        }
-      });
 
       // Arrow + dot clicks via delegation
       var banner = document.getElementById('tools-banner');
