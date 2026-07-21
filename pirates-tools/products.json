@@ -320,7 +320,7 @@
     "category": "Boulonneuses a chocs",
     "tag": "Compact",
     "desc": "330 Nm, compacte, moteur brushless.",
-    "img": "images/products/makita-dtw300z/main.jpg",
+    "img": "images/posters/dtw300z.webp",
     "price": 179,
     "currency": "EUR",
     "vat": 0.2,
@@ -358,7 +358,8 @@
       "Technologie XPT résistante à la poussière et à l'eau, éclairage LED",
       "Format compact malgré la puissance, idéal en usage intensif",
       "Machine nue (batterie et chargeur non inclus, gamme 18V LXT)"
-    ]
+    ],
+    "model": "models/products/DTW300Z.glb"
   },
   {
     "id": "makita-dtd172z",
