@@ -2419,6 +2419,7 @@
   var _3dCarouselBound = false;
   var _3dIdx = 0;
   var _3dModels = [];
+  var _3dScriptIO = null;   // IO dédié : précharge le script 3D SANS forcer le GLB
 
   function _3dShow(idx) {
     var viewer = document.getElementById('carousel3dViewer');
@@ -2432,6 +2433,10 @@
     if (idx >= _3dModels.length) idx = 0;
     _3dIdx = idx;
     var m = _3dModels[idx];
+    // Poster = image produit affichée INSTANTANÉMENT pendant que le GLB
+    // (~1,5-2,5 Mo) se télécharge — jamais de cadre vide au swipe.
+    if (m.poster) viewer.setAttribute('poster', m.poster);
+    else viewer.removeAttribute('poster');
     viewer.setAttribute('src', m.src);
     if (brandEl) brandEl.textContent = m.brand;
     if (nameEl) nameEl.textContent = m.name;
@@ -2449,14 +2454,17 @@
     var dotsEl = document.getElementById('carousel3dDots');
     if (!viewer || !dotsEl) return;
 
-    // Build model list from products that have a "model" field
+    // Build model list from products that have a "model" field.
+    // CAP À 10 (décision produit 21/07) : vitrine, pas catalogue exhaustif —
+    // 35 modèles ne servent à rien ici et chaque swipe coûte ~1,5-2,5 Mo.
+    var CAROUSEL_MAX = 10;
     if (_3dModels.length === 0 && products.length > 0) {
       var seen = {};
-      for (var i = 0; i < products.length; i++) {
+      for (var i = 0; i < products.length && _3dModels.length < CAROUSEL_MAX; i++) {
         var p = products[i];
         if (p.model && !seen[p.model]) {
           seen[p.model] = true;
-          _3dModels.push({ src: p.model, brand: p.brand, name: p.name, slug: p.slug });
+          _3dModels.push({ src: p.model, poster: p.img || '', brand: p.brand, name: p.name, slug: p.slug });
         }
       }
     }
@@ -2476,11 +2484,31 @@
     // Show current model
     _3dShow(_3dIdx);
 
-    // Le carrousel est sous la ligne de flottaison : on charge <model-viewer>
-    // seulement quand il approche du viewport (même IO ~700px que les autres
-    // viewers). Repli : si IntersectionObserver absent, charge tout de suite.
-    var io = getMvPreloadIO();
-    if (io) io.observe(viewer); else ensureModelViewer().catch(function () {});
+    // PERF ACCUEIL : deux étages découplés.
+    //  1) À ~200px du carrousel → précharge le SCRIPT model-viewer seul (léger).
+    //     On n'utilise PLUS getMvPreloadIO ici : son callback basculait l'élément
+    //     en loading="eager" avec un rootMargin de 700px — or le carrousel est à
+    //     ~1200-1400px du haut, DANS la marge dès l'ouverture → l'accueil
+    //     téléchargeait script + GLB (~2,75 Mo, 1er pack) À CHAQUE visite, sans
+    //     même scroller. 200px : rien ne part tant qu'on ne scrolle pas vers lui.
+    //  2) Le GLB ne part que quand le carrousel est RÉELLEMENT à l'écran :
+    //     loading="lazy" natif de model-viewer (même mécanisme, prouvé en prod,
+    //     que le carré 3D de la fiche) + poster produit affiché instantanément.
+    // Repli : si IntersectionObserver absent, comportement d'avant (tout de suite).
+    if ('IntersectionObserver' in window) {
+      if (!_3dScriptIO) {
+        _3dScriptIO = new IntersectionObserver(function (entries) {
+          entries.forEach(function (en) {
+            if (!en.isIntersecting) return;
+            ensureModelViewer().catch(function () {});
+            _3dScriptIO.unobserve(en.target);
+          });
+        }, { rootMargin: '200px 0px 200px 0px' });
+      }
+      _3dScriptIO.observe(viewer);
+    } else {
+      ensureModelViewer().catch(function () {});
+    }
 
     if (!_3dCarouselBound) {
       _3dCarouselBound = true;
