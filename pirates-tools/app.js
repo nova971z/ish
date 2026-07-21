@@ -2457,12 +2457,16 @@
     // Build model list from products that have a "model" field.
     // CAP À 10 (décision produit 21/07) : vitrine, pas catalogue exhaustif —
     // 35 modèles ne servent à rien ici et chaque swipe coûte ~1,5-2,5 Mo.
+    // PRODUITS SEULS UNIQUEMENT (décision produit 21/07) : les packs composés
+    // (fusion outil+chargeur+batteries+coffret, convention *-pack.glb du
+    // builder) sont visuellement moins bons que les scans d'outils seuls —
+    // et plus lourds (~2,5 Mo vs ~1,5-2 Mo). La vitrine ne montre que le meilleur.
     var CAROUSEL_MAX = 10;
     if (_3dModels.length === 0 && products.length > 0) {
       var seen = {};
       for (var i = 0; i < products.length && _3dModels.length < CAROUSEL_MAX; i++) {
         var p = products[i];
-        if (p.model && !seen[p.model]) {
+        if (p.model && !seen[p.model] && !/-pack\.glb$/i.test(p.model)) {
           seen[p.model] = true;
           _3dModels.push({ src: p.model, poster: p.img || '', brand: p.brand, name: p.name, slug: p.slug });
         }
