@@ -515,6 +515,33 @@ Refaire un pack = `node pack-build.mjs <toolFile> <toolMax_mm> <rotYdeg> <out>`.
    base y=721, centré x=560) pour une présence identique quel que soit l'outil.
    Sortie images/posters/<sku>.webp, branché sur products.json .img.
 
+## Session packs multi-outils + DCD996P2 (21/07/2026, SW v354, mergé master)
+5 nouveaux GLB uploadés par l'user (rangés racine→models/products/) : DCD996,
+DCH273 (=DCH273N doublon supprimé), DTW300Z, DCP580N (doublon supprimé).
+Packs composés (builders scratchpad/_gltftools/) :
+- DCK266P2T (DCD796+DCF887) : pack 2-outils AVEC coffret (vendu en T STAK) →
+  pack-build2.mjs (gap -20, décalage cluster -50). Poster collage 2-outils.
+- PPACK0001 (DCF887 + meuleuse) et PPACK0002 (DCF887 + perfo DCH273) : SANS
+  COFFRET (règle user : « 2 outils + 2 batteries + chargeur = pas de boîte ») →
+  pack-build2-nc.mjs : 2 outils DEBOUT en arrière (centrés, décalés gauche -70,
+  relevés/reculés TZB 40 pour ne pas toucher les batteries), batteries à gauche
+  + chargeur à droite en rangée avant (compo photo réf user). Le PERFO doit être
+  BEAUCOUP plus gros que la visseuse (DCH273 realMax 245 vs 180). Meuleuse
+  DEBOUT = rotX 90 / rotY 270.
+- ⚠️ ERREUR ÉVITÉE : 2 meuleuses au catalogue — DCG405N (tête standard, dcg405n.glb,
+  = celle du pack) vs DCG405FN-XJ (tête PLATE, DCG405FN.glb, produit séparé).
+  Le pack PPACK0001 = DCG405N. Ne pas confondre.
+- DCD996P2-QW (perceuse DCD996 SEULE, 1 outil AVEC coffret) : pack-build.mjs.
+  DCD996 « de travers » dans le GLB → pose choisie par l'user via planche
+  d'inclinaisons (rotateOnWorldAxis avant+droite), quaternion figé
+  [0.1349,0.6941,-0.1349,0.6941] (support QUAT env dans pack-build.mjs) ;
+  outil décalé +40 mm à droite (TOOLDX) pour dégager les batteries.
+- POSTERS carte : PPACK0002 = PNG fourni par l'user (compo perfo+visseuse, logos
+  OK 2e version) ; les autres = collages (collage-pack2.js avec coffret,
+  collage-duo-nocase.js sans coffret : 2 outils haut, batteries bas-gauche,
+  chargeur bas-droite). Fiche = TOUJOURS le modèle 3D qui tourne.
+RESTE : DTW300Z / DCP580N pas encore branchés (outils nus, à faire au besoin).
+
 ## Vérification standard
 `cd pirates-tools && node scripts/ci.js` doit rester vert après chaque étape.
 Bump SW (`sw.js` VERSION + ASSET_VER) et `?v=` dans `index.html` à chaque changement d'asset.
