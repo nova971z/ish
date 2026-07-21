@@ -555,6 +555,34 @@ Packs composés (builders scratchpad/_gltftools/) :
   chargeur bas-droite). Fiche = TOUJOURS le modèle 3D qui tourne.
 RESTE : DTW300Z / DCP580N pas encore branchés (outils nus, à faire au besoin).
 
+## Session perf affichage 3D + fiche produit (21/07/2026, SW v373→v376, mergé master)
+- ✅ v373 FICHE PRODUIT (décision produit user) : héros plein écran = POSTER
+  statique (plus aucun GLB au chemin critique) ; le SEUL modèle 3D est le petit
+  carré « vue détail » en loading="lazy" (charge au scroll). setPdpViewer(v,
+  alt, load3D). Fin du double téléchargement/décodage du même GLB par 2 viewers.
+  (1re tentative v373 « SW cache-first modèle + préchargement » ABANDONNÉE/revert.)
+- ✅ v374 = numéro de cache NEUF (deux contenus différents avaient été publiés
+  sous v373 → mélange stale/frais). RÈGLE : jamais réutiliser un numéro.
+- ✅ v375 TITRES FICHE : .pdp-hero height calc(100dvh - var(--safe-top) - 10px)
+  (le héros débordait de 80px = padding-top de #app → bandeau « Économisez »
+  coupé STRUCTURELLEMENT) ; titre clamp réduit (60,8px/3 lignes → 36,8px/2) ;
+  info padding bas 2,5rem. 20/20 assertions Playwright 4 viewports.
+- ✅ v376 ACCUEIL (audit profond v371→v375 demandé par l'user) : AUCUNE
+  régression de code accueil sur la plage MAIS défaut structurel ancien : le
+  carrousel « Outils 3D » (eager + src à l'init + getMvPreloadIO 700px, or il
+  est à ~1200-1400px du haut = dans la marge dès l'ouverture) téléchargeait
+  script + 1er GLB pack 2,45 Mo À CHAQUE visite sans scroll (~2,75 Mo). Fix :
+  cap 10 modèles (décision user), loading="lazy" (GLB seulement quand visible),
+  IO dédié _3dScriptIO 200px (script seul), poster produit affiché pendant le
+  streaming. Harnais réseau : ouverture = 0 octet 3D.
+- LEÇON MESURE : l'user navigue TOUJOURS en privé (cold load intégral à chaque
+  visite) → le SW/cache ne l'aide jamais ; seul le poids brut compte pour lui.
+- OUTILS scratchpad : ab-home.mjs (A/B boot accueil), pdp-render.mjs +
+  pdp-verify-fix.mjs (géométrie fiche 4 viewports), home-net.mjs (interception
+  réseau accueil/carrousel), banner-pos.mjs (position carrousel vs IO).
+- NOTE : minification app.js/styles.css évoquée puis ÉCARTÉE par l'user
+  (« pas besoin ») après retour à la vitesse normale. Option future.
+
 ## Vérification standard
 `cd pirates-tools && node scripts/ci.js` doit rester vert après chaque étape.
 Bump SW (`sw.js` VERSION + ASSET_VER) et `?v=` dans `index.html` à chaque changement d'asset.
