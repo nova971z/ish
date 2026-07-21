@@ -1655,30 +1655,37 @@
       track('view_item', { id: product.id, name: product.title, brand: product.brand, price: product.price });
     }
 
-    // 3D model viewers (hero + secondaire). Si le produit a un VRAI modèle 3D,
-    // on le charge. Sinon (ex. pack composé, ou produit sans GLB), on affiche SON
-    // poster/image — surtout PAS de modèle 3D générique, qui affichait une
-    // visseuse « fantôme » à la place du vrai visuel du produit en scrollant.
-    function setPdpViewer(v, alt) {
+    // 3D model viewers (hero + secondaire).
+    // PERF (décision produit) : UN SEUL modèle 3D par fiche, et il est chargé
+    // À LA DEMANDE au scroll (le petit carré). Le HÉROS plein écran n'affiche
+    // QUE le poster (image ~30 Ko) → la fiche s'ouvre instantanément, plus de
+    // GLB lourd (~2,5 Mo pour les packs) sur le chemin critique, et fini le
+    // double téléchargement/décodage du même modèle par deux <model-viewer>.
+    //   • load3D=false → poster figé, aucun src, aucune 3D (héros).
+    //   • load3D=true  → charge le vrai modèle (carré secondaire, loading=lazy).
+    // Si le produit n'a pas de GLB, personne ne charge de 3D : les deux restent
+    // sur le poster (surtout PAS de modèle générique « fantôme »).
+    function setPdpViewer(v, alt, load3D) {
       if (!v) return;
       v.setAttribute('alt', alt);
       if (product.img) v.setAttribute('poster', product.img);
-      if (product.model) {
+      if (product.model && load3D) {
         v.removeAttribute('reveal');            // reveal auto → charge la 3D interactive
         v.setAttribute('src', product.model);
       } else {
-        v.removeAttribute('src');               // aucun modèle → aucune 3D
-        v.setAttribute('reveal', 'manual');     // reste figé sur le poster (image produit)
+        v.removeAttribute('src');               // aucune 3D → reste sur le poster
+        v.setAttribute('reveal', 'manual');     // figé sur le poster (image produit)
       }
     }
     var viewer = document.getElementById('pdp3d');
     var viewer2 = document.getElementById('pdp3dSecondary');
-    setPdpViewer(viewer, product.title);
-    setPdpViewer(viewer2, product.title + ' - vue detail');
+    setPdpViewer(viewer, product.title, false);                     // héros = poster seul
+    setPdpViewer(viewer2, product.title + ' - vue detail', true);   // carré = le seul 3D
 
-    // L'utilisateur ouvre une fiche produit → il veut voir le modèle 3D :
-    // on charge <model-viewer> immédiatement (idempotent). Les viewers ci-dessus
-    // ont déjà leur src ; ils s'upgradent dès que le custom element est défini.
+    // On charge <model-viewer> (script CDN ~200 Ko, mis en cache) : il est requis
+    // pour AFFICHER le poster dans les deux cadres (un élément non-upgradé
+    // n'honore pas l'attribut `poster` → cadre vide). Le poids lourd (le GLB
+    // ~2,5 Mo) n'est chargé que par le carré secondaire, au scroll (loading=lazy).
     // .catch : échec CDN → le poster reste affiché, aucun rejet non géré.
     if (viewer || viewer2) ensureModelViewer().catch(function () {});
 
