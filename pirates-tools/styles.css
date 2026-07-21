@@ -2527,8 +2527,12 @@ transform: translateY(-2px);
 .pdp-hero {
     position: relative;
     width: 100%;
-    height: 100vh;
-    height: 100dvh;
+    /* Hauteur = fenêtre MOINS le padding-top de #app (calc(--safe-top + 10px),
+       §46). Le héros vit sous la topbar : à 100dvh son bas débordait de 80px
+       sous l'écran → bloc info (ancré en bas) et bandeau « Économisez » coupés,
+       et le produit centré trop bas. Même formule que #app = jamais désynchro. */
+    height: calc(100vh - var(--safe-top, 70px) - 10px);
+    height: calc(100dvh - var(--safe-top, 70px) - 10px);
     display: flex;
     align-items: flex-end;
     justify-content: center;
@@ -2598,7 +2602,7 @@ transform: translateY(-2px);
     position: relative;
     z-index: 3;
     text-align: center;
-    padding: 0 1.5rem 3.5rem;
+    padding: 0 1.5rem 2.5rem;
     will-change: transform, opacity;
     animation: pdpInfoAppear 1s cubic-bezier(0.22, 1, 0.36, 1) .5s both;
 }
@@ -2608,10 +2612,13 @@ transform: translateY(-2px);
 }
 
 .pdp-hero__title {
-    font-size: clamp(2rem, 1rem + 4.5vw, 3.8rem);
+    /* Lettres réduites (3.8rem max → 2.3rem) : les titres longs (packs, kits)
+       passaient sur 3 lignes de ~61px et recouvraient le produit. Le clamp
+       reste fluide en largeur (téléphone → desktop), seule l'échelle baisse. */
+    font-size: clamp(1.3rem, 0.85rem + 2.2vw, 2.3rem);
     font-weight: 900;
     margin: 0 0 .5rem;
-    line-height: 1.05;
+    line-height: 1.15;
     letter-spacing: -0.03em;
     background: linear-gradient(180deg, #fff 30%, rgba(var(--accent-rgb), 0.7) 100%);
     -webkit-background-clip: text;
@@ -3349,7 +3356,7 @@ transform: translateY(-2px);
     .pdp-split__specs .pdp-section__heading {
         text-align: center;
     }
-    .pdp-hero__title { font-size: clamp(1.4rem, 1rem + 3vw, 2.2rem); }
+    .pdp-hero__title { font-size: clamp(1rem, 0.78rem + 1.7vw, 1.4rem); }
     .pdp-section__inner { padding: 3rem 1rem; }
     .pdp-features { grid-template-columns: 1fr; }
     .pdp-discover__heading { font-size: clamp(1.6rem, 1rem + 3vw, 2.4rem); }
