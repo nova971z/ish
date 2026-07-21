@@ -1609,7 +1609,7 @@
     "price_ht": 387.92,
     "stock_status": "in_stock",
     "stock_label": "En stock",
-    "model": "",
+    "model": "models/products/dck276p2-pack.glb",
     "paymentLink": "",
     "weight_kg": 3.2,
     "ncCategory": "power_tool",
