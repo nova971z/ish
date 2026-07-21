@@ -1037,25 +1037,19 @@
   var allBrands = [];
 
   function loadProducts() {
-    // Try cache first for instant render
-    try {
-      var cached = localStorage.getItem(PRODUCTS_CACHE_KEY);
-      if (cached) {
-        var arr = JSON.parse(cached);
-        if (Array.isArray(arr) && arr.length > 0) {
-          setProducts(arr);
-          onRouteChange();
-        }
-      }
-    } catch (_) { /* ignore */ }
-
-    // Prefer the serverless API when available (Vercel), fallback to
-    // static products.json (GitHub Pages / offline). The API returns
-    // { ok, count, products: [...] } while the static file is a raw array.
+    // STRATÉGIE (robustesse — l'accueil ne doit JAMAIS attendre le serverless) :
+    //   0) cache localStorage      → rendu instantané sur visite répétée
+    //   1) products.json (statique) → CHEMIN RAPIDE : servi par le CDN de bord,
+    //      SANS Firestore. C'est lui qui peint l'accueil, tout de suite.
+    //   2) /api/products (overrides admin) → enrichissement, BORNÉ à 6 s.
+    // Avant : /api/products (qui lit Firestore) était le fetch PRIMAIRE, SANS
+    // timeout, et le fallback statique ne se déclenchait que sur ERREUR — jamais
+    // sur LENTEUR. Un serverless froid + Firestore lent figeait donc l'accueil
+    // (produits ET carrousel vides) plusieurs dizaines de secondes.
     var apiConfigured = typeof window.PT_API_BASE === 'string';
     var apiBase = apiBaseUrl();
-    var primaryUrl = apiConfigured ? (apiBase + '/api/products') : 'products.json';
-    var fallbackUrl = 'products.json';
+    var staticUrl = 'products.json';
+    var overridesUrl = apiConfigured ? (apiBase + '/api/products') : null;
 
     function extractProducts(data) {
       if (Array.isArray(data)) return data;
@@ -1076,21 +1070,58 @@
         });
     }
 
-    tryFetch(primaryUrl)
-      .catch(function (err) {
-        console.warn('[products] primary fetch failed (' + primaryUrl + '):', err.message);
-        if (primaryUrl === fallbackUrl) throw err;
-        return tryFetch(fallbackUrl);
-      })
-      .then(function (arr) {
-        try { localStorage.setItem(PRODUCTS_CACHE_KEY, JSON.stringify(arr)); } catch (_) {}
-        setProducts(arr);
-        onRouteChange();
-      })
-      .catch(function (err) {
-        console.error('[products] all fetches failed:', err && err.message);
-        if (products.length === 0) toast('Impossible de charger les produits', 'error');
+    // Borne un fetch : rejette au-delà de `ms` (un serverless froid ne doit
+    // jamais figer l'affichage).
+    function withTimeout(p, ms) {
+      return new Promise(function (resolve, reject) {
+        var t = setTimeout(function () { reject(new Error('timeout')); }, ms);
+        p.then(function (v) { clearTimeout(t); resolve(v); },
+               function (e) { clearTimeout(t); reject(e); });
       });
+    }
+
+    // Fraîcheur croissante : cache < static < api. Une source ne remplace jamais
+    // une source plus fraîche déjà appliquée (course réseau maîtrisée).
+    var RANK = { cache: 0, static: 1, api: 2 };
+    var appliedRank = -1;
+    var firstRenderDone = false;
+    function apply(arr, source) {
+      if (!Array.isArray(arr) || arr.length === 0) return; // jamais de catalogue vide
+      if (RANK[source] <= appliedRank) return;
+      appliedRank = RANK[source];
+      try { localStorage.setItem(PRODUCTS_CACHE_KEY, JSON.stringify(arr)); } catch (_) {}
+      setProducts(arr);
+      // 1er rendu de données → onRouteChange complet. Suivants (enrichissement)
+      // → isDataRefresh=true : re-render EN PLACE, sans défiler (cf. onRouteChange).
+      onRouteChange(firstRenderDone);
+      firstRenderDone = true;
+    }
+
+    // 0) Cache instantané (no-op en navigation privée).
+    try {
+      var cached = localStorage.getItem(PRODUCTS_CACHE_KEY);
+      if (cached) {
+        var carr = JSON.parse(cached);
+        if (Array.isArray(carr) && carr.length > 0) apply(carr, 'cache');
+      }
+    } catch (_) { /* ignore */ }
+
+    // 1) Statique d'abord — rapide, jamais bloquant.
+    tryFetch(staticUrl)
+      .then(function (arr) { apply(arr, 'static'); })
+      .catch(function (err) { console.warn('[products] statique KO:', err.message); });
+
+    // 2) Enrichissement overrides — borné, non bloquant.
+    if (overridesUrl) {
+      withTimeout(tryFetch(overridesUrl), 6000)
+        .then(function (arr) { apply(arr, 'api'); })
+        .catch(function (err) { console.warn('[products] overrides ignorés:', err.message); });
+    }
+
+    // 3) Filet : si rien n'a pu être rendu au bout de 8 s, prévenir l'utilisateur.
+    setTimeout(function () {
+      if (products.length === 0) toast('Impossible de charger les produits', 'error');
+    }, 8000);
   }
 
   function setProducts(arr) {
@@ -3142,7 +3173,7 @@
 
   var _lastRouteKey = null;
 
-  function onRouteChange() {
+  function onRouteChange(isDataRefresh) {
     // Clôt le chrono « temps sur l'article » si on quittait une fiche produit.
     try { aFlushItemTime(); } catch (_) {}
     var parsed = parseHash();
@@ -3221,8 +3252,13 @@
     // behavior:'instant' FORCE le saut immédiat malgré `html{scroll-behavior:
     // smooth}` (sinon le défilement s'anime et le re-rendu de la vue interrompt
     // l'animation en cours de route → on n'atterrissait pas pile en haut).
-    scrollTopNow();
-    requestAnimationFrame(scrollTopNow);
+    // isDataRefresh = re-rendu déclenché par l'arrivée tardive des données
+    // (enrichissement /api/products), PAS une navigation → on NE défile PAS
+    // (l'utilisateur a pu descendre entre-temps ; le yanker en haut serait un bug).
+    if (!isDataRefresh) {
+      scrollTopNow();
+      requestAnimationFrame(scrollTopNow);
+    }
 
     // Route-specific rendering
     switch (route) {
