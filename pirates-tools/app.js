@@ -2450,6 +2450,7 @@
   var _3dCarouselBound = false;
   var _3dIdx = 0;
   var _3dModels = [];
+  var _carouselIO = null;   // charge le 3D SEULEMENT quand on scrolle vers lui
 
   function _3dShow(idx) {
     var viewer = document.getElementById('carousel3dViewer');
@@ -2512,16 +2513,31 @@
     // Show current model
     _3dShow(_3dIdx);
 
-    // Chargement v372 restauré (le plus rapide à l'usage) : le carrousel est à
-    // ~1184px du haut = DANS la marge 700px de getMvPreloadIO dès l'ouverture →
-    // ensureModelViewer + eager immédiats → le 1er GLB (outil seul ~1,9 Mo) se
-    // télécharge EN ARRIÈRE-PLAN, sans bloquer l'accueil ni le bandeau de cartes
-    // (images légères). Le temps de descendre, le modèle est prêt et s'affiche
-    // direct — model-viewer révèle la 3D sans poster (auto-reveal).
-    // LEÇON : un GLB de fond ne ralentit PAS l'accueil ; le rendre lazy retardait
-    // juste l'apparition du 3D (régression). Repli : IO absent → charge tout de suite.
-    var io = getMvPreloadIO();
-    if (io) io.observe(viewer); else ensureModelViewer().catch(function () {});
+    // PERF CRITIQUE : le carrousel 3D ne doit RIEN charger à l'ouverture de la
+    // page. En eager, il téléchargeait ~3 Mo dès le boot (script model-viewer
+    // 935 Ko + GLB 1,9 Mo + décodeurs DRACO) → sur une connexion réelle, ça
+    // SATURE le tuyau et affame les images de marques et de cartes produits
+    // (symptômes constatés : bulles à 14 s, cartes à 30 s). Le contenu de la page
+    // passe AVANT le 3D.
+    // IO dédié, marge 200px < distance minimale du carrousel sous le fold (350px
+    // mesuré) → ne se déclenche JAMAIS à l'ouverture, seulement quand l'utilisateur
+    // scrolle vers le carrousel. Alors on charge le script ET le GLB (eager).
+    // Pas de poster (auto-reveal model-viewer). Repli : pas d'IO → charge direct.
+    if ('IntersectionObserver' in window) {
+      if (!_carouselIO) {
+        _carouselIO = new IntersectionObserver(function (entries) {
+          entries.forEach(function (en) {
+            if (!en.isIntersecting) return;
+            ensureModelViewer().catch(function () {});
+            en.target.setAttribute('loading', 'eager');
+            _carouselIO.unobserve(en.target);
+          });
+        }, { rootMargin: '200px 0px 200px 0px' });
+      }
+      _carouselIO.observe(viewer);
+    } else {
+      ensureModelViewer().catch(function () {});
+    }
 
     if (!_3dCarouselBound) {
       _3dCarouselBound = true;
