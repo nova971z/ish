@@ -1593,6 +1593,57 @@
     "description_long": "Le pack DeWALT DCK266P2T réunit les deux machines qui reviennent le plus souvent sur un chantier : la perceuse à percussion DCD796 et la visseuse à chocs DCF887, toutes deux à moteur sans charbon. La perceuse propose deux vitesses et quinze réglages de couple pour percer et visser proprement, avec un mode percussion pour attaquer la brique et le parpaing. La visseuse à chocs délivre 205 Nm sur trois vitesses, mode Precision Drive compris pour éviter d'abîmer tes vis. L'ensemble partage la même gamme de batteries 18V XR et arrive complet : deux batteries 5,0 Ah, leur chargeur et un coffret de transport T STAK. Un duo polyvalent et endurant, prêt à travailler dès la sortie du carton. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
   },
   {
+    "id": "dewalt-dck276p2-qw",
+    "slug": "dewalt-dck276p2-qw-pack-perceuse-dcd996-visseuse-dcf887-18v-xrp-2x5ah-tstak",
+    "sku": "DCK276P2-QW",
+    "name": "DCK276P2-QW",
+    "brand": "DeWALT",
+    "category": "Combos",
+    "title": "DeWALT DCK276P2-QW — Pack perceuse à percussion DCD996 + visseuse à chocs DCF887 18V XRP (2×5,0 Ah, coffret TSTAK)",
+    "tag": "Best-seller",
+    "desc": "Duo XRP 18V : perceuse à percussion DCD996 (95 Nm) + visseuse à chocs DCF887 (205 Nm), 2 batteries 5,0 Ah + chargeur + coffret TSTAK.",
+    "img": "images/posters/dck276p2.webp",
+    "price": 465.5,
+    "currency": "EUR",
+    "vat": 0.2,
+    "price_ht": 387.92,
+    "stock_status": "in_stock",
+    "stock_label": "En stock",
+    "model": "",
+    "paymentLink": "",
+    "weight_kg": 3.2,
+    "ncCategory": "power_tool",
+    "productType": "pro",
+    "tags": [
+      "cordless",
+      "tropical_ready",
+      "bestseller"
+    ],
+    "features": [
+      "Perceuse à percussion DCD996 : 3 vitesses, jusqu'à 95 Nm, mandrin métal 13 mm",
+      "Visseuse à chocs DCF887 : 205 Nm, 3 vitesses + mode Precision Drive",
+      "Deux machines brushless sur la même gamme de batteries 18V XR",
+      "Livré avec 2 batteries 5,0 Ah + chargeur + coffret TSTAK",
+      "Pack complet pour perçage/vissage intensif sur chantier"
+    ],
+    "specs": {
+      "Marque": "DeWALT",
+      "Type": "Pack 2 machines sans fil (perceuse à percussion + visseuse à chocs)",
+      "Tension": "18 V XR / XRP",
+      "Moteurs": "Brushless (sans charbon)",
+      "Batteries fournies": "2 × 5,0 Ah (XR Li-Ion)",
+      "Chargeur": "Inclus",
+      "Perceuse DCD996 — couple max.": "95 Nm (66/95)",
+      "Perceuse DCD996 — vitesses": "3 (0–450 / 0–1300 / 0–2000 tr/min)",
+      "Perceuse DCD996 — percussion": "38 250 cps/min",
+      "Perceuse DCD996 — mandrin": "Métallique 1,5–13 mm",
+      "Visseuse DCF887 — couple max.": "205 Nm",
+      "Visseuse DCF887 — porte-embout": "1/4'' (6,35 mm) hexagonal",
+      "Livré avec": "2 batteries 5,0 Ah + chargeur + coffret TSTAK"
+    },
+    "description_long": "Le pack DeWALT DCK276P2-QW réunit les deux machines les plus utiles au quotidien : la perceuse à percussion DCD996 (gamme XRP, 3 vitesses, jusqu'à 95 Nm et 38 250 coups/min, mandrin métallique 13 mm) et la visseuse à chocs DCF887 (205 Nm, 3 vitesses, mode Precision Drive). Toutes deux à moteur brushless et sur la même gamme de batteries 18V XR. Livré complet avec deux batteries 5,0 Ah, un chargeur et un coffret TSTAK. Livré dans toute la zone DOM-TOM ; octroi de mer calculé automatiquement selon ton territoire."
+  },
+  {
     "id": "dewalt-dcb118x2-qw",
     "slug": "dewalt-dcb118x2-qw-pack-energie-flexvolt-2x9ah-chargeur-rapide",
     "sku": "DCB118X2-QW",
