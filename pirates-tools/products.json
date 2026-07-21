@@ -425,6 +425,57 @@
     ]
   },
   {
+    "id": "dewalt-dcf870n-xj",
+    "slug": "dewalt-dcf870n-xj-visseuse-a-chocs-hydraulique-18v-xr-machine-seule",
+    "sku": "DCF870N-XJ",
+    "name": "DCF870N-XJ",
+    "brand": "DeWALT",
+    "category": "Visseuses a chocs",
+    "title": "DeWALT DCF870N-XJ — Visseuse à chocs hydraulique 18V XR (machine seule)",
+    "tag": "Nouveau",
+    "desc": "Visseuse à chocs hydraulique XR 18V brushless, plus silencieuse, gâchette à variation de vitesse. Machine seule.",
+    "img": "images/posters/dcf870n.webp",
+    "price": 195.5,
+    "currency": "EUR",
+    "vat": 0.2,
+    "price_ht": 162.92,
+    "stock_status": "in_stock",
+    "stock_label": "En stock",
+    "model": "",
+    "paymentLink": "",
+    "weight_kg": 1.24,
+    "ncCategory": "power_tool",
+    "productType": "pro",
+    "tags": [
+      "cordless",
+      "tropical_ready",
+      "bare_tool"
+    ],
+    "features": [
+      "Mécanisme hydraulique : fonctionnement plus silencieux qu'une visseuse à chocs classique",
+      "Moteur brushless, 3 vitesses avec gâchette à variation de vitesse",
+      "Jusqu'à 3000 tr/min et 4200 coups/min",
+      "Porte-embout rapide 1/4'' (6,35 mm) + éclairage LED",
+      "Machine seule (batterie et chargeur non inclus), gamme 18V XR"
+    ],
+    "specs": {
+      "Marque": "DeWALT",
+      "Type": "Visseuse à chocs hydraulique sans fil (machine seule)",
+      "Tension": "18 V XR",
+      "Moteur": "Brushless (sans charbon)",
+      "Puissance débitée": "500 W",
+      "Nombre de vitesses": "3",
+      "Vitesse à vide": "0–1100 / 0–3000 tr/min",
+      "Cadence de frappe max.": "4200 cps/min",
+      "Couple max.": "56 Nm",
+      "Porte-embout": "1/4'' (6,35 mm) hexagonal",
+      "Technologie de confort": "Gâchette à variation de vitesse, éclairage LED",
+      "Poids net EPTA": "1,24 kg",
+      "Batterie / chargeur": "Non inclus"
+    },
+    "description_long": "La visseuse à chocs hydraulique DeWALT DCF870N-XJ utilise un mécanisme à impulsion hydraulique qui la rend nettement plus silencieuse qu'une visseuse à chocs mécanique classique, tout en restant compacte et pratique. Son moteur brushless et ses 3 vitesses avec gâchette à variation de vitesse permettent de doser précisément la puissance (jusqu'à 3000 tr/min et 4200 coups/min), avec un éclairage LED intégré. Machine seule (sans batterie ni chargeur) à rejoindre ton parc 18V XR. Livrée dans toute la zone DOM-TOM ; octroi de mer calculé automatiquement selon ton territoire."
+  },
+  {
     "id": "makita-dtw300z",
     "slug": "makita-dtw300z-18v-1-2-boulonneuse-nue",
     "sku": "DTW300Z",
