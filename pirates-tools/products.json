@@ -3448,10 +3448,10 @@
     "tag": "Nouveau",
     "desc": "Scie plongeante filaire 1300 W, lame Ø165 mm, profondeur 59 mm, coupe à ras 12 mm, aspiration 90 %, coffret T-STAK.",
     "img": "images/posters/dws520kt.webp",
-    "price": 480.47,
+    "price": 388.56,
     "currency": "EUR",
     "vat": 0.2,
-    "price_ht": 400.39,
+    "price_ht": 323.8,
     "stock_status": "in_stock",
     "stock_label": "En stock",
     "model": "",
@@ -3497,10 +3497,10 @@
     "tag": "Nouveau",
     "desc": "Fraiseuse à lamelles filaire 600 W, 10 000 tr/min, guide à crémaillère 0–90°, préréglages n°0/10/20, coffret.",
     "img": "images/posters/dw682k.webp",
-    "price": 285.15,
+    "price": 287.37,
     "currency": "EUR",
     "vat": 0.2,
-    "price_ht": 237.63,
+    "price_ht": 239.48,
     "stock_status": "in_stock",
     "stock_label": "En stock",
     "model": "",
@@ -3532,5 +3532,52 @@
       "Livré avec": "fraise carbure, sac à poussières, clé, adaptateur 35 mm, coffret"
     },
     "description_long": "La fraiseuse à lamelles DeWALT DW682K-QS est l'outil de référence pour l'assemblage bois par lamelles (biscuits). Son moteur de 600 W tournant à 10 000 tr/min réalise des entailles nettes et régulières. Le guide à crémaillère offre un réglage vertical d'une grande précision et s'incline de 0 à 90° pour tous les types d'assemblage, avec des préréglages de profondeur pour les lamelles n°0, n°10 et n°20. Le blocage d'arbre permet un changement de fraise rapide avec une seule clé, et les ergots antidérapants (8 repères de positionnement) garantissent un placement parfait. Livrée avec fraise carbure, sac à poussières, clé, adaptateur d'aspiration 35 mm et coffret de transport. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+  },
+  {
+    "id": "dewalt-dcf891nt-xj",
+    "slug": "dewalt-dcf891nt-xj-boulonneuse-chocs-18v-coffret",
+    "sku": "DCF891NT-XJ",
+    "title": "DeWALT DCF891NT-XJ — Boulonneuse à chocs 1/2\" 18V XR Brushless (machine seule, coffret TSTAK)",
+    "name": "DCF891NT-XJ",
+    "brand": "DeWALT",
+    "category": "Boulonneuses a chocs",
+    "tag": "Nouveau",
+    "desc": "Boulonneuse à chocs 1/2\" 18V XR sans charbon, 813 Nm de serrage / 1084 Nm de desserrage, 3 vitesses, jonc de sécurité. Machine seule en coffret TSTAK.",
+    "img": "images/posters/dcf891nt.webp",
+    "price": 277.02,
+    "currency": "EUR",
+    "vat": 0.2,
+    "price_ht": 230.85,
+    "stock_status": "in_stock",
+    "stock_label": "En stock",
+    "model": "",
+    "paymentLink": "",
+    "weight_kg": 2,
+    "ncCategory": "power_tool",
+    "productType": "pro",
+    "tags": [
+      "brushless",
+      "tropical_ready"
+    ],
+    "features": [
+      "Moteur sans charbon 18V XR : 813 Nm de serrage et 1084 Nm de desserrage",
+      "Carré conducteur 1/2\" avec jonc de sécurité pour un maintien fiable des douilles",
+      "3 vitesses sélectionnables + mode précision pour maîtriser chaque assemblage",
+      "Compacte et légère (~2 kg) : idéale en mécanique, charpente métallique et maintenance",
+      "Machine seule livrée en coffret TSTAK — compatible toutes batteries 18V XR DeWALT"
+    ],
+    "specs": {
+      "Marque": "DeWALT",
+      "Type": "Boulonneuse à chocs sans charbon",
+      "Tension": "18 V XR",
+      "Entraînement": "Carré 1/2\" avec jonc de sécurité",
+      "Couple de serrage max.": "813 Nm",
+      "Couple de desserrage max.": "1084 Nm",
+      "Vitesse à vide": "3 vitesses, 0 – 2000 tr/min",
+      "Cadence de frappe": "jusqu'à 3250 cps/min",
+      "Poids (sans batterie)": "2 kg",
+      "Livré": "machine seule, coffret TSTAK (batterie et chargeur non inclus)"
+    },
+    "description_long": "La boulonneuse à chocs DeWALT DCF891NT-XJ délivre 813 Nm de couple de serrage et jusqu'à 1084 Nm de desserrage grâce à son moteur sans charbon 18V XR, pour venir à bout des assemblages boulonnés les plus tenaces. Son carré conducteur 1/2\" à jonc de sécurité assure un maintien fiable des douilles, et ses 3 vitesses sélectionnables (plus un mode précision) permettent d'ajuster finement l'effort selon la tâche. Compacte et légère (environ 2 kg), elle est parfaite pour la mécanique, la charpente métallique et la maintenance industrielle. Livrée en machine seule dans un coffret TSTAK robuste — la batterie et le chargeur ne sont pas inclus, elle fonctionne avec toutes les batteries 18V XR DeWALT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
   }
 ]
