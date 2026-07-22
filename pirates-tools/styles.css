@@ -2653,6 +2653,48 @@ transform: translateY(-2px);
     color: rgba(255,255,255,.4);
 }
 
+/* Badges en haut à droite du héros (stock + tag), comme sur les cartes.
+   Libère le centre : le titre descend, le poster remonte. */
+.pdp-hero__badges {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 4;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: .5rem;
+    pointer-events: none;
+}
+.pdp-hero__badges .stock-badge {
+    position: static;      /* dans le flux du conteneur, pas en absolu (cartes) */
+    top: auto; right: auto;
+    font-size: .72rem;
+}
+.pdp-hero__flag {
+    display: inline-flex;
+    align-items: center;
+    padding: .25rem .6rem;
+    border-radius: 999px;
+    font-size: .64rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: rgba(var(--accent-rgb), 1);
+    background: rgba(var(--accent-rgb), 0.16);
+    border: 1px solid rgba(var(--accent-rgb), 0.4);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    white-space: nowrap;
+}
+
+/* Poster/produit remonté vers le haut du héros (sous la topbar), pour laisser
+   la place en bas au titre + prix + bandeau vert. S'applique au poster comme
+   aux futurs PNG (mêmes règles de rendu model-viewer). */
+#pdp3d::part(poster) {
+    background-position: center 14%;
+}
+
 /* Scroll hint */
 .pdp-hero__scroll-hint {
     position: absolute;

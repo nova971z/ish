@@ -741,7 +741,7 @@
       'hero','heroLogoContainer','heroLogo',
       'side-menu','menuBackdrop',
       'q','tag','catList','list','brandGrid',
-      'pdpTitle','pdpTag','pdpDesc','pdpPrice','pdpSpecs','pdpImg',
+      'pdpTitle','pdpTag','pdpHeroBadges','pdpDesc','pdpPrice','pdpSpecs','pdpImg',
       'pdpQuote','pdpWa','pdpShare','pdpRelated',
       'devisList','devisSend','devisClear','devisPay',
       'dock','dockCartBtn','dockCount','dockHomeBtn','dockQuoteBtn',
@@ -1655,7 +1655,13 @@
     }
 
     if (dom.pdpTitle) dom.pdpTitle.textContent = product.title;
-    if (dom.pdpTag) dom.pdpTag.textContent = product.brand + (product.tag ? ' \u00B7 ' + product.tag : '');
+    // Badges en haut \u00E0 droite (comme les cartes) : pastille stock, puis tag
+    // (best-seller\u2026) en dessous. Lib\u00E8re le centre \u2192 titre descendu, poster remont\u00E9.
+    if (dom.pdpHeroBadges) {
+      var badgesHtml = stockBadge(product);
+      if (product.tag) badgesHtml += '<span class="pdp-hero__flag">' + escapeHTML(product.tag) + '</span>';
+      dom.pdpHeroBadges.innerHTML = badgesHtml;
+    }
     if (dom.pdpDesc) dom.pdpDesc.textContent = product.description || product.desc || '';
     if (dom.pdpImg) {
       dom.pdpImg.src = product.img || 'images/placeholder.svg';
@@ -1739,7 +1745,8 @@
     // une fois que features/specs/kit sont injectés dans le DOM. Sinon elle capture
     // des <tr>/<li> périmés et le nouveau contenu reste bloqué à opacity:0 (invisible).
 
-    // Price (TTC + HT + octroi de mer breakdown for the selected territory) + stock badge
+    // Price (TTC + HT + octroi de mer breakdown for the selected territory).
+    // La pastille stock N'EST PLUS ici : elle est passée en haut à droite (badges).
     if (dom.pdpPrice) {
       var price = calcPrice(product, _currentTerritory);
       var terr = getTerritory() || getTerritory(DEFAULT_TERRITORY);
@@ -1753,8 +1760,7 @@
         +     '<li><span>TVA</span><strong>' + formatPrice(price.tva) + '</strong></li>'
         +     '<li class="pdp-price__total"><span>Total TTC</span><strong>' + formatPrice(price.ttc) + '</strong></li>'
         +   '</ul>'
-        + '</details>'
-        + stockBadge(product);
+        + '</details>';
       localPriceComparison(product, price, dom.pdpPrice);
     }
 
