@@ -1745,22 +1745,15 @@
     // une fois que features/specs/kit sont injectés dans le DOM. Sinon elle capture
     // des <tr>/<li> périmés et le nouveau contenu reste bloqué à opacity:0 (invisible).
 
-    // Price (TTC + HT + octroi de mer breakdown for the selected territory).
-    // La pastille stock N'EST PLUS ici : elle est passée en haut à droite (badges).
+    // Price (TTC + HT pour le territoire sélectionné).
+    // La pastille stock N'EST PLUS ici (passée en haut à droite, badges) et le
+    // dépliant « Détail <territoire> » (octroi/TVA) a été RETIRÉ (demande user) :
+    // le détail reste calculé au paiement. Bloc compact → titre resserré au-dessus
+    // du bandeau vert.
     if (dom.pdpPrice) {
       var price = calcPrice(product, _currentTerritory);
-      var terr = getTerritory() || getTerritory(DEFAULT_TERRITORY);
       dom.pdpPrice.innerHTML = '<span class="pdp-price__ttc">' + formatPrice(price.ttc) + ' TTC</span>'
-        + '<span class="pdp-price__ht">' + formatPrice(price.ht) + ' HT</span>'
-        + '<details class="pdp-price__breakdown">'
-        +   '<summary>Détail ' + terr.flag + ' ' + escapeHTML(terr.name) + '</summary>'
-        +   '<ul>'
-        +     '<li><span>Prix HT</span><strong>' + formatPrice(price.ht) + '</strong></li>'
-        +     '<li><span>Octroi de mer</span><strong>' + formatPrice(price.octroi) + '</strong></li>'
-        +     '<li><span>TVA</span><strong>' + formatPrice(price.tva) + '</strong></li>'
-        +     '<li class="pdp-price__total"><span>Total TTC</span><strong>' + formatPrice(price.ttc) + '</strong></li>'
-        +   '</ul>'
-        + '</details>';
+        + '<span class="pdp-price__ht">' + formatPrice(price.ht) + ' HT</span>';
       localPriceComparison(product, price, dom.pdpPrice);
     }
 
