@@ -3438,55 +3438,6 @@
     "description_long": "La meuleuse d'angle DeWALT DCG405FN-XJ se distingue par sa tête plate : un profil bas qui lui permet d'accéder aux espaces confinés et difficiles là où une meuleuse classique ne passe pas. Son moteur brushless délivre une puissance constante pour le meulage, la découpe et le ponçage, sans perte de régime sous charge. L'embrayage électronique limite les retours de couple en cas de blocage du disque, et le frein électronique arrête le disque net dès que tu relâches la gâchette. La poignée latérale anti-vibration se règle sur deux positions pour un travail confortable. Disque de 125 mm, broche M14 standard. Machine seule (1,75 kg) pour rejoindre ton parc de batteries 18V XR. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
   },
   {
-    "id": "dewalt-dws520kt-qs",
-    "slug": "dewalt-dws520kt-qs-scie-plongeante-1300w",
-    "sku": "DWS520KT-QS",
-    "title": "DeWALT DWS520KT-QS — Scie circulaire plongeante filaire 1300 W Ø165 mm (coffret T-STAK)",
-    "name": "DWS520KT-QS",
-    "brand": "DeWALT",
-    "category": "Scies",
-    "tag": "Nouveau",
-    "desc": "Scie plongeante filaire 1300 W, lame Ø165 mm, profondeur 59 mm, coupe à ras 12 mm, aspiration 90 %, coffret T-STAK.",
-    "img": "images/posters/dws520kt.webp",
-    "price": 388.56,
-    "currency": "EUR",
-    "vat": 0.2,
-    "price_ht": 323.8,
-    "stock_status": "in_stock",
-    "stock_label": "En stock",
-    "model": "",
-    "paymentLink": "",
-    "weight_kg": 5,
-    "ncCategory": "power_tool",
-    "productType": "pro",
-    "tags": [
-      "corded",
-      "tropical_ready"
-    ],
-    "features": [
-      "Moteur filaire 1300 W à régulation électronique : vitesse constante jusqu’à 4200 tr/min",
-      "Système plongeant parallèle pour des coupes droites et précises jusqu’à 59 mm de profondeur",
-      "Coupe à ras de mur à seulement 12 mm du bord pour les ajustements finaux",
-      "Aspiration des poussières jusqu’à 90 % pour un poste de travail propre",
-      "Fonction anti-recul et coupe à angle réglable, lame 48 dents incluse, coffret T-STAK"
-    ],
-    "specs": {
-      "Marque": "DeWALT",
-      "Type": "Scie circulaire plongeante filaire",
-      "Alimentation": "Secteur 230 V, 1300 W",
-      "Diamètre de lame": "165 mm",
-      "Alésage": "20 mm",
-      "Vitesse à vide": "4200 tr/min",
-      "Profondeur de coupe à 90°": "59 mm",
-      "Coupe à ras du bord": "12 mm",
-      "Nombre de dents (lame incluse)": "48 dents",
-      "Aspiration des poussières": "jusqu'à 90 %",
-      "Poids": "5 kg",
-      "Livré en": "coffret T-STAK"
-    },
-    "description_long": "La scie circulaire plongeante DeWALT DWS520KT-QS est un outil filaire de précision pour la coupe nette du bois et des panneaux. Son moteur de 1300 W à régulation électronique maintient une vitesse constante jusqu'à 4200 tr/min, quelle que soit la charge. Le système plongeant parallèle garantit une trajectoire rectiligne et des coupes précises jusqu'à 59 mm de profondeur, tandis que la coupe à ras de mur (12 mm du bord) permet les ajustements finaux au plus près. L'aspiration des poussières atteint 90 % pour un poste de travail propre, et la fonction anti-recul sécurise chaque plongée. Livrée avec une lame 48 dents et un coffret T-STAK. Compatible rail de guidage pour des coupes parfaitement droites. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
-  },
-  {
     "id": "dewalt-dw682k-qs",
     "slug": "dewalt-dw682k-qs-fraiseuse-lamelles-600w",
     "sku": "DW682K-QS",
@@ -3579,5 +3530,60 @@
       "Livré": "machine seule, coffret TSTAK (batterie et chargeur non inclus)"
     },
     "description_long": "La boulonneuse à chocs DeWALT DCF891NT-XJ délivre 813 Nm de couple de serrage et jusqu'à 1084 Nm de desserrage grâce à son moteur sans charbon 18V XR, pour venir à bout des assemblages boulonnés les plus tenaces. Son carré conducteur 1/2\" à jonc de sécurité assure un maintien fiable des douilles, et ses 3 vitesses sélectionnables (plus un mode précision) permettent d'ajuster finement l'effort selon la tâche. Compacte et légère (environ 2 kg), elle est parfaite pour la mécanique, la charpente métallique et la maintenance industrielle. Livrée en machine seule dans un coffret TSTAK robuste — la batterie et le chargeur ne sont pas inclus, elle fonctionne avec toutes les batteries 18V XR DeWALT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+  },
+  {
+    "id": "dewalt-dcs520nt-xj",
+    "slug": "dewalt-dcs520nt-xj-scie-plongeante-18v-165mm",
+    "sku": "DCS520NT-XJ",
+    "title": "DeWALT DCS520NT-XJ — Scie circulaire plongeante 18/54V XR FlexVolt Ø165 mm (machine seule, coffret TSTAK)",
+    "name": "DCS520NT-XJ",
+    "brand": "DeWALT",
+    "category": "Scies",
+    "tag": "Nouveau",
+    "desc": "Scie plongeante sans fil 18/54V FlexVolt, moteur brushless, lame Ø165 mm, profondeur 59 mm (44 mm à 45°). Machine seule en coffret TSTAK.",
+    "img": "images/posters/dcs520nt.webp",
+    "price": 597.63,
+    "currency": "EUR",
+    "vat": 0.2,
+    "price_ht": 498.03,
+    "stock_status": "in_stock",
+    "stock_label": "En stock",
+    "model": "",
+    "paymentLink": "",
+    "weight_kg": 4.7,
+    "ncCategory": "power_tool",
+    "productType": "pro",
+    "tags": [
+      "brushless",
+      "tropical_ready"
+    ],
+    "features": [
+      "Sans fil 18/54V XR FlexVolt, moteur brushless : la puissance d’une filaire sans le câble",
+      "Vitesse variable 2500 – 4200 tr/min, adaptée au bois et aux panneaux",
+      "Profondeur de coupe 59 mm à 90° et 44 mm à 45°, lame Ø165 mm",
+      "Système plongeant précis + indicateur de niveau de charge, compatible rail de guidage",
+      "Machine seule (sans batterie ni chargeur) livrée en coffret TSTAK, compatible batteries FlexVolt / XR 18V"
+    ],
+    "specs": {
+      "Marque": "DeWALT",
+      "Type": "Scie circulaire plongeante sans fil",
+      "Tension": "18/54 V FlexVolt",
+      "Batteries compatibles": "FlexVolt 18/54 V, gamme XR 18V (non incluses)",
+      "Composition batterie": "Li-Ion",
+      "Type de moteur": "Brushless (sans charbon)",
+      "Vitesse à vide": "2500 – 4200 tr/min",
+      "Profondeur de coupe à 90°": "59 mm",
+      "Profondeur de coupe à 45°": "44 mm",
+      "Diamètre de lame": "165 mm",
+      "Alésage": "20 mm",
+      "Indicateur de niveau de charge": "Oui",
+      "Pression sonore (LpA)": "82,2 dB(A)",
+      "Puissance sonore (LwA)": "93,2 dB(A)",
+      "Vibrations max.": "1,1 m/s²",
+      "Poids net EPTA": "4,7 kg",
+      "Dimensions (L × h)": "303 × 265 mm",
+      "Livré": "machine seule, coffret TSTAK (batterie et chargeur non inclus)"
+    },
+    "description_long": "La scie circulaire plongeante DeWALT DCS520NT-XJ combine la liberté du sans-fil et la puissance d'une machine filaire grâce à sa plateforme 18/54V XR FlexVolt et son moteur brushless. Sa vitesse variable de 2500 à 4200 tr/min s'adapte à tous les bois et panneaux, pour des découpes précises et nettes jusqu'à 59 mm de profondeur à 90° (44 mm à 45°). Le système plongeant assure une trajectoire rectiligne, l'indicateur de niveau de charge garde un œil sur l'autonomie, et la compatibilité rail de guidage garantit des coupes parfaitement droites. Vendue en machine seule (sans batterie ni chargeur) dans un coffret TSTAK robuste, elle fonctionne avec toutes les batteries FlexVolt 18/54V et XR 18V DeWALT. Poids net 4,7 kg. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
   }
 ]
