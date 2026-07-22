@@ -2562,28 +2562,34 @@ transform: translateY(-2px);
     50% { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
 }
 
-/* Model-viewer plein ecran */
+/* Conteneur du poster héros (cible de la parallaxe au scroll) */
 #pdp3d {
     position: absolute;
     inset: 0;
     width: 100%;
-    height: 100%;          /* poster à sa taille d'origine (pleine hauteur) */
-    --poster-color: transparent;
-    background: transparent !important;
-    border: none !important;
-    outline: none !important;
-    box-shadow: none !important;
+    height: 100%;
+    overflow: hidden;      /* rogne la partie remontée hors cadre */
     will-change: transform, opacity, filter;
     z-index: 1;
-    /* L'outil commence légèrement plus bas et zoome à l'apparition */
     animation: pdpModelAppear 1.2s cubic-bezier(0.22, 1, 0.36, 1) .1s both;
 }
 @keyframes pdpModelAppear {
     from { opacity: 0; transform: scale(0.9) translateY(30px); filter: blur(4px); }
     to   { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
 }
-#pdp3d::part(default-progress-bar) { background: rgba(var(--accent-rgb), 0.6); height: 3px; }
-#pdp3d::part(default-ar-button) { display: none; }
+/* Poster produit : taille d'origine, LÉGÈREMENT remontée pour dégager le titre
+   tout en gardant une marge sous la topbar (le bas vide est rogné par le
+   conteneur en overflow:hidden). -12% = compromis vérifié : marge topbar
+   conservée ET produit au-dessus du titre. Vaut aussi pour les futurs PNG. */
+.pdp-hero__img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center center;
+    transform: translateY(-12%);
+    pointer-events: none;
+    display: block;
+}
 
 /* Gradient en bas du hero */
 .pdp-hero__gradient {
@@ -2694,9 +2700,6 @@ transform: translateY(-2px);
 /* Poster/produit remonté au MAXIMUM vers le haut du héros (juste sous la topbar),
    pour dégager le produit du titre et laisser la place en bas au titre + prix +
    bandeau vert. S'applique au poster comme aux futurs PNG. */
-#pdp3d::part(poster) {
-    background-position: center 8%;
-}
 
 /* Scroll hint */
 .pdp-hero__scroll-hint {

@@ -741,7 +741,7 @@
       'hero','heroLogoContainer','heroLogo',
       'side-menu','menuBackdrop',
       'q','tag','catList','list','brandGrid',
-      'pdpTitle','pdpTag','pdpHeroBadges','pdpDesc','pdpPrice','pdpSpecs','pdpImg',
+      'pdpTitle','pdpTag','pdpHeroBadges','pdpHeroImg','pdpDesc','pdpPrice','pdpSpecs','pdpImg',
       'pdpQuote','pdpWa','pdpShare','pdpRelated',
       'devisList','devisSend','devisClear','devisPay',
       'dock','dockCartBtn','dockCount','dockHomeBtn','dockQuoteBtn',
@@ -1703,16 +1703,15 @@
       track('view_item', { id: product.id, name: product.title, brand: product.brand, price: product.price });
     }
 
-    // 3D model viewers (hero + secondaire).
-    // PERF (décision produit) : UN SEUL modèle 3D par fiche, et il est chargé
-    // À LA DEMANDE au scroll (le petit carré). Le HÉROS plein écran n'affiche
-    // QUE le poster (image ~30 Ko) → la fiche s'ouvre instantanément, plus de
-    // GLB lourd (~2,5 Mo pour les packs) sur le chemin critique, et fini le
-    // double téléchargement/décodage du même modèle par deux <model-viewer>.
-    //   • load3D=false → poster figé, aucun src, aucune 3D (héros).
-    //   • load3D=true  → charge le vrai modèle (carré secondaire, loading=lazy).
-    // Si le produit n'a pas de GLB, personne ne charge de 3D : les deux restent
-    // sur le poster (surtout PAS de modèle générique « fantôme »).
+    // HÉROS = POSTER produit dans une vraie <img> (jamais de 3D ici) → cadrage
+    // contrôlé au pixel côté CSS (produit remonté, bas vide rogné) et plus léger.
+    // La 3D est UNIQUEMENT dans le carré « vue détail » (pdp3dSecondary), chargée
+    // au scroll (loading=lazy). Si le produit n'a pas de GLB, le carré reste sur
+    // son poster (jamais de modèle « fantôme »).
+    if (dom.pdpHeroImg) {
+      dom.pdpHeroImg.src = product.img || 'images/placeholder.svg';
+      dom.pdpHeroImg.alt = product.title;
+    }
     function setPdpViewer(v, alt, load3D) {
       if (!v) return;
       v.setAttribute('alt', alt);
@@ -1725,20 +1724,15 @@
         v.setAttribute('reveal', 'manual');     // figé sur le poster (image produit)
       }
     }
-    var viewer = document.getElementById('pdp3d');
     var viewer2 = document.getElementById('pdp3dSecondary');
-    setPdpViewer(viewer, product.title, false);                     // héros = poster seul
     setPdpViewer(viewer2, product.title + ' - vue detail', true);   // carré = le seul 3D
 
-    // On charge <model-viewer> (script CDN ~200 Ko, mis en cache) : il est requis
-    // pour AFFICHER le poster dans les deux cadres (un élément non-upgradé
-    // n'honore pas l'attribut `poster` → cadre vide). Le poids lourd (le GLB
-    // ~2,5 Mo) n'est chargé que par le carré secondaire, au scroll (loading=lazy).
-    // .catch : échec CDN → le poster reste affiché, aucun rejet non géré.
-    if (viewer || viewer2) ensureModelViewer().catch(function () {});
+    // model-viewer (script CDN ~200 Ko, caché) requis pour le carré 3D. Le GLB
+    // (~2,5 Mo) n'est chargé que par ce carré, au scroll. .catch : échec CDN →
+    // le poster du carré reste, aucun rejet non géré.
+    if (viewer2) ensureModelViewer().catch(function () {});
 
-    // ── Scroll passthrough quand zoom 3D au minimum ──
-    setupModelViewerScrollPassthrough(viewer);
+    // ── Scroll passthrough quand zoom 3D au minimum (carré uniquement) ──
     setupModelViewerScrollPassthrough(viewer2);
 
     // NB : l'animation de scroll (initPdpScrollAnimations) est initialisée PLUS BAS,
