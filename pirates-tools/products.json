@@ -3585,5 +3585,55 @@
       "Livré": "machine seule, coffret TSTAK (batterie et chargeur non inclus)"
     },
     "description_long": "La scie circulaire plongeante DeWALT DCS520NT-XJ combine la liberté du sans-fil et la puissance d'une machine filaire grâce à sa plateforme 18/54V XR FlexVolt et son moteur brushless. Sa vitesse variable de 2500 à 4200 tr/min s'adapte à tous les bois et panneaux, pour des découpes précises et nettes jusqu'à 59 mm de profondeur à 90° (44 mm à 45°). Le système plongeant assure une trajectoire rectiligne, l'indicateur de niveau de charge garde un œil sur l'autonomie, et la compatibilité rail de guidage garantit des coupes parfaitement droites. Vendue en machine seule (sans batterie ni chargeur) dans un coffret TSTAK robuste, elle fonctionne avec toutes les batteries FlexVolt 18/54V et XR 18V DeWALT. Poids net 4,7 kg. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+  },
+  {
+    "id": "dewalt-dcf891p2t-qw",
+    "slug": "dewalt-dcf891p2t-qw-boulonneuse-chocs-812nm-pack",
+    "sku": "DCF891P2T-QW",
+    "title": "DeWALT DCF891P2T-QW — Boulonneuse à chocs 1/2\" 18V XR 812 Nm (2×5,0 Ah + chargeur + coffret TSTAK)",
+    "name": "DCF891P2T-QW",
+    "brand": "DeWALT",
+    "category": "Boulonneuses a chocs",
+    "tag": "Nouveau",
+    "desc": "Boulonneuse à chocs 1/2\" 18V XR sans charbon, 812 Nm, 3 vitesses. Pack complet : 2 batteries 5,0 Ah + chargeur + coffret TSTAK.",
+    "img": "images/posters/dcf891p2t.webp",
+    "price": 473.48,
+    "currency": "EUR",
+    "vat": 0.2,
+    "price_ht": 394.57,
+    "stock_status": "in_stock",
+    "stock_label": "En stock",
+    "model": "",
+    "paymentLink": "",
+    "weight_kg": 2.7,
+    "ncCategory": "power_tool",
+    "productType": "pro",
+    "tags": [
+      "brushless",
+      "tropical_ready"
+    ],
+    "features": [
+      "Moteur sans charbon 18V XR : 812 Nm de couple de serrage sur carré 1/2\"",
+      "3 vitesses sélectionnables + variateur pour maîtriser chaque serrage",
+      "Compacte et légère (1,67 kg nue) : maniable en mécanique et charpente métallique",
+      "Pack complet livré prêt à l’emploi : 2 batteries 5,0 Ah + chargeur + coffret TSTAK",
+      "Gamme 18V XR, compatible avec tous tes autres outils sans fil DeWALT"
+    ],
+    "specs": {
+      "Marque": "DeWALT",
+      "Type": "Boulonneuse à chocs sans charbon",
+      "Tension": "18 V XR",
+      "Entraînement": "Carré 1/2\"",
+      "Couple de serrage max.": "812 Nm",
+      "Nombre de vitesses": "3",
+      "Vitesse à vide": "0 – 2000 tr/min",
+      "Cadence de frappe": "0 – 3250 cps/min",
+      "Type de moteur": "Brushless (sans charbon)",
+      "Composition batterie": "Li-Ion",
+      "Batteries fournies": "2 × 5,0 Ah",
+      "Poids net EPTA (nue)": "1,67 kg",
+      "Livré": "coffret TSTAK avec 2 batteries 5,0 Ah + chargeur"
+    },
+    "description_long": "La boulonneuse à chocs DeWALT DCF891P2T-QW délivre 812 Nm de couple de serrage grâce à son moteur sans charbon 18V XR, sur un carré conducteur 1/2\". Ses 3 vitesses sélectionnables et son variateur permettent d'ajuster finement l'effort selon la tâche, de l'assemblage délicat au boulon récalcitrant. Compacte et légère (1,67 kg à nu), elle reste maniable toute la journée en mécanique, charpente métallique et maintenance. Ce pack est livré complet et prêt à l'emploi : 2 batteries 18V XR 5,0 Ah, un chargeur et un coffret TSTAK robuste. Compatible avec toute la gamme 18V XR DeWALT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
   }
 ]
