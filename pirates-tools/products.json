@@ -53,6 +53,57 @@
     ]
   },
   {
+    "id": "makita-dtw700z",
+    "slug": "makita-dtw700z-boulonneuse-a-chocs-1-2-18v-lxt-700nm-machine-seule",
+    "sku": "DTW700Z",
+    "name": "DTW700Z",
+    "brand": "Makita",
+    "category": "Boulonneuses a chocs",
+    "title": "Makita DTW700Z — Boulonneuse à chocs 1/2\" 18V LXT 700 Nm (machine seule)",
+    "tag": "Nouveau",
+    "desc": "Boulonneuse à chocs 1/2\" 18V LXT brushless, 700 Nm de serrage (1000 Nm desserrage), compacte (170 mm), 4 vitesses, protection XPT. Machine seule.",
+    "img": "images/posters/dtw700z.webp",
+    "price": 248.68,
+    "currency": "EUR",
+    "vat": 0.2,
+    "price_ht": 207.23,
+    "stock_status": "in_stock",
+    "stock_label": "En stock",
+    "model": "",
+    "paymentLink": "",
+    "weight_kg": 2.7,
+    "ncCategory": "power_tool",
+    "productType": "pro",
+    "tags": [
+      "cordless",
+      "tropical_ready",
+      "bare_tool"
+    ],
+    "features": [
+      "Couple de serrage 700 Nm / desserrage jusqu'à 1000 Nm",
+      "Moteur BL sans charbon, ultra-compacte (170 mm)",
+      "4 niveaux de vitesse à réglage électronique + frein électrique",
+      "3 modes d'arrêt automatique (serrage / desserrage)",
+      "Protection XPT (poussière/eau) — machine seule, gamme 18V LXT"
+    ],
+    "specs": {
+      "Marque": "Makita",
+      "Type": "Boulonneuse à chocs 1/2\" sans fil (machine seule)",
+      "Tension": "18 V LXT",
+      "Moteur": "Brushless (sans charbon)",
+      "Emmanchement": "Carré 1/2''",
+      "Couple de serrage max.": "700 Nm",
+      "Couple de desserrage max.": "1000 Nm",
+      "Cadence de frappe max.": "2700 cps/min",
+      "Vitesses": "4 niveaux (réglage électronique)",
+      "Longueur": "170 mm",
+      "Poids (avec batterie)": "2,7 kg",
+      "Protection": "XPT (poussière / eau)",
+      "Batterie / chargeur": "Non inclus"
+    },
+    "description_long": "La Makita DTW700Z est une boulonneuse à chocs 1/2'' 18V LXT à moteur brushless, délivrant 700 Nm de couple de serrage et jusqu'à 1000 Nm au desserrage dans un corps ultra-compact (170 mm seulement). Ses 4 niveaux de vitesse à réglage électronique, son frein électrique et ses 3 modes d'arrêt automatique offrent un contrôle précis en mécanique et construction. Protégée par la technologie XPT contre la poussière et l'eau. Livrée en machine seule (sans batterie ni chargeur). Livraison DOM-TOM ; octroi de mer calculé automatiquement selon ton territoire."
+  },
+  {
     "id": "dewalt-dcf922n-xj",
     "slug": "dewalt-dcf922n-xj-boulonneuse-a-chocs-compacte-1-2-18v-xr-406nm-machine-seule",
     "sku": "DCF922N-XJ",
@@ -1997,6 +2048,66 @@
       "Dimensions": "180 × 310 × 440 mm"
     },
     "description_long": "Le perforateur burineur DeWALT D25033K-QS est un outil filaire compact et puissant, idéal pour tous les travaux de perçage dans le béton. Avec ses 710 W et son emmanchement SDS-Plus, il perce jusqu'à 22 mm dans le béton, 30 mm dans le bois et 13 mm dans le métal, et accepte les couronnes trépan jusqu'à 50 mm. Sa puissance de frappe de 2 joules et sa cadence de 5680 coups/min viennent à bout des matériaux durs, tandis que son mode burinage permet les petits travaux de démolition. Léger (2,5 kg) et bien équilibré, il se manie avec précision. Livré dans un coffret de transport. Un allié fiable pour les chantiers des Antilles. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+  },
+  {
+    "id": "dewalt-dch273p1t-qw",
+    "slug": "dewalt-dch273p1t-qw-perforateur-sds-plus-18v-xr-5ah-chargeur-coffret",
+    "sku": "DCH273P1T-QW",
+    "name": "DCH273P1T-QW",
+    "brand": "DeWALT",
+    "category": "Perforateurs",
+    "title": "DeWALT DCH273P1T-QW — Perforateur burineur SDS-Plus 18V XR (1×5,0 Ah + chargeur + coffret)",
+    "tag": "Nouveau",
+    "desc": "Perforateur burineur SDS-Plus 18V XR brushless 2,1 J, livré avec 1 batterie 5,0 Ah, chargeur et coffret. Système anti-vibrations.",
+    "img": "images/posters/dch273p1t.webp",
+    "price": 412.73,
+    "currency": "EUR",
+    "vat": 0.2,
+    "price_ht": 343.94,
+    "stock_status": "in_stock",
+    "stock_label": "En stock",
+    "model": "",
+    "paymentLink": "",
+    "weight_kg": 3.1,
+    "ncCategory": "power_tool",
+    "productType": "pro",
+    "tags": [
+      "cordless",
+      "tropical_ready"
+    ],
+    "kit": [
+      "Perforateur DCH273 (SDS-Plus, brushless)",
+      "1 batterie 18V XR 5,0 Ah",
+      "Chargeur",
+      "Coffret de transport"
+    ],
+    "features": [
+      "Perforateur SDS-Plus brushless, énergie d'impact 2,1 J (EPTA)",
+      "Perçage, perforation et burinage — béton jusqu'à 24 mm",
+      "Livré complet : 1 batterie 5,0 Ah + chargeur + coffret",
+      "Débrayage de sécurité, système anti-vibrations, éclairage LED",
+      "0–1100 tr/min, 0–4600 cps/min — gamme 18V XR"
+    ],
+    "specs": {
+      "Marque": "DeWALT",
+      "Type": "Perforateur burineur SDS-Plus sans fil (kit)",
+      "Tension": "18 V XR",
+      "Moteur": "Brushless (sans charbon)",
+      "Mandrin": "SDS-Plus",
+      "Énergie d'impact (EPTA)": "2,1 J",
+      "Vitesse à vide max.": "1100 tr/min",
+      "Cadence de frappe max.": "4600 cps/min",
+      "Capacité de perçage béton": "24 mm",
+      "Capacité de perçage métal": "13 mm",
+      "Capacité de perçage bois": "26 mm",
+      "Sécurité / confort": "Débrayage de sécurité, système anti-vibrations, éclairage LED",
+      "Niveau sonore (Lpa / Lwa)": "86 / 97 dB(A)",
+      "Vibrations": "6,5 m/s²",
+      "Poids net EPTA": "3,1 kg",
+      "Dimensions (L×l×h)": "301 × 85 × 202 mm",
+      "Livré avec": "1 batterie 5,0 Ah + chargeur + coffret"
+    },
+    "description_long": "Le DeWALT DCH273P1T-QW réunit le perforateur burineur SDS-Plus 18V XR brushless (2,1 J) et tout ce qu'il faut pour travailler immédiatement : 1 batterie 18V XR 5,0 Ah, son chargeur et un coffret de transport. Idéal pour percer le béton (jusqu'à 24 mm), le métal et le bois, et pour buriner en usage léger. Doté d'un débrayage de sécurité (limiteur de couple), d'un système anti-vibrations et d'un éclairage LED. Livraison DOM-TOM ; octroi de mer calculé automatiquement selon ton territoire."
   },
   {
     "id": "dewalt-dch273n-xj",
