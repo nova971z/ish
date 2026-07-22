@@ -1643,6 +1643,85 @@
 
   // ── PDP (Product Detail Page) ──────────────────────────────
 
+  // Cadre le poster du héros AU PLUS GROS possible entre la topbar et le titre,
+  // sans jamais chevaucher ni l'une ni l'autre. Détecte les bords RÉELS du
+  // produit dans l'image (les posters ont une marge de fond variable) via un
+  // mini-canvas, puis applique translate+scale : le produit est calé juste sous
+  // la topbar (petite marge) et réduit UNIQUEMENT si sa hauteur dépasse la place
+  // au-dessus du titre. Marche pour les posters actuels comme pour les futurs PNG.
+  function fitHeroPoster() {
+    var img = dom.pdpHeroImg;
+    var hero = document.getElementById('pdpHero');
+    var title = dom.pdpTitle;
+    if (!img || !hero || !title) return;
+    function run() {
+      try {
+        var W = img.clientWidth, H = img.clientHeight;
+        var nw = img.naturalWidth, nh = img.naturalHeight;
+        if (!W || !H || !nw || !nh) return;
+        // 1) Bords du produit dans l'image (fond = médiane des 4 coins).
+        var cv = document.createElement('canvas');
+        var sc = Math.min(1, 200 / Math.max(nw, nh));
+        cv.width = Math.max(1, Math.round(nw * sc));
+        cv.height = Math.max(1, Math.round(nh * sc));
+        var cx = cv.getContext('2d', { willReadFrequently: true });
+        cx.drawImage(img, 0, 0, cv.width, cv.height);
+        var d = cx.getImageData(0, 0, cv.width, cv.height).data;
+        var cw = cv.width, ch = cv.height;
+        function px(x, y) { var i = (y * cw + x) * 4; return [d[i], d[i + 1], d[i + 2], d[i + 3]]; }
+        var corners = [px(0, 0), px(cw - 1, 0), px(0, ch - 1), px(cw - 1, ch - 1)];
+        var br = 0, bg = 0, bb = 0;
+        corners.forEach(function (c) { br += c[0]; bg += c[1]; bb += c[2]; });
+        br /= 4; bg /= 4; bb /= 4;
+        var hasAlpha = corners.some(function (c) { return c[3] < 20; });
+        var minY = ch, maxY = -1;
+        for (var y = 0; y < ch; y++) {
+          for (var x = 0; x < cw; x++) {
+            var i = (y * cw + x) * 4;
+            var a = d[i + 3];
+            var dr = d[i] - br, dg = d[i + 1] - bg, db = d[i + 2] - bb;
+            var isProd = hasAlpha ? (a > 25) : (a > 25 && (dr * dr + dg * dg + db * db) > 1400);
+            if (isProd) { if (y < minY) minY = y; if (y > maxY) maxY = y; break; }
+          }
+          // scan complet de la ligne seulement si utile (perf) — ici on s'arrête
+          // au 1er pixel produit de la ligne pour les bornes verticales.
+        }
+        if (maxY < 0 || (maxY - minY) < ch * 0.15) return; // détection douteuse → défaut CSS
+        var tn = minY / ch, bn = (maxY + 1) / ch;   // bornes verticales normalisées
+        // 2) Placement object-fit: contain de l'image dans l'élément.
+        var imgAR = nw / nh, boxAR = W / H, drawH, dy0;
+        if (imgAR > boxAR) { drawH = W / imgAR; dy0 = (H - drawH) / 2; }
+        else { drawH = H; dy0 = 0; }
+        var prodTop = dy0 + tn * drawH;
+        var prodBot = dy0 + bn * drawH;
+        var prodH = prodBot - prodTop;
+        // 3) Zone cible : sous la topbar (marge) → au-dessus du titre (marge).
+        //    Position du titre via offsetTop cumulé (insensible aux transforms
+        //    d'apparition/parallaxe, contrairement à getBoundingClientRect).
+        var titleTop = 0, el = title;
+        while (el && el !== hero && el !== document.body) { titleTop += el.offsetTop; el = el.offsetParent; }
+        var topMargin = 14;
+        var target = (titleTop - 14) - topMargin;   // hauteur dispo
+        if (target < 60) return;
+        var s = Math.min(1, target / prodH);        // le plus gros possible, sans agrandir
+        // origine au sommet du produit → l'échelle réduit vers le bas, le sommet
+        // reste calé ; translateY amène ce sommet juste sous la topbar.
+        img.style.transformOrigin = '50% ' + prodTop.toFixed(1) + 'px';
+        img.style.transform = 'translateY(' + (topMargin - prodTop).toFixed(1) + 'px) scale(' + s.toFixed(4) + ')';
+      } catch (_) { /* fond CSS par défaut conservé */ }
+    }
+    if (img.complete && img.naturalWidth) run();
+    else img.onload = run;
+    _heroFitFn = run;   // rappel au resize / changement d'orientation
+  }
+  var _heroFitFn = null;
+  var _heroFitRAF = 0;
+  window.addEventListener('resize', function () {
+    if (!_heroFitFn) return;
+    if (_heroFitRAF) cancelAnimationFrame(_heroFitRAF);
+    _heroFitRAF = requestAnimationFrame(function () { try { _heroFitFn(); } catch (_) {} });
+  });
+
   function renderPDP(slug) {
     var product = null;
     for (var i = 0; i < products.length; i++) {
@@ -1711,6 +1790,7 @@
     if (dom.pdpHeroImg) {
       dom.pdpHeroImg.src = product.img || 'images/placeholder.svg';
       dom.pdpHeroImg.alt = product.title;
+      fitHeroPoster();
     }
     function setPdpViewer(v, alt, load3D) {
       if (!v) return;
