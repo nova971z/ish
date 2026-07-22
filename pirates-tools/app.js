@@ -811,7 +811,10 @@
     // sur la page produit, là où l'utilisateur veut réellement l'examiner.
     var imgSrc = escapeHTML(p.img || 'images/placeholder.svg');
     var alt = escapeHTML(p.title);
-    return '<img src="' + imgSrc + '" alt="' + alt + '" loading="lazy" decoding="async" class="product-card__img">';
+    // fetchpriority="low" : les vignettes de cartes cèdent la bande passante au
+    // 1er outil du carrousel 3D (priorité normale) → il se charge AVANT elles
+    // (demande user). Elles restent lazy et se chargent juste après / au scroll.
+    return '<img src="' + imgSrc + '" alt="' + alt + '" loading="lazy" fetchpriority="low" decoding="async" class="product-card__img">';
   }
 
   function addToCart(item) {
@@ -1085,11 +1088,19 @@
     var RANK = { cache: 0, static: 1, api: 2 };
     var appliedRank = -1;
     var firstRenderDone = false;
+    var lastJson = null;
     function apply(arr, source) {
       if (!Array.isArray(arr) || arr.length === 0) return; // jamais de catalogue vide
       if (RANK[source] <= appliedRank) return;
       appliedRank = RANK[source];
-      try { localStorage.setItem(PRODUCTS_CACHE_KEY, JSON.stringify(arr)); } catch (_) {}
+      var json = JSON.stringify(arr);
+      // Données IDENTIQUES à ce qui est déjà affiché (cas courant : aucun override
+      // admin → /api/products renvoie exactement products.json) → on NE re-rend
+      // PAS : un re-render inutile rechargeait toutes les images (marques + cartes)
+      // une 2e fois et cassait l'ordre de priorité de chargement.
+      if (json === lastJson) return;
+      lastJson = json;
+      try { localStorage.setItem(PRODUCTS_CACHE_KEY, json); } catch (_) {}
       setProducts(arr);
       // 1er rendu de données → onRouteChange complet. Suivants (enrichissement)
       // → isDataRefresh=true : re-render EN PLACE, sans défiler (cf. onRouteChange).
@@ -2450,7 +2461,21 @@
   var _3dCarouselBound = false;
   var _3dIdx = 0;
   var _3dModels = [];
-  var _carouselIO = null;   // charge le 3D SEULEMENT quand on scrolle vers lui
+  var _carouselIO = null;      // repli : charge le 3D quand on scrolle vers lui
+  var _carousel3dKicked = false;   // 1er outil du carrousel déjà lancé ?
+  var _carousel3dDeferred = false; // trigger window.load déjà armé ?
+
+  // Lance le chargement du 1er outil du carrousel (script model-viewer + GLB).
+  // Idempotent. Appelé soit après le contenu critique (window.load), soit au
+  // scroll vers le carrousel — le premier qui arrive gagne.
+  function kickCarousel3D() {
+    if (_carousel3dKicked) return;
+    _carousel3dKicked = true;
+    var v = document.getElementById('carousel3dViewer');
+    ensureModelViewer().catch(function () {});
+    if (v) v.setAttribute('loading', 'eager');
+    if (_carouselIO && v) { try { _carouselIO.unobserve(v); } catch (_) {} }
+  }
 
   function _3dShow(idx) {
     var viewer = document.getElementById('carousel3dViewer');
@@ -2513,30 +2538,33 @@
     // Show current model
     _3dShow(_3dIdx);
 
-    // PERF CRITIQUE : le carrousel 3D ne doit RIEN charger à l'ouverture de la
-    // page. En eager, il téléchargeait ~3 Mo dès le boot (script model-viewer
-    // 935 Ko + GLB 1,9 Mo + décodeurs DRACO) → sur une connexion réelle, ça
-    // SATURE le tuyau et affame les images de marques et de cartes produits
-    // (symptômes constatés : bulles à 14 s, cartes à 30 s). Le contenu de la page
-    // passe AVANT le 3D.
-    // IO dédié, marge 200px < distance minimale du carrousel sous le fold (350px
-    // mesuré) → ne se déclenche JAMAIS à l'ouverture, seulement quand l'utilisateur
-    // scrolle vers le carrousel. Alors on charge le script ET le GLB (eager).
-    // Pas de poster (auto-reveal model-viewer). Repli : pas d'IO → charge direct.
+    // ORDRE DE PRIORITÉ VOULU (demande user) : contenu critique (hero + marques)
+    // → PUIS le 1er outil du carrousel 3D → PUIS les cartes produits (plus bas,
+    // lazy → chargées au scroll, donc après). Le carrousel ne charge RIEN au boot
+    // (sinon ses ~3 Mo saturent le tuyau et affament les images critiques :
+    // bulles à 14 s, cartes à 30 s constatées) — mais dès que le critique est
+    // peint, on lance le modèle pour qu'il soit prêt avant que l'utilisateur
+    // n'arrive au carrousel.
+    // A) Repli au scroll : si l'utilisateur descend avant window.load. Marge
+    //    200px < distance mini du carrousel sous le fold (350px mesuré) → ne se
+    //    déclenche jamais à l'ouverture. Pas de poster (auto-reveal model-viewer).
     if ('IntersectionObserver' in window) {
       if (!_carouselIO) {
         _carouselIO = new IntersectionObserver(function (entries) {
-          entries.forEach(function (en) {
-            if (!en.isIntersecting) return;
-            ensureModelViewer().catch(function () {});
-            en.target.setAttribute('loading', 'eager');
-            _carouselIO.unobserve(en.target);
-          });
+          entries.forEach(function (en) { if (en.isIntersecting) kickCarousel3D(); });
         }, { rootMargin: '200px 0px 200px 0px' });
       }
       _carouselIO.observe(viewer);
-    } else {
-      ensureModelViewer().catch(function () {});
+    }
+    // B) Priorité voulue (user) : le 1er outil du carrousel AVANT les cartes.
+    //    On lance le carrousel juste après ce 1er rendu de l'accueil (les images
+    //    de marques ont déjà leur requête en file) — PAS à window.load, qui sur
+    //    connexion lente attend aussi les cartes (Chromium élargit le seuil lazy)
+    //    et ferait donc charger le carrousel APRÈS elles. 350ms : laisse les
+    //    marques prendre la bande d'abord, puis le carrousel part avant les cartes.
+    if (!_carousel3dDeferred) {
+      _carousel3dDeferred = true;
+      setTimeout(kickCarousel3D, 350);
     }
 
     if (!_3dCarouselBound) {
@@ -3268,10 +3296,14 @@
     // behavior:'instant' FORCE le saut immédiat malgré `html{scroll-behavior:
     // smooth}` (sinon le défilement s'anime et le re-rendu de la vue interrompt
     // l'animation en cours de route → on n'atterrissait pas pile en haut).
-    // isDataRefresh = re-rendu déclenché par l'arrivée tardive des données
-    // (enrichissement /api/products), PAS une navigation → on NE défile PAS
-    // (l'utilisateur a pu descendre entre-temps ; le yanker en haut serait un bug).
-    if (!isDataRefresh) {
+    // isDataRefresh === true : re-rendu déclenché par l'arrivée tardive des
+    // données (enrichissement /api/products), PAS une navigation → on NE défile
+    // PAS (l'utilisateur a pu descendre entre-temps). Test STRICT obligatoire :
+    // onRouteChange est branché tel quel sur 'hashchange' (l.4100), donc le
+    // navigateur lui passe l'objet Event en 1er argument à chaque navigation —
+    // un simple `!isDataRefresh` le prenait pour un data-refresh (truthy) et
+    // sautait le scroll → on n'atterrissait plus en haut du catalogue.
+    if (isDataRefresh !== true) {
       scrollTopNow();
       requestAnimationFrame(scrollTopNow);
     }
