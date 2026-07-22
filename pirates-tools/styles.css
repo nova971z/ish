@@ -2565,12 +2565,9 @@ transform: translateY(-2px);
 /* Model-viewer plein ecran */
 #pdp3d {
     position: absolute;
-    /* Poster confiné au HAUT du héros (≈62%) : le produit ne descend jamais
-       jusqu'au titre (plus de chevauchement), et il est calé sous la topbar.
-       Le bas du héros reste libre pour titre + prix + bandeau vert. */
-    inset: 0 0 auto 0;
+    inset: 0;
     width: 100%;
-    height: 62%;
+    height: 100%;          /* poster à sa taille d'origine (pleine hauteur) */
     --poster-color: transparent;
     background: transparent !important;
     border: none !important;
@@ -2605,7 +2602,9 @@ transform: translateY(-2px);
     position: relative;
     z-index: 3;
     text-align: center;
-    padding: 0 1.5rem 2.5rem;
+    width: 100%;                 /* titre sur toute la largeur de l'écran… */
+    box-sizing: border-box;
+    padding: 0 1.5rem 2.5rem;    /* …avec une marge latérale (jamais collé aux bords) */
     will-change: transform, opacity;
     animation: pdpInfoAppear 1s cubic-bezier(0.22, 1, 0.36, 1) .5s both;
 }
@@ -2615,10 +2614,11 @@ transform: translateY(-2px);
 }
 
 .pdp-hero__title {
-    /* Lettres réduites (3.8rem max → 2.3rem) : les titres longs (packs, kits)
-       passaient sur 3 lignes de ~61px et recouvraient le produit. Le clamp
-       reste fluide en largeur (téléphone → desktop), seule l'échelle baisse. */
-    font-size: clamp(1.3rem, 0.85rem + 2.2vw, 2.3rem);
+    /* Lettres réduites (produit gardé à sa taille d'origine) : le titre plus
+       petit dégage le produit et se resserre en bas. Le clamp reste fluide en
+       largeur (téléphone → desktop) ; le titre prend toute la largeur (info en
+       width:100% + padding latéral = marge de sécurité, jamais collé aux bords). */
+    font-size: clamp(1.02rem, 0.62rem + 1.7vw, 1.75rem);
     font-weight: 900;
     margin: 0 0 .3rem;
     line-height: 1.15;
@@ -2695,7 +2695,7 @@ transform: translateY(-2px);
    pour dégager le produit du titre et laisser la place en bas au titre + prix +
    bandeau vert. S'applique au poster comme aux futurs PNG. */
 #pdp3d::part(poster) {
-    background-position: center 20%;
+    background-position: center 8%;
 }
 
 /* Scroll hint */
