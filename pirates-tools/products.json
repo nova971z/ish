@@ -1894,6 +1894,58 @@
     "description_long": "Le perforateur burineur DeWALT D25033K-QS est un outil filaire compact et puissant, idéal pour tous les travaux de perçage dans le béton. Avec ses 710 W et son emmanchement SDS-Plus, il perce jusqu'à 22 mm dans le béton, 30 mm dans le bois et 13 mm dans le métal, et accepte les couronnes trépan jusqu'à 50 mm. Sa puissance de frappe de 2 joules et sa cadence de 5680 coups/min viennent à bout des matériaux durs, tandis que son mode burinage permet les petits travaux de démolition. Léger (2,5 kg) et bien équilibré, il se manie avec précision. Livré dans un coffret de transport. Un allié fiable pour les chantiers des Antilles. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
   },
   {
+    "id": "dewalt-dch273n-xj",
+    "slug": "dewalt-dch273n-xj-perforateur-burineur-sds-plus-18v-xr-machine-seule",
+    "sku": "DCH273N-XJ",
+    "name": "DCH273N-XJ",
+    "brand": "DeWALT",
+    "category": "Perforateurs",
+    "title": "DeWALT DCH273N-XJ — Perforateur burineur SDS-Plus 18V XR Brushless (machine seule)",
+    "tag": "Nouveau",
+    "desc": "Perforateur burineur SDS-Plus 18V XR brushless, 2,1 J, léger (2,5 kg) et faibles vibrations (PERFORM+PROTECT). Machine seule.",
+    "img": "images/posters/dch273n.webp",
+    "price": 264.37,
+    "currency": "EUR",
+    "vat": 0.2,
+    "price_ht": 220.31,
+    "stock_status": "in_stock",
+    "stock_label": "En stock",
+    "model": "models/products/DCH273.glb",
+    "paymentLink": "",
+    "weight_kg": 2.5,
+    "ncCategory": "power_tool",
+    "productType": "pro",
+    "tags": [
+      "cordless",
+      "tropical_ready",
+      "bare_tool"
+    ],
+    "features": [
+      "Moteur brushless XR 18V : plus d'autonomie et de durée de vie",
+      "Mandrin SDS-Plus, énergie d'impact 2,1 J (EPTA)",
+      "Perçage, perforation et burinage (rotation stop)",
+      "PERFORM+PROTECT : vibrations maîtrisées (6,6 m/s² perçage / 5,4 m/s² burinage)",
+      "Léger (2,5 kg) — machine seule (batterie et chargeur non inclus), gamme 18V XR"
+    ],
+    "specs": {
+      "Marque": "DeWALT",
+      "Type": "Perforateur burineur SDS-Plus sans fil (machine seule)",
+      "Tension": "18 V XR",
+      "Moteur": "Brushless (sans charbon)",
+      "Mandrin": "SDS-Plus",
+      "Énergie d'impact (EPTA)": "2,1 J",
+      "Vitesse à vide": "0–1100 tr/min",
+      "Cadence de frappe": "0–4600 cps/min",
+      "Capacité de perçage béton": "24 mm max",
+      "Capacité de perçage métal": "13 mm",
+      "Capacité de perçage bois": "26 mm",
+      "Vibrations (perçage / burinage)": "6,6 / 5,4 m/s² (PERFORM+PROTECT)",
+      "Poids": "2,5 kg",
+      "Batterie / chargeur": "Non inclus"
+    },
+    "description_long": "Le perforateur burineur DeWALT DCH273N-XJ combine un moteur brushless 18V XR et un mandrin SDS-Plus délivrant 2,1 J d'énergie d'impact, pour percer le béton (jusqu'à 24 mm), le métal et le bois, et buriner grâce au rotation stop. Compact et léger (2,5 kg), il bénéficie de la technologie PERFORM+PROTECT qui limite les vibrations (6,6 m/s² en perçage, 5,4 m/s² en burinage) pour un confort de travail prolongé. Livré en machine seule (sans batterie ni chargeur), à rejoindre ton parc 18V XR. Livraison DOM-TOM ; octroi de mer calculé automatiquement selon ton territoire."
+  },
+  {
     "id": "dewalt-d25134k",
     "slug": "dewalt-d25134k-perforateur-burineur-sds-plus-800w-coffret-tstak",
     "sku": "D25134K",
