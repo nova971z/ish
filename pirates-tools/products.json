@@ -3635,5 +3635,61 @@
       "Livré": "coffret TSTAK avec 2 batteries 5,0 Ah + chargeur"
     },
     "description_long": "La boulonneuse à chocs DeWALT DCF891P2T-QW délivre 812 Nm de couple de serrage grâce à son moteur sans charbon 18V XR, sur un carré conducteur 1/2\". Ses 3 vitesses sélectionnables et son variateur permettent d'ajuster finement l'effort selon la tâche, de l'assemblage délicat au boulon récalcitrant. Compacte et légère (1,67 kg à nu), elle reste maniable toute la journée en mécanique, charpente métallique et maintenance. Ce pack est livré complet et prêt à l'emploi : 2 batteries 18V XR 5,0 Ah, un chargeur et un coffret TSTAK robuste. Compatible avec toute la gamme 18V XR DeWALT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+  },
+  {
+    "id": "makita-dhr202zj",
+    "slug": "makita-dhr202zj-perforateur-sds-plus-18v",
+    "sku": "DHR202ZJ",
+    "title": "Makita DHR202ZJ — Perforateur burineur SDS-Plus 2J 18V LXT (solo, coffret MAKPAC)",
+    "name": "DHR202ZJ",
+    "brand": "Makita",
+    "category": "Perforateurs",
+    "tag": "Nouveau",
+    "desc": "Perforateur burineur SDS-Plus 18V LXT, 3 fonctions (perçage, percussion, burinage), 2 J, Ø béton 20 mm. Solo en coffret MAKPAC.",
+    "img": "images/posters/dhr202zj.webp",
+    "price": 181.45,
+    "currency": "EUR",
+    "vat": 0.2,
+    "price_ht": 151.21,
+    "stock_status": "in_stock",
+    "stock_label": "En stock",
+    "model": "",
+    "paymentLink": "",
+    "weight_kg": 3.5,
+    "ncCategory": "power_tool",
+    "productType": "pro",
+    "tags": [
+      "tropical_ready"
+    ],
+    "features": [
+      "Perforateur burineur SDS-Plus 18V LXT à 3 fonctions : perçage, percussion et burinage",
+      "Force de frappe 2 J et cadence jusqu’à 4000 cps/min pour attaquer le béton",
+      "Perçage jusqu’à Ø 20 mm dans le béton, 26 mm dans le bois, 13 mm dans le métal",
+      "Sélecteur de mode simple et poignée latérale amovible avec butée de profondeur",
+      "Vendu seul (sans batterie ni chargeur) dans son coffret MAKPAC empilable"
+    ],
+    "specs": {
+      "Marque": "Makita",
+      "Type": "Perforateur burineur SDS-Plus",
+      "Tension": "18 V LXT",
+      "Batteries compatibles": "Gamme LXT 18 V (non incluses)",
+      "Composition batterie": "Li-Ion",
+      "Emmanchement": "SDS-Plus",
+      "Fonctions": "Perçage / perçage à percussion / burinage",
+      "Vitesse à vide": "1200 tr/min",
+      "Cadence de frappe": "4000 cps/min",
+      "Énergie de frappe (EPTA)": "2 J",
+      "Ø max. béton": "20 mm",
+      "Ø max. bois": "26 mm",
+      "Ø max. métal": "13 mm",
+      "Type de moteur": "À charbons (brushed)",
+      "Pression sonore (LpA)": "87 dB(A)",
+      "Puissance sonore (LwA)": "98 dB(A)",
+      "Vibrations (burinage)": "11 m/s²",
+      "Poids net EPTA": "3,5 kg",
+      "Dimensions (L × l × h)": "358 × 104 × 235 mm",
+      "Livré": "machine seule, coffret MAKPAC (batterie et chargeur non inclus)"
+    },
+    "description_long": "Le perforateur burineur Makita DHR202ZJ est un SDS-Plus 18V LXT polyvalent à 3 fonctions : perçage, perçage à percussion et burinage. Avec une énergie de frappe de 2 J et une cadence pouvant atteindre 4000 cps/min, il perce jusqu'à 20 mm dans le béton, 26 mm dans le bois et 13 mm dans le métal. Son sélecteur de mode est simple d'accès et sa poignée latérale amovible avec butée de profondeur assure un travail précis et sûr. Il est vendu seul (sans batterie ni chargeur) dans un coffret MAKPAC empilable, compatible avec toute la gamme LXT 18V Makita. Poids net 3,5 kg. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
   }
 ]
