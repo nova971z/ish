@@ -2066,7 +2066,7 @@
     "price_ht": 343.94,
     "stock_status": "in_stock",
     "stock_label": "En stock",
-    "model": "",
+    "model": "models/products/DCH273.glb",
     "paymentLink": "",
     "weight_kg": 3.1,
     "ncCategory": "power_tool",
