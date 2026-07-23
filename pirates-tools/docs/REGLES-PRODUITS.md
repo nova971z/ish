@@ -109,10 +109,17 @@ Prix = TTC source (hors promo) → affiché (× 1,15) / HT.
 | DCD996P2-QW | poster (pack XRP) | — | — | dcd996p2-v2 |
 | DCG440N-XJ | créé (meuleuse 180 54V) | 317,72 | 365,38 | dcg440n |
 | DCF620P2K | remplace DCF620D2K (5 Ah) | 318,90 | 366,73 | dcf620p2k |
-| DCS378P2-QW | créé (scie à ruban) | **⚠ à revoir** | ⚠ 825,70 provisoire | dcs378p2 |
+| DCS378P2-QW | créé (scie à ruban) | 718,00 (base) | 825,70 ✅ | dcs378p2 |
 
-### ⏳ Prix EN ATTENTE / à revoir
-- **DCS378P2-QW** : le 825,70 € vient d'un « prix conseillé » (MSRP) sur un site en soldes → **trop cher pour les DOM-TOM**. À recaler dès que l'user donne le **vrai prix cotébrico hors promo**.
+### 🌴 CONTEXTE PRIX DOM-TOM (validé user 23/07)
+Les outils se vendent **beaucoup plus cher** en Guadeloupe / DOM-TOM (import + octroi de
+mer + faible concurrence). Nos prix `métropole × 1,15` restent donc **compétitifs
+localement**, même quand ils paraissent élevés vus de métropole.
+- **DCS378P2-QW** (scie à ruban) : **825,70 € VALIDÉ** — l'user estime qu'elle se vend
+  ≥ 1500 € localement. Ne PAS baisser. (Ma crainte « trop cher » était une erreur de
+  lecture : c'est au contraire un bon prix pour le marché antillais.)
+- ⚠️ Nuance : ceci ne rouvre PAS la porte aux promos. On part toujours du **TTC normal
+  hors promo** ; simplement, un prix qui semble haut en métropole peut être juste ici.
 
 ### Décisions produit gravées ailleurs
 - DCF894N = **vrai produit distinct** (à garder), ≠ DCF891NT-XJ (ne pas fusionner/supprimer).
