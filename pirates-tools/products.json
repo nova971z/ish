@@ -3795,5 +3795,55 @@
       "Livré avec": "2 batteries 5,0 Ah + chargeur DCB1104"
     },
     "description_long": "La scie à ruban portative DeWALT DCS378P2-QW coupe proprement les métaux (tubes, profilés, barres) grâce à son moteur brushless 18V XR de 530 W et sa vitesse de ruban réglable jusqu'à 174 m/min sur 5 positions. Sa capacité de coupe de 86 × 86 mm et sa prise en main compacte en font l'outil idéal pour la découpe rapide sur chantier, sans le fil. Ce pack est livré complet : 2 batteries 18V XR 5,0 Ah et un chargeur DCB1104. Compatible avec toute la gamme 18V XR DeWALT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+  },
+  {
+    "id": "dewalt-dcg200nt-xj",
+    "slug": "dewalt-dcg200nt-xj-rainureuse-beton-54v-flexvolt",
+    "sku": "DCG200NT-XJ",
+    "title": "DeWALT DCG200NT-XJ — Rainureuse à béton 54V XR FlexVolt Brushless (machine seule, coffret TSTAK)",
+    "name": "DCG200NT-XJ",
+    "brand": "DeWALT",
+    "category": "Découpeuses",
+    "tag": "Nouveau",
+    "desc": "Rainureuse à béton sans fil 54V XR FlexVolt, profondeur 32 mm, largeur réglable 8–35 mm, 9000 tr/min, frein anti-rebond. Machine seule en coffret TSTAK.",
+    "img": "images/posters/dcg200nt.webp",
+    "price": 672.06,
+    "currency": "EUR",
+    "vat": 0.2,
+    "price_ht": 560.05,
+    "stock_status": "in_stock",
+    "stock_label": "En stock",
+    "model": "",
+    "paymentLink": "",
+    "weight_kg": 5.4,
+    "ncCategory": "power_tool",
+    "productType": "pro",
+    "tags": [
+      "brushless",
+      "tropical_ready"
+    ],
+    "features": [
+      "Première rainureuse à béton sans fil au monde : plateforme 54V XR FlexVolt brushless",
+      "Deux disques diamant 125 mm : réalise des saignées nettes dans le béton plein",
+      "Profondeur de coupe jusqu'à 32 mm, largeur de rainure réglable de 8 à 35 mm",
+      "Frein électronique anti-rebond + réglage de profondeur sans outil",
+      "Machine seule (sans batterie ni chargeur) livrée en coffret TSTAK avec 2 disques"
+    ],
+    "specs": {
+      "Marque": "DeWALT",
+      "Type": "Rainureuse à béton sans fil",
+      "Tension": "54 V XR FlexVolt",
+      "Batteries compatibles": "FlexVolt 54 V (non incluses)",
+      "Type de moteur": "Brushless (sans charbon)",
+      "Vitesse à vide": "9000 tr/min",
+      "Diamètre de disque": "125 mm",
+      "Filetage": "M14",
+      "Profondeur de rainure max.": "32 mm",
+      "Largeur de rainure": "8 à 35 mm (réglable)",
+      "Frein": "Électronique anti-rebond",
+      "Confort": "Réglage de profondeur sans outil, Wireless Tool Control",
+      "Livré": "machine seule + 2 disques diamant + coffret TSTAK (batterie et chargeur non inclus)"
+    },
+    "description_long": "La DeWALT DCG200NT-XJ est la première rainureuse à béton sans fil au monde, sur plateforme 54V XR FlexVolt à moteur brushless. Équipée de deux disques diamant de 125 mm, elle réalise des saignées nettes dans le béton plein jusqu'à 32 mm de profondeur, avec une largeur de rainure réglable de 8 à 35 mm pour tous les diamètres de gaines et tuyaux. Son frein électronique anti-rebond et son réglage de profondeur sans outil sécurisent et accélèrent le travail. Vendue en machine seule (sans batterie ni chargeur) dans un coffret TSTAK avec ses deux disques. Compatible batteries FlexVolt 54V DeWALT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
   }
 ]
