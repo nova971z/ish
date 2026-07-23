@@ -7,6 +7,14 @@ Branche de dev : `claude/pirates-tools-rebuild-zWc1b`. Prod = Vercel, domaine pe
 Code de niveau ingénieur web senior, standard des grandes institutions e-commerce.
 Aucun hasard, aucun bullshit. Chaque correction est vérifiée dans le code avant d'être livrée.
 
+## 🛒 RÈGLES PRODUITS / POSTERS — GRAVÉES (source de vérité : `pirates-tools/docs/REGLES-PRODUITS.md`)
+LIRE CE FICHIER avant d'ajouter/modifier un produit ou un poster. Cœur des règles imposées par l'user (23/07/2026) :
+- **PRIX** : `price` (TTC affiché) = **prix TTC source × 1,15** (marge 15 % SUR le TTC) ; `price_ht` = price / 1,20.
+- **PROMOS INTERDITES** : ⛔ ne JAMAIS regarder ni utiliser un prix soldé / promo / −X% / barré. Toujours le TTC normal. Un « prix conseillé »/MSRP gonflé ≠ prix source → demander le vrai prix cotébrico, ne pas deviner. Prix doit rester crédible DOM-TOM.
+- **POSTERS** : fond sombre obligatoire (jamais blanc — signaler AVANT si fond clair). PNG envoyé = à POSER sur le site (pas à regarder). « Machine seule/outil nu » = pas de batteries sur l'image.
+- **WORKFLOW** : travailler DIRECTEMENT sur `master` (commit + push immédiat → Vercel live). CI verte à chaque fois. Identifier le produit par le TITRE de la capture pirates-tools.com.
+- Journal des produits validés + prix en attente : voir le fichier REGLES-PRODUITS.md §7.
+
 ## 📌 À FAIRE PLUS TARD (en attente, décidé avec l'user — à traiter ensemble)
 - [ ] **Déployer les règles Firestore** (verrou anti-fraude S1 + crypto désactivé
       v322 : le fichier firestore.rules est à jour, mais PAS déployé sur le
