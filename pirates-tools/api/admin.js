@@ -181,7 +181,11 @@ module.exports = async function handler(req, res) {
 // L'IP DE L'USER (le serveur est bloqué en 403) et le POST ici. On extrait
 // réf + prix HORS PROMO, et on met à jour les prix (product_overrides) — avec
 // GARDE-FOUS pour que l'auto-application soit sûre. dryRun=true → aucun écrit.
-const PW = { MARGIN: 1.15, VAT: 1.20, MIN_TTC: 5, MAX_TTC: 2000, MAX_MOVE: 0.25 };
+// MAX_TTC volontairement TRÈS haut (packs multi-outils = chers) : la réf exacte
+// identifie le bon produit et son bloc ne contient que son prix → on fait confiance.
+// Le vrai filet reste MAX_MOVE (variation %), qui rattrape un éventuel découpage
+// de bloc raté sans jamais bloquer un pack cher légitime.
+const PW = { MARGIN: 1.15, VAT: 1.20, MIN_TTC: 5, MAX_TTC: 8000, MAX_MOVE: 0.25 };
 function pwRound2(n) { return Math.round(n * 100) / 100; }
 
 async function handlePriceWatch(req, res, admin, db) {
