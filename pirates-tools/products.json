@@ -337,7 +337,7 @@
     "price_ht": 272.13,
     "stock_status": "in_stock",
     "stock_label": "En stock",
-    "model": "",
+    "model": "models/products/dcf887p2-pack.glb",
     "paymentLink": "",
     "weight_kg": 1.6,
     "ncCategory": "power_tool",
