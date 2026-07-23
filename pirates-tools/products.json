@@ -3691,5 +3691,59 @@
       "Livré": "machine seule, coffret MAKPAC (batterie et chargeur non inclus)"
     },
     "description_long": "Le perforateur burineur Makita DHR202ZJ est un SDS-Plus 18V LXT polyvalent à 3 fonctions : perçage, perçage à percussion et burinage. Avec une énergie de frappe de 2 J et une cadence pouvant atteindre 4000 cps/min, il perce jusqu'à 20 mm dans le béton, 26 mm dans le bois et 13 mm dans le métal. Son sélecteur de mode est simple d'accès et sa poignée latérale amovible avec butée de profondeur assure un travail précis et sûr. Il est vendu seul (sans batterie ni chargeur) dans un coffret MAKPAC empilable, compatible avec toute la gamme LXT 18V Makita. Poids net 3,5 kg. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+  },
+  {
+    "id": "dewalt-dcg440n-xj",
+    "slug": "dewalt-dcg440n-xj-meuleuse-180mm-54v-flexvolt",
+    "sku": "DCG440N-XJ",
+    "title": "DeWALT DCG440N-XJ — Meuleuse d'angle 180 mm 54V XR FlexVolt Brushless (machine seule)",
+    "name": "DCG440N-XJ",
+    "brand": "DeWALT",
+    "category": "Meuleuses",
+    "tag": "Nouveau",
+    "desc": "Meuleuse d'angle 180 mm 18/54V XR FlexVolt, moteur brushless 2300 W utile, 6500 tr/min, frein moteur + débrayage de sécurité. Machine seule.",
+    "img": "images/posters/dcg440n.webp",
+    "price": 365.38,
+    "currency": "EUR",
+    "vat": 0.2,
+    "price_ht": 304.48,
+    "stock_status": "in_stock",
+    "stock_label": "En stock",
+    "model": "",
+    "paymentLink": "",
+    "weight_kg": 2.6,
+    "ncCategory": "power_tool",
+    "productType": "pro",
+    "tags": [
+      "brushless",
+      "tropical_ready"
+    ],
+    "features": [
+      "Meuleuse d'angle 180 mm sur plateforme 18/54V XR FlexVolt : la puissance du filaire sans le câble",
+      "Moteur brushless 2300 W utile, vitesse 6500 tr/min pour meuler et tronçonner",
+      "Frein moteur électronique : le disque s'arrête net dès le relâchement",
+      "Débrayage de sécurité / limiteur de couple anti-recul en cas de blocage du disque",
+      "Machine seule (sans batterie ni chargeur), compatible batteries FlexVolt 18/54V et XR 18V"
+    ],
+    "specs": {
+      "Marque": "DeWALT",
+      "Type": "Meuleuse d'angle sans fil",
+      "Tension": "18/54 V FlexVolt",
+      "Batteries compatibles": "FlexVolt 18/54 V, gamme XR 18V (non incluses)",
+      "Composition batterie": "Li-Ion",
+      "Puissance utile": "2300 W",
+      "Vitesse à vide": "6500 tr/min",
+      "Diamètre du disque": "180 mm",
+      "Alésage / filetage": "M14 (22,23 mm)",
+      "Type de moteur": "Brushless (sans charbon)",
+      "Sécurité": "Débrayage de sécurité / limiteur de couple + frein moteur",
+      "Pression sonore (LpA)": "87 dB(A)",
+      "Puissance sonore (LwA)": "95 dB(A)",
+      "Vibrations (meulage)": "4,5 m/s²",
+      "Vibrations (ponçage)": "3,3 m/s²",
+      "Poids net EPTA": "2,6 kg",
+      "Livré": "machine seule (batterie et chargeur non inclus)"
+    },
+    "description_long": "La meuleuse d'angle DeWALT DCG440N-XJ accepte les disques de 180 mm et délivre la puissance d'une meuleuse filaire grâce à sa plateforme 18/54V XR FlexVolt et son moteur brushless (2300 W utiles, 6500 tr/min). Elle est équipée d'un frein moteur électronique qui stoppe net le disque au relâchement de la gâchette, et d'un débrayage de sécurité / limiteur de couple qui protège l'utilisateur en cas de blocage du disque. Idéale pour le meulage et le tronçonnage sur chantier. Vendue en machine seule (sans batterie ni chargeur), compatible avec toutes les batteries FlexVolt 18/54V et XR 18V DeWALT. Poids net 2,6 kg. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
   }
 ]
