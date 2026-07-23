@@ -1796,12 +1796,23 @@
       if (!v) return;
       v.setAttribute('alt', alt);
       if (product.img) v.setAttribute('poster', product.img);
-      if (product.model && load3D) {
-        v.removeAttribute('reveal');            // reveal auto → charge la 3D interactive
-        v.setAttribute('src', product.model);
+      // #pdp3dSecondary PERSISTE entre les fiches (SPA, même élément réutilisé).
+      // Sans reset explicite, model-viewer garde le DERNIER GLB chargé → « modèle
+      // fantôme » : un produit sans GLB (ou dont le GLB change) affiche le modèle
+      // de la fiche précédente. On force donc l'état EXACT voulu à chaque ouverture.
+      var wanted = (product.model && load3D) ? product.model : '';
+      var current = v.getAttribute('src') || '';
+      if (current !== wanted) {
+        // Décharge systématiquement l'ancien modèle AVANT d'installer le bon
+        // (transition src: absent → nouveau = rechargement garanti par model-viewer).
+        v.removeAttribute('src');
+        try { v.src = null; } catch (e) {}
+      }
+      if (wanted) {
+        v.setAttribute('reveal', 'auto');       // charge/affiche SON modèle 3D
+        v.setAttribute('src', wanted);
       } else {
-        v.removeAttribute('src');               // aucune 3D → reste sur le poster
-        v.setAttribute('reveal', 'manual');     // figé sur le poster (image produit)
+        v.setAttribute('reveal', 'manual');     // aucun GLB → figé sur le poster produit
       }
     }
     var viewer2 = document.getElementById('pdp3dSecondary');
