@@ -3845,5 +3845,60 @@
       "Livré": "machine seule + 2 disques diamant + coffret TSTAK (batterie et chargeur non inclus)"
     },
     "description_long": "La DeWALT DCG200NT-XJ est la première rainureuse à béton sans fil au monde, sur plateforme 54V XR FlexVolt à moteur brushless. Équipée de deux disques diamant de 125 mm, elle réalise des saignées nettes dans le béton plein jusqu'à 32 mm de profondeur, avec une largeur de rainure réglable de 8 à 35 mm pour tous les diamètres de gaines et tuyaux. Son frein électronique anti-rebond et son réglage de profondeur sans outil sécurisent et accélèrent le travail. Vendue en machine seule (sans batterie ni chargeur) dans un coffret TSTAK avec ses deux disques. Compatible batteries FlexVolt 54V DeWALT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+  },
+  {
+    "id": "makita-dga452z",
+    "slug": "makita-dga452z-meuleuse-115mm-18v-lxt",
+    "sku": "DGA452Z",
+    "title": "Makita DGA452Z — Meuleuse angulaire 18V LXT Ø115 mm (machine seule)",
+    "name": "DGA452Z",
+    "brand": "Makita",
+    "category": "Meuleuses",
+    "tag": "Nouveau",
+    "desc": "Meuleuse angulaire 18V LXT Ø115 mm, compacte et légère (1,6 kg), interrupteur blocable, indicateur de charge. Machine seule (sans batterie ni chargeur).",
+    "img": "images/posters/dga452z.webp",
+    "price": 90.68,
+    "currency": "EUR",
+    "vat": 0.2,
+    "price_ht": 75.57,
+    "stock_status": "in_stock",
+    "stock_label": "En stock",
+    "model": "",
+    "paymentLink": "",
+    "weight_kg": 1.6,
+    "ncCategory": "power_tool",
+    "productType": "pro",
+    "tags": [
+      "tropical_ready"
+    ],
+    "features": [
+      "Meuleuse angulaire 18V LXT Ø115 mm : compacte, légère (1,6 kg) et maniable",
+      "Idéale pour le meulage et le tronçonnage courants sur chantier, sans fil",
+      "Interrupteur blocable pour un travail continu en sécurité",
+      "Indicateur de niveau de charge intégré, faible circonférence de prise (195 mm)",
+      "Machine seule (sans batterie ni chargeur), compatible toutes batteries LXT 18V Makita"
+    ],
+    "specs": {
+      "Marque": "Makita",
+      "Type": "Meuleuse angulaire sans fil",
+      "Tension": "18 V LXT",
+      "Batteries compatibles": "Gamme LXT 18 V (non incluses)",
+      "Composition batterie": "Li-Ion",
+      "Type de moteur": "À charbons (brushed)",
+      "Vitesse à vide": "8500 tr/min",
+      "Diamètre du disque": "115 mm",
+      "Alésage / filetage": "M14 (22,23 mm)",
+      "Profondeur de coupe max.": "34 mm",
+      "Type d'interrupteur": "Interrupteur blocable",
+      "Indicateur de charge": "Oui",
+      "Circonférence de prise en main": "195 mm",
+      "Pression sonore (LpA)": "86 dB(A)",
+      "Puissance sonore (LwA)": "97 dB(A)",
+      "Vibrations (meulage)": "5 m/s²",
+      "Poids net EPTA": "1,6 kg",
+      "Dimensions (L × l × h)": "317 × 129 × 126 mm",
+      "Livré": "machine seule (batterie et chargeur non inclus)"
+    },
+    "description_long": "La meuleuse angulaire Makita DGA452Z est un outil 18V LXT compact et léger (1,6 kg) pour disques de 115 mm, pensé pour les travaux de meulage et de tronçonnage courants. Sa faible circonférence de prise en main (195 mm) et son poids réduit la rendent maniable toute la journée. Elle dispose d'un interrupteur blocable pour le travail continu et d'un indicateur de niveau de charge. Vendue en machine seule (sans batterie ni chargeur), elle fonctionne avec toutes les batteries LXT 18V Makita. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
   }
 ]
