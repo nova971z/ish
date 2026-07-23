@@ -5731,7 +5731,7 @@
     } else {
       html += '<div id="adminGlobe" class="admin-globe" aria-hidden="true"></div>';
       var gmap = {};
-      geo.slice(0, 15).forEach(function (g) { gmap[g.country] = g.count; });
+      geo.slice(0, 15).forEach(function (g) { gmap[countryName(g.country)] = g.count; });
       html += barRows(gmap, { limit: 15 });
     }
     html += '</section>';
@@ -5756,6 +5756,27 @@
     BE:[50.5,4.5], ES:[40,-4], IT:[42,12], CA:[56,-106], NL:[52,5], CH:[47,8],
     PT:[39,-8], LU:[49.8,6.1], MA:[32,-6], SN:[14.5,-14.5], CI:[7.5,-5.5]
   };
+  // Code ISO pays → nom complet (FR). Sert à afficher des noms lisibles dans la
+  // liste de provenance de l'admin plutôt que des initiales. Fallback = le code.
+  var COUNTRY_NAME = {
+    FR:'France', GP:'Guadeloupe', MQ:'Martinique', GF:'Guyane', RE:'La Réunion',
+    YT:'Mayotte', PM:'Saint-Pierre-et-Miquelon', BL:'Saint-Barthélemy', MF:'Saint-Martin',
+    NC:'Nouvelle-Calédonie', PF:'Polynésie française', WF:'Wallis-et-Futuna', TF:'TAAF',
+    US:'États-Unis', GB:'Royaume-Uni', DE:'Allemagne', BE:'Belgique', ES:'Espagne',
+    IT:'Italie', CA:'Canada', NL:'Pays-Bas', CH:'Suisse', PT:'Portugal', LU:'Luxembourg',
+    MA:'Maroc', SN:'Sénégal', CI:'Côte d\'Ivoire', IE:'Irlande', AT:'Autriche', SE:'Suède',
+    NO:'Norvège', DK:'Danemark', FI:'Finlande', PL:'Pologne', CZ:'Tchéquie', GR:'Grèce',
+    RO:'Roumanie', HU:'Hongrie', BG:'Bulgarie', HR:'Croatie', SK:'Slovaquie', SI:'Slovénie',
+    LT:'Lituanie', LV:'Lettonie', EE:'Estonie', CY:'Chypre', MT:'Malte', MX:'Mexique',
+    BR:'Brésil', AR:'Argentine', JP:'Japon', CN:'Chine', IN:'Inde', AU:'Australie',
+    NZ:'Nouvelle-Zélande', ZA:'Afrique du Sud', DZ:'Algérie', TN:'Tunisie', RU:'Russie',
+    TR:'Turquie', HT:'Haïti', DO:'République dominicaine', GY:'Guyana', SR:'Suriname',
+    BB:'Barbade', LC:'Sainte-Lucie', DM:'Dominique', AG:'Antigua-et-Barbuda',
+    TT:'Trinité-et-Tobago', VE:'Venezuela', CO:'Colombie', CM:'Cameroun', GA:'Gabon',
+    BJ:'Bénin', TG:'Togo', ML:'Mali', BF:'Burkina Faso', NE:'Niger', GN:'Guinée',
+    CD:'Congo (RDC)', CG:'Congo', MG:'Madagascar', MU:'Maurice'
+  };
+  function countryName(code) { return (code && COUNTRY_NAME[code]) || code || 'Inconnu'; }
   var _adminGlobe = null;
 
   function destroyAdminGlobe() {
