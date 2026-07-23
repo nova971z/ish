@@ -3744,5 +3744,55 @@
       "Livré": "machine seule (batterie et chargeur non inclus)"
     },
     "description_long": "La meuleuse d'angle DeWALT DCG440N-XJ accepte les disques de 180 mm et délivre la puissance d'une meuleuse filaire grâce à sa plateforme 18/54V XR FlexVolt et son moteur brushless (2300 W utiles, 6500 tr/min). Elle est équipée d'un frein moteur électronique qui stoppe net le disque au relâchement de la gâchette, et d'un débrayage de sécurité / limiteur de couple qui protège l'utilisateur en cas de blocage du disque. Idéale pour le meulage et le tronçonnage sur chantier. Vendue en machine seule (sans batterie ni chargeur), compatible avec toutes les batteries FlexVolt 18/54V et XR 18V DeWALT. Poids net 2,6 kg. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+  },
+  {
+    "id": "dewalt-dcs378p2-qw",
+    "slug": "dewalt-dcs378p2-qw-scie-a-ruban-18v-pack",
+    "sku": "DCS378P2-QW",
+    "title": "DeWALT DCS378P2-QW — Scie à ruban 18V XR Brushless (pack 2×5,0 Ah + chargeur DCB1104)",
+    "name": "DCS378P2-QW",
+    "brand": "DeWALT",
+    "category": "Scies",
+    "tag": "Nouveau",
+    "desc": "Scie à ruban portative 18V XR sans charbon, 530 W, 174 m/min, capacité de coupe 86×86 mm, 5 vitesses. Pack 2 batteries 5,0 Ah + chargeur.",
+    "img": "images/posters/dcs378p2.webp",
+    "price": 825.7,
+    "currency": "EUR",
+    "vat": 0.2,
+    "price_ht": 688.08,
+    "stock_status": "in_stock",
+    "stock_label": "En stock",
+    "model": "",
+    "paymentLink": "",
+    "weight_kg": 5,
+    "ncCategory": "power_tool",
+    "productType": "pro",
+    "tags": [
+      "brushless",
+      "tropical_ready"
+    ],
+    "features": [
+      "Scie à ruban portative 18V XR sans charbon : coupe nette des métaux sans effort",
+      "Puissance 530 W et vitesse de ruban jusqu’à 174 m/min, 5 vitesses réglables",
+      "Capacité de coupe 86 × 86 mm (tubes, profilés, barres)",
+      "Compacte et maniable pour la découpe sur chantier, une seule main",
+      "Pack complet : 2 batteries 18V XR 5,0 Ah + chargeur DCB1104"
+    ],
+    "specs": {
+      "Marque": "DeWALT",
+      "Type": "Scie à ruban portative sans fil",
+      "Tension": "18 V XR",
+      "Puissance": "530 W",
+      "Vitesse à vide max.": "174 m/min",
+      "Capacité de coupe": "86 × 86 mm",
+      "Nombre de vitesses": "5",
+      "Type de moteur": "Brushless (sans charbon)",
+      "Batteries fournies": "2 × 5,0 Ah (XR Li-Ion)",
+      "Chargeur": "DCB1104 inclus",
+      "Marquage CE": "Oui",
+      "Poids (outil)": "3,8 kg",
+      "Livré avec": "2 batteries 5,0 Ah + chargeur DCB1104"
+    },
+    "description_long": "La scie à ruban portative DeWALT DCS378P2-QW coupe proprement les métaux (tubes, profilés, barres) grâce à son moteur brushless 18V XR de 530 W et sa vitesse de ruban réglable jusqu'à 174 m/min sur 5 positions. Sa capacité de coupe de 86 × 86 mm et sa prise en main compacte en font l'outil idéal pour la découpe rapide sur chantier, sans le fil. Ce pack est livré complet : 2 batteries 18V XR 5,0 Ah et un chargeur DCB1104. Compatible avec toute la gamme 18V XR DeWALT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
   }
 ]
