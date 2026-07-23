@@ -5776,7 +5776,22 @@
     BJ:'Bénin', TG:'Togo', ML:'Mali', BF:'Burkina Faso', NE:'Niger', GN:'Guinée',
     CD:'Congo (RDC)', CG:'Congo', MG:'Madagascar', MU:'Maurice'
   };
-  function countryName(code) { return (code && COUNTRY_NAME[code]) || code || 'Inconnu'; }
+  // Intl.DisplayNames couvre TOUS les pays ISO en français (natif navigateur,
+  // aucune ressource externe). Repli sur la table ci-dessus pour les très vieux
+  // navigateurs, puis sur le code brut si vraiment inconnu.
+  var _regionNames = null;
+  try {
+    if (typeof Intl !== 'undefined' && Intl.DisplayNames) {
+      _regionNames = new Intl.DisplayNames(['fr'], { type: 'region' });
+    }
+  } catch (_) { _regionNames = null; }
+  function countryName(code) {
+    if (!code) return 'Inconnu';
+    if (_regionNames) {
+      try { var n = _regionNames.of(code); if (n && n !== code) return n; } catch (_) {}
+    }
+    return COUNTRY_NAME[code] || code;
+  }
   var _adminGlobe = null;
 
   function destroyAdminGlobe() {
