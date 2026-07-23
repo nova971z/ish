@@ -7,6 +7,8 @@ const auth = require('./_lib/auth');
 const http = require('./_lib/http');
 const firebase = require('./_lib/firebase');
 const analytics = require('./_lib/analytics');
+const catalog = require('./_lib/catalog');
+const priceParse = require('./_lib/price-parse');
 
 module.exports = async function handler(req, res) {
   http.applyCors(req, res);
@@ -113,6 +115,13 @@ module.exports = async function handler(req, res) {
     }
   }
 
+  // ── POST ?type=price-watch : traqueur de prix fournisseur ──
+  // Fusionné ici (et pas dans un endpoint dédié) pour rester sous le plafond
+  // Vercel Hobby de 12 fonctions serverless.
+  if (req.method === 'POST' && ((req.query && req.query.type) === 'price-watch')) {
+    return handlePriceWatch(req, res, admin, db);
+  }
+
   // ── POST : update or create an override ───────────────────
   if (req.method === 'POST') {
     try {
@@ -166,3 +175,73 @@ module.exports = async function handler(req, res) {
 
   return res.status(405).json({ ok: false, error: 'Method not allowed' });
 };
+
+// ── Traqueur de prix fournisseur (cotébrico) ────────────────────────────────
+// Le raccourci iPad récupère le TEXTE/HTML d'une page marque cotébrico DEPUIS
+// L'IP DE L'USER (le serveur est bloqué en 403) et le POST ici. On extrait
+// réf + prix HORS PROMO, et on met à jour les prix (product_overrides) — avec
+// GARDE-FOUS pour que l'auto-application soit sûre. dryRun=true → aucun écrit.
+const PW = { MARGIN: 1.15, VAT: 1.20, MIN_TTC: 5, MAX_TTC: 2000, MAX_MOVE: 0.25 };
+function pwRound2(n) { return Math.round(n * 100) / 100; }
+
+async function handlePriceWatch(req, res, admin, db) {
+  try {
+    const body = (req.body && typeof req.body === 'object') ? req.body : {};
+    let text = (typeof req.body === 'string') ? req.body : (body.text || '');
+    const brand = String(body.brand || (req.query && req.query.brand) || 'DEWALT').toUpperCase();
+    const dryRun = body.dryRun === true || (req.query && (req.query.dryRun === '1' || req.query.dryRun === 'true'));
+    if (!text || text.length < 200) return res.status(400).json({ ok: false, error: 'text manquant ou trop court' });
+
+    const parsed = priceParse.parseCotebrico(text, brand);
+    if (!parsed.length) return res.status(200).json({ ok: true, brand, parsed: 0, note: 'aucun produit reconnu (mauvaise page ou format changé ?)' });
+
+    const products = await catalog.loadCatalog();
+    const bySku = {};
+    products.forEach((p) => { if (p.sku) bySku[String(p.sku).toUpperCase()] = p; });
+
+    const applied = [], flagged = [], unchanged = [], unknown = [];
+    const now = admin.firestore.FieldValue.serverTimestamp();
+
+    for (const item of parsed) {
+      const p = bySku[item.sku];
+      if (!p) { unknown.push({ sku: item.sku, srcTTC: item.price, name: item.name }); continue; }
+      const src = item.price;
+      const newPrice = pwRound2(src * PW.MARGIN);
+      const newHt = pwRound2(newPrice / PW.VAT);
+      const cur = typeof p.price === 'number' ? p.price : null;
+      const rec = { sku: item.sku, id: p.id, name: p.title || p.name, srcTTC: src, newPrice, newHt, oldPrice: cur };
+
+      if (cur != null && Math.abs(newPrice - cur) < 0.02) { unchanged.push(rec); continue; }
+
+      let reason = null;
+      if (src < PW.MIN_TTC || src > PW.MAX_TTC) reason = 'prix source hors fourchette (' + src + ' €)';
+      else if (cur != null && cur > 0 && Math.abs(newPrice - cur) / cur > PW.MAX_MOVE) {
+        reason = 'variation ' + Math.round(Math.abs(newPrice - cur) / cur * 100) + ' % > ' + Math.round(PW.MAX_MOVE * 100) + ' %';
+      }
+      if (reason) { rec.reason = reason; flagged.push(rec); continue; }
+
+      if (!dryRun) {
+        await db.collection('product_overrides').doc(p.id).set({
+          price: newPrice, price_ht: newHt,
+          priceSource: 'cotebrico', priceSrcTTC: src, priceCheckedAt: now
+        }, { merge: true });
+        await db.collection('price_watch_log').add({
+          sku: item.sku, id: p.id, oldPrice: cur, newPrice, srcTTC: src, brand, at: now
+        });
+      }
+      applied.push(rec);
+    }
+
+    return res.status(200).json({
+      ok: true, brand, dryRun: !!dryRun,
+      counts: { parsed: parsed.length, applied: applied.length, flagged: flagged.length, unchanged: unchanged.length, unknown: unknown.length },
+      applied, flagged, unknown: unknown.slice(0, 100)
+    });
+  } catch (err) {
+    console.error('[api/admin] price-watch failed:', err.message);
+    return res.status(500).json({ ok: false, error: 'price-watch failed' });
+  }
+}
+
+// Corps volumineux (3 pages cotébrico) → augmente la limite du body parser.
+module.exports.config = { api: { bodyParser: { sizeLimit: '4mb' } } };
