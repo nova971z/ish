@@ -31,6 +31,20 @@ module.exports = function () {
   var rTTC = model.recommend(visseuse, { costTTC: 74.40, mode: 'colissimo' });
   near(rTTC.costHT, 62, 0.1, 'costTTC 74,40 → costHT ~62');
 
+  // Mode container : markup plus bas que Colissimo, même marge cible.
+  var cfgCont = Object.assign({}, model.DEFAULT_CONFIG, { mode: 'container' });
+  var rContTTC = model.recommend(visseuse, { costTTC: 74.40, mode: 'container' }, cfgCont);
+  ok(rContTTC.markup < rTTC.markup, 'container : markup < Colissimo (même marge)');
+  ok(rContTTC.marginAfterIS >= 0.149, 'container : marge après IS ≥ 15 %');
+
+  // Sanitisation de la config : rejette clés inconnues, négatifs, mode invalide.
+  var cfgLib = require('../api/_lib/pricing-config');
+  var s = cfgLib.sanitize({ mode: 'container', targetNet: 0.15, evil: 'x', badNum: -5, refTerritory: '971' });
+  ok(s.evil === undefined, 'sanitize : clé inconnue rejetée');
+  ok(s.badNum === undefined, 'sanitize : nombre négatif rejeté');
+  ok(s.mode === 'container', 'sanitize : mode valide conservé');
+  ok(cfgLib.sanitize({ mode: 'avion' }).mode === undefined, 'sanitize : mode invalide rejeté');
+
   return errors;
 };
 

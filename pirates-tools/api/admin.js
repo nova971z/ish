@@ -9,6 +9,8 @@ const firebase = require('./_lib/firebase');
 const analytics = require('./_lib/analytics');
 const catalog = require('./_lib/catalog');
 const priceParse = require('./_lib/price-parse');
+const priceModel = require('./_lib/pricing-model');
+const priceConfig = require('./_lib/pricing-config');
 
 module.exports = async function handler(req, res) {
   http.applyCors(req, res);
@@ -100,6 +102,12 @@ module.exports = async function handler(req, res) {
         return res.status(200).json({ ok: true, clients: clients, total: clients.length });
       }
 
+      // ── Config de tarification (marge cible) ───────────────────
+      if (type === 'pricing-config') {
+        const cfg = await priceConfig.load();
+        return res.status(200).json({ ok: true, config: cfg });
+      }
+
       // Default: list all overrides
       const snap = await db.collection('product_overrides').get();
       const overrides = {};
@@ -120,6 +128,39 @@ module.exports = async function handler(req, res) {
   // Vercel Hobby de 12 fonctions serverless.
   if (req.method === 'POST' && ((req.query && req.query.type) === 'price-watch')) {
     return handlePriceWatch(req, res, admin, db);
+  }
+
+  // ── POST ?type=pricing-config : sauver la config de tarification ──
+  if (req.method === 'POST' && ((req.query && req.query.type) === 'pricing-config')) {
+    try {
+      const cfg = await priceConfig.save(req.body || {});
+      return res.status(200).json({ ok: true, config: cfg });
+    } catch (err) {
+      return res.status(400).json({ ok: false, error: err.message });
+    }
+  }
+
+  // ── POST ?type=price-preview : aperçu du prix recommandé (calcul serveur) ──
+  if (req.method === 'POST' && ((req.query && req.query.type) === 'price-preview')) {
+    try {
+      const body = req.body || {};
+      const cfg = await priceConfig.load();
+      const product = { weight_kg: Number(body.weight) || 2, ncCategory: body.ncCategory || 'power_tool', variantRole: body.variantRole || 'solo', title: body.title || '' };
+      const opts = { mode: body.mode || cfg.mode };
+      if (body.costHT != null) opts.costHT = Number(body.costHT);
+      else opts.costTTC = Number(body.costTTC || 0);
+      const r = priceModel.recommend(product, opts, cfg);
+      return res.status(200).json({ ok: true, result: r });
+    } catch (err) {
+      return res.status(400).json({ ok: false, error: err.message });
+    }
+  }
+
+  // ── POST ?type=reprice-all : recalcule TOUS les prix depuis le modèle ──
+  // Recompute intentionnel (bouton admin). Utilise le coût source connu de chaque
+  // produit (override priceSrcTTC en priorité, sinon price_ht × VAT du produit).
+  if (req.method === 'POST' && ((req.query && req.query.type) === 'reprice-all')) {
+    return handleRepriceAll(req, res, admin, db);
   }
 
   // ── POST : update or create an override ───────────────────
@@ -188,6 +229,75 @@ module.exports = async function handler(req, res) {
 const PW = { MARGIN: 1.15, VAT: 1.20, MIN_TTC: 5, MAX_TTC: 8000, MAX_MOVE: 0.25 };
 function pwRound2(n) { return Math.round(n * 100) / 100; }
 
+// Prix à partir du coût source TTC (src) : MODÈLE de marge cible si cfg.autoPrice,
+// sinon repli historique ×1,15. Retourne { newPrice (TTC métropole), newHt, markup, mode }.
+function pwComputePrice(product, srcTTC, cfg) {
+  if (cfg && cfg.autoPrice) {
+    const r = priceModel.recommend(product, { costTTC: srcTTC, mode: cfg.mode }, cfg);
+    if (r && r.priceHt > 0) {
+      return { newHt: r.priceHt, newPrice: pwRound2(r.priceHt * (1 + (cfg.tvaFR || 0.20))), markup: r.markup, mode: r.mode };
+    }
+  }
+  const newPrice = pwRound2(srcTTC * PW.MARGIN);
+  return { newPrice, newHt: pwRound2(newPrice / PW.VAT), markup: 0.15, mode: 'legacy' };
+}
+
+// Recalcule TOUS les prix depuis le modèle (bouton admin, recompute intentionnel).
+// Coût source = override.priceSrcTTC en priorité, sinon dérivé de price_ht × VAT.
+// Garde-fous de fourchette (MIN/MAX) mais PAS de plafond de variation (le grand
+// saut lors du 1er passage au modèle est voulu). dryRun renvoie l'aperçu sans écrire.
+async function handleRepriceAll(req, res, admin, db) {
+  try {
+    const body = (req.body && typeof req.body === 'object') ? req.body : {};
+    const dryRun = body.dryRun === true || (req.query && (req.query.dryRun === '1' || req.query.dryRun === 'true'));
+    const cfg = await priceConfig.load();
+
+    // Overrides existants (pour le coût source connu).
+    const ovSnap = await db.collection('product_overrides').get();
+    const ov = {};
+    ovSnap.forEach((d) => { ov[d.id] = d.data() || {}; });
+
+    const products = await catalog.loadCatalog();
+    const now = admin.firestore.FieldValue.serverTimestamp();
+    const changed = [], skipped = [];
+
+    for (const p of products) {
+      const o = ov[p.id] || {};
+      // Coût source TTC : priorité au coût réel enregistré par le traqueur.
+      // Sinon, on suppose que le price_ht actuel = ancien coût × 1,15 → on
+      // remonte au coût TTC : srcTTC = (price_ht / 1,15) × (1 + TVA FR).
+      let srcTTC = (typeof o.priceSrcTTC === 'number' && o.priceSrcTTC > 0)
+        ? o.priceSrcTTC
+        : (typeof p.price_ht === 'number' && p.price_ht > 0
+            ? pwRound2((p.price_ht / PW.MARGIN) * (1 + (cfg.tvaFR || 0.20)))
+            : null);
+      if (!(srcTTC > 0)) { skipped.push({ id: p.id, sku: p.sku, reason: 'coût source inconnu' }); continue; }
+      if (srcTTC < PW.MIN_TTC || srcTTC > PW.MAX_TTC) { skipped.push({ id: p.id, sku: p.sku, reason: 'hors fourchette' }); continue; }
+
+      const priced = pwComputePrice(p, srcTTC, cfg);
+      const cur = typeof p.price === 'number' ? p.price : null;
+      if (cur != null && Math.abs(priced.newPrice - cur) < 0.02) continue; // déjà bon
+      const rec = { id: p.id, sku: p.sku, name: p.title || p.name, oldPrice: cur, newPrice: priced.newPrice, newHt: priced.newHt, markup: priced.markup, srcTTC };
+      if (!dryRun) {
+        await db.collection('product_overrides').doc(p.id).set({
+          price: priced.newPrice, price_ht: priced.newHt,
+          priceMarkup: priced.markup, priceMode: priced.mode, priceRecomputedAt: now
+        }, { merge: true });
+      }
+      changed.push(rec);
+    }
+
+    return res.status(200).json({
+      ok: true, dryRun: !!dryRun, mode: cfg.mode, autoPrice: !!cfg.autoPrice,
+      counts: { total: products.length, changed: changed.length, skipped: skipped.length },
+      changed: changed.slice(0, 500), skipped: skipped.slice(0, 100)
+    });
+  } catch (err) {
+    console.error('[api/admin] reprice-all failed:', err.message);
+    return res.status(500).json({ ok: false, error: 'reprice-all failed' });
+  }
+}
+
 async function handlePriceWatch(req, res, admin, db) {
   try {
     const body = (req.body && typeof req.body === 'object') ? req.body : {};
@@ -203,6 +313,10 @@ async function handlePriceWatch(req, res, admin, db) {
     const bySku = {};
     products.forEach((p) => { if (p.sku) bySku[String(p.sku).toUpperCase()] = p; });
 
+    // Config de tarification : si autoPrice, on applique le MODÈLE de marge cible
+    // (markup adaptatif poids/mode pour 15 % net après IS) ; sinon repli ×1,15.
+    const cfg = await priceConfig.load();
+
     const applied = [], flagged = [], unchanged = [], unknown = [];
     const now = admin.firestore.FieldValue.serverTimestamp();
 
@@ -210,10 +324,10 @@ async function handlePriceWatch(req, res, admin, db) {
       const p = bySku[item.sku];
       if (!p) { unknown.push({ sku: item.sku, srcTTC: item.price, name: item.name }); continue; }
       const src = item.price;
-      const newPrice = pwRound2(src * PW.MARGIN);
-      const newHt = pwRound2(newPrice / PW.VAT);
+      const priced = pwComputePrice(p, src, cfg);
+      const newPrice = priced.newPrice, newHt = priced.newHt;
       const cur = typeof p.price === 'number' ? p.price : null;
-      const rec = { sku: item.sku, id: p.id, name: p.title || p.name, srcTTC: src, newPrice, newHt, oldPrice: cur };
+      const rec = { sku: item.sku, id: p.id, name: p.title || p.name, srcTTC: src, newPrice, newHt, markup: priced.markup, oldPrice: cur };
 
       if (cur != null && Math.abs(newPrice - cur) < 0.02) { unchanged.push(rec); continue; }
 
@@ -227,10 +341,12 @@ async function handlePriceWatch(req, res, admin, db) {
       if (!dryRun) {
         await db.collection('product_overrides').doc(p.id).set({
           price: newPrice, price_ht: newHt,
-          priceSource: 'cotebrico', priceSrcTTC: src, priceCheckedAt: now
+          priceSource: 'cotebrico', priceSrcTTC: src, priceCheckedAt: now,
+          priceMarkup: priced.markup, priceMode: priced.mode
         }, { merge: true });
         await db.collection('price_watch_log').add({
-          sku: item.sku, id: p.id, oldPrice: cur, newPrice, srcTTC: src, brand, at: now
+          sku: item.sku, id: p.id, oldPrice: cur, newPrice, srcTTC: src, brand, at: now,
+          markup: priced.markup, mode: priced.mode
         });
       }
       applied.push(rec);
