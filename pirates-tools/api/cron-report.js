@@ -16,6 +16,31 @@ var auth = require('./_lib/auth');
 var firebase = require('./_lib/firebase');
 var A = require('./_lib/analytics');
 
+// ── Rappel mensuel VEILLE (email) ───────────────────────────────────────────
+// Nudge simple et clair (dyspraxie) : quoi vérifier ce mois-ci + liens officiels.
+// Pas de calcul ici : le vrai bilan chiffré est dans l'admin (page Comptabilité).
+function veilleReminderHtml() {
+  var items = [
+    { t: 'Octroi de mer (douane)', d: 'Vérifier les taux d\'octroi de mer / octroi régional appliqués à tes produits (Guadeloupe 971). Une évolution des taux change ton prix de revient.', url: 'https://www.douane.gouv.fr/', link: 'douane.gouv.fr' },
+    { t: 'TVA', d: 'Contrôler ton régime : franchise en base (pas de TVA facturée) tant que tu es sous les seuils. Si tu dépasses, tu bascules et tu dois déclarer/reverser.', url: 'https://www.impots.gouv.fr/', link: 'impots.gouv.fr' },
+    { t: 'Impôt sur les sociétés (IS)', d: 'SASU à l\'IS : 15 % jusqu\'à 42 500 € de bénéfice, 25 % au-delà. Vérifier l\'acompte / la déclaration de résultat le moment venu.', url: 'https://www.impots.gouv.fr/professionnel', link: 'impots.gouv.fr/professionnel' },
+    { t: 'Grille Colissimo / transport', d: 'Comparer la grille La Poste et le tarif container du mois. Si un prix a bougé, mets-le à jour dans l\'admin (Comptabilité → Calculateur) et relance le recalcul.', url: 'https://www.laposte.fr/professionnel/tarifs-colissimo', link: 'laposte.fr' }
+  ];
+  var rows = items.map(function (it) {
+    return '<div style="margin:0 0 16px;padding:14px 16px;background:#faf7ef;border-radius:10px;border:1px solid #e8e0cc">'
+      + '<div style="font-weight:700;color:#1a1a1a;font-size:15px">' + it.t + '</div>'
+      + '<div style="color:#444;font-size:14px;line-height:1.5;margin:6px 0 8px">' + it.d + '</div>'
+      + '<a href="' + it.url + '" style="color:#8a6d1a;font-weight:600;font-size:13px;text-decoration:none">→ ' + it.link + '</a>'
+      + '</div>';
+  }).join('');
+  return '<div style="font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;max-width:560px;margin:0 auto;padding:8px">'
+    + '<h2 style="color:#1a1a1a;font-size:20px;margin:0 0 6px">🗓️ Rappel du mois — taxes &amp; déclarations</h2>'
+    + '<p style="color:#555;font-size:14px;line-height:1.6;margin:0 0 18px">Petit point rapide pour ne rien oublier. Coche chaque ligne dans ton admin (page <strong>Comptabilité</strong>, bouton « C\'est vérifié ») une fois faite.</p>'
+    + rows
+    + '<p style="color:#888;font-size:12px;line-height:1.5;margin:18px 0 0">Le bilan chiffré exact (chiffre d\'affaires, TVA à récupérer, IS, résultat net) est toujours à jour dans ta partie administration. Ce mail n\'est qu\'un rappel.</p>'
+    + '</div>';
+}
+
 async function deleteSnapshot(db, snap) {
   var docs = snap.docs || [];
   var n = 0;
@@ -92,6 +117,22 @@ module.exports = async function handler(req, res) {
     } catch (e) { mailError = e && e.message; console.error('[cron-report] mail:', mailError); }
   } else {
     mailError = 'RESEND_API_KEY / OWNER_EMAIL manquant';
+  }
+
+  // ── 2b) Rappel mensuel VEILLE : taxes officielles + déclarations ──────────
+  // Nudge simple pour ne rien oublier (dyspraxie) — envoyé chaque mois avec le rapport.
+  if (apiKey && to) {
+    try {
+      await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from: from, to: to,
+          subject: 'Pirates Tools — Rappel du mois : taxes & déclarations',
+          html: veilleReminderHtml()
+        })
+      });
+    } catch (e) { console.error('[cron-report] veille mail:', e && e.message); }
   }
 
   // ── 3) Purge (rétention) — jamais bloquante pour la réponse ───────────────

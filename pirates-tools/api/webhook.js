@@ -34,6 +34,19 @@ var stripeMeta = require('./_lib/stripe-meta');
 var postal = require('./_lib/postal');
 var pricing = require('./_lib/pricing');
 var catalog = require('./_lib/catalog');
+var invoiceLib = require('./_lib/invoice');
+
+// Identité vendeur (config/invoice) pour la facture ; défauts si absente.
+async function loadSeller(fb) {
+  var seller = Object.assign({}, invoiceLib.DEFAULT_SELLER);
+  try {
+    if (fb.db) {
+      var doc = await fb.db.collection('config').doc('invoice').get();
+      if (doc.exists) seller = Object.assign(seller, doc.data());
+    }
+  } catch (e) { /* défauts */ }
+  return seller;
+}
 
 // Read the raw request body as a Buffer (parser is disabled — see config).
 async function readRawBody(req) {
@@ -270,7 +283,18 @@ async function handleIntentSucceeded(stripe, fb, pi) {
   });
 
   try {
-    await sendOrderEmails(modelFromIntent(pi, charge, rebuilt, tax, customerEmail));
+    // Facture jointe à l'email client : identité vendeur + n° + détail HT/TVA.
+    var emailModel = modelFromIntent(pi, charge, rebuilt, tax, customerEmail);
+    try {
+      var seller = await loadSeller(fb);
+      var inv = invoiceLib.buildInvoice({
+        invoiceNumber: invoiceNumber, invoiceDateMs: Date.now(), amountCents: pi.amount,
+        territoryDeclared: declaredTerritory, customerEmail: customerEmail, customerName: custName,
+        customerAddress: custAddr, linesDetail: (rebuilt.lines || []).map(function (l) { return { name: l.name, qty: l.qty, unitCents: l.unitCents }; })
+      }, seller);
+      emailModel.invoice = { number: inv.number, seller: seller, totalHt: inv.totalHt, totalTva: inv.totalTva, franchise: inv.franchise, tvaRate: inv.tvaRate };
+    } catch (invErr) { console.error('[webhook] email invoice build failed:', invErr.message); }
+    await sendOrderEmails(emailModel);
   } catch (mailErr) {
     console.error('[webhook] Email send failed:', mailErr.message);
   }
@@ -546,6 +570,21 @@ async function sendOrderEmails(model) {
       + '</div>';
   }).join('');
 
+  // Bloc facture (identité vendeur + n° + HT/TVA + mentions) pour l'email client.
+  const invData = model.invoice;
+  const invoiceBlock = invData ? (function () {
+    const s = invData.seller || {};
+    return '<div style="margin-top:20px;padding:16px;background:#0a0f14;border:1px solid rgba(139,92,246,.25);border-radius:12px;font-size:12px;color:#9aa4b2">'
+      + '<p style="margin:0 0 6px;color:#fff;font-weight:700">Facture n° ' + escape(invData.number) + '</p>'
+      + '<p style="margin:0">Total HT : ' + formatAmount(Math.round(invData.totalHt * 100), currency)
+      + (invData.franchise ? '' : ' &middot; TVA (' + (Math.round(invData.tvaRate * 1000) / 10) + ' %) : ' + formatAmount(Math.round(invData.totalTva * 100), currency))
+      + ' &middot; Total TTC : ' + totalStr + '</p>'
+      + (invData.franchise ? '<p style="margin:6px 0 0">TVA non applicable, art. 293 B du CGI.</p>' : '')
+      + '<p style="margin:8px 0 0;font-size:11px">' + escape(s.raisonSociale || '') + (s.siret ? ' &middot; SIRET ' + escape(s.siret) : '') + (s.adresse ? ' &middot; ' + escape(s.adresse) : '') + '</p>'
+      + '<p style="margin:4px 0 0;font-size:11px">Garantie légale de conformité (2 ans) et garantie des vices cachés. Droit de rétractation : 14 jours (voir CGV).</p>'
+      + '</div>';
+  })() : '';
+
   const baseHtml = function (title, intro, includeWarnings) {
     return '<!doctype html><html lang="fr"><body style="margin:0;padding:0;background:#0a0f14;font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#e6edf5">'
       + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0a0f14;padding:32px 0">'
@@ -574,6 +613,7 @@ async function sendOrderEmails(model) {
       + '<tfoot><tr><td colspan="3" align="right" style="padding:14px 12px;font-weight:700;color:#fff">Total TTC</td>'
       + '<td align="right" style="padding:14px 12px;font-weight:700;color:#8B5CF6;font-size:16px">' + totalStr + '</td></tr></tfoot>'
       + '</table>'
+      + invoiceBlock
       + '<p style="margin:24px 0 0;color:#9aa4b2;font-size:13px;line-height:1.6">'
       + 'Besoin d\'aide ? Écris-nous sur WhatsApp : <a href="https://wa.me/33744776598" style="color:#8B5CF6;text-decoration:none">07 44 77 65 98</a>'
       + '</p>'
