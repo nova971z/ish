@@ -3917,7 +3917,7 @@
     "category": "Ponceuses",
     "tag": "Nouveau",
     "desc": "Ponceuse vibrante 18V 93x185mm (Solo).",
-    "img": "images/placeholder.svg",
+    "img": "images/posters/dbo382z.webp",
     "price": 144.79,
     "currency": "EUR",
     "vat": 0.2,
@@ -3940,8 +3940,21 @@
       "Robuste et endurant, pensé pour un usage professionnel intensif",
       "Idéal pour les chantiers des Antilles / DOM-TOM"
     ],
-    "specs": {},
-    "description_long": "Ponceuse vibrante 18V 93x185mm (Solo). Outil professionnel Makita de la gamme 18V LXT sans fil (moteur brushless). Vendu en machine seule (sans batterie ni chargeur). Compatible avec les batteries Makita LXT. Fiche technique détaillée à compléter. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "specs": {
+      "Marque": "Makita",
+      "Type": "Ponceuse vibrante (orbitale) sans fil",
+      "Alimentation": "Batterie 18 V LXT (vendue seule, sans batterie ni chargeur)",
+      "Moteur": "Brushless (sans charbon)",
+      "Vitesse variable": "4 000 - 12 000 osc/min",
+      "Amplitude d'oscillation": "2,0 mm",
+      "Plateau de ponçage": "93 × 185 mm",
+      "Papier abrasif": "93 × 228 mm",
+      "Pression sonore (LpA)": "72 dB(A)",
+      "Vibrations": "3,6 m/s² (K = 1,5)",
+      "Poids net EPTA": "1,2 kg",
+      "Dimensions": "336 × 92 × 169 mm"
+    },
+    "description_long": "Ponceuse vibrante sans fil Makita DBO382Z (18V LXT), idéale pour le ponçage efficace de grandes surfaces en bois, métal ou plastique. Moteur brushless à vitesse variable (4 000-12 000 osc/min) pour un travail précis et endurant, plateau 93 × 185 mm. Vendue en machine seule (sans batterie ni chargeur), compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM, octroi de mer inclus dans le prix affiché."
   },
   {
     "id": "makita-dbo480z",
