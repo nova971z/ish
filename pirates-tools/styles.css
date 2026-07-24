@@ -6097,6 +6097,21 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .brand-goal__bar span { display: block; height: 100%; background: linear-gradient(90deg,#FEBD17,#e0a500); border-radius: 7px; transition: width .4s ease; }
 .brand-goal__ok { font-size: .82rem; color: #34d17a; font-weight: 600; margin-top: 5px; }
 .brand-goal__sub { font-size: .82rem; color: rgba(255,255,255,.7); margin-top: 5px; }
+/* Onglet Marges (admin) — tableau des marges nettes live */
+.mg-controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin: 14px 0 10px; }
+.mg-chips { display: flex; gap: 7px; flex-wrap: wrap; }
+.mg-chip { background: rgba(255,255,255,.05); border: 1px solid var(--border); color: rgba(255,255,255,.7); padding: 6px 13px; border-radius: 999px; font-size: .84rem; font-weight: 600; cursor: pointer; }
+.mg-chip.is-on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.mg-search { flex: 1; min-width: 160px; max-width: 280px; background: rgba(255,255,255,.05); border: 1px solid var(--border); color: #fff; border-radius: 10px; padding: 8px 12px; font-size: .9rem; }
+.mg-tablewrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; max-height: 70vh; overflow-y: auto; }
+.mg-table { min-width: 640px; margin: 0; }
+.mg-table thead th { position: sticky; top: 0; background: var(--card); z-index: 1; }
+.mg-table th.mg-l, .mg-table td.mg-l { text-align: left; }
+.mg-table td.mg-ship { color: rgba(255,255,255,.55); font-size: .82rem; }
+.mg-good { color: #34d17a; font-weight: 700; }
+.mg-warn { color: #FEBD17; font-weight: 700; }
+.mg-crit { color: #ff6a54; font-weight: 700; }
+.mg-pk { display: inline-block; background: #FEBD17; color: #1b1e24; font-size: .62rem; font-weight: 800; text-transform: uppercase; letter-spacing: .03em; padding: 1px 6px; border-radius: 5px; vertical-align: middle; }
 /* Fiscalité — cartes déclarations */
 .fisc-card { background: rgba(var(--accent-rgb),0.05); border: 1px solid rgba(var(--accent-rgb),0.25); border-radius: 14px; padding: 16px; margin: 10px 0; }
 .fisc-card h3 { margin: 0 0 6px; font-size: 1.05rem; color: #fff; }

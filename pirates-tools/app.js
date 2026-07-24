@@ -6709,6 +6709,96 @@
 
   function fiscDone() { try { return JSON.parse(localStorage.getItem(FISC_DONE_KEY) || '{}'); } catch (e) { return {}; } }
 
+  // ── Marges nettes LIVE (branché sur les prix RÉELS du site) ─────────────
+  var _marginsLoaded = false;
+  function loadAdminMargins(force) {
+    var el = document.getElementById('adminMarginsBody');
+    if (!el) return;
+    if (_marginsLoaded && !force) return;
+    el.innerHTML = '<p class="admin-loading">Calcul des marges sur les prix actuels…</p>';
+    adminGet('margins').then(function (data) {
+      _marginsLoaded = true;
+      renderAdminMargins(el, data || {});
+    }).catch(function () {
+      el.innerHTML = '<p class="compta-line">Impossible de charger les marges. Vérifie ton accès admin et FIREBASE_SERVICE_ACCOUNT.</p>';
+    });
+  }
+
+  function renderAdminMargins(el, data) {
+    var rows = data.rows || [];
+    var s = data.summary || {};
+    var cfg = data.config || {};
+    function eur(n) { return (Math.round((Number(n) || 0) * 100) / 100).toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' €'; }
+    function eur2(n) { return (Math.round((Number(n) || 0) * 100) / 100).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €'; }
+    function pctf(n) { return (Number(n) || 0).toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' %'; }
+    function mcls(m) { return m <= 0 ? 'mg-crit' : (m < 10 ? 'mg-warn' : 'mg-good'); }
+
+    var html = '';
+    html += '<p class="admin-hint">Marge nette réelle au <b>prix actuel du site</b> (catalogue live, mis à jour après chaque scan du traqueur), après envoi + octroi + Stripe + frais fixes + IS. Territoire 971 · '
+      + 'envoi <b>' + escapeHTML(cfg.mode || 'colissimo') + '</b> · cible <b>' + Math.round((cfg.targetNet || 0.15) * 100) + ' % net</b> · traqueur auto <b>' + (cfg.autoPrice ? 'ON' : 'OFF') + '</b>.</p>';
+
+    html += '<div class="compta-kpis">'
+      + '<div class="compta-kpi"><div class="compta-kpi__val">' + pctf(s.avgMarginPct) + '</div><div class="compta-kpi__lbl">Marge nette moyenne</div></div>'
+      + '<div class="compta-kpi"><div class="compta-kpi__val">' + eur(s.totalNet) + '</div><div class="compta-kpi__sub">1 vente de chaque</div><div class="compta-kpi__lbl">Marge € cumulée</div></div>'
+      + '<div class="compta-kpi"><div class="compta-kpi__val">' + (s.packCount || 0) + '</div><div class="compta-kpi__sub">marge ' + eur(s.packNet) + '</div><div class="compta-kpi__lbl">Gros packs</div></div>'
+      + '<div class="compta-kpi"><div class="compta-kpi__val">' + (s.count || 0) + '</div><div class="compta-kpi__lbl">Produits</div></div>'
+      + '</div>';
+
+    html += '<div class="mg-controls">'
+      + '<div class="mg-chips">'
+      + '<button type="button" class="mg-chip is-on" data-mg="all">Tous</button>'
+      + '<button type="button" class="mg-chip" data-mg="pack">Gros packs</button>'
+      + '<button type="button" class="mg-chip" data-mg="low">Marge faible</button>'
+      + '</div>'
+      + '<input type="search" id="mgSearch" class="mg-search" placeholder="Chercher un produit, une marque…">'
+      + '<button type="button" class="btn btn--ghost" id="mgReload">↻ Recalculer</button>'
+      + '</div>';
+
+    html += '<div class="mg-tablewrap"><table class="compta-table mg-table"><thead><tr>'
+      + '<th class="mg-l">Produit</th><th class="mg-l">Marque</th><th class="compta-num">Prix TTC 971</th>'
+      + '<th class="compta-num">Poids</th><th class="mg-l">Envoi</th><th class="compta-num">Marge %</th><th class="compta-num">Marge €</th>'
+      + '</tr></thead><tbody id="mgRows"></tbody></table></div>';
+
+    el.innerHTML = html;
+
+    var filter = 'all', q = '';
+    function matches(r) {
+      if (filter === 'pack' && !r.isPack) return false;
+      if (filter === 'low' && r.marginPct >= 10) return false;
+      if (q) { var t = (r.title + ' ' + r.brand + ' ' + r.sku).toLowerCase(); if (t.indexOf(q) === -1) return false; }
+      return true;
+    }
+    function paint() {
+      var body = document.getElementById('mgRows');
+      if (!body) return;
+      var list = rows.filter(matches);
+      body.innerHTML = list.map(function (r) {
+        var c = mcls(r.marginPct);
+        return '<tr><td class="mg-l">' + (r.isPack ? '<span class="mg-pk">pack</span> ' : '') + escapeHTML(r.title) + '</td>'
+          + '<td class="mg-l">' + escapeHTML(r.brand || '') + '</td>'
+          + '<td class="compta-num">' + eur(r.ttc971) + '</td>'
+          + '<td class="compta-num">' + (r.weight || 0) + ' kg</td>'
+          + '<td class="mg-l mg-ship">' + escapeHTML(r.shipKind) + '</td>'
+          + '<td class="compta-num ' + c + '">' + pctf(r.marginPct) + '</td>'
+          + '<td class="compta-num ' + c + '">' + eur2(r.netEur) + '</td></tr>';
+      }).join('');
+    }
+    var chips = el.querySelectorAll('.mg-chip');
+    chips.forEach(function (b) {
+      b.onclick = function () {
+        chips.forEach(function (x) { x.classList.remove('is-on'); });
+        b.classList.add('is-on');
+        filter = b.getAttribute('data-mg');
+        paint();
+      };
+    });
+    var srch = document.getElementById('mgSearch');
+    if (srch) srch.oninput = function (e) { q = (e.target.value || '').toLowerCase().trim(); paint(); };
+    var rl = document.getElementById('mgReload');
+    if (rl) rl.onclick = function () { loadAdminMargins(true); };
+    paint();
+  }
+
   function renderAdminFisc() {
     var el = document.getElementById('adminFiscBody');
     if (!el) return;
@@ -6883,6 +6973,7 @@
       + '<nav class="admin-tabs" role="tablist">'
       + '<button type="button" class="admin-tab is-active" data-admin-tab="products" role="tab" aria-selected="true">Produits</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="compta" role="tab" aria-selected="false">Comptabilité</button>'
+      + '<button type="button" class="admin-tab" data-admin-tab="margins" role="tab" aria-selected="false">Marges</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="fisc" role="tab" aria-selected="false">Fiscalité</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="invoices" role="tab" aria-selected="false">Factures</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="stats" role="tab" aria-selected="false">Statistiques</button>'
@@ -6899,6 +6990,10 @@
 
       + '<div class="admin-pane" data-admin-pane="compta" hidden>'
       + '<div id="adminComptaBody"></div>'
+      + '</div>'
+
+      + '<div class="admin-pane" data-admin-pane="margins" hidden>'
+      + '<div id="adminMarginsBody"></div>'
       + '</div>'
 
       + '<div class="admin-pane" data-admin-pane="fisc" hidden>'
@@ -7054,6 +7149,7 @@
         });
         if (target === 'orders') loadAdminOrders();
         if (target === 'compta') renderAdminCompta();
+        if (target === 'margins') loadAdminMargins();
         if (target === 'fisc') renderAdminFisc();
         if (target === 'invoices') renderAdminInvoices();
         if (target === 'instagram') initAdminInstagram();

@@ -186,6 +186,52 @@ module.exports = async function handler(req, res) {
         return res.status(200).json({ ok: true, charges: charges });
       }
 
+      // ── Marges nettes LIVE : marge réelle au prix ACTUEL du site ────────
+      // Branché sur le catalogue live (products.json + product_overrides) : donc
+      // reflète les prix en temps réel, y compris après un scan du traqueur.
+      if (type === 'margins') {
+        const cfg = await priceConfig.load();
+        const tvaFR = cfg.tvaFR || 0.20;
+        const ovSnap = await db.collection('product_overrides').get();
+        const ov = {};
+        ovSnap.forEach((doc) => { ov[doc.id] = doc.data() || {}; });
+        const catProducts = await catalog.loadCatalog();
+        const rows = [];
+        catProducts.forEach((p) => {
+          const priceHt = Number(p.price_ht) || 0;
+          if (!(priceHt > 0)) return;
+          const o = ov[p.id] || {};
+          const tracked = (typeof o.priceSrcTTC === 'number' && o.priceSrcTTC > 0);
+          const costTTC = tracked ? o.priceSrcTTC : (priceHt / PW.MARGIN) * (1 + tvaFR);
+          const r = priceModel.marginAt(p, { priceHt: priceHt, costTTC: costTTC, mode: cfg.mode }, cfg);
+          if (!r) return;
+          const skuU = String(p.sku || '').toUpperCase();
+          const isPack = p.variantRole === 'coffret'
+            || String(p.category || '').toLowerCase().indexOf('combo') !== -1
+            || /^DCK|^PPACK|P2T$|P3T$|D2K$/.test(skuU)
+            || /set [ée]nergie|pack\b.*outil|multi-?outil/i.test(p.title || '');
+          rows.push({
+            id: p.id, sku: p.sku, brand: p.brand, title: p.title || p.name, category: p.category,
+            weight: r.weight, shipKind: r.shipKind, ship: pwRound2(r.transport),
+            priceHt: pwRound2(priceHt), ttc971: pwRound2(r.ttc), costSrc: tracked ? 'traqueur' : 'estimé',
+            netEur: pwRound2(r.netAfterIS), marginPct: Math.round(r.marginAfterIS * 1000) / 10, isPack: isPack
+          });
+        });
+        rows.sort((a, b) => b.netEur - a.netEur);
+        const totalNet = rows.reduce((s, r) => s + r.netEur, 0);
+        const avg = rows.length ? rows.reduce((s, r) => s + r.marginPct, 0) / rows.length : 0;
+        const packs = rows.filter((r) => r.isPack);
+        return res.status(200).json({
+          ok: true,
+          config: { mode: cfg.mode, targetNet: cfg.targetNet, autoPrice: cfg.autoPrice !== false },
+          summary: {
+            count: rows.length, totalNet: pwRound2(totalNet), avgMarginPct: Math.round(avg * 10) / 10,
+            packCount: packs.length, packNet: pwRound2(packs.reduce((s, r) => s + r.netEur, 0))
+          },
+          rows: rows
+        });
+      }
+
       // Default: list all overrides
       const snap = await db.collection('product_overrides').get();
       const overrides = {};
@@ -360,8 +406,12 @@ function pwRound2(n) { return Math.round(n * 100) / 100; }
 // Prix à partir du coût source TTC (src) : MODÈLE de marge cible si cfg.autoPrice,
 // sinon repli historique ×1,15. Retourne { newPrice (TTC métropole), newHt, markup, mode }.
 function pwComputePrice(product, srcTTC, cfg) {
-  if (cfg && cfg.autoPrice) {
-    const r = priceModel.recommend(product, { costTTC: srcTTC, mode: cfg.mode }, cfg);
+  // Verrou de sécurité : le MODÈLE de marge cible (15 % net) s'applique par
+  // défaut. On ne retombe au ×1,15 QUE si autoPrice est EXPLICITEMENT désactivé
+  // (autoPrice === false). Ainsi un scan traqueur ne peut jamais casser les
+  // marges à cause d'une config partielle où autoPrice serait absent.
+  if (!cfg || cfg.autoPrice !== false) {
+    const r = priceModel.recommend(product, { costTTC: srcTTC, mode: (cfg && cfg.mode) || 'colissimo' }, cfg);
     if (r && r.priceHt > 0) {
       return { newHt: r.priceHt, newPrice: pwRound2(r.priceHt * (1 + (cfg.tvaFR || 0.20))), markup: r.markup, mode: r.mode };
     }

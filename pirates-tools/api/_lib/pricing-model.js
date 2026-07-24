@@ -96,6 +96,25 @@ function solveMarkup(costHT, ship, octroi, tvaDom, cfg) {
   return 3;
 }
 
+// Sélection du transport pour un produit et un mode. Factorisé (utilisé par
+// recommend ET marginAt) → une seule source de vérité du choix d'envoi.
+function shipFor(product, mode, cfg) {
+  var weight = Number(product && product.weight_kg) || 2;
+  var isCoffret = (product && (product.variantRole === 'coffret' || /coffret|makpac|tstak|valise/i.test(product.title || '')));
+  var heavy = cfg.heavyKg && weight > cfg.heavyKg;
+  var ship, shipKind;
+  if (heavy && mode !== 'container') {
+    ship = cfg.containerPerUnit.coffret; shipKind = 'bateau-lourd';       // trop lourd → bateau
+  } else if (mode === 'container') {
+    ship = isCoffret ? cfg.containerPerUnit.coffret : cfg.containerPerUnit.nu; shipKind = 'container';
+  } else if (cfg.lettre && weight <= cfg.lettre.maxKg) {
+    ship = cfg.lettre.price; shipKind = 'lettre';                          // petit/léger → lettre
+  } else {
+    ship = colissimoCost(weight, cfg.colissimo); shipKind = 'colissimo';
+  }
+  return { ship: ship, shipKind: shipKind, weight: weight };
+}
+
 // API principale : prix recommandé pour un produit.
 //   product : { weight_kg, ncCategory, variantRole, ... }
 //   opts.costHT (prioritaire) OU opts.costTTC (÷ tvaFR) = coût fournisseur
@@ -108,43 +127,46 @@ function recommend(product, opts, config) {
     : Number(opts.costTTC || 0) / (1 + cfg.tvaFR);
   if (!(costHT > 0)) return null;
 
-  var weight = Number(product && product.weight_kg) || 2;
   var mode = opts.mode || 'colissimo';
-  var isCoffret = (product && (product.variantRole === 'coffret' || /coffret|makpac|tstak|valise/i.test(product.title || '')));
-  var heavy = cfg.heavyKg && weight > cfg.heavyKg;
-  var ship, shipKind;
-  if (heavy && mode !== 'container') {
-    // Objet trop lourd/volumineux pour un colis → bateau, tarif volumineux.
-    ship = cfg.containerPerUnit.coffret;
-    shipKind = 'bateau-lourd';
-  } else if (mode === 'container') {
-    ship = isCoffret ? cfg.containerPerUnit.coffret : cfg.containerPerUnit.nu;
-    shipKind = 'container';
-  } else if (cfg.lettre && weight <= cfg.lettre.maxKg) {
-    // Petit objet léger → lettre suivie (~8 €), bien moins cher que Colissimo.
-    ship = cfg.lettre.price;
-    shipKind = 'lettre';
-  } else {
-    ship = colissimoCost(weight, cfg.colissimo);
-    shipKind = 'colissimo';
-  }
-
+  var s = shipFor(product, mode, cfg);
   var octroi = octroiRate(product, cfg);
   var tvaDom = tvaDomRate(cfg);
-  var m = solveMarkup(costHT, ship, octroi, tvaDom, cfg);
-  var r = evaluate(costHT, m, ship, octroi, tvaDom, cfg);
+  var m = solveMarkup(costHT, s.ship, octroi, tvaDom, cfg);
+  var r = evaluate(costHT, m, s.ship, octroi, tvaDom, cfg);
   r.costHT = round2(costHT);
   r.priceHtFor = { price_ht: r.priceHt, price: round2(r.priceHt * (1 + cfg.tvaFR)) };
   r.mode = mode;
-  r.shipKind = shipKind;
-  r.weight = weight;
+  r.shipKind = s.shipKind;
+  r.weight = s.weight;
+  return r;
+}
+
+// Marge RÉELLE à un prix DONNÉ (pas le prix recommandé) : pour auditer le prix
+// actuel du site. opts.priceHt = price_ht courant (catalogue live). opts.costHT
+// OU opts.costTTC = coût fournisseur. Retourne netAfterIS, marginAfterIS, etc.
+function marginAt(product, opts, config) {
+  var cfg = Object.assign({}, DEFAULT_CONFIG, config || {});
+  opts = opts || {};
+  var costHT = (opts.costHT != null) ? Number(opts.costHT) : Number(opts.costTTC || 0) / (1 + cfg.tvaFR);
+  var priceHt = Number(opts.priceHt || 0);
+  if (!(costHT > 0) || !(priceHt > 0)) return null;
+  var mode = opts.mode || 'colissimo';
+  var s = shipFor(product, mode, cfg);
+  var octroi = octroiRate(product, cfg);
+  var tvaDom = tvaDomRate(cfg);
+  var markup = priceHt / costHT - 1;
+  var r = evaluate(costHT, markup, s.ship, octroi, tvaDom, cfg);
+  r.costHT = round2(costHT);
+  r.mode = mode; r.shipKind = s.shipKind; r.weight = s.weight;
   return r;
 }
 
 module.exports = {
   DEFAULT_CONFIG: DEFAULT_CONFIG,
   colissimoCost: colissimoCost,
+  shipFor: shipFor,
   recommend: recommend,
+  marginAt: marginAt,
   evaluate: evaluate,
   solveMarkup: solveMarkup,
   _round2: round2
