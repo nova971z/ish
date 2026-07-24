@@ -94,9 +94,43 @@ function synthesize(payments, charges, cfg) {
     panier_moyen: succeeded.length ? round2(caTtc / succeeded.length) : 0,
     tva: { collectee: round2(tvaCollectee), deductible: round2(tvaDeductible), solde_a_reverser: round2(tvaCollectee - tvaDeductible) },
     par_mois: months,
+    ventes_par_marque: brandStats(payments, cfg),   // preuve partenariat fournisseur
     complet: cogsConnu,   // false si une vente n'a pas de coût snapshoté (données partielles)
     meta: { source: 'RÉEL — paiements Stripe + coûts snapshotés + charges saisies' }
   };
+}
+
+// Ventes par MARQUE (preuve pour partenariat fournisseur, ex. seuil DeWALT
+// ~10 000 €). Agrège les lignes réelles snapshotées à la vente (linesDetail
+// avec brand + unitCents TTC territorial). Les lignes sans marque (remise
+// fidélité, montants négatifs) sont ignorées. Retourne un tableau trié par CA
+// TTC décroissant : [{ marque, unites, ca_ttc, ca_ht, ventes }].
+function brandStats(payments, cfg) {
+  cfg = cfg || {};
+  var succeeded = (payments || []).filter(function (p) { return p && p.status === 'succeeded'; });
+  var byBrand = {};
+  succeeded.forEach(function (p) {
+    var tva = tvaFor(p, cfg);
+    var lines = Array.isArray(p.linesDetail) ? p.linesDetail : [];
+    var brandsInSale = {};
+    lines.forEach(function (l) {
+      var brand = (l && l.brand ? String(l.brand) : '').trim();
+      var unit = Number(l && l.unitCents) || 0;
+      var qty = Number(l && l.qty) || 1;
+      if (!brand || unit <= 0) return;   // ligne sans marque ou remise négative
+      var ttc = c2e(unit) * qty;
+      var b = (byBrand[brand] = byBrand[brand] || { marque: brand, unites: 0, ca_ttc: 0, ca_ht: 0, ventes: 0 });
+      b.unites += qty;
+      b.ca_ttc += ttc;
+      b.ca_ht += ttc / (1 + tva);
+      brandsInSale[brand] = true;
+    });
+    Object.keys(brandsInSale).forEach(function (brand) { byBrand[brand].ventes += 1; });
+  });
+  return Object.keys(byBrand).map(function (k) {
+    return { marque: byBrand[k].marque, unites: byBrand[k].unites,
+      ca_ttc: round2(byBrand[k].ca_ttc), ca_ht: round2(byBrand[k].ca_ht), ventes: byBrand[k].ventes };
+  }).sort(function (a, b) { return b.ca_ttc - a.ca_ttc; });
 }
 
 function monthKey(ms) {
@@ -106,4 +140,4 @@ function monthKey(ms) {
   return d.getUTCFullYear() + '-' + (m < 10 ? '0' + m : '' + m);
 }
 
-module.exports = { synthesize: synthesize, computeIS: computeIS, _round2: round2, _tvaFor: tvaFor };
+module.exports = { synthesize: synthesize, brandStats: brandStats, computeIS: computeIS, _round2: round2, _tvaFor: tvaFor };

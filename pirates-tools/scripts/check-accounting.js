@@ -44,6 +44,31 @@ module.exports = function () {
   var z = acc.synthesize([], [], {});
   ok(z.ca_ttc === 0 && z.resultat_net === 0 && z.panier_moyen === 0, 'vide géré proprement');
 
+  // ── Ventes par marque (preuve partenariat) ──
+  var bpays = [
+    { status: 'succeeded', territoryDeclared: '971', linesDetail: [
+      { name: 'Visseuse', qty: 1, unitCents: 60000, brand: 'DeWALT' },
+      { name: 'Batterie', qty: 2, unitCents: 20000, brand: 'DeWALT' }
+    ] },
+    { status: 'succeeded', territoryDeclared: '971', linesDetail: [
+      { name: 'Scie', qty: 1, unitCents: 30000, brand: 'Makita' },
+      { name: 'Remise fidélité −5 %', qty: 1, unitCents: -2000, brand: '' }
+    ] },
+    { status: 'failed', territoryDeclared: '971', linesDetail: [
+      { name: 'Perfo', qty: 1, unitCents: 99900, brand: 'DeWALT' }
+    ] }
+  ];
+  var bs = acc.brandStats(bpays, { refTerritory: '971' });
+  ok(bs.length === 2, 'deux marques agrégées (échec ignoré)');
+  var dw = bs.filter(function (b) { return b.marque === 'DeWALT'; })[0];
+  ok(dw && dw.unites === 3, 'DeWALT : 3 unités (1 + 2)');
+  near(dw.ca_ttc, 1000, 0.01, 'DeWALT CA TTC = 600 + 2×200');
+  ok(dw.ventes === 1, 'DeWALT compté sur 1 vente');
+  var mk = bs.filter(function (b) { return b.marque === 'Makita'; })[0];
+  near(mk.ca_ttc, 300, 0.01, 'Makita CA TTC (remise négative ignorée)');
+  ok(bs[0].marque === 'DeWALT', 'tri par CA TTC décroissant');
+  ok(dw.ca_ht < dw.ca_ttc, 'CA HT dérivé sous le TTC');
+
   return errors;
 };
 

@@ -269,7 +269,7 @@ async function handleIntentSucceeded(stripe, fb, pi) {
     cogsHtCents: (rebuilt.cogsHtCents != null ? rebuilt.cogsHtCents : null),
     stripeFeeCents: stripeFeeCents,
     // Facture : détail des lignes + numéro + date, pour générer la facture conforme.
-    linesDetail: (rebuilt.lines || []).map(function (l) { return { name: l.name, qty: l.qty, unitCents: l.unitCents }; }),
+    linesDetail: (rebuilt.lines || []).map(function (l) { return { name: l.name, qty: l.qty, unitCents: l.unitCents, brand: l.brand || '' }; }),
     invoiceNumber: invoiceNumber,
     invoiceDateMs: Date.now()
   });
@@ -290,7 +290,7 @@ async function handleIntentSucceeded(stripe, fb, pi) {
       var inv = invoiceLib.buildInvoice({
         invoiceNumber: invoiceNumber, invoiceDateMs: Date.now(), amountCents: pi.amount,
         territoryDeclared: declaredTerritory, customerEmail: customerEmail, customerName: custName,
-        customerAddress: custAddr, linesDetail: (rebuilt.lines || []).map(function (l) { return { name: l.name, qty: l.qty, unitCents: l.unitCents }; })
+        customerAddress: custAddr, linesDetail: (rebuilt.lines || []).map(function (l) { return { name: l.name, qty: l.qty, unitCents: l.unitCents, brand: l.brand || '' }; })
       }, seller);
       emailModel.invoice = { number: inv.number, seller: seller, totalHt: inv.totalHt, totalTva: inv.totalTva, franchise: inv.franchise, tvaRate: inv.tvaRate };
     } catch (invErr) { console.error('[webhook] email invoice build failed:', invErr.message); }
@@ -435,7 +435,7 @@ async function rebuildLines(pi, territory) {
       var unit = pricing.unitCents(product, territory || pricing.DEFAULT_TERRITORY);
       sum += unit * qty;
       cogsHtCents += Math.round(productCostHt(product) * 100) * qty;
-      lines.push({ name: product.title || 'Produit', qty: qty, unitCents: unit, subCents: unit * qty });
+      lines.push({ name: product.title || 'Produit', qty: qty, unitCents: unit, subCents: unit * qty, brand: product.brand || '' });
     }
     // Remise fidélité serveur (create-payment-intent) : pi.amount = brut −
     // remise. On la matérialise en ligne négative pour que le détail somme

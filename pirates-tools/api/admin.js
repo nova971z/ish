@@ -124,7 +124,8 @@ module.exports = async function handler(req, res) {
             stripeFeeCents: (typeof d.stripeFeeCents === 'number') ? d.stripeFeeCents : null,
             status: d.status || '',
             territoryDeclared: d.territoryDeclared || d.territoryFromAddress || null,
-            recordedAtMs: d.recordedAt && d.recordedAt.toMillis ? d.recordedAt.toMillis() : null
+            recordedAtMs: d.recordedAt && d.recordedAt.toMillis ? d.recordedAt.toMillis() : null,
+            linesDetail: Array.isArray(d.linesDetail) ? d.linesDetail : []
           });
         });
         const chSnap = await db.collection('charges').get();

@@ -6089,6 +6089,14 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .compta-kpi__sub { font-size: .82rem; color: var(--accent-soft); font-weight: 600; margin-top: -1px; }
 .compta-kpi__lbl { font-size: .74rem; color: rgba(255,255,255,.7); margin-top: 2px; }
 .compta-res__ht { font-size: .95rem; color: var(--accent-soft); font-weight: 600; }
+/* Objectif partenariat marque (ex. DeWALT 10 000 €) — barre de progression */
+.brand-goal { margin: 12px 0; }
+.brand-goal__head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-size: .9rem; color: #fff; margin-bottom: 5px; }
+.brand-goal__head span { color: #FEBD17; font-weight: 700; font-variant-numeric: tabular-nums; }
+.brand-goal__bar { height: 12px; border-radius: 7px; background: rgba(255,255,255,.1); overflow: hidden; }
+.brand-goal__bar span { display: block; height: 100%; background: linear-gradient(90deg,#FEBD17,#e0a500); border-radius: 7px; transition: width .4s ease; }
+.brand-goal__ok { font-size: .82rem; color: #34d17a; font-weight: 600; margin-top: 5px; }
+.brand-goal__sub { font-size: .82rem; color: rgba(255,255,255,.7); margin-top: 5px; }
 /* Fiscalité — cartes déclarations */
 .fisc-card { background: rgba(var(--accent-rgb),0.05); border: 1px solid rgba(var(--accent-rgb),0.25); border-radius: 14px; padding: 16px; margin: 10px 0; }
 .fisc-card h3 { margin: 0 0 6px; font-size: 1.05rem; color: #fff; }

@@ -6475,6 +6475,35 @@
       a.par_mois.forEach(function (m) { html += '<tr><td>' + m.mois + '</td><td class="compta-num">' + m.ventes + '</td><td class="compta-num">' + eur(m.ca_ttc) + '</td><td class="compta-num">' + eur(m.ca_ht - m.cogs) + '</td></tr>'; });
       html += '</table>';
     }
+    // ── Ventes par marque (preuve pour un partenariat fournisseur) ──
+    var brands = a.ventes_par_marque || [];
+    var BRAND_TARGETS = { 'DeWALT': 10000 };   // seuil partenariat visé
+    html += '<h3 class="compta-card__title" style="margin-top:1rem">Ventes par marque</h3>';
+    if (!brands.length) {
+      html += '<p class="compta-line">Aucune vente par marque pour l\'instant. Chaque vente incrémente automatiquement le compteur de la marque concernée.</p>';
+    } else {
+      html += '<table class="compta-table"><tr><th>Marque</th><th class="compta-num">Unités</th><th class="compta-num">Ventes</th><th class="compta-num">CA TTC</th><th class="compta-num">CA HT</th></tr>';
+      brands.forEach(function (b) {
+        html += '<tr><td>' + escapeHTML(b.marque) + '</td><td class="compta-num">' + (b.unites || 0) + '</td><td class="compta-num">' + (b.ventes || 0) + '</td><td class="compta-num">' + eur(b.ca_ttc) + '</td><td class="compta-num">' + eur(b.ca_ht) + '</td></tr>';
+      });
+      html += '</table>';
+      Object.keys(BRAND_TARGETS).forEach(function (name) {
+        var found = brands.filter(function (b) { return String(b.marque).toLowerCase() === name.toLowerCase(); })[0];
+        var val = found ? found.ca_ttc : 0;
+        var target = BRAND_TARGETS[name];
+        var pct = target > 0 ? Math.min(100, Math.round(val / target * 100)) : 0;
+        html += '<div class="brand-goal">'
+          + '<div class="brand-goal__head"><b>Objectif partenariat ' + escapeHTML(name) + '</b>'
+          + '<span>' + eur(val) + ' / ' + eur(target) + ' &middot; ' + pct + ' %</span></div>'
+          + '<div class="brand-goal__bar"><span style="width:' + pct + '%"></span></div>'
+          + (val >= target
+              ? '<div class="brand-goal__ok">✅ Seuil atteint — volume justifiable auprès de ' + escapeHTML(name) + ' (chiffres réels, factures à l\'appui).</div>'
+              : '<div class="brand-goal__sub">Encore ' + eur(target - val) + ' de ventes ' + escapeHTML(name) + ' pour atteindre le seuil.</div>')
+          + '</div>';
+      });
+      html += '<p class="compta-print-note">Compteur bâti sur les ventes réelles encaissées (marque snapshotée à chaque vente). Sert de justificatif de volume auprès des marques.</p>';
+    }
+
     if (a.complet === false) {
       html += '<p class="compta-print-note">⚠️ Certaines ventes n\'ont pas de coût d\'achat enregistré (données partielles). Le coût réel sera complet pour toutes les ventes à venir.</p>';
     }
