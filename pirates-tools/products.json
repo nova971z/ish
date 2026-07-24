@@ -1320,23 +1320,23 @@
     ]
   },
   {
-    "id": "dewalt-dcs391n",
-    "slug": "dewalt-dcs391n-scie-circulaire-18v-nue",
-    "sku": "DCS391N",
-    "title": "DeWALT DCS391N — Scie circulaire 165 mm 18V XR (outil nu)",
-    "name": "DCS391N",
+    "id": "dewalt-dcs391m2-qw",
+    "slug": "dewalt-dcs391m2-qw-scie-circulaire-165mm-18v-kit-2x4ah-tstak",
+    "sku": "DCS391M2-QW",
+    "title": "DeWALT DCS391M2-QW — Scie circulaire 165 mm 18V XR (kit 2×4,0 Ah + coffret TSTAK)",
+    "name": "DCS391M2-QW",
     "brand": "DeWALT",
     "category": "Scies",
     "tag": "Nu",
-    "desc": "Scie circulaire 165 mm, profondeur 55 mm.",
-    "img": "images/posters/dcs391n.webp",
-    "price": 169,
+    "desc": "Scie circulaire 165 mm 18V XR en kit : 2 batteries 4,0 Ah + chargeur + coffret TSTAK.",
+    "img": "images/placeholder.svg",
+    "price": 360.62,
     "currency": "EUR",
     "vat": 0.2,
-    "price_ht": 140.83,
+    "price_ht": 300.52,
     "stock_status": "in_stock",
     "stock_label": "En stock",
-    "model": "models/products/dcs391n.glb",
+    "model": "",
     "paymentLink": "",
     "weight_kg": 3.5,
     "ncCategory": "power_tool",
@@ -1346,7 +1346,7 @@
       "tropical_ready",
       "mayotte_project"
     ],
-    "description_long": "Scie circulaire 165 mm, profondeur 55 mm. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil DeWALT : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire.",
+    "description_long": "Scie circulaire DeWALT DCS391 (165 mm, 18V XR) livrée en KIT : 2 batteries XR 4,0 Ah, chargeur et coffret TSTAK. Remplace la version outil nu (DCS391N) qui n'a plus cours chez le fournisseur. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
     "specs": {
       "Marque": "DeWALT",
       "Type": "Scie circulaire 165 mm XR (machine nue)",
@@ -1362,11 +1362,11 @@
       "Batterie / chargeur": "Non inclus"
     },
     "features": [
-      "Semelle en alliage de magnésium pour des coupes précises et répétées",
-      "Profondeur de coupe 55 mm à 90°, inclinaison jusqu'à 50°",
-      "Frein électronique de lame",
-      "Blocage d'arbre pour un changement de lame rapide",
-      "Machine nue (batterie et chargeur non inclus, gamme 18V XR)"
+      "Scie circulaire sans fil 165 mm DeWALT DCS391 18V XR",
+      "Kit complet : 2 batteries XR 4,0 Ah + chargeur + coffret TSTAK",
+      "Profondeur de coupe et guide adaptés aux coupes de chantier",
+      "Robuste, pensée pour un usage professionnel intensif",
+      "Livrée dans toute la zone DOM-TOM"
     ]
   },
   {
