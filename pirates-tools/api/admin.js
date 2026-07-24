@@ -120,12 +120,28 @@ module.exports = async function handler(req, res) {
           const d = doc.data() || {};
           payments.push({
             amountCents: typeof d.amountCents === 'number' ? d.amountCents : 0,
+            cogsHtCents: (typeof d.cogsHtCents === 'number') ? d.cogsHtCents : null,
+            stripeFeeCents: (typeof d.stripeFeeCents === 'number') ? d.stripeFeeCents : null,
             status: d.status || '',
             territoryDeclared: d.territoryDeclared || d.territoryFromAddress || null,
             recordedAtMs: d.recordedAt && d.recordedAt.toMillis ? d.recordedAt.toMillis() : null
           });
         });
-        return res.status(200).json({ ok: true, accounting: accounting.synthesize(payments, cfg) });
+        const chSnap = await db.collection('charges').get();
+        const charges = [];
+        chSnap.forEach((doc) => {
+          const d = doc.data() || {};
+          charges.push({ id: doc.id, amountHt: Number(d.amountHt) || 0, tvaDeductible: Number(d.tvaDeductible) || 0, category: d.category || 'autre', label: d.label || '', dateMs: d.dateMs || null });
+        });
+        return res.status(200).json({ ok: true, accounting: accounting.synthesize(payments, charges, cfg), charges: charges });
+      }
+
+      // ── Liste des charges saisies ──────────────────────────────
+      if (type === 'charges') {
+        const chSnap = await db.collection('charges').orderBy('dateMs', 'desc').limit(500).get().catch(() => db.collection('charges').limit(500).get());
+        const charges = [];
+        chSnap.forEach((doc) => { charges.push(Object.assign({ id: doc.id }, doc.data())); });
+        return res.status(200).json({ ok: true, charges: charges });
       }
 
       // Default: list all overrides
@@ -181,6 +197,40 @@ module.exports = async function handler(req, res) {
   // produit (override priceSrcTTC en priorité, sinon price_ht × VAT du produit).
   if (req.method === 'POST' && ((req.query && req.query.type) === 'reprice-all')) {
     return handleRepriceAll(req, res, admin, db);
+  }
+
+  // ── POST ?type=charge : enregistrer une charge réelle (compta) ──
+  if (req.method === 'POST' && ((req.query && req.query.type) === 'charge')) {
+    try {
+      const b = req.body || {};
+      const CATS = ['transport', 'octroi', 'cfe', 'assurance', 'achat', 'banque', 'autre'];
+      const amountHt = Number(b.amountHt);
+      if (!(amountHt > 0)) return res.status(400).json({ ok: false, error: 'Montant HT invalide' });
+      const doc = {
+        category: CATS.indexOf(b.category) !== -1 ? b.category : 'autre',
+        label: String(b.label || '').slice(0, 120),
+        amountHt: pwRound2(amountHt),
+        tvaDeductible: Number(b.tvaDeductible) > 0 ? pwRound2(Number(b.tvaDeductible)) : 0,
+        dateMs: Number(b.dateMs) || Date.now(),
+        createdAt: admin.firestore.FieldValue.serverTimestamp()
+      };
+      const ref = await db.collection('charges').add(doc);
+      return res.status(200).json({ ok: true, id: ref.id, charge: doc });
+    } catch (err) {
+      return res.status(500).json({ ok: false, error: 'Enregistrement charge échoué' });
+    }
+  }
+
+  // ── DELETE ?type=charge&id=… : supprimer une charge ──
+  if (req.method === 'DELETE' && ((req.query && req.query.type) === 'charge')) {
+    try {
+      const id = (req.query && req.query.id) || (req.body && req.body.id) || '';
+      if (!id) return res.status(400).json({ ok: false, error: 'id manquant' });
+      await db.collection('charges').doc(String(id)).delete();
+      return res.status(200).json({ ok: true, id: String(id) });
+    } catch (err) {
+      return res.status(500).json({ ok: false, error: 'Suppression échouée' });
+    }
   }
 
   // ── POST : update or create an override ───────────────────

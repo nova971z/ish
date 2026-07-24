@@ -220,6 +220,18 @@ async function handleIntentSucceeded(stripe, fb, pi) {
   var customerEmail = pi.receipt_email || billing.email || null;
   var piUid = pi.metadata.uid || null;
 
+  // Commission Stripe RÉELLE (compta) : lue sur la balance transaction de la charge.
+  var stripeFeeCents = null;
+  try {
+    var btId = charge && charge.balance_transaction;
+    if (typeof btId === 'string') {
+      var bt = await stripe.balanceTransactions.retrieve(btId);
+      if (bt && typeof bt.fee === 'number') stripeFeeCents = bt.fee;
+    } else if (btId && typeof btId === 'object' && typeof btId.fee === 'number') {
+      stripeFeeCents = btId.fee;
+    }
+  } catch (feeErr) { console.error('[webhook] Stripe fee lookup failed:', feeErr.message); }
+
   await logPayment(fb, pi.id, {
     kind: 'payment_intent',
     status: 'succeeded',
@@ -232,7 +244,10 @@ async function handleIntentSucceeded(stripe, fb, pi) {
     territoryFromAddress: tax.expectedTerritory,
     postalCode: tax.postalCode,
     taxMismatch: tax.mismatch,
-    linesRebuilt: rebuilt.ok
+    linesRebuilt: rebuilt.ok,
+    // Compta 100 % réel : coût d'achat snapshoté + commission Stripe réelle.
+    cogsHtCents: (rebuilt.cogsHtCents != null ? rebuilt.cogsHtCents : null),
+    stripeFeeCents: stripeFeeCents
   });
 
   // Le client écrit sa commande avec paymentIntentId sur /merci (A5). Selon la
@@ -349,12 +364,14 @@ async function rebuildLines(pi, territory) {
     var products = await catalog.loadCatalog();
     var lines = [];
     var sum = 0;
+    var cogsHtCents = 0;   // coût d'achat RÉEL des marchandises vendues (compta)
     for (var i = 0; i < metaItems.length; i++) {
       var product = catalog.findByKey(products, metaItems[i].k);
       if (!product) return fallback;
       var qty = parseInt(metaItems[i].q, 10) || 1;
       var unit = pricing.unitCents(product, territory || pricing.DEFAULT_TERRITORY);
       sum += unit * qty;
+      cogsHtCents += Math.round(productCostHt(product) * 100) * qty;
       lines.push({ name: product.title || 'Produit', qty: qty, unitCents: unit, subCents: unit * qty });
     }
     // Remise fidélité serveur (create-payment-intent) : pi.amount = brut −
@@ -378,11 +395,25 @@ async function rebuildLines(pi, territory) {
       console.warn('[webhook] Rebuilt lines drift:', sum, '≠', pi.amount, '— fallback single line');
       return fallback;
     }
-    return { ok: true, lines: lines };
+    return { ok: true, lines: lines, cogsHtCents: cogsHtCents };
   } catch (e) {
     console.error('[webhook] rebuildLines failed:', e.message);
     return fallback;
   }
+}
+
+// Coût d'achat HT RÉEL d'un produit (compta). Priorité au coût fournisseur
+// enregistré par le traqueur (priceSrcTTC ÷ 1,20). Sinon on remonte depuis le
+// prix de vente HT et le markup appliqué (priceMarkup), ou à défaut ×1,15.
+function productCostHt(product) {
+  if (product && typeof product.priceSrcTTC === 'number' && product.priceSrcTTC > 0) {
+    return product.priceSrcTTC / 1.20;
+  }
+  var ph = (product && typeof product.price_ht === 'number') ? product.price_ht : 0;
+  if (product && typeof product.priceMarkup === 'number' && product.priceMarkup > 0) {
+    return ph / (1 + product.priceMarkup);
+  }
+  return ph > 0 ? ph / 1.15 : 0;
 }
 
 // ── Normalisation : les deux flux produisent le même modèle d'email ──

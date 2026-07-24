@@ -6372,61 +6372,109 @@
     if (!box) return;
     box.innerHTML = '<p class="admin-loading">Chargement des comptes…</p>';
     adminGet('accounting').then(function (data) {
-      comptaRenderAccounting(box, data.accounting || {});
+      comptaRenderAccounting(box, data.accounting || {}, data.charges || []);
     }).catch(function (e) {
       box.innerHTML = '<p class="admin-error">Comptes indisponibles : ' + escapeHTML(e.message)
         + '<br><span class="admin-hint">(nécessite FIREBASE_SERVICE_ACCOUNT sur Vercel)</span></p>';
     });
   }
 
-  function comptaRenderAccounting(box, a) {
-    var r = a.reel || {}, e = a.estime || {}, meta = a.meta || {};
+  // Compte de résultat 100 % RÉEL + saisie des charges.
+  function comptaRenderAccounting(box, a, charges) {
     function eur(n) { return (Math.round((Number(n) || 0) * 100) / 100).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €'; }
     var now = new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
+    function row(label, val, strong) { return '<tr class="' + (strong ? 'compta-row--strong' : '') + '"><td>' + escapeHTML(label) + '</td><td class="compta-num">' + escapeHTML(val) + '</td></tr>'; }
+    function kpi(label, val) { return '<div class="compta-kpi"><div class="compta-kpi__val">' + escapeHTML(val) + '</div><div class="compta-kpi__lbl">' + escapeHTML(label) + '</div></div>'; }
 
+    // ── Partie imprimable (PDF) : 100 % réel ──
     var html = '<div id="comptaPrintable">';
-    html += '<div class="compta-print-head"><b>Pirates Tools — Synthèse comptable</b><span>Édité le ' + now + '</span></div>';
-
-    if (!r.nb_ventes) {
-      html += '<div class="compta-card"><p class="compta-line">Aucune vente encaissée pour l\'instant. Dès la première vente réelle (paiement Stripe confirmé), tes comptes s\'afficheront ici automatiquement.</p></div>';
+    html += '<div class="compta-print-head"><b>Pirates Tools — Compte de résultat</b><span>Édité le ' + now + '</span></div>';
+    if (!a.nb_ventes) {
+      html += '<div class="compta-card"><p class="compta-line">Aucune vente encaissée pour l\'instant. Dès la 1ʳᵉ vente (paiement Stripe confirmé), tout se remplit ici — chiffres 100 % réels.</p></div>';
     }
-
-    // Indicateurs
     html += '<div class="compta-kpis">'
-      + kpi('Chiffre d\'affaires TTC', eur(r.ca_ttc), 'réel') + kpi('Ventes', (r.nb_ventes || 0) + '', 'réel')
-      + kpi('Panier moyen', eur(r.panier_moyen), 'réel') + kpi('Résultat net', eur(e.resultat_net), 'estimé')
+      + kpi('Chiffre d\'affaires TTC', eur(a.ca_ttc)) + kpi('Ventes', (a.nb_ventes || 0) + '')
+      + kpi('Marge brute', eur(a.marge_brute)) + kpi('Résultat net', eur(a.resultat_net))
       + '</div>';
 
-    // Compte de résultat
-    html += '<h3 class="compta-card__title" style="margin-top:1rem">Compte de résultat (synthèse)</h3>';
+    html += '<h3 class="compta-card__title" style="margin-top:1rem">Compte de résultat (réel)</h3>';
     html += '<table class="compta-table">'
-      + row('Ventes TTC (encaissé)', eur(r.ca_ttc), 'réel')
-      + row('− TVA collectée (reversée à l\'État)', eur(r.tva_collectee), 'réel')
-      + row('= Chiffre d\'affaires HT', eur(r.ca_ht), 'réel', true)
-      + row('− Charges totales (marchandises, transport, octroi, Stripe, frais fixes)', eur(e.charges_totales), 'estimé')
-      + row('= Résultat avant impôt', eur(e.resultat_avant_is), 'estimé', true)
-      + row('− Impôt sociétés (IS ' + Math.round((meta.is_taux || 0.15) * 100) + ' %)', eur(e.is), 'estimé')
-      + row('= RÉSULTAT NET', eur(e.resultat_net) + ' (' + (e.marge_nette_pct || 0) + ' %)', 'estimé', true)
+      + row('Ventes TTC (encaissé Stripe)', eur(a.ca_ttc))
+      + row('− TVA collectée (reversée à l\'État)', eur(a.tva_collectee))
+      + row('= Chiffre d\'affaires HT', eur(a.ca_ht), true)
+      + row('− Coût des marchandises vendues', eur(a.cogs))
+      + row('= Marge brute', eur(a.marge_brute), true)
+      + row('− Frais Stripe (réels)', eur(a.frais_stripe))
+      + row('− Charges saisies (transport, octroi, CFE, assurance…)', eur(a.charges_saisies))
+      + row('= Résultat d\'exploitation', eur(a.resultat_exploitation), true)
+      + row('− Impôt sur les sociétés (IS)', eur(a.is))
+      + row('= RÉSULTAT NET', eur(a.resultat_net) + ' (' + (a.marge_nette_pct || 0) + ' %)', true)
       + '</table>';
 
-    // Par mois
+    var tva = a.tva || {};
+    html += '<h3 class="compta-card__title" style="margin-top:1rem">TVA</h3>';
+    html += '<table class="compta-table">'
+      + row('TVA collectée', eur(tva.collectee))
+      + row('− TVA déductible (sur charges)', eur(tva.deductible))
+      + row('= Solde à reverser', eur(tva.solde_a_reverser), true)
+      + '</table>';
+
     if (a.par_mois && a.par_mois.length) {
-      html += '<h3 class="compta-card__title" style="margin-top:1rem">Évolution par mois</h3>';
-      html += '<table class="compta-table"><tr><th>Mois</th><th>Ventes</th><th>CA TTC</th><th>CA HT</th></tr>';
-      a.par_mois.forEach(function (m) { html += '<tr><td>' + m.mois + '</td><td>' + m.ventes + '</td><td>' + eur(m.ca_ttc) + '</td><td>' + eur(m.ca_ht) + '</td></tr>'; });
+      html += '<h3 class="compta-card__title" style="margin-top:1rem">Par mois</h3>';
+      html += '<table class="compta-table"><tr><th>Mois</th><th class="compta-num">Ventes</th><th class="compta-num">CA TTC</th><th class="compta-num">Marge brute</th></tr>';
+      a.par_mois.forEach(function (m) { html += '<tr><td>' + m.mois + '</td><td class="compta-num">' + m.ventes + '</td><td class="compta-num">' + eur(m.ca_ttc) + '</td><td class="compta-num">' + eur(m.ca_ht - m.cogs) + '</td></tr>'; });
+      html += '</table>';
+    }
+    if (a.complet === false) {
+      html += '<p class="compta-print-note">⚠️ Certaines ventes n\'ont pas de coût d\'achat enregistré (données partielles). Le coût réel sera complet pour toutes les ventes à venir.</p>';
+    }
+    html += '<p class="compta-print-note"><b>Chiffres 100 % réels</b> : revenus (Stripe), coût d\'achat snapshoté à la vente, frais Stripe réels, charges saisies. À faire viser par un expert-comptable.</p>';
+    html += '</div>'; // fin imprimable
+
+    // ── Saisie des charges (hors PDF) ──
+    html += '<h3 class="compta-card__title" style="margin-top:1.4rem">Enregistrer une charge</h3>';
+    html += '<div class="compta-card"><div class="compta-cfg-grid">'
+      + '<label>Type<select id="chgCat"><option value="transport">Transport / envois</option><option value="octroi">Octroi de mer</option><option value="achat">Achat marchandise (hors ventes)</option><option value="cfe">CFE</option><option value="assurance">Assurance</option><option value="banque">Frais bancaires</option><option value="autre">Autre</option></select></label>'
+      + '<label>Libellé<input type="text" id="chgLabel" placeholder="ex. Colissimo mars"></label>'
+      + '<label>Montant HT (€)<input type="number" id="chgAmount" step="0.01"></label>'
+      + '</div>'
+      + '<div class="compta-actions"><button type="button" class="btn primary" id="chgAdd">＋ Ajouter la charge</button></div></div>';
+
+    if (charges && charges.length) {
+      html += '<h3 class="compta-card__title" style="margin-top:1rem">Charges enregistrées</h3><table class="compta-table">';
+      charges.forEach(function (c) {
+        var dt = c.dateMs ? new Date(c.dateMs).toLocaleDateString('fr-FR') : '';
+        html += '<tr><td>' + escapeHTML(c.category) + (c.label ? ' — ' + escapeHTML(c.label) : '') + '<br><small style="opacity:.6">' + dt + '</small></td>'
+          + '<td class="compta-num">' + eur(c.amountHt) + '</td>'
+          + '<td><button type="button" class="btn btn--ghost compta-chg-del" data-id="' + escapeHTML(c.id) + '">✕</button></td></tr>';
+      });
       html += '</table>';
     }
 
-    html += '<p class="compta-print-note"><b>Note pour l\'expert-comptable :</b> les <b>revenus sont réels</b> (journal des paiements Stripe, opposable). Les <b>coûts et le résultat sont estimés</b> par le modèle de marge de l\'entreprise — à valider avec les factures d\'achat / d\'import réelles.</p>';
-    html += '</div>';
     box.innerHTML = html;
 
-    function kpi(label, val, tag) {
-      return '<div class="compta-kpi"><div class="compta-kpi__val">' + escapeHTML(val) + '</div><div class="compta-kpi__lbl">' + escapeHTML(label) + ' <span class="compta-tag2 ' + (tag === 'réel' ? 'is-real' : 'is-est') + '">' + tag + '</span></div></div>';
-    }
-    function row(label, val, tag, strong) {
-      return '<tr class="' + (strong ? 'compta-row--strong' : '') + '"><td>' + escapeHTML(label) + '</td><td class="compta-num">' + escapeHTML(val) + '</td><td><span class="compta-tag2 ' + (tag === 'réel' ? 'is-real' : 'is-est') + '">' + tag + '</span></td></tr>';
-    }
+    var addBtn = document.getElementById('chgAdd');
+    if (addBtn) addBtn.onclick = function () {
+      var amount = parseFloat(document.getElementById('chgAmount').value);
+      if (!(amount > 0)) { toast('Entre un montant HT valide', 'error'); return; }
+      addBtn.disabled = true;
+      adminPostType('charge', {
+        category: document.getElementById('chgCat').value,
+        label: document.getElementById('chgLabel').value,
+        amountHt: amount,
+        dateMs: Date.now()
+      }).then(function () { toast('Charge enregistrée', 'success'); comptaLoadAccounting(); })
+        .catch(function (e) { toast('Erreur : ' + e.message, 'error'); addBtn.disabled = false; });
+    };
+    box.querySelectorAll('.compta-chg-del').forEach(function (b) {
+      b.onclick = function () {
+        var id = b.getAttribute('data-id');
+        adminAuthHeaders().then(function (h) {
+          return fetch(apiBaseUrl() + '/api/admin?type=charge&id=' + encodeURIComponent(id), { method: 'DELETE', headers: h });
+        }).then(function (r) { return r.json(); }).then(function () { toast('Charge supprimée', 'success'); comptaLoadAccounting(); })
+          .catch(function (e) { toast('Erreur : ' + e.message, 'error'); });
+      };
+    });
   }
 
   // Charge la config serveur puis construit le calculateur + prix automatiques.
