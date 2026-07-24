@@ -3966,7 +3966,7 @@
     "category": "Ponceuses",
     "tag": "Nouveau",
     "desc": "Ponceuse vibrante 18V LXT 112x102 mm (Machine seule).",
-    "img": "images/placeholder.svg",
+    "img": "images/posters/dbo480z.webp",
     "price": 97.64,
     "currency": "EUR",
     "vat": 0.2,
@@ -3989,8 +3989,21 @@
       "Robuste et endurant, pensé pour un usage professionnel intensif",
       "Idéal pour les chantiers des Antilles / DOM-TOM"
     ],
-    "specs": {},
-    "description_long": "Ponceuse vibrante 18V LXT 112x102 mm (Machine seule). Outil professionnel Makita de la gamme 18V LXT sans fil (moteur brushless). Vendu en machine seule (sans batterie ni chargeur). Compatible avec les batteries Makita LXT. Fiche technique détaillée à compléter. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "specs": {
+      "Marque": "Makita",
+      "Type": "Ponceuse vibrante carrée sans fil",
+      "Alimentation": "Batterie 18 V LXT (vendue seule, sans batterie ni chargeur)",
+      "Moteur": "Brushless (sans charbon), frein moteur",
+      "Vitesse variable": "2 vitesses — 11 000 / 14 000 tr/min (22 000 / 28 000 osc/min)",
+      "Course de ponçage": "1,5 mm",
+      "Plateau de ponçage": "112 × 102 mm (surface 114,24 cm²)",
+      "Feuille abrasive": "114 × 102 mm (auto-agrippante)",
+      "Pression sonore (LpA)": "75 dB(A)",
+      "Puissance sonore (LwA)": "> 80 dB(A) (K = 3,0)",
+      "Poids net EPTA": "1,8 kg",
+      "Dimensions": "171 × 112 × 152 mm"
+    },
+    "description_long": "Ponceuse vibrante carrée sans fil Makita DBO480Z (18V LXT) pour un ponçage rapide et lisse. Moteur brushless à 2 vitesses avec variateur et régulation électronique (jusqu'à 28 000 osc/min), plateau 112 × 102 mm et frein moteur pour un arrêt net. Vendue en machine seule (sans batterie ni chargeur), compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM, octroi de mer inclus dans le prix affiché.",
     "variantGroup": "DBO480",
     "variantRole": "solo",
     "coffretSku": "DBO480ZJ"
