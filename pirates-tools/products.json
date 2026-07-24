@@ -4198,7 +4198,7 @@
     "category": "Défonceuses",
     "tag": "Nouveau",
     "desc": "Affleureuse sans fil pour plâtre 18V (Produit seul).",
-    "img": "images/placeholder.svg",
+    "img": "images/posters/dco181z.webp",
     "price": 166.51,
     "currency": "EUR",
     "vat": 0.2,
@@ -4221,8 +4221,21 @@
       "Robuste et endurant, pensé pour un usage professionnel intensif",
       "Idéal pour les chantiers des Antilles / DOM-TOM"
     ],
-    "specs": {},
-    "description_long": "Affleureuse sans fil pour plâtre 18V (Produit seul). Outil professionnel Makita de la gamme 18V LXT sans fil (moteur brushless). Vendu en machine seule (sans batterie ni chargeur). Compatible avec les batteries Makita LXT. Fiche technique détaillée à compléter. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "specs": {
+      "Marque": "Makita",
+      "Type": "Découpeuse / affleureuse sans fil pour plaques de plâtre",
+      "Alimentation": "Batterie 18 V LXT (vendue seule, sans batterie ni chargeur)",
+      "Moteur": "Brushless (sans charbon)",
+      "Vitesse à vide": "32 000 tr/min",
+      "Ø max. de la pince": "3,18 mm",
+      "Protection": "Frein électrique + XPT (résistance poussière/eau)",
+      "Technologies": "AWS (démarrage sans fil de l'aspirateur), éclairage LED, démarrage progressif, système anti-poussière",
+      "Pression sonore (LpA)": "78 dB(A) (K = 3,0)",
+      "Vibrations": "≤ 2,5 m/s² (K = 1,5)",
+      "Poids net EPTA": "1,7 kg",
+      "Dimensions": "311 × 79 × 117 mm"
+    },
+    "description_long": "Découpeuse sans fil Makita DCO181Z (18V LXT) pensée pour faciliter les découpes rapides et précises dans les plaques de plâtre. Moteur brushless haute vitesse (32 000 tr/min), pince 3,18 mm, éclairage LED et système anti-poussière pour un chantier propre. Protection XPT (poussière/eau) et démarrage progressif. Vendue en machine seule (sans batterie ni chargeur), compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM, octroi de mer inclus dans le prix affiché."
   },
   {
     "id": "makita-ddf083z",
