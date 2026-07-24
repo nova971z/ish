@@ -10,7 +10,7 @@ Aucun hasard, aucun bullshit. Chaque correction est vérifiée dans le code avan
 ## 🛒 RÈGLES PRODUITS / POSTERS — GRAVÉES (source de vérité : `pirates-tools/docs/REGLES-PRODUITS.md`)
 LIRE CE FICHIER avant d'ajouter/modifier un produit ou un poster. Cœur des règles imposées par l'user (23/07/2026) :
 - **PRIX** : `price` (TTC affiché) = **prix TTC source × 1,15** (marge 15 % SUR le TTC) ; `price_ht` = price / 1,20.
-- **PROMOS INTERDITES** : ⛔ ne JAMAIS regarder ni utiliser un prix soldé / promo / −X% / barré. Toujours le TTC normal. Un « prix conseillé »/MSRP gonflé ≠ prix source → demander le vrai prix cotébrico, ne pas deviner. Prix doit rester crédible DOM-TOM.
+- **PROMOS — RÈGLE MISE À JOUR (24/07, décision user)** : le **traqueur de prix** (auto, 2×/jour) PREND le **prix affiché, promo comprise** → on reste compétitif, et ça se réajuste tout seul quand la promo finit (la marge 15 % reste calée sur le coût RÉEL du jour, car si cotébrico solde, l'user achète soldé aussi). L'ancienne « promos interdites » valait pour la saisie MANUELLE d'un prix figé ; dès qu'un produit est couvert par le traqueur, la promo est OK. ⛔ Un « prix conseillé »/MSRP gonflé ≠ prix source → toujours le vrai prix cotébrico. Prix crédible DOM-TOM.
 - **POSTERS** : fond sombre obligatoire (jamais blanc — signaler AVANT si fond clair). PNG envoyé = à POSER sur le site (pas à regarder). « Machine seule/outil nu » = pas de batteries sur l'image.
 - **WORKFLOW** : travailler DIRECTEMENT sur `master` (commit + push immédiat → Vercel live). CI verte à chaque fois. Identifier le produit par le TITRE de la capture pirates-tools.com.
 - Journal des produits validés + prix en attente : voir le fichier REGLES-PRODUITS.md §7.

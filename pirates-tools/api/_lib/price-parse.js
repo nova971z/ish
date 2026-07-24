@@ -46,19 +46,17 @@ function parseCotebrico(rawText, brand) {
     while ((m = brandRe.exec(b)) !== null) skus.push(m[1].toUpperCase());
     if (!skus.length) continue;
     var sku = skus[skus.length - 1];              // le TITRE (dernière réf) = vraie réf produit
-    // Prix : « Prix de base X € » (promo) prioritaire → base hors promo ; sinon « Prix X € ».
-    var pm = b.match(/Prix de base\s+([\d\s   ]+,\d{2})\s*€/);
-    var promo = !!pm;
-    if (!pm) pm = b.match(/Prix\s+([\d\s   ]+,\d{2})\s*€/);
+    // Prix = le PRIX REELLEMENT AFFICHE (promo COMPRISE) = « Prix X € ».
+    // Decision produit (traqueur) : on PREND la promo pour etre competitif. Sur car
+    // le traqueur tourne 2x/jour et se reajuste des que la promo se termine → marge
+    // 15% calee sur le cout REEL du jour (si cotebrico solde, l'user achete soldé aussi).
+    // Le « Prix de base » barre est volontairement ignore. Le prix courant apparait
+    // AVANT « Prix de base » sur la grille → le 1er match = le prix courant.
+    var pm = b.match(/Prix\s+([\d\s\u00a0\u202f\u2009]+,\d{2})\s*€/);
     if (!pm) continue;
     var price = parsePriceFR(pm[1]);
     if (price == null || price <= 0) continue;
-    // Cohérence promo : le prix de base doit dépasser le prix soldé, sinon on saute.
-    if (promo) {
-      var sold = b.match(/Prix\s+([\d\s   ]+,\d{2})\s*€/);
-      var soldN = sold ? parsePriceFR(sold[1]) : null;
-      if (soldN != null && soldN > price) continue; // format douteux → on ignore ce bloc
-    }
+    var promo = /Prix de base/.test(b); // info seulement (rapport)
     if (seen[sku]) continue;                        // dédoublonnage
     seen[sku] = true;
     // Nom (best-effort) : le segment « … - BRAND SKU » le plus proche du prix.

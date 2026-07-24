@@ -12,7 +12,7 @@
 |-------|--------|
 | **Formule** | `price` (TTC métropole affiché) = **prix TTC source × 1,15** (marge 15 % **SUR le TTC**, pas sur le HT — la TVA se récupère en fin d'année). |
 | **HT** | `price_ht` = `price` / 1,20. CI vérifie `price ≈ price_ht × 1,20`. |
-| **PROMOS = INTERDIT** | ⛔ **Ne JAMAIS regarder ni utiliser un prix soldé / promo / −X % / « prix barré ».** Toujours le prix TTC **normal**. |
+| **PROMOS (maj 24/07)** | Le **traqueur** PREND le **prix affiché, promo comprise** (compétitif, auto-réajusté à la fin de la promo → marge 15 % sur le coût réel). « Promos interdites » ne vaut plus que pour une saisie **manuelle figée** hors traqueur. Le parseur lit « Prix X € » (courant), ignore « Prix de base ». |
 | **MSRP ≠ source** | ⚠️ Un « prix conseillé » / MSRP gonflé N'est PAS le prix source. Utiliser le **vrai prix cotébrico hors promo**. Si on n'a que la promo ou le MSRP → **demander à l'user le prix réel**, ne pas deviner. |
 | **Réalité DOM-TOM** | Le prix affiché doit rester crédible pour la Guadeloupe / DOM-TOM (le serveur ajoute octroi de mer + TVA territoriale par-dessus). Un prix trop haut = invendable. |
 | **Devise / TVA** | `currency: "EUR"`, `vat: 0.2`. |
