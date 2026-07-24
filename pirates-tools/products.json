@@ -8373,15 +8373,15 @@
     "description_long": "Guide parallèle pour rabot PA-EHL. Produit officiel Festool. Fiche technique détaillée à compléter. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
   },
   {
-    "id": "festool-ts",
-    "slug": "festool-ts-scie-plongeante-1200-w-160-mm",
-    "sku": "TS",
-    "title": "Festool Scie plongeante 1200 W Ø160 mm",
-    "name": "TS",
+    "id": "festool-576703",
+    "slug": "festool-576703-scie-plongeante-ts-55-febq-plus-1200w-160mm",
+    "sku": "576703",
+    "title": "Festool Scie plongeante TS 55 FEBQ-Plus 1200 W Ø160 mm",
+    "name": "576703",
     "brand": "Festool",
     "category": "Scies",
     "tag": "Nouveau",
-    "desc": "Scie plongeante 1200 W Ø160 mm.",
+    "desc": "Scie plongeante TS 55 FEBQ-Plus 1200 W Ø160 mm.",
     "img": "images/placeholder.svg",
     "price": 674.94,
     "currency": "EUR",
@@ -8398,13 +8398,13 @@
       "tropical_ready"
     ],
     "features": [
-      "Scie plongeante 1200 W Ø160 mm",
-      "Produit officiel Festool",
-      "Outil Festool, qualité et précision d'atelier",
+      "Scie plongeante TS 55 FEBQ-Plus 1200 W Ø160 mm",
+      "Outil Festool filaire, qualité et précision d'atelier",
+      "Compatible rails de guidage Festool FS",
       "Livré dans toute la zone DOM-TOM"
     ],
     "specs": {},
-    "description_long": "Scie plongeante 1200 W Ø160 mm. Produit officiel Festool. Fiche technique détaillée à compléter. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Scie plongeante Festool TS 55 FEBQ-Plus, 1200 W, lame Ø160 mm. Outil filaire, précision d'atelier, compatible rails de guidage FS. Fiche technique détaillée à compléter. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
   },
   {
     "id": "festool-576933",
@@ -8558,14 +8558,14 @@
   },
   {
     "id": "festool-205721",
-    "slug": "festool-205721-r-f-rence-festool-205721-compl-ter",
+    "slug": "festool-205721-systeme-alimentation-mobile-sys-powerstation",
     "sku": "205721",
-    "title": "Festool 205721 — à compléter",
+    "title": "Festool 205721 — Système d'alimentation mobile SYS-PowerStation",
     "name": "205721",
     "brand": "Festool",
-    "category": "Accessoires",
+    "category": "Batteries et chargeurs",
     "tag": "Nouveau",
-    "desc": "Référence Festool 205721 à compléter.",
+    "desc": "Système d'alimentation mobile SYS-PowerStation Festool.",
     "img": "images/placeholder.svg",
     "price": 4140.98,
     "currency": "EUR",
@@ -8575,15 +8575,17 @@
     "stock_label": "En stock",
     "model": "",
     "paymentLink": "",
-    "weight_kg": 1,
+    "weight_kg": 12,
     "ncCategory": "accessory",
     "productType": "pro",
     "tags": [],
     "features": [
-      "Produit Festool — référence 205721 (libellé et fiche à compléter)"
+      "Système d'alimentation mobile SYS-PowerStation Festool",
+      "Station d'énergie portable au format Systainer pour alimenter les outils sur chantier",
+      "Produit officiel Festool",
+      "Livré dans toute la zone DOM-TOM"
     ],
     "specs": {},
-    "description_long": "Produit Festool (référence 205721). Libellé, catégorie et fiche technique à compléter. Livré dans toute la zone DOM-TOM.",
-    "needsName": true
+    "description_long": "Système d'alimentation mobile SYS-PowerStation Festool. Station d'énergie portable (format Systainer) pour alimenter les outils là où il n'y a pas de secteur. Produit officiel Festool. Fiche technique détaillée à compléter. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
   }
 ]
