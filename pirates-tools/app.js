@@ -1191,31 +1191,73 @@
     });
   }
 
+  // ── Rendu PROGRESSIF de la grille catalogue ────────────────────────────────
+  // Rendre 185+ fiches d'un coup = page immense → iOS Safari ne peint pas assez
+  // vite en scroll inertiel (tuiles non peintes = cartes « disparues »). On rend
+  // par LOTS : un premier lot, puis on ajoute la suite quand une sentinelle
+  // approche du bas (IntersectionObserver, marge 800px = ajout avant d'y arriver).
+  // DOM léger au départ, images chargées progressivement. Standard e-commerce.
+  var GRID_BATCH = 30;
+  var _gridItems = [];
+  var _gridShown = 0;
+  var _gridIO = null;
+
+  function productCardHTML(p) {
+    var out = isOutOfStock(p);
+    var price = calcPrice(p, _currentTerritory);
+    return '<a class="product-card' + (out ? ' product-card--out' : '') + '" href="#/produit/' + escapeHTML(p.slug || p.id) + '">'
+      + '<div class="product-card__img-wrap">'
+      + productCardVisual(p)
+      + (p.tag ? '<span class="product-card__tag">' + escapeHTML(p.tag) + '</span>' : '')
+      + stockBadge(p)
+      + wishlistButton(p)
+      + '</div>'
+      + '<div class="product-card__body">'
+      + '<span class="product-card__brand">' + escapeHTML(p.brand) + '</span>'
+      + '<h3 class="product-card__title">' + escapeHTML(p.title) + '</h3>'
+      + '<span class="product-card__price">' + formatPrice(price.ttc) + ' <small>TTC</small></span>'
+      + '</div>'
+      + '</a>';
+  }
+
+  function appendGridBatch() {
+    if (!dom.list) return;
+    var old = document.getElementById('gridSentinel');
+    if (old) old.remove();
+    var next = _gridItems.slice(_gridShown, _gridShown + GRID_BATCH);
+    if (next.length) {
+      dom.list.insertAdjacentHTML('beforeend', next.map(productCardHTML).join(''));
+      _gridShown += next.length;
+      preloadModelViewers(dom.list);
+    }
+    if (_gridShown < _gridItems.length) {
+      dom.list.insertAdjacentHTML('beforeend', '<div id="gridSentinel" class="grid-sentinel" aria-hidden="true"></div>');
+      var s = document.getElementById('gridSentinel');
+      if ('IntersectionObserver' in window && s) {
+        if (!_gridIO) {
+          _gridIO = new IntersectionObserver(function (entries) {
+            if (entries[0] && entries[0].isIntersecting) appendGridBatch();
+          }, { rootMargin: '800px 0px' });
+        }
+        _gridIO.observe(s);
+      } else {
+        // Pas d'IntersectionObserver → tout rendre (le confort > la perf ici).
+        while (_gridShown < _gridItems.length) appendGridBatch();
+      }
+    }
+  }
+
   function renderProductList() {
     if (!dom.list) return;
-    var filtered = filteredProducts();
-    if (filtered.length === 0) {
+    if (_gridIO) _gridIO.disconnect();     // repart propre à chaque filtre/route
+    _gridItems = filteredProducts();
+    _gridShown = 0;
+    if (_gridItems.length === 0) {
       dom.list.innerHTML = '<p class="no-results">Aucun produit trouvé.</p>';
       return;
     }
-    dom.list.innerHTML = filtered.map(function (p) {
-      var out = isOutOfStock(p);
-      var price = calcPrice(p, _currentTerritory);
-      return '<a class="product-card' + (out ? ' product-card--out' : '') + '" href="#/produit/' + escapeHTML(p.slug || p.id) + '">'
-        + '<div class="product-card__img-wrap">'
-        + productCardVisual(p)
-        + (p.tag ? '<span class="product-card__tag">' + escapeHTML(p.tag) + '</span>' : '')
-        + stockBadge(p)
-        + wishlistButton(p)
-        + '</div>'
-        + '<div class="product-card__body">'
-        + '<span class="product-card__brand">' + escapeHTML(p.brand) + '</span>'
-        + '<h3 class="product-card__title">' + escapeHTML(p.title) + '</h3>'
-        + '<span class="product-card__price">' + formatPrice(price.ttc) + ' <small>TTC</small></span>'
-        + '</div>'
-        + '</a>';
-    }).join('');
-    preloadModelViewers(dom.list);
+    dom.list.innerHTML = '';
+    appendGridBatch();
   }
 
   // ── Brand grid (home page) ─────────────────────────────────

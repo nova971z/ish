@@ -688,6 +688,13 @@ gap: .5rem;
     padding: .5rem 0;
 }
 
+/* Sentinelle de rendu progressif : occupe toute la largeur de la grille sans
+   se voir. Quand elle approche du viewport, on charge le lot suivant de cartes. */
+.grid-sentinel {
+    grid-column: 1 / -1;
+    height: 1px;
+}
+
 /* ── Product Cards ── */
 .product-card {
     display: flex;
