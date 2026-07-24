@@ -239,7 +239,7 @@ async function handlePriceWatch(req, res, admin, db) {
     return res.status(200).json({
       ok: true, brand, dryRun: !!dryRun,
       counts: { parsed: parsed.length, applied: applied.length, flagged: flagged.length, unchanged: unchanged.length, unknown: unknown.length },
-      applied, flagged, unknown: unknown.slice(0, 100)
+      applied, flagged, unknown: unknown.slice(0, 800)
     });
   } catch (err) {
     console.error('[api/admin] price-watch failed:', err.message);
