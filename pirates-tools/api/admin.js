@@ -281,6 +281,9 @@ async function handleRepriceAll(req, res, admin, db) {
       if (!dryRun) {
         await db.collection('product_overrides').doc(p.id).set({
           price: priced.newPrice, price_ht: priced.newHt,
+          // Mémorise le coût source utilisé → un recalcul ultérieur repart du VRAI
+          // coût (et non d'une dérivation ×1,15 qui deviendrait fausse).
+          priceSrcTTC: srcTTC,
           priceMarkup: priced.markup, priceMode: priced.mode, priceRecomputedAt: now
         }, { merge: true });
       }
