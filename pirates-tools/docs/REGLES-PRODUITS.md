@@ -121,6 +121,27 @@ localement**, même quand ils paraissent élevés vus de métropole.
 - ⚠️ Nuance : ceci ne rouvre PAS la porte aux promos. On part toujours du **TTC normal
   hors promo** ; simplement, un prix qui semble haut en métropole peut être juste ici.
 
+## 8. 🔀 VARIANTES SOLO / COFFRET (gravé — décision user 24/07)
+
+Un même outil existe souvent en **« sans coffret » (solo)** ET **« avec coffret »**
+(MAKPAC / valise). Règle validée :
+- On affiche le **solo par défaut** sur les **cartes** et la **fiche principale**
+  (moins cher, image nue). Le coffret est marqué `variantSecondary: true` → **masqué
+  de la grille** (`filteredProducts` l'exclut), accessible **uniquement** via le switch.
+- **Fiche produit** : un **switch « Sans coffret / Avec coffret »** dans le héros
+  (près du titre / gros poster). Chaque segment porte **son prix** (= bouton ET
+  écriteau). Il échange **image + prix + cible d'achat** (panier / paiement /
+  WhatsApp). Specs & 3D **inchangés** (même outil, seul le conditionnement change).
+- **Liaison des données** (`products.json`) — sur les DEUX fiches :
+  `variantGroup` (base SKU commune), `variantRole` `'solo'`|`'coffret'` ;
+  le solo porte `coffretSku`, le coffret porte `soloSku` + `variantSecondary:true`.
+- **Convention SKU Makita** : solo = `…Z` (nu) ; coffret = `…ZJ`/`…ZK` (MAKPAC/valise),
+  parfois suivi d'accessoires (`…ZJX3`). `…ZX4` reste un **solo** (accessoires, pas de coffret).
+- Outil qui n'existe **qu'en coffret** chez cotébrico (pas de solo dispo) → reste
+  un **produit simple**, pas de switch. Ne jamais inventer un solo fantôme.
+- Code : `renderPDP` (résolution variante + `applyVariant`), CSS `.pdp-variant`,
+  builder de données `scratchpad/makita-variants.js`. 20 paires liées au 24/07.
+
 ### Décisions produit gravées ailleurs
 - DCF894N = **vrai produit distinct** (à garder), ≠ DCF891NT-XJ (ne pas fusionner/supprimer).
 - Meuleuses : DCG405N (tête standard) ≠ DCG405FN-XJ (tête plate) ≠ DCG440N-XJ (180 mm) ≠ DGA504Z (Makita).
