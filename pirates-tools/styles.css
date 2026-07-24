@@ -6086,7 +6086,15 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 @media (min-width: 560px) { .compta-kpis { grid-template-columns: repeat(4, 1fr); } }
 .compta-kpi { background: rgba(var(--accent-rgb),0.06); border: 1px solid rgba(var(--accent-rgb),0.25); border-radius: 12px; padding: 12px; }
 .compta-kpi__val { font-size: 1.35rem; font-weight: 800; color: #fff; }
+.compta-kpi__sub { font-size: .82rem; color: var(--accent-soft); font-weight: 600; margin-top: -1px; }
 .compta-kpi__lbl { font-size: .74rem; color: rgba(255,255,255,.7); margin-top: 2px; }
+.compta-res__ht { font-size: .95rem; color: var(--accent-soft); font-weight: 600; }
+/* Fiscalité — cartes déclarations */
+.fisc-card { background: rgba(var(--accent-rgb),0.05); border: 1px solid rgba(var(--accent-rgb),0.25); border-radius: 14px; padding: 16px; margin: 10px 0; }
+.fisc-card h3 { margin: 0 0 6px; font-size: 1.05rem; color: #fff; }
+.fisc-when { display: inline-block; font-size: .72rem; font-weight: 800; padding: 2px 9px; border-radius: 999px; background: rgba(var(--accent-rgb),.16); color: var(--accent-soft); margin-bottom: 6px; }
+.fisc-line { font-size: .9rem; color: rgba(255,255,255,.85); margin: 4px 0; }
+.fisc-lbl { color: var(--accent-soft); font-weight: 700; }
 .compta-table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: .88rem; }
 .compta-table td, .compta-table th { padding: 8px 6px; border-bottom: 1px solid rgba(var(--accent-rgb),0.18); text-align: left; color: rgba(255,255,255,.88); }
 .compta-table th { color: var(--accent-soft); font-size: .74rem; text-transform: uppercase; }

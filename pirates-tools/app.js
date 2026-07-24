@@ -6384,7 +6384,7 @@
     function eur(n) { return (Math.round((Number(n) || 0) * 100) / 100).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €'; }
     var now = new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
     function row(label, val, strong) { return '<tr class="' + (strong ? 'compta-row--strong' : '') + '"><td>' + escapeHTML(label) + '</td><td class="compta-num">' + escapeHTML(val) + '</td></tr>'; }
-    function kpi(label, val) { return '<div class="compta-kpi"><div class="compta-kpi__val">' + escapeHTML(val) + '</div><div class="compta-kpi__lbl">' + escapeHTML(label) + '</div></div>'; }
+    function kpi(label, val, sub) { return '<div class="compta-kpi"><div class="compta-kpi__val">' + escapeHTML(val) + '</div>' + (sub ? '<div class="compta-kpi__sub">' + escapeHTML(sub) + '</div>' : '') + '<div class="compta-kpi__lbl">' + escapeHTML(label) + '</div></div>'; }
 
     // ── Partie imprimable (PDF) : 100 % réel ──
     var html = '<div id="comptaPrintable">';
@@ -6393,13 +6393,13 @@
       html += '<div class="compta-card"><p class="compta-line">Aucune vente encaissée pour l\'instant. Dès la 1ʳᵉ vente (paiement Stripe confirmé), tout se remplit ici — chiffres 100 % réels.</p></div>';
     }
     html += '<div class="compta-kpis">'
-      + kpi('Chiffre d\'affaires TTC', eur(a.ca_ttc)) + kpi('Ventes', (a.nb_ventes || 0) + '')
-      + kpi('Marge brute', eur(a.marge_brute)) + kpi('Résultat net', eur(a.resultat_net))
+      + kpi('Chiffre d\'affaires', eur(a.ca_ttc) + ' TTC', eur(a.ca_ht) + ' HT') + kpi('Ventes', (a.nb_ventes || 0) + '')
+      + kpi('Marge brute', eur(a.marge_brute), 'HT') + kpi('Résultat net', eur(a.resultat_net), 'HT')
       + '</div>';
 
     html += '<h3 class="compta-card__title" style="margin-top:1rem">Compte de résultat (réel)</h3>';
     html += '<table class="compta-table">'
-      + row('Ventes TTC (encaissé Stripe)', eur(a.ca_ttc))
+      + row('Ventes encaissées (Stripe)', eur(a.ca_ttc) + ' TTC · ' + eur(a.ca_ht) + ' HT')
       + row('− TVA collectée (reversée à l\'État)', eur(a.tva_collectee))
       + row('= Chiffre d\'affaires HT', eur(a.ca_ht), true)
       + row('− Coût des marchandises vendues', eur(a.cogs))
@@ -6412,12 +6412,16 @@
       + '</table>';
 
     var tva = a.tva || {};
-    html += '<h3 class="compta-card__title" style="margin-top:1rem">TVA</h3>';
+    var solde = tva.solde_a_reverser || 0;
+    html += '<h3 class="compta-card__title" style="margin-top:1rem">TVA — ce que tu dois / ce que tu récupères</h3>';
     html += '<table class="compta-table">'
-      + row('TVA collectée', eur(tva.collectee))
-      + row('− TVA déductible (sur charges)', eur(tva.deductible))
-      + row('= Solde à reverser', eur(tva.solde_a_reverser), true)
+      + row('TVA collectée sur tes ventes', eur(tva.collectee))
+      + row('− TVA déductible (sur tes charges)', eur(tva.deductible))
+      + (solde >= 0
+          ? row('= À REVERSER à l\'État', eur(solde), true)
+          : row('= À RÉCUPÉRER (crédit de TVA, l\'État te rembourse)', eur(-solde), true))
       + '</table>';
+    html += '<p class="compta-print-note">💡 La <b>TVA française 20 %</b> que tu paies à cotébrico sur tes achats est <b>déjà récupérée</b> : ton coût des marchandises est compté en HT.</p>';
 
     if (a.par_mois && a.par_mois.length) {
       html += '<h3 class="compta-card__title" style="margin-top:1rem">Par mois</h3>';
@@ -6544,7 +6548,8 @@
         var r = data.result;
         if (!r) { out.innerHTML = '<p class="admin-error">Pas de résultat</p>'; return; }
         out.innerHTML = '<div class="compta-res">'
-          + '<div class="compta-res__price">' + r.ttc.toFixed(0) + ' € <small>prix client (tout compris)</small></div>'
+          + '<div class="compta-res__price">' + r.ttc.toFixed(0) + ' € <small>TTC (prix client, tout compris)</small></div>'
+          + '<div class="compta-res__ht">' + r.priceHt.toFixed(2) + ' € HT</div>'
           + '<div class="compta-res__brk">'
           + '<span>Markup : <b>' + Math.round(r.markup * 100) + ' %</b></span>'
           + '<span>Coût HT : ' + r.costHT.toFixed(2) + ' €</span>'
@@ -6578,6 +6583,81 @@
         repriceOut.innerHTML = '<p>✅ <b>' + d.counts.changed + '</b> prix mis à jour. Visibles en production sous ~30 s (cache).</p>';
       }).catch(function (e) { repriceOut.innerHTML = '<p class="admin-error">Erreur : ' + escapeHTML(e.message) + '</p>'; btn.disabled = false; });
     };
+  }
+
+  // ── Fiscalité : guide des déclarations officielles (SASU à l'IS, DOM) ──────
+  var FISC_DECLARATIONS = [
+    {
+      titre: 'TVA — déclaration de TVA',
+      quand: 'Chaque mois ou trimestre',
+      quoi: 'Tu déclares la TVA que tu as collectée sur tes ventes moins la TVA déductible sur tes achats/charges (le « solde » que tu vois dans ta compta). Tu reverses la différence, ou tu récupères si c\'est un crédit.',
+      ou: 'impots.gouv.fr → ton Espace Professionnel → « Déclarer la TVA »',
+      url: 'https://www.impots.gouv.fr/professionnel',
+      note: 'Le chiffre exact = la ligne TVA de ton compte de résultat (onglet Comptabilité).'
+    },
+    {
+      titre: 'Impôt sur les sociétés (IS) — déclaration de résultat',
+      quand: 'Une fois par an (+ acomptes)',
+      quoi: 'La « liasse fiscale » (formulaire n° 2065) : tu déclares le résultat de ta société. L\'IS (15 % jusqu\'à 42 500 € de bénéfice, 25 % au-delà) se paie en acomptes puis un solde.',
+      ou: 'impots.gouv.fr → Espace Professionnel → « Déclarer les résultats »',
+      url: 'https://www.impots.gouv.fr/professionnel',
+      note: 'C\'est LE document que ton expert-comptable prépare à partir de ton compte de résultat (exporte le PDF Compta et donne-le-lui).'
+    },
+    {
+      titre: 'CFE — Cotisation Foncière des Entreprises',
+      quand: 'Chaque année (paiement en décembre)',
+      quoi: 'Un impôt local fixe pour les entreprises. Une déclaration initiale (formulaire 1447-C) la 1ʳᵉ année, puis paiement chaque année. Souvent exonérée l\'année de création.',
+      ou: 'impots.gouv.fr → Espace Professionnel → « CFE »',
+      url: 'https://www.impots.gouv.fr/professionnel',
+      note: 'Pense à enregistrer la CFE payée dans tes charges (onglet Comptabilité).'
+    },
+    {
+      titre: 'Octroi de mer — à l\'import en Guadeloupe',
+      quand: 'À chaque importation de marchandise',
+      quoi: 'La taxe DOM sur les marchandises qui entrent. Elle se déclare/paie à la douane au moment où tu fais venir ton stock. C\'est le transitaire qui la gère souvent — vérifie qu\'elle est incluse dans son devis.',
+      ou: 'douane.gouv.fr (téléservice DELT@ / ton transitaire)',
+      url: 'https://www.douane.gouv.fr',
+      note: 'Enregistre l\'octroi payé dans tes charges pour un résultat net exact.'
+    },
+    {
+      titre: 'Comptes annuels — dépôt du bilan',
+      quand: 'Une fois par an (après la clôture)',
+      quoi: 'Ta société doit déposer ses comptes annuels (bilan + compte de résultat) au greffe, via le Guichet unique. C\'est ce qui rend ta compta « officielle ».',
+      ou: 'formalites.entreprises.gouv.fr (Guichet unique INPI)',
+      url: 'https://formalites.entreprises.gouv.fr',
+      note: 'Là encore, c\'est monté à partir de ta compta réelle.'
+    },
+    {
+      titre: 'Formalités entreprise (créer / modifier)',
+      quand: 'À la création, puis si changement',
+      quoi: 'Toute création, modification (adresse, activité…) ou fermeture passe par le Guichet unique. C\'est le point d\'entrée officiel unique depuis 2023.',
+      ou: 'formalites.entreprises.gouv.fr (Guichet unique INPI)',
+      url: 'https://formalites.entreprises.gouv.fr',
+      note: 'Ton numéro SIRET et tes statuts viennent de là.'
+    }
+  ];
+
+  function renderAdminFisc() {
+    var el = document.getElementById('adminFiscBody');
+    if (!el) return;
+    var html = '';
+    html += '<p class="admin-hint">Tes <b>déclarations officielles</b>, expliquées simplement, avec le <b>lien direct</b> vers le bon site du gouvernement. Tu n\'as pas besoin de tout connaître : tu suis les cartes, une par une. 👍</p>';
+    html += '<div class="fisc-card" style="border-color:rgba(245,158,11,.5);background:rgba(245,158,11,.07)">'
+      + '<h3>⚠️ À lire avant tout</h3>'
+      + '<p class="fisc-line">Je te donne les grandes lignes et les bons liens — mais je ne suis <b>pas</b> conseiller fiscal. Pour être sûr de tes obligations exactes (surtout au démarrage), <b>appelle gratuitement ton Service des Impôts des Entreprises (SIE)</b> ou fais un point avec un expert-comptable. Ils répondent à ces questions tous les jours.</p>'
+      + '<p class="fisc-line">💡 <b>Le secret :</b> ton onglet <b>Comptabilité</b> produit déjà tous les chiffres réels. Tu exportes le <b>PDF</b> et il sert à remplir (ou à faire remplir) toutes ces déclarations.</p>'
+      + '</div>';
+    FISC_DECLARATIONS.forEach(function (d) {
+      html += '<article class="fisc-card">'
+        + '<div class="fisc-when">🗓️ ' + escapeHTML(d.quand) + '</div>'
+        + '<h3>' + escapeHTML(d.titre) + '</h3>'
+        + '<p class="fisc-line"><span class="fisc-lbl">C\'est quoi :</span> ' + escapeHTML(d.quoi) + '</p>'
+        + '<p class="fisc-line"><span class="fisc-lbl">Où :</span> ' + escapeHTML(d.ou) + '</p>'
+        + '<p class="fisc-line">' + escapeHTML(d.note) + '</p>'
+        + '<div class="compta-actions"><a class="btn primary" href="' + escapeHTML(d.url) + '" target="_blank" rel="noopener">Ouvrir le site officiel ↗</a></div>'
+        + '</article>';
+    });
+    el.innerHTML = html;
   }
 
   function renderAdmin() {
@@ -6617,6 +6697,7 @@
       + '<nav class="admin-tabs" role="tablist">'
       + '<button type="button" class="admin-tab is-active" data-admin-tab="products" role="tab" aria-selected="true">Produits</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="compta" role="tab" aria-selected="false">Comptabilité</button>'
+      + '<button type="button" class="admin-tab" data-admin-tab="fisc" role="tab" aria-selected="false">Fiscalité</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="stats" role="tab" aria-selected="false">Statistiques</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="clients" role="tab" aria-selected="false">Clients</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="orders" role="tab" aria-selected="false">Commandes</button>'
@@ -6631,6 +6712,10 @@
 
       + '<div class="admin-pane" data-admin-pane="compta" hidden>'
       + '<div id="adminComptaBody"></div>'
+      + '</div>'
+
+      + '<div class="admin-pane" data-admin-pane="fisc" hidden>'
+      + '<div id="adminFiscBody"></div>'
       + '</div>'
 
       + '<div class="admin-pane" data-admin-pane="orders" hidden>'
@@ -6778,6 +6863,7 @@
         });
         if (target === 'orders') loadAdminOrders();
         if (target === 'compta') renderAdminCompta();
+        if (target === 'fisc') renderAdminFisc();
         if (target === 'instagram') initAdminInstagram();
         if (target === 'stats') loadAdminStats();
         if (target === 'clients') loadAdminClients();
