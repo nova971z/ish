@@ -118,9 +118,13 @@ module.exports = async function handler(req, res) {
         return res.status(400).json({ ok: false, error: 'Produit introuvable', key: String(key || '') });
       }
 
-      totalCents += pricing.unitCents(product, territory) * qty;
-      description.push((product.title || 'Produit') + ' x' + qty);
-      validatedLines.push({ key: product.slug || product.id || String(key), qty: qty });
+      // Option coffret TSTAK : surcoût calculé SERVEUR (jamais le client), 0 si
+      // produit non éligible même si le client force le flag.
+      var coffret = (raw.coffret === true || raw.coffret === 'true' || raw.coffret === 1) && pricing.coffretEligible(product);
+      var unit = pricing.unitCents(product, territory) + (coffret ? pricing.coffretSurchargeCents(product) : 0);
+      totalCents += unit * qty;
+      description.push((product.title || 'Produit') + (coffret ? ' (coffret)' : '') + ' x' + qty);
+      validatedLines.push({ key: product.slug || product.id || String(key), qty: qty, coffret: coffret });
     }
 
     if (totalCents < 50) {

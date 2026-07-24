@@ -18,7 +18,9 @@ var MAX_CHUNKS = 40; // garde-fou : au-delà, metadata refusée par Stripe de to
 // fusionner. Retourne null si la sérialisation ne tient pas dans les limites.
 function chunkItems(items) {
   var compact = (items || []).map(function (it) {
-    return { k: String(it.key), q: it.qty };
+    var o = { k: String(it.key), q: it.qty };
+    if (it.coffret) o.c = 1;   // option coffret TSTAK (surcoût serveur)
+    return o;
   });
   var json = JSON.stringify(compact);
   var chunks = [];

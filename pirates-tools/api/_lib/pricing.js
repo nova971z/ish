@@ -86,12 +86,36 @@ function unitCents(product, territoryCode) {
   return Math.round(calcPrice(product, territoryCode).ttc * 100);
 }
 
+// ── Supplément COFFRET TSTAK ──────────────────────────────────────────────
+// Le prix affiché = SANS coffret (outil dans un carton simple). Option « avec
+// coffret » = surcoût d'envoi La Poste Outre-mer dû au volume/poids du coffret
+// (le coffret vient avec l'outil, il n'est pas racheté). 2 paliers selon le
+// poids de l'outil. ⚠️ MIROIR de app.js (calcLocalPrice/coffret) — garder
+// identique. Modifiable ici (tarif La Poste OM à confirmer par l'user).
+// Éligible : machines (ncCategory 'power_tool') uniquement.
+var COFFRET = { petit: 15, gros: 25, heavyKg: 3 };
+// Exclut ce qui n'est pas une machine autonome (batterie/chargeur/accessoire/
+// pack déjà en coffret…). ncCategory sert à l'octroi, pas à ce filtre.
+var COFFRET_DENY = /batterie|chargeur|accessoire|rangement|lame|foret|consommable|coffret|mallette|combo|pack/i;
+function coffretEligible(product) {
+  return !!(product && product.ncCategory === 'power_tool' && !COFFRET_DENY.test(product.category || ''));
+}
+function coffretSurchargeCents(product) {
+  if (!coffretEligible(product)) return 0;
+  var w = Number(product && product.weight_kg) || 0;
+  var eur = (w >= COFFRET.heavyKg) ? COFFRET.gros : COFFRET.petit;
+  return Math.round(eur * 100);
+}
+
 module.exports = {
   TERRITORIES: TERRITORIES,
   TAX_RULES_BY_NC: TAX_RULES_BY_NC,
   DEFAULT_TERRITORY: DEFAULT_TERRITORY,
+  COFFRET: COFFRET,
   getTerritory: getTerritory,
   taxRatesFor: taxRatesFor,
   calcPrice: calcPrice,
-  unitCents: unitCents
+  unitCents: unitCents,
+  coffretEligible: coffretEligible,
+  coffretSurchargeCents: coffretSurchargeCents
 };

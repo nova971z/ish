@@ -887,21 +887,24 @@
   function addToCart(item) {
     var items = getCart();
     var key = item.key || item.id || item.slug;
+    var coffret = !!item.coffret;
     var existing = null;
+    // Une ligne « avec coffret » est distincte de la même sans coffret.
     for (var i = 0; i < items.length; i++) {
-      if (items[i].key === key) { existing = items[i]; break; }
+      if (items[i].key === key && !!items[i].coffret === coffret) { existing = items[i]; break; }
     }
     if (existing) {
       existing.qty = (existing.qty || 1) + 1;
     } else {
       items.push({
         key: key,
-        title: item.title,
+        title: item.title + (coffret ? ' + coffret TSTAK' : ''),
         brand: item.brand || '',
         price: Number(item.price) || 0,
         qty: 1,
         image: item.img || item.image || '',
-        paymentLink: item.paymentLink || ''
+        paymentLink: item.paymentLink || '',
+        coffret: coffret
       });
     }
     saveCart(items);
@@ -2117,6 +2120,7 @@
 
     // Add to cart — stays on page, no redirect
     var pdpOut = isOutOfStock(product);
+    setupPdpCoffret(activeProduct);   // option coffret TSTAK (machines éligibles)
     if (dom.pdpQuote) {
       dom.pdpQuote.disabled = pdpOut;
       if (pdpOut) dom.pdpQuote.setAttribute('aria-disabled', 'true');
@@ -2126,7 +2130,7 @@
           toast('Produit en rupture de stock', 'error');
           return;
         }
-        addToCart(activeProduct);
+        addToCart(Object.assign({}, activeProduct, { coffret: _pdpCoffret }));
       };
     }
 
@@ -2142,7 +2146,7 @@
           toast('Produit en rupture de stock', 'error');
           return;
         }
-        openPayModal([{ key: activeProduct.id || activeProduct.slug, title: activeProduct.title, price: activeProduct.price, qty: 1, paymentLink: activeProduct.paymentLink || '' }]);
+        openPayModal([{ key: activeProduct.id || activeProduct.slug, title: activeProduct.title, price: activeProduct.price, qty: 1, coffret: _pdpCoffret, paymentLink: activeProduct.paymentLink || '' }]);
       };
     }
 
@@ -4957,10 +4961,46 @@
   // (same per-unit rounding) so the amount shown here equals the amount the
   // server will charge. Falls back to the stored metropolitan price only for
   // legacy cart entries whose product is no longer in the live catalogue.
+  // Supplément coffret TSTAK — MIROIR de api/_lib/pricing.js (garder IDENTIQUE).
+  // Éligible = machine (ncCategory 'power_tool'). 2 paliers selon le poids.
+  var COFFRET_SURCH = { petit: 15, gros: 25, heavyKg: 3 };
+  var COFFRET_DENY = /batterie|chargeur|accessoire|rangement|lame|foret|consommable|coffret|mallette|combo|pack/i;
+  function coffretEligible(p) { return !!(p && p.ncCategory === 'power_tool' && !COFFRET_DENY.test(p.category || '')); }
+  function coffretSurchargeCents(p) {
+    if (!coffretEligible(p)) return 0;
+    var w = Number(p && p.weight_kg) || 0;
+    return Math.round((w >= COFFRET_SURCH.heavyKg ? COFFRET_SURCH.gros : COFFRET_SURCH.petit) * 100);
+  }
+
+  // Option coffret sur la fiche : case à cocher injectée dans la zone CTA pour
+  // les machines éligibles (hors produits à vraie variante coffret P2). Le prix
+  // affiché reste le prix SANS coffret ; la case ajoute le supplément au panier
+  // / paiement. _pdpCoffret = choix courant (réinitialisé à chaque fiche).
+  var _pdpCoffret = false;
+  function setupPdpCoffret(product) {
+    _pdpCoffret = false;
+    var old = document.getElementById('pdpCoffretOpt');
+    if (old && old.parentNode) old.parentNode.removeChild(old);
+    var host = dom.pdpQuote ? dom.pdpQuote.parentNode : null;
+    if (!host || !coffretEligible(product) || product.variantGroup) return;
+    var sur = coffretSurchargeCents(product) / 100;
+    var wrap = document.createElement('label');
+    wrap.id = 'pdpCoffretOpt';
+    wrap.className = 'pdp-coffret';
+    wrap.innerHTML = '<input type="checkbox" id="pdpCoffretChk">'
+      + '<span>Ajouter le <strong>coffret TSTAK</strong> '
+      + '<span class="pdp-coffret__price">+' + formatPrice(sur) + '</span></span>';
+    host.insertBefore(wrap, host.firstChild);
+    var chk = document.getElementById('pdpCoffretChk');
+    if (chk) chk.addEventListener('change', function () { _pdpCoffret = chk.checked; });
+  }
+
   function payUnitCents(it) {
     var p = findProductByKey(it && it.key);
     var ttc = p ? calcPrice(p, _currentTerritory).ttc : (Number(it && it.price) || 0);
-    return Math.round(ttc * 100);
+    var cents = Math.round(ttc * 100);
+    if (it && it.coffret && p) cents += coffretSurchargeCents(p);   // option coffret
+    return cents;
   }
 
   function payTotalCents(items) {
@@ -5225,7 +5265,7 @@
     var piBody = JSON.stringify({
       // Server resolves prices from the catalogue by key — no price is sent.
       items: _payItems.map(function (it) {
-        return { key: it.key, title: it.title, qty: it.qty || 1 };
+        return { key: it.key, title: it.title, qty: it.qty || 1, coffret: !!it.coffret };
       }),
       customerEmail: (_currentUser && _currentUser.email) || undefined,
       // Territoire dérivé du CP de livraison ; le serveur re-dérive depuis
@@ -5438,7 +5478,7 @@
       var coBody = JSON.stringify({
         // Server resolves prices from the catalogue by key — no price is sent.
         items: _payItems.map(function (it) {
-          return { key: it.key, title: it.title, qty: it.qty || 1 };
+          return { key: it.key, title: it.title, qty: it.qty || 1, coffret: !!it.coffret };
         }),
         customerEmail: (_currentUser && _currentUser.email) || undefined,
         territory: _currentTerritory

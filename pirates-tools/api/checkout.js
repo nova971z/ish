@@ -80,16 +80,19 @@ module.exports = async function handler(req, res) {
         return res.status(400).json({ ok: false, error: 'Produit introuvable', key: String(key || '') });
       }
 
+      // Option coffret TSTAK : surcoût SERVEUR (0 si non éligible).
+      var coffret = (raw.coffret === true || raw.coffret === 'true' || raw.coffret === 1) && pricing.coffretEligible(product);
+      var unit = pricing.unitCents(product, territory) + (coffret ? pricing.coffretSurchargeCents(product) : 0);
       lineItems.push({
         price_data: {
           currency: 'eur',
           product_data: {
-            name: product.title || 'Produit Pirates Tools',
+            name: (product.title || 'Produit Pirates Tools') + (coffret ? ' + coffret TSTAK' : ''),
             // Only allow catalogue-controlled absolute image URLs.
             ...(typeof product.img === 'string' && /^https?:\/\//.test(product.img)
               ? { images: [product.img] } : {})
           },
-          unit_amount: pricing.unitCents(product, territory)
+          unit_amount: unit
         },
         quantity: qty
       });

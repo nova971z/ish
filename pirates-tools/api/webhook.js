@@ -432,10 +432,13 @@ async function rebuildLines(pi, territory) {
       var product = catalog.findByKey(products, metaItems[i].k);
       if (!product) return fallback;
       var qty = parseInt(metaItems[i].q, 10) || 1;
-      var unit = pricing.unitCents(product, territory || pricing.DEFAULT_TERRITORY);
+      // Option coffret TSTAK : même surcoût SERVEUR qu'à la création du paiement.
+      var coffret = (metaItems[i].c === 1 || metaItems[i].c === '1') && pricing.coffretEligible(product);
+      var unit = pricing.unitCents(product, territory || pricing.DEFAULT_TERRITORY)
+        + (coffret ? pricing.coffretSurchargeCents(product) : 0);
       sum += unit * qty;
       cogsHtCents += Math.round(productCostHt(product) * 100) * qty;
-      lines.push({ name: product.title || 'Produit', qty: qty, unitCents: unit, subCents: unit * qty, brand: product.brand || '' });
+      lines.push({ name: (product.title || 'Produit') + (coffret ? ' + coffret TSTAK' : ''), qty: qty, unitCents: unit, subCents: unit * qty, brand: product.brand || '' });
     }
     // Remise fidélité serveur (create-payment-intent) : pi.amount = brut −
     // remise. On la matérialise en ligne négative pour que le détail somme

@@ -32,6 +32,7 @@ var reqPriceModel = safeRequire('./check-pricing-model','check-pricing-model');
 var reqAccount = safeRequire('./check-accounting','check-accounting');
 var reqInvoice = safeRequire('./check-invoice','check-invoice');
 var reqLoyalty  = safeRequire('./check-loyalty',     'check-loyalty');
+var reqCoffret  = safeRequire('./check-coffret',     'check-coffret');
 var reqCsp      = safeRequire('./check-csp',         'check-csp');
 var reqAnalytics= safeRequire('./check-analytics',   'check-analytics');
 var reqFns      = safeRequire('./check-functions',   'check-functions');
@@ -75,6 +76,7 @@ function runLintProducts(){
   await runOne(reqAccount, 'check-accounting');
   await runOne(reqInvoice, 'check-invoice');
   await runOne(reqLoyalty,  'check-loyalty');
+  await runOne(reqCoffret,  'check-coffret');
   await runOne(reqCsp,      'check-csp');
   await runOne(reqAnalytics,'check-analytics');
   await runOne(reqFns,      'check-functions');
