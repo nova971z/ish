@@ -2644,7 +2644,11 @@ transform: translateY(-2px);
     text-align: center;
     width: 100%;                 /* titre sur toute la largeur de l'écran… */
     box-sizing: border-box;
-    padding: 0 1.5rem 2.5rem;    /* …avec une marge latérale (jamais collé aux bords) */
+    /* Le bloc info est ancré au BAS du héros (align-items:flex-end). Avec un
+       padding-bas de 40px, le contenu le plus bas (le switch Solo/Coffret) tombait
+       SOUS le dock fixe (hauteur 64px + safe-area) → clics avalés par le dock, zone
+       cliquable réduite au haut du bouton. On dégage tout le bloc AU-DESSUS du dock. */
+    padding: 0 1.5rem calc(var(--dockH, 64px) + var(--dock-bottom, 14px) + var(--safe-bottom, 0px) + 16px);
     will-change: transform, opacity;
     animation: pdpInfoAppear 1s cubic-bezier(0.22, 1, 0.36, 1) .5s both;
 }
@@ -2796,6 +2800,7 @@ transform: translateY(-2px);
     left: 50%;
     transform: translateX(-50%);
     z-index: 10;
+    pointer-events: none;   /* purement décoratif → ne jamais capturer un clic */
     display: flex;
     flex-direction: column;
     align-items: center;
