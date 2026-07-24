@@ -6196,6 +6196,145 @@
       }).join('') + '</div>';
   }
 
+  // ── Comptabilité & Veille (admin) ──────────────────────────────────────────
+  // Pensé SIMPLE (dyspraxie) : une action à la fois, langage clair, gros boutons,
+  // texte prêt à copier. Deux blocs : (1) demander un devis transport (CMA CGM &
+  // transitaires), (2) veille des taxes officielles avec rappels + validation 1-clic.
+  var COMPTA_VEILLE_KEY = 'pt:compta:veille';
+
+  var COMPTA_DEVIS = [
+    {
+      id: 'cmacgm',
+      titre: 'CMA CGM — conteneur complet (20′ / 40′)',
+      pour: 'Quand tu passes aux gros volumes (plus de ~10 palettes d’un coup).',
+      quand: 'Avant de commander un conteneur, et pour comparer les prix tous les 6 mois.',
+      ou: 'En ligne : va sur cma-cgm.com → crée un compte pro gratuit → outil de devis « SpotOn » (devis instantané).',
+      url: 'https://www.cma-cgm.com',
+      etapes: [
+        'Ouvre cma-cgm.com et crée un compte professionnel (gratuit).',
+        'Cherche « SpotOn » ou « Demander un devis / Quote ».',
+        'Origine : Le Havre ou Marseille-Fos. Destination : Pointe-à-Pitre (Guadeloupe).',
+        'Colle le texte ci-dessous si un message est demandé, et remplis les [À COMPLÉTER].'
+      ],
+      texte: 'Bonjour,\n\nJe souhaite un devis pour un transport maritime :\n- Origine : Le Havre ou Marseille-Fos (France métropole)\n- Destination : Pointe-à-Pitre (Guadeloupe, 971)\n- Type : conteneur 20′ (ou 40′) — marchandise : outillage électroportatif neuf, sur palettes\n- Volume estimé : [À COMPLÉTER] palettes / m³\n- Fréquence : [ponctuel / mensuel]\n- Je souhaite un devis PORTE-À-PORTE incluant : fret, THC, dédouanement et livraison finale.\n- Merci de préciser si l’octroi de mer est inclus ou en sus.\n\nSociété : [TON NOM / SASU]\nSIRET : [À COMPLÉTER]\nContact : [TON EMAIL / TÉL]\n\nMerci d’avance.\nCordialement,'
+    },
+    {
+      id: 'groupage',
+      titre: 'Transitaire groupage — palette seule (LCL)',
+      pour: 'Pour envoyer 1 à quelques palettes (moins qu’un conteneur entier).',
+      quand: 'Dès que tu passes du colis Colissimo à la palette.',
+      ou: 'Contacte un groupeur : Ovrsea (ovrsea.com), Boxtal Pro (boxtal.com), ou un transitaire local des Antilles.',
+      url: 'https://www.ovrsea.com',
+      etapes: [
+        'Choisis un groupeur (Ovrsea, Boxtal Pro, ou un transitaire antillais).',
+        'Utilise leur formulaire de contact / devis en ligne.',
+        'Colle le texte ci-dessous et remplis les [À COMPLÉTER].'
+      ],
+      texte: 'Bonjour,\n\nJe cherche un tarif de GROUPAGE MARITIME (LCL) :\n- Origine : France métropole\n- Destination : Pointe-à-Pitre (Guadeloupe, 971)\n- Marchandise : outillage électroportatif neuf, sur palette(s) Europe 120×80\n- Dimensions/poids par palette : [ex. 120×80×120 cm, ~400 kg]\n- Nombre de palettes : [À COMPLÉTER]\n- Valeur de la marchandise : [À COMPLÉTER] € (pour l’assurance et l’octroi)\n- Merci d’un tarif au m³ (W/M) + les frais fixes (dédouanement, livraison finale).\n- Merci de préciser si l’octroi de mer est inclus.\n\nSociété : [TON NOM / SASU] — SIRET [À COMPLÉTER]\nContact : [EMAIL / TÉL]\n\nMerci beaucoup.\nCordialement,'
+    }
+  ];
+
+  var COMPTA_VEILLE = [
+    { id: 'octroi', titre: 'Octroi de mer (taux par produit)', freqMois: 6,
+      url: 'https://www.douane.gouv.fr',
+      etapes: ['Va sur douane.gouv.fr', 'Cherche « octroi de mer Guadeloupe », catégorie outillage', 'Compare avec ton logiciel (aujourd’hui : 7 % + 2,5 %)', 'Si différent → corrige dans les Réglages du calculateur'] },
+    { id: 'is', titre: 'Barème impôt sur les sociétés (IS)', freqMois: 12,
+      url: 'https://www.impots.gouv.fr',
+      etapes: ['Va sur impots.gouv.fr', 'Cherche « taux impôt sur les sociétés »', 'Vérifie : 15 % jusqu’à 42 500 € de bénéfice, puis 25 %', 'Change surtout en janvier (loi de finances)'] },
+    { id: 'tva', titre: 'TVA Guadeloupe', freqMois: 12,
+      url: 'https://www.impots.gouv.fr',
+      etapes: ['impots.gouv.fr → « TVA DOM »', 'Vérifie le taux normal Guadeloupe (aujourd’hui 8,5 %)', 'Corrige si besoin'] },
+    { id: 'colissimo', titre: 'Grille Colissimo Outre-mer (poids/prix)', freqMois: 12,
+      url: 'https://www.laposte.fr/tarif-colissimo-outre-mer',
+      etapes: ['laposte.fr → « tarif Colissimo Outre-mer »', 'Note les prix par tranche (0,5 / 1 / 2 / 5 / 10 / 30 kg)', 'Mets à jour la grille du calculateur (nouveaux tarifs chaque janvier)'] }
+  ];
+
+  function comptaState() {
+    try { return JSON.parse(localStorage.getItem(COMPTA_VEILLE_KEY) || '{}'); } catch (e) { return {}; }
+  }
+  function comptaSetChecked(id) {
+    var s = comptaState(); s[id] = Date.now();
+    try { localStorage.setItem(COMPTA_VEILLE_KEY, JSON.stringify(s)); } catch (e) {}
+  }
+  function comptaCopy(text, btn) {
+    function done() { toast('Texte copié — colle-le dans ton email / le formulaire', 'success'); if (btn) { var o = btn.textContent; btn.textContent = '✓ Copié !'; setTimeout(function () { btn.textContent = o; }, 1800); } }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function () { comptaFallbackCopy(text); done(); });
+    } else { comptaFallbackCopy(text); done(); }
+  }
+  function comptaFallbackCopy(text) {
+    var ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch (e) {} document.body.removeChild(ta);
+  }
+
+  function renderAdminCompta() {
+    var el = document.getElementById('adminComptaBody');
+    if (!el) return;
+    var st = comptaState();
+    var now = Date.now();
+    var html = '';
+
+    html += '<p class="admin-hint">Ta page pour <b>demander les devis transport</b> et <b>garder les taxes à jour</b>. Tout est pré-écrit : tu cliques, tu copies, tu colles. Une chose à la fois. 👍</p>';
+
+    // ── Bloc 1 : demander un devis ─────────────────────────────
+    html += '<h2 class="admin-subtitle">📦 Demander un devis transport</h2>';
+    html += '<div class="compta-cards">';
+    COMPTA_DEVIS.forEach(function (d) {
+      html += '<article class="compta-card">'
+        + '<h3 class="compta-card__title">' + escapeHTML(d.titre) + '</h3>'
+        + '<p class="compta-line"><span class="compta-lbl">Pour quoi :</span> ' + escapeHTML(d.pour) + '</p>'
+        + '<p class="compta-line"><span class="compta-lbl">Quand :</span> ' + escapeHTML(d.quand) + '</p>'
+        + '<p class="compta-line"><span class="compta-lbl">Où :</span> ' + escapeHTML(d.ou) + '</p>'
+        + '<ol class="compta-steps">' + d.etapes.map(function (s) { return '<li>' + escapeHTML(s) + '</li>'; }).join('') + '</ol>'
+        + '<div class="compta-actions">'
+        + '<button type="button" class="btn primary compta-copy" data-copy="' + d.id + '">📋 Copier le texte de demande</button>'
+        + '<a class="btn btn--ghost" href="' + escapeHTML(d.url) + '" target="_blank" rel="noopener">Ouvrir le site ↗</a>'
+        + '</div>'
+        + '<pre class="compta-tpl" id="tpl-' + d.id + '">' + escapeHTML(d.texte) + '</pre>'
+        + '</article>';
+    });
+    html += '</div>';
+
+    // ── Bloc 2 : veille taxes ──────────────────────────────────
+    html += '<h2 class="admin-subtitle" style="margin-top:1.6rem">🏛️ Veille des taxes officielles</h2>';
+    html += '<p class="admin-hint">Rappels automatiques : quand une carte est <b>orange</b>, il faut vérifier le taux sur le site officiel puis cliquer <b>« C’est vérifié »</b>. Elle repasse au vert jusqu’à la prochaine fois.</p>';
+    html += '<div class="compta-cards">';
+    COMPTA_VEILLE.forEach(function (v) {
+      var last = st[v.id] || 0;
+      var due = last ? (last + v.freqMois * 30 * 24 * 3600 * 1000) : 0;
+      var todo = !last || now >= due;
+      var when = due ? new Date(due).toLocaleDateString('fr-FR') : '—';
+      html += '<article class="compta-card' + (todo ? ' compta-card--todo' : '') + '">'
+        + '<div class="compta-badge ' + (todo ? 'is-todo' : 'is-ok') + '">' + (todo ? '⚠️ À VÉRIFIER' : '✅ À jour') + '</div>'
+        + '<h3 class="compta-card__title">' + escapeHTML(v.titre) + '</h3>'
+        + '<p class="compta-line"><span class="compta-lbl">Fréquence :</span> tous les ' + v.freqMois + ' mois'
+        + (last ? ' · prochaine : <b>' + when + '</b>' : ' · <b>jamais vérifié</b>') + '</p>'
+        + '<ol class="compta-steps">' + v.etapes.map(function (s) { return '<li>' + escapeHTML(s) + '</li>'; }).join('') + '</ol>'
+        + '<div class="compta-actions">'
+        + '<a class="btn btn--ghost" href="' + escapeHTML(v.url) + '" target="_blank" rel="noopener">Ouvrir le site officiel ↗</a>'
+        + '<button type="button" class="btn primary compta-check" data-check="' + v.id + '">✅ C’est vérifié</button>'
+        + '</div>'
+        + '</article>';
+    });
+    html += '</div>';
+
+    el.innerHTML = html;
+
+    el.querySelectorAll('.compta-copy').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var d = COMPTA_DEVIS.filter(function (x) { return x.id === b.getAttribute('data-copy'); })[0];
+        if (d) comptaCopy(d.texte, b);
+      });
+    });
+    el.querySelectorAll('.compta-check').forEach(function (b) {
+      b.addEventListener('click', function () {
+        comptaSetChecked(b.getAttribute('data-check'));
+        toast('Noté comme vérifié — rappel programmé', 'success');
+        renderAdminCompta();
+      });
+    });
+  }
+
   function renderAdmin() {
     var view = document.getElementById('adminView');
     if (!view) return;
@@ -6232,6 +6371,7 @@
 
       + '<nav class="admin-tabs" role="tablist">'
       + '<button type="button" class="admin-tab is-active" data-admin-tab="products" role="tab" aria-selected="true">Produits</button>'
+      + '<button type="button" class="admin-tab" data-admin-tab="compta" role="tab" aria-selected="false">Comptabilité</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="stats" role="tab" aria-selected="false">Statistiques</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="clients" role="tab" aria-selected="false">Clients</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="orders" role="tab" aria-selected="false">Commandes</button>'
@@ -6242,6 +6382,10 @@
       + '<div class="admin-pane is-active" data-admin-pane="products">'
       + '<p class="admin-hint">Édite le stock et le prix de chaque produit. Les modifications sont enregistrées dans Firestore et visibles en production après rafraîchissement du cache (≤30 s).</p>'
       + '<div id="adminProductList" class="admin-list"><p class="admin-loading">Chargement…</p></div>'
+      + '</div>'
+
+      + '<div class="admin-pane" data-admin-pane="compta" hidden>'
+      + '<div id="adminComptaBody"></div>'
       + '</div>'
 
       + '<div class="admin-pane" data-admin-pane="orders" hidden>'
@@ -6388,6 +6532,7 @@
           p.hidden = !active;
         });
         if (target === 'orders') loadAdminOrders();
+        if (target === 'compta') renderAdminCompta();
         if (target === 'instagram') initAdminInstagram();
         if (target === 'stats') loadAdminStats();
         if (target === 'clients') loadAdminClients();

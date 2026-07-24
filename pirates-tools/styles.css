@@ -6036,6 +6036,37 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 
 .admin-subtitle:first-child { margin-top: 0; }
 
+/* ── Comptabilité & Veille (admin) — pensé lisible/simple (dyspraxie) ─────── */
+.compta-cards { display: grid; gap: 14px; grid-template-columns: 1fr; }
+@media (min-width: 720px) { .compta-cards { grid-template-columns: 1fr 1fr; } }
+.compta-card {
+  position: relative;
+  background: rgba(var(--accent-rgb), 0.05);
+  border: 1px solid rgba(var(--accent-rgb), 0.25);
+  border-radius: 14px;
+  padding: 16px;
+}
+.compta-card--todo { border-color: #f59e0b; background: rgba(245, 158, 11, 0.08); }
+.compta-badge {
+  display: inline-block; font-size: .72rem; font-weight: 800; letter-spacing: .04em;
+  padding: 3px 10px; border-radius: 999px; margin-bottom: 8px;
+}
+.compta-badge.is-todo { background: rgba(245,158,11,.2); color: #fbbf24; border: 1px solid rgba(245,158,11,.5); }
+.compta-badge.is-ok { background: rgba(52,211,153,.15); color: #34d399; border: 1px solid rgba(52,211,153,.4); }
+.compta-card__title { font-size: 1.05rem; color: #fff; margin: 0 0 10px; line-height: 1.25; }
+.compta-line { font-size: .92rem; color: rgba(255,255,255,.85); margin: 4px 0; }
+.compta-lbl { color: var(--accent-soft); font-weight: 700; }
+.compta-steps { margin: 10px 0; padding-left: 1.3rem; font-size: .92rem; color: rgba(255,255,255,.8); }
+.compta-steps li { margin: 5px 0; line-height: 1.4; }
+.compta-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.compta-actions .btn { flex: 1 1 auto; min-height: 46px; font-size: .95rem; }
+.compta-tpl {
+  margin: 12px 0 0; padding: 12px; border-radius: 10px;
+  background: rgba(0,0,0,.35); border: 1px solid rgba(var(--accent-rgb), 0.2);
+  color: rgba(255,255,255,.75); font-size: .82rem; line-height: 1.45;
+  white-space: pre-wrap; word-break: break-word; max-height: 200px; overflow: auto;
+}
+
 .admin-tools-form {
   display: flex;
   flex-wrap: wrap;
