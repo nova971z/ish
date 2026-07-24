@@ -276,8 +276,30 @@
 
   // calcLocalPrice — estimation du prix local moyen (revendeurs DOM-TOM)
   // Ratio 1.60 sur le prix HT (marge + taxes + transport typiques).
+  // Prix concurrents RÉELS relevés en Guadeloupe (TTC, machine nue, magasins de
+  // Jarry — QEGS/BricoBrico, relevé 24/07/2026). Prioritaires sur l'estimation
+  // ×1,60 pour afficher l'économie VRAIE. Étendre au fil des relevés (id produit
+  // → prix moyen local €). Voir docs/CARTOGRAPHIE.md / veille concurrentielle.
+  var LOCAL_PRICES = {
+    'dewalt-dcg200nt-xj': 1165,  // QEGS 1165€
+    'dewalt-dcs520nt-xj': 1025,  // QEGS 1025€
+    'dewalt-dch273n-xj': 638,    // QEGS 638,05€
+    'dewalt-dcp580n': 549,       // QEGS 549€
+    'dewalt-dcs367n-xj': 485,    // QEGS 485€
+    'dewalt-dcf620nt-xj': 435,   // QEGS 435€
+    'dewalt-dcf850n': 399,       // QEGS 399€
+    'dewalt-dcb184': 252,        // QEGS 252,45€
+    'dewalt-dcg405n': 329,       // QEGS 379€ / BricoBrico 279,64€
+    'dewalt-dwe6423-qs': 199,    // QEGS 199€
+    'dewalt-d25033k-qs': 262     // QEGS 262€
+  };
+
   function calcLocalPrice(product) {
     if (!product) return 0;
+    // 1) prix concurrent réel relevé (le plus crédible) ; 2) champ localPrice
+    // éventuel sur la fiche ; 3) repli estimation HT × 1,60.
+    var real = LOCAL_PRICES[product.id] || Number(product.localPrice) || 0;
+    if (real > 0) return real;
     var ht = Number(product.price_ht != null
       ? product.price_ht
       : (product.price / (1 + (product.vat || 0.2))));
