@@ -33,7 +33,7 @@
   <link rel="dns-prefetch" href="https://js.stripe.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=392">
+  <link rel="stylesheet" href="styles.css?v=393">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -384,6 +384,7 @@
 
         <div id="catList" class="cat-list" aria-label="Categories" data-bind="cats"></div>
         <div id="list" class="list" aria-live="polite" aria-busy="false" data-bind="results"></div>
+        <nav id="pager" class="pager" aria-label="Pagination" hidden></nav>
       </div>
     </section>
 
@@ -1609,7 +1610,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=392"></script>
+  <script defer src="app.js?v=393"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

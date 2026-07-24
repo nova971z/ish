@@ -1191,16 +1191,16 @@
     });
   }
 
-  // ── Rendu PROGRESSIF de la grille catalogue ────────────────────────────────
-  // Rendre 185+ fiches d'un coup = page immense → iOS Safari ne peint pas assez
-  // vite en scroll inertiel (tuiles non peintes = cartes « disparues »). On rend
-  // par LOTS : un premier lot, puis on ajoute la suite quand une sentinelle
-  // approche du bas (IntersectionObserver, marge 800px = ajout avant d'y arriver).
-  // DOM léger au départ, images chargées progressivement. Standard e-commerce.
-  var GRID_BATCH = 30;
+  // ── Grille catalogue PAGINÉE ───────────────────────────────────────────────
+  // On n'affiche JAMAIS plus de PAGE_SIZE cartes à la fois (les pages précédentes
+  // sont retirées du DOM). Rendre 185 — ou même 50 — fiches d'un coup fait une
+  // page trop longue → iOS Safari ne peint pas assez vite en scroll inertiel
+  // (cartes « disparues »). Avec un DOM borné à 40, le scroll reste fluide même
+  // sur un vieil iPad. Boutons de page classiques (‹ 1 2 3 … ›).
+  var PAGE_SIZE = 40;
   var _gridItems = [];
-  var _gridShown = 0;
-  var _gridIO = null;
+  var _gridPage = 1;
+  var _pagerWired = false;
 
   function productCardHTML(p) {
     var out = isOutOfStock(p);
@@ -1220,44 +1220,70 @@
       + '</a>';
   }
 
-  function appendGridBatch() {
+  // Liste compacte de numéros de page : 1 … (p-1) p (p+1) … N
+  function pagerNumbers(cur, total) {
+    if (total <= 7) { var a = []; for (var i = 1; i <= total; i++) a.push(i); return a; }
+    var out = [1];
+    var lo = Math.max(2, cur - 1), hi = Math.min(total - 1, cur + 1);
+    if (lo > 2) out.push('…');
+    for (var j = lo; j <= hi; j++) out.push(j);
+    if (hi < total - 1) out.push('…');
+    out.push(total);
+    return out;
+  }
+
+  function renderPager(totalPages) {
+    var pager = document.getElementById('pager');
+    if (!pager) return;
+    if (totalPages <= 1) { pager.innerHTML = ''; pager.hidden = true; return; }
+    pager.hidden = false;
+    var html = '<button class="pager__btn pager__nav" data-page="prev"' + (_gridPage === 1 ? ' disabled' : '') + ' aria-label="Page precedente">‹</button>';
+    pagerNumbers(_gridPage, totalPages).forEach(function (n) {
+      if (n === '…') html += '<span class="pager__ellipsis">…</span>';
+      else html += '<button class="pager__btn' + (n === _gridPage ? ' active' : '') + '" data-page="' + n + '"' + (n === _gridPage ? ' aria-current="page"' : '') + '>' + n + '</button>';
+    });
+    html += '<button class="pager__btn pager__nav" data-page="next"' + (_gridPage === totalPages ? ' disabled' : '') + ' aria-label="Page suivante">›</button>';
+    pager.innerHTML = html;
+    if (!_pagerWired) {
+      _pagerWired = true;
+      pager.addEventListener('click', function (e) {
+        var btn = e.target.closest('button[data-page]');
+        if (!btn || btn.disabled) return;
+        var tp = Math.max(1, Math.ceil(_gridItems.length / PAGE_SIZE));
+        var v = btn.getAttribute('data-page');
+        if (v === 'prev') _gridPage = Math.max(1, _gridPage - 1);
+        else if (v === 'next') _gridPage = Math.min(tp, _gridPage + 1);
+        else _gridPage = Math.min(tp, Math.max(1, parseInt(v, 10) || 1));
+        renderGridPage();
+        // Remonter en haut de la liste (au-dessus = barre de recherche/chips).
+        var y = dom.list.getBoundingClientRect().top + window.pageYOffset - 96;
+        window.scrollTo({ top: Math.max(0, y), behavior: 'auto' });
+      });
+    }
+  }
+
+  function renderGridPage() {
     if (!dom.list) return;
-    var old = document.getElementById('gridSentinel');
-    if (old) old.remove();
-    var next = _gridItems.slice(_gridShown, _gridShown + GRID_BATCH);
-    if (next.length) {
-      dom.list.insertAdjacentHTML('beforeend', next.map(productCardHTML).join(''));
-      _gridShown += next.length;
-      preloadModelViewers(dom.list);
+    var totalPages = Math.max(1, Math.ceil(_gridItems.length / PAGE_SIZE));
+    if (_gridPage > totalPages) _gridPage = totalPages;
+    if (_gridPage < 1) _gridPage = 1;
+    if (_gridItems.length === 0) {
+      dom.list.innerHTML = '<p class="no-results">Aucun produit trouvé.</p>';
+      renderPager(0);
+      return;
     }
-    if (_gridShown < _gridItems.length) {
-      dom.list.insertAdjacentHTML('beforeend', '<div id="gridSentinel" class="grid-sentinel" aria-hidden="true"></div>');
-      var s = document.getElementById('gridSentinel');
-      if ('IntersectionObserver' in window && s) {
-        if (!_gridIO) {
-          _gridIO = new IntersectionObserver(function (entries) {
-            if (entries[0] && entries[0].isIntersecting) appendGridBatch();
-          }, { rootMargin: '800px 0px' });
-        }
-        _gridIO.observe(s);
-      } else {
-        // Pas d'IntersectionObserver → tout rendre (le confort > la perf ici).
-        while (_gridShown < _gridItems.length) appendGridBatch();
-      }
-    }
+    var start = (_gridPage - 1) * PAGE_SIZE;
+    var pageItems = _gridItems.slice(start, start + PAGE_SIZE);
+    dom.list.innerHTML = pageItems.map(productCardHTML).join('');
+    preloadModelViewers(dom.list);
+    renderPager(totalPages);
   }
 
   function renderProductList() {
     if (!dom.list) return;
-    if (_gridIO) _gridIO.disconnect();     // repart propre à chaque filtre/route
     _gridItems = filteredProducts();
-    _gridShown = 0;
-    if (_gridItems.length === 0) {
-      dom.list.innerHTML = '<p class="no-results">Aucun produit trouvé.</p>';
-      return;
-    }
-    dom.list.innerHTML = '';
-    appendGridBatch();
+    _gridPage = 1;                      // tout changement de filtre/route → page 1
+    renderGridPage();
   }
 
   // ── Brand grid (home page) ─────────────────────────────────

@@ -688,12 +688,39 @@ gap: .5rem;
     padding: .5rem 0;
 }
 
-/* Sentinelle de rendu progressif : occupe toute la largeur de la grille sans
-   se voir. Quand elle approche du viewport, on charge le lot suivant de cartes. */
-.grid-sentinel {
-    grid-column: 1 / -1;
-    height: 1px;
+/* Pagination catalogue : boutons de page (DOM borné à PAGE_SIZE cartes). */
+.pager {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: .4rem;
+    margin: 1.8rem 0 .5rem;
 }
+.pager__btn {
+    min-width: 40px;
+    height: 40px;
+    padding: 0 .7rem;
+    border-radius: 10px;
+    border: 1px solid rgba(var(--accent-rgb), 0.3);
+    background: rgba(var(--accent-rgb), 0.06);
+    color: var(--fg);
+    font-size: .95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .18s ease, border-color .18s ease, color .18s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+.pager__btn:hover:not(:disabled) { background: rgba(var(--accent-rgb), 0.16); }
+.pager__btn.active {
+    background: rgba(var(--accent-rgb), 0.28);
+    border-color: rgba(var(--accent-rgb), 0.6);
+    color: #fff;
+    box-shadow: 0 0 14px rgba(var(--accent-rgb), 0.3);
+}
+.pager__btn:disabled { opacity: .35; cursor: default; }
+.pager__nav { font-size: 1.25rem; line-height: 1; }
+.pager__ellipsis { color: rgba(255,255,255,.4); padding: 0 .2rem; }
 
 /* ── Product Cards ── */
 .product-card {
