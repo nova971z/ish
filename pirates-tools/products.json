@@ -4148,7 +4148,7 @@
     "category": "Scies",
     "tag": "Nouveau",
     "desc": "Scie circulaire diamant 18V (Produit seul).",
-    "img": "images/placeholder.svg",
+    "img": "images/posters/dcc500z.webp",
     "price": 206.89,
     "currency": "EUR",
     "vat": 0.2,
@@ -4171,8 +4171,22 @@
       "Robuste et endurant, pensé pour un usage professionnel intensif",
       "Idéal pour les chantiers des Antilles / DOM-TOM"
     ],
-    "specs": {},
-    "description_long": "Scie circulaire diamant 18V (Produit seul). Outil professionnel Makita de la gamme 18V LXT sans fil (moteur brushless). Vendu en machine seule (sans batterie ni chargeur). Compatible avec les batteries Makita LXT. Fiche technique détaillée à compléter. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "specs": {
+      "Marque": "Makita",
+      "Type": "Scie circulaire à lame diamant sans fil (découpe matériaux)",
+      "Alimentation": "Batterie 18 V LXT (vendue seule, sans batterie ni chargeur)",
+      "Moteur": "Brushless (sans charbon) — frein moteur, ADT, vitesse constante",
+      "Vitesse à vide": "8 800 tr/min",
+      "Ø de la lame": "125 mm (alésage 20 mm)",
+      "Profondeur de coupe": "40 mm à 90° / 27 mm à 45°",
+      "Technologies": "AWS (démarrage sans fil de l'aspirateur), éclairage LED, système anti-poussière, démarrage progressif",
+      "Pression sonore (LpA)": "96 dB(A)",
+      "Puissance sonore (LwA)": "107 dB(A) (K = 3,0)",
+      "Vibrations": "4 m/s² (K = 1,5)",
+      "Poids net EPTA": "2,2 kg",
+      "Dimensions": "283 × 158 × 172 mm"
+    },
+    "description_long": "Scie circulaire à lame diamant sans fil Makita DCC500Z (18V LXT), conçue pour la découpe précise de matériaux (carrelage, pierre, panneaux fibrociment…). Moteur brushless à vitesse constante (8 800 tr/min), lame Ø125 mm, profondeur de coupe 40 mm, système anti-poussière avec sac et raccord d'aspiration. Technologie AWS (démarrage sans fil de l'aspirateur), éclairage LED et démarrage progressif. Vendue en machine seule (sans batterie ni chargeur), compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM, octroi de mer inclus dans le prix affiché."
   },
   {
     "id": "makita-dco181z",
