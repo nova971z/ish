@@ -30,6 +30,9 @@ var DEFAULT_CONFIG = {
   // Lettre suivie Outre-mer pour les petits objets légers (≤ 500 g) : ~8 €,
   // bien moins cher que le Colissimo minimum. Prioritaire sous le seuil de poids.
   lettre: { maxKg: 0.5, price: 8 },
+  // Au-delà de ce poids (kg), l'objet est trop lourd/volumineux pour un colis :
+  // il part OBLIGATOIREMENT par bateau (container/fret), même en mode Colissimo.
+  heavyKg: 10,
   // Grille Colissimo Outre-mer OM1 (poids max kg → prix €). Points 5 kg et 30 kg
   // officiels 2026 ; intermédiaires estimés (à confirmer sur laposte.fr).
   colissimo: [[0.5,14],[1,17],[2,23],[3,33],[5,38.90],[10,64],[15,88],[30,143.02]],
@@ -108,8 +111,13 @@ function recommend(product, opts, config) {
   var weight = Number(product && product.weight_kg) || 2;
   var mode = opts.mode || 'colissimo';
   var isCoffret = (product && (product.variantRole === 'coffret' || /coffret|makpac|tstak|valise/i.test(product.title || '')));
+  var heavy = cfg.heavyKg && weight > cfg.heavyKg;
   var ship, shipKind;
-  if (mode === 'container') {
+  if (heavy && mode !== 'container') {
+    // Objet trop lourd/volumineux pour un colis → bateau, tarif volumineux.
+    ship = cfg.containerPerUnit.coffret;
+    shipKind = 'bateau-lourd';
+  } else if (mode === 'container') {
     ship = isCoffret ? cfg.containerPerUnit.coffret : cfg.containerPerUnit.nu;
     shipKind = 'container';
   } else if (cfg.lettre && weight <= cfg.lettre.maxKg) {

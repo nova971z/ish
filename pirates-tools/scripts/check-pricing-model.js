@@ -21,6 +21,11 @@ module.exports = function () {
   var rColisAcc = model.recommend({ weight_kg: 1.0, ncCategory: 'accessory', title: 'X' }, { costHT: 12, mode: 'colissimo' });
   ok(rColisAcc.transport === 17 && rColisAcc.shipKind === 'colissimo', '>500 g → Colissimo (pas lettre)');
 
+  // Objet lourd (>10 kg) en mode Colissimo → forcé bateau (tarif volumineux), pas Colissimo 143 €.
+  var lourd = model.recommend({ weight_kg: 17, ncCategory: 'accessory', title: 'Piètement' }, { costHT: 160, mode: 'colissimo' });
+  ok(lourd.shipKind === 'bateau-lourd', 'objet 17 kg → bateau-lourd');
+  ok(lourd.transport < 40, 'objet lourd : port bateau (< 40 €), pas Colissimo 143 €');
+
   ok(rColis && rColis.transport === 17, 'transport Colissimo 1 kg = 17 €');
   ok(rColis.marginAfterIS >= 0.149, 'Colissimo : marge après IS ≥ 15 % (obtenu ' + (rColis.marginAfterIS * 100).toFixed(1) + '%)');
   near(rColis.markup * 100, 62, 9, 'Colissimo visseuse markup ~55-64 %');

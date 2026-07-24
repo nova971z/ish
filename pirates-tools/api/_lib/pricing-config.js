@@ -15,7 +15,7 @@ var TTL = 30000; // 30 s
 var ALLOWED = [
   'autoPrice', 'mode', 'targetNet', 'is', 'tvaFR',
   'stripePct', 'stripeFix', 'packaging', 'fixedAnnual', 'ordersPerYear',
-  'colissimo', 'containerPerUnit', 'lettre', 'refTerritory'
+  'colissimo', 'containerPerUnit', 'lettre', 'heavyKg', 'refTerritory'
 ];
 
 function defaults() {
