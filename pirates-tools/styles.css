@@ -6118,7 +6118,7 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
    Écran = carte claire ; impression = A4 blanc. Jaune DeWALT ≈ #FEBD17. */
 .pt-invoice { position: relative; overflow: hidden; background: #fff; color: #1c1d1f; border-radius: 10px; padding: 22px; margin-top: 10px; font-size: 13px; line-height: 1.5; }
 /* Filigrane logo en fond, très faible opacité (background-image posée en inline). */
-.pt-inv-watermark { position: absolute; inset: 0; background-position: center 46%; background-repeat: no-repeat; background-size: 300px auto; opacity: .05; pointer-events: none; z-index: 0; }
+.pt-inv-watermark { position: absolute; inset: 0; background-position: center center; background-repeat: no-repeat; background-size: 88% auto; opacity: .04; pointer-events: none; z-index: 0; }
 .pt-invoice > *:not(.pt-inv-watermark) { position: relative; z-index: 1; }
 .pt-inv-head { display: flex; justify-content: space-between; align-items: center; gap: 16px; border-bottom: 3px solid #FEBD17; padding-bottom: 12px; }
 .pt-inv-brand { display: flex; align-items: center; gap: 12px; }
