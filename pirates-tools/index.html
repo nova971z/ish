@@ -33,7 +33,7 @@
   <link rel="dns-prefetch" href="https://js.stripe.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=402">
+  <link rel="stylesheet" href="styles.css?v=403">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -108,7 +108,11 @@
     // NOWPayments ici : une clé de compte côté client fuiterait à chaque
     // visiteur. Pour du crypto dynamique, passer par un endpoint serverless.
     cardCheckout: { url:'' },
-    whatsappNumber: '33744776598'
+    // Numéro de contact UNIQUE (téléphone + WhatsApp) — SOURCE DE VÉRITÉ.
+    // Vide pour l'instant : le numéro perso a été retiré du site. Le jour où
+    // un numéro dédié est pris, le renseigner ICI (ex. '596XXXXXXXXX') et
+    // tous les liens tel:/WhatsApp réapparaissent partout automatiquement.
+    whatsappNumber: ''
   };
   </script>
 
@@ -500,7 +504,7 @@
           <div class="pdp-landing__actions">
             <button id="pdpBuy" class="btn primary btn--lg btn--glow" type="button" data-action="buy-now" aria-label="Acheter maintenant">💳 Acheter maintenant</button>
             <button id="pdpQuote" class="btn btn--lg" type="button" data-action="add-to-cart" aria-label="Ajouter au panier">Ajouter au panier</button>
-            <a id="pdpWa" class="btn btn-wa btn--lg" href="https://wa.me/33744776598" target="_blank" rel="noopener noreferrer" data-action="share-wa">WhatsApp</a>
+            <a id="pdpWa" class="btn btn-wa btn--lg" href="#" target="_blank" rel="noopener noreferrer" data-action="share-wa">WhatsApp</a>
             <button id="pdpShare" class="btn btn--lg" type="button" data-action="share" aria-label="Partager ce produit">Partager</button>
           </div>
         </div>
@@ -872,18 +876,18 @@
 
           <div class="contact-grid">
             <aside class="contact-info">
-              <div class="contact-info__card">
+              <div class="contact-info__card" data-contact="phone">
                 <span class="contact-info__icon" aria-hidden="true">&#9742;</span>
                 <div>
                   <strong>Téléphone</strong>
-                  <a href="tel:+33744776598">07 44 77 65 98</a>
+                  <a href="#" data-tel-link><span data-tel-text></span></a>
                 </div>
               </div>
-              <div class="contact-info__card">
+              <div class="contact-info__card" data-contact="wa">
                 <span class="contact-info__icon" aria-hidden="true">&#128172;</span>
                 <div>
                   <strong>WhatsApp</strong>
-                  <a href="https://wa.me/33744776598" target="_blank" rel="noopener">wa.me/33744776598</a>
+                  <a href="#" data-wa-link target="_blank" rel="noopener"><span data-wa-text></span></a>
                 </div>
               </div>
               <div class="contact-info__card">
@@ -1022,7 +1026,7 @@
           <li><strong>Immatriculation :</strong> [À COMPLÉTER : RCS ou Répertoire des Métiers + ville]</li>
           <li><strong>N° TVA intracommunautaire :</strong> [À COMPLÉTER : si assujetti à la TVA]</li>
           <li><strong>Email :</strong> [À COMPLÉTER : email de contact professionnel]</li>
-          <li><strong>Téléphone :</strong> <a href="tel:+33744776598">07 44 77 65 98</a></li>
+          <li data-contact="phone"><strong>Téléphone :</strong> <a href="#" data-tel-link><span data-tel-text></span></a></li>
         </ul>
 
         <h2>2. Directeur de la publication</h2>
@@ -1129,7 +1133,7 @@
         <p>Nous mettons en œuvre des mesures techniques et organisationnelles pour protéger vos données : connexions chiffrées (HTTPS), accès restreints, prix calculés côté serveur, et prestataires de paiement certifiés (Stripe, conforme PCI-DSS).</p>
 
         <h2>10. Contact</h2>
-        <p>Pour toute question relative à cette politique : [À COMPLÉTER : email de contact] ou via <a href="https://wa.me/33744776598" target="_blank" rel="noopener noreferrer">WhatsApp</a>.</p>
+        <p>Pour toute question relative à cette politique : [À COMPLÉTER : email de contact].</p>
 
         <p class="legal-links"><a href="#/mentions-legales">→ Mentions légales</a></p>
       </div>
@@ -1194,7 +1198,7 @@
         <p>Ces garanties s'appliquent indépendamment de toute garantie commerciale du constructeur (DeWALT, Makita, Festool, etc.). Pour toute mise en œuvre : [À COMPLÉTER : email de contact].</p>
 
         <h2>9. Réclamations et médiation</h2>
-        <p>Toute réclamation peut être adressée à [À COMPLÉTER : email de contact] ou via <a href="https://wa.me/33744776598" target="_blank" rel="noopener noreferrer">WhatsApp</a>. En cas de litige non résolu, le Client peut recourir gratuitement au médiateur de la consommation (voir <a href="#/mentions-legales">Mentions légales</a>) ou à la plateforme européenne de règlement en ligne des litiges : <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer">ec.europa.eu/consumers/odr</a>.</p>
+        <p>Toute réclamation peut être adressée à [À COMPLÉTER : email de contact]. En cas de litige non résolu, le Client peut recourir gratuitement au médiateur de la consommation (voir <a href="#/mentions-legales">Mentions légales</a>) ou à la plateforme européenne de règlement en ligne des litiges : <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer">ec.europa.eu/consumers/odr</a>.</p>
 
         <h2>10. Données personnelles</h2>
         <p>Les données du Client sont traitées conformément à notre <a href="#/confidentialite">Politique de confidentialité</a>.</p>
@@ -1446,8 +1450,8 @@
         </div>
         <div class="footer-col">
           <h4>Contact</h4>
-          <a href="tel:+33744776598">07 44 77 65 98</a>
-          <a href="https://wa.me/33744776598" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+          <a href="#" data-tel-link data-contact="phone"><span data-tel-text></span></a>
+          <a href="#" data-wa-link data-contact="wa" target="_blank" rel="noopener noreferrer">WhatsApp</a>
         </div>
       </div>
       <div class="footer-social">
@@ -1461,7 +1465,7 @@
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
             <span>Instagram</span>
           </a>
-          <a href="https://wa.me/33744776598" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" class="footer-social__link footer-social__link--wa">
+          <a href="#" data-wa-link target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" class="footer-social__link footer-social__link--wa">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
             <span>WhatsApp</span>
           </a>
@@ -1481,7 +1485,7 @@
   </footer>
 
   <!-- =================== FLOATING WHATSAPP =================== -->
-  <a id="waFloat" class="wa-float" data-track="wa:float" href="https://wa.me/33744776598"
+  <a id="waFloat" class="wa-float" data-track="wa:float" href="#"
      target="_blank" rel="noopener noreferrer" aria-label="Contacter sur WhatsApp"
      data-action="wa-float">
     <span class="wa-float__icon" aria-hidden="true">💬</span>
@@ -1513,8 +1517,8 @@
         🛒
         <span id="dockCount" class="dock__badge">0</span>
       </button>
-      <a class="dock__btn dock__btn--call" href="tel:+33744776598" aria-label="Appeler" data-track="dock:appel">📞</a>
-      <a class="dock__btn dock__btn--wa" href="https://wa.me/33744776598" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" data-track="dock:whatsapp">💬</a>
+      <a class="dock__btn dock__btn--call" href="#" aria-label="Appeler" data-track="dock:appel">📞</a>
+      <a class="dock__btn dock__btn--wa" href="#" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" data-track="dock:whatsapp">💬</a>
     </div>
   </nav>
 
@@ -1610,7 +1614,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=402"></script>
+  <script defer src="app.js?v=403"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

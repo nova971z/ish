@@ -511,6 +511,45 @@
     });
   }
 
+  // Formate 596XXXXXXXXX → 0X XX XX XX XX (affichage FR). Repli : +indicatif.
+  function fmtPhone(digits) {
+    var d = String(digits || '');
+    if (d.length === 11 && (d.indexOf('33') === 0)) d = '0' + d.slice(2);
+    if (d.length === 10) return d.replace(/(\d{2})(?=\d)/g, '$1 ').trim();
+    return d ? '+' + digits : '';
+  }
+
+  // Affiche/masque + câble TOUS les points de contact (téléphone + WhatsApp)
+  // selon qu'un numéro est configuré. Aucun numéro → tout est masqué (rien ne
+  // fuite : les libellés sont vides dans le HTML, remplis ici seulement si un
+  // numéro existe). Un numéro renseigné → liens tel:/wa.me + textes posés
+  // partout. Les liens porteurs d'un message (pdpWa/terrViewWa/devis) sont posés
+  // à leur rendu via waLink() ; ici on gère les liens statiques et la visibilité.
+  function applyContactChannels() {
+    var has = !!WA_PHONE;
+    var tel = has ? 'tel:+' + WA_PHONE : '#';
+    var wa = has ? 'https://wa.me/' + WA_PHONE : '#';
+    var hideSel = ['#waFloat', '#pdpWa', '#terrViewWa', '#devisSend',
+      '.dock__btn--call', '.dock__btn--wa', '.footer-social__link--wa',
+      '[data-contact="phone"]', '[data-contact="wa"]'];
+    hideSel.forEach(function (sel) {
+      var els = document.querySelectorAll(sel);
+      for (var i = 0; i < els.length; i++) {
+        els[i].hidden = !has;
+        els[i].style.display = has ? '' : 'none';
+      }
+    });
+    if (!has) return;
+    var telEls = document.querySelectorAll('[data-tel-link], .dock__btn--call');
+    for (var a = 0; a < telEls.length; a++) telEls[a].href = tel;
+    var waEls = document.querySelectorAll('[data-wa-link], .dock__btn--wa, .footer-social__link--wa, #waFloat');
+    for (var b = 0; b < waEls.length; b++) waEls[b].href = wa;
+    var telTxt = document.querySelectorAll('[data-tel-text]');
+    for (var c = 0; c < telTxt.length; c++) telTxt[c].textContent = fmtPhone(WA_PHONE);
+    var waTxt = document.querySelectorAll('[data-wa-text]');
+    for (var d = 0; d < waTxt.length; d++) waTxt[d].textContent = 'wa.me/' + WA_PHONE;
+  }
+
   // Un traceur soumis à consentement est-il RÉELLEMENT configuré ?
   function analyticsConfigured() {
     return !!(ANALYTICS && (ANALYTICS.ga4Id || ANALYTICS.metaPixelId));
@@ -631,6 +670,7 @@
 
   // ── WhatsApp helpers ───────────────────────────────────────
   function waLink(msg) {
+    if (!WA_PHONE) return '';   // aucun numéro configuré → pas de lien
     return 'https://wa.me/' + WA_PHONE + '?text=' + encodeURIComponent(msg || '');
   }
 
@@ -779,7 +819,12 @@
   // ── Cart (single source of truth) ──────────────────────────
 
   var CART_KEY = 'pt_cart';
-  var WA_PHONE = '33744776598';
+  // Numéro de contact UNIQUE (téléphone + WhatsApp) : source de vérité =
+  // window.PT_CRYPTO_CONFIG.whatsappNumber (index.html). Vide tant qu'aucun
+  // numéro dédié n'est pris → applyContactChannels() masque tous les liens
+  // tel:/WhatsApp. Renseigner le numéro à UN SEUL endroit le fait réapparaître
+  // partout.
+  var WA_PHONE = ((window.PT_CRYPTO_CONFIG && window.PT_CRYPTO_CONFIG.whatsappNumber) || '').replace(/[^0-9]/g, '');
 
   function loadCartData() {
     try {
@@ -1014,6 +1059,7 @@
   }
 
   function sendDevisWhatsApp() {
+    if (!WA_PHONE) { toast('Contact bientôt disponible', 'info'); return; }
     var items = getCart();
     if (items.length === 0) { toast('Panier vide', 'error'); return; }
     var msg = waCartMessage(items, _currentTerritory);
@@ -8043,7 +8089,6 @@
       'name': 'Pirates Tools',
       'url': location.origin,
       'logo': location.origin + '/icons/icon-512.png',
-      'telephone': '+33744776598',
       'areaServed': [
         { '@type': 'AdministrativeArea', 'name': 'France' },
         { '@type': 'AdministrativeArea', 'name': 'Guadeloupe' },
@@ -8055,13 +8100,14 @@
       'description': 'Outillage professionnel DeWALT, Makita, Festool, Flex, Facom, Stanley, Wera — livraison DOM-TOM (Guadeloupe, Martinique, Guyane, Réunion, Mayotte). Octroi de mer inclus.',
       'contactPoint': {
         '@type': 'ContactPoint',
-        'telephone': '+33744776598',
         'contactType': 'customer service',
         'availableLanguage': 'French',
         'areaServed': 'FR'
       },
       'sameAs': []
     };
+    // Téléphone dans les données structurées seulement si un numéro est configuré.
+    if (WA_PHONE) { data.telephone = '+' + WA_PHONE; data.contactPoint.telephone = '+' + WA_PHONE; }
     var script = document.createElement('script');
     script.type = 'application/ld+json';
     script.setAttribute('data-jsonld', 'org');
@@ -8455,6 +8501,7 @@
     setupTerritorySelector();
     setupConsentBar();
     setupWaFloat();
+    applyContactChannels();   // masque tel/WhatsApp tant qu'aucun numéro n'est configuré
     bindEvents();
     setupAccountTabs();
     setupRevealAnimations();

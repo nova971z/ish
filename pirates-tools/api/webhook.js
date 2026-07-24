@@ -615,7 +615,7 @@ async function sendOrderEmails(model) {
       + '</table>'
       + invoiceBlock
       + '<p style="margin:24px 0 0;color:#9aa4b2;font-size:13px;line-height:1.6">'
-      + 'Besoin d\'aide ? Écris-nous sur WhatsApp : <a href="https://wa.me/33744776598" style="color:#8B5CF6;text-decoration:none">07 44 77 65 98</a>'
+      + 'Besoin d\'aide ? Réponds simplement à cet email, on te recontacte.'
       + '</p>'
       + '</td></tr>'
       + '<tr><td style="background:#0a0f14;padding:16px 32px;text-align:center;border-top:1px solid rgba(255,255,255,.06)">'
