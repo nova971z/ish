@@ -4339,7 +4339,7 @@
     "category": "Perceuses-visseuses",
     "tag": "Nouveau",
     "desc": "Perceuse visseuse 18V LXT (Machine seule) en MAKPAC.",
-    "img": "images/placeholder.svg",
+    "img": "images/posters/ddf485z.webp",
     "price": 130.95,
     "currency": "EUR",
     "vat": 0.2,
@@ -4362,8 +4362,23 @@
       "Robuste et endurant, pensé pour un usage professionnel intensif",
       "Idéal pour les chantiers des Antilles / DOM-TOM"
     ],
-    "specs": {},
-    "description_long": "Perceuse visseuse 18V LXT (Machine seule) en MAKPAC. Outil professionnel Makita de la gamme 18V LXT sans fil (moteur brushless). Livré en coffret MAKPAC, machine seule (sans batterie ni chargeur). Compatible avec les batteries Makita LXT. Fiche technique détaillée à compléter. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "specs": {
+      "Marque": "Makita",
+      "Type": "Perceuse-visseuse sans fil (mandrin auto-serrant 13 mm)",
+      "Alimentation": "Batterie 18 V LXT (vendue seule, sans batterie ni chargeur)",
+      "Moteur": "Brushless (sans charbon)",
+      "Vitesse à vide": "2 vitesses — 0-500 / 0-1 900 tr/min",
+      "Couple max.": "50 Nm (27 Nm matériau tendre / 50 Nm dur)",
+      "Réglages de couple": "21 positions",
+      "Mandrin": "Auto-serrant 13 mm",
+      "Capacité de perçage": "Ø 38 mm bois / Ø 13 mm métal ; vis à bois 6 × 75 mm",
+      "Pression sonore (LpA)": "74 dB(A) (K = 3,0)",
+      "Vibrations": "2,5 m/s²",
+      "Poids net EPTA": "1,7 kg",
+      "Dimensions": "169 × 79 × 255 mm",
+      "Livraison": "Coffret MAKPAC"
+    },
+    "description_long": "Perceuse-visseuse sans fil Makita DDF485ZJ (18V LXT), livrée en coffret MAKPAC. Moteur brushless 2 vitesses (0-1 900 tr/min), couple 50 Nm sur 21 positions + perçage, mandrin auto-serrant 13 mm. Perce jusqu'à Ø38 mm dans le bois et Ø13 mm dans le métal, éclairage LED. Vendue en machine seule (sans batterie ni chargeur), compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM, octroi de mer inclus dans le prix affiché."
   },
   {
     "id": "makita-ddf489z",
