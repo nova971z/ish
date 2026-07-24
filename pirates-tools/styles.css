@@ -6081,6 +6081,41 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .compta-sample { font-size: .84rem; color: rgba(255,255,255,.85); margin: 6px 0; padding-left: 1.2rem; }
 .compta-sample li { margin: 3px 0; }
 
+/* Synthèse comptable */
+.compta-kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (min-width: 560px) { .compta-kpis { grid-template-columns: repeat(4, 1fr); } }
+.compta-kpi { background: rgba(var(--accent-rgb),0.06); border: 1px solid rgba(var(--accent-rgb),0.25); border-radius: 12px; padding: 12px; }
+.compta-kpi__val { font-size: 1.35rem; font-weight: 800; color: #fff; }
+.compta-kpi__lbl { font-size: .74rem; color: rgba(255,255,255,.7); margin-top: 2px; }
+.compta-table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: .88rem; }
+.compta-table td, .compta-table th { padding: 8px 6px; border-bottom: 1px solid rgba(var(--accent-rgb),0.18); text-align: left; color: rgba(255,255,255,.88); }
+.compta-table th { color: var(--accent-soft); font-size: .74rem; text-transform: uppercase; }
+.compta-table .compta-num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.compta-row--strong td { font-weight: 800; color: #fff; }
+.compta-tag2 { font-size: .62rem; padding: 1px 6px; border-radius: 20px; font-weight: 800; }
+.compta-tag2.is-real { background: rgba(52,211,153,.16); color: #34d399; }
+.compta-tag2.is-est { background: rgba(245,158,11,.16); color: #fbbf24; }
+.compta-print-head, .compta-print-note { display: none; }
+.compta-print-note { font-size: .8rem; color: rgba(255,255,255,.6); margin-top: 10px; }
+
+/* Impression → PDF (iPad : Partager → Enregistrer dans Fichiers en PDF) */
+@media print {
+  body * { visibility: hidden !important; }
+  #comptaPrintable, #comptaPrintable * { visibility: visible !important; }
+  #comptaPrintable {
+    position: absolute; left: 0; top: 0; width: 100%;
+    background: #fff !important; color: #111 !important; padding: 8mm;
+  }
+  #comptaPrintable * { color: #111 !important; }
+  #comptaPrintable .compta-kpi { border: 1px solid #ccc !important; background: #f6f6f8 !important; }
+  #comptaPrintable .compta-table td, #comptaPrintable .compta-table th { border-bottom: 1px solid #ccc !important; }
+  #comptaPrintable .compta-row--strong td { background: #f0eef8 !important; }
+  #comptaPrintable .compta-tag2.is-real { color: #17803d !important; }
+  #comptaPrintable .compta-tag2.is-est { color: #b45309 !important; }
+  .compta-print-head { display: flex !important; justify-content: space-between; align-items: baseline; border-bottom: 2px solid #6d28d9; padding-bottom: 6px; margin-bottom: 10px; font-size: 15px; }
+  .compta-print-note { display: block !important; color: #444 !important; border-top: 1px solid #ccc; padding-top: 8px; }
+}
+
 .admin-tools-form {
   display: flex;
   flex-wrap: wrap;

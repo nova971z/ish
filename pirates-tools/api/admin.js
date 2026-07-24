@@ -108,6 +108,26 @@ module.exports = async function handler(req, res) {
         return res.status(200).json({ ok: true, config: cfg });
       }
 
+      // ── Synthèse comptable (compte de résultat) ────────────────
+      // Revenus RÉELS lus du journal `payments` (Stripe) ; structure de résultat
+      // ESTIMÉE par le modèle de marge (à valider par l'expert-comptable).
+      if (type === 'accounting') {
+        const accounting = require('./_lib/accounting');
+        const cfg = await priceConfig.load();
+        const paySnap = await db.collection('payments').get();
+        const payments = [];
+        paySnap.forEach((doc) => {
+          const d = doc.data() || {};
+          payments.push({
+            amountCents: typeof d.amountCents === 'number' ? d.amountCents : 0,
+            status: d.status || '',
+            territoryDeclared: d.territoryDeclared || d.territoryFromAddress || null,
+            recordedAtMs: d.recordedAt && d.recordedAt.toMillis ? d.recordedAt.toMillis() : null
+          });
+        });
+        return res.status(200).json({ ok: true, accounting: accounting.synthesize(payments, cfg) });
+      }
+
       // Default: list all overrides
       const snap = await db.collection('product_overrides').get();
       const overrides = {};
