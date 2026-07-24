@@ -8609,5 +8609,47 @@
     ],
     "specs": {},
     "description_long": "Système d'alimentation mobile SYS-PowerStation Festool. Station d'énergie portable (format Systainer) pour alimenter les outils là où il n'y a pas de secteur. Produit officiel Festool. Fiche technique détaillée à compléter. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+  },
+  {
+    "id": "dewalt-dwst83402-1",
+    "slug": "dewalt-dwst83402-1-toughsystem-2-0-trolley-3-en-1",
+    "sku": "DWST83402-1",
+    "title": "DeWALT DWST83402-1 — TOUGHSYSTEM 2.0 Trolley 3-en-1 (chariot + 2 coffrets)",
+    "name": "DWST83402-1",
+    "brand": "DeWALT",
+    "category": "Rangements",
+    "tag": "Nouveau",
+    "desc": "Chariot roulant TOUGHSYSTEM 2.0 avec 2 coffrets à outils empilables — transport et rangement de chantier.",
+    "img": "images/posters/dwst83402-1.webp",
+    "price": 339.10,
+    "currency": "EUR",
+    "vat": 0.2,
+    "price_ht": 282.58,
+    "stock_status": "in_stock",
+    "stock_label": "En stock",
+    "paymentLink": "",
+    "weight_kg": 15,
+    "ncCategory": "accessory",
+    "productType": "pro",
+    "tags": [
+      "tropical_ready"
+    ],
+    "description_long": "Chariot de transport DeWALT TOUGHSYSTEM 2.0 (réf. DWST83402-1) : un chariot roulant robuste surmonté de deux coffrets à outils empilables. Poignée télescopique et grandes roues tout-terrain pour déplacer tout ton matériel d'une seule main sur le chantier. Loquets métalliques et étanchéité IP65 (poussière et projections d'eau). Compatible avec toute la gamme TOUGHSYSTEM 2.0. Livré dans toute la zone DOM-TOM, octroi de mer inclus dans le prix affiché.",
+    "specs": {
+      "Système": "TOUGHSYSTEM 2.0",
+      "Composition": "1 chariot roulant + 2 coffrets à outils empilables",
+      "Déplacement": "Poignée télescopique + grandes roues tout-terrain",
+      "Empilage": "Loquets métalliques, verrouillage entre modules",
+      "Étanchéité": "IP65 (poussière et projections d'eau)",
+      "Compatibilité": "Toute la gamme DeWALT TOUGHSYSTEM 2.0",
+      "Référence": "DWST83402-1"
+    },
+    "features": [
+      "Chariot 3-en-1 : se transporte d'une seule main grâce à la poignée télescopique",
+      "Grandes roues tout-terrain pour les sols difficiles de chantier",
+      "Coffrets empilables et verrouillables entre eux",
+      "Étanchéité IP65 (poussière et eau)",
+      "Compatible avec toute la gamme TOUGHSYSTEM 2.0"
+    ]
   }
 ]
