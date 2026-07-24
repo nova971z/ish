@@ -73,6 +73,9 @@ function renderHtml(inv) {
   var s = inv.seller || {};
   var missing = '<span style="color:#c0243a">[À COMPLÉTER]</span>';
   function f(v) { return v ? esc(v) : missing; }
+  // Logo Pirates Tools (haut de facture + filigrane). Surchargéable via
+  // seller.logoUrl ; défaut = asset servi à la racine (même origine que l'admin).
+  var logoUrl = esc(s.logoUrl || '/images/pirates-tools-logo.png');
 
   var sellerBlock =
     '<div class="pt-inv-party"><b>' + f(s.raisonSociale) + '</b><br>'
@@ -99,10 +102,13 @@ function renderHtml(inv) {
 
   return ''
     + '<div id="ptInvoice" class="pt-invoice">'
-    + '<div class="pt-inv-head"><div><h1>FACTURE</h1>'
+    + '<div class="pt-inv-watermark" aria-hidden="true" style="background-image:url(' + logoUrl + ')"></div>'
+    + '<div class="pt-inv-head">'
+    + '<div class="pt-inv-brand"><img class="pt-inv-logoimg" src="' + logoUrl + '" alt="Pirates Tools"><span class="pt-inv-brandname">PIRATES&nbsp;TOOLS</span></div>'
+    + '<div class="pt-inv-meta"><h1>FACTURE</h1>'
     + '<div>N° <b>' + esc(inv.number) + '</b></div>'
     + '<div>Date : ' + esc(fdate(inv.dateMs)) + '</div></div>'
-    + '<div class="pt-inv-logo">Pirates&nbsp;Tools</div></div>'
+    + '</div>'
     + '<div class="pt-inv-parties">' + sellerBlock + buyerBlock + '</div>'
     + '<table class="pt-inv-lines"><thead><tr><th>Désignation</th><th class="n">Qté</th><th class="n">PU HT</th><th class="n">TVA</th><th class="n">Montant HT</th></tr></thead>'
     + '<tbody>' + rows + '</tbody></table>'
