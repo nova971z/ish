@@ -13,6 +13,14 @@ module.exports = function () {
   var rColis = model.recommend(visseuse, { costHT: 62, mode: 'colissimo' });
   var rCont  = model.recommend(visseuse, { costHT: 62, mode: 'container' });
 
+  // Petit objet léger (≤ 500 g) → lettre 8 € (pas Colissimo 14 €).
+  var accessoire = { weight_kg: 0.4, ncCategory: 'accessory', title: 'Guide' };
+  var rLettre = model.recommend(accessoire, { costHT: 12, mode: 'colissimo' });
+  ok(rLettre.transport === 8, 'petit objet ≤500 g → lettre 8 €');
+  ok(rLettre.shipKind === 'lettre', 'shipKind = lettre');
+  var rColisAcc = model.recommend({ weight_kg: 1.0, ncCategory: 'accessory', title: 'X' }, { costHT: 12, mode: 'colissimo' });
+  ok(rColisAcc.transport === 17 && rColisAcc.shipKind === 'colissimo', '>500 g → Colissimo (pas lettre)');
+
   ok(rColis && rColis.transport === 17, 'transport Colissimo 1 kg = 17 €');
   ok(rColis.marginAfterIS >= 0.149, 'Colissimo : marge après IS ≥ 15 % (obtenu ' + (rColis.marginAfterIS * 100).toFixed(1) + '%)');
   near(rColis.markup * 100, 62, 9, 'Colissimo visseuse markup ~55-64 %');

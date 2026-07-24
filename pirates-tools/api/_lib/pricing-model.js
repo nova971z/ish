@@ -27,6 +27,9 @@ var DEFAULT_CONFIG = {
   packaging: 0.5,             // emballage (carton/bulles récupérés)
   fixedAnnual: 1000,          // CFE + assurance + banque (sans comptable), €/an
   ordersPerYear: 400,         // pour répartir les frais fixes par commande
+  // Lettre suivie Outre-mer pour les petits objets légers (≤ 500 g) : ~8 €,
+  // bien moins cher que le Colissimo minimum. Prioritaire sous le seuil de poids.
+  lettre: { maxKg: 0.5, price: 8 },
   // Grille Colissimo Outre-mer OM1 (poids max kg → prix €). Points 5 kg et 30 kg
   // officiels 2026 ; intermédiaires estimés (à confirmer sur laposte.fr).
   colissimo: [[0.5,14],[1,17],[2,23],[3,33],[5,38.90],[10,64],[15,88],[30,143.02]],
@@ -105,9 +108,18 @@ function recommend(product, opts, config) {
   var weight = Number(product && product.weight_kg) || 2;
   var mode = opts.mode || 'colissimo';
   var isCoffret = (product && (product.variantRole === 'coffret' || /coffret|makpac|tstak|valise/i.test(product.title || '')));
-  var ship = (mode === 'container')
-    ? (isCoffret ? cfg.containerPerUnit.coffret : cfg.containerPerUnit.nu)
-    : colissimoCost(weight, cfg.colissimo);
+  var ship, shipKind;
+  if (mode === 'container') {
+    ship = isCoffret ? cfg.containerPerUnit.coffret : cfg.containerPerUnit.nu;
+    shipKind = 'container';
+  } else if (cfg.lettre && weight <= cfg.lettre.maxKg) {
+    // Petit objet léger → lettre suivie (~8 €), bien moins cher que Colissimo.
+    ship = cfg.lettre.price;
+    shipKind = 'lettre';
+  } else {
+    ship = colissimoCost(weight, cfg.colissimo);
+    shipKind = 'colissimo';
+  }
 
   var octroi = octroiRate(product, cfg);
   var tvaDom = tvaDomRate(cfg);
@@ -116,6 +128,7 @@ function recommend(product, opts, config) {
   r.costHT = round2(costHT);
   r.priceHtFor = { price_ht: r.priceHt, price: round2(r.priceHt * (1 + cfg.tvaFR)) };
   r.mode = mode;
+  r.shipKind = shipKind;
   r.weight = weight;
   return r;
 }

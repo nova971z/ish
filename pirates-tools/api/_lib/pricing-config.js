@@ -15,7 +15,7 @@ var TTL = 30000; // 30 s
 var ALLOWED = [
   'autoPrice', 'mode', 'targetNet', 'is', 'tvaFR',
   'stripePct', 'stripeFix', 'packaging', 'fixedAnnual', 'ordersPerYear',
-  'colissimo', 'containerPerUnit', 'refTerritory'
+  'colissimo', 'containerPerUnit', 'lettre', 'refTerritory'
 ];
 
 function defaults() {
@@ -52,6 +52,10 @@ function sanitize(patch) {
     }
     if (k === 'containerPerUnit') {
       if (v && isFinite(v.nu) && isFinite(v.coffret)) out[k] = { nu: Number(v.nu), coffret: Number(v.coffret) };
+      return;
+    }
+    if (k === 'lettre') {
+      if (v && isFinite(v.maxKg) && isFinite(v.price) && v.maxKg >= 0 && v.price >= 0) out[k] = { maxKg: Number(v.maxKg), price: Number(v.price) };
       return;
     }
     // numériques
