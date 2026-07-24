@@ -6432,7 +6432,7 @@
     if (a.complet === false) {
       html += '<p class="compta-print-note">⚠️ Certaines ventes n\'ont pas de coût d\'achat enregistré (données partielles). Le coût réel sera complet pour toutes les ventes à venir.</p>';
     }
-    html += '<p class="compta-print-note"><b>Chiffres 100 % réels</b> : revenus (Stripe), coût d\'achat snapshoté à la vente, frais Stripe réels, charges saisies. À faire viser par un expert-comptable.</p>';
+    html += '<p class="compta-print-note"><b>Chiffres réels</b> (revenus Stripe, coût d\'achat snapshoté, frais Stripe, charges saisies). <b>Outil de gestion</b> : il ne remplace pas la tenue officielle des comptes ni tes factures d\'origine (à conserver 10 ans). À faire viser par un expert-comptable.</p>';
     html += '</div>'; // fin imprimable
 
     // ── Saisie des charges (hors PDF) ──
@@ -6586,78 +6586,103 @@
   }
 
   // ── Fiscalité : guide des déclarations officielles (SASU à l'IS, DOM) ──────
+  var FISC_DONE_KEY = 'pt:fisc:done';
   var FISC_DECLARATIONS = [
     {
-      titre: 'TVA — déclaration de TVA',
-      quand: 'Chaque mois ou trimestre',
-      quoi: 'Tu déclares la TVA que tu as collectée sur tes ventes moins la TVA déductible sur tes achats/charges (le « solde » que tu vois dans ta compta). Tu reverses la différence, ou tu récupères si c\'est un crédit.',
-      ou: 'impots.gouv.fr → ton Espace Professionnel → « Déclarer la TVA »',
-      url: 'https://www.impots.gouv.fr/professionnel',
+      id: 'tva', titre: 'TVA — déclaration de TVA', quand: 'Mensuelle ou trimestrielle',
+      echeance: 'Vers le 24 du mois suivant (réel normal) ou par trimestre — selon ton régime.',
+      quoi: 'Tu déclares la TVA collectée sur tes ventes moins la TVA déductible (le « solde » de ta compta). Tu reverses la différence, ou tu récupères si c\'est un crédit.',
+      ou: 'impots.gouv.fr → Espace Professionnel → « Déclarer la TVA »', url: 'https://www.impots.gouv.fr/professionnel',
       note: 'Le chiffre exact = la ligne TVA de ton compte de résultat (onglet Comptabilité).'
     },
     {
-      titre: 'Impôt sur les sociétés (IS) — déclaration de résultat',
-      quand: 'Une fois par an (+ acomptes)',
-      quoi: 'La « liasse fiscale » (formulaire n° 2065) : tu déclares le résultat de ta société. L\'IS (15 % jusqu\'à 42 500 € de bénéfice, 25 % au-delà) se paie en acomptes puis un solde.',
-      ou: 'impots.gouv.fr → Espace Professionnel → « Déclarer les résultats »',
-      url: 'https://www.impots.gouv.fr/professionnel',
-      note: 'C\'est LE document que ton expert-comptable prépare à partir de ton compte de résultat (exporte le PDF Compta et donne-le-lui).'
+      id: 'is', titre: 'Impôt sur les sociétés (IS) — résultat', quand: 'Annuelle (+ acomptes)',
+      echeance: 'Acomptes : 15 mars · 15 juin · 15 sept · 15 déc. Liasse + solde : ~mi-mai (clôture au 31/12).',
+      quoi: 'La « liasse fiscale » (formulaire n° 2065) : tu déclares le résultat. L\'IS (15 % jusqu\'à 42 500 €, 25 % au-delà) se paie en acomptes puis solde.',
+      ou: 'impots.gouv.fr → Espace Professionnel → « Déclarer les résultats »', url: 'https://www.impots.gouv.fr/professionnel',
+      note: 'C\'est LE document que l\'expert-comptable monte à partir de ton compte de résultat (exporte le PDF Compta).'
     },
     {
-      titre: 'CFE — Cotisation Foncière des Entreprises',
-      quand: 'Chaque année (paiement en décembre)',
-      quoi: 'Un impôt local fixe pour les entreprises. Une déclaration initiale (formulaire 1447-C) la 1ʳᵉ année, puis paiement chaque année. Souvent exonérée l\'année de création.',
-      ou: 'impots.gouv.fr → Espace Professionnel → « CFE »',
-      url: 'https://www.impots.gouv.fr/professionnel',
-      note: 'Pense à enregistrer la CFE payée dans tes charges (onglet Comptabilité).'
+      id: 'cfe', titre: 'CFE — Cotisation Foncière des Entreprises', quand: 'Annuelle',
+      echeance: 'Paiement : 15 décembre. Déclaration initiale (1447-C) : avant le 31 décembre de l\'année de création.',
+      quoi: 'Impôt local fixe. Souvent exonérée l\'année de création (et exonérations prolongées possibles en DOM).',
+      ou: 'impots.gouv.fr → Espace Professionnel → « CFE »', url: 'https://www.impots.gouv.fr/professionnel',
+      note: 'Enregistre la CFE payée dans tes charges (onglet Comptabilité).'
     },
     {
-      titre: 'Octroi de mer — à l\'import en Guadeloupe',
-      quand: 'À chaque importation de marchandise',
-      quoi: 'La taxe DOM sur les marchandises qui entrent. Elle se déclare/paie à la douane au moment où tu fais venir ton stock. C\'est le transitaire qui la gère souvent — vérifie qu\'elle est incluse dans son devis.',
-      ou: 'douane.gouv.fr (téléservice DELT@ / ton transitaire)',
-      url: 'https://www.douane.gouv.fr',
+      id: 'octroi', titre: 'Octroi de mer — à l\'import', quand: 'À chaque importation',
+      echeance: 'Au moment où ta marchandise entre en Guadeloupe (via la douane / ton transitaire).',
+      quoi: 'La taxe DOM sur les marchandises importées. Souvent gérée par le transitaire — vérifie qu\'elle est incluse dans son devis.',
+      ou: 'douane.gouv.fr (téléservice DELT@ / ton transitaire)', url: 'https://www.douane.gouv.fr',
       note: 'Enregistre l\'octroi payé dans tes charges pour un résultat net exact.'
     },
     {
-      titre: 'Comptes annuels — dépôt du bilan',
-      quand: 'Une fois par an (après la clôture)',
-      quoi: 'Ta société doit déposer ses comptes annuels (bilan + compte de résultat) au greffe, via le Guichet unique. C\'est ce qui rend ta compta « officielle ».',
-      ou: 'formalites.entreprises.gouv.fr (Guichet unique INPI)',
-      url: 'https://formalites.entreprises.gouv.fr',
-      note: 'Là encore, c\'est monté à partir de ta compta réelle.'
+      id: 'comptes', titre: 'Comptes annuels — dépôt du bilan', quand: 'Annuelle',
+      echeance: 'AG d\'approbation dans les 6 mois de la clôture, puis dépôt au greffe dans le mois qui suit.',
+      quoi: 'Ta société dépose ses comptes annuels (bilan + compte de résultat) via le Guichet unique — ta compta devient « officielle ».',
+      ou: 'formalites.entreprises.gouv.fr (Guichet unique INPI)', url: 'https://formalites.entreprises.gouv.fr',
+      note: 'Monté à partir de ta compta réelle.'
     },
     {
-      titre: 'Formalités entreprise (créer / modifier)',
-      quand: 'À la création, puis si changement',
-      quoi: 'Toute création, modification (adresse, activité…) ou fermeture passe par le Guichet unique. C\'est le point d\'entrée officiel unique depuis 2023.',
-      ou: 'formalites.entreprises.gouv.fr (Guichet unique INPI)',
-      url: 'https://formalites.entreprises.gouv.fr',
-      note: 'Ton numéro SIRET et tes statuts viennent de là.'
+      id: 'formalites', titre: 'Formalités entreprise (créer / modifier)', quand: 'À la création puis si changement',
+      echeance: 'Dès que tu crées, modifies (adresse, activité…) ou fermes.',
+      quoi: 'Tout passe par le Guichet unique — point d\'entrée officiel unique depuis 2023.',
+      ou: 'formalites.entreprises.gouv.fr (Guichet unique INPI)', url: 'https://formalites.entreprises.gouv.fr',
+      note: 'Ton SIRET et tes statuts viennent de là.'
     }
   ];
+
+  function fiscDone() { try { return JSON.parse(localStorage.getItem(FISC_DONE_KEY) || '{}'); } catch (e) { return {}; } }
 
   function renderAdminFisc() {
     var el = document.getElementById('adminFiscBody');
     if (!el) return;
+    var year = new Date().getFullYear();
+    var done = fiscDone();
     var html = '';
-    html += '<p class="admin-hint">Tes <b>déclarations officielles</b>, expliquées simplement, avec le <b>lien direct</b> vers le bon site du gouvernement. Tu n\'as pas besoin de tout connaître : tu suis les cartes, une par une. 👍</p>';
-    html += '<div class="fisc-card" style="border-color:rgba(245,158,11,.5);background:rgba(245,158,11,.07)">'
-      + '<h3>⚠️ À lire avant tout</h3>'
-      + '<p class="fisc-line">Je te donne les grandes lignes et les bons liens — mais je ne suis <b>pas</b> conseiller fiscal. Pour être sûr de tes obligations exactes (surtout au démarrage), <b>appelle gratuitement ton Service des Impôts des Entreprises (SIE)</b> ou fais un point avec un expert-comptable. Ils répondent à ces questions tous les jours.</p>'
-      + '<p class="fisc-line">💡 <b>Le secret :</b> ton onglet <b>Comptabilité</b> produit déjà tous les chiffres réels. Tu exportes le <b>PDF</b> et il sert à remplir (ou à faire remplir) toutes ces déclarations.</p>'
+    html += '<p class="admin-hint">Tes <b>déclarations officielles</b>, expliquées simplement, avec les <b>échéances</b> et le <b>lien direct</b> vers le bon site. Tu suis les cartes une par une. 👍</p>';
+
+    // 🔴 3 points légaux critiques (la petite bête qui peut te griller)
+    html += '<div class="fisc-card" style="border-color:#c0243a;background:rgba(192,36,58,.08)">'
+      + '<h3>🔴 À VÉRIFIER EN PRIORITÉ (peut te coûter cher)</h3>'
+      + '<p class="fisc-line"><b>1. TVA — es-tu vraiment assujetti ?</b> Ton site facture la TVA (8,5 %). Si ton chiffre d\'affaires est sous les seuils, tu peux être en <b>franchise en base</b> → dans ce cas tu ne dois <b>PAS</b> facturer la TVA (ce serait une faute). <b>Appelle ton SIE</b> pour trancher — si tu es en franchise, dis-le-moi, je retire la TVA du site.</p>'
+      + '<p class="fisc-line"><b>2. IS à 15 % — remplis-tu les conditions ?</b> Le taux réduit exige : capital <b>entièrement libéré</b>, détenu à <b>≥ 75 % par des personnes physiques</b>, CA &lt; 10 M€. Sinon c\'est 25 %.</p>'
+      + '<p class="fisc-line"><b>3. Avantages DOM — ne les rate pas !</b> En Guadeloupe tu peux avoir des <b>exonérations</b> (zone franche <b>ZFANG</b> → abattement sur l\'IS, CFE exonérée plus longtemps). Ça peut <b>réduire fortement tes impôts</b>. Demande à ton SIE si tu y as droit.</p>'
       + '</div>';
+
+    html += '<div class="fisc-card" style="border-color:rgba(245,158,11,.5);background:rgba(245,158,11,.07)">'
+      + '<h3>⚠️ À garder en tête</h3>'
+      + '<p class="fisc-line">Je donne les grandes lignes et les bons liens, mais je ne suis <b>pas</b> conseiller fiscal → pour tes obligations exactes, <b>SIE (gratuit)</b> ou expert-comptable.</p>'
+      + '<p class="fisc-line"><b>Garde TOUTES tes factures</b> (achats cotébrico, transport, octroi…) pendant <b>10 ans</b> : le compte de résultat de l\'app est un <b>outil de gestion</b>, il ne remplace pas tes vraies factures ni la tenue officielle des comptes.</p>'
+      + '<p class="fisc-line">💡 Les dates ci-dessous valent pour une <b>clôture au 31 décembre</b> — confirme ta date de clôture avec ton comptable.</p>'
+      + '</div>';
+
     FISC_DECLARATIONS.forEach(function (d) {
-      html += '<article class="fisc-card">'
+      var isDone = done[d.id] === year;
+      html += '<article class="fisc-card' + (isDone ? ' fisc-card--done' : '') + '">'
         + '<div class="fisc-when">🗓️ ' + escapeHTML(d.quand) + '</div>'
+        + (isDone ? '<span class="compta-tag2 is-real" style="margin-left:6px">✓ fait en ' + year + '</span>' : '')
         + '<h3>' + escapeHTML(d.titre) + '</h3>'
+        + '<p class="fisc-line"><span class="fisc-lbl">📅 Échéance :</span> ' + escapeHTML(d.echeance) + '</p>'
         + '<p class="fisc-line"><span class="fisc-lbl">C\'est quoi :</span> ' + escapeHTML(d.quoi) + '</p>'
         + '<p class="fisc-line"><span class="fisc-lbl">Où :</span> ' + escapeHTML(d.ou) + '</p>'
         + '<p class="fisc-line">' + escapeHTML(d.note) + '</p>'
-        + '<div class="compta-actions"><a class="btn primary" href="' + escapeHTML(d.url) + '" target="_blank" rel="noopener">Ouvrir le site officiel ↗</a></div>'
+        + '<div class="compta-actions">'
+        + '<a class="btn primary" href="' + escapeHTML(d.url) + '" target="_blank" rel="noopener">Ouvrir le site officiel ↗</a>'
+        + '<button type="button" class="btn btn--ghost fisc-done" data-id="' + d.id + '">' + (isDone ? '↺ Annuler' : '✅ Marquer comme fait') + '</button>'
+        + '</div>'
         + '</article>';
     });
     el.innerHTML = html;
+
+    el.querySelectorAll('.fisc-done').forEach(function (b) {
+      b.onclick = function () {
+        var id = b.getAttribute('data-id'); var st = fiscDone();
+        if (st[id] === year) delete st[id]; else st[id] = year;
+        try { localStorage.setItem(FISC_DONE_KEY, JSON.stringify(st)); } catch (e) {}
+        renderAdminFisc();
+      };
+    });
   }
 
   function renderAdmin() {

@@ -7659,3 +7659,5 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 }
 
 #menu-toggle { pointer-events: auto !important; z-index: 1002 !important; }
+
+.fisc-card--done { opacity: .72; border-color: rgba(52,211,153,.4) !important; }
