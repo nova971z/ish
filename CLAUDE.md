@@ -3,6 +3,14 @@
 Travail actif : `pirates-tools/` (PWA vanilla HTML/CSS/JS, API serverless Vercel + Firebase + Stripe).
 Branche de dev : `claude/pirates-tools-rebuild-zWc1b`. Prod = Vercel, domaine perso `pirates-tools.com`.
 
+## 🗺️ CARTOGRAPHIE DU CODE — LIRE EN PREMIER (source de vérité TECHNIQUE)
+`pirates-tools/docs/CARTOGRAPHIE.md` = carte complète du site (où est quoi, comment
+c'est fait) avec numéros de ligne : index.html (vues/routes), app.js (zones + toutes
+les fonctions), styles.css (sections/tokens/z-index), api/ (12 endpoints + 16 modules
+_lib), Firestore (collections/règles), CI, products.json, env vars, flux critiques,
+et surtout une section **⚠️ PIÈGES À NE PAS OUBLIER**. Avant de travailler sur le code,
+CONSULTER cette carte pour aller droit à la source. La mettre à jour si la structure change.
+
 ## Exigence qualité (non négociable)
 Code de niveau ingénieur web senior, standard des grandes institutions e-commerce.
 Aucun hasard, aucun bullshit. Chaque correction est vérifiée dans le code avant d'être livrée.
