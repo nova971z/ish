@@ -2662,6 +2662,60 @@ transform: translateY(-2px);
     color: rgba(255,255,255,.4);
 }
 
+/* ── Switch de variante Solo / Coffret (héros fiche produit) ─────────────────
+   Deux segments côte à côte : chacun porte son libellé (« Sans coffret » /
+   « Avec coffret ») ET son prix → sert de bouton ET d'écriteau. Le segment actif
+   est mis en avant (accent). Le gros prix au-dessus reflète la sélection. */
+.pdp-variant {
+    margin-top: .9rem;
+    display: flex;
+    justify-content: center;
+}
+.pdp-variant__switch {
+    display: inline-flex;
+    gap: .35rem;
+    padding: .3rem;
+    border-radius: 14px;
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(var(--accent-rgb), 0.22);
+    backdrop-filter: blur(6px);
+}
+.pdp-variant__btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .1rem;
+    min-width: 118px;
+    padding: .5rem .85rem;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    background: transparent;
+    color: rgba(255,255,255,.62);
+    cursor: pointer;
+    transition: background .18s ease, color .18s ease, border-color .18s ease, box-shadow .18s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+.pdp-variant__btn .pdp-variant__label {
+    font-size: .7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+}
+.pdp-variant__btn .pdp-variant__amt {
+    font-size: 1rem;
+    font-weight: 800;
+}
+.pdp-variant__btn:hover {
+    color: #fff;
+    background: rgba(var(--accent-rgb), 0.10);
+}
+.pdp-variant__btn.active {
+    color: #fff;
+    background: rgba(var(--accent-rgb), 0.22);
+    border-color: rgba(var(--accent-rgb), 0.55);
+    box-shadow: 0 0 18px rgba(var(--accent-rgb), 0.35);
+}
+
 /* Badges en haut à droite du héros (stock + tag), comme sur les cartes.
    Libère le centre : le titre descend, le poster remonte. */
 .pdp-hero__badges {

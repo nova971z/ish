@@ -1179,6 +1179,9 @@
     var q = currentFilter.query.toLowerCase().trim();
     var cat = currentFilter.category;
     return products.filter(function (p) {
+      // Les variantes « avec coffret » ne s'affichent pas dans la grille : elles
+      // sont accessibles via le switch de la fiche de leur solo (variantSecondary).
+      if (p.variantSecondary) return false;
       if (cat && p.category !== cat) return false;
       if (q) {
         var hay = (p.title + ' ' + p.brand + ' ' + (p.desc || '') + ' ' + (p.description || '')).toLowerCase();
@@ -1733,6 +1736,26 @@
       return;
     }
 
+    // ── Variante Solo / Coffret ───────────────────────────────────────────────
+    // Certains outils existent en « sans coffret » (solo, affiché par défaut sur
+    // les cartes) ET « avec coffret » (MAKPAC/valise). Les deux fiches sont liées
+    // (variantGroup + coffretSku/soloSku). On résout la paire, on affiche le solo
+    // par défaut, et un switch dans le héros permet de basculer (image + prix +
+    // cible d'achat). Le coffret est masqué de la grille (variantSecondary).
+    var variantSolo = null, variantCoffret = null;
+    if (product.variantGroup) {
+      if (product.variantRole === 'coffret') {
+        variantCoffret = product;
+        variantSolo = findProductByKey(product.soloSku) || null;
+      } else {
+        variantSolo = product;
+        variantCoffret = findProductByKey(product.coffretSku) || null;
+      }
+    }
+    var hasVariants = !!(variantSolo && variantCoffret);
+    // Produit « actif » (celui qu'on achète / affiche) — mutable par le switch.
+    var activeProduct = hasVariants ? variantSolo : product;
+
     if (dom.pdpTitle) dom.pdpTitle.textContent = product.title;
     // Badges en haut \u00E0 droite (comme les cartes) : pastille stock, puis tag
     // (best-seller\u2026) en dessous. Lib\u00E8re le centre \u2192 titre descendu, poster remont\u00E9.
@@ -1842,6 +1865,66 @@
       localPriceComparison(product, price, dom.pdpPrice);
     }
 
+    // ── Switch de variante (Solo / Coffret) ───────────────────────────────────
+    // Applique une variante : image héros, prix affiché, cible d'achat (activeProduct),
+    // lien WhatsApp et état visuel des boutons. Ne touche PAS aux specs/3D (identiques :
+    // même outil, seul le conditionnement change).
+    function applyVariant(v) {
+      activeProduct = v;
+      var isCof = (v.variantRole === 'coffret');
+      if (dom.pdpHeroImg) {
+        dom.pdpHeroImg.src = v.img || 'images/placeholder.svg';
+        dom.pdpHeroImg.alt = v.title;
+        fitHeroPoster();
+      }
+      if (dom.pdpImg) { dom.pdpImg.src = v.img || 'images/placeholder.svg'; dom.pdpImg.alt = v.title; }
+      if (dom.pdpTitle) dom.pdpTitle.textContent = v.title;
+      if (dom.pdpPrice) {
+        var pr = calcPrice(v, _currentTerritory);
+        dom.pdpPrice.innerHTML = '<span class="pdp-price__ttc">' + formatPrice(pr.ttc) + ' TTC</span>'
+          + '<span class="pdp-price__ht">' + formatPrice(pr.ht) + ' HT</span>';
+        localPriceComparison(v, pr, dom.pdpPrice);
+      }
+      if (dom.pdpWa) dom.pdpWa.href = waLink(waProductMessage(v, _currentTerritory));
+      var vEl = document.getElementById('pdpVariant');
+      if (vEl) {
+        var btns = vEl.querySelectorAll('[data-variant]');
+        for (var b = 0; b < btns.length; b++) {
+          var on = (btns[b].getAttribute('data-variant') === 'coffret') === isCof;
+          btns[b].classList.toggle('active', on);
+          btns[b].setAttribute('aria-pressed', on ? 'true' : 'false');
+        }
+      }
+    }
+    var pdpVariantEl = document.getElementById('pdpVariant');
+    if (pdpVariantEl) {
+      if (hasVariants) {
+        var pSolo = calcPrice(variantSolo, _currentTerritory);
+        var pCof = calcPrice(variantCoffret, _currentTerritory);
+        pdpVariantEl.hidden = false;
+        pdpVariantEl.innerHTML =
+          '<div class="pdp-variant__switch" role="group" aria-label="Choix du conditionnement">'
+          + '<button type="button" class="pdp-variant__btn" data-variant="solo">'
+          + '<span class="pdp-variant__label">Sans coffret</span>'
+          + '<span class="pdp-variant__amt">' + formatPrice(pSolo.ttc) + '</span></button>'
+          + '<button type="button" class="pdp-variant__btn" data-variant="coffret">'
+          + '<span class="pdp-variant__label">Avec coffret</span>'
+          + '<span class="pdp-variant__amt">' + formatPrice(pCof.ttc) + '</span></button>'
+          + '</div>';
+        var vBtns = pdpVariantEl.querySelectorAll('[data-variant]');
+        for (var vb = 0; vb < vBtns.length; vb++) {
+          vBtns[vb].onclick = (function (which) {
+            return function () { applyVariant(which === 'coffret' ? variantCoffret : variantSolo); };
+          })(vBtns[vb].getAttribute('data-variant'));
+        }
+      } else {
+        pdpVariantEl.hidden = true;
+        pdpVariantEl.innerHTML = '';
+      }
+    }
+    // Applique la variante par défaut (solo si paire, sinon le produit lui-même).
+    applyVariant(activeProduct);
+
     // Features (points forts)
     var featuresEl = document.getElementById('pdpFeatures');
     if (featuresEl && product.features && product.features.length > 0) {
@@ -1907,7 +1990,7 @@
           toast('Produit en rupture de stock', 'error');
           return;
         }
-        addToCart(product);
+        addToCart(activeProduct);
       };
     }
 
@@ -1923,13 +2006,13 @@
           toast('Produit en rupture de stock', 'error');
           return;
         }
-        openPayModal([{ key: product.id || product.slug, title: product.title, price: product.price, qty: 1, paymentLink: product.paymentLink || '' }]);
+        openPayModal([{ key: activeProduct.id || activeProduct.slug, title: activeProduct.title, price: activeProduct.price, qty: 1, paymentLink: activeProduct.paymentLink || '' }]);
       };
     }
 
     // WhatsApp link — territory-aware message
     if (dom.pdpWa) {
-      dom.pdpWa.href = waLink(waProductMessage(product, _currentTerritory));
+      dom.pdpWa.href = waLink(waProductMessage(activeProduct, _currentTerritory));
       dom.pdpWa.target = '_blank';
       // onclick (et non addEventListener) : remplace le handler à chaque
       // renderPDP au lieu d'en empiler un par produit visité (sinon N events

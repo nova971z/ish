@@ -33,7 +33,7 @@
   <link rel="dns-prefetch" href="https://js.stripe.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=390">
+  <link rel="stylesheet" href="styles.css?v=391">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -412,6 +412,10 @@
         <div class="pdp-hero__info" id="pdpHeroInfo">
           <h1 id="pdpTitle" class="pdp-hero__title" tabindex="-1">Produit</h1>
           <div id="pdpPrice" class="pdp-hero__price"></div>
+          <!-- Variante Solo/Coffret : switch conditionnement (masqué si le produit
+               n'a pas de variante). Chaque segment porte son prix (« sans coffret »
+               / « avec coffret ») → sert à la fois de bouton et d'écriteau. -->
+          <div id="pdpVariant" class="pdp-variant" hidden></div>
         </div>
         <div class="pdp-hero__scroll-hint" id="pdpScrollHint">
           <span>Découvrir</span>
@@ -1605,7 +1609,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=390"></script>
+  <script defer src="app.js?v=391"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->
