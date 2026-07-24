@@ -171,7 +171,7 @@ restyle `#comptaPrintable` en clair. **Les 2 imprimables ne se chevauchent pas**
 
 | Endpoint | Méthode | Auth | Rôle |
 |---|---|---|---|
-| **`admin.js`** (498 l.) | GET/POST/DELETE | `requireAdmin` | Hub admin. GET `?type=` : orders, stats, clients, pricing-config, **accounting**, invoice-config, invoices, **invoice** (`&id=`), charges, overrides. POST : **price-watch** (traqueur), pricing-config, price-preview, **reprice-all**, charge, invoice-config, override. DELETE : charge, override. Garde-fous prix `PW` (357). |
+| **`admin.js`** | GET/POST/DELETE | `requireAdmin` | Hub admin. GET `?type=` : orders, stats, clients, pricing-config, **accounting**, invoice-config, invoices, **invoice** (`&id=`), charges, **margins** (marge nette live via `marginAt`), overrides. POST : **price-watch** (traqueur), pricing-config, price-preview, **reprice-all**, charge, invoice-config, override. DELETE : charge, override. Garde-fous prix `PW`. ⚠️ `pwComputePrice` applique le modèle SAUF si `autoPrice === false`. |
 | **`webhook.js`** (698 l.) | POST | Signature Stripe | Confirme paiement. `handleSessionCompleted` (144), **`handleIntentSucceeded`** (197 : rebuildLines, frais Stripe réels, **`assignInvoiceNumber`** 341, facture email), `handleIntentFailed` (304). `rebuildLines` (414, **snapshote cogs + brand par ligne**). Idempotence via `stripe_events`. Corps BRUT (bodyParser off). |
 | `create-payment-intent.js` (191 l.) | POST | public + `verifyUid` | PaymentIntent Elements. **Territoire depuis CODE POSTAL seul** (H3). Prix serveur. Remise fidélité. Lignes → metadata. |
 | `checkout.js` (153 l.) | POST | public + `verifyUid` | Checkout Session (repli). Prix serveur. Coupon fidélité. `shipping_address_collection`. |
@@ -196,7 +196,7 @@ restyle `#comptaPrintable` en clair. **Les 2 imprimables ne se chevauchent pas**
 | `stripe-meta.js` | PUR | `chunkItems`/`readItems` (lignes dans metadata Stripe ; limites CHUNK 450, MAX 40). |
 | `ratelimit.js` | Firestore | `allow(bucket,key,max,windowSec)` fenêtre fixe, **fail-open**, IP hachée (`x-real-ip`). |
 | `loyalty.js` | Firestore | **`TIERS`** (mirror app.js, gardé par check-loyalty), `verifiedSpendCents` (somme `payments`), `quote`. |
-| **`pricing-model.js`** | PUR | Moteur marge cible (net 15% après IS). **`DEFAULT_CONFIG`** (lettre/heavyKg/colissimo/container). `recommend`, `solveMarkup`. |
+| **`pricing-model.js`** | PUR | Moteur marge cible (net 15% après IS). **`DEFAULT_CONFIG`** (lettre/heavyKg/colissimo/container). `recommend` (prix reco), **`marginAt`** (marge à un prix DONNÉ — audit prix actuel), `shipFor` (choix envoi factorisé), `solveMarkup`, `evaluate`. |
 | `pricing-config.js` | Firestore | `config/pricing` (allowlist, cache 30s), `sanitize`, `save`. |
 | **`accounting.js`** | PUR | `synthesize` (compte de résultat réel), **`brandStats`** (ventes/marque), `computeIS` (15%/25%). |
 | **`invoice.js`** | PUR | `buildInvoice`, `renderHtml` (facture A4). 2 régimes (TVA / franchise 293 B). `DEFAULT_SELLER`. |
