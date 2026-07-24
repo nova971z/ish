@@ -4556,7 +4556,7 @@
     "category": "Tarières",
     "tag": "Nouveau",
     "desc": "Tarière sans fil 36 V LXT (2x18V) brushless.",
-    "img": "images/placeholder.svg",
+    "img": "images/posters/ddg461z.webp",
     "price": 595.04,
     "currency": "EUR",
     "vat": 0.2,
@@ -4565,7 +4565,7 @@
     "stock_label": "En stock",
     "model": "",
     "paymentLink": "",
-    "weight_kg": 4.2,
+    "weight_kg": 6.2,
     "ncCategory": "power_tool",
     "productType": "pro",
     "tags": [
@@ -4579,8 +4579,21 @@
       "Robuste et endurant, pensé pour un usage professionnel intensif",
       "Idéal pour les chantiers des Antilles / DOM-TOM"
     ],
-    "specs": {},
-    "description_long": "Tarière sans fil 36 V LXT (2x18V) brushless. Outil professionnel Makita de la gamme 36V LXT sans fil (moteur brushless). Vendu en machine seule (sans batterie ni chargeur). Compatible avec les batteries Makita LXT. Fiche technique détaillée à compléter. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "specs": {
+      "Tension": "36 V (2 × 18 V) LXT Li-Ion",
+      "Batteries compatibles": "Gamme Makita LXT 18 V",
+      "Puissance absorbée": "1350 W",
+      "Moteur": "Brushless (sans charbon)",
+      "Vitesses": "2 vitesses mécaniques",
+      "Vitesse à vide": "0-350 / 0-1400 tr/min",
+      "Couple de calage": "136 Nm",
+      "Niveau de pression acoustique (LpA)": "84 dB(A) — K=3,0",
+      "Niveau de puissance acoustique (LwA)": "95 dB(A)",
+      "Vibrations": "2,5 m/s² — K=1,5",
+      "Poids (EPTA)": "6,2 kg",
+      "Dimensions (L×l×H)": "840 × 607 × 223 mm"
+    },
+    "description_long": "Tarière sans fil 36 V LXT (2 × 18 V) brushless. Outil professionnel Makita de la gamme 36V LXT sans fil (moteur brushless haut rendement, 1350 W). 2 vitesses (0-350 / 0-1400 tr/min), couple de calage 136 Nm. Idéale pour les travaux de forage dans divers sols. Vendue en machine seule (sans batterie ni chargeur), compatible avec les batteries Makita 18V LXT. Poids 6,2 kg (EPTA). Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
   },
   {
     "id": "makita-dga506z",
