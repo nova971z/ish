@@ -6106,10 +6106,28 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .compta-print-head, .compta-print-note { display: none; }
 .compta-print-note { font-size: .8rem; color: rgba(255,255,255,.6); margin-top: 10px; }
 
+/* Facture imprimable (écran = carte sombre ; impression = A4 blanc) */
+.pt-invoice { background: #fff; color: #14181f; border-radius: 10px; padding: 18px; margin-top: 10px; font-size: 13px; line-height: 1.5; }
+.pt-invoice h1 { font-size: 22px; margin: 0; color: #6d28d9; letter-spacing: .02em; }
+.pt-inv-head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #6d28d9; padding-bottom: 8px; }
+.pt-inv-logo { font-weight: 800; color: #6d28d9; font-size: 16px; }
+.pt-inv-parties { display: flex; gap: 20px; flex-wrap: wrap; margin: 14px 0; }
+.pt-inv-party { flex: 1 1 45%; font-size: 12.5px; }
+.pt-inv-lines { width: 100%; border-collapse: collapse; margin: 8px 0; }
+.pt-inv-lines th, .pt-inv-lines td { border-bottom: 1px solid #e3e3ee; padding: 6px 8px; text-align: left; }
+.pt-inv-lines th { background: #f3f0fb; color: #3a2a66; font-size: 11px; text-transform: uppercase; }
+.pt-inv-lines .n, .pt-inv-tot .n { text-align: right; font-variant-numeric: tabular-nums; }
+.pt-inv-tot { margin-left: auto; border-collapse: collapse; min-width: 220px; }
+.pt-inv-tot td { padding: 5px 8px; }
+.pt-inv-tot .tot td { font-weight: 800; font-size: 15px; border-top: 2px solid #6d28d9; }
+.pt-inv-notes { margin-top: 14px; font-size: 10.5px; color: #555; }
+.pt-inv-notes p { margin: 3px 0; }
+
 /* Impression → PDF (iPad : Partager → Enregistrer dans Fichiers en PDF) */
 @media print {
   body * { visibility: hidden !important; }
-  #comptaPrintable, #comptaPrintable * { visibility: visible !important; }
+  #comptaPrintable, #comptaPrintable *, #ptInvoice, #ptInvoice * { visibility: visible !important; }
+  #ptInvoice { position: absolute; left: 0; top: 0; width: 100%; }
   #comptaPrintable {
     position: absolute; left: 0; top: 0; width: 100%;
     background: #fff !important; color: #111 !important; padding: 8mm;

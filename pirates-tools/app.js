@@ -6685,6 +6685,92 @@
     });
   }
 
+  // ── Factures (admin) : identité vendeur + génération / impression ──────────
+  function renderAdminInvoices() {
+    var el = document.getElementById('adminInvoicesBody');
+    if (!el) return;
+    el.innerHTML = '<p class="admin-loading">Chargement…</p>';
+    Promise.all([adminGet('invoice-config'), adminGet('invoices')]).then(function (res) {
+      comptaBuildInvoices(el, res[0].seller || {}, res[1].invoices || []);
+    }).catch(function (e) {
+      el.innerHTML = '<p class="admin-error">Factures indisponibles : ' + escapeHTML(e.message)
+        + '<br><span class="admin-hint">(nécessite FIREBASE_SERVICE_ACCOUNT sur Vercel)</span></p>';
+    });
+  }
+
+  function comptaBuildInvoices(el, s, list) {
+    function v(x) { return escapeHTML(x || ''); }
+    var incomplete = !(s.raisonSociale && s.adresse && s.siret);
+    var html = '';
+    html += '<p class="admin-hint">Tes <b>factures conformes</b> (normes FR) : renseigne ton identité une fois, elles se génèrent ensuite pour chaque vente. Imprime-les pour le colis, ou elles partent par email au client.</p>';
+    if (incomplete) {
+      html += '<div class="fisc-card" style="border-color:rgba(245,158,11,.5);background:rgba(245,158,11,.07)"><h3>⚠️ Identité à compléter</h3><p class="fisc-line">Renseigne les champs ci-dessous <b>quand ta société sera créée</b> (raison sociale, SIRET, adresse…). En attendant, les factures affichent [À COMPLÉTER] — c\'est normal.</p></div>';
+    }
+
+    // Formulaire identité vendeur
+    html += '<h2 class="admin-subtitle">🏢 Identité de l\'entreprise (sur les factures)</h2>';
+    html += '<div class="compta-card"><div class="compta-cfg-grid">'
+      + '<label>Raison sociale<input id="invRS" value="' + v(s.raisonSociale) + '"></label>'
+      + '<label>Forme juridique<input id="invForme" value="' + v(s.formeJuridique || 'SASU') + '"></label>'
+      + '<label>Capital<input id="invCap" placeholder="ex. 1 000 €" value="' + v(s.capital) + '"></label>'
+      + '<label>SIRET<input id="invSiret" value="' + v(s.siret) + '"></label>'
+      + '<label>RCS (ville)<input id="invRcs" value="' + v(s.rcs) + '"></label>'
+      + '<label>N° TVA intracom.<input id="invTva" value="' + v(s.tvaIntra) + '"></label>'
+      + '<label>Email<input id="invEmail" value="' + v(s.email) + '"></label>'
+      + '<label>Téléphone<input id="invTel" value="' + v(s.tel) + '"></label>'
+      + '</div>'
+      + '<label>Adresse du siège<input id="invAddr" value="' + v(s.adresse) + '"></label>'
+      + '<label>Médiateur de la consommation<input id="invMed" placeholder="nom + coordonnées" value="' + v(s.mediateur) + '"></label>'
+      + '<label class="compta-toggle" style="margin-top:8px"><input type="checkbox" id="invFranchise"' + (s.franchise ? ' checked' : '') + '> <span>Franchise en base de TVA (je ne facture PAS la TVA)</span></label>'
+      + '<div class="compta-actions"><button type="button" class="btn primary" id="invSave">💾 Enregistrer l\'identité</button></div></div>';
+
+    // Liste des factures
+    html += '<h2 class="admin-subtitle">🧾 Factures émises</h2>';
+    if (!list.length) {
+      html += '<p class="compta-line" style="opacity:.7">Aucune facture pour l\'instant. Elles apparaîtront ici après chaque vente payée.</p>';
+    } else {
+      html += '<table class="compta-table"><tr><th>N°</th><th>Date</th><th>Client</th><th class="compta-num">Montant</th><th></th></tr>';
+      list.forEach(function (f) {
+        var dt = f.recordedAtMs ? new Date(f.recordedAtMs).toLocaleDateString('fr-FR') : '';
+        html += '<tr><td>' + v(f.invoiceNumber || '—') + '</td><td>' + dt + '</td>'
+          + '<td>' + v(f.customerName || f.customerEmail) + '</td>'
+          + '<td class="compta-num">' + ((f.amountCents || 0) / 100).toFixed(2) + ' €</td>'
+          + '<td><button type="button" class="btn btn--ghost inv-view" data-id="' + v(f.id) + '">Voir</button></td></tr>';
+      });
+      html += '</table>';
+    }
+    html += '<div id="invoiceView"></div>';
+    el.innerHTML = html;
+
+    document.getElementById('invSave').onclick = function () {
+      var btn = this; btn.disabled = true;
+      adminPostType('invoice-config', {
+        raisonSociale: document.getElementById('invRS').value, formeJuridique: document.getElementById('invForme').value,
+        capital: document.getElementById('invCap').value, siret: document.getElementById('invSiret').value,
+        rcs: document.getElementById('invRcs').value, tvaIntra: document.getElementById('invTva').value,
+        email: document.getElementById('invEmail').value, tel: document.getElementById('invTel').value,
+        adresse: document.getElementById('invAddr').value, mediateur: document.getElementById('invMed').value,
+        franchise: document.getElementById('invFranchise').checked
+      }).then(function () { toast('Identité enregistrée', 'success'); btn.disabled = false; })
+        .catch(function (e) { toast('Erreur : ' + e.message, 'error'); btn.disabled = false; });
+    };
+    el.querySelectorAll('.inv-view').forEach(function (b) {
+      b.onclick = function () {
+        var view = document.getElementById('invoiceView');
+        view.innerHTML = '<p class="admin-loading">Génération…</p>';
+        var id = b.getAttribute('data-id');
+        adminAuthHeaders().then(function (h) {
+          return fetch(apiBaseUrl() + '/api/admin?type=invoice&id=' + encodeURIComponent(id), { method: 'GET', headers: h });
+        }).then(function (r) { return r.json(); }).then(function (data) {
+          if (!data.ok) throw new Error(data.error || 'erreur');
+          view.innerHTML = '<div class="compta-actions" style="margin:12px 0"><button type="button" class="btn primary" id="invPrint">🖨️ Imprimer / PDF</button></div>' + (data.html || '');
+          var pb = document.getElementById('invPrint');
+          if (pb) pb.onclick = function () { window.print(); };
+        }).catch(function (e) { view.innerHTML = '<p class="admin-error">Erreur : ' + escapeHTML(e.message) + '</p>'; });
+      };
+    });
+  }
+
   function renderAdmin() {
     var view = document.getElementById('adminView');
     if (!view) return;
@@ -6723,6 +6809,7 @@
       + '<button type="button" class="admin-tab is-active" data-admin-tab="products" role="tab" aria-selected="true">Produits</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="compta" role="tab" aria-selected="false">Comptabilité</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="fisc" role="tab" aria-selected="false">Fiscalité</button>'
+      + '<button type="button" class="admin-tab" data-admin-tab="invoices" role="tab" aria-selected="false">Factures</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="stats" role="tab" aria-selected="false">Statistiques</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="clients" role="tab" aria-selected="false">Clients</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="orders" role="tab" aria-selected="false">Commandes</button>'
@@ -6741,6 +6828,10 @@
 
       + '<div class="admin-pane" data-admin-pane="fisc" hidden>'
       + '<div id="adminFiscBody"></div>'
+      + '</div>'
+
+      + '<div class="admin-pane" data-admin-pane="invoices" hidden>'
+      + '<div id="adminInvoicesBody"></div>'
       + '</div>'
 
       + '<div class="admin-pane" data-admin-pane="orders" hidden>'
@@ -6889,6 +6980,7 @@
         if (target === 'orders') loadAdminOrders();
         if (target === 'compta') renderAdminCompta();
         if (target === 'fisc') renderAdminFisc();
+        if (target === 'invoices') renderAdminInvoices();
         if (target === 'instagram') initAdminInstagram();
         if (target === 'stats') loadAdminStats();
         if (target === 'clients') loadAdminClients();

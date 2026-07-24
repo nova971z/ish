@@ -232,12 +232,19 @@ async function handleIntentSucceeded(stripe, fb, pi) {
     }
   } catch (feeErr) { console.error('[webhook] Stripe fee lookup failed:', feeErr.message); }
 
+  // Facture : numéro séquentiel + snapshot des lignes et de l'identité client.
+  var invoiceNumber = await assignInvoiceNumber(fb, Date.now());
+  var custName = (pi.shipping && pi.shipping.name) || billing.name || '';
+  var custAddr = formatAddr(piShipAddr || billing.address || null);
+
   await logPayment(fb, pi.id, {
     kind: 'payment_intent',
     status: 'succeeded',
     amountCents: pi.amount != null ? pi.amount : null,
     currency: (pi.currency || 'eur').toUpperCase(),
     customerEmail: customerEmail,
+    customerName: custName,
+    customerAddress: custAddr,
     paymentIntentId: pi.id,
     uid: piUid,
     territoryDeclared: declaredTerritory,
@@ -247,7 +254,11 @@ async function handleIntentSucceeded(stripe, fb, pi) {
     linesRebuilt: rebuilt.ok,
     // Compta 100 % réel : coût d'achat snapshoté + commission Stripe réelle.
     cogsHtCents: (rebuilt.cogsHtCents != null ? rebuilt.cogsHtCents : null),
-    stripeFeeCents: stripeFeeCents
+    stripeFeeCents: stripeFeeCents,
+    // Facture : détail des lignes + numéro + date, pour générer la facture conforme.
+    linesDetail: (rebuilt.lines || []).map(function (l) { return { name: l.name, qty: l.qty, unitCents: l.unitCents }; }),
+    invoiceNumber: invoiceNumber,
+    invoiceDateMs: Date.now()
   });
 
   // Le client écrit sa commande avec paymentIntentId sur /merci (A5). Selon la
@@ -299,6 +310,34 @@ function taxCheck(declaredTerritory, address) {
     expectedTerritory: expected,
     mismatch: !!(expected && declaredTerritory && expected !== declaredTerritory)
   };
+}
+
+// Numéro de facture séquentiel, sans trou (compteur transactionnel Firestore).
+// Format Fyyyy-NNNN. Best-effort : jamais bloquant pour le paiement.
+async function assignInvoiceNumber(fb, dateMs) {
+  if (!fb.db) return null;
+  try {
+    var year = new Date(dateMs || Date.now()).getUTCFullYear();
+    var ref = fb.db.collection('config').doc('invoiceCounter');
+    var num = await fb.db.runTransaction(async function (t) {
+      var snap = await t.get(ref);
+      var data = snap.exists ? (snap.data() || {}) : {};
+      var seq = (data['seq_' + year] || 0) + 1;
+      var patch = {}; patch['seq_' + year] = seq;
+      t.set(ref, patch, { merge: true });
+      return seq;
+    });
+    return 'F' + year + '-' + ('0000' + num).slice(-4);
+  } catch (e) {
+    console.error('[webhook] invoice number failed:', e.message);
+    return null;
+  }
+}
+
+function formatAddr(a) {
+  if (!a) return '';
+  return [a.line1, a.line2, [a.postal_code, a.city].filter(Boolean).join(' '), a.country]
+    .filter(Boolean).join(', ');
 }
 
 // A2 — journal Firestore payments/{stripeId}. Best-effort : ne jette jamais

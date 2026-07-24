@@ -136,6 +136,47 @@ module.exports = async function handler(req, res) {
         return res.status(200).json({ ok: true, accounting: accounting.synthesize(payments, charges, cfg), charges: charges });
       }
 
+      // ── Identité vendeur pour les factures ─────────────────────
+      if (type === 'invoice-config') {
+        const invoice = require('./_lib/invoice');
+        const doc = await db.collection('config').doc('invoice').get();
+        const seller = Object.assign({}, invoice.DEFAULT_SELLER, doc.exists ? doc.data() : {});
+        return res.status(200).json({ ok: true, seller: seller });
+      }
+
+      // ── Liste des factures (paiements réussis) ─────────────────
+      if (type === 'invoices') {
+        const snap = await db.collection('payments').get();
+        const list = [];
+        snap.forEach((doc) => {
+          const d = doc.data() || {};
+          if (d.status !== 'succeeded') return;
+          list.push({
+            id: doc.id, invoiceNumber: d.invoiceNumber || null,
+            amountCents: d.amountCents || 0, customerEmail: d.customerEmail || '',
+            customerName: d.customerName || '',
+            recordedAtMs: d.recordedAt && d.recordedAt.toMillis ? d.recordedAt.toMillis() : (d.invoiceDateMs || null)
+          });
+        });
+        list.sort((a, b) => (b.recordedAtMs || 0) - (a.recordedAtMs || 0));
+        return res.status(200).json({ ok: true, invoices: list });
+      }
+
+      // ── Génère la facture (HTML imprimable) d'un paiement ──────
+      if (type === 'invoice') {
+        const invoice = require('./_lib/invoice');
+        const id = (req.query && req.query.id) || '';
+        if (!id) return res.status(400).json({ ok: false, error: 'id manquant' });
+        const doc = await db.collection('payments').doc(String(id)).get();
+        if (!doc.exists) return res.status(404).json({ ok: false, error: 'paiement introuvable' });
+        const p = doc.data() || {};
+        const cfgDoc = await db.collection('config').doc('invoice').get();
+        const seller = Object.assign({}, invoice.DEFAULT_SELLER, cfgDoc.exists ? cfgDoc.data() : {});
+        const payment = Object.assign({}, p, { recordedAtMs: p.recordedAt && p.recordedAt.toMillis ? p.recordedAt.toMillis() : (p.invoiceDateMs || null) });
+        const built = invoice.buildInvoice(payment, seller);
+        return res.status(200).json({ ok: true, html: invoice.renderHtml(built), number: built.number });
+      }
+
       // ── Liste des charges saisies ──────────────────────────────
       if (type === 'charges') {
         const chSnap = await db.collection('charges').orderBy('dateMs', 'desc').limit(500).get().catch(() => db.collection('charges').limit(500).get());
@@ -218,6 +259,22 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ ok: true, id: ref.id, charge: doc });
     } catch (err) {
       return res.status(500).json({ ok: false, error: 'Enregistrement charge échoué' });
+    }
+  }
+
+  // ── POST ?type=invoice-config : identité vendeur (factures) ──
+  if (req.method === 'POST' && ((req.query && req.query.type) === 'invoice-config')) {
+    try {
+      const b = req.body || {};
+      const FIELDS = ['raisonSociale', 'formeJuridique', 'capital', 'adresse', 'siret', 'rcs', 'tvaIntra', 'email', 'tel', 'mediateur'];
+      const patch = {};
+      FIELDS.forEach((k) => { if (b[k] !== undefined) patch[k] = String(b[k]).slice(0, 200); });
+      if (b.franchise !== undefined) patch.franchise = !!b.franchise;
+      if (Object.keys(patch).length === 0) return res.status(400).json({ ok: false, error: 'Aucun champ' });
+      await db.collection('config').doc('invoice').set(patch, { merge: true });
+      return res.status(200).json({ ok: true });
+    } catch (err) {
+      return res.status(500).json({ ok: false, error: 'Sauvegarde échouée' });
     }
   }
 
