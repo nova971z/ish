@@ -8,7 +8,11 @@
 > 2. **cotébrico** → la page marque, tous les produits sur UNE page (GET).
 > 3. **POST** → `…/api/admin?type=price-watch&brand=…` : Méthode **POST**, Corps
 >    **JSON**, champ **`text`** = variable **« Contenu de l'URL »** (la ligne
->    cotébrico juste au-dessus).
+>    cotébrico juste au-dessus). **En-tête obligatoire** (section « En-têtes ») :
+>    Clé = **`x-admin-secret`**, Valeur = **ta clé `ADMIN_SECRET` complète**
+>    (celle définie sur Vercel → Settings → Environment Variables ; JAMAIS écrite
+>    dans le repo). Sans cet en-tête, le serveur renvoie « non autorisé ».
+>    Coller la clé EN ENTIER, sans rien collé en trop autour.
 >
 > ⚠️ NE PAS remettre d'action « Ajouter à Pages » / « Combiner » : c'est ce qui
 > déclenchait le blocage « contenu web » d'iOS. Le contenu cotébrico va DIRECT
