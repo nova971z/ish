@@ -5930,7 +5930,14 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   gap: .5rem;
   border-bottom: 1px solid rgba(var(--accent-rgb), 0.2);
   margin: 0 0 1.5rem;
+  /* Trop d'onglets pour la largeur (mobile/iPad) → défilement horizontal au
+     lieu d'un débordement hors-zone (« Instagram » coupé). Swipe sur tactile. */
+  overflow-x: auto;
+  flex-wrap: nowrap;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;            /* Firefox : barre masquée (on swipe) */
 }
+.admin-tabs::-webkit-scrollbar { height: 0; }   /* WebKit/iOS : barre masquée */
 
 .admin-tab {
   background: transparent;
@@ -5944,6 +5951,8 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
   transition: color .2s, border-color .2s;
+  flex: 0 0 auto;                   /* jamais rétréci → libellé entier, pas coupé */
+  white-space: nowrap;
 }
 
 .admin-tab:hover { color: #e6edf5; }

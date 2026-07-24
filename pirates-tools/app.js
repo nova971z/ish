@@ -7137,6 +7137,8 @@
     tabs.forEach(function (tab) {
       tab.addEventListener('click', function () {
         var target = tab.getAttribute('data-admin-tab');
+        // Barre d'onglets défilante : ramène l'onglet cliqué dans la zone visible.
+        try { tab.scrollIntoView({ inline: 'center', block: 'nearest' }); } catch (_) {}
         tabs.forEach(function (t) {
           var active = t === tab;
           t.classList.toggle('is-active', active);
