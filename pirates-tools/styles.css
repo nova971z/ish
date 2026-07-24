@@ -6066,6 +6066,20 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   color: rgba(255,255,255,.75); font-size: .82rem; line-height: 1.45;
   white-space: pre-wrap; word-break: break-word; max-height: 200px; overflow: auto;
 }
+.compta-cfg-grid { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; margin: 8px 0; }
+@media (min-width: 560px) { .compta-cfg-grid { grid-template-columns: 1fr 1fr 1fr; } }
+.compta-cfg-grid label, .compta-cfg-row label { display: flex; flex-direction: column; gap: 4px; font-size: .8rem; color: var(--accent-soft); font-weight: 700; }
+.compta-cfg-grid input, .compta-cfg-grid select { background: rgba(0,0,0,.3); border: 1px solid rgba(var(--accent-rgb),0.3); color: #fff; border-radius: 9px; padding: 10px; font-size: 16px; }
+.compta-toggle { display: flex; align-items: center; gap: 10px; font-size: .95rem; color: #fff; font-weight: 600; }
+.compta-toggle input { width: 22px; height: 22px; }
+.compta-hr { border: none; border-top: 1px solid rgba(var(--accent-rgb),0.2); margin: 16px 0; }
+.compta-calc-out { margin-top: 10px; }
+.compta-res__price { font-size: 1.6rem; font-weight: 800; color: #fff; }
+.compta-res__price small { font-size: .72rem; color: var(--mut, #98a); font-weight: 500; }
+.compta-res__brk { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 6px; font-size: .84rem; color: rgba(255,255,255,.8); }
+.compta-res__net { color: #34d399; font-weight: 700; }
+.compta-sample { font-size: .84rem; color: rgba(255,255,255,.85); margin: 6px 0; padding-left: 1.2rem; }
+.compta-sample li { margin: 3px 0; }
 
 .admin-tools-form {
   display: flex;

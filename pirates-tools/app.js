@@ -5768,6 +5768,21 @@
     });
   }
 
+  // POST /api/admin?type=… (authentifié). Renvoie le JSON validé.
+  function adminPostType(type, body) {
+    var apiBase = apiBaseUrl();
+    return adminAuthHeaders({ 'Content-Type': 'application/json' }).then(function (headers) {
+      return fetch(apiBase + '/api/admin?type=' + encodeURIComponent(type), {
+        method: 'POST', headers: headers, body: JSON.stringify(body || {})
+      });
+    }).then(function (r) {
+      return r.json().then(function (data) {
+        if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
+        return data;
+      });
+    });
+  }
+
   // ── Dashboard : Statistiques ───────────────────────────────
   var _adminStatsLoaded = false;
   function loadAdminStats(force) {
@@ -6274,7 +6289,11 @@
     var now = Date.now();
     var html = '';
 
-    html += '<p class="admin-hint">Ta page pour <b>demander les devis transport</b> et <b>garder les taxes à jour</b>. Tout est pré-écrit : tu cliques, tu copies, tu colles. Une chose à la fois. 👍</p>';
+    html += '<p class="admin-hint">Ta page pour <b>calculer tes prix</b>, <b>demander les devis transport</b> et <b>garder les taxes à jour</b>. Tout est pré-écrit : tu cliques, tu copies, tu colles. Une chose à la fois. 👍</p>';
+
+    // ── Bloc 0 : calculateur & prix automatiques (rempli après chargement config) ─
+    html += '<h2 class="admin-subtitle">🧮 Calculateur &amp; prix automatiques</h2>';
+    html += '<div id="comptaCalc"><p class="admin-loading">Chargement de la config…</p></div>';
 
     // ── Bloc 1 : demander un devis ─────────────────────────────
     html += '<h2 class="admin-subtitle">📦 Demander un devis transport</h2>';
@@ -6333,6 +6352,111 @@
         renderAdminCompta();
       });
     });
+
+    comptaLoadCalc();
+  }
+
+  // Charge la config serveur puis construit le calculateur + prix automatiques.
+  function comptaLoadCalc() {
+    var box = document.getElementById('comptaCalc');
+    if (!box) return;
+    adminGet('pricing-config').then(function (data) {
+      comptaRenderCalc(box, data.config || {});
+    }).catch(function (e) {
+      box.innerHTML = '<p class="admin-error">Config indisponible : ' + escapeHTML(e.message)
+        + '<br><span class="admin-hint">(nécessite FIREBASE_SERVICE_ACCOUNT sur Vercel)</span></p>';
+    });
+  }
+
+  function comptaRenderCalc(box, cfg) {
+    var mode = cfg.mode || 'colissimo';
+    var auto = cfg.autoPrice !== false;
+    var pct = function (v) { return Math.round((Number(v) || 0) * 1000) / 10; };
+    box.innerHTML =
+      '<div class="compta-card">'
+      + '<div class="compta-cfg-row">'
+      + '<label class="compta-toggle"><input type="checkbox" id="cfgAuto"' + (auto ? ' checked' : '') + '> <span>Prix automatiques (le site calcule les prix tout seul)</span></label>'
+      + '</div>'
+      + '<div class="compta-cfg-grid">'
+      + '<label>Mode d\'expédition<select id="cfgMode"><option value="colissimo"' + (mode === 'colissimo' ? ' selected' : '') + '>Colissimo (démarrage)</option><option value="container"' + (mode === 'container' ? ' selected' : '') + '>Container (prix baissés)</option></select></label>'
+      + '<label>Marge nette cible (%)<input type="number" id="cfgTarget" step="0.5" value="' + pct(cfg.targetNet) + '"></label>'
+      + '<label>IS (%)<input type="number" id="cfgIS" step="0.5" value="' + pct(cfg.is) + '"></label>'
+      + '</div>'
+      + '<div class="compta-actions"><button type="button" class="btn primary" id="cfgSave">💾 Enregistrer la config</button></div>'
+      + '<hr class="compta-hr">'
+      + '<h3 class="compta-card__title" style="margin-top:.4rem">Tester un prix</h3>'
+      + '<div class="compta-cfg-grid">'
+      + '<label>Coût TTC cotébrico (€)<input type="number" id="calcCost" step="0.01" value="84.90"></label>'
+      + '<label>Poids nu (kg)<input type="number" id="calcWeight" step="0.1" value="1.6"></label>'
+      + '</div>'
+      + '<div class="compta-actions"><button type="button" class="btn btn--ghost" id="calcRun">Calculer le prix conseillé</button></div>'
+      + '<div id="calcOut" class="compta-calc-out"></div>'
+      + '<hr class="compta-hr">'
+      + '<h3 class="compta-card__title">Appliquer à tout le catalogue</h3>'
+      + '<p class="compta-line">Recalcule tous les prix depuis la config ci-dessus. On te montre d\'abord ce qui change, tu confirmes ensuite.</p>'
+      + '<div class="compta-actions">'
+      + '<button type="button" class="btn btn--ghost" id="repriceDry">👀 Voir ce qui changerait</button>'
+      + '<button type="button" class="btn primary" id="repriceGo" disabled>✅ Appliquer les nouveaux prix</button>'
+      + '</div>'
+      + '<div id="repriceOut" class="compta-calc-out"></div>'
+      + '</div>';
+
+    document.getElementById('cfgSave').onclick = function () {
+      var btn = this; btn.disabled = true;
+      adminPostType('pricing-config', {
+        autoPrice: document.getElementById('cfgAuto').checked,
+        mode: document.getElementById('cfgMode').value,
+        targetNet: (parseFloat(document.getElementById('cfgTarget').value) || 15) / 100,
+        is: (parseFloat(document.getElementById('cfgIS').value) || 15) / 100
+      }).then(function () { toast('Config enregistrée', 'success'); btn.disabled = false; })
+        .catch(function (e) { toast('Erreur : ' + e.message, 'error'); btn.disabled = false; });
+    };
+
+    document.getElementById('calcRun').onclick = function () {
+      var out = document.getElementById('calcOut');
+      out.innerHTML = '<p class="admin-loading">Calcul…</p>';
+      adminPostType('price-preview', {
+        costTTC: parseFloat(document.getElementById('calcCost').value) || 0,
+        weight: parseFloat(document.getElementById('calcWeight').value) || 2,
+        mode: document.getElementById('cfgMode').value
+      }).then(function (data) {
+        var r = data.result;
+        if (!r) { out.innerHTML = '<p class="admin-error">Pas de résultat</p>'; return; }
+        out.innerHTML = '<div class="compta-res">'
+          + '<div class="compta-res__price">' + r.ttc.toFixed(0) + ' € <small>prix client (tout compris)</small></div>'
+          + '<div class="compta-res__brk">'
+          + '<span>Markup : <b>' + Math.round(r.markup * 100) + ' %</b></span>'
+          + '<span>Coût HT : ' + r.costHT.toFixed(2) + ' €</span>'
+          + '<span>Transport : ' + r.transport.toFixed(2) + ' €</span>'
+          + '<span>Octroi payé : ' + r.octroiPaid.toFixed(2) + ' €</span>'
+          + '<span class="compta-res__net">Net après IS : ' + r.netAfterIS.toFixed(2) + ' € (' + Math.round(r.marginAfterIS * 100) + ' %)</span>'
+          + '</div></div>';
+      }).catch(function (e) { out.innerHTML = '<p class="admin-error">Erreur : ' + escapeHTML(e.message) + '</p>'; });
+    };
+
+    var repriceOut = document.getElementById('repriceOut');
+    document.getElementById('repriceDry').onclick = function () {
+      repriceOut.innerHTML = '<p class="admin-loading">Analyse…</p>';
+      adminPostType('reprice-all', { dryRun: true }).then(function (d) {
+        var c = d.counts || {};
+        var sample = (d.changed || []).slice(0, 8).map(function (x) {
+          return '<li>' + escapeHTML(x.name || x.sku) + ' : ' + (x.oldPrice != null ? x.oldPrice + ' €' : '—') + ' → <b>' + x.newPrice + ' €</b></li>';
+        }).join('');
+        repriceOut.innerHTML = '<p><b>' + c.changed + '</b> prix changeraient sur ' + c.total + ' produits (mode ' + d.mode + '). '
+          + (c.skipped ? c.skipped + ' ignorés (coût inconnu).' : '') + '</p>'
+          + (sample ? '<ul class="compta-sample">' + sample + '</ul>' : '')
+          + '<p class="admin-hint">Vérifie que ça te va, puis clique « Appliquer ».</p>';
+        document.getElementById('repriceGo').disabled = (c.changed === 0);
+      }).catch(function (e) { repriceOut.innerHTML = '<p class="admin-error">Erreur : ' + escapeHTML(e.message) + '</p>'; });
+    };
+    document.getElementById('repriceGo').onclick = function () {
+      var btn = this; btn.disabled = true;
+      repriceOut.innerHTML = '<p class="admin-loading">Application…</p>';
+      adminPostType('reprice-all', { dryRun: false }).then(function (d) {
+        toast((d.counts.changed) + ' prix mis à jour', 'success');
+        repriceOut.innerHTML = '<p>✅ <b>' + d.counts.changed + '</b> prix mis à jour. Visibles en production sous ~30 s (cache).</p>';
+      }).catch(function (e) { repriceOut.innerHTML = '<p class="admin-error">Erreur : ' + escapeHTML(e.message) + '</p>'; btn.disabled = false; });
+    };
   }
 
   function renderAdmin() {
