@@ -19,6 +19,10 @@ coverage/
 .env.*
 !.env.example
 
+# Bac à sable : harnais de vérification jetables (Playwright, rendus, captures).
+# Recréé à chaque session, jamais déployé.
+scratchpad/
+
 # Pages/Actions
 *.zip
 *.tar.gz
