@@ -32,6 +32,17 @@ module.exports = async function handler(req, res) {
   // ── GET : list overrides OR recent orders ────────────────
   if (req.method === 'GET') {
     const type = (req.query && req.query.type) || 'overrides';
+    // FAIL-LOUD : price-watch est POST uniquement (corps JSON {text} + en-tête
+    // x-admin-secret — voir docs/TRAQUEUR-URLS.md). Avant, un GET retombait
+    // SILENCIEUSEMENT sur la liste des overrides → un raccourci iPad mal
+    // configuré (méthode restée GET) « réussissait » sans jamais mettre à jour
+    // un seul prix. Désormais l'erreur est explicite dans la réponse.
+    if (type === 'price-watch') {
+      return res.status(405).json({
+        ok: false,
+        error: 'price-watch = POST uniquement. Raccourci : Méthode POST, Corps JSON { text: <contenu cotébrico> }, en-tête x-admin-secret. Voir docs/TRAQUEUR-URLS.md.'
+      });
+    }
     try {
       if (type === 'orders') {
         // 50 dernières commandes, TOUS clients (collectionGroup).
