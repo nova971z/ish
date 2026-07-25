@@ -5893,6 +5893,8 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .mg-table thead th { position: sticky; top: 0; background: var(--card); z-index: 1; }
 .mg-table th.mg-l, .mg-table td.mg-l { text-align: left; }
 .mg-table td.mg-ship { color: rgba(255,255,255,.55); font-size: .82rem; }
+/* Marqueur « coût estimé » (pas encore relevé par le traqueur) dans Marges. */
+.mg-est { color: #fbbf24; font-weight: 700; cursor: help; }
 .mg-good { color: #34d17a; font-weight: 700; }
 .mg-warn { color: #FEBD17; font-weight: 700; }
 .mg-crit { color: #ff6a54; font-weight: 700; }

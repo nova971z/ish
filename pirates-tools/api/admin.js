@@ -230,6 +230,10 @@ module.exports = async function handler(req, res) {
           rows.push({
             id: p.id, sku: p.sku, brand: p.brand, title: p.title || p.name, category: p.category,
             weight: r.weight, shipKind: r.shipKind, ship: pwRound2(r.transport),
+            // costTTC = TON prix d'achat fournisseur (TTC métropole). SENSIBLE :
+            // ne sort QUE par cet endpoint admin (requireAdmin) — jamais par
+            // /api/products (PRIVATE_FIELDS, gardé par check-catalog-public).
+            costTTC: pwRound2(costTTC),
             priceHt: pwRound2(priceHt), ttc971: pwRound2(r.ttc), costSrc: tracked ? 'traqueur' : 'estimé',
             netEur: pwRound2(r.netAfterIS), marginPct: Math.round(r.marginAfterIS * 1000) / 10, isPack: isPack
           });

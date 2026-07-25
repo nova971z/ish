@@ -6911,8 +6911,12 @@
       + '<button type="button" class="btn btn--ghost" id="mgReload">↻ Recalculer</button>'
       + '</div>';
 
+    // « Mon achat » = coût fournisseur TTC. La donnée n'existe QUE dans la
+    // réponse /api/admin?type=margins (auth admin) — jamais dans le code public
+    // ni dans /api/products (strippé par PRIVATE_FIELDS, gardé par la CI).
     html += '<div class="mg-tablewrap"><table class="compta-table mg-table"><thead><tr>'
-      + '<th class="mg-l">Produit</th><th class="mg-l">Marque</th><th class="compta-num">Prix TTC 971</th>'
+      + '<th class="mg-l">Produit</th><th class="mg-l">Marque</th>'
+      + '<th class="compta-num">Mon achat (TTC)</th><th class="compta-num">Prix TTC 971</th>'
       + '<th class="compta-num">Poids</th><th class="mg-l">Envoi</th><th class="compta-num">Marge %</th><th class="compta-num">Marge €</th>'
       + '</tr></thead><tbody id="mgRows"></tbody></table></div>';
 
@@ -6933,6 +6937,8 @@
         var c = mcls(r.marginPct);
         return '<tr><td class="mg-l">' + (r.isPack ? '<span class="mg-pk">pack</span> ' : '') + escapeHTML(r.title) + '</td>'
           + '<td class="mg-l">' + escapeHTML(r.brand || '') + '</td>'
+          + '<td class="compta-num">' + (r.costTTC != null ? eur2(r.costTTC) : '—')
+          + (r.costSrc === 'estimé' ? ' <span class="mg-est" title="Dérivé du prix (pas encore relevé par le traqueur)">~</span>' : '') + '</td>'
           + '<td class="compta-num">' + eur(r.ttc971) + '</td>'
           + '<td class="compta-num">' + (r.weight || 0) + ' kg</td>'
           + '<td class="mg-l mg-ship">' + escapeHTML(r.shipKind) + '</td>'
