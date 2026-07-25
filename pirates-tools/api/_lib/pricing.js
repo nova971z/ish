@@ -94,9 +94,12 @@ function unitCents(product, territoryCode) {
 // identique. Modifiable ici (tarif La Poste OM à confirmer par l'user).
 // Éligible : machines (ncCategory 'power_tool') uniquement.
 var COFFRET = { petit: 15, gros: 25, heavyKg: 3 };
-// Exclut ce qui n'est pas une machine autonome (batterie/chargeur/accessoire/
-// pack déjà en coffret…). ncCategory sert à l'octroi, pas à ce filtre.
-var COFFRET_DENY = /batterie|chargeur|accessoire|rangement|lame|foret|consommable|coffret|mallette|combo|pack/i;
+// Exclut ce qui n'est pas une machine (batterie/chargeur/accessoire/rangement/
+// consommable). Décision user 25/07 : les PACKS/COMBOS ont AUSSI l'option
+// (prix affiché = sans coffret, +15/25 € = surcoût d'envoi si coffret voulu)
+// → 'combo|pack' retirés de la denylist. \b OBLIGATOIRES : sans eux « lame »
+// matchait « Lamelleuses » et privait ces machines du switch (bug corrigé).
+var COFFRET_DENY = /\b(batteries?|chargeurs?|accessoires?|rangements?|lames?|forets?|consommables?|coffrets?|mallettes?)\b/i;
 function coffretEligible(product) {
   return !!(product && product.ncCategory === 'power_tool' && !COFFRET_DENY.test(product.category || ''));
 }
@@ -117,5 +120,6 @@ module.exports = {
   calcPrice: calcPrice,
   unitCents: unitCents,
   coffretEligible: coffretEligible,
-  coffretSurchargeCents: coffretSurchargeCents
+  coffretSurchargeCents: coffretSurchargeCents,
+  COFFRET_DENY: COFFRET_DENY
 };
