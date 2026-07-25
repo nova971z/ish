@@ -228,8 +228,10 @@ Client = soumis aux règles ; serveur (Admin SDK) = bypass.
 (collectionGroup `orders.stripeSessionId` + `.paymentIntentId`) pour le repli
 webhook sur anciens paiements sans uid.
 
-⚠️ **RÈGLES PAS ENCORE DÉPLOYÉES** sur le projet (action user en attente —
-`firebase deploy --only firestore:rules`). Tant que non fait, la protection est théorique.
+✅ **RÈGLES DÉPLOYÉES** le 25/07/2026 (~20h) par l'user via la console iPad
+(contenu 58 lignes vérifié sur capture, incluant `partners` Phase 2). Les
+règles LIVE = ce fichier firestore.rules. Si le fichier évolue → re-publier
+(console Firebase → Firestore → Règles → coller → Publier).
 
 ---
 

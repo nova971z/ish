@@ -24,11 +24,12 @@ LIRE CE FICHIER avant d'ajouter/modifier un produit ou un poster. Cœur des règ
 - Journal des produits validés + prix en attente : voir le fichier REGLES-PRODUITS.md §7.
 
 ## 📌 À FAIRE PLUS TARD (en attente, décidé avec l'user — à traiter ensemble)
-- [ ] **Déployer les règles Firestore** (verrou anti-fraude S1 + crypto désactivé
-      v322 : le fichier firestore.rules est à jour, mais PAS déployé sur le
-      projet). Voie simple iPad = console.firebase.google.com → Firestore →
-      Règles → coller le contenu de firestore.rules → Publier. (CLI impossible
-      côté Claude : pas d'accès au compte Google de l'user, c'est voulu.)
+- [x] **Règles Firestore DÉPLOYÉES ✅ (25/07/2026, ~20h, par l'user via la
+      console iPad)** : contenu complet vérifié sur capture (58 lignes = verrou
+      anti-fraude S1 + crypto désactivé + analytics fermées + `partners`
+      lecture publique Phase 2 + default-deny final). Les règles LIVE = le
+      fichier firestore.rules du repo. Si le fichier change à l'avenir →
+      re-publier via console (même procédure iPad).
 - [ ] **Auth admin mot de passe fort + Google Authenticator (TOTP)** : demandé.
       Nécessite d'activer Identity Platform (console Firebase) + méthode TOTP,
       puis code : écran login admin (email+MDP+défi TOTP+enrôlement QR) et
