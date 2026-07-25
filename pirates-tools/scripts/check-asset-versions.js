@@ -37,8 +37,10 @@ module.exports = function () {
   ok(mJs && mJs[1] === ASSET, 'index.html app.js?v=' + (mJs && mJs[1]) + ' == ASSET_VER ' + ASSET);
 
   // 3) Icônes + manifest dans le HTML → ICON_VER, sans exception
+  // ≥ 4 : manifest + apple-touch + favicon + repli PNG du héros. (Le srcset du
+  // héros est passé en WebP non versionné — 3 réfs PNG en moins, voulu.)
   var iconRefs = html.match(/(?:icons\/icon-\d+\.png|manifest\.webmanifest)\?v=(\d+)/g) || [];
-  ok(iconRefs.length >= 6, 'au moins 6 réfs icônes/manifest versionnées trouvées (' + iconRefs.length + ')');
+  ok(iconRefs.length >= 4, 'au moins 4 réfs icônes/manifest versionnées trouvées (' + iconRefs.length + ')');
   iconRefs.forEach(function (ref) {
     var v = ref.match(/\?v=(\d+)/)[1];
     ok(v === ICON, 'index.html "' + ref + '" == ICON_VER ' + ICON);
