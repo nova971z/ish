@@ -43,10 +43,18 @@
 
 | Tier | Prix/mois | Bon/mois | Bon/an | Remise* | Annuaire |
 |---|---|---|---|---|---|
-| Basique | 4,90 € | 1,90 € | ~23 € | 3 % | carte texte (0 photo) |
-| Pro | 14,90 € | 5,70 € | ~68 € | 5 % | logo + 1 photo |
-| Gold | 29,90 € | 11,40 € | ~137 € | 7 % | 3 photos + lien |
-| Black Partenaire | 100 € | 38 € | 456 € | 10 % (plafond 100 €/mois) | premium 6 photos |
+| Basique | 4,90 € | 1,90 € | ~23 € | — (petits avantages) | carte texte (0 photo) |
+| Pro | 14,90 € | 5,70 € | ~68 € | 2 % | logo + 1 photo |
+| Gold | 29,90 € | 11,40 € | ~137 € | 3 % | 3 photos + lien |
+| Black Partenaire | 100 € | 38 € | 456 € | 5 % (plafond 100 €/mois) | premium 6 photos |
+
+DÉCISION 25/07 (2e passe) : remises abaissées à 0/2/3/5 % — même non
+cumulées, 8-10 % rognaient trop la marge sur ventes (~13 % du TTC). Quand le
+passage en CONTAINER fera baisser les coûts, baisse de prix NON
+proportionnelle prévue pour redonner de l'espace aux remises. DÉGRESSIF
+STRICT : Black contient TOUT ce que les tiers inférieurs ont (container,
+devis chantier — illimités pour Black), et son pack ÉPI + site web sont
+débloqués IMMÉDIATEMENT au premier paiement (précisé sur la page).
 
 *Remises NON CUMULABLES avec la remise fidélité (la plus avantageuse
 s'applique) — décision 25/07 : sans ce verrou, un gros acheteur Platine

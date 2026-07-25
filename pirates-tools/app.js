@@ -3457,12 +3457,11 @@
     basique: {
       name: 'Basique',
       price: '4,90',
-      saving: 140,
+      saving: 25,
       tagline: 'L\'entrée dans le club',
-      desc: 'Un bon d\'achat qui se remplit tous les mois, une vraie remise permanente et l\'accès aux ventes privées. Sans engagement.',
+      desc: 'Un bon d\'achat qui se remplit tous les mois, l\'accès aux ventes privées et un SAV prioritaire. Sans engagement.',
       features: [
         { icon: '💳', text: 'Bon d\'achat +1,90 € chaque mois', detail: 'Crédité à chaque mensualité payée (~23 €/an), cumulable, et il vous reste acquis même si vous arrêtez.' },
-        { icon: '🏷️', text: 'Remise permanente de 3%', detail: 'Sur tout le catalogue, sans minimum d\'achat. Non cumulable avec la remise fidélité : la plus avantageuse s\'applique.' },
         { icon: '🎁', text: 'Ventes privées abonnés', detail: 'Accès aux offres réservées avant tout le monde.' },
         { icon: '📧', text: 'SAV prioritaire sous 48h', detail: 'Votre demande passe devant, réponse garantie sous 48h ouvrées.' },
         { icon: '📇', text: 'Carte dans l\'annuaire artisans', detail: 'Votre entreprise référencée sur notre page « Nos artisans » (carte texte).' }
@@ -3472,12 +3471,12 @@
     pro: {
       name: 'Pro',
       price: '14,90',
-      saving: 270,
+      saving: 150,
       tagline: 'Pour l\'artisan qui commande régulièrement',
-      desc: 'Le bon mensuel plus costaud, 5% de remise permanente et l\'accès aux précommandes container : les prix bateau, réservés aux abonnés.',
+      desc: 'Le bon mensuel plus costaud, 2% de remise permanente et l\'accès aux précommandes container : les prix bateau, réservés aux abonnés.',
       features: [
         { icon: '💳', text: 'Bon d\'achat +5,70 € chaque mois', detail: 'Crédité à chaque mensualité payée (~68 €/an), cumulable, acquis même si vous arrêtez.' },
-        { icon: '🏷️', text: 'Remise permanente de 5%', detail: 'Sur tout le catalogue. Non cumulable avec la remise fidélité : la plus avantageuse s\'applique.' },
+        { icon: '🏷️', text: 'Remise permanente de 2%', detail: 'Sur tout le catalogue. Non cumulable avec la remise fidélité : la plus avantageuse s\'applique.' },
         { icon: '🚢', text: 'Précommandes container', detail: 'Livraison groupée par bateau : 10 à 40 € de moins par outil, délai 3 à 5 semaines.' },
         { icon: '📧', text: 'SAV prioritaire sous 24h', detail: 'Réponse garantie sous 24h ouvrées, WhatsApp direct.' },
         { icon: '🎁', text: 'Ventes privées abonnés', detail: 'Accès aux offres réservées avant tout le monde.' },
@@ -3488,12 +3487,12 @@
     gold: {
       name: 'Gold',
       price: '29,90',
-      saving: 420,
+      saving: 260,
       tagline: 'Le club avancé, fidélité doublée',
-      desc: 'Remise renforcée, bon mensuel sérieux, fidélité qui monte deux fois plus vite et un devis chantier personnalisé chaque trimestre.',
+      desc: 'Remise renforcée, bon mensuel sérieux et un devis chantier personnalisé chaque trimestre.',
       features: [
         { icon: '💳', text: 'Bon d\'achat +11,40 € chaque mois', detail: 'Crédité à chaque mensualité payée (~137 €/an), cumulable, acquis même si vous arrêtez.' },
-        { icon: '🏷️', text: 'Remise permanente de 7%', detail: 'Sur tout le catalogue. Non cumulable avec la remise fidélité : la plus avantageuse s\'applique.' },
+        { icon: '🏷️', text: 'Remise permanente de 3%', detail: 'Sur tout le catalogue. Non cumulable avec la remise fidélité : la plus avantageuse s\'applique.' },
         { icon: '🚢', text: 'Précommandes container prioritaires', detail: 'Vos outils partent dans le premier groupage disponible.' },
         { icon: '📐', text: '1 devis chantier personnalisé/trimestre', detail: 'On chiffre ensemble l\'outillage complet d\'un chantier, conseils inclus.' },
         { icon: '📧', text: 'SAV prioritaire sous 12h', detail: 'WhatsApp direct, réponse sous 12h ouvrées.' },
@@ -3504,20 +3503,22 @@
     black: {
       name: 'Black Partenaire',
       price: '100',
-      saving: 1200,
+      saving: 1100,
       places: 10,
       tagline: 'Le programme partenaire. 10 places, pas une de plus.',
       desc: 'Bien plus qu\'un abonnement : un pack pro complet chaque année (ÉPI floqués + site web), votre publicité locale gérée, et un réseau d\'entraide entre artisans de métiers différents qui partagent votre travail chaque semaine.',
       features: [
         { icon: '💳', text: 'Bon d\'achat +38 € chaque mois', detail: 'Crédité à chaque mensualité payée (456 €/an), cumulable sans limite — et il vous reste acquis même si vous arrêtez : cet argent est à vous.' },
-        { icon: '🦺', text: 'Pack ÉPI complet floqué, chaque année', detail: 'Chaussures de sécurité, pantalon, t-shirt, lunettes et gants, personnalisés aux couleurs de votre entreprise. Tailles collectées à la souscription.' },
-        { icon: '🌐', text: 'Votre site web pro, créé et remasterisé chaque année', detail: 'Site vitrine + nom de domaine inclus. Vous avez déjà un site ? Au choix : refonte du vôtre, page portfolio complémentaire, ou budget pub doublé le 1er trimestre.' },
+        { icon: '🦺', text: 'Pack ÉPI complet floqué, chaque année', detail: 'Débloqué IMMÉDIATEMENT dès votre premier paiement : chaussures de sécurité, pantalon, t-shirt, lunettes et gants, personnalisés aux couleurs de votre entreprise. Tailles collectées à la souscription, puis renouvelé chaque année.' },
+        { icon: '🌐', text: 'Votre site web pro, créé et remasterisé chaque année', detail: 'Lancé IMMÉDIATEMENT dès votre premier paiement : site vitrine + nom de domaine inclus. Vous avez déjà un site ? Au choix : refonte du vôtre, page portfolio complémentaire, ou budget pub doublé le 1er trimestre.' },
         { icon: '📣', text: 'Votre publicité locale gérée', detail: '~120 €/an de budget publicitaire réel, au choix Google Ads ou Facebook/Instagram, ciblé sur votre zone. Point mensuel WhatsApp.' },
         { icon: '🤝', text: 'Réseau d\'entraide entre artisans', detail: 'Chaque semaine, un partenaire d\'un AUTRE métier partage votre publication (jamais un concurrent : un pisciniste pousse un charpentier). Vous partagez la sienne en retour.' },
         { icon: '📱', text: '1 story dédiée/mois + story hebdo des partenaires', detail: 'Votre entreprise mise en avant sur les réseaux Pirates Tools : une story rien que pour vous chaque mois, plus la story hebdomadaire collective.' },
         { icon: '🎁', text: 'Ventes privées en avant-première', detail: 'Vous voyez les promotions et arrivages avant tous les autres abonnés.' },
+        { icon: '🚢', text: 'Précommandes container prioritaires', detail: 'Comme les packs Pro et Gold — prêt à attendre 3 à 5 semaines ? Les prix bateau (10 à 40 € de moins par outil), et vos outils partent dans le premier groupage.' },
+        { icon: '📐', text: 'Devis chantier personnalisés illimités', detail: 'On chiffre l\'outillage complet de vos chantiers autant de fois que nécessaire, réponse prioritaire.' },
         { icon: '📇', text: 'Carte premium dans l\'annuaire', detail: 'Design premium, 6 photos, badge Partenaire et lien direct vers votre site.' },
-        { icon: '🏷️', text: 'Remise permanente de 10%', detail: 'Sur tout le catalogue, plafonnée à 100 € de remise par mois. Non cumulable avec la remise fidélité : la plus avantageuse s\'applique.' },
+        { icon: '🏷️', text: 'Remise permanente de 5%', detail: 'Sur tout le catalogue, plafonnée à 100 € de remise par mois. Non cumulable avec la remise fidélité : la plus avantageuse s\'applique.' },
         { icon: '📞', text: 'SAV ligne directe', detail: 'Notre ligne directe, réponse prioritaire absolue.' }
       ],
       rules: [
