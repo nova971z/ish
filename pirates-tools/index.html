@@ -29,8 +29,17 @@
        paint (WhatsApp n'est ouvert que sur clic utilisateur). -->
   <link rel="preconnect" href="https://ajax.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://ajax.googleapis.com">
-  <link rel="preconnect" href="https://js.stripe.com" crossorigin>
+  <!-- js.stripe.com : script CLASSIQUE (no-CORS) → preconnect SANS crossorigin,
+       sinon la connexion préchauffée (pool CORS) n'est pas celle utilisée. -->
+  <link rel="preconnect" href="https://js.stripe.com">
   <link rel="dns-prefetch" href="https://js.stripe.com">
+  <!-- www.gstatic.com : Firebase (app+auth+firestore, ~500 Ko) est importé en
+       ES module par firebase-init.js — l'origine n'était découverte qu'APRÈS
+       le téléchargement de firebase-init.js → DNS+TLS+RTT sériels sur le chemin
+       critique, à CHAQUE visite en navigation privée. Modules = CORS →
+       crossorigin obligatoire pour préchauffer le bon pool de connexions. -->
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
   <link rel="stylesheet" href="styles.css?v=418">
