@@ -44,7 +44,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=431">
+  <link rel="stylesheet" href="styles.css?v=432">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -893,6 +893,90 @@
       <div id="aboContent"></div>
     </section>
 
+    <!-- PRÉ-INSCRIPTION PARTENAIRE (Phase 3a — sans paiement) -->
+    <section id="view-rejoindre" class="view hidden" data-route="/rejoindre" role="region" aria-labelledby="rejoindre-h1">
+      <div class="container">
+        <header class="rejoindre-header">
+          <h1 id="rejoindre-h1" tabindex="-1">Rejoindre le réseau d'artisans</h1>
+          <p class="rejoindre-sub">Pré-inscription <strong>sans engagement et sans paiement</strong>. Le programme ouvre bientôt : laisse tes informations, on te recontacte au lancement pour finaliser. Les places Black sont limitées.</p>
+        </header>
+
+        <form id="partnerJoinForm" class="pj-form" novalidate>
+          <!-- Honeypot anti-bot (masqué) -->
+          <div class="pj-hp" aria-hidden="true"><label>Ne pas remplir<input type="text" id="pjHoneypot" tabindex="-1" autocomplete="off"></label></div>
+
+          <fieldset class="pj-fieldset">
+            <legend>Ton entreprise</legend>
+            <label class="pj-field"><span>Nom / entreprise *</span><input type="text" id="pjName" maxlength="100" required></label>
+            <label class="pj-field"><span>Métier * (ex. Charpentier, Pisciniste…)</span><input type="text" id="pjMetier" maxlength="40" required></label>
+            <label class="pj-field"><span>Commune</span><input type="text" id="pjCommune" maxlength="60" placeholder="Baie-Mahault, Le Lamentin…"></label>
+            <label class="pj-field"><span>Email *</span><input type="email" id="pjEmail" maxlength="200" required></label>
+            <label class="pj-field"><span>Téléphone / WhatsApp</span><input type="tel" id="pjPhone" maxlength="30" placeholder="0690…"></label>
+            <label class="pj-field"><span>Formule qui t'intéresse</span>
+              <select id="pjTier">
+                <option value="basique">Basique — 4,90 €/mois</option>
+                <option value="pro">Pro — 14,90 €/mois</option>
+                <option value="gold">Gold — 29,90 €/mois</option>
+                <option value="black" selected>Black Partenaire — 100 €/mois</option>
+              </select>
+            </label>
+          </fieldset>
+
+          <fieldset class="pj-fieldset">
+            <legend>Tailles ÉPI (pour ton pack floqué)</legend>
+            <p class="pj-hint">Utile pour préparer ton équipement personnalisé (t-shirt, pantalon, chaussures, gants). Tu pourras ajuster plus tard.</p>
+            <div class="pj-grid">
+              <label class="pj-field"><span>T-shirt</span>
+                <select id="pjTshirt"><option value="">—</option><option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option><option>XXXL</option></select>
+              </label>
+              <label class="pj-field"><span>Pantalon (taille)</span><input type="text" id="pjPantalon" maxlength="12" placeholder="42, L…"></label>
+              <label class="pj-field"><span>Pointure</span><input type="text" id="pjPointure" maxlength="6" inputmode="numeric" placeholder="43"></label>
+              <label class="pj-field"><span>Gants</span>
+                <select id="pjGants"><option value="">—</option><option>S</option><option>M</option><option>L</option><option>XL</option></select>
+              </label>
+            </div>
+            <label class="pj-field"><span>Couleurs de flocage souhaitées</span><input type="text" id="pjCouleurs" maxlength="60" placeholder="Bleu et jaune…"></label>
+            <label class="pj-field"><span>Ton logo (optionnel)</span><input type="file" id="pjLogoFile" accept="image/*"></label>
+            <div id="pjLogoPreview" class="pj-logo-preview"></div>
+          </fieldset>
+
+          <fieldset class="pj-fieldset">
+            <legend>Visibilité & publicité</legend>
+            <label class="pj-field"><span>Ta page Facebook</span><input type="text" id="pjFacebook" maxlength="200" placeholder="facebook.com/…"></label>
+            <label class="pj-field"><span>Ton Instagram</span><input type="text" id="pjInstagram" maxlength="200" placeholder="@…"></label>
+            <span class="pj-field__label">Où préfères-tu ta publicité locale ?</span>
+            <div class="pj-radios">
+              <label><input type="radio" name="pjPub" value="meta" checked> Facebook / Instagram</label>
+              <label><input type="radio" name="pjPub" value="google"> Google Ads</label>
+              <label><input type="radio" name="pjPub" value="aucun"> Je ne sais pas encore</label>
+            </div>
+            <label class="pj-field pj-field--inline"><input type="checkbox" id="pjHasSite"> <span>J'ai déjà un site web</span></label>
+            <label class="pj-field" id="pjSiteUrlWrap" hidden><span>Adresse de ton site</span><input type="url" id="pjSiteUrl" maxlength="200" placeholder="https://…"></label>
+            <label class="pj-field" id="pjSiteOptWrap" hidden><span>Que préfères-tu pour ton site ?</span>
+              <select id="pjSiteOpt">
+                <option value="refonte">Refonte de mon site actuel</option>
+                <option value="portfolio">Une page portfolio en plus</option>
+                <option value="pub-doublee">Pas de site — budget pub doublé au 1er trimestre</option>
+              </select>
+            </label>
+          </fieldset>
+
+          <fieldset class="pj-fieldset">
+            <legend>Un mot pour nous ? (optionnel)</legend>
+            <label class="pj-field"><span>Message</span><textarea id="pjMessage" rows="3" maxlength="2000" placeholder="Parle-nous de ton activité, tes besoins…"></textarea></label>
+          </fieldset>
+
+          <label class="pj-accept">
+            <input type="checkbox" id="pjRulesChk">
+            <span>J'ai lu et j'accepte les <a href="#/abonnement/black">règles du programme partenaire</a> (partage d'entraide entre artisans, engagement de visibilité croisée). Je comprends qu'il s'agit d'une pré-inscription sans paiement.</span>
+          </label>
+
+          <button type="submit" class="btn primary pj-submit" id="pjSubmit" disabled>Envoyer ma pré-inscription</button>
+          <span id="pjStatus" class="pj-status" aria-live="polite"></span>
+        </form>
+      </div>
+    </section>
+
     <!-- ANNUAIRE ARTISANS (vitrine partenaires, Phase 2 abonnements) -->
     <section id="view-artisans" class="view hidden" data-route="/artisans" role="region" aria-labelledby="artisans-h1">
       <div class="container">
@@ -905,7 +989,8 @@
         </div>
         <div class="artisans-join">
           <p>Vous êtes artisan&nbsp;? Rejoignez le réseau et apparaissez ici.</p>
-          <a class="btn primary" href="#/abonnement">Découvrir les abonnements</a>
+          <a class="btn primary" href="#/rejoindre">Rejoindre le réseau</a>
+          <a class="btn btn--ghost" href="#/abonnement">Voir les formules</a>
         </div>
       </div>
     </section>
@@ -1666,7 +1751,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=431"></script>
+  <script defer src="app.js?v=432"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

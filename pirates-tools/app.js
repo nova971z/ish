@@ -3618,13 +3618,12 @@
       }
       ctaBtn.onclick = function () {
         if (ctaBtn.disabled) return;
-        var msg = 'Bonjour, je souhaite souscrire à l\'abonnement ' + data.name + ' (' + data.price + ' €/mois)'
-          + (data.rules ? ' et j\'accepte les règles du programme Partenaire.' : '.')
-          + ' Mon corps de métier : ';
-        var wa = (typeof waLink === 'function') ? waLink(msg) : '';
-        if (wa) { window.open(wa, '_blank', 'noopener'); }
-        else { location.hash = '#/contact'; toast('Envoie-nous ta demande via le formulaire — on te recontacte pour finaliser.', 'success'); }
+        // Redirige vers le formulaire de pré-inscription structuré (Phase 3a) :
+        // il collecte tout (métier, tailles, logo…) + l'acceptation horodatée
+        // des règles. Aucun paiement (Stripe gelé tant que l'entreprise n'existe
+        // pas). Le tier choisi est pré-sélectionné via le slug.
         if (typeof track === 'function') track('abo_request', { plan: slug });
+        location.hash = '#/rejoindre/' + encodeURIComponent(slug);
       };
     }
   }
@@ -3785,10 +3784,140 @@
     });
   }
 
+  // ── Pré-inscription partenaire (Phase 3a — sans paiement) ──
+  // Formulaire d'onboarding artisan. Envoi via /api/contact
+  // (type=partner-application) : ZÉRO paiement, pure collecte + acceptation
+  // horodatée des règles. Réutilise compressPartnerImage (logo). Le CTA reste
+  // ACTIF seulement quand la case « j'accepte les règles » est cochée.
+
+  var _partnerJoinBound = false;
+  var _pjLogo = '';
+
+  function setupPartnerJoinForm(slug) {
+    var form = document.getElementById('partnerJoinForm');
+    if (!form) return;
+
+    // Pré-sélection de la formule depuis l'URL (#/rejoindre/black).
+    var tierSel = document.getElementById('pjTier');
+    var TIERS = { basique: 1, pro: 1, gold: 1, black: 1 };
+    if (tierSel && slug && TIERS[slug]) tierSel.value = slug;
+
+    if (_partnerJoinBound) return;
+    _partnerJoinBound = true;
+
+    var rulesChk = document.getElementById('pjRulesChk');
+    var submit = document.getElementById('pjSubmit');
+    var statusEl = document.getElementById('pjStatus');
+    var hasSite = document.getElementById('pjHasSite');
+    var siteUrlWrap = document.getElementById('pjSiteUrlWrap');
+    var siteOptWrap = document.getElementById('pjSiteOptWrap');
+    var logoFile = document.getElementById('pjLogoFile');
+    var logoPreview = document.getElementById('pjLogoPreview');
+
+    if (rulesChk && submit) {
+      rulesChk.addEventListener('change', function () { submit.disabled = !rulesChk.checked; });
+    }
+    if (hasSite) {
+      hasSite.addEventListener('change', function () {
+        if (siteUrlWrap) siteUrlWrap.hidden = !hasSite.checked;
+        if (siteOptWrap) siteOptWrap.hidden = !hasSite.checked;
+      });
+    }
+    if (logoFile) {
+      logoFile.addEventListener('change', function () {
+        var f = logoFile.files && logoFile.files[0];
+        if (!f) return;
+        compressPartnerImage(f, 320, function (dataUrl) {
+          if (!dataUrl) { toast('Image logo illisible', 'error'); return; }
+          _pjLogo = dataUrl;
+          if (logoPreview) {
+            logoPreview.innerHTML = '<span class="admin-partner-photo"><img src="' + _pjLogo + '" alt="Logo"><button type="button" id="pjLogoRemove" aria-label="Retirer le logo">✕</button></span>';
+            var rm = document.getElementById('pjLogoRemove');
+            if (rm) rm.onclick = function () { _pjLogo = ''; logoPreview.innerHTML = ''; };
+          }
+        });
+        logoFile.value = '';
+      });
+    }
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (statusEl) { statusEl.textContent = ''; statusEl.className = 'pj-status'; }
+
+      function pjErr(msg) {
+        if (submit) submit.disabled = false;
+        if (statusEl) { statusEl.textContent = msg; statusEl.className = 'pj-status is-error'; }
+      }
+
+      var pubEl = form.querySelector('input[name="pjPub"]:checked');
+      var data = {
+        type: 'partner-application',
+        name: (val('pjName')).trim(),
+        metier: (val('pjMetier')).trim(),
+        commune: (val('pjCommune')).trim(),
+        email: (val('pjEmail')).trim(),
+        phone: (val('pjPhone')).trim(),
+        tier: (val('pjTier') || 'black'),
+        sizes: {
+          tshirt: val('pjTshirt'), pantalon: val('pjPantalon').trim(),
+          pointure: val('pjPointure').trim(), gants: val('pjGants')
+        },
+        couleurs: val('pjCouleurs').trim(),
+        facebook: val('pjFacebook').trim(),
+        instagram: val('pjInstagram').trim(),
+        pubChoice: pubEl ? pubEl.value : 'aucun',
+        hasWebsite: !!(hasSite && hasSite.checked),
+        websiteUrl: val('pjSiteUrl').trim(),
+        siteOption: (hasSite && hasSite.checked) ? (val('pjSiteOpt') || 'refonte') : 'neuf',
+        message: val('pjMessage').trim(),
+        logo: _pjLogo,
+        rulesAccepted: !!(rulesChk && rulesChk.checked),
+        website: val('pjHoneypot') // honeypot (piège à bots, doit rester vide)
+      };
+
+      if (data.name.length < 2) return pjErr('Indique le nom de ton entreprise.');
+      if (data.metier.length < 2) return pjErr('Indique ton métier.');
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) return pjErr('Email invalide.');
+      if (!data.rulesAccepted) return pjErr('Merci d\'accepter les règles du programme.');
+
+      if (submit) submit.disabled = true;
+      if (statusEl) { statusEl.textContent = 'Envoi…'; statusEl.className = 'pj-status'; }
+
+      var apiBase = apiBaseUrl();
+      fetch(apiBase + '/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, data: j }; }); })
+      .then(function (res) {
+        if (res.ok && res.data && res.data.ok) {
+          form.reset();
+          _pjLogo = '';
+          if (logoPreview) logoPreview.innerHTML = '';
+          if (siteUrlWrap) siteUrlWrap.hidden = true;
+          if (siteOptWrap) siteOptWrap.hidden = true;
+          if (submit) submit.disabled = true;
+          if (statusEl) {
+            statusEl.textContent = 'Merci ! Ta pré-inscription est enregistrée. On te recontacte au lancement.';
+            statusEl.className = 'pj-status is-ok';
+          }
+          toast('Pré-inscription envoyée ✓', 'success');
+          track('partner_application', { tier: data.tier });
+        } else {
+          pjErr((res.data && res.data.error) || 'Envoi impossible, réessaie.');
+        }
+      })
+      .catch(function (err) { pjErr('Erreur réseau : ' + err.message); });
+    });
+
+    function val(id) { var el = document.getElementById(id); return el ? (el.value || '') : ''; }
+  }
+
   // ── Router (hash-based SPA) ────────────────────────────────
 
   var ROUTES = ['/', '/catalogue', '/produit', '/devis', '/compte', '/auth', '/abonnement',
-                '/admin', '/merci', '/contact', '/favoris', '/artisans',
+                '/admin', '/merci', '/contact', '/favoris', '/artisans', '/rejoindre',
                 '/mentions-legales', '/confidentialite', '/cgv'];
 
   // Territory landing slugs (keys) → territory codes (values).
@@ -3825,6 +3954,10 @@
     }
     if (hash.indexOf('/abonnement/') === 0) {
       return { route: '/abonnement', slug: hash.replace('/abonnement/', '') };
+    }
+    // Pré-inscription partenaire avec formule pré-sélectionnée (#/rejoindre/black).
+    if (hash.indexOf('/rejoindre/') === 0) {
+      return { route: '/rejoindre', slug: hash.replace('/rejoindre/', '') };
     }
     // Territory landings: /guadeloupe, /martinique, /guyane, /reunion, /mayotte
     var terrSlug = hash.replace(/^\//, '');
@@ -3981,6 +4114,9 @@
         break;
       case '/artisans':
         renderArtisans();
+        break;
+      case '/rejoindre':
+        setupPartnerJoinForm(parsed.slug || '');
         break;
     }
 
@@ -9226,6 +9362,10 @@
         break;
       case '/artisans':
         setDocMeta('Nos artisans — ' + BASE_TITLE, 'L\'annuaire des artisans partenaires Pirates Tools : des professionnels locaux de confiance en Guadeloupe et dans les DOM-TOM.');
+        removeJsonLd('product');
+        break;
+      case '/rejoindre':
+        setDocMeta('Rejoindre le réseau — ' + BASE_TITLE, 'Pré-inscription au programme partenaire artisans Pirates Tools — sans engagement, sans paiement.');
         removeJsonLd('product');
         break;
       case '/admin':

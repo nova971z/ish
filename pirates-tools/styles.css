@@ -7645,3 +7645,66 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .admin-index-warn p { margin: 0 0 .8rem; line-height: 1.5; }
 .admin-index-warn .btn { display: inline-block; }
 .admin-index-warn .admin-hint { margin: .8rem 0 0; }
+
+/* ========== 47) PRÉ-INSCRIPTION PARTENAIRE (Phase 3a) ========== */
+.rejoindre-header { text-align: center; padding: 1rem 0 1.4rem; max-width: 620px; margin: 0 auto; }
+.rejoindre-header h1 {
+  margin: 0 0 .6rem; font-size: clamp(1.5rem, 1.1rem + 2vw, 2.2rem);
+  font-weight: 900; text-shadow: 0 0 18px rgba(var(--accent-rgb), .5);
+}
+.rejoindre-sub { margin: 0; opacity: .82; line-height: 1.55; }
+
+.pj-form { max-width: 620px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.2rem; }
+.pj-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+.pj-fieldset {
+  border: 1px solid rgba(255, 255, 255, .12); border-radius: 16px;
+  background: rgba(255, 255, 255, .03); padding: 1.1rem 1.2rem 1.3rem; margin: 0;
+}
+.pj-fieldset legend {
+  padding: 0 .5rem; font-weight: 800; font-size: .95rem; color: var(--accent);
+}
+.pj-hint { margin: 0 0 .8rem; font-size: .85rem; opacity: .7; line-height: 1.45; }
+
+.pj-field { display: flex; flex-direction: column; gap: .3rem; margin-bottom: .9rem; }
+.pj-field:last-child { margin-bottom: 0; }
+.pj-field > span, .pj-field__label { font-size: .85rem; font-weight: 600; opacity: .9; }
+.pj-field input, .pj-field select, .pj-field textarea {
+  padding: .7rem .85rem; border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, .16); background: #0d1117; color: #e6edf5;
+  font-size: 1rem; font-family: inherit;
+}
+.pj-field input:focus, .pj-field select:focus, .pj-field textarea:focus {
+  outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), .18);
+}
+.pj-field--inline { flex-direction: row; align-items: center; gap: .6rem; }
+.pj-field--inline input { width: 1.15rem; height: 1.15rem; accent-color: var(--accent); }
+
+.pj-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; }
+.pj-grid .pj-field { margin-bottom: 0; }
+
+.pj-field__label { display: block; margin-bottom: .4rem; }
+.pj-radios { display: flex; flex-direction: column; gap: .5rem; margin-bottom: .3rem; }
+.pj-radios label { display: flex; align-items: center; gap: .5rem; font-size: .95rem; cursor: pointer; }
+.pj-radios input { width: 1.1rem; height: 1.1rem; accent-color: var(--accent); }
+
+.pj-logo-preview { margin-top: .2rem; }
+
+.pj-accept {
+  display: flex; gap: .7rem; align-items: flex-start;
+  padding: 1rem 1.1rem; border-radius: 14px;
+  border: 1px solid rgba(var(--accent-rgb), .35); background: rgba(var(--accent-rgb), .07);
+  cursor: pointer; font-size: .92rem; line-height: 1.5;
+}
+.pj-accept input { margin-top: .15rem; width: 1.2rem; height: 1.2rem; flex: 0 0 auto; accent-color: var(--accent); }
+.pj-accept a { color: var(--accent); }
+
+.pj-submit { align-self: stretch; }
+.pj-submit[disabled] { opacity: .45; cursor: not-allowed; filter: saturate(.4); }
+.pj-status { text-align: center; font-size: .92rem; min-height: 1.2em; }
+.pj-status.is-ok { color: #34d399; font-weight: 600; }
+.pj-status.is-error { color: #f87171; font-weight: 600; }
+
+@media (max-width: 480px) {
+  .pj-grid { grid-template-columns: 1fr; }
+}
