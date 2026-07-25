@@ -7610,6 +7610,7 @@
       + '<label class="admin-field"><span>Ordre d\'affichage (petit = premier)</span>'
       + '<input type="number" id="apOrder" value="' + (Number.isFinite(Number(p.order)) ? Number(p.order) : 999) + '"></label>'
       + '<label class="admin-field admin-field--inline"><input type="checkbox" id="apActive"' + (p.active !== false ? ' checked' : '') + '> <span>Carte visible (active)</span></label>'
+      + '<label class="admin-field admin-field--inline"><input type="checkbox" id="apGuest"' + (p.guest === true ? ' checked' : '') + '> <span>Invité / test (gratuit — tous les avantages SAUF le bon de 38 €/mois ; hors compteur des 10 places payantes)</span></label>'
       + '<label class="admin-field"><span>Logo (Pro/Gold/Black)</span>'
       + '<input type="file" id="apLogoFile" accept="image/*"></label>'
       + '<div id="apLogoPreview" class="admin-partner-photos"></div>'
@@ -7702,6 +7703,7 @@
         link: (document.getElementById('apLink') || {}).value || '',
         order: Number((document.getElementById('apOrder') || {}).value),
         active: !!(document.getElementById('apActive') || {}).checked,
+        guest: !!(document.getElementById('apGuest') || {}).checked,
         logo: _adminPartnerLogo,
         photos: _adminPartnerPhotos.slice(0, ADMIN_PARTNER_PHOTOS_MAX[tier] || 0)
       };
@@ -7725,6 +7727,7 @@
         + '<div class="admin-row__info">'
         + '<strong>' + escapeHTML(String(p.name || '')) + '</strong>'
         + ' <span class="admin-row__meta">' + escapeHTML(String(p.metier || '')) + ' · ' + escapeHTML(String(p.tier || 'basique'))
+        + (p.guest === true ? ' · <em>invité</em>' : '')
         + (p.active === false ? ' · <em>masquée</em>' : '') + ' · ordre ' + (Number(p.order) || 0) + '</span>'
         + '</div>'
         + '<div class="admin-row__actions">'

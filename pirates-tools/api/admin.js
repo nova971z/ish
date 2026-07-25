@@ -199,8 +199,16 @@ module.exports = async function handler(req, res) {
       if (type === 'partners') {
         const snap = await db.collection('partners').orderBy('order').get()
           .catch(() => db.collection('partners').get());
+        // Fusionne le marqueur invité (partners_private, serveur seul) pour
+        // l'affichage ADMIN uniquement — jamais présent dans la collection
+        // publique lue par les visiteurs.
+        const privSnap = await db.collection('partners_private').get().catch(() => null);
+        const priv = {};
+        if (privSnap) privSnap.forEach((doc) => { priv[doc.id] = doc.data() || {}; });
         const partners = [];
-        snap.forEach((doc) => { partners.push(Object.assign({ id: doc.id }, doc.data())); });
+        snap.forEach((doc) => {
+          partners.push(Object.assign({ id: doc.id, guest: !!(priv[doc.id] && priv[doc.id].guest) }, doc.data()));
+        });
         return res.status(200).json({ ok: true, partners });
       }
 
@@ -381,7 +389,15 @@ module.exports = async function handler(req, res) {
       const id = String(b.id || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 60)
         || (name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 50) || ('p' + Math.abs(hashCodeStr(name + metier))));
       await db.collection('partners').doc(id).set(doc, { merge: false });
-      return res.status(200).json({ ok: true, id, partner: doc });
+      // Black INVITÉ (décision user 25/07) : 2 artisans choisis à la main +
+      // la carte de test admin. Tous les avantages Black GRATUITS (ÉPI, site,
+      // pub, entraide, remise 5 %) SAUF le bon de 38 €/mois (ils ne paient
+      // pas). Le marqueur vit dans `partners_private` (SERVEUR SEUL, jamais
+      // dans `partners` qui est PUBLIQUEMENT lisible — on n'expose pas qui
+      // paie et qui ne paie pas). Sert aux compteurs (10 places PAYANTES,
+      // Phase 3b) et au portefeuille (pas de bon, Phase 4).
+      await db.collection('partners_private').doc(id).set({ guest: b.guest === true }, { merge: true });
+      return res.status(200).json({ ok: true, id, partner: doc, guest: b.guest === true });
     } catch (err) {
       console.error('[api/admin] partner-save failed:', err.message);
       return res.status(500).json({ ok: false, error: 'partner-save échoué' });
@@ -393,6 +409,7 @@ module.exports = async function handler(req, res) {
       const id = String((req.body || {}).id || '').replace(/[^A-Za-z0-9_-]/g, '');
       if (!id) return res.status(400).json({ ok: false, error: 'id requis' });
       await db.collection('partners').doc(id).delete();
+      await db.collection('partners_private').doc(id).delete().catch(() => {});
       return res.status(200).json({ ok: true, id });
     } catch (err) {
       return res.status(500).json({ ok: false, error: 'partner-delete échoué' });

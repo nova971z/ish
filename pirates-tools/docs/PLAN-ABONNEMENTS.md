@@ -38,6 +38,23 @@
 - **Annuaire « Nos artisans »** : carte PREMIUM (6 photos, badge Partenaire,
   lien vers son site). Sans engagement. Acceptation des conditions par
   formulaire (horodatée en Phase 3).
+- **BLACK INVITÉS (décision user 25/07)** : 2 artisans choisis à la main par
+  l'user reçoivent TOUS les avantages Black GRATUITEMENT (ÉPI complet floqué,
+  site web, pub gérée, entraide, remise 5 %, annuaire premium, SAV) SAUF le
+  bon de 38 €/mois (ils ne paient pas la cotisation → pas de reversement).
+  Ils participent au pool d'entraide Black → rotation sur 12 artisans
+  (10 payants + 2 invités), mêmes règles de partage. + 1 carte ADMIN de test
+  (l'user, marquée invité, hors avantages commerciaux — il n'achète pas sur
+  son propre site). Marqueur `guest:true` sur la carte partenaire (invisible
+  du public, visible admin) : le compteur des 10 places (Phase 3b) ne compte
+  QUE les payants, le portefeuille (Phase 4) ne crédite JAMAIS un invité, la
+  remise 5 % s'applique aussi aux invités (logique serveur Phase 4).
+  ⚠️ CONFIDENTIALITÉ : le marqueur vit dans `partners_private/{id}` (collection
+  SERVEUR SEULE, rules read/write:false) — JAMAIS dans `partners/` qui est
+  publiquement lisible : personne ne peut voir qui paie et qui est invité.
+  Fusionné dans la réponse admin uniquement (GET type=partners).
+  Coût réel /invité/an ≈ 190 € (ÉPI ~60 + pub 120 + domaine 8 + temps site) —
+  assumé comme amorçage : vitrine remplie et entraide vivante dès le jour 1.
 
 ## 📊 Proportionnalité proposée (à co-valider) — bons ≈ 38 % de la cotisation
 
