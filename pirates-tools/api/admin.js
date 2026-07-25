@@ -34,9 +34,15 @@ module.exports = async function handler(req, res) {
     const type = (req.query && req.query.type) || 'overrides';
     try {
       if (type === 'orders') {
-        // Read last 50 orders from collectionGroup('orders')
+        // 50 dernières commandes, TOUS clients (collectionGroup).
+        // Tri sur `date` : c'est LE champ horodatage que le client écrit
+        // (serverTimestamp, app.js — la allowlist firestore.rules n'autorise
+        // d'ailleurs que lui). L'ancien orderBy('createdAt') portait sur un
+        // champ qu'aucune commande n'a jamais eu → Firestore excluait tous les
+        // docs → liste structurellement vide. Nécessite le fieldOverride
+        // COLLECTION_GROUP DESCENDING sur orders.date (firestore.indexes.json).
         const ordersSnap = await db.collectionGroup('orders')
-          .orderBy('createdAt', 'desc')
+          .orderBy('date', 'desc')
           .limit(50)
           .get();
         const orders = [];
@@ -47,7 +53,7 @@ module.exports = async function handler(req, res) {
             status: d.status || 'pending',
             customerEmail: d.customerEmail || d.email || '',
             total: typeof d.total === 'number' ? d.total : (typeof d.amount === 'number' ? d.amount : null),
-            createdAt: d.createdAt && d.createdAt.toMillis ? d.createdAt.toMillis() : (d.createdAt || null),
+            createdAt: d.date && d.date.toMillis ? d.date.toMillis() : (d.date || null),
             stripeSessionId: d.stripeSessionId || ''
           });
         });
