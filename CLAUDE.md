@@ -362,7 +362,9 @@ Playwright + émulateur.
 ⚠️ ACTIONS USER (notées) :
   - H6 : `node scripts/set-admin-claim.js <email>` → reconnexion → vérifier
     /admin connecté sans secret → SUPPRIMER ADMIN_SECRET sur Vercel.
-  - H4 : activer « Email Enumeration Protection » (console Firebase Auth).
+  - H4 : ✅ FAIT — « Protection contre l'énumération d'adresses e-mail »
+    déjà ACTIVÉE (vérifié sur capture 25/07 : Auth → Paramètres → Actions des
+    utilisateurs, case cochée par défaut). + création & suppression activées.
 firebase-tools + émulateur Firestore installés en dev (non committés) pour
 tester règles (S1) — restent dispo pour re-tester.
 
