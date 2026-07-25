@@ -60,10 +60,11 @@ Le site N'EST PAS lancé (décidé le 15/07/2026). Ne rien ouvrir au public tant
 - [ ] Remplir les champs `[À COMPLÉTER]` des 3 pages : mentions légales, confidentialité, CGV (identité entreprise : raison sociale, statut, SIRET, RCS, adresse, TVA, capital, directeur publication, email pro).
 - [ ] Adhérer à un **médiateur de la consommation** agréé (CM2C, Medicys… ~50-100€/an) et mettre ses coordonnées dans mentions + CGV. OBLIGATOIRE pour vendre aux particuliers.
 - [ ] Faire relire les 3 documents légaux par un juriste (recommandé fort).
-- [x] Email pro `contact@pirates-tools.com` ✅ CRÉÉE par l'user (25/07) et affichée
-      dans le footer (mailto). RÈGLE GRAVÉE : TOUTE adresse email affichée sur le
-      site = celle-là, jamais le gmail perso. Reste : la reporter dans les champs
-      [À COMPLÉTER] des mentions/CGV.
+- [x] Email pro du site ✅ CRÉÉE par l'user (25/07) : **contact.piratestools@gmail.com**
+      (corrigée 2× par l'user — c'est EXACTEMENT celle-là, PAS contact@pirates-tools.com
+      ni le gmail perso ki.legrix). Affichée dans le footer (mailto). RÈGLE GRAVÉE :
+      TOUTE adresse email affichée sur le site = contact.piratestools@gmail.com.
+      Reste : la reporter dans les champs [À COMPLÉTER] des mentions/CGV.
 
 ### 🔴 BLOQUANT (paiement carte)
 - [ ] Activer le compte Stripe (infos entreprise + RIB) pour encaisser en LIVE.
