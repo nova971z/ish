@@ -105,8 +105,11 @@ description_long  paragraphe + « Livrée dans toute la zone DOM-TOM. Octroi de 
   import), prix déjà correct 529,90 € = 460,78 × 1,15 → COMPLÉTÉE (poster user
   fond sombre → dhs900zu.webp, specs, features AWS). PAS de fusion : le module
   AWS (démarrage Bluetooth aspirateur) est une VRAIE différence fonctionnelle
-  vs DHS900Z (sans AWS) → les 2 fiches coexistent. ⚠️ DHS900Z reste FANTÔME
-  (specs vides, placeholder) — à compléter quand l'user enverra sa capture.
+  vs DHS900Z (sans AWS) → les 2 fiches coexistent. DHS900Z ✅ COMPLÉTÉE ensuite
+  (capture user) : poster dhs900z.webp (SANS module AWS sur l'image), specs,
+  prix déjà correct 522,81 € = 454,62 × 1,15. DISTINCTION EXACTE : DHS900Z =
+  machine COMPATIBLE AWS mais unité AWS Bluetooth NON incluse ; DHS900ZU =
+  unité AWS INCLUSE. Specs quasi identiques sauf cette ligne.
   ⚠️ DISCORDANCE cotébrico signalée à l'user : page principale DHS900ZU = 460,78 €
   (solo), mais liste des déclinaisons = 450,00 € (« ZU en coffret avec AWS »),
   même SKU. Prix gardé sur 460,78 (affichage principal + prix existant) ;
