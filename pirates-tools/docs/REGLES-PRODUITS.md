@@ -91,6 +91,19 @@ description_long  paragraphe + « Livrée dans toute la zone DOM-TOM. Octroi de 
 
 ## 7. ✅ JOURNAL DES PRODUITS VALIDÉS (session 22–23/07/2026, master direct)
 
+### Décisions coffrets 25/07/2026 (preuves cotébrico fournies par l'user)
+- **DBS180Z/DBS180ZJ** : chez cotébrico le coffret (219,04 €) est RÉELLEMENT
+  moins cher que le solo (220,00 €) → notre affichage « Avec coffret 251,90 <
+  Sans coffret 253 » reflète la réalité fournisseur, marge 15 % intacte des
+  deux côtés. Paire CONSERVÉE. Ne pas « corriger » cette inversion.
+- **DRT50ZJX3** : c'est un KIT 4 bases interchangeables, PAS un simple coffret
+  → DÉLIÉ de DRT50Z (produit autonome, titre explicite « + 4 bases ») ;
+  DRT50Z a le switch standard +15 €. Re-lier = remettre les champs variant*.
+- Rappel traqueur : la fiche cotébrico TS 55 (576703) est titrée « FESTOOL TS
+  55 … » sans numéro → le parseur la remonte en unknown « TS » ; prix actuel
+  juste, mais non auto-suivi (1/57).
+
+
 Prix = TTC source (hors promo) → affiché (× 1,15) / HT.
 
 | Réf | Action | TTC source | Affiché | Poster |
