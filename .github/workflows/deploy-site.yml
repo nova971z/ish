@@ -1,6 +1,7 @@
 name: Deploy Site
+# Legacy iSH (Netlify) — neutralisé (2026-07), manuel uniquement.
 on:
-  release:
+  workflow_dispatch:
 
 jobs:
   deploy:

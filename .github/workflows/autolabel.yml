@@ -1,7 +1,7 @@
 name: Auto-Label
+# Legacy iSH — neutralisé (2026-07), manuel uniquement.
 on:
-  issues:
-    types: [opened]
+  workflow_dispatch:
 jobs:
   label:
     runs-on: ubuntu-latest

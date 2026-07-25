@@ -1,9 +1,10 @@
 name: CI
 
+# Legacy iSH emulator build — NEUTRALISÉ (2026-07) : runner ubuntu-20.04
+# retiré par GitHub (avril 2025) → échec garanti sur CHAQUE push, croix rouge
+# permanente qui masquait la vraie CI (pirates-tools-ci.yml). Manuel uniquement.
 on:
-  push:
-  pull_request:
-      branches: [master]
+  workflow_dispatch:
 
 jobs:
   build-linux:
