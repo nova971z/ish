@@ -1441,6 +1441,31 @@ body.page-devis #view-devis {
     aspect-ratio: 1 / 1;
 }
 
+/* Carte « Voir tout le catalogue » en fin de bandeau (vitrine bornée à
+   HOME_STRIP_MAX cartes — le reste vit dans le catalogue paginé). */
+.product-card--more {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    text-align: center;
+    border: 1px dashed rgba(255, 255, 255, .25);
+    background: rgba(255, 255, 255, .03);
+}
+.product-card--more .product-card__more-icon {
+    font-size: 2rem;
+    line-height: 1;
+    color: var(--accent);
+}
+.product-card--more .product-card__more-label {
+    font-weight: 700;
+}
+.product-card--more .product-card__more-count {
+    font-size: .85rem;
+    opacity: .7;
+}
+
 @media (max-width: 480px) {
     .home-products-strip .product-card {
         flex: 0 0 170px;

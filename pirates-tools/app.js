@@ -1698,6 +1698,15 @@
 
   // ── Home products scroll strip ─────────────────────────────
 
+  // Bandeau « Nos produits » (accueil) : VITRINE bornée, pas le catalogue entier.
+  // Rendre les 207 produits ici (dont les 21 variantes coffret censées être
+  // masquées) = exactement le problème que la pagination du catalogue (PAGE_SIZE
+  // 40) a été créée pour éviter — sur la page d'atterrissage, en navigation
+  // privée, à chaque visite. Règles : variantes coffret exclues (même règle que
+  // filteredProducts), cap HOME_STRIP_MAX, priorité aux produits qui ont une
+  // vraie photo (un bandeau de placeholders ne vend rien), carte « Voir tout »
+  // en fin de piste vers le catalogue complet.
+  var HOME_STRIP_MAX = 16;
   function renderHomeProducts() {
     var track = document.getElementById('homeProductsTrack');
     if (!track) return;
@@ -1705,7 +1714,14 @@
       track.innerHTML = '<p class="no-results">Aucun produit pour le moment.</p>';
       return;
     }
-    track.innerHTML = products.map(function (p) {
+    var pool = products.filter(function (p) { return !p.variantSecondary; });
+    var withImg = [], noImg = [];
+    pool.forEach(function (p) {
+      var real = p.img && p.img.indexOf('placeholder') === -1;
+      (real ? withImg : noImg).push(p);
+    });
+    var list = withImg.concat(noImg).slice(0, HOME_STRIP_MAX);
+    track.innerHTML = list.map(function (p) {
       var out = isOutOfStock(p);
       var price = calcPrice(p, _currentTerritory);
       return '<a class="product-card' + (out ? ' product-card--out' : '') + '" href="#/produit/' + escapeHTML(p.slug || p.id) + '">'
@@ -1721,7 +1737,12 @@
         + '<span class="product-card__price">' + formatPrice(price.ttc) + ' <small>TTC</small></span>'
         + '</div>'
         + '</a>';
-    }).join('');
+    }).join('')
+      + '<a class="product-card product-card--more" href="#/catalogue">'
+      + '<span class="product-card__more-icon">→</span>'
+      + '<span class="product-card__more-label">Voir tout le catalogue</span>'
+      + '<span class="product-card__more-count">' + pool.length + ' produits</span>'
+      + '</a>';
     preloadModelViewers(track);
   }
 
