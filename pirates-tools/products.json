@@ -5473,13 +5473,13 @@
     "id": "makita-dhr283z",
     "slug": "makita-dhr283z-perfo-burineur-sds-plus-18v-lx",
     "sku": "DHR283Z",
-    "title": "Makita DHR283Z — Perfo-burineur SDS-Plus 18V LXT (solo)",
+    "title": "Makita DHR283Z — Perfo-burineur SDS-Plus 36V (2x18V) LXT (solo)",
     "name": "DHR283Z",
     "brand": "Makita",
     "category": "Perforateurs",
     "tag": "Nouveau",
-    "desc": "Perfo-burineur SDS-Plus 18V LXT (solo).",
-    "img": "images/placeholder.svg",
+    "desc": "Perfo-burineur SDS-Plus 36V (2x18V) LXT (solo).",
+    "img": "images/posters/dhr283z.webp",
     "price": 472.95,
     "currency": "EUR",
     "vat": 0.2,
@@ -5488,7 +5488,7 @@
     "stock_label": "En stock",
     "model": "",
     "paymentLink": "",
-    "weight_kg": 3,
+    "weight_kg": 4.1,
     "ncCategory": "power_tool",
     "productType": "pro",
     "tags": [
@@ -5496,14 +5496,35 @@
       "tropical_ready"
     ],
     "features": [
-      "Perfo-burineur SDS-Plus 18V LXT (solo)",
-      "Gamme Makita 18V LXT sans fil, moteur brushless (sans charbon) haut rendement",
-      "Machine seule (batterie et chargeur non inclus), compatible batteries Makita LXT",
-      "Robuste et endurant, pensé pour un usage professionnel intensif",
-      "Idéal pour les chantiers des Antilles / DOM-TOM"
+      "Perfo-burineur SDS-Plus 36V (2x18V) LXT — 2,8 J, fonction burinage",
+      "Fonctionne avec 2 batteries 18V LXT (36V), moteur brushless (sans charbon) haut rendement",
+      "Nouveau système AFT (stop rotation : le moteur se met en sécurité en cas de blocage)",
+      "Anti-vibration AVT, filtre HEPA, connectivité AWS et perçage à la couronne trépan jusqu'à 54 mm",
+      "Machine seule (batteries et chargeur non inclus), compatible batteries Makita 18V LXT"
     ],
-    "specs": {},
-    "description_long": "Perfo-burineur SDS-Plus 18V LXT (solo). Outil professionnel Makita de la gamme 18V LXT sans fil (moteur brushless). Vendu en machine seule (sans batterie ni chargeur). Compatible avec les batteries Makita LXT. Fiche technique détaillée à compléter. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "specs": {
+      "Tension": "36 V (2 × 18 V) LXT Li-Ion",
+      "Batteries compatibles": "Gamme Makita LXT 18 V (× 2)",
+      "Moteur": "Brushless (sans charbon)",
+      "Emmanchement": "SDS-Plus",
+      "Énergie de frappe (EPTA)": "2,8 J",
+      "Vitesse à vide": "950 tr/min",
+      "Cadence de frappe": "5000 cps/min",
+      "Capacité de perçage béton": "28 mm",
+      "Capacité couronne trépan": "54 mm",
+      "Capacité de perçage bois": "32 mm",
+      "Capacité de perçage métal": "13 mm",
+      "Sécurité": "Protection anti-redémarrage, AFT (stop rotation)",
+      "Confort": "Soft No Load, anti-poussière, anti-vibration AVT, filtre HEPA",
+      "Connectivité": "AWS (Auto-start Wireless System)",
+      "Niveau de pression acoustique (LpA)": "92 dB(A)",
+      "Niveau de puissance acoustique (LwA)": "103 dB(A)",
+      "Vibrations (perçage)": "2,5 m/s²",
+      "Vibrations (burinage)": "8,5 m/s²",
+      "Poids (EPTA)": "4,1 kg",
+      "Dimensions (L×l×H)": "404 × 134 × 232 mm"
+    },
+    "description_long": "Perfo-burineur SDS-Plus 36V (2 × 18 V) LXT (solo). Perforateur avec fonction burinage, équipé du nouveau système AFT : stop rotation, le moteur se met en sécurité quand il détecte un blocage. Fonctionne avec 2 batteries 18V LXT (36V), moteur brushless haut rendement. Énergie de frappe 2,8 J, vitesse à vide 950 tr/min, cadence 5000 cps/min. Capacités : béton 28 mm, couronne trépan 54 mm, bois 32 mm, métal 13 mm. Anti-vibration AVT, filtre HEPA, Soft No Load et connectivité AWS. Vendu en machine seule (sans batteries ni chargeur), compatible avec les batteries Makita 18V LXT. Poids 4,1 kg (EPTA). Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
   },
   {
     "id": "makita-dhs660z",
