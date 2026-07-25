@@ -91,8 +91,9 @@
   window.PT_STRIPE_PK = 'pk_live_51TJYJVPynqHG9OETsHfRsfZbs8NWjeo4RO1sVltr9LVqvbL1IsAI13Wgw3YFglVYGQD6kBFOw5pKBPCUovdJ9OV300rHNF9ppi';
   </script>
 
-  <!-- Crypto payment config (inlined pour éviter tout problème de cache/SW)
-       Édite tes adresses dans crypto-config.js ET ici si tu changes. -->
+  <!-- Crypto payment config — CE BLOC INLINE EST LA SOURCE UNIQUE.
+       (crypto-config.js est un vestige non chargé, exclu du déploiement via
+       .vercelignore — ne PAS y maintenir de copie, elle divergerait.) -->
   <script>
   window.PT_CRYPTO_CONFIG = {
     networks: [

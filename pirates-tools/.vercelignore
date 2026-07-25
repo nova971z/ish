@@ -21,3 +21,8 @@ models/products/dcd796.glb
 models/products/dcf850.glb
 models/products/dcf887.glb
 models/products/dcs391n.glb
+
+# crypto-config.js : vestige NON charge par la page (la config crypto vit dans
+# le script inline #3 d'index.html, source unique). Conserve en git pour
+# memoire, jamais deploye (adresses dupliquees = derive garantie).
+crypto-config.js
