@@ -28,7 +28,12 @@ module.exports = function () {
 
   ok(rColis && rColis.transport === 17, 'transport Colissimo 1 kg = 17 €');
   ok(rColis.marginAfterIS >= 0.149, 'Colissimo : marge après IS ≥ 15 % (obtenu ' + (rColis.marginAfterIS * 100).toFixed(1) + '%)');
-  near(rColis.markup * 100, 62, 9, 'Colissimo visseuse markup ~55-64 %');
+  // Golden recalibré 25/07/2026 : +5,10 € de FTD/douane par colis (option
+  // Colissimo « client ne paie rien à l'arrivée ») ajoutés au modèle → le
+  // markup de référence passe de ~62 % à ~73 % pour tenir 15 % net après IS.
+  near(rColis.markup * 100, 73, 8, 'Colissimo visseuse markup ~65-81 %');
+  ok(rColis.douane === 5.10, 'FTD/douane 5,10 € comptée sur les envois colis');
+  ok(rCont.douane === 0, 'container : pas de FTD par colis (dédouanement dans containerPerUnit)');
 
   ok(rCont.transport === 5.3, 'transport container nu = 5,3 €');
   ok(rCont.marginAfterIS >= 0.149, 'Container : marge après IS ≥ 15 %');

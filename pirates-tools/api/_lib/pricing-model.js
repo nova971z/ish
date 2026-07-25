@@ -37,7 +37,16 @@ var DEFAULT_CONFIG = {
   // officiels 2026 ; intermédiaires estimés (à confirmer sur laposte.fr).
   colissimo: [[0.5,14],[1,17],[2,23],[3,33],[5,38.90],[10,64],[15,88],[30,143.02]],
   // Coût logistique par unité en import CONTAINER (groupage LCL réparti).
-  containerPerUnit: { nu: 5.3, coffret: 29 }
+  containerPerUnit: { nu: 5.3, coffret: 29 },
+  // Option FTD Colissimo (Franc de Taxes et Droits) : le destinataire ne paie
+  // RIEN à l'arrivée (promesse du site), taxes + frais refacturés à
+  // l'expéditeur — 5,10 € HT par colis zone OM1 (colissimo.entreprise.
+  // laposte.fr, vérifié 25/07/2026). Appliqué aux envois COLIS (colissimo +
+  // lettre) ; le container a son dédouanement dans containerPerUnit.
+  // ⚠️ Lettre suivie : pas d'option FTD officielle — provision identique pour
+  // couvrir les frais de présentation en douane côté client (à défaut,
+  // basculer ces envois en Colissimo FTD).
+  douanePerParcel: 5.10
 };
 
 function round2(n) { return Math.round(n * 100) / 100; }
@@ -69,18 +78,20 @@ function tvaDomRate(cfg) {
 
 // Résultat économique pour un markup donné.
 // costHT = coût réel HT (TVA FR récupérée). ship = transport €. octroi = taux.
-function evaluate(costHT, markup, ship, octroi, tvaDom, cfg) {
+function evaluate(costHT, markup, ship, octroi, tvaDom, cfg, douane) {
+  douane = Number(douane) || 0;                       // FTD/frais de gestion douane (service, HORS base CIF)
   var priceHt = costHT * (1 + markup);
   var ttc = priceHt * (1 + octroi) * (1 + tvaDom);
   var revenueHT = priceHt * (1 + octroi);            // octroi = revenu (payé à l'import)
   var stripe = ttc * cfg.stripePct + cfg.stripeFix;
   var octroiPaid = octroi * (costHT + ship);          // à l'import, non récupérable
-  var costs = costHT + ship + octroiPaid + stripe + cfg.packaging + fixedPerOrder(cfg);
+  var costs = costHT + ship + octroiPaid + stripe + cfg.packaging + fixedPerOrder(cfg) + douane;
   var netOp = revenueHT - costs;
   var netAfterIS = netOp * (1 - cfg.is);
   return {
     markup: markup, priceHt: round2(priceHt), ttc: round2(ttc),
     transport: round2(ship), octroiPaid: round2(octroiPaid), stripe: round2(stripe),
+    douane: round2(douane),
     fixed: round2(cfg.packaging + fixedPerOrder(cfg)),
     is: round2(netOp * cfg.is), netOp: round2(netOp),
     netAfterIS: round2(netAfterIS),
@@ -89,9 +100,9 @@ function evaluate(costHT, markup, ship, octroi, tvaDom, cfg) {
 }
 
 // Markup minimal (pas de 0,1 %) atteignant la marge cible après IS.
-function solveMarkup(costHT, ship, octroi, tvaDom, cfg) {
+function solveMarkup(costHT, ship, octroi, tvaDom, cfg, douane) {
   for (var m = 0.02; m <= 3; m += 0.001) {
-    if (evaluate(costHT, m, ship, octroi, tvaDom, cfg).marginAfterIS >= cfg.targetNet) return m;
+    if (evaluate(costHT, m, ship, octroi, tvaDom, cfg, douane).marginAfterIS >= cfg.targetNet) return m;
   }
   return 3;
 }
@@ -115,6 +126,13 @@ function shipFor(product, mode, cfg) {
   return { ship: ship, shipKind: shipKind, weight: weight };
 }
 
+// Frais douane/FTD par commande selon le mode d'envoi : colis (colissimo ou
+// lettre) = option FTD par colis ; container/bateau = dédouanement déjà couvert
+// par containerPerUnit.
+function douaneFor(shipKind, cfg) {
+  return (shipKind === 'colissimo' || shipKind === 'lettre') ? (Number(cfg.douanePerParcel) || 0) : 0;
+}
+
 // API principale : prix recommandé pour un produit.
 //   product : { weight_kg, ncCategory, variantRole, ... }
 //   opts.costHT (prioritaire) OU opts.costTTC (÷ tvaFR) = coût fournisseur
@@ -131,8 +149,9 @@ function recommend(product, opts, config) {
   var s = shipFor(product, mode, cfg);
   var octroi = octroiRate(product, cfg);
   var tvaDom = tvaDomRate(cfg);
-  var m = solveMarkup(costHT, s.ship, octroi, tvaDom, cfg);
-  var r = evaluate(costHT, m, s.ship, octroi, tvaDom, cfg);
+  var douane = douaneFor(s.shipKind, cfg);
+  var m = solveMarkup(costHT, s.ship, octroi, tvaDom, cfg, douane);
+  var r = evaluate(costHT, m, s.ship, octroi, tvaDom, cfg, douane);
   r.costHT = round2(costHT);
   r.priceHtFor = { price_ht: r.priceHt, price: round2(r.priceHt * (1 + cfg.tvaFR)) };
   r.mode = mode;
@@ -155,7 +174,7 @@ function marginAt(product, opts, config) {
   var octroi = octroiRate(product, cfg);
   var tvaDom = tvaDomRate(cfg);
   var markup = priceHt / costHT - 1;
-  var r = evaluate(costHT, markup, s.ship, octroi, tvaDom, cfg);
+  var r = evaluate(costHT, markup, s.ship, octroi, tvaDom, cfg, douaneFor(s.shipKind, cfg));
   r.costHT = round2(costHT);
   r.mode = mode; r.shipKind = s.shipKind; r.weight = s.weight;
   return r;
@@ -165,6 +184,7 @@ module.exports = {
   DEFAULT_CONFIG: DEFAULT_CONFIG,
   colissimoCost: colissimoCost,
   shipFor: shipFor,
+  douaneFor: douaneFor,
   recommend: recommend,
   marginAt: marginAt,
   evaluate: evaluate,
