@@ -2225,7 +2225,9 @@
           toast('Produit en rupture de stock', 'error');
           return;
         }
-        openPayModal([{ key: activeProduct.id || activeProduct.slug, title: activeProduct.title, price: activeProduct.price, qty: 1, coffret: _pdpCoffret, paymentLink: activeProduct.paymentLink || '' }]);
+        // Libellé aligné sur addToCart : une ligne « avec coffret » porte son
+        // suffixe partout (modale, email, facture) — le prix, lui, vient du flag.
+        openPayModal([{ key: activeProduct.id || activeProduct.slug, title: activeProduct.title + (_pdpCoffret ? ' + coffret TSTAK' : ''), price: activeProduct.price, qty: 1, coffret: _pdpCoffret, paymentLink: activeProduct.paymentLink || '' }]);
       };
     }
 
