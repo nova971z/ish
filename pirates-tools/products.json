@@ -5250,7 +5250,7 @@
     "category": "Perforateurs",
     "tag": "Nouveau",
     "desc": "Perforateur SDS-Plus 18V LXT 1,7 J (Produit seul).",
-    "img": "images/placeholder.svg",
+    "img": "images/posters/dhr183z.webp",
     "price": 180.23,
     "currency": "EUR",
     "vat": 0.2,
@@ -5259,7 +5259,7 @@
     "stock_label": "En stock",
     "model": "",
     "paymentLink": "",
-    "weight_kg": 3,
+    "weight_kg": 2.9,
     "ncCategory": "power_tool",
     "productType": "pro",
     "tags": [
@@ -5273,8 +5273,28 @@
       "Robuste et endurant, pensé pour un usage professionnel intensif",
       "Idéal pour les chantiers des Antilles / DOM-TOM"
     ],
-    "specs": {},
-    "description_long": "Perforateur SDS-Plus 18V LXT 1,7 J (Produit seul). Outil professionnel Makita de la gamme 18V LXT sans fil (moteur brushless). Vendu en machine seule (sans batterie ni chargeur). Compatible avec les batteries Makita LXT. Fiche technique détaillée à compléter. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "specs": {
+      "Tension": "18 V LXT Li-Ion",
+      "Batteries compatibles": "Gamme Makita LXT 18 V",
+      "Moteur": "Brushless (sans charbon)",
+      "Emmanchement": "SDS-Plus",
+      "Énergie de frappe (EPTA)": "1,7 J",
+      "Vitesse à vide": "0-1100 tr/min",
+      "Cadence de frappe": "0-5000 cps/min",
+      "Capacité de perçage béton": "18 mm",
+      "Capacité de perçage bois": "24 mm",
+      "Capacité de perçage métal": "13 mm",
+      "Anti-vibration": "Système AVT (Anti-Vibration Technology)",
+      "Connectivité": "AWS (Auto-start Wireless System)",
+      "Confort": "Protection électronique anti-surcharge, système anti-poussière",
+      "Niveau de pression acoustique (LpA)": "90 dB(A) — K=3,0",
+      "Niveau de puissance acoustique (LwA)": "101 dB(A)",
+      "Vibrations (perçage)": "7,5 m/s² — K=1,5",
+      "Vibrations (burinage)": "11 m/s²",
+      "Poids (EPTA, avec batterie)": "2,1 - 2,9 kg",
+      "Dimensions (L×l×H)": "288 × 89 × 215 mm"
+    },
+    "description_long": "Perforateur SDS-Plus 18V LXT 1,7 J (Produit seul). Perforateur Makita à mandrin SDS-Plus, idéal pour réaliser des trous dans la maçonnerie. Outil professionnel de la gamme 18V LXT sans fil (moteur brushless haut rendement). Énergie de frappe 1,7 J, vitesse à vide 0-1100 tr/min, cadence 0-5000 cps/min. Capacités : béton 18 mm, bois 24 mm, métal 13 mm. Équipé du système anti-vibration AVT et de la connectivité AWS (Auto-start Wireless System). Protection électronique anti-surcharge et système anti-poussière. Vendu en machine seule (sans batterie ni chargeur), compatible avec les batteries Makita 18V LXT. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
   },
   {
     "id": "makita-dhr242z",
