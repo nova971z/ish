@@ -1,5 +1,5 @@
 /* sw.js — Pirates Tools (PWA) */
-const VERSION        = 'pt-v421';                    // version du SW (logique SW)
+const VERSION        = 'pt-v422';                    // version du SW (logique SW)
 const STATIC_CACHE   = `pt-static-${VERSION}`;
 const RUNTIME_CACHE  = `pt-runtime-${VERSION}`;
 const IMG_CACHE      = `pt-img-${VERSION}`;
@@ -8,7 +8,7 @@ const ORIGIN         = self.location.origin;
 
 // Aligner avec le HTML (cache-busting des assets) — garde-fou CI :
 // scripts/check-asset-versions.js casse la CI si sw.js et index.html divergent.
-const ASSET_VER      = '421';
+const ASSET_VER      = '422';
 
 // Icônes + manifest : fingerprint STABLE, séparé d'ASSET_VER. Ces fichiers ne
 // changent pas à chaque déploiement — les re-cache-buster à chaque bump forçait
@@ -190,9 +190,15 @@ async function handleStatic(event, request){
 }
 
 async function handleImage(request){
-  // Images/icônes -> cache-first puis réseau
+  // Images/icônes -> cache-first puis réseau.
+  // STATIC_CACHE consulté AUSSI : les icônes du shell y sont précachées à
+  // l'install — avant, ce précache n'était JAMAIS lu par ce handler (seule
+  // IMG_CACHE l'était) → chaque icône précachée était re-téléchargée par la
+  // page et stockée en double (~265 Ko de poids mort par install).
   const cached = await fromCache(IMG_CACHE, request);
   if (cached) return cached;
+  const pre = await fromCache(STATIC_CACHE, request);
+  if (pre) return pre;
   try {
     const net = await fetch(request);
     if (net && net.ok) {
