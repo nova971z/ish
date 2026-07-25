@@ -188,7 +188,7 @@ restyle `#comptaPrintable` en clair. **Les 2 imprimables ne se chevauchent pas**
 | Module | Pur ? | Rôle |
 |---|---|---|
 | **`pricing.js`** | PUR | Moteur fiscal DOM-TOM. **MIROIR EXACT de app.js** (gardé par check-pricing). `calcPrice`, `unitCents`. Formule `ttc=ht×(1+octroiExt+octroiRég)×(1+tva)`. |
-| `catalog.js` | Firestore | `loadCatalog` = products.json + `product_overrides` (cache 60s/30s), `findByKey`. |
+| `catalog.js` | Firestore | `loadCatalog` (INTERNE, complet — webhook COGS/marges en dépendent) = products.json + `product_overrides` (cache 60s/30s) ; `loadPublicCatalog` (endpoint public, strippe `PRIVATE_FIELDS` = champs traqueur `priceSrcTTC`/`priceMarkup`/… = coût fournisseur, gardé par check-catalog-public) ; `findByKey`. |
 | `auth.js` | Firestore | `requireAdmin` (claim Firebase OU secret timing-safe). |
 | `http.js` | PUR | `applyCors` (allowlist `ALLOWED_ORIGINS`, refus par défaut). |
 | `firebase.js` | Firestore | `getFirebase` (init unique Admin SDK), `verifyUid` (Bearer→uid), `verifyAdmin` (claim). |
@@ -237,9 +237,11 @@ webhook sur anciens paiements sans uid.
 `check-products-json` (schéma catalogue) · **`check-pricing`** (parité pricing.js ↔
 golden) · **`check-pricing-model`** (sélection transport + marge ≥15%) ·
 **`check-accounting`** (P&L + brandStats) · `check-invoice` (2 régimes TVA/franchise) ·
-**`check-loyalty`** (parité TIERS serveur ↔ app.js) · **`check-csp`** (hash scripts
-inline ↔ vercel.json) · `check-analytics` · **`check-functions`** (≤12 fonctions api/) ·
-`check-firestore-queries` (interdit `orderBy(documentId,'desc')`).
+**`check-loyalty`** (parité TIERS serveur ↔ app.js) · **`check-coffret`** (parité
+supplément coffret client ↔ serveur) · **`check-catalog-public`** (anti-fuite : les
+champs traqueur `price*` ne sortent JAMAIS sur /api/products) · **`check-csp`** (hash
+scripts inline ↔ vercel.json) · `check-analytics` · **`check-functions`** (≤12 fonctions
+api/) · `check-firestore-queries` (interdit `orderBy(documentId,'desc')`).
 
 Autres scripts NON en CI : `set-admin-claim.js`, `test-rules.js` (émulateur Firestore).
 
