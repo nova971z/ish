@@ -54,6 +54,7 @@ async function check(label, promise) {
     await setDoc(doc(db, 'product_overrides/p1'), { price: 100 });
     await setDoc(doc(db, 'stripe_events/e1'), { type: 'x' });
     await setDoc(doc(db, 'rate_limits/r1'), { count: 1 });
+    await setDoc(doc(db, 'partners/artisan1'), { name: 'Menuiserie K', metier: 'Menuisier', tier: 'black', active: true, order: 1 });
   });
 
   console.log('\n── Isolation entre clients ──');
@@ -99,6 +100,15 @@ async function check(label, promise) {
   await check('Alice NE lit PAS analytics_products/', assertFails(getDoc(doc(alice, 'analytics_products/p1'))));
   await check('Alice NE lit PAS analytics_visitors/ (profil d\'affinité d\'autrui)', assertFails(getDoc(doc(alice, 'analytics_visitors/v1'))));
   await check('Alice NE écrit PAS analytics_geo/', assertFails(setDoc(doc(alice, 'analytics_geo/FR'), { count: 1 })));
+
+  console.log('\n── Annuaire partners/ : lecture publique, écriture serveur seule ──');
+  await check('Un ANONYME lit une carte partner (annuaire public)', assertSucceeds(getDoc(doc(anon, 'partners/artisan1'))));
+  await check('Un anonyme LISTE les cartes partners', assertSucceeds(getDocs(collection(anon, 'partners'))));
+  await check('Alice (connectée) lit une carte partner', assertSucceeds(getDoc(doc(alice, 'partners/artisan1'))));
+  await check('Alice NE peut PAS créer une carte partner', assertFails(setDoc(doc(alice, 'partners/pirate'), { name: 'Faux', metier: 'x', tier: 'black', active: true, order: 0 })));
+  await check('Alice NE peut PAS modifier une carte partner', assertFails(updateDoc(doc(alice, 'partners/artisan1'), { name: 'Piraté' })));
+  await check('Un anonyme NE peut PAS écrire dans partners/', assertFails(setDoc(doc(anon, 'partners/pirate2'), { name: 'Faux' })));
+  await check('Alice NE peut PAS supprimer une carte partner', assertFails(deleteDoc(doc(alice, 'partners/artisan1'))));
 
   console.log('\n── Default-deny : collection inconnue ──');
   await check('Alice NE lit PAS une collection non prévue', assertFails(getDoc(doc(alice, 'secret_stuff/x'))));

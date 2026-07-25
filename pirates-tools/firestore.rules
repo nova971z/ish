@@ -79,6 +79,17 @@ service cloud.firestore {
       }
     }
 
+    // ---- partners/{id} : annuaire public « Nos artisans » ------------------
+    // Cartes de l'annuaire partenaires (Phase 2 abonnements). Données PUBLIQUES
+    // par nature (l'artisan souscrit précisément pour être affiché) : lecture
+    // ouverte à tous (la page #/artisans lit via le SDK client — pas de 13e
+    // fonction Vercel possible, plan Hobby 12/12). Écriture SERVEUR UNIQUEMENT
+    // (admin.js type=partner-save/partner-delete via Admin SDK, requireAdmin).
+    match /partners/{partnerId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
     // ---- Collections SERVEUR UNIQUEMENT (Admin SDK, contourne les règles) --
     // Aucune de ces collections n'est jamais lue ni écrite par le client.
     // Les fermer explicitement documente l'intention (et double le catch-all).

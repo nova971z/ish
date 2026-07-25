@@ -44,7 +44,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=429">
+  <link rel="stylesheet" href="styles.css?v=430">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -264,6 +264,15 @@
       <section class="home-products-strip home-products-strip--recent" id="recentlyViewedSection" hidden>
         <h2 class="home-products-strip__title">Récemment consultés</h2>
         <div class="home-products-strip__track" id="recentlyViewedTrack"></div>
+      </section>
+
+      <!-- =================== NOS ARTISANS PARTENAIRES (Black) ===================
+           Vitrine des partenaires Black sur l'accueil : même mécanique que le
+           bandeau produits (scroll horizontal). Masquée tant qu'aucun partenaire
+           Black actif n'existe (renderPartnersStrip, app.js). -->
+      <section class="home-products-strip home-products-strip--partners" id="partnersStripSection" hidden>
+        <h2 class="home-products-strip__title">Nos artisans partenaires</h2>
+        <div class="home-products-strip__track" id="partnersStripTrack"></div>
       </section>
 
       <!-- =================== ABONNEMENTS & SERVICES =================== -->
@@ -882,6 +891,23 @@
     <!-- ABONNEMENT -->
     <section id="view-abonnement" class="view hidden" data-route="/abonnement" role="region" aria-labelledby="abo-h1">
       <div id="aboContent"></div>
+    </section>
+
+    <!-- ANNUAIRE ARTISANS (vitrine partenaires, Phase 2 abonnements) -->
+    <section id="view-artisans" class="view hidden" data-route="/artisans" role="region" aria-labelledby="artisans-h1">
+      <div class="container">
+        <header class="artisans-header">
+          <h1 id="artisans-h1" tabindex="-1">Nos artisans</h1>
+          <p class="artisans-sub">Le réseau des professionnels partenaires Pirates Tools — des artisans locaux de confiance, membres du programme d'entraide.</p>
+        </header>
+        <div id="artisansGrid" class="artisans-grid" aria-live="polite">
+          <p class="no-results">Chargement...</p>
+        </div>
+        <div class="artisans-join">
+          <p>Vous êtes artisan&nbsp;? Rejoignez le réseau et apparaissez ici.</p>
+          <a class="btn primary" href="#/abonnement">Découvrir les abonnements</a>
+        </div>
+      </div>
     </section>
 
     <!-- CONTACT -->
@@ -1598,6 +1624,13 @@
         <span>Contact</span>
       </a>
 
+      <a href="#/artisans" data-route="#/artisans">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M14.7 6.3a5 5 0 0 0-6.6 6.6L3 18v3h3l5.1-5.1a5 5 0 0 0 6.6-6.6l-3.2 3.2-2.8-2.8 3-3z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Nos artisans</span>
+      </a>
+
       <hr class="menu-divider">
       <span class="menu-section-label">Livraison DOM-TOM</span>
       <a href="#/guadeloupe" class="menu-terr-link">🇬🇵 Guadeloupe</a>
@@ -1633,7 +1666,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=429"></script>
+  <script defer src="app.js?v=430"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

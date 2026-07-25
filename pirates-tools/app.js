@@ -3629,10 +3629,166 @@
     }
   }
 
+  // ── Annuaire artisans (Phase 2 abonnements) ────────────────
+  // Données : collection Firestore `partners` — écrite UNIQUEMENT par le
+  // serveur (admin.js type=partner-save, Admin SDK), lue publiquement par le
+  // SDK client (rules : read true / write false). Pas d'endpoint GET dédié :
+  // plan Vercel Hobby 12/12 fonctions (décision Phase 2, PLAN-ABONNEMENTS.md).
+  // window.PT_PARTNERS_FIXTURE = couture de test (Playwright) : si un tableau
+  // est présent, il remplace Firestore (aucun réseau).
+
+  var _partnersPromise = null;
+
+  var PARTNER_TIERS = {
+    basique: { label: 'Basique', photos: 0 },
+    pro:     { label: 'Pro',     photos: 1 },
+    gold:    { label: 'Gold',    photos: 3 },
+    black:   { label: 'Partenaire', photos: 6 }
+  };
+
+  // Défense en profondeur : même si les docs sont écrits par le serveur (déjà
+  // validés), on n'injecte JAMAIS une source d'image qui ne soit pas une
+  // data-URL image inline (miroir du contrôle serveur isDataImg d'admin.js).
+  function isSafePartnerImg(src) {
+    return typeof src === 'string' && /^data:image\/(jpeg|png|webp);base64,/.test(src);
+  }
+  function isSafePartnerLink(url) {
+    return typeof url === 'string' && /^https?:\/\//i.test(url);
+  }
+
+  // Normalisation COMMUNE fixture/Firestore : cartes inactives exclues, tri
+  // par `order` croissant (pas de orderBy Firestore : un doc SANS le champ
+  // serait silencieusement exclu de la requête ; tri client robuste).
+  function normalizePartners(list) {
+    return list.filter(function (p) { return p && p.active !== false; })
+      .sort(function (a, b) { return (Number(a.order) || 0) - (Number(b.order) || 0); });
+  }
+
+  function loadPartners() {
+    if (_partnersPromise) return _partnersPromise;
+    if (Array.isArray(window.PT_PARTNERS_FIXTURE)) {
+      _partnersPromise = Promise.resolve(normalizePartners(window.PT_PARTNERS_FIXTURE.slice()));
+      return _partnersPromise;
+    }
+    _partnersPromise = new Promise(function (resolve) {
+      whenFirebaseReady(function (fb) {
+        if (!fb || !fb.configured || !fb.collection || !fb.getDocs) { resolve([]); return; }
+        fb.getDocs(fb.collection(fb.db, 'partners')).then(function (snap) {
+          var list = [];
+          snap.forEach(function (d) {
+            var p = d.data() || {};
+            p.id = d.id;
+            list.push(p);
+          });
+          resolve(normalizePartners(list));
+        }).catch(function () {
+          _partnersPromise = null; // erreur réseau → retenter à la prochaine visite
+          resolve([]);
+        });
+      });
+    });
+    return _partnersPromise;
+  }
+
+  function partnerWaLink(p) {
+    var digits = String(p.whatsapp || '').replace(/\D/g, '');
+    return digits ? ('https://wa.me/' + digits) : '';
+  }
+
+  // 4 designs par tier : basique = texte seul ; pro = 1 photo ; gold = 3 photos
+  // + lien site ; black = premium (6 photos, badge Partenaire, lien mis en avant).
+  function partnerCardHTML(p) {
+    var tier = PARTNER_TIERS[p.tier] ? p.tier : 'basique';
+    var conf = PARTNER_TIERS[tier];
+    var photos = (Array.isArray(p.photos) ? p.photos : []).filter(isSafePartnerImg).slice(0, conf.photos);
+    var name = escapeHTML(String(p.name || ''));
+    var metier = escapeHTML(String(p.metier || ''));
+    var commune = escapeHTML(String(p.commune || ''));
+    var desc = escapeHTML(String(p.desc || ''));
+    var logo = tier !== 'basique' && isSafePartnerImg(p.logo) ? p.logo : '';
+    var wa = partnerWaLink(p);
+    var link = (tier === 'gold' || tier === 'black') && isSafePartnerLink(p.link) ? p.link : '';
+
+    var html = '<article class="partner-card partner-card--' + tier + '" data-partner-id="' + escapeHTML(String(p.id || '')) + '">';
+    if (tier === 'black') {
+      html += '<span class="partner-card__badge">★ Partenaire Black</span>';
+    }
+    if (photos.length) {
+      html += '<div class="partner-card__cover"><img src="' + photos[0] + '" alt="' + name + '" loading="lazy"></div>';
+      if (photos.length > 1) {
+        html += '<div class="partner-card__thumbs">';
+        for (var i = 1; i < photos.length; i++) {
+          html += '<img src="' + photos[i] + '" alt="" loading="lazy">';
+        }
+        html += '</div>';
+      }
+    }
+    html += '<div class="partner-card__body">'
+          + '<div class="partner-card__head">'
+          + (logo ? '<img class="partner-card__logo" src="' + logo + '" alt="" loading="lazy">' : '')
+          + '<h3 class="partner-card__name">' + name + '</h3>'
+          + '</div>'
+          + (metier ? '<span class="partner-card__metier">' + metier + (commune ? ' — ' + commune : '') + '</span>' : '')
+          + (desc ? '<p class="partner-card__desc">' + desc + '</p>' : '');
+    if (wa || link) {
+      html += '<div class="partner-card__actions">';
+      if (wa) html += '<a class="partner-card__btn partner-card__btn--wa" href="' + wa + '" target="_blank" rel="noopener noreferrer">💬 WhatsApp</a>';
+      if (link) html += '<a class="partner-card__btn" href="' + escapeHTML(link) + '" target="_blank" rel="noopener noreferrer">🌐 Son site</a>';
+      html += '</div>';
+    }
+    html += '</div></article>';
+    return html;
+  }
+
+  function renderArtisans() {
+    var grid = $('#artisansGrid');
+    if (!grid) return;
+    grid.innerHTML = '<p class="no-results">Chargement...</p>';
+    loadPartners().then(function (list) {
+      if (!list.length) {
+        grid.innerHTML = '<div class="artisans-empty">'
+          + '<span class="artisans-empty__icon" aria-hidden="true">🛠️</span>'
+          + '<p>Les premiers artisans partenaires arrivent bientôt.</p>'
+          + '</div>';
+        return;
+      }
+      grid.innerHTML = list.map(partnerCardHTML).join('');
+    });
+  }
+
+  // Accueil : bandeau horizontal (même mécanique que « Nos produits »), réservé
+  // aux partenaires BLACK (premium). Masqué tant qu'il n'y en a aucun.
+  function renderPartnersStrip() {
+    var section = document.getElementById('partnersStripSection');
+    var track = document.getElementById('partnersStripTrack');
+    if (!section || !track) return;
+    loadPartners().then(function (list) {
+      var blacks = list.filter(function (p) { return p.tier === 'black'; });
+      if (!blacks.length) { section.hidden = true; return; }
+      track.innerHTML = blacks.map(function (p) {
+        var photos = (Array.isArray(p.photos) ? p.photos : []).filter(isSafePartnerImg);
+        var name = escapeHTML(String(p.name || ''));
+        var metier = escapeHTML(String(p.metier || ''));
+        return '<a class="partner-strip-card" href="#/artisans" data-track="home:partner">'
+          + (photos.length
+              ? '<div class="partner-strip-card__img"><img src="' + photos[0] + '" alt="' + name + '" loading="lazy"></div>'
+              : '<div class="partner-strip-card__img partner-strip-card__img--empty" aria-hidden="true">🛠️</div>')
+          + '<span class="partner-strip-card__badge">★ Partenaire</span>'
+          + '<span class="partner-strip-card__name">' + name + '</span>'
+          + (metier ? '<span class="partner-strip-card__metier">' + metier + '</span>' : '')
+          + '</a>';
+      }).join('')
+      + '<a class="partner-strip-card partner-strip-card--more" href="#/artisans">'
+      + '<span class="partner-strip-card__more-icon" aria-hidden="true">→</span>'
+      + '<span class="partner-strip-card__name">Voir tous nos artisans</span></a>';
+      section.hidden = false;
+    });
+  }
+
   // ── Router (hash-based SPA) ────────────────────────────────
 
   var ROUTES = ['/', '/catalogue', '/produit', '/devis', '/compte', '/auth', '/abonnement',
-                '/admin', '/merci', '/contact', '/favoris',
+                '/admin', '/merci', '/contact', '/favoris', '/artisans',
                 '/mentions-legales', '/confidentialite', '/cgv'];
 
   // Territory landing slugs (keys) → territory codes (values).
@@ -3782,6 +3938,7 @@
         setupHomeReviews();
         setup3DCarousel();
         setupNewsletterForm();
+        renderPartnersStrip();
         break;
       case '/catalogue':
         renderCategoryChips();
@@ -3821,6 +3978,9 @@
         break;
       case '/favoris':
         renderWishlist();
+        break;
+      case '/artisans':
+        renderArtisans();
         break;
     }
 
@@ -7175,6 +7335,243 @@
     });
   }
 
+  // ── Dashboard : Partenaires (annuaire artisans, Phase 2) ───
+  // CRUD des cartes de l'annuaire via /api/admin (partner-save/partner-delete,
+  // Admin SDK serveur — le client n'écrit JAMAIS dans `partners`, rules
+  // write:false). Photos compressées côté navigateur (canvas → WebP ≤ ~120 Ko,
+  // sous le plafond serveur DATAURL_MAX 170 000 caractères).
+
+  var _adminPartnersList = [];
+  var _adminPartnerPhotos = [];   // dataURLs de la carte en cours d'édition
+  var _adminPartnerLogo = '';
+
+  var ADMIN_PARTNER_PHOTOS_MAX = { basique: 0, pro: 1, gold: 3, black: 6 };
+
+  function compressPartnerImage(file, maxSide, cb) {
+    var url = URL.createObjectURL(file);
+    var img = new Image();
+    img.onload = function () {
+      try {
+        var scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+        var canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(img.width * scale));
+        canvas.height = Math.max(1, Math.round(img.height * scale));
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        // Qualité dégressive jusqu'à passer sous le plafond serveur (170 000
+        // caractères base64) avec de la marge (~150 000).
+        var out = '';
+        var qualities = [0.82, 0.7, 0.58, 0.45, 0.32];
+        for (var i = 0; i < qualities.length; i++) {
+          out = canvas.toDataURL('image/webp', qualities[i]);
+          if (out.indexOf('data:image/webp') !== 0) out = canvas.toDataURL('image/jpeg', qualities[i]);
+          if (out.length <= 150000) break;
+        }
+        URL.revokeObjectURL(url);
+        cb(out.length <= 170000 ? out : '');
+      } catch (_) { URL.revokeObjectURL(url); cb(''); }
+    };
+    img.onerror = function () { URL.revokeObjectURL(url); cb(''); };
+    img.src = url;
+  }
+
+  function loadAdminPartners() {
+    var el = document.getElementById('adminPartnersBody');
+    if (!el) return;
+    el.innerHTML = '<p class="admin-loading">Chargement…</p>';
+    adminGet('partners').then(function (data) {
+      _adminPartnersList = data.partners || [];
+      renderAdminPartners(el);
+    }).catch(function (e) {
+      el.innerHTML = '<p class="admin-error">Erreur : ' + escapeHTML(e.message) + '</p>';
+    });
+  }
+
+  function adminPartnerFormHTML(p) {
+    p = p || {};
+    var tiers = ['basique', 'pro', 'gold', 'black'];
+    var tierOpts = tiers.map(function (t) {
+      return '<option value="' + t + '"' + (p.tier === t ? ' selected' : '') + '>'
+        + t.charAt(0).toUpperCase() + t.slice(1) + '</option>';
+    }).join('');
+    return '<form id="adminPartnerForm" class="admin-tools-form" data-partner-id="' + escapeHTML(String(p.id || '')) + '">'
+      + '<h2 class="admin-subtitle">' + (p.id ? 'Modifier la carte' : 'Nouvelle carte artisan') + '</h2>'
+      + '<label class="admin-field"><span>Nom / Entreprise *</span>'
+      + '<input type="text" id="apName" maxlength="80" required value="' + escapeHTML(String(p.name || '')) + '"></label>'
+      + '<label class="admin-field"><span>Métier * (ex. Charpentier)</span>'
+      + '<input type="text" id="apMetier" maxlength="40" required value="' + escapeHTML(String(p.metier || '')) + '"></label>'
+      + '<label class="admin-field"><span>Commune</span>'
+      + '<input type="text" id="apCommune" maxlength="40" value="' + escapeHTML(String(p.commune || '')) + '"></label>'
+      + '<label class="admin-field"><span>Abonnement</span>'
+      + '<select id="apTier">' + tierOpts + '</select></label>'
+      + '<label class="admin-field"><span>Description (240 max)</span>'
+      + '<textarea id="apDesc" rows="3" maxlength="240">' + escapeHTML(String(p.desc || '')) + '</textarea></label>'
+      + '<label class="admin-field"><span>WhatsApp (chiffres, ex. 590690...)</span>'
+      + '<input type="text" id="apWhatsapp" maxlength="20" value="' + escapeHTML(String(p.whatsapp || '')) + '"></label>'
+      + '<label class="admin-field"><span>Site web (https://…, Gold/Black)</span>'
+      + '<input type="url" id="apLink" maxlength="200" value="' + escapeHTML(String(p.link || '')) + '"></label>'
+      + '<label class="admin-field"><span>Ordre d\'affichage (petit = premier)</span>'
+      + '<input type="number" id="apOrder" value="' + (Number.isFinite(Number(p.order)) ? Number(p.order) : 999) + '"></label>'
+      + '<label class="admin-field admin-field--inline"><input type="checkbox" id="apActive"' + (p.active !== false ? ' checked' : '') + '> <span>Carte visible (active)</span></label>'
+      + '<label class="admin-field"><span>Logo (Pro/Gold/Black)</span>'
+      + '<input type="file" id="apLogoFile" accept="image/*"></label>'
+      + '<div id="apLogoPreview" class="admin-partner-photos"></div>'
+      + '<label class="admin-field"><span>Photos (selon abonnement : Pro 1, Gold 3, Black 6)</span>'
+      + '<input type="file" id="apPhotoFiles" accept="image/*" multiple></label>'
+      + '<div id="apPhotosPreview" class="admin-partner-photos"></div>'
+      + '<div class="ig-publish-actions">'
+      + '<button type="submit" class="btn primary">' + (p.id ? 'Enregistrer' : 'Créer la carte') + '</button>'
+      + (p.id ? '<button type="button" class="btn btn--ghost" id="apCancelEdit">Annuler</button>' : '')
+      + '</div>'
+      + '<span id="apStatus" class="admin-row__status" aria-live="polite"></span>'
+      + '</form>';
+  }
+
+  function renderAdminPartnerPhotos() {
+    var logoBox = document.getElementById('apLogoPreview');
+    var photosBox = document.getElementById('apPhotosPreview');
+    if (logoBox) {
+      logoBox.innerHTML = _adminPartnerLogo
+        ? '<span class="admin-partner-photo"><img src="' + _adminPartnerLogo + '" alt="Logo"><button type="button" data-remove-logo aria-label="Retirer le logo">✕</button></span>'
+        : '';
+      var rmLogo = logoBox.querySelector('[data-remove-logo]');
+      if (rmLogo) rmLogo.onclick = function () { _adminPartnerLogo = ''; renderAdminPartnerPhotos(); };
+    }
+    if (photosBox) {
+      photosBox.innerHTML = _adminPartnerPhotos.map(function (src, i) {
+        return '<span class="admin-partner-photo"><img src="' + src + '" alt="Photo ' + (i + 1) + '"><button type="button" data-remove-photo="' + i + '" aria-label="Retirer la photo ' + (i + 1) + '">✕</button></span>';
+      }).join('');
+      photosBox.querySelectorAll('[data-remove-photo]').forEach(function (btn) {
+        btn.onclick = function () {
+          _adminPartnerPhotos.splice(Number(btn.getAttribute('data-remove-photo')), 1);
+          renderAdminPartnerPhotos();
+        };
+      });
+    }
+  }
+
+  function bindAdminPartnerForm(el, editing) {
+    var form = document.getElementById('adminPartnerForm');
+    if (!form) return;
+    _adminPartnerPhotos = (editing && Array.isArray(editing.photos)) ? editing.photos.slice() : [];
+    _adminPartnerLogo = (editing && editing.logo) || '';
+    renderAdminPartnerPhotos();
+
+    var logoFile = document.getElementById('apLogoFile');
+    if (logoFile) logoFile.onchange = function () {
+      var f = logoFile.files && logoFile.files[0];
+      if (!f) return;
+      compressPartnerImage(f, 320, function (dataUrl) {
+        if (!dataUrl) { toast('Image logo illisible', 'error'); return; }
+        _adminPartnerLogo = dataUrl;
+        renderAdminPartnerPhotos();
+      });
+      logoFile.value = '';
+    };
+
+    var photoFiles = document.getElementById('apPhotoFiles');
+    if (photoFiles) photoFiles.onchange = function () {
+      var tier = (document.getElementById('apTier') || {}).value || 'basique';
+      var max = ADMIN_PARTNER_PHOTOS_MAX[tier] || 0;
+      var files = Array.prototype.slice.call(photoFiles.files || []);
+      photoFiles.value = '';
+      if (!max) { toast('L\'abonnement Basique n\'a pas de photo', 'error'); return; }
+      files.forEach(function (f) {
+        compressPartnerImage(f, 900, function (dataUrl) {
+          if (!dataUrl) { toast('Image illisible : ' + f.name, 'error'); return; }
+          if (_adminPartnerPhotos.length >= max) { toast('Maximum ' + max + ' photo(s) pour ce tier', 'error'); return; }
+          _adminPartnerPhotos.push(dataUrl);
+          renderAdminPartnerPhotos();
+        });
+      });
+    };
+
+    var cancel = document.getElementById('apCancelEdit');
+    if (cancel) cancel.onclick = function () { renderAdminPartners(el); };
+
+    form.onsubmit = function (e) {
+      e.preventDefault();
+      var statusEl = document.getElementById('apStatus');
+      var submit = form.querySelector('button[type="submit"]');
+      var tier = (document.getElementById('apTier') || {}).value || 'basique';
+      var body = {
+        id: form.getAttribute('data-partner-id') || '',
+        name: (document.getElementById('apName') || {}).value || '',
+        metier: (document.getElementById('apMetier') || {}).value || '',
+        commune: (document.getElementById('apCommune') || {}).value || '',
+        tier: tier,
+        desc: (document.getElementById('apDesc') || {}).value || '',
+        whatsapp: (document.getElementById('apWhatsapp') || {}).value || '',
+        link: (document.getElementById('apLink') || {}).value || '',
+        order: Number((document.getElementById('apOrder') || {}).value),
+        active: !!(document.getElementById('apActive') || {}).checked,
+        logo: _adminPartnerLogo,
+        photos: _adminPartnerPhotos.slice(0, ADMIN_PARTNER_PHOTOS_MAX[tier] || 0)
+      };
+      submit.disabled = true;
+      if (statusEl) { statusEl.textContent = 'Enregistrement…'; statusEl.className = 'admin-row__status'; }
+      adminPostType('partner-save', body).then(function () {
+        toast('Carte enregistrée ✓', 'success');
+        loadAdminPartners();
+      }).catch(function (err) {
+        submit.disabled = false;
+        if (statusEl) { statusEl.textContent = 'Erreur : ' + err.message; statusEl.className = 'admin-row__status is-error'; }
+      });
+    };
+  }
+
+  function renderAdminPartners(el) {
+    el = el || document.getElementById('adminPartnersBody');
+    if (!el) return;
+    var rows = _adminPartnersList.map(function (p) {
+      return '<div class="admin-row" data-partner-row="' + escapeHTML(String(p.id || '')) + '">'
+        + '<div class="admin-row__info">'
+        + '<strong>' + escapeHTML(String(p.name || '')) + '</strong>'
+        + ' <span class="admin-row__meta">' + escapeHTML(String(p.metier || '')) + ' · ' + escapeHTML(String(p.tier || 'basique'))
+        + (p.active === false ? ' · <em>masquée</em>' : '') + ' · ordre ' + (Number(p.order) || 0) + '</span>'
+        + '</div>'
+        + '<div class="admin-row__actions">'
+        + '<button type="button" class="btn btn--ghost" data-partner-edit="' + escapeHTML(String(p.id || '')) + '">Modifier</button>'
+        + '<button type="button" class="btn btn--ghost" data-partner-del="' + escapeHTML(String(p.id || '')) + '">Supprimer</button>'
+        + '</div></div>';
+    }).join('');
+    el.innerHTML = '<div class="admin-list">'
+      + (rows || '<p class="admin-hint">Aucune carte pour l\'instant.</p>')
+      + '</div><hr class="menu-divider">' + adminPartnerFormHTML(null);
+
+    bindAdminPartnerForm(el, null);
+
+    el.querySelectorAll('[data-partner-edit]').forEach(function (btn) {
+      btn.onclick = function () {
+        var id = btn.getAttribute('data-partner-edit');
+        var p = null;
+        for (var i = 0; i < _adminPartnersList.length; i++) {
+          if (_adminPartnersList[i].id === id) { p = _adminPartnersList[i]; break; }
+        }
+        if (!p) return;
+        var formSlot = el.querySelector('#adminPartnerForm');
+        if (formSlot) formSlot.outerHTML = adminPartnerFormHTML(p);
+        bindAdminPartnerForm(el, p);
+        var f = el.querySelector('#adminPartnerForm');
+        if (f) f.scrollIntoView({ block: 'nearest' });
+      };
+    });
+
+    el.querySelectorAll('[data-partner-del]').forEach(function (btn) {
+      btn.onclick = function () {
+        var id = btn.getAttribute('data-partner-del');
+        if (!window.confirm('Supprimer définitivement cette carte ?')) return;
+        btn.disabled = true;
+        adminPostType('partner-delete', { id: id }).then(function () {
+          toast('Carte supprimée', 'success');
+          loadAdminPartners();
+        }).catch(function (err) {
+          btn.disabled = false;
+          toast('Erreur : ' + err.message, 'error');
+        });
+      };
+    });
+  }
+
   function renderAdmin() {
     var view = document.getElementById('adminView');
     if (!view) return;
@@ -7217,6 +7614,7 @@
       + '<button type="button" class="admin-tab" data-admin-tab="invoices" role="tab" aria-selected="false">Factures</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="stats" role="tab" aria-selected="false">Statistiques</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="clients" role="tab" aria-selected="false">Clients</button>'
+      + '<button type="button" class="admin-tab" data-admin-tab="partners" role="tab" aria-selected="false">Partenaires</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="orders" role="tab" aria-selected="false">Commandes</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="tools" role="tab" aria-selected="false">Outils</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="instagram" role="tab" aria-selected="false">Instagram</button>'
@@ -7362,6 +7760,12 @@
       + '<button type="button" class="btn btn--ghost" id="adminClientsRefresh">Rafraîchir</button>'
       + '</div>'
 
+      // ── Partenaires (annuaire artisans, Phase 2 abonnements) ──
+      + '<div class="admin-pane" data-admin-pane="partners" hidden>'
+      + '<p class="admin-hint">Cartes de l\'annuaire « Nos artisans » (#/artisans). Les partenaires Black apparaissent aussi sur l\'accueil. Photos compressées automatiquement (≤ ~120 Ko chacune).</p>'
+      + '<div id="adminPartnersBody"><p class="admin-loading">Chargement…</p></div>'
+      + '</div>'
+
       + '</div>';
 
     var logoutBtn = document.getElementById('adminLogoutBtn');
@@ -7396,6 +7800,7 @@
         if (target === 'instagram') initAdminInstagram();
         if (target === 'stats') loadAdminStats();
         if (target === 'clients') loadAdminClients();
+        if (target === 'partners') loadAdminPartners();
         if (target !== 'stats') destroyAdminGlobe(); // libère le contexte WebGL
       });
     });
@@ -8807,6 +9212,10 @@
         break;
       case '/favoris':
         setDocMeta('Mes favoris — ' + BASE_TITLE, 'Tes produits favoris sur Pirates Tools.');
+        removeJsonLd('product');
+        break;
+      case '/artisans':
+        setDocMeta('Nos artisans — ' + BASE_TITLE, 'L\'annuaire des artisans partenaires Pirates Tools : des professionnels locaux de confiance en Guadeloupe et dans les DOM-TOM.');
         removeJsonLd('product');
         break;
       case '/admin':

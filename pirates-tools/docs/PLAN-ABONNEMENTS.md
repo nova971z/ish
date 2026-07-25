@@ -67,7 +67,7 @@ en tête pour comparer sans repasser par l'accueil.
 (coût logistique incluse) − ÉPI ~60 € − pub 120 € − domaine 8 € − Stripe ~21 €
 ≈ **+560 € net** + 12 stories de visibilité croisée. ×10 places ≈ 5 600 €/an.
 
-## PHASE 1 — L'offre publique (pages + valeurs réelles) ✅ EN COURS
+## PHASE 1 — L'offre publique (pages + valeurs réelles) ✅ LIVRÉE (25/07, SW v429)
 1. Source de données UNIQUE `ABO_DATA` (fin du doublon PLAN_INFO/ABO_DATA).
 2. 4 tiers réécrits : Black Partenaire = spec finale complète (pack bienvenue,
    bon, entraide, impayés, 10 places) ; Basique/Pro/Gold = proposition sobre
@@ -80,16 +80,27 @@ en tête pour comparer sans repasser par l'accueil.
    formulaire de contact (pré-lancement affiché honnêtement).
 5. Vérif Playwright (4 orbes, page Black, checkbox→CTA, 0 erreur JS) + CI + SW.
 
-## PHASE 2 — Annuaire public « Nos artisans »
-1. Route `#/artisans` + section renvoi accueil. Collection Firestore
-   `partners` (écriture server-only, rules default-deny inchangées).
-2. 4 designs de cartes (texte → premium). Vide propre au départ.
-3. Admin : onglet Partenaires (CRUD carte, métier, tier, photos compressées
-   côté client ≤ 900 Ko — pas de nouveau service de stockage).
-4. Endpoint lecture publique des cartes via /api/products ? NON — nouvelle
-   lecture via admin ? À trancher : GET public dédié impossible (12/12
-   fonctions Vercel) → lecture Firestore côté client avec rules `read: true`
-   sur `partners` uniquement (données publiques par nature).
+## PHASE 2 — Annuaire public « Nos artisans » ✅ LIVRÉE (25/07, SW v430)
+1. ✅ Route `#/artisans` (vue dédiée, grille + état vide + CTA abonnements)
+   + lien menu « Nos artisans » + strip ACCUEIL réservé aux partenaires BLACK,
+   placé juste AU-DESSUS de la section abonnements, même mécanique de scroll
+   horizontal que « Nos produits » (masqué si aucun Black actif).
+2. ✅ 4 designs de cartes dégressifs : basique = texte seul ; pro = logo +
+   1 photo ; gold = 3 photos + lien site (liseré or) ; black = premium
+   (badge ★, 6 photos, halo violet, lien mis en avant). Cartes inactives
+   exclues, tri par `order` (client-side — orderBy Firestore exclurait les
+   docs sans le champ).
+3. ✅ Admin : onglet Partenaires (liste + upsert + delete via
+   /api/admin?type=partners|partner-save|partner-delete, requireAdmin,
+   allowlist stricte serveur). Photos compressées côté navigateur (canvas →
+   WebP qualité dégressive ≤ 150 000 caractères, plafond serveur 170 000 —
+   les photos vivent DANS le doc Firestore, pas de service de stockage).
+4. ✅ TRANCHÉ : lecture Firestore côté client (SDK) avec rules `read: if true`
+   sur `partners` uniquement (données publiques par nature, écriture
+   `if false` = Admin SDK seul). GET public dédié impossible (12/12 fonctions
+   Vercel). Émulateur 41/41 (7 assertions partners). Vérif Playwright :
+   verify-partners.mjs 18/18 + verify-partners-admin.mjs 9/9 (fixture
+   PT_PARTNERS_FIXTURE, XSS échappé, photos non-dataURL rejetées).
 
 ## PHASE 3 — Souscription réelle (Stripe Subscriptions)
 1. Stripe Checkout mode subscription (4 prix), webhook `invoice.paid` →

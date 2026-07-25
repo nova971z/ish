@@ -53,7 +53,7 @@
 ### Vues SPA (`#view-*` + `data-route`) — le routeur bascule le `.hidden`
 | id | route | Contenu clé |
 |---|---|---|
-| `view-home` | `/` | marques, bannière 3D, strip produits, récemment vus, abonnements, avis, newsletter |
+| `view-home` | `/` | marques, bannière 3D, strip produits, récemment vus, **strip partenaires Black** (`#partnersStripSection`, au-dessus des abonnements), abonnements, avis, newsletter |
 | `view-catalogue` | `/catalogue` | `#q` (recherche), `#tag` (select), `#catList` (chips), `#list` (grille), **`#pager`** |
 | `view-produit` | `/produit` | `#pdpHero`, **`#pdpVariant`** (switch solo/coffret), split 3D+specs, features, kit, CTA, avis, liés |
 | `view-devis` | `/devis` | panier `#devisList`, livraison, fidélité, footer sticky |
@@ -62,6 +62,7 @@
 | `view-abonnement` | `/abonnement` | `#aboContent` (rendu JS) |
 | `view-contact` | `/contact` | `#contactForm` (+ honeypot) |
 | `view-wishlist` | `/favoris` | `#wishlistList` |
+| `view-artisans` | `/artisans` | `#artisansGrid` (annuaire partenaires, 4 designs par tier) + CTA abonnements |
 | `view-admin` | `/admin` | **`#adminView`** — TOUT l'admin est monté par JS ici (aucune sous-vue statique) |
 | `view-territoire` | `/territoire` | atterrissage DOM-TOM (`#/guadeloupe`…`#/mayotte` y résolvent) |
 | `view-merci` | `/merci` | confirmation paiement |
@@ -221,6 +222,7 @@ Client = soumis aux règles ; serveur (Admin SDK) = bypass.
 | `product_overrides/{id}` | ❌ | admin, traqueur |
 | `rate_limits/{id}` | ❌ | ratelimit (IP hachée) |
 | `analytics_*` (daily/products/clicks/geo/visitors/events_recent) | ❌ | events, purge cron |
+| `partners/{id}` | ✅ **read public** (annuaire artisans) ; write ❌ | admin (partner-save/-delete) |
 
 `firestore.indexes.json` : aucun index composite ; 2 `fieldOverrides`
 (collectionGroup `orders.stripeSessionId` + `.paymentIntentId`) pour le repli

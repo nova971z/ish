@@ -195,6 +195,15 @@ module.exports = async function handler(req, res) {
         return res.status(200).json({ ok: true, html: invoice.renderHtml(built), number: built.number });
       }
 
+      // ── Partenaires (annuaire artisans) : liste admin ──────────
+      if (type === 'partners') {
+        const snap = await db.collection('partners').orderBy('order').get()
+          .catch(() => db.collection('partners').get());
+        const partners = [];
+        snap.forEach((doc) => { partners.push(Object.assign({ id: doc.id }, doc.data())); });
+        return res.status(200).json({ ok: true, partners });
+      }
+
       // ── Liste des charges saisies ──────────────────────────────
       if (type === 'charges') {
         const chSnap = await db.collection('charges').orderBy('dateMs', 'desc').limit(500).get().catch(() => db.collection('charges').limit(500).get());
@@ -306,6 +315,58 @@ module.exports = async function handler(req, res) {
   // produit (override priceSrcTTC en priorité, sinon price_ht × VAT du produit).
   if (req.method === 'POST' && ((req.query && req.query.type) === 'reprice-all')) {
     return handleRepriceAll(req, res, admin, db);
+  }
+
+  // ── POST ?type=partner-save : carte artisan de l'annuaire (upsert) ──
+  // Validation STRICTE par allowlist : la carte est affichée publiquement
+  // (route #/artisans + strip accueil), rien d'arbitraire n'entre en base.
+  // Photos/logo = dataURL compressées côté admin (≤ ~120 Ko chacune) ; le
+  // nombre de photos est plafonné par le tier (annuaire dégressif).
+  if (req.method === 'POST' && ((req.query && req.query.type) === 'partner-save')) {
+    try {
+      const b = req.body || {};
+      const TIERS = ['basique', 'pro', 'gold', 'black'];
+      const PHOTOS_MAX = { basique: 0, pro: 1, gold: 3, black: 6 };
+      const DATAURL_MAX = 170000; // ~125 Ko base64 par image
+      const tier = TIERS.indexOf(b.tier) !== -1 ? b.tier : 'basique';
+      const name = String(b.name || '').trim().slice(0, 80);
+      const metier = String(b.metier || '').trim().slice(0, 40);
+      if (!name || !metier) return res.status(400).json({ ok: false, error: 'name et metier requis' });
+      const isDataImg = (v) => typeof v === 'string' && /^data:image\/(jpeg|png|webp);base64,/.test(v) && v.length <= DATAURL_MAX;
+      const link = String(b.link || '').trim().slice(0, 200);
+      if (link && !/^https?:\/\//.test(link)) return res.status(400).json({ ok: false, error: 'link doit être http(s)' });
+      const photos = Array.isArray(b.photos) ? b.photos.filter(isDataImg).slice(0, PHOTOS_MAX[tier]) : [];
+      const doc = {
+        name, metier, tier,
+        commune: String(b.commune || '').trim().slice(0, 40),
+        whatsapp: String(b.whatsapp || '').replace(/[^0-9+]/g, '').slice(0, 20),
+        desc: String(b.desc || '').trim().slice(0, 240),
+        link,
+        logo: isDataImg(b.logo) ? b.logo : '',
+        photos,
+        active: b.active !== false,
+        order: Number.isFinite(Number(b.order)) ? Number(b.order) : 999,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      };
+      const id = String(b.id || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 60)
+        || (name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 50) || ('p' + Math.abs(hashCodeStr(name + metier))));
+      await db.collection('partners').doc(id).set(doc, { merge: false });
+      return res.status(200).json({ ok: true, id, partner: doc });
+    } catch (err) {
+      console.error('[api/admin] partner-save failed:', err.message);
+      return res.status(500).json({ ok: false, error: 'partner-save échoué' });
+    }
+  }
+
+  if (req.method === 'POST' && ((req.query && req.query.type) === 'partner-delete')) {
+    try {
+      const id = String((req.body || {}).id || '').replace(/[^A-Za-z0-9_-]/g, '');
+      if (!id) return res.status(400).json({ ok: false, error: 'id requis' });
+      await db.collection('partners').doc(id).delete();
+      return res.status(200).json({ ok: true, id });
+    } catch (err) {
+      return res.status(500).json({ ok: false, error: 'partner-delete échoué' });
+    }
   }
 
   // ── POST ?type=charge : enregistrer une charge réelle (compta) ──
@@ -498,6 +559,12 @@ async function handleRepriceAll(req, res, admin, db) {
     console.error('[api/admin] reprice-all failed:', err.message);
     return res.status(500).json({ ok: false, error: 'reprice-all failed' });
   }
+}
+
+function hashCodeStr(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) { h = ((h << 5) - h + str.charCodeAt(i)) | 0; }
+  return h;
 }
 
 async function handlePriceWatch(req, res, admin, db) {
