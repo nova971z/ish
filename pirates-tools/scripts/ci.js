@@ -41,6 +41,7 @@ var reqCsp      = safeRequire('./check-csp',         'check-csp');
 var reqAnalytics= safeRequire('./check-analytics',   'check-analytics');
 var reqFns      = safeRequire('./check-functions',   'check-functions');
 var reqFsQ      = safeRequire('./check-firestore-queries','check-firestore-queries');
+var reqPartApp  = safeRequire('./check-partner-application','check-partner-application');
 
 // NOTE 25/07/2026 : l'étape lint-products.js (fichier jamais versionné,
 // silencieusement sautée à chaque run) est SUPPRIMÉE — ses invariants réels
@@ -77,6 +78,7 @@ var reqFsQ      = safeRequire('./check-firestore-queries','check-firestore-queri
   await runOne(reqAnalytics,'check-analytics');
   await runOne(reqFns,      'check-functions');
   await runOne(reqFsQ,      'check-firestore-queries');
+  await runOne(reqPartApp,  'check-partner-application');
 
   var dur = Math.max(1, Date.now() - started);
   if (errors.length){
