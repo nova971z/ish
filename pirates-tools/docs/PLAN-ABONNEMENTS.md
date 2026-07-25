@@ -102,16 +102,41 @@ en tête pour comparer sans repasser par l'accueil.
    verify-partners.mjs 18/18 + verify-partners-admin.mjs 9/9 (fixture
    PT_PARTNERS_FIXTURE, XSS échappé, photos non-dataURL rejetées).
 
-## PHASE 3 — Souscription réelle (Stripe Subscriptions)
+## PHASE 3 — DÉCOUPÉE 3a / 3b (décision user 25/07 : Stripe GELÉ)
+⚠️ DÉCISION USER GRAVÉE : « je ne veux toucher à RIEN qui concerne les
+paiements tant que l'entreprise n'est pas créée ». Un compte Stripe existe mais
+sans entreprise ni RIB connectés. → Tout le moteur de paiement récurrent est
+PARKÉ. On ne construit QUE ce qui est 100 % testable sans Stripe.
+
+### PHASE 3a — Pré-inscription artisan (MAINTENANT, zéro paiement)
+Le formulaire d'onboarding AVANT paiement (le seul morceau indépendant de
+Stripe), cadré HONNÊTEMENT « pré-inscription sans engagement, sans paiement,
+on te recontacte au lancement ». Collecte en avance (dérisque le temps armée) :
+métier (rotation anti-concurrence), tailles ÉPI (t-shirt/pantalon/pointure/
+gants), logo (upload compressé client comme Phase 2), couleurs de flocage,
+réseaux (Facebook/Insta), choix pub (Google Ads OU Meta), choix option site
+(neuf/refonte/portfolio/pub doublée), tier souhaité, + ACCEPTATION HORODATÉE
+des règles du programme (preuve). Séquence 1 = 1 :
+1. Socle : collection Firestore `partner_applications` fermée au client
+   (serveur seul, Admin SDK) + assertions émulateur.
+2. Serveur : branche `type=partner-application` dans api/contact.js (12/12
+   fonctions → pas de 13e endpoint) : validation stricte, stockage Admin SDK,
+   email owner (Resend), rate-limit partagé, honeypot.
+3. UI : formulaire d'onboarding (tailles/logo/métier/choix pub+site, case
+   « j'accepte les règles » horodatée → active l'envoi) ; branche les CTA
+   « Rejoignez le réseau » (page artisans) + Black (page abonnement) dessus.
+4. Admin : onglet « Candidatures » (revue des pré-inscriptions, lecture).
+5. Vérif Playwright + CI + SW + commit.
+
+### PHASE 3b — Souscription réelle Stripe (PARKÉE → entreprise + Stripe live)
 1. Stripe Checkout mode subscription (4 prix), webhook `invoice.paid` →
    crédit du bon (38 € Black…) — réutilise la machine à états stripe_events.
-2. Formulaire d'onboarding complet AVANT paiement : tailles (haut/bas/
-   pointure), logo (upload), couleurs, corps de métier, page Facebook, choix
-   pub Google/Meta, choix option site (neuf/refonte/portfolio/pub doublée),
-   acceptation des conditions HORODATÉE (Firestore, preuve).
+2. Le formulaire 3a alimente la souscription (données déjà collectées).
 3. Compteur de places serveur (10 max Black) — refus propre au-delà.
 4. Politique impayés Stripe : relances auto, pause (geste commercial 1 mois),
    annulation à 1 mois + 15 j. Emails Resend aux étapes clés.
+⛔ NE PAS COMMENCER 3b tant que l'user n'a pas confirmé « l'entreprise est
+créée, tu peux brancher les paiements ».
 
 ## PHASE 4 — Portefeuille (bon d'achat) serveur-autoritaire
 1. Solde `users/{uid}` (champ server-only via rules), historique crédits/débits.

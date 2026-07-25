@@ -93,6 +93,7 @@ service cloud.firestore {
     // ---- Collections SERVEUR UNIQUEMENT (Admin SDK, contourne les règles) --
     // Aucune de ces collections n'est jamais lue ni écrite par le client.
     // Les fermer explicitement documente l'intention (et double le catch-all).
+    match /partner_applications/{appId} { allow read, write: if false; } // pré-inscriptions artisans (Phase 3a) : écrites par contact.js (Admin SDK), lues par l'admin
     match /payments/{paymentId}        { allow read, write: if false; } // journal paiements (email/CP/montants)
     match /stripe_events/{eventId}     { allow read, write: if false; } // idempotence webhook
     match /rate_limits/{bucketId}      { allow read, write: if false; } // compteurs anti-abus (IP)

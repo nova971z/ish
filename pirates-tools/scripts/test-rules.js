@@ -55,6 +55,7 @@ async function check(label, promise) {
     await setDoc(doc(db, 'stripe_events/e1'), { type: 'x' });
     await setDoc(doc(db, 'rate_limits/r1'), { count: 1 });
     await setDoc(doc(db, 'partners/artisan1'), { name: 'Menuiserie K', metier: 'Menuisier', tier: 'black', active: true, order: 1 });
+    await setDoc(doc(db, 'partner_applications/app1'), { name: 'Candidat', metier: 'Plombier', tier: 'black', createdAt: 1 });
   });
 
   console.log('\n── Isolation entre clients ──');
@@ -93,6 +94,9 @@ async function check(label, promise) {
   await check('Alice NE écrit PAS product_overrides/ (prix catalogue)', assertFails(setDoc(doc(alice, 'product_overrides/p1'), { price: 1 })));
   await check('Alice NE lit PAS stripe_events/', assertFails(getDoc(doc(alice, 'stripe_events/e1'))));
   await check('Alice NE lit PAS rate_limits/', assertFails(getDoc(doc(alice, 'rate_limits/r1'))));
+  await check('Alice NE lit PAS partner_applications/ (candidatures artisans)', assertFails(getDoc(doc(alice, 'partner_applications/app1'))));
+  await check('Alice NE écrit PAS partner_applications/ (forger une candidature)', assertFails(setDoc(doc(alice, 'partner_applications/pirate'), { name: 'x', metier: 'y', tier: 'black' })));
+  await check('Un anonyme NE lit PAS partner_applications/', assertFails(getDoc(doc(anon, 'partner_applications/app1'))));
 
   console.log('\n── Mesure d\'audience : fermée au client (lecture + écriture) ──');
   await check('Alice NE lit PAS analytics_daily/', assertFails(getDoc(doc(alice, 'analytics_daily/2026-07-17'))));
