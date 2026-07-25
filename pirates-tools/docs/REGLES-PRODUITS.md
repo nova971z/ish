@@ -92,10 +92,15 @@ description_long  paragraphe + « Livrée dans toute la zone DOM-TOM. Octroi de 
 ## 7. ✅ JOURNAL DES PRODUITS VALIDÉS (session 22–23/07/2026, master direct)
 
 ### Décisions coffrets 25/07/2026 (preuves cotébrico fournies par l'user)
-- **DBS180Z/DBS180ZJ** : chez cotébrico le coffret (219,04 €) est RÉELLEMENT
-  moins cher que le solo (220,00 €) → notre affichage « Avec coffret 251,90 <
-  Sans coffret 253 » reflète la réalité fournisseur, marge 15 % intacte des
-  deux côtés. Paire CONSERVÉE. Ne pas « corriger » cette inversion.
+- **DBS180Z/DBS180ZJ — RÈGLE GÉNÉRALE (user, 25/07)** : quand le fournisseur
+  vend la déclinaison coffret MOINS cher que le nu, ON ACHÈTE TOUJOURS la
+  moins chère → le prix de référence = le MIN des deux sources, UNE SEULE
+  fiche (la ZJ est FUSIONNÉE/supprimée), et « Avec coffret » = +15/25 € de
+  surcoût d'envoi comme les standalone. Implémentation : champ
+  `srcAltSkus: ["DBS180ZJ"]` sur DBS180Z → le traqueur prend
+  min(source Z, source ZJ) à chaque passe (pickCheapestSource, gardé par
+  check-price-watch : un srcAltSkus ne doit JAMAIS pointer vers un SKU encore
+  au catalogue). Prix appliqué : 219,04 × 1,15 = 251,90 € TTC.
 - **DRT50ZJX3** : c'est un KIT 4 bases interchangeables, PAS un simple coffret
   → DÉLIÉ de DRT50Z (produit autonome, titre explicite « + 4 bases ») ;
   DRT50Z a le switch standard +15 €. Re-lier = remettre les champs variant*.

@@ -68,4 +68,21 @@ function parseCotebrico(rawText, brand) {
   return out;
 }
 
-module.exports = { parseCotebrico: parseCotebrico, parsePriceFR: parsePriceFR, stripHtml: stripHtml };
+// Règle user 25/07 : quand le fournisseur vend une DÉCLINAISON moins cher que
+// la réf principale (ex. DBS180ZJ avec coffret < DBS180Z nu), ON ACHÈTE la
+// moins chère → le prix de référence est le MIN des sources. Le produit porte
+// `srcAltSkus: [...]` ; le traqueur prend min(prix propre, prix des alt
+// PRÉSENTES sur la page). Une alt absente de la page est ignorée. PURE (testée
+// par check-price-watch).
+function pickCheapestSource(ownPrice, altSkus, parsedBySku) {
+  var best = ownPrice;
+  if (Array.isArray(altSkus)) {
+    for (var i = 0; i < altSkus.length; i++) {
+      var alt = parsedBySku && parsedBySku[String(altSkus[i]).toUpperCase()];
+      if (typeof alt === 'number' && alt > 0 && alt < best) best = alt;
+    }
+  }
+  return best;
+}
+
+module.exports = { parseCotebrico: parseCotebrico, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource };

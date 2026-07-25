@@ -518,10 +518,17 @@ async function handlePriceWatch(req, res, admin, db) {
     const applied = [], flagged = [], unchanged = [], unknown = [];
     const now = admin.firestore.FieldValue.serverTimestamp();
 
+    // Prix parsés indexés par SKU (pour la règle « min des sources » srcAltSkus).
+    const parsedBySku = {};
+    parsed.forEach((it) => { parsedBySku[String(it.sku).toUpperCase()] = it.price; });
+
     for (const item of parsed) {
       const p = bySku[item.sku];
       if (!p) { unknown.push({ sku: item.sku, srcTTC: item.price, name: item.name }); continue; }
-      const src = item.price;
+      // Règle 25/07 : si le produit référence des déclinaisons fournisseur
+      // (srcAltSkus, ex. DBS180Z ← DBS180ZJ), on achète TOUJOURS la moins
+      // chère → source effective = min des prix présents sur la page.
+      const src = priceParse.pickCheapestSource(item.price, p.srcAltSkus, parsedBySku);
       const priced = pwComputePrice(p, src, cfg);
       const newPrice = priced.newPrice, newHt = priced.newHt;
       const cur = typeof p.price === 'number' ? p.price : null;

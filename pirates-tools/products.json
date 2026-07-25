@@ -4059,10 +4059,10 @@
     "tag": "Nouveau",
     "desc": "Ponceuse à bande 18V BL LXT (Machine seule).",
     "img": "images/posters/dbs180z.webp",
-    "price": 253,
+    "price": 251.9,
     "currency": "EUR",
     "vat": 0.2,
-    "price_ht": 210.83,
+    "price_ht": 209.92,
     "stock_status": "in_stock",
     "stock_label": "En stock",
     "model": "",
@@ -4093,62 +4093,10 @@
       "Poids net EPTA": "1,8 à 2,1 kg",
       "Dimensions": "500 × 96 × 116 mm"
     },
-    "description_long": "Ponceuse à bande sans fil Makita DBS180Z (18V LXT), aussi appelée lime électrique : idéale pour poncer, ébavurer et polir dans les espaces étroits, tubes et recoins inaccessibles aux ponceuses classiques. Moteur brushless à vitesse variable (5 vitesses, 600-1 700 m/min), bande abrasive 9 × 533 mm. Vendue en machine seule (sans batterie ni chargeur), compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM, octroi de mer inclus dans le prix affiché.",
-    "variantGroup": "DBS180",
-    "variantRole": "solo",
-    "coffretSku": "DBS180ZJ"
-  },
-  {
-    "id": "makita-dbs180zj",
-    "slug": "makita-dbs180zj-ponceuse-bande-18v-solo-en-cof",
-    "sku": "DBS180ZJ",
-    "title": "Makita DBS180ZJ — Ponceuse à bande 18V (Solo) en coffret",
-    "name": "DBS180ZJ",
-    "brand": "Makita",
-    "category": "Ponceuses",
-    "tag": "Nouveau",
-    "desc": "Ponceuse à bande 18V (Solo) en coffret.",
-    "img": "images/posters/dbs180z.webp",
-    "price": 251.9,
-    "currency": "EUR",
-    "vat": 0.2,
-    "price_ht": 209.92,
-    "stock_status": "in_stock",
-    "stock_label": "En stock",
-    "model": "",
-    "paymentLink": "",
-    "weight_kg": 1.6,
-    "ncCategory": "power_tool",
-    "productType": "pro",
-    "tags": [
-      "brushless",
-      "tropical_ready"
-    ],
-    "features": [
-      "Ponceuse à bande 18V (Solo) en coffret",
-      "Gamme Makita 18V LXT sans fil, moteur brushless (sans charbon) haut rendement",
-      "Livré en coffret MAKPAC — machine seule (batterie et chargeur non inclus)",
-      "Robuste et endurant, pensé pour un usage professionnel intensif",
-      "Idéal pour les chantiers des Antilles / DOM-TOM"
-    ],
-    "specs": {
-      "Tension": "18 V LXT Li-Ion",
-      "Batteries compatibles": "Gamme Makita LXT 18 V",
-      "Moteur": "Brushless (sans charbon)",
-      "Vitesses": "5 vitesses (variateur)",
-      "Vitesse à vide": "600 - 1700 m/min",
-      "Dimensions de bande": "9 × 533 mm",
-      "Niveau de pression acoustique (LpA)": "77 dB(A) — K=3,0",
-      "Vibrations (ponçage)": "2,5 m/s²",
-      "Poids (EPTA)": "1,8 - 2,1 kg",
-      "Dimensions (L×l×H)": "500 × 96 × 116 mm",
-      "Coffret": "MAKPAC (Makstar) inclus"
-    },
-    "description_long": "Ponceuse à bande 18V BL LXT en coffret MAKPAC (Makstar). Moteur brushless, longueur de bande 9 × 533 mm, 5 vitesses (600 à 1700 m/min). Vendue en machine seule (sans batterie ni chargeur), compatible batteries Makita 18V LXT. Poids 1,8-2,1 kg (EPTA). Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
-    "variantGroup": "DBS180",
-    "variantRole": "coffret",
-    "soloSku": "DBS180Z",
-    "variantSecondary": true
+    "description_long": "Ponceuse à bande 18V BL LXT (Machine seule). Moteur brushless, bande 9 × 533 mm, 5 vitesses (600 à 1700 m/min). Vendue en machine seule (sans batterie ni chargeur), compatible batteries Makita 18V LXT. Poids 1,8-2,1 kg (EPTA). Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "srcAltSkus": [
+      "DBS180ZJ"
+    ]
   },
   {
     "id": "makita-dcc500z",

@@ -36,6 +36,7 @@ var reqCoffret  = safeRequire('./check-coffret',     'check-coffret');
 var reqCatPub   = safeRequire('./check-catalog-public','check-catalog-public');
 var reqAssetVer = safeRequire('./check-asset-versions','check-asset-versions');
 var reqWhClaim  = safeRequire('./check-webhook-claim','check-webhook-claim');
+var reqPwMin    = safeRequire('./check-price-watch','check-price-watch');
 var reqCsp      = safeRequire('./check-csp',         'check-csp');
 var reqAnalytics= safeRequire('./check-analytics',   'check-analytics');
 var reqFns      = safeRequire('./check-functions',   'check-functions');
@@ -71,6 +72,7 @@ var reqFsQ      = safeRequire('./check-firestore-queries','check-firestore-queri
   await runOne(reqCatPub,   'check-catalog-public');
   await runOne(reqAssetVer, 'check-asset-versions');
   await runOne(reqWhClaim,  'check-webhook-claim');
+  await runOne(reqPwMin,    'check-price-watch');
   await runOne(reqCsp,      'check-csp');
   await runOne(reqAnalytics,'check-analytics');
   await runOne(reqFns,      'check-functions');
