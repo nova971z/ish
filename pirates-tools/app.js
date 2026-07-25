@@ -719,6 +719,8 @@
     items.forEach(function (item) {
       var p = findProductByKey(item.key);
       var unit = p ? calcPrice(p, t.code).ttc : Number(item.price) || 0;
+      // Ligne « avec coffret » : le supplément d'envoi fait partie du prix.
+      if (item.coffret && p) unit += coffretSurchargeCents(p) / 100;
       var qty = item.qty || 1;
       var sub = unit * qty;
       total += sub;
@@ -990,10 +992,11 @@
     var totalQty = 0;
     var html = items.map(function (item, idx) {
       var qty = item.qty || 1;
-      // Recompute unit price from the live product (territory-aware),
-      // falling back to the stored item.price for historical cart entries.
-      var p = findProductByKey(item.key);
-      var unit = p ? calcPrice(p, _currentTerritory).ttc : Number(item.price) || 0;
+      // Prix unitaire = payUnitCents (source de vérité UNIQUE du montant débité :
+      // territoire + supplément coffret inclus, miroir exact du serveur). Une
+      // ligne « avec coffret » affiche donc bien base + 15/25 €, comme la fiche
+      // et comme le débit réel. Repli item.price pour les lignes historiques.
+      var unit = payUnitCents({ key: item.key, coffret: !!item.coffret, price: item.price }) / 100;
       var sub = unit * qty;
       total += sub;
       totalQty += qty;
@@ -4575,7 +4578,9 @@
           renderDevis();
         } else if (btn.classList.contains('devis-buy')) {
           var it = c[i]; if (!it) return;
-          openPayModal([{ key: it.key, title: it.title, price: it.price, qty: it.qty || 1, paymentLink: it.paymentLink }]);
+          // coffret propagé → payUnitCents (affichage modale) ET corps envoyé au
+          // serveur ({key,qty,coffret}) facturent le supplément d'envoi.
+          openPayModal([{ key: it.key, title: it.title, price: it.price, qty: it.qty || 1, coffret: !!it.coffret, paymentLink: it.paymentLink }]);
         } else if (btn.closest('.devis-remove')) {
           var el = btn.closest('.devis-item');
           if (el) el.classList.add('devis-item--removing');
@@ -4588,7 +4593,7 @@
       var items = getCart();
       if (!items.length) { toast('Panier vide', 'error'); return; }
       openPayModal(items.map(function (it) {
-        return { key: it.key, title: it.title, price: it.price, qty: it.qty || 1, paymentLink: it.paymentLink || '' };
+        return { key: it.key, title: it.title, price: it.price, qty: it.qty || 1, coffret: !!it.coffret, paymentLink: it.paymentLink || '' };
       }));
     });
     if (dom.devisClear) {
