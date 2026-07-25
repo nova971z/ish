@@ -35,6 +35,7 @@ var reqLoyalty  = safeRequire('./check-loyalty',     'check-loyalty');
 var reqCoffret  = safeRequire('./check-coffret',     'check-coffret');
 var reqCatPub   = safeRequire('./check-catalog-public','check-catalog-public');
 var reqAssetVer = safeRequire('./check-asset-versions','check-asset-versions');
+var reqWhClaim  = safeRequire('./check-webhook-claim','check-webhook-claim');
 var reqCsp      = safeRequire('./check-csp',         'check-csp');
 var reqAnalytics= safeRequire('./check-analytics',   'check-analytics');
 var reqFns      = safeRequire('./check-functions',   'check-functions');
@@ -81,6 +82,7 @@ function runLintProducts(){
   await runOne(reqCoffret,  'check-coffret');
   await runOne(reqCatPub,   'check-catalog-public');
   await runOne(reqAssetVer, 'check-asset-versions');
+  await runOne(reqWhClaim,  'check-webhook-claim');
   await runOne(reqCsp,      'check-csp');
   await runOne(reqAnalytics,'check-analytics');
   await runOne(reqFns,      'check-functions');

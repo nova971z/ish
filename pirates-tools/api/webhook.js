@@ -82,52 +82,122 @@ async function handler(req, res) {
       return res.status(400).json({ ok: false, error: 'Invalid signature' });
     }
 
-    // ── 2) Idempotency: claim the event.id before doing any side effects ──
+    // ── 2) Idempotence : machine à états sur stripe_events/{event.id} ──
+    // États : 'processing' (en vol) → 'done' (succès) / 'failed' (RETRYABLE).
+    // AVANT : le claim était posé puis jamais relâché — si un effet critique
+    // (journal payments/, mise à jour de commande) échouait, on répondait 200 et
+    // la re-livraison Stripe tombait sur « duplicate » → l'événement était
+    // PERDU pour toujours (commande bloquée 'pending', pas d'email, pas de
+    // trace). Désormais : échec → claim 'failed' + 500 → Stripe RE-LIVRE (sa
+    // re-livraison est notre mécanisme de retry, backoff ~3 jours) et la
+    // reprise est autorisée. Les effets sont idempotents (set merge, update,
+    // n° de facture réutilisé, emails dédupliqués via emailsSent).
     var fb = getFirebase();
+    var claimRef = null;
+    var claimPrev = null; // claim repris (failed/stale) — porte emailsSent
     if (fb.db) {
-      var eventRef = fb.db.collection('stripe_events').doc(event.id);
+      claimRef = fb.db.collection('stripe_events').doc(event.id);
+      var claimed = false;
       try {
-        // create() is atomic and fails if the doc already exists → duplicate.
-        await eventRef.create({
+        // create() est atomique : échoue si le doc existe déjà.
+        await claimRef.create({
           type: event.type,
+          status: 'processing',
+          attempts: 1,
           receivedAt: fb.admin.firestore.FieldValue.serverTimestamp()
         });
-      } catch (dupErr) {
-        console.log('[webhook] Duplicate event ignored:', event.id);
-        return res.status(200).json({ ok: true, received: true, duplicate: true });
+        claimed = true;
+      } catch (dupErr) { /* déjà claimé → arbitrage ci-dessous */ }
+      if (!claimed) {
+        var prevSnap = await claimRef.get();
+        var prev = prevSnap.exists ? (prevSnap.data() || {}) : {};
+        var prevMs = prev.receivedAt && prev.receivedAt.toMillis ? prev.receivedAt.toMillis() : null;
+        var decision = claimDecision({ status: prev.status, receivedAtMs: prevMs }, Date.now());
+        if (decision === 'skip') {
+          console.log('[webhook] Duplicate event ignored:', event.id, '(status ' + (prev.status || '?') + ')');
+          return res.status(200).json({ ok: true, received: true, duplicate: true });
+        }
+        // Reprise (failed, ou processing figé > CLAIM_STALE_MS = run tué).
+        claimPrev = prev;
+        await claimRef.set({
+          status: 'processing',
+          attempts: (prev.attempts || 0) + 1,
+          receivedAt: fb.admin.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+        console.log('[webhook] Retrying event:', event.id, '(attempt ' + ((prev.attempts || 0) + 1) + ')');
       }
     } else {
       console.warn('[webhook] Firestore not configured — idempotency disabled for', event.id);
     }
 
     // ── 3) Process the event ──
-    switch (event.type) {
-      case 'checkout.session.completed':
-        await handleSessionCompleted(stripe, fb, event.data.object);
-        break;
+    // ctx.emailsSent : une reprise ne renvoie JAMAIS les emails déjà partis.
+    var ctx = { claimRef: claimRef, emailsSent: !!(claimPrev && claimPrev.emailsSent) };
+    try {
+      switch (event.type) {
+        case 'checkout.session.completed':
+          await handleSessionCompleted(stripe, fb, event.data.object, ctx);
+          break;
 
-      case 'payment_intent.succeeded':
-        await handleIntentSucceeded(stripe, fb, event.data.object);
-        break;
+        case 'payment_intent.succeeded':
+          await handleIntentSucceeded(stripe, fb, event.data.object, ctx);
+          break;
 
-      case 'payment_intent.payment_failed':
-        await handleIntentFailed(fb, event.data.object);
-        break;
+        case 'payment_intent.payment_failed':
+          await handleIntentFailed(fb, event.data.object);
+          break;
 
-      case 'checkout.session.expired': {
-        console.log('[webhook] Session expired:', event.data.object.id);
-        break;
+        case 'checkout.session.expired': {
+          console.log('[webhook] Session expired:', event.data.object.id);
+          break;
+        }
+
+        default:
+          console.log('[webhook] Unhandled event type:', event.type);
       }
-
-      default:
-        console.log('[webhook] Unhandled event type:', event.type);
+    } catch (procErr) {
+      console.error('[webhook] Processing failed (will be retried by Stripe):', event.id, procErr.message);
+      if (claimRef) {
+        try {
+          await claimRef.set({
+            status: 'failed',
+            lastError: String(procErr.message || procErr).slice(0, 300),
+            failedAt: fb.admin.firestore.FieldValue.serverTimestamp()
+          }, { merge: true });
+        } catch (_) { /* claim resté 'processing' → repris après CLAIM_STALE_MS */ }
+      }
+      return res.status(500).json({ ok: false, error: 'Webhook processing failed' });
     }
 
+    if (claimRef) {
+      try {
+        await claimRef.set({
+          status: 'done',
+          doneAt: fb.admin.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+      } catch (_) { /* au pire : reprise après stale, effets idempotents */ }
+    }
     return res.status(200).json({ ok: true, received: true });
   } catch (err) {
     console.error('[webhook] Error:', err.message);
     return res.status(500).json({ ok: false, error: 'Webhook processing failed' });
   }
+}
+
+// Décision de reprise d'un claim existant (PURE — testée par check-webhook-claim).
+// 'skip'  : déjà traité (done) ou traitement concurrent récent (processing frais).
+// 'retry' : échec précédent (failed), run tué (processing plus vieux que
+//           CLAIM_STALE_MS), ou état inconnu/corrompu (les effets sont idempotents).
+var CLAIM_STALE_MS = 10 * 60 * 1000;
+function claimDecision(existing, nowMs) {
+  var c = existing || {};
+  if (c.status === 'done') return 'skip';
+  if (c.status === 'failed') return 'retry';
+  if (c.status === 'processing') {
+    var age = (typeof c.receivedAtMs === 'number') ? (nowMs - c.receivedAtMs) : Infinity;
+    return age > CLAIM_STALE_MS ? 'retry' : 'skip';
+  }
+  return 'retry';
 }
 
 // Disable Vercel's automatic body parsing so we receive the raw bytes Stripe
@@ -140,8 +210,15 @@ module.exports.config = { api: { bodyParser: false } };
 // Event handlers
 // ════════════════════════════════════════════════════════════════
 
+// Marque les emails comme envoyés sur le claim (dédup en cas de reprise).
+// Best-effort : au pire une reprise renverra l'email (préférable à aucun).
+async function markEmailsSent(ctx) {
+  if (!ctx || !ctx.claimRef) return;
+  try { await ctx.claimRef.set({ emailsSent: true }, { merge: true }); } catch (_) {}
+}
+
 // ── Stripe Checkout (redirect) : checkout.session.completed ──
-async function handleSessionCompleted(stripe, fb, sessionLite) {
+async function handleSessionCompleted(stripe, fb, sessionLite, ctx) {
   console.log('[webhook] Payment confirmed (session):', sessionLite.id, 'Amount:', sessionLite.amount_total);
 
   // Retrieve the full session with line items + customer details for email
@@ -185,16 +262,18 @@ async function handleSessionCompleted(stripe, fb, sessionLite) {
     stripePaymentIntent: typeof fullSession.payment_intent === 'string' ? fullSession.payment_intent : null
   });
 
-  // Send confirmation emails via Resend (best-effort; never fail the hook)
-  try {
+  // Emails de confirmation — RETRYABLE : un échec Resend fait échouer le hook
+  // (claim 'failed' + 500) → Stripe re-livre et l'email finit par partir.
+  // Dédup : une reprise dont les emails sont déjà partis (emailsSent sur le
+  // claim) ne renvoie rien. Les effets critiques ci-dessus sont idempotents.
+  if (!ctx || !ctx.emailsSent) {
     await sendOrderEmails(modelFromSession(fullSession, tax));
-  } catch (mailErr) {
-    console.error('[webhook] Email send failed:', mailErr.message);
+    await markEmailsSent(ctx);
   }
 }
 
 // ── Stripe Elements : payment_intent.succeeded ──
-async function handleIntentSucceeded(stripe, fb, pi) {
+async function handleIntentSucceeded(stripe, fb, pi, ctx) {
   // Ne traiter QUE les PaymentIntents créés par create-payment-intent.js.
   // Le PI créé en interne par une Checkout Session ne porte pas notre metadata
   // → il est ignoré ici et traité via checkout.session.completed (pas de
@@ -246,7 +325,8 @@ async function handleIntentSucceeded(stripe, fb, pi) {
   } catch (feeErr) { console.error('[webhook] Stripe fee lookup failed:', feeErr.message); }
 
   // Facture : numéro séquentiel + snapshot des lignes et de l'identité client.
-  var invoiceNumber = await assignInvoiceNumber(fb, Date.now());
+  // Idempotent en reprise : le numéro déjà attribué à CE paiement est réutilisé.
+  var invoiceNumber = await assignInvoiceNumber(fb, Date.now(), pi.id);
   var custName = (pi.shipping && pi.shipping.name) || billing.name || '';
   var custAddr = formatAddr(piShipAddr || billing.address || null);
 
@@ -282,8 +362,10 @@ async function handleIntentSucceeded(stripe, fb, pi) {
     confirmedByWebhook: true
   });
 
-  try {
-    // Facture jointe à l'email client : identité vendeur + n° + détail HT/TVA.
+  // Emails — RETRYABLE (voir handleSessionCompleted) + dédup emailsSent.
+  // Le bloc facture de l'email reste best-effort : un email sans bloc facture
+  // vaut mieux qu'un email bloqué (le n° et le détail vivent dans payments/).
+  if (!ctx || !ctx.emailsSent) {
     var emailModel = modelFromIntent(pi, charge, rebuilt, tax, customerEmail);
     try {
       var seller = await loadSeller(fb);
@@ -295,8 +377,7 @@ async function handleIntentSucceeded(stripe, fb, pi) {
       emailModel.invoice = { number: inv.number, seller: seller, totalHt: inv.totalHt, totalTva: inv.totalTva, franchise: inv.franchise, tvaRate: inv.tvaRate };
     } catch (invErr) { console.error('[webhook] email invoice build failed:', invErr.message); }
     await sendOrderEmails(emailModel);
-  } catch (mailErr) {
-    console.error('[webhook] Email send failed:', mailErr.message);
+    await markEmailsSent(ctx);
   }
 }
 
@@ -337,25 +418,31 @@ function taxCheck(declaredTerritory, address) {
 }
 
 // Numéro de facture séquentiel, sans trou (compteur transactionnel Firestore).
-// Format Fyyyy-NNNN. Best-effort : jamais bloquant pour le paiement.
-async function assignInvoiceNumber(fb, dateMs) {
+// Format Fyyyy-NNNN. IDEMPOTENT par paiement : si payments/{stripeId} porte
+// déjà un invoiceNumber (reprise après échec partiel), on le RÉUTILISE au lieu
+// d'en consommer un nouveau (sinon chaque re-livraison créait un trou dans la
+// séquence = non-conformité facturation). Échec du compteur = CRITIQUE (throw)
+// → claim 'failed' + 500 → Stripe re-livre, le numéro finit par être attribué.
+async function assignInvoiceNumber(fb, dateMs, stripeId) {
   if (!fb.db) return null;
-  try {
-    var year = new Date(dateMs || Date.now()).getUTCFullYear();
-    var ref = fb.db.collection('config').doc('invoiceCounter');
-    var num = await fb.db.runTransaction(async function (t) {
-      var snap = await t.get(ref);
-      var data = snap.exists ? (snap.data() || {}) : {};
-      var seq = (data['seq_' + year] || 0) + 1;
-      var patch = {}; patch['seq_' + year] = seq;
-      t.set(ref, patch, { merge: true });
-      return seq;
-    });
-    return 'F' + year + '-' + ('0000' + num).slice(-4);
-  } catch (e) {
-    console.error('[webhook] invoice number failed:', e.message);
-    return null;
+  if (stripeId) {
+    try {
+      var prevPay = await fb.db.collection('payments').doc(String(stripeId)).get();
+      var prevNum = prevPay.exists && (prevPay.data() || {}).invoiceNumber;
+      if (prevNum) return prevNum;
+    } catch (_) { /* lecture best-effort, la transaction reste la référence */ }
   }
+  var year = new Date(dateMs || Date.now()).getUTCFullYear();
+  var ref = fb.db.collection('config').doc('invoiceCounter');
+  var num = await fb.db.runTransaction(async function (t) {
+    var snap = await t.get(ref);
+    var data = snap.exists ? (snap.data() || {}) : {};
+    var seq = (data['seq_' + year] || 0) + 1;
+    var patch = {}; patch['seq_' + year] = seq;
+    t.set(ref, patch, { merge: true });
+    return seq;
+  });
+  return 'F' + year + '-' + ('0000' + num).slice(-4);
 }
 
 function formatAddr(a) {
@@ -364,22 +451,19 @@ function formatAddr(a) {
     .filter(Boolean).join(', ');
 }
 
-// A2 — journal Firestore payments/{stripeId}. Best-effort : ne jette jamais
-// (un échec de journalisation ne doit pas faire re-livrer l'événement, les
-// emails restant le signal principal).
+// A2 — journal Firestore payments/{stripeId} = LA trace comptable autoritaire
+// (P&L, factures, fidélité s'appuient dessus). CRITIQUE : un échec JETTE →
+// claim 'failed' + 500 → Stripe re-livre (set merge = idempotent en reprise).
+// L'ancien comportement « best-effort » pouvait perdre la trace pour toujours.
 async function logPayment(fb, stripeId, data) {
   if (!fb.db) return;
-  try {
-    await fb.db.collection('payments').doc(String(stripeId)).set(
-      Object.assign({}, data, {
-        recordedAt: fb.admin.firestore.FieldValue.serverTimestamp()
-      }),
-      { merge: true }
-    );
-    console.log('[webhook] Payment journaled:', stripeId, data.status, data.taxMismatch ? '⚠ TAX MISMATCH' : '');
-  } catch (e) {
-    console.error('[webhook] Payment journal failed:', e.message);
-  }
+  await fb.db.collection('payments').doc(String(stripeId)).set(
+    Object.assign({}, data, {
+      recordedAt: fb.admin.firestore.FieldValue.serverTimestamp()
+    }),
+    { merge: true }
+  );
+  console.log('[webhook] Payment journaled:', stripeId, data.status, data.taxMismatch ? '⚠ TAX MISMATCH' : '');
 }
 
 // Met à jour la commande client correspondante.
@@ -402,10 +486,22 @@ async function updateOrderWhere(fb, uid, field, value, patch) {
       }));
       console.log('[webhook] Order updated via', (uid ? 'users/' + uid + '/orders.' : 'collectionGroup.') + field, ':', snap.docs[0].id);
     } else {
+      // Pas une erreur : le doc client peut légitimement ne pas (encore)
+      // exister (course /merci ↔ webhook). Le journal payments/ fait foi.
       console.log('[webhook] No order matches', field, '=', value, uid ? '(uid ' + uid + ')' : '(sans uid)', '— client doc absent ou pas encore écrit');
     }
   } catch (fbErr) {
+    // Index collection-group manquant (FAILED_PRECONDITION, code 9) = erreur
+    // STRUCTURELLE : re-livrer ne la réparera jamais (il faut déployer
+    // firestore.indexes.json) → loguée, non bloquante, comme avant.
+    if (fbErr.code === 9 || /FAILED_PRECONDITION/i.test(String(fbErr.message))) {
+      console.error('[webhook] Order update skipped (index manquant — déployer firestore.indexes.json):', fbErr.message);
+      return;
+    }
+    // CRITIQUE (hoquet transitoire) : avant, l'échec était avalé et la commande
+    // restait 'pending' pour toujours. throw → claim 'failed' + 500 → retry.
     console.error('[webhook] Firestore order update failed (' + field + '):', fbErr.message);
+    throw fbErr;
   }
 }
 
@@ -697,5 +793,9 @@ module.exports._internals = {
   rebuildLines: rebuildLines,
   modelFromSession: modelFromSession,
   modelFromIntent: modelFromIntent,
-  updateOrderWhere: updateOrderWhere
+  updateOrderWhere: updateOrderWhere,
+  claimDecision: claimDecision,
+  CLAIM_STALE_MS: CLAIM_STALE_MS,
+  logPayment: logPayment,
+  assignInvoiceNumber: assignInvoiceNumber
 };
