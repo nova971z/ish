@@ -1380,16 +1380,7 @@ body.page-devis #view-devis {
   box-shadow: 0 6px 20px rgba(var(--accent-rgb),.4);
 }
 
-@keyframes cardAppear {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+
 
 /* ========== 10b) BANDEAU SCROLL PRODUITS (accueil) ========== */
 .home-products-strip {
@@ -2811,26 +2802,14 @@ padding: 0;
     from { opacity: 0; transform: scale(0.7) translateY(60px); filter: blur(8px); }
     to { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
 }
-@keyframes pdpSlideLeft {
-    from { opacity: 0; transform: translateX(-80px); filter: blur(4px); }
-    to { opacity: 1; transform: translateX(0); filter: blur(0); }
-}
-@keyframes pdpSlideRight {
-    from { opacity: 0; transform: translateX(80px); filter: blur(4px); }
-    to { opacity: 1; transform: translateX(0); filter: blur(0); }
-}
+
+
 @keyframes pdpGlow {
     from { box-shadow: 0 0 0 rgba(var(--accent-rgb),0); }
     to { box-shadow: 0 0 60px rgba(var(--accent-rgb),0.25), 0 20px 80px rgba(0,0,0,.6); }
 }
-@keyframes pdpScaleIn {
-    from { opacity: 0; transform: scale(0.7); filter: blur(8px); }
-    to { opacity: 1; transform: scale(1); filter: blur(0); }
-}
-@keyframes pdpLineReveal {
-    from { opacity: 0; transform: translateX(-40px); }
-    to { opacity: 1; transform: translateX(0); }
-}
+
+
 /* pdpGlowPulse SUPPRIMÉ (25/07) : remplacé par le halo statique du viewer
    (voir .pdp-section.visible .pdp-split__viewer) — l'animation box-shadow
    repeignait en continu. goldShimmer/blackTextShine/blackRing conservés :
@@ -2839,10 +2818,7 @@ padding: 0;
     0% { transform: scaleX(0); opacity: 0; }
     100% { transform: scaleX(1); opacity: 1; }
 }
-@keyframes pdpShine {
-    0% { background-position: -200% center; }
-    100% { background-position: 200% center; }
-}
+
 
 /* ── GLOW DIVIDERS between sections ── */
 .pdp-section + .pdp-section::before {
@@ -4133,7 +4109,7 @@ animation: toast-in .18s ease-out both;
 .toast--error .toast__icon { filter: drop-shadow(0 0 8px rgba(255,80,80,.45)); }
 
 @keyframes toast-in { from { transform: translateY(8px); opacity: 0; } to { transform: none; opacity: 1; } }
-@keyframes toast-out { to { transform: translateY(8px); opacity: 0; } }
+
 
 @media (max-width: 480px) {
 #toasts { right: 8px; width: min(94vw, 420px); }
@@ -4191,8 +4167,8 @@ box-shadow: var(--shadow);
    app.js, sw.js ni les autres scripts servis — vérifié à 0 référence. */
 
 /* ========== 28) ANIMATIONS ========== */
-@keyframes exitLeft { to { transform: translateX(-60px); opacity: 0; filter: blur(2px); } }
-@keyframes exitRight { to { transform: translateX(60px); opacity: 0; filter: blur(2px); } }
+
+
 
 @media (prefers-reduced-motion: reduce) {
 html { scroll-behavior: auto; }
@@ -7371,7 +7347,7 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .toast{ background:rgba(0,0,0,.8); color:#fff; border-radius:8px; padding:.6rem .8rem; }
 .toast--success{ background:rgba(23,135,44,.9); }
 .toast--info{ background:rgba(39,96,201,.9); }
-@keyframes toast-out{ to{ opacity:0; transform:translateY(8px); } }
+
 
 /* ── Top loading bar ───────────────────────────────── */
 .pt-loadbar{
