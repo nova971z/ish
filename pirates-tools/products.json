@@ -7114,13 +7114,13 @@
     "id": "makita-dhs900zu",
     "slug": "makita-dhs900zu-scie-circulaire-36v-lxt-235-mm",
     "sku": "DHS900ZU",
-    "title": "Makita DHS900ZU — Scie circulaire 36V LXT Ø235 mm (machine seule, variante ZU)",
+    "title": "Makita DHS900ZU — Scie circulaire 36V Ø235 mm module AWS (machine seule)",
     "name": "DHS900ZU",
     "brand": "Makita",
     "category": "Scies",
     "tag": "Nouveau",
-    "desc": "Scie circulaire 36V LXT Ø235 mm (machine seule, variante ZU).",
-    "img": "images/placeholder.svg",
+    "desc": "36V (2×18V), lame Ø235 mm, coupe 85 mm à 90°, module AWS Bluetooth, brushless.",
+    "img": "images/posters/dhs900zu.webp",
     "price": 529.9,
     "currency": "EUR",
     "vat": 0.2,
@@ -7129,7 +7129,7 @@
     "stock_label": "En stock",
     "model": "",
     "paymentLink": "",
-    "weight_kg": 5.5,
+    "weight_kg": 5.3,
     "ncCategory": "power_tool",
     "productType": "pro",
     "tags": [
@@ -7137,14 +7137,34 @@
       "tropical_ready"
     ],
     "features": [
-      "Scie circulaire 36V LXT Ø235 mm (machine seule, variante ZU)",
-      "Gamme Makita 36V LXT sans fil, moteur brushless (sans charbon) haut rendement",
-      "Machine seule (batterie et chargeur non inclus), compatible batteries Makita LXT",
-      "Robuste et endurant, pensé pour un usage professionnel intensif",
-      "Idéal pour les chantiers des Antilles / DOM-TOM"
+      "Scie circulaire 36V (2×18V) LXT Ø235 mm — puissance de gamme filaire, coupe 85 mm à 90°",
+      "Module AWS (Auto-start Wireless System) : démarre automatiquement ton aspirateur par Bluetooth quand la scie tourne",
+      "Moteur brushless (sans charbon) + ADT : la vitesse s’adapte automatiquement à la charge",
+      "Coupe 85 mm à 90° et 61 mm à 45° — lame Ø235 mm, alésage 30 mm, frein moteur",
+      "Machine seule (2 batteries 18V + chargeur non inclus), compatible batteries Makita LXT"
     ],
-    "specs": {},
-    "description_long": "Scie circulaire 36V LXT Ø235 mm (machine seule, variante ZU). Outil professionnel Makita de la gamme 36V LXT sans fil (moteur brushless). Vendu en machine seule (sans batterie ni chargeur). Compatible avec les batteries Makita LXT. Fiche technique détaillée à compléter. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "specs": {
+      "Marque": "Makita",
+      "Type": "Scie circulaire sans fil 36V (2×18V) LXT Brushless — module AWS (machine nue)",
+      "Tension": "36 V (2 × 18 V, gamme LXT)",
+      "Moteur": "Brushless (sans charbon)",
+      "Ø lame": "235 mm",
+      "Alésage": "30 mm",
+      "Profondeur de coupe à 90°": "85 mm",
+      "Profondeur de coupe à 45°": "61 mm",
+      "Profondeur de coupe à 50°": "44 mm",
+      "Vitesse à vide": "4500 tr/min",
+      "Technologie sans fil": "AWS (Auto-start Wireless System — démarrage auto de l’aspirateur par Bluetooth)",
+      "Technologie moteur": "ADT (contrôle automatique de la vitesse) + frein moteur",
+      "Technologie de confort": "Système anti-poussières",
+      "Pression sonore (LpA)": "93 dB(A)",
+      "Puissance sonore (LwA)": "104 dB(A) (incertitude 3 dB)",
+      "Vibrations": "2,5 m/s² (K = 1,5)",
+      "Poids net EPTA": "5,3 kg",
+      "Dimensions (L×l×h)": "413 × 196 × 316 mm",
+      "Batterie / chargeur": "Non inclus (2 batteries 18V requises)"
+    },
+    "description_long": "Scie circulaire sans fil 36V (2×18V) LXT Ø235 mm avec module AWS, machine seule. Puissance proche du filaire (coupe 85 mm à 90°, 61 mm à 45°), moteur brushless avec ADT qui adapte la vitesse à la charge. Le module AWS (Auto-start Wireless System) démarre automatiquement ton aspirateur par Bluetooth dès que la scie tourne — chantier plus propre, zéro manipulation. Frein moteur et système anti-poussières intégrés. Vendue en machine seule (2 batteries 18V et chargeur non inclus), compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
   },
   {
     "id": "festool-577985",

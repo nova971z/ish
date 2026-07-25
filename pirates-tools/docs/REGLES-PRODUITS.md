@@ -101,6 +101,16 @@ description_long  paragraphe + « Livrée dans toute la zone DOM-TOM. Octroi de 
   min(source Z, source ZJ) à chaque passe (pickCheapestSource, gardé par
   check-price-watch : un srcAltSkus ne doit JAMAIS pointer vers un SKU encore
   au catalogue). Prix appliqué : 219,04 × 1,15 = 251,90 € TTC.
+- **DHS900ZU (25/07 tard, sous Opus)** : fiche fantôme DÉJÀ présente (bulk
+  import), prix déjà correct 529,90 € = 460,78 × 1,15 → COMPLÉTÉE (poster user
+  fond sombre → dhs900zu.webp, specs, features AWS). PAS de fusion : le module
+  AWS (démarrage Bluetooth aspirateur) est une VRAIE différence fonctionnelle
+  vs DHS900Z (sans AWS) → les 2 fiches coexistent. ⚠️ DHS900Z reste FANTÔME
+  (specs vides, placeholder) — à compléter quand l'user enverra sa capture.
+  ⚠️ DISCORDANCE cotébrico signalée à l'user : page principale DHS900ZU = 460,78 €
+  (solo), mais liste des déclinaisons = 450,00 € (« ZU en coffret avec AWS »),
+  même SKU. Prix gardé sur 460,78 (affichage principal + prix existant) ;
+  à confirmer par l'user si 450,00 est le vrai prix.
 - **DHS660Z/DHS660ZJ (25/07 tard)** : même règle générale appliquée — le NU est
   en RUPTURE SANS PRIX chez cotébrico, seule la déclinaison MAKPAC (ZJ) est
   cotée 253,90 € → fiche ZJ FUSIONNÉE/supprimée, `srcAltSkus: ["DHS660ZJ"]`
