@@ -6,7 +6,7 @@
 > **⚠️ Numéros de ligne = ancres approximatives.** Le code bouge à chaque
 > commit. Si le numéro est décalé de quelques dizaines de lignes, **cherche par
 > NOM de fonction/constante** (ils sont tous cités) : c'est la vraie clé.
-> Dernière mise à jour de la carte : session du 24/07/2026 (SW v406).
+> Dernière mise à jour de la carte : session du 25/07/2026 (SW v424, post contre-audit).
 >
 > Fichiers de référence (source de vérité MÉTIER, à lire avant d'agir) :
 > `../CLAUDE.md` (mémoire projet), `docs/REGLES-PRODUITS.md` (prix/posters),
@@ -22,8 +22,8 @@
 | **Prod** | Vercel → domaine `pirates-tools.com`. Déploie **uniquement `master`**. |
 | **Backend** | Vercel serverless (`api/`, Node 22.x) + Firebase/Firestore + Stripe + Resend |
 | **Deps** | `stripe@^14`, `firebase-admin@^12` (c'est TOUT côté serveur) |
-| **Client** | `app.js` (~8 560 lignes, **UN SEUL IIFE**, style ES5 `var`/`function`), `styles.css` (~7 700 lignes), `index.html` (~1 620 lignes), `sw.js` |
-| **Données** | `products.json` (206 produits, **tableau JSON brut**), pas de dossier `data/` |
+| **Client** | `app.js` (~8 800 lignes, **UN SEUL IIFE**, style ES5 `var`/`function`), `styles.css` (~7 700 lignes), `index.html` (~1 620 lignes), `sw.js` |
+| **Données** | `products.json` (207 produits, **tableau JSON brut**), pas de dossier `data/` |
 | **Workflow** | 1 étape = 1 problème = 1 commit = 1 vérif verte (`node scripts/ci.js`). Travail direct sur `master`. Bump SW à chaque changement d'asset. |
 | **Mémoire projet** | `../CLAUDE.md` (un niveau AU-DESSUS de `pirates-tools/`) |
 
@@ -250,14 +250,14 @@ Autres scripts NON en CI : `set-admin-claim.js`, `test-rules.js` (émulateur Fir
 
 ---
 
-## 7. products.json — schéma produit (206 produits, tableau brut)
+## 7. products.json — schéma produit (207 produits, tableau brut)
 
 **Champs** : `id` (clé), `slug`, `sku` (réf. traqueur), `title`, `name`, `brand`,
 `category`, `tag`, `desc`, `img` (`images/posters/*.webp`), **`price`** (TTC réf.),
 `currency`, `vat` (0.2), **`price_ht`** (base moteur fiscal), `stock_status`,
 `stock_label`, `paymentLink`, `weight_kg` (transport), **`ncCategory`**
 (`power_tool`/`accessory`/`hand_tool` → octroi), `productType`, `tags[]`,
-`description_long`, `specs{}`, `features[]`, **`model`** (chemin `.glb`, 200/206).
+`description_long`, `specs{}`, `features[]`, **`model`** (chemin `.glb`, ~39 fiches ; les autres = poster seul).
 **Variantes** : `variantGroup`, `variantRole` (`solo`/`coffret`), `coffretSku`,
 `soloSku`, `variantSecondary` (masqué du catalogue).
 
@@ -312,6 +312,13 @@ Autres scripts NON en CI : `set-admin-claim.js`, `test-rules.js` (émulateur Fir
 ---
 
 ## 10. ⚠️ PIÈGES À NE PAS OUBLIER (lire AVANT de toucher)
+
+0. **PIÈGE CONNU non corrigé (décision 25/07, cas rarissime)** : fiche produit
+   OUVERTE quand l'enrichissement `/api/products` arrive avec des overrides qui
+   diffèrent du statique → re-render de données de la PDP → le choix
+   coffret/variante EN COURS est réinitialisé (Sans coffret). Fix propre =
+   préserver l'état de sélection à travers le re-render ; risqué pour la
+   fréquence du cas → documenté au lieu de corrigé.
 
 1. **CACHE-BUSTING SW — TRIPLE ALIGNEMENT.** À tout changement de `app.js`,
    `styles.css` ou `index.html` : bumper **`sw.js` VERSION (`pt-vNNN`) + ASSET_VER**
