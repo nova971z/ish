@@ -3,3 +3,21 @@
 # conservées dans git pour réversibilité — non servies aux visiteurs, elles ne
 # doivent pas alourdir le déploiement.
 images/_originals/
+
+# models/ : fichiers SOURCES des packs 3D (composants des builders
+# scratchpad/_gltftools — Tstack, chargeur, batteries, outils nus) et essais.
+# Conservés dans git (registre des orientations, re-builds), JAMAIS servis :
+# aucun n'est référencé par products.json ni par le client. ~21 Mo de
+# déploiement économisés. Vérifié par script (réfs .model + app.js + index.html).
+models/dewalt-optimized.glb
+models/tools.json
+models/Tools
+models/products/DCD996.glb
+models/products/DCS334N.glb
+models/products/Tstack.glb
+models/products/dcb1104.glb
+models/products/dcb118.glb
+models/products/dcd796.glb
+models/products/dcf850.glb
+models/products/dcf887.glb
+models/products/dcs391n.glb
