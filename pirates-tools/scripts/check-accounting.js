@@ -69,6 +69,25 @@ module.exports = function () {
   ok(bs[0].marque === 'DeWALT', 'tri par CA TTC décroissant');
   ok(dw.ca_ht < dw.ca_ttc, 'CA HT dérivé sous le TTC');
 
+  // ── Mécénat (art. 238 bis CGI) : don ≠ charge déductible ────────────────
+  // 10 000 € de CA HT, 1 000 € de don : le don est réintégré dans la base IS
+  // (base = résultat comptable + don) puis réduction de 60 % du don.
+  var payMec = [{ amountCents: 1085000, status: 'succeeded', territoryDeclared: '971', recordedAtMs: Date.UTC(2026, 0, 5) }]; // 10 850 TTC → 10 000 HT (8,5 %)
+  var mec = acc.synthesize(payMec, [{ amountHt: 1000, category: 'don', label: 'Asso 971' }], { refTerritory: '971' });
+  near(mec.mecenat.dons, 1000, 0.01, 'dons détectés (catégorie don)');
+  near(mec.mecenat.plafond, 20000, 0.01, 'plafond = max(20 000, 0,5 % CA) → 20 000 ici');
+  near(mec.mecenat.reduction_is, 600, 0.01, 'réduction IS = 60 % du don');
+  ok(mec.mecenat.report_5_ans === 0, 'pas de report sous le plafond');
+  // Base IS réintégrée : résultat comptable (CA - don) + don = CA → IS plein sur 10 000,
+  // puis −600 de réduction. Sans réintégration l'IS serait calculé sur 9 000 (FAUX).
+  var isSansDon = acc.synthesize(payMec, [], { refTerritory: '971' }).is;
+  near(mec.is, Math.max(0, isSansDon - 600), 0.01, 'IS = IS(base réintégrée) − 60 % du don');
+  ok(mec.resultat_net === Math.round((mec.resultat_exploitation - mec.is) * 100) / 100, 'résultat net comptable cohérent');
+  // Don énorme → plafonné + report.
+  var big = acc.synthesize(payMec, [{ amountHt: 25000, category: 'mécénat', label: 'X' }], { refTerritory: '971' });
+  near(big.mecenat.eligibles, 20000, 0.01, 'don plafonné à 20 000');
+  near(big.mecenat.report_5_ans, 5000, 0.01, 'excédent reportable 5 ans');
+
   return errors;
 };
 

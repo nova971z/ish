@@ -58,19 +58,31 @@ function synthesize(payments, charges, cfg) {
     byMonth[key].ca_ttc += ttc; byMonth[key].ca_ht += ht; byMonth[key].cogs += c2e(p.cogsHtCents); byMonth[key].ventes += 1;
   });
 
-  // Charges saisies, regroupées par catégorie.
+  // Charges saisies, regroupées par catégorie. Les DONS (mécénat) sont
+  // comptés à part : comptablement ce sont des charges, mais FISCALEMENT ils
+  // ne sont PAS déductibles (réintégration au résultat imposable) — l'avantage
+  // passe par une RÉDUCTION D'IMPÔT de 60 % du don, plafonnée à
+  // max(20 000 €, 0,5 % du CA HT), excédent reportable 5 ans (art. 238 bis
+  // CGI, vérifié 25/07/2026). Saisir la catégorie « don » ou « mécénat ».
   var chargesParCat = {};
-  var chargesTotal = 0, tvaDeductible = 0;
+  var chargesTotal = 0, tvaDeductible = 0, dons = 0;
   charges.forEach(function (c) {
     var v = Number(c.amountHt) || 0;
-    chargesParCat[c.category || 'autre'] = round2((chargesParCat[c.category || 'autre'] || 0) + v);
+    var cat = c.category || 'autre';
+    chargesParCat[cat] = round2((chargesParCat[cat] || 0) + v);
     chargesTotal += v;
+    if (/^(don|dons|m[ée]c[ée]nat)$/i.test(cat)) dons += v;
     tvaDeductible += Number(c.tvaDeductible) || 0;
   });
 
   var margeBrute = caHt - cogs;
-  var resultatExpl = margeBrute - stripe - chargesTotal;
-  var is = computeIS(resultatExpl, cfg);
+  var resultatExpl = margeBrute - stripe - chargesTotal;   // comptable (dons en charge)
+  // Fiscal : dons réintégrés dans la base IS, puis réduction 60 % plafonnée.
+  var baseIS = resultatExpl + dons;
+  var plafondMecenat = Math.max(20000, 0.005 * caHt);
+  var donsEligibles = Math.min(dons, plafondMecenat);
+  var reductionMecenat = 0.6 * donsEligibles;
+  var is = Math.max(0, computeIS(baseIS, cfg) - reductionMecenat);
   var resultatNet = resultatExpl - is;
 
   var months = Object.keys(byMonth).sort().map(function (k) {
@@ -93,6 +105,13 @@ function synthesize(payments, charges, cfg) {
     nb_ventes: succeeded.length,
     panier_moyen: succeeded.length ? round2(caTtc / succeeded.length) : 0,
     tva: { collectee: round2(tvaCollectee), deductible: round2(tvaDeductible), solde_a_reverser: round2(tvaCollectee - tvaDeductible) },
+    mecenat: {
+      dons: round2(dons),
+      plafond: round2(plafondMecenat),
+      eligibles: round2(donsEligibles),
+      reduction_is: round2(reductionMecenat),
+      report_5_ans: round2(Math.max(0, dons - donsEligibles))
+    },
     par_mois: months,
     ventes_par_marque: brandStats(payments, cfg),   // preuve partenariat fournisseur
     complet: cogsConnu,   // false si une vente n'a pas de coût snapshoté (données partielles)

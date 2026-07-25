@@ -6604,7 +6604,13 @@
       + row('− Frais Stripe (réels)', eur(a.frais_stripe))
       + row('− Charges saisies (transport, octroi, CFE, assurance…)', eur(a.charges_saisies))
       + row('= Résultat d\'exploitation', eur(a.resultat_exploitation), true)
-      + row('− Impôt sur les sociétés (IS)', eur(a.is))
+      // Mécénat (art. 238 bis CGI) : le don est réintégré fiscalement puis
+      // ouvre 60 % de réduction d'IS (plafond max(20 000 €, 0,5 % CA HT)).
+      + ((a.mecenat && a.mecenat.dons > 0)
+        ? row('Dons mécénat (réintégrés fiscalement)', eur(a.mecenat.dons))
+          + row('− Réduction d\'IS mécénat (60 %' + (a.mecenat.report_5_ans > 0 ? ', ' + eur(a.mecenat.report_5_ans) + ' reportés 5 ans' : '') + ')', eur(a.mecenat.reduction_is))
+        : '')
+      + row('− Impôt sur les sociétés (IS' + ((a.mecenat && a.mecenat.dons > 0) ? ', après réduction mécénat' : '') + ')', eur(a.is))
       + row('= RÉSULTAT NET', eur(a.resultat_net) + ' (' + (a.marge_nette_pct || 0) + ' %)', true)
       + '</table>';
 
