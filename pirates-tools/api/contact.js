@@ -7,7 +7,7 @@
 // dédié) car le plan Vercel Hobby est à 12/12 fonctions — aucune 13e possible.
 
 const rl = require('./_lib/ratelimit');
-const { getFirebase } = require('./_lib/firebase');
+const { getFirebase, verifyUid } = require('./_lib/firebase');
 
 module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(204).end();
@@ -39,7 +39,18 @@ module.exports = async function handler(req, res) {
     if (!(await rl.allow('partner-app', rl.clientIp(req), 3, 3600))) {
       return res.status(429).json({ ok: false, error: 'Trop de demandes. Réessayez dans une heure.' });
     }
-    return handlePartnerApplication(body, { apiKey, from, ownerEmail }, res);
+    // uid VÉRIFIÉ (Bearer Firebase) si connecté — rattache la candidature au
+    // compte (obligatoire côté client quand un code d'invitation est saisi).
+    const uid = await verifyUid(req);
+    return handlePartnerApplication(body, { apiKey, from, ownerEmail, uid }, res);
+  }
+
+  // ── Branche : self-service carte artisan (photos/logo depuis Mon compte) ──
+  // Authentifié par ID token Firebase (Bearer) : l'utilisateur ne peut toucher
+  // QUE la carte liée à SON uid (liaison posée par l'admin dans
+  // partners_private). Champs modifiables : photos + logo, RIEN d'autre.
+  if (body.type === 'partner-card-get' || body.type === 'partner-card-media') {
+    return handlePartnerCardSelf(req, body, res);
   }
 
   // Rate limit: 5 messages / hour / IP.
@@ -168,6 +179,34 @@ async function handlePartnerApplication(body, cfg, res) {
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({ ok: false, error: 'Email invalide' });
   if (body.rulesAccepted !== true) return res.status(400).json({ ok: false, error: 'Vous devez accepter les règles du programme.' });
 
+  // ── Code d'invitation (Black offert, décision user 25/07) ────────────────
+  // Validé SERVEUR (jamais confiance au client), usage unique. On valide en
+  // lecture d'abord et on ne marque « utilisé » qu'APRÈS enregistrement réussi
+  // de la candidature : un échec plus loin ne brûle pas le code de l'invité
+  // (le double-usage concurrent est théorique — 2 invités — et l'admin garde
+  // la main sur la création des cartes de toute façon).
+  const inviteCode = String(body.inviteCode || '').trim().toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 24);
+  let invited = false;
+  let inviteRef = null;
+  if (inviteCode) {
+    const fb = getFirebase();
+    if (!fb.db) {
+      return res.status(503).json({ ok: false, error: 'Vérification du code impossible pour le moment, réessaie dans quelques minutes.' });
+    }
+    try {
+      inviteRef = fb.db.collection('invite_codes').doc(inviteCode);
+      const snap = await inviteRef.get();
+      const d = snap.exists ? (snap.data() || {}) : null;
+      if (!d || d.active === false || d.usedBy) {
+        return res.status(400).json({ ok: false, error: 'Code d\'invitation invalide ou déjà utilisé.' });
+      }
+      invited = true;
+    } catch (err) {
+      console.error('[api/contact] invite code check failed:', err.message);
+      return res.status(503).json({ ok: false, error: 'Vérification du code impossible pour le moment, réessaie dans quelques minutes.' });
+    }
+  }
+
   const sizes = body.sizes && typeof body.sizes === 'object' ? body.sizes : {};
   const application = {
     name, metier, email, commune, phone, tier,
@@ -186,6 +225,9 @@ async function handlePartnerApplication(body, cfg, res) {
     siteOption: inSet(body.siteOption, SITE_OPTIONS, 'aucun'),
     message: sTrim(body.message, 2000),
     rulesAccepted: true,
+    invited: invited,
+    inviteCode: invited ? inviteCode : '',
+    uid: sTrim(cfg.uid, 128),
     status: 'nouvelle'
   };
   const hasLogo = typeof body.logo === 'string'
@@ -211,6 +253,17 @@ async function handlePartnerApplication(body, cfg, res) {
     console.error('[api/contact] partner-application store failed:', err.message);
   }
 
+  // Candidature enregistrée avec un code valide → le code est consommé
+  // (usage unique). Best-effort : un échec ici est logué, jamais bloquant.
+  if (invited && stored && inviteRef) {
+    try {
+      const fb = getFirebase();
+      await inviteRef.update({ usedBy: email, usedAt: fb.admin.firestore.FieldValue.serverTimestamp() });
+    } catch (err) {
+      console.error('[api/contact] invite code mark-used failed:', err.message);
+    }
+  }
+
   // Email récapitulatif au propriétaire.
   try {
     const html = partnerApplicationEmail(application, stored);
@@ -221,7 +274,7 @@ async function handlePartnerApplication(body, cfg, res) {
         from: cfg.from,
         to: cfg.ownerEmail,
         reply_to: email,
-        subject: '[Partenaire] Pré-inscription ' + tier.toUpperCase() + ' — ' + name,
+        subject: '[Partenaire] Pré-inscription ' + tier.toUpperCase() + (invited ? ' 🎟️ INVITÉ' : '') + ' — ' + name,
         html: html
       })
     });
@@ -236,6 +289,59 @@ async function handlePartnerApplication(body, cfg, res) {
   } catch (err) {
     console.error('[api/contact] partner-application error:', err.message);
     if (stored) return res.status(200).json({ ok: true, stored: true, emailed: false });
+    return res.status(500).json({ ok: false, error: 'Erreur serveur' });
+  }
+}
+
+// ── Self-service carte artisan (photos/logo depuis Mon compte) ─────────────
+// Sécurité : uid VÉRIFIÉ (Bearer) → la liaison uid→carte vit dans
+// partners_private (posée par l'admin, jamais par le client). Seuls photos et
+// logo sont modifiables, avec EXACTEMENT les mêmes règles que l'admin
+// (dataURL image only, plafond par tier, taille max).
+const SELF_PHOTOS_MAX = { basique: 0, pro: 1, gold: 3, black: 6 };
+
+async function handlePartnerCardSelf(req, body, res) {
+  if (!(await rl.allow('partner-self', rl.clientIp(req), 30, 3600))) {
+    return res.status(429).json({ ok: false, error: 'Trop de requêtes. Réessaie dans une heure.' });
+  }
+  const uid = await verifyUid(req);
+  if (!uid) return res.status(401).json({ ok: false, error: 'Connecte-toi pour gérer ta carte.' });
+  const fb = getFirebase();
+  if (!fb.db) return res.status(503).json({ ok: false, error: 'Service indisponible pour le moment.' });
+
+  try {
+    const privSnap = await fb.db.collection('partners_private').where('uid', '==', uid).limit(1).get();
+    if (privSnap.empty) return res.status(200).json({ ok: true, card: null });
+    const partnerId = privSnap.docs[0].id;
+    const cardSnap = await fb.db.collection('partners').doc(partnerId).get();
+    if (!cardSnap.exists) return res.status(200).json({ ok: true, card: null });
+    const card = cardSnap.data() || {};
+    const tier = SELF_PHOTOS_MAX[card.tier] !== undefined ? card.tier : 'basique';
+
+    if (body.type === 'partner-card-get') {
+      return res.status(200).json({
+        ok: true,
+        card: {
+          id: partnerId, name: card.name || '', metier: card.metier || '',
+          tier: tier, logo: card.logo || '',
+          photos: Array.isArray(card.photos) ? card.photos : [],
+          photosMax: SELF_PHOTOS_MAX[tier]
+        }
+      });
+    }
+
+    // partner-card-media : remplace photos + logo (et rien d'autre).
+    const isDataImg = (v) => typeof v === 'string' && /^data:image\/(jpeg|png|webp);base64,/.test(v) && v.length <= 170000;
+    const photos = Array.isArray(body.photos) ? body.photos.filter(isDataImg).slice(0, SELF_PHOTOS_MAX[tier]) : [];
+    const logo = isDataImg(body.logo) ? body.logo : '';
+    await fb.db.collection('partners').doc(partnerId).update({
+      photos: photos,
+      logo: logo,
+      updatedAt: fb.admin.firestore.FieldValue.serverTimestamp()
+    });
+    return res.status(200).json({ ok: true, saved: true, photos: photos.length, logo: !!logo });
+  } catch (err) {
+    console.error('[api/contact] partner-card-self failed:', err.message);
     return res.status(500).json({ ok: false, error: 'Erreur serveur' });
   }
 }
@@ -280,6 +386,8 @@ function partnerApplicationEmail(a, stored) {
     + row('Option site', siteLabel)
     + row('Message', a.message)
     + '<tr><td style="padding:6px 0;color:#9aa4b2;font-size:12px">Règles acceptées</td><td style="padding:6px 0;color:#34d399;font-size:13px;font-weight:700">✓ Oui (horodaté)</td></tr>'
+    + (a.invited ? '<tr><td style="padding:6px 0;color:#9aa4b2;font-size:12px">Invitation</td><td style="padding:6px 0;color:#fbbf24;font-size:13px;font-weight:700">🎟️ INVITÉ — code ' + escapeHtml(a.inviteCode) + ' (abonnement offert, pas de bon 38 €)</td></tr>' : '')
+    + (a.uid ? '<tr><td style="padding:6px 0;color:#9aa4b2;font-size:12px">Compte lié</td><td style="padding:6px 0;color:#c4b5fd;font-size:13px">uid ' + escapeHtml(a.uid) + '</td></tr>' : '')
     + '</table>'
     + '<p style="margin:18px 0 0;color:' + (stored ? '#6b7280' : '#fbbf24') + ';font-size:11px">'
     + (stored ? 'Enregistrée dans la base (onglet Admin → Candidatures).' : '⚠️ Non enregistrée en base (FIREBASE_SERVICE_ACCOUNT manquant) — cet email fait foi.')

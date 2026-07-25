@@ -3748,6 +3748,11 @@
   }
 
   function renderArtisans() {
+    var back = document.getElementById('artisansBack');
+    if (back) back.onclick = function () {
+      if (history.length > 1) history.back();
+      else location.hash = '#/';
+    };
     var grid = $('#artisansGrid');
     if (!grid) return;
     grid.innerHTML = '<p class="no-results">Chargement...</p>';
@@ -3920,6 +3925,7 @@
         siteOption: (hasSite && hasSite.checked) ? (val('pjSiteOpt') || 'refonte') : 'neuf',
         message: val('pjMessage').trim(),
         logo: _pjLogo,
+        inviteCode: val('pjInviteCode').trim().toUpperCase(),
         rulesAccepted: !!(rulesChk && rulesChk.checked),
         website: val('pjHoneypot') // honeypot (piège à bots, doit rester vide)
       };
@@ -3943,15 +3949,24 @@
       if (data.metier.length < 2) return pjErr('Indique ton métier.');
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) return pjErr('Email invalide.');
       if (!data.rulesAccepted) return pjErr('Merci d\'accepter les règles du programme.');
+      // Code d'invitation → compte OBLIGATOIRE (la carte sera rattachée à
+      // l'uid vérifié ; sans session, le serveur ne peut rien rattacher).
+      if (data.inviteCode && !_currentUser) {
+        return pjErr('Avec un code d\'invitation, connecte-toi d\'abord à ton compte Pirates Tools (Menu → Compte → Créer un compte), puis reviens valider le formulaire.');
+      }
 
       if (submit) submit.disabled = true;
       if (statusEl) { statusEl.textContent = 'Envoi…'; statusEl.className = 'pj-status'; }
 
       var apiBase = apiBaseUrl();
-      fetch(apiBase + '/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
+      // jsonAuthHeaders : joint le Bearer Firebase si connecté → le serveur
+      // rattache la candidature à l'uid VÉRIFIÉ (jamais déclaratif).
+      jsonAuthHeaders().then(function (headers) {
+        return fetch(apiBase + '/api/contact', {
+          method: 'POST',
+          headers: headers,
+          body: JSON.stringify(data)
+        });
       })
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, data: j }; }); })
       .then(function (res) {
@@ -4620,6 +4635,128 @@
 
   // ── Account page ───────────────────────────────────────────
 
+  // ── Ma carte artisan (self-service photos/logo — exigence user 25/07) ──
+  // La carte annuaire liée au compte (liaison posée par l'admin) est éditable
+  // par l'artisan lui-même : logo + photos UNIQUEMENT, via contact.js
+  // (Bearer vérifié serveur). Masqué si aucune carte liée.
+  var _accCardState = null;
+  var _accCardLogoBusy = false;
+  var _accCardPhotosBusy = 0;
+
+  function loadMyPartnerCard() {
+    var wrap = document.getElementById('accPartnerCard');
+    if (!wrap || !_currentUser) return;
+    jsonAuthHeaders().then(function (headers) {
+      return fetch(apiBaseUrl() + '/api/contact', {
+        method: 'POST', headers: headers,
+        body: JSON.stringify({ type: 'partner-card-get' })
+      });
+    }).then(function (r) { return r.json(); }).then(function (data) {
+      if (!data.ok || !data.card) { wrap.hidden = true; return; }
+      _accCardState = data.card;
+      wrap.hidden = false;
+      renderMyPartnerCard();
+    }).catch(function () { wrap.hidden = true; });
+  }
+
+  function renderMyPartnerCard() {
+    var body = document.getElementById('accPartnerBody');
+    var c = _accCardState;
+    if (!body || !c) return;
+    body.innerHTML = '<p style="opacity:.85;margin:0 0 .8rem">'
+      + escapeHTML((c.tier || '').toUpperCase()) + ' — <strong>' + escapeHTML(c.name) + '</strong>'
+      + (c.metier ? ' (' + escapeHTML(c.metier) + ')' : '')
+      + '. Tu peux changer ton logo et tes photos quand tu veux — le reste (texte, lien…) passe par nous sur WhatsApp.</p>'
+      + '<p style="font-weight:600;margin:.2rem 0 .3rem">Logo</p>'
+      + '<div id="accCardLogoBox" class="admin-partner-photos"></div>'
+      + '<input type="file" id="accCardLogoFile" accept="image/*">'
+      + '<p style="font-weight:600;margin:.9rem 0 .3rem">Photos (' + (c.photos || []).length + '/' + c.photosMax + ')</p>'
+      + (c.photosMax > 0
+          ? '<div id="accCardPhotosBox" class="admin-partner-photos"></div><input type="file" id="accCardPhotoFiles" accept="image/*" multiple>'
+          : '<p class="admin-hint">Ta formule n\'inclut pas de photos dans l\'annuaire.</p>')
+      + '<div class="actions" style="margin-top:1rem"><button type="button" class="btn primary" id="accCardSave">Enregistrer ma carte</button></div>'
+      + '<span id="accCardStatus" class="admin-row__status" aria-live="polite"></span>';
+    renderMyPartnerMedia();
+
+    var logoFile = document.getElementById('accCardLogoFile');
+    if (logoFile) logoFile.onchange = function () {
+      var f = logoFile.files && logoFile.files[0];
+      if (!f) return;
+      _accCardLogoBusy = true; renderMyPartnerMedia();
+      compressPartnerImage(f, 320, function (dataUrl) {
+        _accCardLogoBusy = false;
+        if (dataUrl) c.logo = dataUrl; else toast('Image logo illisible', 'error');
+        renderMyPartnerMedia();
+      });
+      logoFile.value = '';
+    };
+    var photoFiles = document.getElementById('accCardPhotoFiles');
+    if (photoFiles) photoFiles.onchange = function () {
+      var files = Array.prototype.slice.call(photoFiles.files || []);
+      photoFiles.value = '';
+      _accCardPhotosBusy += files.length; renderMyPartnerMedia();
+      files.forEach(function (f) {
+        compressPartnerImage(f, 900, function (dataUrl) {
+          _accCardPhotosBusy = Math.max(0, _accCardPhotosBusy - 1);
+          if (dataUrl && c.photos.length < c.photosMax) c.photos.push(dataUrl);
+          else if (dataUrl) toast('Maximum ' + c.photosMax + ' photo(s) pour ta formule', 'error');
+          else toast('Image illisible : ' + f.name, 'error');
+          renderMyPartnerMedia();
+        });
+      });
+    };
+    var save = document.getElementById('accCardSave');
+    if (save) save.onclick = function () {
+      var statusEl = document.getElementById('accCardStatus');
+      save.disabled = true;
+      if (statusEl) { statusEl.textContent = 'Enregistrement…'; statusEl.className = 'admin-row__status'; }
+      jsonAuthHeaders().then(function (headers) {
+        return fetch(apiBaseUrl() + '/api/contact', {
+          method: 'POST', headers: headers,
+          body: JSON.stringify({ type: 'partner-card-media', logo: c.logo || '', photos: c.photos || [] })
+        });
+      }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, data: j }; }); })
+      .then(function (res) {
+        save.disabled = false;
+        if (res.ok && res.data.ok) {
+          if (statusEl) { statusEl.textContent = 'Enregistré ✓ — visible sur le site dans quelques secondes.'; }
+          toast('Carte mise à jour ✓', 'success');
+        } else {
+          if (statusEl) { statusEl.textContent = 'Erreur : ' + ((res.data && res.data.error) || 'réessaie'); statusEl.className = 'admin-row__status is-error'; }
+        }
+      }).catch(function (err) {
+        save.disabled = false;
+        if (statusEl) { statusEl.textContent = 'Erreur réseau : ' + err.message; statusEl.className = 'admin-row__status is-error'; }
+      });
+    };
+  }
+
+  function renderMyPartnerMedia() {
+    var c = _accCardState;
+    if (!c) return;
+    var logoBox = document.getElementById('accCardLogoBox');
+    if (logoBox) {
+      logoBox.innerHTML = (c.logo
+        ? '<span class="admin-partner-photo"><img src="' + c.logo + '" alt="Logo"><button type="button" data-acc-logo-rm aria-label="Retirer le logo">✕</button></span>' : '')
+        + (_accCardLogoBusy ? '<span class="img-busy">⏳ Traitement du logo…</span>' : '');
+      var rm = logoBox.querySelector('[data-acc-logo-rm]');
+      if (rm) rm.onclick = function () { c.logo = ''; renderMyPartnerMedia(); };
+    }
+    var photosBox = document.getElementById('accCardPhotosBox');
+    if (photosBox) {
+      photosBox.innerHTML = (c.photos || []).map(function (src, i) {
+        return '<span class="admin-partner-photo"><img src="' + src + '" alt="Photo ' + (i + 1) + '"><button type="button" data-acc-photo-rm="' + i + '" aria-label="Retirer la photo ' + (i + 1) + '">✕</button></span>';
+      }).join('')
+        + (_accCardPhotosBusy > 0 ? '<span class="img-busy">⏳ Traitement de ' + _accCardPhotosBusy + ' image(s)…</span>' : '');
+      photosBox.querySelectorAll('[data-acc-photo-rm]').forEach(function (btn) {
+        btn.onclick = function () {
+          c.photos.splice(Number(btn.getAttribute('data-acc-photo-rm')), 1);
+          renderMyPartnerMedia();
+        };
+      });
+    }
+  }
+
   function renderAccount() {
     if (!_currentUser) return;
     var p = _userProfile || {};
@@ -4659,6 +4796,9 @@
 
     // Order history (async)
     renderOrderHistory();
+
+    // Carte artisan liée au compte (self-service photos/logo, masqué sinon)
+    loadMyPartnerCard();
   }
 
   function renderOrderHistory() {
@@ -7649,6 +7789,8 @@
       + '<input type="number" id="apOrder" value="' + (Number.isFinite(Number(p.order)) ? Number(p.order) : 999) + '"></label>'
       + '<label class="admin-field admin-field--inline"><input type="checkbox" id="apActive"' + (p.active !== false ? ' checked' : '') + '> <span>Carte visible (active)</span></label>'
       + '<label class="admin-field admin-field--inline"><input type="checkbox" id="apGuest"' + (p.guest === true ? ' checked' : '') + '> <span>Invité / test (gratuit — tous les avantages SAUF le bon de 38 €/mois ; hors compteur des 10 places payantes)</span></label>'
+      + '<label class="admin-field"><span>Email du compte client lié (l\'artisan pourra changer photos/logo depuis SON compte)</span>'
+      + '<input type="email" id="apLinkedEmail" maxlength="200" placeholder="artisan@email.com" value="' + escapeHTML(String(p.linkedEmail || '')) + '"></label>'
       + '<label class="admin-field"><span>Logo (Pro/Gold/Black)</span>'
       + '<input type="file" id="apLogoFile" accept="image/*"></label>'
       + '<div id="apLogoPreview" class="admin-partner-photos"></div>'
@@ -7759,6 +7901,7 @@
         order: Number((document.getElementById('apOrder') || {}).value),
         active: !!(document.getElementById('apActive') || {}).checked,
         guest: !!(document.getElementById('apGuest') || {}).checked,
+        linkedEmail: ((document.getElementById('apLinkedEmail') || {}).value || '').trim(),
         logo: _adminPartnerLogo,
         photos: _adminPartnerPhotos.slice(0, ADMIN_PARTNER_PHOTOS_MAX[tier] || 0)
       };
@@ -7832,7 +7975,59 @@
   var PJ_PUB_LABEL = { google: 'Google Ads', meta: 'Facebook / Instagram', aucun: 'À définir' };
   var PJ_SITE_LABEL = { neuf: 'Site vitrine neuf', refonte: 'Refonte de son site', portfolio: 'Page portfolio', 'pub-doublee': 'Pas de site — pub doublée', aucun: 'À définir' };
 
+  // ── Codes d'invitation (Black offert) ──────────────────────
+  function loadAdminInviteCodes() {
+    var el = document.getElementById('adminInviteCodes');
+    if (!el) return;
+    el.innerHTML = '<p class="admin-loading">Chargement…</p>';
+    adminGet('invite-codes').then(function (data) {
+      var codes = data.codes || [];
+      if (!codes.length) { el.innerHTML = '<p class="admin-hint">Aucun code pour l\'instant.</p>'; return; }
+      el.innerHTML = codes.map(function (c) {
+        return '<div class="admin-row">'
+          + '<div class="admin-row__info"><strong style="letter-spacing:.08em">' + escapeHTML(c.code) + '</strong>'
+          + ' <span class="admin-row__meta">' + (c.usedBy
+              ? '🎟️ utilisé par ' + escapeHTML(c.usedBy)
+              : '<em style="color:#34d399">libre</em>') + '</span></div>'
+          + '<div class="admin-row__actions"><button type="button" class="btn btn--ghost" data-invite-del="' + escapeHTML(c.code) + '">Supprimer</button></div>'
+          + '</div>';
+      }).join('');
+      el.querySelectorAll('[data-invite-del]').forEach(function (btn) {
+        btn.onclick = function () {
+          if (!window.confirm('Supprimer le code ' + btn.getAttribute('data-invite-del') + ' ?')) return;
+          btn.disabled = true;
+          adminPostType('invite-code-delete', { code: btn.getAttribute('data-invite-del') })
+            .then(function () { loadAdminInviteCodes(); })
+            .catch(function (e) { btn.disabled = false; toast('Erreur : ' + e.message, 'error'); });
+        };
+      });
+    }).catch(function (e) {
+      el.innerHTML = '<p class="admin-error">Erreur : ' + escapeHTML(e.message) + '</p>';
+    });
+  }
+
+  function bindAdminInviteCodeCreate() {
+    var btn = document.getElementById('adminInviteCodeCreate');
+    var input = document.getElementById('adminInviteCodeInput');
+    if (!btn || btn._bound) return;
+    btn._bound = true;
+    btn.onclick = function () {
+      btn.disabled = true;
+      adminPostType('invite-code-save', { code: (input && input.value || '').trim() }).then(function (data) {
+        btn.disabled = false;
+        if (input) input.value = '';
+        toast('Code créé : ' + data.code, 'success');
+        loadAdminInviteCodes();
+      }).catch(function (e) {
+        btn.disabled = false;
+        toast('Erreur : ' + e.message, 'error');
+      });
+    };
+  }
+
   function loadAdminApplications() {
+    loadAdminInviteCodes();
+    bindAdminInviteCodeCreate();
     var el = document.getElementById('adminApplicationsBody');
     if (!el) return;
     el.innerHTML = '<p class="admin-loading">Chargement…</p>';
@@ -7853,8 +8048,10 @@
         return '<div class="admin-app admin-app--' + escapeHTML(a.tier || 'basique') + '">'
           + '<div class="admin-app__head">'
           + '<strong>' + escapeHTML(a.name || '') + '</strong>'
-          + '<span class="admin-app__tier">' + escapeHTML((a.tier || '').toUpperCase()) + '</span>'
+          + '<span class="admin-app__tier">' + escapeHTML((a.tier || '').toUpperCase()) + (a.invited ? ' · 🎟️ INVITÉ' : '') + '</span>'
           + '</div>'
+          + (a.invited ? '<div class="admin-app__line"><span>Invitation</span> code ' + escapeHTML(a.inviteCode || '') + ' — abonnement offert (pas de bon 38 €)</div>' : '')
+          + (a.uid ? '<div class="admin-app__line"><span>Compte lié</span> ✓ (mets son email dans « Email du compte client lié » en créant sa carte)</div>' : '')
           + line('Métier', a.metier + (a.commune ? ' — ' + a.commune : ''))
           + '<div class="admin-app__line"><span>Contact</span> '
             + '<a href="mailto:' + encodeURIComponent(a.email) + '">' + escapeHTML(a.email) + '</a>'
@@ -8071,6 +8268,16 @@
 
       // ── Candidatures (pré-inscriptions artisans, Phase 3a) ──
       + '<div class="admin-pane" data-admin-pane="applications" hidden>'
+
+      + '<h2 class="admin-subtitle">Codes d\'invitation</h2>'
+      + '<p class="admin-hint">Crée un code et envoie-le à ton invité : il s\'inscrit via « Rejoindre le réseau » en entrant ce code (abonnement offert, compte requis). Usage unique — le code se consomme à la candidature.</p>'
+      + '<div class="ig-comments-lookup">'
+      + '<input type="text" id="adminInviteCodeInput" placeholder="Vide = code généré (PT-XXXXXX)" class="ig-media-id-input" autocapitalize="characters">'
+      + '<button type="button" class="btn primary" id="adminInviteCodeCreate">Créer un code</button>'
+      + '</div>'
+      + '<div id="adminInviteCodes" class="admin-list"><p class="admin-loading">Chargement…</p></div>'
+
+      + '<h2 class="admin-subtitle">Candidatures reçues</h2>'
       + '<p class="admin-hint">Pré-inscriptions reçues via le formulaire « Rejoindre le réseau » (#/rejoindre). Sans paiement — à recontacter au lancement. Tu reçois aussi chaque candidature par email.</p>'
       + '<div id="adminApplicationsBody"><p class="admin-loading">Chargement…</p></div>'
       + '<button type="button" class="btn btn--ghost" id="adminApplicationsRefresh">Rafraîchir</button>'

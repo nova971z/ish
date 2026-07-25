@@ -44,7 +44,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=436">
+  <link rel="stylesheet" href="styles.css?v=437">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -728,6 +728,13 @@
               <div class="actions"><a class="btn" href="#/devis" data-nav="/devis">Voir le panier</a></div>
             </div>
           </div>
+
+          <!-- Ma carte artisan (self-service partenaires) : visible UNIQUEMENT
+               si la carte annuaire de l'utilisateur est liée à son compte. -->
+          <div class="card" style="margin-top:1.2rem" id="accPartnerCard" hidden>
+            <div class="head"><h3 class="title">Ma carte artisan</h3><span class="badge">Partenaire</span></div>
+            <div class="specs" id="accPartnerBody"></div>
+          </div>
         </div>
 
         <!-- Onglet Commandes -->
@@ -976,6 +983,12 @@
             <label class="pj-field"><span>Message</span><textarea id="pjMessage" rows="3" maxlength="2000" placeholder="Parle-nous de ton activité, tes besoins…"></textarea></label>
           </fieldset>
 
+          <fieldset class="pj-fieldset pj-fieldset--invite">
+            <legend>Code d'invitation</legend>
+            <p class="pj-hint">Pirates Tools t'a envoyé un code&nbsp;? Entre-le ici : ton abonnement est <strong>offert</strong> (aucun paiement). Il te faut un compte Pirates Tools connecté — ta carte artisan y sera rattachée.</p>
+            <label class="pj-field"><span>Code (optionnel)</span><input type="text" id="pjInviteCode" maxlength="24" autocapitalize="characters" autocomplete="off" placeholder="PT-XXXXXX"></label>
+          </fieldset>
+
           <label class="pj-accept">
             <input type="checkbox" id="pjRulesChk">
             <span>J'ai lu et j'accepte les <a href="#/abonnement/black">règles du programme partenaire</a> (partage d'entraide entre artisans, engagement de visibilité croisée). Je comprends qu'il s'agit d'une pré-inscription sans paiement.</span>
@@ -990,6 +1003,7 @@
     <!-- ANNUAIRE ARTISANS (vitrine partenaires, Phase 2 abonnements) -->
     <section id="view-artisans" class="view hidden" data-route="/artisans" role="region" aria-labelledby="artisans-h1">
       <div class="container">
+        <button type="button" class="pj-back" id="artisansBack">← Retour</button>
         <header class="artisans-header">
           <h1 id="artisans-h1" tabindex="-1">Nos artisans</h1>
           <p class="artisans-sub">Le réseau des professionnels partenaires Pirates Tools — des artisans locaux de confiance, membres du programme d'entraide.</p>
@@ -1761,7 +1775,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=436"></script>
+  <script defer src="app.js?v=437"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

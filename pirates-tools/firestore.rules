@@ -94,7 +94,8 @@ service cloud.firestore {
     // Aucune de ces collections n'est jamais lue ni écrite par le client.
     // Les fermer explicitement documente l'intention (et double le catch-all).
     match /partner_applications/{appId} { allow read, write: if false; } // pré-inscriptions artisans (Phase 3a) : écrites par contact.js (Admin SDK), lues par l'admin
-    match /partners_private/{partnerId} { allow read, write: if false; } // marqueur invité/payant des partenaires — JAMAIS public (partners/ l'est, lui)
+    match /partners_private/{partnerId} { allow read, write: if false; } // marqueur invité/payant + uid lié des partenaires — JAMAIS public (partners/ l'est, lui)
+    match /invite_codes/{code}          { allow read, write: if false; } // codes d'invitation Black — validés par contact.js (Admin SDK), jamais lisibles/forgeables client
     match /payments/{paymentId}        { allow read, write: if false; } // journal paiements (email/CP/montants)
     match /stripe_events/{eventId}     { allow read, write: if false; } // idempotence webhook
     match /rate_limits/{bucketId}      { allow read, write: if false; } // compteurs anti-abus (IP)

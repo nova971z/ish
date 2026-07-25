@@ -36,17 +36,48 @@ module.exports = async function checkPartnerApplication() {
   let fbConfigured = true;
   let lastEmail = null;
   let fetchOk = true;
+  let mockUid = null;
+  let inviteCodes = {};   // code -> data
+  let privDocs = {};      // partnerId -> { uid, guest }
+  let partnerDocs = {};   // partnerId -> carte
+  let partnerUpdates = [];
 
   try {
     require.cache[rlPath] = { id: rlPath, filename: rlPath, loaded: true, exports: {
       allow: async () => rlAllowResult, clientIp: () => '127.0.0.1'
     } };
     const fakeAdmin = { firestore: { FieldValue: { serverTimestamp: () => '__TS__' } } };
+    const mockDb = {
+      collection: (name) => {
+        if (name === 'partner_applications') {
+          return { add: async (d) => { storedDocs.push(d); return { id: 'app_x' }; } };
+        }
+        if (name === 'invite_codes') {
+          return { doc: (id) => ({
+            get: async () => ({ exists: id in inviteCodes, data: () => inviteCodes[id] }),
+            update: async (d) => { Object.assign(inviteCodes[id], d); }
+          }) };
+        }
+        if (name === 'partners_private') {
+          return { where: (f, op, v) => ({ limit: () => ({ get: async () => {
+            const hits = Object.keys(privDocs).filter((k) => privDocs[k].uid === v);
+            return { empty: hits.length === 0, docs: hits.map((k) => ({ id: k })) };
+          } }) }) };
+        }
+        if (name === 'partners') {
+          return { doc: (id) => ({
+            get: async () => ({ exists: id in partnerDocs, data: () => partnerDocs[id] }),
+            update: async (d) => { partnerUpdates.push({ id, d }); Object.assign(partnerDocs[id], d); }
+          }) };
+        }
+        throw new Error('mock collection inconnue: ' + name);
+      }
+    };
     require.cache[fbPath] = { id: fbPath, filename: fbPath, loaded: true, exports: {
       getFirebase: () => fbConfigured
-        ? { admin: fakeAdmin, db: { collection: () => ({ add: async (d) => { storedDocs.push(d); return { id: 'app_x' }; } }) } }
+        ? { admin: fakeAdmin, db: mockDb }
         : { admin: null, db: null },
-      verifyUid: async () => null, verifyAdmin: async () => false
+      verifyUid: async () => mockUid, verifyAdmin: async () => false
     } };
     global.fetch = async (url, opts) => {
       lastEmail = JSON.parse(opts.body);
@@ -144,6 +175,71 @@ module.exports = async function checkPartnerApplication() {
 
     r = await call(Object.assign({}, base, { honeypot: 'spam' }));
     check('honeypot → 200 filtré', r._status === 200 && r._json.filtered === true);
+
+    // ── Codes d'invitation ──
+    fbConfigured = true; fetchOk = true;
+    inviteCodes = { 'PT-ABC123': { active: true, usedBy: '' } };
+    storedDocs = [];
+    r = await call(Object.assign({}, base, { inviteCode: 'pt-abc123' })); // minuscules → normalisé
+    check('code valide → 200 + candidature invited + code enregistré',
+      r._status === 200 && storedDocs[0] && storedDocs[0].invited === true && storedDocs[0].inviteCode === 'PT-ABC123');
+    check('code valide → consommé (usedBy = email du candidat)', inviteCodes['PT-ABC123'].usedBy === 'jean@artisan.fr');
+    check('email : sujet marqué INVITÉ', /INVITÉ/.test(lastEmail.subject));
+
+    r = await call(Object.assign({}, base, { inviteCode: 'PT-ABC123' }));
+    check('code DÉJÀ UTILISÉ → 400', r._status === 400 && /invalide|utilisé/i.test(r._json.error));
+
+    r = await call(Object.assign({}, base, { inviteCode: 'INEXISTANT' }));
+    check('code inexistant → 400', r._status === 400);
+
+    inviteCodes['PT-OFF'] = { active: false, usedBy: '' };
+    r = await call(Object.assign({}, base, { inviteCode: 'PT-OFF' }));
+    check('code désactivé → 400', r._status === 400);
+
+    fbConfigured = false;
+    r = await call(Object.assign({}, base, { inviteCode: 'PT-ABC123' }));
+    check('code fourni mais Firebase absent → 503 (jamais accordé sans vérif)', r._status === 503);
+    fbConfigured = true;
+
+    // ── uid vérifié rattaché à la candidature ──
+    mockUid = 'uid_jean_123'; storedDocs = [];
+    await call(base);
+    check('uid vérifié (Bearer) stocké dans la candidature', storedDocs[0] && storedDocs[0].uid === 'uid_jean_123');
+    mockUid = null; storedDocs = [];
+    await call(base);
+    check('sans session → uid vide', storedDocs[0] && storedDocs[0].uid === '');
+
+    // ── Self-service carte artisan (partner-card-get / partner-card-media) ──
+    mockUid = null;
+    r = await call({ type: 'partner-card-get' });
+    check('partner-card-get sans auth → 401', r._status === 401);
+
+    mockUid = 'uid_wood_1';
+    privDocs = {}; partnerDocs = {};
+    r = await call({ type: 'partner-card-get' });
+    check('partner-card-get sans carte liée → card:null', r._status === 200 && r._json.card === null);
+
+    privDocs = { woodnova: { uid: 'uid_wood_1', guest: true } };
+    partnerDocs = { woodnova: { name: 'WoodNova', metier: 'Charpentier', tier: 'black', logo: 'data:image/webp;base64,OLD', photos: ['data:image/webp;base64,P1'] } };
+    r = await call({ type: 'partner-card-get' });
+    check('partner-card-get avec carte liée → carte + plafond par tier',
+      r._status === 200 && r._json.card && r._json.card.id === 'woodnova' && r._json.card.photosMax === 6 && r._json.card.photos.length === 1);
+
+    const okImg = 'data:image/webp;base64,' + 'B'.repeat(50);
+    partnerUpdates = [];
+    r = await call({ type: 'partner-card-media', logo: okImg, photos: [okImg, 'https://evil.example/x.png', okImg] });
+    const updD = (partnerUpdates[0] || {}).d || {};
+    check('partner-card-media → photos/logo remplacés, URL externe REJETÉE',
+      r._status === 200 && partnerUpdates.length === 1 && updD.logo === okImg && updD.photos.length === 2);
+    check('partner-card-media → seuls photos/logo/updatedAt touchés',
+      Object.keys(updD).sort().join(',') === 'logo,photos,updatedAt');
+
+    // Un autre uid ne touche JAMAIS la carte d'autrui
+    mockUid = 'uid_intrus';
+    partnerUpdates = [];
+    r = await call({ type: 'partner-card-media', logo: okImg, photos: [] });
+    check('un AUTRE compte → card:null, aucune écriture', r._status === 200 && r._json.card === null && partnerUpdates.length === 0);
+    mockUid = null;
   } finally {
     // Restauration stricte : la CI charge d'autres checks après celui-ci.
     if (savedRl) require.cache[rlPath] = savedRl; else delete require.cache[rlPath];

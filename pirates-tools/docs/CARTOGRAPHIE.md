@@ -225,6 +225,8 @@ Client = soumis aux règles ; serveur (Admin SDK) = bypass.
 | `analytics_*` (daily/products/clicks/geo/visitors/events_recent) | ❌ | events, purge cron |
 | `partners/{id}` | ✅ **read public** (annuaire artisans) ; write ❌ | admin (partner-save/-delete) |
 | `partner_applications/{id}` | ❌ serveur-only | contact.js (type=partner-application), lues admin |
+| `partners_private/{id}` | ❌ serveur-only | admin (guest + uid lié self-service) |
+| `invite_codes/{code}` | ❌ serveur-only | admin (création), contact.js (validation usage unique) |
 
 `firestore.indexes.json` : aucun index composite ; 2 `fieldOverrides`
 (collectionGroup `orders.stripeSessionId` + `.paymentIntentId`) pour le repli

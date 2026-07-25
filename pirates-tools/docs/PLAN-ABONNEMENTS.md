@@ -165,6 +165,23 @@ des règles du programme (preuve). Séquence 1 = 1 (TOUTE LIVRÉE) :
    — cartes lisibles (tailles, contact mailto, pub/site en clair, logo,
    horodatage), XSS échappé. Playwright 10/10.
 5. ✅ Vérif globale : CI verte, non-régression Phase 2 (18/18), SW v433.
+6. ✅ CODES D'INVITATION + SELF-SERVICE (25/07, SW v437, demande user) :
+   - Codes d'invitation (Black offert) : admin crée/supprime des codes
+     (générés PT-XXXXXX ou choisis) dans l'onglet Candidatures ; l'invité
+     s'inscrit via /rejoindre avec son code → validé SERVEUR (invite_codes,
+     collection fermée au client), usage unique (consommé après candidature
+     réussie — jamais brûlé sur échec), candidature marquée 🎟️ INVITÉ.
+     Compte OBLIGATOIRE avec un code (uid vérifié rattaché via Bearer).
+   - Liaison carte↔compte : champ « Email du compte client lié » sur la carte
+     admin → uid résolu via Firebase Auth, stocké dans partners_private.
+   - SELF-SERVICE (« Ma carte artisan », onglet profil du compte) : l'artisan
+     lié change lui-même photos + logo (compression client, plafond par tier,
+     validations serveur identiques à l'admin) via contact.js
+     type=partner-card-get/-media (Bearer vérifié, rate-limit 30/h). SEULS
+     photos/logo modifiables — le reste passe par l'admin.
+   - Bouton retour ajouté sur la page Nos artisans (celui du formulaire
+     existait déjà). Émulateur 50/50 ; unitaires 40 assertions ; Playwright
+     20/20 + admin 12/12 + annuaire 18/18.
 4. Admin : onglet « Candidatures » (revue des pré-inscriptions, lecture).
 5. Vérif Playwright + CI + SW + commit.
 

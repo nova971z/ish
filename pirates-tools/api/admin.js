@@ -207,9 +207,31 @@ module.exports = async function handler(req, res) {
         if (privSnap) privSnap.forEach((doc) => { priv[doc.id] = doc.data() || {}; });
         const partners = [];
         snap.forEach((doc) => {
-          partners.push(Object.assign({ id: doc.id, guest: !!(priv[doc.id] && priv[doc.id].guest) }, doc.data()));
+          partners.push(Object.assign({
+            id: doc.id,
+            guest: !!(priv[doc.id] && priv[doc.id].guest),
+            linkedEmail: (priv[doc.id] && priv[doc.id].linkedEmail) || ''
+          }, doc.data()));
         });
         return res.status(200).json({ ok: true, partners });
+      }
+
+      // ── Codes d'invitation (Black offert) : liste admin ────────
+      if (type === 'invite-codes') {
+        const snap = await db.collection('invite_codes').get();
+        const codes = [];
+        snap.forEach((doc) => {
+          const d = doc.data() || {};
+          codes.push({
+            code: doc.id,
+            active: d.active !== false,
+            usedBy: d.usedBy || '',
+            usedAt: d.usedAt && d.usedAt.toMillis ? d.usedAt.toMillis() : null,
+            createdAt: d.createdAt && d.createdAt.toMillis ? d.createdAt.toMillis() : null
+          });
+        });
+        codes.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+        return res.status(200).json({ ok: true, codes });
       }
 
       // ── Candidatures partenaires (pré-inscriptions Phase 3a) ────
@@ -230,6 +252,8 @@ module.exports = async function handler(req, res) {
             websiteUrl: d.websiteUrl || '', siteOption: d.siteOption || '',
             message: d.message || '', status: d.status || 'nouvelle',
             hasLogo: !!(d.logo && String(d.logo).length > 0),
+            invited: d.invited === true, inviteCode: d.inviteCode || '',
+            uid: d.uid || '',
             createdAt: d.createdAt && d.createdAt.toMillis ? d.createdAt.toMillis() : null
           });
         });
@@ -388,6 +412,20 @@ module.exports = async function handler(req, res) {
       };
       const id = String(b.id || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 60)
         || (name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 50) || ('p' + Math.abs(hashCodeStr(name + metier))));
+      // Liaison compte client (self-service photos/logo) : l'admin saisit
+      // l'EMAIL du compte → on résout l'uid via Firebase Auth (le compte doit
+      // exister). L'uid vit dans partners_private (serveur seul) : c'est LA
+      // preuve d'appartenance qu'exige l'endpoint self-service (contact.js).
+      let linkedUid = '';
+      const linkedEmail = String(b.linkedEmail || '').trim().slice(0, 200);
+      if (linkedEmail) {
+        try {
+          const userRec = await admin.auth().getUserByEmail(linkedEmail);
+          linkedUid = userRec.uid;
+        } catch (err) {
+          return res.status(400).json({ ok: false, error: 'Aucun compte Pirates Tools avec cet email — l\'artisan doit d\'abord créer son compte (Menu → Compte).' });
+        }
+      }
       await db.collection('partners').doc(id).set(doc, { merge: false });
       // Black INVITÉ (décision user 25/07) : 2 artisans choisis à la main +
       // la carte de test admin. Tous les avantages Black GRATUITS (ÉPI, site,
@@ -396,11 +434,52 @@ module.exports = async function handler(req, res) {
       // dans `partners` qui est PUBLIQUEMENT lisible — on n'expose pas qui
       // paie et qui ne paie pas). Sert aux compteurs (10 places PAYANTES,
       // Phase 3b) et au portefeuille (pas de bon, Phase 4).
-      await db.collection('partners_private').doc(id).set({ guest: b.guest === true }, { merge: true });
-      return res.status(200).json({ ok: true, id, partner: doc, guest: b.guest === true });
+      await db.collection('partners_private').doc(id).set({
+        guest: b.guest === true,
+        uid: linkedUid,
+        linkedEmail: linkedUid ? linkedEmail : ''
+      }, { merge: true });
+      return res.status(200).json({ ok: true, id, partner: doc, guest: b.guest === true, linkedEmail: linkedUid ? linkedEmail : '' });
     } catch (err) {
       console.error('[api/admin] partner-save failed:', err.message);
       return res.status(500).json({ ok: false, error: 'partner-save échoué' });
+    }
+  }
+
+  // ── POST ?type=invite-code-save : créer un code d'invitation ──
+  // Code fourni (normalisé A-Z 0-9 tiret, 4-24) ou GÉNÉRÉ (PT-XXXXXX).
+  // create() échoue si le code existe déjà → pas d'écrasement silencieux.
+  if (req.method === 'POST' && ((req.query && req.query.type) === 'invite-code-save')) {
+    try {
+      let code = String((req.body || {}).code || '').trim().toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 24);
+      if (!code) {
+        const alphabet = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // sans O/0/I/L/1 (lisible)
+        code = 'PT-';
+        for (let i = 0; i < 6; i++) code += alphabet[Math.floor(Math.random() * alphabet.length)];
+      }
+      if (code.length < 4) return res.status(400).json({ ok: false, error: 'Code trop court (4 caractères minimum)' });
+      await db.collection('invite_codes').doc(code).create({
+        active: true, usedBy: '', usedAt: null,
+        createdAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+      return res.status(200).json({ ok: true, code });
+    } catch (err) {
+      if (String(err.code) === '6' || /already.?exists/i.test(err.message)) {
+        return res.status(409).json({ ok: false, error: 'Ce code existe déjà' });
+      }
+      console.error('[api/admin] invite-code-save failed:', err.message);
+      return res.status(500).json({ ok: false, error: 'invite-code-save échoué' });
+    }
+  }
+
+  if (req.method === 'POST' && ((req.query && req.query.type) === 'invite-code-delete')) {
+    try {
+      const code = String((req.body || {}).code || '').trim().toUpperCase().replace(/[^A-Z0-9-]/g, '');
+      if (!code) return res.status(400).json({ ok: false, error: 'code requis' });
+      await db.collection('invite_codes').doc(code).delete();
+      return res.status(200).json({ ok: true, code });
+    } catch (err) {
+      return res.status(500).json({ ok: false, error: 'invite-code-delete échoué' });
     }
   }
 

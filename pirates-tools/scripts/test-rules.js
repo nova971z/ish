@@ -57,6 +57,7 @@ async function check(label, promise) {
     await setDoc(doc(db, 'partners/artisan1'), { name: 'Menuiserie K', metier: 'Menuisier', tier: 'black', active: true, order: 1 });
     await setDoc(doc(db, 'partner_applications/app1'), { name: 'Candidat', metier: 'Plombier', tier: 'black', createdAt: 1 });
     await setDoc(doc(db, 'partners_private/artisan1'), { guest: true });
+    await setDoc(doc(db, 'invite_codes/PT-TEST01'), { active: true, usedBy: '' });
   });
 
   console.log('\n── Isolation entre clients ──');
@@ -101,6 +102,9 @@ async function check(label, promise) {
   await check('Un anonyme NE lit PAS partners_private/ (qui paie / qui est invité)', assertFails(getDoc(doc(anon, 'partners_private/artisan1'))));
   await check('Alice NE lit PAS partners_private/', assertFails(getDoc(doc(alice, 'partners_private/artisan1'))));
   await check('Alice NE écrit PAS partners_private/', assertFails(setDoc(doc(alice, 'partners_private/artisan1'), { guest: false })));
+  await check('Alice NE lit PAS invite_codes/ (deviner un code)', assertFails(getDoc(doc(alice, 'invite_codes/PT-TEST01'))));
+  await check('Alice NE peut PAS forger un code d\'invitation', assertFails(setDoc(doc(alice, 'invite_codes/GRATUIT'), { active: true, usedBy: '' })));
+  await check('Un anonyme NE liste PAS invite_codes/', assertFails(getDocs(collection(anon, 'invite_codes'))));
 
   console.log('\n── Mesure d\'audience : fermée au client (lecture + écriture) ──');
   await check('Alice NE lit PAS analytics_daily/', assertFails(getDoc(doc(alice, 'analytics_daily/2026-07-17'))));
