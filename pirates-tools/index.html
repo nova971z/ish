@@ -185,12 +185,19 @@
   <!-- =================== HERO =================== -->
   <section id="hero" class="hero-full" aria-hidden="true">
     <div class="hero-logo-container initial" id="heroLogoContainer">
-      <img id="heroLogo" class="hero-logo on" alt="Pirates Tools"
-        src="icons/icon-512.png?v=387"
-        srcset="icons/icon-256.png?v=387 256w, icons/icon-384.png?v=387 384w, icons/icon-512.png?v=387 512w"
-        sizes="(max-width: 768px) 90vw, 60vw"
-        width="600" height="600"
-        decoding="async" loading="eager" fetchpriority="high" />
+      <!-- LCP : WebP (−51 % vs PNG, visuellement identique — vérifié pixel à
+           pixel q0.68) via <picture>, repli PNG pour les très vieux moteurs.
+           sizes = l'affichage RÉEL (clamp CSS 180px→420px), plus le 90vw/60vw
+           surévalué qui faisait télécharger le 512w sur mobile DPR2. -->
+      <picture>
+        <source type="image/webp"
+          srcset="images/hero-logo-256.webp 256w, images/hero-logo-384.webp 384w, images/hero-logo-512.webp 512w"
+          sizes="clamp(180px, 42vmin, 420px)">
+        <img id="heroLogo" class="hero-logo on" alt="Pirates Tools"
+          src="icons/icon-512.png?v=387"
+          width="600" height="600"
+          decoding="async" loading="eager" fetchpriority="high" />
+      </picture>
     </div>
   </section>
 
