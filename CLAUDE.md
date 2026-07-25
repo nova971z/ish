@@ -79,11 +79,15 @@ Le site N'EST PAS lancé (décidé le 15/07/2026). Ne rien ouvrir au public tant
       • Manquent encore sur Vercel (notés, non urgents) : CRON_SECRET (rapport
         mensuel), STRIPE_WEBHOOK_SECRET (au lancement Stripe) ; badge « Needs
         Attention » sur STRIPE_…_KEY à examiner au dégel de Stripe.
-- [x] Email pro du site ✅ CRÉÉE par l'user (25/07) : **contact.piratestools@gmail.com**
-      (corrigée 2× par l'user — c'est EXACTEMENT celle-là, PAS contact@pirates-tools.com
-      ni le gmail perso ki.legrix). Affichée dans le footer (mailto). RÈGLE GRAVÉE :
-      TOUTE adresse email affichée sur le site = contact.piratestools@gmail.com.
-      Reste : la reporter dans les champs [À COMPLÉTER] des mentions/CGV.
+- [x] Email AFFICHÉE sur le site ✅ (MISE À JOUR 25/07 tard, décision user après
+      activation de l'Email Routing) : **contact@pirates-tools.com** (l'adresse
+      pro du domaine, qui REÇOIT désormais via Cloudflare → transfert vers la
+      boîte réelle contact.piratestools@gmail.com). RÈGLE À JOUR : adresse
+      affichée partout sur le site = contact@pirates-tools.com ; boîte de
+      réception réelle + comptes de service (Resend, OWNER_EMAIL) =
+      contact.piratestools@gmail.com. Le gmail perso ki.legrix ne s'affiche
+      JAMAIS. Reste : reporter contact@pirates-tools.com dans les champs
+      [À COMPLÉTER] des mentions/CGV.
 
 ### 🔴 BLOQUANT (paiement carte)
 - [ ] Activer le compte Stripe (infos entreprise + RIB) pour encaisser en LIVE.
