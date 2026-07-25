@@ -2470,16 +2470,15 @@
   var _pPirateM = [0.8, 0.6, 1.1, 1.0, 1.4, 0.7, 0.5, 0.8, 1.3, 1.0, 0.9, 1.5];
   var _pMonths = ['Jan','Fev','Mar','Avr','Mai','Jun','Jul','Aou','Sep','Oct','Nov','Dec'];
 
-  var PLAN_INFO = {
-    basique: { name: 'Basique', desc: 'L\'essentiel pour démarrer. Accès à notre catalogue en ligne et tarifs réduits sur vos premières commandes.',
-      features: [{icon:'🏷️',text:'-10% sur le catalogue'},{icon:'📦',text:'Livraison standard'},{icon:'📧',text:'Support par email'}], color:'basique' },
-    pro: { name: 'Pro', desc: 'Le choix des professionnels. Remises significatives, paiement flexible et conseiller dédié pour optimiser vos achats.',
-      features: [{icon:'🏷️',text:'-25% sur le catalogue'},{icon:'💳',text:'Paiement différé 30j'},{icon:'👤',text:'Conseiller dédié'},{icon:'🚚',text:'Livraison express'},{icon:'📊',text:'Dashboard commandes'}], color:'pro' },
-    gold: { name: 'Gold', desc: 'L\'expérience premium. Tous les avantages Pro + communication digitale et fidélité renforcée pour booster votre activité.',
-      features: [{icon:'🏷️',text:'-30% sur le catalogue'},{icon:'💳',text:'Paiement différé 60j'},{icon:'👤',text:'Conseiller prioritaire'},{icon:'🚚',text:'Livraison gratuite'},{icon:'💎',text:'Points fidélité x3'},{icon:'📱',text:'Réseaux sociaux inclus'},{icon:'🎁',text:'Ventes privées'}], color:'gold' },
-    black: { name: 'Black Metal', desc: 'Le summum absolu. Tous nos services réunis, remises maximales, communication complète et accès VIP illimité.',
-      features: [{icon:'🏷️',text:'-40% sur le catalogue'},{icon:'💳',text:'Paiement différé 90j'},{icon:'👤',text:'Account manager VIP'},{icon:'🚚',text:'Livraison J+1 gratuite'},{icon:'💎',text:'Points fidélité x5'},{icon:'📱',text:'Communication 360\u00b0'},{icon:'🎁',text:'Ventes privées exclusives'},{icon:'🌐',text:'Site vitrine offert'},{icon:'📸',text:'Contenu photo/vidéo'},{icon:'🔥',text:'Accès bêta nouveautés'}], color:'black' }
-  };
+  // PLAN_INFO dérivé d'ABO_DATA (source unique) — construit paresseusement
+  // car ABO_DATA est déclaré plus bas dans l'IIFE (var hoisté, affecté après).
+  var _planInfoCache = null;
+  function getPlanInfo(plan) {
+    if (!_planInfoCache) {
+      _planInfoCache = { basique: aboToPlanInfo('basique'), pro: aboToPlanInfo('pro'), gold: aboToPlanInfo('gold'), black: aboToPlanInfo('black') };
+    }
+    return _planInfoCache[plan] || {};
+  }
 
   function _pInitCanvas() {
     var canvas = document.getElementById('plansCanvas');
@@ -2666,7 +2665,7 @@
     var saving = parseInt(orb.dataset.saving) || 0;
     var price = orb.dataset.price || '0';
     var plan = orb.dataset.plan || '';
-    var info = PLAN_INFO[plan] || {};
+    var info = getPlanInfo(plan);
 
     _pDraw(saving);
 
@@ -3446,70 +3445,99 @@
 
   // ── Abonnement Page ──────────────────────────────────────────
 
+  // ── ABO_DATA — SOURCE UNIQUE des abonnements (PLAN_INFO en dérive) ─────────
+  // Remaster 25/07/2026 : valeurs RÉELLES et tenables (fin de la maquette
+  // -25/-40 %/site offert). Black Partenaire = spec finale validée user ;
+  // Basique/Pro/Gold = proportionnalité proposée (bon ≈ 38 % de la cotisation),
+  // à co-valider. Détail complet : docs/PLAN-ABONNEMENTS.md.
+  // `saving` = économie annuelle HONNÊTE sur le profil affiché (artisan
+  // ~4 000 €/an d'achats) : bon annuel + remise sur ce profil (+ valeur du
+  // pack pour Black). Alimente l'orbe (data-saving) ET le graphe.
   var ABO_DATA = {
     basique: {
       name: 'Basique',
-      price: '9',
-      tagline: 'L\'essentiel pour bien démarrer',
-      desc: 'Accédez à notre catalogue en ligne avec des tarifs réduits. L\'abonnement idéal pour découvrir l\'univers Pirates Tools sans engagement.',
+      price: '4,90',
+      saving: 140,
+      tagline: 'L\'entrée dans le club',
+      desc: 'Un bon d\'achat qui se remplit tous les mois, une vraie remise permanente et l\'accès aux ventes privées. Sans engagement.',
       features: [
-        { icon: '🏷️', text: 'Remise de 10% sur tout le catalogue', detail: 'Applicable sur chaque commande, sans minimum d\'achat.' },
-        { icon: '📦', text: 'Livraison standard offerte dès 80\u20ac', detail: 'Livraison sous 3-5 jours ouvrés partout en France.' },
-        { icon: '📧', text: 'Support par email prioritaire', detail: 'Réponse garantie sous 24h les jours ouvrés.' },
-        { icon: '📋', text: 'Accès au catalogue complet', detail: 'Toutes nos références disponibles en ligne 24h/24.' }
+        { icon: '💳', text: 'Bon d\'achat +1,90 € chaque mois', detail: 'Crédité à chaque mensualité payée (~23 €/an), cumulable, et il vous reste acquis même si vous arrêtez.' },
+        { icon: '🏷️', text: 'Remise permanente de 3%', detail: 'Sur tout le catalogue, cumulable avec la fidélité. Sans minimum d\'achat.' },
+        { icon: '🎁', text: 'Ventes privées abonnés', detail: 'Accès aux offres réservées avant tout le monde.' },
+        { icon: '📧', text: 'SAV prioritaire sous 48h', detail: 'Votre demande passe devant, réponse garantie sous 48h ouvrées.' },
+        { icon: '📇', text: 'Carte dans l\'annuaire artisans', detail: 'Votre entreprise référencée sur notre page « Nos artisans » (carte texte).' }
       ],
       theme: 'basique'
     },
     pro: {
       name: 'Pro',
-      price: '29',
-      tagline: 'Le choix des professionnels exigeants',
-      desc: 'Des remises significatives, un paiement flexible et un conseiller dédié pour optimiser chaque commande. Conçu pour les artisans et les pros du bâtiment.',
+      price: '14,90',
+      saving: 270,
+      tagline: 'Pour l\'artisan qui commande régulièrement',
+      desc: 'Le bon mensuel plus costaud, 5% de remise permanente et l\'accès aux précommandes container : les prix bateau, réservés aux abonnés.',
       features: [
-        { icon: '🏷️', text: 'Remise de 25% sur tout le catalogue', detail: 'La meilleure remise pour les professionnels réguliers.' },
-        { icon: '💳', text: 'Paiement différé à 30 jours', detail: 'Payez vos commandes à 30 jours fin de mois.' },
-        { icon: '👤', text: 'Conseiller dédié personnel', detail: 'Un interlocuteur unique qui connaît vos besoins.' },
-        { icon: '🚚', text: 'Livraison express J+1', detail: 'Recevez vos commandes dès le lendemain avant 13h.' },
-        { icon: '📊', text: 'Dashboard commandes', detail: 'Suivez vos commandes, factures et historique en temps réel.' }
+        { icon: '💳', text: 'Bon d\'achat +5,70 € chaque mois', detail: 'Crédité à chaque mensualité payée (~68 €/an), cumulable, acquis même si vous arrêtez.' },
+        { icon: '🏷️', text: 'Remise permanente de 5%', detail: 'Sur tout le catalogue, cumulable avec la fidélité.' },
+        { icon: '🚢', text: 'Précommandes container', detail: 'Livraison groupée par bateau : 10 à 40 € de moins par outil, délai 3 à 5 semaines.' },
+        { icon: '📧', text: 'SAV prioritaire sous 24h', detail: 'Réponse garantie sous 24h ouvrées, WhatsApp direct.' },
+        { icon: '🎁', text: 'Ventes privées abonnés', detail: 'Accès aux offres réservées avant tout le monde.' },
+        { icon: '📇', text: 'Annuaire : logo + 1 photo', detail: 'Votre carte artisan avec logo et une photo de réalisation.' }
       ],
       theme: 'pro'
     },
     gold: {
       name: 'Gold',
-      price: '59',
-      tagline: 'L\'expérience premium sans compromis',
-      desc: 'Tous les avantages Pro amplifiés, avec la communication digitale intégrée et un programme de fidélité renforcé. Pour ceux qui veulent le meilleur.',
+      price: '29,90',
+      saving: 420,
+      tagline: 'Le club avancé, fidélité doublée',
+      desc: 'Remise renforcée, bon mensuel sérieux, fidélité qui monte deux fois plus vite et un devis chantier personnalisé chaque trimestre.',
       features: [
-        { icon: '🏷️', text: 'Remise de 30% sur tout le catalogue', detail: 'Le meilleur rapport qualité-prix du marché.' },
-        { icon: '💳', text: 'Paiement différé à 60 jours', detail: 'Une trésorerie plus souple pour votre activité.' },
-        { icon: '👤', text: 'Conseiller prioritaire VIP', detail: 'Ligne directe, disponible 6j/7 de 7h à 20h.' },
-        { icon: '🚚', text: 'Livraison gratuite illimitée', detail: 'Sans minimum d\'achat, partout en France et DOM-TOM.' },
-        { icon: '💎', text: 'Points fidélité x3', detail: 'Cumulez 3x plus de points à chaque commande.' },
-        { icon: '📱', text: 'Gestion réseaux sociaux', detail: 'Nous gérons vos réseaux sociaux professionnels.' },
-        { icon: '🎁', text: 'Accès ventes privées', detail: 'Des offres exclusives réservées aux membres Gold.' }
+        { icon: '💳', text: 'Bon d\'achat +11,40 € chaque mois', detail: 'Crédité à chaque mensualité payée (~137 €/an), cumulable, acquis même si vous arrêtez.' },
+        { icon: '🏷️', text: 'Remise permanente de 7%', detail: 'Sur tout le catalogue, cumulable avec la fidélité.' },
+        { icon: '💎', text: 'Fidélité x2', detail: 'Votre dépense compte double : vous atteignez les paliers de remise fidélité deux fois plus vite.' },
+        { icon: '🚢', text: 'Précommandes container prioritaires', detail: 'Vos outils partent dans le premier groupage disponible.' },
+        { icon: '📐', text: '1 devis chantier personnalisé/trimestre', detail: 'On chiffre ensemble l\'outillage complet d\'un chantier, conseils inclus.' },
+        { icon: '📧', text: 'SAV prioritaire sous 12h', detail: 'WhatsApp direct, réponse sous 12h ouvrées.' },
+        { icon: '📇', text: 'Annuaire : 3 photos + lien', detail: 'Carte enrichie : logo, 3 photos de réalisations et lien vers votre site.' }
       ],
       theme: 'gold'
     },
     black: {
-      name: 'Black Metal',
-      price: '99',
-      tagline: 'Le summum absolu. Tout inclus.',
-      desc: 'Tous nos services réunis en un seul abonnement. Remises maximales, communication 360°, site web offert et accès VIP illimité. L\'excellence totale.',
+      name: 'Black Partenaire',
+      price: '100',
+      saving: 1200,
+      places: 10,
+      tagline: 'Le programme partenaire. 10 places, pas une de plus.',
+      desc: 'Bien plus qu\'un abonnement : un pack pro complet chaque année (ÉPI floqués + site web), votre publicité locale gérée, et un réseau d\'entraide entre artisans de métiers différents qui partagent votre travail chaque semaine.',
       features: [
-        { icon: '🏷️', text: 'Remise de 40% sur tout le catalogue', detail: 'La remise la plus élevée, réservée à l\'élite.' },
-        { icon: '💳', text: 'Paiement différé à 90 jours', detail: 'La flexibilité maximale pour votre trésorerie.' },
-        { icon: '👤', text: 'Account manager VIP dédié', detail: 'Un expert attitré, joignable 7j/7.' },
-        { icon: '🚚', text: 'Livraison J+1 gratuite illimitée', detail: 'Express gratuit sans minimum, priorité absolue.' },
-        { icon: '💎', text: 'Points fidélité x5', detail: 'Le taux de cumul le plus généreux.' },
-        { icon: '📱', text: 'Communication 360\u00b0 complète', detail: 'Réseaux sociaux, contenu photo/vidéo, branding.' },
-        { icon: '🌐', text: 'Site vitrine professionnel offert', detail: 'Votre site web clé en main, hébergé et maintenu.' },
-        { icon: '📸', text: 'Contenu photo & vidéo', detail: 'Shooting professionnel pour vos réalisations.' },
-        { icon: '🎁', text: 'Ventes privées exclusives', detail: 'Accès prioritaire aux ventes flash et nouveautés.' },
-        { icon: '🔥', text: 'Accès bêta nouveautés', detail: 'Testez les nouveaux produits avant tout le monde.' }
+        { icon: '💳', text: 'Bon d\'achat +38 € chaque mois', detail: 'Crédité à chaque mensualité payée (456 €/an), cumulable sans limite — et il vous reste acquis même si vous arrêtez : cet argent est à vous.' },
+        { icon: '🦺', text: 'Pack ÉPI complet floqué, chaque année', detail: 'Chaussures de sécurité, pantalon, t-shirt, lunettes et gants, personnalisés aux couleurs de votre entreprise. Tailles collectées à la souscription.' },
+        { icon: '🌐', text: 'Votre site web pro, créé et remasterisé chaque année', detail: 'Site vitrine + nom de domaine inclus. Vous avez déjà un site ? Au choix : refonte du vôtre, page portfolio complémentaire, ou budget pub doublé le 1er trimestre.' },
+        { icon: '📣', text: 'Votre publicité locale gérée', detail: '~120 €/an de budget publicitaire réel, au choix Google Ads ou Facebook/Instagram, ciblé sur votre zone. Point mensuel WhatsApp.' },
+        { icon: '🤝', text: 'Réseau d\'entraide entre artisans', detail: 'Chaque semaine, un partenaire d\'un AUTRE métier partage votre publication (jamais un concurrent : un pisciniste pousse un charpentier). Vous partagez la sienne en retour.' },
+        { icon: '📱', text: '1 story dédiée/mois + story hebdo des partenaires', detail: 'Votre entreprise mise en avant sur les réseaux Pirates Tools : une story rien que pour vous chaque mois, plus la story hebdomadaire collective.' },
+        { icon: '📇', text: 'Carte premium dans l\'annuaire', detail: 'Design premium, 6 photos, badge Partenaire et lien direct vers votre site.' },
+        { icon: '🏷️', text: 'Remise permanente de 10%', detail: 'Sur tout le catalogue (plafonnée à 100 € de remise par mois), cumulable avec la fidélité.' },
+        { icon: '💎', text: 'Fidélité x3 + SAV ligne directe', detail: 'Vos achats comptent triple, et vous avez notre ligne directe.' }
+      ],
+      rules: [
+        'Chaque semaine, vous partagez la publication du partenaire qui vous est attribué (métier différent du vôtre, jamais un concurrent) — et un partenaire partage la vôtre.',
+        'Vous partagez la story Pirates Tools de votre binôme au moins 1 fois par mois sur vos réseaux.',
+        '3 manquements aux règles de partage entraînent la sortie du programme.',
+        'Le bon de 38 € est crédité uniquement pour les mois effectivement payés. En cas d\'impayé : rappels par email, 15 jours pour régulariser ; un mois de délai possible sur simple message expliquant votre situation ; au-delà d\'1 mois + 15 jours, l\'abonnement est résilié. Votre bon cumulé reste acquis.',
+        'Sans engagement : vous partez quand vous voulez, votre bon cumulé vous reste.'
       ],
       theme: 'black'
     }
   };
+  // Dérive PLAN_INFO (panneau accueil) depuis la source unique : plus de doublon.
+  function aboToPlanInfo(key) {
+    var d = ABO_DATA[key];
+    return {
+      name: d.name, desc: d.desc, color: d.theme,
+      features: d.features.slice(0, 7).map(function (f) { return { icon: f.icon, text: f.text }; })
+    };
+  }
 
   function renderAbonnement(slug) {
     var data = ABO_DATA[slug];
@@ -3545,12 +3573,48 @@
       + featRows
       + '</div>'
 
-      // CTA
+      // Règles du programme (tiers qui en ont — Black Partenaire) + acceptation.
+      + (data.rules && data.rules.length
+        ? '<div class="abo-rules"><h2 class="abo-features__title">Les règles du programme</h2>'
+          + '<p class="abo-rules__intro">Un club d\'entraide ne fonctionne que si chacun joue le jeu. En souscrivant, vous acceptez ces règles :</p>'
+          + '<ol class="abo-rules__list">'
+          + data.rules.map(function (r) { return '<li>' + escapeHTML(r) + '</li>'; }).join('')
+          + '</ol>'
+          + '<label class="abo-accept"><input type="checkbox" id="aboAcceptChk"> <span>J\'ai lu et j\'accepte les règles du programme Partenaire.</span></label>'
+          + '</div>'
+        : '')
+
+      // CTA — pré-lancement : souscription via contact (WhatsApp si numéro
+      // configuré, sinon formulaire de contact). Le paiement en ligne de
+      // l'abonnement arrive en Phase 3 (Stripe Subscriptions).
       + '<div class="abo-cta-wrap">'
-      + '<button class="abo-cta abo-cta--' + escapeHTML(data.theme) + '">Souscrire a ' + escapeHTML(data.name) + ' \u2014 ' + data.price + '\u20ac/mois</button>'
-      + '<p class="abo-cta-note">Sans engagement \u2022 Annulation a tout moment</p>'
+      + (data.places ? '<p class="abo-places">' + data.places + ' places au total — programme limité</p>' : '')
+      + '<button class="abo-cta abo-cta--' + escapeHTML(data.theme) + '" id="aboCtaBtn"' + (data.rules ? ' disabled aria-disabled="true"' : '') + '>Demander ma place \u2014 ' + data.price + '\u20ac/mois</button>'
+      + '<p class="abo-cta-note">Sans engagement \u2022 Annulation à tout moment \u2022 Souscription accompagnée (on vous recontacte)</p>'
       + '</div>'
       + '</div>';
+
+    // Acceptation des règles → active le CTA (tiers avec règles uniquement).
+    var ctaBtn = document.getElementById('aboCtaBtn');
+    var chk = document.getElementById('aboAcceptChk');
+    if (ctaBtn) {
+      if (chk) {
+        chk.addEventListener('change', function () {
+          ctaBtn.disabled = !chk.checked;
+          ctaBtn.setAttribute('aria-disabled', chk.checked ? 'false' : 'true');
+        });
+      }
+      ctaBtn.onclick = function () {
+        if (ctaBtn.disabled) return;
+        var msg = 'Bonjour, je souhaite souscrire à l\'abonnement ' + data.name + ' (' + data.price + ' €/mois)'
+          + (data.rules ? ' et j\'accepte les règles du programme Partenaire.' : '.')
+          + ' Mon corps de métier : ';
+        var wa = (typeof waLink === 'function') ? waLink(msg) : '';
+        if (wa) { window.open(wa, '_blank', 'noopener'); }
+        else { location.hash = '#/contact'; toast('Envoie-nous ta demande via le formulaire — on te recontacte pour finaliser.', 'success'); }
+        if (typeof track === 'function') track('abo_request', { plan: slug });
+      };
+    }
   }
 
   // ── Router (hash-based SPA) ────────────────────────────────

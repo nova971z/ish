@@ -44,7 +44,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=426">
+  <link rel="stylesheet" href="styles.css?v=427">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -273,48 +273,48 @@
           <div class="plans-header">
             <span class="plans-header__badge">Services Premium</span>
             <h2 class="plans-header__title">Nos Abonnements</h2>
-            <p class="plans-header__sub">Touchez un service pour voir vos economies</p>
+            <p class="plans-header__sub">Touchez un service pour voir vos economies &mdash; estimation pour un artisan qui achete ~4 000 &euro;/an d'outillage</p>
           </div>
 
           <!-- Round service orbs -->
           <div class="plan-orbs" id="planOrbs">
 
-            <button class="plan-orb plan-orb--basique" data-plan="basique" data-price="9" data-saving="220" aria-label="Plan Basique a 9 euros par mois">
+            <button class="plan-orb plan-orb--basique" data-plan="basique" data-price="4,90" data-saving="140" aria-label="Plan Basique a 4,90 euros par mois">
               <div class="plan-orb__circle">
                 <div class="plan-orb__pulse"></div>
                 <span class="plan-orb__emoji">🛡️</span>
               </div>
               <span class="plan-orb__name">Basique</span>
-              <span class="plan-orb__price">9&euro;/m</span>
+              <span class="plan-orb__price">4,90&euro;/m</span>
             </button>
 
-            <button class="plan-orb plan-orb--pro" data-plan="pro" data-price="29" data-saving="720" aria-label="Plan Pro a 29 euros par mois">
+            <button class="plan-orb plan-orb--pro" data-plan="pro" data-price="14,90" data-saving="270" aria-label="Plan Pro a 14,90 euros par mois">
               <div class="plan-orb__circle">
                 <div class="plan-orb__pulse"></div>
                 <span class="plan-orb__emoji">⚡</span>
               </div>
               <span class="plan-orb__name">Pro</span>
-              <span class="plan-orb__price">29&euro;/m</span>
+              <span class="plan-orb__price">14,90&euro;/m</span>
               <span class="plan-orb__tag plan-orb__tag--pro">Populaire</span>
             </button>
 
-            <button class="plan-orb plan-orb--gold" data-plan="gold" data-price="59" data-saving="1440" aria-label="Plan Gold a 59 euros par mois">
+            <button class="plan-orb plan-orb--gold" data-plan="gold" data-price="29,90" data-saving="420" aria-label="Plan Gold a 29,90 euros par mois">
               <div class="plan-orb__circle">
                 <div class="plan-orb__pulse"></div>
                 <span class="plan-orb__emoji">👑</span>
               </div>
               <span class="plan-orb__name">Gold</span>
-              <span class="plan-orb__price">59&euro;/m</span>
+              <span class="plan-orb__price">29,90&euro;/m</span>
               <span class="plan-orb__tag plan-orb__tag--gold">Premium</span>
             </button>
 
-            <button class="plan-orb plan-orb--black" data-plan="black" data-price="99" data-saving="3840" aria-label="Plan Black Metal a 99 euros par mois">
+            <button class="plan-orb plan-orb--black" data-plan="black" data-price="100" data-saving="1200" aria-label="Plan Black Partenaire a 100 euros par mois">
               <div class="plan-orb__circle">
                 <div class="plan-orb__pulse"></div>
                 <span class="plan-orb__emoji">🖤</span>
               </div>
-              <span class="plan-orb__name">Black Metal</span>
-              <span class="plan-orb__price">99&euro;/m</span>
+              <span class="plan-orb__name">Black Partenaire</span>
+              <span class="plan-orb__price">100&euro;/m</span>
               <span class="plan-orb__tag plan-orb__tag--black">All-in</span>
             </button>
 
@@ -1633,7 +1633,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=426"></script>
+  <script defer src="app.js?v=427"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->
