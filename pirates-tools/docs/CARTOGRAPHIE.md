@@ -239,7 +239,10 @@ golden) · **`check-pricing-model`** (sélection transport + marge ≥15%) ·
 **`check-accounting`** (P&L + brandStats) · `check-invoice` (2 régimes TVA/franchise) ·
 **`check-loyalty`** (parité TIERS serveur ↔ app.js) · **`check-coffret`** (parité
 supplément coffret client ↔ serveur) · **`check-catalog-public`** (anti-fuite : les
-champs traqueur `price*` ne sortent JAMAIS sur /api/products) · **`check-csp`** (hash
+champs traqueur `price*` ne sortent JAMAIS sur /api/products) · **`check-asset-versions`**
+(VERSION == ASSET_VER == ?v= HTML, icônes == ICON_VER stable, APP_SHELL cohérent) ·
+**`check-webhook-claim`** (machine à états stripe_events : reprise sur échec, facture
+idempotente, journal payments critique) · **`check-csp`** (hash
 scripts inline ↔ vercel.json) · `check-analytics` · **`check-functions`** (≤12 fonctions
 api/) · `check-firestore-queries` (interdit `orderBy(documentId,'desc')`).
 
