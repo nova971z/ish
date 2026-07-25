@@ -41,21 +41,9 @@ var reqAnalytics= safeRequire('./check-analytics',   'check-analytics');
 var reqFns      = safeRequire('./check-functions',   'check-functions');
 var reqFsQ      = safeRequire('./check-firestore-queries','check-firestore-queries');
 
-// Détection d’un linter produits local (ajouté plus tôt)
-var LINT_FILE = path.resolve(__dirname, './lint-products.js');
-var HAS_LINT  = fs.existsSync(LINT_FILE);
-var PRODUCTS_PATH = process.env.PRODUCTS_JSON || path.resolve(process.cwd(), './products.json');
-
-function runLintProducts(){
-  if (!HAS_LINT) return { errors:[], skipped:true };
-  if (!fs.existsSync(PRODUCTS_PATH)){
-    return { errors: ['[lint-products] Fichier introuvable: ' + PRODUCTS_PATH], skipped:false };
-  }
-  var args = [LINT_FILE, PRODUCTS_PATH]; // sans --fix en CI
-  var res = cp.spawnSync(process.execPath, args, { stdio:'inherit' });
-  var ok = (res.status === 0);
-  return { errors: ok ? [] : ['[lint-products] a signalé des erreurs (voir logs ci-dessus)'], skipped:false };
-}
+// NOTE 25/07/2026 : l'étape lint-products.js (fichier jamais versionné,
+// silencieusement sautée à chaque run) est SUPPRIMÉE — ses invariants réels
+// vivent désormais dans check-products-json.js (schéma 2026).
 
 (async function run(){
   var started = Date.now();
@@ -87,14 +75,6 @@ function runLintProducts(){
   await runOne(reqAnalytics,'check-analytics');
   await runOne(reqFns,      'check-functions');
   await runOne(reqFsQ,      'check-firestore-queries');
-
-  // Linter produits optionnel
-  var lintRes = runLintProducts();
-  if (lintRes && lintRes.errors && lintRes.errors.length){
-    errors = errors.concat(lintRes.errors);
-  } else if (lintRes && lintRes.skipped){
-    console.log('↪︎ lint-products.js absent — étape ignorée.');
-  }
 
   var dur = Math.max(1, Date.now() - started);
   if (errors.length){

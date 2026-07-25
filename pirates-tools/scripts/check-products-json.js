@@ -1,225 +1,110 @@
 #!/usr/bin/env node
-/* eslint-disable no-var */
+// scripts/check-products-json.js — Invariants RÉELS du catalogue (schéma 2026).
+// Réécrit le 25/07/2026 : l'ancienne version validait un schéma disparu
+// (price_cents, price_old, discount_percent — présents dans 0 produit sur 207)
+// et générait ~400 warnings JETÉS (seuls les errors remontaient). Ici : chaque
+// règle correspond à une invariante métier effective, et toute violation est
+// une ERREUR CI.
+//
+// Invariants gardés :
+//  1. Identité : id / sku / slug présents, uniques, sans collision inter-espaces
+//     (findByKey résout par les trois).
+//  2. Prix : price = price_ht × 1,20 (TTC métropole, tolérance 1 centime),
+//     price_ht > 0, vat = 0.2, currency = 'EUR'.
+//  3. Fiscal : ncCategory ∈ {power_tool, accessory, hand_tool} (barème
+//     pricing.js), weight_kg > 0 (paliers coffret + expédition).
+//  4. Paires solo/coffret : liens croisés coffretSku ↔ soloSku résolus, rôles
+//     cohérents, variantSecondary sur CHAQUE coffret (sinon doublon en grille).
+//  5. Fichiers : img existe sur disque, model (GLB) existe si renseigné.
+//  6. Champs d'affichage : title, brand, category non vides.
 'use strict';
 
-var fs   = require('fs');
+var fs = require('fs');
 var path = require('path');
 
-/* =========================================================
-   Cœur du module (réutilisé par la CI et le CLI)
-========================================================= */
+var ROOT = path.join(__dirname, '..');
+var PRODUCTS = process.env.PRODUCTS_JSON || path.join(ROOT, 'products.json');
+var NC_VALID = { power_tool: 1, accessory: 1, hand_tool: 1 };
 
-function readJson(p){
-  var raw = fs.readFileSync(p, 'utf8');
-  var data = JSON.parse(raw);
-  var arr = Array.isArray(data) ? data : (Array.isArray(data.products) ? data.products : null);
-  if (!arr) throw new Error('Le JSON doit être un tableau ou { "products": [...] }');
-  return { root:data, list:arr, isWrapped:!Array.isArray(data) };
-}
-
-function saveJson(p, root, list, isWrapped){
-  var out = isWrapped ? Object.assign({}, root, { products:list }) : list;
-  fs.writeFileSync(p, JSON.stringify(out, null, 2) + '\n', 'utf8');
-}
-
-/* ---------- Utils ---------- */
-function isNum(n){ return typeof n === 'number' && isFinite(n); }
-function toNum(x){
-  if (x == null) return x;
-  if (typeof x === 'number') return x;
-  var n = Number(String(x).replace(',', '.').trim());
-  return isFinite(n) ? n : x;
-}
-function computePct(priceOld, price){
-  if (!isNum(priceOld) || !isNum(price) || priceOld <= 0) return null;
-  return Math.round((priceOld - price) / priceOld * 100);
-}
-function computeCents(price){
-  if (!isNum(price)) return null;
-  return Math.round(price * 100);
-}
-
-/* ---------- Linting logique ---------- */
-function lintList(list, opts){
-  opts = opts || {};
+module.exports = function () {
   var errors = [];
-  var warns  = [];
-  var fixes  = 0;
+  function err(m) { errors.push('[check-products-json] ' + m); }
 
-  var seenId  = Object.create(null);
-  var seenSku = Object.create(null);
-
-  for (var i=0;i<list.length;i++){
-    var p = list[i] || {};
-    var ctx = 'item['+i+']' + (p.id ? ' ('+p.id+')' : '');
-
-    // Champs minimaux
-    var req = ['id','sku','title','brand','currency'];
-    for (var r=0;r<req.length;r++){
-      var k = req[r];
-      if (p[k]==null || p[k]===''){
-        errors.push(ctx+': champ obligatoire manquant "'+k+'"');
-      }
-    }
-
-    // Unicité
-    if (p.id){
-      if (seenId[p.id]) errors.push(ctx+': id dupliqué "'+p.id+'" (déjà vu '+seenId[p.id]+')');
-      seenId[p.id] = ctx;
-    }
-    if (p.sku){
-      if (seenSku[p.sku]) errors.push(ctx+': sku dupliqué "'+p.sku+'" (déjà vu '+seenSku[p.sku]+')');
-      seenSku[p.sku] = ctx;
-    }
-
-    // Prix & cohérences
-    var price = toNum(p.price);
-    var cents = toNum(p.price_cents);
-
-    if (!isNum(price)) {
-      errors.push(ctx+': "price" non numérique ou manquant');
-    }
-
-    var shouldCents = computeCents(price);
-    if (!isNum(cents)) {
-      if (isNum(shouldCents)) {
-        if (opts.fix){ p.price_cents = shouldCents; fixes++; }
-        else warns.push(ctx+': "price_cents" manquant → devrait être '+shouldCents);
-      }
-    } else if (isNum(shouldCents) && cents !== shouldCents) {
-      if (opts.fix){ p.price_cents = shouldCents; fixes++; }
-      else warns.push(ctx+': incohérence price_cents='+cents+' ≠ '+shouldCents);
-    }
-
-    var priceOld = toNum(p.price_old);
-    if (isNum(priceOld) && isNum(price) && priceOld > 0){
-      var pct = computePct(priceOld, price);
-      var cur = toNum(p.discount_percent);
-      if (!isNum(cur)){
-        if (opts.fix){ p.discount_percent = pct; fixes++; }
-        else warns.push(ctx+': "discount_percent" manquant → '+pct+'%');
-      } else if (cur !== pct){
-        if (opts.fix){ p.discount_percent = pct; fixes++; }
-        else warns.push(ctx+': "discount_percent"='+cur+'% incohérent → '+pct+'%');
-      }
-      if (price >= priceOld){
-        warns.push(ctx+': "price" ('+price+') ≥ "price_old" ('+priceOld+') — remise non positive');
-      }
-    } else if (p.hasOwnProperty('discount_percent') && p.discount_percent){
-      warns.push(ctx+': "discount_percent" présent sans "price_old"');
-    }
-
-    // Types numériques conseillés
-    var numericFields = ['torque_nm','weight_kg','length_mm','warranty_months','stock_qty','rating','reviews'];
-    for (var nf=0; nf<numericFields.length; nf++){
-      var kf = numericFields[nf];
-      if (p.hasOwnProperty(kf)){
-        var v = toNum(p[kf]);
-        if (!isNum(v)){
-          warns.push(ctx+': "'+kf+'" devrait être numérique (actuel: '+p[kf]+')');
-        } else if (v !== p[kf] && opts.fix){
-          p[kf] = v; fixes++;
-        }
-      }
-    }
-
-    // Images (validation simple)
-    if (!p.img){
-      warns.push(ctx+': "img" manquant (recommandé)');
-    } else if (typeof p.img !== 'string' || !/^https?:\/\/|^\.\//.test(p.img)){
-      warns.push(ctx+': "img" semble invalide: '+p.img);
-    }
-  }
-
-  return { errors:errors, warns:warns, fixes:fixes };
-}
-
-/* =========================================================
-   Fonction exportée pour la CI
-   - Retourne: Array<string> (SEULEMENT les erreurs bloquantes)
-   - Si products.json absent ou vide → [] (toléré)
-========================================================= */
-async function checkProductsJson(options){
-  options = options || {};
-  var file = options.file || './products.json';
-  var fix  = !!options.fix;
-
-  var abs = path.resolve(process.cwd(), file);
-  if (!fs.existsSync(abs)) {
-    // Pas de produits pour l’instant → pas d’échec CI
-    return [];
-  }
-
-  var parsed;
+  var list;
   try {
-    parsed = readJson(abs);
+    var data = JSON.parse(fs.readFileSync(PRODUCTS, 'utf8'));
+    list = Array.isArray(data) ? data : (data && data.products);
+    if (!Array.isArray(list)) throw new Error('ni tableau ni {products:[]}');
   } catch (e) {
-    return ['products.json invalide: ' + (e.message || e)];
+    err('products.json illisible : ' + e.message);
+    return errors;
   }
 
-  // 0 produit → toléré
-  if (!parsed.list || parsed.list.length === 0) return [];
+  var seen = {}; // clé (id|sku|slug) → sku porteur, pour l'unicité inter-espaces
+  var bySku = {};
+  list.forEach(function (p) { if (p && p.sku) bySku[p.sku] = p; });
 
-  var out = lintList(parsed.list, { fix: fix });
+  list.forEach(function (p, i) {
+    var ref = (p && (p.sku || p.id)) || ('#' + i);
 
-  // Ne renvoyer que les erreurs à la CI
-  if (fix && out.fixes > 0) {
-    try { saveJson(abs, parsed.root, parsed.list, parsed.isWrapped); } catch(_) {}
-  }
+    // 1. Identité
+    ['id', 'sku', 'slug'].forEach(function (k) {
+      if (!p[k] || typeof p[k] !== 'string') err(ref + ' : champ "' + k + '" manquant/vide');
+    });
+    [p.id, p.sku, p.slug].forEach(function (key) {
+      if (!key) return;
+      if (seen[key] && seen[key] !== ref) err(ref + ' : clé "' + key + '" en collision avec ' + seen[key]);
+      else seen[key] = ref;
+    });
 
-  return out.errors;
-}
+    // 2. Prix
+    if (!(typeof p.price === 'number' && p.price > 0)) err(ref + ' : price invalide (' + p.price + ')');
+    if (!(typeof p.price_ht === 'number' && p.price_ht > 0)) err(ref + ' : price_ht invalide (' + p.price_ht + ')');
+    if (typeof p.price === 'number' && typeof p.price_ht === 'number') {
+      var expected = p.price_ht * 1.20;
+      if (Math.abs(p.price - expected) > 0.01) {
+        err(ref + ' : price ' + p.price + ' ≠ price_ht × 1,20 (' + expected.toFixed(2) + ')');
+      }
+    }
+    if (p.vat !== 0.2) err(ref + ' : vat ' + p.vat + ' ≠ 0.2');
+    if (p.currency !== 'EUR') err(ref + ' : currency ' + p.currency + ' ≠ EUR');
 
-module.exports = checkProductsJson;
+    // 3. Fiscal / logistique
+    if (!NC_VALID[p.ncCategory]) err(ref + ' : ncCategory "' + p.ncCategory + '" hors barème');
+    if (!(typeof p.weight_kg === 'number' && p.weight_kg > 0)) err(ref + ' : weight_kg invalide (' + p.weight_kg + ')');
 
-/* =========================================================
-   Mode CLI (node scripts/check-products-json.js [file] [--fix])
-========================================================= */
+    // 4. Paires solo/coffret
+    if (p.variantGroup) {
+      if (p.variantRole === 'solo') {
+        var cof = bySku[p.coffretSku];
+        if (!cof) err(ref + ' : coffretSku "' + p.coffretSku + '" introuvable');
+        else {
+          if (cof.variantGroup !== p.variantGroup) err(ref + ' : variantGroup divergent avec ' + cof.sku);
+          if (cof.soloSku !== p.sku) err(ref + ' : lien croisé cassé (soloSku de ' + cof.sku + ' = ' + cof.soloSku + ')');
+          if (!cof.variantSecondary) err(cof.sku + ' : variantSecondary manquant (le coffret apparaîtrait en DOUBLE dans la grille)');
+        }
+      } else if (p.variantRole === 'coffret') {
+        if (!bySku[p.soloSku]) err(ref + ' : soloSku "' + p.soloSku + '" introuvable');
+      } else {
+        err(ref + ' : variantRole "' + p.variantRole + '" invalide (solo|coffret)');
+      }
+    }
+
+    // 5. Fichiers
+    if (p.img && !fs.existsSync(path.join(ROOT, p.img))) err(ref + ' : image absente du disque (' + p.img + ')');
+    if (p.model && !fs.existsSync(path.join(ROOT, p.model))) err(ref + ' : modèle 3D absent du disque (' + p.model + ')');
+
+    // 6. Affichage
+    ['title', 'brand', 'category'].forEach(function (k) {
+      if (!p[k] || typeof p[k] !== 'string' || !p[k].trim()) err(ref + ' : champ "' + k + '" manquant/vide');
+    });
+  });
+
+  return errors;
+};
+
 if (require.main === module) {
-  (function(){
-    var fileArg = process.argv[2] || './products.json';
-    var DO_FIX  = process.argv.indexOf('--fix') !== -1;
-
-    var abs = path.resolve(process.cwd(), fileArg);
-    if (!fs.existsSync(abs)) {
-      console.log('↪ check-products-json: '+fileArg+' absent — étape ignorée.');
-      process.exit(0);
-      return;
-    }
-
-    var parsed;
-    try {
-      parsed = readJson(abs);
-    } catch (e) {
-      console.error('❌ products.json invalide: ' + (e.message || e));
-      process.exit(1);
-      return;
-    }
-
-    var out = lintList(parsed.list, { fix: DO_FIX });
-
-    if (DO_FIX && out.fixes > 0){
-      try { saveJson(abs, parsed.root, parsed.list, parsed.isWrapped); }
-      catch (e){ console.warn('⚠️  impossible d’écrire le fichier:', e && e.message ? e.message : e); }
-    }
-
-    if (out.errors.length){
-      console.error('\n❌ Erreurs ('+out.errors.length+')');
-      for (var i=0;i<out.errors.length;i++) console.error('  - '+out.errors[i]);
-    } else {
-      console.log('\n✅ OK — 0 erreur.');
-    }
-
-    if (out.warns.length){
-      console.warn('\n⚠️  Avertissements ('+out.warns.length+')');
-      for (var j=0;j<out.warns.length;j++) console.warn('  - '+out.warns[j]);
-    }
-
-    if (DO_FIX){
-      console.log('\n🔧 Corrections appliquées:', out.fixes);
-      if (out.fixes > 0) console.log('   → fichier réécrit:', fileArg);
-    }
-
-    process.exit(out.errors.length ? 1 : 0);
-  })();
+  var e = module.exports();
+  if (e.length) { e.forEach(function (x) { console.error('  ❌ ' + x); }); process.exit(1); }
+  console.log('✅ check-products-json OK (invariants réels, schéma 2026)');
 }
