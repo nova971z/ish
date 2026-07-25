@@ -4131,8 +4131,20 @@
       "Robuste et endurant, pensé pour un usage professionnel intensif",
       "Idéal pour les chantiers des Antilles / DOM-TOM"
     ],
-    "specs": {},
-    "description_long": "Ponceuse à bande 18V (Solo) en coffret. Outil professionnel Makita de la gamme 18V LXT sans fil (moteur brushless). Livré en coffret MAKPAC, machine seule (sans batterie ni chargeur). Compatible avec les batteries Makita LXT. Fiche technique détaillée à compléter. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "specs": {
+      "Tension": "18 V LXT Li-Ion",
+      "Batteries compatibles": "Gamme Makita LXT 18 V",
+      "Moteur": "Brushless (sans charbon)",
+      "Vitesses": "5 vitesses (variateur)",
+      "Vitesse à vide": "600 - 1700 m/min",
+      "Dimensions de bande": "9 × 533 mm",
+      "Niveau de pression acoustique (LpA)": "77 dB(A) — K=3,0",
+      "Vibrations (ponçage)": "2,5 m/s²",
+      "Poids (EPTA)": "1,8 - 2,1 kg",
+      "Dimensions (L×l×H)": "500 × 96 × 116 mm",
+      "Coffret": "MAKPAC (Makstar) inclus"
+    },
+    "description_long": "Ponceuse à bande 18V BL LXT en coffret MAKPAC (Makstar). Moteur brushless, longueur de bande 9 × 533 mm, 5 vitesses (600 à 1700 m/min). Vendue en machine seule (sans batterie ni chargeur), compatible batteries Makita 18V LXT. Poids 1,8-2,1 kg (EPTA). Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
     "variantGroup": "DBS180",
     "variantRole": "coffret",
     "soloSku": "DBS180Z",
@@ -6239,22 +6251,32 @@
       "Robuste et endurant, pensé pour un usage professionnel intensif",
       "Idéal pour les chantiers des Antilles / DOM-TOM"
     ],
-    "specs": {},
-    "description_long": "Affleureuse 18V LXT Ø6 et 8 mm (Machine seule). Outil professionnel Makita de la gamme 18V LXT sans fil (moteur brushless). Vendu en machine seule (sans batterie ni chargeur). Compatible avec les batteries Makita LXT. Fiche technique détaillée à compléter. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
-    "variantGroup": "DRT50",
-    "variantRole": "solo",
-    "coffretSku": "DRT50ZJX3"
+    "specs": {
+      "Tension": "18 V LXT Li-Ion",
+      "Batteries compatibles": "Gamme Makita LXT 18 V",
+      "Moteur": "Brushless (sans charbon)",
+      "Vitesses": "5 vitesses (variateur)",
+      "Vitesse à vide": "10 000 - 30 000 tr/min",
+      "Profondeur de défonçage": "0 - 35 mm",
+      "Profondeur de fraisage": "0 - 40 mm",
+      "Diamètre de pince": "6 et 8 mm",
+      "Niveau de pression acoustique (LpA)": "82 dB(A) — K=3,0",
+      "Vibrations": "4,5 m/s² — K=1,5",
+      "Poids (EPTA)": "1,8 kg",
+      "Dimensions (L×l×H)": "89 × 89 × 226 mm"
+    },
+    "description_long": "Affleureuse 18V LXT Ø6 et 8 mm (Machine seule). Outil professionnel Makita de la gamme 18V LXT sans fil (moteur brushless). 5 vitesses, 10 000 à 30 000 tr/min, pince 6 et 8 mm. Vendue en machine seule (sans batterie ni chargeur), compatible batteries Makita 18V LXT. Poids 1,8 kg (EPTA). Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
   },
   {
     "id": "makita-drt50zjx3",
     "slug": "makita-drt50zjx3-affleureuse-18v-lxt-6-8-mm-mac",
     "sku": "DRT50ZJX3",
-    "title": "Makita DRT50ZJX3 — Affleureuse 18V LXT Ø6-8 mm (Machine seule) en MAKPAC + accessoires",
+    "title": "Makita DRT50ZJX3 — Affleureuse 18V LXT Ø6-8 mm en MAKPAC + 4 bases (défonçage, affleurage déporté/droit/incliné)",
     "name": "DRT50ZJX3",
     "brand": "Makita",
     "category": "Défonceuses",
     "tag": "Nouveau",
-    "desc": "Affleureuse 18V LXT Ø6-8 mm (Machine seule) en MAKPAC + accessoires.",
+    "desc": "Affleureuse 18V LXT Ø6-8 mm en MAKPAC + 4 bases interchangeables.",
     "img": "images/placeholder.svg",
     "price": 402.38,
     "currency": "EUR",
@@ -6278,12 +6300,22 @@
       "Robuste et endurant, pensé pour un usage professionnel intensif",
       "Idéal pour les chantiers des Antilles / DOM-TOM"
     ],
-    "specs": {},
-    "description_long": "Affleureuse 18V LXT Ø6-8 mm (Machine seule) en MAKPAC + accessoires. Outil professionnel Makita de la gamme 18V LXT sans fil (moteur brushless). Livré en coffret MAKPAC, machine seule (sans batterie ni chargeur). Compatible avec les batteries Makita LXT. Fiche technique détaillée à compléter. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
-    "variantGroup": "DRT50",
-    "variantRole": "coffret",
-    "soloSku": "DRT50Z",
-    "variantSecondary": true
+    "specs": {
+      "Tension": "18 V LXT Li-Ion",
+      "Batteries compatibles": "Gamme Makita LXT 18 V",
+      "Moteur": "Brushless (sans charbon)",
+      "Vitesses": "5 vitesses (variateur)",
+      "Vitesse à vide": "10 000 - 30 000 tr/min",
+      "Profondeur de défonçage": "0 - 35 mm",
+      "Profondeur de fraisage": "0 - 40 mm",
+      "Diamètre de pince": "6 et 8 mm",
+      "Niveau de pression acoustique (LpA)": "82 dB(A) — K=3,0",
+      "Vibrations": "4,5 m/s² — K=1,5",
+      "Poids (EPTA)": "1,8 kg",
+      "Dimensions (L×l×H)": "89 × 89 × 226 mm",
+      "Kit": "4 bases interchangeables (défonçage, affleurage déporté, droit, incliné) + coffret MAKPAC"
+    },
+    "description_long": "Affleureuse 18V LXT Ø6-8 mm en coffret MAKPAC avec 4 bases de travail interchangeables : défonçage, affleurage déporté, affleurage droit et affleurage incliné. Très polyvalente grâce à son bloc moteur brushless performant. 5 vitesses, 10 000 à 30 000 tr/min, pince 6 et 8 mm. Vendue sans batterie ni chargeur, compatible batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
   },
   {
     "id": "makita-drv250zj",
@@ -7135,7 +7167,20 @@
       "Robuste et endurant, pensé pour un usage professionnel intensif",
       "Idéal pour les chantiers des Antilles / DOM-TOM"
     ],
-    "specs": {},
+    "specs": {
+      "Tension": "18 V LXT Li-Ion",
+      "Batteries compatibles": "Gamme Makita LXT 18 V",
+      "Moteur": "Brushless (sans charbon)",
+      "Vitesses": "5 vitesses (variateur)",
+      "Vitesse à vide": "10 000 - 30 000 tr/min",
+      "Profondeur de défonçage": "0 - 35 mm",
+      "Profondeur de fraisage": "0 - 40 mm",
+      "Diamètre de pince": "6 et 8 mm",
+      "Niveau de pression acoustique (LpA)": "82 dB(A) — K=3,0",
+      "Vibrations": "4,5 m/s² — K=1,5",
+      "Poids (EPTA)": "1,8 kg",
+      "Dimensions (L×l×H)": "89 × 89 × 226 mm"
+    },
     "description_long": "Affleureuse 18V LXT Ø6 et 8 mm (Machine seule) avec accessoires. Outil professionnel Makita de la gamme 18V LXT sans fil (moteur brushless). Vendu en machine seule (sans batterie ni chargeur). Compatible avec les batteries Makita LXT. Fiche technique détaillée à compléter. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
   },
   {
