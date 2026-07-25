@@ -7911,6 +7911,16 @@
       }
       var orders = res.data.orders || [];
       if (orders.length === 0) {
+        // Index Firestore manquant : Firestore renvoie un lien de création
+        // « 1 tap ». On l'affiche pour que l'admin crée l'index sans CLI.
+        if (res.data.indexUrl) {
+          listEl.innerHTML = '<div class="admin-index-warn">'
+            + '<p><b>Index Firestore manquant.</b> La liste des commandes a besoin d\'un index. Touche le bouton ci-dessous : la console Firebase s\'ouvre, tu confirmes, et l\'index se crée tout seul (quelques minutes).</p>'
+            + '<a class="btn primary" href="' + encodeURI(res.data.indexUrl) + '" target="_blank" rel="noopener noreferrer">Créer l\'index Firestore</a>'
+            + '<p class="admin-hint">Après création, reviens ici et touche « Rafraîchir ».</p>'
+            + '</div>';
+          return;
+        }
         listEl.innerHTML = '<p class="admin-loading">Aucune commande pour l\'instant.</p>';
         return;
       }

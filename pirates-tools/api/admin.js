@@ -269,9 +269,15 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ ok: true, overrides: overrides });
     } catch (err) {
       console.error('[api/admin] GET failed:', err.message);
-      // collectionGroup index errors: return an empty list instead of 500
+      // Erreur d'index collectionGroup (FAILED_PRECONDITION) : au lieu d'un 500,
+      // on renvoie une liste vide + le LIEN de création d'index que Firestore
+      // fournit dans le message d'erreur (« ...requires an index. You can create
+      // it here: https://console.firebase.google.com/... »). L'admin n'a qu'à
+      // toucher le lien → l'index se crée en 1 tap (voie iPad sans CLI).
       if (String(err.message).indexOf('index') !== -1) {
-        return res.status(200).json({ ok: true, orders: [], hint: 'Firestore index required — check console' });
+        const m = String(err.message).match(/https:\/\/console\.firebase\.google\.com\/\S+/);
+        const indexUrl = m ? m[0].replace(/[).,\s]+$/, '') : '';
+        return res.status(200).json({ ok: true, orders: [], hint: 'Firestore index required — check console', indexUrl: indexUrl });
       }
       return res.status(500).json({ ok: false, error: 'Failed to load' });
     }

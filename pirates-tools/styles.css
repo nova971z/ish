@@ -7635,3 +7635,13 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   border: none; background: #ef4444; color: #fff;
   font-size: .7rem; line-height: 1; cursor: pointer;
 }
+
+/* Avertissement index Firestore manquant (admin Commandes) — lien 1-tap. */
+.admin-index-warn {
+  padding: 1.2rem; border-radius: 14px;
+  border: 1px solid rgba(251, 191, 36, .45);
+  background: rgba(251, 191, 36, .08);
+}
+.admin-index-warn p { margin: 0 0 .8rem; line-height: 1.5; }
+.admin-index-warn .btn { display: inline-block; }
+.admin-index-warn .admin-hint { margin: .8rem 0 0; }
