@@ -5495,47 +5495,8 @@
     "brand": "Makita",
     "category": "Scies",
     "tag": "Nouveau",
-    "desc": "Scie circulaire 18V LXT Ø165 mm (Machine seule).",
-    "img": "images/placeholder.svg",
-    "price": 269.08,
-    "currency": "EUR",
-    "vat": 0.2,
-    "price_ht": 224.23,
-    "stock_status": "in_stock",
-    "stock_label": "En stock",
-    "model": "",
-    "paymentLink": "",
-    "weight_kg": 3.5,
-    "ncCategory": "power_tool",
-    "productType": "pro",
-    "tags": [
-      "brushless",
-      "tropical_ready"
-    ],
-    "features": [
-      "Scie circulaire 18V LXT Ø165 mm (Machine seule)",
-      "Gamme Makita 18V LXT sans fil, moteur brushless (sans charbon) haut rendement",
-      "Machine seule (batterie et chargeur non inclus), compatible batteries Makita LXT",
-      "Robuste et endurant, pensé pour un usage professionnel intensif",
-      "Idéal pour les chantiers des Antilles / DOM-TOM"
-    ],
-    "specs": {},
-    "description_long": "Scie circulaire 18V LXT Ø165 mm (Machine seule). Outil professionnel Makita de la gamme 18V LXT sans fil (moteur brushless). Vendu en machine seule (sans batterie ni chargeur). Compatible avec les batteries Makita LXT. Fiche technique détaillée à compléter. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
-    "variantGroup": "DHS660",
-    "variantRole": "solo",
-    "coffretSku": "DHS660ZJ"
-  },
-  {
-    "id": "makita-dhs660zj",
-    "slug": "makita-dhs660zj-scie-circulaire-18v-lxt-165mm-",
-    "sku": "DHS660ZJ",
-    "title": "Makita DHS660ZJ — Scie circulaire 18V LXT Ø 165mm (Machine seule) en MAKPAC",
-    "name": "DHS660ZJ",
-    "brand": "Makita",
-    "category": "Scies",
-    "tag": "Nouveau",
-    "desc": "Scie circulaire 18V LXT Ø 165mm (Machine seule) en MAKPAC.",
-    "img": "images/placeholder.svg",
+    "desc": "Légère (2,9 kg), brushless, coupe 57 mm à 90°, frein moteur + ADT.",
+    "img": "images/posters/dhs660z.webp",
     "price": 291.98,
     "currency": "EUR",
     "vat": 0.2,
@@ -5552,18 +5513,36 @@
       "tropical_ready"
     ],
     "features": [
-      "Scie circulaire 18V LXT Ø 165mm (Machine seule) en MAKPAC",
-      "Gamme Makita 18V LXT sans fil, moteur brushless (sans charbon) haut rendement",
-      "Livré en coffret MAKPAC — machine seule (batterie et chargeur non inclus)",
-      "Robuste et endurant, pensé pour un usage professionnel intensif",
-      "Idéal pour les chantiers des Antilles / DOM-TOM"
+      "Scie circulaire 18V LXT Ø165 mm — légère et puissante (2,9 kg EPTA)",
+      "Moteur brushless (sans charbon) + ADT : la vitesse s’adapte automatiquement à la charge",
+      "Coupe 57 mm à 90°, 41 mm à 45° — lame Ø165 mm, alésage 20 mm",
+      "Frein moteur, démarrage progressif et système anti-poussières",
+      "Machine seule (batterie et chargeur non inclus), compatible batteries Makita LXT"
     ],
-    "specs": {},
-    "description_long": "Scie circulaire 18V LXT Ø 165mm (Machine seule) en MAKPAC. Outil professionnel Makita de la gamme 18V LXT sans fil (moteur brushless). Livré en coffret MAKPAC, machine seule (sans batterie ni chargeur). Compatible avec les batteries Makita LXT. Fiche technique détaillée à compléter. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
-    "variantGroup": "DHS660",
-    "variantRole": "coffret",
-    "soloSku": "DHS660Z",
-    "variantSecondary": true
+    "specs": {
+      "Marque": "Makita",
+      "Type": "Scie circulaire sans fil 18V LXT Brushless (machine nue)",
+      "Tension": "18 V (gamme LXT Li-Ion)",
+      "Moteur": "Brushless (sans charbon)",
+      "Ø lame": "165 mm",
+      "Alésage": "20 mm",
+      "Profondeur de coupe à 90°": "57 mm",
+      "Profondeur de coupe à 45°": "41 mm",
+      "Profondeur de coupe à 50°": "37 mm",
+      "Vitesse à vide": "5000 tr/min",
+      "Technologie moteur": "ADT (contrôle automatique de la vitesse) + frein moteur",
+      "Technologie de confort": "Système anti-poussières, démarrage progressif",
+      "Pression sonore (LpA)": "93 dB(A)",
+      "Puissance sonore (LwA)": "104 dB(A) (incertitude 3 dB)",
+      "Vibrations": "2,5 m/s² max",
+      "Poids net EPTA": "2,9 kg",
+      "Dimensions (L×l×h)": "270 × 186 × 250 mm",
+      "Batterie / chargeur": "Non inclus"
+    },
+    "description_long": "Scie circulaire 18V LXT Ø165 mm (machine seule). Légère et puissante (2,9 kg EPTA), moteur brushless avec ADT : l’électronique adapte la vitesse à la charge pour une coupe optimale. Coupe 57 mm à 90° et 41 mm à 45°, frein moteur, démarrage progressif et système anti-poussières. Vendue en machine seule (sans batterie ni chargeur), compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "srcAltSkus": [
+      "DHS660ZJ"
+    ]
   },
   {
     "id": "makita-dhs680zj",

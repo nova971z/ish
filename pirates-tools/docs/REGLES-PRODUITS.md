@@ -101,6 +101,12 @@ description_long  paragraphe + « Livrée dans toute la zone DOM-TOM. Octroi de 
   min(source Z, source ZJ) à chaque passe (pickCheapestSource, gardé par
   check-price-watch : un srcAltSkus ne doit JAMAIS pointer vers un SKU encore
   au catalogue). Prix appliqué : 219,04 × 1,15 = 251,90 € TTC.
+- **DHS660Z/DHS660ZJ (25/07 tard)** : même règle générale appliquée — le NU est
+  en RUPTURE SANS PRIX chez cotébrico, seule la déclinaison MAKPAC (ZJ) est
+  cotée 253,90 € → fiche ZJ FUSIONNÉE/supprimée, `srcAltSkus: ["DHS660ZJ"]`
+  sur DHS660Z, prix 253,90 × 1,15 = 291,98 € (ht 243,32). Poster fourni par
+  l'user (fond sombre) → images/posters/dhs660z.webp. Specs remplies depuis la
+  fiche cotébrico (57 mm à 90°, 5000 tr/min, 2,9 kg EPTA). Catalogue 206→205.
 - **DRT50ZJX3** : c'est un KIT 4 bases interchangeables, PAS un simple coffret
   → DÉLIÉ de DRT50Z (produit autonome, titre explicite « + 4 bases ») ;
   DRT50Z a le switch standard +15 €. Re-lier = remettre les champs variant*.
