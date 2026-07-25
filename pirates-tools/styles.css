@@ -553,13 +553,6 @@ pointer-events: none !important;
 #hero.hero-out .hero-logo-container {
 display: none !important;
 }
-body.after-hero #hero {
-z-index: -1;
-pointer-events: none;
-height: 0 !important;
-min-height: 0 !important;
-display: none !important;
-}
 
 #heroLogo, .hero-logo {
     position: relative;
@@ -602,10 +595,6 @@ visibility: hidden !important;
 
 body.page-home #hero { display: block; }
 body.page-home #heroLogo { display: block; }
-
-/* hero-fade gradients removed — no visible separation */
-
-.after-hero .hero-fade-fixed { opacity: 0; }
 
 @media (max-height: 480px) {
 #heroLogo, .hero-logo { width: clamp(140px, 40vmin, 420px); }
@@ -2529,31 +2518,6 @@ padding: 0;
   .cat-list .cat-chip { flex: 0 0 auto; white-space: nowrap; }
 }
 
-.cat-card {
-background: rgba(var(--accent-rgb), 0.05);
-border: 2px solid var(--accent);
-border-radius: var(--radius);
-padding: 1rem 1.1rem;
-cursor: pointer;
-box-shadow:
-0 0 10px rgba(var(--accent-rgb), 0.3),
-0 0 20px rgba(var(--accent-rgb), 0.2),
-0 0 30px rgba(var(--accent-rgb), 0.1),
-inset 0 1px 0 rgba(var(--accent-rgb), 0.2);
-transition: all 0.3s ease;
-/* content-visibility:auto retiré (même bug de peinture skip iOS que .view). */
-}
-
-.cat-card:hover {
-border-color: #A855F7;
-box-shadow:
-0 0 15px rgba(168, 85, 247, 0.4),
-0 0 25px rgba(168, 85, 247, 0.3),
-0 0 35px rgba(168, 85, 247, 0.2),
-inset 0 1px 0 rgba(168, 85, 247, 0.3);
-transform: translateY(-2px);
-}
-
 /* ========== 14) PDP — LANDING INTERACTIVE (Apple-style) ========== */
 
 /* Navigation retour */
@@ -2699,15 +2663,6 @@ transform: translateY(-2px);
     text-shadow: none;
 }
 
-.pdp-hero__tag {
-    font-size: .95rem;
-    color: rgba(255,255,255,.5);
-    margin: 0 0 .8rem;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    font-weight: 600;
-}
-
 .pdp-hero__price {
     font-size: 1.8rem;
     font-weight: 800;
@@ -2734,16 +2689,6 @@ transform: translateY(-2px);
     display: flex;
     justify-content: center;
 }
-/* Option « + coffret TSTAK » (supplément d'envoi) injectée dans la zone CTA */
-.pdp-coffret {
-    display: flex; align-items: center; gap: 11px; cursor: pointer;
-    font-size: .95rem; color: var(--fg);
-    background: rgba(var(--accent-rgb), .06);
-    border: 1px solid rgba(var(--accent-rgb), .25);
-    border-radius: 12px; padding: 12px 14px; margin-bottom: 12px;
-}
-.pdp-coffret input { width: 20px; height: 20px; accent-color: var(--accent); flex: 0 0 auto; margin: 0; }
-.pdp-coffret__price { color: var(--accent-soft); font-weight: 700; white-space: nowrap; }
 .pdp-variant__switch {
     display: inline-flex;
     gap: .35rem;
@@ -2886,10 +2831,10 @@ transform: translateY(-2px);
     from { opacity: 0; transform: translateX(-40px); }
     to { opacity: 1; transform: translateX(0); }
 }
-@keyframes pdpGlowPulse {
-    0%, 100% { box-shadow: 0 0 20px rgba(var(--accent-rgb),0.1); }
-    50% { box-shadow: 0 0 50px rgba(var(--accent-rgb),0.3), 0 0 100px rgba(var(--accent-rgb),0.12); }
-}
+/* pdpGlowPulse SUPPRIMÉ (25/07) : remplacé par le halo statique du viewer
+   (voir .pdp-section.visible .pdp-split__viewer) — l'animation box-shadow
+   repeignait en continu. goldShimmer/blackTextShine/blackRing conservés :
+   surfaces minuscules, coût de repaint négligeable (décision documentée). */
 @keyframes pdpGlowLine {
     0% { transform: scaleX(0); opacity: 0; }
     100% { transform: scaleX(1); opacity: 1; }
@@ -3056,7 +3001,12 @@ transform: translateY(-2px);
     opacity: 0;
 }
 .pdp-section.visible .pdp-split__viewer {
-    animation: pdpGlowPulse 4s ease infinite;
+    /* Halo STATIQUE (intensité moyenne de l'ancien pdpGlowPulse). L'animation
+       box-shadow 20→100px de blur repeignait en continu le plus grand bloc de
+       la fiche (coût iPad réel). Un pseudo-élément compositor est impossible :
+       overflow:hidden clippe ::before/::after, et toucher au conteneur 3D est
+       invérifiable en sandbox (leçon v318). Halo conservé, repaint supprimé. */
+    box-shadow: 0 0 35px rgba(var(--accent-rgb), 0.2), 0 0 70px rgba(var(--accent-rgb), 0.08);
 }
 #pdp3dSecondary {
     width: 100%;
@@ -3540,83 +3490,6 @@ transform: translateY(-2px);
 
 /* Legacy fallbacks */
 .pdp { padding: .5rem 0 1.2rem; }
-.pdp__grid { display: grid; gap: 1.2rem; grid-template-columns: 1.2fr 1fr; }
-
-.pdp__media {
-background: var(--panel);
-border: 1px solid var(--border);
-border-radius: var(--radius);
-box-shadow: var(--shadow);
-padding: .8rem;
-display: grid;
-place-items: center;
-min-height: 180px;
-}
-
-.pdp__media img {
-width: 100%;
-height: auto;
-display: block;
-max-height: 56vh;
-object-fit: contain;
-transform: translateZ(0);
-filter: drop-shadow(0 18px 36px rgba(0,0,0,.35));
-}
-
-.pdp__info {
-background: var(--card);
-border: 1px solid var(--border);
-border-radius: var(--radius);
-box-shadow: var(--shadow);
-padding: 1rem 1.1rem;
-}
-
-.pdp__title { margin: .2rem 0 .2rem; overflow-wrap: anywhere; hyphens: auto; }
-.pdp__tag { margin: .2rem 0 .6rem; color: #cfeaf8; }
-.pdp__desc { margin: 0 0 1rem; color: #d8e6f1; }
-.pdp__specs { margin: .8rem 0 0; padding-left: 1.1rem; color: #b9d0e2; }
-.pdp__specs li { margin: .25rem 0; }
-
-.pdp__specs table {
-width: 100%;
-border-collapse: collapse;
-font-size: .95rem;
-margin-top: .25rem;
-border: 1px solid rgba(255,255,255,.06);
-background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));
-}
-
-.pdp__specs th, .pdp__specs td {
-text-align: left;
-padding: .55rem .7rem;
-vertical-align: top;
-border-bottom: 1px solid rgba(255,255,255,.06);
-}
-
-.pdp__specs th {
-width: 38%;
-color: #cfeaf8;
-font-weight: 700;
-}
-
-.pdp__specs tr:last-child th, .pdp__specs tr:last-child td { border-bottom: 0; }
-
-.pdp__specs .badge {
-background: linear-gradient(180deg, rgba(25,211,255,.22), rgba(0,225,180,.10));
-border-color: rgba(25,211,255,.45);
-color: #e6f7ff;
-}
-
-.pdp__related {
-margin: 1.2rem 0 0;
-display: grid;
-gap: .8rem;
-grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-}
-
-@media (max-width: 740px) {
-.pdp__grid { grid-template-columns: 1fr; }
-}
 
 /* ========== 15) (legacy devis cleared) ========== */
 
@@ -3714,9 +3587,6 @@ background: linear-gradient(180deg, rgba(25,211,255,.22), rgba(0,225,180,.10));
 border-color: rgba(25,211,255,.45);
 color: #e6f7ff;
 }
-
-.tabpanels [data-panel] { display: none; }
-.tabpanels [data-panel].is-active { display: block; }
 
 /* ========== 18) AUTH ========== */
 
@@ -4093,20 +3963,6 @@ color: #e6f7ff;
   }
 }
 
-/* ========== 19) AVIS ========== */
-.ratings {
-margin: 2rem auto 1rem;
-width: min(var(--container-w), 92vw);
-background: var(--panel);
-border: 1px solid var(--border);
-border-radius: var(--radius);
-padding: 1rem 1.1rem;
-box-shadow: var(--shadow);
-}
-
-.ratings h2 { margin: 0 0 .5rem; font-size: 1.05rem; }
-.ratings__list { margin: 0; padding-left: 1.1rem; }
-
 /* ========== 20) CHIPS ========== */
 .chip {
 display: inline-flex;
@@ -4123,17 +3979,6 @@ box-shadow: inset 0 -1px 0 rgba(255,255,255,.05);
 }
 
 .chip:hover { background: rgba(255,255,255,.07); }
-
-.chip--back {
-border: 1px solid var(--border);
-border-radius: 9999px;
-background: rgba(255,255,255,.05);
-padding: .36rem .7rem;
-margin: .5rem 0 1rem;
-display: inline-flex;
-align-items: center;
-gap: .4rem;
-}
 
 /* ========== 23) DOCK ========== */
 #dock, .dock {
@@ -4349,21 +4194,10 @@ box-shadow: var(--shadow);
 @keyframes exitLeft { to { transform: translateX(-60px); opacity: 0; filter: blur(2px); } }
 @keyframes exitRight { to { transform: translateX(60px); opacity: 0; filter: blur(2px); } }
 
-.tool--exit-left {
-animation: exitLeft 420ms cubic-bezier(.22,.61,.36,1) forwards;
-will-change: transform, opacity;
-}
-
-.tool--exit-right {
-animation: exitRight 420ms cubic-bezier(.22,.61,.36,1) forwards;
-will-change: transform, opacity;
-}
-
 @media (prefers-reduced-motion: reduce) {
 html { scroll-behavior: auto; }
 .toast { animation: none; }
 .dock__btn--cart { animation: none; }
-.tool--exit-left, .tool--exit-right { animation: none; opacity: 0; }
 }
 
 /* ========== 29) MARQUES — Showcase Premium ========== */
@@ -4656,21 +4490,6 @@ font-size: 16px;
 .tools-3d-next { margin-left: -16px; }
 .tools-3d-name { font-size: 0.85rem; }
 .tools-3d-brand { font-size: 0.6rem; }
-
-/* Responsive modal 3D */
-.tool-3d-container {
-width: 100vw;
-height: 100vh;
-border-radius: 0;
-}
-
-.tool-3d-actions {
-flex-direction: column;
-}
-
-.tool-3d-actions .btn {
-width: 100%;
-}
 
 }
 
@@ -5369,60 +5188,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   color:var(--muted); font-size:.72rem;
   margin-top:.4rem; line-height:1.4;
 }
-
-/* ── Tuto paiement (4 étapes) ─────────────────────────── */
-.paytuto{
-  background: linear-gradient(135deg, rgba(99,91,255,.10), rgba(var(--accent-rgb),.10));
-  border:1px solid rgba(var(--accent-rgb),.30);
-  border-radius:12px;
-  padding:.6rem .8rem;
-  margin-bottom:.9rem;
-}
-.paytuto[open]{ padding-bottom:.9rem; }
-.paytuto summary{
-  list-style:none; cursor:pointer;
-  display:flex; align-items:center; justify-content:space-between;
-  gap:.5rem; user-select:none;
-}
-.paytuto summary::-webkit-details-marker{ display:none; }
-.paytuto__title{ color:#fff; font-weight:700; font-size:.88rem; }
-.paytuto__chev{
-  color:var(--accent-soft); font-size:.9rem;
-  transition: transform .2s ease;
-}
-.paytuto[open] .paytuto__chev{ transform: rotate(180deg); }
-
-.paytuto__steps{
-  list-style:none; padding:0; margin:.7rem 0 0;
-  display:flex; flex-direction:column; gap:.55rem;
-}
-.paytuto__steps > li{
-  display:flex; align-items:flex-start; gap:.6rem;
-}
-.paytuto__num{
-  flex:0 0 auto;
-  width:24px; height:24px;
-  display:inline-flex; align-items:center; justify-content:center;
-  background:linear-gradient(135deg, #635bff, var(--accent));
-  color:#fff; font-weight:800; font-size:.78rem;
-  border-radius:50%;
-  box-shadow: 0 0 10px rgba(var(--accent-rgb),.35);
-}
-.paytuto__steps strong{ color:#fff; font-size:.85rem; display:block; }
-.paytuto__steps p{
-  margin:.15rem 0 0; color:var(--muted);
-  font-size:.76rem; line-height:1.4;
-}
-.paytuto__tips{
-  margin-top:.7rem;
-  background:rgba(255,255,255,.04);
-  border-left:3px solid #34c77a;
-  border-radius:6px;
-  padding:.5rem .7rem;
-}
-.paytuto__tips p{ margin:0; font-size:.76rem; color:var(--muted); line-height:1.4; }
-.paytuto__tips strong{ color:#fff; }
-.paytuto--mini{ margin-bottom: .8rem; }
 
 .cryptopay__warn{
   margin:.2rem 0 0;
@@ -6169,36 +5934,8 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .compta-row--strong td { font-weight: 800; color: #fff; }
 .compta-tag2 { font-size: .62rem; padding: 1px 6px; border-radius: 20px; font-weight: 800; }
 .compta-tag2.is-real { background: rgba(52,211,153,.16); color: #34d399; }
-.compta-tag2.is-est { background: rgba(245,158,11,.16); color: #fbbf24; }
 .compta-print-head, .compta-print-note { display: none; }
 .compta-print-note { font-size: .8rem; color: rgba(255,255,255,.6); margin-top: 10px; }
-
-/* Facture imprimable — charte Pirates Tools façon DeWALT (gris anthracite + jaune).
-   Écran = carte claire ; impression = A4 blanc. Jaune DeWALT ≈ #FEBD17. */
-.pt-invoice { position: relative; overflow: hidden; background: #fff; color: #1c1d1f; border-radius: 10px; padding: 22px; margin-top: 10px; font-size: 13px; line-height: 1.5; }
-/* Filigrane logo en fond, très faible opacité (background-image posée en inline). */
-/* Filigrane logo : le plus grand possible, touche les bords, sans jamais déborder
-   (contain = ajusté pour tenir entier ; ne rogne pas). Marge minimale = padding. */
-.pt-inv-watermark { position: absolute; inset: 0; background-position: center center; background-repeat: no-repeat; background-size: contain; opacity: .04; pointer-events: none; z-index: 0; }
-.pt-invoice > *:not(.pt-inv-watermark) { position: relative; z-index: 1; }
-.pt-inv-head { display: flex; justify-content: space-between; align-items: center; gap: 16px; border-bottom: 3px solid #FEBD17; padding-bottom: 12px; }
-.pt-inv-brand { display: flex; align-items: center; gap: 12px; }
-.pt-inv-logoimg { width: 62px; height: 62px; object-fit: contain; border-radius: 8px; background: #1c1d1f; padding: 4px; }
-.pt-inv-brandname { font-weight: 800; font-size: 19px; letter-spacing: .05em; color: #1c1d1f; }
-.pt-inv-meta { text-align: right; }
-.pt-invoice h1 { font-size: 26px; margin: 0 0 2px; color: #1c1d1f; letter-spacing: .07em; font-weight: 800; }
-.pt-inv-meta > div { font-size: 12.5px; color: #4a4d52; }
-.pt-inv-parties { display: flex; gap: 16px; flex-wrap: wrap; margin: 16px 0; }
-.pt-inv-party { flex: 1 1 45%; font-size: 12.5px; background: #f6f6f7; border-left: 3px solid #FEBD17; border-radius: 4px; padding: 10px 12px; }
-.pt-inv-lines { width: 100%; border-collapse: collapse; margin: 10px 0; }
-.pt-inv-lines th, .pt-inv-lines td { border-bottom: 1px solid #e4e4e7; padding: 8px; text-align: left; }
-.pt-inv-lines th { background: #1c1d1f; color: #FEBD17; font-size: 11px; text-transform: uppercase; letter-spacing: .03em; }
-.pt-inv-lines .n, .pt-inv-tot .n { text-align: right; font-variant-numeric: tabular-nums; }
-.pt-inv-tot { margin-left: auto; border-collapse: collapse; min-width: 240px; }
-.pt-inv-tot td { padding: 6px 8px; }
-.pt-inv-tot .tot td { font-weight: 800; font-size: 16px; border-top: 3px solid #FEBD17; background: #1c1d1f; color: #FEBD17; }
-.pt-inv-notes { margin-top: 16px; font-size: 10.5px; color: #555; border-top: 1px solid #e4e4e7; padding-top: 10px; }
-.pt-inv-notes p { margin: 3px 0; }
 
 /* Impression → PDF (iPad : Partager → Enregistrer dans Fichiers en PDF) */
 @media print {
@@ -6754,47 +6491,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   .terr-btn__label { max-width: 90px; }
 }
 
-/* ========== 34) PDP PRICE BREAKDOWN ========== */
-.pdp-price__breakdown {
-  margin-top: 10px;
-  font-size: 13px;
-  color: #cdd6e0;
-}
-.pdp-price__breakdown summary {
-  cursor: pointer;
-  color: var(--accent);
-  font-weight: 600;
-  list-style: none;
-  padding: 4px 0;
-}
-.pdp-price__breakdown summary::-webkit-details-marker { display: none; }
-.pdp-price__breakdown summary::before {
-  content: '▸ ';
-  display: inline-block;
-  transition: transform .18s ease;
-}
-.pdp-price__breakdown[open] summary::before { transform: rotate(90deg); }
-.pdp-price__breakdown ul {
-  list-style: none;
-  margin: 8px 0 0;
-  padding: 10px 12px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
-}
-.pdp-price__breakdown li {
-  display: flex;
-  justify-content: space-between;
-  padding: 4px 0;
-}
-.pdp-price__breakdown .pdp-price__total {
-  margin-top: 6px;
-  padding-top: 8px;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
-  color: #fff;
-  font-weight: 700;
-}
-
 /* ========== 35) PRODUCT DOM-TOM BADGES ========== */
 .pt-badges {
   position: absolute;
@@ -6828,7 +6524,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .pt-badge--tropical { background: rgba(34, 197, 94, 0.22); border-color: rgba(34, 197, 94, 0.5); }
 .pt-badge--cordless { background: rgba(59, 130, 246, 0.22); border-color: rgba(59, 130, 246, 0.5); }
 .pt-badge--mayotte  { background: rgba(251, 146, 60, 0.22); border-color: rgba(251, 146, 60, 0.5); }
-.pt-badge--stock    { background: rgba(250, 204, 21, 0.22); border-color: rgba(250, 204, 21, 0.5); }
 
 /* Flow variant on PDP discover section — show label text */
 .pt-badges--pdp {
@@ -7649,7 +7344,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 #dock{ position:fixed!important; left:50%!important; right:auto!important;
   bottom: calc(var(--dock-bottom) + var(--safe-bottom,0px))!important;
   transform:translateX(-50%)!important; width:auto!important; padding:0!important; z-index:999; }
-#dock.dock--visible{ transform:translateX(-50%)!important; }
 /* brand styles now in styles.css */
 
 /* ── ex <style id="hero-scroll-animation"> ── */
@@ -7671,7 +7365,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 
 .chips{ display:flex; flex-wrap:wrap; gap:.4rem; }
 .chip{ border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.04); border-radius:999px; padding:.35rem .7rem; }
-.chip--on{ background:rgba(255,255,255,.14); }
 
 #toasts{ position:fixed; right:.8rem; bottom:calc(var(--safe-bottom,0px) + 1rem);
   display:grid; gap:.4rem; z-index:10000; }
@@ -7731,8 +7424,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 [hidden]{ display:none !important; }
 
 .view.hidden{ display:none !important; }
-
-#dock.dock--visible{ opacity:1; transform:translateX(-50%) translateY(0) }
 #dock .dock__shell{ pointer-events:auto }
 
 #dock.dock--pulse{ animation:dockPulse .46s ease }
@@ -7741,10 +7432,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   40%  { transform:translateX(-50%) translateY(0) scale(1.03) }
   100% { transform:translateX(-50%) translateY(0) scale(1) }
 }
-
-.pdp__tag{ opacity:.8; margin:.2rem 0 .6rem; }
-.pdp__price{ font-size:1.25rem; font-weight:700; }
-.pdp__price-ht{ opacity:.8; }
 
 /* Force menu states */
 #side-menu.open,

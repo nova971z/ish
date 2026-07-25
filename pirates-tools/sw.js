@@ -1,5 +1,5 @@
 /* sw.js — Pirates Tools (PWA) */
-const VERSION        = 'pt-v420';                    // version du SW (logique SW)
+const VERSION        = 'pt-v421';                    // version du SW (logique SW)
 const STATIC_CACHE   = `pt-static-${VERSION}`;
 const RUNTIME_CACHE  = `pt-runtime-${VERSION}`;
 const IMG_CACHE      = `pt-img-${VERSION}`;
@@ -8,7 +8,7 @@ const ORIGIN         = self.location.origin;
 
 // Aligner avec le HTML (cache-busting des assets) — garde-fou CI :
 // scripts/check-asset-versions.js casse la CI si sw.js et index.html divergent.
-const ASSET_VER      = '420';
+const ASSET_VER      = '421';
 
 // Icônes + manifest : fingerprint STABLE, séparé d'ASSET_VER. Ces fichiers ne
 // changent pas à chaque déploiement — les re-cache-buster à chaque bump forçait
@@ -16,7 +16,7 @@ const ASSET_VER      = '420';
 // ne matchait JAMAIS les requêtes de la page (restées sur l'ancien ?v=) →
 // chaque asset téléchargé DEUX fois et stocké en double (STATIC + IMG cache).
 // DOIT rester égal aux ?v= des icônes/manifest dans index.html (CI le vérifie).
-const ICON_VER       = '387';
+const ICON_VER       = '421';
 
 // Production = Vercel (pirates-tools.com), servi à la racine (/).
 // On garde des chemins relatifs (./) pour que le SW fonctionne à l'identique
