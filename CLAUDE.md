@@ -60,6 +60,25 @@ Le site N'EST PAS lancé (décidé le 15/07/2026). Ne rien ouvrir au public tant
 - [ ] Remplir les champs `[À COMPLÉTER]` des 3 pages : mentions légales, confidentialité, CGV (identité entreprise : raison sociale, statut, SIRET, RCS, adresse, TVA, capital, directeur publication, email pro).
 - [ ] Adhérer à un **médiateur de la consommation** agréé (CM2C, Medicys… ~50-100€/an) et mettre ses coordonnées dans mentions + CGV. OBLIGATOIRE pour vendre aux particuliers.
 - [ ] Faire relire les 3 documents légaux par un juriste (recommandé fort).
+- [x] **INFRA EMAIL COMPLÈTE ✅ (25/07/2026 soir, guidée pas à pas, testée de bout
+      en bout)** — état GRAVÉ :
+      • Vercel `OWNER_EMAIL` = contact.piratestools@gmail.com (reçoit tout :
+        contact, candidatures artisans, alertes, rapport mensuel).
+      • Resend : compte contact.piratestools + `RESEND_API_KEY` posée sur Vercel ;
+        test admin « ✅ Resend fonctionne » REÇU.
+      • Domaine pirates-tools.com VÉRIFIÉ chez Resend (région eu-west-1, DNS
+        posés AUTO via Cloudflare — le DNS du domaine est chez CLOUDFLARE,
+        compte ki.legrix). `RESEND_FROM` = `Pirates Tools <contact@pirates-tools.com>`
+        → tous les emails du site partent sous le domaine (testé reçu).
+      • Cloudflare Email Routing ENABLED : contact@pirates-tools.com →
+        contact.piratestools@gmail.com (destination Verified ; test iCloud reçu
+        dans Gmail 23h37). ⚠️ piège : domaine AVEC tiret (pirates-tools.com),
+        gmail SANS tiret — 1er test avait rebondi sur piratestools.com inexistant.
+      • Le site peut donc ENVOYER (Resend, domaine signé) et le domaine peut
+        RECEVOIR (Cloudflare). Prérequis « emails clients » de la Phase 3b : OK.
+      • Manquent encore sur Vercel (notés, non urgents) : CRON_SECRET (rapport
+        mensuel), STRIPE_WEBHOOK_SECRET (au lancement Stripe) ; badge « Needs
+        Attention » sur STRIPE_…_KEY à examiner au dégel de Stripe.
 - [x] Email pro du site ✅ CRÉÉE par l'user (25/07) : **contact.piratestools@gmail.com**
       (corrigée 2× par l'user — c'est EXACTEMENT celle-là, PAS contact@pirates-tools.com
       ni le gmail perso ki.legrix). Affichée dans le footer (mailto). RÈGLE GRAVÉE :
