@@ -7532,9 +7532,13 @@
   // ── Instagram Admin ──────────────────────────────────────────
   var _igDraftCreationId = null;
 
-  function igApiFetch(action, method, body) {
+  // extraQuery : paramètres additionnels DÉJÀ encodés (ex. 'media_id=…').
+  // Ne JAMAIS les concaténer dans `action` : encodeURIComponent encoderait le
+  // « & » et le serveur recevrait action="comments&media_id=…" → 400.
+  function igApiFetch(action, method, body, extraQuery) {
     var apiBase = apiBaseUrl();
-    var url = apiBase + '/api/instagram?action=' + encodeURIComponent(action);
+    var url = apiBase + '/api/instagram?action=' + encodeURIComponent(action)
+      + (extraQuery ? '&' + extraQuery : '');
     var extra = (body && method === 'POST') ? { 'Content-Type': 'application/json' } : null;
     return adminAuthHeaders(extra).then(function (headers) {
       var opts = { method: method || 'GET', headers: headers };
@@ -7840,7 +7844,7 @@
     if (!listEl) return;
     listEl.innerHTML = '<p class="admin-loading">Chargement des commentaires…</p>';
 
-    igApiFetch('comments&media_id=' + encodeURIComponent(mediaId), 'GET').then(function (res) {
+    igApiFetch('comments', 'GET', null, 'media_id=' + encodeURIComponent(mediaId)).then(function (res) {
       if (!res.ok || !res.data.ok) {
         listEl.innerHTML = '<p class="ig-error">' + escapeHTML(res.data.error || 'Erreur') + '</p>';
         return;
