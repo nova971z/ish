@@ -21,6 +21,8 @@
   OU Facebook/Instagram** (Meta pilotable à distance via Business Suite —
   accès partenaire à configurer une fois, ~30-60 min/client ; Meta recommandé
   par défaut pour les artisans locaux).
+- **Ventes privées en avant-première** (ajout 25/07 : présent sur tous les
+  tiers, prioritaire pour Black).
 - **Réseau d'entraide OBLIGATOIRE** : chaque semaine, chaque partenaire reçoit
   la publication d'un AUTRE partenaire d'un MÉTIER DIFFÉRENT (algorithme de
   rotation anti-concurrence : un pisciniste partage un charpentier, jamais un
@@ -39,12 +41,19 @@
 
 ## 📊 Proportionnalité proposée (à co-valider) — bons ≈ 38 % de la cotisation
 
-| Tier | Prix/mois | Bon/mois | Bon/an | Remise | Annuaire |
+| Tier | Prix/mois | Bon/mois | Bon/an | Remise* | Annuaire |
 |---|---|---|---|---|---|
 | Basique | 4,90 € | 1,90 € | ~23 € | 3 % | carte texte (0 photo) |
 | Pro | 14,90 € | 5,70 € | ~68 € | 5 % | logo + 1 photo |
 | Gold | 29,90 € | 11,40 € | ~137 € | 7 % | 3 photos + lien |
 | Black Partenaire | 100 € | 38 € | 456 € | 10 % (plafond 100 €/mois) | premium 6 photos |
+
+*Remises NON CUMULABLES avec la remise fidélité (la plus avantageuse
+s'applique) — décision 25/07 : sans ce verrou, un gros acheteur Platine
+(remise 18 % cumulée) passait la marge en négatif. Multiplicateurs fidélité
+(×2/×3) RETIRÉS de tous les tiers (décision user 25/07). Tous les tiers ont
+les ventes privées ; Black les a en avant-première. Pages : switcher de packs
+en tête pour comparer sans repasser par l'accueil.
 
 Économie Black/an/partenaire (coûts réels user) : 1 106 € HT − bon ~330 €
 (coût logistique incluse) − ÉPI ~60 € − pub 120 € − domaine 8 € − Stripe ~21 €

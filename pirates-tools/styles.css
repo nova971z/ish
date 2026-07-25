@@ -7446,3 +7446,22 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .abo-accept input { margin-top: .2rem; width: 1.1rem; height: 1.1rem; accent-color: var(--accent); }
 .abo-places { color: #fbbf24; font-weight: 700; letter-spacing: .04em; margin: 0 0 .6rem; }
 .abo-cta[disabled] { opacity: .45; cursor: not-allowed; filter: saturate(.4); }
+
+/* Switcher de packs en tête de page abonnement (comparaison directe). */
+.abo-switch {
+  display: flex; gap: .5rem; flex-wrap: nowrap;
+  overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+  margin: .8rem 0 1.2rem; padding: .2rem;
+}
+.abo-switch::-webkit-scrollbar { display: none; }
+.abo-switch__pill {
+  flex: 0 0 auto; display: flex; flex-direction: column; align-items: center;
+  gap: .1rem; padding: .5rem .95rem; border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, .14); background: rgba(255, 255, 255, .04);
+  color: #e6edf5; text-decoration: none; font-weight: 700; font-size: .85rem;
+  transition: border-color .2s, background .2s;
+}
+.abo-switch__price { font-size: .72rem; font-weight: 600; opacity: .65; }
+.abo-switch__pill.is-active { border-color: var(--accent); background: rgba(var(--accent-rgb), .14); }
+.abo-switch__pill--gold.is-active { border-color: #fbbf24; background: rgba(251, 191, 36, .12); }
+.abo-switch__pill--black.is-active { border-color: #c084fc; background: rgba(192, 132, 252, .12); }

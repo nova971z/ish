@@ -3462,7 +3462,7 @@
       desc: 'Un bon d\'achat qui se remplit tous les mois, une vraie remise permanente et l\'accès aux ventes privées. Sans engagement.',
       features: [
         { icon: '💳', text: 'Bon d\'achat +1,90 € chaque mois', detail: 'Crédité à chaque mensualité payée (~23 €/an), cumulable, et il vous reste acquis même si vous arrêtez.' },
-        { icon: '🏷️', text: 'Remise permanente de 3%', detail: 'Sur tout le catalogue, cumulable avec la fidélité. Sans minimum d\'achat.' },
+        { icon: '🏷️', text: 'Remise permanente de 3%', detail: 'Sur tout le catalogue, sans minimum d\'achat. Non cumulable avec la remise fidélité : la plus avantageuse s\'applique.' },
         { icon: '🎁', text: 'Ventes privées abonnés', detail: 'Accès aux offres réservées avant tout le monde.' },
         { icon: '📧', text: 'SAV prioritaire sous 48h', detail: 'Votre demande passe devant, réponse garantie sous 48h ouvrées.' },
         { icon: '📇', text: 'Carte dans l\'annuaire artisans', detail: 'Votre entreprise référencée sur notre page « Nos artisans » (carte texte).' }
@@ -3477,7 +3477,7 @@
       desc: 'Le bon mensuel plus costaud, 5% de remise permanente et l\'accès aux précommandes container : les prix bateau, réservés aux abonnés.',
       features: [
         { icon: '💳', text: 'Bon d\'achat +5,70 € chaque mois', detail: 'Crédité à chaque mensualité payée (~68 €/an), cumulable, acquis même si vous arrêtez.' },
-        { icon: '🏷️', text: 'Remise permanente de 5%', detail: 'Sur tout le catalogue, cumulable avec la fidélité.' },
+        { icon: '🏷️', text: 'Remise permanente de 5%', detail: 'Sur tout le catalogue. Non cumulable avec la remise fidélité : la plus avantageuse s\'applique.' },
         { icon: '🚢', text: 'Précommandes container', detail: 'Livraison groupée par bateau : 10 à 40 € de moins par outil, délai 3 à 5 semaines.' },
         { icon: '📧', text: 'SAV prioritaire sous 24h', detail: 'Réponse garantie sous 24h ouvrées, WhatsApp direct.' },
         { icon: '🎁', text: 'Ventes privées abonnés', detail: 'Accès aux offres réservées avant tout le monde.' },
@@ -3493,8 +3493,7 @@
       desc: 'Remise renforcée, bon mensuel sérieux, fidélité qui monte deux fois plus vite et un devis chantier personnalisé chaque trimestre.',
       features: [
         { icon: '💳', text: 'Bon d\'achat +11,40 € chaque mois', detail: 'Crédité à chaque mensualité payée (~137 €/an), cumulable, acquis même si vous arrêtez.' },
-        { icon: '🏷️', text: 'Remise permanente de 7%', detail: 'Sur tout le catalogue, cumulable avec la fidélité.' },
-        { icon: '💎', text: 'Fidélité x2', detail: 'Votre dépense compte double : vous atteignez les paliers de remise fidélité deux fois plus vite.' },
+        { icon: '🏷️', text: 'Remise permanente de 7%', detail: 'Sur tout le catalogue. Non cumulable avec la remise fidélité : la plus avantageuse s\'applique.' },
         { icon: '🚢', text: 'Précommandes container prioritaires', detail: 'Vos outils partent dans le premier groupage disponible.' },
         { icon: '📐', text: '1 devis chantier personnalisé/trimestre', detail: 'On chiffre ensemble l\'outillage complet d\'un chantier, conseils inclus.' },
         { icon: '📧', text: 'SAV prioritaire sous 12h', detail: 'WhatsApp direct, réponse sous 12h ouvrées.' },
@@ -3516,9 +3515,10 @@
         { icon: '📣', text: 'Votre publicité locale gérée', detail: '~120 €/an de budget publicitaire réel, au choix Google Ads ou Facebook/Instagram, ciblé sur votre zone. Point mensuel WhatsApp.' },
         { icon: '🤝', text: 'Réseau d\'entraide entre artisans', detail: 'Chaque semaine, un partenaire d\'un AUTRE métier partage votre publication (jamais un concurrent : un pisciniste pousse un charpentier). Vous partagez la sienne en retour.' },
         { icon: '📱', text: '1 story dédiée/mois + story hebdo des partenaires', detail: 'Votre entreprise mise en avant sur les réseaux Pirates Tools : une story rien que pour vous chaque mois, plus la story hebdomadaire collective.' },
+        { icon: '🎁', text: 'Ventes privées en avant-première', detail: 'Vous voyez les promotions et arrivages avant tous les autres abonnés.' },
         { icon: '📇', text: 'Carte premium dans l\'annuaire', detail: 'Design premium, 6 photos, badge Partenaire et lien direct vers votre site.' },
-        { icon: '🏷️', text: 'Remise permanente de 10%', detail: 'Sur tout le catalogue (plafonnée à 100 € de remise par mois), cumulable avec la fidélité.' },
-        { icon: '💎', text: 'Fidélité x3 + SAV ligne directe', detail: 'Vos achats comptent triple, et vous avez notre ligne directe.' }
+        { icon: '🏷️', text: 'Remise permanente de 10%', detail: 'Sur tout le catalogue, plafonnée à 100 € de remise par mois. Non cumulable avec la remise fidélité : la plus avantageuse s\'applique.' },
+        { icon: '📞', text: 'SAV ligne directe', detail: 'Notre ligne directe, réponse prioritaire absolue.' }
       ],
       rules: [
         'Chaque semaine, vous partagez la publication du partenaire qui vous est attribué (métier différent du vôtre, jamais un concurrent) — et un partenaire partage la vôtre.',
@@ -3554,9 +3554,20 @@
         + '</div></div>';
     });
 
+    // Switcher : comparer/changer de pack sans repasser par l'accueil.
+    var switcher = '<nav class="abo-switch" aria-label="Comparer les abonnements">'
+      + ['basique', 'pro', 'gold', 'black'].map(function (k) {
+        var d = ABO_DATA[k];
+        return '<a href="#/abonnement/' + k + '" class="abo-switch__pill abo-switch__pill--' + d.theme + (k === slug ? ' is-active' : '') + '"'
+          + (k === slug ? ' aria-current="page"' : '') + '>'
+          + escapeHTML(d.name) + '<span class="abo-switch__price">' + d.price + '\u20ac/m</span></a>';
+      }).join('')
+      + '</nav>';
+
     el.innerHTML = '<div class="abo-page abo-page--' + escapeHTML(data.theme) + '">'
       // Back link
       + '<a href="#/" class="abo-back">\u2190 Retour</a>'
+      + switcher
 
       // Hero header
       + '<div class="abo-hero">'
