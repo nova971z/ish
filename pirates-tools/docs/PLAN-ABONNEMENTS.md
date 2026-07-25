@@ -188,6 +188,12 @@ créée, tu peux brancher les paiements ».
    (remise sur vente, pas de fausse perte) ; tests check-accounting étendus.
 
 ## PHASE 5 — Entraide & stories (le cœur du club)
+0. ⚠️ EXIGENCE USER GRAVÉE (25/07) : l'artisan abonné peut changer ses PHOTOS
+   et son LOGO d'annuaire QUAND IL VEUT depuis son compte (self-service,
+   validation serveur identique à partner-save : allowlist, plafonds par tier,
+   dataURL only). L'admin a déjà cette capacité (Modifier → remplacer →
+   Enregistrer, prouvé par test). En attendant la Phase 5, les artisans passent
+   par l'user (WhatsApp) qui modifie via l'admin.
 1. Upload de la publication (JPEG/PNG, compression client) dans le compte.
 2. Admin : galerie des publications + bouton téléchargement + marquer « posté ».
 3. Rotation d'appariement MÉTIERS CROISÉS (round-robin, contrainte métier

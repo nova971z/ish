@@ -3871,8 +3871,13 @@
       logoFile.addEventListener('change', function () {
         var f = logoFile.files && logoFile.files[0];
         if (!f) return;
+        if (logoPreview) logoPreview.innerHTML = '<span class="img-busy">⏳ Traitement du logo…</span>';
         compressPartnerImage(f, 320, function (dataUrl) {
-          if (!dataUrl) { toast('Image logo illisible', 'error'); return; }
+          if (!dataUrl) {
+            if (logoPreview) logoPreview.innerHTML = '';
+            toast('Image logo illisible', 'error');
+            return;
+          }
           _pjLogo = dataUrl;
           if (logoPreview) {
             logoPreview.innerHTML = '<span class="admin-partner-photo"><img src="' + _pjLogo + '" alt="Logo"><button type="button" id="pjLogoRemove" aria-label="Retirer le logo">✕</button></span>';
@@ -7545,31 +7550,64 @@
 
   var ADMIN_PARTNER_PHOTOS_MAX = { basique: 0, pro: 1, gold: 3, black: 6 };
 
-  function compressPartnerImage(file, maxSide, cb) {
-    var url = URL.createObjectURL(file);
-    var img = new Image();
-    img.onload = function () {
+  // PERF (retour user iPad : « le logo met beaucoup de temps à s'afficher ») :
+  // 1) le format d'export (WebP sinon JPEG) est détecté UNE FOIS — avant,
+  //    chaque itération de qualité tentait un encodage WebP que Safari ne sait
+  //    pas produire : il renvoyait un PNG complet (coûteux) jeté aussitôt, ×5 ;
+  // 2) décodage via createImageBitmap(file) quand dispo — décode hors du fil
+  //    principal, bien plus rapide qu'un <img> pour les photos 12 Mpx d'iPad ;
+  //    repli <img> conservé (vieux navigateurs). Orientation EXIF demandée
+  //    quand l'option est supportée.
+  var _canvasWebpOk = null;
+  function canvasWebpSupported() {
+    if (_canvasWebpOk === null) {
       try {
-        var scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+        var c = document.createElement('canvas'); c.width = 1; c.height = 1;
+        _canvasWebpOk = c.toDataURL('image/webp').indexOf('data:image/webp') === 0;
+      } catch (_) { _canvasWebpOk = false; }
+    }
+    return _canvasWebpOk;
+  }
+
+  function compressPartnerImage(file, maxSide, cb) {
+    function encode(source, w, h, done) {
+      try {
+        var scale = Math.min(1, maxSide / Math.max(w, h));
         var canvas = document.createElement('canvas');
-        canvas.width = Math.max(1, Math.round(img.width * scale));
-        canvas.height = Math.max(1, Math.round(img.height * scale));
-        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        canvas.width = Math.max(1, Math.round(w * scale));
+        canvas.height = Math.max(1, Math.round(h * scale));
+        canvas.getContext('2d').drawImage(source, 0, 0, canvas.width, canvas.height);
         // Qualité dégressive jusqu'à passer sous le plafond serveur (170 000
         // caractères base64) avec de la marge (~150 000).
-        var out = '';
+        var mime = canvasWebpSupported() ? 'image/webp' : 'image/jpeg';
         var qualities = [0.82, 0.7, 0.58, 0.45, 0.32];
+        var out = '';
         for (var i = 0; i < qualities.length; i++) {
-          out = canvas.toDataURL('image/webp', qualities[i]);
-          if (out.indexOf('data:image/webp') !== 0) out = canvas.toDataURL('image/jpeg', qualities[i]);
+          out = canvas.toDataURL(mime, qualities[i]);
           if (out.length <= 150000) break;
         }
-        URL.revokeObjectURL(url);
+        if (done) done();
         cb(out.length <= 170000 ? out : '');
-      } catch (_) { URL.revokeObjectURL(url); cb(''); }
-    };
-    img.onerror = function () { URL.revokeObjectURL(url); cb(''); };
-    img.src = url;
+      } catch (_) { if (done) done(); cb(''); }
+    }
+    function legacyDecode() {
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () { encode(img, img.width, img.height, function () { URL.revokeObjectURL(url); }); };
+      img.onerror = function () { URL.revokeObjectURL(url); cb(''); };
+      img.src = url;
+    }
+    if (typeof createImageBitmap === 'function') {
+      // Option orientation EXIF si supportée, sinon appel nu, sinon repli <img>.
+      createImageBitmap(file, { imageOrientation: 'from-image' })
+        .catch(function () { return createImageBitmap(file); })
+        .then(function (bmp) {
+          encode(bmp, bmp.width, bmp.height, function () { if (bmp.close) bmp.close(); });
+        })
+        .catch(legacyDecode);
+    } else {
+      legacyDecode();
+    }
   }
 
   function loadAdminPartners() {
@@ -7625,20 +7663,27 @@
       + '</form>';
   }
 
+  // Retour visuel immédiat pendant la compression (photos iPad 12 Mpx =
+  // décodage perceptible) : chips « ⏳ » tant qu'un traitement est en cours.
+  var _adminLogoBusy = false;
+  var _adminPhotosBusy = 0;
+
   function renderAdminPartnerPhotos() {
     var logoBox = document.getElementById('apLogoPreview');
     var photosBox = document.getElementById('apPhotosPreview');
     if (logoBox) {
-      logoBox.innerHTML = _adminPartnerLogo
+      logoBox.innerHTML = (_adminPartnerLogo
         ? '<span class="admin-partner-photo"><img src="' + _adminPartnerLogo + '" alt="Logo"><button type="button" data-remove-logo aria-label="Retirer le logo">✕</button></span>'
-        : '';
+        : '')
+        + (_adminLogoBusy ? '<span class="img-busy">⏳ Traitement du logo…</span>' : '');
       var rmLogo = logoBox.querySelector('[data-remove-logo]');
       if (rmLogo) rmLogo.onclick = function () { _adminPartnerLogo = ''; renderAdminPartnerPhotos(); };
     }
     if (photosBox) {
       photosBox.innerHTML = _adminPartnerPhotos.map(function (src, i) {
         return '<span class="admin-partner-photo"><img src="' + src + '" alt="Photo ' + (i + 1) + '"><button type="button" data-remove-photo="' + i + '" aria-label="Retirer la photo ' + (i + 1) + '">✕</button></span>';
-      }).join('');
+      }).join('')
+        + (_adminPhotosBusy > 0 ? '<span class="img-busy">⏳ Traitement de ' + _adminPhotosBusy + ' image(s)…</span>' : '');
       photosBox.querySelectorAll('[data-remove-photo]').forEach(function (btn) {
         btn.onclick = function () {
           _adminPartnerPhotos.splice(Number(btn.getAttribute('data-remove-photo')), 1);
@@ -7659,10 +7704,13 @@
     if (logoFile) logoFile.onchange = function () {
       var f = logoFile.files && logoFile.files[0];
       if (!f) return;
+      _adminLogoBusy = true;
+      renderAdminPartnerPhotos(); // « ⏳ » immédiat — l'user voit que ça travaille
       compressPartnerImage(f, 320, function (dataUrl) {
-        if (!dataUrl) { toast('Image logo illisible', 'error'); return; }
-        _adminPartnerLogo = dataUrl;
+        _adminLogoBusy = false;
+        if (dataUrl) _adminPartnerLogo = dataUrl;
         renderAdminPartnerPhotos();
+        if (!dataUrl) toast('Image logo illisible', 'error');
       });
       logoFile.value = '';
     };
@@ -7674,11 +7722,18 @@
       var files = Array.prototype.slice.call(photoFiles.files || []);
       photoFiles.value = '';
       if (!max) { toast('L\'abonnement Basique n\'a pas de photo', 'error'); return; }
+      _adminPhotosBusy += files.length;
+      renderAdminPartnerPhotos(); // « ⏳ n image(s) » immédiat
       files.forEach(function (f) {
         compressPartnerImage(f, 900, function (dataUrl) {
-          if (!dataUrl) { toast('Image illisible : ' + f.name, 'error'); return; }
-          if (_adminPartnerPhotos.length >= max) { toast('Maximum ' + max + ' photo(s) pour ce tier', 'error'); return; }
-          _adminPartnerPhotos.push(dataUrl);
+          _adminPhotosBusy = Math.max(0, _adminPhotosBusy - 1);
+          if (dataUrl && _adminPartnerPhotos.length < max) {
+            _adminPartnerPhotos.push(dataUrl);
+          } else if (dataUrl) {
+            toast('Maximum ' + max + ' photo(s) pour ce tier', 'error');
+          } else {
+            toast('Image illisible : ' + f.name, 'error');
+          }
           renderAdminPartnerPhotos();
         });
       });
