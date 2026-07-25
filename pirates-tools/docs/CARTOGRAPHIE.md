@@ -63,6 +63,7 @@
 | `view-contact` | `/contact` | `#contactForm` (+ honeypot) |
 | `view-wishlist` | `/favoris` | `#wishlistList` |
 | `view-artisans` | `/artisans` | `#artisansGrid` (annuaire partenaires, 4 designs par tier) + CTA abonnements |
+| `view-rejoindre` | `/rejoindre` | `#partnerJoinForm` (pré-inscription artisan, sans paiement ; slug `#/rejoindre/black` pré-sélectionne le tier) |
 | `view-admin` | `/admin` | **`#adminView`** — TOUT l'admin est monté par JS ici (aucune sous-vue statique) |
 | `view-territoire` | `/territoire` | atterrissage DOM-TOM (`#/guadeloupe`…`#/mayotte` y résolvent) |
 | `view-merci` | `/merci` | confirmation paiement |
@@ -223,6 +224,7 @@ Client = soumis aux règles ; serveur (Admin SDK) = bypass.
 | `rate_limits/{id}` | ❌ | ratelimit (IP hachée) |
 | `analytics_*` (daily/products/clicks/geo/visitors/events_recent) | ❌ | events, purge cron |
 | `partners/{id}` | ✅ **read public** (annuaire artisans) ; write ❌ | admin (partner-save/-delete) |
+| `partner_applications/{id}` | ❌ serveur-only | contact.js (type=partner-application), lues admin |
 
 `firestore.indexes.json` : aucun index composite ; 2 `fieldOverrides`
 (collectionGroup `orders.stripeSessionId` + `.paymentIntentId`) pour le repli

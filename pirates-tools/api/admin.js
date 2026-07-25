@@ -204,6 +204,30 @@ module.exports = async function handler(req, res) {
         return res.status(200).json({ ok: true, partners });
       }
 
+      // ── Candidatures partenaires (pré-inscriptions Phase 3a) ────
+      if (type === 'partner-applications') {
+        // Tri par date desc si possible ; fallback sans tri (index auto).
+        const snap = await db.collection('partner_applications').orderBy('createdAt', 'desc').limit(200).get()
+          .catch(() => db.collection('partner_applications').limit(200).get());
+        const applications = [];
+        snap.forEach((doc) => {
+          const d = doc.data() || {};
+          applications.push({
+            id: doc.id,
+            name: d.name || '', metier: d.metier || '', commune: d.commune || '',
+            email: d.email || '', phone: d.phone || '', tier: d.tier || '',
+            sizes: d.sizes || {}, couleurs: d.couleurs || '',
+            facebook: d.facebook || '', instagram: d.instagram || '',
+            pubChoice: d.pubChoice || '', hasWebsite: !!d.hasWebsite,
+            websiteUrl: d.websiteUrl || '', siteOption: d.siteOption || '',
+            message: d.message || '', status: d.status || 'nouvelle',
+            hasLogo: !!(d.logo && String(d.logo).length > 0),
+            createdAt: d.createdAt && d.createdAt.toMillis ? d.createdAt.toMillis() : null
+          });
+        });
+        return res.status(200).json({ ok: true, applications });
+      }
+
       // ── Liste des charges saisies ──────────────────────────────
       if (type === 'charges') {
         const chSnap = await db.collection('charges').orderBy('dateMs', 'desc').limit(500).get().catch(() => db.collection('charges').limit(500).get());

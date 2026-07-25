@@ -108,7 +108,7 @@ paiements tant que l'entreprise n'est pas créée ». Un compte Stripe existe ma
 sans entreprise ni RIB connectés. → Tout le moteur de paiement récurrent est
 PARKÉ. On ne construit QUE ce qui est 100 % testable sans Stripe.
 
-### PHASE 3a — Pré-inscription artisan (MAINTENANT, zéro paiement)
+### PHASE 3a — Pré-inscription artisan ✅ LIVRÉE (25/07, SW v433)
 Le formulaire d'onboarding AVANT paiement (le seul morceau indépendant de
 Stripe), cadré HONNÊTEMENT « pré-inscription sans engagement, sans paiement,
 on te recontacte au lancement ». Collecte en avance (dérisque le temps armée) :
@@ -116,15 +116,22 @@ métier (rotation anti-concurrence), tailles ÉPI (t-shirt/pantalon/pointure/
 gants), logo (upload compressé client comme Phase 2), couleurs de flocage,
 réseaux (Facebook/Insta), choix pub (Google Ads OU Meta), choix option site
 (neuf/refonte/portfolio/pub doublée), tier souhaité, + ACCEPTATION HORODATÉE
-des règles du programme (preuve). Séquence 1 = 1 :
-1. Socle : collection Firestore `partner_applications` fermée au client
-   (serveur seul, Admin SDK) + assertions émulateur.
-2. Serveur : branche `type=partner-application` dans api/contact.js (12/12
+des règles du programme (preuve). Séquence 1 = 1 (TOUTE LIVRÉE) :
+1. ✅ Socle : collection Firestore `partner_applications` fermée au client
+   (serveur seul, Admin SDK) — émulateur 44/44 (+3 assertions).
+2. ✅ Serveur : branche `type=partner-application` dans api/contact.js (12/12
    fonctions → pas de 13e endpoint) : validation stricte, stockage Admin SDK,
-   email owner (Resend), rate-limit partagé, honeypot.
-3. UI : formulaire d'onboarding (tailles/logo/métier/choix pub+site, case
-   « j'accepte les règles » horodatée → active l'envoi) ; branche les CTA
-   « Rejoignez le réseau » (page artisans) + Black (page abonnement) dessus.
+   email owner (Resend), rate-limit dédié (3/h/IP), honeypot, dégradation
+   prouvée (rien perdu). check-partner-application.js 24 assertions (CI).
+3. ✅ UI : vue #/rejoindre (+ slug #/rejoindre/black) — formulaire d'onboarding
+   (tailles/logo compressé/métier/choix pub+site conditionnels, case
+   « j'accepte les règles » horodatée → active l'envoi) ; CTA « Rejoindre le
+   réseau » (page artisans) + CTA Black (page abonnement) branchés dessus.
+   parseHash : préfixe /rejoindre/ ajouté. Playwright 13/13.
+4. ✅ Admin : onglet « Candidatures » (GET partner-applications, requireAdmin)
+   — cartes lisibles (tailles, contact mailto, pub/site en clair, logo,
+   horodatage), XSS échappé. Playwright 10/10.
+5. ✅ Vérif globale : CI verte, non-régression Phase 2 (18/18), SW v433.
 4. Admin : onglet « Candidatures » (revue des pré-inscriptions, lecture).
 5. Vérif Playwright + CI + SW + commit.
 

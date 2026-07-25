@@ -7708,3 +7708,22 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 @media (max-width: 480px) {
   .pj-grid { grid-template-columns: 1fr; }
 }
+
+/* Admin — cartes de candidatures (pré-inscriptions artisans, Phase 3a). */
+.admin-app {
+  border: 1px solid rgba(255, 255, 255, .12); border-radius: 12px;
+  background: rgba(255, 255, 255, .03); padding: .9rem 1rem; margin-bottom: .8rem;
+}
+.admin-app--black { border-color: rgba(192, 132, 252, .5); }
+.admin-app--gold { border-color: rgba(251, 191, 36, .45); }
+.admin-app__head { display: flex; align-items: center; justify-content: space-between; gap: .6rem; margin-bottom: .5rem; }
+.admin-app__head strong { font-size: 1.05rem; }
+.admin-app__tier {
+  font-size: .7rem; font-weight: 800; letter-spacing: .05em;
+  padding: .2rem .55rem; border-radius: 999px;
+  background: rgba(var(--accent-rgb), .18); color: #c4b5fd;
+}
+.admin-app__line { font-size: .88rem; margin: .2rem 0; line-height: 1.45; }
+.admin-app__line > span { color: #9aa4b2; font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; margin-right: .3rem; }
+.admin-app__line a { color: var(--accent); }
+.admin-app__foot { margin-top: .5rem; font-size: .75rem; opacity: .6; }

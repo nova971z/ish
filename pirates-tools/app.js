@@ -7708,6 +7708,52 @@
     });
   }
 
+  // ── Dashboard : Candidatures partenaires (Phase 3a) ────────
+  var PJ_PUB_LABEL = { google: 'Google Ads', meta: 'Facebook / Instagram', aucun: 'À définir' };
+  var PJ_SITE_LABEL = { neuf: 'Site vitrine neuf', refonte: 'Refonte de son site', portfolio: 'Page portfolio', 'pub-doublee': 'Pas de site — pub doublée', aucun: 'À définir' };
+
+  function loadAdminApplications() {
+    var el = document.getElementById('adminApplicationsBody');
+    if (!el) return;
+    el.innerHTML = '<p class="admin-loading">Chargement…</p>';
+    adminGet('partner-applications').then(function (data) {
+      var list = data.applications || [];
+      if (!list.length) { el.innerHTML = '<p class="admin-hint">Aucune candidature pour l\'instant.</p>'; return; }
+      el.innerHTML = list.map(function (a) {
+        var when = a.createdAt ? new Date(a.createdAt).toLocaleString('fr-FR') : '—';
+        var sizes = [
+          a.sizes && a.sizes.tshirt ? 'T-shirt ' + a.sizes.tshirt : '',
+          a.sizes && a.sizes.pantalon ? 'Pantalon ' + a.sizes.pantalon : '',
+          a.sizes && a.sizes.pointure ? 'Pointure ' + a.sizes.pointure : '',
+          a.sizes && a.sizes.gants ? 'Gants ' + a.sizes.gants : ''
+        ].filter(Boolean).join(' · ');
+        function line(label, val) {
+          return val ? '<div class="admin-app__line"><span>' + escapeHTML(label) + '</span> ' + escapeHTML(val) + '</div>' : '';
+        }
+        return '<div class="admin-app admin-app--' + escapeHTML(a.tier || 'basique') + '">'
+          + '<div class="admin-app__head">'
+          + '<strong>' + escapeHTML(a.name || '') + '</strong>'
+          + '<span class="admin-app__tier">' + escapeHTML((a.tier || '').toUpperCase()) + '</span>'
+          + '</div>'
+          + line('Métier', a.metier + (a.commune ? ' — ' + a.commune : ''))
+          + '<div class="admin-app__line"><span>Contact</span> '
+            + '<a href="mailto:' + encodeURIComponent(a.email) + '">' + escapeHTML(a.email) + '</a>'
+            + (a.phone ? ' · ' + escapeHTML(a.phone) : '') + '</div>'
+          + line('Tailles ÉPI', sizes)
+          + line('Couleurs', a.couleurs)
+          + line('Réseaux', [a.facebook, a.instagram].filter(Boolean).join(' · '))
+          + line('Publicité', PJ_PUB_LABEL[a.pubChoice] || a.pubChoice)
+          + line('Site', a.hasWebsite ? ('Oui (' + (a.websiteUrl || 'n.c.') + ') — ' + (PJ_SITE_LABEL[a.siteOption] || a.siteOption)) : (PJ_SITE_LABEL[a.siteOption] || ''))
+          + (a.hasLogo ? '<div class="admin-app__line"><span>Logo</span> ✓ fourni</div>' : '')
+          + line('Message', a.message)
+          + '<div class="admin-app__foot">' + escapeHTML(when) + ' · statut : ' + escapeHTML(a.status || 'nouvelle') + '</div>'
+          + '</div>';
+      }).join('');
+    }).catch(function (e) {
+      el.innerHTML = '<p class="admin-error">Erreur : ' + escapeHTML(e.message) + '</p>';
+    });
+  }
+
   function renderAdmin() {
     var view = document.getElementById('adminView');
     if (!view) return;
@@ -7751,6 +7797,7 @@
       + '<button type="button" class="admin-tab" data-admin-tab="stats" role="tab" aria-selected="false">Statistiques</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="clients" role="tab" aria-selected="false">Clients</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="partners" role="tab" aria-selected="false">Partenaires</button>'
+      + '<button type="button" class="admin-tab" data-admin-tab="applications" role="tab" aria-selected="false">Candidatures</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="orders" role="tab" aria-selected="false">Commandes</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="tools" role="tab" aria-selected="false">Outils</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="instagram" role="tab" aria-selected="false">Instagram</button>'
@@ -7902,6 +7949,13 @@
       + '<div id="adminPartnersBody"><p class="admin-loading">Chargement…</p></div>'
       + '</div>'
 
+      // ── Candidatures (pré-inscriptions artisans, Phase 3a) ──
+      + '<div class="admin-pane" data-admin-pane="applications" hidden>'
+      + '<p class="admin-hint">Pré-inscriptions reçues via le formulaire « Rejoindre le réseau » (#/rejoindre). Sans paiement — à recontacter au lancement. Tu reçois aussi chaque candidature par email.</p>'
+      + '<div id="adminApplicationsBody"><p class="admin-loading">Chargement…</p></div>'
+      + '<button type="button" class="btn btn--ghost" id="adminApplicationsRefresh">Rafraîchir</button>'
+      + '</div>'
+
       + '</div>';
 
     var logoutBtn = document.getElementById('adminLogoutBtn');
@@ -7937,6 +7991,7 @@
         if (target === 'stats') loadAdminStats();
         if (target === 'clients') loadAdminClients();
         if (target === 'partners') loadAdminPartners();
+        if (target === 'applications') loadAdminApplications();
         if (target !== 'stats') destroyAdminGlobe(); // libère le contexte WebGL
       });
     });
@@ -7947,6 +8002,8 @@
     if (reportBtn) reportBtn.onclick = sendAdminReport;
     var clientsRefresh = document.getElementById('adminClientsRefresh');
     if (clientsRefresh) clientsRefresh.onclick = function () { loadAdminClients(true); };
+    var appsRefresh = document.getElementById('adminApplicationsRefresh');
+    if (appsRefresh) appsRefresh.onclick = function () { loadAdminApplications(); };
 
     // Test email form
     var testForm = document.getElementById('adminTestEmailForm');
