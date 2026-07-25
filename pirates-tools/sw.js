@@ -1,28 +1,38 @@
 /* sw.js — Pirates Tools (PWA) */
-const VERSION        = 'pt-v417';                    // version du SW (logique SW)
+const VERSION        = 'pt-v418';                    // version du SW (logique SW)
 const STATIC_CACHE   = `pt-static-${VERSION}`;
 const RUNTIME_CACHE  = `pt-runtime-${VERSION}`;
 const IMG_CACHE      = `pt-img-${VERSION}`;
 const DATA_CACHE     = `pt-data-${VERSION}`;
 const ORIGIN         = self.location.origin;
 
-// Aligner avec le HTML (cache-busting des assets)
-const ASSET_VER      = '417';
+// Aligner avec le HTML (cache-busting des assets) — garde-fou CI :
+// scripts/check-asset-versions.js casse la CI si sw.js et index.html divergent.
+const ASSET_VER      = '418';
+
+// Icônes + manifest : fingerprint STABLE, séparé d'ASSET_VER. Ces fichiers ne
+// changent pas à chaque déploiement — les re-cache-buster à chaque bump forçait
+// leur re-téléchargement (~300 Ko) à chaque install, et le précache (?v=bump)
+// ne matchait JAMAIS les requêtes de la page (restées sur l'ancien ?v=) →
+// chaque asset téléchargé DEUX fois et stocké en double (STATIC + IMG cache).
+// DOIT rester égal aux ?v= des icônes/manifest dans index.html (CI le vérifie).
+const ICON_VER       = '387';
 
 // Production = Vercel (pirates-tools.com), servi à la racine (/).
 // On garde des chemins relatifs (./) pour que le SW fonctionne à l'identique
 // en local, en preview Vercel et en production.
+// NB : pas d'entrée './' — handleNavigate ne lit que la clé './index.html' ;
+// précacher './' téléchargeait index.html une 2e fois pour une clé morte.
 const APP_SHELL = [
-  './',                           // racine (navigation)
   './index.html',                 // clé canonique unique du shell (fallback offline)
   `./styles.css?v=${ASSET_VER}`,
   `./app.js?v=${ASSET_VER}`,
-  `./manifest.webmanifest?v=${ASSET_VER}`,
-  `./icons/icon-180.png?v=${ASSET_VER}`,
-  `./icons/icon-192.png?v=${ASSET_VER}`,
-  `./icons/icon-256.png?v=${ASSET_VER}`,
-  `./icons/icon-384.png?v=${ASSET_VER}`,
-  `./icons/icon-512.png?v=${ASSET_VER}`
+  `./manifest.webmanifest?v=${ICON_VER}`,
+  `./icons/icon-180.png?v=${ICON_VER}`,
+  `./icons/icon-192.png?v=${ICON_VER}`,
+  `./icons/icon-256.png?v=${ICON_VER}`,
+  `./icons/icon-384.png?v=${ICON_VER}`,
+  `./icons/icon-512.png?v=${ICON_VER}`
   // pirates-tools-logo.png retiré du précache : jamais affiché (poids mort).
 ];
 
@@ -192,7 +202,7 @@ async function handleImage(request){
   } catch(_){
     // Fallback icône — fromCache est async : il faut AWAIT chaque lookup,
     // sinon le `||` renvoie une Promise (toujours truthy) → respondWith(null).
-    const c1 = await fromCache(STATIC_CACHE, `./icons/icon-256.png?v=${ASSET_VER}`);
+    const c1 = await fromCache(STATIC_CACHE, `./icons/icon-256.png?v=${ICON_VER}`);
     if (c1) return c1;
     const c2 = await fromCache(STATIC_CACHE, './icons/icon-256.png');
     if (c2) return c2;
