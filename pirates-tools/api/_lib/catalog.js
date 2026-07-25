@@ -76,6 +76,29 @@ async function loadCatalog() {
   return applyOverrides(products, overrides);
 }
 
+// Champs INTERNES écrits par le traqueur de prix / reprice dans product_overrides
+// (coût d'achat fournisseur réel + marge appliquée). Ils sont indispensables au
+// webhook (COGS) et à l'admin (marges), mais ne doivent JAMAIS sortir sur
+// l'endpoint public /api/products : les exposer = publier le prix d'achat et la
+// marge exacte de chaque produit.
+var PRIVATE_FIELDS = [
+  'priceSource', 'priceSrcTTC', 'priceCheckedAt',
+  'priceMarkup', 'priceMode', 'priceRecomputedAt',
+  'hidden'
+];
+
+function toPublic(p) {
+  var clean = Object.assign({}, p);
+  for (var i = 0; i < PRIVATE_FIELDS.length; i++) delete clean[PRIVATE_FIELDS[i]];
+  return clean;
+}
+
+// Catalogue pour l'endpoint PUBLIC : même fusion, champs internes retirés.
+async function loadPublicCatalog() {
+  var merged = await loadCatalog();
+  return merged.map(toPublic);
+}
+
 // Resolve a product by its client key. Mirrors findProductByKey() in app.js:
 // matches on id, slug, or sku.
 function findByKey(catalog, key) {
@@ -89,5 +112,8 @@ function findByKey(catalog, key) {
 
 module.exports = {
   loadCatalog: loadCatalog,
-  findByKey: findByKey
+  loadPublicCatalog: loadPublicCatalog,
+  findByKey: findByKey,
+  // Exposés pour les tests CI (fonctions pures).
+  _internals: { applyOverrides: applyOverrides, toPublic: toPublic, PRIVATE_FIELDS: PRIVATE_FIELDS }
 };

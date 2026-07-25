@@ -12,12 +12,17 @@ module.exports = async function handler(req, res) {
 
   if (req.method === 'GET') {
     try {
-      var merged = await catalog.loadCatalog();
+      // Catalogue PUBLIC : champs internes (coût fournisseur, marge du traqueur)
+      // retirés — voir PRIVATE_FIELDS dans _lib/catalog.js.
+      var merged = await catalog.loadPublicCatalog();
 
+      // Un paramètre répété (?brand=a&brand=b) arrive en Array → on ne garde
+      // que la première valeur au lieu de planter sur .toLowerCase().
       var query = req.query || {};
-      var brand = query.brand;
-      var category = query.category;
-      var q = query.q;
+      var one = function (v) { return Array.isArray(v) ? String(v[0] || '') : (v ? String(v) : ''); };
+      var brand = one(query.brand);
+      var category = one(query.category);
+      var q = one(query.q);
 
       var filtered = merged;
       if (brand) {
