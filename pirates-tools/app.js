@@ -1161,7 +1161,6 @@
     // une source plus fraîche déjà appliquée (course réseau maîtrisée).
     var RANK = { cache: 0, static: 1, api: 2 };
     var appliedRank = -1;
-    var firstRenderDone = false;
     var lastJson = null;
     function apply(arr, source) {
       if (!Array.isArray(arr) || arr.length === 0) return; // jamais de catalogue vide
@@ -1176,10 +1175,13 @@
       lastJson = json;
       try { localStorage.setItem(PRODUCTS_CACHE_KEY, json); } catch (_) {}
       setProducts(arr);
-      // 1er rendu de données → onRouteChange complet. Suivants (enrichissement)
-      // → isDataRefresh=true : re-render EN PLACE, sans défiler (cf. onRouteChange).
-      onRouteChange(firstRenderDone);
-      firstRenderDone = true;
+      // L'arrivée de données N'EST JAMAIS une navigation → toujours
+      // isDataRefresh=true : re-render EN PLACE (pas de scroll reset, pas de
+      // page_view — dédupliqué par routeKey dans onRouteChange). Avant, le 1er
+      // apply() repassait en onRouteChange(false) → à CHAQUE cold load en
+      // navigation privée : double rendu complet de la route + page_view ×2
+      // (stats admin gonflées ~×2 sur la page d'atterrissage).
+      onRouteChange(true);
     }
 
     // 0) Cache instantané (no-op en navigation privée).
@@ -3745,7 +3747,8 @@
     // focus à ces moments-là casserait la tabulation initiale (skip-link).
     // preventScroll : scrollTopNow gère déjà le défilement.
     var routeKey = route + '|' + (parsed.slug || '');
-    if (_lastRouteKey !== null && routeKey !== _lastRouteKey) {
+    var routeChanged = (routeKey !== _lastRouteKey);
+    if (_lastRouteKey !== null && routeChanged) {
       var activeView = document.querySelector('.view:not(.hidden)');
       var viewTitle = activeView ? activeView.querySelector('h1') : null;
       if (viewTitle) {
@@ -3755,8 +3758,11 @@
     }
     _lastRouteKey = routeKey;
 
-    // Analytics : page view + territory view
-    if (typeof track === 'function') {
+    // Analytics : page view + territory view — UNIQUEMENT quand la route change
+    // réellement (routeKey). onRouteChange est re-invoqué sur la MÊME route par
+    // l'arrivée des produits et la restauration de l'auth : sans ce garde,
+    // chaque cold load comptait 2-3 page_view (stats admin gonflées).
+    if (typeof track === 'function' && routeChanged) {
       track('page_view', { route: route, slug: parsed.slug || null });
       if (route === '/territoire' && parsed.slug) {
         track('view_territory', { code: territoryCodeFromSlug(parsed.slug) });
