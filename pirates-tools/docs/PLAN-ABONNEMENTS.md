@@ -63,6 +63,22 @@ s'applique) — décision 25/07 : sans ce verrou, un gros acheteur Platine
 les ventes privées ; Black les a en avant-première. Pages : switcher de packs
 en tête pour comparer sans repasser par l'accueil.
 
+DÉCISION 25/07 (3e passe, user) — GOLD ENRICHI :
+- ÉPI Gold = t-shirt + pantalon floqués UNIQUEMENT, renouvelés chaque année
+  (le pack complet chaussures/lunettes/gants reste exclusif Black).
+  Coût réel ≈ 20 €/an (8 € t-shirt + 12 € pantalon, flocage inclus).
+- « Publicité » Gold = ENTRAIDE DU CLUB GOLD uniquement : 2 partages/mois
+  (posts/stories Instagram ou Facebook) par d'autres membres Gold — PAS de
+  budget pub géré (Google/Meta = exclusif Black), PAS de site offert.
+- MÊME ALGORITHME anti-concurrence que Black : jamais deux artisans du même
+  métier appariés (un charpentier ne partage JAMAIS un charpentier). Pools de
+  rotation SÉPARÉS : club Gold (2×/mois) et partenaires Black (1×/semaine).
+- Gold a désormais des RÈGLES (partage obligatoire, 3 manquements = sortie du
+  programme d'entraide) → case d'acceptation sur sa page + formulaire.
+- Formulaire /rejoindre ADAPTATIF : Basique/Pro = pas d'ÉPI ni visibilité ;
+  Gold = t-shirt/pantalon + réseaux seulement ; Black = tout. Les champs
+  masqués sont vidés à l'envoi (le payload reflète l'offre).
+
 Économie Black/an/partenaire (coûts réels user) : 1 106 € HT − bon ~330 €
 (coût logistique incluse) − ÉPI ~60 € − pub 120 € − domaine 8 € − Stripe ~21 €
 ≈ **+560 € net** + 12 stories de visibilité croisée. ×10 places ≈ 5 600 €/an.
@@ -157,9 +173,12 @@ créée, tu peux brancher les paiements ».
 ## PHASE 5 — Entraide & stories (le cœur du club)
 1. Upload de la publication (JPEG/PNG, compression client) dans le compte.
 2. Admin : galerie des publications + bouton téléchargement + marquer « posté ».
-3. Rotation hebdomadaire d'appariement MÉTIERS CROISÉS (round-robin, contrainte
-   métier A ≠ métier B) — job hebdo via le cron EXISTANT (param `?job=partners`,
-   pas de 13e fonction Vercel). Notification email + compte à chaque binôme.
+3. Rotation d'appariement MÉTIERS CROISÉS (round-robin, contrainte métier
+   A ≠ métier B) — job via le cron EXISTANT (param `?job=partners`, pas de 13e
+   fonction Vercel). Notification email + compte à chaque binôme.
+   DEUX POOLS SÉPARÉS (décision 25/07) : partenaires BLACK (1 partage/semaine)
+   et club GOLD (2 partages/mois) — même algorithme, cadences distinctes,
+   jamais de mélange entre pools.
 4. Compteur de manquements (3 → clôture) + écran admin de suivi.
 
 ## PHASE 6 — Usine à sites vitrine + pub

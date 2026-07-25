@@ -44,7 +44,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=433">
+  <link rel="stylesheet" href="styles.css?v=434">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -896,6 +896,7 @@
     <!-- PRÉ-INSCRIPTION PARTENAIRE (Phase 3a — sans paiement) -->
     <section id="view-rejoindre" class="view hidden" data-route="/rejoindre" role="region" aria-labelledby="rejoindre-h1">
       <div class="container">
+        <button type="button" class="pj-back" id="pjBack">← Retour</button>
         <header class="rejoindre-header">
           <h1 id="rejoindre-h1" tabindex="-1">Rejoindre le réseau d'artisans</h1>
           <p class="rejoindre-sub">Pré-inscription <strong>sans engagement et sans paiement</strong>. Le programme ouvre bientôt : laisse tes informations, on te recontacte au lancement pour finaliser. Les places Black sont limitées.</p>
@@ -922,16 +923,18 @@
             </label>
           </fieldset>
 
-          <fieldset class="pj-fieldset">
-            <legend>Tailles ÉPI (pour ton pack floqué)</legend>
-            <p class="pj-hint">Utile pour préparer ton équipement personnalisé (t-shirt, pantalon, chaussures, gants). Tu pourras ajuster plus tard.</p>
+          <!-- ÉPI : Gold (t-shirt + pantalon) et Black (pack complet) uniquement.
+               Masqué pour Basique/Pro (pas d'équipement dans ces formules). -->
+          <fieldset class="pj-fieldset" id="pjFsEpi">
+            <legend>Tailles (pour ton équipement floqué)</legend>
+            <p class="pj-hint" id="pjEpiHint">Utile pour préparer ton équipement personnalisé. Tu pourras ajuster plus tard.</p>
             <div class="pj-grid">
               <label class="pj-field"><span>T-shirt</span>
                 <select id="pjTshirt"><option value="">—</option><option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option><option>XXXL</option></select>
               </label>
               <label class="pj-field"><span>Pantalon (taille)</span><input type="text" id="pjPantalon" maxlength="12" placeholder="42, L…"></label>
-              <label class="pj-field"><span>Pointure</span><input type="text" id="pjPointure" maxlength="6" inputmode="numeric" placeholder="43"></label>
-              <label class="pj-field"><span>Gants</span>
+              <label class="pj-field" id="pjFieldPointure"><span>Pointure</span><input type="text" id="pjPointure" maxlength="6" inputmode="numeric" placeholder="43"></label>
+              <label class="pj-field" id="pjFieldGants"><span>Gants</span>
                 <select id="pjGants"><option value="">—</option><option>S</option><option>M</option><option>L</option><option>XL</option></select>
               </label>
             </div>
@@ -940,25 +943,32 @@
             <div id="pjLogoPreview" class="pj-logo-preview"></div>
           </fieldset>
 
-          <fieldset class="pj-fieldset">
+          <!-- Visibilité : Gold (réseaux pour le partage croisé du club) et
+               Black (réseaux + pub gérée + site). Masqué pour Basique/Pro. -->
+          <fieldset class="pj-fieldset" id="pjFsVisibilite">
             <legend>Visibilité & publicité</legend>
+            <p class="pj-hint" id="pjVisHint" hidden>Club Gold : tes réalisations sont partagées 2 fois par mois par des membres d'autres métiers — tes réseaux nous servent à organiser ces partages.</p>
             <label class="pj-field"><span>Ta page Facebook</span><input type="text" id="pjFacebook" maxlength="200" placeholder="facebook.com/…"></label>
             <label class="pj-field"><span>Ton Instagram</span><input type="text" id="pjInstagram" maxlength="200" placeholder="@…"></label>
-            <span class="pj-field__label">Où préfères-tu ta publicité locale ?</span>
-            <div class="pj-radios">
-              <label><input type="radio" name="pjPub" value="meta" checked> Facebook / Instagram</label>
-              <label><input type="radio" name="pjPub" value="google"> Google Ads</label>
-              <label><input type="radio" name="pjPub" value="aucun"> Je ne sais pas encore</label>
+            <div id="pjPubBlock">
+              <span class="pj-field__label">Où préfères-tu ta publicité locale ?</span>
+              <div class="pj-radios">
+                <label><input type="radio" name="pjPub" value="meta" checked> Facebook / Instagram</label>
+                <label><input type="radio" name="pjPub" value="google"> Google Ads</label>
+                <label><input type="radio" name="pjPub" value="aucun"> Je ne sais pas encore</label>
+              </div>
             </div>
-            <label class="pj-field pj-field--inline"><input type="checkbox" id="pjHasSite"> <span>J'ai déjà un site web</span></label>
-            <label class="pj-field" id="pjSiteUrlWrap" hidden><span>Adresse de ton site</span><input type="url" id="pjSiteUrl" maxlength="200" placeholder="https://…"></label>
-            <label class="pj-field" id="pjSiteOptWrap" hidden><span>Que préfères-tu pour ton site ?</span>
-              <select id="pjSiteOpt">
-                <option value="refonte">Refonte de mon site actuel</option>
-                <option value="portfolio">Une page portfolio en plus</option>
-                <option value="pub-doublee">Pas de site — budget pub doublé au 1er trimestre</option>
-              </select>
-            </label>
+            <div id="pjSiteBlock">
+              <label class="pj-field pj-field--inline"><input type="checkbox" id="pjHasSite"> <span>J'ai déjà un site web</span></label>
+              <label class="pj-field" id="pjSiteUrlWrap" hidden><span>Adresse de ton site</span><input type="url" id="pjSiteUrl" maxlength="200" placeholder="https://…"></label>
+              <label class="pj-field" id="pjSiteOptWrap" hidden><span>Que préfères-tu pour ton site ?</span>
+                <select id="pjSiteOpt">
+                  <option value="refonte">Refonte de mon site actuel</option>
+                  <option value="portfolio">Une page portfolio en plus</option>
+                  <option value="pub-doublee">Pas de site — budget pub doublé au 1er trimestre</option>
+                </select>
+              </label>
+            </div>
           </fieldset>
 
           <fieldset class="pj-fieldset">
@@ -1751,7 +1761,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=433"></script>
+  <script defer src="app.js?v=434"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

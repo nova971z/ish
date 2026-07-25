@@ -7727,3 +7727,13 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .admin-app__line > span { color: #9aa4b2; font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; margin-right: .3rem; }
 .admin-app__line a { color: var(--accent); }
 .admin-app__foot { margin-top: .5rem; font-size: .75rem; opacity: .6; }
+
+/* Bouton retour du formulaire de pré-inscription. */
+.pj-back {
+  display: inline-flex; align-items: center; gap: .4rem;
+  margin: .4rem 0 0; padding: .55rem 1rem; border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, .18); background: rgba(255, 255, 255, .05);
+  color: #e6edf5; font-weight: 700; font-size: .9rem; cursor: pointer;
+  transition: border-color .2s, background .2s;
+}
+.pj-back:hover { border-color: var(--accent); background: rgba(var(--accent-rgb), .12); }

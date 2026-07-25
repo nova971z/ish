@@ -3488,15 +3488,23 @@
       name: 'Gold',
       price: '29,90',
       saving: 260,
-      tagline: 'Le club avancé, fidélité doublée',
-      desc: 'Remise renforcée, bon mensuel sérieux et un devis chantier personnalisé chaque trimestre.',
+      tagline: 'Le club avancé : équipement floqué et entraide entre membres',
+      desc: 'Remise renforcée, bon mensuel sérieux, t-shirt et pantalon floqués chaque année, et le réseau d\'entraide du club Gold : des artisans d\'autres métiers partagent vos réalisations.',
       features: [
         { icon: '💳', text: 'Bon d\'achat +11,40 € chaque mois', detail: 'Crédité à chaque mensualité payée (~137 €/an), cumulable, acquis même si vous arrêtez.' },
+        { icon: '🦺', text: 'T-shirt + pantalon floqués, chaque année', detail: 'Personnalisés aux couleurs de votre entreprise, flocage inclus, renouvelés chaque année. Tailles collectées à l\'inscription. (Le pack ÉPI complet — chaussures, lunettes, gants — est réservé au Black Partenaire.)' },
+        { icon: '🤝', text: 'Entraide du club Gold : 2 partages/mois', detail: '2 fois par mois, un membre Gold d\'un AUTRE métier partage votre post ou story Instagram/Facebook — jamais un concurrent : un charpentier ne partage jamais un charpentier. Vous partagez en retour.' },
         { icon: '🏷️', text: 'Remise permanente de 3%', detail: 'Sur tout le catalogue. Non cumulable avec la remise fidélité : la plus avantageuse s\'applique.' },
         { icon: '🚢', text: 'Précommandes container prioritaires', detail: 'Vos outils partent dans le premier groupage disponible.' },
         { icon: '📐', text: '1 devis chantier personnalisé/trimestre', detail: 'On chiffre ensemble l\'outillage complet d\'un chantier, conseils inclus.' },
         { icon: '📧', text: 'SAV prioritaire sous 12h', detail: 'WhatsApp direct, réponse sous 12h ouvrées.' },
         { icon: '📇', text: 'Annuaire : 3 photos + lien', detail: 'Carte enrichie : logo, 3 photos de réalisations et lien vers votre site.' }
+      ],
+      rules: [
+        '2 fois par mois, vous partagez la publication du membre Gold qui vous est attribué (métier différent du vôtre, jamais un concurrent) — et un membre partage la vôtre.',
+        '3 manquements aux règles de partage entraînent la sortie du programme d\'entraide.',
+        'Le bon de 11,40 € est crédité uniquement pour les mois effectivement payés.',
+        'Sans engagement : vous partez quand vous voulez, votre bon cumulé vous reste.'
       ],
       theme: 'gold'
     },
@@ -3793,6 +3801,29 @@
   var _partnerJoinBound = false;
   var _pjLogo = '';
 
+  // Champs visibles selon la formule (décision user 25/07) :
+  //   Basique / Pro → annuaire seul : PAS d'ÉPI, PAS de visibilité/pub.
+  //   Gold → t-shirt + pantalon floqués (pas de pointure/gants) + réseaux
+  //          (partage croisé du club Gold, 2×/mois) — PAS de pub gérée ni site.
+  //   Black → tout (pack ÉPI complet, pub gérée Google/Meta, site vitrine).
+  function applyTierFields(tier) {
+    var noEquip = (tier === 'basique' || tier === 'pro');
+    var isGold = (tier === 'gold');
+    var el;
+    if ((el = document.getElementById('pjFsEpi'))) el.hidden = noEquip;
+    if ((el = document.getElementById('pjFsVisibilite'))) el.hidden = noEquip;
+    if ((el = document.getElementById('pjFieldPointure'))) el.hidden = isGold;
+    if ((el = document.getElementById('pjFieldGants'))) el.hidden = isGold;
+    if ((el = document.getElementById('pjPubBlock'))) el.hidden = (tier !== 'black');
+    if ((el = document.getElementById('pjSiteBlock'))) el.hidden = (tier !== 'black');
+    if ((el = document.getElementById('pjEpiHint'))) {
+      el.textContent = isGold
+        ? 'Ton pack Gold : t-shirt + pantalon floqués aux couleurs de ton entreprise, renouvelés chaque année.'
+        : 'Utile pour préparer ton pack complet (t-shirt, pantalon, chaussures, lunettes, gants). Tu pourras ajuster plus tard.';
+    }
+    if ((el = document.getElementById('pjVisHint'))) el.hidden = !isGold;
+  }
+
   function setupPartnerJoinForm(slug) {
     var form = document.getElementById('partnerJoinForm');
     if (!form) return;
@@ -3801,9 +3832,22 @@
     var tierSel = document.getElementById('pjTier');
     var TIERS = { basique: 1, pro: 1, gold: 1, black: 1 };
     if (tierSel && slug && TIERS[slug]) tierSel.value = slug;
+    applyTierFields(tierSel ? tierSel.value : 'black');
 
     if (_partnerJoinBound) return;
     _partnerJoinBound = true;
+
+    if (tierSel) {
+      tierSel.addEventListener('change', function () { applyTierFields(tierSel.value); });
+    }
+
+    // Bouton retour : revient à la page précédente (annuaire, abonnement…) ;
+    // arrivée directe sans historique → repli sur l'annuaire artisans.
+    var backBtn = document.getElementById('pjBack');
+    if (backBtn) backBtn.onclick = function () {
+      if (history.length > 1) history.back();
+      else location.hash = '#/artisans';
+    };
 
     var rulesChk = document.getElementById('pjRulesChk');
     var submit = document.getElementById('pjSubmit');
@@ -3874,6 +3918,21 @@
         rulesAccepted: !!(rulesChk && rulesChk.checked),
         website: val('pjHoneypot') // honeypot (piège à bots, doit rester vide)
       };
+
+      // Ne transmettre QUE les champs qui existent dans la formule choisie :
+      // les blocs masqués (applyTierFields) peuvent garder des saisies d'un
+      // choix précédent — on les vide pour que la candidature reflète l'offre.
+      if (data.tier === 'basique' || data.tier === 'pro') {
+        data.sizes = { tshirt: '', pantalon: '', pointure: '', gants: '' };
+        data.couleurs = ''; data.logo = '';
+        data.facebook = ''; data.instagram = '';
+        data.pubChoice = 'aucun'; data.hasWebsite = false;
+        data.websiteUrl = ''; data.siteOption = 'aucun';
+      } else if (data.tier === 'gold') {
+        data.sizes.pointure = ''; data.sizes.gants = '';
+        data.pubChoice = 'aucun'; data.hasWebsite = false;
+        data.websiteUrl = ''; data.siteOption = 'aucun';
+      }
 
       if (data.name.length < 2) return pjErr('Indique le nom de ton entreprise.');
       if (data.metier.length < 2) return pjErr('Indique ton métier.');
@@ -4095,7 +4154,10 @@
         showAuthTab('login');
         break;
       case '/abonnement':
-        if (parsed.slug) renderAbonnement(parsed.slug);
+        // Sans slug (#/abonnement, ex. lien « Voir les formules ») : afficher
+        // le premier tier — la page a un switcher en tête pour comparer les 4.
+        // Avant, l'absence de slug laissait #aboContent VIDE (page blanche).
+        renderAbonnement(parsed.slug || 'basique');
         break;
       case '/territoire':
         if (parsed.slug) handleTerritoryRoute(parsed.slug);
