@@ -2035,6 +2035,32 @@
         }
       }
     }
+    // Applique l'option coffret pour un produit SANS vraie variante (standalone) :
+    // même switch 2 boutons que les paires, « Avec coffret » = prix de base +
+    // supplément d'envoi (+15/25 € La Poste, volume). Le prix de BASE est intact,
+    // l'image ne change pas (poster coffret dédié à venir). Pilote _pdpCoffret
+    // (repris par addToCart / openPayModal / payUnitCents → débit serveur exact).
+    function applyCoffretToggle(prod, withC) {
+      _pdpCoffret = !!withC;
+      activeProduct = prod;
+      var pr = calcPrice(prod, _currentTerritory);
+      var surEuro = withC ? coffretSurchargeCents(prod) / 100 : 0;
+      var shown = { ttc: pr.ttc + surEuro, ht: pr.ht + surEuro };
+      if (dom.pdpPrice) {
+        dom.pdpPrice.innerHTML = '<span class="pdp-price__ttc">' + formatPrice(shown.ttc) + ' TTC</span>'
+          + '<span class="pdp-price__ht">' + formatPrice(shown.ht) + ' HT</span>';
+        localPriceComparison(prod, shown, dom.pdpPrice);
+      }
+      var vEl = document.getElementById('pdpVariant');
+      if (vEl) {
+        var bs = vEl.querySelectorAll('[data-coffret]');
+        for (var i = 0; i < bs.length; i++) {
+          var on = (bs[i].getAttribute('data-coffret') === '1') === !!withC;
+          bs[i].classList.toggle('active', on);
+          bs[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+        }
+      }
+    }
     var pdpVariantEl = document.getElementById('pdpVariant');
     if (pdpVariantEl) {
       if (hasVariants) {
@@ -2055,6 +2081,26 @@
           vBtns[vb].onclick = (function (which) {
             return function () { applyVariant(which === 'coffret' ? variantCoffret : variantSolo); };
           })(vBtns[vb].getAttribute('data-variant'));
+        }
+      } else if (coffretEligible(product)) {
+        // Produit standalone éligible : switch coffret (supplément d'envoi).
+        var pB = calcPrice(product, _currentTerritory);
+        var surE = coffretSurchargeCents(product) / 100;
+        pdpVariantEl.hidden = false;
+        pdpVariantEl.innerHTML =
+          '<div class="pdp-variant__switch" role="group" aria-label="Choix du conditionnement">'
+          + '<button type="button" class="pdp-variant__btn active" data-coffret="0" aria-pressed="true">'
+          + '<span class="pdp-variant__label">Sans coffret</span>'
+          + '<span class="pdp-variant__amt">' + formatPrice(pB.ttc) + '</span></button>'
+          + '<button type="button" class="pdp-variant__btn" data-coffret="1" aria-pressed="false">'
+          + '<span class="pdp-variant__label">Avec coffret</span>'
+          + '<span class="pdp-variant__amt">' + formatPrice(pB.ttc + surE) + '</span></button>'
+          + '</div>';
+        var cBtns = pdpVariantEl.querySelectorAll('[data-coffret]');
+        for (var cb = 0; cb < cBtns.length; cb++) {
+          cBtns[cb].onclick = (function (withC) {
+            return function () { applyCoffretToggle(product, withC); };
+          })(cBtns[cb].getAttribute('data-coffret') === '1');
         }
       } else {
         pdpVariantEl.hidden = true;
@@ -4972,27 +5018,16 @@
     return Math.round((w >= COFFRET_SURCH.heavyKg ? COFFRET_SURCH.gros : COFFRET_SURCH.petit) * 100);
   }
 
-  // Option coffret sur la fiche : case à cocher injectée dans la zone CTA pour
-  // les machines éligibles (hors produits à vraie variante coffret P2). Le prix
-  // affiché reste le prix SANS coffret ; la case ajoute le supplément au panier
-  // / paiement. _pdpCoffret = choix courant (réinitialisé à chaque fiche).
+  // Choix « coffret » courant sur la fiche (réinitialisé à chaque ouverture).
+  // Le switch 2 boutons (Sans/Avec coffret) est rendu dans #pdpVariant par
+  // renderPDP (applyCoffretToggle pour les standalone, applyVariant pour les
+  // paires). Ici on ne fait plus que réinitialiser l'état + nettoyer une
+  // éventuelle ancienne case à cocher (compat).
   var _pdpCoffret = false;
   function setupPdpCoffret(product) {
     _pdpCoffret = false;
     var old = document.getElementById('pdpCoffretOpt');
     if (old && old.parentNode) old.parentNode.removeChild(old);
-    var host = dom.pdpQuote ? dom.pdpQuote.parentNode : null;
-    if (!host || !coffretEligible(product) || product.variantGroup) return;
-    var sur = coffretSurchargeCents(product) / 100;
-    var wrap = document.createElement('label');
-    wrap.id = 'pdpCoffretOpt';
-    wrap.className = 'pdp-coffret';
-    wrap.innerHTML = '<input type="checkbox" id="pdpCoffretChk">'
-      + '<span>Ajouter le <strong>coffret TSTAK</strong> '
-      + '<span class="pdp-coffret__price">+' + formatPrice(sur) + '</span></span>';
-    host.insertBefore(wrap, host.firstChild);
-    var chk = document.getElementById('pdpCoffretChk');
-    if (chk) chk.addEventListener('change', function () { _pdpCoffret = chk.checked; });
   }
 
   function payUnitCents(it) {
