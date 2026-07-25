@@ -3708,6 +3708,10 @@
       case '/catalogue':
         renderCategoryChips();
         renderCategorySelect();
+        // Ré-aligne chips + select sur le filtre PERSISTANT (currentFilter.
+        // category survit à la navigation) : sans ça, revenir sur /catalogue
+        // affichait la liste filtrée mais la chip « Tout » active (désynchro).
+        syncFilters();
         renderProductList();
         break;
       case '/produit':
@@ -5087,6 +5091,8 @@
   function openPayModal(items) {
     var modal = document.getElementById('payModal');
     if (!modal || !items || !items.length) return;
+    // Annule une fermeture en cours (course fermer→rouvrir < 250 ms).
+    if (_payCloseTimer) { clearTimeout(_payCloseTimer); _payCloseTimer = null; }
     _payItems = items;
     _cryptoTotalEur = payTotalCents(items) / 100;
     _cryptoSelected = null;
@@ -5144,13 +5150,19 @@
   }
 
   var _payTrapRelease = null;
+  // Timer de fermeture (animation 250 ms). openPayModal l'ANNULE : sans ça,
+  // fermer puis rouvrir en < 250 ms laissait le vieux timer masquer la modale
+  // fraîchement ouverte et réactiver le scroll du body sous elle.
+  var _payCloseTimer = null;
 
   function closePayModal() {
     var modal = document.getElementById('payModal');
     if (!modal) return;
     if (_payTrapRelease) { _payTrapRelease(); _payTrapRelease = null; }
     modal.classList.remove('is-open');
-    setTimeout(function () {
+    if (_payCloseTimer) clearTimeout(_payCloseTimer);
+    _payCloseTimer = setTimeout(function () {
+      _payCloseTimer = null;
       modal.hidden = true;
       modal.setAttribute('aria-hidden', 'true');
       document.body.style.overflow = '';
