@@ -56,3 +56,12 @@ module.exports = function checkCsp() {
 
   return errors;
 };
+
+// Exécution directe : `node scripts/check-csp.js` doit VÉRIFIER, pas sortir
+// vert en silence (contre-audit D2 : seul check sans ce bloc — un run manuel
+// « croyait » à un vert qui n'avait rien testé).
+if (require.main === module) {
+  var e = module.exports();
+  if (e.length) { e.forEach(function (x) { console.error('  ❌ ' + x); }); process.exit(1); }
+  console.log('✅ check-csp OK');
+}
