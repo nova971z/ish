@@ -1507,6 +1507,13 @@
 
   function createBrandSphere(container, brand, logoSrc) {
     if (container.dataset.sphereReady === '1') return;
+    // Garde anti-orphelin : le chargement de three.js est asynchrone (CDN) et
+    // la grille de marques peut être re-rendue (innerHTML) entre-temps — le
+    // container capturé par la closure est alors DÉTACHÉ du DOM. Sans cette
+    // garde, on créait un WebGLRenderer par container mort (jusqu'à 7 par
+    // re-rendu), poussé dans _brandScenes et jamais disposé → épuisement des
+    // contextes WebGL (~16 max, l'iPad sature le premier).
+    if (!container.isConnected) return;
     if (typeof window.THREE === 'undefined') {
       // Defer until Three is ready, then re-enter once.
       ensureThree().then(function () {
