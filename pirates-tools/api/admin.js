@@ -372,8 +372,11 @@ module.exports = async function handler(req, res) {
           const priceHt = Number(p.price_ht) || 0;
           if (!(priceHt > 0)) return;
           const o = ov[p.id] || {};
-          const tracked = (typeof o.priceSrcTTC === 'number' && o.priceSrcTTC > 0);
-          const costTTC = tracked ? o.priceSrcTTC : (priceHt / PW.MARGIN) * (1 + tvaFR);
+          // Même source de vérité que le recalcul de prix (pwSourceCost) :
+          // traqueur > prix réel saisi en fiche > estimation dérivée.
+          const ci = pwSourceCost(p, o, cfg);
+          const tracked = ci.origin && ci.origin !== 'estimé';
+          const costTTC = (ci.srcTTC > 0) ? ci.srcTTC : (priceHt / PW.MARGIN) * (1 + tvaFR);
           const r = priceModel.marginAt(p, { priceHt: priceHt, costTTC: costTTC, mode: cfg.mode }, cfg);
           if (!r) return;
           const skuU = String(p.sku || '').toUpperCase();
@@ -388,7 +391,7 @@ module.exports = async function handler(req, res) {
             // ne sort QUE par cet endpoint admin (requireAdmin) — jamais par
             // /api/products (PRIVATE_FIELDS, gardé par check-catalog-public).
             costTTC: pwRound2(costTTC),
-            priceHt: pwRound2(priceHt), ttc971: pwRound2(r.ttc), costSrc: tracked ? 'traqueur' : 'estimé',
+            priceHt: pwRound2(priceHt), ttc971: pwRound2(r.ttc), costSrc: ci.origin || 'estimé',
             netEur: pwRound2(r.netAfterIS), marginPct: Math.round(r.marginAfterIS * 1000) / 10, isPack: isPack
           });
         });
@@ -767,6 +770,26 @@ function pwRound2(n) { return Math.round(n * 100) / 100; }
 
 // Prix à partir du coût source TTC (src) : MODÈLE de marge cible si cfg.autoPrice,
 // sinon repli historique ×1,15. Retourne { newPrice (TTC métropole), newHt, markup, mode }.
+// Coût d'achat source (TTC métropole) d'un produit, par ordre de fiabilité :
+//  1. override.priceSrcTTC  → relevé RÉEL du traqueur (scan cotébrico) ;
+//  2. produit.priceSrcTTC   → prix fournisseur RÉEL saisi dans products.json
+//     (produits que le traqueur ne voit pas : variantes « machine seule »…) ;
+//  3. dérivé de price_ht    → ESTIMATION (le prix catalogue est supposé être
+//     l'ancien coût ×1,15). À remplacer par un vrai prix dès que possible.
+// Retourne { srcTTC, origin } — origin est affiché dans l'aperçu admin.
+function pwSourceCost(p, o, cfg) {
+  if (o && typeof o.priceSrcTTC === 'number' && o.priceSrcTTC > 0) {
+    return { srcTTC: o.priceSrcTTC, origin: 'traqueur' };
+  }
+  if (p && typeof p.priceSrcTTC === 'number' && p.priceSrcTTC > 0) {
+    return { srcTTC: p.priceSrcTTC, origin: 'fiche' };
+  }
+  if (p && typeof p.price_ht === 'number' && p.price_ht > 0) {
+    return { srcTTC: pwRound2((p.price_ht / PW.MARGIN) * (1 + ((cfg && cfg.tvaFR) || 0.20))), origin: 'estimé' };
+  }
+  return { srcTTC: null, origin: null };
+}
+
 function pwComputePrice(product, srcTTC, cfg) {
   // Verrou de sécurité : le MODÈLE de marge cible (15 % net) s'applique par
   // défaut. On ne retombe au ×1,15 QUE si autoPrice est EXPLICITEMENT désactivé
@@ -803,14 +826,9 @@ async function handleRepriceAll(req, res, admin, db) {
 
     for (const p of products) {
       const o = ov[p.id] || {};
-      // Coût source TTC : priorité au coût réel enregistré par le traqueur.
-      // Sinon, on suppose que le price_ht actuel = ancien coût × 1,15 → on
-      // remonte au coût TTC : srcTTC = (price_ht / 1,15) × (1 + TVA FR).
-      let srcTTC = (typeof o.priceSrcTTC === 'number' && o.priceSrcTTC > 0)
-        ? o.priceSrcTTC
-        : (typeof p.price_ht === 'number' && p.price_ht > 0
-            ? pwRound2((p.price_ht / PW.MARGIN) * (1 + (cfg.tvaFR || 0.20)))
-            : null);
+      // Coût source TTC : traqueur > prix réel saisi en fiche > estimation.
+      const srcInfo = pwSourceCost(p, o, cfg);
+      const srcTTC = srcInfo.srcTTC;
       if (!(srcTTC > 0)) { skipped.push({ id: p.id, sku: p.sku, reason: 'coût source inconnu' }); continue; }
       if (srcTTC < PW.MIN_TTC || srcTTC > PW.MAX_TTC) { skipped.push({ id: p.id, sku: p.sku, reason: 'hors fourchette' }); continue; }
 
@@ -824,7 +842,7 @@ async function handleRepriceAll(req, res, admin, db) {
         : (typeof p.price === 'number' ? p.price : null);
       if (cur != null && Math.abs(priced.newPrice - cur) < 0.02) continue; // déjà bon
       const rec = { id: p.id, sku: p.sku, name: p.title || p.name, oldPrice: cur, newPrice: priced.newPrice, newHt: priced.newHt, markup: priced.markup, srcTTC,
-        costSrc: (typeof o.priceSrcTTC === 'number' && o.priceSrcTTC > 0) ? 'traqueur' : 'estimé' };
+        costSrc: srcInfo.origin };
       if (!dryRun) {
         await db.collection('product_overrides').doc(p.id).set({
           price: priced.newPrice, price_ht: priced.newHt,
