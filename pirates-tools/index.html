@@ -44,7 +44,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=474">
+  <link rel="stylesheet" href="styles.css?v=475">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -694,7 +694,6 @@
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
             </label>
           </div>
-          <a class="btn primary acc-hero__liv" id="accLivBtn" href="#/mes-livraisons" title="Mes livraisons">📦 Mes livraisons</a>
           <div class="acc-hero__info">
             <h2 id="accHeroName" class="acc-hero__name">Pirate</h2>
             <p id="accHeroEmail" class="acc-hero__email">—</p>
@@ -706,6 +705,13 @@
               </div>
               <div class="meter__scale"><span>0</span><span>1000 pts</span></div>
             </div>
+          </div>
+          <!-- Actions livraison, TOUT À DROITE : Mode livraison (livreurs
+               acceptés/testeur seulement, masqué sinon) + Mes livraisons
+               (tous les clients), empilés. -->
+          <div class="acc-hero__actions">
+            <a class="btn primary" id="accLivBtn" href="#/mode-livraison" hidden>🛵 Mode livraison</a>
+            <a class="btn" id="accMyDelivBtn" href="#/mes-livraisons">📦 Mes livraisons</a>
           </div>
         </div>
 
@@ -1979,7 +1985,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=474"></script>
+  <script defer src="app.js?v=475"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

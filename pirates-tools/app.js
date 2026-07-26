@@ -4638,14 +4638,13 @@
       .catch(function () { return lvIsTester(); });
     return _lvRolePromise;
   }
-  // Bouton du compte : « Mode livraison » (livreur accepté) / « Mes livraisons » (client).
+  // Boutons du compte (colonne droite) : « Mes livraisons » pour TOUS ;
+  // « Mode livraison » UNIQUEMENT pour les livreurs acceptés (ou testeur).
   function updateAccLivBtn() {
     var btn = document.getElementById('accLivBtn');
     if (!btn) return;
-    lvGetRole().then(function (isC) {
-      btn.textContent = isC ? '🛵 Mode livraison' : '📦 Mes livraisons';
-      btn.setAttribute('href', isC ? '#/mode-livraison' : '#/mes-livraisons');
-    });
+    btn.hidden = !lvIsTester();          // affichage immédiat pour le testeur
+    lvGetRole().then(function (isC) { btn.hidden = !isC; });
   }
 
   // Espace livreur : RÉSERVÉ aux livreurs acceptés — un client est redirigé
