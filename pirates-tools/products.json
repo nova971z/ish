@@ -6416,13 +6416,13 @@
     "id": "makita-drv250zj",
     "slug": "makita-drv250zj-riveteuse-18-v-li-ion-bl-6-4-m",
     "sku": "DRV250ZJ",
-    "title": "Makita DRV250ZJ — Riveteuse 18 V Li-Ion BL Ø 6,4 mm (Produit seul)",
+    "title": "Makita DRV250ZJ — Riveteuse sans fil 18V LXT brushless Ø4,8-6,4 mm en MAKPAC (machine seule)",
     "name": "DRV250ZJ",
     "brand": "Makita",
     "category": "Riveteuses",
     "tag": "Nouveau",
-    "desc": "Riveteuse 18 V Li-Ion BL Ø 6,4 mm (Produit seul).",
-    "img": "images/placeholder.svg",
+    "desc": "Riveteuse (pose-rivets) sans fil 18V LXT, moteur brushless, force de traction 20 kN, rivets Ø4,8 à 6,4 mm alu et acier, double LED, XPT, livrée en coffret MAKPAC — sans batterie ni chargeur.",
+    "img": "images/posters/drv250zj.webp",
     "price": 781.08,
     "currency": "EUR",
     "vat": 0.2,
@@ -6439,14 +6439,30 @@
       "tropical_ready"
     ],
     "features": [
-      "Riveteuse 18 V Li-Ion BL Ø 6,4 mm (Produit seul)",
-      "Gamme Makita 18V LXT sans fil, moteur brushless (sans charbon) haut rendement",
-      "Machine seule (batterie et chargeur non inclus), compatible batteries Makita LXT",
-      "Robuste et endurant, pensé pour un usage professionnel intensif",
-      "Idéal pour les chantiers des Antilles / DOM-TOM"
+      "Riveteuse (pose-rivets aveugles) sans fil 18V LXT — moteur brushless",
+      "Force de traction 20 kN, course 30 mm — rivets Ø4,8 à 6,4 mm (alu et acier)",
+      "Jusqu'à ~3000 rivetages par charge, mécanisme de maintien du rivet",
+      "Double lampe LED + protection XPT (résistance eau et poussière)",
+      "Livrée en coffret MAKPAC — machine seule (batterie et chargeur non inclus)"
     ],
-    "specs": {},
-    "description_long": "Riveteuse 18 V Li-Ion BL Ø 6,4 mm (Produit seul). Outil professionnel Makita de la gamme 18V LXT sans fil (moteur brushless). Vendu en machine seule (sans batterie ni chargeur). Compatible avec les batteries Makita LXT. Fiche technique détaillée à compléter. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "specs": {
+      "Marque": "Makita",
+      "Type": "Riveteuse (pose-rivets) sans fil 18V LXT Brushless — machine nue en MAKPAC",
+      "Tension": "18 V (gamme LXT)",
+      "Moteur": "Brushless (sans charbon)",
+      "Force de traction": "20 kN",
+      "Longueur de course": "30 mm",
+      "Diamètre de rivets": "4,8 à 6,4 mm (aluminium et acier)",
+      "Autonomie": "≈ 3000 rivetages par charge",
+      "Éclairage": "Double lampe LED",
+      "Protection": "XPT (résistance eau et poussière)",
+      "Poids": "2,4 kg",
+      "Dimensions (L×l×h)": "323 × 80 × 287 mm",
+      "Coffret": "MAKPAC empilable",
+      "Batterie / chargeur": "Non inclus"
+    },
+    "description_long": "Riveteuse (pose-rivets aveugles) sans fil Makita 18V LXT (DRV250ZJ), machine seule livrée en coffret MAKPAC. Moteur brushless développant une force de traction de 20 kN pour poser des rivets Ø4,8 à 6,4 mm en aluminium comme en acier, avec une course de 30 mm. Jusqu'à environ 3000 rivetages sur une seule charge, mécanisme de maintien du rivet en place pendant la pose, double lampe LED pour éclairer la zone de travail et protection XPT contre l'eau et la poussière. Vendue sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "coffretIncluded": true
   },
   {
     "id": "makita-dsp601zju",
