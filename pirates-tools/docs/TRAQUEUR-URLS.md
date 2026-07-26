@@ -71,6 +71,17 @@ dépasse, le raccourci échoue (413) ou remonte `parsed: 0`.
 `?order=product.price.asc&resultsPerPage=400` : les deux moitiés se rejoignent
 au milieu et couvrent tout le catalogue.
 
+### 🔒 Deux règles gravées (26/07/2026, après le 1er scan dé-filtré)
+1. **Le coût relevé est enregistré même quand le prix ne bouge pas.** Avant, un
+   produit dont le prix tombait déjà juste (`unchanged`) n'était jamais écrit :
+   il n'avait donc AUCUN coût réel en base, comptait comme « estimé », et ne
+   pouvait pas servir de base au garde-fou coffret ± 20 €.
+2. **Le plafond de variation (25 %) ne s'applique QU'AUX produits déjà suivis.**
+   Au premier relevé réel, l'écart est attendu (le prix venait d'une
+   estimation) : le bloquer figerait définitivement un prix faux. Cas réels
+   débloqués : DJV185Z 340,64 → 254,98 € et DGA452Z 143,29 → 182,74 €.
+   Les bornes absolues MIN/MAX_TTC restent actives dans tous les cas.
+
 ### Notes
 - **`dryRun=0`** = applique les prix (marge 15 % sur le TTC affiché, promo comprise).
   **`dryRun=1`** = simulation, n'écrit rien (utile au 1er test d'une nouvelle marque).
