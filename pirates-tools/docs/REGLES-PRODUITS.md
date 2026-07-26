@@ -114,15 +114,24 @@ description_long  paragraphe + « Livrée dans toute la zone DOM-TOM. Octroi de 
   DHS900ZU confirme 460,78 € + « Module de connexion Bluetooth AWS inclus ».
   Le 450,00 € de la liste des déclinaisons était une autre présentation ;
   prix retenu = 460,78 → 529,90 € affiché. CORRECT, rien à changer.
-- **DJR187Z/DJR187ZK (scie sabre récipro, 26/07)** : même règle min-source
-  (comme DHS660). Paire variant DÉJÀ présente (fantômes) : nu DJR187Z 182,75 €
-  (→ 210,16, déjà correct) vs valise DJR187ZK 300,07 €. Le NU est le MOINS
-  cher → gardé comme fiche unique, MIGRÉ vers le modèle single-fiche (champs
-  variantGroup/variantRole/coffretSku RETIRÉS, `srcAltSkus: ["DJR187ZK"]`),
-  fiche coffret DJR187ZK SUPPRIMÉE, switch coffret standard +25 € (gros, 3,4 kg)
-  gère l'option valise. Poster user (outil nu, fond sombre) → djr187z.webp.
-  Specs remplies (bois 255/acier 130 mm, course 32 mm, 3000 c/min, pendulaire,
-  brushless, 3,4 kg). Catalogue 205→204. Catégorie « Scies ».
+- **DJR187Z/DJR187ZK (scie sabre récipro, 26/07)** : ⚠️ LEÇON — la règle
+  min-source NE s'applique QUE si le coffret est MOINS cher que le nu. ICI le
+  coffret (valise DJR187ZK 300,07 €) est PLUS cher que le nu (DJR187Z 182,75 €)
+  → PAS de fusion. Ce sont 2 variantes d'une PAIRE (modèle variantGroup) :
+  DJR187Z solo (visible catalogue) + DJR187ZK coffret (variantSecondary, caché,
+  accessible via le switch « Avec coffret » du PDP). Le switch échange l'image
+  (applyVariant → pdpHeroImg.src) ET le prix : c'est POURQUOI l'user envoie une
+  photo « avec valise » distincte pour la variante coffret.
+  (J'avais fusionné/supprimé DJR187ZK à tort le 26/07 — RESTAURÉ ensuite.)
+  État final : DJR187Z solo 210,16 € (poster nu djr187z.webp) ; DJR187ZK coffret
+  345,08 € (= 300,07 × 1,15 ; poster valise djr187zk.webp). Specs identiques
+  (bois 255/acier 130 mm, course 32 mm, 3000 c/min, pendulaire, brushless,
+  3,4 kg) sur les 2. Catalogue 205 (ZK caché). Catégorie « Scies ».
+  RÈGLE GÉNÉRALE CLARIFIÉE : produits de la LISTE À COMPLÉTER = paires
+  solo/coffret déjà créées (fantômes). L'user envoie réf + fiche technique +
+  PNG. Le PNG « nu » va sur la variante solo, le PNG « avec valise/coffret » va
+  sur la variante coffret (variantSecondary). On COMPLÈTE, on ne recrée pas, on
+  ne fusionne QUE si coffret < nu.
 - **DHS660Z/DHS660ZJ (25/07 tard)** : même règle générale appliquée — le NU est
   en RUPTURE SANS PRIX chez cotébrico, seule la déclinaison MAKPAC (ZJ) est
   cotée 253,90 € → fiche ZJ FUSIONNÉE/supprimée, `srcAltSkus: ["DHS660ZJ"]`

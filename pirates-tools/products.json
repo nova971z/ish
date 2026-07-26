@@ -5696,9 +5696,70 @@
       "Batterie / chargeur": "Non inclus"
     },
     "description_long": "Scie sabre (récipro) sans fil Makita 18V LXT, machine seule. Dotée du nouveau système d’entraînement Makita et d’un moteur brushless, elle coupe le bois jusqu’à 255 mm et l’acier jusqu’à 130 mm. Vitesse variable (3000 courses/min), course de 32 mm et mouvement pendulaire pour un débit rapide ; protection électronique contre les surcharges, démarrage progressif et système anti-poussières. Vendue en machine seule (batterie et chargeur non inclus), livrée avec 2 lames (bois et métal), compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
-    "srcAltSkus": [
-      "DJR187ZK"
-    ]
+    "variantGroup": "DJR187",
+    "variantRole": "solo",
+    "coffretSku": "DJR187ZK"
+  },
+  {
+    "id": "makita-djr187zk",
+    "slug": "makita-djr187zk-scie-sabre-18v-lxt-machine-seu",
+    "sku": "DJR187ZK",
+    "title": "Makita DJR187ZK — Scie sabre 18V LXT brushless (machine seule) en valise synthétique",
+    "name": "DJR187ZK",
+    "brand": "Makita",
+    "category": "Scies",
+    "tag": "Nouveau",
+    "desc": "Scie sabre 18V LXT brushless, machine seule livrée en valise synthétique avec 2 lames.",
+    "img": "images/posters/djr187zk.webp",
+    "price": 345.08,
+    "currency": "EUR",
+    "vat": 0.2,
+    "price_ht": 287.57,
+    "stock_status": "in_stock",
+    "stock_label": "En stock",
+    "model": "",
+    "paymentLink": "",
+    "weight_kg": 3.4,
+    "ncCategory": "power_tool",
+    "productType": "pro",
+    "tags": [
+      "brushless",
+      "tropical_ready"
+    ],
+    "features": [
+      "Scie sabre sans fil 18V LXT en valise synthétique — capacité bois 255 mm, acier 130 mm",
+      "Moteur brushless (sans charbon) + protection électronique contre les surcharges",
+      "Vitesse variable (jusqu’à 3000 courses/min), course 32 mm, mouvement pendulaire",
+      "Livrée en valise synthétique de transport, avec 2 lames (bois + métal)",
+      "Machine seule (batterie et chargeur non inclus), compatible batteries Makita LXT"
+    ],
+    "specs": {
+      "Marque": "Makita",
+      "Type": "Scie sabre (récipro) sans fil 18V LXT Brushless — machine nue",
+      "Tension": "18 V (gamme LXT)",
+      "Moteur": "Brushless (sans charbon)",
+      "Cadence de coupe": "3000 courses/min (vitesse variable)",
+      "Longueur de course": "32 mm",
+      "Mouvement pendulaire": "Oui",
+      "Capacité de coupe (bois)": "255 mm",
+      "Capacité de coupe (acier)": "130 mm",
+      "Capacité de coupe (tube acier)": "130 mm",
+      "Coupe en biais": "45°",
+      "Technologie moteur": "Vitesse variable + protection électronique contre les surcharges",
+      "Technologie de confort": "Système anti-poussières, démarrage progressif",
+      "Pression sonore (LpA)": "84 dB(A)",
+      "Puissance sonore (LwA)": "95 dB(A) (incertitude 3 dB)",
+      "Vibrations": "16,5 m/s² (K = 1,5)",
+      "Poids net EPTA": "3,4 kg",
+      "Dimensions (L×l×h)": "439 × 83 × 231 mm",
+      "Livré avec": "2 lames (bois + métal)",
+      "Batterie / chargeur": "Non inclus"
+    },
+    "description_long": "Scie sabre (récipro) sans fil Makita 18V LXT, machine seule, livrée en valise synthétique de transport avec 2 lames (bois et métal). Moteur brushless, coupe bois jusqu’à 255 mm et acier jusqu’à 130 mm, vitesse variable (3000 courses/min), course de 32 mm et mouvement pendulaire ; protection électronique contre les surcharges, démarrage progressif et système anti-poussières. Vendue sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "variantGroup": "DJR187",
+    "variantRole": "coffret",
+    "soloSku": "DJR187Z",
+    "variantSecondary": true
   },
   {
     "id": "makita-djr188z",
