@@ -34,6 +34,14 @@ Aucun hasard, aucun bullshit. Chaque correction est vérifiée dans le code avan
 LIRE CE FICHIER avant d'ajouter/modifier un produit ou un poster. Cœur des règles imposées par l'user (23/07/2026) :
 - **PRIX** : `price` (TTC affiché) = **prix TTC source × 1,15** (marge 15 % SUR le TTC) ; `price_ht` = price / 1,20.
 - **PROMOS — RÈGLE MISE À JOUR (24/07, décision user)** : le **traqueur de prix** (auto, 2×/jour) PREND le **prix affiché, promo comprise** → on reste compétitif, et ça se réajuste tout seul quand la promo finit (la marge 15 % reste calée sur le coût RÉEL du jour, car si cotébrico solde, l'user achète soldé aussi). L'ancienne « promos interdites » valait pour la saisie MANUELLE d'un prix figé ; dès qu'un produit est couvert par le traqueur, la promo est OK. ⛔ Un « prix conseillé »/MSRP gonflé ≠ prix source → toujours le vrai prix cotébrico. Prix crédible DOM-TOM.
+- **PLUS AUCUN PRIX SAISI À LA MAIN (décision user 26/07/2026)** : tout passe par
+  le calculateur (admin → Recalculer). Coût d'achat résolu dans cet ordre par
+  `pwSourceCost` (api/admin.js) : **traqueur** (scan réel) > **fiche**
+  (`priceSrcTTC` dans products.json, prix cotébrico relevé à la main) >
+  **variante** (garde-fou coffret : coffret = nue **+20 €**, nue = coffret
+  **−20 €**, `COFFRET_COST_DELTA`) > **estimé** (dérivé de price_ht, dernier
+  recours). L'origine s'affiche dans l'aperçu admin — un « coût estimé » = prix
+  bâti sur une supposition, à remplacer par un vrai relevé.
 - **POSTERS** : fond sombre obligatoire (jamais blanc — signaler AVANT si fond clair). PNG envoyé = à POSER sur le site (pas à regarder). « Machine seule/outil nu » = pas de batteries sur l'image.
 - **WORKFLOW** : travailler DIRECTEMENT sur `master` (commit + push immédiat → Vercel live). CI verte à chaque fois. Identifier le produit par le TITRE de la capture pirates-tools.com.
 - Journal des produits validés + prix en attente : voir le fichier REGLES-PRODUITS.md §7.
