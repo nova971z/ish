@@ -787,7 +787,10 @@ function pwBuildVariantCosts(products, ov) {
     var p = products[i];
     if (!p.variantGroup || (p.variantRole !== 'solo' && p.variantRole !== 'coffret')) continue;
     var o = (ov && ov[p.id]) || {};
-    var real = (typeof o.priceSrcTTC === 'number' && o.priceSrcTTC > 0) ? o.priceSrcTTC
+    // Même exigence que pwSourceCost : seul un coût RELEVÉ (traqueur) ou saisi
+    // en fiche sert de base à la dérivation ± 20 € — jamais une estimation.
+    var real = (o.priceSource === 'cotebrico' && typeof o.priceSrcTTC === 'number' && o.priceSrcTTC > 0)
+      ? o.priceSrcTTC
       : ((typeof p.priceSrcTTC === 'number' && p.priceSrcTTC > 0) ? p.priceSrcTTC : null);
     if (!(real > 0)) continue;
     if (!byGroup[p.variantGroup]) byGroup[p.variantGroup] = {};
@@ -805,7 +808,11 @@ function pwBuildVariantCosts(products, ov) {
 //     l'ancien coût ×1,15). À remplacer par un vrai prix dès que possible.
 // Retourne { srcTTC, origin } — origin est affiché dans l'aperçu admin.
 function pwSourceCost(p, o, cfg, byGroup) {
-  if (o && typeof o.priceSrcTTC === 'number' && o.priceSrcTTC > 0) {
+  // ⚠️ Un coût n'est « relevé » que s'il porte priceSource='cotebrico', la
+  // marque du traqueur. Sans ce contrôle, un coût ESTIMÉ écrit par un ancien
+  // « Appliquer » se faisait passer pour un relevé réel : la supposition
+  // devenait définitive et neutralisait le garde-fou coffret.
+  if (o && o.priceSource === 'cotebrico' && typeof o.priceSrcTTC === 'number' && o.priceSrcTTC > 0) {
     return { srcTTC: o.priceSrcTTC, origin: 'traqueur' };
   }
   if (p && typeof p.priceSrcTTC === 'number' && p.priceSrcTTC > 0) {
@@ -885,12 +892,16 @@ async function handleRepriceAll(req, res, admin, db) {
       const rec = { id: p.id, sku: p.sku, name: p.title || p.name, oldPrice: cur, newPrice: priced.newPrice, newHt: priced.newHt, markup: priced.markup, srcTTC,
         costSrc: srcInfo.origin };
       if (!dryRun) {
+        // ⚠️ N'ÉCRIT PLUS priceSrcTTC. Le coût d'achat n'appartient qu'à ses
+        // sources RÉELLES : le traqueur (scan cotébrico) ou la fiche produit.
+        // L'écrire ici « blanchissait » une estimation en coût réel, la figeait
+        // définitivement et empêchait toute correction ultérieure (garde-fou
+        // coffret, nouveau relevé). Le coût est désormais re-résolu à chaque
+        // passage ; on ne mémorise que son ORIGINE, pour la transparence.
         await db.collection('product_overrides').doc(p.id).set({
           price: priced.newPrice, price_ht: priced.newHt,
-          // Mémorise le coût source utilisé → un recalcul ultérieur repart du VRAI
-          // coût (et non d'une dérivation ×1,15 qui deviendrait fausse).
-          priceSrcTTC: srcTTC,
-          priceMarkup: priced.markup, priceMode: priced.mode, priceRecomputedAt: now
+          priceMarkup: priced.markup, priceMode: priced.mode,
+          priceCostOrigin: srcInfo.origin, priceRecomputedAt: now
         }, { merge: true });
       }
       changed.push(rec);

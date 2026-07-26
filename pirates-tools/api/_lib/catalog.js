@@ -92,7 +92,7 @@ async function loadCatalog() {
 // marge exacte de chaque produit.
 var PRIVATE_FIELDS = [
   'priceSource', 'priceSrcTTC', 'priceCheckedAt',
-  'priceMarkup', 'priceMode', 'priceRecomputedAt',
+  'priceMarkup', 'priceMode', 'priceRecomputedAt', 'priceCostOrigin',
   'hidden'
 ];
 
