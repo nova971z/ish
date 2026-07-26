@@ -44,7 +44,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=467">
+  <link rel="stylesheet" href="styles.css?v=468">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -467,6 +467,31 @@
             <summary>En savoir plus</summary>
             <p id="pdpDescLong"></p>
           </details>
+        </div>
+      </div>
+
+      <!-- SECTION : Livraison chantier (produits QUINCAILLERIE uniquement —
+           remplace le split 3D/specs ; rempli par initPdpDelivery()). -->
+      <div class="pdp-section" id="pdpDelivery" hidden>
+        <div class="pdp-section__inner">
+          <h2 class="pdp-section__heading">🛵 Livraison sur ton chantier</h2>
+          <p class="lv-hint" style="margin:.2rem 0 .8rem">Commande ta quincaillerie, un livreur te l'apporte directement — <span id="pdpDelivBanner">🟢 service disponible à partir du <strong>1er janvier</strong>, tu peux déjà tout tester</span>.</p>
+          <div id="pdpDeliveryMap" class="pdp-deliv-map" aria-label="Carte de livraison"></div>
+          <div class="pdp-deliv-form">
+            <label class="lv-field"><span>📍 Adresse du chantier *</span><input type="text" id="pdpDelivAddr" maxlength="200" placeholder="Rue, quartier, commune…"></label>
+            <div class="lv-grid2">
+              <label class="lv-field"><span>📅 Date de livraison</span><input type="date" id="pdpDelivDate"></label>
+              <div class="lv-field"><span>🕐 Quand dans la journée ? *</span>
+                <div class="pj-radios pdp-deliv-when">
+                  <label><input type="radio" name="pdpDelivWhen" value="matin" checked> Matin</label>
+                  <label><input type="radio" name="pdpDelivWhen" value="apresmidi"> Après-midi</label>
+                  <label><input type="radio" name="pdpDelivWhen" value="heure"> Heure précise</label>
+                </div>
+              </div>
+            </div>
+            <label class="lv-field" id="pdpDelivHourWrap" hidden><span>Heure souhaitée</span><input type="time" id="pdpDelivHour"></label>
+            <p class="lv-hint" id="pdpDelivZoneTxt"></p>
+          </div>
         </div>
       </div>
 
@@ -1876,7 +1901,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=467"></script>
+  <script defer src="app.js?v=468"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

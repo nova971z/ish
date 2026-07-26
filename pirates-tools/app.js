@@ -1702,7 +1702,10 @@
     $$('.brand-card', dom.brandGrid).forEach(function (btn) {
       btn.addEventListener('click', function () {
         var brand = btn.dataset.brand;
-        if (brand === '__livraison') { location.hash = '#/livraison'; return; }
+        // Bulle Quincaillerie : même mécanique que les marques — catalogue avec
+        // la recherche pré-remplie « Quincaillerie » (les 304 fiches QC- matchent
+        // par brand/catégorie). La page #/livraison reste accessible via le menu.
+        if (brand === '__livraison') brand = 'Quincaillerie';
         location.hash = '#/catalogue';
         // Slight delay so route change renders catalogue first
         setTimeout(function () {
@@ -2213,6 +2216,18 @@
     } else {
       if (kitSection) kitSection.style.display = 'none';
       if (kitEl) kitEl.innerHTML = '';
+    }
+
+    // ── Fiches QUINCAILLERIE : le split 3D/specs est REMPLACÉ par le bloc
+    // « Livraison sur ton chantier » (carte de l'île + adresse + créneau). Le
+    // reste de la fiche (prix, achat, WhatsApp…) est inchangé.
+    var isQuinc = (product.brand === 'Quincaillerie');
+    var splitSection = document.querySelector('.pdp-section--split');
+    var delivSection = document.getElementById('pdpDelivery');
+    if (splitSection) splitSection.hidden = isQuinc;
+    if (delivSection) {
+      delivSection.hidden = !isQuinc;
+      if (isQuinc) initPdpDelivery(product);
     }
 
     // Scroll animation for landing sections — APRÈS l'injection de features/specs/kit
@@ -4047,6 +4062,82 @@
       + '<div class="lv-law__plain"><span class="lv-law__tag">En clair</span> ' + law.plain + '</div>'
       + (law.link ? '<a class="lv-law__link" href="' + escapeHTML(law.link) + '" target="_blank" rel="noopener noreferrer">Lire le texte officiel ↗</a>' : '')
       + '</div>';
+  }
+
+  // ── Google Maps (livraison chantier) — chargé À LA DEMANDE, par ÎLE ────────
+  // ⚠️ Clé API à créer dans Google Cloud Console au lancement (restriction par
+  // referrer pirates-tools.com). Vide = la carte affiche un aperçu doré de
+  // l'île (contours GeoJSON) en attendant — tout le reste du bloc fonctionne.
+  // INTELLIGENT : centre automatiquement la carte sur l'île du visiteur
+  // (_currentTerritory : choisie à l'inscription/topbar, persistée localement
+  // → quelqu'un qui ouvre depuis la Martinique voit la carte de la Martinique).
+  var PT_GMAPS_KEY = '';
+  var ISLAND_MAP = {
+    '971': { lat: 16.22,  lng: -61.53, zoom: 10, name: 'Guadeloupe' },
+    '972': { lat: 14.64,  lng: -61.02, zoom: 11, name: 'Martinique' },
+    '973': { lat: 4.94,   lng: -52.33, zoom: 9,  name: 'Guyane' },
+    '974': { lat: -21.13, lng: 55.53,  zoom: 10, name: 'La Réunion' },
+    '976': { lat: -12.82, lng: 45.15,  zoom: 12, name: 'Mayotte' }
+  };
+  var _gmapsPromise = null;
+  function ensureGoogleMaps() {
+    if (!PT_GMAPS_KEY) return Promise.reject(new Error('gmaps-key-missing'));
+    if (window.google && window.google.maps) return Promise.resolve();
+    if (_gmapsPromise) return _gmapsPromise;
+    _gmapsPromise = new Promise(function (resolve, reject) {
+      var s = document.createElement('script');
+      s.src = 'https://maps.googleapis.com/maps/api/js?key=' + encodeURIComponent(PT_GMAPS_KEY) + '&loading=async';
+      s.async = true;
+      s.onload = function () { resolve(); };
+      s.onerror = function () { _gmapsPromise = null; reject(new Error('gmaps-load-failed')); };
+      document.head.appendChild(s);
+    });
+    return _gmapsPromise;
+  }
+
+  // Bloc livraison des fiches QUINCAILLERIE : carte de l'île du client +
+  // adresse + date + créneau (matin / après-midi / heure précise).
+  function initPdpDelivery(product) {
+    var box = document.getElementById('pdpDelivery');
+    if (!box) return;
+    var isle = ISLAND_MAP[_currentTerritory] || ISLAND_MAP['971'];
+    var zoneTxt = document.getElementById('pdpDelivZoneTxt');
+    if (zoneTxt) zoneTxt.innerHTML = '💶 Frais de livraison payés <strong>intégralement au livreur</strong>, selon la zone ('
+      + LV_BAREME.map(function (b) { return b.emoji + ' ' + b.prix + ' €'; }).join(' · ')
+      + ' — distance depuis Sainte-Anne). L\'itinéraire proposé au livreur est indicatif : il reste libre de sa route.';
+    // Créneau : l'input heure ne s'affiche qu'en mode « heure précise ».
+    var hourWrap = document.getElementById('pdpDelivHourWrap');
+    var radios = box.querySelectorAll('input[name="pdpDelivWhen"]');
+    for (var i = 0; i < radios.length; i++) {
+      radios[i].onchange = function () {
+        var mode = (box.querySelector('input[name="pdpDelivWhen"]:checked') || {}).value;
+        if (hourWrap) hourWrap.hidden = (mode !== 'heure');
+      };
+    }
+    // Carte : Google Maps si clé configurée, sinon aperçu doré de l'île (GeoJSON).
+    var mapEl = document.getElementById('pdpDeliveryMap');
+    if (!mapEl || mapEl.dataset.ready === _currentTerritory) return;
+    mapEl.dataset.ready = _currentTerritory;
+    ensureGoogleMaps().then(function () {
+      var m = new google.maps.Map(mapEl, {
+        center: { lat: isle.lat, lng: isle.lng }, zoom: isle.zoom,
+        mapTypeControl: false, streetViewControl: false, fullscreenControl: false
+      });
+      mapEl._ptMap = m;
+    }).catch(function () {
+      // Pas de clé (avant lancement) : aperçu doré = contour GeoJSON de l'île.
+      mapEl.innerHTML = '';
+      var src = document.querySelector('#regIslands .isl[data-isl="' + (ISLAND_MAP[_currentTerritory] ? _currentTerritory : '971') + '"] svg');
+      if (src) {
+        var cl = src.cloneNode(true);
+        mapEl.appendChild(cl);
+        try { var bb = cl.getBBox(); cl.setAttribute('viewBox', (bb.x - 3) + ' ' + (bb.y - 3) + ' ' + (bb.width + 6) + ' ' + (bb.height + 6)); } catch (_) {}
+      }
+      var note = document.createElement('p');
+      note.className = 'pdp-deliv-map__note';
+      note.innerHTML = '🗺️ Carte <strong>' + isle.name + '</strong> — le plan interactif Google Maps s\'active au lancement du service.';
+      mapEl.appendChild(note);
+    });
   }
 
   // Page vitrine « Livraison quincaillerie » : barème rendu depuis LV_BAREME

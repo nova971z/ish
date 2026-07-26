@@ -7926,3 +7926,16 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .liv-steps { margin: 0; padding-left: 1.3rem; display: grid; gap: .6rem; line-height: 1.55; }
 .brand-card__bubble--liv { display: grid; place-items: center; font-size: 2.3rem;
   background: radial-gradient(circle at 35% 30%, rgba(52,211,153,.35), rgba(16,25,20,.9)); }
+/* Fiche quincaillerie : bloc livraison chantier */
+.pdp-deliv-map { position: relative; width: 100%; height: 300px; border-radius: 16px; overflow: hidden;
+  background: #0a0f14; border: 1px solid rgba(242,193,78,.25); display: grid; place-items: center; margin-bottom: 1rem; }
+.pdp-deliv-map svg { width: 70%; height: 70%; overflow: visible; }
+.pdp-deliv-map svg path { fill: none; stroke: #f2c14e; stroke-width: 1.1; vector-effect: non-scaling-stroke;
+  stroke-linejoin: round; filter: drop-shadow(0 0 2px rgba(242,193,78,.75)); }
+.pdp-deliv-map__note { position: absolute; bottom: .6rem; left: 50%; transform: translateX(-50%); margin: 0;
+  padding: .35rem .8rem; background: rgba(10,15,20,.85); border: 1px solid rgba(242,193,78,.3); border-radius: 999px;
+  font-size: .8rem; white-space: nowrap; max-width: 94%; overflow: hidden; text-overflow: ellipsis; }
+.pdp-deliv-form { display: grid; gap: .7rem; }
+.pdp-deliv-form input[type=text], .pdp-deliv-form input[type=date], .pdp-deliv-form input[type=time] {
+  padding: .6rem .8rem; border-radius: 10px; border: 1px solid rgba(255,255,255,.15); background: rgba(0,0,0,.25); color: #fff; font: inherit; width: 100%; box-sizing: border-box; }
+.pdp-deliv-when { display: flex; gap: .9rem; flex-wrap: wrap; padding-top: .4rem; }
