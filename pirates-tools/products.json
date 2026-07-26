@@ -5928,6 +5928,7 @@
     "weight_kg": 4.0,
     "ncCategory": "power_tool",
     "productType": "pro",
+    "coffretIncluded": true,
     "tags": [
       "brushless",
       "tropical_ready"

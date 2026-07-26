@@ -26,6 +26,10 @@ module.exports = function () {
   ok(pricing.coffretEligible({ ncCategory: 'power_tool', category: 'Lamelleuses' }) === true, 'lamelleuse éligible (fix \\b anti « lame »)');
   ok(pricing.coffretEligible({ ncCategory: 'accessory', category: 'Lames et forets' }) === false, 'lames/forets exclus');
   ok(pricing.coffretEligible({ ncCategory: 'power_tool', category: 'Rangements' }) === false, 'rangements exclus');
+  // coffretIncluded : produit déjà vendu en coffret (DJR360ZK) → PAS de switch,
+  // et surcoût forcé côté serveur = 0 (anti-abus).
+  ok(pricing.coffretEligible({ ncCategory: 'power_tool', category: 'Scies', coffretIncluded: true }) === false, 'coffretIncluded → non éligible (switch masqué)');
+  ok(pricing.coffretSurchargeCents({ ncCategory: 'power_tool', category: 'Scies', coffretIncluded: true, weight_kg: 4 }) === 0, 'coffretIncluded → surcoût 0 même forcé');
 
   // Parité avec le miroir client (app.js) — regex BYTE-IDENTIQUE, plus un préfixe.
   var app = fs.readFileSync(path.join(__dirname, '..', 'app.js'), 'utf8');

@@ -5636,7 +5636,7 @@
   var COFFRET_SURCH = { petit: 15, gros: 25, heavyKg: 3 };
   // Packs/combos INCLUS (décision user 25/07) ; \b anti « lame »→« Lamelleuses ».
   var COFFRET_DENY = /\b(batteries?|chargeurs?|accessoires?|rangements?|lames?|forets?|consommables?|coffrets?|mallettes?)\b/i;
-  function coffretEligible(p) { return !!(p && p.ncCategory === 'power_tool' && !COFFRET_DENY.test(p.category || '')); }
+  function coffretEligible(p) { return !!(p && p.ncCategory === 'power_tool' && !p.coffretIncluded && !COFFRET_DENY.test(p.category || '')); }
   function coffretSurchargeCents(p) {
     if (!coffretEligible(p)) return 0;
     var w = Number(p && p.weight_kg) || 0;

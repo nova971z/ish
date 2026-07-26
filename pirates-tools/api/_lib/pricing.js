@@ -101,7 +101,11 @@ var COFFRET = { petit: 15, gros: 25, heavyKg: 3 };
 // matchait « Lamelleuses » et privait ces machines du switch (bug corrigé).
 var COFFRET_DENY = /\b(batteries?|chargeurs?|accessoires?|rangements?|lames?|forets?|consommables?|coffrets?|mallettes?)\b/i;
 function coffretEligible(product) {
-  return !!(product && product.ncCategory === 'power_tool' && !COFFRET_DENY.test(product.category || ''));
+  // coffretIncluded : produit DÉJÀ vendu en coffret/valise (ex. DJR360ZK) →
+  // pas de switch « Sans/Avec coffret » (ni de surcoût forçable côté serveur).
+  return !!(product && product.ncCategory === 'power_tool'
+    && !product.coffretIncluded
+    && !COFFRET_DENY.test(product.category || ''));
 }
 function coffretSurchargeCents(product) {
   if (!coffretEligible(product)) return 0;
