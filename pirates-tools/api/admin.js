@@ -367,6 +367,7 @@ module.exports = async function handler(req, res) {
         const ov = {};
         ovSnap.forEach((doc) => { ov[doc.id] = doc.data() || {}; });
         const catProducts = await catalog.loadCatalog();
+        const variantCostsM = pwBuildVariantCosts(catProducts, ov);
         const rows = [];
         catProducts.forEach((p) => {
           const priceHt = Number(p.price_ht) || 0;
@@ -374,7 +375,7 @@ module.exports = async function handler(req, res) {
           const o = ov[p.id] || {};
           // Même source de vérité que le recalcul de prix (pwSourceCost) :
           // traqueur > prix réel saisi en fiche > estimation dérivée.
-          const ci = pwSourceCost(p, o, cfg);
+          const ci = pwSourceCost(p, o, cfg, variantCostsM);
           const tracked = ci.origin && ci.origin !== 'estimé';
           const costTTC = (ci.srcTTC > 0) ? ci.srcTTC : (priceHt / PW.MARGIN) * (1 + tvaFR);
           const r = priceModel.marginAt(p, { priceHt: priceHt, costTTC: costTTC, mode: cfg.mode }, cfg);
@@ -770,19 +771,56 @@ function pwRound2(n) { return Math.round(n * 100) / 100; }
 
 // Prix à partir du coût source TTC (src) : MODÈLE de marge cible si cfg.autoPrice,
 // sinon repli historique ×1,15. Retourne { newPrice (TTC métropole), newHt, markup, mode }.
+// GARDE-FOU COFFRET (décision user 26/07/2026) : chez le fournisseur, la même
+// machine en coffret MAKPAC/TSTAK coûte ~20 € TTC de plus que la version nue.
+// Quand le traqueur ne connaît qu'UNE des deux variantes, on dérive l'autre
+// avec cet écart au lieu de partir d'une estimation en l'air — c'est ce qui
+// évitait au calculateur de « se perdre » (ex. DJV185ZJ était estimé à
+// 240,79 € alors que la version nue coûte 149,90 € → coût réel ~169,90 €).
+var COFFRET_COST_DELTA = 20;
+
+// Index des coûts RÉELS connus (traqueur ou fiche), par groupe de variante.
+// { [variantGroup]: { solo: srcTTC, coffret: srcTTC } }
+function pwBuildVariantCosts(products, ov) {
+  var byGroup = {};
+  for (var i = 0; i < products.length; i++) {
+    var p = products[i];
+    if (!p.variantGroup || (p.variantRole !== 'solo' && p.variantRole !== 'coffret')) continue;
+    var o = (ov && ov[p.id]) || {};
+    var real = (typeof o.priceSrcTTC === 'number' && o.priceSrcTTC > 0) ? o.priceSrcTTC
+      : ((typeof p.priceSrcTTC === 'number' && p.priceSrcTTC > 0) ? p.priceSrcTTC : null);
+    if (!(real > 0)) continue;
+    if (!byGroup[p.variantGroup]) byGroup[p.variantGroup] = {};
+    byGroup[p.variantGroup][p.variantRole] = real;
+  }
+  return byGroup;
+}
+
 // Coût d'achat source (TTC métropole) d'un produit, par ordre de fiabilité :
 //  1. override.priceSrcTTC  → relevé RÉEL du traqueur (scan cotébrico) ;
 //  2. produit.priceSrcTTC   → prix fournisseur RÉEL saisi dans products.json
 //     (produits que le traqueur ne voit pas : variantes « machine seule »…) ;
-//  3. dérivé de price_ht    → ESTIMATION (le prix catalogue est supposé être
+//  3. variante jumelle      → coût RÉEL de l'autre variante ± 20 € (coffret) ;
+//  4. dérivé de price_ht    → ESTIMATION (le prix catalogue est supposé être
 //     l'ancien coût ×1,15). À remplacer par un vrai prix dès que possible.
 // Retourne { srcTTC, origin } — origin est affiché dans l'aperçu admin.
-function pwSourceCost(p, o, cfg) {
+function pwSourceCost(p, o, cfg, byGroup) {
   if (o && typeof o.priceSrcTTC === 'number' && o.priceSrcTTC > 0) {
     return { srcTTC: o.priceSrcTTC, origin: 'traqueur' };
   }
   if (p && typeof p.priceSrcTTC === 'number' && p.priceSrcTTC > 0) {
     return { srcTTC: p.priceSrcTTC, origin: 'fiche' };
+  }
+  // Garde-fou coffret : dériver de la variante jumelle au coût RÉEL connu.
+  if (byGroup && p && p.variantGroup && byGroup[p.variantGroup]) {
+    var g = byGroup[p.variantGroup];
+    if (p.variantRole === 'coffret' && g.solo > 0) {
+      return { srcTTC: pwRound2(g.solo + COFFRET_COST_DELTA), origin: 'variante' };
+    }
+    if (p.variantRole === 'solo' && g.coffret > 0) {
+      // Jamais en dessous de zéro (garde-fou sur les très petits prix).
+      return { srcTTC: pwRound2(Math.max(0.01, g.coffret - COFFRET_COST_DELTA)), origin: 'variante' };
+    }
   }
   if (p && typeof p.price_ht === 'number' && p.price_ht > 0) {
     return { srcTTC: pwRound2((p.price_ht / PW.MARGIN) * (1 + ((cfg && cfg.tvaFR) || 0.20))), origin: 'estimé' };
@@ -821,13 +859,16 @@ async function handleRepriceAll(req, res, admin, db) {
     ovSnap.forEach((d) => { ov[d.id] = d.data() || {}; });
 
     const products = await catalog.loadCatalog();
+    // Garde-fou coffret : coûts RÉELS connus par groupe de variante, pour
+    // dériver la variante manquante (± 20 €) au lieu de l'estimer.
+    const variantCosts = pwBuildVariantCosts(products, ov);
     const now = admin.firestore.FieldValue.serverTimestamp();
     const changed = [], skipped = [];
 
     for (const p of products) {
       const o = ov[p.id] || {};
-      // Coût source TTC : traqueur > prix réel saisi en fiche > estimation.
-      const srcInfo = pwSourceCost(p, o, cfg);
+      // Coût source TTC : traqueur > fiche > variante jumelle ±20 € > estimation.
+      const srcInfo = pwSourceCost(p, o, cfg, variantCosts);
       const srcTTC = srcInfo.srcTTC;
       if (!(srcTTC > 0)) { skipped.push({ id: p.id, sku: p.sku, reason: 'coût source inconnu' }); continue; }
       if (srcTTC < PW.MIN_TTC || srcTTC > PW.MAX_TTC) { skipped.push({ id: p.id, sku: p.sku, reason: 'hors fourchette' }); continue; }
