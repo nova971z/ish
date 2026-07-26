@@ -3937,7 +3937,13 @@
     var box = document.getElementById('lvForm');
     if (!box) return;
     var noteClass = { warn: 'lv-note--warn', ok: 'lv-note--ok', strong: 'lv-note--strong' };
-    var state = { veh: null, dossier: false, files: {} };
+    var state = { veh: null, dossier: false, files: {}, cylindree: '', remun: false,
+                  contact: { name: '', email: '', phone: '' }, consent: false, submitted: false };
+    // Pré-remplissage depuis le compte connecté (email au minimum).
+    try { if (typeof _currentUser !== 'undefined' && _currentUser) {
+      state.contact.email = _currentUser.email || '';
+      state.contact.name = _currentUser.displayName || '';
+    } } catch (_) {}
     function piecesFor(veh) { return LV_PIECES_BASE.concat(LV_PIECES_EXTRA[veh] || []); }
 
     // SHELL STABLE : le champ date est rendu UNE fois et n'est JAMAIS recréé
@@ -3945,7 +3951,7 @@
     // ouvert le fermait avant validation (bug signalé). Seuls #lvAgeMsg et
     // #lvDynamic changent -> le picker natif reste stable jusqu'au « Valider ».
     box.innerHTML =
-      '<div class="lv-banner">🚧 <strong>Programme en préparation.</strong> Tu peux déjà tout découvrir et préparer tes démarches. Les inscriptions ouvriront bientôt — reviens régulièrement.</div>'
+      '<div class="lv-banner lv-banner--green">🟢 <strong>Ce service ouvre le 1er janvier.</strong> Tu peux déjà tout préparer et <strong>tester le formulaire</strong> (choisir tes fichiers, remplir ton dossier). Pour l\'instant, <strong>rien n\'est enregistré</strong> — c\'est juste pour découvrir.</div>'
       + '<div class="lv-card"><label class="lv-field"><span>Ta date de naissance *</span>'
       + '<input type="date" id="lvBirth" autocomplete="bday"></label>'
       + '<p class="lv-hint" id="lvAgeMsg" style="margin-top:.6rem">Renseigne ta date de naissance pour continuer.</p></div>'
@@ -3987,6 +3993,10 @@
 
       if (state.veh && LV_VEHICLES[state.veh]) {
         var v = LV_VEHICLES[state.veh];
+        // Bouton rémunération (barème par distance) — plein largeur, vert néon.
+        // La carte interactive + la grille de prix arrivent (prochain message user).
+        h.push('<button type="button" class="lv-remun" id="lvRemun">💶 Combien je vais gagner&nbsp;? — Voir le barème par distance</button>');
+        if (state.remun) h.push('<div class="lv-card lv-remun-panel">🚧 Le <strong>barème de rémunération selon la distance</strong> arrive très bientôt : une <strong>carte interactive de ta zone</strong> où tu verras combien te rapporte chaque livraison. On y travaille.</div>');
         // Coût + délai des démarches, JUSTE EN DESSOUS des cartes (position validée
         // par l'user), maj au changement de véhicule.
         var c = LV_COSTS[state.veh];
@@ -4009,6 +4019,19 @@
         }
         h.push('<div class="lv-card"><h2 class="lv-h2">Ton cahier des charges — ' + v.emoji + ' ' + v.label + '</h2>');
         if (v.note) h.push('<div class="lv-note ' + (noteClass[v.note.type] || '') + '">' + v.note.txt + '</div>');
+        // Cylindrée (moto/scooter) : détermine le permis requis + servira au barème.
+        if (state.veh === 'scooter') {
+          h.push('<label class="lv-field lv-cyl"><span>🏍️ Cylindrée de ton véhicule *</span><select id="lvCyl">'
+            + '<option value="">— Choisis —</option>'
+            + '<option' + (state.cylindree === '50' ? ' selected' : '') + ' value="50">50 cm³ (cyclomoteur)</option>'
+            + '<option' + (state.cylindree === '125' ? ' selected' : '') + ' value="125">125 cm³</option>'
+            + '<option' + (state.cylindree === '125+' ? ' selected' : '') + ' value="125+">Plus de 125 cm³</option>'
+            + '</select></label>');
+          if (state.cylindree) {
+            var permisMap = { '50': 'Permis AM (dès 14 ans)', '125': 'Permis A1 (dès 16 ans), ou permis B + formation de 7 h', '125+': 'Permis A2 (dès 18 ans), puis A' };
+            h.push('<p class="lv-hint">Permis requis : <strong>' + permisMap[state.cylindree] + '</strong>.</p>');
+          }
+        }
         h.push('<h3 class="lv-h3">Le socle commun (obligatoire pour tous)</h3><ul class="lv-docs">');
         LV_BASE.forEach(function (d) { h.push(lvDocItem(d)); });
         h.push('</ul>');
@@ -4050,9 +4073,20 @@
           });
           h.push('</ul>');
           var allReady = ready === pieces.length;
-          h.push('<div class="lv-cta" style="margin-top:1rem">'
-            + '<button type="button" class="btn primary" id="lvSubmitDossier"' + (COURIER_ENABLED && allReady ? '' : ' disabled') + '>Envoyer mon dossier</button>'
-            + '<span class="lv-cta__note">' + (COURIER_ENABLED ? (allReady ? 'On vérifie tes pièces sous 48 h.' : 'Dépose toutes les pièces pour pouvoir envoyer.') : '🚧 L\'envoi ouvrira au lancement du service. Tu peux déjà tout préparer.') + '</span></div>');
+          if (state.submitted) {
+            h.push('<div class="lv-note lv-note--ok" style="margin-top:1rem">✅ <strong>Ton dossier de test est complet&nbsp;!</strong> Le service ouvre le 1er janvier — on vérifiera tes pièces à ce moment-là. Pour l\'instant rien n\'est enregistré (c\'est un test).</div>');
+          } else {
+            h.push('<h3 class="lv-h3">Tes coordonnées</h3>');
+            h.push('<div class="lv-grid2">'
+              + '<label class="lv-field"><span>Nom complet *</span><input type="text" id="lvName" value="' + escapeHTML(state.contact.name) + '" maxlength="80"></label>'
+              + '<label class="lv-field"><span>Email *</span><input type="email" id="lvEmail" value="' + escapeHTML(state.contact.email) + '" maxlength="120"></label>'
+              + '<label class="lv-field"><span>Téléphone / WhatsApp</span><input type="tel" id="lvPhone" value="' + escapeHTML(state.contact.phone) + '" maxlength="30" placeholder="0690…"></label>'
+              + '</div>');
+            h.push('<label class="lv-consent"><input type="checkbox" id="lvConsent"' + (state.consent ? ' checked' : '') + '> <span>J\'autorise Pirates Tools à traiter mes documents (pièce d\'identité, permis, assurance…) dans le seul but de vérifier mon éligibilité au service de livraison. Je peux demander leur suppression à tout moment. <a href="#/confidentialite">Politique de confidentialité</a>.</span></label>');
+            h.push('<div class="lv-cta" style="margin-top:1rem">'
+              + '<button type="button" class="btn primary" id="lvSubmitDossier">Envoyer mon dossier (test)</button>'
+              + '<span class="lv-cta__note" id="lvSubmitNote"></span></div>');
+          }
           h.push('</div>');
         }
       }
@@ -4061,19 +4095,44 @@
       var vehBtns = dyn.querySelectorAll('[data-veh]');
       for (var i = 0; i < vehBtns.length; i++) {
         (function (btn) { btn.onclick = function () {
-          state.veh = btn.getAttribute('data-veh'); state.dossier = false; state.files = {}; renderDynamic();
+          state.veh = btn.getAttribute('data-veh');
+          state.dossier = false; state.files = {}; state.cylindree = ''; state.submitted = false; state.remun = false;
+          renderDynamic();
         }; })(vehBtns[i]);
       }
+      var remun = document.getElementById('lvRemun');
+      if (remun) remun.onclick = function () { state.remun = !state.remun; renderDynamic(); };
+      var cyl = document.getElementById('lvCyl');
+      if (cyl) cyl.onchange = function () { state.cylindree = cyl.value; renderDynamic(); };
       var openDos = document.getElementById('lvOpenDossier');
       if (openDos) openDos.onclick = function () { state.dossier = true; renderDynamic(); };
       var fileInputs = dyn.querySelectorAll('[data-piece]');
       for (var j = 0; j < fileInputs.length; j++) {
         (function (inp) { inp.onchange = function () {
           var f = inp.files && inp.files[0];
-          if (f) state.files[inp.getAttribute('data-piece')] = f.name;  // dépôt réel : au lancement (Storage + endpoint)
+          if (f) state.files[inp.getAttribute('data-piece')] = f.name;  // TEST : nom seulement, AUCUN stockage
           renderDynamic();
         }; })(fileInputs[j]);
       }
+      // Coordonnées : maj SANS re-render (garde le focus pendant la frappe).
+      var nm = document.getElementById('lvName'); if (nm) nm.oninput = function () { state.contact.name = nm.value; };
+      var em = document.getElementById('lvEmail'); if (em) em.oninput = function () { state.contact.email = em.value; };
+      var ph = document.getElementById('lvPhone'); if (ph) ph.oninput = function () { state.contact.phone = ph.value; };
+      var cs = document.getElementById('lvConsent'); if (cs) cs.onchange = function () { state.consent = cs.checked; };
+      var sub = document.getElementById('lvSubmitDossier');
+      if (sub) sub.onclick = function () {
+        if (nm) state.contact.name = nm.value; if (em) state.contact.email = em.value;
+        if (ph) state.contact.phone = ph.value; if (cs) state.consent = cs.checked;
+        var missing = [];
+        if (piecesFor(state.veh).some(function (p) { return !state.files[p.id]; })) missing.push('toutes les pièces');
+        if (state.veh === 'scooter' && !state.cylindree) missing.push('la cylindrée');
+        if (!state.contact.name) missing.push('ton nom');
+        if (!state.contact.email) missing.push('ton email');
+        if (!state.consent) missing.push('le consentement (case à cocher)');
+        var note = document.getElementById('lvSubmitNote');
+        if (missing.length) { if (note) note.textContent = 'Il manque : ' + missing.join(', ') + '.'; return; }
+        state.submitted = true; renderDynamic();  // DÉMO — aucun stockage, aucun envoi serveur
+      };
     }
 
     var birthEl = document.getElementById('lvBirth');
