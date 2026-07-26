@@ -7880,3 +7880,13 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .isl--on svg path { stroke: #ffd76a; fill: rgba(242,193,78,.12);
   filter: drop-shadow(0 0 5px rgba(255,215,106,1)) drop-shadow(0 0 14px rgba(242,193,78,.8)); }
 .isl--on span { color: #ffd76a; }
+/* Bandeau livreur : îles dorées + bouton fermer */
+.lv-banner { position: relative; }
+.lv-banner__close { position: absolute; top: .4rem; right: .55rem; width: 26px; height: 26px; border: 0; border-radius: 50%;
+  background: rgba(255,255,255,.12); color: inherit; font-size: 1.05rem; line-height: 1; cursor: pointer; }
+.lv-banner__close:hover { background: rgba(255,255,255,.22); }
+.lv-banner__isles { display: flex; justify-content: center; gap: .9rem; margin: .1rem 0 .55rem; }
+.lv-banner__isles svg { width: 40px; height: 40px; overflow: visible; }
+.lv-banner__isles svg path { fill: none; stroke: #f2c14e; stroke-width: 2.4; stroke-linejoin: round; stroke-linecap: round;
+  filter: drop-shadow(0 0 3px rgba(242,193,78,.9)) drop-shadow(0 0 7px rgba(242,193,78,.4)); }
+@media (max-width: 480px) { .lv-banner__isles svg { width: 30px; height: 30px; } .lv-banner__isles { gap: .5rem; } }

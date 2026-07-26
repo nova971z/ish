@@ -3950,8 +3950,15 @@
     // pendant la saisie. Sur iOS, remplacer l'input pendant que le sélecteur est
     // ouvert le fermait avant validation (bug signalé). Seuls #lvAgeMsg et
     // #lvDynamic changent -> le picker natif reste stable jusqu'au « Valider ».
+    var bannerClosed = false;
+    try { bannerClosed = localStorage.getItem('pt:lv-banner-closed') === '1'; } catch (_) {}
     box.innerHTML =
-      '<div class="lv-banner lv-banner--green">🟢 <strong>Ce service ouvre le 1er janvier.</strong> Tu peux déjà tout préparer et <strong>tester le formulaire</strong> (choisir tes fichiers, remplir ton dossier). Pour l\'instant, <strong>rien n\'est enregistré</strong> — c\'est juste pour découvrir.</div>'
+      (bannerClosed ? '' :
+        '<div class="lv-banner lv-banner--green" id="lvBanner">'
+        + '<button type="button" class="lv-banner__close" id="lvBannerClose" aria-label="Fermer ce message">×</button>'
+        + '<div class="lv-banner__isles" id="lvBannerIsles" aria-hidden="true"></div>'
+        + '<div>🟢 <strong>Ce service ouvre le 1er janvier.</strong> Tu peux déjà tout préparer et <strong>tester le formulaire</strong> (choisir tes fichiers, remplir ton dossier). Pour l\'instant, <strong>rien n\'est enregistré</strong> — c\'est juste pour découvrir.</div>'
+        + '</div>')
       + '<div class="lv-card"><label class="lv-field"><span>Ta date de naissance *</span>'
       + '<input type="date" id="lvBirth" autocomplete="bday"></label>'
       + '<p class="lv-hint" id="lvAgeMsg" style="margin-top:.6rem">Renseigne ta date de naissance pour continuer.</p></div>'
@@ -4139,6 +4146,20 @@
     if (birthEl) birthEl.onchange = renderDynamic;   // fire au « Valider » du picker
     var back = document.getElementById('lvBack');
     if (back) back.onclick = function () { history.length > 1 ? history.back() : (location.hash = '#/compte'); };
+
+    // Bandeau : contours dorés des îles (clonés depuis le sélecteur d'inscription
+    // #regIslands = les VRAIS tracés GeoJSON, zéro duplication) + bouton fermer.
+    var bIsles = document.getElementById('lvBannerIsles');
+    if (bIsles) {
+      var srcSvgs = document.querySelectorAll('#regIslands .isl svg');
+      for (var si = 0; si < srcSvgs.length; si++) bIsles.appendChild(srcSvgs[si].cloneNode(true));
+    }
+    var bClose = document.getElementById('lvBannerClose');
+    if (bClose) bClose.onclick = function () {
+      var bn = document.getElementById('lvBanner');
+      if (bn) bn.remove();
+      try { localStorage.setItem('pt:lv-banner-closed', '1'); } catch (_) {}
+    };
   }
 
   function renderArtisans() {
