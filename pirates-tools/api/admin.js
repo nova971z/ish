@@ -815,9 +815,16 @@ async function handleRepriceAll(req, res, admin, db) {
       if (srcTTC < PW.MIN_TTC || srcTTC > PW.MAX_TTC) { skipped.push({ id: p.id, sku: p.sku, reason: 'hors fourchette' }); continue; }
 
       const priced = pwComputePrice(p, srcTTC, cfg);
-      const cur = typeof p.price === 'number' ? p.price : null;
+      // Prix ACTUEL : l'override fraîchement relu fait foi. `p` vient du
+      // catalogue fusionné, dont le cache d'overrides peut avoir jusqu'à 30 s
+      // de retard : juste après un « Appliquer », il renvoyait encore l'ancien
+      // prix → les mêmes produits étaient re-signalés comme « à changer »
+      // alors qu'ils venaient d'être corrigés (fausse impression de bug).
+      const cur = (typeof o.price === 'number') ? o.price
+        : (typeof p.price === 'number' ? p.price : null);
       if (cur != null && Math.abs(priced.newPrice - cur) < 0.02) continue; // déjà bon
-      const rec = { id: p.id, sku: p.sku, name: p.title || p.name, oldPrice: cur, newPrice: priced.newPrice, newHt: priced.newHt, markup: priced.markup, srcTTC };
+      const rec = { id: p.id, sku: p.sku, name: p.title || p.name, oldPrice: cur, newPrice: priced.newPrice, newHt: priced.newHt, markup: priced.markup, srcTTC,
+        costSrc: (typeof o.priceSrcTTC === 'number' && o.priceSrcTTC > 0) ? 'traqueur' : 'estimé' };
       if (!dryRun) {
         await db.collection('product_overrides').doc(p.id).set({
           price: priced.newPrice, price_ht: priced.newHt,
@@ -829,6 +836,10 @@ async function handleRepriceAll(req, res, admin, db) {
       }
       changed.push(rec);
     }
+
+    // Écritures faites : purge le cache pour que le prochain contrôle (et le
+    // site public) reparte des prix réels, sans attendre l'expiration.
+    if (!dryRun && changed.length) catalog.invalidateOverrides();
 
     return res.status(200).json({
       ok: true, dryRun: !!dryRun, mode: cfg.mode, autoPrice: !!cfg.autoPrice,
@@ -862,6 +873,13 @@ async function handlePriceWatch(req, res, admin, db) {
     const bySku = {};
     products.forEach((p) => { if (p.sku) bySku[String(p.sku).toUpperCase()] = p; });
 
+    // Overrides relus À LA SOURCE : le catalogue fusionné peut avoir jusqu'à
+    // 30 s de retard, et ici un prix actuel périmé fausserait AUSSI la garde
+    // « variation > 25 % » (produit bloqué à tort, ou laissé passer à tort).
+    const ovSnapW = await db.collection('product_overrides').get();
+    const ovW = {};
+    ovSnapW.forEach((d) => { ovW[d.id] = d.data() || {}; });
+
     // Config de tarification : si autoPrice, on applique le MODÈLE de marge cible
     // (markup adaptatif poids/mode pour 15 % net après IS) ; sinon repli ×1,15.
     const cfg = await priceConfig.load();
@@ -882,7 +900,9 @@ async function handlePriceWatch(req, res, admin, db) {
       const src = priceParse.pickCheapestSource(item.price, p.srcAltSkus, parsedBySku);
       const priced = pwComputePrice(p, src, cfg);
       const newPrice = priced.newPrice, newHt = priced.newHt;
-      const cur = typeof p.price === 'number' ? p.price : null;
+      const oW = ovW[p.id] || {};
+      const cur = (typeof oW.price === 'number') ? oW.price
+        : (typeof p.price === 'number' ? p.price : null);
       const rec = { sku: item.sku, id: p.id, name: p.title || p.name, srcTTC: src, newPrice, newHt, markup: priced.markup, oldPrice: cur };
 
       if (cur != null && Math.abs(newPrice - cur) < 0.02) { unchanged.push(rec); continue; }
@@ -907,6 +927,8 @@ async function handlePriceWatch(req, res, admin, db) {
       }
       applied.push(rec);
     }
+
+    if (!dryRun && applied.length) catalog.invalidateOverrides();
 
     return res.status(200).json({
       ok: true, brand, dryRun: !!dryRun,

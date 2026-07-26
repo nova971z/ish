@@ -9178,7 +9178,11 @@
       adminPostType('reprice-all', { dryRun: true }).then(function (d) {
         var c = d.counts || {};
         var sample = (d.changed || []).slice(0, 8).map(function (x) {
-          return '<li>' + escapeHTML(x.name || x.sku) + ' : ' + (x.oldPrice != null ? x.oldPrice + ' €' : '—') + ' → <b>' + x.newPrice + ' €</b></li>';
+          // costSrc : d'où vient le coût d'achat qui justifie le nouveau prix.
+          // « traqueur » = prix fournisseur réel relevé ; « estimé » = déduit
+          // du prix catalogue (produit jamais vu par le traqueur).
+          return '<li>' + escapeHTML(x.name || x.sku) + ' : ' + (x.oldPrice != null ? x.oldPrice + ' €' : '—') + ' → <b>' + x.newPrice + ' €</b>'
+            + (x.costSrc ? ' <small>(coût ' + escapeHTML(x.costSrc) + ')</small>' : '') + '</li>';
         }).join('');
         repriceOut.innerHTML = '<p><b>' + c.changed + '</b> prix changeraient sur ' + c.total + ' produits (mode ' + d.mode + '). '
           + (c.skipped ? c.skipped + ' ignorés (coût inconnu).' : '') + '</p>'
@@ -9192,7 +9196,18 @@
       repriceOut.innerHTML = '<p class="admin-loading">Application…</p>';
       adminPostType('reprice-all', { dryRun: false }).then(function (d) {
         toast((d.counts.changed) + ' prix mis à jour', 'success');
-        repriceOut.innerHTML = '<p>✅ <b>' + d.counts.changed + '</b> prix mis à jour. Visibles en production sous ~30 s (cache).</p>';
+        repriceOut.innerHTML = '<p>✅ <b>' + d.counts.changed + '</b> prix mis à jour. Visibles en production sous ~30 s (cache).</p>'
+          + '<p class="admin-loading">Contre-vérification en cours…</p>';
+        // AUTO-VÉRIFICATION : on relance immédiatement l'analyse. Si tout a
+        // bien été enregistré, il doit rester 0 prix à changer. Plus besoin de
+        // se demander « est-ce que ça a marché ? » — la réponse est affichée.
+        return adminPostType('reprice-all', { dryRun: true }).then(function (v) {
+          var rest = (v.counts && v.counts.changed) || 0;
+          repriceOut.innerHTML = '<p>✅ <b>' + d.counts.changed + '</b> prix mis à jour.</p>'
+            + (rest === 0
+              ? '<p class="admin-ok">✅ Contre-vérification : <b>plus aucun prix à changer</b>. Les nouveaux prix sont bien enregistrés.</p>'
+              : '<p class="admin-error">⚠️ Contre-vérification : <b>' + rest + '</b> prix seraient encore à changer — signale-le, l\'enregistrement n\'a pas tout pris.</p>');
+        });
       }).catch(function (e) { repriceOut.innerHTML = '<p class="admin-error">Erreur : ' + escapeHTML(e.message) + '</p>'; btn.disabled = false; });
     };
   }

@@ -69,6 +69,15 @@ function applyOverrides(products, overrides) {
     .filter(function (p) { return !p.hidden; }); // hidden → not listed, not purchasable
 }
 
+// Invalide le cache des overrides. À appeler APRÈS toute écriture de prix
+// (reprice-all, traqueur) : sans ça, la même instance serverless continue de
+// servir jusqu'à 30 s le catalogue d'AVANT l'écriture — et un contrôle
+// immédiat re-signale les produits qu'on vient pourtant de corriger.
+function invalidateOverrides() {
+  _overridesCache = null;
+  _overridesCacheTime = 0;
+}
+
 // Merged catalogue (products.json + overrides, hidden removed).
 async function loadCatalog() {
   var products = loadProducts();
@@ -114,6 +123,7 @@ module.exports = {
   loadCatalog: loadCatalog,
   loadPublicCatalog: loadPublicCatalog,
   findByKey: findByKey,
+  invalidateOverrides: invalidateOverrides,
   // Exposés pour les tests CI (fonctions pures).
   _internals: { applyOverrides: applyOverrides, toPublic: toPublic, PRIVATE_FIELDS: PRIVATE_FIELDS }
 };
