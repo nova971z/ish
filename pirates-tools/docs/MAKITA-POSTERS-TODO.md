@@ -24,7 +24,7 @@
 19. [x] DHS680ZJ — Scie circulaire 18V LXT Ø165 mm brushless en MAKPAC — SPECS (Cotébrico/Leroy/Screwfix) + POSTER OK ✅ (coffretIncluded ; PNG transparent sur fond sombre)
 20. [x] DJR189Z (solo, créée) + DJR189ZJ (coffret) — PAIRE DE VARIANTES OK ✅ Règle user prix : solo = prix qu'on avait (205,41 €) ; coffret = +25 € surplus (poids 3,5kg) = 230,41 €. Posters + specs OK
 21. [x] DJV184Z — Scie sauteuse 18V LXT brushless compacte (machine seule)
-22. [ ] DJV185Z — Scie sauteuse 18V LXT Li-Ion (Machine seule)
+22. [x] DJV185Z (solo) + DJV185ZJ (coffret, créée) — PAIRE DE VARIANTES OK ✅ solo 251,91 € ; coffret +25 € = 276,91 €. Posters (solo dark direct, coffret transparent->fond sombre) + specs (800-3000 spm, course 23, bois 135) OK
 23. [ ] DLS600Z — Scie à onglet 18V Li-ion Ø165 mm (Produit seul)
 24. [ ] DSP601ZJU — Scie plongeante 36V LXT BL (2x18V) Ø165 mm avec module AWS
 25. [ ] DUB363ZV — Souffleur broyeur 36V LXT (machine seule)
