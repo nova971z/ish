@@ -1,5 +1,5 @@
 /* sw.js — Pirates Tools (PWA) */
-const VERSION        = 'pt-v486';                    // version du SW (logique SW)
+const VERSION        = 'pt-v487';                    // version du SW (logique SW)
 const STATIC_CACHE   = `pt-static-${VERSION}`;
 const RUNTIME_CACHE  = `pt-runtime-${VERSION}`;
 const IMG_CACHE      = `pt-img-${VERSION}`;
@@ -8,7 +8,7 @@ const ORIGIN         = self.location.origin;
 
 // Aligner avec le HTML (cache-busting des assets) — garde-fou CI :
 // scripts/check-asset-versions.js casse la CI si sw.js et index.html divergent.
-const ASSET_VER      = '486';
+const ASSET_VER      = '487';
 
 // Icônes + manifest : fingerprint STABLE, séparé d'ASSET_VER. Ces fichiers ne
 // changent pas à chaque déploiement — les re-cache-buster à chaque bump forçait
@@ -224,6 +224,13 @@ self.addEventListener('fetch', (event) => {
 
   // Laisse passer les requêtes cross-origin (WhatsApp, fonts externes CDN, etc.)
   if (!sameOrigin(url)) return;
+
+  // ⚠️ NE JAMAIS INTERCEPTER L'API. Les endpoints /api/* sont dynamiques et
+  // authentifiés : les mettre en cache renvoie des données périmées (admin,
+  // comptes, prix), et le repli « réponse vide 504 » du cas par défaut casse
+  // l'appel côté client — Safari le signale par « TypeError: Type error ».
+  // On laisse le navigateur les traiter lui-même, sans intermédiaire.
+  if (url.pathname.indexOf('/api/') === 0 || url.pathname === '/api') return;
 
   // 1) Navigation (SPA hash routes)
   if (isNav(event)) {
