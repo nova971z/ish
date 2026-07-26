@@ -2,15 +2,14 @@
 
 > Numérotation = liste dans les Notes de l'user (aspirateur=1). NE PAS renuméroter.
 > [x] fait · [~] partiel (poster posé, specs/prix en attente) · [ ] à faire.
-> À chaque produit livré : MAJ statut + donner le n° SUIVANT non fait. Ne compléter
-> QUE sur envoi explicite ; fantôme (rupture cotébrico) → supprimer.
+> À chaque produit livré : MAJ statut + donner le n° SUIVANT non fait.
 
 1. [~] (poster OK, specs/prix en attente) DVC560Z — Aspirateur 36V BL (2x18 V) Li-Ion 120 mbar (Produit seul)
 2. [x] DTW1001Z — Boulonneuse à chocs 18V LXT 3/4" 1050 Nm brushless (machine seule)
 3. [~] (poster OK, specs/prix en attente) DTW1002Z — Boulonneuse à chocs 18V LXT 1500 Nm brushless (machine seule)
 4. [x] DTW181Z — Boulonneuse à chocs 18V LXT 1/2" 210 Nm brushless compacte (machine seule)
 5. [x] DTW181ZJ — Boulonneuse à chocs 18V LXT 1/2" 210 Nm brushless en MAKPAC (machine seule)
-6. [ ] DTW301ZJ — Boulonneuse à chocs 18V XGT 330Nm (solo) en Makpac
+6. [x] DTW301ZJ — Boulonneuse à chocs 18V LXT 1/2" 330 Nm brushless en MAKPAC (machine seule)
 7. [ ] DTW700ZJ — Boulonneuse à chocs 18V LXT 700 Nm 1/2" (Machine seule) en MAKPAC
 8. [ ] DRT50Z — Affleureuse 18V LXT Ø6 et 8 mm (Machine seule)
 9. [ ] DRT50ZJX3 — Affleureuse 18V LXT Ø6-8 mm en MAKPAC + 4 bases (défonçage, affleurage déporté/droit/incliné)
