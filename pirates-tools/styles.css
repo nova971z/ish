@@ -7900,3 +7900,5 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   stroke-linejoin: round; stroke-linecap: round;
   filter: drop-shadow(0 0 2px rgba(242,193,78,.75)); }
 .lv-remun-isle__name { text-align: center; margin: 0; font-weight: 800; color: #ffd76a; letter-spacing: .03em; }
+/* Détail consommation cylindrée (livreur) */
+.lv-conso { margin: .2rem 0 .8rem; padding: .6rem .8rem; background: rgba(0,0,0,.22); border: 1px solid rgba(255,255,255,.08); border-radius: 12px; }

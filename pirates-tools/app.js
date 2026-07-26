@@ -3833,6 +3833,19 @@
     }
   };
 
+  // Cylindrées détaillées + consommation. Base = conso réelle constatée en
+  // cycle mixte (sources revendeurs/essais) ; GUADELOUPE = +20 % (chaleur qui
+  // dégrade le rendement + relief et virages permanents = relances constantes).
+  // Ces consos serviront au CALCUL DU BARÈME par véhicule (coût/km réel).
+  var LV_CYL = {
+    '50':      { label: '50 cm³ (cyclomoteur)',  base: 2.5, permis: 'Permis AM (dès 14 ans)' },
+    '125':     { label: '125 cm³',               base: 3.0, permis: 'Permis A1 (dès 16 ans), ou permis B + formation de 7 h' },
+    '300-500': { label: '300 à 500 cm³',         base: 4.5, permis: 'Permis A2 (dès 18 ans)' },
+    '600+':    { label: '600 cm³ et plus',       base: 6.0, permis: 'Permis A2 (dès 18 ans), puis A' }
+  };
+  var LV_GP_SURCONSO = 1.20;   // +20 % Guadeloupe
+  function lvConsoGp(key) { return Math.round(LV_CYL[key].base * LV_GP_SURCONSO * 10) / 10; }
+
   // Pièces à TÉLÉVERSER (option B : dépôt + validation manuelle admin).
   // Le dossier passe en statut « en_attente » ; l'admin valide/refuse chaque
   // pièce. Architecture prête à brancher un vérificateur en direct plus tard.
@@ -4104,14 +4117,20 @@
         // Cylindrée (moto/scooter) : détermine le permis requis + servira au barème.
         if (state.veh === 'scooter') {
           h.push('<label class="lv-field lv-cyl"><span>🏍️ Cylindrée de ton véhicule *</span><select id="lvCyl">'
-            + '<option value="">— Choisis —</option>'
-            + '<option' + (state.cylindree === '50' ? ' selected' : '') + ' value="50">50 cm³ (cyclomoteur)</option>'
-            + '<option' + (state.cylindree === '125' ? ' selected' : '') + ' value="125">125 cm³</option>'
-            + '<option' + (state.cylindree === '125+' ? ' selected' : '') + ' value="125+">Plus de 125 cm³</option>'
-            + '</select></label>');
-          if (state.cylindree) {
-            var permisMap = { '50': 'Permis AM (dès 14 ans)', '125': 'Permis A1 (dès 16 ans), ou permis B + formation de 7 h', '125+': 'Permis A2 (dès 18 ans), puis A' };
-            h.push('<p class="lv-hint">Permis requis : <strong>' + permisMap[state.cylindree] + '</strong>.</p>');
+            + '<option value="">— Choisis —</option>');
+          Object.keys(LV_CYL).forEach(function (ck) {
+            h.push('<option' + (state.cylindree === ck ? ' selected' : '') + ' value="' + ck + '">'
+              + LV_CYL[ck].label + ' — ≈ ' + String(lvConsoGp(ck)).replace('.', ',') + ' L/100 km en Guadeloupe</option>');
+          });
+          h.push('</select></label>');
+          if (state.cylindree && LV_CYL[state.cylindree]) {
+            var cy = LV_CYL[state.cylindree];
+            h.push('<div class="lv-conso">'
+              + '<div class="lv-cost__row"><span>Consommation constructeur (cycle mixte)</span><span class="lv-cost__v">≈ ' + String(cy.base).replace('.', ',') + ' L/100 km</span></div>'
+              + '<div class="lv-cost__row"><span>Majoration Guadeloupe (chaleur + virages/relief : relances constantes)</span><span class="lv-cost__v">+20 %</span></div>'
+              + '<div class="lv-cost__row"><span><strong>Consommation retenue pour ton barème</strong></span><span class="lv-cost__v">≈ ' + String(lvConsoGp(state.cylindree)).replace('.', ',') + ' L/100 km</span></div>'
+              + '</div>');
+            h.push('<p class="lv-hint">Permis requis : <strong>' + cy.permis + '</strong>. Cette consommation sert à calculer ta rémunération : plus ton véhicule consomme, plus le tarif en tient compte — tu ne travailles jamais à perte.</p>');
           }
         }
         h.push('<h3 class="lv-h3">Le socle commun (obligatoire pour tous)</h3><ul class="lv-docs">');
