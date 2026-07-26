@@ -3909,6 +3909,70 @@
     }
   };
 
+  // ── Zones tarifaires (barème par distance) — Guadeloupe validée par l'user.
+  // Centre = bourg de Sainte-Anne ; rayons en km RÉELS (cercle 4 = côte ouest
+  // de Basse-Terre, 46 km). Coordonnées dans le repère du SVG 100x100 du
+  // sélecteur d'îles (#regIslands), même projection GeoJSON (scratchpad/
+  // zones-971c.mjs). upk = unités SVG par km.
+  var LV_ZONES = {
+    '971': {
+      sa: [52.56, 44.44], upk: 1.0209, rad: [10, 22, 34, 46],
+      viewBox: '3 7.7 94 84.6',
+      fills: ['rgba(52,211,153,0.40)', 'rgba(96,165,250,0.36)', 'rgba(250,204,21,0.30)', 'rgba(248,113,113,0.30)'],
+      strokes: ['#34d399', '#60a5fa', '#facc15', '#f87171'],
+      label: 'Sainte-Anne'
+    }
+  };
+
+  // Construit la carte des zones dans `host` à partir du SVG d'île source
+  // (contours GeoJSON clonés : clip + tracé). Zones = anneaux transparents
+  // CLIPPÉS à la terre (rien ne peint la mer), traits ultra-fins.
+  function lvBuildZoneMap(host, srcSvg, z) {
+    var NS = 'http://www.w3.org/2000/svg';
+    var svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('viewBox', z.viewBox);
+    var clipId = 'lvClip' + Math.floor(Math.random() * 1e6);
+    var defs = document.createElementNS(NS, 'defs');
+    var clip = document.createElementNS(NS, 'clipPath');
+    clip.setAttribute('id', clipId);
+    var srcPaths = srcSvg.querySelectorAll('path');
+    var i, p;
+    for (i = 0; i < srcPaths.length; i++) clip.appendChild(srcPaths[i].cloneNode(true));
+    defs.appendChild(clip); svg.appendChild(defs);
+    var g = document.createElementNS(NS, 'g');
+    g.setAttribute('clip-path', 'url(#' + clipId + ')');
+    function circlePath(cx, cy, r) {
+      return 'M' + (cx - r).toFixed(2) + ' ' + cy.toFixed(2)
+        + 'a' + r.toFixed(2) + ' ' + r.toFixed(2) + ' 0 1 0 ' + (2 * r).toFixed(2) + ' 0'
+        + 'a' + r.toFixed(2) + ' ' + r.toFixed(2) + ' 0 1 0 ' + (-2 * r).toFixed(2) + ' 0Z';
+    }
+    for (i = 0; i < z.rad.length; i++) {
+      var rO = z.rad[i] * z.upk;
+      p = document.createElementNS(NS, 'path');
+      p.setAttribute('d', i === 0 ? circlePath(z.sa[0], z.sa[1], rO)
+        : circlePath(z.sa[0], z.sa[1], rO) + ' ' + circlePath(z.sa[0], z.sa[1], z.rad[i - 1] * z.upk));
+      if (i > 0) p.setAttribute('fill-rule', 'evenodd');
+      p.setAttribute('style', 'fill:' + z.fills[i] + ';stroke:none;filter:none'); // inline > CSS or doré
+      g.appendChild(p);
+      var c = document.createElementNS(NS, 'circle');
+      c.setAttribute('cx', z.sa[0]); c.setAttribute('cy', z.sa[1]); c.setAttribute('r', rO.toFixed(2));
+      c.setAttribute('style', 'fill:none;stroke:' + z.strokes[i] + ';stroke-width:.18;stroke-opacity:.85');
+      g.appendChild(c);
+    }
+    svg.appendChild(g);
+    for (i = 0; i < srcPaths.length; i++) svg.appendChild(srcPaths[i].cloneNode(true)); // contour doré (CSS)
+    var dot = document.createElementNS(NS, 'circle');
+    dot.setAttribute('cx', z.sa[0]); dot.setAttribute('cy', z.sa[1]); dot.setAttribute('r', '0.7');
+    dot.setAttribute('style', 'fill:#fff');
+    svg.appendChild(dot);
+    var txt = document.createElementNS(NS, 'text');
+    txt.setAttribute('x', (z.sa[0] + 1.5).toFixed(1)); txt.setAttribute('y', (z.sa[1] - 1.2).toFixed(1));
+    txt.setAttribute('style', 'fill:#fff;font:600 3.4px sans-serif');
+    txt.textContent = z.label;
+    svg.appendChild(txt);
+    host.appendChild(svg);
+  }
+
   function lvDocItem(d) {
     var h = '<li class="lv-doc"><span class="lv-doc__t">' + d.t + '</span>';
     if (d.h) h += '<span class="lv-doc__h">' + d.h + '</span>';
@@ -4011,7 +4075,9 @@
           h.push('<div class="lv-card lv-remun-panel">'
             + '<div class="lv-remun-isle" id="lvRemunIsle" data-isle="' + terr.code + '" aria-label="' + escapeHTML(terr.name) + '"></div>'
             + '<p class="lv-remun-isle__name">' + escapeHTML(terr.name) + '</p>'
-            + '<p style="margin:.4rem 0 0">🚧 Le <strong>barème de rémunération selon la distance</strong> arrive très bientôt : les <strong>zones tarifaires</strong> seront tracées directement sur ta carte, et tu verras combien te rapporte chaque livraison. On y travaille.</p></div>');
+            + '<p style="margin:.4rem 0 0">Voici tes <strong>4 zones de livraison</strong> autour de Sainte-Anne'
+            + ' <span style="white-space:nowrap">(🟢 0-10 km</span> · <span style="white-space:nowrap">🔵 10-22 km</span> · <span style="white-space:nowrap">🟡 22-34 km</span> · <span style="white-space:nowrap">🔴 34-46 km)</span>.'
+            + ' 🚧 Les <strong>tarifs par zone</strong> (selon ton véhicule) arrivent très bientôt.</p></div>');
         }
         // Coût + délai des démarches, JUSTE EN DESSOUS des cartes (position validée
         // par l'user), maj au changement de véhicule.
@@ -4122,8 +4188,12 @@
       // le sélecteur d'inscription (source unique des tracés).
       var remIsle = document.getElementById('lvRemunIsle');
       if (remIsle) {
-        var srcIsle = document.querySelector('#regIslands .isl[data-isl="' + remIsle.getAttribute('data-isle') + '"] svg');
-        if (srcIsle) {
+        var isleCode = remIsle.getAttribute('data-isle');
+        var srcIsle = document.querySelector('#regIslands .isl[data-isl="' + isleCode + '"] svg');
+        if (srcIsle && LV_ZONES[isleCode]) {
+          // Carte des ZONES TARIFAIRES (clippées à la terre, validée user).
+          lvBuildZoneMap(remIsle, srcIsle, LV_ZONES[isleCode]);
+        } else if (srcIsle) {
           var cl = srcIsle.cloneNode(true);
           remIsle.appendChild(cl);
           // Recadre le viewBox sur le contenu RÉEL (le carré 100x100 du sélecteur
