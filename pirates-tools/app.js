@@ -9193,7 +9193,9 @@
           var b = x.brand || '—';
           (parMarque[b] = parMarque[b] || []).push(x);
         });
-        h += '<p class="admin-hint">Ces ' + d.estimes.length + ' produits n\'apparaissent pas dans le traqueur — leur prix repose sur une supposition :</p>';
+        h += '<p class="admin-hint">Ces ' + d.estimes.length + ' produits n\'apparaissent pas dans le traqueur — leur prix repose sur une supposition :</p>'
+          + '<div class="lv-cta" style="margin:.2rem 0 .6rem"><button type="button" class="btn" id="repriceCopyEst">📋 Copier la liste (' + d.estimes.length + ')</button>'
+          + '<span class="lv-cta__note" id="repriceCopySt" aria-live="polite"></span></div>';
         Object.keys(parMarque).sort().forEach(function (b) {
           h += '<p class="admin-hint" style="margin:.5rem 0 .2rem"><strong>' + escapeHTML(b) + '</strong> — ' + parMarque[b].length + '</p>'
             + '<ul class="compta-sample">' + parMarque[b].map(function (x) {
@@ -9205,6 +9207,29 @@
         h += '<p class="admin-ok">✅ Tous les prix calculés reposent sur un coût d\'achat réel.</p>';
       }
       return h;
+    }
+
+    // Branche le bouton « Copier la liste » APRÈS injection du HTML (le bloc de
+    // santé est rendu par innerHTML, donc l'écouteur doit être posé ensuite).
+    function wireRepriceCopy(d) {
+      var btn = document.getElementById('repriceCopyEst');
+      if (!btn || !d || !d.estimes) return;
+      btn.onclick = function () {
+        var txt = d.estimes.map(function (x) {
+          return (x.brand || '?') + '\t' + (x.sku || '') + '\t' + (x.name || '') + '\t' + x.srcTTC + ' EUR';
+        }).join('\n');
+        var st = document.getElementById('repriceCopySt');
+        navigator.clipboard.writeText(txt).then(function () {
+          if (st) st.textContent = '✅ ' + d.estimes.length + ' lignes copiées — colle-les dans le chat.';
+        }).catch(function () {
+          // Safari sans permission presse-papier : on affiche le texte à copier.
+          if (st) st.textContent = 'Copie auto refusée — sélectionne le texte ci-dessous :';
+          var pre = document.createElement('textarea');
+          pre.readOnly = true; pre.rows = 12; pre.style.width = '100%'; pre.value = txt;
+          btn.parentNode.parentNode.appendChild(pre);
+          pre.select();
+        });
+      };
     }
 
     var repriceOut = document.getElementById('repriceOut');
@@ -9224,6 +9249,7 @@
           + (sample ? '<ul class="compta-sample">' + sample + '</ul>' : '')
           + repriceHealthHtml(d)
           + '<p class="admin-hint">Vérifie que ça te va, puis clique « Appliquer ».</p>';
+        wireRepriceCopy(d);
         document.getElementById('repriceGo').disabled = (c.changed === 0);
       }).catch(function (e) { repriceOut.innerHTML = '<p class="admin-error">Erreur : ' + escapeHTML(e.message) + '</p>'; });
     };
@@ -9244,6 +9270,7 @@
               ? '<p class="admin-ok">✅ Contre-vérification : <b>plus aucun prix à changer</b>. Les nouveaux prix sont bien enregistrés.</p>'
               : '<p class="admin-error">⚠️ Contre-vérification : <b>' + rest + '</b> prix seraient encore à changer — signale-le, l\'enregistrement n\'a pas tout pris.</p>')
             + repriceHealthHtml(v);
+          wireRepriceCopy(v);
         });
       }).catch(function (e) { repriceOut.innerHTML = '<p class="admin-error">Erreur : ' + escapeHTML(e.message) + '</p>'; btn.disabled = false; });
     };
