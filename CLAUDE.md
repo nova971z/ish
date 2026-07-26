@@ -711,6 +711,24 @@ confirmé la réception. Zéro bénéfice plateforme sur la course.
   compte de tiers) — le gel actuel sur notre solde + virement manuel est
   acceptable en TEST uniquement.
 
+## 💳 STRIPE EN MODE TEST (26/07/2026, SW v481) — À INVERSER AU LANCEMENT
+Avant lancement, le site tourne sur les clés **TEST** de Stripe (compte activé
+non requis) pour permettre à l'user de dérouler la chaîne complète course :
+photo chantier → paiement → course → code/QR → livreur → confirmation.
+- `index.html` : `PT_STRIPE_PK` = `pk_test_51TJYJVPynqHG9OET…` ; la clé LIVE est
+  conservée EN COMMENTAIRE juste au-dessus (ne pas la perdre).
+- Vercel : `STRIPE_SECRET_KEY` = `sk_test_…` (posée par l'user).
+- Carte de test : **4242 4242 4242 4242**, date future, CVC quelconque.
+- ⚠️ PIÈGE MAJEUR : la clé vit dans un **script inline autorisé par empreinte
+  sha256** (H1). Changer la clé change le hash → `node scripts/check-csp.js`
+  devient rouge et, non corrigé, la CSP BLOQUE le script en prod (site cassé,
+  aucun PT_STRIPE_PK). Procédure : éditer index.html → lancer check-csp →
+  remplacer le hash obsolète dans `vercel.json` → re-vérifier.
+- AU LANCEMENT : remettre `pk_live_…` dans index.html, `sk_live_…` sur Vercel,
+  recalculer l'empreinte CSP, poser `STRIPE_WEBHOOK_SECRET`.
+- NOTE : le webhook n'est PAS requis pour tester — /merci vérifie le paiement
+  chez Stripe et crée la course (repli idempotent, doc id = pi.id).
+
 ## Vérification standard
 `cd pirates-tools && node scripts/ci.js` doit rester vert après chaque étape.
 Bump SW (`sw.js` VERSION + ASSET_VER) et `?v=` dans `index.html` à chaque changement d'asset.
