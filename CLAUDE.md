@@ -61,20 +61,25 @@ LIRE CE FICHIER avant d'ajouter/modifier un produit ou un poster. Cœur des règ
 - [ ] **Tableau de bord admin — stats de visite/clics** : demandé (voir réponse
       donnée). À cadrer : reco = collecte maison (events → Firestore) OU GA4.
       Décision produit + périmètre à trancher avec l'user avant de coder.
-- [ ] **⚠️ USER À VÉRIFIER — 2 fiches produits au SKU imprécis** (décidé le
-      18/07/2026 : « laisse comme ça pour l'instant, mais garde ces valeurs et
-      note qu'il faut que j'aille vérifier »). Ces 2 produits d'origine ont un
-      SKU qui n'existe pas tel quel au catalogue constructeur ; leurs specs ont
-      été remplies à partir du VRAI modèle équivalent (recherche web) mais
-      RESTENT À CONFIRMER par l'user avant lancement :
-        • Facom `CL3.C18SP` → vraie réf. probable **CL3.CH18SP2** (boulonneuse
-          à chocs 1/2" 18V brushless, 950 Nm, kit 2×5 Ah + coffret ToughSystem).
-        • Flex `FW1/2-502` → vraie réf. probable **Flex IW 1/2" 18.0-EC**
-          (boulonneuse à chocs 1/2", 250 Nm ; « FW » n'existe pas chez Flex).
-      Action user : confirmer que ce sont bien ces modèles vendus → alors
-      corriger SKU/titre/id pour être exact ; sinon les retirer. (3 autres
-      fiches fantômes DÉJÀ SUPPRIMÉES le 18/07 : Stanley FMC645D2, FMC688L2,
-      Facom CL2.C18S.)
+- [x] **SKU imprécis — RÉSOLU le 26/07/2026 : Flex et Facom SUPPRIMÉS.** Le
+      traqueur a confirmé le diagnostic du 18/07 (ces références n'existent pas
+      chez cotébrico → jamais de coût réel possible). Décision user :
+      « supprime les produits Flex, on les remettra correctement à l'aide du
+      traqueur ; supprime les produits Facom également ». 3 fiches retirées de
+      products.json : Flex `FW1/2-502`, Flex `ID1/4-18`, Facom `CL3.C18SP`.
+      Catalogue 510 → 507 (203 vrais produits + 304 quincaillerie).
+      ⚠️ Les ASSETS sont CONSERVÉS pour le retour de ces produits :
+      `images/posters/Visseuseachocflex.webp` + `-hero.webp` et
+      `models/products/Visseuseachocflex.glb` (visseuse Flex ID 1/4").
+      (3 autres fiches fantômes déjà supprimées le 18/07 : Stanley FMC645D2,
+      FMC688L2, Facom CL2.C18S.)
+- [ ] **3 Festool au SKU inventé — à corriger** (détecté 26/07 par le traqueur) :
+      `TI-18` (TID 18), `TPC-18` (TPC 18/4), `TSC55` (TSC 55 KEB). Tous les
+      autres Festool utilisent le VRAI code article numérique (577985, 578011…)
+      et sont correctement traqués. Ces 3-là ne matchent donc jamais. L'user a
+      constaté que la page 2 de Festool chez cotébrico « ne contient que des
+      articles qu'on ne vend pas » → ces sets ne sont peut-être pas vendus par
+      cotébrico. À trancher : retrouver le vrai code article, ou retirer.
 
 ## ⚠️ CHECKLIST PRÉ-LANCEMENT — à dérouler quand l'user demande « est-ce qu'on est prêt à lancer »
 Le site N'EST PAS lancé (décidé le 15/07/2026). Ne rien ouvrir au public tant que ces points bloquants ne sont pas faits. Quand l'user pose la question, PARCOURIR cette liste et donner l'état point par point.
