@@ -30,8 +30,8 @@
 25. [x] DUB363ZV — Souffleur / aspirateur-broyeur 2-en-1 36V (2×18V) LXT brushless (machine seule) — SPECS (fournies par user) + POSTER OK ✅ (coffretIncluded : pas de caisse ; prix maxoutil 264 x 1,15 = 303,60 € car absent Cotébrico)
 26. [x] DTD153Z — Visseuse à chocs 18V LXT 170 Nm brushless (machine seule) — SPECS (fiche cotébrico) + POSTER OK ✅ (fond brun détouré ; variante solo, prix 78,38 € inchangé)
 27. [x] DTD153ZJ — Visseuse à chocs 18V LXT 170 Nm brushless en MAKPAC — SPECS + POSTER OK ✅ (transparent->fond sombre ; variante coffret, prix 114,89 € inchangé = vrai prix cotébrico, PAS surplus)
-28. [ ] DTD154Z — Visseuse à chocs 18V LXT 175 Nm (Machine seule)
-29. [ ] DTD154ZJ — Visseuse à chocs 18V LXT 175Nm (Machine seule) en MAKPAC
+28. [x] DTD154Z — Visseuse à chocs 18V LXT 175 Nm brushless (machine seule) — SPECS (fiche cotébrico) + POSTER OK ✅ (image = même corps que DTD153, réutilisée ; variante solo 161,45 €)
+29. [x] DTD154ZJ — Visseuse à chocs 18V LXT 175 Nm brushless en MAKPAC — SPECS + POSTER OK ✅ (variante coffret 184,66 €, vrai prix cotébrico)
 30. [ ] DTD155ZJ — Visseuse à chocs 18V Li-Ion LXT 140Nm (Produit seul) en MAKPAC
 31. [ ] DTD158Z — Visseuse à chocs 18V LXT 170Nm (Produit seul)
 32. [ ] DUA301Z — Tronçonneuse d'élagage sur perche 36V LXT guide 30 cm (Produit Seul)
