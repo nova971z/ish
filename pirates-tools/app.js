@@ -9186,11 +9186,21 @@
         + (est ? '<span class="admin-error">⚠️ ' + est + ' estimés</span>' : '✅ 0 estimé')
         + '</div>';
       if (est && d.estimes && d.estimes.length) {
-        h += '<p class="admin-hint">Ces prix sont bâtis sur une supposition — envoie-moi leur vrai prix cotébrico :</p>'
-          + '<ul class="compta-sample">' + d.estimes.slice(0, 12).map(function (x) {
-            return '<li>' + escapeHTML(x.sku || '') + ' — ' + escapeHTML((x.name || '').slice(0, 70))
-              + ' <small>(coût supposé ' + x.srcTTC + ' €)</small></li>';
-          }).join('') + '</ul>';
+        // Liste COMPLÈTE (plus de troncature) et regroupée par marque : c'est
+        // l'inventaire exact des produits que le traqueur ne voit pas.
+        var parMarque = {};
+        d.estimes.forEach(function (x) {
+          var b = x.brand || '—';
+          (parMarque[b] = parMarque[b] || []).push(x);
+        });
+        h += '<p class="admin-hint">Ces ' + d.estimes.length + ' produits n\'apparaissent pas dans le traqueur — leur prix repose sur une supposition :</p>';
+        Object.keys(parMarque).sort().forEach(function (b) {
+          h += '<p class="admin-hint" style="margin:.5rem 0 .2rem"><strong>' + escapeHTML(b) + '</strong> — ' + parMarque[b].length + '</p>'
+            + '<ul class="compta-sample">' + parMarque[b].map(function (x) {
+              return '<li>' + escapeHTML(x.sku || '') + ' — ' + escapeHTML((x.name || '').slice(0, 70))
+                + ' <small>(coût supposé ' + x.srcTTC + ' €)</small></li>';
+            }).join('') + '</ul>';
+        });
       } else if (solide) {
         h += '<p class="admin-ok">✅ Tous les prix calculés reposent sur un coût d\'achat réel.</p>';
       }

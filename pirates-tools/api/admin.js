@@ -891,8 +891,11 @@ async function handleRepriceAll(req, res, admin, db) {
       if (!(srcTTC > 0)) { skipped.push({ id: p.id, sku: p.sku, reason: 'coût source inconnu' }); continue; }
       if (srcTTC < PW.MIN_TTC || srcTTC > PW.MAX_TTC) { skipped.push({ id: p.id, sku: p.sku, reason: 'hors fourchette' }); continue; }
       if (origins[srcInfo.origin] !== undefined) origins[srcInfo.origin]++;
-      if (srcInfo.origin === 'estimé' && estimes.length < 40) {
-        estimes.push({ sku: p.sku, name: p.title || p.name, srcTTC: srcTTC });
+      // Liste EXHAUSTIVE des produits sans coût réel : c'est la réponse à
+      // « quels produits n'apparaissent pas dans le traqueur ? ». Plafond haut
+      // (250) pour ne jamais tronquer silencieusement le catalogue réel.
+      if (srcInfo.origin === 'estimé' && estimes.length < 250) {
+        estimes.push({ sku: p.sku, brand: p.brand || '', name: p.title || p.name, srcTTC: srcTTC });
       }
 
       const priced = pwComputePrice(p, srcTTC, cfg);
