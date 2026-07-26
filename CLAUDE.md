@@ -681,6 +681,29 @@ confirmé la réception. Zéro bénéfice plateforme sur la course.
   Firestore — 2 photos dans le doc course la crèveraient) ; accès via
   course-proof (artisan/livreur de la course seulement) ; rules default-deny
   couvrent les sous-chemins. Courses legacy sans code : contrôle sauté.
+- VIDÉOS DE PROTECTION MUTUELLE + LITIGES (26/07 nuit, SW v478, demande user) :
+  vidéo de remise OPTIONNELLE des deux côtés (le livreur peut filmer la remise,
+  le client peut en déposer une dans le litige) → **Firebase Storage** (les
+  vidéos ne tiennent pas dans Firestore) : storage.rules versionnées
+  (default-deny ; write = participants de la course via lecture croisée
+  firestore.get, ≤120 Mo, video/* ; read/delete client = JAMAIS), firebase.json
+  branche storage, firebase-init.js expose loadStorage() (module Storage chargé
+  À LA DEMANDE, 0 octet au boot). Upload SDK direct (uploadBytesResumable +
+  progression %) puis référence journalisée via contact.js course-video
+  (participant only, chemin validé courses/{id}/videos/, max 6). LITIGE :
+  course-dispute (client OU livreur, message ≥10 car., un seul ouvert à la
+  fois) → email owner ; bloc UI partagé lvVideoDisputeHtml/wireVideoDispute
+  (les 2 espaces). ADMIN (onglet Livreurs → « Litiges & vidéos ») :
+  admin.js course-disputes = liste courses avec litige/vidéos + **URL signées
+  1 h** (admin.storage().bucket('pirates-tools.firebasestorage.app')) ;
+  course-dispute-close = clôture + décision + **suppression définitive des
+  vidéos** (deleteFiles prefix) — engagement affiché partout : vidéos privées,
+  jamais publiées, admin seul, effacées à la clôture. CONSENTEMENT obligatoire
+  des 2 côtés : case 🎥 dans les 2 widgets de commande client (bloque la
+  commande sinon) + case 🎥 dans le dossier livreur (bloque l'envoi sinon).
+  ⚠️ ACTION USER au lancement : activer Storage (console Firebase → Build →
+  Storage) puis `npx firebase deploy --only storage` — sans ça l'upload vidéo
+  échouera proprement (message d'erreur, le reste de la chaîne fonctionne).
 - STRIPE CONNECT (à faire au lancement) : onboarding Express des livreurs
   (KYC Stripe + IBAN) → poser stripeAccountId dans couriers/{uid} → les
   versements deviennent 100 % automatiques. Sans Connect, on NE PEUT PAS

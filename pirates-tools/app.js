@@ -4220,6 +4220,12 @@
         if (sceneBtn) sceneBtn.focus();
         return;
       }
+      var filmOk = document.getElementById(cfg.filmOk);
+      if (filmOk && !filmOk.checked) {
+        if (orderSt) orderSt.textContent = '🎥 Coche l\'accord de remise filmée (obligatoire) — c\'est la protection mutuelle client/livreur.';
+        filmOk.focus();
+        return;
+      }
       if (orderSt) orderSt.textContent = '💳 Paiement sécurisé — la course part chez les livreurs dès le paiement validé.';
       openPayModal(pl.items, {
         address: g.label, street: g.street || '', postal: g.postal || '', city: g.city || '',
@@ -4319,7 +4325,7 @@
       box: 'pdpDelivery', map: 'pdpDeliveryMap', addr: 'pdpDelivAddr', date: 'pdpDelivDate',
       hourWrap: 'pdpDelivHourWrap', hour: 'pdpDelivHour', whenName: 'pdpDelivWhen',
       zone: 'pdpDelivZoneTxt', order: 'pdpDelivOrder', status: 'pdpDelivStatus',
-      scene: 'pdpDelivScene', sceneBtn: 'pdpDelivSceneBtn', sceneSt: 'pdpDelivSceneSt', scenePrev: 'pdpDelivScenePrev',
+      scene: 'pdpDelivScene', sceneBtn: 'pdpDelivSceneBtn', sceneSt: 'pdpDelivSceneSt', scenePrev: 'pdpDelivScenePrev', filmOk: 'pdpDelivFilmOk',
       payload: function () {
         // Lignes PAYABLES (modale carte) — quantité = sélecteur de la fiche.
         return { items: [{ key: product.id || product.slug, title: product.title, price: product.price, qty: _pdpQty }] };
@@ -4361,7 +4367,7 @@
       box: 'livraisonOrder', map: 'livDelivMap', addr: 'livDelivAddr', date: 'livDelivDate',
       hourWrap: 'livDelivHourWrap', hour: 'livDelivHour', whenName: 'livDelivWhen',
       zone: 'livDelivZoneTxt', order: 'livDelivOrder', status: 'livDelivStatus',
-      scene: 'livDelivScene', sceneBtn: 'livDelivSceneBtn', sceneSt: 'livDelivSceneSt', scenePrev: 'livDelivScenePrev',
+      scene: 'livDelivScene', sceneBtn: 'livDelivSceneBtn', sceneSt: 'livDelivSceneSt', scenePrev: 'livDelivScenePrev', filmOk: 'livDelivFilmOk',
       payload: function () {
         // Lignes PAYABLES = la quincaillerie du panier (modale carte).
         var items = getCart().filter(function (it) {
@@ -4382,7 +4388,7 @@
     var box = document.getElementById('lvForm');
     if (!box) return;
     var noteClass = { warn: 'lv-note--warn', ok: 'lv-note--ok', strong: 'lv-note--strong' };
-    var state = { veh: null, dossier: false, files: {}, cylindree: '', remun: false,
+    var state = { veh: null, dossier: false, files: {}, cylindree: '', remun: false, filmConsent: false,
                   contact: { name: '', email: '', phone: '' }, consent: false, submitted: false };
     // Pré-remplissage depuis le compte connecté (email au minimum).
     try { if (typeof _currentUser !== 'undefined' && _currentUser) {
@@ -4570,6 +4576,7 @@
               + '<label class="lv-field"><span>Téléphone / WhatsApp</span><input type="tel" id="lvPhone" value="' + escapeHTML(state.contact.phone) + '" maxlength="30" placeholder="0690…"></label>'
               + '</div>');
             h.push('<label class="lv-consent"><input type="checkbox" id="lvConsent"' + (state.consent ? ' checked' : '') + '> <span>J\'autorise Pirates Tools à traiter mes documents (pièce d\'identité, permis, assurance…) dans le seul but de vérifier mon éligibilité au service de livraison. Je peux demander leur suppression à tout moment. <a href="#/confidentialite">Politique de confidentialité</a>.</span></label>');
+            h.push('<label class="lv-consent"><input type="checkbox" id="lvFilmConsent"' + (state.filmConsent ? ' checked' : '') + '> <span>🎥 J\'accepte que les <strong>remises de colis puissent être filmées</strong>, par le client comme par moi, comme preuve mutuelle en cas de litige. Ces vidéos restent <strong>privées</strong> (jamais publiées, visibles de l\'administrateur seul) et sont <strong>supprimées une fois le litige clos</strong>. Toute remise se fait dans le respect mutuel.</span></label>');
             h.push('<div class="lv-cta" style="margin-top:1rem">'
               + '<button type="button" class="btn primary" id="lvSubmitDossier">Envoyer mon dossier (test)</button>'
               + '<span class="lv-cta__note" id="lvSubmitNote"></span></div>');
@@ -4627,16 +4634,19 @@
       var em = document.getElementById('lvEmail'); if (em) em.oninput = function () { state.contact.email = em.value; };
       var ph = document.getElementById('lvPhone'); if (ph) ph.oninput = function () { state.contact.phone = ph.value; };
       var cs = document.getElementById('lvConsent'); if (cs) cs.onchange = function () { state.consent = cs.checked; };
+      var fc = document.getElementById('lvFilmConsent'); if (fc) fc.onchange = function () { state.filmConsent = fc.checked; };
       var sub = document.getElementById('lvSubmitDossier');
       if (sub) sub.onclick = function () {
         if (nm) state.contact.name = nm.value; if (em) state.contact.email = em.value;
         if (ph) state.contact.phone = ph.value; if (cs) state.consent = cs.checked;
+        if (fc) state.filmConsent = fc.checked;
         var missing = [];
         if (piecesFor(state.veh).some(function (p) { return !state.files[p.id]; })) missing.push('toutes les pièces');
         if (state.veh === 'scooter' && !state.cylindree) missing.push('la cylindrée');
         if (!state.contact.name) missing.push('ton nom');
         if (!state.contact.email) missing.push('ton email');
         if (!state.consent) missing.push('le consentement (case à cocher)');
+        if (!state.filmConsent) missing.push('l\'accord de remise filmée (case 🎥)');
         var note = document.getElementById('lvSubmitNote');
         if (missing.length) { if (note) note.textContent = 'Il manque : ' + missing.join(', ') + '.'; return; }
         state.submitted = true; renderDynamic();  // DÉMO — aucun stockage, aucun envoi serveur
@@ -4731,6 +4741,102 @@
     return escapeHTML(c.status);
   }
 
+  // ── Vidéos de remise / litige (Firebase Storage, module chargé à la
+  // demande — 0 octet au boot). Le FICHIER part direct au Storage (rules :
+  // participants de la course seulement, ≤120 Mo, video/*) ; la référence est
+  // ensuite journalisée serveur (course-video). Vidéos PRIVÉES : lisibles par
+  // l'admin seul (URL signée), jamais publiées, supprimées à la clôture.
+  function lvUploadVideo(c, file, onProgress) {
+    if (!file || String(file.type).indexOf('video/') !== 0) return Promise.reject(new Error('Choisis une vidéo.'));
+    if (file.size > 100 * 1024 * 1024) return Promise.reject(new Error('Vidéo trop lourde (max 100 Mo) — filme plus court.'));
+    if (!_fb || !_fb.loadStorage) return Promise.reject(new Error('Connexion requise.'));
+    var ext = (String(file.name).split('.').pop() || 'mp4').toLowerCase().replace(/[^a-z0-9]/g, '') || 'mp4';
+    var path = 'courses/' + c.id + '/videos/' + Date.now() + '.' + ext;
+    return _fb.loadStorage().then(function (S) {
+      var task = S.uploadBytesResumable(S.ref(S.storage, path), file, { contentType: file.type });
+      return new Promise(function (resolve, reject) {
+        task.on('state_changed', function (snap) {
+          if (onProgress && snap.totalBytes) onProgress(Math.round(snap.bytesTransferred / snap.totalBytes * 100));
+        }, reject, function () { resolve(path); });
+      });
+    }).then(function (donePath) {
+      return jsonAuthHeaders().then(function (headers) {
+        return fetch(apiBaseUrl() + '/api/contact', {
+          method: 'POST', headers: headers,
+          body: JSON.stringify({ type: 'course-video', id: c.id, path: donePath })
+        });
+      }).then(function (r) { return r.json(); }).then(function (d) {
+        if (!d.ok) throw new Error(d.error || 'Enregistrement de la vidéo échoué');
+        return donePath;
+      });
+    });
+  }
+
+  // Bloc vidéo + litige commun aux deux espaces (client et livreur).
+  function lvVideoDisputeHtml(c) {
+    var litOpen = c.litige && c.litige.open;
+    var h = '<div class="lv-vid">';
+    if (litOpen) {
+      h += '<div class="lv-note lv-note--warn">⚠️ <strong>Litige en cours</strong> (ouvert par le '
+        + escapeHTML(c.litige.role || '?') + '). L\'administrateur examine les preuves — ajoute ta vidéo si tu en as une.</div>';
+    }
+    h += '<p class="lv-hint">🎥 Vidéo de la remise' + (litOpen ? ' / du litige' : '') + ' (optionnelle) : elle protège les <strong>deux</strong> parties. '
+      + 'Privée — visible de l\'administrateur seul, jamais publiée, supprimée à la clôture du litige.'
+      + (c.videosCount ? ' <strong>' + c.videosCount + ' vidéo' + (c.videosCount > 1 ? 's' : '') + ' déjà déposée' + (c.videosCount > 1 ? 's' : '') + '.</strong>' : '') + '</p>'
+      + '<input type="file" accept="video/*" capture="environment" class="lv-vid__file" hidden>'
+      + '<div class="lv-cta"><button type="button" class="btn lv-vid__btn">🎥 Ajouter une vidéo</button>'
+      + '<span class="lv-cta__note lv-vid__st" aria-live="polite"></span></div>';
+    if (!litOpen) {
+      h += '<details class="lv-dispute"><summary>⚠️ Un problème avec cette livraison ? Ouvrir un litige</summary>'
+        + '<textarea class="lv-dispute__msg" maxlength="1000" rows="3" placeholder="Décris précisément le problème (min. 10 caractères)…"></textarea>'
+        + '<div class="lv-cta"><button type="button" class="btn lv-dispute__send">Ouvrir le litige</button>'
+        + '<span class="lv-cta__note lv-dispute__st" aria-live="polite"></span></div></details>';
+    }
+    h += '</div>';
+    return h;
+  }
+
+  function wireVideoDispute(root, c, rerender) {
+    var box = root.querySelector('.lv-vid');
+    if (!box) return;
+    var btn = box.querySelector('.lv-vid__btn');
+    var file = box.querySelector('.lv-vid__file');
+    var st = box.querySelector('.lv-vid__st');
+    if (btn && file) {
+      btn.onclick = function () { file.click(); };
+      file.onchange = function () {
+        var f = file.files && file.files[0];
+        if (!f) return;
+        btn.disabled = true;
+        lvUploadVideo(c, f, function (pct) { if (st) st.textContent = '⏫ Envoi… ' + pct + ' %'; })
+          .then(function () {
+            toast('🎥 Vidéo déposée — privée, visible de l\'administrateur seul', 'success');
+            rerender();
+          })
+          .catch(function (e) {
+            btn.disabled = false;
+            if (st) st.textContent = '❌ ' + ((e && e.message) || 'Envoi échoué');
+          });
+      };
+    }
+    var send = box.querySelector('.lv-dispute__send');
+    if (send) send.onclick = function () {
+      var msg = box.querySelector('.lv-dispute__msg');
+      var dst = box.querySelector('.lv-dispute__st');
+      send.disabled = true;
+      if (dst) dst.textContent = 'Ouverture…';
+      jsonAuthHeaders().then(function (headers) {
+        return fetch(apiBaseUrl() + '/api/contact', {
+          method: 'POST', headers: headers,
+          body: JSON.stringify({ type: 'course-dispute', id: c.id, message: msg ? msg.value : '' })
+        });
+      }).then(function (r) { return r.json(); }).then(function (d) {
+        if (d.ok) { toast('⚠️ Litige ouvert — l\'administrateur est prévenu par email', 'success'); rerender(); }
+        else { send.disabled = false; if (dst) dst.textContent = '❌ ' + (d.error || 'Erreur'); }
+      }).catch(function () { send.disabled = false; if (dst) dst.textContent = 'Erreur réseau.'; });
+    };
+  }
+
   function renderCourierSpace() {
     lvGetRole().then(function (isC) {
       if (!isC) { location.hash = '#/mes-livraisons'; return; }
@@ -4812,9 +4918,13 @@
             + '<button type="button" class="btn" id="courierPhoto2Btn">🏗️ Photo du chantier (colis posés, vue large)</button></div>'
             + '<div class="lv-cta"><button type="button" class="btn primary" id="courierProofBtn" disabled>✅ Marquer livrée</button>'
             + '<span class="lv-cta__note" id="courierProofSt" aria-live="polite"></span></div>'
-            + '</div>' : '');
+            + '</div>' : '')
+        // Vidéo de remise + litige (protection mutuelle — voir consentement)
+        + (c.acceptedByMe && ['acceptee', 'livree', 'terminee'].indexOf(c.status) !== -1
+          ? lvVideoDisputeHtml(c) : '');
       wireAccept(det);
       wireProof(det, c);
+      wireVideoDispute(det, c, renderCourierSpace);
       det.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
     function wireAccept(root) {
@@ -5053,6 +5163,10 @@
           + '<span class="lv-cta__note" id="clientConfirmSt" aria-live="polite"></span></div>'
           + '</div>';
       }
+      // Vidéo + litige côté CLIENT (dès qu'un livreur est impliqué)
+      if (c.mine && ['acceptee', 'livree', 'terminee'].indexOf(c.status) !== -1) {
+        h += lvVideoDisputeHtml(c);
+      }
       if (c.rating) {
         h += '<div class="lv-note lv-note--ok" style="margin-top:.7rem">⭐ Ta note : <strong>' + stars(c.rating) + '</strong>'
           + (c.ratingComment ? '<br>« ' + escapeHTML(c.ratingComment) + ' »' : '') + '</div>';
@@ -5069,6 +5183,7 @@
         h += '<p class="lv-hint" style="margin-top:.6rem">Tu pourras noter ton livreur dès qu\'il aura pris la course.</p>';
       }
       det.innerHTML = h;
+      wireVideoDispute(det, c, renderClientDeliveries);
       // QR du code de remise (généré 100 % en local — ensureQRLib, jamais de tiers)
       var qrBox = det.querySelector('#clientCodeQR');
       if (qrBox && c.code) {
@@ -9838,6 +9953,43 @@
       }).join('');
     }).catch(function (e) { rEl.innerHTML = '<p class="admin-error">Erreur : ' + escapeHTML(e.message) + '</p>'; });
 
+    // Litiges & vidéos (privées — liens signés 1 h ; clôture = suppression)
+    var dEl = document.getElementById('adminCourierDisputes');
+    if (dEl) adminGet('course-disputes').then(function (data) {
+      var list = data.disputes || [];
+      if (!list.length) { dEl.innerHTML = '<p class="admin-hint">Aucun litige ni vidéo pour l\'instant.</p>'; return; }
+      dEl.innerHTML = list.map(function (d) {
+        var lit = d.litige;
+        var vids = (d.videos || []).map(function (v, i) {
+          var when = v.at ? new Date(v.at).toLocaleString('fr-FR') : '';
+          return v.url
+            ? '<a href="' + escapeHTML(v.url) + '" target="_blank" rel="noopener noreferrer">🎥 Vidéo ' + (i + 1) + ' (' + escapeHTML(v.role || '?') + (when ? ' · ' + escapeHTML(when) : '') + ') ↗</a>'
+            : '<em>🎥 Vidéo ' + (i + 1) + ' (' + escapeHTML(v.role || '?') + ') — fichier indisponible (Storage non activé ?)</em>';
+        }).join('<br>');
+        return '<div class="admin-app admin-app--dispute">'
+          + '<div class="admin-app__head"><strong>' + (lit && lit.open ? '⚠️ LITIGE OUVERT' : (lit ? '✅ Litige clos' : '🎥 Vidéos')) + '</strong>'
+          + '<span class="admin-app__tier">Zone ' + d.zone + ' · ' + d.prix + ' € · ' + escapeHTML(d.status || '') + (d.escrow ? ' · escrow ' + escapeHTML(d.escrow) : '') + '</span></div>'
+          + '<div class="admin-app__line"><span>Course</span> ' + escapeHTML(d.id) + ' — ' + escapeHTML(d.address || '') + '</div>'
+          + '<div class="admin-app__line"><span>Client</span> ' + escapeHTML(d.artisanEmail || '—') + ' · <span>Livreur</span> ' + escapeHTML(d.courierEmail || '—') + '</div>'
+          + (lit && lit.message ? '<div class="admin-app__line"><span>Motif (' + escapeHTML(lit.role || '?') + ')</span> « ' + escapeHTML(lit.message) + ' »</div>' : '')
+          + (vids ? '<div class="admin-app__line"><span>Vidéos</span> ' + vids + '</div>' : '')
+          + (lit && lit.open
+            ? '<div class="admin-app__actions"><button type="button" class="btn primary" data-dispute-close="' + escapeHTML(d.id) + '">✅ Clore le litige (supprime les vidéos)</button></div>'
+            : '')
+          + '</div>';
+      }).join('');
+      dEl.querySelectorAll('[data-dispute-close]').forEach(function (b) {
+        b.onclick = function () {
+          var decision = prompt('Décision (notée dans le dossier de la course) :', '');
+          if (decision === null) return;
+          b.disabled = true;
+          adminPostType('course-dispute-close', { id: b.getAttribute('data-dispute-close'), decision: decision })
+            .then(function () { loadAdminCouriers(); })
+            .catch(function (e) { b.disabled = false; alert('Erreur : ' + e.message); });
+        };
+      });
+    }).catch(function (e) { dEl.innerHTML = '<p class="admin-error">Erreur : ' + escapeHTML(e.message) + '</p>'; });
+
     var el = document.getElementById('adminCouriersBody');
     if (!el) return;
     el.innerHTML = '<p class="admin-loading">Chargement…</p>';
@@ -10097,6 +10249,9 @@
       + '<div id="adminCourierBareme"><p class="admin-loading">Chargement…</p></div>'
       + '<h2 class="admin-subtitle">⭐ Avis clients sur les livreurs</h2>'
       + '<div id="adminCourierRatings"><p class="admin-loading">Chargement…</p></div>'
+      + '<h2 class="admin-subtitle">⚠️ Litiges & vidéos de remise</h2>'
+      + '<p class="admin-hint">Vidéos PRIVÉES (client/livreur) lisibles ici uniquement, via lien signé 1 h. Engagement : jamais divulguées, effacées à la clôture du litige. Clore un litige supprime définitivement ses vidéos du Storage.</p>'
+      + '<div id="adminCourierDisputes"><p class="admin-loading">Chargement…</p></div>'
       + '<h2 class="admin-subtitle">Dossiers livreurs</h2>'
       + '<p class="admin-hint">Candidatures coursier reçues via « Devenir Livreur ». Vérifie les pièces (identité, permis, assurance, capacité transport…) puis valide ou refuse. Le service est INACTIF tant que le module n\'est pas ouvert : cette liste sera vide jusqu\'au lancement.</p>'
       + '<div id="adminCouriersBody"><p class="admin-loading">Chargement…</p></div>'

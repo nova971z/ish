@@ -130,7 +130,19 @@ if (!isConfigured) {
     query: query,
     orderBy: orderBy,
     limit: limit,
-    serverTimestamp: serverTimestamp
+    serverTimestamp: serverTimestamp,
+    // Storage (vidéos de remise/litige) : module chargé À LA DEMANDE
+    // uniquement (aucun octet au boot — même principe que la 3D).
+    loadStorage: function () {
+      return import("https://www.gstatic.com/firebasejs/10.13.2/firebase-storage.js")
+        .then(function (m) {
+          return {
+            storage: m.getStorage(app),
+            ref: m.ref,
+            uploadBytesResumable: m.uploadBytesResumable
+          };
+        });
+    }
   };
 }
 

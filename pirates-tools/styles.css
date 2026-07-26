@@ -8003,3 +8003,9 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-proof__cell img { width: 100%; border-radius: 10px; border: 1px solid rgba(255,255,255,.15); display: block; }
 .lv-proof__cell figcaption { font-size: .78rem; color: var(--muted, #c9c9d9); }
 .lv-scenefield .lv-proof__img img { max-width: 220px; }
+/* Vidéo de remise + litige (protection mutuelle client/livreur) */
+.lv-vid { margin-top: .8rem; padding: .8rem .9rem; border: 1px solid rgba(255,255,255,.14); border-radius: 12px; display: grid; gap: .55rem; background: rgba(0,0,0,.18); }
+.lv-dispute { margin-top: .2rem; }
+.lv-dispute summary { cursor: pointer; color: #f87171; font-weight: 700; font-size: .9rem; }
+.lv-dispute .lv-dispute__msg { width: 100%; box-sizing: border-box; margin-top: .55rem; padding: .6rem .8rem; border-radius: 10px; border: 1px solid rgba(248,113,113,.45); background: rgba(0,0,0,.25); color: #fff; font: inherit; resize: vertical; }
+.lv-consent--film { border: 1px dashed rgba(242,193,78,.45); border-radius: 10px; padding: .6rem .7rem; background: rgba(242,193,78,.05); }

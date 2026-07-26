@@ -61,7 +61,7 @@ module.exports = async function handler(req, res) {
   if (body.type === 'course-create' || body.type === 'course-list' || body.type === 'course-accept'
       || body.type === 'courier-status' || body.type === 'course-rate'
       || body.type === 'course-deliver' || body.type === 'course-confirm' || body.type === 'course-proof'
-      || body.type === 'course-scene') {
+      || body.type === 'course-scene' || body.type === 'course-video' || body.type === 'course-dispute') {
     return handleCourses(req, body, { apiKey, from, ownerEmail }, res);
   }
 
@@ -492,6 +492,8 @@ async function handleCourses(req, body, cfg, res) {
         feeCents: c.feeCents || 0, amountCents: c.amountCents || 0,
         hasProof: !!c.proofPhoto || !!c.hasProof,
         hasScene: !!c.hasScene,
+        videosCount: (c.videos || []).length,
+        litige: c.litige ? { open: !!c.litige.open, role: c.litige.role || '' } : null,
         createdAt: c.createdAt && c.createdAt.toMillis ? c.createdAt.toMillis() : null
       };
       // CODE DE REMISE : visible UNIQUEMENT par le client qui a commandé —
@@ -701,6 +703,61 @@ async function handleCourses(req, body, cfg, res) {
     snap.forEach((p) => { if (photos.hasOwnProperty(p.id)) photos[p.id] = (p.data() || {}).data || null; });
     if (!photos.remise && c.proofPhoto) photos.remise = c.proofPhoto;   // courses d'avant le passage en sous-collection
     return res.status(200).json({ ok: true, id, photos, photo: photos.remise });
+  }
+
+  // ── Vidéo déposée (remise/litige) : enregistrer la référence ──
+  // Le FICHIER part directement dans Firebase Storage (SDK client, gouverné
+  // par storage.rules : participants de la course seulement, ≤120 Mo, video/*).
+  // Ici on ne journalise que le CHEMIN dans le doc course — l'admin liste et
+  // lit via URL signée (jamais de lecture publique), et supprime tout à la
+  // clôture du litige.
+  if (body.type === 'course-video') {
+    const id = String(body.id || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 64);
+    const path = String(body.path || '').slice(0, 300);
+    if (!id) return res.status(400).json({ ok: false, error: 'id requis' });
+    if (path.indexOf('courses/' + id + '/videos/') !== 0) {
+      return res.status(400).json({ ok: false, error: 'Chemin vidéo invalide.' });
+    }
+    const ref = db.collection('courses').doc(id);
+    const d = await ref.get();
+    if (!d.exists) return res.status(404).json({ ok: false, error: 'Course introuvable.' });
+    const c = d.data();
+    const role = c.artisanUid === uid ? 'client' : (c.courierUid === uid ? 'livreur' : null);
+    if (!role) return res.status(403).json({ ok: false, error: 'Accès refusé.' });
+    if ((c.videos || []).length >= 6) return res.status(409).json({ ok: false, error: 'Limite de 6 vidéos atteinte sur cette course.' });
+    await ref.update({
+      videos: admin.firestore.FieldValue.arrayUnion({ path, by: uid, role, at: new Date() })
+    });
+    return res.status(200).json({ ok: true, id });
+  }
+
+  // ── Ouvrir un LITIGE (client OU livreur de la course) ──
+  // Gèle la situation, alerte l'owner, ouvre le dépôt de vidéos des deux
+  // côtés. Clôture par l'admin uniquement (les vidéos sont alors effacées).
+  if (body.type === 'course-dispute') {
+    const id = String(body.id || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 64);
+    const message = String(body.message || '').trim().slice(0, 1000);
+    if (!id) return res.status(400).json({ ok: false, error: 'id requis' });
+    if (message.length < 10) return res.status(400).json({ ok: false, error: 'Décris le problème (au moins 10 caractères).' });
+    const ref = db.collection('courses').doc(id);
+    const d = await ref.get();
+    if (!d.exists) return res.status(404).json({ ok: false, error: 'Course introuvable.' });
+    const c = d.data();
+    const role = c.artisanUid === uid ? 'client' : (c.courierUid === uid ? 'livreur' : null);
+    if (!role) return res.status(403).json({ ok: false, error: 'Accès refusé.' });
+    if (c.litige && c.litige.open) return res.status(409).json({ ok: false, error: 'Un litige est déjà ouvert sur cette course.' });
+    await ref.update({ litige: { open: true, by: uid, role, message, at: new Date() } });
+    if (cfg.ownerEmail) {
+      await coursesLib.sendMail(cfg.ownerEmail,
+        '⚠️ LITIGE ouvert sur une course — ' + id,
+        '<p>Un litige vient d\'être ouvert par le <strong>' + role + '</strong>.</p>'
+        + '<p>Course : ' + coursesLib.escapeHtml(id) + '<br>📍 ' + coursesLib.escapeHtml(c.address || '')
+        + '<br>💶 ' + (c.prix || '?') + ' € — escrow : ' + coursesLib.escapeHtml(c.escrow || 'n/a') + '</p>'
+        + '<p>Message : « ' + coursesLib.escapeHtml(message) + ' »</p>'
+        + '<p>Ouvre l\'admin → Livreurs → Litiges pour voir les photos/vidéos et trancher. '
+        + 'Les vidéos restent privées et seront effacées à la clôture.</p>');
+    }
+    return res.status(200).json({ ok: true, id });
   }
 
   // ── Noter le livreur (client UNIQUEMENT, sa propre course, une seule fois) ──

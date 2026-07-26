@@ -287,6 +287,48 @@ module.exports = async function handler(req, res) {
         return res.status(200).json({ ok: true, ratings });
       }
 
+      // ── Litiges & vidéos de remise (admin SEUL — jamais de lecture client).
+      // Vidéos servies en URL SIGNÉE temporaire (1 h) depuis Firebase Storage.
+      // Engagement : privées, jamais divulguées, effacées à la clôture. ──
+      if (type === 'course-disputes') {
+        const snap = await db.collection('courses').orderBy('createdAt', 'desc').limit(200).get()
+          .catch(() => db.collection('courses').limit(200).get())
+          .catch(() => null);
+        const bucketName = process.env.FIREBASE_STORAGE_BUCKET || 'pirates-tools.firebasestorage.app';
+        let bucket = null;
+        try { bucket = admin.storage().bucket(bucketName); } catch (e) { console.warn('[admin] storage indisponible:', e.message); }
+        const disputes = [];
+        if (snap) {
+          for (const doc of snap.docs) {
+            const c = doc.data() || {};
+            const hasVideos = (c.videos || []).length > 0;
+            const hasDispute = !!(c.litige && (c.litige.open || c.litige.closedAt));
+            if (!hasVideos && !hasDispute) continue;
+            const videos = [];
+            for (const v of (c.videos || [])) {
+              let url = null;
+              if (bucket) {
+                try {
+                  const [signed] = await bucket.file(v.path).getSignedUrl({ action: 'read', expires: Date.now() + 3600 * 1000 });
+                  url = signed;
+                } catch (e) { /* fichier absent / Storage non activé */ }
+              }
+              videos.push({ role: v.role, at: v.at && v.at.toMillis ? v.at.toMillis() : null, url });
+            }
+            disputes.push({
+              id: doc.id, status: c.status, address: c.address || '', prix: c.prix || 0, zone: c.zone || 0,
+              escrow: c.escrow || null, artisanEmail: c.artisanEmail || '', courierEmail: c.courierEmail || '',
+              litige: c.litige ? {
+                open: !!c.litige.open, role: c.litige.role || '', message: c.litige.message || '',
+                at: c.litige.at && c.litige.at.toMillis ? c.litige.at.toMillis() : null
+              } : null,
+              videos
+            });
+          }
+        }
+        return res.status(200).json({ ok: true, disputes });
+      }
+
       // ── Dossiers livreurs (service coursier — validation manuelle option B).
       // Vide tant que le service est inactif (aucune candidature écrite). ──
       if (type === 'courier-applications') {
@@ -551,6 +593,36 @@ module.exports = async function handler(req, res) {
     } catch (err) {
       console.error('[api/admin] courier-review failed:', err.message);
       return res.status(500).json({ ok: false, error: 'courier-review échoué' });
+    }
+  }
+
+  // Clôture d'un litige : les vidéos sont EFFACÉES de Storage (engagement :
+  // privées, conservées le temps du litige seulement) et la trace du litige
+  // passe en « clos » (qui/quand/décision restent dans le doc course).
+  if (req.method === 'POST' && ((req.query && req.query.type) === 'course-dispute-close')) {
+    try {
+      const id = String((req.body || {}).id || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 64);
+      const decision = String((req.body || {}).decision || '').slice(0, 500);
+      if (!id) return res.status(400).json({ ok: false, error: 'id requis' });
+      const ref = db.collection('courses').doc(id);
+      const d = await ref.get();
+      if (!d.exists) return res.status(404).json({ ok: false, error: 'course introuvable' });
+      const c = d.data() || {};
+      let videosDeleted = 0;
+      try {
+        const bucketName = process.env.FIREBASE_STORAGE_BUCKET || 'pirates-tools.firebasestorage.app';
+        const bucket = admin.storage().bucket(bucketName);
+        await bucket.deleteFiles({ prefix: 'courses/' + id + '/videos/' });
+        videosDeleted = (c.videos || []).length;
+      } catch (e) { console.warn('[admin] suppression vidéos:', e.message); }
+      await ref.update({
+        videos: [],
+        litige: Object.assign({}, c.litige || {}, { open: false, closedAt: new Date(), decision: decision || '' })
+      });
+      return res.status(200).json({ ok: true, id, videosDeleted });
+    } catch (err) {
+      console.error('[api/admin] course-dispute-close failed:', err.message);
+      return res.status(500).json({ ok: false, error: 'course-dispute-close échoué' });
     }
   }
 

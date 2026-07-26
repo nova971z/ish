@@ -1,0 +1,36 @@
+rules_version = '2';
+
+// Firebase STORAGE — vidéos de remise/litige des courses UNIQUEMENT.
+// Principe identique à firestore.rules : DEFAULT-DENY, ouverture minimale.
+//
+// Écriture : seul un PARTICIPANT de la course (artisan qui a commandé OU
+// livreur qui a accepté — vérifié par lecture croisée du doc Firestore) peut
+// déposer une vidéo, ≤ 120 Mo, type video/* obligatoire.
+// Lecture : PERSONNE côté client. Les vidéos ne sortent que par l'admin
+// (Admin SDK → URL signée temporaire, api/admin.js type=course-disputes).
+// Suppression : personne côté client — l'admin supprime à la clôture du
+// litige (engagement : vidéos privées, jamais divulguées, effacées après).
+//
+// Déploiement : `npx firebase deploy --only storage` (Storage doit être
+// activé une fois dans la console Firebase → Build → Storage).
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    match /courses/{courseId}/videos/{fileName} {
+      allow write: if request.auth != null
+        && request.resource.size < 120 * 1024 * 1024
+        && request.resource.contentType.matches('video/.*')
+        && (
+          firestore.get(/databases/(default)/documents/courses/$(courseId)).data.artisanUid == request.auth.uid
+          || firestore.get(/databases/(default)/documents/courses/$(courseId)).data.courierUid == request.auth.uid
+        );
+      allow read, delete: if false;
+    }
+
+    // Tout le reste : fermé.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
