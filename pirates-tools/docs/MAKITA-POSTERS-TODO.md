@@ -5,10 +5,13 @@
 >
 > ⛔ RÈGLE POSTER GRAVÉE (erreur commise le 26/07, ne PLUS refaire) : les PNG
 > envoyés par l'user sont TRANSPARENTS (pas de fond). On PRÉSERVE l'alpha
-> (trim marges + resize 780, AUCUN fond ajouté) → l'outil se pose sur le noir
-> du hero fiche (#0a0f14). NE JAMAIS compositer sur un dégradé gris (ça fait un
-> pavé clair visible). Détourage seulement si le fichier a un vrai fond opaque
-> (blanc/brun) → alors détourer VERS transparent, pas vers un fond gris.
+> (trim marges + AUCUN fond ajouté) → l'outil se pose sur le noir du hero fiche
+> (#0a0f14). NE JAMAIS compositer sur un dégradé gris (ça fait un pavé clair
+> visible). Détourage seulement si le fichier a un vrai fond opaque (blanc/brun)
+> → alors détourer VERS transparent, pas vers un fond gris.
+> QUALITÉ : régénérer à 1400px max (côté long), webp qualité 0.92. JAMAIS
+> 780px/0.82 (pixelisé — erreur 26/07 sur le souffleur). Pipeline de référence :
+> scratchpad/regen-hq.mjs (trim si transparent, resize 1400, webp 0.92, 0 fond).
 
 1. [~] (poster OK, specs/prix en attente) DVC560Z — Aspirateur 36V BL (2x18 V) Li-Ion 120 mbar (Produit seul)
 2. [x] DTW1001Z — Boulonneuse à chocs 18V LXT 3/4" 1050 Nm brushless (machine seule)
