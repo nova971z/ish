@@ -7890,3 +7890,9 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-banner__isles svg path { fill: none; stroke: #f2c14e; stroke-width: 2.4; stroke-linejoin: round; stroke-linecap: round;
   filter: drop-shadow(0 0 3px rgba(242,193,78,.9)) drop-shadow(0 0 7px rgba(242,193,78,.4)); }
 @media (max-width: 480px) { .lv-banner__isles svg { width: 30px; height: 30px; } .lv-banner__isles { gap: .5rem; } }
+/* Panneau tarifs livreur : l'île du client (grand contour doré, futur support des zones) */
+.lv-remun-isle { display: flex; justify-content: center; margin: .3rem 0 .2rem; }
+.lv-remun-isle svg { width: min(240px, 60vw); height: min(240px, 60vw); overflow: visible; }
+.lv-remun-isle svg path { fill: none; stroke: #f2c14e; stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round;
+  filter: drop-shadow(0 0 4px rgba(242,193,78,.9)) drop-shadow(0 0 12px rgba(242,193,78,.5)); }
+.lv-remun-isle__name { text-align: center; margin: 0; font-weight: 800; color: #ffd76a; letter-spacing: .03em; }

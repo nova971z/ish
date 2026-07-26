@@ -4003,7 +4003,16 @@
         // Bouton rémunération (barème par distance) — plein largeur, vert néon.
         // La carte interactive + la grille de prix arrivent (prochain message user).
         h.push('<button type="button" class="lv-remun" id="lvRemun">💶 Combien je vais gagner&nbsp;? — Voir le barème par distance</button>');
-        if (state.remun) h.push('<div class="lv-card lv-remun-panel">🚧 Le <strong>barème de rémunération selon la distance</strong> arrive très bientôt : une <strong>carte interactive de ta zone</strong> où tu verras combien te rapporte chaque livraison. On y travaille.</div>');
+        if (state.remun) {
+          // Panneau tarifs : UNIQUEMENT l'île du compte du client (territoire
+          // sélectionné) — c'est à l'intérieur de ce contour que les zones
+          // tarifaires seront délimitées (carte interactive à venir).
+          var terr = getTerritory(_currentTerritory) || getTerritory(DEFAULT_TERRITORY);
+          h.push('<div class="lv-card lv-remun-panel">'
+            + '<div class="lv-remun-isle" id="lvRemunIsle" data-isle="' + terr.code + '" aria-label="' + escapeHTML(terr.name) + '"></div>'
+            + '<p class="lv-remun-isle__name">' + escapeHTML(terr.name) + '</p>'
+            + '<p style="margin:.4rem 0 0">🚧 Le <strong>barème de rémunération selon la distance</strong> arrive très bientôt : les <strong>zones tarifaires</strong> seront tracées directement sur ta carte, et tu verras combien te rapporte chaque livraison. On y travaille.</p></div>');
+        }
         // Coût + délai des démarches, JUSTE EN DESSOUS des cartes (position validée
         // par l'user), maj au changement de véhicule.
         var c = LV_COSTS[state.veh];
@@ -4109,6 +4118,13 @@
       }
       var remun = document.getElementById('lvRemun');
       if (remun) remun.onclick = function () { state.remun = !state.remun; renderDynamic(); };
+      // Île du client dans le panneau tarifs : clone le contour GeoJSON depuis
+      // le sélecteur d'inscription (source unique des tracés).
+      var remIsle = document.getElementById('lvRemunIsle');
+      if (remIsle) {
+        var srcIsle = document.querySelector('#regIslands .isl[data-isl="' + remIsle.getAttribute('data-isle') + '"] svg');
+        if (srcIsle) remIsle.appendChild(srcIsle.cloneNode(true));
+      }
       var cyl = document.getElementById('lvCyl');
       if (cyl) cyl.onchange = function () { state.cylindree = cyl.value; renderDynamic(); };
       var openDos = document.getElementById('lvOpenDossier');
