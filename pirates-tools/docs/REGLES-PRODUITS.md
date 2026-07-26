@@ -110,10 +110,19 @@ description_long  paragraphe + « Livrée dans toute la zone DOM-TOM. Octroi de 
   prix déjà correct 522,81 € = 454,62 × 1,15. DISTINCTION EXACTE : DHS900Z =
   machine COMPATIBLE AWS mais unité AWS Bluetooth NON incluse ; DHS900ZU =
   unité AWS INCLUSE. Specs quasi identiques sauf cette ligne.
-  ⚠️ DISCORDANCE cotébrico signalée à l'user : page principale DHS900ZU = 460,78 €
-  (solo), mais liste des déclinaisons = 450,00 € (« ZU en coffret avec AWS »),
-  même SKU. Prix gardé sur 460,78 (affichage principal + prix existant) ;
-  à confirmer par l'user si 450,00 est le vrai prix.
+  ✅ DISCORDANCE PRIX RÉSOLUE (3e capture user, 26/07) : la page produit
+  DHS900ZU confirme 460,78 € + « Module de connexion Bluetooth AWS inclus ».
+  Le 450,00 € de la liste des déclinaisons était une autre présentation ;
+  prix retenu = 460,78 → 529,90 € affiché. CORRECT, rien à changer.
+- **DJR187Z/DJR187ZK (scie sabre récipro, 26/07)** : même règle min-source
+  (comme DHS660). Paire variant DÉJÀ présente (fantômes) : nu DJR187Z 182,75 €
+  (→ 210,16, déjà correct) vs valise DJR187ZK 300,07 €. Le NU est le MOINS
+  cher → gardé comme fiche unique, MIGRÉ vers le modèle single-fiche (champs
+  variantGroup/variantRole/coffretSku RETIRÉS, `srcAltSkus: ["DJR187ZK"]`),
+  fiche coffret DJR187ZK SUPPRIMÉE, switch coffret standard +25 € (gros, 3,4 kg)
+  gère l'option valise. Poster user (outil nu, fond sombre) → djr187z.webp.
+  Specs remplies (bois 255/acier 130 mm, course 32 mm, 3000 c/min, pendulaire,
+  brushless, 3,4 kg). Catalogue 205→204. Catégorie « Scies ».
 - **DHS660Z/DHS660ZJ (25/07 tard)** : même règle générale appliquée — le NU est
   en RUPTURE SANS PRIX chez cotébrico, seule la déclinaison MAKPAC (ZJ) est
   cotée 253,90 € → fiche ZJ FUSIONNÉE/supprimée, `srcAltSkus: ["DHS660ZJ"]`
