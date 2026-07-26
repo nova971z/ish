@@ -4064,14 +4064,15 @@
       + '</div>';
   }
 
-  // ── Google Maps (livraison chantier) — chargé À LA DEMANDE, par ÎLE ────────
-  // ⚠️ Clé API à créer dans Google Cloud Console au lancement (restriction par
-  // referrer pirates-tools.com). Vide = la carte affiche un aperçu doré de
-  // l'île (contours GeoJSON) en attendant — tout le reste du bloc fonctionne.
-  // INTELLIGENT : centre automatiquement la carte sur l'île du visiteur
-  // (_currentTerritory : choisie à l'inscription/topbar, persistée localement
-  // → quelqu'un qui ouvre depuis la Martinique voit la carte de la Martinique).
-  var PT_GMAPS_KEY = '';
+  // ── Carte de livraison (LEAFLET + OpenStreetMap + services de l'ÉTAT) ──────
+  // Décision user 26/07 : PAS Google Maps. Pile 100 % gratuite/institutionnelle :
+  //  • Leaflet 1.9.4 VENDU en local (vendor/leaflet/, ~145 Ko, zéro CDN) ;
+  //  • fond de carte OpenStreetMap (routes complètes DOM-TOM) ;
+  //  • géocodage adresse = Base Adresse Nationale (api-adresse.data.gouv.fr,
+  //    service OFFICIEL de l'État, sans clé) ;
+  //  • itinéraire indicatif = OSRM (router.project-osrm.org, open-source).
+  // INTELLIGENT : centrée automatiquement sur l'île du visiteur
+  // (_currentTerritory, persistant → un client Martinique voit la Martinique).
   var ISLAND_MAP = {
     '971': { lat: 16.22,  lng: -61.53, zoom: 10, name: 'Guadeloupe' },
     '972': { lat: 14.64,  lng: -61.02, zoom: 11, name: 'Martinique' },
@@ -4079,32 +4080,52 @@
     '974': { lat: -21.13, lng: 55.53,  zoom: 10, name: 'La Réunion' },
     '976': { lat: -12.82, lng: 45.15,  zoom: 12, name: 'Mayotte' }
   };
-  var _gmapsPromise = null;
-  function ensureGoogleMaps() {
-    if (!PT_GMAPS_KEY) return Promise.reject(new Error('gmaps-key-missing'));
-    if (window.google && window.google.maps) return Promise.resolve();
-    if (_gmapsPromise) return _gmapsPromise;
-    _gmapsPromise = new Promise(function (resolve, reject) {
+  var LV_DEPOT = { lat: 16.2260, lng: -61.3823 };   // Sainte-Anne (départ courses 971)
+  var _leafletPromise = null;
+  function ensureLeaflet() {
+    if (window.L && window.L.map) return Promise.resolve();
+    if (_leafletPromise) return _leafletPromise;
+    _leafletPromise = new Promise(function (resolve, reject) {
+      var css = document.createElement('link');
+      css.rel = 'stylesheet'; css.href = 'vendor/leaflet/leaflet.css';
+      document.head.appendChild(css);
       var s = document.createElement('script');
-      s.src = 'https://maps.googleapis.com/maps/api/js?key=' + encodeURIComponent(PT_GMAPS_KEY) + '&loading=async';
-      s.async = true;
-      s.onload = function () { resolve(); };
-      s.onerror = function () { _gmapsPromise = null; reject(new Error('gmaps-load-failed')); };
+      s.src = 'vendor/leaflet/leaflet.js'; s.async = true;
+      s.onload = function () {
+        try { window.L.Icon.Default.prototype.options.imagePath = 'vendor/leaflet/images/'; } catch (_) {}
+        resolve();
+      };
+      s.onerror = function () { _leafletPromise = null; reject(new Error('leaflet-load-failed')); };
       document.head.appendChild(s);
     });
-    return _gmapsPromise;
+    return _leafletPromise;
+  }
+  function haversineKm(a, b) {
+    var R = 6371, dLat = (b.lat - a.lat) * Math.PI / 180, dLng = (b.lng - a.lng) * Math.PI / 180;
+    var s = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+      + Math.cos(a.lat * Math.PI / 180) * Math.cos(b.lat * Math.PI / 180) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    return 2 * R * Math.asin(Math.sqrt(s));
+  }
+  function lvZoneForKm(km) {
+    var radii = [10, 22, 34, 46];
+    for (var i = 0; i < radii.length; i++) if (km <= radii[i]) return LV_BAREME[i];
+    return null;   // hors zone
   }
 
   // Bloc livraison des fiches QUINCAILLERIE : carte de l'île du client +
-  // adresse + date + créneau (matin / après-midi / heure précise).
+  // adresse (géocodée BAN) + date + créneau (matin / après-midi / heure).
   function initPdpDelivery(product) {
     var box = document.getElementById('pdpDelivery');
     if (!box) return;
     var isle = ISLAND_MAP[_currentTerritory] || ISLAND_MAP['971'];
+    var is971 = !ISLAND_MAP[_currentTerritory] || _currentTerritory === '971';
     var zoneTxt = document.getElementById('pdpDelivZoneTxt');
-    if (zoneTxt) zoneTxt.innerHTML = '💶 Frais de livraison payés <strong>intégralement au livreur</strong>, selon la zone ('
-      + LV_BAREME.map(function (b) { return b.emoji + ' ' + b.prix + ' €'; }).join(' · ')
-      + ' — distance depuis Sainte-Anne). L\'itinéraire proposé au livreur est indicatif : il reste libre de sa route.';
+    function zoneBaseTxt() {
+      return '💶 Frais de livraison payés <strong>intégralement au livreur</strong>, selon la zone ('
+        + LV_BAREME.map(function (b) { return b.emoji + ' ' + b.prix + ' €'; }).join(' · ')
+        + ' — distance depuis Sainte-Anne). Tape ton adresse : ta zone s\'affiche. L\'itinéraire proposé au livreur est indicatif : il reste libre de sa route.';
+    }
+    if (zoneTxt) zoneTxt.innerHTML = zoneBaseTxt();
     // Créneau : l'input heure ne s'affiche qu'en mode « heure précise ».
     var hourWrap = document.getElementById('pdpDelivHourWrap');
     var radios = box.querySelectorAll('input[name="pdpDelivWhen"]');
@@ -4114,29 +4135,76 @@
         if (hourWrap) hourWrap.hidden = (mode !== 'heure');
       };
     }
-    // Carte : Google Maps si clé configurée, sinon aperçu doré de l'île (GeoJSON).
     var mapEl = document.getElementById('pdpDeliveryMap');
-    if (!mapEl || mapEl.dataset.ready === _currentTerritory) return;
-    mapEl.dataset.ready = _currentTerritory;
-    ensureGoogleMaps().then(function () {
-      var m = new google.maps.Map(mapEl, {
-        center: { lat: isle.lat, lng: isle.lng }, zoom: isle.zoom,
-        mapTypeControl: false, streetViewControl: false, fullscreenControl: false
-      });
-      mapEl._ptMap = m;
+    if (!mapEl) return;
+    ensureLeaflet().then(function () {
+      var map = mapEl._ptMap;
+      if (!map) {
+        mapEl.innerHTML = '';
+        map = window.L.map(mapEl, { scrollWheelZoom: false }).setView([isle.lat, isle.lng], isle.zoom);
+        window.L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>'
+        }).addTo(map);
+        if (is971) window.L.marker([LV_DEPOT.lat, LV_DEPOT.lng]).addTo(map).bindPopup('Départ des courses — Sainte-Anne');
+        mapEl._ptMap = map;
+      } else if (mapEl.dataset.isle !== _currentTerritory) {
+        map.setView([isle.lat, isle.lng], isle.zoom);
+      }
+      mapEl.dataset.isle = _currentTerritory;
+      setTimeout(function () { map.invalidateSize(); }, 60);
+
+      // Adresse → position (Base Adresse Nationale, service officiel de l'État).
+      var addr = document.getElementById('pdpDelivAddr');
+      if (addr && !addr._ptWired) {
+        addr._ptWired = true;
+        var geocode = function () {
+          var q = addr.value.trim();
+          if (q.length < 4) return;
+          fetch('https://api-adresse.data.gouv.fr/search/?q=' + encodeURIComponent(q)
+              + '&limit=1&lat=' + isle.lat + '&lon=' + isle.lng)
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+              var f = data && data.features && data.features[0];
+              if (!f) { if (zoneTxt) zoneTxt.innerHTML = '❓ Adresse introuvable — précise la commune (ex. « Rue X, Le Gosier »).<br>' + zoneBaseTxt(); return; }
+              var lng = f.geometry.coordinates[0], lat = f.geometry.coordinates[1];
+              var label = f.properties && f.properties.label || q;
+              if (mapEl._ptDest) map.removeLayer(mapEl._ptDest);
+              mapEl._ptDest = window.L.marker([lat, lng]).addTo(map).bindPopup(escapeHTML(label)).openPopup();
+              map.setView([lat, lng], 13);
+              if (is971) {
+                var km = haversineKm(LV_DEPOT, { lat: lat, lng: lng });
+                var z = lvZoneForKm(km);
+                if (zoneTxt) zoneTxt.innerHTML = z
+                  ? '📍 <strong>' + escapeHTML(label) + '</strong> — ' + km.toFixed(1) + ' km de Sainte-Anne → '
+                    + z.emoji + ' <strong>Zone ' + z.zone + ' : ' + z.prix + ' € de livraison</strong> (payés intégralement au livreur).'
+                  : '📍 <strong>' + escapeHTML(label) + '</strong> — ' + km.toFixed(1) + ' km : hors zone de livraison actuelle (max 46 km depuis Sainte-Anne).';
+                // Itinéraire INDICATIF (OSRM, open-source) — le livreur reste libre.
+                fetch('https://router.project-osrm.org/route/v1/driving/' + LV_DEPOT.lng + ',' + LV_DEPOT.lat + ';' + lng + ',' + lat + '?overview=full&geometries=geojson')
+                  .then(function (r) { return r.json(); })
+                  .then(function (rt) {
+                    var route = rt && rt.routes && rt.routes[0];
+                    if (!route) return;
+                    if (mapEl._ptRoute) map.removeLayer(mapEl._ptRoute);
+                    var coords = route.geometry.coordinates.map(function (c) { return [c[1], c[0]]; });
+                    mapEl._ptRoute = window.L.polyline(coords, { color: '#f2c14e', weight: 4, opacity: 0.85 }).addTo(map);
+                    map.fitBounds(mapEl._ptRoute.getBounds(), { padding: [28, 28] });
+                  }).catch(function () {});
+              }
+            }).catch(function () {});
+        };
+        addr.addEventListener('change', geocode);
+        addr.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); geocode(); } });
+      }
     }).catch(function () {
-      // Pas de clé (avant lancement) : aperçu doré = contour GeoJSON de l'île.
-      mapEl.innerHTML = '';
+      // Repli (Leaflet indisponible) : aperçu doré du contour de l'île.
+      if (mapEl.dataset.fallback) return;
+      mapEl.dataset.fallback = '1';
       var src = document.querySelector('#regIslands .isl[data-isl="' + (ISLAND_MAP[_currentTerritory] ? _currentTerritory : '971') + '"] svg');
       if (src) {
         var cl = src.cloneNode(true);
         mapEl.appendChild(cl);
         try { var bb = cl.getBBox(); cl.setAttribute('viewBox', (bb.x - 3) + ' ' + (bb.y - 3) + ' ' + (bb.width + 6) + ' ' + (bb.height + 6)); } catch (_) {}
       }
-      var note = document.createElement('p');
-      note.className = 'pdp-deliv-map__note';
-      note.innerHTML = '🗺️ Carte <strong>' + isle.name + '</strong> — le plan interactif Google Maps s\'active au lancement du service.';
-      mapEl.appendChild(note);
     });
   }
 

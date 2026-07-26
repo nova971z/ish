@@ -7939,3 +7939,8 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .pdp-deliv-form input[type=text], .pdp-deliv-form input[type=date], .pdp-deliv-form input[type=time] {
   padding: .6rem .8rem; border-radius: 10px; border: 1px solid rgba(255,255,255,.15); background: rgba(0,0,0,.25); color: #fff; font: inherit; width: 100%; box-sizing: border-box; }
 .pdp-deliv-when { display: flex; gap: .9rem; flex-wrap: wrap; padding-top: .4rem; }
+/* Espacement des blocs dynamiques du formulaire livreur (fix blocs collés) */
+#lvDynamic { display: grid; gap: 1rem; }
+#lvDynamic .lv-remun { margin: 0; }
+/* Leaflet dans notre thème sombre */
+.pdp-deliv-map .leaflet-container { width: 100%; height: 100%; border-radius: 16px; background: #0a0f14; }
