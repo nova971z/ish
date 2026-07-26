@@ -18,8 +18,8 @@
 13. [x] DMC300Z — Découpeuse / meuleuse compacte 18V LXT Ø76 mm brushless (machine seule) — SPECS (Makita/Cotébrico) + POSTER OK ✅
 14. [x] DTM52Z — Outil multifonctions oscillant 18V LXT brushless StarlockMax AVT (machine seule) — SPECS (Makita/Cotébrico) + POSTER OK ✅
 15. [x] DTP141Z — Visseuse 4 fonctions 18V LXT brushless (perçage/percussion/vissage/choc, machine seule) — SPECS + POSTER OK ✅
-16. [ ] DPV300Z — Ponceuse polisseuse 18V LXT Ø75 mm (Machine seule)
-17. [ ] DPV300ZJ — Ponceuse polisseuse 18V LXT Ø75 mm (Solo) en MAKPAC
+16. [x] DPV300Z — Ponceuse polisseuse 18V LXT Ø75 mm brushless (machine seule) — SPECS + POSTER OK ✅ (variante solo)
+17. [x] DPV300ZJ — Ponceuse polisseuse Ø75 mm en MAKPAC — SPECS + POSTER OK ✅ (fond blanc DÉTOURÉ sur fond sombre ; variante coffret de #16)
 18. [ ] DRV250ZJ — Riveteuse 18 V Li-Ion BL Ø 6,4 mm (Produit seul)
 19. [ ] DHS680ZJ — Scie circulaire 18V LXT Ø165 mm (Machine seule) en MAKPAC
 20. [ ] DJR189ZJ — Scie sabre récipro 18V LXT (Produit seul) en coffret MAKPAC
