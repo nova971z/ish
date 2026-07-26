@@ -1685,7 +1685,15 @@
         + '</div>'
         + '<span class="brand-card__name">' + escapeHTML(b) + '</span>'
         + '</button>';
-    }).join('');
+    }).join('')
+      // Bulle « Livraison quincaillerie » (service coursier) — pas une marque :
+      // navigue vers la page #/livraison (pas de sphère 3D, pas de filtre).
+      + '<button class="brand-card" data-brand="__livraison" style="animation-delay:' + (brandNames.length * 70) + 'ms">'
+      + '<div class="brand-card__ring">'
+      + '<div class="brand-card__bubble brand-card__bubble--liv" aria-hidden="true">🛵</div>'
+      + '</div>'
+      + '<span class="brand-card__name">Livraison quincaillerie</span>'
+      + '</button>';
 
     initBrandSpheres();
     // Re-observe newly inserted reveal targets (brands grid + section).
@@ -1694,6 +1702,7 @@
     $$('.brand-card', dom.brandGrid).forEach(function (btn) {
       btn.addEventListener('click', function () {
         var brand = btn.dataset.brand;
+        if (brand === '__livraison') { location.hash = '#/livraison'; return; }
         location.hash = '#/catalogue';
         // Slight delay so route change renders catalogue first
         setTimeout(function () {
@@ -3865,6 +3874,17 @@
   var LV_ROUTE_FACTOR = 1.62;  // route réelle ≈ 1,62 × vol d'oiseau (mesuré sur
                                // Sainte-Anne→Capesterre : 46 km route / 28,4 km)
 
+  // Aides RÉELLES pour financer les démarches (véhicules motorisés) — organismes
+  // officiels, liens directs. Affichées dans le cahier des charges scooter/moto.
+  var LV_AIDES = [
+    { name: 'CPF', desc: 'Finance le permis A1/A2 (plafond 900 €) et la formation capacité transport', url: 'https://www.moncompteformation.gouv.fr' },
+    { name: 'France Travail — AIF', desc: 'Aide Individuelle à la Formation : complète le CPF si tu es inscrit', url: 'https://www.francetravail.fr' },
+    { name: 'Mission Locale (16-25 ans)', desc: 'Accompagnement jeunes + aides permis + allocation CEJ', url: 'https://www.unml.info' },
+    { name: 'ADIE — microcrédit', desc: 'Prête jusqu\'à 12 000 € (véhicule, équipement, permis) — très présente en Outre-mer', url: 'https://www.adie.org' },
+    { name: 'ACRE', desc: 'Cotisations réduites de ~50 % ta 1re année de micro-entreprise', url: 'https://www.autoentrepreneur.urssaf.fr/portail/accueil/sinformer-sur-le-statut/toutes-les-aides.html' },
+    { name: 'Région Guadeloupe', desc: 'Aides régionales à la formation professionnelle des jeunes', url: 'https://www.regionguadeloupe.fr' }
+  ];
+
   // Pièces à TÉLÉVERSER (option B : dépôt + validation manuelle admin).
   // Le dossier passe en statut « en_attente » ; l'admin valide/refuse chaque
   // pièce. Architecture prête à brancher un vérificateur en direct plus tard.
@@ -4029,6 +4049,17 @@
       + '</div>';
   }
 
+  // Page vitrine « Livraison quincaillerie » : barème rendu depuis LV_BAREME
+  // (source unique — le panneau livreur affiche exactement les mêmes prix).
+  function renderLivraison() {
+    var box = document.getElementById('livraisonBareme');
+    if (!box) return;
+    box.innerHTML = LV_BAREME.map(function (b) {
+      return '<div class="lv-bareme__row"><span>' + b.emoji + ' Zone ' + b.zone + ' <em>(' + b.km + ' km)</em></span>'
+        + '<span class="lv-bareme__prix">' + b.prix + ' \u20ac</span></div>';
+    }).join('');
+  }
+
   function renderLivreur() {
     var box = document.getElementById('lvForm');
     if (!box) return;
@@ -4163,6 +4194,19 @@
           h.push('<h3 class="lv-h3">En plus, pour ' + v.label + '</h3><ul class="lv-docs">');
           v.docs.forEach(function (d) { h.push(lvDocItem(d)); });
           h.push('</ul>');
+          // Aides au financement (véhicules motorisés uniquement) : la
+          // formation + le permis + le véhicule peuvent être largement financés.
+          if (state.veh === 'scooter') {
+            h.push('<h3 class="lv-h3">💰 Tu n\'es pas obligé de tout payer de ta poche — les aides RÉELLES</h3>');
+            h.push('<p class="lv-hint" style="margin:0 0 .6rem">La formation capacité, le permis et même le véhicule peuvent être financés en grande partie. Clique, vérifie tes droits, monte ton dossier :</p>');
+            h.push('<div class="lv-insurers">');
+            LV_AIDES.forEach(function (a) {
+              h.push('<a class="lv-ins" href="' + escapeHTML(a.url) + '" target="_blank" rel="noopener noreferrer">'
+                + '<span class="lv-ins__name">' + escapeHTML(a.name) + '</span>'
+                + '<span class="lv-ins__desc">' + escapeHTML(a.desc) + '</span></a>');
+            });
+            h.push('</div>');
+          }
         } else {
           h.push('<p class="lv-hint">✅ Rien de plus que le socle commun — c\'est le véhicule le plus simple administrativement.</p>');
         }
@@ -4549,7 +4593,7 @@
   // ── Router (hash-based SPA) ────────────────────────────────
 
   var ROUTES = ['/', '/catalogue', '/produit', '/devis', '/compte', '/auth', '/abonnement',
-                '/admin', '/merci', '/contact', '/favoris', '/artisans', '/rejoindre', '/livreur',
+                '/admin', '/merci', '/contact', '/favoris', '/artisans', '/rejoindre', '/livreur', '/livraison',
                 '/mentions-legales', '/confidentialite', '/cgv'];
 
   // Territory landing slugs (keys) → territory codes (values).
@@ -4755,6 +4799,9 @@
         break;
       case '/livreur':
         renderLivreur();
+        break;
+      case '/livraison':
+        renderLivraison();
         break;
     }
 
@@ -10449,6 +10496,9 @@
         break;
       case '/produit':
         // product meta is set in renderPDP once we know which product
+        break;
+      case '/livraison':
+        setDocMeta('Livraison quincaillerie \u2014 ' + BASE_TITLE, 'Fais-toi livrer ta quincaillerie directement sur ton chantier en Guadeloupe. Tarifs fixes par zone, livreurs locaux. Ouverture le 1er janvier.');
         break;
       case '/devis':
         setDocMeta('Panier / devis — ' + BASE_TITLE, 'Finalise ton devis et passe commande chez Pirates Tools.');

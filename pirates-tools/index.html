@@ -44,7 +44,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=466">
+  <link rel="stylesheet" href="styles.css?v=467">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -1038,6 +1038,39 @@
       </div>
     </section>
 
+    <!-- LIVRAISON QUINCAILLERIE (page vitrine du service coursier — ouverture
+         1er janvier ; barème rendu par renderLivraison() depuis LV_BAREME). -->
+    <section id="view-livraison" class="view hidden" data-route="/livraison" role="region" aria-labelledby="livraison-h1">
+      <div class="container">
+        <header class="lv-header">
+          <h1 id="livraison-h1" tabindex="-1">🛵 Livraison quincaillerie</h1>
+          <p class="lv-sub">Plus besoin de perdre une journée de chantier pour trois paquets de vis&nbsp;: <strong>tu commandes, un livreur te l'apporte directement sur ton chantier</strong>, à l'heure que tu choisis.</p>
+        </header>
+        <div class="lv-banner lv-banner--green">🟢 <strong>Ce service ouvre le 1er janvier</strong> en Guadeloupe. Les tarifs ci-dessous sont déjà fixés — transparents pour tout le monde.</div>
+
+        <div class="lv-card">
+          <h2 class="lv-h2">Comment ça marche&nbsp;?</h2>
+          <ol class="liv-steps">
+            <li><strong>Tu commandes ta quincaillerie</strong> sur Pirates Tools (référence + quantité) et tu indiques l'adresse du chantier.</li>
+            <li><strong>Tu choisis QUAND</strong> : dans la journée, l'après-midi, ou à une heure précise — c'est toi qui décides.</li>
+            <li><strong>Un livreur accepte ta course</strong> et t'apporte tout sur le chantier. Tu suis sa position en direct.</li>
+          </ol>
+        </div>
+
+        <div class="lv-card">
+          <h2 class="lv-h2">Tarifs de livraison (Guadeloupe)</h2>
+          <p class="lv-hint" style="margin:0 0 .6rem">Distance mesurée depuis Sainte-Anne. Le montant va <strong>intégralement au livreur</strong> — Pirates Tools ne prend rien&nbsp;: ce service existe pour aider les artisans et donner du travail aux jeunes de l'île.</p>
+          <div id="livraisonBareme" class="lv-bareme"><!-- rendu par renderLivraison() --></div>
+        </div>
+
+        <div class="lv-card lv-cta">
+          <a class="btn primary" href="#/livreur">🛵 Devenir livreur</a>
+          <a class="btn" href="#/catalogue" data-nav="/catalogue">Voir le catalogue</a>
+          <span class="lv-cta__note">Tu as un deux-roues&nbsp;? Gagne de 22 à 100&nbsp;€ par course — on te guide pour toutes les démarches.</span>
+        </div>
+      </div>
+    </section>
+
     <!-- DEVENIR LIVREUR (service coursier — formulaire adaptatif par véhicule,
          contenu légal rendu par app.js renderLivreur(). Inactif : COURIER_ENABLED. -->
     <section id="view-livreur" class="view hidden" data-route="/livreur" role="region" aria-labelledby="livreur-h1">
@@ -1769,6 +1802,15 @@
         <span>Devis</span>
       </a>
 
+      <a href="#/livraison" data-route="#/livraison">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3 7l9-4 9 4v10l-9 4-9-4z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M3 7l9 4 9-4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M12 11v10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+        <span>Livraison quincaillerie</span>
+      </a>
+
       <a href="#/favoris" data-route="#/favoris">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M12 21s-7.5-4.35-10-9.2C.6 8.3 2.7 4.5 6.5 4.5c2 0 3.5 1 5.5 3 2-2 3.5-3 5.5-3 3.8 0 5.9 3.8 4.5 7.3C19.5 16.65 12 21 12 21z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -1834,7 +1876,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=466"></script>
+  <script defer src="app.js?v=467"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

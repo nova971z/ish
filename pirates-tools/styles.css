@@ -7921,3 +7921,8 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .admin-bareme__table th { color: var(--accent, #a78bfa); font-size: .78rem; text-transform: uppercase; letter-spacing: .02em; }
 .admin-bareme__table small { color: var(--muted, #9a9ab0); text-transform: none; letter-spacing: 0; }
 .admin-bareme__net { color: #6ee7b7; font-weight: 700; }
+/* Page Livraison quincaillerie + bulle accueil */
+#view-livraison .container { max-width: 780px; display: grid; gap: 1rem; }
+.liv-steps { margin: 0; padding-left: 1.3rem; display: grid; gap: .6rem; line-height: 1.55; }
+.brand-card__bubble--liv { display: grid; place-items: center; font-size: 2.3rem;
+  background: radial-gradient(circle at 35% 30%, rgba(52,211,153,.35), rgba(16,25,20,.9)); }
