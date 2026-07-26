@@ -50,7 +50,8 @@
       "Couple de desserrage jusqu'à ≈ 812 Nm pour les boulons grippés",
       "Bague LED pour éclairer la zone de travail",
       "Kit complet : 2 batteries 5,0 Ah + chargeur + coffret TSTAK"
-    ]
+    ],
+    "heroImg": "images/posters/dcf894p2-hero.webp"
   },
   {
     "id": "makita-dtw700z",
@@ -104,7 +105,8 @@
     "description_long": "La Makita DTW700Z est une boulonneuse à chocs 1/2'' 18V LXT à moteur brushless, délivrant 700 Nm de couple de serrage et jusqu'à 1000 Nm au desserrage dans un corps ultra-compact (170 mm seulement). Ses 4 niveaux de vitesse à réglage électronique, son frein électrique et ses 3 modes d'arrêt automatique offrent un contrôle précis en mécanique et construction. Protégée par la technologie XPT contre la poussière et l'eau. Livrée en machine seule (sans batterie ni chargeur). Livraison DOM-TOM ; octroi de mer calculé automatiquement selon ton territoire.",
     "variantGroup": "DTW700",
     "variantRole": "solo",
-    "coffretSku": "DTW700ZJ"
+    "coffretSku": "DTW700ZJ",
+    "heroImg": "images/posters/dtw700z-hero.webp"
   },
   {
     "id": "dewalt-dcf922n-xj",
@@ -156,7 +158,8 @@
       "Vibrations": "13 m/s²",
       "Batterie / chargeur": "Non inclus"
     },
-    "description_long": "La boulonneuse à chocs compacte DeWALT DCF922N-XJ délivre 406 Nm de couple de serrage et jusqu'à 1898 Nm de desserrage dans un format ultra-court, parfait pour travailler en espace restreint. Son moteur brushless, sa vitesse variable et son démarrage progressif offrent un contrôle précis (0–2500 tr/min, 0–3500 cps/min), avec éclairage LED intégré et emmanchement carré 1/2''. Compatible batteries 18V XR et FlexVolt 18/54 V. Livrée en machine seule (sans batterie ni chargeur). Livraison DOM-TOM ; octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "La boulonneuse à chocs compacte DeWALT DCF922N-XJ délivre 406 Nm de couple de serrage et jusqu'à 1898 Nm de desserrage dans un format ultra-court, parfait pour travailler en espace restreint. Son moteur brushless, sa vitesse variable et son démarrage progressif offrent un contrôle précis (0–2500 tr/min, 0–3500 cps/min), avec éclairage LED intégré et emmanchement carré 1/2''. Compatible batteries 18V XR et FlexVolt 18/54 V. Livrée en machine seule (sans batterie ni chargeur). Livraison DOM-TOM ; octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dcf922n-hero.webp"
   },
   {
     "id": "dewalt-dcf899nt-xj",
@@ -212,7 +215,8 @@
       "Dimensions (L×l×h)": "224 × 78 × 225 mm",
       "Livré avec": "Coffret TSTAK (sans batterie ni chargeur)"
     },
-    "description_long": "La boulonneuse à chocs DeWALT DCF899NT-XJ délivre un couple de serrage de 950 Nm et un couple de desserrage de 1625 Nm : de quoi venir à bout de la boulonnerie la plus serrée (jusqu'à M20). Son emmanchement carré 1/2'' (12,7 mm) accepte les douilles à chocs standard. Le moteur brushless et les 3 vitesses à variateur électronique permettent de doser précisément la puissance, avec un éclairage LED intégré. Livrée en coffret TSTAK, sans batterie ni chargeur, pour rejoindre ton parc 18V XR. Livrée dans toute la zone DOM-TOM ; octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "La boulonneuse à chocs DeWALT DCF899NT-XJ délivre un couple de serrage de 950 Nm et un couple de desserrage de 1625 Nm : de quoi venir à bout de la boulonnerie la plus serrée (jusqu'à M20). Son emmanchement carré 1/2'' (12,7 mm) accepte les douilles à chocs standard. Le moteur brushless et les 3 vitesses à variateur électronique permettent de doser précisément la puissance, avec un éclairage LED intégré. Livrée en coffret TSTAK, sans batterie ni chargeur, pour rejoindre ton parc 18V XR. Livrée dans toute la zone DOM-TOM ; octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dcf899nt-user-hero.webp"
   },
   {
     "id": "dewalt-dcf899p2",
@@ -270,7 +274,8 @@
       "Dimensions outil (L×l×h)": "224 × 78 × 225 mm",
       "Livré avec": "2 batteries 5,0 Ah + chargeur + coffret TSTAK"
     },
-    "description_long": "Le pack DeWALT DCF899P2 réunit la boulonneuse à chocs 1/2'' 18V XR (950 Nm de serrage, 1625 Nm de desserrage, jusqu'à M20), deux batteries 5,0 Ah XR et un chargeur, le tout dans un coffret TSTAK. Le moteur brushless et les 3 vitesses à variateur électronique dosent la puissance au plus juste, avec éclairage LED. La solution complète pour la boulonnerie lourde, prête à l'emploi. Livrée dans toute la zone DOM-TOM ; octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Le pack DeWALT DCF899P2 réunit la boulonneuse à chocs 1/2'' 18V XR (950 Nm de serrage, 1625 Nm de desserrage, jusqu'à M20), deux batteries 5,0 Ah XR et un chargeur, le tout dans un coffret TSTAK. Le moteur brushless et les 3 vitesses à variateur électronique dosent la puissance au plus juste, avec éclairage LED. La solution complète pour la boulonnerie lourde, prête à l'emploi. Livrée dans toute la zone DOM-TOM ; octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dcf899p2-hero.webp"
   },
   {
     "id": "dewalt-dcf894n",
@@ -321,7 +326,8 @@
       "3 modes dont Precision Wrench pour un serrage maîtrisé",
       "Couple de desserrage jusqu'à ≈ 812 Nm",
       "Machine nue (batterie et chargeur non inclus, gamme 18V XR)"
-    ]
+    ],
+    "heroImg": "images/posters/dcf894n-hero.webp"
   },
   {
     "id": "dewalt-dcf887p2",
@@ -373,7 +379,8 @@
       "Cadence jusqu'à 3800 coups/min pour un vissage rapide",
       "3 LED annulaires supprimant les ombres portées",
       "Kit complet : 2 batteries 5,0 Ah + chargeur + coffret TSTAK"
-    ]
+    ],
+    "heroImg": "images/posters/dcf887p2-hero.webp"
   },
   {
     "id": "dewalt-dcf887n",
@@ -426,7 +433,8 @@
       "Poids net EPTA": "1,5 kg",
       "Batterie / chargeur": "Non inclus"
     },
-    "description_long": "La visseuse à chocs DeWALT DCF887N est l'un des outils de fixation préférés des professionnels. Son moteur sans charbon délivre jusqu'à 205 Nm de couple : de quoi venir à bout des vis à bois, tirefonds et boulons les plus récalcitrants. Trois vitesses te laissent doser la frappe, du mode doux pour ne pas abîmer une petite vis à la pleine puissance pour le serrage lourd. Le porte-embout 1/4'' se recharge d'une seule main et l'éclairage LED illumine ta zone de travail. Compacte et bien équilibrée, elle se glisse dans les espaces confinés sans fatiguer le poignet. Vendue en machine seule, elle rejoint directement ton parc de batteries 18V XR. Adaptée aux chantiers tropicaux des Antilles (humidité, chaleur, air salin). Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "La visseuse à chocs DeWALT DCF887N est l'un des outils de fixation préférés des professionnels. Son moteur sans charbon délivre jusqu'à 205 Nm de couple : de quoi venir à bout des vis à bois, tirefonds et boulons les plus récalcitrants. Trois vitesses te laissent doser la frappe, du mode doux pour ne pas abîmer une petite vis à la pleine puissance pour le serrage lourd. Le porte-embout 1/4'' se recharge d'une seule main et l'éclairage LED illumine ta zone de travail. Compacte et bien équilibrée, elle se glisse dans les espaces confinés sans fatiguer le poignet. Vendue en machine seule, elle rejoint directement ton parc de batteries 18V XR. Adaptée aux chantiers tropicaux des Antilles (humidité, chaleur, air salin). Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dcf887n-hero.webp"
   },
   {
     "id": "dewalt-dcf850p2t",
@@ -478,7 +486,8 @@
       "3 modes dont mode Précision pour préserver vis et matériau",
       "Bague LED pour éclairer les zones sombres",
       "Kit complet : 2 batteries 5,0 Ah + chargeur + coffret TSTAK"
-    ]
+    ],
+    "heroImg": "images/posters/dcf850p2t-hero.webp"
   },
   {
     "id": "dewalt-dcf850n",
@@ -528,7 +537,8 @@
       "Moteur brushless : 205 Nm de couple",
       "3 modes dont mode Précision",
       "Machine nue (batterie et chargeur non inclus, gamme 18V XR)"
-    ]
+    ],
+    "heroImg": "images/posters/dcf850n-hero.webp"
   },
   {
     "id": "dewalt-dcf870n-xj",
@@ -579,7 +589,8 @@
       "Poids net EPTA": "1,24 kg",
       "Batterie / chargeur": "Non inclus"
     },
-    "description_long": "La visseuse à chocs hydraulique DeWALT DCF870N-XJ utilise un mécanisme à impulsion hydraulique qui la rend nettement plus silencieuse qu'une visseuse à chocs mécanique classique, tout en restant compacte et pratique. Son moteur brushless et ses 3 vitesses avec gâchette à variation de vitesse permettent de doser précisément la puissance (jusqu'à 3000 tr/min et 4200 coups/min), avec un éclairage LED intégré. Machine seule (sans batterie ni chargeur) à rejoindre ton parc 18V XR. Livrée dans toute la zone DOM-TOM ; octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "La visseuse à chocs hydraulique DeWALT DCF870N-XJ utilise un mécanisme à impulsion hydraulique qui la rend nettement plus silencieuse qu'une visseuse à chocs mécanique classique, tout en restant compacte et pratique. Son moteur brushless et ses 3 vitesses avec gâchette à variation de vitesse permettent de doser précisément la puissance (jusqu'à 3000 tr/min et 4200 coups/min), avec un éclairage LED intégré. Machine seule (sans batterie ni chargeur) à rejoindre ton parc 18V XR. Livrée dans toute la zone DOM-TOM ; octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dcf870n-hero.webp"
   },
   {
     "id": "makita-dtw300z",
@@ -630,7 +641,8 @@
       "Format compact malgré la puissance, idéal en usage intensif",
       "Machine nue (batterie et chargeur non inclus, gamme 18V LXT)"
     ],
-    "model": "models/products/DTW300Z.glb"
+    "model": "models/products/DTW300Z.glb",
+    "heroImg": "images/posters/dtw300z-hero.webp"
   },
   {
     "id": "makita-dtd172z",
@@ -679,7 +691,8 @@
       "Moteur brushless, double éclairage LED, technologie XPT",
       "Fonction mémoire des réglages pour retrouver ton mode favori",
       "Machine nue (batterie et chargeur non inclus, gamme 18V LXT)"
-    ]
+    ],
+    "heroImg": "images/posters/dtd172z-hero.webp"
   },
   {
     "id": "makita-ddf487z",
@@ -729,7 +742,8 @@
       "Perce jusqu'à 36 mm dans le bois et 13 mm dans le métal",
       "Double LED avec rémanence, technologie XPT",
       "Machine nue (batterie et chargeur non inclus, gamme 18V LXT)"
-    ]
+    ],
+    "heroImg": "images/posters/ddf487z-hero.webp"
   },
   {
     "id": "makita-dga504z",
@@ -741,7 +755,7 @@
     "category": "Meuleuses",
     "tag": "Pro",
     "desc": "Meuleuse 125 mm sans fil, 8500 tr/min.",
-    "img": "images/posters/dga504z-v2.webp",
+    "img": "images/posters/dga504z-card.webp",
     "price": 139,
     "currency": "EUR",
     "vat": 0.2,
@@ -778,7 +792,8 @@
       "Protection électronique contre les surcharges moteur et batterie",
       "Ø disque 125 mm, broche M14, technologie XPT",
       "Machine nue (batterie et chargeur non inclus, gamme 18V LXT)"
-    ]
+    ],
+    "heroImg": "images/posters/dga504z-hero.webp"
   },
   {
     "id": "makita-dhs680z",
@@ -836,7 +851,8 @@
     ],
     "variantGroup": "DHS680",
     "variantRole": "solo",
-    "coffretSku": "DHS680ZJ"
+    "coffretSku": "DHS680ZJ",
+    "heroImg": "images/posters/dhs680z-hero.webp"
   },
   {
     "id": "dewalt-dcs367n-xj",
@@ -889,7 +905,8 @@
       "Poids net EPTA": "2,3 kg",
       "Batterie / chargeur": "Non inclus"
     },
-    "description_long": "La scie sabre compacte DeWALT DCS367N-XJ embarque un moteur brushless 18V XR pour scier bois (jusqu'à 300 mm), acier et tuyaux (jusqu'à 100 mm) partout où l'accès est difficile. Compacte et bien équilibrée (2,3 kg), rapide (2900 courses/min, course 28,6 mm), elle dispose d'un éclairage LED et d'une semelle pivotante. Livrée en machine seule (sans batterie ni chargeur), à rejoindre ton parc 18V XR. Livraison DOM-TOM ; octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "La scie sabre compacte DeWALT DCS367N-XJ embarque un moteur brushless 18V XR pour scier bois (jusqu'à 300 mm), acier et tuyaux (jusqu'à 100 mm) partout où l'accès est difficile. Compacte et bien équilibrée (2,3 kg), rapide (2900 courses/min, course 28,6 mm), elle dispose d'un éclairage LED et d'une semelle pivotante. Livrée en machine seule (sans batterie ni chargeur), à rejoindre ton parc 18V XR. Livraison DOM-TOM ; octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dcs367n-hero.webp"
   },
   {
     "id": "festool-ti-18",
@@ -1032,7 +1049,8 @@
       "Coupe de précision sur rail de guidage FS, double échelle de profondeur",
       "Lame 160 mm, profondeur 55 mm à 90°, inclinable jusqu'à 45°",
       "Fournie en set avec 2 batteries 5,2 Ah + rail FS 1400"
-    ]
+    ],
+    "heroImg": "images/posters/tsc55-hero.webp"
   },
   {
     "id": "flex-fw1-2-502",
@@ -1126,7 +1144,8 @@
       "Couple élevé de 225 Nm dans un format compact",
       "Machine nue (batterie et chargeur non inclus, gamme Flex 18 V)"
     ],
-    "model": "models/products/Visseuseachocflex.glb"
+    "model": "models/products/Visseuseachocflex.glb",
+    "heroImg": "images/posters/Visseuseachocflex-hero.webp"
   },
   {
     "id": "facom-cl3-c18sp",
@@ -1220,7 +1239,8 @@
       "16 embouts 89 mm couvrant fente, six pans, PH, PZ et Torx",
       "Pochette textile repliable, compacte à emporter partout",
       "Usage manuel et sur visseuse (embouts standard 1/4\")"
-    ]
+    ],
+    "heroImg": "images/posters/kraftform-kompakt-hero.webp"
   },
   {
     "id": "wera-zyklop-speed",
@@ -1262,7 +1282,8 @@
       "Entraînement rapide en bout de manche pour visser vite",
       "Repérage 'Take it easy' par code couleur selon la taille de douille",
       "Coffret complet 28 pièces : cliquet + douilles + rallonges + embouts"
-    ]
+    ],
+    "heroImg": "images/posters/zyklop-speed-hero.webp"
   },
   {
     "id": "dewalt-dcd796p2",
@@ -1317,7 +1338,8 @@
       "Mode percussion jusqu'à 34 000 coups/min pour brique et parpaing",
       "Lampe LED 3 positions",
       "Kit complet : 2 batteries 5,0 Ah + chargeur + coffret TSTAK"
-    ]
+    ],
+    "heroImg": "images/posters/dcd796p2-hero.webp"
   },
   {
     "id": "dewalt-dcs391m2-qw",
@@ -1367,7 +1389,8 @@
       "Profondeur de coupe et guide adaptés aux coupes de chantier",
       "Robuste, pensée pour un usage professionnel intensif",
       "Livrée dans toute la zone DOM-TOM"
-    ]
+    ],
+    "heroImg": "images/posters/dcs391m2-qw-hero.webp"
   },
   {
     "id": "dewalt-dcs570n",
@@ -1420,7 +1443,8 @@
       "Poids net EPTA": "3,6 kg",
       "Batterie / chargeur": "Non inclus"
     },
-    "description_long": "La scie circulaire DeWALT DCS570N (lame Ø184 mm) offre une profondeur de coupe de 64 mm à 90° et 48 mm à 45°, avec une semelle inclinable jusqu'à 57°. Son moteur brushless monte à 5500 tr/min pour des coupes rapides et propres dans le bois et les panneaux. Compacte et légère (3,6 kg), elle reste maniable sur de longues sessions. Machine seule à rejoindre ton parc de batteries 18V XR (batterie et chargeur non inclus). Livrée dans toute la zone DOM-TOM ; octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "La scie circulaire DeWALT DCS570N (lame Ø184 mm) offre une profondeur de coupe de 64 mm à 90° et 48 mm à 45°, avec une semelle inclinable jusqu'à 57°. Son moteur brushless monte à 5500 tr/min pour des coupes rapides et propres dans le bois et les panneaux. Compacte et légère (3,6 kg), elle reste maniable sur de longues sessions. Machine seule à rejoindre ton parc de batteries 18V XR (batterie et chargeur non inclus). Livrée dans toute la zone DOM-TOM ; octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dcs570n-hero.webp"
   },
   {
     "id": "dewalt-dcg405n",
@@ -1468,7 +1492,8 @@
       "Embrayage électronique anti-rebond en cas de blocage du disque",
       "Poignée latérale 2 positions et grille anti-poussière moteur",
       "Machine nue (batterie et chargeur non inclus, gamme 18V XR)"
-    ]
+    ],
+    "heroImg": "images/posters/dcg405n-hero.webp"
   },
   {
     "id": "makita-dlx2220jx2",
@@ -1561,7 +1586,8 @@
       "Chargeur": "Chargeur Li-Ion inclus",
       "Livraison": "Emballage carton"
     },
-    "description_long": "Le pack idéal pour attaquer tous tes travaux avec un seul système de batteries. La visseuse à chocs DeWALT DCF887, à moteur sans charbon, délivre 205 Nm et propose trois vitesses pour doser ta puissance, du vissage délicat au serrage lourd. La meuleuse d'angle DCG405 de 125 mm complète l'ensemble pour tronçonner et ébavarder, avec un frein électronique qui arrête le disque dès que tu relâches la gâchette. Deux batteries 18V XR 5,0 Ah et leur chargeur sont fournis : tu travailles pendant que l'autre charge. Un duo robuste, pensé pour tenir le rythme des chantiers antillais. Livré vers la Guadeloupe, la Martinique, la Guyane, La Réunion et Mayotte. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Le pack idéal pour attaquer tous tes travaux avec un seul système de batteries. La visseuse à chocs DeWALT DCF887, à moteur sans charbon, délivre 205 Nm et propose trois vitesses pour doser ta puissance, du vissage délicat au serrage lourd. La meuleuse d'angle DCG405 de 125 mm complète l'ensemble pour tronçonner et ébavarder, avec un frein électronique qui arrête le disque dès que tu relâches la gâchette. Deux batteries 18V XR 5,0 Ah et leur chargeur sont fournis : tu travailles pendant que l'autre charge. Un duo robuste, pensé pour tenir le rythme des chantiers antillais. Livré vers la Guadeloupe, la Martinique, la Guyane, La Réunion et Mayotte. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/ppack0001-hero.webp"
   },
   {
     "id": "dewalt-ppack0002",
@@ -1609,7 +1635,8 @@
       "Chargeur": "Chargeur Li-Ion inclus",
       "Livraison": "Emballage carton"
     },
-    "description_long": "Deux machines essentielles réunies sur la même gamme de batteries 18V XR. La visseuse à chocs DeWALT DCF887, sans charbon, assure tout ton vissage avec 205 Nm et trois vitesses, y compris un mode Precision Drive pour éviter d'abîmer les vis. Le perforateur burineur DCH273 SDS-Plus s'occupe du gros œuvre : il perce le béton, la brique et les matériaux durs de 6 à 14 mm, avec un mode percussion et un mode burinage léger. Comptez environ 90 trous par charge — de quoi tenir une belle session. L'ensemble arrive avec deux batteries 5,0 Ah et leur chargeur. Un pack complet et endurant, livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Deux machines essentielles réunies sur la même gamme de batteries 18V XR. La visseuse à chocs DeWALT DCF887, sans charbon, assure tout ton vissage avec 205 Nm et trois vitesses, y compris un mode Precision Drive pour éviter d'abîmer les vis. Le perforateur burineur DCH273 SDS-Plus s'occupe du gros œuvre : il perce le béton, la brique et les matériaux durs de 6 à 14 mm, avec un mode percussion et un mode burinage léger. Comptez environ 90 trous par charge — de quoi tenir une belle session. L'ensemble arrive avec deux batteries 5,0 Ah et leur chargeur. Un pack complet et endurant, livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/ppack0002-hero.webp"
   },
   {
     "id": "dewalt-dcp580n",
@@ -1659,7 +1686,8 @@
       "Poids (sans batterie)": "2,5 kg",
       "Batterie / chargeur": "Non inclus"
     },
-    "description_long": "Un rabot sans fil compact et maniable pour les menuisiers et charpentiers. Le DeWALT DCP580N, à moteur sans charbon, offre un rabotage régulier et une belle autonomie sur batterie 18V XR. Sa largeur de coupe de 82 mm et sa profondeur réglable de 0 à 2 mm couvrent l'essentiel des besoins, tandis que la feuillure jusqu'à 9 mm permet les travaux d'assemblage. Les lames carbure réversibles se changent vite et durent longtemps. Léger et bien équilibré, il se manie confortablement dans toutes les positions. Vendu en machine seule pour ceux qui possèdent déjà des batteries XR. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Un rabot sans fil compact et maniable pour les menuisiers et charpentiers. Le DeWALT DCP580N, à moteur sans charbon, offre un rabotage régulier et une belle autonomie sur batterie 18V XR. Sa largeur de coupe de 82 mm et sa profondeur réglable de 0 à 2 mm couvrent l'essentiel des besoins, tandis que la feuillure jusqu'à 9 mm permet les travaux d'assemblage. Les lames carbure réversibles se changent vite et durent longtemps. Léger et bien équilibré, il se manie confortablement dans toutes les positions. Vendu en machine seule pour ceux qui possèdent déjà des batteries XR. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dcp580n-hero.webp"
   },
   {
     "id": "dewalt-dcv100-xj",
@@ -1710,7 +1738,8 @@
       "Longueur": "508 mm",
       "Batterie / chargeur": "Non inclus"
     },
-    "description_long": "Un souffleur sans fil ultra-compact, taillé pour le nettoyage rapide. Le DeWALT DCV100-XJ de la gamme XR 18V débarrasse en un instant sciure, poussière et débris de ton établi, de ta machine ou du chantier, avec une vitesse d'air atteignant 80 m/s. Léger et court (508 mm), il se glisse partout et se manie d'une main. Compatible avec toutes les batteries XR 18V de 3 à 5 Ah, il vient en machine seule pour rejoindre ton parc d'outils existant. Un petit outil qui rend de grands services au quotidien. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Un souffleur sans fil ultra-compact, taillé pour le nettoyage rapide. Le DeWALT DCV100-XJ de la gamme XR 18V débarrasse en un instant sciure, poussière et débris de ton établi, de ta machine ou du chantier, avec une vitesse d'air atteignant 80 m/s. Léger et court (508 mm), il se glisse partout et se manie d'une main. Compatible avec toutes les batteries XR 18V de 3 à 5 Ah, il vient en machine seule pour rejoindre ton parc d'outils existant. Un petit outil qui rend de grands services au quotidien. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dcv100-hero.webp"
   },
   {
     "id": "dewalt-dcv584l",
@@ -1755,7 +1784,8 @@
       "Débit d'air max.": "954 l/min",
       "Puissance sonore": "87 dB(A)"
     },
-    "description_long": "Un aspirateur eau et poussière polyvalent qui s'adapte à ton chantier. Le DeWALT DCV584L fonctionne aussi bien sur secteur que sur batterie 18/54V FLEXVOLT : tu n'es jamais bloqué, même sans prise à proximité. Sa cuve de 7,5 L et son débit d'air de 954 l/min viennent à bout des gravats, de la poussière et des liquides, avec une certification classe de poussière L pour travailler proprement. Robuste et pensé pour un usage intensif, c'est l'allié des fins de chantier et des ateliers. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Un aspirateur eau et poussière polyvalent qui s'adapte à ton chantier. Le DeWALT DCV584L fonctionne aussi bien sur secteur que sur batterie 18/54V FLEXVOLT : tu n'es jamais bloqué, même sans prise à proximité. Sa cuve de 7,5 L et son débit d'air de 954 l/min viennent à bout des gravats, de la poussière et des liquides, avec une certification classe de poussière L pour travailler proprement. Robuste et pensé pour un usage intensif, c'est l'allié des fins de chantier et des ateliers. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dcv584l-hero.webp"
   },
   {
     "id": "dewalt-dck266p2t",
@@ -1803,7 +1833,8 @@
       "Coffret": "Mallette de transport T STAK",
       "Livraison": "Coffret T STAK"
     },
-    "description_long": "Le pack DeWALT DCK266P2T réunit les deux machines qui reviennent le plus souvent sur un chantier : la perceuse à percussion DCD796 et la visseuse à chocs DCF887, toutes deux à moteur sans charbon. La perceuse propose deux vitesses et quinze réglages de couple pour percer et visser proprement, avec un mode percussion pour attaquer la brique et le parpaing. La visseuse à chocs délivre 205 Nm sur trois vitesses, mode Precision Drive compris pour éviter d'abîmer tes vis. L'ensemble partage la même gamme de batteries 18V XR et arrive complet : deux batteries 5,0 Ah, leur chargeur et un coffret de transport T STAK. Un duo polyvalent et endurant, prêt à travailler dès la sortie du carton. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Le pack DeWALT DCK266P2T réunit les deux machines qui reviennent le plus souvent sur un chantier : la perceuse à percussion DCD796 et la visseuse à chocs DCF887, toutes deux à moteur sans charbon. La perceuse propose deux vitesses et quinze réglages de couple pour percer et visser proprement, avec un mode percussion pour attaquer la brique et le parpaing. La visseuse à chocs délivre 205 Nm sur trois vitesses, mode Precision Drive compris pour éviter d'abîmer tes vis. L'ensemble partage la même gamme de batteries 18V XR et arrive complet : deux batteries 5,0 Ah, leur chargeur et un coffret de transport T STAK. Un duo polyvalent et endurant, prêt à travailler dès la sortie du carton. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dck266p2t-hero.webp"
   },
   {
     "id": "dewalt-dck276p2-qw",
@@ -1854,7 +1885,8 @@
       "Visseuse DCF887 — porte-embout": "1/4'' (6,35 mm) hexagonal",
       "Livré avec": "2 batteries 5,0 Ah + chargeur + coffret TSTAK"
     },
-    "description_long": "Le pack DeWALT DCK276P2-QW réunit les deux machines les plus utiles au quotidien : la perceuse à percussion DCD996 (gamme XRP, 3 vitesses, jusqu'à 95 Nm et 38 250 coups/min, mandrin métallique 13 mm) et la visseuse à chocs DCF887 (205 Nm, 3 vitesses, mode Precision Drive). Toutes deux à moteur brushless et sur la même gamme de batteries 18V XR. Livré complet avec deux batteries 5,0 Ah, un chargeur et un coffret TSTAK. Livré dans toute la zone DOM-TOM ; octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Le pack DeWALT DCK276P2-QW réunit les deux machines les plus utiles au quotidien : la perceuse à percussion DCD996 (gamme XRP, 3 vitesses, jusqu'à 95 Nm et 38 250 coups/min, mandrin métallique 13 mm) et la visseuse à chocs DCF887 (205 Nm, 3 vitesses, mode Precision Drive). Toutes deux à moteur brushless et sur la même gamme de batteries 18V XR. Livré complet avec deux batteries 5,0 Ah, un chargeur et un coffret TSTAK. Livré dans toute la zone DOM-TOM ; octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dck276p2-hero.webp"
   },
   {
     "id": "dewalt-dcb118x2-qw",
@@ -1903,7 +1935,8 @@
       "Poids net EPTA (par batterie)": "1,08 kg",
       "Dimensions batterie": "150 × 115 × 80 mm"
     },
-    "description_long": "Le pack énergie DeWALT DCB118X2-QW donne de l'autonomie à tout ton parc d'outils. Il réunit deux batteries XR FLEXVOLT et le chargeur rapide DCB118. La technologie FLEXVOLT fait basculer automatiquement chaque batterie entre 18 V et 54 V selon l'outil branché : tu alimentes aussi bien une visseuse compacte qu'une scie ou une meuleuse gourmande. Avec 9,0 Ah (162 Wh) par batterie, tu tiens de longues sessions, et le chargeur rapide à ventilation active limite les temps d'arrêt. Un indicateur de charge sur chaque pack te dit où tu en es d'un coup d'œil. La solution idéale pour ne jamais tomber en panne d'énergie sur le chantier. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Le pack énergie DeWALT DCB118X2-QW donne de l'autonomie à tout ton parc d'outils. Il réunit deux batteries XR FLEXVOLT et le chargeur rapide DCB118. La technologie FLEXVOLT fait basculer automatiquement chaque batterie entre 18 V et 54 V selon l'outil branché : tu alimentes aussi bien une visseuse compacte qu'une scie ou une meuleuse gourmande. Avec 9,0 Ah (162 Wh) par batterie, tu tiens de longues sessions, et le chargeur rapide à ventilation active limite les temps d'arrêt. Un indicateur de charge sur chaque pack te dit où tu en es d'un coup d'œil. La solution idéale pour ne jamais tomber en panne d'énergie sur le chantier. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dcb118-pack-hero.webp"
   },
   {
     "id": "dewalt-dcb118y2-qw",
@@ -1952,7 +1985,8 @@
       "Poids net EPTA (par batterie)": "1,46 kg",
       "Dimensions batterie": "150 × 115 × 80 mm"
     },
-    "description_long": "Le pack énergie DeWALT DCB118Y2-QW pousse l'autonomie au maximum. Il associe deux batteries XR FLEXVOLT de 12,0 Ah au chargeur rapide DCB118. Grâce à la technologie FLEXVOLT, chaque batterie bascule automatiquement entre 18 V et 54 V selon l'outil : parfaite pour alimenter longuement les machines 54V les plus énergivores comme les scies circulaires et les grandes meuleuses. Le chargeur rapide à ventilation active réduit les temps d'attente, et l'indicateur de charge intégré t'évite les mauvaises surprises. Deux batteries de forte capacité, c'est l'assurance de tenir une journée entière sans recharge. Un investissement durable pour les gros utilisateurs. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Le pack énergie DeWALT DCB118Y2-QW pousse l'autonomie au maximum. Il associe deux batteries XR FLEXVOLT de 12,0 Ah au chargeur rapide DCB118. Grâce à la technologie FLEXVOLT, chaque batterie bascule automatiquement entre 18 V et 54 V selon l'outil : parfaite pour alimenter longuement les machines 54V les plus énergivores comme les scies circulaires et les grandes meuleuses. Le chargeur rapide à ventilation active réduit les temps d'attente, et l'indicateur de charge intégré t'évite les mauvaises surprises. Deux batteries de forte capacité, c'est l'assurance de tenir une journée entière sans recharge. Un investissement durable pour les gros utilisateurs. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dcb118-pack-hero.webp"
   },
   {
     "id": "dewalt-dcb118y3-qw",
@@ -2001,7 +2035,8 @@
       "Poids net EPTA (par batterie)": "1,08 kg",
       "Dimensions du pack": "400 × 200 × 100 mm"
     },
-    "description_long": "Le pack énergie DeWALT DCB118Y3-QW est la solution pour les équipes et les gros chantiers : trois batteries XR FLEXVOLT de 12,0 Ah accompagnées du chargeur rapide DCB118. Avec trois packs haute capacité, tu fais tourner plusieurs outils en parallèle ou tu enchaînes les rotations sans jamais attendre la recharge. Chaque batterie bascule automatiquement entre 18 V et 54 V selon la machine, du plus petit outil compact à la scie ou la meuleuse 54V la plus gourmande. Le chargeur rapide à ventilation active remet une batterie à niveau pendant que les autres travaillent. Un ensemble pensé pour l'usage intensif et la productivité. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Le pack énergie DeWALT DCB118Y3-QW est la solution pour les équipes et les gros chantiers : trois batteries XR FLEXVOLT de 12,0 Ah accompagnées du chargeur rapide DCB118. Avec trois packs haute capacité, tu fais tourner plusieurs outils en parallèle ou tu enchaînes les rotations sans jamais attendre la recharge. Chaque batterie bascule automatiquement entre 18 V et 54 V selon la machine, du plus petit outil compact à la scie ou la meuleuse 54V la plus gourmande. Le chargeur rapide à ventilation active remet une batterie à niveau pendant que les autres travaillent. Un ensemble pensé pour l'usage intensif et la productivité. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dcb118y3-hero.webp"
   },
   {
     "id": "dewalt-d25033k-qs",
@@ -2053,7 +2088,8 @@
       "Poids net EPTA": "2,5 kg",
       "Dimensions": "180 × 310 × 440 mm"
     },
-    "description_long": "Le perforateur burineur DeWALT D25033K-QS est un outil filaire compact et puissant, idéal pour tous les travaux de perçage dans le béton. Avec ses 710 W et son emmanchement SDS-Plus, il perce jusqu'à 22 mm dans le béton, 30 mm dans le bois et 13 mm dans le métal, et accepte les couronnes trépan jusqu'à 50 mm. Sa puissance de frappe de 2 joules et sa cadence de 5680 coups/min viennent à bout des matériaux durs, tandis que son mode burinage permet les petits travaux de démolition. Léger (2,5 kg) et bien équilibré, il se manie avec précision. Livré dans un coffret de transport. Un allié fiable pour les chantiers des Antilles. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Le perforateur burineur DeWALT D25033K-QS est un outil filaire compact et puissant, idéal pour tous les travaux de perçage dans le béton. Avec ses 710 W et son emmanchement SDS-Plus, il perce jusqu'à 22 mm dans le béton, 30 mm dans le bois et 13 mm dans le métal, et accepte les couronnes trépan jusqu'à 50 mm. Sa puissance de frappe de 2 joules et sa cadence de 5680 coups/min viennent à bout des matériaux durs, tandis que son mode burinage permet les petits travaux de démolition. Léger (2,5 kg) et bien équilibré, il se manie avec précision. Livré dans un coffret de transport. Un allié fiable pour les chantiers des Antilles. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/d25033k-hero.webp"
   },
   {
     "id": "dewalt-dch273p1t-qw",
@@ -2113,7 +2149,8 @@
       "Dimensions (L×l×h)": "301 × 85 × 202 mm",
       "Livré avec": "1 batterie 5,0 Ah + chargeur + coffret"
     },
-    "description_long": "Le DeWALT DCH273P1T-QW réunit le perforateur burineur SDS-Plus 18V XR brushless (2,1 J) et tout ce qu'il faut pour travailler immédiatement : 1 batterie 18V XR 5,0 Ah, son chargeur et un coffret de transport. Idéal pour percer le béton (jusqu'à 24 mm), le métal et le bois, et pour buriner en usage léger. Doté d'un débrayage de sécurité (limiteur de couple), d'un système anti-vibrations et d'un éclairage LED. Livraison DOM-TOM ; octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Le DeWALT DCH273P1T-QW réunit le perforateur burineur SDS-Plus 18V XR brushless (2,1 J) et tout ce qu'il faut pour travailler immédiatement : 1 batterie 18V XR 5,0 Ah, son chargeur et un coffret de transport. Idéal pour percer le béton (jusqu'à 24 mm), le métal et le bois, et pour buriner en usage léger. Doté d'un débrayage de sécurité (limiteur de couple), d'un système anti-vibrations et d'un éclairage LED. Livraison DOM-TOM ; octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dch273p1t-hero.webp"
   },
   {
     "id": "dewalt-dch273n-xj",
@@ -2165,7 +2202,8 @@
       "Poids": "2,5 kg",
       "Batterie / chargeur": "Non inclus"
     },
-    "description_long": "Le perforateur burineur DeWALT DCH273N-XJ combine un moteur brushless 18V XR et un mandrin SDS-Plus délivrant 2,1 J d'énergie d'impact, pour percer le béton (jusqu'à 24 mm), le métal et le bois, et buriner grâce au rotation stop. Compact et léger (2,5 kg), il bénéficie de la technologie PERFORM+PROTECT qui limite les vibrations (6,6 m/s² en perçage, 5,4 m/s² en burinage) pour un confort de travail prolongé. Livré en machine seule (sans batterie ni chargeur), à rejoindre ton parc 18V XR. Livraison DOM-TOM ; octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Le perforateur burineur DeWALT DCH273N-XJ combine un moteur brushless 18V XR et un mandrin SDS-Plus délivrant 2,1 J d'énergie d'impact, pour percer le béton (jusqu'à 24 mm), le métal et le bois, et buriner grâce au rotation stop. Compact et léger (2,5 kg), il bénéficie de la technologie PERFORM+PROTECT qui limite les vibrations (6,6 m/s² en perçage, 5,4 m/s² en burinage) pour un confort de travail prolongé. Livré en machine seule (sans batterie ni chargeur), à rejoindre ton parc 18V XR. Livraison DOM-TOM ; octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dch273n-hero.webp"
   },
   {
     "id": "dewalt-d25134k",
@@ -2219,7 +2257,8 @@
       "Dimensions": "355 × 75 × 210 mm",
       "Coffret": "TSTAK"
     },
-    "description_long": "Le perforateur burineur DeWALT D25134K monte en puissance avec son moteur filaire de 800 W et sa frappe de 2,8 joules. Grâce à son emmanchement SDS-Plus, il perce jusqu'à 26 mm dans le béton, accepte les couronnes trépan jusqu'à 65 mm et gère aussi le bois (30 mm) et le métal (13 mm). Ses trois modes — perçage, perçage avec percussion et burinage — en font un outil polyvalent, aussi bien pour le gros œuvre que pour les finitions. Sa cadence de 5540 coups/min attaque efficacement le béton armé. Livré dans un coffret de transport TSTAK empilable avec le reste de ta gamme. Un perforateur robuste et endurant, taillé pour un usage professionnel. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Le perforateur burineur DeWALT D25134K monte en puissance avec son moteur filaire de 800 W et sa frappe de 2,8 joules. Grâce à son emmanchement SDS-Plus, il perce jusqu'à 26 mm dans le béton, accepte les couronnes trépan jusqu'à 65 mm et gère aussi le bois (30 mm) et le métal (13 mm). Ses trois modes — perçage, perçage avec percussion et burinage — en font un outil polyvalent, aussi bien pour le gros œuvre que pour les finitions. Sa cadence de 5540 coups/min attaque efficacement le béton armé. Livré dans un coffret de transport TSTAK empilable avec le reste de ta gamme. Un perforateur robuste et endurant, taillé pour un usage professionnel. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/d25134k-hero.webp"
   },
   {
     "id": "dewalt-dcb184",
@@ -2263,7 +2302,8 @@
       "Effet mémoire": "Non",
       "Compatibilité": "Outils DeWALT 18V XR"
     },
-    "description_long": "La batterie DeWALT DCB184 de 5,0 Ah alimente tout l'écosystème d'outils sans fil DeWALT 18V XR. Sa technologie Li-Ion offre une grande durée de vie, sans effet mémoire ni perte de charge : tu la recharges quand tu veux, sans l'abîmer. Le témoin de charge à LED t'indique d'un coup d'œil l'autonomie restante. Légère par rapport à une batterie NiCd de capacité équivalente, elle se transporte et se manie facilement toute la journée. Compatible avec l'ensemble des outils DeWALT de la gamme XR 18V, c'est la batterie de rechange idéale pour ne jamais tomber en panne d'énergie sur le chantier. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "La batterie DeWALT DCB184 de 5,0 Ah alimente tout l'écosystème d'outils sans fil DeWALT 18V XR. Sa technologie Li-Ion offre une grande durée de vie, sans effet mémoire ni perte de charge : tu la recharges quand tu veux, sans l'abîmer. Le témoin de charge à LED t'indique d'un coup d'œil l'autonomie restante. Légère par rapport à une batterie NiCd de capacité équivalente, elle se transporte et se manie facilement toute la journée. Compatible avec l'ensemble des outils DeWALT de la gamme XR 18V, c'est la batterie de rechange idéale pour ne jamais tomber en panne d'énergie sur le chantier. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dcb184-hero.webp"
   },
   {
     "id": "dewalt-dcd996p2-qw",
@@ -2318,7 +2358,8 @@
       "Coffret": "TSTAK",
       "Poids net EPTA": "2,1 kg"
     },
-    "description_long": "La perceuse à percussion DeWALT DCD996P2 est une machine robuste et puissante pour l'usage intensif. Son moteur sans charbon délivre jusqu'à 95 Nm de couple et propose trois vitesses mécaniques pour percer, visser et attaquer le béton en mode percussion (jusqu'à 13 mm). Le mandrin métallique auto-serrant de 13 mm tient fermement les forets, et les onze positions de réglage du couple protègent tes vissages. Elle perce jusqu'à 55 mm dans le bois et 15 mm dans le métal. Livrée en kit complet : deux batteries 18V XR 5,0 Ah, un chargeur et un coffret de transport TSTAK. La polyvalente par excellence pour le chantier. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "La perceuse à percussion DeWALT DCD996P2 est une machine robuste et puissante pour l'usage intensif. Son moteur sans charbon délivre jusqu'à 95 Nm de couple et propose trois vitesses mécaniques pour percer, visser et attaquer le béton en mode percussion (jusqu'à 13 mm). Le mandrin métallique auto-serrant de 13 mm tient fermement les forets, et les onze positions de réglage du couple protègent tes vissages. Elle perce jusqu'à 55 mm dans le bois et 15 mm dans le métal. Livrée en kit complet : deux batteries 18V XR 5,0 Ah, un chargeur et un coffret de transport TSTAK. La polyvalente par excellence pour le chantier. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dcd996p2-hero.webp"
   },
   {
     "id": "dewalt-dcd996n",
@@ -2375,7 +2416,8 @@
       "Dimensions (L×l×h)": "213 × 70 × 208 mm",
       "Batterie / chargeur": "Non inclus"
     },
-    "description_long": "La perceuse à percussion DeWALT DCD996N (gamme XRP) associe un moteur brushless et 3 vitesses mécaniques pour couvrir tous les travaux, du vissage délicat au perçage béton. Elle délivre jusqu'à 95 Nm de couple, 2000 tr/min et 38 250 coups/min en percussion, avec un mandrin métallique 13 mm et une bague de couple à 11 positions. Perçage jusqu'à 55 mm dans le bois, 16 mm dans le béton et 15 mm dans le métal. Machine seule à rejoindre ton parc de batteries 18V XR (batterie et chargeur non inclus). Livrée dans toute la zone DOM-TOM ; octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "La perceuse à percussion DeWALT DCD996N (gamme XRP) associe un moteur brushless et 3 vitesses mécaniques pour couvrir tous les travaux, du vissage délicat au perçage béton. Elle délivre jusqu'à 95 Nm de couple, 2000 tr/min et 38 250 coups/min en percussion, avec un mandrin métallique 13 mm et une bague de couple à 11 positions. Perçage jusqu'à 55 mm dans le bois, 16 mm dans le béton et 15 mm dans le métal. Machine seule à rejoindre ton parc de batteries 18V XR (batterie et chargeur non inclus). Livrée dans toute la zone DOM-TOM ; octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dcd996n-hero.webp"
   },
   {
     "id": "dewalt-dcf620nt-xj",
@@ -2427,7 +2469,8 @@
       "Coffret": "TSTAK",
       "Batterie / chargeur": "Non inclus"
     },
-    "description_long": "La visseuse à placo DeWALT DCF620NT-XJ est l'outil dédié à la pose de plaques de plâtre. Conçue pour enchaîner les vis rapidement et avec régularité, elle atteint 4400 tr/min et embarque une butée de profondeur qui débraye net dès que la vis est à la bonne hauteur — fini les vis trop enfoncées qui déchirent le placo. Le résultat est propre et constant, plaque après plaque. Compacte et légère (1,48 kg), elle limite la fatigue sur les grands chantiers de cloisons et de plafonds. Vendue en solo (sans batterie ni chargeur) dans un coffret TSTAK, elle rejoint directement ton parc de batteries 18V XR. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "La visseuse à placo DeWALT DCF620NT-XJ est l'outil dédié à la pose de plaques de plâtre. Conçue pour enchaîner les vis rapidement et avec régularité, elle atteint 4400 tr/min et embarque une butée de profondeur qui débraye net dès que la vis est à la bonne hauteur — fini les vis trop enfoncées qui déchirent le placo. Le résultat est propre et constant, plaque après plaque. Compacte et légère (1,48 kg), elle limite la fatigue sur les grands chantiers de cloisons et de plafonds. Vendue en solo (sans batterie ni chargeur) dans un coffret TSTAK, elle rejoint directement ton parc de batteries 18V XR. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dcf620nt-hero.webp"
   },
   {
     "id": "dewalt-dcf620kn-xe",
@@ -2481,7 +2524,8 @@
       "Poids": "1,88 kg",
       "Batterie / chargeur": "Non inclus"
     },
-    "description_long": "La DeWALT DCF620KN-XE réunit la visseuse à placo 18V XR brushless DCF620 et son chargeur de vis en bande DCF6202 pour enchaîner les vissages de plaques de plâtre sans recharger à la main : rapide, régulier et sans effort. Couple ajustable 5–30 Nm, vitesse 0–440 tr/min, butée de profondeur pour un enfoncement constant, éclairage LED et porte-embout 1/4''. Compacte (380 mm) et légère (1,88 kg). Livrée en machine seule (sans batterie ni chargeur d'accu). Livraison DOM-TOM ; octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "La DeWALT DCF620KN-XE réunit la visseuse à placo 18V XR brushless DCF620 et son chargeur de vis en bande DCF6202 pour enchaîner les vissages de plaques de plâtre sans recharger à la main : rapide, régulier et sans effort. Couple ajustable 5–30 Nm, vitesse 0–440 tr/min, butée de profondeur pour un enfoncement constant, éclairage LED et porte-embout 1/4''. Compacte (380 mm) et légère (1,88 kg). Livrée en machine seule (sans batterie ni chargeur d'accu). Livraison DOM-TOM ; octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dcf620kn-hero.webp"
   },
   {
     "id": "dewalt-dck75p3t",
@@ -2575,7 +2619,8 @@
       "Pieds": "Repliables",
       "Poignée": "Intégrée pour le transport"
     },
-    "description_long": "Le piètement DeWALT DE7023-XJ est le support idéal pour travailler en sécurité avec ta scie à onglets. Robuste, il supporte jusqu'à 227 kg et déploie une longueur utile de 3,83 mètres pour soutenir les longues pièces. Ses pieds se replient en un geste, et sa poignée intégrée facilite le transport d'un chantier à l'autre. Les bras support réglables maintiennent fermement le matériau pour des coupes précises et répétées. Un accessoire d'atelier durable qui fait gagner en confort et en précision. Produit hors gabarit, livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Le piètement DeWALT DE7023-XJ est le support idéal pour travailler en sécurité avec ta scie à onglets. Robuste, il supporte jusqu'à 227 kg et déploie une longueur utile de 3,83 mètres pour soutenir les longues pièces. Ses pieds se replient en un geste, et sa poignée intégrée facilite le transport d'un chantier à l'autre. Les bras support réglables maintiennent fermement le matériau pour des coupes précises et répétées. Un accessoire d'atelier durable qui fait gagner en confort et en précision. Produit hors gabarit, livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/de7023-hero.webp"
   },
   {
     "id": "dewalt-d26200-qs",
@@ -2621,7 +2666,8 @@
       "Poids net EPTA": "2 kg",
       "Dimensions": "120 × 200 mm"
     },
-    "description_long": "L'affleureuse de paume DeWALT D26200-QS est un outil filaire compact et précis pour l'affleurage, le chanfreinage et les petits travaux de défonçage. Son moteur de 900 W offre une vitesse variable de 16 000 à 27 000 tr/min, s'adaptant à tous les matériaux et aux fraises jusqu'à 30 mm de diamètre. Le bloc moteur en aluminium est robuste et durable, tandis que la base en D garantit un maximum de stabilité sur la pièce. Elle accepte les pinces de 6 et 8 mm et se règle finement en profondeur. Maniable d'une seule main, c'est l'alliée des menuisiers et ébénistes. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "L'affleureuse de paume DeWALT D26200-QS est un outil filaire compact et précis pour l'affleurage, le chanfreinage et les petits travaux de défonçage. Son moteur de 900 W offre une vitesse variable de 16 000 à 27 000 tr/min, s'adaptant à tous les matériaux et aux fraises jusqu'à 30 mm de diamètre. Le bloc moteur en aluminium est robuste et durable, tandis que la base en D garantit un maximum de stabilité sur la pièce. Elle accepte les pinces de 6 et 8 mm et se règle finement en profondeur. Maniable d'une seule main, c'est l'alliée des menuisiers et ébénistes. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/d26200-hero.webp"
   },
   {
     "id": "dewalt-dcmps520n-xj",
@@ -2668,7 +2714,8 @@
       "Poids net EPTA": "2 kg",
       "Batterie / chargeur": "Non inclus"
     },
-    "description_long": "La tronçonneuse d'élagage DeWALT DCMPS520N-XJ est l'outil idéal pour l'entretien régulier des arbres et des haies. Compacte et maniable, avec son guide de 20 cm, elle atteint les branches dans les endroits difficiles d'accès. Sa chaîne file jusqu'à 8,6 m/s pour des coupes nettes et rapides, et son graissage automatique (réservoir 0,055 L) préserve la chaîne. Légère (2 kg), elle se manie d'une main sans fatigue. Vendue en solo pour rejoindre ton parc de batteries 18V XR. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "La tronçonneuse d'élagage DeWALT DCMPS520N-XJ est l'outil idéal pour l'entretien régulier des arbres et des haies. Compacte et maniable, avec son guide de 20 cm, elle atteint les branches dans les endroits difficiles d'accès. Sa chaîne file jusqu'à 8,6 m/s pour des coupes nettes et rapides, et son graissage automatique (réservoir 0,055 L) préserve la chaîne. Légère (2 kg), elle se manie d'une main sans fatigue. Vendue en solo pour rejoindre ton parc de batteries 18V XR. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dcmps520n-hero.webp"
   },
   {
     "id": "dewalt-dwe6423-qs",
@@ -2720,7 +2767,8 @@
       "Poids net EPTA": "1,28 kg",
       "Dimensions": "170 × 140 mm"
     },
-    "description_long": "La ponceuse excentrique DeWALT DWE6423-QS est une machine filaire compacte pour des finitions propres et rapides. Son moteur de 280 W maintient une vitesse constante en charge, réglable de 8000 à 12 000 tr/min selon le travail. L'excentricité de 2,6 mm assure un ponçage fin et régulier, idéal avant peinture ou vernis. Le système anti-poussières et le sac textile fourni gardent ton plan de travail propre. Légère (1,28 kg) et bien équilibrée, elle se manie longtemps sans fatigue. Un outil professionnel pour le bois comme pour le métal. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "La ponceuse excentrique DeWALT DWE6423-QS est une machine filaire compacte pour des finitions propres et rapides. Son moteur de 280 W maintient une vitesse constante en charge, réglable de 8000 à 12 000 tr/min selon le travail. L'excentricité de 2,6 mm assure un ponçage fin et régulier, idéal avant peinture ou vernis. Le système anti-poussières et le sac textile fourni gardent ton plan de travail propre. Légère (1,28 kg) et bien équilibrée, elle se manie longtemps sans fatigue. Un outil professionnel pour le bois comme pour le métal. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dwe6423-hero.webp"
   },
   {
     "id": "dewalt-dcd444n-xj",
@@ -2772,7 +2820,8 @@
       "Poids net EPTA": "4,1 kg",
       "Batterie / chargeur": "Non inclus"
     },
-    "description_long": "La perceuse-visseuse d'angle DeWALT DCD444N-XJ est conçue pour percer et visser là où une perceuse classique ne passe pas : entre les montants, dans les angles et les espaces confinés. Son moteur brushless développe un couple maximal de 233 Nm et entraîne un mandrin auto-serrant de 13 mm, capable de percer jusqu'à 102 mm dans le bois. Sa longue poignée arrière offre un excellent bras de levier pour garder le contrôle sous forte charge. Robuste (4,1 kg) et pensée pour l'usage intensif, c'est l'outil des plombiers, électriciens et charpentiers. Vendue solo pour rejoindre ton parc de batteries 18V XR. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "La perceuse-visseuse d'angle DeWALT DCD444N-XJ est conçue pour percer et visser là où une perceuse classique ne passe pas : entre les montants, dans les angles et les espaces confinés. Son moteur brushless développe un couple maximal de 233 Nm et entraîne un mandrin auto-serrant de 13 mm, capable de percer jusqu'à 102 mm dans le bois. Sa longue poignée arrière offre un excellent bras de levier pour garder le contrôle sous forte charge. Robuste (4,1 kg) et pensée pour l'usage intensif, c'est l'outil des plombiers, électriciens et charpentiers. Vendue solo pour rejoindre ton parc de batteries 18V XR. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dcd444n-hero.webp"
   },
   {
     "id": "dewalt-dcs355nt-xj",
@@ -2825,7 +2874,8 @@
       "Dimensions": "L 306 mm",
       "Batterie / chargeur": "Non inclus"
     },
-    "description_long": "L'outil multifonctions oscillant DeWALT DCS355NT-XJ est le couteau suisse du chantier : il scie, ponce, gratte, découpe et affleure selon l'accessoire monté. Son moteur brushless atteint 20 000 oscillations par minute pour un travail rapide et précis, et son porte-outils Starlock permet de changer d'accessoire sans clé, d'un simple geste. L'éclairage LED intégré éclaire la zone de travail. Il est livré avec 25 feuilles de ponçage et des accessoires, le tout rangé dans un coffret TSTAK empilable. Compact (1,1 kg) et maniable, il rend service partout. Vendu solo pour rejoindre ton parc de batteries 18V XR. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "L'outil multifonctions oscillant DeWALT DCS355NT-XJ est le couteau suisse du chantier : il scie, ponce, gratte, découpe et affleure selon l'accessoire monté. Son moteur brushless atteint 20 000 oscillations par minute pour un travail rapide et précis, et son porte-outils Starlock permet de changer d'accessoire sans clé, d'un simple geste. L'éclairage LED intégré éclaire la zone de travail. Il est livré avec 25 feuilles de ponçage et des accessoires, le tout rangé dans un coffret TSTAK empilable. Compact (1,1 kg) et maniable, il rend service partout. Vendu solo pour rejoindre ton parc de batteries 18V XR. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dcs355nt-hero.webp"
   },
   {
     "id": "dewalt-dcf620p2k",
@@ -2880,7 +2930,8 @@
       "Dimensions (L × h)": "380 × 250 mm",
       "Livré avec": "2 batteries 5,0 Ah + chargeur + chargeur de vis en bande + coffret TSTAK"
     },
-    "description_long": "La visseuse à plaques de plâtre DeWALT DCF620P2K est équipée d'un moteur brushless 18V XR et d'un chargeur de vis en bande amovible qui augmente fortement votre productivité : jusqu'à 3500 vis posées à la suite sans recharger à la main. Sa tête orientable et son réglage de profondeur assurent un fraisage régulier sans percer la plaque, grâce à l'embrayage à débrayage. Elle tourne à 4400 tr/min pour un vissage rapide et net. Ce pack est livré complet : 2 batteries 18V XR 5,0 Ah, un chargeur et un coffret TSTAK. Compatible avec toute la gamme 18V XR DeWALT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "La visseuse à plaques de plâtre DeWALT DCF620P2K est équipée d'un moteur brushless 18V XR et d'un chargeur de vis en bande amovible qui augmente fortement votre productivité : jusqu'à 3500 vis posées à la suite sans recharger à la main. Sa tête orientable et son réglage de profondeur assurent un fraisage régulier sans percer la plaque, grâce à l'embrayage à débrayage. Elle tourne à 4400 tr/min pour un vissage rapide et net. Ce pack est livré complet : 2 batteries 18V XR 5,0 Ah, un chargeur et un coffret TSTAK. Compatible avec toute la gamme 18V XR DeWALT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dcf620p2k-hero.webp"
   },
   {
     "id": "dewalt-dcf512n",
@@ -2932,7 +2983,8 @@
       "Dimensions": "L 360 mm",
       "Batterie / chargeur": "Non inclus"
     },
-    "description_long": "La clé à cliquet sans fil DeWALT DCF512N motorise le serrage et le desserrage des boulons et écrous. Son moteur brushless délivre jusqu'à 95 Nm de couple et fait tourner l'entraînement carré 1/2\" à 250 tr/min, tout en conservant le geste naturel d'un cliquet pour finir au ressenti. Sa tête compacte se glisse dans les endroits exigus, et l'éclairage LED éclaire la zone de travail. Idéale pour la mécanique, la maintenance et le montage, elle fait gagner un temps précieux sur les séries de fixations. Vendue seule pour rejoindre ton parc de batteries 18V XR. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "La clé à cliquet sans fil DeWALT DCF512N motorise le serrage et le desserrage des boulons et écrous. Son moteur brushless délivre jusqu'à 95 Nm de couple et fait tourner l'entraînement carré 1/2\" à 250 tr/min, tout en conservant le geste naturel d'un cliquet pour finir au ressenti. Sa tête compacte se glisse dans les endroits exigus, et l'éclairage LED éclaire la zone de travail. Idéale pour la mécanique, la maintenance et le montage, elle fait gagner un temps précieux sur les séries de fixations. Vendue seule pour rejoindre ton parc de batteries 18V XR. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dcf512n-hero.webp"
   },
   {
     "id": "dewalt-dcs691n",
@@ -2986,7 +3038,8 @@
       "Poids net EPTA": "5,7 kg",
       "Batterie / chargeur": "Non inclus"
     },
-    "description_long": "La découpeuse sans fil DeWALT DCS691N apporte la puissance d'une découpeuse filaire sans la contrainte du câble, grâce à la technologie FLEXVOLT 18/54 V. Son disque de 230 mm et sa profondeur de coupe de 83 mm viennent à bout du béton, du métal et des matériaux de construction, entraînés par un moteur brushless tournant à 6600 tr/min. L'interrupteur étanche et la robustesse de la machine la destinent aux chantiers exigeants, tandis que le Wireless Tool Control permet de piloter à distance un système d'aspiration. Machine seule (5,7 kg) pour rejoindre ton parc de batteries FLEXVOLT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "La découpeuse sans fil DeWALT DCS691N apporte la puissance d'une découpeuse filaire sans la contrainte du câble, grâce à la technologie FLEXVOLT 18/54 V. Son disque de 230 mm et sa profondeur de coupe de 83 mm viennent à bout du béton, du métal et des matériaux de construction, entraînés par un moteur brushless tournant à 6600 tr/min. L'interrupteur étanche et la robustesse de la machine la destinent aux chantiers exigeants, tandis que le Wireless Tool Control permet de piloter à distance un système d'aspiration. Machine seule (5,7 kg) pour rejoindre ton parc de batteries FLEXVOLT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dcs691n-hero.webp"
   },
   {
     "id": "makita-hr5212c",
@@ -3041,7 +3094,8 @@
       "Dimensions (L × l × h)": "599 × 140 × 287 mm",
       "Livré": "coffret + poignée latérale"
     },
-    "description_long": "Le perforateur burineur Makita HR5212C est une machine filaire SDS-Max de 1510 W délivrant 19,1 joules de puissance de frappe, taillée pour le perçage et la démolition lourde. Il perce jusqu'à 52 mm dans le béton et 160 mm avec une couronne trépan. Son triple système anti-vibrations AVT réduit fortement la fatigue et améliore le contrôle, tandis que le démarrage progressif, la vitesse constante sous charge et le débrayage de sécurité (limiteur de couple anti-recul) sécurisent le travail. Livré en coffret avec poignée latérale. Poids 11,9 kg. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Le perforateur burineur Makita HR5212C est une machine filaire SDS-Max de 1510 W délivrant 19,1 joules de puissance de frappe, taillée pour le perçage et la démolition lourde. Il perce jusqu'à 52 mm dans le béton et 160 mm avec une couronne trépan. Son triple système anti-vibrations AVT réduit fortement la fatigue et améliore le contrôle, tandis que le démarrage progressif, la vitesse constante sous charge et le débrayage de sécurité (limiteur de couple anti-recul) sécurisent le travail. Livré en coffret avec poignée latérale. Poids 11,9 kg. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/hr5212c-hero.webp"
   },
   {
     "id": "makita-rp0900j",
@@ -3089,7 +3143,8 @@
       "Dimensions": "110 × 256 × 217 mm",
       "Coffret": "Makpac"
     },
-    "description_long": "La défonceuse plongeante Makita RP0900J est une machine filaire compacte et économique pour la menuiserie courante. Son moteur de 900 W entraîne la fraise pour réaliser rainures, feuillures et moulures, avec une profondeur de plongée réglable jusqu'à 35 mm. Sa semelle de 145 mm assure une bonne stabilité sur la pièce, et elle accepte les fraises à queue de 8 mm. Simple à prendre en main et bien équilibrée, elle rend service à l'atelier comme sur le chantier. Livrée dans un coffret Makpac empilable. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "La défonceuse plongeante Makita RP0900J est une machine filaire compacte et économique pour la menuiserie courante. Son moteur de 900 W entraîne la fraise pour réaliser rainures, feuillures et moulures, avec une profondeur de plongée réglable jusqu'à 35 mm. Sa semelle de 145 mm assure une bonne stabilité sur la pièce, et elle accepte les fraises à queue de 8 mm. Simple à prendre en main et bien équilibrée, elle rend service à l'atelier comme sur le chantier. Livrée dans un coffret Makpac empilable. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/rp0900j-hero.webp"
   },
   {
     "id": "makita-pj7000j",
@@ -3142,7 +3197,8 @@
       "Dimensions": "302 × 139 × 145 mm",
       "Coffret": "Makpac"
     },
-    "description_long": "La lamelleuse Makita PJ7000J réalise des assemblages bois invisibles et robustes grâce aux lamelles (biscuits) insérées dans des saignées parfaitement alignées. Son moteur de 701 W entraîne une lame de 100 mm à 11 000 tr/min pour des plongées nettes jusqu'à 20 mm, et l'angle de coupe se règle de 0 à 90° pour les assemblages d'angle. Le raccord d'aspiration garde la zone de travail propre. Ergonomique et précise, c'est l'outil des menuisiers et ébénistes pour panneaux, plateaux et cadres. Livrée dans un coffret Makpac empilable. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "La lamelleuse Makita PJ7000J réalise des assemblages bois invisibles et robustes grâce aux lamelles (biscuits) insérées dans des saignées parfaitement alignées. Son moteur de 701 W entraîne une lame de 100 mm à 11 000 tr/min pour des plongées nettes jusqu'à 20 mm, et l'angle de coupe se règle de 0 à 90° pour les assemblages d'angle. Le raccord d'aspiration garde la zone de travail propre. Ergonomique et précise, c'est l'outil des menuisiers et ébénistes pour panneaux, plateaux et cadres. Livrée dans un coffret Makpac empilable. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/pj7000j-hero.webp"
   },
   {
     "id": "makita-bl1830b",
@@ -3189,7 +3245,8 @@
       "Dimensions": "80 × 60 × 110 mm",
       "Compatibilité": "Outils Makita 18V LXT"
     },
-    "description_long": "La batterie Makita BL1830B de 3,0 Ah alimente tout l'écosystème d'outils sans fil Makita 18V LXT. Sa technologie Li-Ion offre une bonne autonomie dans un format léger (0,64 kg), et l'indicateur de charge à LED t'indique d'un coup d'œil l'énergie restante. Elle se recharge en 22 minutes sur le chargeur rapide DC18RC, et sa protection électronique la préserve contre la surcharge, la surchauffe et la décharge profonde. Compatible avec l'ensemble des outils Makita LXT 18V, c'est la batterie de rechange idéale pour ne jamais tomber en panne. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "La batterie Makita BL1830B de 3,0 Ah alimente tout l'écosystème d'outils sans fil Makita 18V LXT. Sa technologie Li-Ion offre une bonne autonomie dans un format léger (0,64 kg), et l'indicateur de charge à LED t'indique d'un coup d'œil l'énergie restante. Elle se recharge en 22 minutes sur le chargeur rapide DC18RC, et sa protection électronique la préserve contre la surcharge, la surchauffe et la décharge profonde. Compatible avec l'ensemble des outils Makita LXT 18V, c'est la batterie de rechange idéale pour ne jamais tomber en panne. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/bl1830b-hero.webp"
   },
   {
     "id": "dewalt-dcmcs575n-xj",
@@ -3241,7 +3298,8 @@
       "Poids net EPTA": "5 kg",
       "Batterie / chargeur": "Non inclus"
     },
-    "description_long": "La tronçonneuse sans fil DeWALT DCMCS575N-XJ offre la puissance d'une tronçonneuse thermique sans le bruit, les vibrations ni l'essence, grâce à la technologie FLEXVOLT 18/54 V. Son guide de 50 cm et sa chaîne filant à 15 m/s abattent et tronçonnent des sections importantes, entraînés par un moteur brushless robuste. Le frein de chaîne assure la sécurité, le graissage automatique (réservoir 115 ml) préserve la chaîne, et la tension se règle sans outil. Idéale pour l'entretien des terrains, l'abattage et le débitage. Machine seule (5 kg) pour rejoindre ton parc de batteries FLEXVOLT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "La tronçonneuse sans fil DeWALT DCMCS575N-XJ offre la puissance d'une tronçonneuse thermique sans le bruit, les vibrations ni l'essence, grâce à la technologie FLEXVOLT 18/54 V. Son guide de 50 cm et sa chaîne filant à 15 m/s abattent et tronçonnent des sections importantes, entraînés par un moteur brushless robuste. Le frein de chaîne assure la sécurité, le graissage automatique (réservoir 115 ml) préserve la chaîne, et la tension se règle sans outil. Idéale pour l'entretien des terrains, l'abattage et le débitage. Machine seule (5 kg) pour rejoindre ton parc de batteries FLEXVOLT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dcmcs575n-hero.webp"
   },
   {
     "id": "dewalt-dcn930n",
@@ -3293,7 +3351,8 @@
       "Poids net EPTA": "3,9 kg",
       "Batterie / chargeur": "Non inclus"
     },
-    "description_long": "Le cloueur de charpente DeWALT DCN930N libère les charpentiers du compresseur et du tuyau. Sans fil et compact, il enfonce des pointes de 50 à 90 mm dans les bois de structure, avec un magasin incliné à 33° d'une capacité de 55 clous. Son moteur brushless à mécanisme de volant d'inertie tire sans temps de chauffe, prêt à l'emploi instantanément, et son réglage de profondeur sans outil assure un enfoncement net et régulier. Idéal pour la charpente, l'ossature bois et le platelage. Machine seule (3,9 kg) pour rejoindre ton parc de batteries 18V XR. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Le cloueur de charpente DeWALT DCN930N libère les charpentiers du compresseur et du tuyau. Sans fil et compact, il enfonce des pointes de 50 à 90 mm dans les bois de structure, avec un magasin incliné à 33° d'une capacité de 55 clous. Son moteur brushless à mécanisme de volant d'inertie tire sans temps de chauffe, prêt à l'emploi instantanément, et son réglage de profondeur sans outil assure un enfoncement net et régulier. Idéal pour la charpente, l'ossature bois et le platelage. Machine seule (3,9 kg) pour rejoindre ton parc de batteries 18V XR. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dcn930n-hero.webp"
   },
   {
     "id": "dewalt-dcb548-xj",
@@ -3339,7 +3398,8 @@
       "Poids net EPTA": "1,2 kg",
       "Dimensions": "138 × 87 mm"
     },
-    "description_long": "La batterie DeWALT DCB548-XJ est la plus haute capacité de la gamme FLEXVOLT : 12,0 Ah, soit 648 Wh d'énergie. Grâce à la technologie FLEXVOLT, elle bascule automatiquement entre 18 V et 54 V selon l'outil branché, ce qui lui permet d'alimenter longuement les machines les plus énergivores — tronçonneuse, meuleuse, scie circulaire, découpeuse. L'indicateur de charge à LED t'informe de l'autonomie restante d'un coup d'œil. C'est la batterie de référence pour les gros travaux sans interruption. Compatible avec tout l'écosystème DeWALT 18V XR et 54V FLEXVOLT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "La batterie DeWALT DCB548-XJ est la plus haute capacité de la gamme FLEXVOLT : 12,0 Ah, soit 648 Wh d'énergie. Grâce à la technologie FLEXVOLT, elle bascule automatiquement entre 18 V et 54 V selon l'outil branché, ce qui lui permet d'alimenter longuement les machines les plus énergivores — tronçonneuse, meuleuse, scie circulaire, découpeuse. L'indicateur de charge à LED t'informe de l'autonomie restante d'un coup d'œil. C'est la batterie de référence pour les gros travaux sans interruption. Compatible avec tout l'écosystème DeWALT 18V XR et 54V FLEXVOLT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dcb548-hero.webp"
   },
   {
     "id": "dewalt-dcf809n",
@@ -3389,7 +3449,8 @@
       "Poids net EPTA": "0,96 kg",
       "Batterie / chargeur": "Non inclus"
     },
-    "description_long": "La visseuse à chocs DeWALT DCF809N appartient à la gamme ultra-compacte XR : à peine 0,96 kg et une tête très courte pour travailler dans les espaces les plus réduits. Malgré sa taille, son moteur brushless délivre jusqu'à 190 Nm de couple pour visser et dévisser efficacement. Son porte-embout 1/4'' se recharge d'une main et l'éclairage LED illumine la zone de travail. Un excellent compromis entre compacité, légèreté et performance, idéal pour un usage quotidien. Machine seule pour rejoindre ton parc de batteries 18V XR. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "La visseuse à chocs DeWALT DCF809N appartient à la gamme ultra-compacte XR : à peine 0,96 kg et une tête très courte pour travailler dans les espaces les plus réduits. Malgré sa taille, son moteur brushless délivre jusqu'à 190 Nm de couple pour visser et dévisser efficacement. Son porte-embout 1/4'' se recharge d'une main et l'éclairage LED illumine la zone de travail. Un excellent compromis entre compacité, légèreté et performance, idéal pour un usage quotidien. Machine seule pour rejoindre ton parc de batteries 18V XR. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dcf887n-hero.webp"
   },
   {
     "id": "dewalt-dcg405fn-xj",
@@ -3441,7 +3502,8 @@
       "Dimensions": "380 × 160 × 140 mm",
       "Batterie / chargeur": "Non inclus"
     },
-    "description_long": "La meuleuse d'angle DeWALT DCG405FN-XJ se distingue par sa tête plate : un profil bas qui lui permet d'accéder aux espaces confinés et difficiles là où une meuleuse classique ne passe pas. Son moteur brushless délivre une puissance constante pour le meulage, la découpe et le ponçage, sans perte de régime sous charge. L'embrayage électronique limite les retours de couple en cas de blocage du disque, et le frein électronique arrête le disque net dès que tu relâches la gâchette. La poignée latérale anti-vibration se règle sur deux positions pour un travail confortable. Disque de 125 mm, broche M14 standard. Machine seule (1,75 kg) pour rejoindre ton parc de batteries 18V XR. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "La meuleuse d'angle DeWALT DCG405FN-XJ se distingue par sa tête plate : un profil bas qui lui permet d'accéder aux espaces confinés et difficiles là où une meuleuse classique ne passe pas. Son moteur brushless délivre une puissance constante pour le meulage, la découpe et le ponçage, sans perte de régime sous charge. L'embrayage électronique limite les retours de couple en cas de blocage du disque, et le frein électronique arrête le disque net dès que tu relâches la gâchette. La poignée latérale anti-vibration se règle sur deux positions pour un travail confortable. Disque de 125 mm, broche M14 standard. Machine seule (1,75 kg) pour rejoindre ton parc de batteries 18V XR. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/DCG405FN-hero.webp"
   },
   {
     "id": "dewalt-dw682k-qs",
@@ -3488,7 +3550,8 @@
       "Poids": "3 kg",
       "Livré avec": "fraise carbure, sac à poussières, clé, adaptateur 35 mm, coffret"
     },
-    "description_long": "La fraiseuse à lamelles DeWALT DW682K-QS est l'outil de référence pour l'assemblage bois par lamelles (biscuits). Son moteur de 600 W tournant à 10 000 tr/min réalise des entailles nettes et régulières. Le guide à crémaillère offre un réglage vertical d'une grande précision et s'incline de 0 à 90° pour tous les types d'assemblage, avec des préréglages de profondeur pour les lamelles n°0, n°10 et n°20. Le blocage d'arbre permet un changement de fraise rapide avec une seule clé, et les ergots antidérapants (8 repères de positionnement) garantissent un placement parfait. Livrée avec fraise carbure, sac à poussières, clé, adaptateur d'aspiration 35 mm et coffret de transport. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "La fraiseuse à lamelles DeWALT DW682K-QS est l'outil de référence pour l'assemblage bois par lamelles (biscuits). Son moteur de 600 W tournant à 10 000 tr/min réalise des entailles nettes et régulières. Le guide à crémaillère offre un réglage vertical d'une grande précision et s'incline de 0 à 90° pour tous les types d'assemblage, avec des préréglages de profondeur pour les lamelles n°0, n°10 et n°20. Le blocage d'arbre permet un changement de fraise rapide avec une seule clé, et les ergots antidérapants (8 repères de positionnement) garantissent un placement parfait. Livrée avec fraise carbure, sac à poussières, clé, adaptateur d'aspiration 35 mm et coffret de transport. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dw682k-hero.webp"
   },
   {
     "id": "dewalt-dcf891nt-xj",
@@ -3535,7 +3598,8 @@
       "Poids (sans batterie)": "2 kg",
       "Livré": "machine seule, coffret TSTAK (batterie et chargeur non inclus)"
     },
-    "description_long": "La boulonneuse à chocs DeWALT DCF891NT-XJ délivre 813 Nm de couple de serrage et jusqu'à 1084 Nm de desserrage grâce à son moteur sans charbon 18V XR, pour venir à bout des assemblages boulonnés les plus tenaces. Son carré conducteur 1/2\" à jonc de sécurité assure un maintien fiable des douilles, et ses 3 vitesses sélectionnables (plus un mode précision) permettent d'ajuster finement l'effort selon la tâche. Compacte et légère (environ 2 kg), elle est parfaite pour la mécanique, la charpente métallique et la maintenance industrielle. Livrée en machine seule dans un coffret TSTAK robuste — la batterie et le chargeur ne sont pas inclus, elle fonctionne avec toutes les batteries 18V XR DeWALT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "La boulonneuse à chocs DeWALT DCF891NT-XJ délivre 813 Nm de couple de serrage et jusqu'à 1084 Nm de desserrage grâce à son moteur sans charbon 18V XR, pour venir à bout des assemblages boulonnés les plus tenaces. Son carré conducteur 1/2\" à jonc de sécurité assure un maintien fiable des douilles, et ses 3 vitesses sélectionnables (plus un mode précision) permettent d'ajuster finement l'effort selon la tâche. Compacte et légère (environ 2 kg), elle est parfaite pour la mécanique, la charpente métallique et la maintenance industrielle. Livrée en machine seule dans un coffret TSTAK robuste — la batterie et le chargeur ne sont pas inclus, elle fonctionne avec toutes les batteries 18V XR DeWALT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dcf891nt-hero.webp"
   },
   {
     "id": "dewalt-dcs520nt-xj",
@@ -3590,7 +3654,8 @@
       "Dimensions (L × h)": "303 × 265 mm",
       "Livré": "machine seule, coffret TSTAK (batterie et chargeur non inclus)"
     },
-    "description_long": "La scie circulaire plongeante DeWALT DCS520NT-XJ combine la liberté du sans-fil et la puissance d'une machine filaire grâce à sa plateforme 18/54V XR FlexVolt et son moteur brushless. Sa vitesse variable de 2500 à 4200 tr/min s'adapte à tous les bois et panneaux, pour des découpes précises et nettes jusqu'à 59 mm de profondeur à 90° (44 mm à 45°). Le système plongeant assure une trajectoire rectiligne, l'indicateur de niveau de charge garde un œil sur l'autonomie, et la compatibilité rail de guidage garantit des coupes parfaitement droites. Vendue en machine seule (sans batterie ni chargeur) dans un coffret TSTAK robuste, elle fonctionne avec toutes les batteries FlexVolt 18/54V et XR 18V DeWALT. Poids net 4,7 kg. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "La scie circulaire plongeante DeWALT DCS520NT-XJ combine la liberté du sans-fil et la puissance d'une machine filaire grâce à sa plateforme 18/54V XR FlexVolt et son moteur brushless. Sa vitesse variable de 2500 à 4200 tr/min s'adapte à tous les bois et panneaux, pour des découpes précises et nettes jusqu'à 59 mm de profondeur à 90° (44 mm à 45°). Le système plongeant assure une trajectoire rectiligne, l'indicateur de niveau de charge garde un œil sur l'autonomie, et la compatibilité rail de guidage garantit des coupes parfaitement droites. Vendue en machine seule (sans batterie ni chargeur) dans un coffret TSTAK robuste, elle fonctionne avec toutes les batteries FlexVolt 18/54V et XR 18V DeWALT. Poids net 4,7 kg. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dcs520nt-hero.webp"
   },
   {
     "id": "dewalt-dcf891p2t-qw",
@@ -3640,7 +3705,8 @@
       "Poids net EPTA (nue)": "1,67 kg",
       "Livré": "coffret TSTAK avec 2 batteries 5,0 Ah + chargeur"
     },
-    "description_long": "La boulonneuse à chocs DeWALT DCF891P2T-QW délivre 812 Nm de couple de serrage grâce à son moteur sans charbon 18V XR, sur un carré conducteur 1/2\". Ses 3 vitesses sélectionnables et son variateur permettent d'ajuster finement l'effort selon la tâche, de l'assemblage délicat au boulon récalcitrant. Compacte et légère (1,67 kg à nu), elle reste maniable toute la journée en mécanique, charpente métallique et maintenance. Ce pack est livré complet et prêt à l'emploi : 2 batteries 18V XR 5,0 Ah, un chargeur et un coffret TSTAK robuste. Compatible avec toute la gamme 18V XR DeWALT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "La boulonneuse à chocs DeWALT DCF891P2T-QW délivre 812 Nm de couple de serrage grâce à son moteur sans charbon 18V XR, sur un carré conducteur 1/2\". Ses 3 vitesses sélectionnables et son variateur permettent d'ajuster finement l'effort selon la tâche, de l'assemblage délicat au boulon récalcitrant. Compacte et légère (1,67 kg à nu), elle reste maniable toute la journée en mécanique, charpente métallique et maintenance. Ce pack est livré complet et prêt à l'emploi : 2 batteries 18V XR 5,0 Ah, un chargeur et un coffret TSTAK robuste. Compatible avec toute la gamme 18V XR DeWALT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dcf891p2t-hero.webp"
   },
   {
     "id": "makita-dhr202zj",
@@ -3696,7 +3762,8 @@
       "Dimensions (L × l × h)": "358 × 104 × 235 mm",
       "Livré": "machine seule, coffret MAKPAC (batterie et chargeur non inclus)"
     },
-    "description_long": "Le perforateur burineur Makita DHR202ZJ est un SDS-Plus 18V LXT polyvalent à 3 fonctions : perçage, perçage à percussion et burinage. Avec une énergie de frappe de 2 J et une cadence pouvant atteindre 4000 cps/min, il perce jusqu'à 20 mm dans le béton, 26 mm dans le bois et 13 mm dans le métal. Son sélecteur de mode est simple d'accès et sa poignée latérale amovible avec butée de profondeur assure un travail précis et sûr. Il est vendu seul (sans batterie ni chargeur) dans un coffret MAKPAC empilable, compatible avec toute la gamme LXT 18V Makita. Poids net 3,5 kg. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Le perforateur burineur Makita DHR202ZJ est un SDS-Plus 18V LXT polyvalent à 3 fonctions : perçage, perçage à percussion et burinage. Avec une énergie de frappe de 2 J et une cadence pouvant atteindre 4000 cps/min, il perce jusqu'à 20 mm dans le béton, 26 mm dans le bois et 13 mm dans le métal. Son sélecteur de mode est simple d'accès et sa poignée latérale amovible avec butée de profondeur assure un travail précis et sûr. Il est vendu seul (sans batterie ni chargeur) dans un coffret MAKPAC empilable, compatible avec toute la gamme LXT 18V Makita. Poids net 3,5 kg. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dhr202zj-hero.webp"
   },
   {
     "id": "dewalt-dcg440n-xj",
@@ -3750,7 +3817,8 @@
       "Poids net EPTA": "2,6 kg",
       "Livré": "machine seule (batterie et chargeur non inclus)"
     },
-    "description_long": "La meuleuse d'angle DeWALT DCG440N-XJ accepte les disques de 180 mm et délivre la puissance d'une meuleuse filaire grâce à sa plateforme 18/54V XR FlexVolt et son moteur brushless (2300 W utiles, 6500 tr/min). Elle est équipée d'un frein moteur électronique qui stoppe net le disque au relâchement de la gâchette, et d'un débrayage de sécurité / limiteur de couple qui protège l'utilisateur en cas de blocage du disque. Idéale pour le meulage et le tronçonnage sur chantier. Vendue en machine seule (sans batterie ni chargeur), compatible avec toutes les batteries FlexVolt 18/54V et XR 18V DeWALT. Poids net 2,6 kg. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "La meuleuse d'angle DeWALT DCG440N-XJ accepte les disques de 180 mm et délivre la puissance d'une meuleuse filaire grâce à sa plateforme 18/54V XR FlexVolt et son moteur brushless (2300 W utiles, 6500 tr/min). Elle est équipée d'un frein moteur électronique qui stoppe net le disque au relâchement de la gâchette, et d'un débrayage de sécurité / limiteur de couple qui protège l'utilisateur en cas de blocage du disque. Idéale pour le meulage et le tronçonnage sur chantier. Vendue en machine seule (sans batterie ni chargeur), compatible avec toutes les batteries FlexVolt 18/54V et XR 18V DeWALT. Poids net 2,6 kg. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dcg440n-hero.webp"
   },
   {
     "id": "dewalt-dcs378p2-qw",
@@ -3800,7 +3868,8 @@
       "Poids (outil)": "3,8 kg",
       "Livré avec": "2 batteries 5,0 Ah + chargeur DCB1104"
     },
-    "description_long": "La scie à ruban portative DeWALT DCS378P2-QW coupe proprement les métaux (tubes, profilés, barres) grâce à son moteur brushless 18V XR de 530 W et sa vitesse de ruban réglable jusqu'à 174 m/min sur 5 positions. Sa capacité de coupe de 86 × 86 mm et sa prise en main compacte en font l'outil idéal pour la découpe rapide sur chantier, sans le fil. Ce pack est livré complet : 2 batteries 18V XR 5,0 Ah et un chargeur DCB1104. Compatible avec toute la gamme 18V XR DeWALT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "La scie à ruban portative DeWALT DCS378P2-QW coupe proprement les métaux (tubes, profilés, barres) grâce à son moteur brushless 18V XR de 530 W et sa vitesse de ruban réglable jusqu'à 174 m/min sur 5 positions. Sa capacité de coupe de 86 × 86 mm et sa prise en main compacte en font l'outil idéal pour la découpe rapide sur chantier, sans le fil. Ce pack est livré complet : 2 batteries 18V XR 5,0 Ah et un chargeur DCB1104. Compatible avec toute la gamme 18V XR DeWALT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dcs378p2-hero.webp"
   },
   {
     "id": "dewalt-dcg200nt-xj",
@@ -3850,7 +3919,8 @@
       "Confort": "Réglage de profondeur sans outil, Wireless Tool Control",
       "Livré": "machine seule + 2 disques diamant + coffret TSTAK (batterie et chargeur non inclus)"
     },
-    "description_long": "La DeWALT DCG200NT-XJ est la première rainureuse à béton sans fil au monde, sur plateforme 54V XR FlexVolt à moteur brushless. Équipée de deux disques diamant de 125 mm, elle réalise des saignées nettes dans le béton plein jusqu'à 32 mm de profondeur, avec une largeur de rainure réglable de 8 à 35 mm pour tous les diamètres de gaines et tuyaux. Son frein électronique anti-rebond et son réglage de profondeur sans outil sécurisent et accélèrent le travail. Vendue en machine seule (sans batterie ni chargeur) dans un coffret TSTAK avec ses deux disques. Compatible batteries FlexVolt 54V DeWALT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "La DeWALT DCG200NT-XJ est la première rainureuse à béton sans fil au monde, sur plateforme 54V XR FlexVolt à moteur brushless. Équipée de deux disques diamant de 125 mm, elle réalise des saignées nettes dans le béton plein jusqu'à 32 mm de profondeur, avec une largeur de rainure réglable de 8 à 35 mm pour tous les diamètres de gaines et tuyaux. Son frein électronique anti-rebond et son réglage de profondeur sans outil sécurisent et accélèrent le travail. Vendue en machine seule (sans batterie ni chargeur) dans un coffret TSTAK avec ses deux disques. Compatible batteries FlexVolt 54V DeWALT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dcg200nt-hero.webp"
   },
   {
     "id": "makita-dga452z",
@@ -3862,7 +3932,7 @@
     "category": "Meuleuses",
     "tag": "Nouveau",
     "desc": "Meuleuse angulaire 18V LXT Ø115 mm, compacte et légère (1,6 kg), interrupteur blocable, indicateur de charge. Machine seule (sans batterie ni chargeur).",
-    "img": "images/posters/dga452z-v2.webp",
+    "img": "images/posters/dga452z-card.webp",
     "price": 90.68,
     "currency": "EUR",
     "vat": 0.2,
@@ -3905,7 +3975,8 @@
       "Dimensions (L × l × h)": "317 × 129 × 126 mm",
       "Livré": "machine seule (batterie et chargeur non inclus)"
     },
-    "description_long": "La meuleuse angulaire Makita DGA452Z est un outil 18V LXT compact et léger (1,6 kg) pour disques de 115 mm, pensé pour les travaux de meulage et de tronçonnage courants. Sa faible circonférence de prise en main (195 mm) et son poids réduit la rendent maniable toute la journée. Elle dispose d'un interrupteur blocable pour le travail continu et d'un indicateur de niveau de charge. Vendue en machine seule (sans batterie ni chargeur), elle fonctionne avec toutes les batteries LXT 18V Makita. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "La meuleuse angulaire Makita DGA452Z est un outil 18V LXT compact et léger (1,6 kg) pour disques de 115 mm, pensé pour les travaux de meulage et de tronçonnage courants. Sa faible circonférence de prise en main (195 mm) et son poids réduit la rendent maniable toute la journée. Elle dispose d'un interrupteur blocable pour le travail continu et d'un indicateur de niveau de charge. Vendue en machine seule (sans batterie ni chargeur), elle fonctionne avec toutes les batteries LXT 18V Makita. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dga452z-hero.webp"
   },
   {
     "id": "makita-dbo382z",
@@ -3917,7 +3988,7 @@
     "category": "Ponceuses",
     "tag": "Nouveau",
     "desc": "Ponceuse vibrante 18V 93x185mm (Solo).",
-    "img": "images/posters/dbo382z-v3.webp",
+    "img": "images/posters/dbo382z-card.webp",
     "price": 144.79,
     "currency": "EUR",
     "vat": 0.2,
@@ -3954,7 +4025,8 @@
       "Poids net EPTA": "1,2 kg",
       "Dimensions": "336 × 92 × 169 mm"
     },
-    "description_long": "Ponceuse vibrante sans fil Makita DBO382Z (18V LXT), idéale pour le ponçage efficace de grandes surfaces en bois, métal ou plastique. Moteur brushless à vitesse variable (4 000-12 000 osc/min) pour un travail précis et endurant, plateau 93 × 185 mm. Vendue en machine seule (sans batterie ni chargeur), compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM, octroi de mer inclus dans le prix affiché."
+    "description_long": "Ponceuse vibrante sans fil Makita DBO382Z (18V LXT), idéale pour le ponçage efficace de grandes surfaces en bois, métal ou plastique. Moteur brushless à vitesse variable (4 000-12 000 osc/min) pour un travail précis et endurant, plateau 93 × 185 mm. Vendue en machine seule (sans batterie ni chargeur), compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM, octroi de mer inclus dans le prix affiché.",
+    "heroImg": "images/posters/dbo382z-hero.webp"
   },
   {
     "id": "makita-dbo480z",
@@ -3966,7 +4038,7 @@
     "category": "Ponceuses",
     "tag": "Nouveau",
     "desc": "Ponceuse vibrante 18V LXT 112x102 mm (Machine seule).",
-    "img": "images/posters/dbo480z-v3.webp",
+    "img": "images/posters/dbo480z-card.webp",
     "price": 97.64,
     "currency": "EUR",
     "vat": 0.2,
@@ -4006,7 +4078,8 @@
     "description_long": "Ponceuse vibrante carrée sans fil Makita DBO480Z (18V LXT) pour un ponçage rapide et lisse. Moteur brushless à 2 vitesses avec variateur et régulation électronique (jusqu'à 28 000 osc/min), plateau 112 × 102 mm et frein moteur pour un arrêt net. Vendue en machine seule (sans batterie ni chargeur), compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM, octroi de mer inclus dans le prix affiché.",
     "variantGroup": "DBO480",
     "variantRole": "solo",
-    "coffretSku": "DBO480ZJ"
+    "coffretSku": "DBO480ZJ",
+    "heroImg": "images/posters/dbo480z-hero.webp"
   },
   {
     "id": "makita-dbo480zj",
@@ -4018,7 +4091,7 @@
     "category": "Ponceuses",
     "tag": "Nouveau",
     "desc": "Ponceuse vibrante 18V LXT 112x102 mm (Machine seule) en MAKPAC.",
-    "img": "images/posters/dbo480z-v3.webp",
+    "img": "images/posters/dbo480z-card.webp",
     "price": 114.89,
     "currency": "EUR",
     "vat": 0.2,
@@ -4046,7 +4119,8 @@
     "variantGroup": "DBO480",
     "variantRole": "coffret",
     "soloSku": "DBO480Z",
-    "variantSecondary": true
+    "variantSecondary": true,
+    "heroImg": "images/posters/dbo480z-hero.webp"
   },
   {
     "id": "makita-dbs180z",
@@ -4058,7 +4132,7 @@
     "category": "Ponceuses",
     "tag": "Nouveau",
     "desc": "Ponceuse à bande 18V BL LXT (Machine seule).",
-    "img": "images/posters/dbs180z-v2.webp",
+    "img": "images/posters/dbs180z-card.webp",
     "price": 251.9,
     "currency": "EUR",
     "vat": 0.2,
@@ -4096,7 +4170,8 @@
     "description_long": "Ponceuse à bande 18V BL LXT (Machine seule). Moteur brushless, bande 9 × 533 mm, 5 vitesses (600 à 1700 m/min). Vendue en machine seule (sans batterie ni chargeur), compatible batteries Makita 18V LXT. Poids 1,8-2,1 kg (EPTA). Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
     "srcAltSkus": [
       "DBS180ZJ"
-    ]
+    ],
+    "heroImg": "images/posters/dbs180z-hero.webp"
   },
   {
     "id": "makita-dcc500z",
@@ -4146,7 +4221,8 @@
       "Poids net EPTA": "2,2 kg",
       "Dimensions": "283 × 158 × 172 mm"
     },
-    "description_long": "Scie circulaire à lame diamant sans fil Makita DCC500Z (18V LXT), conçue pour la découpe précise de matériaux (carrelage, pierre, panneaux fibrociment…). Moteur brushless à vitesse constante (8 800 tr/min), lame Ø125 mm, profondeur de coupe 40 mm, système anti-poussière avec sac et raccord d'aspiration. Technologie AWS (démarrage sans fil de l'aspirateur), éclairage LED et démarrage progressif. Vendue en machine seule (sans batterie ni chargeur), compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM, octroi de mer inclus dans le prix affiché."
+    "description_long": "Scie circulaire à lame diamant sans fil Makita DCC500Z (18V LXT), conçue pour la découpe précise de matériaux (carrelage, pierre, panneaux fibrociment…). Moteur brushless à vitesse constante (8 800 tr/min), lame Ø125 mm, profondeur de coupe 40 mm, système anti-poussière avec sac et raccord d'aspiration. Technologie AWS (démarrage sans fil de l'aspirateur), éclairage LED et démarrage progressif. Vendue en machine seule (sans batterie ni chargeur), compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM, octroi de mer inclus dans le prix affiché.",
+    "heroImg": "images/posters/dcc500z-hero.webp"
   },
   {
     "id": "makita-dco181z",
@@ -4158,7 +4234,7 @@
     "category": "Défonceuses",
     "tag": "Nouveau",
     "desc": "Affleureuse sans fil pour plâtre 18V (Produit seul).",
-    "img": "images/posters/dco181z-v2.webp",
+    "img": "images/posters/dco181z-card.webp",
     "price": 166.51,
     "currency": "EUR",
     "vat": 0.2,
@@ -4195,7 +4271,8 @@
       "Poids net EPTA": "1,7 kg",
       "Dimensions": "311 × 79 × 117 mm"
     },
-    "description_long": "Découpeuse sans fil Makita DCO181Z (18V LXT) pensée pour faciliter les découpes rapides et précises dans les plaques de plâtre. Moteur brushless haute vitesse (32 000 tr/min), pince 3,18 mm, éclairage LED et système anti-poussière pour un chantier propre. Protection XPT (poussière/eau) et démarrage progressif. Vendue en machine seule (sans batterie ni chargeur), compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM, octroi de mer inclus dans le prix affiché."
+    "description_long": "Découpeuse sans fil Makita DCO181Z (18V LXT) pensée pour faciliter les découpes rapides et précises dans les plaques de plâtre. Moteur brushless haute vitesse (32 000 tr/min), pince 3,18 mm, éclairage LED et système anti-poussière pour un chantier propre. Protection XPT (poussière/eau) et démarrage progressif. Vendue en machine seule (sans batterie ni chargeur), compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM, octroi de mer inclus dans le prix affiché.",
+    "heroImg": "images/posters/dco181z-hero.webp"
   },
   {
     "id": "makita-ddf083z",
@@ -4247,7 +4324,8 @@
     "description_long": "Perceuse-visseuse compacte sans fil Makita DDF083Z (18V LXT), ultra-légère (1,3 kg) et courte (124 mm) pour travailler dans les espaces réduits. Moteur brushless 2 vitesses (jusqu'à 1 700 tr/min), couple 40 Nm, mandrin hexagonal 1/4\" pour changer d'embout en un clic, 20 positions de couple + perçage, éclairage LED et protection XPT (poussière/eau). Vendue en machine seule (sans batterie ni chargeur), compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM, octroi de mer inclus dans le prix affiché.",
     "variantGroup": "DDF083",
     "variantRole": "solo",
-    "coffretSku": "DDF083ZJ"
+    "coffretSku": "DDF083ZJ",
+    "heroImg": "images/posters/ddf083z-hero.webp"
   },
   {
     "id": "makita-ddf083zj",
@@ -4287,7 +4365,8 @@
     "variantGroup": "DDF083",
     "variantRole": "coffret",
     "soloSku": "DDF083Z",
-    "variantSecondary": true
+    "variantSecondary": true,
+    "heroImg": "images/posters/ddf083z-hero.webp"
   },
   {
     "id": "makita-ddf485zj",
@@ -4338,7 +4417,8 @@
       "Dimensions": "169 × 79 × 255 mm",
       "Livraison": "Coffret MAKPAC"
     },
-    "description_long": "Perceuse-visseuse sans fil Makita DDF485ZJ (18V LXT), livrée en coffret MAKPAC. Moteur brushless 2 vitesses (0-1 900 tr/min), couple 50 Nm sur 21 positions + perçage, mandrin auto-serrant 13 mm. Perce jusqu'à Ø38 mm dans le bois et Ø13 mm dans le métal, éclairage LED. Vendue en machine seule (sans batterie ni chargeur), compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM, octroi de mer inclus dans le prix affiché."
+    "description_long": "Perceuse-visseuse sans fil Makita DDF485ZJ (18V LXT), livrée en coffret MAKPAC. Moteur brushless 2 vitesses (0-1 900 tr/min), couple 50 Nm sur 21 positions + perçage, mandrin auto-serrant 13 mm. Perce jusqu'à Ø38 mm dans le bois et Ø13 mm dans le métal, éclairage LED. Vendue en machine seule (sans batterie ni chargeur), compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM, octroi de mer inclus dans le prix affiché.",
+    "heroImg": "images/posters/ddf485z-hero.webp"
   },
   {
     "id": "makita-ddf489z",
@@ -4394,7 +4474,8 @@
     "description_long": "Perceuse-visseuse 18V LXT 70 Nm (Machine seule). Outil professionnel Makita de la gamme 18V LXT sans fil (moteur brushless haut rendement). 2 vitesses (0-500 / 0-1800 tr/min), couple max 73 Nm, 21 positions d'embrayage + mode perçage. Perçage bois 51 mm, métal 13 mm, mandrin auto-serrant 1,5-13 mm. Frein moteur, protection électronique anti-surcharge et éclairage LED. Vendu en machine seule (sans batterie ni chargeur), compatible avec les batteries Makita 18V LXT. Poids 1,45 kg (EPTA). Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
     "variantGroup": "DDF489",
     "variantRole": "solo",
-    "coffretSku": "DDF489ZJ"
+    "coffretSku": "DDF489ZJ",
+    "heroImg": "images/posters/ddf489z-hero.webp"
   },
   {
     "id": "makita-ddf489zj",
@@ -4452,7 +4533,8 @@
     "variantGroup": "DDF489",
     "variantRole": "coffret",
     "soloSku": "DDF489Z",
-    "variantSecondary": true
+    "variantSecondary": true,
+    "heroImg": "images/posters/ddf489z-hero.webp"
   },
   {
     "id": "makita-ddf490z",
@@ -4504,7 +4586,8 @@
       "Poids (EPTA)": "1 kg",
       "Dimensions (L×l×H)": "167 × 81 × 255 mm"
     },
-    "description_long": "Perceuse-visseuse 18V LXT Ø13 mm. Outil professionnel Makita de la gamme 18V LXT sans fil (moteur brushless haut rendement). 2 vitesses (0-500 / 0-1900 tr/min), couple de serrage max 50 Nm, 20 positions d'embrayage. Perçage bois jusqu'à 38 mm, mandrin auto-serrant 1,5-13 mm. Vitesse variable, frein moteur et éclairage LED. Vendu en machine seule (sans batterie ni chargeur), compatible avec les batteries Makita 18V LXT. Poids 1 kg (EPTA). Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Perceuse-visseuse 18V LXT Ø13 mm. Outil professionnel Makita de la gamme 18V LXT sans fil (moteur brushless haut rendement). 2 vitesses (0-500 / 0-1900 tr/min), couple de serrage max 50 Nm, 20 positions d'embrayage. Perçage bois jusqu'à 38 mm, mandrin auto-serrant 1,5-13 mm. Vitesse variable, frein moteur et éclairage LED. Vendu en machine seule (sans batterie ni chargeur), compatible avec les batteries Makita 18V LXT. Poids 1 kg (EPTA). Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/ddf490z-hero.webp"
   },
   {
     "id": "makita-ddg461z",
@@ -4516,7 +4599,7 @@
     "category": "Tarières",
     "tag": "Nouveau",
     "desc": "Tarière sans fil 36 V LXT (2x18V) brushless.",
-    "img": "images/posters/ddg461z-v4.webp",
+    "img": "images/posters/ddg461z-card.webp",
     "price": 595.04,
     "currency": "EUR",
     "vat": 0.2,
@@ -4553,7 +4636,8 @@
       "Poids (EPTA)": "6,2 kg",
       "Dimensions (L×l×H)": "840 × 607 × 223 mm"
     },
-    "description_long": "Tarière sans fil 36 V LXT (2 × 18 V) brushless. Outil professionnel Makita de la gamme 36V LXT sans fil (moteur brushless haut rendement, 1350 W). 2 vitesses (0-350 / 0-1400 tr/min), couple de calage 136 Nm. Idéale pour les travaux de forage dans divers sols. Vendue en machine seule (sans batterie ni chargeur), compatible avec les batteries Makita 18V LXT. Poids 6,2 kg (EPTA). Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Tarière sans fil 36 V LXT (2 × 18 V) brushless. Outil professionnel Makita de la gamme 36V LXT sans fil (moteur brushless haut rendement, 1350 W). 2 vitesses (0-350 / 0-1400 tr/min), couple de calage 136 Nm. Idéale pour les travaux de forage dans divers sols. Vendue en machine seule (sans batterie ni chargeur), compatible avec les batteries Makita 18V LXT. Poids 6,2 kg (EPTA). Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/ddg461z-hero.webp"
   },
   {
     "id": "makita-dga506z",
@@ -4565,7 +4649,7 @@
     "category": "Meuleuses",
     "tag": "Nouveau",
     "desc": "Meuleuse d'angle 18V LXT Ø125 mm (Machine seule).",
-    "img": "images/posters/dga506z-v2.webp",
+    "img": "images/posters/dga506z-card.webp",
     "price": 155.14,
     "currency": "EUR",
     "vat": 0.2,
@@ -4609,7 +4693,8 @@
     "description_long": "Meuleuse d'angle 18V LXT Ø125 mm (Machine seule). Outil professionnel Makita de la gamme 18V LXT sans fil (moteur brushless haut rendement). Disque Ø125 mm, alésage M14, vitesse à vide 8500 tr/min, profondeur de coupe 29 mm. Sécurité complète : AFT (détection anti-recul), interrupteur homme mort, protection anti-redémarrage ; plus frein moteur, système anti-poussière et démarrage progressif. Vendue en machine seule (sans batterie ni chargeur), compatible avec les batteries Makita 18V LXT. Poids 2,4 kg (EPTA). Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
     "variantGroup": "DGA506",
     "variantRole": "solo",
-    "coffretSku": "DGA506ZJ"
+    "coffretSku": "DGA506ZJ",
+    "heroImg": "images/posters/dga506z-hero.webp"
   },
   {
     "id": "makita-dga506zj",
@@ -4621,7 +4706,7 @@
     "category": "Meuleuses",
     "tag": "Nouveau",
     "desc": "Meuleuse d'angle 18V LXT Ø125 mm (Machine seule) en MAKPAC.",
-    "img": "images/posters/dga506z-v2.webp",
+    "img": "images/posters/dga506z-card.webp",
     "price": 198.56,
     "currency": "EUR",
     "vat": 0.2,
@@ -4667,7 +4752,8 @@
     "variantGroup": "DGA506",
     "variantRole": "coffret",
     "soloSku": "DGA506Z",
-    "variantSecondary": true
+    "variantSecondary": true,
+    "heroImg": "images/posters/dga506z-hero.webp"
   },
   {
     "id": "makita-dga508z",
@@ -4679,7 +4765,7 @@
     "category": "Meuleuses",
     "tag": "Nouveau",
     "desc": "Meuleuse angulaire 18V Li-Ion LXT Ø125 mm (Machine seule).",
-    "img": "images/posters/dga508z-v2.webp",
+    "img": "images/posters/dga508z-card.webp",
     "price": 175.56,
     "currency": "EUR",
     "vat": 0.2,
@@ -4720,7 +4806,8 @@
       "Poids (EPTA)": "2,4 kg",
       "Dimensions (L×l×H)": "362 × 140 × 151 mm"
     },
-    "description_long": "Meuleuse angulaire 18V Li-Ion LXT Ø125 mm (Machine seule). Outil professionnel Makita de la gamme 18V LXT sans fil (moteur brushless haut rendement). Disque Ø125 mm, alésage M14, vitesse à vide 8500 tr/min, profondeur de coupe 29 mm. Très sécuritaire avec double protection : frein électronique et interrupteur homme mort. Variateur de vitesse à régulation électronique, système anti-poussière et démarrage progressif. Vendue en machine seule (sans batterie ni chargeur), compatible avec les batteries Makita 18V LXT. Poids 2,4 kg (EPTA). Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Meuleuse angulaire 18V Li-Ion LXT Ø125 mm (Machine seule). Outil professionnel Makita de la gamme 18V LXT sans fil (moteur brushless haut rendement). Disque Ø125 mm, alésage M14, vitesse à vide 8500 tr/min, profondeur de coupe 29 mm. Très sécuritaire avec double protection : frein électronique et interrupteur homme mort. Variateur de vitesse à régulation électronique, système anti-poussière et démarrage progressif. Vendue en machine seule (sans batterie ni chargeur), compatible avec les batteries Makita 18V LXT. Poids 2,4 kg (EPTA). Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dga508z-hero.webp"
   },
   {
     "id": "makita-dga513zj",
@@ -4772,7 +4859,8 @@
       "Batterie / chargeur": "Non inclus"
     },
     "description_long": "Meuleuse d'angle sans fil Makita 18V LXT Ø125 mm (DGA513ZJ), machine seule livrée en coffret MAKPAC empilable. Moteur brushless à vitesse variable (3000-8500 tr/min) avec technologie ADT qui ajuste automatiquement vitesse et couple selon la charge, protection anti-retour AFT et frein électronique pour la sécurité. Broche M14, disque Ø125 mm. Protection XPT contre l'eau et la poussière. Livrée avec carter de protection, poignée latérale, écrou de flasque et clé. Vendue sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
-    "coffretIncluded": true
+    "coffretIncluded": true,
+    "heroImg": "images/posters/dga513zj-hero.webp"
   },
   {
     "id": "makita-dga517z",
@@ -4784,7 +4872,7 @@
     "category": "Meuleuses",
     "tag": "Nouveau",
     "desc": "Meuleuse d'angle 18V LXT Ø125 mm (Machine seule).",
-    "img": "images/posters/dga517z-v4.webp",
+    "img": "images/posters/dga517z-card.webp",
     "price": 199.52,
     "currency": "EUR",
     "vat": 0.2,
@@ -4826,7 +4914,8 @@
     "description_long": "Meuleuse d'angle 18V LXT Ø125 mm (Machine seule). Disqueuse professionnelle Makita d'un diamètre de 125 mm, gamme 18V LXT sans fil (moteur brushless haut rendement). Disque Ø125 mm, alésage M14, 5 vitesses (variateur) et vitesse à vide 8500 tr/min. Sécurité AFT (détection anti-recul), frein moteur, régulation électronique et démarrage progressif. Vendue en machine seule (sans batterie ni chargeur), compatible avec les batteries Makita 18V LXT. Poids 2,4 kg (EPTA). Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
     "variantGroup": "DGA517",
     "variantRole": "solo",
-    "coffretSku": "DGA517ZJ"
+    "coffretSku": "DGA517ZJ",
+    "heroImg": "images/posters/dga517z-hero.webp"
   },
   {
     "id": "makita-dga517zj",
@@ -4882,7 +4971,8 @@
     "variantGroup": "DGA517",
     "variantRole": "coffret",
     "soloSku": "DGA517Z",
-    "variantSecondary": true
+    "variantSecondary": true,
+    "heroImg": "images/posters/dga517z-hero.webp"
   },
   {
     "id": "makita-dga519z",
@@ -4894,7 +4984,7 @@
     "category": "Meuleuses",
     "tag": "Nouveau",
     "desc": "Meuleuse d'angle 18V LXT Ø125 mm avec système X-LOCK (Machine seule).",
-    "img": "images/posters/dga519z-v3.webp",
+    "img": "images/posters/dga519z-card.webp",
     "price": 275.44,
     "currency": "EUR",
     "vat": 0.2,
@@ -4932,7 +5022,8 @@
     "description_long": "Nouvelle meuleuse d'angle 18V LXT Ø125 mm avec système X-LOCK. Disqueuse professionnelle Makita d'un diamètre de 125 mm, dotée du système X-LOCK permettant un changement d'accessoire ultra-rapide et sans outil. Moteur brushless (sans charbon) alimenté à 8500 tr/min, variateur de vitesse réglable. Sécurité maximale : interrupteur homme mort, système anti kick-back (AFT) et frein électrique. XPT (protection contre la poussière et l'eau), démarrage progressif et éclairage LED 3 niveaux. Vendue en machine seule (sans batterie ni chargeur), compatible avec les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
     "variantGroup": "DGA519",
     "variantRole": "solo",
-    "coffretSku": "DGA519ZJ"
+    "coffretSku": "DGA519ZJ",
+    "heroImg": "images/posters/dga519z-hero.webp"
   },
   {
     "id": "makita-dga519zj",
@@ -4944,7 +5035,7 @@
     "category": "Meuleuses",
     "tag": "Nouveau",
     "desc": "Meuleuse d'angle 18V LXT Ø125 mm avec système X-LOCK, en MAKPAC.",
-    "img": "images/posters/dga519z-v3.webp",
+    "img": "images/posters/dga519z-card.webp",
     "price": 292.01,
     "currency": "EUR",
     "vat": 0.2,
@@ -4984,7 +5075,8 @@
     "variantGroup": "DGA519",
     "variantRole": "coffret",
     "soloSku": "DGA519Z",
-    "variantSecondary": true
+    "variantSecondary": true,
+    "heroImg": "images/posters/dga519z-hero.webp"
   },
   {
     "id": "makita-dhp489z",
@@ -5041,7 +5133,8 @@
     "description_long": "Perceuse à percussion 18V LXT 70 Nm (Machine seule). Dernière génération, usage régulier avec un couple de 70 Nm. Outil professionnel Makita de la gamme 18V LXT sans fil (moteur brushless haut rendement). 2 vitesses (0-550 / 0-1800 tr/min), cadence de frappe jusqu'à 27000 cps/min, 21 positions d'embrayage. Capacités : bois 38 mm, béton 13 mm, métal 13 mm, mandrin métallique 1,5-13 mm. Protection électronique anti-surcharge, frein moteur, variateur de vitesse, système anti-poussière et éclairage LED. Vendue en machine seule (sans batterie ni chargeur), compatible avec les batteries Makita 18V LXT. Poids 1,5 kg (EPTA). Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
     "variantGroup": "DHP489",
     "variantRole": "solo",
-    "coffretSku": "DHP489ZJ"
+    "coffretSku": "DHP489ZJ",
+    "heroImg": "images/posters/dhp489z-hero.webp"
   },
   {
     "id": "makita-dhp489zj",
@@ -5100,7 +5193,8 @@
     "variantGroup": "DHP489",
     "variantRole": "coffret",
     "soloSku": "DHP489Z",
-    "variantSecondary": true
+    "variantSecondary": true,
+    "heroImg": "images/posters/dhp489z-hero.webp"
   },
   {
     "id": "makita-dhr171z",
@@ -5156,7 +5250,8 @@
     "description_long": "Perforateur SDS-Plus 18V LXT 1,2 J (Machine seule). Conçu spécialement pour le perçage de trous de fixation, particulièrement adapté aux travaux au-dessus de la tête grâce à sa forme compacte. Outil professionnel Makita de la gamme 18V LXT sans fil (moteur brushless). Emmanchement SDS-Plus, énergie de frappe 1,2 J, vitesse à vide 680 tr/min, cadence 4800 cps/min. Capacités : béton 17 mm, bois 13 mm, métal 10 mm. Système anti-poussière intégré. Vendu en machine seule (sans batterie ni chargeur), compatible avec les batteries Makita 18V LXT. Poids 2,8 kg (EPTA). Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
     "variantGroup": "DHR171",
     "variantRole": "solo",
-    "coffretSku": "DHR171ZJ"
+    "coffretSku": "DHR171ZJ",
+    "heroImg": "images/posters/dhr171z-hero.webp"
   },
   {
     "id": "makita-dhr171zj",
@@ -5214,7 +5309,8 @@
     "variantGroup": "DHR171",
     "variantRole": "coffret",
     "soloSku": "DHR171Z",
-    "variantSecondary": true
+    "variantSecondary": true,
+    "heroImg": "images/posters/dhr171z-hero.webp"
   },
   {
     "id": "makita-dhr183z",
@@ -5270,7 +5366,8 @@
       "Poids (EPTA, avec batterie)": "2,1 - 2,9 kg",
       "Dimensions (L×l×H)": "288 × 89 × 215 mm"
     },
-    "description_long": "Perforateur SDS-Plus 18V LXT 1,7 J (Produit seul). Perforateur Makita à mandrin SDS-Plus, idéal pour réaliser des trous dans la maçonnerie. Outil professionnel de la gamme 18V LXT sans fil (moteur brushless haut rendement). Énergie de frappe 1,7 J, vitesse à vide 0-1100 tr/min, cadence 0-5000 cps/min. Capacités : béton 18 mm, bois 24 mm, métal 13 mm. Équipé du système anti-vibration AVT et de la connectivité AWS (Auto-start Wireless System). Protection électronique anti-surcharge et système anti-poussière. Vendu en machine seule (sans batterie ni chargeur), compatible avec les batteries Makita 18V LXT. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Perforateur SDS-Plus 18V LXT 1,7 J (Produit seul). Perforateur Makita à mandrin SDS-Plus, idéal pour réaliser des trous dans la maçonnerie. Outil professionnel de la gamme 18V LXT sans fil (moteur brushless haut rendement). Énergie de frappe 1,7 J, vitesse à vide 0-1100 tr/min, cadence 0-5000 cps/min. Capacités : béton 18 mm, bois 24 mm, métal 13 mm. Équipé du système anti-vibration AVT et de la connectivité AWS (Auto-start Wireless System). Protection électronique anti-surcharge et système anti-poussière. Vendu en machine seule (sans batterie ni chargeur), compatible avec les batteries Makita 18V LXT. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dhr183z-hero.webp"
   },
   {
     "id": "makita-dhr242z",
@@ -5325,7 +5422,8 @@
       "Poids (EPTA)": "3,4 kg",
       "Dimensions (L×l×H)": "353 × 85 × 213 mm"
     },
-    "description_long": "Perforateur burineur SDS-Plus 18V LXT Li-Ion (machine seule). Perforateur burineur Makita avec 3 modes de fonctionnement (perçage, perforation, burinage). Outil professionnel de la gamme 18V LXT sans fil (moteur brushless haut rendement). Énergie de frappe 2 J, vitesse à vide 950 tr/min, cadence 4700 cps/min. Capacités : béton 24 mm, métal 13 mm. Débrayage de sécurité / limiteur de couple et vitesse variable. Vendu en machine seule (sans batterie ni chargeur), compatible avec les batteries Makita 18V LXT. Poids 3,4 kg (EPTA). Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Perforateur burineur SDS-Plus 18V LXT Li-Ion (machine seule). Perforateur burineur Makita avec 3 modes de fonctionnement (perçage, perforation, burinage). Outil professionnel de la gamme 18V LXT sans fil (moteur brushless haut rendement). Énergie de frappe 2 J, vitesse à vide 950 tr/min, cadence 4700 cps/min. Capacités : béton 24 mm, métal 13 mm. Débrayage de sécurité / limiteur de couple et vitesse variable. Vendu en machine seule (sans batterie ni chargeur), compatible avec les batteries Makita 18V LXT. Poids 3,4 kg (EPTA). Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dhr242z-hero.webp"
   },
   {
     "id": "makita-dhr243z",
@@ -5383,7 +5481,8 @@
     "description_long": "Perfo-burineur 18V LXT SDS-Plus 2 J (Machine seule). Perforateur burineur puissant et compact pour les travaux de construction et de rénovation. Livré avec un mandrin porte-foret interchangeable (perçage bois/métal en plus du SDS-Plus). Outil professionnel Makita de la gamme 18V LXT sans fil (moteur brushless haut rendement). Énergie de frappe 2 J, vitesse à vide 950 tr/min, cadence 4700 cps/min. Capacités : béton 24 mm, bois 27 mm, métal 13 mm. Débrayage de sécurité, frein moteur, vitesse constante, système anti-poussière et filtre HEPA. Vendu en machine seule (sans batterie ni chargeur), compatible avec les batteries Makita 18V LXT. Poids 3,4 kg (EPTA). Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
     "variantGroup": "DHR243",
     "variantRole": "solo",
-    "coffretSku": "DHR243ZJ"
+    "coffretSku": "DHR243ZJ",
+    "heroImg": "images/posters/dhr243z-hero.webp"
   },
   {
     "id": "makita-dhr243zj",
@@ -5443,7 +5542,8 @@
     "variantGroup": "DHR243",
     "variantRole": "coffret",
     "soloSku": "DHR243Z",
-    "variantSecondary": true
+    "variantSecondary": true,
+    "heroImg": "images/posters/dhr243z-hero.webp"
   },
   {
     "id": "makita-dhr283z",
@@ -5455,7 +5555,7 @@
     "category": "Perforateurs",
     "tag": "Nouveau",
     "desc": "Perfo-burineur SDS-Plus 36V (2x18V) LXT (solo).",
-    "img": "images/posters/dhr283z-v2.webp",
+    "img": "images/posters/dhr283z-card.webp",
     "price": 472.95,
     "currency": "EUR",
     "vat": 0.2,
@@ -5500,7 +5600,8 @@
       "Poids (EPTA)": "4,1 kg",
       "Dimensions (L×l×H)": "404 × 134 × 232 mm"
     },
-    "description_long": "Perfo-burineur SDS-Plus 36V (2 × 18 V) LXT (solo). Perforateur avec fonction burinage, équipé du nouveau système AFT : stop rotation, le moteur se met en sécurité quand il détecte un blocage. Fonctionne avec 2 batteries 18V LXT (36V), moteur brushless haut rendement. Énergie de frappe 2,8 J, vitesse à vide 950 tr/min, cadence 5000 cps/min. Capacités : béton 28 mm, couronne trépan 54 mm, bois 32 mm, métal 13 mm. Anti-vibration AVT, filtre HEPA, Soft No Load et connectivité AWS. Vendu en machine seule (sans batteries ni chargeur), compatible avec les batteries Makita 18V LXT. Poids 4,1 kg (EPTA). Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Perfo-burineur SDS-Plus 36V (2 × 18 V) LXT (solo). Perforateur avec fonction burinage, équipé du nouveau système AFT : stop rotation, le moteur se met en sécurité quand il détecte un blocage. Fonctionne avec 2 batteries 18V LXT (36V), moteur brushless haut rendement. Énergie de frappe 2,8 J, vitesse à vide 950 tr/min, cadence 5000 cps/min. Capacités : béton 28 mm, couronne trépan 54 mm, bois 32 mm, métal 13 mm. Anti-vibration AVT, filtre HEPA, Soft No Load et connectivité AWS. Vendu en machine seule (sans batteries ni chargeur), compatible avec les batteries Makita 18V LXT. Poids 4,1 kg (EPTA). Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dhr283z-hero.webp"
   },
   {
     "id": "makita-dhs660z",
@@ -5558,7 +5659,8 @@
     "description_long": "Scie circulaire 18V LXT Ø165 mm (machine seule). Légère et puissante (2,9 kg EPTA), moteur brushless avec ADT : l’électronique adapte la vitesse à la charge pour une coupe optimale. Coupe 57 mm à 90° et 41 mm à 45°, frein moteur, démarrage progressif et système anti-poussières. Vendue en machine seule (sans batterie ni chargeur), compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
     "srcAltSkus": [
       "DHS660ZJ"
-    ]
+    ],
+    "heroImg": "images/posters/dhs660z-hero.webp"
   },
   {
     "id": "makita-dhs680zj",
@@ -5615,7 +5717,8 @@
     "variantRole": "coffret",
     "soloSku": "DHS680Z",
     "variantSecondary": true,
-    "coffretIncluded": true
+    "coffretIncluded": true,
+    "heroImg": "images/posters/dhs680zj-hero.webp"
   },
   {
     "id": "makita-dhs900z",
@@ -5627,7 +5730,7 @@
     "category": "Scies",
     "tag": "Nouveau",
     "desc": "36V (2×18V), lame Ø235 mm, coupe 85 mm à 90°, compatible AWS (unité non incluse), brushless.",
-    "img": "images/posters/dhs900z-v2.webp",
+    "img": "images/posters/dhs900z-card.webp",
     "price": 522.81,
     "currency": "EUR",
     "vat": 0.2,
@@ -5671,7 +5774,8 @@
       "Dimensions (L×l×h)": "413 × 196 × 316 mm",
       "Batterie / chargeur": "Non inclus (2 batteries 18V requises)"
     },
-    "description_long": "Scie circulaire sans fil 36V (2×18V) LXT Ø235 mm, machine seule. Performances proches d’un modèle filaire grâce à l’alimentation 36V en série : coupe 85 mm à 90° et 61 mm à 45°, moteur brushless avec ADT qui adapte la vitesse à la charge, frein moteur et système anti-poussières. Machine compatible AWS (Auto-start Wireless System) — l’unité AWS Bluetooth et le coffret ne sont PAS inclus (à ajouter séparément si besoin). Vendue en machine seule (2 batteries 18V et chargeur non inclus), compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Scie circulaire sans fil 36V (2×18V) LXT Ø235 mm, machine seule. Performances proches d’un modèle filaire grâce à l’alimentation 36V en série : coupe 85 mm à 90° et 61 mm à 45°, moteur brushless avec ADT qui adapte la vitesse à la charge, frein moteur et système anti-poussières. Machine compatible AWS (Auto-start Wireless System) — l’unité AWS Bluetooth et le coffret ne sont PAS inclus (à ajouter séparément si besoin). Vendue en machine seule (2 batteries 18V et chargeur non inclus), compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dhs900z-hero.webp"
   },
   {
     "id": "makita-djr187z",
@@ -5683,7 +5787,7 @@
     "category": "Scies",
     "tag": "Nouveau",
     "desc": "Sans fil 18V, lame bois 255 mm / acier 130 mm, course 32 mm, brushless, pendulaire.",
-    "img": "images/posters/djr187z-v2.webp",
+    "img": "images/posters/djr187z-card.webp",
     "price": 210.16,
     "currency": "EUR",
     "vat": 0.2,
@@ -5731,7 +5835,8 @@
     "description_long": "Scie sabre (récipro) sans fil Makita 18V LXT, machine seule. Dotée du nouveau système d’entraînement Makita et d’un moteur brushless, elle coupe le bois jusqu’à 255 mm et l’acier jusqu’à 130 mm. Vitesse variable (3000 courses/min), course de 32 mm et mouvement pendulaire pour un débit rapide ; protection électronique contre les surcharges, démarrage progressif et système anti-poussières. Vendue en machine seule (batterie et chargeur non inclus), livrée avec 2 lames (bois et métal), compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
     "variantGroup": "DJR187",
     "variantRole": "solo",
-    "coffretSku": "DJR187ZK"
+    "coffretSku": "DJR187ZK",
+    "heroImg": "images/posters/djr187z-hero.webp"
   },
   {
     "id": "makita-djr187zk",
@@ -5792,7 +5897,8 @@
     "variantGroup": "DJR187",
     "variantRole": "coffret",
     "soloSku": "DJR187Z",
-    "variantSecondary": true
+    "variantSecondary": true,
+    "heroImg": "images/posters/djr187zk-hero.webp"
   },
   {
     "id": "makita-djr188z",
@@ -5804,7 +5910,7 @@
     "category": "Scies",
     "tag": "Nouveau",
     "desc": "Récipro COMPACTE 18V LXT brushless, coupe bois 255 mm, course 20 mm, 2,9 kg — machine seule.",
-    "img": "images/posters/djr188z-v2.webp",
+    "img": "images/posters/djr188z-card.webp",
     "price": 274.07,
     "currency": "EUR",
     "vat": 0.2,
@@ -5846,7 +5952,8 @@
     "description_long": "Scie sabre (récipro) COMPACTE sans fil Makita 18V LXT, machine seule. Très compacte et puissante (2,9 kg), sa course de 20 mm autorise des coupes jusqu’à 255 mm de diamètre dans le bois et 130 mm dans l’acier. Moteur brushless, frein moteur, vitesse variable et constante, éclairage LED et système anti-poussières. Idéale pour travailler en espace restreint ou en hauteur. Vendue sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
     "variantGroup": "DJR188",
     "variantRole": "solo",
-    "coffretSku": "DJR188ZJ"
+    "coffretSku": "DJR188ZJ",
+    "heroImg": "images/posters/djr188z-hero.webp"
   },
   {
     "id": "makita-djr188zj",
@@ -5901,7 +6008,8 @@
     "variantGroup": "DJR188",
     "variantRole": "coffret",
     "soloSku": "DJR188Z",
-    "variantSecondary": true
+    "variantSecondary": true,
+    "heroImg": "images/posters/djr188zj-hero.webp"
   },
   {
     "id": "makita-djr189z",
@@ -5913,7 +6021,7 @@
     "category": "Scies",
     "tag": "Nouveau",
     "desc": "Scie récipro / sabre compacte une main, sans fil 18V LXT, moteur brushless, cadence 0-3100 cpm, changement de lame sans outil, LED — sans batterie ni chargeur.",
-    "img": "images/posters/djr189z-v4.webp",
+    "img": "images/posters/djr189z-card.webp",
     "price": 205.41,
     "currency": "EUR",
     "vat": 0.2,
@@ -5950,7 +6058,8 @@
     "description_long": "Scie récipro (scie sabre) compacte une main sans fil Makita 18V LXT (DJR189Z), machine seule. Moteur brushless à cadence variable (0 à 3100 coups/min), course de lame de 13 mm. Compacte et légère, elle se manie d'une seule main pour couper métal, bois et plastique dans les espaces restreints. Changement de lame sans outil et éclairage LED intégré. Vendue sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
     "variantGroup": "DJR189",
     "variantRole": "solo",
-    "coffretSku": "DJR189ZJ"
+    "coffretSku": "DJR189ZJ",
+    "heroImg": "images/posters/djr189z-hero.webp"
   },
   {
     "id": "makita-djr189zj",
@@ -6002,7 +6111,8 @@
     "variantGroup": "DJR189",
     "variantRole": "coffret",
     "soloSku": "DJR189Z",
-    "variantSecondary": true
+    "variantSecondary": true,
+    "heroImg": "images/posters/djr189zj-hero.webp"
   },
   {
     "id": "makita-djr360zk",
@@ -6056,7 +6166,8 @@
       "Livré avec": "Coffret synthétique + 2 lames (bois + métal)",
       "Batterie / chargeur": "Non inclus (2 batteries 18V requises)"
     },
-    "description_long": "Scie sabre (récipro) sans fil Makita 36V (2×18V) LXT, machine seule, livrée en coffret synthétique de transport avec 2 lames (bois et métal). Pratique et puissante, elle offre d’excellentes capacités de coupe aussi bien dans le bois (255 mm) que dans l’acier (130 mm), grâce à son moteur brushless et à l’alimentation 36V en série. Vitesse variable (3000 courses/min), course de 32 mm, éclairage LED et système anti-poussières. Vendue sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Scie sabre (récipro) sans fil Makita 36V (2×18V) LXT, machine seule, livrée en coffret synthétique de transport avec 2 lames (bois et métal). Pratique et puissante, elle offre d’excellentes capacités de coupe aussi bien dans le bois (255 mm) que dans l’acier (130 mm), grâce à son moteur brushless et à l’alimentation 36V en série. Vitesse variable (3000 courses/min), course de 32 mm, éclairage LED et système anti-poussières. Vendue sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/djr360zk-hero.webp"
   },
   {
     "id": "makita-djv181z",
@@ -6109,7 +6220,8 @@
       "Dimensions (L×l×h)": "298 × 77 × 189 mm",
       "Batterie / chargeur": "Non inclus"
     },
-    "description_long": "Scie sauteuse sans fil Makita 18V LXT (DJV181Z), machine seule. Travail rapide et précis grâce au moteur brushless : coupe le bois jusqu’à 135 mm, l’acier 10 mm et l’aluminium 20 mm, à 3500 courses/min avec une course de 26 mm et un mouvement pendulaire réglable. Soft No Load (démarrage doux) et protection électronique contre les surcharges, faibles vibrations (6,5 m/s²). Vendue sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Scie sauteuse sans fil Makita 18V LXT (DJV181Z), machine seule. Travail rapide et précis grâce au moteur brushless : coupe le bois jusqu’à 135 mm, l’acier 10 mm et l’aluminium 20 mm, à 3500 courses/min avec une course de 26 mm et un mouvement pendulaire réglable. Soft No Load (démarrage doux) et protection électronique contre les surcharges, faibles vibrations (6,5 m/s²). Vendue sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/djv181z-hero.webp"
   },
   {
     "id": "makita-djv184z",
@@ -6165,7 +6277,8 @@
       "Dimensions (L×l×h)": "259 × 78 × 205 mm",
       "Batterie / chargeur": "Non inclus"
     },
-    "description_long": "Nouvelle scie sauteuse compacte Makita 18V LXT (DJV184Z), machine seule. Moteur brushless, plus compacte et plus légère (2,4 kg) que le modèle précédent : coupe le bois jusqu’à 135 mm, l’acier 10 mm et l’aluminium 20 mm, à 3000 courses/min avec une course de 23 mm, mouvement pendulaire et inclinaison jusqu’à 45°. Soft No Load, démarrage progressif, système anti-poussières et protection électronique contre les surcharges. Vendue sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Nouvelle scie sauteuse compacte Makita 18V LXT (DJV184Z), machine seule. Moteur brushless, plus compacte et plus légère (2,4 kg) que le modèle précédent : coupe le bois jusqu’à 135 mm, l’acier 10 mm et l’aluminium 20 mm, à 3000 courses/min avec une course de 23 mm, mouvement pendulaire et inclinaison jusqu’à 45°. Soft No Load, démarrage progressif, système anti-poussières et protection électronique contre les surcharges. Vendue sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/djv184z-hero.webp"
   },
   {
     "id": "makita-djv185z",
@@ -6221,7 +6334,8 @@
     "description_long": "Scie sauteuse pendulaire à poignée barillet sans fil Makita 18V LXT (DJV185Z), machine seule. Moteur brushless à cadence variable (800 à 3000 coups/min), course de lame 23 mm et 3 réglages de mouvement pendulaire (plus coupe droite) pour s'adapter au matériau. Capacité de coupe jusqu'à 135 mm dans le bois, 10 mm dans l'acier et 20 mm dans l'aluminium, inclinaison de 0 à 45°. Serrage de lame sans outil et protection XPT contre l'eau et la poussière. Vendue sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
     "variantGroup": "DJV185",
     "variantRole": "solo",
-    "coffretSku": "DJV185ZJ"
+    "coffretSku": "DJV185ZJ",
+    "heroImg": "images/posters/djv185z-hero.webp"
   },
   {
     "id": "makita-djv185zj",
@@ -6279,7 +6393,8 @@
     "variantGroup": "DJV185",
     "variantRole": "coffret",
     "variantSecondary": true,
-    "soloSku": "DJV185Z"
+    "soloSku": "DJV185Z",
+    "heroImg": "images/posters/djv185zj-hero.webp"
   },
   {
     "id": "makita-dls600z",
@@ -6330,7 +6445,8 @@
       "Batterie / chargeur": "Non inclus"
     },
     "description_long": "Scie à onglet radiale double biseau sans fil Makita 18V LXT Ø165 mm (DLS600Z), machine seule. Moteur brushless associé à la technologie ADT qui adapte automatiquement la vitesse de coupe à la charge (5000 tr/min). Capacité de coupe de 46 × 92 mm, onglet 52° à gauche comme à droite (butées 0 / 15 / 22,5 / 31,6 / 45°) et inclinaison 46° gauche et droite pour les coupes composées. Équipée d'un éclairage LED, d'une ligne laser et d'une jauge de batterie. Compacte et légère (6,6 kg) pour la finition, la rénovation et le chantier. Vendue sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
-    "coffretIncluded": true
+    "coffretIncluded": true,
+    "heroImg": "images/posters/dls600z-hero.webp"
   },
   {
     "id": "makita-dmc300z",
@@ -6342,7 +6458,7 @@
     "category": "Meuleuses",
     "tag": "Nouveau",
     "desc": "Découpeuse / meuleuse compacte sans fil 18V LXT, moteur brushless, disque Ø76 mm, jusqu'à 20000 tr/min, frein électronique + XPT — idéale tôle fine et tubes. Sans batterie ni chargeur.",
-    "img": "images/posters/dmc300z-v4.webp",
+    "img": "images/posters/dmc300z-card.webp",
     "price": 145.82,
     "currency": "EUR",
     "vat": 0.2,
@@ -6377,7 +6493,8 @@
       "Usage recommandé": "Tôle fine, tubes, profilés métalliques",
       "Batterie / chargeur": "Non inclus"
     },
-    "description_long": "Découpeuse / meuleuse compacte sans fil Makita 18V LXT (DMC300Z), machine seule. Moteur brushless offrant une puissance stable jusqu'à 20000 tr/min pour un disque Ø76 mm (profondeur de coupe 16 mm). Compacte, légère et bien équilibrée, elle excelle dans les espaces restreints pour couper proprement tôle fine, tubes et profilés métalliques. Contrôle de vitesse constant sous charge, frein électronique pour un arrêt rapide et protection XPT contre l'eau et la poussière. Vendue sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Découpeuse / meuleuse compacte sans fil Makita 18V LXT (DMC300Z), machine seule. Moteur brushless offrant une puissance stable jusqu'à 20000 tr/min pour un disque Ø76 mm (profondeur de coupe 16 mm). Compacte, légère et bien équilibrée, elle excelle dans les espaces restreints pour couper proprement tôle fine, tubes et profilés métalliques. Contrôle de vitesse constant sous charge, frein électronique pour un arrêt rapide et protection XPT contre l'eau et la poussière. Vendue sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dmc300z-hero.webp"
   },
   {
     "id": "makita-dpv300z",
@@ -6428,7 +6545,8 @@
     "description_long": "Ponceuse / polisseuse compacte sans fil Makita 18V LXT (DPV300Z), machine seule. Moteur brushless à vitesse variable (0-2800 / 0-9500 tr/min) avec maintien de la vitesse constante sous charge pour une finition homogène en polissage comme en ponçage. Plateau Ø75 mm, verrou de gâchette pour le travail continu, fonction anti-redémarrage et protection XPT contre l'eau et la poussière. Livrée avec tampon mousse doux, tampon mousse fin, peau de mouton, plateaux de ponçage 50 et 75 mm et adaptateur. Vendue sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
     "variantGroup": "DPV300",
     "variantRole": "solo",
-    "coffretSku": "DPV300ZJ"
+    "coffretSku": "DPV300ZJ",
+    "heroImg": "images/posters/dpv300z-hero.webp"
   },
   {
     "id": "makita-dpv300zj",
@@ -6481,7 +6599,8 @@
     "variantGroup": "DPV300",
     "variantRole": "coffret",
     "soloSku": "DPV300Z",
-    "variantSecondary": true
+    "variantSecondary": true,
+    "heroImg": "images/posters/dpv300zj-hero.webp"
   },
   {
     "id": "makita-drt50z",
@@ -6533,7 +6652,8 @@
       "Dimensions (L×l×h)": "89 × 89 × 226 mm",
       "Batterie / chargeur": "Non inclus"
     },
-    "description_long": "Affleureuse (défonceuse compacte) sans fil Makita 18V LXT (DRT50Z), machine seule. Moteur brushless à vitesse variable (5 vitesses, 10000 à 30000 tr/min) pour un état de surface net sur tous les matériaux. Pince de serrage Ø6 et 8 mm, profondeur de défonçage jusqu’à 35 mm et fraisage 40 mm, base réglable au dixième. Compacte, maniable et peu vibrante (4,5 m/s²). Vendue sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Affleureuse (défonceuse compacte) sans fil Makita 18V LXT (DRT50Z), machine seule. Moteur brushless à vitesse variable (5 vitesses, 10000 à 30000 tr/min) pour un état de surface net sur tous les matériaux. Pince de serrage Ø6 et 8 mm, profondeur de défonçage jusqu’à 35 mm et fraisage 40 mm, base réglable au dixième. Compacte, maniable et peu vibrante (4,5 m/s²). Vendue sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/drt50z-hero.webp"
   },
   {
     "id": "makita-drt50zjx3",
@@ -6585,7 +6705,8 @@
       "Poids net EPTA": "1,8 kg (moteur nu)",
       "Batterie / chargeur": "Non inclus"
     },
-    "description_long": "Kit affleureuse / défonceuse compacte Makita 18V LXT (DRT50ZJX3) livré en coffret MAKPAC empilable. Moteur brushless à vitesse variable (5 vitesses, 10000 à 30000 tr/min), pince Ø6 et 8 mm. Le kit comprend 4 bases interchangeables — base de plongée, base standard, base déportée pour l'affleurage et base inclinable — ainsi que les guides, clés et accessoires visibles. Profondeur de défonçage jusqu'à 35 mm, fraisage 40 mm. Vendu en machine seule (sans batterie ni chargeur), compatible avec toutes les batteries Makita 18V LXT. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Kit affleureuse / défonceuse compacte Makita 18V LXT (DRT50ZJX3) livré en coffret MAKPAC empilable. Moteur brushless à vitesse variable (5 vitesses, 10000 à 30000 tr/min), pince Ø6 et 8 mm. Le kit comprend 4 bases interchangeables — base de plongée, base standard, base déportée pour l'affleurage et base inclinable — ainsi que les guides, clés et accessoires visibles. Profondeur de défonçage jusqu'à 35 mm, fraisage 40 mm. Vendu en machine seule (sans batterie ni chargeur), compatible avec toutes les batteries Makita 18V LXT. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/drt50zjx3-hero.webp"
   },
   {
     "id": "makita-drv250zj",
@@ -6637,7 +6758,8 @@
       "Batterie / chargeur": "Non inclus"
     },
     "description_long": "Riveteuse (pose-rivets aveugles) sans fil Makita 18V LXT (DRV250ZJ), machine seule livrée en coffret MAKPAC. Moteur brushless développant une force de traction de 20 kN pour poser des rivets Ø4,8 à 6,4 mm en aluminium comme en acier, avec une course de 30 mm. Jusqu'à environ 3000 rivetages sur une seule charge, mécanisme de maintien du rivet en place pendant la pose, double lampe LED pour éclairer la zone de travail et protection XPT contre l'eau et la poussière. Vendue sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
-    "coffretIncluded": true
+    "coffretIncluded": true,
+    "heroImg": "images/posters/drv250zj-hero.webp"
   },
   {
     "id": "makita-dsp601zju",
@@ -6688,7 +6810,8 @@
       "Batteries / chargeur": "Non inclus (nécessite 2 batteries 18 V LXT)"
     },
     "description_long": "Scie plongeante sans fil Makita 36V (2×18V LXT) Ø165 mm (DSP601ZJU), machine seule livrée en coffret MAKPAC. Deux batteries 18V alimentent un moteur brushless doté de la technologie ADT qui adapte vitesse et couple pendant la coupe (vitesse variable 2500 à 6300 tr/min). Profondeur de coupe de 56 mm à 0°, inclinaison de -1° à 48° (butées à 22,5° et 45°). Équipée du module AWS (Auto-start Wireless System) qui déclenche automatiquement l'aspirateur compatible par Bluetooth, ainsi que d'un démarrage progressif et d'un frein électronique. Vendue sans batteries ni chargeur, nécessite 2 batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
-    "coffretIncluded": true
+    "coffretIncluded": true,
+    "heroImg": "images/posters/dsp601zju-hero.webp"
   },
   {
     "id": "makita-dtd153z",
@@ -6749,7 +6872,8 @@
     "description_long": "Visseuse à chocs sans fil Makita 18V LXT (DTD153Z), machine seule. Moteur brushless développant un couple de serrage maximal de 170 Nm à 3400 tr/min (3600 coups/min). Capacité vis à bois 22-125 mm, vis à machine M4-M8, boulons M5-M16 (standard) et M5-M14 (haute résistance). Compacte et légère (1,5 kg, 126×79×236 mm), équipée d'un système anti-poussières. Vendue sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
     "variantGroup": "DTD153",
     "variantRole": "solo",
-    "coffretSku": "DTD153ZJ"
+    "coffretSku": "DTD153ZJ",
+    "heroImg": "images/posters/dtd153z-hero.webp"
   },
   {
     "id": "makita-dtd153zj",
@@ -6812,7 +6936,8 @@
     "variantGroup": "DTD153",
     "variantRole": "coffret",
     "soloSku": "DTD153Z",
-    "variantSecondary": true
+    "variantSecondary": true,
+    "heroImg": "images/posters/dtd153zj-hero.webp"
   },
   {
     "id": "makita-dtd154z",
@@ -6872,7 +6997,8 @@
     "description_long": "Visseuse à chocs sans fil Makita 18V LXT (DTD154Z), machine seule. Moteur brushless développant un couple de serrage maximal de 175 Nm à 3600 tr/min (3800 coups/min). Emmanchement hexagonal 1/4\", capacité vis à bois 22-125 mm, boulons M5-M16 (standard) et M5-M14 (haute résistance). Compacte et légère (1,5 kg, 117×79×236 mm), équipée d'un système anti-poussières. Vendue sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
     "variantGroup": "DTD154",
     "variantRole": "solo",
-    "coffretSku": "DTD154ZJ"
+    "coffretSku": "DTD154ZJ",
+    "heroImg": "images/posters/dtd154z-hero.webp"
   },
   {
     "id": "makita-dtd154zj",
@@ -6934,7 +7060,8 @@
     "variantGroup": "DTD154",
     "variantRole": "coffret",
     "soloSku": "DTD154Z",
-    "variantSecondary": true
+    "variantSecondary": true,
+    "heroImg": "images/posters/dtd154zj-hero.webp"
   },
   {
     "id": "makita-dtd155zj",
@@ -7018,7 +7145,7 @@
     "category": "Outils multifonctions",
     "tag": "Nouveau",
     "desc": "Outil multifonctions oscillant sans fil 18V LXT, moteur brushless, système StarlockMax sans outil, technologie anti-vibrations AVT, 10000-20000 opm — sans batterie ni chargeur.",
-    "img": "images/posters/dtm52z-v4.webp",
+    "img": "images/posters/dtm52z-card.webp",
     "price": 193.29,
     "currency": "EUR",
     "vat": 0.2,
@@ -7055,7 +7182,8 @@
       "Dimensions (L×l×h)": "322 × 95 × 126 mm",
       "Batterie / chargeur": "Non inclus"
     },
-    "description_long": "Outil multifonctions oscillant sans fil Makita 18V LXT (DTM52Z), machine seule. Moteur brushless à vitesse variable (10000 à 20000 opm) avec démarrage progressif. Doté du système StarlockMax pour changer les accessoires sans outil et de la technologie anti-vibrations AVT (contrepoids interne) qui réduit fortement les vibrations pour un travail confortable et précis. Angle d'oscillation 3,6°, 12 positions d'accessoire (tous les 30°). Idéal pour couper, poncer, gratter et affleurer dans tous les matériaux. Vendu sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Outil multifonctions oscillant sans fil Makita 18V LXT (DTM52Z), machine seule. Moteur brushless à vitesse variable (10000 à 20000 opm) avec démarrage progressif. Doté du système StarlockMax pour changer les accessoires sans outil et de la technologie anti-vibrations AVT (contrepoids interne) qui réduit fortement les vibrations pour un travail confortable et précis. Angle d'oscillation 3,6°, 12 positions d'accessoire (tous les 30°). Idéal pour couper, poncer, gratter et affleurer dans tous les matériaux. Vendu sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dtm52z-hero.webp"
   },
   {
     "id": "makita-dtp141z",
@@ -7105,7 +7233,8 @@
       "Poids": "≈ 1,6 à 1,8 kg selon batterie",
       "Batterie / chargeur": "Non inclus"
     },
-    "description_long": "Outil 4-en-1 sans fil Makita 18V LXT (DTP141Z), machine seule. Un seul outil pour quatre usages : perçage, perçage à percussion, vissage et visseuse à chocs. Moteur brushless associé à un embrayage électronique (1,5 à 8,0 Nm) qui adapte la vitesse au couple présélectionné pour éviter le surserrage. Couple maxi de 150 Nm en mode choc, mandrin porte-embout hexagonal 1/4\", vitesse jusqu'à 2700 tr/min. Compact (171 mm) et polyvalent, idéal pour passer du perçage au vissage à chocs sans changer d'outil. Vendu sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Outil 4-en-1 sans fil Makita 18V LXT (DTP141Z), machine seule. Un seul outil pour quatre usages : perçage, perçage à percussion, vissage et visseuse à chocs. Moteur brushless associé à un embrayage électronique (1,5 à 8,0 Nm) qui adapte la vitesse au couple présélectionné pour éviter le surserrage. Couple maxi de 150 Nm en mode choc, mandrin porte-embout hexagonal 1/4\", vitesse jusqu'à 2700 tr/min. Compact (171 mm) et polyvalent, idéal pour passer du perçage au vissage à chocs sans changer d'outil. Vendu sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dtp141z-hero.webp"
   },
   {
     "id": "makita-dtw1001z",
@@ -7160,7 +7289,8 @@
       "Dimensions (L×l×h)": "229 × 91 × 289 mm",
       "Batterie / chargeur": "Non inclus"
     },
-    "description_long": "Boulonneuse à chocs sans fil Makita 18V LXT (DTW1001Z), machine seule. Moteur brushless et emmanchement carré 3/4\" (19,05 mm) pour la grosse boulonnerie : couple de serrage de 1050 Nm et desserrage jusqu’à 1500 Nm, capacité boulon M12 à M30. Trois vitesses et cadences réglables (jusqu’à 1800 tr/min et 2200 coups/min) pour maîtriser le vissage. Vendue sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Boulonneuse à chocs sans fil Makita 18V LXT (DTW1001Z), machine seule. Moteur brushless et emmanchement carré 3/4\" (19,05 mm) pour la grosse boulonnerie : couple de serrage de 1050 Nm et desserrage jusqu’à 1500 Nm, capacité boulon M12 à M30. Trois vitesses et cadences réglables (jusqu’à 1800 tr/min et 2200 coups/min) pour maîtriser le vissage. Vendue sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dtw1001z-hero.webp"
   },
   {
     "id": "makita-dtw1002z",
@@ -7196,7 +7326,8 @@
       "Idéal pour les chantiers des Antilles / DOM-TOM"
     ],
     "specs": {},
-    "description_long": "Boulonneuse à chocs 18V 1000Nm 1/2\" (Solo). Outil professionnel Makita de la gamme 18V LXT sans fil (moteur brushless). Vendu en machine seule (sans batterie ni chargeur). Compatible avec les batteries Makita LXT. Fiche technique détaillée à compléter. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Boulonneuse à chocs 18V 1000Nm 1/2\" (Solo). Outil professionnel Makita de la gamme 18V LXT sans fil (moteur brushless). Vendu en machine seule (sans batterie ni chargeur). Compatible avec les batteries Makita LXT. Fiche technique détaillée à compléter. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dtw1002z-hero.webp"
   },
   {
     "id": "makita-dtw181z",
@@ -7254,7 +7385,8 @@
     "description_long": "Boulonneuse à chocs COMPACTE sans fil Makita 18V LXT (DTW181Z), machine seule. Très compacte et légère (1,5 kg, 144 mm de long), elle délivre un couple de serrage de 210 Nm grâce à son moteur brushless — parfaite pour travailler en espace restreint. Emmanchement carré 1/2\" (12,7 mm), capacité boulon M8 à M16, 2 vitesses et cadences réglables (jusqu’à 2400 tr/min et 3600 coups/min) et système anti-poussières. Vendue sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
     "variantGroup": "DTW181",
     "variantRole": "solo",
-    "coffretSku": "DTW181ZJ"
+    "coffretSku": "DTW181ZJ",
+    "heroImg": "images/posters/dtw181z-hero.webp"
   },
   {
     "id": "makita-dtw181zj",
@@ -7313,7 +7445,8 @@
     "variantGroup": "DTW181",
     "variantRole": "coffret",
     "soloSku": "DTW181Z",
-    "variantSecondary": true
+    "variantSecondary": true,
+    "heroImg": "images/posters/dtw181zj-hero.webp"
   },
   {
     "id": "makita-dtw301zj",
@@ -7371,7 +7504,8 @@
       "Livré avec": "Coffret MAKPAC",
       "Batterie / chargeur": "Non inclus"
     },
-    "description_long": "Boulonneuse à chocs sans fil Makita 18V LXT (DTW301ZJ), machine seule livrée en coffret MAKPAC. Moteur brushless de 420 W et emmanchement carré 1/2\" : 4 modes de couple jusqu’à 330 Nm de serrage et 580 Nm de desserrage, capacité boulon M10 à M20. Compacte et légère (1,2 kg), avec vitesse variable et éclairage LED. Vendue sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Boulonneuse à chocs sans fil Makita 18V LXT (DTW301ZJ), machine seule livrée en coffret MAKPAC. Moteur brushless de 420 W et emmanchement carré 1/2\" : 4 modes de couple jusqu’à 330 Nm de serrage et 580 Nm de desserrage, capacité boulon M10 à M20. Compacte et légère (1,2 kg), avec vitesse variable et éclairage LED. Vendue sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dtw301zj-hero.webp"
   },
   {
     "id": "makita-dtw700zj",
@@ -7425,7 +7559,8 @@
     "variantGroup": "DTW700",
     "variantRole": "coffret",
     "soloSku": "DTW700Z",
-    "variantSecondary": true
+    "variantSecondary": true,
+    "heroImg": "images/posters/dtw700zj-hero.webp"
   },
   {
     "id": "makita-dua301z",
@@ -7473,7 +7608,7 @@
     "category": "Souffleurs",
     "tag": "Nouveau",
     "desc": "Souffleur et aspirateur-broyeur 2-en-1 sans fil 36V (2×18V LXT), moteur brushless, débit 804 m³/h, air 65 m/s, dépression 33 mbar, sac 50 l — sans batterie ni chargeur.",
-    "img": "images/posters/dub363zv-v4.webp",
+    "img": "images/posters/dub363zv-card.webp",
     "price": 303.6,
     "currency": "EUR",
     "vat": 0.2,
@@ -7516,7 +7651,8 @@
       "Batteries / chargeur": "Non inclus (nécessite 2 batteries 18 V LXT)"
     },
     "description_long": "Souffleur et aspirateur-broyeur 2-en-1 sans fil Makita 36V (2×18V LXT), machine seule. Alimenté par deux batteries 18V, son moteur brushless offre une vitesse variable à la gâchette : en mode soufflage, débit d'air maximal de 804 m³/h, vitesse d'air de 65 m/s et poussée de 14,4 N ; en mode aspiration-broyage, dépression de 33 mbar avec un sac de ramassage de 50 l. Faibles vibrations (2,5 m/s²), niveaux sonores 79 dB(A) (LpA) / 94 dB(A) (LwA). Dimensions 350 × 190 × 415 mm, poids net EPTA 4,8 kg. Vendu sans batteries ni chargeur, nécessite 2 batteries Makita 18V LXT. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
-    "coffretIncluded": true
+    "coffretIncluded": true,
+    "heroImg": "images/posters/dub363zv-hero.webp"
   },
   {
     "id": "makita-duc101z",
@@ -7600,7 +7736,7 @@
     "category": "Malaxeurs",
     "tag": "Nouveau",
     "desc": "Malaxeur / mélangeur sans fil 18V LXT, moteur brushless, 2 vitesses (mortier / peinture), Ø mélange 165 mm, protection XPT — sans batterie ni chargeur.",
-    "img": "images/posters/dut130z-v4.webp",
+    "img": "images/posters/dut130z-card.webp",
     "price": 312.97,
     "currency": "EUR",
     "vat": 0.2,
@@ -7638,7 +7774,8 @@
       "Poids (avec batterie)": "≈ 2,5 à 2,8 kg selon batterie",
       "Batterie / chargeur": "Non inclus"
     },
-    "description_long": "Malaxeur / mélangeur sans fil Makita 18V LXT (DUT130Z), machine seule. Moteur brushless puissant (650 W max) à 2 vitesses : vitesse lente (0-350 tr/min) pour les matériaux lourds type mortier, vitesse rapide (0-1300 tr/min) pour la peinture et les enduits. Diamètre de mélange jusqu'à 165 mm, arbre fileté M12 / M14. Protection XPT contre l'eau et la poussière, livré avec carter avant et poignée latérale pour un maniement sûr. Vendu sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Malaxeur / mélangeur sans fil Makita 18V LXT (DUT130Z), machine seule. Moteur brushless puissant (650 W max) à 2 vitesses : vitesse lente (0-350 tr/min) pour les matériaux lourds type mortier, vitesse rapide (0-1300 tr/min) pour la peinture et les enduits. Diamètre de mélange jusqu'à 165 mm, arbre fileté M12 / M14. Protection XPT contre l'eau et la poussière, livré avec carter avant et poignée latérale pour un maniement sûr. Vendu sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dut130z-hero.webp"
   },
   {
     "id": "makita-dvc560z",
@@ -7674,7 +7811,8 @@
       "Idéal pour les chantiers des Antilles / DOM-TOM"
     ],
     "specs": {},
-    "description_long": "Aspirateur 36V BL (2x18 V) Li-Ion 120 mbar (Produit seul). Outil professionnel Makita de la gamme 36V LXT sans fil (moteur brushless). Vendu en machine seule (sans batterie ni chargeur). Compatible avec les batteries Makita LXT. Fiche technique détaillée à compléter. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Aspirateur 36V BL (2x18 V) Li-Ion 120 mbar (Produit seul). Outil professionnel Makita de la gamme 36V LXT sans fil (moteur brushless). Vendu en machine seule (sans batterie ni chargeur). Compatible avec les batteries Makita LXT. Fiche technique détaillée à compléter. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dvc560z-hero.webp"
   },
   {
     "id": "makita-drt50zx4",
@@ -7726,7 +7864,8 @@
       "Dimensions (L×l×h)": "89 × 89 × 226 mm",
       "Batterie / chargeur": "Non inclus"
     },
-    "description_long": "Affleureuse (défonceuse compacte) sans fil Makita 18V LXT (DRT50ZX4), machine seule livrée avec ses accessoires. Moteur brushless à vitesse variable (5 vitesses, 10000 à 30000 tr/min), pince Ø6 et 8 mm. Fournie avec guide parallèle, guide droit, buse d'aspiration et pinces pour un travail précis. Profondeur de défonçage jusqu'à 35 mm, fraisage 40 mm. Vendue sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Affleureuse (défonceuse compacte) sans fil Makita 18V LXT (DRT50ZX4), machine seule livrée avec ses accessoires. Moteur brushless à vitesse variable (5 vitesses, 10000 à 30000 tr/min), pince Ø6 et 8 mm. Fournie avec guide parallèle, guide droit, buse d'aspiration et pinces pour un travail précis. Profondeur de défonçage jusqu'à 35 mm, fraisage 40 mm. Vendue sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/drt50zx4-hero.webp"
   },
   {
     "id": "makita-dhs900zu",
@@ -7782,7 +7921,8 @@
       "Dimensions (L×l×h)": "413 × 196 × 316 mm",
       "Batterie / chargeur": "Non inclus (2 batteries 18V requises)"
     },
-    "description_long": "Scie circulaire sans fil 36V (2×18V) LXT Ø235 mm avec module AWS, machine seule. Puissance proche du filaire (coupe 85 mm à 90°, 61 mm à 45°), moteur brushless avec ADT qui adapte la vitesse à la charge. Le module AWS (Auto-start Wireless System) démarre automatiquement ton aspirateur par Bluetooth dès que la scie tourne — chantier plus propre, zéro manipulation. Frein moteur et système anti-poussières intégrés. Vendue en machine seule (2 batteries 18V et chargeur non inclus), compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Scie circulaire sans fil 36V (2×18V) LXT Ø235 mm avec module AWS, machine seule. Puissance proche du filaire (coupe 85 mm à 90°, 61 mm à 45°), moteur brushless avec ADT qui adapte la vitesse à la charge. Le module AWS (Auto-start Wireless System) démarre automatiquement ton aspirateur par Bluetooth dès que la scie tourne — chantier plus propre, zéro manipulation. Frein moteur et système anti-poussières intégrés. Vendue en machine seule (2 batteries 18V et chargeur non inclus), compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "heroImg": "images/posters/dhs900zu-hero.webp"
   },
   {
     "id": "festool-577985",
@@ -9693,6 +9833,7 @@
       "Coffrets empilables et verrouillables entre eux",
       "Étanchéité IP65 (poussière et eau)",
       "Compatible avec toute la gamme TOUGHSYSTEM 2.0"
-    ]
+    ],
+    "heroImg": "images/posters/dwst83402-1-hero.webp"
   }
 ]

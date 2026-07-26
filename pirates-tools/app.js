@@ -1983,7 +1983,9 @@
     // au scroll (loading=lazy). Si le produit n'a pas de GLB, le carré reste sur
     // son poster (jamais de modèle « fantôme »).
     if (dom.pdpHeroImg) {
-      dom.pdpHeroImg.src = product.img || 'images/placeholder.svg';
+      // Héros = version « fiche » (heroImg : lumière cuite + outils horizontaux
+      // réduits) ; carte de catalogue = product.img (taille pleine). Repli img.
+      dom.pdpHeroImg.src = product.heroImg || product.img || 'images/placeholder.svg';
       dom.pdpHeroImg.alt = product.title;
       fitHeroPoster();
     }
@@ -2045,7 +2047,7 @@
       activeProduct = v;
       var isCof = (v.variantRole === 'coffret');
       if (dom.pdpHeroImg) {
-        dom.pdpHeroImg.src = v.img || 'images/placeholder.svg';
+        dom.pdpHeroImg.src = v.heroImg || v.img || 'images/placeholder.svg';
         dom.pdpHeroImg.alt = v.title;
         fitHeroPoster();
       }
