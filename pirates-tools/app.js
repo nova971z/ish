@@ -5154,6 +5154,13 @@
       // CODE DE REMISE : le client le garde pour lui et ne le donne au livreur
       // qu'EN MAIN PROPRE, contre le colis — sans lui, le livreur ne peut pas
       // valider la livraison. Affiché en clair + en QR (généré 100 % en local).
+      // Courses de TEST créées avant le paiement en ligne : ni code, ni
+      // escrow. Le dire franchement plutôt que d'afficher un bloc vide.
+      if (c.mine && !c.code && !c.paid && (c.status === 'en_attente' || c.status === 'acceptee')) {
+        h += '<div class="lv-note lv-note--warn" style="margin-top:.7rem">ℹ️ <strong>Ancienne course de test</strong> — créée avant la mise en place du paiement en ligne : '
+          + 'elle n\'a donc <strong>pas de code de remise</strong> et aucun montant n\'a été débité. '
+          + 'Passe une nouvelle commande pour voir le code, le QR et la chaîne complète.</div>';
+      }
       if (c.mine && c.code && (c.status === 'en_attente' || c.status === 'acceptee')) {
         h += '<div class="lv-handcode">'
           + '<div class="lv-handcode__row"><span class="lv-handcode__key">🔑 Code de remise</span>'
