@@ -22,7 +22,7 @@
 17. [x] DPV300ZJ — Ponceuse polisseuse Ø75 mm en MAKPAC — SPECS + POSTER OK ✅ (v2 : PNG transparent propre reposé sur fond sombre ; variante coffret de #16)
 18. [x] DRV250ZJ — Riveteuse 18V LXT brushless Ø4,8-6,4 mm en MAKPAC — SPECS (Leroy/Castorama/Fixami) + POSTER OK ✅ (coffretIncluded ; PNG transparent reposé sur fond sombre)
 19. [x] DHS680ZJ — Scie circulaire 18V LXT Ø165 mm brushless en MAKPAC — SPECS (Cotébrico/Leroy/Screwfix) + POSTER OK ✅ (coffretIncluded ; PNG transparent sur fond sombre)
-20. [~] DJR189ZJ — Scie récipro sabre 18V LXT brushless en MAKPAC — SPECS + POSTER OK ✅ (coffretIncluded). VARIANTE SOLO DJR189Z : poster prêt (images/posters/djr189z.webp), EN ATTENTE DU PRIX COTÉBRICO pour créer la fiche + paire de variantes
+20. [x] DJR189Z (solo, créée) + DJR189ZJ (coffret) — PAIRE DE VARIANTES OK ✅ Règle user prix : solo = prix qu'on avait (205,41 €) ; coffret = +25 € surplus (poids 3,5kg) = 230,41 €. Posters + specs OK
 21. [x] DJV184Z — Scie sauteuse 18V LXT brushless compacte (machine seule)
 22. [ ] DJV185Z — Scie sauteuse 18V LXT Li-Ion (Machine seule)
 23. [ ] DLS600Z — Scie à onglet 18V Li-ion Ø165 mm (Produit seul)
