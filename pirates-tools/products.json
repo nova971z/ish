@@ -6161,13 +6161,13 @@
     "id": "makita-dmc300z",
     "slug": "makita-dmc300z-meuleuse-compacte-18v-lxt-76-m",
     "sku": "DMC300Z",
-    "title": "Makita DMC300Z — Meuleuse compacte 18V LXT 76 mm (Produit seul)",
+    "title": "Makita DMC300Z — Découpeuse / meuleuse compacte 18V LXT Ø76 mm brushless (machine seule)",
     "name": "DMC300Z",
     "brand": "Makita",
     "category": "Meuleuses",
     "tag": "Nouveau",
-    "desc": "Meuleuse compacte 18V LXT 76 mm (Produit seul).",
-    "img": "images/placeholder.svg",
+    "desc": "Découpeuse / meuleuse compacte sans fil 18V LXT, moteur brushless, disque Ø76 mm, jusqu'à 20000 tr/min, frein électronique + XPT — idéale tôle fine et tubes. Sans batterie ni chargeur.",
+    "img": "images/posters/dmc300z.webp",
     "price": 145.82,
     "currency": "EUR",
     "vat": 0.2,
@@ -6184,14 +6184,25 @@
       "tropical_ready"
     ],
     "features": [
-      "Meuleuse compacte 18V LXT 76 mm (Produit seul)",
-      "Gamme Makita 18V LXT sans fil, moteur brushless (sans charbon) haut rendement",
-      "Machine seule (batterie et chargeur non inclus), compatible batteries Makita LXT",
-      "Robuste et endurant, pensé pour un usage professionnel intensif",
-      "Idéal pour les chantiers des Antilles / DOM-TOM"
+      "Découpeuse / meuleuse compacte sans fil 18V LXT — disque Ø76 mm",
+      "Moteur brushless (sans charbon), jusqu'à 20000 tr/min",
+      "Profondeur de coupe 16 mm — coupe nette sur tôle fine, tubes et profilés",
+      "Contrôle de vitesse constant + frein électronique + protection XPT",
+      "Compacte et équilibrée pour les espaces restreints — machine seule (batterie et chargeur non inclus)"
     ],
-    "specs": {},
-    "description_long": "Meuleuse compacte 18V LXT 76 mm (Produit seul). Outil professionnel Makita de la gamme 18V LXT sans fil (moteur brushless). Vendu en machine seule (sans batterie ni chargeur). Compatible avec les batteries Makita LXT. Fiche technique détaillée à compléter. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "specs": {
+      "Marque": "Makita",
+      "Type": "Découpeuse / meuleuse compacte sans fil 18V LXT Brushless Ø76 mm — machine nue",
+      "Tension": "18 V (gamme LXT)",
+      "Moteur": "Brushless (sans charbon)",
+      "Diamètre de disque": "76 mm",
+      "Vitesse à vide": "jusqu'à 20000 tr/min",
+      "Profondeur de coupe max": "16 mm",
+      "Technologies": "Vitesse constante, frein électronique, XPT (eau/poussière)",
+      "Usage recommandé": "Tôle fine, tubes, profilés métalliques",
+      "Batterie / chargeur": "Non inclus"
+    },
+    "description_long": "Découpeuse / meuleuse compacte sans fil Makita 18V LXT (DMC300Z), machine seule. Moteur brushless offrant une puissance stable jusqu'à 20000 tr/min pour un disque Ø76 mm (profondeur de coupe 16 mm). Compacte, légère et bien équilibrée, elle excelle dans les espaces restreints pour couper proprement tôle fine, tubes et profilés métalliques. Contrôle de vitesse constant sous charge, frein électronique pour un arrêt rapide et protection XPT contre l'eau et la poussière. Vendue sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
   },
   {
     "id": "makita-dpv300z",
