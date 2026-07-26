@@ -7831,3 +7831,11 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 /* Actions admin dossier livreur */
 .admin-app__actions { display: flex; gap: .6rem; margin-top: .7rem; flex-wrap: wrap; }
 .admin-app--courier { border-left: 3px solid #34d399; }
+/* Boutons démarche / formulaire par pièce (dossier livreur) */
+.lv-piece__actions { display: flex; align-items: center; gap: .4rem; flex-wrap: wrap; margin-left: auto; }
+.lv-piece__demarche, .lv-piece__form { font-size: .8rem; font-weight: 600; text-decoration: none; padding: .35rem .6rem; border-radius: 9px; white-space: nowrap; }
+.lv-piece__demarche { color: #93c5fd; border: 1px solid rgba(147,197,253,.4); }
+.lv-piece__demarche:hover { background: rgba(147,197,253,.12); }
+.lv-piece__form { color: #6ee7b7; border: 1px solid rgba(110,231,183,.4); }
+.lv-piece__form:hover { background: rgba(110,231,183,.12); }
+@media (max-width: 560px) { .lv-piece__actions { margin-left: 0; width: 100%; } }

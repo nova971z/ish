@@ -3830,20 +3830,30 @@
   // pièce. Architecture prête à brancher un vérificateur en direct plus tard.
   var LV_PIECES_BASE = [
     { id: 'id',    t: 'Pièce d\'identité (recto-verso)' },
-    { id: 'siret', t: 'Justificatif auto-entrepreneur (avis SIRET / INPI)' },
-    { id: 'rcpro', t: 'Attestation d\'assurance RC Pro' },
+    { id: 'siret', t: 'Justificatif auto-entrepreneur (avis SIRET / INPI)',
+      demarche: { u: LV_LINKS.inpi, l: 'Créer ma micro-entreprise' } },
+    { id: 'rcpro', t: 'Attestation d\'assurance RC Pro',
+      demarche: { u: 'https://www.orus.eu/assurance-rc-pro/coursier-livreur', l: 'Souscrire une RC Pro' } },
     { id: 'rib',   t: 'RIB à ton nom' }
   ];
   var LV_PIECES_EXTRA = {
     vae: [],
-    trottinette: [ { id: 'rc', t: 'Attestation assurance responsabilité civile' } ],
+    trottinette: [ { id: 'rc', t: 'Attestation assurance responsabilité civile',
+      demarche: { u: 'https://www.orus.eu', l: 'Assurer ma trottinette' } } ],
     scooter: [
-      { id: 'permis',   t: 'Permis de conduire (adapté à la cylindrée)' },
-      { id: 'cg',       t: 'Carte grise du véhicule à ton nom' },
-      { id: 'assveh',   t: 'Attestation assurance véhicule — usage professionnel' },
-      { id: 'assmarch', t: 'Attestation assurance des marchandises transportées' },
-      { id: 'capacite', t: 'Attestation de capacité de transport léger (DREAL)' },
-      { id: 'registre', t: 'Récépissé d\'inscription au registre des transporteurs' }
+      { id: 'permis',   t: 'Permis de conduire (adapté à la cylindrée)',
+        demarche: { u: LV_LINKS.permis, l: 'Infos permis' } },
+      { id: 'cg',       t: 'Carte grise du véhicule à ton nom',
+        demarche: { u: 'https://immatriculation.ants.gouv.fr', l: 'Carte grise (ANTS)' } },
+      { id: 'assveh',   t: 'Attestation assurance véhicule — usage professionnel',
+        demarche: { u: 'https://www.opticourtage.com/assurance-scooter-de-livraison/', l: 'Assurer mon véhicule pro' } },
+      { id: 'assmarch', t: 'Attestation assurance des marchandises transportées',
+        demarche: { u: 'https://www.coover.fr', l: 'Assurer les marchandises' } },
+      { id: 'capacite', t: 'Attestation de capacité de transport léger (DREAL)',
+        demarche: { u: 'https://www.aftral.com/formation/ac-transport-leger-de-marchandises', l: 'Trouver la formation' } },
+      { id: 'registre', t: 'Récépissé d\'inscription au registre des transporteurs',
+        demarche: { u: LV_LINKS.dealGp, l: 'DEAL Guadeloupe' },
+        form: { u: 'https://www.formulaires.service-public.gouv.fr/gf/cerfa_16093.do', l: 'Télécharger le formulaire (CERFA)' } }
     ]
   };
 
@@ -4018,8 +4028,12 @@
             h.push('<li class="lv-piece' + (got ? ' lv-piece--ok' : '') + '">'
               + '<span class="lv-piece__t">' + (got ? '✅ ' : '') + p.t + '</span>'
               + (got ? '<span class="lv-piece__file">' + escapeHTML(got) + '</span>' : '')
+              + '<span class="lv-piece__actions">'
+              + (p.demarche ? '<a class="lv-piece__demarche" href="' + escapeHTML(p.demarche.u) + '" target="_blank" rel="noopener noreferrer">📋 ' + escapeHTML(p.demarche.l) + ' ↗</a>' : '')
+              + (p.form ? '<a class="lv-piece__form" href="' + escapeHTML(p.form.u) + '" target="_blank" rel="noopener noreferrer">⬇️ ' + escapeHTML(p.form.l) + '</a>' : '')
               + '<label class="lv-piece__btn">' + (got ? 'Remplacer' : 'Choisir un fichier')
-              + '<input type="file" accept="image/*,application/pdf" data-piece="' + p.id + '" hidden></label></li>');
+              + '<input type="file" accept="image/*,application/pdf" data-piece="' + p.id + '" hidden></label>'
+              + '</span></li>');
           });
           h.push('</ul>');
           var allReady = ready === pieces.length;
