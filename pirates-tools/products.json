@@ -6260,12 +6260,12 @@
     "id": "makita-drt50z",
     "slug": "makita-drt50z-affleureuse-18v-lxt-6-et-8-mm-",
     "sku": "DRT50Z",
-    "title": "Makita DRT50Z — Affleureuse 18V LXT Ø6 et 8 mm (Machine seule)",
+    "title": "Makita DRT50Z — Affleureuse 18V LXT brushless Ø6-8 mm (machine seule)",
     "name": "DRT50Z",
     "brand": "Makita",
     "category": "Défonceuses",
     "tag": "Nouveau",
-    "desc": "Affleureuse 18V LXT Ø6 et 8 mm (Machine seule).",
+    "desc": "Affleureuse / défonceuse compacte 18V, brushless, 10000-30000 tr/min, pince Ø6 et 8 mm — machine seule.",
     "img": "images/placeholder.svg",
     "price": 185.73,
     "currency": "EUR",
@@ -6283,27 +6283,30 @@
       "tropical_ready"
     ],
     "features": [
-      "Affleureuse 18V LXT Ø6 et 8 mm (Machine seule)",
-      "Gamme Makita 18V LXT sans fil, moteur brushless (sans charbon) haut rendement",
-      "Machine seule (batterie et chargeur non inclus), compatible batteries Makita LXT",
-      "Robuste et endurant, pensé pour un usage professionnel intensif",
-      "Idéal pour les chantiers des Antilles / DOM-TOM"
+      "Affleureuse (défonceuse compacte) sans fil 18V LXT — pince Ø6 et 8 mm",
+      "Moteur brushless (sans charbon) à vitesse variable : 5 vitesses, 10000 à 30000 tr/min",
+      "Profondeur de défonçage 0-35 mm, fraisage 0-40 mm — base réglable précise",
+      "Compacte et maniable, faibles vibrations (4,5 m/s²)",
+      "Machine seule (batterie et chargeur non inclus), compatible batteries Makita LXT"
     ],
     "specs": {
-      "Tension": "18 V LXT Li-Ion",
-      "Batteries compatibles": "Gamme Makita LXT 18 V",
+      "Marque": "Makita",
+      "Type": "Affleureuse / défonceuse compacte sans fil 18V LXT Brushless — machine nue",
+      "Tension": "18 V (gamme LXT)",
       "Moteur": "Brushless (sans charbon)",
-      "Vitesses": "5 vitesses (variateur)",
-      "Vitesse à vide": "10 000 - 30 000 tr/min",
-      "Profondeur de défonçage": "0 - 35 mm",
-      "Profondeur de fraisage": "0 - 40 mm",
+      "Nombre de vitesses": "5",
+      "Vitesse à vide": "10000 à 30000 tr/min",
       "Diamètre de pince": "6 et 8 mm",
-      "Niveau de pression acoustique (LpA)": "82 dB(A) — K=3,0",
-      "Vibrations": "4,5 m/s² — K=1,5",
-      "Poids (EPTA)": "1,8 kg",
-      "Dimensions (L×l×H)": "89 × 89 × 226 mm"
+      "Profondeur de défonçage": "0 à 35 mm",
+      "Profondeur de fraisage": "0 à 40 mm",
+      "Technologie moteur": "Vitesse variable",
+      "Pression sonore (LpA)": "82 dB(A) (incertitude 3 dB)",
+      "Vibrations": "4,5 m/s²",
+      "Poids net EPTA": "1,8 kg",
+      "Dimensions (L×l×h)": "89 × 89 × 226 mm",
+      "Batterie / chargeur": "Non inclus"
     },
-    "description_long": "Affleureuse 18V LXT Ø6 et 8 mm (Machine seule). Outil professionnel Makita de la gamme 18V LXT sans fil (moteur brushless). 5 vitesses, 10 000 à 30 000 tr/min, pince 6 et 8 mm. Vendue en machine seule (sans batterie ni chargeur), compatible batteries Makita 18V LXT. Poids 1,8 kg (EPTA). Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "description_long": "Affleureuse (défonceuse compacte) sans fil Makita 18V LXT (DRT50Z), machine seule. Moteur brushless à vitesse variable (5 vitesses, 10000 à 30000 tr/min) pour un état de surface net sur tous les matériaux. Pince de serrage Ø6 et 8 mm, profondeur de défonçage jusqu’à 35 mm et fraisage 40 mm, base réglable au dixième. Compacte, maniable et peu vibrante (4,5 m/s²). Vendue sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
   },
   {
     "id": "makita-drt50zjx3",
