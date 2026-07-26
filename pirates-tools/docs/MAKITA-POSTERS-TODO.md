@@ -27,7 +27,7 @@
 22. [x] DJV185Z (solo) + DJV185ZJ (coffret, créée) — PAIRE DE VARIANTES OK ✅ solo 251,91 € ; coffret +25 € = 276,91 €. Posters (solo dark direct, coffret transparent->fond sombre) + specs (800-3000 spm, course 23, bois 135) OK
 23. [x] DLS600Z — Scie à onglet radiale 18V LXT Ø165 mm brushless (machine seule) — SPECS (Makita/Screwfix) + POSTER OK ✅ (coffretIncluded=true : PAS de switch coffret, aucun coffret à sa taille — décision user)
 24. [x] DSP601ZJU — Scie plongeante 36V (2×18V) LXT Ø165 mm brushless AWS en MAKPAC — SPECS (Makita/revendeurs) + POSTER OK ✅ (coffretIncluded ; fond déjà sombre, conversion directe)
-25. [ ] DUB363ZV — Souffleur broyeur 36V LXT (machine seule)
+25. [x] DUB363ZV — Souffleur / aspirateur-broyeur 2-en-1 36V (2×18V) LXT brushless (machine seule) — SPECS (fournies par user) + POSTER OK ✅ (coffretIncluded : pas de caisse ; prix maxoutil 264 x 1,15 = 303,60 € car absent Cotébrico)
 26. [ ] DTD153Z — Visseuse à chocs 18V LXT 170 Nm (Machine seule)
 27. [ ] DTD153ZJ — Visseuse à chocs 18V LXT 170Nm (Machine seule) en MAKPAC
 28. [ ] DTD154Z — Visseuse à chocs 18V LXT 175 Nm (Machine seule)
