@@ -3798,6 +3798,28 @@
     { name: 'Opticourtage', desc: 'Scooter / moto de livraison', price: 'devis scooter pro', url: 'https://www.opticourtage.com/assurance-scooter-de-livraison/' }
   ];
 
+  // Pièces à TÉLÉVERSER (option B : dépôt + validation manuelle admin).
+  // Le dossier passe en statut « en_attente » ; l'admin valide/refuse chaque
+  // pièce. Architecture prête à brancher un vérificateur en direct plus tard.
+  var LV_PIECES_BASE = [
+    { id: 'id',    t: 'Pièce d\'identité (recto-verso)' },
+    { id: 'siret', t: 'Justificatif auto-entrepreneur (avis SIRET / INPI)' },
+    { id: 'rcpro', t: 'Attestation d\'assurance RC Pro' },
+    { id: 'rib',   t: 'RIB à ton nom' }
+  ];
+  var LV_PIECES_EXTRA = {
+    vae: [],
+    trottinette: [ { id: 'rc', t: 'Attestation assurance responsabilité civile' } ],
+    scooter: [
+      { id: 'permis',   t: 'Permis de conduire (adapté à la cylindrée)' },
+      { id: 'cg',       t: 'Carte grise du véhicule à ton nom' },
+      { id: 'assveh',   t: 'Attestation assurance véhicule — usage professionnel' },
+      { id: 'assmarch', t: 'Attestation assurance des marchandises transportées' },
+      { id: 'capacite', t: 'Attestation de capacité de transport léger (DREAL)' },
+      { id: 'registre', t: 'Récépissé d\'inscription au registre des transporteurs' }
+    ]
+  };
+
   var LV_VEHICLES = {
     vae: {
       emoji: '🔋', label: 'Vélo à assistance électrique (VAE)',
@@ -3870,7 +3892,8 @@
     var box = document.getElementById('lvForm');
     if (!box) return;
     var noteClass = { warn: 'lv-note--warn', ok: 'lv-note--ok', strong: 'lv-note--strong' };
-    var state = { veh: null };
+    var state = { veh: null, dossier: false, files: {} };
+    function piecesFor(veh) { return LV_PIECES_BASE.concat(LV_PIECES_EXTRA[veh] || []); }
 
     // SHELL STABLE : le champ date est rendu UNE fois et n'est JAMAIS recréé
     // pendant la saisie. Sur iOS, remplacer l'input pendant que le sélecteur est
@@ -3934,15 +3957,52 @@
         h.push('<div class="lv-card"><h2 class="lv-h2">3. Les textes de loi (et ce qu\'ils veulent dire)</h2>');
         v.laws.forEach(function (law) { h.push(lvLawBlock(law)); });
         h.push('<p class="lv-hint">Sources officielles : URSSAF, DREAL/DEAL, Légifrance.</p></div>');
-        h.push('<div class="lv-card lv-cta">'
-          + '<button type="button" class="btn primary" id="lvApply"' + (COURIER_ENABLED ? '' : ' disabled') + '>Je prépare mon dossier</button>'
-          + '<span class="lv-cta__note">' + (COURIER_ENABLED ? 'On te contactera pour vérifier tes pièces.' : 'Inscriptions bientôt ouvertes — prépare déjà tes documents ci-dessus.') + '</span></div>');
+        if (!state.dossier) {
+          h.push('<div class="lv-card lv-cta">'
+            + '<button type="button" class="btn primary" id="lvOpenDossier">Je prépare mon dossier →</button>'
+            + '<span class="lv-cta__note">Prépare et dépose tes pièces. On vérifie tout avant de t\'activer.</span></div>');
+        } else {
+          // ── Mon dossier : dépôt des pièces (option B) ──
+          var pieces = piecesFor(state.veh);
+          var ready = 0;
+          pieces.forEach(function (p) { if (state.files[p.id]) ready++; });
+          h.push('<div class="lv-card"><h2 class="lv-h2">4. Mon dossier — pièces à déposer</h2>');
+          h.push('<div class="lv-progress"><div class="lv-progress__bar"><span style="width:' + Math.round(100 * ready / pieces.length) + '%"></span></div>'
+            + '<span class="lv-progress__txt">' + ready + ' / ' + pieces.length + ' pièces prêtes</span></div>');
+          h.push('<ul class="lv-docs">');
+          pieces.forEach(function (p) {
+            var got = state.files[p.id];
+            h.push('<li class="lv-piece' + (got ? ' lv-piece--ok' : '') + '">'
+              + '<span class="lv-piece__t">' + (got ? '✅ ' : '') + p.t + '</span>'
+              + (got ? '<span class="lv-piece__file">' + escapeHTML(got) + '</span>' : '')
+              + '<label class="lv-piece__btn">' + (got ? 'Remplacer' : 'Choisir un fichier')
+              + '<input type="file" accept="image/*,application/pdf" data-piece="' + p.id + '" hidden></label></li>');
+          });
+          h.push('</ul>');
+          var allReady = ready === pieces.length;
+          h.push('<div class="lv-cta" style="margin-top:1rem">'
+            + '<button type="button" class="btn primary" id="lvSubmitDossier"' + (COURIER_ENABLED && allReady ? '' : ' disabled') + '>Envoyer mon dossier</button>'
+            + '<span class="lv-cta__note">' + (COURIER_ENABLED ? (allReady ? 'On vérifie tes pièces sous 48 h.' : 'Dépose toutes les pièces pour pouvoir envoyer.') : '🚧 L\'envoi ouvrira au lancement du service. Tu peux déjà tout préparer.') + '</span></div>');
+          h.push('</div>');
+        }
       }
 
       dyn.innerHTML = h.join('');
       var vehBtns = dyn.querySelectorAll('[data-veh]');
       for (var i = 0; i < vehBtns.length; i++) {
-        (function (btn) { btn.onclick = function () { state.veh = btn.getAttribute('data-veh'); renderDynamic(); }; })(vehBtns[i]);
+        (function (btn) { btn.onclick = function () {
+          state.veh = btn.getAttribute('data-veh'); state.dossier = false; state.files = {}; renderDynamic();
+        }; })(vehBtns[i]);
+      }
+      var openDos = document.getElementById('lvOpenDossier');
+      if (openDos) openDos.onclick = function () { state.dossier = true; renderDynamic(); };
+      var fileInputs = dyn.querySelectorAll('[data-piece]');
+      for (var j = 0; j < fileInputs.length; j++) {
+        (function (inp) { inp.onchange = function () {
+          var f = inp.files && inp.files[0];
+          if (f) state.files[inp.getAttribute('data-piece')] = f.name;  // dépôt réel : au lancement (Storage + endpoint)
+          renderDynamic();
+        }; })(fileInputs[j]);
       }
     }
 

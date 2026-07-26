@@ -34,6 +34,21 @@ Chaque phase indique l'exigence légale qu'elle sert (renvoi §B).
   auto)** → exigence CNIL §B-5.
 - Règles Firestore : default-deny, écriture serveur, lecture minimale.
 
+### 🔨 JOURNAL DE CONSTRUCTION (fait)
+- ✅ Formulaire « Devenir Livreur » (route #/livreur, bouton dans le compte),
+  adaptatif par véhicule, garde-fou âge ≥18, textes de loi + explications + liens
+  officiels + boutons assureurs. INACTIF (COURIER_ENABLED=false).
+- ✅ **Décision véhicules** : UNIQUEMENT électriques/motorisés — **VAE,
+  trottinette électrique, scooter/moto**. Vélo musculaire & trottinette non
+  électrique EXCLUS (décision user).
+- ✅ **Décision vérification KYC = option B** : dépôt des pièces + **validation
+  manuelle admin** (gratuit, contrôle total), architecture prête à brancher un
+  vérificateur en direct (Ubble/Onfido) en V2. Étape « Mon dossier » construite
+  (checklist de pièces par véhicule + progression + envoi gated).
+- ⏳ RESTE pour la V-launch : stockage réel des fichiers (Firebase Storage +
+  règles RGPD), endpoint serveur de dépôt, écran de validation admin, statut du
+  dossier (en_attente/validé/refusé), le tout activé avec COURIER_ENABLED.
+
 ### Phase 2 — Onboarding coursier « on mâche les démarches » (§B-1, B-2)
 Assistant pas-à-pas dans le compte Coursier :
 1. **Créer sa micro-entreprise** → lien guichet unique INPI + guide.
