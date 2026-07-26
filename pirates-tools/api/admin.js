@@ -789,9 +789,10 @@ function pwBuildVariantCosts(products, ov) {
     var o = (ov && ov[p.id]) || {};
     // Même exigence que pwSourceCost : seul un coût RELEVÉ (traqueur) ou saisi
     // en fiche sert de base à la dérivation ± 20 € — jamais une estimation.
-    var real = (o.priceSource === 'cotebrico' && typeof o.priceSrcTTC === 'number' && o.priceSrcTTC > 0)
+    var ovHasCost = (typeof o.priceSrcTTC === 'number' && o.priceSrcTTC > 0);
+    var real = (o.priceSource === 'cotebrico' && ovHasCost)
       ? o.priceSrcTTC
-      : ((typeof p.priceSrcTTC === 'number' && p.priceSrcTTC > 0) ? p.priceSrcTTC : null);
+      : ((!ovHasCost && typeof p.priceSrcTTC === 'number' && p.priceSrcTTC > 0) ? p.priceSrcTTC : null);
     if (!(real > 0)) continue;
     if (!byGroup[p.variantGroup]) byGroup[p.variantGroup] = {};
     byGroup[p.variantGroup][p.variantRole] = real;
@@ -815,7 +816,12 @@ function pwSourceCost(p, o, cfg, byGroup) {
   if (o && o.priceSource === 'cotebrico' && typeof o.priceSrcTTC === 'number' && o.priceSrcTTC > 0) {
     return { srcTTC: o.priceSrcTTC, origin: 'traqueur' };
   }
-  if (p && typeof p.priceSrcTTC === 'number' && p.priceSrcTTC > 0) {
+  // ⚠️ `p` est le produit FUSIONNÉ : si l'override porte un priceSrcTTC, alors
+  // p.priceSrcTTC EST cette valeur, pas le prix saisi dans products.json. On ne
+  // lit donc la fiche que si l'override est muet — sinon un coût blanchi se
+  // ferait passer pour un « prix fournisseur saisi ».
+  var overrideHasCost = !!(o && typeof o.priceSrcTTC === 'number' && o.priceSrcTTC > 0);
+  if (!overrideHasCost && p && typeof p.priceSrcTTC === 'number' && p.priceSrcTTC > 0) {
     return { srcTTC: p.priceSrcTTC, origin: 'fiche' };
   }
   // Garde-fou coffret : dériver de la variante jumelle au coût RÉEL connu.
