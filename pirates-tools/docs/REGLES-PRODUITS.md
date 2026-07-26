@@ -114,6 +114,13 @@ description_long  paragraphe + « Livrée dans toute la zone DOM-TOM. Octroi de 
   DHS900ZU confirme 460,78 € + « Module de connexion Bluetooth AWS inclus ».
   Le 450,00 € de la liste des déclinaisons était une autre présentation ;
   prix retenu = 460,78 → 529,90 € affiché. CORRECT, rien à changer.
+- **DJR188Z/DJR188ZJ (scie sabre COMPACTE, 26/07)** : paire déjà présente,
+  prix DÉJÀ corrects (DJR188Z 274,07 = 238,32×1,15 ; DJR188ZJ 335,97 =
+  292,15×1,15). PNG reçu = outil NU → posé sur la variante SOLO (djr188z.webp).
+  Specs remplies sur les 2 (même outil : compact, course 20 mm, 2,9 kg, 13
+  lignes — moins que le DJR187). Photo COFFRET DJR188ZJ pas encore reçue →
+  variante coffret reste sur placeholder jusqu'à son PNG (le toggle « Avec
+  coffret » montrera le placeholder en attendant, comme DJR187ZK avant).
 - **DJR187Z/DJR187ZK (scie sabre récipro, 26/07)** : ⚠️ LEÇON — la règle
   min-source NE s'applique QUE si le coffret est MOINS cher que le nu. ICI le
   coffret (valise DJR187ZK 300,07 €) est PLUS cher que le nu (DJR187Z 182,75 €)
