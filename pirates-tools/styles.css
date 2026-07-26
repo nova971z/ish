@@ -7964,3 +7964,9 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 @media (max-width: 560px) { .acc-hero__liv { margin-left: 0; width: 100%; text-align: center; } }
 .lv-course--btn { width: 100%; text-align: left; cursor: pointer; border: 1px solid rgba(255,255,255,.1); background: rgba(0,0,0,.22); color: inherit; font: inherit; transition: border-color .15s; }
 .lv-course--btn:hover { border-color: rgba(var(--accent-rgb,167,139,250),.6); }
+/* Notation du livreur (environnement client) */
+.lv-rate { margin-top: .8rem; display: grid; gap: .6rem; }
+.lv-rate__stars { display: flex; gap: .3rem; }
+.lv-rate__star { font-size: 1.9rem; line-height: 1; background: none; border: 0; cursor: pointer; color: #f2c14e; padding: .1rem; transition: transform .12s; }
+.lv-rate__star:hover { transform: scale(1.15); }
+.lv-rate__comment { width: 100%; box-sizing: border-box; padding: .6rem .8rem; border-radius: 10px; border: 1px solid rgba(255,255,255,.15); background: rgba(0,0,0,.25); color: #fff; font: inherit; resize: vertical; }

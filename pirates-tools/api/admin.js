@@ -268,6 +268,25 @@ module.exports = async function handler(req, res) {
         return res.status(200).json({ ok: true, config: { fuelPrice: config.fuelPrice || null } });
       }
 
+      // ── Avis clients sur les livreurs (notes + commentaires des courses) ──
+      if (type === 'course-ratings') {
+        const snap = await db.collection('courses').orderBy('createdAt', 'desc').limit(200).get()
+          .catch(() => db.collection('courses').limit(200).get())
+          .catch(() => null);
+        const ratings = [];
+        if (snap) snap.forEach((doc) => {
+          const c = doc.data() || {};
+          if (!c.rating) return;
+          ratings.push({
+            id: doc.id, rating: c.rating, comment: c.ratingComment || '',
+            address: c.address || '', productTitle: c.productTitle || '', prix: c.prix || 0,
+            zone: c.zone || 0, courierEmail: c.courierEmail || '', artisanEmail: c.artisanEmail || '',
+            ratedAt: c.ratedAt && c.ratedAt.toMillis ? c.ratedAt.toMillis() : null
+          });
+        });
+        return res.status(200).json({ ok: true, ratings });
+      }
+
       // ── Dossiers livreurs (service coursier — validation manuelle option B).
       // Vide tant que le service est inactif (aucune candidature écrite). ──
       if (type === 'courier-applications') {

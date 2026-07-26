@@ -4626,7 +4626,37 @@
   // Carte de l'île avec les courses posées dessus (pastille couleur de zone),
   // détail au clic (carte ↔ liste synchronisées), acceptation (serveur seul
   // juge : mode test = allowlist, sinon 403), historique de courses.
+  // ── Rôle livraison (cache) : livreur ACCEPTÉ (serveur) ou client ──────────
+  var _lvRolePromise = null;
+  function lvGetRole() {
+    if (!_currentUser) return Promise.resolve(false);
+    if (_lvRolePromise) return _lvRolePromise;
+    _lvRolePromise = jsonAuthHeaders().then(function (headers) {
+      return fetch(apiBaseUrl() + '/api/contact', { method: 'POST', headers: headers, body: JSON.stringify({ type: 'courier-status' }) });
+    }).then(function (r) { return r.json(); })
+      .then(function (d) { return !!(d && d.courier); })
+      .catch(function () { return lvIsTester(); });
+    return _lvRolePromise;
+  }
+  // Bouton du compte : « Mode livraison » (livreur accepté) / « Mes livraisons » (client).
+  function updateAccLivBtn() {
+    var btn = document.getElementById('accLivBtn');
+    if (!btn) return;
+    lvGetRole().then(function (isC) {
+      btn.textContent = isC ? '🛵 Mode livraison' : '📦 Mes livraisons';
+      btn.setAttribute('href', isC ? '#/mode-livraison' : '#/mes-livraisons');
+    });
+  }
+
+  // Espace livreur : RÉSERVÉ aux livreurs acceptés — un client est redirigé
+  // vers SON environnement « Mes livraisons ».
   function renderCourierSpace() {
+    lvGetRole().then(function (isC) {
+      if (!isC) { location.hash = '#/mes-livraisons'; return; }
+      renderCourierSpaceInner();
+    });
+  }
+  function renderCourierSpaceInner() {
     var back = document.getElementById('courierBack');
     if (back) back.onclick = function () { history.length > 1 ? history.back() : (location.hash = '#/compte'); };
     var refresh = document.getElementById('courierRefresh');
@@ -4760,6 +4790,159 @@
     }).catch(function () {
       var dispoEl = document.getElementById('courierDispo');
       if (dispoEl) dispoEl.innerHTML = '<p class="lv-hint">Erreur réseau.</p>';
+    });
+  }
+
+  // ── MES LIVRAISONS : l'environnement CLIENT ────────────────────────────────
+  // Carte de ses livraisons, détail (montant payé, dates, statut) et NOTATION
+  // du livreur (étoiles + commentaire, une seule fois, visible dans l'admin).
+  function renderClientDeliveries() {
+    var back = document.getElementById('clientDelivBack');
+    if (back) back.onclick = function () { history.length > 1 ? history.back() : (location.hash = '#/compte'); };
+    var refresh = document.getElementById('clientDelivRefresh');
+    if (refresh) refresh.onclick = renderClientDeliveries;
+    var isleCode = ISLAND_MAP[_currentTerritory] ? _currentTerritory : '971';
+    var mapEl = document.getElementById('clientDelivMap');
+    var markers = {};
+    var mapReady = ensureLeaflet().then(function () {
+      var map = mapEl._ptMap;
+      if (!map) {
+        mapEl.innerHTML = '';
+        map = window.L.map(mapEl, { scrollWheelZoom: false });
+        window.L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>'
+        }).addTo(map);
+        mapEl._ptMap = map;
+      }
+      if (mapEl._ptLayer) map.removeLayer(mapEl._ptLayer);
+      mapEl._ptLayer = window.L.layerGroup().addTo(map);
+      map.fitBounds(ISLAND_BOUNDS[isleCode] || ISLAND_BOUNDS['971'], { padding: [8, 8] });
+      setTimeout(function () { map.invalidateSize(); map.fitBounds(ISLAND_BOUNDS[isleCode] || ISLAND_BOUNDS['971'], { padding: [8, 8] }); }, 80);
+      return map;
+    }).catch(function () { return null; });
+
+    var ZCOLOR = ['#34d399', '#60a5fa', '#facc15', '#f87171'];
+    function whenTxt(c) {
+      return c.when === 'heure' ? ('à ' + escapeHTML(c.hour || '?')) : (c.when === 'matin' ? 'le matin' : "l'après-midi");
+    }
+    function stars(n) {
+      var s = '';
+      for (var i = 1; i <= 5; i++) s += (i <= n ? '★' : '☆');
+      return s;
+    }
+    function statusLabel(c) {
+      if (c.status === 'en_attente') return '⏳ En attente d\'un livreur';
+      if (c.status === 'acceptee') return '🛵 Prise en charge par un livreur';
+      if (c.status === 'livree') return '✅ Livrée';
+      return escapeHTML(c.status);
+    }
+    function showDetail(c) {
+      var det = document.getElementById('clientDelivDetail');
+      if (!det) return;
+      var z = LV_BAREME[(c.zone || 1) - 1] || LV_BAREME[0];
+      det.hidden = false;
+      var h = '<h2 class="lv-h2">' + z.emoji + ' Livraison zone ' + c.zone + '</h2>'
+        + '<div class="lv-course__body">'
+        + '📦 ' + escapeHTML(c.productTitle || '') + (c.qty > 1 ? ' × ' + c.qty : '') + '<br>'
+        + '📍 ' + escapeHTML(c.address || '') + ' <em>(' + c.km + ' km de Sainte-Anne)</em><br>'
+        + '📅 ' + (c.date ? escapeHTML(c.date) : 'au plus tôt') + ' ' + whenTxt(c) + '<br>'
+        + '💶 Frais de livraison : <strong>' + c.prix + ' €</strong> (payés au livreur à la réception)<br>'
+        + '🚦 ' + statusLabel(c) + '</div>';
+      if (c.rating) {
+        h += '<div class="lv-note lv-note--ok" style="margin-top:.7rem">⭐ Ta note : <strong>' + stars(c.rating) + '</strong>'
+          + (c.ratingComment ? '<br>« ' + escapeHTML(c.ratingComment) + ' »' : '') + '</div>';
+      } else if (c.status === 'acceptee' || c.status === 'livree') {
+        h += '<div class="lv-rate" data-rate-id="' + escapeHTML(c.id) + '">'
+          + '<h3 class="lv-h3">Note ton livreur</h3>'
+          + '<div class="lv-rate__stars" role="radiogroup" aria-label="Note sur 5">'
+          + [1, 2, 3, 4, 5].map(function (i) { return '<button type="button" class="lv-rate__star" data-star="' + i + '" aria-label="' + i + ' étoile' + (i > 1 ? 's' : '') + '">☆</button>'; }).join('')
+          + '</div>'
+          + '<textarea class="lv-rate__comment" maxlength="500" rows="2" placeholder="Un commentaire sur la livraison ? (optionnel)"></textarea>'
+          + '<div class="lv-cta"><button type="button" class="btn primary lv-rate__send" disabled>Envoyer ma note</button>'
+          + '<span class="lv-cta__note lv-rate__status" aria-live="polite"></span></div></div>';
+      } else {
+        h += '<p class="lv-hint" style="margin-top:.6rem">Tu pourras noter ton livreur dès qu\'il aura pris la course.</p>';
+      }
+      det.innerHTML = h;
+      // Étoiles interactives
+      var rate = det.querySelector('.lv-rate');
+      if (rate) {
+        var chosen = 0;
+        var starBtns = rate.querySelectorAll('.lv-rate__star');
+        var send = rate.querySelector('.lv-rate__send');
+        var st = rate.querySelector('.lv-rate__status');
+        function paint() {
+          for (var i = 0; i < starBtns.length; i++) starBtns[i].textContent = (i < chosen) ? '★' : '☆';
+          if (send) send.disabled = !chosen;
+        }
+        for (var i = 0; i < starBtns.length; i++) {
+          (function (b) { b.onclick = function () { chosen = parseInt(b.getAttribute('data-star'), 10); paint(); }; })(starBtns[i]);
+        }
+        if (send) send.onclick = function () {
+          send.disabled = true;
+          if (st) st.textContent = 'Envoi…';
+          jsonAuthHeaders().then(function (headers) {
+            return fetch(apiBaseUrl() + '/api/contact', {
+              method: 'POST', headers: headers,
+              body: JSON.stringify({ type: 'course-rate', id: rate.getAttribute('data-rate-id'), rating: chosen, comment: rate.querySelector('.lv-rate__comment').value })
+            });
+          }).then(function (r) { return r.json(); }).then(function (d) {
+            if (d.ok) { toast('Merci pour ta note ⭐', 'success'); renderClientDeliveries(); }
+            else { send.disabled = false; if (st) st.textContent = '❌ ' + (d.error || 'Erreur'); }
+          }).catch(function () { send.disabled = false; if (st) st.textContent = 'Erreur réseau.'; });
+        };
+      }
+      det.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    jsonAuthHeaders().then(function (headers) {
+      return fetch(apiBaseUrl() + '/api/contact', { method: 'POST', headers: headers, body: JSON.stringify({ type: 'course-list' }) });
+    }).then(function (r) { return r.json(); }).then(function (d) {
+      var listEl = document.getElementById('clientDelivList');
+      if (!listEl) return;
+      if (!d.ok) { listEl.innerHTML = '<p class="lv-hint">Erreur : ' + escapeHTML(d.error || '?') + '</p>'; return; }
+      var mine = (d.mine || []).filter(function (c) { return c.mine; });
+      if (!mine.length) {
+        listEl.innerHTML = '<p class="lv-hint">Aucune livraison pour l\'instant. Commande ta quincaillerie et fais-toi livrer sur ton chantier — depuis une fiche produit ou la page <a href="#/livraison">Livraison quincaillerie</a>.</p>';
+        return;
+      }
+      var byId = {};
+      mine.forEach(function (c) { byId[c.id] = c; });
+      listEl.innerHTML = mine.map(function (c) {
+        var z = LV_BAREME[(c.zone || 1) - 1] || LV_BAREME[0];
+        return '<button type="button" class="lv-course lv-course--btn' + (c.status !== 'en_attente' ? '' : '') + '" data-deliv-focus="' + escapeHTML(c.id) + '">'
+          + '<span class="lv-course__head"><span>' + z.emoji + ' <strong>' + c.prix + ' €</strong> · ' + (c.date ? escapeHTML(c.date) : 'au plus tôt') + '</span>'
+          + '<span class="lv-course__status">' + (c.rating ? '⭐ ' + c.rating + '/5' : statusLabel(c)) + '</span></span>'
+          + '<span class="lv-course__body">📍 ' + escapeHTML((c.address || '').slice(0, 60)) + '</span>'
+          + '</button>';
+      }).join('');
+      var cards = listEl.querySelectorAll('[data-deliv-focus]');
+      for (var i = 0; i < cards.length; i++) {
+        (function (btn) {
+          btn.onclick = function () {
+            var c = byId[btn.getAttribute('data-deliv-focus')];
+            if (!c) return;
+            showDetail(c);
+            mapReady.then(function (map) {
+              if (map && isFinite(c.lat) && isFinite(c.lng)) { map.setView([c.lat, c.lng], 12); if (markers[c.id]) markers[c.id].openPopup(); }
+            });
+          };
+        })(cards[i]);
+      }
+      mapReady.then(function (map) {
+        if (!map || !mapEl._ptLayer) return;
+        mine.forEach(function (c) {
+          if (!isFinite(c.lat) || !isFinite(c.lng)) return;
+          var col = ZCOLOR[(c.zone || 1) - 1] || ZCOLOR[0];
+          var m = window.L.circleMarker([c.lat, c.lng], { radius: 9, color: col, weight: 2, fillColor: col, fillOpacity: 0.7 }).addTo(mapEl._ptLayer);
+          m.bindPopup(escapeHTML((c.address || '').slice(0, 60)) + '<br>' + c.prix + ' € — ' + (c.date || 'au plus tôt'));
+          m.on('click', function () { showDetail(c); });
+          markers[c.id] = m;
+        });
+      });
+    }).catch(function () {
+      var listEl = document.getElementById('clientDelivList');
+      if (listEl) listEl.innerHTML = '<p class="lv-hint">Erreur réseau.</p>';
     });
   }
 
@@ -5073,7 +5256,7 @@
   // ── Router (hash-based SPA) ────────────────────────────────
 
   var ROUTES = ['/', '/catalogue', '/produit', '/devis', '/compte', '/auth', '/abonnement',
-                '/admin', '/merci', '/contact', '/favoris', '/artisans', '/rejoindre', '/livreur', '/livraison', '/mode-livraison',
+                '/admin', '/merci', '/contact', '/favoris', '/artisans', '/rejoindre', '/livreur', '/livraison', '/mode-livraison', '/mes-livraisons',
                 '/mentions-legales', '/confidentialite', '/cgv'];
 
   // Territory landing slugs (keys) → territory codes (values).
@@ -5142,6 +5325,7 @@
     // relance onRouteChange dès que l'auth est prête.
     if (route === '/compte' && _authReady && !_currentUser) { location.hash = '#/auth'; return; }
     if (route === '/mode-livraison' && _authReady && !_currentUser) { location.hash = '#/auth'; return; }
+    if (route === '/mes-livraisons' && _authReady && !_currentUser) { location.hash = '#/auth'; return; }
     if (route === '/auth' && _authReady && _currentUser) { location.hash = '#/compte'; return; }
 
     // Cleanup PDP animation loop when leaving product page
@@ -5247,6 +5431,7 @@
         break;
       case '/compte':
         renderAccount();
+        updateAccLivBtn();
         break;
       case '/auth':
         showAuthTab('login');
@@ -5286,6 +5471,9 @@
         break;
       case '/mode-livraison':
         renderCourierSpace();
+        break;
+      case '/mes-livraisons':
+        renderClientDeliveries();
         break;
     }
 
@@ -9274,6 +9462,23 @@
       }).catch(function () { _lvAdminFuel = LV_FUEL_DEFAULT; renderAdminCourierBareme(); });
     } else renderAdminCourierBareme();
 
+    // Avis clients (notes + commentaires des courses)
+    var rEl = document.getElementById('adminCourierRatings');
+    if (rEl) adminGet('course-ratings').then(function (data) {
+      var list = data.ratings || [];
+      if (!list.length) { rEl.innerHTML = '<p class="admin-hint">Aucun avis pour l\'instant.</p>'; return; }
+      rEl.innerHTML = list.map(function (a) {
+        var when = a.ratedAt ? new Date(a.ratedAt).toLocaleString('fr-FR') : '—';
+        var st = '★★★★★'.slice(0, a.rating) + '☆☆☆☆☆'.slice(0, 5 - a.rating);
+        return '<div class="admin-app"><div class="admin-app__head"><strong>' + st + ' (' + a.rating + '/5)</strong>'
+          + '<span class="admin-app__tier">Zone ' + a.zone + ' · ' + a.prix + ' €</span></div>'
+          + (a.comment ? '<div class="admin-app__line"><span>Commentaire</span> « ' + escapeHTML(a.comment) + ' »</div>' : '')
+          + '<div class="admin-app__line"><span>Livraison</span> ' + escapeHTML(a.productTitle || '') + ' — ' + escapeHTML(a.address || '') + '</div>'
+          + '<div class="admin-app__line"><span>Livreur</span> ' + escapeHTML(a.courierEmail || '—') + ' · <span>Client</span> ' + escapeHTML(a.artisanEmail || '—') + '</div>'
+          + '<div class="admin-app__foot">' + escapeHTML(when) + '</div></div>';
+      }).join('');
+    }).catch(function (e) { rEl.innerHTML = '<p class="admin-error">Erreur : ' + escapeHTML(e.message) + '</p>'; });
+
     var el = document.getElementById('adminCouriersBody');
     if (!el) return;
     el.innerHTML = '<p class="admin-loading">Chargement…</p>';
@@ -9531,6 +9736,8 @@
       + '<div class="admin-pane" data-admin-pane="couriers" hidden>'
       + '<h2 class="admin-subtitle">Barème & carburant</h2>'
       + '<div id="adminCourierBareme"><p class="admin-loading">Chargement…</p></div>'
+      + '<h2 class="admin-subtitle">⭐ Avis clients sur les livreurs</h2>'
+      + '<div id="adminCourierRatings"><p class="admin-loading">Chargement…</p></div>'
       + '<h2 class="admin-subtitle">Dossiers livreurs</h2>'
       + '<p class="admin-hint">Candidatures coursier reçues via « Devenir Livreur ». Vérifie les pièces (identité, permis, assurance, capacité transport…) puis valide ou refuse. Le service est INACTIF tant que le module n\'est pas ouvert : cette liste sera vide jusqu\'au lancement.</p>'
       + '<div id="adminCouriersBody"><p class="admin-loading">Chargement…</p></div>'

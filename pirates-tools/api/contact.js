@@ -57,7 +57,8 @@ module.exports = async function handler(req, res) {
   // Service coursier INACTIF pour le public : seuls les comptes de TEST
   // (allowlist ci-dessous) peuvent créer/accepter des courses, le temps de
   // valider toute la chaîne de bout en bout. Auth Bearer OBLIGATOIRE.
-  if (body.type === 'course-create' || body.type === 'course-list' || body.type === 'course-accept') {
+  if (body.type === 'course-create' || body.type === 'course-list' || body.type === 'course-accept'
+      || body.type === 'courier-status' || body.type === 'course-rate') {
     return handleCourses(req, body, { apiKey, from, ownerEmail }, res);
   }
 
@@ -435,6 +436,19 @@ async function handleCourses(req, body, cfg, res) {
   let email = '';
   try { email = String((await admin.auth().getUser(uid)).email || '').toLowerCase(); } catch (_) {}
   const isTester = COURSE_TEST_EMAILS.includes(email);
+  // Livreur ACCEPTÉ = dossier validé par l'admin (couriers/{uid}.kycStatus)
+  let isCourier = isTester;
+  if (!isCourier) {
+    try {
+      const cd = await db.collection('couriers').doc(uid).get();
+      isCourier = cd.exists && cd.data().kycStatus === 'valide';
+    } catch (_) {}
+  }
+
+  // ── Statut de rôle (léger — pilote le bouton du compte) ──
+  if (body.type === 'courier-status') {
+    return res.status(200).json({ ok: true, courier: isCourier });
+  }
 
   // ── Créer une course (artisan) ──
   if (body.type === 'course-create') {
@@ -497,18 +511,18 @@ async function handleCourses(req, body, cfg, res) {
         lat: c.lat, lng: c.lng,
         date: c.date, when: c.when, hour: c.hour,
         mine: c.artisanUid === uid, acceptedByMe: c.courierUid === uid,
+        rating: c.rating || 0, ratingComment: c.ratingComment || '',
         createdAt: c.createdAt && c.createdAt.toMillis ? c.createdAt.toMillis() : null
       };
       if (c.artisanUid === uid || c.courierUid === uid) mine.push(out);
-      if (isTester && c.status === 'en_attente' && c.artisanUid !== uid) dispo.push(out);
-      else if (isTester && c.status === 'en_attente' && c.artisanUid === uid) dispo.push(out); // test : même compte des 2 côtés
+      if (isCourier && c.status === 'en_attente') dispo.push(out); // (test : même compte des 2 côtés accepté)
     });
-    return res.status(200).json({ ok: true, courier: isTester, dispo, mine });
+    return res.status(200).json({ ok: true, courier: isCourier, dispo, mine });
   }
 
   // ── Accepter (livreur de test — 1er arrivé, transaction atomique) ──
   if (body.type === 'course-accept') {
-    if (!isTester) return res.status(403).json({ ok: false, error: 'Réservé aux livreurs validés (service en test).' });
+    if (!isCourier) return res.status(403).json({ ok: false, error: 'Réservé aux livreurs validés (service en test).' });
     const id = String(body.id || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 64);
     if (!id) return res.status(400).json({ ok: false, error: 'id requis' });
     const ref = db.collection('courses').doc(id);
@@ -541,6 +555,35 @@ async function handleCourses(req, body, cfg, res) {
       if (e.message === 'introuvable') return res.status(404).json({ ok: false, error: 'Course introuvable.' });
       console.error('[courses] accept failed:', e.message);
       return res.status(500).json({ ok: false, error: 'Acceptation échouée.' });
+    }
+  }
+
+  // ── Noter le livreur (client UNIQUEMENT, sa propre course, une seule fois) ──
+  if (body.type === 'course-rate') {
+    const id = String(body.id || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 64);
+    const rating = parseInt(body.rating, 10);
+    const comment = String(body.comment || '').trim().slice(0, 500);
+    if (!id) return res.status(400).json({ ok: false, error: 'id requis' });
+    if (!(rating >= 1 && rating <= 5)) return res.status(400).json({ ok: false, error: 'note 1 à 5 requise' });
+    const ref = db.collection('courses').doc(id);
+    try {
+      await db.runTransaction(async (tx) => {
+        const d = await tx.get(ref);
+        if (!d.exists) throw new Error('introuvable');
+        const c = d.data();
+        if (c.artisanUid !== uid) throw new Error('pas-ta-course');
+        if (!['acceptee', 'livree'].includes(c.status)) throw new Error('pas-encore');
+        if (c.rating) throw new Error('deja-note');
+        tx.update(ref, { rating, ratingComment: comment, ratedAt: new Date(), ratedBy: uid });
+      });
+      return res.status(200).json({ ok: true, id, rating });
+    } catch (e) {
+      const map = { 'introuvable': [404, 'Course introuvable.'], 'pas-ta-course': [403, 'Tu ne peux noter que tes propres livraisons.'],
+        'pas-encore': [400, 'Tu pourras noter une fois la livraison prise en charge.'], 'deja-note': [409, 'Tu as déjà noté cette livraison.'] };
+      const m = map[e.message];
+      if (m) return res.status(m[0]).json({ ok: false, error: m[1] });
+      console.error('[courses] rate failed:', e.message);
+      return res.status(500).json({ ok: false, error: 'Notation échouée.' });
     }
   }
 
