@@ -53,6 +53,14 @@ module.exports = async function handler(req, res) {
     return handlePartnerCardSelf(req, body, res);
   }
 
+  // ── Branche : COURSES livraison quincaillerie (MODE TEST) ─────────────────
+  // Service coursier INACTIF pour le public : seuls les comptes de TEST
+  // (allowlist ci-dessous) peuvent créer/accepter des courses, le temps de
+  // valider toute la chaîne de bout en bout. Auth Bearer OBLIGATOIRE.
+  if (body.type === 'course-create' || body.type === 'course-list' || body.type === 'course-accept') {
+    return handleCourses(req, body, { apiKey, from, ownerEmail }, res);
+  }
+
   // Rate limit: 5 messages / hour / IP.
   if (!(await rl.allow('contact', rl.clientIp(req), 5, 3600))) {
     return res.status(429).json({ ok: false, error: 'Trop de messages envoyés. Réessayez dans une heure.' });
@@ -393,4 +401,147 @@ function partnerApplicationEmail(a, stored) {
     + (stored ? 'Enregistrée dans la base (onglet Admin → Candidatures).' : '⚠️ Non enregistrée en base (FIREBASE_SERVICE_ACCOUNT manquant) — cet email fait foi.')
     + '</p>'
     + '</td></tr></table></td></tr></table></body></html>';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// COURSES livraison quincaillerie — MODE TEST (chaîne complète de bout en bout)
+// Créer (artisan) → alerte email (livreurs de test) → accepter (1er gagnant).
+// Seuls les comptes de l'allowlist peuvent agir tant que le service est
+// inactif. Le serveur RECALCULE zone/prix depuis lat/lng (client jamais cru).
+// ═══════════════════════════════════════════════════════════════════════════
+const COURSE_TEST_EMAILS = ['justforwada@icloud.com'];   // comptes de test (user)
+const COURSE_DEPOT = { lat: 16.2260, lng: -61.3823 };    // Sainte-Anne
+const COURSE_BAREME = [                                   // = LV_BAREME client
+  { zone: 1, maxKm: 10, prix: 22 },
+  { zone: 2, maxKm: 22, prix: 48 },
+  { zone: 3, maxKm: 34, prix: 74 },
+  { zone: 4, maxKm: 46, prix: 100 }
+];
+function courseHaversineKm(a, b) {
+  const R = 6371, dLat = (b.lat - a.lat) * Math.PI / 180, dLng = (b.lng - a.lng) * Math.PI / 180;
+  const s = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * Math.PI / 180) * Math.cos(b.lat * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(s));
+}
+
+async function handleCourses(req, body, cfg, res) {
+  const rlOk = await rl.allow('courses', rl.clientIp(req), 30, 3600);
+  if (!rlOk) return res.status(429).json({ ok: false, error: 'Trop de requêtes. Réessaie plus tard.' });
+
+  const uid = await verifyUid(req);
+  if (!uid) return res.status(401).json({ ok: false, error: 'Connexion requise.' });
+  const { admin, db } = getFirebase();
+  if (!db) return res.status(503).json({ ok: false, error: 'Base non configurée.' });
+
+  let email = '';
+  try { email = String((await admin.auth().getUser(uid)).email || '').toLowerCase(); } catch (_) {}
+  const isTester = COURSE_TEST_EMAILS.includes(email);
+
+  // ── Créer une course (artisan) ──
+  if (body.type === 'course-create') {
+    if (!isTester) return res.status(403).json({ ok: false, error: 'Service en test — ouverture le 1er janvier.' });
+    const address = String(body.address || '').trim().slice(0, 200);
+    const lat = Number(body.lat), lng = Number(body.lng);
+    const qty = Math.max(1, Math.min(99, parseInt(body.qty, 10) || 1));
+    const productKey = String(body.productKey || '').slice(0, 80);
+    const productTitle = String(body.productTitle || '').slice(0, 160);
+    const when = ['matin', 'apresmidi', 'heure'].includes(body.when) ? body.when : 'matin';
+    const hour = /^\d{2}:\d{2}$/.test(String(body.hour || '')) ? body.hour : '';
+    const date = /^\d{4}-\d{2}-\d{2}$/.test(String(body.date || '')) ? body.date : '';
+    if (address.length < 4) return res.status(400).json({ ok: false, error: 'Adresse trop courte.' });
+    if (!isFinite(lat) || !isFinite(lng)) return res.status(400).json({ ok: false, error: 'Position manquante — tape ton adresse et valide-la sur la carte.' });
+    // Zone/prix AUTORITAIRES serveur (le client n'est jamais cru).
+    const km = courseHaversineKm(COURSE_DEPOT, { lat, lng });
+    const z = COURSE_BAREME.find((b2) => km <= b2.maxKm);
+    if (!z) return res.status(400).json({ ok: false, error: 'Hors zone de livraison (max 46 km depuis Sainte-Anne).' });
+    const doc = {
+      status: 'en_attente', test: true,
+      artisanUid: uid, artisanEmail: email,
+      productKey, productTitle, qty, address, lat, lng,
+      km: Math.round(km * 10) / 10, zone: z.zone, prix: z.prix,
+      date, when, hour,
+      createdAt: new Date()
+    };
+    const ref = await db.collection('courses').add(doc);
+    // Alerte email aux livreurs de test + owner (Resend).
+    const whenTxt = when === 'heure' ? ('à ' + hour) : (when === 'matin' ? 'le matin' : "l'après-midi");
+    const subject = '🛵 Nouvelle course zone ' + z.zone + ' — ' + z.prix + ' € — ' + address.slice(0, 60);
+    const html = '<p><strong>Nouvelle course de livraison (TEST)</strong></p>'
+      + '<p>' + escapeHtml(productTitle || productKey) + ' × ' + qty + '<br>'
+      + '📍 ' + escapeHtml(address) + ' (' + doc.km + ' km de Sainte-Anne — zone ' + z.zone + ')<br>'
+      + '📅 ' + (date || 'au plus tôt') + ' ' + whenTxt + '<br>'
+      + '💶 <strong>' + z.prix + ' €</strong> pour le livreur</p>'
+      + '<p>Ouvre ton espace livreur sur pirates-tools.com pour accepter la course (premier arrivé, premier servi).</p>';
+    const dests = Array.from(new Set(COURSE_TEST_EMAILS.concat([cfg.ownerEmail])));
+    for (const to of dests) {
+      try {
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + cfg.apiKey },
+          body: JSON.stringify({ from: cfg.from, to, subject, html })
+        });
+      } catch (e) { console.warn('[courses] alerte email échouée:', e.message); }
+    }
+    return res.status(200).json({ ok: true, course: { id: ref.id, km: doc.km, zone: z.zone, prix: z.prix } });
+  }
+
+  // ── Lister (livreur de test : dispo + les miennes ; artisan : les miennes) ──
+  if (body.type === 'course-list') {
+    const snap = await db.collection('courses').orderBy('createdAt', 'desc').limit(50).get()
+      .catch(() => db.collection('courses').limit(50).get());
+    const mine = [], dispo = [];
+    snap.forEach((d) => {
+      const c = Object.assign({ id: d.id }, d.data());
+      const out = {
+        id: c.id, status: c.status, productTitle: c.productTitle, qty: c.qty,
+        address: c.address, km: c.km, zone: c.zone, prix: c.prix,
+        date: c.date, when: c.when, hour: c.hour,
+        mine: c.artisanUid === uid, acceptedByMe: c.courierUid === uid,
+        createdAt: c.createdAt && c.createdAt.toMillis ? c.createdAt.toMillis() : null
+      };
+      if (c.artisanUid === uid || c.courierUid === uid) mine.push(out);
+      if (isTester && c.status === 'en_attente' && c.artisanUid !== uid) dispo.push(out);
+      else if (isTester && c.status === 'en_attente' && c.artisanUid === uid) dispo.push(out); // test : même compte des 2 côtés
+    });
+    return res.status(200).json({ ok: true, courier: isTester, dispo, mine });
+  }
+
+  // ── Accepter (livreur de test — 1er arrivé, transaction atomique) ──
+  if (body.type === 'course-accept') {
+    if (!isTester) return res.status(403).json({ ok: false, error: 'Réservé aux livreurs validés (service en test).' });
+    const id = String(body.id || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 64);
+    if (!id) return res.status(400).json({ ok: false, error: 'id requis' });
+    const ref = db.collection('courses').doc(id);
+    try {
+      const result = await db.runTransaction(async (tx) => {
+        const d = await tx.get(ref);
+        if (!d.exists) throw new Error('introuvable');
+        if (d.data().status !== 'en_attente') throw new Error('deja-prise');
+        tx.update(ref, { status: 'acceptee', courierUid: uid, courierEmail: email, acceptedAt: new Date() });
+        return d.data();
+      });
+      // Alerte l'artisan : sa course est prise.
+      try {
+        if (result.artisanEmail) {
+          await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + cfg.apiKey },
+            body: JSON.stringify({
+              from: cfg.from, to: result.artisanEmail,
+              subject: '✅ Ta livraison est prise en charge — ' + String(result.address || '').slice(0, 60),
+              html: '<p>Un livreur a accepté ta course (TEST).</p><p>📍 ' + escapeHtml(result.address || '')
+                + '<br>💶 ' + result.prix + ' € à régler au livreur à la réception.</p>'
+            })
+          });
+        }
+      } catch (e) { console.warn('[courses] email accept échoué:', e.message); }
+      return res.status(200).json({ ok: true, id, status: 'acceptee' });
+    } catch (e) {
+      if (e.message === 'deja-prise') return res.status(409).json({ ok: false, error: 'Trop tard — un autre livreur a déjà pris cette course.' });
+      if (e.message === 'introuvable') return res.status(404).json({ ok: false, error: 'Course introuvable.' });
+      console.error('[courses] accept failed:', e.message);
+      return res.status(500).json({ ok: false, error: 'Acceptation échouée.' });
+    }
+  }
+
+  return res.status(400).json({ ok: false, error: 'type inconnu' });
 }

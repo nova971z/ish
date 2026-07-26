@@ -2224,10 +2224,13 @@
     var isQuinc = (product.brand === 'Quincaillerie');
     var splitSection = document.querySelector('.pdp-section--split');
     var delivSection = document.getElementById('pdpDelivery');
+    // Testeur (allowlist) : bloc livraison AUSSI sur les machines (chaîne de
+    // test complète) — le split 3D/specs reste alors visible.
+    var showDeliv = isQuinc || lvIsTester();
     if (splitSection) splitSection.hidden = isQuinc;
     if (delivSection) {
-      delivSection.hidden = !isQuinc;
-      if (isQuinc) initPdpDelivery(product);
+      delivSection.hidden = !showDeliv;
+      if (showDeliv) initPdpDelivery(product);
     }
 
     // Scroll animation for landing sections — APRÈS l'injection de features/specs/kit
@@ -3884,6 +3887,14 @@
     { zone: 3, emoji: '🟡', km: '22-34', prix: 74 },
     { zone: 4, emoji: '🔴', km: '34-46', prix: 100 }
   ];
+  // Comptes de TEST (chaîne complète courses actives pour eux seuls — décision
+  // user : son compte perso teste artisan ET livreur, sans documents).
+  var LV_TEST_EMAILS = ['justforwada@icloud.com'];
+  function lvIsTester() {
+    try { return !!(_currentUser && _currentUser.email && LV_TEST_EMAILS.indexOf(String(_currentUser.email).toLowerCase()) !== -1); }
+    catch (_) { return false; }
+  }
+
   var LV_FUEL_DEFAULT = 1.87;  // €/L sans plomb Guadeloupe (réglementé, révisé
                                // chaque mois — modifiable dans Admin → Livreurs)
   var LV_ROUTE_FACTOR = 1.62;  // route réelle ≈ 1,62 × vol d'oiseau (mesuré sur
@@ -4135,8 +4146,46 @@
         if (hourWrap) hourWrap.hidden = (mode !== 'heure');
       };
     }
+    // Date par défaut = aujourd'hui (l'input iOS vide ressemblait à un trou).
+    var dateEl = document.getElementById('pdpDelivDate');
+    if (dateEl && !dateEl.value) {
+      var now = new Date();
+      dateEl.value = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+    }
     var mapEl = document.getElementById('pdpDeliveryMap');
     if (!mapEl) return;
+    // Bouton COMMANDER (mode test : réservé à l'allowlist, serveur autoritaire).
+    var orderBtn = document.getElementById('pdpDelivOrder');
+    var orderSt = document.getElementById('pdpDelivStatus');
+    if (orderBtn) orderBtn.onclick = function () {
+      if (!_currentUser) { toast('Connecte-toi pour commander une livraison', 'error'); location.hash = '#/auth'; return; }
+      var g = mapEl._ptGeo;
+      if (!g) { if (orderSt) orderSt.textContent = 'Tape ton adresse et valide-la (Entrée) pour la localiser.'; return; }
+      var when = (box.querySelector('input[name="pdpDelivWhen"]:checked') || {}).value || 'matin';
+      var hour = (document.getElementById('pdpDelivHour') || {}).value || '';
+      if (when === 'heure' && !hour) { if (orderSt) orderSt.textContent = 'Choisis l\'heure souhaitée.'; return; }
+      orderBtn.disabled = true;
+      if (orderSt) orderSt.textContent = 'Envoi…';
+      jsonAuthHeaders().then(function (headers) {
+        return fetch(apiBaseUrl() + '/api/contact', {
+          method: 'POST', headers: headers,
+          body: JSON.stringify({
+            type: 'course-create',
+            productKey: product.id || product.slug, productTitle: product.title, qty: 1,
+            address: g.label, lat: g.lat, lng: g.lng,
+            date: (document.getElementById('pdpDelivDate') || {}).value || '',
+            when: when, hour: hour
+          })
+        });
+      }).then(function (r) { return r.json().then(function (d) { return { r: r, d: d }; }); })
+        .then(function (x) {
+          orderBtn.disabled = false;
+          if (!x.r.ok || !x.d.ok) { if (orderSt) orderSt.textContent = '❌ ' + (x.d.error || 'Erreur'); return; }
+          if (orderSt) orderSt.textContent = '✅ Course créée — zone ' + x.d.course.zone + ', ' + x.d.course.prix + ' €. Les livreurs sont alertés par email.';
+          toast('Course de livraison créée ✅', 'success');
+        })
+        .catch(function () { orderBtn.disabled = false; if (orderSt) orderSt.textContent = 'Erreur réseau.'; });
+    };
     ensureLeaflet().then(function () {
       var map = mapEl._ptMap;
       if (!map) {
@@ -4170,6 +4219,7 @@
               var label = f.properties && f.properties.label || q;
               if (mapEl._ptDest) map.removeLayer(mapEl._ptDest);
               mapEl._ptDest = window.L.marker([lat, lng]).addTo(map).bindPopup(escapeHTML(label)).openPopup();
+              mapEl._ptGeo = { lat: lat, lng: lng, label: label };   // pour « Commander »
               map.setView([lat, lng], 13);
               if (is971) {
                 var km = haversineKm(LV_DEPOT, { lat: lat, lng: lng });
@@ -4199,6 +4249,7 @@
       // Repli (Leaflet indisponible) : aperçu doré du contour de l'île.
       if (mapEl.dataset.fallback) return;
       mapEl.dataset.fallback = '1';
+      mapEl.classList.add('pdp-deliv-map--fallback');
       var src = document.querySelector('#regIslands .isl[data-isl="' + (ISLAND_MAP[_currentTerritory] ? _currentTerritory : '971') + '"] svg');
       if (src) {
         var cl = src.cloneNode(true);
@@ -4245,6 +4296,7 @@
         + '<div class="lv-banner__isles" id="lvBannerIsles" aria-hidden="true"></div>'
         + '<div>🟢 <strong>Ce service ouvre le 1er janvier.</strong> Tu peux déjà tout préparer et <strong>tester le formulaire</strong> (choisir tes fichiers, remplir ton dossier). Pour l\'instant, <strong>rien n\'est enregistré</strong> — c\'est juste pour découvrir.</div>'
         + '</div>')
+      + '<div id="lvCourses"></div>'
       + '<div class="lv-card"><label class="lv-field"><span>Ta date de naissance *</span>'
       + '<input type="date" id="lvBirth" autocomplete="bday"></label>'
       + '<p class="lv-hint" id="lvAgeMsg" style="margin-top:.6rem">Renseigne ta date de naissance pour continuer.</p></div>'
@@ -4501,6 +4553,72 @@
       if (bn) bn.remove();
       try { localStorage.setItem('pt:lv-banner-closed', '1'); } catch (_) {}
     };
+
+    // ── MODE TEST : espace courses du livreur (allowlist uniquement) ──
+    // Le compte de test voit les courses en attente et peut les accepter
+    // (1er arrivé = transaction serveur). Alertes par email à la création.
+    if (lvIsTester()) loadLvCourses();
+  }
+
+  function loadLvCourses() {
+    var host = document.getElementById('lvCourses');
+    if (!host) return;
+    host.innerHTML = '<div class="lv-card"><h2 class="lv-h2">📬 Courses (mode test)</h2>'
+      + '<p class="lv-hint">Ton compte est en <strong>mode test livreur</strong> — aucun document requis. Tu vois les courses créées et tu peux les accepter.</p>'
+      + '<div id="lvCoursesList"><p class="lv-hint">Chargement…</p></div>'
+      + '<button type="button" class="btn" id="lvCoursesRefresh" style="margin-top:.6rem">Rafraîchir</button></div>';
+    var refresh = document.getElementById('lvCoursesRefresh');
+    if (refresh) refresh.onclick = loadLvCourses;
+    var list = document.getElementById('lvCoursesList');
+    jsonAuthHeaders().then(function (headers) {
+      return fetch(apiBaseUrl() + '/api/contact', {
+        method: 'POST', headers: headers, body: JSON.stringify({ type: 'course-list' })
+      });
+    }).then(function (r) { return r.json(); }).then(function (d) {
+      if (!d.ok) { list.innerHTML = '<p class="lv-hint">Erreur : ' + escapeHTML(d.error || '?') + '</p>'; return; }
+      var whenTxt = function (c) {
+        return c.when === 'heure' ? ('à ' + escapeHTML(c.hour || '?')) : (c.when === 'matin' ? 'le matin' : "l'après-midi");
+      };
+      var card = function (c, withAccept) {
+        var z = LV_BAREME[(c.zone || 1) - 1] || LV_BAREME[0];
+        return '<div class="lv-course' + (c.status !== 'en_attente' ? ' lv-course--done' : '') + '">'
+          + '<div class="lv-course__head"><span>' + z.emoji + ' Zone ' + c.zone + ' · <strong>' + c.prix + ' €</strong></span>'
+          + '<span class="lv-course__status">' + (c.status === 'en_attente' ? 'En attente' : (c.acceptedByMe ? '✅ Acceptée par toi' : escapeHTML(c.status))) + '</span></div>'
+          + '<div class="lv-course__body">' + escapeHTML(c.productTitle || '') + (c.qty > 1 ? ' × ' + c.qty : '') + '<br>'
+          + '📍 ' + escapeHTML(c.address || '') + ' <em>(' + c.km + ' km)</em><br>'
+          + '📅 ' + (c.date ? escapeHTML(c.date) : 'au plus tôt') + ' ' + whenTxt(c) + '</div>'
+          + (withAccept && c.status === 'en_attente'
+            ? '<button type="button" class="btn primary" data-course-accept="' + escapeHTML(c.id) + '">✅ Accepter cette course</button>' : '')
+          + '</div>';
+      };
+      var h = '';
+      if (d.dispo && d.dispo.length) {
+        h += '<h3 class="lv-h3">Disponibles</h3>' + d.dispo.map(function (c) { return card(c, true); }).join('');
+      } else {
+        h += '<p class="lv-hint">Aucune course en attente pour l\'instant. Crée-en une depuis une fiche produit (bloc « Livraison sur ton chantier »).</p>';
+      }
+      var doneMine = (d.mine || []).filter(function (c) { return c.status !== 'en_attente'; });
+      if (doneMine.length) h += '<h3 class="lv-h3">Historique</h3>' + doneMine.map(function (c) { return card(c, false); }).join('');
+      list.innerHTML = h;
+      var btns = list.querySelectorAll('[data-course-accept]');
+      for (var i = 0; i < btns.length; i++) {
+        (function (b) {
+          b.onclick = function () {
+            b.disabled = true; b.textContent = '…';
+            jsonAuthHeaders().then(function (headers) {
+              return fetch(apiBaseUrl() + '/api/contact', {
+                method: 'POST', headers: headers,
+                body: JSON.stringify({ type: 'course-accept', id: b.getAttribute('data-course-accept') })
+              });
+            }).then(function (r) { return r.json(); }).then(function (dd) {
+              if (dd.ok) { toast('Course acceptée ✅ — l\'artisan est prévenu par email', 'success'); }
+              else { toast(dd.error || 'Erreur', 'error'); }
+              loadLvCourses();
+            }).catch(function () { toast('Erreur réseau', 'error'); loadLvCourses(); });
+          };
+        })(btns[i]);
+      }
+    }).catch(function () { list.innerHTML = '<p class="lv-hint">Erreur réseau.</p>'; });
   }
 
   function renderArtisans() {
