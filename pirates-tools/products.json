@@ -6285,13 +6285,13 @@
     "id": "makita-dls600z",
     "slug": "makita-dls600z-scie-onglet-18v-li-ion-165-mm-",
     "sku": "DLS600Z",
-    "title": "Makita DLS600Z — Scie à onglet 18V Li-ion Ø165 mm (Produit seul)",
+    "title": "Makita DLS600Z — Scie à onglet radiale 18V LXT Ø165 mm brushless (machine seule)",
     "name": "DLS600Z",
     "brand": "Makita",
     "category": "Scies",
     "tag": "Nouveau",
-    "desc": "Scie à onglet 18V Li-ion Ø165 mm (Produit seul).",
-    "img": "images/placeholder.svg",
+    "desc": "Scie à onglet radiale (double biseau) sans fil 18V LXT Ø165 mm, moteur brushless + ADT, coupe 46×92 mm, onglet 52° G/D, biseau 46° G/D, LED + laser — sans batterie ni chargeur.",
+    "img": "images/posters/dls600z.webp",
     "price": 504.97,
     "currency": "EUR",
     "vat": 0.2,
@@ -6308,14 +6308,29 @@
       "tropical_ready"
     ],
     "features": [
-      "Scie à onglet 18V Li-ion Ø165 mm (Produit seul)",
-      "Gamme Makita 18V LXT sans fil, moteur brushless (sans charbon) haut rendement",
-      "Machine seule (batterie et chargeur non inclus), compatible batteries Makita LXT",
-      "Robuste et endurant, pensé pour un usage professionnel intensif",
-      "Idéal pour les chantiers des Antilles / DOM-TOM"
+      "Scie à onglet radiale double biseau sans fil 18V LXT — lame Ø165 mm",
+      "Moteur brushless + ADT (adapte la vitesse à la charge), 5000 tr/min",
+      "Capacité de coupe 46 × 92 mm — onglet 52° gauche/droite, biseau 46° gauche/droite",
+      "Éclairage LED, ligne laser et jauge de batterie",
+      "Compacte et légère (6,6 kg) — machine seule (batterie et chargeur non inclus)"
     ],
-    "specs": {},
-    "description_long": "Scie à onglet 18V Li-ion Ø165 mm (Produit seul). Outil professionnel Makita de la gamme 18V LXT sans fil (moteur brushless). Vendu en machine seule (sans batterie ni chargeur). Compatible avec les batteries Makita LXT. Fiche technique détaillée à compléter. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "specs": {
+      "Marque": "Makita",
+      "Type": "Scie à onglet radiale double biseau sans fil 18V LXT Brushless Ø165 mm — machine nue",
+      "Tension": "18 V (gamme LXT)",
+      "Moteur": "Brushless (sans charbon) + ADT",
+      "Diamètre de lame": "165 mm",
+      "Alésage": "20 mm",
+      "Vitesse à vide": "5000 tr/min",
+      "Capacité de coupe (H×L)": "46 × 92 mm",
+      "Onglet": "52° gauche et droite (butées 0 / 15 / 22,5 / 31,6 / 45°)",
+      "Inclinaison (biseau)": "46° gauche et droite (double biseau)",
+      "Équipement": "Éclairage LED, ligne laser, jauge de batterie",
+      "Poids": "6,6 kg",
+      "Batterie / chargeur": "Non inclus"
+    },
+    "description_long": "Scie à onglet radiale double biseau sans fil Makita 18V LXT Ø165 mm (DLS600Z), machine seule. Moteur brushless associé à la technologie ADT qui adapte automatiquement la vitesse de coupe à la charge (5000 tr/min). Capacité de coupe de 46 × 92 mm, onglet 52° à gauche comme à droite (butées 0 / 15 / 22,5 / 31,6 / 45°) et inclinaison 46° gauche et droite pour les coupes composées. Équipée d'un éclairage LED, d'une ligne laser et d'une jauge de batterie. Compacte et légère (6,6 kg) pour la finition, la rénovation et le chantier. Vendue sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "coffretIncluded": true
   },
   {
     "id": "makita-dmc300z",

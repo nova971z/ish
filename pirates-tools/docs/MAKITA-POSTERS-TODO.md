@@ -25,7 +25,7 @@
 20. [x] DJR189Z (solo, créée) + DJR189ZJ (coffret) — PAIRE DE VARIANTES OK ✅ Règle user prix : solo = prix qu'on avait (205,41 €) ; coffret = +25 € surplus (poids 3,5kg) = 230,41 €. Posters + specs OK
 21. [x] DJV184Z — Scie sauteuse 18V LXT brushless compacte (machine seule)
 22. [x] DJV185Z (solo) + DJV185ZJ (coffret, créée) — PAIRE DE VARIANTES OK ✅ solo 251,91 € ; coffret +25 € = 276,91 €. Posters (solo dark direct, coffret transparent->fond sombre) + specs (800-3000 spm, course 23, bois 135) OK
-23. [ ] DLS600Z — Scie à onglet 18V Li-ion Ø165 mm (Produit seul)
+23. [x] DLS600Z — Scie à onglet radiale 18V LXT Ø165 mm brushless (machine seule) — SPECS (Makita/Screwfix) + POSTER OK ✅ (coffretIncluded=true : PAS de switch coffret, aucun coffret à sa taille — décision user)
 24. [ ] DSP601ZJU — Scie plongeante 36V LXT BL (2x18V) Ø165 mm avec module AWS
 25. [ ] DUB363ZV — Souffleur broyeur 36V LXT (machine seule)
 26. [ ] DTD153Z — Visseuse à chocs 18V LXT 170 Nm (Machine seule)
