@@ -871,6 +871,11 @@ async function handleRepriceAll(req, res, admin, db) {
     const variantCosts = pwBuildVariantCosts(products, ov);
     const now = admin.firestore.FieldValue.serverTimestamp();
     const changed = [], skipped = [];
+    // Santé des coûts d'achat : sur quoi reposent RÉELLEMENT les prix du site.
+    // Affiché même quand rien ne change — « 0 à changer » ne veut rien dire si
+    // les prix sont bâtis sur des estimations.
+    const origins = { traqueur: 0, fiche: 0, variante: 0, 'estimé': 0 };
+    const estimes = [];
 
     for (const p of products) {
       const o = ov[p.id] || {};
@@ -879,6 +884,10 @@ async function handleRepriceAll(req, res, admin, db) {
       const srcTTC = srcInfo.srcTTC;
       if (!(srcTTC > 0)) { skipped.push({ id: p.id, sku: p.sku, reason: 'coût source inconnu' }); continue; }
       if (srcTTC < PW.MIN_TTC || srcTTC > PW.MAX_TTC) { skipped.push({ id: p.id, sku: p.sku, reason: 'hors fourchette' }); continue; }
+      if (origins[srcInfo.origin] !== undefined) origins[srcInfo.origin]++;
+      if (srcInfo.origin === 'estimé' && estimes.length < 40) {
+        estimes.push({ sku: p.sku, name: p.title || p.name, srcTTC: srcTTC });
+      }
 
       const priced = pwComputePrice(p, srcTTC, cfg);
       // Prix ACTUEL : l'override fraîchement relu fait foi. `p` vient du
@@ -914,6 +923,7 @@ async function handleRepriceAll(req, res, admin, db) {
     return res.status(200).json({
       ok: true, dryRun: !!dryRun, mode: cfg.mode, autoPrice: !!cfg.autoPrice,
       counts: { total: products.length, changed: changed.length, skipped: skipped.length },
+      origins: origins, estimes: estimes,
       changed: changed.slice(0, 500), skipped: skipped.slice(0, 100)
     });
   } catch (err) {

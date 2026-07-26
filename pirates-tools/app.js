@@ -9172,6 +9172,31 @@
       }).catch(function (e) { out.innerHTML = '<p class="admin-error">Erreur : ' + escapeHTML(e.message) + '</p>'; });
     };
 
+    // Santé des coûts d'achat : « 0 prix à changer » ne prouve rien si les prix
+    // reposent sur des suppositions. On montre TOUJOURS d'où vient le coût.
+    function repriceHealthHtml(d) {
+      var o = d && d.origins;
+      if (!o) return '';
+      var solide = (o.traqueur || 0) + (o.fiche || 0) + (o.variante || 0);
+      var est = o['estimé'] || 0;
+      var h = '<div class="reprice-health"><strong>Sur quoi reposent tes prix :</strong><br>'
+        + '📡 ' + (o.traqueur || 0) + ' relevés par le traqueur · '
+        + '📄 ' + (o.fiche || 0) + ' prix fournisseur saisis · '
+        + '🔗 ' + (o.variante || 0) + ' déduits de la variante (± 20 €) · '
+        + (est ? '<span class="admin-error">⚠️ ' + est + ' estimés</span>' : '✅ 0 estimé')
+        + '</div>';
+      if (est && d.estimes && d.estimes.length) {
+        h += '<p class="admin-hint">Ces prix sont bâtis sur une supposition — envoie-moi leur vrai prix cotébrico :</p>'
+          + '<ul class="compta-sample">' + d.estimes.slice(0, 12).map(function (x) {
+            return '<li>' + escapeHTML(x.sku || '') + ' — ' + escapeHTML((x.name || '').slice(0, 70))
+              + ' <small>(coût supposé ' + x.srcTTC + ' €)</small></li>';
+          }).join('') + '</ul>';
+      } else if (solide) {
+        h += '<p class="admin-ok">✅ Tous les prix calculés reposent sur un coût d\'achat réel.</p>';
+      }
+      return h;
+    }
+
     var repriceOut = document.getElementById('repriceOut');
     document.getElementById('repriceDry').onclick = function () {
       repriceOut.innerHTML = '<p class="admin-loading">Analyse…</p>';
@@ -9187,6 +9212,7 @@
         repriceOut.innerHTML = '<p><b>' + c.changed + '</b> prix changeraient sur ' + c.total + ' produits (mode ' + d.mode + '). '
           + (c.skipped ? c.skipped + ' ignorés (coût inconnu).' : '') + '</p>'
           + (sample ? '<ul class="compta-sample">' + sample + '</ul>' : '')
+          + repriceHealthHtml(d)
           + '<p class="admin-hint">Vérifie que ça te va, puis clique « Appliquer ».</p>';
         document.getElementById('repriceGo').disabled = (c.changed === 0);
       }).catch(function (e) { repriceOut.innerHTML = '<p class="admin-error">Erreur : ' + escapeHTML(e.message) + '</p>'; });
@@ -9206,7 +9232,8 @@
           repriceOut.innerHTML = '<p>✅ <b>' + d.counts.changed + '</b> prix mis à jour.</p>'
             + (rest === 0
               ? '<p class="admin-ok">✅ Contre-vérification : <b>plus aucun prix à changer</b>. Les nouveaux prix sont bien enregistrés.</p>'
-              : '<p class="admin-error">⚠️ Contre-vérification : <b>' + rest + '</b> prix seraient encore à changer — signale-le, l\'enregistrement n\'a pas tout pris.</p>');
+              : '<p class="admin-error">⚠️ Contre-vérification : <b>' + rest + '</b> prix seraient encore à changer — signale-le, l\'enregistrement n\'a pas tout pris.</p>')
+            + repriceHealthHtml(v);
         });
       }).catch(function (e) { repriceOut.innerHTML = '<p class="admin-error">Erreur : ' + escapeHTML(e.message) + '</p>'; btn.disabled = false; });
     };

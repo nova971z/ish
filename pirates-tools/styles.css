@@ -8010,3 +8010,5 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-dispute summary { cursor: pointer; color: #f87171; font-weight: 700; font-size: .9rem; }
 .lv-dispute .lv-dispute__msg { width: 100%; box-sizing: border-box; margin-top: .55rem; padding: .6rem .8rem; border-radius: 10px; border: 1px solid rgba(248,113,113,.45); background: rgba(0,0,0,.25); color: #fff; font: inherit; resize: vertical; }
 .lv-consent--film { border: 1px dashed rgba(242,193,78,.45); border-radius: 10px; padding: .6rem .7rem; background: rgba(242,193,78,.05); }
+/* Santé des coûts d'achat (admin → recalcul des prix) */
+.reprice-health { margin: .7rem 0; padding: .7rem .85rem; border: 1px solid rgba(255,255,255,.14); border-radius: 10px; background: rgba(0,0,0,.22); font-size: .9rem; line-height: 1.7; }
