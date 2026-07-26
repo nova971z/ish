@@ -664,6 +664,23 @@ confirmé la réception. Zéro bénéfice plateforme sur la course.
 - STEPPER QUANTITÉ (fiches quincaillerie SEULEMENT) : pilule − / n / + dorée
   (#pdpQtyWrap, §50 CSS), pilote ajout panier (addToCart addQty), achat direct
   et livraison. Masqué sur les machines. Harnais Playwright 10/10.
+- REMISE SÉCURISÉE (26/07 soir, SW v477, demande user « QR/numéro unique +
+  photos croisées ») : chaque course PAYÉE porte un **code de remise 6 chiffres**
+  (crypto.randomInt, généré dans createFromIntent) visible UNIQUEMENT par le
+  client (course-list ne le joint que si artisanUid===uid ; jamais dans la
+  liste dispo ni les emails livreurs). Le client l'affiche en clair + **QR
+  généré 100 % local** (ensureQRLib/cryptoLocalQR réutilisés) dans Mes
+  livraisons, et le donne EN MAIN PROPRE contre le colis. course-deliver EXIGE :
+  le bon code (sinon 403 code-invalide) + 2 photos (colis remis + vue large du
+  chantier colis posés). Le CLIENT doit joindre une **photo du chantier à la
+  commande** (widget : bouton obligatoire, compression locale, sessionStorage
+  pt_course_scene à travers le paiement → course-scene après création) — le
+  livreur la voit pour repérer le dépôt, et à la livraison le client compare
+  les 3 photos (grille lv-proof__grid) avant de confirmer. Photos stockées en
+  SOUS-COLLECTION courses/{id}/photos/{scene|remise|chantier} (limite 1 Mio/doc
+  Firestore — 2 photos dans le doc course la crèveraient) ; accès via
+  course-proof (artisan/livreur de la course seulement) ; rules default-deny
+  couvrent les sous-chemins. Courses legacy sans code : contrôle sauté.
 - STRIPE CONNECT (à faire au lancement) : onboarding Express des livreurs
   (KYC Stripe + IBAN) → poser stripeAccountId dans couriers/{uid} → les
   versements deviennent 100 % automatiques. Sans Connect, on NE PEUT PAS

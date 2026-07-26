@@ -4172,6 +4172,27 @@
     }
     var mapEl = document.getElementById(cfg.map);
     if (!mapEl) return;
+    // Photo du CHANTIER (obligatoire) : référence pour le livreur + preuve de
+    // comparaison à la livraison. Compressée localement, envoyée après paiement.
+    var sceneBtn = document.getElementById(cfg.sceneBtn);
+    var sceneFile = document.getElementById(cfg.scene);
+    var sceneSt = document.getElementById(cfg.sceneSt);
+    var scenePrev = document.getElementById(cfg.scenePrev);
+    if (sceneBtn && sceneFile) {
+      sceneBtn.onclick = function () { sceneFile.click(); };
+      sceneFile.onchange = function () {
+        var f = sceneFile.files && sceneFile.files[0];
+        if (!f) return;
+        if (sceneSt) sceneSt.textContent = 'Compression…';
+        lvCompressPhoto(f).then(function (data) {
+          box._ptScene = data;
+          if (sceneSt) sceneSt.textContent = '✅ Photo ajoutée';
+          if (scenePrev) { scenePrev.hidden = false; scenePrev.innerHTML = '<img src="' + data + '" alt="Photo du chantier">'; }
+        }).catch(function () {
+          if (sceneSt) sceneSt.textContent = '❌ Photo illisible — réessaie.';
+        });
+      };
+    }
     // Bouton COMMANDER → ouvre la MODALE DE PAIEMENT (la même que pour les
     // outils) : produits + frais de livraison payés en une fois. La course
     // n'est créée qu'APRÈS paiement vérifié (metadata Stripe → /merci ou
@@ -4194,12 +4215,18 @@
       if (when === 'heure' && !hour) { if (orderSt) orderSt.textContent = 'Choisis l\'heure souhaitée.'; return; }
       var pl = cfg.payload();
       if (!pl || !pl.items || !pl.items.length) { if (orderSt) orderSt.textContent = 'Ton panier ne contient pas de quincaillerie.'; return; }
+      if (!box._ptScene) {
+        if (orderSt) orderSt.textContent = '📷 Ajoute la photo du chantier (obligatoire) — elle guide le livreur et sert de preuve.';
+        if (sceneBtn) sceneBtn.focus();
+        return;
+      }
       if (orderSt) orderSt.textContent = '💳 Paiement sécurisé — la course part chez les livreurs dès le paiement validé.';
       openPayModal(pl.items, {
         address: g.label, street: g.street || '', postal: g.postal || '', city: g.city || '',
         lat: g.lat, lng: g.lng,
         date: (dateEl || {}).value || '', when: when, hour: hour,
-        zone: z.zone, prix: z.prix
+        zone: z.zone, prix: z.prix,
+        scenePhoto: box._ptScene
       });
     };
     ensureLeaflet().then(function () {
@@ -4292,6 +4319,7 @@
       box: 'pdpDelivery', map: 'pdpDeliveryMap', addr: 'pdpDelivAddr', date: 'pdpDelivDate',
       hourWrap: 'pdpDelivHourWrap', hour: 'pdpDelivHour', whenName: 'pdpDelivWhen',
       zone: 'pdpDelivZoneTxt', order: 'pdpDelivOrder', status: 'pdpDelivStatus',
+      scene: 'pdpDelivScene', sceneBtn: 'pdpDelivSceneBtn', sceneSt: 'pdpDelivSceneSt', scenePrev: 'pdpDelivScenePrev',
       payload: function () {
         // Lignes PAYABLES (modale carte) — quantité = sélecteur de la fiche.
         return { items: [{ key: product.id || product.slug, title: product.title, price: product.price, qty: _pdpQty }] };
@@ -4333,6 +4361,7 @@
       box: 'livraisonOrder', map: 'livDelivMap', addr: 'livDelivAddr', date: 'livDelivDate',
       hourWrap: 'livDelivHourWrap', hour: 'livDelivHour', whenName: 'livDelivWhen',
       zone: 'livDelivZoneTxt', order: 'livDelivOrder', status: 'livDelivStatus',
+      scene: 'livDelivScene', sceneBtn: 'livDelivSceneBtn', sceneSt: 'livDelivSceneSt', scenePrev: 'livDelivScenePrev',
       payload: function () {
         // Lignes PAYABLES = la quincaillerie du panier (modale carte).
         var items = getCart().filter(function (it) {
@@ -4767,14 +4796,21 @@
         + (c.acceptedByMe ? ' — ✅ acceptée par toi' : '') + '</div>'
         + (canAccept && c.status === 'en_attente'
           ? '<button type="button" class="btn primary" style="margin-top:.6rem" data-course-accept="' + escapeHTML(c.id) + '">✅ Accepter cette course</button>' : '')
-        // Preuve de livraison : photo OBLIGATOIRE prise sur place (colis
-        // remis) — c'est elle qui protège le livreur d'une contestation et
-        // conditionne le déblocage de son paiement.
+        // Validation de livraison en 3 preuves : CODE DE REMISE (le client le
+        // donne en main propre contre le colis), photo du colis remis, photo
+        // large du chantier avec les colis posés. Sans les 3, pas de statut
+        // « livrée », donc pas de déblocage d'argent.
         + (c.acceptedByMe && c.status === 'acceptee'
           ? '<div class="lv-proof">'
-            + '<p class="lv-hint">📸 Colis remis ? Prends une photo <strong>sur place</strong> (colis + lieu/client) : c\'est ta preuve de livraison — elle débloque ton paiement après confirmation du client.</p>'
+            + (c.hasScene ? '<p class="lv-hint">📷 Chantier photographié par le client (repère le point de dépôt) :</p><div class="lv-proof__img" id="courierSceneImg">Chargement…</div>' : '')
+            + '<p class="lv-hint">✅ Pour valider la livraison, il te faut les <strong>3 preuves</strong> :</p>'
+            + '<label class="lv-field"><span>🔑 Code de remise (6 chiffres) — le client te le donne contre le colis</span>'
+            + '<input type="text" id="courierCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="••••••" class="lv-code-input"></label>'
             + '<input type="file" accept="image/*" capture="environment" id="courierProofFile" hidden>'
-            + '<div class="lv-cta"><button type="button" class="btn primary" id="courierProofBtn">📸 Photo + marquer livrée</button>'
+            + '<input type="file" accept="image/*" capture="environment" id="courierProofFile2" hidden>'
+            + '<div class="lv-cta"><button type="button" class="btn" id="courierPhoto1Btn">📦 Photo du colis remis</button>'
+            + '<button type="button" class="btn" id="courierPhoto2Btn">🏗️ Photo du chantier (colis posés, vue large)</button></div>'
+            + '<div class="lv-cta"><button type="button" class="btn primary" id="courierProofBtn" disabled>✅ Marquer livrée</button>'
             + '<span class="lv-cta__note" id="courierProofSt" aria-live="polite"></span></div>'
             + '</div>' : '');
       wireAccept(det);
@@ -4803,26 +4839,64 @@
     }
     function wireProof(root, c) {
       var btn = root.querySelector('#courierProofBtn');
-      var file = root.querySelector('#courierProofFile');
+      if (!btn) return;
       var st = root.querySelector('#courierProofSt');
-      if (!btn || !file) return;
-      btn.onclick = function () { file.click(); };
-      file.onchange = function () {
-        var f = file.files && file.files[0];
-        if (!f) return;
+      var codeEl = root.querySelector('#courierCode');
+      // Photo du chantier fournie par le client à la commande (repère + comparaison)
+      var sceneImg = root.querySelector('#courierSceneImg');
+      if (sceneImg) {
+        jsonAuthHeaders().then(function (headers) {
+          return fetch(apiBaseUrl() + '/api/contact', {
+            method: 'POST', headers: headers, body: JSON.stringify({ type: 'course-proof', id: c.id })
+          });
+        }).then(function (r) { return r.json(); }).then(function (d) {
+          var src = d.ok && d.photos && d.photos.scene;
+          sceneImg.innerHTML = src ? '<img src="' + src + '" alt="Chantier photographié par le client">' : 'Photo indisponible.';
+        }).catch(function () { sceneImg.textContent = 'Photo indisponible (réseau).'; });
+      }
+      // 3 preuves : code + 2 photos — le bouton ne s'active que quand tout y est.
+      var shots = { p1: null, p2: null };
+      function ready() {
+        var codeOk = !c.code || (codeEl && codeEl.value.replace(/\D/g, '').length === 6);
+        btn.disabled = !(codeOk && shots.p1 && shots.p2);
+      }
+      function wireShot(btnId, fileId, slot, doneLabel) {
+        var b = root.querySelector('#' + btnId);
+        var f = root.querySelector('#' + fileId);
+        if (!b || !f) return;
+        b.onclick = function () { f.click(); };
+        f.onchange = function () {
+          var fl = f.files && f.files[0];
+          if (!fl) return;
+          b.disabled = true; b.textContent = '⏳ Compression…';
+          lvCompressPhoto(fl).then(function (data) {
+            shots[slot] = data;
+            b.disabled = false; b.textContent = '✅ ' + doneLabel;
+            ready();
+          }).catch(function () {
+            b.disabled = false; b.textContent = '❌ Réessaie — ' + doneLabel;
+          });
+        };
+      }
+      wireShot('courierPhoto1Btn', 'courierProofFile', 'p1', 'Colis remis');
+      wireShot('courierPhoto2Btn', 'courierProofFile2', 'p2', 'Vue du chantier');
+      if (codeEl) codeEl.oninput = ready;
+      ready();
+      btn.onclick = function () {
         btn.disabled = true;
-        if (st) st.textContent = 'Compression de la photo…';
-        lvCompressPhoto(f).then(function (data) {
-          if (st) st.textContent = 'Envoi…';
-          return jsonAuthHeaders().then(function (headers) {
-            return fetch(apiBaseUrl() + '/api/contact', {
-              method: 'POST', headers: headers,
-              body: JSON.stringify({ type: 'course-deliver', id: c.id, photo: data })
-            });
+        if (st) st.textContent = 'Envoi des preuves…';
+        jsonAuthHeaders().then(function (headers) {
+          return fetch(apiBaseUrl() + '/api/contact', {
+            method: 'POST', headers: headers,
+            body: JSON.stringify({
+              type: 'course-deliver', id: c.id,
+              code: codeEl ? codeEl.value.replace(/\D/g, '') : '',
+              photo: shots.p1, photo2: shots.p2
+            })
           });
         }).then(function (r) { return r.json(); }).then(function (d) {
           if (d.ok) {
-            toast('📦 Livraison enregistrée — le client doit confirmer pour débloquer tes ' + c.prix + ' €', 'success');
+            toast('📦 Livraison validée — le client doit confirmer pour débloquer tes ' + c.prix + ' €', 'success');
             renderCourierSpace();
           } else { btn.disabled = false; if (st) st.textContent = '❌ ' + (d.error || 'Erreur'); }
         }).catch(function (e) {
@@ -4955,11 +5029,26 @@
         + '📅 ' + (c.date ? escapeHTML(c.date) : 'au plus tôt') + ' ' + whenTxt(c) + '<br>'
         + payLine
         + '🚦 ' + statusLabel(c) + '</div>';
-      // Livrée → le client vérifie la PHOTO du livreur puis confirme : c'est
+      // CODE DE REMISE : le client le garde pour lui et ne le donne au livreur
+      // qu'EN MAIN PROPRE, contre le colis — sans lui, le livreur ne peut pas
+      // valider la livraison. Affiché en clair + en QR (généré 100 % en local).
+      if (c.mine && c.code && (c.status === 'en_attente' || c.status === 'acceptee')) {
+        h += '<div class="lv-handcode">'
+          + '<div class="lv-handcode__row"><span class="lv-handcode__key">🔑 Code de remise</span>'
+          + '<strong class="lv-handcode__num">' + escapeHTML(c.code) + '</strong></div>'
+          + '<div class="lv-handcode__qr" id="clientCodeQR"></div>'
+          + '<p class="lv-hint">Donne ce code au livreur (ou fais-lui scanner le QR) <strong>uniquement quand il te remet le colis</strong> — c\'est lui qui valide la livraison et débloque son paiement.</p>'
+          + '</div>';
+      }
+      // Livrée → le client vérifie les PHOTOS du livreur (colis remis + vue du
+      // chantier) et les compare à SA photo de commande, puis confirme : c'est
       // sa confirmation qui débloque les frais gelés (anti-arnaque des 2 côtés).
       if (c.status === 'livree' && c.mine) {
         h += '<div class="lv-proof" id="clientProofBox">'
-          + (c.hasProof ? '<p class="lv-hint">📸 Photo de livraison prise par ton livreur :</p><div class="lv-proof__img" id="clientProofImg">Chargement de la photo…</div>' : '<p class="lv-hint">Le livreur n\'a pas joint de photo.</p>')
+          + (c.hasProof
+            ? '<p class="lv-hint">📸 Preuves du livreur' + (c.hasScene ? ' + ta photo de commande — vérifie que tout correspond' : '') + ' :</p>'
+              + '<div class="lv-proof__grid" id="clientProofImg">Chargement des photos…</div>'
+            : '<p class="lv-hint">Le livreur n\'a pas joint de photo.</p>')
           + '<div class="lv-cta"><button type="button" class="btn primary" id="clientConfirmBtn">✅ Confirmer la réception — débloque le paiement du livreur</button>'
           + '<span class="lv-cta__note" id="clientConfirmSt" aria-live="polite"></span></div>'
           + '</div>';
@@ -4980,7 +5069,15 @@
         h += '<p class="lv-hint" style="margin-top:.6rem">Tu pourras noter ton livreur dès qu\'il aura pris la course.</p>';
       }
       det.innerHTML = h;
-      // Photo de preuve + confirmation de réception (statut « livrée »)
+      // QR du code de remise (généré 100 % en local — ensureQRLib, jamais de tiers)
+      var qrBox = det.querySelector('#clientCodeQR');
+      if (qrBox && c.code) {
+        ensureQRLib().then(function () {
+          var url = cryptoLocalQR(c.code);
+          if (url) qrBox.innerHTML = '<img src="' + url + '" alt="QR du code de remise ' + escapeHTML(c.code) + '">';
+        }).catch(function () { /* le code en clair suffit */ });
+      }
+      // Photos de preuve + confirmation de réception (statut « livrée »)
       if (c.status === 'livree' && c.mine) {
         if (c.hasProof) {
           jsonAuthHeaders().then(function (headers) {
@@ -4991,12 +5088,17 @@
           }).then(function (r) { return r.json(); }).then(function (d) {
             var box = document.getElementById('clientProofImg');
             if (!box) return;
-            box.innerHTML = (d.ok && d.photo)
-              ? '<img src="' + d.photo + '" alt="Photo de livraison prise par le livreur">'
-              : 'Photo indisponible.';
+            var ph = (d.ok && d.photos) || {};
+            var cell = function (src, label) {
+              return src ? '<figure class="lv-proof__cell"><img src="' + src + '" alt="' + label + '"><figcaption>' + label + '</figcaption></figure>' : '';
+            };
+            var html2 = cell(ph.remise, '📦 Colis remis (livreur)')
+              + cell(ph.chantier, '🏗️ Vue du chantier, colis posés (livreur)')
+              + cell(ph.scene, '📷 Ta photo à la commande');
+            box.innerHTML = html2 || 'Photos indisponibles.';
           }).catch(function () {
             var box = document.getElementById('clientProofImg');
-            if (box) box.textContent = 'Photo indisponible (réseau).';
+            if (box) box.textContent = 'Photos indisponibles (réseau).';
           });
         }
         var cf = det.querySelector('#clientConfirmBtn');
@@ -7588,6 +7690,11 @@
           // Course : /merci finalisera la création (preuve = paymentIntentId).
           course: _payCourse ? 1 : 0
         }));
+        // Photo du chantier : trop lourde pour le pending localStorage → elle
+        // voyage en sessionStorage (survit au retour 3DS, purgée après envoi).
+        if (_payCourse && _payCourse.scenePhoto) {
+          sessionStorage.setItem('pt_course_scene', _payCourse.scenePhoto);
+        }
       } catch (_) {}
 
       stripe.confirmPayment({
@@ -7847,8 +7954,22 @@
           body: JSON.stringify({ type: 'course-create', paymentIntentId: proof.paymentIntentId })
         });
       }).then(function (r) { return r.json(); }).then(function (d) {
-        if (d.ok) toast('🛵 Course créée — les livreurs sont alertés par email', 'success');
-        else if (d.error) toast('Livraison : ' + d.error, 'error');
+        if (d.ok) {
+          toast('🛵 Course créée — les livreurs sont alertés par email', 'success');
+          // Photo du chantier prise à la commande → jointe à la course créée.
+          var scene = null;
+          try { scene = sessionStorage.getItem('pt_course_scene'); } catch (_) {}
+          if (scene && d.course && d.course.id) {
+            jsonAuthHeaders().then(function (headers) {
+              return fetch(apiBaseUrl() + '/api/contact', {
+                method: 'POST', headers: headers,
+                body: JSON.stringify({ type: 'course-scene', id: d.course.id, photo: scene })
+              });
+            }).then(function (r2) { return r2.json(); }).then(function (d2) {
+              if (d2.ok) { try { sessionStorage.removeItem('pt_course_scene'); } catch (_) {} }
+            }).catch(function () {});
+          }
+        } else if (d.error) toast('Livraison : ' + d.error, 'error');
       }).catch(function () {});
     }
 

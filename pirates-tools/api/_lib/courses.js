@@ -21,6 +21,8 @@
 
 'use strict';
 
+const crypto = require('crypto');
+
 const DEPOT = { lat: 16.2260, lng: -61.3823 };   // Sainte-Anne (Guadeloupe)
 const BAREME = [                                  // = LV_BAREME client (source croisée, CI check-products non concerné)
   { zone: 1, maxKm: 10, prix: 22 },
@@ -55,6 +57,11 @@ async function createFromIntent(db, pi, fallback) {
   const feeCents = parseInt(md.courseFeeCents, 10) || 0;
   const course = {
     status: 'en_attente', test: true,
+    // CODE DE REMISE (6 chiffres, aléatoire crypto) : détenu par le CLIENT
+    // seul (jamais montré aux livreurs dans les listes/emails). Le livreur ne
+    // peut marquer « livrée » qu'en fournissant ce code — il ne l'obtient
+    // qu'EN MAIN PROPRE, au moment de remettre le colis.
+    code: String(crypto.randomInt(0, 1000000)).padStart(6, '0'),
     paid: true, escrow: 'gele',                       // frais livreur gelés jusqu'à confirmation client
     artisanUid: md.uid || (fallback && fallback.uid) || null,
     artisanEmail: pi.receipt_email || (fallback && fallback.email) || null,

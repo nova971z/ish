@@ -60,7 +60,8 @@ module.exports = async function handler(req, res) {
   // valider toute la chaîne de bout en bout. Auth Bearer OBLIGATOIRE.
   if (body.type === 'course-create' || body.type === 'course-list' || body.type === 'course-accept'
       || body.type === 'courier-status' || body.type === 'course-rate'
-      || body.type === 'course-deliver' || body.type === 'course-confirm' || body.type === 'course-proof') {
+      || body.type === 'course-deliver' || body.type === 'course-confirm' || body.type === 'course-proof'
+      || body.type === 'course-scene') {
     return handleCourses(req, body, { apiKey, from, ownerEmail }, res);
   }
 
@@ -489,9 +490,13 @@ async function handleCourses(req, body, cfg, res) {
         rating: c.rating || 0, ratingComment: c.ratingComment || '',
         paid: !!c.paid, escrow: c.escrow || null,
         feeCents: c.feeCents || 0, amountCents: c.amountCents || 0,
-        hasProof: !!c.proofPhoto,
+        hasProof: !!c.proofPhoto || !!c.hasProof,
+        hasScene: !!c.hasScene,
         createdAt: c.createdAt && c.createdAt.toMillis ? c.createdAt.toMillis() : null
       };
+      // CODE DE REMISE : visible UNIQUEMENT par le client qui a commandé —
+      // jamais dans la liste dispo des livreurs (il se donne en main propre).
+      if (c.artisanUid === uid) out.code = c.code || null;
       if (c.artisanUid === uid || c.courierUid === uid) mine.push(out);
       if (isCourier && c.status === 'en_attente') dispo.push(out); // (test : même compte des 2 côtés accepté)
     });
@@ -543,12 +548,13 @@ async function handleCourses(req, body, cfg, res) {
   // (JPEG compressé client ≤ ~500 Ko base64, limite doc Firestore 1 Mio).
   if (body.type === 'course-deliver') {
     const id = String(body.id || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 64);
-    const photo = String(body.photo || '');
+    const code = String(body.code || '').replace(/\D/g, '').slice(0, 6);
+    const photo = String(body.photo || '');      // colis remis (gros plan)
+    const photo2 = String(body.photo2 || '');    // vue du chantier, colis posés
     if (!id) return res.status(400).json({ ok: false, error: 'id requis' });
-    if (!/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(photo)) {
-      return res.status(400).json({ ok: false, error: 'Photo de livraison requise (prise sur place, colis remis).' });
-    }
-    if (photo.length > 700000) return res.status(400).json({ ok: false, error: 'Photo trop lourde — réessaie, elle sera compressée.' });
+    const okImg = (p) => /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(p) && p.length <= 700000;
+    if (!okImg(photo)) return res.status(400).json({ ok: false, error: 'Photo du colis remis requise (prise sur place).' });
+    if (!okImg(photo2)) return res.status(400).json({ ok: false, error: 'Photo du chantier requise (colis posés, vue large).' });
     const ref = db.collection('courses').doc(id);
     try {
       const result = await db.runTransaction(async (tx) => {
@@ -557,7 +563,16 @@ async function handleCourses(req, body, cfg, res) {
         const c = d.data();
         if (c.courierUid !== uid) throw new Error('pas-ta-course');
         if (c.status !== 'acceptee') throw new Error('pas-acceptee');
-        tx.update(ref, { status: 'livree', deliveredAt: new Date(), proofPhoto: photo });
+        // CODE DE REMISE : le client le détient dans « Mes livraisons » et le
+        // donne EN MAIN PROPRE contre le colis. Sans le bon code, impossible
+        // de marquer livrée. (Courses legacy sans code : pas de contrôle.)
+        if (c.code && code !== c.code) throw new Error('code-invalide');
+        // Photos en SOUS-COLLECTION (limite 1 Mio par doc Firestore : 2 photos
+        // dans le doc course la crèveraient). Accès serveur uniquement (rules
+        // default-deny sur les sous-chemins, Admin SDK seul).
+        tx.set(ref.collection('photos').doc('remise'), { data: photo, at: new Date(), by: uid });
+        tx.set(ref.collection('photos').doc('chantier'), { data: photo2, at: new Date(), by: uid });
+        tx.update(ref, { status: 'livree', deliveredAt: new Date(), hasProof: true, codeVerified: !!c.code });
         return c;
       });
       // Prévenir l'artisan : à lui de confirmer pour débloquer le livreur.
@@ -573,7 +588,8 @@ async function handleCourses(req, body, cfg, res) {
       return res.status(200).json({ ok: true, id, status: 'livree' });
     } catch (e) {
       const map = { 'introuvable': [404, 'Course introuvable.'], 'pas-ta-course': [403, 'Seul le livreur qui a accepté peut marquer la livraison.'],
-        'pas-acceptee': [409, 'Cette course n\'est pas (ou plus) en cours de livraison.'] };
+        'pas-acceptee': [409, 'Cette course n\'est pas (ou plus) en cours de livraison.'],
+        'code-invalide': [403, 'Code de remise incorrect — demande-le au client (il l\'a dans « Mes livraisons »), il te le donne contre le colis.'] };
       const m = map[e.message];
       if (m) return res.status(m[0]).json({ ok: false, error: m[1] });
       console.error('[courses] deliver failed:', e.message);
@@ -646,17 +662,45 @@ async function handleCourses(req, body, cfg, res) {
     return res.status(200).json({ ok: true, id, status: 'terminee', escrow });
   }
 
-  // ── Photo de livraison (uniquement l'artisan ou le livreur de la course) ──
+  // ── Photo du chantier par le CLIENT (à la commande) ──
+  // Sert de référence : le livreur la voit pour retrouver le chantier, et à
+  // la livraison on compare avec SA photo — tout doit matcher.
+  if (body.type === 'course-scene') {
+    const id = String(body.id || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 64);
+    const photo = String(body.photo || '');
+    if (!id) return res.status(400).json({ ok: false, error: 'id requis' });
+    if (!/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(photo) || photo.length > 700000) {
+      return res.status(400).json({ ok: false, error: 'Photo du chantier invalide.' });
+    }
+    const ref = db.collection('courses').doc(id);
+    const d = await ref.get();
+    if (!d.exists) return res.status(404).json({ ok: false, error: 'Course introuvable.' });
+    const c = d.data();
+    if (c.artisanUid !== uid) return res.status(403).json({ ok: false, error: 'Tu ne peux joindre une photo qu\'à tes propres commandes.' });
+    if (!['en_attente', 'acceptee'].includes(c.status)) return res.status(409).json({ ok: false, error: 'Course déjà livrée.' });
+    await ref.collection('photos').doc('scene').set({ data: photo, at: new Date(), by: uid });
+    await ref.update({ hasScene: true });
+    return res.status(200).json({ ok: true, id });
+  }
+
+  // ── Photos de la course (uniquement l'artisan ou le livreur de la course) ──
+  // scene = chantier vu par le client (commande) ; remise = colis remis ;
+  // chantier = vue large du livreur, colis posés. Comparaison anti-arnaque.
   if (body.type === 'course-proof') {
     const id = String(body.id || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 64);
     if (!id) return res.status(400).json({ ok: false, error: 'id requis' });
-    const d = await db.collection('courses').doc(id).get();
+    const ref = db.collection('courses').doc(id);
+    const d = await ref.get();
     if (!d.exists) return res.status(404).json({ ok: false, error: 'Course introuvable.' });
     const c = d.data();
     if (c.artisanUid !== uid && c.courierUid !== uid) {
       return res.status(403).json({ ok: false, error: 'Accès refusé.' });
     }
-    return res.status(200).json({ ok: true, id, photo: c.proofPhoto || null });
+    const photos = { scene: null, remise: null, chantier: null };
+    const snap = await ref.collection('photos').get();
+    snap.forEach((p) => { if (photos.hasOwnProperty(p.id)) photos[p.id] = (p.data() || {}).data || null; });
+    if (!photos.remise && c.proofPhoto) photos.remise = c.proofPhoto;   // courses d'avant le passage en sous-collection
+    return res.status(200).json({ ok: true, id, photos, photo: photos.remise });
   }
 
   // ── Noter le livreur (client UNIQUEMENT, sa propre course, une seule fois) ──

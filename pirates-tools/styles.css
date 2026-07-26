@@ -7989,3 +7989,17 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-proof { margin-top: .8rem; padding: .8rem .9rem; border: 1px dashed rgba(242,193,78,.5); border-radius: 12px; display: grid; gap: .6rem; background: rgba(242,193,78,.05); }
 .lv-proof__img { min-height: 60px; font-size: .85rem; color: var(--muted, #c9c9d9); }
 .lv-proof__img img { max-width: 100%; border-radius: 12px; display: block; border: 1px solid rgba(255,255,255,.15); }
+/* Code de remise (espace client) : gros chiffres dorés + QR local */
+.lv-handcode { margin-top: .8rem; padding: .9rem 1rem; border: 1px solid rgba(242,193,78,.55); border-radius: 14px; background: rgba(242,193,78,.07); display: grid; gap: .6rem; justify-items: start; }
+.lv-handcode__row { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; }
+.lv-handcode__key { font-weight: 700; }
+.lv-handcode__num { font-size: 1.9rem; font-weight: 800; letter-spacing: .35em; color: #f2c14e; font-variant-numeric: tabular-nums; }
+.lv-handcode__qr img { width: 132px; height: 132px; border-radius: 10px; background: #fff; padding: 4px; display: block; }
+/* Saisie du code côté livreur */
+.lv-code-input { width: 9ch; font-size: 1.4rem; font-weight: 800; letter-spacing: .3em; text-align: center; font-variant-numeric: tabular-nums; padding: .45rem .5rem; border-radius: 10px; border: 1px solid rgba(242,193,78,.5); background: rgba(0,0,0,.3); color: #fff; }
+/* Grille des photos de preuve (client : remise + chantier + sa photo) */
+.lv-proof__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .7rem; font-size: .85rem; color: var(--muted, #c9c9d9); }
+.lv-proof__cell { margin: 0; display: grid; gap: .3rem; }
+.lv-proof__cell img { width: 100%; border-radius: 10px; border: 1px solid rgba(255,255,255,.15); display: block; }
+.lv-proof__cell figcaption { font-size: .78rem; color: var(--muted, #c9c9d9); }
+.lv-scenefield .lv-proof__img img { max-width: 220px; }
