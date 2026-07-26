@@ -2,6 +2,13 @@
 
 > Numérotation = liste dans les Notes de l'user (aspirateur=1). NE PAS renuméroter.
 > [x] fait · [~] partiel (poster posé, specs/prix en attente) · [ ] à faire.
+>
+> ⛔ RÈGLE POSTER GRAVÉE (erreur commise le 26/07, ne PLUS refaire) : les PNG
+> envoyés par l'user sont TRANSPARENTS (pas de fond). On PRÉSERVE l'alpha
+> (trim marges + resize 780, AUCUN fond ajouté) → l'outil se pose sur le noir
+> du hero fiche (#0a0f14). NE JAMAIS compositer sur un dégradé gris (ça fait un
+> pavé clair visible). Détourage seulement si le fichier a un vrai fond opaque
+> (blanc/brun) → alors détourer VERS transparent, pas vers un fond gris.
 
 1. [~] (poster OK, specs/prix en attente) DVC560Z — Aspirateur 36V BL (2x18 V) Li-Ion 120 mbar (Produit seul)
 2. [x] DTW1001Z — Boulonneuse à chocs 18V LXT 3/4" 1050 Nm brushless (machine seule)
