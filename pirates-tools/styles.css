@@ -7774,7 +7774,10 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-age--ok { background: rgba(52,211,153,.12); color: #6ee7b7; }
 .lv-age--ko { background: rgba(248,113,113,.12); color: #fca5a5; }
 .lv-hint { color: var(--muted, #9a9ab0); font-size: .88rem; margin: .4rem 0 0; }
-.lv-vehicles { display: grid; grid-template-columns: repeat(2, 1fr); gap: .7rem; }
+/* Flex + wrap + centré : la 3e carte (Scooter/Moto) se centre seule sur sa
+   ligne au lieu de rester bloquée dans la colonne gauche d'une grille. */
+.lv-vehicles { display: flex; flex-wrap: wrap; justify-content: center; gap: .7rem; }
+.lv-vehicles .lv-veh { flex: 1 1 200px; max-width: 48%; }
 .lv-vehicles[aria-disabled=true] { opacity: .45; }
 .lv-veh { display: flex; flex-direction: column; align-items: center; gap: .35rem; padding: 1rem .6rem; border-radius: 14px; border: 2px solid rgba(255,255,255,.1); background: rgba(0,0,0,.2); color: #fff; cursor: pointer; transition: border-color .15s, background .15s; }
 .lv-veh:disabled { cursor: not-allowed; }
@@ -7800,7 +7803,7 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-law__link:hover { text-decoration: underline; }
 .lv-cta { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
 .lv-cta__note { color: var(--muted, #9a9ab0); font-size: .88rem; }
-@media (max-width: 560px) { .lv-vehicles { grid-template-columns: 1fr; } .lv-cta { flex-direction: column; align-items: stretch; } }
+@media (max-width: 560px) { .lv-vehicles .lv-veh { max-width: 100%; } .lv-cta { flex-direction: column; align-items: stretch; } }
 /* Boutons assureurs (encadré assurance moto — mâche le travail) */
 .lv-insurers { display: grid; grid-template-columns: repeat(2, 1fr); gap: .5rem; margin: .5rem 0 .3rem; }
 .lv-ins { display: grid; gap: .1rem; padding: .6rem .7rem; border-radius: 12px; border: 1px solid rgba(255,255,255,.14); background: rgba(0,0,0,.28); text-decoration: none; transition: border-color .15s, background .15s; }
@@ -7847,8 +7850,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 @media (max-width: 480px) { .lv-cost__headline { grid-template-columns: 1fr; } }
 /* Livreur : bandeau vert, cartes centrées, bouton rémunération, coordonnées, consentement */
 .lv-banner--green { background: rgba(52,211,153,.12); border-color: rgba(52,211,153,.5); color: #6ee7b7; }
-.lv-vehicles { justify-content: center; }
-.lv-vehicles .lv-veh { flex: 0 1 200px; }
 .lv-remun { display: block; width: 100%; margin: 0 0 1rem; padding: .95rem 1rem; border: 0; border-radius: 14px; cursor: pointer;
   font-size: 1rem; font-weight: 800; color: #05271a; letter-spacing: .01em;
   background: linear-gradient(135deg, #34d399, #10b981); box-shadow: 0 0 22px rgba(52,211,153,.5), 0 0 4px rgba(52,211,153,.8); }
@@ -7862,3 +7863,20 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-consent input { margin-top: .2rem; flex-shrink: 0; }
 .lv-consent a { color: var(--accent, #a78bfa); }
 @media (max-width: 560px) { .lv-grid2 { grid-template-columns: 1fr; } }
+
+/* ═══ §48 — SÉLECTEUR D'ÎLE (inscription) : contours DORÉS lumineux ══════════ */
+.isl-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: .6rem; }
+.isl { flex: 1 1 30%; max-width: 32%; min-width: 92px; display: flex; flex-direction: column; align-items: center; gap: .25rem;
+  padding: .6rem .3rem .5rem; background: rgba(0,0,0,.25); border: 1px solid rgba(255,255,255,.08); border-radius: 14px;
+  cursor: pointer; transition: border-color .18s, background .18s, transform .18s; }
+.isl svg { width: 64px; height: 64px; overflow: visible; }
+.isl svg path { fill: none; stroke: #f2c14e; stroke-width: 2.6; stroke-linejoin: round; stroke-linecap: round;
+  filter: drop-shadow(0 0 3px rgba(242,193,78,.9)) drop-shadow(0 0 8px rgba(242,193,78,.45));
+  transition: filter .18s, stroke .18s; }
+.isl span { font-size: .74rem; font-weight: 700; color: #e8d5a4; letter-spacing: .02em; }
+.isl:hover { border-color: rgba(242,193,78,.55); transform: translateY(-2px); }
+.isl:hover svg path { filter: drop-shadow(0 0 4px rgba(242,193,78,1)) drop-shadow(0 0 12px rgba(242,193,78,.7)); }
+.isl--on { border-color: #f2c14e; background: rgba(242,193,78,.10); box-shadow: 0 0 16px rgba(242,193,78,.35); }
+.isl--on svg path { stroke: #ffd76a; fill: rgba(242,193,78,.12);
+  filter: drop-shadow(0 0 5px rgba(255,215,106,1)) drop-shadow(0 0 14px rgba(242,193,78,.8)); }
+.isl--on span { color: #ffd76a; }

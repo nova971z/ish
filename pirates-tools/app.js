@@ -4917,6 +4917,8 @@
 
   // ── Handlers ───────────────────────────────────────────────
 
+  var _regIsland = '';   // île choisie à l'inscription (cartes dorées) → territoire
+
   function handleRegister(e) {
     e.preventDefault();
     if (!_fb || !_fb.configured) { toast('Authentification non configuree', 'error'); return; }
@@ -4927,6 +4929,7 @@
 
     if (!name || !email || !pwd) { toast('Remplissez tous les champs', 'error'); return; }
     if (pwd.length < 6) { toast('Mot de passe trop court (min. 6)', 'error'); return; }
+    if (!_regIsland) { toast('Choisis ton île 🏝️', 'error'); return; }
 
     setBtnLoading(dom.regSubmit, true);
     _fb.createUserWithEmailAndPassword(_fb.auth, email, pwd)
@@ -4951,6 +4954,8 @@
       .then(function (user) {
         // Send verification email (non-blocking)
         _fb.sendEmailVerification(user).catch(function (e) { console.warn('verify email:', e); });
+        // Applique l'île choisie comme territoire du site (octroi/TVA, persisté).
+        if (_regIsland && getTerritory(_regIsland)) setTerritory(_regIsland);
         toast('Compte créé, bienvenue ' + name + ' !', 'success');
         location.hash = '#/compte';
       })
@@ -5633,6 +5638,22 @@
     // Auth form submissions
     if (dom.loginForm) dom.loginForm.addEventListener('submit', handleLogin);
     if (dom.registerForm) dom.registerForm.addEventListener('submit', handleRegister);
+
+    // Sélecteur d'île (inscription) : cartes aux contours dorés. Le clic marque
+    // la sélection ; le territoire n'est APPLIQUÉ (setTerritory) qu'à la
+    // création réussie du compte (handleRegister lit _regIsland).
+    var islGrid = document.getElementById('regIslands');
+    if (islGrid) islGrid.addEventListener('click', function (e) {
+      var btn = e.target.closest('.isl');
+      if (!btn) return;
+      _regIsland = btn.getAttribute('data-isl') || '';
+      var all = islGrid.querySelectorAll('.isl');
+      for (var ii = 0; ii < all.length; ii++) {
+        var on = all[ii] === btn;
+        all[ii].classList.toggle('isl--on', on);
+        all[ii].setAttribute('aria-checked', on ? 'true' : 'false');
+      }
+    });
 
     // Forgot password
     if (dom.authForgotBtn) {
