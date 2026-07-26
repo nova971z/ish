@@ -5907,13 +5907,13 @@
     "id": "makita-djr189zj",
     "slug": "makita-djr189zj-scie-sabre-r-cipro-18v-lxt-pro",
     "sku": "DJR189ZJ",
-    "title": "Makita DJR189ZJ — Scie sabre récipro 18V LXT (Produit seul) en coffret MAKPAC",
+    "title": "Makita DJR189ZJ — Scie récipro (sabre) compacte 18V LXT brushless en MAKPAC (machine seule)",
     "name": "DJR189ZJ",
     "brand": "Makita",
     "category": "Scies",
     "tag": "Nouveau",
-    "desc": "Scie sabre récipro 18V LXT (Produit seul) en coffret MAKPAC.",
-    "img": "images/placeholder.svg",
+    "desc": "Scie récipro / sabre compacte une main, sans fil 18V LXT, moteur brushless, cadence 0-3100 cpm, changement de lame sans outil, LED, livrée en coffret MAKPAC — sans batterie ni chargeur.",
+    "img": "images/posters/djr189zj.webp",
     "price": 205.41,
     "currency": "EUR",
     "vat": 0.2,
@@ -5930,14 +5930,27 @@
       "tropical_ready"
     ],
     "features": [
-      "Scie sabre récipro 18V LXT (Produit seul) en coffret MAKPAC",
-      "Gamme Makita 18V LXT sans fil, moteur brushless (sans charbon) haut rendement",
-      "Livré en coffret MAKPAC — machine seule (batterie et chargeur non inclus)",
-      "Robuste et endurant, pensé pour un usage professionnel intensif",
-      "Idéal pour les chantiers des Antilles / DOM-TOM"
+      "Scie récipro (sabre) compacte une main — sans fil 18V LXT, moteur brushless",
+      "Cadence variable 0-3100 coups/min, course de lame 13 mm",
+      "Changement de lame sans outil + éclairage LED intégré",
+      "Compacte et légère pour travailler dans les espaces restreints",
+      "Livrée en coffret MAKPAC avec jeu de lames — machine seule (batterie et chargeur non inclus)"
     ],
-    "specs": {},
-    "description_long": "Scie sabre récipro 18V LXT (Produit seul) en coffret MAKPAC. Outil professionnel Makita de la gamme 18V LXT sans fil (moteur brushless). Livré en coffret MAKPAC, machine seule (sans batterie ni chargeur). Compatible avec les batteries Makita LXT. Fiche technique détaillée à compléter. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "specs": {
+      "Marque": "Makita",
+      "Type": "Scie récipro / sabre compacte sans fil 18V LXT Brushless — machine nue en MAKPAC",
+      "Tension": "18 V (gamme LXT)",
+      "Moteur": "Brushless (sans charbon)",
+      "Cadence": "0 à 3100 coups/min (variable)",
+      "Course de lame": "13 mm",
+      "Changement de lame": "Sans outil",
+      "Éclairage": "LED intégrée",
+      "Livré avec": "Jeu de lames S-Express (métal / bois-métal / bois), coffret MAKPAC",
+      "Coffret": "MAKPAC empilable",
+      "Batterie / chargeur": "Non inclus"
+    },
+    "description_long": "Scie récipro (scie sabre) compacte une main sans fil Makita 18V LXT (DJR189ZJ), machine seule livrée en coffret MAKPAC. Moteur brushless à cadence variable (0 à 3100 coups/min), course de lame de 13 mm. Compacte et légère, elle se manie d'une seule main pour couper métal, bois et plastique dans les espaces restreints. Changement de lame sans outil et éclairage LED intégré. Livrée avec un jeu de lames S-Express (métal, bois-métal, bois). Vendue sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "coffretIncluded": true
   },
   {
     "id": "makita-djr360zk",
