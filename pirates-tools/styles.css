@@ -7757,3 +7757,47 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   border: 1px solid rgba(251, 191, 36, .35);
 }
 .pdp-batt-note__tri { font-size: 1rem; line-height: 1; }
+
+/* ═══ §47 — DEVENIR LIVREUR (service coursier, formulaire adaptatif) ═══════════ */
+.lv-cta-card .lv-cta-txt { margin: 0 0 .8rem; color: var(--muted, #b7b7c9); line-height: 1.5; }
+.lv-header { text-align: center; max-width: 760px; margin: 0 auto 1.4rem; }
+.lv-sub { color: var(--muted, #b7b7c9); line-height: 1.55; }
+#lvForm { max-width: 780px; margin: 0 auto; display: grid; gap: 1rem; }
+.lv-banner { background: rgba(251,191,36,.12); border: 1px solid rgba(251,191,36,.4); color: #fde68a; padding: .8rem 1rem; border-radius: 12px; line-height: 1.5; }
+.lv-card { background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 1.1rem 1.2rem; }
+.lv-h2 { font-size: 1.15rem; margin: 0 0 .8rem; }
+.lv-h3 { font-size: .98rem; margin: 1rem 0 .5rem; color: var(--accent, #a78bfa); }
+.lv-field { display: grid; gap: .35rem; }
+.lv-field span { font-size: .9rem; color: var(--muted, #b7b7c9); }
+.lv-field input[type=date] { padding: .6rem .8rem; border-radius: 10px; border: 1px solid rgba(255,255,255,.15); background: rgba(0,0,0,.25); color: #fff; font: inherit; }
+.lv-age { margin: .7rem 0 0; padding: .6rem .8rem; border-radius: 10px; font-weight: 600; }
+.lv-age--ok { background: rgba(52,211,153,.12); color: #6ee7b7; }
+.lv-age--ko { background: rgba(248,113,113,.12); color: #fca5a5; }
+.lv-hint { color: var(--muted, #9a9ab0); font-size: .88rem; margin: .4rem 0 0; }
+.lv-vehicles { display: grid; grid-template-columns: repeat(2, 1fr); gap: .7rem; }
+.lv-vehicles[aria-disabled=true] { opacity: .45; }
+.lv-veh { display: flex; flex-direction: column; align-items: center; gap: .35rem; padding: 1rem .6rem; border-radius: 14px; border: 2px solid rgba(255,255,255,.1); background: rgba(0,0,0,.2); color: #fff; cursor: pointer; transition: border-color .15s, background .15s; }
+.lv-veh:disabled { cursor: not-allowed; }
+.lv-veh:not(:disabled):hover { border-color: rgba(var(--accent-rgb,167,139,250),.6); }
+.lv-veh--on { border-color: var(--accent, #a78bfa); background: rgba(var(--accent-rgb,167,139,250),.14); }
+.lv-veh__emoji { font-size: 1.9rem; line-height: 1; }
+.lv-veh__label { font-size: .9rem; font-weight: 600; text-align: center; }
+.lv-note { padding: .7rem .9rem; border-radius: 12px; line-height: 1.5; margin-bottom: 1rem; font-size: .92rem; }
+.lv-note--warn { background: rgba(251,191,36,.1); border: 1px solid rgba(251,191,36,.35); color: #fde68a; }
+.lv-note--ok { background: rgba(52,211,153,.1); border: 1px solid rgba(52,211,153,.3); color: #a7f3d0; }
+.lv-note--strong { background: rgba(248,113,113,.1); border: 1px solid rgba(248,113,113,.35); color: #fecaca; }
+.lv-docs { list-style: none; padding: 0; margin: 0; display: grid; gap: .6rem; }
+.lv-doc { display: grid; gap: .2rem; padding: .7rem .85rem; background: rgba(0,0,0,.22); border: 1px solid rgba(255,255,255,.07); border-radius: 12px; border-left: 3px solid var(--accent, #a78bfa); }
+.lv-doc__t { font-weight: 600; }
+.lv-doc__h { font-size: .86rem; color: var(--muted, #a9a9be); line-height: 1.45; }
+.lv-doc__link { font-size: .86rem; color: var(--accent, #a78bfa); font-weight: 600; text-decoration: none; margin-top: .15rem; }
+.lv-doc__link:hover { text-decoration: underline; }
+.lv-law { padding: .8rem .9rem; background: rgba(0,0,0,.25); border: 1px solid rgba(255,255,255,.08); border-radius: 12px; margin-bottom: .7rem; }
+.lv-law__ref { font-size: .84rem; color: var(--muted, #b7b7c9); margin-bottom: .45rem; }
+.lv-law__plain { line-height: 1.55; }
+.lv-law__tag { display: inline-block; font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; background: var(--accent, #a78bfa); color: #1a1030; padding: .1rem .4rem; border-radius: 5px; margin-right: .35rem; }
+.lv-law__link { display: inline-block; margin-top: .45rem; font-size: .85rem; color: var(--accent, #a78bfa); font-weight: 600; text-decoration: none; }
+.lv-law__link:hover { text-decoration: underline; }
+.lv-cta { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.lv-cta__note { color: var(--muted, #9a9ab0); font-size: .88rem; }
+@media (max-width: 560px) { .lv-vehicles { grid-template-columns: 1fr; } .lv-cta { flex-direction: column; align-items: stretch; } }

@@ -44,7 +44,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=450">
+  <link rel="stylesheet" href="styles.css?v=451">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -699,6 +699,14 @@
 
         <!-- Onglet Profil -->
         <div class="acc-pane active" data-acc-pane="profile">
+          <!-- Devenir Livreur (service coursier — en préparation) -->
+          <div class="card lv-cta-card">
+            <div class="head"><h3 class="title">🛵 Devenir Livreur</h3><span class="badge">Nouveau</span></div>
+            <div class="specs">
+              <p class="lv-cta-txt">Tu as un deux-roues (vélo, trottinette, scooter, moto)&nbsp;? Gagne de l'argent en livrant de la quincaillerie aux artisans sur leurs chantiers. On te <strong>mâche toutes les démarches</strong> pour être en règle.</p>
+              <a class="btn primary" href="#/livreur">Voir comment devenir livreur →</a>
+            </div>
+          </div>
           <div class="card">
             <div class="head"><h3 class="title">Informations personnelles</h3><span class="badge">Profil</span></div>
             <div class="specs">
@@ -998,6 +1006,19 @@
           <button type="submit" class="btn primary pj-submit" id="pjSubmit" disabled>Envoyer ma pré-inscription</button>
           <span id="pjStatus" class="pj-status" aria-live="polite"></span>
         </form>
+      </div>
+    </section>
+
+    <!-- DEVENIR LIVREUR (service coursier — formulaire adaptatif par véhicule,
+         contenu légal rendu par app.js renderLivreur(). Inactif : COURIER_ENABLED. -->
+    <section id="view-livreur" class="view hidden" data-route="/livreur" role="region" aria-labelledby="livreur-h1">
+      <div class="container">
+        <button type="button" class="pj-back" id="lvBack">← Retour</button>
+        <header class="lv-header">
+          <h1 id="livreur-h1" tabindex="-1">Devenir Livreur Pirates Tools</h1>
+          <p class="lv-sub">Livre de la quincaillerie aux artisans, gagne bien ta vie, et roule <strong>en toute légalité</strong>. On t'explique tout et on te mâche le travail. Choisis ton véhicule, le cahier des charges s'affiche.</p>
+        </header>
+        <div id="lvForm" aria-live="polite"><!-- rendu par renderLivreur() --></div>
       </div>
     </section>
 
@@ -1784,7 +1805,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=450"></script>
+  <script defer src="app.js?v=451"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

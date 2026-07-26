@@ -100,6 +100,12 @@ service cloud.firestore {
     match /stripe_events/{eventId}     { allow read, write: if false; } // idempotence webhook
     match /rate_limits/{bucketId}      { allow read, write: if false; } // compteurs anti-abus (IP)
     match /product_overrides/{prodId}  { allow read, write: if false; } // prix/stock admin
+    // ── Service coursier (Ubur) — construit mais INACTIF (COURIER_ENABLED=false).
+    // Fermé au client tant que le module n'est pas ouvert + validé avocat.
+    match /couriers/{uid}              { allow read, write: if false; } // profils coursiers + statut KYC
+    match /courier_applications/{uid}  { allow read, write: if false; } // candidatures + pièces (SIRET, assurance, permis…)
+    match /courses/{courseId}          { allow read, write: if false; } // demandes de livraison artisan
+    match /courier_locations/{uid}     { allow read, write: if false; } // géoloc temps réel (TTL court, RGPD)
 
     // Mesure d'audience maison : écrite par l'Admin SDK (api/events.js), lue
     // UNIQUEMENT par l'API admin authentifiée (api/admin?type=stats). Jamais

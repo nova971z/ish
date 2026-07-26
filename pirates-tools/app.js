@@ -3761,6 +3761,193 @@
     return html;
   }
 
+  // ══════════════════════════════════════════════════════════════════════════
+  // SERVICE COURSIER — formulaire « Devenir Livreur » (adaptatif par véhicule)
+  // ⚠️ INACTIF tant que COURIER_ENABLED = false : personne ne peut réellement
+  // candidater/faire des courses. On construit toute l'archi maintenant.
+  // Cadre légal complet + sources : docs/plan-creation-coursier.md.
+  // ══════════════════════════════════════════════════════════════════════════
+  var COURIER_ENABLED = false;
+
+  // Liens officiels (sources gouvernementales — vérifiés dans le doc).
+  var LV_LINKS = {
+    inpi:      'https://formalites.entreprises.gouv.fr',
+    transport: 'https://www.ecologie.gouv.fr/politiques-publiques/acces-exercice-profession-transporteur-marchandises',
+    dealGp:    'https://www.guadeloupe.developpement-durable.gouv.fr',
+    permis:    'https://www.service-public.fr/particuliers/vosdroits/N530',
+    urssaf:    'https://www.autoentrepreneur.urssaf.fr'
+  };
+
+  // Socle commun à TOUS les véhicules (livrer contre rémunération = activité pro).
+  var LV_BASE = [
+    { t: 'Avoir 18 ans minimum', h: 'Obligatoire. La date de naissance ci-dessus le vérifie automatiquement.' },
+    { t: 'Être auto-entrepreneur (micro-entreprise)', h: 'Livrer contre paiement est une activité professionnelle : tu dois avoir un statut. Création 100&nbsp;% gratuite et en ligne.', link: { u: LV_LINKS.inpi, l: 'Créer ma micro-entreprise (Guichet unique)' } },
+    { t: 'Une pièce d\'identité valide', h: 'Carte d\'identité ou passeport.' },
+    { t: 'Une assurance Responsabilité Civile Professionnelle (RC Pro)', h: 'Elle te couvre si tu causes un dommage pendant une livraison.' },
+    { t: 'Un RIB à ton nom', h: 'Pour être payé automatiquement après chaque course.' },
+    { t: 'Un smartphone', h: 'Pour recevoir les courses et te faire guider.' }
+  ];
+
+  // Véhicules : chaque entrée = cahier des charges + textes de loi + explications.
+  var LV_VEHICLES = {
+    velo: {
+      emoji: '🚲', label: 'Vélo (musculaire)',
+      note: { type: 'warn', txt: 'En Guadeloupe, le vélo sans assistance n\'est viable que pour de très courtes distances (les îles sont grandes, il fait chaud). À réserver à la proximité.' },
+      docs: [], permis: null,
+      laws: [
+        { ref: 'Code des transports — accès à la profession de transporteur',
+          plain: 'Le vélo n\'est PAS un véhicule motorisé : tu n\'as AUCUNE licence de transport ni inscription au registre à faire. Il te faut seulement le socle commun (dont le statut auto-entrepreneur).',
+          link: LV_LINKS.transport }
+      ]
+    },
+    vae: {
+      emoji: '🔋', label: 'Vélo à assistance électrique (VAE)',
+      note: { type: 'ok', txt: 'Bon compromis : assimilé à un vélo (aucune licence transport, aucun permis), tout en couvrant plus de distance. Doit être bridé à 25 km/h.' },
+      docs: [ { t: 'Ton VAE doit être bridé à 25 km/h (assistance légale)', h: 'Au-delà de 25 km/h (« speed-bike »), c\'est un cyclomoteur : permis + immatriculation + assurance obligatoires (voir la catégorie Scooter/Moto).' } ],
+      permis: null,
+      laws: [
+        { ref: 'Code de la route, art. R311-1 (cycle à pédalage assisté)',
+          plain: 'Un VAE (assistance ≤ 25 km/h, moteur ≤ 250 W qui se coupe dès que tu arrêtes de pédaler) est légalement un VÉLO. Donc : pas de permis, pas d\'immatriculation, pas de licence transport. Juste le socle commun.',
+          link: 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000025758263' }
+      ]
+    },
+    trottinette: {
+      emoji: '🛴', label: 'Trottinette électrique',
+      note: { type: 'ok', txt: 'Autorisée. Engin motorisé (≤ 25 km/h) : une assurance responsabilité civile est OBLIGATOIRE.' },
+      docs: [ { t: 'Assurance Responsabilité Civile OBLIGATOIRE', h: 'Une trottinette électrique est un engin motorisé : l\'assurance RC est imposée par la loi (au-delà de la RC Pro du socle).' } ],
+      permis: null,
+      laws: [
+        { ref: 'Décret n° 2019-1082 (EDPM) + Code des assurances, art. L211-1',
+          plain: 'La trottinette électrique est un « engin de déplacement personnel motorisé » (EDPM), limité à 25 km/h. Pas de permis ni d\'immatriculation, MAIS comme elle est motorisée, l\'assurance responsabilité civile est OBLIGATOIRE.',
+          link: 'https://www.legifrance.gouv.fr/loda/id/JORFTEXT000039258297' }
+      ]
+    },
+    scooter: {
+      emoji: '🛵', label: 'Scooter / Moto',
+      note: { type: 'strong', txt: 'Le plus rentable (distances) MAIS le plus de démarches. Tant que TOUT n\'est pas fourni et validé, tu ne peux pas faire de courses. On te guide pas à pas.' },
+      docs: [
+        { t: 'Permis adapté à la cylindrée', h: 'AM (50 cm³, dès 14 ans) · A1 (125 cm³, dès 16 ans) · A2 (dès 18 ans) · A. Permis B + 7 h de formation → 125 cm³.', link: { u: LV_LINKS.permis, l: 'Quel permis pour quel deux-roues' } },
+        { t: 'Carte grise du véhicule à ton nom', h: 'Le deux-roues doit être immatriculé.' },
+        { t: 'Assurance du véhicule à usage PROFESSIONNEL (livraison)', h: '⚠️ Ton assurance deux-roues personnelle NE couvre PAS le transport pour autrui. En cas d\'accident en livraison, tu serais non assuré. Il faut une assurance pro.' },
+        { t: 'Assurance des marchandises transportées', h: 'Tu es responsable de ce que tu transportes (vis, prises…) : une assurance dédiée couvre la perte ou la casse.' },
+        { t: '🔴 Attestation de capacité professionnelle de transport léger', h: 'Formation d\'environ 105 h + examen à la DREAL. Obligatoire pour transporter des marchandises pour autrui avec un véhicule motorisé.', link: { u: LV_LINKS.transport, l: 'Accès à la profession de transporteur' } },
+        { t: '🔴 Inscription au registre des transporteurs (DEAL Guadeloupe)', h: 'Demande d\'autorisation d\'exercer déposée à la DEAL/DREAL de ta région. Un récépissé est délivré sous ~2 mois.', link: { u: LV_LINKS.dealGp, l: 'DEAL Guadeloupe' } },
+        { t: 'Casque homologué + gants certifiés', h: 'Obligatoires à deux-roues motorisé.' }
+      ],
+      permis: 'AM / A1 / A2 / A',
+      laws: [
+        { ref: 'Code des transports — transport public routier de marchandises',
+          plain: 'Transporter des marchandises POUR AUTRUI avec un véhicule MOTORISÉ (même un scooter 50 cm³) = « transport public de marchandises », une activité réglementée. Il faut la capacité professionnelle de transport léger (≈105 h de formation) ET l\'inscription au registre des transporteurs. Le vélo, lui, en est exempté.',
+          link: LV_LINKS.transport }
+      ]
+    }
+  };
+
+  function lvDocItem(d) {
+    var h = '<li class="lv-doc"><span class="lv-doc__t">' + d.t + '</span>';
+    if (d.h) h += '<span class="lv-doc__h">' + d.h + '</span>';
+    if (d.link) h += '<a class="lv-doc__link" href="' + escapeHTML(d.link.u) + '" target="_blank" rel="noopener noreferrer">' + escapeHTML(d.link.l) + ' ↗</a>';
+    return h + '</li>';
+  }
+  function lvLawBlock(law) {
+    return '<div class="lv-law">'
+      + '<div class="lv-law__ref">📜 Ce que dit la loi — <strong>' + escapeHTML(law.ref) + '</strong></div>'
+      + '<div class="lv-law__plain"><span class="lv-law__tag">En clair</span> ' + law.plain + '</div>'
+      + (law.link ? '<a class="lv-law__link" href="' + escapeHTML(law.link) + '" target="_blank" rel="noopener noreferrer">Lire le texte officiel ↗</a>' : '')
+      + '</div>';
+  }
+
+  function renderLivreur() {
+    var box = document.getElementById('lvForm');
+    if (!box) return;
+    var noteClass = { warn: 'lv-note--warn', ok: 'lv-note--ok', strong: 'lv-note--strong' };
+
+    function draw(vehKey, age) {
+      var h = [];
+      // Bandeau « en préparation »
+      h.push('<div class="lv-banner">🚧 <strong>Programme en préparation.</strong> Tu peux déjà tout découvrir et préparer tes démarches. Les inscriptions ouvriront bientôt — reviens ici régulièrement.</div>');
+
+      // Âge
+      h.push('<div class="lv-card"><label class="lv-field"><span>Ta date de naissance *</span>'
+        + '<input type="date" id="lvBirth" value="' + (age && age.val ? escapeHTML(age.val) : '') + '"></label>');
+      if (age && age.val) {
+        if (age.years < 18) {
+          h.push('<p class="lv-age lv-age--ko">❌ Tu dois avoir <strong>18 ans minimum</strong> pour devenir livreur (obligation légale). Reviens à ta majorité&nbsp;!</p></div>');
+          box.innerHTML = h.join('');
+          wire(vehKey, age);
+          return;
+        }
+        h.push('<p class="lv-age lv-age--ok">✅ Tu as ' + age.years + ' ans — tu peux continuer.</p>');
+      }
+      h.push('</div>');
+
+      // Sélecteur de véhicule (débloqué si âge OK)
+      var ageOk = age && age.val && age.years >= 18;
+      h.push('<div class="lv-card"><h2 class="lv-h2">1. Choisis ton véhicule</h2>');
+      if (!ageOk) h.push('<p class="lv-hint">Renseigne d\'abord ta date de naissance ci-dessus.</p>');
+      h.push('<div class="lv-vehicles"' + (ageOk ? '' : ' aria-disabled="true"') + '>');
+      Object.keys(LV_VEHICLES).forEach(function (k) {
+        var v = LV_VEHICLES[k];
+        h.push('<button type="button" class="lv-veh' + (vehKey === k ? ' lv-veh--on' : '') + '" data-veh="' + k + '"' + (ageOk ? '' : ' disabled') + '>'
+          + '<span class="lv-veh__emoji">' + v.emoji + '</span><span class="lv-veh__label">' + v.label + '</span></button>');
+      });
+      h.push('</div></div>');
+
+      // Cahier des charges du véhicule choisi
+      if (ageOk && vehKey && LV_VEHICLES[vehKey]) {
+        var v = LV_VEHICLES[vehKey];
+        h.push('<div class="lv-card">');
+        h.push('<h2 class="lv-h2">2. Ton cahier des charges — ' + v.emoji + ' ' + v.label + '</h2>');
+        if (v.note) h.push('<div class="lv-note ' + (noteClass[v.note.type] || '') + '">' + v.note.txt + '</div>');
+        h.push('<h3 class="lv-h3">Le socle commun (obligatoire pour tous)</h3><ul class="lv-docs">');
+        LV_BASE.forEach(function (d) { h.push(lvDocItem(d)); });
+        h.push('</ul>');
+        if (v.docs && v.docs.length) {
+          h.push('<h3 class="lv-h3">En plus, pour ' + v.label + '</h3><ul class="lv-docs">');
+          v.docs.forEach(function (d) { h.push(lvDocItem(d)); });
+          h.push('</ul>');
+        } else {
+          h.push('<p class="lv-hint">✅ Rien de plus que le socle commun — c\'est le véhicule le plus simple administrativement.</p>');
+        }
+        h.push('</div>');
+
+        // Textes de loi
+        h.push('<div class="lv-card"><h2 class="lv-h2">3. Les textes de loi (et ce qu\'ils veulent dire)</h2>');
+        v.laws.forEach(function (law) { h.push(lvLawBlock(law)); });
+        h.push('<p class="lv-hint">Sources officielles complètes : URSSAF, DREAL/DEAL, Légifrance. En cas de doute, on est là pour t\'aider.</p></div>');
+
+        // CTA (désactivé tant que le programme n'est pas ouvert)
+        h.push('<div class="lv-card lv-cta">'
+          + '<button type="button" class="btn primary" id="lvApply"' + (COURIER_ENABLED ? '' : ' disabled') + '>Je prépare mon dossier</button>'
+          + '<span class="lv-cta__note">' + (COURIER_ENABLED ? 'On te contactera pour vérifier tes pièces.' : 'Inscriptions bientôt ouvertes — prépare déjà tes documents ci-dessus.') + '</span></div>');
+      }
+
+      box.innerHTML = h.join('');
+      wire(vehKey, age);
+    }
+
+    function wire(vehKey, age) {
+      var birth = document.getElementById('lvBirth');
+      if (birth) birth.onchange = function () {
+        var val = birth.value, years = 0;
+        if (val) {
+          var d = new Date(val), now = new Date();
+          years = now.getFullYear() - d.getFullYear();
+          if (now.getMonth() < d.getMonth() || (now.getMonth() === d.getMonth() && now.getDate() < d.getDate())) years--;
+        }
+        draw(vehKey, { val: val, years: years });
+      };
+      var vehBtns = box.querySelectorAll('[data-veh]');
+      for (var i = 0; i < vehBtns.length; i++) {
+        (function (btn) { btn.onclick = function () { draw(btn.getAttribute('data-veh'), age); }; })(vehBtns[i]);
+      }
+    }
+
+    draw(null, null);
+    var back = document.getElementById('lvBack');
+    if (back) back.onclick = function () { history.length > 1 ? history.back() : (location.hash = '#/compte'); };
+  }
+
   function renderArtisans() {
     var back = document.getElementById('artisansBack');
     if (back) back.onclick = function () {
@@ -4010,7 +4197,7 @@
   // ── Router (hash-based SPA) ────────────────────────────────
 
   var ROUTES = ['/', '/catalogue', '/produit', '/devis', '/compte', '/auth', '/abonnement',
-                '/admin', '/merci', '/contact', '/favoris', '/artisans', '/rejoindre',
+                '/admin', '/merci', '/contact', '/favoris', '/artisans', '/rejoindre', '/livreur',
                 '/mentions-legales', '/confidentialite', '/cgv'];
 
   // Territory landing slugs (keys) → territory codes (values).
@@ -4213,6 +4400,9 @@
         break;
       case '/rejoindre':
         setupPartnerJoinForm(parsed.slug || '');
+        break;
+      case '/livreur':
+        renderLivreur();
         break;
     }
 
