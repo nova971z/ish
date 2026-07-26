@@ -1,5 +1,5 @@
 /* sw.js — Pirates Tools (PWA) */
-const VERSION        = 'pt-v488';                    // version du SW (logique SW)
+const VERSION        = 'pt-v489';                    // version du SW (logique SW)
 const STATIC_CACHE   = `pt-static-${VERSION}`;
 const RUNTIME_CACHE  = `pt-runtime-${VERSION}`;
 const IMG_CACHE      = `pt-img-${VERSION}`;
@@ -8,7 +8,7 @@ const ORIGIN         = self.location.origin;
 
 // Aligner avec le HTML (cache-busting des assets) — garde-fou CI :
 // scripts/check-asset-versions.js casse la CI si sw.js et index.html divergent.
-const ASSET_VER      = '488';
+const ASSET_VER      = '489';
 
 // Icônes + manifest : fingerprint STABLE, séparé d'ASSET_VER. Ces fichiers ne
 // changent pas à chaque déploiement — les re-cache-buster à chaque bump forçait
@@ -265,9 +265,17 @@ self.addEventListener('fetch', (event) => {
       const net = await fetch(req);
       if (net && net.ok && sameOrigin(url)) { putCache(RUNTIME_CACHE, req, net.clone()); }
       return net;
-    } catch(_){
+    } catch(err){
       const cached = await fromCache(RUNTIME_CACHE, req) || await fromCache(STATIC_CACHE, req);
-      return cached || new Response('', { status:504 });
+      if (cached) return cached;
+      // JAMAIS de corps vide : un `new Response('')` fait échouer le .json()
+      // de l'appelant, et le navigateur ne remonte qu'un « TypeError » opaque
+      // qui ne dit ni l'URL ni la cause. On répond une erreur LISIBLE.
+      return new Response(JSON.stringify({
+        ok: false,
+        error: 'Service Worker : réseau injoignable et rien en cache pour ' + url.pathname,
+        detail: String((err && err.message) || err || 'network error')
+      }), { status: 504, headers: { 'Content-Type': 'application/json' } });
     }
   })());
 });

@@ -46,6 +46,35 @@ LIRE CE FICHIER avant d'ajouter/modifier un produit ou un poster. Cœur des règ
 - **WORKFLOW** : travailler DIRECTEMENT sur `master` (commit + push immédiat → Vercel live). CI verte à chaque fois. Identifier le produit par le TITRE de la capture pirates-tools.com.
 - Journal des produits validés + prix en attente : voir le fichier REGLES-PRODUITS.md §7.
 
+## ⚠️ PIÈGE SW — le Service Worker ne doit JAMAIS toucher /api/ (27/07/2026, v487-489)
+PANNE VÉCUE : admin cassée, « Comptes indisponibles : Type error » et « Config
+indisponible : Type error ». Diagnostic long car le message de WebKit ne dit ni
+l'URL, ni le code HTTP, ni la cause.
+- CAUSE RACINE : l'aiguillage `fetch` du SW ne reconnaissait pas `/api/`. Ces
+  requêtes tombaient dans le CAS PAR DÉFAUT qui (1) **mettait en cache** les
+  réponses d'API (données admin/compta/prix servies périmées) et (2) renvoyait
+  `new Response('', {status:504})` — un CORPS VIDE — au moindre incident réseau.
+  Le `.json()` de l'appelant échouait alors, et Safari ne remontait qu'un
+  `TypeError: Type error` opaque.
+- PREUVE DÉCISIVE (à réutiliser) : le SW n'intercepte QUE les GET
+  (`if (!isGET(req)) return;`). Or **100 % des appels cassés étaient des GET**
+  (accounting, pricing-config) et **100 % des appels qui marchaient étaient des
+  POST** (reprice-all, price-watch). Corrélation parfaite = SW coupable.
+- DÉCLENCHEUR : 6 bumps de version en 90 min → caches runtime neufs (donc
+  vides) à chaque fois, + navigation privée (caches éphémères) → le repli ne
+  trouvait jamais rien et servait le corps vide. En version stable, un cache
+  existant masquait le bug depuis toujours.
+- ⏳ PIÈGE DE VÉRIFICATION : un SW corrigé ne prend la main qu'au rechargement
+  SUIVANT. Après le correctif v487 l'user voyait encore l'erreur — j'ai cru à
+  tort m'être trompé de cause. **Toujours faire recharger DEUX fois avant de
+  conclure qu'un correctif de SW n'a pas marché.**
+- CORRECTIFS : (1) `/api/*` sort direct au réseau, jamais intercepté ni mis en
+  cache ; (2) le repli du cas par défaut ne renvoie plus JAMAIS de corps vide
+  mais un JSON d'erreur lisible ; (3) `adminGet`/`adminPostType` lisent la
+  réponse en texte d'abord et nomment l'échec (HTTP + URL + content-type +
+  extrait) ; (4) `/api/health` expose `firebaseCheck` (intégrité du compte de
+  service : longueur, parsing, clé privée complète — jamais la valeur).
+
 ## 🧹 PURGE CATALOGUE — « seul ce que le traqueur voit reste » (26/07/2026)
 RÈGLE ISSUE DE CETTE SESSION : un produit dont le **coût d'achat n'est pas
 relevé chez cotébrico** ne reste pas au catalogue — son prix reposerait sur une
