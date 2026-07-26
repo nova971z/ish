@@ -44,7 +44,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=471">
+  <link rel="stylesheet" href="styles.css?v=472">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -477,16 +477,14 @@
           <h2 class="pdp-section__heading">🛵 Livraison sur ton chantier</h2>
           <p class="lv-hint" style="margin:.2rem 0 .8rem">Commande ta quincaillerie, un livreur te l'apporte directement — <span id="pdpDelivBanner">🟢 service disponible à partir du <strong>1er janvier</strong>, tu peux déjà tout tester</span>.</p>
           <div id="pdpDeliveryMap" class="pdp-deliv-map" aria-label="Carte de livraison"></div>
-          <div class="pdp-deliv-form">
+          <div class="pdp-deliv-form pdp-deliv-fields">
             <label class="lv-field"><span>📍 Adresse du chantier *</span><input type="text" id="pdpDelivAddr" maxlength="200" placeholder="Rue, quartier, commune…"></label>
-            <div class="lv-grid2">
-              <label class="lv-field"><span>📅 Date de livraison</span><input type="date" id="pdpDelivDate"></label>
-              <div class="lv-field"><span>🕐 Quand dans la journée ? *</span>
-                <div class="pj-radios pdp-deliv-when">
-                  <label><input type="radio" name="pdpDelivWhen" value="matin" checked> Matin</label>
-                  <label><input type="radio" name="pdpDelivWhen" value="apresmidi"> Après-midi</label>
-                  <label><input type="radio" name="pdpDelivWhen" value="heure"> Heure précise</label>
-                </div>
+            <label class="lv-field"><span>📅 Date de livraison</span><input type="date" id="pdpDelivDate"></label>
+            <div class="lv-field"><span>🕐 Quand dans la journée ? *</span>
+              <div class="pj-radios pdp-deliv-when">
+                <label><input type="radio" name="pdpDelivWhen" value="matin" checked> Matin</label>
+                <label><input type="radio" name="pdpDelivWhen" value="apresmidi"> Après-midi</label>
+                <label><input type="radio" name="pdpDelivWhen" value="heure"> Heure précise</label>
               </div>
             </div>
             <label class="lv-field" id="pdpDelivHourWrap" hidden><span>Heure souhaitée</span><input type="time" id="pdpDelivHour"></label>
@@ -1090,6 +1088,35 @@
           <h2 class="lv-h2">Tarifs de livraison (Guadeloupe)</h2>
           <p class="lv-hint" style="margin:0 0 .6rem">Distance mesurée depuis Sainte-Anne. Le montant va <strong>intégralement au livreur</strong> — Pirates Tools ne prend rien&nbsp;: ce service existe pour aider les artisans et donner du travail aux jeunes de l'île.</p>
           <div id="livraisonBareme" class="lv-bareme"><!-- rendu par renderLivraison() --></div>
+        </div>
+
+        <!-- Commander une livraison depuis le PANIER (si quincaillerie dedans) -->
+        <div class="lv-card" id="livraisonNoCart">
+          <h2 class="lv-h2">🛒 Commander une livraison</h2>
+          <p class="lv-hint" style="margin:0 0 .8rem">Ajoute d'abord de la <strong>quincaillerie à ton panier</strong> — tu pourras ensuite commander ta livraison directement ici, sur la grande carte.</p>
+          <a class="btn primary" href="#/catalogue">Voir la quincaillerie</a>
+        </div>
+        <div class="lv-card" id="livraisonOrder" hidden>
+          <h2 class="lv-h2">🛒 Commander la livraison de ton panier</h2>
+          <div id="livDelivItems" class="lv-bareme" style="margin:0 0 .8rem"></div>
+          <div id="livDelivMap" class="pdp-deliv-map" aria-label="Carte de livraison"></div>
+          <div class="pdp-deliv-fields">
+            <label class="lv-field"><span>📍 Adresse du chantier *</span><input type="text" id="livDelivAddr" maxlength="200" placeholder="Rue, quartier, commune…"></label>
+            <label class="lv-field"><span>📅 Date de livraison</span><input type="date" id="livDelivDate"></label>
+            <div class="lv-field"><span>🕐 Quand dans la journée ? *</span>
+              <div class="pj-radios pdp-deliv-when">
+                <label><input type="radio" name="livDelivWhen" value="matin" checked> Matin</label>
+                <label><input type="radio" name="livDelivWhen" value="apresmidi"> Après-midi</label>
+                <label><input type="radio" name="livDelivWhen" value="heure"> Heure précise</label>
+              </div>
+            </div>
+            <label class="lv-field" id="livDelivHourWrap" hidden><span>Heure souhaitée</span><input type="time" id="livDelivHour"></label>
+            <p class="lv-hint" id="livDelivZoneTxt"></p>
+            <div class="lv-cta" style="margin-top:.4rem">
+              <button type="button" class="btn primary" id="livDelivOrder">🛒 Commander la livraison</button>
+              <span class="lv-cta__note" id="livDelivStatus" aria-live="polite"></span>
+            </div>
+          </div>
         </div>
 
         <div class="lv-card lv-cta">
@@ -1905,7 +1932,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=471"></script>
+  <script defer src="app.js?v=472"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

@@ -4123,47 +4123,61 @@
     return null;   // hors zone
   }
 
-  // Bloc livraison des fiches QUINCAILLERIE : carte de l'île du client +
-  // adresse (géocodée BAN) + date + créneau (matin / après-midi / heure).
-  function initPdpDelivery(product) {
-    var box = document.getElementById('pdpDelivery');
+  // Limites géographiques par île (fitBounds = île ENTIÈRE toujours visible
+  // dans la carte carrée — inclut Marie-Galante/Les Saintes/Désirade pour 971).
+  var ISLAND_BOUNDS = {
+    '971': [[15.80, -61.88], [16.55, -60.95]],
+    '972': [[14.38, -61.25], [14.90, -60.78]],
+    '973': [[2.10, -54.65], [5.80, -51.55]],
+    '974': [[-21.42, 55.20], [-20.85, 55.86]],
+    '976': [[-13.05, 44.95], [-12.60, 45.32]]
+  };
+
+  // ── WIDGET LIVRAISON réutilisable (fiche produit + page Livraison) ──────────
+  // cfg = { box, map, addr, date, hourWrap, hour, whenName, zone, order, status,
+  //         payload() → { productKey, productTitle, qty } }
+  function initDeliveryWidget(cfg) {
+    var box = document.getElementById(cfg.box);
     if (!box) return;
     var isle = ISLAND_MAP[_currentTerritory] || ISLAND_MAP['971'];
-    var is971 = !ISLAND_MAP[_currentTerritory] || _currentTerritory === '971';
-    var zoneTxt = document.getElementById('pdpDelivZoneTxt');
+    var isleCode = ISLAND_MAP[_currentTerritory] ? _currentTerritory : '971';
+    var is971 = isleCode === '971';
+    var zoneTxt = document.getElementById(cfg.zone);
     function zoneBaseTxt() {
       return '💶 Frais de livraison payés <strong>intégralement au livreur</strong>, selon la zone ('
         + LV_BAREME.map(function (b) { return b.emoji + ' ' + b.prix + ' €'; }).join(' · ')
         + ' — distance depuis Sainte-Anne). Tape ton adresse : ta zone s\'affiche. L\'itinéraire proposé au livreur est indicatif : il reste libre de sa route.';
     }
     if (zoneTxt) zoneTxt.innerHTML = zoneBaseTxt();
-    // Créneau : l'input heure ne s'affiche qu'en mode « heure précise ».
-    var hourWrap = document.getElementById('pdpDelivHourWrap');
-    var radios = box.querySelectorAll('input[name="pdpDelivWhen"]');
-    for (var i = 0; i < radios.length; i++) {
-      radios[i].onchange = function () {
-        var mode = (box.querySelector('input[name="pdpDelivWhen"]:checked') || {}).value;
-        if (hourWrap) hourWrap.hidden = (mode !== 'heure');
-      };
-    }
-    // Date par défaut = aujourd'hui (l'input iOS vide ressemblait à un trou).
-    var dateEl = document.getElementById('pdpDelivDate');
+    // Date par défaut = aujourd'hui (input iOS vide = trou visuel).
+    var dateEl = document.getElementById(cfg.date);
     if (dateEl && !dateEl.value) {
       var now = new Date();
       dateEl.value = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
     }
-    var mapEl = document.getElementById('pdpDeliveryMap');
+    // Créneau : l'heure ne s'affiche qu'en « heure précise ».
+    var hourWrap = document.getElementById(cfg.hourWrap);
+    var radios = box.querySelectorAll('input[name="' + cfg.whenName + '"]');
+    for (var i = 0; i < radios.length; i++) {
+      radios[i].onchange = function () {
+        var mode = (box.querySelector('input[name="' + cfg.whenName + '"]:checked') || {}).value;
+        if (hourWrap) hourWrap.hidden = (mode !== 'heure');
+      };
+    }
+    var mapEl = document.getElementById(cfg.map);
     if (!mapEl) return;
-    // Bouton COMMANDER (mode test : réservé à l'allowlist, serveur autoritaire).
-    var orderBtn = document.getElementById('pdpDelivOrder');
-    var orderSt = document.getElementById('pdpDelivStatus');
+    // Bouton COMMANDER (mode test : allowlist serveur, zone/prix recalculés serveur).
+    var orderBtn = document.getElementById(cfg.order);
+    var orderSt = document.getElementById(cfg.status);
     if (orderBtn) orderBtn.onclick = function () {
       if (!_currentUser) { toast('Connecte-toi pour commander une livraison', 'error'); location.hash = '#/auth'; return; }
       var g = mapEl._ptGeo;
       if (!g) { if (orderSt) orderSt.textContent = 'Tape ton adresse et valide-la (Entrée) pour la localiser.'; return; }
-      var when = (box.querySelector('input[name="pdpDelivWhen"]:checked') || {}).value || 'matin';
-      var hour = (document.getElementById('pdpDelivHour') || {}).value || '';
+      var when = (box.querySelector('input[name="' + cfg.whenName + '"]:checked') || {}).value || 'matin';
+      var hour = (document.getElementById(cfg.hour) || {}).value || '';
       if (when === 'heure' && !hour) { if (orderSt) orderSt.textContent = 'Choisis l\'heure souhaitée.'; return; }
+      var pl = cfg.payload();
+      if (!pl) { if (orderSt) orderSt.textContent = 'Ton panier ne contient pas de quincaillerie.'; return; }
       orderBtn.disabled = true;
       if (orderSt) orderSt.textContent = 'Envoi…';
       jsonAuthHeaders().then(function (headers) {
@@ -4171,10 +4185,9 @@
           method: 'POST', headers: headers,
           body: JSON.stringify({
             type: 'course-create',
-            productKey: product.id || product.slug, productTitle: product.title, qty: 1,
+            productKey: pl.productKey, productTitle: pl.productTitle, qty: pl.qty,
             address: g.label, lat: g.lat, lng: g.lng,
-            date: (document.getElementById('pdpDelivDate') || {}).value || '',
-            when: when, hour: hour
+            date: (dateEl || {}).value || '', when: when, hour: hour
           })
         });
       }).then(function (r) { return r.json().then(function (d) { return { r: r, d: d }; }); })
@@ -4190,20 +4203,26 @@
       var map = mapEl._ptMap;
       if (!map) {
         mapEl.innerHTML = '';
-        map = window.L.map(mapEl, { scrollWheelZoom: false }).setView([isle.lat, isle.lng], isle.zoom);
+        map = window.L.map(mapEl, { scrollWheelZoom: false });
         window.L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
           maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>'
         }).addTo(map);
         if (is971) window.L.marker([LV_DEPOT.lat, LV_DEPOT.lng]).addTo(map).bindPopup('Départ des courses — Sainte-Anne');
         mapEl._ptMap = map;
-      } else if (mapEl.dataset.isle !== _currentTerritory) {
-        map.setView([isle.lat, isle.lng], isle.zoom);
       }
-      mapEl.dataset.isle = _currentTerritory;
-      setTimeout(function () { map.invalidateSize(); }, 60);
+      // Cadrage = l'ÎLE ENTIÈRE dans la carte carrée (fitBounds), pas un centre/zoom fixe.
+      if (mapEl.dataset.isle !== isleCode) {
+        mapEl.dataset.isle = isleCode;
+        if (ISLAND_BOUNDS[isleCode]) map.fitBounds(ISLAND_BOUNDS[isleCode], { padding: [8, 8] });
+        else map.setView([isle.lat, isle.lng], isle.zoom);
+      }
+      setTimeout(function () {
+        map.invalidateSize();
+        if (ISLAND_BOUNDS[isleCode] && !mapEl._ptDest) map.fitBounds(ISLAND_BOUNDS[isleCode], { padding: [8, 8] });
+      }, 80);
 
       // Adresse → position (Base Adresse Nationale, service officiel de l'État).
-      var addr = document.getElementById('pdpDelivAddr');
+      var addr = document.getElementById(cfg.addr);
       if (addr && !addr._ptWired) {
         addr._ptWired = true;
         var geocode = function () {
@@ -4219,7 +4238,7 @@
               var label = f.properties && f.properties.label || q;
               if (mapEl._ptDest) map.removeLayer(mapEl._ptDest);
               mapEl._ptDest = window.L.marker([lat, lng]).addTo(map).bindPopup(escapeHTML(label)).openPopup();
-              mapEl._ptGeo = { lat: lat, lng: lng, label: label };   // pour « Commander »
+              mapEl._ptGeo = { lat: lat, lng: lng, label: label };
               map.setView([lat, lng], 13);
               if (is971) {
                 var km = haversineKm(LV_DEPOT, { lat: lat, lng: lng });
@@ -4228,7 +4247,6 @@
                   ? '📍 <strong>' + escapeHTML(label) + '</strong> — ' + km.toFixed(1) + ' km de Sainte-Anne → '
                     + z.emoji + ' <strong>Zone ' + z.zone + ' : ' + z.prix + ' € de livraison</strong> (payés intégralement au livreur).'
                   : '📍 <strong>' + escapeHTML(label) + '</strong> — ' + km.toFixed(1) + ' km : hors zone de livraison actuelle (max 46 km depuis Sainte-Anne).';
-                // Itinéraire INDICATIF (OSRM, open-source) — le livreur reste libre.
                 fetch('https://router.project-osrm.org/route/v1/driving/' + LV_DEPOT.lng + ',' + LV_DEPOT.lat + ';' + lng + ',' + lat + '?overview=full&geometries=geojson')
                   .then(function (r) { return r.json(); })
                   .then(function (rt) {
@@ -4246,16 +4264,25 @@
         addr.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); geocode(); } });
       }
     }).catch(function () {
-      // Repli (Leaflet indisponible) : aperçu doré du contour de l'île.
       if (mapEl.dataset.fallback) return;
       mapEl.dataset.fallback = '1';
       mapEl.classList.add('pdp-deliv-map--fallback');
-      var src = document.querySelector('#regIslands .isl[data-isl="' + (ISLAND_MAP[_currentTerritory] ? _currentTerritory : '971') + '"] svg');
-      if (src) {
-        var cl = src.cloneNode(true);
+      var src2 = document.querySelector('#regIslands .isl[data-isl="' + isleCode + '"] svg');
+      if (src2) {
+        var cl = src2.cloneNode(true);
         mapEl.appendChild(cl);
         try { var bb = cl.getBBox(); cl.setAttribute('viewBox', (bb.x - 3) + ' ' + (bb.y - 3) + ' ' + (bb.width + 6) + ' ' + (bb.height + 6)); } catch (_) {}
       }
+    });
+  }
+
+  // Fiche produit : livraison d'UN produit.
+  function initPdpDelivery(product) {
+    initDeliveryWidget({
+      box: 'pdpDelivery', map: 'pdpDeliveryMap', addr: 'pdpDelivAddr', date: 'pdpDelivDate',
+      hourWrap: 'pdpDelivHourWrap', hour: 'pdpDelivHour', whenName: 'pdpDelivWhen',
+      zone: 'pdpDelivZoneTxt', order: 'pdpDelivOrder', status: 'pdpDelivStatus',
+      payload: function () { return { productKey: product.id || product.slug, productTitle: product.title, qty: 1 }; }
     });
   }
 
@@ -4263,11 +4290,46 @@
   // (source unique — le panneau livreur affiche exactement les mêmes prix).
   function renderLivraison() {
     var box = document.getElementById('livraisonBareme');
-    if (!box) return;
-    box.innerHTML = LV_BAREME.map(function (b) {
+    if (box) box.innerHTML = LV_BAREME.map(function (b) {
       return '<div class="lv-bareme__row"><span>' + b.emoji + ' Zone ' + b.zone + ' <em>(' + b.km + ' km)</em></span>'
         + '<span class="lv-bareme__prix">' + b.prix + ' \u20ac</span></div>';
     }).join('');
+
+    // ── Commander une livraison depuis le PANIER (quincaillerie uniquement) ──
+    // Grande carte carrée + widget complet, visibles si le panier contient de
+    // la quincaillerie ; sinon invitation à en ajouter.
+    var orderSec = document.getElementById('livraisonOrder');
+    var noCart = document.getElementById('livraisonNoCart');
+    if (!orderSec) return;
+    var quincItems = getCart().filter(function (it) {
+      var p = findProductByKey(it.key);
+      return p && p.brand === 'Quincaillerie';
+    });
+    var has = quincItems.length > 0;
+    orderSec.hidden = !has;
+    if (noCart) noCart.hidden = has;
+    if (!has) return;
+    var itemsEl = document.getElementById('livDelivItems');
+    var totalQty = 0;
+    if (itemsEl) itemsEl.innerHTML = quincItems.map(function (it) {
+      totalQty += (it.qty || 1);
+      return '<div class="lv-bareme__row"><span>' + escapeHTML(it.title || it.key) + '</span><span class="lv-bareme__prix">× ' + (it.qty || 1) + '</span></div>';
+    }).join('');
+    else quincItems.forEach(function (it) { totalQty += (it.qty || 1); });
+    initDeliveryWidget({
+      box: 'livraisonOrder', map: 'livDelivMap', addr: 'livDelivAddr', date: 'livDelivDate',
+      hourWrap: 'livDelivHourWrap', hour: 'livDelivHour', whenName: 'livDelivWhen',
+      zone: 'livDelivZoneTxt', order: 'livDelivOrder', status: 'livDelivStatus',
+      payload: function () {
+        var items = getCart().filter(function (it) {
+          var p = findProductByKey(it.key);
+          return p && p.brand === 'Quincaillerie';
+        });
+        if (!items.length) return null;
+        var qty = 0, names = items.map(function (it) { qty += (it.qty || 1); return (it.title || it.key) + ' \u00d7' + (it.qty || 1); });
+        return { productKey: 'panier-quincaillerie', productTitle: names.join(', ').slice(0, 160), qty: qty };
+      }
+    });
   }
 
   function renderLivreur() {
