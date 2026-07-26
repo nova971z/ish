@@ -3819,12 +3819,17 @@
       once: [
         { l: 'Création auto-entrepreneur', v: 'Gratuit' },
         { l: 'Formation capacité transport léger', v: '750 à 1 500 €' },
-        { l: 'Permis (si tu ne l\'as pas déjà)', v: '600 à 1 000 €' },
-        { l: 'Équipement (casque + gants homologués)', v: '~100 à 200 €' }
+        { l: 'Permis (uniquement si tu ne l\'as pas déjà)', v: '600 à 1 000 €' },
+        { l: 'Casque homologué', v: '~50 à 100 €' },
+        { l: 'Gants certifiés', v: '~30 à 80 €' }
       ],
-      justify: [ { l: 'Capacité financière à justifier', v: '~1 800 € en réserve (pas dépensé)' } ],
-      month: [ { l: 'Assurances (RC Pro + véhicule pro + marchandises)', v: '~50 à 90 €' } ],
-      summary: 'Le plus rentable, mais il faut investir au départ : ~850 à 1 700 € une fois (formation + équipement, hors permis si tu l\'as déjà), une réserve de ~1 800 € à justifier, puis ~50 à 90 €/mois d\'assurances. Le délai vient surtout de la formation capacité (~3 semaines) et de l\'inscription au registre (récépissé sous ~2 mois).'
+      justify: [ { l: 'Capacité financière à justifier (réserve)', v: '~1 800 € (pas dépensé)' } ],
+      month: [
+        { l: 'Assurance RC Pro', v: '~10 à 15 €' },
+        { l: 'Assurance du véhicule (usage pro)', v: '~30 à 60 €' },
+        { l: 'Assurance des marchandises transportées', v: '~5 à 20 €' }
+      ],
+      summary: 'Le plus rentable, mais il faut investir au départ. En une fois : formation capacité 750-1 500 € + casque/gants ~80-180 € (le permis n\'est à payer que si tu ne l\'as pas déjà). À prévoir aussi : ~1 800 € de réserve à justifier (tu ne les dépenses pas). Puis, chaque mois : ~45 à 95 € d\'assurances au total. Le délai vient surtout de la formation (~3 semaines) et de l\'inscription au registre (récépissé sous ~2 mois).'
     }
   };
 
