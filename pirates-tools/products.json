@@ -7202,13 +7202,13 @@
     "id": "makita-dut130z",
     "slug": "makita-dut130z-malaxeur-de-peinture-18v-lxt-b",
     "sku": "DUT130Z",
-    "title": "Makita DUT130Z — Malaxeur de peinture 18V LXT BL Li-Ion (Produit seul)",
+    "title": "Makita DUT130Z — Malaxeur / mélangeur 18V LXT brushless (machine seule)",
     "name": "DUT130Z",
     "brand": "Makita",
     "category": "Malaxeurs",
     "tag": "Nouveau",
-    "desc": "Malaxeur de peinture 18V LXT BL Li-Ion (Produit seul).",
-    "img": "images/placeholder.svg",
+    "desc": "Malaxeur / mélangeur sans fil 18V LXT, moteur brushless, 2 vitesses (mortier / peinture), Ø mélange 165 mm, protection XPT — sans batterie ni chargeur.",
+    "img": "images/posters/dut130z.webp",
     "price": 312.97,
     "currency": "EUR",
     "vat": 0.2,
@@ -7225,14 +7225,28 @@
       "tropical_ready"
     ],
     "features": [
-      "Malaxeur de peinture 18V LXT BL Li-Ion (Produit seul)",
-      "Gamme Makita 18V LXT sans fil, moteur brushless (sans charbon) haut rendement",
-      "Machine seule (batterie et chargeur non inclus), compatible batteries Makita LXT",
-      "Robuste et endurant, pensé pour un usage professionnel intensif",
-      "Idéal pour les chantiers des Antilles / DOM-TOM"
+      "Malaxeur / mélangeur sans fil 18V LXT — moteur brushless (sans charbon)",
+      "2 vitesses : lente pour le mortier, rapide pour la peinture et enduits",
+      "Diamètre de mélange jusqu'à 165 mm, arbre fileté M12 / M14",
+      "Protection XPT (résistance à l'eau et à la poussière), carter avant + poignée latérale",
+      "Machine seule (batterie et chargeur non inclus), compatible batteries Makita LXT"
     ],
-    "specs": {},
-    "description_long": "Malaxeur de peinture 18V LXT BL Li-Ion (Produit seul). Outil professionnel Makita de la gamme 18V LXT sans fil (moteur brushless). Vendu en machine seule (sans batterie ni chargeur). Compatible avec les batteries Makita LXT. Fiche technique détaillée à compléter. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "specs": {
+      "Marque": "Makita",
+      "Type": "Malaxeur / mélangeur sans fil 18V LXT Brushless (machine nue)",
+      "Tension": "18 V (gamme LXT)",
+      "Moteur": "Brushless (sans charbon)",
+      "Puissance max": "650 W",
+      "Nombre de vitesses": "2",
+      "Vitesse à vide": "0-350 / 0-1300 tr/min",
+      "Diamètre max de mélange": "165 mm",
+      "Filetage de l'arbre": "M12 / M14",
+      "Protection": "XPT (résistance eau et poussière)",
+      "Équipement": "Carter avant + poignée latérale",
+      "Poids (avec batterie)": "≈ 2,5 à 2,8 kg selon batterie",
+      "Batterie / chargeur": "Non inclus"
+    },
+    "description_long": "Malaxeur / mélangeur sans fil Makita 18V LXT (DUT130Z), machine seule. Moteur brushless puissant (650 W max) à 2 vitesses : vitesse lente (0-350 tr/min) pour les matériaux lourds type mortier, vitesse rapide (0-1300 tr/min) pour la peinture et les enduits. Diamètre de mélange jusqu'à 165 mm, arbre fileté M12 / M14. Protection XPT contre l'eau et la poussière, livré avec carter avant et poignée latérale pour un maniement sûr. Vendu sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
   },
   {
     "id": "makita-dvc560z",

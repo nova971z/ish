@@ -13,7 +13,7 @@
 8. [x] DRT50Z — Affleureuse 18V LXT Ø6 et 8 mm (Machine seule) — SPECS + POSTER OK ✅ (PNG posé sur décision user malgré logos IA « BRUSHLESSS »/« Thalata »)
 9. [x] DRT50ZJX3 — Affleureuse 18V LXT Ø6-8 mm en MAKPAC + 4 bases — SPECS + POSTER OK ✅ (fiche standalone 402,38 €, NON liée en variante à #8 = kit ≠ machine seule)
 10. [x] DRT50ZX4 — Affleureuse 18V LXT + accessoires (machine seule) — SPECS + POSTER OK ✅ (fiche standalone 190,15 €)
-11. [ ] DUT130Z — Malaxeur de peinture 18V LXT BL Li-Ion (Produit seul)
+11. [x] DUT130Z — Malaxeur / mélangeur 18V LXT brushless (machine seule) — SPECS (fiche Makita/Cotébrico/Screwfix) + POSTER OK ✅
 12. [ ] DGA513ZJ — Meuleuse d'angle 18V LXT Ø125 mm (Machine seule) en MAKPAC
 13. [ ] DMC300Z — Meuleuse compacte 18V LXT 76 mm (Produit seul)
 14. [ ] DTM52Z — Outil multifonctions 18V Li-Ion LXT (machine seule)
