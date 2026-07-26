@@ -44,7 +44,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=475">
+  <link rel="stylesheet" href="styles.css?v=476">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -557,6 +557,14 @@
       <div class="pdp-section pdp-section--cta" data-animate="scale-up">
         <div class="pdp-section__inner">
           <h2 class="pdp-cta__heading">Prêt à passer à l'action ?</h2>
+          <div class="qty-step" id="pdpQtyWrap" hidden>
+            <span class="qty-step__label">Quantité</span>
+            <div class="qty-step__ctrl" role="group" aria-label="Choisir la quantité">
+              <button type="button" class="qty-step__btn" id="pdpQtyMinus" aria-label="Diminuer la quantité">−</button>
+              <span class="qty-step__val" id="pdpQtyVal" aria-live="polite">1</span>
+              <button type="button" class="qty-step__btn" id="pdpQtyPlus" aria-label="Augmenter la quantité">+</button>
+            </div>
+          </div>
           <div class="pdp-landing__actions">
             <button id="pdpBuy" class="btn primary btn--lg btn--glow" type="button" data-action="buy-now" aria-label="Acheter maintenant">💳 Acheter maintenant</button>
             <button id="pdpQuote" class="btn btn--lg" type="button" data-action="add-to-cart" aria-label="Ajouter au panier">Ajouter au panier</button>
@@ -1985,7 +1993,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=475"></script>
+  <script defer src="app.js?v=476"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

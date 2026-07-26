@@ -8,6 +8,7 @@
 
 const rl = require('./_lib/ratelimit');
 const { getFirebase, verifyUid } = require('./_lib/firebase');
+const coursesLib = require('./_lib/courses');
 
 module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(204).end();
@@ -58,7 +59,8 @@ module.exports = async function handler(req, res) {
   // (allowlist ci-dessous) peuvent créer/accepter des courses, le temps de
   // valider toute la chaîne de bout en bout. Auth Bearer OBLIGATOIRE.
   if (body.type === 'course-create' || body.type === 'course-list' || body.type === 'course-accept'
-      || body.type === 'courier-status' || body.type === 'course-rate') {
+      || body.type === 'courier-status' || body.type === 'course-rate'
+      || body.type === 'course-deliver' || body.type === 'course-confirm' || body.type === 'course-proof') {
     return handleCourses(req, body, { apiKey, from, ownerEmail }, res);
   }
 
@@ -410,19 +412,9 @@ function partnerApplicationEmail(a, stored) {
 // Seuls les comptes de l'allowlist peuvent agir tant que le service est
 // inactif. Le serveur RECALCULE zone/prix depuis lat/lng (client jamais cru).
 // ═══════════════════════════════════════════════════════════════════════════
-const COURSE_TEST_EMAILS = ['justforwada@icloud.com'];   // comptes de test (user)
-const COURSE_DEPOT = { lat: 16.2260, lng: -61.3823 };    // Sainte-Anne
-const COURSE_BAREME = [                                   // = LV_BAREME client
-  { zone: 1, maxKm: 10, prix: 22 },
-  { zone: 2, maxKm: 22, prix: 48 },
-  { zone: 3, maxKm: 34, prix: 74 },
-  { zone: 4, maxKm: 46, prix: 100 }
-];
-function courseHaversineKm(a, b) {
-  const R = 6371, dLat = (b.lat - a.lat) * Math.PI / 180, dLng = (b.lng - a.lng) * Math.PI / 180;
-  const s = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * Math.PI / 180) * Math.cos(b.lat * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
-  return 2 * R * Math.asin(Math.sqrt(s));
-}
+// Barème, dépôt, allowlist de test, création depuis paiement : _lib/courses.js
+// (source UNIQUE partagée avec create-payment-intent.js et webhook.js).
+const COURSE_TEST_EMAILS = coursesLib.TEST_EMAILS;
 
 async function handleCourses(req, body, cfg, res) {
   const rlOk = await rl.allow('courses', rl.clientIp(req), 30, 3600);
@@ -450,52 +442,35 @@ async function handleCourses(req, body, cfg, res) {
     return res.status(200).json({ ok: true, courier: isCourier });
   }
 
-  // ── Créer une course (artisan) ──
+  // ── Créer une course (artisan) — sur PREUVE DE PAIEMENT ──
+  // Le client PAIE d'abord (produits + frais de livraison, modale carte —
+  // create-payment-intent pose la metadata course*). Il envoie ensuite son
+  // paymentIntentId : le serveur VÉRIFIE chez Stripe que le paiement est
+  // abouti, qu'il porte bien une course, et qu'il appartient à cet uid, puis
+  // crée la course depuis la METADATA (jamais depuis le corps client). Doc id
+  // = pi.id → idempotent avec le webhook (aucun doublon, aucune double alerte).
   if (body.type === 'course-create') {
     if (!isTester) return res.status(403).json({ ok: false, error: 'Service en test — ouverture le 1er janvier.' });
-    const address = String(body.address || '').trim().slice(0, 200);
-    const lat = Number(body.lat), lng = Number(body.lng);
-    const qty = Math.max(1, Math.min(99, parseInt(body.qty, 10) || 1));
-    const productKey = String(body.productKey || '').slice(0, 80);
-    const productTitle = String(body.productTitle || '').slice(0, 160);
-    const when = ['matin', 'apresmidi', 'heure'].includes(body.when) ? body.when : 'matin';
-    const hour = /^\d{2}:\d{2}$/.test(String(body.hour || '')) ? body.hour : '';
-    const date = /^\d{4}-\d{2}-\d{2}$/.test(String(body.date || '')) ? body.date : '';
-    if (address.length < 4) return res.status(400).json({ ok: false, error: 'Adresse trop courte.' });
-    if (!isFinite(lat) || !isFinite(lng)) return res.status(400).json({ ok: false, error: 'Position manquante — tape ton adresse et valide-la sur la carte.' });
-    // Zone/prix AUTORITAIRES serveur (le client n'est jamais cru).
-    const km = courseHaversineKm(COURSE_DEPOT, { lat, lng });
-    const z = COURSE_BAREME.find((b2) => km <= b2.maxKm);
-    if (!z) return res.status(400).json({ ok: false, error: 'Hors zone de livraison (max 46 km depuis Sainte-Anne).' });
-    const doc = {
-      status: 'en_attente', test: true,
-      artisanUid: uid, artisanEmail: email,
-      productKey, productTitle, qty, address, lat, lng,
-      km: Math.round(km * 10) / 10, zone: z.zone, prix: z.prix,
-      date, when, hour,
-      createdAt: new Date()
-    };
-    const ref = await db.collection('courses').add(doc);
-    // Alerte email aux livreurs de test + owner (Resend).
-    const whenTxt = when === 'heure' ? ('à ' + hour) : (when === 'matin' ? 'le matin' : "l'après-midi");
-    const subject = '🛵 Nouvelle course zone ' + z.zone + ' — ' + z.prix + ' € — ' + address.slice(0, 60);
-    const html = '<p><strong>Nouvelle course de livraison (TEST)</strong></p>'
-      + '<p>' + escapeHtml(productTitle || productKey) + ' × ' + qty + '<br>'
-      + '📍 ' + escapeHtml(address) + ' (' + doc.km + ' km de Sainte-Anne — zone ' + z.zone + ')<br>'
-      + '📅 ' + (date || 'au plus tôt') + ' ' + whenTxt + '<br>'
-      + '💶 <strong>' + z.prix + ' €</strong> pour le livreur</p>'
-      + '<p>Ouvre ton espace livreur sur pirates-tools.com pour accepter la course (premier arrivé, premier servi).</p>';
-    const dests = Array.from(new Set(COURSE_TEST_EMAILS.concat([cfg.ownerEmail])));
-    for (const to of dests) {
-      try {
-        await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + cfg.apiKey },
-          body: JSON.stringify({ from: cfg.from, to, subject, html })
-        });
-      } catch (e) { console.warn('[courses] alerte email échouée:', e.message); }
+    const piId = String(body.paymentIntentId || '').trim().slice(0, 80);
+    const stripeKey = process.env.STRIPE_SECRET_KEY;
+    if (!piId) return res.status(400).json({ ok: false, error: 'Paiement requis — la course est créée après le paiement de la commande.' });
+    if (!stripeKey) return res.status(503).json({ ok: false, error: 'Paiement non configuré.' });
+    let pi = null;
+    try { pi = await require('stripe')(stripeKey).paymentIntents.retrieve(piId); }
+    catch (e) { return res.status(404).json({ ok: false, error: 'Paiement introuvable.' }); }
+    if (!pi || pi.status !== 'succeeded') return res.status(400).json({ ok: false, error: 'Paiement non abouti.' });
+    if (!pi.metadata || pi.metadata.source !== 'pirates-tools' || !pi.metadata.courseZone) {
+      return res.status(400).json({ ok: false, error: 'Ce paiement ne correspond pas à une commande avec livraison.' });
     }
-    return res.status(200).json({ ok: true, course: { id: ref.id, km: doc.km, zone: z.zone, prix: z.prix } });
+    if (pi.metadata.uid && pi.metadata.uid !== uid) {
+      return res.status(403).json({ ok: false, error: 'Ce paiement ne t\'appartient pas.' });
+    }
+    const cc = await coursesLib.createFromIntent(db, pi, { uid, email });
+    if (cc.created) await coursesLib.alertNewCourse(cc.course, cc.id);
+    return res.status(200).json({
+      ok: true, created: cc.created,
+      course: { id: cc.id, km: cc.course.km, zone: cc.course.zone, prix: cc.course.prix }
+    });
   }
 
   // ── Lister (livreur de test : dispo + les miennes ; artisan : les miennes) ──
@@ -512,6 +487,9 @@ async function handleCourses(req, body, cfg, res) {
         date: c.date, when: c.when, hour: c.hour,
         mine: c.artisanUid === uid, acceptedByMe: c.courierUid === uid,
         rating: c.rating || 0, ratingComment: c.ratingComment || '',
+        paid: !!c.paid, escrow: c.escrow || null,
+        feeCents: c.feeCents || 0, amountCents: c.amountCents || 0,
+        hasProof: !!c.proofPhoto,
         createdAt: c.createdAt && c.createdAt.toMillis ? c.createdAt.toMillis() : null
       };
       if (c.artisanUid === uid || c.courierUid === uid) mine.push(out);
@@ -558,6 +536,129 @@ async function handleCourses(req, body, cfg, res) {
     }
   }
 
+  // ── Marquer livrée (livreur qui a accepté, PHOTO OBLIGATOIRE) ──
+  // La photo (colis remis, prise sur place) est la PREUVE anti-arnaque des
+  // deux côtés : le livreur ne peut pas réclamer sans avoir livré, le client
+  // ne peut pas nier une livraison photographiée. Stockée dans le doc course
+  // (JPEG compressé client ≤ ~500 Ko base64, limite doc Firestore 1 Mio).
+  if (body.type === 'course-deliver') {
+    const id = String(body.id || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 64);
+    const photo = String(body.photo || '');
+    if (!id) return res.status(400).json({ ok: false, error: 'id requis' });
+    if (!/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(photo)) {
+      return res.status(400).json({ ok: false, error: 'Photo de livraison requise (prise sur place, colis remis).' });
+    }
+    if (photo.length > 700000) return res.status(400).json({ ok: false, error: 'Photo trop lourde — réessaie, elle sera compressée.' });
+    const ref = db.collection('courses').doc(id);
+    try {
+      const result = await db.runTransaction(async (tx) => {
+        const d = await tx.get(ref);
+        if (!d.exists) throw new Error('introuvable');
+        const c = d.data();
+        if (c.courierUid !== uid) throw new Error('pas-ta-course');
+        if (c.status !== 'acceptee') throw new Error('pas-acceptee');
+        tx.update(ref, { status: 'livree', deliveredAt: new Date(), proofPhoto: photo });
+        return c;
+      });
+      // Prévenir l'artisan : à lui de confirmer pour débloquer le livreur.
+      if (result.artisanEmail) {
+        await coursesLib.sendMail(result.artisanEmail,
+          '📦 Ta livraison est arrivée — confirme la réception',
+          '<p>Ton livreur a marqué ta commande comme <strong>livrée</strong> (photo à l\'appui).</p>'
+          + '<p>📍 ' + coursesLib.escapeHtml(result.address || '') + '</p>'
+          + '<p>Ouvre <strong>Mes livraisons</strong> sur pirates-tools.com : vérifie la photo puis '
+          + '<strong>confirme la réception</strong> — c\'est ce qui débloque le paiement du livreur'
+          + (result.paid ? ' (' + result.prix + ' € gelés en attente)' : '') + '.</p>');
+      }
+      return res.status(200).json({ ok: true, id, status: 'livree' });
+    } catch (e) {
+      const map = { 'introuvable': [404, 'Course introuvable.'], 'pas-ta-course': [403, 'Seul le livreur qui a accepté peut marquer la livraison.'],
+        'pas-acceptee': [409, 'Cette course n\'est pas (ou plus) en cours de livraison.'] };
+      const m = map[e.message];
+      if (m) return res.status(m[0]).json({ ok: false, error: m[1] });
+      console.error('[courses] deliver failed:', e.message);
+      return res.status(500).json({ ok: false, error: 'Enregistrement échoué.' });
+    }
+  }
+
+  // ── Confirmer la réception (client) → DÉGEL des frais livreur ──
+  // Escrow : 'gele' → 'libere' si Stripe Connect du livreur est branché
+  // (transfer automatique), sinon 'liberable' + email owner (virement manuel
+  // en attendant l'onboarding Connect — activation au lancement).
+  if (body.type === 'course-confirm') {
+    const id = String(body.id || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 64);
+    if (!id) return res.status(400).json({ ok: false, error: 'id requis' });
+    const ref = db.collection('courses').doc(id);
+    let course = null;
+    try {
+      course = await db.runTransaction(async (tx) => {
+        const d = await tx.get(ref);
+        if (!d.exists) throw new Error('introuvable');
+        const c = d.data();
+        if (c.artisanUid !== uid) throw new Error('pas-ta-course');
+        if (c.status !== 'livree') throw new Error('pas-livree');
+        tx.update(ref, { status: 'terminee', confirmedAt: new Date(), escrow: c.paid ? 'liberable' : null });
+        return c;
+      });
+    } catch (e) {
+      const map = { 'introuvable': [404, 'Course introuvable.'], 'pas-ta-course': [403, 'Tu ne peux confirmer que tes propres livraisons.'],
+        'pas-livree': [409, 'Le livreur n\'a pas encore marqué cette course comme livrée.'] };
+      const m = map[e.message];
+      if (m) return res.status(m[0]).json({ ok: false, error: m[1] });
+      console.error('[courses] confirm failed:', e.message);
+      return res.status(500).json({ ok: false, error: 'Confirmation échouée.' });
+    }
+    let escrow = course.paid ? 'liberable' : null;
+    if (course.paid && course.feeCents > 0) {
+      // Versement automatique si le livreur a un compte Stripe Connect lié.
+      let released = false;
+      try {
+        const stripeKey = process.env.STRIPE_SECRET_KEY;
+        const cd = course.courierUid ? await db.collection('couriers').doc(course.courierUid).get() : null;
+        const acct = cd && cd.exists ? cd.data().stripeAccountId : null;
+        if (stripeKey && acct) {
+          const tr = await require('stripe')(stripeKey).transfers.create({
+            amount: course.feeCents, currency: 'eur', destination: acct,
+            transfer_group: id, metadata: { course: id }
+          });
+          await ref.update({ escrow: 'libere', transferId: tr.id, releasedAt: new Date() });
+          escrow = 'libere'; released = true;
+        }
+      } catch (e) { console.error('[courses] transfer failed:', e.message); }
+      if (!released && cfg.ownerEmail) {
+        // Pas de Connect : l'owner verse à la main (trace email + doc course).
+        await coursesLib.sendMail(cfg.ownerEmail,
+          '💰 ' + course.prix + ' € à verser au livreur — course confirmée',
+          '<p>Le client a confirmé la réception de sa livraison.</p>'
+          + '<p>Livreur : ' + coursesLib.escapeHtml(course.courierEmail || course.courierUid || '?')
+          + '<br>Montant gelé à verser : <strong>' + course.prix + ' €</strong>'
+          + '<br>Course : ' + coursesLib.escapeHtml(id) + '<br>📍 ' + coursesLib.escapeHtml(course.address || '') + '</p>'
+          + '<p>Stripe Connect du livreur non branché → virement manuel, puis marquer versé.</p>');
+      }
+      if (course.courierEmail) {
+        await coursesLib.sendMail(course.courierEmail,
+          '✅ Livraison confirmée — tes ' + course.prix + ' € sont débloqués',
+          '<p>Le client a confirmé la réception (photo validée).</p>'
+          + '<p>💶 <strong>' + course.prix + ' €</strong> — '
+          + (escrow === 'libere' ? 'virement Stripe envoyé vers ton compte.' : 'versement en cours de traitement.') + '</p>');
+      }
+    }
+    return res.status(200).json({ ok: true, id, status: 'terminee', escrow });
+  }
+
+  // ── Photo de livraison (uniquement l'artisan ou le livreur de la course) ──
+  if (body.type === 'course-proof') {
+    const id = String(body.id || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 64);
+    if (!id) return res.status(400).json({ ok: false, error: 'id requis' });
+    const d = await db.collection('courses').doc(id).get();
+    if (!d.exists) return res.status(404).json({ ok: false, error: 'Course introuvable.' });
+    const c = d.data();
+    if (c.artisanUid !== uid && c.courierUid !== uid) {
+      return res.status(403).json({ ok: false, error: 'Accès refusé.' });
+    }
+    return res.status(200).json({ ok: true, id, photo: c.proofPhoto || null });
+  }
+
   // ── Noter le livreur (client UNIQUEMENT, sa propre course, une seule fois) ──
   if (body.type === 'course-rate') {
     const id = String(body.id || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 64);
@@ -572,7 +673,7 @@ async function handleCourses(req, body, cfg, res) {
         if (!d.exists) throw new Error('introuvable');
         const c = d.data();
         if (c.artisanUid !== uid) throw new Error('pas-ta-course');
-        if (!['acceptee', 'livree'].includes(c.status)) throw new Error('pas-encore');
+        if (!['acceptee', 'livree', 'terminee'].includes(c.status)) throw new Error('pas-encore');
         if (c.rating) throw new Error('deja-note');
         tx.update(ref, { rating, ratingComment: comment, ratedAt: new Date(), ratedBy: uid });
       });

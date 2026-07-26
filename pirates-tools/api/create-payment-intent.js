@@ -14,6 +14,7 @@ var stripeMeta = require('./_lib/stripe-meta');
 var rl = require('./_lib/ratelimit');
 var loyalty = require('./_lib/loyalty');
 var postal = require('./_lib/postal');
+var coursesLib = require('./_lib/courses');
 var fbLib = require('./_lib/firebase');
 var getFirebase = fbLib.getFirebase;
 
@@ -93,6 +94,21 @@ module.exports = async function handler(req, res) {
       };
     }
 
+    // Course de livraison quincaillerie (facultative) : zone et PRIX recalculés
+    // SERVEUR depuis lat/lng — jamais depuis un montant client. Les frais sont
+    // reversés à 100 % au livreur après confirmation (voir _lib/courses.js).
+    var courseIn = body.course || null;
+    var courseQuote = null;
+    if (courseIn) {
+      if (territory !== '971') {
+        return res.status(400).json({ ok: false, error: 'Livraison sur chantier disponible en Guadeloupe uniquement pour le moment.' });
+      }
+      courseQuote = coursesLib.quote(courseIn.lat, courseIn.lng);
+      if (!courseQuote) {
+        return res.status(400).json({ ok: false, error: 'Adresse hors zone de livraison (max 46 km depuis Sainte-Anne).' });
+      }
+    }
+
     if (!Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ ok: false, error: 'Cart is empty' });
     }
@@ -146,6 +162,29 @@ module.exports = async function handler(req, res) {
       amountCents = totalCents;
     }
 
+    // Frais de livraison chantier : ajoutés APRÈS la remise fidélité — la
+    // remise ne porte que sur les produits, les frais partent à 100 % au
+    // livreur (gelés jusqu'à confirmation de réception par le client).
+    var deliveryCents = courseQuote ? courseQuote.prix * 100 : 0;
+    amountCents += deliveryCents;
+    var courseMeta = {};
+    if (courseQuote) {
+      var totalQty = validatedLines.reduce(function (s, l) { return s + l.qty; }, 0);
+      description.push('Livraison chantier zone ' + courseQuote.zone);
+      courseMeta = {
+        courseZone: String(courseQuote.zone),
+        courseKm: String(courseQuote.km),
+        courseFeeCents: String(deliveryCents),
+        courseAddress: cleanStr(courseIn.address, 200),
+        courseLat: String(courseQuote.lat),
+        courseLng: String(courseQuote.lng),
+        courseDate: /^\d{4}-\d{2}-\d{2}$/.test(String(courseIn.date || '')) ? courseIn.date : '',
+        courseWhen: ['matin', 'apresmidi', 'heure'].indexOf(courseIn.when) !== -1 ? courseIn.when : 'matin',
+        courseHour: /^\d{2}:\d{2}$/.test(String(courseIn.hour || '')) ? courseIn.hour : '',
+        courseQty: String(totalQty)
+      };
+    }
+
     // A2 : les lignes {key, qty} voyagent dans la metadata (chunkées — limite
     // Stripe 500 car./valeur). Le webhook payment_intent.succeeded les relit
     // pour reconstruire la commande côté serveur (email détaillé + journal),
@@ -167,7 +206,7 @@ module.exports = async function handler(req, res) {
         grossTotalEur: (totalCents / 100).toFixed(2),
         loyaltyPct: String(loyaltyQuote.pct),
         loyaltyDiscountCents: String(loyaltyQuote.discountCents)
-      }, uid ? { uid: uid } : {}, itemsMeta)
+      }, uid ? { uid: uid } : {}, courseMeta, itemsMeta)
     };
     if (customerEmail) intentParams.receipt_email = customerEmail;
     if (shipping) intentParams.shipping = shipping;
@@ -178,8 +217,10 @@ module.exports = async function handler(req, res) {
       ok: true,
       clientSecret: paymentIntent.client_secret,
       paymentIntentId: paymentIntent.id,
-      amount: amountCents,   // montant DÉBITÉ (remise déduite) — le client DOIT afficher celui-ci
-      gross: totalCents,     // total plein tarif avant remise
+      amount: amountCents,   // montant DÉBITÉ (remise déduite + livraison) — le client DOIT afficher celui-ci
+      gross: totalCents,     // total plein tarif avant remise (produits seuls)
+      deliveryCents: deliveryCents,
+      course: courseQuote ? { zone: courseQuote.zone, km: courseQuote.km, prix: courseQuote.prix } : null,
       loyalty: {
         pct: loyaltyQuote.pct,
         discountCents: loyaltyQuote.discountCents,

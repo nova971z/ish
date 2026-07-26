@@ -35,6 +35,7 @@ var postal = require('./_lib/postal');
 var pricing = require('./_lib/pricing');
 var catalog = require('./_lib/catalog');
 var invoiceLib = require('./_lib/invoice');
+var coursesLib = require('./_lib/courses');
 
 // Identité vendeur (config/invoice) pour la facture ; défauts si absente.
 async function loadSeller(fb) {
@@ -362,6 +363,18 @@ async function handleIntentSucceeded(stripe, fb, pi, ctx) {
     confirmedByWebhook: true
   });
 
+  // Course de livraison quincaillerie payée : créer la course (doc id = pi.id,
+  // idempotent avec le repli client /merci) + alerter les livreurs. Les frais
+  // livreur restent GELÉS (escrow) jusqu'à confirmation de réception.
+  if (pi.metadata.courseZone && fb.db) {
+    try {
+      var cc = await coursesLib.createFromIntent(fb.db, pi);
+      if (cc.created) await coursesLib.alertNewCourse(cc.course, cc.id);
+    } catch (courseErr) {
+      console.error('[webhook] course create failed:', courseErr.message);
+    }
+  }
+
   // Emails — RETRYABLE (voir handleSessionCompleted) + dédup emailsSent.
   // Le bloc facture de l'email reste best-effort : un email sans bloc facture
   // vaut mieux qu'un email bloqué (le n° et le détail vivent dans payments/).
@@ -549,6 +562,19 @@ async function rebuildLines(pi, territory) {
         subCents: -discountCents
       });
       sum -= discountCents;
+    }
+    // Frais de livraison chantier (course quincaillerie) : ligne dédiée —
+    // reversés à 100 % au livreur, hors remise fidélité. Sans elle, la somme
+    // ne vaudrait plus pi.amount et l'intégrité dégraderait à tort.
+    var courseFeeCents = parseInt((pi.metadata && pi.metadata.courseFeeCents) || '0', 10);
+    if (isFinite(courseFeeCents) && courseFeeCents > 0) {
+      lines.push({
+        name: 'Livraison sur chantier — zone ' + ((pi.metadata && pi.metadata.courseZone) || '?') + ' (reversée intégralement au livreur)',
+        qty: 1,
+        unitCents: courseFeeCents,
+        subCents: courseFeeCents
+      });
+      sum += courseFeeCents;
     }
     // Intégrité : le détail reconstruit doit valoir exactement le montant
     // débité. Un prix catalogue modifié entre paiement et webhook → dégradation

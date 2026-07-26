@@ -895,15 +895,18 @@
     for (var i = 0; i < items.length; i++) {
       if (items[i].key === key && !!items[i].coffret === coffret) { existing = items[i]; break; }
     }
+    // addQty : quantité ajoutée en un clic (sélecteur de quantité des fiches
+    // quincaillerie) — 1 par défaut, comportement historique inchangé.
+    var addQty = Math.max(1, Math.min(99, parseInt(item.addQty, 10) || 1));
     if (existing) {
-      existing.qty = (existing.qty || 1) + 1;
+      existing.qty = Math.min(99, (existing.qty || 1) + addQty);
     } else {
       items.push({
         key: key,
         title: item.title + (coffret ? ' + coffret TSTAK' : ''),
         brand: item.brand || '',
         price: Number(item.price) || 0,
-        qty: 1,
+        qty: addQty,
         image: item.img || item.image || '',
         paymentLink: item.paymentLink || '',
         coffret: coffret
@@ -2241,6 +2244,7 @@
     // Add to cart — stays on page, no redirect
     var pdpOut = isOutOfStock(product);
     setupPdpCoffret(activeProduct);   // option coffret TSTAK (machines éligibles)
+    setupPdpQty(isQuinc);             // sélecteur de quantité (quincaillerie)
     if (dom.pdpQuote) {
       dom.pdpQuote.disabled = pdpOut;
       if (pdpOut) dom.pdpQuote.setAttribute('aria-disabled', 'true');
@@ -2250,7 +2254,7 @@
           toast('Produit en rupture de stock', 'error');
           return;
         }
-        addToCart(Object.assign({}, activeProduct, { coffret: _pdpCoffret }));
+        addToCart(Object.assign({}, activeProduct, { coffret: _pdpCoffret, addQty: _pdpQty }));
       };
     }
 
@@ -2268,7 +2272,7 @@
         }
         // Libellé aligné sur addToCart : une ligne « avec coffret » porte son
         // suffixe partout (modale, email, facture) — le prix, lui, vient du flag.
-        openPayModal([{ key: activeProduct.id || activeProduct.slug, title: activeProduct.title + (_pdpCoffret ? ' + coffret TSTAK' : ''), price: activeProduct.price, qty: 1, coffret: _pdpCoffret, paymentLink: activeProduct.paymentLink || '' }]);
+        openPayModal([{ key: activeProduct.id || activeProduct.slug, title: activeProduct.title + (_pdpCoffret ? ' + coffret TSTAK' : ''), price: activeProduct.price, qty: _pdpQty, coffret: _pdpCoffret, paymentLink: activeProduct.paymentLink || '' }]);
       };
     }
 
@@ -4144,9 +4148,11 @@
     var is971 = isleCode === '971';
     var zoneTxt = document.getElementById(cfg.zone);
     function zoneBaseTxt() {
-      return '💶 Frais de livraison payés <strong>intégralement au livreur</strong>, selon la zone ('
+      return '💶 Frais de livraison selon la zone ('
         + LV_BAREME.map(function (b) { return b.emoji + ' ' + b.prix + ' €'; }).join(' · ')
-        + ' — distance depuis Sainte-Anne). Tape ton adresse : ta zone s\'affiche. L\'itinéraire proposé au livreur est indicatif : il reste libre de sa route.';
+        + ' — distance depuis Sainte-Anne), payés <strong>en ligne avec ta commande</strong> puis reversés '
+        + '<strong>à 100 % au livreur</strong> une fois ta livraison confirmée (photo à l\'appui). '
+        + 'Tape ton adresse : ta zone s\'affiche. L\'itinéraire proposé au livreur est indicatif : il reste libre de sa route.';
     }
     if (zoneTxt) zoneTxt.innerHTML = zoneBaseTxt();
     // Date par défaut = aujourd'hui (input iOS vide = trou visuel).
@@ -4166,38 +4172,35 @@
     }
     var mapEl = document.getElementById(cfg.map);
     if (!mapEl) return;
-    // Bouton COMMANDER (mode test : allowlist serveur, zone/prix recalculés serveur).
+    // Bouton COMMANDER → ouvre la MODALE DE PAIEMENT (la même que pour les
+    // outils) : produits + frais de livraison payés en une fois. La course
+    // n'est créée qu'APRÈS paiement vérifié (metadata Stripe → /merci ou
+    // webhook) — impossible de commander sans payer.
     var orderBtn = document.getElementById(cfg.order);
     var orderSt = document.getElementById(cfg.status);
     if (orderBtn) orderBtn.onclick = function () {
       if (!_currentUser) { toast('Connecte-toi pour commander une livraison', 'error'); location.hash = '#/auth'; return; }
       var g = mapEl._ptGeo;
       if (!g) { if (orderSt) orderSt.textContent = 'Tape ton adresse et valide-la (Entrée) pour la localiser.'; return; }
+      if (territoryFromPostalClient(g.postal) !== '971') {
+        if (orderSt) orderSt.textContent = 'Livraison sur chantier disponible en Guadeloupe uniquement pour le moment.';
+        return;
+      }
+      var km = haversineKm(LV_DEPOT, { lat: g.lat, lng: g.lng });
+      var z = lvZoneForKm(km);
+      if (!z) { if (orderSt) orderSt.textContent = 'Adresse hors zone de livraison (max 46 km depuis Sainte-Anne).'; return; }
       var when = (box.querySelector('input[name="' + cfg.whenName + '"]:checked') || {}).value || 'matin';
       var hour = (document.getElementById(cfg.hour) || {}).value || '';
       if (when === 'heure' && !hour) { if (orderSt) orderSt.textContent = 'Choisis l\'heure souhaitée.'; return; }
       var pl = cfg.payload();
-      if (!pl) { if (orderSt) orderSt.textContent = 'Ton panier ne contient pas de quincaillerie.'; return; }
-      orderBtn.disabled = true;
-      if (orderSt) orderSt.textContent = 'Envoi…';
-      jsonAuthHeaders().then(function (headers) {
-        return fetch(apiBaseUrl() + '/api/contact', {
-          method: 'POST', headers: headers,
-          body: JSON.stringify({
-            type: 'course-create',
-            productKey: pl.productKey, productTitle: pl.productTitle, qty: pl.qty,
-            address: g.label, lat: g.lat, lng: g.lng,
-            date: (dateEl || {}).value || '', when: when, hour: hour
-          })
-        });
-      }).then(function (r) { return r.json().then(function (d) { return { r: r, d: d }; }); })
-        .then(function (x) {
-          orderBtn.disabled = false;
-          if (!x.r.ok || !x.d.ok) { if (orderSt) orderSt.textContent = '❌ ' + (x.d.error || 'Erreur'); return; }
-          if (orderSt) orderSt.textContent = '✅ Course créée — zone ' + x.d.course.zone + ', ' + x.d.course.prix + ' €. Les livreurs sont alertés par email.';
-          toast('Course de livraison créée ✅', 'success');
-        })
-        .catch(function () { orderBtn.disabled = false; if (orderSt) orderSt.textContent = 'Erreur réseau.'; });
+      if (!pl || !pl.items || !pl.items.length) { if (orderSt) orderSt.textContent = 'Ton panier ne contient pas de quincaillerie.'; return; }
+      if (orderSt) orderSt.textContent = '💳 Paiement sécurisé — la course part chez les livreurs dès le paiement validé.';
+      openPayModal(pl.items, {
+        address: g.label, street: g.street || '', postal: g.postal || '', city: g.city || '',
+        lat: g.lat, lng: g.lng,
+        date: (dateEl || {}).value || '', when: when, hour: hour,
+        zone: z.zone, prix: z.prix
+      });
     };
     ensureLeaflet().then(function () {
       var map = mapEl._ptMap;
@@ -4238,14 +4241,21 @@
               var label = f.properties && f.properties.label || q;
               if (mapEl._ptDest) map.removeLayer(mapEl._ptDest);
               mapEl._ptDest = window.L.marker([lat, lng]).addTo(map).bindPopup(escapeHTML(label)).openPopup();
-              mapEl._ptGeo = { lat: lat, lng: lng, label: label };
+              mapEl._ptGeo = {
+                lat: lat, lng: lng, label: label,
+                // BAN : rue / CP / commune séparés → préremplissage de la
+                // modale de paiement (le CP fixe le territoire fiscal).
+                street: (f.properties && f.properties.name) || '',
+                postal: (f.properties && f.properties.postcode) || '',
+                city: (f.properties && f.properties.city) || ''
+              };
               map.setView([lat, lng], 13);
               if (is971) {
                 var km = haversineKm(LV_DEPOT, { lat: lat, lng: lng });
                 var z = lvZoneForKm(km);
                 if (zoneTxt) zoneTxt.innerHTML = z
                   ? '📍 <strong>' + escapeHTML(label) + '</strong> — ' + km.toFixed(1) + ' km de Sainte-Anne → '
-                    + z.emoji + ' <strong>Zone ' + z.zone + ' : ' + z.prix + ' € de livraison</strong> (payés intégralement au livreur).'
+                    + z.emoji + ' <strong>Zone ' + z.zone + ' : ' + z.prix + ' € de livraison</strong> (payés avec ta commande — reversés à 100 % au livreur après confirmation).'
                   : '📍 <strong>' + escapeHTML(label) + '</strong> — ' + km.toFixed(1) + ' km : hors zone de livraison actuelle (max 46 km depuis Sainte-Anne).';
                 fetch('https://router.project-osrm.org/route/v1/driving/' + LV_DEPOT.lng + ',' + LV_DEPOT.lat + ';' + lng + ',' + lat + '?overview=full&geometries=geojson')
                   .then(function (r) { return r.json(); })
@@ -4282,7 +4292,10 @@
       box: 'pdpDelivery', map: 'pdpDeliveryMap', addr: 'pdpDelivAddr', date: 'pdpDelivDate',
       hourWrap: 'pdpDelivHourWrap', hour: 'pdpDelivHour', whenName: 'pdpDelivWhen',
       zone: 'pdpDelivZoneTxt', order: 'pdpDelivOrder', status: 'pdpDelivStatus',
-      payload: function () { return { productKey: product.id || product.slug, productTitle: product.title, qty: 1 }; }
+      payload: function () {
+        // Lignes PAYABLES (modale carte) — quantité = sélecteur de la fiche.
+        return { items: [{ key: product.id || product.slug, title: product.title, price: product.price, qty: _pdpQty }] };
+      }
     });
   }
 
@@ -4321,13 +4334,17 @@
       hourWrap: 'livDelivHourWrap', hour: 'livDelivHour', whenName: 'livDelivWhen',
       zone: 'livDelivZoneTxt', order: 'livDelivOrder', status: 'livDelivStatus',
       payload: function () {
+        // Lignes PAYABLES = la quincaillerie du panier (modale carte).
         var items = getCart().filter(function (it) {
           var p = findProductByKey(it.key);
           return p && p.brand === 'Quincaillerie';
         });
         if (!items.length) return null;
-        var qty = 0, names = items.map(function (it) { qty += (it.qty || 1); return (it.title || it.key) + ' \u00d7' + (it.qty || 1); });
-        return { productKey: 'panier-quincaillerie', productTitle: names.join(', ').slice(0, 160), qty: qty };
+        return {
+          items: items.map(function (it) {
+            return { key: it.key, title: it.title || it.key, price: it.price, qty: it.qty || 1, coffret: !!it.coffret };
+          })
+        };
       }
     });
   }
@@ -4649,6 +4666,42 @@
 
   // Espace livreur : RÉSERVÉ aux livreurs acceptés — un client est redirigé
   // vers SON environnement « Mes livraisons ».
+  // Compresse la photo de preuve de livraison : max 1100 px, JPEG — vise
+  // < 500 Ko en base64 (limite doc Firestore 1 Mio, garde serveur 700 Ko).
+  function lvCompressPhoto(file) {
+    return new Promise(function (resolve, reject) {
+      var fr = new FileReader();
+      fr.onerror = function () { reject(new Error('Lecture du fichier impossible')); };
+      fr.onload = function () {
+        var img = new Image();
+        img.onerror = function () { reject(new Error('Image illisible')); };
+        img.onload = function () {
+          var MAX = 1100;
+          var sc = Math.min(1, MAX / Math.max(img.width, img.height));
+          var cv = document.createElement('canvas');
+          cv.width = Math.round(img.width * sc);
+          cv.height = Math.round(img.height * sc);
+          cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+          var q = 0.72;
+          var out = cv.toDataURL('image/jpeg', q);
+          while (out.length > 680000 && q > 0.4) { q -= 0.1; out = cv.toDataURL('image/jpeg', q); }
+          resolve(out);
+        };
+        img.src = fr.result;
+      };
+      fr.readAsDataURL(file);
+    });
+  }
+
+  // Libellés partagés des statuts de course (livreur + client).
+  function lvCourseStatusTxt(c, forClient) {
+    if (c.status === 'en_attente') return '⏳ En attente d\'un livreur';
+    if (c.status === 'acceptee') return forClient ? '🛵 Prise en charge par un livreur' : '🛵 Acceptée — livraison en cours';
+    if (c.status === 'livree') return forClient ? '📦 Livrée — vérifie la photo et confirme la réception' : '📦 Livrée — en attente de confirmation du client';
+    if (c.status === 'terminee') return '✅ Terminée';
+    return escapeHTML(c.status);
+  }
+
   function renderCourierSpace() {
     lvGetRole().then(function (isC) {
       if (!isC) { location.hash = '#/mes-livraisons'; return; }
@@ -4695,16 +4748,37 @@
       if (!det) return;
       var z = LV_BAREME[(c.zone || 1) - 1] || LV_BAREME[0];
       det.hidden = false;
+      // Rémunération : payée en ligne par le client, GELÉE jusqu'à sa
+      // confirmation de réception (photo à l'appui) — puis versée au livreur.
+      var payLine = '';
+      if (c.paid) {
+        payLine = '💰 <strong>' + c.prix + ' €</strong> — '
+          + (c.escrow === 'libere' ? 'versés sur ton compte ✅'
+            : c.escrow === 'liberable' ? 'débloqués, versement en cours'
+            : 'payés par le client, <strong>gelés</strong> jusqu\'à sa confirmation de réception') + '<br>';
+      }
       det.innerHTML = '<h2 class="lv-h2">' + z.emoji + ' Course zone ' + c.zone + ' — <strong>' + c.prix + ' €</strong></h2>'
         + '<div class="lv-course__body">'
         + '📦 ' + escapeHTML(c.productTitle || '') + (c.qty > 1 ? ' × ' + c.qty : '') + '<br>'
         + '📍 ' + escapeHTML(c.address || '') + ' <em>(' + c.km + ' km de Sainte-Anne)</em><br>'
         + '📅 ' + (c.date ? escapeHTML(c.date) : 'au plus tôt') + ' ' + whenTxt(c) + '<br>'
-        + '🚦 Statut : <strong>' + (c.status === 'en_attente' ? 'en attente d\'un livreur' : escapeHTML(c.status)) + '</strong>'
+        + payLine
+        + '🚦 Statut : <strong>' + lvCourseStatusTxt(c, false) + '</strong>'
         + (c.acceptedByMe ? ' — ✅ acceptée par toi' : '') + '</div>'
         + (canAccept && c.status === 'en_attente'
-          ? '<button type="button" class="btn primary" style="margin-top:.6rem" data-course-accept="' + escapeHTML(c.id) + '">✅ Accepter cette course</button>' : '');
+          ? '<button type="button" class="btn primary" style="margin-top:.6rem" data-course-accept="' + escapeHTML(c.id) + '">✅ Accepter cette course</button>' : '')
+        // Preuve de livraison : photo OBLIGATOIRE prise sur place (colis
+        // remis) — c'est elle qui protège le livreur d'une contestation et
+        // conditionne le déblocage de son paiement.
+        + (c.acceptedByMe && c.status === 'acceptee'
+          ? '<div class="lv-proof">'
+            + '<p class="lv-hint">📸 Colis remis ? Prends une photo <strong>sur place</strong> (colis + lieu/client) : c\'est ta preuve de livraison — elle débloque ton paiement après confirmation du client.</p>'
+            + '<input type="file" accept="image/*" capture="environment" id="courierProofFile" hidden>'
+            + '<div class="lv-cta"><button type="button" class="btn primary" id="courierProofBtn">📸 Photo + marquer livrée</button>'
+            + '<span class="lv-cta__note" id="courierProofSt" aria-live="polite"></span></div>'
+            + '</div>' : '');
       wireAccept(det);
+      wireProof(det, c);
       det.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
     function wireAccept(root) {
@@ -4726,6 +4800,36 @@
           };
         })(btns[i]);
       }
+    }
+    function wireProof(root, c) {
+      var btn = root.querySelector('#courierProofBtn');
+      var file = root.querySelector('#courierProofFile');
+      var st = root.querySelector('#courierProofSt');
+      if (!btn || !file) return;
+      btn.onclick = function () { file.click(); };
+      file.onchange = function () {
+        var f = file.files && file.files[0];
+        if (!f) return;
+        btn.disabled = true;
+        if (st) st.textContent = 'Compression de la photo…';
+        lvCompressPhoto(f).then(function (data) {
+          if (st) st.textContent = 'Envoi…';
+          return jsonAuthHeaders().then(function (headers) {
+            return fetch(apiBaseUrl() + '/api/contact', {
+              method: 'POST', headers: headers,
+              body: JSON.stringify({ type: 'course-deliver', id: c.id, photo: data })
+            });
+          });
+        }).then(function (r) { return r.json(); }).then(function (d) {
+          if (d.ok) {
+            toast('📦 Livraison enregistrée — le client doit confirmer pour débloquer tes ' + c.prix + ' €', 'success');
+            renderCourierSpace();
+          } else { btn.disabled = false; if (st) st.textContent = '❌ ' + (d.error || 'Erreur'); }
+        }).catch(function (e) {
+          btn.disabled = false;
+          if (st) st.textContent = '❌ ' + ((e && e.message) || 'Erreur réseau.');
+        });
+      };
     }
     function courseCard(c, canAccept) {
       var z = LV_BAREME[(c.zone || 1) - 1] || LV_BAREME[0];
@@ -4829,28 +4933,41 @@
       for (var i = 1; i <= 5; i++) s += (i <= n ? '★' : '☆');
       return s;
     }
-    function statusLabel(c) {
-      if (c.status === 'en_attente') return '⏳ En attente d\'un livreur';
-      if (c.status === 'acceptee') return '🛵 Prise en charge par un livreur';
-      if (c.status === 'livree') return '✅ Livrée';
-      return escapeHTML(c.status);
-    }
+    function statusLabel(c) { return lvCourseStatusTxt(c, true); }
     function showDetail(c) {
       var det = document.getElementById('clientDelivDetail');
       if (!det) return;
       var z = LV_BAREME[(c.zone || 1) - 1] || LV_BAREME[0];
       det.hidden = false;
+      // Argent : montant payé en ligne (produits + livraison) — les frais de
+      // livraison sont gelés puis reversés au livreur après confirmation.
+      var payLine = c.paid
+        ? '💶 Payé en ligne : <strong>' + formatPrice((c.amountCents || 0) / 100) + '</strong> — dont '
+          + c.prix + ' € de livraison '
+          + (c.escrow === 'libere' ? 'versés au livreur ✅'
+            : c.escrow === 'liberable' ? 'débloqués pour le livreur'
+            : 'gelés jusqu\'à ta confirmation de réception') + '<br>'
+        : '💶 Frais de livraison : <strong>' + c.prix + ' €</strong><br>';
       var h = '<h2 class="lv-h2">' + z.emoji + ' Livraison zone ' + c.zone + '</h2>'
         + '<div class="lv-course__body">'
         + '📦 ' + escapeHTML(c.productTitle || '') + (c.qty > 1 ? ' × ' + c.qty : '') + '<br>'
         + '📍 ' + escapeHTML(c.address || '') + ' <em>(' + c.km + ' km de Sainte-Anne)</em><br>'
         + '📅 ' + (c.date ? escapeHTML(c.date) : 'au plus tôt') + ' ' + whenTxt(c) + '<br>'
-        + '💶 Frais de livraison : <strong>' + c.prix + ' €</strong> (payés au livreur à la réception)<br>'
+        + payLine
         + '🚦 ' + statusLabel(c) + '</div>';
+      // Livrée → le client vérifie la PHOTO du livreur puis confirme : c'est
+      // sa confirmation qui débloque les frais gelés (anti-arnaque des 2 côtés).
+      if (c.status === 'livree' && c.mine) {
+        h += '<div class="lv-proof" id="clientProofBox">'
+          + (c.hasProof ? '<p class="lv-hint">📸 Photo de livraison prise par ton livreur :</p><div class="lv-proof__img" id="clientProofImg">Chargement de la photo…</div>' : '<p class="lv-hint">Le livreur n\'a pas joint de photo.</p>')
+          + '<div class="lv-cta"><button type="button" class="btn primary" id="clientConfirmBtn">✅ Confirmer la réception — débloque le paiement du livreur</button>'
+          + '<span class="lv-cta__note" id="clientConfirmSt" aria-live="polite"></span></div>'
+          + '</div>';
+      }
       if (c.rating) {
         h += '<div class="lv-note lv-note--ok" style="margin-top:.7rem">⭐ Ta note : <strong>' + stars(c.rating) + '</strong>'
           + (c.ratingComment ? '<br>« ' + escapeHTML(c.ratingComment) + ' »' : '') + '</div>';
-      } else if (c.status === 'acceptee' || c.status === 'livree') {
+      } else if (c.status === 'acceptee' || c.status === 'livree' || c.status === 'terminee') {
         h += '<div class="lv-rate" data-rate-id="' + escapeHTML(c.id) + '">'
           + '<h3 class="lv-h3">Note ton livreur</h3>'
           + '<div class="lv-rate__stars" role="radiogroup" aria-label="Note sur 5">'
@@ -4863,6 +4980,43 @@
         h += '<p class="lv-hint" style="margin-top:.6rem">Tu pourras noter ton livreur dès qu\'il aura pris la course.</p>';
       }
       det.innerHTML = h;
+      // Photo de preuve + confirmation de réception (statut « livrée »)
+      if (c.status === 'livree' && c.mine) {
+        if (c.hasProof) {
+          jsonAuthHeaders().then(function (headers) {
+            return fetch(apiBaseUrl() + '/api/contact', {
+              method: 'POST', headers: headers,
+              body: JSON.stringify({ type: 'course-proof', id: c.id })
+            });
+          }).then(function (r) { return r.json(); }).then(function (d) {
+            var box = document.getElementById('clientProofImg');
+            if (!box) return;
+            box.innerHTML = (d.ok && d.photo)
+              ? '<img src="' + d.photo + '" alt="Photo de livraison prise par le livreur">'
+              : 'Photo indisponible.';
+          }).catch(function () {
+            var box = document.getElementById('clientProofImg');
+            if (box) box.textContent = 'Photo indisponible (réseau).';
+          });
+        }
+        var cf = det.querySelector('#clientConfirmBtn');
+        var cfSt = det.querySelector('#clientConfirmSt');
+        if (cf) cf.onclick = function () {
+          cf.disabled = true;
+          if (cfSt) cfSt.textContent = 'Confirmation…';
+          jsonAuthHeaders().then(function (headers) {
+            return fetch(apiBaseUrl() + '/api/contact', {
+              method: 'POST', headers: headers,
+              body: JSON.stringify({ type: 'course-confirm', id: c.id })
+            });
+          }).then(function (r) { return r.json(); }).then(function (d) {
+            if (d.ok) {
+              toast('✅ Réception confirmée — le paiement du livreur est débloqué', 'success');
+              renderClientDeliveries();
+            } else { cf.disabled = false; if (cfSt) cfSt.textContent = '❌ ' + (d.error || 'Erreur'); }
+          }).catch(function () { cf.disabled = false; if (cfSt) cfSt.textContent = 'Erreur réseau.'; });
+        };
+      }
       // Étoiles interactives
       var rate = det.querySelector('.lv-rate');
       if (rate) {
@@ -6577,6 +6731,11 @@
 
   // ── Stripe Payment Modal ───────────────────────────────────
   var _payItems = null;
+  // Course de livraison quincaillerie attachée au paiement en cours :
+  // { address, lat, lng, postal, city, date, when, hour, zone, prix } ou null.
+  // Le serveur (create-payment-intent) recalcule zone/prix depuis lat/lng —
+  // cet objet ne sert qu'à l'UX (préremplissage adresse, ligne livraison).
+  var _payCourse = null;
 
   // ── Crypto pay state ───────────────────────────────────────
   var _cryptoSelected = null; // network object from PT_CRYPTO_CONFIG
@@ -6962,6 +7121,29 @@
     if (old && old.parentNode) old.parentNode.removeChild(old);
   }
 
+  // Sélecteur de QUANTITÉ de la fiche (quincaillerie uniquement — les
+  // machines s'achètent à l'unité, le panier gère les multiples). Pilote
+  // l'ajout panier, l'achat direct et la commande de livraison.
+  var _pdpQty = 1;
+  function setupPdpQty(show) {
+    _pdpQty = 1;
+    var wrap = document.getElementById('pdpQtyWrap');
+    if (!wrap) return;
+    wrap.hidden = !show;
+    if (!show) return;
+    var val = document.getElementById('pdpQtyVal');
+    var minus = document.getElementById('pdpQtyMinus');
+    var plus = document.getElementById('pdpQtyPlus');
+    function paint() {
+      if (val) val.textContent = String(_pdpQty);
+      if (minus) minus.disabled = _pdpQty <= 1;
+      if (plus) plus.disabled = _pdpQty >= 99;
+    }
+    if (minus) minus.onclick = function () { if (_pdpQty > 1) { _pdpQty--; paint(); } };
+    if (plus) plus.onclick = function () { if (_pdpQty < 99) { _pdpQty++; paint(); } };
+    paint();
+  }
+
   function payUnitCents(it) {
     var p = findProductByKey(it && it.key);
     var ttc = p ? calcPrice(p, _currentTerritory).ttc : (Number(it && it.price) || 0);
@@ -6976,12 +7158,13 @@
     }, 0);
   }
 
-  function openPayModal(items) {
+  function openPayModal(items, courseCtx) {
     var modal = document.getElementById('payModal');
     if (!modal || !items || !items.length) return;
     // Annule une fermeture en cours (course fermer→rouvrir < 250 ms).
     if (_payCloseTimer) { clearTimeout(_payCloseTimer); _payCloseTimer = null; }
     _payItems = items;
+    _payCourse = courseCtx || null;
     _cryptoTotalEur = payTotalCents(items) / 100;
     _cryptoSelected = null;
     applyCryptoVisibility(modal);        // masque l'onglet crypto si désactivé
@@ -7003,6 +7186,18 @@
         + '<span class="pay-modal__line-price">' + formatPrice(lineCents / 100) + '</span>'
         + '</div>';
     });
+    // Ligne livraison chantier (estimation locale — le serveur renverra le
+    // montant AUTORITAIRE via renderServerQuote, recalculé depuis lat/lng).
+    if (_payCourse && _payCourse.prix) {
+      totalCents += _payCourse.prix * 100;
+      html += '<div class="pay-modal__line pay-modal__line--deliv">'
+        + '<div class="pay-modal__line-info">'
+        +   '<span class="pay-modal__line-title">🛵 Livraison sur chantier — zone ' + _payCourse.zone + ' <em>(100 % reversés au livreur)</em></span>'
+        +   '<span class="pay-modal__line-qty">x1</span>'
+        + '</div>'
+        + '<span class="pay-modal__line-price">' + formatPrice(_payCourse.prix) + '</span>'
+        + '</div>';
+    }
     var total = totalCents / 100;
     if (itemsEl) itemsEl.innerHTML = html;
     if (totalEl) totalEl.textContent = formatPrice(total);
@@ -7024,6 +7219,15 @@
     _stripeClientSecret = null;
     _quoteTerritory = null;
     setupPayAddressForm();
+    // Course : l'adresse du CHANTIER (déjà géocodée sur la carte) préremplit
+    // le formulaire — le formulaire carte se charge immédiatement.
+    if (_payCourse) {
+      var pf = function (id, v) { var el = document.getElementById(id); if (el && v) el.value = v; };
+      pf('payAddrName', (_currentUser && (_currentUser.displayName || _currentUser.email)) || '');
+      pf('payAddrLine1', _payCourse.street || _payCourse.address || '');
+      pf('payAddrPostal', _payCourse.postal || '');
+      pf('payAddrCity', _payCourse.city || '');
+    }
     handlePayAddressChange();
 
     // Analytics
@@ -7247,7 +7451,13 @@
       // postalCode (source autoritaire) — celui-ci prime toujours.
       territory: ship.territory,
       postalCode: ship.addr.postal,
-      shipping: { name: ship.addr.name, line1: ship.addr.line1, city: ship.addr.city }
+      shipping: { name: ship.addr.name, line1: ship.addr.line1, city: ship.addr.city },
+      // Course quincaillerie : le serveur recalcule zone + frais depuis lat/lng
+      // et les AJOUTE au montant débité (reversés au livreur après confirmation).
+      course: _payCourse ? {
+        lat: _payCourse.lat, lng: _payCourse.lng, address: _payCourse.address,
+        date: _payCourse.date, when: _payCourse.when, hour: _payCourse.hour
+      } : undefined
       // uid retiré du corps (S2) : le serveur le dérive de l'ID token vérifié
       // (en-tête Authorization), il n'est plus déclaratif.
     });
@@ -7342,6 +7552,17 @@
     if (totalEl && typeof data.amount === 'number') {
       totalEl.textContent = formatPrice(data.amount / 100);
     }
+    // Ligne livraison chantier : réalignée sur le devis SERVEUR (zone + frais
+    // recalculés depuis lat/lng — l'estimation locale ne fait jamais foi).
+    if (data.course && itemsEl) {
+      var dl = itemsEl.querySelector('.pay-modal__line--deliv');
+      if (dl) {
+        var dt = dl.querySelector('.pay-modal__line-title');
+        var dp = dl.querySelector('.pay-modal__line-price');
+        if (dt) dt.innerHTML = '🛵 Livraison sur chantier — zone ' + data.course.zone + ' <em>(100 % reversés au livreur)</em>';
+        if (dp) dp.textContent = formatPrice((data.deliveryCents || data.course.prix * 100) / 100);
+      }
+    }
     if (data.loyalty && typeof data.loyalty.verifiedSpendCents === 'number') {
       saveLoyalty({ totalSpent: data.loyalty.verifiedSpendCents / 100 });
     }
@@ -7363,7 +7584,9 @@
       try {
         localStorage.setItem('pt_pending_order', JSON.stringify({
           items: _payItems.map(function (it) { return { key: it.key, title: it.title, price: payUnitCents(it) / 100, qty: it.qty }; }),
-          total: total, ts: Date.now()
+          total: total, ts: Date.now(),
+          // Course : /merci finalisera la création (preuve = paymentIntentId).
+          course: _payCourse ? 1 : 0
         }));
       } catch (_) {}
 
@@ -7612,6 +7835,22 @@
     var isCrypto = proof.kind === 'crypto';
     var lines = Array.isArray(pending.items) ? pending.items : [];
     var totalNum = Number(pending.total) || 0;
+
+    // Course de livraison quincaillerie PAYÉE : finaliser sa création avec la
+    // preuve (paymentIntentId). Le serveur vérifie le paiement chez Stripe et
+    // crée la course depuis la metadata — idempotent avec le webhook (doc id
+    // = pi.id), donc aucun doublon si les deux chemins passent.
+    if (pending.course && proof.paymentIntentId) {
+      jsonAuthHeaders().then(function (headers) {
+        return fetch(apiBaseUrl() + '/api/contact', {
+          method: 'POST', headers: headers,
+          body: JSON.stringify({ type: 'course-create', paymentIntentId: proof.paymentIntentId })
+        });
+      }).then(function (r) { return r.json(); }).then(function (d) {
+        if (d.ok) toast('🛵 Course créée — les livreurs sont alertés par email', 'success');
+        else if (d.error) toast('Livraison : ' + d.error, 'error');
+      }).catch(function () {});
+    }
 
     if (!isCrypto) {
       // Fidélité locale : uniquement sur paiement carte prouvé. La déclaration

@@ -629,6 +629,48 @@ RESTE : DTW300Z / DCP580N pas encore branchés (outils nus, à faire au besoin).
 - NOTE : minification app.js/styles.css évoquée puis ÉCARTÉE par l'user
   (« pas besoin ») après retour à la vitesse normale. Option future.
 
+## Session paiement des courses + escrow livreur (26/07/2026, SW v476)
+DÉCISION USER GRAVÉE : le client PAIE sa commande quincaillerie + livraison EN
+LIGNE, EN UNE FOIS (même modale carte que les outils). L'argent est ensuite
+VENTILÉ : produits → owner ; frais de livraison → GELÉS (escrow) puis reversés
+à 100 % au livreur quand (1) le livreur a marqué « livrée » avec PHOTO
+OBLIGATOIRE prise sur place (anti-arnaque des 2 côtés) et (2) le client a
+confirmé la réception. Zéro bénéfice plateforme sur la course.
+- `api/_lib/courses.js` (NOUVEAU, source unique) : DEPOT/BAREME/quote (zone+prix
+  serveur depuis lat/lng), createFromIntent (doc courses/ id = pi.id →
+  IDEMPOTENT webhook ↔ repli /merci, jamais de doublon), alertNewCourse,
+  TEST_EMAILS. Testé 12/12 (barème réel Gosier/Basse-Terre, rejeu sans doublon).
+- create-payment-intent : body.course {lat,lng,address,date,when,hour} →
+  territoire 971 obligatoire, zone/frais AUTORITAIRES serveur ajoutés au
+  montant débité (remise fidélité = produits seuls), metadata course*.
+- webhook : rebuildLines ajoute la ligne « Livraison sur chantier — zone X
+  (reversée intégralement au livreur) » (intégrité au centime conservée,
+  testée) ; payment_intent.succeeded avec courseZone → crée la course + alerte.
+- contact.js : course-create EXIGE paymentIntentId (vérifié chez Stripe :
+  succeeded + source + courseZone + uid du payeur) — IMPOSSIBLE de commander
+  sans payer ; course-deliver (livreur accepté, photo data-URL JPEG compressée
+  client ≤700 Ko, statut acceptee→livree, email client « confirme ») ;
+  course-confirm (client, livree→terminee, escrow gele→liberable/libere ;
+  transfer Stripe Connect AUTO si couriers/{uid}.stripeAccountId existe, sinon
+  email owner « X € à verser » = virement manuel en attendant Connect) ;
+  course-proof (photo visible artisan/livreur seulement).
+- app.js : bouton « Commander la livraison » (fiche QC + page livraison) ouvre
+  openPayModal(items, courseCtx) — adresse chantier BAN préremplit le
+  formulaire (street/postcode/city stockés dans _ptGeo), ligne 🛵 livraison
+  affichée, /merci finalise course-create avec la preuve ; espace livreur =
+  statuts + « 💰 gelés/débloqués/versés » + bouton photo (lvCompressPhoto
+  canvas 1100 px JPEG) ; espace client = total payé, photo du livreur, bouton
+  « ✅ Confirmer la réception », notation aussi sur terminee.
+- STEPPER QUANTITÉ (fiches quincaillerie SEULEMENT) : pilule − / n / + dorée
+  (#pdpQtyWrap, §50 CSS), pilote ajout panier (addToCart addQty), achat direct
+  et livraison. Masqué sur les machines. Harnais Playwright 10/10.
+- STRIPE CONNECT (à faire au lancement) : onboarding Express des livreurs
+  (KYC Stripe + IBAN) → poser stripeAccountId dans couriers/{uid} → les
+  versements deviennent 100 % automatiques. Sans Connect, on NE PEUT PAS
+  détenir l'argent des livreurs légalement à long terme (encaissement pour
+  compte de tiers) — le gel actuel sur notre solde + virement manuel est
+  acceptable en TEST uniquement.
+
 ## Vérification standard
 `cd pirates-tools && node scripts/ci.js` doit rester vert après chaque étape.
 Bump SW (`sw.js` VERSION + ASSET_VER) et `?v=` dans `index.html` à chaque changement d'asset.
