@@ -5969,8 +5969,8 @@
     "brand": "Makita",
     "category": "Scies",
     "tag": "Nouveau",
-    "desc": "Scie sauteuse 18V LXT Li-Ion (Machine seule).",
-    "img": "images/placeholder.svg",
+    "desc": "Sauteuse 18V LXT brushless, coupe bois 135 mm, course 26 mm, pendulaire — machine seule.",
+    "img": "images/posters/djv181z.webp",
     "price": 370.97,
     "currency": "EUR",
     "vat": 0.2,
@@ -5979,7 +5979,7 @@
     "stock_label": "En stock",
     "model": "",
     "paymentLink": "",
-    "weight_kg": 3.5,
+    "weight_kg": 2.6,
     "ncCategory": "power_tool",
     "productType": "pro",
     "tags": [
@@ -5987,14 +5987,31 @@
       "tropical_ready"
     ],
     "features": [
-      "Scie sauteuse 18V LXT Li-Ion (Machine seule)",
-      "Gamme Makita 18V LXT sans fil, moteur brushless (sans charbon) haut rendement",
-      "Machine seule (batterie et chargeur non inclus), compatible batteries Makita LXT",
-      "Robuste et endurant, pensé pour un usage professionnel intensif",
-      "Idéal pour les chantiers des Antilles / DOM-TOM"
+      "Scie sauteuse sans fil 18V LXT — coupe bois 135 mm, acier 10 mm, alu 20 mm",
+      "Moteur brushless (sans charbon), 3500 courses/min, longueur de course 26 mm",
+      "Mouvement pendulaire pour un débit rapide et des coupes nettes",
+      "Soft No Load + protection électronique contre les surcharges, faibles vibrations (6,5 m/s²)",
+      "Machine seule (batterie et chargeur non inclus), compatible batteries Makita LXT"
     ],
-    "specs": {},
-    "description_long": "Scie sauteuse 18V LXT Li-Ion (Machine seule). Outil professionnel Makita de la gamme 18V LXT sans fil (moteur brushless). Vendu en machine seule (sans batterie ni chargeur). Compatible avec les batteries Makita LXT. Fiche technique détaillée à compléter. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "specs": {
+      "Marque": "Makita",
+      "Type": "Scie sauteuse sans fil 18V LXT Brushless — machine nue",
+      "Tension": "18 V (gamme LXT)",
+      "Moteur": "Brushless (sans charbon)",
+      "Cadence de coupe": "3500 courses/min",
+      "Longueur de course": "26 mm",
+      "Mouvement pendulaire": "Oui",
+      "Capacité de coupe (bois)": "135 mm",
+      "Capacité de coupe (acier)": "10 mm",
+      "Capacité de coupe (aluminium)": "20 mm",
+      "Technologie moteur": "Soft No Load + protection électronique contre les surcharges",
+      "Pression sonore (LpA)": "78 dB(A) (incertitude 3 dB)",
+      "Vibrations": "6,5 m/s² (K = 1,5)",
+      "Poids net EPTA": "2,6 kg",
+      "Dimensions (L×l×h)": "298 × 77 × 189 mm",
+      "Batterie / chargeur": "Non inclus"
+    },
+    "description_long": "Scie sauteuse sans fil Makita 18V LXT (DJV181Z), machine seule. Travail rapide et précis grâce au moteur brushless : coupe le bois jusqu’à 135 mm, l’acier 10 mm et l’aluminium 20 mm, à 3500 courses/min avec une course de 26 mm et un mouvement pendulaire réglable. Soft No Load (démarrage doux) et protection électronique contre les surcharges, faibles vibrations (6,5 m/s²). Vendue sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
   },
   {
     "id": "makita-djv182z",
@@ -6005,8 +6022,8 @@
     "brand": "Makita",
     "category": "Scies",
     "tag": "Nouveau",
-    "desc": "Scie sauteuse 18V LXT Li-Ion (Machine seule).",
-    "img": "images/placeholder.svg",
+    "desc": "Sauteuse 18V LXT brushless, coupe bois 135 mm, course 26 mm, pendulaire — machine seule.",
+    "img": "images/posters/djv182z.webp",
     "price": 212.36,
     "currency": "EUR",
     "vat": 0.2,
@@ -6015,7 +6032,7 @@
     "stock_label": "En stock",
     "model": "",
     "paymentLink": "",
-    "weight_kg": 3.5,
+    "weight_kg": 2.6,
     "ncCategory": "power_tool",
     "productType": "pro",
     "tags": [
@@ -6023,14 +6040,31 @@
       "tropical_ready"
     ],
     "features": [
-      "Scie sauteuse 18V LXT Li-Ion (Machine seule)",
-      "Gamme Makita 18V LXT sans fil, moteur brushless (sans charbon) haut rendement",
-      "Machine seule (batterie et chargeur non inclus), compatible batteries Makita LXT",
-      "Robuste et endurant, pensé pour un usage professionnel intensif",
-      "Idéal pour les chantiers des Antilles / DOM-TOM"
+      "Scie sauteuse sans fil 18V LXT — coupe bois 135 mm, acier 10 mm, alu 20 mm",
+      "Moteur brushless (sans charbon), 3500 courses/min, longueur de course 26 mm",
+      "Mouvement pendulaire pour un débit rapide et des coupes nettes",
+      "Soft No Load + protection électronique contre les surcharges, faibles vibrations (6,5 m/s²)",
+      "Machine seule (batterie et chargeur non inclus), compatible batteries Makita LXT"
     ],
-    "specs": {},
-    "description_long": "Scie sauteuse 18V LXT Li-Ion (Machine seule). Outil professionnel Makita de la gamme 18V LXT sans fil (moteur brushless). Vendu en machine seule (sans batterie ni chargeur). Compatible avec les batteries Makita LXT. Fiche technique détaillée à compléter. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "specs": {
+      "Marque": "Makita",
+      "Type": "Scie sauteuse sans fil 18V LXT Brushless — machine nue",
+      "Tension": "18 V (gamme LXT)",
+      "Moteur": "Brushless (sans charbon)",
+      "Cadence de coupe": "3500 courses/min",
+      "Longueur de course": "26 mm",
+      "Mouvement pendulaire": "Oui",
+      "Capacité de coupe (bois)": "135 mm",
+      "Capacité de coupe (acier)": "10 mm",
+      "Capacité de coupe (aluminium)": "20 mm",
+      "Technologie moteur": "Soft No Load + protection électronique contre les surcharges",
+      "Pression sonore (LpA)": "78 dB(A) (incertitude 3 dB)",
+      "Vibrations": "6,5 m/s² (K = 1,5)",
+      "Poids net EPTA": "2,6 kg",
+      "Dimensions (L×l×h)": "298 × 77 × 189 mm",
+      "Batterie / chargeur": "Non inclus"
+    },
+    "description_long": "Scie sauteuse sans fil Makita 18V LXT (DJV182Z), machine seule. Travail rapide et précis grâce au moteur brushless : coupe le bois jusqu’à 135 mm, l’acier 10 mm et l’aluminium 20 mm, à 3500 courses/min avec une course de 26 mm et un mouvement pendulaire réglable. Soft No Load (démarrage doux) et protection électronique contre les surcharges, faibles vibrations (6,5 m/s²). Vendue sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
   },
   {
     "id": "makita-djv184z",
