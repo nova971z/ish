@@ -73,13 +73,19 @@ LIRE CE FICHIER avant d'ajouter/modifier un produit ou un poster. Cœur des règ
       `models/products/Visseuseachocflex.glb` (visseuse Flex ID 1/4").
       (3 autres fiches fantômes déjà supprimées le 18/07 : Stanley FMC645D2,
       FMC688L2, Facom CL2.C18S.)
-- [ ] **3 Festool au SKU inventé — à corriger** (détecté 26/07 par le traqueur) :
-      `TI-18` (TID 18), `TPC-18` (TPC 18/4), `TSC55` (TSC 55 KEB). Tous les
-      autres Festool utilisent le VRAI code article numérique (577985, 578011…)
-      et sont correctement traqués. Ces 3-là ne matchent donc jamais. L'user a
-      constaté que la page 2 de Festool chez cotébrico « ne contient que des
-      articles qu'on ne vend pas » → ces sets ne sont peut-être pas vendus par
-      cotébrico. À trancher : retrouver le vrai code article, ou retirer.
+- [x] **3 Festool au SKU inventé — SUPPRIMÉS le 26/07/2026.** `TI-18` (TID 18),
+      `TPC-18` (TPC 18/4) et `TSC55` (TSC 55 KEB Set) avaient un SKU qui ne
+      correspond à rien chez cotébrico (tous les autres Festool utilisent le
+      VRAI code article numérique — 577985, 578011… — et sont bien traqués).
+      Vérification user sur cotébrico : **une seule des trois existe**, et
+      encore, dans une AUTRE configuration (TSC 55 KEB-Basic 100Y **Limited
+      Edition solo**, réf 578223, 533,61 € — pas le Set 2×5,2Ah + rail de la
+      fiche). Décision user : supprimer les trois — une édition limitée est une
+      référence temporaire, le produit redeviendrait introuvable au traqueur.
+      ⚠️ ASSETS CONSERVÉS pour un éventuel retour : `images/posters/tsc55.webp`
+      + `-hero.webp` et `models/products/tsc55.glb` (⚠️ le poster montre le SET
+      avec ses 2 batteries → à refaire si on repart sur une version « machine
+      seule », règle posters).
 
 ## ⚠️ CHECKLIST PRÉ-LANCEMENT — à dérouler quand l'user demande « est-ce qu'on est prêt à lancer »
 Le site N'EST PAS lancé (décidé le 15/07/2026). Ne rien ouvrir au public tant que ces points bloquants ne sont pas faits. Quand l'user pose la question, PARCOURIR cette liste et donner l'état point par point.

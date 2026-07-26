@@ -909,56 +909,6 @@
     "heroImg": "images/posters/dcs367n-hero.webp"
   },
   {
-    "id": "festool-tsc55",
-    "slug": "festool-tsc55-scie-plongeante-18v",
-    "sku": "TSC55",
-    "title": "Festool TSC 55 KEB — Scie plongeante 18V (Set 2x5,2Ah + rail FS 1400)",
-    "name": "TSC 55 KEB",
-    "brand": "Festool",
-    "category": "Scies",
-    "tag": "Premium",
-    "desc": "Scie plongeante 160 mm, kickback stop, rail inclus.",
-    "img": "images/posters/tsc55.webp",
-    "price": 1089,
-    "currency": "EUR",
-    "vat": 0.2,
-    "price_ht": 907.5,
-    "stock_status": "in_stock",
-    "stock_label": "En stock",
-    "model": "models/products/tsc55.glb",
-    "paymentLink": "",
-    "weight_kg": 3.5,
-    "ncCategory": "power_tool",
-    "productType": "pro",
-    "tags": [
-      "cordless",
-      "tropical_ready",
-      "mayotte_project"
-    ],
-    "description_long": "Scie plongeante 160 mm, kickback stop, rail inclus. Usage professionnel DOM-TOM : adapté aux chantiers tropicaux (humidité, chaleur, salinité). Machine sans fil Festool : brushless, batteries Li-Ion, autonomie terrain. Stock livré depuis la métropole vers Guadeloupe, Martinique, Guyane, La Réunion et Mayotte. Garantie constructeur + SAV Pirates Tools. Octroi de mer calculé automatiquement selon votre territoire.",
-    "specs": {
-      "Marque": "Festool",
-      "Type": "Scie plongeante sans fil (sur rail), bi-tension",
-      "Tension": "36 V (2 × 18 V)",
-      "Moteur": "Brushless EC-TEC",
-      "Ø lame": "160 mm",
-      "Alésage": "20 mm",
-      "Profondeur de coupe à 90°": "0–55 mm",
-      "Profondeur de coupe à 45°": "0–43 mm",
-      "Vitesse à vide": "2650–5200 tr/min",
-      "Compatible rail": "Oui (rail de guidage FS Festool)",
-      "Poids": "4,6 kg"
-    },
-    "features": [
-      "Fonctionne en 36 V grâce à 2 batteries 18 V (bi-tension)",
-      "Sécurité KickbackStop : blocage anti-rebond de la lame",
-      "Coupe de précision sur rail de guidage FS, double échelle de profondeur",
-      "Lame 160 mm, profondeur 55 mm à 90°, inclinable jusqu'à 45°",
-      "Fournie en set avec 2 batteries 5,2 Ah + rail FS 1400"
-    ],
-    "heroImg": "images/posters/tsc55-hero.webp"
-  },
-  {
     "id": "wera-kraftform-kompakt",
     "slug": "wera-kraftform-kompakt-60-tournevis-set",
     "sku": "KK60",
