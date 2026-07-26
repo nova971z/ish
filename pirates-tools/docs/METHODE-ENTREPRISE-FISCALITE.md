@@ -95,6 +95,36 @@ L'user **achète à 20 %** (métropole) et **encaisse à 8,5 %** (Guadeloupe).
   (déclaration annuelle CA12) : c'est LUI qui créerait le trou de trésorerie
   redouté. **Opter pour le réel normal mensuel dès la création.**
 
+### e) « Suis-je en perte pendant le mois où j'attends la TVA ? » → **NON**
+Question posée par l'user le 26/07/2026. Calcul vérifié sur DHS900Z (coût réel
+454,62 € TTC, prix client Guadeloupe 663,01 € TTC) :
+
+| Le jour de la vente, AVANT toute récupération de TVA | € |
+|---|---|
+| Achat fournisseur TTC (dont 75,77 € de TVA avancée) | −454,62 |
+| Transport Colissimo OM1 | −64,00 |
+| FTD douane | −5,10 |
+| Octroi de mer à l'import | −42,07 |
+| Stripe | −10,20 |
+| Emballage + quote-part frais fixes | −3,00 |
+| **Total sorties** | **−578,99** |
+| **Encaissement client (TTC 971)** | **+663,01** |
+| **➡️ TRÉSORERIE IMMÉDIATE** | **+84,02 €** |
+
+Puis à la CA3 du mois suivant : TVA collectée −51,94 / TVA déductible +75,77
+= **crédit de +23,83 €**. Total 107,85 € − IS 16,18 € = **91,67 € net = 15,00 %**.
+
+**Raison de fond** : le prix de vente couvre le prix d'achat **TTC**, pas
+seulement le HT. La TVA avancée est donc déjà récupérée via l'encaissement
+client ; le remboursement de l'État vient **en plus**. Il n'y a JAMAIS de mois
+en perte à cause de la TVA.
+
+**La seule vraie contrainte de trésorerie = le STOCK** (payer la marchandise
+avant de l'avoir vendue), pas la TVA. Le modèle actuel (Colissimo à l'unité,
+achat chez cotébrico APRÈS paiement du client) supprime ce besoin : aucune
+avance. Il ne réapparaîtra qu'au passage aux **imports groupés par conteneur**
+→ chiffrer le besoin en fonds de roulement AVANT de basculer.
+
 ---
 
 ## 4. Prix de vente : TTC ou HT ?
