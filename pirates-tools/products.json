@@ -6733,13 +6733,13 @@
     "id": "makita-dtw1001z",
     "slug": "makita-dtw1001z-boulonneuse-chocs-18v-3-4-solo",
     "sku": "DTW1001Z",
-    "title": "Makita DTW1001Z — Boulonneuse à chocs 18V 3/4\" (Solo)",
+    "title": "Makita DTW1001Z — Boulonneuse à chocs 18V LXT 3/4\" 1050 Nm brushless (machine seule)",
     "name": "DTW1001Z",
     "brand": "Makita",
     "category": "Boulonneuses a chocs",
     "tag": "Nouveau",
-    "desc": "Boulonneuse à chocs 18V 3/4\" (Solo).",
-    "img": "images/placeholder.svg",
+    "desc": "Boulonneuse à chocs 18V, carré 3/4\", 1050 Nm serrage / 1500 Nm desserrage, brushless — machine seule.",
+    "img": "images/posters/dtw1001z.webp",
     "price": 332.52,
     "currency": "EUR",
     "vat": 0.2,
@@ -6748,7 +6748,7 @@
     "stock_label": "En stock",
     "model": "",
     "paymentLink": "",
-    "weight_kg": 1.7,
+    "weight_kg": 3.7,
     "ncCategory": "power_tool",
     "productType": "pro",
     "tags": [
@@ -6756,14 +6756,33 @@
       "tropical_ready"
     ],
     "features": [
-      "Boulonneuse à chocs 18V 3/4\" (Solo)",
-      "Gamme Makita 18V LXT sans fil, moteur brushless (sans charbon) haut rendement",
-      "Machine seule (batterie et chargeur non inclus), compatible batteries Makita LXT",
-      "Robuste et endurant, pensé pour un usage professionnel intensif",
-      "Idéal pour les chantiers des Antilles / DOM-TOM"
+      "Boulonneuse à chocs sans fil 18V LXT — carré 3/4\" (19,05 mm), pour la grosse boulonnerie",
+      "Couple de serrage 1050 Nm, desserrage 1500 Nm — moteur brushless (sans charbon)",
+      "3 vitesses / cadences réglables (jusqu’à 1800 tr/min et 2200 coups/min)",
+      "Capacité boulon M12 à M30 (M10 à M24 en haute résistance)",
+      "Machine seule (batterie et chargeur non inclus), compatible batteries Makita LXT"
     ],
-    "specs": {},
-    "description_long": "Boulonneuse à chocs 18V 3/4\" (Solo). Outil professionnel Makita de la gamme 18V LXT sans fil (moteur brushless). Vendu en machine seule (sans batterie ni chargeur). Compatible avec les batteries Makita LXT. Fiche technique détaillée à compléter. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "specs": {
+      "Marque": "Makita",
+      "Type": "Boulonneuse à chocs sans fil 18V LXT Brushless — machine nue",
+      "Tension": "18 V (gamme LXT)",
+      "Moteur": "Brushless (sans charbon)",
+      "Emmanchement": "Carré 3/4\" (19,05 mm)",
+      "Couple de serrage max": "1050 Nm",
+      "Couple de desserrage max": "1500 Nm",
+      "Capacité boulon standard": "M12 à M30",
+      "Capacité boulon haute résistance": "M10 à M24",
+      "Nombre de vitesses": "3",
+      "Vitesse à vide": "0-900 / 0-1000 / 0-1800 tr/min",
+      "Cadence de frappe": "0-1800 / 0-2000 / 0-2200 coups/min",
+      "Pression sonore (LpA)": "98 dB(A)",
+      "Puissance sonore (LwA)": "109 dB(A) (incertitude 3 dB)",
+      "Vibrations": "15,5 m/s²",
+      "Poids net EPTA": "3,7 kg",
+      "Dimensions (L×l×h)": "229 × 91 × 289 mm",
+      "Batterie / chargeur": "Non inclus"
+    },
+    "description_long": "Boulonneuse à chocs sans fil Makita 18V LXT (DTW1001Z), machine seule. Moteur brushless et emmanchement carré 3/4\" (19,05 mm) pour la grosse boulonnerie : couple de serrage de 1050 Nm et desserrage jusqu’à 1500 Nm, capacité boulon M12 à M30. Trois vitesses et cadences réglables (jusqu’à 1800 tr/min et 2200 coups/min) pour maîtriser le vissage. Vendue sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
   },
   {
     "id": "makita-dtw1002z",

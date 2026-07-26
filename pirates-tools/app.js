@@ -2143,6 +2143,18 @@
     // Applique la variante par défaut (solo si paire, sinon le produit lui-même).
     applyVariant(activeProduct);
 
+    // Note « vendu sans batterie ni chargeur » (machine seule) — demande user.
+    var battNote = document.getElementById('pdpBattNote');
+    if (battNote) {
+      if (batteryNotIncluded(product)) {
+        battNote.innerHTML = '<span class="pdp-batt-note__tri" aria-hidden="true">⚠️</span> Vendu sans batterie ni chargeur';
+        battNote.hidden = false;
+      } else {
+        battNote.hidden = true;
+        battNote.innerHTML = '';
+      }
+    }
+
     // Features (points forts)
     var featuresEl = document.getElementById('pdpFeatures');
     if (featuresEl && product.features && product.features.length > 0) {
@@ -5637,6 +5649,18 @@
   // Packs/combos INCLUS (décision user 25/07) ; \b anti « lame »→« Lamelleuses ».
   var COFFRET_DENY = /\b(batteries?|chargeurs?|accessoires?|rangements?|lames?|forets?|consommables?|coffrets?|mallettes?)\b/i;
   function coffretEligible(p) { return !!(p && p.ncCategory === 'power_tool' && !p.coffretIncluded && !COFFRET_DENY.test(p.category || '')); }
+
+  // Outil vendu SANS batterie ni chargeur (machine seule / solo / produit seul)
+  // → note d'avertissement sur la fiche (demande user : « ajoute sans batterie »).
+  // Les packs/kits/combos (batteries incluses) sont EXCLUS.
+  function batteryNotIncluded(p) {
+    if (!p) return false;
+    var s = (p.specs && (p.specs['Batterie / chargeur'] || p.specs['Batterie/chargeur'])) || '';
+    if (/non\s*inclus/i.test(s)) return true;
+    var txt = ((p.title || '') + ' ' + (p.desc || '') + ' ' + (p.name || '')).toLowerCase();
+    if (/pack|combo|\bkit\b|2x\d|\(2x|batteries?\s+inclus/.test(txt)) return false;
+    return /machine seule|machine nue|produit seul|outil nu|\(solo\)|\bsolo\b/.test(txt);
+  }
   function coffretSurchargeCents(p) {
     if (!coffretEligible(p)) return 0;
     var w = Number(p && p.weight_kg) || 0;

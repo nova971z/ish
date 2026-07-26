@@ -7,7 +7,7 @@
 
 
 ## Boulonneuses a chocs
-1. [ ] DTW1001Z — Boulonneuse à chocs 18V 3/4" (Solo)
+1. [x] DTW1001Z — Boulonneuse à chocs 18V 3/4" (Solo)
 2. [ ] DTW1002Z — Boulonneuse à chocs 18V 1000Nm 1/2" (Solo)
 3. [ ] DTW181Z — Boulonneuse à chocs 18V LXT 180 Nm 1/2" (Machine seule)
 4. [ ] DTW181ZJ — Boulonneuse à chocs 18V LXT 180 Nm 1/2" (Machine seule) en MAKPAC
