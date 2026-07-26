@@ -44,7 +44,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=472">
+  <link rel="stylesheet" href="styles.css?v=473">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -694,6 +694,7 @@
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
             </label>
           </div>
+          <a class="btn primary acc-hero__liv" href="#/mode-livraison" title="Espace livreur">🛵 Mode livraison</a>
           <div class="acc-hero__info">
             <h2 id="accHeroName" class="acc-hero__name">Pirate</h2>
             <p id="accHeroEmail" class="acc-hero__email">—</p>
@@ -1124,6 +1125,33 @@
           <a class="btn" href="#/catalogue" data-nav="/catalogue">Voir le catalogue</a>
           <span class="lv-cta__note">Tu as un deux-roues&nbsp;? Gagne de 22 à 100&nbsp;€ par course — on te guide pour toutes les démarches.</span>
         </div>
+      </div>
+    </section>
+
+    <!-- MODE LIVRAISON (espace livreur : carte des courses + détails + historique.
+         MÊME environnement pour tous les clients ; les actions réelles sont
+         limitées au mode test jusqu'au lancement. Rendu par renderCourierSpace(). -->
+    <section id="view-mode-livraison" class="view hidden" data-route="/mode-livraison" role="region" aria-labelledby="modeliv-h1">
+      <div class="container courier-space">
+        <button type="button" class="pj-back" id="courierBack">← Retour</button>
+        <header class="lv-header">
+          <h1 id="modeliv-h1" tabindex="-1">🛵 Mode livraison</h1>
+          <p class="lv-sub">Ton espace livreur : les courses disponibles sur la carte, leurs détails, et ton historique.</p>
+        </header>
+        <div id="courierBanner"></div>
+        <div id="courierMap" class="pdp-deliv-map courier-map" aria-label="Carte des courses"></div>
+        <div id="courierDetail" class="lv-card" hidden></div>
+        <div class="courier-cols">
+          <div class="lv-card">
+            <h2 class="lv-h2">📬 Courses disponibles</h2>
+            <div id="courierDispo"><p class="lv-hint">Chargement…</p></div>
+          </div>
+          <div class="lv-card">
+            <h2 class="lv-h2">🕘 Mes courses</h2>
+            <div id="courierMine"><p class="lv-hint">Chargement…</p></div>
+          </div>
+        </div>
+        <button type="button" class="btn" id="courierRefresh">🔄 Rafraîchir</button>
       </div>
     </section>
 
@@ -1932,7 +1960,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=472"></script>
+  <script defer src="app.js?v=473"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

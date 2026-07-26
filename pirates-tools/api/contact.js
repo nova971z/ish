@@ -494,6 +494,7 @@ async function handleCourses(req, body, cfg, res) {
       const out = {
         id: c.id, status: c.status, productTitle: c.productTitle, qty: c.qty,
         address: c.address, km: c.km, zone: c.zone, prix: c.prix,
+        lat: c.lat, lng: c.lng,
         date: c.date, when: c.when, hour: c.hour,
         mine: c.artisanUid === uid, acceptedByMe: c.courierUid === uid,
         createdAt: c.createdAt && c.createdAt.toMillis ? c.createdAt.toMillis() : null

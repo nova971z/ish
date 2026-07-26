@@ -4622,6 +4622,147 @@
     if (lvIsTester()) loadLvCourses();
   }
 
+  // ── MODE LIVRAISON : l'espace livreur (même environnement pour TOUS) ───────
+  // Carte de l'île avec les courses posées dessus (pastille couleur de zone),
+  // détail au clic (carte ↔ liste synchronisées), acceptation (serveur seul
+  // juge : mode test = allowlist, sinon 403), historique de courses.
+  function renderCourierSpace() {
+    var back = document.getElementById('courierBack');
+    if (back) back.onclick = function () { history.length > 1 ? history.back() : (location.hash = '#/compte'); };
+    var refresh = document.getElementById('courierRefresh');
+    if (refresh) refresh.onclick = renderCourierSpace;
+    var banner = document.getElementById('courierBanner');
+    if (banner) banner.innerHTML = lvIsTester()
+      ? '<div class="lv-banner lv-banner--green">🟢 <strong>Mode test actif</strong> sur ton compte — les courses ci-dessous sont réelles (test), tu peux les accepter.</div>'
+      : '<div class="lv-banner lv-banner--green">🟢 <strong>Le service ouvre le 1er janvier.</strong> Ton espace livreur est prêt — les courses apparaîtront ici dès l\'ouverture.</div>';
+
+    var isleCode = ISLAND_MAP[_currentTerritory] ? _currentTerritory : '971';
+    var mapEl = document.getElementById('courierMap');
+    var markers = {};
+    var mapReady = ensureLeaflet().then(function () {
+      var map = mapEl._ptMap;
+      if (!map) {
+        mapEl.innerHTML = '';
+        map = window.L.map(mapEl, { scrollWheelZoom: false });
+        window.L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>'
+        }).addTo(map);
+        window.L.marker([LV_DEPOT.lat, LV_DEPOT.lng]).addTo(map).bindPopup('Dépôt — Sainte-Anne');
+        mapEl._ptMap = map;
+      }
+      if (mapEl._ptLayer) { map.removeLayer(mapEl._ptLayer); }
+      mapEl._ptLayer = window.L.layerGroup().addTo(map);
+      map.fitBounds(ISLAND_BOUNDS[isleCode] || ISLAND_BOUNDS['971'], { padding: [8, 8] });
+      setTimeout(function () { map.invalidateSize(); map.fitBounds(ISLAND_BOUNDS[isleCode] || ISLAND_BOUNDS['971'], { padding: [8, 8] }); }, 80);
+      return map;
+    }).catch(function () { return null; });
+
+    var ZCOLOR = ['#34d399', '#60a5fa', '#facc15', '#f87171'];
+    function whenTxt(c) {
+      return c.when === 'heure' ? ('à ' + escapeHTML(c.hour || '?')) : (c.when === 'matin' ? 'le matin' : "l'après-midi");
+    }
+    function showDetail(c, canAccept) {
+      var det = document.getElementById('courierDetail');
+      if (!det) return;
+      var z = LV_BAREME[(c.zone || 1) - 1] || LV_BAREME[0];
+      det.hidden = false;
+      det.innerHTML = '<h2 class="lv-h2">' + z.emoji + ' Course zone ' + c.zone + ' — <strong>' + c.prix + ' €</strong></h2>'
+        + '<div class="lv-course__body">'
+        + '📦 ' + escapeHTML(c.productTitle || '') + (c.qty > 1 ? ' × ' + c.qty : '') + '<br>'
+        + '📍 ' + escapeHTML(c.address || '') + ' <em>(' + c.km + ' km de Sainte-Anne)</em><br>'
+        + '📅 ' + (c.date ? escapeHTML(c.date) : 'au plus tôt') + ' ' + whenTxt(c) + '<br>'
+        + '🚦 Statut : <strong>' + (c.status === 'en_attente' ? 'en attente d\'un livreur' : escapeHTML(c.status)) + '</strong>'
+        + (c.acceptedByMe ? ' — ✅ acceptée par toi' : '') + '</div>'
+        + (canAccept && c.status === 'en_attente'
+          ? '<button type="button" class="btn primary" style="margin-top:.6rem" data-course-accept="' + escapeHTML(c.id) + '">✅ Accepter cette course</button>' : '');
+      wireAccept(det);
+      det.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    function wireAccept(root) {
+      var btns = root.querySelectorAll('[data-course-accept]');
+      for (var i = 0; i < btns.length; i++) {
+        (function (b) {
+          b.onclick = function () {
+            b.disabled = true; b.textContent = '…';
+            jsonAuthHeaders().then(function (headers) {
+              return fetch(apiBaseUrl() + '/api/contact', {
+                method: 'POST', headers: headers,
+                body: JSON.stringify({ type: 'course-accept', id: b.getAttribute('data-course-accept') })
+              });
+            }).then(function (r) { return r.json(); }).then(function (dd) {
+              if (dd.ok) toast('Course acceptée ✅ — l\'artisan est prévenu par email', 'success');
+              else toast(dd.error || 'Erreur', 'error');
+              renderCourierSpace();
+            }).catch(function () { toast('Erreur réseau', 'error'); renderCourierSpace(); });
+          };
+        })(btns[i]);
+      }
+    }
+    function courseCard(c, canAccept) {
+      var z = LV_BAREME[(c.zone || 1) - 1] || LV_BAREME[0];
+      return '<button type="button" class="lv-course lv-course--btn' + (c.status !== 'en_attente' ? ' lv-course--done' : '') + '" data-course-focus="' + escapeHTML(c.id) + '">'
+        + '<span class="lv-course__head"><span>' + z.emoji + ' Zone ' + c.zone + ' · <strong>' + c.prix + ' €</strong></span>'
+        + '<span class="lv-course__status">' + (c.status === 'en_attente' ? 'En attente' : (c.acceptedByMe ? '✅ Par toi' : escapeHTML(c.status))) + '</span></span>'
+        + '<span class="lv-course__body">📍 ' + escapeHTML((c.address || '').slice(0, 60)) + ' <em>(' + c.km + ' km)</em></span>'
+        + '</button>';
+    }
+
+    jsonAuthHeaders().then(function (headers) {
+      return fetch(apiBaseUrl() + '/api/contact', { method: 'POST', headers: headers, body: JSON.stringify({ type: 'course-list' }) });
+    }).then(function (r) { return r.json(); }).then(function (d) {
+      var dispoEl = document.getElementById('courierDispo');
+      var mineEl = document.getElementById('courierMine');
+      if (!d.ok) {
+        if (dispoEl) dispoEl.innerHTML = '<p class="lv-hint">Erreur : ' + escapeHTML(d.error || '?') + '</p>';
+        if (mineEl) mineEl.innerHTML = '';
+        return;
+      }
+      var canAccept = !!d.courier;
+      var byId = {};
+      (d.dispo || []).concat(d.mine || []).forEach(function (c) { byId[c.id] = c; });
+      if (dispoEl) dispoEl.innerHTML = (d.dispo && d.dispo.length)
+        ? d.dispo.map(function (c) { return courseCard(c, canAccept); }).join('')
+        : '<p class="lv-hint">Aucune course disponible pour l\'instant.</p>';
+      if (mineEl) mineEl.innerHTML = (d.mine && d.mine.length)
+        ? d.mine.map(function (c) { return courseCard(c, false); }).join('')
+        : '<p class="lv-hint">Aucune course pour l\'instant — commande une livraison depuis une fiche quincaillerie ou la page Livraison.</p>';
+      // Clic carte de course -> détail + focus carte
+      var cards = document.querySelectorAll('[data-course-focus]');
+      for (var i = 0; i < cards.length; i++) {
+        (function (btn) {
+          btn.onclick = function () {
+            var c = byId[btn.getAttribute('data-course-focus')];
+            if (!c) return;
+            showDetail(c, canAccept);
+            mapReady.then(function (map) {
+              if (map && isFinite(c.lat) && isFinite(c.lng)) {
+                map.setView([c.lat, c.lng], 12);
+                if (markers[c.id]) markers[c.id].openPopup();
+              }
+            });
+          };
+        })(cards[i]);
+      }
+      // Pastilles sur la carte (couleur de zone)
+      mapReady.then(function (map) {
+        if (!map || !mapEl._ptLayer) return;
+        (d.dispo || []).concat((d.mine || []).filter(function (c) { return !byId[c.id] || true; })).forEach(function (c) {
+          if (!isFinite(c.lat) || !isFinite(c.lng) || markers[c.id]) return;
+          var col = ZCOLOR[(c.zone || 1) - 1] || ZCOLOR[0];
+          var m = window.L.circleMarker([c.lat, c.lng], {
+            radius: 9, color: col, weight: 2, fillColor: col, fillOpacity: c.status === 'en_attente' ? 0.75 : 0.3
+          }).addTo(mapEl._ptLayer);
+          m.bindPopup((c.status === 'en_attente' ? '📬 ' : '✅ ') + escapeHTML((c.address || '').slice(0, 60)) + '<br>Zone ' + c.zone + ' — ' + c.prix + ' €');
+          m.on('click', function () { showDetail(c, canAccept); });
+          markers[c.id] = m;
+        });
+      });
+    }).catch(function () {
+      var dispoEl = document.getElementById('courierDispo');
+      if (dispoEl) dispoEl.innerHTML = '<p class="lv-hint">Erreur réseau.</p>';
+    });
+  }
+
   function loadLvCourses() {
     var host = document.getElementById('lvCourses');
     if (!host) return;
@@ -4932,7 +5073,7 @@
   // ── Router (hash-based SPA) ────────────────────────────────
 
   var ROUTES = ['/', '/catalogue', '/produit', '/devis', '/compte', '/auth', '/abonnement',
-                '/admin', '/merci', '/contact', '/favoris', '/artisans', '/rejoindre', '/livreur', '/livraison',
+                '/admin', '/merci', '/contact', '/favoris', '/artisans', '/rejoindre', '/livreur', '/livraison', '/mode-livraison',
                 '/mentions-legales', '/confidentialite', '/cgv'];
 
   // Territory landing slugs (keys) → territory codes (values).
@@ -5000,6 +5141,7 @@
     // renderAccount() no-op tant que _currentUser est null ; onAuthStateChanged
     // relance onRouteChange dès que l'auth est prête.
     if (route === '/compte' && _authReady && !_currentUser) { location.hash = '#/auth'; return; }
+    if (route === '/mode-livraison' && _authReady && !_currentUser) { location.hash = '#/auth'; return; }
     if (route === '/auth' && _authReady && _currentUser) { location.hash = '#/compte'; return; }
 
     // Cleanup PDP animation loop when leaving product page
@@ -5141,6 +5283,9 @@
         break;
       case '/livraison':
         renderLivraison();
+        break;
+      case '/mode-livraison':
+        renderCourierSpace();
         break;
     }
 
