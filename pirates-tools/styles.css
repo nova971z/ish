@@ -7821,3 +7821,13 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-piece__file { font-size: .78rem; color: var(--muted, #a9a9be); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lv-piece__btn { cursor: pointer; font-size: .82rem; font-weight: 600; color: var(--accent, #a78bfa); border: 1px solid rgba(var(--accent-rgb,167,139,250),.4); padding: .35rem .7rem; border-radius: 9px; white-space: nowrap; }
 .lv-piece__btn:hover { background: rgba(var(--accent-rgb,167,139,250),.12); }
+/* Bloc coût estimé (démarches livreur) */
+.lv-cost__grp { margin-bottom: .8rem; }
+.lv-cost__title { display: block; font-size: .82rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: var(--accent, #a78bfa); margin-bottom: .35rem; }
+.lv-cost__row { display: flex; justify-content: space-between; gap: 1rem; padding: .4rem 0; border-bottom: 1px solid rgba(255,255,255,.06); }
+.lv-cost__row:last-child { border-bottom: 0; }
+.lv-cost__v { font-weight: 700; white-space: nowrap; color: #fff; }
+.lv-cost__sum { margin: .6rem 0 0; padding: .7rem .9rem; background: rgba(var(--accent-rgb,167,139,250),.1); border-radius: 12px; line-height: 1.55; }
+/* Actions admin dossier livreur */
+.admin-app__actions { display: flex; gap: .6rem; margin-top: .7rem; flex-wrap: wrap; }
+.admin-app--courier { border-left: 3px solid #34d399; }

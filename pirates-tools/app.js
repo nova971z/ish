@@ -3798,6 +3798,33 @@
     { name: 'Opticourtage', desc: 'Scooter / moto de livraison', price: 'devis scooter pro', url: 'https://www.opticourtage.com/assurance-scooter-de-livraison/' }
   ];
 
+  // Coût estimé des démarches par véhicule (VRAIES valeurs — sources : France
+  // Travail/AFTRAL/Promotrans pour la formation, réglementation transport léger,
+  // devis assureurs). Affiché au-dessus du cahier des charges, maj au changement.
+  var LV_COSTS = {
+    vae: {
+      once: [ { l: 'Création auto-entrepreneur', v: 'Gratuit' } ],
+      month: [ { l: 'Assurance RC Pro', v: '~10 à 15 €' } ],
+      summary: 'Quasi rien à débourser : juste ton assurance RC Pro (~10-15 €/mois). Aucun permis, aucune licence transport.'
+    },
+    trottinette: {
+      once: [ { l: 'Création auto-entrepreneur', v: 'Gratuit' } ],
+      month: [ { l: 'Assurance RC Pro', v: '~10 à 15 €' }, { l: 'Assurance RC trottinette (obligatoire)', v: '~5 à 15 €' } ],
+      summary: 'Aucun frais d\'installation. Compte environ 15 à 30 €/mois d\'assurances. Aucun permis.'
+    },
+    scooter: {
+      once: [
+        { l: 'Création auto-entrepreneur', v: 'Gratuit' },
+        { l: 'Formation capacité transport léger', v: '750 à 1 500 €' },
+        { l: 'Permis (si tu ne l\'as pas déjà)', v: '600 à 1 000 €' },
+        { l: 'Équipement (casque + gants homologués)', v: '~100 à 200 €' }
+      ],
+      justify: [ { l: 'Capacité financière à justifier', v: '~1 800 € en réserve (pas dépensé)' } ],
+      month: [ { l: 'Assurances (RC Pro + véhicule pro + marchandises)', v: '~50 à 90 €' } ],
+      summary: 'Le plus rentable, mais il faut investir au départ : ~850 à 1 700 € une fois (formation + équipement, hors permis si tu l\'as déjà), une réserve de ~1 800 € à justifier, puis ~50 à 90 €/mois d\'assurances.'
+    }
+  };
+
   // Pièces à TÉLÉVERSER (option B : dépôt + validation manuelle admin).
   // Le dossier passe en statut « en_attente » ; l'admin valide/refuse chaque
   // pièce. Architecture prête à brancher un vérificateur en direct plus tard.
@@ -3931,7 +3958,7 @@
       if (msg) { msg.className = 'lv-age lv-age--ok'; msg.textContent = '✅ Tu as ' + years + ' ans — tu peux continuer.'; }
 
       var h = [];
-      h.push('<div class="lv-card"><h2 class="lv-h2">1. Choisis ton véhicule</h2><div class="lv-vehicles">');
+      h.push('<div class="lv-card"><h2 class="lv-h2">Choisis ton véhicule</h2><div class="lv-vehicles">');
       Object.keys(LV_VEHICLES).forEach(function (k) {
         var v = LV_VEHICLES[k];
         h.push('<button type="button" class="lv-veh' + (state.veh === k ? ' lv-veh--on' : '') + '" data-veh="' + k + '">'
@@ -3941,7 +3968,23 @@
 
       if (state.veh && LV_VEHICLES[state.veh]) {
         var v = LV_VEHICLES[state.veh];
-        h.push('<div class="lv-card"><h2 class="lv-h2">2. Ton cahier des charges — ' + v.emoji + ' ' + v.label + '</h2>');
+        // Coût estimé des démarches (au-dessus du cahier des charges).
+        var c = LV_COSTS[state.veh];
+        if (c) {
+          h.push('<div class="lv-card lv-cost"><h2 class="lv-h2">💶 Ce que ça va te coûter (estimation)</h2>');
+          function costRows(title, rows) {
+            if (!rows || !rows.length) return;
+            h.push('<div class="lv-cost__grp"><span class="lv-cost__title">' + title + '</span>');
+            rows.forEach(function (r) { h.push('<div class="lv-cost__row"><span>' + r.l + '</span><span class="lv-cost__v">' + r.v + '</span></div>'); });
+            h.push('</div>');
+          }
+          costRows('À l\'installation (une fois)', c.once);
+          costRows('À justifier (réserve, non dépensé)', c.justify);
+          costRows('Par mois (récurrent)', c.month);
+          h.push('<p class="lv-cost__sum">' + c.summary + '</p>');
+          h.push('<p class="lv-hint">Estimations indicatives — les tarifs réels dépendent des organismes/assureurs. On te met les liens pour comparer.</p></div>');
+        }
+        h.push('<div class="lv-card"><h2 class="lv-h2">Ton cahier des charges — ' + v.emoji + ' ' + v.label + '</h2>');
         if (v.note) h.push('<div class="lv-note ' + (noteClass[v.note.type] || '') + '">' + v.note.txt + '</div>');
         h.push('<h3 class="lv-h3">Le socle commun (obligatoire pour tous)</h3><ul class="lv-docs">');
         LV_BASE.forEach(function (d) { h.push(lvDocItem(d)); });
@@ -3954,7 +3997,7 @@
           h.push('<p class="lv-hint">✅ Rien de plus que le socle commun — c\'est le véhicule le plus simple administrativement.</p>');
         }
         h.push('</div>');
-        h.push('<div class="lv-card"><h2 class="lv-h2">3. Les textes de loi (et ce qu\'ils veulent dire)</h2>');
+        h.push('<div class="lv-card"><h2 class="lv-h2">Les textes de loi (et ce qu\'ils veulent dire)</h2>');
         v.laws.forEach(function (law) { h.push(lvLawBlock(law)); });
         h.push('<p class="lv-hint">Sources officielles : URSSAF, DREAL/DEAL, Légifrance.</p></div>');
         if (!state.dossier) {
@@ -3966,7 +4009,7 @@
           var pieces = piecesFor(state.veh);
           var ready = 0;
           pieces.forEach(function (p) { if (state.files[p.id]) ready++; });
-          h.push('<div class="lv-card"><h2 class="lv-h2">4. Mon dossier — pièces à déposer</h2>');
+          h.push('<div class="lv-card"><h2 class="lv-h2">Mon dossier — pièces à déposer</h2>');
           h.push('<div class="lv-progress"><div class="lv-progress__bar"><span style="width:' + Math.round(100 * ready / pieces.length) + '%"></span></div>'
             + '<span class="lv-progress__txt">' + ready + ' / ' + pieces.length + ' pièces prêtes</span></div>');
           h.push('<ul class="lv-docs">');
@@ -8351,6 +8394,48 @@
     });
   }
 
+  // ── Dashboard : Dossiers livreurs (service coursier — validation manuelle) ──
+  function loadAdminCouriers() {
+    var el = document.getElementById('adminCouriersBody');
+    if (!el) return;
+    el.innerHTML = '<p class="admin-loading">Chargement…</p>';
+    adminGet('courier-applications').then(function (data) {
+      var list = data.applications || [];
+      if (!list.length) { el.innerHTML = '<p class="admin-hint">Aucun dossier livreur pour l\'instant (service inactif).</p>'; return; }
+      el.innerHTML = list.map(function (a) {
+        var veh = LV_VEHICLES[a.vehicle] ? (LV_VEHICLES[a.vehicle].emoji + ' ' + LV_VEHICLES[a.vehicle].label) : (a.vehicle || '—');
+        var pieces = LV_PIECES_BASE.concat(LV_PIECES_EXTRA[a.vehicle] || []);
+        var piecesHtml = pieces.map(function (p) {
+          var f = a.pieces && a.pieces[p.id];
+          return '<div class="admin-app__line"><span>' + escapeHTML(p.t) + '</span> '
+            + (f ? '<a href="' + escapeHTML(f.url || '#') + '" target="_blank" rel="noopener noreferrer">Voir la pièce ↗</a>' : '<em>manquante</em>') + '</div>';
+        }).join('');
+        var st = a.status || 'en_attente';
+        var when = a.createdAt ? new Date(a.createdAt).toLocaleString('fr-FR') : '—';
+        return '<div class="admin-app admin-app--courier">'
+          + '<div class="admin-app__head"><strong>' + escapeHTML(a.name || 'Livreur') + '</strong>'
+          + '<span class="admin-app__tier">' + escapeHTML(veh) + ' · ' + escapeHTML(st) + '</span></div>'
+          + '<div class="admin-app__line"><span>Contact</span> <a href="mailto:' + encodeURIComponent(a.email || '') + '">' + escapeHTML(a.email || '') + '</a>' + (a.phone ? ' · ' + escapeHTML(a.phone) : '') + '</div>'
+          + piecesHtml
+          + '<div class="admin-app__foot">' + escapeHTML(when) + '</div>'
+          + '<div class="admin-app__actions">'
+          + '<button type="button" class="btn primary" data-courier-ok="' + escapeHTML(a.uid || '') + '">✅ Valider</button>'
+          + '<button type="button" class="btn" data-courier-ko="' + escapeHTML(a.uid || '') + '">❌ Refuser</button>'
+          + '</div></div>';
+      }).join('');
+      el.querySelectorAll('[data-courier-ok]').forEach(function (b) { b.onclick = function () { reviewCourier(b.getAttribute('data-courier-ok'), 'valide'); }; });
+      el.querySelectorAll('[data-courier-ko]').forEach(function (b) { b.onclick = function () { reviewCourier(b.getAttribute('data-courier-ko'), 'refuse'); }; });
+    }).catch(function (e) {
+      el.innerHTML = '<p class="admin-error">Erreur : ' + escapeHTML(e.message) + '</p>';
+    });
+  }
+  function reviewCourier(uid, status) {
+    if (!uid) return;
+    adminPostType('courier-review', { uid: uid, status: status })
+      .then(function () { loadAdminCouriers(); })
+      .catch(function (e) { alert('Erreur : ' + e.message); });
+  }
+
   function renderAdmin() {
     var view = document.getElementById('adminView');
     if (!view) return;
@@ -8395,6 +8480,7 @@
       + '<button type="button" class="admin-tab" data-admin-tab="clients" role="tab" aria-selected="false">Clients</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="partners" role="tab" aria-selected="false">Partenaires</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="applications" role="tab" aria-selected="false">Candidatures</button>'
+      + '<button type="button" class="admin-tab" data-admin-tab="couriers" role="tab" aria-selected="false">Livreurs</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="orders" role="tab" aria-selected="false">Commandes</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="tools" role="tab" aria-selected="false">Outils</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="instagram" role="tab" aria-selected="false">Instagram</button>'
@@ -8563,6 +8649,14 @@
       + '<button type="button" class="btn btn--ghost" id="adminApplicationsRefresh">Rafraîchir</button>'
       + '</div>'
 
+      // ── Livreurs : validation des dossiers coursier (option B, KYC manuel) ──
+      + '<div class="admin-pane" data-admin-pane="couriers" hidden>'
+      + '<h2 class="admin-subtitle">Dossiers livreurs</h2>'
+      + '<p class="admin-hint">Candidatures coursier reçues via « Devenir Livreur ». Vérifie les pièces (identité, permis, assurance, capacité transport…) puis valide ou refuse. Le service est INACTIF tant que le module n\'est pas ouvert : cette liste sera vide jusqu\'au lancement.</p>'
+      + '<div id="adminCouriersBody"><p class="admin-loading">Chargement…</p></div>'
+      + '<button type="button" class="btn btn--ghost" id="adminCouriersRefresh">Rafraîchir</button>'
+      + '</div>'
+
       + '</div>';
 
     var logoutBtn = document.getElementById('adminLogoutBtn');
@@ -8599,6 +8693,7 @@
         if (target === 'clients') loadAdminClients();
         if (target === 'partners') loadAdminPartners();
         if (target === 'applications') loadAdminApplications();
+        if (target === 'couriers') loadAdminCouriers();
         if (target !== 'stats') destroyAdminGlobe(); // libère le contexte WebGL
       });
     });
@@ -8611,6 +8706,8 @@
     if (clientsRefresh) clientsRefresh.onclick = function () { loadAdminClients(true); };
     var appsRefresh = document.getElementById('adminApplicationsRefresh');
     if (appsRefresh) appsRefresh.onclick = function () { loadAdminApplications(); };
+    var couriersRefresh = document.getElementById('adminCouriersRefresh');
+    if (couriersRefresh) couriersRefresh.onclick = function () { loadAdminCouriers(); };
 
     // Test email form
     var testForm = document.getElementById('adminTestEmailForm');

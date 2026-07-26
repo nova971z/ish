@@ -260,6 +260,26 @@ module.exports = async function handler(req, res) {
         return res.status(200).json({ ok: true, applications });
       }
 
+      // ── Dossiers livreurs (service coursier — validation manuelle option B).
+      // Vide tant que le service est inactif (aucune candidature écrite). ──
+      if (type === 'courier-applications') {
+        const snap = await db.collection('courier_applications').orderBy('createdAt', 'desc').limit(200).get()
+          .catch(() => db.collection('courier_applications').limit(200).get())
+          .catch(() => null);
+        const applications = [];
+        if (snap) snap.forEach((doc) => {
+          const d = doc.data() || {};
+          applications.push({
+            uid: doc.id,
+            name: d.name || '', email: d.email || '', phone: d.phone || '',
+            vehicle: d.vehicle || '', status: d.status || 'en_attente',
+            pieces: d.pieces || {},
+            createdAt: d.createdAt && d.createdAt.toMillis ? d.createdAt.toMillis() : null
+          });
+        });
+        return res.status(200).json({ ok: true, applications });
+      }
+
       // ── Liste des charges saisies ──────────────────────────────
       if (type === 'charges') {
         const chSnap = await db.collection('charges').orderBy('dateMs', 'desc').limit(500).get().catch(() => db.collection('charges').limit(500).get());
@@ -469,6 +489,26 @@ module.exports = async function handler(req, res) {
       }
       console.error('[api/admin] invite-code-save failed:', err.message);
       return res.status(500).json({ ok: false, error: 'invite-code-save échoué' });
+    }
+  }
+
+  // ── Validation d'un dossier livreur (option B) : valide / refuse. ──
+  if (req.method === 'POST' && ((req.query && req.query.type) === 'courier-review')) {
+    try {
+      const b = req.body || {};
+      const uid = String(b.uid || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 128);
+      const status = String(b.status || '');
+      if (!uid) return res.status(400).json({ ok: false, error: 'uid requis' });
+      if (status !== 'valide' && status !== 'refuse') return res.status(400).json({ ok: false, error: 'statut invalide' });
+      await db.collection('courier_applications').doc(uid).set({
+        status: status, reviewedAt: new Date()
+      }, { merge: true });
+      // Reporte le statut sur le profil coursier si présent (source de vérité activation).
+      await db.collection('couriers').doc(uid).set({ kycStatus: status }, { merge: true }).catch(() => {});
+      return res.status(200).json({ ok: true, uid, status });
+    } catch (err) {
+      console.error('[api/admin] courier-review failed:', err.message);
+      return res.status(500).json({ ok: false, error: 'courier-review échoué' });
     }
   }
 
