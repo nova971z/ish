@@ -11,6 +11,21 @@ _lib), Firestore (collections/règles), CI, products.json, env vars, flux critiq
 et surtout une section **⚠️ PIÈGES À NE PAS OUBLIER**. Avant de travailler sur le code,
 CONSULTER cette carte pour aller droit à la source. La mettre à jour si la structure change.
 
+## 💼 MÉTHODE D'ENTREPRISE & FISCALITÉ — LIRE AVANT TOUTE QUESTION D'ARGENT
+`pirates-tools/docs/METHODE-ENTREPRISE-FISCALITE.md` = **source de vérité
+fiscale**. Statut GRAVÉ : **SASU à l'IS, assujettie à la TVA au RÉEL NORMAL
+(CA3 mensuelle), établie en Guadeloupe. AUCUNE franchise en base** (refusée par
+l'user : « mon site est ma marque »). Contient : taux TVA DOM/IS 2026, circuit
+complet de la TVA (exonération art. 294 CGI métropole→DOM, autoliquidation à
+l'import obligatoire depuis 2022 = zéro avance en douane, crédit de TVA
+structurel remboursable mensuellement dès 760 €), ce que le moteur de prix
+prend en compte, les angles morts, et les sources officielles.
+⛔ RÈGLE USER (26/07/2026) : **ne JAMAIS répondre « demande à ton comptable »**
+sur un point fiscal factuel — tout est public, le chercher aux sources
+officielles (impots.gouv.fr, douane.gouv.fr, BOFiP), le donner sourcé et daté,
+et l'AJOUTER à ce fichier. Le comptable ne servira qu'à la validation
+juridique, jamais à la gestion des comptes.
+
 ## Exigence qualité (non négociable)
 Code de niveau ingénieur web senior, standard des grandes institutions e-commerce.
 Aucun hasard, aucun bullshit. Chaque correction est vérifiée dans le code avant d'être livrée.
