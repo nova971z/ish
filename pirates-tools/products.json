@@ -4726,13 +4726,13 @@
     "id": "makita-dga513zj",
     "slug": "makita-dga513zj-meuleuse-dangle-18v-lxt-125-mm",
     "sku": "DGA513ZJ",
-    "title": "Makita DGA513ZJ — Meuleuse d'angle 18V LXT Ø125 mm (Machine seule) en MAKPAC",
+    "title": "Makita DGA513ZJ — Meuleuse d'angle 18V LXT Ø125 mm brushless en MAKPAC (machine seule)",
     "name": "DGA513ZJ",
     "brand": "Makita",
     "category": "Meuleuses",
     "tag": "Nouveau",
-    "desc": "Meuleuse d'angle 18V LXT Ø125 mm (Machine seule) en MAKPAC.",
-    "img": "images/placeholder.svg",
+    "desc": "Meuleuse d'angle sans fil 18V LXT Ø125 mm, moteur brushless, vitesse variable 3000-8500 tr/min, technologies ADT/AFT/XPT, livrée en coffret MAKPAC — sans batterie ni chargeur.",
+    "img": "images/posters/dga513zj.webp",
     "price": 198.54,
     "currency": "EUR",
     "vat": 0.2,
@@ -4749,14 +4749,30 @@
       "tropical_ready"
     ],
     "features": [
-      "Meuleuse d'angle 18V LXT Ø125 mm (Machine seule) en MAKPAC",
-      "Gamme Makita 18V LXT sans fil, moteur brushless (sans charbon) haut rendement",
-      "Livré en coffret MAKPAC — machine seule (batterie et chargeur non inclus)",
-      "Robuste et endurant, pensé pour un usage professionnel intensif",
-      "Idéal pour les chantiers des Antilles / DOM-TOM"
+      "Meuleuse d'angle sans fil 18V LXT — disque Ø125 mm, broche M14",
+      "Moteur brushless (sans charbon), vitesse variable 3000-8500 tr/min",
+      "ADT (couple/vitesse auto) + AFT (anti-retour) + frein électronique",
+      "Protection XPT (résistance eau et poussière), carter + poignée latérale",
+      "Livrée en coffret MAKPAC — machine seule (batterie et chargeur non inclus)"
     ],
-    "specs": {},
-    "description_long": "Meuleuse d'angle 18V LXT Ø125 mm (Machine seule) en MAKPAC. Outil professionnel Makita de la gamme 18V LXT sans fil (moteur brushless). Livré en coffret MAKPAC, machine seule (sans batterie ni chargeur). Compatible avec les batteries Makita LXT. Fiche technique détaillée à compléter. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "specs": {
+      "Marque": "Makita",
+      "Type": "Meuleuse d'angle sans fil 18V LXT Brushless Ø125 mm — machine nue en MAKPAC",
+      "Tension": "18 V (gamme LXT)",
+      "Moteur": "Brushless (sans charbon)",
+      "Diamètre de disque": "125 mm",
+      "Vitesse à vide": "3000-8500 tr/min (variable)",
+      "Filetage de broche": "M14",
+      "Technologies": "ADT, AFT (anti-retour), XPT, frein électronique",
+      "Pression sonore (LpA)": "79 dB(A)",
+      "Poids EPTA": "2,4 kg",
+      "Dimensions (L×l×h)": "382 × 140 × 145 mm",
+      "Coffret": "MAKPAC empilable",
+      "Livré avec": "Carter de protection, poignée latérale, écrou de flasque, clé",
+      "Batterie / chargeur": "Non inclus"
+    },
+    "description_long": "Meuleuse d'angle sans fil Makita 18V LXT Ø125 mm (DGA513ZJ), machine seule livrée en coffret MAKPAC empilable. Moteur brushless à vitesse variable (3000-8500 tr/min) avec technologie ADT qui ajuste automatiquement vitesse et couple selon la charge, protection anti-retour AFT et frein électronique pour la sécurité. Broche M14, disque Ø125 mm. Protection XPT contre l'eau et la poussière. Livrée avec carter de protection, poignée latérale, écrou de flasque et clé. Vendue sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "coffretIncluded": true
   },
   {
     "id": "makita-dga517z",
