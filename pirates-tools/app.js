@@ -8333,31 +8333,44 @@
   }
 
   // GET /api/admin?type=… (authentifié). Renvoie le JSON validé.
-  function adminGet(type) {
-    var apiBase = apiBaseUrl();
-    return adminAuthHeaders().then(function (headers) {
-      return fetch(apiBase + '/api/admin?type=' + encodeURIComponent(type), { method: 'GET', headers: headers });
-    }).then(function (r) {
-      return r.json().then(function (data) {
-        if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
-        return data;
-      });
+  // Lit une réponse admin en NOMMANT précisément l'échec. Sans ça, un corps
+  // non-JSON (page d'erreur Vercel, réponse vide) ou une coupure réseau
+  // remontaient en « TypeError: Type error » côté Safari — un message qui ne
+  // dit ni le code HTTP, ni l'URL, ni ce qu'a réellement renvoyé le serveur,
+  // donc impossible à diagnostiquer.
+  function adminReadResponse(r, url) {
+    return r.text().then(function (txt) {
+      var data = null;
+      try { data = JSON.parse(txt); } catch (_) {
+        var ct = (r.headers && r.headers.get && r.headers.get('content-type')) || 'inconnu';
+        throw new Error('HTTP ' + r.status + ' sur ' + url + ' — réponse non-JSON (' + ct + ') : '
+          + (txt ? txt.slice(0, 200) : 'CORPS VIDE'));
+      }
+      if (!r.ok || !data.ok) throw new Error((data && data.error) || ('HTTP ' + r.status));
+      return data;
     });
+  }
+  function adminNetworkError(url, err) {
+    return new Error('Requête bloquée avant réponse sur ' + url + ' — '
+      + ((err && err.name) || 'Error') + ' : ' + ((err && err.message) || '?')
+      + ' (réseau coupé, requête refusée par le navigateur, ou fonction serveur plantée)');
+  }
+
+  function adminGet(type) {
+    var url = apiBaseUrl() + '/api/admin?type=' + encodeURIComponent(type);
+    return adminAuthHeaders().then(function (headers) {
+      return fetch(url, { method: 'GET', headers: headers })
+        .catch(function (e) { throw adminNetworkError(url, e); });
+    }).then(function (r) { return adminReadResponse(r, url); });
   }
 
   // POST /api/admin?type=… (authentifié). Renvoie le JSON validé.
   function adminPostType(type, body) {
-    var apiBase = apiBaseUrl();
+    var url = apiBaseUrl() + '/api/admin?type=' + encodeURIComponent(type);
     return adminAuthHeaders({ 'Content-Type': 'application/json' }).then(function (headers) {
-      return fetch(apiBase + '/api/admin?type=' + encodeURIComponent(type), {
-        method: 'POST', headers: headers, body: JSON.stringify(body || {})
-      });
-    }).then(function (r) {
-      return r.json().then(function (data) {
-        if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
-        return data;
-      });
-    });
+      return fetch(url, { method: 'POST', headers: headers, body: JSON.stringify(body || {}) })
+        .catch(function (e) { throw adminNetworkError(url, e); });
+    }).then(function (r) { return adminReadResponse(r, url); });
   }
 
   // ── Dashboard : Statistiques ───────────────────────────────
