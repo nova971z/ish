@@ -44,7 +44,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=480">
+  <link rel="stylesheet" href="styles.css?v=481">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -88,7 +88,12 @@
        origin (e.g. GitHub Pages) where /api/* does not exist. -->
   <script>
   window.PT_API_BASE = '';
-  window.PT_STRIPE_PK = 'pk_live_51TJYJVPynqHG9OETsHfRsfZbs8NWjeo4RO1sVltr9LVqvbL1IsAI13Wgw3YFglVYGQD6kBFOw5pKBPCUovdJ9OV300rHNF9ppi';
+  // MODE TEST Stripe (avant lancement) : paiements simulés, carte 4242 4242
+  // 4242 4242. La clé secrète correspondante (sk_test_) est sur Vercel.
+  // AU LANCEMENT : remettre la clé LIVE ci-dessous, remettre sk_live_ sur
+  // Vercel, et recalculer l'empreinte CSP (node scripts/check-csp.js).
+  // LIVE = pk_live_51TJYJVPynqHG9OETsHfRsfZbs8NWjeo4RO1sVltr9LVqvbL1IsAI13Wgw3YFglVYGQD6kBFOw5pKBPCUovdJ9OV300rHNF9ppi
+  window.PT_STRIPE_PK = 'pk_test_51TJYJVPynqHG9OETUy7WH3TE6rMc4XSN3k95tQrRiGsGNjeAtlUJEQZIHwnZssaat689xRbXCmFpnwA9A1MlCtjH003fzcmzXD';
   </script>
 
   <!-- Crypto payment config — CE BLOC INLINE EST LA SOURCE UNIQUE.
@@ -2007,7 +2012,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=480"></script>
+  <script defer src="app.js?v=481"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->
