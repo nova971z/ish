@@ -4123,7 +4123,17 @@
       var remIsle = document.getElementById('lvRemunIsle');
       if (remIsle) {
         var srcIsle = document.querySelector('#regIslands .isl[data-isl="' + remIsle.getAttribute('data-isle') + '"] svg');
-        if (srcIsle) remIsle.appendChild(srcIsle.cloneNode(true));
+        if (srcIsle) {
+          var cl = srcIsle.cloneNode(true);
+          remIsle.appendChild(cl);
+          // Recadre le viewBox sur le contenu RÉEL (le carré 100x100 du sélecteur
+          // laisse du vide autour des îles larges) → l'île occupe tout l'espace
+          // du panneau sans agrandir celui-ci.
+          try {
+            var bb = cl.getBBox();
+            cl.setAttribute('viewBox', (bb.x - 3) + ' ' + (bb.y - 3) + ' ' + (bb.width + 6) + ' ' + (bb.height + 6));
+          } catch (_) {}
+        }
       }
       var cyl = document.getElementById('lvCyl');
       if (cyl) cyl.onchange = function () { state.cylindree = cyl.value; renderDynamic(); };
