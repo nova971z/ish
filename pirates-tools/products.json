@@ -6643,13 +6643,13 @@
     "id": "makita-dsp601zju",
     "slug": "makita-dsp601zju-scie-plongeante-36v-lxt-bl-2x1",
     "sku": "DSP601ZJU",
-    "title": "Makita DSP601ZJU — Scie plongeante 36V LXT BL (2x18V) Ø165 mm avec module AWS",
+    "title": "Makita DSP601ZJU — Scie plongeante 36V (2×18V) LXT Ø165 mm brushless AWS en MAKPAC (machine seule)",
     "name": "DSP601ZJU",
     "brand": "Makita",
     "category": "Scies",
     "tag": "Nouveau",
-    "desc": "Scie plongeante 36V LXT BL (2x18V) Ø165 mm avec module AWS.",
-    "img": "images/placeholder.svg",
+    "desc": "Scie plongeante sans fil 36V (2×18V LXT) Ø165 mm, moteur brushless + ADT, coupe 56 mm, biseau -1 à 48°, module AWS (aspiration Bluetooth), en coffret MAKPAC — sans batterie ni chargeur.",
+    "img": "images/posters/dsp601zju.webp",
     "price": 580.73,
     "currency": "EUR",
     "vat": 0.2,
@@ -6666,14 +6666,29 @@
       "tropical_ready"
     ],
     "features": [
-      "Scie plongeante 36V LXT BL (2x18V) Ø165 mm avec module AWS",
-      "Gamme Makita 36V LXT sans fil, moteur brushless (sans charbon) haut rendement",
-      "Machine seule (batterie et chargeur non inclus), compatible batteries Makita LXT",
-      "Robuste et endurant, pensé pour un usage professionnel intensif",
-      "Idéal pour les chantiers des Antilles / DOM-TOM"
+      "Scie plongeante sans fil 36V (2 batteries 18V LXT) — lame Ø165 mm",
+      "Moteur brushless + ADT (adapte vitesse/couple), vitesse variable 2500-6300 tr/min",
+      "Profondeur de coupe 56 mm à 0°, biseau -1° à 48° (butées 22,5° et 45°)",
+      "Module AWS (Auto-start Wireless) : déclenche l'aspirateur par Bluetooth",
+      "Démarrage progressif + frein électronique — livrée en MAKPAC, machine seule (batteries et chargeur non inclus)"
     ],
-    "specs": {},
-    "description_long": "Scie plongeante 36V LXT BL (2x18V) Ø165 mm avec module AWS. Outil professionnel Makita de la gamme 36V LXT sans fil (moteur brushless). Vendu en machine seule (sans batterie ni chargeur). Compatible avec les batteries Makita LXT. Fiche technique détaillée à compléter. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "specs": {
+      "Marque": "Makita",
+      "Type": "Scie plongeante sans fil 36V (2×18V LXT) Brushless Ø165 mm — machine nue en MAKPAC",
+      "Tension": "36 V (2 batteries 18 V LXT)",
+      "Moteur": "Brushless (sans charbon) + ADT",
+      "Diamètre de lame": "165 mm",
+      "Alésage": "20 mm",
+      "Vitesse à vide": "2500 à 6300 tr/min (variable)",
+      "Profondeur de coupe à 0°": "56 mm",
+      "Inclinaison (biseau)": "-1° à 48° (butées 22,5° et 45°)",
+      "Connectivité": "AWS (Auto-start Wireless System, aspiration Bluetooth)",
+      "Équipement": "Démarrage progressif, frein électronique",
+      "Coffret": "MAKPAC empilable",
+      "Batteries / chargeur": "Non inclus (nécessite 2 batteries 18 V LXT)"
+    },
+    "description_long": "Scie plongeante sans fil Makita 36V (2×18V LXT) Ø165 mm (DSP601ZJU), machine seule livrée en coffret MAKPAC. Deux batteries 18V alimentent un moteur brushless doté de la technologie ADT qui adapte vitesse et couple pendant la coupe (vitesse variable 2500 à 6300 tr/min). Profondeur de coupe de 56 mm à 0°, inclinaison de -1° à 48° (butées à 22,5° et 45°). Équipée du module AWS (Auto-start Wireless System) qui déclenche automatiquement l'aspirateur compatible par Bluetooth, ainsi que d'un démarrage progressif et d'un frein électronique. Vendue sans batteries ni chargeur, nécessite 2 batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
+    "coffretIncluded": true
   },
   {
     "id": "makita-dtd153z",
