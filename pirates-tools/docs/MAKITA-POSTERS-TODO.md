@@ -11,7 +11,7 @@
 6. [x] DTW301ZJ — Boulonneuse à chocs 18V LXT 1/2" 330 Nm brushless en MAKPAC (machine seule)
 7. [x] DTW700ZJ — Boulonneuse à chocs 18V LXT 1/2" 700 Nm brushless en MAKPAC (machine seule)
 8. [x] DRT50Z — Affleureuse 18V LXT Ø6 et 8 mm (Machine seule) — SPECS + POSTER OK ✅ (PNG posé sur décision user malgré logos IA « BRUSHLESSS »/« Thalata »)
-9. [ ] DRT50ZJX3 — Affleureuse 18V LXT Ø6-8 mm en MAKPAC + 4 bases (défonçage, affleurage déporté/droit/incliné)
+9. [x] DRT50ZJX3 — Affleureuse 18V LXT Ø6-8 mm en MAKPAC + 4 bases — SPECS + POSTER OK ✅ (fiche standalone 402,38 €, NON liée en variante à #8 = kit ≠ machine seule)
 10. [ ] DRT50ZX4 — Affleureuse 18V LXT Ø6 et 8 mm (Machine seule) avec accessoires
 11. [ ] DUT130Z — Malaxeur de peinture 18V LXT BL Li-Ion (Produit seul)
 12. [ ] DGA513ZJ — Meuleuse d'angle 18V LXT Ø125 mm (Machine seule) en MAKPAC
