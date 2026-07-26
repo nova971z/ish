@@ -49,6 +49,25 @@ Chaque phase indique l'exigence légale qu'elle sert (renvoi §B).
   règles RGPD), endpoint serveur de dépôt, écran de validation admin, statut du
   dossier (en_attente/validé/refusé), le tout activé avec COURIER_ENABLED.
 
+### 🗺️ BARÈME & ZONES (décisions user — À CONSTRUIRE, carte au prochain msg)
+- Bouton « rémunération » (vert néon, plein largeur) → ouvrira une **carte
+  interactive de l'île** (Guadeloupe, base Sainte-Anne). Placeholder posé.
+- **Barème = selon la DISTANCE + la CONSOMMATION du véhicule** → prix différents
+  selon le véhicule choisi (scooter ≠ trottinette). Objectif : que l'user ne
+  travaille jamais à perte.
+- **Trottinette & vélo élec = mêmes tarifs entre eux, MAIS zones RÉDUITES** :
+  livraisons uniquement secteur **Sainte-Anne / Saint-François / Le Moule**,
+  avec une **limite = trait Le Moule → Le Gosier** ; au-delà interdit (route
+  trop dangereuse). Scooter/moto = zones larges.
+- Découpage précis des îles pour la grille tarifaire = à définir avec l'user
+  (prochain message).
+
+### ✅ FLUX DOSSIER (fait, mode TEST sans stockage) — 26/07
+Bandeau vert « ouvre le 1er janvier ». Cylindrée (moto) → permis affiché. Cartes
+centrées. Coordonnées + consentement RGPD + envoi de test (validation complète)
+SANS aucun stockage ni écriture serveur (démo pour tester). Firebase Storage +
+écriture réelle = à l'activation (COURIER_ENABLED, après entreprise + RGPD).
+
 ### Phase 2 — Onboarding coursier « on mâche les démarches » (§B-1, B-2)
 Assistant pas-à-pas dans le compte Coursier :
 1. **Créer sa micro-entreprise** → lien guichet unique INPI + guide.
