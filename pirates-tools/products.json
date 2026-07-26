@@ -6742,13 +6742,13 @@
     "id": "makita-dtp141z",
     "slug": "makita-dtp141z-perceuse-4-fonctions-18v-lxt-p",
     "sku": "DTP141Z",
-    "title": "Makita DTP141Z — Perceuse 4 fonctions 18V LXT (Produit seul)",
+    "title": "Makita DTP141Z — Visseuse 4 fonctions 18V LXT brushless (perçage/percussion/vissage/choc, machine seule)",
     "name": "DTP141Z",
     "brand": "Makita",
     "category": "Perceuses-visseuses",
     "tag": "Nouveau",
-    "desc": "Perceuse 4 fonctions 18V LXT (Produit seul).",
-    "img": "images/placeholder.svg",
+    "desc": "Outil 4-en-1 sans fil 18V LXT brushless : perçage, perçage à percussion, vissage et visseuse à chocs. Mandrin hex 1/4\", couple choc 150 Nm, embrayage électronique — sans batterie ni chargeur.",
+    "img": "images/posters/dtp141z.webp",
     "price": 295.73,
     "currency": "EUR",
     "vat": 0.2,
@@ -6765,14 +6765,28 @@
       "tropical_ready"
     ],
     "features": [
-      "Perceuse 4 fonctions 18V LXT (Produit seul)",
-      "Gamme Makita 18V LXT sans fil, moteur brushless (sans charbon) haut rendement",
-      "Machine seule (batterie et chargeur non inclus), compatible batteries Makita LXT",
-      "Robuste et endurant, pensé pour un usage professionnel intensif",
-      "Idéal pour les chantiers des Antilles / DOM-TOM"
+      "4 modes en un : perçage, perçage à percussion, vissage, visseuse à chocs",
+      "Moteur brushless (sans charbon) + embrayage électronique 1,5 à 8,0 Nm",
+      "Couple max en mode choc : 150 Nm — mandrin porte-embout hex 1/4\"",
+      "Vitesse jusqu'à 2700 tr/min (choc/perçage), 1100 tr/min en vissage",
+      "Machine seule (batterie et chargeur non inclus), compatible batteries Makita LXT"
     ],
-    "specs": {},
-    "description_long": "Perceuse 4 fonctions 18V LXT (Produit seul). Outil professionnel Makita de la gamme 18V LXT sans fil (moteur brushless). Vendu en machine seule (sans batterie ni chargeur). Compatible avec les batteries Makita LXT. Fiche technique détaillée à compléter. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "specs": {
+      "Marque": "Makita",
+      "Type": "Visseuse / perceuse 4 fonctions sans fil 18V LXT Brushless — machine nue",
+      "Tension": "18 V (gamme LXT)",
+      "Moteur": "Brushless (sans charbon) + embrayage électronique",
+      "Fonctions": "Perçage, perçage à percussion, vissage, visseuse à chocs",
+      "Mandrin": "Porte-embout hexagonal 1/4\"",
+      "Couple max (mode choc)": "150 Nm",
+      "Plage d'embrayage": "1,5 à 8,0 Nm",
+      "Vitesse à vide": "0-2700 tr/min (choc/perçage) — 0-1100 tr/min (vissage)",
+      "Fréquence de choc": "0-8400 / 0-32400 cps/min",
+      "Longueur": "171 mm",
+      "Poids": "≈ 1,6 à 1,8 kg selon batterie",
+      "Batterie / chargeur": "Non inclus"
+    },
+    "description_long": "Outil 4-en-1 sans fil Makita 18V LXT (DTP141Z), machine seule. Un seul outil pour quatre usages : perçage, perçage à percussion, vissage et visseuse à chocs. Moteur brushless associé à un embrayage électronique (1,5 à 8,0 Nm) qui adapte la vitesse au couple présélectionné pour éviter le surserrage. Couple maxi de 150 Nm en mode choc, mandrin porte-embout hexagonal 1/4\", vitesse jusqu'à 2700 tr/min. Compact (171 mm) et polyvalent, idéal pour passer du perçage au vissage à chocs sans changer d'outil. Vendu sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
   },
   {
     "id": "makita-dtw1001z",
