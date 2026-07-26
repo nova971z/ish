@@ -1,5 +1,9 @@
 # 🛵 Service Coursier « quincaillerie à la demande » — Cadrage (NON codé)
 
+> 👉 **Doc de CONSTRUCTION + cadre juridique complet (lois, articles, seuils,
+> sources officielles, check-list avocat)** : voir **`plan-creation-coursier.md`**.
+> Le présent fichier = concept & décisions user (le « quoi »).
+
 > Document de cadrage produit + légal. **Rien n'est codé.** À dérouler quand les
 > prérequis seront réunis (voir §8). ⚠️ Le volet légal ci-dessous est une
 > synthèse d'orientation, PAS un avis juridique — **faire valider par un avocat
