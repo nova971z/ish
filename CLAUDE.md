@@ -46,6 +46,24 @@ LIRE CE FICHIER avant d'ajouter/modifier un produit ou un poster. Cœur des règ
 - **WORKFLOW** : travailler DIRECTEMENT sur `master` (commit + push immédiat → Vercel live). CI verte à chaque fois. Identifier le produit par le TITRE de la capture pirates-tools.com.
 - Journal des produits validés + prix en attente : voir le fichier REGLES-PRODUITS.md §7.
 
+## 🧹 PURGE CATALOGUE — « seul ce que le traqueur voit reste » (26/07/2026)
+RÈGLE ISSUE DE CETTE SESSION : un produit dont le **coût d'achat n'est pas
+relevé chez cotébrico** ne reste pas au catalogue — son prix reposerait sur une
+supposition et il n'est de toute façon pas approvisionnable. 34 fiches retirées
+en 4 vagues : Flex ×2, Facom ×1, Festool SKU inventé ×3 (TI-18, TPC-18, TSC55),
+puis **28 fiches « coût estimé »** (15 DeWALT · 9 Makita · 4 Festool · 2 Wera).
+Catalogue **510 → 476** (172 vrais produits + 304 quincaillerie).
+- ⚠️ EXCEPTION VOULUE : `DWST83402-1` (TOUGHSYSTEM 2.0 Trolley) CONSERVÉ.
+- ⚠️ TOUS LES ASSETS SONT CONSERVÉS (posters + 14 modèles 3D, dont les 4 packs
+  fusionnés dcf894p2-pack / dcd796p2-pack / dck276p2-pack / dcd996p2-pack).
+  Remettre une fiche = la recréer dans products.json, les visuels sont là.
+- ⚠️ Deux suppressions CONTREDISENT des décisions antérieures — à re-trancher si
+  l'user les redemande : `DUB363ZV` (ajouté sciemment le ~24/07 alors qu'il
+  n'est PAS chez cotébrico) et `DCG405FN-XJ` (prix dérivé d'Amazon, validé
+  explicitement par l'user le ~20/07). Restaurables via git.
+- Wera n'a JAMAIS eu de raccourci traqueur → ses 2 fiches sont parties faute de
+  couverture, pas faute d'existence. Créer le raccourci si on les remet.
+
 ## 📌 À FAIRE PLUS TARD (en attente, décidé avec l'user — à traiter ensemble)
 - [x] **Règles Firestore DÉPLOYÉES ✅ (25/07/2026, ~20h, par l'user via la
       console iPad)** : contenu complet vérifié sur capture (58 lignes = verrou
