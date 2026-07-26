@@ -4757,7 +4757,19 @@
       return new Promise(function (resolve, reject) {
         task.on('state_changed', function (snap) {
           if (onProgress && snap.totalBytes) onProgress(Math.round(snap.bytesTransferred / snap.totalBytes * 100));
-        }, reject, function () { resolve(path); });
+        }, function (err) {
+          // Message EXPLICITE au lieu du code Firebase brut : tant que
+          // Storage n'est pas activé sur le projet, l'upload échoue et
+          // l'utilisateur doit comprendre que ce n'est pas SA faute.
+          var code = (err && err.code) || '';
+          if (code === 'storage/unauthorized') {
+            reject(new Error('Dépôt refusé — tu dois être le client ou le livreur de cette course.'));
+          } else if (code === 'storage/retry-limit-exceeded' || code === 'storage/canceled') {
+            reject(new Error('Connexion trop instable — réessaie avec une vidéo plus courte.'));
+          } else {
+            reject(new Error('Dépôt de vidéos indisponible pour le moment (fonction pas encore activée). Tes photos et le litige fonctionnent normalement.'));
+          }
+        }, function () { resolve(path); });
       });
     }).then(function (donePath) {
       return jsonAuthHeaders().then(function (headers) {
