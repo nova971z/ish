@@ -991,11 +991,32 @@ async function handlePriceWatch(req, res, admin, db) {
         : (typeof p.price === 'number' ? p.price : null);
       const rec = { sku: item.sku, id: p.id, name: p.title || p.name, srcTTC: src, newPrice, newHt, markup: priced.markup, oldPrice: cur };
 
-      if (cur != null && Math.abs(newPrice - cur) < 0.02) { unchanged.push(rec); continue; }
+      // Le produit a-t-il DÉJÀ un coût réel relevé ? (marque du traqueur)
+      const dejaReleve = (oW.priceSource === 'cotebrico' && typeof oW.priceSrcTTC === 'number' && oW.priceSrcTTC > 0);
+
+      if (cur != null && Math.abs(newPrice - cur) < 0.02) {
+        unchanged.push(rec);
+        // Le prix est déjà bon — mais le COÛT RELEVÉ doit quand même être
+        // enregistré. Sans ça, un produit parfaitement suivi n'a JAMAIS de coût
+        // réel en base : il compte comme « estimé », le garde-fou coffret ne
+        // peut pas s'appuyer dessus, et la marge affichée repose sur une
+        // supposition alors que le vrai prix fournisseur est connu.
+        if (!dryRun && (!dejaReleve || Math.abs((oW.priceSrcTTC || 0) - src) >= 0.01)) {
+          await db.collection('product_overrides').doc(p.id).set({
+            priceSource: 'cotebrico', priceSrcTTC: src, priceCheckedAt: now
+          }, { merge: true });
+        }
+        continue;
+      }
 
       let reason = null;
       if (src < PW.MIN_TTC || src > PW.MAX_TTC) reason = 'prix source hors fourchette (' + src + ' €)';
-      else if (cur != null && cur > 0 && Math.abs(newPrice - cur) / cur > PW.MAX_MOVE) {
+      // Plafond de variation : il protège d'une LECTURE ABERRANTE sur un produit
+      // dont on suivait déjà le coût réel. Au PREMIER relevé réel, le grand saut
+      // est au contraire attendu (le prix venait d'une estimation) — le bloquer
+      // reviendrait à figer définitivement un prix faux. Les bornes MIN/MAX_TTC
+      // restent actives dans tous les cas.
+      else if (dejaReleve && cur != null && cur > 0 && Math.abs(newPrice - cur) / cur > PW.MAX_MOVE) {
         reason = 'variation ' + Math.round(Math.abs(newPrice - cur) / cur * 100) + ' % > ' + Math.round(PW.MAX_MOVE * 100) + ' %';
       }
       if (reason) { rec.reason = reason; flagged.push(rec); continue; }
