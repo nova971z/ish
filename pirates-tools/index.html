@@ -44,7 +44,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=469">
+  <link rel="stylesheet" href="styles.css?v=470">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -472,7 +472,7 @@
 
       <!-- SECTION : Livraison chantier (produits QUINCAILLERIE uniquement —
            remplace le split 3D/specs ; rempli par initPdpDelivery()). -->
-      <div class="pdp-section" id="pdpDelivery" hidden>
+      <div class="pdp-section" data-animate="fade-up" id="pdpDelivery" hidden>
         <div class="pdp-section__inner">
           <h2 class="pdp-section__heading">🛵 Livraison sur ton chantier</h2>
           <p class="lv-hint" style="margin:.2rem 0 .8rem">Commande ta quincaillerie, un livreur te l'apporte directement — <span id="pdpDelivBanner">🟢 service disponible à partir du <strong>1er janvier</strong>, tu peux déjà tout tester</span>.</p>
@@ -1901,7 +1901,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=469"></script>
+  <script defer src="app.js?v=470"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->
