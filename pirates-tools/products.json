@@ -5910,13 +5910,13 @@
     "id": "makita-djr360zk",
     "slug": "makita-djr360zk-scie-sabre-36v-lxt-machine-seu",
     "sku": "DJR360ZK",
-    "title": "Makita DJR360ZK — Scie sabre 36V LXT (machine seule) dans coffret synthétique",
+    "title": "Makita DJR360ZK — Scie sabre 36V LXT brushless en coffret synthétique (machine seule)",
     "name": "DJR360ZK",
     "brand": "Makita",
     "category": "Scies",
     "tag": "Nouveau",
-    "desc": "Scie sabre 36V LXT (machine seule) dans coffret synthétique.",
-    "img": "images/placeholder.svg",
+    "desc": "Sans fil 36V (2×18V), coupe bois 255 mm / acier 130 mm, course 32 mm, brushless, en coffret + 2 lames.",
+    "img": "images/posters/djr360zk.webp",
     "price": 292.1,
     "currency": "EUR",
     "vat": 0.2,
@@ -5925,7 +5925,7 @@
     "stock_label": "En stock",
     "model": "",
     "paymentLink": "",
-    "weight_kg": 3.5,
+    "weight_kg": 4.0,
     "ncCategory": "power_tool",
     "productType": "pro",
     "tags": [
@@ -5933,14 +5933,31 @@
       "tropical_ready"
     ],
     "features": [
-      "Scie sabre 36V LXT (machine seule) dans coffret synthétique",
-      "Gamme Makita 36V LXT sans fil, moteur brushless (sans charbon) haut rendement",
-      "Livré en coffret MAKPAC — machine seule (batterie et chargeur non inclus)",
-      "Robuste et endurant, pensé pour un usage professionnel intensif",
-      "Idéal pour les chantiers des Antilles / DOM-TOM"
+      "Scie sabre sans fil 36V (2×18V) LXT — coupe bois jusqu’à 255 mm, acier 130 mm",
+      "Moteur brushless (sans charbon), vitesse variable jusqu’à 3000 courses/min, course 32 mm",
+      "Puissante et endurante grâce à l’alimentation 36V en série (2 batteries 18V)",
+      "Livrée en coffret synthétique de transport, avec 2 lames (bois + métal)",
+      "Machine seule (batteries et chargeur non inclus), compatible batteries Makita 18V LXT"
     ],
-    "specs": {},
-    "description_long": "Scie sabre 36V LXT (machine seule) dans coffret synthétique. Outil professionnel Makita de la gamme 36V LXT sans fil (moteur brushless). Livré en coffret MAKPAC, machine seule (sans batterie ni chargeur). Compatible avec les batteries Makita LXT. Fiche technique détaillée à compléter. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "specs": {
+      "Marque": "Makita",
+      "Type": "Scie sabre (récipro) sans fil 36V (2×18V) LXT Brushless — machine nue",
+      "Tension": "36 V (2 × 18 V, gamme LXT)",
+      "Moteur": "Brushless (sans charbon)",
+      "Cadence de coupe": "3000 courses/min (vitesse variable)",
+      "Longueur de course": "32 mm",
+      "Capacité de coupe (bois)": "255 mm",
+      "Capacité de coupe (acier)": "130 mm",
+      "Technologie moteur": "Vitesse variable",
+      "Technologie de confort": "Système anti-poussières, éclairage LED",
+      "Pression sonore (LpA)": "85 dB(A) (incertitude 3 dB)",
+      "Vibrations": "16,5 m/s²",
+      "Poids net EPTA": "4,0 kg",
+      "Dimensions (L×l×h)": "448 × 116 × 243 mm",
+      "Livré avec": "Coffret synthétique + 2 lames (bois + métal)",
+      "Batterie / chargeur": "Non inclus (2 batteries 18V requises)"
+    },
+    "description_long": "Scie sabre (récipro) sans fil Makita 36V (2×18V) LXT, machine seule, livrée en coffret synthétique de transport avec 2 lames (bois et métal). Pratique et puissante, elle offre d’excellentes capacités de coupe aussi bien dans le bois (255 mm) que dans l’acier (130 mm), grâce à son moteur brushless et à l’alimentation 36V en série. Vitesse variable (3000 courses/min), course de 32 mm, éclairage LED et système anti-poussières. Vendue sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
   },
   {
     "id": "makita-djv181z",
