@@ -1028,4 +1028,8 @@ async function handlePriceWatch(req, res, admin, db) {
 }
 
 // Corps volumineux (3 pages cotébrico) → augmente la limite du body parser.
-module.exports.config = { api: { bodyParser: { sizeLimit: '4mb' } } };
+// Corps volumineux : le traqueur reçoit le HTML BRUT d'une page cotébrico
+// entière. Une page « toute la marque » (resultsPerPage=800) pèse plusieurs Mo.
+// 4,5 Mo = plafond de Vercel pour le corps d'une requête serverless — on s'y
+// cale. Au-delà, découper la marque en 2 pages (voir docs/TRAQUEUR-URLS.md).
+module.exports.config = { api: { bodyParser: { sizeLimit: '4.5mb' } } };

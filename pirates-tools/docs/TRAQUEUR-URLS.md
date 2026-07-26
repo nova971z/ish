@@ -32,8 +32,16 @@ La **1ʳᵉ URL (health) est identique pour les 3 marques** :
 
 ## 🔵 Makita
 1. `https://pirates-tools.com/api/health`
-2. `https://www.cotebrico.fr/8-outils-electroportatifs/s-1/tension-18_v+36_v_2_x_18_v/marque-makita/nombre_de_batteries_fournies-aucune/type_de_moteur-brushless_sans_charbon/type_d_alimentation-batterie/batteries_compatibles-gamme_lxt_18_v/en_stock-oui/categories_2-outils_electroportatifs?resultsPerPage=200`
+2. `https://www.cotebrico.fr/1/makita?order=product.price.desc&resultsPerPage=800`
 3. `https://pirates-tools.com/api/admin?type=price-watch&brand=MAKITA&dryRun=0`
+
+> ⚠️ **URL CORRIGÉE le 26/07/2026.** L'ancienne était filtrée
+> (`nombre_de_batteries_fournies-aucune` + `type_de_moteur-brushless` +
+> `tension-18_v` + `en_stock-oui`) : elle EXCLUAIT donc structurellement tous
+> les kits avec batteries, tous les modèles à charbons, les filaires et les
+> produits en rupture — soit la majorité des 87 Makita du catalogue, qui
+> n'avaient JAMAIS de coût relevé. Ne jamais remettre de filtre ici : le
+> traqueur ne peut voir que ce que la page contient.
 
 ## ⚫ Festool
 1. `https://pirates-tools.com/api/health`
@@ -41,6 +49,27 @@ La **1ʳᵉ URL (health) est identique pour les 3 marques** :
 3. `https://pirates-tools.com/api/admin?type=price-watch&brand=FESTOOL&dryRun=1`
 
 ---
+
+## 🟠 Flex · Wera · Facom (À CRÉER — 5 produits jamais traqués)
+Même structure, seules la page cotébrico et le `brand=` changent. Le parseur est
+agnostique de la marque (il cherche « MARQUE + référence » dans les titres).
+Faire un 1er passage en `dryRun=1` pour vérifier ce qui est reconnu.
+
+- Flex : page marque cotébrico + `?order=product.price.desc&resultsPerPage=400`
+  → `…/api/admin?type=price-watch&brand=FLEX&dryRun=1`
+- Wera : idem → `brand=WERA`
+- Facom : idem → `brand=FACOM`
+
+---
+
+### ⚠️ Taille de page et limite serveur
+Le corps du POST = le HTML BRUT de la page. Plafond Vercel = **4,5 Mo**
+(`bodyParser.sizeLimit` dans api/admin.js). Si une page « toute la marque »
+dépasse, le raccourci échoue (413) ou remonte `parsed: 0`.
+**Repli** : deux raccourcis par marque, mêmes réglages, sorts opposés —
+`?order=product.price.desc&resultsPerPage=400` et
+`?order=product.price.asc&resultsPerPage=400` : les deux moitiés se rejoignent
+au milieu et couvrent tout le catalogue.
 
 ### Notes
 - **`dryRun=0`** = applique les prix (marge 15 % sur le TTC affiché, promo comprise).
