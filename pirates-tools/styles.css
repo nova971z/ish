@@ -7801,3 +7801,12 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-cta { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
 .lv-cta__note { color: var(--muted, #9a9ab0); font-size: .88rem; }
 @media (max-width: 560px) { .lv-vehicles { grid-template-columns: 1fr; } .lv-cta { flex-direction: column; align-items: stretch; } }
+/* Boutons assureurs (encadré assurance moto — mâche le travail) */
+.lv-insurers { display: grid; grid-template-columns: repeat(2, 1fr); gap: .5rem; margin: .5rem 0 .3rem; }
+.lv-ins { display: grid; gap: .1rem; padding: .6rem .7rem; border-radius: 12px; border: 1px solid rgba(255,255,255,.14); background: rgba(0,0,0,.28); text-decoration: none; transition: border-color .15s, background .15s; }
+.lv-ins:hover { border-color: rgba(var(--accent-rgb,167,139,250),.6); background: rgba(var(--accent-rgb,167,139,250),.1); }
+.lv-ins__name { font-weight: 700; color: #fff; }
+.lv-ins__desc { font-size: .78rem; color: var(--muted, #a9a9be); line-height: 1.3; }
+.lv-ins__price { font-size: .82rem; font-weight: 700; color: var(--accent, #a78bfa); margin-top: .15rem; }
+.lv-ins__note { display: block; font-size: .76rem; color: var(--muted, #9a9ab0); font-style: italic; margin-top: .2rem; }
+@media (max-width: 560px) { .lv-insurers { grid-template-columns: 1fr; } }

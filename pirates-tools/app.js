@@ -3789,17 +3789,16 @@
   ];
 
   // Véhicules : chaque entrée = cahier des charges + textes de loi + explications.
+  // Assureurs pros deux-roues livraison (boutons cliquables → devis). Prix
+  // INDICATIFS (le tarif réel dépend de l'âge/véhicule/zone) — signalé à l'user.
+  var LV_INSURERS = [
+    { name: 'Orus', desc: 'RC Pro coursier / livreur', price: 'dès ~10 €/mois*', url: 'https://www.orus.eu/assurance-rc-pro/coursier-livreur' },
+    { name: 'Coover', desc: 'Assurance pro livreur', price: 'devis en ligne', url: 'https://www.coover.fr' },
+    { name: 'AssurUp', desc: 'RC Pro & véhicule pro', price: 'devis en ligne', url: 'https://www.assurup.com' },
+    { name: 'Opticourtage', desc: 'Scooter / moto de livraison', price: 'devis scooter pro', url: 'https://www.opticourtage.com/assurance-scooter-de-livraison/' }
+  ];
+
   var LV_VEHICLES = {
-    velo: {
-      emoji: '🚲', label: 'Vélo (musculaire)',
-      note: { type: 'warn', txt: 'En Guadeloupe, le vélo sans assistance n\'est viable que pour de très courtes distances (les îles sont grandes, il fait chaud). À réserver à la proximité.' },
-      docs: [], permis: null,
-      laws: [
-        { ref: 'Code des transports — accès à la profession de transporteur',
-          plain: 'Le vélo n\'est PAS un véhicule motorisé : tu n\'as AUCUNE licence de transport ni inscription au registre à faire. Il te faut seulement le socle commun (dont le statut auto-entrepreneur).',
-          link: LV_LINKS.transport }
-      ]
-    },
     vae: {
       emoji: '🔋', label: 'Vélo à assistance électrique (VAE)',
       note: { type: 'ok', txt: 'Bon compromis : assimilé à un vélo (aucune licence transport, aucun permis), tout en couvrant plus de distance. Doit être bridé à 25 km/h.' },
@@ -3828,7 +3827,7 @@
       docs: [
         { t: 'Permis adapté à la cylindrée', h: 'AM (50 cm³, dès 14 ans) · A1 (125 cm³, dès 16 ans) · A2 (dès 18 ans) · A. Permis B + 7 h de formation → 125 cm³.', link: { u: LV_LINKS.permis, l: 'Quel permis pour quel deux-roues' } },
         { t: 'Carte grise du véhicule à ton nom', h: 'Le deux-roues doit être immatriculé.' },
-        { t: 'Assurance du véhicule à usage PROFESSIONNEL (livraison)', h: '⚠️ Ton assurance deux-roues personnelle NE couvre PAS le transport pour autrui. En cas d\'accident en livraison, tu serais non assuré. Il faut une assurance pro.' },
+        { t: 'Assurance du véhicule à usage PROFESSIONNEL (livraison)', h: '⚠️ Ton assurance deux-roues personnelle NE couvre PAS le transport pour autrui. En cas d\'accident en livraison, tu serais non assuré. Choisis une assurance pro ci-dessous :', insurers: true },
         { t: 'Assurance des marchandises transportées', h: 'Tu es responsable de ce que tu transportes (vis, prises…) : une assurance dédiée couvre la perte ou la casse.' },
         { t: '🔴 Attestation de capacité professionnelle de transport léger', h: 'Formation d\'environ 105 h + examen à la DREAL. Obligatoire pour transporter des marchandises pour autrui avec un véhicule motorisé.', link: { u: LV_LINKS.transport, l: 'Accès à la profession de transporteur' } },
         { t: '🔴 Inscription au registre des transporteurs (DEAL Guadeloupe)', h: 'Demande d\'autorisation d\'exercer déposée à la DEAL/DREAL de ta région. Un récépissé est délivré sous ~2 mois.', link: { u: LV_LINKS.dealGp, l: 'DEAL Guadeloupe' } },
@@ -3846,6 +3845,16 @@
   function lvDocItem(d) {
     var h = '<li class="lv-doc"><span class="lv-doc__t">' + d.t + '</span>';
     if (d.h) h += '<span class="lv-doc__h">' + d.h + '</span>';
+    if (d.insurers) {
+      h += '<div class="lv-insurers">';
+      LV_INSURERS.forEach(function (ins) {
+        h += '<a class="lv-ins" href="' + escapeHTML(ins.url) + '" target="_blank" rel="noopener noreferrer">'
+          + '<span class="lv-ins__name">' + escapeHTML(ins.name) + '</span>'
+          + '<span class="lv-ins__desc">' + escapeHTML(ins.desc) + '</span>'
+          + '<span class="lv-ins__price">' + escapeHTML(ins.price) + '</span></a>';
+      });
+      h += '</div><span class="lv-ins__note">*prix indicatif — le tarif réel dépend de ton âge, ton véhicule et ta zone. Fais un devis gratuit sur leur site.</span>';
+    }
     if (d.link) h += '<a class="lv-doc__link" href="' + escapeHTML(d.link.u) + '" target="_blank" rel="noopener noreferrer">' + escapeHTML(d.link.l) + ' ↗</a>';
     return h + '</li>';
   }
@@ -3861,43 +3870,55 @@
     var box = document.getElementById('lvForm');
     if (!box) return;
     var noteClass = { warn: 'lv-note--warn', ok: 'lv-note--ok', strong: 'lv-note--strong' };
+    var state = { veh: null };
 
-    function draw(vehKey, age) {
-      var h = [];
-      // Bandeau « en préparation »
-      h.push('<div class="lv-banner">🚧 <strong>Programme en préparation.</strong> Tu peux déjà tout découvrir et préparer tes démarches. Les inscriptions ouvriront bientôt — reviens ici régulièrement.</div>');
+    // SHELL STABLE : le champ date est rendu UNE fois et n'est JAMAIS recréé
+    // pendant la saisie. Sur iOS, remplacer l'input pendant que le sélecteur est
+    // ouvert le fermait avant validation (bug signalé). Seuls #lvAgeMsg et
+    // #lvDynamic changent -> le picker natif reste stable jusqu'au « Valider ».
+    box.innerHTML =
+      '<div class="lv-banner">🚧 <strong>Programme en préparation.</strong> Tu peux déjà tout découvrir et préparer tes démarches. Les inscriptions ouvriront bientôt — reviens régulièrement.</div>'
+      + '<div class="lv-card"><label class="lv-field"><span>Ta date de naissance *</span>'
+      + '<input type="date" id="lvBirth" autocomplete="bday"></label>'
+      + '<p class="lv-hint" id="lvAgeMsg" style="margin-top:.6rem">Renseigne ta date de naissance pour continuer.</p></div>'
+      + '<div id="lvDynamic"></div>';
 
-      // Âge
-      h.push('<div class="lv-card"><label class="lv-field"><span>Ta date de naissance *</span>'
-        + '<input type="date" id="lvBirth" value="' + (age && age.val ? escapeHTML(age.val) : '') + '"></label>');
-      if (age && age.val) {
-        if (age.years < 18) {
-          h.push('<p class="lv-age lv-age--ko">❌ Tu dois avoir <strong>18 ans minimum</strong> pour devenir livreur (obligation légale). Reviens à ta majorité&nbsp;!</p></div>');
-          box.innerHTML = h.join('');
-          wire(vehKey, age);
-          return;
-        }
-        h.push('<p class="lv-age lv-age--ok">✅ Tu as ' + age.years + ' ans — tu peux continuer.</p>');
+    function ageFromInput() {
+      var birth = document.getElementById('lvBirth');
+      if (!birth || !birth.value) return null;
+      var d = new Date(birth.value), now = new Date();
+      var years = now.getFullYear() - d.getFullYear();
+      if (now.getMonth() < d.getMonth() || (now.getMonth() === d.getMonth() && now.getDate() < d.getDate())) years--;
+      return years;
+    }
+
+    function renderDynamic() {
+      var years = ageFromInput();
+      var msg = document.getElementById('lvAgeMsg');
+      var dyn = document.getElementById('lvDynamic');
+      if (!dyn) return;
+      if (years === null) {
+        if (msg) { msg.className = 'lv-hint'; msg.textContent = 'Renseigne ta date de naissance pour continuer.'; }
+        dyn.innerHTML = ''; return;
       }
-      h.push('</div>');
+      if (years < 18) {
+        if (msg) { msg.className = 'lv-age lv-age--ko'; msg.innerHTML = '❌ Tu dois avoir <strong>18 ans minimum</strong> pour devenir livreur (obligation légale). Reviens à ta majorité&nbsp;!'; }
+        dyn.innerHTML = ''; return;
+      }
+      if (msg) { msg.className = 'lv-age lv-age--ok'; msg.textContent = '✅ Tu as ' + years + ' ans — tu peux continuer.'; }
 
-      // Sélecteur de véhicule (débloqué si âge OK)
-      var ageOk = age && age.val && age.years >= 18;
-      h.push('<div class="lv-card"><h2 class="lv-h2">1. Choisis ton véhicule</h2>');
-      if (!ageOk) h.push('<p class="lv-hint">Renseigne d\'abord ta date de naissance ci-dessus.</p>');
-      h.push('<div class="lv-vehicles"' + (ageOk ? '' : ' aria-disabled="true"') + '>');
+      var h = [];
+      h.push('<div class="lv-card"><h2 class="lv-h2">1. Choisis ton véhicule</h2><div class="lv-vehicles">');
       Object.keys(LV_VEHICLES).forEach(function (k) {
         var v = LV_VEHICLES[k];
-        h.push('<button type="button" class="lv-veh' + (vehKey === k ? ' lv-veh--on' : '') + '" data-veh="' + k + '"' + (ageOk ? '' : ' disabled') + '>'
+        h.push('<button type="button" class="lv-veh' + (state.veh === k ? ' lv-veh--on' : '') + '" data-veh="' + k + '">'
           + '<span class="lv-veh__emoji">' + v.emoji + '</span><span class="lv-veh__label">' + v.label + '</span></button>');
       });
       h.push('</div></div>');
 
-      // Cahier des charges du véhicule choisi
-      if (ageOk && vehKey && LV_VEHICLES[vehKey]) {
-        var v = LV_VEHICLES[vehKey];
-        h.push('<div class="lv-card">');
-        h.push('<h2 class="lv-h2">2. Ton cahier des charges — ' + v.emoji + ' ' + v.label + '</h2>');
+      if (state.veh && LV_VEHICLES[state.veh]) {
+        var v = LV_VEHICLES[state.veh];
+        h.push('<div class="lv-card"><h2 class="lv-h2">2. Ton cahier des charges — ' + v.emoji + ' ' + v.label + '</h2>');
         if (v.note) h.push('<div class="lv-note ' + (noteClass[v.note.type] || '') + '">' + v.note.txt + '</div>');
         h.push('<h3 class="lv-h3">Le socle commun (obligatoire pour tous)</h3><ul class="lv-docs">');
         LV_BASE.forEach(function (d) { h.push(lvDocItem(d)); });
@@ -3910,40 +3931,23 @@
           h.push('<p class="lv-hint">✅ Rien de plus que le socle commun — c\'est le véhicule le plus simple administrativement.</p>');
         }
         h.push('</div>');
-
-        // Textes de loi
         h.push('<div class="lv-card"><h2 class="lv-h2">3. Les textes de loi (et ce qu\'ils veulent dire)</h2>');
         v.laws.forEach(function (law) { h.push(lvLawBlock(law)); });
-        h.push('<p class="lv-hint">Sources officielles complètes : URSSAF, DREAL/DEAL, Légifrance. En cas de doute, on est là pour t\'aider.</p></div>');
-
-        // CTA (désactivé tant que le programme n'est pas ouvert)
+        h.push('<p class="lv-hint">Sources officielles : URSSAF, DREAL/DEAL, Légifrance.</p></div>');
         h.push('<div class="lv-card lv-cta">'
           + '<button type="button" class="btn primary" id="lvApply"' + (COURIER_ENABLED ? '' : ' disabled') + '>Je prépare mon dossier</button>'
           + '<span class="lv-cta__note">' + (COURIER_ENABLED ? 'On te contactera pour vérifier tes pièces.' : 'Inscriptions bientôt ouvertes — prépare déjà tes documents ci-dessus.') + '</span></div>');
       }
 
-      box.innerHTML = h.join('');
-      wire(vehKey, age);
-    }
-
-    function wire(vehKey, age) {
-      var birth = document.getElementById('lvBirth');
-      if (birth) birth.onchange = function () {
-        var val = birth.value, years = 0;
-        if (val) {
-          var d = new Date(val), now = new Date();
-          years = now.getFullYear() - d.getFullYear();
-          if (now.getMonth() < d.getMonth() || (now.getMonth() === d.getMonth() && now.getDate() < d.getDate())) years--;
-        }
-        draw(vehKey, { val: val, years: years });
-      };
-      var vehBtns = box.querySelectorAll('[data-veh]');
+      dyn.innerHTML = h.join('');
+      var vehBtns = dyn.querySelectorAll('[data-veh]');
       for (var i = 0; i < vehBtns.length; i++) {
-        (function (btn) { btn.onclick = function () { draw(btn.getAttribute('data-veh'), age); }; })(vehBtns[i]);
+        (function (btn) { btn.onclick = function () { state.veh = btn.getAttribute('data-veh'); renderDynamic(); }; })(vehBtns[i]);
       }
     }
 
-    draw(null, null);
+    var birthEl = document.getElementById('lvBirth');
+    if (birthEl) birthEl.onchange = renderDynamic;   // fire au « Valider » du picker
     var back = document.getElementById('lvBack');
     if (back) back.onclick = function () { history.length > 1 ? history.back() : (location.hash = '#/compte'); };
   }

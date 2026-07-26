@@ -44,7 +44,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=451">
+  <link rel="stylesheet" href="styles.css?v=452">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -699,14 +699,6 @@
 
         <!-- Onglet Profil -->
         <div class="acc-pane active" data-acc-pane="profile">
-          <!-- Devenir Livreur (service coursier — en préparation) -->
-          <div class="card lv-cta-card">
-            <div class="head"><h3 class="title">🛵 Devenir Livreur</h3><span class="badge">Nouveau</span></div>
-            <div class="specs">
-              <p class="lv-cta-txt">Tu as un deux-roues (vélo, trottinette, scooter, moto)&nbsp;? Gagne de l'argent en livrant de la quincaillerie aux artisans sur leurs chantiers. On te <strong>mâche toutes les démarches</strong> pour être en règle.</p>
-              <a class="btn primary" href="#/livreur">Voir comment devenir livreur →</a>
-            </div>
-          </div>
           <div class="card">
             <div class="head"><h3 class="title">Informations personnelles</h3><span class="badge">Profil</span></div>
             <div class="specs">
@@ -743,6 +735,15 @@
           <div class="card" style="margin-top:1.2rem" id="accPartnerCard" hidden>
             <div class="head"><h3 class="title">Ma carte artisan</h3><span class="badge">Partenaire</span></div>
             <div class="specs" id="accPartnerBody"></div>
+          </div>
+
+          <!-- Devenir Livreur (service coursier — en préparation). Placé EN BAS. -->
+          <div class="card lv-cta-card" style="margin-top:1.2rem">
+            <div class="head"><h3 class="title">🛵 Devenir Livreur</h3><span class="badge">Nouveau</span></div>
+            <div class="specs">
+              <p class="lv-cta-txt">Tu as un <strong>vélo électrique, une trottinette électrique, un scooter ou une moto</strong>&nbsp;? Gagne de l'argent en livrant de la quincaillerie aux artisans sur leurs chantiers. On te <strong>mâche toutes les démarches</strong> pour être en règle.</p>
+              <a class="btn primary" href="#/livreur">Voir comment devenir livreur →</a>
+            </div>
           </div>
         </div>
 
@@ -1805,7 +1806,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=451"></script>
+  <script defer src="app.js?v=452"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->
