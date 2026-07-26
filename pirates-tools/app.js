@@ -3803,16 +3803,19 @@
   // devis assureurs). Affiché au-dessus du cahier des charges, maj au changement.
   var LV_COSTS = {
     vae: {
+      total: 'Environ 0 € à l\'installation', time: 'Prêt en ~3 à 7 jours',
       once: [ { l: 'Création auto-entrepreneur', v: 'Gratuit' } ],
       month: [ { l: 'Assurance RC Pro', v: '~10 à 15 €' } ],
-      summary: 'Quasi rien à débourser : juste ton assurance RC Pro (~10-15 €/mois). Aucun permis, aucune licence transport.'
+      summary: 'Quasi rien à débourser : juste ton assurance RC Pro (~10-15 €/mois). Aucun permis, aucune licence transport. Le seul délai = créer ta micro-entreprise (SIRET reçu sous quelques jours) et souscrire ton assurance.'
     },
     trottinette: {
+      total: 'Environ 0 € à l\'installation', time: 'Prêt en ~3 à 7 jours',
       once: [ { l: 'Création auto-entrepreneur', v: 'Gratuit' } ],
       month: [ { l: 'Assurance RC Pro', v: '~10 à 15 €' }, { l: 'Assurance RC trottinette (obligatoire)', v: '~5 à 15 €' } ],
-      summary: 'Aucun frais d\'installation. Compte environ 15 à 30 €/mois d\'assurances. Aucun permis.'
+      summary: 'Aucun frais d\'installation. Compte environ 15 à 30 €/mois d\'assurances. Aucun permis. Délai = création micro-entreprise + assurances (quelques jours).'
     },
     scooter: {
+      total: 'Environ 850 à 1 700 € au départ', time: 'Compte ~2 à 3 mois',
       once: [
         { l: 'Création auto-entrepreneur', v: 'Gratuit' },
         { l: 'Formation capacité transport léger', v: '750 à 1 500 €' },
@@ -3821,7 +3824,7 @@
       ],
       justify: [ { l: 'Capacité financière à justifier', v: '~1 800 € en réserve (pas dépensé)' } ],
       month: [ { l: 'Assurances (RC Pro + véhicule pro + marchandises)', v: '~50 à 90 €' } ],
-      summary: 'Le plus rentable, mais il faut investir au départ : ~850 à 1 700 € une fois (formation + équipement, hors permis si tu l\'as déjà), une réserve de ~1 800 € à justifier, puis ~50 à 90 €/mois d\'assurances.'
+      summary: 'Le plus rentable, mais il faut investir au départ : ~850 à 1 700 € une fois (formation + équipement, hors permis si tu l\'as déjà), une réserve de ~1 800 € à justifier, puis ~50 à 90 €/mois d\'assurances. Le délai vient surtout de la formation capacité (~3 semaines) et de l\'inscription au registre (récépissé sous ~2 mois).'
     }
   };
 
@@ -3968,31 +3971,36 @@
       if (msg) { msg.className = 'lv-age lv-age--ok'; msg.textContent = '✅ Tu as ' + years + ' ans — tu peux continuer.'; }
 
       var h = [];
+      // Sélecteur véhicule.
       h.push('<div class="lv-card"><h2 class="lv-h2">Choisis ton véhicule</h2><div class="lv-vehicles">');
       Object.keys(LV_VEHICLES).forEach(function (k) {
-        var v = LV_VEHICLES[k];
+        var vv = LV_VEHICLES[k];
         h.push('<button type="button" class="lv-veh' + (state.veh === k ? ' lv-veh--on' : '') + '" data-veh="' + k + '">'
-          + '<span class="lv-veh__emoji">' + v.emoji + '</span><span class="lv-veh__label">' + v.label + '</span></button>');
+          + '<span class="lv-veh__emoji">' + vv.emoji + '</span><span class="lv-veh__label">' + vv.label + '</span></button>');
       });
       h.push('</div></div>');
 
       if (state.veh && LV_VEHICLES[state.veh]) {
         var v = LV_VEHICLES[state.veh];
-        // Coût estimé des démarches (au-dessus du cahier des charges).
+        // Coût + délai des démarches, JUSTE EN DESSOUS des cartes (position validée
+        // par l'user), maj au changement de véhicule.
         var c = LV_COSTS[state.veh];
         if (c) {
-          h.push('<div class="lv-card lv-cost"><h2 class="lv-h2">💶 Ce que ça va te coûter (estimation)</h2>');
-          function costRows(title, rows) {
+          h.push('<div class="lv-card lv-cost"><h2 class="lv-h2">💶 Coût & délai des démarches</h2>');
+          h.push('<div class="lv-cost__headline">'
+            + '<div class="lv-cost__big"><span class="lv-cost__biglbl">Budget de départ</span><span class="lv-cost__bigv">' + c.total + '</span></div>'
+            + '<div class="lv-cost__big"><span class="lv-cost__biglbl">Délai estimé</span><span class="lv-cost__bigv">⏱️ ' + c.time + '</span></div></div>');
+          var costRows = function (title, rows) {
             if (!rows || !rows.length) return;
             h.push('<div class="lv-cost__grp"><span class="lv-cost__title">' + title + '</span>');
             rows.forEach(function (r) { h.push('<div class="lv-cost__row"><span>' + r.l + '</span><span class="lv-cost__v">' + r.v + '</span></div>'); });
             h.push('</div>');
-          }
+          };
           costRows('À l\'installation (une fois)', c.once);
           costRows('À justifier (réserve, non dépensé)', c.justify);
           costRows('Par mois (récurrent)', c.month);
           h.push('<p class="lv-cost__sum">' + c.summary + '</p>');
-          h.push('<p class="lv-hint">Estimations indicatives — les tarifs réels dépendent des organismes/assureurs. On te met les liens pour comparer.</p></div>');
+          h.push('<p class="lv-hint">Estimations indicatives — les tarifs et délais réels dépendent des organismes et assureurs.</p></div>');
         }
         h.push('<div class="lv-card"><h2 class="lv-h2">Ton cahier des charges — ' + v.emoji + ' ' + v.label + '</h2>');
         if (v.note) h.push('<div class="lv-note ' + (noteClass[v.note.type] || '') + '">' + v.note.txt + '</div>');

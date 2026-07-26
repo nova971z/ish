@@ -7839,3 +7839,9 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-piece__form { color: #6ee7b7; border: 1px solid rgba(110,231,183,.4); }
 .lv-piece__form:hover { background: rgba(110,231,183,.12); }
 @media (max-width: 560px) { .lv-piece__actions { margin-left: 0; width: 100%; } }
+/* Bandeau budget + délai (en tête du bloc coût livreur) */
+.lv-cost__headline { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin-bottom: 1rem; }
+.lv-cost__big { display: grid; gap: .2rem; padding: .7rem .8rem; background: rgba(var(--accent-rgb,167,139,250),.12); border: 1px solid rgba(var(--accent-rgb,167,139,250),.3); border-radius: 12px; }
+.lv-cost__biglbl { font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted, #b7b7c9); }
+.lv-cost__bigv { font-size: 1.05rem; font-weight: 800; color: #fff; }
+@media (max-width: 480px) { .lv-cost__headline { grid-template-columns: 1fr; } }
