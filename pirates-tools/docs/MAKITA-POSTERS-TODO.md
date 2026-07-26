@@ -16,7 +16,7 @@
 11. [x] DUT130Z — Malaxeur / mélangeur 18V LXT brushless (machine seule) — SPECS (fiche Makita/Cotébrico/Screwfix) + POSTER OK ✅
 12. [x] DGA513ZJ — Meuleuse d'angle 18V LXT Ø125 mm brushless en MAKPAC — SPECS (Cotébrico/Makita) + POSTER OK ✅ (coffretIncluded)
 13. [x] DMC300Z — Découpeuse / meuleuse compacte 18V LXT Ø76 mm brushless (machine seule) — SPECS (Makita/Cotébrico) + POSTER OK ✅
-14. [ ] DTM52Z — Outil multifonctions 18V Li-Ion LXT (machine seule)
+14. [x] DTM52Z — Outil multifonctions oscillant 18V LXT brushless StarlockMax AVT (machine seule) — SPECS (Makita/Cotébrico) + POSTER OK ✅
 15. [ ] DTP141Z — Perceuse 4 fonctions 18V LXT (Produit seul)
 16. [ ] DPV300Z — Ponceuse polisseuse 18V LXT Ø75 mm (Machine seule)
 17. [ ] DPV300ZJ — Ponceuse polisseuse 18V LXT Ø75 mm (Solo) en MAKPAC

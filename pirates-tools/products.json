@@ -6693,13 +6693,13 @@
     "id": "makita-dtm52z",
     "slug": "makita-dtm52z-outil-multifonctions-18v-li-io",
     "sku": "DTM52Z",
-    "title": "Makita DTM52Z — Outil multifonctions 18V Li-Ion LXT (machine seule)",
+    "title": "Makita DTM52Z — Outil multifonctions oscillant 18V LXT brushless StarlockMax AVT (machine seule)",
     "name": "DTM52Z",
     "brand": "Makita",
     "category": "Outils multifonctions",
     "tag": "Nouveau",
-    "desc": "Outil multifonctions 18V Li-Ion LXT (machine seule).",
-    "img": "images/placeholder.svg",
+    "desc": "Outil multifonctions oscillant sans fil 18V LXT, moteur brushless, système StarlockMax sans outil, technologie anti-vibrations AVT, 10000-20000 opm — sans batterie ni chargeur.",
+    "img": "images/posters/dtm52z.webp",
     "price": 193.29,
     "currency": "EUR",
     "vat": 0.2,
@@ -6716,14 +6716,27 @@
       "tropical_ready"
     ],
     "features": [
-      "Outil multifonctions 18V Li-Ion LXT (machine seule)",
-      "Gamme Makita 18V LXT sans fil, moteur brushless (sans charbon) haut rendement",
-      "Machine seule (batterie et chargeur non inclus), compatible batteries Makita LXT",
-      "Robuste et endurant, pensé pour un usage professionnel intensif",
-      "Idéal pour les chantiers des Antilles / DOM-TOM"
+      "Outil multifonctions oscillant sans fil 18V LXT — moteur brushless",
+      "Système StarlockMax : changement d'accessoire sans outil, ultra-rapide",
+      "Technologie AVT (anti-vibrations) à contrepoids interne pour le confort",
+      "Vitesse variable 10000-20000 opm, angle d'oscillation 3,6°, démarrage progressif",
+      "12 positions d'accessoire (tous les 30°) — machine seule (batterie et chargeur non inclus)"
     ],
-    "specs": {},
-    "description_long": "Outil multifonctions 18V Li-Ion LXT (machine seule). Outil professionnel Makita de la gamme 18V LXT sans fil (moteur brushless). Vendu en machine seule (sans batterie ni chargeur). Compatible avec les batteries Makita LXT. Fiche technique détaillée à compléter. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
+    "specs": {
+      "Marque": "Makita",
+      "Type": "Outil multifonctions oscillant sans fil 18V LXT Brushless — machine nue",
+      "Tension": "18 V (gamme LXT)",
+      "Moteur": "Brushless (sans charbon)",
+      "Système de fixation": "StarlockMax (serrage sans outil)",
+      "Fréquence d'oscillation": "10000 à 20000 opm (variable)",
+      "Angle d'oscillation": "3,6°",
+      "Anti-vibrations": "AVT (contrepoids interne)",
+      "Positions d'accessoire": "12 (tous les 30°)",
+      "Poids net": "1,7 kg (2,0 kg avec batterie)",
+      "Dimensions (L×l×h)": "322 × 95 × 126 mm",
+      "Batterie / chargeur": "Non inclus"
+    },
+    "description_long": "Outil multifonctions oscillant sans fil Makita 18V LXT (DTM52Z), machine seule. Moteur brushless à vitesse variable (10000 à 20000 opm) avec démarrage progressif. Doté du système StarlockMax pour changer les accessoires sans outil et de la technologie anti-vibrations AVT (contrepoids interne) qui réduit fortement les vibrations pour un travail confortable et précis. Angle d'oscillation 3,6°, 12 positions d'accessoire (tous les 30°). Idéal pour couper, poncer, gratter et affleurer dans tous les matériaux. Vendu sans batterie ni chargeur, compatible avec toutes les batteries Makita 18V LXT. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire."
   },
   {
     "id": "makita-dtp141z",
