@@ -106,6 +106,7 @@ service cloud.firestore {
     match /courier_applications/{uid}  { allow read, write: if false; } // candidatures + pièces (SIRET, assurance, permis…)
     match /courses/{courseId}          { allow read, write: if false; } // demandes de livraison artisan
     match /courier_locations/{uid}     { allow read, write: if false; } // géoloc temps réel (TTL court, RGPD)
+    match /courier_config/{id}         { allow read, write: if false; } // barème/prix essence (écrit via admin API)
 
     // Mesure d'audience maison : écrite par l'Admin SDK (api/events.js), lue
     // UNIQUEMENT par l'API admin authentifiée (api/admin?type=stats). Jamais

@@ -3846,6 +3846,25 @@
   var LV_GP_SURCONSO = 1.20;   // +20 % Guadeloupe
   function lvConsoGp(key) { return Math.round(LV_CYL[key].base * LV_GP_SURCONSO * 10) / 10; }
 
+  // ── BARÈME PAR ZONE (décision user, corrigée 26/07) ────────────────────────
+  // Ancrage : le trajet LE PLUS LONG = Sainte-Anne → BASSE-TERRE (la ville),
+  // zone 🔴 4 (rayon 46 km) = 100 € MAXIMUM. Tarif DÉGRESSIF proportionnel au
+  // rayon extérieur de zone : taux = 100 € / 46 km ≈ 2,17 €/km.
+  // → Z1 (10 km) 22 € · Z2 (22 km) 48 € · Z3 (34 km) 74 € · Z4 (46 km) 100 €.
+  // (Z1 respecte le plancher de 20 € voulu par l'user.) Montants = rémunération
+  // MINIMUM garantie du livreur, carburant à sa charge (coûts réels très en
+  // dessous : voir tableau admin Barème).
+  var LV_BAREME = [
+    { zone: 1, emoji: '🟢', km: '0-10',  prix: 22 },
+    { zone: 2, emoji: '🔵', km: '10-22', prix: 48 },
+    { zone: 3, emoji: '🟡', km: '22-34', prix: 74 },
+    { zone: 4, emoji: '🔴', km: '34-46', prix: 100 }
+  ];
+  var LV_FUEL_DEFAULT = 1.87;  // €/L sans plomb Guadeloupe (réglementé, révisé
+                               // chaque mois — modifiable dans Admin → Livreurs)
+  var LV_ROUTE_FACTOR = 1.62;  // route réelle ≈ 1,62 × vol d'oiseau (mesuré sur
+                               // Sainte-Anne→Capesterre : 46 km route / 28,4 km)
+
   // Pièces à TÉLÉVERSER (option B : dépôt + validation manuelle admin).
   // Le dossier passe en statut « en_attente » ; l'admin valide/refuse chaque
   // pièce. Architecture prête à brancher un vérificateur en direct plus tard.
@@ -4088,9 +4107,13 @@
           h.push('<div class="lv-card lv-remun-panel">'
             + '<div class="lv-remun-isle" id="lvRemunIsle" data-isle="' + terr.code + '" aria-label="' + escapeHTML(terr.name) + '"></div>'
             + '<p class="lv-remun-isle__name">' + escapeHTML(terr.name) + '</p>'
-            + '<p style="margin:.4rem 0 0">Voici tes <strong>4 zones de livraison</strong> autour de Sainte-Anne'
-            + ' <span style="white-space:nowrap">(🟢 0-10 km</span> · <span style="white-space:nowrap">🔵 10-22 km</span> · <span style="white-space:nowrap">🟡 22-34 km</span> · <span style="white-space:nowrap">🔴 34-46 km)</span>.'
-            + ' 🚧 Les <strong>tarifs par zone</strong> (selon ton véhicule) arrivent très bientôt.</p></div>');
+            + '<div class="lv-bareme">'
+            + LV_BAREME.map(function (b) {
+                return '<div class="lv-bareme__row"><span>' + b.emoji + ' Zone ' + b.zone + ' <em>(' + b.km + ' km)</em></span>'
+                  + '<span class="lv-bareme__prix">' + b.prix + ' €</span></div>';
+              }).join('')
+            + '</div>'
+            + '<p style="margin:.5rem 0 0" class="lv-hint">💶 Montants <strong>minimum garantis</strong> par livraison, payés par l\'artisan — la distance est mesurée depuis Sainte-Anne. Exemples : livrer à Capesterre-Belle-Eau (zone 🟡) = <strong>74 €</strong> ; jusqu\'à Basse-Terre (zone 🔴, le plus long trajet) = <strong>100 €</strong>, pour ~12 € d\'essence aller-retour même en grosse moto.</p></div>');
         }
         // Coût + délai des démarches, JUSTE EN DESSOUS des cartes (position validée
         // par l'user), maj au changement de véhicule.
@@ -8637,8 +8660,89 @@
     });
   }
 
+  // ── Dashboard : Barème livreurs & carburant (prix essence modifiable live) ──
+  var _lvAdminFuel = null;   // prix du litre chargé depuis le serveur
+  function renderAdminCourierBareme() {
+    var el = document.getElementById('adminCourierBareme');
+    if (!el) return;
+    var P = _lvAdminFuel || LV_FUEL_DEFAULT;
+    var fmt = function (n, d) { return n.toFixed(d === undefined ? 2 : d).replace('.', ','); };
+    var EXAMPLES = [
+      { label: 'Sainte-Anne ↔ Capesterre-Belle-Eau', route: 46, zone: 2 },  // zone 🟡 (index 2)
+      { label: 'Sainte-Anne ↔ Basse-Terre (ville)',  route: 61, zone: 3 }   // zone 🔴 (index 3)
+    ];
+    var h = '<div class="admin-bareme">'
+      // Barème par zone (rappel)
+      + '<div class="admin-bareme__zones">'
+      + LV_BAREME.map(function (b) {
+          return '<div class="admin-bareme__zone"><span>' + b.emoji + ' Z' + b.zone + '</span><em>' + b.km + ' km</em><strong>' + b.prix + ' €</strong></div>';
+        }).join('')
+      + '</div>'
+      + '<p class="admin-hint">Barème dégressif : ancrage Sainte-Anne → Basse-Terre (zone 🔴, trajet le plus long) = 100 €, proportionnel au rayon (≈ 2,17 €/km). Payé par l\'artisan au livreur — 0 % pour la plateforme.</p>'
+      // Prix essence modifiable
+      + '<div class="admin-bareme__fuel">'
+      + '<label>⛽ Prix du litre sans plomb (Guadeloupe, réglementé — révisé chaque mois par la préfecture)'
+      + '<input type="number" id="lvFuelInput" step="0.01" min="0.5" max="5" value="' + P.toFixed(2) + '"> €/L</label>'
+      + '<button type="button" class="btn primary" id="lvFuelSave">Enregistrer</button>'
+      + '<span id="lvFuelStatus" class="pj-status" aria-live="polite"></span>'
+      + '</div>'
+      // Tableau conso par cylindrée (recalcul LIVE quand le prix change)
+      + '<div class="admin-bareme__tablewrap"><table class="admin-bareme__table"><thead><tr>'
+      + '<th>Cylindrée</th><th>Conso constructeur</th><th>Conso Guadeloupe<br><small>(+20 % chaleur/virages)</small></th><th>Coût essence<br>par km</th>'
+      + EXAMPLES.map(function (ex) {
+          var z = LV_BAREME[ex.zone];
+          return '<th>' + ex.label + '<br><small>' + (ex.route * 2) + ' km A/R route · course ' + z.emoji + ' ' + z.prix + ' €</small></th>';
+        }).join('')
+      + '</tr></thead><tbody id="lvBaremeBody"></tbody></table></div>'
+      + '<p class="admin-hint">« Il lui reste » = rémunération de la course moins l\'essence A/R (avant cotisations micro-entrepreneur ~21,2 %). Le tableau se recalcule instantanément quand tu changes le prix du litre.</p>'
+      + '</div>';
+    el.innerHTML = h;
+
+    function body() {
+      var Pnow = parseFloat((document.getElementById('lvFuelInput') || {}).value) || P;
+      var rows = Object.keys(LV_CYL).map(function (ck) {
+        var c = LV_CYL[ck], gp = lvConsoGp(ck);
+        var perKm = gp / 100 * Pnow;
+        var cells = '<td><strong>' + c.label + '</strong></td>'
+          + '<td>' + fmt(c.base, 1) + ' L/100</td>'
+          + '<td><strong>' + fmt(gp, 1) + ' L/100</strong></td>'
+          + '<td>' + fmt(perKm, 3) + ' €/km</td>';
+        EXAMPLES.forEach(function (ex) {
+          var kmAR = ex.route * 2, litres = gp * kmAR / 100, cout = litres * Pnow;
+          var net = LV_BAREME[ex.zone].prix - cout;
+          cells += '<td>' + fmt(litres, 1) + ' L → ' + fmt(cout) + ' €<br><small class="admin-bareme__net">il lui reste ' + fmt(net) + ' €</small></td>';
+        });
+        return '<tr>' + cells + '</tr>';
+      }).join('');
+      var tb = document.getElementById('lvBaremeBody');
+      if (tb) tb.innerHTML = rows;
+    }
+    body();
+    var inp = document.getElementById('lvFuelInput');
+    if (inp) inp.oninput = body;
+    var save = document.getElementById('lvFuelSave');
+    if (save) save.onclick = function () {
+      var v = parseFloat(inp.value);
+      var st = document.getElementById('lvFuelStatus');
+      if (!(v > 0.5 && v < 5)) { if (st) st.textContent = 'Prix invalide.'; return; }
+      if (st) st.textContent = 'Enregistrement…';
+      adminPostType('courier-config', { fuelPrice: v }).then(function () {
+        _lvAdminFuel = v;
+        if (st) st.textContent = '✅ Enregistré (' + fmt(v) + ' €/L).';
+      }).catch(function (e) { if (st) st.textContent = 'Erreur : ' + e.message; });
+    };
+  }
+
   // ── Dashboard : Dossiers livreurs (service coursier — validation manuelle) ──
   function loadAdminCouriers() {
+    // Barème & carburant : charge le prix du litre serveur puis rend le tableau.
+    if (_lvAdminFuel === null) {
+      adminGet('courier-config').then(function (d) {
+        _lvAdminFuel = (d.config && d.config.fuelPrice) || LV_FUEL_DEFAULT;
+        renderAdminCourierBareme();
+      }).catch(function () { _lvAdminFuel = LV_FUEL_DEFAULT; renderAdminCourierBareme(); });
+    } else renderAdminCourierBareme();
+
     var el = document.getElementById('adminCouriersBody');
     if (!el) return;
     el.innerHTML = '<p class="admin-loading">Chargement…</p>';
@@ -8894,6 +8998,8 @@
 
       // ── Livreurs : validation des dossiers coursier (option B, KYC manuel) ──
       + '<div class="admin-pane" data-admin-pane="couriers" hidden>'
+      + '<h2 class="admin-subtitle">Barème & carburant</h2>'
+      + '<div id="adminCourierBareme"><p class="admin-loading">Chargement…</p></div>'
       + '<h2 class="admin-subtitle">Dossiers livreurs</h2>'
       + '<p class="admin-hint">Candidatures coursier reçues via « Devenir Livreur ». Vérifie les pièces (identité, permis, assurance, capacité transport…) puis valide ou refuse. Le service est INACTIF tant que le module n\'est pas ouvert : cette liste sera vide jusqu\'au lancement.</p>'
       + '<div id="adminCouriersBody"><p class="admin-loading">Chargement…</p></div>'

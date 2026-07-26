@@ -7902,3 +7902,22 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-remun-isle__name { text-align: center; margin: 0; font-weight: 800; color: #ffd76a; letter-spacing: .03em; }
 /* Détail consommation cylindrée (livreur) */
 .lv-conso { margin: .2rem 0 .8rem; padding: .6rem .8rem; background: rgba(0,0,0,.22); border: 1px solid rgba(255,255,255,.08); border-radius: 12px; }
+/* Barème livreur : liste des zones (panneau public) */
+.lv-bareme { margin-top: .6rem; display: grid; gap: .35rem; }
+.lv-bareme__row { display: flex; justify-content: space-between; align-items: center; padding: .45rem .7rem; background: rgba(0,0,0,.25); border: 1px solid rgba(255,255,255,.08); border-radius: 10px; }
+.lv-bareme__row em { font-style: normal; color: var(--muted, #9a9ab0); font-size: .85rem; }
+.lv-bareme__prix { font-weight: 800; color: #6ee7b7; font-size: 1.05rem; }
+/* Admin : barème & carburant */
+.admin-bareme__zones { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: .5rem; }
+.admin-bareme__zone { display: grid; gap: .05rem; padding: .5rem .8rem; background: rgba(0,0,0,.25); border: 1px solid rgba(255,255,255,.1); border-radius: 10px; text-align: center; }
+.admin-bareme__zone em { font-style: normal; font-size: .75rem; color: var(--muted, #9a9ab0); }
+.admin-bareme__zone strong { font-size: 1.05rem; color: #6ee7b7; }
+.admin-bareme__fuel { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; margin: .8rem 0; padding: .8rem; background: rgba(0,0,0,.22); border: 1px solid rgba(255,255,255,.1); border-radius: 12px; }
+.admin-bareme__fuel label { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; font-size: .9rem; }
+.admin-bareme__fuel input { width: 90px; padding: .45rem .6rem; border-radius: 8px; border: 1px solid rgba(255,255,255,.2); background: rgba(0,0,0,.3); color: #fff; font: inherit; font-weight: 700; }
+.admin-bareme__tablewrap { overflow-x: auto; }
+.admin-bareme__table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+.admin-bareme__table th, .admin-bareme__table td { padding: .5rem .6rem; border-bottom: 1px solid rgba(255,255,255,.08); text-align: left; vertical-align: top; }
+.admin-bareme__table th { color: var(--accent, #a78bfa); font-size: .78rem; text-transform: uppercase; letter-spacing: .02em; }
+.admin-bareme__table small { color: var(--muted, #9a9ab0); text-transform: none; letter-spacing: 0; }
+.admin-bareme__net { color: #6ee7b7; font-weight: 700; }

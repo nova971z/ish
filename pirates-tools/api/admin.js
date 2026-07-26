@@ -260,6 +260,14 @@ module.exports = async function handler(req, res) {
         return res.status(200).json({ ok: true, applications });
       }
 
+      // ── Config coursier : prix du litre d'essence (réglementé, révisé chaque
+      // mois) pour le barème livreurs. Lu/écrit UNIQUEMENT via l'admin. ──
+      if (type === 'courier-config') {
+        const doc = await db.collection('courier_config').doc('main').get().catch(() => null);
+        const config = (doc && doc.exists) ? doc.data() : {};
+        return res.status(200).json({ ok: true, config: { fuelPrice: config.fuelPrice || null } });
+      }
+
       // ── Dossiers livreurs (service coursier — validation manuelle option B).
       // Vide tant que le service est inactif (aucune candidature écrite). ──
       if (type === 'courier-applications') {
@@ -489,6 +497,21 @@ module.exports = async function handler(req, res) {
       }
       console.error('[api/admin] invite-code-save failed:', err.message);
       return res.status(500).json({ ok: false, error: 'invite-code-save échoué' });
+    }
+  }
+
+  // ── Sauvegarde config coursier (prix du litre) ──
+  if (req.method === 'POST' && ((req.query && req.query.type) === 'courier-config')) {
+    try {
+      const v = Number((req.body || {}).fuelPrice);
+      if (!(v > 0.5 && v < 5)) return res.status(400).json({ ok: false, error: 'fuelPrice invalide (0,5-5 €/L)' });
+      await db.collection('courier_config').doc('main').set({
+        fuelPrice: Math.round(v * 100) / 100, updatedAt: new Date()
+      }, { merge: true });
+      return res.status(200).json({ ok: true, fuelPrice: Math.round(v * 100) / 100 });
+    } catch (err) {
+      console.error('[api/admin] courier-config failed:', err.message);
+      return res.status(500).json({ ok: false, error: 'courier-config échoué' });
     }
   }
 
