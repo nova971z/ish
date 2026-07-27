@@ -483,3 +483,47 @@ vaut rien, et un détecteur faussement vert est pire que pas de détecteur.
 
 **Vérifications** : CI verte · couriers.mjs 80/80 · course-pay.mjs 14/14 ·
 émulateur Firestore 98/98.
+
+## PASSE P7 — ARCHITECTURE ET QUALITÉ ✅ (27/07/2026, SW v505)
+
+**Outil créé : `scripts/audit/p7-architecture.js`**, branché à `ci.js`.
+Nouveau harnais visuel : `scratchpad/cards.mjs` (6 assertions).
+
+### Défauts trouvés et corrigés
+
+| # | Gravité | Défaut | Correctif |
+|---|---|---|---|
+| P7-1 | 🟠 | **Données d'un TIERS à l'écran.** `_accCardState` (fiche artisan : nom, logo, photos, chargée par `partner-card-get`) **n'était jamais remise à zéro**. Après une déconnexion/reconnexion sur un autre compte, l'espace « Ma carte » pouvait afficher la fiche de **quelqu'un d'autre** le temps que la nouvelle requête réponde. Même famille que le rôle livreur mis en cache à vie (trouvé en P3). | Remise à zéro étendue à **14 variables** au changement d'identité : fiche artisan et ses drapeaux, modale de paiement (`_payItems`, `_payCourse`, `_payGoodsCourseId`), caches admin. Le contrôle exige désormais que **chaque** variable « d'identité » soit réinitialisée **ou classée nommément** comme non personnelle (18 justifications écrites). |
+| P7-2 | 🟠 | **Le balisage de la carte produit existait en 4 exemplaires** (catalogue, accueil, favoris, récemment vus, page territoire). Et **2 copies avaient dérivé** : favoris et « récemment vus » affichaient le prix **sans la mention « TTC »**, alors que le prix est territorial. C'est la deuxième dérive sur les favoris (la première, en étape 10b, affichait un prix métropole). | **Source unique** `productCardHTML(p, opts)`. Les variantes légitimes deviennent des options explicites : `territory` (forcé sur les pages territoire), `wishlist` et `tag` (masqués dans les bandeaux). **5 surfaces vérifiées au navigateur** : 40 cartes catalogue, 16 accueil, 2 favoris, 8 territoire — toutes avec « TTC ». |
+
+### Contrôles PASSÉS
+
+- ✅ **Fuites** : 1 `setInterval` pour 2 `clearInterval` · **5 observateurs pour
+  5 `disconnect`** · abonnement Firestore temps réel coupé (3 points de sortie).
+  Les 118 `addEventListener` visent des éléments détruits avec leur conteneur —
+  ce n'est pas une fuite, vérifié.
+- ✅ **Sources uniques** : carte produit, carte livreur, carte artisan — une
+  implémentation chacune. (Le premier marqueur « carte livreur » comptait des
+  occurrences **internes à la même fonction** : marqueur corrigé après
+  vérification, pas de duplication réelle.)
+
+### Décision assumée : les fonctions démesurées ne sont PAS découpées
+
+17 fonctions dépassent 150 lignes (de 163 à **416** pour `renderPDP`). Le projet
+a **déjà tranché deux fois** (étape 10d, puis session dette technique) : découper
+`renderPDP`, `initPdpScrollAnimations` et `renderAdmin` est un refactor **risqué,
+sans valeur utilisateur, et non vérifiable en statique** (moteur rAF à état
+partagé, CRUD admin non exerçable hors production). **Je ne reviens pas sur cette
+décision** — la rediscuter à chaque audit ferait perdre du temps sans rien gagner.
+
+En revanche, la dette est **gelée** : un **cliquet** enregistre la taille exacte
+des 17 fonctions. Aucune ne peut grossir d'une ligne, et **aucune nouvelle
+fonction ne peut naître au-dessus de 150 lignes** sans casser la CI. Descendre
+un plafond après une découpe est encouragé ; le remonter exige une décision
+explicite.
+
+**Contrôle prouvé capable d'échouer** : `_accCardState` retiré de la remise à
+zéro → `❌ NI RÉINITIALISÉES NI CLASSÉES` ; restauré → vert.
+
+**Vérifications** : CI verte · cards.mjs **6/6** · couriers.mjs 80/80 ·
+course-pay.mjs 14/14 · émulateur Firestore 98/98.

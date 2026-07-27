@@ -1280,14 +1280,28 @@
   var _pagerWired = false;
 
   function productCardHTML(p) {
+    return productCardHTML(p);
+  }
+
+  // SOURCE UNIQUE du balisage d'une carte produit (audit P7). Il était écrit
+  // TROIS fois — catalogue, accueil, favoris — et la copie des favoris avait
+  // dérivé : elle affichait le prix SANS la mention « TTC », alors que le prix
+  // est territorial. Une carte, un endroit.
+  // opts.territory : territoire FORCE (pages territoire #/guadeloupe…), sinon
+  //                   celui de l'utilisateur.
+  // opts.wishlist  : false pour les bandeaux (« recemment vus », pages
+  //                   territoire) ou le bouton favori n'a pas sa place.
+  // opts.tag       : false pour masquer la pastille promotionnelle.
+  function productCardHTML(p, opts) {
+    opts = opts || {};
     var out = isOutOfStock(p);
-    var price = calcPrice(p, _currentTerritory);
+    var price = calcPrice(p, opts.territory || _currentTerritory);
     return '<a class="product-card' + (out ? ' product-card--out' : '') + '" href="#/produit/' + escapeHTML(p.slug || p.id) + '">'
       + '<div class="product-card__img-wrap">'
       + productCardVisual(p)
-      + (p.tag ? '<span class="product-card__tag">' + escapeHTML(p.tag) + '</span>' : '')
+      + (p.tag && opts.tag !== false ? '<span class="product-card__tag">' + escapeHTML(p.tag) + '</span>' : '')
       + stockBadge(p)
-      + wishlistButton(p)
+      + (opts.wishlist === false ? '' : wishlistButton(p))
       + '</div>'
       + '<div class="product-card__body">'
       + '<span class="product-card__brand">' + escapeHTML(p.brand) + '</span>'
@@ -1733,23 +1747,7 @@
       (real ? withImg : noImg).push(p);
     });
     var list = withImg.concat(noImg).slice(0, HOME_STRIP_MAX);
-    track.innerHTML = list.map(function (p) {
-      var out = isOutOfStock(p);
-      var price = calcPrice(p, _currentTerritory);
-      return '<a class="product-card' + (out ? ' product-card--out' : '') + '" href="#/produit/' + escapeHTML(p.slug || p.id) + '">'
-        + '<div class="product-card__img-wrap">'
-        + productCardVisual(p)
-        + (p.tag ? '<span class="product-card__tag">' + escapeHTML(p.tag) + '</span>' : '')
-        + stockBadge(p)
-        + wishlistButton(p)
-        + '</div>'
-        + '<div class="product-card__body">'
-        + '<span class="product-card__brand">' + escapeHTML(p.brand) + '</span>'
-        + '<h3 class="product-card__title">' + escapeHTML(p.title) + '</h3>'
-        + '<span class="product-card__price">' + formatPrice(price.ttc) + ' <small>TTC</small></span>'
-        + '</div>'
-        + '</a>';
-    }).join('')
+    track.innerHTML = list.map(productCardHTML).join('')
       + '<a class="product-card product-card--more" href="#/catalogue">'
       + '<span class="product-card__more-icon">→</span>'
       + '<span class="product-card__more-label">Voir tout le catalogue</span>'
@@ -7106,9 +7104,28 @@
         // compte : sinon le rôle livreur du compte précédent survivait, et
         // son fil de discussion restait abonné.
         if (changed) {
+          // Rôle et tarifs livreur, fil de discussion.
           _lvRolePromise = null;
           _lvMyTarifs = null;
           if (_lvChatUnsub) { try { _lvChatUnsub(); } catch (_) {} _lvChatUnsub = null; }
+          // Fiche artisan du compte précédent (nom, logo, photos). Sans cette
+          // remise à zéro, l'espace « Ma carte » pouvait afficher la fiche de
+          // QUELQU'UN D'AUTRE le temps que la nouvelle requête réponde —
+          // données d'un tiers à l'écran (audit P7).
+          _accCardState = null;
+          _accCardLogoBusy = false;
+          _accCardPhotosBusy = false;
+          // Modale de paiement : rien du panier précédent ne doit survivre à
+          // un changement de compte.
+          _payItems = [];
+          _payCourse = null;
+          _payGoodsCourseId = null;
+          // Caches de l'espace admin.
+          _adminPartnersList = [];
+          _adminPartnerPhotos = [];
+          _adminPartnerLogo = '';
+          _adminStatsLoaded = false;
+          _adminClientsLoaded = false;
         }
         if (user) {
           // Load Firestore profile in background
@@ -12348,22 +12365,7 @@
 
     var favs = products.filter(function (p) { return ids.indexOf(p.id) !== -1; });
 
-    listEl.innerHTML = favs.map(function (p) {
-      var out = isOutOfStock(p);
-      return '<a class="product-card' + (out ? ' product-card--out' : '') + '" href="#/produit/' + escapeHTML(p.slug || p.id) + '">'
-        + '<div class="product-card__img-wrap">'
-        + productCardVisual(p)
-        + (p.tag ? '<span class="product-card__tag">' + escapeHTML(p.tag) + '</span>' : '')
-        + stockBadge(p)
-        + wishlistButton(p)
-        + '</div>'
-        + '<div class="product-card__body">'
-        + '<span class="product-card__brand">' + escapeHTML(p.brand) + '</span>'
-        + '<h3 class="product-card__title">' + escapeHTML(p.title) + '</h3>'
-        + '<span class="product-card__price">' + formatPrice(calcPrice(p, _currentTerritory).ttc) + '</span>'
-        + '</div>'
-        + '</a>';
-    }).join('');
+    listEl.innerHTML = favs.map(productCardHTML).join('');
     preloadModelViewers(listEl);
   }
 
@@ -12419,18 +12421,7 @@
     section.hidden = false;
 
     track.innerHTML = items.map(function (p) {
-      var out = isOutOfStock(p);
-      return '<a class="product-card' + (out ? ' product-card--out' : '') + '" href="#/produit/' + escapeHTML(p.slug || p.id) + '">'
-        + '<div class="product-card__img-wrap">'
-        + productCardVisual(p)
-        + stockBadge(p)
-        + '</div>'
-        + '<div class="product-card__body">'
-        + '<span class="product-card__brand">' + escapeHTML(p.brand) + '</span>'
-        + '<h3 class="product-card__title">' + escapeHTML(p.title) + '</h3>'
-        + '<span class="product-card__price">' + formatPrice(calcPrice(p, _currentTerritory).ttc) + '</span>'
-        + '</div>'
-        + '</a>';
+      return productCardHTML(p, { wishlist: false, tag: false });
     }).join('');
     preloadModelViewers(track);
   }
@@ -12805,20 +12796,7 @@
       }).slice(0, 8);
       if (!featured.length) featured = products.slice(0, 8);
       prodEl.innerHTML = featured.map(function (p) {
-        var out = isOutOfStock(p);
-        var pr = calcPrice(p, code);
-        return '<a class="product-card' + (out ? ' product-card--out' : '') + '" href="#/produit/' + escapeHTML(p.slug || p.id) + '">'
-          + '<div class="product-card__img-wrap">'
-          + productCardVisual(p)
-          + (p.tag ? '<span class="product-card__tag">' + escapeHTML(p.tag) + '</span>' : '')
-          + stockBadge(p)
-          + '</div>'
-          + '<div class="product-card__body">'
-          + '<span class="product-card__brand">' + escapeHTML(p.brand) + '</span>'
-          + '<h3 class="product-card__title">' + escapeHTML(p.title) + '</h3>'
-          + '<span class="product-card__price">' + formatPrice(pr.ttc) + ' <small>TTC</small></span>'
-          + '</div>'
-          + '</a>';
+        return productCardHTML(p, { territory: code, wishlist: false });
       }).join('');
       preloadModelViewers(prodEl);
     }
