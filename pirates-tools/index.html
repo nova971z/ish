@@ -44,7 +44,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=519">
+  <link rel="stylesheet" href="styles.css?v=520">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -1973,6 +1973,29 @@
   </footer>
 
   <!-- =================== FLOATING WHATSAPP =================== -->
+  <!-- ══ BULLE DE DISCUSSION (façon Messenger) ══════════════════════════════
+       En bas à GAUCHE, toujours accessible : le fil ne doit plus être enterré
+       dans un panneau qu'il faut penser à ouvrir (défaut signalé le 27/07/2026 :
+       « côté client on ne voit pas les messages »).
+       Le contenu ne se charge qu'au PREMIER clic — zéro octet au démarrage. -->
+  <button type="button" id="chatBubble" class="chat-bubble" hidden
+          aria-expanded="false" aria-controls="chatWin" aria-label="Mes discussions">
+    <span class="chat-bubble__i" aria-hidden="true">💬</span>
+    <span class="chat-bubble__n" id="chatBubbleCount" hidden></span>
+  </button>
+  <section id="chatWin" class="chat-win" hidden aria-label="Mes discussions">
+    <header class="chat-win__head">
+      <button type="button" class="chat-win__back" id="chatWinBack" hidden aria-label="Retour à la liste">←</button>
+      <strong class="chat-win__t" id="chatWinTitle">Mes discussions</strong>
+      <button type="button" class="chat-win__x" id="chatWinClose" aria-label="Fermer">✕</button>
+    </header>
+    <div class="chat-win__body" id="chatWinBody"><p class="lv-hint">Chargement…</p></div>
+    <div class="chat-win__send" id="chatWinSend" hidden>
+      <input type="text" id="chatWinInput" maxlength="800" placeholder="Écris ton message…" autocomplete="off">
+      <button type="button" class="btn primary" id="chatWinGo">Envoyer</button>
+    </div>
+  </section>
+
   <a id="waFloat" class="wa-float" data-track="wa:float" href="#"
      target="_blank" rel="noopener noreferrer" aria-label="Contacter sur WhatsApp"
      data-action="wa-float">
@@ -2118,7 +2141,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=519"></script>
+  <script defer src="app.js?v=520"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

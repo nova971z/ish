@@ -577,6 +577,17 @@
     return !!(ANALYTICS && (ANALYTICS.ga4Id || ANALYTICS.metaPixelId));
   }
 
+  // ⚠️ PIÈGE DÉJÀ VÉCU (15/07/2026 avec les chips, puis 27/07 avec la bulle de
+  // discussion) : le bandeau cookies est fixé EN BAS et pleine largeur — il
+  // recouvre tout ce qui vit dans ce coin et AVALE LES CLICS. On publie donc sa
+  // hauteur réelle dans --consent-h, et les éléments flottants s'écartent
+  // d'autant. Mesurée, pas devinée : le texte fait plusieurs lignes sur mobile.
+  function lvMajHauteurConsent() {
+    var bar = document.getElementById('consentBar');
+    var h = (bar && !bar.hidden) ? Math.ceil(bar.getBoundingClientRect().height) : 0;
+    document.documentElement.style.setProperty('--consent-h', h + 'px');
+  }
+
   function setupConsentBar() {
     if (_consent) return; // choix Accepter/Refuser déjà exprimé
     var bar = document.getElementById('consentBar');
@@ -603,6 +614,8 @@
     }
 
     bar.hidden = false;
+    lvMajHauteurConsent();
+    window.addEventListener('resize', lvMajHauteurConsent);
     bar.addEventListener('click', function (e) {
       var btn = e.target.closest('[data-consent]');
       if (!btn) return;
@@ -610,6 +623,7 @@
       if (value !== 'accept' && value !== 'deny') return;
       saveConsent(value === 'accept' ? 'granted' : 'denied');
       bar.hidden = true;
+      lvMajHauteurConsent();
       if (value === 'accept') {
         // Personnalisation acceptée : crée l'identifiant persistant (affinité)
         // et pousse les événements en attente avec le consentement.
@@ -4485,6 +4499,197 @@
       });
   }
 
+  // ══ BULLE DE DISCUSSION (façon Messenger) ═════════════════════════════════
+  // 🐛 DÉFAUT SIGNALÉ (27/07/2026) : « côté client on ne voit pas les
+  // messages ». Le fil n'était accessible qu'au fond d'un panneau qu'il fallait
+  // penser à ouvrir en cliquant la bonne carte. La bulle le rend accessible en
+  // permanence, depuis n'importe quel écran.
+  // ⚡ RIEN n'est chargé au démarrage : la liste part au PREMIER clic. L'user
+  // navigue toujours en privé, chaque octet est retéléchargé à chaque visite.
+  var _dockUnsub = null;          // abonnement du fil ouvert dans la bulle
+  var _dockFils = null;           // liste des discussions (chargée une fois)
+  var _dockOuvert = false;
+
+  function lvDockEls() {
+    return {
+      bulle: document.getElementById('chatBubble'),
+      win: document.getElementById('chatWin'),
+      body: document.getElementById('chatWinBody'),
+      titre: document.getElementById('chatWinTitle'),
+      retour: document.getElementById('chatWinBack'),
+      zoneEnvoi: document.getElementById('chatWinSend'),
+      input: document.getElementById('chatWinInput'),
+      go: document.getElementById('chatWinGo'),
+      compteur: document.getElementById('chatBubbleCount')
+    };
+  }
+
+  // Coupe l'abonnement temps réel de la bulle (et LUI SEUL : la page a le
+  // sien, _lvChatUnsub — les mélanger couperait le mauvais).
+  function lvDockCouper() {
+    if (_dockUnsub) { try { _dockUnsub(); } catch (_) {} _dockUnsub = null; }
+  }
+
+  // Affiche ou masque la bulle selon qu'on est connecté. Appelée au démarrage
+  // ET à chaque verdict d'authentification.
+  function lvDockSync() {
+    var e = lvDockEls();
+    if (!e.bulle) return;
+    var connecte = !!_currentUser;
+    e.bulle.hidden = !connecte;
+    if (!connecte) { lvDockFermer(); _dockFils = null; }
+  }
+
+  function lvDockFermer() {
+    var e = lvDockEls();
+    _dockOuvert = false;
+    lvDockCouper();
+    if (e.win) e.win.hidden = true;
+    if (e.bulle) e.bulle.setAttribute('aria-expanded', 'false');
+  }
+
+  // Liste des discussions : les COURSES dont le fil est ouvert + les
+  // DISCUSSIONS DIRECTES. Deux appels, en parallèle, une seule fois.
+  function lvDockCharger() {
+    if (_dockFils) return Promise.resolve(_dockFils);
+    return jsonAuthHeaders().then(function (headers) {
+      var appel = function (type) {
+        return fetch(apiBaseUrl() + '/api/contact', {
+          method: 'POST', headers: headers, body: JSON.stringify({ type: type })
+        }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+      };
+      return Promise.all([appel('course-list'), appel('conv-list')]);
+    }).then(function (rep) {
+      var fils = [];
+      var courses = (rep[0] && rep[0].ok && rep[0].mine) || [];
+      courses.forEach(function (c) {
+        if (!c.chatOpen) return;
+        var moiClient = !!c.mine;
+        fils.push({
+          type: 'course', id: c.id, round: c.round || 1,
+          role: moiClient ? 'client' : 'livreur',
+          titre: (moiClient ? '🛵 ' + (c.courierName || 'Mon livreur') : '👤 Mon client'),
+          sous: 'Course · ' + escapeHTML(String(c.address || '').slice(0, 34))
+        });
+      });
+      var convs = (rep[1] && rep[1].ok && rep[1].conversations) || [];
+      convs.forEach(function (c) {
+        fils.push({
+          type: 'conv', id: c.id, round: null, role: c.role,
+          titre: (c.role === 'client' ? '🛵 ' + (c.courierName || 'Livreur') : '👤 ' + (c.clientEmail || 'Client')),
+          sous: 'Discussion directe'
+        });
+      });
+      _dockFils = fils;
+      return fils;
+    });
+  }
+
+  // Écran 1 : la liste.
+  function lvDockListe() {
+    var e = lvDockEls();
+    lvDockCouper();
+    if (e.retour) e.retour.hidden = true;
+    if (e.zoneEnvoi) e.zoneEnvoi.hidden = true;
+    if (e.titre) e.titre.textContent = 'Mes discussions';
+    if (e.body) e.body.innerHTML = '<p class="lv-hint">Chargement…</p>';
+    lvDockCharger().then(function (fils) {
+      if (!e.body) return;
+      if (e.compteur) {
+        e.compteur.hidden = !fils.length;
+        e.compteur.textContent = String(fils.length);
+      }
+      if (!fils.length) {
+        e.body.innerHTML = '<p class="lv-hint">Aucune discussion pour l\'instant. '
+          + 'Elles s\'ouvrent quand un livreur accepte ta demande, ou quand tu contactes '
+          + 'un livreur <strong>en service</strong> depuis sa carte.</p>';
+        return;
+      }
+      e.body.innerHTML = fils.map(function (f, i) {
+        return '<button type="button" class="chat-item" data-fil="' + i + '">'
+          + '<span class="chat-item__t">' + f.titre + '</span>'
+          + '<span class="chat-item__s">' + f.sous + '</span></button>';
+      }).join('');
+      var btns = e.body.querySelectorAll('[data-fil]');
+      for (var i = 0; i < btns.length; i++) {
+        (function (b) { b.onclick = function () { lvDockFil(fils[parseInt(b.getAttribute('data-fil'), 10)]); }; })(btns[i]);
+      }
+    }).catch(function () {
+      if (e.body) e.body.innerHTML = '<p class="lv-hint">Discussions indisponibles. Réessaie.</p>';
+    });
+  }
+
+  // Écran 2 : un fil. Même modèle de données pour une course et pour une
+  // discussion directe — seul le chemin (et le filtre `round`) change.
+  function lvDockFil(f) {
+    var e = lvDockEls();
+    lvDockCouper();
+    if (e.retour) { e.retour.hidden = false; e.retour.onclick = lvDockListe; }
+    if (e.titre) e.titre.textContent = f.titre;
+    if (e.zoneEnvoi) e.zoneEnvoi.hidden = false;
+    if (e.body) e.body.innerHTML = '<p class="lv-hint">Chargement…</p>';
+    var chemin = f.type === 'course'
+      ? ['courses', String(f.id), 'messages']
+      : ['conversations', String(f.id), 'messages'];
+    whenFirebaseReady(function (fb) {
+      if (!fb || !fb.configured || !fb.onSnapshot) {
+        if (e.body) e.body.innerHTML = '<p class="lv-hint">Discussion indisponible (hors connexion).</p>';
+        return;
+      }
+      var col = fb.collection.apply(null, [fb.db].concat(chemin));
+      // Filtre `round` obligatoire sur une course (les règles Firestore
+      // n'autorisent que le round courant). AUCUN orderBy : cela demanderait
+      // un index composite, fatal en production.
+      var q = f.round
+        ? fb.query(col, fb.where('round', '==', f.round), fb.limit(300))
+        : fb.query(col, fb.limit(300));
+      _dockUnsub = fb.onSnapshot(q, function (snap) {
+        var msgs = [];
+        snap.forEach(function (d) { msgs.push(d.data() || {}); });
+        msgs.sort(function (x, y) { return lvMs(x.at) - lvMs(y.at); });
+        if (!e.body) return;
+        e.body.innerHTML = msgs.length
+          ? msgs.map(function (m) { return lvMsgHTML(m, f.role); }).join('')
+          : '<p class="lv-hint">Aucun message — dis bonjour !</p>';
+        e.body.scrollTop = e.body.scrollHeight;
+      }, function () {
+        if (e.body) e.body.innerHTML = '<p class="lv-hint">Discussion indisponible.</p>';
+      });
+      var envoyer = function () {
+        var txt = (e.input && e.input.value || '').trim().slice(0, 800);
+        if (!txt || !_currentUser) return;
+        if (e.go) e.go.disabled = true;
+        var msg = { uid: _currentUser.uid, role: f.role, text: txt, at: new Date() };
+        if (f.round) msg.round = f.round;
+        fb.addDoc(fb.collection.apply(null, [fb.db].concat(chemin)), msg)
+          .then(function () { if (e.input) e.input.value = ''; })
+          .catch(function () { toast('Envoi impossible', 'error'); })
+          .then(function () { if (e.go) e.go.disabled = false; });
+      };
+      if (e.go) e.go.onclick = envoyer;
+      if (e.input) e.input.onkeydown = function (ev) { if (ev.key === 'Enter') { ev.preventDefault(); envoyer(); } };
+    });
+  }
+
+  function lvDockBasculer() {
+    var e = lvDockEls();
+    if (!e.win) return;
+    _dockOuvert = !_dockOuvert;
+    e.win.hidden = !_dockOuvert;
+    if (e.bulle) e.bulle.setAttribute('aria-expanded', _dockOuvert ? 'true' : 'false');
+    if (_dockOuvert) { _dockFils = null; lvDockListe(); } else { lvDockCouper(); }
+  }
+
+  function lvDockInit() {
+    var e = lvDockEls();
+    if (!e.bulle || e.bulle._lie) return;
+    e.bulle._lie = true;
+    e.bulle.onclick = lvDockBasculer;
+    var x = document.getElementById('chatWinClose');
+    if (x) x.onclick = lvDockFermer;
+    lvDockSync();
+  }
+
   // Profil PUBLIC d'un livreur (vue client) : sa carte des zones avec SES
   // prix, son compteur de courses, sa note et les avis laissés par les clients.
   function renderCourierProfile(uid) {
@@ -7742,6 +7947,8 @@
         // plus personne ne repassait ensuite, et le bouton restait tel quel.
         // On le réévalue donc à chaque verdict d'authentification.
         updateAccLivBtn();
+        // La bulle de discussion n'existe que pour un compte connecté.
+        lvDockInit(); lvDockSync();
       });
     });
   }

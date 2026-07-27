@@ -8201,6 +8201,85 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .courier-mycard { max-width: 260px; margin: .6rem 0; }
 .courier-mycard .courier-card { pointer-events: none; }
 
+/* ══ BULLE DE DISCUSSION (façon Messenger) ════════════════════════════════
+   En bas à GAUCHE — le dock des raccourcis est centré, le bouton WhatsApp est
+   à droite : les trois ne se croisent jamais. z-index 9600 : au-dessus du dock
+   (1001) et des overlays (9500), en dessous du WhatsApp (9700) et des
+   messages système (10000). */
+.chat-bubble {
+  position: fixed; left: 16px; z-index: 9600;
+  /* --consent-h : hauteur RÉELLE du bandeau cookies, publiée par app.js. Sans
+     ce décalage, le bandeau recouvre la bulle et avale les clics — piège déjà
+     vécu le 15/07/2026 avec les chips du catalogue. 0 le reste du temps. */
+  bottom: calc(16px + var(--consent-h, 0px) + env(safe-area-inset-bottom, 0px));
+  transition: bottom .25s ease;
+  width: 56px; height: 56px; border-radius: 50%; border: 0; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+  box-shadow: 0 8px 24px rgba(109, 40, 217, .55), 0 0 0 1px rgba(255,255,255,.08) inset;
+  transition: transform .18s ease, box-shadow .2s ease;
+}
+.chat-bubble:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(109,40,217,.7); }
+.chat-bubble:active { transform: scale(.94); }
+.chat-bubble__i { font-size: 24px; line-height: 1; }
+/* Pastille du nombre de discussions. */
+.chat-bubble__n {
+  position: absolute; top: -2px; right: -2px; min-width: 20px; height: 20px;
+  padding: 0 5px; border-radius: 10px; background: #df342a; color: #fff;
+  font-size: 11px; font-weight: 800; line-height: 20px; text-align: center;
+  box-shadow: 0 0 0 2px #0a0f14;
+}
+/* La FENÊTRE : petite, ancrée au-dessus de la bulle, comme Messenger. */
+.chat-win {
+  position: fixed; left: 16px; z-index: 9600;
+  bottom: calc(84px + var(--consent-h, 0px) + env(safe-area-inset-bottom, 0px));
+  width: min(360px, calc(100vw - 32px)); max-height: min(70vh, 560px);
+  display: flex; flex-direction: column; overflow: hidden;
+  border-radius: 18px; border: 1px solid rgba(139, 92, 246, .45);
+  background: #0f1720; box-shadow: 0 20px 60px rgba(0, 0, 0, .6);
+  animation: chat-win-in .18s ease-out;
+}
+@keyframes chat-win-in { from { opacity: 0; transform: translateY(10px) scale(.98); } }
+@media (prefers-reduced-motion: reduce) { .chat-win { animation: none; } }
+.chat-win__head {
+  display: flex; align-items: center; gap: .5rem; flex-shrink: 0;
+  padding: .7rem .8rem; border-bottom: 1px solid rgba(255, 255, 255, .1);
+  background: rgba(139, 92, 246, .12);
+}
+.chat-win__t { flex: 1; min-width: 0; font-size: .95rem; color: #fff;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chat-win__back, .chat-win__x {
+  flex: 0 0 32px; width: 32px; height: 32px; border-radius: 50%; border: 0;
+  background: rgba(255, 255, 255, .08); color: #e6edf5; font-size: 15px; cursor: pointer;
+}
+.chat-win__back:hover, .chat-win__x:hover { background: rgba(255, 255, 255, .18); }
+.chat-win__body { flex: 1; overflow-y: auto; padding: .7rem .8rem; -webkit-overflow-scrolling: touch; }
+.chat-win__send {
+  display: flex; gap: .5rem; flex-shrink: 0; padding: .6rem .7rem;
+  border-top: 1px solid rgba(255, 255, 255, .1); background: rgba(255, 255, 255, .03);
+}
+.chat-win__send input {
+  flex: 1; min-width: 0; padding: .55rem .7rem; border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, .16); background: rgba(0, 0, 0, .3); color: #e6edf5;
+}
+.chat-win__send .btn { flex: 0 0 auto; padding: .55rem .9rem; font-size: .85rem; }
+/* Une entrée de la liste des discussions. */
+.chat-item {
+  display: flex; flex-direction: column; gap: .15rem; width: 100%; text-align: left;
+  padding: .6rem .7rem; border-radius: 12px; cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, .1); background: rgba(255, 255, 255, .04);
+  color: #e6edf5;
+}
+.chat-item + .chat-item { margin-top: .5rem; }
+.chat-item:hover { background: rgba(139, 92, 246, .14); border-color: rgba(139, 92, 246, .45); }
+.chat-item__t { font-weight: 700; font-size: .9rem; }
+.chat-item__s { font-size: .78rem; color: var(--muted, #c9c9d9); }
+/* Sur petit écran, la fenêtre prend presque tout l'espace. */
+@media (max-width: 480px) {
+  .chat-win { left: 8px; right: 8px; width: auto; max-height: 74vh; }
+  .chat-bubble { left: 12px; }
+}
+
 .lv-chat--solo { display: block; }
 .lv-chat--solo .lv-chat__log { min-height: 46vh; }
 
