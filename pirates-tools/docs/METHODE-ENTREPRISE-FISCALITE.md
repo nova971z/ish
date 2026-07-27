@@ -234,6 +234,45 @@ sortir du champ. La plus simple à casser est le PRIX.
    possible hors L7342) : pas d'exclusivité, droit de refuser sans conséquence,
    pas de déclassement algorithmique, pas de sanction automatique.
 
+### ⛔ POURQUOI UNE FOURCHETTE IMPOSÉE NE MARCHE PAS (vérifié 27/07/2026)
+Idée user : imposer un intervalle par zone (« zone rouge : entre 90 et 120 € »)
+et laisser client/livreur s'accorder dedans. **Réponse : NON, sur DEUX terrains.**
+
+1. **Droit du travail (L7342-1)** — encadrer par un plancher ET un plafond,
+   c'est déterminer le niveau du prix. La plateforme décide que la course vaut
+   90-120 € ; le livreur ne peut ni descendre ni monter. C'est « fixer le prix »
+   avec une tolérance → la parade échoue, on reste dans le champ.
+2. **Droit de la concurrence** — « **imposer une fourchette de prix est
+   considéré comme une pratique de prix imposé** ». Imposer un prix fixe **ou
+   minimum** à un indépendant est **en principe illicite** ; seul un prix
+   **maximum** échappe à l'interdiction. Même un « prix minimum affiché » est
+   requalifié en prix imposé indirect.
+   ⚠️ Contre-intuitif : c'est le **PLANCHER** (celui qui protège le livreur) qui
+   est illicite, pas le plafond.
+
+✅ **CE QUI EST LICITE — le prix CONSEILLÉ.** Critère explicite : un prix est
+conseillé « lorsque [le prestataire] **peut en fixer un différent SANS ENCOURIR
+DE SANCTION** dans le cadre de sa relation commerciale ». Donc :
+- afficher un **repère indicatif** par zone (« sur cette zone, les livreurs
+  demandent en général 90-120 € ») ;
+- le livreur saisit **le montant qu'il veut**, au-dessus comme en dessous ;
+- **aucune sanction, aucun déclassement, aucun retrait** s'il sort du repère —
+  et cette absence de sanction doit être vraie dans le CODE, pas seulement dans
+  les CGU (pas de filtre, pas de tri pénalisant, pas de blocage).
+→ Atteint l'objectif de l'user (que les livreurs soient bien payés, par effet
+d'ancrage) SANS fixer le prix, donc hors L7342-1 et hors prix imposé.
+
+⛔ **LYDIA n'est pas l'outil** : c'est du paiement entre particuliers, sans
+séquestre conditionnel pilotable par une API. Les bons outils : **Stripe**
+(capture différée = l'argent reste chez le client jusqu'à la preuve, aucun
+fonds détenu par nous) ou un **établissement de monnaie électronique agréé**
+(Mangopay, Lemonway) avec cantonnement et libération sur instruction.
+
+Sources : CMS — prix imposés / prix conseillés
+https://cms.law/fr/fra/news-information/prix-imposes-et-prix-conseilles-bien-les-distinguer
+· Règlement d'exemption restrictions verticales
+https://www.agn-avocats.fr/blog/droit-contrats-distribution/concurrence-focus-sur-le-nouveau-reglement-dexemption-sur-les-restrictions-verticales-et-la-fixation-des-prix/
+
 ### ⚠️ LE REVERS À CONNAÎTRE — capacité de transport
 Dès que le livreur **facture directement son client**, il exerce le transport
 public routier de marchandises pour son propre compte. Or :
