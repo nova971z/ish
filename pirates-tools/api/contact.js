@@ -65,7 +65,9 @@ module.exports = async function handler(req, res) {
       || body.type === 'courier-profile' || body.type === 'courier-profile-save'
       || body.type === 'courier-available'
       || body.type === 'course-request' || body.type === 'course-release'
-      || body.type === 'course-cancel') {
+      || body.type === 'course-cancel'
+      || body.type === 'course-accord-propose' || body.type === 'course-accord-accept'
+      || body.type === 'course-accord-reject' || body.type === 'course-goods-paid') {
     return handleCourses(req, body, { apiKey, from, ownerEmail }, res);
   }
 

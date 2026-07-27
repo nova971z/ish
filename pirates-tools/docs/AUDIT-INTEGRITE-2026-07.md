@@ -245,3 +245,50 @@ pas suivre jusqu'à leur construction, et champs numériques serveur (`c.zone`,
 `c.qty`, `c.km`, `pct`…). Elles ont été **relues une par une** : aucune ne
 transporte de texte utilisateur non échappé. Suivre les accumulateurs
 exigerait une analyse de flux de données — hors périmètre de cette passe, noté.
+
+## PASSE P3 — SÉCURITÉ SERVEUR ✅ (27/07/2026, SW v501)
+
+⚠️ **CORRECTION DU PLAN** : la surface réelle n'est pas de 24 endpoints mais de
+**65 points d'entrée** — 12 fonctions serverless + 24 sous-routes `body.type`
+(contact.js) + 29 sous-routes `query.type` (admin.js).
+
+**Outils créés** : `scripts/audit/p3-endpoints.js` (analyse statique, 4 contrôles)
+et `scripts/audit/p3-dispatch-live.js` (**test d'exécution réel**). Les deux sont
+**branchés à `ci.js`**.
+
+### 🔴 DÉFAUT CRITIQUE TROUVÉ — fonctionnalité morte en production
+
+| # | Gravité | Défaut | Preuve | Correctif |
+|---|---|---|---|---|
+| P3-1 | 🔴 | **4 endpoints implémentés mais JAMAIS aiguillés** : `course-accord-propose`, `course-accord-accept`, `course-accord-reject`, `course-goods-paid`. `contact.js` aiguille par une liste de `body.type` en tête de fichier ; les gestionnaires ont été ajoutés plus bas **sans mettre la liste à jour**. En production, l'appel retombait dans le **formulaire de contact** : toute la fonctionnalité « accord + paiement de la marchandise » (livrée la veille) **ne s'exécutait jamais**. | Test d'exécution : le défaut réintroduit volontairement fait répondre **`400 « Nom invalide (2–100 caractères) »`** au bouton « Proposer cet accord » | Les 4 types ajoutés à la liste + **deux contrôles CI** qui rendent la classe de défaut impossible |
+
+**Pourquoi aucun test ne l'avait vu** : les harnais Playwright **simulent**
+`/api/contact` et renvoient des réponses préfabriquées — ils ne touchent donc
+jamais l'aiguillage réel. C'est un angle mort structurel du harnais, désormais
+couvert par `p3-dispatch-live.js` qui appelle **la vraie fonction exportée**.
+Ce test a été **prouvé capable d'échouer** (défaut réintroduit → 4 rouges,
+restauré → 21/21 verts).
+
+### Contrôles PASSÉS
+
+| Contrôle | Résultat |
+|---|---|
+| **Aiguillage ↔ implémentation** (contact.js, dans les 2 sens) | ✅ 21/21 types atteignent leur gestionnaire (vérifié **à l'exécution**) |
+| **Garde admin** : les 29 sous-routes d'admin | ✅ `requireAdmin` en **ligne 20**, avant toute branche métier — point de passage unique, aucune branche ne peut lui échapper |
+| **Filtre de méthode HTTP** | ✅ présent sur les 10 fonctions qui en ont besoin |
+| **Authentification par fonction** | ✅ 12/12 conformes au niveau attendu (admin / mixte / public / secret cron / signature Stripe) |
+| **Limitation de débit sur les écritures publiques** | ✅ contact (5 seaux), newsletter, events, create-payment-intent, checkout |
+| **Appartenance des objets (IDOR)** sur les 20 routes de course | ✅ 20/20 — chaque route agissant sur une course vérifie que l'appelant en est partie (`artisanUid`/`courierUid` comparés au uid **du jeton vérifié**, jamais au corps de la requête) |
+| **Carte artisan self-service** | ✅ IDOR **impossible par construction** : l'id de la carte est dérivé du uid vérifié (`partners_private where uid == uid`), jamais lu dans la requête |
+
+### Attente corrigée (faux positif écarté, pas le code)
+Six fonctions n'appellent pas `applyCors`. Vérification faite dans
+`_lib/http.js` : `applyCors` n'émet des en-têtes **que** pour une origine
+explicitement autorisée. **Son absence signifie « aucun en-tête CORS », donc
+blocage par le navigateur de tout appel cross-origin** — c'est l'état le plus
+sûr, pas un défaut. L'attente du contrôle a été corrigée, le code non touché.
+Seule réserve 🟢 : si `ALLOWED_ORIGINS` est un jour renseigné, ces 6 fonctions
+ne l'honoreront pas — à savoir, sans impact aujourd'hui (tout est same-origin).
+
+**Vérifications** : CI verte · couriers.mjs 76/76 · course-pay.mjs 14/14 ·
+émulateur Firestore 78/78.
