@@ -9192,11 +9192,13 @@
       if (!o) return '';
       var solide = (o.traqueur || 0) + (o.fiche || 0) + (o.variante || 0);
       var est = o['estimé'] || 0;
+      var locked = (d.counts && d.counts.locked) || 0;
       var h = '<div class="reprice-health"><strong>Sur quoi reposent tes prix :</strong><br>'
         + '📡 ' + (o.traqueur || 0) + ' relevés par le traqueur · '
         + '📄 ' + (o.fiche || 0) + ' prix fournisseur saisis · '
         + '🔗 ' + (o.variante || 0) + ' déduits de la variante (± 20 €) · '
         + (est ? '<span class="admin-error">⚠️ ' + est + ' estimés</span>' : '✅ 0 estimé')
+        + (locked ? ' · 🔒 ' + locked + ' à prix verrouillé (jamais recalculé)' : '')
         + '</div>';
       if (est && d.estimes && d.estimes.length) {
         // Liste COMPLÈTE (plus de troncature) et regroupée par marque : c'est

@@ -882,8 +882,15 @@ async function handleRepriceAll(req, res, admin, db) {
     // les prix sont bâtis sur des estimations.
     const origins = { traqueur: 0, fiche: 0, variante: 0, 'estimé': 0 };
     const estimes = [];
+    let lockedCount = 0;   // produits à prix verrouillé (jamais recalculés)
 
     for (const p of products) {
+      // 🔒 PRIX VERROUILLÉ : décision commerciale de l'owner, le calculateur
+      // n'y touche JAMAIS (produit dont le coût fournisseur n'est pas relevable
+      // — prix constaté variable selon les revendeurs). Sorti du décompte des
+      // « estimés » : ce n'est pas une lacune à combler, c'est un choix.
+      if (p.priceLocked === true) { lockedCount++; continue; }
+
       const o = ov[p.id] || {};
       // Coût source TTC : traqueur > fiche > variante jumelle ±20 € > estimation.
       const srcInfo = pwSourceCost(p, o, cfg, variantCosts);
@@ -931,7 +938,7 @@ async function handleRepriceAll(req, res, admin, db) {
 
     return res.status(200).json({
       ok: true, dryRun: !!dryRun, mode: cfg.mode, autoPrice: !!cfg.autoPrice,
-      counts: { total: products.length, changed: changed.length, skipped: skipped.length },
+      counts: { total: products.length, changed: changed.length, skipped: skipped.length, locked: lockedCount },
       origins: origins, estimes: estimes,
       changed: changed.slice(0, 500), skipped: skipped.slice(0, 100)
     });
@@ -973,7 +980,7 @@ async function handlePriceWatch(req, res, admin, db) {
     // (markup adaptatif poids/mode pour 15 % net après IS) ; sinon repli ×1,15.
     const cfg = await priceConfig.load();
 
-    const applied = [], flagged = [], unchanged = [], unknown = [];
+    const applied = [], flagged = [], unchanged = [], unknown = [], lockedW = [];
     const now = admin.firestore.FieldValue.serverTimestamp();
 
     // Prix parsés indexés par SKU (pour la règle « min des sources » srcAltSkus).
@@ -986,6 +993,8 @@ async function handlePriceWatch(req, res, admin, db) {
       // Règle 25/07 : si le produit référence des déclinaisons fournisseur
       // (srcAltSkus, ex. DBS180Z ← DBS180ZJ), on achète TOUJOURS la moins
       // chère → source effective = min des prix présents sur la page.
+      // 🔒 Prix verrouillé : le traqueur relève, mais n'écrit JAMAIS.
+      if (p.priceLocked === true) { lockedW.push({ sku: item.sku, id: p.id, name: p.title || p.name }); continue; }
       const src = priceParse.pickCheapestSource(item.price, p.srcAltSkus, parsedBySku);
       const priced = pwComputePrice(p, src, cfg);
       const newPrice = priced.newPrice, newHt = priced.newHt;
@@ -1042,7 +1051,7 @@ async function handlePriceWatch(req, res, admin, db) {
 
     return res.status(200).json({
       ok: true, brand, dryRun: !!dryRun,
-      counts: { parsed: parsed.length, applied: applied.length, flagged: flagged.length, unchanged: unchanged.length, unknown: unknown.length },
+      counts: { parsed: parsed.length, applied: applied.length, flagged: flagged.length, unchanged: unchanged.length, unknown: unknown.length, locked: lockedW.length },
       applied, flagged, unknown: unknown.slice(0, 800)
     });
   } catch (err) {

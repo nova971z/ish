@@ -42,6 +42,17 @@ LIRE CE FICHIER avant d'ajouter/modifier un produit ou un poster. Cœur des règ
   **−20 €**, `COFFRET_COST_DELTA`) > **estimé** (dérivé de price_ht, dernier
   recours). L'origine s'affiche dans l'aperçu admin — un « coût estimé » = prix
   bâti sur une supposition, à remplacer par un vrai relevé.
+- **🔒 PRIX VERROUILLÉ — `priceLocked: true`** (règle gravée 27/07/2026) : un
+  produit portant ce drapeau dans products.json n'est **JAMAIS** recalculé, ni
+  par « Appliquer les nouveaux prix », ni par le traqueur. C'est une décision
+  commerciale de l'user, pas une lacune : il est donc sorti du décompte des
+  « estimés » et affiché à part (🔒) dans le bandeau de santé admin.
+  Aujourd'hui **1 seul produit** : `DWST83402-1` (TOUGHSYSTEM 2.0 Trolley) —
+  motif user : « il coûte entre 166 € et 200 € selon le site, et le prix on n'y
+  touche pas ». Coût fournisseur non relevable (cotébrico ne le vend pas, prix
+  très variable d'un revendeur à l'autre) → toute recalculation reposerait sur
+  une supposition. ⚠️ Le verrou gèle le prix ACTUELLEMENT SERVI (celui de
+  l'override Firestore), pas celui de products.json.
 - **POSTERS** : fond sombre obligatoire (jamais blanc — signaler AVANT si fond clair). PNG envoyé = à POSER sur le site (pas à regarder). « Machine seule/outil nu » = pas de batteries sur l'image.
 - **WORKFLOW** : travailler DIRECTEMENT sur `master` (commit + push immédiat → Vercel live). CI verte à chaque fois. Identifier le produit par le TITRE de la capture pirates-tools.com.
 - Journal des produits validés + prix en attente : voir le fichier REGLES-PRODUITS.md §7.
