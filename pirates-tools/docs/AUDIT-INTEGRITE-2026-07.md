@@ -617,3 +617,89 @@ infinie, correction du `.map` qui passait l'index en options.
 réintroduction d'un différé sur les vignettes. Le seul levier restant est de
 générer de **vraies vignettes** (320 px) en fichiers séparés, originaux
 intacts — à décider par l'user, jamais de ma seule initiative.
+
+---
+
+## P9 — ACCESSIBILITÉ ET ROBUSTESSE ✅ (27/07/2026, SW v508)
+
+**Question posée** : le site est-il utilisable par quelqu'un qui voit mal, qui
+n'utilise que le clavier, ou dont le téléphone est à court de place / de
+réseau ? Et sur l'iPad de l'user, dans les DEUX orientations ?
+
+### Méthode
+Deux volets, l'un mesuré au navigateur, l'autre exécuté en CI.
+- **Volet mesuré** — `scratchpad/a11y.mjs` (Playwright, Chromium) : contrastes
+  calculés sur les **styles réellement appliqués** (luminance WCAG, fond
+  effectif obtenu en remontant les ancêtres jusqu'à un fond opaque), cibles
+  tactiles mesurées au pixel, débordement horizontal mesuré, comportement
+  vérifié **stockage saturé** (`Storage.prototype.setItem` qui lève, comme en
+  navigation privée Safari à la limite) et **réseau coupé après chargement**.
+- **Volet CI** — `scripts/audit/p9-a11y.js` : recalcule les contrastes depuis
+  les couleurs écrites dans `styles.css` (aucun ratio en dur : changer un
+  hexadécimal change le verdict), vérifie le nom accessible des 159 commandes
+  d'`index.html`, et verrouille 6 acquis (zoom autorisé, langue déclarée,
+  mouvement réduit, piège de focus, lien d'évitement, `aria-expanded`).
+
+### Résultat : 4 défauts réels de contraste, tous corrigés
+| Élément | Avant | Après | Vu par le client |
+|---|---|---|---|
+| Bouton **Facebook** (pied de page **et** barre haute) | `#fff` / `#1877F2` = **4,23:1** | `#fff` / `#1773E9` = **4,50:1** | oui |
+| **Pastille du panier** (11 px, gras) | `#fff` / `#ff3b30` = **3,55:1** | `#fff` / `#df342a` = **4,50:1** | dès que le panier n'est pas vide |
+| **WhatsApp flottant** | `#fff` / `#25D366` = **1,98:1** | `#042016` / `#25D366` = **8,66:1** | non (masqué tant qu'aucun numéro n'est configuré) |
+| Bouton **✕** de retrait de photo | `#fff` / `#ef4444` = **3,76:1** | `#fff` / `#d83d3d` = **4,51:1** | admin seulement |
+
+Décidés AVEC l'user (deux questions posées, deux réponses « oui »), jamais
+appliqués de ma seule initiative — c'est son apparence.
+- **Facebook** : écart perçu **ΔE2000 = 1,77**, sous le seuil de perception à
+  l'œil nu. La MÊME valeur est posée aux deux endroits → **un seul bleu
+  Facebook** sur tout le site (avant, seul le pied de page aurait bougé).
+- **WhatsApp** : le vert de marque `#25D366` est **inchangé**. C'est le texte
+  qui fonce — exactement ce que faisait déjà `.footer-social__link--wa`
+  (8,66:1). La correction aligne le site sur son propre motif.
+
+### Ce qui a été écarté APRÈS vérification (et pourquoi)
+Un détecteur qui crie à tort finit ignoré. Chaque alerte a été instruite :
+- **Bouton Facebook de la barre haute** : icône seule, aucun texte → relève de
+  **1.4.11** (seuil 3:1), pas de 1.4.3. Non deviné : le contrôle **lit
+  index.html** et vérifie l'absence de texte dans l'élément.
+- **4 liens téléphone / WhatsApp vides dans le HTML** : leur libellé est écrit
+  au démarrage par `applyContactChannels()`, et ils sont **masqués** tant
+  qu'aucun numéro n'existe (c'est ce qui évite qu'un numéro fuite dans la
+  source). La dérogation n'est pas déclarative : le contrôle **exige** que les
+  deux mécanismes (`fmtPhone` + `hidden = !has`) soient présents, sinon elle
+  tombe.
+- **10 pastilles du carrousel 3D**, 8×8 px : sous les 24×24 px de **WCAG 2.5.8
+  AA**, mais couvertes par l'exception **« Équivalent »** — les flèches
+  Précédent/Suivant font la même chose et mesurent **44×44 px**. Vérifié : si
+  on masque les flèches, l'exception **tombe** et les 10 pastilles redeviennent
+  des défauts.
+- **Liens du menu latéral**, 224×23 px : couverts par l'exception
+  **d'espacement** de 2.5.8 (aucun autre disque de 24 px ne les chevauche).
+- Deux **faux positifs de mes propres contrôles** ont été corrigés dans le
+  contrôle, pas dans le site : le pot de miel du formulaire (déjà
+  `aria-hidden` + `tabindex="-1"`) et le lien du logo (dont le nom accessible
+  vient de `<img alt="Pirates Tools">` — un `||` naïf s'arrêtait sur un
+  `textContent` fait d'espaces).
+- Mon analyseur CSS **cassait sur les commentaires** que je venais d'ajouter
+  (« `/* … */ .wa-float` » devenait le sélecteur). Corrigé : les commentaires
+  sont retirés avant toute analyse.
+
+### Preuve de faillibilité (obligatoire)
+- `scratchpad/p9-preuve.mjs` : **9/9** — bouton muet injecté → détecté ; deux
+  cibles 12×12 collées → détectées ; flèches du carrousel masquées →
+  l'exception tombe et les 10 pastilles ressortent ; retrait du défaut → vert.
+- Volet CI : ancien bleu Facebook remis → **détecté** ; texte blanc remis sur
+  le vert WhatsApp → **détecté** (3 blocs) ; `aria-label` du bouton menu
+  retiré → **détecté**. État rétabli → vert.
+
+### État final mesuré
+- Navigateur : **16 OK / 0 KO / 0 avertissement**.
+- CI : `audit/p9-a11y` branché dans `scripts/ci.js` → **CI verte**.
+- Non-régression : `couriers.mjs` **80/80**, `course-pay.mjs` **14/14**,
+  `cards.mjs` **6/6**.
+- Robustesse confirmée : stockage saturé → l'app démarre, le catalogue
+  s'affiche, **0 exception** ; réseau coupé → navigation intacte, **40 → 40**
+  cartes, aucune vue vide. Aucun débordement horizontal sur 4 routes × 2
+  orientations d'iPad.
+
+═══ AUDIT D'INTÉGRITÉ TERMINÉ — 9 passes sur 9, 10 contrôles en CI. ═══
