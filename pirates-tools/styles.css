@@ -8195,6 +8195,26 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-gear:hover { background: rgba(var(--accent-rgb), .24); transform: translateY(-1px); }
 .lv-gear:active { transform: scale(.97); }
 .lv-gear__i { font-size: 1.1rem; line-height: 1; }
+/* Variante neutre : même gabarit, sans la couleur d'accent (action secondaire
+   comme « Rafraîchir » — elle ne doit pas rivaliser avec l'action principale). */
+.lv-gear--plain { border-color: rgba(255,255,255,.18); background: rgba(255,255,255,.06); color: #e6edf5; }
+.lv-gear--plain:hover { background: rgba(255,255,255,.12); }
+
+/* ── BANDEAU « À FAIRE MAINTENANT » (modèle Uber) ───────────────────────────
+   Une seule chose à l'écran doit crier. S'il y a une action attendue de moi,
+   elle est ICI, en haut, avec son bouton — et rien d'autre ne lui ressemble. */
+.lv-todo {
+  display: flex; align-items: center; gap: .9rem; flex-wrap: wrap;
+  padding: 1rem 1.1rem; border-radius: 16px;
+  border: 1px solid rgba(52, 211, 153, .5);
+  background: linear-gradient(135deg, rgba(52,211,153,.16), rgba(52,211,153,.06));
+  box-shadow: 0 0 24px rgba(52, 211, 153, .18);
+}
+.lv-todo__i { font-size: 1.6rem; line-height: 1; flex: 0 0 auto; }
+.lv-todo__c { flex: 1 1 200px; min-width: 0; }
+.lv-todo__t { display: block; font-weight: 800; color: #6ee7b7; font-size: .98rem; }
+.lv-todo__s { display: block; font-size: .84rem; color: var(--muted, #c9c9d9); margin-top: .15rem; }
+.lv-todo .btn { flex: 0 0 auto; }
 @media (max-width: 520px) { .lv-gear__t { display: none; } .lv-gear { padding: .6rem .8rem; } }
 
 /* La carte du livreur telle que les clients la voient, dans son espace. */
@@ -8351,7 +8371,16 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 /* — Fil de discussion client ↔ livreur — */
 .lv-chat { margin-top: .9rem; padding: .8rem .85rem; border-radius: 14px; border: 1px solid rgba(139,92,246,.35); background: rgba(139,92,246,.06); }
 .lv-chat__log { max-height: 320px; overflow-y: auto; display: grid; gap: .4rem; padding: .5rem; margin: .5rem 0; border-radius: 10px; background: rgba(0,0,0,.28); }
+/* 🐛 Les bulles se touchaient : .lv-msg n'avait aucune marge, les messages
+   se collaient les uns aux autres et le fil devenait illisible. On respire
+   entre chaque, un peu plus quand l'interlocuteur change (regroupement visuel
+   des messages consécutifs d'une même personne, comme dans les messageries). */
 .lv-msg { display: flex; }
+.lv-msg + .lv-msg { margin-top: .35rem; }
+.lv-msg--me + .lv-msg--them,
+.lv-msg--them + .lv-msg--me { margin-top: .75rem; }
+.lv-msg--sys { margin-top: .9rem; }
+.lv-msg--sys + .lv-msg { margin-top: .9rem; }
 .lv-msg__t { max-width: 82%; padding: .45rem .65rem; border-radius: 12px; font-size: .9rem; line-height: 1.45; word-break: break-word; }
 .lv-msg--me { justify-content: flex-end; }
 .lv-msg--me .lv-msg__t { background: rgba(139,92,246,.35); border-bottom-right-radius: 4px; }

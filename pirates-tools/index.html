@@ -44,7 +44,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=520">
+  <link rel="stylesheet" href="styles.css?v=521">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -1183,17 +1183,31 @@
     <section id="view-mes-livraisons" class="view hidden" data-route="/mes-livraisons" role="region" aria-labelledby="meslivs-h1">
       <div class="container courier-space">
         <button type="button" class="pj-back" id="clientDelivBack">← Retour</button>
-        <header class="lv-header">
-          <h1 id="meslivs-h1" tabindex="-1">📦 Mes livraisons</h1>
-          <p class="lv-sub">Toutes tes demandes de livraison : où elles en sont, le livreur qui les a prises, ta discussion avec lui, et la note que tu lui laisses.</p>
+        <header class="lv-header lv-header--tools">
+          <div>
+            <h1 id="meslivs-h1" tabindex="-1">📦 Mes livraisons</h1>
+            <p class="lv-sub">Où en sont tes demandes, et avec qui.</p>
+          </div>
+          <button type="button" class="lv-gear lv-gear--plain" id="clientDelivRefresh"
+                  title="Rafraîchir la liste">
+            <span class="lv-gear__i" aria-hidden="true">🔄</span>
+            <span class="lv-gear__t">Rafraîchir</span>
+          </button>
         </header>
-        <div id="clientDelivMap" class="pdp-deliv-map courier-map" aria-label="Carte de mes livraisons"></div>
-        <div id="clientDelivDetail" class="lv-card" hidden></div>
+        <!-- ORDRE VOULU (refonte 27/07/2026, modèle Uber) : ce qui demande une
+             ACTION en premier, la liste ensuite, la carte en dernier — elle
+             situe, elle ne fait pas agir. Avant, la carte occupait le haut de
+             l'écran et repoussait l'essentiel sous la ligne de flottaison. -->
+        <div id="clientDelivTodo"></div>
         <div class="lv-card">
-          <h2 class="lv-h2">🧾 Historique</h2>
+          <h2 class="lv-h2">🧾 Mes demandes</h2>
           <div id="clientDelivList"><p class="lv-hint">Chargement…</p></div>
         </div>
-        <button type="button" class="btn" id="clientDelivRefresh">🔄 Rafraîchir</button>
+        <div id="clientDelivDetail" class="lv-card" hidden></div>
+        <div class="lv-card">
+          <h2 class="lv-h2">🗺️ Où elles se situent</h2>
+          <div id="clientDelivMap" class="pdp-deliv-map courier-map" aria-label="Carte de mes livraisons"></div>
+        </div>
       </div>
     </section>
 
@@ -1228,8 +1242,8 @@
         <!-- ÉCRAN DE TRAVAIL : sa carte, puis les courses, DISSOCIÉES. -->
         <div id="courierWork">
           <div id="courierMyCard"></div>
-          <div id="courierEarnings"></div>
-          <div id="courierMap" class="pdp-deliv-map courier-map" aria-label="Carte des courses"></div>
+          <!-- ORDRE VOULU (modèle Uber) : ma carte, puis LES COURSES, puis les
+               gains, puis la carte géographique. Agir d'abord, situer ensuite. -->
           <div id="courierDetail" class="lv-card" hidden></div>
           <div class="courier-cols">
             <div class="lv-card">
@@ -1242,6 +1256,11 @@
               <p class="lv-hint">Celles que tu as acceptées : en cours, puis terminées.</p>
               <div id="courierMine"><p class="lv-hint">Chargement…</p></div>
             </div>
+          </div>
+          <div id="courierEarnings"></div>
+          <div class="lv-card">
+            <h2 class="lv-h2">🗺️ Où elles se situent</h2>
+            <div id="courierMap" class="pdp-deliv-map courier-map" aria-label="Carte des courses"></div>
           </div>
           <button type="button" class="btn" id="courierRefresh">🔄 Rafraîchir</button>
         </div>
@@ -2141,7 +2160,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=520"></script>
+  <script defer src="app.js?v=521"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

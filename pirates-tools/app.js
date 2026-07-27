@@ -5767,10 +5767,15 @@
       : (a.valide ? '✅ validé' : (moiOk ? '⏳ en attente de l\'autre' : '👉 à accepter'));
     var payBadge = c.goodsPaid ? '✅ réglée' : (a && a.valide ? '👉 à régler' : 'après l\'accord');
 
+    // ✅ ACCORD VALIDÉ DES DEUX CÔTÉS → le panneau DISPARAÎT (décision user
+    // 27/07/2026). Il n'a plus rien à demander ; le message système laissé
+    // dans le fil récapitule ce qui a été convenu, et ça suffit. Garder un
+    // bouton qui n'ouvre qu'un résumé, c'est du bruit.
     var side = '<aside class="lv-chat__side" aria-label="Actions de la course">'
-      + '<button type="button" class="lv-cbtn" data-cpanel="accord">'
-      + '<span class="lv-cbtn__i" aria-hidden="true">📝</span>'
-      + '<span class="lv-cbtn__t">L\'accord</span><span class="lv-cbtn__s">' + accordBadge + '</span></button>';
+      + (a && a.valide ? ''
+        : '<button type="button" class="lv-cbtn" data-cpanel="accord">'
+          + '<span class="lv-cbtn__i" aria-hidden="true">📝</span>'
+          + '<span class="lv-cbtn__t">L\'accord</span><span class="lv-cbtn__s">' + accordBadge + '</span></button>');
     if (isClient) {
       side += '<button type="button" class="lv-cbtn" data-cpanel="pay">'
         + '<span class="lv-cbtn__i" aria-hidden="true">💳</span>'
@@ -6795,6 +6800,32 @@
   // ── MES LIVRAISONS : l'environnement CLIENT ────────────────────────────────
   // Carte de ses livraisons, détail (montant payé, dates, statut) et NOTATION
   // du livreur (étoiles + commentaire, une seule fois, visible dans l'admin).
+  // « À FAIRE MAINTENANT » — modèle Uber : une seule chose doit crier à
+  // l'écran. On calcule l'action la plus urgente attendue DU CLIENT et on
+  // l'affiche en haut avec son bouton. Rien à faire → le bandeau disparaît,
+  // il ne devient jamais du décor.
+  function lvTodoClient(mine, ouvrir) {
+    var host = document.getElementById('clientDelivTodo');
+    if (!host) return;
+    // Ordre d'urgence : confirmer une réception (l'argent du livreur en
+    // dépend) > régler la marchandise > accepter l'accord proposé.
+    var c = mine.filter(function (x) { return x.status === 'livree'; })[0]
+      || mine.filter(function (x) { return x.accord && x.accord.valide && !x.goodsPaid; })[0]
+      || mine.filter(function (x) { return x.accord && !x.accord.valide && !x.accord.okClient; })[0];
+    if (!c) { host.innerHTML = ''; return; }
+    var quoi = c.status === 'livree'
+      ? { i: '📦', t: 'Confirme la réception', s: 'Vérifie les photos, puis confirme — ton livreur attend.', b: 'Confirmer' }
+      : (c.accord && c.accord.valide)
+        ? { i: '💳', t: 'Règle ta marchandise', s: 'Dernière étape : ta course sera alors commandée.', b: 'Régler' }
+        : { i: '📝', t: 'Un accord t\'attend', s: 'Ton livreur a proposé un prix et des modalités.', b: 'Voir l\'accord' };
+    host.innerHTML = '<div class="lv-todo"><span class="lv-todo__i" aria-hidden="true">' + quoi.i + '</span>'
+      + '<span class="lv-todo__c"><span class="lv-todo__t">' + quoi.t + '</span>'
+      + '<span class="lv-todo__s">' + quoi.s + ' — ' + escapeHTML(String(c.address || '').slice(0, 40)) + '</span></span>'
+      + '<button type="button" class="btn primary" id="lvTodoBtn">' + quoi.b + '</button></div>';
+    var b = document.getElementById('lvTodoBtn');
+    if (b) b.onclick = function () { ouvrir(c); };
+  }
+
   function renderClientDeliveries() {
     // Même course d'auth que l'espace livreur : sans le jeton, course-list
     // répond 401 et la page affiche « Erreur » à tort au chargement à froid.
@@ -7048,6 +7079,7 @@
           + (attend ? '<span class="lv-course__todo">👉 Action requise : vérifie les photos et confirme la réception</span>' : '')
           + '</button>';
       }).join('');
+      lvTodoClient(mine, showDetail);
       if (aConfirmer) showDetail(aConfirmer);
       var cards = listEl.querySelectorAll('[data-deliv-focus]');
       for (var i = 0; i < cards.length; i++) {
