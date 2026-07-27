@@ -4065,7 +4065,18 @@
     var svg = host.querySelector('svg');
     if (!svg) return null;
     var NS = 'http://www.w3.org/2000/svg';
-    var COS = 0.819, SIN = -0.574;                 // diagonale haut-droite (-35°)
+    // Direction dans laquelle on aligne les 4 prix, depuis Sainte-Anne.
+    // ⚠️ NE PAS remettre −35° (haut-droite) : Sainte-Anne est sur la côte EST,
+    // cette diagonale part droit dans l'ATLANTIQUE — mesuré, 3 prix sur 4
+    // tombaient en pleine mer. Les angles où le milieu de l'anneau est sur la
+    // TERRE (relevés au tracé réel, isPointInFill) :
+    //   zone 1 : 160°→338°   zone 2 : 180°→264°
+    //   zone 3 : 134°→198°   zone 4 : 136°→200°
+    // Seule plage commune aux QUATRE : 180°→198°. On prend le milieu, 190°
+    // (plein ouest, très légèrement vers le haut) — les prix traversent alors
+    // Grande-Terre puis Basse-Terre, chacun dans son anneau.
+    var ANG = 190 * Math.PI / 180;
+    var COS = Math.cos(ANG), SIN = Math.sin(ANG);
     for (var i = 0; i < z.rad.length; i++) {
       var rIn = i === 0 ? 0 : z.rad[i - 1] * z.upk;
       var mid = (rIn + z.rad[i] * z.upk) / 2;
@@ -4076,7 +4087,13 @@
       t.setAttribute('text-anchor', 'middle');
       // paint-order + stroke : le prix reste lisible au-dessus de la mer comme
       // au-dessus de la terre, quelle que soit la couleur de l'anneau.
-      t.setAttribute('style', 'fill:#fff;stroke:#0b0b12;stroke-width:1.1;paint-order:stroke;font:800 5px system-ui,sans-serif');
+      // Taille MESURÉE, pas choisie à l'œil : les 4 prix sont alignés sur un
+      // rayon et l'écart entre deux anneaux voisins n'est que de ~11 unités.
+      // À 5 px, « 100 € » fait 15,6 unités → les prix se chevauchaient.
+      // Balayage : 4,2 px → 0,4 u de jeu · 4 px → 0,9 · 3,8 px → 1,5 ·
+      // 3,6 px → 2,05 u. On prend 3,6 px (≈ 29 px à l'écran, bien lisible).
+      // Le plus large possible est « 500 € », même gabarit que « 100 € ».
+      t.setAttribute('style', 'fill:#fff;stroke:#0b0b12;stroke-width:.8;paint-order:stroke;font:800 3.6px system-ui,sans-serif');
       t.textContent = (tarifs[i + 1] || LV_BAREME[i].prix) + ' €';
       svg.appendChild(t);
     }

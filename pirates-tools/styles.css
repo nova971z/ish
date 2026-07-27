@@ -8058,6 +8058,16 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 /* — Grande carte des zones : pleine largeur, format généreux (iPad/mobile) — */
 .lv-tarifs__map { width: 100%; margin: .2rem 0 1rem; border-radius: 16px; background: radial-gradient(120% 120% at 50% 0%, rgba(139,92,246,.12), rgba(0,0,0,.32)); border: 1px solid rgba(255,255,255,.10); overflow: hidden; }
 .lv-tarifs__map svg { display: block; width: 100%; height: auto; max-height: 62vh; }
+/* ⚠️ RÈGLE INDISPENSABLE — sans elle, l'île est NOIRE et masque les anneaux.
+   Les tracés de l'île sont CLONÉS depuis #regIslands ; en changeant de parent
+   ils perdent « .isl svg path { fill:none } » et retombent sur le fill par
+   défaut du SVG, c'est-à-dire NOIR OPAQUE. Comme ils sont peints APRÈS les
+   anneaux, ils recouvrent toute la carte. Même trait doré que .lv-remun-isle.
+   Les anneaux, eux, portent leur couleur en style INLINE : ils gagnent sur
+   cette règle et ne sont donc pas effacés. */
+.lv-tarifs__map svg path { fill: none; stroke: #f2c14e; stroke-width: 1.1;
+  vector-effect: non-scaling-stroke; stroke-linejoin: round; stroke-linecap: round;
+  filter: drop-shadow(0 0 2px rgba(242,193,78,.75)); }
 .lv-tarifs__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .6rem; }
 @media (max-width: 760px) { .lv-tarifs__grid { grid-template-columns: repeat(2, 1fr); } }
 .lv-tarif { display: grid; gap: .28rem; padding: .65rem .7rem; border-radius: 12px; background: rgba(0,0,0,.28); border: 1px solid rgba(255,255,255,.10); border-left-width: 4px; }
