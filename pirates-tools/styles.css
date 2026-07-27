@@ -8031,3 +8031,8 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-earn__cell--gele strong { color: #facc15; }
 .lv-earn__cell--todo strong { color: #60a5fa; }
 .lv-earn__cell--ok strong { color: #6ee7b7; }
+/* Acceptation des CGV avant paiement (art. L221-14 C. conso) */
+.pay-modal__cgv { display: flex; gap: .6rem; align-items: flex-start; margin: 0 0 .7rem; font-size: .86rem; line-height: 1.5; color: var(--muted, #c9c9d9); text-align: left; }
+.pay-modal__cgv input { margin-top: .2rem; flex: 0 0 auto; width: 18px; height: 18px; accent-color: #8B5CF6; }
+.pay-modal__cgv a { color: #c4b5fd; }
+.pay-modal__cgv-note { margin: -.4rem 0 .6rem; color: #ff8a8a; font-size: .84rem; font-weight: 600; }

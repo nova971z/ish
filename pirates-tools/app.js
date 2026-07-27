@@ -7512,6 +7512,10 @@
     _stripeReady = false;
     _stripeClientSecret = null;
     _quoteTerritory = null;
+    var cgvBox = document.getElementById('payCgvOk');
+    if (cgvBox) cgvBox.checked = false;          // consentement redemandé à chaque commande
+    var cgvMsg = document.getElementById('payCgvNote');
+    if (cgvMsg) cgvMsg.hidden = true;
     setupPayAddressForm();
     // Course : l'adresse du CHANTIER (déjà géocodée sur la carte) préremplit
     // le formulaire — le formulaire carte se charge immédiatement.
@@ -7864,6 +7868,16 @@
 
   function confirmPayment() {
     if (!_payItems || !_payItems.length) return;
+    // Consentement explicite aux CGV avant tout débit (preuve du consentement
+    // en vente à distance). Sans la case, la commande n'est pas envoyée.
+    var cgv = document.getElementById('payCgvOk');
+    var cgvNote = document.getElementById('payCgvNote');
+    if (cgv && !cgv.checked) {
+      if (cgvNote) cgvNote.hidden = false;
+      cgv.focus();
+      return;
+    }
+    if (cgvNote) cgvNote.hidden = true;
     var total = payTotalCents(_payItems) / 100;
     var stripe = getStripe();
     var errorEl = document.getElementById('stripeCardError');
@@ -7905,7 +7919,7 @@
           }
           if (btn) {
             btn.disabled = false;
-            btn.innerHTML = '<span class="pay-modal__btn-icon">💳</span> Payer en toute sécurité';
+            btn.innerHTML = '<span class="pay-modal__btn-icon">💳</span> Commander avec obligation de paiement';
           }
           toast(result.error.message || 'Le paiement a échoué', 'error');
         } else {
@@ -7936,7 +7950,7 @@
         console.error('[confirmPayment]', err && err.message);
         if (btn) {
           btn.disabled = false;
-          btn.innerHTML = '<span class="pay-modal__btn-icon">💳</span> Payer en toute sécurité';
+          btn.innerHTML = '<span class="pay-modal__btn-icon">💳</span> Commander avec obligation de paiement';
         }
         if (errorEl) {
           errorEl.textContent = 'Le paiement n\'a pas pu aboutir. Vérifiez votre connexion et réessayez.';

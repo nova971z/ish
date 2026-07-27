@@ -44,7 +44,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=493">
+  <link rel="stylesheet" href="styles.css?v=494">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -1789,9 +1789,19 @@
       </div>
 
       <div class="pay-modal__footer">
-        <button id="payModalConfirm" class="btn primary btn--lg btn--glow" type="button" aria-label="Payer en toute sécurité">
+        <!-- Art. L221-14 al. 2 du Code de la consommation : le bouton de
+             validation DOIT porter la mention « commande avec obligation de
+             paiement » (ou une formule analogue non ambiguë), à peine de
+             NULLITÉ du contrat + amende administrative (15 000 € pour une
+             société). « Payer en toute sécurité » ne satisfaisait pas ce texte.
+             + acceptation explicite des CGV et du droit de rétractation. -->
+        <label class="pay-modal__cgv"><input type="checkbox" id="payCgvOk">
+          <span>J'ai lu et j'accepte les <a href="#/cgv" target="_blank" rel="noopener">conditions générales de vente</a>
+          et la <a href="#/confidentialite" target="_blank" rel="noopener">politique de confidentialité</a>.</span></label>
+        <p class="pay-modal__cgv-note" id="payCgvNote" role="alert" hidden>Coche cette case pour valider ta commande.</p>
+        <button id="payModalConfirm" class="btn primary btn--lg btn--glow" type="button" aria-label="Commander avec obligation de paiement">
           <span class="pay-modal__btn-icon">💳</span>
-          Payer en toute sécurité
+          Commander avec obligation de paiement
         </button>
         <button id="payModalCryptoConfirm" class="btn primary btn--lg btn--glow" type="button" hidden aria-label="Confirmer le paiement crypto">
           <span class="pay-modal__btn-icon">✅</span>
@@ -2013,7 +2023,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=493"></script>
+  <script defer src="app.js?v=494"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->
