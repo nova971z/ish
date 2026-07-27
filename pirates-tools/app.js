@@ -3850,14 +3850,30 @@
   var LV_GP_SURCONSO = 1.20;   // +20 % Guadeloupe
   function lvConsoGp(key) { return Math.round(LV_CYL[key].base * LV_GP_SURCONSO * 10) / 10; }
 
+  // ⚖️ Texte de référence du barème, affiché au livreur. Sorti des fonctions
+  // (déjà démesurées) et écrit UNE fois : ces mots ont une portée juridique,
+  // ils ne doivent pas diverger d'un écran à l'autre.
+  var LV_BAREME_CONSEILLE_HTML = '<p style="margin:.5rem 0 0" class="lv-hint">'
+    + '💶 <strong>Barème CONSEILLÉ</strong>, pas un tarif imposé : <strong>c\'est toi qui fixes tes prix</strong> '
+    + 'dans ton espace livreur, au-dessus comme en dessous, sans aucune conséquence sur ton accès aux courses '
+    + 'ni sur ta place dans l\'annuaire. Ces montants sont calculés pour être <strong>les plus justes des deux '
+    + 'côtés</strong> : de quoi être correctement payé une fois l\'essence déduite, tout en restant raisonnable '
+    + 'pour l\'artisan qui commande. La distance est mesurée depuis Sainte-Anne. Exemples : Capesterre-Belle-Eau '
+    + '(zone 🟡) ≈ <strong>74 €</strong> ; Basse-Terre (zone 🔴, le plus long trajet) ≈ <strong>100 €</strong>, '
+    + 'pour ~12 € d\'essence aller-retour même en grosse moto.</p>';
+
   // ── BARÈME PAR ZONE (décision user, corrigée 26/07) ────────────────────────
   // Ancrage : le trajet LE PLUS LONG = Sainte-Anne → BASSE-TERRE (la ville),
   // zone 🔴 4 (rayon 46 km) = 100 € MAXIMUM. Tarif DÉGRESSIF proportionnel au
   // rayon extérieur de zone : taux = 100 € / 46 km ≈ 2,17 €/km.
   // → Z1 (10 km) 22 € · Z2 (22 km) 48 € · Z3 (34 km) 74 € · Z4 (46 km) 100 €.
-  // (Z1 respecte le plancher de 20 € voulu par l'user.) Montants = rémunération
-  // MINIMUM garantie du livreur, carburant à sa charge (coûts réels très en
-  // dessous : voir tableau admin Barème).
+  // (Z1 respecte le plancher de 20 € voulu par l'user.)
+  // ⚖️ CE BARÈME EST UN REPÈRE CONSEILLÉ, JAMAIS UN TARIF IMPOSÉ — et le mot
+  // compte juridiquement (L7342-1, directive (UE) 2024/2831). Il n'y a aucune
+  // « rémunération minimum garantie » : chaque livreur fixe SES prix, au-dessus
+  // comme en dessous, sans la moindre conséquence. Le repère est calibré pour
+  // être juste DES DEUX CÔTÉS : le livreur reste largement gagnant une fois
+  // l'essence déduite (tableau admin Barème), l'artisan paie un prix tenable.
   var LV_BAREME = [
     { zone: 1, emoji: '🟢', km: '0-10',  prix: 22 },
     { zone: 2, emoji: '🔵', km: '10-22', prix: 48 },
@@ -4812,7 +4828,7 @@
         var v = LV_VEHICLES[state.veh];
         // Bouton rémunération (barème par distance) — plein largeur, vert néon.
         // La carte interactive + la grille de prix arrivent (prochain message user).
-        h.push('<button type="button" class="lv-remun" id="lvRemun">💶 Combien je vais gagner&nbsp;? — Voir le barème par distance</button>');
+        h.push('<button type="button" class="lv-remun" id="lvRemun">💶 Combien je vais gagner&nbsp;? — Voir le barème CONSEILLÉ par distance</button>');
         if (state.remun) {
           // Panneau tarifs : UNIQUEMENT l'île du compte du client (territoire
           // sélectionné) — c'est à l'intérieur de ce contour que les zones
@@ -4827,7 +4843,7 @@
                   + '<span class="lv-bareme__prix">' + b.prix + ' €</span></div>';
               }).join('')
             + '</div>'
-            + '<p style="margin:.5rem 0 0" class="lv-hint">💶 Montants <strong>minimum garantis</strong> par livraison, payés par l\'artisan — la distance est mesurée depuis Sainte-Anne. Exemples : livrer à Capesterre-Belle-Eau (zone 🟡) = <strong>74 €</strong> ; jusqu\'à Basse-Terre (zone 🔴, le plus long trajet) = <strong>100 €</strong>, pour ~12 € d\'essence aller-retour même en grosse moto.</p></div>');
+            + LV_BAREME_CONSEILLE_HTML + '</div>');
         }
         // Coût + délai des démarches, JUSTE EN DESSOUS des cartes (position validée
         // par l'user), maj au changement de véhicule.
@@ -5065,8 +5081,17 @@
   // identité pas encore prête → null, rien n'est gravé, et on réessaiera.
   var _lvRoleVerdict = null;   // true / false une fois SÛR ; null tant qu'inconnu
   var _lvRoleInflight = null;  // requête en cours (évite les appels en rafale)
+  var _lvRoleAt = 0;           // horodatage du verdict (voir LV_ROLE_TTL)
+  // ⏳ Le verdict ne doit PAS être figé pour toute la session : un dossier
+  // validé par l'administration pendant que le livreur est connecté le
+  // laisserait dehors jusqu'à la fermeture complète du site. Panne vécue le
+  // 27/07/2026 — « je valide ma demande et ça ne marche pas ». Le verdict est
+  // donc revérifié au bout d'une minute (une requête très légère).
+  var LV_ROLE_TTL = 60000;
   function lvGetRole() {
-    if (_lvRoleVerdict !== null) return Promise.resolve(_lvRoleVerdict);
+    if (_lvRoleVerdict !== null && (Date.now() - _lvRoleAt) < LV_ROLE_TTL) {
+      return Promise.resolve(_lvRoleVerdict);
+    }
     if (_lvRoleInflight) return _lvRoleInflight;
     _lvRoleInflight = whenAuthReady().then(function () {
       if (!_currentUser) return null;                       // identité inconnue
@@ -5084,12 +5109,12 @@
       return null;                                          // réseau coupé → inconnu
     }).then(function (v) {
       _lvRoleInflight = null;
-      if (v !== null) _lvRoleVerdict = v;                   // on ne grave que le sûr
+      if (v !== null) { _lvRoleVerdict = v; _lvRoleAt = Date.now(); }  // on ne grave que le sûr
       return v;
     });
     return _lvRoleInflight;
   }
-  function lvResetRole() { _lvRoleVerdict = null; _lvRoleInflight = null; }
+  function lvResetRole() { _lvRoleVerdict = null; _lvRoleInflight = null; _lvRoleAt = 0; }
 
   // Boutons du compte (colonne droite) : « Mes livraisons » pour TOUS ;
   // « Mode livraison » UNIQUEMENT pour les livreurs acceptés (ou testeur).
@@ -11281,7 +11306,14 @@
           return '<div class="admin-bareme__zone"><span>' + b.emoji + ' Z' + b.zone + '</span><em>' + b.km + ' km</em><strong>' + b.prix + ' €</strong></div>';
         }).join('')
       + '</div>'
-      + '<p class="admin-hint">Barème dégressif : ancrage Sainte-Anne → Basse-Terre (zone 🔴, trajet le plus long) = 100 €, proportionnel au rayon (≈ 2,17 €/km). Payé par l\'artisan au livreur — 0 % pour la plateforme.</p>'
+      + '<p class="admin-hint"><strong>⚖️ Barème CONSEILLÉ — jamais imposé.</strong> Chaque livreur fixe librement ses '
+      + 'propres tarifs dans son espace ; aucune sanction, aucun déclassement et aucun filtre ne dépend du montant '
+      + 'choisi, et le tri de l\'annuaire ignore le prix (disponibilité, note, ancienneté). C\'est ce qui nous tient '
+      + 'hors de l\'art. L7342-1 et du critère « prix fixé unilatéralement » de la directive (UE) 2024/2831.<br>'
+      + 'Construction du repère : ancrage Sainte-Anne → Basse-Terre (zone 🔴, trajet le plus long) = 100 €, '
+      + 'proportionnel au rayon (≈ 2,17 €/km) — calibré pour être juste des DEUX côtés : le livreur reste gagnant '
+      + 'essence déduite (voir le tableau ci-dessous), l\'artisan paie un prix tenable. Réglé en direct entre eux, '
+      + '0 % pour la plateforme.</p>'
       // Prix essence modifiable
       + '<div class="admin-bareme__fuel">'
       + '<label>⛽ Prix du litre sans plomb (Guadeloupe, réglementé — révisé chaque mois par la préfecture)'
@@ -11487,8 +11519,19 @@
   function reviewCourier(uid, status) {
     if (!uid) return;
     adminPostType('courier-review', { uid: uid, status: status })
-      .then(function () { loadAdminCouriers(); })
-      .catch(function (e) { alert('Erreur : ' + e.message); });
+      .then(function (d) {
+        // Le serveur RELIT après écriture et renvoie l'état réellement appliqué :
+        // on affiche ce constat, pas une supposition.
+        toast(d && d.courierActif
+          ? '✅ Dossier validé — accès livreur ACTIF'
+          : (status === 'refuse' ? '❌ Dossier refusé — accès livreur retiré' : '✅ Enregistré'), 'success');
+        // Si l'administrateur valide SON PROPRE compte, son rôle en mémoire est
+        // périmé : sans ça il resterait bloqué dehors jusqu'à la fermeture du
+        // site (panne vécue le 27/07/2026).
+        if (_currentUser && _currentUser.uid === uid) { lvResetRole(); updateAccLivBtn(); }
+        loadAdminCouriers();
+      })
+      .catch(function (e) { toast('Erreur : ' + e.message, 'error'); });
   }
 
   function renderAdmin() {
@@ -11706,7 +11749,7 @@
 
       // ── Livreurs : validation des dossiers coursier (option B, KYC manuel) ──
       + '<div class="admin-pane" data-admin-pane="couriers" hidden>'
-      + '<h2 class="admin-subtitle">Barème & carburant</h2>'
+      + '<h2 class="admin-subtitle">Barème CONSEILLÉ (indicatif) & carburant</h2>'
       + '<div id="adminCourierBareme"><p class="admin-loading">Chargement…</p></div>'
       + '<h2 class="admin-subtitle">⭐ Avis clients sur les livreurs</h2>'
       + '<div id="adminCourierRatings"><p class="admin-loading">Chargement…</p></div>'

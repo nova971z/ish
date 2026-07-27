@@ -67,7 +67,24 @@ ni lire le compte Instagram, ni afficher les publications.
 
 ---
 
-## 3. BARÈME LIVREURS — écrire noir sur blanc « barème CONSEILLÉ »
+## 3. BARÈME LIVREURS — ✅ FAIT le 27/07/2026 (v514)
+
+Les trois endroits qui contredisaient le code ont été corrigés :
+- page Livraison (client) : « les tarifs sont déjà **fixés** » → **barème
+  conseillé**, calculé pour être le plus juste **des deux côtés**, chaque
+  livreur restant libre de ses prix ;
+- inscription livreur : « montants **minimum garantis** » → **barème
+  CONSEILLÉ**, avec le rappel que c'est le livreur qui fixe ses prix, sans
+  aucune conséquence sur son accès aux courses ni sur son classement ;
+- admin, onglet Livreurs : titre « Barème **CONSEILLÉ (indicatif)** &
+  carburant » + le fondement juridique écrit (L7342-1, directive (UE)
+  2024/2831) et le rappel que le tri de l'annuaire ignore le prix.
+Le texte de référence vit désormais dans UNE constante (`LV_BAREME_CONSEILLE_HTML`)
+pour qu'il ne puisse plus diverger d'un écran à l'autre.
+
+<details><summary>Énoncé d'origine (conservé)</summary>
+
+### 3 bis. BARÈME LIVREURS — écrire noir sur blanc « barème CONSEILLÉ »
 
 **Pourquoi c'est important (juridique, pas cosmétique)** : si la plateforme
 **fixe** le prix de la course, elle tombe sous l'article **L7342-1 du code du
@@ -89,6 +106,8 @@ l'écrit ce que fait le code.
   du prix (aujourd'hui : disponibilité → note → ancienneté — c'est correct).
 - Reporter la formulation retenue dans `docs/METHODE-ENTREPRISE-FISCALITE.md`
   § 5 bis (« LA PARADE »).
+
+</details>
 
 ---
 

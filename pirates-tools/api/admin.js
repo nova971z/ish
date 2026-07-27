@@ -620,9 +620,36 @@ module.exports = async function handler(req, res) {
       await db.collection('courier_applications').doc(uid).set({
         status: status, reviewedAt: new Date()
       }, { merge: true });
-      // Reporte le statut sur le profil coursier si présent (source de vérité activation).
-      await db.collection('couriers').doc(uid).set({ kycStatus: status }, { merge: true }).catch(() => {});
-      return res.status(200).json({ ok: true, uid, status });
+      // ⚠️ C'EST CETTE ÉCRITURE QUI DONNE (OU RETIRE) L'ACCÈS LIVREUR.
+      // couriers/{uid}.kycValide === 'valide' est la SEULE porte d'entrée
+      // (contact.js). Elle portait un « .catch(() => {}) » : en cas d'échec,
+      // l'administration répondait « ✅ ok », la candidature passait en
+      // « valide »… et le compte n'avait toujours aucun accès. Panne vécue le
+      // 27/07/2026 — « je valide et ça ne marche pas », sans le moindre
+      // message. On ne masque plus rien.
+      try {
+        await db.collection('couriers').doc(uid).set({ kycStatus: status }, { merge: true });
+      } catch (e) {
+        console.error('[api/admin] courier-review kycStatus failed:', e.message);
+        return res.status(500).json({
+          ok: false,
+          error: 'Le dossier est marqué « ' + status + ' », mais l\'accès livreur n\'a PAS pu être appliqué '
+            + '(écriture couriers/' + uid + ' refusée). Réessaie ; si ça persiste, le compte de service '
+            + 'Firebase est en cause.'
+        });
+      }
+      // ET ON VÉRIFIE L'EFFET : on relit. Annoncer un succès sans l'avoir
+      // constaté, c'est reproduire exactement la panne.
+      const apres = await db.collection('couriers').doc(uid).get();
+      const kycStatus = apres.exists ? (apres.data().kycStatus || '') : '';
+      if (kycStatus !== status) {
+        return res.status(500).json({
+          ok: false,
+          error: 'Le statut du dossier a été enregistré, mais l\'accès livreur n\'a PAS été appliqué '
+            + '(couriers/' + uid + '.kycStatus = « ' + (kycStatus || 'absent') + ' »). Réessaie.'
+        });
+      }
+      return res.status(200).json({ ok: true, uid, status, kycStatus, courierActif: kycStatus === 'valide' });
     } catch (err) {
       console.error('[api/admin] courier-review failed:', err.message);
       return res.status(500).json({ ok: false, error: 'courier-review échoué' });
