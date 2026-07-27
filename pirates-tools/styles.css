@@ -8012,3 +8012,7 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-consent--film { border: 1px dashed rgba(242,193,78,.45); border-radius: 10px; padding: .6rem .7rem; background: rgba(242,193,78,.05); }
 /* Santé des coûts d'achat (admin → recalcul des prix) */
 .reprice-health { margin: .7rem 0; padding: .7rem .85rem; border: 1px solid rgba(255,255,255,.14); border-radius: 10px; background: rgba(0,0,0,.22); font-size: .9rem; line-height: 1.7; }
+/* Livraison qui attend une action du client (à confirmer) */
+.lv-course--todo { border-color: rgba(110,231,183,.6); box-shadow: 0 0 16px rgba(110,231,183,.18); }
+.lv-course__todo { display: block; margin-top: .35rem; font-size: .84rem; font-weight: 700; color: #6ee7b7; }
+.lv-proof__img--none { font-style: italic; opacity: .75; }

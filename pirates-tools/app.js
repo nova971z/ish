@@ -4920,7 +4920,14 @@
         // « livrée », donc pas de déblocage d'argent.
         + (c.acceptedByMe && c.status === 'acceptee'
           ? '<div class="lv-proof">'
-            + (c.hasScene ? '<p class="lv-hint">📷 Chantier photographié par le client (repère le point de dépôt) :</p><div class="lv-proof__img" id="courierSceneImg">Chargement…</div>' : '')
+            // Photo du chantier prise par le client : TOUJOURS annoncée, même
+            // absente. Avant, le bloc disparaissait sans un mot quand la photo
+            // manquait — le livreur ne pouvait pas savoir s'il devait en
+            // attendre une ou si le site avait échoué à la transmettre.
+            + '<p class="lv-hint">📷 Chantier photographié par le client (repère le point de dépôt) :</p>'
+            + (c.hasScene
+              ? '<div class="lv-proof__img" id="courierSceneImg">Chargement…</div>'
+              : '<div class="lv-proof__img lv-proof__img--none">Aucune photo transmise pour cette course.</div>')
             + '<p class="lv-hint">✅ Pour valider la livraison, il te faut les <strong>3 preuves</strong> :</p>'
             + '<label class="lv-field"><span>🔑 Code de remise (6 chiffres) — le client te le donne contre le colis</span>'
             + '<input type="text" id="courierCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="••••••" class="lv-code-input"></label>'
@@ -5052,9 +5059,16 @@
       if (dispoEl) dispoEl.innerHTML = (d.dispo && d.dispo.length)
         ? d.dispo.map(function (c) { return courseCard(c, canAccept); }).join('')
         : '<p class="lv-hint">Aucune course disponible pour l\'instant.</p>';
-      if (mineEl) mineEl.innerHTML = (d.mine && d.mine.length)
-        ? d.mine.map(function (c) { return courseCard(c, false); }).join('')
-        : '<p class="lv-hint">Aucune course pour l\'instant — commande une livraison depuis une fiche quincaillerie ou la page Livraison.</p>';
+      // « Mes courses » de l'espace LIVREUR = uniquement celles que J'AI
+      // ACCEPTÉES. Le serveur renvoie dans `mine` les courses où l'on est
+      // artisan OU livreur ; sur un compte de test qui joue les deux rôles,
+      // les courses simplement COMMANDÉES apparaissaient donc ici — alors
+      // qu'un autre livreur peut encore les prendre. (L'espace client fait
+      // le filtre symétrique sur c.mine.)
+      var mesCourses = (d.mine || []).filter(function (c) { return c.acceptedByMe; });
+      if (mineEl) mineEl.innerHTML = mesCourses.length
+        ? mesCourses.map(function (c) { return courseCard(c, false); }).join('')
+        : '<p class="lv-hint">Tu n\'as accepté aucune course pour l\'instant. Prends-en une dans « Courses disponibles ».</p>';
       // Clic carte de course -> détail + focus carte
       var cards = document.querySelectorAll('[data-course-focus]');
       for (var i = 0; i < cards.length; i++) {
@@ -5297,14 +5311,23 @@
       }
       var byId = {};
       mine.forEach(function (c) { byId[c.id] = c; });
+      // Une livraison au statut « livrée » ATTEND une action du client (vérifier
+      // les photos puis confirmer, ce qui débloque le paiement du livreur).
+      // Elle est signalée dans la liste et son détail s'ouvre tout seul : sans
+      // ça, le bouton de confirmation restait invisible tant qu'on ne cliquait
+      // pas sur la bonne carte, et on pouvait croire qu'il n'existait pas.
+      var aConfirmer = mine.filter(function (c) { return c.status === 'livree'; })[0] || null;
       listEl.innerHTML = mine.map(function (c) {
         var z = LV_BAREME[(c.zone || 1) - 1] || LV_BAREME[0];
-        return '<button type="button" class="lv-course lv-course--btn' + (c.status !== 'en_attente' ? '' : '') + '" data-deliv-focus="' + escapeHTML(c.id) + '">'
+        var attend = (c.status === 'livree');
+        return '<button type="button" class="lv-course lv-course--btn' + (attend ? ' lv-course--todo' : '') + '" data-deliv-focus="' + escapeHTML(c.id) + '">'
           + '<span class="lv-course__head"><span>' + z.emoji + ' <strong>' + c.prix + ' €</strong> · ' + (c.date ? escapeHTML(c.date) : 'au plus tôt') + '</span>'
           + '<span class="lv-course__status">' + (c.rating ? '⭐ ' + c.rating + '/5' : statusLabel(c)) + '</span></span>'
           + '<span class="lv-course__body">📍 ' + escapeHTML((c.address || '').slice(0, 60)) + '</span>'
+          + (attend ? '<span class="lv-course__todo">👉 Action requise : vérifie les photos et confirme la réception</span>' : '')
           + '</button>';
       }).join('');
+      if (aConfirmer) showDetail(aConfirmer);
       var cards = listEl.querySelectorAll('[data-deliv-focus]');
       for (var i = 0; i < cards.length; i++) {
         (function (btn) {
@@ -8091,17 +8114,34 @@
         if (d.ok) {
           toast('🛵 Course créée — les livreurs sont alertés par email', 'success');
           // Photo du chantier prise à la commande → jointe à la course créée.
+          // TOUT échec est ANNONCÉ : cette photo est la référence que le
+          // livreur utilise pour trouver le dépôt et que le client compare à
+          // la livraison. Un envoi raté en silence, c'est une preuve perdue
+          // sans que personne ne le sache.
           var scene = null;
           try { scene = sessionStorage.getItem('pt_course_scene'); } catch (_) {}
-          if (scene && d.course && d.course.id) {
+          if (!scene) {
+            toast('⚠️ Photo du chantier introuvable — le livreur ne la verra pas', 'error');
+          } else if (!(d.course && d.course.id)) {
+            toast('⚠️ Course sans identifiant — photo du chantier non envoyée', 'error');
+          } else {
             jsonAuthHeaders().then(function (headers) {
               return fetch(apiBaseUrl() + '/api/contact', {
                 method: 'POST', headers: headers,
                 body: JSON.stringify({ type: 'course-scene', id: d.course.id, photo: scene })
               });
-            }).then(function (r2) { return r2.json(); }).then(function (d2) {
-              if (d2.ok) { try { sessionStorage.removeItem('pt_course_scene'); } catch (_) {} }
-            }).catch(function () {});
+            }).then(function (r2) { return r2.text(); }).then(function (txt) {
+              var d2 = null;
+              try { d2 = JSON.parse(txt); } catch (_) {}
+              if (d2 && d2.ok) {
+                try { sessionStorage.removeItem('pt_course_scene'); } catch (_) {}
+                toast('📷 Photo du chantier transmise au livreur', 'success');
+              } else {
+                toast('⚠️ Photo du chantier refusée : ' + ((d2 && d2.error) || txt.slice(0, 80)), 'error');
+              }
+            }).catch(function (e) {
+              toast('⚠️ Photo du chantier non envoyée : ' + ((e && e.message) || 'réseau'), 'error');
+            });
           }
         } else if (d.error) toast('Livraison : ' + d.error, 'error');
       }).catch(function () {});
