@@ -124,4 +124,38 @@ async function alertNewCourse(course, id) {
   for (const to of dests) await sendMail(to, subject, html);
 }
 
-module.exports = { DEPOT, BAREME, TEST_EMAILS, haversineKm, quote, createFromIntent, alertNewCourse, sendMail, escapeHtml };
+// Confirmation de PAIEMENT au client. Envoyée une seule fois, au moment où la
+// course est réellement créée (createFromIntent → created === true), donc
+// jamais en double même si le webhook et le repli /merci passent tous les deux.
+// ⚠️ Le CODE DE REMISE n'est volontairement PAS dans cet email : il se lit
+// dans « Mes livraisons » et se donne en main propre. Un email transite et se
+// transfère — la preuve de remise ne doit pas circuler.
+async function confirmToClient(course, id) {
+  if (!course || !course.artisanEmail) return false;
+  const eur = (cents) => (Number(cents || 0) / 100).toFixed(2).replace('.', ',') + ' €';
+  const whenTxt = course.when === 'heure' ? ('à ' + course.hour)
+    : (course.when === 'matin' ? 'le matin' : "l'après-midi");
+  const html =
+    '<p><strong>Paiement confirmé ✅</strong> — merci pour ta commande.</p>'
+    + '<table style="border-collapse:collapse">'
+    + '<tr><td style="padding:4px 12px 4px 0">Marchandise</td><td><strong>' + eur(course.productsCents) + '</strong></td></tr>'
+    + '<tr><td style="padding:4px 12px 4px 0">Livraison sur chantier (zone ' + course.zone + ')</td><td><strong>' + eur(course.feeCents) + '</strong></td></tr>'
+    + '<tr><td style="padding:8px 12px 4px 0;border-top:1px solid #ddd">Total payé</td><td style="border-top:1px solid #ddd"><strong>' + eur(course.amountCents) + '</strong></td></tr>'
+    + '</table>'
+    + '<p>📍 ' + escapeHtml(course.address) + '<br>'
+    + '📅 ' + (course.date || 'au plus tôt') + ' ' + whenTxt + '</p>'
+    + '<p>Les ' + course.prix + ' € de livraison sont <strong>gelés</strong> : ils ne seront versés au livreur '
+    + 'qu\'après <strong>ta confirmation de réception</strong>. C\'est toi qui débloques le paiement, pas nous.</p>'
+    + '<p><strong>La suite :</strong></p>'
+    + '<ol>'
+    + '<li>Un livreur accepte ta course (tu reçois un email).</li>'
+    + '<li>À son arrivée, tu lui donnes ton <strong>code de remise à 6 chiffres</strong> — il est dans '
+    + '<strong>Mes livraisons</strong> sur pirates-tools.com, avec son QR code. Ne le communique qu\'en main propre, contre le colis.</li>'
+    + '<li>Tu vérifies ses photos, tu confirmes la réception, et son paiement part.</li>'
+    + '</ol>'
+    + '<p style="color:#666;font-size:13px">Référence de la course : ' + escapeHtml(id) + '</p>';
+  await sendMail(course.artisanEmail, '✅ Paiement confirmé — ta livraison est en préparation', html);
+  return true;
+}
+
+module.exports = { DEPOT, BAREME, TEST_EMAILS, haversineKm, quote, createFromIntent, alertNewCourse, confirmToClient, sendMail, escapeHtml };

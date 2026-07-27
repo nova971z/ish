@@ -467,7 +467,12 @@ async function handleCourses(req, body, cfg, res) {
       return res.status(403).json({ ok: false, error: 'Ce paiement ne t\'appartient pas.' });
     }
     const cc = await coursesLib.createFromIntent(db, pi, { uid, email });
-    if (cc.created) await coursesLib.alertNewCourse(cc.course, cc.id);
+    if (cc.created) {
+      await coursesLib.alertNewCourse(cc.course, cc.id);
+      // Confirmation de paiement au CLIENT — gardée par cc.created, donc
+      // jamais envoyée deux fois si le webhook a déjà créé la course.
+      await coursesLib.confirmToClient(cc.course, cc.id);
+    }
     return res.status(200).json({
       ok: true, created: cc.created,
       course: { id: cc.id, km: cc.course.km, zone: cc.course.zone, prix: cc.course.prix }

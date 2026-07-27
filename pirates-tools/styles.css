@@ -8016,3 +8016,18 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-course--todo { border-color: rgba(110,231,183,.6); box-shadow: 0 0 16px rgba(110,231,183,.18); }
 .lv-course__todo { display: block; margin-top: .35rem; font-size: .84rem; font-weight: 700; color: #6ee7b7; }
 .lv-proof__img--none { font-style: italic; opacity: .75; }
+/* Widget « Mes gains » (espace livreur) */
+.lv-earn { padding: 1rem 1.1rem; border: 1px solid rgba(110,231,183,.35); border-radius: 16px; background: linear-gradient(160deg, rgba(110,231,183,.10), rgba(0,0,0,.25)); display: grid; gap: .9rem; }
+.lv-earn--empty { text-align: center; color: var(--muted, #c9c9d9); font-size: .92rem; border-style: dashed; }
+.lv-earn__total { display: flex; align-items: baseline; gap: .6rem; flex-wrap: wrap; }
+.lv-earn__amount { font-size: 2rem; font-weight: 800; color: #6ee7b7; font-variant-numeric: tabular-nums; line-height: 1; }
+.lv-earn__label { font-size: .9rem; color: var(--muted, #c9c9d9); }
+.lv-earn__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .6rem; }
+@media (max-width: 560px) { .lv-earn__grid { grid-template-columns: 1fr; } }
+.lv-earn__cell { padding: .65rem .7rem; border-radius: 12px; background: rgba(0,0,0,.28); border: 1px solid rgba(255,255,255,.10); display: grid; gap: .2rem; }
+.lv-earn__cell strong { font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+.lv-earn__cell span { font-size: .78rem; color: var(--muted, #c9c9d9); line-height: 1.4; }
+.lv-earn__cell em { font-style: normal; opacity: .8; font-size: .74rem; }
+.lv-earn__cell--gele strong { color: #facc15; }
+.lv-earn__cell--todo strong { color: #60a5fa; }
+.lv-earn__cell--ok strong { color: #6ee7b7; }

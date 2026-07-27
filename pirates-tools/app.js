@@ -4849,6 +4849,40 @@
     };
   }
 
+  // Widget « Mes gains » de l'espace livreur. Trois états de l'argent, calculés
+  // depuis les courses que le livreur a acceptées :
+  //   • GELÉ      : payé par le client, retenu tant qu'il n'a pas confirmé ;
+  //   • À VERSER  : confirmé, en attente du virement (ou de Stripe Connect) ;
+  //   • VERSÉ     : parti sur le compte du livreur.
+  // Seules les courses PAYÉES comptent — une course non payée ne représente
+  // aucun argent réel et ne doit jamais gonfler un total affiché.
+  function renderCourierEarnings(courses) {
+    var box = document.getElementById('courierEarnings');
+    if (!box) return;
+    var gele = 0, aVerser = 0, verse = 0, nb = 0;
+    (courses || []).forEach(function (c) {
+      if (!c.paid) return;
+      var eur = (typeof c.feeCents === 'number' && c.feeCents > 0) ? c.feeCents / 100 : (Number(c.prix) || 0);
+      nb++;
+      if (c.escrow === 'libere') verse += eur;
+      else if (c.escrow === 'liberable') aVerser += eur;
+      else gele += eur;
+    });
+    if (!nb) {
+      box.innerHTML = '<div class="lv-earn lv-earn--empty">💰 Aucun gain pour l\'instant — accepte une course pour commencer.</div>';
+      return;
+    }
+    var total = gele + aVerser + verse;
+    box.innerHTML = '<div class="lv-earn">'
+      + '<div class="lv-earn__total"><span class="lv-earn__amount">' + formatPrice(total) + '</span>'
+      + '<span class="lv-earn__label">gagnés sur ' + nb + ' course' + (nb > 1 ? 's' : '') + '</span></div>'
+      + '<div class="lv-earn__grid">'
+      + '<div class="lv-earn__cell lv-earn__cell--gele"><strong>' + formatPrice(gele) + '</strong><span>🔒 Gelés<br><em>en attente de la confirmation du client</em></span></div>'
+      + '<div class="lv-earn__cell lv-earn__cell--todo"><strong>' + formatPrice(aVerser) + '</strong><span>⏳ À verser<br><em>confirmés, virement en cours</em></span></div>'
+      + '<div class="lv-earn__cell lv-earn__cell--ok"><strong>' + formatPrice(verse) + '</strong><span>✅ Versés<br><em>sur ton compte</em></span></div>'
+      + '</div></div>';
+  }
+
   function renderCourierSpace() {
     lvGetRole().then(function (isC) {
       if (!isC) { location.hash = '#/mes-livraisons'; return; }
@@ -5066,6 +5100,7 @@
       // qu'un autre livreur peut encore les prendre. (L'espace client fait
       // le filtre symétrique sur c.mine.)
       var mesCourses = (d.mine || []).filter(function (c) { return c.acceptedByMe; });
+      renderCourierEarnings(mesCourses);
       if (mineEl) mineEl.innerHTML = mesCourses.length
         ? mesCourses.map(function (c) { return courseCard(c, false); }).join('')
         : '<p class="lv-hint">Tu n\'as accepté aucune course pour l\'instant. Prends-en une dans « Courses disponibles ».</p>';

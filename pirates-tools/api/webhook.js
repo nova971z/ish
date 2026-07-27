@@ -369,7 +369,10 @@ async function handleIntentSucceeded(stripe, fb, pi, ctx) {
   if (pi.metadata.courseZone && fb.db) {
     try {
       var cc = await coursesLib.createFromIntent(fb.db, pi);
-      if (cc.created) await coursesLib.alertNewCourse(cc.course, cc.id);
+      if (cc.created) {
+        await coursesLib.alertNewCourse(cc.course, cc.id);
+        await coursesLib.confirmToClient(cc.course, cc.id);
+      }
     } catch (courseErr) {
       console.error('[webhook] course create failed:', courseErr.message);
     }
