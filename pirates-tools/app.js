@@ -4100,7 +4100,11 @@
   }
   // Texte lisible des horaires, ou '' si le livreur n'en a pas renseigné.
   function lvHorairesTxt(c) {
-    if (!c || !lvHhmmEnMinutes(c.hDebut) || !lvHhmmEnMinutes(c.hFin)) return '';
+    // ⚠️ Comparer à null, PAS tester la vérité : « 00:00 » vaut 0 minute, et
+    // !0 est VRAI — minuit était donc pris pour une heure invalide, et les
+    // horaires d'un livreur commençant à minuit disparaissaient de sa carte.
+    // Défaut trouvé par le harnais, pas à l'œil.
+    if (!c || lvHhmmEnMinutes(c.hDebut) === null || lvHhmmEnMinutes(c.hFin) === null) return '';
     return String(c.hDebut) + ' – ' + String(c.hFin);
   }
   // Options d'un menu déroulant d'heures, par pas de 30 minutes.
@@ -4131,6 +4135,32 @@
       + '<span class="lv-service__dot" aria-hidden="true"></span>'
       + '<strong>' + (on ? 'EN SERVICE' : 'PAS EN SERVICE') + '</strong>'
       + '<span class="lv-service__why">' + raison + '</span></p>';
+  }
+
+  // Bouton « Discuter » — actif UNIQUEMENT si le livreur est en service.
+  // Hors service il reste VISIBLE mais désactivé, et il dit pourquoi : un
+  // bouton qui disparaît laisse croire que la fonction n'existe pas.
+  // Le serveur refait le contrôle (conv-open) : ceci n'est que la courtoisie.
+  function lvBoutonDiscuterHTML(c) {
+    var on = lvEnService(c);
+    var uid = escapeHTML(String(c.uid || ''));
+    return on
+      ? '<button type="button" class="btn primary lv-discuter" data-conv-open="' + uid + '">💬 Discuter</button>'
+      : '<button type="button" class="btn lv-discuter" disabled '
+        + 'title="Ce livreur n\'est pas en service — tu pourras le contacter dès son retour">'
+        + '💬 Discuter <span class="lv-discuter__no">(pas en service)</span></button>';
+  }
+  // Câble tous les boutons « Discuter » présents dans un conteneur.
+  function lvWireDiscuter(root) {
+    var btns = (root || document).querySelectorAll('[data-conv-open]');
+    for (var i = 0; i < btns.length; i++) {
+      (function (b) {
+        b.onclick = function (e) {
+          e.preventDefault(); e.stopPropagation();   // la carte est un lien
+          lvOuvrirDiscussion(b.getAttribute('data-conv-open'), b);
+        };
+      })(btns[i]);
+    }
   }
 
   function lvDefaultTarifs() {
@@ -4299,6 +4329,7 @@
       + '</span>'
       + '<span class="courier-card__done">📦 ' + (c.coursesDone || 0) + ' course' + ((c.coursesDone || 0) > 1 ? 's' : '') + ' livrée' + ((c.coursesDone || 0) > 1 ? 's' : '') + '</span>'
       + '<span class="courier-card__price">à partir de <strong>' + lvMinTarif(c) + ' €</strong></span>'
+      + '<span class="courier-card__cta">' + lvBoutonDiscuterHTML(c) + '</span>'
       + '</a>';
   }
 
@@ -4311,6 +4342,7 @@
       grid.innerHTML = list.length
         ? list.map(courierCardHTML).join('')
         : '<p class="lv-hint">Aucun livreur inscrit pour l\'instant. <a href="#/livreur">Deviens le premier</a>.</p>';
+      lvWireDiscuter(grid);
     });
   }
   function renderCouriersStrip() {
@@ -4323,8 +4355,134 @@
         + '<a class="courier-card courier-card--more" href="#/livraison">'
         + '<span class="courier-card__ph courier-card__ph--none" aria-hidden="true">→</span>'
         + '<span class="courier-card__name">Voir tous les livreurs</span></a>';
+      lvWireDiscuter(track);
       section.hidden = false;
     });
+  }
+
+  // ══ DISCUSSION DIRECTE client ↔ livreur ═══════════════════════════════════
+  // Le document de la conversation est écrit par le SERVEUR seul (c'est lui qui
+  // vérifie que le livreur est en service). Les MESSAGES, eux, passent par le
+  // SDK sous règles Firestore : temps réel, coût serverless nul.
+  function lvMsgHTML(m, monRole) {
+    var mien = (m.role === monRole && m.role !== 'systeme');
+    var cls = m.role === 'systeme' ? 'lv-msg--sys' : (mien ? 'lv-msg--me' : 'lv-msg--them');
+    return '<div class="lv-msg ' + cls + '"><span class="lv-msg__t">'
+      + escapeHTML(String(m.text || '')) + '</span></div>';
+  }
+  // Ramène en millisecondes un `at` qui est un Timestamp Firestore une fois
+  // écrit, mais une Date JS sur le message qu'on vient d'envoyer.
+  function lvMs(v) {
+    if (!v) return 0;
+    if (typeof v.toMillis === 'function') return v.toMillis();
+    if (typeof v.getTime === 'function') return v.getTime();
+    return Number(v) || 0;
+  }
+
+  // Identifiant lisible dans l'URL d'une vue « une entité par identifiant ».
+  function lvSlug(parsed) { return decodeURIComponent((parsed && parsed.slug) || ''); }
+
+  function renderDiscussion(convId) {
+    var body = document.getElementById('discussionBody');
+    var back = document.getElementById('discussionBack');
+    if (back) back.onclick = function () { history.length > 1 ? history.back() : (location.hash = '#/livraison'); };
+    if (!body) return;
+    if (!convId) { body.innerHTML = '<p class="lv-hint">Discussion introuvable.</p>'; return; }
+    body.innerHTML = '<p class="lv-hint">Chargement…</p>';
+    whenAuthReady().then(function () {
+      if (!_currentUser) { lvRedirect('#/auth'); return; }
+      // Mon rôle se déduit de l'identifiant, qui est « clientUid_courierUid ».
+      var monRole = (String(convId).indexOf(_currentUser.uid + '_') === 0) ? 'client' : 'livreur';
+      body.innerHTML =
+        '<div class="lv-card lv-chat lv-chat--solo" data-chat>'
+        + '<p class="lv-hint">Vous convenez librement de ce que vous voulez. '
+        + 'Pirates Tools ne fixe aucun prix et ne prend rien sur la course. '
+        + 'Les messages sont <strong>définitifs</strong> — ils font foi en cas de litige.</p>'
+        + '<div class="lv-chat__log" id="lvChatLog"><p class="lv-hint">Chargement…</p></div>'
+        + '<div class="lv-chat__send">'
+        + '<input type="text" id="lvChatInput" maxlength="800" placeholder="Écris ton message…" autocomplete="off">'
+        + '<button type="button" class="btn primary" id="lvChatSend">Envoyer</button></div>'
+        + '<span class="lv-cta__note" id="lvChatSt" aria-live="polite"></span>'
+        + '</div>';
+      lvBindFilDirect(convId, monRole);
+    });
+  }
+
+  // Abonnement temps réel + envoi, pour une discussion directe.
+  function lvBindFilDirect(convId, monRole) {
+    var log = document.getElementById('lvChatLog');
+    var input = document.getElementById('lvChatInput');
+    var send = document.getElementById('lvChatSend');
+    var st = document.getElementById('lvChatSt');
+    if (_lvChatUnsub) { try { _lvChatUnsub(); } catch (_) {} _lvChatUnsub = null; }
+    whenFirebaseReady(function (fb) {
+      if (!fb || !fb.configured || !fb.onSnapshot) {
+        if (log) log.innerHTML = '<p class="lv-hint">Discussion indisponible (hors connexion).</p>';
+        return;
+      }
+      var col = fb.collection(fb.db, 'conversations', String(convId), 'messages');
+      // ⚠️ AUCUN orderBy : « where » + « orderBy » sur deux champs exigerait un
+      // index composite, invisible en émulateur et fatal en production. Ici il
+      // n'y a même pas de filtre — on trie en JS (300 messages, coût nul).
+      _lvChatUnsub = fb.onSnapshot(fb.query(col, fb.limit(300)), function (snap) {
+        var msgs = [];
+        snap.forEach(function (d) { msgs.push(d.data() || {}); });
+        msgs.sort(function (x, y) { return lvMs(x.at) - lvMs(y.at); });
+        if (!log) return;
+        log.innerHTML = msgs.length
+          ? msgs.map(function (m) { return lvMsgHTML(m, monRole); }).join('')
+          : '<p class="lv-hint">Aucun message — dis bonjour !</p>';
+        log.scrollTop = log.scrollHeight;
+      }, function () {
+        if (log) log.innerHTML = '<p class="lv-hint">Discussion indisponible. '
+          + 'Si le problème persiste, les règles Firestore ne sont peut-être pas publiées.</p>';
+      });
+    });
+    function envoyer() {
+      var txt = (input && input.value || '').trim().slice(0, 800);
+      if (!txt) return;
+      if (send) send.disabled = true;
+      whenFirebaseReady(function (fb) {
+        if (!fb || !fb.addDoc || !_currentUser) {
+          if (st) st.textContent = 'Connexion requise.';
+          if (send) send.disabled = false;
+          return;
+        }
+        fb.addDoc(fb.collection(fb.db, 'conversations', String(convId), 'messages'), {
+          uid: _currentUser.uid, role: monRole, text: txt, at: new Date()
+        }).then(function () {
+          if (input) input.value = '';
+          if (st) st.textContent = '';
+        }).catch(function (e) {
+          if (st) st.textContent = 'Envoi impossible : ' + ((e && e.message) || 'erreur');
+        }).then(function () { if (send) send.disabled = false; });
+      });
+    }
+    if (send) send.onclick = envoyer;
+    if (input) input.onkeydown = function (e) { if (e.key === 'Enter') envoyer(); };
+  }
+
+  // Ouvre (ou rouvre) la discussion avec un livreur. Le serveur refuse si le
+  // livreur n'est pas en service — on affiche alors sa réponse telle quelle.
+  function lvOuvrirDiscussion(courierUid, bouton) {
+    if (!_currentUser) { toast('Connecte-toi pour discuter avec un livreur', 'error'); location.hash = '#/auth'; return; }
+    if (bouton) { bouton.disabled = true; bouton.textContent = 'Ouverture…'; }
+    jsonAuthHeaders().then(function (headers) {
+      return fetch(apiBaseUrl() + '/api/contact', {
+        method: 'POST', headers: headers,
+        body: JSON.stringify({ type: 'conv-open', courierUid: courierUid })
+      });
+    }).then(function (r) { return r.text().then(function (t) { return { s: r.status, t: t }; }); })
+      .then(function (rep) {
+        var d = null;
+        try { d = JSON.parse(rep.t); } catch (_) {}
+        if (rep.s === 200 && d && d.ok) { location.hash = '#/discussion/' + encodeURIComponent(d.id); return; }
+        toast((d && d.error) || lvErrTxt(rep.s, d), 'error');
+        if (bouton) { bouton.disabled = false; bouton.textContent = '💬 Discuter'; }
+      }).catch(function () {
+        toast('Connexion impossible. Réessaie.', 'error');
+        if (bouton) { bouton.disabled = false; bouton.textContent = '💬 Discuter'; }
+      });
   }
 
   // Profil PUBLIC d'un livreur (vue client) : sa carte des zones avec SES
@@ -4357,6 +4515,7 @@
         + (c.commune ? '📍 ' + escapeHTML(String(c.commune)) + ' · ' : '')
         + (c.vehicle ? escapeHTML(lvVehLabel(c.vehicle)) : '') + '</p>'
         + lvServiceBandeauHTML(c)
+        + '<div class="courier-prof__cta">' + lvBoutonDiscuterHTML(c) + '</div>'
         + '</div></header>';
       // Compteurs
       h += '<div class="courier-prof__counters">'
@@ -4387,6 +4546,7 @@
       h += '<div class="lv-card lv-cta"><a class="btn primary" href="#/livraison">📨 Demander une livraison</a>'
         + '<span class="lv-cta__note">Tu choisis ta date et ton heure à la commande. Le livreur qui accepte en premier ouvre une discussion avec toi.</span></div>';
       wrap.innerHTML = h;
+      lvWireDiscuter(wrap);
       var mapHost = document.getElementById('courierProfMap');
       if (mapHost) lvBuildTarifMap(mapHost, tarifs, 'cpZ');
     });
@@ -5891,7 +6051,7 @@
   //      sortir de « Mes livraisons ». On utilise location.replace, qui
   //      REMPLACE l'entrée courante — le Retour ramène à la page d'avant.
   // Routes qui exigent d'être connecté (garde unique dans onRouteChange).
-  var ROUTES_CONNECTE = ['/compte', '/mode-livraison', '/mes-livraisons'];
+  var ROUTES_CONNECTE = ['/compte', '/mode-livraison', '/mes-livraisons', '/discussion'];
   function lvRedirect(hash) {
     try { location.replace(location.pathname + location.search + hash); }
     catch (_) { location.hash = hash; }
@@ -6944,7 +7104,7 @@
   // ── Router (hash-based SPA) ────────────────────────────────
 
   var ROUTES = ['/', '/catalogue', '/produit', '/devis', '/compte', '/auth', '/abonnement',
-                '/admin', '/merci', '/contact', '/favoris', '/artisans', '/rejoindre', '/livreur', '/livraison', '/mode-livraison', '/mes-livraisons', '/livreur-profil',
+                '/admin', '/merci', '/contact', '/favoris', '/artisans', '/rejoindre', '/livreur', '/livraison', '/mode-livraison', '/mes-livraisons', '/livreur-profil', '/discussion',
                 '/mentions-legales', '/confidentialite', '/cgv'];
 
   // Territory landing slugs (keys) → territory codes (values).
@@ -6984,6 +7144,10 @@
     if (hash.indexOf('/livreur-profil/') === 0) {
       return { route: '/livreur-profil', slug: hash.replace('/livreur-profil/', '') };
     }
+    // Discussion directe (#/discussion/{convId}).
+    if (hash.indexOf('/discussion/') === 0) {
+      return { route: '/discussion', slug: hash.replace('/discussion/', '') };
+    }
     // Territory landings: /guadeloupe, /martinique, /guyane, /reunion, /mayotte
     var terrSlug = hash.replace(/^\//, '');
     if (territoryCodeFromSlug(terrSlug)) {
@@ -7006,7 +7170,7 @@
     // Quitte les espaces livraison → coupe l'abonnement temps réel du chat.
     // Sans ça, l'écoute Firestore survivait à la navigation et continuait de
     // recevoir (puis d'échouer après une remise en ligne, le round ayant changé).
-    if (route !== '/mode-livraison' && route !== '/mes-livraisons' && _lvChatUnsub) {
+    if (route !== '/mode-livraison' && route !== '/mes-livraisons' && route !== '/discussion' && _lvChatUnsub) {
       try { _lvChatUnsub(); } catch (_) {}
       _lvChatUnsub = null;
     }
@@ -7169,9 +7333,8 @@
       case '/mes-livraisons':
         renderClientDeliveries();
         break;
-      case '/livreur-profil':
-        renderCourierProfile(decodeURIComponent(parsed.slug || ''));
-        break;
+      case '/livreur-profil': renderCourierProfile(lvSlug(parsed)); break;
+      case '/discussion':     renderDiscussion(lvSlug(parsed)); break;
     }
 
     // Update <title> + meta description for SEO

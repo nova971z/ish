@@ -162,6 +162,17 @@ while ((bm = reBlock.exec(handlers)) !== null) {
 const NO_TARGET = ['courier-status', 'courier-profile', 'courier-profile-save',
   'courier-available', 'courier-apply', 'course-request', 'course-list', 'course-create'];
 const CIBLE_CLIENT = /body\.(id|uid|courseId|courierUid|artisanUid)\b/;
+
+// Troisième cas légitime : les routes qui n'agissent QUE sur des documents
+// ANCRÉS sur l'uid vérifié de l'appelant — soit parce que l'identifiant du
+// document est construit à partir de cet uid, soit parce que la requête est
+// filtrée dessus. Il n'y a alors pas d'objet d'autrui à protéger.
+// ⚠️ Ce n'est PAS une liste de confiance : l'ancrage doit être VISIBLE dans le
+// code du bloc, sinon la route ressort comme un défaut. Sans ce troisième cas,
+// « conv-open » passait au vert par HASARD — le contrôle générique repérait
+// « courierUid === uid », qui est en réalité le garde-fou « ne t'écris pas à
+// toi-même », pas une vérification d'appartenance.
+const ANCRE_UID = /\buid \+ '_'|=== uid \+ '_'|\.where\('(clientUid|courierUid|artisanUid)', '==', uid\)|\.doc\(uid\)/;
 const OWNERSHIP = /artisanUid !== uid|artisanUid === uid|courierUid !== uid|courierUid === uid|pas-participant|pas-ta-course|isCourier|md\.uid !== uid|pi\.metadata\.uid !== uid/;
 
 let idorOk = 0;
@@ -177,6 +188,7 @@ blocks.forEach((b) => {
     LOG('  ❌ ' + b.type + ' : exemption caduque (lit un id du client)');
     return;
   }
+  if (ANCRE_UID.test(b.body)) { idorOk++; return; }
   if (OWNERSHIP.test(b.body)) { idorOk++; return; }
   problems.push('route ' + b.type + ' : agit sur une course sans vérifier l\'appartenance (IDOR)');
   LOG('  ❌ ' + b.type + ' : AUCUNE vérification d\'appartenance');

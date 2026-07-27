@@ -64,6 +64,7 @@ module.exports = async function handler(req, res) {
       || body.type === 'course-scene' || body.type === 'course-video' || body.type === 'course-dispute'
       || body.type === 'courier-profile' || body.type === 'courier-profile-save'
       || body.type === 'courier-available' || body.type === 'courier-apply'
+      || body.type === 'conv-open' || body.type === 'conv-list'
       || body.type === 'course-request' || body.type === 'course-release'
       || body.type === 'course-cancel'
       || body.type === 'course-accord-propose' || body.type === 'course-accord-accept'
@@ -428,7 +429,7 @@ const COURSE_TEST_EMAILS = coursesLib.TEST_EMAILS;
 // chaque affichage de page, et elles doivent donc avoir leur propre quota,
 // bien plus large que celui des opérations qui écrivent.
 const COURSE_READS = new Set([
-  'course-list', 'courier-status', 'courier-profile', 'course-proof'
+  'course-list', 'courier-status', 'courier-profile', 'course-proof', 'conv-list'
 ]);
 
 async function handleCourses(req, body, cfg, res) {
@@ -1141,6 +1142,86 @@ async function handleCourses(req, body, cfg, res) {
   }
 
   // ── Lister (livreur de test : dispo + les miennes ; artisan : les miennes) ──
+  // ══ DISCUSSION DIRECTE CLIENT ↔ LIVREUR ═══════════════════════════════════
+  // Ouverte depuis la carte d'un livreur, SANS passer par une course.
+  // ⚖️ Elle ne crée aucun engagement : c'est une mise en relation, rien de
+  // plus. Le prix, les modalités et l'éventuelle course restent entre eux.
+  //
+  // 🔒 POURQUOI CETTE ROUTE EXISTE au lieu d'une écriture directe : c'est ICI,
+  // et seulement ici, qu'on vérifie que le livreur est réellement EN SERVICE.
+  // Les règles Firestore interdisent au client de créer le document lui-même —
+  // sinon il forgerait le fil sans ce contrôle, et pourrait même y inscrire
+  // l'uid de quelqu'un d'autre comme participant.
+  if (body.type === 'conv-open') {
+    const courierUid = String(body.courierUid || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 128);
+    if (!courierUid) return res.status(400).json({ ok: false, error: 'Livreur introuvable.' });
+    if (courierUid === uid) {
+      return res.status(400).json({ ok: false, error: 'Tu ne peux pas t\'écrire à toi-même.' });
+    }
+    const fiche = await db.collection('couriers_public').doc(courierUid).get();
+    if (!fiche.exists || !fiche.data().published) {
+      return res.status(404).json({ ok: false, error: 'Ce livreur n\'a pas de fiche publique.' });
+    }
+    const f = fiche.data();
+    // LE CONTRÔLE CENTRAL, refait serveur : interrupteur ET plage horaire.
+    if (!coursesLib.enService(f, new Date())) {
+      return res.status(409).json({
+        ok: false, code: 'hors-service',
+        error: 'Ce livreur n\'est pas en service actuellement. Tu pourras le contacter '
+          + 'dès qu\'il sera de nouveau disponible.'
+      });
+    }
+    // Identifiant DÉTERMINISTE : un même client ne peut pas ouvrir dix fils
+    // avec le même livreur, et rejouer la requête ne crée jamais de doublon.
+    const convId = uid + '_' + courierUid;
+    const ref = db.collection('conversations').doc(convId);
+    const deja = await ref.get();
+    if (!deja.exists) {
+      await ref.set({
+        clientUid: uid, clientEmail: email,
+        courierUid, courierName: String(f.displayName || '').slice(0, 60),
+        createdAt: new Date(), lastAt: new Date()
+      });
+      // Amorce écrite par le serveur : le fil n'est jamais vide, et les deux
+      // savent d'emblée ce que cette discussion est — et ce qu'elle n'est pas.
+      await ref.collection('messages').add({
+        uid: 'systeme', role: 'systeme', at: new Date(),
+        text: 'Discussion ouverte avec ' + (f.displayName || 'ce livreur')
+          + '. Vous pouvez convenir librement de ce que vous voulez : Pirates Tools '
+          + 'ne fixe aucun prix et ne prend rien sur la course.'
+      });
+    } else {
+      await ref.set({ lastAt: new Date() }, { merge: true });
+    }
+    return res.status(200).json({ ok: true, id: convId, courierName: f.displayName || '' });
+  }
+
+  // Mes discussions directes — que je sois le client ou le livreur.
+  if (body.type === 'conv-list') {
+    // ⚠️ AUCUN orderBy ici, volontairement : « where » + « orderBy » sur deux
+    // champs différents exigerait un INDEX COMPOSITE, et la requête échouerait
+    // en production alors que l'émulateur crée les index à la volée (panne
+    // vécue le 27/07/2026 sur le chat des courses). On trie en JS.
+    const [cotClient, cotLivreur] = await Promise.all([
+      db.collection('conversations').where('clientUid', '==', uid).limit(50).get(),
+      db.collection('conversations').where('courierUid', '==', uid).limit(50).get()
+    ]);
+    const vues = {};
+    [cotClient, cotLivreur].forEach((snap) => snap.forEach((d) => {
+      const c = d.data() || {};
+      vues[d.id] = {
+        id: d.id,
+        role: c.clientUid === uid ? 'client' : 'livreur',
+        courierUid: c.courierUid || '', courierName: c.courierName || '',
+        clientEmail: c.courierUid === uid ? (c.clientEmail || '') : '',
+        lastAt: c.lastAt && c.lastAt.toMillis ? c.lastAt.toMillis() : 0
+      };
+    }));
+    const conversations = Object.keys(vues).map((k) => vues[k])
+      .sort((a, b) => b.lastAt - a.lastAt);
+    return res.status(200).json({ ok: true, conversations });
+  }
+
   if (body.type === 'course-list') {
     const snap = await db.collection('courses').orderBy('createdAt', 'desc').limit(50).get()
       .catch(() => db.collection('courses').limit(50).get());

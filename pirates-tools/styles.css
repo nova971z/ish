@@ -8137,6 +8137,21 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .courier-prof__dispo.is-on { color: #6ee7b7; }
 .courier-prof__dispo.is-off { color: var(--muted, #c9c9d9); }
 
+/* Discussion directe : le fil occupe toute la largeur (pas de colonne de
+   boutons comme dans le chat d'une course — il n'y a ni accord ni paiement
+   ici, c'est une simple mise en relation). */
+/* Bouton « Discuter » : sur la carte comme sur la fiche. Hors service il
+   reste VISIBLE mais éteint et non cliquable — le faire disparaître laisserait
+   croire que la fonction n'existe pas. */
+.courier-card__cta { margin-top: .5rem; display: block; }
+.courier-card__cta .btn { width: 100%; font-size: .82rem; padding: .5rem .6rem; }
+.courier-prof__cta { margin-top: .6rem; }
+.lv-discuter[disabled] { opacity: .55; cursor: not-allowed; box-shadow: none; }
+.lv-discuter__no { font-weight: 600; opacity: .8; font-size: .78em; }
+
+.lv-chat--solo { display: block; }
+.lv-chat--solo .lv-chat__log { min-height: 46vh; }
+
 /* ── BANDEAU « EN SERVICE » + POINT LUMINEUX ────────────────────────────────
    L'état se lit d'un coup d'œil, sans avoir à lire : le bandeau ET le point
    s'allument ensemble ou s'éteignent ensemble. Le vert est celui du reste du

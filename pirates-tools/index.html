@@ -44,7 +44,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=516">
+  <link rel="stylesheet" href="styles.css?v=517">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -1241,6 +1241,19 @@
       </div>
     </section>
 
+    <!-- DISCUSSION DIRECTE client ↔ livreur (#/discussion/{id}) — ouverte
+         depuis la carte d'un livreur EN SERVICE. Aucun engagement : c'est une
+         mise en relation, le prix et les modalités restent entre eux. -->
+    <section id="view-discussion" class="view hidden" data-route="/discussion" role="region" aria-labelledby="discussion-h1">
+      <div class="container">
+        <button type="button" class="pj-back" id="discussionBack">← Retour</button>
+        <header class="lv-header">
+          <h1 id="discussion-h1" tabindex="-1">💬 Discussion</h1>
+        </header>
+        <div id="discussionBody" aria-live="polite"><p class="lv-hint">Chargement…</p></div>
+      </div>
+    </section>
+
     <!-- DEVENIR LIVREUR (service coursier — formulaire adaptatif par véhicule,
          contenu légal rendu par app.js renderLivreur(). Inactif : COURIER_ENABLED. -->
     <section id="view-livreur" class="view hidden" data-route="/livreur" role="region" aria-labelledby="livreur-h1">
@@ -2087,7 +2100,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=516"></script>
+  <script defer src="app.js?v=517"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

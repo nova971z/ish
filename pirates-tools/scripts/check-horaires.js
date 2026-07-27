@@ -53,7 +53,7 @@ module.exports = async function () {
     return null;
   }
   const offset = app.match(/var LV_TZ_GP_OFFSET = (-?\d+);/);
-  const morceaux = ['lvHhmmEnMinutes', 'lvMinutesLocalesGP', 'lvDansPlageHoraire', 'lvEnService']
+  const morceaux = ['lvHhmmEnMinutes', 'lvMinutesLocalesGP', 'lvDansPlageHoraire', 'lvEnService', 'lvHorairesTxt']
     .map((n) => ({ n, code: extraire(n) }));
   const manquants = morceaux.filter((m) => !m.code).map((m) => m.n);
   if (!offset || manquants.length) {
@@ -97,7 +97,13 @@ module.exports = async function () {
     // ⚠️ LE CAS QUI PROUVE LE FUSEAU : sans conversion UTC−4, ce test passerait
     // au vert à tort (04:00 UTC serait lu « 04:00 » et non « 00:00 locales »).
     { t: '2026-07-27T04:00:00Z', c: { available: true, hDebut: '03:00', hFin: '06:00' }, attendu: false,
-      quoi: 'minuit locales (04 h UTC), plage 03–06 → hors service (piège du fuseau)' }
+      quoi: 'minuit locales (04 h UTC), plage 03–06 → hors service (piège du fuseau)' },
+    // ⚠️ « 00:00 » vaut 0 minute, et 0 est FAUX en JavaScript. Un test de
+    // vérité au lieu d'une comparaison à null fait disparaître minuit.
+    { t: '2026-07-27T14:00:00Z', c: { available: true, hDebut: '00:00', hFin: '23:30' }, attendu: true,
+      quoi: 'plage 00:00–23:30 → en service (piège du zéro qui vaut faux)' },
+    { t: '2026-07-27T14:00:00Z', c: { available: true, hDebut: '00:00', hFin: '06:00' }, attendu: false,
+      quoi: 'plage 00:00–06:00 à 10 h locales → hors service' }
   ];
 
   LOG('\n' + '━'.repeat(74));
@@ -132,6 +138,16 @@ module.exports = async function () {
     problems.push('le décalage horaire diffère : serveur UTC' + srv.TZ_GP_OFFSET
       + ', navigateur UTC' + offClient + '.');
   }
+
+  // Le libellé des horaires doit survivre à minuit (même piège du zéro).
+  const libelle = (c) => vm.runInContext('lvHorairesTxt(' + JSON.stringify(c) + ')', bac);
+  const okMinuit = libelle({ hDebut: '00:00', hFin: '23:30' }) === '00:00 – 23:30';
+  const okVide = libelle({}) === '';
+  LOG('  ' + (okMinuit && okVide ? '✅' : '❌')
+    + ' les horaires commençant à MINUIT restent affichés (0 ne vaut pas « absent »)');
+  if (!okMinuit) problems.push('lvHorairesTxt efface une plage commençant à 00:00 : le zéro '
+    + 'est traité comme une absence d\'horaire.');
+  if (!okVide) problems.push('lvHorairesTxt affiche quelque chose sans horaires.');
 
   // Normalisation : une heure invalide ne doit jamais être enregistrée.
   const n1 = srv.sanitizeHoraires({ hDebut: '08:00', hFin: '18:00' });

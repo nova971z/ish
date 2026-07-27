@@ -75,6 +75,13 @@ async function check(label, promise) {
     await setDoc(doc(db, 'courses/c1'), { artisanUid: 'alice', courierUid: 'bob', status: 'acceptee', code: '123456', round: 1 });
     await setDoc(doc(db, 'courses/c1/messages/m1'), { uid: 'alice', role: 'client', text: 'Bonjour', at: 1, round: 1 });
     await setDoc(doc(db, 'courses/c2'), { artisanUid: 'carol', courierUid: 'dave', status: 'acceptee', round: 1 });
+    // DISCUSSION DIRECTE (hors course) : alice cliente ↔ bob livreur.
+    await setDoc(doc(db, 'conversations/alice_bob'), {
+      clientUid: 'alice', courierUid: 'bob', courierName: 'Bob', createdAt: 1
+    });
+    await setDoc(doc(db, 'conversations/alice_bob/messages/m1'), {
+      uid: 'alice', role: 'client', text: 'Bonjour, tu es dispo ?', at: 1
+    });
   });
 
   console.log('\n── Isolation entre clients ──');
@@ -178,6 +185,42 @@ async function check(label, promise) {
   await check('Bob (ex-livreur détaché) NE lit plus RIEN sur cette course', assertFails(getDocs(fil(bob, 'c1', 2))));
   await check('Bob (ex-livreur) NE peut plus écrire sur cette course', assertFails(addDoc(collection(bob, 'courses/c1/messages'), { uid: 'bob', role: 'livreur', text: 'encore moi', at: 11, round: 2 })));
   await check('Alice (cliente) écrit bien dans le NOUVEAU round', assertSucceeds(addDoc(collection(alice, 'courses/c1/messages'), { uid: 'alice', role: 'client', text: 'nouveau tour', at: 12, round: 2 })));
+
+  console.log('\n── DISCUSSION DIRECTE client ↔ livreur (conversations/) ──');
+  const CONV = 'conversations/alice_bob';
+  await check('Alice (cliente) LIT sa conversation', assertSucceeds(getDoc(doc(alice, CONV))));
+  await check('Bob (livreur) LIT la même conversation', assertSucceeds(getDoc(doc(bob, CONV))));
+  await check('Carol NE LIT PAS la conversation d\'autrui', assertFails(getDoc(doc(carol, CONV))));
+  await check('Un anonyme NE LIT PAS une conversation', assertFails(getDoc(doc(anon, CONV))));
+
+  // Le DOCUMENT est serveur-seul : c'est lui qui garantit que le livreur était
+  // bien EN SERVICE. Si le client pouvait le forger, il contournerait ce
+  // contrôle — et pourrait s'inscrire comme participant chez n'importe qui.
+  await check('Alice NE PEUT PAS créer une conversation elle-même',
+    assertFails(setDoc(doc(alice, 'conversations/alice_dave'), { clientUid: 'alice', courierUid: 'dave', createdAt: 1 })));
+  await check('Alice NE PEUT PAS se rajouter dans une conversation existante',
+    assertFails(updateDoc(doc(alice, 'conversations/alice_bob'), { courierUid: 'alice' })));
+  await check('Carol NE PEUT PAS se forger un accès en créant le document',
+    assertFails(setDoc(doc(carol, CONV), { clientUid: 'carol', courierUid: 'bob', createdAt: 1 })));
+  await check('Alice NE PEUT PAS supprimer la conversation',
+    assertFails(deleteDoc(doc(alice, CONV))));
+
+  await check('Alice LIT les messages de sa conversation', assertSucceeds(getDocs(collection(alice, CONV + '/messages'))));
+  await check('Bob LIT les messages de sa conversation', assertSucceeds(getDocs(collection(bob, CONV + '/messages'))));
+  await check('Carol NE LIT PAS les messages d\'autrui', assertFails(getDocs(collection(carol, CONV + '/messages'))));
+
+  await check('Alice ÉCRIT un message', assertSucceeds(addDoc(collection(alice, CONV + '/messages'), { uid: 'alice', role: 'client', text: 'Tu passes quand ?', at: 2 })));
+  await check('Bob ÉCRIT un message', assertSucceeds(addDoc(collection(bob, CONV + '/messages'), { uid: 'bob', role: 'livreur', text: 'Dans 20 min', at: 3 })));
+  await check('Carol NE ÉCRIT PAS dans ce fil', assertFails(addDoc(collection(carol, CONV + '/messages'), { uid: 'carol', role: 'client', text: 'coucou', at: 4 })));
+  await check('Alice NE PEUT PAS signer au nom de Bob', assertFails(addDoc(collection(alice, CONV + '/messages'), { uid: 'bob', role: 'livreur', text: 'faux', at: 5 })));
+  await check('Alice NE PEUT PAS glisser un champ non prévu', assertFails(addDoc(collection(alice, CONV + '/messages'), { uid: 'alice', role: 'client', text: 'x', at: 6, admin: true })));
+  await check('Message VIDE refusé', assertFails(addDoc(collection(alice, CONV + '/messages'), { uid: 'alice', role: 'client', text: '', at: 7 })));
+  await check('Message de plus de 800 caractères refusé', assertFails(addDoc(collection(alice, CONV + '/messages'), { uid: 'alice', role: 'client', text: 'x'.repeat(801), at: 8 })));
+  await check('Rôle inventé refusé', assertFails(addDoc(collection(alice, CONV + '/messages'), { uid: 'alice', role: 'admin', text: 'x', at: 9 })));
+  await check('Un message est IMMUABLE (pas de modification)', assertFails(updateDoc(doc(alice, CONV + '/messages/m1'), { text: 'réécrit' })));
+  await check('Un message est IMMUABLE (pas de suppression)', assertFails(deleteDoc(doc(alice, CONV + '/messages/m1'))));
+  await check('Conversation INEXISTANTE : écriture refusée (fail-closed)',
+    assertFails(addDoc(collection(alice, 'conversations/nexiste_pas/messages'), { uid: 'alice', role: 'client', text: 'x', at: 10 })));
 
   console.log('\n── Collections serveur : chaque règle est prouvée (audit P4) ──');
   const FERMEES = [

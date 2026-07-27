@@ -32,6 +32,16 @@ service cloud.firestore {
     // l'a acceptée. Lu dans le document parent courses/{id} — que le client ne
     // peut PAS lire lui-même (get() en règle contourne les règles de lecture).
     // Une course inexistante fait échouer le get() → accès refusé (fail-closed).
+    // Participant d'une DISCUSSION DIRECTE client ↔ livreur (hors course).
+    // Même principe que pour les courses : on lit le document parent, que le
+    // client ne peut pas écrire. Une conversation inexistante fait échouer le
+    // get() → accès refusé (fail-closed).
+    function isConvParticipant(convId) {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/conversations/$(convId))
+        && (get(/databases/$(database)/documents/conversations/$(convId)).data.clientUid == request.auth.uid
+            || get(/databases/$(database)/documents/conversations/$(convId)).data.courierUid == request.auth.uid);
+    }
     function isCourseParticipant(courseId) {
       return isSignedIn()
         && exists(/databases/$(database)/documents/courses/$(courseId))
@@ -170,6 +180,41 @@ service cloud.firestore {
         allow update, delete: if false;
       }
     }
+    // ---- conversations/{id} : DISCUSSION DIRECTE client ↔ livreur ---------
+    // Ouverte depuis la carte d'un livreur EN SERVICE, sans passer par une
+    // course. L'identifiant est déterministe (clientUid_courierUid) : un même
+    // client ne peut pas ouvrir dix fils avec le même livreur.
+    //
+    // Le DOCUMENT est écrit par le serveur SEUL (contact.js → conv-open, Admin
+    // SDK). C'est capital : c'est lui qui vérifie que le livreur est réellement
+    // en service AVANT d'ouvrir le fil. Si le client pouvait créer le document,
+    // il lui suffirait de le forger pour contourner cette vérification — et
+    // pire, d'y inscrire n'importe quel uid comme participant, donc de
+    // s'octroyer l'accès à la discussion de quelqu'un d'autre.
+    // Lecture : les deux participants, pour afficher le fil et son en-tête.
+    match /conversations/{convId} {
+      allow read: if isSignedIn()
+        && (resource.data.clientUid == request.auth.uid
+            || resource.data.courierUid == request.auth.uid);
+      allow write: if false;
+
+      // Les MESSAGES, eux, sont écrits directement par les deux participants
+      // (coût serverless nul, temps réel via onSnapshot). Immuables : ni
+      // modification ni suppression — un fil qui peut être réécrit ne prouve
+      // plus rien en cas de litige.
+      match /messages/{messageId} {
+        allow read: if isConvParticipant(convId);
+        allow create: if isConvParticipant(convId)
+          && request.resource.data.keys().hasOnly(['uid', 'role', 'text', 'at'])
+          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.role in ['client', 'livreur']
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0
+          && request.resource.data.text.size() <= 800;
+        allow update, delete: if false;
+      }
+    }
+
     match /courier_locations/{uid}     { allow read, write: if false; } // géoloc temps réel (TTL court, RGPD)
     match /courier_config/{id}         { allow read, write: if false; } // barème/prix essence (écrit via admin API)
 
