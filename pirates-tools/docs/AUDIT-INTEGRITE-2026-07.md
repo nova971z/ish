@@ -582,3 +582,38 @@ image à ~15 Ko, soit **l'accueil autour de 400 Ko** et le catalogue sous
 
 **Vérifications** : CI verte · cards.mjs 6/6 · couriers.mjs 80/80 ·
 course-pay.mjs 14/14 · émulateur Firestore 98/98.
+
+### ⛔ P8 — CORRECTIF RETIRÉ : le chargement différé des vignettes (SW v507)
+
+**Décision user, gravée.** Le différé (`data-src` + `IntersectionObserver`)
+introduit en v506 a été **entièrement retiré**. Motifs, dans l'ordre :
+
+1. **Il n'était pas demandé.** L'user n'a jamais demandé d'alléger le
+   chargement. Il a en revanche passé **des heures** à obtenir un affichage
+   **instantané au défilement, y compris en navigation privée** — critère
+   explicite et non négociable. Le différé mettait précisément ça en danger.
+2. **La tentative de « garder les deux » a EMPIRÉ les choses.** Mesure du
+   chemin critique : **3 552 Ko** avec marge élargie + préchargement de fond,
+   contre **2 990 Ko** à l'état initial. J'ai échangé sa fluidité contre une
+   régression.
+3. **Faute de méthode** : j'ai modifié le code pendant que l'user testait le
+   site, après qu'il m'a explicitement demandé d'attendre. Sa vérification
+   portait donc sur une base mouvante.
+
+**Preuve du retour à l'identique** :
+- la ligne qui génère l'image est **identique au caractère près** à celle
+  d'avant l'audit (comparaison avec `82bc1a4^`) ;
+- **0 occurrence** de `data-src`, `armCardImages`, `prefetchRestWhenIdle`,
+  `_cardImgIO`, `requestIdleCallback` ;
+- mesure au navigateur, cache vide : **accueil 2 990 Ko / 26 requêtes**,
+  **catalogue 4 444 Ko / 34 requêtes** — **exactement** les chiffres d'origine.
+
+**Ce qui est CONSERVÉ de P8** (aucun rapport avec les images) : durcissement du
+Service Worker (plus de corps vide hors image), budget de poids des fichiers
+texte, invariants du SW vérifiés automatiquement, suppression de la récursion
+infinie, correction du `.map` qui passait l'index en options.
+
+**Règle pour la suite** : le contrôle `p8-perf.js` **refuse** désormais toute
+réintroduction d'un différé sur les vignettes. Le seul levier restant est de
+générer de **vraies vignettes** (320 px) en fichiers séparés, originaux
+intacts — à décider par l'user, jamais de ma seule initiative.

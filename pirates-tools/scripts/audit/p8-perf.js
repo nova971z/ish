@@ -6,9 +6,11 @@
    et il se mesure — il ne s'estime pas.
 
    MESURE DE RÉFÉRENCE (27/07/2026, Playwright, contexte neuf, cache vide) :
-     AVANT correctifs : accueil 2 990 Ko / 26 req · catalogue 4 444 Ko / 34 req
-     APRÈS correctifs : accueil 1 839 Ko / 15 req · catalogue 2 300 Ko / 14 req
-   Le harnais reste dans scratchpad/perf.mjs (Playwright, hors CI).
+     accueil 2 990 Ko / 26 requêtes · catalogue 4 444 Ko / 34 requêtes.
+   Un chargement différé des vignettes a été tenté (accueil 1 839 Ko) puis
+   RETIRÉ : il mettait en péril l'affichage instantané au défilement, exigence
+   explicite de l'user, et la mesure du chemin critique était finalement PIRE
+   (3 552 Ko). Le harnais reste dans scratchpad/perf.mjs (Playwright, hors CI).
 
    CONTRÔLE 1 — BUDGET DE POIDS (bloquant)
      Les gros fichiers texte sont plafonnés à leur taille compressée mesurée,
@@ -23,8 +25,8 @@
        • le repli « n'importe quelle version » existe (écran noir après
          déploiement, panne v314).
 
-   CONTRÔLE 3 — IMAGES : pas de vignette servie en pleine résolution sans
-     chargement différé.
+   CONTRÔLE 3 — IMAGES : les vignettes se chargent IMMÉDIATEMENT. Le différé
+     est interdit sans mesure et accord explicite (voir ci-dessus).
 
    Lancement : node scripts/audit/p8-perf.js
    ========================================================================= */
@@ -114,26 +116,28 @@ LOG('  ' + (manquants.length ? '❌' : '✅') + ' les ' + shell.length
 manquants.forEach((f) => problems.push('le Service Worker précache « ' + f
   + ' » qui N\'EXISTE PAS : l\'install échoue silencieusement sur cette entrée.'));
 
-// ═══ CONTRÔLE 3 — images de vignette ══════════════════════════════════════
+// ═══ CONTRÔLE 3 — RÈGLE GRAVÉE : pas de chargement différé des vignettes ══
+// DÉCISION USER (27/07/2026) : l'affichage doit être INSTANTANÉ au défilement,
+// y compris en navigation privée — c'est un travail de plusieurs heures et un
+// critère non négociable. Un différé (data-src + observateur) a été tenté puis
+// RETIRÉ : la mesure a montré un chemin critique de 3 552 Ko contre 2 990 Ko
+// avant, soit une régression sur les DEUX tableaux. Ce contrôle empêche de le
+// réintroduire par mégarde.
 LOG('\n' + '━'.repeat(74));
-LOG('  P8.3 — VIGNETTES : chargement différé dans les listes');
+LOG('  P8.3 — VIGNETTES : chargement immédiat (décision user, non négociable)');
 LOG('━'.repeat(74));
 const APP = read('app.js').toString();
-const aDefer = /data-src="' \+ imgSrc/.test(APP) && /function armCardImages/.test(APP);
-LOG('  ' + (aDefer ? '✅' : '❌') + ' la carte produit sait différer son image (data-src + observateur)');
-if (!aDefer) problems.push('la carte produit ne différe plus ses images : les bandeaux horizontaux '
-  + 'retéléchargeront tous les posters d\'un coup (mesuré à 1,4 Mo sur l\'accueil).');
-
-// Chaque conteneur qui rend des cartes différées doit ARMER l'observateur,
-// sinon les images ne se chargent jamais.
-const rendus = (APP.match(/defer: true/g) || []).length;
-const armes = (APP.match(/armCardImages\(/g) || []).length - 1;   // −1 : la définition
-LOG('  ' + (armes >= rendus ? '✅' : '❌') + ' ' + rendus + ' rendu(s) différé(s) · '
-  + armes + ' armement(s) de l\'observateur');
-if (armes < rendus) {
-  problems.push('un rendu utilise defer: true SANS appeler armCardImages() : les vignettes '
-    + 'resteraient vides à l\'écran.');
+const differe = /data-src="' \+ imgSrc/.test(APP) || /armCardImages/.test(APP);
+LOG('  ' + (differe ? '❌' : '✅') + ' les vignettes se chargent immédiatement (aucun data-src)');
+if (differe) {
+  problems.push('CHARGEMENT DIFFÉRÉ RÉINTRODUIT sur les vignettes. Décision user du '
+    + '27/07/2026 : l\'affichage doit être instantané au défilement, même en navigation '
+    + 'privée. Un différé a déjà été tenté et retiré (chemin critique mesuré PIRE : '
+    + '3 552 Ko contre 2 990). Ne pas refaire sans mesure ET accord explicite.');
 }
+const lazy = /loading="lazy"/.test(APP);
+LOG('  ' + (lazy ? '✅' : '❌') + ' attribut loading="lazy" conservé (économie sans risque)');
+if (!lazy) problems.push('loading="lazy" a disparu des vignettes.');
 
 LOG('\n' + '═'.repeat(74));
 LOG(problems.length === 0 ? '  ✅ P8 : performance et PWA conformes.' : '  ❌ P8 : ' + problems.length + ' défaut(s).');
