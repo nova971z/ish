@@ -44,7 +44,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=498">
+  <link rel="stylesheet" href="styles.css?v=499">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -192,7 +192,7 @@
 
   <!-- =================== HERO =================== -->
   <section id="hero" class="hero-full" aria-hidden="true">
-    <div class="hero-logo-container initial" id="heroLogoContainer">
+    <div class="hero-logo-container" id="heroLogoContainer">
       <!-- LCP : WebP (−51 % vs PNG, visuellement identique — vérifié pixel à
            pixel q0.68) via <picture>, repli PNG pour les très vieux moteurs.
            sizes = l'affichage RÉEL (clamp CSS 180px→420px), plus le 90vw/60vw
@@ -586,7 +586,7 @@
             </div>
           </div>
           <div class="pdp-landing__actions">
-            <button id="pdpBuy" class="btn primary btn--lg btn--glow" type="button" data-action="buy-now" aria-label="Acheter maintenant">💳 Acheter maintenant</button>
+            <button id="pdpBuy" class="btn primary btn--lg" type="button" data-action="buy-now" aria-label="Acheter maintenant">💳 Acheter maintenant</button>
             <button id="pdpQuote" class="btn btn--lg" type="button" data-action="add-to-cart" aria-label="Ajouter au panier">Ajouter au panier</button>
             <a id="pdpWa" class="btn btn-wa btn--lg" href="#" target="_blank" rel="noopener noreferrer" data-action="share-wa">WhatsApp</a>
             <button id="pdpShare" class="btn btn--lg" type="button" data-action="share" aria-label="Partager ce produit">Partager</button>
@@ -627,7 +627,7 @@
                 </div>
                 <input id="pdpReviewName" type="text" class="pdp-reviews__input" placeholder="Votre prénom" aria-label="Votre prénom" required maxlength="40" />
                 <textarea id="pdpReviewText" class="pdp-reviews__textarea" placeholder="Votre avis sur ce produit..." aria-label="Votre avis sur ce produit" required maxlength="500" rows="3"></textarea>
-                <button type="submit" class="btn primary btn--lg btn--glow pdp-reviews__submit">Publier mon avis</button>
+                <button type="submit" class="btn primary btn--lg pdp-reviews__submit">Publier mon avis</button>
               </form>
             </div>
           </div>
@@ -896,7 +896,6 @@
             <button id="authRegisterTab" class="auth-tab" role="tab" aria-controls="authRegister" aria-selected="false" aria-label="Inscription">
               <span class="auth-tab__icon">⚓</span> Inscription
             </button>
-            <div class="auth-tabs__indicator"></div>
           </div>
 
           <div class="auth-card__body">
@@ -1833,11 +1832,11 @@
           <span>J'ai lu et j'accepte les <a href="#/cgv" target="_blank" rel="noopener">conditions générales de vente</a>
           et la <a href="#/confidentialite" target="_blank" rel="noopener">politique de confidentialité</a>.</span></label>
         <p class="pay-modal__cgv-note" id="payCgvNote" role="alert" hidden>Coche cette case pour valider ta commande.</p>
-        <button id="payModalConfirm" class="btn primary btn--lg btn--glow" type="button" aria-label="Commander avec obligation de paiement">
+        <button id="payModalConfirm" class="btn primary btn--lg" type="button" aria-label="Commander avec obligation de paiement">
           <span class="pay-modal__btn-icon">💳</span>
           Commander avec obligation de paiement
         </button>
-        <button id="payModalCryptoConfirm" class="btn primary btn--lg btn--glow" type="button" hidden aria-label="Confirmer le paiement crypto">
+        <button id="payModalCryptoConfirm" class="btn primary btn--lg" type="button" hidden aria-label="Confirmer le paiement crypto">
           <span class="pay-modal__btn-icon">✅</span>
           J'ai effectué le paiement
         </button>
@@ -2057,7 +2056,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=498"></script>
+  <script defer src="app.js?v=499"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

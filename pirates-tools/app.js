@@ -833,9 +833,7 @@
     el.className = 'toast toast--' + type;
     el.textContent = msg;
     dom.toasts.appendChild(el);
-    requestAnimationFrame(function () { el.classList.add('toast--visible'); });
     setTimeout(function () {
-      el.classList.remove('toast--visible');
       setTimeout(function () { el.remove(); }, 300);
     }, 3000);
   }
@@ -1447,16 +1445,6 @@
     img.src = logoSrc;
   }
 
-  function shadeColor(hex, percent) {
-    var num = parseInt(hex.replace('#', ''), 16);
-    var r = (num >> 16) + percent;
-    var g = ((num >> 8) & 0xff) + percent;
-    var b = (num & 0xff) + percent;
-    r = Math.max(0, Math.min(255, r));
-    g = Math.max(0, Math.min(255, g));
-    b = Math.max(0, Math.min(255, b));
-    return '#' + ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0');
-  }
 
   // Lazy-load Three.js once, on demand. Prevents the "multiple
   // instances of Three.js" race with model-viewer at boot, which
@@ -2243,7 +2231,7 @@
 
     // Add to cart — stays on page, no redirect
     var pdpOut = isOutOfStock(product);
-    setupPdpCoffret(activeProduct);   // option coffret TSTAK (machines éligibles)
+    setupPdpCoffret();                // option coffret TSTAK (machines éligibles)
     setupPdpQty(isQuinc);             // sélecteur de quantité (quincaillerie)
     if (dom.pdpQuote) {
       dom.pdpQuote.disabled = pdpOut;
@@ -3468,25 +3456,6 @@
   }
 
   // ── Counter animation for spec numeric values ──
-  function animateCounter(el, val) {
-    var num = parseFloat(val);
-    if (isNaN(num)) { el.textContent = val; return; }
-    var suffix = val.replace(/[\d.,\-+]/g, '').trim();
-    var isFloat = val.indexOf('.') !== -1 || val.indexOf(',') !== -1;
-    var decimals = isFloat ? (val.split(/[.,]/)[1] || '').length : 0;
-    var start = 0;
-    var duration = 1200;
-    var startTime = null;
-    function step(ts) {
-      if (!startTime) startTime = ts;
-      var p = Math.min((ts - startTime) / duration, 1);
-      var eased = 1 - Math.pow(1 - p, 3);
-      var current = start + (num - start) * eased;
-      el.textContent = (decimals > 0 ? current.toFixed(decimals) : Math.round(current)) + (suffix ? ' ' + suffix : '');
-      if (p < 1) requestAnimationFrame(step);
-    }
-    requestAnimationFrame(step);
-  }
 
   // ── Abonnement Page ──────────────────────────────────────────
 
@@ -6625,12 +6594,6 @@
       : null;
   }
 
-  function territorySlugFromCode(code) {
-    for (var k in TERRITORY_SLUGS) {
-      if (TERRITORY_SLUGS[k] === code) return k;
-    }
-    return null;
-  }
 
   function parseHash() {
     var hash = location.hash.replace(/^#/, '') || '/';
@@ -8338,10 +8301,11 @@
   // paires). Ici on ne fait plus que réinitialiser l'état + nettoyer une
   // éventuelle ancienne case à cocher (compat).
   var _pdpCoffret = false;
-  function setupPdpCoffret(product) {
+  // Réinitialise l'option coffret à chaque ouverture de fiche. (Le sélecteur
+  // #pdpCoffretOpt qu'on nettoyait ici n'est plus généré depuis longtemps —
+  // retiré à l'audit P1 : il ne pouvait plus jamais exister.)
+  function setupPdpCoffret() {
     _pdpCoffret = false;
-    var old = document.getElementById('pdpCoffretOpt');
-    if (old && old.parentNode) old.parentNode.removeChild(old);
   }
 
   // Sélecteur de QUANTITÉ de la fiche (quincaillerie uniquement — les
@@ -9239,7 +9203,6 @@
   function ptLoadStart() {
     var el = ptLoadBar(); if (!el) return;
     clearTimeout(_ptLoadHide);
-    el.classList.remove('is-done');
     el.classList.add('is-on', 'is-indet');
     var bar = el.firstElementChild;
     if (bar) bar.style.width = '';
@@ -12317,12 +12280,6 @@
       btn.setAttribute('aria-pressed', active ? 'true' : 'false');
       btn.setAttribute('aria-label', active ? 'Retirer des favoris' : 'Ajouter aux favoris');
     });
-    // Update wishlist count badge if present
-    var countEl = document.getElementById('wishlistCount');
-    if (countEl) {
-      countEl.textContent = list.length;
-      countEl.hidden = list.length === 0;
-    }
   }
 
   function wishlistButton(product) {

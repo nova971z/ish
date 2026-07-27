@@ -8156,3 +8156,36 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-accord__list li span { color: var(--muted, #c9c9d9); }
 .lv-accord__list li strong { text-align: right; font-variant-numeric: tabular-nums; }
 .lv-accord__sign { margin: .2rem 0 0; font-size: .92rem; font-weight: 700; letter-spacing: .02em; }
+
+/* ═══ §52 — CORRECTIFS AUDIT P1 (intégrité statique) ═════════════════════════
+   `.product-grid` était utilisée sur #terrViewProducts (pages territoire
+   #/guadeloupe, #/martinique, #/guyane, #/reunion, #/mayotte) SANS AUCUNE
+   règle : les 8 produits mis en avant s'empilaient en pleine largeur au lieu
+   de former une grille. Alignée sur `.list` (la grille du catalogue) pour que
+   les cartes soient rigoureusement identiques d'une page à l'autre. */
+.product-grid {
+  display: grid;
+  gap: 1.2rem;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  position: relative;
+  z-index: 10;
+  padding: .5rem 0;
+}
+
+/* `.btn--ghost` : variante SECONDAIRE, utilisée 29 fois (28 boutons d'admin +
+   « Voir les formules ») mais JAMAIS définie — tous ces boutons secondaires
+   étaient donc rendus comme l'action principale (dégradé bleu plein, ombre
+   portée), ce qui écrasait la hiérarchie visuelle. Défaut trouvé à l'audit P1,
+   même famille que `.btn--primary` (étape C1). */
+.btn--ghost {
+  background: rgba(255, 255, 255, .05);
+  color: var(--muted, #c9c9d9);
+  border: 1px solid rgba(255, 255, 255, .18);
+  box-shadow: none;
+  font-weight: 600;
+}
+.btn--ghost:hover, .btn--ghost:focus-visible {
+  background: rgba(255, 255, 255, .10);
+  border-color: rgba(255, 255, 255, .32);
+  color: #fff;
+}

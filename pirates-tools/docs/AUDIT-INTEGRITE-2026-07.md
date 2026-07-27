@@ -1,0 +1,208 @@
+# AUDIT D'INTÉGRITÉ, DE SÉCURITÉ ET D'ARCHITECTURE — juillet 2026
+
+> Demande user (27/07/2026) : « repasse tout au peigne fin… la moindre ligne doit
+> être vérifiée… intégrité du code, sa qualité de niveau institutionnel, sa
+> sécurité ainsi que l'architecture. Établis un plan d'action ultra complet
+> avant de commencer. 1=1. »
+
+---
+
+## 0. PÉRIMÈTRE RÉEL (mesuré, pas estimé)
+
+| Fichier / zone | Lignes | Poids |
+|---|---:|---:|
+| `app.js` (1 IIFE, 423 fonctions, 176 var de haut niveau) | 13 036 | 644 Ko |
+| `styles.css` | 8 158 | 244 Ko |
+| `api/*.js` (12 fonctions serverless) | 4 456 | — |
+| `api/_lib/*.js` (16 modules) | 2 033 | — |
+| `index.html` | 2 063 | 140 Ko |
+| `sw.js` · `firebase-init.js` · `firestore.rules` · `storage.rules` | 679 | — |
+| **TOTAL applicatif** | **≈ 30 400** | — |
+
+Surface d'attaque / de bug mesurée :
+- **237** affectations `innerHTML` (vecteur XSS n°1)
+- **47** appels `fetch`, **24** types d'endpoint POST
+- **22** collections Firestore côté serveur
+- **119** `addEventListener` + **87** `.onclick` (fuites / doubles liaisons)
+- **52** accès `localStorage` (quota Safari privé)
+
+## 1. MÉTHODE — pourquoi « exhaustif » ne veut pas dire « tout relire à l'œil »
+
+Relire 30 400 lignes à l'œil, une par une, n'est ni faisable ni fiable : l'œil
+humain (ou machine) rate ce qu'il a déjà vu dix fois. La méthode retenue est
+celle des audits institutionnels — **exhaustivité PAR CONSTRUCTION** :
+
+1. **Pour chaque classe de défaut**, on écrit un **contrôle automatique qui
+   parcourt 100 % des lignes concernées**. Le contrôle est versionné dans
+   `scripts/`, rejouable, et branché à la CI quand il est stable.
+2. **La revue manuelle** est réservée (a) aux zones que les contrôles signalent,
+   (b) aux **chemins critiques argent / auth / données personnelles**, relus
+   ligne à ligne quoi qu'il arrive.
+3. **Aucune conclusion sans preuve exécutée.** Un défaut n'est « trouvé » que si
+   on peut le montrer (sortie de script, test qui échoue, capture). Un correctif
+   n'est « fait » que si un test le verrouille.
+
+> Conséquence assumée : la couverture est **totale sur les classes de défauts
+> traitées**, et je liste explicitement en fin de rapport ce qui n'est PAS
+> couvert. Pas de « j'ai tout vérifié » creux.
+
+## 2. ÉCHELLE DE GRAVITÉ
+
+| Niveau | Définition | Traitement |
+|---|---|---|
+| 🔴 **CRITIQUE** | Perte d'argent, fuite de données, parcours cassé en prod | Correction immédiate + test de non-régression |
+| 🟠 **MAJEUR** | Comportement faux dans un cas réel, faille exploitable sous condition | Correction dans la passe |
+| 🟡 **MINEUR** | Incohérence, cas limite, message trompeur | Correction si sans risque |
+| 🟢 **DETTE** | Qualité / lisibilité / convention, aucun impact utilisateur | Consigné, corrigé si gratuit |
+
+## 3. RÈGLE DE TRAVAIL (non négociable)
+
+**1 passe = 1 thème = 1 lot de correctifs = 1 vérification verte = 1 commit.**
+Jamais de correctif non testé. Jamais de passe à moitié faite. À chaque commit :
+`node scripts/ci.js` vert + harnais concernés verts.
+
+---
+
+## 4. LES 9 PASSES
+
+### P1 — INTÉGRITÉ STATIQUE (le code fait-il ce qu'il dit ?)
+**Contrôles automatiques à écrire** (`scripts/audit/*.js`) :
+- `dom-contract` : tout `getElementById('x')` / `querySelector('#x')` de app.js
+  a-t-il un `id="x"` dans index.html (ou est-il créé dynamiquement) ? Et
+  l'inverse : id HTML jamais référencé = mort ?
+- `id-unique` : aucun `id` dupliqué dans index.html (casse silencieusement
+  `getElementById`).
+- `fn-graph` : fonctions définies / jamais appelées ; fonctions appelées /
+  jamais définies (ReferenceError latent).
+- `globals` : variables affectées sans `var/let/const` (fuite en global).
+- `css-refs` : classes CSS définies / jamais utilisées, et classes utilisées en
+  JS/HTML / jamais définies (le défaut C1 `.btn--primary` a déjà coûté).
+- `dead-branches` : `data-*` référencés d'un seul côté.
+
+### P2 — SÉCURITÉ CLIENT (XSS et injection)
+- Balayage des **237 `innerHTML`** : chaque interpolation `+ variable +` doit
+  être soit un littéral, soit un nombre, soit passée par `escapeHTML`.
+  Contrôle automatique + revue manuelle de chaque cas signalé.
+- Attributs construits (`href`, `src`, `style`, `data-*`) : encodage correct.
+- `isSafePartnerImg` / `isSafePartnerLink` : appliqués partout où une donnée
+  serveur devient une URL.
+- CSP : re-calcul des empreintes, vérification qu'aucune directive n'a été
+  élargie inutilement.
+
+### P3 — SÉCURITÉ SERVEUR (authz, validation, abus)
+Revue **ligne à ligne** des 24 endpoints. Pour chacun, une grille :
+1. méthode HTTP vérifiée ? 2. auth exigée et du bon niveau (public / connecté /
+propriétaire / admin) ? 3. **IDOR** : l'objet visé appartient-il bien à
+l'appelant ? 4. tous les champs d'entrée validés (type, longueur, liste
+blanche) ? 5. rate-limit ? 6. les erreurs ne fuient-elles rien ? 7. aucune PII
+dans les logs ?
+→ Livrable : tableau de conformité 24 lignes × 7 colonnes, aucune case vide.
+
+### P4 — RÈGLES FIRESTORE & STORAGE (la vraie barrière)
+- **Couverture** : chaque collection écrite/lue par le serveur a-t-elle un
+  `match` explicite ? (`charges`, `config`, `price_watch_log` sont aujourd'hui
+  couvertes par le seul catch-all → à déclarer.)
+- Chaque règle `allow` relue et **prouvée par une assertion** dans
+  `test-rules.js` (objectif : aucune règle sans test).
+- **Requêtes ↔ index** : toute requête client `where`+`orderBy` exige un index
+  composite que l'émulateur ne réclame jamais → contrôle automatique dédié
+  (`check-firestore-queries.js` à étendre).
+- `storage.rules` : mêmes contrôles.
+
+### P5 — ARGENT (intégrité comptable et fiscale)
+- Parité **prix client ↔ prix serveur** au centime (déjà `check-pricing.js`, à
+  étendre aux nouveaux chemins).
+- Machine à états des courses : **énumérer toutes les transitions possibles**
+  et vérifier qu'aucune ne permet un état absurde (livrer sans confirmer,
+  annuler après paiement, noter sans livraison…). Livrable : diagramme +
+  tableau des transitions autorisées, aligné client/serveur.
+- Idempotence : webhook, `/merci`, `course-goods-paid`, `createFromIntent`.
+- TVA / octroi de mer / territoires : re-vérification des taux contre
+  `METHODE-ENTREPRISE-FISCALITE.md`.
+
+### P6 — DONNÉES PERSONNELLES (RGPD)
+- Inventaire complet : quelle donnée, où, combien de temps, qui y accède.
+- Droit à l'oubli : la suppression de compte efface-t-elle **tout** (courses,
+  messages, photos, vidéos, analytics) ?
+- Minimisation : la fiche publique livreur ne doit contenir aucune donnée KYC.
+- Consentements : traçés et respectés.
+
+### P7 — ARCHITECTURE & QUALITÉ
+- Duplications réelles (mêmes 10+ lignes à N endroits).
+- Fonctions XXL (> 150 lignes) : liste, risque, découpe si sûre.
+- État global d'app.js (176 `var`) : lesquelles sont dépendantes de l'identité
+  et doivent tomber à la déconnexion ? (un défaut de ce type a déjà été trouvé)
+- Fuites : listeners, observers, `setInterval`, abonnements Firestore, WebGL.
+- Cohérence des conventions (nommage, ES5, commentaires).
+
+### P8 — PERFORMANCE & PWA
+- Poids réel servi au premier chargement (l'user navigue TOUJOURS en privé →
+  aucun cache ne l'aide).
+- Service Worker : relecture intégrale (299 lignes), alignement des versions,
+  aucun chemin ne peut rendre un corps vide.
+- Requêtes réseau au boot : mesure, pas d'estimation.
+
+### P9 — ACCESSIBILITÉ & ROBUSTESSE FRONT
+- Contrastes, focus visible, pièges de focus, libellés ARIA.
+- Comportement hors ligne / réseau coupé / quota localStorage plein.
+- Rendu iPad (viewport réel 1194×834 et 834×1194).
+
+---
+
+## 5. LIVRABLES
+
+1. Ce document, complété au fil des passes avec **chaque défaut trouvé** (avec
+   sa preuve) et **son correctif** (avec son test).
+2. Les scripts d'audit dans `scripts/audit/`, rejouables à volonté.
+3. Les contrôles stables branchés à `scripts/ci.js` — pour que ces défauts ne
+   puissent plus jamais revenir.
+4. Un commit par passe.
+
+---
+
+# JOURNAL DES PASSES
+
+<!-- rempli au fur et à mesure -->
+
+## PASSE P1 — INTÉGRITÉ STATIQUE ✅ (27/07/2026, SW v499)
+
+**Outil créé : `scripts/audit/p1-static.js`** — analyse de l'arbre syntaxique
+(esprima) de app.js + index.html + styles.css. Couverture : **100 % des lignes**
+des 3 fichiers pour les 5 classes de défaut ci-dessous. **Branché à `ci.js`** :
+toute régression casse désormais le build.
+
+Périmètre mesuré : 344 ids HTML · 198 ids générés en JS · 359 ids lus par le JS ·
+422 fonctions · 1 025 classes CSS · 984 classes utilisées.
+
+### Défauts trouvés et corrigés
+
+| # | Gravité | Défaut | Preuve | Correctif |
+|---|---|---|---|---|
+| P1-1 | 🟠 | **`.product-grid` sans aucune règle CSS** → les 8 produits mis en avant des **5 pages territoire** (`#/guadeloupe`, `#/martinique`, `#/guyane`, `#/reunion`, `#/mayotte`) s'empilaient en pleine largeur au lieu de former une grille | `grep -c '\.product-grid' styles.css` = 0, classe posée sur `#terrViewProducts` (app.js) | Règle §52 alignée sur `.list` (grille du catalogue) → cartes identiques partout |
+| P1-2 | 🟡 | **`.btn--ghost` utilisée 29 fois, jamais définie** → 28 boutons d'admin + « Voir les formules » rendus comme l'action PRINCIPALE (dégradé bleu plein) : hiérarchie visuelle écrasée. Même famille que `.btn--primary` (étape C1) | 29 occurrences, 0 règle | Variante implémentée (fond translucide, bordure discrète) |
+| P1-3 | 🟡 | **`.btn--glow` utilisée 4 fois, jamais définie** (bouton Acheter, Publier un avis, Payer, Payer crypto) | 4 occurrences, 0 règle | Classe **retirée** (aucun changement visuel). L'effet « glow » n'a jamais existé — à décider avec l'user s'il le veut vraiment |
+| P1-4 | 🟡 | **`#wishlistCount`** : le code met à jour un badge de comptage des favoris qui **n'existe dans aucun HTML** → bloc jamais exécutable | id absent de index.html et du HTML généré | Bloc mort retiré |
+| P1-5 | 🟡 | **`toast--visible`** ajoutée puis retirée à chaque toast, **0 règle CSS** → la sortie du toast n'a jamais été animée | 0 règle | Manipulation morte retirée (l'entrée reste animée par `@keyframes toast-in`) |
+| P1-6 | 🟢 | **3 fonctions déclarées et jamais référencées** : `shadeColor` (11 l.), `animateCounter` (20 l.), `territorySlugFromCode` (7 l.) | graphe d'appels AST | Supprimées (38 lignes) |
+| P1-7 | 🟢 | `setupPdpCoffret` supprimait `#pdpCoffretOpt`, **élément qui n'est plus jamais créé** ; paramètre `product` inutilisé | id introuvable | Nettoyée |
+| P1-8 | 🟢 | `.pt-loadbar` : `classList.remove('is-done')` alors que **`is-done` n'est ajoutée nulle part** et n'a aucune règle | 1 seule occurrence, en `remove` | Ligne morte retirée |
+| P1-9 | 🟢 | `<div class="auth-tabs__indicator">` : div **vide, sans style, sans JS** | 0 CSS, 0 JS | Retirée |
+| P1-10 | 🟢 | `.initial` sur le conteneur du logo d'accueil : aucune règle, aucun JS | 0 CSS, 0 JS | Retirée |
+
+### Contrôles PASSÉS (aucun défaut)
+
+- ✅ **Contrat DOM** : les 359 identifiants lus par le JS existent tous.
+- ✅ **Unicité** : les 344 ids de index.html sont uniques (un doublon ferait
+  silencieusement échouer `getElementById`).
+- ✅ **Graphe d'appels** : aucun appel vers une fonction inexistante.
+- ✅ **Portée** : **aucune globale implicite** — les 13 000 lignes de app.js
+  déclarent toutes leurs variables.
+- ✅ **Contrat CSS** : après correctifs, toute classe utilisée a une règle, ou
+  figure dans une **allowlist justifiée nommément** (29 entrées, une raison
+  vérifiée par entrée). Toute nouvelle classe non justifiée casse la CI.
+
+### Réserve honnête
+21 lectures DOM dynamiques (`getElementById(variable)`) ne sont pas vérifiables
+statiquement — elles restent hors couverture de ce contrôle.
+
+**Vérifications** : `ci.js` vert · couriers.mjs 76/76 · course-pay.mjs 14/14.
