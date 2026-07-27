@@ -803,6 +803,52 @@ confirmé la réception. Zéro bénéfice plateforme sur la course.
   compte de tiers) — le gel actuel sur notre solde + virement manuel est
   acceptable en TEST uniquement.
 
+## 🛵 LIVREURS INDÉPENDANTS — fiches publiques, tarifs libres, chat (27/07/2026, SW v495)
+Demande user : carte des zones EN GRAND en tête du « Mode livraison » où le
+livreur inscrit SES prix ; cartes livreurs comme les artisans (accueil + page
+Livraison) menant à un PROFIL vue client (carte de ses tarifs, compteur de
+courses, notes et avis) ; bouton « disponible » qui allume le bandeau vert ;
+le 1er livreur qui accepte ouvre un CHAT avec le client.
+⚖️ RAISON DE FOND (pas cosmétique) : c'est la pièce 1 de LA PARADE
+(docs/METHODE-ENTREPRISE-FISCALITE.md § 5 bis) — la plateforme ne doit plus
+FIXER le prix, sinon art. L7342-1 + critère de présomption de salariat de la
+directive (UE) 2024/2831 (transposition avant le 02/12/2026). LV_BAREME
+(22/48/74/100 €) devient un **repère indicatif** pré-rempli ; le livreur met ce
+qu'il veut (1→500 € = garde-fous anti-faute de frappe, pas un barème) et
+**AUCUNE sanction ni tri ne dépend du montant** — le tri de l'annuaire est
+dispo → note → ancienneté, JAMAIS le prix (vérifié dans loadCouriers).
+- **Modèle de données** : `couriers/{uid}` reste PRIVÉ (KYC, email, Stripe
+  Connect) ; nouveau `couriers_public/{uid}` = miroir PUBLIC écrit par l'Admin
+  SDK seul (nom, photo, commune, véhicule, tarifs, available, coursesDone,
+  ratingCount/Sum, avis[20 max]). Lecture publique via le SDK client (même
+  schéma que `partners/` — plan Vercel Hobby saturé à 12/12 fonctions, donc
+  AUCUN nouvel endpoint : tout passe par contact.js).
+- **API (contact.js)** : `courier-profile` (lire la sienne), `courier-profile-save`
+  (nom/commune/véhicule/bio/photo ≤300 Ko/tarifs), `courier-available`
+  (interrupteur ; refuse si la fiche n'a pas de nom). `course-rate` agrège la
+  note + l'avis (SANS nom ni email du client — RGPD) ; `course-confirm`
+  incrémente `coursesDone` → un livreur ne peut RIEN gonfler lui-même.
+- **CHAT** : `courses/{id}/messages`, écrit DIRECTEMENT par le SDK client sous
+  règles (participants seuls, messages IMMUABLES = preuve en cas de litige,
+  ≤800 car., uid == request.auth.uid, hasOnly 4 champs). Temps réel via
+  `onSnapshot` (ajouté à firebase-init.js). `course-accept` pose `chatOpen:true`
+  + `courierName` et écrit l'amorce système. Coût serverless : ZÉRO.
+- **UI** : `renderCourierTarifPanel()` en tête de #/mode-livraison (carte SVG
+  pleine largeur, prix inscrits DANS les anneaux, mise à jour en direct à la
+  frappe) ; `courierCardHTML` + `#couriersGrid` (page Livraison) +
+  `#couriersStripSection` (accueil) ; nouvelle route `#/livreur-profil/{uid}`.
+- VÉRIFIÉ : 35/35 Playwright (scratchpad/couriers.mjs) + **72/72 émulateur
+  Firestore réel** (scripts/test-rules.js, dont 22 nouvelles assertions).
+- ⚠️ **ACTION USER OBLIGATOIRE** : `npx firebase deploy --only firestore:rules`
+  (ou console iPad). Tant que ce n'est pas fait, l'annuaire livreurs et le chat
+  RESTENT VIDES/MUETS — les nouvelles règles ne sont pas en ligne.
+- ⏭️ PAS ENCORE FAIT (suite logique, à décider avec l'user) : le prix DÉBITÉ
+  reste celui du barème plateforme (create-payment-intent). Tant que le client
+  ne paie pas le tarif DU livreur qu'il a choisi, on n'est pas sorti de
+  L7342-1 — la fiche affiche des prix libres mais l'encaissement, lui, est
+  encore au barème. Étape suivante = choix du livreur AVANT paiement + Stripe
+  Connect direct charges.
+
 ## 💳 STRIPE EN MODE TEST (26/07/2026, SW v481) — À INVERSER AU LANCEMENT
 Avant lancement, le site tourne sur les clés **TEST** de Stripe (compte activé
 non requis) pour permettre à l'user de dérouler la chaîne complète course :

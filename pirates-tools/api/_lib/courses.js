@@ -96,6 +96,49 @@ function escapeHtml(s) {
   return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
+// ── TARIFS PROPRES AU LIVREUR ───────────────────────────────────────────────
+// ⚠️ CADRE JURIDIQUE (docs/METHODE-ENTREPRISE-FISCALITE.md § 5 bis) : la
+// plateforme ne DOIT PAS fixer le prix de la course — sinon art. L7342-1
+// (responsabilité sociale) et, à partir du 02/12/2026, critère de présomption
+// de salariat de la directive (UE) 2024/2831. BAREME n'est donc qu'un REPÈRE
+// INDICATIF pré-rempli : chaque livreur saisit SES prix, au-dessus comme en
+// dessous, SANS AUCUNE SANCTION (aucun filtre, aucun déclassement, aucun
+// retrait ne dépend de ce montant — ni ici ni dans l'affichage client).
+// Les bornes ci-dessous ne sont pas un barème imposé : ce sont des garde-fous
+// anti-erreur de saisie / anti-abus (0 €, 10 000 €…), volontairement très larges.
+const TARIF_MIN = 1;
+const TARIF_MAX = 500;
+
+function defaultTarifs() {
+  const t = {};
+  BAREME.forEach((b) => { t[b.zone] = b.prix; });
+  return t;
+}
+
+// Nettoie l'objet {1..4: prix} reçu du client. Toute zone absente/illisible
+// retombe sur le repère indicatif. Retourne TOUJOURS les 4 zones.
+function sanitizeTarifs(raw) {
+  const src = (raw && typeof raw === 'object') ? raw : {};
+  const out = {};
+  BAREME.forEach((b) => {
+    const n = Math.round(Number(src[b.zone] != null ? src[b.zone] : src[String(b.zone)]));
+    out[b.zone] = (isFinite(n) && n >= TARIF_MIN && n <= TARIF_MAX) ? n : b.prix;
+  });
+  return out;
+}
+
+// Miroir PUBLIC du profil livreur (couriers_public/{uid}) : la fiche que les
+// clients voient dans l'annuaire. Écrit par l'Admin SDK UNIQUEMENT (règles
+// Firestore : lecture publique, écriture interdite au client) — le KYC, les
+// pièces et l'email restent dans couriers/{uid}, jamais publiés.
+async function mirrorCourierPublic(db, uid, patch) {
+  if (!db || !uid) return;
+  await db.collection('couriers_public').doc(uid).set(
+    Object.assign({ uid, updatedAt: new Date() }, patch || {}),
+    { merge: true }
+  );
+}
+
 async function sendMail(to, subject, html) {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.RESEND_FROM || 'Pirates Tools <onboarding@resend.dev>';
@@ -158,4 +201,8 @@ async function confirmToClient(course, id) {
   return true;
 }
 
-module.exports = { DEPOT, BAREME, TEST_EMAILS, haversineKm, quote, createFromIntent, alertNewCourse, confirmToClient, sendMail, escapeHtml };
+module.exports = {
+  DEPOT, BAREME, TEST_EMAILS, TARIF_MIN, TARIF_MAX,
+  haversineKm, quote, createFromIntent, alertNewCourse, confirmToClient, sendMail, escapeHtml,
+  defaultTarifs, sanitizeTarifs, mirrorCourierPublic
+};

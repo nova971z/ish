@@ -28,6 +28,16 @@ service cloud.firestore {
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
+    // Participant d'une course = le client qui l'a commandée OU le livreur qui
+    // l'a acceptée. Lu dans le document parent courses/{id} — que le client ne
+    // peut PAS lire lui-même (get() en règle contourne les règles de lecture).
+    // Une course inexistante fait échouer le get() → accès refusé (fail-closed).
+    function isCourseParticipant(courseId) {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/courses/$(courseId))
+        && (get(/databases/$(database)/documents/courses/$(courseId)).data.artisanUid == request.auth.uid
+            || get(/databases/$(database)/documents/courses/$(courseId)).data.courierUid == request.auth.uid);
+    }
 
     // ---- users/{uid} : profil client, self-only ---------------------------
     // Un utilisateur ne peut lire/écrire QUE son propre document. Les champs
@@ -104,7 +114,41 @@ service cloud.firestore {
     // Fermé au client tant que le module n'est pas ouvert + validé avocat.
     match /couriers/{uid}              { allow read, write: if false; } // profils coursiers + statut KYC
     match /courier_applications/{uid}  { allow read, write: if false; } // candidatures + pièces (SIRET, assurance, permis…)
-    match /courses/{courseId}          { allow read, write: if false; } // demandes de livraison artisan
+
+    // ---- couriers_public/{uid} : FICHE PUBLIQUE du livreur -----------------
+    // Miroir public écrit par le serveur (contact.js → mirrorCourierPublic,
+    // Admin SDK) : nom affiché, photo, commune, véhicule, SES tarifs par zone,
+    // disponibilité, nombre de courses terminées, note moyenne et avis.
+    // Lecture OUVERTE (l'annuaire livreurs se lit via le SDK client — même
+    // schéma que partners/, pas de fonction Vercel supplémentaire possible).
+    // Écriture SERVEUR UNIQUEMENT : un livreur ne peut ni gonfler son compteur,
+    // ni s'inventer des avis, ni s'afficher disponible sans passer par l'API.
+    // AUCUNE donnée KYC/email/IBAN ici — elles restent dans couriers/{uid}.
+    match /couriers_public/{uid}       { allow read: if true; allow write: if false; }
+
+    // ---- courses/{id} : demandes de livraison ------------------------------
+    // Le document lui-même reste SERVEUR UNIQUEMENT (montants, escrow, code de
+    // remise). Seul le FIL DE DISCUSSION est ouvert aux deux participants.
+    match /courses/{courseId} {
+      allow read, write: if false;
+
+      // Chat client ↔ livreur, ouvert dès qu'un livreur accepte la course.
+      // Lecture/écriture réservées aux DEUX participants de CETTE course
+      // (vérifiés dans le document parent, que le client ne peut pas lire).
+      // Messages immuables : ni modification ni suppression — le fil fait foi
+      // en cas de litige.
+      match /messages/{messageId} {
+        allow read: if isCourseParticipant(courseId);
+        allow create: if isCourseParticipant(courseId)
+          && request.resource.data.keys().hasOnly(['uid', 'role', 'text', 'at'])
+          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.role in ['client', 'livreur']
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0
+          && request.resource.data.text.size() <= 800;
+        allow update, delete: if false;
+      }
+    }
     match /courier_locations/{uid}     { allow read, write: if false; } // géoloc temps réel (TTL court, RGPD)
     match /courier_config/{id}         { allow read, write: if false; } // barème/prix essence (écrit via admin API)
 

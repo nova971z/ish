@@ -78,6 +78,7 @@ import {
   query,
   orderBy,
   limit,
+  onSnapshot,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
@@ -130,6 +131,9 @@ if (!isConfigured) {
     query: query,
     orderBy: orderBy,
     limit: limit,
+    // Chat course client ↔ livreur : temps réel (onSnapshot) sur
+    // courses/{id}/messages, gouverné par firestore.rules (participants seuls).
+    onSnapshot: onSnapshot,
     serverTimestamp: serverTimestamp,
     // Storage (vidéos de remise/litige) : module chargé À LA DEMANDE
     // uniquement (aucun octet au boot — même principe que la 3D).

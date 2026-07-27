@@ -44,7 +44,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=494">
+  <link rel="stylesheet" href="styles.css?v=495">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -278,6 +278,14 @@
       <section class="home-products-strip home-products-strip--partners" id="partnersStripSection" hidden>
         <h2 class="home-products-strip__title">Nos artisans partenaires</h2>
         <div class="home-products-strip__track" id="partnersStripTrack"></div>
+      </section>
+
+      <!-- LIVREURS : bandeau des fiches livreurs (même mécanique que ci-dessus).
+           Le liseré vert « Disponible » ne s'allume que si le livreur a lui-même
+           cliqué son interrupteur dans son espace (renderCouriersStrip, app.js). -->
+      <section class="home-products-strip home-products-strip--couriers" id="couriersStripSection" hidden>
+        <h2 class="home-products-strip__title">Nos livreurs</h2>
+        <div class="home-products-strip__track" id="couriersStripTrack"></div>
       </section>
 
       <!-- =================== ABONNEMENTS & SERVICES =================== -->
@@ -1117,6 +1125,16 @@
           <div id="livraisonBareme" class="lv-bareme"><!-- rendu par renderLivraison() --></div>
         </div>
 
+        <!-- ANNUAIRE DES LIVREURS : une carte par livreur inscrit, cliquable
+             vers sa fiche publique (#/livreur-profil/{uid} : ses tarifs sur la
+             carte des zones, son compteur de courses, ses notes et avis).
+             Bandeau vert « Disponible » = interrupteur cliqué par le livreur. -->
+        <div class="lv-card">
+          <h2 class="lv-h2">🛵 Nos livreurs</h2>
+          <p class="lv-hint" style="margin:0 0 .8rem">Chaque livreur est indépendant et <strong>fixe lui-même ses tarifs</strong>. Touche une carte pour voir sa fiche : ses prix par zone, ses courses déjà livrées et les avis de ses clients.</p>
+          <div id="couriersGrid" class="couriers-grid" aria-live="polite"><p class="lv-hint">Chargement…</p></div>
+        </div>
+
         <!-- Commander une livraison depuis le PANIER (si quincaillerie dedans) -->
         <div class="lv-card" id="livraisonNoCart">
           <h2 class="lv-h2">🛒 Commander une livraison</h2>
@@ -1191,6 +1209,11 @@
           <p class="lv-sub">Ton espace livreur : les courses disponibles sur la carte, leurs détails, et ton historique.</p>
         </header>
         <div id="courierBanner"></div>
+        <!-- EN TÊTE : interrupteur « Disponible » + grande carte des zones sur
+             toute la largeur, où le livreur inscrit SES prix (renderCourierTarifPanel).
+             ⚠️ La plateforme ne fixe aucun prix : montants libres, sans sanction
+             (docs/METHODE-ENTREPRISE-FISCALITE.md § 5 bis). -->
+        <div id="courierTarifs"></div>
         <div id="courierEarnings"></div>
         <div id="courierMap" class="pdp-deliv-map courier-map" aria-label="Carte des courses"></div>
         <div id="courierDetail" class="lv-card" hidden></div>
@@ -1205,6 +1228,17 @@
           </div>
         </div>
         <button type="button" class="btn" id="courierRefresh">🔄 Rafraîchir</button>
+      </div>
+    </section>
+
+    <!-- FICHE PUBLIQUE D'UN LIVREUR (vue CLIENT) — #/livreur-profil/{uid}.
+         Rendu intégral par renderCourierProfile() : en-tête (photo, commune,
+         véhicule, pastille de disponibilité), compteurs (courses livrées, note,
+         prix mini), grande carte des zones avec SES tarifs, puis les avis. -->
+    <section id="view-livreur-profil" class="view hidden" data-route="/livreur-profil" role="region" aria-labelledby="courierprof-h1">
+      <div class="container courier-prof">
+        <button type="button" class="pj-back" id="courierProfileBack">← Retour</button>
+        <div id="courierProfileBody" aria-live="polite"><p class="lv-hint">Chargement…</p></div>
       </div>
     </section>
 
@@ -2023,7 +2057,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=494"></script>
+  <script defer src="app.js?v=495"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

@@ -8036,3 +8036,87 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .pay-modal__cgv input { margin-top: .2rem; flex: 0 0 auto; width: 18px; height: 18px; accent-color: #8B5CF6; }
 .pay-modal__cgv a { color: #c4b5fd; }
 .pay-modal__cgv-note { margin: -.4rem 0 .6rem; color: #ff8a8a; font-size: .84rem; font-weight: 600; }
+
+/* ═══ §51 — LIVREURS : TARIFS PAR ZONE, FICHES PUBLIQUES, CHAT ═══════════════
+   Le livreur fixe LUI-MÊME ses prix (garde-fou juridique : la plateforme
+   n'impose aucun montant et ne trie jamais sur le prix — voir
+   docs/METHODE-ENTREPRISE-FISCALITE.md § 5 bis). Ces styles couvrent :
+   la grande carte des zones éditable, les cartes livreurs (accueil + annuaire
+   + fiche publique) et le fil de discussion client ↔ livreur. */
+
+/* — Grande carte des zones : pleine largeur, format généreux (iPad/mobile) — */
+.lv-tarifs__map { width: 100%; margin: .2rem 0 1rem; border-radius: 16px; background: radial-gradient(120% 120% at 50% 0%, rgba(139,92,246,.12), rgba(0,0,0,.32)); border: 1px solid rgba(255,255,255,.10); overflow: hidden; }
+.lv-tarifs__map svg { display: block; width: 100%; height: auto; max-height: 62vh; }
+.lv-tarifs__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .6rem; }
+@media (max-width: 760px) { .lv-tarifs__grid { grid-template-columns: repeat(2, 1fr); } }
+.lv-tarif { display: grid; gap: .28rem; padding: .65rem .7rem; border-radius: 12px; background: rgba(0,0,0,.28); border: 1px solid rgba(255,255,255,.10); border-left-width: 4px; }
+.lv-tarif--z1 { border-left-color: #34d399; }
+.lv-tarif--z2 { border-left-color: #60a5fa; }
+.lv-tarif--z3 { border-left-color: #facc15; }
+.lv-tarif--z4 { border-left-color: #f87171; }
+.lv-tarif__zone { font-weight: 700; font-size: .9rem; }
+.lv-tarif__km { font-size: .76rem; color: var(--muted, #c9c9d9); }
+.lv-tarif__price { font-size: 1.15rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.lv-tarif__in { display: flex; align-items: center; gap: .35rem; }
+.lv-tarif__in input { width: 100%; min-width: 0; padding: .45rem .55rem; border-radius: 10px; border: 1px solid rgba(255,255,255,.22); background: rgba(0,0,0,.35); color: #fff; font: 800 1.05rem/1.2 inherit; font-variant-numeric: tabular-nums; text-align: right; }
+.lv-tarif__in em { font-style: normal; font-weight: 800; opacity: .8; }
+
+/* — Interrupteur « je suis disponible » — */
+.lv-dispo { display: grid; gap: .4rem; margin-bottom: 1rem; }
+.lv-dispo__btn { display: inline-flex; align-items: center; gap: .6rem; width: 100%; padding: .85rem 1rem; border-radius: 14px; border: 1px solid rgba(255,255,255,.16); background: rgba(0,0,0,.3); color: #fff; font: 800 1rem/1.2 inherit; cursor: pointer; transition: background .18s, border-color .18s, box-shadow .18s; }
+.lv-dispo__btn .lv-dispo__dot { width: 12px; height: 12px; border-radius: 50%; background: #6b7280; flex: 0 0 auto; }
+.lv-dispo__btn.is-on { border-color: rgba(110,231,183,.6); background: linear-gradient(160deg, rgba(110,231,183,.16), rgba(0,0,0,.3)); box-shadow: 0 0 18px rgba(110,231,183,.20); }
+.lv-dispo__btn.is-on .lv-dispo__dot { background: #6ee7b7; box-shadow: 0 0 10px rgba(110,231,183,.9); }
+.lv-dispo__btn[disabled] { opacity: .6; cursor: default; }
+
+/* — Cartes livreurs (grille annuaire + bandeau accueil) — */
+.couriers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: .8rem; }
+.courier-card { display: grid; gap: .3rem; padding: .85rem .9rem 1rem; border-radius: 16px; background: rgba(0,0,0,.3); border: 1px solid rgba(255,255,255,.10); color: inherit; text-decoration: none; transition: border-color .18s, transform .18s, box-shadow .18s; }
+.courier-card:hover, .courier-card:focus-visible { border-color: rgba(242,193,78,.5); transform: translateY(-2px); }
+.courier-card--on { border-color: rgba(110,231,183,.5); box-shadow: 0 0 16px rgba(110,231,183,.14); }
+.courier-card__dispo { justify-self: start; font-size: .74rem; font-weight: 800; letter-spacing: .02em; padding: .18rem .5rem; border-radius: 999px; background: rgba(255,255,255,.08); color: var(--muted, #c9c9d9); }
+.courier-card--on .courier-card__dispo { background: rgba(110,231,183,.16); color: #6ee7b7; }
+.courier-card__ph { width: 64px; height: 64px; border-radius: 50%; overflow: hidden; display: grid; place-items: center; background: rgba(255,255,255,.06); font-size: 1.6rem; margin: .2rem 0 .15rem; }
+.courier-card__ph img { width: 100%; height: 100%; object-fit: cover; }
+.courier-card__name { font-weight: 800; font-size: 1.02rem; }
+.courier-card__meta { font-size: .78rem; color: var(--muted, #c9c9d9); }
+.courier-card__stats { display: flex; align-items: center; gap: .4rem; font-size: .8rem; }
+.courier-card__stats em { font-style: normal; color: var(--muted, #c9c9d9); }
+.courier-card__done { font-size: .78rem; color: var(--muted, #c9c9d9); }
+.courier-card__price { margin-top: .25rem; font-size: .82rem; color: var(--muted, #c9c9d9); }
+.courier-card__price strong { color: #f2c14e; font-size: 1rem; font-variant-numeric: tabular-nums; }
+.courier-card--more { align-content: center; justify-items: center; text-align: center; border-style: dashed; }
+.lv-stars { color: #f2c14e; letter-spacing: .06em; }
+.home-products-strip--couriers .courier-card { flex: 0 0 200px; scroll-snap-align: start; }
+
+/* — Fiche publique du livreur — */
+.courier-prof__head { display: flex; align-items: center; gap: 1rem; margin: .4rem 0 1rem; flex-wrap: wrap; }
+.courier-prof__ph { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; background: rgba(255,255,255,.06); display: grid; place-items: center; font-size: 2.4rem; flex: 0 0 auto; }
+.courier-prof__id h1 { margin: 0 0 .2rem; }
+.courier-prof__meta { margin: 0; font-size: .9rem; color: var(--muted, #c9c9d9); }
+.courier-prof__dispo { margin: .35rem 0 0; font-weight: 700; font-size: .9rem; }
+.courier-prof__dispo.is-on { color: #6ee7b7; }
+.courier-prof__dispo.is-off { color: var(--muted, #c9c9d9); }
+.courier-prof__counters { display: grid; grid-template-columns: repeat(3, 1fr); gap: .6rem; margin-bottom: 1rem; }
+.courier-prof__c { padding: .75rem .8rem; border-radius: 14px; background: rgba(0,0,0,.28); border: 1px solid rgba(255,255,255,.10); display: grid; gap: .15rem; text-align: center; }
+.courier-prof__c strong { font-size: 1.4rem; font-variant-numeric: tabular-nums; color: #f2c14e; }
+.courier-prof__c span { font-size: .76rem; color: var(--muted, #c9c9d9); }
+.courier-prof__bio { margin: 0; line-height: 1.6; }
+.courier-prof__phprev img { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; margin-top: .4rem; }
+.courier-avis { list-style: none; margin: 0; padding: 0; display: grid; gap: .6rem; }
+.courier-avis__i { padding: .65rem .75rem; border-radius: 12px; background: rgba(0,0,0,.25); border: 1px solid rgba(255,255,255,.08); }
+.courier-avis__d { margin-left: .5rem; font-size: .76rem; color: var(--muted, #c9c9d9); }
+.courier-avis__c { margin: .3rem 0 0; font-size: .9rem; line-height: 1.5; }
+
+/* — Fil de discussion client ↔ livreur — */
+.lv-chat { margin-top: .9rem; padding: .8rem .85rem; border-radius: 14px; border: 1px solid rgba(139,92,246,.35); background: rgba(139,92,246,.06); }
+.lv-chat__log { max-height: 320px; overflow-y: auto; display: grid; gap: .4rem; padding: .5rem; margin: .5rem 0; border-radius: 10px; background: rgba(0,0,0,.28); }
+.lv-msg { display: flex; }
+.lv-msg__t { max-width: 82%; padding: .45rem .65rem; border-radius: 12px; font-size: .9rem; line-height: 1.45; word-break: break-word; }
+.lv-msg--me { justify-content: flex-end; }
+.lv-msg--me .lv-msg__t { background: rgba(139,92,246,.35); border-bottom-right-radius: 4px; }
+.lv-msg--them .lv-msg__t { background: rgba(255,255,255,.10); border-bottom-left-radius: 4px; }
+.lv-msg--sys { justify-content: center; }
+.lv-msg--sys .lv-msg__t { max-width: 100%; background: transparent; color: var(--muted, #c9c9d9); font-size: .8rem; font-style: italic; text-align: center; }
+.lv-chat__send { display: flex; gap: .5rem; }
+.lv-chat__send input { flex: 1 1 auto; min-width: 0; padding: .6rem .75rem; border-radius: 10px; border: 1px solid rgba(255,255,255,.22); background: rgba(0,0,0,.35); color: #fff; font: inherit; }

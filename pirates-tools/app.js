@@ -4055,6 +4055,253 @@
     host.appendChild(svg);
   }
 
+  // ══════════════════════════════════════════════════════════════════════════
+  // TARIFS DU LIVREUR — grande carte des zones, prix saisis PAR LE LIVREUR
+  // ══════════════════════════════════════════════════════════════════════════
+  // ⚠️ CADRE JURIDIQUE (docs/METHODE-ENTREPRISE-FISCALITE.md § 5 bis) :
+  // Pirates Tools ne FIXE PAS le prix des courses. LV_BAREME n'est qu'un
+  // REPÈRE INDICATIF pré-rempli ; chaque livreur saisit ses propres montants,
+  // au-dessus comme en dessous, et AUCUNE sanction, AUCUN déclassement, AUCUN
+  // filtre ne dépend du montant choisi (ni ici, ni dans le tri des cartes).
+  // C'est ce qui nous sort de l'art. L7342-1 et du critère « prix fixé
+  // unilatéralement » de la directive (UE) 2024/2831.
+
+  function lvDefaultTarifs() {
+    var t = {};
+    LV_BAREME.forEach(function (b) { t[b.zone] = b.prix; });
+    return t;
+  }
+  function lvNormTarifs(raw) {
+    var src = raw || {}, out = {};
+    LV_BAREME.forEach(function (b) {
+      var n = Math.round(Number(src[b.zone]));
+      out[b.zone] = (isFinite(n) && n >= 1 && n <= 500) ? n : b.prix;
+    });
+    return out;
+  }
+
+  // Grande carte des zones + prix inscrits DANS les anneaux. `host` reçoit le
+  // SVG ; les libellés portent un id (lvZlabN) pour être mis à jour en direct
+  // pendant la frappe, sans reconstruire la carte.
+  function lvBuildTarifMap(host, tarifs, idPrefix) {
+    var z = LV_ZONES['971'];
+    var srcIsle = document.querySelector('#regIslands .isl[data-isl="971"] svg');
+    if (!z || !srcIsle) { host.innerHTML = '<p class="lv-hint">Carte indisponible.</p>'; return null; }
+    host.innerHTML = '';
+    lvBuildZoneMap(host, srcIsle, z);
+    var svg = host.querySelector('svg');
+    if (!svg) return null;
+    var NS = 'http://www.w3.org/2000/svg';
+    var COS = 0.819, SIN = -0.574;                 // diagonale haut-droite (-35°)
+    for (var i = 0; i < z.rad.length; i++) {
+      var rIn = i === 0 ? 0 : z.rad[i - 1] * z.upk;
+      var mid = (rIn + z.rad[i] * z.upk) / 2;
+      var x = z.sa[0] + mid * COS, y = z.sa[1] + mid * SIN;
+      var t = document.createElementNS(NS, 'text');
+      t.setAttribute('id', idPrefix + (i + 1));
+      t.setAttribute('x', x.toFixed(2)); t.setAttribute('y', y.toFixed(2));
+      t.setAttribute('text-anchor', 'middle');
+      // paint-order + stroke : le prix reste lisible au-dessus de la mer comme
+      // au-dessus de la terre, quelle que soit la couleur de l'anneau.
+      t.setAttribute('style', 'fill:#fff;stroke:#0b0b12;stroke-width:1.1;paint-order:stroke;font:800 5px system-ui,sans-serif');
+      t.textContent = (tarifs[i + 1] || LV_BAREME[i].prix) + ' €';
+      svg.appendChild(t);
+    }
+    return svg;
+  }
+  function lvUpdateTarifLabels(idPrefix, tarifs) {
+    LV_BAREME.forEach(function (b, i) {
+      var el = document.getElementById(idPrefix + (i + 1));
+      if (el) el.textContent = (tarifs[b.zone] || b.prix) + ' €';
+    });
+  }
+  // Légende sous la carte : une pastille par zone (couleur + rayon + prix).
+  function lvTarifLegendHTML(tarifs, editable) {
+    return '<div class="lv-tarifs__grid">' + LV_BAREME.map(function (b) {
+      var p = tarifs[b.zone] || b.prix;
+      return '<div class="lv-tarif lv-tarif--z' + b.zone + '">'
+        + '<span class="lv-tarif__zone">' + b.emoji + ' Zone ' + b.zone + '</span>'
+        + '<span class="lv-tarif__km">' + b.km + ' km de Sainte-Anne</span>'
+        + (editable
+          ? '<span class="lv-tarif__in"><input type="number" inputmode="numeric" min="1" max="500" step="1" '
+            + 'id="lvTarifIn' + b.zone + '" data-zone="' + b.zone + '" value="' + p + '" aria-label="Ton prix zone ' + b.zone + '"><em>€</em></span>'
+          : '<span class="lv-tarif__price">' + p + ' €</span>')
+        + '</div>';
+    }).join('') + '</div>';
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // ANNUAIRE DES LIVREURS — fiches publiques (couriers_public)
+  // ══════════════════════════════════════════════════════════════════════════
+  // Même mécanique que l'annuaire artisans : lecture directe via le SDK client
+  // (règle Firestore : lecture publique, écriture serveur seule). Aucune donnée
+  // KYC/email n'y figure jamais.
+  var _couriersPromise = null;
+  function loadCouriers(force) {
+    if (force) _couriersPromise = null;
+    if (_couriersPromise) return _couriersPromise;
+    if (Array.isArray(window.PT_COURIERS_FIXTURE)) {
+      _couriersPromise = Promise.resolve(window.PT_COURIERS_FIXTURE.slice());
+      return _couriersPromise;
+    }
+    _couriersPromise = new Promise(function (resolve) {
+      whenFirebaseReady(function (fb) {
+        if (!fb || !fb.configured || !fb.collection || !fb.getDocs) { resolve([]); return; }
+        fb.getDocs(fb.collection(fb.db, 'couriers_public')).then(function (snap) {
+          var list = [];
+          snap.forEach(function (d) {
+            var c = d.data() || {};
+            c.uid = d.id;
+            if (c.published) list.push(c);
+          });
+          // Tri : disponibles d'abord, puis les mieux notés, puis les plus
+          // expérimentés. ⚠️ JAMAIS par prix — trier sur le montant reviendrait
+          // à sanctionner un tarif, donc à le fixer indirectement.
+          list.sort(function (a, b) {
+            if (!!b.available !== !!a.available) return b.available ? 1 : -1;
+            var na = (a.ratingCount ? a.ratingSum / a.ratingCount : 0);
+            var nb = (b.ratingCount ? b.ratingSum / b.ratingCount : 0);
+            if (nb !== na) return nb - na;
+            return (b.coursesDone || 0) - (a.coursesDone || 0);
+          });
+          resolve(list);
+        }).catch(function () { _couriersPromise = null; resolve([]); });
+      });
+    });
+    return _couriersPromise;
+  }
+
+  function lvStarsHTML(avg) {
+    var full = Math.round(avg);
+    var s = '';
+    for (var i = 1; i <= 5; i++) s += (i <= full ? '★' : '☆');
+    return '<span class="lv-stars" aria-label="' + avg.toFixed(1) + ' sur 5">' + s + '</span>';
+  }
+  function lvVehLabel(v) {
+    return LV_VEHICLES[v] ? (LV_VEHICLES[v].emoji + ' ' + LV_VEHICLES[v].label) : '';
+  }
+  function lvMinTarif(c) {
+    var t = lvNormTarifs(c.tarifs), min = Infinity;
+    LV_BAREME.forEach(function (b) { if (t[b.zone] < min) min = t[b.zone]; });
+    return isFinite(min) ? min : LV_BAREME[0].prix;
+  }
+
+  // Carte publique d'un livreur (accueil + page Livraison). Le bandeau vert
+  // « Disponible » ne s'allume QUE si le livreur a cliqué son interrupteur.
+  function courierCardHTML(c) {
+    var name = escapeHTML(String(c.displayName || 'Livreur'));
+    var avg = c.ratingCount ? (c.ratingSum / c.ratingCount) : 0;
+    var photo = isSafePartnerImg(c.photo) ? c.photo : '';
+    return '<a class="courier-card' + (c.available ? ' courier-card--on' : '') + '" href="#/livreur-profil/'
+      + encodeURIComponent(String(c.uid || '')) + '" data-track="courier:card">'
+      + '<span class="courier-card__dispo">' + (c.available ? '🟢 Disponible' : '⚪️ Hors ligne') + '</span>'
+      + (photo
+        ? '<span class="courier-card__ph"><img src="' + photo + '" alt="' + name + '" loading="lazy"></span>'
+        : '<span class="courier-card__ph courier-card__ph--none" aria-hidden="true">🛵</span>')
+      + '<span class="courier-card__name">' + name + '</span>'
+      + (c.commune ? '<span class="courier-card__meta">📍 ' + escapeHTML(String(c.commune)) + '</span>' : '')
+      + (c.vehicle ? '<span class="courier-card__meta">' + escapeHTML(lvVehLabel(c.vehicle)) + '</span>' : '')
+      + '<span class="courier-card__stats">'
+      + (c.ratingCount
+        ? lvStarsHTML(avg) + '<em>' + avg.toFixed(1) + ' · ' + c.ratingCount + ' avis</em>'
+        : '<em>Nouveau livreur</em>')
+      + '</span>'
+      + '<span class="courier-card__done">📦 ' + (c.coursesDone || 0) + ' course' + ((c.coursesDone || 0) > 1 ? 's' : '') + ' livrée' + ((c.coursesDone || 0) > 1 ? 's' : '') + '</span>'
+      + '<span class="courier-card__price">à partir de <strong>' + lvMinTarif(c) + ' €</strong></span>'
+      + '</a>';
+  }
+
+  // Grille complète (page #/livraison) + bandeau accueil.
+  function renderCouriersGrid() {
+    var grid = document.getElementById('couriersGrid');
+    if (!grid) return;
+    grid.innerHTML = '<p class="lv-hint">Chargement…</p>';
+    loadCouriers(true).then(function (list) {
+      grid.innerHTML = list.length
+        ? list.map(courierCardHTML).join('')
+        : '<p class="lv-hint">Aucun livreur inscrit pour l\'instant. <a href="#/livreur">Deviens le premier</a>.</p>';
+    });
+  }
+  function renderCouriersStrip() {
+    var section = document.getElementById('couriersStripSection');
+    var track = document.getElementById('couriersStripTrack');
+    if (!section || !track) return;
+    loadCouriers().then(function (list) {
+      if (!list.length) { section.hidden = true; return; }
+      track.innerHTML = list.slice(0, 12).map(courierCardHTML).join('')
+        + '<a class="courier-card courier-card--more" href="#/livraison">'
+        + '<span class="courier-card__ph courier-card__ph--none" aria-hidden="true">→</span>'
+        + '<span class="courier-card__name">Voir tous les livreurs</span></a>';
+      section.hidden = false;
+    });
+  }
+
+  // Profil PUBLIC d'un livreur (vue client) : sa carte des zones avec SES
+  // prix, son compteur de courses, sa note et les avis laissés par les clients.
+  function renderCourierProfile(uid) {
+    var wrap = document.getElementById('courierProfileBody');
+    var back = document.getElementById('courierProfileBack');
+    if (back) back.onclick = function () { history.length > 1 ? history.back() : (location.hash = '#/livraison'); };
+    if (!wrap) return;
+    wrap.innerHTML = '<p class="lv-hint">Chargement…</p>';
+    loadCouriers().then(function (list) {
+      var c = null;
+      for (var i = 0; i < list.length; i++) if (list[i].uid === uid) { c = list[i]; break; }
+      if (!c) {
+        wrap.innerHTML = '<div class="lv-card"><p class="lv-hint">Ce livreur n\'existe pas ou n\'est plus inscrit. <a href="#/livraison">Retour aux livreurs</a></p></div>';
+        return;
+      }
+      var name = escapeHTML(String(c.displayName || 'Livreur'));
+      var avg = c.ratingCount ? (c.ratingSum / c.ratingCount) : 0;
+      var photo = isSafePartnerImg(c.photo) ? c.photo : '';
+      var tarifs = lvNormTarifs(c.tarifs);
+      var avis = Array.isArray(c.avis) ? c.avis.slice().reverse() : [];
+      var h = '';
+      h += '<header class="courier-prof__head">'
+        + (photo ? '<img class="courier-prof__ph" src="' + photo + '" alt="' + name + '">'
+                 : '<span class="courier-prof__ph courier-prof__ph--none" aria-hidden="true">🛵</span>')
+        + '<div class="courier-prof__id">'
+        + '<h1 id="courierprof-h1" tabindex="-1">' + name + '</h1>'
+        + '<p class="courier-prof__meta">'
+        + (c.commune ? '📍 ' + escapeHTML(String(c.commune)) + ' · ' : '')
+        + (c.vehicle ? escapeHTML(lvVehLabel(c.vehicle)) : '') + '</p>'
+        + '<p class="courier-prof__dispo ' + (c.available ? 'is-on' : 'is-off') + '">'
+        + (c.available ? '🟢 Disponible maintenant' : '⚪️ Hors ligne pour le moment') + '</p>'
+        + '</div></header>';
+      // Compteurs
+      h += '<div class="courier-prof__counters">'
+        + '<div class="courier-prof__c"><strong>' + (c.coursesDone || 0) + '</strong><span>course' + ((c.coursesDone || 0) > 1 ? 's' : '') + ' livrée' + ((c.coursesDone || 0) > 1 ? 's' : '') + '</span></div>'
+        + '<div class="courier-prof__c"><strong>' + (c.ratingCount ? avg.toFixed(1) + '/5' : '—') + '</strong><span>' + (c.ratingCount ? c.ratingCount + ' avis client' + (c.ratingCount > 1 ? 's' : '') : 'aucun avis') + '</span></div>'
+        + '<div class="courier-prof__c"><strong>' + lvMinTarif(c) + ' €</strong><span>à partir de</span></div>'
+        + '</div>';
+      if (c.bio) h += '<div class="lv-card"><p class="courier-prof__bio">' + escapeHTML(String(c.bio)) + '</p></div>';
+      // Carte de SES tarifs
+      h += '<div class="lv-card lv-tarifs">'
+        + '<h2 class="lv-h2">💶 Ses tarifs par zone</h2>'
+        + '<p class="lv-hint">Distances mesurées depuis Sainte-Anne. <strong>' + name + ' fixe lui-même ses prix</strong> — Pirates Tools ne prend rien sur la course et n\'impose aucun montant.</p>'
+        + '<div class="lv-tarifs__map" id="courierProfMap" aria-label="Carte des zones et tarifs"></div>'
+        + lvTarifLegendHTML(tarifs, false)
+        + '</div>';
+      // Avis
+      h += '<div class="lv-card"><h2 class="lv-h2">⭐ Avis des clients</h2>';
+      h += avis.length
+        ? '<ul class="courier-avis">' + avis.map(function (a) {
+            return '<li class="courier-avis__i">'
+              + lvStarsHTML(Number(a.r) || 0)
+              + '<span class="courier-avis__d">' + escapeHTML(String(a.d || '')) + '</span>'
+              + (a.c ? '<p class="courier-avis__c">« ' + escapeHTML(String(a.c)) + ' »</p>' : '')
+              + '</li>';
+          }).join('') + '</ul>'
+        : '<p class="lv-hint">Pas encore d\'avis — les notes apparaissent ici dès qu\'un client confirme une livraison.</p>';
+      h += '</div>';
+      h += '<div class="lv-card lv-cta"><a class="btn primary" href="#/livraison">🛒 Commander une livraison</a>'
+        + '<span class="lv-cta__note">Tu choisis ta date et ton heure à la commande. Le livreur qui accepte en premier ouvre une discussion avec toi.</span></div>';
+      wrap.innerHTML = h;
+      var mapHost = document.getElementById('courierProfMap');
+      if (mapHost) lvBuildTarifMap(mapHost, tarifs, 'cpZ');
+    });
+  }
+
   function lvDocItem(d) {
     var h = '<li class="lv-doc"><span class="lv-doc__t">' + d.t + '</span>';
     if (d.h) h += '<span class="lv-doc__h">' + d.h + '</span>';
@@ -4849,6 +5096,84 @@
     };
   }
 
+  // ══════════════════════════════════════════════════════════════════════════
+  // CHAT DE COURSE — mise en relation client ↔ livreur dès l'acceptation
+  // ══════════════════════════════════════════════════════════════════════════
+  // Le 1er livreur qui accepte ouvre le fil (chatOpen posé serveur). Les deux
+  // participants s'y accordent sur l'heure exacte, le point de dépôt, l'accès
+  // au chantier. Stockage : courses/{id}/messages, écrit DIRECTEMENT par le SDK
+  // client sous firestore.rules (participants de la course UNIQUEMENT, messages
+  // immuables — le fil fait foi en cas de litige). Temps réel via onSnapshot ;
+  // aucun appel API, donc aucun coût de fonction serverless.
+  function lvChatHTML(c) {
+    if (!c || !c.chatOpen) return '';
+    var who = c.mine ? (c.courierName ? escapeHTML(c.courierName) : 'ton livreur') : 'ton client';
+    return '<div class="lv-chat" data-chat="' + escapeHTML(String(c.id)) + '">'
+      + '<h3 class="lv-h3">💬 Discussion avec ' + who + '</h3>'
+      + '<p class="lv-hint">Mettez-vous d\'accord ici : heure exacte, point de dépôt, accès au chantier, téléphone si vous le souhaitez. '
+      + 'Les messages ne peuvent être ni modifiés ni effacés — ils servent de preuve en cas de litige.</p>'
+      + '<div class="lv-chat__log" id="lvChatLog" aria-live="polite"><p class="lv-hint">Chargement…</p></div>'
+      + '<div class="lv-chat__send">'
+      + '<input type="text" id="lvChatInput" maxlength="800" placeholder="Écris ton message…" autocomplete="off">'
+      + '<button type="button" class="btn primary" id="lvChatSend">Envoyer</button>'
+      + '</div><span class="lv-cta__note" id="lvChatSt" aria-live="polite"></span></div>';
+  }
+
+  // Branche le fil : abonnement temps réel + envoi. `role` = 'client' ou
+  // 'livreur' (l'espace appelant le connaît ; le serveur ne s'en sert que pour
+  // l'affichage — l'identité réelle vient de request.auth.uid dans les règles).
+  var _lvChatUnsub = null;
+  function wireChat(root, c, role) {
+    var box = root.querySelector('[data-chat]');
+    if (!box) return;
+    var log = root.querySelector('#lvChatLog');
+    var input = root.querySelector('#lvChatInput');
+    var send = root.querySelector('#lvChatSend');
+    var st = root.querySelector('#lvChatSt');
+    if (_lvChatUnsub) { try { _lvChatUnsub(); } catch (_) {} _lvChatUnsub = null; }
+    whenFirebaseReady(function (fb) {
+      if (!fb || !fb.configured || !fb.onSnapshot) {
+        if (log) log.innerHTML = '<p class="lv-hint">Discussion indisponible (hors connexion).</p>';
+        return;
+      }
+      var col = fb.collection(fb.db, 'courses', String(c.id), 'messages');
+      var q = fb.query(col, fb.orderBy('at'), fb.limit(200));
+      _lvChatUnsub = fb.onSnapshot(q, function (snap) {
+        var h = [];
+        snap.forEach(function (d) {
+          var m = d.data() || {};
+          var mine = (m.role === role && m.role !== 'systeme');
+          var cls = m.role === 'systeme' ? 'lv-msg--sys' : (mine ? 'lv-msg--me' : 'lv-msg--them');
+          h.push('<div class="lv-msg ' + cls + '"><span class="lv-msg__t">' + escapeHTML(String(m.text || '')) + '</span></div>');
+        });
+        if (log) {
+          log.innerHTML = h.length ? h.join('') : '<p class="lv-hint">Aucun message pour l\'instant — dis bonjour !</p>';
+          log.scrollTop = log.scrollHeight;
+        }
+      }, function () {
+        if (log) log.innerHTML = '<p class="lv-hint">Discussion indisponible.</p>';
+      });
+    });
+    function doSend() {
+      var txt = (input && input.value || '').trim().slice(0, 800);
+      if (!txt) return;
+      if (send) send.disabled = true;
+      whenFirebaseReady(function (fb) {
+        if (!fb || !fb.addDoc || !_currentUser) { if (st) st.textContent = 'Connexion requise.'; if (send) send.disabled = false; return; }
+        fb.addDoc(fb.collection(fb.db, 'courses', String(c.id), 'messages'), {
+          uid: _currentUser.uid, role: role, text: txt, at: new Date()
+        }).then(function () {
+          if (input) input.value = '';
+          if (st) st.textContent = '';
+        }).catch(function (e) {
+          if (st) st.textContent = '❌ Envoi impossible' + (e && e.code ? ' (' + e.code + ')' : '') + '.';
+        }).then(function () { if (send) send.disabled = false; });
+      });
+    }
+    if (send) send.onclick = doSend;
+    if (input) input.onkeydown = function (e) { if (e.key === 'Enter') { e.preventDefault(); doSend(); } };
+  }
+
   // Widget « Mes gains » de l'espace livreur. Trois états de l'argent, calculés
   // depuis les courses que le livreur a acceptées :
   //   • GELÉ      : payé par le client, retenu tant qu'il n'a pas confirmé ;
@@ -4889,7 +5214,147 @@
       renderCourierSpaceInner();
     });
   }
+  // ── Panneau TARIFS + DISPONIBILITÉ (en tête de l'espace livreur) ──────────
+  // Grande carte des zones sur toute la largeur : le livreur y inscrit SES
+  // prix. Rien n'est imposé, aucun montant n'est refusé, aucun tri ne dépend du
+  // prix (voir le cadre juridique en tête du bloc TARIFS).
+  function renderCourierTarifPanel() {
+    var host = document.getElementById('courierTarifs');
+    if (!host) return;
+    host.innerHTML = '<p class="lv-hint">Chargement de ta fiche…</p>';
+    jsonAuthHeaders().then(function (headers) {
+      return fetch(apiBaseUrl() + '/api/contact', {
+        method: 'POST', headers: headers, body: JSON.stringify({ type: 'courier-profile' })
+      });
+    }).then(function (r) { return r.json(); }).then(function (d) {
+      if (!d.ok) { host.innerHTML = '<p class="lv-hint">Fiche indisponible : ' + escapeHTML(d.error || '?') + '</p>'; return; }
+      var p = d.profile || {};
+      var tarifs = lvNormTarifs(p.tarifs);
+      var repere = lvDefaultTarifs();
+      host.innerHTML =
+        '<div class="lv-card lv-tarifs">'
+        + '<div class="lv-dispo">'
+        + '<button type="button" class="lv-dispo__btn' + (p.available ? ' is-on' : '') + '" id="lvDispoBtn" aria-pressed="' + (p.available ? 'true' : 'false') + '">'
+        + '<span class="lv-dispo__dot"></span>'
+        + '<span class="lv-dispo__txt">' + (p.available ? '🟢 Tu es DISPONIBLE' : '⚪️ Tu es hors ligne') + '</span></button>'
+        + '<p class="lv-hint" id="lvDispoNote">' + (p.available
+          ? 'Les clients voient le bandeau vert « Disponible » sur ta carte. Clique pour te mettre hors ligne.'
+          : 'Tant que tu n\'as pas cliqué, aucun bandeau vert ne s\'allume sur ta carte côté client.') + '</p>'
+        + '</div>'
+        + '<h2 class="lv-h2">💶 Tes tarifs par zone</h2>'
+        + '<p class="lv-hint">C\'est <strong>toi</strong> qui fixes tes prix — Pirates Tools ne prend rien sur la course et '
+        + 'n\'impose aucun montant. Les valeurs pré-remplies (' + LV_BAREME.map(function (b) { return repere[b.zone] + ' €'; }).join(' · ')
+        + ') ne sont qu\'un <strong>repère indicatif</strong> : tu peux mettre plus ou moins, '
+        + '<strong>sans aucune conséquence</strong> sur ton accès aux courses ou ta place dans l\'annuaire.</p>'
+        + '<div class="lv-tarifs__map" id="courierTarifMap" aria-label="Carte des zones et de tes tarifs"></div>'
+        + lvTarifLegendHTML(tarifs, true)
+        + '<div class="lv-grid2" style="margin-top:.8rem">'
+        + '<label class="lv-field"><span>Nom affiché aux clients *</span><input type="text" id="lvPfName" maxlength="60" value="' + escapeHTML(p.displayName || '') + '" placeholder="Ex. Kevin L."></label>'
+        + '<label class="lv-field"><span>Ta commune</span><input type="text" id="lvPfCommune" maxlength="60" value="' + escapeHTML(p.commune || '') + '" placeholder="Sainte-Anne"></label>'
+        + '</div>'
+        + '<label class="lv-field"><span>Ton véhicule</span><select id="lvPfVeh">'
+        + '<option value="">— choisir —</option>'
+        + Object.keys(LV_VEHICLES).map(function (k) {
+            return '<option value="' + k + '"' + (p.vehicle === k ? ' selected' : '') + '>' + escapeHTML(lvVehLabel(k)) + '</option>';
+          }).join('')
+        + '</select></label>'
+        + '<label class="lv-field"><span>Ta présentation <em>(visible des clients)</em></span>'
+        + '<textarea id="lvPfBio" maxlength="400" rows="3" placeholder="Quelques mots : ton expérience, tes horaires, ce que tu transportes…">' + escapeHTML(p.bio || '') + '</textarea></label>'
+        + '<div class="lv-field"><span>Ta photo <em>(facultatif)</em></span>'
+        + '<input type="file" accept="image/*" id="lvPfPhotoFile" hidden>'
+        + '<div class="lv-cta"><button type="button" class="btn" id="lvPfPhotoBtn">📷 Choisir une photo</button>'
+        + '<span class="lv-cta__note" id="lvPfPhotoSt"></span></div>'
+        + '<div class="courier-prof__phprev" id="lvPfPhotoPrev">' + (isSafePartnerImg(p.photo) ? '<img src="' + p.photo + '" alt="Ta photo">' : '') + '</div></div>'
+        + '<div class="lv-cta" style="margin-top:.6rem"><button type="button" class="btn primary" id="lvPfSave">💾 Enregistrer ma fiche et mes tarifs</button>'
+        + '<span class="lv-cta__note" id="lvPfSt" aria-live="polite"></span></div>'
+        + '<p class="lv-hint">Ta fiche apparaît ensuite dans <a href="#/livraison">l\'annuaire des livreurs</a> et sur l\'accueil.</p>'
+        + '</div>';
+
+      var mapHost = document.getElementById('courierTarifMap');
+      if (mapHost) lvBuildTarifMap(mapHost, tarifs, 'ctZ');
+      // Saisie des prix : mise à jour EN DIRECT du prix inscrit dans l'anneau.
+      LV_BAREME.forEach(function (b) {
+        var inp = document.getElementById('lvTarifIn' + b.zone);
+        if (!inp) return;
+        inp.oninput = function () {
+          var n = Math.round(Number(inp.value));
+          tarifs[b.zone] = (isFinite(n) && n >= 1 && n <= 500) ? n : tarifs[b.zone];
+          lvUpdateTarifLabels('ctZ', tarifs);
+        };
+      });
+      var photoData = '';
+      var pf = document.getElementById('lvPfPhotoFile');
+      var pb = document.getElementById('lvPfPhotoBtn');
+      var pst = document.getElementById('lvPfPhotoSt');
+      if (pb && pf) {
+        pb.onclick = function () { pf.click(); };
+        pf.onchange = function () {
+          var f = pf.files && pf.files[0];
+          if (!f) return;
+          if (pst) pst.textContent = '⏳ Compression…';
+          lvCompressPhoto(f).then(function (data) {
+            photoData = data;
+            if (pst) pst.textContent = '✅ Photo prête';
+            var prev = document.getElementById('lvPfPhotoPrev');
+            if (prev) prev.innerHTML = '<img src="' + data + '" alt="Ta photo">';
+          }).catch(function () { if (pst) pst.textContent = '❌ Image illisible'; });
+        };
+      }
+      var save = document.getElementById('lvPfSave');
+      if (save) save.onclick = function () {
+        var stEl = document.getElementById('lvPfSt');
+        var name = (document.getElementById('lvPfName') || {}).value || '';
+        if (!name.trim()) { if (stEl) stEl.textContent = 'Ton nom affiché est obligatoire.'; return; }
+        save.disabled = true;
+        if (stEl) stEl.textContent = 'Enregistrement…';
+        jsonAuthHeaders().then(function (headers) {
+          return fetch(apiBaseUrl() + '/api/contact', {
+            method: 'POST', headers: headers,
+            body: JSON.stringify({
+              type: 'courier-profile-save',
+              displayName: name,
+              commune: (document.getElementById('lvPfCommune') || {}).value || '',
+              vehicle: (document.getElementById('lvPfVeh') || {}).value || '',
+              bio: (document.getElementById('lvPfBio') || {}).value || '',
+              photo: photoData || '',
+              tarifs: tarifs
+            })
+          });
+        }).then(function (r) { return r.json(); }).then(function (dd) {
+          save.disabled = false;
+          if (dd.ok) { if (stEl) stEl.textContent = '✅ Enregistré'; toast('Fiche livreur enregistrée ✅', 'success'); _couriersPromise = null; }
+          else if (stEl) stEl.textContent = '❌ ' + (dd.error || 'Erreur');
+        }).catch(function () { save.disabled = false; if (stEl) stEl.textContent = '❌ Erreur réseau'; });
+      };
+      var dispo = document.getElementById('lvDispoBtn');
+      if (dispo) dispo.onclick = function () {
+        var next = !(dispo.getAttribute('aria-pressed') === 'true');
+        dispo.disabled = true;
+        jsonAuthHeaders().then(function (headers) {
+          return fetch(apiBaseUrl() + '/api/contact', {
+            method: 'POST', headers: headers,
+            body: JSON.stringify({ type: 'courier-available', available: next })
+          });
+        }).then(function (r) { return r.json(); }).then(function (dd) {
+          dispo.disabled = false;
+          if (!dd.ok) { toast(dd.error || 'Erreur', 'error'); return; }
+          _couriersPromise = null;
+          dispo.setAttribute('aria-pressed', dd.available ? 'true' : 'false');
+          dispo.className = 'lv-dispo__btn' + (dd.available ? ' is-on' : '');
+          var t = dispo.querySelector('.lv-dispo__txt');
+          if (t) t.textContent = dd.available ? '🟢 Tu es DISPONIBLE' : '⚪️ Tu es hors ligne';
+          var note = document.getElementById('lvDispoNote');
+          if (note) note.textContent = dd.available
+            ? 'Les clients voient le bandeau vert « Disponible » sur ta carte. Clique pour te mettre hors ligne.'
+            : 'Tant que tu n\'as pas cliqué, aucun bandeau vert ne s\'allume sur ta carte côté client.';
+          toast(dd.available ? '🟢 Tu es visible comme disponible' : '⚪️ Tu es hors ligne', 'success');
+        }).catch(function () { dispo.disabled = false; toast('Erreur réseau', 'error'); });
+      };
+    }).catch(function () { host.innerHTML = '<p class="lv-hint">Fiche indisponible (réseau).</p>'; });
+  }
+
   function renderCourierSpaceInner() {
+    renderCourierTarifPanel();
     var back = document.getElementById('courierBack');
     if (back) back.onclick = function () { history.length > 1 ? history.back() : (location.hash = '#/compte'); };
     var refresh = document.getElementById('courierRefresh');
@@ -4972,11 +5437,14 @@
             + '<div class="lv-cta"><button type="button" class="btn primary" id="courierProofBtn" disabled>✅ Marquer livrée</button>'
             + '<span class="lv-cta__note" id="courierProofSt" aria-live="polite"></span></div>'
             + '</div>' : '')
+        // Fil de discussion avec le client (ouvert dès l'acceptation)
+        + (c.acceptedByMe ? lvChatHTML(c) : '')
         // Vidéo de remise + litige (protection mutuelle — voir consentement)
         + (c.acceptedByMe && ['acceptee', 'livree', 'terminee'].indexOf(c.status) !== -1
           ? lvVideoDisputeHtml(c) : '');
       wireAccept(det);
       wireProof(det, c);
+      if (c.acceptedByMe) wireChat(det, c, 'livreur');
       wireVideoDispute(det, c, renderCourierSpace);
       det.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
@@ -5231,6 +5699,13 @@
           + '<span class="lv-cta__note" id="clientConfirmSt" aria-live="polite"></span></div>'
           + '</div>';
       }
+      // Fil de discussion avec le livreur, ouvert dès qu'il a accepté +
+      // raccourci vers sa fiche publique (note, avis, tarifs).
+      if (c.mine && c.courierUid) {
+        h += '<p class="lv-hint" style="margin-top:.6rem">🛵 Livreur : <a href="#/livreur-profil/'
+          + encodeURIComponent(c.courierUid) + '">' + escapeHTML(c.courierName || 'voir sa fiche') + '</a></p>';
+      }
+      if (c.mine) h += lvChatHTML(c);
       // Vidéo + litige côté CLIENT (dès qu'un livreur est impliqué)
       if (c.mine && ['acceptee', 'livree', 'terminee'].indexOf(c.status) !== -1) {
         h += lvVideoDisputeHtml(c);
@@ -5251,6 +5726,7 @@
         h += '<p class="lv-hint" style="margin-top:.6rem">Tu pourras noter ton livreur dès qu\'il aura pris la course.</p>';
       }
       det.innerHTML = h;
+      if (c.mine) wireChat(det, c, 'client');
       wireVideoDispute(det, c, renderClientDeliveries);
       // QR du code de remise (généré 100 % en local — ensureQRLib, jamais de tiers)
       var qrBox = det.querySelector('#clientCodeQR');
@@ -5703,7 +6179,7 @@
   // ── Router (hash-based SPA) ────────────────────────────────
 
   var ROUTES = ['/', '/catalogue', '/produit', '/devis', '/compte', '/auth', '/abonnement',
-                '/admin', '/merci', '/contact', '/favoris', '/artisans', '/rejoindre', '/livreur', '/livraison', '/mode-livraison', '/mes-livraisons',
+                '/admin', '/merci', '/contact', '/favoris', '/artisans', '/rejoindre', '/livreur', '/livraison', '/mode-livraison', '/mes-livraisons', '/livreur-profil',
                 '/mentions-legales', '/confidentialite', '/cgv'];
 
   // Territory landing slugs (keys) → territory codes (values).
@@ -5744,6 +6220,10 @@
     // Pré-inscription partenaire avec formule pré-sélectionnée (#/rejoindre/black).
     if (hash.indexOf('/rejoindre/') === 0) {
       return { route: '/rejoindre', slug: hash.replace('/rejoindre/', '') };
+    }
+    // Fiche publique d'un livreur (#/livreur-profil/{uid}) — vue CLIENT.
+    if (hash.indexOf('/livreur-profil/') === 0) {
+      return { route: '/livreur-profil', slug: hash.replace('/livreur-profil/', '') };
     }
     // Territory landings: /guadeloupe, /martinique, /guyane, /reunion, /mayotte
     var terrSlug = hash.replace(/^\//, '');
@@ -5860,6 +6340,7 @@
         setup3DCarousel();
         setupNewsletterForm();
         renderPartnersStrip();
+        renderCouriersStrip();
         break;
       case '/catalogue':
         renderCategoryChips();
@@ -5915,12 +6396,16 @@
         break;
       case '/livraison':
         renderLivraison();
+        renderCouriersGrid();
         break;
       case '/mode-livraison':
         renderCourierSpace();
         break;
       case '/mes-livraisons':
         renderClientDeliveries();
+        break;
+      case '/livreur-profil':
+        renderCourierProfile(decodeURIComponent(parsed.slug || ''));
         break;
     }
 
@@ -11978,6 +12463,10 @@
         break;
       case '/rejoindre':
         setDocMeta('Rejoindre le réseau — ' + BASE_TITLE, 'Pré-inscription au programme partenaire artisans Pirates Tools — sans engagement, sans paiement.');
+        removeJsonLd('product');
+        break;
+      case '/livreur-profil':
+        setDocMeta('Fiche livreur — ' + BASE_TITLE, 'Les tarifs, les avis et le nombre de courses d\'un livreur Pirates Tools en Guadeloupe.');
         removeJsonLd('product');
         break;
       case '/admin':

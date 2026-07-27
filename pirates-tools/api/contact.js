@@ -61,7 +61,9 @@ module.exports = async function handler(req, res) {
   if (body.type === 'course-create' || body.type === 'course-list' || body.type === 'course-accept'
       || body.type === 'courier-status' || body.type === 'course-rate'
       || body.type === 'course-deliver' || body.type === 'course-confirm' || body.type === 'course-proof'
-      || body.type === 'course-scene' || body.type === 'course-video' || body.type === 'course-dispute') {
+      || body.type === 'course-scene' || body.type === 'course-video' || body.type === 'course-dispute'
+      || body.type === 'courier-profile' || body.type === 'courier-profile-save'
+      || body.type === 'courier-available') {
     return handleCourses(req, body, { apiKey, from, ownerEmail }, res);
   }
 
@@ -443,6 +445,84 @@ async function handleCourses(req, body, cfg, res) {
     return res.status(200).json({ ok: true, courier: isCourier });
   }
 
+  // ══ PROFIL LIVREUR ════════════════════════════════════════════════════════
+  // Deux documents, deux niveaux de confidentialité :
+  //   couriers/{uid}        → PRIVÉ (KYC, email, Stripe Connect) — jamais lu par le client
+  //   couriers_public/{uid} → PUBLIC (fiche annuaire : nom, photo, tarifs, note,
+  //                           disponibilité) — lecture ouverte, écriture serveur seule
+  // ⚠️ Les TARIFS appartiennent au LIVREUR (voir _lib/courses.js § TARIFS) :
+  // la plateforme ne les impose pas et ne sanctionne jamais un montant.
+
+  // Lire SON propre profil (formulaire de l'espace livreur).
+  if (body.type === 'courier-profile') {
+    const [priv, pub] = await Promise.all([
+      db.collection('couriers').doc(uid).get(),
+      db.collection('couriers_public').doc(uid).get()
+    ]);
+    const p = pub.exists ? pub.data() : {};
+    const v = priv.exists ? priv.data() : {};
+    return res.status(200).json({
+      ok: true, courier: isCourier,
+      profile: {
+        uid,
+        displayName: p.displayName || v.displayName || '',
+        commune: p.commune || '',
+        vehicle: p.vehicle || '',
+        bio: p.bio || '',
+        photo: p.photo || '',
+        tarifs: coursesLib.sanitizeTarifs(p.tarifs),
+        available: !!p.available,
+        published: !!p.published,
+        coursesDone: p.coursesDone || 0,
+        ratingCount: p.ratingCount || 0,
+        ratingSum: p.ratingSum || 0
+      },
+      repere: coursesLib.defaultTarifs()
+    });
+  }
+
+  // Enregistrer son profil + SES tarifs. Réservé aux livreurs validés.
+  if (body.type === 'courier-profile-save') {
+    if (!isCourier) return res.status(403).json({ ok: false, error: 'Réservé aux livreurs validés.' });
+    const displayName = String(body.displayName || '').trim().slice(0, 60);
+    const commune = String(body.commune || '').trim().slice(0, 60);
+    const bio = String(body.bio || '').trim().slice(0, 400);
+    const vehicle = ['vae', 'trottinette', 'scooter'].includes(body.vehicle) ? body.vehicle : '';
+    const photo = String(body.photo || '');
+    if (!displayName) return res.status(400).json({ ok: false, error: 'Ton nom affiché est obligatoire.' });
+    if (photo && (!/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(photo) || photo.length > 300000)) {
+      return res.status(400).json({ ok: false, error: 'Photo de profil invalide (JPEG/PNG/WebP, 300 Ko max).' });
+    }
+    const tarifs = coursesLib.sanitizeTarifs(body.tarifs);
+    const pub = {
+      displayName, commune, bio, vehicle, tarifs,
+      published: true,
+      available: body.available === true ? true : (body.available === false ? false : undefined)
+    };
+    if (photo) pub.photo = photo;
+    if (pub.available === undefined) delete pub.available;
+    await coursesLib.mirrorCourierPublic(db, uid, pub);
+    await db.collection('couriers').doc(uid).set(
+      { displayName, email, updatedAt: new Date() }, { merge: true }
+    );
+    return res.status(200).json({ ok: true, tarifs });
+  }
+
+  // Interrupteur « je suis disponible » (bandeau vert de la carte publique).
+  // Tant qu'il n'a pas cliqué, aucun bandeau ne s'allume côté client.
+  if (body.type === 'courier-available') {
+    if (!isCourier) return res.status(403).json({ ok: false, error: 'Réservé aux livreurs validés.' });
+    const available = body.available === true;
+    const pub = await db.collection('couriers_public').doc(uid).get();
+    if (!pub.exists || !pub.data().displayName) {
+      return res.status(409).json({ ok: false, error: 'Complète d\'abord ta fiche (nom + tarifs) avant de te déclarer disponible.' });
+    }
+    await coursesLib.mirrorCourierPublic(db, uid, {
+      available, availableAt: available ? new Date() : null
+    });
+    return res.status(200).json({ ok: true, available });
+  }
+
   // ── Créer une course (artisan) — sur PREUVE DE PAIEMENT ──
   // Le client PAIE d'abord (produits + frais de livraison, modale carte —
   // create-payment-intent pose la metadata course*). Il envoie ensuite son
@@ -492,6 +572,8 @@ async function handleCourses(req, body, cfg, res) {
         lat: c.lat, lng: c.lng,
         date: c.date, when: c.when, hour: c.hour,
         mine: c.artisanUid === uid, acceptedByMe: c.courierUid === uid,
+        courierUid: c.courierUid || null, courierName: c.courierName || '',
+        chatOpen: !!c.chatOpen,
         rating: c.rating || 0, ratingComment: c.ratingComment || '',
         paid: !!c.paid, escrow: c.escrow || null,
         feeCents: c.feeCents || 0, amountCents: c.amountCents || 0,
@@ -516,14 +598,37 @@ async function handleCourses(req, body, cfg, res) {
     const id = String(body.id || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 64);
     if (!id) return res.status(400).json({ ok: false, error: 'id requis' });
     const ref = db.collection('courses').doc(id);
+    // Nom affiché du livreur : lu AVANT la transaction (aucune lecture hors
+    // transaction ne doit s'y glisser) — sert au fil de discussion et à la
+    // fiche publique côté client.
+    let courierName = '';
+    try {
+      const cp = await db.collection('couriers_public').doc(uid).get();
+      if (cp.exists) courierName = String(cp.data().displayName || '').slice(0, 60);
+    } catch (_) {}
     try {
       const result = await db.runTransaction(async (tx) => {
         const d = await tx.get(ref);
         if (!d.exists) throw new Error('introuvable');
         if (d.data().status !== 'en_attente') throw new Error('deja-prise');
-        tx.update(ref, { status: 'acceptee', courierUid: uid, courierEmail: email, acceptedAt: new Date() });
+        tx.update(ref, {
+          status: 'acceptee', courierUid: uid, courierEmail: email,
+          courierName, chatOpen: true, acceptedAt: new Date()
+        });
         return d.data();
       });
+      // Ouvre le fil de discussion : 1er arrivé = mise en relation immédiate.
+      // Message d'amorce écrit par le serveur (rôle 'systeme') — les deux
+      // participants écrivent ensuite directement via le SDK, sous les règles
+      // Firestore (courses/{id}/messages, participants seuls).
+      try {
+        await ref.collection('messages').add({
+          uid: 'systeme', role: 'systeme',
+          text: 'Course acceptée par ' + (courierName || 'un livreur')
+            + '. Mettez-vous d\'accord ici sur l\'heure exacte, le point de dépôt et l\'accès au chantier.',
+          at: new Date()
+        });
+      } catch (e) { console.warn('[courses] amorce chat échouée:', e.message); }
       // Alerte l'artisan : sa course est prise.
       try {
         if (result.artisanEmail) {
@@ -630,6 +735,18 @@ async function handleCourses(req, body, cfg, res) {
       if (m) return res.status(m[0]).json({ ok: false, error: m[1] });
       console.error('[courses] confirm failed:', e.message);
       return res.status(500).json({ ok: false, error: 'Confirmation échouée.' });
+    }
+    // Compteur PUBLIC de courses terminées (visible des clients sur sa fiche).
+    // Incrémenté seulement à la confirmation du client — donc jamais gonflable
+    // par le livreur seul.
+    if (course.courierUid) {
+      try {
+        await db.collection('couriers_public').doc(course.courierUid).set({
+          uid: course.courierUid,
+          coursesDone: admin.firestore.FieldValue.increment(1),
+          updatedAt: new Date()
+        }, { merge: true });
+      } catch (e) { console.warn('[courses] compteur public échoué:', e.message); }
     }
     let escrow = course.paid ? 'liberable' : null;
     if (course.paid && course.feeCents > 0) {
@@ -782,7 +899,31 @@ async function handleCourses(req, body, cfg, res) {
         if (!['acceptee', 'livree', 'terminee'].includes(c.status)) throw new Error('pas-encore');
         if (c.rating) throw new Error('deja-note');
         tx.update(ref, { rating, ratingComment: comment, ratedAt: new Date(), ratedBy: uid });
+        return c;
       });
+      // Report sur la fiche PUBLIQUE du livreur (note moyenne + derniers avis).
+      // ⚠️ RGPD : aucun nom, aucun email de client dans l'avis publié — la note,
+      // le commentaire et la date suffisent. Fait hors transaction (autre doc,
+      // échec non bloquant : la note reste enregistrée sur la course).
+      try {
+        const cu = await ref.get();
+        const courierUid = cu.exists ? cu.data().courierUid : null;
+        if (courierUid) {
+          const pref = db.collection('couriers_public').doc(courierUid);
+          await db.runTransaction(async (tx) => {
+            const p = await tx.get(pref);
+            const d = p.exists ? p.data() : {};
+            const avis = Array.isArray(d.avis) ? d.avis.slice(-19) : [];
+            avis.push({ r: rating, c: comment, d: new Date().toISOString().slice(0, 10) });
+            tx.set(pref, {
+              uid: courierUid,
+              ratingCount: (d.ratingCount || 0) + 1,
+              ratingSum: (d.ratingSum || 0) + rating,
+              avis, updatedAt: new Date()
+            }, { merge: true });
+          });
+        }
+      } catch (e) { console.warn('[courses] agrégation note échouée:', e.message); }
       return res.status(200).json({ ok: true, id, rating });
     } catch (e) {
       const map = { 'introuvable': [404, 'Course introuvable.'], 'pas-ta-course': [403, 'Tu ne peux noter que tes propres livraisons.'],

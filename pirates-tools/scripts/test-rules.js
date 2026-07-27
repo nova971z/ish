@@ -58,6 +58,12 @@ async function check(label, promise) {
     await setDoc(doc(db, 'partner_applications/app1'), { name: 'Candidat', metier: 'Plombier', tier: 'black', createdAt: 1 });
     await setDoc(doc(db, 'partners_private/artisan1'), { guest: true });
     await setDoc(doc(db, 'invite_codes/PT-TEST01'), { active: true, usedBy: '' });
+    // Service coursier : fiche publique du livreur + course avec fil de discussion.
+    await setDoc(doc(db, 'couriers_public/bob'), { uid: 'bob', displayName: 'Bob L.', published: true, available: true, coursesDone: 3, ratingCount: 1, ratingSum: 5, tarifs: { 1: 30 } });
+    await setDoc(doc(db, 'couriers/bob'), { kycStatus: 'valide', email: 'b@x.fr' });
+    await setDoc(doc(db, 'courses/c1'), { artisanUid: 'alice', courierUid: 'bob', status: 'acceptee', code: '123456', prix: 22 });
+    await setDoc(doc(db, 'courses/c1/messages/m1'), { uid: 'alice', role: 'client', text: 'Bonjour', at: 1 });
+    await setDoc(doc(db, 'courses/c2'), { artisanUid: 'carol', courierUid: 'dave', status: 'acceptee' });
   });
 
   console.log('\n── Isolation entre clients ──');
@@ -121,6 +127,33 @@ async function check(label, promise) {
   await check('Alice NE peut PAS modifier une carte partner', assertFails(updateDoc(doc(alice, 'partners/artisan1'), { name: 'Piraté' })));
   await check('Un anonyme NE peut PAS écrire dans partners/', assertFails(setDoc(doc(anon, 'partners/pirate2'), { name: 'Faux' })));
   await check('Alice NE peut PAS supprimer une carte partner', assertFails(deleteDoc(doc(alice, 'partners/artisan1'))));
+
+  console.log('\n── couriers_public/ : fiche livreur publique, écriture serveur seule ──');
+  await check('Un ANONYME lit la fiche publique d\'un livreur', assertSucceeds(getDoc(doc(anon, 'couriers_public/bob'))));
+  await check('Un anonyme LISTE l\'annuaire des livreurs', assertSucceeds(getDocs(collection(anon, 'couriers_public'))));
+  await check('Bob NE peut PAS gonfler SON compteur de courses', assertFails(updateDoc(doc(bob, 'couriers_public/bob'), { coursesDone: 999 })));
+  await check('Bob NE peut PAS se déclarer disponible sans passer par l\'API', assertFails(updateDoc(doc(bob, 'couriers_public/bob'), { available: true })));
+  await check('Bob NE peut PAS s\'inventer un avis 5 étoiles', assertFails(updateDoc(doc(bob, 'couriers_public/bob'), { ratingCount: 50, ratingSum: 250 })));
+  await check('Alice NE peut PAS créer une fausse fiche livreur', assertFails(setDoc(doc(alice, 'couriers_public/pirate'), { displayName: 'Faux', published: true })));
+  await check('Alice NE lit PAS couriers/ (KYC, email, IBAN)', assertFails(getDoc(doc(alice, 'couriers/bob'))));
+
+  console.log('\n── courses/{id}/messages : chat réservé aux DEUX participants ──');
+  const carol = env.authenticatedContext('carol').firestore();
+  await check('Alice NE lit PAS le document course lui-même (montants, code de remise)', assertFails(getDoc(doc(alice, 'courses/c1'))));
+  await check('Alice (cliente) LIT le fil de sa course', assertSucceeds(getDocs(collection(alice, 'courses/c1/messages'))));
+  await check('Bob (livreur) LIT le fil de sa course', assertSucceeds(getDocs(collection(bob, 'courses/c1/messages'))));
+  await check('Alice ÉCRIT un message sur sa course', assertSucceeds(addDoc(collection(alice, 'courses/c1/messages'), { uid: 'alice', role: 'client', text: 'A quelle heure ?', at: 2 })));
+  await check('Bob ÉCRIT un message sur sa course', assertSucceeds(addDoc(collection(bob, 'courses/c1/messages'), { uid: 'bob', role: 'livreur', text: 'Vers 9h', at: 3 })));
+  await check('Carol (tiers) NE lit PAS le fil d\'une course qui n\'est pas la sienne', assertFails(getDocs(collection(carol, 'courses/c1/messages'))));
+  await check('Carol NE écrit PAS dans le fil d\'autrui', assertFails(addDoc(collection(carol, 'courses/c1/messages'), { uid: 'carol', role: 'client', text: 'coucou', at: 4 })));
+  await check('Un anonyme NE lit PAS un fil de course', assertFails(getDocs(collection(anon, 'courses/c1/messages'))));
+  await check('Alice NE peut PAS signer un message au nom de Bob', assertFails(addDoc(collection(alice, 'courses/c1/messages'), { uid: 'bob', role: 'livreur', text: 'faux', at: 5 })));
+  await check('Alice NE peut PAS glisser un champ non prévu', assertFails(addDoc(collection(alice, 'courses/c1/messages'), { uid: 'alice', role: 'client', text: 'x', at: 6, admin: true })));
+  await check('Message VIDE refusé', assertFails(addDoc(collection(alice, 'courses/c1/messages'), { uid: 'alice', role: 'client', text: '', at: 7 })));
+  await check('Message de plus de 800 caractères refusé', assertFails(addDoc(collection(alice, 'courses/c1/messages'), { uid: 'alice', role: 'client', text: 'x'.repeat(801), at: 8 })));
+  await check('Un message ne peut PAS être modifié (preuve en cas de litige)', assertFails(updateDoc(doc(alice, 'courses/c1/messages/m1'), { text: 'reecrit' })));
+  await check('Un message ne peut PAS être supprimé', assertFails(deleteDoc(doc(alice, 'courses/c1/messages/m1'))));
+  await check('Aucun fil sur une course INEXISTANTE', assertFails(addDoc(collection(alice, 'courses/fantome/messages'), { uid: 'alice', role: 'client', text: 'x', at: 9 })));
 
   console.log('\n── Default-deny : collection inconnue ──');
   await check('Alice NE lit PAS une collection non prévue', assertFails(getDoc(doc(alice, 'secret_stuff/x'))));
