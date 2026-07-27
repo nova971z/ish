@@ -172,6 +172,65 @@ pour tous (`scripts/check-pricing-model.js` + contrôle ad hoc 26/07/2026).
 
 ---
 
+## 5 bis. ⚠️ SERVICE DE LIVRAISON — LA PLATEFORME A UNE RESPONSABILITÉ SOCIALE LÉGALE
+**Découvert à l'audit du 27/07/2026. Point le plus lourd du projet.**
+
+**Article L7342-1 du Code du travail** : « Lorsque la plateforme **détermine les
+caractéristiques de la prestation** de service fournie **et fixe son prix**, elle
+a, à l'égard des travailleurs concernés, **une responsabilité sociale**. »
+
+⚠️ Pirates Tools tombe **exactement** dans ce champ : l'user fixe lui-même le
+barème (22 / 48 / 74 / 100 € par zone) ET les caractéristiques (zones, créneaux,
+photos obligatoires, code de remise). **Le fait de ne prendre AUCUN bénéfice sur
+la course ne sort PAS du champ** — c'est la fixation du prix et des
+caractéristiques qui déclenche l'obligation, pas la marge.
+
+Obligations qui en découlent (chapitre L7342-1 à L7342-11) :
+- **Cotisation d'assurance accident du travail PRISE EN CHARGE par la
+  plateforme** (art. L7342-2), dans la limite d'un plafond fixé par décret —
+  sauf si la plateforme souscrit elle-même un contrat collectif équivalent.
+- Contribution à la **formation professionnelle** des travailleurs.
+- **Droit de refuser une prestation sans sanction** (aucune pénalité, aucun
+  déclassement) — à refléter dans le code ET dans les conditions livreur.
+- Droit de constituer une organisation syndicale / d'action collective.
+- **Charte de responsabilité sociale** facultative mais **homologable** par
+  l'autorité administrative (réponse sous 4 mois) : l'homologation sécurise
+  contre la requalification.
+
+🔴 RISQUE MAJEUR ASSOCIÉ — **requalification en contrat de travail**. La
+jurisprudence (Uber, Deliveroo) requalifie quand la plateforme exerce un
+pouvoir de direction, de contrôle et de sanction. Points de vigilance dans
+notre modèle : barème imposé, obligations de preuve (code + 2 photos),
+possibilité de « bloquer » un livreur. À faire valider par un avocat AVANT
+d'ouvrir le service.
+
+⚖️ **ENCAISSEMENT POUR COMPTE DE TIERS** — le modèle « le client paie tout, on
+gèle la part du livreur » = détention de fonds appartenant à un tiers. Illégal
+sans agrément… SAUF en passant par un prestataire agréé. **Stripe Connect est
+donc OBLIGATOIRE avant toute ouverture réelle** (l'escrow actuel sur notre
+propre solde n'est acceptable qu'en TEST, avec nos propres comptes).
+
+Sources : Légifrance L7342-1 à L7342-11
+https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000006072050/LEGISCTA000033013020/
+· art. L7342-2 (assurance AT) https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000039678037
+
+---
+
+## 5 ter. VENTE À DISTANCE — obligations du tunnel de paiement
+- **Art. L221-14 al. 2 C. conso** : le bouton de validation DOIT porter
+  « commande avec obligation de paiement » ou une formule analogue non
+  ambiguë. Sanction : **NULLITÉ du contrat** + amende administrative jusqu'à
+  **15 000 €** pour une personne morale. ✅ CORRIGÉ le 27/07/2026 (SW v494) —
+  le bouton portait « Payer en toute sécurité », non conforme.
+- ✅ Case d'acceptation des CGV + politique de confidentialité posée avant tout
+  débit (preuve du consentement), re-demandée à chaque commande.
+- 🔴 RESTE : **médiateur de la consommation** — l'adhésion est OBLIGATOIRE pour
+  vendre aux particuliers (art. L612-1 C. conso), ses coordonnées doivent
+  figurer dans les CGV et les mentions légales.
+Source : https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000032226854
+
+---
+
 ## 6. Sources officielles (à re-vérifier chaque janvier — loi de finances)
 
 - TVA DOM (taux) — impots.gouv.fr :
