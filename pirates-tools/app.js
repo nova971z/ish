@@ -5183,7 +5183,9 @@
         + '<span class="lv-cbtn__i" aria-hidden="true">🔑</span>'
         + '<span class="lv-cbtn__t">Code de remise</span><span class="lv-cbtn__s">à donner en main propre</span></button>';
     }
-    if (c.status === 'acceptee' && !c.paid && !c.goodsPaid) {
+    // Disponible AUSSI quand la marchandise est réglée : c'est la seule sortie
+    // autonome du client si le livreur ne se présente jamais (audit P5).
+    if ((c.status === 'acceptee' || c.status === 'confirmee') && !c.paid) {
       side += '<button type="button" class="lv-cbtn lv-cbtn--danger" data-cpanel="release">'
         + '<span class="lv-cbtn__i" aria-hidden="true">↩️</span>'
         + '<span class="lv-cbtn__t">Remettre en ligne</span><span class="lv-cbtn__s">si ça ne convient pas</span></button>';
@@ -5324,8 +5326,12 @@
 
   function lvPanelRelease(c) {
     return '<h4 class="lv-panel__t">↩️ Remettre la demande en ligne</h4>'
-      + '<p class="lv-hint">Si vous ne trouvez pas d\'accord, la demande repart chez <strong>tous les livreurs</strong>. '
-      + 'Rien n\'a été débité. <strong>Cette discussion sera close</strong> et le prochain livreur ne pourra pas la lire.</p>'
+      + '<p class="lv-hint">La demande repart chez <strong>tous les livreurs</strong>. '
+      + '<strong>Cette discussion sera close</strong> et le prochain livreur ne pourra pas la lire.</p>'
+      + (c.goodsPaid
+        ? '<div class="lv-note lv-note--ok">✅ <strong>Ta marchandise reste payée</strong> — tu ne la régleras pas une seconde fois. '
+          + 'Dès que tu seras d\'accord avec un nouveau livreur, la course repassera « commandée » automatiquement.</div>'
+        : '<p class="lv-hint">Rien n\'a été débité.</p>')
       + '<div class="lv-cta"><button type="button" class="btn btn--danger" id="lvChatRelease">↩️ Remettre en ligne</button>'
       + '<span class="lv-cta__note" id="lvChatReleaseSt" aria-live="polite"></span></div>';
   }

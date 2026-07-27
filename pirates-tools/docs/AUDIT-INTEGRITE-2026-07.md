@@ -330,3 +330,59 @@ l'ex-livreur perd l'accès. **Conforme**, plus le durcissement P4-1.
 
 **Vérifications** : CI verte · couriers.mjs 76/76 · course-pay.mjs 14/14 ·
 **émulateur Firestore 98/98**.
+
+## PASSE P5 — ARGENT : machine à états, idempotence, taux ✅ (27/07/2026, SW v503)
+
+**Outil créé : `scripts/audit/p5-money.js`**, branché à `ci.js`. La machine à
+états est désormais **DÉCLARÉE noir sur blanc** dans le script ; le contrôle
+extrait du code le statut écrit et la garde de chaque route, et **compare dans
+les deux sens**. Une divergence entre l'intention et le code fait échouer la CI.
+
+### La machine à états, écrite et vérifiée
+
+| Route | Depuis | Vers | Déclenché par |
+|---|---|---|---|
+| `course-request` | (création) | `en_attente` | client |
+| `course-accept` | `en_attente` | `acceptee` | livreur (1er arrivé, transaction) |
+| `course-goods-paid` | `acceptee` | `confirmee` | client (paiement vérifié chez Stripe) |
+| `course-accord-accept` | `acceptee` | `confirmee` | participant — **uniquement si la marchandise est déjà réglée** |
+| `course-release` | `acceptee` · `confirmee` | `en_attente` | participant |
+| `course-cancel` | `en_attente` · `acceptee` | `annulee` | client |
+| `course-deliver` | `confirmee` · `acceptee`+payée | `livree` | livreur (code + 2 photos) |
+| `course-confirm` | `livree` | `terminee` | client |
+
+### Défauts trouvés et corrigés
+
+| # | Gravité | Défaut | Correctif |
+|---|---|---|---|
+| P5-1 | 🟠 | **ÉTAT PIÈGE.** Depuis `confirmee` (marchandise réglée), les seules issues étaient : le livreur livre, ou un litige. **Un client ayant payé et dont le livreur ne se présente jamais n'avait AUCUNE sortie autonome** — son argent était engagé et seul un email à l'exploitant débloquait la situation. | `course-release` autorisé depuis `confirmee`. **`goodsPaid` est conservé** : dès qu'un nouvel accord est validé, la course repasse « confirmée » **sans second paiement** (`course-accord-accept` → `confirmee` si `goodsPaid`). Corollaire : `course-cancel` refuse désormais si la marchandise est payée — annuler devient une décision commerciale (chat ou litige), plus un clic. |
+| P5-2 | 🟡 | **`course-goods-paid` n'avait AUCUNE garde de statut** : elle écrivait `confirmee` depuis n'importe quel état. Non exploitable aujourd'hui (la sortie anticipée sur `goodsPaid` bloque le rejeu), mais une route qui touche à l'argent ne doit jamais écrire un statut à l'aveugle. | Garde `status === 'acceptee'` ajoutée, et le contrôle d'idempotence remonté AVANT la vérification de l'accord. |
+
+**Détecteur prouvé capable d'échouer** : le piège réintroduit → `❌ course-release`
++ sortie en erreur ; retiré → vert.
+
+### Contrôles PASSÉS
+
+- ✅ **Accessibilité** : depuis chacun des 4 états non terminaux, il existe au
+  moins une sortie **déclenchable par les parties elles-mêmes**. Plus aucun état
+  ne dépend d'une intervention humaine de l'exploitant.
+- ✅ **Idempotence des 4 chemins d'argent** :
+  création de course (id du doc = id du PaymentIntent, `create()` atomique) ·
+  événements Stripe (claim de `event.id` avant tout effet) ·
+  marchandise réglée (sortie anticipée) ·
+  acceptation (transaction, second arrivé refusé).
+- ✅ **Taux de TVA conformes** à `METHODE-ENTREPRISE-FISCALITE.md` §2 :
+  971/972/974 = 8,5 % · 973/976 = non applicable. Vérifié champ par champ.
+- ✅ Les **7 contrôles argent préexistants** (parité des prix client/serveur,
+  modèle de marge, fidélité, coffret, comptabilité, facture, claim webhook)
+  sont verts.
+
+### Test réaligné, et pourquoi
+Une assertion écrite à la passe P3 (« Course confirmée : plus de remise en
+ligne ») **verrouillait précisément le piège**. La spécification ayant changé,
+le test change avec elle — il vérifie désormais que la sortie existe. Ce n'est
+pas un test qu'on assouplit pour faire passer du rouge : c'est une intention
+corrigée, donc une assertion corrigée.
+
+**Vérifications** : CI verte · couriers.mjs **80/80** · course-pay.mjs 14/14 ·
+émulateur Firestore 98/98.

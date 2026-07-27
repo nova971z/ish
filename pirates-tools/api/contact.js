@@ -639,7 +639,12 @@ async function handleCourses(req, body, cfg, res) {
         if (role === 'client') a.okClient = true; else a.okLivreur = true;
         a.valide = !!(a.okClient && a.okLivreur);
         if (a.valide) a.valideAt = new Date();
-        tx.update(ref, { accord: a });
+        // Course remise en ligne APRÈS paiement de la marchandise : dès que le
+        // nouvel accord est validé, elle repasse « confirmée » sans second
+        // paiement. Le client ne paie sa marchandise QU'UNE FOIS (audit P5).
+        const patch = { accord: a };
+        if (a.valide && c.goodsPaid) { patch.status = 'confirmee'; patch.confirmedOrderAt = new Date(); }
+        tx.update(ref, patch);
         return { role, action: a.valide ? 'valide' : 'accept', accord: a, round: c.round || 1, course: c };
       });
     } catch (e) {
@@ -712,8 +717,12 @@ async function handleCourses(req, body, cfg, res) {
         if (!d.exists) throw new Error('introuvable');
         const c = d.data();
         if (c.artisanUid !== uid) throw new Error('pas-ta-course');
-        if (!c.accord || !c.accord.valide) throw new Error('accord-manquant');
         if (c.goodsPaid) return c;                     // idempotent (double clic / retour /merci)
+        if (!c.accord || !c.accord.valide) throw new Error('accord-manquant');
+        // GARDE DE STATUT (audit P5) : une route qui écrit un statut ne doit
+        // jamais le faire depuis n'importe quel état. Sans elle, `confirmee`
+        // pouvait être écrit par-dessus un état plus avancé.
+        if (c.status !== 'acceptee') throw new Error('pas-en-negociation');
         tx.update(ref, {
           goodsPaid: true, goodsPaymentIntentId: pi.id,
           goodsAmountCents: pi.amount || 0,
@@ -725,7 +734,8 @@ async function handleCourses(req, body, cfg, res) {
       const map = {
         'introuvable': [404, 'Course introuvable.'],
         'pas-ta-course': [403, 'Cette livraison n\'est pas la tienne.'],
-        'accord-manquant': [409, 'L\'accord doit être validé par les deux parties avant le paiement.']
+        'accord-manquant': [409, 'L\'accord doit être validé par les deux parties avant le paiement.'],
+        'pas-en-negociation': [409, 'Cette course n\'est plus au stade de la mise en relation.']
       };
       const m = map[e.message];
       if (m) return res.status(m[0]).json({ ok: false, error: m[1] });
@@ -766,7 +776,12 @@ async function handleCourses(req, body, cfg, res) {
         if (!d.exists) throw new Error('introuvable');
         const c = d.data();
         if (c.artisanUid !== uid && c.courierUid !== uid) throw new Error('pas-participant');
-        if (c.status !== 'acceptee') throw new Error('pas-acceptee');
+        // 'confirmee' est AUTORISÉ ici (audit P5) : sans ça, un client qui a
+        // réglé sa marchandise et dont le livreur ne se présente jamais n'avait
+        // AUCUNE sortie autonome — seul un litige, donc une intervention
+        // humaine, débloquait la situation alors que son argent était engagé.
+        // `goodsPaid` est CONSERVÉ : il ne repaiera jamais deux fois.
+        if (c.status !== 'acceptee' && c.status !== 'confirmee') throw new Error('pas-acceptee');
         if (c.paid) throw new Error('deja-payee');
         tx.update(ref, {
           status: 'en_attente', chatOpen: false,
@@ -816,6 +831,10 @@ async function handleCourses(req, body, cfg, res) {
         if (c.artisanUid !== uid) throw new Error('pas-ta-course');
         if (!['en_attente', 'acceptee'].includes(c.status)) throw new Error('trop-tard');
         if (c.paid) throw new Error('deja-payee');
+        // Marchandise déjà réglée : l'annulation n'est plus un simple bouton,
+        // c'est une décision commerciale (remboursement, retrait des articles).
+        // Elle passe par la discussion ou le litige, pas par un clic.
+        if (c.goodsPaid) throw new Error('marchandise-payee');
         tx.update(ref, { status: 'annulee', chatOpen: false, canceledAt: new Date() });
         return c;
       });
@@ -824,7 +843,8 @@ async function handleCourses(req, body, cfg, res) {
         'introuvable': [404, 'Demande introuvable.'],
         'pas-ta-course': [403, 'Tu ne peux annuler que tes propres demandes.'],
         'trop-tard': [409, 'Trop tard : cette livraison est déjà en cours ou terminée.'],
-        'deja-payee': [409, 'Cette course a été payée — contacte-nous plutôt que de l\'annuler.']
+        'deja-payee': [409, 'Cette course a été payée — contacte-nous plutôt que de l\'annuler.'],
+        'marchandise-payee': [409, 'Ta marchandise est déjà réglée : passe par la discussion pour convenir de la suite (ou remets la demande en ligne pour trouver un autre livreur).']
       };
       const m = map[e.message];
       if (m) return res.status(m[0]).json({ ok: false, error: m[1] });
