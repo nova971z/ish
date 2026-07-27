@@ -7594,7 +7594,15 @@
     var btn = document.getElementById('deleteAccountBtn');
     var pwd = pwdEl ? pwdEl.value : '';
     if (!pwd) { toast('Confirme ton mot de passe', 'error'); return; }
-    if (!window.confirm('Cette action est IRRÉVERSIBLE : ton compte, ton profil et ton historique seront supprimés définitivement. Continuer ?')) return;
+    if (!window.confirm(
+      'Cette action est IRRÉVERSIBLE.\n\n'
+      + 'SUPPRIMÉ : ton compte, ton profil, tes commandes, ta fiche livreur publique '
+      + '(nom, photo, avis), ton dossier et tes pièces, les photos, les vidéos et '
+      + 'les conversations de tes livraisons.\n\n'
+      + 'CONSERVÉ : les justificatifs de paiement, que la loi comptable nous oblige '
+      + 'à garder. Les livraisons déjà effectuées sont conservées SANS ton identité '
+      + '(le livreur a droit à son historique de travail).\n\n'
+      + 'Continuer ?')) return;
 
     if (btn) { btn.disabled = true; btn.textContent = 'Suppression…'; }
     var user = _fb.auth.currentUser;
@@ -7603,20 +7611,25 @@
 
     _fb.reauthenticateWithCredential(user, cred)
       .then(function () {
-        // Purge les commandes du client (chacune supprimée par le titulaire).
-        var ordersRef = _fb.collection(_fb.db, 'users', uid, 'orders');
-        return _fb.getDocs(ordersRef).then(function (snap) {
-          var dels = [];
-          snap.forEach(function (d) { dels.push(_fb.deleteDoc(d.ref)); });
-          return Promise.all(dels);
+        // PURGE SERVEUR (audit P6). Le client ne peut effacer que son profil et
+        // ses commandes : les règles lui interdisent de toucher aux courses, au
+        // fil de discussion, aux photos, à sa fiche livreur publique et à son
+        // dossier KYC. Sans cet appel, tout cela SURVIVAIT à la suppression du
+        // compte — dont son nom et sa photo, publiquement lisibles.
+        return jsonAuthHeaders().then(function (headers) {
+          return fetch(apiBaseUrl() + '/api/contact', {
+            method: 'POST', headers: headers, body: JSON.stringify({ type: 'account-erase' })
+          });
+        }).then(function (r) { return r.json(); }).then(function (d) {
+          // Échec = ARRÊT. Supprimer le compte Auth malgré une purge ratée
+          // laisserait les données orphelines et SANS titulaire pour les
+          // réclamer : le pire des deux mondes.
+          if (!d || !d.ok) throw new Error(d && d.error ? d.error : 'La suppression de tes données a échoué. Ton compte n\'a PAS été supprimé — réessaie ou écris-nous.');
+          return d;
         });
       })
       .then(function () {
-        // Supprime le document profil.
-        return _fb.deleteDoc(_fb.doc(_fb.db, 'users', uid));
-      })
-      .then(function () {
-        // Supprime le compte Auth (en dernier).
+        // Compte Auth en DERNIER : tant qu'il existe, la purge est réclamable.
         return _fb.deleteUser(user);
       })
       .then(function () {

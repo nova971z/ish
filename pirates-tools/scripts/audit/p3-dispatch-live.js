@@ -42,7 +42,7 @@ const COURSE_TYPES = [
   'courier-profile', 'courier-profile-save', 'courier-available',
   'course-request', 'course-release', 'course-cancel',
   'course-accord-propose', 'course-accord-accept', 'course-accord-reject',
-  'course-goods-paid'
+  'course-goods-paid', 'account-erase'
 ];
 
 function fakeRes() {

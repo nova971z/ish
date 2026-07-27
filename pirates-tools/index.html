@@ -44,7 +44,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=503">
+  <link rel="stylesheet" href="styles.css?v=504">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -1498,6 +1498,19 @@
           <li><strong>Paiement crypto :</strong> seule une adresse publique de portefeuille est affichée ; aucune donnée personnelle n'est traitée.</li>
         </ul>
 
+        <h3>2 bis. Service de livraison sur chantier</h3>
+        <p>Ce service met en relation un client et un livreur indépendant. Il traite des données supplémentaires, listées ici sans exception&nbsp;:</p>
+        <ul>
+          <li><strong>Demande de livraison (client) :</strong> adresse du chantier et ses <strong>coordonnées GPS</strong> (obtenues via la Base Adresse Nationale), date et créneau souhaités, articles à livrer, et une <strong>photo du chantier</strong> que vous prenez vous-même pour indiquer le point de dépôt.</li>
+          <li><strong>Fiche livreur (publique) :</strong> nom affiché, photo, commune, véhicule, présentation, tarifs, disponibilité, nombre de courses livrées, note moyenne et avis reçus. Ces informations sont <strong>visibles de tous les visiteurs</strong> — c'est leur objet même. <strong>Aucune pièce d'identité, aucun document justificatif et aucune coordonnée bancaire n'y figure jamais.</strong></li>
+          <li><strong>Dossier livreur (privé) :</strong> pièce d'identité, justificatif d'auto-entrepreneur, attestations d'assurance, permis et carte grise le cas échéant, coordonnées bancaires. <strong>Strictement inaccessible depuis le site</strong> ; réservé à la vérification d'éligibilité.</li>
+          <li><strong>Discussion client ↔ livreur :</strong> le contenu des messages échangés. Ils sont <strong>immuables</strong> (ni modifiables ni effaçables par leurs auteurs) car ils font foi en cas de litige, et ne sont lisibles que par les deux personnes concernées.</li>
+          <li><strong>Preuves de livraison :</strong> code de remise à 6 chiffres, photo du colis remis et photo du chantier prises par le livreur. Visibles des deux parties uniquement.</li>
+          <li><strong>Vidéos de remise (facultatives) :</strong> déposées par l'une ou l'autre partie, avec l'accord préalable des deux. Elles ne sont <strong>jamais publiées</strong>, ne sont consultables que par l'administrateur en cas de litige, et sont <strong>effacées à la clôture du litige</strong>.</li>
+          <li><strong>Avis publiés :</strong> une note et un commentaire apparaissent sur la fiche du livreur <strong>sans le nom ni l'adresse email de leur auteur</strong>.</li>
+        </ul>
+        <p>Le <strong>prix de la course est convenu directement entre le client et le livreur</strong> et ne transite pas par Pirates Tools&nbsp;: nous n'en conservons que le montant inscrit dans l'accord, à titre de preuve de ce qui a été convenu.</p>
+
         <h2>3. Finalités et bases légales</h2>
         <ul>
           <li><strong>Gérer votre compte et vos commandes</strong> — exécution du contrat.</li>
@@ -1529,9 +1542,14 @@
           <li><strong>Prospection / newsletter :</strong> jusqu'au retrait du consentement, et au plus 3 ans après le dernier contact.</li>
           <li><strong>Messages de contact :</strong> 3 ans après le dernier échange.</li>
           <li><strong>Cookies :</strong> 13 mois maximum.</li>
+          <li><strong>Demandes et livraisons :</strong> conservées le temps de la relation ; à la suppression de votre compte, les livraisons <strong>déjà effectuées</strong> sont conservées <strong>sans votre identité</strong> (le livreur, qui est un tiers, conserve son historique de travail), et les demandes non exécutées sont supprimées.</li>
+          <li><strong>Photos et conversations de livraison :</strong> supprimées avec votre compte, ou à la clôture d'un éventuel litige.</li>
+          <li><strong>Vidéos de remise :</strong> supprimées dès la clôture du litige, et au plus tard avec votre compte.</li>
+          <li><strong>Dossier et pièces du livreur :</strong> supprimés avec le compte.</li>
         </ul>
 
         <h2>7. Vos droits</h2>
+        <p><strong>Effacement — ce qui se passe exactement.</strong> Le bouton «&nbsp;Supprimer mon compte&nbsp;» de votre espace client déclenche la suppression de&nbsp;: votre profil, vos commandes, votre fiche livreur publique (nom, photo, avis), votre dossier et vos pièces justificatives, les photos, les vidéos et les conversations de vos livraisons, ainsi que les demandes non exécutées. Sont <strong>conservés</strong>&nbsp;: les justificatifs de paiement, que la loi comptable impose de garder&nbsp;10&nbsp;ans, et les livraisons déjà effectuées, <strong>sans votre identité</strong>. Si un <strong>litige est en cours</strong>, l'effacement est suspendu jusqu'à sa clôture (article&nbsp;17.3.e du RGPD) et vous en êtes informé immédiatement.</p>
         <p>Conformément aux articles 15 à 22 du RGPD, vous disposez des droits suivants : <strong>accès</strong>, <strong>rectification</strong>, <strong>effacement</strong>, <strong>limitation</strong>, <strong>portabilité</strong>, <strong>opposition</strong>, et <strong>retrait de votre consentement</strong> à tout moment. Vous pouvez aussi définir des directives sur le sort de vos données après votre décès.</p>
         <p>Pour exercer ces droits, écrivez à : <a href="mailto:contact@pirates-tools.com">contact@pirates-tools.com</a>. Une réponse vous sera apportée dans un délai maximum d'un mois.</p>
         <p><strong>Suppression directe :</strong> vous pouvez supprimer vous-même votre compte et vos données (profil, historique de commandes) depuis <strong>Mon compte → Paramètres → « Supprimer mon compte »</strong>. Seuls les justificatifs de paiement que la loi impose de conserver (obligations comptables et fiscales) sont conservés de façon dissociée pendant la durée légale.</p>
@@ -1589,6 +1607,19 @@
           <li><strong>Frais :</strong> [À COMPLÉTER : grille des frais de livraison].</li>
         </ul>
         <p>Les délais sont donnés à titre indicatif. Le transfert des risques (perte, dommage) intervient à la remise du produit au Client. En cas de colis endommagé, le Client doit émettre des réserves auprès du transporteur et en informer le Vendeur.</p>
+
+        <h2>6 bis. Livraison sur chantier — service de MISE EN RELATION</h2>
+        <p>À distinguer strictement de l'article&nbsp;6 (expédition de vos produits par transporteur). La «&nbsp;livraison sur chantier&nbsp;» est un service <strong>de mise en relation</strong>&nbsp;:</p>
+        <ul>
+          <li><strong>Le livreur est un professionnel indépendant</strong>, ni salarié ni sous-traitant de [À COMPLÉTER&nbsp;: raison sociale]. Il n'agit pas en son nom.</li>
+          <li><strong>Le prix de la course est convenu librement entre le Client et le livreur</strong> dans la discussion prévue à cet effet. [À COMPLÉTER&nbsp;: raison sociale] <strong>ne le fixe pas, ne l'impose pas et ne l'encaisse pas</strong>&nbsp;: il est réglé directement au livreur, par virement sur sa facture ou en espèces, selon ce que les deux parties ont inscrit dans leur accord.</li>
+          <li><strong>Le montant réglé sur le site correspond uniquement à la marchandise</strong> vendue par [À COMPLÉTER&nbsp;: raison sociale]. Aucun euro de la course ne transite par le site.</li>
+          <li>Le contrat de transport se forme <strong>entre le Client et le livreur</strong>. La responsabilité de la bonne exécution de la course (ponctualité, état des marchandises pendant le transport, dommages) incombe au livreur, dans les conditions du droit commun.</li>
+          <li>Le rôle de [À COMPLÉTER&nbsp;: raison sociale] se limite à&nbsp;: publier la demande auprès des livreurs inscrits, fournir l'outil de discussion, l'accord écrit, le code de remise et les preuves photographiques, et conserver ces éléments en cas de litige.</li>
+          <li>Chaque partie peut <strong>remettre la demande en ligne</strong> tant que la livraison n'a pas eu lieu&nbsp;; le Client ne règle jamais deux fois sa marchandise.</li>
+          <li>En cas de difficulté, un <strong>litige</strong> peut être ouvert depuis l'espace personnel&nbsp;: [À COMPLÉTER&nbsp;: raison sociale] examine les éléments et rend un avis, sans se substituer aux juridictions compétentes.</li>
+        </ul>
+        <p class="legal-note">Cette architecture est délibérée&nbsp;: elle garantit que le livreur reste maître de son tarif et de son organisation.</p>
 
         <h2>7. Droit de rétractation</h2>
         <p>Conformément aux articles L.221-18 et suivants du Code de la consommation, le Client particulier dispose d'un délai de <strong>14 jours</strong> à compter de la réception du produit pour exercer son droit de rétractation, sans avoir à motiver sa décision.</p>
@@ -2056,7 +2087,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=503"></script>
+  <script defer src="app.js?v=504"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

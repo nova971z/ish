@@ -1,6 +1,6 @@
 /* =========================================================
    Pirates Tools — CI runner
-   - Agrège: audit/p1-static (intégrité statique AST), audit/p2-xss (injection HTML), audit/p3-* (securite serveur + aiguillage reel), audit/p4-firestore (regles + index), audit/p5-money (machine a etats + taux), check-required-ids, check-paths, check-products-json
+   - Agrège: audit/p1-static (intégrité statique AST), audit/p2-xss (injection HTML), audit/p3-* (securite serveur + aiguillage reel), audit/p4-firestore (regles + index), audit/p5-money (machine a etats + taux), audit/p6-rgpd (effacement + information), check-required-ids, check-paths, check-products-json
    - + Optionnel: lint-products.js (si présent) sur products.json
    - Robuste: safe require, rapports clairs, exitCode propre
 ========================================================= */
@@ -31,6 +31,7 @@ var p3Endpoints = safeRequire('./audit/p3-endpoints', 'audit/p3-endpoints');
 var p3Dispatch  = safeRequire('./audit/p3-dispatch-live', 'audit/p3-dispatch-live');
 var p4Firestore = safeRequire('./audit/p4-firestore', 'audit/p4-firestore');
 var p5Money     = safeRequire('./audit/p5-money', 'audit/p5-money');
+var p6Rgpd      = safeRequire('./audit/p6-rgpd', 'audit/p6-rgpd');
 var reqPaths    = safeRequire('./check-paths',       'check-paths');
 var reqProducts = safeRequire('./check-products-json','check-products-json');
 var reqPricing  = safeRequire('./check-pricing',     'check-pricing');
@@ -74,6 +75,7 @@ var reqPartApp  = safeRequire('./check-partner-application','check-partner-appli
   await runOne(p3Dispatch,  'audit/p3-dispatch-live');
   await runOne(p4Firestore, 'audit/p4-firestore');
   await runOne(p5Money,     'audit/p5-money');
+  await runOne(p6Rgpd,      'audit/p6-rgpd');
   await runOne(reqPaths,    'check-paths');
   await runOne(reqProducts, 'check-products-json');
   await runOne(reqPricing,  'check-pricing');

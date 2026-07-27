@@ -67,7 +67,8 @@ module.exports = async function handler(req, res) {
       || body.type === 'course-request' || body.type === 'course-release'
       || body.type === 'course-cancel'
       || body.type === 'course-accord-propose' || body.type === 'course-accord-accept'
-      || body.type === 'course-accord-reject' || body.type === 'course-goods-paid') {
+      || body.type === 'course-accord-reject' || body.type === 'course-goods-paid'
+      || body.type === 'account-erase') {
     return handleCourses(req, body, { apiKey, from, ownerEmail }, res);
   }
 
@@ -561,6 +562,97 @@ async function handleCourses(req, body, cfg, res) {
       ok: true, created: cc.created,
       course: { id: cc.id, km: cc.course.km, zone: cc.course.zone, prix: cc.course.prix }
     });
+  }
+
+  // ══ DROIT À L'EFFACEMENT (art. 17 RGPD) — purge SERVEUR ══════════════════
+  // Le client seul ne peut effacer que users/{uid} et ses commandes : les
+  // règles Firestore lui interdisent (à raison) de toucher aux courses, au
+  // fil de discussion, aux photos, à sa fiche livreur publique et à son
+  // dossier KYC. Sans cette route, le bouton « supprimer mon compte » laissait
+  // donc en base : le NOM et la PHOTO publiquement lisibles du livreur,
+  // l'adresse des chantiers, les emails, les conversations, les photos et les
+  // vidéos. Il promettait un effacement qu'il ne faisait pas (audit P6).
+  //
+  // POLITIQUE, écrite et assumée :
+  //   • SUPPRIMÉ    profil, commandes, fiche publique, dossier livreur + KYC,
+  //                 photos, messages, vidéos, courses non exécutées.
+  //   • ANONYMISÉ   courses déjà livrées/terminées — montants et dates restent
+  //                 (obligation comptable, et le LIVREUR est un tiers dont
+  //                 l'historique de travail ne peut pas être effacé par l'autre
+  //                 partie). Identité, email, adresse et code sont retirés.
+  //   • CONSERVÉ    payments/ — obligation légale de conservation comptable.
+  //   • BLOQUÉ      si un litige est OUVERT : art. 17.3.e RGPD (constatation ou
+  //                 exercice d'un droit en justice). L'utilisateur en est informé.
+  if (body.type === 'account-erase') {
+    const purge = { courses: 0, anonymisees: 0, messages: 0, photos: 0, videos: 0, fiches: 0 };
+    // 1. Litige ouvert → on ne touche à rien et on l'explique.
+    const [asClient, asCourier] = await Promise.all([
+      db.collection('courses').where('artisanUid', '==', uid).get(),
+      db.collection('courses').where('courierUid', '==', uid).get()
+    ]);
+    const toutes = [];
+    const vus = new Set();
+    [...asClient.docs, ...asCourier.docs].forEach((d) => { if (!vus.has(d.id)) { vus.add(d.id); toutes.push(d); } });
+    const litige = toutes.find((d) => (d.data().litige || {}).open);
+    if (litige) {
+      return res.status(409).json({
+        ok: false,
+        error: 'Un litige est en cours sur une de tes livraisons. La loi nous oblige à conserver '
+          + 'les éléments tant qu\'il n\'est pas clos (RGPD art. 17.3.e). Ton compte sera effaçable '
+          + 'dès la clôture — écris-nous si tu veux qu\'on la traite en priorité.'
+      });
+    }
+
+    // 2. Courses : suppression ou anonymisation, sous-collections d'abord.
+    const EXECUTEES = ['livree', 'terminee'];
+    for (const d of toutes) {
+      const c = d.data();
+      const ref = d.ref;
+      for (const sub of ['photos', 'messages']) {
+        const snap = await ref.collection(sub).get();
+        for (const doc of snap.docs) { await doc.ref.delete(); purge[sub]++; }
+      }
+      if ((c.videos || []).length) {
+        try {
+          const bucketName = process.env.FIREBASE_STORAGE_BUCKET || 'pirates-tools.firebasestorage.app';
+          await admin.storage().bucket(bucketName).deleteFiles({ prefix: 'courses/' + d.id + '/videos/' });
+          purge.videos += c.videos.length;
+        } catch (e) { console.warn('[erase] vidéos:', e.message); }
+      }
+      if (EXECUTEES.includes(c.status)) {
+        // Anonymisation : on garde la trace économique, on retire l'identité.
+        const patch = { videos: admin.firestore.FieldValue.delete() };
+        if (c.artisanUid === uid) {
+          Object.assign(patch, {
+            artisanUid: 'compte-supprime', artisanEmail: null,
+            address: '(adresse effacée à la demande du client)',
+            code: null, lines: [], hasScene: false, hasProof: false
+          });
+        }
+        if (c.courierUid === uid) {
+          Object.assign(patch, { courierUid: 'compte-supprime', courierEmail: null, courierName: '' });
+        }
+        await ref.update(patch);
+        purge.anonymisees++;
+      } else {
+        await ref.delete();
+        purge.courses++;
+      }
+    }
+
+    // 3. Fiches et dossiers strictement personnels : suppression pure.
+    for (const coll of ['couriers_public', 'couriers', 'courier_applications']) {
+      const doc = await db.collection(coll).doc(uid).get();
+      if (doc.exists) { await doc.ref.delete(); purge.fiches++; }
+    }
+
+    // 4. Profil et commandes (l'Admin SDK les efface sans dépendre des règles).
+    const orders = await db.collection('users').doc(uid).collection('orders').get();
+    for (const o of orders.docs) await o.ref.delete();
+    await db.collection('users').doc(uid).delete().catch(() => {});
+
+    console.log('[erase] compte purgé', JSON.stringify(purge));   // aucun uid, aucune PII
+    return res.status(200).json({ ok: true, purge });
   }
 
   // ══ DEMANDE DE LIVRAISON — SANS PAIEMENT (flux courant, 27/07/2026) ═══════

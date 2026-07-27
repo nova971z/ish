@@ -386,3 +386,100 @@ corrigée, donc une assertion corrigée.
 
 **Vérifications** : CI verte · couriers.mjs **80/80** · course-pay.mjs 14/14 ·
 émulateur Firestore 98/98.
+
+## PASSE P6 — DONNÉES PERSONNELLES (RGPD) ✅ (27/07/2026, SW v504)
+
+**Outil créé : `scripts/audit/p6-rgpd.js`**, branché à `ci.js`. 4 contrôles.
+Cadre posé par l'user : les champs `[À COMPLÉTER]` des textes légaux sont
+**volontaires** (société non créée, à remplir avec un avocat et un médiateur) —
+ils ne sont pas comptés comme défauts. En revanche l'**intégrité** des textes,
+elle, est contrôlée.
+
+### 🔴 Défaut majeur : le bouton « Supprimer mon compte » MENTAIT
+
+Il annonçait « ton compte, ton profil et ton **historique** seront supprimés
+définitivement » et n'effaçait en réalité que `users/{uid}` et ses commandes.
+**Survivaient à la suppression** :
+
+| Donnée | Gravité |
+|---|---|
+| `couriers_public/{uid}` — **nom et photo LISIBLES PAR TOUT LE MONDE** | 🔴 |
+| `couriers/{uid}` — dossier livreur, email, Stripe Connect | 🔴 |
+| `courier_applications/{uid}` — pièce d'identité, SIRET, assurances | 🔴 |
+| `courses/*` — adresse du chantier, GPS, emails, code de remise | 🔴 |
+| `courses/*/messages` — conversations | 🟠 |
+| `courses/*/photos` — photos de chantier et de remise | 🟠 |
+| Storage `courses/*/videos` — vidéos de remise | 🟠 |
+
+**Cause racine** : `M4` (droit à l'oubli) a été implémenté **avant** le module
+livraison. Chaque fonctionnalité livrée depuis a élargi la surface de données
+personnelles sans jamais élargir l'effacement. Le client ne PEUT pas effacer
+ces collections lui-même — les règles Firestore le lui interdisent, à raison.
+
+**Correctif** : route serveur **`account-erase`** (Admin SDK), avec une
+politique écrite et assumée :
+- **SUPPRIMÉ** : profil, commandes, fiche publique, dossier + pièces, photos,
+  messages, vidéos, et les demandes **non exécutées**.
+- **ANONYMISÉ** : les livraisons **déjà effectuées** — montants et dates
+  conservés, identité/email/adresse/code retirés. Motif : le **livreur est un
+  tiers** dont l'historique de travail ne peut pas être effacé par l'autre partie.
+- **CONSERVÉ** : `payments/` — obligation comptable (10 ans).
+- **SUSPENDU** : si un litige est **ouvert**, l'effacement est refusé avec un
+  message explicite (**art. 17.3.e RGPD** — constatation ou exercice d'un droit
+  en justice).
+
+Le texte de confirmation dit désormais **exactement** ce qui part et ce qui
+reste. Et si la purge échoue, **le compte Auth n'est PAS supprimé** : des
+données orphelines sans titulaire pour les réclamer seraient le pire des deux
+mondes.
+
+### 🔴 Défaut : la politique de confidentialité ignorait tout le module livraison
+
+Mesure avant correctif — occurrences dans la page : `livreur` **0** ·
+`chantier` **0** · `photo` **0** · `vidéo` **0** · `géolocalisation` **0**.
+Le site collecte pourtant adresse de chantier + **coordonnées GPS**, photos de
+chantier et de preuve, vidéos de remise, conversations, dossier KYC, fiche
+publique et avis. **Collecte silencieuse = manquement à l'art. 13 RGPD**, et ce
+n'est pas un `[À COMPLÉTER]` : c'est une section absente.
+
+**Correctif** : section **2 bis** rédigée **à partir du code** (chaque donnée
+annoncée correspond à une donnée réellement collectée), durées de conservation
+correspondantes en §6, et §7 décrivant précisément ce que l'effacement fait.
+
+### 🟠 Défaut : les CGV présentaient la livraison comme un service Pirates Tools
+
+L'article 6 ne traite que l'**expédition de colis par transporteur**. Le service
+« livraison sur chantier » n'était mentionné **nulle part** — un client pouvait
+donc légitimement croire que Pirates Tools livre et en répond, ce qui
+**contredit frontalement** le montage juridique (§ 5 bis de
+`METHODE-ENTREPRISE-FISCALITE.md`) et ruinerait la sortie de l'art. L7342-1.
+
+**Correctif** : article **6 bis « Livraison sur chantier — service de MISE EN
+RELATION »** : livreur professionnel indépendant · prix convenu entre les
+parties, **ni fixé ni encaissé** par la plateforme · seule la marchandise est
+réglée sur le site · le contrat de transport se forme entre le client et le
+livreur · rôle de la plateforme limité et énuméré · remise en ligne sans second
+paiement · litige. (5 nouveaux `[À COMPLÉTER]` : la raison sociale.)
+
+### Contrôles PASSÉS
+
+- ✅ **Minimisation** : aucun champ d'identité (email, KYC, SIRET, IBAN,
+  téléphone, date de naissance, pièces) ne peut entrer dans la fiche publique.
+- ✅ **Avis publiés** : note + commentaire + date, **sans nom ni email** de leur
+  auteur.
+- ✅ **Journaux serveur** : 87 appels de journalisation inspectés, **aucune**
+  adresse email ni postale en clair (les 8 premiers signalements étaient des
+  faux positifs — le *mot* « email » dans un libellé, vérifié un par un).
+- ✅ **Emails affichés** : `contact@pirates-tools.com` ×18, le gmail personnel
+  n'apparaît nulle part.
+
+### Erreur d'outil corrigée (et pourquoi je la consigne)
+Le premier détecteur d'effacement déclarait `couriers_public` « traité » **alors
+qu'il ne l'était pas** : ma tranche de code partait de la ligne de *routage* et
+englobait des gestionnaires voisins qui lisent cette collection. Même classe
+d'erreur qu'en P5. Le contrôle a été corrigé puis **prouvé capable d'échouer**
+(défaut réintroduit → rouge ; restauré → vert). Un détecteur non éprouvé ne
+vaut rien, et un détecteur faussement vert est pire que pas de détecteur.
+
+**Vérifications** : CI verte · couriers.mjs 80/80 · course-pay.mjs 14/14 ·
+émulateur Firestore 98/98.
