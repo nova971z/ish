@@ -1,6 +1,6 @@
 /* =========================================================
    Pirates Tools — CI runner
-   - Agrège: audit/p1-static (intégrité statique AST), check-required-ids, check-paths, check-products-json
+   - Agrège: audit/p1-static (intégrité statique AST), audit/p2-xss (injection HTML), check-required-ids, check-paths, check-products-json
    - + Optionnel: lint-products.js (si présent) sur products.json
    - Robuste: safe require, rapports clairs, exitCode propre
 ========================================================= */
@@ -26,6 +26,7 @@ function asArray(x){
 
 var reqIds      = safeRequire('./check-required-ids', 'check-required-ids');
 var p1Static    = safeRequire('./audit/p1-static', 'audit/p1-static');
+var p2Xss       = safeRequire('./audit/p2-xss', 'audit/p2-xss');
 var reqPaths    = safeRequire('./check-paths',       'check-paths');
 var reqProducts = safeRequire('./check-products-json','check-products-json');
 var reqPricing  = safeRequire('./check-pricing',     'check-pricing');
@@ -64,6 +65,7 @@ var reqPartApp  = safeRequire('./check-partner-application','check-partner-appli
 
   await runOne(reqIds,      'check-required-ids');
   await runOne(p1Static,    'audit/p1-static');
+  await runOne(p2Xss,       'audit/p2-xss');
   await runOne(reqPaths,    'check-paths');
   await runOne(reqProducts, 'check-products-json');
   await runOne(reqPricing,  'check-pricing');

@@ -3673,6 +3673,16 @@
   function isSafePartnerImg(src) {
     return typeof src === 'string' && /^data:image\/(jpeg|png|webp);base64,/.test(src);
   }
+  // Défense en profondeur GÉNÉRALISÉE (audit P2) : toute image issue de la base
+  // — photo de chantier, preuve de livraison, logo ou photo d'artisan — passe
+  // par ce filtre avant d'entrer dans un attribut src. Le serveur valide déjà à
+  // l'écriture, mais un seul chemin d'écriture oublié (migration, futur
+  // endpoint, import) suffirait à faire sortir la valeur de l'attribut. Une
+  // valeur non conforme donne une chaîne vide, jamais du HTML.
+  function safeImgSrc(src) {
+    return isSafePartnerImg(src) ? src : '';
+  }
+
   function isSafePartnerLink(url) {
     return typeof url === 'string' && /^https?:\/\//i.test(url);
   }
@@ -4406,7 +4416,7 @@
         lvCompressPhoto(f).then(function (data) {
           box._ptScene = data;
           if (sceneSt) sceneSt.textContent = '✅ Photo ajoutée';
-          if (scenePrev) { scenePrev.hidden = false; scenePrev.innerHTML = '<img src="' + data + '" alt="Photo du chantier">'; }
+          if (scenePrev) { scenePrev.hidden = false; scenePrev.innerHTML = '<img src="' + safeImgSrc(data) + '" alt="Photo du chantier">'; }
         }).catch(function () {
           if (sceneSt) sceneSt.textContent = '❌ Photo illisible — réessaie.';
         });
@@ -5646,7 +5656,7 @@
             photoData = data;
             if (pst) pst.textContent = '✅ Photo prête';
             var prev = document.getElementById('lvPfPhotoPrev');
-            if (prev) prev.innerHTML = '<img src="' + data + '" alt="Ta photo">';
+            if (prev) prev.innerHTML = '<img src="' + safeImgSrc(data) + '" alt="Ta photo">';
           }).catch(function () { if (pst) pst.textContent = '❌ Image illisible'; });
         };
       }
@@ -5836,7 +5846,8 @@
           });
         }).then(function (r) { return r.json(); }).then(function (d) {
           var src = d.ok && d.photos && d.photos.scene;
-          sceneImg.innerHTML = src ? '<img src="' + src + '" alt="Chantier photographié par le client">' : 'Photo indisponible.';
+          var safeSrc = safeImgSrc(src);
+          sceneImg.innerHTML = safeSrc ? '<img src="' + safeSrc + '" alt="Chantier photographié par le client">' : 'Photo indisponible.';
         }).catch(function () { sceneImg.textContent = 'Photo indisponible (réseau).'; });
       }
       // 3 preuves : code + 2 photos — le bouton ne s'active que quand tout y est.
@@ -6144,7 +6155,8 @@
             if (!box) return;
             var ph = (d.ok && d.photos) || {};
             var cell = function (src, label) {
-              return src ? '<figure class="lv-proof__cell"><img src="' + src + '" alt="' + label + '"><figcaption>' + label + '</figcaption></figure>' : '';
+              var v = safeImgSrc(src);
+              return v ? '<figure class="lv-proof__cell"><img src="' + v + '" alt="' + label + '"><figcaption>' + label + '</figcaption></figure>' : '';
             };
             var html2 = cell(ph.remise, '📦 Colis remis (livreur)')
               + cell(ph.chantier, '🏗️ Vue du chantier, colis posés (livreur)')
@@ -6464,7 +6476,7 @@
           }
           _pjLogo = dataUrl;
           if (logoPreview) {
-            logoPreview.innerHTML = '<span class="admin-partner-photo"><img src="' + _pjLogo + '" alt="Logo"><button type="button" id="pjLogoRemove" aria-label="Retirer le logo">✕</button></span>';
+            logoPreview.innerHTML = '<span class="admin-partner-photo"><img src="' + safeImgSrc(_pjLogo) + '" alt="Logo"><button type="button" id="pjLogoRemove" aria-label="Retirer le logo">✕</button></span>';
             var rm = document.getElementById('pjLogoRemove');
             if (rm) rm.onclick = function () { _pjLogo = ''; logoPreview.innerHTML = ''; };
           }
@@ -7354,8 +7366,8 @@
     if (!c) return;
     var logoBox = document.getElementById('accCardLogoBox');
     if (logoBox) {
-      logoBox.innerHTML = (c.logo
-        ? '<span class="admin-partner-photo"><img src="' + c.logo + '" alt="Logo"><button type="button" data-acc-logo-rm aria-label="Retirer le logo">✕</button></span>' : '')
+      logoBox.innerHTML = (safeImgSrc(c.logo)
+        ? '<span class="admin-partner-photo"><img src="' + safeImgSrc(c.logo) + '" alt="Logo"><button type="button" data-acc-logo-rm aria-label="Retirer le logo">✕</button></span>' : '')
         + (_accCardLogoBusy ? '<span class="img-busy">⏳ Traitement du logo…</span>' : '');
       var rm = logoBox.querySelector('[data-acc-logo-rm]');
       if (rm) rm.onclick = function () { c.logo = ''; renderMyPartnerMedia(); };
@@ -7363,7 +7375,7 @@
     var photosBox = document.getElementById('accCardPhotosBox');
     if (photosBox) {
       photosBox.innerHTML = (c.photos || []).map(function (src, i) {
-        return '<span class="admin-partner-photo"><img src="' + src + '" alt="Photo ' + (i + 1) + '"><button type="button" data-acc-photo-rm="' + i + '" aria-label="Retirer la photo ' + (i + 1) + '">✕</button></span>';
+        return '<span class="admin-partner-photo"><img src="' + safeImgSrc(src) + '" alt="Photo ' + (i + 1) + '"><button type="button" data-acc-photo-rm="' + i + '" aria-label="Retirer la photo ' + (i + 1) + '">✕</button></span>';
       }).join('')
         + (_accCardPhotosBusy > 0 ? '<span class="img-busy">⏳ Traitement de ' + _accCardPhotosBusy + ' image(s)…</span>' : '');
       photosBox.querySelectorAll('[data-acc-photo-rm]').forEach(function (btn) {
@@ -10721,7 +10733,7 @@
     var photosBox = document.getElementById('apPhotosPreview');
     if (logoBox) {
       logoBox.innerHTML = (_adminPartnerLogo
-        ? '<span class="admin-partner-photo"><img src="' + _adminPartnerLogo + '" alt="Logo"><button type="button" data-remove-logo aria-label="Retirer le logo">✕</button></span>'
+        ? '<span class="admin-partner-photo"><img src="' + safeImgSrc(_adminPartnerLogo) + '" alt="Logo"><button type="button" data-remove-logo aria-label="Retirer le logo">✕</button></span>'
         : '')
         + (_adminLogoBusy ? '<span class="img-busy">⏳ Traitement du logo…</span>' : '');
       var rmLogo = logoBox.querySelector('[data-remove-logo]');
@@ -10729,7 +10741,7 @@
     }
     if (photosBox) {
       photosBox.innerHTML = _adminPartnerPhotos.map(function (src, i) {
-        return '<span class="admin-partner-photo"><img src="' + src + '" alt="Photo ' + (i + 1) + '"><button type="button" data-remove-photo="' + i + '" aria-label="Retirer la photo ' + (i + 1) + '">✕</button></span>';
+        return '<span class="admin-partner-photo"><img src="' + safeImgSrc(src) + '" alt="Photo ' + (i + 1) + '"><button type="button" data-remove-photo="' + i + '" aria-label="Retirer la photo ' + (i + 1) + '">✕</button></span>';
       }).join('')
         + (_adminPhotosBusy > 0 ? '<span class="img-busy">⏳ Traitement de ' + _adminPhotosBusy + ' image(s)…</span>' : '');
       photosBox.querySelectorAll('[data-remove-photo]').forEach(function (btn) {

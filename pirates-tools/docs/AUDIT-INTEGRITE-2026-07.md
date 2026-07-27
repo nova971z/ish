@@ -206,3 +206,42 @@ Périmètre mesuré : 344 ids HTML · 198 ids générés en JS · 359 ids lus pa
 statiquement — elles restent hors couverture de ce contrôle.
 
 **Vérifications** : `ci.js` vert · couriers.mjs 76/76 · course-pay.mjs 14/14.
+
+## PASSE P2 — SÉCURITÉ CLIENT : INJECTION HTML (XSS) ✅ (27/07/2026, SW v500)
+
+**Outil créé : `scripts/audit/p2-xss.js`** — analyse AST de **239 points
+d'écriture HTML** (`innerHTML`, `outerHTML`, `insertAdjacentHTML`). Pour chacun,
+l'arbre de concaténation est décomposé et **chaque morceau dynamique** est
+classé : littéral · nombre · `escapeHTML()` · `encodeURIComponent()` · appel à un
+constructeur de HTML audité. **Branché à `ci.js`** (partie bloquante).
+
+Résultat brut : **177 / 239 écritures prouvées 100 % sûres** sans intervention.
+252 morceaux dynamiques inspectés.
+
+### Défaut trouvé et corrigé
+
+| # | Gravité | Défaut | Preuve | Correctif |
+|---|---|---|---|---|
+| P2-1 | 🟠 | **9 images injectées dans `src="…"` sans aucun filtre côté client**, alors que le projet applique déjà `isSafePartnerImg` ailleurs — **violation de son propre invariant de défense en profondeur** (le commentaire au-dessus d'`isSafePartnerImg` dit littéralement « on n'injecte JAMAIS une source d'image qui ne soit pas une data-URL inline »). Sites : photo du chantier vue par le livreur, les 3 photos de preuve vues par le client, logo + photos d'artisan (espace self-service **et** admin), 3 aperçus locaux. Une valeur contenant `"` sortirait de l'attribut. | `grep 'src="'\'' +'` : 22 sites, 9 sans garde | Helper unique **`safeImgSrc()`** créé et appliqué aux 9 sites. Contrôle CI **bloquant** : toute nouvelle image non filtrée casse le build. |
+
+### Vérifications ciblées PASSÉES
+
+- ✅ **Texte saisi par un utilisateur** (adresse de chantier, titre de produit,
+  nom/bio/commune de livreur, avis clients, messages de chat, nom/métier
+  d'artisan) : recherche exhaustive des injections **sans `escapeHTML`** → 3
+  résultats, **tous légitimes** après vérification : un message WhatsApp (texte
+  brut, pas du HTML), un helper dont l'unique appelant échappe déjà, et un
+  passage par une fonction `line()` qui échappe.
+- ✅ **Messages du chat** : `escapeHTML(String(m.text))` — le texte de l'autre
+  partie ne peut pas s'exécuter.
+- ✅ **Avis clients publiés** sur la fiche livreur : `escapeHTML` sur note,
+  commentaire et date.
+- ✅ **Liens** (`href`) : `escapeHTML` + `encodeURIComponent` sur les uid.
+
+### Réserve honnête
+Le contrôle signale encore **67 expressions dynamiques informatives** :
+variables accumulatrices (`html`, `h`, `rows`…) que l'analyse statique ne peut
+pas suivre jusqu'à leur construction, et champs numériques serveur (`c.zone`,
+`c.qty`, `c.km`, `pct`…). Elles ont été **relues une par une** : aucune ne
+transporte de texte utilisateur non échappé. Suivre les accumulateurs
+exigerait une analyse de flux de données — hors périmètre de cette passe, noté.
