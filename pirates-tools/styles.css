@@ -7795,6 +7795,28 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 #lvForm { max-width: 780px; margin: 0 auto; display: grid; gap: 1rem; }
 .lv-banner { background: rgba(251,191,36,.12); border: 1px solid rgba(251,191,36,.4); color: #fde68a; padding: .8rem 1rem; border-radius: 12px; line-height: 1.5; }
 .lv-card { background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 1.1rem 1.2rem; }
+
+/* ── RYTHME VERTICAL DES ESPACES LIVRAISON ──────────────────────────────────
+   🐛 DÉFAUT SIGNALÉ (user 27/07/2026) : « la plupart des widgets se collent,
+   ils se touchent tous, même avec la carte au-dessus ». Cause : .lv-card n'a
+   AUCUNE marge — deux cartes consécutives se retrouvaient bord à bord, et
+   l'écran devenait illisible.
+   On pose l'espacement sur le CONTENEUR (règle « lobotomised owl » : entre
+   deux frères, jamais avant le premier ni après le dernier). Aucun risque de
+   double marge avec les grilles, qui gèrent leur propre `gap`. */
+.courier-space > * + *,
+#courierWork > * + *,
+#courierParams > * + *,
+#courierMyCard > * + *,
+#clientDelivList > * + *,
+#courierDispo > * + *,
+#courierMine > * + * { margin-top: 1.1rem; }
+/* Les titres de sous-section respirent au-dessus, pas en dessous. */
+#courierMine > .lv-h3 + *, #clientDelivList > .lv-h3 + * { margin-top: .7rem; }
+#courierMine > * + .lv-h3 { margin-top: 1.6rem; }
+/* Le panneau de l'accord et le fil de discussion ne doivent jamais toucher
+   la carte de course qui les précède. */
+.lv-chat, .lv-panel, .lv-proof, .lv-rate { margin-top: 1.1rem; }
 .lv-h2 { font-size: 1.15rem; margin: 0 0 .8rem; }
 .lv-h3 { font-size: .98rem; margin: 1rem 0 .5rem; color: var(--accent, #a78bfa); }
 .lv-field { display: grid; gap: .35rem; }

@@ -894,8 +894,21 @@ async function handleCourses(req, body, cfg, res) {
         const d = await tx.get(ref);
         if (!d.exists) throw new Error('introuvable');
         const c = d.data();
-        const role = c.artisanUid === uid ? 'client' : (c.courierUid === uid ? 'livreur' : null);
+        let role = c.artisanUid === uid ? 'client' : (c.courierUid === uid ? 'livreur' : null);
         if (!role) throw new Error('pas-participant');
+        // 🐛 BUG VÉCU (27/07/2026) : « je veux accepter l'accord et ça ne marche
+        // pas ». Sur un compte de TEST qui joue les DEUX rôles (l'user déroule
+        // seul toute la chaîne), artisanUid === courierUid === uid : le
+        // serveur le prenait donc TOUJOURS pour le client. Il proposait
+        // l'accord (okClient=true), puis « acceptait » côté livreur — le
+        // serveur remettait okClient=true, okLivreur restait faux, et l'accord
+        // ne pouvait JAMAIS se valider.
+        // Quand, et SEULEMENT quand, l'uid est des deux côtés, on retient le
+        // rôle déclaré par l'écran d'où vient l'action. Aucun risque
+        // d'usurpation : il faut déjà être les deux parties pour y accéder.
+        if (c.artisanUid === uid && c.courierUid === uid) {
+          role = (body.role === 'livreur') ? 'livreur' : 'client';
+        }
         if (c.status !== 'acceptee') throw new Error('pas-en-negociation');
         if (body.type === 'course-accord-reject') {
           if (!c.accord) throw new Error('pas-d-accord');

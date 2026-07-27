@@ -5731,6 +5731,25 @@
   // 'livreur' (l'espace appelant le connaît ; le serveur ne s'en sert que pour
   // l'affichage — l'identité réelle vient de request.auth.uid dans les règles).
   var _lvChatUnsub = null;
+  // Appel serveur d'une action de course, depuis un panneau (accord, paiement,
+  // remise en ligne…). `role` dit depuis QUEL écran on agit : indispensable
+  // quand le même compte est client ET livreur (compte de test) — sans lui, le
+  // serveur ne peut pas savoir quel côté accepte l'accord.
+  function lvPostCourse(panel, id, role, type, extra, onOk) {
+    var st = panel.querySelector('#acSt');
+    if (st) st.textContent = 'Envoi…';
+    return jsonAuthHeaders().then(function (headers) {
+      return fetch(apiBaseUrl() + '/api/contact', {
+        method: 'POST', headers: headers,
+        body: JSON.stringify(Object.assign({ type: type, id: id, role: role }, extra || {}))
+      });
+    }).then(function (r) { return r.json(); }).then(function (d) {
+      if (d.ok) { if (onOk) onOk(d); }
+      else if (st) st.textContent = '❌ ' + (d.error || 'Erreur');
+      return d;
+    }).catch(function () { if (st) st.textContent = '❌ Erreur réseau'; });
+  }
+
   function wireChat(root, c, role, reload) {
     var box = root.querySelector('[data-chat]');
     if (!box) return;
@@ -5805,18 +5824,7 @@
     var panel = root.querySelector('#lvChatPanel');
     var tabs = root.querySelectorAll('[data-cpanel]');
     function post(type, extra, onOk) {
-      var st = panel.querySelector('#acSt');
-      if (st) st.textContent = 'Envoi…';
-      return jsonAuthHeaders().then(function (headers) {
-        return fetch(apiBaseUrl() + '/api/contact', {
-          method: 'POST', headers: headers,
-          body: JSON.stringify(Object.assign({ type: type, id: c.id }, extra || {}))
-        });
-      }).then(function (r) { return r.json(); }).then(function (d) {
-        if (d.ok) { if (onOk) onOk(d); }
-        else if (st) st.textContent = '❌ ' + (d.error || 'Erreur');
-        return d;
-      }).catch(function () { if (st) st.textContent = '❌ Erreur réseau'; });
+      return lvPostCourse(panel, c.id, role, type, extra, onOk);
     }
     function openPanel(name, btn) {
       for (var i = 0; i < tabs.length; i++) tabs[i].classList.toggle('is-on', tabs[i] === btn);
