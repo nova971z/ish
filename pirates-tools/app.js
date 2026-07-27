@@ -4065,6 +4065,74 @@
   // C'est ce qui nous sort de l'art. L7342-1 et du critère « prix fixé
   // unilatéralement » de la directive (UE) 2024/2831.
 
+  // ── HORAIRES DE SERVICE — MIROIR EXACT du serveur (_lib/courses.js) ────────
+  // ⏰ La Guadeloupe est à UTC−4 et ne change JAMAIS d'heure. Le navigateur du
+  // livreur y est déjà, mais celui d'un client en métropole NON : sans cette
+  // conversion, il verrait « hors service » un livreur pourtant disponible.
+  // On calcule donc TOUJOURS en heure de Guadeloupe, des deux côtés.
+  // La parité de ce bloc avec le serveur est vérifiée en CI
+  // (scripts/check-horaires.js) : s'ils divergent, la CI passe au rouge.
+  var LV_TZ_GP_OFFSET = -4;
+  function lvHhmmEnMinutes(v) {
+    var m = /^(\d{2}):(\d{2})$/.exec(String(v || ''));
+    if (!m) return null;
+    var h = parseInt(m[1], 10), mi = parseInt(m[2], 10);
+    if (!(h >= 0 && h <= 23 && mi >= 0 && mi <= 59)) return null;
+    return h * 60 + mi;
+  }
+  function lvMinutesLocalesGP(now) {
+    var t = (now instanceof Date) ? now : new Date(now || Date.now());
+    var utc = t.getUTCHours() * 60 + t.getUTCMinutes();
+    return ((utc + LV_TZ_GP_OFFSET * 60) % 1440 + 1440) % 1440;
+  }
+  function lvDansPlageHoraire(hDebut, hFin, now) {
+    var d = lvHhmmEnMinutes(hDebut), f = lvHhmmEnMinutes(hFin);
+    if (d === null || f === null) return true;   // pas d'horaires → pas de contrainte
+    if (d === f) return true;                    // 24 h/24
+    var m = lvMinutesLocalesGP(now);
+    return (d < f) ? (m >= d && m < f) : (m >= d || m < f);
+  }
+  // Deux conditions cumulatives : l'interrupteur (le livreur décide) ET la
+  // plage horaire (la part automatique).
+  function lvEnService(c, now) {
+    if (!c || !c.available) return false;
+    return lvDansPlageHoraire(c.hDebut, c.hFin, now);
+  }
+  // Texte lisible des horaires, ou '' si le livreur n'en a pas renseigné.
+  function lvHorairesTxt(c) {
+    if (!c || !lvHhmmEnMinutes(c.hDebut) || !lvHhmmEnMinutes(c.hFin)) return '';
+    return String(c.hDebut) + ' – ' + String(c.hFin);
+  }
+  // Options d'un menu déroulant d'heures, par pas de 30 minutes.
+  function lvHeureOptions(valeur) {
+    var out = '<option value="">—</option>';
+    for (var h = 0; h < 24; h++) {
+      for (var m = 0; m < 60; m += 30) {
+        var v = (h < 10 ? '0' + h : h) + ':' + (m === 0 ? '00' : '30');
+        out += '<option value="' + v + '"' + (valeur === v ? ' selected' : '') + '>' + v + '</option>';
+      }
+    }
+    return out;
+  }
+
+  // Bandeau « en service / hors service » + point lumineux. UN SEUL endroit
+  // le fabrique : la carte, la fiche publique et l'espace livreur affichent
+  // donc rigoureusement la même chose, et le jour où la règle change, elle
+  // change partout à la fois.
+  function lvServiceBandeauHTML(c, now) {
+    var on = lvEnService(c, now);
+    var horaires = lvHorairesTxt(c);
+    var raison = on
+      ? (horaires ? 'Aujourd\'hui ' + escapeHTML(horaires) : 'Disponible maintenant')
+      : (!c || !c.available
+          ? 'Le livreur s\'est mis hors ligne'
+          : (horaires ? 'En dehors de ses horaires (' + escapeHTML(horaires) + ')' : 'Hors ligne'));
+    return '<p class="lv-service ' + (on ? 'is-on' : 'is-off') + '" role="status">'
+      + '<span class="lv-service__dot" aria-hidden="true"></span>'
+      + '<strong>' + (on ? 'EN SERVICE' : 'PAS EN SERVICE') + '</strong>'
+      + '<span class="lv-service__why">' + raison + '</span></p>';
+  }
+
   function lvDefaultTarifs() {
     var t = {};
     LV_BAREME.forEach(function (b) { t[b.zone] = b.prix; });
@@ -4208,15 +4276,22 @@
     var name = escapeHTML(String(c.displayName || 'Livreur'));
     var avg = c.ratingCount ? (c.ratingSum / c.ratingCount) : 0;
     var photo = isSafePartnerImg(c.photo) ? c.photo : '';
-    return '<a class="courier-card' + (c.available ? ' courier-card--on' : '') + '" href="#/livreur-profil/'
+    // ⏰ L'état affiché n'est PAS l'interrupteur brut : c'est l'interrupteur ET
+    // la plage horaire. Un livreur qui a oublié de se couper à 18 h apparaît
+    // automatiquement hors service — c'est le but des horaires.
+    var on = lvEnService(c);
+    var horaires = lvHorairesTxt(c);
+    return '<a class="courier-card' + (on ? ' courier-card--on' : '') + '" href="#/livreur-profil/'
       + encodeURIComponent(String(c.uid || '')) + '" data-track="courier:card">'
-      + '<span class="courier-card__dispo">' + (c.available ? '🟢 Disponible' : '⚪️ Hors ligne') + '</span>'
+      + '<span class="courier-card__dispo"><span class="lv-service__dot" aria-hidden="true"></span>'
+      + (on ? 'En service' : 'Pas en service') + '</span>'
       + (photo
         ? '<span class="courier-card__ph"><img src="' + photo + '" alt="' + name + '" loading="lazy"></span>'
         : '<span class="courier-card__ph courier-card__ph--none" aria-hidden="true">🛵</span>')
       + '<span class="courier-card__name">' + name + '</span>'
       + (c.commune ? '<span class="courier-card__meta">📍 ' + escapeHTML(String(c.commune)) + '</span>' : '')
       + (c.vehicle ? '<span class="courier-card__meta">' + escapeHTML(lvVehLabel(c.vehicle)) + '</span>' : '')
+      + (horaires ? '<span class="courier-card__meta">⏰ ' + escapeHTML(horaires) + '</span>' : '')
       + '<span class="courier-card__stats">'
       + (c.ratingCount
         ? lvStarsHTML(avg) + '<em>' + avg.toFixed(1) + ' · ' + c.ratingCount + ' avis</em>'
@@ -4281,8 +4356,7 @@
         + '<p class="courier-prof__meta">'
         + (c.commune ? '📍 ' + escapeHTML(String(c.commune)) + ' · ' : '')
         + (c.vehicle ? escapeHTML(lvVehLabel(c.vehicle)) : '') + '</p>'
-        + '<p class="courier-prof__dispo ' + (c.available ? 'is-on' : 'is-off') + '">'
-        + (c.available ? '🟢 Disponible maintenant' : '⚪️ Hors ligne pour le moment') + '</p>'
+        + lvServiceBandeauHTML(c)
         + '</div></header>';
       // Compteurs
       h += '<div class="courier-prof__counters">'
@@ -5855,22 +5929,13 @@
     var t = _lvMyTarifs || lvDefaultTarifs();
     return t[zone] || t[1];
   }
-  function renderCourierTarifPanel() {
-    var host = document.getElementById('courierTarifs');
-    if (!host) return Promise.resolve();
-    host.innerHTML = '<p class="lv-hint">Chargement de ta fiche…</p>';
-    return jsonAuthHeaders().then(function (headers) {
-      return fetch(apiBaseUrl() + '/api/contact', {
-        method: 'POST', headers: headers, body: JSON.stringify({ type: 'courier-profile' })
-      });
-    }).then(function (r) { return r.json(); }).then(function (d) {
-      if (!d.ok) { host.innerHTML = '<p class="lv-hint">Fiche indisponible : ' + escapeHTML(d.error || '?') + '</p>'; return; }
-      var p = d.profile || {};
-      var tarifs = lvNormTarifs(p.tarifs);
-      _lvMyTarifs = tarifs;            // réutilisés pour afficher MON prix sur chaque course
-      var repere = lvDefaultTarifs();
-      host.innerHTML =
-        '<div class="lv-card lv-tarifs">'
+  // Panneau « ma fiche livreur » : interrupteur de disponibilité, horaires,
+  // carte des zones avec SES tarifs, identité et photo. Sorti de
+  // renderCourierTarifPanel, qui dépassait le plafond de 150 lignes — et
+  // c'est aussi ce panneau qui devient l'écran ⚙️ Paramètres.
+  function lvProfilPanneauHTML(p, tarifs) {
+    var repere = lvDefaultTarifs();
+    return '<div class="lv-card lv-tarifs">'
         + '<div class="lv-dispo">'
         + '<button type="button" class="lv-dispo__btn' + (p.available ? ' is-on' : '') + '" id="lvDispoBtn" aria-pressed="' + (p.available ? 'true' : 'false') + '">'
         + '<span class="lv-dispo__dot"></span>'
@@ -5890,6 +5955,19 @@
         + '<label class="lv-field"><span>Nom affiché aux clients *</span><input type="text" id="lvPfName" maxlength="60" value="' + escapeHTML(p.displayName || '') + '" placeholder="Ex. Kevin L."></label>'
         + '<label class="lv-field"><span>Ta commune</span><input type="text" id="lvPfCommune" maxlength="60" value="' + escapeHTML(p.commune || '') + '" placeholder="Sainte-Anne"></label>'
         + '</div>'
+        // HORAIRES : deux menus déroulants DISTINCTS. C'est ce qui rend l'état
+        // automatique — hors de cette plage, les clients te voient hors service
+        // même si tu as oublié de couper ton interrupteur.
+        + '<div class="lv-grid2">'
+        + '<label class="lv-field"><span>Je commence à</span>'
+        + '<select id="lvPfHDebut">' + lvHeureOptions(p.hDebut || '') + '</select></label>'
+        + '<label class="lv-field"><span>Je termine à</span>'
+        + '<select id="lvPfHFin">' + lvHeureOptions(p.hFin || '') + '</select></label>'
+        + '</div>'
+        + '<p class="lv-hint">⏰ Heure de la Guadeloupe. En dehors de ces heures, ta carte '
+        + 'passe automatiquement en <strong>hors service</strong> et personne ne peut te '
+        + 'contacter — inutile d\'y penser. Laisse les deux vides pour n\'avoir aucune '
+        + 'contrainte d\'horaire. Une plage de nuit (ex. 22:00 → 02:00) fonctionne.</p>'
         // Le véhicule vient du DOSSIER D'INSCRIPTION quand la fiche publique ne
         // le porte pas encore : on ne redemande jamais une information déjà
         // donnée. « — choisir — » n'apparaît QUE si rien n'est connu (dossier
@@ -5915,6 +5993,22 @@
         + '<span class="lv-cta__note" id="lvPfSt" aria-live="polite"></span></div>'
         + '<p class="lv-hint">Ta fiche apparaît ensuite dans <a href="#/livraison">l\'annuaire des livreurs</a> et sur l\'accueil.</p>'
         + '</div>';
+  }
+
+  function renderCourierTarifPanel() {
+    var host = document.getElementById('courierTarifs');
+    if (!host) return Promise.resolve();
+    host.innerHTML = '<p class="lv-hint">Chargement de ta fiche…</p>';
+    return jsonAuthHeaders().then(function (headers) {
+      return fetch(apiBaseUrl() + '/api/contact', {
+        method: 'POST', headers: headers, body: JSON.stringify({ type: 'courier-profile' })
+      });
+    }).then(function (r) { return r.json(); }).then(function (d) {
+      if (!d.ok) { host.innerHTML = '<p class="lv-hint">Fiche indisponible : ' + escapeHTML(d.error || '?') + '</p>'; return; }
+      var p = d.profile || {};
+      var tarifs = lvNormTarifs(p.tarifs);
+      _lvMyTarifs = tarifs;            // réutilisés pour afficher MON prix sur chaque course
+      host.innerHTML = lvProfilPanneauHTML(p, tarifs);
 
       var mapHost = document.getElementById('courierTarifMap');
       if (mapHost) lvBuildTarifMap(mapHost, tarifs, 'ctZ');
@@ -5961,6 +6055,8 @@
               displayName: name,
               commune: (document.getElementById('lvPfCommune') || {}).value || '',
               vehicle: (document.getElementById('lvPfVeh') || {}).value || '',
+              hDebut: (document.getElementById('lvPfHDebut') || {}).value || '',
+              hFin: (document.getElementById('lvPfHFin') || {}).value || '',
               bio: (document.getElementById('lvPfBio') || {}).value || '',
               photo: photoData || '',
               tarifs: tarifs

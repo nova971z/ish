@@ -8136,6 +8136,61 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .courier-prof__dispo { margin: .35rem 0 0; font-weight: 700; font-size: .9rem; }
 .courier-prof__dispo.is-on { color: #6ee7b7; }
 .courier-prof__dispo.is-off { color: var(--muted, #c9c9d9); }
+
+/* ── BANDEAU « EN SERVICE » + POINT LUMINEUX ────────────────────────────────
+   L'état se lit d'un coup d'œil, sans avoir à lire : le bandeau ET le point
+   s'allument ensemble ou s'éteignent ensemble. Le vert est celui du reste du
+   site (#34d399) ; hors service, tout retombe en gris neutre — pas en rouge,
+   qui signalerait un problème alors que le livreur a simplement fini sa
+   journée. */
+.lv-service {
+  display: flex; align-items: center; gap: .55rem; flex-wrap: wrap;
+  margin: .5rem 0 0; padding: .5rem .8rem; border-radius: 999px;
+  font-size: .86rem; line-height: 1.3;
+  border: 1px solid rgba(255, 255, 255, .12);
+  background: rgba(255, 255, 255, .04);
+  color: var(--muted, #c9c9d9);
+  transition: background .35s ease, border-color .35s ease, box-shadow .35s ease, color .35s ease;
+}
+.lv-service strong { letter-spacing: .04em; font-size: .8rem; }
+.lv-service__why { opacity: .85; font-size: .8rem; }
+.lv-service__dot {
+  width: 10px; height: 10px; flex: 0 0 10px; border-radius: 50%;
+  background: rgba(255, 255, 255, .28);
+  transition: background .35s ease, box-shadow .35s ease;
+}
+/* ALLUMÉ : le bandeau se teinte, le point s'illumine et respire. */
+.lv-service.is-on {
+  border-color: rgba(52, 211, 153, .55);
+  background: rgba(52, 211, 153, .12);
+  color: #6ee7b7;
+  box-shadow: 0 0 18px rgba(52, 211, 153, .28);
+}
+.lv-service.is-on .lv-service__dot {
+  background: #34d399;
+  box-shadow: 0 0 8px rgba(52, 211, 153, .95), 0 0 16px rgba(52, 211, 153, .6);
+  animation: lv-pulse 2s ease-in-out infinite;
+}
+@keyframes lv-pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(52, 211, 153, .95), 0 0 16px rgba(52, 211, 153, .55); }
+  50%      { box-shadow: 0 0 12px rgba(52, 211, 153, 1),  0 0 26px rgba(52, 211, 153, .8); }
+}
+/* ÉTEINT : aucune animation, aucune lueur. */
+.lv-service.is-off .lv-service__dot { background: rgba(255, 255, 255, .28); box-shadow: none; }
+/* Respect du réglage système « réduire les animations ». */
+@media (prefers-reduced-motion: reduce) {
+  .lv-service.is-on .lv-service__dot { animation: none; }
+}
+/* La pastille de la CARTE reprend exactement le même point. */
+.courier-card__dispo { display: inline-flex; align-items: center; gap: .35rem; }
+.courier-card--on .lv-service__dot {
+  background: #34d399;
+  box-shadow: 0 0 8px rgba(52, 211, 153, .95), 0 0 16px rgba(52, 211, 153, .6);
+  animation: lv-pulse 2s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .courier-card--on .lv-service__dot { animation: none; }
+}
 .courier-prof__counters { display: grid; grid-template-columns: repeat(3, 1fr); gap: .6rem; margin-bottom: 1rem; }
 .courier-prof__c { padding: .75rem .8rem; border-radius: 14px; background: rgba(0,0,0,.28); border: 1px solid rgba(255,255,255,.10); display: grid; gap: .15rem; text-align: center; }
 .courier-prof__c strong { font-size: 1.4rem; font-variant-numeric: tabular-nums; color: #f2c14e; }

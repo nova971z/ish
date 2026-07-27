@@ -42,6 +42,7 @@ var reqPriceModel = safeRequire('./check-pricing-model','check-pricing-model');
 var reqAccount = safeRequire('./check-accounting','check-accounting');
 var reqInvoice = safeRequire('./check-invoice','check-invoice');
 var reqLoyalty  = safeRequire('./check-loyalty',     'check-loyalty');
+var reqHoraires = safeRequire('./check-horaires',    'check-horaires');
 var reqCoffret  = safeRequire('./check-coffret',     'check-coffret');
 var reqCatPub   = safeRequire('./check-catalog-public','check-catalog-public');
 var reqAssetVer = safeRequire('./check-asset-versions','check-asset-versions');
@@ -89,6 +90,7 @@ var reqPartApp  = safeRequire('./check-partner-application','check-partner-appli
   await runOne(reqAccount, 'check-accounting');
   await runOne(reqInvoice, 'check-invoice');
   await runOne(reqLoyalty,  'check-loyalty');
+  await runOne(reqHoraires, 'check-horaires');
   await runOne(reqCoffret,  'check-coffret');
   await runOne(reqCatPub,   'check-catalog-public');
   await runOne(reqAssetVer, 'check-asset-versions');

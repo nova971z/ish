@@ -273,6 +273,64 @@ function sanitizeTarifs(raw) {
   return out;
 }
 
+// ── HORAIRES DE SERVICE DU LIVREUR ──────────────────────────────────────────
+// Deux heures, début et fin, choisies par le livreur. Elles rendent son état
+// AUTOMATIQUE : hors de sa plage, il n'est plus « en service », même s'il a
+// oublié de couper son interrupteur.
+//
+// ⏰ FUSEAU — LE PIÈGE À NE PAS MANQUER. Ce serveur tourne en UTC ; la
+// Guadeloupe est à UTC−4 et ne change JAMAIS d'heure (ni été ni hiver). Sans
+// conversion explicite, un livreur « 08:00–18:00 » serait vu en service de
+// 04:00 à 14:00 heure locale. On convertit donc ici, une fois, et le client
+// fait le même calcul (parité vérifiée en CI par scripts/check-horaires.js).
+const TZ_GP_OFFSET = -4;                       // heures par rapport à UTC
+
+// 'HH:MM' → minutes depuis minuit, ou null si la valeur n'est pas une heure.
+function hhmmEnMinutes(v) {
+  const m = /^(\d{2}):(\d{2})$/.exec(String(v || ''));
+  if (!m) return null;
+  const h = parseInt(m[1], 10), mi = parseInt(m[2], 10);
+  if (!(h >= 0 && h <= 23 && mi >= 0 && mi <= 59)) return null;
+  return h * 60 + mi;
+}
+
+// Minutes écoulées depuis minuit, EN GUADELOUPE, pour un instant donné.
+function minutesLocalesGP(now) {
+  const t = now instanceof Date ? now : new Date(now || Date.now());
+  const utc = t.getUTCHours() * 60 + t.getUTCMinutes();
+  return ((utc + TZ_GP_OFFSET * 60) % 1440 + 1440) % 1440;
+}
+
+// Le livreur est-il DANS sa plage horaire à cet instant ?
+// Pas d'horaires renseignés → on ne contraint rien (true).
+// Plage à cheval sur minuit (22:00 → 02:00) : gérée explicitement.
+function dansPlageHoraire(hDebut, hFin, now) {
+  const d = hhmmEnMinutes(hDebut), f = hhmmEnMinutes(hFin);
+  if (d === null || f === null) return true;
+  if (d === f) return true;                    // 24 h/24
+  const m = minutesLocalesGP(now);
+  return (d < f) ? (m >= d && m < f) : (m >= d || m < f);
+}
+
+// ÉTAT « EN SERVICE » — SOURCE DE VÉRITÉ UNIQUE.
+// Deux conditions cumulatives, et l'ordre du raisonnement compte :
+//   1. le livreur a allumé son interrupteur (il décide, on ne décide pas
+//      pour lui — c'est aussi ce qui le distingue d'un salarié planifié) ;
+//   2. l'heure locale est dans sa plage — c'est la part automatique.
+function enService(c, now) {
+  if (!c || !c.available) return false;
+  return dansPlageHoraire(c.hDebut, c.hFin, now);
+}
+
+// Normalise les horaires reçus du client. Les deux doivent être valides, sinon
+// on considère qu'il n'y a pas d'horaires (et l'interrupteur seul décide).
+function sanitizeHoraires(raw) {
+  const src = (raw && typeof raw === 'object') ? raw : {};
+  const d = hhmmEnMinutes(src.hDebut), f = hhmmEnMinutes(src.hFin);
+  if (d === null || f === null) return { hDebut: '', hFin: '' };
+  return { hDebut: String(src.hDebut), hFin: String(src.hFin) };
+}
+
 // Miroir PUBLIC du profil livreur (couriers_public/{uid}) : la fiche que les
 // clients voient dans l'annuaire. Écrit par l'Admin SDK UNIQUEMENT (règles
 // Firestore : lecture publique, écriture interdite au client) — le KYC, les
@@ -360,5 +418,6 @@ module.exports = {
   haversineKm, quote, buildRequest, createFromIntent,
   alertNewCourse, alertCourseAgain, alertCourierApplication, confirmToClient, sendMail, escapeHtml,
   defaultTarifs, sanitizeTarifs, mirrorCourierPublic,
+  TZ_GP_OFFSET, hhmmEnMinutes, minutesLocalesGP, dansPlageHoraire, enService, sanitizeHoraires,
   sanitizeLines, sanitizeAccord, accordSummary, accordPaiementLabel, ACCORD_PAIEMENTS
 };

@@ -641,7 +641,12 @@ async function handleCourses(req, body, cfg, res) {
         bio: p.bio || '',
         photo: p.photo || '',
         tarifs: coursesLib.sanitizeTarifs(p.tarifs),
+        // Horaires de service : rendent l'état AUTOMATIQUE hors de la plage.
+        hDebut: p.hDebut || '', hFin: p.hFin || '',
         available: !!p.available,
+        // État réellement vu par les clients à cet instant (interrupteur ET
+        // horaires) — calculé SERVEUR, jamais déduit du client.
+        enService: coursesLib.enService(p, new Date()),
         published: !!p.published,
         coursesDone: p.coursesDone || 0,
         ratingCount: p.ratingCount || 0,
@@ -664,8 +669,12 @@ async function handleCourses(req, body, cfg, res) {
       return res.status(400).json({ ok: false, error: 'Photo de profil invalide (JPEG/PNG/WebP, 300 Ko max).' });
     }
     const tarifs = coursesLib.sanitizeTarifs(body.tarifs);
+    // Horaires : les deux heures doivent être valides, sinon on considère
+    // qu'il n'y en a pas (et l'interrupteur seul décide). Jamais d'à-peu-près.
+    const horaires = coursesLib.sanitizeHoraires(body);
     const pub = {
       displayName, commune, bio, vehicle, tarifs,
+      hDebut: horaires.hDebut, hFin: horaires.hFin,
       published: true,
       available: body.available === true ? true : (body.available === false ? false : undefined)
     };
@@ -675,7 +684,13 @@ async function handleCourses(req, body, cfg, res) {
     await db.collection('couriers').doc(uid).set(
       { displayName, email, updatedAt: new Date() }, { merge: true }
     );
-    return res.status(200).json({ ok: true, tarifs });
+    const apres = await db.collection('couriers_public').doc(uid).get();
+    const pd = apres.exists ? apres.data() : {};
+    return res.status(200).json({
+      ok: true, tarifs,
+      hDebut: horaires.hDebut, hFin: horaires.hFin,
+      enService: coursesLib.enService(pd, new Date())
+    });
   }
 
   // Interrupteur « je suis disponible » (bandeau vert de la carte publique).
@@ -690,7 +705,14 @@ async function handleCourses(req, body, cfg, res) {
     await coursesLib.mirrorCourierPublic(db, uid, {
       available, availableAt: available ? new Date() : null
     });
-    return res.status(200).json({ ok: true, available });
+    // L'interrupteur ne suffit pas : hors de sa plage horaire, le livreur
+    // n'est PAS en service. On renvoie l'état réel pour que l'écran ne
+    // promette pas l'inverse de ce que voient les clients.
+    const d = pub.exists ? pub.data() : {};
+    return res.status(200).json({
+      ok: true, available,
+      enService: coursesLib.enService(Object.assign({}, d, { available }), new Date())
+    });
   }
 
   // ── Créer une course (artisan) — sur PREUVE DE PAIEMENT ──
