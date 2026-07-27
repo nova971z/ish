@@ -77,6 +77,7 @@ import {
   getDocs,
   query,
   orderBy,
+  where,
   limit,
   onSnapshot,
   serverTimestamp
@@ -130,6 +131,7 @@ if (!isConfigured) {
     getDocs: getDocs,
     query: query,
     orderBy: orderBy,
+    where: where,
     limit: limit,
     // Chat course client ↔ livreur : temps réel (onSnapshot) sur
     // courses/{id}/messages, gouverné par firestore.rules (participants seuls).

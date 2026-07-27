@@ -63,7 +63,9 @@ module.exports = async function handler(req, res) {
       || body.type === 'course-deliver' || body.type === 'course-confirm' || body.type === 'course-proof'
       || body.type === 'course-scene' || body.type === 'course-video' || body.type === 'course-dispute'
       || body.type === 'courier-profile' || body.type === 'courier-profile-save'
-      || body.type === 'courier-available') {
+      || body.type === 'courier-available'
+      || body.type === 'course-request' || body.type === 'course-release'
+      || body.type === 'course-cancel') {
     return handleCourses(req, body, { apiKey, from, ownerEmail }, res);
   }
 
@@ -559,6 +561,121 @@ async function handleCourses(req, body, cfg, res) {
     });
   }
 
+  // ══ DEMANDE DE LIVRAISON — SANS PAIEMENT (flux courant, 27/07/2026) ═══════
+  // Le client dépose une demande : rien n'est débité. Elle devient visible de
+  // TOUS les livreurs. Le premier qui accepte ouvre le chat ; l'alerte s'arrête
+  // (la course quitte la liste « disponibles »). Si l'accord ne se fait pas,
+  // course-release la remet en ligne pour tout le monde.
+  if (body.type === 'course-request') {
+    if (!isTester) return res.status(403).json({ ok: false, error: 'Service en test — ouverture le 1er janvier.' });
+    // Anti-spam : 10 demandes / h / compte (au-delà, c'est du bruit pour les livreurs).
+    if (!(await rl.allow('course-req', uid, 10, 3600))) {
+      return res.status(429).json({ ok: false, error: 'Trop de demandes envoyées. Réessaie dans une heure.' });
+    }
+    const course = coursesLib.buildRequest(body, { uid, email });
+    if (!course) {
+      return res.status(400).json({ ok: false, error: 'Adresse hors zone de livraison (46 km max depuis Sainte-Anne).' });
+    }
+    if (!course.address) return res.status(400).json({ ok: false, error: 'Adresse du chantier requise.' });
+    const ref = await db.collection('courses').add(course);
+    await coursesLib.alertNewCourse(course, ref.id);
+    return res.status(200).json({
+      ok: true, id: ref.id,
+      course: { id: ref.id, km: course.km, zone: course.zone, code: course.code }
+    });
+  }
+
+  // ── Remettre la demande EN LIGNE (client OU livreur, depuis le chat) ──────
+  // « Ça ne colle pas » : on annule la mise en relation, pas la demande. La
+  // course redevient visible de tous les livreurs et l'alerte repart.
+  // round + 1 → le fil de discussion précédent devient inaccessible aux DEUX
+  // (règles Firestore) : le livreur suivant ne lira jamais la conversation
+  // d'avant, et l'ancien livreur perd l'accès à la course.
+  if (body.type === 'course-release') {
+    const id = String(body.id || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 64);
+    if (!id) return res.status(400).json({ ok: false, error: 'id requis' });
+    const ref = db.collection('courses').doc(id);
+    let out = null;
+    try {
+      out = await db.runTransaction(async (tx) => {
+        const d = await tx.get(ref);
+        if (!d.exists) throw new Error('introuvable');
+        const c = d.data();
+        if (c.artisanUid !== uid && c.courierUid !== uid) throw new Error('pas-participant');
+        if (c.status !== 'acceptee') throw new Error('pas-acceptee');
+        if (c.paid) throw new Error('deja-payee');
+        tx.update(ref, {
+          status: 'en_attente', chatOpen: false,
+          courierUid: null, courierEmail: null, courierName: '',
+          round: (c.round || 1) + 1,
+          releasedAt: new Date(), releasedBy: c.artisanUid === uid ? 'client' : 'livreur'
+        });
+        return { course: c, par: c.artisanUid === uid ? 'client' : 'livreur' };
+      });
+    } catch (e) {
+      const map = {
+        'introuvable': [404, 'Course introuvable.'],
+        'pas-participant': [403, 'Tu n\'es pas concerné par cette course.'],
+        'pas-acceptee': [409, 'Cette course n\'est pas en cours de mise en relation.'],
+        'deja-payee': [409, 'Cette course a déjà été payée — ouvre un litige plutôt qu\'une remise en ligne.']
+      };
+      const m = map[e.message];
+      if (m) return res.status(m[0]).json({ ok: false, error: m[1] });
+      console.error('[courses] release failed:', e.message);
+      return res.status(500).json({ ok: false, error: 'Remise en ligne échouée.' });
+    }
+    // L'alerte repart vers tous les livreurs + on prévient l'autre partie.
+    await coursesLib.alertCourseAgain(out.course, id);
+    const autre = out.par === 'client' ? out.course.courierEmail : out.course.artisanEmail;
+    if (autre) {
+      await coursesLib.sendMail(autre,
+        '🔁 Mise en relation annulée — la course repart chez les livreurs',
+        '<p>Le ' + out.par + ' a mis fin à la mise en relation sur cette course.</p>'
+        + '<p>📍 ' + coursesLib.escapeHtml(out.course.address || '') + '</p>'
+        + '<p>La demande est de nouveau ouverte à tous les livreurs. Rien n\'a été débité.</p>');
+    }
+    return res.status(200).json({ ok: true, id, status: 'en_attente' });
+  }
+
+  // ── ANNULER sa demande (le CLIENT a changé d'avis) ────────────────────────
+  if (body.type === 'course-cancel') {
+    const id = String(body.id || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 64);
+    if (!id) return res.status(400).json({ ok: false, error: 'id requis' });
+    const ref = db.collection('courses').doc(id);
+    let course = null;
+    try {
+      course = await db.runTransaction(async (tx) => {
+        const d = await tx.get(ref);
+        if (!d.exists) throw new Error('introuvable');
+        const c = d.data();
+        if (c.artisanUid !== uid) throw new Error('pas-ta-course');
+        if (!['en_attente', 'acceptee'].includes(c.status)) throw new Error('trop-tard');
+        if (c.paid) throw new Error('deja-payee');
+        tx.update(ref, { status: 'annulee', chatOpen: false, canceledAt: new Date() });
+        return c;
+      });
+    } catch (e) {
+      const map = {
+        'introuvable': [404, 'Demande introuvable.'],
+        'pas-ta-course': [403, 'Tu ne peux annuler que tes propres demandes.'],
+        'trop-tard': [409, 'Trop tard : cette livraison est déjà en cours ou terminée.'],
+        'deja-payee': [409, 'Cette course a été payée — contacte-nous plutôt que de l\'annuler.']
+      };
+      const m = map[e.message];
+      if (m) return res.status(m[0]).json({ ok: false, error: m[1] });
+      console.error('[courses] cancel failed:', e.message);
+      return res.status(500).json({ ok: false, error: 'Annulation échouée.' });
+    }
+    if (course.courierEmail) {
+      await coursesLib.sendMail(course.courierEmail,
+        '❌ Demande de livraison annulée par le client',
+        '<p>Le client a annulé sa demande de livraison.</p>'
+        + '<p>📍 ' + coursesLib.escapeHtml(course.address || '') + '</p>'
+        + '<p>Rien n\'a été débité, rien ne t\'est dû. La course disparaît de ton espace.</p>');
+    }
+    return res.status(200).json({ ok: true, id, status: 'annulee' });
+  }
+
   // ── Lister (livreur de test : dispo + les miennes ; artisan : les miennes) ──
   if (body.type === 'course-list') {
     const snap = await db.collection('courses').orderBy('createdAt', 'desc').limit(50).get()
@@ -573,7 +690,7 @@ async function handleCourses(req, body, cfg, res) {
         date: c.date, when: c.when, hour: c.hour,
         mine: c.artisanUid === uid, acceptedByMe: c.courierUid === uid,
         courierUid: c.courierUid || null, courierName: c.courierName || '',
-        chatOpen: !!c.chatOpen,
+        chatOpen: !!c.chatOpen, round: c.round || 1,
         rating: c.rating || 0, ratingComment: c.ratingComment || '',
         paid: !!c.paid, escrow: c.escrow || null,
         feeCents: c.feeCents || 0, amountCents: c.amountCents || 0,
@@ -602,15 +719,21 @@ async function handleCourses(req, body, cfg, res) {
     // transaction ne doit s'y glisser) — sert au fil de discussion et à la
     // fiche publique côté client.
     let courierName = '';
+    let tarifZone = null;
     try {
       const cp = await db.collection('couriers_public').doc(uid).get();
-      if (cp.exists) courierName = String(cp.data().displayName || '').slice(0, 60);
+      if (cp.exists) {
+        courierName = String(cp.data().displayName || '').slice(0, 60);
+        tarifZone = coursesLib.sanitizeTarifs(cp.data().tarifs);
+      }
     } catch (_) {}
+    let round = 1;
     try {
       const result = await db.runTransaction(async (tx) => {
         const d = await tx.get(ref);
         if (!d.exists) throw new Error('introuvable');
         if (d.data().status !== 'en_attente') throw new Error('deja-prise');
+        round = d.data().round || 1;
         tx.update(ref, {
           status: 'acceptee', courierUid: uid, courierEmail: email,
           courierName, chatOpen: true, acceptedAt: new Date()
@@ -622,10 +745,14 @@ async function handleCourses(req, body, cfg, res) {
       // participants écrivent ensuite directement via le SDK, sous les règles
       // Firestore (courses/{id}/messages, participants seuls).
       try {
+        const zone = (result && result.zone) || 1;
+        const tarif = tarifZone ? tarifZone[zone] : null;
         await ref.collection('messages').add({
-          uid: 'systeme', role: 'systeme',
+          uid: 'systeme', role: 'systeme', round,
           text: 'Course acceptée par ' + (courierName || 'un livreur')
-            + '. Mettez-vous d\'accord ici sur l\'heure exacte, le point de dépôt et l\'accès au chantier.',
+            + (tarif ? ' — son tarif zone ' + zone + ' : ' + tarif + ' €' : '')
+            + '. Mettez-vous d\'accord ici sur le prix, l\'heure exacte, le point de dépôt et l\'accès au chantier. '
+            + 'Si ça ne convient pas, chacun peut remettre la demande en ligne.',
           at: new Date()
         });
       } catch (e) { console.warn('[courses] amorce chat échouée:', e.message); }

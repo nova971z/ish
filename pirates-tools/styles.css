@@ -8120,3 +8120,9 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-msg--sys .lv-msg__t { max-width: 100%; background: transparent; color: var(--muted, #c9c9d9); font-size: .8rem; font-style: italic; text-align: center; }
 .lv-chat__send { display: flex; gap: .5rem; }
 .lv-chat__send input { flex: 1 1 auto; min-width: 0; padding: .6rem .75rem; border-radius: 10px; border: 1px solid rgba(255,255,255,.22); background: rgba(0,0,0,.35); color: #fff; font: inherit; }
+
+/* — Demande de course : sortie de secours (remise en ligne) et annulation — */
+.btn--danger { border-color: rgba(248,113,113,.55); color: #ffb4b4; background: rgba(248,113,113,.10); }
+.btn--danger:hover, .btn--danger:focus-visible { border-color: rgba(248,113,113,.85); background: rgba(248,113,113,.18); }
+.lv-chat__end { margin-top: .7rem; padding-top: .7rem; border-top: 1px dashed rgba(255,255,255,.14); display: grid; gap: .35rem; justify-items: start; }
+.lv-cancel { margin-top: .9rem; padding-top: .8rem; border-top: 1px dashed rgba(255,255,255,.14); display: grid; gap: .35rem; justify-items: start; }

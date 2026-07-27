@@ -44,7 +44,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=495">
+  <link rel="stylesheet" href="styles.css?v=496">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -510,7 +510,7 @@
             <label class="lv-consent lv-consent--film"><input type="checkbox" id="pdpDelivFilmOk"> <span>🎥 J'accepte que la remise du colis puisse être <strong>filmée</strong>, par le livreur comme par moi, comme preuve mutuelle en cas de litige. Vidéos <strong>privées</strong> (jamais publiées, visibles de l'administrateur seul), <strong>supprimées une fois le litige clos</strong>. La remise se fait dans le respect mutuel. *</span></label>
             <p class="lv-hint" id="pdpDelivZoneTxt"></p>
             <div class="lv-cta" style="margin-top:.4rem">
-              <button type="button" class="btn primary" id="pdpDelivOrder">🛒 Commander la livraison</button>
+              <button type="button" class="btn primary" id="pdpDelivOrder">📨 Envoyer ma demande aux livreurs</button>
               <span class="lv-cta__note" id="pdpDelivStatus" aria-live="polite"></span>
             </div>
           </div>
@@ -1113,15 +1113,15 @@
         <div class="lv-card">
           <h2 class="lv-h2">Comment ça marche&nbsp;?</h2>
           <ol class="liv-steps">
-            <li><strong>Tu commandes ta quincaillerie</strong> sur Pirates Tools (référence + quantité) et tu indiques l'adresse du chantier.</li>
+            <li><strong>Tu envoies une demande</strong> (référence + quantité + adresse du chantier). <strong>Tu ne paies rien à ce moment-là.</strong></li>
             <li><strong>Tu choisis QUAND</strong> : dans la journée, l'après-midi, ou à une heure précise — c'est toi qui décides.</li>
-            <li><strong>Un livreur accepte ta course</strong> et t'apporte tout sur le chantier. Tu suis sa position en direct.</li>
+            <li><strong>Le premier livreur qui accepte</strong> ouvre une discussion avec toi&nbsp;: vous convenez du prix, de l'heure et de l'accès au chantier. Si ça ne te convient pas, tu remets ta demande en ligne en un bouton.</li>
           </ol>
         </div>
 
         <div class="lv-card">
-          <h2 class="lv-h2">Tarifs de livraison (Guadeloupe)</h2>
-          <p class="lv-hint" style="margin:0 0 .6rem">Distance mesurée depuis Sainte-Anne. Le montant va <strong>intégralement au livreur</strong> — Pirates Tools ne prend rien&nbsp;: ce service existe pour aider les artisans et donner du travail aux jeunes de l'île.</p>
+          <h2 class="lv-h2">Repère de tarifs (Guadeloupe)</h2>
+          <p class="lv-hint" style="margin:0 0 .6rem"><strong>Ces montants ne sont qu'un repère.</strong> Chaque livreur est indépendant et fixe <strong>lui-même</strong> ses tarifs&nbsp;: touche sa carte ci-dessous pour voir ses vrais prix. Pirates Tools ne fixe aucun prix, ne prend rien sur la course et n'encaisse rien&nbsp;: le service existe pour aider les artisans et donner du travail aux jeunes de l'île.</p>
           <div id="livraisonBareme" class="lv-bareme"><!-- rendu par renderLivraison() --></div>
         </div>
 
@@ -1137,12 +1137,12 @@
 
         <!-- Commander une livraison depuis le PANIER (si quincaillerie dedans) -->
         <div class="lv-card" id="livraisonNoCart">
-          <h2 class="lv-h2">🛒 Commander une livraison</h2>
+          <h2 class="lv-h2">📨 Demander une livraison</h2>
           <p class="lv-hint" style="margin:0 0 .8rem">Ajoute d'abord de la <strong>quincaillerie à ton panier</strong> — tu pourras ensuite commander ta livraison directement ici, sur la grande carte.</p>
           <a class="btn primary" href="#/catalogue">Voir la quincaillerie</a>
         </div>
         <div class="lv-card" id="livraisonOrder" hidden>
-          <h2 class="lv-h2">🛒 Commander la livraison de ton panier</h2>
+          <h2 class="lv-h2">📨 Demander la livraison de ton panier</h2>
           <div id="livDelivItems" class="lv-bareme" style="margin:0 0 .8rem"></div>
           <div id="livDelivMap" class="pdp-deliv-map" aria-label="Carte de livraison"></div>
           <div class="pdp-deliv-fields">
@@ -1165,7 +1165,7 @@
             <label class="lv-consent lv-consent--film"><input type="checkbox" id="livDelivFilmOk"> <span>🎥 J'accepte que la remise du colis puisse être <strong>filmée</strong>, par le livreur comme par moi, comme preuve mutuelle en cas de litige. Vidéos <strong>privées</strong> (jamais publiées, visibles de l'administrateur seul), <strong>supprimées une fois le litige clos</strong>. La remise se fait dans le respect mutuel. *</span></label>
             <p class="lv-hint" id="livDelivZoneTxt"></p>
             <div class="lv-cta" style="margin-top:.4rem">
-              <button type="button" class="btn primary" id="livDelivOrder">🛒 Commander la livraison</button>
+              <button type="button" class="btn primary" id="livDelivOrder">📨 Envoyer ma demande aux livreurs</button>
               <span class="lv-cta__note" id="livDelivStatus" aria-live="polite"></span>
             </div>
           </div>
@@ -1186,7 +1186,7 @@
         <button type="button" class="pj-back" id="clientDelivBack">← Retour</button>
         <header class="lv-header">
           <h1 id="meslivs-h1" tabindex="-1">📦 Mes livraisons</h1>
-          <p class="lv-sub">Toutes tes livraisons de chantier : où elles en sont, ce que tu as payé, et la note que tu laisses à ton livreur.</p>
+          <p class="lv-sub">Toutes tes demandes de livraison : où elles en sont, le livreur qui les a prises, ta discussion avec lui, et la note que tu lui laisses.</p>
         </header>
         <div id="clientDelivMap" class="pdp-deliv-map courier-map" aria-label="Carte de mes livraisons"></div>
         <div id="clientDelivDetail" class="lv-card" hidden></div>
@@ -2057,7 +2057,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=495"></script>
+  <script defer src="app.js?v=496"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

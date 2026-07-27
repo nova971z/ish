@@ -4294,7 +4294,7 @@
           }).join('') + '</ul>'
         : '<p class="lv-hint">Pas encore d\'avis — les notes apparaissent ici dès qu\'un client confirme une livraison.</p>';
       h += '</div>';
-      h += '<div class="lv-card lv-cta"><a class="btn primary" href="#/livraison">🛒 Commander une livraison</a>'
+      h += '<div class="lv-card lv-cta"><a class="btn primary" href="#/livraison">📨 Demander une livraison</a>'
         + '<span class="lv-cta__note">Tu choisis ta date et ton heure à la commande. Le livreur qui accepte en premier ouvre une discussion avec toi.</span></div>';
       wrap.innerHTML = h;
       var mapHost = document.getElementById('courierProfMap');
@@ -4395,10 +4395,13 @@
     var is971 = isleCode === '971';
     var zoneTxt = document.getElementById(cfg.zone);
     function zoneBaseTxt() {
-      return '💶 Frais de livraison selon la zone ('
-        + LV_BAREME.map(function (b) { return b.emoji + ' ' + b.prix + ' €'; }).join(' · ')
-        + ' — distance depuis Sainte-Anne), payés <strong>en ligne avec ta commande</strong> puis reversés '
-        + '<strong>à 100 % au livreur</strong> une fois ta livraison confirmée (photo à l\'appui). '
+      // ⚠️ AUCUN PRIX ANNONCÉ ICI : c'est le livreur qui fixe le sien (repère
+      // indicatif seulement). La zone sert à savoir QUEL de ses tarifs s'applique.
+      return '📨 <strong>Tu envoies une demande, tu ne paies rien maintenant.</strong> '
+        + 'Elle part chez tous les livreurs ; le premier qui l\'accepte ouvre une discussion avec toi '
+        + 'pour convenir du prix et des modalités. Chaque livreur fixe ses propres tarifs (repère indicatif : '
+        + LV_BAREME.map(function (b) { return b.emoji + ' ~' + b.prix + ' €'; }).join(' · ')
+        + ' selon la distance depuis Sainte-Anne). '
         + 'Tape ton adresse : ta zone s\'affiche. L\'itinéraire proposé au livreur est indicatif : il reste libre de sa route.';
     }
     if (zoneTxt) zoneTxt.innerHTML = zoneBaseTxt();
@@ -4440,14 +4443,15 @@
         });
       };
     }
-    // Bouton COMMANDER → ouvre la MODALE DE PAIEMENT (la même que pour les
-    // outils) : produits + frais de livraison payés en une fois. La course
-    // n'est créée qu'APRÈS paiement vérifié (metadata Stripe → /merci ou
-    // webhook) — impossible de commander sans payer.
+    // Bouton DEMANDER → dépose une DEMANDE DE COURSE. ⚠️ AUCUN PAIEMENT ici
+    // (décision user 27/07/2026) : la demande part chez TOUS les livreurs, le
+    // premier qui l'accepte ouvre un chat avec le client, et ils conviennent
+    // eux-mêmes du prix et des modalités. C'est ce qui nous sort de L7342-1 :
+    // la plateforme met en relation, elle ne fixe rien et n'encaisse rien.
     var orderBtn = document.getElementById(cfg.order);
     var orderSt = document.getElementById(cfg.status);
     if (orderBtn) orderBtn.onclick = function () {
-      if (!_currentUser) { toast('Connecte-toi pour commander une livraison', 'error'); location.hash = '#/auth'; return; }
+      if (!_currentUser) { toast('Connecte-toi pour demander une livraison', 'error'); location.hash = '#/auth'; return; }
       var g = mapEl._ptGeo;
       if (!g) { if (orderSt) orderSt.textContent = 'Tape ton adresse et valide-la (Entrée) pour la localiser.'; return; }
       if (territoryFromPostalClient(g.postal) !== '971') {
@@ -4473,13 +4477,41 @@
         filmOk.focus();
         return;
       }
-      if (orderSt) orderSt.textContent = '💳 Paiement sécurisé — la course part chez les livreurs dès le paiement validé.';
-      openPayModal(pl.items, {
-        address: g.label, street: g.street || '', postal: g.postal || '', city: g.city || '',
-        lat: g.lat, lng: g.lng,
-        date: (dateEl || {}).value || '', when: when, hour: hour,
-        zone: z.zone, prix: z.prix,
-        scenePhoto: box._ptScene
+      orderBtn.disabled = true;
+      if (orderSt) orderSt.textContent = '📨 Envoi de ta demande aux livreurs…';
+      var titre = pl.items.length === 1
+        ? pl.items[0].title
+        : (pl.items.length + ' articles de quincaillerie');
+      var totQty = 0;
+      pl.items.forEach(function (it) { totQty += (it.qty || 1); });
+      jsonAuthHeaders().then(function (headers) {
+        return fetch(apiBaseUrl() + '/api/contact', {
+          method: 'POST', headers: headers,
+          body: JSON.stringify({
+            type: 'course-request',
+            productTitle: titre, qty: totQty,
+            address: g.label, lat: g.lat, lng: g.lng,
+            date: (dateEl || {}).value || '', when: when, hour: hour
+          })
+        });
+      }).then(function (r) { return r.json(); }).then(function (d) {
+        orderBtn.disabled = false;
+        if (!d.ok) { if (orderSt) orderSt.textContent = '❌ ' + (d.error || 'Erreur'); return; }
+        // Photo du chantier : jointe juste après la création (elle sert de
+        // repère au livreur et de preuve à la remise).
+        return jsonAuthHeaders().then(function (headers) {
+          return fetch(apiBaseUrl() + '/api/contact', {
+            method: 'POST', headers: headers,
+            body: JSON.stringify({ type: 'course-scene', id: d.id, photo: box._ptScene })
+          });
+        }).catch(function () {}).then(function () {
+          if (orderSt) orderSt.textContent = '✅ Demande envoyée — tu es prévenu dès qu\'un livreur l\'accepte.';
+          toast('📨 Demande envoyée aux livreurs — aucun paiement pour l\'instant', 'success');
+          location.hash = '#/mes-livraisons';
+        });
+      }).catch(function () {
+        orderBtn.disabled = false;
+        if (orderSt) orderSt.textContent = '❌ Erreur réseau — réessaie.';
       });
     };
     ensureLeaflet().then(function () {
@@ -4535,7 +4567,8 @@
                 var z = lvZoneForKm(km);
                 if (zoneTxt) zoneTxt.innerHTML = z
                   ? '📍 <strong>' + escapeHTML(label) + '</strong> — ' + km.toFixed(1) + ' km de Sainte-Anne → '
-                    + z.emoji + ' <strong>Zone ' + z.zone + ' : ' + z.prix + ' € de livraison</strong> (payés avec ta commande — reversés à 100 % au livreur après confirmation).'
+                    + z.emoji + ' <strong>Zone ' + z.zone + '</strong>. C\'est le <strong>tarif zone ' + z.zone + ' du livreur</strong> '
+                    + 'qui acceptera qui s\'appliquera (repère indicatif : ~' + z.prix + ' €). Rien n\'est débité maintenant.'
                   : '📍 <strong>' + escapeHTML(label) + '</strong> — ' + km.toFixed(1) + ' km : hors zone de livraison actuelle (max 46 km depuis Sainte-Anne).';
                 fetch('https://router.project-osrm.org/route/v1/driving/' + LV_DEPOT.lng + ',' + LV_DEPOT.lat + ';' + lng + ',' + lat + '?overview=full&geometries=geojson')
                   .then(function (r) { return r.json(); })
@@ -4584,9 +4617,11 @@
   // (source unique — le panneau livreur affiche exactement les mêmes prix).
   function renderLivraison() {
     var box = document.getElementById('livraisonBareme');
+    // REPÈRE INDICATIF (le « ~ » n'est pas décoratif) : la plateforme ne fixe
+    // aucun prix — chaque livreur inscrit les siens sur sa fiche.
     if (box) box.innerHTML = LV_BAREME.map(function (b) {
       return '<div class="lv-bareme__row"><span>' + b.emoji + ' Zone ' + b.zone + ' <em>(' + b.km + ' km)</em></span>'
-        + '<span class="lv-bareme__prix">' + b.prix + ' \u20ac</span></div>';
+        + '<span class="lv-bareme__prix">~ ' + b.prix + ' \u20ac</span></div>';
     }).join('');
 
     // ── Commander une livraison depuis le PANIER (quincaillerie uniquement) ──
@@ -4981,8 +5016,11 @@
 
   // Libellés partagés des statuts de course (livreur + client).
   function lvCourseStatusTxt(c, forClient) {
-    if (c.status === 'en_attente') return '⏳ En attente d\'un livreur';
+    if (c.status === 'en_attente') return (c.round && c.round > 1)
+      ? '⏳ De nouveau en ligne — en attente d\'un autre livreur'
+      : '⏳ En attente d\'un livreur';
     if (c.status === 'acceptee') return forClient ? '🛵 Prise en charge par un livreur' : '🛵 Acceptée — livraison en cours';
+    if (c.status === 'annulee') return '❌ Demande annulée';
     if (c.status === 'livree') return forClient ? '📦 Livrée — vérifie la photo et confirme la réception' : '📦 Livrée — en attente de confirmation du client';
     if (c.status === 'terminee') return '✅ Terminée';
     return escapeHTML(c.status);
@@ -5116,14 +5154,23 @@
       + '<div class="lv-chat__send">'
       + '<input type="text" id="lvChatInput" maxlength="800" placeholder="Écris ton message…" autocomplete="off">'
       + '<button type="button" class="btn primary" id="lvChatSend">Envoyer</button>'
-      + '</div><span class="lv-cta__note" id="lvChatSt" aria-live="polite"></span></div>';
+      + '</div><span class="lv-cta__note" id="lvChatSt" aria-live="polite"></span>'
+      // Sortie de secours des DEUX côtés : si l'accord ne se fait pas, on
+      // annule la mise en relation (pas la demande) — la course repart chez
+      // tous les livreurs et le fil ci-dessus devient inaccessible aux deux.
+      + (c.status === 'acceptee' && !c.paid
+        ? '<div class="lv-chat__end"><button type="button" class="btn btn--danger" id="lvChatRelease">'
+          + '↩️ Ça ne convient pas — remettre la demande en ligne</button>'
+          + '<span class="lv-cta__note" id="lvChatReleaseSt" aria-live="polite">Rien n\'a été débité. La demande redeviendra visible de tous les livreurs.</span></div>'
+        : '')
+      + '</div>';
   }
 
   // Branche le fil : abonnement temps réel + envoi. `role` = 'client' ou
   // 'livreur' (l'espace appelant le connaît ; le serveur ne s'en sert que pour
   // l'affichage — l'identité réelle vient de request.auth.uid dans les règles).
   var _lvChatUnsub = null;
-  function wireChat(root, c, role) {
+  function wireChat(root, c, role, reload) {
     var box = root.querySelector('[data-chat]');
     if (!box) return;
     var log = root.querySelector('#lvChatLog');
@@ -5137,7 +5184,11 @@
         return;
       }
       var col = fb.collection(fb.db, 'courses', String(c.id), 'messages');
-      var q = fb.query(col, fb.orderBy('at'), fb.limit(200));
+      // Le filtre sur `round` n'est pas cosmétique : les règles Firestore
+      // n'autorisent la lecture QUE du round courant, et une requête non
+      // filtrée serait refusée en bloc. Cloisonne les mises en relation
+      // successives (le livreur suivant ne lit jamais le fil d'avant).
+      var q = fb.query(col, fb.where('round', '==', (c.round || 1)), fb.orderBy('at'), fb.limit(200));
       _lvChatUnsub = fb.onSnapshot(q, function (snap) {
         var h = [];
         snap.forEach(function (d) {
@@ -5161,7 +5212,7 @@
       whenFirebaseReady(function (fb) {
         if (!fb || !fb.addDoc || !_currentUser) { if (st) st.textContent = 'Connexion requise.'; if (send) send.disabled = false; return; }
         fb.addDoc(fb.collection(fb.db, 'courses', String(c.id), 'messages'), {
-          uid: _currentUser.uid, role: role, text: txt, at: new Date()
+          uid: _currentUser.uid, role: role, text: txt, at: new Date(), round: (c.round || 1)
         }).then(function () {
           if (input) input.value = '';
           if (st) st.textContent = '';
@@ -5172,6 +5223,24 @@
     }
     if (send) send.onclick = doSend;
     if (input) input.onkeydown = function (e) { if (e.key === 'Enter') { e.preventDefault(); doSend(); } };
+    // « Ça ne convient pas » : remet la demande en ligne pour tous les livreurs.
+    var rel = root.querySelector('#lvChatRelease');
+    if (rel) rel.onclick = function () {
+      var rst = root.querySelector('#lvChatReleaseSt');
+      rel.disabled = true;
+      if (rst) rst.textContent = 'Remise en ligne…';
+      jsonAuthHeaders().then(function (headers) {
+        return fetch(apiBaseUrl() + '/api/contact', {
+          method: 'POST', headers: headers,
+          body: JSON.stringify({ type: 'course-release', id: c.id })
+        });
+      }).then(function (r) { return r.json(); }).then(function (d) {
+        if (d.ok) {
+          toast('↩️ Demande remise en ligne — tous les livreurs la revoient', 'success');
+          if (typeof reload === 'function') reload();
+        } else { rel.disabled = false; if (rst) rst.textContent = '❌ ' + (d.error || 'Erreur'); }
+      }).catch(function () { rel.disabled = false; if (rst) rst.textContent = '❌ Erreur réseau'; });
+    };
   }
 
   // Widget « Mes gains » de l'espace livreur. Trois états de l'argent, calculés
@@ -5218,6 +5287,11 @@
   // Grande carte des zones sur toute la largeur : le livreur y inscrit SES
   // prix. Rien n'est imposé, aucun montant n'est refusé, aucun tri ne dépend du
   // prix (voir le cadre juridique en tête du bloc TARIFS).
+  var _lvMyTarifs = null;          // tarifs du livreur connecté (chargés par le panneau)
+  function lvMyPrice(zone) {
+    var t = _lvMyTarifs || lvDefaultTarifs();
+    return t[zone] || t[1];
+  }
   function renderCourierTarifPanel() {
     var host = document.getElementById('courierTarifs');
     if (!host) return;
@@ -5230,6 +5304,7 @@
       if (!d.ok) { host.innerHTML = '<p class="lv-hint">Fiche indisponible : ' + escapeHTML(d.error || '?') + '</p>'; return; }
       var p = d.profile || {};
       var tarifs = lvNormTarifs(p.tarifs);
+      _lvMyTarifs = tarifs;            // réutilisés pour afficher MON prix sur chaque course
       var repere = lvDefaultTarifs();
       host.innerHTML =
         '<div class="lv-card lv-tarifs">'
@@ -5403,7 +5478,8 @@
             : c.escrow === 'liberable' ? 'débloqués, versement en cours'
             : 'payés par le client, <strong>gelés</strong> jusqu\'à sa confirmation de réception') + '<br>';
       }
-      det.innerHTML = '<h2 class="lv-h2">' + z.emoji + ' Course zone ' + c.zone + ' — <strong>' + c.prix + ' €</strong></h2>'
+      var detPrix = c.paid && c.prix ? (c.prix + ' €') : (lvMyPrice(c.zone) + ' € — ton tarif zone ' + c.zone);
+      det.innerHTML = '<h2 class="lv-h2">' + z.emoji + ' Course zone ' + c.zone + ' — <strong>' + detPrix + '</strong></h2>'
         + '<div class="lv-course__body">'
         + '📦 ' + escapeHTML(c.productTitle || '') + (c.qty > 1 ? ' × ' + c.qty : '') + '<br>'
         + '📍 ' + escapeHTML(c.address || '') + ' <em>(' + c.km + ' km de Sainte-Anne)</em><br>'
@@ -5444,7 +5520,7 @@
           ? lvVideoDisputeHtml(c) : '');
       wireAccept(det);
       wireProof(det, c);
-      if (c.acceptedByMe) wireChat(det, c, 'livreur');
+      if (c.acceptedByMe) wireChat(det, c, 'livreur', renderCourierSpace);
       wireVideoDispute(det, c, renderCourierSpace);
       det.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
@@ -5527,7 +5603,8 @@
           });
         }).then(function (r) { return r.json(); }).then(function (d) {
           if (d.ok) {
-            toast('📦 Livraison validée — le client doit confirmer pour débloquer tes ' + c.prix + ' €', 'success');
+            toast('📦 Livraison validée — le client doit maintenant confirmer la réception'
+              + (c.paid && c.prix ? ' pour débloquer tes ' + c.prix + ' €' : ''), 'success');
             renderCourierSpace();
           } else { btn.disabled = false; if (st) st.textContent = '❌ ' + (d.error || 'Erreur'); }
         }).catch(function (e) {
@@ -5538,8 +5615,11 @@
     }
     function courseCard(c, canAccept) {
       var z = LV_BAREME[(c.zone || 1) - 1] || LV_BAREME[0];
+      // Prix affiché = SON tarif pour cette zone (ou celui déjà payé sur les
+      // anciennes courses pré-payées). La plateforme n'en impose aucun.
+      var prixTxt = c.paid && c.prix ? (c.prix + ' €') : (lvMyPrice(c.zone) + ' € <em>(ton tarif)</em>');
       return '<button type="button" class="lv-course lv-course--btn' + (c.status !== 'en_attente' ? ' lv-course--done' : '') + '" data-course-focus="' + escapeHTML(c.id) + '">'
-        + '<span class="lv-course__head"><span>' + z.emoji + ' Zone ' + c.zone + ' · <strong>' + c.prix + ' €</strong></span>'
+        + '<span class="lv-course__head"><span>' + z.emoji + ' Zone ' + c.zone + ' · <strong>' + prixTxt + '</strong></span>'
         + '<span class="lv-course__status">' + (c.status === 'en_attente' ? 'En attente' : (c.acceptedByMe ? '✅ Par toi' : escapeHTML(c.status))) + '</span></span>'
         + '<span class="lv-course__body">📍 ' + escapeHTML((c.address || '').slice(0, 60)) + ' <em>(' + c.km + ' km)</em></span>'
         + '</button>';
@@ -5660,7 +5740,9 @@
           + (c.escrow === 'libere' ? 'versés au livreur ✅'
             : c.escrow === 'liberable' ? 'débloqués pour le livreur'
             : 'gelés jusqu\'à ta confirmation de réception') + '<br>'
-        : '💶 Frais de livraison : <strong>' + c.prix + ' €</strong><br>';
+        : (c.courierUid
+            ? '💶 Prix : <strong>à convenir dans la discussion</strong> avec ton livreur (chacun fixe ses tarifs)<br>'
+            : '💶 Aucun paiement pour l\'instant — le prix se convient avec le livreur qui acceptera<br>');
       var h = '<h2 class="lv-h2">' + z.emoji + ' Livraison zone ' + c.zone + '</h2>'
         + '<div class="lv-course__body">'
         + '📦 ' + escapeHTML(c.productTitle || '') + (c.qty > 1 ? ' × ' + c.qty : '') + '<br>'
@@ -5695,7 +5777,8 @@
             ? '<p class="lv-hint">📸 Preuves du livreur' + (c.hasScene ? ' + ta photo de commande — vérifie que tout correspond' : '') + ' :</p>'
               + '<div class="lv-proof__grid" id="clientProofImg">Chargement des photos…</div>'
             : '<p class="lv-hint">Le livreur n\'a pas joint de photo.</p>')
-          + '<div class="lv-cta"><button type="button" class="btn primary" id="clientConfirmBtn">✅ Confirmer la réception — débloque le paiement du livreur</button>'
+          + '<div class="lv-cta"><button type="button" class="btn primary" id="clientConfirmBtn">✅ Confirmer la réception'
+          + (c.paid ? ' — débloque le paiement du livreur' : '') + '</button>'
           + '<span class="lv-cta__note" id="clientConfirmSt" aria-live="polite"></span></div>'
           + '</div>';
       }
@@ -5706,6 +5789,14 @@
           + encodeURIComponent(c.courierUid) + '">' + escapeHTML(c.courierName || 'voir sa fiche') + '</a></p>';
       }
       if (c.mine) h += lvChatHTML(c);
+      // ANNULER SA DEMANDE — tant que rien n'est livré ni payé, le client
+      // reste libre de changer d'avis. Confirmation en deux temps (le bouton
+      // se transforme) : pas d'annulation par tap accidentel sur mobile.
+      if (c.mine && ['en_attente', 'acceptee'].indexOf(c.status) !== -1 && !c.paid) {
+        h += '<div class="lv-cancel"><button type="button" class="btn btn--danger" id="clientCancelBtn" data-armed="0">'
+          + '❌ Annuler ma demande de livraison</button>'
+          + '<span class="lv-cta__note" id="clientCancelSt" aria-live="polite">Tu as changé d\'avis ? Rien n\'a été débité, l\'annulation est libre.</span></div>';
+      }
       // Vidéo + litige côté CLIENT (dès qu'un livreur est impliqué)
       if (c.mine && ['acceptee', 'livree', 'terminee'].indexOf(c.status) !== -1) {
         h += lvVideoDisputeHtml(c);
@@ -5726,7 +5817,28 @@
         h += '<p class="lv-hint" style="margin-top:.6rem">Tu pourras noter ton livreur dès qu\'il aura pris la course.</p>';
       }
       det.innerHTML = h;
-      if (c.mine) wireChat(det, c, 'client');
+      if (c.mine) wireChat(det, c, 'client', renderClientDeliveries);
+      var cancelBtn = det.querySelector('#clientCancelBtn');
+      if (cancelBtn) cancelBtn.onclick = function () {
+        var cst = det.querySelector('#clientCancelSt');
+        if (cancelBtn.getAttribute('data-armed') !== '1') {   // 1er clic = armement
+          cancelBtn.setAttribute('data-armed', '1');
+          cancelBtn.textContent = '⚠️ Confirmer l\'annulation';
+          if (cst) cst.textContent = 'Touche à nouveau pour annuler définitivement cette demande.';
+          return;
+        }
+        cancelBtn.disabled = true;
+        if (cst) cst.textContent = 'Annulation…';
+        jsonAuthHeaders().then(function (headers) {
+          return fetch(apiBaseUrl() + '/api/contact', {
+            method: 'POST', headers: headers,
+            body: JSON.stringify({ type: 'course-cancel', id: c.id })
+          });
+        }).then(function (r) { return r.json(); }).then(function (d) {
+          if (d.ok) { toast('Demande annulée', 'success'); renderClientDeliveries(); }
+          else { cancelBtn.disabled = false; if (cst) cst.textContent = '❌ ' + (d.error || 'Erreur'); }
+        }).catch(function () { cancelBtn.disabled = false; if (cst) cst.textContent = '❌ Erreur réseau'; });
+      };
       wireVideoDispute(det, c, renderClientDeliveries);
       // QR du code de remise (généré 100 % en local — ensureQRLib, jamais de tiers)
       var qrBox = det.querySelector('#clientCodeQR');
@@ -5772,7 +5884,8 @@
             });
           }).then(function (r) { return r.json(); }).then(function (d) {
             if (d.ok) {
-              toast('✅ Réception confirmée — le paiement du livreur est débloqué', 'success');
+              toast(c.paid ? '✅ Réception confirmée — le paiement du livreur est débloqué'
+                : '✅ Réception confirmée — merci !', 'success');
               renderClientDeliveries();
             } else { cf.disabled = false; if (cfSt) cfSt.textContent = '❌ ' + (d.error || 'Erreur'); }
           }).catch(function () { cf.disabled = false; if (cfSt) cfSt.textContent = 'Erreur réseau.'; });

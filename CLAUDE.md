@@ -842,12 +842,46 @@ dispo → note → ancienneté, JAMAIS le prix (vérifié dans loadCouriers).
 - ⚠️ **ACTION USER OBLIGATOIRE** : `npx firebase deploy --only firestore:rules`
   (ou console iPad). Tant que ce n'est pas fait, l'annuaire livreurs et le chat
   RESTENT VIDES/MUETS — les nouvelles règles ne sont pas en ligne.
-- ⏭️ PAS ENCORE FAIT (suite logique, à décider avec l'user) : le prix DÉBITÉ
-  reste celui du barème plateforme (create-payment-intent). Tant que le client
-  ne paie pas le tarif DU livreur qu'il a choisi, on n'est pas sorti de
-  L7342-1 — la fiche affiche des prix libres mais l'encaissement, lui, est
-  encore au barème. Étape suivante = choix du livreur AVANT paiement + Stripe
-  Connect direct charges.
+## 📨 DEMANDE DE COURSE SANS PAIEMENT — mise en relation pure (27/07/2026, SW v496)
+DÉCISION USER : « le client fait une demande de courses, il ne paye rien avant
+donc on enlève le panneau de paiement ». C'est la SORTIE COMPLÈTE de L7342-1 :
+la plateforme ne fixe plus le prix (fait en v495) ET n'encaisse plus rien.
+- **Flux** : demande déposée (aucun débit) → visible de TOUS les livreurs →
+  1er qui accepte = chat ouvert + la course quitte la liste « disponibles »
+  (l'alerte s'arrête d'elle-même) → ils conviennent du prix et des modalités →
+  si ça ne colle pas, l'un OU l'autre clique « remettre en ligne » → la demande
+  repart chez tous (email `alertCourseAgain`). Le client peut ANNULER sa
+  demande à tout moment (confirmation en 2 temps, anti-tap accidentel).
+- **`round` = LA trouvaille** : chaque remise en ligne incrémente `round` sur la
+  course. Les règles Firestore n'autorisent lecture/écriture des messages QUE
+  du round courant → **le livreur suivant ne lira JAMAIS la conversation
+  d'avant**, et l'ex-livreur perd tout accès. Corollaire OBLIGATOIRE côté
+  client : la requête doit filtrer `where('round','==',round)`, sinon Firestore
+  refuse la requête entière (elle serait trop large). `where` ajouté à
+  firebase-init.js.
+- **API (contact.js)** : `course-request` (rate-limit 10/h/compte, zone dérivée
+  serveur de lat/lng, AUCUN champ `prix`), `course-release` (participant,
+  acceptee→en_attente, round+1, détache le livreur), `course-cancel` (client,
+  en_attente|acceptee→annulee). Les trois refusent si `paid` (les anciennes
+  courses pré-payées gardent l'ancien chemin litige/escrow).
+- **Prix affichés** : côté livreur, chaque course montre SON tarif de zone
+  (`lvMyPrice`) ; côté client, « prix à convenir dans la discussion ». Le
+  barème LV_BAREME n'apparaît plus qu'en « ~ » (repère).
+- **Ce qui reste en place** : photo du chantier obligatoire (jointe juste après
+  la demande via course-scene), code de remise 6 chiffres + QR, 2 photos du
+  livreur, consentement vidéo, litiges, notation. Seul le PAIEMENT a disparu du
+  parcours livraison.
+- **Code de paiement conservé mais plus appelé** : `openPayModal` garde sa
+  branche `_payCourse` et `/merci` garde `course-create` (paiement prouvé) —
+  plus rien ne les déclenche côté livraison. La modale carte sert toujours à
+  l'achat d'outils. NE PAS les supprimer sans revoir le webhook.
+- VÉRIFIÉ : **47/47 Playwright** (dont « AUCUN panneau de paiement ne s'ouvre »,
+  demande sans prix, photo jointe, release, annulation 2 temps, filtre round)
+  + **78/78 émulateur Firestore** (dont 4 assertions de cloisonnement round).
+- ⏭️ RESTE À DÉCIDER : comment l'argent circule au final (main propre ? Stripe
+  Connect direct charges entre client et livreur ?). Aujourd'hui la plateforme
+  ne touche plus à l'argent de la course — c'est volontaire et c'est ce qui
+  nous met dans les clous.
 
 ## 💳 STRIPE EN MODE TEST (26/07/2026, SW v481) — À INVERSER AU LANCEMENT
 Avant lancement, le site tourne sur les clés **TEST** de Stripe (compte activé

@@ -21,7 +21,7 @@ const {
 } = require('@firebase/rules-unit-testing');
 const {
   doc, getDoc, setDoc, updateDoc, deleteDoc,
-  collection, addDoc, getDocs, setLogLevel
+  collection, addDoc, getDocs, query, where, setLogLevel
 } = require('firebase/firestore');
 
 setLogLevel('error'); // silence les avertissements SDK attendus (permission-denied)
@@ -61,9 +61,9 @@ async function check(label, promise) {
     // Service coursier : fiche publique du livreur + course avec fil de discussion.
     await setDoc(doc(db, 'couriers_public/bob'), { uid: 'bob', displayName: 'Bob L.', published: true, available: true, coursesDone: 3, ratingCount: 1, ratingSum: 5, tarifs: { 1: 30 } });
     await setDoc(doc(db, 'couriers/bob'), { kycStatus: 'valide', email: 'b@x.fr' });
-    await setDoc(doc(db, 'courses/c1'), { artisanUid: 'alice', courierUid: 'bob', status: 'acceptee', code: '123456', prix: 22 });
-    await setDoc(doc(db, 'courses/c1/messages/m1'), { uid: 'alice', role: 'client', text: 'Bonjour', at: 1 });
-    await setDoc(doc(db, 'courses/c2'), { artisanUid: 'carol', courierUid: 'dave', status: 'acceptee' });
+    await setDoc(doc(db, 'courses/c1'), { artisanUid: 'alice', courierUid: 'bob', status: 'acceptee', code: '123456', round: 1 });
+    await setDoc(doc(db, 'courses/c1/messages/m1'), { uid: 'alice', role: 'client', text: 'Bonjour', at: 1, round: 1 });
+    await setDoc(doc(db, 'courses/c2'), { artisanUid: 'carol', courierUid: 'dave', status: 'acceptee', round: 1 });
   });
 
   console.log('\n── Isolation entre clients ──');
@@ -140,20 +140,33 @@ async function check(label, promise) {
   console.log('\n── courses/{id}/messages : chat réservé aux DEUX participants ──');
   const carol = env.authenticatedContext('carol').firestore();
   await check('Alice NE lit PAS le document course lui-même (montants, code de remise)', assertFails(getDoc(doc(alice, 'courses/c1'))));
-  await check('Alice (cliente) LIT le fil de sa course', assertSucceeds(getDocs(collection(alice, 'courses/c1/messages'))));
-  await check('Bob (livreur) LIT le fil de sa course', assertSucceeds(getDocs(collection(bob, 'courses/c1/messages'))));
-  await check('Alice ÉCRIT un message sur sa course', assertSucceeds(addDoc(collection(alice, 'courses/c1/messages'), { uid: 'alice', role: 'client', text: 'A quelle heure ?', at: 2 })));
-  await check('Bob ÉCRIT un message sur sa course', assertSucceeds(addDoc(collection(bob, 'courses/c1/messages'), { uid: 'bob', role: 'livreur', text: 'Vers 9h', at: 3 })));
-  await check('Carol (tiers) NE lit PAS le fil d\'une course qui n\'est pas la sienne', assertFails(getDocs(collection(carol, 'courses/c1/messages'))));
-  await check('Carol NE écrit PAS dans le fil d\'autrui', assertFails(addDoc(collection(carol, 'courses/c1/messages'), { uid: 'carol', role: 'client', text: 'coucou', at: 4 })));
-  await check('Un anonyme NE lit PAS un fil de course', assertFails(getDocs(collection(anon, 'courses/c1/messages'))));
-  await check('Alice NE peut PAS signer un message au nom de Bob', assertFails(addDoc(collection(alice, 'courses/c1/messages'), { uid: 'bob', role: 'livreur', text: 'faux', at: 5 })));
-  await check('Alice NE peut PAS glisser un champ non prévu', assertFails(addDoc(collection(alice, 'courses/c1/messages'), { uid: 'alice', role: 'client', text: 'x', at: 6, admin: true })));
-  await check('Message VIDE refusé', assertFails(addDoc(collection(alice, 'courses/c1/messages'), { uid: 'alice', role: 'client', text: '', at: 7 })));
-  await check('Message de plus de 800 caractères refusé', assertFails(addDoc(collection(alice, 'courses/c1/messages'), { uid: 'alice', role: 'client', text: 'x'.repeat(801), at: 8 })));
+  const fil = (db, id, round) => query(collection(db, 'courses/' + id + '/messages'), where('round', '==', round));
+  await check('Alice (cliente) LIT le fil de sa course', assertSucceeds(getDocs(fil(alice, 'c1', 1))));
+  await check('Bob (livreur) LIT le fil de sa course', assertSucceeds(getDocs(fil(bob, 'c1', 1))));
+  await check('Alice ÉCRIT un message sur sa course', assertSucceeds(addDoc(collection(alice, 'courses/c1/messages'), { uid: 'alice', role: 'client', text: 'A quelle heure ?', at: 2, round: 1 })));
+  await check('Bob ÉCRIT un message sur sa course', assertSucceeds(addDoc(collection(bob, 'courses/c1/messages'), { uid: 'bob', role: 'livreur', text: 'Vers 9h', at: 3, round: 1 })));
+  await check('Carol (tiers) NE lit PAS le fil d\'une course qui n\'est pas la sienne', assertFails(getDocs(fil(carol, 'c1', 1))));
+  await check('Carol NE écrit PAS dans le fil d\'autrui', assertFails(addDoc(collection(carol, 'courses/c1/messages'), { uid: 'carol', role: 'client', text: 'coucou', at: 4, round: 1 })));
+  await check('Un anonyme NE lit PAS un fil de course', assertFails(getDocs(fil(anon, 'c1', 1))));
+  await check('Alice NE peut PAS signer un message au nom de Bob', assertFails(addDoc(collection(alice, 'courses/c1/messages'), { uid: 'bob', role: 'livreur', text: 'faux', at: 5, round: 1 })));
+  await check('Alice NE peut PAS glisser un champ non prévu', assertFails(addDoc(collection(alice, 'courses/c1/messages'), { uid: 'alice', role: 'client', text: 'x', at: 6, round: 1, admin: true })));
+  await check('Message VIDE refusé', assertFails(addDoc(collection(alice, 'courses/c1/messages'), { uid: 'alice', role: 'client', text: '', at: 7, round: 1 })));
+  await check('Message de plus de 800 caractères refusé', assertFails(addDoc(collection(alice, 'courses/c1/messages'), { uid: 'alice', role: 'client', text: 'x'.repeat(801), at: 8, round: 1 })));
   await check('Un message ne peut PAS être modifié (preuve en cas de litige)', assertFails(updateDoc(doc(alice, 'courses/c1/messages/m1'), { text: 'reecrit' })));
   await check('Un message ne peut PAS être supprimé', assertFails(deleteDoc(doc(alice, 'courses/c1/messages/m1'))));
-  await check('Aucun fil sur une course INEXISTANTE', assertFails(addDoc(collection(alice, 'courses/fantome/messages'), { uid: 'alice', role: 'client', text: 'x', at: 9 })));
+  await check('Aucun fil sur une course INEXISTANTE', assertFails(addDoc(collection(alice, 'courses/fantome/messages'), { uid: 'alice', role: 'client', text: 'x', at: 9, round: 1 })));
+  await check('Un message d\'un AUTRE round est refusé à l\'écriture', assertFails(addDoc(collection(alice, 'courses/c1/messages'), { uid: 'alice', role: 'client', text: 'triche', at: 10, round: 2 })));
+  await check('Lire le fil SANS filtrer le round est refusé (requête trop large)', assertFails(getDocs(collection(alice, 'courses/c1/messages'))));
+
+  console.log('\n── Remise en ligne : le fil précédent devient inaccessible ──');
+  // Le serveur (course-release) incrémente `round` et détache le livreur.
+  await env.withSecurityRulesDisabled(async (ctx) => {
+    await updateDoc(doc(ctx.firestore(), 'courses/c1'), { round: 2, status: 'en_attente', courierUid: null, chatOpen: false });
+  });
+  await check('Alice NE relit PAS l\'ancien fil (round 1) après remise en ligne', assertFails(getDocs(fil(alice, 'c1', 1))));
+  await check('Bob (ex-livreur détaché) NE lit plus RIEN sur cette course', assertFails(getDocs(fil(bob, 'c1', 2))));
+  await check('Bob (ex-livreur) NE peut plus écrire sur cette course', assertFails(addDoc(collection(bob, 'courses/c1/messages'), { uid: 'bob', role: 'livreur', text: 'encore moi', at: 11, round: 2 })));
+  await check('Alice (cliente) écrit bien dans le NOUVEAU round', assertSucceeds(addDoc(collection(alice, 'courses/c1/messages'), { uid: 'alice', role: 'client', text: 'nouveau tour', at: 12, round: 2 })));
 
   console.log('\n── Default-deny : collection inconnue ──');
   await check('Alice NE lit PAS une collection non prévue', assertFails(getDoc(doc(alice, 'secret_stuff/x'))));

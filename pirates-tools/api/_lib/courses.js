@@ -48,6 +48,54 @@ function quote(lat, lng) {
   return { km: Math.round(km * 10) / 10, zone: z.zone, prix: z.prix, lat, lng };
 }
 
+// ── DEMANDE DE COURSE — SANS PAIEMENT (décision user 27/07/2026) ────────────
+// Le client dépose une DEMANDE : rien n'est débité, rien n'est promis. Elle
+// part en alerte à tous les livreurs. Le premier qui l'accepte ouvre un chat
+// avec le client ; ils conviennent eux-mêmes des modalités et du prix (celui
+// affiché sur la fiche du livreur). Si ça ne colle pas, l'un ou l'autre
+// « remet en ligne » : la demande redevient visible de tous (round + 1, le fil
+// précédent devient inaccessible aux deux côtés — voir firestore.rules).
+// ⚖️ C'est ce qui nous sort de L7342-1 : la plateforme ne fixe pas le prix, ne
+// détient pas les fonds, et n'attribue pas la course — elle met en relation.
+function buildRequest(input, who) {
+  const q = quote(input.lat, input.lng);
+  if (!q) return null;
+  return {
+    status: 'en_attente',
+    test: true,
+    round: 1,                                   // n° de mise en relation (voir course-release)
+    chatOpen: false,
+    paid: false,                                // AUCUN paiement à la demande
+    escrow: null,
+    code: String(crypto.randomInt(0, 1000000)).padStart(6, '0'),
+    artisanUid: who.uid,
+    artisanEmail: who.email || null,
+    productKey: 'demande-livraison',
+    productTitle: String(input.productTitle || 'Quincaillerie à livrer').slice(0, 200),
+    qty: Math.max(1, Math.min(999, parseInt(input.qty, 10) || 1)),
+    address: String(input.address || '').slice(0, 200),
+    lat: q.lat, lng: q.lng, km: q.km, zone: q.zone,
+    // `prix` VOLONTAIREMENT ABSENT : le tarif est celui du livreur qui accepte.
+    date: /^\d{4}-\d{2}-\d{2}$/.test(String(input.date || '')) ? input.date : '',
+    when: ['matin', 'apresmidi', 'heure'].includes(input.when) ? input.when : 'matin',
+    hour: /^\d{2}:\d{2}$/.test(String(input.hour || '')) ? input.hour : '',
+    createdAt: new Date()
+  };
+}
+
+// Alerte « demande remise en ligne » (après une annulation de mise en relation).
+async function alertCourseAgain(course, id) {
+  const subject = '🔁 Course de nouveau disponible — zone ' + course.zone + ' — ' + String(course.address || '').slice(0, 60);
+  const html = '<p><strong>Une demande de livraison est de nouveau ouverte.</strong> '
+    + 'Le client et le livreur précédent ne se sont pas mis d\'accord.</p>'
+    + '<p>📍 ' + escapeHtml(course.address) + ' (' + course.km + ' km de Sainte-Anne — zone ' + course.zone + ')<br>'
+    + '📅 ' + (course.date || 'au plus tôt') + '</p>'
+    + '<p>Premier arrivé, premier servi : ouvre ton espace livreur sur pirates-tools.com.</p>';
+  const owner = process.env.OWNER_EMAIL;
+  const dests = Array.from(new Set(TEST_EMAILS.concat(owner ? [owner] : [])));
+  for (const to of dests) await sendMail(to, subject, html);
+}
+
 // Crée la course depuis un PaymentIntent PAYÉ (metadata course* posée par
 // create-payment-intent). Doc id = pi.id → idempotent (create() refuse le
 // doublon). Retourne { created, id, course }.
@@ -155,13 +203,21 @@ async function sendMail(to, subject, html) {
 // Alerte « nouvelle course » aux livreurs de test + owner.
 async function alertNewCourse(course, id) {
   const whenTxt = course.when === 'heure' ? ('à ' + course.hour) : (course.when === 'matin' ? 'le matin' : "l'après-midi");
-  const subject = '🛵 Nouvelle course zone ' + course.zone + ' — ' + course.prix + ' € — ' + String(course.address || '').slice(0, 60);
-  const html = '<p><strong>Nouvelle course de livraison (TEST)</strong> — payée en ligne ✅</p>'
+  // Deux régimes cohabitent : la DEMANDE sans paiement (nouveau flux, aucun
+  // prix imposé — c'est le tarif du livreur qui s'appliquera) et l'ancienne
+  // course payée d'avance (conservée pour les courses déjà en base).
+  const paye = !!course.paid && course.prix;
+  const subject = (paye ? '🛵 Nouvelle course zone ' : '🛵 Nouvelle demande de livraison — zone ')
+    + course.zone + (paye ? ' — ' + course.prix + ' €' : '') + ' — ' + String(course.address || '').slice(0, 60);
+  const html = '<p><strong>' + (paye ? 'Nouvelle course de livraison (TEST) — payée en ligne ✅' : 'Nouvelle demande de livraison (TEST)') + '</strong></p>'
     + '<p>' + escapeHtml(course.productTitle) + (course.qty > 1 ? ' × ' + course.qty : '') + '<br>'
     + '📍 ' + escapeHtml(course.address) + ' (' + course.km + ' km de Sainte-Anne — zone ' + course.zone + ')<br>'
     + '📅 ' + (course.date || 'au plus tôt') + ' ' + whenTxt + '<br>'
-    + '💶 <strong>' + course.prix + ' €</strong> pour le livreur — gelés, débloqués à la confirmation de livraison (photo à l\'appui).</p>'
-    + '<p>Ouvre ton espace livreur sur pirates-tools.com pour accepter la course (premier arrivé, premier servi).</p>';
+    + (paye
+      ? '💶 <strong>' + course.prix + ' €</strong> pour le livreur — gelés, débloqués à la confirmation de livraison (photo à l\'appui).</p>'
+      : '💶 <strong>Ton tarif zone ' + course.zone + '</strong> s\'applique — celui que TU as inscrit sur ta fiche. Rien n\'est imposé.</p>')
+    + '<p>Ouvre ton espace livreur sur pirates-tools.com pour accepter la course (premier arrivé, premier servi). '
+    + 'Accepter ouvre une discussion directe avec le client pour convenir des modalités.</p>';
   const owner = process.env.OWNER_EMAIL;
   const dests = Array.from(new Set(TEST_EMAILS.concat(owner ? [owner] : [])));
   for (const to of dests) await sendMail(to, subject, html);
@@ -203,6 +259,7 @@ async function confirmToClient(course, id) {
 
 module.exports = {
   DEPOT, BAREME, TEST_EMAILS, TARIF_MIN, TARIF_MAX,
-  haversineKm, quote, createFromIntent, alertNewCourse, confirmToClient, sendMail, escapeHtml,
+  haversineKm, quote, buildRequest, createFromIntent,
+  alertNewCourse, alertCourseAgain, confirmToClient, sendMail, escapeHtml,
   defaultTarifs, sanitizeTarifs, mirrorCourierPublic
 };

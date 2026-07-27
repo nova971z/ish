@@ -38,6 +38,14 @@ service cloud.firestore {
         && (get(/databases/$(database)/documents/courses/$(courseId)).data.artisanUid == request.auth.uid
             || get(/databases/$(database)/documents/courses/$(courseId)).data.courierUid == request.auth.uid);
     }
+    // N° de mise en relation en cours. Incrémenté par le serveur à chaque
+    // « remise en ligne » (course-release) : le fil précédent devient
+    // inaccessible aux DEUX côtés, si bien que le livreur suivant ne lira
+    // jamais la conversation d'avant. Défaut 1 pour les courses antérieures.
+    function courseRound(courseId) {
+      return ('round' in get(/databases/$(database)/documents/courses/$(courseId)).data)
+        ? get(/databases/$(database)/documents/courses/$(courseId)).data.round : 1;
+    }
 
     // ---- users/{uid} : profil client, self-only ---------------------------
     // Un utilisateur ne peut lire/écrire QUE son propre document. Les champs
@@ -137,12 +145,17 @@ service cloud.firestore {
       // (vérifiés dans le document parent, que le client ne peut pas lire).
       // Messages immuables : ni modification ni suppression — le fil fait foi
       // en cas de litige.
+      // Le champ `round` cloisonne les mises en relation successives : on ne
+      // lit et on n'écrit QUE dans le round courant de la course. Les requêtes
+      // client doivent donc filtrer where('round','==',round) — c'est voulu.
       match /messages/{messageId} {
-        allow read: if isCourseParticipant(courseId);
+        allow read: if isCourseParticipant(courseId)
+          && resource.data.round == courseRound(courseId);
         allow create: if isCourseParticipant(courseId)
-          && request.resource.data.keys().hasOnly(['uid', 'role', 'text', 'at'])
+          && request.resource.data.keys().hasOnly(['uid', 'role', 'text', 'at', 'round'])
           && request.resource.data.uid == request.auth.uid
           && request.resource.data.role in ['client', 'livreur']
+          && request.resource.data.round == courseRound(courseId)
           && request.resource.data.text is string
           && request.resource.data.text.size() > 0
           && request.resource.data.text.size() <= 800;
