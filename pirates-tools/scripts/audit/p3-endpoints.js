@@ -153,14 +153,30 @@ while ((bm = reBlock.exec(handlers)) !== null) {
   const end = handlers.indexOf("\n  if (body.type === '", next);
   blocks.push({ type: bm[1], body: handlers.slice(start, end === -1 ? handlers.length : end) });
 }
-// Routes qui n'agissent PAS sur une course d'autrui (rien à vérifier).
+// Routes qui n'agissent PAS sur un objet d'autrui : elles écrivent uniquement
+// sous l'uid VÉRIFIÉ de l'appelant. L'exemption n'est pas un blanc-seing —
+// elle est CONTRÔLÉE plus bas : si l'une d'elles se met à lire un identifiant
+// fourni par le client (body.id / body.uid), elle sort de l'exemption et
+// redevient un défaut. Sans ça, la liste serait un trou par lequel une vraie
+// faille passerait.
 const NO_TARGET = ['courier-status', 'courier-profile', 'courier-profile-save',
-  'courier-available', 'course-request', 'course-list', 'course-create'];
+  'courier-available', 'courier-apply', 'course-request', 'course-list', 'course-create'];
+const CIBLE_CLIENT = /body\.(id|uid|courseId|courierUid|artisanUid)\b/;
 const OWNERSHIP = /artisanUid !== uid|artisanUid === uid|courierUid !== uid|courierUid === uid|pas-participant|pas-ta-course|isCourier|md\.uid !== uid|pi\.metadata\.uid !== uid/;
 
 let idorOk = 0;
 blocks.forEach((b) => {
-  if (NO_TARGET.includes(b.type)) { idorOk++; return; }
+  if (NO_TARGET.includes(b.type)) {
+    if (!CIBLE_CLIENT.test(b.body)) { idorOk++; return; }
+    // Elle était censée n'agir que sur l'appelant : elle lit désormais un
+    // identifiant du client. L'exemption tombe, on exige une vérification.
+    if (OWNERSHIP.test(b.body)) { idorOk++; return; }
+    problems.push('route ' + b.type + ' : exemptée d\'IDOR car censée n\'agir que sur '
+      + 'l\'appelant, mais elle lit un identifiant fourni par le client sans vérifier '
+      + 'l\'appartenance. Retire-la de NO_TARGET ou ajoute le contrôle.');
+    LOG('  ❌ ' + b.type + ' : exemption caduque (lit un id du client)');
+    return;
+  }
   if (OWNERSHIP.test(b.body)) { idorOk++; return; }
   problems.push('route ' + b.type + ' : agit sur une course sans vérifier l\'appartenance (IDOR)');
   LOG('  ❌ ' + b.type + ' : AUCUNE vérification d\'appartenance');

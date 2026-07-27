@@ -120,6 +120,28 @@ aucune carte ne doit en chevaucher une autre, ni la toucher.**
 
 ---
 
+## 5. PIÈCES JUSTIFICATIVES DU DOSSIER LIVREUR — fichiers non téléversés
+
+**État au 27/07/2026 (v512)** : le dossier livreur est désormais VRAIMENT
+enregistré (véhicule, cylindrée, âge vérifié serveur, contact, consentements)
+et l'espace livreur en hérite. **Mais les FICHIERS eux-mêmes — pièce
+d'identité, avis SIRET, RC Pro, RIB, permis, carte grise, assurances,
+capacité de transport — ne sont pas téléversés** : seul le NOM du fichier
+choisi est enregistré (`pieces: { id: { name: 'cni.jpg', uploaded: false } }`).
+L'admin voit donc « pièce déclarée » mais ne peut pas l'ouvrir.
+
+**Ce qu'il faudra faire** : passer les pièces par **Firebase Storage** (comme
+les vidéos de course), avec des règles d'accès strictes — le livreur téléverse
+les siennes, l'admin seul les lit, personne d'autre. Prérequis : activer
+Storage (plan Blaze) puis `npx firebase deploy --only storage` — c'est la même
+action déjà en attente pour les vidéos.
+
+⚠️ **Conséquence à connaître aujourd'hui** : un dossier ne peut pas être
+validé sur pièces depuis l'admin. La validation reste une décision manuelle,
+prise hors du site (documents reçus par email, par exemple).
+
+---
+
 ## RAPPEL DE MÉTHODE (imposé par l'user, 27/07/2026)
 
 - **Un plan enregistré n'est pas un plan appliqué.** Tant que l'user n'a pas dit

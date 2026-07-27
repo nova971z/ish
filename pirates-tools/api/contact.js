@@ -63,7 +63,7 @@ module.exports = async function handler(req, res) {
       || body.type === 'course-deliver' || body.type === 'course-confirm' || body.type === 'course-proof'
       || body.type === 'course-scene' || body.type === 'course-video' || body.type === 'course-dispute'
       || body.type === 'courier-profile' || body.type === 'courier-profile-save'
-      || body.type === 'courier-available'
+      || body.type === 'courier-available' || body.type === 'courier-apply'
       || body.type === 'course-request' || body.type === 'course-release'
       || body.type === 'course-cancel'
       || body.type === 'course-accord-propose' || body.type === 'course-accord-accept'
@@ -504,6 +504,91 @@ async function handleCourses(req, body, cfg, res) {
   // ⚠️ Les TARIFS appartiennent au LIVREUR (voir _lib/courses.js § TARIFS) :
   // la plateforme ne les impose pas et ne sanctionne jamais un montant.
 
+  // ══ DÉPÔT DU DOSSIER LIVREUR ══════════════════════════════════════════════
+  // 🐛 DÉFAUT VÉCU (27/07/2026) : l'espace livreur redemandait « Ton véhicule »
+  // alors qu'il est choisi à l'inscription. Cause : le formulaire d'inscription
+  // ne l'envoyait NULLE PART — il finissait par `state.submitted = true`, une
+  // simple variable JavaScript effacée au changement de page. Rien n'était donc
+  // jamais enregistré : ni le véhicule, ni la cylindrée, ni le contact, et
+  // l'onglet « Candidatures » de l'admin lisait une collection que rien
+  // n'alimentait. Cet endpoint enregistre le dossier pour de bon.
+  //
+  // ⚠️ LES CONTRÔLES SONT REFAITS ICI. Le formulaire vérifie déjà l'âge et la
+  // cylindrée, mais un contrôle côté navigateur n'est qu'un confort : il se
+  // contourne. L'âge minimum de 18 ans est une obligation légale — il se
+  // vérifie sur le serveur, à partir de la date de naissance.
+  if (body.type === 'courier-apply') {
+    const VEHICULES = ['vae', 'trottinette', 'scooter'];
+    const CYLINDREES = ['50', '125', '300-500', '600+'];
+    const vehicle = VEHICULES.includes(body.vehicle) ? body.vehicle : '';
+    if (!vehicle) return res.status(400).json({ ok: false, error: 'Choisis ton véhicule.' });
+
+    const naissance = String(body.birth || '');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(naissance)) {
+      return res.status(400).json({ ok: false, error: 'Indique ta date de naissance.' });
+    }
+    const d = new Date(naissance + 'T00:00:00Z');
+    if (isNaN(d.getTime())) return res.status(400).json({ ok: false, error: 'Date de naissance invalide.' });
+    const now = new Date();
+    let age = now.getUTCFullYear() - d.getUTCFullYear();
+    const m = now.getUTCMonth() - d.getUTCMonth();
+    if (m < 0 || (m === 0 && now.getUTCDate() < d.getUTCDate())) age--;
+    if (!(age >= 18 && age < 120)) {
+      return res.status(400).json({ ok: false, error: 'Il faut avoir 18 ans révolus pour devenir livreur.' });
+    }
+
+    const cylindree = CYLINDREES.includes(body.cylindree) ? body.cylindree : '';
+    if (vehicle === 'scooter' && !cylindree) {
+      return res.status(400).json({ ok: false, error: 'Indique la cylindrée de ton véhicule.' });
+    }
+    const nom = String(body.name || '').trim().slice(0, 100);
+    if (nom.length < 2) return res.status(400).json({ ok: false, error: 'Indique ton nom.' });
+    const mail = String(body.email || '').trim().slice(0, 200);
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)) {
+      return res.status(400).json({ ok: false, error: 'Adresse email invalide.' });
+    }
+    const tel = String(body.phone || '').trim().slice(0, 30);
+    if (body.consent !== true) return res.status(400).json({ ok: false, error: 'Le consentement est obligatoire.' });
+    if (body.filmConsent !== true) return res.status(400).json({ ok: false, error: 'L\'accord de remise filmée est obligatoire.' });
+
+    // Pièces DÉCLARÉES (nom de fichier seulement — le téléversement des
+    // documents eux-mêmes reste à faire, il demande Firebase Storage).
+    const pieces = {};
+    if (body.pieces && typeof body.pieces === 'object') {
+      Object.keys(body.pieces).slice(0, 20).forEach((k) => {
+        const cle = String(k).replace(/[^a-z0-9_-]/gi, '').slice(0, 24);
+        const nomFichier = String(body.pieces[k] || '').slice(0, 160);
+        if (cle && nomFichier) pieces[cle] = { name: nomFichier, uploaded: false };
+      });
+    }
+
+    // Un dossier DÉJÀ VALIDÉ ne doit pas être renvoyé au statut « en attente »
+    // par un nouvel envoi : ce serait une régression de droits silencieuse.
+    const dejaValide = (await db.collection('couriers').doc(uid).get()
+      .then((s) => s.exists && s.data().kycStatus === 'valide').catch(() => false));
+
+    await db.collection('courier_applications').doc(uid).set({
+      uid, name: nom, email: mail, phone: tel, vehicle, cylindree,
+      birth: naissance, age, pieces,
+      consent: true, filmConsent: true,
+      status: dejaValide ? 'valide' : 'en_attente',
+      createdAt: new Date()
+    }, { merge: true });
+
+    // Le compte livreur porte les informations RÉUTILISABLES (véhicule,
+    // cylindrée, contact) : c'est de là que l'espace livreur les relit, au lieu
+    // de les redemander.
+    const compte = {
+      displayName: nom, email: mail, phone: tel,
+      vehicle, cylindree, updatedAt: new Date()
+    };
+    if (!dejaValide) compte.kycStatus = 'en_attente';
+    await db.collection('couriers').doc(uid).set(compte, { merge: true });
+
+    try { await coursesLib.alertCourierApplication(compte, uid, cfg); } catch (_) {}
+    return res.status(200).json({ ok: true, status: dejaValide ? 'valide' : 'en_attente' });
+  }
+
   // Lire SON propre profil (formulaire de l'espace livreur).
   if (body.type === 'courier-profile') {
     const [priv, pub] = await Promise.all([
@@ -516,9 +601,15 @@ async function handleCourses(req, body, cfg, res) {
       ok: true, courier: isCourier,
       profile: {
         uid,
+        // Le véhicule et la commune sont HÉRITÉS du dossier d'inscription
+        // (couriers/{uid}) tant que la fiche publique ne les porte pas : le
+        // livreur les a déjà renseignés, on ne les redemande pas.
         displayName: p.displayName || v.displayName || '',
-        commune: p.commune || '',
-        vehicle: p.vehicle || '',
+        commune: p.commune || v.commune || '',
+        vehicle: p.vehicle || v.vehicle || '',
+        // Origine de la valeur : sert à l'expliquer dans le formulaire.
+        vehicleFromDossier: !p.vehicle && !!v.vehicle,
+        cylindree: v.cylindree || '',
         bio: p.bio || '',
         photo: p.photo || '',
         tarifs: coursesLib.sanitizeTarifs(p.tarifs),

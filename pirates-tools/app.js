@@ -4656,6 +4656,77 @@
     });
   }
 
+  // Envoi RÉEL du dossier livreur. Le serveur refait tous les contrôles (âge
+  // 18 ans, véhicule, cylindrée, consentements) — ceux du formulaire ne sont
+  // qu'un confort. Résout si le dossier est enregistré, rejette avec un
+  // message lisible sinon.
+  function lvSubmitDossier(state) {
+    var birth = (document.getElementById('lvBirth') || {}).value || '';
+    return jsonAuthHeaders().then(function (headers) {
+      return fetch(apiBaseUrl() + '/api/contact', {
+        method: 'POST', headers: headers, body: JSON.stringify({
+          type: 'courier-apply',
+          vehicle: state.veh, cylindree: state.cylindree || '', birth: birth,
+          name: state.contact.name, email: state.contact.email, phone: state.contact.phone,
+          consent: !!state.consent, filmConsent: !!state.filmConsent,
+          pieces: state.files                      // noms de fichiers déclarés
+        })
+      });
+    }).then(function (r) { return r.text().then(function (t) { return { s: r.status, t: t }; }); })
+      .then(function (rep) {
+        var d = null;
+        try { d = JSON.parse(rep.t); } catch (_) {}
+        if (rep.s === 200 && d && d.ok) return d;
+        throw new Error((d && d.error) || lvErrTxt(rep.s, d));
+      });
+  }
+
+  // Câble le bouton « Envoyer mon dossier » : relit les champs, contrôle ce
+  // qui manque, puis ENVOIE VRAIMENT (lvSubmitDossier). Sorti de renderDynamic
+  // à dessein — cette fonction est déjà démesurée et gelée par l'audit.
+  function lvWireDossierSubmit(state, champs, rerender) {
+    var sub = document.getElementById('lvSubmitDossier');
+    var note = document.getElementById('lvSubmitNote');
+    if (!sub) return;
+    sub.onclick = function () {
+      if (champs.nm) state.contact.name = champs.nm.value;
+      if (champs.em) state.contact.email = champs.em.value;
+      if (champs.ph) state.contact.phone = champs.ph.value;
+      if (champs.cs) state.consent = champs.cs.checked;
+      if (champs.fc) state.filmConsent = champs.fc.checked;
+      var manque = lvDossierManque(state);
+      if (manque.length) { if (note) note.textContent = 'Il manque : ' + manque.join(', ') + '.'; return; }
+      if (!_currentUser) {
+        if (note) note.textContent = 'Connecte-toi d\'abord : ton dossier doit être rattaché à ton compte.';
+        return;
+      }
+      // 🐛 AVANT : « state.submitted = true » et RIEN d'autre — le dossier
+      // n'était envoyé nulle part. Le véhicule choisi ici disparaissait au
+      // changement de page, et l'espace livreur le redemandait ensuite.
+      sub.disabled = true;
+      if (note) note.textContent = 'Envoi du dossier…';
+      lvSubmitDossier(state).then(function () {
+        state.submitted = true; rerender();
+      }).catch(function (e) {
+        sub.disabled = false;
+        if (note) note.textContent = '❌ ' + ((e && e.message) || 'Envoi impossible. Réessaie.');
+      });
+    };
+  }
+  // Ce qui empêche encore d'envoyer le dossier (liste lisible par l'utilisateur).
+  function lvDossierManque(state) {
+    var m = [];
+    var pieces = LV_PIECES_BASE.concat(LV_PIECES_EXTRA[state.veh] || []);
+    if (pieces.some(function (p) { return !state.files[p.id]; })) m.push('toutes les pièces');
+    if (state.veh === 'scooter' && !state.cylindree) m.push('la cylindrée');
+    if (!(document.getElementById('lvBirth') || {}).value) m.push('ta date de naissance');
+    if (!state.contact.name) m.push('ton nom');
+    if (!state.contact.email) m.push('ton email');
+    if (!state.consent) m.push('le consentement (case à cocher)');
+    if (!state.filmConsent) m.push('l\'accord de remise filmée (case 🎥)');
+    return m;
+  }
+
   function renderLivreur() {
     var box = document.getElementById('lvForm');
     if (!box) return;
@@ -4907,22 +4978,7 @@
       var ph = document.getElementById('lvPhone'); if (ph) ph.oninput = function () { state.contact.phone = ph.value; };
       var cs = document.getElementById('lvConsent'); if (cs) cs.onchange = function () { state.consent = cs.checked; };
       var fc = document.getElementById('lvFilmConsent'); if (fc) fc.onchange = function () { state.filmConsent = fc.checked; };
-      var sub = document.getElementById('lvSubmitDossier');
-      if (sub) sub.onclick = function () {
-        if (nm) state.contact.name = nm.value; if (em) state.contact.email = em.value;
-        if (ph) state.contact.phone = ph.value; if (cs) state.consent = cs.checked;
-        if (fc) state.filmConsent = fc.checked;
-        var missing = [];
-        if (piecesFor(state.veh).some(function (p) { return !state.files[p.id]; })) missing.push('toutes les pièces');
-        if (state.veh === 'scooter' && !state.cylindree) missing.push('la cylindrée');
-        if (!state.contact.name) missing.push('ton nom');
-        if (!state.contact.email) missing.push('ton email');
-        if (!state.consent) missing.push('le consentement (case à cocher)');
-        if (!state.filmConsent) missing.push('l\'accord de remise filmée (case 🎥)');
-        var note = document.getElementById('lvSubmitNote');
-        if (missing.length) { if (note) note.textContent = 'Il manque : ' + missing.join(', ') + '.'; return; }
-        state.submitted = true; renderDynamic();  // DÉMO — aucun stockage, aucun envoi serveur
-      };
+      lvWireDossierSubmit(state, { nm: nm, em: em, ph: ph, cs: cs, fc: fc }, renderDynamic);
     }
 
     var birthEl = document.getElementById('lvBirth');
@@ -5775,12 +5831,20 @@
         + '<label class="lv-field"><span>Nom affiché aux clients *</span><input type="text" id="lvPfName" maxlength="60" value="' + escapeHTML(p.displayName || '') + '" placeholder="Ex. Kevin L."></label>'
         + '<label class="lv-field"><span>Ta commune</span><input type="text" id="lvPfCommune" maxlength="60" value="' + escapeHTML(p.commune || '') + '" placeholder="Sainte-Anne"></label>'
         + '</div>'
+        // Le véhicule vient du DOSSIER D'INSCRIPTION quand la fiche publique ne
+        // le porte pas encore : on ne redemande jamais une information déjà
+        // donnée. « — choisir — » n'apparaît QUE si rien n'est connu (dossier
+        // déposé avant cette correction).
         + '<label class="lv-field"><span>Ton véhicule</span><select id="lvPfVeh">'
-        + '<option value="">— choisir —</option>'
+        + (p.vehicle ? '' : '<option value="">— choisir —</option>')
         + Object.keys(LV_VEHICLES).map(function (k) {
             return '<option value="' + k + '"' + (p.vehicle === k ? ' selected' : '') + '>' + escapeHTML(lvVehLabel(k)) + '</option>';
           }).join('')
-        + '</select></label>'
+        + '</select>'
+        + (p.vehicleFromDossier
+            ? '<em class="lv-hint">Repris de ton dossier d\'inscription' + (p.cylindree ? ' (' + escapeHTML(p.cylindree) + ' cm³)' : '') + ' — tu peux le changer si tu as changé de véhicule.</em>'
+            : '')
+        + '</label>'
         + '<label class="lv-field"><span>Ta présentation <em>(visible des clients)</em></span>'
         + '<textarea id="lvPfBio" maxlength="400" rows="3" placeholder="Quelques mots : ton expérience, tes horaires, ce que tu transportes…">' + escapeHTML(p.bio || '') + '</textarea></label>'
         + '<div class="lv-field"><span>Ta photo <em>(facultatif)</em></span>'

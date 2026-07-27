@@ -150,6 +150,25 @@ async function alertCourseAgain(course, id) {
   for (const to of dests) await sendMail(to, subject, html);
 }
 
+// Alerte « nouveau dossier livreur déposé » — l'owner doit le valider dans
+// l'admin (onglet Candidatures) pour que le compte devienne livreur.
+// Ne contient AUCUNE pièce justificative : uniquement de quoi savoir qu'un
+// dossier attend, et de qui.
+const VEH_LABEL = { vae: 'Vélo à assistance électrique', trottinette: 'Trottinette électrique', scooter: 'Scooter / Moto' };
+async function alertCourierApplication(compte, uid) {
+  const veh = VEH_LABEL[compte.vehicle] || compte.vehicle || '—';
+  const subject = '🛵 Nouveau dossier livreur — ' + String(compte.displayName || '').slice(0, 60);
+  const html = '<p><strong>Un dossier livreur vient d\'être déposé.</strong></p>'
+    + '<p>👤 ' + escapeHtml(compte.displayName || '') + '<br>'
+    + '✉️ ' + escapeHtml(compte.email || '') + (compte.phone ? '<br>📞 ' + escapeHtml(compte.phone) : '') + '<br>'
+    + '🛵 ' + escapeHtml(veh) + (compte.cylindree ? ' — ' + escapeHtml(compte.cylindree) + ' cm³' : '') + '</p>'
+    + '<p>À valider dans l\'administration, onglet <strong>Candidatures</strong>. '
+    + 'Tant qu\'il n\'est pas validé, ce compte n\'a AUCUN accès livreur.</p>';
+  const owner = process.env.OWNER_EMAIL;
+  const dests = Array.from(new Set(TEST_EMAILS.concat(owner ? [owner] : [])));
+  for (const to of dests) await sendMail(to, subject, html);
+}
+
 // Crée la course depuis un PaymentIntent PAYÉ (metadata course* posée par
 // create-payment-intent). Doc id = pi.id → idempotent (create() refuse le
 // doublon). Retourne { created, id, course }.
@@ -314,7 +333,7 @@ async function confirmToClient(course, id) {
 module.exports = {
   DEPOT, BAREME, TEST_EMAILS, TARIF_MIN, TARIF_MAX,
   haversineKm, quote, buildRequest, createFromIntent,
-  alertNewCourse, alertCourseAgain, confirmToClient, sendMail, escapeHtml,
+  alertNewCourse, alertCourseAgain, alertCourierApplication, confirmToClient, sendMail, escapeHtml,
   defaultTarifs, sanitizeTarifs, mirrorCourierPublic,
   sanitizeLines, sanitizeAccord, accordSummary, accordPaiementLabel, ACCORD_PAIEMENTS
 };

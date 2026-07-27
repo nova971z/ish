@@ -39,7 +39,7 @@ const COURSE_TYPES = [
   'course-create', 'course-list', 'course-accept', 'courier-status',
   'course-rate', 'course-deliver', 'course-confirm', 'course-proof',
   'course-scene', 'course-video', 'course-dispute',
-  'courier-profile', 'courier-profile-save', 'courier-available',
+  'courier-profile', 'courier-profile-save', 'courier-available', 'courier-apply',
   'course-request', 'course-release', 'course-cancel',
   'course-accord-propose', 'course-accord-accept', 'course-accord-reject',
   'course-goods-paid', 'account-erase'
