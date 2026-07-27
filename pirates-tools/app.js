@@ -4967,27 +4967,58 @@
       setTimeout(function () { clearInterval(t); resolve(); }, 5000);
     });
   }
-  var _lvRolePromise = null;
+  // ── Rôle livreur ──────────────────────────────────────────────────────────
+  // TROIS réponses possibles, pas deux : true (livreur), false (pas livreur),
+  // null (ON NE SAIT PAS ENCORE). La distinction est vitale.
+  // 🐛 BUG VÉCU (27/07/2026, signalé par l'user) : le bouton « Mode livraison »
+  // apparaissait puis DISPARAISSAIT, et changeait à chaque rechargement.
+  // Cause : la chaîne renvoyait `null` quand l'identité n'était pas encore
+  // connue (Safari privé = démarrage à froid, le premier verdict d'auth peut
+  // dépasser les 5 s du plafond), puis `!!(d && d.courier)` écrasait ce
+  // « je ne sais pas » en **false** — et ce faux verdict était MÉMORISÉ dans
+  // _lvRolePromise pour toute la session. Le bouton ne revenait jamais.
+  // Règle : on ne mémorise QUE les verdicts SÛRS. Un échec réseau, un 401, une
+  // identité pas encore prête → null, rien n'est gravé, et on réessaiera.
+  var _lvRoleVerdict = null;   // true / false une fois SÛR ; null tant qu'inconnu
+  var _lvRoleInflight = null;  // requête en cours (évite les appels en rafale)
   function lvGetRole() {
-    if (_lvRolePromise) return _lvRolePromise;
-    _lvRolePromise = whenAuthReady().then(function () {
-      if (!_currentUser) return null;
+    if (_lvRoleVerdict !== null) return Promise.resolve(_lvRoleVerdict);
+    if (_lvRoleInflight) return _lvRoleInflight;
+    _lvRoleInflight = whenAuthReady().then(function () {
+      if (!_currentUser) return null;                       // identité inconnue
       return jsonAuthHeaders();
     }).then(function (headers) {
       if (!headers) return null;
       return fetch(apiBaseUrl() + '/api/contact', { method: 'POST', headers: headers, body: JSON.stringify({ type: 'courier-status' }) });
-    }).then(function (r) { return r ? r.json() : null; })
-      .then(function (d) { return !!(d && d.courier); })
-      .catch(function () { return lvIsTester(); });
-    return _lvRolePromise;
+    }).then(function (r) {
+      if (!r || !r.ok) return null;                         // 401/500 ≠ « pas livreur »
+      return r.json();
+    }).then(function (d) {
+      if (!d || typeof d.courier !== 'boolean') return null;
+      return d.courier;
+    }).catch(function () {
+      return null;                                          // réseau coupé → inconnu
+    }).then(function (v) {
+      _lvRoleInflight = null;
+      if (v !== null) _lvRoleVerdict = v;                   // on ne grave que le sûr
+      return v;
+    });
+    return _lvRoleInflight;
   }
+  function lvResetRole() { _lvRoleVerdict = null; _lvRoleInflight = null; }
+
   // Boutons du compte (colonne droite) : « Mes livraisons » pour TOUS ;
   // « Mode livraison » UNIQUEMENT pour les livreurs acceptés (ou testeur).
   function updateAccLivBtn() {
     var btn = document.getElementById('accLivBtn');
     if (!btn) return;
     btn.hidden = !lvIsTester();          // affichage immédiat pour le testeur
-    lvGetRole().then(function (isC) { btn.hidden = !isC; });
+    lvGetRole().then(function (isC) {
+      // ⚠️ null = verdict INDÉTERMINÉ : on NE TOUCHE À RIEN. Masquer ici, c'est
+      // exactement le bug qui faisait disparaître le bouton (voir lvGetRole).
+      if (isC === null) return;
+      btn.hidden = !isC;
+    });
   }
 
   // Espace livreur : RÉSERVÉ aux livreurs acceptés — un client est redirigé
@@ -7118,7 +7149,7 @@
         // son fil de discussion restait abonné.
         if (changed) {
           // Rôle et tarifs livreur, fil de discussion.
-          _lvRolePromise = null;
+          lvResetRole();
           _lvMyTarifs = null;
           if (_lvChatUnsub) { try { _lvChatUnsub(); } catch (_) {} _lvChatUnsub = null; }
           // Fiche artisan du compte précédent (nom, logo, photos). Sans cette
@@ -7155,6 +7186,13 @@
         } else if (location.hash === '#/auth' && user) {
           location.hash = '#/compte';
         }
+        // 🐛 2e moitié du bug « Mode livraison qui disparaît » : ce bouton
+        // n'était recalculé qu'au CHANGEMENT DE PAGE (onRouteChange). Or au
+        // démarrage à froid — le cas de l'user, toujours en navigation privée —
+        // la page « Mon compte » est peinte AVANT que l'identité soit connue :
+        // plus personne ne repassait ensuite, et le bouton restait tel quel.
+        // On le réévalue donc à chaque verdict d'authentification.
+        updateAccLivBtn();
       });
     });
   }

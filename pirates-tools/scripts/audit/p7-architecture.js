@@ -66,7 +66,23 @@ iife.forEach((n) => {
   n.declarations.forEach((d) => { if (d.id.type === 'Identifier') moduleVars.push(d.id.name); });
 });
 
-const resetBloc = APP.slice(APP.indexOf('if (changed) {'), APP.indexOf('if (user) {'));
+let resetBloc = APP.slice(APP.indexOf('if (changed) {'), APP.indexOf('if (user) {'));
+
+// Une remise à zéro peut être DÉLÉGUÉE à une fonction dédiée (lvResetRole()…).
+// On ne la croit pas sur parole : on va chercher son CORPS et on l'ajoute au
+// bloc analysé. Si la fonction n'existe pas ou ne remet rien à zéro, les
+// variables concernées ressortiront comme nues, exactement comme avant.
+(resetBloc.match(/\b([A-Za-z_$][\w$]*)\s*\(\s*\)\s*;/g) || []).forEach((appel) => {
+  const nom = appel.replace(/\s*\(\s*\)\s*;/, '').trim();
+  const i = APP.indexOf('function ' + nom + '(');
+  if (i < 0) return;
+  let d = 0;
+  const j = APP.indexOf('{', i);
+  for (let k = j; k < APP.length; k++) {
+    if (APP[k] === '{') d++;
+    else if (APP[k] === '}') { d--; if (!d) { resetBloc += '\n' + APP.slice(i, k + 1); break; } }
+  }
+});
 
 // Variables dont le nom évoque l'identité mais qui NE portent PAS de données
 // personnelles — classées ici, avec leur raison, une par une.
