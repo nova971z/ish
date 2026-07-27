@@ -214,6 +214,53 @@ Sources : Légifrance L7342-1 à L7342-11
 https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000006072050/LEGISCTA000033013020/
 · art. L7342-2 (assurance AT) https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000039678037
 
+### 🔑 LA PARADE (validée sur le texte, 27/07/2026)
+Les deux conditions de L7342-1 sont **CUMULATIVES** (« détermine les
+caractéristiques **ET** fixe son prix »). **Il suffit d'en casser UNE** pour
+sortir du champ. La plus simple à casser est le PRIX.
+
+**Montage cible en 3 pièces :**
+1. **Le prix appartient au LIVREUR.** Le barème par zone devient un tarif
+   **proposé** que chaque livreur reprend, augmente ou baisse dans son profil.
+   Le client voit le tarif DU livreur qu'il choisit. La plateforme ne fixe plus
+   rien → L7342-1 ne s'applique plus. ⚠️ Il faut que la liberté soit RÉELLE
+   (modifiable à tout moment, tarifs réellement différents d'un livreur à
+   l'autre) — un « barème conseillé » que personne ne peut changer serait
+   requalifié en prix fixé par la plateforme.
+2. **L'argent ne transite plus par Pirates Tools.** Le client paie le livreur
+   directement (Stripe Connect en *direct charges*, le livreur est le marchand).
+   → supprime aussi l'encaissement pour compte de tiers.
+3. **Aucun lien de subordination** (protège de la requalification, qui reste
+   possible hors L7342) : pas d'exclusivité, droit de refuser sans conséquence,
+   pas de déclassement algorithmique, pas de sanction automatique.
+
+### ⚠️ LE REVERS À CONNAÎTRE — capacité de transport
+Dès que le livreur **facture directement son client**, il exerce le transport
+public routier de marchandises pour son propre compte. Or :
+- **Véhicule MOTORISÉ, y compris à moins de 4 roues** (scooter, moto,
+  triporteur électrique) → **inscription obligatoire au registre des
+  transporteurs** (DREAL) + **attestation de capacité professionnelle**
+  transport léger + capacité financière (~1 800 € pour le 1er véhicule).
+- **Cycle à pédalage assisté (VAE)** → **N'EST PAS un véhicule motorisé** au
+  sens de la réglementation transport : une entreprise n'utilisant que des VAE
+  **n'est PAS inscrite** au registre. → **AUCUNE de ces obligations.**
+
+👉 CONSÉQUENCE DIRECTE SUR LE MODÈLE : le **VAE est la seule monture qui permet
+« zéro contrainte au livreur »**, ce que l'user voulait dès le départ. Le
+scooter/moto reste possible mais impose au livreur un vrai parcours
+administratif — à afficher honnêtement dans le dossier livreur. Cela recoupe
+l'intuition de l'user (« les vélos ne feront que Sainte-Anne / Saint-François /
+Le Moule ») : zones 1-2 en VAE sans contrainte, zones 3-4 en motorisé avec
+capacité de transport.
+
+Sources : Ministère de la Transition écologique — accès à la profession de
+transporteur de marchandises
+https://www.ecologie.gouv.fr/politiques-publiques/acces-exercice-profession-transporteur-marchandises
+(« les entreprises utilisant des véhicules motorisés, y compris ceux ayant moins
+de quatre roues, quel que soit leur tonnage, doivent être inscrites au registre » ;
+« les cycles à pédalage assisté ne sont pas considérés comme des véhicules
+motorisés »)
+
 ---
 
 ## 5 ter. VENTE À DISTANCE — obligations du tunnel de paiement
