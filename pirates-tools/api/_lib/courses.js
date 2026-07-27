@@ -57,6 +57,55 @@ function quote(lat, lng) {
 // précédent devient inaccessible aux deux côtés — voir firestore.rules).
 // ⚖️ C'est ce qui nous sort de L7342-1 : la plateforme ne fixe pas le prix, ne
 // détient pas les fonds, et n'attribue pas la course — elle met en relation.
+function sanitizeLines(raw) {
+  if (!Array.isArray(raw)) return [];
+  return raw.slice(0, 30).map((l) => ({
+    key: String((l && l.key) || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 80),
+    qty: Math.max(1, Math.min(99, parseInt(l && l.qty, 10) || 1))
+  })).filter((l) => l.key);
+}
+
+// ── L'ACCORD — ce que les deux parties ont convenu, noir sur blanc ──────────
+// Rédigé dans le chat par l'un, accepté par l'autre. Il fige : le prix de la
+// course (convenu ENTRE EUX, jamais par nous), le mode de règlement du
+// livreur, la date, l'heure et le point de dépôt.
+// ⚖️ Le prix n'est ni proposé ni borné par la plateforme : le champ est libre,
+// les bornes ci-dessous ne sont qu'un garde-fou anti-faute de frappe.
+const ACCORD_PAIEMENTS = ['virement', 'especes'];
+const ACCORD_PRIX_MIN = 1;
+const ACCORD_PRIX_MAX = 2000;
+
+function sanitizeAccord(raw) {
+  const src = raw || {};
+  const prix = Math.round(Number(src.prix));
+  if (!isFinite(prix) || prix < ACCORD_PRIX_MIN || prix > ACCORD_PRIX_MAX) return null;
+  if (!ACCORD_PAIEMENTS.includes(src.paiement)) return null;
+  return {
+    prix,
+    paiement: src.paiement,
+    date: /^\d{4}-\d{2}-\d{2}$/.test(String(src.date || '')) ? src.date : '',
+    hour: /^\d{2}:\d{2}$/.test(String(src.hour || '')) ? src.hour : '',
+    lieu: String(src.lieu || '').trim().slice(0, 200),
+    notes: String(src.notes || '').trim().slice(0, 500)
+  };
+}
+
+function accordPaiementLabel(p) {
+  return p === 'virement'
+    ? 'Facturation classique — virement au livreur'
+    : 'Espèces, en main propre à la livraison';
+}
+
+// Résumé lisible de l'accord (chat, emails, récapitulatif).
+function accordSummary(a) {
+  if (!a) return '';
+  return 'Prix de la course : ' + a.prix + ' € · Règlement : ' + accordPaiementLabel(a.paiement)
+    + (a.date ? ' · Date : ' + a.date : '')
+    + (a.hour ? ' à ' + a.hour : '')
+    + (a.lieu ? ' · Point de dépôt : ' + a.lieu : '')
+    + (a.notes ? ' · Précisions : ' + a.notes : '');
+}
+
 function buildRequest(input, who) {
   const q = quote(input.lat, input.lng);
   if (!q) return null;
@@ -73,6 +122,11 @@ function buildRequest(input, who) {
     productKey: 'demande-livraison',
     productTitle: String(input.productTitle || 'Quincaillerie à livrer').slice(0, 200),
     qty: Math.max(1, Math.min(999, parseInt(input.qty, 10) || 1)),
+    // Lignes du panier au moment de la demande : {key, qty} SEULEMENT (aucun
+    // prix client n'est jamais cru). Sert à reconstruire le paiement de la
+    // MARCHANDISE plus tard, même si le panier a été vidé entre-temps —
+    // create-payment-intent revalide chaque clé contre le catalogue serveur.
+    lines: sanitizeLines(input.lines),
     address: String(input.address || '').slice(0, 200),
     lat: q.lat, lng: q.lng, km: q.km, zone: q.zone,
     // `prix` VOLONTAIREMENT ABSENT : le tarif est celui du livreur qui accepte.
@@ -261,5 +315,6 @@ module.exports = {
   DEPOT, BAREME, TEST_EMAILS, TARIF_MIN, TARIF_MAX,
   haversineKm, quote, buildRequest, createFromIntent,
   alertNewCourse, alertCourseAgain, confirmToClient, sendMail, escapeHtml,
-  defaultTarifs, sanitizeTarifs, mirrorCourierPublic
+  defaultTarifs, sanitizeTarifs, mirrorCourierPublic,
+  sanitizeLines, sanitizeAccord, accordSummary, accordPaiementLabel, ACCORD_PAIEMENTS
 };

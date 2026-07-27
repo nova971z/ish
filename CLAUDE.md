@@ -878,10 +878,51 @@ la plateforme ne fixe plus le prix (fait en v495) ET n'encaisse plus rien.
 - VÉRIFIÉ : **47/47 Playwright** (dont « AUCUN panneau de paiement ne s'ouvre »,
   demande sans prix, photo jointe, release, annulation 2 temps, filtre round)
   + **78/78 émulateur Firestore** (dont 4 assertions de cloisonnement round).
-- ⏭️ RESTE À DÉCIDER : comment l'argent circule au final (main propre ? Stripe
-  Connect direct charges entre client et livreur ?). Aujourd'hui la plateforme
-  ne touche plus à l'argent de la course — c'est volontaire et c'est ce qui
-  nous met dans les clous.
+## 📝 L'ACCORD + PAIEMENT DE LA MARCHANDISE (27/07/2026, SW v497)
+DEMANDE USER : un bouton dans le chat pour écrire noir sur blanc ce que les deux
+ont convenu, un formulaire que les DEUX acceptent, avec le mode de règlement du
+livreur ; et AVANT validation, le client doit payer SA MARCHANDISE à l'owner —
+une fois payée, la course est réellement commandée. Le tout dans une COLONNE
+DE BOUTONS à droite du chat, chacun ouvrant un panneau dédié.
+- **Séquence complète** : demande (0 €) → 1er livreur accepte → chat → 📝 accord
+  (prix + mode de règlement + date/heure + point de dépôt + précisions) → l'autre
+  accepte → 💳 le client règle SA MARCHANDISE à Pirates Tools → `status:'confirmee'`
+  = course réellement commandée → livraison (code + 2 photos) → confirmation.
+- **Séparation des deux argents — LE point juridique** : Pirates Tools encaisse
+  UNIQUEMENT la marchandise (notre vente). Le prix de la course est convenu
+  entre eux et réglé EN DIRECT (`virement` = facturation classique, ou
+  `especes` en main propre). Aucun euro de course ne transite par nous.
+- **API** : `course-accord-propose|accept|reject` (participants, status
+  'acceptee', prix 1→2000 € = garde-fou de frappe, PAS un barème), et
+  `course-goods-paid` (vérifie chez Stripe : succeeded + uid + `courseRef`
+  posé par create-payment-intent via `body.courseId`). Chaque étape écrit un
+  message SYSTÈME immuable dans le fil → l'accord est tracé.
+- **UI** : `lvChatHTML(c, role)` en 2 colonnes ; `lvPanelAccord/Pay/Code/Release`.
+  Pastilles d'état sur les boutons ; le panneau qui attend une action de MOI
+  s'ouvre TOUT SEUL (sur iPad, un bouton à penser à toucher n'est pas vu).
+  `openPayModal(items, courseCtx, {goodsCourseId})` → `sessionStorage
+  pt_goods_course` → /merci appelle `course-goods-paid`.
+- **`course.lines`** ({key,qty} seulement) est enregistré à la demande : le
+  paiement se reconstruit même si le panier a été vidé (les prix viennent
+  TOUJOURS du catalogue serveur).
+- 🐛 **2 VRAIS BUGS attrapés par le harnais, à retenir** :
+  1. `var el` PARTAGÉ réassigné par les `if ((el = panel.querySelector(...)))`
+     successifs → au clic, `el` pointait sur le dernier résultat (null).
+     Chaque bouton capture désormais SON élément.
+  2. **Course d'authentification** : `renderCourierSpace` lisait `_currentUser`
+     avant le 1er verdict de `onAuthStateChanged` → au chargement à FROID le
+     livreur était éjecté vers #/mes-livraisons. Ajout de `whenAuthReady()`
+     (attend `_authReady`, plafond 5 s), utilisé par `lvGetRole` ET
+     `renderClientDeliveries` (qui affichait « Erreur » sur un 401).
+     ⚠️ Bug de PRODUCTION, pas d'artefact de test.
+  3. PIÈGE HARNAIS : deux `page.goto()` sur la MÊME URL = navigation
+     same-document, AUCUN rechargement → l'app ne se ré-initialise pas et on
+     teste l'état précédent. Toujours varier l'URL (`?b=N`).
+- VÉRIFIÉ : **63/63 Playwright** + **78/78 émulateur** (règles INCHANGÉES
+  depuis v496 — l'accord vit sur le doc course, écrit par l'Admin SDK seul).
+- ⏭️ RESTE À DÉCIDER : rien de bloquant côté argent — la plateforme ne touche
+  plus à l'argent de la course. Stripe Connect deviendra utile seulement si
+  l'user veut un jour proposer le paiement de la course en ligne (facultatif).
 
 ## 💳 STRIPE EN MODE TEST (26/07/2026, SW v481) — À INVERSER AU LANCEMENT
 Avant lancement, le site tourne sur les clés **TEST** de Stripe (compte activé

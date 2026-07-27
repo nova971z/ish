@@ -8126,3 +8126,33 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .btn--danger:hover, .btn--danger:focus-visible { border-color: rgba(248,113,113,.85); background: rgba(248,113,113,.18); }
 .lv-chat__end { margin-top: .7rem; padding-top: .7rem; border-top: 1px dashed rgba(255,255,255,.14); display: grid; gap: .35rem; justify-items: start; }
 .lv-cancel { margin-top: .9rem; padding-top: .8rem; border-top: 1px dashed rgba(255,255,255,.14); display: grid; gap: .35rem; justify-items: start; }
+
+/* — Chat en 2 colonnes : fil à gauche, colonne d'actions à droite — */
+.lv-chat__body { display: grid; grid-template-columns: 1fr 210px; gap: .8rem; align-items: start; }
+@media (max-width: 720px) { .lv-chat__body { grid-template-columns: 1fr; } }
+.lv-chat__main { min-width: 0; }
+.lv-chat__side { display: grid; gap: .5rem; align-content: start; }
+@media (max-width: 720px) { .lv-chat__side { grid-template-columns: repeat(2, 1fr); } }
+.lv-cbtn { display: grid; gap: .1rem; padding: .6rem .7rem; border-radius: 12px; border: 1px solid rgba(255,255,255,.14); background: rgba(0,0,0,.3); color: #fff; text-align: left; cursor: pointer; transition: border-color .18s, background .18s; }
+.lv-cbtn:hover, .lv-cbtn:focus-visible { border-color: rgba(242,193,78,.55); background: rgba(242,193,78,.08); }
+.lv-cbtn.is-on { border-color: rgba(242,193,78,.85); background: rgba(242,193,78,.14); }
+.lv-cbtn__i { font-size: 1.15rem; line-height: 1; }
+.lv-cbtn__t { font-weight: 800; font-size: .92rem; }
+.lv-cbtn__s { font-size: .72rem; color: var(--muted, #c9c9d9); line-height: 1.35; }
+.lv-cbtn--danger { border-color: rgba(248,113,113,.35); }
+.lv-cbtn--danger:hover, .lv-cbtn--danger:focus-visible { border-color: rgba(248,113,113,.75); background: rgba(248,113,113,.12); }
+.lv-chat__panel { margin-top: .8rem; padding: .85rem .9rem; border-radius: 14px; border: 1px solid rgba(242,193,78,.35); background: rgba(0,0,0,.3); display: grid; gap: .55rem; }
+.lv-panel__t { margin: 0; font-size: 1.02rem; font-weight: 800; }
+
+/* — Formulaire et récapitulatif de l'accord — */
+.lv-radios { display: grid; gap: .5rem; margin-top: .35rem; }
+.lv-radio { display: flex; gap: .6rem; align-items: flex-start; padding: .55rem .65rem; border-radius: 10px; border: 1px solid rgba(255,255,255,.12); background: rgba(0,0,0,.22); cursor: pointer; }
+.lv-radio input { margin-top: .25rem; flex: 0 0 auto; width: 18px; height: 18px; accent-color: #f2c14e; }
+.lv-radio span { display: grid; gap: .15rem; font-size: .9rem; }
+.lv-radio em { font-style: normal; font-size: .78rem; color: var(--muted, #c9c9d9); line-height: 1.4; }
+.lv-radio:has(input:checked) { border-color: rgba(242,193,78,.7); background: rgba(242,193,78,.10); }
+.lv-accord__list { list-style: none; margin: 0; padding: 0; display: grid; gap: .3rem; }
+.lv-accord__list li { display: flex; justify-content: space-between; gap: .8rem; padding: .4rem .55rem; border-radius: 8px; background: rgba(0,0,0,.28); font-size: .9rem; }
+.lv-accord__list li span { color: var(--muted, #c9c9d9); }
+.lv-accord__list li strong { text-align: right; font-variant-numeric: tabular-nums; }
+.lv-accord__sign { margin: .2rem 0 0; font-size: .92rem; font-weight: 700; letter-spacing: .02em; }

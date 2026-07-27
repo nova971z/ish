@@ -185,6 +185,16 @@ module.exports = async function handler(req, res) {
       };
     }
 
+    // Paiement de la MARCHANDISE rattaché à une demande de livraison (flux
+    // « demande de course », 27/07/2026) : on ne fait que MARQUER le lien.
+    // ⚠️ Aucun frais de livraison n'est ajouté ici — le prix de la course est
+    // convenu entre le client et le livreur et ne transite PAS par nous.
+    // contact.js (course-goods-paid) relit ce marqueur pour vérifier que le
+    // paiement correspond bien à CETTE course avant de la confirmer.
+    var courseRefMeta = {};
+    var courseRefIn = cleanStr(body.courseId, 64).replace(/[^A-Za-z0-9_-]/g, '');
+    if (courseRefIn) courseRefMeta = { courseRef: courseRefIn };
+
     // A2 : les lignes {key, qty} voyagent dans la metadata (chunkées — limite
     // Stripe 500 car./valeur). Le webhook payment_intent.succeeded les relit
     // pour reconstruire la commande côté serveur (email détaillé + journal),
@@ -206,7 +216,7 @@ module.exports = async function handler(req, res) {
         grossTotalEur: (totalCents / 100).toFixed(2),
         loyaltyPct: String(loyaltyQuote.pct),
         loyaltyDiscountCents: String(loyaltyQuote.discountCents)
-      }, uid ? { uid: uid } : {}, courseMeta, itemsMeta)
+      }, uid ? { uid: uid } : {}, courseMeta, courseRefMeta, itemsMeta)
     };
     if (customerEmail) intentParams.receipt_email = customerEmail;
     if (shipping) intentParams.shipping = shipping;

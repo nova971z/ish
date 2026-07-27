@@ -585,6 +585,168 @@ async function handleCourses(req, body, cfg, res) {
     });
   }
 
+  // ══ L'ACCORD — ce que les deux ont convenu, noir sur blanc ════════════════
+  // Rédigé par l'un dans le chat, accepté par l'autre. Fige le prix de la
+  // course (convenu ENTRE EUX), le mode de règlement du livreur (virement ou
+  // espèces), la date, l'heure et le point de dépôt. Un message système trace
+  // chaque étape dans le fil — le fil fait foi en cas de litige.
+  // ⚠️ La course n'est RÉELLEMENT commandée qu'après : accord accepté des deux
+  // côtés ET marchandise payée par le client (course-goods-paid).
+  if (body.type === 'course-accord-propose' || body.type === 'course-accord-accept'
+      || body.type === 'course-accord-reject') {
+    const id = String(body.id || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 64);
+    if (!id) return res.status(400).json({ ok: false, error: 'id requis' });
+    const ref = db.collection('courses').doc(id);
+    const propose = body.type === 'course-accord-propose';
+    const accept = body.type === 'course-accord-accept';
+    let clean = null;
+    if (propose) {
+      clean = coursesLib.sanitizeAccord(body.accord);
+      if (!clean) {
+        return res.status(400).json({ ok: false, error: 'Indique un prix (1 à 2000 €) et un mode de règlement.' });
+      }
+    }
+    let out = null;
+    try {
+      out = await db.runTransaction(async (tx) => {
+        const d = await tx.get(ref);
+        if (!d.exists) throw new Error('introuvable');
+        const c = d.data();
+        const role = c.artisanUid === uid ? 'client' : (c.courierUid === uid ? 'livreur' : null);
+        if (!role) throw new Error('pas-participant');
+        if (c.status !== 'acceptee') throw new Error('pas-en-negociation');
+        if (body.type === 'course-accord-reject') {
+          if (!c.accord) throw new Error('pas-d-accord');
+          if (c.accord.valide) throw new Error('deja-valide');
+          tx.update(ref, { accord: null });
+          return { role, action: 'reject', round: c.round || 1, course: c };
+        }
+        if (propose) {
+          if (c.accord && c.accord.valide) throw new Error('deja-valide');
+          const accord = Object.assign({}, clean, {
+            proposeBy: uid, proposeRole: role, proposeAt: new Date(),
+            okClient: role === 'client', okLivreur: role === 'livreur', valide: false
+          });
+          tx.update(ref, { accord });
+          return { role, action: 'propose', accord, round: c.round || 1, course: c };
+        }
+        // accept
+        if (!c.accord) throw new Error('pas-d-accord');
+        if (c.accord.valide) throw new Error('deja-valide');
+        const a = Object.assign({}, c.accord);
+        if (role === 'client') a.okClient = true; else a.okLivreur = true;
+        a.valide = !!(a.okClient && a.okLivreur);
+        if (a.valide) a.valideAt = new Date();
+        tx.update(ref, { accord: a });
+        return { role, action: a.valide ? 'valide' : 'accept', accord: a, round: c.round || 1, course: c };
+      });
+    } catch (e) {
+      const map = {
+        'introuvable': [404, 'Course introuvable.'],
+        'pas-participant': [403, 'Tu n\'es pas concerné par cette course.'],
+        'pas-en-negociation': [409, 'Cette course n\'est plus au stade de la mise en relation.'],
+        'pas-d-accord': [409, 'Aucun accord n\'a encore été proposé.'],
+        'deja-valide': [409, 'L\'accord est déjà validé par les deux parties.']
+      };
+      const m = map[e.message];
+      if (m) return res.status(m[0]).json({ ok: false, error: m[1] });
+      console.error('[courses] accord failed:', e.message);
+      return res.status(500).json({ ok: false, error: 'Opération échouée.' });
+    }
+    // Trace systématique dans le fil (message immuable).
+    const txt = out.action === 'propose'
+      ? '📝 Accord proposé par le ' + out.role + ' — ' + coursesLib.accordSummary(out.accord)
+        + '. L\'autre partie doit l\'accepter.'
+      : out.action === 'accept'
+        ? '👍 Le ' + out.role + ' a accepté l\'accord. En attente de l\'autre partie.'
+        : out.action === 'valide'
+          ? '✅ Accord validé par les DEUX parties — ' + coursesLib.accordSummary(out.accord)
+            + '. Le client doit maintenant régler sa marchandise à Pirates Tools : la course sera alors réellement commandée.'
+          : '❌ Accord refusé par le ' + out.role + '. Reprenez la discussion.';
+    try {
+      await ref.collection('messages').add({
+        uid: 'systeme', role: 'systeme', round: out.round, text: txt, at: new Date()
+      });
+    } catch (e) { console.warn('[courses] message accord échoué:', e.message); }
+    if (out.action === 'valide') {
+      const dests = [out.course.artisanEmail, out.course.courierEmail].filter(Boolean);
+      for (const to of dests) {
+        await coursesLib.sendMail(to, '✅ Accord validé — ' + String(out.course.address || '').slice(0, 60),
+          '<p><strong>Vous êtes d\'accord tous les deux.</strong></p>'
+          + '<p>' + coursesLib.escapeHtml(coursesLib.accordSummary(out.accord)) + '</p>'
+          + '<p>Dernière étape : le client règle sa marchandise à Pirates Tools. '
+          + 'La course est alors <strong>réellement commandée</strong>.</p>'
+          + '<p style="color:#666;font-size:13px">Le prix de la course a été convenu directement entre vous : '
+          + 'Pirates Tools ne le fixe pas et n\'encaisse rien dessus.</p>');
+      }
+    }
+    return res.status(200).json({ ok: true, id, accord: out.accord || null, valide: out.action === 'valide' });
+  }
+
+  // ── MARCHANDISE PAYÉE → la course est réellement commandée ────────────────
+  // Le client règle SES ARTICLES à Pirates Tools (c'est notre vente). Le prix
+  // de la course, lui, ne passe pas par nous. On vérifie le paiement chez
+  // Stripe : abouti, à ce compte, et marqué pour CETTE course (courseRef).
+  if (body.type === 'course-goods-paid') {
+    const id = String(body.id || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 64);
+    const piId = String(body.paymentIntentId || '').trim().slice(0, 80);
+    if (!id || !piId) return res.status(400).json({ ok: false, error: 'id et paiement requis' });
+    const stripeKey = process.env.STRIPE_SECRET_KEY;
+    if (!stripeKey) return res.status(503).json({ ok: false, error: 'Paiement non configuré.' });
+    let pi = null;
+    try { pi = await require('stripe')(stripeKey).paymentIntents.retrieve(piId); }
+    catch (e) { return res.status(404).json({ ok: false, error: 'Paiement introuvable.' }); }
+    if (!pi || pi.status !== 'succeeded') return res.status(400).json({ ok: false, error: 'Paiement non abouti.' });
+    const md = pi.metadata || {};
+    if (md.source !== 'pirates-tools' || md.courseRef !== id) {
+      return res.status(400).json({ ok: false, error: 'Ce paiement ne correspond pas à cette livraison.' });
+    }
+    if (md.uid && md.uid !== uid) return res.status(403).json({ ok: false, error: 'Ce paiement ne t\'appartient pas.' });
+    const ref = db.collection('courses').doc(id);
+    let course = null;
+    try {
+      course = await db.runTransaction(async (tx) => {
+        const d = await tx.get(ref);
+        if (!d.exists) throw new Error('introuvable');
+        const c = d.data();
+        if (c.artisanUid !== uid) throw new Error('pas-ta-course');
+        if (!c.accord || !c.accord.valide) throw new Error('accord-manquant');
+        if (c.goodsPaid) return c;                     // idempotent (double clic / retour /merci)
+        tx.update(ref, {
+          goodsPaid: true, goodsPaymentIntentId: pi.id,
+          goodsAmountCents: pi.amount || 0,
+          status: 'confirmee', confirmedOrderAt: new Date()
+        });
+        return c;
+      });
+    } catch (e) {
+      const map = {
+        'introuvable': [404, 'Course introuvable.'],
+        'pas-ta-course': [403, 'Cette livraison n\'est pas la tienne.'],
+        'accord-manquant': [409, 'L\'accord doit être validé par les deux parties avant le paiement.']
+      };
+      const m = map[e.message];
+      if (m) return res.status(m[0]).json({ ok: false, error: m[1] });
+      console.error('[courses] goods-paid failed:', e.message);
+      return res.status(500).json({ ok: false, error: 'Confirmation échouée.' });
+    }
+    try {
+      await ref.collection('messages').add({
+        uid: 'systeme', role: 'systeme', round: course.round || 1,
+        text: '💳 Marchandise réglée par le client — la course est officiellement commandée. Bonne livraison !',
+        at: new Date()
+      });
+    } catch (_) {}
+    if (course.courierEmail) {
+      await coursesLib.sendMail(course.courierEmail,
+        '🚀 Course confirmée — la marchandise est payée',
+        '<p>Le client a réglé sa marchandise : <strong>la course est officiellement commandée</strong>.</p>'
+        + '<p>' + coursesLib.escapeHtml(coursesLib.accordSummary(course.accord)) + '</p>'
+        + '<p>📍 ' + coursesLib.escapeHtml(course.address || '') + '</p>');
+    }
+    return res.status(200).json({ ok: true, id, status: 'confirmee' });
+  }
+
   // ── Remettre la demande EN LIGNE (client OU livreur, depuis le chat) ──────
   // « Ça ne colle pas » : on annule la mise en relation, pas la demande. La
   // course redevient visible de tous les livreurs et l'alerte repart.
@@ -607,6 +769,7 @@ async function handleCourses(req, body, cfg, res) {
         tx.update(ref, {
           status: 'en_attente', chatOpen: false,
           courierUid: null, courierEmail: null, courierName: '',
+          accord: null,                       // l'accord appartenait à CETTE mise en relation
           round: (c.round || 1) + 1,
           releasedAt: new Date(), releasedBy: c.artisanUid === uid ? 'client' : 'livreur'
         });
@@ -691,6 +854,9 @@ async function handleCourses(req, body, cfg, res) {
         mine: c.artisanUid === uid, acceptedByMe: c.courierUid === uid,
         courierUid: c.courierUid || null, courierName: c.courierName || '',
         chatOpen: !!c.chatOpen, round: c.round || 1,
+        accord: c.accord || null, goodsPaid: !!c.goodsPaid,
+        goodsAmountCents: c.goodsAmountCents || 0,
+        lines: Array.isArray(c.lines) ? c.lines : [],
         rating: c.rating || 0, ratingComment: c.ratingComment || '',
         paid: !!c.paid, escrow: c.escrow || null,
         feeCents: c.feeCents || 0, amountCents: c.amountCents || 0,
@@ -801,7 +967,9 @@ async function handleCourses(req, body, cfg, res) {
         if (!d.exists) throw new Error('introuvable');
         const c = d.data();
         if (c.courierUid !== uid) throw new Error('pas-ta-course');
-        if (c.status !== 'acceptee') throw new Error('pas-acceptee');
+        // 'confirmee' = accord validé + marchandise payée (flux courant).
+        // 'acceptee' = anciennes courses pré-payées (flux d'avant le 27/07).
+        if (c.status !== 'confirmee' && c.status !== 'acceptee') throw new Error('pas-acceptee');
         // CODE DE REMISE : le client le détient dans « Mes livraisons » et le
         // donne EN MAIN PROPRE contre le colis. Sans le bon code, impossible
         // de marquer livrée. (Courses legacy sans code : pas de contrôle.)
