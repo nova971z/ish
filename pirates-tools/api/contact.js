@@ -967,9 +967,11 @@ async function handleCourses(req, body, cfg, res) {
         if (!d.exists) throw new Error('introuvable');
         const c = d.data();
         if (c.courierUid !== uid) throw new Error('pas-ta-course');
-        // 'confirmee' = accord validé + marchandise payée (flux courant).
-        // 'acceptee' = anciennes courses pré-payées (flux d'avant le 27/07).
-        if (c.status !== 'confirmee' && c.status !== 'acceptee') throw new Error('pas-acceptee');
+        // 'confirmee' = accord validé PAR LES DEUX + marchandise réglée (flux
+        // courant). 'acceptee' n'est livrable que pour les anciennes courses
+        // PRÉ-PAYÉES : sans ça, un livreur pouvait clore une course dont rien
+        // n'avait été convenu ni payé.
+        if (!(c.status === 'confirmee' || (c.status === 'acceptee' && c.paid))) throw new Error('pas-acceptee');
         // CODE DE REMISE : le client le détient dans « Mes livraisons » et le
         // donne EN MAIN PROPRE contre le colis. Sans le bon code, impossible
         // de marquer livrée. (Courses legacy sans code : pas de contrôle.)
@@ -1096,7 +1098,7 @@ async function handleCourses(req, body, cfg, res) {
     if (!d.exists) return res.status(404).json({ ok: false, error: 'Course introuvable.' });
     const c = d.data();
     if (c.artisanUid !== uid) return res.status(403).json({ ok: false, error: 'Tu ne peux joindre une photo qu\'à tes propres commandes.' });
-    if (!['en_attente', 'acceptee'].includes(c.status)) return res.status(409).json({ ok: false, error: 'Course déjà livrée.' });
+    if (!['en_attente', 'acceptee', 'confirmee'].includes(c.status)) return res.status(409).json({ ok: false, error: 'Course déjà livrée.' });
     await ref.collection('photos').doc('scene').set({ data: photo, at: new Date(), by: uid });
     await ref.update({ hasScene: true });
     return res.status(200).json({ ok: true, id });
@@ -1191,7 +1193,11 @@ async function handleCourses(req, body, cfg, res) {
         if (!d.exists) throw new Error('introuvable');
         const c = d.data();
         if (c.artisanUid !== uid) throw new Error('pas-ta-course');
-        if (!['acceptee', 'livree', 'terminee'].includes(c.status)) throw new Error('pas-encore');
+        // La note est PUBLIQUE (fiche du livreur) : elle ne peut exister
+        // qu'après une livraison réellement effectuée. Avant, une note était
+        // possible dès l'acceptation — un client pouvait noter un livreur qui
+        // n'avait encore rien fait.
+        if (!['livree', 'terminee'].includes(c.status)) throw new Error('pas-encore');
         if (c.rating) throw new Error('deja-note');
         tx.update(ref, { rating, ratingComment: comment, ratedAt: new Date(), ratedBy: uid });
         return c;
@@ -1222,7 +1228,7 @@ async function handleCourses(req, body, cfg, res) {
       return res.status(200).json({ ok: true, id, rating });
     } catch (e) {
       const map = { 'introuvable': [404, 'Course introuvable.'], 'pas-ta-course': [403, 'Tu ne peux noter que tes propres livraisons.'],
-        'pas-encore': [400, 'Tu pourras noter une fois la livraison prise en charge.'], 'deja-note': [409, 'Tu as déjà noté cette livraison.'] };
+        'pas-encore': [400, 'Tu pourras noter une fois la livraison effectuée.'], 'deja-note': [409, 'Tu as déjà noté cette livraison.'] };
       const m = map[e.message];
       if (m) return res.status(m[0]).json({ ok: false, error: m[1] });
       console.error('[courses] rate failed:', e.message);

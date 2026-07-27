@@ -677,6 +677,14 @@ module.exports = async function handler(req, res) {
       const photos = await ref.collection('photos').get();
       for (const p of photos.docs) { await p.ref.delete(); photosDeleted++; }
 
+      // 1 bis. Sous-collection messages (le fil de discussion). Supprimer le
+      //    document parent NE supprime PAS ses sous-collections dans Firestore :
+      //    sans ça, la conversation survivait indéfiniment, inaccessible mais
+      //    stockée — inacceptable pour des échanges entre deux personnes.
+      let messagesDeleted = 0;
+      const msgs = await ref.collection('messages').get();
+      for (const m of msgs.docs) { await m.ref.delete(); messagesDeleted++; }
+
       // 2. Vidéos Storage (best-effort : Storage peut ne pas être activé)
       let videosDeleted = 0;
       if ((data.videos || []).length) {
@@ -690,7 +698,7 @@ module.exports = async function handler(req, res) {
       // 3. La course elle-même, en DERNIER : si une étape échoue avant, le doc
       //    reste et l'opération est rejouable — jamais d'orphelin silencieux.
       await ref.delete();
-      return res.status(200).json({ ok: true, id, photosDeleted, videosDeleted });
+      return res.status(200).json({ ok: true, id, photosDeleted, messagesDeleted, videosDeleted });
     } catch (err) {
       console.error('[api/admin] course-delete failed:', err.message);
       return res.status(500).json({ ok: false, error: 'course-delete échoué : ' + err.message });

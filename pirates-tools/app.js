@@ -5030,11 +5030,29 @@
   }
 
   // Libellés partagés des statuts de course (livreur + client).
+  // Une course est LIVRABLE quand elle est confirmée (accord validé +
+  // marchandise réglée) — ou, pour les anciennes courses pré-payées, dès
+  // qu'elle est acceptée. Miroir exact du contrôle serveur (course-deliver).
+  function lvLivrable(c) {
+    return c.status === 'confirmee' || (c.status === 'acceptee' && !!c.paid);
+  }
+  // Prix affichable d'une course, SANS jamais inventer de montant :
+  //   • course pré-payée (ancien flux) → le montant réellement débité ;
+  //   • accord validé → le prix convenu ENTRE EUX ;
+  //   • sinon → rien n'est encore convenu, et on le dit.
+  // Avant ce helper, `c.prix` (absent des demandes) s'affichait « undefined € ».
+  function lvPrixTxt(c) {
+    if (c.paid && c.prix) return c.prix + ' €';
+    if (c.accord && c.accord.valide && c.accord.prix) return c.accord.prix + ' € convenus';
+    if (c.accord && c.accord.prix) return c.accord.prix + ' € proposés';
+    return 'prix à convenir';
+  }
   function lvCourseStatusTxt(c, forClient) {
     if (c.status === 'en_attente') return (c.round && c.round > 1)
       ? '⏳ De nouveau en ligne — en attente d\'un autre livreur'
       : '⏳ En attente d\'un livreur';
-    if (c.status === 'acceptee') return forClient ? '🛵 Prise en charge par un livreur' : '🛵 Acceptée — livraison en cours';
+    if (c.status === 'acceptee') return forClient ? '🤝 Livreur trouvé — accordez-vous dans la discussion' : '🤝 À toi de t\'accorder avec le client';
+    if (c.status === 'confirmee') return forClient ? '🚀 Commandée — ton livreur arrive' : '🚀 Confirmée — marchandise payée, à livrer';
     if (c.status === 'annulee') return '❌ Demande annulée';
     if (c.status === 'livree') return forClient ? '📦 Livrée — vérifie la photo et confirme la réception' : '📦 Livrée — en attente de confirmation du client';
     if (c.status === 'terminee') return '✅ Terminée';
@@ -5351,14 +5369,31 @@
       // n'autorisent la lecture QUE du round courant, et une requête non
       // filtrée serait refusée en bloc. Cloisonne les mises en relation
       // successives (le livreur suivant ne lit jamais le fil d'avant).
-      var q = fb.query(col, fb.where('round', '==', (c.round || 1)), fb.orderBy('at'), fb.limit(200));
+      // ⚠️ PAS d'orderBy ICI, VOLONTAIREMENT. `where` + `orderBy` sur deux
+      // champs différents exigerait un INDEX COMPOSITE Firestore : en
+      // production la requête échouerait (FAILED_PRECONDITION) alors que
+      // l'émulateur, lui, crée les index à la volée — le piège ne se voit pas
+      // en test. Le filtre `round` seul tient dans l'index automatique, et on
+      // trie les messages nous-mêmes ci-dessous (300 max, coût nul).
+      var q = fb.query(col, fb.where('round', '==', (c.round || 1)), fb.limit(300));
       _lvChatUnsub = fb.onSnapshot(q, function (snap) {
-        var h = [];
-        snap.forEach(function (d) {
-          var m = d.data() || {};
+        var msgs = [];
+        snap.forEach(function (d) { msgs.push(d.data() || {}); });
+        // Tri chronologique côté client (voir la note sur l'index ci-dessus).
+        // `at` est un Timestamp Firestore une fois écrit, mais une Date JS sur
+        // le message que l'on vient d'envoyer (écriture optimiste) : les deux
+        // doivent être ramenés à des millisecondes.
+        var ms = function (v) {
+          if (!v) return 0;
+          if (typeof v.toMillis === 'function') return v.toMillis();
+          if (typeof v.getTime === 'function') return v.getTime();
+          return Number(v) || 0;
+        };
+        msgs.sort(function (x, y) { return ms(x.at) - ms(y.at); });
+        var h = msgs.map(function (m) {
           var mine = (m.role === role && m.role !== 'systeme');
           var cls = m.role === 'systeme' ? 'lv-msg--sys' : (mine ? 'lv-msg--me' : 'lv-msg--them');
-          h.push('<div class="lv-msg ' + cls + '"><span class="lv-msg__t">' + escapeHTML(String(m.text || '')) + '</span></div>');
+          return '<div class="lv-msg ' + cls + '"><span class="lv-msg__t">' + escapeHTML(String(m.text || '')) + '</span></div>';
         });
         if (log) {
           log.innerHTML = h.length ? h.join('') : '<p class="lv-hint">Aucun message pour l\'instant — dis bonjour !</p>';
@@ -5525,7 +5560,16 @@
       else gele += eur;
     });
     if (!nb) {
-      box.innerHTML = '<div class="lv-earn lv-earn--empty">💰 Aucun gain pour l\'instant — accepte une course pour commencer.</div>';
+      // Plus aucune course ne transite par la plateforme : afficher un solde à
+      // 0 € laisserait croire qu'on retient de l'argent. On compte les courses
+      // faites et on rappelle comment le livreur est réellement payé.
+      var faites = (courses || []).filter(function (c) { return c.status === 'terminee'; }).length;
+      box.innerHTML = '<div class="lv-earn lv-earn--empty">'
+        + (faites
+          ? '✅ <strong>' + faites + ' course' + (faites > 1 ? 's' : '') + ' terminée' + (faites > 1 ? 's' : '') + '.</strong> '
+          : '💰 Aucune course terminée pour l\'instant. ')
+        + 'Tes courses sont réglées <strong>directement par le client</strong> (virement ou espèces, selon l\'accord) — '
+        + 'Pirates Tools ne retient rien et ne prélève rien.</div>';
       return;
     }
     var total = gele + aVerser + verse;
@@ -5556,9 +5600,9 @@
   }
   function renderCourierTarifPanel() {
     var host = document.getElementById('courierTarifs');
-    if (!host) return;
+    if (!host) return Promise.resolve();
     host.innerHTML = '<p class="lv-hint">Chargement de ta fiche…</p>';
-    jsonAuthHeaders().then(function (headers) {
+    return jsonAuthHeaders().then(function (headers) {
       return fetch(apiBaseUrl() + '/api/contact', {
         method: 'POST', headers: headers, body: JSON.stringify({ type: 'courier-profile' })
       });
@@ -5691,7 +5735,10 @@
   }
 
   function renderCourierSpaceInner() {
-    renderCourierTarifPanel();
+    // Les deux requêtes partent EN PARALLÈLE, mais l'affichage des courses
+    // attend les tarifs : sinon les cartes annonçaient le repère indicatif
+    // (22 €) à la place du prix réel du livreur (course de données).
+    var tarifsReady = renderCourierTarifPanel();
     var back = document.getElementById('courierBack');
     if (back) back.onclick = function () { history.length > 1 ? history.back() : (location.hash = '#/compte'); };
     var refresh = document.getElementById('courierRefresh');
@@ -5755,7 +5802,7 @@
         // donne en main propre contre le colis), photo du colis remis, photo
         // large du chantier avec les colis posés. Sans les 3, pas de statut
         // « livrée », donc pas de déblocage d'argent.
-        + (c.acceptedByMe && c.status === 'acceptee'
+        + (c.acceptedByMe && lvLivrable(c)
           ? '<div class="lv-proof">'
             // Photo du chantier prise par le client : TOUJOURS annoncée, même
             // absente. Avant, le bloc disparaissait sans un mot quand la photo
@@ -5778,7 +5825,7 @@
         // Fil de discussion avec le client (ouvert dès l'acceptation)
         + (c.acceptedByMe ? lvChatHTML(c, 'livreur') : '')
         // Vidéo de remise + litige (protection mutuelle — voir consentement)
-        + (c.acceptedByMe && ['acceptee', 'livree', 'terminee'].indexOf(c.status) !== -1
+        + (c.acceptedByMe && ['acceptee', 'confirmee', 'livree', 'terminee'].indexOf(c.status) !== -1
           ? lvVideoDisputeHtml(c) : '');
       wireAccept(det);
       wireProof(det, c);
@@ -5890,6 +5937,8 @@
     jsonAuthHeaders().then(function (headers) {
       return fetch(apiBaseUrl() + '/api/contact', { method: 'POST', headers: headers, body: JSON.stringify({ type: 'course-list' }) });
     }).then(function (r) { return r.json(); }).then(function (d) {
+      return tarifsReady.then(function () { return d; });
+    }).then(function (d) {
       var dispoEl = document.getElementById('courierDispo');
       var mineEl = document.getElementById('courierMine');
       if (!d.ok) {
@@ -5940,7 +5989,7 @@
           var m = window.L.circleMarker([c.lat, c.lng], {
             radius: 9, color: col, weight: 2, fillColor: col, fillOpacity: c.status === 'en_attente' ? 0.75 : 0.3
           }).addTo(mapEl._ptLayer);
-          m.bindPopup((c.status === 'en_attente' ? '📬 ' : '✅ ') + escapeHTML((c.address || '').slice(0, 60)) + '<br>Zone ' + c.zone + ' — ' + c.prix + ' €');
+          m.bindPopup((c.status === 'en_attente' ? '📬 ' : '✅ ') + escapeHTML((c.address || '').slice(0, 60)) + '<br>Zone ' + c.zone + ' — ' + lvPrixTxt(c));
           m.on('click', function () { showDetail(c, canAccept); });
           markers[c.id] = m;
         });
@@ -6020,12 +6069,12 @@
       // valider la livraison. Affiché en clair + en QR (généré 100 % en local).
       // Courses de TEST créées avant le paiement en ligne : ni code, ni
       // escrow. Le dire franchement plutôt que d'afficher un bloc vide.
-      if (c.mine && !c.code && !c.paid && (c.status === 'en_attente' || c.status === 'acceptee')) {
+      if (c.mine && !c.code && !c.paid && ['en_attente', 'acceptee', 'confirmee'].indexOf(c.status) !== -1) {
         h += '<div class="lv-note lv-note--warn" style="margin-top:.7rem">ℹ️ <strong>Ancienne course de test</strong> — créée avant la mise en place du paiement en ligne : '
           + 'elle n\'a donc <strong>pas de code de remise</strong> et aucun montant n\'a été débité. '
           + 'Passe une nouvelle commande pour voir le code, le QR et la chaîne complète.</div>';
       }
-      if (c.mine && c.code && (c.status === 'en_attente' || c.status === 'acceptee')) {
+      if (c.mine && c.code && ['en_attente', 'acceptee', 'confirmee'].indexOf(c.status) !== -1) {
         h += '<div class="lv-handcode">'
           + '<div class="lv-handcode__row"><span class="lv-handcode__key">🔑 Code de remise</span>'
           + '<strong class="lv-handcode__num">' + escapeHTML(c.code) + '</strong></div>'
@@ -6063,13 +6112,13 @@
           + '<span class="lv-cta__note" id="clientCancelSt" aria-live="polite">Tu as changé d\'avis ? Rien n\'a été débité, l\'annulation est libre.</span></div>';
       }
       // Vidéo + litige côté CLIENT (dès qu'un livreur est impliqué)
-      if (c.mine && ['acceptee', 'livree', 'terminee'].indexOf(c.status) !== -1) {
+      if (c.mine && ['acceptee', 'confirmee', 'livree', 'terminee'].indexOf(c.status) !== -1) {
         h += lvVideoDisputeHtml(c);
       }
       if (c.rating) {
         h += '<div class="lv-note lv-note--ok" style="margin-top:.7rem">⭐ Ta note : <strong>' + stars(c.rating) + '</strong>'
           + (c.ratingComment ? '<br>« ' + escapeHTML(c.ratingComment) + ' »' : '') + '</div>';
-      } else if (c.status === 'acceptee' || c.status === 'livree' || c.status === 'terminee') {
+      } else if (c.status === 'livree' || c.status === 'terminee') {
         h += '<div class="lv-rate" data-rate-id="' + escapeHTML(c.id) + '">'
           + '<h3 class="lv-h3">Note ton livreur</h3>'
           + '<div class="lv-rate__stars" role="radiogroup" aria-label="Note sur 5">'
@@ -6079,7 +6128,7 @@
           + '<div class="lv-cta"><button type="button" class="btn primary lv-rate__send" disabled>Envoyer ma note</button>'
           + '<span class="lv-cta__note lv-rate__status" aria-live="polite"></span></div></div>';
       } else {
-        h += '<p class="lv-hint" style="margin-top:.6rem">Tu pourras noter ton livreur dès qu\'il aura pris la course.</p>';
+        h += '<p class="lv-hint" style="margin-top:.6rem">Tu pourras noter ton livreur une fois la livraison faite.</p>';
       }
       det.innerHTML = h;
       if (c.mine) wireChat(det, c, 'client', renderClientDeliveries);
@@ -6210,7 +6259,7 @@
         var z = LV_BAREME[(c.zone || 1) - 1] || LV_BAREME[0];
         var attend = (c.status === 'livree');
         return '<button type="button" class="lv-course lv-course--btn' + (attend ? ' lv-course--todo' : '') + '" data-deliv-focus="' + escapeHTML(c.id) + '">'
-          + '<span class="lv-course__head"><span>' + z.emoji + ' <strong>' + c.prix + ' €</strong> · ' + (c.date ? escapeHTML(c.date) : 'au plus tôt') + '</span>'
+          + '<span class="lv-course__head"><span>' + z.emoji + ' <strong>' + lvPrixTxt(c) + '</strong> · ' + (c.date ? escapeHTML(c.date) : 'au plus tôt') + '</span>'
           + '<span class="lv-course__status">' + (c.rating ? '⭐ ' + c.rating + '/5' : statusLabel(c)) + '</span></span>'
           + '<span class="lv-course__body">📍 ' + escapeHTML((c.address || '').slice(0, 60)) + '</span>'
           + (attend ? '<span class="lv-course__todo">👉 Action requise : vérifie les photos et confirme la réception</span>' : '')
@@ -6236,7 +6285,7 @@
           if (!isFinite(c.lat) || !isFinite(c.lng)) return;
           var col = ZCOLOR[(c.zone || 1) - 1] || ZCOLOR[0];
           var m = window.L.circleMarker([c.lat, c.lng], { radius: 9, color: col, weight: 2, fillColor: col, fillOpacity: 0.7 }).addTo(mapEl._ptLayer);
-          m.bindPopup(escapeHTML((c.address || '').slice(0, 60)) + '<br>' + c.prix + ' € — ' + (c.date || 'au plus tôt'));
+          m.bindPopup(escapeHTML((c.address || '').slice(0, 60)) + '<br>' + lvPrixTxt(c) + ' — ' + (c.date || 'au plus tôt'));
           m.on('click', function () { showDetail(c); });
           markers[c.id] = m;
         });
@@ -6269,7 +6318,7 @@
       var card = function (c, withAccept) {
         var z = LV_BAREME[(c.zone || 1) - 1] || LV_BAREME[0];
         return '<div class="lv-course' + (c.status !== 'en_attente' ? ' lv-course--done' : '') + '">'
-          + '<div class="lv-course__head"><span>' + z.emoji + ' Zone ' + c.zone + ' · <strong>' + c.prix + ' €</strong></span>'
+          + '<div class="lv-course__head"><span>' + z.emoji + ' Zone ' + c.zone + ' · <strong>' + lvPrixTxt(c) + '</strong></span>'
           + '<span class="lv-course__status">' + (c.status === 'en_attente' ? 'En attente' : (c.acceptedByMe ? '✅ Acceptée par toi' : escapeHTML(c.status))) + '</span></div>'
           + '<div class="lv-course__body">' + escapeHTML(c.productTitle || '') + (c.qty > 1 ? ' × ' + c.qty : '') + '<br>'
           + '📍 ' + escapeHTML(c.address || '') + ' <em>(' + c.km + ' km)</em><br>'
@@ -6622,6 +6671,13 @@
 
     // Quitte l'admin → libère le globe 3D (contexte WebGL, rAF).
     if (route !== '/admin') { try { destroyAdminGlobe(); } catch (_) {} }
+    // Quitte les espaces livraison → coupe l'abonnement temps réel du chat.
+    // Sans ça, l'écoute Firestore survivait à la navigation et continuait de
+    // recevoir (puis d'échouer après une remise en ligne, le round ayant changé).
+    if (route !== '/mode-livraison' && route !== '/mes-livraisons' && _lvChatUnsub) {
+      try { _lvChatUnsub(); } catch (_) {}
+      _lvChatUnsub = null;
+    }
 
     // Auth guards — n'appliquer la redirection qu'une fois la session Firebase
     // restaurée (_authReady). Sinon un utilisateur connecté qui recharge sur
@@ -7058,8 +7114,17 @@
       // Listen to auth state changes (store unsubscribe for cleanup)
       if (_authUnsub) _authUnsub();
       _authUnsub = fb.onAuthStateChanged(fb.auth, function (user) {
+        var changed = ((_currentUser && _currentUser.uid) || null) !== ((user && user.uid) || null);
         _currentUser = user || null;
         _authReady = true;
+        // Tout état DÉPENDANT DE L'IDENTITÉ doit tomber au changement de
+        // compte : sinon le rôle livreur du compte précédent survivait, et
+        // son fil de discussion restait abonné.
+        if (changed) {
+          _lvRolePromise = null;
+          _lvMyTarifs = null;
+          if (_lvChatUnsub) { try { _lvChatUnsub(); } catch (_) {} _lvChatUnsub = null; }
+        }
         if (user) {
           // Load Firestore profile in background
           loadUserProfile().then(function () {
@@ -11063,8 +11128,9 @@
         if (c.videos) preuves.push('🎥 ' + c.videos);
         return '<div class="admin-app">'
           + '<div class="admin-app__head"><strong>' + escapeHTML(ST[c.status] || c.status) + '</strong>'
-          + '<span class="admin-app__tier">Zone ' + c.zone + ' · ' + c.prix + ' €'
-          + (c.paid ? ' · payée' : ' · NON payée') + (c.escrow ? ' · ' + escapeHTML(c.escrow) : '') + '</span></div>'
+          + '<span class="admin-app__tier">Zone ' + c.zone + ' · '
+          + (c.paid && c.prix ? c.prix + ' €' : (c.accord && c.accord.prix ? c.accord.prix + ' € (accord)' : 'prix à convenir'))
+          + (c.goodsPaid ? ' · marchandise réglée' : (c.paid ? ' · payée' : ' · course non facturée par nous')) + (c.escrow ? ' · ' + escapeHTML(c.escrow) : '') + '</span></div>'
           + '<div class="admin-app__line"><span>📍</span> ' + escapeHTML(c.address || '—')
           + (c.date ? ' — ' + escapeHTML(c.date) : '') + '</div>'
           + '<div class="admin-app__line"><span>Client</span> ' + escapeHTML(c.artisanEmail || '—')
@@ -11106,7 +11172,9 @@
         }).join('<br>');
         return '<div class="admin-app admin-app--dispute">'
           + '<div class="admin-app__head"><strong>' + (lit && lit.open ? '⚠️ LITIGE OUVERT' : (lit ? '✅ Litige clos' : '🎥 Vidéos')) + '</strong>'
-          + '<span class="admin-app__tier">Zone ' + d.zone + ' · ' + d.prix + ' € · ' + escapeHTML(d.status || '') + (d.escrow ? ' · escrow ' + escapeHTML(d.escrow) : '') + '</span></div>'
+          + '<span class="admin-app__tier">Zone ' + d.zone + ' · '
+          + (d.paid && d.prix ? d.prix + ' €' : (d.accord && d.accord.prix ? d.accord.prix + ' € (accord)' : 'prix à convenir'))
+          + ' · ' + escapeHTML(d.status || '') + (d.escrow ? ' · escrow ' + escapeHTML(d.escrow) : '') + '</span></div>'
           + '<div class="admin-app__line"><span>Course</span> ' + escapeHTML(d.id) + ' — ' + escapeHTML(d.address || '') + '</div>'
           + '<div class="admin-app__line"><span>Client</span> ' + escapeHTML(d.artisanEmail || '—') + ' · <span>Livreur</span> ' + escapeHTML(d.courierEmail || '—') + '</div>'
           + (lit && lit.message ? '<div class="admin-app__line"><span>Motif (' + escapeHTML(lit.role || '?') + ')</span> « ' + escapeHTML(lit.message) + ' »</div>' : '')

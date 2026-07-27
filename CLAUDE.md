@@ -924,6 +924,51 @@ DE BOUTONS à droite du chat, chacun ouvrant un panneau dédié.
   plus à l'argent de la course. Stripe Connect deviendra utile seulement si
   l'user veut un jour proposer le paiement de la course en ligne (facultatif).
 
+## 🔎 AUDIT APRÈS DÉPLOIEMENT DES RÈGLES (27/07/2026, SW v498) — 9 DÉFAUTS CORRIGÉS
+User : « fais un check-up… recherche approfondie de bugs, d'erreurs ou de
+mauvaises architectures ». Règles Firestore déployées par l'user juste avant.
+Revue ligne à ligne des 3 sessions précédentes → **9 défauts RÉELS**, dont 4
+auraient cassé le parcours en production. Tous corrigés + testés.
+- 🔴 **INDEX FIRESTORE MANQUANT (le plus grave)** : le chat faisait
+  `where('round','==',n) + orderBy('at')` → **index composite obligatoire**,
+  absent de firestore.indexes.json → `FAILED_PRECONDITION` en prod, chat mort.
+  ⚠️ **INVISIBLE EN TEST : l'émulateur crée les index à la volée.** Correctif
+  choisi = SUPPRIMER le besoin (filtre `round` seul, tri fait en JS sur ≤300
+  messages) plutôt qu'ajouter une étape de déploiement d'index à l'user.
+  **RÈGLE À RETENIR : toute requête `where` + `orderBy` sur 2 champs différents
+  exige un index composite — l'émulateur ne le dira jamais.**
+- 🔴 **Le livreur ne pouvait PAS valider une livraison** : le bloc des 3 preuves
+  était conditionné à `status === 'acceptee'`, or le flux courant passe en
+  `'confirmee'`. Idem vidéo/litige. Helper `lvLivrable(c)` = miroir exact du
+  contrôle serveur.
+- 🔴 **Le client perdait son code de remise** au statut `'confirmee'` — pile au
+  moment où il en a besoin.
+- 🔴 **`undefined €` partout** : `c.prix` n'existe plus sur une demande. Helper
+  unique `lvPrixTxt(c)` (payé → montant réel ; accord → prix convenu ; sinon
+  « prix à convenir »), appliqué aussi à l'admin et aux popups de carte.
+- 🟠 **Livrer une course non confirmée était possible** (serveur) : `'acceptee'`
+  n'est désormais livrable QUE si `paid` (courses legacy).
+- 🟠 **Note publique avant toute livraison** : `course-rate` acceptait
+  `'acceptee'` → un client pouvait noter un livreur qui n'avait rien fait, et
+  ça alimentait sa fiche PUBLIQUE. Restreint à `livree|terminee` (client aligné).
+- 🟠 **Rôle livreur mis en cache À VIE** (`_lvRolePromise`) : survivait à un
+  changement de compte. Réinitialisé dans `onAuthStateChanged` (+ `_lvMyTarifs`,
+  + désabonnement du chat).
+- 🟠 **Fuite de l'abonnement `onSnapshot`** du chat : jamais coupé en quittant la
+  page. Teardown ajouté dans `onRouteChange` (même endroit que le globe admin).
+- 🟠 **Course de données sur les tarifs** : la liste des courses pouvait être
+  peinte AVANT le chargement du profil → le livreur voyait le repère 22 € au
+  lieu de SON tarif. `renderCourierTarifPanel()` renvoie une promesse, les deux
+  requêtes partent en parallèle mais l'affichage attend les deux.
+- 🟠 **`admin course-delete` n'effaçait pas la sous-collection `messages`**
+  (Firestore ne supprime jamais les sous-collections d'un doc supprimé) → la
+  conversation survivait indéfiniment, inaccessible mais stockée.
+- ⚪️ Widget « Mes gains » réécrit : afficher un solde 0 € laissait croire qu'on
+  retient l'argent des livreurs. Il compte les courses terminées et rappelle
+  que le client règle en direct.
+- VÉRIFIÉ : **76/76 Playwright** (couriers.mjs) + **14/14** (course-pay.mjs,
+  zéro régression sur la modale de paiement outils) + **78/78 émulateur**.
+
 ## 💳 STRIPE EN MODE TEST (26/07/2026, SW v481) — À INVERSER AU LANCEMENT
 Avant lancement, le site tourne sur les clés **TEST** de Stripe (compte activé
 non requis) pour permettre à l'user de dérouler la chaîne complète course :
