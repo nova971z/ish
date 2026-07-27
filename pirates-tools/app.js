@@ -3867,6 +3867,16 @@
   // Comptes de TEST (chaîne complète courses actives pour eux seuls — décision
   // user : son compte perso teste artisan ET livreur, sans documents).
   var LV_TEST_EMAILS = ['justforwada@icloud.com'];
+  // Comptes DISPENSÉS de pièces justificatives (miroir exact de
+  // PIECES_BYPASS_EMAILS côté serveur — c'est LUI qui décide, ceci n'est que
+  // le confort d'affichage : le serveur refuserait de toute façon).
+  var LV_PIECES_BYPASS = ['justforwada@icloud.com'];
+  function lvPiecesDispense() {
+    try {
+      return !!(_currentUser && _currentUser.email
+        && LV_PIECES_BYPASS.indexOf(String(_currentUser.email).toLowerCase()) !== -1);
+    } catch (_) { return false; }
+  }
   function lvIsTester() {
     try { return !!(_currentUser && _currentUser.email && LV_TEST_EMAILS.indexOf(String(_currentUser.email).toLowerCase()) !== -1); }
     catch (_) { return false; }
@@ -4716,8 +4726,13 @@
   // Ce qui empêche encore d'envoyer le dossier (liste lisible par l'utilisateur).
   function lvDossierManque(state) {
     var m = [];
+    // Les pièces sont exigées par le SERVEUR (source de vérité). Ici on évite
+    // seulement de laisser envoyer un dossier qu'il refusera — sauf pour les
+    // comptes de test, dispensés de pièces (voir PIECES_BYPASS_EMAILS).
     var pieces = LV_PIECES_BASE.concat(LV_PIECES_EXTRA[state.veh] || []);
-    if (pieces.some(function (p) { return !state.files[p.id]; })) m.push('toutes les pièces');
+    if (!lvPiecesDispense() && pieces.some(function (p) { return !state.files[p.id]; })) {
+      m.push('toutes les pièces');
+    }
     if (state.veh === 'scooter' && !state.cylindree) m.push('la cylindrée');
     if (!(document.getElementById('lvBirth') || {}).value) m.push('ta date de naissance');
     if (!state.contact.name) m.push('ton nom');
@@ -4892,6 +4907,14 @@
           var ready = 0;
           pieces.forEach(function (p) { if (state.files[p.id]) ready++; });
           h.push('<div class="lv-card"><h2 class="lv-h2">Mon dossier — pièces à déposer</h2>');
+          // Compte dispensé de pièces (test) : on le DIT, on ne le cache pas.
+          if (lvPiecesDispense()) {
+            h.push('<div class="lv-banner">🧪 <strong>Compte de test</strong> — les pièces '
+              + 'justificatives ne te sont pas exigées pour envoyer ce dossier. '
+              + 'Tout le reste suit le parcours réel : âge, véhicule, consentements, '
+              + 'puis <strong>validation par l\'administration</strong>. '
+              + 'La dispense est inscrite dans le dossier, elle sera visible à la validation.</div>');
+          }
           h.push('<div class="lv-progress"><div class="lv-progress__bar"><span style="width:' + Math.round(100 * ready / pieces.length) + '%"></span></div>'
             + '<span class="lv-progress__txt">' + ready + ' / ' + pieces.length + ' pièces prêtes</span></div>');
           h.push('<ul class="lv-docs">');
@@ -4908,9 +4931,14 @@
               + '</span></li>');
           });
           h.push('</ul>');
-          var allReady = ready === pieces.length;
           if (state.submitted) {
-            h.push('<div class="lv-note lv-note--ok" style="margin-top:1rem">✅ <strong>Ton dossier de test est complet&nbsp;!</strong> Le service ouvre le 1er janvier — on vérifiera tes pièces à ce moment-là. Pour l\'instant rien n\'est enregistré (c\'est un test).</div>');
+            // ⚠️ Ce message disait « rien n'est enregistré » — c'était vrai
+            // tant que le formulaire n'envoyait rien. Depuis le 27/07/2026 le
+            // dossier est RÉELLEMENT enregistré : le texte doit le dire.
+            h.push('<div class="lv-note lv-note--ok" style="margin-top:1rem">✅ <strong>Dossier envoyé&nbsp;!</strong> '
+              + 'Il est enregistré et attend la <strong>validation de l\'administration</strong>. '
+              + 'Tant qu\'il n\'est pas validé, ton compte n\'a pas encore accès à l\'espace livreur. '
+              + 'Tu peux fermer cette page : rien ne sera perdu.</div>');
           } else {
             h.push('<h3 class="lv-h3">Tes coordonnées</h3>');
             h.push('<div class="lv-grid2">'
@@ -4921,7 +4949,7 @@
             h.push('<label class="lv-consent"><input type="checkbox" id="lvConsent"' + (state.consent ? ' checked' : '') + '> <span>J\'autorise Pirates Tools à traiter mes documents (pièce d\'identité, permis, assurance…) dans le seul but de vérifier mon éligibilité au service de livraison. Je peux demander leur suppression à tout moment. <a href="#/confidentialite">Politique de confidentialité</a>.</span></label>');
             h.push('<label class="lv-consent"><input type="checkbox" id="lvFilmConsent"' + (state.filmConsent ? ' checked' : '') + '> <span>🎥 J\'accepte que les <strong>remises de colis puissent être filmées</strong>, par le client comme par moi, comme preuve mutuelle en cas de litige. Ces vidéos restent <strong>privées</strong> (jamais publiées, visibles de l\'administrateur seul) et sont <strong>supprimées une fois le litige clos</strong>. Toute remise se fait dans le respect mutuel.</span></label>');
             h.push('<div class="lv-cta" style="margin-top:1rem">'
-              + '<button type="button" class="btn primary" id="lvSubmitDossier">Envoyer mon dossier (test)</button>'
+              + '<button type="button" class="btn primary" id="lvSubmitDossier">Envoyer mon dossier</button>'
               + '<span class="lv-cta__note" id="lvSubmitNote"></span></div>');
           }
           h.push('</div>');
@@ -5068,7 +5096,13 @@
   function updateAccLivBtn() {
     var btn = document.getElementById('accLivBtn');
     if (!btn) return;
-    btn.hidden = !lvIsTester();          // affichage immédiat pour le testeur
+    // Fermé par défaut : être livreur se mérite (dossier validé par l'admin).
+    // Avant, le compte de test l'ouvrait tout de suite — ce raccourci a été
+    // retiré le 27/07/2026 pour pouvoir tester la vraie chaîne d'inscription.
+    // MAIS si un verdict SÛR est déjà en mémoire, on l'applique immédiatement :
+    // le refermer d'abord pour le rouvrir ensuite le ferait clignoter à chaque
+    // changement de page (défaut attrapé par le harnais, pas à l'œil).
+    btn.hidden = (_lvRoleVerdict === null) ? true : !_lvRoleVerdict;
     lvGetRole().then(function (isC) {
       // ⚠️ null = verdict INDÉTERMINÉ : on NE TOUCHE À RIEN. Masquer ici, c'est
       // exactement le bug qui faisait disparaître le bouton (voir lvGetRole).
@@ -11430,6 +11464,12 @@
         return '<div class="admin-app admin-app--courier">'
           + '<div class="admin-app__head"><strong>' + escapeHTML(a.name || 'Livreur') + '</strong>'
           + '<span class="admin-app__tier">' + escapeHTML(veh) + ' · ' + escapeHTML(st) + '</span></div>'
+          // Dossier déposé SANS pièces (dérogation de test) : l'admin doit le
+          // savoir AVANT de valider. Une exception silencieuse est dangereuse.
+          + (a.piecesBypass
+            ? '<div class="admin-app__line"><strong>🧪 Dossier de TEST — dispensé de pièces</strong> ('
+              + escapeHTML(String((a.piecesManquantes || []).length)) + ' manquante(s)). '
+              + 'Ne valide que si tu sais exactement pourquoi.</div>' : '')
           + '<div class="admin-app__line"><span>Contact</span> <a href="mailto:' + encodeURIComponent(a.email || '') + '">' + escapeHTML(a.email || '') + '</a>' + (a.phone ? ' · ' + escapeHTML(a.phone) : '') + '</div>'
           + piecesHtml
           + '<div class="admin-app__foot">' + escapeHTML(when) + '</div>'

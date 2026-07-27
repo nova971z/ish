@@ -32,6 +32,31 @@ const BAREME = [                                  // = LV_BAREME client (source 
 ];
 const TEST_EMAILS = ['justforwada@icloud.com'];   // comptes de test (user)
 
+// ── DÉROGATION AUX PIÈCES JUSTIFICATIVES — strictement nominative ───────────
+// Demande de l'user (27/07/2026) : pouvoir dérouler TOUTE la chaîne livreur
+// (dépôt du dossier → validation admin → courses) sans posséder un vrai avis
+// SIRET, une RC Pro ni une carte grise. La dérogation porte UNIQUEMENT sur les
+// PIÈCES, uniquement pour les comptes listés ici, et sur rien d'autre :
+// l'âge de 18 ans, le véhicule, la cylindrée, les consentements et surtout la
+// VALIDATION PAR L'ADMIN restent exigés, pour lui comme pour tout le monde.
+// Liste séparée de TEST_EMAILS À DESSEIN : le jour où l'un des deux usages
+// disparaît, l'autre ne suit pas en silence.
+const PIECES_BYPASS_EMAILS = ['justforwada@icloud.com'];
+
+// Pièces exigées selon le véhicule — SOURCE DE VÉRITÉ SERVEUR.
+// ⚠️ Avant le 27/07/2026 cette exigence n'existait QUE dans le navigateur
+// (app.js) : elle se contournait donc entièrement. Elle est désormais
+// appliquée ici, où le client ne peut rien changer.
+const PIECES_BASE = ['id', 'siret', 'rcpro', 'rib'];
+const PIECES_EXTRA = {
+  vae: [],
+  trottinette: ['rc'],
+  scooter: ['permis', 'cg', 'assveh', 'assmarch', 'capacite', 'registre']
+};
+function piecesRequises(vehicle) {
+  return PIECES_BASE.concat(PIECES_EXTRA[vehicle] || []);
+}
+
 function haversineKm(a, b) {
   const R = 6371, dLat = (b.lat - a.lat) * Math.PI / 180, dLng = (b.lng - a.lng) * Math.PI / 180;
   const s = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * Math.PI / 180) * Math.cos(b.lat * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
@@ -331,7 +356,7 @@ async function confirmToClient(course, id) {
 }
 
 module.exports = {
-  DEPOT, BAREME, TEST_EMAILS, TARIF_MIN, TARIF_MAX,
+  DEPOT, BAREME, TEST_EMAILS, PIECES_BYPASS_EMAILS, piecesRequises, TARIF_MIN, TARIF_MAX,
   haversineKm, quote, buildRequest, createFromIntent,
   alertNewCourse, alertCourseAgain, alertCourierApplication, confirmToClient, sendMail, escapeHtml,
   defaultTarifs, sanitizeTarifs, mirrorCourierPublic,

@@ -479,9 +479,17 @@ async function handleCourses(req, body, cfg, res) {
     return res.status(503).json({ ok: false, error: 'Service momentanément indisponible. Réessaie dans un instant.' });
   }
   const isTester = COURSE_TEST_EMAILS.includes(email);
-  // Livreur ACCEPTÉ = dossier validé par l'admin (couriers/{uid}.kycStatus)
-  let isCourier = isTester;
-  if (!isCourier) {
+  // ⚖️ ÊTRE LIVREUR SE MÉRITE, MÊME POUR LE COMPTE DE TEST.
+  // Jusqu'au 27/07/2026, `isCourier = isTester` : le compte de l'user était
+  // livreur d'office, sans dossier ni validation. Impossible, dans ces
+  // conditions, de dérouler la vraie chaîne (inscription → dossier → validation
+  // admin → courses) ni de voir ce qui s'y casse. À sa demande, cette
+  // dérogation est SUPPRIMÉE : la seule porte d'entrée est désormais
+  // couriers/{uid}.kycStatus === 'valide', posé par l'admin, pour TOUS.
+  // (Le compte de test garde son accès CLIENT au service en avant-première —
+  // c'est `isTester`, plus bas, qui autorise à déposer une demande de course.)
+  let isCourier = false;
+  {
     try {
       const cd = await db.collection('couriers').doc(uid).get();
       isCourier = cd.exists && cd.data().kycStatus === 'valide';
@@ -562,6 +570,22 @@ async function handleCourses(req, body, cfg, res) {
       });
     }
 
+    // ── PIÈCES OBLIGATOIRES ───────────────────────────────────────────────
+    // Cette exigence n'existait QUE dans le navigateur : elle se contournait
+    // donc entièrement. Elle est appliquée ici, où le client ne peut rien
+    // changer. Seule exception : les comptes de PIECES_BYPASS_EMAILS, pour
+    // permettre de dérouler la chaîne complète en test (demande de l'user du
+    // 27/07/2026). La dérogation est TRACÉE dans le dossier — l'admin voit
+    // noir sur blanc qu'il valide un dossier sans pièces.
+    const bypassPieces = coursesLib.PIECES_BYPASS_EMAILS.includes(email);
+    const manquantes = coursesLib.piecesRequises(vehicle).filter((k) => !pieces[k]);
+    if (manquantes.length && !bypassPieces) {
+      return res.status(400).json({
+        ok: false,
+        error: 'Il manque ' + manquantes.length + ' pièce(s) justificative(s) pour ce véhicule.'
+      });
+    }
+
     // Un dossier DÉJÀ VALIDÉ ne doit pas être renvoyé au statut « en attente »
     // par un nouvel envoi : ce serait une régression de droits silencieuse.
     const dejaValide = (await db.collection('couriers').doc(uid).get()
@@ -570,6 +594,10 @@ async function handleCourses(req, body, cfg, res) {
     await db.collection('courier_applications').doc(uid).set({
       uid, name: nom, email: mail, phone: tel, vehicle, cylindree,
       birth: naissance, age, pieces,
+      // Trace de la dérogation : l'admin doit SAVOIR qu'il valide un dossier
+      // incomplet. Une exception silencieuse est une exception dangereuse.
+      piecesBypass: bypassPieces && manquantes.length > 0,
+      piecesManquantes: bypassPieces ? manquantes : [],
       consent: true, filmConsent: true,
       status: dejaValide ? 'valide' : 'en_attente',
       createdAt: new Date()
