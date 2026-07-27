@@ -5614,11 +5614,122 @@
       + '</div></div>';
   }
 
+  // ── Accès UNIQUE à la liste des courses ───────────────────────────────────
+  // 🐛 PANNE VÉCUE (27/07/2026) : « ma commande a disparu des deux côtés ».
+  // Les deux écrans appelaient course-list sans JAMAIS regarder le code HTTP :
+  // un 429 (quota épuisé) ou un 503 se retrouvait affiché comme un état normal,
+  // et l'utilisateur en concluait que sa commande était effacée. Une donnée
+  // absente et une donnée qu'on n'a pas pu lire, ce n'est PAS la même chose, et
+  // l'écran doit le dire.
+  // Renvoie toujours { ok, status, data, erreur } — jamais d'exception.
+  function lvFetchCourses() {
+    var st = 0;
+    return jsonAuthHeaders().then(function (headers) {
+      return fetch(apiBaseUrl() + '/api/contact', {
+        method: 'POST', headers: headers, body: JSON.stringify({ type: 'course-list' })
+      });
+    }).then(function (r) {
+      st = r.status;
+      return r.text();                                  // texte d'abord : une
+    }).then(function (txt) {                            // passerelle peut renvoyer du HTML
+      var d = null;
+      try { d = JSON.parse(txt); } catch (_) {}
+      if (st === 200 && d && d.ok) return { ok: true, status: st, data: d };
+      return { ok: false, status: st, data: d, erreur: lvErrTxt(st, d) };
+    }).catch(function () {
+      return { ok: false, status: st, data: null, erreur: lvErrTxt(0, null) };
+    });
+  }
+  // Message NON technique, qui dit ce qui se passe ET ce qu'il faut faire.
+  function lvErrTxt(status, d) {
+    if (status === 429) return 'Trop de requêtes en peu de temps. Patiente une minute puis touche « Réessayer » — rien n\'est perdu.';
+    if (status === 401) return 'Ta session a expiré. Reconnecte-toi, tes commandes sont toujours là.';
+    if (status === 503) return 'Le service est momentanément indisponible. Réessaie dans un instant — rien n\'est perdu.';
+    if (status === 0) return 'Connexion au serveur impossible. Vérifie ton réseau puis réessaie — rien n\'est perdu.';
+    return (d && d.error) ? String(d.error) : ('Erreur technique (code ' + status + '). Réessaie — rien n\'est perdu.');
+  }
+  // Écrit le bloc d'erreur DANS un conteneur et câble son bouton « Réessayer ».
+  // Volontairement SANS identifiant global : un id fabriqué par concaténation
+  // est invisible pour les contrôles statiques et peut entrer en collision. On
+  // retrouve le bouton dans le conteneur qu'on vient d'écrire.
+  function lvRenderErr(el, msg, onRetry) {
+    if (!el) return;
+    el.innerHTML = '<div class="lv-banner">⚠️ ' + escapeHTML(msg)
+      + '<br><button type="button" class="btn primary lv-retry" style="margin-top:.6rem">Réessayer</button></div>';
+    var b = el.querySelector('.lv-retry');
+    if (b) b.onclick = function () { b.disabled = true; onRetry(); };
+  }
+
+  // Rappelle SOUS QUEL COMPTE on regarde : si une commande a été passée depuis
+  // un autre compte, ça se voit tout de suite au lieu de ressembler à une perte.
+  function lvQuiTxt() {
+    var e = _currentUser && _currentUser.email;
+    return e ? ' (<strong>' + escapeHTML(e) + '</strong>)' : '';
+  }
+
+  // Carte Leaflet des courses — SOURCE UNIQUE. Le même code était écrit deux
+  // fois (espace livreur et « Mes livraisons ») : deux copies à maintenir, deux
+  // occasions de diverger. `avecDepot` est la seule différence réelle.
+  // Renvoie une promesse qui vaut la carte, ou null si Leaflet n'a pas chargé.
+  function lvBuildCourseMap(mapEl, isleCode, avecDepot) {
+    return ensureLeaflet().then(function () {
+      var map = mapEl._ptMap;
+      if (!map) {
+        mapEl.innerHTML = '';
+        map = window.L.map(mapEl, { scrollWheelZoom: false });
+        window.L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>'
+        }).addTo(map);
+        if (avecDepot) window.L.marker([LV_DEPOT.lat, LV_DEPOT.lng]).addTo(map).bindPopup('Dépôt — Sainte-Anne');
+        mapEl._ptMap = map;
+      }
+      if (mapEl._ptLayer) map.removeLayer(mapEl._ptLayer);
+      mapEl._ptLayer = window.L.layerGroup().addTo(map);
+      var cadre = function () { map.fitBounds(ISLAND_BOUNDS[isleCode] || ISLAND_BOUNDS['971'], { padding: [8, 8] }); };
+      cadre();
+      setTimeout(function () { map.invalidateSize(); cadre(); }, 80);
+      return map;
+    }).catch(function () { return null; });
+  }
+
+  // Garde de l'espace livreur.
+  // 🐛 DEUX PANNES VÉCUES ICI (27/07/2026) :
+  //  (a) un verdict INDÉTERMINÉ (429, 401, réseau) était traité comme « pas
+  //      livreur » → le livreur était éjecté de son propre espace ;
+  //  (b) la redirection utilisait « location.hash = … », qui EMPILE une entrée
+  //      d'historique. Le bouton Retour renvoyait donc sur #/mode-livraison,
+  //      qui redirigeait de nouveau, qui empilait de nouveau… : impossible de
+  //      sortir de « Mes livraisons ». On utilise location.replace, qui
+  //      REMPLACE l'entrée courante — le Retour ramène à la page d'avant.
+  // Routes qui exigent d'être connecté (garde unique dans onRouteChange).
+  var ROUTES_CONNECTE = ['/compte', '/mode-livraison', '/mes-livraisons'];
+  function lvRedirect(hash) {
+    try { location.replace(location.pathname + location.search + hash); }
+    catch (_) { location.hash = hash; }
+  }
   function renderCourierSpace() {
     lvGetRole().then(function (isC) {
-      if (!isC) { location.hash = '#/mes-livraisons'; return; }
-      renderCourierSpaceInner();
+      if (isC === true) { renderCourierSpaceInner(); return; }
+      if (isC === false) { lvRedirect('#/mes-livraisons'); return; }
+      // isC === null : on NE SAIT PAS. On n'éjecte pas — on le dit, et on
+      // laisse réessayer. Éjecter ici, c'est punir l'utilisateur d'un incident
+      // qui ne le concerne pas.
+      lvShowRoleUnknown();
     });
+  }
+  // Écran « verdict indisponible » : explicite, avec un bouton pour réessayer.
+  // Aucun écran vide, aucun message qui laisse croire à un refus.
+  function lvShowRoleUnknown() {
+    // On écrit dans le bandeau de la vue : le reste de l'espace garde sa
+    // structure (rien n'est détruit), et le message est le premier élément vu.
+    var host = document.getElementById('courierBanner');
+    if (!host) { lvRedirect('#/mes-livraisons'); return; }
+    host.innerHTML = '<div class="lv-banner">⚠️ <strong>Vérification de ton accès livreur impossible</strong> '
+      + 'pour le moment (réseau, ou trop de requêtes en peu de temps). '
+      + 'Ton espace n\'est pas perdu — réessaie. '
+      + '<button type="button" class="btn primary" id="lvRoleRetry" style="margin-top:.6rem">Réessayer</button></div>';
+    var b = document.getElementById('lvRoleRetry');
+    if (b) b.onclick = function () { b.disabled = true; lvResetRole(); renderCourierSpace(); };
   }
   // ── Panneau TARIFS + DISPONIBILITÉ (en tête de l'espace livreur) ──────────
   // Grande carte des zones sur toute la largeur : le livreur y inscrit SES
@@ -5782,23 +5893,7 @@
     var isleCode = ISLAND_MAP[_currentTerritory] ? _currentTerritory : '971';
     var mapEl = document.getElementById('courierMap');
     var markers = {};
-    var mapReady = ensureLeaflet().then(function () {
-      var map = mapEl._ptMap;
-      if (!map) {
-        mapEl.innerHTML = '';
-        map = window.L.map(mapEl, { scrollWheelZoom: false });
-        window.L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>'
-        }).addTo(map);
-        window.L.marker([LV_DEPOT.lat, LV_DEPOT.lng]).addTo(map).bindPopup('Dépôt — Sainte-Anne');
-        mapEl._ptMap = map;
-      }
-      if (mapEl._ptLayer) { map.removeLayer(mapEl._ptLayer); }
-      mapEl._ptLayer = window.L.layerGroup().addTo(map);
-      map.fitBounds(ISLAND_BOUNDS[isleCode] || ISLAND_BOUNDS['971'], { padding: [8, 8] });
-      setTimeout(function () { map.invalidateSize(); map.fitBounds(ISLAND_BOUNDS[isleCode] || ISLAND_BOUNDS['971'], { padding: [8, 8] }); }, 80);
-      return map;
-    }).catch(function () { return null; });
+    var mapReady = lvBuildCourseMap(mapEl, isleCode, true);
 
     var ZCOLOR = ['#34d399', '#60a5fa', '#facc15', '#f87171'];
     function whenTxt(c) {
@@ -5966,18 +6061,17 @@
         + '</button>';
     }
 
-    jsonAuthHeaders().then(function (headers) {
-      return fetch(apiBaseUrl() + '/api/contact', { method: 'POST', headers: headers, body: JSON.stringify({ type: 'course-list' }) });
-    }).then(function (r) { return r.json(); }).then(function (d) {
-      return tarifsReady.then(function () { return d; });
-    }).then(function (d) {
+    lvFetchCourses().then(function (res) {
+      return tarifsReady.then(function () { return res; });
+    }).then(function (res) {
       var dispoEl = document.getElementById('courierDispo');
       var mineEl = document.getElementById('courierMine');
-      if (!d.ok) {
-        if (dispoEl) dispoEl.innerHTML = '<p class="lv-hint">Erreur : ' + escapeHTML(d.error || '?') + '</p>';
-        if (mineEl) mineEl.innerHTML = '';
+      if (!res.ok) {                       // ÉCHEC ≠ VIDE : on le dit.
+        lvRenderErr(dispoEl, res.erreur, renderCourierSpaceInner);
+        if (mineEl) mineEl.innerHTML = '<p class="lv-hint">Liste indisponible — rien n\'est perdu.</p>';
         return;
       }
+      var d = res.data;
       var canAccept = !!d.courier;
       var byId = {};
       (d.dispo || []).concat(d.mine || []).forEach(function (c) { byId[c.id] = c; });
@@ -6046,22 +6140,7 @@
     var isleCode = ISLAND_MAP[_currentTerritory] ? _currentTerritory : '971';
     var mapEl = document.getElementById('clientDelivMap');
     var markers = {};
-    var mapReady = ensureLeaflet().then(function () {
-      var map = mapEl._ptMap;
-      if (!map) {
-        mapEl.innerHTML = '';
-        map = window.L.map(mapEl, { scrollWheelZoom: false });
-        window.L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>'
-        }).addTo(map);
-        mapEl._ptMap = map;
-      }
-      if (mapEl._ptLayer) map.removeLayer(mapEl._ptLayer);
-      mapEl._ptLayer = window.L.layerGroup().addTo(map);
-      map.fitBounds(ISLAND_BOUNDS[isleCode] || ISLAND_BOUNDS['971'], { padding: [8, 8] });
-      setTimeout(function () { map.invalidateSize(); map.fitBounds(ISLAND_BOUNDS[isleCode] || ISLAND_BOUNDS['971'], { padding: [8, 8] }); }, 80);
-      return map;
-    }).catch(function () { return null; });
+    var mapReady = lvBuildCourseMap(mapEl, isleCode, false);
 
     var ZCOLOR = ['#34d399', '#60a5fa', '#facc15', '#f87171'];
     function whenTxt(c) {
@@ -6269,15 +6348,20 @@
       det.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
-    jsonAuthHeaders().then(function (headers) {
-      return fetch(apiBaseUrl() + '/api/contact', { method: 'POST', headers: headers, body: JSON.stringify({ type: 'course-list' }) });
-    }).then(function (r) { return r.json(); }).then(function (d) {
+    lvFetchCourses().then(function (res) {
       var listEl = document.getElementById('clientDelivList');
       if (!listEl) return;
-      if (!d.ok) { listEl.innerHTML = '<p class="lv-hint">Erreur : ' + escapeHTML(d.error || '?') + '</p>'; return; }
+      // ⚠️ NE JAMAIS écrire « aucune livraison » quand on n'a PAS PU LIRE :
+      // c'est exactement ce qui a fait croire à une commande effacée.
+      if (!res.ok) { lvRenderErr(listEl, res.erreur, renderClientDeliveries); return; }
+      var d = res.data;
       var mine = (d.mine || []).filter(function (c) { return c.mine; });
       if (!mine.length) {
-        listEl.innerHTML = '<p class="lv-hint">Aucune livraison pour l\'instant. Commande ta quincaillerie et fais-toi livrer sur ton chantier — depuis une fiche produit ou la page <a href="#/livraison">Livraison quincaillerie</a>.</p>';
+        // Vraie liste vide. On rappelle SOUS QUEL COMPTE on regarde : si une
+        // commande a été passée depuis un autre compte, ça se voit tout de
+        // suite au lieu de ressembler à une perte de données.
+        listEl.innerHTML = '<p class="lv-hint">Aucune livraison sur ce compte' + lvQuiTxt() + '. '
+          + 'Commande ta quincaillerie et fais-toi livrer sur ton chantier — depuis une fiche produit ou la page <a href="#/livraison">Livraison quincaillerie</a>.</p>';
         return;
       }
       var byId = {};
@@ -6324,8 +6408,10 @@
         });
       });
     }).catch(function () {
-      var listEl = document.getElementById('clientDelivList');
-      if (listEl) listEl.innerHTML = '<p class="lv-hint">Erreur réseau.</p>';
+      // Ici on n'échoue plus sur la REQUÊTE (lvFetchCourses ne rejette jamais)
+      // mais sur le RENDU. On le dit aussi, plutôt que d'afficher un vide.
+      lvRenderErr(document.getElementById('clientDelivList'),
+        'Affichage impossible. Réessaie — rien n\'est perdu.', renderClientDeliveries);
     });
   }
 
@@ -6711,10 +6797,9 @@
     // #/compte est renvoyé vers #/auth puis ramené (double navigation/flicker).
     // renderAccount() no-op tant que _currentUser est null ; onAuthStateChanged
     // relance onRouteChange dès que l'auth est prête.
-    if (route === '/compte' && _authReady && !_currentUser) { location.hash = '#/auth'; return; }
-    if (route === '/mode-livraison' && _authReady && !_currentUser) { location.hash = '#/auth'; return; }
-    if (route === '/mes-livraisons' && _authReady && !_currentUser) { location.hash = '#/auth'; return; }
-    if (route === '/auth' && _authReady && _currentUser) { location.hash = '#/compte'; return; }
+    // lvRedirect, JAMAIS « location.hash = » (piège du bouton Retour, cf. lvRedirect).
+    if (_authReady && !_currentUser && ROUTES_CONNECTE.indexOf(route) !== -1) { lvRedirect('#/auth'); return; }
+    if (route === '/auth' && _authReady && _currentUser) { lvRedirect('#/compte'); return; }
 
     // Cleanup PDP animation loop when leaving product page
     if (route !== '/produit') {

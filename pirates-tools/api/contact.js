@@ -424,17 +424,60 @@ function partnerApplicationEmail(a, stored) {
 // (source UNIQUE partagée avec create-payment-intent.js et webhook.js).
 const COURSE_TEST_EMAILS = coursesLib.TEST_EMAILS;
 
-async function handleCourses(req, body, cfg, res) {
-  const rlOk = await rl.allow('courses', rl.clientIp(req), 30, 3600);
-  if (!rlOk) return res.status(429).json({ ok: false, error: 'Trop de requêtes. Réessaie plus tard.' });
+// Opérations de LECTURE seule : elles ne changent rien, elles sont appelées à
+// chaque affichage de page, et elles doivent donc avoir leur propre quota,
+// bien plus large que celui des opérations qui écrivent.
+const COURSE_READS = new Set([
+  'course-list', 'courier-status', 'courier-profile', 'course-proof'
+]);
 
+async function handleCourses(req, body, cfg, res) {
   const uid = await verifyUid(req);
   if (!uid) return res.status(401).json({ ok: false, error: 'Connexion requise.' });
+
+  // ── LIMITEUR DE DÉBIT ─────────────────────────────────────────────────────
+  // 🐛 PANNE VÉCUE (27/07/2026) : un seul seau « courses » de 30 requêtes/heure
+  // par ADRESSE IP couvrait les 22 opérations. Or un simple affichage de page
+  // en coûte 2 à 3 (courier-status + courier-profile + course-list). En
+  // navigation privée, rien n'est mis en cache : le quota tombait en une
+  // dizaine de visites, puis le serveur répondait 429 à TOUT. Le client
+  // prenait ce refus pour une réponse : « pas livreur » (bouton disparu,
+  // éjection de l'espace livreur) et « aucune course » (la commande semblait
+  // effacée des deux côtés). La fenêtre étant FIXE, tout revenait au changement
+  // d'heure — d'où l'intermittence.
+  // 🌐 DÉFAUT DE PRODUCTION, en plus : derrière un opérateur mobile, des
+  // CENTAINES de clients partagent une même IP publique. Un seul utilisateur
+  // actif aurait bloqué tous les autres.
+  // Conception retenue :
+  //   • la clé est le COMPTE (uid vérifié), pas l'IP — chacun son quota ;
+  //   • lectures et écritures dans des seaux SÉPARÉS ;
+  //   • un garde-fou par IP reste, mais assez haut pour ne jamais gêner un
+  //     usage réel (il ne sert qu'à arrêter un abus massif).
+  const estLecture = COURSE_READS.has(body.type);
+  const quotaOk = await rl.allow(
+    estLecture ? 'courses-lecture' : 'courses-ecriture',
+    uid, estLecture ? 400 : 120, 3600
+  );
+  if (!quotaOk) {
+    return res.status(429).json({ ok: false, error: 'Trop de requêtes. Réessaie dans quelques minutes.' });
+  }
+  if (!(await rl.allow('courses-ip', rl.clientIp(req), 2000, 3600))) {
+    return res.status(429).json({ ok: false, error: 'Trop de requêtes. Réessaie dans quelques minutes.' });
+  }
+
   const { admin, db } = getFirebase();
   if (!db) return res.status(503).json({ ok: false, error: 'Base non configurée.' });
 
+  // ⚠️ L'identité NE DOIT PAS échouer en silence. Avant, un incident réseau sur
+  // getUser() laissait `email` vide → isTester faux → isCourier faux : le
+  // livreur devenait un inconnu, sans qu'aucune erreur ne le dise. On répond
+  // désormais 503 : le client sait que c'est une panne, pas un refus.
   let email = '';
-  try { email = String((await admin.auth().getUser(uid)).email || '').toLowerCase(); } catch (_) {}
+  try {
+    email = String((await admin.auth().getUser(uid)).email || '').toLowerCase();
+  } catch (e) {
+    return res.status(503).json({ ok: false, error: 'Service momentanément indisponible. Réessaie dans un instant.' });
+  }
   const isTester = COURSE_TEST_EMAILS.includes(email);
   // Livreur ACCEPTÉ = dossier validé par l'admin (couriers/{uid}.kycStatus)
   let isCourier = isTester;
@@ -442,7 +485,10 @@ async function handleCourses(req, body, cfg, res) {
     try {
       const cd = await db.collection('couriers').doc(uid).get();
       isCourier = cd.exists && cd.data().kycStatus === 'valide';
-    } catch (_) {}
+    } catch (e) {
+      // Même principe : « je n'ai pas pu lire » ≠ « ce n'est pas un livreur ».
+      return res.status(503).json({ ok: false, error: 'Service momentanément indisponible. Réessaie dans un instant.' });
+    }
   }
 
   // ── Statut de rôle (léger — pilote le bouton du compte) ──
