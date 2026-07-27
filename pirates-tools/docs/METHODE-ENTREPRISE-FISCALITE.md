@@ -300,6 +300,73 @@ de quatre roues, quel que soit leur tonnage, doivent être inscrites au registre
 « les cycles à pédalage assisté ne sont pas considérés comme des véhicules
 motorisés »)
 
+### 🚗 « COMMENT FAIT UBER ? » — la prémisse est FAUSSE (vérifié 27/07/2026)
+Question user : « Uber ne paye pas les cotisations de ses livreurs, il ne rentre
+pas sous la forme juridique sous laquelle je ne veux pas rentrer ».
+**Réponse factuelle : Uber Eats EST DEDANS.** Il faut distinguer DEUX choses que
+la question mélange :
+
+| | Ce que c'est | Uber le paie ? |
+|---|---|---|
+| **Cotisations patronales** (URSSAF, ~40-45 % du salaire) | Le SALARIAT. Suppose un contrat de travail. | **NON** — les livreurs sont des indépendants qui cotisent eux-mêmes sur leur CA. |
+| **Responsabilité sociale des plateformes (L7342)** | Assurance AT-MP + formation professionnelle + droits collectifs. **Ne fait PAS de la plateforme un employeur.** | **OUI** — Uber Eats et Deliveroo y sont soumis et le disent publiquement. |
+
+Preuve : Deliveroo écrit à ses livreurs « en application des dispositions sur la
+**responsabilité sociale des plateformes**, Deliveroo peut contribuer, sous
+certaines conditions, à la prise en charge de votre **assurance accident du
+travail** ainsi qu'à votre **formation professionnelle** ».
+
+👉 Uber n'échappe donc PAS à L7342 : il échappe au **salariat**, ce qui est un
+tout autre sujet — et il y échappe mal (Cass. soc. 4 mars 2020 : requalification
+d'un chauffeur Uber en salarié). **On ne peut pas « copier Uber » pour sortir de
+L7342.** La seule sortie reste celle du § LA PARADE ci-dessus : casser UNE des
+deux conditions cumulatives (le prix).
+
+#### 💶 Ce que L7342 coûterait RÉELLEMENT à Pirates Tools (chiffré)
+Beaucoup plus léger que ce que l'user croit :
+- **Seuil de déclenchement — art. D7342-1** : la plateforme ne prend en charge la
+  cotisation AT-MP (L7342-2) ET la contribution formation (L7342-3) que si le
+  livreur a réalisé **sur CETTE plateforme**, dans l'année civile, un chiffre
+  d'affaires **≥ 13 % du PASS**. PASS 2026 = **48 060 €** → seuil =
+  **6 247,80 € de courses par livreur et par an**.
+  ⚠️ En dessous : **la plateforme ne doit RIEN**. Avec le barème actuel
+  (22-100 €/course), un livreur doit dépasser ~60 à 280 courses/an chez nous pour
+  déclencher quoi que ce soit. Au démarrage, le coût est très probablement **0 €**.
+- **Plafond du remboursement — art. D7342-2** : plafonné à la cotisation de
+  l'**assurance volontaire AT-MP** (art. L743-1 CSS) calculée sur le **salaire
+  minimum des rentes** (art. L434-16 CSS) = **21 498,47 €** depuis le 01/04/2026,
+  au taux de la profession **diminué de 45 %**. Ordre de grandeur : quelques
+  centaines d'euros par an et par livreur concerné (le taux exact dépend du code
+  risque retenu par la CARSAT → à confirmer au moment venu, ne PAS avancer un
+  chiffre ferme).
+- **Formation professionnelle** : contribution de l'art. L6331-48 (CFP du
+  travailleur indépendant), même seuil de 13 % du PASS.
+- **Droits collectifs** (refus sans sanction, syndicalisation, ARPE) : coût 0 €,
+  mais impose que le CODE ne pénalise jamais un refus.
+
+#### 🔴 LE VRAI RISQUE N'EST PAS L7342 — c'est la directive (UE) 2024/2831
+Adoptée le 14/10/2024, **à transposer avant le 2 décembre 2026** (donc
+imminent) : elle instaure une **présomption de salariat** dès lors que des
+critères de contrôle sont réunis — et parmi ces critères figure explicitement
+**la fixation unilatérale du prix par la plateforme**. C'est la plateforme qui
+doit prouver le contraire.
+👉 Conclusion opérationnelle : la parade « le prix appartient au livreur » ne
+sert pas seulement à sortir de L7342, elle **retire aussi le critère le plus
+lourd de la future présomption de salariat**. Et symétriquement, la fourchette
+imposée (déjà écartée) serait le pire choix possible à 4 mois de la transposition.
+
+Sources : Légifrance art. L7342-2
+https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000039784485
+· art. D7342-1 / D7342-2 (seuil 13 % du PASS + plafond)
+https://code.travail.gouv.fr/code-du-travail/d7342-2
+· PASS 2026 = 48 060 € (arrêté publié au JO du 22/12/2025)
+https://bpifrance-creation.fr/entrepreneur/actualites/plafonds-securite-sociale-2026
+· Assurance volontaire AT-MP indépendants (base mini 21 498,47 € au 01/04/2026,
+taux profession −45 %) https://www.ameli.fr/assure/droits-demarches/maladie-accident-hospitalisation/assurance-volontaire-individuelle-mp-independant
+· Deliveroo — responsabilité sociale des plateformes https://riders.deliveroo.fr
+· Directive (UE) 2024/2831, transposition avant le 02/12/2026
+https://questions.assemblee-nationale.fr/q17/17-14781QE.htm
+
 ---
 
 ## 5 ter. VENTE À DISTANCE — obligations du tunnel de paiement
