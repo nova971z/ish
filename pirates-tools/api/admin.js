@@ -370,11 +370,38 @@ module.exports = async function handler(req, res) {
           applications.push({
             uid: doc.id,
             name: d.name || '', email: d.email || '', phone: d.phone || '',
-            vehicle: d.vehicle || '', status: d.status || 'en_attente',
+            vehicle: d.vehicle || '', cylindree: d.cylindree || '',
+            status: d.status || 'en_attente',
             pieces: d.pieces || {},
+            // Dérogation aux pièces (comptes de test) : l'admin doit la voir.
+            piecesBypass: !!d.piecesBypass,
+            piecesManquantes: Array.isArray(d.piecesManquantes) ? d.piecesManquantes : [],
             createdAt: d.createdAt && d.createdAt.toMillis ? d.createdAt.toMillis() : null
           });
         });
+        // Un dossier VALIDÉ n'est plus une candidature : c'est un livreur. On
+        // joint sa fiche publique (photo, commune, véhicule, tarifs, courses,
+        // note) pour que l'administration affiche sa CARTE et non un formulaire
+        // de validation déjà traité.
+        const valides = applications.filter((a) => a.status === 'valide');
+        if (valides.length) {
+          const fiches = await Promise.all(valides.map((a) =>
+            db.collection('couriers_public').doc(a.uid).get()
+              .then((s) => (s.exists ? s.data() : null)).catch(() => null)));
+          valides.forEach((a, i) => {
+            const f = fiches[i];
+            a.profile = f ? {
+              uid: a.uid,
+              displayName: f.displayName || a.name || '',
+              photo: f.photo || '', commune: f.commune || '',
+              vehicle: f.vehicle || a.vehicle || '', bio: f.bio || '',
+              tarifs: f.tarifs || null, available: !!f.available,
+              published: !!f.published,
+              coursesDone: f.coursesDone || 0,
+              ratingCount: f.ratingCount || 0, ratingSum: f.ratingSum || 0
+            } : null;   // null = validé mais fiche pas encore remplie
+          });
+        }
         return res.status(200).json({ ok: true, applications });
       }
 

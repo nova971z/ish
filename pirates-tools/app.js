@@ -11482,40 +11482,121 @@
     el.innerHTML = '<p class="admin-loading">Chargement…</p>';
     adminGet('courier-applications').then(function (data) {
       var list = data.applications || [];
-      if (!list.length) { el.innerHTML = '<p class="admin-hint">Aucun dossier livreur pour l\'instant (service inactif).</p>'; return; }
-      el.innerHTML = list.map(function (a) {
-        var veh = LV_VEHICLES[a.vehicle] ? (LV_VEHICLES[a.vehicle].emoji + ' ' + LV_VEHICLES[a.vehicle].label) : (a.vehicle || '—');
-        var pieces = LV_PIECES_BASE.concat(LV_PIECES_EXTRA[a.vehicle] || []);
-        var piecesHtml = pieces.map(function (p) {
-          var f = a.pieces && a.pieces[p.id];
-          return '<div class="admin-app__line"><span>' + escapeHTML(p.t) + '</span> '
-            + (f ? '<a href="' + escapeHTML(f.url || '#') + '" target="_blank" rel="noopener noreferrer">Voir la pièce ↗</a>' : '<em>manquante</em>') + '</div>';
-        }).join('');
-        var st = a.status || 'en_attente';
-        var when = a.createdAt ? new Date(a.createdAt).toLocaleString('fr-FR') : '—';
-        return '<div class="admin-app admin-app--courier">'
-          + '<div class="admin-app__head"><strong>' + escapeHTML(a.name || 'Livreur') + '</strong>'
-          + '<span class="admin-app__tier">' + escapeHTML(veh) + ' · ' + escapeHTML(st) + '</span></div>'
-          // Dossier déposé SANS pièces (dérogation de test) : l'admin doit le
-          // savoir AVANT de valider. Une exception silencieuse est dangereuse.
-          + (a.piecesBypass
-            ? '<div class="admin-app__line"><strong>🧪 Dossier de TEST — dispensé de pièces</strong> ('
-              + escapeHTML(String((a.piecesManquantes || []).length)) + ' manquante(s)). '
-              + 'Ne valide que si tu sais exactement pourquoi.</div>' : '')
-          + '<div class="admin-app__line"><span>Contact</span> <a href="mailto:' + encodeURIComponent(a.email || '') + '">' + escapeHTML(a.email || '') + '</a>' + (a.phone ? ' · ' + escapeHTML(a.phone) : '') + '</div>'
-          + piecesHtml
-          + '<div class="admin-app__foot">' + escapeHTML(when) + '</div>'
-          + '<div class="admin-app__actions">'
-          + '<button type="button" class="btn primary" data-courier-ok="' + escapeHTML(a.uid || '') + '">✅ Valider</button>'
-          + '<button type="button" class="btn" data-courier-ko="' + escapeHTML(a.uid || '') + '">❌ Refuser</button>'
-          + '</div></div>';
-      }).join('');
+      if (!list.length) { el.innerHTML = '<p class="admin-hint">Aucun dossier livreur pour l\'instant.</p>'; return; }
+      // 🐛 DÉFAUT SIGNALÉ (27/07/2026) : un dossier VALIDÉ continuait de
+      // s'afficher comme une candidature à traiter, avec ses pièces
+      // « manquante » et son bouton « Valider ». Une fois validé, ce n'est plus
+      // un dossier : c'est un LIVREUR. On sépare donc franchement les états.
+      var attente = list.filter(function (a) { return (a.status || 'en_attente') === 'en_attente'; });
+      var valides = list.filter(function (a) { return a.status === 'valide'; });
+      var refuses = list.filter(function (a) { return a.status === 'refuse'; });
+      el.innerHTML =
+          adminCourierSection('📥 À traiter', attente, adminCourierDossierHTML,
+            'Aucun dossier en attente.')
+        + adminCourierSection('🛵 Livreurs actifs', valides, adminCourierFicheHTML,
+            'Aucun livreur validé pour l\'instant.')
+        + (refuses.length
+            ? adminCourierSection('🚫 Refusés', refuses, adminCourierDossierHTML, '')
+            : '');
       el.querySelectorAll('[data-courier-ok]').forEach(function (b) { b.onclick = function () { reviewCourier(b.getAttribute('data-courier-ok'), 'valide'); }; });
       el.querySelectorAll('[data-courier-ko]').forEach(function (b) { b.onclick = function () { reviewCourier(b.getAttribute('data-courier-ko'), 'refuse'); }; });
     }).catch(function (e) {
       el.innerHTML = '<p class="admin-error">Erreur : ' + escapeHTML(e.message) + '</p>';
     });
   }
+  // Un bloc titré + ses cartes (ou un message si la liste est vide).
+  function adminCourierSection(titre, liste, carte, vide) {
+    if (!liste.length && !vide) return '';
+    return '<h3 class="admin-subtitle">' + titre + ' <span class="admin-hint">(' + liste.length + ')</span></h3>'
+      + (liste.length ? liste.map(carte).join('') : '<p class="admin-hint">' + vide + '</p>');
+  }
+
+  // DOSSIER à traiter (ou refusé) : les pièces, le contact, et les décisions.
+  function adminCourierDossierHTML(a) {
+    var veh = LV_VEHICLES[a.vehicle] ? (LV_VEHICLES[a.vehicle].emoji + ' ' + LV_VEHICLES[a.vehicle].label) : (a.vehicle || '—');
+    var pieces = LV_PIECES_BASE.concat(LV_PIECES_EXTRA[a.vehicle] || []);
+    var st = a.status || 'en_attente';
+    var when = a.createdAt ? new Date(a.createdAt).toLocaleString('fr-FR') : '—';
+    return '<div class="admin-app admin-app--courier">'
+      + '<div class="admin-app__head"><strong>' + escapeHTML(a.name || 'Livreur') + '</strong>'
+      + '<span class="admin-app__tier">' + escapeHTML(veh)
+      + (a.cylindree ? ' · ' + escapeHTML(a.cylindree) + ' cm³' : '')
+      + ' · ' + (st === 'refuse' ? '🚫 refusé' : '⏳ en attente') + '</span></div>'
+      // Dossier déposé SANS pièces (dérogation de test) : l'admin doit le
+      // savoir AVANT de valider. Une exception silencieuse est dangereuse.
+      + (a.piecesBypass
+        ? '<div class="admin-app__line"><strong>🧪 Dossier de TEST — dispensé de pièces</strong> ('
+          + escapeHTML(String((a.piecesManquantes || []).length)) + ' manquante(s)). '
+          + 'Ne valide que si tu sais exactement pourquoi.</div>' : '')
+      + '<div class="admin-app__line"><span>Contact</span> <a href="mailto:' + encodeURIComponent(a.email || '') + '">'
+      + escapeHTML(a.email || '') + '</a>' + (a.phone ? ' · ' + escapeHTML(a.phone) : '') + '</div>'
+      + pieces.map(function (p) {
+          var f = a.pieces && a.pieces[p.id];
+          return '<div class="admin-app__line"><span>' + escapeHTML(p.t) + '</span> '
+            + (f ? (f.url
+                ? '<a href="' + escapeHTML(f.url) + '" target="_blank" rel="noopener noreferrer">Voir la pièce ↗</a>'
+                : '<em>déclarée : ' + escapeHTML(f.name || '?') + ' (fichier non téléversé)</em>')
+              : '<em>manquante</em>') + '</div>';
+        }).join('')
+      + '<div class="admin-app__foot">' + escapeHTML(when) + '</div>'
+      + '<div class="admin-app__actions">'
+      + (st === 'refuse'
+        ? '<button type="button" class="btn primary" data-courier-ok="' + escapeHTML(a.uid || '') + '">↩️ Réactiver</button>'
+        : '<button type="button" class="btn primary" data-courier-ok="' + escapeHTML(a.uid || '') + '">✅ Valider</button>'
+          + '<button type="button" class="btn" data-courier-ko="' + escapeHTML(a.uid || '') + '">❌ Refuser</button>')
+      + '</div></div>';
+  }
+
+  // LIVREUR ACTIF : sa carte telle que les clients la voient — photo, commune,
+  // véhicule, disponibilité, courses livrées, note — plus ce que l'admin seul
+  // doit savoir (email, téléphone) et le retrait d'accès.
+  function adminCourierFicheHTML(a) {
+    var p = a.profile;
+    if (!p) {
+      return '<div class="admin-app admin-app--courier">'
+        + '<div class="admin-app__head"><strong>' + escapeHTML(a.name || 'Livreur') + '</strong>'
+        + '<span class="admin-app__tier">✅ accès actif</span></div>'
+        + '<div class="admin-app__line">Ce livreur n\'a pas encore rempli sa fiche publique '
+        + '(nom affiché, photo, tarifs). Elle apparaîtra ici dès qu\'il l\'aura enregistrée '
+        + 'depuis son espace livreur.</div>'
+        + '<div class="admin-app__line"><span>Contact</span> ' + escapeHTML(a.email || '') + '</div>'
+        + '<div class="admin-app__actions"><button type="button" class="btn" data-courier-ko="'
+        + escapeHTML(a.uid || '') + '">🚫 Retirer l\'accès livreur</button></div></div>';
+    }
+    var avg = p.ratingCount ? (p.ratingSum / p.ratingCount) : 0;
+    var photo = isSafePartnerImg(p.photo) ? p.photo : '';
+    var nom = escapeHTML(String(p.displayName || a.name || 'Livreur'));
+    return '<div class="admin-app admin-app--courier">'
+      + '<div class="admin-courier-fiche">'
+      + (photo
+        ? '<img class="admin-courier-fiche__ph" src="' + photo + '" alt="' + nom + '" loading="lazy">'
+        : '<span class="admin-courier-fiche__ph admin-courier-fiche__ph--none" aria-hidden="true">🛵</span>')
+      + '<div class="admin-courier-fiche__id">'
+      + '<strong>' + nom + '</strong>'
+      + '<span class="admin-app__tier">' + (p.available ? '🟢 Disponible' : '⚪️ Hors ligne')
+      + ' · ' + (p.published ? 'fiche publiée' : 'fiche non publiée') + '</span>'
+      + '<span class="admin-hint">'
+      + (p.commune ? '📍 ' + escapeHTML(String(p.commune)) + ' · ' : '')
+      + (p.vehicle ? escapeHTML(lvVehLabel(p.vehicle)) : '')
+      + (a.cylindree ? ' ' + escapeHTML(a.cylindree) + ' cm³' : '') + '</span>'
+      + '</div></div>'
+      + (p.bio ? '<div class="admin-app__line">« ' + escapeHTML(String(p.bio)) + ' »</div>' : '')
+      + '<div class="admin-app__line"><span>Tarifs affichés</span> '
+      + LV_BAREME.map(function (b) {
+          var t = (p.tarifs && p.tarifs[b.zone]) || null;
+          return b.emoji + ' ' + (t ? t + ' €' : '—');
+        }).join(' · ') + '</div>'
+      + '<div class="admin-app__line"><span>Activité</span> 📦 ' + (p.coursesDone || 0)
+      + ' course' + ((p.coursesDone || 0) > 1 ? 's' : '') + ' livrée' + ((p.coursesDone || 0) > 1 ? 's' : '')
+      + ' · ' + (p.ratingCount ? '⭐ ' + avg.toFixed(1) + '/5 (' + p.ratingCount + ' avis)' : 'aucun avis') + '</div>'
+      + '<div class="admin-app__line"><span>Contact</span> <a href="mailto:' + encodeURIComponent(a.email || '') + '">'
+      + escapeHTML(a.email || '') + '</a>' + (a.phone ? ' · ' + escapeHTML(a.phone) : '') + '</div>'
+      + '<div class="admin-app__actions">'
+      + '<a class="btn" href="#/livreur-profil/' + encodeURIComponent(String(a.uid || '')) + '">👁️ Voir sa fiche publique</a>'
+      + '<button type="button" class="btn" data-courier-ko="' + escapeHTML(a.uid || '') + '">🚫 Retirer l\'accès livreur</button>'
+      + '</div></div>';
+  }
+
   function reviewCourier(uid, status) {
     if (!uid) return;
     adminPostType('courier-review', { uid: uid, status: status })

@@ -7740,6 +7740,24 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .admin-app__line a { color: var(--accent); }
 .admin-app__foot { margin-top: .5rem; font-size: .75rem; opacity: .6; }
 
+/* Carte d'un LIVREUR ACTIF dans l'administration : sa photo et son identité,
+   telles que les clients les voient. Un dossier validé n'est plus une
+   candidature à traiter — il doit se présenter comme une fiche. */
+.admin-courier-fiche { display: flex; align-items: center; gap: .85rem; margin-bottom: .6rem; }
+.admin-courier-fiche__ph {
+  width: 64px; height: 64px; flex: 0 0 64px; border-radius: 50%;
+  object-fit: cover; background: rgba(255, 255, 255, .06);
+  border: 2px solid rgba(var(--accent-rgb), .45);
+}
+.admin-courier-fiche__ph--none {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem; line-height: 1;
+}
+.admin-courier-fiche__id { display: flex; flex-direction: column; gap: .2rem; min-width: 0; }
+.admin-courier-fiche__id strong { font-size: 1.05rem; }
+.admin-courier-fiche__id .admin-app__tier { align-self: flex-start; }
+.admin-courier-fiche__id .admin-hint { margin: 0; font-size: .8rem; }
+
 /* Bouton retour du formulaire de pré-inscription. */
 .pj-back {
   display: inline-flex; align-items: center; gap: .4rem;
