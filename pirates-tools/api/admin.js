@@ -287,6 +287,35 @@ module.exports = async function handler(req, res) {
         return res.status(200).json({ ok: true, ratings });
       }
 
+      // ── Toutes les courses (administration + ménage de la phase de test) ──
+      if (type === 'courses') {
+        const snap = await db.collection('courses').orderBy('createdAt', 'desc').limit(200).get()
+          .catch(() => db.collection('courses').limit(200).get())
+          .catch(() => null);
+        const courses = [];
+        if (snap) snap.forEach((doc) => {
+          const c = doc.data() || {};
+          courses.push({
+            id: doc.id,
+            status: c.status || '',
+            address: c.address || '',
+            zone: c.zone || 0,
+            prix: c.prix || 0,
+            date: c.date || '',
+            paid: !!c.paid,
+            escrow: c.escrow || null,
+            artisanEmail: c.artisanEmail || '',
+            courierEmail: c.courierEmail || '',
+            hasScene: !!c.hasScene,
+            hasProof: !!c.proofPhoto || !!c.hasProof,
+            videos: (c.videos || []).length,
+            rating: c.rating || 0,
+            createdAt: c.createdAt && c.createdAt.toMillis ? c.createdAt.toMillis() : null
+          });
+        });
+        return res.status(200).json({ ok: true, courses });
+      }
+
       // ── Litiges & vidéos de remise (admin SEUL — jamais de lecture client).
       // Vidéos servies en URL SIGNÉE temporaire (1 h) depuis Firebase Storage.
       // Engagement : privées, jamais divulguées, effacées à la clôture. ──
@@ -627,6 +656,44 @@ module.exports = async function handler(req, res) {
     } catch (err) {
       console.error('[api/admin] course-dispute-close failed:', err.message);
       return res.status(500).json({ ok: false, error: 'course-dispute-close échoué' });
+    }
+  }
+
+  // Supprimer une course DÉFINITIVEMENT (ménage de la phase de test).
+  // Emporte tout ce qui lui appartient : la sous-collection `photos` (scène,
+  // colis remis, vue du chantier) et les vidéos dans Storage — sinon ces
+  // documents et fichiers resteraient orphelins, invisibles et facturés.
+  if (req.method === 'POST' && ((req.query && req.query.type) === 'course-delete')) {
+    try {
+      const id = String((req.body || {}).id || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 64);
+      if (!id) return res.status(400).json({ ok: false, error: 'id requis' });
+      const ref = db.collection('courses').doc(id);
+      const doc = await ref.get();
+      if (!doc.exists) return res.status(404).json({ ok: false, error: 'course introuvable' });
+      const data = doc.data() || {};
+
+      // 1. Sous-collection photos
+      let photosDeleted = 0;
+      const photos = await ref.collection('photos').get();
+      for (const p of photos.docs) { await p.ref.delete(); photosDeleted++; }
+
+      // 2. Vidéos Storage (best-effort : Storage peut ne pas être activé)
+      let videosDeleted = 0;
+      if ((data.videos || []).length) {
+        try {
+          const bucketName = process.env.FIREBASE_STORAGE_BUCKET || 'pirates-tools.firebasestorage.app';
+          await admin.storage().bucket(bucketName).deleteFiles({ prefix: 'courses/' + id + '/videos/' });
+          videosDeleted = data.videos.length;
+        } catch (e) { console.warn('[admin] course-delete vidéos:', e.message); }
+      }
+
+      // 3. La course elle-même, en DERNIER : si une étape échoue avant, le doc
+      //    reste et l'opération est rejouable — jamais d'orphelin silencieux.
+      await ref.delete();
+      return res.status(200).json({ ok: true, id, photosDeleted, videosDeleted });
+    } catch (err) {
+      console.error('[api/admin] course-delete failed:', err.message);
+      return res.status(500).json({ ok: false, error: 'course-delete échoué : ' + err.message });
     }
   }
 

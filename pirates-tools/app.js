@@ -10106,6 +10106,48 @@
       }).join('');
     }).catch(function (e) { rEl.innerHTML = '<p class="admin-error">Erreur : ' + escapeHTML(e.message) + '</p>'; });
 
+    // Toutes les courses + suppression définitive (ménage de la phase de test)
+    var cEl = document.getElementById('adminCoursesBody');
+    if (cEl) adminGet('courses').then(function (data) {
+      var list = data.courses || [];
+      if (!list.length) { cEl.innerHTML = '<p class="admin-hint">Aucune course enregistrée.</p>'; return; }
+      var ST = { en_attente: '⏳ En attente', acceptee: '🛵 Acceptée', livree: '📦 Livrée', terminee: '✅ Terminée' };
+      cEl.innerHTML = list.map(function (c) {
+        var when = c.createdAt ? new Date(c.createdAt).toLocaleString('fr-FR') : '—';
+        var preuves = [];
+        if (c.hasScene) preuves.push('📷 chantier');
+        if (c.hasProof) preuves.push('📦 remise');
+        if (c.videos) preuves.push('🎥 ' + c.videos);
+        return '<div class="admin-app">'
+          + '<div class="admin-app__head"><strong>' + escapeHTML(ST[c.status] || c.status) + '</strong>'
+          + '<span class="admin-app__tier">Zone ' + c.zone + ' · ' + c.prix + ' €'
+          + (c.paid ? ' · payée' : ' · NON payée') + (c.escrow ? ' · ' + escapeHTML(c.escrow) : '') + '</span></div>'
+          + '<div class="admin-app__line"><span>📍</span> ' + escapeHTML(c.address || '—')
+          + (c.date ? ' — ' + escapeHTML(c.date) : '') + '</div>'
+          + '<div class="admin-app__line"><span>Client</span> ' + escapeHTML(c.artisanEmail || '—')
+          + ' · <span>Livreur</span> ' + escapeHTML(c.courierEmail || '—') + '</div>'
+          + '<div class="admin-app__line"><span>Preuves</span> ' + (preuves.length ? preuves.join(' · ') : 'aucune')
+          + (c.rating ? ' · ⭐ ' + c.rating + '/5' : '') + '</div>'
+          + '<div class="admin-app__foot">' + escapeHTML(when) + ' · ' + escapeHTML(c.id) + '</div>'
+          + '<div class="admin-app__actions"><button type="button" class="btn" data-course-del="' + escapeHTML(c.id) + '">🗑 Supprimer définitivement</button></div>'
+          + '</div>';
+      }).join('');
+      cEl.querySelectorAll('[data-course-del]').forEach(function (b) {
+        b.onclick = function () {
+          var id = b.getAttribute('data-course-del');
+          // Action destructive et irréversible : confirmation explicite.
+          if (!confirm('Supprimer DÉFINITIVEMENT cette course ?\n\nSes photos et ses vidéos seront effacées.\nCette action est irréversible.')) return;
+          b.disabled = true; b.textContent = 'Suppression…';
+          adminPostType('course-delete', { id: id })
+            .then(function (d) {
+              toast('Course supprimée (' + (d.photosDeleted || 0) + ' photo(s), ' + (d.videosDeleted || 0) + ' vidéo(s))', 'success');
+              loadAdminCouriers();
+            })
+            .catch(function (e) { b.disabled = false; b.textContent = '🗑 Supprimer définitivement'; alert('Erreur : ' + e.message); });
+        };
+      });
+    }).catch(function (e) { cEl.innerHTML = '<p class="admin-error">Erreur : ' + escapeHTML(e.message) + '</p>'; });
+
     // Litiges & vidéos (privées — liens signés 1 h ; clôture = suppression)
     var dEl = document.getElementById('adminCourierDisputes');
     if (dEl) adminGet('course-disputes').then(function (data) {
@@ -10402,6 +10444,9 @@
       + '<div id="adminCourierBareme"><p class="admin-loading">Chargement…</p></div>'
       + '<h2 class="admin-subtitle">⭐ Avis clients sur les livreurs</h2>'
       + '<div id="adminCourierRatings"><p class="admin-loading">Chargement…</p></div>'
+      + '<h2 class="admin-subtitle">🧪 Toutes les courses</h2>'
+      + '<p class="admin-hint">Vue complète, y compris les courses de test. La suppression est DÉFINITIVE et emporte les photos et les vidéos de la course.</p>'
+      + '<div id="adminCoursesBody"><p class="admin-loading">Chargement…</p></div>'
       + '<h2 class="admin-subtitle">⚠️ Litiges & vidéos de remise</h2>'
       + '<p class="admin-hint">Vidéos PRIVÉES (client/livreur) lisibles ici uniquement, via lien signé 1 h. Engagement : jamais divulguées, effacées à la clôture du litige. Clore un litige supprime définitivement ses vidéos du Storage.</p>'
       + '<div id="adminCourierDisputes"><p class="admin-loading">Chargement…</p></div>'
