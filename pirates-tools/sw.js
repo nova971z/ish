@@ -1,5 +1,5 @@
 /* sw.js — Pirates Tools (PWA) */
-const VERSION        = 'pt-v505';                    // version du SW (logique SW)
+const VERSION        = 'pt-v506';                    // version du SW (logique SW)
 const STATIC_CACHE   = `pt-static-${VERSION}`;
 const RUNTIME_CACHE  = `pt-runtime-${VERSION}`;
 const IMG_CACHE      = `pt-img-${VERSION}`;
@@ -8,7 +8,7 @@ const ORIGIN         = self.location.origin;
 
 // Aligner avec le HTML (cache-busting des assets) — garde-fou CI :
 // scripts/check-asset-versions.js casse la CI si sw.js et index.html divergent.
-const ASSET_VER      = '505';
+const ASSET_VER      = '506';
 
 // Icônes + manifest : fingerprint STABLE, séparé d'ASSET_VER. Ces fichiers ne
 // changent pas à chaque déploiement — les re-cache-buster à chaque bump forçait
@@ -185,7 +185,21 @@ async function handleStatic(event, request){
     return net;
   } catch(_){
     const anyVersion = await fromCacheAnyVersion(STATIC_CACHE, request);
-    return cached || anyVersion || new Response('', { status:504 });
+    if (cached) return cached;
+    if (anyVersion) return anyVersion;
+    // JAMAIS de corps vide — règle gravée après la panne v487 : un corps vide
+    // fait échouer le .json() de l'appelant et Safari ne remonte qu'un
+    // « TypeError » opaque, sans URL ni cause. On répond quelque chose de
+    // LISIBLE, adapté au type demandé.
+    const p = new URL(request.url).pathname;
+    if (p.endsWith('.json') || p.endsWith('.webmanifest')) {
+      return new Response(JSON.stringify({
+        ok: false,
+        error: 'Service Worker : réseau injoignable et aucune version en cache pour ' + p
+      }), { status: 504, headers: { 'Content-Type': 'application/json' } });
+    }
+    return new Response('/* Service Worker : ' + p + ' injoignable, aucune version en cache */',
+      { status: 504, headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
   }
 }
 
@@ -212,7 +226,10 @@ async function handleImage(request){
     if (c1) return c1;
     const c2 = await fromCache(STATIC_CACHE, './icons/icon-256.png');
     if (c2) return c2;
-    return new Response('', { status:504 });
+    // Image : un corps vide est ici SANS danger (aucun appelant ne le parse,
+    // le navigateur affiche simplement une image cassée). On garde malgré tout
+    // un statut explicite pour le diagnostic.
+    return new Response('', { status: 504, headers: { 'X-PT-Reason': 'image-unavailable-offline' } });
   }
 }
 

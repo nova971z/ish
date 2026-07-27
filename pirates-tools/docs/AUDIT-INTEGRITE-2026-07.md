@@ -527,3 +527,58 @@ zéro → `❌ NI RÉINITIALISÉES NI CLASSÉES` ; restauré → vert.
 
 **Vérifications** : CI verte · cards.mjs **6/6** · couriers.mjs 80/80 ·
 course-pay.mjs 14/14 · émulateur Firestore 98/98.
+
+## PASSE P8 — PERFORMANCE ET PWA ✅ (27/07/2026, SW v506)
+
+**Outils créés** : `scripts/audit/p8-perf.js` (branché à `ci.js`) et le harnais
+de mesure `scratchpad/perf.mjs` (Playwright, contexte neuf = cache vide).
+
+### Mesure RÉELLE — pas une estimation
+
+L'user navigue **toujours en privé** : aucun cache ne l'aide, chaque visite est
+un chargement à froid intégral.
+
+| | Avant | Après | Gain |
+|---|---:|---:|---:|
+| **Accueil** | 2 990 Ko · 26 req | **1 839 Ko · 15 req** | **−38 %** |
+| ├ dont images | 1 416 Ko | **264 Ko** | **−81 %** |
+| **Catalogue** | 4 444 Ko · 34 req | **2 300 Ko · 14 req** | **−48 %** |
+| ├ dont images | 2 870 Ko | **725 Ko** | **−75 %** |
+
+En production (Vercel compresse le texte) : **texte 323 Ko gzip**, images
+incompressibles. L'accueil passe donc d'environ **1,7 Mo à 590 Ko**.
+
+### Défauts trouvés et corrigés
+
+| # | Gravité | Défaut | Correctif |
+|---|---|---|---|
+| P8-1 | 🟠 | **`loading="lazy"` est INOPÉRANT dans un bandeau horizontal.** Le navigateur considère toute la rangée comme « dans la fenêtre » et téléchargeait **les 16 posters de l'accueil d'un coup — 1,4 Mo pour ~4 vignettes réellement visibles**. | Chargement différé réel : `data-src` + `IntersectionObserver` (marge 300 px), appliqué aux bandeaux ET aux grilles. Repli sans `IntersectionObserver` : tout charger plutôt que d'afficher des cartes vides. |
+| P8-2 | 🟠 | **Doublon de déclaration avec RÉCURSION INFINIE** : ma factorisation de la carte produit (P7) avait laissé `function productCardHTML(p) { return productCardHTML(p, {…}); }`. Neutralisé **par hasard** (la vraie déclaration, plus bas, l'écrase) — déplacer du code l'aurait réveillé en débordement de pile. | Vestige supprimé, et **nouveau contrôle P1** : deux `function X()` dans la **même portée**. (Les homonymes de portées différentes — `openMenu`, `paint`, `tick` — restent légitimes, vérifiés.) |
+| P8-3 | 🟡 | **`.map(productCardHTML)` passe l'INDEX comme options.** `Array.map` fournit `(élément, index, tableau)` : la carte recevait un nombre en guise d'options. Inoffensif par chance, mais toute option future aurait été silencieusement ignorée — et c'est exactement ce qui empêchait le catalogue de différer ses images. | Tous les sites d'appel passent des options explicites. |
+| P8-4 | 🟢 | **Deux replis du Service Worker renvoyaient un CORPS VIDE**, alors que le projet s'est interdit ça après la panne v487 (« TypeError » opaque sous Safari, sans URL ni cause). | Repli lisible : JSON d'erreur pour `.json`/`.webmanifest`, texte pour le reste. Corps vide conservé **uniquement pour les images**, où aucun appelant ne le parse — avec un en-tête de diagnostic. |
+| P8-5 | 🟢 | Une fuite d'`IntersectionObserver` **introduite par mon propre correctif** (observateur jamais coupé entre deux rendus) — attrapée par le contrôle P7 écrit la veille. | `disconnect()` avant chaque nouvel armement. |
+
+### Service Worker — relecture intégrale (300 lignes)
+
+Les 5 invariants issus de pannes réelles sont **tous respectés**, et désormais
+vérifiés automatiquement :
+`/api/*` jamais intercepté (v487) · repli « n'importe quelle version » contre
+l'écran noir après déploiement (v314) · `navigationPreload` à l'activate ·
+seul le shell racine rafraîchit `index.html` (anti-empoisonnement) · anciens
+caches supprimés. Les **7 fichiers du précache existent** sur le disque.
+
+### 🔴 Ce que je NE peux PAS corriger ici — à faire savoir
+
+**Les 177 posters font 780 à 1024 px** (18,6 Mo au total) et servent de
+vignettes dans des cartes de ~260 px : **4× trop de pixels, 16× en surface**.
+Aucun outil de traitement d'image n'est disponible dans cet environnement
+(`sharp`, `imagemagick`, `cwebp`, `vips` : tous absents) — **je ne peux donc pas
+générer les vignettes**. Le chargement différé compense en réduisant le NOMBRE
+d'images chargées, mais chaque image reste 4× trop lourde.
+
+**Gain restant estimé** : des vignettes à 320 px ramèneraient les ~90 Ko par
+image à ~15 Ko, soit **l'accueil autour de 400 Ko** et le catalogue sous
+**600 Ko**. C'est le dernier grand levier de performance du site.
+
+**Vérifications** : CI verte · cards.mjs 6/6 · couriers.mjs 80/80 ·
+course-pay.mjs 14/14 · émulateur Firestore 98/98.

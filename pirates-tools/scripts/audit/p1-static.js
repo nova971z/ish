@@ -176,6 +176,37 @@ LOG('  fonctions déclarées : ' + declared.size + ' · identifiants appelés : 
 if (undefinedCalls.length) { bad('APPELS VERS UNE FONCTION JAMAIS DÉFINIE (' + undefinedCalls.length + ') :'); LOG(list(undefinedCalls)); }
 else ok('Aucun appel vers une fonction inexistante.');
 
+// ── DOUBLONS DE DÉCLARATION DANS LA MÊME PORTÉE ──────────────────────────
+// Deux `function X()` dans le MÊME corps : la seconde écrase la première en
+// silence. Défaut réellement introduit lors de la factorisation de la carte
+// produit (P7) : un vestige `function productCardHTML(p) { return
+// productCardHTML(p, {...}); }` — une RÉCURSION INFINIE — n'était neutralisé
+// que par l'ordre des déclarations. Déplacer du code l'aurait réveillée.
+// (Deux fonctions de même nom dans des portées DIFFÉRENTES sont légitimes :
+//  openMenu/closeMenu existent en local et au niveau module, sans conflit.)
+const dupScope = [];
+(function scanScopes(node) {
+  if (!node || typeof node.type !== 'string') return;
+  const corps = node.type === 'Program' ? node.body
+    : (node.type === 'BlockStatement' ? node.body : null);
+  if (corps) {
+    const vus = new Map();
+    corps.forEach((st) => {
+      if (st.type !== 'FunctionDeclaration' || !st.id) return;
+      if (vus.has(st.id.name)) dupScope.push(st.id.name + '  (app.js:' + vus.get(st.id.name) + ' et ' + st.loc.start.line + ')');
+      else vus.set(st.id.name, st.loc.start.line);
+    });
+  }
+  for (const k of Object.keys(node)) {
+    if (k === 'loc' || k === 'range') continue;
+    const v = node[k];
+    if (Array.isArray(v)) v.forEach((c) => scanScopes(c));
+    else if (v && typeof v.type === 'string') scanScopes(v);
+  }
+})(AST);
+if (dupScope.length) { bad('FONCTIONS DÉCLARÉES DEUX FOIS DANS LA MÊME PORTÉE (' + dupScope.length + ') — la seconde écrase la première :'); LOG(list(dupScope)); }
+else ok('Aucune fonction déclarée deux fois dans une même portée.');
+
 const neverCalled = [];
 for (const [nm, line] of declared) {
   if (called.has(nm)) continue;

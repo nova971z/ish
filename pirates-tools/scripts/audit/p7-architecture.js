@@ -178,7 +178,9 @@ const UNIQUES = [
   ['carte artisan',  'partner-card__body']
 ];
 UNIQUES.forEach(([nom, marqueur]) => {
-  const n = (APP.match(new RegExp(marqueur, 'g')) || []).length;
+  // Ne compter que les occurrences dans un attribut class="…" : une mention en
+  // COMMENTAIRE n'est pas une implémentation (faux positif constaté à P8).
+  const n = (APP.match(new RegExp('class="[^"]*' + marqueur, 'g')) || []).length;
   const ok = n <= 1;
   LOG('  ' + (ok ? '✅' : '❌') + ' ' + nom.padEnd(18) + n + ' occurrence(s) du balisage');
   if (!ok) problems.push('le balisage « ' + nom + ' » est écrit ' + n + ' fois (marqueur '

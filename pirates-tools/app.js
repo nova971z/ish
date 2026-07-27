@@ -868,7 +868,7 @@
 
   function getCart() { return loadCartData(); }
 
-  function productCardVisual(p) {
+  function productCardVisual(p, defer) {
     // PERF (cascade de chargement fluide) : les vignettes du catalogue
     // n'affichent QUE l'image légère (poster). Le modèle 3D (lourd, ~2 Mo/pièce)
     // ne se charge PLUS sur la grille — uniquement sur la fiche produit (PDP).
@@ -881,6 +881,16 @@
     // fetchpriority="low" : les vignettes de cartes cèdent la bande passante au
     // 1er outil du carrousel 3D (priorité normale) → il se charge AVANT elles
     // (demande user). Elles restent lazy et se chargent juste après / au scroll.
+    // `defer` : l'image part en data-src et n'est chargée qu'à l'approche
+    // (cardImgIO). Indispensable dans les BANDEAUX HORIZONTAUX, où
+    // loading="lazy" est inopérant : le navigateur considère toute la rangée
+    // comme « dans la fenêtre » et télécharge les 16 posters d'un coup —
+    // mesuré à 1,4 Mo sur l'accueil pour ~4 vignettes réellement visibles.
+    // Aucun risque de saut visuel : .product-card__img-wrap impose déjà un
+    // aspect-ratio 4/3, la boîte est réservée avant le chargement.
+    if (defer) {
+      return '<img data-src="' + imgSrc + '" alt="' + alt + '" decoding="async" class="product-card__img">';
+    }
     return '<img src="' + imgSrc + '" alt="' + alt + '" loading="lazy" fetchpriority="low" decoding="async" class="product-card__img">';
   }
 
@@ -1279,10 +1289,6 @@
   var _gridPage = 1;
   var _pagerWired = false;
 
-  function productCardHTML(p) {
-    return productCardHTML(p);
-  }
-
   // SOURCE UNIQUE du balisage d'une carte produit (audit P7). Il était écrit
   // TROIS fois — catalogue, accueil, favoris — et la copie des favoris avait
   // dérivé : elle affichait le prix SANS la mention « TTC », alors que le prix
@@ -1292,13 +1298,44 @@
   // opts.wishlist  : false pour les bandeaux (« recemment vus », pages
   //                   territoire) ou le bouton favori n'a pas sa place.
   // opts.tag       : false pour masquer la pastille promotionnelle.
+  // Charge les vignettes différées quand elles approchent de la fenêtre.
+  // Marge de 300 px : l'image est prête avant d'être visible, sans être
+  // téléchargée pour rien.
+  var _cardImgIO = null;
+  function armCardImages(root) {
+    if (!root || !window.IntersectionObserver) {
+      // Sans IntersectionObserver (très vieux navigateur) : on charge tout,
+      // plutôt que de laisser des cartes vides. Dégradation, jamais d'écran mort.
+      var all = (root || document).querySelectorAll('img[data-src]');
+      for (var k = 0; k < all.length; k++) { all[k].src = all[k].getAttribute('data-src'); all[k].removeAttribute('data-src'); }
+      return;
+    }
+    // Coupe l'observation précédente : les éléments d'un rendu antérieur sont
+    // détruits, les garder observés est une fuite (défaut attrapé par le
+    // contrôle P7 sur ce correctif même).
+    if (_cardImgIO) _cardImgIO.disconnect();
+    {
+      _cardImgIO = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (!e.isIntersecting) return;
+          var img = e.target;
+          var src = img.getAttribute('data-src');
+          if (src) { img.src = src; img.removeAttribute('data-src'); }
+          _cardImgIO.unobserve(img);
+        });
+      }, { rootMargin: '300px' });
+    }
+    var imgs = root.querySelectorAll('img[data-src]');
+    for (var i = 0; i < imgs.length; i++) _cardImgIO.observe(imgs[i]);
+  }
+
   function productCardHTML(p, opts) {
     opts = opts || {};
     var out = isOutOfStock(p);
     var price = calcPrice(p, opts.territory || _currentTerritory);
     return '<a class="product-card' + (out ? ' product-card--out' : '') + '" href="#/produit/' + escapeHTML(p.slug || p.id) + '">'
       + '<div class="product-card__img-wrap">'
-      + productCardVisual(p)
+      + productCardVisual(p, opts.defer === true)
       + (p.tag && opts.tag !== false ? '<span class="product-card__tag">' + escapeHTML(p.tag) + '</span>' : '')
       + stockBadge(p)
       + (opts.wishlist === false ? '' : wishlistButton(p))
@@ -1365,7 +1402,8 @@
     }
     var start = (_gridPage - 1) * PAGE_SIZE;
     var pageItems = _gridItems.slice(start, start + PAGE_SIZE);
-    dom.list.innerHTML = pageItems.map(productCardHTML).join('');
+    dom.list.innerHTML = pageItems.map(function (p) { return productCardHTML(p, { defer: true }); }).join('');
+    armCardImages(dom.list);
     preloadModelViewers(dom.list);
     renderPager(totalPages);
   }
@@ -1747,12 +1785,13 @@
       (real ? withImg : noImg).push(p);
     });
     var list = withImg.concat(noImg).slice(0, HOME_STRIP_MAX);
-    track.innerHTML = list.map(productCardHTML).join('')
+    track.innerHTML = list.map(function (p) { return productCardHTML(p, { defer: true }); }).join('')
       + '<a class="product-card product-card--more" href="#/catalogue">'
       + '<span class="product-card__more-icon">→</span>'
       + '<span class="product-card__more-label">Voir tout le catalogue</span>'
       + '<span class="product-card__more-count">' + pool.length + ' produits</span>'
       + '</a>';
+    armCardImages(track);
     preloadModelViewers(track);
   }
 
@@ -12365,7 +12404,8 @@
 
     var favs = products.filter(function (p) { return ids.indexOf(p.id) !== -1; });
 
-    listEl.innerHTML = favs.map(productCardHTML).join('');
+    listEl.innerHTML = favs.map(function (p) { return productCardHTML(p, { defer: true }); }).join('');
+    armCardImages(listEl);
     preloadModelViewers(listEl);
   }
 
@@ -12421,8 +12461,9 @@
     section.hidden = false;
 
     track.innerHTML = items.map(function (p) {
-      return productCardHTML(p, { wishlist: false, tag: false });
+      return productCardHTML(p, { wishlist: false, tag: false, defer: true });
     }).join('');
+    armCardImages(track);
     preloadModelViewers(track);
   }
 
