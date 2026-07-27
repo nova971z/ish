@@ -44,7 +44,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=517">
+  <link rel="stylesheet" href="styles.css?v=518">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -1203,30 +1203,48 @@
     <section id="view-mode-livraison" class="view hidden" data-route="/mode-livraison" role="region" aria-labelledby="modeliv-h1">
       <div class="container courier-space">
         <button type="button" class="pj-back" id="courierBack">← Retour</button>
-        <header class="lv-header">
-          <h1 id="modeliv-h1" tabindex="-1">🛵 Mode livraison</h1>
-          <p class="lv-sub">Ton espace livreur : les courses disponibles sur la carte, leurs détails, et ton historique.</p>
+        <!-- ⚙️ PARAMÈTRES : une fois la fiche remplie, elle n'est modifiable
+             QUE derrière ce bouton (décision user 27/07/2026). L'espace de
+             travail reste dédié aux COURSES. -->
+        <header class="lv-header lv-header--tools">
+          <div>
+            <h1 id="modeliv-h1" tabindex="-1">🛵 Mode livraison</h1>
+            <p class="lv-sub" id="courierSub">Ton espace livreur : ta carte, les courses disponibles et celles que tu as prises.</p>
+          </div>
+          <button type="button" class="lv-gear" id="courierGear" aria-expanded="false"
+                  aria-controls="courierParams" title="Paramètres de ma fiche livreur">
+            <span class="lv-gear__i" aria-hidden="true">⚙️</span>
+            <span class="lv-gear__t">Paramètres</span>
+          </button>
         </header>
         <div id="courierBanner"></div>
-        <!-- EN TÊTE : interrupteur « Disponible » + grande carte des zones sur
-             toute la largeur, où le livreur inscrit SES prix (renderCourierTarifPanel).
-             ⚠️ La plateforme ne fixe aucun prix : montants libres, sans sanction
-             (docs/METHODE-ENTREPRISE-FISCALITE.md § 5 bis). -->
-        <div id="courierTarifs"></div>
-        <div id="courierEarnings"></div>
-        <div id="courierMap" class="pdp-deliv-map courier-map" aria-label="Carte des courses"></div>
-        <div id="courierDetail" class="lv-card" hidden></div>
-        <div class="courier-cols">
-          <div class="lv-card">
-            <h2 class="lv-h2">📬 Courses disponibles</h2>
-            <div id="courierDispo"><p class="lv-hint">Chargement…</p></div>
-          </div>
-          <div class="lv-card">
-            <h2 class="lv-h2">🕘 Mes courses</h2>
-            <div id="courierMine"><p class="lv-hint">Chargement…</p></div>
-          </div>
+
+        <!-- ÉCRAN PARAMÈTRES (masqué par défaut) : identité, photo, horaires,
+             tarifs. C'est le SEUL endroit où ces informations se modifient. -->
+        <div id="courierParams" hidden>
+          <div id="courierTarifs"></div>
         </div>
-        <button type="button" class="btn" id="courierRefresh">🔄 Rafraîchir</button>
+
+        <!-- ÉCRAN DE TRAVAIL : sa carte, puis les courses, DISSOCIÉES. -->
+        <div id="courierWork">
+          <div id="courierMyCard"></div>
+          <div id="courierEarnings"></div>
+          <div id="courierMap" class="pdp-deliv-map courier-map" aria-label="Carte des courses"></div>
+          <div id="courierDetail" class="lv-card" hidden></div>
+          <div class="courier-cols">
+            <div class="lv-card">
+              <h2 class="lv-h2">📬 Courses en attente</h2>
+              <p class="lv-hint">Déposées par des clients, pas encore prises. Le premier qui accepte ouvre la discussion.</p>
+              <div id="courierDispo"><p class="lv-hint">Chargement…</p></div>
+            </div>
+            <div class="lv-card">
+              <h2 class="lv-h2">🕘 Mes courses</h2>
+              <p class="lv-hint">Celles que tu as acceptées : en cours, puis terminées.</p>
+              <div id="courierMine"><p class="lv-hint">Chargement…</p></div>
+            </div>
+          </div>
+          <button type="button" class="btn" id="courierRefresh">🔄 Rafraîchir</button>
+        </div>
       </div>
     </section>
 
@@ -2100,7 +2118,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=517"></script>
+  <script defer src="app.js?v=518"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

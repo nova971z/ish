@@ -8149,6 +8149,36 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-discuter[disabled] { opacity: .55; cursor: not-allowed; box-shadow: none; }
 .lv-discuter__no { font-weight: 600; opacity: .8; font-size: .78em; }
 
+/* En-tête de l'espace livreur : titre à gauche, ⚙️ Paramètres à DROITE et
+   parfaitement visible (demande user 27/07/2026). */
+/* ⚠️ Le bouton doit rester EN HAUT À DROITE, y compris quand le texte est
+   long. Avec flex-wrap seul il passait à la ligne et se retrouvait À GAUCHE
+   (mesuré x=126 au lieu de ~720) — « margin-left:auto » le colle à droite
+   dans TOUS les cas, enroulé ou non. Le bloc de texte peut rétrécir
+   (min-width:0), sinon il pousse le bouton hors de l'en-tête. */
+.lv-header--tools {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 1rem; flex-wrap: wrap; text-align: left; max-width: 980px;
+}
+.lv-header--tools > div { flex: 1 1 240px; min-width: 0; }
+.lv-header--tools .lv-gear { margin-left: auto; }
+.lv-gear {
+  display: inline-flex; align-items: center; gap: .45rem; flex-shrink: 0;
+  padding: .6rem 1rem; border-radius: 999px; cursor: pointer;
+  border: 1px solid rgba(var(--accent-rgb), .55);
+  background: rgba(var(--accent-rgb), .14);
+  color: #ddd6fe; font-weight: 800; font-size: .9rem;
+  transition: background .2s ease, border-color .2s ease, transform .15s ease;
+}
+.lv-gear:hover { background: rgba(var(--accent-rgb), .24); transform: translateY(-1px); }
+.lv-gear:active { transform: scale(.97); }
+.lv-gear__i { font-size: 1.1rem; line-height: 1; }
+@media (max-width: 520px) { .lv-gear__t { display: none; } .lv-gear { padding: .6rem .8rem; } }
+
+/* La carte du livreur telle que les clients la voient, dans son espace. */
+.courier-mycard { max-width: 260px; margin: .6rem 0; }
+.courier-mycard .courier-card { pointer-events: none; }
+
 .lv-chat--solo { display: block; }
 .lv-chat--solo .lv-chat__log { min-height: 46vh; }
 

@@ -104,7 +104,9 @@ const NON_PERSONNEL = {
   _adminLogoBusy:    'drapeau d\'occupation, sans donnée',
   _adminPhotosBusy:  'drapeau d\'occupation, sans donnée',
   _lvAdminFuel:      'paramètre public (prix du carburant), pas une identité',
-  _lvChatUnsub:      'fonction de désabonnement — coupée dans le bloc de remise à zéro'
+  _lvChatUnsub:      'fonction de désabonnement — coupée dans le bloc de remise à zéro',
+  _lvVueParams:      'quel écran de l\'espace livreur est affiché (travail ou paramètres) — '
+                     + 'aucune donnée personnelle, et remis à false à chaque rendu de l\'espace'
 };
 
 const IDENT = /^_(?:current|user|auth|lv|pay|admin|partner|my|acc|loyal|courier)/i;

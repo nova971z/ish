@@ -6168,6 +6168,10 @@
       var p = d.profile || {};
       var tarifs = lvNormTarifs(p.tarifs);
       _lvMyTarifs = tarifs;            // réutilisés pour afficher MON prix sur chaque course
+      // Sa carte, telle que les clients la voient — dans l'espace de travail,
+      // pas dans les paramètres. p.uid vient du serveur ; sans lui la carte
+      // pointerait vers une fiche vide.
+      lvRenderMaCarte(p);
       host.innerHTML = lvProfilPanneauHTML(p, tarifs);
 
       var mapHost = document.getElementById('courierTarifMap');
@@ -6255,6 +6259,75 @@
     }).catch(function () { host.innerHTML = '<p class="lv-hint">Fiche indisponible (réseau).</p>'; });
   }
 
+  // Bascule entre l'ESPACE DE TRAVAIL (carte + courses) et les PARAMÈTRES.
+  // Une fois la fiche remplie, ses informations ne se modifient QUE derrière
+  // le ⚙️ — l'espace de travail reste dédié aux courses (décision user).
+  var _lvVueParams = false;
+  function lvBasculerVue(versParams) {
+    _lvVueParams = !!versParams;
+    var params = document.getElementById('courierParams');
+    var work = document.getElementById('courierWork');
+    var gear = document.getElementById('courierGear');
+    var sub = document.getElementById('courierSub');
+    if (params) params.hidden = !_lvVueParams;
+    if (work) work.hidden = _lvVueParams;
+    if (gear) {
+      gear.setAttribute('aria-expanded', _lvVueParams ? 'true' : 'false');
+      gear.querySelector('.lv-gear__i').textContent = _lvVueParams ? '←' : '⚙️';
+      gear.querySelector('.lv-gear__t').textContent = _lvVueParams ? 'Retour aux courses' : 'Paramètres';
+    }
+    if (sub) {
+      sub.textContent = _lvVueParams
+        ? 'Modifie ici ta fiche : nom affiché, commune, véhicule, horaires, présentation, photo et tarifs.'
+        : 'Ton espace livreur : ta carte, les courses disponibles et celles que tu as prises.';
+    }
+    var h1 = document.getElementById('modeliv-h1');
+    if (h1) { try { h1.focus(); } catch (_) {} }
+  }
+
+  // MA carte, telle que les clients la voient. Le livreur doit pouvoir
+  // vérifier d'un coup d'œil ce qui est affiché de lui.
+  function lvRenderMaCarte(p) {
+    var host = document.getElementById('courierMyCard');
+    if (!host) return;
+    var complete = !!(p && p.displayName);
+    if (!complete) {
+      host.innerHTML = '<div class="lv-card"><h2 class="lv-h2">👋 Ta fiche n\'est pas encore créée</h2>'
+        + '<p class="lv-hint">Tant que tu n\'as pas renseigné ton <strong>nom affiché</strong> et tes '
+        + '<strong>tarifs</strong>, tu n\'apparais pas dans l\'annuaire et aucun client ne peut te contacter.</p>'
+        + '<button type="button" class="btn primary" id="lvGoParams">⚙️ Créer ma fiche</button></div>';
+      var b = document.getElementById('lvGoParams');
+      if (b) b.onclick = function () { lvBasculerVue(true); };
+      return;
+    }
+    host.innerHTML = '<div class="lv-card"><h2 class="lv-h2">🪪 Ma carte, vue par les clients</h2>'
+      + lvServiceBandeauHTML(p)
+      + '<div class="courier-mycard">' + courierCardHTML(p) + '</div>'
+      + '<p class="lv-hint">C\'est exactement ce que voient les clients sur l\'accueil et dans '
+      + 'l\'annuaire. Pour la modifier, touche <strong>⚙️ Paramètres</strong> en haut.</p></div>';
+  }
+
+  // MES COURSES — dissociées comme demandé (user 27/07/2026) : ce qui est EN
+  // COURS d'abord, l'historique ensuite. Sans cette séparation, une course à
+  // livrer se perd au milieu des terminées.
+  function lvMesCoursesHTML(mesCourses, carte) {
+    if (!mesCourses.length) {
+      return '<p class="lv-hint">Tu n\'as accepté aucune course pour l\'instant. '
+        + 'Prends-en une dans « Courses en attente ».</p>';
+    }
+    var fini = function (c) { return c.status === 'terminee' || c.status === 'annulee'; };
+    var enCours = mesCourses.filter(function (c) { return !fini(c); });
+    var terminees = mesCourses.filter(fini);
+    return (enCours.length
+        ? '<h3 class="lv-h3">🔴 En cours (' + enCours.length + ')</h3>'
+          + enCours.map(function (c) { return carte(c, false); }).join('')
+        : '<p class="lv-hint">Aucune course en cours.</p>')
+      + (terminees.length
+        ? '<h3 class="lv-h3">✅ Terminées (' + terminees.length + ')</h3>'
+          + terminees.map(function (c) { return carte(c, false); }).join('')
+        : '');
+  }
+
   function renderCourierSpaceInner() {
     // Les deux requêtes partent EN PARALLÈLE, mais l'affichage des courses
     // attend les tarifs : sinon les cartes annonçaient le repère indicatif
@@ -6264,6 +6337,9 @@
     if (back) back.onclick = function () { history.length > 1 ? history.back() : (location.hash = '#/compte'); };
     var refresh = document.getElementById('courierRefresh');
     if (refresh) refresh.onclick = renderCourierSpace;
+    var gear = document.getElementById('courierGear');
+    if (gear) gear.onclick = function () { lvBasculerVue(!_lvVueParams); };
+    lvBasculerVue(false);          // on arrive TOUJOURS sur les courses
     var banner = document.getElementById('courierBanner');
     if (banner) banner.innerHTML = lvIsTester()
       ? '<div class="lv-banner lv-banner--green">🟢 <strong>Mode test actif</strong> sur ton compte — les courses ci-dessous sont réelles (test), tu peux les accepter.</div>'
@@ -6465,9 +6541,7 @@
       // le filtre symétrique sur c.mine.)
       var mesCourses = (d.mine || []).filter(function (c) { return c.acceptedByMe; });
       renderCourierEarnings(mesCourses);
-      if (mineEl) mineEl.innerHTML = mesCourses.length
-        ? mesCourses.map(function (c) { return courseCard(c, false); }).join('')
-        : '<p class="lv-hint">Tu n\'as accepté aucune course pour l\'instant. Prends-en une dans « Courses disponibles ».</p>';
+      if (mineEl) mineEl.innerHTML = lvMesCoursesHTML(mesCourses, courseCard);
       // Clic carte de course -> détail + focus carte
       var cards = document.querySelectorAll('[data-course-focus]');
       for (var i = 0; i < cards.length; i++) {
