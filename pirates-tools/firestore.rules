@@ -28,20 +28,19 @@ service cloud.firestore {
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
-    // Participant d'une course = le client qui l'a commandée OU le livreur qui
-    // l'a acceptée. Lu dans le document parent courses/{id} — que le client ne
-    // peut PAS lire lui-même (get() en règle contourne les règles de lecture).
-    // Une course inexistante fait échouer le get() → accès refusé (fail-closed).
     // Participant d'une DISCUSSION DIRECTE client ↔ livreur (hors course).
-    // Même principe que pour les courses : on lit le document parent, que le
-    // client ne peut pas écrire. Une conversation inexistante fait échouer le
-    // get() → accès refusé (fail-closed).
+    // On lit le document parent, que le client ne peut PAS écrire. Une
+    // conversation inexistante fait échouer le get() → refus (fail-closed).
     function isConvParticipant(convId) {
       return isSignedIn()
         && exists(/databases/$(database)/documents/conversations/$(convId))
         && (get(/databases/$(database)/documents/conversations/$(convId)).data.clientUid == request.auth.uid
             || get(/databases/$(database)/documents/conversations/$(convId)).data.courierUid == request.auth.uid);
     }
+    // Participant d'une course = le client qui l'a commandée OU le livreur qui
+    // l'a acceptée. Lu dans le document parent courses/{id} — que le client ne
+    // peut PAS lire lui-même (get() en règle contourne les règles de lecture).
+    // Une course inexistante fait échouer le get() → accès refusé (fail-closed).
     function isCourseParticipant(courseId) {
       return isSignedIn()
         && exists(/databases/$(database)/documents/courses/$(courseId))
@@ -180,6 +179,7 @@ service cloud.firestore {
         allow update, delete: if false;
       }
     }
+
     // ---- conversations/{id} : DISCUSSION DIRECTE client ↔ livreur ---------
     // Ouverte depuis la carte d'un livreur EN SERVICE, sans passer par une
     // course. L'identifiant est déterministe (clientUid_courierUid) : un même
