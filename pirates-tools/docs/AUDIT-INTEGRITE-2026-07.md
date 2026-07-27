@@ -292,3 +292,41 @@ ne l'honoreront pas — à savoir, sans impact aujourd'hui (tout est same-origin
 
 **Vérifications** : CI verte · couriers.mjs 76/76 · course-pay.mjs 14/14 ·
 émulateur Firestore 78/78.
+
+## PASSE P4 — RÈGLES FIRESTORE, COUVERTURE ET INDEX ✅ (27/07/2026, SW v502)
+
+**Outil créé : `scripts/audit/p4-firestore.js`**, branché à `ci.js`. Trois
+contrôles, dont le détecteur d'index composite — celui qui manquait.
+
+### 🟢 Le contrôle le plus important passe : aucun index manquant
+
+**16 requêtes Firestore analysées** (2 navigateur + 14 serveur), classées selon
+les règles officielles d'indexation. **Aucune n'exige d'index composite.**
+Les deux requêtes multi-clauses sont correctes et l'étaient déjà :
+- `payments.where(uid==).where(status==)` → égalités multiples seules :
+  Firestore fusionne les index mono-champ, **aucun index composite requis** ;
+- `collectionGroup('orders').orderBy('date','desc')` → couvert par le
+  `fieldOverride` COLLECTION_GROUP DESCENDING déjà versionné.
+
+**Détecteur prouvé capable d'échouer** : l'`orderBy('at')` fautif réintroduit
+→ `⚠️ app.js:5361  round== tri:at` + sortie en erreur ; retiré → vert.
+C'est exactement le défaut qui serait parti en production sans être vu, **parce
+que l'émulateur crée les index à la volée et ne réclame jamais rien**.
+
+### Défauts trouvés et corrigés
+
+| # | Gravité | Défaut | Correctif |
+|---|---|---|---|
+| P4-1 | 🟡 | **Vidéos de litige écrasables.** Le nom de fichier était un simple horodatage (`courses/{id}/videos/1753…mp4`), sans l'auteur. `storage.rules` autorisant les DEUX participants à écrire sur ce chemin, un participant pouvait écraser la vidéo de l'autre — **une preuve détruite en silence**, dans le seul module où la preuve est l'enjeu. | Chemin préfixé par l'uid de l'auteur + `storage.rules` exige `fileName.matches('^' + request.auth.uid + '-.*')` → **écrasement impossible par construction**. Coût nul : Storage n'est pas encore déployé. |
+| P4-2 | 🟢 | **4 collections sans `match` explicite** (`charges`, `config`, `price_watch_log`, et la sous-collection `courses/{id}/photos`) : protégées par le seul filet final. Sans déclaration, impossible de distinguer « fermé volontairement » de « oublié ». | Déclarées nommément avec leur raison. |
+| P4-3 | 🟠 | **9 règles n'étaient prouvées par AUCUN test.** Une règle non testée est une règle dont personne ne sait si elle fait ce qu'elle dit — et c'est la seule barrière entre un navigateur et les données clients. | **20 assertions ajoutées** → `test-rules.js` passe de **78 à 98 assertions**, toutes vertes sur l'émulateur réel. Objectif « aucune règle sans test » **atteint : 27/27**. |
+
+### Revue manuelle de `storage.rules`
+Default-deny · écriture réservée aux participants (lecture croisée Firestore) ·
+120 Mo max · `video/*` obligatoire · **lecture et suppression interdites au
+client** (les vidéos ne sortent que par URL signée admin) · course inexistante
+→ `firestore.get` échoue → refus (fail-closed) · après une remise en ligne,
+l'ex-livreur perd l'accès. **Conforme**, plus le durcissement P4-1.
+
+**Vérifications** : CI verte · couriers.mjs 76/76 · course-pay.mjs 14/14 ·
+**émulateur Firestore 98/98**.

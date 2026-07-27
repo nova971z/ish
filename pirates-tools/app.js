@@ -5048,7 +5048,11 @@
     if (file.size > 100 * 1024 * 1024) return Promise.reject(new Error('Vidéo trop lourde (max 100 Mo) — filme plus court.'));
     if (!_fb || !_fb.loadStorage) return Promise.reject(new Error('Connexion requise.'));
     var ext = (String(file.name).split('.').pop() || 'mp4').toLowerCase().replace(/[^a-z0-9]/g, '') || 'mp4';
-    var path = 'courses/' + c.id + '/videos/' + Date.now() + '.' + ext;
+    // Le nom porte l'uid de L'AUTEUR : conjugue a storage.rules, un participant
+    // ne peut plus ecrire (donc ecraser) le fichier de l'autre. Avant, un simple
+    // horodatage suffisait — deux depots dans la meme milliseconde, ou un nom
+    // devine, ecrasaient la video d'en face. Preuve detruite en silence.
+    var path = 'courses/' + c.id + '/videos/' + _currentUser.uid + '-' + Date.now() + '.' + ext;
     return _fb.loadStorage().then(function (S) {
       var task = S.uploadBytesResumable(S.ref(S.storage, path), file, { contentType: file.type });
       return new Promise(function (resolve, reject) {

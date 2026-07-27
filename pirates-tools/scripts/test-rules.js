@@ -61,6 +61,17 @@ async function check(label, promise) {
     // Service coursier : fiche publique du livreur + course avec fil de discussion.
     await setDoc(doc(db, 'couriers_public/bob'), { uid: 'bob', displayName: 'Bob L.', published: true, available: true, coursesDone: 3, ratingCount: 1, ratingSum: 5, tarifs: { 1: 30 } });
     await setDoc(doc(db, 'couriers/bob'), { kycStatus: 'valide', email: 'b@x.fr' });
+    // Collections serveur restantes (audit P4) : elles doivent TOUTES être
+    // fermées au client, et chacune est desormais prouvee par une assertion.
+    await setDoc(doc(db, 'charges/ch1'), { label: 'Assurance', amountCents: 12000 });
+    await setDoc(doc(db, 'config/pricing'), { targetNet: 0.15 });
+    await setDoc(doc(db, 'price_watch_log/run1'), { at: 1, changed: 3 });
+    await setDoc(doc(db, 'courier_applications/bob'), { kyc: 'piece-identite' });
+    await setDoc(doc(db, 'courier_locations/bob'), { lat: 16.2, lng: -61.5 });
+    await setDoc(doc(db, 'courier_config/bareme'), { fuel: 1.87 });
+    await setDoc(doc(db, 'analytics_clicks/dock'), { count: 42 });
+    await setDoc(doc(db, 'analytics_events_recent/e1'), { type: 'view' });
+    await setDoc(doc(db, 'courses/c1/photos/scene'), { data: 'data:image/jpeg;base64,AAA' });
     await setDoc(doc(db, 'courses/c1'), { artisanUid: 'alice', courierUid: 'bob', status: 'acceptee', code: '123456', round: 1 });
     await setDoc(doc(db, 'courses/c1/messages/m1'), { uid: 'alice', role: 'client', text: 'Bonjour', at: 1, round: 1 });
     await setDoc(doc(db, 'courses/c2'), { artisanUid: 'carol', courierUid: 'dave', status: 'acceptee', round: 1 });
@@ -167,6 +178,25 @@ async function check(label, promise) {
   await check('Bob (ex-livreur détaché) NE lit plus RIEN sur cette course', assertFails(getDocs(fil(bob, 'c1', 2))));
   await check('Bob (ex-livreur) NE peut plus écrire sur cette course', assertFails(addDoc(collection(bob, 'courses/c1/messages'), { uid: 'bob', role: 'livreur', text: 'encore moi', at: 11, round: 2 })));
   await check('Alice (cliente) écrit bien dans le NOUVEAU round', assertSucceeds(addDoc(collection(alice, 'courses/c1/messages'), { uid: 'alice', role: 'client', text: 'nouveau tour', at: 12, round: 2 })));
+
+  console.log('\n── Collections serveur : chaque règle est prouvée (audit P4) ──');
+  const FERMEES = [
+    ['charges/ch1', 'charges comptables'],
+    ['config/pricing', 'config serveur (marge cible, facturation)'],
+    ['price_watch_log/run1', 'journal du traqueur de prix'],
+    ['courier_applications/bob', 'candidatures livreurs (pièce d\'identité, SIRET)'],
+    ['courier_locations/bob', 'géolocalisation temps réel'],
+    ['courier_config/bareme', 'barème / prix du carburant'],
+    ['analytics_clicks/dock', 'compteurs de clics'],
+    ['analytics_events_recent/e1', 'événements récents'],
+    ['courses/c1/photos/scene', 'photos de preuve des courses']
+  ];
+  for (const [chemin, quoi] of FERMEES) {
+    await check('Alice NE lit PAS ' + chemin + ' (' + quoi + ')', assertFails(getDoc(doc(alice, chemin))));
+    await check('Alice NE écrit PAS ' + chemin, assertFails(setDoc(doc(alice, chemin), { pirate: true })));
+  }
+  await check('Bob (livreur) NE lit PAS les photos de preuve en direct', assertFails(getDoc(doc(bob, 'courses/c1/photos/scene'))));
+  await check('Un anonyme NE lit PAS la config serveur', assertFails(getDoc(doc(anon, 'config/pricing'))));
 
   console.log('\n── Default-deny : collection inconnue ──');
   await check('Alice NE lit PAS une collection non prévue', assertFails(getDoc(doc(alice, 'secret_stuff/x'))));

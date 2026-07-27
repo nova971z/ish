@@ -118,6 +118,9 @@ service cloud.firestore {
     match /stripe_events/{eventId}     { allow read, write: if false; } // idempotence webhook
     match /rate_limits/{bucketId}      { allow read, write: if false; } // compteurs anti-abus (IP)
     match /product_overrides/{prodId}  { allow read, write: if false; } // prix/stock admin
+    match /charges/{chargeId}          { allow read, write: if false; } // charges comptables (admin)
+    match /config/{docId}              { allow read, write: if false; } // config serveur (prix, facturation)
+    match /price_watch_log/{runId}     { allow read, write: if false; } // journal du traqueur de prix
     // ── Service coursier (Ubur) — construit mais INACTIF (COURIER_ENABLED=false).
     // Fermé au client tant que le module n'est pas ouvert + validé avocat.
     match /couriers/{uid}              { allow read, write: if false; } // profils coursiers + statut KYC
@@ -148,6 +151,11 @@ service cloud.firestore {
       // Le champ `round` cloisonne les mises en relation successives : on ne
       // lit et on n'écrit QUE dans le round courant de la course. Les requêtes
       // client doivent donc filtrer where('round','==',round) — c'est voulu.
+      // Photos de preuve (chantier, colis remis, vue large) : SERVEUR UNIQUEMENT.
+      // Le client les obtient via l'API (course-proof), qui verifie qu'il est
+      // partie a la course — jamais en lecture directe.
+      match /photos/{photoId} { allow read, write: if false; }
+
       match /messages/{messageId} {
         allow read: if isCourseParticipant(courseId)
           && resource.data.round == courseRound(courseId);
