@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Essai — découpage du catalogue</title>
+<link rel="stylesheet" href="essai.css">
+</head>
+<body>
+
+<main>
+  <h1>Essai — découper le catalogue</h1>
+  <p class="chapo">
+    Cette page mesure, <strong>sur ta connexion et sur ton appareil</strong>, ce que
+    coûterait le découpage du catalogue. Elle ne modifie rien sur le site : elle
+    télécharge des fichiers d'essai et chronomètre.
+  </p>
+
+  <button id="go" type="button">▶︎ Lancer la mesure</button>
+  <p id="etat" class="etat" role="status">Prêt.</p>
+
+  <section class="bloc">
+    <h2>1 · Ouverture du site</h2>
+    <p class="expl">Ce qu'il faut télécharger <em>avant</em> de voir la boutique.</p>
+    <div class="duo">
+      <div class="mesure"><span class="etiq">Aujourd'hui<br><small>catalogue entier — 476 produits</small></span><span class="val" id="v-avant">—</span></div>
+      <div class="mesure ok"><span class="etiq">Découpé<br><small>seulement les cartes</small></span><span class="val" id="v-apres">—</span></div>
+    </div>
+    <p class="gain" id="g-ouverture"></p>
+  </section>
+
+  <section class="bloc">
+    <h2>2 · Ouverture d'une fiche produit</h2>
+    <p class="expl">
+      Du clic jusqu'à l'image en <strong>pleine qualité</strong> affichée
+      (Makita DHS680Z, image de 282 Ko — celle de ta fiche, non compressée davantage).
+    </p>
+    <div class="trio">
+      <div class="mesure"><span class="etiq">A · Aujourd'hui<br><small>l'image seule</small></span><span class="val" id="v-a">—</span></div>
+      <div class="mesure warn"><span class="etiq">B · Découpé, mal fait<br><small>fiche puis image</small></span><span class="val" id="v-b">—</span></div>
+      <div class="mesure ok"><span class="etiq">C · Découpé, bien fait<br><small>fiche et image ensemble</small></span><span class="val" id="v-c">—</span></div>
+    </div>
+    <p class="gain" id="g-fiche"></p>
+  </section>
+
+  <section class="bloc apercu">
+    <h2>3 · L'image reçue</h2>
+    <p class="expl">Vérifie toi-même la qualité : c'est le fichier réel du site, intact.</p>
+    <div id="apercu"></div>
+  </section>
+
+  <p class="note">
+    Chaque essai utilise une adresse unique, pour que rien ne soit servi depuis la
+    mémoire du navigateur : les chiffres sont ceux d'une <strong>première visite</strong>.
+    Relance plusieurs fois — le réseau varie.
+  </p>
+</main>
+
+<script src="essai.js"></script>
+</body>
+</html>
