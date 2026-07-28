@@ -6718,21 +6718,12 @@
       + '</button>';
   }
 
-  // COURSES EN COURS : elles ne sont plus dans l'historique (replié, tout en
-  // bas). La grosse fiche s'ouvre donc toute seule sur la première. S'il y en a
-  // PLUSIEURS, et seulement dans ce cas, on affiche de quoi basculer entre
-  // elles — sinon ce serait la même course écrite deux fois à l'écran.
-  // Renvoie la liste des courses en cours.
   function lvRenderEnCours(mesCourses) {
-    var enCours = mesCourses.filter(function (c) { return !lvFini(c); });
-    var ecEl = document.getElementById('courierEnCours');
-    if (ecEl) {
-      ecEl.hidden = enCours.length < 2;
-      ecEl.innerHTML = enCours.length < 2 ? ''
-        : '<h3 class="lv-h3">🔴 Mes courses en cours (' + enCours.length + ')</h3>'
-          + enCours.map(function (c) { return lvCourseCardHTML(c); }).join('');
-    }
-    return enCours;
+    return lvRenderSignets(mesCourses, 'courierEnCours', '🛵 Course en cours', function (c) {
+      var z = LV_BAREME[(c.zone || 1) - 1] || LV_BAREME[0];
+      return z.emoji + ' Zone ' + c.zone + ' · <strong>'
+        + (c.paid && c.prix ? c.prix + ' €' : lvMyPrice(c.zone) + ' €') + '</strong>';
+    }, 'data-course-focus');
   }
 
   // Plus AUCUNE course en cours → la grosse fiche DISPARAÎT (demande user
@@ -6985,7 +6976,10 @@
           };
         })(cards[i]);
       }
-      if (enCours.length) showDetail(enCours[0], canAccept); else lvFermerFiche();
+      // AUCUNE ouverture automatique (décision user 28/07/2026) : le signet
+      // orange suffit à dire qu'une course tourne ; la grosse fiche ne s'ouvre
+      // qu'au clic dessus.
+      lvFermerFiche();
       // Pastilles sur la carte (couleur de zone)
       mapReady.then(function (map) {
         if (!map || !mapEl._ptLayer) return;
@@ -7033,6 +7027,35 @@
       + '<button type="button" class="btn primary" id="lvTodoBtn">' + quoi.b + '</button></div>';
     var b = document.getElementById('lvTodoBtn');
     if (b) b.onclick = function () { ouvrir(c); };
+  }
+
+  // SIGNET « en cours » (décision user 28/07/2026 : « il est censé y avoir le
+  // petit signet en cours, orange effet néon, donc la grosse fiche n'a pas
+  // besoin de rester ouverte »). C'est LUI qui porte la course tant qu'elle
+  // n'est pas finie : visible d'emblée, hors de l'historique replié, et un
+  // clic ouvre la grosse fiche. Sans lui, une course en cours serait
+  // introuvable — elle ne figure plus dans aucune liste.
+  function lvSignetHTML(c, titre, attr) {
+    return '<button type="button" class="lv-signet" ' + attr + '="' + escapeHTML(String(c.id)) + '">'
+      + '<span class="lv-signet__c"><span class="lv-signet__t">' + titre + '</span>'
+      + '<span class="lv-signet__s">📍 ' + escapeHTML(String(c.address || '').slice(0, 48))
+      + (c.date ? ' · ' + escapeHTML(c.date) : '') + '</span></span>'
+      + '<span class="lv-pill lv-pill--wait"><span class="lv-pill__dot" aria-hidden="true"></span>'
+      + 'Statut : en cours</span></button>';
+  }
+
+  // Rend les signets des courses EN COURS dans `hostId`, et renvoie la liste.
+  // Bloc masqué quand il n'y a rien en cours : jamais de titre orphelin.
+  function lvRenderSignets(courses, hostId, titre, ligne, attr) {
+    var enCours = courses.filter(function (c) { return !lvFini(c); });
+    var host = document.getElementById(hostId);
+    if (host) {
+      host.hidden = !enCours.length;
+      host.innerHTML = !enCours.length ? ''
+        : '<h2 class="lv-h2">' + titre + (enCours.length > 1 ? ' (' + enCours.length + ')' : '') + '</h2>'
+          + enCours.map(function (c) { return lvSignetHTML(c, ligne(c), attr); }).join('');
+    }
+    return enCours;
   }
 
   // Grille de FICHES : une information = une fiche, côte à côte, et non plus
@@ -7275,10 +7298,8 @@
       mine.forEach(function (c) { byId[c.id] = c; });
       // Une livraison au statut « livrée » ATTEND une action du client (vérifier
       // les photos puis confirmer, ce qui débloque le paiement du livreur).
-      // Elle est signalée dans la liste et son détail s'ouvre tout seul : sans
-      // ça, le bouton de confirmation restait invisible tant qu'on ne cliquait
-      // pas sur la bonne carte, et on pouvait croire qu'il n'existait pas.
-      var aConfirmer = mine.filter(function (c) { return c.status === 'livree'; })[0] || null;
+      // Elle est signalée dans la liste ET remontée par lvTodoClient, dont le
+      // bouton ouvre le détail : le client n'a jamais à deviner où cliquer.
       listEl.innerHTML = mine.map(function (c) {
         var z = LV_BAREME[(c.zone || 1) - 1] || LV_BAREME[0];
         var attend = (c.status === 'livree');
@@ -7290,12 +7311,19 @@
           + '</button>';
       }).join('');
       lvTodoClient(mine, showDetail);
-      // La liste vit désormais dans l'historique REPLIÉ : la livraison en cours
-      // doit donc s'ouvrir d'elle-même, sinon elle serait inatteignable sans
-      // déplier un bloc nommé « historique ».
-      var aOuvrir = aConfirmer || mine.filter(function (c) { return !lvFini(c); })[0] || null;
-      if (aOuvrir) showDetail(aOuvrir);
-      var cards = listEl.querySelectorAll('[data-deliv-focus]');
+      // Signet « en cours », hors de l'historique replié : la livraison en
+      // cours reste atteignable d'un clic, sans qu'aucune fiche ne s'ouvre
+      // toute seule. Symétrique de l'espace livreur.
+      lvRenderSignets(mine, 'clientDelivEnCours', '📦 Livraison en cours', function (c) {
+        var z = LV_BAREME[(c.zone || 1) - 1] || LV_BAREME[0];
+        return z.emoji + ' Zone ' + c.zone + ' · <strong>' + lvPrixTxt(c) + '</strong>';
+      }, 'data-deliv-focus');
+      var detEl = document.getElementById('clientDelivDetail');
+      if (detEl) { detEl.hidden = true; detEl.innerHTML = ''; }
+      // ⚠️ Portée : les signets « en cours » sont HORS de `listEl` (ils vivent
+      // au-dessus, en dehors de l'historique replié). Une recherche limitée à
+      // la liste les laisserait morts au clic.
+      var cards = document.querySelectorAll('#view-mes-livraisons [data-deliv-focus]');
       for (var i = 0; i < cards.length; i++) {
         (function (btn) {
           btn.onclick = function () {

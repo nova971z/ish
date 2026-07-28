@@ -169,6 +169,10 @@ for (const [nm, lines] of called) {
   // paramètre de fonction / variable locale recevant une fonction : cherché dans tout l'AST
   const isLocal = new RegExp('(?:var|let|const|function)\\s+' + nm + '\\b').test(APP)
     || new RegExp('function\\s*\\([^)]*\\b' + nm + '\\b').test(APP)
+    // Paramètre d'une fonction NOMMÉE : `function f(a, cb, c)`. Sans cette
+    // ligne, seules les fonctions anonymes voyaient leurs paramètres reconnus,
+    // et toute fonction nommée recevant un callback était signalée à tort.
+    || new RegExp('function\\s+\\w+\\s*\\([^)]*\\b' + nm + '\\b').test(APP)
     || new RegExp('\\b' + nm + '\\s*(?:,|\\))\\s*(?:\\{|=>)').test(APP);
   if (!isLocal) undefinedCalls.push(nm + '  (app.js:' + lines.slice(0, 3).join(',') + ')');
 }

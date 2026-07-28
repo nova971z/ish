@@ -1125,22 +1125,37 @@ demande arrivait donc « sans marchandise ».
   son texte dépend AUSSI de l'accord (plus de contradiction avec le bandeau).
 - **LIVREUR** : « Mes courses » → **« 🧾 Historique de course »**, `<details>`
   REPLIÉ, **tout en bas**, ne contenant QUE les courses terminées/annulées
-  (`lvFini`). La course EN COURS vit dans la grosse fiche, avec une **pastille
-  orange néon « Statut : en cours »** à droite du titre (`margin-left:auto` →
-  reste à droite même quand elle passe à la ligne sur iPhone). Quand la course
-  se termine, la fiche **disparaît** (`lvFermerFiche`) et la course rejoint
-  l'historique — y compris SANS rechargement (le vrai parcours).
-- ⚠️ L'historique n'est PAS un bouton mort : un clic y rouvre la fiche, avec
-  une pastille **verte « Statut : terminée »**.
+  (`lvFini`).
+- **🟠 LE SIGNET (correctif user, 2e passe) : AUCUNE fiche ne s'ouvre toute
+  seule.** J'avais d'abord fait s'auto-ouvrir la grosse fiche sur la course en
+  cours (elle n'était plus dans aucune liste). L'user a tranché : « pas besoin
+  qu'elle soit ouverte, il est censé y avoir le petit signet en cours, orange
+  effet néon ». → `lvSignetHTML` / `lvRenderSignets` : un **signet cliquable**
+  (liseré + halo orange néon, pastille « Statut : en cours ») porte la course
+  tant qu'elle tourne, **hors** de l'historique replié, et c'est LUI qui ouvre
+  la grosse fiche. Conteneurs `#courierEnCours` et `#clientDelivEnCours` —
+  **les deux espaces se lisent pareil**. `lvFermerFiche()` à chaque rendu.
+  ⚠️ Le signet vivant HORS de la liste, la délégation de clic client a dû
+  passer de `listEl.querySelectorAll` à `#view-mes-livraisons …` — sinon
+  bouton mort.
+- La grosse fiche garde sa **pastille** à droite du titre (`margin-left:auto`
+  → reste à droite même en passant à la ligne sur iPhone) : **orange « en
+  cours »**, **verte « terminée »** quand on la rouvre depuis l'historique.
+- ⚠️ L'historique n'est PAS un bouton mort : un clic y rouvre la fiche.
 - ⚠️ PIÈGE ATTRAPÉ : mon premier correctif mettait un garde-fou dans
   `showDetail` — **il était inatteignable** (le sabotage ne le faisait jamais
   échouer) ET il aurait rendu l'historique cliquable-sans-effet. Retiré. RÈGLE
   CONFIRMÉE : **une vérification qu'on ne parvient pas à faire échouer est une
   vérification qui ne vérifie rien** — chaque contrôle de cette session a été
   prouvé faillible par réintroduction délibérée du défaut (6 sabotages).
-- VÉRIFIÉ : **49/49 plan8.mjs** + 79/79 couriers + 32/32 bulle + 25/25 detail
+- 🔧 **OUTIL DURCI** : `scripts/audit/p1-static.js` ne reconnaissait les
+  paramètres-callbacks que sur les fonctions **anonymes** → toute fonction
+  NOMMÉE recevant un callback était signalée « appel vers une fonction jamais
+  définie ». Regex ajoutée pour `function nom(a, cb, c)`. Re-prouvé faillible
+  (un vrai appel inexistant est toujours détecté).
+- VÉRIFIÉ : **62/62 plan8.mjs** + 81/81 couriers + 32/32 bulle + 25/25 detail
   + 24/24 espace + 22/22 plan7 + 15/15 accordE2E + 16/16 a11y + 15/15 adminliv
-  + 14/14 course-pay. CI verte.
+  + 14/14 course-pay (couriers passé à 81). CI verte.
 - HARNAIS PÉRIMÉS RECALÉS sur la nouvelle spec (ils encodaient des exigences
   que l'user a lui-même renversées) : `#courierMine` est désormais dans un
   `<details>` replié → `waitForSelector` doit utiliser `state:'attached'`, pas

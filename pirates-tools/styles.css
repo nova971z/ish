@@ -8539,6 +8539,32 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   .lv-statut--wait .lv-statut__dot { animation: lv-pulse 1.8s ease-in-out infinite; }
 }
 
+/* ── SIGNET « en cours » ───────────────────────────────────────────────────
+   Le petit marqueur orange néon qui porte la course tant qu'elle tourne
+   (user 28/07/2026). Il est CLIQUABLE — c'est lui qui ouvre la grosse fiche,
+   qui ne s'affiche donc plus d'elle-même. Liseré orange à gauche pour qu'on
+   le repère sans lire. */
+.lv-signet {
+  display: flex; align-items: center; gap: .8rem; flex-wrap: wrap;
+  width: 100%; text-align: left; cursor: pointer;
+  position: relative; padding: .9rem 1rem .9rem 1.15rem; border-radius: 14px;
+  border: 1px solid rgba(251, 146, 60, .45); background: rgba(251, 146, 60, .07);
+  box-shadow: 0 0 18px rgba(251, 146, 60, .16);
+  transition: transform .16s ease, border-color .2s ease, box-shadow .2s ease;
+}
+.lv-signet + .lv-signet { margin-top: .6rem; }
+.lv-signet::before {
+  content: ''; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px;
+  border-radius: 3px; background: #fb923c; box-shadow: 0 0 10px rgba(251, 146, 60, .8);
+}
+.lv-signet:hover {
+  transform: translateY(-1px); border-color: rgba(251, 146, 60, .75);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .35), 0 0 22px rgba(251, 146, 60, .3);
+}
+.lv-signet__c { flex: 1 1 12rem; display: flex; flex-direction: column; gap: .25rem; min-width: 0; }
+.lv-signet__t { font-size: .98rem; color: #e6edf5; }
+.lv-signet__s { font-size: .84rem; color: var(--muted, #c9c9d9); }
+
 /* En-tête de la grosse fiche livreur : titre à gauche, PASTILLE à droite. */
 .lv-dhead { display: flex; align-items: flex-start; justify-content: space-between; gap: .8rem; flex-wrap: wrap; }
 .lv-dhead .lv-h2 { margin: 0; flex: 1 1 14rem; }
