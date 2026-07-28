@@ -1114,6 +1114,25 @@ demande arrivait donc « sans marchandise ».
   (`openPayModal(items, null, {goodsCourseId})`). Vérifié : la modale s'ouvre,
   contient le formulaire de carte, et on ne navigue nulle part.
 
+## ⛔ JAMAIS DE BOUTON GRISÉ COMME ÉTAT DE REPOS (28/07/2026, SW v527)
+2e reproche user sur le MÊME bouton : « le bouton régler ma marchandise ne
+marche pas, il est devenu sombre, je ne peux pas tester ». J'avais remplacé le
+bouton mort par un bouton `disabled` — même faute dans un autre costume : ça ne
+dit ni ce qui manque, ni quoi faire, et ça bloque le test.
+- SON CAS EXACT, à retenir : demande déposée AVANT le correctif `lines`
+  (donc `c.lines` vide) **ET** panier effacé — il navigue TOUJOURS en privé et
+  ferme le site, donc localStorage est vidé entre deux visites. Le repli
+  « panier courant » ne trouvait donc rien non plus. Zéro article chiffrable.
+- RÈGLE GRAVÉE : dans ce parcours, un bouton n'est JAMAIS `disabled` au repos.
+  Il est toujours actif et a toujours un effet VISIBLE — soit il ouvre la
+  modale carte, soit il emmène là où on peut débloquer (panier), avec une
+  ligne d'explication. `disabled` reste légitime UNIQUEMENT le temps d'un
+  envoi en cours (état transitoire).
+- Vérifié par sabotage : remettre `disabled` fait tomber le test sur
+  `opacity:0.45` — la « couleur sombre » qu'il a vue est mesurée, pas devinée.
+- ⚠️ PIÈGE HARNAIS : `addInitScript` réinjectait le panier À CHAQUE navigation
+  → impossible de simuler un panier vidé. Drapeau `pt_no_cart` ajouté.
+
 ## 🚦 BANDEAU DE STATUT + RÉORGANISATION DES DEUX ESPACES (28/07/2026, SW v527)
 - **CLIENT** : la petite fiche « 🚦 Statut » ne reflétait que le statut BRUT.
   Or il reste `'acceptee'` jusqu'au règlement de la marchandise → elle affichait
@@ -1153,7 +1172,7 @@ demande arrivait donc « sans marchandise ».
   NOMMÉE recevant un callback était signalée « appel vers une fonction jamais
   définie ». Regex ajoutée pour `function nom(a, cb, c)`. Re-prouvé faillible
   (un vrai appel inexistant est toujours détecté).
-- VÉRIFIÉ : **62/62 plan8.mjs** + 81/81 couriers + 32/32 bulle + 25/25 detail
+- VÉRIFIÉ : **70/70 plan8.mjs** + 81/81 couriers + 32/32 bulle + 25/25 detail
   + 24/24 espace + 22/22 plan7 + 15/15 accordE2E + 16/16 a11y + 15/15 adminliv
   + 14/14 course-pay (couriers passé à 81). CI verte.
 - HARNAIS PÉRIMÉS RECALÉS sur la nouvelle spec (ils encodaient des exigences

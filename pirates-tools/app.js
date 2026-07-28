@@ -6067,14 +6067,22 @@
       + (lignes.depuisPanier
         ? '<p class="lv-hint">ℹ️ Articles repris de <strong>ton panier</strong> : cette demande est antérieure '
           + 'à l\'enregistrement des lignes. Vérifie la liste avant de régler.</p>' : '')
-      // Le bouton de paiement ouvre la MODALE CARTE habituelle — celle où l'on
-      // saisit son numéro de carte. C'est le seul et unique chemin de règlement.
-      + '<div class="lv-cta"><button type="button" class="btn primary" id="acPay"'
-      + (lignes.payables.length ? '' : ' disabled') + '>💳 Payer ma marchandise</button>'
+      // ⛔ JAMAIS DE BOUTON GRISÉ ICI (28/07/2026, 2e reproche user : « il est
+      // devenu sombre, je ne peux pas tester »). Un bouton éteint ne dit ni ce
+      // qui manque ni quoi faire — c'est un cul-de-sac. Le bouton est TOUJOURS
+      // actif et ouvre la MODALE CARTE (celle où l'on saisit son numéro) dès
+      // qu'il y a quelque chose à régler ; sinon il conduit là où l'on peut
+      // débloquer la situation, et le panneau l'explique en une ligne.
+      + (lignes.payables.length ? '' : '<div class="lv-note lv-note--warn">'
+        + 'Cette demande date d\'<strong>avant l\'enregistrement du panier</strong>, et ton panier '
+        + 'est vide : il n\'y a donc aucun article à chiffrer. Remplis ton panier — '
+        + 'il sera repris ici automatiquement.</div>')
+      + '<div class="lv-cta"><button type="button" class="btn primary" id="acPay">'
+      + (lignes.payables.length ? '💳 Payer ma marchandise' : '🧰 Remplir mon panier') + '</button>'
       + '<span class="lv-cta__note" id="acSt" aria-live="polite">'
       + (lignes.payables.length
         ? 'Le paiement confirme définitivement la course.'
-        : 'Ajoute ta quincaillerie au panier pour pouvoir la régler ici.')
+        : 'Tes articles reviendront dans ce panneau, prêts à régler.')
       + '</span></div>';
   }
 
@@ -6248,7 +6256,13 @@
       var payBtn = panel.querySelector('#acPay');
       if (payBtn) payBtn.onclick = function () {
         var items = lvPayLignes(c).payables;
-        if (!items.length) { toast('Ajoute ta quincaillerie au panier pour la régler ici', 'error'); return; }
+        // Rien à chiffrer → on EMMÈNE l'utilisateur là où il peut agir. Le
+        // bouton fait toujours quelque chose de visible : jamais un clic mort.
+        if (!items.length) {
+          toast('Ajoute ta quincaillerie au panier — elle sera reprise ici', 'success');
+          location.hash = '#/catalogue';
+          return;
+        }
         openPayModal(items, null, { goodsCourseId: c.id });
       };
       // QR du code de remise (généré 100 % en local, jamais de service tiers)
