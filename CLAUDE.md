@@ -1479,6 +1479,21 @@ preuve A5, barème) — l'information est conservée, la redondance retirée.
   ré-authentification, clé texte retirée, blocage e-mail levé, défi supprimé —
   tous détectés. + 20/20 plan12-serveur + 27/27 plan11 + 32/32 plan10 + 70/70
   plan9 + 70/70 plan8 + 82/82 couriers + 214 autres. CI verte.
+### 📱 L'USER N'A PAS DE TÉLÉPHONE — TOUT EST SUR IPAD (contrainte gravée)
+Signalé le 28/07/2026 : **un appareil ne peut pas scanner son propre écran.**
+La saisie manuelle de la clé n'est donc PAS un repli pour lui, c'est LE chemin.
+- La **clé est présentée EN PREMIER**, le QR passe dans un `<details>` replié
+  (« ou scanner depuis un autre appareil »).
+- **Bouton « 📋 Copier la clé »** — sur tablette, sélectionner un texte à la
+  main est pénible et un seul caractère oublié = code refusé sans explication.
+  ⚠️ Repli obligatoire si le presse-papiers est refusé : on SÉLECTIONNE la clé
+  (« touche Copier »). Jamais de bouton sans effet — sabotage vérifié.
+- La marche à suivre est écrite : **+ → « Saisir une clé de configuration » →
+  type « Basé sur le temps »**.
+- 💡 Sur iPad, le **trousseau Apple fait le TOTP nativement** (Réglages →
+  Mots de passe → le compte → « Configurer le code de vérification » → « Saisir
+  une clé de configuration »). Il remplit même le code automatiquement à la
+  connexion. À privilégier sur une app tierce dans son cas.
 ### ⏭️ RESTE À FAIRE (user)
 Activer la 2FA sur le compte admin depuis Mon compte → 🔐, **après** avoir
 vérifié son adresse e-mail. Garder `scripts/mfa-unlock.js` sous la main.

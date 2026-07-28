@@ -202,15 +202,27 @@
       var box = document.getElementById('mfaStep2');
       if (!box) return;
       box.hidden = false;
-      box.innerHTML = '<h4 class="lv-panel__t">Étape 2 — scanne ce code</h4>'
-        + '<div class="lv-handcode"><div class="lv-handcode__qr" id="mfaQR">…</div>'
-        + '<p class="lv-hint">Impossible de scanner ? Saisis cette clé à la main :</p>'
-        + '<div class="lv-handcode__row"><span class="lv-handcode__key">Clé</span>'
-        + '<strong class="lv-handcode__num">' + CTX.escape(p.cle) + '</strong></div></div>'
+      // DEUX VOIES À ÉGALITÉ, la clé D'ABORD (décision user 28/07/2026 : « je
+      // n'ai pas de téléphone, tout est sur mon iPad »). Un appareil ne peut
+      // pas scanner son propre écran : pour lui, la saisie manuelle n'est pas
+      // un repli, c'est LE chemin. Le QR passe donc en second, replié.
+      box.innerHTML = '<h4 class="lv-panel__t">Étape 2 — enregistre la clé</h4>'
+        + '<div class="lv-handcode">'
+        + '<div class="lv-handcode__row"><span class="lv-handcode__key">Ta clé</span>'
+        + '<strong class="lv-handcode__num" id="mfaCle">' + CTX.escape(p.cle) + '</strong></div>'
+        + '<div class="lv-cta"><button type="button" class="btn" id="mfaCopy">📋 Copier la clé</button>'
+        + '<span class="lv-cta__note" id="mfaCopySt" aria-live="polite"></span></div></div>'
+        + '<p class="lv-hint">Dans ton application : <strong>+</strong> → '
+        + '<strong>« Saisir une clé de configuration »</strong> → colle la clé, '
+        + 'type <strong>« Basé sur le temps »</strong>.</p>'
+        + '<details class="lv-histo" style="margin:.6rem 0"><summary class="lv-histo__sum">'
+        + '<span class="lv-h2">📷 Ou scanner un QR (depuis un autre appareil)</span></summary>'
+        + '<div class="lv-handcode__qr" id="mfaQR" style="padding:1rem">…</div></details>'
         + '<label class="lv-field"><span>Étape 3 — recopie le code affiché par l\'application</span>'
         + '<input type="text" id="mfaCode" inputmode="numeric" maxlength="6" placeholder="123456" autocomplete="one-time-code"></label>'
         + '<div class="lv-cta"><button type="button" class="btn primary" id="mfaConfirm">Activer</button>'
         + '<span class="lv-cta__note" id="mfaSt2" aria-live="polite"></span></div>';
+      copier(p.cle);
       CTX.qr(p.url).then(function (url) {
         var q = document.getElementById('mfaQR');
         if (!q) return;
@@ -226,6 +238,32 @@
       btn.disabled = false;
       if (st) st.textContent = '❌ ' + lisible(e);
     });
+  }
+
+  // Copie de la clé. Sur une tablette, sélectionner un texte à la main est
+  // pénible et source d'erreur (un caractère oublié = code toujours refusé).
+  // Repli si le presse-papiers est refusé : on SÉLECTIONNE la clé pour que
+  // « Copier » du menu système suffise — jamais de bouton sans effet.
+  function copier(cle) {
+    var b = document.getElementById('mfaCopy');
+    var st = document.getElementById('mfaCopySt');
+    if (!b) return;
+    b.onclick = function () {
+      var ok = function () { if (st) st.textContent = '✅ Clé copiée'; };
+      var replier = function () {
+        var el = document.getElementById('mfaCle');
+        if (el && window.getSelection && document.createRange) {
+          var r = document.createRange(); r.selectNodeContents(el);
+          var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+          if (st) st.textContent = 'Clé sélectionnée — touche « Copier ».';
+        } else if (st) st.textContent = 'Recopie la clé ci-dessus.';
+      };
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(String(cle)).then(ok).catch(replier);
+        } else { replier(); }
+      } catch (_) { replier(); }
+    };
   }
 
   function activer(btn, secret) {
