@@ -8413,6 +8413,26 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
    principale à côté : les actions occupent toute la largeur, sur UNE RANGÉE. */
 .lv-chat__body { display: block; }
 .lv-chat__main { min-width: 0; }
+/* ── FICHES D'INFORMATION : une info = une fiche, côte à côte ──────────────
+   Remplace cinq lignes de texte brut empilées (demande user 28/07/2026).
+   Elles s'enroulent d'elles-mêmes ; sur téléphone, deux par rangée. */
+.lv-facts {
+  display: grid; gap: .55rem; margin: .8rem 0;
+  grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+}
+.lv-fact {
+  display: flex; flex-direction: column; gap: .15rem; min-width: 0;
+  padding: .6rem .7rem; border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, .1); background: rgba(255, 255, 255, .04);
+}
+.lv-fact__k {
+  font-size: .7rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+  color: var(--muted, #9aa4b2);
+}
+.lv-fact__v { font-size: .92rem; font-weight: 700; color: #fff; line-height: 1.35; word-break: break-word; }
+.lv-fact__v em { display: block; font-style: normal; font-weight: 500; font-size: .78rem;
+  color: var(--muted, #c9c9d9); margin-top: .1rem; }
+
 .lv-chat__side { display: flex; flex-wrap: wrap; gap: .6rem; }
 .lv-chat__side .lv-cbtn { flex: 1 1 180px; min-width: 0; }
 .lv-cbtn { display: grid; gap: .1rem; padding: .6rem .7rem; border-radius: 12px; border: 1px solid rgba(255,255,255,.14); background: rgba(0,0,0,.3); color: #fff; text-align: left; cursor: pointer; transition: border-color .18s, background .18s; }

@@ -6566,22 +6566,25 @@
       det.hidden = false;
       // Rémunération : payée en ligne par le client, GELÉE jusqu'à sa
       // confirmation de réception (photo à l'appui) — puis versée au livreur.
-      var payLine = '';
-      if (c.paid) {
-        payLine = '💰 <strong>' + c.prix + ' €</strong> — '
-          + (c.escrow === 'libere' ? 'versés sur ton compte ✅'
+      // Même présentation en FICHES que côté client : les deux espaces doivent
+      // se lire de la même façon (demande user 28/07/2026).
+      var prixV = c.paid
+        ? c.prix + ' €<em>' + (c.escrow === 'libere' ? 'versés sur ton compte ✅'
             : c.escrow === 'liberable' ? 'débloqués, versement en cours'
-            : 'payés par le client, <strong>gelés</strong> jusqu\'à sa confirmation de réception') + '<br>';
-      }
+            : 'gelés jusqu\'à la confirmation du client') + '</em>'
+        : (c.accord && c.accord.prix
+            ? c.accord.prix + ' €<em>' + (c.accord.valide ? 'convenus' : 'proposés') + '</em>'
+            : lvMyPrice(c.zone) + ' €<em>ton tarif zone ' + c.zone + '</em>');
       var detPrix = c.paid && c.prix ? (c.prix + ' €') : (lvMyPrice(c.zone) + ' € — ton tarif zone ' + c.zone);
       det.innerHTML = '<h2 class="lv-h2">' + z.emoji + ' Course zone ' + c.zone + ' — <strong>' + detPrix + '</strong></h2>'
-        + '<div class="lv-course__body">'
-        + '📦 ' + escapeHTML(c.productTitle || '') + (c.qty > 1 ? ' × ' + c.qty : '') + '<br>'
-        + '📍 ' + escapeHTML(c.address || '') + ' <em>(' + c.km + ' km de Sainte-Anne)</em><br>'
-        + '📅 ' + (c.date ? escapeHTML(c.date) : 'au plus tôt') + ' ' + whenTxt(c) + '<br>'
-        + payLine
-        + '🚦 Statut : <strong>' + lvCourseStatusTxt(c, false) + '</strong>'
-        + (c.acceptedByMe ? ' — ✅ acceptée par toi' : '') + '</div>'
+        + lvFichesHTML([
+          { i: '📦', t: 'Marchandise', v: escapeHTML(c.productTitle || '—') + (c.qty > 1 ? ' <em>× ' + c.qty + '</em>' : '') },
+          { i: '📍', t: 'Chantier', v: escapeHTML(c.address || '—') + '<em>' + c.km + ' km de Sainte-Anne</em>' },
+          { i: '📅', t: 'Quand', v: (c.date ? escapeHTML(c.date) : 'Au plus tôt') + '<em>' + whenTxt(c) + '</em>' },
+          { i: '💰', t: 'Prix', v: prixV },
+          { i: '🚦', t: 'Statut', v: lvCourseStatusTxt(c, false)
+              + (c.acceptedByMe ? '<em>acceptée par toi</em>' : '') }
+        ])
         + (canAccept && c.status === 'en_attente'
           ? '<button type="button" class="btn primary" style="margin-top:.6rem" data-course-accept="' + escapeHTML(c.id) + '">✅ Accepter cette course</button>' : '')
         // Validation de livraison en 3 preuves : CODE DE REMISE (le client le
@@ -6813,6 +6816,17 @@
     if (b) b.onclick = function () { ouvrir(c); };
   }
 
+  // Grille de FICHES : une information = une fiche, côte à côte, et non plus
+  // cinq lignes de texte brut empilées (demande user 28/07/2026). Les fiches
+  // s'enroulent d'elles-mêmes sur petit écran.
+  // `champs` = [{ i: emoji, t: intitulé, v: valeur HTML (déjà échappée) }]
+  function lvFichesHTML(champs) {
+    return '<div class="lv-facts">' + champs.filter(Boolean).map(function (f) {
+      return '<div class="lv-fact"><span class="lv-fact__k">' + f.i + ' ' + f.t + '</span>'
+        + '<span class="lv-fact__v">' + f.v + '</span></div>';
+    }).join('') + '</div>';
+  }
+
   function renderClientDeliveries() {
     // Même course d'auth que l'espace livreur : sans le jeton, course-list
     // répond 401 et la page affiche « Erreur » à tort au chargement à froid.
@@ -6843,22 +6857,22 @@
       det.hidden = false;
       // Argent : montant payé en ligne (produits + livraison) — les frais de
       // livraison sont gelés puis reversés au livreur après confirmation.
-      var payLine = c.paid
-        ? '💶 Payé en ligne : <strong>' + formatPrice((c.amountCents || 0) / 100) + '</strong> — dont '
-          + c.prix + ' € de livraison '
+      var prix = c.paid
+        ? formatPrice((c.amountCents || 0) / 100) + '<em>dont ' + c.prix + ' € de livraison, '
           + (c.escrow === 'libere' ? 'versés au livreur ✅'
             : c.escrow === 'liberable' ? 'débloqués pour le livreur'
-            : 'gelés jusqu\'à ta confirmation de réception') + '<br>'
-        : (c.courierUid
-            ? '💶 Prix : <strong>à convenir dans la discussion</strong> avec ton livreur (chacun fixe ses tarifs)<br>'
-            : '💶 Aucun paiement pour l\'instant — le prix se convient avec le livreur qui acceptera<br>');
+            : 'gelés jusqu\'à ta confirmation') + '</em>'
+        : (c.accord && c.accord.prix
+            ? c.accord.prix + ' €<em>' + (c.accord.valide ? 'convenus' : 'proposés') + '</em>'
+            : 'À convenir<em>' + (c.courierUid ? 'dans la discussion' : 'avec le livreur qui acceptera') + '</em>');
       var h = '<h2 class="lv-h2">' + z.emoji + ' Livraison zone ' + c.zone + '</h2>'
-        + '<div class="lv-course__body">'
-        + '📦 ' + escapeHTML(c.productTitle || '') + (c.qty > 1 ? ' × ' + c.qty : '') + '<br>'
-        + '📍 ' + escapeHTML(c.address || '') + ' <em>(' + c.km + ' km de Sainte-Anne)</em><br>'
-        + '📅 ' + (c.date ? escapeHTML(c.date) : 'au plus tôt') + ' ' + whenTxt(c) + '<br>'
-        + payLine
-        + '🚦 ' + statusLabel(c) + '</div>';
+        + lvFichesHTML([
+          { i: '📦', t: 'Marchandise', v: escapeHTML(c.productTitle || '—') + (c.qty > 1 ? ' <em>× ' + c.qty + '</em>' : '') },
+          { i: '📍', t: 'Chantier', v: escapeHTML(c.address || '—') + '<em>' + c.km + ' km de Sainte-Anne</em>' },
+          { i: '📅', t: 'Quand', v: (c.date ? escapeHTML(c.date) : 'Au plus tôt') + '<em>' + whenTxt(c) + '</em>' },
+          { i: '💶', t: 'Prix', v: prix },
+          { i: '🚦', t: 'Statut', v: statusLabel(c) }
+        ]);
       // CODE DE REMISE : le client le garde pour lui et ne le donne au livreur
       // qu'EN MAIN PROPRE, contre le colis — sans lui, le livreur ne peut pas
       // valider la livraison. Affiché en clair + en QR (généré 100 % en local).
@@ -6869,14 +6883,11 @@
           + 'elle n\'a donc <strong>pas de code de remise</strong> et aucun montant n\'a été débité. '
           + 'Passe une nouvelle commande pour voir le code, le QR et la chaîne complète.</div>';
       }
-      if (c.mine && c.code && ['en_attente', 'acceptee', 'confirmee'].indexOf(c.status) !== -1) {
-        h += '<div class="lv-handcode">'
-          + '<div class="lv-handcode__row"><span class="lv-handcode__key">🔑 Code de remise</span>'
-          + '<strong class="lv-handcode__num">' + escapeHTML(c.code) + '</strong></div>'
-          + '<div class="lv-handcode__qr" id="clientCodeQR"></div>'
-          + '<p class="lv-hint">Donne ce code au livreur (ou fais-lui scanner le QR) <strong>uniquement quand il te remet le colis</strong> — c\'est lui qui valide la livraison et débloque son paiement.</p>'
-          + '</div>';
-      }
+      // 🔑 LE CODE ET SON QR NE SONT PLUS ICI (demande user 28/07/2026) : ils
+      // s'affichaient DEUX FOIS à l'écran — une fois en clair dans ce bloc, une
+      // fois dans le panneau « Code de remise ». On ne garde que le panneau,
+      // qui ne s'ouvre qu'au clic : un code secret n'a rien à faire en
+      // permanence sous les yeux de qui passe derrière l'épaule.
       // Livrée → le client vérifie les PHOTOS du livreur (colis remis + vue du
       // chantier) et les compare à SA photo de commande, puis confirme : c'est
       // sa confirmation qui débloque les frais gelés (anti-arnaque des 2 côtés).
@@ -6949,14 +6960,6 @@
         }).catch(function () { cancelBtn.disabled = false; if (cst) cst.textContent = '❌ Erreur réseau'; });
       };
       wireVideoDispute(det, c, renderClientDeliveries);
-      // QR du code de remise (généré 100 % en local — ensureQRLib, jamais de tiers)
-      var qrBox = det.querySelector('#clientCodeQR');
-      if (qrBox && c.code) {
-        ensureQRLib().then(function () {
-          var url = cryptoLocalQR(c.code);
-          if (url) qrBox.innerHTML = '<img src="' + url + '" alt="QR du code de remise ' + escapeHTML(c.code) + '">';
-        }).catch(function () { /* le code en clair suffit */ });
-      }
       // Photos de preuve + confirmation de réception (statut « livrée »)
       if (c.status === 'livree' && c.mine) {
         if (c.hasProof) {
