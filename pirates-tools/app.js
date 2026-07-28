@@ -3904,17 +3904,12 @@
     + 'pour ~12 € d\'essence aller-retour même en grosse moto.</p>';
 
   // ── BARÈME PAR ZONE (décision user, corrigée 26/07) ────────────────────────
-  // Ancrage : le trajet LE PLUS LONG = Sainte-Anne → BASSE-TERRE (la ville),
-  // zone 🔴 4 (rayon 46 km) = 100 € MAXIMUM. Tarif DÉGRESSIF proportionnel au
-  // rayon extérieur de zone : taux = 100 € / 46 km ≈ 2,17 €/km.
+  // Ancrage : trajet le plus long Sainte-Anne → Basse-Terre, zone 4 (46 km) =
+  // 100 € max. Dégressif proportionnel au rayon : ≈ 2,17 €/km.
   // → Z1 (10 km) 22 € · Z2 (22 km) 48 € · Z3 (34 km) 74 € · Z4 (46 km) 100 €.
-  // (Z1 respecte le plancher de 20 € voulu par l'user.)
-  // ⚖️ CE BARÈME EST UN REPÈRE CONSEILLÉ, JAMAIS UN TARIF IMPOSÉ — et le mot
-  // compte juridiquement (L7342-1, directive (UE) 2024/2831). Il n'y a aucune
-  // « rémunération minimum garantie » : chaque livreur fixe SES prix, au-dessus
-  // comme en dessous, sans la moindre conséquence. Le repère est calibré pour
-  // être juste DES DEUX CÔTÉS : le livreur reste largement gagnant une fois
-  // l'essence déduite (tableau admin Barème), l'artisan paie un prix tenable.
+  // ⚖️ REPÈRE CONSEILLÉ, JAMAIS UN TARIF IMPOSÉ — le mot compte juridiquement
+  // (L7342-1, directive (UE) 2024/2831). Aucune « rémunération minimum » :
+  // chaque livreur fixe SES prix, au-dessus comme en dessous, sans conséquence.
   var LV_BAREME = [
     { zone: 1, emoji: '🟢', km: '0-10',  prix: 22 },
     { zone: 2, emoji: '🔵', km: '10-22', prix: 48 },
@@ -8139,21 +8134,12 @@
     // Close sidebar on any navigation
     closeMenu();
 
-    // Retour en HAUT à chaque navigation. On réinitialise tout de suite (avant
-    // le rendu de la vue) PUIS après le prochain paint via rAF : plusieurs vues
-    // peignent leur contenu de façon asynchrone (filtre marque à +50 ms,
-    // animations reveal, 3D paresseux) et un décalage de mise en page laissait
-    // sinon un résidu de défilement (on n'atterrissait pas pile en haut).
-    // behavior:'instant' FORCE le saut immédiat malgré `html{scroll-behavior:
-    // smooth}` (sinon le défilement s'anime et le re-rendu de la vue interrompt
-    // l'animation en cours de route → on n'atterrissait pas pile en haut).
-    // isDataRefresh === true : re-rendu déclenché par l'arrivée tardive des
-    // données (enrichissement /api/products), PAS une navigation → on NE défile
-    // PAS (l'utilisateur a pu descendre entre-temps). Test STRICT obligatoire :
-    // onRouteChange est branché tel quel sur 'hashchange' (l.4100), donc le
-    // navigateur lui passe l'objet Event en 1er argument à chaque navigation —
-    // un simple `!isDataRefresh` le prenait pour un data-refresh (truthy) et
-    // sautait le scroll → on n'atterrissait plus en haut du catalogue.
+    // Retour en HAUT : tout de suite PUIS après le paint (rAF) — des vues
+    // peignent en asynchrone et laissaient un résidu de défilement.
+    // behavior:'instant' FORCE le saut malgré `html{scroll-behavior:smooth}`.
+    // ⚠️ Test STRICT `!== true` : onRouteChange est branché sur 'hashchange',
+    // le navigateur lui passe un Event en 1er argument — `!isDataRefresh` le
+    // prenait pour un data-refresh (truthy) et sautait le scroll.
     if (isDataRefresh !== true) {
       scrollTopNow();
       requestAnimationFrame(scrollTopNow);
@@ -8658,14 +8644,20 @@
 
     setBtnLoading(dom.loginSubmit, true);
     _fb.signInWithEmailAndPassword(_fb.auth, email, pwd)
-      .then(function (cred) {
-        toast('Bienvenue, ' + (cred.user.displayName || cred.user.email), 'success');
-        location.hash = '#/compte';
-      })
+      .then(function (cred) { loginOk(cred); })
       .catch(function (err) {
+        // DÉFI DU SECOND FACTEUR : la connexion n'a pas échoué, elle est
+        // SUSPENDUE. `err` porte de quoi la reprendre — on ne redemande donc
+        // jamais le mot de passe. Tout le reste vit dans mfa.js.
+        if (err && err.code === 'auth/multi-factor-auth-required') {
+          setBtnLoading(dom.loginSubmit, false);
+          // ⚠️ Module absent → on le DIT : sinon le formulaire « ne fait rien »
+          // alors que le mot de passe était bon.
+          ensureMFA().then(function (M) { M.defi(mfaCtx(), err, loginOk); })
+            .catch(function () { toast('Double authentification requise — recharge la page.', 'error'); });
+          return;
+        }
         toast(authLoginError(err), 'error'); // message générique (anti-énumération)
-      })
-      .finally(function () {
         setBtnLoading(dom.loginSubmit, false);
       });
   }
@@ -8876,6 +8868,7 @@
     if (dom.accVerifyBanner) {
       dom.accVerifyBanner.hidden = !!_currentUser.emailVerified;
     }
+    mfaInit();
 
     // Order history (async)
     renderOrderHistory();
@@ -9439,6 +9432,40 @@
   // vendue, licence MIT, vérifiée par aller-retour). Aucun service tiers → une
   // adresse crypto ne peut plus être substituée ni fuitée. Chargée à la demande.
   var _qrLibPromise = null;
+  function loginOk(cred) {
+    toast('Bienvenue, ' + (cred.user.displayName || cred.user.email), 'success');
+    location.hash = '#/compte';
+  }
+  // ══ DOUBLE AUTHENTIFICATION (TOTP) — TOUT vit dans mfa.js ════════════════
+  // app.js ne garde que le chargeur. Une visite qui ne touche ni à « Mon
+  // compte » ni au défi de connexion ne télécharge pas un octet de ce code.
+  var _mfaPromise = null;
+  function ensureMFA() {
+    if (window.PT_MFA) return Promise.resolve(window.PT_MFA);
+    if (_mfaPromise) return _mfaPromise;
+    _mfaPromise = new Promise(function (resolve, reject) {
+      var sc = document.createElement('script');
+      sc.src = 'mfa.js';          // même modèle que qrcode.js : le bump du SW purge le cache
+      sc.async = true;
+      sc.onload = function () { window.PT_MFA ? resolve(window.PT_MFA) : reject(new Error('mfa')); };
+      sc.onerror = function () { _mfaPromise = null; reject(new Error('mfa')); };
+      document.head.appendChild(sc);
+    });
+    return _mfaPromise;
+  }
+  // Le module ne connaît ni les variables d'app.js ni le DOM : on lui passe tout.
+  function mfaCtx() {
+    return {
+      fb: _fb, user: _currentUser, escape: escapeHTML, toast: toast,
+      qr: function (p) { return ensureQRLib().then(function () { return cryptoLocalQR(p); }); }
+    };
+  }
+  // Rendu de « Mon compte ». Échec = badge absent, jamais de page cassée.
+  function mfaInit() {
+    if (!_currentUser) return;
+    ensureMFA().then(function (M) { M.monter(mfaCtx()); }).catch(function () {});
+  }
+
   function ensureQRLib() {
     if (typeof window.qrcode === 'function') return Promise.resolve(window.qrcode);
     if (_qrLibPromise) return _qrLibPromise;
@@ -10458,20 +10485,13 @@
     return m ? decodeURIComponent(m[1].replace(/\+/g, ' ')) : null;
   }
 
-  // A5 — preuve de paiement pour /merci. AVANT : l'existence d'un
-  // pt_pending_order suffisait à écrire une commande « paid » + créditer la
-  // fidélité — or le pending est posé AVANT la confirmation Stripe (paiement
-  // abandonné → pending fantôme) et une simple déclaration crypto WhatsApp
-  // finissait aussi en « paid ». Trois preuves acceptées :
-  //  1. inline  : pending.paymentIntentId — écrit UNIQUEMENT dans la branche
-  //     pi.status === 'succeeded' de confirmPayment ;
-  //  2. redirect: ?redirect_status=succeeded&payment_intent=pi_… posé par
-  //     Stripe AVANT le hash au retour 3DS (location.search) ;
-  //  3. session : #/merci?session_id=cs_… (Stripe Checkout ne redirige vers
-  //     success_url qu'après paiement) ET correspondance avec le sessionId
-  //     mémorisé au départ vers Stripe.
-  // La déclaration crypto n'est PAS une preuve : commande 'declared' (à
-  // vérifier via TXID), zéro point fidélité.
+  // A5 — PREUVE de paiement pour /merci. Avant, un simple pt_pending_order
+  // suffisait à écrire « paid » — or il est posé AVANT la confirmation Stripe
+  // (paiement abandonné → pending fantôme). Trois preuves acceptées :
+  //  1. inline   : pending.paymentIntentId (écrit seulement si succeeded) ;
+  //  2. redirect : ?redirect_status=succeeded&payment_intent=… (retour 3DS) ;
+  //  3. session  : session_id=cs_… ET correspondance avec le sessionId mémorisé.
+  // La déclaration crypto n'est PAS une preuve : 'declared', zéro point.
   function merciPaymentProof(pending) {
     var redirectStatus = qsParam(location.search, 'redirect_status');
     if (redirectStatus && redirectStatus !== 'succeeded') {

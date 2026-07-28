@@ -1394,3 +1394,91 @@ Manquent : `multiFactor`, `TotpMultiFactorGenerator`, `getMultiFactorResolver`.
 défi de connexion VERROUILLE l'utilisateur hors de son compte. Porte de sortie
 obligatoire = suppression du 2e facteur depuis la console (Identity Platform →
 Utilisateurs). À valider AVANT que l'user n'enrôle son compte admin.
+
+## 🔐 ADRESSE E-MAIL VÉRIFIÉE EXIGÉE (28/07/2026, SW v532) — étape 1/2
+Décision user : **e-mail + Google Authenticator, PAS de SMS** (« gratuit pour
+50 000 comptes, ça nous laisse une marge très large »).
+### Ce qui existait déjà
+`sendEmailVerification` était **déjà** appelé à l'inscription, et un bandeau
+`#accVerifyBanner` + un bouton de renvoi existaient. Il manquait **le blocage** :
+`verifyUid` ne lisait pas `email_verified`, donc rien n'était exigé.
+### Ce qui a été fait
+- `verifyIdentity(req)` (api/_lib/firebase.js) renvoie `{uid, email,
+  emailVerified}` depuis la revendication **signée** `email_verified` — le
+  client ne peut pas la falsifier, contrairement à un champ du corps.
+  `verifyUid` est conservé (rétrocompatibilité) et délègue.
+- `EXIGE_EMAIL_VERIFIE = {course-request, courier-apply}` dans contact.js →
+  **403 `code:'email-non-verifie'`** avec un message qui dit quoi faire.
+- ⚠️ **PÉRIMÈTRE VOLONTAIREMENT ÉTROIT** : la LECTURE (`course-list`,
+  `courier-status`, `conv-list`) et les actions d'une course DÉJÀ ENGAGÉE
+  (`course-accord-accept`, `course-cancel`, `course-release`) ne sont PAS
+  bloquées. Coincer quelqu'un au milieu d'un parcours ne protège personne.
+- ⚠️ **LE PIÈGE DU JETON PÉRIMÉ** : `email_verified` n'est mis à jour dans le
+  jeton qu'au renouvellement (**1 h**) ou sur `getIdToken(true)`. Sans
+  traitement, l'utilisateur qui vient de cliquer le lien resterait refusé une
+  heure. → `jsonAuthHeaders(force)` + `lvEmailNonVerifie()` qui recharge
+  l'utilisateur, force un jeton neuf et renvoie vers Mon compte.
+- VÉRIFIÉ : **20/20 plan12-serveur** (dont « la lecture n'est PAS bloquée » et
+  « 401 ≠ 403 »). 2 sabotages : blocage retiré, blocage trop zélé étendu à la
+  lecture — les deux détectés.
+  ⚠️ PIÈGE DE HARNAIS : sans `RESEND_API_KEY`/`OWNER_EMAIL`, contact.js répond
+  503 AVANT tout contrôle et les tests « pas bloqué » passaient pour la
+  MAUVAISE raison (faux vert). Variables posées + assertion explicite
+  `aFranchiLeControle()`.
+  ⚠️ Tout harnais qui stubbe `_lib/firebase` doit désormais fournir
+  `verifyIdentity` (accordE2E.mjs mis à jour).
+### ⏭️ ÉTAPE 2 — TOTP (Google Authenticator) : BLOQUÉE SUR ACTION USER
+Le TOTP n'existe PAS dans Firebase Auth standard : il exige **Identity
+Platform** (upgrade gratuit du projet, jusqu'à 50 000 comptes actifs).
+Tant que ce n'est pas activé, `multiFactor(...).enroll()` avec TOTP n'est pas
+disponible dans le SDK — impossible à coder à l'aveugle.
+PROCÉDURE : console Firebase → Authentication → Settings → « Upgrade to
+Identity Platform », puis Authentication → Sign-in method → activer
+**Multi-factor / TOTP**. Prévenir dès que c'est fait.
+PRIORITÉ RAPPELÉE À L'USER : le compte **ADMIN** en a plus besoin que les
+clients (un admin piraté expose les données de tous).
+
+## 🔐 DOUBLE AUTHENTIFICATION TOTP — LIVRÉE (28/07/2026, SW v533)
+Étape 2/2 de la sécurité voulue par l'user (e-mail + Google Authenticator).
+### 🛟 LA PORTE DE SORTIE A ÉTÉ ÉCRITE **AVANT** L'INTERFACE
+`scripts/mfa-unlock.js` retire les seconds facteurs d'un compte avec l'Admin
+SDK, **depuis l'extérieur du site**. C'est le seul chemin quand tout est
+verrouillé (téléphone perdu, appli effacée, défaut du défi) — et sur le compte
+ADMIN, un verrouillage signifie perdre toute l'administration.
+- `--check <email>` = LECTURE SEULE (constater sans risquer de modifier, et
+  RELIRE après coup : on ne se fie jamais au message de succès).
+- Sans `--check` : retire tous les facteurs, puis **relit** et échoue en 1 s'il
+  en reste. Refuse proprement sans credentials / sans cible / avec un JSON
+  invalide (les 3 cas testés).
+### 📦 ARCHITECTURE : `mfa.js`, module chargé À LA DEMANDE
+⚠️ **app.js était à 205 Ko / 205 (plafond P8) : impossible d'y entasser le
+TOTP.** Le plafond n'a PAS été relevé — tout le code (badge, panneau, QR,
+activation, retrait, défi de connexion) vit dans `mfa.js` (4,5 Ko), chargé
+seulement si on ouvre le réglage ou si un défi survient. **Mesuré : 0 octet sur
+l'accueil et le catalogue.** app.js ne garde que `ensureMFA` + `mfaCtx` +
+`mfaInit` et la détection `auth/multi-factor-auth-required`.
+Place trouvée en condensant 4 blocs de commentaires verbeux (scroll de route,
+preuve A5, barème) — l'information est conservée, la redondance retirée.
+### CE QUE FAIT LE CODE
+- **Enrôlement** (Mon compte → 🔐) : mot de passe → secret → **QR généré
+  100 % EN LOCAL** (`cryptoLocalQR`, aucun service tiers) **+ la clé TOUJOURS
+  en toutes lettres** (un QR illisible ne doit jamais être un cul-de-sac) →
+  code à 6 chiffres → activé. Le code prouve que l'appli est bien réglée :
+  sans cette preuve on inscrirait un facteur que l'user ne peut pas produire.
+- **Défi de connexion** : la connexion n'est pas ÉCHOUÉE mais SUSPENDUE — `err`
+  suffit à la reprendre, le mot de passe n'est jamais redemandé. Le champ
+  remplace le bouton, le curseur y est placé.
+- **Retrait** possible par l'utilisateur (mot de passe redemandé).
+- ⚠️ `reauthenticateWithCredential` est OBLIGATOIRE avant enroll/unenroll
+  (`auth/requires-recent-login`) — imposé par Firebase, pas par confort.
+- ⚠️ **Adresse vérifiée = condition GOOGLE** (« MFA requires email
+  verification ») : le panneau le dit au lieu de laisser l'enrôlement échouer.
+  L'étape 1/2 livrée plus tôt le même jour était donc un prérequis, pas un bonus.
+- VÉRIFIÉ : **27/27 plan13.mjs** (dont « 0 chargement sur l'accueil » et « QR en
+  data:image, donc local »). **4 sabotages** : enrôlement sans
+  ré-authentification, clé texte retirée, blocage e-mail levé, défi supprimé —
+  tous détectés. + 20/20 plan12-serveur + 27/27 plan11 + 32/32 plan10 + 70/70
+  plan9 + 70/70 plan8 + 82/82 couriers + 214 autres. CI verte.
+### ⏭️ RESTE À FAIRE (user)
+Activer la 2FA sur le compte admin depuis Mon compte → 🔐, **après** avoir
+vérifié son adresse e-mail. Garder `scripts/mfa-unlock.js` sous la main.

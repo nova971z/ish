@@ -44,7 +44,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=532">
+  <link rel="stylesheet" href="styles.css?v=533">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -856,6 +856,21 @@
             </div>
           </div>
 
+          <!-- DOUBLE AUTHENTIFICATION (TOTP). Tout le contenu est injecté par
+               app.js APRÈS chargement à la demande de mfa.js : la page ne
+               télécharge rien tant qu'on n'ouvre pas ce bloc. -->
+          <div class="card" id="mfaCard" style="margin-top:1.2rem">
+            <div class="head"><h3 class="title">🔐 Double authentification</h3>
+              <span class="badge" id="mfaBadge">…</span></div>
+            <div class="specs" id="mfaBody">
+              <p style="opacity:.8;margin:0 0 .8rem;font-size:.9rem">
+                Ajoute un code à 6 chiffres, changeant toutes les 30 secondes, en plus de ton
+                mot de passe. Même si quelqu'un te vole ton mot de passe, il ne peut pas entrer.
+              </p>
+              <div class="actions"><button id="mfaOpen" class="btn primary" type="button">Gérer la double authentification</button></div>
+            </div>
+          </div>
+
           <!-- Droit à l'oubli (RGPD) : suppression définitive du compte. -->
           <div class="card acc-danger" style="margin-top:1.2rem;border-color:rgba(239,68,68,.35)">
             <div class="head"><h3 class="title">Supprimer mon compte</h3><span class="badge" style="background:rgba(239,68,68,.15);color:#f87171">Irréversible</span></div>
@@ -913,6 +928,18 @@
                 </div>
                 <div class="auth-forgot-row">
                   <button id="authForgotBtn" type="button" class="auth-forgot-link">Mot de passe oublie ?</button>
+                </div>
+                <!-- DÉFI TOTP : révélé UNIQUEMENT si Firebase interrompt la
+                     connexion pour réclamer le second facteur. Il remplace
+                     alors le bouton de connexion habituel. -->
+                <div class="auth-field mfa-challenge" id="loginMfa" hidden>
+                  <label for="loginMfaCode">Code de ton application d'authentification</label>
+                  <input id="loginMfaCode" type="text" inputmode="numeric" autocomplete="one-time-code"
+                         maxlength="6" pattern="[0-9]*" placeholder="123456" />
+                  <p class="mfa-challenge__hint">Ouvre Google Authenticator et saisis le code à 6 chiffres.
+                     Il change toutes les 30 secondes.</p>
+                  <button id="loginMfaGo" class="auth-submit" type="button">Valider le code</button>
+                  <p class="mfa-challenge__err" id="loginMfaErr" role="alert" aria-live="polite"></p>
                 </div>
                 <button id="loginSubmit" class="auth-submit" type="submit">
                   <span class="auth-submit__label">Se connecter</span>
@@ -2203,7 +2230,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=532"></script>
+  <script defer src="app.js?v=533"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

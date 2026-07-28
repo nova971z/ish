@@ -63,7 +63,16 @@ import {
   reauthenticateWithCredential,
   sendPasswordResetEmail,
   sendEmailVerification,
-  deleteUser
+  deleteUser,
+  // ── DOUBLE AUTHENTIFICATION (TOTP / Google Authenticator) ──────────────
+  // Disponible parce que le projet est passé sur Identity Platform le
+  // 28/07/2026 (TOTP activé par API, SMS volontairement laissé désactivé).
+  //   multiFactor(user)        → session d'enrôlement + enroll/unenroll
+  //   TotpMultiFactorGenerator → secret, QR, et les deux « assertions »
+  //   getMultiFactorResolver   → reprend une connexion interrompue par le défi
+  multiFactor,
+  TotpMultiFactorGenerator,
+  getMultiFactorResolver
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 import {
   getFirestore,
@@ -120,6 +129,9 @@ if (!isConfigured) {
     sendPasswordResetEmail: sendPasswordResetEmail,
     sendEmailVerification: sendEmailVerification,
     deleteUser: deleteUser,
+    multiFactor: multiFactor,
+    TotpMultiFactorGenerator: TotpMultiFactorGenerator,
+    getMultiFactorResolver: getMultiFactorResolver,
     // Firestore methods
     doc: doc,
     getDoc: getDoc,

@@ -8514,6 +8514,12 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   .lv-statut--wait .lv-statut__dot { animation: lv-pulse 1.8s ease-in-out infinite; }
 }
 
+/* Défi TOTP à la connexion : révélé seulement si Firebase le réclame. */
+.mfa-challenge { display: block; }
+.mfa-challenge__hint { margin: .3rem 0 .6rem; font-size: .8rem; color: var(--muted, #9aa4b2); }
+.mfa-challenge__err:empty { display: none; }
+.mfa-challenge__err { margin: .5rem 0 0; font-size: .84rem; color: #fca5a5; }
+
 /* Pastilles de STATUT sur les cartes de course. Avant, toute course « à moi »
    affichait « ✅ Par toi » : une annulée et une terminée se lisaient pareil.
    La couleur porte l'information autant que le mot (défaut vécu 28/07/2026). */
