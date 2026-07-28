@@ -8466,39 +8466,36 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 /* ── « MES COURSES » — présentation haut de gamme ──────────────────────────
    Une course = une carte avec un liseré d'état à gauche, une ligne de titre
    forte (zone + prix), et ses détails en dessous. Fini la liste plate. */
-.lv-mine__head { display: flex; align-items: baseline; gap: .7rem; flex-wrap: wrap; margin-bottom: .2rem; }
-.lv-mine__head .lv-h2 { margin: 0; }
-.lv-mine__head .lv-hint { margin: 0; }
-#courierMine .lv-h3 {
+#courierMine .lv-h3, #courierEnCours .lv-h3 {
   display: flex; align-items: center; gap: .5rem; margin: 1.4rem 0 .6rem;
   font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted, #9aa4b2);
 }
-#courierMine .lv-h3::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(255,255,255,.18), transparent); }
-#courierMine > .lv-h3:first-child { margin-top: .4rem; }
-#courierMine .lv-course {
+#courierMine .lv-h3::after, #courierEnCours .lv-h3::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(255,255,255,.18), transparent); }
+#courierMine > .lv-h3:first-child, #courierEnCours > .lv-h3:first-child { margin-top: .4rem; }
+#courierMine .lv-course, #courierEnCours .lv-course {
   position: relative; width: 100%; text-align: left;
   padding: .85rem 1rem .85rem 1.15rem; border-radius: 14px; cursor: pointer;
   border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04);
   transition: transform .16s ease, border-color .2s ease, box-shadow .2s ease, background .2s ease;
 }
-#courierMine .lv-course::before {
+#courierMine .lv-course::before, #courierEnCours .lv-course::before {
   content: ''; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px;
   border-radius: 3px; background: #34d399; box-shadow: 0 0 10px rgba(52,211,153,.7);
 }
-#courierMine .lv-course--done { opacity: .72; }
-#courierMine .lv-course--done::before { background: rgba(255,255,255,.25); box-shadow: none; }
-#courierMine .lv-course:hover {
+#courierMine .lv-course--done, #courierEnCours .lv-course--done { opacity: .72; }
+#courierMine .lv-course--done::before, #courierEnCours .lv-course--done::before { background: rgba(255,255,255,.25); box-shadow: none; }
+#courierMine .lv-course:hover, #courierEnCours .lv-course:hover {
   transform: translateY(-1px); border-color: rgba(var(--accent-rgb), .55);
   background: rgba(var(--accent-rgb), .08);
   box-shadow: 0 8px 22px rgba(0,0,0,.35), 0 0 18px rgba(var(--accent-rgb), .18);
 }
-#courierMine .lv-course__head { display: flex; align-items: center; justify-content: space-between; gap: .6rem; font-size: .95rem; }
-#courierMine .lv-course__status {
+#courierMine .lv-course__head, #courierEnCours .lv-course__head { display: flex; align-items: center; justify-content: space-between; gap: .6rem; font-size: .95rem; }
+#courierMine .lv-course__status, #courierEnCours .lv-course__status {
   flex: 0 0 auto; font-size: .7rem; font-weight: 800; letter-spacing: .04em;
   padding: .18rem .5rem; border-radius: 999px;
   background: rgba(var(--accent-rgb), .18); color: #c4b5fd;
 }
-#courierMine .lv-course__body { display: block; margin-top: .35rem; font-size: .84rem; color: var(--muted, #c9c9d9); line-height: 1.5; }
+#courierMine .lv-course__body, #courierEnCours .lv-course__body { display: block; margin-top: .35rem; font-size: .84rem; color: var(--muted, #c9c9d9); line-height: 1.5; }
 
 /* Historique replié : le résumé se lit comme un titre de carte, avec un
    chevron qui dit clairement que ça s'ouvre. */
@@ -8512,7 +8509,65 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-histo[open] > .lv-histo__sum::after { content: '▾'; }
 .lv-histo[open] > .lv-histo__sum { border-bottom: 1px solid rgba(255, 255, 255, .1); }
 .lv-histo .lv-h2 { margin: 0; }
-.lv-histo > #clientDelivList { padding: 1rem 1.2rem 1.2rem; }
+.lv-histo > #clientDelivList,
+.lv-histo > #courierMine { padding: 1rem 1.2rem 1.2rem; }
+
+/* ── BANDEAU DE STATUT (pleine largeur de la grosse fiche) ─────────────────
+   Demande user 28/07/2026 : le statut doit se lire d'un coup d'œil, en néon.
+   VERT = c'est acté · ORANGE = ça attend quelqu'un. Il traverse toute la
+   fiche, juste sous le titre — impossible de le manquer. */
+.lv-statut {
+  display: flex; align-items: center; gap: .6rem; width: 100%;
+  margin: .1rem 0 1rem; padding: .7rem 1rem; border-radius: 14px;
+  font-weight: 800; font-size: .95rem; letter-spacing: .02em;
+  border: 1px solid currentColor;
+}
+.lv-statut__t { text-shadow: 0 0 12px currentColor; }
+.lv-statut__dot {
+  flex: 0 0 auto; width: 10px; height: 10px; border-radius: 50%;
+  background: currentColor; box-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
+}
+.lv-statut--ok {
+  color: #34d399; background: rgba(52, 211, 153, .1);
+  box-shadow: 0 0 18px rgba(52, 211, 153, .28), inset 0 0 22px rgba(52, 211, 153, .07);
+}
+.lv-statut--wait {
+  color: #fb923c; background: rgba(251, 146, 60, .1);
+  box-shadow: 0 0 18px rgba(251, 146, 60, .28), inset 0 0 22px rgba(251, 146, 60, .07);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lv-statut--wait .lv-statut__dot { animation: lv-pulse 1.8s ease-in-out infinite; }
+}
+
+/* En-tête de la grosse fiche livreur : titre à gauche, PASTILLE à droite. */
+.lv-dhead { display: flex; align-items: flex-start; justify-content: space-between; gap: .8rem; flex-wrap: wrap; }
+.lv-dhead .lv-h2 { margin: 0; flex: 1 1 14rem; }
+/* `margin-left:auto` : la pastille reste collée À DROITE même quand elle passe
+   à la ligne sous le titre sur un écran étroit (iPhone) — sinon elle se
+   recollait à gauche et ne se lisait plus comme un état. */
+.lv-pill {
+  flex: 0 0 auto; margin-left: auto; display: inline-flex; align-items: center; gap: .45rem;
+  padding: .35rem .8rem; border-radius: 999px;
+  font-size: .78rem; font-weight: 800; letter-spacing: .03em; white-space: nowrap;
+  border: 1px solid currentColor;
+}
+.lv-pill__dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: currentColor; box-shadow: 0 0 8px currentColor, 0 0 16px currentColor;
+}
+.lv-pill--wait {
+  color: #fb923c; background: rgba(251, 146, 60, .12);
+  box-shadow: 0 0 16px rgba(251, 146, 60, .3);
+  text-shadow: 0 0 10px rgba(251, 146, 60, .8);
+}
+.lv-pill--ok {
+  color: #34d399; background: rgba(52, 211, 153, .12);
+  box-shadow: 0 0 16px rgba(52, 211, 153, .3);
+  text-shadow: 0 0 10px rgba(52, 211, 153, .8);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lv-pill--wait .lv-pill__dot { animation: lv-pulse 1.8s ease-in-out infinite; }
+}
 
 .lv-annuler { display: flex; flex-direction: column; align-items: center; text-align: center; gap: .4rem; margin: 1.2rem 0; }
 .lv-annuler .btn { min-width: 260px; justify-content: center; }

@@ -44,7 +44,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=526">
+  <link rel="stylesheet" href="styles.css?v=527">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -1253,21 +1253,24 @@
             <div id="courierMap" class="pdp-deliv-map courier-map" aria-label="Carte des courses"></div>
           </div>
           <div id="courierMyCard"></div>
+          <!-- Sélecteur affiché UNIQUEMENT s'il y a plusieurs courses en cours
+               (sinon la grosse fiche ci-dessous est déjà la course). -->
+          <div id="courierEnCours" class="lv-card" hidden></div>
           <div id="courierDetail" class="lv-card" hidden></div>
           <!-- « Courses en attente » a été REMPLACÉE par le bandeau vert sous
                la barre du haut (#courseAlert). Le conteneur reste, vide et
                masqué : le rendu continue d'y écrire et l'alerte s'en nourrit,
                sans dupliquer la logique. -->
           <div id="courierDispo" hidden></div>
-          <section class="lv-card lv-mine">
-            <header class="lv-mine__head">
-              <h2 class="lv-h2">🕘 Mes courses</h2>
-              <p class="lv-hint">Celles que tu as acceptées.</p>
-            </header>
-            <div id="courierMine"><p class="lv-hint">Chargement…</p></div>
-          </section>
           <div id="courierEarnings"></div>
           <button type="button" class="btn" id="courierRefresh">🔄 Rafraîchir</button>
+          <!-- HISTORIQUE DE COURSE : tout en bas et REPLIÉ (demande user
+               28/07/2026). N'y figurent QUE les courses terminées — celle en
+               cours reste en haut, dans la grosse fiche, là où on agit. -->
+          <details class="lv-card lv-histo">
+            <summary class="lv-histo__sum"><span class="lv-h2">🧾 Historique de course</span></summary>
+            <div id="courierMine"><p class="lv-hint">Chargement…</p></div>
+          </details>
         </div>
       </div>
     </section>
@@ -2178,7 +2181,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=526"></script>
+  <script defer src="app.js?v=527"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

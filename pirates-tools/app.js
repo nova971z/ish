@@ -4982,27 +4982,7 @@
     }
     var mapEl = document.getElementById(cfg.map);
     if (!mapEl) return;
-    // Photo du CHANTIER (obligatoire) : référence pour le livreur + preuve de
-    // comparaison à la livraison. Compressée localement, envoyée après paiement.
-    var sceneBtn = document.getElementById(cfg.sceneBtn);
-    var sceneFile = document.getElementById(cfg.scene);
-    var sceneSt = document.getElementById(cfg.sceneSt);
-    var scenePrev = document.getElementById(cfg.scenePrev);
-    if (sceneBtn && sceneFile) {
-      sceneBtn.onclick = function () { sceneFile.click(); };
-      sceneFile.onchange = function () {
-        var f = sceneFile.files && sceneFile.files[0];
-        if (!f) return;
-        if (sceneSt) sceneSt.textContent = 'Compression…';
-        lvCompressPhoto(f).then(function (data) {
-          box._ptScene = data;
-          if (sceneSt) sceneSt.textContent = '✅ Photo ajoutée';
-          if (scenePrev) { scenePrev.hidden = false; scenePrev.innerHTML = '<img src="' + safeImgSrc(data) + '" alt="Photo du chantier">'; }
-        }).catch(function () {
-          if (sceneSt) sceneSt.textContent = '❌ Photo illisible — réessaie.';
-        });
-      };
-    }
+    var sceneBtn = lvWireScenePhoto(cfg, box);
     // Bouton DEMANDER → dépose une DEMANDE DE COURSE. ⚠️ AUCUN PAIEMENT ici
     // (décision user 27/07/2026) : la demande part chez TOUS les livreurs, le
     // premier qui l'accepte ouvre un chat avec le client, et ils conviennent
@@ -5050,6 +5030,15 @@
           body: JSON.stringify({
             type: 'course-request',
             productTitle: titre, qty: totQty,
+            // 🐛 CAUSE RACINE du « bouton payer ma marchandise ne marche pas »
+            // (28/07/2026) : les LIGNES DU PANIER n'étaient jamais envoyées.
+            // Le serveur les attend pourtant (buildRequest → sanitizeLines) et
+            // c'est avec elles qu'on reconstruit le paiement plus tard, même si
+            // le panier a été vidé entre-temps. Sans elles, la course arrivait
+            // « sans marchandise » et il n'y avait littéralement rien à régler.
+            // On n'envoie QUE {key, qty} : aucun prix client n'est jamais cru,
+            // create-payment-intent revalide chaque clé contre le catalogue.
+            lines: pl.items.map(function (it) { return { key: it.key, qty: it.qty || 1 }; }),
             address: g.label, lat: g.lat, lng: g.lng,
             date: (dateEl || {}).value || '', when: when, hour: hour
           })
@@ -5157,6 +5146,32 @@
         try { var bb = cl.getBBox(); cl.setAttribute('viewBox', (bb.x - 3) + ' ' + (bb.y - 3) + ' ' + (bb.width + 6) + ' ' + (bb.height + 6)); } catch (_) {}
       }
     });
+  }
+
+  // Photo du CHANTIER (obligatoire) : référence pour le livreur + preuve de
+  // comparaison à la livraison. Compressée localement (canvas), stockée sur le
+  // widget et envoyée juste après la création de la demande.
+  // Renvoie le bouton, pour que l'appelant puisse y ramener le focus.
+  function lvWireScenePhoto(cfg, box) {
+    var sceneBtn = document.getElementById(cfg.sceneBtn);
+    var sceneFile = document.getElementById(cfg.scene);
+    var sceneSt = document.getElementById(cfg.sceneSt);
+    var scenePrev = document.getElementById(cfg.scenePrev);
+    if (!sceneBtn || !sceneFile) return sceneBtn;
+    sceneBtn.onclick = function () { sceneFile.click(); };
+    sceneFile.onchange = function () {
+      var f = sceneFile.files && sceneFile.files[0];
+      if (!f) return;
+      if (sceneSt) sceneSt.textContent = 'Compression…';
+      lvCompressPhoto(f).then(function (data) {
+        box._ptScene = data;
+        if (sceneSt) sceneSt.textContent = '✅ Photo ajoutée';
+        if (scenePrev) { scenePrev.hidden = false; scenePrev.innerHTML = '<img src="' + safeImgSrc(data) + '" alt="Photo du chantier">'; }
+      }).catch(function () {
+        if (sceneSt) sceneSt.textContent = '❌ Photo illisible — réessaie.';
+      });
+    };
+    return sceneBtn;
   }
 
   // Fiche produit : livraison d'UN produit.
@@ -5716,6 +5731,9 @@
   function lvLivrable(c) {
     return c.status === 'confirmee' || (c.status === 'acceptee' && !!c.paid);
   }
+  // Course SOLDÉE : plus rien à y faire. Seule source de vérité du partage
+  // « en cours » (grosse fiche) / « historique » (bloc replié tout en bas).
+  function lvFini(c) { return c.status === 'terminee' || c.status === 'annulee'; }
   // Prix affichable d'une course, SANS jamais inventer de montant :
   //   • course pré-payée (ancien flux) → le montant réellement débité ;
   //   • accord validé → le prix convenu ENTRE EUX ;
@@ -5731,12 +5749,45 @@
     if (c.status === 'en_attente') return (c.round && c.round > 1)
       ? '⏳ De nouveau en ligne — en attente d\'un autre livreur'
       : '⏳ En attente d\'un livreur';
-    if (c.status === 'acceptee') return forClient ? '🤝 Livreur trouvé — accordez-vous dans la discussion' : '🤝 À toi de t\'accorder avec le client';
+    // ⚠️ Le statut BRUT reste 'acceptee' jusqu'au règlement de la marchandise.
+    // Écrire « accordez-vous » alors que les deux ont DÉJÀ signé l'accord, c'est
+    // contredire le bandeau vert juste au-dessus (défaut signalé 28/07/2026).
+    // L'étape suivante dépend donc de l'accord, pas du seul statut.
+    if (c.status === 'acceptee') {
+      if (c.accord && c.accord.valide) {
+        return forClient ? '💳 Accord signé — règle ta marchandise pour lancer la course'
+          : '💳 Accord signé — en attente du règlement de la marchandise par le client';
+      }
+      if (c.accord) return forClient ? '📝 Un accord est sur la table — à valider' : '📝 Accord en cours de validation';
+      return forClient ? '🤝 Livreur trouvé — accordez-vous dans la discussion' : '🤝 À toi de t\'accorder avec le client';
+    }
     if (c.status === 'confirmee') return forClient ? '🚀 Commandée — ton livreur arrive' : '🚀 Confirmée — marchandise payée, à livrer';
     if (c.status === 'annulee') return '❌ Demande annulée';
     if (c.status === 'livree') return forClient ? '📦 Livrée — vérifie la photo et confirme la réception' : '📦 Livrée — en attente de confirmation du client';
     if (c.status === 'terminee') return '✅ Terminée';
     return escapeHTML(c.status);
+  }
+
+  // BANDEAU DE STATUT — pleine largeur, en tête de la grosse fiche (demande
+  // user 28/07/2026). Il remplace la petite fiche « 🚦 Statut », qui affichait
+  // le statut BRUT de la course : tant que la marchandise n'est pas réglée, ce
+  // statut reste 'acceptee' et se lisait « accordez-vous dans la discussion »
+  // ALORS QUE les deux parties venaient d'accepter l'accord. Le bandeau, lui,
+  // dit où l'on en est VRAIMENT — l'accord fait foi.
+  //   • vert néon  = c'est acté (accord validé, commandée, livrée, terminée)
+  //   • orange néon = ça attend quelqu'un
+  function lvStatutBandeau(c) {
+    var s = c.status;
+    var accordOk = !!(c.accord && c.accord.valide);
+    var etat = s === 'terminee' ? { ok: 1, t: 'terminée' }
+      : s === 'livree' ? { ok: 1, t: 'livrée' }
+      : s === 'confirmee' ? { ok: 1, t: 'commandée' }
+      : s === 'annulee' ? { ok: 0, t: 'annulée' }
+      : accordOk ? { ok: 1, t: 'accepté' }
+      : { ok: 0, t: 'en attente' };
+    return '<div class="lv-statut ' + (etat.ok ? 'lv-statut--ok' : 'lv-statut--wait') + '" role="status">'
+      + '<span class="lv-statut__dot" aria-hidden="true"></span>'
+      + '<span class="lv-statut__t">Statut : ' + etat.t + '</span></div>';
   }
 
   // ── Vidéos de remise / litige (Firebase Storage, module chargé à la
@@ -5998,10 +6049,8 @@
         + '(marchandise uniquement). La course (' + a.prix + ' €) se règle directement au livreur '
         + (a.paiement === 'virement' ? 'par virement, sur sa facture.' : 'en espèces, à la livraison.') + '</p>';
     }
-    var lines = (c.lines || []).map(function (l) {
-      var p = findProductByKey(l.key);
-      return { key: l.key, title: p ? p.title : l.key, price: p ? p.price : 0, qty: l.qty || 1, ok: !!p };
-    });
+    var lignes = lvPayLignes(c);
+    var lines = lignes.lignes;
     var manquants = lines.filter(function (l) { return !l.ok; }).length;
     return '<h4 class="lv-panel__t">💳 Régler ma marchandise</h4>'
       + '<p class="lv-hint">Tu règles <strong>uniquement tes articles</strong> à Pirates Tools. '
@@ -6013,21 +6062,47 @@
             return '<li><span>' + escapeHTML(l.title) + ' × ' + l.qty + '</span><strong>'
               + (l.ok ? formatPrice(calcPrice(l.price).ttc * l.qty) : '—') + '</strong></li>';
           }).join('') + '</ul>'
-        : '<p class="lv-hint">Aucun article n\'a été enregistré avec cette demande.</p>')
+        : '')
       + (manquants ? '<div class="lv-note lv-note--warn">' + manquants + ' article(s) ne sont plus au catalogue — ils seront ignorés.</div>' : '')
-      // 🐛 « le bouton payer ne marche pas » (28/07/2026) : quand la demande a
-      // été déposée SANS panier, il n'y a rien à payer. Le bouton était bien
-      // désactivé, mais rien ne le montrait — il avait l'air cliquable et ne
-      // faisait rien. On ne montre plus de bouton mort : on dit ce qui manque
-      // et on donne la sortie.
-      + (lines.filter(function (l) { return l.ok; }).length
-        ? '<div class="lv-cta"><button type="button" class="btn primary" id="acPay">💳 Payer ma marchandise</button>'
-          + '<span class="lv-cta__note" id="acSt" aria-live="polite">Le paiement confirme définitivement la course.</span></div>'
-        : '<div class="lv-note lv-note--warn">Cette demande a été déposée <strong>sans panier</strong> : '
-          + 'il n\'y a donc aucune marchandise à régler. Ajoute tes articles au panier, puis '
-          + 'redépose une demande depuis la page Livraison.</div>'
-          + '<div class="lv-cta"><a class="btn primary" href="#/catalogue">🧰 Aller au catalogue</a>'
-          + '<span class="lv-cta__note" id="acSt" aria-live="polite"></span></div>');
+      + (lignes.depuisPanier
+        ? '<p class="lv-hint">ℹ️ Articles repris de <strong>ton panier</strong> : cette demande est antérieure '
+          + 'à l\'enregistrement des lignes. Vérifie la liste avant de régler.</p>' : '')
+      // Le bouton de paiement ouvre la MODALE CARTE habituelle — celle où l'on
+      // saisit son numéro de carte. C'est le seul et unique chemin de règlement.
+      + '<div class="lv-cta"><button type="button" class="btn primary" id="acPay"'
+      + (lignes.payables.length ? '' : ' disabled') + '>💳 Payer ma marchandise</button>'
+      + '<span class="lv-cta__note" id="acSt" aria-live="polite">'
+      + (lignes.payables.length
+        ? 'Le paiement confirme définitivement la course.'
+        : 'Ajoute ta quincaillerie au panier pour pouvoir la régler ici.')
+      + '</span></div>';
+  }
+
+  // Articles PAYABLES d'une course, résolus contre le catalogue serveur.
+  // Source normale = `c.lines`, enregistrées avec la demande. Repli = la
+  // quincaillerie actuellement au panier, pour les demandes déposées AVANT le
+  // correctif du 28/07/2026 (leurs lignes n'ont jamais été transmises) : sans
+  // ce repli, ces courses resteraient impayables à vie.
+  function lvPayLignes(c) {
+    var src = c.lines || [];
+    var depuisPanier = false;
+    if (!src.length) {
+      src = getCart().filter(function (it) {
+        var p = findProductByKey(it.key);
+        return p && p.brand === 'Quincaillerie';
+      }).map(function (it) { return { key: it.key, qty: it.qty || 1 }; });
+      depuisPanier = src.length > 0;
+    }
+    var lignes = src.map(function (l) {
+      var p = findProductByKey(l.key);
+      return { key: l.key, title: p ? p.title : l.key, price: p ? p.price : 0, qty: l.qty || 1, ok: !!p };
+    });
+    return {
+      lignes: lignes,
+      depuisPanier: depuisPanier,
+      payables: lignes.filter(function (l) { return l.ok; })
+        .map(function (l) { return { key: l.key, title: l.title, price: l.price, qty: l.qty }; })
+    };
   }
 
   function lvPanelCode(c) {
@@ -6172,11 +6247,8 @@
       // le marqueur de course. Le prix de la course n'y figure PAS.
       var payBtn = panel.querySelector('#acPay');
       if (payBtn) payBtn.onclick = function () {
-        var items = (c.lines || []).map(function (l) {
-          var p = findProductByKey(l.key);
-          return p ? { key: l.key, title: p.title, price: p.price, qty: l.qty || 1 } : null;
-        }).filter(Boolean);
-        if (!items.length) { toast('Aucun article disponible au catalogue', 'error'); return; }
+        var items = lvPayLignes(c).payables;
+        if (!items.length) { toast('Ajoute ta quincaillerie au panier pour la régler ici', 'error'); return; }
         openPayModal(items, null, { goodsCourseId: c.id });
       };
       // QR du code de remise (généré 100 % en local, jamais de service tiers)
@@ -6618,25 +6690,61 @@
       + 'l\'annuaire. Pour la modifier, touche <strong>⚙️ Paramètres</strong> en haut.</p></div>';
   }
 
-  // MES COURSES — dissociées comme demandé (user 27/07/2026) : ce qui est EN
-  // COURS d'abord, l'historique ensuite. Sans cette séparation, une course à
-  // livrer se perd au milieu des terminées.
+  // HISTORIQUE DE COURSE (user 28/07/2026) : n'y figurent QUE les courses
+  // SOLDÉES. Une course en cours n'a rien à faire dans un historique — elle
+  // vit dans la grosse fiche, en haut, là où on agit dessus. Ce bloc est
+  // replié et placé tout en bas : on arrive ici pour travailler, pas pour
+  // relire le passé.
   function lvMesCoursesHTML(mesCourses, carte) {
-    if (!mesCourses.length) {
-      return '<p class="lv-hint">Tu n\'as accepté aucune course pour l\'instant. '
-        + 'Prends-en une dans « Courses en attente ».</p>';
+    var terminees = mesCourses.filter(lvFini);
+    if (!terminees.length) {
+      return '<p class="lv-hint">Aucune course terminée pour l\'instant. '
+        + 'Elles viendront s\'archiver ici une fois livrées et confirmées.</p>';
     }
-    var fini = function (c) { return c.status === 'terminee' || c.status === 'annulee'; };
-    var enCours = mesCourses.filter(function (c) { return !fini(c); });
-    var terminees = mesCourses.filter(fini);
-    return (enCours.length
-        ? '<h3 class="lv-h3">🔴 En cours (' + enCours.length + ')</h3>'
-          + enCours.map(function (c) { return carte(c, false); }).join('')
-        : '<p class="lv-hint">Aucune course en cours.</p>')
-      + (terminees.length
-        ? '<h3 class="lv-h3">✅ Terminées (' + terminees.length + ')</h3>'
-          + terminees.map(function (c) { return carte(c, false); }).join('')
-        : '');
+    return terminees.map(function (c) { return carte(c, false); }).join('');
+  }
+
+  // Carte compacte d'une course dans l'espace livreur (liste des disponibles,
+  // sélecteur « en cours », historique). Prix affiché = SON tarif pour cette
+  // zone (ou celui déjà payé sur les anciennes courses pré-payées) : la
+  // plateforme n'en impose aucun.
+  function lvCourseCardHTML(c) {
+    var z = LV_BAREME[(c.zone || 1) - 1] || LV_BAREME[0];
+    var prixTxt = c.paid && c.prix ? (c.prix + ' €') : (lvMyPrice(c.zone) + ' € <em>(ton tarif)</em>');
+    return '<button type="button" class="lv-course lv-course--btn' + (c.status !== 'en_attente' ? ' lv-course--done' : '') + '" data-course-focus="' + escapeHTML(c.id) + '">'
+      + '<span class="lv-course__head"><span>' + z.emoji + ' Zone ' + c.zone + ' · <strong>' + prixTxt + '</strong></span>'
+      + '<span class="lv-course__status">' + (c.status === 'en_attente' ? 'En attente' : (c.acceptedByMe ? '✅ Par toi' : escapeHTML(c.status))) + '</span></span>'
+      + '<span class="lv-course__body">📍 ' + escapeHTML((c.address || '').slice(0, 60)) + ' <em>(' + c.km + ' km)</em></span>'
+      + '</button>';
+  }
+
+  // COURSES EN COURS : elles ne sont plus dans l'historique (replié, tout en
+  // bas). La grosse fiche s'ouvre donc toute seule sur la première. S'il y en a
+  // PLUSIEURS, et seulement dans ce cas, on affiche de quoi basculer entre
+  // elles — sinon ce serait la même course écrite deux fois à l'écran.
+  // Renvoie la liste des courses en cours.
+  function lvRenderEnCours(mesCourses) {
+    var enCours = mesCourses.filter(function (c) { return !lvFini(c); });
+    var ecEl = document.getElementById('courierEnCours');
+    if (ecEl) {
+      ecEl.hidden = enCours.length < 2;
+      ecEl.innerHTML = enCours.length < 2 ? ''
+        : '<h3 class="lv-h3">🔴 Mes courses en cours (' + enCours.length + ')</h3>'
+          + enCours.map(function (c) { return lvCourseCardHTML(c); }).join('');
+    }
+    return enCours;
+  }
+
+  // Plus AUCUNE course en cours → la grosse fiche DISPARAÎT (demande user
+  // 28/07/2026) : une course terminée n'appelle plus aucune action, elle vit
+  // dans l'historique replié. On peut toujours l'y rouvrir d'un clic, la fiche
+  // revient alors avec sa pastille VERTE « terminée ».
+  // ⚠️ Indispensable au parcours RÉEL : quand la course se termine pendant la
+  // session (validation puis confirmation), la page se re-rend sans
+  // rechargement — sans cette fermeture, la fiche resterait ouverte à l'écran.
+  function lvFermerFiche() {
+    var detEl = document.getElementById('courierDetail');
+    if (detEl) { detEl.hidden = true; detEl.innerHTML = ''; }
   }
 
   function renderCourierSpaceInner() {
@@ -6682,13 +6790,23 @@
             ? c.accord.prix + ' €<em>' + (c.accord.valide ? 'convenus' : 'proposés') + '</em>'
             : lvMyPrice(c.zone) + ' €<em>ton tarif zone ' + c.zone + '</em>');
       var detPrix = c.paid && c.prix ? (c.prix + ' €') : (lvMyPrice(c.zone) + ' € — ton tarif zone ' + c.zone);
-      det.innerHTML = '<h2 class="lv-h2">' + z.emoji + ' Course zone ' + c.zone + ' — <strong>' + detPrix + '</strong></h2>'
+      // PASTILLE NÉON à droite du titre (demande user 28/07/2026) : ORANGE
+      // « en cours » tant que la course n'est pas finie, VERTE « terminée »
+      // quand on la rouvre depuis l'historique.
+      var pastille = !c.acceptedByMe ? ''
+        : lvFini(c)
+          ? '<span class="lv-pill lv-pill--ok" role="status"><span class="lv-pill__dot" aria-hidden="true"></span>Statut : terminée</span>'
+          : '<span class="lv-pill lv-pill--wait" role="status"><span class="lv-pill__dot" aria-hidden="true"></span>Statut : en cours</span>';
+      det.innerHTML = '<div class="lv-dhead">'
+        + '<h2 class="lv-h2">' + z.emoji + ' Course zone ' + c.zone + ' — <strong>' + detPrix + '</strong></h2>'
+        + pastille
+        + '</div>'
         + lvFichesHTML([
           { i: '📦', t: 'Marchandise', v: escapeHTML(c.productTitle || '—') + (c.qty > 1 ? ' <em>× ' + c.qty + '</em>' : '') },
           { i: '📍', t: 'Chantier', v: escapeHTML(c.address || '—') + '<em>' + c.km + ' km de Sainte-Anne</em>' },
           { i: '📅', t: 'Quand', v: (c.date ? escapeHTML(c.date) : 'Au plus tôt') + '<em>' + whenTxt(c) + '</em>' },
           { i: '💰', t: 'Prix', v: prixV },
-          { i: '🚦', t: 'Statut', v: lvCourseStatusTxt(c, false)
+          { i: '🧭', t: 'Étape', v: lvCourseStatusTxt(c, false)
               + (c.acceptedByMe ? '<em>acceptée par toi</em>' : '') }
         ])
         + (canAccept && c.status === 'en_attente'
@@ -6818,18 +6936,6 @@
         });
       };
     }
-    function courseCard(c, canAccept) {
-      var z = LV_BAREME[(c.zone || 1) - 1] || LV_BAREME[0];
-      // Prix affiché = SON tarif pour cette zone (ou celui déjà payé sur les
-      // anciennes courses pré-payées). La plateforme n'en impose aucun.
-      var prixTxt = c.paid && c.prix ? (c.prix + ' €') : (lvMyPrice(c.zone) + ' € <em>(ton tarif)</em>');
-      return '<button type="button" class="lv-course lv-course--btn' + (c.status !== 'en_attente' ? ' lv-course--done' : '') + '" data-course-focus="' + escapeHTML(c.id) + '">'
-        + '<span class="lv-course__head"><span>' + z.emoji + ' Zone ' + c.zone + ' · <strong>' + prixTxt + '</strong></span>'
-        + '<span class="lv-course__status">' + (c.status === 'en_attente' ? 'En attente' : (c.acceptedByMe ? '✅ Par toi' : escapeHTML(c.status))) + '</span></span>'
-        + '<span class="lv-course__body">📍 ' + escapeHTML((c.address || '').slice(0, 60)) + ' <em>(' + c.km + ' km)</em></span>'
-        + '</button>';
-    }
-
     lvFetchCourses().then(function (res) {
       return tarifsReady.then(function () { return res; });
     }).then(function (res) {
@@ -6846,7 +6952,7 @@
       (d.dispo || []).concat(d.mine || []).forEach(function (c) { byId[c.id] = c; });
       lvAlertMaj(d.dispo);          // le bandeau se nourrit de la MÊME liste
       if (dispoEl) dispoEl.innerHTML = (d.dispo && d.dispo.length)
-        ? d.dispo.map(function (c) { return courseCard(c, canAccept); }).join('')
+        ? d.dispo.map(function (c) { return lvCourseCardHTML(c); }).join('')
         : '<p class="lv-hint">Aucune course disponible pour l\'instant.</p>';
       // « Mes courses » de l'espace LIVREUR = uniquement celles que J'AI
       // ACCEPTÉES. Le serveur renvoie dans `mine` les courses où l'on est
@@ -6856,7 +6962,12 @@
       // le filtre symétrique sur c.mine.)
       var mesCourses = (d.mine || []).filter(function (c) { return c.acceptedByMe; });
       renderCourierEarnings(mesCourses);
-      if (mineEl) mineEl.innerHTML = lvMesCoursesHTML(mesCourses, courseCard);
+      if (mineEl) mineEl.innerHTML = lvMesCoursesHTML(mesCourses, lvCourseCardHTML);
+      // COURSES EN COURS : elles ne sont plus dans l'historique. La grosse
+      // fiche s'ouvre donc toute seule sur la première. S'il y en a plusieurs,
+      // et seulement dans ce cas, on affiche de quoi basculer entre elles —
+      // sinon ce serait la même course écrite deux fois à l'écran.
+      var enCours = lvRenderEnCours(mesCourses);
       // Clic carte de course -> détail + focus carte
       var cards = document.querySelectorAll('[data-course-focus]');
       for (var i = 0; i < cards.length; i++) {
@@ -6874,6 +6985,7 @@
           };
         })(cards[i]);
       }
+      if (enCours.length) showDetail(enCours[0], canAccept); else lvFermerFiche();
       // Pastilles sur la carte (couleur de zone)
       mapReady.then(function (map) {
         if (!map || !mapEl._ptLayer) return;
@@ -6973,12 +7085,13 @@
             ? c.accord.prix + ' €<em>' + (c.accord.valide ? 'convenus' : 'proposés') + '</em>'
             : 'À convenir<em>' + (c.courierUid ? 'dans la discussion' : 'avec le livreur qui acceptera') + '</em>');
       var h = '<h2 class="lv-h2">' + z.emoji + ' Livraison zone ' + c.zone + '</h2>'
+        + lvStatutBandeau(c)
         + lvFichesHTML([
           { i: '📦', t: 'Marchandise', v: escapeHTML(c.productTitle || '—') + (c.qty > 1 ? ' <em>× ' + c.qty + '</em>' : '') },
           { i: '📍', t: 'Chantier', v: escapeHTML(c.address || '—') + '<em>' + c.km + ' km de Sainte-Anne</em>' },
           { i: '📅', t: 'Quand', v: (c.date ? escapeHTML(c.date) : 'Au plus tôt') + '<em>' + whenTxt(c) + '</em>' },
           { i: '💶', t: 'Prix', v: prix },
-          { i: '🚦', t: 'Statut', v: statusLabel(c) }
+          { i: '🧭', t: 'Étape', v: statusLabel(c) }
         ]);
       // CODE DE REMISE : le client le garde pour lui et ne le donne au livreur
       // qu'EN MAIN PROPRE, contre le colis — sans lui, le livreur ne peut pas
@@ -7177,7 +7290,11 @@
           + '</button>';
       }).join('');
       lvTodoClient(mine, showDetail);
-      if (aConfirmer) showDetail(aConfirmer);
+      // La liste vit désormais dans l'historique REPLIÉ : la livraison en cours
+      // doit donc s'ouvrir d'elle-même, sinon elle serait inatteignable sans
+      // déplier un bloc nommé « historique ».
+      var aOuvrir = aConfirmer || mine.filter(function (c) { return !lvFini(c); })[0] || null;
+      if (aOuvrir) showDetail(aOuvrir);
       var cards = listEl.querySelectorAll('[data-deliv-focus]');
       for (var i = 0; i < cards.length; i++) {
         (function (btn) {

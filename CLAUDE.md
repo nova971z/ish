@@ -1091,3 +1091,59 @@ compresser « un tout petit peu » si trop lourd.
   (cx/cz/emprise par composant) ET les formules paramétriques relatives au
   coffret → à réappliquer tel quel pour les prochains packs. Vérif orientation
   d'un GLB : `scratchpad/_orient.js` (4 vues à 90°).
+
+## 🛒 LE PANIER N'ÉTAIT PAS ENREGISTRÉ AVEC LA DEMANDE (28/07/2026, SW v527)
+CAUSE RACINE d'un bug que j'avais d'abord MASQUÉ (reproche user justifié : « le
+bouton régler ma marchandise tu l'as transformé en aller au catalogue, tu te
+fous de ma gueule, je t'ai juste dit qu'il ne marchait pas »). Le bouton ne
+marchait pas parce qu'il n'y avait RIEN à payer : le POST `course-request`
+(app.js) envoyait `productTitle` et `qty` mais **jamais `lines`** — alors que
+le serveur les attend depuis toujours (`buildRequest` → `sanitizeLines`). Toute
+demande arrivait donc « sans marchandise ».
+- ⛔ **LEÇON À NE PLUS REFAIRE** : quand l'user dit « ça ne marche pas », on
+  cherche POURQUOI en amont. Désactiver le bouton, expliquer l'absence et
+  proposer une sortie (« Aller au catalogue ») = masquer le symptôme. Le
+  bandeau orange « déposée sans panier » n'était pas une information, c'était
+  l'aveu d'un bug non diagnostiqué.
+- CORRECTIF : `lines: pl.items.map(...{key,qty})` dans le POST (aucun prix
+  client — le catalogue serveur revalide chaque clé).
+- REPLI pour les demandes ANTÉRIEURES (leurs lignes n'existeront jamais) :
+  `lvPayLignes(c)` retombe sur la quincaillerie du panier courant, en le
+  DISANT. Sans ce repli, ces courses seraient impayables à vie.
+- Le bouton « 💳 Payer ma marchandise » ouvre de nouveau la MODALE CARTE
+  (`openPayModal(items, null, {goodsCourseId})`). Vérifié : la modale s'ouvre,
+  contient le formulaire de carte, et on ne navigue nulle part.
+
+## 🚦 BANDEAU DE STATUT + RÉORGANISATION DES DEUX ESPACES (28/07/2026, SW v527)
+- **CLIENT** : la petite fiche « 🚦 Statut » ne reflétait que le statut BRUT.
+  Or il reste `'acceptee'` jusqu'au règlement de la marchandise → elle affichait
+  « accordez-vous dans la discussion » ALORS QUE les deux venaient de signer.
+  Remplacée par `lvStatutBandeau(c)` : **bandeau pleine largeur** en tête de la
+  grosse fiche, **vert néon « Statut : accepté »** (accord validé / commandée /
+  livrée / terminée) ou **orange néon « Statut : en attente »**. C'est l'ACCORD
+  qui fait foi, pas le statut seul. La fiche restante s'appelle « 🧭 Étape » et
+  son texte dépend AUSSI de l'accord (plus de contradiction avec le bandeau).
+- **LIVREUR** : « Mes courses » → **« 🧾 Historique de course »**, `<details>`
+  REPLIÉ, **tout en bas**, ne contenant QUE les courses terminées/annulées
+  (`lvFini`). La course EN COURS vit dans la grosse fiche, avec une **pastille
+  orange néon « Statut : en cours »** à droite du titre (`margin-left:auto` →
+  reste à droite même quand elle passe à la ligne sur iPhone). Quand la course
+  se termine, la fiche **disparaît** (`lvFermerFiche`) et la course rejoint
+  l'historique — y compris SANS rechargement (le vrai parcours).
+- ⚠️ L'historique n'est PAS un bouton mort : un clic y rouvre la fiche, avec
+  une pastille **verte « Statut : terminée »**.
+- ⚠️ PIÈGE ATTRAPÉ : mon premier correctif mettait un garde-fou dans
+  `showDetail` — **il était inatteignable** (le sabotage ne le faisait jamais
+  échouer) ET il aurait rendu l'historique cliquable-sans-effet. Retiré. RÈGLE
+  CONFIRMÉE : **une vérification qu'on ne parvient pas à faire échouer est une
+  vérification qui ne vérifie rien** — chaque contrôle de cette session a été
+  prouvé faillible par réintroduction délibérée du défaut (6 sabotages).
+- VÉRIFIÉ : **49/49 plan8.mjs** + 79/79 couriers + 32/32 bulle + 25/25 detail
+  + 24/24 espace + 22/22 plan7 + 15/15 accordE2E + 16/16 a11y + 15/15 adminliv
+  + 14/14 course-pay. CI verte.
+- HARNAIS PÉRIMÉS RECALÉS sur la nouvelle spec (ils encodaient des exigences
+  que l'user a lui-même renversées) : `#courierMine` est désormais dans un
+  `<details>` replié → `waitForSelector` doit utiliser `state:'attached'`, pas
+  la visibilité ; plus AUCUN panneau ne s'ouvre tout seul ; le fil de messages
+  a quitté le bloc détail (il vit dans la bulle) ; le code de remise n'est plus
+  visible en permanence (panneau au clic).
