@@ -100,18 +100,40 @@ const ACCORD_PAIEMENTS = ['virement', 'especes'];
 const ACCORD_PRIX_MIN = 1;
 const ACCORD_PRIX_MAX = 2000;
 
-function sanitizeAccord(raw) {
+// Mode de règlement VOULU PAR LE LIVREUR (décision user 28/07/2026 : « c'est au
+// livreur de dire comment il veut être payé »). Il vit dans SON profil, plus
+// dans l'accord : on ne redemande pas à chaque course une préférence stable.
+// Le client qui n'est pas d'accord négocie dans la discussion — le livreur
+// change alors son réglage, comme pour ses tarifs.
+function sanitizePaiement(v) {
+  return ACCORD_PAIEMENTS.includes(v) ? v : '';
+}
+
+// L'ACCORD, NOUVELLE FORME (décision user 28/07/2026) — il ne se NÉGOCIE plus
+// champ par champ, il ENTÉRINE :
+//   • le PRIX vient du LIVREUR seul (le client ne propose jamais de montant ;
+//     s'il trouve ça cher, il négocie dans la discussion et le livreur ajuste) ;
+//   • le MODE DE RÈGLEMENT vient du PROFIL du livreur (« c'est au livreur de
+//     dire comment il veut être payé ») ;
+//   • la DATE, l'HEURE, le POINT DE DÉPÔT et les PRÉCISIONS viennent de la
+//     COURSE, c'est-à-dire de ce que le client a posé À LA COMMANDE. Ils ne
+//     sont plus jamais ressaisis, donc plus jamais contredits.
+// ⚠️ `raw` n'apporte QUE le prix : aucune autre valeur du corps client n'est
+// lue. C'est ce qui rend impossible qu'un accord raconte autre chose que la
+// demande d'origine.
+function sanitizeAccord(raw, course, paiementLivreur) {
   const src = raw || {};
+  const c = course || {};
   const prix = Math.round(Number(src.prix));
   if (!isFinite(prix) || prix < ACCORD_PRIX_MIN || prix > ACCORD_PRIX_MAX) return null;
-  if (!ACCORD_PAIEMENTS.includes(src.paiement)) return null;
   return {
     prix,
-    paiement: src.paiement,
-    date: /^\d{4}-\d{2}-\d{2}$/.test(String(src.date || '')) ? src.date : '',
-    hour: /^\d{2}:\d{2}$/.test(String(src.hour || '')) ? src.hour : '',
-    lieu: String(src.lieu || '').trim().slice(0, 200),
-    notes: String(src.notes || '').trim().slice(0, 500)
+    paiement: sanitizePaiement(paiementLivreur) || 'especes',
+    date: /^\d{4}-\d{2}-\d{2}$/.test(String(c.date || '')) ? c.date : '',
+    hour: /^\d{2}:\d{2}$/.test(String(c.hour || '')) ? c.hour : '',
+    when: ['matin', 'apresmidi', 'heure'].includes(c.when) ? c.when : 'matin',
+    lieu: String(c.lieu || '').trim().slice(0, 200),
+    notes: String(c.notes || '').trim().slice(0, 500)
   };
 }
 
@@ -124,7 +146,7 @@ function accordPaiementLabel(p) {
 // Résumé lisible de l'accord (chat, emails, récapitulatif).
 function accordSummary(a) {
   if (!a) return '';
-  return 'Prix de la course : ' + a.prix + ' € · Règlement : ' + accordPaiementLabel(a.paiement)
+  return 'Prix proposé par le livreur : ' + a.prix + ' € · Règlement : ' + accordPaiementLabel(a.paiement)
     + (a.date ? ' · Date : ' + a.date : '')
     + (a.hour ? ' à ' + a.hour : '')
     + (a.lieu ? ' · Point de dépôt : ' + a.lieu : '')
@@ -153,6 +175,13 @@ function buildRequest(input, who) {
     // create-payment-intent revalide chaque clé contre le catalogue serveur.
     lines: sanitizeLines(input.lines),
     address: String(input.address || '').slice(0, 200),
+    // CONDITIONS POSÉES PAR LE CLIENT À LA COMMANDE (décision user 28/07/2026 :
+    // « le client met absolument toutes ces conditions, sauf pour le prix »).
+    // Elles vivaient jusqu'ici dans l'ACCORD, donc ressaisies APRÈS coup par
+    // l'un ou l'autre : le client redonnait ce qu'il avait déjà dit. Elles
+    // appartiennent à la demande — l'accord ne fera plus que les reprendre.
+    lieu: String(input.lieu || '').trim().slice(0, 200),
+    notes: String(input.notes || '').trim().slice(0, 500),
     lat: q.lat, lng: q.lng, km: q.km, zone: q.zone,
     // `prix` VOLONTAIREMENT ABSENT : le tarif est celui du livreur qui accepte.
     date: /^\d{4}-\d{2}-\d{2}$/.test(String(input.date || '')) ? input.date : '',
@@ -419,5 +448,5 @@ module.exports = {
   alertNewCourse, alertCourseAgain, alertCourierApplication, confirmToClient, sendMail, escapeHtml,
   defaultTarifs, sanitizeTarifs, mirrorCourierPublic,
   TZ_GP_OFFSET, hhmmEnMinutes, minutesLocalesGP, dansPlageHoraire, enService, sanitizeHoraires,
-  sanitizeLines, sanitizeAccord, accordSummary, accordPaiementLabel, ACCORD_PAIEMENTS
+  sanitizeLines, sanitizeAccord, sanitizePaiement, accordSummary, accordPaiementLabel, ACCORD_PAIEMENTS
 };

@@ -4321,7 +4321,7 @@
 
   // Carte publique d'un livreur (accueil + page Livraison). Le bandeau vert
   // « Disponible » ne s'allume QUE si le livreur a cliqué son interrupteur.
-  function courierCardHTML(c) {
+  function courierCardHTML(c, opts) {
     var name = escapeHTML(String(c.displayName || 'Livreur'));
     var avg = c.ratingCount ? (c.ratingSum / c.ratingCount) : 0;
     var photo = isSafePartnerImg(c.photo) ? c.photo : '';
@@ -4348,7 +4348,10 @@
       + '</span>'
       + '<span class="courier-card__done">📦 ' + (c.coursesDone || 0) + ' course' + ((c.coursesDone || 0) > 1 ? 's' : '') + ' livrée' + ((c.coursesDone || 0) > 1 ? 's' : '') + '</span>'
       + '<span class="courier-card__price">à partir de <strong>' + lvMinTarif(c) + ' €</strong></span>'
-      + '<span class="courier-card__cta">' + lvBoutonDiscuterHTML(c) + '</span>'
+      // `opts.sansCta` : dans « mes livraisons », la discussion de la course est
+      // déjà ouverte (bulle) et le livreur est déjà engagé — un bouton
+      // « Discuter » grisé hors service n'y serait qu'un cul-de-sac.
+      + ((opts && opts.sansCta) ? '' : '<span class="courier-card__cta">' + lvBoutonDiscuterHTML(c) + '</span>')
       + '</a>';
   }
 
@@ -4528,13 +4531,38 @@
       box: document.getElementById('courseAlert'),
       go: document.getElementById('courseAlertGo'),
       txt: document.getElementById('courseAlertTxt'),
-      x: document.getElementById('courseAlertX')
+      x: document.getElementById('courseAlertX'),
+      det: document.getElementById('courseAlertDet'),
+      info: document.getElementById('courseAlertInfo'),
+      ok: document.getElementById('courseAlertOk'),
+      no: document.getElementById('courseAlertNo'),
+      st: document.getElementById('courseAlertSt')
     };
   }
   function lvAlertCacher() {
     var e = lvAlertEls();
-    if (e.box) e.box.hidden = true;
+    if (e.box) { e.box.hidden = true; e.box.classList.remove('course-alert--blink'); }
+    if (e.det) e.det.hidden = true;
+    if (e.go) e.go.setAttribute('aria-expanded', 'false');
     _alertCourante = null;
+  }
+  // Détails du client, montrés AVANT toute acceptation : le livreur ne doit
+  // jamais s'engager à l'aveugle (user 28/07/2026). Tout vient de la course,
+  // c'est-à-dire de ce que le client a posé à la commande.
+  function lvAlertDetailHTML(c) {
+    var quand = c.when === 'heure' ? ('à ' + escapeHTML(c.hour || '?'))
+      : (c.when === 'matin' ? 'le matin' : "l'après-midi");
+    return '<ul class="lv-accord__list">'
+      + '<li><span>📦 Marchandise</span><strong>' + escapeHTML(c.productTitle || '—')
+      + (c.qty > 1 ? ' × ' + c.qty : '') + '</strong></li>'
+      + '<li><span>📍 Chantier</span><strong>' + escapeHTML(c.address || '—') + ' — ' + c.km + ' km</strong></li>'
+      + '<li><span>📅 Quand</span><strong>' + (c.date ? escapeHTML(c.date) : 'au plus tôt') + ' — ' + quand + '</strong></li>'
+      + (c.lieu ? '<li><span>📦 Point de dépôt</span><strong>' + escapeHTML(c.lieu) + '</strong></li>' : '')
+      + (c.notes ? '<li><span>📝 Précisions</span><strong>' + escapeHTML(c.notes) + '</strong></li>' : '')
+      + '<li><span>💶 Ton tarif zone ' + c.zone + '</span><strong>' + lvMyPrice(c.zone) + ' €</strong></li>'
+      + '</ul>'
+      + '<p class="lv-hint">Tu proposeras ce prix au client une fois la course acceptée — '
+      + 'tu peux l\'ajuster à ce moment-là.</p>';
   }
   // `dispo` = les courses en attente renvoyées par le serveur.
   function lvAlertMaj(dispo) {
@@ -4547,14 +4575,38 @@
     e.txt.textContent = z.emoji + ' Nouvelle course — ' + lvMyPrice(c.zone) + ' € · '
       + String(c.address || '').slice(0, 40) + ' (' + c.km + ' km)';
     e.box.hidden = false;
-    e.go.onclick = function () { lvAlertAccepter(c.id, e.go); };
-    e.x.onclick = function () {
+    // Replié à chaque mise à jour : on ne laisse jamais les détails d'une
+    // course affichés au-dessus d'une AUTRE course.
+    if (e.det) { e.det.hidden = true; e.det.classList.remove('is-on'); }
+    if (e.info) e.info.innerHTML = '';
+    if (e.st) e.st.textContent = '';
+    e.go.setAttribute('aria-expanded', 'false');
+    e.box.classList.add('course-alert--blink');
+    // Le bouton principal DÉPLIE, il n'accepte plus.
+    e.go.onclick = function () {
+      var ouvert = !e.det.hidden;
+      if (ouvert) {
+        e.det.hidden = true;
+        e.go.setAttribute('aria-expanded', 'false');
+        e.box.classList.add('course-alert--blink');
+        return;
+      }
+      e.info.innerHTML = lvAlertDetailHTML(c);
+      e.det.hidden = false;
+      e.go.setAttribute('aria-expanded', 'true');
+      // On arrête de clignoter pendant la lecture : l'attention est captée.
+      e.box.classList.remove('course-alert--blink');
+    };
+    if (e.ok) e.ok.onclick = function () { lvAlertAccepter(c.id, e.ok); };
+    var ecarter = function () {
       // On écarte CETTE course, pas la fonction : une autre course fera
       // réapparaître le bandeau. Rien n'est perdu — elle reste acceptable
       // depuis l'espace livreur.
       _alertIgnorees[c.id] = true;
       lvAlertMaj(dispo);
     };
+    e.x.onclick = ecarter;
+    if (e.no) e.no.onclick = ecarter;
   }
   // Charge les courses disponibles pour alimenter le bandeau, UNIQUEMENT si le
   // compte est bien livreur. Un client ne doit jamais voir ce bandeau.
@@ -4574,6 +4626,10 @@
 
   function lvAlertAccepter(id, btn) {
     if (btn) { btn.disabled = true; }
+    // L'échec doit se LIRE dans le bandeau, pas seulement passer en toast :
+    // sur mobile un message flottant se rate facilement.
+    var st = document.getElementById('courseAlertSt');
+    if (st) st.textContent = 'Acceptation en cours…';
     jsonAuthHeaders().then(function (headers) {
       return fetch(apiBaseUrl() + '/api/contact', {
         method: 'POST', headers: headers,
@@ -4588,11 +4644,14 @@
           lvAlertCacher();
           if (location.hash.indexOf('/mode-livraison') !== -1) renderCourierSpace();
         } else {
-          toast((d && d.error) || lvErrTxt(rep.s, d), 'error');
+          var msg = (d && d.error) || lvErrTxt(rep.s, d);
+          toast(msg, 'error');
+          if (st) st.textContent = '❌ ' + msg;
           if (btn) btn.disabled = false;
         }
       }).catch(function () {
         toast('Connexion impossible. Réessaie.', 'error');
+        if (st) st.textContent = '❌ Connexion impossible. Réessaie.';
         if (btn) btn.disabled = false;
       });
   }
@@ -4958,8 +5017,10 @@
       // ⚠️ AUCUN PRIX ANNONCÉ ICI : c'est le livreur qui fixe le sien (repère
       // indicatif seulement). La zone sert à savoir QUEL de ses tarifs s'applique.
       return '📨 <strong>Tu envoies une demande, tu ne paies rien maintenant.</strong> '
-        + 'Elle part chez tous les livreurs ; le premier qui l\'accepte ouvre une discussion avec toi '
-        + 'pour convenir du prix et des modalités. Chaque livreur fixe ses propres tarifs (repère indicatif : '
+        + 'Renseigne ici <strong>toutes tes conditions</strong> — date, créneau, point de dépôt, précisions : '
+        + 'elles suivront la demande, tu n\'auras rien à répéter ensuite. '
+        + '<strong>Le prix, lui, est proposé par le livreur</strong> qui accepte ; s\'il ne te convient pas, '
+        + 'tu en discutes avec lui. Chaque livreur fixe ses propres tarifs (repère indicatif : '
         + LV_BAREME.map(function (b) { return b.emoji + ' ~' + b.prix + ' €'; }).join(' · ')
         + ' selon la distance depuis Sainte-Anne). '
         + 'Tape ton adresse : ta zone s\'affiche. L\'itinéraire proposé au livreur est indicatif : il reste libre de sa route.';
@@ -5040,6 +5101,11 @@
             // create-payment-intent revalide chaque clé contre le catalogue.
             lines: pl.items.map(function (it) { return { key: it.key, qty: it.qty || 1 }; }),
             address: g.label, lat: g.lat, lng: g.lng,
+            // CONDITIONS DU CLIENT, POSÉES ICI ET UNE SEULE FOIS (user
+            // 28/07/2026) : elles étaient auparavant redemandées dans l'accord,
+            // après coup, alors qu'il venait de les choisir.
+            lieu: (document.getElementById(cfg.lieu) || {}).value || '',
+            notes: (document.getElementById(cfg.notes) || {}).value || '',
             date: (dateEl || {}).value || '', when: when, hour: hour
           })
         });
@@ -5179,6 +5245,7 @@
     initDeliveryWidget({
       box: 'pdpDelivery', map: 'pdpDeliveryMap', addr: 'pdpDelivAddr', date: 'pdpDelivDate',
       hourWrap: 'pdpDelivHourWrap', hour: 'pdpDelivHour', whenName: 'pdpDelivWhen',
+      lieu: 'pdpDelivLieu', notes: 'pdpDelivNotes',
       zone: 'pdpDelivZoneTxt', order: 'pdpDelivOrder', status: 'pdpDelivStatus',
       scene: 'pdpDelivScene', sceneBtn: 'pdpDelivSceneBtn', sceneSt: 'pdpDelivSceneSt', scenePrev: 'pdpDelivScenePrev', filmOk: 'pdpDelivFilmOk',
       payload: function () {
@@ -5223,6 +5290,7 @@
     initDeliveryWidget({
       box: 'livraisonOrder', map: 'livDelivMap', addr: 'livDelivAddr', date: 'livDelivDate',
       hourWrap: 'livDelivHourWrap', hour: 'livDelivHour', whenName: 'livDelivWhen',
+      lieu: 'livDelivLieu', notes: 'livDelivNotes',
       zone: 'livDelivZoneTxt', order: 'livDelivOrder', status: 'livDelivStatus',
       scene: 'livDelivScene', sceneBtn: 'livDelivSceneBtn', sceneSt: 'livDelivSceneSt', scenePrev: 'livDelivScenePrev', filmOk: 'livDelivFilmOk',
       payload: function () {
@@ -5973,48 +6041,69 @@
   // ── Panneaux dédiés de la colonne d'actions ───────────────────────────────
   // Un bouton = un panneau. Chaque panneau est autonome et rendu à la demande
   // (aucun état caché à maintenir : on relit toujours la course à jour).
+  // Conditions posées par le CLIENT à la commande. Lecture seule des deux
+  // côtés : elles ne se renégocient pas dans un formulaire, elles se discutent
+  // dans le chat. Source unique = la course.
+  function lvConditionsHTML(c) {
+    var quand = c.when === 'heure' ? ('à ' + escapeHTML(c.hour || '?'))
+      : (c.when === 'matin' ? 'le matin' : "l'après-midi");
+    return '<ul class="lv-accord__list">'
+      + '<li><span>📅 Quand</span><strong>' + (c.date ? escapeHTML(c.date) : 'au plus tôt') + ' — ' + quand + '</strong></li>'
+      + '<li><span>📍 Chantier</span><strong>' + escapeHTML(c.address || '—') + '</strong></li>'
+      + (c.lieu ? '<li><span>📦 Point de dépôt</span><strong>' + escapeHTML(c.lieu) + '</strong></li>' : '')
+      + (c.notes ? '<li><span>📝 Précisions</span><strong>' + escapeHTML(c.notes) + '</strong></li>' : '')
+      + '</ul>';
+  }
+
+  // Récapitulatif d'un accord PROPOSÉ : le prix et le règlement du livreur,
+  // au-dessus des conditions du client (qui n'ont pas bougé).
+  function lvAccordRecapHTML(c, a) {
+    return '<ul class="lv-accord__list">'
+      + '<li><span>💶 Prix de la course</span><strong>' + a.prix + ' €</strong></li>'
+      + '<li><span>💳 Règlement du livreur</span><strong>'
+      + (a.paiement === 'virement' ? 'Facturation classique — virement' : 'Espèces, en main propre') + '</strong></li>'
+      + '</ul>'
+      + '<p class="lv-hint">Conditions que tu as posées à la commande :</p>'
+      + lvConditionsHTML(c)
+      + '<p class="lv-accord__sign">' + (a.okClient ? '✅' : '⬜️') + ' Client &nbsp;·&nbsp; '
+      + (a.okLivreur ? '✅' : '⬜️') + ' Livreur</p>';
+  }
+
+  // ── PANNEAU « L'ACCORD » ───────────────────────────────────────────────────
+  // RÈGLE MÉTIER (user 28/07/2026), à ne plus jamais inverser :
+  //   • le CLIENT a tout posé à la commande (date, créneau, dépôt, précisions)
+  //     et ne saisit PLUS RIEN ici — il accepte ou il discute ;
+  //   • le LIVREUR propose SON prix (pré-rempli par son tarif de zone) ;
+  //   • le MODE DE RÈGLEMENT vient de SES paramètres, pas d'un choix du client.
+  // Le serveur applique exactement la même règle (course-accord-propose refuse
+  // le client) : l'interface n'est pas la sécurité.
   function lvPanelAccord(c, role) {
     var a = c.accord || null;
     var isClient = (role === 'client');
-    var PAIEMENTS = [
-      { v: 'virement', t: '🏦 Facturation classique — virement au livreur',
-        h: 'Le livreur t\'établit une facture ; tu le règles par virement sur son compte.' },
-      { v: 'especes', t: '💵 Espèces, en main propre à la livraison',
-        h: 'Tu paies le livreur de la main à la main au moment de la remise du colis.' }
-    ];
     if (!a) {
-      return '<h4 class="lv-panel__t">📝 Écrire l\'accord</h4>'
-        + '<p class="lv-hint">Une fois d\'accord dans la discussion, remplis ce petit formulaire. '
-        + 'L\'autre partie devra l\'accepter. <strong>C\'est vous deux qui fixez le prix</strong> — '
+      if (isClient) {
+        return '<h4 class="lv-panel__t">📝 En attente du prix du livreur</h4>'
+          + '<p class="lv-hint">Tes conditions sont déjà transmises. <strong>C\'est au livreur '
+          + 'd\'annoncer son prix</strong> — Pirates Tools n\'en impose aucun et ne prend rien '
+          + 'sur la course. Dès qu\'il l\'aura proposé, tu pourras l\'accepter ici. '
+          + 'Trop cher ? Dis-le-lui dans la discussion : il peut ajuster.</p>'
+          + lvConditionsHTML(c);
+      }
+      return '<h4 class="lv-panel__t">📝 Proposer mon prix</h4>'
+        + '<p class="lv-hint">Le client a déjà posé ses conditions (ci-dessous). Il ne te reste '
+        + 'qu\'à annoncer <strong>ton prix</strong>. Tu es libre du montant : '
         + 'Pirates Tools n\'impose rien et ne prend rien sur la course.</p>'
-        + '<div class="lv-grid2">'
-        + '<label class="lv-field"><span>Prix de la course convenu (€) *</span>'
-        + '<input type="number" id="acPrix" inputmode="numeric" min="1" max="2000" step="1" placeholder="Ex. 35"></label>'
-        + '<label class="lv-field"><span>Date convenue</span><input type="date" id="acDate" value="' + escapeHTML(c.date || '') + '"></label>'
-        + '</div>'
-        + '<label class="lv-field"><span>Heure convenue</span><input type="time" id="acHour" value="' + escapeHTML(c.hour || '') + '"></label>'
-        + '<div class="lv-field"><span>Comment le livreur sera-t-il payé ? *</span>'
-        + '<div class="lv-radios">' + PAIEMENTS.map(function (p, i) {
-            return '<label class="lv-radio"><input type="radio" name="acPaiement" value="' + p.v + '"' + (i === 0 ? ' checked' : '') + '>'
-              + '<span><strong>' + p.t + '</strong><em>' + p.h + '</em></span></label>';
-          }).join('') + '</div></div>'
-        + '<label class="lv-field"><span>Point de dépôt exact / accès au chantier</span>'
-        + '<input type="text" id="acLieu" maxlength="200" placeholder="Ex. portail bleu, dépôt sous l\'auvent"></label>'
-        + '<label class="lv-field"><span>Autres précisions convenues</span>'
-        + '<textarea id="acNotes" maxlength="500" rows="2" placeholder="Ex. appeler 10 min avant, chien dans la cour…"></textarea></label>'
-        + '<div class="lv-cta"><button type="button" class="btn primary" id="acPropose">📝 Proposer cet accord</button>'
+        + lvConditionsHTML(c)
+        + '<label class="lv-field"><span>Ton prix pour cette course (€) *</span>'
+        + '<input type="number" id="acPrix" inputmode="numeric" min="1" max="2000" step="1" '
+        + 'value="' + lvMyPrice(c.zone) + '"></label>'
+        + '<p class="lv-hint">Pré-rempli avec <strong>ton tarif zone ' + c.zone + '</strong>. '
+        + 'Tu seras payé <strong>' + (lvMyPaiement() === 'virement' ? 'par virement, sur facture' : 'en espèces, en main propre')
+        + '</strong> — c\'est ton réglage : tu le changes dans <strong>⚙️ Paramètres</strong>.</p>'
+        + '<div class="lv-cta"><button type="button" class="btn primary" id="acPropose">📝 Proposer ce prix</button>'
         + '<span class="lv-cta__note" id="acSt" aria-live="polite"></span></div>';
     }
-    var recap = '<ul class="lv-accord__list">'
-      + '<li><span>Prix de la course</span><strong>' + a.prix + ' €</strong></li>'
-      + '<li><span>Règlement du livreur</span><strong>'
-      + (a.paiement === 'virement' ? 'Facturation classique — virement' : 'Espèces, en main propre') + '</strong></li>'
-      + (a.date ? '<li><span>Date</span><strong>' + escapeHTML(a.date) + (a.hour ? ' à ' + escapeHTML(a.hour) : '') + '</strong></li>' : '')
-      + (a.lieu ? '<li><span>Point de dépôt</span><strong>' + escapeHTML(a.lieu) + '</strong></li>' : '')
-      + (a.notes ? '<li><span>Précisions</span><strong>' + escapeHTML(a.notes) + '</strong></li>' : '')
-      + '</ul>'
-      + '<p class="lv-accord__sign">' + (a.okClient ? '✅' : '⬜️') + ' Client &nbsp;·&nbsp; '
-      + (a.okLivreur ? '✅' : '⬜️') + ' Livreur</p>';
+    var recap = lvAccordRecapHTML(c, a);
     if (a.valide) {
       return '<h4 class="lv-panel__t">✅ Accord validé par les deux parties</h4>' + recap
         + (c.goodsPaid
@@ -6024,13 +6113,13 @@
             + (isClient ? ' Ouvre le panneau « Ma marchandise ».' : ' On te préviendra par email dès que c\'est fait.') + '</div>');
     }
     var moiOk = isClient ? a.okClient : a.okLivreur;
-    return '<h4 class="lv-panel__t">📝 Accord proposé — à valider</h4>' + recap
+    return '<h4 class="lv-panel__t">📝 Prix proposé — à valider</h4>' + recap
       + (moiOk
-        ? '<p class="lv-hint">Tu as accepté. En attente de l\'autre partie.</p>'
+        ? '<p class="lv-hint">' + (isClient ? 'Tu as accepté. En attente du livreur.' : 'Ton prix est proposé. En attente du client.') + '</p>'
           + '<div class="lv-cta"><button type="button" class="btn btn--danger" id="acReject">❌ Annuler cette proposition</button>'
           + '<span class="lv-cta__note" id="acSt" aria-live="polite"></span></div>'
-        : '<div class="lv-cta"><button type="button" class="btn primary" id="acAccept">✅ J\'accepte cet accord</button>'
-          + '<button type="button" class="btn btn--danger" id="acReject">❌ Refuser et rediscuter</button>'
+        : '<div class="lv-cta"><button type="button" class="btn primary" id="acAccept">✅ J\'accepte ce prix</button>'
+          + '<button type="button" class="btn btn--danger" id="acReject">❌ Refuser et négocier</button>'
           + '<span class="lv-cta__note" id="acSt" aria-live="polite"></span></div>');
   }
 
@@ -6221,27 +6310,24 @@
       // ⚠️ Chaque bouton capture SON propre élément. Une variable `el` partagée
       // et réassignée par les recherches suivantes pointerait sur le dernier
       // résultat (null) au moment du clic — bug attrapé au harnais.
+      // ⚖️ On n'envoie QUE le prix. La date, le créneau, le point de dépôt et
+      // les précisions viennent de la COURSE (posés par le client à la
+      // commande) ; le mode de règlement vient du PROFIL du livreur. Le
+      // serveur ignore de toute façon tout autre champ — l'accord ne peut
+      // donc jamais raconter autre chose que la demande d'origine.
       var el = panel.querySelector('#acPropose');
       if (el) el.onclick = (function (el) { return function () {
         el.disabled = true;
-        var pay = panel.querySelector('input[name="acPaiement"]:checked');
         post('course-accord-propose', {
-          accord: {
-            prix: (panel.querySelector('#acPrix') || {}).value,
-            paiement: pay ? pay.value : '',
-            date: (panel.querySelector('#acDate') || {}).value || '',
-            hour: (panel.querySelector('#acHour') || {}).value || '',
-            lieu: (panel.querySelector('#acLieu') || {}).value || '',
-            notes: (panel.querySelector('#acNotes') || {}).value || ''
-          }
-        }, function () { toast('📝 Accord proposé — en attente de l\'autre partie', 'success'); reloadAfter(); })
+          accord: { prix: (panel.querySelector('#acPrix') || {}).value }
+        }, function () { toast('📝 Prix proposé — en attente du client', 'success'); reloadAfter(); })
           .then(function (d) { if (!d || !d.ok) el.disabled = false; });
       }; })(el);
       var acc = panel.querySelector('#acAccept');
       if (acc) acc.onclick = function () {
         acc.disabled = true;
         post('course-accord-accept', {}, function (d) {
-          toast(d.valide ? '✅ Accord validé des deux côtés' : '👍 Accord accepté — en attente de l\'autre', 'success');
+          toast(d.valide ? '✅ Accord validé des deux côtés' : '👍 Prix accepté — en attente de l\'autre', 'success');
           reloadAfter();
         }).then(function (d) { if (!d || !d.ok) acc.disabled = false; });
       };
@@ -6473,10 +6559,14 @@
   // prix. Rien n'est imposé, aucun montant n'est refusé, aucun tri ne dépend du
   // prix (voir le cadre juridique en tête du bloc TARIFS).
   var _lvMyTarifs = null;          // tarifs du livreur connecté (chargés par le panneau)
+  var _lvMyPaiement = '';          // son mode de règlement (idem)
   function lvMyPrice(zone) {
     var t = _lvMyTarifs || lvDefaultTarifs();
     return t[zone] || t[1];
   }
+  // Mode de règlement du livreur connecté. Défaut « espèces » : jamais vide,
+  // sinon l'accord ne pourrait pas dire comment il sera payé.
+  function lvMyPaiement() { return _lvMyPaiement === 'virement' ? 'virement' : 'especes'; }
   // Panneau « ma fiche livreur » : interrupteur de disponibilité, horaires,
   // carte des zones avec SES tarifs, identité et photo. Sorti de
   // renderCourierTarifPanel, qui dépassait le plafond de 150 lignes — et
@@ -6539,6 +6629,15 @@
             ? '<em class="lv-hint">Repris de ton dossier d\'inscription' + (p.cylindree ? ' (' + escapeHTML(p.cylindree) + ' cm³)' : '') + ' — tu peux le changer si tu as changé de véhicule.</em>'
             : '')
         + '</label>'
+        // MODE DE RÈGLEMENT : c'est SON choix, au même titre que ses tarifs
+        // (user 28/07/2026). Il vaut pour toutes ses courses et s'inscrit
+        // automatiquement dans l'accord — le client ne le choisit jamais.
+        + '<label class="lv-field"><span>💳 Comment veux-tu être payé ? *</span>'
+        + '<select id="lvPfPaiement">'
+        + '<option value="especes"' + (p.paiement === 'virement' ? '' : ' selected') + '>💵 Espèces, en main propre à la livraison</option>'
+        + '<option value="virement"' + (p.paiement === 'virement' ? ' selected' : '') + '>🏦 Facturation classique — virement sur mon compte</option>'
+        + '</select>'
+        + '<em class="lv-hint">Ce choix s\'inscrit tout seul dans chaque accord : tu n\'as plus à le redire à chaque course. Le client ne peut pas l\'imposer — s\'il préfère autre chose, il t\'en parle dans la discussion et tu changes ici.</em></label>'
         + '<label class="lv-field"><span>Ta présentation <em>(visible des clients)</em></span>'
         + '<textarea id="lvPfBio" maxlength="400" rows="3" placeholder="Quelques mots : ton expérience, tes horaires, ce que tu transportes…">' + escapeHTML(p.bio || '') + '</textarea></label>'
         + '<div class="lv-field"><span>Ta photo <em>(facultatif)</em></span>'
@@ -6565,6 +6664,7 @@
       var p = d.profile || {};
       var tarifs = lvNormTarifs(p.tarifs);
       _lvMyTarifs = tarifs;            // réutilisés pour afficher MON prix sur chaque course
+      _lvMyPaiement = p.paiement || 'especes';
       // Sa carte, telle que les clients la voient — dans l'espace de travail,
       // pas dans les paramètres. p.uid vient du serveur ; sans lui la carte
       // pointerait vers une fiche vide.
@@ -6620,12 +6720,21 @@
               hFin: (document.getElementById('lvPfHFin') || {}).value || '',
               bio: (document.getElementById('lvPfBio') || {}).value || '',
               photo: photoData || '',
+              paiement: (document.getElementById('lvPfPaiement') || {}).value || '',
               tarifs: tarifs
             })
           });
         }).then(function (r) { return r.json(); }).then(function (dd) {
           save.disabled = false;
-          if (dd.ok) { if (stEl) stEl.textContent = '✅ Enregistré'; toast('Fiche livreur enregistrée ✅', 'success'); _couriersPromise = null; }
+          if (dd.ok) {
+            if (stEl) stEl.textContent = '✅ Enregistré';
+            toast('Fiche livreur enregistrée ✅', 'success');
+            _couriersPromise = null;
+            // Le cache local doit suivre : sinon le panneau d'accord annoncerait
+            // encore l'ancien mode de règlement jusqu'au prochain rechargement.
+            if (dd.paiement) _lvMyPaiement = dd.paiement;
+            if (dd.tarifs) _lvMyTarifs = dd.tarifs;
+          }
           else if (stEl) stEl.textContent = '❌ ' + (dd.error || 'Erreur');
         }).catch(function () { save.disabled = false; if (stEl) stEl.textContent = '❌ Erreur réseau'; });
       };
@@ -7058,16 +7167,63 @@
       + 'Statut : en cours</span></button>';
   }
 
+  // DUO signet + livreur (user 28/07/2026 : « mets-le en carré rangé sur la
+  // gauche et à ses côtés la carte du livreur qui a accepté la course, ils
+  // doivent avoir exactement la même hauteur »). La hauteur identique vient de
+  // la grille (`align-items: stretch`), pas d'une valeur en dur : elle reste
+  // vraie quel que soit le contenu.
+  // Tant qu'aucun livreur n'a accepté, la colonne de droite ne disparaît pas —
+  // elle dit l'attente. Sinon la mise en page sauterait à l'acceptation.
+  function lvDuoHTML(c, titre, attr) {
+    return '<div class="lv-duo">'
+      + lvSignetHTML(c, titre, attr)
+      + '<div class="lv-duo__co" data-duo-co="' + escapeHTML(String(c.courierUid || '')) + '">'
+      + (c.courierUid
+        ? '<p class="lv-hint">Chargement du livreur…</p>'
+        : '<div class="lv-duo__wait"><span class="lv-duo__waiti" aria-hidden="true">⏳</span>'
+          + '<span class="lv-duo__waitt">En attente d\'un livreur</span>'
+          + '<span class="lv-duo__waits">Ta demande est visible de tous les livreurs. '
+          + 'Le premier qui l\'accepte apparaîtra ici.</span></div>')
+      + '</div></div>';
+  }
+
+  // Remplit les colonnes « livreur » avec sa VRAIE fiche publique (photo, note,
+  // courses livrées) — la même que celle de l'annuaire, source unique.
+  function lvRemplirDuoLivreurs(root) {
+    var cases = (root || document).querySelectorAll('[data-duo-co]');
+    if (!cases.length) return;
+    var besoin = false;
+    for (var i = 0; i < cases.length; i++) if (cases[i].getAttribute('data-duo-co')) besoin = true;
+    if (!besoin) return;
+    loadCouriers().then(function (list) {
+      var parUid = {};
+      (list || []).forEach(function (x) { parUid[x.uid] = x; });
+      for (var j = 0; j < cases.length; j++) {
+        var uid = cases[j].getAttribute('data-duo-co');
+        if (!uid) continue;
+        var p = parUid[uid];
+        cases[j].innerHTML = p
+          ? courierCardHTML(p, { sansCta: true })
+          : '<div class="lv-duo__wait"><span class="lv-duo__waiti" aria-hidden="true">🛵</span>'
+            + '<span class="lv-duo__waitt">Livreur engagé</span>'
+            + '<span class="lv-duo__waits">Sa fiche publique n\'est pas disponible pour le moment.</span></div>';
+      }
+    }).catch(function () { /* jamais bloquant : le signet reste utilisable */ });
+  }
+
   // Rend les signets des courses EN COURS dans `hostId`, et renvoie la liste.
   // Bloc masqué quand il n'y a rien en cours : jamais de titre orphelin.
-  function lvRenderSignets(courses, hostId, titre, ligne, attr) {
+  function lvRenderSignets(courses, hostId, titre, ligne, attr, avecLivreur) {
     var enCours = courses.filter(function (c) { return !lvFini(c); });
     var host = document.getElementById(hostId);
     if (host) {
       host.hidden = !enCours.length;
       host.innerHTML = !enCours.length ? ''
         : '<h2 class="lv-h2">' + titre + (enCours.length > 1 ? ' (' + enCours.length + ')' : '') + '</h2>'
-          + enCours.map(function (c) { return lvSignetHTML(c, ligne(c), attr); }).join('');
+          + enCours.map(function (c) {
+              return avecLivreur ? lvDuoHTML(c, ligne(c), attr) : lvSignetHTML(c, ligne(c), attr);
+            }).join('');
+      if (avecLivreur && enCours.length) lvRemplirDuoLivreurs(host);
     }
     return enCours;
   }
@@ -7331,7 +7487,7 @@
       lvRenderSignets(mine, 'clientDelivEnCours', '📦 Livraison en cours', function (c) {
         var z = LV_BAREME[(c.zone || 1) - 1] || LV_BAREME[0];
         return z.emoji + ' Zone ' + c.zone + ' · <strong>' + lvPrixTxt(c) + '</strong>';
-      }, 'data-deliv-focus');
+      }, 'data-deliv-focus', true);
       var detEl = document.getElementById('clientDelivDetail');
       if (detEl) { detEl.hidden = true; detEl.innerHTML = ''; }
       // ⚠️ Portée : les signets « en cours » sont HORS de `listEl` (ils vivent
@@ -8193,6 +8349,7 @@
           // Rôle et tarifs livreur, fil de discussion.
           lvResetRole();
           _lvMyTarifs = null;
+          _lvMyPaiement = '';
           if (_lvChatUnsub) { try { _lvChatUnsub(); } catch (_) {} _lvChatUnsub = null; }
           // Fiche artisan du compte précédent (nom, logo, photos). Sans cette
           // remise à zéro, l'espace « Ma carte » pouvait afficher la fiche de

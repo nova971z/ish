@@ -1181,3 +1181,55 @@ dit ni ce qui manque, ni quoi faire, et ça bloque le test.
   la visibilité ; plus AUCUN panneau ne s'ouvre tout seul ; le fil de messages
   a quitté le bloc détail (il vit dans la bulle) ; le code de remise n'est plus
   visible en permanence (panneau au clic).
+
+## ⚖️ QUI DÉCIDE QUOI — LA CHAÎNE DE LA LIVRAISON REDRESSÉE (28/07/2026, SW v528)
+User : « il y a plein de choses pas cohérentes ». Il avait raison, et la
+correction touche le MODÈLE, pas l'affichage. Règle GRAVÉE, à ne plus inverser :
+- **Le CLIENT pose TOUTES ses conditions À LA COMMANDE** — date, créneau,
+  **point de dépôt**, **précisions** — et ne les ressaisit **JAMAIS** après.
+- **Le CLIENT ne propose JAMAIS de prix.** S'il trouve trop cher, il négocie
+  dans la discussion et le livreur ajuste ses tarifs dans SES paramètres.
+- **Le MODE DE RÈGLEMENT appartient au LIVREUR** (nouveau champ `paiement` de
+  `couriers_public`, réglé dans ⚙️ Paramètres). Le client ne le choisit pas.
+- **L'ACCORD n'est plus une négociation champ par champ, il ENTÉRINE** :
+  `sanitizeAccord(raw, course, paiementLivreur)` ne lit du corps QUE le prix ;
+  date/heure/créneau/lieu/notes viennent de la COURSE, le règlement du PROFIL.
+  → une injection `{lieu:'PIRATÉ', date:'1999-01-01'}` est ignorée (testé).
+- `course-accord-propose` **refuse le client côté SERVEUR** (403
+  `propose-livreur-seul`) — l'interface n'est jamais la sécurité.
+### 3 INCOHÉRENCES DE FOND trouvées en retraçant la chaîne (non signalées)
+1. `lieu`/`notes` **n'existaient pas sur la course** : ils ne vivaient que dans
+   l'accord → ajoutés à `buildRequest` + projetés par `course-list`.
+2. Le **mode de règlement du livreur n'existait nulle part** dans son profil :
+   il était ressaisi à chaque accord.
+3. Le **bandeau vert acceptait à l'aveugle** — un clic = engagement, sans
+   jamais voir la course.
+### UI
+- **DUO client** (`#clientDelivEnCours`) : signet **carré à gauche**, **carte
+  publique du livreur à droite**, **hauteurs égales**. ⚠️ L'égalité vient de
+  DEUX mécanismes redondants (`align-items:stretch` sur la grille + `height:100%`
+  pour les enfants non-items) : retirer l'un ne casse rien, retirer les deux si.
+  Sans livreur → colonne « ⏳ En attente d'un livreur » (jamais de saut de mise
+  en page). Carte **sans bouton « Discuter »** (grisé hors service = cul-de-sac).
+- **BANDEAU VERT** : **clignote** (`.course-alert--blink`, s'arrête à la
+  lecture), bouton **« Voir les détails »** qui **déplie** les conditions du
+  client + son tarif de zone, puis **✅ J'accepte** / **✕ Pas pour moi**.
+- 🐛 Défaut MESURÉ et corrigé : la pastille (167 px) débordait de la tuile
+  (155 px) de **31 px** sur iPhone → `white-space: normal` + `max-width:100%`.
+- 🐛 `.lv-accord__list li` : une valeur longue s'enroulait **au milieu de son
+  intitulé** (« 📦 … × » / « Marchandise 3 ») → `flex-wrap` + bases de largeur.
+### PLAFOND PERF ATTEINT — purge CSS ciblée
+`scripts/ci.js` a bloqué à **60 Ko compressés** (plafond 60). ⛔ Plafond NON
+relevé : purge de **16 règles réellement mortes** (0 occurrence prouvée dans
+app.js/index.html/sw.js) → 59,97 Ko. ⚠️ **PIÈGE ÉVITÉ** : 65 classes semblaient
+mortes, mais `abo-page--*`, `plan-detail--*`, `partner-card--*`, `stock-badge--*`,
+`toast--*`, `lv-tarif--z*`, `admin-app--*`, `page-*` sont **CONSTRUITES par
+concaténation** (`'toast--' + type`) et `leaflet-container` est posée par
+Leaflet. Vérifier CHAQUE préfixe avant toute suppression.
+- VÉRIFIÉ : **70/70 plan9** + **31/31 plan9-serveur** + 70/70 plan8 + 82/82
+  couriers + 32/32 bulle + 25/25 detail + 24/24 espace + 24/24 plan7 + 15/15
+  accordE2E + 16/16 a11y + 15/15 adminliv + 14/14 course-pay. CI verte.
+  7 sabotages délibérés (injection du lieu par le corps, règlement repris du
+  corps, formulaire de prix rendu au client, bandeau qui ne clignote plus,
+  acceptation à l'aveugle, hauteurs désalignées, pastille en nowrap) : tous
+  détectés.

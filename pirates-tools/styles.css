@@ -4009,7 +4009,6 @@ transition: transform .15s ease;
 
 .dock__btn--home,
 .dock__btn--tools,
-.dock__btn--account,
 .dock__btn--cart {
 background: rgba(255,255,255,.06);
 color: #e6edf5;
@@ -4423,36 +4422,6 @@ font-size: 18px;
 }
 .tools-3d-prev { margin-right: -18px; }
 .tools-3d-next { margin-left: -18px; }
-
-/* Responsive modal 3D */
-.tool-3d-container {
-width: 95vw;
-height: 85vh;
-margin: 0;
-}
-
-.tool-3d-header {
-padding: 1rem 1.5rem;
-}
-
-.tool-3d-header h2 {
-font-size: 1.3rem;
-}
-
-.tool-3d-controls {
-flex-direction: column;
-align-items: stretch;
-gap: 1rem;
-padding: 1rem 1.5rem;
-}
-
-.tool-3d-actions {
-justify-content: center;
-}
-
-.control-hints {
-display: none;
-}
 
 /* Responsive devis - mobile */
 .devis-item__name { font-size: .82rem; }
@@ -5369,8 +5338,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   .cat-chip:hover,
   .dock__btn:hover,
   .btn:hover,
-  .pdp-related__card:hover,
-  .tool-card:hover,
   .devis-item:hover {
     transform: none;
   }
@@ -7392,7 +7359,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 }
 
 .sr-only{ position:absolute !important; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,1px); white-space:nowrap; border:0; }
-.pt-root{ z-index:1; }
 
 /* Drawer (menu lateral) */
 .drawer{
@@ -7984,9 +7950,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .pdp-deliv-map--fallback svg { width: 70%; height: 70%; overflow: visible; }
 .pdp-deliv-map--fallback svg path { fill: none; stroke: #f2c14e; stroke-width: 1.1; vector-effect: non-scaling-stroke;
   stroke-linejoin: round; filter: drop-shadow(0 0 2px rgba(242,193,78,.75)); }
-.pdp-deliv-map__note { position: absolute; bottom: .6rem; left: 50%; transform: translateX(-50%); margin: 0;
-  padding: .35rem .8rem; background: rgba(10,15,20,.85); border: 1px solid rgba(242,193,78,.3); border-radius: 999px;
-  font-size: .8rem; white-space: nowrap; max-width: 94%; overflow: hidden; text-overflow: ellipsis; }
 .pdp-deliv-form { display: grid; gap: .7rem; }
 .pdp-deliv-form input[type=text], .pdp-deliv-form input[type=date], .pdp-deliv-form input[type=time] {
   padding: .6rem .8rem; border-radius: 10px; border: 1px solid rgba(255,255,255,.15); background: rgba(0,0,0,.25); color: #fff; font: inherit; width: 100%; box-sizing: border-box; }
@@ -8010,7 +7973,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .pdp-deliv-fields .lv-field { min-width: 0; }
 /* ═══ §49 — MODE LIVRAISON (espace livreur) ═══════════════════════════════════ */
 .courier-space { max-width: 780px; display: grid; gap: 1rem; }
-.courier-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 @media (max-width: 700px) { .courier-cols { grid-template-columns: 1fr; } }
 .acc-hero__actions { margin-left: auto; align-self: center; display: flex; flex-direction: column; gap: .55rem; }
 .acc-hero__actions .btn { white-space: nowrap; text-align: center; }
@@ -8155,7 +8117,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .courier-prof__ph { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; background: rgba(255,255,255,.06); display: grid; place-items: center; font-size: 2.4rem; flex: 0 0 auto; }
 .courier-prof__id h1 { margin: 0 0 .2rem; }
 .courier-prof__meta { margin: 0; font-size: .9rem; color: var(--muted, #c9c9d9); }
-.courier-prof__dispo { margin: .35rem 0 0; font-weight: 700; font-size: .9rem; }
 .courier-prof__dispo.is-on { color: #6ee7b7; }
 .courier-prof__dispo.is-off { color: var(--muted, #c9c9d9); }
 
@@ -8271,11 +8232,11 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 }
 .chat-win__t { flex: 1; min-width: 0; font-size: .95rem; color: #fff;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.chat-win__back, .chat-win__x {
+.chat-win__x {
   flex: 0 0 32px; width: 32px; height: 32px; border-radius: 50%; border: 0;
   background: rgba(255, 255, 255, .08); color: #e6edf5; font-size: 15px; cursor: pointer;
 }
-.chat-win__back:hover, .chat-win__x:hover { background: rgba(255, 255, 255, .18); }
+.chat-win__x:hover { background: rgba(255, 255, 255, .18); }
 .chat-win__body { flex: 1; overflow-y: auto; padding: .7rem .8rem; -webkit-overflow-scrolling: touch; }
 .chat-win__send {
   display: flex; gap: .5rem; flex-shrink: 0; padding: .6rem .7rem;
@@ -8408,14 +8369,12 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 /* — Demande de course : sortie de secours (remise en ligne) et annulation — */
 .btn--danger { border-color: rgba(248,113,113,.55); color: #ffb4b4; background: rgba(248,113,113,.10); }
 .btn--danger:hover, .btn--danger:focus-visible { border-color: rgba(248,113,113,.85); background: rgba(248,113,113,.18); }
-.lv-chat__end { margin-top: .7rem; padding-top: .7rem; border-top: 1px dashed rgba(255,255,255,.14); display: grid; gap: .35rem; justify-items: start; }
 .lv-cancel { margin-top: .9rem; padding-top: .8rem; border-top: 1px dashed rgba(255,255,255,.14); display: grid; gap: .35rem; justify-items: start; }
 
 /* — Chat en 2 colonnes : fil à gauche, colonne d'actions à droite — */
 /* Le fil ayant quitté ce bloc (28/07/2026), il n'y a plus de colonne
    principale à côté : les actions occupent toute la largeur, sur UNE RANGÉE. */
 .lv-chat__body { display: block; }
-.lv-chat__main { min-width: 0; }
 /* ── FICHES D'INFORMATION : une info = une fiche, côte à côte ──────────────
    Remplace cinq lignes de texte brut empilées (demande user 28/07/2026).
    Elles s'enroulent d'elles-mêmes ; sur téléphone, deux par rangée. */
@@ -8428,10 +8387,12 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .course-alert {
   position: fixed; left: 0; right: 0; z-index: 9550;
   top: calc(var(--safe-top, 70px) - 6px);
-  display: flex; align-items: stretch; gap: .5rem;
+  display: block;
   padding: .5rem .8rem;
+  max-height: calc(100dvh - var(--safe-top, 70px) - 20px); overflow-y: auto;
   animation: alert-in .3s cubic-bezier(.2,.8,.3,1);
 }
+.course-alert__row { display: flex; align-items: stretch; gap: .5rem; }
 @keyframes alert-in { from { opacity: 0; transform: translateY(-16px); } }
 @media (prefers-reduced-motion: reduce) { .course-alert { animation: none; } }
 .course-alert__go {
@@ -8461,6 +8422,29 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
 }
 .course-alert__x:hover { background: rgba(255,255,255,.14); }
+/* CLIGNOTEMENT (user 28/07/2026) : tant qu'une course attend, le bandeau
+   respire — c'est ce qui le fait remarquer quand on ne regarde pas l'écran.
+   Il s'ARRÊTE dès que les détails sont dépliés : le clignotement appelle
+   l'attention, il ne doit pas gêner la lecture. */
+@keyframes course-alert-blink {
+  0%, 100% { box-shadow: 0 8px 28px rgba(0,0,0,.5), 0 0 22px rgba(52,211,153,.28); border-color: rgba(52,211,153,.55); }
+  50%      { box-shadow: 0 8px 30px rgba(0,0,0,.55), 0 0 34px rgba(52,211,153,.75); border-color: rgba(52,211,153,1); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .course-alert--blink .course-alert__go { animation: course-alert-blink 1.2s ease-in-out infinite; }
+}
+
+/* Détails du client, dépliés au clic. */
+.course-alert__det {
+  margin-top: .5rem; padding: .9rem 1rem; border-radius: 14px;
+  border: 1px solid rgba(52,211,153,.45); background: rgba(10,15,20,.92);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 12px 34px rgba(0,0,0,.55);
+}
+.course-alert__det .lv-accord__list { margin: 0 0 .7rem; }
+.course-alert__acts { display: flex; gap: .5rem; flex-wrap: wrap; }
+.course-alert__acts .btn { flex: 1 1 auto; justify-content: center; }
+.course-alert__st { display: block; margin-top: .45rem; font-size: .8rem; color: var(--muted, #c9c9d9); }
 @media (max-width: 480px) { .course-alert__cta { display: none; } }
 
 /* ── « MES COURSES » — présentation haut de gamme ──────────────────────────
@@ -8565,6 +8549,50 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-signet__t { font-size: .98rem; color: #e6edf5; }
 .lv-signet__s { font-size: .84rem; color: var(--muted, #c9c9d9); }
 
+/* ── DUO : signet « en cours » à GAUCHE, carte du livreur à DROITE ─────────
+   Demande user 28/07/2026 : « mets-le en carré rangé sur la gauche et à ses
+   côtés la carte du livreur, ils doivent avoir exactement la même hauteur ».
+   La hauteur identique vient de `align-items: stretch` + `height: 100%` sur
+   les enfants : elle reste vraie quel que soit le contenu, sans valeur figée.
+   DEUX colonnes EXACTEMENT (`1fr 1fr`), pas `auto-fit` : celui-ci déclarait
+   autant de pistes que la largeur en permettait (4 sur desktop, dont 2 vides
+   et collapsées). Le rendu était juste, mais la règle ne disait pas ce qu'on
+   voulait — et une règle qui se trouve juste par accident finit par se tromper.
+   Sous 360 px seulement, on empile : deux colonnes y deviendraient illisibles. */
+.lv-duo {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: .8rem; align-items: stretch;
+}
+@media (max-width: 359px) { .lv-duo { grid-template-columns: 1fr; } }
+.lv-duo + .lv-duo { margin-top: .8rem; }
+/* Deux mécanismes REDONDANTS, et c'est voulu : `align-items: stretch` égalise
+   les items de la grille, `height: 100%` propage la hauteur aux enfants
+   (.courier-card, .lv-duo__wait) qui, eux, ne sont pas des items de grille.
+   Retirer l'un seul ne casse rien ; retirer les deux casse l'alignement — le
+   harnais le prouve (plan9.mjs, sabotage F3). */
+.lv-duo > * { height: 100%; min-width: 0; }
+/* Le signet passe en TUILE (colonne) : c'est le « carré » demandé. */
+.lv-duo .lv-signet {
+  flex-direction: column; align-items: flex-start; justify-content: center;
+  gap: .55rem; margin: 0;
+}
+/* Dans la tuile (≈155 px sur iPhone), la pastille en `nowrap` débordait de
+   31 px mesurés. Elle doit pouvoir se replier et ne jamais dépasser son bloc. */
+.lv-duo .lv-signet .lv-pill {
+  margin-left: 0; max-width: 100%; white-space: normal; text-align: left;
+}
+.lv-duo__co { display: flex; }
+.lv-duo__co > .courier-card { width: 100%; height: 100%; margin: 0; }
+.lv-duo__wait {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: .35rem; width: 100%; height: 100%; text-align: center;
+  padding: .9rem 1rem; border-radius: 14px;
+  border: 1px dashed rgba(255, 255, 255, .18); background: rgba(255, 255, 255, .03);
+}
+.lv-duo__waiti { font-size: 1.5rem; }
+.lv-duo__waitt { font-weight: 800; color: #e6edf5; font-size: .95rem; }
+.lv-duo__waits { font-size: .8rem; color: var(--muted, #c9c9d9); line-height: 1.45; }
+
 /* En-tête de la grosse fiche livreur : titre à gauche, PASTILLE à droite. */
 .lv-dhead { display: flex; align-items: flex-start; justify-content: space-between; gap: .8rem; flex-wrap: wrap; }
 .lv-dhead .lv-h2 { margin: 0; flex: 1 1 14rem; }
@@ -8634,18 +8662,14 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-cbtn--danger:hover, .lv-cbtn--danger:focus-visible { border-color: rgba(248,113,113,.75); background: rgba(248,113,113,.12); }
 .lv-chat__panel { margin-top: .8rem; padding: .85rem .9rem; border-radius: 14px; border: 1px solid rgba(242,193,78,.35); background: rgba(0,0,0,.3); display: grid; gap: .55rem; }
 .lv-panel__t { margin: 0; font-size: 1.02rem; font-weight: 800; }
-
-/* — Formulaire et récapitulatif de l'accord — */
-.lv-radios { display: grid; gap: .5rem; margin-top: .35rem; }
-.lv-radio { display: flex; gap: .6rem; align-items: flex-start; padding: .55rem .65rem; border-radius: 10px; border: 1px solid rgba(255,255,255,.12); background: rgba(0,0,0,.22); cursor: pointer; }
-.lv-radio input { margin-top: .25rem; flex: 0 0 auto; width: 18px; height: 18px; accent-color: #f2c14e; }
-.lv-radio span { display: grid; gap: .15rem; font-size: .9rem; }
-.lv-radio em { font-style: normal; font-size: .78rem; color: var(--muted, #c9c9d9); line-height: 1.4; }
-.lv-radio:has(input:checked) { border-color: rgba(242,193,78,.7); background: rgba(242,193,78,.10); }
 .lv-accord__list { list-style: none; margin: 0; padding: 0; display: grid; gap: .3rem; }
-.lv-accord__list li { display: flex; justify-content: space-between; gap: .8rem; padding: .4rem .55rem; border-radius: 8px; background: rgba(0,0,0,.28); font-size: .9rem; }
-.lv-accord__list li span { color: var(--muted, #c9c9d9); }
-.lv-accord__list li strong { text-align: right; font-variant-numeric: tabular-nums; }
+/* Intitulé à gauche, valeur à droite. Sur écran étroit, une valeur longue
+   (« 2 articles de quincaillerie × 3 ») s'enroulait AU MILIEU de l'intitulé :
+   on lisait « 📦 … × » puis « Marchandise 3 ». `flex-wrap` + bases de largeur
+   font passer la valeur À LA LIGNE ENTIÈRE plutôt que de couper l'intitulé. */
+.lv-accord__list li { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: .2rem .8rem; padding: .4rem .55rem; border-radius: 8px; background: rgba(0,0,0,.28); font-size: .9rem; }
+.lv-accord__list li span { color: var(--muted, #c9c9d9); flex: 0 0 auto; }
+.lv-accord__list li strong { flex: 1 1 auto; min-width: 0; text-align: right; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .lv-accord__sign { margin: .2rem 0 0; font-size: .92rem; font-weight: 700; letter-spacing: .02em; }
 
 /* ═══ §52 — CORRECTIFS AUDIT P1 (intégrité statique) ═════════════════════════

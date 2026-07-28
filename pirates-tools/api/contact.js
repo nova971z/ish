@@ -642,6 +642,10 @@ async function handleCourses(req, body, cfg, res) {
         bio: p.bio || '',
         photo: p.photo || '',
         tarifs: coursesLib.sanitizeTarifs(p.tarifs),
+        // Mode de règlement voulu par le livreur. Défaut = espèces : c'est le
+        // plus simple pour une remise en main propre, et surtout jamais vide —
+        // l'accord doit toujours pouvoir dire comment le livreur sera payé.
+        paiement: coursesLib.sanitizePaiement(p.paiement) || 'especes',
         // Horaires de service : rendent l'état AUTOMATIQUE hors de la plage.
         hDebut: p.hDebut || '', hFin: p.hFin || '',
         available: !!p.available,
@@ -670,6 +674,9 @@ async function handleCourses(req, body, cfg, res) {
       return res.status(400).json({ ok: false, error: 'Photo de profil invalide (JPEG/PNG/WebP, 300 Ko max).' });
     }
     const tarifs = coursesLib.sanitizeTarifs(body.tarifs);
+    // Mode de règlement du livreur : conservé tel quel s'il n'est pas fourni
+    // (un enregistrement partiel ne doit jamais effacer un réglage existant).
+    const paiement = coursesLib.sanitizePaiement(body.paiement);
     // Horaires : les deux heures doivent être valides, sinon on considère
     // qu'il n'y en a pas (et l'interrupteur seul décide). Jamais d'à-peu-près.
     const horaires = coursesLib.sanitizeHoraires(body);
@@ -680,6 +687,7 @@ async function handleCourses(req, body, cfg, res) {
       available: body.available === true ? true : (body.available === false ? false : undefined)
     };
     if (photo) pub.photo = photo;
+    if (paiement) pub.paiement = paiement;
     if (pub.available === undefined) delete pub.available;
     await coursesLib.mirrorCourierPublic(db, uid, pub);
     await db.collection('couriers').doc(uid).set(
@@ -690,6 +698,7 @@ async function handleCourses(req, body, cfg, res) {
     return res.status(200).json({
       ok: true, tarifs,
       hDebut: horaires.hDebut, hFin: horaires.hFin,
+      paiement: pd.paiement || 'especes',
       enService: coursesLib.enService(pd, new Date())
     });
   }
@@ -881,12 +890,12 @@ async function handleCourses(req, body, cfg, res) {
     const ref = db.collection('courses').doc(id);
     const propose = body.type === 'course-accord-propose';
     const accept = body.type === 'course-accord-accept';
-    let clean = null;
+    // Mode de règlement du livreur, lu sur SA fiche (hors transaction : il ne
+    // participe à aucune règle d'atomicité, il ne fait qu'alimenter l'accord).
+    let paiementLivreur = '';
     if (propose) {
-      clean = coursesLib.sanitizeAccord(body.accord);
-      if (!clean) {
-        return res.status(400).json({ ok: false, error: 'Indique un prix (1 à 2000 €) et un mode de règlement.' });
-      }
+      const mp = await db.collection('couriers_public').doc(uid).get().catch(() => null);
+      paiementLivreur = (mp && mp.exists && mp.data().paiement) || '';
     }
     let out = null;
     try {
@@ -918,9 +927,18 @@ async function handleCourses(req, body, cfg, res) {
         }
         if (propose) {
           if (c.accord && c.accord.valide) throw new Error('deja-valide');
+          // ⚖️ SEUL LE LIVREUR PROPOSE (décision user 28/07/2026). Le client ne
+          // met jamais de prix : s'il trouve trop cher, il négocie dans la
+          // discussion et le livreur ajuste. Contrôle SERVEUR, pas seulement
+          // d'interface — sans lui, un client pourrait poster un prix à la main.
+          if (role !== 'livreur') throw new Error('propose-livreur-seul');
+          // Le prix vient du corps ; TOUT le reste vient de la course (ce que
+          // le client a posé à la commande) et du profil du livreur.
+          const clean = coursesLib.sanitizeAccord(body.accord, c, paiementLivreur);
+          if (!clean) throw new Error('prix-invalide');
           const accord = Object.assign({}, clean, {
             proposeBy: uid, proposeRole: role, proposeAt: new Date(),
-            okClient: role === 'client', okLivreur: role === 'livreur', valide: false
+            okClient: false, okLivreur: true, valide: false
           });
           tx.update(ref, { accord });
           return { role, action: 'propose', accord, round: c.round || 1, course: c };
@@ -946,7 +964,11 @@ async function handleCourses(req, body, cfg, res) {
         'pas-participant': [403, 'Tu n\'es pas concerné par cette course.'],
         'pas-en-negociation': [409, 'Cette course n\'est plus au stade de la mise en relation.'],
         'pas-d-accord': [409, 'Aucun accord n\'a encore été proposé.'],
-        'deja-valide': [409, 'L\'accord est déjà validé par les deux parties.']
+        'deja-valide': [409, 'L\'accord est déjà validé par les deux parties.'],
+        // ⚠️ Un refus doit TOUJOURS se lire en clair (leçon des échecs muets) :
+        // sans entrée ici, ces deux cas tomberaient dans le 500 générique.
+        'propose-livreur-seul': [403, 'C\'est au livreur de proposer son prix — indique dans la discussion ce qui ne te convient pas.'],
+        'prix-invalide': [400, 'Indique un prix entre 1 et 2000 €.']
       };
       const m = map[e.message];
       if (m) return res.status(m[0]).json({ ok: false, error: m[1] });
@@ -1246,6 +1268,7 @@ async function handleCourses(req, body, cfg, res) {
         address: c.address, km: c.km, zone: c.zone, prix: c.prix,
         lat: c.lat, lng: c.lng,
         date: c.date, when: c.when, hour: c.hour,
+        lieu: c.lieu || '', notes: c.notes || '',
         mine: c.artisanUid === uid, acceptedByMe: c.courierUid === uid,
         courierUid: c.courierUid || null, courierName: c.courierName || '',
         chatOpen: !!c.chatOpen, round: c.round || 1,

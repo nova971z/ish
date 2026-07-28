@@ -44,7 +44,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=527">
+  <link rel="stylesheet" href="styles.css?v=528">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -501,6 +501,8 @@
               </div>
             </div>
             <label class="lv-field" id="pdpDelivHourWrap" hidden><span>Heure souhaitée</span><input type="time" id="pdpDelivHour"></label>
+            <label class="lv-field"><span>📦 Point de dépôt exact / accès au chantier</span><input type="text" id="pdpDelivLieu" maxlength="200" placeholder="Ex. portail bleu, dépôt sous l'auvent"></label>
+            <label class="lv-field"><span>📝 Précisions pour le livreur</span><textarea id="pdpDelivNotes" maxlength="500" rows="2" placeholder="Ex. appeler 10 min avant, chien dans la cour…"></textarea></label>
             <div class="lv-field lv-scenefield"><span>📷 Photo du chantier * <em>(le point de dépôt — sert de référence au livreur et de preuve)</em></span>
               <input type="file" accept="image/*" capture="environment" id="pdpDelivScene" hidden>
               <div class="lv-cta"><button type="button" class="btn" id="pdpDelivSceneBtn">📷 Prendre la photo du chantier</button>
@@ -1155,6 +1157,8 @@
               </div>
             </div>
             <label class="lv-field" id="livDelivHourWrap" hidden><span>Heure souhaitée</span><input type="time" id="livDelivHour"></label>
+            <label class="lv-field"><span>📦 Point de dépôt exact / accès au chantier</span><input type="text" id="livDelivLieu" maxlength="200" placeholder="Ex. portail bleu, dépôt sous l'auvent"></label>
+            <label class="lv-field"><span>📝 Précisions pour le livreur</span><textarea id="livDelivNotes" maxlength="500" rows="2" placeholder="Ex. appeler 10 min avant, chien dans la cour…"></textarea></label>
             <div class="lv-field lv-scenefield"><span>📷 Photo du chantier * <em>(le point de dépôt — sert de référence au livreur et de preuve)</em></span>
               <input type="file" accept="image/*" capture="environment" id="livDelivScene" hidden>
               <div class="lv-cta"><button type="button" class="btn" id="livDelivSceneBtn">📷 Prendre la photo du chantier</button>
@@ -2008,13 +2012,28 @@
        pour le refuser (demande user 28/07/2026). Il remplace la fiche
        « Courses en attente » : un livreur ne doit pas avoir à aller chercher
        les courses, elles viennent à lui. -->
+  <!-- BANDEAU « nouvelle course » (livreur). Il CLIGNOTE tant qu'une course
+       attend, et le clic n'accepte plus à l'aveugle : il DÉPLIE les détails du
+       client (demande user 28/07/2026). L'acceptation ne se fait qu'ensuite,
+       en connaissance de cause — ou on écarte d'une croix. -->
   <div id="courseAlert" class="course-alert" hidden role="status">
-    <button type="button" class="course-alert__go" id="courseAlertGo">
-      <span class="course-alert__dot" aria-hidden="true"></span>
-      <span class="course-alert__txt" id="courseAlertTxt">Nouvelle course disponible</span>
-      <span class="course-alert__cta">Accepter</span>
-    </button>
-    <button type="button" class="course-alert__x" id="courseAlertX" aria-label="Ignorer cette course">✕</button>
+    <div class="course-alert__row">
+      <button type="button" class="course-alert__go" id="courseAlertGo"
+              aria-expanded="false" aria-controls="courseAlertDet">
+        <span class="course-alert__dot" aria-hidden="true"></span>
+        <span class="course-alert__txt" id="courseAlertTxt">Nouvelle course disponible</span>
+        <span class="course-alert__cta" id="courseAlertSee">Voir les détails</span>
+      </button>
+      <button type="button" class="course-alert__x" id="courseAlertX" aria-label="Ignorer cette course">✕</button>
+    </div>
+    <div class="course-alert__det" id="courseAlertDet" hidden>
+      <div id="courseAlertInfo"></div>
+      <div class="course-alert__acts">
+        <button type="button" class="btn primary" id="courseAlertOk">✅ J'accepte cette course</button>
+        <button type="button" class="btn" id="courseAlertNo">✕ Pas pour moi</button>
+      </div>
+      <span class="course-alert__st" id="courseAlertSt" aria-live="polite"></span>
+    </div>
   </div>
 
   <!-- ══ BULLE DE DISCUSSION (façon Messenger) ══════════════════════════════
@@ -2184,7 +2203,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=527"></script>
+  <script defer src="app.js?v=528"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->
