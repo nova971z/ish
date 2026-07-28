@@ -44,7 +44,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=523">
+  <link rel="stylesheet" href="styles.css?v=524">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -1198,16 +1198,19 @@
              ACTION en premier, la liste ensuite, la carte en dernier — elle
              situe, elle ne fait pas agir. Avant, la carte occupait le haut de
              l'écran et repoussait l'essentiel sous la ligne de flottaison. -->
+        <!-- ORDRE VOULU (user 28/07/2026) : la CARTE tout en haut, le reste
+             bien rangé dessous. Elle donne le contexte d'un coup d'œil ; les
+             actions et les listes viennent ensuite. -->
+        <div class="lv-card">
+          <h2 class="lv-h2">🗺️ Mes livraisons sur la carte</h2>
+          <div id="clientDelivMap" class="pdp-deliv-map courier-map" aria-label="Carte de mes livraisons"></div>
+        </div>
         <div id="clientDelivTodo"></div>
         <div class="lv-card">
           <h2 class="lv-h2">🧾 Mes demandes</h2>
           <div id="clientDelivList"><p class="lv-hint">Chargement…</p></div>
         </div>
         <div id="clientDelivDetail" class="lv-card" hidden></div>
-        <div class="lv-card">
-          <h2 class="lv-h2">🗺️ Où elles se situent</h2>
-          <div id="clientDelivMap" class="pdp-deliv-map courier-map" aria-label="Carte de mes livraisons"></div>
-        </div>
       </div>
     </section>
 
@@ -1241,9 +1244,13 @@
 
         <!-- ÉCRAN DE TRAVAIL : sa carte, puis les courses, DISSOCIÉES. -->
         <div id="courierWork">
+          <!-- ORDRE VOULU (user 28/07/2026) : la CARTE tout en haut, puis ma
+               fiche, les courses, les gains. -->
+          <div class="lv-card">
+            <h2 class="lv-h2">🗺️ Les courses sur la carte</h2>
+            <div id="courierMap" class="pdp-deliv-map courier-map" aria-label="Carte des courses"></div>
+          </div>
           <div id="courierMyCard"></div>
-          <!-- ORDRE VOULU (modèle Uber) : ma carte, puis LES COURSES, puis les
-               gains, puis la carte géographique. Agir d'abord, situer ensuite. -->
           <div id="courierDetail" class="lv-card" hidden></div>
           <div class="courier-cols">
             <div class="lv-card">
@@ -1258,10 +1265,6 @@
             </div>
           </div>
           <div id="courierEarnings"></div>
-          <div class="lv-card">
-            <h2 class="lv-h2">🗺️ Où elles se situent</h2>
-            <div id="courierMap" class="pdp-deliv-map courier-map" aria-label="Carte des courses"></div>
-          </div>
           <button type="button" class="btn" id="courierRefresh">🔄 Rafraîchir</button>
         </div>
       </div>
@@ -2159,7 +2162,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=523"></script>
+  <script defer src="app.js?v=524"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

@@ -5970,16 +5970,49 @@
   function lvPostCourse(panel, id, role, type, extra, onOk) {
     var st = panel.querySelector('#acSt');
     if (st) st.textContent = 'Envoi…';
+    // ⚠️ UN ÉCHEC NE DOIT JAMAIS ÊTRE DISCRET. Avant, le refus s'écrivait dans
+    // une minuscule note en bas du panneau : on cliquait, rien ne se passait
+    // en apparence, et on en concluait « ça ne marche pas » sans jamais savoir
+    // pourquoi (vécu le 28/07/2026 sur l'acceptation de l'accord). L'erreur
+    // est désormais affichée EN GRAND dans le panneau, avec le code HTTP, ET
+    // annoncée par un message flottant.
+    var echec = function (msg, code) {
+      var txt = msg + (code ? ' (code ' + code + ')' : '');
+      if (st) st.textContent = '';
+      if (panel) {
+        var box = panel.querySelector('.lv-erreur');
+        if (!box) {
+          box = document.createElement('div');
+          box.className = 'lv-note lv-note--warn lv-erreur';
+          panel.appendChild(box);
+        }
+        box.textContent = '❌ ' + txt;
+      }
+      toast(txt, 'error');
+    };
     return jsonAuthHeaders().then(function (headers) {
       return fetch(apiBaseUrl() + '/api/contact', {
         method: 'POST', headers: headers,
         body: JSON.stringify(Object.assign({ type: type, id: id, role: role }, extra || {}))
       });
-    }).then(function (r) { return r.json(); }).then(function (d) {
-      if (d.ok) { if (onOk) onOk(d); }
-      else if (st) st.textContent = '❌ ' + (d.error || 'Erreur');
-      return d;
-    }).catch(function () { if (st) st.textContent = '❌ Erreur réseau'; });
+    }).then(function (r) {
+      return r.text().then(function (t) { return { s: r.status, t: t }; });
+    }).then(function (rep) {
+      var d = null;
+      try { d = JSON.parse(rep.t); } catch (_) {}
+      if (rep.s === 200 && d && d.ok) {
+        var vieux = panel && panel.querySelector('.lv-erreur');
+        if (vieux) vieux.remove();
+        if (st) st.textContent = '';
+        if (onOk) onOk(d);
+        return d;
+      }
+      echec((d && d.error) || lvErrTxt(rep.s, d), rep.s);
+      return d || { ok: false };
+    }).catch(function () {
+      echec('Connexion au serveur impossible. Vérifie ton réseau et réessaie.', 0);
+      return { ok: false };
+    });
   }
 
   function wireChat(root, c, role, reload) {
