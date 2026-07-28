@@ -1,7 +1,10 @@
-import pkg from '/opt/node22/lib/node_modules/playwright/index.js';
+import { join, basename } from 'node:path';
+import { sortie, RACINE } from './_socle.mjs';
+import { playwright } from './_socle.mjs';
+const pkg = await playwright();
 const { chromium } = pkg;
 import http from 'http'; import fs from 'fs'; import path from 'path';
-const ROOT='/home/user/ish/pirates-tools';
+const ROOT = RACINE;
 const model = (await import('file://'+ROOT+'/api/_lib/pricing-model.js')).default;
 const MIME={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.webp':'image/webp','.svg':'image/svg+xml','.png':'image/png','.webmanifest':'application/manifest+json'};
 const DEFAULTS=Object.assign({},model.DEFAULT_CONFIG,{autoPrice:true,mode:'colissimo'});
@@ -49,5 +52,5 @@ await pg.selectOption('#cfgMode','container'); await pg.locator('#cfgSave').clic
 ok(errs.length===0,'0 erreur JS');
 console.log('erreurs:',errs.length?errs:'aucune');
 console.log(`\n${fail===0?'✅ ALL PASS':'❌ FAIL'} — ${pass} ok, ${fail} ko`);
-await pg.screenshot({path:'/tmp/claude-0/-home-user-ish/5fdd6ad4-f914-5559-9038-8318b9646f86/scratchpad/calc.png',fullPage:true});
+await pg.screenshot({path:join(await sortie('captures'), 'calc.png'),fullPage:true});
 await br.close();srv.close();process.exit(fail?1:0);

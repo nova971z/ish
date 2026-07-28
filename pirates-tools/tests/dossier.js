@@ -1,10 +1,12 @@
+const { join, basename } = require('path');
+const { RACINE } = require('./_socle.cjs');
 /* Le dossier livreur doit être ENREGISTRÉ, et l'espace livreur doit en hériter.
    On appelle la VRAIE fonction exportée par api/contact.js, avec Firebase et
    l'authentification simulés — pour tester la logique, pas le réseau. */
 'use strict';
 const path = require('path');
 const Module = require('module');
-const ROOT = '/home/user/ish/pirates-tools';
+const ROOT = RACINE;
 process.env.RESEND_API_KEY = 'test'; process.env.OWNER_EMAIL = 'o@x.invalid';
 
 // ── Firestore simulé : un simple objet, mais avec la sémantique merge ────────
@@ -34,7 +36,10 @@ const vraiResolve = Module._resolveFilename;
 const FAUX = {};
 FAUX[path.join(ROOT, 'api/_lib/firebase.js')] = {
   getFirebase: () => ({ admin, db }),
-  verifyUid: async (req) => (req.headers.authorization ? 'UID-TEST' : null)
+  verifyUid: async (req) => (req.headers.authorization ? 'UID-TEST' : null),
+  // verifyIdentity ajoute le 28/07 (plan12 : adresse e-mail verifiee exigee).
+  verifyIdentity: async (req) => (req.headers.authorization
+    ? { uid: 'UID-TEST', email: 'test@example.test', emailVerified: true } : null)
 };
 FAUX[path.join(ROOT, 'api/_lib/ratelimit.js')] = { allow: async () => true, clientIp: () => '1.2.3.4' };
 const vraiLoad = Module._load;

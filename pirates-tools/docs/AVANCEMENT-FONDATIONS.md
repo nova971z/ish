@@ -13,7 +13,7 @@ Dernière mise à jour : **28/07/2026**
 
 | Phase | État | Où ça en est |
 |---|---|---|
-| **0 — Sauver les harnais** | 🟡 **en cours (19/60)** | risque irréversible **LEVÉ** : les 60 harnais sont dans le dépôt. 19 portés, relancés, **595/595 verts**. 41 restent à porter dans `tests/_bruts/`. Détail : `docs/TRI-SCRATCHPAD.md` |
+| **0 — Sauver les harnais** | 🟢 **quasi terminée (47/60 tranchés)** | risque irréversible **LEVÉ**. **42 portés et verts (777/777)**, 3 corrigés (specs renversées), 5 supprimés avec motif écrit, **13 non diagnostiqués** remis dans `tests/_bruts/`. Détail complet : `docs/TRI-SCRATCHPAD.md` |
 | 1 — Architecture documentaire | ⬜ à faire | remplacée par le plan mémoire ci-dessous |
 | 2 — Invariants | ⬜ à faire | |
 | 3 — Graphe d'appels | ⬜ à faire | doit libérer ≥ 2 Ko sur `app.js` avant la phase 5 |
@@ -45,15 +45,22 @@ Dernière mise à jour : **28/07/2026**
 
 ## ▶️ REPRENDRE ICI
 
-**Prochain geste** : porter les 41 harnais restants de `tests/_bruts/`,
-par lots, en commençant par les plus récents.
+**Prochain geste** : trier les **13 harnais restants** de `tests/_bruts/`
+(audit-buttons, carte2b, pipeline-emulator, regression, test-acc-ui, test-grid,
+test-variant, test-variant-live, verify-beacon, verify-consent, verify-cron,
+verify-dashboard, verify-globe). Chacun reçoit une issue : porté, corrigé, ou
+supprimé avec motif.
+
+**Puis** : recréer un harnais pour le **rendu des caractéristiques sur la fiche
+produit** — couverture perdue en supprimant les 5 harnais ancrés sur l'ancien
+catalogue, et signalée comme telle plutôt que passée sous silence.
 
 ```bash
 cd pirates-tools
 node tests/lancer.mjs --noyau      # 6 harnais, ~51 s — l'argent et la livraison
 node tests/lancer.mjs --complet    # 19 harnais, ~239 s
 node tests/_porter.mjs tests/_bruts/<fichier>   # rendre un harnais portable
-node scripts/ci.js                 # 30 contrôles, ~110 ms
+node scripts/ci.js                 # 30 contrôles, ~106 ms
 ```
 
 ## ⏳ EN ATTENTE D'UNE DÉCISION DE L'USER

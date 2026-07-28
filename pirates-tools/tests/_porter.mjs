@@ -38,21 +38,34 @@ const RESTE_ABSOLU = /['"`](\/(?:home|opt|tmp|usr|var)\/[^'"`]*)['"`]/g;
 export async function porter(chemin, { controle = false } = {}) {
   const src = await readFile(chemin, 'utf8');
   let s = src;
+
+  /* ⚠️ DÉFAUT RÉEL, CORRIGÉ LE 28/07 : une première version injectait des
+     `import` ESM dans des fichiers CommonJS. Node 22 détecte la syntaxe ESM et
+     bascule le fichier en module — leurs `require()` échouaient alors avec
+     « require is not defined in ES module scope ». 12 harnais ont été cassés
+     ainsi, et le lanceur l'a montré (« a planté avant de tester »).
+     On détecte donc le dialecte AVANT de toucher au fichier. */
+  const estCJS = /(^|\n)\s*(const|let|var)[^\n]*\brequire\s*\(/.test(src)
+    && !/^\s*import\s/m.test(src);
   for (const [de, vers] of REECRITURES) s = s.replace(de, vers);
 
-  // Les imports du socle dont le fichier a désormais besoin.
+  // Les imports du socle dont le fichier a désormais besoin,
+  // dans le DIALECTE du fichier — jamais l'autre.
   const besoins = [];
   if (/\bRACINE\b/.test(s) && !/from '\.\/_socle\.mjs'/.test(s)) besoins.push('RACINE');
   if (/\bsortie\(/.test(s)) besoins.push('sortie');
   if (besoins.length) {
-    const ligne = "import { " + besoins.join(', ') + " } from './_socle.mjs';";
+    const ligne = estCJS
+      ? "const { " + besoins.join(', ') + " } = require('./_socle.cjs');"
+      : "import { " + besoins.join(', ') + " } from './_socle.mjs';";
     s = /^import /m.test(s) ? s.replace(/^(import .*)$/m, ligne + '\n$1') : ligne + '\n' + s;
   }
   if (/\bRACINE\b/.test(s) && /from '\.\/_socle\.mjs'/.test(s) && !/\{[^}]*RACINE[^}]*\} from '\.\/_socle\.mjs'/.test(s)) {
     s = s.replace(/import \{ ([^}]*) \} from '\.\/_socle\.mjs';/, "import { $1, RACINE } from './_socle.mjs';");
   }
-  if (/\bjoin\(/.test(s) && !/from 'node:path'/.test(s)) {
-    s = "import { join, basename } from 'node:path';\n" + s;
+  if (/\bjoin\(/.test(s) && !/from 'node:path'/.test(s) && !/require\('path'\)/.test(s)) {
+    s = (estCJS ? "const { join, basename } = require('path');\n"
+                : "import { join, basename } from 'node:path';\n") + s;
   }
 
   const restants = [...s.matchAll(RESTE_ABSOLU)].map((m) => m[1]);

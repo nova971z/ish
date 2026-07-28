@@ -1,9 +1,11 @@
+const { join, basename } = require('path');
+const { RACINE } = require('./_socle.cjs');
 /* « Je valide la demande de livreur et ça ne marche pas ».
    On appelle la VRAIE fonction exportée par api/admin.js. */
 'use strict';
 const path = require('path');
 const Module = require('module');
-const ROOT = '/home/user/ish/pirates-tools';
+const ROOT = RACINE;
 process.env.ADMIN_SECRET = 'secret-de-test';
 
 const STORE = {};

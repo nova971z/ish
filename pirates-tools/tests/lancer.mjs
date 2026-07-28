@@ -33,16 +33,16 @@ const noyau = args.includes('--noyau') || (!complet && args.filter((a) => !a.sta
 const nommes = args.filter((a) => !a.startsWith('--'));
 
 const tous = (await readdir(TESTS))
-  .filter((f) => f.endsWith('.mjs') && !f.startsWith('_') && f !== 'lancer.mjs')
+  .filter((f) => (f.endsWith('.mjs') || f.endsWith('.js')) && !f.startsWith('_') && f !== 'lancer.mjs')
   .sort();
 
 let liste = complet ? tous
-  : nommes.length ? tous.filter((f) => nommes.some((n) => f.startsWith(n.replace(/\.mjs$/, ''))))
+  : nommes.length ? tous.filter((f) => nommes.some((n) => f.startsWith(n.replace(/\.(mjs|js)$/, ''))))
   : NOYAU.filter((f) => tous.includes(f));
 
 if (!liste.length) {
   console.log('Aucun harnais à lancer.');
-  console.log('Disponibles : ' + tous.map((f) => f.replace('.mjs', '')).join(' · '));
+  console.log('Disponibles : ' + tous.map((f) => f.replace(/\.(mjs|js)$/, '')).join(' · '));
   process.exit(1);
 }
 
@@ -73,7 +73,7 @@ for (const f of liste) {
   const r = await lancer(f);
   res.push(r);
   const etat = r.code === 0 ? '✅' : '❌';
-  console.log('  ' + etat + ' ' + f.replace('.mjs', '').padEnd(22)
+  console.log('  ' + etat + ' ' + f.replace(/\.(mjs|js)$/, '').padEnd(22)
     + String(r.ok + '/' + (r.ok + r.ko)).padStart(9) + '   ' + (r.ms / 1000).toFixed(1) + ' s');
   if (r.code !== 0) {
     const lignes = r.sortie.split('\n').filter((l) => l.startsWith('❌') || l.startsWith('⛔'));
@@ -92,7 +92,7 @@ const duree = res.reduce((s, r) => s + r.ms, 0) / 1000;
 console.log('\n' + '─'.repeat(70));
 console.log('  ' + bons + '/' + tot + ' assertions · ' + (res.length - rouges.length) + '/' + res.length
   + ' harnais verts · ' + duree.toFixed(1) + ' s');
-if (rouges.length) console.log('  ❌ à reprendre : ' + rouges.map((r) => r.f.replace('.mjs', '')).join(' · '));
+if (rouges.length) console.log('  ❌ à reprendre : ' + rouges.map((r) => r.f.replace(/\.(mjs|js)$/, '')).join(' · '));
 else console.log('  ✅ tout est vert');
 console.log('─'.repeat(70));
 

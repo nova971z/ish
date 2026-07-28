@@ -1,10 +1,12 @@
 // VÉRIFICATION de la carte des tarifs, mesurée sur le rendu réel.
-import pkg from '/opt/node22/lib/node_modules/playwright/index.js';
+import { sortie, RACINE } from './_socle.mjs';
+import { playwright } from './_socle.mjs';
+const pkg = await playwright();
 const { chromium } = pkg;
 import http from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
-const ROOT='/home/user/ish/pirates-tools';
+const ROOT = RACINE;
 const MIME={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.webp':'image/webp','.png':'image/png','.jpg':'image/jpeg','.svg':'image/svg+xml','.webmanifest':'application/manifest+json'};
 const server=http.createServer(async(req,res)=>{try{let p=decodeURIComponent(req.url.split('?')[0]);if(p==='/')p='/index.html';
  const fp=normalize(join(ROOT,p));if(!fp.startsWith(ROOT)){res.writeHead(403);return res.end();}
@@ -117,7 +119,7 @@ r.labels.forEach(l=>{
 T('aucun prix n\'en chevauche un autre', r.collisions===0, r.collisions+' chevauchement(s)');
 
 }
-await page.locator('#__mapTest').screenshot({path:'/tmp/claude-0/-home-user-ish/5fdd6ad4-f914-5559-9038-8318b9646f86/scratchpad/carte-apres.png'});
+await page.locator('#__mapTest').screenshot({path:join(await sortie('captures'), 'carte-apres.png')});
 console.log('\n'+pass+' OK / '+fail+' KO   → capture : carte-apres.png');
 await browser.close();server.close();
 process.exit(fail?1:0);

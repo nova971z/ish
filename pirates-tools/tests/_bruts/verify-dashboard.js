@@ -1,6 +1,7 @@
+const { playwright, optionsNavigateur, RACINE, sortie } = require('./_socle.cjs');
 const http=require('http'), fs=require('fs'), path=require('path');
-const { chromium } = require('/opt/node22/lib/node_modules/playwright');
-const ROOT='/home/user/ish/pirates-tools';
+const { chromium } = playwright();
+const ROOT = RACINE;
 const vercel=require(path.join(ROOT,'vercel.json'));
 let CSP=vercel.headers[0].headers.find(h=>h.key==='Content-Security-Policy').value.replace(/;?\s*upgrade-insecure-requests/,'');
 const MIME={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.webmanifest':'application/manifest+json','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.webp':'image/webp','.svg':'image/svg+xml','.glb':'model/gltf-binary','.ico':'image/x-icon','.woff2':'font/woff2'};
@@ -38,7 +39,7 @@ const server=http.createServer((req,res)=>{
 async function run(){
   await new Promise(r=>server.listen(0,r));
   const base=`http://localhost:${server.address().port}`;
-  const browser=await chromium.launch({executablePath:'/opt/pw-browsers/chromium',args:['--no-sandbox']});
+  const browser=await chromium.launch({args:['--no-sandbox']});
   const ctx=await browser.newContext({viewport:{width:1280,height:1000}});
   const page=await ctx.newPage();
   const perr=[], cspv=[];
@@ -91,7 +92,7 @@ async function run(){
   check('0 violation CSP', csp.length===0, csp.join(','));
   check('0 erreur JS', perr.length===0, perr.join(' | ')||'aucune');
 
-  await page.screenshot({ path:'/tmp/claude-0/-home-user-ish/5fdd6ad4-f914-5559-9038-8318b9646f86/scratchpad/dashboard-stats.png', fullPage:true });
+  await page.screenshot({ path:require('path').join(sortie('captures'), 'dashboard-stats.png'), fullPage:true });
   console.log(`\n${pass}/${pass+fail} assertions vertes`);
   await browser.close(); server.close();
   if(fail) process.exit(1);

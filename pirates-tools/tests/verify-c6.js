@@ -1,10 +1,12 @@
+const { join, basename } = require('path');
+const { RACINE , playwright, optionsNavigateur } = require('./_socle.cjs');
 const http=require('http'),fs=require('fs'),path=require('path');
-const {chromium}=require(process.env.PW+'/playwright');
-const ROOT='/home/user/ish/pirates-tools';
+const {chromium} = playwright();
+const ROOT = RACINE;
 const MIME={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.png':'image/png','.jpg':'image/jpeg','.webp':'image/webp','.svg':'image/svg+xml','.ico':'image/x-icon','.webmanifest':'application/manifest+json','.glb':'model/gltf-binary'};
 const server=http.createServer((req,res)=>{let p=decodeURIComponent(req.url.split('?')[0].split('#')[0]);if(p==='/')p='/index.html';const fp=path.join(ROOT,p);if(!fp.startsWith(ROOT)||!fs.existsSync(fp)||fs.statSync(fp).isDirectory()){res.writeHead(404);res.end('nf');return;}res.writeHead(200,{'Content-Type':MIME[path.extname(fp)]||'application/octet-stream'});fs.createReadStream(fp).pipe(res);});
 (async()=>{await new Promise(r=>server.listen(0,r));const port=server.address().port,base=`http://127.0.0.1:${port}`;
-const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium',args:['--no-sandbox']});
+const b=await chromium.launch({args:['--no-sandbox']});
 const ctx=await b.newContext({viewport:{width:1280,height:900}});const page=await ctx.newPage();
 const errs=[];page.on('pageerror',e=>errs.push(e.message));
 const products=JSON.parse(fs.readFileSync(ROOT+'/products.json','utf8'));const prod=products[0];

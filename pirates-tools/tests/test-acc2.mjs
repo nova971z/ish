@@ -1,7 +1,9 @@
-import pkg from '/opt/node22/lib/node_modules/playwright/index.js';
+import { join, basename } from 'node:path';
+import { playwright, RACINE } from './_socle.mjs';
+const pkg = await playwright();
 const { chromium } = pkg;
 import http from 'http'; import fs from 'fs'; import path from 'path';
-const ROOT='/home/user/ish/pirates-tools';
+const ROOT = RACINE;
 const model=(await import('file://'+ROOT+'/api/_lib/pricing-model.js')).default;
 const acc=(await import('file://'+ROOT+'/api/_lib/accounting.js')).default;
 const DEF=Object.assign({},model.DEFAULT_CONFIG,{autoPrice:true,mode:'colissimo'});

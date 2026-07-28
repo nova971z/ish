@@ -1,6 +1,8 @@
+const { join, basename } = require('path');
+const { RACINE } = require('./_socle.cjs');
 // Test du endpoint api/cron-report avec Firestore mocké + Resend intercepté.
 const path = require('path');
-const ROOT = '/home/user/ish/pirates-tools';
+const ROOT = RACINE;
 
 // ── Données Firestore simulées ──────────────────────────────────────────────
 const NOW = Date.now();

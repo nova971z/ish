@@ -1,11 +1,13 @@
+const { join, basename } = require('path');
+const { RACINE, sortie } = require('./_socle.cjs');
 // Test END-TO-END du VRAI code serveur contre Firestore émulé.
 // events.js (écriture agrégats) → admin.js type=stats (lecture summarize).
 const fs = require('fs');
 const path = require('path');
-const ROOT = '/home/user/ish/pirates-tools';
+const ROOT = RACINE;
 
 process.env.FIREBASE_SERVICE_ACCOUNT = fs.readFileSync(
-  '/tmp/claude-0/-home-user-ish/5fdd6ad4-f914-5559-9038-8318b9646f86/scratchpad/fake_sa.json', 'utf8');
+  join(sortie('captures'), 'fake_sa.json'), 'utf8');
 process.env.ADMIN_SECRET = 'test-secret';
 // FIRESTORE_EMULATOR_HOST est posé par `firebase emulators:exec`.
 console.log('FIRESTORE_EMULATOR_HOST =', process.env.FIRESTORE_EMULATOR_HOST);

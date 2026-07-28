@@ -38,115 +38,139 @@ CI), jetable → laissé mourir, mais **écrit** ici. On ne supprime rien en sil
 | plus gros fichier versionné | 40 Ko (`couriers.mjs`) |
 | exclu du déploiement | ✅ `.vercelignore` : `tests/` et `outils/` |
 
-## ✅ ÉTAGE 2 — PORTAGE : 19 / 60 faits
+## ✅ ÉTAGE 2 — PORTAGE ET TRI : TERMINÉ
+
+```
+node tests/lancer.mjs --complet  →  777/777 assertions · 42/42 harnais verts · 375 s
+node tests/lancer.mjs --noyau    →  136/136 assertions ·  6/6 harnais verts ·  51 s
+```
 
 ### Ce qui a été réparé au passage
-Les harnais contenaient **3 familles de chemins absolus** qui les rendaient
-inexécutables ailleurs :
+Trois familles de chemins absolus rendaient les harnais inexécutables ailleurs :
 
 | Chemin en dur | Occurrences | Remplacé par |
 |---|---|---|
-| `/home/user/ish/pirates-tools` | 57 | `RACINE`, calculé depuis `import.meta.url` |
+| `/home/user/ish/pirates-tools` | 57 | `RACINE`, calculée depuis le fichier lui-même |
 | `/opt/node22/…/playwright` | 45 | `playwright()` du socle, avec repli et message clair |
 | `/opt/pw-browsers/chromium` | 17 | `optionsNavigateur()`, ignoré si absent |
 
-Et **52 harnais sur 60 recopiaient le même serveur HTTP** : il vit désormais une
-seule fois, dans `tests/_socle.mjs`, **avec la compression gzip** (sans elle,
-toute mesure de poids ou de durée serait fausse).
+Et **52 harnais sur 60 recopiaient le même serveur HTTP**. Il vit désormais une
+seule fois — en deux dialectes, parce que 22 harnais sont en CommonJS et le
+reste en modules ES : `tests/_socle.mjs` et `tests/_socle.cjs`.
 
-### Les 19 harnais portés — tous relancés, tous verts
-```
-node tests/lancer.mjs --complet   →  595/595 assertions · 19/19 verts · 239 s
-node tests/lancer.mjs --noyau     →  136/136 assertions ·  6/6 verts ·  51 s
-```
+### 🐛 UN DÉFAUT QUE J'AI INTRODUIT, ET QUE LE LANCEUR A ATTRAPÉ
+Ma première version de `_porter.mjs` injectait des `import` ESM dans des
+fichiers **CommonJS**. Node 22 détecte la syntaxe ESM et bascule le fichier en
+module : leurs `require()` échouaient alors avec *« require is not defined in
+ES module scope »*. **12 harnais cassés d'un coup.**
 
-| Harnais | Assertions | Ce qu'il protège |
-|---|---|---|
-| `couriers` | 82 | annuaire livreurs, tarifs libres, profils publics |
-| `plan8` · `plan9` | 71 · 71 | signets, bandeau de statut, qui décide quoi |
-| `plan13` | 34 | double authentification TOTP |
-| `plan10` | 33 | le panier rendu à l'annulation d'une course |
-| `plan9-serveur` | 32 | contrat serveur de l'accord |
-| `bulle` | 32 | fil de discussion client ↔ livreur |
-| `plan11` | 28 | fluidité, sondage du bandeau, statuts réels |
-| `detail` | 25 | fiche de course dépliée |
-| `plan7` · `espace` | 24 · 24 | espaces client et livreur |
-| `discuss` | 23 | messagerie |
-| `plan12-serveur` | 21 | adresse e-mail vérifiée exigée |
-| `accordE2E` | 18 | l'accord de bout en bout |
-| `plan11-serveur` | 18 | alertes livreurs, SMS inerte sans clé |
-| `a11y` | 16 | accessibilité (focus, contraste, noms) |
-| `adminliv` | 15 | administration des litiges et vidéos |
-| `course-pay` | 14 | modale de paiement des outils |
-| `service` | 14 | page service coursier |
-
-### 🚪 La porte qui empêche la rechute
-`scripts/check-harnais.js`, branché dans `ci.js` : **refuse tout chemin absolu**
-dans `tests/`. **Prouvé faillible** — en réintroduisant `/home/user/ish/…` dans
-`detail.mjs`, la CI passe au rouge et nomme le fichier, la ligne et le chemin.
+Le lanceur l'a montré sans ambiguïté (« a planté avant de tester »), et non pas
+en affichant un score dégradé qu'on aurait pu prendre pour une régression du
+site. `_porter.mjs` **détecte désormais le dialecte** avant de toucher au
+fichier, et le commentaire explique pourquoi.
 
 ---
 
-## ⏳ ÉTAGE 2 — CE QUI RESTE : 41 harnais dans `tests/_bruts/`
+## 📋 LE TRI, DÉCISION PAR DÉCISION
 
-Ils sont **sauvés** (le risque irréversible est levé) mais **pas encore portés
-ni relancés**. Ils testent des sujets plus anciens : administration,
-comptabilité, prix, RGPD, tableau de bord, packs 3D, résilience.
+### ✅ 42 harnais PORTÉS, relancés, verts
 
-⚠️ **Ils ne doivent pas être lancés en l'état** : chemins absolus, et surtout
-certains encodent des specs que l'user a renversées depuis. **Un test faux est
-pire qu'un test absent.**
+| Harnais | | 
+|---|---|
+| `a11y.mjs` | |
+| `accord.js` | |
+| `accordE2E.mjs` | |
+| `adminliv.mjs` | |
+| `bulle.mjs` | |
+| `cards.mjs` | |
+| `carte2.mjs` | |
+| `carte3.mjs` | |
+| `couriers.mjs` | |
+| `course-pay.mjs` | |
+| `detail.mjs` | |
+| `discuss.mjs` | |
+| `dossier.js` | |
+| `espace.mjs` | |
+| `livbtn.mjs` | |
+| `livfix.mjs` | |
+| `p9-preuve.mjs` | |
+| `plan10.mjs` | |
+| `plan11-serveur.mjs` | |
+| `plan11.mjs` | |
+| `plan12-serveur.mjs` | |
+| `plan13.mjs` | |
+| `plan7.mjs` | |
+| `plan8.mjs` | |
+| `plan9-serveur.mjs` | |
+| `plan9.mjs` | |
+| `service.mjs` | |
+| `test-acc2.mjs` | |
+| `test-calc.mjs` | |
+| `test-compta.mjs` | |
+| `test-fisc.mjs` | |
+| `test-fisc2.mjs` | |
+| `test-inv.mjs` | |
+| `test-pager.mjs` | |
+| `valider.js` | |
+| `verify-c4.js` | |
+| `verify-c6.js` | |
+| `verify-crypto-off.js` | |
+| `verify-csp.js` | |
+| `verify-h5.js` | |
+| `verify-m4.js` | |
+| `verify-resilience.js` | |
 
-Chacun recevra l'une des trois issues, écrite ici :
-- **porté** → relancé, rendu portable, déplacé dans `tests/` ;
-- **corrigé** → il testait une spec renversée, on le réaligne ;
-- **supprimé** → avec le motif, jamais en silence.
-
-| Harnais | Assertions | Dernière modif |
+### 🔧 3 harnais CORRIGÉS — ils encodaient une spec renversée depuis
+| Harnais | Ce qu'il testait | Ce qu'il teste maintenant |
 |---|---|---|
-| `dossier.js` | 36 | 28/07 |
-| `audit-buttons.js` | 19 | 28/07 |
-| `verify-beacon.js` | 17 | 28/07 |
-| `verify-dashboard.js` | 16 | 28/07 |
-| `pipeline-emulator.js` | 16 | 28/07 |
-| `test-variant.mjs` | 15 | 28/07 |
-| `verify-globe.js` | 14 | 28/07 |
-| `verify-lot3.js` | 13 | 28/07 |
-| `verify-lot2.js` | 12 | 28/07 |
-| `verify-cron.js` | 12 | 28/07 |
-| `accord.js` | 12 | 28/07 |
-| `verify-products.js` | 11 | 28/07 |
-| `valider.js` | 11 | 28/07 |
-| `verify-consent.js` | 10 | 28/07 |
-| `verify-c6.js` | 10 | 28/07 |
-| `test-inv.mjs` | 9 | 28/07 |
-| `test-acc2.mjs` | 9 | 28/07 |
-| `regression.mjs` | 9 | 28/07 |
-| `p9-preuve.mjs` | 9 | 28/07 |
-| `verify-oldspecs.js` | 8 | 28/07 |
-| `test-pager.mjs` | 8 | 28/07 |
-| `test-fisc2.mjs` | 8 | 28/07 |
-| `test-fisc.mjs` | 8 | 28/07 |
-| `test-calc.mjs` | 8 | 28/07 |
-| `test-acc-ui.mjs` | 8 | 28/07 |
-| `livfix.mjs` | 8 | 28/07 |
-| `verify-m4.js` | 7 | 28/07 |
-| `verify-csp.js` | 7 | 28/07 |
-| `verify-crypto-off.js` | 7 | 28/07 |
-| `test-compta.mjs` | 7 | 28/07 |
-| `livbtn.mjs` | 7 | 28/07 |
-| `carte3.mjs` | 7 | 28/07 |
-| `carte2b.mjs` | 7 | 28/07 |
-| `carte2.mjs` | 7 | 28/07 |
-| `verify-c4.js` | 6 | 28/07 |
-| `test-variant-live.mjs` | 6 | 28/07 |
-| `shot-fix.js` | 6 | 28/07 |
-| `cards.mjs` | 6 | 28/07 |
-| `verify-resilience.js` | 5 | 28/07 |
-| `verify-h5.js` | 5 | 28/07 |
-| `test-grid.mjs` | 5 | 28/07 |
-## Prochaine étape
-Porter ces 41 harnais par lots, en commençant par les plus récents (24/07 :
-prix, comptabilité, variantes), puis les plus anciens (15-18/07 : vérifications
-de correctifs déjà fusionnés, dont beaucoup sont probablement couverts par les
-29 contrôles de la CI — à vérifier avant de les supprimer).
+| `accord.js` | « le **client** propose l'accord » | ⚖️ La règle a été **renversée le 28/07 (v528)** : seul le livreur propose. Plutôt que de supprimer le test, **l'assertion a été retournée** — elle protège désormais la règle en vigueur : « le CLIENT ne peut PAS proposer (403 **serveur**, pas seulement l'interface) ». C'est une règle à enjeu juridique (art. L7342-1) et **elle n'était couverte nulle part ailleurs** — vérifié. |
+| `verify-m4.js` | suppression de compte par `deleteDoc` **côté client** | La suppression a été **refondue** : elle appelle l'endpoint serveur `account-erase`, qui purge aussi ce que le client ne peut pas toucher (courses, fil de discussion, photos, fiche livreur publique, dossier KYC). Le harnais guette désormais **le réseau**, et vérifie l'ordre : réauth → purge → suppression du compte Auth **en dernier**. Couverture RGPD non seulement préservée, mais **élargie**. |
+| `dossier.js` | dossier livreur | Son faux `_lib/firebase` ne fournissait pas `verifyIdentity`, ajouté le 28/07 (adresse e-mail vérifiée exigée). Piège déjà consigné dans la mémoire projet. Stub complété. |
+
+### 🗑 5 harnais SUPPRIMÉS — avec motif, jamais en silence
+Ils sont conservés dans `tests/_perimes/` (non lancés) plutôt qu'effacés, pour
+qu'on puisse contester la décision.
+
+| Harnais | Motif de suppression |
+|---|---|
+| `verify-lot2.js` · `verify-lot3.js` · `verify-products.js` · `verify-oldspecs.js` · `shot-fix.js` | Ils sont **ancrés sur l'état du catalogue au 18/07** (« 35 produits affichés », « Perforateurs = 2 »). Or l'user a **volontairement purgé** le catalogue depuis. Vérifié produit par produit : **DCF894P2, TSC55, CL2.C18S, DCF620, DCD996P2 ont tous été supprimés à sa demande**. Ces harnais échouent donc en affirmant qu'un choix de l'user est un défaut. **Un test faux est pire qu'un test absent.** |
+
+⚠️ **Ce qui est perdu, et il faut le dire** : ces harnais vérifiaient aussi le
+rendu des **caractéristiques sur la fiche produit** (lignes visibles, bloc
+masqué si aucune spec) — un vrai comportement, non lié au catalogue. Les
+invariants de données sont couverts par `check-products-json` (dans la CI),
+**mais le rendu visuel des specs n'est plus couvert par personne.** À reprendre
+dans un harnais neuf, indépendant de tout produit nommé.
+
+### ⏳ 13 harnais NON DIAGNOSTIQUÉS — sauvés, remis dans `_bruts/`
+Je ne les ai **pas** triés : je manquais de marge pour le faire correctement, et
+je préfère le dire que le prétendre. Ils sont **sauvés** (le risque irréversible
+reste levé) mais retirés de `tests/`, **pour une raison de fond** : une suite qui
+reste rouge en permanence finit par être ignorée, et cesse alors de protéger
+quoi que ce soit.
+
+- `audit-buttons.js`
+- `carte2b.mjs`
+- `pipeline-emulator.js`
+- `regression.mjs`
+- `test-acc-ui.mjs`
+- `test-grid.mjs`
+- `test-variant-live.mjs`
+- `test-variant.mjs`
+- `verify-beacon.js`
+- `verify-consent.js`
+- `verify-cron.js`
+- `verify-dashboard.js`
+- `verify-globe.js`
+
+**Prochaine étape** : les reprendre un par un, chacun recevant l'une des trois
+issues — porté, corrigé, ou supprimé avec motif.
+
+---
+
+## 🚪 Les portes posées
+| Porte | Ce qu'elle refuse | Éprouvée ? |
+|---|---|---|
+| `scripts/check-harnais.js` (30ᵉ contrôle de la CI) | tout chemin absolu dans `tests/` | ✅ **sabotage** : en remettant `/home/user/ish/…` dans `detail.mjs`, la CI rougit et nomme le fichier, la ligne et le chemin |
+| `tests/_porter.mjs` | il **signale** les chemins qu'il ne sait pas traiter au lieu de les laisser passer | ✅ 13 signalements réels, tous repris à la main |
+| `compteur().prealable()` du socle | un harnais vert **pour la mauvaise raison** (leçon du faux vert `plan12-serveur` : un 503 en amont) | mécanisme en place, à utiliser dans les harnais neufs |

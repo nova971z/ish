@@ -1,6 +1,7 @@
+const { playwright, optionsNavigateur, RACINE, sortie } = require('./_socle.cjs');
 const http=require('http'), fs=require('fs'), path=require('path');
-const { chromium } = require('/opt/node22/lib/node_modules/playwright');
-const ROOT='/home/user/ish/pirates-tools';
+const { chromium } = playwright();
+const ROOT = RACINE;
 const vercel=require(path.join(ROOT,'vercel.json'));
 let CSP=vercel.headers[0].headers.find(h=>h.key==='Content-Security-Policy').value.replace(/;?\s*upgrade-insecure-requests/,'');
 const MIME={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.webmanifest':'application/manifest+json','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.webp':'image/webp','.svg':'image/svg+xml','.glb':'model/gltf-binary','.ico':'image/x-icon','.woff2':'font/woff2'};
@@ -9,7 +10,7 @@ const server=http.createServer((req,res)=>{let p=decodeURIComponent(req.url.spli
 async function run(){
   await new Promise(r=>server.listen(0,r));
   const base=`http://localhost:${server.address().port}`;
-  const browser=await chromium.launch({executablePath:'/opt/pw-browsers/chromium',args:['--no-sandbox']});
+  const browser=await chromium.launch({args:['--no-sandbox']});
   let pass=0, fail=0;
   const check=(name,ok,detail)=>{ console.log((ok?'✅':'❌')+' '+name+(detail?' — '+detail:'')); ok?pass++:fail++; };
 

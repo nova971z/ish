@@ -1,6 +1,8 @@
+const { join, basename } = require('path');
+const { RACINE , playwright, optionsNavigateur } = require('./_socle.cjs');
 const http=require('http'),fs=require('fs'),path=require('path');
-const {chromium}=require(process.env.PW+'/playwright');
-const ROOT='/home/user/ish/pirates-tools';
+const {chromium} = playwright();
+const ROOT = RACINE;
 const MIME={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.png':'image/png','.jpg':'image/jpeg','.webp':'image/webp','.svg':'image/svg+xml','.ico':'image/x-icon','.webmanifest':'application/manifest+json','.glb':'model/gltf-binary'};
 // CSP EXACTE depuis vercel.json (on retire upgrade-insecure-requests : le
 // serveur de test est en http localhost, la prod est 100% https).
@@ -9,7 +11,7 @@ let CSP='';vercel.headers[0].headers.forEach(h=>{if(h.key==='Content-Security-Po
 CSP=CSP.replace(/;\s*upgrade-insecure-requests/,'');
 const server=http.createServer((req,res)=>{let p=decodeURIComponent(req.url.split('?')[0].split('#')[0]);if(p==='/')p='/index.html';const fp=path.join(ROOT,p);if(!fp.startsWith(ROOT)||!fs.existsSync(fp)||fs.statSync(fp).isDirectory()){res.writeHead(404);res.end('nf');return;}res.writeHead(200,{'Content-Type':MIME[path.extname(fp)]||'application/octet-stream','Content-Security-Policy':CSP});fs.createReadStream(fp).pipe(res);});
 (async()=>{await new Promise(r=>server.listen(0,r));const port=server.address().port,base=`http://127.0.0.1:${port}`;
-const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium',args:['--no-sandbox']});
+const b=await chromium.launch({args:['--no-sandbox']});
 const ctx=await b.newContext({viewport:{width:1280,height:900}});const page=await ctx.newPage();
 const cspViolations=[];
 page.on('console',m=>{const t=m.text();if(/Content Security Policy|Refused to (load|execute|apply|connect)/i.test(t))cspViolations.push(t.slice(0,140));});

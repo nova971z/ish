@@ -1,10 +1,12 @@
-import pkg from '/opt/node22/lib/node_modules/playwright/index.js';
+import { join, basename } from 'node:path';
+import { playwright, RACINE } from './_socle.mjs';
+const pkg = await playwright();
 const { chromium } = pkg;
 import http from 'http';
 import fs from 'fs';
 import path from 'path';
 
-const ROOT = '/home/user/ish/pirates-tools';
+const ROOT = RACINE;
 const MIME = { '.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.webp':'image/webp','.svg':'image/svg+xml','.png':'image/png','.webmanifest':'application/manifest+json','.glb':'model/gltf-binary' };
 const productsJson = fs.readFileSync(path.join(ROOT,'products.json'),'utf8');
 
