@@ -1273,3 +1273,78 @@ la course, le produit reste au panier, il n'a plus qu'à refaire une demande ».
   **5 sabotages** : filtre de statut retiré, restauration supprimée, pose au
   panier supprimée, cumul au lieu du maximum, restauration sur échec — tous
   détectés.
+
+## 🔔 FLUIDITÉ & VÉRITÉ DE L'AFFICHAGE (28/07/2026, SW v530)
+Cinq retours, tous tracés dans le code AVANT correction.
+### P1 — Le bandeau vert ne s'actualisait JAMAIS
+« il ne s'affiche que sur la page du livreur, ou alors il met beaucoup de temps ».
+Il était bien posé sur toutes les pages, mais chargé **UNE SEULE FOIS**, au
+verdict d'authentification : une course déposée après l'ouverture n'apparaissait
+jamais. → `lvAlertPlanifier()` : sondage **45 s** (~80 req/h, plafond 400
+lectures/h/uid), **rien quand l'onglet est caché**, une seule minuterie.
+- ⚠️ PIÈGE ANTICIPÉ : si le sondage tombe pendant que le livreur LIT les
+  détails dépliés, `lvAlertMaj` les refermait sous ses yeux. Garde ajoutée :
+  `if (e.det && !e.det.hidden) return;`.
+### P2 — Aucun vrai livreur n'était prévenu
+`alertNewCourse` n'écrivait qu'aux `TEST_EMAILS` + owner. → `destinatairesLivreurs(db)`
+lit `couriers` où `kycStatus === 'valide'` (plafond 50) et alerte par email.
+⚠️ Les 3 appels (`course-request`, `course-create`, webhook) passent désormais `db`.
+- **SMS** : aucun fournisseur n'existait. `sendSms()` (Twilio, HTTP + Basic auth,
+  zéro dépendance) est écrit mais **TOTALEMENT INERTE** sans
+  `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` / `TWILIO_FROM` — prouvé : 0 appel
+  réseau sans clé. `telE164` normalise (0690… → +590690…) et REFUSE tout ce qui
+  n'est pas un vrai numéro. ⚠️ ACTION USER pour activer : créer un compte
+  Twilio, acheter un numéro, poser les 3 variables sur Vercel.
+### P3 — Le livreur ne pouvait plus toucher à son prix
+Le serveur l'autorisait DÉJÀ (il ne refuse qu'un accord **validé**) — seul
+l'écran ne l'offrait pas. Champ + « 💶 Mettre à jour mon prix » tant que le
+client n'a pas accepté ; plus rien une fois validé.
+### P4 — L'historique mentait
+`'✅ Par toi'` s'affichait dès que la course était à moi : **annulée et terminée
+se lisaient à l'identique**. → `lvStatutCourt` / `lvStatutClasse` (mot +
+couleur). Défaut RÉEL, pas un artefact du compte de test.
+### P5 — L'annuaire disparaissait de l'accueil
+`loadCouriers`/`loadPartners` résolvaient `[]` **en cas d'échec réseau**, et
+l'appelant masquait la section. → `_couriersDernier`/`_partnersDernier` :
+dernier succès resservi. **ÉCHEC ≠ VIDE** (5e occurrence de ce motif ici).
+### P6 — On ne distinguait plus qui écrit → RÉSOLU AUTREMENT (section suivante)
+Le CSS était déjà juste (violet à droite / gris à gauche). Le rôle venait de
+`c.mine` SEUL : sur un compte qui joue les DEUX côtés, la bulle le prenait
+toujours pour le client. J'avais ajouté un sélecteur « J'écris en tant que » —
+**mauvaise décision, retirée le 28/07** : voir la section suivante.
+- VÉRIFIÉ : **27/27 plan11** + **17/17 plan11-serveur** + 32/32 plan10 + 70/70
+  plan9 + 31/31 plan9-serveur + 70/70 plan8 + 82/82 couriers + 18/18 accordE2E
+  + 129 autres. CI verte. **6 sabotages** (sondage retiré, détails refermés,
+  retour du « Par toi », prix non modifiable, échec=vide, SMS sans clé) : tous
+  détectés.
+- ⚠️ Budget P8 atteint DEUX fois (app.js 205 Ko, styles.css 60 Ko) : plafonds
+  NON relevés — commentaires condensés + 9 règles CSS mortes vérifiées
+  (`toast__icon/body/close` : `toast()` n'émet que `toast toast--type`).
+
+## 🧪 DEUXIÈME COMPTE DE TEST + FIN DU SÉLECTEUR DE RÔLE (28/07/2026, SW v531)
+User : « tu as ajouté un bouton Client ou Livreur en haut, tu trouves pas ça
+bizarre ? est-ce que le problème vient du fait que je m'envoie des messages à
+moi-même ? ». **Oui, et il avait raison sur les deux points.**
+- **IMPOSSIBILITÉ LOGIQUE, PAS DIFFICULTÉ TECHNIQUE** : une bulle distingue
+  « moi » de « l'autre » par l'identité de l'expéditeur. Quand le client et le
+  livreur sont le MÊME compte, les deux côtés portent le même uid — aucune
+  information dans le message ne permet de trancher. Aucun code ne peut
+  distinguer deux personnes qui n'en sont qu'une.
+- ⛔ **MA FAUTE À NE PAS REFAIRE** : devant cette impossibilité, j'avais posé
+  une **béquille de test dans le PRODUIT** (sélecteur « J'écris en tant que »).
+  Un vrai client n'aurait jamais dû le voir. La bonne réponse était de
+  SIGNALER la limite, pas de la contourner dans l'interface.
+- **SOLUTION RETENUE (décision user)** : un DEUXIÈME compte de test.
+  `contact.piratestools@gmail.com` ajouté à `TEST_EMAILS` (dépôt de demande,
+  acceptation, paiement test) **et** à `PIECES_BYPASS_EMAILS` (dossier livreur
+  validable sans avis d'imposition). L'user reste le CLIENT sur
+  `justforwada@icloud.com`, le 2e compte joue le LIVREUR.
+- Sélecteur **entièrement supprimé** (app.js + index.html + styles.css, zéro
+  trace). Le calcul `c.mine ? 'client' : 'livreur'` était déjà juste pour deux
+  comptes distincts — donc plus rien à corriger.
+- ⚠️ `contact.piratestools@gmail.com` est aussi `OWNER_EMAIL` : ce compte
+  recevra les alertes owner ET livreur. Sans gravité en test, à RETIRER de
+  `TEST_EMAILS` au lancement.
+- ⚠️ **PIÈGE D'ÉCRITURE** : un 2e `pirates-tools/CLAUDE.md` avait été créé par
+  erreur (mauvais répertoire courant lors d'un `cat >>`). Rapatrié ici et
+  supprimé — **la mémoire du projet est UN SEUL fichier, à la racine**.
