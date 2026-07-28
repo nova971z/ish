@@ -4113,6 +4113,11 @@
     return lvDansPlageHoraire(c.hDebut, c.hFin, now);
   }
   // Texte lisible des horaires, ou '' si le livreur n'en a pas renseigné.
+  // Heure courante EN GUADELOUPE, quel que soit le fuseau de l'appareil.
+  function lvHeureGPTxt(now) {
+    var m = lvMinutesLocalesGP(now);
+    return (m / 60 < 10 ? '0' : '') + Math.floor(m / 60) + ':' + (m % 60 < 10 ? '0' : '') + (m % 60);
+  }
   function lvHorairesTxt(c) {
     // ⚠️ Comparer à null, PAS tester la vérité : « 00:00 » vaut 0 minute, et
     // !0 est VRAI — minuit était donc pris pour une heure invalide, et les
@@ -4509,6 +4514,88 @@
   var _dockUnsub = null;          // abonnement du fil ouvert dans la bulle
   var _dockFils = null;           // liste des discussions (chargée une fois)
   var _dockOuvert = false;
+
+  // ══ BANDEAU « NOUVELLE COURSE » (livreurs) ════════════════════════════════
+  // Un livreur ne doit pas avoir à aller CHERCHER les courses : elles viennent
+  // à lui (demande user 28/07/2026, en remplacement de la fiche « Courses en
+  // attente »). Sous la barre du haut, sur toutes les pages. Un clic accepte,
+  // la croix écarte CETTE course — et seulement elle, jamais les suivantes.
+  var _alertIgnorees = {};        // courses écartées, pour cette session
+  var _alertCourante = null;
+
+  function lvAlertEls() {
+    return {
+      box: document.getElementById('courseAlert'),
+      go: document.getElementById('courseAlertGo'),
+      txt: document.getElementById('courseAlertTxt'),
+      x: document.getElementById('courseAlertX')
+    };
+  }
+  function lvAlertCacher() {
+    var e = lvAlertEls();
+    if (e.box) e.box.hidden = true;
+    _alertCourante = null;
+  }
+  // `dispo` = les courses en attente renvoyées par le serveur.
+  function lvAlertMaj(dispo) {
+    var e = lvAlertEls();
+    if (!e.box) return;
+    var c = (dispo || []).filter(function (x) { return !_alertIgnorees[x.id]; })[0];
+    if (!c) { lvAlertCacher(); return; }
+    _alertCourante = c;
+    var z = LV_BAREME[(c.zone || 1) - 1] || LV_BAREME[0];
+    e.txt.textContent = z.emoji + ' Nouvelle course — ' + lvMyPrice(c.zone) + ' € · '
+      + String(c.address || '').slice(0, 40) + ' (' + c.km + ' km)';
+    e.box.hidden = false;
+    e.go.onclick = function () { lvAlertAccepter(c.id, e.go); };
+    e.x.onclick = function () {
+      // On écarte CETTE course, pas la fonction : une autre course fera
+      // réapparaître le bandeau. Rien n'est perdu — elle reste acceptable
+      // depuis l'espace livreur.
+      _alertIgnorees[c.id] = true;
+      lvAlertMaj(dispo);
+    };
+  }
+  // Charge les courses disponibles pour alimenter le bandeau, UNIQUEMENT si le
+  // compte est bien livreur. Un client ne doit jamais voir ce bandeau.
+  function lvAlertCharger() {
+    if (!_currentUser) { lvAlertCacher(); return; }
+    lvGetRole().then(function (estLivreur) {
+      if (estLivreur !== true) { lvAlertCacher(); return; }
+      return jsonAuthHeaders().then(function (headers) {
+        return fetch(apiBaseUrl() + '/api/contact', {
+          method: 'POST', headers: headers, body: JSON.stringify({ type: 'course-list' })
+        });
+      }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+        if (d && d.ok) lvAlertMaj(d.dispo);
+      });
+    }).catch(function () { /* jamais bloquant */ });
+  }
+
+  function lvAlertAccepter(id, btn) {
+    if (btn) { btn.disabled = true; }
+    jsonAuthHeaders().then(function (headers) {
+      return fetch(apiBaseUrl() + '/api/contact', {
+        method: 'POST', headers: headers,
+        body: JSON.stringify({ type: 'course-accept', id: id })
+      });
+    }).then(function (r) { return r.text().then(function (t) { return { s: r.status, t: t }; }); })
+      .then(function (rep) {
+        var d = null;
+        try { d = JSON.parse(rep.t); } catch (_) {}
+        if (rep.s === 200 && d && d.ok) {
+          toast('✅ Course acceptée — la discussion est ouverte', 'success');
+          lvAlertCacher();
+          if (location.hash.indexOf('/mode-livraison') !== -1) renderCourierSpace();
+        } else {
+          toast((d && d.error) || lvErrTxt(rep.s, d), 'error');
+          if (btn) btn.disabled = false;
+        }
+      }).catch(function () {
+        toast('Connexion impossible. Réessaie.', 'error');
+        if (btn) btn.disabled = false;
+      });
+  }
 
   function lvDockEls() {
     return {
@@ -5928,9 +6015,19 @@
           }).join('') + '</ul>'
         : '<p class="lv-hint">Aucun article n\'a été enregistré avec cette demande.</p>')
       + (manquants ? '<div class="lv-note lv-note--warn">' + manquants + ' article(s) ne sont plus au catalogue — ils seront ignorés.</div>' : '')
-      + '<div class="lv-cta"><button type="button" class="btn primary" id="acPay"'
-      + (lines.filter(function (l) { return l.ok; }).length ? '' : ' disabled') + '>💳 Payer ma marchandise</button>'
-      + '<span class="lv-cta__note" id="acSt" aria-live="polite">Le paiement confirme définitivement la course.</span></div>';
+      // 🐛 « le bouton payer ne marche pas » (28/07/2026) : quand la demande a
+      // été déposée SANS panier, il n'y a rien à payer. Le bouton était bien
+      // désactivé, mais rien ne le montrait — il avait l'air cliquable et ne
+      // faisait rien. On ne montre plus de bouton mort : on dit ce qui manque
+      // et on donne la sortie.
+      + (lines.filter(function (l) { return l.ok; }).length
+        ? '<div class="lv-cta"><button type="button" class="btn primary" id="acPay">💳 Payer ma marchandise</button>'
+          + '<span class="lv-cta__note" id="acSt" aria-live="polite">Le paiement confirme définitivement la course.</span></div>'
+        : '<div class="lv-note lv-note--warn">Cette demande a été déposée <strong>sans panier</strong> : '
+          + 'il n\'y a donc aucune marchandise à régler. Ajoute tes articles au panier, puis '
+          + 'redépose une demande depuis la page Livraison.</div>'
+          + '<div class="lv-cta"><a class="btn primary" href="#/catalogue">🧰 Aller au catalogue</a>'
+          + '<span class="lv-cta__note" id="acSt" aria-live="polite"></span></div>');
   }
 
   function lvPanelCode(c) {
@@ -6304,10 +6401,19 @@
         + '<div class="lv-dispo">'
         + '<button type="button" class="lv-dispo__btn' + (p.available ? ' is-on' : '') + '" id="lvDispoBtn" aria-pressed="' + (p.available ? 'true' : 'false') + '">'
         + '<span class="lv-dispo__dot"></span>'
-        + '<span class="lv-dispo__txt">' + (p.available ? '🟢 Tu es DISPONIBLE' : '⚪️ Tu es hors ligne') + '</span></button>'
-        + '<p class="lv-hint" id="lvDispoNote">' + (p.available
-          ? 'Les clients voient le bandeau vert « Disponible » sur ta carte. Clique pour te mettre hors ligne.'
-          : 'Tant que tu n\'as pas cliqué, aucun bandeau vert ne s\'allume sur ta carte côté client.') + '</p>'
+        + '<span class="lv-dispo__txt">' + (p.available ? '🟢 Mon interrupteur : ALLUMÉ' : '⚪️ Mon interrupteur : ÉTEINT') + '</span></button>'
+        // 🐛 « dans les paramètres je suis disponible, dehors je ne le suis
+        // plus » (28/07/2026). Les deux écrans montraient DEUX ÉTATS DIFFÉRENTS
+        // sans le dire : ici l'interrupteur seul, ailleurs l'interrupteur ET les
+        // horaires. Ce n'était pas un défaut de calcul (vérifié) mais un défaut
+        // d'affichage. On montre donc ICI AUSSI l'état réellement vu par les
+        // clients, avec l'heure de Guadeloupe — le service tourne à cette
+        // heure-là, quel que soit le fuseau de ton appareil.
+        + lvServiceBandeauHTML(p)
+        + '<p class="lv-hint" id="lvDispoNote">Il est <strong>' + lvHeureGPTxt()
+        + '</strong> en Guadeloupe. Ton interrupteur ne suffit pas : hors de tes horaires, '
+        + 'les clients te voient <strong>hors service</strong>' + (lvHorairesTxt(p)
+          ? ' (les tiens : ' + escapeHTML(lvHorairesTxt(p)) + ').' : '.') + '</p>'
         + '</div>'
         + '<h2 class="lv-h2">💶 Tes tarifs par zone</h2>'
         + '<p class="lv-hint">C\'est <strong>toi</strong> qui fixes tes prix — Pirates Tools ne prend rien sur la course et '
@@ -6738,6 +6844,7 @@
       var canAccept = !!d.courier;
       var byId = {};
       (d.dispo || []).concat(d.mine || []).forEach(function (c) { byId[c.id] = c; });
+      lvAlertMaj(d.dispo);          // le bandeau se nourrit de la MÊME liste
       if (dispoEl) dispoEl.innerHTML = (d.dispo && d.dispo.length)
         ? d.dispo.map(function (c) { return courseCard(c, canAccept); }).join('')
         : '<p class="lv-hint">Aucune course disponible pour l\'instant.</p>';
@@ -6913,7 +7020,7 @@
       // reste libre de changer d'avis. Confirmation en deux temps (le bouton
       // se transforme) : pas d'annulation par tap accidentel sur mobile.
       if (c.mine && ['en_attente', 'acceptee'].indexOf(c.status) !== -1 && !c.paid) {
-        h += '<div class="lv-cancel"><button type="button" class="btn btn--danger" id="clientCancelBtn" data-armed="0">'
+        h += '<div class="lv-cancel lv-annuler"><button type="button" class="btn btn--danger" id="clientCancelBtn" data-armed="0">'
           + '❌ Annuler ma demande de livraison</button>'
           + '<span class="lv-cta__note" id="clientCancelSt" aria-live="polite">Tu as changé d\'avis ? Rien n\'a été débité, l\'annulation est libre.</span></div>';
       }
@@ -7971,6 +8078,8 @@
         updateAccLivBtn();
         // La bulle de discussion n'existe que pour un compte connecté.
         lvDockInit(); lvDockSync();
+        // Le bandeau « nouvelle course » suit le livreur sur TOUTES les pages.
+        lvAlertCharger();
       });
     });
   }

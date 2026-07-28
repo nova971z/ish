@@ -8169,6 +8169,9 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .courier-card__cta .btn { width: 100%; font-size: .82rem; padding: .5rem .6rem; }
 .courier-prof__cta { margin-top: .6rem; }
 .lv-discuter[disabled] { opacity: .55; cursor: not-allowed; box-shadow: none; }
+/* Regle generale : un bouton desactive ne doit JAMAIS avoir l'air cliquable
+   (defaut vecu le 28/07/2026 sur « Payer ma marchandise »). */
+.btn[disabled], .btn:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; filter: grayscale(.5); }
 .lv-discuter__no { font-weight: 600; opacity: .8; font-size: .78em; }
 
 /* En-tête de l'espace livreur : titre à gauche, ⚙️ Paramètres à DROITE et
@@ -8416,18 +8419,123 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 /* ── FICHES D'INFORMATION : une info = une fiche, côte à côte ──────────────
    Remplace cinq lignes de texte brut empilées (demande user 28/07/2026).
    Elles s'enroulent d'elles-mêmes ; sur téléphone, deux par rangée. */
+/* Annulation d'une demande : action grave et rare — centrée, seule sur sa
+   ligne, pour qu'on ne la touche jamais par accident (demande user 28/07). */
+/* ── BANDEAU « NOUVELLE COURSE » ────────────────────────────────────────────
+   Sous la barre du haut, pleine largeur, vert. Il glisse depuis le haut, on
+   touche pour accepter, la croix l'écarte. z-index 9550 : au-dessus du contenu
+   et de la barre haute, en dessous de la bulle (9600) et des messages (10000). */
+.course-alert {
+  position: fixed; left: 0; right: 0; z-index: 9550;
+  top: calc(var(--safe-top, 70px) - 6px);
+  display: flex; align-items: stretch; gap: .5rem;
+  padding: .5rem .8rem;
+  animation: alert-in .3s cubic-bezier(.2,.8,.3,1);
+}
+@keyframes alert-in { from { opacity: 0; transform: translateY(-16px); } }
+@media (prefers-reduced-motion: reduce) { .course-alert { animation: none; } }
+.course-alert__go {
+  flex: 1; min-width: 0; display: flex; align-items: center; gap: .6rem;
+  padding: .7rem 1rem; border-radius: 14px; cursor: pointer; text-align: left;
+  border: 1px solid rgba(52, 211, 153, .6);
+  background: linear-gradient(135deg, rgba(52,211,153,.22), rgba(52,211,153,.10));
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  color: #6ee7b7; font-weight: 700; font-size: .92rem;
+  box-shadow: 0 8px 28px rgba(0,0,0,.5), 0 0 22px rgba(52,211,153,.28);
+}
+.course-alert__go:hover { border-color: rgba(52,211,153,.9); box-shadow: 0 8px 30px rgba(0,0,0,.55), 0 0 30px rgba(52,211,153,.45); }
+.course-alert__dot {
+  width: 10px; height: 10px; flex: 0 0 10px; border-radius: 50%; background: #34d399;
+  box-shadow: 0 0 8px rgba(52,211,153,.95); animation: lv-pulse 2s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) { .course-alert__dot { animation: none; } }
+.course-alert__txt { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.course-alert__cta {
+  flex: 0 0 auto; padding: .3rem .7rem; border-radius: 999px;
+  background: rgba(52,211,153,.9); color: #04231a; font-weight: 900; font-size: .8rem;
+}
+.course-alert__x {
+  flex: 0 0 44px; width: 44px; border-radius: 14px; cursor: pointer;
+  border: 1px solid rgba(255,255,255,.16); background: rgba(10,15,20,.8);
+  color: #e6edf5; font-size: 1rem;
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+}
+.course-alert__x:hover { background: rgba(255,255,255,.14); }
+@media (max-width: 480px) { .course-alert__cta { display: none; } }
+
+/* ── « MES COURSES » — présentation haut de gamme ──────────────────────────
+   Une course = une carte avec un liseré d'état à gauche, une ligne de titre
+   forte (zone + prix), et ses détails en dessous. Fini la liste plate. */
+.lv-mine__head { display: flex; align-items: baseline; gap: .7rem; flex-wrap: wrap; margin-bottom: .2rem; }
+.lv-mine__head .lv-h2 { margin: 0; }
+.lv-mine__head .lv-hint { margin: 0; }
+#courierMine .lv-h3 {
+  display: flex; align-items: center; gap: .5rem; margin: 1.4rem 0 .6rem;
+  font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted, #9aa4b2);
+}
+#courierMine .lv-h3::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(255,255,255,.18), transparent); }
+#courierMine > .lv-h3:first-child { margin-top: .4rem; }
+#courierMine .lv-course {
+  position: relative; width: 100%; text-align: left;
+  padding: .85rem 1rem .85rem 1.15rem; border-radius: 14px; cursor: pointer;
+  border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04);
+  transition: transform .16s ease, border-color .2s ease, box-shadow .2s ease, background .2s ease;
+}
+#courierMine .lv-course::before {
+  content: ''; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px;
+  border-radius: 3px; background: #34d399; box-shadow: 0 0 10px rgba(52,211,153,.7);
+}
+#courierMine .lv-course--done { opacity: .72; }
+#courierMine .lv-course--done::before { background: rgba(255,255,255,.25); box-shadow: none; }
+#courierMine .lv-course:hover {
+  transform: translateY(-1px); border-color: rgba(var(--accent-rgb), .55);
+  background: rgba(var(--accent-rgb), .08);
+  box-shadow: 0 8px 22px rgba(0,0,0,.35), 0 0 18px rgba(var(--accent-rgb), .18);
+}
+#courierMine .lv-course__head { display: flex; align-items: center; justify-content: space-between; gap: .6rem; font-size: .95rem; }
+#courierMine .lv-course__status {
+  flex: 0 0 auto; font-size: .7rem; font-weight: 800; letter-spacing: .04em;
+  padding: .18rem .5rem; border-radius: 999px;
+  background: rgba(var(--accent-rgb), .18); color: #c4b5fd;
+}
+#courierMine .lv-course__body { display: block; margin-top: .35rem; font-size: .84rem; color: var(--muted, #c9c9d9); line-height: 1.5; }
+
+/* Historique replié : le résumé se lit comme un titre de carte, avec un
+   chevron qui dit clairement que ça s'ouvre. */
+.lv-histo { padding: 0; }
+.lv-histo__sum {
+  cursor: pointer; list-style: none; display: flex; align-items: center; gap: .6rem;
+  padding: 1.1rem 1.2rem;
+}
+.lv-histo__sum::-webkit-details-marker { display: none; }
+.lv-histo__sum::after { content: '▸'; margin-left: auto; color: var(--muted, #9aa4b2); font-size: 1.1rem; }
+.lv-histo[open] > .lv-histo__sum::after { content: '▾'; }
+.lv-histo[open] > .lv-histo__sum { border-bottom: 1px solid rgba(255, 255, 255, .1); }
+.lv-histo .lv-h2 { margin: 0; }
+.lv-histo > #clientDelivList { padding: 1rem 1.2rem 1.2rem; }
+
+.lv-annuler { display: flex; flex-direction: column; align-items: center; text-align: center; gap: .4rem; margin: 1.2rem 0; }
+.lv-annuler .btn { min-width: 260px; justify-content: center; }
+
 .lv-facts {
   display: grid; gap: .55rem; margin: .8rem 0;
   grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
 }
 .lv-fact {
-  display: flex; flex-direction: column; gap: .15rem; min-width: 0;
-  padding: .6rem .7rem; border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, .1); background: rgba(255, 255, 255, .04);
+  display: flex; flex-direction: column; gap: .35rem; min-width: 0;
+  padding: .7rem .8rem; border-radius: 14px;
+  border: 1px solid rgba(var(--accent-rgb), .38);
+  background: linear-gradient(160deg, rgba(var(--accent-rgb), .10), rgba(255, 255, 255, .03));
+  box-shadow: 0 0 16px rgba(var(--accent-rgb), .16), inset 0 1px 0 rgba(255, 255, 255, .05);
+  transition: border-color .2s ease, box-shadow .2s ease;
 }
+.lv-fact:hover { border-color: rgba(var(--accent-rgb), .7); box-shadow: 0 0 24px rgba(var(--accent-rgb), .3); }
+/* Le titre est SÉPARÉ de la valeur par un trait lumineux, pas par du vide. */
 .lv-fact__k {
-  font-size: .7rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
-  color: var(--muted, #9aa4b2);
+  font-size: .68rem; font-weight: 800; letter-spacing: .07em; text-transform: uppercase;
+  color: #c4b5fd; padding-bottom: .35rem;
+  border-bottom: 1px solid rgba(var(--accent-rgb), .45);
+  box-shadow: 0 1px 6px -2px rgba(var(--accent-rgb), .9);
 }
 .lv-fact__v { font-size: .92rem; font-weight: 700; color: #fff; line-height: 1.35; word-break: break-word; }
 .lv-fact__v em { display: block; font-style: normal; font-weight: 500; font-size: .78rem;

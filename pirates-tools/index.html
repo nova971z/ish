@@ -44,7 +44,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=525">
+  <link rel="stylesheet" href="styles.css?v=526">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -1206,11 +1206,13 @@
           <div id="clientDelivMap" class="pdp-deliv-map courier-map" aria-label="Carte de mes livraisons"></div>
         </div>
         <div id="clientDelivTodo"></div>
-        <div class="lv-card">
-          <h2 class="lv-h2">🧾 Mes demandes</h2>
-          <div id="clientDelivList"><p class="lv-hint">Chargement…</p></div>
-        </div>
         <div id="clientDelivDetail" class="lv-card" hidden></div>
+        <!-- HISTORIQUE : tout en bas et REPLIÉ (demande user 28/07/2026). On
+             arrive pour agir sur la course en cours, pas pour relire le passé. -->
+        <details class="lv-card lv-histo">
+          <summary class="lv-histo__sum"><span class="lv-h2">🧾 Historique de commande</span></summary>
+          <div id="clientDelivList"><p class="lv-hint">Chargement…</p></div>
+        </details>
       </div>
     </section>
 
@@ -1252,18 +1254,18 @@
           </div>
           <div id="courierMyCard"></div>
           <div id="courierDetail" class="lv-card" hidden></div>
-          <div class="courier-cols">
-            <div class="lv-card">
-              <h2 class="lv-h2">📬 Courses en attente</h2>
-              <p class="lv-hint">Déposées par des clients, pas encore prises. Le premier qui accepte ouvre la discussion.</p>
-              <div id="courierDispo"><p class="lv-hint">Chargement…</p></div>
-            </div>
-            <div class="lv-card">
+          <!-- « Courses en attente » a été REMPLACÉE par le bandeau vert sous
+               la barre du haut (#courseAlert). Le conteneur reste, vide et
+               masqué : le rendu continue d'y écrire et l'alerte s'en nourrit,
+               sans dupliquer la logique. -->
+          <div id="courierDispo" hidden></div>
+          <section class="lv-card lv-mine">
+            <header class="lv-mine__head">
               <h2 class="lv-h2">🕘 Mes courses</h2>
-              <p class="lv-hint">Celles que tu as acceptées : en cours, puis terminées.</p>
-              <div id="courierMine"><p class="lv-hint">Chargement…</p></div>
-            </div>
-          </div>
+              <p class="lv-hint">Celles que tu as acceptées.</p>
+            </header>
+            <div id="courierMine"><p class="lv-hint">Chargement…</p></div>
+          </section>
           <div id="courierEarnings"></div>
           <button type="button" class="btn" id="courierRefresh">🔄 Rafraîchir</button>
         </div>
@@ -1995,6 +1997,20 @@
   </footer>
 
   <!-- =================== FLOATING WHATSAPP =================== -->
+  <!-- ══ BANDEAU « NOUVELLE COURSE » (livreurs) ═════════════════════════════
+       Sous la barre du haut, vert, cliquable pour accepter, avec une croix
+       pour le refuser (demande user 28/07/2026). Il remplace la fiche
+       « Courses en attente » : un livreur ne doit pas avoir à aller chercher
+       les courses, elles viennent à lui. -->
+  <div id="courseAlert" class="course-alert" hidden role="status">
+    <button type="button" class="course-alert__go" id="courseAlertGo">
+      <span class="course-alert__dot" aria-hidden="true"></span>
+      <span class="course-alert__txt" id="courseAlertTxt">Nouvelle course disponible</span>
+      <span class="course-alert__cta">Accepter</span>
+    </button>
+    <button type="button" class="course-alert__x" id="courseAlertX" aria-label="Ignorer cette course">✕</button>
+  </div>
+
   <!-- ══ BULLE DE DISCUSSION (façon Messenger) ══════════════════════════════
        En bas à GAUCHE, toujours accessible : le fil ne doit plus être enterré
        dans un panneau qu'il faut penser à ouvrir (défaut signalé le 27/07/2026 :
@@ -2162,7 +2178,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=525"></script>
+  <script defer src="app.js?v=526"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->
