@@ -1,8 +1,10 @@
 # PLAN FONDATIONS — Pirates Tools
 ## Construire les instruments avant d'auditer
 
-> **État : PLAN v2 — SOUMIS À VALIDATION. Rien n'est appliqué.**
-> v1 rédigée le 28/07/2026. **v2 le 28/07/2026 après vérification par mesure.**
+> **État : PLAN v3 — SOUMIS À VALIDATION. Rien n'est appliqué.**
+> v1 le 28/07/2026 · **v2** après vérification par mesure ·
+> **v3** après recherche documentaire extérieure et réponse à la proposition
+> de numérotation des lignes.
 > À relire et amender par l'user avant exécution.
 
 ---
@@ -25,6 +27,122 @@ et c'est ce qui a fait naître le principe P-C.
 C'est exact, mais `scripts/check-firestore-queries.js` **existe déjà** et couvre
 une règle voisine (refus du *descending key scan*). → On l'**étend**, on ne crée
 pas un 28ᵉ fichier.
+
+---
+
+## 📚 CE QUE LA RECHERCHE EXTÉRIEURE A CORRIGÉ DANS LA v2
+
+La v2 avait été vérifiée **contre le code**. Elle n'avait pas été vérifiée
+**contre l'état de l'art**. Sept trous en sont sortis, dont trois changent le
+plan en profondeur. Les sources sont en annexe.
+
+### R1 — 🔴 L'aiguillage documentaire peut être MÉCANIQUE, pas déclaratif
+
+La v2 pariait sur ma discipline : « `CLAUDE.md` te dit quel document ouvrir,
+tu l'ouvres ». C'est un vœu, pas une porte — exactement ce que P-B interdit.
+
+La documentation officielle décrit `.claude/rules/` avec un en-tête `paths:` :
+une règle ainsi étiquetée **se charge toute seule quand je lis un fichier
+correspondant**. Concrètement :
+
+```yaml
+---
+paths: ["api/**/*.js"]
+---
+# Règles serveur : l'argent, l'authentification, les taux
+```
+
+→ dès que j'ouvre `api/contact.js`, les règles serveur entrent en contexte
+**sans que personne ait à y penser**. C'est P-B appliqué à la documentation
+elle-même. **La v2 aurait construit un aiguillage qu'on peut rater.**
+
+### R2 — 🔴 Découper `CLAUDE.md` avec des `@imports` ne gagne RIEN
+
+Je m'apprêtais à recommander des imports `@docs/…`. La doc est formelle : les
+fichiers importés **sont chargés au lancement et entrent dans le contexte**.
+Un import ne réduit donc pas le poids : il le déplace. Le seul vrai gain vient
+de `.claude/rules/` avec `paths:` (chargement conditionnel) ou de documents
+**non importés**, que j'ouvre à la demande.
+→ **Correction** : aucun `@import` dans le `CLAUDE.md` cible. L'aiguillage
+nomme les fichiers **entre accents graves** (ce qui empêche justement l'import).
+
+### R3 — 🔴 Une règle dans `CLAUDE.md` n'est PAS une porte
+
+La doc le dit sans détour : ces fichiers sont du **contexte**, pas de la
+configuration ; il n'y a **aucune garantie** de respect strict, et pour bloquer
+une action il faut un **hook** ou un contrôle exécuté.
+→ **Correction de la phase 6** : une consigne écrite est un rappel, jamais une
+porte. Les seules portes sont `ci.js` et les hooks. Le plan disait déjà
+« exécutable avant tout » — désormais il dit **pourquoi**, avec la source.
+
+### R4 — 🟠 Les décisions renversées se contredisent en silence
+
+La doc avertit : **deux consignes qui se contredisent → j'en choisis une au
+hasard.** Or notre mémoire contient au moins cinq décisions renversées qui
+cohabitent avec leur version d'origine (promos interdites → autorisées sous
+traqueur ; bandeau cookies masqué → affiché ; fiche auto-ouverte → signet ;
+sélecteur de rôle ajouté → supprimé ; SMS → abandonné). Le journal les raconte
+toutes, **sans marquer laquelle gagne**.
+
+La pratique établie pour ça s'appelle **ADR** (*Architecture Decision Record*) :
+une décision acceptée n'est **jamais réécrite**, elle est **remplacée**
+(`superseded by #N`), et les deux restent liées. On garde l'histoire **et** on
+sait qui fait foi.
+→ **Nouveau livrable en phase 1** : `docs/DECISIONS.md`, une décision par
+entrée, avec un statut **ACTIVE / REMPLACÉE PAR #N**. C'est ce qui manquait
+pour que le journal cesse d'être ambigu.
+
+### R5 — 🟠 Notre « sabotage » a un nom, une littérature et une mesure
+
+Ce qu'on appelle sabotage depuis des semaines s'appelle **mutation testing** :
+on introduit un défaut (*mutant*), et un test qui échoue a « **tué le mutant** ».
+La qualité d'une suite se mesure en **score de mutation** = mutants tués /
+mutants introduits.
+→ **Amélioration des phases 4 et 6** : on ne dit plus « éprouvé par sabotage »
+(oui/non), on affiche **un score par domaine**. « 6 sabotages, 6 détectés » sur
+la livraison et « 0/0 » sur l'admin, ce n'est pas la même protection — et
+aujourd'hui le plan les afficherait pareil.
+
+### R6 — 🟠 Il manque les tests qui figent le comportement ACTUEL
+
+Nos harnais testent ce que le site **doit** faire. Pour découper `app.js` sans
+rien casser, il faut l'inverse : des tests qui figent ce qu'il **fait
+aujourd'hui**, correct ou non. Ça s'appelle un **test de caractérisation**
+(ou *golden master*) : on ne juge pas, on épingle.
+→ **Nouveau prérequis avant tout découpage** (phase 8) : pour chacune des
+11 routes, on capture le rendu produit et on exige qu'il soit **identique**
+après extraction. L'outillage de comparaison existe déjà (harnais de captures
+et comparaison de pixels des sessions précédentes).
+
+### R7 — 🟢 L'émulateur Firestore est structurellement aveugle aux index
+
+Confirmation par la documentation Google : **l'émulateur ne suit pas les index
+composites et exécute n'importe quelle requête valide** ; il est explicitement
+recommandé de tester contre une vraie instance. Nos **78/78 assertions
+d'émulateur** ne peuvent donc **jamais** attraper un index manquant.
+→ Ce n'est plus une intuition tirée d'un incident, c'est un fait documenté :
+l'invariant « `where` + `orderBy` exige un index » **doit** être un contrôle
+statique, parce qu'aucun test ne le trouvera.
+
+### R8 — 🟢 Deux détails utiles, gratuits
+
+- Les **commentaires HTML de bloc** (`<!-- … -->`) sont **retirés avant
+  chargement** de `CLAUDE.md` : on peut y laisser des notes de maintenance
+  **sans qu'elles coûtent un octet de contexte**.
+- La commande **`/doctor`** propose des coupes sur un `CLAUDE.md` versionné :
+  elle retire ce que je peux déduire du code et garde les pièges et les
+  raisons. → À passer **au début de la phase 1**, avant de trier à la main.
+
+### R9 — ⚪ Le quadrant manquant de la structure documentaire
+
+Le cadre **Diátaxis** distingue quatre besoins : apprendre, faire, chercher un
+fait, **comprendre**. La v2 couvrait « faire » (règles), « chercher » (carto,
+invariants) et l'histoire — mais **rien n'explique comment le système
+fonctionne aujourd'hui**, et la v2 l'interdisait même à la cartographie.
+→ **Ajout borné** : `docs/FONCTIONNEMENT.md`, limité aux **4 flux critiques**
+(achat d'un outil · demande de livraison · accord et règlement · administration),
+écrit pour un lecteur non développeur. Borné à 4, sinon il devient une seconde
+cartographie qui se périme.
 
 ---
 
@@ -86,6 +204,84 @@ parce que le risque qu'elle traite est en cours de réalisation.
 
 ---
 
+## 📏 NUMÉROTER CHAQUE LIGNE DU CODE — proposition de l'user, réponse mesurée
+
+> Proposition (28/07/2026) : *« lors de l'audit on devrait numéroter chaque ligne
+> du code, ce qui te permettrait de te repérer et d'agrémenter la cartographie
+> correctement. »*
+
+**Le besoin est juste et il est même le cœur du problème.** La réponse se
+sépare en deux : **écrire** les numéros dans le fichier = non, et voici les
+chiffres ; **s'appuyer** sur des numéros exacts et vérifiables = oui, et c'est
+adopté sous trois formes concrètes.
+
+### ❌ Ce qu'il ne faut PAS faire : inscrire les numéros dans le code
+
+Test réel : `awk '{printf "/*%d*/%s\n", NR, $0}' app.js` — chaque ligne
+préfixée de son numéro en commentaire.
+
+| | `app.js` actuel | `app.js` numéroté |
+|---|---|---|
+| brut | 744 342 o (727 Ko) | 864 249 o (844 Ko) |
+| **gzip — ce que P8 mesure et ce que le client télécharge** | **204,1 Ko** | **250,3 Ko** |
+| plafond P8 | 205 Ko | 205 Ko |
+| verdict | marge : **0,9 Ko** | **dépassement : +45,3 Ko** |
+
+**Quatre raisons de refuser, par ordre de gravité :**
+
+1. **+45 Ko compressés téléchargés par chaque client, à chaque visite.**
+   Ce sont **120 000 octets bruts de commentaires** que le navigateur doit
+   télécharger, décompresser et analyser — **pour zéro bénéfice utilisateur**.
+   Et tu navigues en privé : rien n'est mis en cache, c'est retéléchargé à
+   chaque fois. Ce serait le plus gros ajout de poids de l'histoire du site,
+   au bénéfice exclusif de mon confort de lecture.
+2. **Les numéros seraient faux dès la première modification.** Insérer une seule
+   ligne au milieu rend faux les 10 000 numéros du dessous. C'est **exactement**
+   le défaut qu'on cherche à corriger dans la cartographie actuelle — on le
+   reproduirait, en pire, parce qu'il serait écrit dans le code.
+3. **Les différences git deviendraient illisibles.** Ajouter une ligne
+   afficherait **14 557 lignes modifiées**. Impossible de relire un correctif,
+   impossible de revenir en arrière proprement.
+4. **Je les ai déjà.** Mon outil de lecture affiche le numéro devant chaque
+   ligne qu'il me montre, systématiquement. Je n'ai **jamais** manqué de
+   numéros de ligne. Ce qui me manque, ce n'est pas le numéro : c'est
+   **qu'il reste vrai demain**.
+
+### ✅ Ce que la proposition apporte de juste, et qui est adopté
+
+Le vrai besoin derrière l'idée, c'est : **une référence exacte, vérifiable, qui
+ne ment pas.** Trois mécanismes le donnent, sans un octet livré au client.
+
+**1. Les fiches d'audit citent le numéro de ligne ET l'empreinte du commit.**
+Un audit est une **photographie**. Figée à un commit précis, une ligne est
+exacte **pour toujours** et vérifiable par n'importe qui :
+
+```
+FICHE — lvPanelAccord
+  app.js:6012–6118  @ commit 6ab57bf
+  vérifiable : git show 6ab57bf:pirates-tools/app.js | sed -n '6012,6118p'
+```
+
+C'est ta demande, prise au mot, et rendue **infalsifiable** : la commande
+ci-dessus affichera toujours exactement ce que j'ai lu, même dans six mois.
+
+**2. Les ancres pour la carte durable** (phase 5). Un repère nommé posé en
+commentaire (`// ══ ZONE : PAIEMENT ══`) ne se décale pas : il suit son code.
+Coût mesuré : ~150 ancres × ~40 octets ≈ **6 Ko bruts**, contre 120 000 pour la
+numérotation intégrale — **20 fois moins**, et ça reste vrai.
+
+**3. `docs/ANCRES.md` — le tableau « ancre → ligne actuelle », REGÉNÉRÉ par
+commande.** C'est le point qui te donne le confort que tu cherches : tu obtiens
+bien une liste de numéros de ligne à jour, mais elle est **produite par la
+machine à la demande**, pas écrite à la main et pas embarquée dans le site.
+Un contrôle CI échoue si le tableau n'est plus à jour.
+
+> **En une phrase** : ton idée est bonne, sa mise en œuvre doit être **à côté du
+> code, pas dedans**. Numéros exacts figés à un commit pour l'audit, ancres pour
+> la carte, tableau régénérable pour la lecture — et **0 octet** envoyé au client.
+
+---
+
 ## Les principes non négociables
 
 **P-A — Une documentation non vérifiée est un mensonge en préparation.**
@@ -129,6 +325,11 @@ produits.
 | **Ancre** | un repère nommé posé en commentaire dans le code (`// ══ ZONE : PAIEMENT ══`). Contrairement à un numéro de ligne, elle ne se décale pas quand on modifie le fichier. |
 | **Cliquet** | un contrôle qui autorise à faire mieux mais jamais pire (une fonction trop longue a le droit de rétrécir, jamais de regrossir). |
 | **Index composite** | un réglage à déclarer chez Firebase pour que certaines recherches fonctionnent. Sans lui, la recherche marche en test et **plante en vrai**. |
+| **Score de mutation** | la note d'un sabotage : défauts détectés / défauts introduits. « 6/6 » veut dire que les six pièges volontaires ont tous été vus. C'est le nom officiel de ce qu'on fait depuis des semaines. |
+| **Test de caractérisation** | un test qui fige ce que le code fait **aujourd'hui**, sans dire si c'est bien. Il sert de filet quand on déplace du code : si le résultat change, c'est qu'on a cassé quelque chose. |
+| **Décision remplacée** | quand un choix en annule un plus ancien, on **ne réécrit pas** l'ancien : on le marque « remplacée par #N ». On garde l'histoire, et on sait lequel fait foi. |
+| **Règle à périmètre** | une règle rangée dans `.claude/rules/` avec la liste des fichiers qu'elle concerne. Elle **se charge toute seule** quand j'ouvre un de ces fichiers, et reste invisible le reste du temps. |
+| **Hook** | une commande que l'outil exécute automatiquement à un moment fixe (avant un commit, après une modification). Contrairement à une consigne écrite, elle s'applique **quoi que je décide**. |
 
 ---
 
@@ -187,16 +388,16 @@ plein, soit à peu près une demi-journée d'échange soutenu.
 | Phase | Sessions estimées | Ce qui rend l'estimation fragile |
 |---|---|---|
 | 0 — Sauver les harnais | **1 à 2** | le nombre de harnais périmés à corriger est inconnu tant qu'on ne les a pas relancés |
-| 1 — Architecture documentaire | **1 à 2** | 1 499 lignes à trier ; découpage mécanique mais long |
+| 1 — Architecture documentaire | **2 à 3** *(relevé en v3)* | 1 499 lignes à trier, **plus** la mise en place de `.claude/rules/`, du registre des décisions et des 4 flux expliqués |
 | 2 — Invariants | **1** | plafonné à 15 invariants, donc borné par construction |
 | 3 — Graphe d'appels | **2 à 3** | le plus incertain : les appels indirects (`onclick`, délégation) peuvent doubler le travail |
 | 4 — Catalogue des harnais | **1** | généré, donc rapide — dépend de la phase 0 |
 | 5 — Sommaire et cartographie | **2** | l'épreuve à l'aveugle peut imposer une seconde passe |
 | 6 — Les portes | **1 à 2** | chaque porte exige son sabotage, ce qui double le temps par porte |
 | 7 — Audit ligne par ligne | **7 à 10** (1+ par lot) | le lot 7.2/7.3 (`app.js` cœur) peut déborder |
-| 8 — Synthèse et découpage | **1** | |
+| 8 — Synthèse et découpage | **2** *(relevé en v3)* | inclut désormais les tests de caractérisation des 11 routes |
 | 9 — Corrections | **variable** | dépend entièrement de ce que l'audit trouve — **non estimable avant la phase 8** |
-| **Total hors phase 9** | **17 à 24 sessions** | |
+| **Total hors phase 9** | **19 à 27 sessions** | |
 
 ⚠️ **Cette estimation est un ordre de grandeur, pas un engagement.** Si un lot
 dépasse le double de son estimation, la règle d'arrêt n°2 s'applique.
@@ -310,27 +511,51 @@ Tout le reste est un **outil**, et les outils suivent une règle différente :
 # PHASE 1 — ARCHITECTURE DOCUMENTAIRE
 
 ### Le problème exact
-`CLAUDE.md` = **1 499 lignes** de journal chronologique. Et un
-`CLAUDE_PIRATESTOOLS.md` **ne serait pas lu automatiquement** : seul `CLAUDE.md`
-l'est. Écrire des règles ailleurs sans aiguillage = écrire des règles mortes.
+`CLAUDE.md` = **1 499 lignes** de journal chronologique, alors que la
+recommandation officielle est **sous 200 lignes** (« au-delà, ça consomme du
+contexte et réduit l'adhérence aux consignes »). Et un `CLAUDE_PIRATESTOOLS.md`
+**ne serait pas lu automatiquement** : seul `CLAUDE.md` l'est. Écrire des règles
+ailleurs sans mécanisme de chargement = écrire des règles mortes.
 Preuve mesurée : `docs/` contient 17 fichiers, **11 ne sont cités nulle part**.
 
-### Structure cible
+### Structure cible — **révisée en v3** (voir R1, R2, R4, R9)
 
-| Fichier | Nature | Taille visée | Lu quand |
+| Fichier | Nature | Taille visée | Chargé comment |
 |---|---|---|---|
-| `CLAUDE.md` (racine) | **aiguillage** : quoi lire selon la tâche | ≤ 80 lignes | automatiquement, toujours |
-| `docs/REGLES-PIRATESTOOLS.md` | **règles impératives** du site | ≤ 300 lignes | dès qu'on touche au site |
-| `docs/INVARIANTS.md` | **vérités inviolables** (phase 2) | ≤ 120 lignes | avant toute modification |
-| `docs/JOURNAL.md` | **historique** : pourquoi on en est là | libre | seulement en cas de doute |
-| `docs/CARTOGRAPHIE.md` | **où est quoi** (phase 5) | libre | avant d'intervenir |
-| `docs/AVANCEMENT-FONDATIONS.md` | **où j'en suis** | ≤ 40 lignes | au démarrage de chaque session |
+| `CLAUDE.md` (racine) | **aiguillage** : quoi lire selon la tâche | ≤ 80 lignes | **automatiquement, toujours** |
+| `.claude/rules/argent.md` | règles serveur, prix, paiement | ≤ 120 lignes | **tout seul** quand j'ouvre `api/**` |
+| `.claude/rules/livraison.md` | règles de la chaîne livreur | ≤ 120 lignes | **tout seul** sur les zones concernées |
+| `.claude/rules/produits.md` | prix, posters, packs 3D | ≤ 120 lignes | **tout seul** sur `products.json`, `images/**` |
+| `docs/INVARIANTS.md` | vérités inviolables (phase 2) | ≤ 120 lignes | à la demande |
+| `docs/DECISIONS.md` | **décisions, avec statut ACTIVE / REMPLACÉE PAR #N** | libre | à la demande |
+| `docs/JOURNAL.md` | historique : comment on en est arrivé là | libre | en cas de doute |
+| `docs/FONCTIONNEMENT.md` | **les 4 flux critiques expliqués**, pour un humain | ≤ 200 lignes | quand l'user veut comprendre |
+| `docs/CARTOGRAPHIE.md` | où est quoi (phase 5) | libre | avant d'intervenir |
+| `docs/ANCRES.md` | ancre → ligne actuelle, **généré** | libre | à la demande |
+| `docs/AVANCEMENT-FONDATIONS.md` | où j'en suis | ≤ 40 lignes | au démarrage de session |
+
+⚠️ **Aucun `@import` dans `CLAUDE.md`.** Un fichier importé est chargé au
+lancement comme s'il était collé dedans : ça n'allège rien (R2). Les documents
+sont **nommés entre accents graves**, ce qui empêche justement l'import.
+
+⚠️ **Le découpage `.claude/rules/` est le vrai gain.** C'est la seule mécanique
+qui charge une règle **au moment où elle sert** — donc la seule qui rende
+l'aiguillage fiable au lieu de dépendre de ma discipline (R1).
 
 ### Règle de tri — appliquée sans exception
 - **Impératif au présent** (« le prix vient toujours du serveur ») → RÈGLES
+- **Choix tranché par l'user** (« pas de minification ») → **DECISIONS**, avec statut
 - **Récit au passé** (« le 26/07 on a découvert que… ») → JOURNAL
 - **Localisation** (« lvPanelPay est à app.js:6013 ») → CARTOGRAPHIE
 - **Vérité absolue et testable** → INVARIANTS
+- **Explication d'un flux de bout en bout** → FONCTIONNEMENT (4 flux, pas plus)
+
+### Étape préalable, gratuite
+Passer **`/doctor`** sur le `CLAUDE.md` actuel **avant** tout tri manuel : il
+propose des coupes en retirant ce que je peux déduire du code et en gardant les
+pièges et les raisons (R8). Ce qu'il propose est une **suggestion**, pas une
+décision : chaque coupe reste soumise à la règle « aucune suppression, que des
+déplacements ».
 
 ### Le sort des 17 documents existants — décidé, pas subi
 Chaque fichier de `docs/` reçoit **une** étiquette, écrite dans l'index :
@@ -362,14 +587,35 @@ Chaque fichier de `docs/` reçoit **une** étiquette, écrite dans l'index :
 - ⚠️ **Les acquis de méthode transférables** : `CLAUDE.md` contient des leçons
   qui ne concernent pas ce site (elles vaudraient pour n'importe quel projet).
   → Elles vont dans `docs/METHODE-TRAVAIL.md`, pas dans les règles du site.
+- ⚠️ **Les contradictions silencieuses** *(nouveau v3)* : deux consignes
+  opposées → j'en choisis une **au hasard** (R3/R4). Au moins **5 décisions
+  renversées** cohabitent aujourd'hui avec leur version d'origine. → Contrôle
+  CI : aucune décision de `docs/DECISIONS.md` ne peut être ACTIVE si une autre
+  la déclare REMPLACÉE. Une décision **n'est jamais réécrite**, elle est
+  **remplacée**, et le lien entre les deux est conservé.
+- ⚠️ **Un `paths:` trop large annule le gain** : une règle étiquetée `**/*.js`
+  se charge partout, donc revient à l'inclure dans `CLAUDE.md`. → Chaque règle
+  déclare le périmètre le plus étroit qui la rende utile, et on **mesure** ce
+  qui se charge réellement (`/context`) plutôt que de le supposer.
+- ⚠️ **La duplication de `CLAUDE.md`** : un second fichier a été créé par erreur
+  **deux fois**. La doc ajoute une raison de plus de l'interdire : un
+  `CLAUDE.md` de sous-dossier **ne survit pas à la compression du contexte**,
+  alors que celui de la racine est rechargé. Un doublon serait donc à la fois
+  contradictoire **et** intermittent — le pire des deux.
 
 ### Preuve de réussite
 - [ ] `CLAUDE.md` ≤ 80 lignes et ne contient **aucune** règle métier
 - [ ] `find . -name CLAUDE.md -not -path "*/node_modules/*" | wc -l` = **1**
+- [ ] Aucun `@import` dans `CLAUDE.md` (contrôle automatique)
+- [ ] `/context` confirme que les règles `paths:` **ne se chargent pas** sur une
+      session ordinaire, et **se chargent** dès que le fichier visé est ouvert —
+      vérifié, pas supposé
 - [ ] Chaque fichier de `docs/` est atteignable depuis `CLAUDE.md` — contrôle
       automatique qui échoue sur un orphelin, **prouvé faillible**
-- [ ] Contrôle automatique : aucune date ni verbe au passé dans le fichier de
+- [ ] Contrôle automatique : aucune date ni verbe au passé dans les fichiers de
       RÈGLES (heuristique, avec liste d'exceptions justifiées)
+- [ ] `docs/DECISIONS.md` : chaque renversement historique retrouvé porte son
+      statut, et **aucune paire contradictoire ne subsiste**
 - [ ] Épreuve : je réponds à « quelle est la règle sur les prix produits ? » en
       ouvrant **≤ 2 fichiers**
 
@@ -390,7 +636,7 @@ exécutables** partout où c'est possible (P-B).
 | On ne se fie jamais au retour d'une écriture : on relit | non (procédural) | prose + revue |
 | Une vérification qu'on ne peut pas faire échouer ne vérifie rien | non (procédural) | prose + sabotage obligatoire |
 | Aucun secret serveur côté client | oui | `p3-endpoints` partiel |
-| Toute requête `where` + `orderBy` sur 2 champs exige un index composite | oui (statique) | **à ajouter dans `check-firestore-queries.js`** (le fichier existe, la règle non) |
+| Toute requête `where` + `orderBy` sur 2 champs exige un index composite | oui (statique) — **et c'est la SEULE voie** : Google documente que l'émulateur ne suit pas les index et exécute toute requête valide (R7) | **à ajouter dans `check-firestore-queries.js`** (le fichier existe, la règle non) |
 | L'interface n'est jamais la sécurité : le serveur revérifie | partiellement | `p3-dispatch-live` |
 | Une classe CSS construite par concaténation n'est jamais « morte » | oui (statique) | **aucun — à créer** (piège de purge rencontré 2 fois) |
 
@@ -482,6 +728,11 @@ couvert ce qui ne l'est pas.
 - ⚠️ **Le harnais vert qui ne teste rien** : déjà rencontré (faux vert dû à un
   503 en amont, `plan12-serveur`). → Marquer les harnais dont la faillibilité a
   été **prouvée par sabotage**, signaler les autres comme **non éprouvés**.
+- ⚠️ **« Éprouvé » en oui/non ne mesure rien** *(nouveau v3, R5)* : notre
+  sabotage est du **mutation testing**, et cette pratique se mesure en **score
+  de mutation** (mutants tués / mutants introduits). Marquer « éprouvé » un
+  domaine avec 1 sabotage et un autre avec 12 les fait passer pour équivalents.
+  → Le catalogue affiche **le score par domaine**, pas une case cochée.
 - ⚠️ **L'intitulé qui ne dit rien** : une assertion nommée « test 4 » ne peut pas
   alimenter un catalogue. → Contrôle : tout intitulé d'assertion doit faire
   ≥ 3 mots. Les harnais fautifs sont renommés en phase 0.
@@ -508,6 +759,10 @@ couvert ce qui ne l'est pas.
 2. **`docs/CARTOGRAPHIE.md` refondue** (29,5 Ko existants à reprendre).
 3. **Ancres stables** dans le code (`// ══ ZONE : PAIEMENT ══`), **plus robustes
    qu'un numéro de ligne**, qui se décale à chaque modification.
+4. **`docs/ANCRES.md`** — le tableau *ancre → numéro de ligne actuel*,
+   **régénéré par commande**. C'est la réponse à la demande de numérotation :
+   on obtient bien une liste de numéros exacts, mais produite par la machine,
+   donc jamais périmée, et **pesant 0 octet dans le fichier livré au client**.
 
 ⚠️ **C'est la seule phase 0-6 qui touche au code** — et uniquement pour ajouter
 des commentaires. Aucun comportement modifié. La CI doit rester verte avant/après
@@ -539,6 +794,15 @@ sont courtes, mais elles ne sont pas gratuites.
 
 ### Objectif
 Rendre **impossible** — pas « déconseillé » — de refaire les erreurs déjà commises.
+
+### 🔴 CE QU'UNE PORTE N'EST PAS *(établi en v3, R3)*
+La documentation officielle est sans ambiguïté : un fichier de consignes est du
+**contexte**, pas de la configuration — **aucune garantie** de respect strict,
+et pour bloquer une action il faut un **hook** ou un contrôle exécuté.
+→ **Conséquence directe** : une règle écrite dans `CLAUDE.md`, si bien rédigée
+soit-elle, **n'est pas une porte**. C'est un rappel. Les seules vraies portes
+sont `scripts/ci.js` (bloquant) et les **hooks** (exécutés à un moment fixe du
+cycle, quoi que je décide). Toute la valeur de cette phase tient là-dedans.
 
 ### Les portes, par nature
 **Exécutables (priorité absolue)** — un contrôle CI qui refuse le passage.
@@ -613,6 +877,15 @@ parcours qui n'est pas encore ouvert au public.
 1. Lecture **exhaustive et séquentielle**, sans saut.
 2. Pour chaque bloc : **une fiche** — rôle, entrées/sorties, invariants qu'il
    doit respecter, pièges, couverture de test, défauts constatés.
+   **En-tête obligatoire, format figé** *(v3, proposition de l'user)* :
+   ```
+   FICHE — <nom du bloc>
+     <fichier>:<ligne début>–<ligne fin>  @ commit <empreinte>
+     vérifiable : git show <empreinte>:pirates-tools/<fichier> | sed -n '<d>,<f>p'
+   ```
+   L'empreinte du commit rend la référence **exacte pour toujours** : quelqu'un
+   peut afficher, dans six mois, exactement les lignes que j'ai lues. Sans elle,
+   les numéros mentent dès le commit suivant.
 3. Défauts **classés** : bloquant / réel / cosmétique / faux positif.
 4. **Aucune correction pendant l'audit** — sauf le cas critique ci-dessous.
 5. Cartographie et graphe **mis à jour au passage**.
@@ -670,6 +943,10 @@ rendement quasi nul.
 ### Preuve de réussite par lot
 - [ ] Nombre de lignes lues déclaré, cohérent avec le périmètre
 - [ ] Une fiche par bloc, aucune zone sans fiche
+- [ ] **Aucun trou de couverture** : les plages de lignes des fiches, mises
+      bout à bout, couvrent **la totalité** du périmètre du lot. Contrôle
+      automatique — c'est la seule façon de prouver qu'on n'a pas survolé
+- [ ] Chaque fiche porte son empreinte de commit et sa commande de vérification
 - [ ] Chaque défaut annoncé porte un scénario d'échec concret
 - [ ] Cartographie et graphe mis à jour
 - [ ] `docs/AVANCEMENT-FONDATIONS.md` à jour
@@ -687,8 +964,28 @@ rendement quasi nul.
 3. Mise à jour des règles et invariants avec ce que l'audit a appris.
 4. **Le carnet de la phase 9** : les défauts, triés par gravité, prêts à être
    priorisés par l'user.
+5. **`tests/golden/` — les tests de caractérisation** *(nouveau v3, R6)*.
+
+### 🔒 PRÉREQUIS ABSOLU AU DÉCOUPAGE — le test de caractérisation
+Nos harnais vérifient ce que le site **doit** faire. Pour sortir un module de
+`app.js` sans rien casser, il faut l'inverse : figer ce qu'il **fait
+aujourd'hui**, correct ou non. C'est le *test de caractérisation* (ou *golden
+master*) : **on ne juge pas, on épingle**.
+
+Concrètement : pour chacune des **11 routes**, on capture le rendu produit
+(structure de la page + styles calculés) **avant** toute extraction, et on exige
+qu'il soit **identique après**. L'outillage existe déjà (harnais de captures et
+comparaison de pixels des sessions précédentes) — il n'y a rien à inventer, juste
+à figer.
+
+⚠️ **Sans ce filet, le découpage est un pari.** Un module extrait peut très bien
+faire passer tous les harnais existants et casser un détail que personne ne
+testait — et c'est précisément ce genre de détail qui a produit l'écran noir,
+les textures blanches et la page vide dans l'histoire de ce site.
 
 ### Preuve de réussite
+- [ ] `tests/golden/` couvre les **11 routes**, et une modification volontaire
+      d'un rendu le fait **échouer** (prouvé faillible)
 - [ ] Chaque module proposé au découpage est une **grappe réelle** du graphe
 - [ ] Chaque étape de découpage est **réversible** et protégée par des harnais
       existants
@@ -779,6 +1076,11 @@ Pour chaque correctif :
   l'user — avec la seule exception du **défaut critique** (phase 7).
 - ❌ **Blocage du lancement commercial** : ce chantier est indépendant de la
   checklist de lancement et ne la retarde pas.
+- ❌ **Numéros de ligne inscrits dans le code** : écarté sur mesure
+  (**+45,3 Ko compressés**, plafond P8 crevé, numéros faux au premier commit,
+  différences git illisibles). **Le besoin est retenu** sous trois autres
+  formes : fiches d'audit avec empreinte de commit, ancres nommées,
+  `docs/ANCRES.md` régénérable. Voir la section dédiée.
 
 ---
 
@@ -804,4 +1106,22 @@ grep -oE "docs/[A-Za-z0-9._-]+\.md" CLAUDE.md | sort -u | wc -l
 # volume du code
 wc -l pirates-tools/app.js pirates-tools/styles.css pirates-tools/index.html
 find pirates-tools/api -name '*.js' | xargs wc -l | tail -1
+
+# coût réel d'une numérotation de chaque ligne (section « numérotation »)
+awk '{printf "/*%d*/%s\n", NR, $0}' app.js > /tmp/num.js
+echo "gzip actuel   : $(gzip -9 -c app.js  | wc -c)"   # 209 028 o = 204,1 Ko
+echo "gzip numéroté : $(gzip -9 -c /tmp/num.js | wc -c)" # 256 328 o = 250,3 Ko
 ```
+
+---
+
+## Annexe — sources extérieures consultées (v3, 28/07/2026)
+
+| # | Sujet | Ce qu'on en tire | Source |
+|---|---|---|---|
+| R1/R2/R3/R8 | Fichiers de mémoire, règles à périmètre, imports, `/doctor`, commentaires HTML, compression du contexte | l'aiguillage devient mécanique ; un import n'allège rien ; une consigne n'est pas une porte | [Claude Code — How Claude remembers your project](https://code.claude.com/docs/en/memory) |
+| R4 | Registre des décisions (ADR) : statut, `superseded`, ne jamais réécrire | `docs/DECISIONS.md` avec statuts | [adr.github.io](https://adr.github.io/) · [Martin Fowler — Architecture Decision Record](https://www.martinfowler.com/bliki/ArchitectureDecisionRecord.html) · [Microsoft Learn — Maintain an ADR](https://learn.microsoft.com/en-us/azure/well-architected/architect-role/architecture-decision-record) |
+| R5 | *Mutation testing* : mutant, « tuer le mutant », score de mutation | notre sabotage devient une **note**, pas une case cochée | [Wikipedia — Mutation testing](https://en.wikipedia.org/wiki/Mutation_testing) |
+| R6 | Tests de caractérisation / *golden master*, coutures, code hérité | filet obligatoire **avant** tout découpage de `app.js` | [Wikipedia — Characterization test](https://en.wikipedia.org/wiki/Characterization_test) · [Understand Legacy Code — key points of Feathers](https://understandlegacycode.com/blog/key-points-of-working-effectively-with-legacy-code/) |
+| R7 | Index composites Firestore ; l'émulateur ne les suit pas | l'invariant **doit** être un contrôle statique : aucun test ne le trouvera | [Firebase — Index types](https://firebase.google.com/docs/firestore/query-data/index-overview) · [Google Cloud — Use the Firestore emulator](https://docs.cloud.google.com/firestore/native/docs/emulator) |
+| R9 | Diátaxis : quatre besoins documentaires distincts | le quadrant « comprendre » manquait → `docs/FONCTIONNEMENT.md`, borné à 4 flux | [diataxis.fr](https://diataxis.fr/) |
