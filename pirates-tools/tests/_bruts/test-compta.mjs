@@ -1,0 +1,39 @@
+import pkg from '/opt/node22/lib/node_modules/playwright/index.js';
+const { chromium } = pkg;
+import http from 'http'; import fs from 'fs'; import path from 'path';
+const ROOT='/home/user/ish/pirates-tools';
+const MIME={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.webp':'image/webp','.svg':'image/svg+xml','.png':'image/png','.webmanifest':'application/manifest+json'};
+const srv=http.createServer((req,res)=>{let u=decodeURIComponent(req.url.split('?')[0]);if(u.startsWith('/api/')){res.writeHead(200,{'Content-Type':'application/json'});return res.end('{"ok":true,"overrides":{}}');}if(u==='/')u='/index.html';const fp=path.join(ROOT,u);if(!fp.startsWith(ROOT)||!fs.existsSync(fp)||fs.statSync(fp).isDirectory()){res.writeHead(404);return res.end('nf');}res.writeHead(200,{'Content-Type':MIME[path.extname(fp)]||'application/octet-stream'});fs.createReadStream(fp).pipe(res);});
+await new Promise(r=>srv.listen(0,r));const base=`http://127.0.0.1:${srv.address().port}`;
+const br=await chromium.launch();const ctx=await br.newContext({viewport:{width:430,height:900},permissions:['clipboard-read','clipboard-write']});
+const pg=await ctx.newPage();
+const errs=[];pg.on('pageerror',e=>errs.push(e.message));
+await pg.addInitScript(()=>{ window.PT_API_BASE=''; try{sessionStorage.setItem('pt_admin_secret','test')}catch(e){} });
+await pg.goto(`${base}/#/admin`,{waitUntil:'networkidle'});
+await pg.waitForTimeout(1200);
+let pass=0,fail=0;const ok=(c,m)=>{if(c)pass++;else{fail++;console.log(' ❌',m);}};
+const tab=pg.locator('.admin-tab[data-admin-tab="compta"]');
+ok(await tab.count()===1,'onglet Comptabilité présent');
+await tab.click(); await pg.waitForTimeout(400);
+const cards=await pg.locator('.compta-card').count();
+console.log('cartes compta:',cards);
+ok(cards>=6,'>=6 cartes (2 devis + 4 veille)');
+ok(await pg.locator('.compta-copy').count()>=2,'boutons Copier présents');
+// veille : toutes à VÉRIFIER au départ
+const todoBefore=await pg.locator('.compta-badge.is-todo').count();
+console.log('badges à-vérifier avant:',todoBefore);
+ok(todoBefore>=1,'au moins une veille à vérifier');
+// clique "C'est vérifié" sur la 1re
+await pg.locator('.compta-check').first().click(); await pg.waitForTimeout(300);
+const todoAfter=await pg.locator('.compta-badge.is-todo').count();
+console.log('badges à-vérifier après 1 clic:',todoAfter);
+ok(todoAfter===todoBefore-1,'un rappel passe à jour après clic');
+// copier
+await pg.locator('.compta-copy').first().click(); await pg.waitForTimeout(200);
+const clip=await pg.evaluate(()=>navigator.clipboard.readText().catch(()=>''));
+ok(clip.includes('Pointe-à-Pitre'),'le texte de devis est bien copié');
+console.log('erreurs JS:',errs.length?errs:'aucune');
+ok(errs.length===0,'aucune erreur JS');
+console.log(`\n${fail===0?'✅ ALL PASS':'❌ FAIL'} — ${pass} ok, ${fail} ko`);
+await pg.screenshot({path:'/tmp/claude-0/-home-user-ish/5fdd6ad4-f914-5559-9038-8318b9646f86/scratchpad/compta.png',fullPage:true});
+await br.close();srv.close();process.exit(fail?1:0);

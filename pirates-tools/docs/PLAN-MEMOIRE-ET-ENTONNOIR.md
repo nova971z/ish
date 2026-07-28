@@ -166,6 +166,24 @@ l'apprendrais après avoir tout déplacé.
 faible), et **on l'écrit** au lieu de le taire. Le reste du plan tient quand même.
 **Annulation** : `rm .claude/rules/_essai.md`. Coût nul.
 
+### ✅ FAIT — 28/07/2026. L'hypothèse est VÉRIFIÉE, l'architecture ne change pas.
+
+| # | Observation | Résultat |
+|---|---|---|
+| — | outil : **Claude Code 2.1.220** (les règles à périmètre exigent ≥ 2.1.198) | ✅ supporté |
+| A | règle créée en cours de session, aucun fichier visé ouvert | **rien ne se charge** ✅ |
+| C | ouverture de `api/_lib/http.js` — un fichier `api/` **non visé** | **rien ne se charge** ✅ |
+| B | ouverture de `api/_lib/postal.js` — le fichier **visé** | **la règle est apparue seule dans mon contexte** ✅ |
+
+La sentinelle `SENTINELLE-ENTONNOIR-7Q4X` est bien apparue à l'ouverture du
+fichier visé, et **uniquement** à ce moment-là. Le chargement conditionnel
+fonctionne exactement comme la documentation l'annonce.
+
+→ **Conséquence : l'architecture cible du plan est CONFIRMÉE, aucune
+modification nécessaire.** `.claude/rules/` avec `paths:` sera bien le mécanisme
+de l'aiguillage, et le repli déclaratif n'a pas à être activé.
+→ Le fichier d'essai a été **supprimé** immédiatement après l'observation.
+
 ---
 
 ## ÉTAPE 2 — Le filet : copier AVANT de couper

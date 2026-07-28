@@ -26,3 +26,10 @@ models/products/dcs391n.glb
 # le script inline #3 d'index.html, source unique). Conserve en git pour
 # memoire, jamais deploye (adresses dupliquees = derive garantie).
 crypto-config.js
+
+# tests/ et outils/ : harnais de vérification et fabricants de packs 3D.
+# Versionnés dans git (ils protègent la livraison, les paiements, la 2FA et
+# permettent de refaire un pack 3D), mais JAMAIS servis aux visiteurs : ils
+# n'ont rien à faire dans le déploiement.
+tests/
+outils/

@@ -1,0 +1,27 @@
+import pkg from '/opt/node22/lib/node_modules/playwright/index.js';
+const { chromium } = pkg;
+import http from 'http'; import fs from 'fs'; import path from 'path';
+const ROOT='/home/user/ish/pirates-tools';
+const MIME={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.svg':'image/svg+xml','.png':'image/png','.webp':'image/webp','.webmanifest':'application/manifest+json'};
+const srv=http.createServer((req,res)=>{let u=decodeURIComponent(req.url.split('?')[0]);if(u.startsWith('/api/')){res.writeHead(200,{'Content-Type':'application/json'});return res.end('{"ok":true}')}let f=u==='/'?'/index.html':u;const fp=path.join(ROOT,f);if(!fp.startsWith(ROOT)||!fs.existsSync(fp)||fs.statSync(fp).isDirectory()){res.writeHead(404);return res.end('nf')}res.writeHead(200,{'Content-Type':MIME[path.extname(fp)]||'application/octet-stream'});fs.createReadStream(fp).pipe(res)});
+await new Promise(r=>srv.listen(0,r));const base=`http://127.0.0.1:${srv.address().port}`;
+const br=await chromium.launch();const pg=await br.newPage({viewport:{width:430,height:1200}});
+const errs=[];pg.on('pageerror',e=>errs.push(e.message));
+await pg.addInitScript(()=>{window.PT_API_BASE=undefined;try{sessionStorage.setItem('pt_admin_secret','test')}catch(e){}});
+await pg.goto(`${base}/#/admin`,{waitUntil:'networkidle'});await pg.waitForTimeout(900);
+let pass=0,fail=0;const ok=(c,m)=>{if(c)pass++;else{fail++;console.log(' ❌',m)}};
+await pg.locator('.admin-tab[data-admin-tab="fisc"]').click();await pg.waitForTimeout(400);
+const t=await pg.locator('#adminFiscBody').textContent();
+ok(/À VÉRIFIER EN PRIORITÉ/.test(t),'bloc 3 alertes critiques');
+ok(/franchise en base/.test(t),'alerte TVA franchise');
+ok(/ZFANG/.test(t),'alerte avantages DOM ZFANG');
+ok(/10 ans/.test(t),'note garde factures 10 ans');
+ok(/Échéance/.test(t)&&/15 mars/.test(t),'echeances affichees');
+ok(await pg.locator('.fisc-done').count()>=6,'boutons Marquer fait');
+// toggle fait
+await pg.locator('.fisc-done').first().click();await pg.waitForTimeout(200);
+ok(await pg.locator('.fisc-card--done').count()>=1,'toggle fait -> carte marquee');
+ok(errs.length===0,'0 erreur JS');
+console.log('errs:',errs.length?errs:'aucune');
+console.log(`\n${fail===0?'✅ ALL PASS':'❌ FAIL'} — ${pass} ok, ${fail} ko`);
+await br.close();srv.close();process.exit(fail?1:0);
