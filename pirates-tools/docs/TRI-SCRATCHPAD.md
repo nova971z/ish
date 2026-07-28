@@ -142,31 +142,42 @@ invariants de données sont couverts par `check-products-json` (dans la CI),
 **mais le rendu visuel des specs n'est plus couvert par personne.** À reprendre
 dans un harnais neuf, indépendant de tout produit nommé.
 
-### ⏳ 13 harnais NON DIAGNOSTIQUÉS — sauvés, remis dans `_bruts/`
-Je ne les ai **pas** triés : je manquais de marge pour le faire correctement, et
-je préfère le dire que le prétendre. Ils sont **sauvés** (le risque irréversible
-reste levé) mais retirés de `tests/`, **pour une raison de fond** : une suite qui
-reste rouge en permanence finit par être ignorée, et cesse alors de protéger
-quoi que ce soit.
+### 🔧 4 harnais de plus RÉCUPÉRÉS (28/07, 2ᵉ passe)
 
-- `audit-buttons.js`
-- `carte2b.mjs`
-- `pipeline-emulator.js`
-- `regression.mjs`
-- `test-acc-ui.mjs`
-- `test-grid.mjs`
-- `test-variant-live.mjs`
-- `test-variant.mjs`
-- `verify-beacon.js`
-- `verify-consent.js`
-- `verify-cron.js`
-- `verify-dashboard.js`
-- `verify-globe.js`
+| Harnais | Cause **exacte** | Décision |
+|---|---|---|
+| `carte2b.mjs` | `const r` déclaré **dans** la boucle, utilisé **après** → `ReferenceError`. **Ce harnais n'avait jamais atteint une seule de ses assertions depuis son écriture.** | portée corrigée → **13/13** |
+| `test-acc-ui.mjs` | appelait `synthesize(payments, cfg)` alors que la signature est `synthesize(payments, charges, cfg)` — le paramètre `charges` a été ajouté avec les charges saisies (art. 238 bis CGI, 25/07). Le plantage était **dans le code serveur**, mais la faute était dans l'appel. | appel corrigé → **8/8** |
+| `audit-buttons.js` | 2 attentes périmées : « exactement 2 meuleuses » (catalogue passé de ~40 à 476) et « **onglet crypto actif** » alors que le canal crypto est **désactivé par décision user du 17/07** (`PT_CRYPTO_ENABLED = false`). | la 1ʳᵉ teste désormais le **comportement** du filtre (aucun produit nommé), la 2ᵉ a été **retournée** : elle protège la décision → **tout propre** |
+| `pipeline-emulator.js` | exige l'**émulateur Firestore**, absent. Sans lui, l'Admin SDK visait la vraie base et rendait un mur d'`UNAUTHENTICATED`. | ⏭ **prérequis déclaré** : sortie en code 2, le lanceur affiche « IGNORÉ » et rappelle que *non exécuté n'est PAS vert* |
 
-**Prochaine étape** : les reprendre un par un, chacun recevant l'une des trois
-issues — porté, corrigé, ou supprimé avec motif.
+### 🔐 UNE CLÉ PRIVÉE RETIRÉE DU CHEMIN DE GIT
+`pipeline-emulator.js` lisait un `fake_sa.json` **contenant une clé privée PEM**.
+Même factice, elle n'entre pas dans le dépôt : c'est ce que `tests/README.md`
+interdit, tout scanner de secrets la signalerait, et un lecteur qui la trouve
+dans l'historique n'a aucun moyen de savoir qu'elle est fausse.
+→ `tests/_fauxcompte.cjs` la **génère à l'exécution** (RSA 2048, projet
+`demo-pt` — jamais `pirates-tools`). Rien de secret dans git, aucun fichier à
+perdre, et une clé neuve à chaque lancement.
 
----
+### ⏳ 9 harnais NON DIAGNOSTIQUÉS — symptôme mesuré, cause NON établie
+Je les ai **lancés** et j'ai relevé leur symptôme exact. Je n'ai **pas** établi
+la cause : je préfère l'écrire que le prétendre. Ils restent dans `_bruts/`.
+
+| Harnais | Symptôme mesuré | Piste (à confirmer, **pas une conclusion**) |
+|---|---|---|
+| `regression.mjs` | 8/9 — « PDF simple : pas de switch » | une seule assertion, la facture PDF |
+| `test-grid.mjs` | « lot initial ≤ 35 (rendu progressif), pas 185 » | le rendu progressif du catalogue a changé |
+| `test-variant.mjs` | 13/15 | 2 assertions sur les variantes coffret/nue |
+| `test-variant-live.mjs` | **sort vert avec 1 assertion sur 6** | ⚠️ **faux vert probable** : il s'arrête en route sans le dire. Le plus suspect des neuf |
+| `verify-beacon.js` | `view_item` et `time_on_item` non émis | mesure d'audience — à vérifier : régression réelle ou stub périmé ? |
+| `verify-consent.js` | le texte du bandeau ne correspond plus | le texte **a été réécrit par décision user (v321)** — probablement à retourner |
+| `verify-cron.js` | sujet, pièce jointe JSON du rapport mensuel | |
+| `verify-dashboard.js` | 15/16 — « géo présente (FR/GP/MQ) » | |
+| `verify-globe.js` | 12/14 — liste par pays absente | |
+
+⚠️ **`verify-beacon` mérite d'être traité en premier** : si la mesure d'audience
+n'émet réellement plus rien, c'est une régression du site, pas un test périmé.
 
 ## 🚪 Les portes posées
 | Porte | Ce qu'elle refuse | Éprouvée ? |

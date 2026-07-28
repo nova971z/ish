@@ -111,8 +111,24 @@ const sr=await page.evaluate(()=>document.querySelectorAll('#list .product-card'
 ok(sr>0&&sr<26,'recherche «makita» filtre ('+sr+')');
 await page.fill('#q','');await page.waitForTimeout(500);
 // Select catégorie
-await page.selectOption('#tag','Meuleuses');await page.waitForTimeout(400);
-ok(await page.evaluate(()=>document.querySelectorAll('#list .product-card').length)===2,'select catégorie Meuleuses = 2');
+// ⚠️ Ancrage sur la DONNÉE corrigé le 28/07 : ce test exigeait « exactement 2
+// meuleuses ». Le catalogue est passé de ~40 à 476 produits — l'assertion
+// échouait donc en affirmant qu'un choix de l'user était un défaut.
+// On teste désormais le COMPORTEMENT du filtre, qui lui ne dépend d'aucun
+// produit nommé : il filtre, il ne vide pas, et tout ce qu'il rend appartient
+// bien à la catégorie demandée.
+{
+  // On repart d'un état NON filtré : un test précédent a pu laisser un filtre,
+  // et mesurer « avant » sur une liste déjà réduite ne veut rien dire.
+  await page.selectOption('#tag',''); await page.waitForTimeout(400);
+  const avant = await page.evaluate(()=>document.querySelectorAll('#list .product-card').length);
+  await page.selectOption('#tag','Meuleuses'); await page.waitForTimeout(400);
+  const apres = await page.evaluate(()=>document.querySelectorAll('#list .product-card').length);
+  const cat = await page.evaluate(()=>[...document.querySelectorAll('#list .product-card')]
+    .every(c=>/meuleuse/i.test(c.textContent||'')));
+  ok(apres>0 && apres<avant, 'le filtre catégorie réduit la liste sans la vider — '+avant+' → '+apres);
+  ok(cat, 'tout ce qui reste appartient bien à la catégorie demandée');
+}
 await page.selectOption('#tag','');
 // Carte produit → PDP
 await page.evaluate(()=>document.querySelector('#list .product-card').click());await page.waitForTimeout(900);
@@ -139,7 +155,16 @@ await page.evaluate(()=>document.getElementById('devisPay').click());await page.
 ok(await page.evaluate(()=>!document.getElementById('payModal').hidden),'devis Payer → modale ouverte');
 // Onglets modale
 await page.evaluate(()=>document.querySelector('[data-pay-tab="crypto"]').click());await page.waitForTimeout(300);
-ok(await page.evaluate(()=>document.querySelector('[data-pay-pane="crypto"]').className.indexOf('is-active')!==-1||!document.querySelector('[data-pay-pane="crypto"]').hidden),'onglet crypto actif');
+// ⚖️ DÉCISION USER DU 17/07/2026 : le canal crypto est DÉSACTIVÉ
+// (PT_CRYPTO_ENABLED = false, app.js). Le flux était déclaratif, donc non
+// vérifiable côté serveur — risque de fraude. Ce harnais testait que l'onglet
+// s'active : il testait donc l'inverse de la décision. L'assertion est
+// RETOURNÉE — elle protège maintenant la décision.
+ok(await page.evaluate(()=>{
+     const p=document.querySelector('[data-pay-pane="crypto"]');
+     const o=document.querySelector('[data-pay-tab="crypto"]');
+     return (!p || p.hidden || p.offsetParent===null) && (!o || o.hidden || o.offsetParent===null);
+   }),'le canal crypto reste INACCESSIBLE (décision user du 17/07)');
 await page.evaluate(()=>document.querySelector('[data-pay-tab="card"]').click());await page.waitForTimeout(200);
 await page.keyboard.press('Escape');await page.waitForTimeout(400);
 ok(await page.evaluate(()=>document.getElementById('payModal').hidden),'Escape ferme la modale');

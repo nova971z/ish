@@ -6,10 +6,25 @@ const fs = require('fs');
 const path = require('path');
 const ROOT = RACINE;
 
-process.env.FIREBASE_SERVICE_ACCOUNT = fs.readFileSync(
-  join(sortie('captures'), 'fake_sa.json'), 'utf8');
+// ⛔ PAS de clé privée versionnée : on la génère à l'exécution (_fauxcompte.cjs).
+// Projet « demo-pt », jamais « pirates-tools » : un harnais ne doit pas pouvoir
+// toucher la vraie base, même par accident.
+process.env.FIREBASE_SERVICE_ACCOUNT = require('./_fauxcompte.cjs').fauxCompteDeService();
 process.env.ADMIN_SECRET = 'test-secret';
 // FIRESTORE_EMULATOR_HOST est posé par `firebase emulators:exec`.
+/* ⛔ PRÉREQUIS EXTERNE — ce harnais parle au VRAI code serveur contre un
+   Firestore ÉMULÉ. Sans l'émulateur, l'Admin SDK tente d'atteindre la vraie
+   base et rend un mur d'« UNAUTHENTICATED » : illisible, et surtout trompeur.
+   On sort donc avec le code 2 (« prérequis absent »), distinct du code 1
+   (« le test a échoué »). Le lanceur affiche « ignoré » — jamais « vert ».
+   Un test qu'on ne peut pas exécuter doit le DIRE. */
+if (!process.env.FIRESTORE_EMULATOR_HOST) {
+  console.log('⏭  PRÉREQUIS ABSENT — l\'émulateur Firestore ne tourne pas.');
+  console.log('   Pour lancer ce harnais :');
+  console.log('     npx firebase emulators:exec --only firestore \\');
+  console.log('       "node tests/pipeline-emulator.js"');
+  process.exit(2);
+}
 console.log('FIRESTORE_EMULATOR_HOST =', process.env.FIRESTORE_EMULATOR_HOST);
 
 function mockRes() {

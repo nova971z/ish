@@ -14,7 +14,7 @@ function body(req){return new Promise(r=>{let d='';req.on('data',c=>d+=c);req.on
 const srv=http.createServer(async(req,res)=>{const url=new URL(req.url,'http://x');const u=decodeURIComponent(url.pathname);const t=url.searchParams.get('type');
  if(u==='/api/admin'){res.writeHead(200,{'Content-Type':'application/json'});
    if(req.method==='GET'&&t==='pricing-config')return res.end(JSON.stringify({ok:true,config:DEF}));
-   if(req.method==='GET'&&t==='accounting')return res.end(JSON.stringify({ok:true,accounting:acc.synthesize(PAYS,DEF)}));
+   if(req.method==='GET'&&t==='accounting')return res.end(JSON.stringify({ok:true,accounting:acc.synthesize(PAYS,[],DEF)}));
    await body(req);return res.end(JSON.stringify({ok:true,overrides:{},config:DEF}));}
  if(u.startsWith('/api/')){res.writeHead(200,{'Content-Type':'application/json'});return res.end('{"ok":true}')}
  let f=u==='/'?'/index.html':u;const fp=path.join(ROOT,f);if(!fp.startsWith(ROOT)||!fs.existsSync(fp)||fs.statSync(fp).isDirectory()){res.writeHead(404);return res.end('nf')}res.writeHead(200,{'Content-Type':MIME[path.extname(fp)]||'application/octet-stream'});fs.createReadStream(fp).pipe(res)});

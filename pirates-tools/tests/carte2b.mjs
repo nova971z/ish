@@ -26,9 +26,15 @@ let pass=0,fail=0;
 const T=(n,ok,x='')=>{ok?pass++:fail++;console.log((ok?'✅':'❌')+' '+n+(x?' — '+x:''));};
 
 // On construit la carte dans un hôte de la même classe que la vraie.
+// ⚠️ DÉFAUT D'ORIGINE, corrigé le 28/07 : `r` était déclaré DANS la boucle et
+// utilisé APRÈS elle → « ReferenceError: r is not defined ». Ce harnais n'avait
+// donc JAMAIS atteint une seule de ses assertions depuis son écriture.
+// Déclaré ici, il conserve le rendu de la DERNIÈRE taille de police essayée —
+// ce que l'auteur voulait manifestement mesurer.
+let r;
 for (const FS of [5,4.5,4.2,4,3.8,3.6,3.4]) {
 await page.evaluate((f)=>{window.__fs=f;const o=document.getElementById('__mapTest');if(o)o.remove();},FS);
-const r = await page.evaluate(() => {
+r = await page.evaluate(() => {
   const NS='http://www.w3.org/2000/svg';
   const src=document.querySelector('#regIslands .isl[data-isl="971"] svg');
   const Z={sa:[52.56,44.44],upk:1.0209,rad:[10,22,34,46],viewBox:'3 7.7 94 84.6'};

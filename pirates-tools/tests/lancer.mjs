@@ -72,10 +72,16 @@ const res = [];
 for (const f of liste) {
   const r = await lancer(f);
   res.push(r);
-  const etat = r.code === 0 ? '✅' : '❌';
+  // Code 2 = PRÉREQUIS ABSENT (ex. l'émulateur Firestore ne tourne pas).
+  // Distinct de l'échec : un test non exécuté n'est ni vert ni rouge, il est
+  // IGNORÉ — et ça doit se voir, sinon on croit couvert ce qui ne l'est pas.
+  const etat = r.code === 0 ? '✅' : (r.code === 2 ? '⏭ ' : '❌');
   console.log('  ' + etat + ' ' + f.replace(/\.(mjs|js)$/, '').padEnd(22)
     + String(r.ok + '/' + (r.ok + r.ko)).padStart(9) + '   ' + (r.ms / 1000).toFixed(1) + ' s');
-  if (r.code !== 0) {
+  if (r.code === 2) {
+    const q = r.sortie.split('\n').filter((l) => l.trim().startsWith('⏭') || /^\s{3}/.test(l));
+    q.slice(0, 4).forEach((l) => console.log('        ' + l.trim()));
+  } else if (r.code !== 0) {
     const lignes = r.sortie.split('\n').filter((l) => l.startsWith('❌') || l.startsWith('⛔'));
     lignes.slice(0, 6).forEach((l) => console.log('        ' + l));
     if (lignes.length > 6) console.log('        … et ' + (lignes.length - 6) + ' autre(s)');
@@ -86,12 +92,19 @@ for (const f of liste) {
 
 const tot = res.reduce((s, r) => s + r.ok + r.ko, 0);
 const bons = res.reduce((s, r) => s + r.ok, 0);
-const rouges = res.filter((r) => r.code !== 0);
+const rouges = res.filter((r) => r.code !== 0 && r.code !== 2);
+const ignores = res.filter((r) => r.code === 2);
 const duree = res.reduce((s, r) => s + r.ms, 0) / 1000;
 
 console.log('\n' + '─'.repeat(70));
-console.log('  ' + bons + '/' + tot + ' assertions · ' + (res.length - rouges.length) + '/' + res.length
+console.log('  ' + bons + '/' + tot + ' assertions · '
+  + (res.length - rouges.length - ignores.length) + '/' + (res.length - ignores.length)
   + ' harnais verts · ' + duree.toFixed(1) + ' s');
+if (ignores.length) {
+  console.log('  ⏭  ' + ignores.length + ' IGNORÉ(S), prérequis absent : '
+    + ignores.map((r) => r.f.replace(/\.(mjs|js)$/, '')).join(' · '));
+  console.log('     → non exécuté n\'est PAS vert. Ces parcours ne sont pas couverts.');
+}
 if (rouges.length) console.log('  ❌ à reprendre : ' + rouges.map((r) => r.f.replace(/\.(mjs|js)$/, '')).join(' · '));
 else console.log('  ✅ tout est vert');
 console.log('─'.repeat(70));
