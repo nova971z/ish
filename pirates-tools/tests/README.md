@@ -11,7 +11,14 @@ C'était le seul risque du projet à la fois **immédiat et irréversible**.
 
 ## État actuel — deux étages, volontairement
 
-### `tests/_bruts/` — le sauvetage
+### ✅ `tests/_bruts/` — SUPPRIMÉ LE 28/07/2026, le tri est TERMINÉ
+Ce dossier a contenu la copie verbatim des 60 harnais sauvés du scratchpad. Il
+devait finir vide : **c'est fait**. Les 60 ont tous reçu une issue —
+55 portés et verts, 1 avec prérequis déclaré, 5 supprimés avec motif écrit
+(`tests/_perimes/`). Le détail, décision par décision, est dans
+`docs/TRI-SCRATCHPAD.md`.
+
+<details><summary>Ce que ce dossier était</summary>
 Copie **VERBATIM** des 60 harnais, telle quelle. Ces fichiers :
 - ⚠️ contiennent des **chemins absolus** (`/home/user/ish/pirates-tools`,
   `/opt/node22/lib/node_modules/playwright`) → ils ne tournent **que** dans
@@ -21,7 +28,9 @@ Copie **VERBATIM** des 60 harnais, telle quelle. Ces fichiers :
   **Un test faux est pire qu'un test absent** ;
 - ⚠️ dupliquent chacun ~20 lignes de serveur HTTP statique.
 
-**Ils sont là pour ne plus pouvoir être perdus, pas pour être lancés en l'état.**
+**Ils étaient là pour ne plus pouvoir être perdus, pas pour être lancés en
+l'état.**
+</details>
 
 ### `tests/` (racine) — les harnais portés
 Au fur et à mesure du tri, chaque harnais est :
@@ -29,7 +38,7 @@ Au fur et à mesure du tri, chaque harnais est :
 2. rendu **portable** (chemins relatifs au dépôt, socle partagé) ;
 3. déplacé de `_bruts/` vers ici.
 
-`_bruts/` doit finir vide. Tant qu'il ne l'est pas, le tri n'est pas terminé.
+✅ `_bruts/` est vide et supprimé : le tri est terminé.
 
 ## Règles
 - ❌ **Jamais de `node_modules` ici.** Le code des outils, jamais leurs

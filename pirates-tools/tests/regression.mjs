@@ -27,7 +27,25 @@ await pg.locator('#pdpVariant [data-variant="coffret"]').click();await pg.waitFo
 ok((await pg.locator('#pdpPrice .pdp-price__ttc').textContent()).trim()!==pSolo,'PDF : bascule change le prix');
 // PDF produit simple (pas de switch)
 await pg.goto(`${base}/#/produit/makita-dtw300z`,{waitUntil:'networkidle'}).catch(()=>{});await pg.waitForTimeout(700);
-ok(!(await pg.locator('#pdpVariant').isVisible().catch(()=>false)),'PDF simple : pas de switch');
+/* ⚠️ SPEC RENVERSÉE — corrigé le 28/07/2026.
+   Ce test exigeait qu'un produit SANS variante n'ait PAS de sélecteur. C'était
+   vrai à l'époque. Depuis, l'option coffret a été étendue aux produits
+   « standalone » (app.js:2107) : « Avec coffret » = prix de base + supplément
+   d'envoi (+15/25 € La Poste), le prix de BASE restant intact.
+   VÉRIFIÉ AVANT DE CONCLURE : makita-dtw300zj n'existe pas au catalogue — le
+   second bouton ne vend donc pas un produit fantôme, il ajoute un supplément
+   au MÊME produit. Ce n'est pas un défaut, c'est une fonctionnalité.
+   L'assertion est retournée : elle protège désormais ce comportement, et
+   surtout le fait que le supplément soit RÉEL (sinon les deux boutons
+   afficheraient le même prix, ce qui serait trompeur). */
+{
+  const v = pg.locator('#pdpVariant');
+  ok(await v.isVisible().catch(()=>false), 'produit standalone : le choix coffret est proposé');
+  const txt = ((await v.textContent().catch(()=>'')) || '').replace(/\s+/g,' ');
+  ok(/Sans coffret/.test(txt) && /Avec coffret/.test(txt), 'les deux options sont nommées — ' + txt.slice(0,50));
+  const prix = (txt.match(/(\d+[.,]\d{2})/g) || []).map(x=>parseFloat(x.replace(',','.')));
+  ok(prix.length>=2 && prix[1]>prix[0], 'le supplément coffret est RÉEL (sinon les 2 boutons mentiraient) — ' + prix.join(' / '));
+}
 // Admin compta (avec secret)
 await pg.evaluate(()=>{try{sessionStorage.setItem('pt_admin_secret','test')}catch(e){}});
 await pg.goto(`${base}/#/admin`,{waitUntil:'networkidle'});await pg.waitForTimeout(800);

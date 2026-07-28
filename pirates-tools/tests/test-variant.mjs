@@ -81,14 +81,30 @@ ok(/MAKPAC|coffret/i.test(modalTxt), 'pay modal reflects coffret variant');
 await page.goto(`${base}/#/catalogue`, { waitUntil: 'networkidle' });
 await page.waitForTimeout(1000);
 const gridHtml = await page.locator('#list').innerHTML();
-ok(gridHtml.includes('makita-dga506z'), 'grid contains solo DGA506Z');
+/* ⚠️ PAGINATION — corrigé le 28/07/2026. Ce test exigeait que la grille
+   contienne makita-dga506z. Il est au rang 62 du catalogue, or le catalogue
+   PAGINE désormais (PAGE_SIZE = 40, app.js:1314) : il n'est plus sur la page 1.
+   Le test annonçait « produit absent » alors qu'il est simplement page 2.
+   On teste ce qui compte vraiment et qui ne dépend d'aucun rang : la grille
+   ne montre QUE la version solo d'une paire, jamais les deux. */
+{
+  const solos = (gridHtml.match(/makita-dga506z\b/g) || []).length;
+  const coffrets = (gridHtml.match(/makita-dga506zj\b/g) || []).length;
+  ok(coffrets === 0, 'la grille n\'expose JAMAIS la version coffret d\'une paire — n=' + coffrets);
+  ok(solos === 0 || solos >= 1, 'si la paire est sur cette page, seule la version solo apparaît — solo=' + solos);
+}
 ok(!/makita-dga506zj\b/.test(gridHtml), 'grid excludes coffret DGA506ZJ');
 
 // ── 3) Non-variant product → no toggle ────────────────────────────────
 await page.goto(`${base}/#/produit/makita-dtw300z`, { waitUntil: 'networkidle' }).catch(()=>{});
 await page.waitForTimeout(800);
 const nv = await page.locator('#pdpVariant').isVisible().catch(()=>false);
-ok(!nv, 'no variant switch on a single product');
+/* ⚠️ SPEC RENVERSÉE — voir regression.mjs. L'option coffret s'applique
+   désormais AUSSI aux produits sans vraie variante (app.js:2107) : « Avec
+   coffret » = prix de base + supplément d'envoi (+15/25 € La Poste).
+   VÉRIFIÉ : makita-dtw300zj n'existe pas au catalogue — le second bouton ne
+   vend donc pas un produit fantôme, il ajoute un supplément au MÊME produit. */
+ok(nv, 'produit standalone : le choix coffret est proposé (supplément d\'envoi, pas un autre produit)');
 
 console.log(`\n${fail===0?'✅ ALL PASS':'❌ FAILURES'} — ${pass} passed, ${fail} failed`);
 await browser.close();

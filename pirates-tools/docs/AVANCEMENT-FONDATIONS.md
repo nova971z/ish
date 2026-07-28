@@ -13,7 +13,7 @@ Dernière mise à jour : **28/07/2026**
 
 | Phase | État | Où ça en est |
 |---|---|---|
-| **0 — Sauver les harnais** | 🟢 **58/60 tranchés** | **52 harnais verts (977/977)** + 1 ignoré (prérequis déclaré), 5 supprimés avec motif, **2 non diagnostiqués**. Détail : `docs/TRI-SCRATCHPAD.md` |
+| **0 — Sauver les harnais** | ✅ **TERMINÉE — 60/60 tranchés** | **55 harnais verts (1 012/1 012)** + 1 avec prérequis déclaré + 5 supprimés avec motif. `tests/_bruts/` est **vide et supprimé**. Couverture perdue **recréée** (`tests/pdp-specs.mjs`). Détail : `docs/TRI-SCRATCHPAD.md` |
 | 1 — Architecture documentaire | ⬜ à faire | remplacée par le plan mémoire ci-dessous |
 | 2 — Invariants | ⬜ à faire | |
 | 3 — Graphe d'appels | ⬜ à faire | doit libérer ≥ 2 Ko sur `app.js` avant la phase 5 |
@@ -45,21 +45,13 @@ Dernière mise à jour : **28/07/2026**
 
 ## ▶️ REPRENDRE ICI
 
-**Prochain geste** : les **2 derniers** harnais de `tests/_bruts/`.
+**Prochain geste** : le tri des **~690 entrées de scratchpad non
+catégorisées**. Le plan de phase 0 exigeait que *chaque* fichier reçoive une
+catégorie ; seuls les 60 harnais l'ont reçue.
 
-| Harnais | Symptôme mesuré |
-|---|---|
-| `regression.mjs` | 8/9 — « PDF simple : pas de switch » |
-| `test-variant.mjs` | 13/15 — variantes coffret/nue |
-
-**Puis** : recréer un harnais pour le **rendu des caractéristiques sur la fiche
-produit** — couverture perdue avec les 5 harnais supprimés. ⚠️ **Sans nommer
-aucun produit** : c'est la leçon de `verify-beacon` et de `audit-buttons`.
-
-**Puis** : le tri des ~690 entrées de scratchpad non catégorisées.
-
-**Enfin** : `CLAUDE.md` (plan mémoire, étape 2 — la copie verbatim avant toute
-coupe, puis les 55 règles enfouies).
+**Puis** : `CLAUDE.md` — plan mémoire, étape 2. La copie verbatim dans
+`docs/JOURNAL.md` **avant toute coupe**, puis l'extraction des **55 règles
+enfouies**.
 
 ## ✅ LES 3 DÉCISIONS EN ATTENTE ONT ÉTÉ TRANCHÉES (28/07/2026)
 Registre : **`docs/DECISIONS.md`**
