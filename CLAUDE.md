@@ -1348,3 +1348,49 @@ moi-même ? ». **Oui, et il avait raison sur les deux points.**
 - ⚠️ **PIÈGE D'ÉCRITURE** : un 2e `pirates-tools/CLAUDE.md` avait été créé par
   erreur (mauvais répertoire courant lors d'un `cat >>`). Rapatrié ici et
   supprimé — **la mémoire du projet est UN SEUL fichier, à la racine**.
+
+## ✅ IDENTITY PLATFORM + TOTP ACTIVÉS (28/07/2026) — infrastructure ACQUISE
+Décision user : **e-mail + Google Authenticator, PAS de SMS** (SMS abandonné).
+### État GRAVÉ de la console (vérifié par lecture, pas supposé)
+- Projet Firebase **`pirates-tools`** (n° 573379176641) — ⚠️ l'user a DEUX autres
+  projets nommés « Pirates-tools » (`gen-lang-client-…`) créés par des outils
+  Google : ils n'ont RIEN à voir. Le bon ID est exactement `pirates-tools`.
+- **Firebase Authentication with Identity Platform : ACTIVÉ** (plan **Spark**,
+  0 €). ⚠️ Sur Spark, le plafond est **3 000 utilisateurs actifs par JOUR**
+  (et non 50 000/mois — ça, c'est Blaze). Décision user : « 3 000 c'est déjà
+  pas mal pour un début, je passerai au pack supérieur après quelques ventes ».
+- **MFA TOTP : ACTIVÉ**, SMS laissé désactivé :
+  `mfa.state = ENABLED` ET `providerConfigs[0].totpProviderConfig.state = ENABLED`
+  (adjacentIntervals 5 ≈ ±2 min 30 de dérive d'horloge tolérée).
+### ⚠️ PIÈGES DE CETTE ACTIVATION — à ne pas réapprendre
+1. **Le bouton d'upgrade Identity Platform n'est PAS dans Authentication →
+   Paramètres** mais dans **Méthode de connexion → Options avancées**, dans
+   l'encart bleu du bloc « MFA par SMS » : « Mettre à niveau pour activer ».
+   Ne PAS confondre avec « Mettre à niveau » en bas à gauche (= plan Blaze,
+   facturation) ni avec « Activer » du bandeau orange (= connexion Google).
+2. **Le TOTP n'existe DANS AUCUNE interface** — ni Firebase, ni Cloud Console
+   (la page Identity Platform → MFA ne propose que le SMS). Il s'active
+   UNIQUEMENT par l'API REST / Admin SDK. Fait via **Cloud Shell** (icône `>_`,
+   accessible depuis l'iPad) après `gcloud config set project pirates-tools`.
+3. 🐛 **MA COMMANDE ÉTAIT INCOMPLÈTE au 1er essai** : j'avais posé
+   `providerConfigs` sans `mfa.state`. Résultat : TOTP « ENABLED » MAIS MFA
+   générale « DISABLED » — une serrure sans porte. **Il y a DEUX états à
+   allumer.** Sans la vérification par LECTURE, j'aurais conclu à tort que
+   c'était fait : l'user m'avait proposé de répondre « oui/non », c'est le
+   fait qu'il ait recopié le bloc qui a révélé le défaut.
+   → RÈGLE CONFIRMÉE : on ne se fie JAMAIS au retour d'une écriture, on relit.
+4. Commande de vérification (lecture seule, n'affiche QUE le bloc mfa, aucun
+   secret) — à réutiliser :
+   `curl -s ".../admin/v2/projects/pirates-tools/config" -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "X-Goog-User-Project: pirates-tools" | python3 -c "import sys,json; print(json.dumps(json.load(sys.stdin).get('mfa',{}), indent=2))"`
+### 🔒 SÉCURITÉ DE L'ÉCHANGE (règle rappelée à l'user, qui a eu le bon réflexe)
+Ne JAMAIS lui faire coller une sortie brute de config complète : filtrer côté
+commande pour n'afficher que ce qui est nécessaire. Un état/statut se partage,
+une suite de caractères aléatoires (`sk_`, `AIza`, `ya29.`, `private_key`) non.
+### ⏭️ RESTE À CODER (SDK Firebase 10.13.2 — TOTP disponible)
+`firebase-init.js` expose déjà `EmailAuthProvider` + `reauthenticateWithCredential`
+(nécessaires : Firebase exige une connexion RÉCENTE avant l'enrôlement MFA).
+Manquent : `multiFactor`, `TotpMultiFactorGenerator`, `getMultiFactorResolver`.
+⚠️ **RISQUE PRINCIPAL À TRAITER AVANT TOUT ENRÔLEMENT** : un défaut dans le
+défi de connexion VERROUILLE l'utilisateur hors de son compte. Porte de sortie
+obligatoire = suppression du 2e facteur depuis la console (Identity Platform →
+Utilisateurs). À valider AVANT que l'user n'enrôle son compte admin.
