@@ -7,7 +7,7 @@
 // dédié) car le plan Vercel Hobby est à 12/12 fonctions — aucune 13e possible.
 
 const rl = require('./_lib/ratelimit');
-const { getFirebase, verifyUid } = require('./_lib/firebase');
+const { getFirebase, verifyUid, verifyIdentity } = require('./_lib/firebase');
 const coursesLib = require('./_lib/courses');
 
 module.exports = async function handler(req, res) {
@@ -432,9 +432,27 @@ const COURSE_READS = new Set([
   'course-list', 'courier-status', 'courier-profile', 'course-proof', 'conv-list'
 ]);
 
+// ── ADRESSE E-MAIL VÉRIFIÉE EXIGÉE (28/07/2026, décision user) ──────────────
+// Uniquement sur les actions ENGAGEANTES : déposer une demande de livraison,
+// candidater comme livreur. Volontairement PAS sur la lecture ni sur les
+// actions d'une course DÉJÀ engagée — bloquer un parcours en cours ne
+// protégerait personne et laisserait l'utilisateur coincé au milieu du gué.
+// L'état vient de la revendication SIGNÉE `email_verified` du jeton : le
+// client ne peut pas la falsifier.
+const EXIGE_EMAIL_VERIFIE = new Set(['course-request', 'courier-apply']);
+
 async function handleCourses(req, body, cfg, res) {
-  const uid = await verifyUid(req);
+  const ident = await verifyIdentity(req);
+  const uid = ident ? ident.uid : null;
   if (!uid) return res.status(401).json({ ok: false, error: 'Connexion requise.' });
+  if (EXIGE_EMAIL_VERIFIE.has(body.type) && !ident.emailVerified) {
+    // `code` permet à l'écran de proposer le renvoi du lien plutôt que
+    // d'afficher un refus sec dont l'utilisateur ne sait que faire.
+    return res.status(403).json({
+      ok: false, code: 'email-non-verifie',
+      error: 'Vérifie ton adresse e-mail avant de continuer : ouvre le lien que nous t\'avons envoyé, puis reviens sur cette page.'
+    });
+  }
 
   // ── LIMITEUR DE DÉBIT ─────────────────────────────────────────────────────
   // 🐛 PANNE VÉCUE (27/07/2026) : un seul seau « courses » de 30 requêtes/heure

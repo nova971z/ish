@@ -50,16 +50,39 @@
   // reposent plus sur un uid déclaratif falsifiable). Résout toujours (jamais
   // de rejet) : sans session ou si getIdToken échoue, on part sans en-tête auth
   // (le serveur traite alors la requête comme anonyme = pas de remise).
-  function jsonAuthHeaders() {
+  // `force` : redemande un jeton NEUF à Firebase. Indispensable après une
+  // vérification d'adresse — la revendication `email_verified` n'est mise à
+  // jour dans le jeton qu'au renouvellement (1 h) ou sur demande explicite.
+  // Sans ça, l'utilisateur qui vient de cliquer le lien resterait refusé par le
+  // serveur pendant une heure, sans comprendre pourquoi.
+  function jsonAuthHeaders(force) {
     var base = { 'Content-Type': 'application/json' };
     var user = _currentUser;
     if (user && typeof user.getIdToken === 'function') {
-      return user.getIdToken().then(function (tok) {
+      return user.getIdToken(force === true).then(function (tok) {
         base['Authorization'] = 'Bearer ' + tok;
         return base;
       }).catch(function () { return base; });
     }
     return Promise.resolve(base);
+  }
+
+  // Réponse serveur « adresse non vérifiée » : on ne laisse JAMAIS un refus sec.
+  // On tente d'abord un rafraîchissement du jeton (l'utilisateur a peut-être
+  // cliqué le lien à l'instant), et sinon on explique et on propose le renvoi.
+  // Renvoie true si le refus a été traité.
+  function lvEmailNonVerifie(d, msgEl) {
+    if (!d || d.code !== 'email-non-verifie') return false;
+    var txt = 'Vérifie ton adresse e-mail pour continuer — on t\'a envoyé un lien.';
+    if (msgEl) msgEl.textContent = '✉️ ' + txt;
+    toast(txt, 'error');
+    // Recharge l'utilisateur : si la vérification vient d'avoir lieu, le
+    // prochain appel repartira avec un jeton à jour.
+    if (_currentUser && typeof _currentUser.reload === 'function') {
+      _currentUser.reload().then(function () { return jsonAuthHeaders(true); }).catch(function () {});
+    }
+    location.hash = '#/compte';
+    return true;
   }
 
   function debounce(fn, ms) {
@@ -5150,7 +5173,7 @@
         });
       }).then(function (r) { return r.json(); }).then(function (d) {
         orderBtn.disabled = false;
-        if (!d.ok) { if (orderSt) orderSt.textContent = '❌ ' + (d.error || 'Erreur'); return; }
+        if (!d.ok) { lvEchecDemande(d, orderSt); return; }
         // Photo du chantier : jointe juste après la création (elle sert de
         // repère au livreur et de preuve à la remise).
         return jsonAuthHeaders().then(function (headers) {
@@ -5279,6 +5302,13 @@
     return sceneBtn;
   }
 
+  // Échec d'une demande de livraison : l'adresse non vérifiée est traitée
+  // nommément (renvoi du lien + jeton rafraîchi), le reste est affiché tel quel.
+  function lvEchecDemande(d, st) {
+    if (lvEmailNonVerifie(d, st)) return;
+    if (st) st.textContent = '❌ ' + ((d && d.error) || 'Erreur');
+  }
+
   // Fiche produit : livraison d'UN produit.
   function initPdpDelivery(product) {
     initDeliveryWidget({
@@ -5369,6 +5399,9 @@
         var d = null;
         try { d = JSON.parse(rep.t); } catch (_) {}
         if (rep.s === 200 && d && d.ok) return d;
+        // Adresse non vérifiée : on traite le cas nommément (renvoi du lien,
+        // rafraîchissement du jeton) au lieu d'un message d'échec opaque.
+        if (lvEmailNonVerifie(d, null)) throw new Error('Vérifie ton adresse e-mail avant d\'envoyer ton dossier.');
         throw new Error((d && d.error) || lvErrTxt(rep.s, d));
       });
   }
