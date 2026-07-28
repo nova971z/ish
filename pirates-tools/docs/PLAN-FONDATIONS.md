@@ -1,10 +1,12 @@
 # PLAN FONDATIONS — Pirates Tools
 ## Construire les instruments avant d'auditer
 
-> **État : PLAN v3 — SOUMIS À VALIDATION. Rien n'est appliqué.**
+> **État : PLAN v4 — SOUMIS À VALIDATION. Rien n'est appliqué.**
 > v1 le 28/07/2026 · **v2** après vérification par mesure ·
 > **v3** après recherche documentaire extérieure et réponse à la proposition
-> de numérotation des lignes.
+> de numérotation des lignes ·
+> **v4** après la demande d'un **système entonnoir** : numérotation par zones
+> qui se réajuste toute seule, et recherche qui converge mécaniquement.
 > À relire et amender par l'user avant exécution.
 
 ---
@@ -279,6 +281,179 @@ Un contrôle CI échoue si le tableau n'est plus à jour.
 > **En une phrase** : ton idée est bonne, sa mise en œuvre doit être **à côté du
 > code, pas dedans**. Numéros exacts figés à un commit pour l'audit, ancres pour
 > la carte, tableau régénérable pour la lecture — et **0 octet** envoyé au client.
+
+---
+
+# 🔻 LE SYSTÈME ENTONNOIR — la numérotation qui se réajuste toute seule
+
+> Demande de l'user (28/07/2026, après lecture de la v3) : *« il faut trouver un
+> système intelligent qui se réajuste, afin de créer un système entonnoir dans
+> tes recherches qui obligatoirement va t'amener là où tu dois aller et non pas
+> là où toi tu veux aller. »*
+
+**Réponse honnête à la question posée : non, la v3 ne l'avait pas.** Elle
+contenait le bon ingrédient (`docs/ANCRES.md`, régénérable) mais présenté comme
+un **confort de lecture**. L'user demande autre chose et de plus important : que
+la recherche **converge mécaniquement**, au lieu de dépendre de mon flair. C'est
+le même principe que P-B, appliqué à ma façon de chercher. Cette section est
+donc **nouvelle**, et elle refond la phase 5.
+
+## 1. Le mécanisme : on ne STOCKE jamais un numéro, on le CALCULE
+
+C'est toute l'astuce, et elle est simple. Un numéro écrit quelque part se périme.
+Un numéro **dérivé du fichier au moment où on le demande** ne peut pas se périmer.
+
+**Preuve exécutée** (28/07/2026, sur une copie de `app.js`) :
+
+| Étape | Résultat |
+|---|---|
+| repère `@zone PAY-03` posé | `app.js:6012` |
+| 40 lignes insérées **1 200 lignes plus haut** | `app.js:6052` |
+| travail manuel de renumérotation | **zéro** |
+| temps de résolution sur 14 600 lignes | **70 ms** |
+
+C'est exactement le comportement demandé — « le numéro des lignes en dessous se
+réajuste ». Simplement, **le réajustement a lieu à la lecture, pas à l'écriture**.
+Personne ne renumérote jamais rien.
+
+## 2. Ce qu'on numérote : les ZONES, pas les lignes
+
+Voilà le déplacement qui fait tout fonctionner. Une ligne est **une position** :
+elle bouge dès qu'on touche au-dessus. Une zone est **une identité** : elle ne
+bouge jamais.
+
+```
+  // ══ @zone PAY-03 — Règlement de la marchandise par le client ══
+```
+
+`PAY` = le domaine · `03` = la zone. Tu obtiens bien la carte numérotée que tu
+veux — mais numérotée là où le numéro peut rester vrai.
+
+### ⚠️ La règle d'attribution, qui est la clé du système
+**Un numéro de zone est une identité, jamais une position.**
+- il est attribué **une fois** et n'est **jamais réutilisé**, même après suppression ;
+- une nouvelle zone insérée entre `PAY-03` et `PAY-04` prend **le prochain
+  numéro libre** (`PAY-27`), surtout pas `PAY-03bis` ni une renumérotation ;
+- **on ne réordonne jamais** : la lecture dans l'ordre du fichier est donnée par
+  l'index, pas par la valeur du numéro.
+
+C'est précisément ce qui manquait à la numérotation ligne à ligne : là, le
+numéro **était** la position, donc il mentait au premier ajout. Ici, il n'a
+aucun rapport avec la position — donc il ne peut plus mentir. C'est aussi la
+règle des registres de décisions (§R4), pour la même raison.
+
+## 3. L'entonnoir : quatre étages, aucun choix laissé à mon jugement
+
+```
+   ① INTENTION      « je veux modifier le règlement de la marchandise »
+        ↓            table des intentions (docs/INDEX.md)
+   ② DOMAINE        PAY   (l'argent)
+        ↓            index des zones
+   ③ ZONE           PAY-03
+        ↓            balayage du fichier, à l'instant
+   ④ LIGNE VIVE     app.js:6052–6141  +  api/contact.js:412–470
+```
+
+**Une seule commande parcourt les quatre étages :**
+
+```
+$ node scripts/ou.js "règlement de la marchandise"
+
+  ZONE   PAY-03 — Règlement de la marchandise par le client
+  ICI    app.js:6052–6141           (calculé à l'instant)
+         api/contact.js:412–470     course-goods-paid
+
+  INVARIANTS QUI S'APPLIQUENT ICI
+   · le montant débité vient TOUJOURS du catalogue serveur
+   · jamais de bouton désactivé comme état de repos
+
+  CE QUI PROTÈGE CETTE ZONE
+   · tests/plan10.mjs — 32 assertions, score de mutation 5/5
+   · scripts/check-pricing.js
+
+  PIÈGES DÉJÀ PAYÉS ICI
+   · les lignes du panier doivent voyager AVEC la demande (panne v527)
+   · c.lines ne porte que {key, qty} : titre et prix relus au catalogue
+
+  DÉCISIONS EN VIGUEUR
+   · #12 la plateforme n'encaisse QUE la marchandise, jamais la course (ACTIVE)
+```
+
+### 🔴 Le point décisif : l'entonnoir ne localise pas, il CONTRAINT
+Un moteur de recherche répond *« c'est là »* et me laisse faire ce que je veux.
+L'entonnoir répond *« c'est là, **et voici ce que tu n'as pas le droit d'y
+faire** »* : les invariants, les pièges déjà payés, les décisions en vigueur, et
+ce qui te préviendra si tu casses quelque chose.
+
+C'est ça, « m'amener là où je dois aller et non là où je veux aller » : la
+sortie de la commande **arrive avec ses interdits**. Aujourd'hui, ces interdits
+sont dispersés dans 1 499 lignes de journal et je peux passer à côté sans même
+savoir qu'ils existaient.
+
+## 4. Les trois degrés de force — et lequel on choisit
+
+| Degré | Mécanisme | Force réelle |
+|---|---|---|
+| ① Disponible | la commande existe | **faible** — je peux ne pas m'en servir |
+| ② Rappelé | `CLAUDE.md` dit de l'utiliser | **faible** — c'est du contexte, pas une garantie (§R3) |
+| ③ Imposé | un **hook** intercepte la recherche à l'aveugle dans `app.js` et renvoie vers `ou.js` | **fort** — s'applique quoi que je décide |
+
+**Recommandation : ③, mais étroitement borné.** Le hook ne se déclenche que sur
+une recherche large dans les trois gros fichiers (`app.js`, `styles.css`,
+`index.html`), et il est **contournable par un drapeau explicite** — parce
+qu'une porte qui bloque du travail légitime finit désactivée, et emporte avec
+elle la protection réelle (piège déjà identifié en phase 6).
+
+⚠️ **Coût assumé** : un hook mal réglé devient une gêne permanente. Il est donc
+créé **en dernier**, une fois `ou.js` réellement utile — jamais avant.
+
+## 5. Les trois contrôles qui empêchent l'entonnoir de mentir
+
+| Contrôle | Ce qu'il refuse |
+|---|---|
+| **E1** | une zone citée dans un document mais **absente du code** |
+| **E2** | une zone présente dans le code mais **absente de l'index** |
+| **E3** | 🔴 **une ligne de `app.js` n'appartenant à AUCUNE zone** |
+
+**E3 est le contrôle qui fait exister l'entonnoir.** Tant que les zones ne
+couvrent pas 100 % du fichier, il reste des terres sans nom où je peux errer.
+Quand la couverture est totale, **toute ligne appartient à exactement une zone**,
+donc l'entonnoir aboutit **toujours** — il n'a plus le droit de ne pas savoir.
+
+## 6. ⚠️ Ce qui bloque aujourd'hui : il n'y a plus un octet de place
+
+Mesure du jour, par le contrôle P8 lui-même :
+
+| Fichier | Poids compressé | Plafond | Marge |
+|---|---|---|---|
+| `app.js` | **205 Ko** | 205 Ko | **0** |
+
+Et 150 repères de zone coûtent, mesuré : **+9 Ko bruts, +1,36 Ko compressés**
+→ `app.js` passerait à **206,3 Ko**, soit **1,33 Ko au-dessus du plafond**.
+
+**Conséquence sur l'ordre du plan** : la phase 5 ne peut pas poser les repères
+tant que la place n'est pas libérée. Or **la phase 3 produit exactement ça** —
+la liste des fonctions orphelines, c'est-à-dire du code mort réel à supprimer.
+Ce n'était qu'un enchaînement logique dans la v3 ; c'est désormais une
+**dépendance dure et chiffrée** : *la phase 3 doit libérer au moins 2 Ko
+compressés avant que la phase 5 puisse commencer.*
+
+Si elle n'y arrive pas, deux issues, et **c'est l'user qui tranche** :
+- relever le plafond P8 de 205 à 208 Ko (décision explicite, tracée dans
+  `docs/DECISIONS.md` — jamais une dérive silencieuse) ;
+- ou poser moins de repères (zones plus grosses, entonnoir moins fin).
+
+⚠️ Le plafond **n'est pas relevé par défaut**. Il a déjà forcé trois nettoyages
+utiles ; c'est un détecteur de dérive, pas une contrariété.
+
+## 7. Ce que ça change dans le plan
+
+| Phase | Modification |
+|---|---|
+| **3** — graphe | gagne un **objectif chiffré** : libérer ≥ 2 Ko compressés de code mort |
+| **5** — cartographie | refondue **autour de l'entonnoir** : zones numérotées, `scripts/ou.js`, contrôles E1/E2/E3 |
+| **6** — portes | gagne le **hook** qui impose l'entonnoir (créé en dernier) |
+| **7** — audit | chaque fiche porte **son numéro de zone** en plus de sa plage de lignes et de l'empreinte du commit |
 
 ---
 
@@ -677,6 +852,17 @@ casse ? »* — et **rendre le découpage de `app.js` possible sans deviner**.
    - les **orphelines** (code mort réel).
 2. **`docs/GRAPHE.md`** — la sortie lisible, régénérable par commande.
 
+### 🎯 OBJECTIF CHIFFRÉ AJOUTÉ — libérer la place des repères de zone
+`app.js` pèse **205 Ko compressés pour un plafond de 205** : marge nulle. Les
+repères de la phase 5 coûtent **+1,36 Ko**. Cette phase doit donc **libérer au
+moins 2 Ko compressés** en supprimant les fonctions orphelines qu'elle détecte.
+C'est ce qui transforme la détection de code mort en travail utile immédiat,
+au lieu d'une liste qu'on regarde en hochant la tête.
+⚠️ Une orpheline ne se supprime **qu'après vérification manuelle exhaustive** :
+le graphe a des angles morts déclarés (appels via `onclick`, délégation), et
+supprimer une fonction encore appelée par une chaîne de caractères casserait le
+site en silence.
+
 ### Pièges identifiés
 - ⚠️ **Appels indirects** : `onclick`, `addEventListener`, tableaux de fonctions,
   `data-*` + délégation. Un graphe qui les ignore mentirait par omission.
@@ -702,6 +888,9 @@ casse ? »* — et **rendre le découpage de `app.js` possible sans deviner**.
       catalogue…) — sinon l'analyse est à revoir
 - [ ] Les orphelines détectées sont **réellement** mortes (vérification manuelle
       exhaustive : c'est du code qu'on va supprimer)
+- [ ] **≥ 2 Ko compressés libérés sur `app.js`** — mesuré par `p8-perf`, pas
+      estimé. Sinon la phase 5 est bloquée et l'user doit trancher (relever le
+      plafond ou poser moins de repères)
 - [ ] Le taux de couverture est affiché et ≥ 80 % des appels résolus
 - [ ] Un contrôle CI échoue si `docs/GRAPHE.md` n'est plus à jour
 
@@ -750,24 +939,35 @@ couvert ce qui ne l'est pas.
 # PHASE 5 — SOMMAIRE ET CARTOGRAPHIE MAXIMALE
 
 ### Objectif
-**L'instrument que l'user demande** : savoir où intervenir sans chercher.
+**Construire l'entonnoir** décrit plus haut : que la recherche converge
+mécaniquement au lieu de dépendre de mon flair.
+
+### 🚧 Condition d'entrée — non négociable
+La phase 3 doit avoir **libéré ≥ 2 Ko compressés** sur `app.js` (marge actuelle :
+**0**). Sinon cette phase ne démarre pas et l'user tranche entre relever le
+plafond ou poser moins de repères. **On ne pose pas un seul repère sur un budget
+déjà crevé.**
 
 ### Livrables
-1. **`docs/INDEX.md`** — l'entrée unique. Table à trois colonnes :
-   *« je veux faire X »* → *fichier + ancre* → *contrôles et harnais qui
-   protègent cette zone*.
-2. **`docs/CARTOGRAPHIE.md` refondue** (29,5 Ko existants à reprendre).
-3. **Ancres stables** dans le code (`// ══ ZONE : PAIEMENT ══`), **plus robustes
-   qu'un numéro de ligne**, qui se décale à chaque modification.
-4. **`docs/ANCRES.md`** — le tableau *ancre → numéro de ligne actuel*,
-   **régénéré par commande**. C'est la réponse à la demande de numérotation :
-   on obtient bien une liste de numéros exacts, mais produite par la machine,
-   donc jamais périmée, et **pesant 0 octet dans le fichier livré au client**.
+1. **Zones numérotées** posées dans le code :
+   `// ══ @zone PAY-03 — Règlement de la marchandise par le client ══`
+   Le numéro est une **identité** : attribué une fois, jamais réutilisé, jamais
+   réordonné (voir la règle d'attribution, section Entonnoir §2).
+2. **`scripts/ou.js`** — la commande qui parcourt les quatre étages de
+   l'entonnoir et rend : localisation vive, invariants applicables, harnais qui
+   protègent, pièges déjà payés, décisions en vigueur.
+3. **`docs/INDEX.md`** — la table des **intentions** (« je veux faire X ») vers
+   les domaines et les zones. C'est l'étage ① de l'entonnoir.
+4. **`docs/ANCRES.md`** — le tableau *zone → ligne actuelle*, **régénéré par
+   commande**. La numérotation demandée par l'user, toujours à jour parce que
+   jamais stockée, et **0 octet livré au client**.
+5. **`docs/CARTOGRAPHIE.md` refondue** (29,5 Ko existants à reprendre), indexée
+   par zone et non par numéro de ligne.
+6. **Contrôles E1 / E2 / E3** dans la CI (voir Entonnoir §5).
 
 ⚠️ **C'est la seule phase 0-6 qui touche au code** — et uniquement pour ajouter
-des commentaires. Aucun comportement modifié. La CI doit rester verte avant/après
-et le poids de `app.js` ne doit pas franchir le budget P8 (205 Ko) : les ancres
-sont courtes, mais elles ne sont pas gratuites.
+des commentaires. Aucun comportement modifié : la CI et le lot complet des
+harnais doivent être verts avant **et** après, à l'identique.
 
 ### Pièges identifiés
 - ⚠️ **Les numéros de ligne mentent dès le commit suivant.** C'est le défaut
@@ -778,15 +978,28 @@ sont courtes, mais elles ne sont pas gratuites.
   *comment* : le comment est dans le code, seule source de vérité.
 - ⚠️ **La table des matières illisible** : 200 entrées ne servent à rien.
   → L'index part des **intentions**, pas de la structure des fichiers.
-- ⚠️ **Le budget de poids** : ~150 ancres × ~40 octets ≈ 6 Ko bruts. À vérifier
-  contre le plafond P8 **avant** de les poser toutes, pas après.
+- ⚠️ **Le budget de poids** : mesuré, **+1,36 Ko compressés** pour 150 repères,
+  sur une marge de **0**. D'où la condition d'entrée ci-dessus. Ce n'est pas une
+  précaution théorique : le contrôle P8 refusera le commit.
+- ⚠️ **Les zones trop fines** : une zone tous les 30 lignes fait 480 zones,
+  donc un index illisible et un budget crevé. → Viser **~150 zones**, soit une
+  centaine de lignes par zone en moyenne, et regrouper plutôt que découper.
+- ⚠️ **La zone qui déménage** : si du code migre d'une zone à l'autre, le repère
+  reste juste mais l'intitulé ment. → E2 vérifie l'existence, pas le sens ;
+  la cohérence intitulé/contenu est **relue à chaque lot de la phase 7**, qui
+  traverse de toute façon tout le fichier.
 
 ### Preuve de réussite
-- [ ] Épreuve à l'aveugle : sur **10 intentions tirées au sort**, l'index mène au
-      bon endroit en **≤ 2 sauts**, sans aucune recherche textuelle
-- [ ] Toutes les ancres citées existent — contrôle automatique **prouvé faillible**
+- [ ] **Épreuve à l'aveugle** : sur **10 intentions tirées au sort**,
+      `node scripts/ou.js` mène au bon endroit **du premier coup**, sans aucune
+      recherche textuelle de ma part
+- [ ] **E3 vert** : aucune ligne de `app.js` hors zone — c'est ce contrôle qui
+      prouve que l'entonnoir aboutit toujours
+- [ ] E1 et E2 verts, et tous deux **prouvés faillibles** par sabotage
+- [ ] `docs/ANCRES.md` régénéré donne les mêmes numéros qu'une lecture directe
+      du fichier, vérifié sur 5 zones tirées au sort
 - [ ] La cartographie ne contient **aucun** extrait de code
-- [ ] `node scripts/ci.js` vert, budget P8 non dépassé
+- [ ] `node scripts/ci.js` vert, budget P8 **non dépassé** (pas « relevé »)
 
 ---
 
@@ -812,7 +1025,18 @@ budget dépassé (P8), appel vers une fonction inexistante (P1), plafond des
 
 **À créer** : bouton désactivé au repos · échec traité comme vide · `where` +
 `orderBy` sans index composite · harnais avec chemin absolu · document orphelin ·
-second `CLAUDE.md` · classe CSS construite par concaténation traitée comme morte.
+second `CLAUDE.md` · classe CSS construite par concaténation traitée comme morte ·
+**E1/E2/E3 de l'entonnoir** (zone citée inexistante · zone hors index · ligne
+sans zone).
+
+**Le hook de l'entonnoir — la seule porte qui agisse sur MOI, pas sur le code.**
+Toutes les autres portes vérifient un fichier. Celle-ci intercepte **une
+recherche à l'aveugle** dans `app.js` / `styles.css` / `index.html` et la
+renvoie vers `node scripts/ou.js`. C'est le seul mécanisme qui rende l'entonnoir
+obligatoire plutôt que disponible (voir Entonnoir §4).
+⚠️ **Créée en DERNIER**, une fois `ou.js` réellement utile, et **contournable
+par un drapeau explicite** : une porte qui bloque du travail légitime finit
+désactivée, et emporte la protection réelle avec elle.
 
 **Procédurales (seulement si l'automatisation est impossible)** — une liste
 courte. Chaque entrée dit **pourquoi** elle n'est pas automatisable.
@@ -877,15 +1101,21 @@ parcours qui n'est pas encore ouvert au public.
 1. Lecture **exhaustive et séquentielle**, sans saut.
 2. Pour chaque bloc : **une fiche** — rôle, entrées/sorties, invariants qu'il
    doit respecter, pièges, couverture de test, défauts constatés.
-   **En-tête obligatoire, format figé** *(v3, proposition de l'user)* :
+   **En-tête obligatoire, format figé** *(v4)* :
    ```
-   FICHE — <nom du bloc>
-     <fichier>:<ligne début>–<ligne fin>  @ commit <empreinte>
-     vérifiable : git show <empreinte>:pirates-tools/<fichier> | sed -n '<d>,<f>p'
+   FICHE — PAY-03 — Règlement de la marchandise par le client
+     app.js:6052–6141  @ commit d23d43d
+     vérifiable : git show d23d43d:pirates-tools/app.js | sed -n '6052,6141p'
+     retrouvable : node scripts/ou.js PAY-03
    ```
-   L'empreinte du commit rend la référence **exacte pour toujours** : quelqu'un
-   peut afficher, dans six mois, exactement les lignes que j'ai lues. Sans elle,
-   les numéros mentent dès le commit suivant.
+   Trois références, chacune pour un usage différent :
+   - le **numéro de zone** est l'identité durable — il ne bougera jamais ;
+   - la **plage de lignes + empreinte de commit** fige la photographie : dans
+     six mois, la commande affichera exactement ce que j'ai lu ;
+   - `ou.js` donne la **position vive**, recalculée à l'instant.
+
+   ⚠️ Une fiche sans numéro de zone est refusée : elle serait introuvable par
+   l'entonnoir, donc invisible à la prochaine session.
 3. Défauts **classés** : bloquant / réel / cosmétique / faux positif.
 4. **Aucune correction pendant l'audit** — sauf le cas critique ci-dessous.
 5. Cartographie et graphe **mis à jour au passage**.
