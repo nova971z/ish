@@ -139,6 +139,93 @@ const lazy = /loading="lazy"/.test(APP);
 LOG('  ' + (lazy ? '✅' : '❌') + ' attribut loading="lazy" conservé (économie sans risque)');
 if (!lazy) problems.push('loading="lazy" a disparu des vignettes.');
 
+
+// ═══ CONTRÔLE 4 — LE TOTAL SERVI À FROID ══════════════════════════════════
+// DÉCISION USER DU 28/07/2026 : plafond de 400 Ko sur le TEXTE téléchargé à
+// la première visite.
+// POURQUOI CE CONTRÔLE EXISTE EN PLUS DES PLAFONDS PAR FICHIER : un plafond
+// par fichier se CONTOURNE tout seul. Découper app.js en cinq fichiers ferait
+// passer les cinq au vert sans qu'un seul octet ne disparaisse. Le visiteur,
+// lui, télécharge le total. C'est donc le seul chiffre qui le concerne.
+LOG('\n' + '━'.repeat(74));
+LOG('  P8.4 — TOTAL SERVI À FROID (le chiffre que voit le visiteur)');
+LOG('━'.repeat(74));
+
+const PLAFOND_TOTAL_KO = 400;                       // décision user 28/07/2026
+const SERVIS_A_FROID = ['index.html', 'styles.css', 'app.js',
+  'firebase-init.js', 'products.json', 'sw.js'];
+let totalFroid = 0;
+SERVIS_A_FROID.forEach((f) => {
+  try { totalFroid += zlib.gzipSync(read(f), { level: 9 }).length / 1024; } catch (e) {}
+});
+LOG('  ' + (totalFroid <= PLAFOND_TOTAL_KO ? '✅' : '❌')
+  + ' total ' + totalFroid.toFixed(1) + ' Ko compressés   (plafond '
+  + PLAFOND_TOTAL_KO + ', marge ' + (PLAFOND_TOTAL_KO - totalFroid).toFixed(1) + ')');
+if (totalFroid > PLAFOND_TOTAL_KO) {
+  problems.push('TOTAL SERVI À FROID DÉPASSÉ : ' + totalFroid.toFixed(1) + ' Ko '
+    + '(plafond ' + PLAFOND_TOTAL_KO + '). Découper un fichier ne règle RIEN ici : '
+    + 'ce contrôle mesure ce que le visiteur télécharge en tout. Il faut soit '
+    + 'retirer du poids, soit différer du code (chargement à la demande), soit '
+    + 'que l\'user relève le plafond par une décision tracée.');
+}
+
+// ═══ CONTRÔLE 5 — POIDS DES IMAGES SERVIES ════════════════════════════════
+// DÉCISION USER DU 28/07/2026 : « on ne dépasse pas le plus gros héros qui
+// fait 871 Ko ». Le plafond est donc calé sur l'image la plus lourde du site
+// à cette date — c'est un CLIQUET : on a le droit de faire plus léger, jamais
+// plus lourd.
+// ⛔ CE CONTRÔLE NE COMPRESSE JAMAIS LES VISUELS. L'user exige des images de
+// très haute qualité, contrairement aux sites d'outillage concurrents. Le
+// levier n'est PAS la compression : c'est de servir la bonne TAILLE au bon
+// endroit (vignette petite, héros intact). La qualité n'est jamais la
+// variable d'ajustement.
+// ⚠️ Ne portent QUE sur les images RÉELLEMENT DÉPLOYÉES : images/_originals/
+// est une sauvegarde haute résolution, exclue par .vercelignore. La compter
+// ferait crier le contrôle sur un fichier qu'aucun visiteur ne reçoit.
+LOG('\n' + '━'.repeat(74));
+LOG('  P8.5 — POIDS DES IMAGES SERVIES (cliquet, jamais de compression)');
+LOG('━'.repeat(74));
+
+const PLAFOND_IMAGE_KO = 871;                       // décision user 28/07/2026
+const EXCLUS = (function () {
+  try {
+    return fs.readFileSync(path.join(ROOT, '.vercelignore'), 'utf8')
+      .split('\n').map((l) => l.trim())
+      .filter((l) => l && l[0] !== '#')
+      .map((l) => l.replace(/\/$/, ''));
+  } catch (e) { return []; }
+})();
+function estDeploye(rel) {
+  return !EXCLUS.some((x) => rel === x || rel.indexOf(x + '/') === 0);
+}
+function parcourir(dir, acc) {
+  let entrees = [];
+  try { entrees = fs.readdirSync(path.join(ROOT, dir), { withFileTypes: true }); }
+  catch (e) { return acc; }
+  entrees.forEach((e) => {
+    const rel = dir + '/' + e.name;
+    if (!estDeploye(rel)) return;
+    if (e.isDirectory()) parcourir(rel, acc);
+    else if (/\.(webp|png|jpe?g|gif|svg)$/i.test(e.name)) {
+      acc.push({ rel: rel, ko: fs.statSync(path.join(ROOT, rel)).size / 1024 });
+    }
+  });
+  return acc;
+}
+const imagesServies = parcourir('images', []);
+const tropLourdes = imagesServies.filter((i) => i.ko > PLAFOND_IMAGE_KO);
+const plusGrosse = imagesServies.slice().sort((a, b) => b.ko - a.ko)[0];
+LOG('  ' + (tropLourdes.length === 0 ? '✅' : '❌') + ' ' + imagesServies.length
+  + ' image(s) servie(s) · la plus lourde : '
+  + (plusGrosse ? plusGrosse.ko.toFixed(1) + ' Ko (' + plusGrosse.rel + ')' : 'aucune')
+  + '   (plafond ' + PLAFOND_IMAGE_KO + ')');
+tropLourdes.forEach((i) => {
+  problems.push('IMAGE TROP LOURDE : ' + i.rel + ' pèse ' + i.ko.toFixed(0) + ' Ko '
+    + '(plafond ' + PLAFOND_IMAGE_KO + ', calé sur le plus gros héros au 28/07). '
+    + 'NE PAS LA RECOMPRESSER : servir une version PLUS PETITE là où elle est '
+    + 'affichée petite (vignette), et garder l\'original intact sur la fiche produit.');
+});
+
 LOG('\n' + '═'.repeat(74));
 LOG(problems.length === 0 ? '  ✅ P8 : performance et PWA conformes.' : '  ❌ P8 : ' + problems.length + ' défaut(s).');
 LOG('═'.repeat(74) + '\n');

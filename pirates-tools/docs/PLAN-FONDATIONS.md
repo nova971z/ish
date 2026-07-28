@@ -1048,11 +1048,18 @@ couvert ce qui ne l'est pas.
 **Construire l'entonnoir** décrit plus haut : que la recherche converge
 mécaniquement au lieu de dépendre de mon flair.
 
-### 🚧 Condition d'entrée — non négociable
-La phase 3 doit avoir **libéré ≥ 2 Ko compressés** sur `app.js` (marge actuelle :
-**0**). Sinon cette phase ne démarre pas et l'user tranche entre relever le
-plafond ou poser moins de repères. **On ne pose pas un seul repère sur un budget
-déjà crevé.**
+### ✅ CONDITION D'ENTRÉE LEVÉE — décision **D-003** du 28/07/2026
+Cette phase était bloquée par une dépendance dure : « la phase 3 doit d'abord
+libérer 2 Ko sur `app.js` ». **Elle ne l'est plus** : les repères de zone sont
+**refusés** (`docs/DECISIONS.md`, D-003).
+
+Motif mesuré : les **434 noms de fonction déjà présents** donnent un repère
+tous les **34 lignes pour 0 Ko**, là où ~150 repères de zone en donneraient un
+tous les **97 lignes pour +1,36 Ko livrés à chaque visiteur**. Plus grossier
+**et** payant.
+
+→ **Cette phase ne touche donc plus au code du site**, ne demande plus de bump
+du Service Worker, et n'a plus aucune condition d'entrée.
 
 ### Livrables
 1. **Zones numérotées** posées dans le code :
@@ -1075,9 +1082,16 @@ déjà crevé.**
 des commentaires. Aucun comportement modifié : la CI et le lot complet des
 harnais doivent être verts avant **et** après, à l'identique.
 
+### ✅ CE RISQUE A DISPARU — décision **D-003**
+Ce qui suit décrivait le seul geste du chantier touchant la production : poser
+les repères dans `app.js` imposait un bump du Service Worker, celui-là même qui
+a produit l'**écran noir v314** et le **mélange stale/frais v374**.
+**Les repères sont refusés (D-003) : plus aucune étape du chantier ne modifie le
+code servi, donc plus aucun bump.** La procédure ci-dessous est **conservée**
+— elle reste la référence le jour où un asset changera pour une autre raison.
+
 ### 🔴 LE GESTE QUI PEUT CASSER LE SITE — le bump du Service Worker
-**La v4 ne le mentionnait nulle part. C'est le seul endroit de tout le chantier
-qui touche la production.**
+**La v4 ne le mentionnait nulle part.**
 
 Modifier `app.js` — même pour n'y ajouter que des commentaires — est un
 **changement d'asset**. La règle du projet, vérifiée par `check-asset-versions`,

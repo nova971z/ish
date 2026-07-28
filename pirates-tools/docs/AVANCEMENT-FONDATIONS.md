@@ -72,12 +72,11 @@ node tests/_porter.mjs tests/_bruts/<fichier>   # rendre un harnais portable
 node scripts/ci.js                 # 30 contrôles, ~106 ms
 ```
 
-## ⏳ EN ATTENTE D'UNE DÉCISION DE L'USER
-1. **Plafond sur le TOTAL du texte** chargé à froid (368 Ko aujourd'hui) —
-   un plafond par fichier se contourne en découpant.
-2. **Plafond par image, selon le rôle** — vignette serrée, héros large.
-   Mesuré : le plus gros héros pèse **871 Ko**, rien ne le surveille.
-   ⚠️ Jamais un budget unique : **la qualité des visuels n'est pas la variable
-   d'ajustement.**
-3. **Les 1,36 Ko des repères de zone** (phase 5) — c'est une décision, pas un
-   effet de bord d'un plafond relevé.
+## ✅ LES 3 DÉCISIONS EN ATTENTE ONT ÉTÉ TRANCHÉES (28/07/2026)
+Registre : **`docs/DECISIONS.md`**
+
+| # | Décision | Contrôle qui l'applique |
+|---|---|---|
+| **D-001** | plafond **400 Ko** sur le total du texte servi à froid (367,8 aujourd'hui) | `p8-perf` **P8.4**, prouvé faillible |
+| **D-002** | aucune image servie au-dessus de **871 Ko** — **sans jamais recompresser** : on sert la bonne taille, pas une qualité dégradée | `p8-perf` **P8.5**, prouvé faillible, `_originals/` exclu |
+| **D-003** | **pas de repères de zone dans le code livré** — les 434 noms de fonction donnent un repère tous les 34 lignes pour 0 Ko, contre 97 lignes pour +1,36 Ko | conséquence : la phase 5 perd sa condition d'entrée **et** son bump SW |
