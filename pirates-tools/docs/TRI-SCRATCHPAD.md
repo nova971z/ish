@@ -160,7 +160,31 @@ dans l'historique n'a aucun moyen de savoir qu'elle est fausse.
 `demo-pt` — jamais `pirates-tools`). Rien de secret dans git, aucun fichier à
 perdre, et une clé neuve à chaque lancement.
 
-### ⏳ 9 harnais NON DIAGNOSTIQUÉS — symptôme mesuré, cause NON établie
+### ✅ `verify-beacon.js` — FAUSSE ALERTE DE RÉGRESSION, tranchée
+
+Il annonçait que la mesure d'audience n'émettait plus `view_item` ni
+`time_on_item`. **C'était le point n°1 de la liste de reprise**, parce qu'une
+régression du site prime sur tout.
+
+**Vérifié dans le code** : les deux événements sont toujours émis
+(`app.js:495`, `app.js:507`, `app.js:2011`). La cause réelle : le harnais
+ouvrait `#/produit/makita-dga504z`, **produit retiré du catalogue lors de la
+purge voulue par l'user**. Il annonçait donc une panne inexistante.
+
+→ **Les deux produits nommés en dur ont été supprimés** (session anonyme ET
+session consentante) : le harnais prend désormais le **premier produit
+réellement présent** au catalogue. Plus aucune suppression future ne peut le
+casser. **17/17.**
+
+⚠️ Le second ancrage (`dewalt-dcg405n`) **existait encore** — il n'échouait
+pas, mais c'était un piège latent qui aurait explosé à la prochaine purge.
+Traité aussi.
+
+ℹ️ `pipeline-emulator.js` contient aussi `makita-dga504z`, et c'est **légitime** :
+il s'agit d'événements **synthétiques** qu'il injecte lui-même pour vérifier
+l'agrégation. Aucune lecture du catalogue, donc aucune dépendance.
+
+### ⏳ 8 harnais NON DIAGNOSTIQUÉS — symptôme mesuré, cause NON établie
 Je les ai **lancés** et j'ai relevé leur symptôme exact. Je n'ai **pas** établi
 la cause : je préfère l'écrire que le prétendre. Ils restent dans `_bruts/`.
 
@@ -170,14 +194,14 @@ la cause : je préfère l'écrire que le prétendre. Ils restent dans `_bruts/`.
 | `test-grid.mjs` | « lot initial ≤ 35 (rendu progressif), pas 185 » | le rendu progressif du catalogue a changé |
 | `test-variant.mjs` | 13/15 | 2 assertions sur les variantes coffret/nue |
 | `test-variant-live.mjs` | **sort vert avec 1 assertion sur 6** | ⚠️ **faux vert probable** : il s'arrête en route sans le dire. Le plus suspect des neuf |
-| `verify-beacon.js` | `view_item` et `time_on_item` non émis | mesure d'audience — à vérifier : régression réelle ou stub périmé ? |
 | `verify-consent.js` | le texte du bandeau ne correspond plus | le texte **a été réécrit par décision user (v321)** — probablement à retourner |
 | `verify-cron.js` | sujet, pièce jointe JSON du rapport mensuel | |
 | `verify-dashboard.js` | 15/16 — « géo présente (FR/GP/MQ) » | |
 | `verify-globe.js` | 12/14 — liste par pays absente | |
 
-⚠️ **`verify-beacon` mérite d'être traité en premier** : si la mesure d'audience
-n'émet réellement plus rien, c'est une régression du site, pas un test périmé.
+ℹ️ `verify-beacon` a été traité en premier et **écarté** : fausse alerte, voir
+ci-dessus. Le suivant sur la liste est `test-variant-live` — un faux vert est
+plus dangereux qu'un rouge.
 
 ## 🚪 Les portes posées
 | Porte | Ce qu'elle refuse | Éprouvée ? |

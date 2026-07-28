@@ -13,7 +13,7 @@ Dernière mise à jour : **28/07/2026**
 
 | Phase | État | Où ça en est |
 |---|---|---|
-| **0 — Sauver les harnais** | 🟡 **51/60 tranchés** | risque irréversible **LEVÉ**. **45 verts (791/791)** + 1 ignoré (prérequis émulateur), 5 supprimés avec motif, **9 non diagnostiqués** dans `tests/_bruts/`. `_bruts/` doit finir VIDE : tant qu'il ne l'est pas, cette phase n'est PAS terminée. Détail : `docs/TRI-SCRATCHPAD.md` |
+| **0 — Sauver les harnais** | 🟡 **52/60 tranchés** | risque irréversible **LEVÉ**. **46 verts (808/808)** + 1 ignoré (prérequis émulateur), 5 supprimés avec motif, **8 non diagnostiqués** dans `tests/_bruts/`. `_bruts/` doit finir VIDE : tant qu'il ne l'est pas, cette phase n'est PAS terminée. Détail : `docs/TRI-SCRATCHPAD.md` |
 | 1 — Architecture documentaire | ⬜ à faire | remplacée par le plan mémoire ci-dessous |
 | 2 — Invariants | ⬜ à faire | |
 | 3 — Graphe d'appels | ⬜ à faire | doit libérer ≥ 2 Ko sur `app.js` avant la phase 5 |
@@ -50,9 +50,9 @@ symptôme est mesuré et écrit dans `docs/TRI-SCRATCHPAD.md`, leur cause n'est
 PAS établie.
 
 **Dans cet ordre, et pas un autre :**
-1. `verify-beacon.js` — il dit que la mesure d'audience n'émet plus rien.
-   **Si c'est vrai, c'est une régression du site, pas un test périmé.** À
-   trancher avant tout le reste.
+1. ~~`verify-beacon.js`~~ ✅ **TRANCHÉ** : fausse alerte. Les événements sont
+   toujours émis ; le harnais ouvrait un produit supprimé lors de la purge.
+   Ancrages produits retirés → 17/17.
 2. `test-variant-live.mjs` — sort **vert avec 1 assertion sur 6**. Un faux vert
    est plus dangereux qu'un rouge.
 3. `verify-consent.js` — le texte du bandeau a été réécrit par décision user

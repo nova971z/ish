@@ -46,7 +46,19 @@ async function run(){
   // naviguer catalogue → produit (view_item + time_on_item), cliquer un chip + dock
   await page.evaluate(()=>{ location.hash='#/catalogue'; }); await page.waitForTimeout(500);
   await page.evaluate(()=>{ var c=document.querySelector('#catList .cat-chip[data-cat="Meuleuses"]'); if(c) c.click(); }); await page.waitForTimeout(300);
-  await page.evaluate(()=>{ location.hash='#/produit/makita-dga504z'; }); await page.waitForTimeout(900);
+  // ⚠️ ANCRAGE SUR UN PRODUIT NOMMÉ, SUPPRIMÉ LE 28/07 : ce harnais ouvrait
+  // « makita-dga504z », retiré du catalogue lors de la purge voulue par l'user.
+  // Il annonçait donc « view_item n'est plus émis » — une fausse alerte de
+  // régression sur la mesure d'audience. On prend désormais le PREMIER produit
+  // réellement présent au catalogue : plus aucune suppression ne peut le casser.
+  const PRODUIT = await page.evaluate(async () => {
+    const r = await fetch('/products.json'); const j = await r.json();
+    const l = Array.isArray(j) ? j : (j.products || []);
+    const p = l.find(x => x && x.id && x.title);
+    return p ? p.id : null;
+  });
+  if (!PRODUIT) { console.log('⛔ PRÉALABLE NON REMPLI — aucun produit au catalogue'); process.exit(1); }
+  await page.evaluate((id)=>{ location.hash='#/produit/'+id; }, PRODUIT); await page.waitForTimeout(900);
   await page.evaluate(()=>{ location.hash='#/'; }); await page.waitForTimeout(400); // quitte le produit → flush time_on_item
   await page.evaluate(()=>{ var d=document.querySelector('[data-track="dock:catalogue"]'); if(d) d.click(); }); await page.waitForTimeout(300);
   // forcer un flush (pagehide)
@@ -56,8 +68,8 @@ async function run(){
   const names = ev.map(e=>e.event);
   check('session_start émis', names.includes('session_start'));
   check('page_view émis', names.includes('page_view'));
-  check('view_item émis avec id produit', ev.some(e=>e.event==='view_item'&&e.id==='makita-dga504z'));
-  check('time_on_item émis avec ms>0', ev.some(e=>e.event==='time_on_item'&&e.id==='makita-dga504z'&&e.ms>0), JSON.stringify(ev.find(e=>e.event==='time_on_item')||{}));
+  check('view_item émis avec id produit', ev.some(e=>e.event==='view_item'&&e.id===PRODUIT), 'produit='+PRODUIT);
+  check('time_on_item émis avec ms>0', ev.some(e=>e.event==='time_on_item'&&e.id===PRODUIT&&e.ms>0), JSON.stringify(ev.find(e=>e.event==='time_on_item')||{}));
   check('click chip:Meuleuses capturé', ev.some(e=>e.event==='click'&&e.t==='chip:Meuleuses'));
   check('click dock:catalogue capturé', ev.some(e=>e.event==='click'&&e.t==='dock:catalogue'));
   check('device=mobile détecté', ev.every(e=>e._device==='mobile'));
@@ -77,7 +89,14 @@ async function run(){
   await page2.addInitScript(()=>{ try{ Object.defineProperty(navigator,'webdriver',{get:function(){return false;}}); }catch(_){} });
   await page2.goto(base+'/',{waitUntil:'domcontentloaded'}); await page2.waitForTimeout(400);
   await page2.click('#consentBar [data-consent="accept"]'); await page2.waitForTimeout(300);
-  await page2.evaluate(()=>{ location.hash='#/produit/dewalt-dcg405n'; }); await page2.waitForTimeout(700);
+  // Même précaution qu'en session 1 : aucun produit nommé en dur.
+  const PRODUIT2 = await page2.evaluate(async () => {
+    const r = await fetch('/products.json'); const j = await r.json();
+    const l = Array.isArray(j) ? j : (j.products || []);
+    const p = l.find(x => x && x.id && x.title);
+    return p ? p.id : null;
+  });
+  await page2.evaluate((id)=>{ location.hash='#/produit/'+id; }, PRODUIT2); await page2.waitForTimeout(700);
   await page2.evaluate(()=>{ window.dispatchEvent(new Event('pagehide')); }); await page2.waitForTimeout(400);
   const ev2 = allEvents();
   check('CONSENTI : consent=true après Accepter', ev2.length>0 && ev2.some(e=>e._consent===true), 'n='+ev2.length);
