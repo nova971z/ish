@@ -1,41 +1,66 @@
 # PLAN FONDATIONS — Pirates Tools
 ## Construire les instruments avant d'auditer
 
-> **État : PLAN v4 — SOUMIS À VALIDATION. Rien n'est appliqué.**
+> **État : PLAN v5 — SOUMIS À VALIDATION. Rien n'est appliqué.**
 > v1 le 28/07/2026 · **v2** après vérification par mesure ·
 > **v3** après recherche documentaire extérieure et réponse à la proposition
 > de numérotation des lignes ·
 > **v4** après la demande d'un **système entonnoir** : numérotation par zones
-> qui se réajuste toute seule, et recherche qui converge mécaniquement.
+> qui se réajuste toute seule, et recherche qui converge mécaniquement ·
+> **v5** après relecture ligne à ligne du plan par lui-même : **26 défauts**
+> corrigés, dont **3 graves** (un `git add` de 110 Mo, un bump de Service Worker
+> oublié, une contradiction interne qui autorisait et interdisait la même chose).
 > À relire et amender par l'user avant exécution.
 
 ---
 
-## ⚠️ CE QUE LA RELECTURE A CORRIGÉ DANS MA PROPRE v1
+## 🔎 CE QUE LA RELECTURE LIGNE À LIGNE A TROUVÉ DANS LA v4 (v5, 28/07/2026)
+
+Le plan a été relu **ligne par ligne contre le code réel**. **26 défauts**, dont
+**3 qui auraient pu abîmer le dépôt ou le site** s'ils avaient été exécutés tels
+quels. Tous corrigés dans cette version.
+
+| Gravité | Défaut | Où c'est traité |
+|---|---|---|
+| 🔴 | « versionner `_gltftools/` » aurait commité **110 Mo de `node_modules`** — et git n'oublie jamais | phase 0, encadré « DANGER MESURÉ » |
+| 🔴 | poser les ancres modifie `app.js` → **bump du Service Worker obligatoire**, jamais mentionné. Deux pannes réelles du projet viennent de là (écran noir v314, mélange stale/frais v374) | phase 5, encadré « LE GESTE QUI PEUT CASSER LE SITE » |
+| 🔴 | **contradiction interne** : la phase 3 devait supprimer du code, la règle de réversibilité l'interdisait | § Réversibilité, tableau des deux exceptions |
+| 🟠 | **E3 était infaisable** : `app.js` est un IIFE unique, ses 8 lignes d'enveloppe n'appartiennent à aucune zone → le contrôle aurait toujours échoué | Entonnoir §5, zone `SOC-00` |
+| 🟠 | **trois exemples chiffrés inventés** (`lvPanelAccord` est à 6167, pas 6012–6118 ; `course-goods-paid` à 1030, pas 412–470) — dans un plan qui pose P-A | §numérotation, Entonnoir §3, phase 7 |
+| 🟠 | deux chiffres **déjà corrigés en conversation** traînaient encore : « 309 Ko » et « ~8× moins que la médiane » | § décisions déjà prises |
+| 🟠 | le **hook n'avait pas d'adresse** : posé dans `settings.local.json`, il ne protégerait qu'une machine | phase 6 |
+| 🟡 | 9 inexactitudes : « 28ᵉ fichier » (il y en a 29), « sept trous » (neuf), « quatre erreurs » (trois), 19-27 sessions (19-26), `docs/` 292 Ko (348), cartographie 29,5 Ko (32), un piège écrit **deux fois**, deux formulations périmées | partout |
+| ⚪ | 3 manques : les **décisions en suspens** n'existaient nulle part, le plan **ne se rangeait pas lui-même**, l'annexe P-C ne couvrait pas ses propres chiffres | § EN SUSPENS, phase 1, annexe |
+
+---
+
+## ⚠️ CE QUE LA RELECTURE AVAIT DÉJÀ CORRIGÉ DANS LA v1
 
 J'ai passé la v1 au même régime que le code : chaque chiffre re-mesuré par une
-commande. **Quatre affirmations étaient fausses.** Elles sont corrigées ci-dessous
-et c'est ce qui a fait naître le principe P-C.
+commande. **Trois affirmations étaient fausses**, et une quatrième ligne (E4)
+n'était pas une erreur de la v1 mais une information neuve — elle est marquée
+comme telle, parce que s'attribuer une faute qu'on n'a pas commise est encore
+une inexactitude. C'est ce constat qui a fait naître le principe P-C.
 
 | # | Ce que la v1 affirmait | Ce que la mesure dit | Conséquence |
 |---|---|---|---|
 | E1 | « 125 fichiers de vérification » | **284 fichiers**, dont **60 vrais harnais** (~959 assertions) et **224 outils jetables** | le tri de la phase 0 change d'échelle : on versionne 60 fichiers, pas 125 |
 | E2 | « `scratchpad/` est dans `.gitignore` » | vrai **mais incomplet** : il y a **DEUX** scratchpads, et le plus important est **hors du dépôt** | le risque est plus grave que décrit — voir F1 |
 | E3 | « 10 contrôles automatiques » | **29 contrôles** enchaînés par `ci.js` | la couverture existante est bien meilleure que je ne le disais |
-| E4 | « la CI est déjà longue » (sous-entendu) | **148 ms** (1,7 s avec le démarrage de node) | aucun budget de durée à défendre côté CI ; le coût est **uniquement** dans les harnais Playwright |
+| E4 *(pas une erreur : mesure neuve)* | la v1 ne parlait que de la durée des **harnais** | la CI, elle, prend **148 ms** (1,7 s avec le démarrage de node) | aucun budget de durée à défendre côté CI ; le coût est **uniquement** dans les harnais Playwright |
 
 **Une erreur de la v1 n'a PAS été corrigée mais précisée** : l'invariant
 « `where` + `orderBy` exige un index » était marqué « aucun contrôle — à créer ».
 C'est exact, mais `scripts/check-firestore-queries.js` **existe déjà** et couvre
 une règle voisine (refus du *descending key scan*). → On l'**étend**, on ne crée
-pas un 28ᵉ fichier.
+pas un 30ᵉ fichier (il y en a déjà 29).
 
 ---
 
 ## 📚 CE QUE LA RECHERCHE EXTÉRIEURE A CORRIGÉ DANS LA v2
 
 La v2 avait été vérifiée **contre le code**. Elle n'avait pas été vérifiée
-**contre l'état de l'art**. Sept trous en sont sortis, dont trois changent le
+**contre l'état de l'art**. **Neuf** constats en sont sortis (R1 → R9), dont trois changent le
 plan en profondeur. Les sources sont en annexe.
 
 ### R1 — 🔴 L'aiguillage documentaire peut être MÉCANIQUE, pas déclaratif
@@ -175,7 +200,7 @@ prouver une non-régression sur ces parcours.
 l'historique. Je relis donc du contexte inutile à chaque session, et une règle
 enfouie au milieu d'un récit du 20/07 a toutes les chances d'être manquée.
 
-Corollaire mesuré : `docs/` contient **17 fichiers (292 Ko)**, dont **6
+Corollaire mesuré : `docs/` contient **17 fichiers (348 Ko)**, dont **6
 seulement** sont cités depuis `CLAUDE.md`. **11 documents sont orphelins** —
 donc jamais ouverts.
 
@@ -225,9 +250,15 @@ préfixée de son numéro en commentaire.
 | | `app.js` actuel | `app.js` numéroté |
 |---|---|---|
 | brut | 744 342 o (727 Ko) | 864 249 o (844 Ko) |
-| **gzip — ce que P8 mesure et ce que le client télécharge** | **204,1 Ko** | **250,3 Ko** |
+| **compressé — ce que le client télécharge** | **205,0 Ko** | **250,3 Ko** |
 | plafond P8 | 205 Ko | 205 Ko |
-| verdict | marge : **0,9 Ko** | **dépassement : +45,3 Ko** |
+| verdict | marge : **0** | **dépassement : +45,3 Ko** |
+
+⚠️ *Deux outils donnent deux chiffres différents pour le même fichier :
+`gzip -9` en ligne de commande rend 204,1 Ko, `zlib.gzipSync` niveau 9 rend
+205,0 Ko. **C'est le second qui fait foi**, parce que c'est celui que le
+contrôle P8 exécute. La v4 citait les deux sans le dire, et annonçait donc une
+marge de 0,9 Ko là où elle est nulle.*
 
 **Quatre raisons de refuser, par ordre de gravité :**
 
@@ -260,17 +291,22 @@ exacte **pour toujours** et vérifiable par n'importe qui :
 
 ```
 FICHE — lvPanelAccord
-  app.js:6012–6118  @ commit 6ab57bf
-  vérifiable : git show 6ab57bf:pirates-tools/app.js | sed -n '6012,6118p'
+  app.js:6167–…  @ commit 45567e7
+  vérifiable : git show 45567e7:pirates-tools/app.js | sed -n '6167,6240p'
 ```
+*(Exemple **vérifié** le 28/07 : `grep -n "function lvPanelAccord" app.js`
+rend bien 6167. La v4 citait « 6012–6118 » — un numéro **inventé**, dans la
+section même qui prêche P-A. Corrigé, et c'est la raison pour laquelle tout
+exemple chiffré de ce plan porte désormais sa commande de vérification.)*
 
 C'est ta demande, prise au mot, et rendue **infalsifiable** : la commande
 ci-dessus affichera toujours exactement ce que j'ai lu, même dans six mois.
 
 **2. Les ancres pour la carte durable** (phase 5). Un repère nommé posé en
 commentaire (`// ══ ZONE : PAIEMENT ══`) ne se décale pas : il suit son code.
-Coût mesuré : ~150 ancres × ~40 octets ≈ **6 Ko bruts**, contre 120 000 pour la
-numérotation intégrale — **20 fois moins**, et ça reste vrai.
+Coût **mesuré** (pas estimé) : 150 repères = **+9 Ko bruts, +1,36 Ko
+compressés**, contre 120 000 octets bruts pour la numérotation intégrale —
+**13 fois moins**, et ça reste vrai.
 
 **3. `docs/ANCRES.md` — le tableau « ancre → ligne actuelle », REGÉNÉRÉ par
 commande.** C'est le point qui te donne le confort que tu cherches : tu obtiens
@@ -351,7 +387,7 @@ règle des registres de décisions (§R4), pour la même raison.
         ↓            index des zones
    ③ ZONE           PAY-03
         ↓            balayage du fichier, à l'instant
-   ④ LIGNE VIVE     app.js:6052–6141  +  api/contact.js:412–470
+   ④ LIGNE VIVE     app.js:6167–6240  +  api/contact.js:1030–…
 ```
 
 **Une seule commande parcourt les quatre étages :**
@@ -360,8 +396,8 @@ règle des registres de décisions (§R4), pour la même raison.
 $ node scripts/ou.js "règlement de la marchandise"
 
   ZONE   PAY-03 — Règlement de la marchandise par le client
-  ICI    app.js:6052–6141           (calculé à l'instant)
-         api/contact.js:412–470     course-goods-paid
+  ICI    app.js:6167–6240           (calculé à l'instant)
+         api/contact.js:1030–…      course-goods-paid
 
   INVARIANTS QUI S'APPLIQUENT ICI
    · le montant débité vient TOUJOURS du catalogue serveur
@@ -419,6 +455,16 @@ créé **en dernier**, une fois `ou.js` réellement utile — jamais avant.
 couvrent pas 100 % du fichier, il reste des terres sans nom où je peux errer.
 Quand la couverture est totale, **toute ligne appartient à exactement une zone**,
 donc l'entonnoir aboutit **toujours** — il n'a plus le droit de ne pas savoir.
+
+⚠️ **Correction de la v4 : E3 tel qu'il était écrit était infaisable.**
+`app.js` est **un seul IIFE** : les 6 premières lignes (en-tête, `(function () {`,
+`'use strict'`) et les 2 dernières (`})();`) n'appartiennent à aucun domaine
+métier. « Aucune ligne hors zone » aurait donc **toujours échoué**, ou forcé une
+zone artificielle — et un contrôle qui échoue toujours finit désactivé.
+→ Une zone **`SOC-00 — enveloppe du fichier`** couvre explicitement l'ouverture
+et la fermeture de l'IIFE. E3 exige alors une couverture réellement totale,
+**et devient tenable**. Aucune autre exception n'est admise : chaque tolérance
+supplémentaire rouvrirait une terre sans nom.
 
 ## 6. ⚠️ Ce qui bloque aujourd'hui : il n'y a plus un octet de place
 
@@ -513,7 +559,10 @@ produits.
 À la fin, une seule question tranche : **« Combien de fichiers dois-je ouvrir
 pour savoir où intervenir sur un sujet donné ? »**
 Aujourd'hui : 3 à 6 (mémoire + cartographie + recherche + code).
-Cible : **1** (l'index), puis directement le bon endroit du code.
+Cible : **zéro fichier ouvert à la main** — une commande, `node scripts/ou.js`,
+puis directement le bon endroit du code. *(La v4 disait « 1 fichier, l'index » ;
+l'entonnoir a rendu cette réponse périmée : ce n'est plus un fichier qu'on
+ouvre, c'est une commande qu'on lance.)*
 
 ## 🛑 Critère d'ARRÊT — pour que ce chantier ne dévore pas tout
 
@@ -546,8 +595,9 @@ PHASE 2  ⬜ à faire
 LOT 7.3  🔄 en cours   lu jusqu'à app.js:8420 (fiche « panier » écrite, « paiement » non)
 ```
 
-**Règle de session** : au démarrage, je lis **`docs/AVANCEMENT-FONDATIONS.md`
-en premier, et lui seul**, pour savoir quoi ouvrir ensuite. C'est le point de
+**Règle de session** : `CLAUDE.md` est chargé automatiquement, je n'y peux
+rien ; **le premier fichier que j'OUVRE volontairement** est
+`docs/AVANCEMENT-FONDATIONS.md`, et rien d'autre avant lui. C'est le point de
 reprise, et c'est aussi ce qui évite de brûler du contexte à retrouver le fil.
 
 **Règle d'écriture** : ce fichier est mis à jour **à la fin de chaque session**,
@@ -572,7 +622,7 @@ plein, soit à peu près une demi-journée d'échange soutenu.
 | 7 — Audit ligne par ligne | **7 à 10** (1+ par lot) | le lot 7.2/7.3 (`app.js` cœur) peut déborder |
 | 8 — Synthèse et découpage | **2** *(relevé en v3)* | inclut désormais les tests de caractérisation des 11 routes |
 | 9 — Corrections | **variable** | dépend entièrement de ce que l'audit trouve — **non estimable avant la phase 8** |
-| **Total hors phase 9** | **19 à 27 sessions** | |
+| **Total hors phase 9** | **19 à 26 sessions** | somme des minima / maxima, revérifiée |
 
 ⚠️ **Cette estimation est un ordre de grandeur, pas un engagement.** Si un lot
 dépasse le double de son estimation, la règle d'arrêt n°2 s'applique.
@@ -588,10 +638,36 @@ Chaque commit de ce chantier :
 - est annulable seul (`git revert`) sans casser une autre phase.
 
 **Ce que je m'interdis pendant les phases 0 à 6** : toucher à `app.js`,
-`styles.css`, `index.html`, `api/` **autrement que pour ajouter des ancres en
-commentaire** (phase 5). Les fondations ne modifient pas le produit. Toute
-modification de comportement pendant ces phases est une faute, pas une
+`styles.css`, `index.html`, `api/`. Les fondations ne modifient pas le produit.
+Toute modification de comportement pendant ces phases est une faute, pas une
 initiative.
+
+**Deux exceptions, et deux seulement** — la v4 en oubliait une, ce qui la
+rendait contradictoire avec elle-même :
+
+| Exception | Phase | Nature du risque | Encadrement |
+|---|---|---|---|
+| **ajouter des ancres en commentaire** | 5 | quasi nul (un commentaire ne s'exécute pas) | commit unique + bump du Service Worker (voir phase 5) |
+| **supprimer des fonctions orphelines** | 3 | 🔴 **réel** : c'est du code qui disparaît | voir l'encadrement ci-dessous |
+
+### 🔴 Supprimer du code mort N'EST PAS anodin
+La v4 demandait à la phase 3 de « libérer ≥ 2 Ko en supprimant les orphelines »
+tout en écrivant, deux pages plus loin, que je m'interdis de toucher à `app.js`.
+**Les deux ne pouvaient pas être vrais.** Tranché ici : la suppression est
+autorisée, mais c'est le geste le plus risqué des phases 0-6, bien plus
+qu'ajouter un commentaire.
+
+- Le graphe a des **angles morts déclarés** : `onclick` dans une chaîne de
+  caractères, délégation par `data-*`, tableaux de fonctions. Une « orpheline »
+  peut être appelée par un de ces chemins.
+- → **Une orpheline par commit**, jamais un lot. Ainsi un `git revert` cible
+  exactement la fonction fautive.
+- → Avant chaque suppression : recherche textuelle du nom **dans tout le dépôt**
+  (`app.js`, `index.html`, les harnais), pas seulement dans le graphe.
+- → Après chaque suppression : **lot complet des harnais**, pas le noyau rapide.
+- → Si les 2 Ko ne sont pas atteints sans forcer, **on n'insiste pas** : c'est
+  l'user qui tranche (relever le plafond ou poser moins de repères). Supprimer
+  du code pour tenir un chiffre serait une inversion des priorités.
 
 ---
 
@@ -623,6 +699,32 @@ Tout le reste est un **outil**, et les outils suivent une règle différente :
 - **outil réutilisable** (constructeurs de packs 3D `_gltftools/`, collages de
   posters, `_orient.js`) → versionné dans `outils/`, **sans** être lancé par la
   CI, parce que refaire un pack sans eux coûterait des jours ;
+
+### 🔴 DANGER MESURÉ — ne JAMAIS versionner les dépendances des outils
+La v4 disait « versionner `_gltftools/` ». **Mesuré :
+`_gltftools/node_modules` pèse 110 Mo**, et l'ensemble des `node_modules` du
+scratchpad **725 Mo** :
+
+| dossier | poids |
+|---|---|
+| `eagerbuild/node_modules` | 512 Mo |
+| `_gltftools/node_modules` | **110 Mo** |
+| `node_modules` (racine du scratchpad) | 69 Mo |
+| `_3dtest/node_modules` | 33 Mo |
+| `qrtest/node_modules` | 1 Mo |
+
+Un `git add outils/` naïf commiterait ces 110 Mo — et **git n'oublie jamais** :
+l'historique resterait gonflé même après suppression, il faudrait réécrire tout
+le dépôt pour le nettoyer. C'est le geste **le plus dangereux et le plus
+irréversible** de tout ce chantier.
+
+→ **Règle absolue** : on versionne **le code des outils**, jamais leurs
+dépendances. `outils/` reçoit un `package.json` (la liste de ce qu'il faut
+installer) et un `.gitignore` contenant `node_modules/`. Un contrôle CI refuse
+tout fichier de plus de **1 Mo** entrant dans `tests/` ou `outils/`.
+→ **Vérification avant le premier commit de la phase 0** :
+`git add -n outils/ tests/ | wc -l` et `du -sh` sur ce qui serait ajouté.
+On regarde AVANT, pas après.
 - **outil jetable** (captures ponctuelles, scripts d'application d'un correctif
   déjà appliqué) → **laissé mourir**, avec la liste écrite de ce qui est
   abandonné. On ne supprime rien en silence.
@@ -693,7 +795,7 @@ contexte et réduit l'adhérence aux consignes »). Et un `CLAUDE_PIRATESTOOLS.m
 ailleurs sans mécanisme de chargement = écrire des règles mortes.
 Preuve mesurée : `docs/` contient 17 fichiers, **11 ne sont cités nulle part**.
 
-### Structure cible — **révisée en v3** (voir R1, R2, R4, R9)
+### Structure cible — **révisée en v3** (R1, R2, R4, R9) **et v4** (`docs/ANCRES.md`)
 
 | Fichier | Nature | Taille visée | Chargé comment |
 |---|---|---|---|
@@ -743,6 +845,13 @@ Chaque fichier de `docs/` reçoit **une** étiquette, écrite dans l'index :
 
 ⚠️ **Aucun document n'est supprimé dans cette phase.** Archiver, c'est déplacer.
 
+⚠️ **Et ce plan-ci ?** Il doit se ranger lui-même, sinon il devient le
+18ᵉ document orphelin qu'il dénonce. Étiquette : **VIVANT tant que les phases
+0 à 9 ne sont pas soldées**, puis **ARCHIVE**. Ses acquis durables (invariants,
+décisions, règle des zones) auront alors migré dans `docs/INVARIANTS.md`,
+`docs/DECISIONS.md` et `docs/CARTOGRAPHIE.md` — un plan terminé n'a plus à être
+lu, seulement à être consultable.
+
 ### Pièges identifiés
 - ⚠️ **La perte d'information** : découper 1 499 lignes, c'est risquer de perdre
   une leçon durement acquise. → **Aucune suppression** : uniquement des
@@ -756,9 +865,6 @@ Chaque fichier de `docs/` reçoit **une** étiquette, écrite dans l'index :
   aujourd'hui). → Contrôle CI : **chaque fichier de `docs/` est cité** au moins
   une fois depuis l'aiguillage, directement ou en cascade. Les archives sont
   citées collectivement, via `docs/archives/`.
-- ⚠️ **Le doublon de mémoire** : un second `CLAUDE.md` a été créé par erreur
-  **deux fois** dans `pirates-tools/`. → Contrôle CI : **il n'existe qu'un seul
-  `CLAUDE.md` dans le dépôt**, à la racine. Contrôle trivial, incident réel.
 - ⚠️ **Les acquis de méthode transférables** : `CLAUDE.md` contient des leçons
   qui ne concernent pas ce site (elles vaudraient pour n'importe quel projet).
   → Elles vont dans `docs/METHODE-TRAVAIL.md`, pas dans les règles du site.
@@ -961,13 +1067,46 @@ déjà crevé.**
 4. **`docs/ANCRES.md`** — le tableau *zone → ligne actuelle*, **régénéré par
    commande**. La numérotation demandée par l'user, toujours à jour parce que
    jamais stockée, et **0 octet livré au client**.
-5. **`docs/CARTOGRAPHIE.md` refondue** (29,5 Ko existants à reprendre), indexée
+5. **`docs/CARTOGRAPHIE.md` refondue** (32 Ko existants à reprendre), indexée
    par zone et non par numéro de ligne.
 6. **Contrôles E1 / E2 / E3** dans la CI (voir Entonnoir §5).
 
 ⚠️ **C'est la seule phase 0-6 qui touche au code** — et uniquement pour ajouter
 des commentaires. Aucun comportement modifié : la CI et le lot complet des
 harnais doivent être verts avant **et** après, à l'identique.
+
+### 🔴 LE GESTE QUI PEUT CASSER LE SITE — le bump du Service Worker
+**La v4 ne le mentionnait nulle part. C'est le seul endroit de tout le chantier
+qui touche la production.**
+
+Modifier `app.js` — même pour n'y ajouter que des commentaires — est un
+**changement d'asset**. La règle du projet, vérifiée par `check-asset-versions`,
+impose alors d'aligner **quatre choses d'un seul coup** :
+
+| | quoi |
+|---|---|
+| 1 | `sw.js` → `VERSION = 'pt-vN'` |
+| 2 | `sw.js` → `ASSET_VER = 'N'` |
+| 3 | `index.html` → `app.js?v=N` **et** `styles.css?v=N` |
+| 4 | `sw.js` → `APP_SHELL` référence les mêmes `?v=N` |
+
+**Deux pannes réelles de ce projet viennent de là**, et elles sont dans le
+journal :
+- **v314 — écran noir.** `app.js?v=NOUVEAU` absent du cache du Service Worker
+  + un hoquet réseau → l'application ne s'exécutait jamais, page noire muette.
+- **v374 — mélange stale/frais.** Un numéro de version **réutilisé** : deux
+  contenus différents publiés sous le même numéro, des visiteurs servis moitié
+  ancien moitié nouveau.
+
+→ **Règles pour la phase 5**, non négociables :
+- **un seul commit** pose toutes les ancres et fait le bump — jamais deux
+  commits, jamais un bump oublié ;
+- **jamais un numéro déjà utilisé**, même après un revert ;
+- `node scripts/ci.js` doit être vert (c'est `check-asset-versions` qui
+  l'atteste), et l'user **recharge DEUX fois** avant de conclure — un Service
+  Worker corrigé ne prend la main qu'au chargement suivant ;
+- si quoi que ce soit cloche, **`git revert` du commit unique** remet le site
+  exactement dans son état d'avant. C'est pour ça qu'il doit être unique.
 
 ### Pièges identifiés
 - ⚠️ **Les numéros de ligne mentent dès le commit suivant.** C'est le défaut
@@ -1038,6 +1177,14 @@ obligatoire plutôt que disponible (voir Entonnoir §4).
 par un drapeau explicite** : une porte qui bloque du travail légitime finit
 désactivée, et emporte la protection réelle avec elle.
 
+⚠️ **Où vit ce hook — la v4 ne le disait pas, et ça compte.** Il n'existe
+aujourd'hui **aucun** `.claude/settings.json` dans le dépôt (vérifié). Le hook
+doit être posé dans **`.claude/settings.json` VERSIONNÉ**, pas dans
+`settings.local.json` : dans le second cas il ne protégerait que la machine où
+il a été écrit, et disparaîtrait au prochain conteneur — exactement le défaut
+que la phase 0 corrige pour les harnais. Créer ce fichier est donc un livrable
+en soi, et il est **le seul fichier de configuration** que ce chantier ajoute.
+
 **Procédurales (seulement si l'automatisation est impossible)** — une liste
 courte. Chaque entrée dit **pourquoi** elle n'est pas automatisable.
 
@@ -1092,6 +1239,14 @@ relire 38 000 lignes sans savoir ce qui est déjà vérifié.
 | 7.6 | `index.html` + `styles.css` | la structure et le visuel |
 | 7.7 | `scripts/` — auditer les auditeurs | un contrôle faux est pire que pas de contrôle |
 
+⚠️ **Limite assumée du lot 7.7** : la phase 6 vient d'ajouter des portes dans
+`scripts/`. Les auditer au lot 7.7, c'est **me relire moi-même**, à quelques
+sessions d'écart. Ça vaut mieux que rien, mais ça ne vaut pas une relecture
+extérieure. → Pour ces portes-là précisément, le vrai contrôle n'est pas la
+relecture : c'est le **sabotage**, qui ne dépend pas de mon jugement. Le lot 7.7
+vérifie donc en priorité que **chaque porte a bien son sabotage tracé**, et
+seulement ensuite lit le code.
+
 **Question tranchée** : `api/` passe **avant** la livraison, alors même que la
 livraison est le code le plus récent. Motif : un défaut dans `api/` touche
 l'argent réel de l'user et de ses clients ; un défaut de livraison touche un
@@ -1104,10 +1259,15 @@ parcours qui n'est pas encore ouvert au public.
    **En-tête obligatoire, format figé** *(v4)* :
    ```
    FICHE — PAY-03 — Règlement de la marchandise par le client
-     app.js:6052–6141  @ commit d23d43d
-     vérifiable : git show d23d43d:pirates-tools/app.js | sed -n '6052,6141p'
+     app.js:6167–6240  @ commit 45567e7
+     vérifiable : git show 45567e7:pirates-tools/app.js | sed -n '6167,6240p'
      retrouvable : node scripts/ou.js PAY-03
    ```
+   ⚠️ **Les numéros ci-dessus sont réels, pas illustratifs.** La v4 en donnait
+   d'inventés (`6012–6118`, `api/contact.js:412–470`) : dans un plan qui pose
+   P-A, un exemple faux est la pire des fautes, parce qu'il enseigne l'erreur.
+   **Règle : aucun exemple chiffré n'entre dans un document sans avoir été
+   exécuté.**
    Trois références, chacune pour un usage différent :
    - le **numéro de zone** est l'identité durable — il ne bougera jamais ;
    - la **plage de lignes + empreinte de commit** fige la photographie : dans
@@ -1295,11 +1455,30 @@ Pour chaque correctif :
 
 ---
 
+## ⏳ EN SUSPENS — décisions posées à l'user, jamais tranchées
+
+Ces trois points ont été proposés en conversation le 28/07 et **n'ont pas reçu
+de réponse** — la discussion est passée à autre chose. Sans être écrits ici, ils
+seraient purement et simplement perdus. Ils n'engagent rien tant que l'user
+n'a pas tranché.
+
+| # | Proposition | Pourquoi elle a été faite | État |
+|---|---|---|---|
+| S1 | **Un plafond sur le TOTAL du texte chargé à froid** (368 Ko aujourd'hui) | un plafond *par fichier* se contourne tout seul : découper `app.js` en cinq fichiers ferait passer tous les plafonds au vert **sans qu'un octet ne disparaisse** | ⏳ non tranché |
+| S2 | **Un plafond par image, distinct selon le rôle** — serré sur les vignettes, large sur les héros | mesuré : le plus gros héros pèse **871 Ko**, soit plus du double de tout le code du site, et **rien ne le surveille**. ⚠️ Deux budgets selon le rôle, **jamais un seul** : l'user exige des visuels de très haute qualité, la qualité n'est **jamais** la variable d'ajustement | ⏳ non tranché |
+| S3 | **Les 1,36 Ko des repères de zone** | +0,37 % du poids total, en échange d'un système de navigation durable. Cela reste **une décision, pas un effet de bord d'un plafond relevé** | ⏳ non tranché |
+
+⚠️ **Ces trois lignes migrent dans `docs/DECISIONS.md` dès la phase 1**, avec le
+statut que l'user leur donnera. Une proposition sans réponse n'est pas un accord.
+
+---
+
 ## Ce qui n'est PAS dans ce plan — décisions déjà prises
 - ❌ **Minification** : écartée par l'user (28/07/2026). Motif : ajoute une étape
   de fabrication entre le `git push` et le site, donc un risque, pour un gain sur
-  un poids déjà bon (309 Ko au premier chargement, ~8× moins que la médiane
-  e-commerce).
+  un poids déjà bon : **368 Ko de texte au premier chargement** (mesuré), soit
+  **~3,5× moins** que la médiane e-commerce — *et non « 309 Ko, 8× moins »,
+  chiffres donnés de mémoire puis corrigés par la mesure le 28/07*.
 - ❌ **Refonte d'architecture avant lancement** : écartée. Le découpage sera
   incrémental, fondé sur le graphe, module par module.
 - ❌ **Correction des défauts pendant l'audit** : phase 9 séparée, priorisée par
@@ -1353,6 +1532,20 @@ grep -oE "docs/[A-Za-z0-9._-]+\.md" CLAUDE.md | sort -u | wc -l
 # volume du code
 wc -l pirates-tools/app.js pirates-tools/styles.css pirates-tools/index.html
 find pirates-tools/api -name '*.js' | xargs wc -l | tail -1
+
+# entonnoir : un repère nommé se réajuste-t-il vraiment ? (section Entonnoir §1)
+grep -n "@zone PAY-03" app.js        # -> le numéro de ligne, recalculé à l'instant
+
+# coût des 150 repères de zone (section Entonnoir §6)
+#   +9 Ko bruts / +1,36 Ko compressés, mesuré en insérant 150 lignes de commentaire
+#   puis en comparant zlib.gzipSync(level 9) avant / après
+
+# poids réels du site (section « ce qui n'est pas dans ce plan »)
+node -e 'const z=require("zlib"),f=require("fs");["index.html","styles.css","app.js","products.json","firebase-init.js","sw.js"].forEach(x=>console.log(x,(z.gzipSync(f.readFileSync(x),{level:9}).length/1024).toFixed(1),"Ko"))'
+
+# vérifier un exemple cité dans ce plan AVANT de l'écrire (règle v5)
+grep -n "function lvPanelAccord" app.js
+grep -n "course-goods-paid" api/contact.js
 
 # coût réel d'une numérotation de chaque ligne (section « numérotation »)
 awk '{printf "/*%d*/%s\n", NR, $0}' app.js > /tmp/num.js
