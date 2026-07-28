@@ -6,7 +6,8 @@ process.env.RESEND_API_KEY = 'test';
 process.env.OWNER_EMAIL = 'owner@test.invalid';
 process.env.ALLOWED_ORIGINS = 'https://pirates-tools.com';
 import { createRequire } from 'node:module';
-const require = createRequire('/home/user/ish/pirates-tools/');
+import { RACINE } from './_socle.mjs';
+const require = createRequire(RACINE + '/');
 let pass = 0, fail = 0;
 const T = (n, ok, x = '') => { ok ? pass++ : fail++; console.log((ok ? '✅' : '❌') + ' ' + n + (x ? ' — ' + x : '')); };
 

@@ -1,10 +1,12 @@
 // BULLE DE DISCUSSION : accessible partout, rien chargé avant le 1er clic.
-import pkg from '/opt/node22/lib/node_modules/playwright/index.js';
+import { sortie, RACINE } from './_socle.mjs';
+import { playwright } from './_socle.mjs';
+const pkg = await playwright();
 const { chromium } = pkg;
 import http from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
-const ROOT='/home/user/ish/pirates-tools';
+const ROOT = RACINE;
 const MIME={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.webp':'image/webp','.png':'image/png','.jpg':'image/jpeg','.svg':'image/svg+xml','.webmanifest':'application/manifest+json'};
 const server=http.createServer(async(req,res)=>{try{let p=decodeURIComponent(req.url.split('?')[0]);if(p==='/')p='/index.html';
  const fp=normalize(join(ROOT,p));if(!fp.startsWith(ROOT)){res.writeHead(403);return res.end();}
@@ -165,7 +167,7 @@ for (const h of ['#/catalogue','#/mes-livraisons','#/livraison']) {
   await boot(h);
   T('  présente sur '+h, await page.evaluate(()=>!document.getElementById('chatBubble').hidden));
 }
-await page.locator('body').screenshot({path:'/tmp/claude-0/-home-user-ish/5fdd6ad4-f914-5559-9038-8318b9646f86/scratchpad/bulle.png'}).catch(()=>{});
+await page.locator('body').screenshot({path:join(await sortie('captures'), 'bulle.png')}).catch(()=>{});
 console.log('\n'+pass+' OK / '+fail+' KO');
 await browser.close();server.close();
 process.exit(fail?1:0);

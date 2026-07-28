@@ -1,6 +1,9 @@
 // PLAN 9 — contrôles SERVEUR de la nouvelle chaîne de l'accord (28/07/2026).
 // Le serveur est l'autorité : l'interface n'est jamais la sécurité.
-import lib from '/home/user/ish/pirates-tools/api/_lib/courses.js';
+import { RACINE } from './_socle.mjs';
+import { pathToFileURL } from 'node:url';
+import { join } from 'node:path';
+const lib = (await import(pathToFileURL(join(RACINE, 'api/_lib/courses.js')).href)).default;
 let pass = 0, fail = 0;
 const T = (n, ok, x = '') => { ok ? pass++ : fail++; console.log((ok ? '✅' : '❌') + ' ' + n + (x ? ' — ' + x : '')); };
 

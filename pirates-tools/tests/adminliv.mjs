@@ -1,11 +1,13 @@
 // L'administration doit distinguer un DOSSIER à traiter d'un LIVREUR ACTIF.
 // On extrait les vraies fabriques de balisage d'app.js et on les exécute.
-import pkg from '/opt/node22/lib/node_modules/playwright/index.js';
+import { sortie, RACINE } from './_socle.mjs';
+import { playwright } from './_socle.mjs';
+const pkg = await playwright();
 const { chromium } = pkg;
 import http from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
-const ROOT='/home/user/ish/pirates-tools';
+const ROOT = RACINE;
 const MIME={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.webp':'image/webp','.png':'image/png','.jpg':'image/jpeg','.svg':'image/svg+xml','.webmanifest':'application/manifest+json'};
 const server=http.createServer(async(req,res)=>{try{let p=decodeURIComponent(req.url.split('?')[0]);if(p==='/')p='/index.html';
  const fp=normalize(join(ROOT,p));if(!fp.startsWith(ROOT)){res.writeHead(403);return res.end();}
@@ -107,7 +109,7 @@ T('  chaque livreur actif peut voir son accès retiré', r.retraitAcces === 2, '
 console.log('\n— dossier REFUSÉ —');
 T('  il propose « Réactiver »', r.refuseAReactiver);
 
-await page.locator('#__admLiv').screenshot({path:'/tmp/claude-0/-home-user-ish/5fdd6ad4-f914-5559-9038-8318b9646f86/scratchpad/admin-livreurs.png'});
+await page.locator('#__admLiv').screenshot({path:join(await sortie('captures'), 'admin-livreurs.png')});
 console.log('\n'+pass+' OK / '+fail+' KO   → capture : admin-livreurs.png');
 await browser.close();server.close();
 process.exit(fail?1:0);

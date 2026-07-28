@@ -4,12 +4,13 @@
 //  3. le mode de règlement vient du livreur, pas d'un choix du client
 //  4. date/heure/dépôt/précisions posés À LA COMMANDE, jamais redemandés
 //  5. bandeau vert : clignote, « voir les détails », puis ✅ / ✕
-import pkg from '/opt/node22/lib/node_modules/playwright/index.js';
+import { playwright, RACINE } from './_socle.mjs';
+const pkg = await playwright();
 const { chromium } = pkg;
 import http from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
-const ROOT = '/home/user/ish/pirates-tools';
+const ROOT = RACINE;
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.webp': 'image/webp', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.webmanifest': 'application/manifest+json' };
 const server = http.createServer(async (req, res) => {
   try {

@@ -2,12 +2,13 @@
 // toujours là ; quand je clique, ça rouvre la commande annulée » (28/07/2026).
 // + « la demande doit mettre l'article au panier : on annule la COURSE, pas la
 //   commande — le produit reste au panier, il n'y a plus qu'à redemander ».
-import pkg from '/opt/node22/lib/node_modules/playwright/index.js';
+import { playwright, RACINE } from './_socle.mjs';
+const pkg = await playwright();
 const { chromium } = pkg;
 import http from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
-const ROOT = '/home/user/ish/pirates-tools';
+const ROOT = RACINE;
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.webp': 'image/webp', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.webmanifest': 'application/manifest+json' };
 const server = http.createServer(async (req, res) => {
   try {

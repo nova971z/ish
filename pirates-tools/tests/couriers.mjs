@@ -5,12 +5,13 @@
 //  D. #/mode-livraison → panneau tarifs : carte pleine largeur, saisie en direct,
 //     interrupteur de disponibilité.
 //  E. Espace client → fil de discussion présent dès que la course est acceptée.
-import pkg from '/opt/node22/lib/node_modules/playwright/index.js';
+import { playwright, RACINE } from './_socle.mjs';
+const pkg = await playwright();
 const { chromium } = pkg;
 import http from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
-const ROOT = '/home/user/ish/pirates-tools';
+const ROOT = RACINE;
 const MIME = { '.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.webp':'image/webp','.png':'image/png','.webmanifest':'application/manifest+json','.svg':'image/svg+xml' };
 const server = http.createServer(async (req,res)=>{
   try { let p = decodeURIComponent(req.url.split('?')[0]); if (p==='/') p='/index.html';

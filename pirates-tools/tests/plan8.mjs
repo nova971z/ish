@@ -5,12 +5,13 @@
 //  4. livreur : « Historique de course » replié, TOUT EN BAS, courses finies SEULEMENT
 //  5. livreur : pastille orange « Statut : en cours », et la grosse fiche
 //     DISPARAÎT quand la course est terminée
-import pkg from '/opt/node22/lib/node_modules/playwright/index.js';
+import { playwright, RACINE } from './_socle.mjs';
+const pkg = await playwright();
 const { chromium } = pkg;
 import http from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
-const ROOT = '/home/user/ish/pirates-tools';
+const ROOT = RACINE;
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.webp': 'image/webp', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.webmanifest': 'application/manifest+json' };
 const server = http.createServer(async (req, res) => {
   try {

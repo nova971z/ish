@@ -1,11 +1,13 @@
 // Le bandeau et le point doivent s'allumer ET s'éteindre POUR DE VRAI :
 // on mesure les couleurs et la lueur calculées, pas les classes.
-import pkg from '/opt/node22/lib/node_modules/playwright/index.js';
+import { sortie, RACINE } from './_socle.mjs';
+import { playwright } from './_socle.mjs';
+const pkg = await playwright();
 const { chromium } = pkg;
 import http from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
-const ROOT='/home/user/ish/pirates-tools';
+const ROOT = RACINE;
 const MIME={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.webp':'image/webp','.png':'image/png','.jpg':'image/jpeg','.svg':'image/svg+xml','.webmanifest':'application/manifest+json'};
 const server=http.createServer(async(req,res)=>{try{let p=decodeURIComponent(req.url.split('?')[0]);if(p==='/')p='/index.html';
  const fp=normalize(join(ROOT,p));if(!fp.startsWith(ROOT)){res.writeHead(403);return res.end();}
@@ -77,7 +79,7 @@ T('  sans horaires + allumé : en service', sansH.classeOn);
 console.log('\n— LISIBILITÉ —');
 T('  le point mesure au moins 10 px', parseFloat(on.taillePoint) >= 10, on.taillePoint);
 
-await page.locator('#__svc').screenshot({path:'/tmp/claude-0/-home-user-ish/5fdd6ad4-f914-5559-9038-8318b9646f86/scratchpad/service.png'});
+await page.locator('#__svc').screenshot({path:join(await sortie('captures'), 'service.png')});
 console.log('\n'+pass+' OK / '+fail+' KO   → capture : service.png');
 await browser.close();server.close();
 process.exit(fail?1:0);

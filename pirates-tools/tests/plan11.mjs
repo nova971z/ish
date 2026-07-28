@@ -4,12 +4,13 @@
 //  P4 l'historique montre les VRAIS statuts (annulée ≠ terminée)
 //  P5 un échec réseau ne fait plus DISPARAÎTRE l'annuaire de l'accueil
 //  P6 dans la bulle, on distingue qui écrit (compte jouant les deux rôles)
-import pkg from '/opt/node22/lib/node_modules/playwright/index.js';
+import { playwright, RACINE } from './_socle.mjs';
+const pkg = await playwright();
 const { chromium } = pkg;
 import http from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
-const ROOT = '/home/user/ish/pirates-tools';
+const ROOT = RACINE;
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.webp': 'image/webp', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.webmanifest': 'application/manifest+json' };
 const server = http.createServer(async (req, res) => {
   try {
