@@ -90,6 +90,12 @@ const NON_PERSONNEL = {
   _currentTerritory: 'préférence d\'affichage (territoire fiscal), pas une identité',
   _partnersPromise:  'cache de l\'annuaire PUBLIC des artisans',
   _couriersPromise:  'cache de l\'annuaire PUBLIC des livreurs',
+  // Filets « échec ≠ vide » : dernière liste RÉUSSIE des deux annuaires
+  // PUBLICS. Aucune donnée de compte — ce sont les mêmes fiches que voit un
+  // visiteur non connecté. Les resservir après un hoquet réseau évite que la
+  // section disparaisse de l'accueil (défaut vécu le 28/07/2026).
+  _couriersDernier:  'dernier succès de l\'annuaire PUBLIC des livreurs',
+  _partnersDernier:  'dernier succès de l\'annuaire PUBLIC des artisans',
   _partnerJoinBound: 'drapeau de liaison unique du formulaire, sans donnée',
   _currentUser:      'l\'utilisateur lui-même — écrasé à chaque verdict d\'auth',
   _userProfile:      'remis à null dans la branche « pas d\'utilisateur »',

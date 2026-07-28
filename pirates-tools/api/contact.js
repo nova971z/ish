@@ -750,7 +750,7 @@ async function handleCourses(req, body, cfg, res) {
     }
     const cc = await coursesLib.createFromIntent(db, pi, { uid, email });
     if (cc.created) {
-      await coursesLib.alertNewCourse(cc.course, cc.id);
+      await coursesLib.alertNewCourse(cc.course, cc.id, db);
       // Confirmation de paiement au CLIENT — gardée par cc.created, donc
       // jamais envoyée deux fois si le webhook a déjà créé la course.
       await coursesLib.confirmToClient(cc.course, cc.id);
@@ -869,7 +869,7 @@ async function handleCourses(req, body, cfg, res) {
     }
     if (!course.address) return res.status(400).json({ ok: false, error: 'Adresse du chantier requise.' });
     const ref = await db.collection('courses').add(course);
-    await coursesLib.alertNewCourse(course, ref.id);
+    await coursesLib.alertNewCourse(course, ref.id, db);   // db → alerte les livreurs VALIDÉS
     return res.status(200).json({
       ok: true, id: ref.id,
       course: { id: ref.id, km: course.km, zone: course.zone, code: course.code }

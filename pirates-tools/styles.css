@@ -116,7 +116,6 @@ overscroll-behavior-y: auto;
 }
 
 /* Couche de masquage du hero après scroll — désactivée */
-/* body.after-hero::after removed */
 
 img, svg, video { max-width: 100%; height: auto; display: block; }
 a { color: inherit; text-decoration: none; }
@@ -4107,11 +4106,6 @@ gap: .6rem;
 animation: toast-in .18s ease-out both;
 }
 
-.toast__icon { font-size: 1.1rem; line-height: 1; }
-.toast__body { flex: 1; color: #d8e6f1; }
-.toast__close { background: transparent; border: 0; color: #9fb4c5; cursor: pointer; font-size: 1.1rem; }
-.toast--success .toast__icon { filter: drop-shadow(0 0 8px rgba(0,225,180,.45)); }
-.toast--error .toast__icon { filter: drop-shadow(0 0 8px rgba(255,80,80,.45)); }
 
 @keyframes toast-in { from { transform: translateY(8px); opacity: 0; } to { transform: none; opacity: 1; } }
 
@@ -7973,7 +7967,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .pdp-deliv-fields .lv-field { min-width: 0; }
 /* ═══ §49 — MODE LIVRAISON (espace livreur) ═══════════════════════════════════ */
 .courier-space { max-width: 780px; display: grid; gap: 1rem; }
-@media (max-width: 700px) { .courier-cols { grid-template-columns: 1fr; } }
 .acc-hero__actions { margin-left: auto; align-self: center; display: flex; flex-direction: column; gap: .55rem; }
 .acc-hero__actions .btn { white-space: nowrap; text-align: center; }
 @media (max-width: 560px) { .acc-hero__actions { margin-left: 0; width: 100%; } }
@@ -8117,8 +8110,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .courier-prof__ph { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; background: rgba(255,255,255,.06); display: grid; place-items: center; font-size: 2.4rem; flex: 0 0 auto; }
 .courier-prof__id h1 { margin: 0 0 .2rem; }
 .courier-prof__meta { margin: 0; font-size: .9rem; color: var(--muted, #c9c9d9); }
-.courier-prof__dispo.is-on { color: #6ee7b7; }
-.courier-prof__dispo.is-off { color: var(--muted, #c9c9d9); }
 
 /* Discussion directe : le fil occupe toute la largeur (pas de colonne de
    boutons comme dans le chat d'une course — il n'y a ni accord ni paiement
@@ -8522,6 +8513,31 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 @media (prefers-reduced-motion: no-preference) {
   .lv-statut--wait .lv-statut__dot { animation: lv-pulse 1.8s ease-in-out infinite; }
 }
+
+/* Sélecteur « j'écris en tant que » — n'apparaît que sur un compte qui joue
+   les deux rôles. Le bouton actif dit de quel côté partiront les messages. */
+.chat-role {
+  display: flex; align-items: center; gap: .4rem; flex-wrap: wrap;
+  padding: .45rem .7rem; border-bottom: 1px solid rgba(255,255,255,.1);
+  background: rgba(255,255,255,.03);
+}
+.chat-role__l { font-size: .74rem; color: var(--muted, #9aa4b2); }
+.chat-role__b {
+  padding: .22rem .55rem; border-radius: 999px; cursor: pointer;
+  font-size: .74rem; font-weight: 800;
+  border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.05); color: #c9c9d9;
+}
+.chat-role__b.is-on {
+  border-color: rgba(var(--accent-rgb), .7); background: rgba(var(--accent-rgb), .28); color: #fff;
+}
+
+/* Pastilles de STATUT sur les cartes de course. Avant, toute course « à moi »
+   affichait « ✅ Par toi » : une annulée et une terminée se lisaient pareil.
+   La couleur porte l'information autant que le mot (défaut vécu 28/07/2026). */
+.lv-st--wait { background: rgba(251,146,60,.18) !important; color: #fdba74 !important; }
+.lv-st--go   { background: rgba(96,165,250,.18) !important; color: #93c5fd !important; }
+.lv-st--ok   { background: rgba(52,211,153,.18) !important; color: #6ee7b7 !important; }
+.lv-st--no   { background: rgba(248,113,113,.18) !important; color: #fca5a5 !important; }
 
 /* ── SIGNET « en cours » ───────────────────────────────────────────────────
    Le petit marqueur orange néon qui porte la course tant qu'elle tourne

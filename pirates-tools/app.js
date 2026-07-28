@@ -3703,6 +3703,7 @@
       .sort(function (a, b) { return (Number(a.order) || 0) - (Number(b.order) || 0); });
   }
 
+  var _partnersDernier = null;     // dernière liste RÉUSSIE (filet en cas d'échec)
   function loadPartners() {
     if (_partnersPromise) return _partnersPromise;
     if (Array.isArray(window.PT_PARTNERS_FIXTURE)) {
@@ -3719,10 +3720,13 @@
             p.id = d.id;
             list.push(p);
           });
-          resolve(normalizePartners(list));
+          _partnersDernier = normalizePartners(list);
+          resolve(_partnersDernier.slice());
         }).catch(function () {
+          // Même règle que pour les livreurs : un échec réseau ne doit JAMAIS
+          // se traduire par un annuaire vide, donc par une section masquée.
           _partnersPromise = null; // erreur réseau → retenter à la prochaine visite
-          resolve([]);
+          resolve(_partnersDernier ? _partnersDernier.slice() : []);
         });
       });
     });
@@ -4270,6 +4274,7 @@
   // (règle Firestore : lecture publique, écriture serveur seule). Aucune donnée
   // KYC/email n'y figure jamais.
   var _couriersPromise = null;
+  var _couriersDernier = null;     // dernière liste RÉUSSIE (filet en cas d'échec)
   function loadCouriers(force) {
     if (force) _couriersPromise = null;
     if (_couriersPromise) return _couriersPromise;
@@ -4297,8 +4302,15 @@
             if (nb !== na) return nb - na;
             return (b.coursesDone || 0) - (a.coursesDone || 0);
           });
+          _couriersDernier = list.slice();     // dernier succès : filet anti-disparition
           resolve(list);
-        }).catch(function () { _couriersPromise = null; resolve([]); });
+        }).catch(function () {
+          // 🐛 « des fois les livreurs ne s'affichent plus » (28/07/2026) : un
+          // hoquet réseau résolvait à [], l'appelant en concluait « aucun » et
+          // MASQUAIT la section. ÉCHEC ≠ VIDE : on resert le dernier succès.
+          _couriersPromise = null;
+          resolve(_couriersDernier ? _couriersDernier.slice() : []);
+        });
       });
     });
     return _couriersPromise;
@@ -4568,6 +4580,10 @@
   function lvAlertMaj(dispo) {
     var e = lvAlertEls();
     if (!e.box) return;
+    // ⚠️ PIÈGE DU SONDAGE : si les détails sont DÉPLIÉS, le livreur est en
+    // train de les lire. Les réécrire les refermerait sous ses yeux, en plein
+    // milieu de sa décision. On ne touche à rien tant qu'il lit.
+    if (e.det && !e.det.hidden) return;
     var c = (dispo || []).filter(function (x) { return !_alertIgnorees[x.id]; })[0];
     if (!c) { lvAlertCacher(); return; }
     _alertCourante = c;
@@ -4607,6 +4623,20 @@
     };
     e.x.onclick = ecarter;
     if (e.no) e.no.onclick = ecarter;
+  }
+  // 🐛 « le bandeau ne s'affiche que sur la page du livreur » (28/07/2026) :
+  // il n'était chargé QU'UNE FOIS, au verdict d'auth — une course déposée
+  // après l'ouverture n'apparaissait jamais. Sondage 45 s (~80 req/h, plafond
+  // 400), RIEN quand l'onglet est caché, rattrapage au retour au premier plan.
+  var _alertTimer = null;
+  var LV_ALERT_MS = 45000;
+  function lvAlertPlanifier() {
+    if (_alertTimer) { clearInterval(_alertTimer); _alertTimer = null; }   // jamais deux minuteries
+    if (!_currentUser) return;
+    _alertTimer = setInterval(function () {
+      if (document.hidden) return;
+      lvAlertCharger();
+    }, LV_ALERT_MS);
   }
   // Charge les courses disponibles pour alimenter le bandeau, UNIQUEMENT si le
   // compte est bien livreur. Un client ne doit jamais voir ce bandeau.
@@ -4709,10 +4739,17 @@
       var courses = (rep[0] && rep[0].ok && rep[0].mine) || [];
       courses.forEach(function (c) {
         if (!c.chatOpen) return;
+        // 🐛 « on ne distingue plus qui envoie » (28/07/2026) : le rôle venait
+        // de `c.mine` SEUL. Sur un compte qui joue les DEUX côtés, `mine` et
+        // `acceptedByMe` sont vrais → la bulle le prenait toujours pour le
+        // client, tous ses envois partaient du même côté. En usage réel le
+        // calcul était juste : on ajoute seulement le choix quand c'est double.
         var moiClient = !!c.mine;
+        var double = !!(c.mine && c.acceptedByMe);
         fils.push({
           type: 'course', id: c.id, round: c.round || 1,
           role: moiClient ? 'client' : 'livreur',
+          double: double,
           titre: (moiClient ? '🛵 ' + (c.courierName || 'Mon livreur') : '👤 Mon client'),
           sous: 'Course · ' + escapeHTML(String(c.address || '').slice(0, 34))
         });
@@ -4772,6 +4809,10 @@
     // Rouvrir la bulle repart de la liste.
     if (e.titre) e.titre.textContent = f.titre;
     if (e.zoneEnvoi) e.zoneEnvoi.hidden = false;
+    // COMPTE QUI JOUE LES DEUX RÔLES (test) : sans ce choix, tous les messages
+    // partiraient du même côté et on ne saurait plus qui parle. Le sélecteur
+    // n'apparaît QUE dans ce cas — un vrai client ne le voit jamais.
+    lvDockRoleSelecteur(f);
     if (e.body) e.body.innerHTML = '<p class="lv-hint">Chargement…</p>';
     var chemin = f.type === 'course'
       ? ['courses', String(f.id), 'messages']
@@ -4783,6 +4824,33 @@
     // d'authentification, et on réessaie UNE fois si la lecture est refusée
     // (le jeton peut arriver une fraction de seconde plus tard).
     whenAuthReady().then(function () { lvDockBrancherFil(f, chemin, 0); });
+  }
+
+  // Sélecteur « j'écris en tant que… », affiché UNIQUEMENT quand le compte est
+  // à la fois le client et le livreur de la course. Changer de rôle re-rend le
+  // fil : les bulles basculent de côté immédiatement, sans rechargement.
+  function lvDockRoleSelecteur(f) {
+    var hote = document.getElementById('chatRole');
+    if (!hote) return;
+    if (!f.double) { hote.hidden = true; hote.innerHTML = ''; return; }
+    hote.hidden = false;
+    // ⚠️ Classe calculée AVANT : concaténer au milieu de `class="…"` trompe le
+    // contrôleur statique (il lirait `data-role="client"` comme une classe).
+    var bouton = function (role, txt) {
+      var cls = 'chat-role__b' + (f.role === role ? ' is-on' : '');
+      return '<button type="button" class="' + cls + '" data-role="' + role + '">' + txt + '</button>';
+    };
+    hote.innerHTML = '<span class="chat-role__l">J\'écris en tant que</span>'
+      + bouton('client', '👤 Client') + bouton('livreur', '🛵 Livreur');
+    var btns = hote.querySelectorAll('[data-role]');
+    for (var i = 0; i < btns.length; i++) {
+      (function (b) {
+        b.onclick = function () {
+          f.role = b.getAttribute('data-role');
+          lvDockFil(f);                       // re-rend : les bulles changent de côté
+        };
+      })(btns[i]);
+    }
   }
 
   function lvDockBrancherFil(f, chemin, essai) {
@@ -5805,6 +5873,26 @@
   // Course SOLDÉE : plus rien à y faire. Seule source de vérité du partage
   // « en cours » (grosse fiche) / « historique » (bloc replié tout en bas).
   function lvFini(c) { return c.status === 'terminee' || c.status === 'annulee'; }
+  // 🐛 « dans l'historique elles sont toutes validées alors qu'il y en a eu
+  // deux annulées » (28/07/2026) : la pastille affichait « ✅ Par toi » dès que
+  // la course était à moi, jamais le STATUT réel. Annulée et terminée se
+  // lisaient donc à l'identique. Ces helpers disent la vérité, mot + couleur.
+  var LV_STATUTS = {
+    en_attente: { t: 'En attente', c: 'lv-st--wait' },
+    acceptee:   { t: 'Acceptée',   c: 'lv-st--go' },
+    confirmee:  { t: 'Commandée',  c: 'lv-st--go' },
+    livree:     { t: 'Livrée',     c: 'lv-st--go' },
+    terminee:   { t: '✅ Terminée', c: 'lv-st--ok' },
+    annulee:    { t: '❌ Annulée',  c: 'lv-st--no' }
+  };
+  function lvStatutCourt(c) {
+    var s = LV_STATUTS[c && c.status];
+    return s ? s.t : escapeHTML(String((c && c.status) || '—'));
+  }
+  function lvStatutClasse(c) {
+    var s = LV_STATUTS[c && c.status];
+    return s ? s.c : 'lv-st--wait';
+  }
   // Prix affichable d'une course, SANS jamais inventer de montant :
   //   • course pré-payée (ancien flux) → le montant réellement débité ;
   //   • accord validé → le prix convenu ENTRE EUX ;
@@ -6116,9 +6204,24 @@
             + (isClient ? ' Ouvre le panneau « Ma marchandise ».' : ' On te préviendra par email dès que c\'est fait.') + '</div>');
     }
     var moiOk = isClient ? a.okClient : a.okLivreur;
+    if (!isClient) {
+      // 💶 LE LIVREUR PEUT REVOIR SON PRIX tant que le client n'a pas accepté
+      // (user 28/07/2026) : c'est la fenêtre de négociation. Le serveur
+      // l'autorisait déjà (il ne refuse qu'un accord VALIDÉ) — pas l'écran.
+      return '<h4 class="lv-panel__t">📝 Ton prix est proposé — en attente du client</h4>' + recap
+        + '<p class="lv-hint">Vous en discutez et il trouve ça trop cher ? '
+        + '<strong>Tu peux encore changer ton prix</strong> — tant qu\'il n\'a pas accepté, '
+        + 'rien n\'est figé.</p>'
+        + '<label class="lv-field"><span>Nouveau prix pour cette course (€)</span>'
+        + '<input type="number" id="acPrix" inputmode="numeric" min="1" max="2000" step="1" '
+        + 'value="' + a.prix + '"></label>'
+        + '<div class="lv-cta"><button type="button" class="btn primary" id="acPropose">💶 Mettre à jour mon prix</button>'
+        + '<button type="button" class="btn btn--danger" id="acReject">❌ Retirer ma proposition</button>'
+        + '<span class="lv-cta__note" id="acSt" aria-live="polite"></span></div>';
+    }
     return '<h4 class="lv-panel__t">📝 Prix proposé — à valider</h4>' + recap
       + (moiOk
-        ? '<p class="lv-hint">' + (isClient ? 'Tu as accepté. En attente du livreur.' : 'Ton prix est proposé. En attente du client.') + '</p>'
+        ? '<p class="lv-hint">Tu as accepté. En attente du livreur.</p>'
           + '<div class="lv-cta"><button type="button" class="btn btn--danger" id="acReject">❌ Annuler cette proposition</button>'
           + '<span class="lv-cta__note" id="acSt" aria-live="polite"></span></div>'
         : '<div class="lv-cta"><button type="button" class="btn primary" id="acAccept">✅ J\'accepte ce prix</button>'
@@ -6323,7 +6426,7 @@
         el.disabled = true;
         post('course-accord-propose', {
           accord: { prix: (panel.querySelector('#acPrix') || {}).value }
-        }, function () { toast('📝 Prix proposé — en attente du client', 'success'); reloadAfter(); })
+        }, function () { toast('💶 Prix transmis au client', 'success'); reloadAfter(); })
           .then(function (d) { if (!d || !d.ok) el.disabled = false; });
       }; })(el);
       var acc = panel.querySelector('#acAccept');
@@ -6839,7 +6942,7 @@
     var prixTxt = c.paid && c.prix ? (c.prix + ' €') : (lvMyPrice(c.zone) + ' € <em>(ton tarif)</em>');
     return '<button type="button" class="lv-course lv-course--btn' + (c.status !== 'en_attente' ? ' lv-course--done' : '') + '" data-course-focus="' + escapeHTML(c.id) + '">'
       + '<span class="lv-course__head"><span>' + z.emoji + ' Zone ' + c.zone + ' · <strong>' + prixTxt + '</strong></span>'
-      + '<span class="lv-course__status">' + (c.status === 'en_attente' ? 'En attente' : (c.acceptedByMe ? '✅ Par toi' : escapeHTML(c.status))) + '</span></span>'
+      + '<span class="lv-course__status ' + lvStatutClasse(c) + '">' + lvStatutCourt(c) + '</span></span>'
       + '<span class="lv-course__body">📍 ' + escapeHTML((c.address || '').slice(0, 60)) + ' <em>(' + c.km + ' km)</em></span>'
       + '</button>';
   }
@@ -7614,7 +7717,7 @@
         var z = LV_BAREME[(c.zone || 1) - 1] || LV_BAREME[0];
         return '<div class="lv-course' + (c.status !== 'en_attente' ? ' lv-course--done' : '') + '">'
           + '<div class="lv-course__head"><span>' + z.emoji + ' Zone ' + c.zone + ' · <strong>' + lvPrixTxt(c) + '</strong></span>'
-          + '<span class="lv-course__status">' + (c.status === 'en_attente' ? 'En attente' : (c.acceptedByMe ? '✅ Acceptée par toi' : escapeHTML(c.status))) + '</span></div>'
+          + '<span class="lv-course__status ' + lvStatutClasse(c) + '">' + lvStatutCourt(c) + '</span></div>'
           + '<div class="lv-course__body">' + escapeHTML(c.productTitle || '') + (c.qty > 1 ? ' × ' + c.qty : '') + '<br>'
           + '📍 ' + escapeHTML(c.address || '') + ' <em>(' + c.km + ' km)</em><br>'
           + '📅 ' + (c.date ? escapeHTML(c.date) : 'au plus tôt') + ' ' + whenTxt(c) + '</div>'
@@ -8460,8 +8563,10 @@
         updateAccLivBtn();
         // La bulle de discussion n'existe que pour un compte connecté.
         lvDockInit(); lvDockSync();
-        // Le bandeau « nouvelle course » suit le livreur sur TOUTES les pages.
+        // Le bandeau « nouvelle course » suit le livreur sur TOUTES les pages,
+        // et se rafraîchit tout seul tant que la session est ouverte.
         lvAlertCharger();
+        lvAlertPlanifier();
       });
     });
   }

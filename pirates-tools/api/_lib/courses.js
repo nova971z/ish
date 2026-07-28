@@ -199,9 +199,22 @@ async function alertCourseAgain(course, id) {
     + '<p>📍 ' + escapeHtml(course.address) + ' (' + course.km + ' km de Sainte-Anne — zone ' + course.zone + ')<br>'
     + '📅 ' + (course.date || 'au plus tôt') + '</p>'
     + '<p>Premier arrivé, premier servi : ouvre ton espace livreur sur pirates-tools.com.</p>';
+  // DESTINATAIRES : les livreurs VALIDÉS (leur email de dossier), plus les
+  // comptes de test et l'owner. Avant, seuls ces deux derniers recevaient
+  // l'alerte : un vrai livreur n'était prévenu de RIEN (user 28/07/2026).
   const owner = process.env.OWNER_EMAIL;
-  const dests = Array.from(new Set(TEST_EMAILS.concat(owner ? [owner] : [])));
+  const livreurs = await destinatairesLivreurs(db, 50);
+  const dests = Array.from(new Set(
+    TEST_EMAILS
+      .concat(owner ? [owner] : [])
+      .concat(livreurs.map((l) => l.email).filter(Boolean))
+  ));
   for (const to of dests) await sendMail(to, subject, html);
+  // SMS : court, sans donnée sensible, et seulement si le canal est configuré.
+  const sms = '🛵 Pirates Tools — nouvelle course zone ' + course.zone + ' · '
+    + String(course.address || '').slice(0, 40) + ' (' + course.km + ' km). '
+    + 'Ouvre ton espace livreur pour l\'accepter.';
+  for (const l of livreurs) { if (l.phone) await sendSms(l.phone, sms); }
 }
 
 // Alerte « nouveau dossier livreur déposé » — l'owner doit le valider dans
@@ -218,9 +231,22 @@ async function alertCourierApplication(compte, uid) {
     + '🛵 ' + escapeHtml(veh) + (compte.cylindree ? ' — ' + escapeHtml(compte.cylindree) + ' cm³' : '') + '</p>'
     + '<p>À valider dans l\'administration, onglet <strong>Candidatures</strong>. '
     + 'Tant qu\'il n\'est pas validé, ce compte n\'a AUCUN accès livreur.</p>';
+  // DESTINATAIRES : les livreurs VALIDÉS (leur email de dossier), plus les
+  // comptes de test et l'owner. Avant, seuls ces deux derniers recevaient
+  // l'alerte : un vrai livreur n'était prévenu de RIEN (user 28/07/2026).
   const owner = process.env.OWNER_EMAIL;
-  const dests = Array.from(new Set(TEST_EMAILS.concat(owner ? [owner] : [])));
+  const livreurs = await destinatairesLivreurs(db, 50);
+  const dests = Array.from(new Set(
+    TEST_EMAILS
+      .concat(owner ? [owner] : [])
+      .concat(livreurs.map((l) => l.email).filter(Boolean))
+  ));
   for (const to of dests) await sendMail(to, subject, html);
+  // SMS : court, sans donnée sensible, et seulement si le canal est configuré.
+  const sms = '🛵 Pirates Tools — nouvelle course zone ' + course.zone + ' · '
+    + String(course.address || '').slice(0, 40) + ' (' + course.km + ' km). '
+    + 'Ouvre ton espace livreur pour l\'accepter.';
+  for (const l of livreurs) { if (l.phone) await sendSms(l.phone, sms); }
 }
 
 // Crée la course depuis un PaymentIntent PAYÉ (metadata course* posée par
@@ -385,8 +411,63 @@ async function sendMail(to, subject, html) {
   } catch (e) { console.warn('[courses] email échoué:', e.message); }
 }
 
+// ── SMS (canal OPTIONNEL) ───────────────────────────────────────────────────
+// Demande user 28/07/2026 : prévenir le livreur par SMS en plus de l'email.
+// Aucun fournisseur n'était branché sur le projet : le canal est donc écrit
+// ici mais reste TOTALEMENT INERTE tant que les variables d'environnement ne
+// sont pas posées — exactement comme Resend au début (pas de clé, pas d'envoi,
+// aucune erreur). Twilio est retenu : simple HTTP + Basic auth, zéro dépendance.
+// Variables attendues sur Vercel : TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN,
+// TWILIO_FROM (numéro émetteur au format +…).
+// ⚠️ Le numéro n'est JAMAIS journalisé (RGPD) : on ne logue que l'échec.
+function telE164(brut) {
+  const t = String(brut || '').replace(/[^\d+]/g, '');
+  if (!t) return '';
+  if (t.startsWith('+')) return t.length >= 8 && t.length <= 16 ? t : '';
+  // Guadeloupe : 0690…/0590… sur 10 chiffres → +590 sans le 0 initial.
+  if (/^0\d{9}$/.test(t)) return '+590' + t.slice(1);
+  return '';
+}
+
+async function sendSms(to, texte) {
+  const sid = process.env.TWILIO_ACCOUNT_SID;
+  const token = process.env.TWILIO_AUTH_TOKEN;
+  const from = process.env.TWILIO_FROM;
+  if (!sid || !token || !from) return false;      // canal non configuré : silence
+  const num = telE164(to);
+  if (!num) return false;
+  try {
+    const r = await fetch('https://api.twilio.com/2010-04-01/Accounts/' + sid + '/Messages.json', {
+      method: 'POST',
+      headers: {
+        Authorization: 'Basic ' + Buffer.from(sid + ':' + token).toString('base64'),
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: new URLSearchParams({ To: num, From: from, Body: String(texte).slice(0, 300) })
+    });
+    if (!r.ok) { console.warn('[courses] sms refusé:', r.status); return false; }
+    return true;
+  } catch (e) { console.warn('[courses] sms échoué:', e.message); return false; }
+}
+
+// Livreurs VALIDÉS à prévenir : { email, phone }. Jamais les dossiers en
+// attente — un compte non validé ne peut de toute façon pas accepter.
+// Plafonné : une alerte ne doit pas se transformer en campagne d'envoi.
+async function destinatairesLivreurs(db, max) {
+  if (!db) return [];
+  try {
+    const snap = await db.collection('couriers').where('kycStatus', '==', 'valide').limit(max || 50).get();
+    const out = [];
+    snap.forEach((d) => {
+      const c = d.data() || {};
+      if (c.email || c.phone) out.push({ email: c.email || '', phone: c.phone || '' });
+    });
+    return out;
+  } catch (e) { console.warn('[courses] destinataires livreurs:', e.message); return []; }
+}
+
 // Alerte « nouvelle course » aux livreurs de test + owner.
-async function alertNewCourse(course, id) {
+async function alertNewCourse(course, id, db) {
   const whenTxt = course.when === 'heure' ? ('à ' + course.hour) : (course.when === 'matin' ? 'le matin' : "l'après-midi");
   // Deux régimes cohabitent : la DEMANDE sans paiement (nouveau flux, aucun
   // prix imposé — c'est le tarif du livreur qui s'appliquera) et l'ancienne
@@ -403,9 +484,22 @@ async function alertNewCourse(course, id) {
       : '💶 <strong>Ton tarif zone ' + course.zone + '</strong> s\'applique — celui que TU as inscrit sur ta fiche. Rien n\'est imposé.</p>')
     + '<p>Ouvre ton espace livreur sur pirates-tools.com pour accepter la course (premier arrivé, premier servi). '
     + 'Accepter ouvre une discussion directe avec le client pour convenir des modalités.</p>';
+  // DESTINATAIRES : les livreurs VALIDÉS (leur email de dossier), plus les
+  // comptes de test et l'owner. Avant, seuls ces deux derniers recevaient
+  // l'alerte : un vrai livreur n'était prévenu de RIEN (user 28/07/2026).
   const owner = process.env.OWNER_EMAIL;
-  const dests = Array.from(new Set(TEST_EMAILS.concat(owner ? [owner] : [])));
+  const livreurs = await destinatairesLivreurs(db, 50);
+  const dests = Array.from(new Set(
+    TEST_EMAILS
+      .concat(owner ? [owner] : [])
+      .concat(livreurs.map((l) => l.email).filter(Boolean))
+  ));
   for (const to of dests) await sendMail(to, subject, html);
+  // SMS : court, sans donnée sensible, et seulement si le canal est configuré.
+  const sms = '🛵 Pirates Tools — nouvelle course zone ' + course.zone + ' · '
+    + String(course.address || '').slice(0, 40) + ' (' + course.km + ' km). '
+    + 'Ouvre ton espace livreur pour l\'accepter.';
+  for (const l of livreurs) { if (l.phone) await sendSms(l.phone, sms); }
 }
 
 // Confirmation de PAIEMENT au client. Envoyée une seule fois, au moment où la
@@ -446,6 +540,7 @@ module.exports = {
   DEPOT, BAREME, TEST_EMAILS, PIECES_BYPASS_EMAILS, piecesRequises, TARIF_MIN, TARIF_MAX,
   haversineKm, quote, buildRequest, createFromIntent,
   alertNewCourse, alertCourseAgain, alertCourierApplication, confirmToClient, sendMail, escapeHtml,
+  sendSms, telE164, destinatairesLivreurs,
   defaultTarifs, sanitizeTarifs, mirrorCourierPublic,
   TZ_GP_OFFSET, hhmmEnMinutes, minutesLocalesGP, dansPlageHoraire, enService, sanitizeHoraires,
   sanitizeLines, sanitizeAccord, sanitizePaiement, accordSummary, accordPaiementLabel, ACCORD_PAIEMENTS

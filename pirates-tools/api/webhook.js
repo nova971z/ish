@@ -370,7 +370,7 @@ async function handleIntentSucceeded(stripe, fb, pi, ctx) {
     try {
       var cc = await coursesLib.createFromIntent(fb.db, pi);
       if (cc.created) {
-        await coursesLib.alertNewCourse(cc.course, cc.id);
+        await coursesLib.alertNewCourse(cc.course, cc.id, fb.db);
         await coursesLib.confirmToClient(cc.course, cc.id);
       }
     } catch (courseErr) {
