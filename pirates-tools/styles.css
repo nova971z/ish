@@ -8300,11 +8300,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   .chat-bubble { left: 12px; }
 }
 
-/* Accès à la discussion depuis le détail d'une course. Le fil lui-même vit
-   dans la bulle : ici on n'a qu'une porte d'entrée, pleine largeur pour être
-   impossible à manquer. */
-.lv-openchat { width: 100%; justify-content: center; padding: .8rem 1rem; font-size: .95rem; }
-
 /* Actions secondaires d'une course (vidéo, litige) : repliées par défaut.
    Elles ne servent qu'en cas de problème et ne doivent pas encombrer l'écran. */
 .lv-vid__sum {
@@ -8414,11 +8409,12 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-cancel { margin-top: .9rem; padding-top: .8rem; border-top: 1px dashed rgba(255,255,255,.14); display: grid; gap: .35rem; justify-items: start; }
 
 /* — Chat en 2 colonnes : fil à gauche, colonne d'actions à droite — */
-.lv-chat__body { display: grid; grid-template-columns: 1fr 210px; gap: .8rem; align-items: start; }
-@media (max-width: 720px) { .lv-chat__body { grid-template-columns: 1fr; } }
+/* Le fil ayant quitté ce bloc (28/07/2026), il n'y a plus de colonne
+   principale à côté : les actions occupent toute la largeur, sur UNE RANGÉE. */
+.lv-chat__body { display: block; }
 .lv-chat__main { min-width: 0; }
-.lv-chat__side { display: grid; gap: .5rem; align-content: start; }
-@media (max-width: 720px) { .lv-chat__side { grid-template-columns: repeat(2, 1fr); } }
+.lv-chat__side { display: flex; flex-wrap: wrap; gap: .6rem; }
+.lv-chat__side .lv-cbtn { flex: 1 1 180px; min-width: 0; }
 .lv-cbtn { display: grid; gap: .1rem; padding: .6rem .7rem; border-radius: 12px; border: 1px solid rgba(255,255,255,.14); background: rgba(0,0,0,.3); color: #fff; text-align: left; cursor: pointer; transition: border-color .18s, background .18s; }
 .lv-cbtn:hover, .lv-cbtn:focus-visible { border-color: rgba(242,193,78,.55); background: rgba(242,193,78,.08); }
 .lv-cbtn.is-on { border-color: rgba(242,193,78,.85); background: rgba(242,193,78,.14); }

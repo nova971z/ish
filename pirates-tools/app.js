@@ -4516,7 +4516,6 @@
       win: document.getElementById('chatWin'),
       body: document.getElementById('chatWinBody'),
       titre: document.getElementById('chatWinTitle'),
-      retour: document.getElementById('chatWinBack'),
       zoneEnvoi: document.getElementById('chatWinSend'),
       input: document.getElementById('chatWinInput'),
       go: document.getElementById('chatWinGo'),
@@ -4589,7 +4588,6 @@
   function lvDockListe() {
     var e = lvDockEls();
     lvDockCouper();
-    if (e.retour) e.retour.hidden = true;
     if (e.zoneEnvoi) e.zoneEnvoi.hidden = true;
     if (e.titre) e.titre.textContent = 'Mes discussions';
     if (e.body) e.body.innerHTML = '<p class="lv-hint">Chargement…</p>';
@@ -4624,13 +4622,25 @@
   function lvDockFil(f) {
     var e = lvDockEls();
     lvDockCouper();
-    if (e.retour) { e.retour.hidden = false; e.retour.onclick = lvDockListe; }
+    // Pas de bouton « retour » : la croix suffit (décision user 28/07/2026).
+    // Rouvrir la bulle repart de la liste.
     if (e.titre) e.titre.textContent = f.titre;
     if (e.zoneEnvoi) e.zoneEnvoi.hidden = false;
     if (e.body) e.body.innerHTML = '<p class="lv-hint">Chargement…</p>';
     var chemin = f.type === 'course'
       ? ['courses', String(f.id), 'messages']
       : ['conversations', String(f.id), 'messages'];
+    // 🐛 « les messages ne se chargent pas tant que je n'envoie rien »
+    // (28/07/2026). Les règles Firestore exigent request.auth : une écoute
+    // attachée AVANT que l'identité soit propagée est refusée, et le fil reste
+    // vide jusqu'à ce qu'une écriture réveille tout. On attend donc le verdict
+    // d'authentification, et on réessaie UNE fois si la lecture est refusée
+    // (le jeton peut arriver une fraction de seconde plus tard).
+    whenAuthReady().then(function () { lvDockBrancherFil(f, chemin, 0); });
+  }
+
+  function lvDockBrancherFil(f, chemin, essai) {
+    var e = lvDockEls();
     whenFirebaseReady(function (fb) {
       if (!fb || !fb.configured || !fb.onSnapshot) {
         if (e.body) e.body.innerHTML = '<p class="lv-hint">Discussion indisponible (hors connexion).</p>';
@@ -4652,8 +4662,16 @@
           ? msgs.map(function (m) { return lvMsgHTML(m, f.role); }).join('')
           : '<p class="lv-hint">Aucun message — dis bonjour !</p>';
         e.body.scrollTop = e.body.scrollHeight;
-      }, function () {
-        if (e.body) e.body.innerHTML = '<p class="lv-hint">Discussion indisponible.</p>';
+      }, function (err) {
+        // Un seul nouvel essai : au-delà, on DIT ce qui se passe au lieu de
+        // laisser un fil vide qui ressemble à « aucun message ».
+        if (essai < 1) { setTimeout(function () { lvDockBrancherFil(f, chemin, essai + 1); }, 900); return; }
+        if (e.body) {
+          e.body.innerHTML = '<p class="lv-hint">Discussion indisponible'
+            + (err && err.code === 'permission-denied'
+              ? ' — les règles Firestore ne sont peut-être pas publiées.' : '.')
+            + '</p>';
+        }
       });
       var envoyer = function () {
         var txt = (e.input && e.input.value || '').trim().slice(0, 800);
@@ -4669,20 +4687,6 @@
       if (e.go) e.go.onclick = envoyer;
       if (e.input) e.input.onkeydown = function (ev) { if (ev.key === 'Enter') { ev.preventDefault(); envoyer(); } };
     });
-  }
-
-  // Ouvre la bulle DIRECTEMENT sur un fil (depuis le détail d'une course).
-  function lvDockOuvrirFil(fil) {
-    var e = lvDockEls();
-    if (!e.win || !e.bulle) return;
-    e.bulle.hidden = false;
-    _dockOuvert = true;
-    e.win.hidden = false;
-    e.bulle.setAttribute('aria-expanded', 'true');
-    // Le bouton « retour » doit ramener à la LISTE, même si on n'y est jamais
-    // passé : sinon l'utilisateur se retrouve coincé sur un seul fil.
-    _dockFils = null;
-    lvDockFil(fil);
   }
 
   function lvDockBasculer() {
@@ -5823,12 +5827,7 @@
     // discussion, et la colonne des actions.
     return '<div class="lv-chat" data-chat="' + escapeHTML(String(c.id)) + '">'
       + '<div class="lv-chat__body">'
-      + '<div class="lv-chat__main">'
-      + '<button type="button" class="btn primary lv-openchat" data-openchat="' + escapeHTML(String(c.id)) + '">'
-      + '💬 Ouvrir la discussion avec ' + who + '</button>'
-      + '<p class="lv-hint">Le prix, l\'heure exacte, le point de dépôt et l\'accès au chantier se conviennent '
-      + 'dans la discussion. Les messages ne peuvent être ni modifiés ni effacés — ils font preuve en cas de litige.</p>'
-      + '</div>' + side + '</div>'
+      + side + '</div>'
       + '<div class="lv-chat__panel" id="lvChatPanel" hidden aria-live="polite"></div>'
       + '</div>';
   }
@@ -5988,16 +5987,6 @@
     if (!box) return;
     // 🗨️ Plus AUCUN abonnement temps réel ici : le fil vit dans la BULLE.
     // Ce bloc ne garde que l'accès à la discussion et les panneaux d'action.
-    var ouvre = root.querySelector('[data-openchat]');
-    if (ouvre) {
-      ouvre.onclick = function () {
-        lvDockOuvrirFil({
-          type: 'course', id: c.id, round: c.round || 1, role: role,
-          titre: (role === 'client' ? '🛵 ' + (c.courierName || 'Mon livreur') : '👤 Mon client'),
-          sous: 'Course · ' + escapeHTML(String(c.address || '').slice(0, 34))
-        });
-      };
-    }
     // ── Colonne d'actions : un bouton = un panneau dédié ───────────────────
     var panel = root.querySelector('#lvChatPanel');
     var tabs = root.querySelectorAll('[data-cpanel]');
@@ -6097,13 +6086,10 @@
         };
       })(tabs[t]);
     }
-    // Ouverture AUTOMATIQUE du panneau qui attend une action de MOI : sur
-    // iPad, un bouton qu'il faut penser à toucher est un bouton qu'on ne voit
-    // pas. L'accord à accepter, puis le paiement, s'affichent d'eux-mêmes.
-    var a = c.accord || null;
-    var moiOk = a && (role === 'client' ? a.okClient : a.okLivreur);
-    if (a && !a.valide && !moiOk) openPanel('accord', root.querySelector('[data-cpanel="accord"]'));
-    else if (a && a.valide && !c.goodsPaid && role === 'client') openPanel('pay', root.querySelector('[data-cpanel="pay"]'));
+    // AUCUNE ouverture automatique (décision user 28/07/2026) : en arrivant sur
+    // la page, tous les panneaux sont FERMÉS. Ils ne s'ouvrent qu'au clic sur
+    // leur bouton. Un panneau qui se déplie tout seul au milieu du bloc, c'est
+    // précisément ce qui rendait l'écran illisible.
   }
 
   // Widget « Mes gains » de l'espace livreur. Trois états de l'argent, calculés
