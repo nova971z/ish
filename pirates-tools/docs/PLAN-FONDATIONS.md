@@ -1306,6 +1306,23 @@ Pour chaque correctif :
   l'user — avec la seule exception du **défaut critique** (phase 7).
 - ❌ **Blocage du lancement commercial** : ce chantier est indépendant de la
   checklist de lancement et ne la retarde pas.
+- ❌ **Découpage du catalogue (index léger + fiches à la demande)** : écarté par
+  l'user le 28/07/2026, **après mesure sur son propre iPad**. Le gain réel à
+  476 produits est de **25 ms** (82 → 57 ms) : sans commune mesure avec le
+  chantier. Motifs de l'user : il compte rester à **500-600 produits maximum**,
+  et si le site marche il prendra un **serveur privé** qu'il optimisera pour un
+  affichage instantané même en mauvaise connexion.
+  → **Ne pas reproposer** tant que le catalogue reste sous ~1000 produits.
+  Les mesures qui ont servi à trancher sont conservées ci-dessous, pour ne pas
+  avoir à les refaire :
+  | catalogue | ouverture, non découpé | découpé | seuil |
+  |---|---|---|---|
+  | 476 produits (aujourd'hui) | 54 Ko | 16 Ko | gain 25 ms — **non rentable** |
+  | 2000 produits | 251 Ko | 76 Ko | gain ~5 s sur 4G faible — rentable |
+  Et le point qui restait à prouver, prouvé : **bien fait, le découpage ne coûte
+  rien sur la fiche produit** (l'adresse de l'image voyage dans la carte, donc
+  image et données partent ensemble). La qualité des visuels n'est jamais la
+  variable d'ajustement.
 - ❌ **Numéros de ligne inscrits dans le code** : écarté sur mesure
   (**+45,3 Ko compressés**, plafond P8 crevé, numéros faux au premier commit,
   différences git illisibles). **Le besoin est retenu** sous trois autres
