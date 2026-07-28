@@ -4671,6 +4671,20 @@
     });
   }
 
+  // Ouvre la bulle DIRECTEMENT sur un fil (depuis le détail d'une course).
+  function lvDockOuvrirFil(fil) {
+    var e = lvDockEls();
+    if (!e.win || !e.bulle) return;
+    e.bulle.hidden = false;
+    _dockOuvert = true;
+    e.win.hidden = false;
+    e.bulle.setAttribute('aria-expanded', 'true');
+    // Le bouton « retour » doit ramener à la LISTE, même si on n'y est jamais
+    // passé : sinon l'utilisateur se retrouve coincé sur un seul fil.
+    _dockFils = null;
+    lvDockFil(fil);
+  }
+
   function lvDockBasculer() {
     var e = lvDockEls();
     if (!e.win) return;
@@ -5682,9 +5696,17 @@
   }
 
   // Bloc vidéo + litige commun aux deux espaces (client et livreur).
+  // Actions SECONDAIRES d'une course : vidéo de remise et litige. Elles ne
+  // servent qu'en cas de problème — elles sont donc REPLIÉES par défaut
+  // (décision user 28/07/2026 : le bloc détail était illisible tellement tout
+  // y était étalé). Un litige EN COURS, lui, s'ouvre tout seul : c'est une
+  // information qu'on ne doit pas avoir à chercher.
   function lvVideoDisputeHtml(c) {
     var litOpen = c.litige && c.litige.open;
-    var h = '<div class="lv-vid">';
+    var h = '<details class="lv-vid"' + (litOpen ? ' open' : '') + '>'
+      + '<summary class="lv-vid__sum">'
+      + (litOpen ? '⚠️ Litige en cours — preuves' : '🎥 Vidéo de la remise · signaler un problème')
+      + '</summary>';
     if (litOpen) {
       h += '<div class="lv-note lv-note--warn">⚠️ <strong>Litige en cours</strong> (ouvert par le '
         + escapeHTML(c.litige.role || '?') + '). L\'administrateur examine les preuves — ajoute ta vidéo si tu en as une.</div>';
@@ -5701,7 +5723,7 @@
         + '<div class="lv-cta"><button type="button" class="btn lv-dispute__send">Ouvrir le litige</button>'
         + '<span class="lv-cta__note lv-dispute__st" aria-live="polite"></span></div></details>';
     }
-    h += '</div>';
+    h += '</details>';
     return h;
   }
 
@@ -5793,18 +5815,19 @@
     }
     side += '</aside>';
 
+    // 🗨️ LE FIL A QUITTÉ CE BLOC (décision user 28/07/2026). Il y était
+    // recopié en entier — messages, champ de saisie, texte d'explication — au
+    // milieu des informations de la course : illisible. La BULLE en bas à
+    // gauche est là pour ça, elle est accessible depuis n'importe quel écran.
+    // Ne reste ici que ce qui appartient VRAIMENT à la course : un accès à la
+    // discussion, et la colonne des actions.
     return '<div class="lv-chat" data-chat="' + escapeHTML(String(c.id)) + '">'
-      + '<h3 class="lv-h3">💬 Discussion avec ' + who + '</h3>'
-      + '<p class="lv-hint">Mettez-vous d\'accord ici : prix de la course, heure exacte, point de dépôt, accès au chantier. '
-      + 'Les messages ne peuvent être ni modifiés ni effacés — ils servent de preuve en cas de litige. '
-      + 'Quand vous êtes d\'accord, remplissez <strong>L\'accord</strong> : il écrit noir sur blanc ce que vous avez convenu.</p>'
       + '<div class="lv-chat__body">'
       + '<div class="lv-chat__main">'
-      + '<div class="lv-chat__log" id="lvChatLog" aria-live="polite"><p class="lv-hint">Chargement…</p></div>'
-      + '<div class="lv-chat__send">'
-      + '<input type="text" id="lvChatInput" maxlength="800" placeholder="Écris ton message…" autocomplete="off">'
-      + '<button type="button" class="btn primary" id="lvChatSend">Envoyer</button>'
-      + '</div><span class="lv-cta__note" id="lvChatSt" aria-live="polite"></span>'
+      + '<button type="button" class="btn primary lv-openchat" data-openchat="' + escapeHTML(String(c.id)) + '">'
+      + '💬 Ouvrir la discussion avec ' + who + '</button>'
+      + '<p class="lv-hint">Le prix, l\'heure exacte, le point de dépôt et l\'accès au chantier se conviennent '
+      + 'dans la discussion. Les messages ne peuvent être ni modifiés ni effacés — ils font preuve en cas de litige.</p>'
       + '</div>' + side + '</div>'
       + '<div class="lv-chat__panel" id="lvChatPanel" hidden aria-live="polite"></div>'
       + '</div>';
@@ -5963,73 +5986,18 @@
   function wireChat(root, c, role, reload) {
     var box = root.querySelector('[data-chat]');
     if (!box) return;
-    var log = root.querySelector('#lvChatLog');
-    var input = root.querySelector('#lvChatInput');
-    var send = root.querySelector('#lvChatSend');
-    var st = root.querySelector('#lvChatSt');
-    if (_lvChatUnsub) { try { _lvChatUnsub(); } catch (_) {} _lvChatUnsub = null; }
-    whenFirebaseReady(function (fb) {
-      if (!fb || !fb.configured || !fb.onSnapshot) {
-        if (log) log.innerHTML = '<p class="lv-hint">Discussion indisponible (hors connexion).</p>';
-        return;
-      }
-      var col = fb.collection(fb.db, 'courses', String(c.id), 'messages');
-      // Le filtre sur `round` n'est pas cosmétique : les règles Firestore
-      // n'autorisent la lecture QUE du round courant, et une requête non
-      // filtrée serait refusée en bloc. Cloisonne les mises en relation
-      // successives (le livreur suivant ne lit jamais le fil d'avant).
-      // ⚠️ PAS d'orderBy ICI, VOLONTAIREMENT. `where` + `orderBy` sur deux
-      // champs différents exigerait un INDEX COMPOSITE Firestore : en
-      // production la requête échouerait (FAILED_PRECONDITION) alors que
-      // l'émulateur, lui, crée les index à la volée — le piège ne se voit pas
-      // en test. Le filtre `round` seul tient dans l'index automatique, et on
-      // trie les messages nous-mêmes ci-dessous (300 max, coût nul).
-      var q = fb.query(col, fb.where('round', '==', (c.round || 1)), fb.limit(300));
-      _lvChatUnsub = fb.onSnapshot(q, function (snap) {
-        var msgs = [];
-        snap.forEach(function (d) { msgs.push(d.data() || {}); });
-        // Tri chronologique côté client (voir la note sur l'index ci-dessus).
-        // `at` est un Timestamp Firestore une fois écrit, mais une Date JS sur
-        // le message que l'on vient d'envoyer (écriture optimiste) : les deux
-        // doivent être ramenés à des millisecondes.
-        var ms = function (v) {
-          if (!v) return 0;
-          if (typeof v.toMillis === 'function') return v.toMillis();
-          if (typeof v.getTime === 'function') return v.getTime();
-          return Number(v) || 0;
-        };
-        msgs.sort(function (x, y) { return ms(x.at) - ms(y.at); });
-        var h = msgs.map(function (m) {
-          var mine = (m.role === role && m.role !== 'systeme');
-          var cls = m.role === 'systeme' ? 'lv-msg--sys' : (mine ? 'lv-msg--me' : 'lv-msg--them');
-          return '<div class="lv-msg ' + cls + '"><span class="lv-msg__t">' + escapeHTML(String(m.text || '')) + '</span></div>';
+    // 🗨️ Plus AUCUN abonnement temps réel ici : le fil vit dans la BULLE.
+    // Ce bloc ne garde que l'accès à la discussion et les panneaux d'action.
+    var ouvre = root.querySelector('[data-openchat]');
+    if (ouvre) {
+      ouvre.onclick = function () {
+        lvDockOuvrirFil({
+          type: 'course', id: c.id, round: c.round || 1, role: role,
+          titre: (role === 'client' ? '🛵 ' + (c.courierName || 'Mon livreur') : '👤 Mon client'),
+          sous: 'Course · ' + escapeHTML(String(c.address || '').slice(0, 34))
         });
-        if (log) {
-          log.innerHTML = h.length ? h.join('') : '<p class="lv-hint">Aucun message pour l\'instant — dis bonjour !</p>';
-          log.scrollTop = log.scrollHeight;
-        }
-      }, function () {
-        if (log) log.innerHTML = '<p class="lv-hint">Discussion indisponible.</p>';
-      });
-    });
-    function doSend() {
-      var txt = (input && input.value || '').trim().slice(0, 800);
-      if (!txt) return;
-      if (send) send.disabled = true;
-      whenFirebaseReady(function (fb) {
-        if (!fb || !fb.addDoc || !_currentUser) { if (st) st.textContent = 'Connexion requise.'; if (send) send.disabled = false; return; }
-        fb.addDoc(fb.collection(fb.db, 'courses', String(c.id), 'messages'), {
-          uid: _currentUser.uid, role: role, text: txt, at: new Date(), round: (c.round || 1)
-        }).then(function () {
-          if (input) input.value = '';
-          if (st) st.textContent = '';
-        }).catch(function (e) {
-          if (st) st.textContent = '❌ Envoi impossible' + (e && e.code ? ' (' + e.code + ')' : '') + '.';
-        }).then(function () { if (send) send.disabled = false; });
-      });
+      };
     }
-    if (send) send.onclick = doSend;
-    if (input) input.onkeydown = function (e) { if (e.key === 'Enter') { e.preventDefault(); doSend(); } };
     // ── Colonne d'actions : un bouton = un panneau dédié ───────────────────
     var panel = root.querySelector('#lvChatPanel');
     var tabs = root.querySelectorAll('[data-cpanel]');

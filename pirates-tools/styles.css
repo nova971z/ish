@@ -8300,6 +8300,23 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   .chat-bubble { left: 12px; }
 }
 
+/* Accès à la discussion depuis le détail d'une course. Le fil lui-même vit
+   dans la bulle : ici on n'a qu'une porte d'entrée, pleine largeur pour être
+   impossible à manquer. */
+.lv-openchat { width: 100%; justify-content: center; padding: .8rem 1rem; font-size: .95rem; }
+
+/* Actions secondaires d'une course (vidéo, litige) : repliées par défaut.
+   Elles ne servent qu'en cas de problème et ne doivent pas encombrer l'écran. */
+.lv-vid__sum {
+  cursor: pointer; list-style: none; padding: .6rem .8rem; border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, .12); background: rgba(255, 255, 255, .04);
+  font-size: .86rem; font-weight: 700; color: var(--muted, #c9c9d9);
+}
+.lv-vid__sum::-webkit-details-marker { display: none; }
+.lv-vid__sum::before { content: '▸ '; }
+.lv-vid[open] > .lv-vid__sum::before { content: '▾ '; }
+.lv-vid[open] > .lv-vid__sum { border-color: rgba(242,193,78,.45); color: #fde68a; margin-bottom: .7rem; }
+
 .lv-chat--solo { display: block; }
 .lv-chat--solo .lv-chat__log { min-height: 46vh; }
 
