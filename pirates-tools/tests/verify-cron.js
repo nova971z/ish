@@ -55,10 +55,17 @@ const firebase = require(path.join(ROOT,'api/_lib/firebase'));
 firebase.getFirebase = () => ({ db: mockDb, admin: mockAdmin });
 
 // Intercepte Resend.
+// ⚠️ DÉFAUT CORRIGÉ LE 28/07 : `mail` était ÉCRASÉ à chaque envoi. Or
+// cron-report en fait DEUX (le rapport d'audience, puis le rappel fiscal
+// ajouté plus tard) : la variable gardait donc le SECOND, qui n'a pas de pièce
+// jointe. Le harnais annonçait « pas de JSON joint » sur le mauvais courriel.
+// On collecte TOUT, et on désigne chaque mail par son OBJET — ainsi l'ordre
+// d'envoi peut changer sans rien casser.
 let mail = null;
+const envois = [];
 const realFetch = global.fetch;
 global.fetch = async (url, opts) => {
-  if (String(url).indexOf('api.resend.com') !== -1) { mail = JSON.parse(opts.body); return { ok:true, status:200, json: async()=>({id:'mock'}), text: async()=>'' }; }
+  if (String(url).indexOf('api.resend.com') !== -1) { mail = JSON.parse(opts.body); envois.push(mail); return { ok:true, status:200, json: async()=>({id:'mock'}), text: async()=>'' }; }
   return realFetch(url, opts);
 };
 
@@ -91,12 +98,16 @@ function mockRes(){ const r={ _s:0,_j:null, status(s){this._s=s;return this;}, j
   check('période = juillet '+new Date(NOW).getUTCFullYear(), res._j && /\d{4}/.test(res._j.period), res._j&&res._j.period);
 
   // Mail
-  check('mail envoyé à OWNER_EMAIL', mail && mail.to==='owner@example.com');
-  check('sujet contient la période', mail && /Rapport d'audience/.test(mail.subject));
-  check('pièce jointe JSON présente', mail && mail.attachments && /\.json$/.test(mail.attachments[0].filename), mail&&mail.attachments&&mail.attachments[0].filename);
-  let parsed=null; try { parsed = JSON.parse(Buffer.from(mail.attachments[0].content,'base64').toString('utf8')); } catch(_){}
+  const rapport = envois.find(m => /Rapport d'audience/.test(m.subject || ''));
+  const fiscal  = envois.find(m => /taxes|déclarations/i.test(m.subject || ''));
+  check('les DEUX courriels du mois partent (audience + rappel fiscal)',
+    !!rapport && !!fiscal, envois.map(m=>m.subject).join(' | '));
+  check('mail envoyé à OWNER_EMAIL', envois.every(m => m.to==='owner@example.com'));
+  check('sujet du rapport contient la période', rapport && /\d{4}/.test(rapport.subject), rapport&&rapport.subject);
+  check('pièce jointe JSON présente sur le RAPPORT', rapport && rapport.attachments && /\.json$/.test(rapport.attachments[0].filename), rapport&&rapport.attachments&&rapport.attachments[0].filename);
+  let parsed=null; try { parsed = JSON.parse(Buffer.from(rapport.attachments[0].content,'base64').toString('utf8')); } catch(_){}
   check('JSON joint valide + analysable (totaux + produits)', parsed && parsed.totals && Array.isArray(parsed.topProducts), parsed?('sessions='+parsed.totals.sessions):'illisible');
-  check('HTML rapport contient les visites', mail && /Visites/.test(mail.html));
+  check('HTML rapport contient les visites', rapport && /Visites/.test(rapport.html));
 
   // Purge
   check('purge daily > 14 mois (2024-01-01 supprimé)', !store.analytics_daily['2024-01-01'] && !!store.analytics_daily['2026-07-17'], 'reste='+Object.keys(store.analytics_daily).join(','));

@@ -184,24 +184,41 @@ Traité aussi.
 il s'agit d'événements **synthétiques** qu'il injecte lui-même pour vérifier
 l'agrégation. Aucune lecture du catalogue, donc aucune dépendance.
 
-### ⏳ 8 harnais NON DIAGNOSTIQUÉS — symptôme mesuré, cause NON établie
-Je les ai **lancés** et j'ai relevé leur symptôme exact. Je n'ai **pas** établi
-la cause : je préfère l'écrire que le prétendre. Ils restent dans `_bruts/`.
+### 🐛 UN DÉFAUT DANS MON PROPRE INSTRUMENT — trouvé en cherchant un faux vert
 
-| Harnais | Symptôme mesuré | Piste (à confirmer, **pas une conclusion**) |
+`test-variant-live` était noté « vert avec 1 assertion sur 6 » et classé comme
+le plus suspect. **Il n'avait rien de suspect** : il rend bien « 6 passed,
+0 failed ». C'est **le lanceur** qui comptait mal — il comptait les lignes
+commençant par `✅`, alors que **16 harnais sur 47** résument tout sur une
+seule ligne (`ALL PASS — 8 ok, 0 ko`, `12 OK / 0 KO`…).
+
+**Mon total de « 808 assertions » était donc faux.** C'est le pire défaut
+possible pour un instrument de mesure : un chiffre sous-évalué qui a l'air
+précis. Corrigé — le lanceur lit d'abord le bilan que le harnais rend
+lui-même, et **affiche la méthode employée** quand ce n'est pas le comptage
+direct. Total réel après correction : **977 assertions**.
+
+Ajouté au passage : un harnais **vert mais rendant 0 assertion** est désormais
+**signalé** (« leur couverture est INVÉRIFIABLE — vert ne veut pas dire
+vérifié »). `audit-buttons` était dans ce cas : il ne comptait que ses échecs.
+Corrigé à la source, il rend maintenant **45/45**.
+
+### 🔧 6 harnais de plus RÉCUPÉRÉS (28/07, 3ᵉ passe)
+
+| Harnais | Cause **exacte** | Décision |
 |---|---|---|
-| `regression.mjs` | 8/9 — « PDF simple : pas de switch » | une seule assertion, la facture PDF |
-| `test-grid.mjs` | « lot initial ≤ 35 (rendu progressif), pas 185 » | le rendu progressif du catalogue a changé |
-| `test-variant.mjs` | 13/15 | 2 assertions sur les variantes coffret/nue |
-| `test-variant-live.mjs` | **sort vert avec 1 assertion sur 6** | ⚠️ **faux vert probable** : il s'arrête en route sans le dire. Le plus suspect des neuf |
-| `verify-consent.js` | le texte du bandeau ne correspond plus | le texte **a été réécrit par décision user (v321)** — probablement à retourner |
-| `verify-cron.js` | sujet, pièce jointe JSON du rapport mensuel | |
-| `verify-dashboard.js` | 15/16 — « géo présente (FR/GP/MQ) » | |
-| `verify-globe.js` | 12/14 — liste par pays absente | |
+| `test-variant-live.mjs` | rien — c'était le lanceur | **6/6** |
+| `audit-buttons.js` | ne comptait que ses échecs, rendait 0/0 en vert | compte aussi les réussites → **45/45** |
+| `verify-consent.js` | exigeait les mots « techniques nécessaires » et « pourra être activée ». Le texte a été **réécrit par décision user (v321)**, après son constat que « pas de choix = pas respectable ». | teste désormais ce que le bandeau doit **garantir**, pas comment il le dit → **11/11** |
+| `verify-cron.js` | la variable `mail` était **écrasée** à chaque envoi. `cron-report` en fait **deux** (audience + rappel fiscal, ajouté plus tard) : elle gardait le second, sans pièce jointe. | collecte **tous** les envois et désigne chacun par son **objet** — l'ordre peut changer sans rien casser → **13/13** |
+| `verify-globe.js` · `verify-dashboard.js` | cherchaient le code pays brut `FR`. L'interface affiche désormais le **nom** (`countryName` : FR → « France ») — une amélioration que le test dénonçait comme un défaut. | vérifient que la provenance est rendue, sans dépendre du nom d'un pays → **14/14** et **16/16** |
+| `test-grid.mjs` | testait un **défilement infini** (`#gridSentinel`, lots de 35). Ce mécanisme **n'existe plus** : 0 occurrence dans `app.js`. Il a été remplacé par une **pagination** (`PAGE_SIZE = 40`, app.js:1314), suite au bug de la « page vide » (v320). | **réécrit** sur le mécanisme actuel : page 1 ≤ 40, contrôle de pagination présent, et surtout **la page 2 montre des produits DIFFÉRENTS** — une pagination qui répète la page 1 serait pire que pas de pagination. Ce comportement n'était protégé par personne → **7/7** |
 
-ℹ️ `verify-beacon` a été traité en premier et **écarté** : fausse alerte, voir
-ci-dessus. Le suivant sur la liste est `test-variant-live` — un faux vert est
-plus dangereux qu'un rouge.
+### ⏳ 2 harnais restants — symptôme mesuré, cause NON établie
+| Harnais | Symptôme |
+|---|---|
+| `regression.mjs` | 8/9 — « PDF simple : pas de switch » (une seule assertion, la facture PDF) |
+| `test-variant.mjs` | 13/15 — 2 assertions sur les variantes coffret/nue |
 
 ## 🚪 Les portes posées
 | Porte | Ce qu'elle refuse | Éprouvée ? |

@@ -94,7 +94,13 @@ await page.addInitScript(({slug})=>{
   localStorage.setItem('pt_cart',JSON.stringify({version:'1',items:[{key:slug,title:'x',qty:2}]}));
   window.open=()=>null; // wa.me / liens externes neutralisés
 },{slug:slug0});
-let B=[];const ok=(c,m)=>{if(!c)B.push(m);};
+// ⚠️ Ce harnais ne comptait QUE ses échecs : il rendait « TOUT PROPRE » sans
+// jamais dire combien d'assertions il avait exécutées. Le lanceur affichait
+// donc 0/0 en vert — soit, littéralement, « rien n'a été vérifié ».
+// On compte désormais aussi les RÉUSSITES : sans total, une couverture est
+// invérifiable, et un vert sans total est un vert qui ne prouve rien.
+let B=[]; let Bok=0;
+const ok=(c,m)=>{ if(!c) B.push(m); else Bok++; };
 
 // Catalogue : CHAQUE chip filtre
 await page.goto(base+'/#/catalogue',{waitUntil:'load'});await page.waitForTimeout(1800);
@@ -216,5 +222,8 @@ if(errs.length)B.push('PAGEERRORS volet B: '+errs.join(' | ').slice(0,120));
 
 console.log('══ VOLET B — fonctionnel ('+B.length+' échec(s)) ══');
 B.forEach(m=>console.log(' ❌',m));
-console.log('━━ RÉSULTAT :',(problems.length===0&&B.length===0)?'✅ TOUT PROPRE':'❌ '+problems.length+' hit-test + '+B.length+' fonctionnels');
+const totalOk = Bok + (problems.length===0 ? 1 : 0);   // +1 : le volet hit-test lui-même
+const totalKo = B.length + problems.length;
+console.log('━━ RÉSULTAT :',(totalKo===0)?'✅ TOUT PROPRE':'❌ '+problems.length+' hit-test + '+B.length+' fonctionnels');
+console.log(totalOk+' ok, '+totalKo+' ko');
 await b.close();server.close();process.exit((problems.length||B.length)?1:0);})().catch(e=>{console.error(e);process.exit(1);});

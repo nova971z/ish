@@ -13,7 +13,7 @@ Dernière mise à jour : **28/07/2026**
 
 | Phase | État | Où ça en est |
 |---|---|---|
-| **0 — Sauver les harnais** | 🟡 **52/60 tranchés** | risque irréversible **LEVÉ**. **46 verts (808/808)** + 1 ignoré (prérequis émulateur), 5 supprimés avec motif, **8 non diagnostiqués** dans `tests/_bruts/`. `_bruts/` doit finir VIDE : tant qu'il ne l'est pas, cette phase n'est PAS terminée. Détail : `docs/TRI-SCRATCHPAD.md` |
+| **0 — Sauver les harnais** | 🟢 **58/60 tranchés** | **52 harnais verts (977/977)** + 1 ignoré (prérequis déclaré), 5 supprimés avec motif, **2 non diagnostiqués**. Détail : `docs/TRI-SCRATCHPAD.md` |
 | 1 — Architecture documentaire | ⬜ à faire | remplacée par le plan mémoire ci-dessous |
 | 2 — Invariants | ⬜ à faire | |
 | 3 — Graphe d'appels | ⬜ à faire | doit libérer ≥ 2 Ko sur `app.js` avant la phase 5 |
@@ -45,32 +45,21 @@ Dernière mise à jour : **28/07/2026**
 
 ## ▶️ REPRENDRE ICI
 
-**Prochain geste** : les **9 harnais restants** de `tests/_bruts/`. Leur
-symptôme est mesuré et écrit dans `docs/TRI-SCRATCHPAD.md`, leur cause n'est
-PAS établie.
+**Prochain geste** : les **2 derniers** harnais de `tests/_bruts/`.
 
-**Dans cet ordre, et pas un autre :**
-1. ~~`verify-beacon.js`~~ ✅ **TRANCHÉ** : fausse alerte. Les événements sont
-   toujours émis ; le harnais ouvrait un produit supprimé lors de la purge.
-   Ancrages produits retirés → 17/17.
-2. `test-variant-live.mjs` — sort **vert avec 1 assertion sur 6**. Un faux vert
-   est plus dangereux qu'un rouge.
-3. `verify-consent.js` — le texte du bandeau a été réécrit par décision user
-   (v321) : l'assertion est probablement à retourner, pas à supprimer.
-4. Les 5 autres : `regression`, `test-grid`, `test-variant`, `verify-cron`,
-   `verify-dashboard`, `verify-globe`.
+| Harnais | Symptôme mesuré |
+|---|---|
+| `regression.mjs` | 8/9 — « PDF simple : pas de switch » |
+| `test-variant.mjs` | 13/15 — variantes coffret/nue |
 
 **Puis** : recréer un harnais pour le **rendu des caractéristiques sur la fiche
-produit** — couverture perdue en supprimant les 5 harnais ancrés sur l'ancien
-catalogue, et signalée comme telle plutôt que passée sous silence.
+produit** — couverture perdue avec les 5 harnais supprimés. ⚠️ **Sans nommer
+aucun produit** : c'est la leçon de `verify-beacon` et de `audit-buttons`.
 
-```bash
-cd pirates-tools
-node tests/lancer.mjs --noyau      # 6 harnais, ~51 s — l'argent et la livraison
-node tests/lancer.mjs --complet    # 19 harnais, ~239 s
-node tests/_porter.mjs tests/_bruts/<fichier>   # rendre un harnais portable
-node scripts/ci.js                 # 30 contrôles, ~106 ms
-```
+**Puis** : le tri des ~690 entrées de scratchpad non catégorisées.
+
+**Enfin** : `CLAUDE.md` (plan mémoire, étape 2 — la copie verbatim avant toute
+coupe, puis les 55 règles enfouies).
 
 ## ✅ LES 3 DÉCISIONS EN ATTENTE ONT ÉTÉ TRANCHÉES (28/07/2026)
 Registre : **`docs/DECISIONS.md`**

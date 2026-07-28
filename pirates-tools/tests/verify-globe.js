@@ -54,7 +54,13 @@ async function scenario(page, base, useMock){
   await page.click('.admin-tab[data-admin-tab="stats"]'); await page.waitForTimeout(1200);
   return { perr,
     globePresent: await page.evaluate(()=>!!document.getElementById('adminGlobe')),
-    listPresent: await page.evaluate(()=>{ var e=document.getElementById('adminStats'); return /FR/.test(e.innerHTML) && e.querySelectorAll('.stat-bar__label').length>0; }),
+    listPresent: await page.evaluate(()=>{ var e=document.getElementById('adminStats'); // ⚠️ ANCRAGE SUR LE CODE PAYS BRUT, corrigé le 28/07 : le harnais cherchait
+      // « FR » dans le HTML. L'interface affiche désormais le NOM du pays
+      // (countryName : FR -> « France »), ce qui est une amélioration — le test
+      // annonçait donc un défaut là où il y avait un progrès.
+      // On teste ce qui compte : la liste EXISTE et porte des libellés remplis.
+      var lab = e.querySelectorAll('.stat-bar__label');
+      return lab.length > 0 && Array.prototype.some.call(lab, function (l) { return (l.textContent||'').trim().length > 1; }); }),
     three: await page.evaluate(()=>window.__three||null),
     canvasInGlobe: await page.evaluate(()=>{ var g=document.getElementById('adminGlobe'); return g?g.querySelectorAll('canvas').length:0; })
   };

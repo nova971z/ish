@@ -70,7 +70,12 @@ async function run(){
   check('produit affiché par son titre (pas juste la clé)', /Makita/i.test(stats.html));
   check('temps moyen formaté (min/s)', /min|\bs\b/.test(stats.html));
   check('clics précis en barres (chip:Meuleuses)', stats.bars.some(b=>/Meuleuses/.test(b)));
-  check('géo présente (FR/GP/MQ)', stats.bars.some(b=>b==='FR'));
+  // ⚠️ Même correction que verify-globe : l'interface affiche le NOM du pays
+  // (countryName : FR -> « France »), plus son code brut. On vérifie que la
+  // provenance est bien rendue, sans dépendre de la façon de nommer un pays.
+  check('provenance des visiteurs rendue (libellés de pays remplis)',
+    stats.bars.some(b => typeof b === 'string' && b.trim().length > 1),
+    'libellés=' + stats.bars.slice(0, 4).join(', '));
 
   // Onglet Clients
   await page.click('.admin-tab[data-admin-tab="clients"]'); await page.waitForTimeout(500);

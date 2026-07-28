@@ -51,7 +51,60 @@ console.log('║  ' + (complet ? 'LOT COMPLET' : noyau ? 'NOYAU RAPIDE' : 'SÉLE
 console.log('║  ' + (liste.length + ' harnais').padEnd(66) + '║');
 console.log('╚' + '═'.repeat(68) + '╝\n');
 
-/** Lance un harnais et récupère son score depuis sa dernière ligne de bilan. */
+/* ═══ COMPTER LES ASSERTIONS — défaut réel corrigé le 28/07 ════════════════
+   La première version comptait les lignes commençant par « ✅ ». Or **16
+   harnais sur 47** n'en émettent pas une par assertion : ils résument tout sur
+   UNE ligne (« ✅ ALL PASS — 6 passed, 0 failed », « 12 OK / 0 KO »…).
+   Résultat : le lanceur affichait 1 assertion là où il y en avait 6, et le
+   total général était SOUS-ÉVALUÉ — un chiffre faux qui avait l'air précis.
+   C'est le pire défaut possible pour un instrument de mesure.
+
+   On lit donc d'ABORD le bilan que le harnais rend lui-même — il sait ce qu'il
+   a exécuté — et on ne retombe sur le comptage de lignes que s'il n'en rend
+   aucun. La source retenue est affichée quand elle n'est pas le comptage
+   direct : on ne cache pas comment un chiffre a été obtenu. */
+const BILANS = [
+  // « ✅ ALL PASS — 6 passed, 0 failed »  ·  « ❌ FAILURES — 13 passed, 2 failed »
+  { re: /(\d+)\s+passed,\s*(\d+)\s+failed/i, ok: 1, ko: 2, nom: 'passed/failed' },
+  // « 12 OK / 0 KO »
+  { re: /(\d+)\s*OK\s*\/\s*(\d+)\s*KO/i, ok: 1, ko: 2, nom: 'OK/KO' },
+  // « ALL PASS — 8 ok, 0 ko »  (minuscules, autre tournure)
+  { re: /(\d+)\s*ok,\s*(\d+)\s*ko/i, ok: 1, ko: 2, nom: 'ok/ko' },
+  // « 0 hit-test + 2 fonctionnels » : deux compteurs d'ÉCHECS, pas de total
+  { re: /(\d+)\s*hit-test\s*\+\s*(\d+)\s*fonctionnels?/i, echecs: [1, 2], nom: 'échecs seuls' },
+  // « 17/17 assertions vertes »  ·  « ✅ titre — 8/8 » (socle)
+  { re: /(\d+)\s*\/\s*(\d+)\s*assertions/i, ok: 1, tot: 2, nom: 'X/Y assertions' },
+  // « ━━ RÉSULTAT : ❌ 0 hit-test + 2 fonctionnels » → pas de total exploitable
+];
+
+function compter(sortie) {
+  const lignes = (sortie.match(/^✅ /gm) || []).length;
+  const rouges = (sortie.match(/^❌ /gm) || []).length;
+  // On cherche le bilan dans les DERNIÈRES lignes : c'est là qu'il est rendu,
+  // et ça évite de confondre avec une phrase du corps du harnais.
+  const fin = sortie.trim().split('\n').slice(-6).join('\n');
+  for (const b of BILANS) {
+    const m = fin.match(b.re);
+    if (!m) continue;
+    if (b.echecs) {
+      // Ce harnais ne compte que ses ÉCHECS. On ne peut pas en déduire un
+      // total : on garde le comptage de lignes, et on le DIT.
+      const ko2 = b.echecs.reduce((a, i) => a + (parseInt(m[i], 10) || 0), 0);
+      return { ok: lignes, ko: Math.max(rouges, ko2), source: 'échecs seuls (total inconnu)' };
+    }
+    const ok = parseInt(m[b.ok], 10);
+    const ko = b.ko ? parseInt(m[b.ko], 10) : (parseInt(m[b.tot], 10) - ok);
+    if (!isFinite(ok) || !isFinite(ko) || ok + ko === 0) continue;
+    // Si le harnais annonce MOINS que ce qu'on a compté, on garde le plus
+    // grand : un bilan partiel ne doit jamais faire disparaître des lignes
+    // réellement vertes.
+    if (ok + ko < lignes + rouges) break;
+    return { ok, ko, source: b.nom };
+  }
+  return { ok: lignes, ko: rouges, source: null };
+}
+
+/** Lance un harnais et récupère son score. */
 function lancer(f) {
   return new Promise((resolve) => {
     const t = Date.now();
@@ -60,10 +113,8 @@ function lancer(f) {
     p.stdout.on('data', (d) => { sortie += d; });
     p.stderr.on('data', (d) => { sortie += d; });
     p.on('close', (code) => {
-      // Compte les ✅ / ❌ : marche quel que soit le style du harnais.
-      const ok = (sortie.match(/^✅ /gm) || []).length;
-      const ko = (sortie.match(/^❌ /gm) || []).length;
-      resolve({ f, code, ok, ko, ms: Date.now() - t, sortie });
+      const c = compter(sortie);
+      resolve({ f, code, ok: c.ok, ko: c.ko, source: c.source, ms: Date.now() - t, sortie });
     });
   });
 }
@@ -77,7 +128,8 @@ for (const f of liste) {
   // IGNORÉ — et ça doit se voir, sinon on croit couvert ce qui ne l'est pas.
   const etat = r.code === 0 ? '✅' : (r.code === 2 ? '⏭ ' : '❌');
   console.log('  ' + etat + ' ' + f.replace(/\.(mjs|js)$/, '').padEnd(22)
-    + String(r.ok + '/' + (r.ok + r.ko)).padStart(9) + '   ' + (r.ms / 1000).toFixed(1) + ' s');
+    + String(r.ok + '/' + (r.ok + r.ko)).padStart(9) + '   ' + (r.ms / 1000).toFixed(1) + ' s'
+    + (r.source ? '   (' + r.source + ')' : ''));
   if (r.code === 2) {
     const q = r.sortie.split('\n').filter((l) => l.trim().startsWith('⏭') || /^\s{3}/.test(l));
     q.slice(0, 4).forEach((l) => console.log('        ' + l.trim()));
@@ -94,6 +146,10 @@ const tot = res.reduce((s, r) => s + r.ok + r.ko, 0);
 const bons = res.reduce((s, r) => s + r.ok, 0);
 const rouges = res.filter((r) => r.code !== 0 && r.code !== 2);
 const ignores = res.filter((r) => r.code === 2);
+/* ⚠️ Un harnais VERT qui annonce 0 assertion dit littéralement « je n'ai rien
+   vérifié ». Le compter comme bon, c'est croire couvert ce qui ne l'est pas.
+   On ne le passe pas en rouge — il n'a pas échoué — mais on le NOMME. */
+const muets = res.filter((r) => r.code === 0 && r.ok + r.ko === 0);
 const duree = res.reduce((s, r) => s + r.ms, 0) / 1000;
 
 console.log('\n' + '─'.repeat(70));
@@ -104,6 +160,11 @@ if (ignores.length) {
   console.log('  ⏭  ' + ignores.length + ' IGNORÉ(S), prérequis absent : '
     + ignores.map((r) => r.f.replace(/\.(mjs|js)$/, '')).join(' · '));
   console.log('     → non exécuté n\'est PAS vert. Ces parcours ne sont pas couverts.');
+}
+if (muets.length) {
+  console.log('  ⚠️  ' + muets.length + ' harnais VERT(S) mais rendant 0 assertion : '
+    + muets.map((r) => r.f.replace(/\.(mjs|js)$/, '')).join(' · '));
+  console.log('     → leur couverture est INVÉRIFIABLE. Vert ne veut pas dire vérifié.');
 }
 if (rouges.length) console.log('  ❌ à reprendre : ' + rouges.map((r) => r.f.replace(/\.(mjs|js)$/, '')).join(' · '));
 else console.log('  ✅ tout est vert');

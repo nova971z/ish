@@ -25,8 +25,20 @@ async function run(){
       btns:[...bar.querySelectorAll('[data-consent]')].map(b=>({v:b.getAttribute('data-consent'),t:b.textContent.trim(),visible:b.offsetHeight>0})) };
   });
   check('bandeau visible au 1er passage', !st.hidden);
-  check('texte annonce cookies techniques toujours actifs', /techniques nécessaires/.test(st.text) && /toujours actifs/.test(st.text), st.text.slice(0,90)+'…');
-  check('texte honnête (« pourra être activée », pas de traceur affirmé)', /pourra être activée/.test(st.text));
+  // ⚠️ ANCRAGE SUR LA FORMULATION EXACTE, corrigé le 28/07 : ce harnais exigeait
+  // les mots « techniques nécessaires » et « pourra être activée ». Le texte a
+  // été RÉÉCRIT par décision de l'user (v321), après son constat que « pas de
+  // choix = pas respectable ». Le harnais annonçait donc un défaut là où il y
+  // avait une amélioration voulue.
+  // On teste désormais ce que le bandeau doit GARANTIR, pas comment il le dit :
+  // un texte se retouche, une obligation non.
+  check('les cookies techniques sont annoncés comme TOUJOURS actifs (donc sans case à cocher)',
+    /techniques/i.test(st.text) && /toujours actifs?/i.test(st.text), st.text.slice(0, 90) + '…');
+  check('aucun traceur n\'est affirmé comme actif, et la personnalisation est soumise à l\'accord',
+    /avec votre accord|si vous acceptez|pourra être activée/i.test(st.text)
+    && !/(google analytics|ga4|meta pixel|facebook pixel)/i.test(st.text), st.text.slice(0, 90) + '…');
+  check('aucune publicité ni revente n\'est promise — engagement écrit dans le bandeau',
+    /jamais de publicité/i.test(st.text) && /revente/i.test(st.text));
   const deny=st.btns.find(b=>b.v==='deny'), acc=st.btns.find(b=>b.v==='accept');
   check('2 boutons visibles : Refuser + Accepter', !!(deny&&deny.visible&&acc&&acc.visible), JSON.stringify(st.btns.map(b=>b.t)));
   await a.click('#consentBar [data-consent="deny"]'); await a.waitForTimeout(200);
