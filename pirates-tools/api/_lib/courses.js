@@ -30,7 +30,12 @@ const BAREME = [                                  // = LV_BAREME client (source 
   { zone: 3, maxKm: 34, prix: 74 },
   { zone: 4, maxKm: 46, prix: 100 }
 ];
-const TEST_EMAILS = ['justforwada@icloud.com'];   // comptes de test (user)
+// Comptes de TEST autorisés à dérouler la chaîne course (dépôt de demande,
+// acceptation, paiement en mode test). Le 2e compte a été ajouté le 28/07/2026
+// pour tester la discussion À DEUX : quand client et livreur sont le MÊME
+// compte, aucune information ne permet de distinguer qui a écrit un message —
+// c'est une impossibilité logique, pas une limite de code.
+const TEST_EMAILS = ['justforwada@icloud.com', 'contact.piratestools@gmail.com'];
 
 // ── DÉROGATION AUX PIÈCES JUSTIFICATIVES — strictement nominative ───────────
 // Demande de l'user (27/07/2026) : pouvoir dérouler TOUTE la chaîne livreur
@@ -41,7 +46,7 @@ const TEST_EMAILS = ['justforwada@icloud.com'];   // comptes de test (user)
 // VALIDATION PAR L'ADMIN restent exigés, pour lui comme pour tout le monde.
 // Liste séparée de TEST_EMAILS À DESSEIN : le jour où l'un des deux usages
 // disparaît, l'autre ne suit pas en silence.
-const PIECES_BYPASS_EMAILS = ['justforwada@icloud.com'];
+const PIECES_BYPASS_EMAILS = ['justforwada@icloud.com', 'contact.piratestools@gmail.com'];
 
 // Pièces exigées selon le véhicule — SOURCE DE VÉRITÉ SERVEUR.
 // ⚠️ Avant le 27/07/2026 cette exigence n'existait QUE dans le navigateur

@@ -44,7 +44,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=530">
+  <link rel="stylesheet" href="styles.css?v=531">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -2051,10 +2051,6 @@
       <strong class="chat-win__t" id="chatWinTitle">Mes discussions</strong>
       <button type="button" class="chat-win__x" id="chatWinClose" aria-label="Fermer">✕</button>
     </header>
-    <!-- Sélecteur de rôle : visible UNIQUEMENT quand le compte connecté est à
-         la fois le client et le livreur de la course (compte de test). Sans
-         lui, tous les messages partiraient du même côté. -->
-    <div class="chat-role" id="chatRole" hidden></div>
     <div class="chat-win__body" id="chatWinBody"><p class="lv-hint">Chargement…</p></div>
     <div class="chat-win__send" id="chatWinSend" hidden>
       <input type="text" id="chatWinInput" maxlength="800" placeholder="Écris ton message…" autocomplete="off">
@@ -2207,7 +2203,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=530"></script>
+  <script defer src="app.js?v=531"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

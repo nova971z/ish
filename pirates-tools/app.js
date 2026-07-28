@@ -4739,17 +4739,16 @@
       var courses = (rep[0] && rep[0].ok && rep[0].mine) || [];
       courses.forEach(function (c) {
         if (!c.chatOpen) return;
-        // 🐛 « on ne distingue plus qui envoie » (28/07/2026) : le rôle venait
-        // de `c.mine` SEUL. Sur un compte qui joue les DEUX côtés, `mine` et
-        // `acceptedByMe` sont vrais → la bulle le prenait toujours pour le
-        // client, tous ses envois partaient du même côté. En usage réel le
-        // calcul était juste : on ajoute seulement le choix quand c'est double.
+        // Le rôle vient de `c.mine` : je suis le client si la course est la
+        // mienne, le livreur sinon. Correct dès que les deux parties sont deux
+        // comptes DISTINCTS — ce qui est le cas réel, et désormais le cas en
+        // test (2e compte autorisé le 28/07/2026). Quand un seul compte tenait
+        // les deux rôles, aucune information ne permettait de distinguer qui
+        // avait écrit : c'était une impossibilité logique, pas un bug.
         var moiClient = !!c.mine;
-        var double = !!(c.mine && c.acceptedByMe);
         fils.push({
           type: 'course', id: c.id, round: c.round || 1,
           role: moiClient ? 'client' : 'livreur',
-          double: double,
           titre: (moiClient ? '🛵 ' + (c.courierName || 'Mon livreur') : '👤 Mon client'),
           sous: 'Course · ' + escapeHTML(String(c.address || '').slice(0, 34))
         });
@@ -4809,10 +4808,6 @@
     // Rouvrir la bulle repart de la liste.
     if (e.titre) e.titre.textContent = f.titre;
     if (e.zoneEnvoi) e.zoneEnvoi.hidden = false;
-    // COMPTE QUI JOUE LES DEUX RÔLES (test) : sans ce choix, tous les messages
-    // partiraient du même côté et on ne saurait plus qui parle. Le sélecteur
-    // n'apparaît QUE dans ce cas — un vrai client ne le voit jamais.
-    lvDockRoleSelecteur(f);
     if (e.body) e.body.innerHTML = '<p class="lv-hint">Chargement…</p>';
     var chemin = f.type === 'course'
       ? ['courses', String(f.id), 'messages']
@@ -4824,33 +4819,6 @@
     // d'authentification, et on réessaie UNE fois si la lecture est refusée
     // (le jeton peut arriver une fraction de seconde plus tard).
     whenAuthReady().then(function () { lvDockBrancherFil(f, chemin, 0); });
-  }
-
-  // Sélecteur « j'écris en tant que… », affiché UNIQUEMENT quand le compte est
-  // à la fois le client et le livreur de la course. Changer de rôle re-rend le
-  // fil : les bulles basculent de côté immédiatement, sans rechargement.
-  function lvDockRoleSelecteur(f) {
-    var hote = document.getElementById('chatRole');
-    if (!hote) return;
-    if (!f.double) { hote.hidden = true; hote.innerHTML = ''; return; }
-    hote.hidden = false;
-    // ⚠️ Classe calculée AVANT : concaténer au milieu de `class="…"` trompe le
-    // contrôleur statique (il lirait `data-role="client"` comme une classe).
-    var bouton = function (role, txt) {
-      var cls = 'chat-role__b' + (f.role === role ? ' is-on' : '');
-      return '<button type="button" class="' + cls + '" data-role="' + role + '">' + txt + '</button>';
-    };
-    hote.innerHTML = '<span class="chat-role__l">J\'écris en tant que</span>'
-      + bouton('client', '👤 Client') + bouton('livreur', '🛵 Livreur');
-    var btns = hote.querySelectorAll('[data-role]');
-    for (var i = 0; i < btns.length; i++) {
-      (function (b) {
-        b.onclick = function () {
-          f.role = b.getAttribute('data-role');
-          lvDockFil(f);                       // re-rend : les bulles changent de côté
-        };
-      })(btns[i]);
-    }
   }
 
   function lvDockBrancherFil(f, chemin, essai) {

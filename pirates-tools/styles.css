@@ -8514,23 +8514,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   .lv-statut--wait .lv-statut__dot { animation: lv-pulse 1.8s ease-in-out infinite; }
 }
 
-/* Sélecteur « j'écris en tant que » — n'apparaît que sur un compte qui joue
-   les deux rôles. Le bouton actif dit de quel côté partiront les messages. */
-.chat-role {
-  display: flex; align-items: center; gap: .4rem; flex-wrap: wrap;
-  padding: .45rem .7rem; border-bottom: 1px solid rgba(255,255,255,.1);
-  background: rgba(255,255,255,.03);
-}
-.chat-role__l { font-size: .74rem; color: var(--muted, #9aa4b2); }
-.chat-role__b {
-  padding: .22rem .55rem; border-radius: 999px; cursor: pointer;
-  font-size: .74rem; font-weight: 800;
-  border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.05); color: #c9c9d9;
-}
-.chat-role__b.is-on {
-  border-color: rgba(var(--accent-rgb), .7); background: rgba(var(--accent-rgb), .28); color: #fff;
-}
-
 /* Pastilles de STATUT sur les cartes de course. Avant, toute course « à moi »
    affichait « ✅ Par toi » : une annulée et une terminée se lisaient pareil.
    La couleur porte l'information autant que le mot (défaut vécu 28/07/2026). */
