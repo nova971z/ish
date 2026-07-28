@@ -1233,3 +1233,43 @@ Leaflet. Vérifier CHAQUE préfixe avant toute suppression.
   corps, formulaire de prix rendu au client, bandeau qui ne clignote plus,
   acceptation à l'aveugle, hauteurs désalignées, pastille en nowrap) : tous
   détectés.
+
+## 🛒 ANNULER LA COURSE ≠ PERDRE SA COMMANDE (28/07/2026, SW v529)
+Deux défauts signalés, une seule idée derrière : **le panier doit survivre à
+l'annulation**.
+### 🐛 DÉFAUT 1 — le bandeau « Règle ta marchandise » survivait à l'annulation
+User : « j'ai annulé ma commande et le petit bandeau est toujours présent ; en
+plus, quand je clique sur Régler, ça rouvre la commande annulée ».
+- CAUSE RACINE, une ligne : `lvTodoClient` sélectionnait la course à réclamer
+  **sans AUCUN filtre sur le statut**. Une course `annulee` portant un accord
+  validé restait éligible, et son bouton appelait `showDetail(c)` → la fiche
+  annulée se rouvrait. Le serveur, lui, était correct (`status:'annulee'`,
+  `chatOpen:false`) : le défaut était 100 % côté client.
+- CORRECTIF : pré-filtre `mine.filter(x => !lvFini(x))`.
+- ⚠️ PIÈGE : `livree` n'est **PAS** soldée — elle attend la confirmation du
+  client, c'est même l'action la plus urgente. `lvFini` = terminee|annulee
+  seulement. Le harnais vérifie les 3 états vivants (à régler / à confirmer /
+  accord à accepter) pour que le correctif ne tue pas le bandeau utile.
+### 🐛 DÉFAUT 2 — demander depuis une FICHE PRODUIT ne mettait rien au panier
+User : « il faut que ça mette obligatoirement l'article dans son panier : comme
+ça, si les conditions ne lui vont pas, au lieu d'annuler la commande il annule
+la course, le produit reste au panier, il n'a plus qu'à refaire une demande ».
+- Sa phrase désignait un vrai trou : depuis la page Livraison la marchandise
+  vient du panier, mais depuis une **fiche produit** `payload()` fabriquait la
+  ligne à la volée — l'article n'était JAMAIS au panier. Annuler laissait donc
+  le client les mains vides.
+- `lvPoserAuPanier(lignes)` : fonction UNIQUE utilisée aux deux bouts —
+  à la DEMANDE (garantir la présence) et à l'ANNULATION (rendre les articles).
+- ⚠️ RÈGLE : on ne **CUMULE JAMAIS** — annuler trois fois ne doit pas donner
+  six articles. On porte la quantité au **MAXIMUM** entre panier et course.
+- ⚠️ `lines` ne porte que `{key, qty}` : titre/prix/image sont **relus au
+  catalogue**. Une clé disparue est ignorée (jamais de ligne fantôme).
+- ⚠️ La restauration n'a lieu **QUE si le serveur a accepté** l'annulation —
+  sinon on rendrait des articles pour une course toujours vivante.
+- Le bouton ANNONCE désormais « tes articles retournent dans ton panier ».
+- VÉRIFIÉ : **32/32 plan10.mjs** (dont le cas décisif : fiche produit + panier
+  vide → l'article est au panier après la demande) + 70/70 plan9 + 31/31
+  plan9-serveur + 70/70 plan8 + 82/82 couriers + 149 autres. CI verte.
+  **5 sabotages** : filtre de statut retiré, restauration supprimée, pose au
+  panier supprimée, cumul au lieu du maximum, restauration sur échec — tous
+  détectés.

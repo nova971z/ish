@@ -5080,6 +5080,9 @@
       }
       orderBtn.disabled = true;
       if (orderSt) orderSt.textContent = '📨 Envoi de ta demande aux livreurs…';
+      // Depuis une FICHE PRODUIT, l'article n'est pas forcément au panier : on
+      // l'y pose, sinon une annulation laisserait le client les mains vides.
+      lvPoserAuPanier(pl.items.map(function (it) { return { key: it.key, qty: it.qty || 1 }; }));
       var titre = pl.items.length === 1
         ? pl.items[0].title
         : (pl.items.length + ' articles de quincaillerie');
@@ -7133,11 +7136,20 @@
   function lvTodoClient(mine, ouvrir) {
     var host = document.getElementById('clientDelivTodo');
     if (!host) return;
+    // 🐛 BUG VÉCU (28/07/2026) : « j'ai annulé ma commande et le bandeau
+    // "règle ta marchandise" est toujours là ; quand je clique, ça rouvre la
+    // commande annulée ». CAUSE : aucun filtre sur le statut — une course
+    // ANNULÉE qui portait un accord validé restait éligible. On écarte donc
+    // d'abord tout ce qui est SOLDÉ (annulée, terminée) : une course finie
+    // n'attend plus rien de personne.
+    // ⚠️ `livree` n'est PAS soldée — elle attend justement la confirmation du
+    // client, c'est l'action la plus urgente de toute la liste.
+    var vivantes = mine.filter(function (x) { return !lvFini(x); });
     // Ordre d'urgence : confirmer une réception (l'argent du livreur en
     // dépend) > régler la marchandise > accepter l'accord proposé.
-    var c = mine.filter(function (x) { return x.status === 'livree'; })[0]
-      || mine.filter(function (x) { return x.accord && x.accord.valide && !x.goodsPaid; })[0]
-      || mine.filter(function (x) { return x.accord && !x.accord.valide && !x.accord.okClient; })[0];
+    var c = vivantes.filter(function (x) { return x.status === 'livree'; })[0]
+      || vivantes.filter(function (x) { return x.accord && x.accord.valide && !x.goodsPaid; })[0]
+      || vivantes.filter(function (x) { return x.accord && !x.accord.valide && !x.accord.okClient; })[0];
     if (!c) { host.innerHTML = ''; return; }
     var quoi = c.status === 'livree'
       ? { i: '📦', t: 'Confirme la réception', s: 'Vérifie les photos, puis confirme — ton livreur attend.', b: 'Confirmer' }
@@ -7150,6 +7162,59 @@
       + '<button type="button" class="btn primary" id="lvTodoBtn">' + quoi.b + '</button></div>';
     var b = document.getElementById('lvTodoBtn');
     if (b) b.onclick = function () { ouvrir(c); };
+  }
+
+  // ── LE PANIER SUIT LA DEMANDE (décision user 28/07/2026) ──────────────────
+  // « Lorsqu'on demande une livraison, il faut que ça mette obligatoirement
+  // l'article dans son panier : comme ça, si les conditions ne conviennent
+  // pas, on annule la COURSE et pas la commande — le produit reste au panier,
+  // il n'y a plus qu'à refaire une demande. »
+  // Deux usages : à la DEMANDE (garantir la présence) et à l'ANNULATION
+  // (rendre les articles). Une seule fonction, donc un seul comportement.
+  // ⚠️ On ne CUMULE JAMAIS : annuler trois fois ne doit pas donner six
+  // articles. On porte la quantité au MAXIMUM entre le panier et la course.
+  // ⚠️ `lignes` ne porte que {key, qty} : le titre, le prix et l'image sont
+  // relus au CATALOGUE. Une clé qui n'y est plus est ignorée (et comptée).
+  // Renvoie { poses, ignores } pour pouvoir le DIRE à l'utilisateur.
+  function lvPoserAuPanier(lignes) {
+    var out = { poses: 0, ignores: 0 };
+    if (!lignes || !lignes.length) return out;
+    var items = getCart();
+    lignes.forEach(function (l) {
+      var key = l && l.key;
+      if (!key) return;
+      var qty = Math.max(1, Math.min(99, parseInt(l.qty, 10) || 1));
+      var p = findProductByKey(key);
+      if (!p) { out.ignores++; return; }
+      var existante = null;
+      for (var i = 0; i < items.length; i++) {
+        if (items[i].key === key && !items[i].coffret) { existante = items[i]; break; }
+      }
+      if (existante) {
+        if ((existante.qty || 1) < qty) { existante.qty = qty; out.poses++; }
+        return;                                   // déjà là : rien à cumuler
+      }
+      items.push({
+        key: key, title: p.title || key, brand: p.brand || '',
+        price: Number(p.price) || 0, qty: qty,
+        image: p.img || p.image || '', paymentLink: p.paymentLink || '', coffret: false
+      });
+      out.poses++;
+    });
+    if (out.poses) saveCart(items);               // saveCart rafraîchit l'UI du panier
+    return out;
+  }
+
+  // ANNULER LA COURSE ≠ PERDRE SA COMMANDE : les articles retournent au panier,
+  // prêts pour une nouvelle demande. On le DIT — sinon le client croit avoir
+  // tout perdu et refait ses recherches. Les lignes viennent de la course en
+  // MÉMOIRE : le serveur ne les renvoie pas dans sa réponse, et la liste est
+  // justement sur le point d'être rechargée.
+  function lvApresAnnulation(c) {
+    var r = lvPoserAuPanier((c && c.lines) || []);
+    toast(r.poses
+      ? 'Demande annulée — tes articles sont de retour dans ton panier 🛒'
+      : 'Demande annulée', 'success');
   }
 
   // SIGNET « en cours » (décision user 28/07/2026 : « il est censé y avoir le
@@ -7328,7 +7393,8 @@
       if (c.mine && ['en_attente', 'acceptee'].indexOf(c.status) !== -1 && !c.paid) {
         h += '<div class="lv-cancel lv-annuler"><button type="button" class="btn btn--danger" id="clientCancelBtn" data-armed="0">'
           + '❌ Annuler ma demande de livraison</button>'
-          + '<span class="lv-cta__note" id="clientCancelSt" aria-live="polite">Tu as changé d\'avis ? Rien n\'a été débité, l\'annulation est libre.</span></div>';
+          + '<span class="lv-cta__note" id="clientCancelSt" aria-live="polite">Rien n\'a été débité, l\'annulation est libre — '
+          + '<strong>tes articles retournent dans ton panier</strong>, tu pourras redéposer une demande en deux clics.</span></div>';
       }
       // Vidéo + litige côté CLIENT (dès qu'un livreur est impliqué)
       if (c.mine && ['acceptee', 'confirmee', 'livree', 'terminee'].indexOf(c.status) !== -1) {
@@ -7368,7 +7434,7 @@
             body: JSON.stringify({ type: 'course-cancel', id: c.id })
           });
         }).then(function (r) { return r.json(); }).then(function (d) {
-          if (d.ok) { toast('Demande annulée', 'success'); renderClientDeliveries(); }
+          if (d.ok) { lvApresAnnulation(c); renderClientDeliveries(); }
           else { cancelBtn.disabled = false; if (cst) cst.textContent = '❌ ' + (d.error || 'Erreur'); }
         }).catch(function () { cancelBtn.disabled = false; if (cst) cst.textContent = '❌ Erreur réseau'; });
       };
