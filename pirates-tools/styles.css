@@ -8001,6 +8001,8 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-handcode__row { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; }
 .lv-handcode__key { font-weight: 700; }
 .lv-handcode__num { font-size: 1.9rem; font-weight: 800; letter-spacing: .35em; color: #f2c14e; font-variant-numeric: tabular-nums; }
+/* Clé TOTP 32 car. — pourquoi pas .lv-handcode__num : voir mfa.js */
+.mfa-cle{font:700 clamp(.95rem,3.4vw,1.2rem)/1.5 ui-monospace,Menlo,monospace;letter-spacing:.06em;color:#f2c14e;word-break:break-all;overflow-wrap:anywhere;max-width:100%;display:block;user-select:all;-webkit-user-select:all}
 .lv-handcode__qr img { width: 132px; height: 132px; border-radius: 10px; background: #fff; padding: 4px; display: block; }
 /* Saisie du code côté livreur */
 .lv-code-input { width: 9ch; font-size: 1.4rem; font-weight: 800; letter-spacing: .3em; text-align: center; font-variant-numeric: tabular-nums; padding: .45rem .5rem; border-radius: 10px; border: 1px solid rgba(242,193,78,.5); background: rgba(0,0,0,.3); color: #fff; }

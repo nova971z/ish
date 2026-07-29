@@ -128,9 +128,31 @@
   // l'échappement HTML, les messages flottants et le générateur de QR LOCAL.
   var CTX = null;
 
+  /* ⚠️ ON LIT L'ÉTAT VIVANT, PAS LA COPIE CAPTURÉE AU MONTAGE.
+     `CTX.user.multiFactor.enrolledFactors` est une photographie prise à
+     l'ouverture de la page : après un enrôlement réussi elle vaut encore
+     « aucun facteur ». Le panneau se redessinait donc à l'identique et
+     remontrait le formulaire, exactement comme si rien ne s'était passé.
+     Constaté par l'user le 29/07/2026 — il a cru que ça n'avait pas marché.
+     `fb.multiFactor(user)` interroge l'état courant. */
   function actif() {
-    var mf = CTX && CTX.user && CTX.user.multiFactor;
+    if (!CTX || !CTX.user) return false;
+    try {
+      var live = CTX.fb && CTX.fb.multiFactor && CTX.fb.multiFactor(CTX.user);
+      if (live && live.enrolledFactors) return live.enrolledFactors.length > 0;
+    } catch (_) { /* on retombe sur la copie plutôt que de casser l'affichage */ }
+    var mf = CTX.user.multiFactor;
     return !!(mf && mf.enrolledFactors && mf.enrolledFactors.length);
+  }
+
+  /* Recharge le compte AVANT de redessiner. Sans ça, même l'état vivant peut
+     traîner d'un cycle. On n'échoue jamais là-dessus : au pire on redessine
+     avec ce qu'on a. */
+  function rafraichirPuis(rendre) {
+    var u = CTX && CTX.user;
+    if (u && typeof u.reload === 'function') {
+      u.reload().then(rendre).catch(rendre);
+    } else { rendre(); }
   }
 
   function badge() {
@@ -208,8 +230,14 @@
       // un repli, c'est LE chemin. Le QR passe donc en second, replié.
       box.innerHTML = '<h4 class="lv-panel__t">Étape 2 — enregistre la clé</h4>'
         + '<div class="lv-handcode">'
+        /* ⚠️ CLASSE DÉDIÉE, PAS `lv-handcode__num`. Celle-là est taillée pour un
+           code de livraison à 6 chiffres (1,9 rem + 0,35 em d'interlettrage).
+           Une clé TOTP fait 32 caractères : à cette taille elle sort de l'écran
+           d'un iPad et rien ne l'autorise à passer à la ligne. Constaté par
+           l'user le 29/07/2026. Réutiliser un style « qui ressemble » sans
+           regarder ce qu'il contiendra, c'est ça que ça donne. */
         + '<div class="lv-handcode__row"><span class="lv-handcode__key">Ta clé</span>'
-        + '<strong class="lv-handcode__num" id="mfaCle">' + CTX.escape(p.cle) + '</strong></div>'
+        + '<strong class="mfa-cle" id="mfaCle">' + CTX.escape(p.cle) + '</strong></div>'
         + '<div class="lv-cta"><button type="button" class="btn" id="mfaCopy">📋 Copier la clé</button>'
         + '<span class="lv-cta__note" id="mfaCopySt" aria-live="polite"></span></div></div>'
         + '<p class="lv-hint">Dans ton application : <strong>+</strong> → '
@@ -274,7 +302,7 @@
     if (st) st.textContent = 'Activation…';
     confirmer(CTX.fb, CTX.user, secret, code).then(function () {
       CTX.toast('🔐 Double authentification activée', 'success');
-      badge(); panneau();
+      rafraichirPuis(function () { badge(); panneau(); });
     }).catch(function (e) {
       btn.disabled = false;
       if (st) st.textContent = '❌ ' + lisible(e);
@@ -287,7 +315,7 @@
     if (st) st.textContent = 'Désactivation…';
     retirer(CTX.fb, CTX.user, pwd.value).then(function () {
       CTX.toast('Double authentification désactivée', 'success');
-      badge(); panneau();
+      rafraichirPuis(function () { badge(); panneau(); });
     }).catch(function (e) {
       btn.disabled = false;
       if (st) st.textContent = '❌ ' + lisible(e);
