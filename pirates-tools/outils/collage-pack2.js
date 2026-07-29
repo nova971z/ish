@@ -1,8 +1,9 @@
+const { RACINE, MODELES, POSTERS, travail } = require('./_socle.cjs');
 // Poster pack 2 OUTILS = collage 2D. Coffret + chargeur + 2 batteries aux MÊMES
 // slots que le poster DCF887P2 ; 2 outils côte à côte à droite (gabarit hauteur).
 // args: <toolLImg> <toolRImg> <outWebpName>
 const http=require('http'),fs=require('fs'),path=require('path');
-const {chromium}=require('/opt/node22/lib/node_modules/playwright');
+const {chromium}=playwright();
 const OBJS=__dirname+'/objs';
 const [toolL,toolR,outName]=process.argv.slice(2);
 const RECTS={ case:[262,268,432], charger:[272,500,222], bat1:[128,632,208], bat2:[300,668,208] };
@@ -29,5 +30,5 @@ const srv=http.createServer((q,res)=>{const u=decodeURIComponent(q.url.split('?'
 const b=await chromium.launch({args:['--no-sandbox']});const p=await(await b.newContext({viewport:{width:800,height:800}})).newPage();
 await p.goto(base+'/clean',{waitUntil:'domcontentloaded'});await p.waitForFunction('window.__done',{timeout:15000});
 const du=await p.evaluate(()=>window.__webp);
-fs.writeFileSync('/home/user/ish/pirates-tools/images/posters/'+outName,Buffer.from(du.split(',')[1],'base64'));
+fs.writeFileSync(POSTERS + '/' +outName,Buffer.from(du.split(',')[1],'base64'));
 console.log('OK',outName);await b.close();srv.close();})().catch(e=>{console.error(e);process.exit(1);});

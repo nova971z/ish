@@ -1,6 +1,7 @@
+const { RACINE, MODELES, POSTERS, travail } = require('./_socle.cjs');
 const http=require('http'),fs=require('fs'),path=require('path');
-const {chromium}=require('/opt/node22/lib/node_modules/playwright');
-const T=__dirname+'/_3dtest/node_modules/three', M='/home/user/ish/pirates-tools/models/products', OUT=__dirname+'/objs';
+const {chromium}=playwright();
+const T=__dirname+'/_3dtest/node_modules/three', M=MODELES, OUT=__dirname+'/objs';
 const MIME={'.js':'text/javascript','.wasm':'application/wasm','.glb':'model/gltf-binary'};
 const H=`<!doctype html><body style="margin:0"><script type="importmap">{"imports":{"three":"/three/build/three.module.js"}}</script><canvas id=c width=900 height=900></canvas>
 <script type=module>

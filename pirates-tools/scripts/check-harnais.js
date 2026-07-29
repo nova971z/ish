@@ -12,33 +12,49 @@ var fs = require('fs');
 var path = require('path');
 
 var RACINE = path.join(__dirname, '..');
-var TESTS = path.join(RACINE, 'tests');
+/* ⚠️ TROU DANS CETTE PORTE, comblé le 28/07/2026 : elle ne couvrait que
+   `tests/`. Or `outils/` avait EXACTEMENT le même défaut — 16 chemins absolus
+   dans des outils versionnés, donc inexécutables ailleurs, alors que leur
+   README affirme que « refaire un pack sans eux coûterait des jours ».
+   Un outil sauvé mais incapable de tourner ne sauve rien. */
+var DOSSIERS = ['tests', 'outils'];
 
 // Le socle a le DROIT de citer des chemins : c'est lui qui les résout, en un
 // seul endroit, avec un repli et un message clair. C'est toute sa raison d'être.
-var DISPENSES = ['_socle.mjs', '_porter.mjs'];
+var DISPENSES = ['_socle.mjs', '_socle.cjs', '_porter.mjs', '_fauxcompte.cjs'];
 
 // Ce qu'on refuse : un chemin absolu système dans une chaîne de caractères.
 var ABSOLU = /['"`](\/(?:home|opt|usr|var|tmp|Users|mnt)\/[^'"`\n]*)['"`]/g;
 
 module.exports = function checkHarnais() {
   var errors = [];
-  if (!fs.existsSync(TESTS)) return errors;
-
-  var fichiers = fs.readdirSync(TESTS).filter(function (f) {
-    return (/\.(mjs|js)$/).test(f) && DISPENSES.indexOf(f) === -1;
+  var fichiers = [];
+  DOSSIERS.forEach(function (d) {
+    var abs = path.join(RACINE, d);
+    if (!fs.existsSync(abs)) return;
+    // récursif : outils/gltf/ contient les constructeurs de packs
+    (function parcourir(rel) {
+      fs.readdirSync(path.join(RACINE, rel), { withFileTypes: true }).forEach(function (e) {
+        if (e.name === 'node_modules' || e.name.charAt(0) === '.') return;
+        var r = rel + '/' + e.name;
+        if (e.isDirectory()) { if (e.name !== '_perimes' && e.name !== '_travail' && e.name !== '_sortie') parcourir(r); }
+        else if ((/\.(mjs|js|cjs)$/).test(e.name) && DISPENSES.indexOf(e.name) === -1) fichiers.push(r);
+      });
+    })(d);
   });
 
   fichiers.forEach(function (f) {
-    var src = fs.readFileSync(path.join(TESTS, f), 'utf8');
+    var src = fs.readFileSync(path.join(RACINE, f), 'utf8');
     var lignes = src.split('\n');
     lignes.forEach(function (l, i) {
       ABSOLU.lastIndex = 0;
       var m;
       while ((m = ABSOLU.exec(l))) {
-        errors.push('CHEMIN ABSOLU dans tests/' + f + ':' + (i + 1) + ' → "' + m[1] + '". '
-          + 'Un harnais qui cite un chemin en dur ne tourne que sur la machine où il a '
-          + 'été écrit. Passe par tests/_socle.mjs (RACINE, playwright(), sortie()).');
+        errors.push('CHEMIN ABSOLU dans ' + f + ':' + (i + 1) + ' → "' + m[1] + '". '
+          + 'Un fichier qui cite un chemin en dur ne tourne que sur la machine où il '
+          + 'a été écrit. Passe par le socle de son dossier : tests/_socle.mjs '
+          + '(RACINE, playwright(), sortie()) ou outils/_socle.cjs (RACINE, MODELES, '
+          + 'POSTERS, travail(), playwright(), three()).');
       }
     });
   });
@@ -46,7 +62,7 @@ module.exports = function checkHarnais() {
   // Le dossier de sauvetage doit finir vide : tant qu'il reste des harnais
   // dedans, le tri n'est pas terminé. Ce n'est pas une erreur bloquante —
   // c'est un compteur qui doit descendre.
-  var bruts = path.join(TESTS, '_bruts');
+  var bruts = path.join(RACINE, 'tests', '_bruts');
   if (fs.existsSync(bruts)) {
     var n = fs.readdirSync(bruts).filter(function (f) { return (/\.(mjs|js)$/).test(f); }).length;
     if (n > 0 && require.main === module) {
@@ -61,5 +77,5 @@ module.exports = function checkHarnais() {
 if (require.main === module) {
   var errs = module.exports();
   if (errs.length) { errs.forEach(function (e) { console.error('❌ ' + e); }); process.exit(1); }
-  console.log('✅ check-harnais : aucun chemin absolu dans tests/');
+  console.log('✅ check-harnais : aucun chemin absolu dans tests/ ni outils/');
 }

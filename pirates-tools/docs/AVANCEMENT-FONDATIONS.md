@@ -13,7 +13,7 @@ Dernière mise à jour : **28/07/2026**
 
 | Phase | État | Où ça en est |
 |---|---|---|
-| **0 — Sauver les harnais** | ✅ **TERMINÉE — 60/60 tranchés** | **55 harnais verts (1 012/1 012)** + 1 avec prérequis déclaré + 5 supprimés avec motif. `tests/_bruts/` est **vide et supprimé**. Couverture perdue **recréée** (`tests/pdp-specs.mjs`). Détail : `docs/TRI-SCRATCHPAD.md` |
+| **0 — Sauver les harnais** | ✅ **TERMINÉE — 69/69 tranchés** | **64 harnais verts (1 083/1 083)** + 1 avec prérequis déclaré + 5 supprimés avec motif. `tests/_bruts/` vide et supprimé. **Les 748 entrées des deux scratchpads sont catégorisées** (`docs/TRI-SCRATCHPAD-INVENTAIRE.md`). ⚠️ Le compte n'était pas 60 mais **69** : 9 harnais du scratchpad du dépôt avaient été oubliés. |
 | 1 — Architecture documentaire | ⬜ à faire | remplacée par le plan mémoire ci-dessous |
 | 2 — Invariants | ⬜ à faire | |
 | 3 — Graphe d'appels | ⬜ à faire | doit libérer ≥ 2 Ko sur `app.js` avant la phase 5 |
@@ -45,13 +45,16 @@ Dernière mise à jour : **28/07/2026**
 
 ## ▶️ REPRENDRE ICI
 
-**Prochain geste** : le tri des **~690 entrées de scratchpad non
-catégorisées**. Le plan de phase 0 exigeait que *chaque* fichier reçoive une
-catégorie ; seuls les 60 harnais l'ont reçue.
+**Prochain geste** : `CLAUDE.md` — plan mémoire, étape 2.
+La copie verbatim dans `docs/JOURNAL.md` **avant toute coupe**, puis
+l'extraction des **55 règles enfouies**. Plus rien ne bloque.
 
-**Puis** : `CLAUDE.md` — plan mémoire, étape 2. La copie verbatim dans
-`docs/JOURNAL.md` **avant toute coupe**, puis l'extraction des **55 règles
-enfouies**.
+```bash
+cd pirates-tools
+node tests/lancer.mjs --noyau      # 6 harnais, ~52 s — l'argent et la livraison
+node tests/lancer.mjs --complet    # 64 harnais, ~625 s
+node scripts/ci.js                 # 32 controles, ~85 ms
+```
 
 ## ✅ LES 3 DÉCISIONS EN ATTENTE ONT ÉTÉ TRANCHÉES (28/07/2026)
 Registre : **`docs/DECISIONS.md`**

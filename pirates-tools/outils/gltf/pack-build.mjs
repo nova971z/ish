@@ -1,3 +1,5 @@
+import { createRequire } from 'node:module';
+const { RACINE, MODELES, POSTERS, travail } = createRequire(import.meta.url)('../_socle.cjs');
 // Builder générique de pack 3D — GARDE-FOUS :
 //  1) ACCESSOIRES VERROUILLÉS AU MAPPING : chargeur + 2 batteries + coffret sont
 //     les MÊMES objets sur tous les packs → placés aux coordonnées EXACTES du
@@ -17,7 +19,7 @@ import draco3d from 'draco3dgltf';
 import { MeshoptSimplifier } from 'meshoptimizer';
 import { writeFileSync } from 'node:fs';
 await MeshoptSimplifier.ready;
-const M='/home/user/ish/pirates-tools/models/products';
+const M=MODELES;
 // Args: <toolFile> <toolMax> <rotYdeg> [rotXdeg] <outPath>
 // rotXdeg optionnel (défaut 0) — pour redresser un outil au pitch tordu.
 const _a=process.argv.slice(2);
@@ -100,7 +102,7 @@ for(const k of ['case','charger','bat1','bat2']){
 }
 const layout={ tool:toolFile, rotYdeg:Number(toolRotDegS), toolNudge:nudged, note:'plan au sol (mm), +Z vers caméra', components:{} };
 for(const k of keys){const p=P[k];layout.components[k]={cx:Math.round(p.tx),cz:Math.round(p.tz),w:Math.round(p.w),dp:Math.round(p.dp)};}
-writeFileSync('/tmp/claude-0/-home-user-ish/5fdd6ad4-f914-5559-9038-8318b9646f86/scratchpad/pack-layout.json', JSON.stringify(layout,null,2));
+writeFileSync(travail() + '/pack-layout.json', JSON.stringify(layout,null,2));
 if(problems.length){ console.error('❌ CHEVAUCHEMENT — build refusé :\n  '+problems.join('\n  ')); process.exit(2); }
 console.log(`✓ 0 chevauchement | accessoires au mapping | outil décalé de ${nudged}mm vers la droite`);
 

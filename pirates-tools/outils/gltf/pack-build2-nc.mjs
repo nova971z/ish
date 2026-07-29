@@ -1,3 +1,5 @@
+import { createRequire } from 'node:module';
+const { RACINE, MODELES, POSTERS, travail } = createRequire(import.meta.url)('../_socle.cjs');
 // Builder pack 2 OUTILS SANS COFFRET (compo photo réf) : 2 outils debout en
 // ARRIÈRE côte à côte, batteries (gauche) + chargeur (droite) en rangée AVANT.
 // Args par outil : <file> <max> <rotY> <rotX>. + outPath.
@@ -9,7 +11,7 @@ import draco3d from 'draco3dgltf';
 import { MeshoptSimplifier } from 'meshoptimizer';
 import { writeFileSync } from 'node:fs';
 await MeshoptSimplifier.ready;
-const M='/home/user/ish/pirates-tools/models/products';
+const M=MODELES;
 const [t1F,t1M,t1Ry,t1Rx, t2F,t2M,t2Ry,t2Rx, outPath]=process.argv.slice(2);
 const io=await new NodeIO().registerExtensions(ALL_EXTENSIONS).registerDependencies({
   'draco3d.decoder': await draco3d.createDecoderModule(),

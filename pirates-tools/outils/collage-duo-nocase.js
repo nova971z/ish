@@ -1,8 +1,9 @@
+const { RACINE, MODELES, POSTERS, travail } = require('./_socle.cjs');
 // Poster duo SANS COFFRET — compo de la photo réf : 2 outils en haut,
 // 2 batteries en bas-gauche (empilées), chargeur en bas-droite.
 // args: <toolLImg> <toolRImg> <outWebpName>
 const http=require('http'),fs=require('fs'),path=require('path');
-const {chromium}=require('/opt/node22/lib/node_modules/playwright');
+const {chromium}=playwright();
 const OBJS=__dirname+'/objs';
 const [toolL,toolR,outName]=process.argv.slice(2);
 // [cx,cy,width] dans l'espace 800x800 ; bat & tools par hauteur/base
@@ -35,5 +36,5 @@ const srv=http.createServer((q,res)=>{const u=decodeURIComponent(q.url.split('?'
 const b=await chromium.launch({args:['--no-sandbox']});const p=await(await b.newContext({viewport:{width:800,height:800}})).newPage();
 await p.goto(base+'/clean',{waitUntil:'domcontentloaded'});await p.waitForFunction('window.__done',{timeout:15000});
 const du=await p.evaluate(()=>window.__webp);
-fs.writeFileSync('/home/user/ish/pirates-tools/images/posters/'+outName,Buffer.from(du.split(',')[1],'base64'));
+fs.writeFileSync(POSTERS + '/' +outName,Buffer.from(du.split(',')[1],'base64'));
 console.log('OK',outName);await b.close();srv.close();})().catch(e=>{console.error(e);process.exit(1);});

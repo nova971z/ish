@@ -1,10 +1,11 @@
+const { RACINE, MODELES, POSTERS, travail } = require('./_socle.cjs');
 // Render a single GLB at 4 Y-rotations from the fixed PDP camera (E ≈ 25/72),
 // to identify the "hero" facing of the tool and the face of the case.
 const http=require('http'), fs=require('fs'), path=require('path');
-const { chromium } = require('/opt/node22/lib/node_modules/playwright');
-const THREE_DIR='/tmp/claude-0/-home-user-ish/5fdd6ad4-f914-5559-9038-8318b9646f86/scratchpad/_3dtest/node_modules/three';
-const MODELS='/home/user/ish/pirates-tools/models/products';
-const OUT='/tmp/claude-0/-home-user-ish/5fdd6ad4-f914-5559-9038-8318b9646f86/scratchpad/orient';
+const { chromium } = playwright();
+const THREE_DIR='three';
+const MODELS=MODELES;
+const OUT=travail() + '/orient';
 fs.mkdirSync(OUT,{recursive:true});
 const MIME={'.js':'text/javascript','.wasm':'application/wasm','.glb':'model/gltf-binary'};
 const HTML=`<!doctype html><html><body style="margin:0">

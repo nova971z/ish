@@ -1,3 +1,5 @@
+import { createRequire } from 'node:module';
+const { RACINE, MODELES, POSTERS, travail } = createRequire(import.meta.url)('../_socle.cjs');
 // Builder pack 2 OUTILS — côte à côte au premier plan. Accessoires (chargeur +
 // 2 batteries + coffret) VERROUILLÉS au mapping DCF887P2. Les 2 outils sont
 // posés côte à côte devant la rangée d'accessoires, chacun à SON orientation
@@ -12,7 +14,7 @@ import draco3d from 'draco3dgltf';
 import { MeshoptSimplifier } from 'meshoptimizer';
 import { writeFileSync } from 'node:fs';
 await MeshoptSimplifier.ready;
-const M='/home/user/ish/pirates-tools/models/products';
+const M=MODELES;
 // Args par outil : <file> <max> <rotY> <rotX>. rotX permet de mettre DEBOUT un
 // outil modélisé à l'horizontale (ex. meuleuse). rotX=0 pour les outils droits.
 const [t1F,t1M,t1Ry,t1Rx, t2F,t2M,t2Ry,t2Rx, outPath]=process.argv.slice(2);
@@ -74,7 +76,7 @@ for(const t of ['toolL','toolR']) for(const k of ['case','charger','bat1','bat2'
 {const cl=clearance(P.toolL,P.toolR);console.log('  clairance boîtes toolL×toolR = '+cl.toFixed(1)+'mm (gap='+gap+')');}
 const layout={t1:t1F,t2:t2F,components:{}};
 for(const k of Object.keys(P)){const p=P[k];layout.components[k]={cx:Math.round(p.tx),cz:Math.round(p.tz),w:Math.round(p.w),dp:Math.round(p.dp)};}
-writeFileSync('/tmp/claude-0/-home-user-ish/5fdd6ad4-f914-5559-9038-8318b9646f86/scratchpad/pack-layout2.json',JSON.stringify(layout,null,2));
+writeFileSync(travail() + '/pack-layout2.json',JSON.stringify(layout,null,2));
 if(problems.length){console.error('❌ CHEVAUCHEMENT — build refusé :\n  '+problems.join('\n  '));process.exit(2);}
 console.log('✓ 0 chevauchement (2 outils côte à côte, accessoires au mapping)');
 // 2 outils = ~2× maillage → décimation plus forte (0.22) pour rester < 3 Mo.

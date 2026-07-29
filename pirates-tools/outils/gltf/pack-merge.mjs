@@ -1,3 +1,5 @@
+import { createRequire } from 'node:module';
+const { RACINE, MODELES, POSTERS, travail } = createRequire(import.meta.url)('../_socle.cjs');
 import { NodeIO, getBounds } from '@gltf-transform/core';
 import { ALL_EXTENSIONS } from '@gltf-transform/extensions';
 import { dedup, prune, draco, mergeDocuments, textureCompress, weld, simplify } from '@gltf-transform/functions';
@@ -5,7 +7,7 @@ import sharp from 'sharp';
 import draco3d from 'draco3dgltf';
 import { MeshoptSimplifier } from 'meshoptimizer';
 await MeshoptSimplifier.ready;
-const M='/home/user/ish/pirates-tools/models/products';
+const M=MODELES;
 const io=await new NodeIO().registerExtensions(ALL_EXTENSIONS).registerDependencies({
   'draco3d.decoder': await draco3d.createDecoderModule(),
   'draco3d.encoder': await draco3d.createEncoderModule(),
@@ -60,7 +62,7 @@ import { writeFileSync } from 'node:fs';
 const layout={ note:'DCF887P2 — plan au sol validé (mm). +Z vers la caméra PDP, +X à droite. Caméra ≈ azimut 25°.',
   case_realMax:400, components:{} };
 for(const [name,[tx,tz]] of Object.entries(pos)){const p=P[name];layout.components[name]={cx:Math.round(tx),cz:Math.round(tz),w:Math.round(p.w),dp:Math.round(p.dp)};}
-writeFileSync('/tmp/claude-0/-home-user-ish/5fdd6ad4-f914-5559-9038-8318b9646f86/scratchpad/pack-layout.json', JSON.stringify(layout,null,2));
+writeFileSync(travail() + '/pack-layout.json', JSON.stringify(layout,null,2));
 // Décimation du maillage (1,19 M verts → cible ~0,4x) : ramène le poids sous le
 // plafond 3 Mo. error 0,1 % = imperceptible sur un pack vu de loin.
 await doc.transform(
@@ -75,5 +77,5 @@ await doc.transform(
 const buf=doc.getRoot().listBuffers()[0];
 doc.getRoot().listAccessors().forEach(a=>a.setBuffer(buf));
 doc.getRoot().listBuffers().slice(1).forEach(b=>b.dispose());
-await io.write('/tmp/claude-0/-home-user-ish/5fdd6ad4-f914-5559-9038-8318b9646f86/scratchpad/pack-merged.glb', doc);
+await io.write(travail() + '/pack-merged.glb', doc);
 console.log('OK merge + draco');

@@ -1,0 +1,33 @@
+import { join, basename } from 'node:path';
+import { RACINE } from './_socle.mjs';
+import { playwright } from './_socle.mjs';
+const pw = await playwright();
+import http from 'http'; import fs from 'fs'; import path from 'path';
+const ROOT = RACINE;
+const MIME={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.webp':'image/webp','.svg':'image/svg+xml','.png':'image/png'};
+const srv=http.createServer((req,res)=>{let u=decodeURIComponent(req.url.split('?')[0]);if(u==='/')u='/index.html';const f=path.join(ROOT,u);fs.readFile(f,(e,d)=>{if(e){res.writeHead(404);res.end();return;}res.writeHead(200,{'Content-Type':MIME[path.extname(f)]||'application/octet-stream'});res.end(d);});});
+await new Promise(r=>srv.listen(8815,r));
+const {chromium}=pw;const b=await chromium.launch();const pg=await b.newPage({serviceWorkers:'block'});
+let errs=[];pg.on('pageerror',e=>errs.push(e.message));
+const A=[];const ok=(c,m)=>{A.push((c?'✅':'❌')+' '+m); if(!c)process.exitCode=1;};
+async function body(slug){await pg.goto('http://127.0.0.1:8815/index.html#/abonnement/'+slug,{waitUntil:'networkidle'});await pg.waitForTimeout(500);return pg.evaluate(()=>document.getElementById('aboContent').textContent);}
+const bas=await body('basique');
+ok(!/Remise permanente/.test(bas), 'Basique : AUCUNE remise (petits avantages seulement)');
+const pro=await body('pro');
+ok(/Remise permanente de 2%/.test(pro), 'Pro : remise 2%');
+const gold=await body('gold');
+ok(/Remise permanente de 3%/.test(gold), 'Gold : remise 3%');
+const black=await body('black');
+ok(/Remise permanente de 5%/.test(black) && !/10%/.test(black), 'Black : remise 5% (plus de 10%)');
+ok(/Précommandes container prioritaires/.test(black), 'Black : container inclus (dégressif complet)');
+ok(/Devis chantier personnalisés illimités/.test(black), 'Black : devis chantier illimités');
+ok(/Débloqué IMMÉDIATEMENT/.test(black) && /Lancé IMMÉDIATEMENT/.test(black), 'Black : ÉPI + site débloqués immédiatement au 1er paiement');
+// dégressif : tout ce que Basique/Pro/Gold ont, Black l'a
+ok(/Bon d'achat/.test(black) && /avant-première/.test(black) && /ligne directe/.test(black) && /annuaire/i.test(black), 'Black contient tous les avantages inférieurs');
+const orbs=await pg.evaluate(()=>{location.hash='#/';return null;});
+await pg.waitForTimeout(700);
+const savings=await pg.evaluate(()=>[...document.querySelectorAll('.plan-orb')].map(o=>o.dataset.saving).join(','));
+ok(savings==='25,150,260,1100', 'économies orbes recalculées 25/150/260/1100 — lu '+savings);
+ok(errs.length===0, '0 erreur JS');
+console.log(A.join('\n'));
+await b.close();srv.close();
