@@ -15,13 +15,13 @@
 | Origine | Mécanisme | Cas | Antidote | Porte |
 |---|---|---|---|---|
 | **O1** | Affirmer avant de mesurer | 8 | §3 · §8 | `garde-sortie.js` *(hook Stop)* |
-| **O2** | L'instrument de mesure est faux | 8 | §4.3 | sabotage obligatoire |
+| **O2** | L'instrument de mesure est faux | 9 | §4.3 | sabotage obligatoire |
 | **O3** | Réutiliser sans vérifier le contexte | 7 | §1.4 | `check-lecons.js` |
 | **O4** | Contrainte connue, non appliquée | 3 | §1 | `garde-entonnoir.js` |
 | **O5** | Outil artisanal au lieu de l'outil existant | 1 | §1.4 | aucune — humaine |
 | **O6** | Copie périmée au lieu de la source vivante | 2 | §4.4 | `p7-architecture.js` |
 
-**29 erreurs, 6 mécanismes.** O1 et O2 en concentrent **16 à elles deux** :
+**30 erreurs, 6 mécanismes.** O1 et O2 en concentrent **17 à elles deux** :
 c'est là qu'il faut regarder en premier, toujours.
 
 ---
@@ -82,6 +82,7 @@ confiance qui n'existe pas.*
 | **E-206** | `git checkout <f> \|\| true` après sabotage | « fichier restauré » | `f` n'était pas suivi : rien restauré, **rien dit** |
 | **E-207** | S3 de `garde-sortie.js` | « chiffre inventé détecté » | cherchait en SOUS-CHAÎNE : « 55 » se trouve dans n'importe quel identifiant |
 | **E-208** | S4 de `garde-sortie.js` | « travail déclaré sans preuve » | **refus à tort** : le participe « vérifié » vit dans n'importe quelle phrase, y compris une question |
+| **E-209** | S3 de `garde-sortie.js` | « chiffre jamais imprimé » | **refus à tort** : fenêtre fixe de 8 Mo — dans un tour long, les mesures du début tombaient hors de vue |
 
 **Antidote** : §4.3 — **sabotage obligatoire**. On réintroduit le défaut ; si le
 contrôle reste vert, c'est **le contrôle** qui est faux, pas le code qui est bon.

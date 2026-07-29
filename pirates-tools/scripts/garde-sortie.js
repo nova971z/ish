@@ -99,12 +99,31 @@ function temoin(d) {
    Un `tool_result` est enregistré comme une entrée « user » ET porte un
    promptId : le prendre pour un message de l'user découpe le tour en morceaux
    d'un seul appel. Mesuré, pas supposé. */
+/* ⚠️ E-209 — LA FENÊTRE DOIT COUVRIR LE TOUR, PAS UN NOMBRE D'OCTETS.
+   Une fenêtre fixe de 8 Mo a produit un REFUS À TORT : dans un tour très
+   long, les premières sorties d'outils tombaient hors de la fenêtre, et deux
+   chiffres pourtant mesurés ont été déclarés inventés.
+   On agrandit donc jusqu'à voir le message de l'user AVEC des entrées avant
+   lui — c'est la seule preuve qu'on tient le tour ENTIER. Sans cette preuve,
+   `tourCourant` rend `null` et S3 se désactive : mieux vaut ne pas contrôler
+   que refuser à tort, une porte qui gêne finit désactivée. */
+var FENETRES = [8, 32, 128, 512].map(function (m) { return m * 1024 * 1024; });
+
 function tourCourant(chemin) {
+  for (var k = 0; k < FENETRES.length; k++) {
+    var r = tourDansFenetre(chemin, FENETRES[k]);
+    if (r === null) return null;                 // illisible : on passe
+    if (r.complet || FENETRES[k] >= r.taille) return r.tour;
+  }
+  return null;                                   // tour non prouvé entier
+}
+
+function tourDansFenetre(chemin, fenetreVoulue) {
   var brut;
   try {
     var fd = fs.openSync(chemin, 'r');
     var taille = fs.fstatSync(fd).size;
-    var fenetre = Math.min(taille, 8 * 1024 * 1024);
+    var fenetre = Math.min(taille, fenetreVoulue);
     var buf = Buffer.alloc(fenetre);
     fs.readSync(fd, buf, 0, fenetre, taille - fenetre);
     fs.closeSync(fd);
@@ -118,7 +137,7 @@ function tourCourant(chemin) {
     if (!l) return;
     try { L.push(JSON.parse(l)); } catch (e) { /* ligne partielle : ignorée */ }
   });
-  if (!L.length) return null;
+  if (!L.length) return { tour: null, complet: false, taille: taille };
 
   var debut = -1;
   L.forEach(function (o, i) {
@@ -127,7 +146,13 @@ function tourCourant(chemin) {
     if (Array.isArray(c) && c.some(function (x) { return x.type === 'tool_result'; })) return;
     debut = i;
   });
-  if (debut === -1) return null;
+  if (debut === -1) return { tour: null, complet: false, taille: taille };
+
+  /* Le tour n'est PROUVÉ entier que si des entrées précèdent le message de
+     l'user dans la fenêtre — ou si la fenêtre couvre tout le fichier. Sinon
+     elle a pu couper le début du tour, et un chiffre mesuré passerait pour
+     inventé (E-209). */
+  var complet = debut > 0 || fenetre >= taille;
 
   var appels = 0, resultats = 0, sorties = '';
   L.slice(debut).forEach(function (o) {
@@ -141,7 +166,10 @@ function tourCourant(chemin) {
       }
     });
   });
-  return { appels: appels, resultats: resultats, sorties: sorties };
+  return {
+    tour: { appels: appels, resultats: resultats, sorties: sorties },
+    complet: complet, taille: taille
+  };
 }
 
 /** Le fichier existe-t-il, sous l'une des racines plausibles ? */
