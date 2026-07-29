@@ -63,6 +63,28 @@ var CONTEXTE_ABSENCE = /crée|créé|créer|création|à venir|futur|n'existe pa
    au moindre doute sur la formulation, on n'inscrit pas le motif ici. */
 var DECLARE_FAIT = /(c'est fait|c'est bon|ça marche|tout est vert|c'est déployé|c'est poussé|je l'ai (poussé|déployé|commité|committé))/i;
 
+/* ── S5 : la CERTITUDE SUR CE QUI N'EST PAS ENCORE ARRIVÉ ──────────────────
+   Troisième faiblesse reconnue : je calibre mal ma confiance. Elle a une
+   signature étroite — la promesse sur l'avenir ou sur le risque. Par
+   construction, elle ne peut PAS être mesurée au moment où on l'écrit : il
+   n'existe aucune commande qui prouve qu'une chose est « sans risque ».
+
+   E-103 est exactement cela : « D1 : du gain pur, sans risque » — l'analyse
+   a ensuite trouvé 45 liaisons dont 7 pièges. La phrase était formulée avant
+   la mesure, et elle a orienté toute la suite.
+
+   Le remède n'est pas de se taire : c'est de dire CE QUI A ÉTÉ MESURÉ.
+   « les 138 assertions passent » vaut mieux que « sans risque » — la première
+   est vérifiable, la seconde est une humeur déguisée en fait. */
+var CERTITUDE = /(sans risque|aucun risque|du gain pur|ça devrait (marcher|fonctionner|passer)|ne peut pas casser|c'est trivial|il suffit de)/i;
+
+/* Une citation n'est pas une affirmation. Le registre CONTIENT « du gain pur,
+   sans risque » : sans cette précaution, le citer se bloquerait lui-même —
+   et une porte qui empêche de parler de ses propres erreurs est absurde. */
+function horsCitations(txt) {
+  return txt.replace(/«[^»]*»/g, ' ').replace(/`[^`]*`/g, ' ').replace(/"[^"]*"/g, ' ');
+}
+
 function lireEntree() {
   try { return JSON.parse(fs.readFileSync(0, 'utf8')) || {}; } catch (e) { return null; }
 }
@@ -184,6 +206,17 @@ function controler(msg, tour) {
       + 'n°2 : rien n\'est fait sans preuve produite et montrée.');
   }
 
+  /* ── S5 : certitude sur ce qui n'est pas encore arrivé ────────────────── */
+  var nu = horsCitations(msg);
+  var c5 = nu.match(CERTITUDE);
+  if (c5) {
+    griefs.push('« ' + c5[0] + ' » est une promesse sur l\'avenir : aucune commande '
+      + 'ne peut la prouver au moment où elle est écrite. C\'est E-103 — « du gain '
+      + 'pur, sans risque » avant que l\'analyse ne trouve 45 liaisons dont 7 pièges. '
+      + 'Dire ce qui a été MESURÉ à la place : un résultat vérifiable vaut mieux '
+      + 'qu\'une humeur déguisée en fait.');
+  }
+
   return griefs;
 }
 
@@ -225,7 +258,22 @@ var CAS = [
   { nom: 'réponse conversationnelle ordinaire, aucun outil', bloque: false,
     msg: 'Sur ce qui se mesure je suis fiable ; sur le jugement, non. '
        + 'Le travail a été poussé hier, mais je ne le réaffirme pas ici.',
-    tour: { appels: 0, resultats: 0, sorties: '' } }
+    tour: { appels: 0, resultats: 0, sorties: '' } },
+
+  /* ── S5 ── la promesse sur l'avenir, et ce qui NE doit pas la déclencher */
+  { nom: 'promesse d\'absence de risque', bloque: true,
+    msg: 'On peut appliquer ce correctif sans risque.' },
+  { nom: 'minimisation d\'un travail à venir', bloque: true,
+    msg: 'Pour corriger, il suffit de changer la ligne.' },
+  { nom: 'pronostic sur un correctif non essayé', bloque: true,
+    msg: 'Avec cette modification, ça devrait marcher.' },
+  { nom: 'la MÊME formule, mais CITÉE — le registre doit rester citable',
+    bloque: false,
+    msg: 'E-103 disait « du gain pur, sans risque », et c\'était faux.' },
+  { nom: 'la même formule dans un extrait de code', bloque: false,
+    msg: 'Le motif `sans risque` figure dans la liste des formules interdites.' },
+  { nom: 'un constat MESURÉ à la place de la promesse', bloque: false,
+    msg: 'Les 138 assertions passent et la CI est verte : rien ne régresse.' }
 ];
 
 function autoControle() {

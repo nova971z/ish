@@ -13,6 +13,16 @@
     ],
     "PostToolUse": [
       {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /home/user/ish/pirates-tools/scripts/garde-fraicheur.js --lu 2>/dev/null || true",
+            "timeout": 10
+          }
+        ]
+      },
+      {
         "matcher": "Bash",
         "hooks": [
           {
@@ -28,6 +38,11 @@
           {
             "type": "command",
             "command": "node /home/user/ish/pirates-tools/scripts/garde-entonnoir.js --liste 2>/dev/null || true",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "node /home/user/ish/pirates-tools/scripts/garde-fraicheur.js --ecrit 2>/dev/null || true",
             "timeout": 10
           }
         ]
@@ -48,6 +63,11 @@
       {
         "matcher": "Write|Edit",
         "hooks": [
+          {
+            "type": "command",
+            "command": "node /home/user/ish/pirates-tools/scripts/garde-fraicheur.js --garde 2>/dev/null || true",
+            "timeout": 10
+          },
           {
             "type": "command",
             "command": "node /home/user/ish/pirates-tools/scripts/garde-entonnoir.js --garde 2>/dev/null || true",

@@ -56,6 +56,7 @@ var PROTEGES = [
   /(^|\/)pirates-tools\/styles\.css$/,
   /(^|\/)pirates-tools\/mfa\.js$/,
   /(^|\/)pirates-tools\/firebase-init\.js$/,
+  /(^|\/)pirates-tools\/manifest\.webmanifest$/,
   /(^|\/)pirates-tools\/products\.json$/,
   /(^|\/)pirates-tools\/vercel\.json$/,
   /(^|\/)pirates-tools\/(firestore|storage)\.rules$/,
@@ -94,7 +95,7 @@ function temoinJur(d, dom) {
    Chaque point vient d'un défaut RÉELLEMENT constaté sur ce projet. */
 var LISTES = [
   { nom: 'PAIEMENT',
-    quand: /pirates-tools\/api\/(create-payment-intent|webhook|checkout)\.js$/,
+    quand: /pirates-tools\/api\/((create-payment-intent|webhook|checkout)\.js|_lib\/(pricing|pricing-model|pricing-config|price-parse|accounting|invoice|loyalty|stripe-meta|postal)\.js)$/,
     points: [
       'Le SERVEUR est autoritaire sur le montant : un prix venu du client est ignoré.',
       'Le webhook lit le corps BRUT — un corps parsé invalide la signature Stripe.',
@@ -105,7 +106,7 @@ var LISTES = [
       'Preuve exigée : scripts/check-pricing.js + audit/p5-money.js verts.'
     ] },
   { nom: 'IDENTITÉ ET DONNÉES',
-    quand: /pirates-tools\/(firebase-init\.js|mfa\.js|firestore\.rules|storage\.rules|api\/_lib\/(auth|firebase)\.js)$/,
+    quand: /pirates-tools\/(firebase-init\.js|mfa\.js|firestore\.rules|storage\.rules|api\/(admin|newsletter|events|cron-report)\.js|api\/_lib\/(auth|firebase|analytics|ratelimit)\.js)$/,
     points: [
       'L\'uid vient UNIQUEMENT du jeton vérifié, jamais du corps de la requête.',
       'email_verified se lit dans la revendication signée, pas dans un champ transmis.',
@@ -137,7 +138,7 @@ var LISTES = [
       'Preuve exigée : plan9, plan10, plan11, couriers verts.'
     ] },
   { nom: 'CATALOGUE ET VISUELS',
-    quand: /pirates-tools\/(products\.json|images\/|models\/)/,
+    quand: /pirates-tools\/(products\.json|images\/|models\/|api\/products\.js$|api\/_lib\/catalog\.js$)/,
     points: [
       'priceLocked: true ⇒ le prix n\'est JAMAIS recalculé.',
       'Un produit sans coût d\'achat relevé ne reste pas au catalogue.',
@@ -147,6 +148,28 @@ var LISTES = [
       'Preuve exigée : audit/p8-perf.js vert.'
     ] }
 ];
+
+/* ═══ CE QUI N'A DÉLIBÉRÉMENT PAS DE LISTE ════════════════════════════════
+   Une couverture partielle qui se croit complète est le pire état : la sonde
+   de `scripts/couverture.js` EXIGE que chaque fichier serveur soit rattaché à
+   une liste, ou nommé ici avec sa raison. Un fichier oublié devient bruyant.
+   ⚠️ C'est E-106 généralisé : la table juridique visait 8 fichiers quand il en
+   fallait 20, et seule une sonde l'a vu. */
+var HORS_LISTE = {
+  'pirates-tools/api/health.js': 'sonde de disponibilité — ne lit ni n\'écrit rien',
+  'pirates-tools/api/test-email.js': 'outil de diagnostic, jamais atteint par un client',
+  'pirates-tools/api/instagram.js': 'relais de médias publics, aucune règle métier',
+  'pirates-tools/api/_lib/http.js': 'transport pur — statuts et en-têtes, aucune décision métier'
+};
+
+module.exports = { PROTEGES: PROTEGES, LISTES: LISTES, HORS_LISTE: HORS_LISTE };
+
+/* ⚠️ Tout ce qui suit ne doit tourner QUE si le script est lancé par un hook.
+   Sans cette garde, un simple `require` de ce module lisait l'entrée standard
+   et se terminait par `process.exit(0)` — le programme appelant mourait en
+   silence, sans une ligne d'erreur. C'est ainsi que `couverture.js` n'a rien
+   affiché à son premier lancement. */
+if (require.main !== module) return;
 
 var mode = process.argv[2];
 var d = lireEntree();

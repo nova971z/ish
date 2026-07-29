@@ -71,6 +71,11 @@ var reqJur      = modJur && modJur.controle ? modJur.controle : null;
 // La porte d'O1 (hook Stop). Elle doit refuser le faux ET laisser passer le
 // vrai : une porte hystérique finit désactivée, donc ne protège plus rien.
 var reqSortie   = safeRequire('./garde-sortie',      'check-sortie');
+// On n'écrit pas sur un fichier dont l'état a changé depuis qu'on l'a lu.
+var modFrais    = safeRequire('./garde-fraicheur',   'check-fraicheur');
+var reqFrais    = modFrais && modFrais.controle ? modFrais.controle : null;
+// La sonde d'oublis : une table écrite à la main, confrontée au code réel.
+var reqCouv     = safeRequire('./couverture',        'check-couverture');
 
 // NOTE 25/07/2026 : l'étape lint-products.js (fichier jamais versionné,
 // silencieusement sautée à chaque run) est SUPPRIMÉE — ses invariants réels
@@ -126,6 +131,8 @@ var reqSortie   = safeRequire('./garde-sortie',      'check-sortie');
   await runOne(reqErreurs,  'check-erreurs');
   await runOne(reqJur,      'check-juridique');
   await runOne(reqSortie,   'check-sortie');
+  await runOne(reqFrais,    'check-fraicheur');
+  await runOne(reqCouv,     'check-couverture');
 
   var dur = Math.max(1, Date.now() - started);
   if (errors.length){
