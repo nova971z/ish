@@ -50,6 +50,19 @@ tests « ce n'est pas bloqué » passent pour la mauvaise raison. D'où
 `compteur().prealable()` : une condition sans laquelle le harnais n'a rien
 vérifié fait **échouer** le harnais au lieu de le laisser verdir à vide.
 
+**Une propriété testée sur un APPEL ISOLÉ ne dit rien de l'usage réel.**
+Mesuré le 29/07/2026 : une fonction de remboursement passait **5 propriétés sur
+6** et se trompait d'un centime dès le deuxième appel — parce qu'un client ne
+renvoie jamais tout d'un coup. Seule la propriété qui rejouait une **SÉQUENCE**
+d'appels l'a démasquée. Un jeu de propriétés tiré de la *forme de l'énoncé* est
+aveugle à la *séquence d'appels* : toute fonction appelée plusieurs fois sur le
+même objet se teste en séquence, pas seulement en un coup.
+
+**Un énoncé peut être INSATISFIABLE.** Avant de s'acharner, vérifier qu'une
+solution existe : trois unités identiques et un total non divisible par trois
+rendaient l'invariant demandé arithmétiquement impossible. Démontrer
+l'impossibilité vaut mieux que produire un contournement qui ment.
+
 ## Ancrage
 
 ⛔ **Un harnais ne nomme jamais une donnée du catalogue** (référence produit,

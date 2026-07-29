@@ -176,6 +176,29 @@ var d = lireEntree();
 var t = temoin(d);
 
 try {
+  if (mode === '--interdits') {
+    /* Se déclenche sur les MOTS DE L'USER, avant tout aiguillage. Mesuré en
+       épreuve : « trier l'annuaire par prix » et « prix barré » routaient tous
+       deux vers D-012, jamais vers D-009 ni D-004 qui les interdisent. Une
+       demande dangereuse se formule par son bénéfice, jamais par le mécanisme
+       qu'elle enfreint — l'entonnoir seul ne pouvait donc pas la voir. */
+    var INT = null;
+    try { INT = require('./interdits.js'); } catch (e) { process.exit(0); }
+    var li = INT.verifier(String(d.prompt || ''));
+    if (!li.length) process.exit(0);
+    console.log(JSON.stringify({
+      hookSpecificOutput: {
+        hookEventName: 'UserPromptSubmit',
+        additionalContext: 'Cette demande touche une règle déjà tranchée. Elle n\'est '
+          + 'PAS interdite — c\'est l\'entreprise de l\'user. Mais elle ne se code pas '
+          + 'avant de lui avoir dit ce qu\'elle engage, et d\'avoir eu sa réponse :\n\n'
+          + INT.rendu(li)
+          + '\n\n⚠️ Aucun test ne rougit si on l\'implémente. Ce rappel est le seul filet.'
+      }
+    }));
+    process.exit(0);
+  }
+
   if (mode === '--debut') {
     // Nouveau message de l'user : le tour recommence, les témoins tombent.
     try { fs.unlinkSync(t); } catch (e) { /* absent = déjà bon */ }

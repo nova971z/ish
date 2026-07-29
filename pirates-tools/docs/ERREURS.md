@@ -14,14 +14,14 @@
 
 | Origine | Mécanisme | Cas | Antidote | Porte |
 |---|---|---|---|---|
-| **O1** | Affirmer avant de mesurer | 7 | §3 · §8 | `garde-sortie.js` *(hook Stop)* |
+| **O1** | Affirmer avant de mesurer | 8 | §3 · §8 | `garde-sortie.js` *(hook Stop)* |
 | **O2** | L'instrument de mesure est faux | 8 | §4.3 | sabotage obligatoire |
-| **O3** | Réutiliser sans vérifier le contexte | 6 | §1.4 | `check-lecons.js` |
+| **O3** | Réutiliser sans vérifier le contexte | 7 | §1.4 | `check-lecons.js` |
 | **O4** | Contrainte connue, non appliquée | 3 | §1 | `garde-entonnoir.js` |
 | **O5** | Outil artisanal au lieu de l'outil existant | 1 | §1.4 | aucune — humaine |
 | **O6** | Copie périmée au lieu de la source vivante | 2 | §4.4 | `p7-architecture.js` |
 
-**27 erreurs, 6 mécanismes.** O1 et O2 en concentrent **15 à elles deux** :
+**29 erreurs, 6 mécanismes.** O1 et O2 en concentrent **16 à elles deux** :
 c'est là qu'il faut regarder en premier, toujours.
 
 ---
@@ -40,6 +40,7 @@ confiance dans tout ce que je dis.*
 | **E-105** | « la plage 64.29.17.x est cassée » | `ish-ebon` y répondait | comparaison des 3 adresses |
 | **E-106** | la porte juridique « couvre ce qui engage » | 8 fichiers sur **20** | sondes sur le code : `contact.js` = 91 marqueurs |
 | **E-107** | l'entonnoir « protège ce qui est servi » | `manifest.webmanifest` servi sans protection ; **21 fichiers serveur sur 28** sans liste de contrôle | `scripts/couverture.js` |
+| **E-108** | « les trois invariants tombent **par construction** » | faux : **1684 échecs sur 3000** | oracle de propriétés indépendant, manche 1 |
 
 **Antidote** : §3 — la commande **dans le même message**. §8 — un écran qui ne
 proteste pas ne prouve rien.
@@ -113,6 +114,7 @@ va contenir ici.*
 | **E-304** | `type==="user"` pour délimiter un tour | découper le transcript | un `tool_result` est AUSSI une entrée « user » : tours coupés en morceaux d'un appel |
 | **E-305** | `String.replace(a, b)` avec un `b` non maîtrisé | corriger un registre | une séquence spéciale dans `b` a **dupliqué le fichier entier** |
 | **E-306** | `require()` sur un script conçu pour un hook | lire sa table de motifs | son `process.exit(0)` de haut niveau **tuait l'appelant sans un mot** |
+| **E-307** | l'entonnoir interrogé avec MES mots | router une demande commerciale | « trier par prix » routait vers **D-012**, jamais vers D-009 qui l'interdit |
 
 **Antidote** : §1.4 — regarder **ce que le motif va contenir**, pas ce à quoi il
 ressemble.

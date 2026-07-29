@@ -76,6 +76,8 @@ var modFrais    = safeRequire('./garde-fraicheur',   'check-fraicheur');
 var reqFrais    = modFrais && modFrais.controle ? modFrais.controle : null;
 // La sonde d'oublis : une table écrite à la main, confrontée au code réel.
 var reqCouv     = safeRequire('./couverture',        'check-couverture');
+// Le filet qui mord sur les MOTS DE LA DEMANDE, pas sur l'aiguillage.
+var reqInterd   = safeRequire('./interdits',         'check-interdits');
 
 // NOTE 25/07/2026 : l'étape lint-products.js (fichier jamais versionné,
 // silencieusement sautée à chaque run) est SUPPRIMÉE — ses invariants réels
@@ -133,6 +135,7 @@ var reqCouv     = safeRequire('./couverture',        'check-couverture');
   await runOne(reqSortie,   'check-sortie');
   await runOne(reqFrais,    'check-fraicheur');
   await runOne(reqCouv,     'check-couverture');
+  await runOne(reqInterd,   'check-interdits');
 
   var dur = Math.max(1, Date.now() - started);
   if (errors.length){

@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "d=$(cat); printf '%s' \"$d\" | node /home/user/ish/pirates-tools/scripts/garde-entonnoir.js --debut; cat /home/user/ish/.claude/PROTOCOLE.md 2>/dev/null || true; echo; echo '# REGISTRE DES ERREURS — sommaire seul, détail sur demande'; node /home/user/ish/pirates-tools/scripts/erreurs.js --sommaire 2>/dev/null || true; echo; echo \"Détail d'une classe : cd pirates-tools && node scripts/erreurs.js --classe O1\"; echo; echo '# PORTES JURIDIQUES — la fiche se lit AVANT d'\\''écrire'; node /home/user/ish/pirates-tools/scripts/juridique.js 2>/dev/null || true",
+            "command": "d=$(cat); printf '%s' \"$d\" | node /home/user/ish/pirates-tools/scripts/garde-entonnoir.js --interdits; printf '%s' \"$d\" | node /home/user/ish/pirates-tools/scripts/garde-entonnoir.js --debut; cat /home/user/ish/.claude/PROTOCOLE.md 2>/dev/null || true; echo; echo '# REGISTRE DES ERREURS — sommaire seul, détail sur demande'; node /home/user/ish/pirates-tools/scripts/erreurs.js --sommaire 2>/dev/null || true; echo; echo \"Détail d'une classe : cd pirates-tools && node scripts/erreurs.js --classe O1\"; echo; echo '# PORTES JURIDIQUES — la fiche se lit AVANT d'\\''écrire'; node /home/user/ish/pirates-tools/scripts/juridique.js 2>/dev/null || true",
             "timeout": 10
           }
         ]
