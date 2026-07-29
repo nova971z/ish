@@ -24,11 +24,15 @@
 
 var admin = require('firebase-admin');
 
+/* ⚠️ DEUX CHEMINS D'AUTHENTIFICATION — voir scripts/mfa-unlock.js, même motif.
+   L'user travaille EXCLUSIVEMENT sur iPad : exiger la clé de service rendait ce
+   script inexécutable pour lui, donc la fonctionnalité inatteignable.
+   Le chemin recommandé est Google Cloud Shell : on y est déjà authentifié comme
+   propriétaire du projet, AUCUNE clé n'est téléchargée — et une clé qui
+   n'existe pas ne peut pas fuiter. */
 var sa = process.env.FIREBASE_SERVICE_ACCOUNT;
-if (!sa) {
-  console.error('❌ FIREBASE_SERVICE_ACCOUNT manquant (JSON du compte de service).');
-  process.exit(1);
-}
+var PROJET = process.env.GOOGLE_CLOUD_PROJECT || process.env.GCLOUD_PROJECT
+          || process.env.FIREBASE_PROJECT_ID || 'pirates-tools';
 
 var arg = process.argv[2];
 var isUid = arg === '--uid';
@@ -39,7 +43,35 @@ if (!target) {
 }
 
 if (!admin.apps.length) {
-  admin.initializeApp({ credential: admin.credential.cert(JSON.parse(sa)) });
+  if (sa) {
+    var creds;
+    try { creds = JSON.parse(sa); }
+    catch (e) {
+      console.error('❌ FIREBASE_SERVICE_ACCOUNT n\'est pas un JSON valide :', e.message);
+      process.exit(1);
+    }
+    admin.initializeApp({ credential: admin.credential.cert(creds) });
+    console.log('· identité : clé de service (FIREBASE_SERVICE_ACCOUNT)');
+  } else {
+    admin.initializeApp({ credential: admin.credential.applicationDefault(), projectId: PROJET });
+    console.log('· identité : identifiants par défaut (projet ' + PROJET + ')');
+  }
+}
+
+/* Traduit l'erreur d'authentification, qui n'apparaît qu'au PREMIER APPEL
+   RÉSEAU et pas à l'initialisation. Le message brut de Firebase parle de
+   « metadata.google.internal » — il n'indique à personne quoi faire. */
+function expliquerIdentite(msg) {
+  if (!/fetch a valid Google OAuth2 access token|metadata\.google\.internal|Could not load the default credentials|ENOTFOUND/i.test(msg)) return false;
+  console.error('❌ Personne n\'est authentifié — aucune identité utilisable.\n');
+  console.error('   Le chemin RECOMMANDÉ, sans jamais manipuler de clé :');
+  console.error('     1. ouvrir  https://shell.cloud.google.com  (gratuit, dans le navigateur)');
+  console.error('     2. git clone <le dépôt> puis  cd pirates-tools');
+  console.error('     3. npm install firebase-admin');
+  console.error('     4. node scripts/set-admin-claim.js <email>');
+  console.error('   Dans Cloud Shell on est déjà propriétaire du projet : aucune clé');
+  console.error('   de service n\'est téléchargée, donc aucune ne peut fuiter.');
+  return true;
 }
 
 (async function () {
@@ -53,7 +85,8 @@ if (!admin.apps.length) {
     console.log('     puis vérifie l\'accès /admin en étant connecté (sans secret).');
     process.exit(0);
   } catch (e) {
-    console.error('❌ Échec :', e.message);
+    var msg = String((e && e.message) || e);
+    if (!expliquerIdentite(msg)) console.error('❌ Échec :', msg);
     process.exit(1);
   }
 })();

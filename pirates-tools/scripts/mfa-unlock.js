@@ -31,11 +31,26 @@
 
 var admin = require('firebase-admin');
 
+/* ⚠️ DEUX CHEMINS D'AUTHENTIFICATION, et le second est le PLUS SÛR.
+   Ajouté le 29/07/2026, après avoir constaté un trou béant : la seule porte de
+   sortie du TOTP exigeait la clé de service, or l'user travaille EXCLUSIVEMENT
+   sur iPad — aucun terminal, aucun endroit sûr où poser ce fichier. La porte
+   de secours existait donc sur le papier et pas dans la réalité. Poser un
+   verrou dont on ne peut pas ouvrir la serrure, c'est enfermer.
+
+   1. FIREBASE_SERVICE_ACCOUNT — le JSON, quand on l'a déjà sous la main.
+   2. IDENTIFIANTS PAR DÉFAUT (Application Default Credentials) — c'est le
+      chemin à privilégier. Dans **Google Cloud Shell** (gratuit, dans le
+      navigateur, rien à installer), on est déjà authentifié comme
+      propriétaire du projet : AUCUNE clé n'a besoin d'être téléchargée,
+      copiée, ni stockée nulle part. Une clé qui n'existe pas ne fuite pas.
+
+   Depuis Cloud Shell :
+     git clone <dépôt> && cd pirates-tools && npm i firebase-admin
+     node scripts/mfa-unlock.js --check <email> */
 var sa = process.env.FIREBASE_SERVICE_ACCOUNT;
-if (!sa) {
-  console.error('❌ FIREBASE_SERVICE_ACCOUNT manquant (JSON du compte de service).');
-  process.exit(1);
-}
+var PROJET = process.env.GOOGLE_CLOUD_PROJECT || process.env.GCLOUD_PROJECT
+          || process.env.FIREBASE_PROJECT_ID || 'pirates-tools';
 
 var args = process.argv.slice(2);
 // --check : mode LECTURE SEULE. Il existe pour qu'on puisse constater l'état
@@ -52,14 +67,34 @@ if (!cible) {
   process.exit(1);
 }
 
-var creds;
-try { creds = JSON.parse(sa); }
-catch (e) {
-  console.error('❌ FIREBASE_SERVICE_ACCOUNT n\'est pas un JSON valide :', e.message);
-  process.exit(1);
+if (sa) {
+  var creds;
+  try { creds = JSON.parse(sa); }
+  catch (e) {
+    console.error('❌ FIREBASE_SERVICE_ACCOUNT n\'est pas un JSON valide :', e.message);
+    process.exit(1);
+  }
+  admin.initializeApp({ credential: admin.credential.cert(creds) });
+  console.log('· identité : clé de service (FIREBASE_SERVICE_ACCOUNT)');
+} else {
+  /* Aucune clé fournie : on tente les identifiants par défaut. C'est le cas
+     normal dans Cloud Shell. Si personne n'est authentifié, l'appel suivant
+     échouera — et le message ci-dessous dit quoi faire, plutôt que de laisser
+     une trace cryptique. */
+  try {
+    admin.initializeApp({ credential: admin.credential.applicationDefault(), projectId: PROJET });
+    console.log('· identité : identifiants par défaut (projet ' + PROJET + ')');
+  } catch (e) {
+    console.error('❌ Aucune identité utilisable.\n'
+      + '   Deux façons de s\'authentifier :\n'
+      + '   1) Dans Google Cloud Shell (gratuit, rien à installer, AUCUNE clé à manipuler) :\n'
+      + '        gcloud auth application-default login   (souvent déjà fait)\n'
+      + '   2) Avec la clé de service, si tu l\'as déjà :\n'
+      + '        FIREBASE_SERVICE_ACCOUNT="$(cat sa.json)" node scripts/mfa-unlock.js …\n'
+      + '   Détail : ' + (e && e.message));
+    process.exit(1);
+  }
 }
-
-admin.initializeApp({ credential: admin.credential.cert(creds) });
 var auth = admin.auth();
 
 function decrire(u) {
@@ -100,10 +135,26 @@ function decrire(u) {
       });
   })
   .catch(function (e) {
+    var msg = String((e && e.message) || e);
     if (e && e.code === 'auth/user-not-found') {
       console.error('❌ Aucun compte pour « ' + cible +' ».');
+    } else if (/fetch a valid Google OAuth2 access token|metadata\.google\.internal|Could not load the default credentials|ENOTFOUND/i.test(msg)) {
+      /* ⚠️ Ce cas ne se manifeste PAS à l'initialisation : `applicationDefault()`
+         ne vérifie rien tant qu'aucun appel réseau n'est fait. Le message brut
+         de Firebase parle de « metadata.google.internal », ce qui n'indique à
+         personne quoi faire. On le traduit ici, au seul endroit où il apparaît. */
+      console.error('❌ Personne n\'est authentifié — aucune identité utilisable.\n');
+      console.error('   Le chemin RECOMMANDÉ, sans jamais manipuler de clé :');
+      console.error('     1. ouvrir  https://shell.cloud.google.com  (gratuit, dans le navigateur)');
+      console.error('     2. git clone <le dépôt> puis  cd pirates-tools');
+      console.error('     3. npm install firebase-admin');
+      console.error('     4. node scripts/mfa-unlock.js --check <email>');
+      console.error('   Dans Cloud Shell on est déjà authentifié comme propriétaire du projet :');
+      console.error('   aucune clé de service n\'est téléchargée, donc aucune ne peut fuiter.\n');
+      console.error('   À défaut, avec la clé de service déjà en main :');
+      console.error('     FIREBASE_SERVICE_ACCOUNT="$(cat sa.json)" node scripts/mfa-unlock.js …');
     } else {
-      console.error('❌ Échec :', (e && e.message) || e);
+      console.error('❌ Échec :', msg);
     }
     process.exit(1);
   });
