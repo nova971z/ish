@@ -68,6 +68,9 @@ var reqErreurs  = safeRequire('./erreurs',           'check-erreurs');
 // plus aucun fichier ne refuse plus rien ET ne le dit pas.
 var modJur      = safeRequire('./juridique',         'check-juridique');
 var reqJur      = modJur && modJur.controle ? modJur.controle : null;
+// La porte d'O1 (hook Stop). Elle doit refuser le faux ET laisser passer le
+// vrai : une porte hystérique finit désactivée, donc ne protège plus rien.
+var reqSortie   = safeRequire('./garde-sortie',      'check-sortie');
 
 // NOTE 25/07/2026 : l'étape lint-products.js (fichier jamais versionné,
 // silencieusement sautée à chaque run) est SUPPRIMÉE — ses invariants réels
@@ -122,6 +125,7 @@ var reqJur      = modJur && modJur.controle ? modJur.controle : null;
   await runOne(reqLecons,   'check-lecons');
   await runOne(reqErreurs,  'check-erreurs');
   await runOne(reqJur,      'check-juridique');
+  await runOne(reqSortie,   'check-sortie');
 
   var dur = Math.max(1, Date.now() - started);
   if (errors.length){

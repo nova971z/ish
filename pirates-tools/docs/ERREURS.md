@@ -14,14 +14,14 @@
 
 | Origine | Mécanisme | Cas | Antidote | Porte |
 |---|---|---|---|---|
-| **O1** | Affirmer avant de mesurer | 6 | §3 · §8 | aucune — humaine |
-| **O2** | L'instrument de mesure est faux | 6 | §4.3 | sabotage obligatoire |
-| **O3** | Réutiliser sans vérifier le contexte | 3 | §1.4 | `check-lecons.js` |
+| **O1** | Affirmer avant de mesurer | 6 | §3 · §8 | `garde-sortie.js` *(hook Stop)* |
+| **O2** | L'instrument de mesure est faux | 7 | §4.3 | sabotage obligatoire |
+| **O3** | Réutiliser sans vérifier le contexte | 5 | §1.4 | `check-lecons.js` |
 | **O4** | Contrainte connue, non appliquée | 3 | §1 | `garde-entonnoir.js` |
 | **O5** | Outil artisanal au lieu de l'outil existant | 1 | §1.4 | aucune — humaine |
 | **O6** | Copie périmée au lieu de la source vivante | 2 | §4.4 | `p7-architecture.js` |
 
-**21 erreurs, 6 mécanismes.** O1 et O2 en concentrent **12 à elles deux** :
+**24 erreurs, 6 mécanismes.** O1 et O2 en concentrent **13 à elles deux** :
 c'est là qu'il faut regarder en premier, toujours.
 
 ---
@@ -42,8 +42,26 @@ confiance dans tout ce que je dis.*
 
 **Antidote** : §3 — la commande **dans le même message**. §8 — un écran qui ne
 proteste pas ne prouve rien.
-⚠️ **Aucune porte mécanique ne peut attraper cette classe.** Un hook ne peut pas
-vérifier ce que j'affirme en prose. C'est la limite dure du dispositif.
+
+**Porte** : `scripts/garde-sortie.js`, branché sur le hook `Stop`. Il lit ma
+réponse **avant qu'elle parte** et la **refuse** sur quatre points décidables :
+
+| | Ce qui est refusé |
+|---|---|
+| **S1** | un fichier cité comme existant qui n'est **pas sur le disque** |
+| **S2** | une commande citée dont le script n'existe pas |
+| **S3** | un chiffre donné comme mesuré qu'**aucune sortie d'outil du tour n'a imprimé** |
+| **S4** | « c'est fait / tout est vert » alors qu'**aucun outil n'a été lancé** |
+
+S3 est E-101 rendu impossible : « 55 règles enfouies » n'était imprimé nulle part.
+
+⚠️ **Ce que cette porte ne peut PAS faire**, et il faut le dire : elle ne juge
+pas un raisonnement, ne voit pas une conclusion fausse tirée de chiffres justes,
+ne lit pas une intention. Elle attrape le **détail concret inventé** — la forme
+la plus fréquente et la plus coûteuse. Le reste de la classe reste humain.
+Elle ne bloque **qu'une fois par message** et laisse passer au moindre doute :
+un refus injustifié rendrait la session inutilisable, donc la porte serait
+désactivée, donc elle ne protégerait plus rien.
 
 ---
 
@@ -60,6 +78,7 @@ confiance qui n'existe pas.*
 | **E-204** | porte M4 | déclarait orphelin ce qui était rangé | ignorait `INDEX-DOCS.md` |
 | **E-205** | mon test de `LECONS.md` | `D-013` et `D-014` « absents » | `grep` les prenait pour des fichiers |
 | **E-206** | `git checkout <f> \|\| true` après sabotage | « fichier restauré » | `f` n'était pas suivi : rien restauré, **rien dit** |
+| **E-207** | S3 de `garde-sortie.js` | « chiffre inventé détecté » | cherchait en SOUS-CHAÎNE : « 55 » se trouve dans n'importe quel identifiant |
 
 **Antidote** : §4.3 — **sabotage obligatoire**. On réintroduit le défaut ; si le
 contrôle reste vert, c'est **le contrôle** qui est faux, pas le code qui est bon.
@@ -81,10 +100,18 @@ va contenir ici.*
 |---|---|---|---|
 | **E-301** | classe `.lv-handcode__num` (6 chiffres) | clé TOTP de 32 caractères | 1064 px sur un écran de 375 |
 | **E-302** | plage « d'une fonction à la suivante » | découper 41 fonctions | emportait commentaires et déclarations |
-| **E-303** | motif `\b$\b` | détecter `$` et `$$` | zéro correspondance, code déclaré mort à tort |
+| **E-303** | un motif de mot pour un symbole qui n'en est pas un | détecter les signes monétaires | zéro correspondance, code déclaré mort à tort |
+| **E-304** | `type==="user"` pour délimiter un tour | découper le transcript | un `tool_result` est AUSSI une entrée « user » : tours coupés en morceaux d'un appel |
+| **E-305** | `String.replace(a, b)` avec un `b` non maîtrisé | corriger un registre | une séquence spéciale dans `b` a **dupliqué le fichier entier** |
 
 **Antidote** : §1.4 — regarder **ce que le motif va contenir**, pas ce à quoi il
 ressemble.
+
+⛔ **E-305 : ne jamais réparer un document avec `String.replace` en ligne de
+commande.** Certaines séquences du texte de remplacement sont interprétées par
+le moteur et recopient tout ce qui suit — le registre a été **dupliqué en
+entier**, et `E-303` a été avalé au passage. On répare avec un outil d'édition
+exact, ou avec une fonction de remplacement littérale.
 
 ---
 

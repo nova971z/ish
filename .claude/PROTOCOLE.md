@@ -124,9 +124,16 @@ premiers l'ont laissé passer. Une erreur qui **répète** un cas déjà listé
 n'ajoute pas de ligne, elle incrémente le compteur : on mesure la **récidive**,
 pas le volume. `scripts/erreurs.js --controle` (CI) refuse un sommaire qui enfle.
 
-⚠️ **O1 n'a aucune porte mécanique.** Aucun hook ne peut vérifier ce que
-j'affirme en prose. C'est la limite dure du dispositif — donc la seule classe
-où la vigilance doit être consciente, à chaque phrase qui engage.
+**O1 a désormais une porte** : `scripts/garde-sortie.js`, sur le hook `Stop`.
+Il lit ma réponse **avant qu'elle parte** et la refuse si elle cite un fichier
+qui n'existe pas, une commande introuvable, un chiffre qu'aucune sortie d'outil
+du tour n'a imprimé, ou un « c'est fait » sans qu'aucun outil ait tourné.
+
+⚠️ **Elle n'attrape que le détail concret inventé** — pas un raisonnement faux,
+pas une conclusion erronée tirée de chiffres justes. Elle laisse passer au
+moindre doute et ne bloque qu'une fois par message : une porte qui gêne finit
+désactivée. Pour tout le reste d'O1, la vigilance reste consciente, à chaque
+phrase qui engage.
 
 ## 12. PORTE JURIDIQUE — ce qui n'expose pas à un bogue mais à une INFRACTION
 Certains fichiers ne risquent pas une régression : ils risquent une
