@@ -1,5 +1,5 @@
 /* sw.js — Pirates Tools (PWA) */
-const VERSION        = 'pt-v534';                    // version du SW (logique SW)
+const VERSION        = 'pt-v535';                    // version du SW (logique SW)
 const STATIC_CACHE   = `pt-static-${VERSION}`;
 const RUNTIME_CACHE  = `pt-runtime-${VERSION}`;
 const IMG_CACHE      = `pt-img-${VERSION}`;
@@ -8,7 +8,7 @@ const ORIGIN         = self.location.origin;
 
 // Aligner avec le HTML (cache-busting des assets) — garde-fou CI :
 // scripts/check-asset-versions.js casse la CI si sw.js et index.html divergent.
-const ASSET_VER = '534';
+const ASSET_VER = '535';
 
 // Icônes + manifest : fingerprint STABLE, séparé d'ASSET_VER. Ces fichiers ne
 // changent pas à chaque déploiement — les re-cache-buster à chaque bump forçait
@@ -96,6 +96,48 @@ function timeout(ms, promise){
   });
 }
 
+/* ⛔ PAGE DE SECOURS — remplace un `Response.redirect('./')` qui BOUCLAIT.
+   PANNE VÉCUE le 29/07/2026 (pirates-tools.com noir, chargement sans fin,
+   AUCUN bouton) : le dernier recours de handleNavigate renvoyait
+   `Response.redirect('./', 302)`. Or pour une navigation vers `/`, `./` résout
+   vers… `/`. La page se redirigeait donc VERS ELLE-MÊME, indéfiniment.
+   Reproduit et mesuré : `net::ERR_TOO_MANY_REDIRECTS` (tests/sw-navigation.mjs,
+   caches vidés + serveur éteint).
+   Conséquence exacte du symptôme observé : AUCUN octet de HTML n'est jamais
+   rendu → aucun script ne s'exécute → le watchdog de index.html ne part pas →
+   pas de bouton « Recharger ». L'utilisateur n'a strictement aucune sortie.
+   ⚠️ Et ça ne frappait QUE le domaine : un Service Worker est enregistré PAR
+   ORIGINE. ish-ebon.vercel.app, mêmes fichiers, n'en a pas → il marchait.
+   RÈGLE GRAVÉE : un dernier recours ne renvoie JAMAIS de redirection. Il rend
+   une page autonome, lisible, qui dit ce qui se passe et offre une sortie.
+   Aucune ressource externe (le réseau est justement coupé), aucun script
+   (rien ne garantit qu'il serait autorisé), un simple lien qui fonctionne. */
+function pageDeSecours(pathname){
+  const html = '<!doctype html><html lang="fr"><head><meta charset="utf-8">'
+    + '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'
+    + '<title>Pirates Tools — connexion indisponible</title><style>'
+    + 'html,body{margin:0;height:100%;background:#0b0b12;color:#e9e9f2;'
+    + 'font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}'
+    + 'main{max-width:34rem;margin:0 auto;padding:18vh 1.5rem 3rem;text-align:center}'
+    + 'h1{font-size:1.4rem;margin:0 0 .8rem;color:#fbbf24}'
+    + 'p{margin:0 0 1rem;color:#b9b9c9}code{color:#8B5CF6;word-break:break-all}'
+    + 'a{display:inline-block;margin-top:1rem;padding:.85rem 1.6rem;border-radius:999px;'
+    + 'background:#8B5CF6;color:#fff;text-decoration:none;font-weight:600}'
+    + '</style></head><body><main>'
+    + '<h1>Connexion indisponible</h1>'
+    + '<p>Le site n\'a pas pu être chargé et aucune version hors ligne n\'est '
+    + 'disponible sur cet appareil.</p>'
+    + '<p>Vérifie ta connexion, puis réessaie.</p>'
+    + '<a href="/">Réessayer</a>'
+    + '<p style="margin-top:2rem;font-size:.8rem">Page demandée : <code>'
+    + pathname.replace(/[<>&"]/g, '') + '</code></p>'
+    + '</main></body></html>';
+  return new Response(html, {
+    status: 503,
+    headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }
+  });
+}
+
 // Stratégies
 async function handleNavigate(event){
   // Navigation : preload/réseau, sinon fallback index.html en cache.
@@ -105,10 +147,19 @@ async function handleNavigate(event){
   const url = new URL(event.request.url);
   const isShell = url.pathname === '/' || url.pathname === '/index.html';
 
+  // Une panne SERVEUR (5xx) n'est pas une réponse : c'est une absence de
+  // réponse habillée en HTTP. Si on a le shell en cache, il vaut infiniment
+  // mieux qu'une page d'erreur Vercel — l'app est une SPA, elle repart du hash.
+  // Un 404, lui, reste un 404 : c'est une information, on ne la masque pas.
+  const utilisable = (r) => !!r && (r.ok || r.status < 500);
+
   try {
     const pre = await event.preloadResponse;
     if (pre) {
       if (isShell && pre.ok) putCache(STATIC_CACHE, './index.html', pre.clone());
+      if (utilisable(pre)) return pre;
+      const secours5xx = await fromCache(STATIC_CACHE, './index.html');
+      if (secours5xx) return secours5xx;
       return pre;
     }
   } catch(_){}
@@ -116,11 +167,15 @@ async function handleNavigate(event){
   try {
     const net = await fetch(event.request);
     if (isShell && net && net.ok) putCache(STATIC_CACHE, './index.html', net.clone());
+    if (utilisable(net)) return net;
+    const secours5xx = await fromCache(STATIC_CACHE, './index.html');
+    if (secours5xx) return secours5xx;
     return net;
   } catch(_){
     const cached = await fromCache(STATIC_CACHE, './index.html');
     if (cached) return cached;
-    return Response.redirect('./', 302); // dernier recours
+    // ⛔ JAMAIS de redirection ici — voir pageDeSecours() ci-dessus.
+    return pageDeSecours(url.pathname);
   }
 }
 
@@ -168,24 +223,28 @@ async function fromCacheAnyVersion(cacheName, request) {
 async function handleStatic(event, request){
   // CSS/JS/Manifest/JSON (non data) -> stale-while-revalidate
   const cached = await fromCache(STATIC_CACHE, request);
-  const fetching = (async ()=>{
-    try {
-      const net = await fetch(request);
-      if (net && net.ok) {
-        await putCache(STATIC_CACHE, request, net.clone());
-      }
-    } catch(_){}
-  })();
 
-  if (cached) { event.waitUntil(fetching); return cached; }
+  // ⚠️ UNE SEULE requête réseau, réutilisée dans les deux branches.
+  // Avant : la revalidation partait TOUJOURS, puis la branche « rien en cache »
+  // relançait un `fetch(request)` — donc app.js (205 Ko) et styles.css (60 Ko)
+  // étaient demandés DEUX fois à chaque chargement à froid. L'user navigue
+  // toujours en privé : chez lui, tout chargement est un chargement à froid.
+  const reseau = fetch(request).then((net) => {
+    if (net && net.ok) putCache(STATIC_CACHE, request, net.clone());
+    return net;
+  });
+
+  if (cached) {
+    // On ne laisse JAMAIS ce rejet sans preneur : une promesse rejetée passée à
+    // waitUntil() peut faire tomber l'événement entier.
+    event.waitUntil(reseau.catch(() => {}));
+    return cached;
+  }
 
   try {
-    const net = await fetch(request);
-    if (net && net.ok) { putCache(STATIC_CACHE, request, net.clone()); }
-    return net;
+    return await reseau;
   } catch(_){
     const anyVersion = await fromCacheAnyVersion(STATIC_CACHE, request);
-    if (cached) return cached;
     if (anyVersion) return anyVersion;
     // JAMAIS de corps vide — règle gravée après la panne v487 : un corps vide
     // fait échouer le .json() de l'appelant et Safari ne remonte qu'un

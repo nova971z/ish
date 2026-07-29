@@ -19,6 +19,10 @@ const TESTS = dirname(fileURLToPath(import.meta.url));
 /* Le noyau : ce dont la panne coûterait de l'argent ou casserait un parcours.
    Un harnais absent d'ici n'est pas moins important — il est plus lent. */
 const NOYAU = [
+  // Panne du 29/07/2026 : site entièrement inaccessible sur le domaine (boucle
+  // de redirection du Service Worker). Rien ne coûte plus cher qu'un site mort —
+  // ce harnais passe donc en tête du noyau, avant même les parcours d'argent.
+  'sw-navigation.mjs',
   'plan9-serveur.mjs',   // le serveur de la chaîne livraison (rapide, sans navigateur)
   'plan11-serveur.mjs',
   'plan12-serveur.mjs',  // adresse e-mail vérifiée exigée
