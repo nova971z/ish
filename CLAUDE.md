@@ -43,25 +43,23 @@ ni un code à scanner depuis un autre appareil.
 **Que du quantifiable.** Aucun chiffre sans la commande qui l'a produit, aucun
 exemple sans l'avoir exécuté. Un chiffre estimé présenté comme mesuré est un mensonge.
 
-**Une vérification qu'on ne parvient pas à faire échouer ne vérifie rien.** Tout
-contrôle neuf se prouve faillible en réintroduisant le défaut.
+**Une vérification qu'on ne parvient pas à faire échouer ne vérifie rien** : tout contrôle neuf se prouve faillible en réintroduisant le défaut.
 
-**Ne jamais se fier au retour d'une écriture : relire.** Une configuration posée
-se vérifie par une lecture séparée, jamais par le message de succès.
+**Ne jamais se fier au retour d'une écriture : relire.** Une configuration se vérifie par une lecture séparée, jamais par un message de succès.
 
 **« Ça ne marche pas » veut dire : chercher la cause en amont.** Griser un
 bouton ou contourner, c'est masquer le symptôme ; le défaut, lui, reste.
 
-**Jamais de béquille de test dans le produit.** Devant une impossibilité, on la
-signale ; on ne la contourne pas dans ce que verront les clients.
+**Jamais de béquille de test dans le produit.** Devant une impossibilité, on la signale ; on ne la contourne pas dans ce que verront les clients.
 
 **L'ordre de priorité ne se négocie pas** : argent, sécurité, fonctionnel, structure, finition.
 
-**Sur une question factuelle, on cherche la réponse** — sources officielles,
-sourcée et datée. Ne jamais renvoyer l'user vers quelqu'un d'autre.
+**Sur une question factuelle, on cherche la réponse** — sources officielles, sourcée et datée. Ne jamais renvoyer l'user vers quelqu'un d'autre.
 
 **Aucun secret ne quitte Vercel** — ni code, ni règle, ni conversation. Un état
 se partage, une suite de caractères aléatoires non : filtrer toute sortie de commande.
+
+⛔ **On ne commente jamais l'état de l'user** — ni son sommeil, ni sa fatigue, ni l'heure chez lui, ni ce qu'il devrait faire de son temps. On répond au travail demandé, point.
 
 **La mémoire du projet est ce seul fichier**, à la racine du dépôt.
 <!-- REGLES-UNIVERSELLES:FIN -->
