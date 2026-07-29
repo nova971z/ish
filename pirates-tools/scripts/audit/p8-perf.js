@@ -49,8 +49,19 @@ LOG('━'.repeat(74));
 
 // Plafonds en Ko GZIP, figés sur la mesure du 27/07/2026 + ~15 % de marge.
 // Dépasser exige une décision explicite, pas une dérive silencieuse.
+/* ⚠️ `app.js` : plafond RELEVÉ de 205 à 400 le 29/07/2026 — décision D-014 de
+   l'user, tracée dans docs/DECISIONS.md, jamais une dérive silencieuse.
+   Le fichier était à 204,97 pour 205 : 29 octets de marge. Un correctif de
+   SÉCURITÉ (la porte admin n'atteignait jamais la voie du claim) ne pouvait
+   plus entrer. Motif retenu, et il rejoint celui de D-001 : le seul chiffre
+   qui concerne le visiteur est le TOTAL servi à froid. C'est donc P8.4
+   (400 Ko, à 369,8 aujourd'hui) qui devient la limite réellement mordante —
+   app.js ne peut pas dépasser ~335 Ko sans la faire rougir.
+   ⚠️ CONTREPARTIE ACTÉE : sortir les 33 fonctions d'administration (92 Ko
+   bruts, 12,9 % du fichier) dans un module chargé à la demande, comme mfa.js.
+   Seul le propriétaire s'en sert ; tous les autres les téléchargent pour rien. */
 const BUDGET = {
-  'app.js':        205,   // mesuré 176
+  'app.js':        400,   // relevé (D-014) — mesuré 205
   'styles.css':     60,   // mesuré  51
   'products.json':  65,   // mesuré  54
   'index.html':     46    // mesuré  39

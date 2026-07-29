@@ -332,3 +332,42 @@ double chemin qui a permis de diagnostiquer la panne.
 **Effets de bord à ne pas prendre pour des pannes** : Vercel peut afficher
 « Invalid Configuration » (il voit des IP Cloudflare) = cosmétique ; un
 déploiement qui ne s'affiche pas = cache Cloudflare → **Purge Everything**.
+
+---
+
+## D-014 — Plafond d'`app.js` relevé de 205 à 400 Ko
+
+| | |
+|---|---|
+| **Statut** | ✅ **ACTIVE** |
+| **Date** | 29/07/2026 |
+| **Décidé par** | l'user — « relève la limite à 400, je ne pense pas que ça aura un gros impact sur la vitesse de téléchargement du site, c'est même pas le poids d'une photo » |
+| **Mesure au moment de la décision** | `app.js` **205,18 Ko** · total servi à froid **369,9 Ko** (plafond 400, marge 30,1) |
+
+**Motif.** `app.js` était à **204,97 Ko pour un plafond de 205** : **29 octets de
+marge**. Un correctif de **sécurité** — la porte de l'administration n'atteignait
+jamais la voie du claim, rendant `ADMIN_SECRET` impossible à retirer — pesait
+186 octets de trop. Le plafond bloquait une correction nécessaire, ce qui n'est
+pas son rôle.
+
+Le raisonnement de l'user rejoint celui de **D-001** : *le seul chiffre qui
+concerne réellement le visiteur est le TOTAL servi à froid*. Un plafond par
+fichier se contourne de toute façon en découpant. **C'est donc P8.4 (400 Ko au
+total) qui devient la limite réellement mordante** : `app.js` ne peut pas
+dépasser ~335 Ko sans la faire rougir.
+
+**Nuance dite à l'user, et assumée par lui** : du JavaScript n'est pas une
+image. Une photo s'affiche, du code se **lit et s'exécute** — et l'user navigue
+en privé, donc à **chaque** visite. Le coût n'est pas seulement du
+téléchargement, c'est du temps processeur sur iPad.
+
+**Ce qui n'est PAS autorisé par cette décision** : laisser `app.js` grossir sans
+regarder. Le plafond total reste opposable et la CI le vérifie.
+
+**CONTREPARTIE ACTÉE, à faire** : sortir les **33 fonctions d'administration**
+(**92 Ko bruts, 12,9 % du fichier**, mesuré) dans un module chargé à la demande,
+sur le modèle de `mfa.js` et `qrcode.js`. **Seul le propriétaire s'en sert** ;
+tous les visiteurs les téléchargent et les font analyser par leur navigateur
+pour rien. Une fois fait, on rabaissera le plafond à la mesure réelle.
+
+**Où c'est exécuté** : `scripts/audit/p8-perf.js`, contrôle **P8.1**.

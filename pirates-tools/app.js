@@ -8502,6 +8502,8 @@
         // compte : sinon le rôle livreur du compte précédent survivait, et
         // son fil de discussion restait abonné.
         if (changed) {
+          // Un droit d'accès ne survit JAMAIS à un changement de compte.
+          _adminClaimOk = false;
           // Rôle et tarifs livreur, fil de discussion.
           lvResetRole();
           _lvMyTarifs = null;
@@ -12802,26 +12804,38 @@
       .catch(function (e) { toast('Erreur : ' + e.message, 'error'); });
   }
 
+  // Claim admin prouvé par le serveur. Voir .claude/rules/donnees.md.
+  var _adminClaimOk = false;
+
+  function afficherPorteAdmin(view) {
+    view.innerHTML = adminLoginTemplate();
+    var form = document.getElementById('adminLoginForm');
+    var input = document.getElementById('adminSecretInput');
+    if (form && input) {
+      form.onsubmit = function (e) {
+        e.preventDefault();
+        var val = (input.value || '').trim();
+        if (!val) return;
+        setAdminSecret(val);
+        renderAdmin();
+      };
+    }
+  }
+
+  // true si la porte a pris la main : ni secret, ni claim encore prouvé.
+  function porteAdmin(v) {
+    if (getAdminSecret() || _adminClaimOk) return false;
+    if (!_currentUser) { afficherPorteAdmin(v); return true; }
+    v.innerHTML = '<p>Vérification…</p>';
+    adminFetch('GET').then(function () { _adminClaimOk = true; renderAdmin(); })
+      .catch(function () { afficherPorteAdmin(v); });
+    return true;
+  }
+
   function renderAdmin() {
     var view = document.getElementById('adminView');
     if (!view) return;
-
-    var secret = getAdminSecret();
-    if (!secret) {
-      view.innerHTML = adminLoginTemplate();
-      var form = document.getElementById('adminLoginForm');
-      var input = document.getElementById('adminSecretInput');
-      if (form && input) {
-        form.onsubmit = function (e) {
-          e.preventDefault();
-          var val = (input.value || '').trim();
-          if (!val) return;
-          setAdminSecret(val);
-          renderAdmin();
-        };
-      }
-      return;
-    }
+    if (porteAdmin(view)) return;
 
     // Re-rendu de l'admin : réinitialise les drapeaux de chargement paresseux
     // (sinon, en ré-entrant dans l'admin, les onglets resteraient sur

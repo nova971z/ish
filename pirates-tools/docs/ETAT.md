@@ -58,7 +58,6 @@ vérifiable**.
 | # | À faire | Preuve |
 |---|---|---|
 | A1 | Activer **Storage** (console Firebase → Build → Storage) puis `npx firebase deploy --only storage` | sans ça l'envoi de vidéo échoue proprement, le reste fonctionne |
-| A2 | Activer la 2FA sur le compte **admin** (Mon compte → 🔐), après avoir vérifié son adresse e-mail | `scripts/mfa-unlock.js --check <email>` |
 | ~~A3~~ | ~~Politique **TTL** Firestore sur `rate_limits.expiresAt`~~ | ⛔ **BLOQUÉ — exige la facturation, voir ci-dessous** |
 | A5 | `node scripts/set-admin-claim.js <email>`, se reconnecter, vérifier l'accès admin **sans** secret, puis **supprimer `ADMIN_SECRET`** de Vercel | l'authentification par claim existe déjà (H6) |
 
@@ -99,8 +98,15 @@ Chacune de ces lignes figurait encore comme « à faire » dans `CLAUDE.md`.
 | Domaine et proxy réparés | D-013, mesuré le 29/07 |
 | **A4 — DMARC posé** | `dig TXT _dmarc.pirates-tools.com` → `v=DMARC1; p=none; rua=mailto:contact@…` — et SPF + DKIM Resend + DKIM Cloudflare répondent, donc la politique s'appuie sur du réel |
 | **V1 — `CRON_SECRET` posé et redéployé** | `/api/cron-report` sans jeton → `{"ok":false,"error":"Invalid admin credentials"}`. Le verrou est actif. |
+| **A2 — 2FA activée sur le compte admin** | `mfa-unlock.js --check` → `facteurs: 1 · Application d'authentification — type totp — inscrit le 29 Jul 2026 10:20:47`. Et la **porte de sortie** est opérationnelle depuis Cloud Shell, essayée AVANT de poser le verrou. |
 
 ---
+
+## 🟠 Contrepartie de D-014 — à faire
+
+| # | À faire | Gain mesuré |
+|---|---|---|
+| **D1** | Sortir les 33 fonctions d'administration d'`app.js` dans un module chargé à la demande (modèle `mfa.js`) | **92 Ko bruts, 12,9 % du fichier** — téléchargés et analysés par CHAQUE visiteur alors que seul le propriétaire s'en sert |
 
 ## ⚪️ Dette technique reportée — non bloquante, décidée
 
