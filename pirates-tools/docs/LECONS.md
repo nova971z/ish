@@ -30,6 +30,7 @@
 | 29/07/2026 | Le domaine ne répondait plus depuis le Maroc | Migration vers des IP Vercel injoignables depuis cet opérateur | `D-013` |
 | 29/07/2026 | 20 erreurs répétées sans qu'aucune trace ne dise **d'où** elles venaient | Rien ne classait les fautes par mécanisme : chacune semblait isolée, donc imprévisible | `scripts/erreurs.js` |
 | 29/07/2026 | Prix, statut des livreurs et données personnelles éditables sans jamais lire ce qu'ils engagent | Le filet ne couvrait que le bogue ; l'infraction ne se manifeste pas à l'exécution | `scripts/juridique.js` |
+| 29/07/2026 | Cette même porte ne couvrait que 8 fichiers sur 20 — `contact.js` et ses 91 marqueurs de données personnelles passaient au travers | La table de correspondance était écrite à la main et rien ne la confrontait au code | `docs/JURIDIQUE.md` |
 | 29/07/2026 | Un sabotage cru annulé restait en place : `git checkout` sur un fichier non suivi, échec avalé par un `ou-vrai` de complaisance | La restauration est un instrument comme un autre, et il n'était pas relu | `docs/ERREURS.md` |
 
 ---

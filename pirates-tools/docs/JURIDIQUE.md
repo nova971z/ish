@@ -13,13 +13,26 @@
 
 ## SOMMAIRE — cinq domaines qui exposent
 
-| Réf | Domaine | Ce qu'on risque | Fichiers concernés |
+| Réf | Domaine | Ce qu'on risque | Fichiers sous porte |
 |---|---|---|---|
-| **J1** | Information légale du site | vente illicite en B2C | `index.html` *(mentions, CGV, confidentialité)* |
-| **J2** | Statut des livreurs | requalification en salariat | `api/contact.js`, `api/_lib/courses.js` |
-| **J3** | Données personnelles | sanction CNIL | `firestore.rules`, `storage.rules`, `api/_lib/analytics.js` |
-| **J4** | Prix et promotions | pratique commerciale trompeuse | `products.json`, `api/_lib/pricing.js` |
-| **J5** | Fiscalité DOM | redressement | `api/_lib/pricing.js` *(TVA, octroi de mer)* |
+| **J1** | Information légale du site | vente illicite en B2C | 1 — `index.html` *(mentions, CGV, confidentialité)* |
+| **J2** | Statut des livreurs | requalification en salariat | 2 — `api/contact.js`, `api/_lib/courses.js` |
+| **J3** | Données personnelles | sanction CNIL | 12 — règles Firestore/Storage + tout point d'entrée qui touche une adresse, un e-mail ou un consentement |
+| **J4** | Prix et promotions | pratique commerciale trompeuse | 9 — `products.json` + toute la chaîne de calcul et d'affichage du prix |
+| **J5** | Fiscalité DOM | redressement | 9 — TVA, octroi de mer, facturation, comptabilité |
+
+La liste **exacte** n'est pas recopiée ici : elle vivrait à côté du code et
+divergerait. Elle se lit de la seule source qui décide :
+
+```bash
+cd pirates-tools && node scripts/juridique.js --controle   # cohérence + angles morts
+```
+
+⚠️ **Ce tableau a d'abord couvert 8 fichiers, puis 20.** L'écart n'a pas été
+trouvé à l'œil : c'est le détecteur d'angles morts de `scripts/juridique.js` qui
+a signalé qu'`api/contact.js` portait **91** marqueurs de données personnelles
+sans être rattaché à J3. Une table écrite à la main oublie ; le contrôle qui la
+relit ne peut plus la laisser oublier en silence.
 
 ---
 

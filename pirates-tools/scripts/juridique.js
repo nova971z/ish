@@ -34,11 +34,36 @@ var DOMAINES = {
         motifs: [/pirates-tools\/api\/contact\.js$/, /pirates-tools\/api\/_lib\/courses\.js$/] },
   J3: { titre: 'Données personnelles — RGPD',
         motifs: [/pirates-tools\/(firestore|storage)\.rules$/,
-                 /pirates-tools\/api\/_lib\/analytics\.js$/] },
+                 /pirates-tools\/api\/(contact|newsletter|events|admin|cron-report|webhook|create-payment-intent)\.js$/,
+                 /pirates-tools\/api\/_lib\/(analytics|courses|invoice|postal)\.js$/] },
   J4: { titre: 'Prix et promotions',
-        motifs: [/pirates-tools\/products\.json$/, /pirates-tools\/api\/_lib\/pricing\.js$/] },
+        motifs: [/pirates-tools\/products\.json$/,
+                 /pirates-tools\/api\/(contact|checkout|create-payment-intent|webhook|admin)\.js$/,
+                 /pirates-tools\/api\/_lib\/(pricing|pricing-model|price-parse|courses)\.js$/] },
   J5: { titre: 'Fiscalité DOM — TVA et octroi de mer',
-        motifs: [/pirates-tools\/api\/_lib\/pricing\.js$/] }
+        motifs: [/pirates-tools\/api\/(checkout|create-payment-intent|webhook|admin|cron-report)\.js$/,
+                 /pirates-tools\/api\/_lib\/(pricing|pricing-model|accounting|invoice)\.js$/] }
+};
+
+/* ═══ DÉTECTION DES ANGLES MORTS ══════════════════════════════════════════
+   Une porte ne vaut que par sa couverture. La table ci-dessus est écrite à la
+   main : elle peut oublier un fichier — c'est arrivé, huit fichiers couverts
+   quand `newsletter.js` en collectait dix-sept signaux de données personnelles.
+   Ces sondes relisent le code et EXIGENT qu'un fichier chargé juridiquement
+   soit rattaché à un domaine, ou explicitement écarté ci-dessous. */
+var SONDES = {
+  J3: /\b(email|adresse|address|phone|telephone|consent|consentement)\b/gi,
+  J4: /\b(amount|price|prix|remise|discount|promo)\b/gi,
+  J5: /\b(tva|vat|octroi|taxe|hors ?taxe|ttc)\b/gi
+};
+var SEUIL = 5;
+
+/* Écartés en connaissance de cause — chacun justifié, jamais « oublié ». */
+var HORS_PORTEE = {
+  'pirates-tools/api/health.js': 'sonde de disponibilité, aucune donnée',
+  'pirates-tools/api/test-email.js': 'outil de diagnostic, jamais servi aux clients',
+  'pirates-tools/api/instagram.js': 'relais de médias publics, aucune donnée personnelle',
+  'pirates-tools/api/products.js': 'lecture du catalogue, les prix sont fixés ailleurs'
 };
 
 /** Les domaines qu'un fichier engage. Vide = aucune obligation juridique. */
@@ -126,6 +151,30 @@ function controle() {
       }
     });
   });
+
+  /* Angles morts : un fichier chargé juridiquement mais rattaché à rien.
+     C'est le seul contrôle qui puisse rattraper un OUBLI de ma part — les
+     autres ne vérifient que la cohérence de ce que j'ai déjà écrit. */
+  var racine = path.join(__dirname, '..');
+  tous.filter(function (f) { return /^pirates-tools\/api\/.*\.js$/.test(f); })
+    .forEach(function (f) {
+      if (HORS_PORTEE[f]) return;
+      var couvert = domainesDe(f);
+      var src;
+      try { src = fs.readFileSync(path.join(racine, f.replace(/^pirates-tools\//, '')), 'utf8'); }
+      catch (e) { return; }
+      Object.keys(SONDES).forEach(function (dom) {
+        if (couvert.indexOf(dom) !== -1) return;
+        var n = (src.match(SONDES[dom]) || []).length;
+        if (n >= SEUIL) {
+          errors.push('juridique : ' + f + ' porte ' + n + ' signaux de ' + dom + ' ('
+            + DOMAINES[dom].titre + ') et n\'y est rattaché par aucun motif. '
+            + 'On l\'ajoute à ' + dom + ', ou on l\'écarte NOMMÉMENT dans HORS_PORTEE '
+            + 'avec la raison. Un oubli silencieux est le seul défaut que les '
+            + 'autres contrôles ne peuvent pas voir.');
+        }
+      });
+    });
   return errors;
 }
 

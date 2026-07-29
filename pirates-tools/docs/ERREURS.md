@@ -14,14 +14,14 @@
 
 | Origine | Mécanisme | Cas | Antidote | Porte |
 |---|---|---|---|---|
-| **O1** | Affirmer avant de mesurer | 5 | §3 · §8 | aucune — humaine |
+| **O1** | Affirmer avant de mesurer | 6 | §3 · §8 | aucune — humaine |
 | **O2** | L'instrument de mesure est faux | 6 | §4.3 | sabotage obligatoire |
 | **O3** | Réutiliser sans vérifier le contexte | 3 | §1.4 | `check-lecons.js` |
 | **O4** | Contrainte connue, non appliquée | 3 | §1 | `garde-entonnoir.js` |
 | **O5** | Outil artisanal au lieu de l'outil existant | 1 | §1.4 | aucune — humaine |
 | **O6** | Copie périmée au lieu de la source vivante | 2 | §4.4 | `p7-architecture.js` |
 
-**20 erreurs, 6 mécanismes.** O1 et O2 en concentrent **11 à elles deux** :
+**21 erreurs, 6 mécanismes.** O1 et O2 en concentrent **12 à elles deux** :
 c'est là qu'il faut regarder en premier, toujours.
 
 ---
@@ -38,6 +38,7 @@ confiance dans tout ce que je dis.*
 | **E-103** | « D1 : du gain pur, sans risque » | 45 liaisons dont 7 pièges | analyse `esprima` |
 | **E-104** | « aucune mention de médiateur dans index.html » | **3** occurrences | `grep -ci` |
 | **E-105** | « la plage 64.29.17.x est cassée » | `ish-ebon` y répondait | comparaison des 3 adresses |
+| **E-106** | la porte juridique « couvre ce qui engage » | 8 fichiers sur **20** | sondes sur le code : `contact.js` = 91 marqueurs |
 
 **Antidote** : §3 — la commande **dans le même message**. §8 — un écran qui ne
 proteste pas ne prouve rien.
