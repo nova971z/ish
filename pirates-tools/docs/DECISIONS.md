@@ -144,19 +144,191 @@ elle peut être aussi bavarde qu'on veut.
 
 ---
 
-## Décisions antérieures à reprendre dans ce registre
-Ces choix ont été tranchés avant l'ouverture du registre et vivent encore dans
-`CLAUDE.md` ou `docs/PLAN-FONDATIONS.md`. **Ils y seront transférés à l'étape 4
-du plan mémoire**, avec leur statut — dont les **cinq renversements** qui
-cohabitent aujourd'hui avec leur version d'origine.
+## D-004 — Les promotions sont prises en compte, si le traqueur couvre le produit
 
-| Sujet | Où c'est écrit aujourd'hui |
+| | |
 |---|---|
-| Pas de minification | `docs/PLAN-FONDATIONS.md` |
-| Pas de découpage du catalogue sous ~1000 produits | `docs/PLAN-FONDATIONS.md` |
-| Pas de numéros de ligne inscrits dans le code | `docs/PLAN-FONDATIONS.md` |
-| Canal crypto désactivé | `CLAUDE.md` |
-| Purge du catalogue (« seul ce que le traqueur voit reste ») | `CLAUDE.md` |
-| Stripe en mode test jusqu'au lancement | `CLAUDE.md` |
-| Le client ne propose jamais de prix (livraison) | `CLAUDE.md` |
-| Demande de course sans paiement | `CLAUDE.md` |
+| **Statut** | ✅ **ACTIVE** — **REMPLACE D-004a** |
+| **Date** | 24/07/2026 |
+| **Décidé par** | l'user |
+
+**Motif.** Le traqueur relève **le prix affiché, promo comprise**. La marge de
+15 % reste donc calée sur le **coût réel du jour** : si le fournisseur solde,
+l'user achète soldé aussi. Le prix se réajuste seul quand la promo finit.
+
+**D-004a — RENVERSÉE** : « les promotions sont ignorées ». Elle valait pour la
+saisie **manuelle** d'un prix figé, où une promo aurait gravé un coût faux.
+⛔ Ne jamais la repromouvoir sur un produit couvert par le traqueur.
+**Reste vrai dans les deux cas** : un « prix conseillé » ou un MSRP gonflé
+n'est jamais un prix source.
+
+---
+
+## D-005 — Bandeau cookies : choix réel entre Accepter et Refuser
+
+| | |
+|---|---|
+| **Statut** | ✅ **ACTIVE** — **REMPLACE D-005a et D-005b** |
+| **Date** | 16/07/2026 |
+| **Décidé par** | l'user — « pas de choix = pas respectable » |
+
+**Motif.** Cookies techniques toujours actifs et annoncés dans le texte ; choix
+réel sur la mesure d'audience, **Refuser aussi accessible qu'Accepter** (CNIL).
+Le choix est enregistré dans `pt:analytics-consent`, la clé qui gouvernera un
+éventuel traceur : refuser vaut pour toujours, même après activation.
+
+**D-005a — RENVERSÉE** : « bandeau masqué tant qu'aucun traceur n'est
+configuré » (conforme ePrivacy, mais l'user le veut visible).
+**D-005b — RENVERSÉE** : bandeau d'information avec un seul bouton
+« J'ai compris ».
+
+---
+
+## D-006 — Aucune fiche de course ne s'ouvre d'elle-même : un signet la porte
+
+| | |
+|---|---|
+| **Statut** | ✅ **ACTIVE** — **REMPLACE D-006a** |
+| **Date** | 28/07/2026 |
+| **Décidé par** | l'user — « pas besoin qu'elle soit ouverte, il est censé y avoir le petit signet en cours, orange effet néon » |
+
+**Motif.** La course en cours vit **hors** de l'historique replié, portée par un
+signet cliquable à liseré orange. C'est lui qui ouvre la fiche.
+
+**D-006a — RENVERSÉE** : la fiche de la course en cours s'ouvrait
+automatiquement, au motif qu'elle n'apparaissait dans aucune liste.
+
+---
+
+## D-007 — Deux comptes de test distincts, jamais de béquille dans le produit
+
+| | |
+|---|---|
+| **Statut** | ✅ **ACTIVE** — **REMPLACE D-007a** |
+| **Date** | 28/07/2026 |
+| **Décidé par** | l'user — « tu trouves pas ça bizarre ? » |
+
+**Motif.** Quand le client et le livreur sont le **même compte**, les deux côtés
+portent le même identifiant : **aucun code ne peut distinguer deux personnes qui
+n'en sont qu'une.** C'est une impossibilité logique, pas une difficulté
+technique. La réponse est un second compte de test, pas un contournement.
+
+**D-007a — RENVERSÉE** : un sélecteur « J'écris en tant que » avait été ajouté
+**dans l'interface**. Un vrai client n'aurait jamais dû le voir.
+⛔ **Règle générale qui en découle** : devant une impossibilité, on la SIGNALE ;
+on ne pose pas une béquille de test dans le produit.
+
+---
+
+## D-008 — Second facteur par application d'authentification, jamais par SMS
+
+| | |
+|---|---|
+| **Statut** | ✅ **ACTIVE** — **REMPLACE D-008a** |
+| **Date** | 28/07/2026 |
+| **Décidé par** | l'user — « e-mail + Google Authenticator, pas de SMS » |
+
+**Motif.** Le SMS coûte, dépend d'un opérateur, et **l'user n'a pas de
+téléphone**. Le TOTP fonctionne hors ligne, sur son iPad, via le trousseau
+Apple. Identity Platform et le TOTP sont activés sur le projet.
+
+**D-008a — RENVERSÉE** : envoi d'alertes et de codes par SMS (Twilio). Le code
+`sendSms()` subsiste mais est **totalement inerte** sans les trois variables
+d'environnement — vérifié : zéro appel réseau sans clé.
+
+---
+
+## D-009 — La plateforme ne fixe pas le prix de la course et ne l'encaisse pas
+
+| | |
+|---|---|
+| **Statut** | ✅ **ACTIVE** — **REMPLACE D-009a** |
+| **Date** | 27/07/2026 |
+| **Décidé par** | l'user — « le client fait une demande de courses, il ne paye rien avant » |
+
+**Motif.** C'est la sortie complète de l'art. **L7342-1** et du critère de
+présomption de salariat de la directive **(UE) 2024/2831** (transposition avant
+le 02/12/2026). Le livreur fixe librement ses tarifs ; **aucun tri ni aucune
+sanction ne dépend du montant**. Pirates Tools n'encaisse que **sa** marchandise.
+
+**D-009a — RENVERSÉE** : le client payait marchandise + livraison en une fois,
+les frais de course étaient **autoritaires côté serveur** et gelés en escrow.
+⛔ Le code de paiement subsiste pour l'achat d'outils — ne pas le supprimer,
+mais ne plus le brancher sur la livraison.
+
+---
+
+## D-010 — On travaille directement sur `master`
+
+| | |
+|---|---|
+| **Statut** | ✅ **ACTIVE** — **REMPLACE D-010a** |
+| **Date** | 23/07/2026 |
+| **Décidé par** | l'user |
+
+**Motif.** Vercel ne déploie que `master`. Un correctif resté sur une branche
+n'existe pas pour l'utilisateur : le 16/07, deux correctifs y sont restés
+pendant qu'il testait le site en ligne, et il a constaté « rien ne marche ».
+
+**D-010a — RENVERSÉE** : « toujours merger `master` après vérification ».
+**Ce qui reste vrai** : un correctif non poussé n'est pas déployé.
+
+---
+
+## D-011 — Pas de minification
+
+| | |
+|---|---|
+| **Statut** | ✅ **ACTIVE** |
+| **Date** | 21/07/2026 |
+| **Décidé par** | l'user — « pas besoin » |
+
+**Motif.** Évoquée après un travail de performance, écartée une fois la vitesse
+redevenue normale. Elle ajouterait une étape de construction entre le code
+source et ce qui est servi — donc un écart entre ce qu'on lit et ce qui tourne.
+Réversible : à rouvrir si un plafond de **D-001** devient intenable autrement.
+
+---
+
+## D-012 — Pas de découpage du catalogue sous ~1000 produits
+
+| | |
+|---|---|
+| **Statut** | ✅ **ACTIVE** |
+| **Date** | 28/07/2026 |
+| **Décidé par** | l'user — « je resterai à 500-600 produits maximum » |
+
+**Motif.** Le gain mesuré était de **25 ms**, jugé sans rapport avec la
+complexité ajoutée. Un serveur dédié est envisagé plus tard pour la montée en
+charge. Seuil de réouverture : **au-delà de ~1000 produits**.
+
+---
+
+## D-013 — Le domaine reste sur l'ancienne cible Vercel, derrière le proxy Cloudflare
+
+| | |
+|---|---|
+| **Statut** | ✅ **ACTIVE** |
+| **Date** | 29/07/2026 |
+| **Décidé par** | l'user, après une panne totale du site |
+| **Mesure** | `pirates-tools.com` → `104.21.19.232` · `172.67.190.117` (Cloudflare) |
+
+**Motif.** L'apex pointait sur la **nouvelle** cible Vercel
+(`…vercel-dns-017.com` → `64.29.17.65` / `216.198.79.65`), injoignable depuis
+l'opérateur marocain de l'user. Problème **connu et récurrent** des nouvelles
+plages Vercel — cas identiques signalés depuis le Brésil (AS28668), Oman
+(AS204170) et la Corée du Sud. Rien n'apparaît sur le statut Vercel : la coupure
+est dans le chemin réseau.
+
+**Ce qui est décidé** : apex **et** `www` sur `cname.vercel-dns.com` (ancienne
+cible, plages `66.33.60.x` / `76.76.21.x`), **proxy Cloudflare activé** sur les
+deux. ⛔ Ne jamais accepter la migration vers la cible par projet sans avoir
+d'abord vérifié que les nouvelles IP répondent depuis le Maroc.
+
+**Ce qui est conservé volontairement** : `www` reste branché en **Production**
+(et non en redirection) — deux chemins indépendants vers le site. C'est ce
+double chemin qui a permis de diagnostiquer la panne.
+
+**Effets de bord à ne pas prendre pour des pannes** : Vercel peut afficher
+« Invalid Configuration » (il voit des IP Cloudflare) = cosmétique ; un
+déploiement qui ne s'affiche pas = cache Cloudflare → **Purge Everything**.

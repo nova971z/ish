@@ -54,6 +54,11 @@ var reqFns      = safeRequire('./check-functions',   'check-functions');
 var reqFsQ      = safeRequire('./check-firestore-queries','check-firestore-queries');
 var reqPartApp  = safeRequire('./check-partner-application','check-partner-application');
 var reqHarnais  = safeRequire('./check-harnais',      'check-harnais');
+// Portes de la MÉMOIRE (29/07/2026) : CLAUDE.md avait atteint 1557 lignes parce
+// que rien n'empêchait d'y écrire. Une mémoire ne tient pas par discipline,
+// elle tient par des portes.
+var reqMemoire  = safeRequire('./check-memoire',     'check-memoire');
+var reqOu       = safeRequire('./check-ou',          'check-ou');
 
 // NOTE 25/07/2026 : l'étape lint-products.js (fichier jamais versionné,
 // silencieusement sautée à chaque run) est SUPPRIMÉE — ses invariants réels
@@ -103,6 +108,8 @@ var reqHarnais  = safeRequire('./check-harnais',      'check-harnais');
   await runOne(reqFsQ,      'check-firestore-queries');
   await runOne(reqPartApp,  'check-partner-application');
   await runOne(reqHarnais,  'check-harnais');
+  await runOne(reqMemoire,  'check-memoire');
+  await runOne(reqOu,       'check-ou');
 
   var dur = Math.max(1, Date.now() - started);
   if (errors.length){

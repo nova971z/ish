@@ -1,3 +1,7 @@
+> ⚠️ **ARCHIVÉ le 29/07/2026** — chantier terminé, étapes 1 à 12 exécutées.
+> Bilan chiffré : `docs/AVANCEMENT-FONDATIONS.md`. Conservé pour la méthode
+> (les 7 garde-fous) et pour la traçabilité de ce qui a été décidé.
+
 # RUNBOOK — RESTRUCTURATION DE LA MÉMOIRE PROJET
 ## Le plan d'exécution que je suis à la lettre, étape par étape
 
