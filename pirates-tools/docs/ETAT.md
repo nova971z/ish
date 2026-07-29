@@ -44,7 +44,6 @@ vérifiable**.
 
 | # | Variable | Conséquence de l'absence |
 |---|---|---|
-| V1 | `CRON_SECRET` | le rapport mensuel refuse (401) et n'envoie rien |
 | V2 | `STRIPE_WEBHOOK_SECRET` | voir P2 |
 | V3 | `TWILIO_ACCOUNT_SID` / `AUTH_TOKEN` / `FROM` | **facultatif** — `sendSms()` reste totalement inerte sans elles (vérifié : zéro appel réseau) |
 
@@ -60,9 +59,20 @@ vérifiable**.
 |---|---|---|
 | A1 | Activer **Storage** (console Firebase → Build → Storage) puis `npx firebase deploy --only storage` | sans ça l'envoi de vidéo échoue proprement, le reste fonctionne |
 | A2 | Activer la 2FA sur le compte **admin** (Mon compte → 🔐), après avoir vérifié son adresse e-mail | `scripts/mfa-unlock.js --check <email>` |
-| A3 | Poser une politique **TTL** Firestore sur `rate_limits.expiresAt` | sinon la collection grossit indéfiniment |
-| A4 | Poser un enregistrement **DMARC** chez Cloudflare | recommandé par Cloudflare, protège la délivrabilité |
+| ~~A3~~ | ~~Politique **TTL** Firestore sur `rate_limits.expiresAt`~~ | ⛔ **BLOQUÉ — exige la facturation, voir ci-dessous** |
 | A5 | `node scripts/set-admin-claim.js <email>`, se reconnecter, vérifier l'accès admin **sans** secret, puis **supprimer `ADMIN_SECRET`** de Vercel | l'authentification par claim existe déjà (H6) |
+
+> ⛔ **A3 — TENTÉ ET REFUSÉ le 29/07/2026.** Message exact de Google Cloud :
+> `403: Project pirates-tools has billing disabled. Please enable it.`
+> Les règles TTL **exigent le plan Blaze** (carte bancaire liée), même si la
+> facture reste à 0 €. Décision : **on ne lie pas de carte pour ça** — c'est une
+> optimisation de coût à long terme, pas une protection. `rate_limits` restera
+> minuscule pendant des mois. À reprendre le jour où Blaze sera activé pour
+> Storage (A1), et pas avant.
+>
+> ⚠️ **Piège de méthode payé ce jour-là** : le formulaire acceptait la saisie
+> sans broncher, et j'en avais conclu que c'était autorisé. Google ne vérifie
+> qu'à l'ENVOI. **Un écran qui ne proteste pas ne prouve rien.**
 
 ## 🟢 Mise en production
 
@@ -87,6 +97,8 @@ Chacune de ces lignes figurait encore comme « à faire » dans `CLAUDE.md`.
 | Infrastructure e-mail (Resend + domaine vérifié + routage Cloudflare) | testée de bout en bout le 25/07 |
 | Identity Platform + MFA TOTP activés | `mfa.state = ENABLED` **et** `totpProviderConfig.state = ENABLED`, relus par API |
 | Domaine et proxy réparés | D-013, mesuré le 29/07 |
+| **A4 — DMARC posé** | `dig TXT _dmarc.pirates-tools.com` → `v=DMARC1; p=none; rua=mailto:contact@…` — et SPF + DKIM Resend + DKIM Cloudflare répondent, donc la politique s'appuie sur du réel |
+| **V1 — `CRON_SECRET` posé et redéployé** | `/api/cron-report` sans jeton → `{"ok":false,"error":"Invalid admin credentials"}`. Le verrou est actif. |
 
 ---
 
