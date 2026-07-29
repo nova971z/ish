@@ -76,17 +76,35 @@ const BILANS = [
   { re: /(\d+)\s*ok,\s*(\d+)\s*ko/i, ok: 1, ko: 2, nom: 'ok/ko' },
   // « 0 hit-test + 2 fonctionnels » : deux compteurs d'ÉCHECS, pas de total
   { re: /(\d+)\s*hit-test\s*\+\s*(\d+)\s*fonctionnels?/i, echecs: [1, 2], nom: 'échecs seuls' },
-  // « 17/17 assertions vertes »  ·  « ✅ titre — 8/8 » (socle)
+  // « 17/17 assertions vertes »
   { re: /(\d+)\s*\/\s*(\d+)\s*assertions/i, ok: 1, tot: 2, nom: 'X/Y assertions' },
+  // « ✅ titre du harnais — 8/8 » : le bilan rendu par tests/_socle.mjs.
+  // Il n'était couvert par AUCUN motif — les harnais du socle retombaient donc
+  // sur le comptage de lignes, bilan honnête ignoré.
+  { re: /^[✅❌] .+? — (\d+)\/(\d+)\s*$/m, ok: 1, tot: 2, nom: 'bilan du socle' },
   // « ━━ RÉSULTAT : ❌ 0 hit-test + 2 fonctionnels » → pas de total exploitable
 ];
 
 function compter(sortie) {
-  const lignes = (sortie.match(/^✅ /gm) || []).length;
-  const rouges = (sortie.match(/^❌ /gm) || []).length;
+  /* ⚠️ SURCOMPTAGE DE +1, corrigé le 29/07/2026 — deuxième défaut trouvé dans
+     ce compteur, et le pire genre : un instrument de mesure qui GONFLE.
+     Le lanceur affichait « plan8 71/71 » là où le harnais lancé seul dit
+     « 70/70 ». Cause : sa ligne de bilan commence elle aussi par « ✅ »
+     (« ✅ 70/70 assertions », « ✅ titre — 6/6 ») et était comptée comme une
+     assertion de plus. Le garde-fou de la ligne 105 se déclenchait alors à
+     tort (« le bilan annonce moins que ce que j'ai compté »), le bilan
+     honnête du harnais était écarté, et c'est le comptage gonflé qui gagnait.
+     Correction : une ligne qui a la FORME d'un bilan n'est jamais comptée
+     comme une assertion — c'est le résumé, pas le contenu.
+     ⚠️ On exclut par la FORME, pas par la position : couper « les N dernières
+     lignes » mangerait de vraies assertions chez un harnais court. */
+  const toutes = sortie.trim().split('\n');
+  const estBilan = (l) => /\d+\s*\/\s*\d+\s*assertions|\d+\s+passed,\s*\d+\s+failed|\d+\s*OK\s*\/\s*\d+\s*KO|\d+\s*ok,\s*\d+\s*ko|—\s*\d+\/\d+\s*$/i.test(l);
+  const lignes = toutes.filter((l) => /^✅ /.test(l) && !estBilan(l)).length;
+  const rouges = toutes.filter((l) => /^❌ /.test(l) && !estBilan(l)).length;
   // On cherche le bilan dans les DERNIÈRES lignes : c'est là qu'il est rendu,
   // et ça évite de confondre avec une phrase du corps du harnais.
-  const fin = sortie.trim().split('\n').slice(-6).join('\n');
+  const fin = toutes.slice(-6).join('\n');
   for (const b of BILANS) {
     const m = fin.match(b.re);
     if (!m) continue;
