@@ -106,7 +106,18 @@ Chacune de ces lignes figurait encore comme « à faire » dans `CLAUDE.md`.
 
 | # | À faire | Gain mesuré |
 |---|---|---|
-| **D1** | Sortir les 33 fonctions d'administration d'`app.js` dans un module chargé à la demande (modèle `mfa.js`) | **92 Ko bruts, 12,9 % du fichier** — téléchargés et analysés par CHAQUE visiteur alors que seul le propriétaire s'en sert |
+| **D1a** | **PRÉALABLE** — un harnais qui exerce les ÉTATS de l'administration (drapeaux de chargement paresseux, libération du globe), pas seulement son affichage | sans lui, l'extraction se ferait à l'aveugle sur son vrai mode de panne |
+| **D1b** | Puis sortir les **48 fonctions** d'administration dans un module chargé à la demande | **23,4 Ko compressés** — analyse complète : `docs/D1-EXTRACTION-ADMIN.md` |
+
+> ⛔ **D1 SUSPENDU le 29/07/2026, après analyse syntaxique complète.**
+> 48 fonctions, 130 Ko bruts, **45 liaisons** à recréer — dont **7 variables
+> mutables écrites des DEUX côtés** (`_adminStatsLoaded`, `_adminGlobe`,
+> `_regionNames`…). Passées par valeur, une écriture du module n'atteindrait
+> jamais `app.js` : onglets bloqués sur « Chargement… », globe 3D jamais libéré.
+> **Ces pannes sont silencieuses** — les 10 harnais qui ouvrent l'administration
+> vérifient le rendu et les erreurs JS, ils ne verraient rien.
+> Un filet qui ne couvre pas le mode de panne du chantier n'est pas un filet :
+> on pose D1a d'abord.
 
 ## ⚪️ Dette technique reportée — non bloquante, décidée
 

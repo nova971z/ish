@@ -39,6 +39,7 @@ désigné ici, soit il est rangé.
 | `TRAQUEUR-URLS.md` | raccourcis du traqueur de prix, utilisés en production |
 | `MAKITA-POSTERS-TODO.md` | posters restant à produire |
 | `entreprise-sasu.md` | fiche d'identité de la société |
+| `D1-EXTRACTION-ADMIN.md` | analyse préalable de l'extraction de l'administration — chantier suspendu |
 
 ## 📦 ARCHIVÉS — travail terminé, déplacé dans `docs/archives/`
 
