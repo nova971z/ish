@@ -53,8 +53,15 @@ var CHEMIN = /(?:^|[\s`'"(])((?:pirates-tools\/|scripts\/|tests\/|docs\/|api\/|\
    être jugée sur son existence. On ne devine pas : on s'abstient. */
 var CONTEXTE_ABSENCE = /crée|créé|créer|création|à venir|futur|n'existe pas|inexistant|absent|supprim|renomm|manquant|proposer|il faudrait|serait/i;
 
-/* ── S4 : les mots qui déclarent une chose faite ─────────────────────────── */
-var DECLARE_FAIT = /\b(c'est fait|c'est bon|ça marche|tout est vert|terminé|poussé|committé|commité|déployé|vérifié)\b/i;
+/* ── S4 : les mots qui DÉCLARENT une chose faite ──────────────────────────
+   ⚠️ Uniquement des formules qui ne peuvent pas être autre chose qu'une
+   déclaration de travail accompli. Le premier jet listait aussi des
+   participes isolés — « vérifié », « terminé » — et a REFUSÉ une réponse
+   conversationnelle contenant « comment tu l'as vérifié ». Un participe vit
+   dans n'importe quelle phrase ordinaire, y compris dans une question.
+   Une porte qui refuse à tort finit désactivée, donc ne protège plus rien :
+   au moindre doute sur la formulation, on n'inscrit pas le motif ici. */
+var DECLARE_FAIT = /(c'est fait|c'est bon|ça marche|tout est vert|c'est déployé|c'est poussé|je l'ai (poussé|déployé|commité|committé))/i;
 
 function lireEntree() {
   try { return JSON.parse(fs.readFileSync(0, 'utf8')) || {}; } catch (e) { return null; }
@@ -207,7 +214,18 @@ var CAS = [
   { nom: 'fait sans preuve, aucun outil lancé', bloque: true,
     msg: 'C\'est fait, tout est vert.', tour: { appels: 0, resultats: 0, sorties: '' } },
   { nom: 'chiffre non vérifiable, transcript en retard', bloque: false,
-    msg: 'La CI passe 4711 portes.', tour: { appels: 9, resultats: 2, sorties: 'x' } }
+    msg: 'La CI passe 4711 portes.', tour: { appels: 9, resultats: 2, sorties: 'x' } },
+  /* ⚠️ RÉGRESSION E-208 — refus à tort en production. Une réponse purement
+     conversationnelle, sans aucun outil lancé, est LÉGITIME : répondre à une
+     question n'est pas déclarer un travail fait. Le participe « vérifié »
+     dans une question l'avait fait refuser. */
+  { nom: 'question contenant « vérifié », aucun outil — conversation', bloque: false,
+    msg: 'Demande-moi toujours ce qui manque et comment je l\'ai vérifié.',
+    tour: { appels: 0, resultats: 0, sorties: '' } },
+  { nom: 'réponse conversationnelle ordinaire, aucun outil', bloque: false,
+    msg: 'Sur ce qui se mesure je suis fiable ; sur le jugement, non. '
+       + 'Le travail a été poussé hier, mais je ne le réaffirme pas ici.',
+    tour: { appels: 0, resultats: 0, sorties: '' } }
 ];
 
 function autoControle() {

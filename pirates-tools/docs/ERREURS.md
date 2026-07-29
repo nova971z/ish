@@ -15,13 +15,13 @@
 | Origine | Mécanisme | Cas | Antidote | Porte |
 |---|---|---|---|---|
 | **O1** | Affirmer avant de mesurer | 6 | §3 · §8 | `garde-sortie.js` *(hook Stop)* |
-| **O2** | L'instrument de mesure est faux | 7 | §4.3 | sabotage obligatoire |
+| **O2** | L'instrument de mesure est faux | 8 | §4.3 | sabotage obligatoire |
 | **O3** | Réutiliser sans vérifier le contexte | 5 | §1.4 | `check-lecons.js` |
 | **O4** | Contrainte connue, non appliquée | 3 | §1 | `garde-entonnoir.js` |
 | **O5** | Outil artisanal au lieu de l'outil existant | 1 | §1.4 | aucune — humaine |
 | **O6** | Copie périmée au lieu de la source vivante | 2 | §4.4 | `p7-architecture.js` |
 
-**24 erreurs, 6 mécanismes.** O1 et O2 en concentrent **13 à elles deux** :
+**25 erreurs, 6 mécanismes.** O1 et O2 en concentrent **14 à elles deux** :
 c'est là qu'il faut regarder en premier, toujours.
 
 ---
@@ -79,10 +79,18 @@ confiance qui n'existe pas.*
 | **E-205** | mon test de `LECONS.md` | `D-013` et `D-014` « absents » | `grep` les prenait pour des fichiers |
 | **E-206** | `git checkout <f> \|\| true` après sabotage | « fichier restauré » | `f` n'était pas suivi : rien restauré, **rien dit** |
 | **E-207** | S3 de `garde-sortie.js` | « chiffre inventé détecté » | cherchait en SOUS-CHAÎNE : « 55 » se trouve dans n'importe quel identifiant |
+| **E-208** | S4 de `garde-sortie.js` | « travail déclaré sans preuve » | **refus à tort** : le participe « vérifié » vit dans n'importe quelle phrase, y compris une question |
 
 **Antidote** : §4.3 — **sabotage obligatoire**. On réintroduit le défaut ; si le
 contrôle reste vert, c'est **le contrôle** qui est faux, pas le code qui est bon.
 **Porte** : c'est la seule classe entièrement couverte — le sabotage est exigé.
+
+⚠️ **E-208 ajoute l'autre sens à la classe.** Un instrument peut être faux en
+**refusant à tort**, pas seulement en laissant passer. C'est même plus grave
+ici : une porte qui gêne finit désactivée, donc elle cesse de protéger — le
+faux refus détruit la protection *entière*, pas seulement un cas. D'où la règle
+posée dans l'auto-contrôle : **les deux directions sont testées**, refuser le
+faux ET laisser passer le vrai.
 
 ⚠️ **E-206 étend la classe à la RESTAURATION.** Un sabotage se défait, et la
 remise en état est un instrument comme un autre : `|| true` avale l'échec,
