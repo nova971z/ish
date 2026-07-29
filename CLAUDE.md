@@ -3,6 +3,58 @@
 Travail actif : `pirates-tools/` (PWA vanilla HTML/CSS/JS, API serverless Vercel + Firebase + Stripe).
 Branche de dev : `claude/pirates-tools-rebuild-zWc1b`. Prod = Vercel, domaine perso `pirates-tools.com`.
 
+## 🧭 CONTEXTE DE L'USER — GRAVÉ (lire AVANT tout diagnostic le concernant)
+Trois faits qui invalident la moitié des diagnostics par défaut. Ignorés le
+29/07/2026, ils lui ont coûté une nuit entière.
+- **L'USER EST AU MAROC.** L'ENTREPRISE est en Guadeloupe (fiscalité, octroi de
+  mer, livraisons), **lui non**. ⛔ Ne JAMAIS déduire sa localisation de celle
+  de la société : c'est l'erreur exacte commise cette nuit-là, et elle a orienté
+  tout un diagnostic réseau dans la mauvaise direction.
+- **NAVIGATION PRIVÉE EXCLUSIVE, sur iPad + Safari.** Conséquences qui doivent
+  être appliquées, pas seulement connues : **AUCUN Service Worker n'est
+  enregistré** (iOS les désactive en privé), **aucun cache ne persiste**,
+  **`localStorage` est vidé entre deux visites**. ⛔ Donc : aucun diagnostic le
+  concernant ne peut reposer sur le SW, sur un cache, ou sur une donnée
+  stockée ; et « efface les données de site » est une consigne VIDE de sens
+  pour lui. Tout chargement chez lui est un **chargement à froid intégral** —
+  seul le poids brut compte, le cache ne l'aide jamais.
+- **PAS DE TÉLÉPHONE, PAS DE DONNÉES CELLULAIRES.** Tout est sur l'iPad. ⛔ Ne
+  jamais proposer « teste en 4G », ni un QR à scanner depuis un autre appareil
+  (un écran ne se scanne pas lui-même → la clé TOTP en toutes lettres est LE
+  chemin, pas un repli).
+
+## 🌐 PANNE DU 29/07/2026 — LE DOMAINE POINTAIT SUR DES IP VERCEL INJOIGNABLES
+Site totalement inaccessible sur `pirates-tools.com` (page noire, chargement
+sans fin, aucun bouton) pendant que `ish-ebon.vercel.app` fonctionnait. **Ni le
+code, ni le déploiement, ni Cloudflare n'étaient en cause** — CI verte, Vercel
+« Ready », 0 % d'erreur, aucun fichier servi modifié depuis des jours.
+- **CAUSE** : l'apex pointait sur la **nouvelle cible Vercel**
+  `d8bfe7610bcdbce8.vercel-dns-017.com` → `64.29.17.65` / `216.198.79.65`. Ces
+  IP ne répondaient pas depuis son opérateur marocain. Problème **connu et
+  récurrent** : les nouvelles plages Vercel (`216.198.79.x`, `64.29.17.x`) sont
+  régulièrement blackholées par certains opérateurs — cas identiques signalés
+  depuis le Brésil (AS28668), Oman (AS204170), la Corée du Sud. Rien n'apparaît
+  jamais sur le statut Vercel : la coupure est dans le chemin réseau, pas chez eux.
+- **CORRECTIF APPLIQUÉ** : apex ET `www` repointés sur l'**ancienne cible**
+  `cname.vercel-dns.com` (plages `66.33.60.x` / `76.76.21.x`, non touchées),
+  puis **proxy Cloudflare ACTIVÉ (nuage orange)** sur les deux → le trafic passe
+  par le PoP de Casablanca (`104.21.19.232` / `172.67.190.117`). Résultat
+  constaté par l'user : « ça marche, c'est même plus rapide qu'avant ».
+- ⚠️ **`www` reste branché en Production** (et non en redirection 308) : deux
+  chemins indépendants vers le site. C'est ce qui a permis de diagnostiquer.
+- ⚠️ **Conséquences du proxy Cloudflare, à ne pas prendre pour des pannes** :
+  Vercel peut afficher « Invalid Configuration » (il voit des IP Cloudflare) =
+  **cosmétique** ; et si un déploiement ne s'affiche pas, c'est le cache
+  Cloudflare → **Caching → Purge Everything**.
+- **MÉTHODE À RÉUTILISER** : comparer ce que résolvent les différentes adresses
+  d'un même projet. `pirates-tools.com`, `www.pirates-tools.com` et
+  `ish-ebon.vercel.app` pointaient sur **trois réseaux différents** — c'est cette
+  mesure, et elle seule, qui a désigné la cause après cinq hypothèses fausses.
+- ⛔ **LEÇON DE MÉTHODE** : le watchdog de `index.html` est inline et fonctionne
+  (prouvé). **Son absence à l'écran signifie que le HTML n'est jamais arrivé** —
+  donc que `app.js` n'a même pas été téléchargé, donc qu'aucune relecture de
+  code ne peut expliquer la panne. Ce raisonnement aurait fait gagner des heures.
+
 ## 🗺️ CARTOGRAPHIE DU CODE — LIRE EN PREMIER (source de vérité TECHNIQUE)
 `pirates-tools/docs/CARTOGRAPHIE.md` = carte complète du site (où est quoi, comment
 c'est fait) avec numéros de ligne : index.html (vues/routes), app.js (zones + toutes

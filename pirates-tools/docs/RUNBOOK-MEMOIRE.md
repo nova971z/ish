@@ -140,7 +140,7 @@ cd /home/user/ish
 
 **Vérification — mécanique, pas déclarative**
 ```bash
-diff <(tail -n +6 pirates-tools/docs/JOURNAL.md) CLAUDE.md && echo "IDENTIQUE"
+diff <(tail -n +7 pirates-tools/docs/JOURNAL.md) CLAUDE.md && echo "IDENTIQUE"
 ```
 
 **Résultat attendu** : la sortie affiche exactement `IDENTIQUE`, sans aucune
