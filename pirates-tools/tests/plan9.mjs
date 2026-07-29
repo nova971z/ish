@@ -4,7 +4,7 @@
 //  3. le mode de règlement vient du livreur, pas d'un choix du client
 //  4. date/heure/dépôt/précisions posés À LA COMMANDE, jamais redemandés
 //  5. bandeau vert : clignote, « voir les détails », puis ✅ / ✕
-import { playwright, RACINE } from './_socle.mjs';
+import { playwright, RACINE, sortie } from './_socle.mjs';
 const pkg = await playwright();
 const { chromium } = pkg;
 import http from 'node:http';
@@ -404,12 +404,12 @@ T('L\'enregistrement transporte son choix', !!SV && SV.paiement === 'especes', S
 await page.setViewportSize({ width: 430, height: 1600 });
 COURSES = { ok: true, courier: true, dispo: [], mine: [Object.assign({}, baseC)] };
 await boot('#/mes-livraisons');
-await page.screenshot({ path: 'p9-client.png', fullPage: true });
+await page.screenshot({ path: join(await sortie('plan9'), 'client.png'), fullPage: true });
 COURSES = { ok: true, courier: true, dispo: [dispoC], mine: [] };
 await boot('#/mode-livraison');
 await page.evaluate(() => { const g = document.getElementById('courseAlertGo'); if (g) g.click(); });
 await page.waitForTimeout(500);
-await page.screenshot({ path: 'p9-bandeau.png' });
+await page.screenshot({ path: join(await sortie('plan9'), 'bandeau.png') });
 await browser.close(); server.close();
 console.log('\n' + (fail ? '❌' : '✅') + ` ${pass}/${pass + fail} assertions`);
 process.exit(fail ? 1 : 0);

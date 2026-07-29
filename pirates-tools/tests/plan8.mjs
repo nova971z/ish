@@ -5,7 +5,7 @@
 //  4. livreur : « Historique de course » replié, TOUT EN BAS, courses finies SEULEMENT
 //  5. livreur : pastille orange « Statut : en cours », et la grosse fiche
 //     DISPARAÎT quand la course est terminée
-import { playwright, RACINE } from './_socle.mjs';
+import { playwright, RACINE, sortie } from './_socle.mjs';
 const pkg = await playwright();
 const { chromium } = pkg;
 import http from 'node:http';
@@ -433,11 +433,11 @@ T('La course a rejoint l\'historique sans rechargement', apres.histo === 1, apre
 COURSES = { ok: true, courier: true, dispo: [], mine: [Object.assign({}, baseC, { status: 'acceptee', accord: { prix: 100, paiement: 'especes', okClient: true, okLivreur: true, valide: true } })] };
 await page.setViewportSize({ width: 430, height: 1500 });
 await boot('#/mes-livraisons');
-await page.screenshot({ path: 'p8-client.png', fullPage: true });
+await page.screenshot({ path: join(await sortie('plan8'), 'client.png'), fullPage: true });
 COURSES = { ok: true, courier: true, dispo: [], mine: [Object.assign({}, baseC, { status: 'confirmee', goodsPaid: true, accord: { prix: 100, paiement: 'especes', okClient: true, okLivreur: true, valide: true } })] };
 await boot('#/mode-livraison');
-await page.screenshot({ path: 'p8-livreur.png', fullPage: true });
-console.log('captures : p8-client.png / p8-livreur.png');
+await page.screenshot({ path: join(await sortie('plan8'), 'livreur.png'), fullPage: true });
+console.log('captures : tests/_sortie/plan8/');
 await browser.close(); server.close();
 console.log('\n' + (fail ? '❌' : '✅') + ` ${pass}/${pass + fail} assertions`);
 process.exit(fail ? 1 : 0);

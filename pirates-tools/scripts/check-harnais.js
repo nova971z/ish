@@ -43,10 +43,34 @@ module.exports = function checkHarnais() {
     })(d);
   });
 
+  /* ⚠️ TROU N°2, comblé le 29/07/2026 : quatre harnais écrivaient leurs
+     captures d'écran À LA RACINE DU SITE (`p8-client.png`, `p9-bandeau.png`…).
+     Conséquences réelles, pas théoriques :
+       1. Ces fichiers étaient VERSIONNÉS et réécrits à chaque exécution — le
+          dépôt devenait sale sans qu'on ait touché une ligne de code ;
+       2. rien ne les excluait du déploiement : ils étaient donc SERVIS
+          PUBLIQUEMENT sur pirates-tools.com (des copies d'écran des espaces
+          client et livreur, accessibles à qui devine le nom) ;
+       3. ~913 Ko de déploiement pour zéro usage.
+     Le socle expose `sortie(nom)` exactement pour ça : tests/_sortie/ n'est ni
+     versionné ni déployé. Cette porte refuse toute capture écrite ailleurs. */
+  var CAPTURE = /screenshot\s*\(\s*\{[^}]*\bpath\s*:\s*['"`]([^'"`\n]+)['"`]/g;
+
   fichiers.forEach(function (f) {
     var src = fs.readFileSync(path.join(RACINE, f), 'utf8');
     var lignes = src.split('\n');
     lignes.forEach(function (l, i) {
+      CAPTURE.lastIndex = 0;
+      var cap;
+      while ((cap = CAPTURE.exec(l))) {
+        if (cap[1].indexOf('_sortie') === -1) {
+          errors.push('CAPTURE HORS tests/_sortie/ dans ' + f + ':' + (i + 1)
+            + ' → "' + cap[1] + '". Une capture écrite ailleurs salit le dépôt à '
+            + 'chaque exécution et finit SERVIE PUBLIQUEMENT si elle atterrit à la '
+            + 'racine du site. Passe par le socle : '
+            + 'path: join(await sortie(\'<harnais>\'), \'<nom>.png\').');
+        }
+      }
       ABSOLU.lastIndex = 0;
       var m;
       while ((m = ABSOLU.exec(l))) {
