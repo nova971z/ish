@@ -40,7 +40,7 @@ précisément cela.
 ### G3 — Aucun déplacement sans preuve mécanique de la destination
 Une règle retirée du journal doit être **retrouvable par une commande** dans son
 nouveau fichier. Un script le vérifie, il ne suffit pas d'y croire.
-**Risque mesuré** : **55 lignes de règle** sont enfouies dans des sections de
+**Risque MESURÉ le 29/07 par `node scripts/regles-enfouies.js`** : **79 lignes de règle** sont enfouies dans des sections de
 récit. Un découpage naïf les perdrait en silence.
 
 ### G4 — Aucune suppression, uniquement des déplacements
@@ -77,7 +77,7 @@ bougé, c'est le document qui est corrigé, jamais la mesure qui est arrondie.
 |---|---|---|
 | `CLAUDE.md` | **1 499 lignes · 113 672 octets · 45 sections** | `wc -l CLAUDE.md ; wc -c CLAUDE.md ; grep -c '^## ' CLAUDE.md` |
 | Répartition | journal **73,5 %** · règles 12,2 % · état 9,4 % · décisions 3,3 % · aiguillage 1,5 % | classement par bornes de section |
-| Règles enfouies dans le journal | **55 lignes** | détection par marqueurs, §étape 2 |
+| Règles enfouies dans le journal | **79 lignes** (mesuré, pas estimé) | détection par marqueurs, §étape 2 |
 | Documents dans `docs/` | **22** (432 Ko) | `ls docs/*.md \| wc -l` |
 | Cités depuis `CLAUDE.md` | **6** | `grep -oE 'docs/[^ ]+\.md' CLAUDE.md \| sort -u \| wc -l` |
 | **Orphelins** | **16** | 22 − 6 |
@@ -155,9 +155,9 @@ ne contient QUE cette copie**.
 
 ---
 
-## ÉTAPE 3 — EXTRAIRE LES 55 RÈGLES ENFOUIES *(l'étape la plus délicate)*
+## ÉTAPE 3 — EXTRAIRE LES 79 RÈGLES ENFOUIES *(l'étape la plus délicate)*
 
-**Objectif.** Aucune de ces 55 lignes ne disparaît en silence.
+**Objectif.** Aucune de ces 79 lignes ne disparaît en silence.
 
 ### 3.1 — Créer l'outil de détection (versionné, pas jetable)
 `scripts/regles-enfouies.js` : liste les lignes de sections de **journal**
@@ -167,11 +167,11 @@ portant un marqueur d'impératif — `RÈGLE`, `⛔`, `JAMAIS`, `TOUJOURS`,
 ```bash
 node scripts/regles-enfouies.js
 ```
-**Résultat attendu** : **55** lignes, avec numéro et section d'origine.
+**Résultat attendu** : **79** lignes (⚠️ le « 55 » initial était une ESTIMATION présentée comme une mesure — violation de mon propre garde-fou G1, corrigée le 29/07), avec numéro et section d'origine.
 **Si le compte diffère** → **G5** : arrêt. Soit `CLAUDE.md` a changé, soit ma
 détection est fausse. On tranche **avant** de continuer.
 
-### 3.2 — Traiter les 55, une par une, sans exception
+### 3.2 — Traiter les 79, une par une, sans exception
 Chacune reçoit **exactement une** issue, écrite dans
 `docs/EXTRACTION-REGLES.md` :
 
@@ -182,12 +182,12 @@ Chacune reçoit **exactement une** issue, écrite dans
 | **DÉJÀ COUVERTE** | existe ailleurs (règle ou contrôle CI) — **je note où**, vérifié par `grep` (**G2**) |
 | **PÉRIMÉE** | la décision a été renversée depuis — **je note par quoi** |
 
-⚠️ **Piège identifié** : certaines de ces 55 ont été **renversées** (le bandeau
+⚠️ **Piège identifié** : certaines de ces 79 ont été **renversées** (le bandeau
 cookies, l'auto-ouverture des fiches). **Promouvoir une règle morte serait pire
 que la perdre** : elle contredirait la règle vivante, et je choisirais alors
 l'une des deux au hasard. Croisement obligatoire avec `docs/DECISIONS.md`.
 
-⚠️ **Second piège** : viser **≤ 25 règles promues**. 55 règles séparées font un
+⚠️ **Second piège** : viser **≤ 25 règles promues**. 79 règles séparées font un
 pavé que personne ne lit. On regroupe par sujet.
 
 ### 3.3 — Relecture humaine des sections de journal
@@ -204,7 +204,7 @@ justifiée.
 promouvoir → la CI doit rougir et **nommer la ligne**.
 
 **Preuve de fin**
-- [ ] les 55 ont une issue écrite, **aucune sans décision**
+- [ ] les 79 ont une issue écrite, **aucune sans décision**
 - [ ] `check-memoire.js` vert **et prouvé faillible**
 - [ ] le compte de lignes relues à la main est déclaré
 
@@ -418,7 +418,7 @@ mesuré par `/context`, avant et après.
 |---|---|---|---|
 | 1 | Re-mesurer | non | — |
 | 2 | Filet (copie verbatim) | non | `git revert` |
-| 3 | Extraire les 55 règles | non | `git revert` |
+| 3 | Extraire les 79 règles | non | `git revert` |
 | 4 | Registre des décisions | non | `git revert` |
 | 5 | Règles à périmètre | non | `git revert` |
 | 6 | `CLAUDE.md` = aiguillage | non | `git revert` |
