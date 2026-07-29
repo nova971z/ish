@@ -59,7 +59,6 @@ vérifiable**.
 |---|---|---|
 | A1 | Activer **Storage** (console Firebase → Build → Storage) puis `npx firebase deploy --only storage` | sans ça l'envoi de vidéo échoue proprement, le reste fonctionne |
 | ~~A3~~ | ~~Politique **TTL** Firestore sur `rate_limits.expiresAt`~~ | ⛔ **BLOQUÉ — exige la facturation, voir ci-dessous** |
-| A5 | `node scripts/set-admin-claim.js <email>`, se reconnecter, vérifier l'accès admin **sans** secret, puis **supprimer `ADMIN_SECRET`** de Vercel | l'authentification par claim existe déjà (H6) |
 
 > ⛔ **A3 — TENTÉ ET REFUSÉ le 29/07/2026.** Message exact de Google Cloud :
 > `403: Project pirates-tools has billing disabled. Please enable it.`
@@ -99,6 +98,7 @@ Chacune de ces lignes figurait encore comme « à faire » dans `CLAUDE.md`.
 | **A4 — DMARC posé** | `dig TXT _dmarc.pirates-tools.com` → `v=DMARC1; p=none; rua=mailto:contact@…` — et SPF + DKIM Resend + DKIM Cloudflare répondent, donc la politique s'appuie sur du réel |
 | **V1 — `CRON_SECRET` posé et redéployé** | `/api/cron-report` sans jeton → `{"ok":false,"error":"Invalid admin credentials"}`. Le verrou est actif. |
 | **A2 — 2FA activée sur le compte admin** | `mfa-unlock.js --check` → `facteurs: 1 · Application d'authentification — type totp — inscrit le 29 Jul 2026 10:20:47`. Et la **porte de sortie** est opérationnelle depuis Cloud Shell, essayée AVANT de poser le verrou. |
+| **A5 — claim admin posé, `ADMIN_SECRET` retiré** | Onglet fermé (mémoire de session vide → mot de passe admin envoyé VIDE, donc rejeté par le serveur), reconnexion, administration ouverte **sans aucun secret**. Seule la voie du claim pouvait passer. Puis `ADMIN_SECRET` retiré de Vercel : l'accès fonctionne toujours. |
 
 ---
 
