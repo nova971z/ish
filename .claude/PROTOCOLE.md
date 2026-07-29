@@ -93,5 +93,20 @@ me bloque » sont des réponses complètes. Une invention polie ne l'est pas.
 données, mise en ligne)* **se vérifie par TROIS chemins indépendants.** Deux qui
 concordent et un troisième qui diverge = on ne conclut pas, on cherche pourquoi.
 
-## 9. Le reste
+## 9. LISTE DE CONTRÔLE MÉTIER — imposée, pas suggérée
+Toucher un fichier sensible injecte automatiquement sa liste
+(`scripts/garde-entonnoir.js --liste`) : **paiement · identité et données ·
+front servi · chaîne de livraison · catalogue**. Chaque point vient d'un défaut
+réellement constaté ici. Rien n'est « fait » tant qu'ils ne sont pas tous vrais
+**et prouvés**.
+
+## 10. BOUCLE D'APPRENTISSAGE — une panne produit une PORTE
+Toute panne se solde par une ligne dans `docs/LECONS.md` :
+`date · ce qui a cassé · la cause · la porte qui l'empêche`.
+`scripts/check-lecons.js` (dans la CI) **refuse** une leçon dont la porte est
+vide ou dont le fichier n'existe pas.
+⛔ Une leçon sans dent est une anecdote. Un commit ne se relit pas ; une porte
+se déclenche toute seule.
+
+## 11. Le reste
 `CLAUDE.md` · `.claude/rules/` (par domaine) · `docs/DECISIONS.md` · `docs/ETAT.md`

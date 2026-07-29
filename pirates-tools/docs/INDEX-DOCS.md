@@ -26,6 +26,7 @@ désigné ici, soit il est rangé.
 | `JOURNAL.md` | copie intégrale de la mémoire — le filet |
 | `EXTRACTION-REGLES.md` | le tri des 79 règles enfouies |
 | `AVANCEMENT-FONDATIONS.md` | où en est le chantier |
+| `LECONS.md` | registre des pannes et de la porte que chacune a produite |
 | `INDEX-DOCS.md` | ce fichier |
 
 ## 🟡 VIVANTS — travaux en cours, à reprendre

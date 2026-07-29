@@ -60,6 +60,68 @@ function temoin(d) {
   return path.join(os.tmpdir(), 'pt-entonnoir-' + sid);
 }
 
+/* ═══ LISTES DE CONTRÔLE MÉTIER ═══════════════════════════════════════════
+   Le protocole seul est une MÉTHODE. Un expert applique en plus le savoir du
+   domaine touché. Ces listes sont injectées dans le contexte APRÈS l'édition,
+   au moment exact où elles servent : « tu viens de toucher au paiement, voici
+   ce qui doit être vrai avant de dire que c'est fini ».
+   Chaque point vient d'un défaut RÉELLEMENT constaté sur ce projet. */
+var LISTES = [
+  { nom: 'PAIEMENT',
+    quand: /pirates-tools\/api\/(create-payment-intent|webhook|checkout)\.js$/,
+    points: [
+      'Le SERVEUR est autoritaire sur le montant : un prix venu du client est ignoré.',
+      'Le webhook lit le corps BRUT — un corps parsé invalide la signature Stripe.',
+      'Idempotence : le même événement rejoué deux fois ne débite pas deux fois.',
+      'Le montant AFFICHÉ et le montant DÉBITÉ tombent au centime.',
+      'Le territoire fiscal vient du CODE POSTAL, jamais d\'un champ déclaré.',
+      'Aucune donnée personnelle dans les journaux (ni e-mail, ni adresse).',
+      'Preuve exigée : scripts/check-pricing.js + audit/p5-money.js verts.'
+    ] },
+  { nom: 'IDENTITÉ ET DONNÉES',
+    quand: /pirates-tools\/(firebase-init\.js|mfa\.js|firestore\.rules|storage\.rules|api\/_lib\/(auth|firebase)\.js)$/,
+    points: [
+      'L\'uid vient UNIQUEMENT du jeton vérifié, jamais du corps de la requête.',
+      'email_verified se lit dans la revendication signée, pas dans un champ transmis.',
+      'Les règles sont en default-deny : toute collection nouvelle est fermée.',
+      'where + orderBy sur deux champs ⇒ index composite. L\'ÉMULATEUR NE LE DIRA JAMAIS.',
+      'Une règle modifiée doit être DÉPLOYÉE, sinon la protection est théorique.',
+      'Second facteur : la porte de sortie (mfa-unlock) doit être essayée AVANT.',
+      'Preuve exigée : test-rules.js contre l\'émulateur réel + audit/p4-firestore.js.'
+    ] },
+  { nom: 'FRONT SERVI AUX VISITEURS',
+    quand: /pirates-tools\/(app\.js|sw\.js|index\.html|styles\.css)$/,
+    points: [
+      'Bumper sw.js (VERSION, ASSET_VER) ET les ?v= de index.html — la CI le vérifie.',
+      'Script inline modifié ⇒ recalculer l\'empreinte CSP, sinon le site meurt.',
+      'Service Worker : jamais de corps vide, jamais de redirection en dernier recours.',
+      'Plafonds : on retire du poids, on ne relève pas la limite.',
+      'L\'user navigue en privé : chaque octet est repayé à CHAQUE visite.',
+      'Preuve exigée : ci.js + tests/lancer.mjs --noyau verts.'
+    ] },
+  { nom: 'CHAÎNE DE LIVRAISON',
+    quand: /pirates-tools\/api\/(contact\.js|_lib\/courses\.js)$/,
+    points: [
+      'La plateforme ne fixe PAS le prix et n\'encaisse PAS la course (art. L7342-1).',
+      'Le client pose ses conditions à la commande et ne les ressaisit jamais.',
+      'Le tri de l\'annuaire ne dépend JAMAIS du prix.',
+      'Cloisonnement par round : le livreur suivant ne lit pas la conversation d\'avant.',
+      'Le code de remise n\'est JAMAIS visible d\'un livreur.',
+      'Les prix viennent TOUJOURS du catalogue serveur.',
+      'Preuve exigée : plan9, plan10, plan11, couriers verts.'
+    ] },
+  { nom: 'CATALOGUE ET VISUELS',
+    quand: /pirates-tools\/(products\.json|images\/|models\/)/,
+    points: [
+      'priceLocked: true ⇒ le prix n\'est JAMAIS recalculé.',
+      'Un produit sans coût d\'achat relevé ne reste pas au catalogue.',
+      'Posters : fond sombre obligatoire. Les visuels sont le travail de l\'user.',
+      'Orientation de pack validée = GRAVÉE : on ne la re-dérive jamais à l\'œil.',
+      'Aucune image servie au-dessus de 871 Ko (D-002).',
+      'Preuve exigée : audit/p8-perf.js vert.'
+    ] }
+];
+
 var mode = process.argv[2];
 var d = lireEntree();
 var t = temoin(d);
@@ -74,6 +136,27 @@ try {
   if (mode === '--marque') {
     var cmd = String((d.tool_input && d.tool_input.command) || '');
     if (/\bou\.js\b/.test(cmd)) fs.writeFileSync(t, String(Date.now()));
+    process.exit(0);
+  }
+
+  if (mode === '--liste') {
+    /* Après une édition : on remet sous les yeux le savoir du domaine touché.
+       Injecté en contexte — donc lu, pas rangé dans un fichier qu'on n'ouvre pas. */
+    var fe = String((d.tool_input && d.tool_input.file_path)
+                 || (d.tool_response && d.tool_response.filePath) || '');
+    var L = LISTES.filter(function (x) { return x.quand.test(fe); });
+    if (!L.length) process.exit(0);
+    var txt = L.map(function (x) {
+      return '⚠️ LISTE DE CONTRÔLE — ' + x.nom + '\n'
+        + x.points.map(function (p, i) { return '  ' + (i + 1) + '. ' + p; }).join('\n');
+    }).join('\n\n');
+    console.log(JSON.stringify({
+      hookSpecificOutput: {
+        hookEventName: 'PostToolUse',
+        additionalContext: 'Tu viens de modifier un fichier sensible. Rien n\'est '
+          + '« fait » tant que CHACUN de ces points n\'est pas vrai ET prouvé :\n\n' + txt
+      }
+    }));
     process.exit(0);
   }
 

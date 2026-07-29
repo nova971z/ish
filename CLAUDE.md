@@ -24,8 +24,8 @@ elle le dit et demande de l'ajouter — jamais « rien ».
 | Comment le site est fait | `pirates-tools/docs/CARTOGRAPHIE.md` |
 | Fiscalité, statut, TVA | `pirates-tools/docs/METHODE-ENTREPRISE-FISCALITE.md` |
 | L'histoire complète du projet | `pirates-tools/docs/JOURNAL.md` |
-| Le tri des règles enfouies | `pirates-tools/docs/EXTRACTION-REGLES.md` |
 | Où en est le chantier | `pirates-tools/docs/AVANCEMENT-FONDATIONS.md` |
+| Une panne, sa cause, la porte posée | `pirates-tools/docs/LECONS.md` |
 | La liste de tous les documents | `pirates-tools/docs/INDEX-DOCS.md` |
 
 Ouvrir `sw.js` charge `front.md` ; `api/contact.js` charge `livraison.md`.

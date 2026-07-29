@@ -59,6 +59,8 @@ var reqHarnais  = safeRequire('./check-harnais',      'check-harnais');
 // elle tient par des portes.
 var reqMemoire  = safeRequire('./check-memoire',     'check-memoire');
 var reqOu       = safeRequire('./check-ou',          'check-ou');
+// Une panne doit produire une PORTE, pas un souvenir (boucle d'apprentissage).
+var reqLecons   = safeRequire('./check-lecons',      'check-lecons');
 
 // NOTE 25/07/2026 : l'étape lint-products.js (fichier jamais versionné,
 // silencieusement sautée à chaque run) est SUPPRIMÉE — ses invariants réels
@@ -110,6 +112,7 @@ var reqOu       = safeRequire('./check-ou',          'check-ou');
   await runOne(reqHarnais,  'check-harnais');
   await runOne(reqMemoire,  'check-memoire');
   await runOne(reqOu,       'check-ou');
+  await runOne(reqLecons,   'check-lecons');
 
   var dur = Math.max(1, Date.now() - started);
   if (errors.length){
