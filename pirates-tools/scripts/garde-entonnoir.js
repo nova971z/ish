@@ -9,12 +9,20 @@
 
    Un protocole qu'on peut oublier est un vœu. Celui-ci **refuse l'édition**.
 
-   MÉCANIQUE — trois modes, appelés par les hooks de .claude/settings.json :
-     --debut   (UserPromptSubmit) efface le témoin : chaque message rouvre le
+   MÉCANIQUE — quatre modes, appelés par les hooks de .claude/settings.json :
+     --debut   (UserPromptSubmit) efface les témoins : chaque message rouvre le
                tour, l'entonnoir doit être reconsulté.
-     --marque  (PostToolUse/Bash) pose le témoin si la commande a lancé ou.js.
+     --marque  (PostToolUse/Bash) pose le témoin si la commande a lancé ou.js,
+               ou le témoin juridique si elle a lu une fiche.
+     --liste   (PostToolUse/Write|Edit) remet sous les yeux le savoir du domaine.
      --garde   (PreToolUse/Write|Edit) REFUSE si un fichier SERVI est modifié
-               sans témoin.
+               sans témoin — et DEUX FOIS si ce fichier engage la responsabilité
+               juridique sans que la fiche du domaine ait été lue.
+
+   DEUX PORTES INDÉPENDANTES, jamais confondues :
+     l'entonnoir protège du BOGUE       → savoir comment le projet est fait ;
+     la porte juridique protège de l'INFRACTION → savoir ce qu'on risque.
+   Un test vert ne dit rien de la seconde. C'est pourquoi elle existe à part.
 
    ⚠️ PORTÉE VOLONTAIREMENT ÉTROITE : uniquement ce que les visiteurs
    téléchargent ou ce qui garde leurs données. Documents, règles, tests et
@@ -31,6 +39,13 @@
 var fs = require('fs');
 var os = require('os');
 var path = require('path');
+
+/* La table des domaines juridiques vit dans UN seul fichier. La porte et le
+   registre lisent la même — donc elles ne peuvent pas diverger. Si ce module
+   manque, `JUR` reste nul et la porte juridique s'efface : jamais de blocage
+   par accident (voir l'avertissement en fin de fichier). */
+var JUR = null;
+try { JUR = require('./juridique.js'); } catch (e) { JUR = null; }
 
 /* Fichiers SERVIS aux visiteurs, ou gardiens de leurs données. Toute
    modification ici exige d'avoir consulté l'entonnoir. */
@@ -56,8 +71,19 @@ function lireEntree() {
 /* Un témoin PAR SESSION : deux sessions parallèles ne se déverrouillent pas
    l'une l'autre. */
 function temoin(d) {
-  var sid = String((d && d.session_id) || 'sans-session').replace(/[^\w-]/g, '');
-  return path.join(os.tmpdir(), 'pt-entonnoir-' + sid);
+  return path.join(os.tmpdir(), 'pt-entonnoir-' + sessionDe(d));
+}
+
+function sessionDe(d) {
+  return String((d && d.session_id) || process.env.CLAUDE_SESSION_ID
+    || 'sans-session').replace(/[^\w-]/g, '');
+}
+
+/* Le témoin juridique est posé ICI, avec l'identifiant de session que voit le
+   hook — et non celui que devine `juridique.js` depuis l'environnement. Les
+   deux peuvent différer ; la porte ne lit que celui-ci. */
+function temoinJur(d, dom) {
+  return path.join(os.tmpdir(), 'pt-juridique-' + sessionDe(d) + '-' + dom);
 }
 
 /* ═══ LISTES DE CONTRÔLE MÉTIER ═══════════════════════════════════════════
@@ -128,14 +154,26 @@ var t = temoin(d);
 
 try {
   if (mode === '--debut') {
-    // Nouveau message de l'user : le tour recommence, le témoin tombe.
+    // Nouveau message de l'user : le tour recommence, les témoins tombent.
     try { fs.unlinkSync(t); } catch (e) { /* absent = déjà bon */ }
+    /* Les portes juridiques retombent AUSSI. Une fiche lue ce matin ne couvre
+       pas ce qu'on édite ce soir : c'est exactement la panne E-403 — l'outil
+       construit puis jamais rouvert. */
+    if (JUR) Object.keys(JUR.DOMAINES).forEach(function (k) {
+      try { fs.unlinkSync(temoinJur(d, k)); } catch (e) {}
+    });
     process.exit(0);
   }
 
   if (mode === '--marque') {
     var cmd = String((d.tool_input && d.tool_input.command) || '');
     if (/\bou\.js\b/.test(cmd)) fs.writeFileSync(t, String(Date.now()));
+    /* `node scripts/juridique.js J2` ⇒ la fiche J2 a été AFFICHÉE, donc lue.
+       On ne pose le témoin que pour le domaine effectivement demandé. */
+    var j = cmd.match(/juridique\.js\s+(J\d+)/i);
+    if (j && JUR && JUR.DOMAINES[j[1].toUpperCase()]) {
+      fs.writeFileSync(temoinJur(d, j[1].toUpperCase()), String(Date.now()));
+    }
     process.exit(0);
   }
 
@@ -162,6 +200,40 @@ try {
 
   if (mode === '--garde') {
     var f = String((d.tool_input && d.tool_input.file_path) || '');
+
+    /* ═══ PORTE 1 — JURIDIQUE ═══════════════════════════════════════════════
+       Passée en PREMIER, et c'est délibéré : un bogue se corrige, une clause
+       illicite mise en ligne a déjà produit ses effets quand on s'en aperçoit.
+       L'ordre de priorité du projet le dit — argent, sécurité, fonctionnel. */
+    var doms = JUR ? JUR.domainesDe(f.replace(/\\/g, '/')) : [];
+    var manquants = doms.filter(function (k) { return !fs.existsSync(temoinJur(d, k)); });
+    if (manquants.length) {
+      console.log(JSON.stringify({
+        hookSpecificOutput: {
+          hookEventName: 'PreToolUse',
+          permissionDecision: 'deny',
+          permissionDecisionReason:
+            '⛔ PORTE JURIDIQUE — ce fichier n\'expose pas à un bogue, il expose '
+            + 'à une INFRACTION.\n\n  Fichier : ' + f + '\n'
+            + manquants.map(function (k) {
+                return '  Domaine engagé : ' + k + ' — ' + JUR.DOMAINES[k].titre;
+              }).join('\n')
+            + '\n\n  Lis la fiche AVANT d\'écrire — elle dit ce qu\'on risque et '
+            + 'à quelle source officielle le vérifier :\n'
+            + manquants.map(function (k) {
+                return '      cd pirates-tools && node scripts/juridique.js ' + k;
+              }).join('\n')
+            + '\n\n  ⚠️ Aucun test vert ne couvre ce mode de panne : requalification '
+            + 'en salariat, sanction CNIL, pratique commerciale trompeuse ou '
+            + 'redressement ne se détectent pas à l\'exécution.\n'
+            + '  ⛔ Et rien ici n\'est une source de droit : un article cité de '
+            + 'mémoire est une invention (protocole §8, registre O1).'
+        }
+      }));
+      process.exit(0);
+    }
+
+    /* ═══ PORTE 2 — ENTONNOIR ═════════════════════════════════════════════ */
     var vise = PROTEGES.some(function (re) { return re.test(f); });
     if (!vise || fs.existsSync(t)) process.exit(0);   // hors portée, ou entonnoir consulté
 

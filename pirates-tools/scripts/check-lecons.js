@@ -41,6 +41,18 @@ module.exports = function checkLecons() {
     var m = LIGNE.exec(l);
     if (!m) return;
     n++;
+
+    /* Une cellule contenant une barre verticale décale toutes les colonnes :
+       la « porte » lue n'est alors pas la porte écrite, et le message d'erreur
+       accuse le mauvais coupable. On refuse la ligne en la nommant pour ce
+       qu'elle est — malformée — au lieu de diagnostiquer à côté (E-206). */
+    if ((l.match(/\|/g) || []).length !== 5) {
+      errors.push('LECONS.md ligne ' + (i + 1) + ' : ligne malformée — '
+        + ((l.match(/\|/g) || []).length - 1) + ' colonnes au lieu de 4. '
+        + 'Une barre verticale dans une cellule décale la lecture : la porte '
+        + 'contrôlée ne serait pas celle qui est écrite. Reformuler sans « | ».');
+      return;
+    }
     var quoi = m[2].trim();
     var porte = m[4].trim().replace(/`/g, '');
 

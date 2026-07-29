@@ -28,6 +28,9 @@
 | 29/07/2026 | `ou.js` construit le matin, utilisé **zéro fois** de la journée | Un protocole qu'on peut oublier est un vœu | `scripts/garde-entonnoir.js` |
 | 29/07/2026 | Plafond d'`app.js` bloquant un correctif de sécurité | Le fichier était à 29 octets de sa limite | `D-014` |
 | 29/07/2026 | Le domaine ne répondait plus depuis le Maroc | Migration vers des IP Vercel injoignables depuis cet opérateur | `D-013` |
+| 29/07/2026 | 20 erreurs répétées sans qu'aucune trace ne dise **d'où** elles venaient | Rien ne classait les fautes par mécanisme : chacune semblait isolée, donc imprévisible | `scripts/erreurs.js` |
+| 29/07/2026 | Prix, statut des livreurs et données personnelles éditables sans jamais lire ce qu'ils engagent | Le filet ne couvrait que le bogue ; l'infraction ne se manifeste pas à l'exécution | `scripts/juridique.js` |
+| 29/07/2026 | Un sabotage cru annulé restait en place : `git checkout` sur un fichier non suivi, échec avalé par un `ou-vrai` de complaisance | La restauration est un instrument comme un autre, et il n'était pas relu | `docs/ERREURS.md` |
 
 ---
 

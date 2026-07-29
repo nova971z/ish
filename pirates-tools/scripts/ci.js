@@ -61,6 +61,13 @@ var reqMemoire  = safeRequire('./check-memoire',     'check-memoire');
 var reqOu       = safeRequire('./check-ou',          'check-ou');
 // Une panne doit produire une PORTE, pas un souvenir (boucle d'apprentissage).
 var reqLecons   = safeRequire('./check-lecons',      'check-lecons');
+// Le registre des erreurs est injecté à CHAQUE message : s'il se déforme ou
+// s'il enfle, il finit ignoré — et un registre ignoré ne trace plus rien.
+var reqErreurs  = safeRequire('./erreurs',           'check-erreurs');
+// La porte juridique : on vérifie qu'elle a des dents. Un motif qui ne vise
+// plus aucun fichier ne refuse plus rien ET ne le dit pas.
+var modJur      = safeRequire('./juridique',         'check-juridique');
+var reqJur      = modJur && modJur.controle ? modJur.controle : null;
 
 // NOTE 25/07/2026 : l'étape lint-products.js (fichier jamais versionné,
 // silencieusement sautée à chaque run) est SUPPRIMÉE — ses invariants réels
@@ -113,6 +120,8 @@ var reqLecons   = safeRequire('./check-lecons',      'check-lecons');
   await runOne(reqMemoire,  'check-memoire');
   await runOne(reqOu,       'check-ou');
   await runOne(reqLecons,   'check-lecons');
+  await runOne(reqErreurs,  'check-erreurs');
+  await runOne(reqJur,      'check-juridique');
 
   var dur = Math.max(1, Date.now() - started);
   if (errors.length){

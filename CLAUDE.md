@@ -10,9 +10,8 @@ On travaille **directement sur `master`** : Vercel ne déploie que lui.
 cd pirates-tools && node scripts/ou.js "ce que je veux faire"
 ```
 
-Six blocs : où intervenir · ce qui protège · règles applicables · pièges déjà
-payés · décisions en vigueur · ce que « fini » veut dire ici. Intention inconnue :
-elle le dit et demande de l'ajouter — jamais « rien ».
+Six blocs : où intervenir · ce qui protège · règles applicables · pièges déjà payés ·
+décisions en vigueur · « fini » ici. Intention inconnue : elle le dit et demande de l'ajouter — jamais « rien ».
 
 ## Où vit quoi
 
@@ -26,6 +25,8 @@ elle le dit et demande de l'ajouter — jamais « rien ».
 | L'histoire complète du projet | `pirates-tools/docs/JOURNAL.md` |
 | Où en est le chantier | `pirates-tools/docs/AVANCEMENT-FONDATIONS.md` |
 | Une panne, sa cause, la porte posée | `pirates-tools/docs/LECONS.md` |
+| **D'où viennent mes erreurs**, par mécanisme | `pirates-tools/docs/ERREURS.md` *(`node scripts/erreurs.js`)* |
+| **Ce qui engage juridiquement** — la porte à ouvrir | `pirates-tools/docs/JURIDIQUE.md` *(`node scripts/juridique.js`)* |
 | La liste de tous les documents | `pirates-tools/docs/INDEX-DOCS.md` |
 
 Ouvrir `sw.js` charge `front.md` ; `api/contact.js` charge `livraison.md`.
@@ -33,12 +34,11 @@ Ouvrir `sw.js` charge `front.md` ; `api/contact.js` charge `livraison.md`.
 <!-- REGLES-UNIVERSELLES:DEBUT -->
 ## Ce qui vaut partout, tout le temps
 
-**Qui est l'user.** Il est **au Maroc** ; l'entreprise est en Guadeloupe — ne
-jamais déduire l'un de l'autre. Il travaille **sur iPad, en navigation privée
-exclusivement** : aucun service worker, aucun cache, stockage local vide entre
-deux visites — aucun diagnostic le concernant ne peut s'appuyer là-dessus. Il
-n'a **ni téléphone ni données cellulaires** : ne jamais proposer un test en 4G,
-ni un code à scanner depuis un autre appareil.
+**Qui est l'user.** Il est **au Maroc** ; l'entreprise est en Guadeloupe — ne jamais
+déduire l'un de l'autre. Il travaille **sur iPad, en navigation privée exclusivement** :
+aucun service worker, aucun cache, stockage local vide entre deux visites — aucun
+diagnostic le concernant ne peut s'appuyer là-dessus. Il n'a **ni téléphone ni données
+cellulaires** : jamais de test en 4G, ni de code à scanner depuis un autre appareil.
 
 **Que du quantifiable.** Aucun chiffre sans la commande qui l'a produit, aucun
 exemple sans l'avoir exécuté. Un chiffre estimé présenté comme mesuré est un mensonge.

@@ -108,5 +108,52 @@ vide ou dont le fichier n'existe pas.
 ⛔ Une leçon sans dent est une anecdote. Un commit ne se relit pas ; une porte
 se déclenche toute seule.
 
-## 11. Le reste
+## 11. REGISTRE DES ERREURS — classées par ORIGINE, pas par date
+Le sommaire de `docs/ERREURS.md` est injecté **juste en dessous**, à chaque
+message. Six mécanismes, pas plus : **une erreur ne vient jamais de partout.**
+
+**Comment on s'en sert — trois réflexes, pas une lecture**
+1. Sur le point d'**affirmer** quelque chose d'engageant → **O1**.
+2. Sur le point de **déclarer un contrôle vert** → **O2**.
+3. Sur le point de **réutiliser** un motif, une classe, une regex → **O3**.
+
+Le détail ne se lit **jamais en entier** : `node scripts/erreurs.js --classe O1`.
+⛔ Une erreur neuve se **classe dans une origine existante**. Si aucune ne
+convient, c'est un mécanisme inédit : créer **O7** et dire pourquoi les six
+premiers l'ont laissé passer. Une erreur qui **répète** un cas déjà listé
+n'ajoute pas de ligne, elle incrémente le compteur : on mesure la **récidive**,
+pas le volume. `scripts/erreurs.js --controle` (CI) refuse un sommaire qui enfle.
+
+⚠️ **O1 n'a aucune porte mécanique.** Aucun hook ne peut vérifier ce que
+j'affirme en prose. C'est la limite dure du dispositif — donc la seule classe
+où la vigilance doit être consciente, à chaque phrase qui engage.
+
+## 12. PORTE JURIDIQUE — ce qui n'expose pas à un bogue mais à une INFRACTION
+Certains fichiers ne risquent pas une régression : ils risquent une
+requalification en salariat, une sanction CNIL, une pratique commerciale
+trompeuse ou un redressement. **Aucun test vert ne couvre ce mode de panne** —
+il ne se manifeste pas à l'exécution, il se manifeste au contentieux.
+
+`scripts/garde-entonnoir.js --garde` **refuse l'écriture** sur un fichier de
+`docs/JURIDIQUE.md` tant que sa fiche n'a pas été lue :
+```bash
+cd pirates-tools && node scripts/juridique.js J2
+```
+Cinq domaines — **J1** information légale · **J2** statut des livreurs ·
+**J3** données personnelles · **J4** prix et promotions · **J5** fiscalité DOM.
+La porte se **referme à chaque message** : une fiche lue ce matin ne couvre pas
+ce qu'on édite ce soir.
+
+**Elle passe AVANT la porte de l'entonnoir**, et c'est délibéré : un bogue se
+corrige, une clause illicite mise en ligne a déjà produit ses effets quand on
+s'en aperçoit. C'est l'ordre de priorité du projet, appliqué.
+
+⛔ **Rien de tout cela n'est une source de droit.** Le registre nomme
+l'obligation et **désigne où la vérifier** — `legifrance`, `economie.gouv.fr`,
+`cnil.fr`, `impots.gouv.fr`, `douane.gouv.fr`, `bofip`. Un numéro d'article
+cité de mémoire est une invention : c'est **O1**, appliqué au droit, où il
+coûte le plus cher. Sur un point qui engage vraiment : « voici la source
+officielle, voici ce qu'elle dit, fais-la relire ».
+
+## 13. Le reste
 `CLAUDE.md` · `.claude/rules/` (par domaine) · `docs/DECISIONS.md` · `docs/ETAT.md`
