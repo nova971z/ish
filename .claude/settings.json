@@ -5,8 +5,32 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cat /home/user/ish/.claude/PROTOCOLE.md 2>/dev/null || true",
-            "timeout": 5
+            "command": "d=$(cat); printf '%s' \"$d\" | node /home/user/ish/pirates-tools/scripts/garde-entonnoir.js --debut; cat /home/user/ish/.claude/PROTOCOLE.md 2>/dev/null || true",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /home/user/ish/pirates-tools/scripts/garde-entonnoir.js --marque 2>/dev/null || true",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /home/user/ish/pirates-tools/scripts/garde-entonnoir.js --garde 2>/dev/null || true",
+            "timeout": 10
           }
         ]
       }
