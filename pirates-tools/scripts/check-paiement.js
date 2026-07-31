@@ -169,7 +169,7 @@ module.exports = function () {
   /* ── 6. Aucun appel direct au SDK là où la couture est censée passer ───
      Cliquet : les fichiers déjà migrés ne doivent pas voir revenir un
      require('stripe') en douce. La liste grandit à chaque étape. */
-  var MIGRES = ['api/create-payment-intent.js'];
+  var MIGRES = ['api/create-payment-intent.js', 'api/webhook.js'];
   MIGRES.forEach(function (f) {
     var abs = path.join(RACINE, f);
     if (!fs.existsSync(abs)) { ok(false, 'check-paiement : ' + f + ' introuvable.'); return; }
@@ -178,6 +178,27 @@ module.exports = function () {
       '⛔ ' + f + ' appelle encore `require("stripe")` en direct alors qu\'il est passé '
       + 'par la couture. Un appel direct qui repasse, c\'est un endroit de plus à '
       + 'réécrire le jour de la bascule — et celui qu\'on oubliera.');
+  });
+
+  /* ── 7. ⛔ La commission ne doit JAMAIS être forcée à 0 ────────────────
+     TROU DÉCOUVERT PAR SABOTAGE le 31/07/2026 : remplacer
+     `normalise.commissionCents` par `normalise.commissionCents || 0` ne faisait
+     rougir AUCUN contrôle. Or c'est exactement le défaut le plus coûteux de
+     toute la comptabilité : une commission inconnue devenue 0 se confond avec
+     une commission réellement nulle, la marge paraît meilleure qu'elle n'est,
+     et rien ne le signale. `null` se voit ; `0` ment. */
+  MIGRES.concat(['api/_lib/paiement/stripe.js']).forEach(function (f) {
+    var abs = path.join(RACINE, f);
+    if (!fs.existsSync(abs)) return;
+    var src = fs.readFileSync(abs, 'utf8');
+    ok(!/commissionCents\s*(\|\|\s*0|\?\?\s*0)/.test(src),
+      '⛔ ' + f + ' force la commission à 0 quand elle est inconnue. Un zéro se '
+      + 'confond avec une commission réellement nulle dans le compte de résultat : '
+      + 'la marge paraît meilleure qu\'elle n\'est, et rien ne le signale. '
+      + 'Laisser `null` — une valeur absente doit se VOIR.');
+    ok(!/stripeFeeCents\s*(\|\|\s*0|\?\?\s*0)/.test(src),
+      '⛔ ' + f + ' force stripeFeeCents à 0 quand il est inconnu. Même défaut, '
+      + 'même conséquence sur le compte de résultat.');
   });
 
   return errors;

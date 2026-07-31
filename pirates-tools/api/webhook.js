@@ -30,6 +30,7 @@
 'use strict';
 
 var getFirebase = require('./_lib/firebase').getFirebase;
+var paiementSocle = require('./_lib/paiement');   // couture : fournisseur actif
 var stripeMeta = require('./_lib/stripe-meta');
 var postal = require('./_lib/postal');
 var pricing = require('./_lib/pricing');
@@ -63,25 +64,33 @@ async function handler(req, res) {
     return res.status(405).json({ ok: false, error: 'Method not allowed' });
   }
 
-  var stripeKey = process.env.STRIPE_SECRET_KEY;
-  var webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-  if (!stripeKey || !webhookSecret) {
-    return res.status(503).json({ ok: false, error: 'Stripe webhook not configured' });
+  // ⚠️ COUTURE PAIEMENT (31/07/2026) — la signature n'est plus vérifiée par un
+  // appel direct au SDK Stripe mais par le fournisseur actif. Voir
+  // api/_lib/paiement/index.js et docs/PLAN-REVOLUT.md.
+  var paiement = paiementSocle.fournisseur();
+  if (!paiement.estConfigure()) {
+    return res.status(503).json({ ok: false, error: 'Webhook paiement non configuré (' + paiement.nom() + ')' });
   }
 
   try {
-    var stripe = require('stripe')(stripeKey);
-
-    // ── 1) Verify signature against the RAW body ──
-    var sig = req.headers['stripe-signature'];
+    // ── 1) Vérifier la signature sur le corps BRUT ──
+    // ⛔ `readRawBody` est ce qui rend cette vérification possible : le
+    // bodyParser est désactivé (voir `config` en bas de fichier). Un corps
+    // parsé puis re-sérialisé produit des octets DIFFÉRENTS — prouvé sur six
+    // formes de JSON — et invaliderait la signature chez Stripe comme chez
+    // Revolut. Cette ligne ne se « simplifie » jamais.
     var rawBody = await readRawBody(req);
-    var event;
-    try {
-      event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
-    } catch (err) {
-      console.error('[webhook] Signature verification failed:', err.message);
+    var verif = paiement.verifierSignature(rawBody, req.headers || {});
+    if (!verif || !verif.ok) {
+      console.error('[webhook] Signature refusée:', (verif && verif.erreur) || 'raison inconnue');
       return res.status(400).json({ ok: false, error: 'Invalid signature' });
     }
+    var event = verif.evenement;
+    /* Clé d'idempotence FOURNIE par le fournisseur, plus lue en dur.
+       Stripe donne un identifiant d'événement unique ; Revolut n'en fournit
+       AUCUN et devra la dériver de `event + order_id`. En passant par le
+       contrat, le jour de la bascule ne demande pas de retoucher ce fichier. */
+    var cleEvenement = verif.cle;
 
     // ── 2) Idempotence : machine à états sur stripe_events/{event.id} ──
     // États : 'processing' (en vol) → 'done' (succès) / 'failed' (RETRYABLE).
@@ -97,7 +106,7 @@ async function handler(req, res) {
     var claimRef = null;
     var claimPrev = null; // claim repris (failed/stale) — porte emailsSent
     if (fb.db) {
-      claimRef = fb.db.collection('stripe_events').doc(event.id);
+      claimRef = fb.db.collection('stripe_events').doc(cleEvenement);
       var claimed = false;
       try {
         // create() est atomique : échoue si le doc existe déjà.
@@ -115,7 +124,7 @@ async function handler(req, res) {
         var prevMs = prev.receivedAt && prev.receivedAt.toMillis ? prev.receivedAt.toMillis() : null;
         var decision = claimDecision({ status: prev.status, receivedAtMs: prevMs }, Date.now());
         if (decision === 'skip') {
-          console.log('[webhook] Duplicate event ignored:', event.id, '(status ' + (prev.status || '?') + ')');
+          console.log('[webhook] Duplicate event ignored:', cleEvenement, '(status ' + (prev.status || '?') + ')');
           return res.status(200).json({ ok: true, received: true, duplicate: true });
         }
         // Reprise (failed, ou processing figé > CLAIM_STALE_MS = run tué).
@@ -125,10 +134,10 @@ async function handler(req, res) {
           attempts: (prev.attempts || 0) + 1,
           receivedAt: fb.admin.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
-        console.log('[webhook] Retrying event:', event.id, '(attempt ' + ((prev.attempts || 0) + 1) + ')');
+        console.log('[webhook] Retrying event:', cleEvenement, '(attempt ' + ((prev.attempts || 0) + 1) + ')');
       }
     } else {
-      console.warn('[webhook] Firestore not configured — idempotency disabled for', event.id);
+      console.warn('[webhook] Firestore not configured — idempotency disabled for', cleEvenement);
     }
 
     // ── 3) Process the event ──
@@ -137,11 +146,11 @@ async function handler(req, res) {
     try {
       switch (event.type) {
         case 'checkout.session.completed':
-          await handleSessionCompleted(stripe, fb, event.data.object, ctx);
+          await handleSessionCompleted(paiement, fb, event.data.object, ctx);
           break;
 
         case 'payment_intent.succeeded':
-          await handleIntentSucceeded(stripe, fb, event.data.object, ctx);
+          await handleIntentSucceeded(paiement, fb, event.data.object, ctx);
           break;
 
         case 'payment_intent.payment_failed':
@@ -157,7 +166,7 @@ async function handler(req, res) {
           console.log('[webhook] Unhandled event type:', event.type);
       }
     } catch (procErr) {
-      console.error('[webhook] Processing failed (will be retried by Stripe):', event.id, procErr.message);
+      console.error('[webhook] Traitement en echec (le fournisseur re-livrera):', cleEvenement, procErr.message);
       if (claimRef) {
         try {
           await claimRef.set({
@@ -219,17 +228,20 @@ async function markEmailsSent(ctx) {
 }
 
 // ── Stripe Checkout (redirect) : checkout.session.completed ──
-async function handleSessionCompleted(stripe, fb, sessionLite, ctx) {
+async function handleSessionCompleted(paiement, fb, sessionLite, ctx) {
   console.log('[webhook] Payment confirmed (session):', sessionLite.id, 'Amount:', sessionLite.amount_total);
 
-  // Retrieve the full session with line items + customer details for email
+  // Session complète (lignes + coordonnées client) pour l'email.
+  // ⚠️ `lireSession` est propre au flux Checkout et n'appartient pas au contrat
+  // commun : on teste sa présence. Chez Revolut, page hébergée et widget
+  // partagent le même objet `order` — ce chemin disparaîtra à ce moment-là.
   var fullSession = sessionLite;
-  try {
-    fullSession = await stripe.checkout.sessions.retrieve(sessionLite.id, {
-      expand: ['line_items', 'line_items.data.price.product', 'customer_details']
-    });
-  } catch (retrieveErr) {
-    console.error('[webhook] Could not retrieve session:', retrieveErr.message);
+  if (typeof paiement.lireSession === 'function') {
+    try {
+      fullSession = await paiement.lireSession(sessionLite.id);
+    } catch (retrieveErr) {
+      console.error('[webhook] Session illisible:', retrieveErr.message);
+    }
   }
 
   // A1 — contrôle fiscal détectif : adresse de LIVRAISON (collectée par
@@ -274,7 +286,7 @@ async function handleSessionCompleted(stripe, fb, sessionLite, ctx) {
 }
 
 // ── Stripe Elements : payment_intent.succeeded ──
-async function handleIntentSucceeded(stripe, fb, pi, ctx) {
+async function handleIntentSucceeded(paiement, fb, pi, ctx) {
   // Ne traiter QUE les PaymentIntents créés par create-payment-intent.js.
   // Le PI créé en interne par une Checkout Session ne porte pas notre metadata
   // → il est ignoré ici et traité via checkout.session.completed (pas de
@@ -285,19 +297,20 @@ async function handleIntentSucceeded(stripe, fb, pi, ctx) {
   }
   console.log('[webhook] Payment confirmed (intent):', pi.id, 'Amount:', pi.amount);
 
-  // Adresse de facturation de la carte (seule adresse disponible sur ce flux —
-  // le formulaire embarqué ne collecte pas d'adresse de livraison).
-  var charge = null;
-  try {
-    if (typeof pi.latest_charge === 'string') {
-      charge = await stripe.charges.retrieve(pi.latest_charge);
-    } else if (pi.latest_charge && typeof pi.latest_charge === 'object') {
-      charge = pi.latest_charge;
-    }
-  } catch (chargeErr) {
-    console.error('[webhook] Could not retrieve charge:', chargeErr.message);
-  }
-  var billing = (charge && charge.billing_details) || {};
+  /* ⚠️ COUTURE — un seul appel remplace les deux (charge + balance transaction).
+     `avecCommission: true` déclenche la lecture de la commission RÉELLE : c'est
+     ce qui rend la comptabilité « 100 % réelle », et c'est aussi ce qui coûte
+     un aller-retour réseau de plus. On ne le demande donc QUE sur ce chemin,
+     celui d'un paiement effectivement encaissé. */
+  var normalise = await paiement.lirePaiement(pi.id, { avecCommission: true });
+  var billing = {
+    email: normalise.email,
+    name: normalise.nom,
+    address: normalise.adresse ? {
+      line1: normalise.adresse.ligne1, city: normalise.adresse.ville,
+      postal_code: normalise.adresse.codePostal, country: normalise.adresse.pays
+    } : null
+  };
   var declaredTerritory = pi.metadata.territory || null;
   // Adresse de LIVRAISON attachée au PI (formulaire adresse de la modale) en
   // priorité ; repli facturation carte (anciens paiements sans adresse).
@@ -313,17 +326,13 @@ async function handleIntentSucceeded(stripe, fb, pi, ctx) {
   var customerEmail = pi.receipt_email || billing.email || null;
   var piUid = pi.metadata.uid || null;
 
-  // Commission Stripe RÉELLE (compta) : lue sur la balance transaction de la charge.
-  var stripeFeeCents = null;
-  try {
-    var btId = charge && charge.balance_transaction;
-    if (typeof btId === 'string') {
-      var bt = await stripe.balanceTransactions.retrieve(btId);
-      if (bt && typeof bt.fee === 'number') stripeFeeCents = bt.fee;
-    } else if (btId && typeof btId === 'object' && typeof btId.fee === 'number') {
-      stripeFeeCents = btId.fee;
-    }
-  } catch (feeErr) { console.error('[webhook] Stripe fee lookup failed:', feeErr.message); }
+  /* Commission RÉELLE (compta), déjà lue par la couture ci-dessus.
+     ⛔ Reste `null` si la lecture a échoué — JAMAIS 0, et jamais une
+     estimation : un zéro se confondrait avec une commission réellement nulle
+     dans le compte de résultat, et une estimation aurait l'air d'un vrai
+     chiffre. Le nom du champ garde son préfixe historique tant que la
+     collection `payments` n'est pas migrée (étape 7). */
+  var stripeFeeCents = normalise.commissionCents;
 
   // Facture : numéro séquentiel + snapshot des lignes et de l'identité client.
   // Idempotent en reprise : le numéro déjà attribué à CE paiement est réutilisé.
@@ -382,7 +391,7 @@ async function handleIntentSucceeded(stripe, fb, pi, ctx) {
   // Le bloc facture de l'email reste best-effort : un email sans bloc facture
   // vaut mieux qu'un email bloqué (le n° et le détail vivent dans payments/).
   if (!ctx || !ctx.emailsSent) {
-    var emailModel = modelFromIntent(pi, charge, rebuilt, tax, customerEmail);
+    var emailModel = modelFromIntent(pi, custName, rebuilt, tax, customerEmail);
     try {
       var seller = await loadSeller(fb);
       var inv = invoiceLib.buildInvoice({
@@ -630,14 +639,17 @@ function modelFromSession(session, tax) {
   };
 }
 
-function modelFromIntent(pi, charge, rebuilt, tax, customerEmail) {
-  var billing = (charge && charge.billing_details) || {};
+/* ⚠️ Signature changee le 31/07/2026 (couture) : ce modele recevait l'objet
+   `charge` de Stripe UNIQUEMENT pour en extraire le nom du porteur. La couche
+   paiement le fournit deja, normalise — on passe donc le nom, pas un objet
+   propre a un fournisseur. */
+function modelFromIntent(pi, nomClient, rebuilt, tax, customerEmail) {
   return {
     orderRef: (pi.id || '').slice(-8).toUpperCase(),
     totalCents: pi.amount != null ? pi.amount : null,
     currency: (pi.currency || 'eur').toUpperCase(),
     customerEmail: customerEmail || '',
-    customerName: billing.name || '',
+    customerName: nomClient || '',
     lines: rebuilt.lines,
     ownerWarnings: buildTaxWarnings(tax, pi.metadata && pi.metadata.territory)
       .concat(rebuilt.ok ? [] : ['Détail des lignes indisponible — le total débité fait foi.'])

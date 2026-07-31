@@ -95,7 +95,14 @@ for (const f of Object.keys(EXPECTED)) {
   const hasAdmin = /requireAdmin\(/.test(src);
   const hasUid = /verifyUid\(/.test(src);
   const hasSecret = /CRON_SECRET|timingSafeEqual/.test(src);
-  const hasSig = /constructEvent\(/.test(src);
+  /* Vérification de signature du webhook. Deux formes acceptées, et PAS une de
+     plus : l'appel direct au SDK (`constructEvent`) ou le passage par la
+     couture (`verifierSignature`), qui délègue au fournisseur actif.
+     ⚠️ Élargi le 31/07/2026 quand webhook.js est passé derrière la couture.
+     L'élargissement est volontairement ÉTROIT : si aucune des deux formes n'est
+     présente, le webhook accepte n'importe quelle requête — c'est-à-dire
+     n'importe qui peut déclarer un paiement reçu. */
+  const hasSig = /constructEvent\(|verifierSignature\(/.test(src);
   const hasRl = /rl\.allow\(/.test(src);
 
   const authOk = exp.auth === 'admin' ? hasAdmin

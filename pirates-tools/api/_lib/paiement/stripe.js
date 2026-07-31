@@ -87,15 +87,27 @@ async function creerPaiement(params) {
    comptabilité. Une simple vérification d'état ne les paie pas. */
 async function lirePaiement(id, options) {
   var opts = options || {};
-  var s = sdk();
-  var pi = await s.paymentIntents.retrieve(String(id));
-  return await depuisIntent(s, pi, opts.avecCommission === true);
+  var pi = await sdk().paymentIntents.retrieve(String(id));
+  return await depuisIntent(pi, opts.avecCommission === true);
+}
+
+/* ⚠️ SPÉCIFIQUE AU FLUX CHECKOUT (redirection) — PAS dans le contrat commun.
+   Revolut n'aura pas d'équivalent : chez lui, la page hébergée et le widget
+   partagent le MÊME objet `order`, donc les deux flux du site convergeront sur
+   `lirePaiement`. Cette fonction disparaîtra alors. C'est pourquoi elle ne
+   figure pas dans OPERATIONS — un fournisseur n'a pas à la fournir, et
+   l'appelant teste sa présence avant de s'en servir. */
+async function lireSession(sessionId) {
+  return await sdk().checkout.sessions.retrieve(String(sessionId), {
+    expand: ['line_items', 'line_items.data.price.product', 'customer_details']
+  });
 }
 
 /* Convertit un PaymentIntent Stripe (déjà en main) en paiement normalisé.
    Exporté à part : le webhook reçoit l'objet dans l'événement, il n'a pas à le
    re-télécharger. */
-async function depuisIntent(s, pi, avecCommission) {
+async function depuisIntent(pi, avecCommission) {
+  var s = sdk();
   var out = socle.paiementVide();
   out.fournisseur = 'stripe';
   out.id = pi.id;
@@ -197,5 +209,6 @@ module.exports = {
   rembourser: rembourser,
   // Exportés pour le webhook (qui a déjà l'objet) et pour les contrôles.
   depuisIntent: depuisIntent,
+  lireSession: lireSession,   // ⚠️ hors contrat commun — voir son commentaire
   ETATS_STRIPE: ETATS_STRIPE
 };
