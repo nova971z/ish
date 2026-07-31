@@ -269,17 +269,88 @@ paiements déjà encaissés : c'est l'historique comptable, il se conserve.
 
 Classé par ce qui bloque le plus tôt.
 
-## 4.1 🔴 CRITIQUE — Vérifier la signature du webhook
-`developer.revolut.com` → *Accept payments → Tutorials → Verify the payload signature*
+## 4.1 ✅ RÉSOLU le 31/07/2026 — signature du webhook
 
-Il faut **l'algorithme exact** : comment `Revolut-Request-Timestamp` et le corps
-brut sont concaténés, quel HMAC, quel encodage, le format `v1=…`, et la fenêtre
-de tolérance sur l'horodatage.
+Fourni par l'user depuis *Manage Accounts → Webhooks → Verify the payload
+signature*, et **vérifié contre le vecteur de test officiel de cette page** :
 
-**Pourquoi c'est le premier** : sans signature correcte, n'importe qui peut poster
-une fausse confirmation de paiement à `/api/webhook` et déclencher une commande
-payée qui ne l'est pas. Et c'est le genre de défaut qui **ne rougit dans aucun
-test** — un webhook qui accepte tout passe tous les tests fonctionnels.
+```
+payload_to_sign = "v1." + {Revolut-Request-Timestamp} + "." + {corps BRUT}
+signature       = "v1=" + HMAC_SHA256(signing_secret, payload_to_sign).hex()
+```
+
+Mesure exécutée (`scratchpad`, hors dépôt) :
+
+```
+attendu : v1=bca326fb378d0da7f7c490ad584a8106bab9723d8d9cdd0d50b4c5b3be3837c0
+obtenu  : v1=bca326fb378d0da7f7c490ad584a8106bab9723d8d9cdd0d50b4c5b3be3837c0
+✅ ALGORITHME CONFIRMÉ sur le vecteur officiel
+1) Buffer brut + préfixe   : ✅ CONFORME    (forme serveur, bodyParser désactivé)
+1 octet modifié            → ✅ rejeté
+horodatage modifié         → ✅ rejeté
+```
+
+### Quatre points d'implémentation, chacun mesuré
+
+**a) Le corps DOIT être lu brut — prouvé, pas supposé.** Six formes de corps
+donnent une signature FAUSSE si on parse puis re-sérialise :
+
+```
+⛔ espace après les deux-points   ⛔ indentation / retour ligne
+⛔ unicode échappé é         ⛔ nombre 1.0        ⛔ nombre 1e2
+⛔ barre oblique échappée \/
+6/6 cas où parser le corps produirait une signature FAUSSE.
+```
+
+`api/webhook.js:206-208` désactive déjà le `bodyParser` : **cette ligne se garde
+telle quelle**, elle vaut pour Revolut exactement comme pour Stripe.
+
+**b) L'en-tête peut porter PLUSIEURS signatures.** La doc : *« must match exactly
+the signature (**or one of the multiple signatures**) sent in that header »*.
+C'est le mécanisme de `POST /api/webhooks/{id}/rotate-signing-secret` avec son
+`expiration_period` : pendant la rotation, l'ancien et le nouveau secret sont
+valides. Il faut donc découper l'en-tête et comparer à **chacune**. Vérifié :
+
+```
+4) en-tête à 2 signatures, la bonne en 1re : ✅ acceptée
+5) en-tête à 2 signatures, la bonne en 2e  : ✅ acceptée
+6) en-tête sans la bonne signature         : ✅ rejetée
+7) en-tête vide                            : ✅ rejetée
+```
+
+**c) Comparaison à temps constant obligatoire.** `api/_lib/auth.js`
+(`timingSafeEqualStr`) fait déjà exactement ça — on le réutilise, on ne le
+réécrit pas.
+
+**d) Filtrer par IP d'origine, en plus.** La doc donne les adresses :
+production `35.246.21.235`, `34.89.70.170` · bac à sable `35.242.130.242`,
+`35.242.162.241`. C'est une deuxième barrière, jamais la seule — une IP se
+falsifie derrière un intermédiaire mal configuré.
+
+### ⚠️ Deux réserves à lever avant de coder
+
+1. **La page fournie est celle de la Business API**, pas de la Merchant API
+   (fil d'Ariane : *Home → Manage Accounts → Webhooks*). Son exemple porte un
+   événement `TransactionStateChanged`, qui n'existe pas côté Merchant. Les noms
+   d'en-tête sont identiques et le `signing_secret` Merchant a le même préfixe
+   `wsk_` — c'est un indice fort, **pas une preuve**.
+   *Risque acceptable* : si le schéma diffère, le bac à sable rejettera **tous**
+   les webhooks. C'est une panne bruyante, pas un trou silencieux. On code
+   dessus, et le bac à sable tranche.
+2. **« The raw webhook payload without whitespaces »** est ambigu. Deux lectures
+   opposées : *« Revolut envoie du JSON compact, prends-le tel quel »* ou
+   *« retire toi-même les espaces »*. La seconde contredit la phrase suivante de
+   la même page — *« it is crucial not to alter the body »* — et les 6 cas du
+   point (a). **On prend le corps tel quel, on ne le touche pas.** À confirmer
+   au premier webhook réel en bac à sable.
+
+### ⛔ Ce que la doc ne dit PAS : la fenêtre anti-rejeu
+
+Aucune tolérance n'est indiquée pour `Revolut-Request-Timestamp`. Sans
+vérification d'âge, une requête signée capturée peut être **rejouée
+indéfiniment**. On retiendra **5 minutes**, valeur à écrire en clair dans le
+code avec ce commentaire : *chiffre choisi par nous, pas lu chez Revolut, à
+corriger si la doc le précise un jour.*
 
 ## 4.2 🟠 Référence du widget RevolutCheckout.js
 `developer.revolut.com/docs/revolut-checkout-js/`
@@ -319,7 +390,18 @@ directement le champ `stripeFeeRendu` du panneau comptabilité.
 
 ## Le prochain lien, un seul
 
-**`developer.revolut.com` → Accept payments → Tutorials → Verify the payload
-signature.**
+**`developer.revolut.com` → Accept payments → *Order and payment lifecycle*.**
 
-C'est celui qui garde la porte. Tant qu'il manque, l'étape 2 ne commence pas.
+Il faut la liste exhaustive des états d'ordre et de paiement, et surtout :
+**quel état signifie que l'argent est acquis.**
+
+Pourquoi celui-ci passe devant les autres : c'est le seul trou restant dont
+l'erreur est **silencieuse**. Se tromper d'état, c'est expédier un outil sur un
+paiement seulement autorisé — donc annulable — et découvrir la perte des
+semaines plus tard. Les autres inconnues (widget, limites de `metadata`, hôte du
+bac à sable) échouent bruyamment : ça ne compile pas, ça ne s'affiche pas, ça
+renvoie une erreur. Une panne bruyante ne coûte que du temps ; une panne
+silencieuse coûte de la marchandise.
+
+Aujourd'hui c'est `payment_intent.succeeded` qui répond à cette question. Il
+faut son équivalent **exact**, pas le plus vraisemblable.
