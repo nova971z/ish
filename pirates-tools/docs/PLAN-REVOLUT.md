@@ -266,6 +266,45 @@ l'encaissement réel côté Revolut.
 Ce qui ne l'est PAS encore : le webhook (aucun n'est enregistré), la lecture de
 la commission, le remboursement, et le widget dans le site.
 
+---
+
+# PLAN DE FINALISATION — 31/07/2026
+
+État à ce point : la couture est posée, le module Revolut écrit et éprouvé
+hors ligne, le webhook aiguille par genre, le champ carte est branché, et un
+paiement de 30 € a réussi en bac à sable via la page hébergée.
+
+Ce qui EMPÊCHE encore de basculer, dans l'ordre où ça bloque :
+
+### R1 — Enregistrer le webhook chez Revolut
+Sans webhook, un paiement réussi ne produit **ni commande, ni facture, ni
+e-mail**. C'est le trou le plus large qui reste.
+`POST /api/webhooks` renvoie un `signing_secret` qu'il faut poser sur Vercel.
+⚠️ Ce secret doit forcément s'afficher une fois — c'est le seul moyen de le
+récupérer. Il s'affichera dans l'admin, derrière l'authentification, avec un
+avertissement explicite.
+*Fini* : le webhook existe côté Revolut, son secret est sur Vercel.
+
+### R2 — Le webhook sait traiter un événement REVOLUT
+Le handler attend aujourd'hui un objet Stripe complet (`event.data.object`).
+Revolut n'envoie que `{ event, order_id }` : il faut RELIRE la commande, puis
+présenter le résultat au handler existant sans réécrire toute sa logique
+(facture, journal, e-mails, contrôle fiscal).
+*Fini* : `check-paiement` vérifie que le chemin Revolut relit la commande, et
+qu'aucun accès direct à `event.data.object` ne subsiste sur ce chemin.
+
+### R3 — Brancher la réconciliation
+Le module existe et est éprouvé ; personne ne l'appelle. Un bouton dans
+l'admin, qui compare les commandes du fournisseur au journal `payments/`.
+*Fini* : le bouton existe, il est atteignable (via `adminGet`), et il ne
+renvoie aucune donnée personnelle.
+
+### R4 — Vérification finale
+CI, noyau, sabotages rejoués, documentation à jour, et la liste exacte de ce
+qui reste à faire côté user.
+
+---
+
 ## Étape 5 — Bac à sable de bout en bout
 Paiement réel en sandbox : montant débité = montant affiché au centime,
 `payments/` écrit, facture numérotée, emails partis, commission réelle enregistrée.

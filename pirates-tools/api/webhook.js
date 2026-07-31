@@ -153,19 +153,34 @@ async function handler(req, res) {
          'abandonne'. Chez Revolut, ORDER_PAYMENT_DECLINED signale l'échec d'UNE
          tentative — le client peut réessayer sur le MÊME ordre. Enterrer la
          commande à ce moment-là tuerait une vente en train d'être sauvée. */
+      /* ⚠️ DEUX FORMES DE CHARGE UTILE, UNE SEULE LOGIQUE MÉTIER.
+         Stripe livre l'objet complet dans l'événement (`event.data.object`).
+         Revolut n'envoie QUE `{ event, order_id }` : il faut RELIRE la commande
+         chez lui, puis la présenter sous la même forme au handler.
+         `objetPaiement` fait exactement cette bascule, et rien d'autre : la
+         facture, le journal, le contrôle fiscal et les e-mails restent écrits
+         une seule fois, pour les deux fournisseurs. */
+      /* ⚠️ La relecture est faite DANS le cas qui en a besoin, pas avant.
+         Deux genres seulement exploitent l'objet ; les autres n'ont aucun effet
+         et ne justifient pas un aller-retour réseau chez le fournisseur. */
+      var objet;
       switch (verif.genre) {
         case paiementSocle.GENRE_ACQUIS:
           // Le SEUL genre qui déclenche des effets : journal, facture, emails.
+          objet = await objetPaiement(paiement, event, verif);
+          if (!objet) { console.log('[webhook] Charge utile inexploitable, aucun effet:', cleEvenement); break; }
           if (event.type === 'checkout.session.completed') {
-            await handleSessionCompleted(paiement, fb, event.data.object, ctx);
+            await handleSessionCompleted(paiement, fb, objet, ctx);
           } else {
-            await handleIntentSucceeded(paiement, fb, event.data.object, ctx);
+            await handleIntentSucceeded(paiement, fb, objet, ctx);
           }
           break;
 
         case 'tentative_ratee':
           // ⛔ On journalise, on n'enterre RIEN : la commande reste vivante.
-          await handleIntentFailed(fb, event.data.object);
+          objet = await objetPaiement(paiement, event, verif);
+          if (!objet) { console.log('[webhook] Charge utile inexploitable, aucun effet:', cleEvenement); break; }
+          await handleIntentFailed(fb, objet);
           break;
 
         case 'autorise':
@@ -231,10 +246,95 @@ function claimDecision(existing, nowMs) {
 // `export const config = { api: { bodyParser: false } }`.
 module.exports = handler;
 module.exports.config = { api: { bodyParser: false } };
+/* Exposé pour la PREUVE, pas pour l'usage. `objetPaiement` porte la seule règle
+   que rien d'autre ne peut vérifier de l'extérieur : la garde d'état ne doit
+   valoir que sur le genre qui encaisse. Une regex sur le source dirait
+   seulement à quoi le code ressemble ; ceci dit ce qu'il FAIT.
+   Vérifié par scripts/check-paiement.js. */
+module.exports._objetPaiement = objetPaiement;
 
 // ════════════════════════════════════════════════════════════════
 // Event handlers
 // ════════════════════════════════════════════════════════════════
+
+/* ── LA BASCULE ENTRE LES DEUX FORMES DE CHARGE UTILE ────────────────────────
+   Stripe met tout l'objet dans l'événement. Revolut n'envoie que
+   `{ event, order_id }` — il faut aller relire la commande.
+
+   Cette fonction rend TOUJOURS un objet de forme « PaymentIntent », parce que
+   c'est ce que les handlers savent lire. Ce n'est pas de la nostalgie de
+   Stripe : c'est le refus de dupliquer la facture, le journal, le contrôle
+   fiscal et les e-mails en deux versions qui divergeraient au premier
+   correctif appliqué à une seule.
+
+   ⛔ LA GARDE D'ÉTAT NE VAUT QUE POUR LE GENRE QUI ENCAISSE. Un ordre
+   `authorised` — donc réversible — ne doit jamais produire de commande : les
+   fonds peuvent repartir chez le client. Mais une TENTATIVE RATÉE laisse
+   l'ordre en `pending` (le client peut réessayer dessus) : exiger l'état acquis
+   là aussi renverrait `null` et l'échec ne serait JAMAIS journalisé chez
+   Revolut, alors qu'il l'est chez Stripe. Deux fournisseurs, deux niveaux de
+   traçabilité — exactement ce que la couture existe pour empêcher.
+
+   ⚠️ La commission n'est demandée que sur le chemin encaissé : c'est un
+   aller-retour réseau de plus, et une tentative ratée n'en a aucune. La lecture
+   normalisée est attachée sous `_dejaLu` pour que le handler ne relise pas. */
+async function objetPaiement(paiement, event, verif) {
+  // Stripe : l'objet est déjà là, rien à faire.
+  if (event && event.data && event.data.object) return event.data.object;
+
+  var idOrdre = event && event.order_id;
+  if (!idOrdre) return null;
+
+  var encaisse = !!verif && verif.genre === paiementSocle.GENRE_ACQUIS;
+
+  var p;
+  try {
+    p = await paiement.lirePaiement(idOrdre, { avecCommission: encaisse });
+  } catch (e) {
+    // ⛔ On LAISSE remonter : un échec de lecture doit faire échouer le webhook
+    // (claim 'failed' + 500) pour que le fournisseur re-livre. Rendre `null`
+    // ici acquitterait un paiement qu'on n'a pas su traiter.
+    throw new Error('Commande ' + idOrdre + ' illisible : ' + e.message);
+  }
+
+  if (!p) return null;
+  if (encaisse && p.etat !== paiementSocle.ETAT_ACQUIS) {
+    /* Le fournisseur annonce un encaissement, la commande dit autre chose : on
+       croit la COMMANDE, jamais l'annonce. Aucun effet, et une trace pour
+       comprendre (l'état brut n'est pas une donnée personnelle). */
+    console.log('[webhook] Ordre', idOrdre, 'annoncé encaissé mais état « '
+      + p.etatBrut + ' » — aucun effet.');
+    return null;
+  }
+
+  return {
+    id: p.id,
+    amount: p.montantCents,
+    currency: (p.devise || 'EUR').toLowerCase(),
+    metadata: p.metadata || {},
+    receipt_email: p.email || null,
+    shipping: p.adresse ? {
+      name: p.nom || '',
+      address: {
+        line1: p.adresse.ligne1 || '',
+        city: p.adresse.ville || '',
+        postal_code: p.adresse.codePostal || '',
+        country: p.adresse.pays || 'FR'
+      }
+    } : null,
+    /* Motif d'échec : Revolut ne renvoie AUCUN message exploitable sur l'ordre.
+       On journalise donc ce qu'on sait réellement — l'état brut, tel qu'il l'a
+       dit — plutôt qu'une phrase inventée qui aurait l'air d'un diagnostic.
+       Nul sur le chemin encaissé : il n'y a pas d'échec à raconter. */
+    last_payment_error: encaisse ? null
+      : { message: 'Revolut : état « ' + (p.etatBrut || 'inconnu') + ' » après tentative refusée' },
+    /* ⚠️ La lecture normalisée est ATTACHÉE, pas jetée. Le handler la
+       réutilise au lieu de relire la commande — un aller-retour réseau de
+       moins par paiement, et surtout AUCUN risque que les deux lectures
+       divergent (état changé entre les deux, commission apparue entre-temps). */
+    _dejaLu: p
+  };
+}
 
 // Marque les emails comme envoyés sur le claim (dédup en cas de reprise).
 // Best-effort : au pire une reprise renverra l'email (préférable à aucun).
@@ -311,14 +411,30 @@ async function handleIntentSucceeded(paiement, fb, pi, ctx) {
     console.log('[webhook] payment_intent.succeeded ignored (not ours):', pi.id);
     return;
   }
+  /* ⛔ COMMANDE DE DIAGNOSTIC — `api/admin.js ?type=revolut-commande-test` crée
+     un ordre à 30 € qui porte `source: pirates-tools` (il doit le porter : c'est
+     ce qui prouve que la chaîne complète fonctionne). Sans cette exclusion, son
+     webhook produirait une écriture comptable, un numéro de facture consommé et
+     des emails de confirmation pour une vente qui n'existe pas. La marque
+     `test` est posée par le diagnostic et par lui seul ; aucun paiement client
+     ne peut la porter (create-payment-intent.js ne l'écrit nulle part). */
+  if (pi.metadata.test) {
+    console.log('[webhook] ignoré : commande de diagnostic (metadata.test):', pi.id);
+    return;
+  }
   console.log('[webhook] Payment confirmed (intent):', pi.id, 'Amount:', pi.amount);
 
   /* ⚠️ COUTURE — un seul appel remplace les deux (charge + balance transaction).
      `avecCommission: true` déclenche la lecture de la commission RÉELLE : c'est
      ce qui rend la comptabilité « 100 % réelle », et c'est aussi ce qui coûte
      un aller-retour réseau de plus. On ne le demande donc QUE sur ce chemin,
-     celui d'un paiement effectivement encaissé. */
-  var normalise = await paiement.lirePaiement(pi.id, { avecCommission: true });
+     celui d'un paiement effectivement encaissé.
+
+     ⚠️ `_dejaLu` : chez Revolut, la commande vient d'être relue par
+     `objetPaiement` (sa charge utile ne contient que l'identifiant). On
+     réutilise cette lecture au lieu d'en refaire une — un aller-retour de
+     moins, et zéro risque que les deux lectures divergent. */
+  var normalise = pi._dejaLu || await paiement.lirePaiement(pi.id, { avecCommission: true });
   var billing = {
     email: normalise.email,
     name: normalise.nom,
@@ -425,6 +541,9 @@ async function handleIntentSucceeded(paiement, fb, pi, ctx) {
 // ── Stripe Elements : payment_intent.payment_failed ──
 async function handleIntentFailed(fb, pi) {
   if (!pi.metadata || pi.metadata.source !== 'pirates-tools') return;
+  // Même exclusion qu'au succès : la commande de diagnostic ne pollue pas le
+  // journal des paiements, pas même en échec.
+  if (pi.metadata.test) return;
   var lastErr = (pi.last_payment_error && pi.last_payment_error.message) || null;
   console.log('[webhook] Payment failed (intent):', pi.id, lastErr || '');
   await logPayment(fb, pi.id, {

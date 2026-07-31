@@ -389,6 +389,38 @@ function comparerSignatures(enTete, attendue) {
   });
 }
 
+/* ── Enregistrer le webhook chez Revolut ──────────────────────────────────
+   `POST /api/webhooks` renvoie un `signing_secret` — la seule et unique fois
+   où on peut le lire à la creation. Sans lui, aucune signature n'est
+   verifiable, donc aucun evenement n'est accepte, donc aucune commande n'est
+   traitee. C'est le maillon dont l'absence ne se voit qu'au premier paiement.
+
+   Evenements retenus : les six qui existent. On s'abonne meme a ceux qu'on ne
+   fait que journaliser (tentatives ratees) — une trace coute moins cher qu'un
+   diagnostic a l'aveugle le jour ou un client dit « j'ai paye ». */
+var EVENEMENTS = ['ORDER_COMPLETED', 'ORDER_AUTHORISED', 'ORDER_CANCELLED',
+  'ORDER_FAILED', 'ORDER_PAYMENT_DECLINED', 'ORDER_PAYMENT_FAILED'];
+
+async function creerWebhook(url) {
+  var r = await appel('POST', '/webhooks', { url: String(url), events: EVENEMENTS });
+  return {
+    id: r && r.id,
+    url: r && r.url,
+    evenements: (r && r.events) || [],
+    // ⚠️ Le SEUL moment ou ce secret est lisible a la creation. L'appelant doit
+    // le poser sur Vercel immediatement — il n'est pas stocke ici.
+    secretSignature: r && r.signing_secret
+  };
+}
+
+/* Liste les webhooks deja enregistres — pour eviter d'en creer un deuxieme
+   sur la meme URL (Revolut plafonne a 10, et deux abonnements identiques
+   doublent chaque notification). */
+async function listerWebhooks() {
+  var r = await appel('GET', '/webhooks');
+  return (r && Array.isArray(r.webhooks)) ? r.webhooks : [];
+}
+
 /* ── Remboursement ────────────────────────────────────────────────────────
    Crée un NOUVEL ordre de type `refund`, lié par `related_order_id`.
    `Idempotency-Key` évite le double remboursement si l'appel est rejoué. */
@@ -411,6 +443,9 @@ module.exports = {
   verifierSignature: verifierSignature,
   rembourser: rembourser,
   listerPaiements: listerPaiements,
+  creerWebhook: creerWebhook,
+  listerWebhooks: listerWebhooks,
+  EVENEMENTS: EVENEMENTS,
   // Exportés pour les contrôles : ce sont les parties PURES, celles qui
   // portent les deux pièges et qui s'éprouvent sans réseau.
   depuisOrdre: depuisOrdre,

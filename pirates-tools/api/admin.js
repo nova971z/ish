@@ -179,6 +179,64 @@ module.exports = async function handler(req, res) {
       }
     }
 
+    /* ── GET ?type=revolut-webhook : enregistrer le webhook chez Revolut ────
+       Sans webhook, un paiement réussi ne produit NI commande, NI facture, NI
+       e-mail. C'est le maillon dont l'absence ne se voit qu'au premier vrai
+       paiement — c'est-à-dire trop tard.
+
+       ⚠️ CE POINT D'ENTRÉE AFFICHE UN SECRET, ET C'EST INÉVITABLE.
+       `POST /api/webhooks` renvoie le `signing_secret` ; c'est le seul moyen de
+       l'obtenir, et il doit être recopié sur Vercel. Trois précautions :
+         · il ne s'affiche que derrière `requireAdmin` ;
+         · il n'est JAMAIS écrit dans un journal serveur ni dans Firestore ;
+         · la réponse porte un avertissement explicite.
+       ⛔ Refuse en production, comme les deux autres diagnostics.
+
+       Idempotence : si un webhook pointe DÉJÀ sur cette adresse, on ne crée
+       rien. Deux abonnements identiques doubleraient chaque notification, donc
+       chaque tentative de traitement. */
+    if (type === 'revolut-webhook') {
+      const rev = require('./_lib/paiement/revolut');
+      if (rev._modeProd()) {
+        return res.status(400).json({ ok: false, etape: 'garde',
+          erreur: 'REVOLUT_MODE vaut « prod ». Cet outil ne touche que le bac à sable.' });
+      }
+      if (!rev.estConfigure()) {
+        return res.status(400).json({ ok: false, etape: 'cle',
+          erreur: 'REVOLUT_SECRET_KEY_SANDBOX absente.' });
+      }
+      const origine = (req.headers && (req.headers.origin
+        || String(req.headers.referer || '').replace(/\/(#.*)?$/, ''))) || '';
+      const cible = String(origine).replace(/\/+$/, '') + '/api/webhook';
+      try {
+        const deja = await rev.listerWebhooks();
+        const memeUrl = deja.filter(function (w) { return w && w.url === cible; });
+        if (memeUrl.length) {
+          return res.status(200).json({
+            ok: true, etape: 'existant',
+            message: 'Un webhook pointe DÉJÀ sur cette adresse — rien n\'a été créé.',
+            url: cible, id: memeUrl[0].id, evenements: memeUrl[0].events || [],
+            rappel: 'Le secret de signature ne se ré-affiche pas ici. S\'il manque sur '
+              + 'Vercel, supprimer ce webhook côté Revolut puis relancer ce bouton.'
+          });
+        }
+        const w = await rev.creerWebhook(cible);
+        return res.status(200).json({
+          ok: true, etape: 'creation',
+          message: 'Webhook enregistré.',
+          url: w.url, id: w.id, evenements: w.evenements,
+          secretSignature: w.secretSignature,
+          aFaire: 'Poser ce secret sur Vercel sous le nom '
+            + 'REVOLUT_WEBHOOK_SECRET_SANDBOX, puis REDÉPLOYER. '
+            + '⚠️ Il ne sera plus affiché ici.'
+        });
+      } catch (e) {
+        return res.status(200).json({ ok: false, etape: 'creation',
+          erreur: String(e.message || e).slice(0, 400), url: cible,
+          indice: 'L\'adresse doit être publique et en HTTPS pour que Revolut l\'accepte.' });
+      }
+    }
+
     if (type === 'export-catalogue') {
       try {
         const fusion = await catalog.loadPublicCatalog();

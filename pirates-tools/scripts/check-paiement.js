@@ -22,7 +22,7 @@
 var fs = require('fs');
 var path = require('path');
 
-module.exports = function () {
+module.exports = async function () {
   var errors = [];
   function ok(c, m) { if (!c) errors.push('[check-paiement] ' + m); }
 
@@ -257,6 +257,108 @@ module.exports = function () {
     ok(!/case\s*'payment_intent\.succeeded'/.test(whSrc),
       '⛔ api/webhook.js contient encore un `case \'payment_intent.succeeded\'` : '
       + 'un nom d\'événement propre à Stripe est redevenu une décision.');
+
+    /* ⛔⛔ LA COMMANDE DE DIAGNOSTIC NE DOIT JAMAIS DEVENIR UNE VENTE.
+       `api/admin.js ?type=revolut-commande-test` crée un ordre à 30 € portant
+       `source: pirates-tools` — il DOIT le porter, c'est ce qui prouve que la
+       chaîne complète marche. Mais la garde d'appartenance du webhook ne
+       regarde que ce marqueur : sans exclusion explicite du marqueur `test`,
+       ce faux paiement produit une écriture comptable, consomme un numéro de
+       facture (séquence légale, on ne « dé-consomme » pas) et envoie des
+       emails de confirmation pour une vente qui n'existe pas.
+       Aucun test fonctionnel ne verrait le défaut : tout « marche ». */
+    var mGarde = whSrc.match(/function handleIntentSucceeded[\s\S]{0,1600}?Payment confirmed/);
+    ok(mGarde && /metadata\.test/.test(mGarde[0]),
+      '⛔⛔ la garde d\'appartenance de `handleIntentSucceeded` n\'exclut plus les '
+      + 'commandes de diagnostic (`metadata.test`). L\'ordre de test à 30 € porte '
+      + '`source: pirates-tools` : son webhook produirait une écriture comptable, un '
+      + 'numéro de facture consommé et des emails de confirmation pour une vente qui '
+      + 'n\'existe pas.');
+  }
+
+  /* Le pendant côté émetteur : si le diagnostic cesse de poser le marqueur, la
+     garde ci-dessus n'a plus rien à surveiller et reverdit à vide. */
+  var ADM = path.join(RACINE, 'api', 'admin.js');
+  if (fs.existsSync(ADM)) {
+    var admSrc = fs.readFileSync(ADM, 'utf8');
+    var mTest = admSrc.match(/type === 'revolut-commande-test'[\s\S]{0,1800}?metadata:[^\n]*/);
+    ok(!mTest || /test:\s*'1'/.test(mTest[0]),
+      '⛔⛔ la commande de diagnostic Revolut ne porte plus `test: \'1\'` dans sa '
+      + 'metadata. La garde du webhook s\'appuie dessus pour ne pas la traiter comme '
+      + 'une vraie vente : sans ce marqueur, elle en devient une.');
+  }
+
+  /* ── 4 ter bis. LA GARDE D'ÉTAT NE VAUT QUE POUR L'ENCAISSEMENT ─────────
+     Ceci n'est pas une lecture de source : on APPELLE `objetPaiement` avec un
+     faux fournisseur et on regarde ce qu'elle rend. Une regex dirait à quoi le
+     code ressemble ; cet appel dit ce qu'il FAIT.
+
+     Le défaut visé, trouvé le 31/07/2026 en relisant mon propre code : la garde
+     « état ≠ payé → null » était INCONDITIONNELLE. Chez Revolut, une tentative
+     refusée laisse l'ordre en `pending` (le client peut réessayer dessus) — donc
+     `objetPaiement` rendait `null`, `handleIntentFailed` n'était jamais appelée,
+     et AUCUN échec de paiement n'était journalisé. Chez Stripe si, chez Revolut
+     non : deux niveaux de traçabilité selon le fournisseur, exactement ce que la
+     couture existe pour empêcher. Rien ne l'aurait montré — pas un euro perdu,
+     juste un journal muet le jour où on en aurait eu besoin.
+
+     ⚠️ Les trois cas comptent ENSEMBLE. Sans le cas 2, on ne prouve pas que la
+     garde protège encore ; sans le cas 3, on ne prouve pas qu'elle protège du
+     BON danger — un ordre seulement autorisé, donc réversible. */
+  var wh = null;
+  try { wh = require(path.join(RACINE, 'api', 'webhook.js')); } catch (eWh) {
+    ok(false, '⛔ api/webhook.js ne peut plus être chargé : ' + (eWh && eWh.message));
+  }
+  if (wh && typeof wh._objetPaiement === 'function') {
+    var faux = function (etatRendu) {
+      return {
+        lirePaiement: function () {
+          return Promise.resolve({
+            id: 'ord_faux', etat: etatRendu, etatBrut: etatRendu,
+            montantCents: 4200, devise: 'EUR',
+            metadata: { source: 'pirates-tools' }, email: null, adresse: null
+          });
+        }
+      };
+    };
+    // Charge utile RÉELLE de Revolut : un nom d'événement et un identifiant, rien d'autre.
+    var evt = { event: 'PEU_IMPORTE', order_id: 'ord_faux' };
+
+    // 1) Tentative ratée, ordre resté « en_attente » → l'objet DOIT exister.
+    var r1 = await wh._objetPaiement(faux('en_attente'), evt, { genre: 'tentative_ratee' });
+    ok(r1 && r1.id === 'ord_faux',
+      '⛔⛔ `objetPaiement` rend `null` pour une TENTATIVE RATÉE dont l\'ordre est '
+      + 'resté en attente. C\'est le cas NORMAL chez Revolut (le client peut réessayer '
+      + 'sur le même ordre) : aucun échec de paiement ne serait journalisé, alors que '
+      + 'chez Stripe ils le sont tous. La garde d\'état ne doit valoir que pour le '
+      + 'genre qui encaisse.');
+
+    // 2) Encaissement annoncé, ordre réellement payé → l'objet DOIT exister.
+    var r2 = await wh._objetPaiement(faux('paye'), evt, { genre: 'encaisse' });
+    ok(r2 && r2.amount === 4200,
+      '⛔ `objetPaiement` refuse un encaissement pourtant confirmé par la commande : '
+      + 'le paiement serait acquitté sans facture, sans journal et sans e-mail.');
+
+    /* 3) Encaissement ANNONCÉ mais ordre seulement autorisé → l'objet doit être
+       `null`. Ce cas fait journaliser le webhook : on met la console en veille
+       le temps de l'appel, sinon la sortie de la CI porte une ligne de faux
+       incident à chaque passage — et une CI qui crie pour rien finit par ne
+       plus être lue. La preuve reste l'assertion, pas la ligne de journal. */
+    var logVrai = console.log;
+    console.log = function () {};
+    var r3;
+    try { r3 = await wh._objetPaiement(faux('autorise'), evt, { genre: 'encaisse' }); }
+    finally { console.log = logVrai; }
+    ok(r3 === null,
+      '⛔⛔ `objetPaiement` accepte un ordre seulement AUTORISÉ comme s\'il était '
+      + 'encaissé. L\'autorisation est RÉVERSIBLE — les fonds repartent chez le client '
+      + 'si rien n\'est capturé sous 7 jours. On expédierait la marchandise contre de '
+      + 'l\'argent qui n\'est jamais arrivé.');
+  } else if (wh) {
+    ok(false, '⛔ api/webhook.js n\'expose plus `_objetPaiement` : les trois preuves '
+      + 'de la garde d\'état (tentative ratée journalisée, encaissement accepté, '
+      + 'autorisation refusée) ne tournent plus. Aucune ne peut être remplacée par '
+      + 'une lecture de source.');
   }
 
   /* ── 4 quater. La CSP autorise les DEUX fournisseurs ───────────────────
@@ -540,7 +642,14 @@ module.exports = function () {
 };
 
 if (require.main === module) {
-  var e = module.exports();
-  if (e.length) { e.forEach(function (x) { console.error('  ❌ ' + x); }); process.exit(1); }
-  console.log('✅ check-paiement OK');
+  /* ⚠️ Le module est devenu ASYNCHRONE (une assertion appelle réellement
+     `objetPaiement`). Sans ce `.then`, `e.length` serait lu sur une Promise —
+     `undefined`, donc falsy : le contrôle sortirait VERT quoi qu'il arrive. */
+  module.exports().then(function (e) {
+    if (e.length) { e.forEach(function (x) { console.error('  ❌ ' + x); }); process.exit(1); }
+    console.log('✅ check-paiement OK');
+  }, function (err) {
+    console.error('  ❌ [check-paiement] a explosé : ' + (err && err.message ? err.message : err));
+    process.exit(1);
+  });
 }
