@@ -249,6 +249,23 @@ sha256 du script inline recalculée** (`node scripts/check-csp.js`), `?v=` et
 *Fini* : `check-csp` vert, zéro violation CSP dans un vrai navigateur, formulaire
 monté et carte de test acceptée en bac à sable.
 
+### ✅ JALON ATTEINT — 31/07/2026, premier paiement Revolut
+
+Chaîne complète prouvée en bac à sable, dans cet ordre :
+
+1. `revolut-ping` → *« Revolut répond »*, base `sandbox-merchant.revolut.com/api`,
+   clé de 67 caractères acceptée, 0 commande sur 24 h.
+2. `revolut-commande-test` → ordre créé, `checkout_url` rendue.
+3. Page hébergée ouverte, carte de test `4929 4205 7359 5709` saisie.
+4. **« Paiement effectué — 30 € — Visa •• 5709 »**, référence `TEST-…`.
+
+Ce qui est désormais prouvé par l'exécution, plus par la lecture :
+l'authentification, l'URL de base, la création d'ordre, la page hébergée, et
+l'encaissement réel côté Revolut.
+
+Ce qui ne l'est PAS encore : le webhook (aucun n'est enregistré), la lecture de
+la commission, le remboursement, et le widget dans le site.
+
 ## Étape 5 — Bac à sable de bout en bout
 Paiement réel en sandbox : montant débité = montant affiché au centime,
 `payments/` écrit, facture numérotée, emails partis, commission réelle enregistrée.

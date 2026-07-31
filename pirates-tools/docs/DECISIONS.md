@@ -409,3 +409,63 @@ Le contre-poids réel : l'user relit le rapport du traqueur à chaque relevé.
 produits déjà suivis ») devient sans objet.
 
 ---
+
+## D-016 — Stripe est retiré du site ; les livreurs sont payés en DIRECT
+
+**Date** : 31/07/2026 · **Statut** : ACTIVE · **Décidée par** : l'user
+
+**Ce qui la déclenche.** Le premier paiement Revolut de bout en bout a réussi
+en bac à sable le 31/07/2026 : commande créée par le serveur, page hébergée
+ouverte, 30,00 € payés par carte de test Visa, page « Paiement effectué »
+affichée. La chaîne complète est prouvée.
+
+**Décision, deux volets.**
+
+1. **Stripe sort du site.** Revolut devient le seul encaisseur : fonds
+   disponibles sous 24 h contre 3 à 7 jours ouvrés, commissions plus basses.
+
+2. **La plateforme ne touche plus JAMAIS l'argent d'une course.** Le livreur
+   émet lui-même son lien de paiement Revolut ; le client le paie en direct ;
+   le livreur est payé instantanément, en espèces ou par virement, sans que
+   rien ne transite par Pirates Tools.
+
+**Ce que le volet 2 supprime, et c'est le point important.** L'escrow, le
+versement au livreur et `transfers.create` (Stripe Connect) disparaissent —
+c'était le DERNIER endroit où la plateforme touchait l'argent d'une course, et
+le seul appel direct au SDK Stripe qui subsistait dans tout le site.
+
+**Ce que ça renforce juridiquement.** La décision D-009 posait déjà que la
+plateforme ne fixe pas le prix et n'encaisse pas la course (art. L7342-1,
+présomption de salariat ; directive (UE) 2024/2831). Ne plus jamais détenir cet
+argent, même transitoirement, éloigne encore la requalification.
+
+### ⚠️ RÉSERVE — « il faut ABSOLUMENT avoir un compte Revolut »
+
+Formulé comme une **obligation**, ce serait un ordre donné à un indépendant sur
+l'outil de son métier. La règle livraison en vigueur dit l'inverse : *« le MODE
+DE RÈGLEMENT appartient au LIVREUR »*. Imposer un fournisseur, c'est reprendre
+d'une main la liberté qu'on lui reconnaît de l'autre — et ce genre d'indice,
+accumulé, nourrit précisément une requalification.
+
+**Formulation retenue** : le livreur reste libre de son moyen d'encaissement.
+Revolut est **proposé et documenté** comme le plus simple (paiement instantané,
+lien à générer soi-même), jamais exigé. Un livreur qui préfère l'espèce, un
+autre fournisseur ou son propre IBAN reste éligible.
+
+⚠️ À vérifier à la source avant l'ouverture du service (registre J2) :
+legifrance.gouv.fr → travailleurs des plateformes · directive (UE) 2024/2831.
+
+### ⛔ ORDRE D'EXÉCUTION — Stripe se retire EN DERNIER
+
+Le site encaisse **encore** par Stripe aujourd'hui (`PAYMENT_PROVIDER` non
+posé). Le retirer maintenant ne laisserait rien pour encaisser.
+
+L'ordre ne se négocie pas : étape 4 (formulaire de carte) → étape 5 (bout en
+bout en bac à sable) → étape 6 (bascule, Stripe reste branché derrière la
+couture) → **étape 7 seulement** : retrait.
+
+⛔ Et même à l'étape 7 : on ne supprime NI la collection `stripe_events`, NI
+les champs `stripe*` des paiements déjà encaissés. C'est l'historique
+comptable, il se conserve.
+
+---
