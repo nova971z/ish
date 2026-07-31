@@ -94,8 +94,14 @@ var OPERATIONS = [
   'estConfigure',      // () → bool — les variables d'environnement sont-elles là ?
   'creerPaiement',     // (params) → { id, jetonClient, urlHebergee }
   'lirePaiement',      // (id) → paiement normalisé
-  'verifierSignature', // (corpsBrut, entetes) → { ok, evenement, cle, erreur }
-  'rembourser'         // (id, montantCents, devise, cleIdempotence) → { id, etat }
+  'verifierSignature', // (corpsBrut, entetes) → { ok, evenement, cle, erreur, genre }
+  'rembourser',        // (id, montantCents, devise, cleIdempotence) → { id, etat }
+  /* (depuisMs, jusquaMs) → [paiements normalisés, avec `creeAMs`]
+     ⚠️ Indispensable au RATTRAPAGE. Sans la liste de ce que le fournisseur dit
+     avoir encaissé, la réconciliation n'a rien à comparer et le filet sous le
+     webhook n'existe pas. C'est la seule opération dont l'absence ne se voit
+     JAMAIS en fonctionnement normal : elle ne sert que le jour de la panne. */
+  'listerPaiements'
 ];
 
 /* Choix du fournisseur. Par défaut STRIPE — c'est ce qui encaisse aujourd'hui.

@@ -210,6 +210,29 @@ async function creerSession(params) {
   return { id: session.id, urlHebergee: session.url };
 }
 
+/* ── Lister les paiements sur une fenêtre — LE RATTRAPAGE ─────────────────
+   Même rôle que chez Revolut : alimenter la réconciliation.
+   ⚠️ On ne garde que NOS intents (`metadata.source`) : ceux créés en interne
+   par une Checkout Session ne portent pas notre marque et sont traités par
+   l'autre chemin. Les compter ici produirait de faux orphelins. */
+async function listerPaiements(depuisMs, jusquaMs) {
+  var params = { limit: 100 };
+  var created = {};
+  if (depuisMs) created.gte = Math.floor(depuisMs / 1000);
+  if (jusquaMs) created.lte = Math.floor(jusquaMs / 1000);
+  if (created.gte || created.lte) params.created = created;
+  var page = await sdk().paymentIntents.list(params);
+  var out = [];
+  for (var i = 0; i < (page.data || []).length; i++) {
+    var pi = page.data[i];
+    if (!pi.metadata || pi.metadata.source !== 'pirates-tools') continue;
+    var n = await depuisIntent(pi, false);
+    n.creeAMs = (typeof pi.created === 'number') ? pi.created * 1000 : null;
+    out.push(n);
+  }
+  return out;
+}
+
 /* Vérifie la signature du webhook sur le corps BRUT.
    ⚠️ `corpsBrut` DOIT être le Buffer reçu, jamais un objet re-sérialisé :
    six formes de JSON produisent des octets différents pour la même donnée.
@@ -254,6 +277,7 @@ module.exports = {
   lirePaiement: lirePaiement,
   verifierSignature: verifierSignature,
   rembourser: rembourser,
+  listerPaiements: listerPaiements,
   // Exportés pour le webhook (qui a déjà l'objet) et pour les contrôles.
   depuisIntent: depuisIntent,
   lireSession: lireSession,   // ⚠️ hors contrat commun — voir son commentaire

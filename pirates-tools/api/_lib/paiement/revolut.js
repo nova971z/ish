@@ -279,6 +279,33 @@ function depuisOrdre(o) {
   return out;
 }
 
+/* ── Lister les ordres sur une fenêtre — LE RATTRAPAGE ────────────────────
+   Sert uniquement à la réconciliation : comparer ce que Revolut dit avoir
+   encaissé à ce que notre journal contient. Voir reconciliation.js.
+
+   La documentation donne `GET /api/orders` avec `from`, `to`, `limit` et
+   `state`. On filtre sur `completed` — les seuls qui devraient avoir produit
+   une commande chez nous.
+
+   ⚠️ `limit` borné : une fenêtre trop large sur un compte actif renverrait des
+   milliers d'ordres et ferait expirer la fonction serverless. On préfère
+   plusieurs passages courts qu'un passage unique qui n'aboutit jamais. */
+async function listerPaiements(depuisMs, jusquaMs) {
+  var q = [];
+  if (depuisMs) q.push('from=' + encodeURIComponent(new Date(depuisMs).toISOString()));
+  if (jusquaMs) q.push('to=' + encodeURIComponent(new Date(jusquaMs).toISOString()));
+  q.push('state=completed');
+  q.push('limit=100');
+  var rep = await appel('GET', '/orders?' + q.join('&'));
+  var liste = (rep && Array.isArray(rep.orders)) ? rep.orders : [];
+  return liste.map(function (o) {
+    var n = depuisOrdre(o);
+    // `creeAMs` : la réconciliation en a besoin pour son délai de grâce.
+    n.creeAMs = o.created_at ? Date.parse(o.created_at) : null;
+    return n;
+  });
+}
+
 /* ── Signature du webhook ─────────────────────────────────────────────────
    Algorithme VÉRIFIÉ contre le vecteur de test officiel :
 
@@ -383,6 +410,7 @@ module.exports = {
   lirePaiement: lirePaiement,
   verifierSignature: verifierSignature,
   rembourser: rembourser,
+  listerPaiements: listerPaiements,
   // Exportés pour les contrôles : ce sont les parties PURES, celles qui
   // portent les deux pièges et qui s'éprouvent sans réseau.
   depuisOrdre: depuisOrdre,
