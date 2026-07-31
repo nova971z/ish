@@ -522,10 +522,72 @@ ne devrait jamais poser problème — mais elle est écrite ici pour que personn
 `ORDER_AUTHORISED` reste utile à journaliser : il donne une trace de tentative,
 sans jamais déclencher d'expédition ni de facture.
 
-⚠️ **Réserve** : la liste exhaustive des états intermédiaires n'a pas été lue.
-Le bac à sable la révélera, et un état inconnu doit être **journalisé et
-ignoré**, jamais traité comme un succès. C'est une règle d'implémentation, pas
-une supposition.
+### ✅ La table COMPLÈTE, obtenue le 31/07/2026 (page *Hosted Checkout Page — API*)
+
+| État | Signification | Final ? |
+|---|---|---|
+| `pending` | ordre créé, aucune tentative de paiement | non |
+| `processing` | tentative en cours | non |
+| `authorised` | autorisé, **capture manuelle en attente** | final *(déclencheur si capture manuelle)* |
+| `completed` | **capturé et réglé** | ✅ **final — notre déclencheur** |
+| `cancelled` | annulé (API, tableau de bord, ou autorisation expirée) | final, échec |
+| `failed` | expiré sans paiement abouti | final, échec |
+
+> *« Only trigger fulfilment and business logic when orders reach final states.
+> Do not fulfil orders in `pending` or `processing` states. »*
+
+Notre `capture_mode` est `automatic` → **on agit sur `completed`, et sur rien
+d'autre.**
+
+### ⛔⛔ LE PIÈGE QUE J'AURAIS FAIT — un paiement raté n'est PAS une commande ratée
+
+> *« Receiving `ORDER_PAYMENT_FAILED` or `ORDER_PAYMENT_DECLINED` webhooks
+> **does not mean the order has reached a final unsuccessful state**. These
+> events indicate individual payment attempt failures, but **the customer can
+> retry payment on the same order**. »*
+
+Chez Stripe, `payment_intent.payment_failed` est traité comme un échec
+(`handleIntentFailed`, `webhook.js`). Transposer ce réflexe tel quel serait un
+**bug qui coûte des ventes** : on marquerait morte une commande que le client
+est en train de réessayer, et le `ORDER_COMPLETED` qui suit arriverait sur une
+commande déjà enterrée.
+
+**Règle** : `ORDER_PAYMENT_DECLINED` et `ORDER_PAYMENT_FAILED` se **journalisent
+seulement**. Une commande ne meurt que sur `ORDER_CANCELLED` ou `ORDER_FAILED`.
+
+### ⛔ Corollaire pour la COMMISSION : `payments` est un TABLEAU, lui aussi
+
+> *« Each attempt creates a new payment object in the `payments` array. »*
+
+J'avais noté « `fees` est un tableau, on somme ». **Insuffisant.** Un ordre
+réessayé porte PLUSIEURS paiements : des tentatives refusées, puis une réussie.
+Sommer les `fees` de tous les paiements compterait des commissions qui n'ont
+jamais été prélevées.
+
+**Règle** : trouver le paiement dont l'état vaut `completed`/`captured`, **puis**
+sommer SES `fees`. Jamais `payments[0]`, jamais la somme globale.
+
+### Deux délais à régler nous-mêmes
+
+- **`expire_pending_after`** — un ordre non payé reste `pending` **30 jours par
+  défaut**. Beaucoup trop long : autant de commandes fantômes dans le journal.
+  Format ISO 8601, ex. `"PT30M"`.
+- **`cancel_authorised_after`** — 7 jours maximum en autorisation finale. Sans
+  objet chez nous (capture automatique), noté pour mémoire.
+
+### Cartes de test du bac à sable
+
+| Carte | Effet |
+|---|---|
+| `4929420573595709` · `5281438801804148` | paiement réussi (Visa / Mastercard) |
+| `4242424242424242` | échec 3-D Secure — ⚠️ **il faut un montant ≥ 30 € en EUR**, en dessous le 3DS est contourné et le paiement réussit |
+| `4929573638125985` | fonds insuffisants |
+| `4532336743874205` | carte expirée |
+| `2720998837779594` | refus banque (*do not honour*) |
+| `5215674115127070` | vérification supplémentaire échouée |
+| `2223000010479399` | **reste bloqué en `processing`** — le cas qui teste notre patience et nos délais |
+
+CVV : 3 chiffres au hasard. Expiration : n'importe quelle date future.
 
 ## 4.4 🟡 Limites de `metadata`
 Cherché dans « Create an order » — non précisé.

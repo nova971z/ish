@@ -33,14 +33,45 @@
                    ⚠️ AUCUN identifiant d'événement → clé d'idempotence à
                       dériver de event + order_id
 
-   États           on agit sur ORDER_COMPLETED / order `completed` UNIQUEMENT.
-                   `authorised` est RÉVERSIBLE (fonds rendus sous 7 jours).
+   Bac à sable     https://sandbox-merchant.revolut.com/
+                   RevolutCheckout(token, 'sandbox')
+
+   ─────────────────────────────────────────────────────────────────────────
+   LES SIX ÉTATS D'UN ORDRE — table officielle, obtenue le 31/07/2026
+
+     pending     ordre créé, aucune tentative         — non final
+     processing  tentative en cours                   — non final
+     authorised  autorisé, capture manuelle attendue  — final SI capture manuelle
+     completed   capturé et réglé                     — ✅ NOTRE DÉCLENCHEUR
+     cancelled   annulé / autorisation expirée        — final, échec
+     failed      expiré sans paiement                 — final, échec
+
+   Notre `capture_mode` est `automatic` → on agit sur `completed`, et sur rien
+   d'autre. Un état inconnu se journalise et s'IGNORE.
+
+   ⛔⛔ PIÈGE N°1 — UN PAIEMENT RATÉ N'EST PAS UNE COMMANDE RATÉE.
+   ORDER_PAYMENT_DECLINED et ORDER_PAYMENT_FAILED signalent l'échec d'UNE
+   TENTATIVE ; le client peut réessayer sur le MÊME ordre. Les traiter comme un
+   échec définitif — le réflexe hérité de `payment_intent.payment_failed` chez
+   Stripe — enterrerait une commande en train d'être sauvée, et le
+   ORDER_COMPLETED suivant arriverait sur un dossier déjà clos.
+   On les JOURNALISE, point. Une commande ne meurt que sur ORDER_CANCELLED ou
+   ORDER_FAILED.
+
+   ⛔⛔ PIÈGE N°2 — `payments` EST UN TABLEAU, LUI AUSSI.
+   Un ordre réessayé porte plusieurs paiements : des refusés, puis un réussi.
+   Pour la commission RÉELLE : trouver le paiement à l'état completed/captured,
+   PUIS sommer SES `fees`. Sommer tout le tableau facturerait des commissions
+   jamais prélevées ; prendre payments[0] tomberait sur la tentative refusée.
+
+   ⚠️ expire_pending_after vaut 30 JOURS par défaut. Trop long — un ordre
+   jamais payé encombrerait le journal un mois. À régler court (ISO 8601).
 
    RESTE À OBTENIR avant de brancher pour de vrai :
-     · limites du champ `metadata` (nombre de clés, longueur d'une valeur)
-     · adresse de l'API en bac à sable + génération des clés
-     · politique de re-livraison des webhooks (informatif : le rattrapage par
-       réconciliation se construit de toute façon)
+     · limites du champ `metadata` — NON BLOQUANT : on garde des tranches de
+       450 caractères, très en dessous de tout plafond plausible
+     · politique de re-livraison des webhooks — NON BLOQUANT : le rattrapage
+       par réconciliation se construit de toute façon
    ───────────────────────────────────────────────────────────────────────── */
 
 'use strict';
