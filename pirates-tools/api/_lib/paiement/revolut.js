@@ -62,6 +62,13 @@ function modeProd() {
   return String(process.env.REVOLUT_MODE || '').trim().toLowerCase() === 'prod';
 }
 
+/* Contrat commun — voir OPERATIONS dans index.js.
+   ⚠️ Chez Revolut la réponse est CERTAINE, jamais `null` : le bac à sable est
+   le défaut, et il faut écrire `prod` en toutes lettres pour en sortir. Il n'y
+   a donc pas d'état « indéterminable » à gérer, contrairement à Stripe où le
+   verdict se lit sur le préfixe d'une clé qui peut être mal collée. */
+function modeTest() { return !modeProd(); }
+
 function base() {
   return modeProd()
     ? 'https://merchant.revolut.com/api'
@@ -438,6 +445,7 @@ async function rembourser(id, montantCents, devise, cleIdempotence) {
 module.exports = {
   nom: nom,
   estConfigure: estConfigure,
+  modeTest: modeTest,
   creerPaiement: creerPaiement,
   lirePaiement: lirePaiement,
   verifierSignature: verifierSignature,

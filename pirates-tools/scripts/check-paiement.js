@@ -46,6 +46,58 @@ module.exports = async function () {
       'le fournisseur REVOLUT n\'expose pas « ' + op + ' » — on découvrirait le trou '
       + 'le jour de la bascule, pas avant.');
   });
+  /* ── `modeTest` : le verdict « est-ce de l'argent ? », par APPEL RÉEL ───
+     Faux positif vécu le 01/08/2026 : la réconciliation a annoncé
+     « 317,79 € encaissés, un client attend » sur deux paiements Stripe de TEST.
+     Le constat était juste, la gravité fausse. Trois façons de re-casser ça,
+     et aucune ne se voit en fonctionnement normal :
+       · Stripe rend `true` sur une clé LIVE → de vraies ventes perdues
+         s'afficheraient comme des essais sans importance. Le pire des deux ;
+       · Stripe DEVINE sur une clé au format inattendu au lieu de rendre `null` ;
+       · Revolut rend `true` en production. */
+  var envAvant = {
+    sk: process.env.STRIPE_SECRET_KEY,
+    rm: process.env.REVOLUT_MODE
+  };
+  try {
+    process.env.STRIPE_SECRET_KEY = 'sk_test_ceciNestPasUneCle';
+    ok(stripe.modeTest() === true,
+      '⛔ une clé `sk_test_` n\'est pas reconnue comme registre de TEST. Les essais '
+      + 'seraient annoncés comme des ventes perdues, à chaque passage : on apprendrait '
+      + 'à ne plus regarder l\'alerte, donc à la manquer le jour où elle est vraie.');
+
+    process.env.STRIPE_SECRET_KEY = 'sk_live_ceciNestPasUneCle';
+    ok(stripe.modeTest() === false,
+      '⛔⛔ une clé `sk_live_` est prise pour du TEST. C\'est le pire sens de l\'erreur : '
+      + 'de VRAIES ventes encaissées et jamais enregistrées s\'afficheraient comme des '
+      + 'essais sans importance. Un client aurait payé, personne ne le saurait.');
+
+    ['', 'rk_live_autre_chose', 'sk_', 'SK_LIVE_MAJUSCULES', 'pk_test_cle_publique'].forEach(function (v) {
+      process.env.STRIPE_SECRET_KEY = v;
+      ok(stripe.modeTest() === null,
+        '⛔ `modeTest()` DEVINE sur une clé inattendue (« ' + (v || '(vide)') + ' ») au lieu '
+        + 'de rendre `null`. Deviner du côté rassurant, c\'est présenter de l\'argent réel '
+        + 'comme de la fausse monnaie.');
+    });
+
+    process.env.REVOLUT_MODE = 'prod';
+    ok(revolut.modeTest() === false,
+      '⛔⛔ Revolut se déclare en TEST alors que REVOLUT_MODE vaut « prod ». Les vraies '
+      + 'ventes orphelines passeraient pour des essais.');
+    ['', 'sandbox', 'PROD_', 'production', undefined].forEach(function (v) {
+      if (v === undefined) delete process.env.REVOLUT_MODE;
+      else process.env.REVOLUT_MODE = v;
+      ok(revolut.modeTest() === true,
+        '⛔ Revolut ne se déclare pas en TEST pour REVOLUT_MODE = « ' + String(v) + ' ». '
+        + 'Le bac à sable est le DÉFAUT : seul le mot `prod` en toutes lettres en sort.');
+    });
+  } finally {
+    if (envAvant.sk === undefined) delete process.env.STRIPE_SECRET_KEY;
+    else process.env.STRIPE_SECRET_KEY = envAvant.sk;
+    if (envAvant.rm === undefined) delete process.env.REVOLUT_MODE;
+    else process.env.REVOLUT_MODE = envAvant.rm;
+  }
+
   ok((socle.OPERATIONS || []).length >= 6,
     'la liste OPERATIONS a rétréci : un contrat qui maigrit laisse des appels directs '
     + 'au SDK repartir dans la nature.');
@@ -358,6 +410,20 @@ module.exports = async function () {
           + ' ». Les ordres relus portent e-mail, nom et adresse : ils ne doivent PAS '
           + 'ressortir. Identifiants, montants et dates seulement (règle J3, audit p6).');
       });
+
+      /* ⛔ Le VERDICT « est-ce de l'argent » doit sortir de l'API. Sans lui,
+         l'écran ne peut que supposer — et il supposera du côté rassurant. */
+      /* ⚠️ 1ʳᵉ VERSION TROP LÂCHE, démasquée par sabotage : elle cherchait le
+         mot « modeTest » n'importe où dans le bloc — ce que l'APPEL
+         `paiement.modeTest()` satisfait à lui seul. Retirer le champ de la
+         RÉPONSE laissait donc le contrôle vert. Même classe que E-210 : on
+         cherchait une ressemblance, pas la règle. On exige le champ. */
+      ok(/modeTest\s*:/.test(mRec[0]),
+        '⛔⛔ la réponse de réconciliation ne PORTE plus le champ `modeTest` — le calculer '
+        + 'sans l\'envoyer ne sert à rien. '
+        + 'L\'écran ne peut alors que supposer, et il supposera du côté rassurant : de '
+        + 'vraies ventes perdues passeraient pour des essais. C\'est le faux positif du '
+        + '01/08/2026, retourné dans le sens qui coûte.');
 
       /* ⛔ Un échec doit se DIRE. Renvoyer un résultat vide sur erreur, c'est
          afficher « aucun orphelin » alors que rien n'a été comparé. */
@@ -742,6 +808,30 @@ module.exports = async function () {
       + '« le contrôle n\'a pas tourné ». Un appel en échec affiché comme rassurant, c\'est '
       + 'un filet qui certifie sans avoir regardé — pire que pas de filet, parce qu\'on le '
       + 'croit.');
+
+    /* b bis) ⛔ L'ÉCRAN DOIT LIRE LE VERDICT, pas seulement le recevoir.
+       Le 01/08/2026, l'écran a annoncé « 317,79 € encaissés, un client attend »
+       sur deux paiements de TEST. Le constat était juste, la gravité fausse —
+       et une alerte qui crie sur de la fausse monnaie à chaque passage apprend
+       à ne plus être regardée. Deux conditions, et il faut les DEUX :
+         · l'écran consulte `modeTest` ;
+         · il traite `null` comme du RÉEL (`=== true` et non « truthy »), sinon
+           une clé au format inattendu ferait passer de l'argent véritable pour
+           un essai. C'est le sens de l'erreur qui coûte. */
+    /* ⚠️ Une assertion « l'écran mentionne modeTest » serait FAUSSE : le pied de
+       tableau le mentionne déjà pour afficher le registre. Elle resterait verte
+       alors que la DÉCISION ne s'en sert plus. On vérifie donc les deux choses
+       qui décident vraiment : le test strict, et la branche qu'il commande. */
+    ok(mRecon && /'\s*\+\s*'attend|Personne n/.test(mRecon[0]),
+      '⛔⛔ l\'écran n\'a plus de message distinct pour un registre de TEST : il annonce '
+      + '« un client a payé et attend » sur de la fausse monnaie. L\'alerte crie à chaque '
+      + 'passage — et on apprend à ne plus la regarder, donc à la manquer le jour où elle '
+      + 'est vraie.');
+    ok(mRecon && /d\.modeTest\s*===\s*true/.test(mRecon[0]),
+      '⛔⛔ l\'écran teste `modeTest` sans exiger `=== true`. Un verdict `null` — clé au '
+      + 'format inattendu, donc mode INDÉTERMINABLE — passerait pour du test : de vraies '
+      + 'ventes encaissées et jamais enregistrées s\'afficheraient comme des essais sans '
+      + 'importance. Dans le doute, on traite comme RÉEL.');
 
     /* c) Le paramètre de fenêtre ne doit PAS être concaténé dans le type :
        `adminGet` fait `encodeURIComponent(type)`, donc « recon&jours=7 »

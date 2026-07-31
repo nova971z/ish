@@ -291,9 +291,17 @@ module.exports = async function handler(req, res) {
         journalSnap.forEach(function (doc) { idsAboutis.push(doc.id); });
 
         const r = recon.comparer(ordres, idsAboutis, {});
+        /* ⛔ EST-CE DE L'ARGENT ? La réponse change la NATURE du message, pas
+           sa véracité. Deux paiements Stripe en mode test ont été signalés
+           comme « 317,79 € encaissés, un client attend » le 01/08/2026 : le
+           filet disait vrai (absents du journal) et mentait sur la gravité.
+           `null` = indéterminable → l'écran doit se comporter comme si c'était
+           réel. On ne devine pas du côté qui rassure. */
+        const enTest = paiement.modeTest();
         return res.status(200).json({
           ok: true,
           fournisseur: paiement.nom(),
+          modeTest: enTest,
           fenetreJours: jours,
           resume: recon.resume(r),
           // Identifiants, montants, dates. Rien d'autre ne sort d'ici.

@@ -11799,8 +11799,14 @@
         }
 
         var c = d.comptes || {};
+        /* ⛔ EST-CE DE L'ARGENT ? `true` = registre de test, `false` = argent
+           réel, `null` = on n'a pas pu le déterminer → on traite comme RÉEL.
+           On ne devine JAMAIS du côté qui rassure. */
+        var faux = d.modeTest === true;
         var pied = '<div class="compta-res__brk">'
           + '<span>Fournisseur : <b>' + escapeHTML(String(d.fournisseur || '')) + '</b></span>'
+          + '<span>Registre : <b>' + (faux ? 'TEST — fausse monnaie'
+              : (d.modeTest === false ? 'RÉEL — argent véritable' : '⚠️ indéterminé')) + '</b></span>'
           + '<span>Encaissements examinés : ' + escapeHTML(String(c.examines)) + '</span>'
           + '<span>Déjà enregistrés : ' + escapeHTML(String(c.dejaTraites)) + '</span>'
           + '<span>Trop récents pour conclure : ' + escapeHTML(String(c.tropRecents)) + '</span>'
@@ -11824,10 +11830,32 @@
             + (o.creeAMs ? ' — ' + escapeHTML(new Date(o.creeAMs).toLocaleString('fr-FR')) : '')
             + '</p>';
         });
+
+        /* ⚠️ MÊME CONSTAT, DEUX GRAVITÉS. Sur un registre de test, ces lignes
+           sont des essais qu'aucune notification ne viendra jamais réconcilier :
+           les annoncer comme des ventes perdues ferait crier l'écran à chaque
+           passage, et on apprendrait à ne plus le regarder — donc à le manquer
+           le jour où c'est vrai. On informe, on n'alarme pas. */
+        if (faux) {
+          out.innerHTML = '<div class="compta-res">'
+            + '<div class="compta-res__price" style="font-size:1.05rem">🧪 '
+            + orph.length + ' paiement(s) de TEST non enregistré(s) — '
+            + escapeHTML(formatPrice(somme / 100)) + ' de fausse monnaie</div>'
+            + '<p class="compta-line"><b>Personne n\'attend</b> : ce sont des essais, pas des '
+            + 'ventes. Aucun euro réel n\'est en jeu et il n\'y a rien à traiter. '
+            + 'Ils resteront listés ici tant que le registre de test ne sera pas remis à zéro '
+            + 'chez le fournisseur — c\'est normal.</p>'
+            + lignes + pied + '</div>';
+          return;
+        }
+
         out.innerHTML = '<p class="admin-error"><b>⛔ ' + orph.length + ' paiement(s) encaissé(s) '
           + 'SANS commande enregistrée — ' + escapeHTML(formatPrice(somme / 100)) + '</b><br>'
+          + (d.modeTest === null
+              ? '⚠️ Le registre n\'a pas pu être identifié (clé au format inattendu) : on '
+                + 'traite ces lignes comme de l\'argent RÉEL, par prudence.<br>' : '')
           + 'Un client a payé et attend. À traiter à la main : retrouver la référence chez le '
-          + 'fournisseur, créer la commande, puis le prévenir.</p>' + lignes;
+          + 'fournisseur, créer la commande, puis le prévenir.</p>' + lignes + pied;
       }).catch(function (e) {
         if (b7) b7.disabled = false;
         if (b30) b30.disabled = false;

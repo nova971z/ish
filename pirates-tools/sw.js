@@ -1,5 +1,5 @@
 /* sw.js — Pirates Tools (PWA) */
-const VERSION        = 'pt-v544';                    // version du SW (logique SW)
+const VERSION        = 'pt-v545';                    // version du SW (logique SW)
 const STATIC_CACHE   = `pt-static-${VERSION}`;
 const RUNTIME_CACHE  = `pt-runtime-${VERSION}`;
 const IMG_CACHE      = `pt-img-${VERSION}`;
@@ -8,7 +8,7 @@ const ORIGIN         = self.location.origin;
 
 // Aligner avec le HTML (cache-busting des assets) — garde-fou CI :
 // scripts/check-asset-versions.js casse la CI si sw.js et index.html divergent.
-const ASSET_VER = '544';
+const ASSET_VER = '545';
 
 // Icônes + manifest : fingerprint STABLE, séparé d'ASSET_VER. Ces fichiers ne
 // changent pas à chaque déploiement — les re-cache-buster à chaque bump forçait

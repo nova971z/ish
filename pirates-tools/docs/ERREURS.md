@@ -15,13 +15,13 @@
 | Origine | Mécanisme | Cas | Antidote | Porte |
 |---|---|---|---|---|
 | **O1** | Affirmer avant de mesurer | 9 | §3 · §8 | `garde-sortie.js` *(hook Stop)* |
-| **O2** | L'instrument de mesure est faux | 11 | §4.3 | sabotage obligatoire |
+| **O2** | L'instrument de mesure est faux | 13 | §4.3 | sabotage obligatoire |
 | **O3** | Réutiliser sans vérifier le contexte | 7 | §1.4 | `check-lecons.js` |
 | **O4** | Contrainte connue, non appliquée | 3 | §1 | `garde-entonnoir.js` |
 | **O5** | Outil artisanal au lieu de l'outil existant | 1 | §1.4 | aucune — humaine |
 | **O6** | Copie périmée au lieu de la source vivante | 2 | §4.4 | `p7-architecture.js` |
 
-**33 erreurs, 6 mécanismes.** O1 et O2 en concentrent **20 à elles deux** :
+**35 erreurs, 6 mécanismes.** O1 et O2 en concentrent **22 à elles deux** :
 c'est là qu'il faut regarder en premier, toujours.
 
 ---
@@ -86,6 +86,8 @@ confiance qui n'existe pas.*
 | **E-209** | S3 de `garde-sortie.js` | « chiffre jamais imprimé » | **refus à tort** : fenêtre fixe de 8 Mo — dans un tour long, les mesures du début tombaient hors de vue |
 | **E-210** | mon assertion « le bouton de réconciliation est branché » | vert après suppression de l'appel | la regex matchait aussi la **définition** `function X()` : une fonction jamais appelée passait pour branchée |
 | **E-211** | mon assertion « un seul accès à `event.data.object` » | **refus à tort** sur du code correct | je comptais les OCCURRENCES ; la ligne légitime en porte deux (`if (… && x) return x;`). La règle réelle est « aucune hors de la bascule », pas « exactement une » |
+| **E-212** | mon assertion « la réponse porte `modeTest` » | vert après retrait du champ | je cherchais le MOT dans le bloc — l'appel `paiement.modeTest()` suffisait à le satisfaire. Récidive exacte d'E-210 : chercher une ressemblance au lieu d'énoncer la règle (`modeTest\s*:`) |
+| **E-213** | la réconciliation elle-même | « 317,79 € encaissés, un client attend » | **VRAI sur le fond, FAUX sur la gravité** : deux paiements Stripe en mode TEST. Le filet ne savait pas distinguer l'argent réel de la fausse monnaie — et une alerte qui crie sur des essais apprend à ne plus être regardée |
 
 **Antidote** : §4.3 — **sabotage obligatoire**. On réintroduit le défaut ; si le
 contrôle reste vert, c'est **le contrôle** qui est faux, pas le code qui est bon.

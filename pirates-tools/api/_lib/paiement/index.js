@@ -92,6 +92,16 @@ function normaliserGenre(brut, table) {
 var OPERATIONS = [
   'nom',               // string — identifiant du fournisseur, pour les journaux
   'estConfigure',      // () → bool — les variables d'environnement sont-elles là ?
+  /* () → true (test) | false (argent réel) | null (indéterminable)
+     ⚠️ Entré au contrat le 01/08/2026, après un faux positif RÉEL : la
+     réconciliation a crié « 317,79 € encaissés, un client attend » sur deux
+     paiements Stripe en mode TEST. Le filet disait vrai — ils ne sont pas dans
+     le journal — et mentait sur la GRAVITÉ : ce n'est pas de l'argent, et
+     personne n'attend. Une alerte qui crie sur de la fausse monnaie apprend à
+     ne plus être regardée, donc à être manquée le jour où elle est vraie.
+     Savoir si le registre est réel n'est donc pas un détail de fournisseur :
+     c'est ce qui sépare une alerte d'une information. */
+  'modeTest',
   'creerPaiement',     // (params) → { id, jetonClient, urlHebergee }
   'lirePaiement',      // (id) → paiement normalisé
   'verifierSignature', // (corpsBrut, entetes) → { ok, evenement, cle, erreur, genre }

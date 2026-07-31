@@ -48,6 +48,24 @@ function cle() { return process.env.STRIPE_SECRET_KEY || ''; }
 
 function estConfigure() { return !!cle(); }
 
+/* ⛔ EST-CE DE L'ARGENT RÉEL ? — la question que le filet doit pouvoir poser.
+   Stripe tient DEUX registres totalement séparés : `sk_test_` et `sk_live_`.
+   Un paiement de test n'est pas de l'argent, aucun client n'attend derrière, et
+   l'annoncer comme une vente perdue apprend à ne plus regarder l'alerte — donc
+   à la manquer le jour où elle est vraie.
+
+   Rend `true` (test) · `false` (réel) · `null` (INDÉTERMINABLE). Jamais de
+   supposition : une clé au format inattendu rend `null`, et l'appelant doit
+   alors se comporter comme si c'était RÉEL — c'est le côté prudent.
+   ⛔ Ne renvoie que le VERDICT. Ni la clé, ni un morceau de clé, ni sa
+   longueur : la question posée est « est-ce réel ? », pas « quelle clé ? ». */
+function modeTest() {
+  var k = cle();
+  if (/^sk_test_/.test(k)) return true;
+  if (/^sk_live_/.test(k)) return false;
+  return null;
+}
+
 function sdk() {
   var k = cle();
   if (!k) throw new Error('STRIPE_SECRET_KEY absente');
@@ -273,6 +291,7 @@ async function rembourser(id, montantCents, devise, cleIdempotence) {
 module.exports = {
   nom: nom,
   estConfigure: estConfigure,
+  modeTest: modeTest,
   creerPaiement: creerPaiement,
   lirePaiement: lirePaiement,
   verifierSignature: verifierSignature,
