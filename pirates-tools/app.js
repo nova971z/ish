@@ -9975,6 +9975,12 @@
   var _stripeElements = null; // Stripe Elements instance
   var _stripeClientSecret = null;
   var _stripeReady = false;
+  /* Fournisseur de paiement ANNONCÉ PAR LE SERVEUR pour la commande en cours.
+     Jamais deviné côté client : voir le commentaire au point de branchement. */
+  var _paiementFournisseur = 'stripe';
+  var _urlPaiementHebergee = null;   // repli Revolut si le widget ne charge pas
+  var _revolutCardField = null;      // instance du champ carte Revolut montée
+  var _revolutSDK = null;            // promesse de chargement du script Revolut
   var _quoteTerritory = null;   // territoire du PaymentIntent en cours (dérivé du CP)
   var _payAddressBound = false; // listeners du formulaire adresse posés une seule fois
   var _payAddrDebounce = null;
@@ -10100,6 +10106,176 @@
     }
   };
 
+  /* ── Widget carte REVOLUT ────────────────────────────────────────────────
+     Chargement À LA DEMANDE, jamais dans index.html.
+     ⚠️ L'user navigue en privé : aucun cache entre deux visites, chaque octet
+     est repayé à CHAQUE passage. Un client qui ne va pas jusqu'au paiement ne
+     doit pas télécharger un SDK de paiement.
+
+     ⚠️ Le domaine doit figurer dans `script-src` de la CSP, sinon le script est
+     bloqué et le formulaire reste vide sans message exploitable. Les deux
+     domaines (production et bac à sable) y sont, et check-paiement le vérifie
+     directive par directive. */
+  function chargerSDKRevolut() {
+    if (_revolutSDK) return _revolutSDK;
+    _revolutSDK = new Promise(function (resolve, reject) {
+      if (window.RevolutCheckout) { resolve(window.RevolutCheckout); return; }
+      var s = document.createElement('script');
+      // Le bac à sable et la production servent le MÊME rôle depuis deux
+      // domaines distincts. On suit ce que le serveur a annoncé.
+      s.src = (_urlPaiementHebergee && /sandbox/.test(_urlPaiementHebergee))
+        ? 'https://sandbox-merchant.revolut.com/embed.js'
+        : 'https://merchant.revolut.com/embed.js';
+      s.async = true;
+      s.onload = function () {
+        if (window.RevolutCheckout) resolve(window.RevolutCheckout);
+        else reject(new Error('Script Revolut chargé mais RevolutCheckout absent.'));
+      };
+      s.onerror = function () {
+        _revolutSDK = null;   // permet une nouvelle tentative
+        reject(new Error('Impossible de charger le formulaire de paiement.'));
+      };
+      document.head.appendChild(s);
+    });
+    return _revolutSDK;
+  }
+
+  /* Monte le champ carte Revolut dans le conteneur du formulaire.
+
+     ⛔⛔ `billingAddress`, `name` et `email` sont OBLIGATOIRES EN PRODUCTION.
+     La documentation Revolut prévient : « Some sandbox payments may still
+     succeed WITHOUT billingAddress. Do not treat that as production-ready. »
+     Autrement dit : le bac à sable passe au vert sans, et la production refuse
+     les cartes. C'est un test vert pour la mauvaise raison — on ne s'y expose
+     pas, les trois champs partent toujours. `check-paiement` refuse d'ailleurs
+     tout appel à createCardField qui ne les mentionnerait pas. */
+  function monterChampCarteRevolut(jeton, ship, container, errorEl) {
+    if (container) {
+      container.innerHTML = '<div class="stripe-loading">'
+        + '<div class="stripe-loading__spinner"></div>'
+        + '<span>Chargement du formulaire de paiement…</span></div>';
+    }
+    return chargerSDKRevolut().then(function (RevolutCheckout) {
+      var mode = (_urlPaiementHebergee && /sandbox/.test(_urlPaiementHebergee)) ? 'sandbox' : 'prod';
+      return RevolutCheckout(jeton, mode);
+    }).then(function (instance) {
+      if (container) container.innerHTML = '';
+      if (_revolutCardField) { try { _revolutCardField.destroy(); } catch (_) {} }
+
+      var adr = (ship && ship.addr) || {};
+      _revolutCardField = instance.createCardField({
+        target: container,
+        locale: 'fr',
+        theme: 'dark',
+        name: adr.name || '',
+        email: (_currentUser && _currentUser.email) || '',
+        billingAddress: {
+          countryCode: 'FR',            // DOM : code postal 97x, pays FR
+          postcode: adr.postal || '',
+          city: adr.city || '',
+          streetLine1: adr.line1 || ''
+        },
+        onValidation: function (erreurs) {
+          if (!errorEl) return;
+          var msg = (erreurs && erreurs.length && erreurs[0].message) || '';
+          errorEl.textContent = msg;
+          errorEl.hidden = !msg;
+        },
+        /* ⚠️ DIFFÉRENCE MAJEURE AVEC STRIPE : Stripe REDIRIGE vers `return_url`.
+           Revolut rappelle `onSuccess` SANS quitter la page. La navigation vers
+           /merci devient donc NOTRE responsabilité — sans ça, le client paie et
+           reste bloqué sur le formulaire, persuadé que rien ne s'est passé. */
+        onSuccess: function () {
+          lvRedirect('#/merci');
+        },
+        onError: function (err) {
+          if (errorEl) {
+            errorEl.textContent = (err && err.message) || 'Le paiement a échoué.';
+            errorEl.hidden = false;
+          }
+          reactiverBoutonPayer();
+        },
+        onCancel: function () {
+          if (errorEl) {
+            errorEl.textContent = 'Paiement interrompu. Tu peux réessayer.';
+            errorEl.hidden = false;
+          }
+          reactiverBoutonPayer();
+        }
+      });
+      _stripeReady = true;
+    }).catch(function (err) {
+      _stripeReady = false;
+      /* Repli : Revolut fournit une page de paiement hébergée dès la création
+         de la commande. Un script bloqué ne doit pas coûter la vente. */
+      if (container) {
+        container.innerHTML = '<div class="stripe-fallback">'
+          + '<p>Le formulaire ne s\'est pas chargé.</p>'
+          + (_urlPaiementHebergee
+              ? '<p><a class="btn primary" href="' + escapeHTML(_urlPaiementHebergee)
+                + '" target="_blank" rel="noopener">💳 Payer sur la page sécurisée</a></p>'
+              : '<p>' + escapeHTML(err.message || 'Erreur réseau') + '</p>')
+          + '</div>';
+      }
+    });
+  }
+
+  /* Mémorise la commande AVANT de déclencher le paiement.
+     ⚠️ Extrait du bloc Stripe le 31/07/2026 pour que les DEUX fournisseurs
+     l'appellent. Sans ça, un paiement Revolut aboutirait sans que /merci sache
+     quoi finaliser : le client paie, la commande n'existe pas côté client, et
+     seul le journal serveur garderait la trace. Le genre d'oubli qu'aucun test
+     ne voit parce que le paiement, lui, a bien marché. */
+  function sauverCommandeEnAttente(total) {
+    try {
+      localStorage.setItem('pt_pending_order', JSON.stringify({
+        items: _payItems.map(function (it) { return { key: it.key, title: it.title, price: payUnitCents(it) / 100, qty: it.qty }; }),
+        total: total, ts: Date.now(),
+        // Course : /merci finalisera la création (preuve = paymentIntentId).
+        course: _payCourse ? 1 : 0
+      }));
+      // Photo du chantier : trop lourde pour le pending localStorage → elle
+      // voyage en sessionStorage (survit au retour 3DS, purgée après envoi).
+      if (_payGoodsCourseId) sessionStorage.setItem('pt_goods_course', _payGoodsCourseId);
+      if (_payCourse && _payCourse.scenePhoto) {
+        sessionStorage.setItem('pt_course_scene', _payCourse.scenePhoto);
+      }
+    } catch (_) {}
+  }
+
+  /* Déclenche le paiement Revolut. Le résultat ne revient PAS ici : il arrive
+     par les callbacks posés au montage du champ (onSuccess / onError /
+     onCancel). Rien à enchaîner, donc — et surtout rien à supposer. */
+  function confirmerPaiementRevolut(total, errorEl) {
+    var btn = document.getElementById('payModalConfirm');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="pay-modal__btn-icon">⏳</span> Traitement en cours…'; }
+    if (errorEl) errorEl.hidden = true;
+    sauverCommandeEnAttente(total);
+    var adr = (validatePayAddress() || {}).addr || {};
+    /* Les trois champs obligatoires repassent au submit. La documentation
+       autorise les deux endroits ; les redonner ici garantit qu'ils reflètent
+       l'adresse au moment du CLIC, pas au moment du montage — le client a pu
+       la corriger entre les deux. */
+    _revolutCardField.submit({
+      name: adr.name || '',
+      email: (_currentUser && _currentUser.email) || '',
+      billingAddress: {
+        countryCode: 'FR',
+        postcode: adr.postal || '',
+        city: adr.city || '',
+        streetLine1: adr.line1 || ''
+      }
+    });
+  }
+
+  // Remet le bouton de paiement dans son état initial après un échec.
+  function reactiverBoutonPayer() {
+    var btn = document.getElementById('payModalConfirm');
+    if (!btn) return;
+    btn.disabled = false;
+    btn.innerHTML = '<span class="pay-modal__btn-icon">💳</span> Commander avec obligation de paiement';
+  }
+
   function getStripe() {
     if (_stripe) return _stripe;
     var pk = window.PT_STRIPE_PK;
@@ -10176,12 +10352,22 @@
         throw new Error(data.error || 'Erreur création du paiement');
       }
       _stripeClientSecret = data.clientSecret;
+      /* ⚠️ QUEL WIDGET MONTER — c'est le SERVEUR qui le dit (`fournisseur`),
+         jamais une déduction du front. Lui seul sait quel jeton il vient de
+         fabriquer : un jeton Revolut monté dans le widget Stripe donnerait un
+         formulaire vide et une erreur qui n'expliquerait rien. */
+      _paiementFournisseur = String(data.fournisseur || 'stripe');
+      _urlPaiementHebergee = data.urlHebergee || null;
 
       // Le serveur est la SEULE vérité du montant débité : il applique la
       // remise fidélité vérifiée (journal payments/, infalsifiable). On
       // réaligne l'affichage de la modale sur sa réponse (total + ligne
       // remise) — jamais l'inverse.
       renderServerQuote(data);
+
+      if (_paiementFournisseur === 'revolut') {
+        return monterChampCarteRevolut(_stripeClientSecret, ship, container, errorEl);
+      }
 
       // Unmount previous elements if any
       if (_stripeElements) {
@@ -10288,27 +10474,21 @@
     var stripe = getStripe();
     var errorEl = document.getElementById('stripeCardError');
 
+    /* ── Champ carte REVOLUT ──────────────────────────────────────────────
+       Le même bouton, deux fournisseurs. Chez Revolut, `submit()` déclenche le
+       paiement et le résultat revient par les callbacks posés au montage —
+       il n'y a rien à enchaîner ici. */
+    if (_paiementFournisseur === 'revolut' && _revolutCardField) {
+      return confirmerPaiementRevolut(total, errorEl);
+    }
+
     // ── Stripe Elements flow (embedded card form) ──
     if (stripe && _stripeElements && _stripeClientSecret) {
       var btn = document.getElementById('payModalConfirm');
       if (btn) { btn.disabled = true; btn.innerHTML = '<span class="pay-modal__btn-icon">⏳</span> Traitement en cours…'; }
       if (errorEl) { errorEl.hidden = true; }
 
-      // Save pending order before confirming
-      try {
-        localStorage.setItem('pt_pending_order', JSON.stringify({
-          items: _payItems.map(function (it) { return { key: it.key, title: it.title, price: payUnitCents(it) / 100, qty: it.qty }; }),
-          total: total, ts: Date.now(),
-          // Course : /merci finalisera la création (preuve = paymentIntentId).
-          course: _payCourse ? 1 : 0
-        }));
-        // Photo du chantier : trop lourde pour le pending localStorage → elle
-        // voyage en sessionStorage (survit au retour 3DS, purgée après envoi).
-        if (_payGoodsCourseId) sessionStorage.setItem('pt_goods_course', _payGoodsCourseId);
-        if (_payCourse && _payCourse.scenePhoto) {
-          sessionStorage.setItem('pt_course_scene', _payCourse.scenePhoto);
-        }
-      } catch (_) {}
+      sauverCommandeEnAttente(total);
 
       stripe.confirmPayment({
         elements: _stripeElements,

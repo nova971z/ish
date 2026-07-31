@@ -447,10 +447,28 @@ DE RÈGLEMENT appartient au LIVREUR »*. Imposer un fournisseur, c'est reprendre
 d'une main la liberté qu'on lui reconnaît de l'autre — et ce genre d'indice,
 accumulé, nourrit précisément une requalification.
 
-**Formulation retenue** : le livreur reste libre de son moyen d'encaissement.
-Revolut est **proposé et documenté** comme le plus simple (paiement instantané,
-lien à générer soi-même), jamais exigé. Un livreur qui préfère l'espèce, un
-autre fournisseur ou son propre IBAN reste éligible.
+**Formulation retenue** *(arbitrée par l'user le 31/07/2026)* : le livreur reste
+libre de son moyen d'encaissement. On ne dit pas « il faut » — on **explique**.
+
+> **Comment tu es payé, et quand.**
+> Tu encaisses **en direct**, sans passer par Pirates Tools : le client te règle,
+> l'argent est à toi. Nous ne le touchons à aucun moment.
+>
+> Si tu veux être payé **immédiatement, dès la livraison faite**, il te faut un
+> moyen d'encaissement qui crédite ton compte en temps réel. Aujourd'hui, très
+> peu de solutions le permettent — **Revolut Business** en fait partie : tu
+> génères un lien de paiement en quelques secondes, le client paie, c'est
+> encaissé.
+>
+> Tu restes libre : espèces, virement, un autre service. Le choix t'appartient,
+> et il est affiché sur ta fiche pour que le client le connaisse avant de
+> commander.
+
+⛔ La différence n'est pas cosmétique. « Il faut Revolut » est un ORDRE sur
+l'outil de travail d'un indépendant. « Voilà ce qui permet d'être payé tout de
+suite, à toi de voir » est une INFORMATION. Le résultat pratique est le même —
+la plupart choisiront Revolut parce que c'est le plus commode — mais le second
+ne fabrique aucun indice de subordination.
 
 ⚠️ À vérifier à la source avant l'ouverture du service (registre J2) :
 legifrance.gouv.fr → travailleurs des plateformes · directive (UE) 2024/2831.

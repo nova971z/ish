@@ -509,6 +509,30 @@ module.exports = function () {
           '⛔ app.js appelle createCardField mais ne mentionne nulle part `' + c[0] + '` : '
           + c[1] + '. Revolut l\'exige en production.');
       });
+
+      /* ⛔⛔ TROU DÉCOUVERT PAR SABOTAGE le 31/07/2026 : vider `onSuccess` ne
+         faisait rougir aucun contrôle.
+
+         C'est LA différence entre les deux fournisseurs. Stripe REDIRIGE vers
+         `return_url` ; Revolut rappelle `onSuccess` SANS quitter la page. Si
+         `onSuccess` ne navigue pas, le client paie, reste devant le formulaire,
+         croit que rien ne s'est passé — et repaie. Le paiement, lui, a
+         parfaitement fonctionné : aucun test fonctionnel ne verrait le défaut. */
+      var mSucces = appSrc.match(/onSuccess\s*:\s*function[^{]*\{([\s\S]{0,400}?)\}/);
+      ok(mSucces && /lvRedirect|location\.hash|#\/merci/.test(mSucces[1]),
+        '⛔⛔ le callback `onSuccess` du champ carte Revolut ne navigue nulle part. '
+        + 'Contrairement à Stripe, Revolut NE REDIRIGE PAS : sans navigation, le client '
+        + 'paie et reste bloqué sur le formulaire, persuadé que rien ne s\'est passé. '
+        + 'Il repaiera. Et le paiement aura parfaitement fonctionné — aucun test ne le verra.');
+
+      /* La commande doit être mémorisée AVANT le paiement, sur les DEUX chemins :
+         sinon /merci ne sait pas quoi finaliser. */
+      ok(/function sauverCommandeEnAttente/.test(appSrc)
+         && (appSrc.match(/sauverCommandeEnAttente\(/g) || []).length >= 3,
+        '⛔ `sauverCommandeEnAttente` n\'est pas appelée par les DEUX chemins de '
+        + 'paiement (Stripe et Revolut). Un paiement abouti sans commande mémorisée : '
+        + 'le client paie, /merci ne finalise rien, et seul le journal serveur garde '
+        + 'la trace.');
     }
   }
 
