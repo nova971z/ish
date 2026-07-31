@@ -169,7 +169,7 @@ module.exports = function () {
   /* ── 6. Aucun appel direct au SDK là où la couture est censée passer ───
      Cliquet : les fichiers déjà migrés ne doivent pas voir revenir un
      require('stripe') en douce. La liste grandit à chaque étape. */
-  var MIGRES = ['api/create-payment-intent.js', 'api/webhook.js'];
+  var MIGRES = ['api/create-payment-intent.js', 'api/webhook.js', 'api/checkout.js'];
   MIGRES.forEach(function (f) {
     var abs = path.join(RACINE, f);
     if (!fs.existsSync(abs)) { ok(false, 'check-paiement : ' + f + ' introuvable.'); return; }

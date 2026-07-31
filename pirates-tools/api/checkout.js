@@ -9,6 +9,7 @@
 
 var catalog = require('./_lib/catalog');
 var pricing = require('./_lib/pricing');
+var paiementSocle = require('./_lib/paiement');   // couture : fournisseur actif
 var rl = require('./_lib/ratelimit');
 var loyalty = require('./_lib/loyalty');
 var fbLib = require('./_lib/firebase');
@@ -23,11 +24,21 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ ok: false, error: 'Method not allowed' });
   }
 
-  var stripeKey = process.env.STRIPE_SECRET_KEY;
-  if (!stripeKey) {
+  // ⚠️ COUTURE PAIEMENT (31/07/2026) — voir api/_lib/paiement/index.js.
+  // ⛔ La couche ne touche NI au prix, NI au territoire, NI à la remise : tout
+  // reste calculé plus bas, côté serveur. Elle transporte, elle ne décide pas.
+  var paiement = paiementSocle.fournisseur();
+  if (!paiement.estConfigure()) {
+    return res.status(503).json({ ok: false, error: 'Paiement non configuré (' + paiement.nom() + ').' });
+  }
+  // Le flux Checkout (page hébergée) est propre à Stripe : chez Revolut, la
+  // même création d'ordre renvoie `token` ET `checkout_url`, donc les deux flux
+  // du site convergeront. Tant que ce n'est pas fait, on refuse proprement.
+  if (typeof paiement.creerSession !== 'function') {
     return res.status(503).json({
       ok: false,
-      error: 'Stripe not configured. Add STRIPE_SECRET_KEY in Vercel environment variables.'
+      error: 'Le fournisseur ' + paiement.nom() + ' n\'expose pas de page de paiement hébergée. '
+        + 'Utiliser le formulaire embarqué (/api/create-payment-intent).'
     });
   }
 
@@ -38,7 +49,6 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    var stripe = require('stripe')(stripeKey);
     var body = req.body || {};
     var items = body.items;
     var customerEmail = body.customerEmail;
@@ -111,34 +121,26 @@ module.exports = async function handler(req, res) {
     var loyaltyQuote = uid && fb.db
       ? await loyalty.quote(fb.db, uid, grossCents)
       : { pct: 0, discountCents: 0 };
-    var discounts = [];
-    if (loyaltyQuote.discountCents > 0 && grossCents - loyaltyQuote.discountCents >= 50) {
-      var coupon = await stripe.coupons.create({
-        amount_off: loyaltyQuote.discountCents,
-        currency: 'eur',
-        duration: 'once',
-        name: 'Fidélité −' + loyaltyQuote.pct + ' %'
-      });
-      discounts = [{ coupon: coupon.id }];
-    }
+    // Remise appliquée seulement si elle ne fait pas passer sous le minimum
+    // encaissable : mieux vaut une remise tronquée qu'un paiement refusé.
+    var remiseCents = (loyaltyQuote.discountCents > 0
+      && grossCents - loyaltyQuote.discountCents >= 50) ? loyaltyQuote.discountCents : 0;
 
-    var session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      mode: 'payment',
-      line_items: lineItems,
-      ...(customerEmail ? { customer_email: customerEmail } : {}),
+    var session = await paiement.creerSession({
+      lignes: lineItems,
+      devise: 'eur',
+      email: customerEmail || null,
+      remiseCents: remiseCents,
+      remiseLibelle: 'Fidélité −' + loyaltyQuote.pct + ' %',
       // A1 : adresse de livraison OBLIGATOIRE. C'est la donnée non-déclarative
       // qui permet au webhook de vérifier que le territoire facturé correspond
       // au lieu de livraison réel (code postal 97x → territoire, _lib/postal.js).
       // Les DOM ont leurs codes ISO propres (GP/MQ/GF/RE/YT) mais une adresse
       // DOM est aussi couramment saisie sous FR — les deux sont acceptés, le
       // code postal fait foi.
-      shipping_address_collection: {
-        allowed_countries: ['GP', 'MQ', 'GF', 'RE', 'YT', 'FR']
-      },
-      ...(discounts.length ? { discounts: discounts } : {}),
-      success_url: baseUrl + '/#/merci?session_id={CHECKOUT_SESSION_ID}',
-      cancel_url: baseUrl + '/#/devis',
+      paysLivraison: ['GP', 'MQ', 'GF', 'RE', 'YT', 'FR'],
+      urlSucces: baseUrl + '/#/merci?session_id={CHECKOUT_SESSION_ID}',
+      urlAnnule: baseUrl + '/#/devis',
       metadata: Object.assign({
         source: 'pirates-tools',
         territory: String(territory),
@@ -148,9 +150,9 @@ module.exports = async function handler(req, res) {
       }, uid ? { uid: uid } : {})
     });
 
-    return res.status(200).json({ ok: true, sessionId: session.id, url: session.url });
+    return res.status(200).json({ ok: true, sessionId: session.id, url: session.urlHebergee });
   } catch (err) {
-    console.error('[api/checkout] Stripe error:', err.message);
+    console.error('[api/checkout] création de session échouée:', err.message);
     return res.status(500).json({ ok: false, error: 'Payment session creation failed' });
   }
 };

@@ -164,6 +164,40 @@ async function depuisIntent(pi, avecCommission) {
   return out;
 }
 
+/* ⚠️ SPÉCIFIQUE AU FLUX CHECKOUT (redirection) — PAS dans le contrat commun.
+   Crée une session hébergée : le client est redirigé, paie chez Stripe, revient.
+
+   `remiseCents` : Stripe Checkout REFUSE une ligne négative — d'où le coupon à
+   usage unique, créé à la volée au montant exact. Chez Revolut ce détour
+   disparaît : `POST /api/orders` prend un `amount` brut, la remise se soustrait
+   avant, comme le fait déjà le flux Elements. Un objet de moins, donc une
+   source d'écart de moins entre le montant affiché et le montant débité. */
+async function creerSession(params) {
+  var p = params || {};
+  var s = sdk();
+  var discounts = [];
+  if (p.remiseCents > 0) {
+    var coupon = await s.coupons.create({
+      amount_off: p.remiseCents,
+      currency: String(p.devise || 'eur').toLowerCase(),
+      duration: 'once',
+      name: p.remiseLibelle || 'Remise'
+    });
+    discounts = [{ coupon: coupon.id }];
+  }
+  var session = await s.checkout.sessions.create(Object.assign({
+    payment_method_types: ['card'],
+    mode: 'payment',
+    line_items: p.lignes,
+    shipping_address_collection: { allowed_countries: p.paysLivraison },
+    success_url: p.urlSucces,
+    cancel_url: p.urlAnnule,
+    metadata: p.metadata || {}
+  }, p.email ? { customer_email: p.email } : {},
+     discounts.length ? { discounts: discounts } : {}));
+  return { id: session.id, urlHebergee: session.url };
+}
+
 /* Vérifie la signature du webhook sur le corps BRUT.
    ⚠️ `corpsBrut` DOIT être le Buffer reçu, jamais un objet re-sérialisé :
    six formes de JSON produisent des octets différents pour la même donnée.
@@ -210,5 +244,6 @@ module.exports = {
   // Exportés pour le webhook (qui a déjà l'objet) et pour les contrôles.
   depuisIntent: depuisIntent,
   lireSession: lireSession,   // ⚠️ hors contrat commun — voir son commentaire
+  creerSession: creerSession, // ⚠️ hors contrat commun — disparaît avec Revolut
   ETATS_STRIPE: ETATS_STRIPE
 };
