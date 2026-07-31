@@ -11,6 +11,7 @@ const catalog = require('./_lib/catalog');
 const priceParse = require('./_lib/price-parse');
 const priceModel = require('./_lib/pricing-model');
 const priceConfig = require('./_lib/pricing-config');
+const pricing = require('./_lib/pricing');   // territoires (taux TVA/octroi) — saisie remboursement
 
 module.exports = async function handler(req, res) {
   http.applyCors(req, res);
@@ -202,7 +203,29 @@ module.exports = async function handler(req, res) {
           const d = doc.data() || {};
           charges.push({ id: doc.id, amountHt: Number(d.amountHt) || 0, tvaDeductible: Number(d.tvaDeductible) || 0, category: d.category || 'autre', label: d.label || '', dateMs: d.dateMs || null });
         });
-        return res.status(200).json({ ok: true, accounting: accounting.synthesize(payments, charges, cfg), charges: charges });
+        // Remboursements : 4e source du compte de résultat. Ils VIENNENT EN
+        // MOINS du CA et de la TVA collectée — jamais en plus des charges.
+        const rfSnap2 = await db.collection('refunds').get();
+        const refunds = [];
+        rfSnap2.forEach((doc) => {
+          const d = doc.data() || {};
+          refunds.push({
+            id: doc.id,
+            amountTtc: Number(d.amountTtc) || 0,
+            cogsAnnuleHt: Number(d.cogsAnnuleHt) || 0,
+            stripeFeeRendu: Number(d.stripeFeeRendu) || 0,
+            territory: d.territory || null,
+            avoirRef: d.avoirRef || '',
+            label: d.label || '',
+            dateMs: d.dateMs || null
+          });
+        });
+        return res.status(200).json({
+          ok: true,
+          accounting: accounting.synthesize(payments, charges, cfg, refunds),
+          charges: charges,
+          refunds: refunds
+        });
       }
 
       // ── Identité vendeur pour les factures ─────────────────────
@@ -454,6 +477,17 @@ module.exports = async function handler(req, res) {
           });
         }
         return res.status(200).json({ ok: true, applications });
+      }
+
+      // ── Liste des remboursements saisis ────────────────────────
+      // orderBy sur UN SEUL champ : aucun index composite requis (le piège que
+      // l'émulateur ne signale jamais). Repli sans tri si le champ manque.
+      if (type === 'refunds') {
+        const rfSnap = await db.collection('refunds').orderBy('dateMs', 'desc').limit(500).get()
+          .catch(() => db.collection('refunds').limit(500).get());
+        const refunds = [];
+        rfSnap.forEach((doc) => { refunds.push(Object.assign({ id: doc.id }, doc.data())); });
+        return res.status(200).json({ ok: true, refunds: refunds });
       }
 
       // ── Liste des charges saisies ──────────────────────────────
@@ -852,6 +886,62 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ ok: true, id: ref.id, charge: doc });
     } catch (err) {
       return res.status(500).json({ ok: false, error: 'Enregistrement charge échoué' });
+    }
+  }
+
+  /* ── POST ?type=refund : enregistrer un remboursement client ──────────────
+     ⛔ CE N'EST PAS UNE CHARGE. Un remboursement annule une vente : il diminue
+     le CA et la TVA COLLECTÉE. Saisi dans `charges`, il gonflerait la TVA
+     DÉDUCTIBLE — on réclamerait au fisc une taxe jamais versée. Les deux
+     collections restent séparées pour que la confusion soit impossible
+     (démonstration chiffrée dans _lib/accounting.js et check-accounting.js).
+
+     Le site ne rembourse RIEN tout seul : l'user rembourse depuis Stripe, puis
+     saisit ici ce qu'il a réellement constaté. Aucun champ n'est deviné. */
+  if (req.method === 'POST' && ((req.query && req.query.type) === 'refund')) {
+    try {
+      const b = req.body || {};
+      const amountTtc = Number(b.amountTtc);
+      if (!(amountTtc > 0)) return res.status(400).json({ ok: false, error: 'Montant TTC remboursé invalide' });
+      // Le territoire fixe le taux de TVA à annuler : il doit exister au
+      // barème, sinon on retomberait silencieusement sur un taux inventé.
+      const terr = pricing.getTerritory(String(b.territory || '')) ? String(b.territory) : '971';
+      const doc = {
+        amountTtc: pwRound2(amountTtc),
+        // Coût d'achat annulé : 0 si l'outil a DÉJÀ été commandé au
+        // fournisseur — il part en stock, la dépense reste bien réelle.
+        cogsAnnuleHt: Number(b.cogsAnnuleHt) > 0 ? pwRound2(Number(b.cogsAnnuleHt)) : 0,
+        // Commission Stripe réellement restituée, LUE sur le tableau de bord.
+        // 0 par défaut = l'hypothèse la plus défavorable ; on ne suppose rien.
+        stripeFeeRendu: Number(b.stripeFeeRendu) > 0 ? pwRound2(Number(b.stripeFeeRendu)) : 0,
+        territory: terr,
+        // Référence de l'AVOIR (facture rectificative). Sans elle, la TVA
+        // collectée reste due : la synthèse refuse de la retrancher.
+        avoirRef: String(b.avoirRef || '').slice(0, 60),
+        // Lien vers la vente : un identifiant Stripe/commande, PAS un nom de
+        // client. Minimisation RGPD (J3) — ce document n'a aucun besoin
+        // d'identifier une personne pour faire de la comptabilité juste.
+        paymentId: String(b.paymentId || '').slice(0, 120),
+        label: String(b.label || '').slice(0, 160),
+        dateMs: Number(b.dateMs) || Date.now(),
+        createdAt: admin.firestore.FieldValue.serverTimestamp()
+      };
+      const ref = await db.collection('refunds').add(doc);
+      return res.status(200).json({ ok: true, id: ref.id, refund: doc });
+    } catch (err) {
+      return res.status(500).json({ ok: false, error: 'Enregistrement remboursement échoué' });
+    }
+  }
+
+  // ── DELETE ?type=refund&id=… : retirer un remboursement mal saisi ──
+  if (req.method === 'DELETE' && ((req.query && req.query.type) === 'refund')) {
+    try {
+      const id = (req.query && req.query.id) || (req.body && req.body.id) || '';
+      if (!id) return res.status(400).json({ ok: false, error: 'id manquant' });
+      await db.collection('refunds').doc(String(id)).delete();
+      return res.status(200).json({ ok: true, id: String(id) });
+    } catch (err) {
+      return res.status(500).json({ ok: false, error: 'Suppression échouée' });
     }
   }
 

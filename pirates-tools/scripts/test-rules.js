@@ -64,6 +64,7 @@ async function check(label, promise) {
     // Collections serveur restantes (audit P4) : elles doivent TOUTES être
     // fermées au client, et chacune est desormais prouvee par une assertion.
     await setDoc(doc(db, 'charges/ch1'), { label: 'Assurance', amountCents: 12000 });
+    await setDoc(doc(db, 'refunds/rf1'), { amountTtc: 108.5, territory: '971', avoirRef: 'AV-1' });
     await setDoc(doc(db, 'config/pricing'), { targetNet: 0.15 });
     await setDoc(doc(db, 'price_watch_log/run1'), { at: 1, changed: 3 });
     await setDoc(doc(db, 'courier_applications/bob'), { kyc: 'piece-identite' });
@@ -225,6 +226,7 @@ async function check(label, promise) {
   console.log('\n── Collections serveur : chaque règle est prouvée (audit P4) ──');
   const FERMEES = [
     ['charges/ch1', 'charges comptables'],
+    ['refunds/rf1', 'remboursements saisis (montants + référence d\'avoir)'],
     ['config/pricing', 'config serveur (marge cible, facturation)'],
     ['price_watch_log/run1', 'journal du traqueur de prix'],
     ['courier_applications/bob', 'candidatures livreurs (pièce d\'identité, SIRET)'],

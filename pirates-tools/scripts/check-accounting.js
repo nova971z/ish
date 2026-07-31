@@ -88,6 +88,111 @@ module.exports = function () {
   near(big.mecenat.eligibles, 20000, 0.01, 'don plafonné à 20 000');
   near(big.mecenat.report_5_ans, 5000, 0.01, 'excédent reportable 5 ans');
 
+  /* ── REMBOURSEMENTS ──────────────────────────────────────────────────────
+     Le traqueur applique les promos automatiquement (décision user 31/07/2026).
+     Un client peut donc payer un prix soldé que le fournisseur ne pratique
+     déjà plus : la commande est annulée et remboursée. La compta doit le
+     refléter SANS se tromper de sens.
+     ⛔ Le piège central : un remboursement diminue la TVA COLLECTÉE. Saisi en
+     charge, il gonflerait la TVA DÉDUCTIBLE — on réclamerait le remboursement
+     d'une taxe jamais payée. Ce contrôle existe pour que les deux ne puissent
+     jamais être confondus. */
+  var base1 = { amountCents: 10850, cogsHtCents: 6000, stripeFeeCents: 200,
+    status: 'succeeded', territoryDeclared: '971', recordedAtMs: Date.UTC(2026, 2, 10) };
+  var sansR = acc.synthesize([base1], [], { refTerritory: '971' });
+  near(sansR.ca_ttc, 108.50, 0.01, 'témoin : CA TTC sans remboursement');
+  near(sansR.tva_collectee, 8.50, 0.02, 'témoin : TVA collectée 8,5 % (971)');
+
+  // 1) Remboursement TOTAL, avoir émis, outil jamais commandé, Stripe ne rend rien.
+  var rTotal = [{ amountTtc: 108.50, cogsAnnuleHt: 60, stripeFeeRendu: 0,
+    territory: '971', avoirRef: 'AV-2026-001', dateMs: Date.UTC(2026, 2, 12) }];
+  var s1 = acc.synthesize([base1], [], { refTerritory: '971' }, rTotal);
+  near(s1.ca_ttc, 0, 0.01, 'remboursement total → CA TTC ramené à zéro');
+  near(s1.tva_collectee, 0, 0.02, 'remboursement total avec avoir → TVA collectée annulée');
+  near(s1.cogs, 0, 0.01, 'outil jamais commandé → COGS annulé');
+  near(s1.frais_stripe, 2, 0.01,
+    '⛔ la commission Stripe NON rendue doit RESTER une charge. La supposer '
+    + 'restituée ferait apparaître un résultat qui n\'existe pas.');
+  near(s1.resultat_exploitation, -2, 0.01, 'il reste exactement la perte de commission');
+  near(s1.brut.ca_ttc, 108.50, 0.01, 'le CA BRUT reste visible à côté du net');
+  ok(s1.remboursements.nb === 1, 'le nombre de remboursements est exposé');
+  near(s1.remboursements.total_ttc, 108.50, 0.01, 'total remboursé TTC exposé');
+
+  // 2) ⛔ SENS DE LA TVA — un remboursement ne doit JAMAIS toucher la déductible.
+  ok(s1.tva.deductible === sansR.tva.deductible,
+    '⛔ un remboursement a bougé la TVA DÉDUCTIBLE. C\'est le sens inverse : il '
+    + 'annule une TVA qu\'on a COLLECTÉE, il ne crée pas une TVA qu\'on aurait payée. '
+    + 'Saisi ainsi, on réclamerait au fisc une taxe jamais versée.');
+  ok(s1.tva.solde_a_reverser < sansR.tva.solde_a_reverser,
+    'la TVA à reverser DIMINUE après un remboursement couvert par un avoir');
+
+  // 3) SANS avoir : la TVA reste due. Le plus contre-intuitif, donc le plus utile.
+  var rSansAvoir = [{ amountTtc: 108.50, cogsAnnuleHt: 60, stripeFeeRendu: 0,
+    territory: '971', dateMs: Date.UTC(2026, 2, 12) }];
+  var s2 = acc.synthesize([base1], [], { refTerritory: '971' }, rSansAvoir);
+  near(s2.ca_ttc, 0, 0.01, 'sans avoir : le CA baisse quand même (l\'argent est parti)');
+  near(s2.tva_collectee, 8.50, 0.02,
+    '⛔ sans avoir, la TVA collectée doit RESTER DUE. La récupération est '
+    + 'subordonnée à la rectification de la facture initiale (J5, CGI 271/272). '
+    + 'La retrancher sans avoir, c\'est se déclarer un crédit qu\'on ne peut pas justifier.');
+  ok(s2.remboursements.sans_avoir === 1, 'les remboursements sans avoir sont COMPTÉS');
+  near(s2.remboursements.tva_non_recuperable, 8.50, 0.02,
+    'le montant de TVA non récupérable est CHIFFRÉ — sinon on ne sait pas quoi régulariser');
+  /* ⚠️ 1ʳᵉ VERSION FAUSSE de cette assertion : elle exigeait un
+     `resultat_exploitation` PLUS MAUVAIS sans avoir. Elle est tombée en rouge,
+     et elle avait tort — la TVA n'est pas une charge, c'est une taxe collectée
+     pour le Trésor : elle ne traverse pas le compte de résultat. L'absence
+     d'avoir ne coûte pas du RÉSULTAT, elle coûte de la TRÉSORERIE — 8,50 € à
+     reverser sur une vente qui n'a pas eu lieu. C'est là qu'il faut regarder. */
+  ok(s2.tva.solde_a_reverser > s1.tva.solde_a_reverser,
+    'sans avoir, la TVA À REVERSER reste plus élevée qu\'avec : on doit une taxe '
+    + 'sur une vente annulée tant que la facture n\'est pas rectifiée');
+  near(s2.tva.solde_a_reverser - s1.tva.solde_a_reverser, 8.50, 0.02,
+    'l\'écart vaut exactement la TVA de la vente remboursée');
+  near(s2.resultat_exploitation, s1.resultat_exploitation, 0.01,
+    'le RÉSULTAT, lui, est identique : la TVA ne le traverse pas');
+
+  // 4) Outil DÉJÀ commandé → le coût reste (il part en stock, pas en fumée).
+  var rStock = [{ amountTtc: 108.50, cogsAnnuleHt: 0, stripeFeeRendu: 0,
+    territory: '971', avoirRef: 'AV-2026-002', dateMs: Date.UTC(2026, 2, 12) }];
+  var s3 = acc.synthesize([base1], [], { refTerritory: '971' }, rStock);
+  near(s3.cogs, 60, 0.01,
+    'outil déjà commandé → le COGS RESTE. L\'annuler d\'office ferait disparaître '
+    + 'un achat bien réel du compte de résultat.');
+  ok(s3.resultat_exploitation < s1.resultat_exploitation, 'garder le stock coûte plus cher que l\'annuler');
+
+  // 5) Le panier moyen ne doit PAS être contaminé : il mesure ce qu'un client
+  //    dépense quand il achète, pas ce qui reste après annulation.
+  near(s1.panier_moyen, 108.50, 0.01,
+    'le panier moyen reste calculé sur le CA BRUT — un remboursement annule une '
+    + 'vente, il ne rend pas les paniers plus petits');
+
+  // 6) Mois : un remboursement apparaît dans SON mois, et un mois qui n'a QUE
+  //    des remboursements ne doit pas disparaître du tableau.
+  var rAutreMois = [{ amountTtc: 108.50, cogsAnnuleHt: 60, stripeFeeRendu: 0,
+    territory: '971', avoirRef: 'AV-2026-003', dateMs: Date.UTC(2026, 5, 3) }];
+  var s4 = acc.synthesize([base1], [], { refTerritory: '971' }, rAutreMois);
+  var moisRemb = s4.par_mois.filter(function (m) { return m.remboursements > 0; });
+  ok(moisRemb.length === 1 && moisRemb[0] && moisRemb[0].mois === '2026-06',
+    'un mois sans vente mais avec remboursement existe dans par_mois (sinon un mois négatif s\'évapore)');
+  /* ⚠️ Le sabotage « le mois sans vente disparaît » faisait CRASHER ce contrôle
+     (TypeError sur moisRemb[0]) au lieu de le faire échouer proprement. Un
+     contrôle qui plante interrompt toute la CI et masque les suivants : il doit
+     REPORTER, pas exploser. D'où la garde. */
+  if (moisRemb[0]) near(moisRemb[0].ca_ttc, -108.50, 0.01, 'ce mois-là est NÉGATIF, et on le voit');
+  else ok(false, 'aucun mois de remboursement dans par_mois — le mois négatif s\'est évaporé');
+
+  // 7) Lignes aberrantes ignorées sans planter.
+  var sJunk = acc.synthesize([base1], [], { refTerritory: '971' },
+    [{ amountTtc: 0 }, { amountTtc: -50 }, {}, null]);
+  near(sJunk.ca_ttc, 108.50, 0.01, 'montant nul, négatif ou vide → ligne ignorée');
+  ok(sJunk.remboursements.nb === 0, 'aucune ligne aberrante comptée');
+
+  // 8) Rétrocompatibilité : les appels à 3 arguments doivent rester identiques.
+  ok(JSON.stringify(acc.synthesize([base1], [], { refTerritory: '971' }))
+     === JSON.stringify(acc.synthesize([base1], [], { refTerritory: '971' }, [])),
+    'synthesize sans 4e argument == avec une liste vide (aucun appel existant cassé)');
+
   return errors;
 };
 

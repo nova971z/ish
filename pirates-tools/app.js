@@ -11473,15 +11473,125 @@
     if (!box) return;
     box.innerHTML = '<p class="admin-loading">Chargement des comptes…</p>';
     adminGet('accounting').then(function (data) {
-      comptaRenderAccounting(box, data.accounting || {}, data.charges || []);
+      comptaRenderAccounting(box, data.accounting || {}, data.charges || [], data.refunds || []);
     }).catch(function (e) {
       box.innerHTML = '<p class="admin-error">Comptes indisponibles : ' + escapeHTML(e.message)
         + '<br><span class="admin-hint">(nécessite FIREBASE_SERVICE_ACCOUNT sur Vercel)</span></p>';
     });
   }
 
-  // Compte de résultat 100 % RÉEL + saisie des charges.
-  function comptaRenderAccounting(box, a, charges) {
+  // ── Saisie des CHARGES (dépenses réelles : transport, octroi, CFE…) ──
+  function comptaChargesHtml(charges, eur) {
+    var html = '<h3 class="compta-card__title" style="margin-top:1.4rem">Enregistrer une charge</h3>'
+      + '<div class="compta-card"><div class="compta-cfg-grid">'
+      + '<label>Type<select id="chgCat"><option value="transport">Transport / envois</option><option value="octroi">Octroi de mer</option><option value="achat">Achat marchandise (hors ventes)</option><option value="cfe">CFE</option><option value="assurance">Assurance</option><option value="banque">Frais bancaires</option><option value="autre">Autre</option></select></label>'
+      + '<label>Libellé<input type="text" id="chgLabel" placeholder="ex. Colissimo mars"></label>'
+      + '<label>Montant HT (€)<input type="number" id="chgAmount" step="0.01"></label>'
+      + '</div>'
+      + '<div class="compta-actions"><button type="button" class="btn primary" id="chgAdd">＋ Ajouter la charge</button></div></div>';
+
+    if (!charges || !charges.length) return html;
+    html += '<h3 class="compta-card__title" style="margin-top:1rem">Charges enregistrées</h3><table class="compta-table">';
+    charges.forEach(function (c) {
+      var dt = c.dateMs ? new Date(c.dateMs).toLocaleDateString('fr-FR') : '';
+      html += '<tr><td>' + escapeHTML(c.category) + (c.label ? ' — ' + escapeHTML(c.label) : '') + '<br><small style="opacity:.6">' + dt + '</small></td>'
+        + '<td class="compta-num">' + eur(c.amountHt) + '</td>'
+        + '<td><button type="button" class="btn btn--ghost compta-chg-del" data-id="' + escapeHTML(c.id) + '">✕</button></td></tr>';
+    });
+    return html + '</table>';
+  }
+
+  function comptaBrancherCharges(box) {
+    var addBtn = document.getElementById('chgAdd');
+    if (addBtn) addBtn.onclick = function () {
+      var amount = parseFloat(document.getElementById('chgAmount').value);
+      if (!(amount > 0)) { toast('Entre un montant HT valide', 'error'); return; }
+      addBtn.disabled = true;
+      adminPostType('charge', {
+        category: document.getElementById('chgCat').value,
+        label: document.getElementById('chgLabel').value,
+        amountHt: amount,
+        dateMs: Date.now()
+      }).then(function () { toast('Charge enregistrée', 'success'); comptaLoadAccounting(); })
+        .catch(function (e) { toast('Erreur : ' + e.message, 'error'); addBtn.disabled = false; });
+    };
+    box.querySelectorAll('.compta-chg-del').forEach(function (b) {
+      b.onclick = function () {
+        var id = b.getAttribute('data-id');
+        adminAuthHeaders().then(function (h) {
+          return fetch(apiBaseUrl() + '/api/admin?type=charge&id=' + encodeURIComponent(id), { method: 'DELETE', headers: h });
+        }).then(function (r) { return r.json(); }).then(function () { toast('Charge supprimée', 'success'); comptaLoadAccounting(); })
+          .catch(function (e) { toast('Erreur : ' + e.message, 'error'); });
+      };
+    });
+  }
+
+  /* ── Saisie des REMBOURSEMENTS ────────────────────────────────────────────
+     Séparé des charges À DESSEIN. Un remboursement annule une vente : il
+     retire du CA et de la TVA COLLECTÉE. Saisi comme une charge, il gonflerait
+     la TVA DÉDUCTIBLE — on réclamerait au fisc une taxe jamais payée.
+     Le site ne rembourse RIEN tout seul : on rembourse depuis Stripe, puis on
+     saisit ici ce qu'on a réellement constaté. Aucun champ n'est deviné. */
+  function comptaRemboursementsHtml(refunds, eur) {
+    var html = '<h3 class="compta-card__title" style="margin-top:1.4rem">Enregistrer un remboursement</h3>'
+      + '<div class="compta-card">'
+      + '<p class="compta-line">Un remboursement <b>annule une vente</b> : il retire du chiffre d\'affaires et de la TVA collectée. Ne le saisis jamais comme une charge.</p>'
+      + '<div class="compta-cfg-grid">'
+      + '<label>Montant remboursé TTC (€)<input type="number" id="rfAmount" step="0.01" placeholder="ce qui est reparti chez le client"></label>'
+      + '<label>Référence de l\'avoir<input type="text" id="rfAvoir" placeholder="ex. AV-2026-001"></label>'
+      + '<label>Coût d\'achat annulé HT (€)<input type="number" id="rfCogs" step="0.01" value="0" placeholder="0 si l\'outil est déjà commandé"></label>'
+      + '<label>Commission Stripe rendue (€)<input type="number" id="rfFee" step="0.01" value="0" placeholder="0 si Stripe ne rend rien"></label>'
+      + '<label>Motif (sans nom de client)<input type="text" id="rfLabel" placeholder="ex. promo fournisseur terminée"></label>'
+      + '<label>Référence de la vente<input type="text" id="rfPayment" placeholder="n° de commande ou identifiant Stripe"></label>'
+      + '</div>'
+      + '<p class="compta-line"><b>Sans référence d\'avoir, la TVA reste due.</b> Sa récupération est subordonnée à la rectification de la facture initiale : le calcul ne la retirera donc pas, et te le signalera.</p>'
+      + '<div class="compta-actions"><button type="button" class="btn primary" id="rfAdd">＋ Enregistrer le remboursement</button></div></div>';
+
+    if (!refunds || !refunds.length) return html;
+    html += '<h3 class="compta-card__title" style="margin-top:1rem">Remboursements enregistrés</h3><table class="compta-table">';
+    refunds.forEach(function (r) {
+      var dt = r.dateMs ? new Date(r.dateMs).toLocaleDateString('fr-FR') : '';
+      var av = r.avoirRef
+        ? 'avoir ' + escapeHTML(r.avoirRef)
+        : '<b style="color:var(--danger,#c0392b)">SANS AVOIR — TVA encore due</b>';
+      html += '<tr><td>' + (r.label ? escapeHTML(r.label) : 'Remboursement')
+        + '<br><small style="opacity:.6">' + dt + ' · ' + av + '</small></td>'
+        + '<td class="compta-num">−' + eur(r.amountTtc) + '</td>'
+        + '<td><button type="button" class="btn btn--ghost compta-rf-del" data-id="' + escapeHTML(r.id) + '">✕</button></td></tr>';
+    });
+    return html + '</table>';
+  }
+
+  function comptaBrancherRemboursements(box) {
+    var rfBtn = document.getElementById('rfAdd');
+    if (rfBtn) rfBtn.onclick = function () {
+      var amount = parseFloat(document.getElementById('rfAmount').value);
+      if (!(amount > 0)) { toast('Entre le montant TTC réellement remboursé', 'error'); return; }
+      rfBtn.disabled = true;
+      adminPostType('refund', {
+        amountTtc: amount,
+        avoirRef: document.getElementById('rfAvoir').value,
+        cogsAnnuleHt: parseFloat(document.getElementById('rfCogs').value) || 0,
+        stripeFeeRendu: parseFloat(document.getElementById('rfFee').value) || 0,
+        label: document.getElementById('rfLabel').value,
+        paymentId: document.getElementById('rfPayment').value,
+        dateMs: Date.now()
+      }).then(function () { toast('Remboursement enregistré', 'success'); comptaLoadAccounting(); })
+        .catch(function (e) { toast('Erreur : ' + e.message, 'error'); rfBtn.disabled = false; });
+    };
+    box.querySelectorAll('.compta-rf-del').forEach(function (b) {
+      b.onclick = function () {
+        var id = b.getAttribute('data-id');
+        adminAuthHeaders().then(function (h) {
+          return fetch(apiBaseUrl() + '/api/admin?type=refund&id=' + encodeURIComponent(id), { method: 'DELETE', headers: h });
+        }).then(function (r) { return r.json(); }).then(function () { toast('Remboursement supprimé', 'success'); comptaLoadAccounting(); })
+          .catch(function (e) { toast('Erreur : ' + e.message, 'error'); });
+      };
+    });
+  }
+
+  // Compte de résultat 100 % RÉEL + saisie des charges ET des remboursements.
+  function comptaRenderAccounting(box, a, charges, refunds) {
     function eur(n) { return (Math.round((Number(n) || 0) * 100) / 100).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €'; }
     var now = new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
     function row(label, val, strong) { return '<tr class="' + (strong ? 'compta-row--strong' : '') + '"><td>' + escapeHTML(label) + '</td><td class="compta-num">' + escapeHTML(val) + '</td></tr>'; }
@@ -11500,7 +11610,14 @@
 
     html += '<h3 class="compta-card__title" style="margin-top:1rem">Compte de résultat (réel)</h3>';
     html += '<table class="compta-table">'
-      + row('Ventes encaissées (Stripe)', eur(a.ca_ttc) + ' TTC · ' + eur(a.ca_ht) + ' HT')
+      + row('Ventes encaissées (Stripe)', eur((a.brut && a.brut.ca_ttc) || a.ca_ttc) + ' TTC · ' + eur((a.brut && a.brut.ca_ht) || a.ca_ht) + ' HT')
+      // Les remboursements ne s'ajoutent pas aux charges : ils RETIRENT du CA.
+      // On ne montre la ligne que s'il y en a — un zéro permanent devient du bruit.
+      + ((a.remboursements && a.remboursements.nb > 0)
+        ? row('− Remboursements clients (' + a.remboursements.nb + ' vente'
+            + (a.remboursements.nb > 1 ? 's annulées' : ' annulée') + ')', eur(a.remboursements.total_ttc) + ' TTC')
+          + row('= Ventes nettes', eur(a.ca_ttc) + ' TTC · ' + eur(a.ca_ht) + ' HT', true)
+        : '')
       + row('− TVA collectée (reversée à l\'État)', eur(a.tva_collectee))
       + row('= Chiffre d\'affaires HT', eur(a.ca_ht), true)
       + row('− Coût des marchandises vendues', eur(a.cogs))
@@ -11529,6 +11646,18 @@
           : row('= À RÉCUPÉRER (crédit de TVA, l\'État te rembourse)', eur(-solde), true))
       + '</table>';
     html += '<p class="compta-print-note">💡 La <b>TVA française 20 %</b> que tu paies à cotébrico sur tes achats est <b>déjà récupérée</b> : ton coût des marchandises est compté en HT.</p>';
+
+    /* ⚠️ Remboursements sans avoir : la TVA correspondante est TOUJOURS DUE.
+       Ce n'est pas un détail de présentation, c'est de l'argent à reverser sur
+       une vente qui n'a pas eu lieu. On le dit fort, avec le chiffre. */
+    if (a.remboursements && a.remboursements.sans_avoir > 0) {
+      html += '<p class="admin-error"><b>' + a.remboursements.sans_avoir + ' remboursement'
+        + (a.remboursements.sans_avoir > 1 ? 's sont enregistrés' : ' est enregistré')
+        + ' sans référence d\'avoir.</b> ' + eur(a.remboursements.tva_non_recuperable)
+        + ' de TVA restent donc à reverser alors que la vente est annulée. '
+        + 'La récupération est subordonnée à la rectification de la facture initiale : '
+        + 'émets l\'avoir au client, puis renseigne sa référence ci-dessous.</p>';
+    }
 
     if (a.par_mois && a.par_mois.length) {
       html += '<h3 class="compta-card__title" style="margin-top:1rem">Par mois</h3>';
@@ -11571,50 +11700,13 @@
     html += '<p class="compta-print-note"><b>Chiffres réels</b> (revenus Stripe, coût d\'achat snapshoté, frais Stripe, charges saisies). <b>Outil de gestion</b> : il ne remplace pas la tenue officielle des comptes ni tes factures d\'origine (à conserver 10 ans). À faire viser par un expert-comptable.</p>';
     html += '</div>'; // fin imprimable
 
-    // ── Saisie des charges (hors PDF) ──
-    html += '<h3 class="compta-card__title" style="margin-top:1.4rem">Enregistrer une charge</h3>';
-    html += '<div class="compta-card"><div class="compta-cfg-grid">'
-      + '<label>Type<select id="chgCat"><option value="transport">Transport / envois</option><option value="octroi">Octroi de mer</option><option value="achat">Achat marchandise (hors ventes)</option><option value="cfe">CFE</option><option value="assurance">Assurance</option><option value="banque">Frais bancaires</option><option value="autre">Autre</option></select></label>'
-      + '<label>Libellé<input type="text" id="chgLabel" placeholder="ex. Colissimo mars"></label>'
-      + '<label>Montant HT (€)<input type="number" id="chgAmount" step="0.01"></label>'
-      + '</div>'
-      + '<div class="compta-actions"><button type="button" class="btn primary" id="chgAdd">＋ Ajouter la charge</button></div></div>';
-
-    if (charges && charges.length) {
-      html += '<h3 class="compta-card__title" style="margin-top:1rem">Charges enregistrées</h3><table class="compta-table">';
-      charges.forEach(function (c) {
-        var dt = c.dateMs ? new Date(c.dateMs).toLocaleDateString('fr-FR') : '';
-        html += '<tr><td>' + escapeHTML(c.category) + (c.label ? ' — ' + escapeHTML(c.label) : '') + '<br><small style="opacity:.6">' + dt + '</small></td>'
-          + '<td class="compta-num">' + eur(c.amountHt) + '</td>'
-          + '<td><button type="button" class="btn btn--ghost compta-chg-del" data-id="' + escapeHTML(c.id) + '">✕</button></td></tr>';
-      });
-      html += '</table>';
-    }
+    // ── Saisies hors PDF : charges, puis remboursements. Les deux formulaires
+    // sont volontairement distincts — un remboursement n'est PAS une charge.
+    html += comptaChargesHtml(charges, eur) + comptaRemboursementsHtml(refunds, eur);
 
     box.innerHTML = html;
-
-    var addBtn = document.getElementById('chgAdd');
-    if (addBtn) addBtn.onclick = function () {
-      var amount = parseFloat(document.getElementById('chgAmount').value);
-      if (!(amount > 0)) { toast('Entre un montant HT valide', 'error'); return; }
-      addBtn.disabled = true;
-      adminPostType('charge', {
-        category: document.getElementById('chgCat').value,
-        label: document.getElementById('chgLabel').value,
-        amountHt: amount,
-        dateMs: Date.now()
-      }).then(function () { toast('Charge enregistrée', 'success'); comptaLoadAccounting(); })
-        .catch(function (e) { toast('Erreur : ' + e.message, 'error'); addBtn.disabled = false; });
-    };
-    box.querySelectorAll('.compta-chg-del').forEach(function (b) {
-      b.onclick = function () {
-        var id = b.getAttribute('data-id');
-        adminAuthHeaders().then(function (h) {
-          return fetch(apiBaseUrl() + '/api/admin?type=charge&id=' + encodeURIComponent(id), { method: 'DELETE', headers: h });
-        }).then(function (r) { return r.json(); }).then(function () { toast('Charge supprimée', 'success'); comptaLoadAccounting(); })
-          .catch(function (e) { toast('Erreur : ' + e.message, 'error'); });
-      };
-    });
+    comptaBrancherCharges(box);
+    comptaBrancherRemboursements(box);
   }
 
   // Charge la config serveur puis construit le calculateur + prix automatiques.

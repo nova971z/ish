@@ -48,12 +48,30 @@ module.exports = function checkOu() {
     return ['scripts/ou.js : l\'index est vide — l\'entonnoir ne guide plus rien.'];
   }
 
-  // Les fonctions déclarées dans app.js, lues une seule fois.
-  var appjs = fs.readFileSync(path.join(RACINE, 'app.js'), 'utf8');
-  var declarees = {};
-  (appjs.match(/function\s+([A-Za-z_$][\w$]*)/g) || []).forEach(function (m) {
-    declarees[m.replace(/function\s+/, '')] = true;
-  });
+  /* Fonctions déclarées, par fichier — mémoïsé, chaque fichier lu une seule fois.
+     ⚠️ CETTE FONCTION NE REGARDAIT QUE app.js. Tant que tout le code d'intérêt
+     y vivait, ça passait. La première entrée d'index pointant vers un module
+     serveur (api/_lib/accounting.js) a fait échouer la CI en accusant l'index
+     d'être périmé, alors que les fonctions existaient bel et bien. Un contrôle
+     qui accuse à tort finit par être contourné. On cherche donc dans LES
+     FICHIERS QUE L'ENTRÉE ELLE-MÊME DÉSIGNE, plus app.js en repli. */
+  var cacheDecl = {};
+  function declareesDans(chemin) {
+    if (cacheDecl[chemin]) return cacheDecl[chemin];
+    var d = {};
+    try {
+      var src = fs.readFileSync(resoudre(chemin), 'utf8');
+      // `function nom(`, `var nom = function`, `nom: function`, `const nom = (…) =>`
+      (src.match(/function\s+([A-Za-z_$][\w$]*)/g) || []).forEach(function (m) {
+        d[m.replace(/function\s+/, '')] = true;
+      });
+      (src.match(/(?:var|let|const)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:async\s*)?(?:function|\()/g) || []).forEach(function (m) {
+        d[m.replace(/(?:var|let|const)\s+/, '').replace(/\s*=[\s\S]*$/, '')] = true;
+      });
+    } catch (e) { /* fichier illisible : déjà signalé par le contrôle d'existence */ }
+    cacheDecl[chemin] = d;
+    return d;
+  }
 
   // Les décisions réellement enregistrées.
   var decisions = {};
@@ -78,9 +96,12 @@ module.exports = function checkOu() {
     });
 
     (e.fonctions || []).forEach(function (fn) {
-      if (!declarees[fn]) {
-        errors.push(ou_ + ' nomme la fonction ' + fn + '() qui n\'est PLUS déclarée dans app.js '
-          + '(renommée ou supprimée ?). Mets l\'index à jour.');
+      var cherchesDans = (e.fichiers || []).concat(['app.js']);
+      var trouvee = cherchesDans.some(function (f) { return declareesDans(f)[fn]; });
+      if (!trouvee) {
+        errors.push(ou_ + ' nomme la fonction ' + fn + '() qui n\'est déclarée dans AUCUN '
+          + 'des fichiers de l\'entrée (' + cherchesDans.join(', ') + ') — renommée ou '
+          + 'supprimée ? Mets l\'index à jour.');
       }
     });
 

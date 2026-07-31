@@ -34,9 +34,62 @@ function computeIS(benefice, cfg) {
   return seuil * tauxRed + (benefice - seuil) * tauxNorm;
 }
 
+/* REMBOURSEMENTS — pourquoi ce n'est PAS une charge
+   ─────────────────────────────────────────────────────────────────────────
+   Tentation : saisir un remboursement dans `charges`. Ce serait FAUX, et faux
+   d'une façon qui se paie :
+
+   · Un remboursement ANNULE une vente. Il diminue le CA et la **TVA
+     COLLECTÉE**. Passé en charge, il gonflerait au contraire la TVA
+     DÉDUCTIBLE : on réclamerait le remboursement d'une taxe jamais payée. Ce
+     n'est pas une erreur de présentation, c'est une déclaration fausse.
+   · Il n'annule PAS forcément le coût d'achat : si l'outil a déjà été commandé
+     chez le fournisseur, le coût reste — l'outil part en stock, pas en fumée.
+     D'où `cogsAnnuleHt`, saisi au cas par cas.
+   · La commission Stripe n'est PAS supposée rendue. `stripeFeeRendu` se saisit
+     d'après ce que le tableau de bord Stripe montre RÉELLEMENT (0 par défaut,
+     l'hypothèse la plus défavorable). Ce fichier ne calcule que du réel : une
+     supposition polie y serait un mensonge.
+
+   ⚠️ CONDITION FISCALE — la récupération de la TVA sur une vente annulée est
+   subordonnée à la RECTIFICATION DE LA FACTURE INITIALE (avoir / facture
+   rectificative). Sans avoir émis au client, la TVA collectée reste due malgré
+   le remboursement. D'où `avoirRef` : la synthèse RETRANCHE la TVA seulement
+   quand l'avoir existe, et signale les autres au lieu de déduire une taxe
+   qu'on n'a pas le droit de déduire. À vérifier à la source (J5) : CGI art.
+   271 et 272 ; BOFiP BOI-TVA-DECLA-20-30-10-10 et BOI-TVA-DED-40-10-20.
+
+   refunds : [{ amountTtc, cogsAnnuleHt, stripeFeeRendu, territory, dateMs,
+                label, paymentId, avoirRef }]  — montants en EUROS. */
+function applyRefunds(refunds, cfg) {
+  var t = { ttc: 0, ht: 0, tva: 0, tvaSansAvoir: 0, cogsAnnule: 0, stripeRendu: 0,
+            nb: 0, nbSansAvoir: 0, parMois: {} };
+  (refunds || []).forEach(function (r) {
+    var ttc = Number(r && r.amountTtc) || 0;
+    if (!(ttc > 0)) return;                       // 0 ou négatif : ligne ignorée
+    var tva = tvaFor({ territoryDeclared: r.territory }, cfg);
+    var ht = ttc / (1 + tva);
+    var taxe = ttc - ht;
+    t.ttc += ttc; t.ht += ht; t.nb += 1;
+    // La TVA ne se récupère QU'AVEC un avoir. Sans référence, on la laisse due :
+    // mieux vaut un résultat pessimiste qu'un redressement.
+    if (r.avoirRef) t.tva += taxe;
+    else { t.tvaSansAvoir += taxe; t.nbSansAvoir += 1; }
+    t.cogsAnnule += Math.max(0, Number(r.cogsAnnuleHt) || 0);
+    t.stripeRendu += Math.max(0, Number(r.stripeFeeRendu) || 0);
+    var k = monthKey(r.dateMs);
+    (t.parMois[k] = t.parMois[k] || { ttc: 0, ht: 0, cogs: 0, nb: 0 });
+    t.parMois[k].ttc += ttc; t.parMois[k].ht += ht;
+    t.parMois[k].cogs += Math.max(0, Number(r.cogsAnnuleHt) || 0);
+    t.parMois[k].nb += 1;
+  });
+  return t;
+}
+
 // payments : [{ amountCents, cogsHtCents, stripeFeeCents, status, territoryDeclared, recordedAtMs }]
 // charges  : [{ amountHt, tvaDeductible, category, label, dateMs }]
-function synthesize(payments, charges, cfg) {
+// refunds  : [{ amountTtc, cogsAnnuleHt, stripeFeeRendu, territory, dateMs, label, avoirRef }]
+function synthesize(payments, charges, cfg, refunds) {
   cfg = cfg || {};
   charges = charges || [];
 
@@ -75,6 +128,19 @@ function synthesize(payments, charges, cfg) {
     tvaDeductible += Number(c.tvaDeductible) || 0;
   });
 
+  /* Remboursements : ils VIENNENT EN MOINS du chiffre d'affaires, pas en plus
+     des charges (voir le long commentaire d'applyRefunds). On garde les
+     totaux BRUTS à côté : un chiffre qui a bougé sans qu'on puisse voir de
+     combien est un chiffre qu'on ne peut pas contrôler. */
+  var rb = applyRefunds(refunds, cfg);
+  var caTtcBrut = caTtc, caHtBrut = caHt, tvaBrute = tvaCollectee;
+  var cogsBrut = cogs, stripeBrut = stripe;
+  caTtc -= rb.ttc;
+  caHt -= rb.ht;
+  tvaCollectee -= rb.tva;              // uniquement la part couverte par un avoir
+  cogs -= rb.cogsAnnule;               // outil jamais commandé → coût annulé
+  stripe -= rb.stripeRendu;            // commission réellement rendue, saisie
+
   var margeBrute = caHt - cogs;
   var resultatExpl = margeBrute - stripe - chargesTotal;   // comptable (dons en charge)
   // Fiscal : dons réintégrés dans la base IS, puis réduction 60 % plafonnée.
@@ -85,8 +151,22 @@ function synthesize(payments, charges, cfg) {
   var is = Math.max(0, computeIS(baseIS, cfg) - reductionMecenat);
   var resultatNet = resultatExpl - is;
 
+  // Les mois où il n'y a EU QUE des remboursements doivent exister aussi,
+  // sinon un mois négatif disparaît purement et simplement du tableau.
+  Object.keys(rb.parMois).forEach(function (k) {
+    if (!byMonth[k]) byMonth[k] = { ca_ttc: 0, ca_ht: 0, cogs: 0, ventes: 0 };
+  });
   var months = Object.keys(byMonth).sort().map(function (k) {
-    return { mois: k, ca_ttc: round2(byMonth[k].ca_ttc), ca_ht: round2(byMonth[k].ca_ht), cogs: round2(byMonth[k].cogs), ventes: byMonth[k].ventes };
+    var r = rb.parMois[k] || { ttc: 0, ht: 0, cogs: 0, nb: 0 };
+    return {
+      mois: k,
+      ca_ttc: round2(byMonth[k].ca_ttc - r.ttc),
+      ca_ht: round2(byMonth[k].ca_ht - r.ht),
+      cogs: round2(byMonth[k].cogs - r.cogs),
+      ventes: byMonth[k].ventes,
+      remboursements: r.nb,
+      remb_ttc: round2(r.ttc)
+    };
   });
 
   return {
@@ -103,7 +183,28 @@ function synthesize(payments, charges, cfg) {
     resultat_net: round2(resultatNet),
     marge_nette_pct: caHt > 0 ? round2(resultatNet / caHt * 100) : 0,
     nb_ventes: succeeded.length,
-    panier_moyen: succeeded.length ? round2(caTtc / succeeded.length) : 0,
+    // Panier moyen = ce qu'un client dépense EN MOYENNE quand il achète. Il se
+    // calcule donc sur le CA BRUT : un remboursement n'a pas rendu les paniers
+    // plus petits, il a annulé une vente. Les deux chiffres ne parlent pas de
+    // la même chose et ne doivent pas se contaminer.
+    panier_moyen: succeeded.length ? round2(caTtcBrut / succeeded.length) : 0,
+    // Totaux AVANT remboursements — pour pouvoir vérifier l'écart soi-même.
+    brut: {
+      ca_ttc: round2(caTtcBrut), ca_ht: round2(caHtBrut), tva_collectee: round2(tvaBrute),
+      cogs: round2(cogsBrut), frais_stripe: round2(stripeBrut)
+    },
+    remboursements: {
+      nb: rb.nb,
+      total_ttc: round2(rb.ttc),
+      total_ht: round2(rb.ht),
+      tva_recuperee: round2(rb.tva),
+      cogs_annule: round2(rb.cogsAnnule),
+      stripe_rendu: round2(rb.stripeRendu),
+      // ⚠️ Remboursements SANS avoir : la TVA correspondante reste DUE. Ce
+      // n'est pas un détail de présentation — c'est de l'argent à reverser.
+      sans_avoir: rb.nbSansAvoir,
+      tva_non_recuperable: round2(rb.tvaSansAvoir)
+    },
     tva: { collectee: round2(tvaCollectee), deductible: round2(tvaDeductible), solde_a_reverser: round2(tvaCollectee - tvaDeductible) },
     mecenat: {
       dons: round2(dons),
@@ -115,7 +216,7 @@ function synthesize(payments, charges, cfg) {
     par_mois: months,
     ventes_par_marque: brandStats(payments, cfg),   // preuve partenariat fournisseur
     complet: cogsConnu,   // false si une vente n'a pas de coût snapshoté (données partielles)
-    meta: { source: 'RÉEL — paiements Stripe + coûts snapshotés + charges saisies' }
+    meta: { source: 'RÉEL — paiements Stripe + coûts snapshotés + charges et remboursements saisis' }
   };
 }
 
@@ -159,4 +260,5 @@ function monthKey(ms) {
   return d.getUTCFullYear() + '-' + (m < 10 ? '0' + m : '' + m);
 }
 
-module.exports = { synthesize: synthesize, brandStats: brandStats, computeIS: computeIS, _round2: round2, _tvaFor: tvaFor };
+module.exports = { synthesize: synthesize, brandStats: brandStats, computeIS: computeIS,
+  applyRefunds: applyRefunds, _round2: round2, _tvaFor: tvaFor };

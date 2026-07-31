@@ -128,6 +128,7 @@ service cloud.firestore {
     match /rate_limits/{bucketId}      { allow read, write: if false; } // compteurs anti-abus (IP)
     match /product_overrides/{prodId}  { allow read, write: if false; } // prix/stock admin
     match /charges/{chargeId}          { allow read, write: if false; } // charges comptables (admin)
+    match /refunds/{refundId}          { allow read, write: if false; } // remboursements saisis (admin) — ≠ charges : ils annulent du CA et de la TVA COLLECTÉE
     match /config/{docId}              { allow read, write: if false; } // config serveur (prix, facturation)
     match /price_watch_log/{runId}     { allow read, write: if false; } // journal du traqueur de prix
     // ── Service coursier (Ubur) — construit mais INACTIF (COURIER_ENABLED=false).

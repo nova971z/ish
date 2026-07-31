@@ -138,6 +138,24 @@ var INDEX = [
     fini: 'check-analytics vert et p6-rgpd vert.'
   },
   {
+    intention: 'Compte de résultat, remboursements, avoirs, TVA à reverser',
+    mots: ['comptabilité', 'compte de résultat', 'remboursement', 'rembourser', 'avoir',
+           'facture rectificative', 'tva collectée', 'tva déductible', 'charge', 'charges',
+           'cogs', 'résultat net', 'bilan', 'is', 'impôt sur les sociétés'],
+    fichiers: ['api/_lib/accounting.js', 'api/admin.js', 'app.js'],
+    fonctions: ['synthesize', 'applyRefunds', 'computeIS'],
+    protege: ['scripts/check-accounting.js', 'scripts/audit/p5-money.js'],
+    regles: ['.claude/rules/donnees.md'],
+    pieges: [
+      'Un remboursement n\'est PAS une charge : il diminue la TVA COLLECTÉE. Le saisir en charge gonflerait la TVA DÉDUCTIBLE — on réclamerait une taxe jamais payée.',
+      'La TVA d\'une vente annulée ne se récupère QU\'AVEC un avoir (facture rectificative). Sans avoir, elle reste due malgré le remboursement.',
+      'Un remboursement n\'annule le coût d\'achat que si l\'outil n\'a PAS été commandé. Sinon il part en stock, et le coût reste.',
+      'La commission Stripe n\'est pas supposée rendue : elle se saisit d\'après le tableau de bord, jamais d\'après une hypothèse.'
+    ],
+    decisions: [],
+    fini: 'check-accounting vert (dont les cas remboursement), p5-money vert, et chaque nouvelle assertion prouvée faillible par sabotage.'
+  },
+  {
     intention: 'Panier, favoris, ajout au panier',
     mots: ['panier', 'favoris', 'cart', 'devis'],
     fichiers: ['app.js'],
