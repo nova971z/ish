@@ -125,6 +125,60 @@ module.exports = async function handler(req, res) {
       }
     }
 
+    /* ── GET ?type=revolut-commande-test : créer un ORDRE réel, en bac à sable ─
+       Deuxième étape du diagnostic. `revolut-ping` prouve que la clé est
+       acceptée ; celui-ci prouve qu'on sait CRÉER, et rend une `checkout_url`
+       ouvrable pour payer avec une carte de test.
+
+       ⛔ MÊME GARDE QU'AU PING : refuse si REVOLUT_MODE vaut « prod ». Créer
+       des ordres de test en production polluerait la comptabilité réelle avec
+       des montants qui ne correspondent à aucune vente.
+
+       Montant : 3000 centimes = 30,00 €. Ce n'est pas arbitraire — la
+       documentation dit que les commandes sous 30 € en EUR sont EXEMPTÉES de
+       3-D Secure. En dessous, la carte de test « échec 3DS » réussirait, et le
+       test ne testerait rien. */
+    if (type === 'revolut-commande-test') {
+      const rev = require('./_lib/paiement/revolut');
+      if (rev._modeProd()) {
+        return res.status(400).json({
+          ok: false, etape: 'garde',
+          erreur: 'REVOLUT_MODE vaut « prod ». On ne crée JAMAIS de commande de test '
+            + 'en production : elle polluerait la comptabilité réelle.'
+        });
+      }
+      if (!rev.estConfigure()) {
+        return res.status(400).json({ ok: false, etape: 'cle',
+          erreur: 'REVOLUT_SECRET_KEY_SANDBOX absente. Lancer d\'abord le test de connexion.' });
+      }
+      try {
+        const cree = await rev.creerPaiement({
+          montantCents: 3000,
+          devise: 'eur',
+          description: 'Commande de test Pirates Tools (bac a sable)',
+          reference: 'TEST-' + Date.now(),
+          metadata: { source: 'pirates-tools', test: '1' }
+        });
+        return res.status(200).json({
+          ok: true, etape: 'creation',
+          message: 'Commande créée dans le bac à sable.',
+          id: cree.id,
+          // ⚠️ Le `token` sert à monter le widget. Ce n'est pas un secret de
+          // compte : il ne vaut que pour CETTE commande de test à 30 € en
+          // fausse monnaie, et il expire (expire_pending_after = PT30M).
+          jeton: cree.jetonClient,
+          urlPaiement: cree.urlHebergee,
+          montant: '30,00 €'
+        });
+      } catch (e) {
+        return res.status(200).json({
+          ok: false, etape: 'creation',
+          erreur: String(e.message || e).slice(0, 400),
+          indice: 'Le compte Merchant du bac à sable doit être activé et accepter l\'EUR.'
+        });
+      }
+    }
+
     if (type === 'export-catalogue') {
       try {
         const fusion = await catalog.loadPublicCatalog();

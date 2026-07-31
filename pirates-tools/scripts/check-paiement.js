@@ -379,6 +379,19 @@ module.exports = function () {
          URL ouverte à la main. Il faut donc un bouton qui passe par `adminGet`. */
       var appSrc2 = fs.existsSync(path.join(RACINE, 'app.js'))
         ? fs.readFileSync(path.join(RACINE, 'app.js'), 'utf8') : '';
+      /* Le créateur de commande de test porte les MÊMES risques que le ping :
+         il fait un appel réel et il ÉCRIT chez le fournisseur. */
+      if (/revolut-commande-test/.test(admSrc)) {
+        var blocT = admSrc.slice(admSrc.indexOf("type === 'revolut-commande-test'"),
+          admSrc.indexOf("type === 'export-catalogue'"));
+        ok(/_modeProd\(\)/.test(blocT),
+          '⛔ le créateur de commande de test ne vérifie pas le mode. Il pourrait créer '
+          + 'des ordres en PRODUCTION — des montants qui ne correspondent à aucune vente, '
+          + 'au milieu de la comptabilité réelle.');
+        ok(/adminGet\(\s*['"]revolut-commande-test['"]\s*\)/.test(appSrc2),
+          '⛔ le créateur de commande de test n\'est appelé par aucun bouton de l\'admin : '
+          + 'il serait injoignable (le jeton Firebase ne passe pas par la barre d\'adresse).');
+      }
       ok(/adminGet\(\s*['"]revolut-ping['"]\s*\)/.test(appSrc2),
         '⛔ le diagnostic revolut-ping existe côté serveur mais AUCUN bouton de '
         + 'l\'admin ne l\'appelle via `adminGet`. Il serait donc injoignable : une '

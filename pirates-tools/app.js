@@ -11407,7 +11407,13 @@
     html += '<div class="compta-card">'
       + '<p class="compta-line">Vérifie que le site sait parler au fournisseur de paiement. '
       + 'L\'appel est en <b>lecture seule</b> : il ne crée rien et ne débite rien.</p>'
-      + '<div class="compta-actions"><button type="button" class="btn primary" id="revolutPing">🔌 Tester la connexion Revolut</button></div>'
+      + '<div class="compta-actions">'
+      + '<button type="button" class="btn primary" id="revolutPing">🔌 Tester la connexion Revolut</button>'
+      + '<button type="button" class="btn btn--ghost" id="revolutOrdre">🧾 Créer une commande de test (30 €)</button>'
+      + '</div>'
+      + '<p class="compta-line"><small>La commande de test est créée dans le <b>bac à sable</b>, '
+      + 'en fausse monnaie, et n\'apparaît pas dans ta comptabilité. 30 € et pas moins : '
+      + 'en dessous, le 3-D Secure est contourné et la carte de test « échec » réussirait.</small></p>'
       + '<div id="revolutPingOut" class="compta-calc-out"></div></div>';
 
     // ── Bloc 0 : calculateur & prix automatiques (rempli après chargement config) ─
@@ -11481,6 +11487,46 @@
     comptaBrancherPing();
   }
 
+  /* Crée une commande de test dans le BAC À SABLE et rend son lien de paiement.
+     Le lien s'ouvre dans un nouvel onglet : c'est là qu'on paiera avec une
+     carte de test, ce qui prouvera la chaîne complète création → paiement. */
+  function comptaBrancherOrdreTest(out) {
+    var b = document.getElementById('revolutOrdre');
+    if (!b || !out) return;
+    b.onclick = function () {
+      b.disabled = true;
+      out.innerHTML = '<p class="admin-loading">Création de la commande…</p>';
+      adminGet('revolut-commande-test').then(function (d) {
+        b.disabled = false;
+        if (!d || !d.ok) {
+          out.innerHTML = '<p class="admin-error"><b>❌ Étape « '
+            + escapeHTML(String((d && d.etape) || '?')) + ' » — '
+            + escapeHTML(String((d && d.erreur) || 'raison inconnue')) + '</b>'
+            + ((d && d.indice) ? '<br>👉 ' + escapeHTML(String(d.indice)) : '') + '</p>';
+          return;
+        }
+        var url = String(d.urlPaiement || '');
+        out.innerHTML = '<div class="compta-res">'
+          + '<div class="compta-res__price" style="font-size:1.1rem">✅ Commande créée — '
+          + escapeHTML(String(d.montant || '')) + '</div>'
+          + '<div class="compta-res__brk">'
+          + '<span>Référence : <b>' + escapeHTML(String(d.id || '')) + '</b></span>'
+          + '</div>'
+          // ⚠️ `noopener` obligatoire sur toute ouverture d'onglet externe.
+          + (url ? '<div class="lv-cta" style="margin-top:.6rem">'
+              + '<a class="btn primary" href="' + escapeHTML(url) + '" target="_blank" rel="noopener">'
+              + '💳 Ouvrir la page de paiement</a></div>'
+              + '<p class="compta-line"><small>Carte de test : <b>4929 4205 7359 5709</b> · '
+              + 'n\'importe quel CVV à 3 chiffres · n\'importe quelle date future.</small></p>'
+            : '<p class="admin-error">Aucune URL de paiement renvoyée.</p>')
+          + '</div>';
+      }).catch(function (e) {
+        b.disabled = false;
+        out.innerHTML = '<p class="admin-error">Erreur réseau : ' + escapeHTML(e.message || String(e)) + '</p>';
+      });
+    };
+  }
+
   /* Diagnostic du fournisseur de paiement.
      ⚠️ Passe par `adminGet`, qui attache le jeton Firebase. C'est LA raison
      d'être de ce bouton : la même adresse tapée dans la barre du navigateur
@@ -11489,6 +11535,7 @@
     var btn = document.getElementById('revolutPing');
     var out = document.getElementById('revolutPingOut');
     if (!btn || !out) return;
+    comptaBrancherOrdreTest(out);
     btn.onclick = function () {
       btn.disabled = true;
       out.innerHTML = '<p class="admin-loading">Appel de Revolut…</p>';
