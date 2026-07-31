@@ -88,6 +88,10 @@ var reqPrixAff  = safeRequire('./check-prix-affiches','check-prix-affiches');
 // jamais s'y trouver. 3 fiches l'exposaient le 31/07 — irreversible une fois
 // sur le CDN et dans l'historique git.
 var reqPrixFui  = safeRequire('./check-prix-fuite',  'check-prix-fuite');
+// La couture paiement : deux fournisseurs, un seul contrat. Le defaut doit
+// toujours designer celui qui ENCAISSE, et aucun etat inconnu ne doit pouvoir
+// passer pour « paye » — c'est le seul defaut ici qui couterait de la marchandise.
+var reqPaiement = safeRequire('./check-paiement',    'check-paiement');
 
 // NOTE 25/07/2026 : l'étape lint-products.js (fichier jamais versionné,
 // silencieusement sautée à chaque run) est SUPPRIMÉE — ses invariants réels
@@ -149,6 +153,7 @@ var reqPrixFui  = safeRequire('./check-prix-fuite',  'check-prix-fuite');
   await runOne(reqWatchAu,  'check-watch-auth');
   await runOne(reqPrixAff,  'check-prix-affiches');
   await runOne(reqPrixFui,  'check-prix-fuite');
+  await runOne(reqPaiement, 'check-paiement');
 
   var dur = Math.max(1, Date.now() - started);
   if (errors.length){

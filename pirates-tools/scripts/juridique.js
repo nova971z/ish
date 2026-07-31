@@ -35,11 +35,17 @@ var DOMAINES = {
   J3: { titre: 'Données personnelles — RGPD',
         motifs: [/pirates-tools\/(firestore|storage)\.rules$/,
                  /pirates-tools\/api\/(contact|newsletter|events|admin|cron-report|webhook|create-payment-intent)\.js$/,
-                 /pirates-tools\/api\/_lib\/(analytics|courses|invoice|postal)\.js$/] },
+                 /pirates-tools\/api\/_lib\/(analytics|courses|invoice|postal)\.js$/,
+                 // Couture paiement : ces modules manipulent e-mail, nom et
+                 // adresse du client pour les transmettre au fournisseur.
+                 /pirates-tools\/api\/_lib\/paiement\/.+\.js$/] },
   J4: { titre: 'Prix et promotions',
         motifs: [/pirates-tools\/products\.json$/,
                  /pirates-tools\/api\/(contact|checkout|create-payment-intent|webhook|admin)\.js$/,
-                 /pirates-tools\/api\/_lib\/(pricing|pricing-model|price-parse|courses)\.js$/] },
+                 /pirates-tools\/api\/_lib\/(pricing|pricing-model|price-parse|courses)\.js$/,
+                 // Couture paiement : c'est par là que passe le montant
+                 // réellement débité — le prix opposable au client.
+                 /pirates-tools\/api\/_lib\/paiement\/.+\.js$/] },
   J5: { titre: 'Fiscalité DOM — TVA et octroi de mer',
         motifs: [/pirates-tools\/api\/(checkout|create-payment-intent|webhook|admin|cron-report)\.js$/,
                  /pirates-tools\/api\/_lib\/(pricing|pricing-model|accounting|invoice)\.js$/] }

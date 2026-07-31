@@ -10,6 +10,7 @@
 
 var catalog = require('./_lib/catalog');
 var pricing = require('./_lib/pricing');
+var paiementSocle = require('./_lib/paiement');
 var stripeMeta = require('./_lib/stripe-meta');
 var rl = require('./_lib/ratelimit');
 var loyalty = require('./_lib/loyalty');
@@ -27,11 +28,19 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ ok: false, error: 'Method not allowed' });
   }
 
-  var stripeKey = process.env.STRIPE_SECRET_KEY;
-  if (!stripeKey) {
+  // ⚠️ COUTURE PAIEMENT (31/07/2026) — on ne parle plus à Stripe directement.
+  // Le fournisseur actif est choisi par PAYMENT_PROVIDER (défaut : stripe).
+  // Voir api/_lib/paiement/index.js et docs/PLAN-REVOLUT.md.
+  //
+  // ⛔ Cette couche ne touche NI au prix, NI au territoire fiscal, NI à la
+  // remise. Tout cela reste calculé plus bas, côté serveur, à l'identique :
+  // le fournisseur de paiement reçoit un montant déjà arrêté et ne le discute
+  // pas. Changer de fournisseur ne peut donc pas changer ce qu'un client paie.
+  var paiement = paiementSocle.fournisseur();
+  if (!paiement.estConfigure()) {
     return res.status(503).json({
       ok: false,
-      error: 'Stripe not configured. Add STRIPE_SECRET_KEY in Vercel environment variables.'
+      error: 'Paiement non configuré (fournisseur : ' + paiement.nom() + ').'
     });
   }
 
@@ -43,7 +52,6 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    var stripe = require('stripe')(stripeKey);
     var body = req.body || {};
     var items = body.items;
     var customerEmail = body.customerEmail;
@@ -201,11 +209,20 @@ module.exports = async function handler(req, res) {
     // ce qu'un PaymentIntent ne permet pas nativement (pas de line_items).
     var itemsMeta = stripeMeta.chunkItems(validatedLines) || {};
 
-    var intentParams = {
-      amount: amountCents,
-      currency: 'eur',
-      automatic_payment_methods: { enabled: true },
+    // Contrat NEUTRE (couture) : le fournisseur reçoit un montant déjà arrêté
+    // et des données à transporter. Il ne décide de rien.
+    var cree = await paiement.creerPaiement({
+      montantCents: amountCents,
+      devise: 'eur',
       description: description.join(', ').substring(0, 500),
+      email: customerEmail || null,
+      livraison: shipping ? {
+        nom: shipping.name,
+        ligne1: shipping.address.line1,
+        ville: shipping.address.city,
+        codePostal: shipping.address.postal_code,
+        pays: shipping.address.country
+      } : null,
       metadata: Object.assign({
         source: 'pirates-tools',
         territory: String(territory),
@@ -217,16 +234,15 @@ module.exports = async function handler(req, res) {
         loyaltyPct: String(loyaltyQuote.pct),
         loyaltyDiscountCents: String(loyaltyQuote.discountCents)
       }, uid ? { uid: uid } : {}, courseMeta, courseRefMeta, itemsMeta)
-    };
-    if (customerEmail) intentParams.receipt_email = customerEmail;
-    if (shipping) intentParams.shipping = shipping;
-
-    var paymentIntent = await stripe.paymentIntents.create(intentParams);
+    });
 
     return res.status(200).json({
       ok: true,
-      clientSecret: paymentIntent.client_secret,
-      paymentIntentId: paymentIntent.id,
+      // Nom historique conservé : le front l'attend, et renommer un champ de
+      // l'API publique pendant une migration de paiement, c'est deux risques
+      // au lieu d'un. Le renommage se fera à l'étape 4, avec le front.
+      clientSecret: cree.jetonClient,
+      paymentIntentId: cree.id,
       amount: amountCents,   // montant DÉBITÉ (remise déduite + livraison) — le client DOIT afficher celui-ci
       gross: totalCents,     // total plein tarif avant remise (produits seuls)
       deliveryCents: deliveryCents,
