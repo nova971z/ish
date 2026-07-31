@@ -70,6 +70,9 @@
     plancherAlpha: 0.08,   // en dessous, on efface — puis on réétale
     pelage: 2,             // tours de pelage du liseré de contact sombre
     limSombre: 22,         // luminance en dessous de laquelle on parle de noir
+    clairDerriere: 60,     // au-delà, l'objet derrière le liseré est CLAIR :
+                           // le liseré est alors son ombre. Mesuré 114 sous le
+                           // plateau jaune, 23 au bord de la prise noire.
     lissage: 2             // passes de moyenne 3×3 sur la bande de transition
   };
 
@@ -269,8 +272,15 @@
       if (comp.length <= o.grainMax) { grains++; for (var k2 = 0; k2 < comp.length; k2++) brut[comp[k2]] = 0; }
     });
 
-    /* ── liseré de contact ─────────────────────────────────────────────── */
-    var peles = 0, tour, aPeler;
+    /* ── liseré de contact ───────────────────────────────────────────────
+       ⚠️ CE QUI DÉCIDE : LA CLARTÉ DE CE QU'IL Y A DERRIÈRE LE LISERÉ.
+       Un bord très sombre adossé à un objet CLAIR est l'ombre portée de cet
+       objet — mesuré sous le plateau : 4 px vers l'intérieur, L = 114.
+       Le même bord très sombre adossé à un objet SOMBRE est l'objet lui-même
+       — mesuré au bord de la prise : 4 px vers l'intérieur, L = 23.
+       Sans ce garde-fou, le pelage rongeait la prise et le câble, tous deux
+       noirs et posés sur leur propre ombre. */
+    var peles = 0, tour, aPeler, REGARD = 5;
     for (tour = 0; tour < o.pelage; tour++) {
       aPeler = [];
       for (y = 1; y < h - 1; y++) for (x = 1; x < w - 1; x++) {
@@ -278,7 +288,19 @@
         if (!brut[i] || lum[i] > o.limSombre) continue;
         for (k = 0; k < 4; k++) {
           q = k === 0 ? i - 1 : k === 1 ? i + 1 : k === 2 ? i - w : i + w;
-          if (!brut[q] && lum[q] < o.limSombre * 2.2) { aPeler.push(i); break; }
+          if (brut[q] || lum[q] >= o.limSombre * 2.2) continue;
+          /* on regarde à l'OPPOSÉ du fond : que vaut l'objet derrière ? */
+          var dx3 = k === 0 ? 1 : k === 1 ? -1 : 0;
+          var dy3 = k === 2 ? 1 : k === 3 ? -1 : 0;
+          var clarte = 0, r3, xx3, yy3, l3;
+          for (r3 = 1; r3 <= REGARD; r3++) {
+            xx3 = x + dx3 * r3; yy3 = y + dy3 * r3;
+            if (xx3 < 0 || yy3 < 0 || xx3 >= w || yy3 >= h) break;
+            l3 = lum[yy3 * w + xx3];
+            if (l3 > clarte) clarte = l3;
+          }
+          if (clarte > o.clairDerriere) aPeler.push(i);
+          break;
         }
       }
       if (!aPeler.length) break;
