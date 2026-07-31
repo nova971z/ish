@@ -259,6 +259,91 @@ module.exports = function () {
       + 'un nom d\'événement propre à Stripe est redevenu une décision.');
   }
 
+  /* ── 4 quater. La CSP autorise les DEUX fournisseurs ───────────────────
+     Le piège maison numéro un, écrit dans l'entonnoir : « la clé publique vit
+     dans un script inline autorisé par empreinte sha256 : la changer sans
+     recalculer la CSP BLOQUE le script et tue le site ». Corollaire : basculer
+     sur Revolut sans autoriser ses domaines donne un formulaire de paiement
+     VIDE, sans message d'erreur exploitable pour le client.
+
+     ⚠️ Les deux fournisseurs doivent rester autorisés PENDANT toute la
+     transition — c'est ce qui permet de revenir en arrière sans redéployer une
+     CSP dans l'urgence. */
+  /* ⚠️ 1ʳᵉ VERSION TROP GROSSIÈRE : elle cherchait le domaine N'IMPORTE OÙ dans
+     vercel.json. Le sabotage « retirer Stripe de la CSP » est passé au VERT,
+     parce qu'une occurrence survivait dans un AUTRE en-tête
+     (`Permissions-Policy`). Un domaine autorisé dans la mauvaise directive
+     n'autorise rien. On vérifie donc DIRECTIVE PAR DIRECTIVE. */
+  var VERCEL = path.join(RACINE, 'vercel.json');
+  if (fs.existsSync(VERCEL)) {
+    var brut = fs.readFileSync(VERCEL, 'utf8');
+    var mCsp = brut.match(/"value"\s*:\s*"(default-src[^"]*)"/);
+    ok(!!mCsp, 'check-paiement : impossible de retrouver la Content-Security-Policy '
+      + 'dans vercel.json — le contrôle ne vérifierait plus rien.');
+    if (mCsp) {
+      var directives = {};
+      mCsp[1].split(';').forEach(function (d) {
+        var t = d.trim().split(/\s+/);
+        if (t.length) directives[t[0]] = ' ' + t.slice(1).join(' ') + ' ';
+      });
+      [
+        ['script-src', 'https://js.stripe.com', 'le widget Stripe — il encaisse ENCORE aujourd\'hui'],
+        ['connect-src', 'https://api.stripe.com', 'les appels du widget Stripe'],
+        ['frame-src', 'https://js.stripe.com', 'l\'iframe du formulaire Stripe'],
+        ['script-src', 'https://merchant.revolut.com', 'le widget Revolut en production'],
+        ['script-src', 'https://sandbox-merchant.revolut.com', 'le widget Revolut en bac à sable — sans lui, impossible de TESTER'],
+        ['connect-src', 'https://merchant.revolut.com', 'les appels du widget Revolut'],
+        ['connect-src', 'https://sandbox-merchant.revolut.com', 'les appels du widget Revolut en bac à sable'],
+        ['frame-src', 'https://merchant.revolut.com', 'l\'iframe du champ carte Revolut'],
+        ['frame-src', 'https://sandbox-merchant.revolut.com', 'l\'iframe du champ carte en bac à sable'],
+        ['frame-src', 'https://checkout.revolut.com', 'la page hébergée et le 3-D Secure de Revolut']
+      ].forEach(function (d) {
+        var dir = directives[d[0]] || '';
+        ok(dir.indexOf(' ' + d[1] + ' ') !== -1,
+          '⛔ la directive CSP `' + d[0] + '` n\'autorise pas « ' + d[1] + '  » : ' + d[2]
+          + '. Un domaine manquant donne un formulaire de paiement VIDE, sans erreur '
+          + 'lisible — le client ne peut pas payer et ne sait pas pourquoi. '
+          + '(Être présent AILLEURS dans le fichier ne compte pas : un domaine autorisé '
+          + 'dans la mauvaise directive n\'autorise rien.)');
+      });
+    }
+
+    /* La Payment Request API (Apple Pay / Google Pay) est bornée à part, par
+       l'en-tête Permissions-Policy. Le SDK Revolut expose `paymentRequest` :
+       si on l'active un jour sans ouvrir cette porte, les boutons Apple/Google
+       Pay échoueront SANS message. */
+    /* ⚠️ La valeur contient des guillemets ÉCHAPPÉS (`payment=(self \"…\")`).
+       Un `[^"]*` s'arrête au premier `\"` et tronque la chaîne : la 1ʳᵉ version
+       de cette ligne lisait donc une valeur amputée et rougissait alors que
+       l'en-tête était correct. On accepte explicitement les échappements. */
+    var mPP = brut.match(/"Permissions-Policy"\s*,\s*"value"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+    if (mPP && /payment=/.test(mPP[1])) {
+      ok(/merchant\.revolut\.com/.test(mPP[1]),
+        '⚠️ Permissions-Policy `payment=()` n\'autorise pas Revolut. Sans lui, Apple Pay '
+        + 'et Google Pay échoueront en silence le jour où on les activera.');
+    }
+  }
+
+  /* ── 4 quinquies. Le serveur DIT quel widget monter ────────────────────
+     TROU DÉCOUVERT PAR SABOTAGE : retirer `fournisseur: paiement.nom()` de la
+     réponse ne faisait rougir aucun contrôle. Or c'est le seul moyen pour le
+     front de savoir quel widget charger. Sans ce champ, il devinerait — et le
+     jour de la bascule il monterait le widget Stripe sur un jeton Revolut :
+     formulaire vide, message d'erreur inutile, client incapable de payer. */
+  var CPI = path.join(RACINE, 'api', 'create-payment-intent.js');
+  if (fs.existsSync(CPI)) {
+    var cpiSrc = fs.readFileSync(CPI, 'utf8');
+    ok(/fournisseur\s*:\s*paiement\.nom\(\)/.test(cpiSrc),
+      '⛔ /api/create-payment-intent ne renvoie plus `fournisseur`. Le front ne peut '
+      + 'plus savoir quel widget monter : il devinerait, et monterait un jour le '
+      + 'formulaire Stripe sur un jeton Revolut.');
+    ok(/urlHebergee\s*:/.test(cpiSrc),
+      '⛔ la réponse ne porte plus `urlHebergee`. C\'est le repli quand le widget '
+      + 'refuse de se charger : chez Revolut, la page de paiement existe dès la '
+      + 'création de l\'ordre — s\'en priver, c\'est perdre une vente pour un script '
+      + 'bloqué.');
+  }
+
   /* ── 5. Le paiement normalisé n'a aucun champ `undefined` ──────────────
      `undefined` disparaît d'un JSON et d'un document Firestore. Un champ
      manquant doit se VOIR, donc valoir null. */

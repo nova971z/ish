@@ -243,6 +243,17 @@ module.exports = async function handler(req, res) {
       // au lieu d'un. Le renommage se fera à l'étape 4, avec le front.
       clientSecret: cree.jetonClient,
       paymentIntentId: cree.id,
+      /* ⚠️ QUEL WIDGET MONTER — ajouté le 31/07/2026 (étape 4).
+         Le front ne doit PAS deviner le fournisseur : c'est le serveur qui
+         décide (PAYMENT_PROVIDER), et lui seul sait quel jeton il vient de
+         fabriquer. Un front qui choisirait tout seul monterait un jour le
+         widget Stripe sur un jeton Revolut : le formulaire ne s'afficherait
+         pas, et le message d'erreur ne dirait pas pourquoi.
+         `urlHebergee` : Revolut fournit une page de paiement dès la création de
+         l'ordre ; Stripe Elements n'en a pas (null). Repli utile si le widget
+         refuse de se charger. */
+      fournisseur: paiement.nom(),
+      urlHebergee: cree.urlHebergee || null,
       amount: amountCents,   // montant DÉBITÉ (remise déduite + livraison) — le client DOIT afficher celui-ci
       gross: totalCents,     // total plein tarif avant remise (produits seuls)
       deliveryCents: deliveryCents,
