@@ -944,9 +944,17 @@ module.exports = async function handler(req, res) {
 // GARDE-FOUS pour que l'auto-application soit sûre. dryRun=true → aucun écrit.
 // MAX_TTC volontairement TRÈS haut (packs multi-outils = chers) : la réf exacte
 // identifie le bon produit et son bloc ne contient que son prix → on fait confiance.
-// Le vrai filet reste MAX_MOVE (variation %), qui rattrape un éventuel découpage
-// de bloc raté sans jamais bloquer un pack cher légitime.
-const PW = { MARGIN: 1.15, VAT: 1.20, MIN_TTC: 5, MAX_TTC: 8000, MAX_MOVE: 0.25 };
+//
+// ⛔ MAX_MOVE (plafond de variation 25 %) RETIRÉ le 31/07/2026 — décision D-015.
+// Il jugeait un ÉCART, pas une valeur. Or le traqueur lit ce que la page du
+// fournisseur affiche : une hausse de 29 % n'est pas une anomalie de lecture,
+// c'est le tarif que l'user paiera. Le verrou a maintenu DVC560Z à un prix qui
+// perdait 8,31 € par vente, parce que la réparation dépassait le seuil.
+//
+// Il ne reste donc que des bornes ABSOLUES : MIN_TTC / MAX_TTC. Elles ne jugent
+// pas une variation mais une valeur impossible — c'est le seul filet qui
+// attrape un parseur qui déraille, et il ne peut pas bloquer un prix réel.
+const PW = { MARGIN: 1.15, VAT: 1.20, MIN_TTC: 5, MAX_TTC: 8000 };
 function pwRound2(n) { return Math.round(n * 100) / 100; }
 
 // Prix à partir du coût source TTC (src) : MODÈLE de marge cible si cfg.autoPrice,
@@ -1163,18 +1171,6 @@ async function handlePriceWatch(req, res, admin, db) {
     const applied = [], flagged = [], unchanged = [], unknown = [], lockedW = [];
     const now = admin.firestore.FieldValue.serverTimestamp();
 
-    // Références dont on accepte NOMMÉMENT une variation hors plafond, parce
-    // qu'on est allé vérifier le coût à la source. Accepté dans l'URL ou dans
-    // le corps ; les deux sont fusionnés, aucun ne l'emporte silencieusement.
-    const autorises = {};
-    [(req.query && req.query.allow), body.allow].forEach(function (v) {
-      if (!v) return;
-      String(v).split(/[,\s]+/).forEach(function (s) {
-        var k = s.trim().toUpperCase();
-        if (k) autorises[k] = true;
-      });
-    });
-
     // Prix parsés indexés par SKU (pour la règle « min des sources » srcAltSkus).
     const parsedBySku = {};
     parsed.forEach((it) => { parsedBySku[String(it.sku).toUpperCase()] = it.price; });
@@ -1215,32 +1211,25 @@ async function handlePriceWatch(req, res, admin, db) {
 
       let reason = null;
       if (src < PW.MIN_TTC || src > PW.MAX_TTC) reason = 'prix source hors fourchette (' + src + ' €)';
-      // Plafond de variation : il protège d'une LECTURE ABERRANTE sur un produit
-      // dont on suivait déjà le coût réel. Au PREMIER relevé réel, le grand saut
-      // est au contraire attendu (le prix venait d'une estimation) — le bloquer
-      // reviendrait à figer définitivement un prix faux. Les bornes MIN/MAX_TTC
-      // restent actives dans tous les cas.
-      // ⚠️ AUTORISATION NOMMÉE — `&allow=SKU1,SKU2`
-      // Une variation au-delà du plafond est parfois RÉELLE : le fournisseur a
-      // vraiment changé son tarif. Le 31/07/2026, deux produits ont été bloqués
-      // (−31 % et +29 %) alors que les coûts relevés étaient exacts, vérifiés à
-      // la source par l'user. Sans cette voie, il ne restait qu'à saisir le prix
-      // À LA MAIN — ce que la règle produits interdit, et pour une bonne raison :
-      // un prix saisi ne repose sur aucun coût traçable.
+      // ⛔ PLAFOND DE VARIATION RETIRÉ — décision D-015 de l'user, 31/07/2026.
       //
-      // L'autorisation est NOMINATIVE et ne vaut que pour ce relevé : on déclare
-      // les références qu'on a vérifiées, jamais « tout laisser passer ». Elle ne
-      // lève QUE le plafond de variation — les bornes MIN/MAX_TTC et le verrou
-      // `priceLocked` restent actifs : eux ne se vérifient pas à l'œil.
-      else if (dejaReleve && cur != null && cur > 0 && Math.abs(newPrice - cur) / cur > PW.MAX_MOVE) {
-        var variation = Math.round(Math.abs(newPrice - cur) / cur * 100);
-        if (autorises[item.sku]) {
-          rec.autorise = 'variation ' + variation + ' % acceptée nommément';
-        } else {
-          reason = 'variation ' + variation + ' % > ' + Math.round(PW.MAX_MOVE * 100) + ' %'
-            + ' — vérifier le coût à la source, puis relancer avec &allow=' + item.sku;
-        }
-      }
+      // Il refusait tout prix bougeant de plus de 25 % par rapport au dernier
+      // relevé. Motif d'origine : se protéger d'une page mal lue. Motif du
+      // retrait, et il est plus fort : **le traqueur lit ce que la page du
+      // fournisseur AFFICHE — c'est exactement ce que l'user paiera.** Une
+      // hausse de 29 % n'est pas une anomalie à filtrer, c'est le tarif réel.
+      //
+      // Ce que ce verrou a réellement coûté : DVC560Z est resté à un prix qui
+      // faisait perdre 8,31 € par vente, parce que la correction nécessaire
+      // dépassait le seuil. Un garde-fou qui bloque la réparation d'une perte
+      // ne protège pas, il ampute.
+      //
+      // ⚠️ Les bornes ABSOLUES (MIN_TTC / MAX_TTC) restent en place : elles ne
+      // jugent pas une variation mais une valeur impossible, et c'est le seul
+      // filet qui attrape un parseur qui déraille. Le verrou `priceLocked`
+      // reste actif lui aussi.
+      // Une variation, même énorme, reste visible dans la réponse (`applied`)
+      // et dans `price_watch_log` : on ne perd pas la trace, on cesse de bloquer.
       if (reason) { rec.reason = reason; flagged.push(rec); continue; }
 
       if (!dryRun) {

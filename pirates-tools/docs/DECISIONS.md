@@ -371,3 +371,41 @@ tous les visiteurs les téléchargent et les font analyser par leur navigateur
 pour rien. Une fois fait, on rabaissera le plafond à la mesure réelle.
 
 **Où c'est exécuté** : `scripts/audit/p8-perf.js`, contrôle **P8.1**.
+
+## D-015 — Le plafond de variation du traqueur (25 %) est retiré
+
+**Date** : 31/07/2026 · **Statut** : ACTIVE · **Décidée par** : l'user
+
+**Ce qui existait.** `price-watch` refusait d'écrire un prix s'écartant de plus
+de 25 % du dernier relevé. Motif d'origine : se protéger d'une page cotébrico
+mal découpée.
+
+**Ce que ça a coûté, mesuré.** Deux produits sont restés bloqués alors que les
+coûts relevés étaient exacts — vérifiés à la source par l'user, au centime.
+Pour `DVC560Z`, le prix maintenu faisait **perdre 8,31 € par vente** (−7,07 €
+après impôt, soit −4,6 % de marge) là où le calculateur recommandait un prix
+rendant **+29,94 € nets**, ses 15 % visés.
+
+**L'argument qui tranche, et il est de l'user** : *le traqueur lit ce que la
+page du fournisseur AFFICHE — c'est exactement ce qui sera payé.* Une hausse de
+29 % n'est pas une anomalie de lecture à filtrer, c'est le tarif réel. Un
+garde-fou qui juge un ÉCART plutôt qu'une VALEUR bloque les vraies variations
+en même temps que les fausses, et il bloque d'autant plus fort que la
+correction est nécessaire.
+
+**Ce qui reste.** Les bornes ABSOLUES `MIN_TTC` / `MAX_TTC` : elles ne jugent
+pas une variation mais une valeur impossible. C'est le seul filet qui attrape
+un parseur qui déraille, et il ne peut pas bloquer un prix réel. Le verrou
+`priceLocked` reste actif.
+
+**Ce qu'on accepte en contrepartie, et il faut le dire.** Si cotébrico change
+la structure de ses pages et que le parseur associe un prix à la mauvaise
+référence, plus rien n'arrêtera l'écriture. La trace subsiste (`applied` dans
+la réponse, `price_watch_log` en base) mais elle est constatée APRÈS coup.
+Le contre-poids réel : l'user relit le rapport du traqueur à chaque relevé.
+
+**Ce que ça renverse** : la règle gravée le 26/07/2026 dans
+`docs/TRAQUEUR-URLS.md` (« le plafond de variation ne s'applique qu'aux
+produits déjà suivis ») devient sans objet.
+
+---

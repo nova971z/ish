@@ -94,11 +94,11 @@ au milieu et couvrent tout le catalogue.
    produit dont le prix tombait déjà juste (`unchanged`) n'était jamais écrit :
    il n'avait donc AUCUN coût réel en base, comptait comme « estimé », et ne
    pouvait pas servir de base au garde-fou coffret ± 20 €.
-2. **Le plafond de variation (25 %) ne s'applique QU'AUX produits déjà suivis.**
-   Au premier relevé réel, l'écart est attendu (le prix venait d'une
-   estimation) : le bloquer figerait définitivement un prix faux. Cas réels
-   débloqués : DJV185Z 340,64 → 254,98 € et DGA452Z 143,29 → 182,74 €.
-   Les bornes absolues MIN/MAX_TTC restent actives dans tous les cas.
+2. ~~**Le plafond de variation (25 %)**~~ — **RETIRÉ le 31/07/2026 (D-015).**
+   Il ne jugeait pas une valeur mais un ÉCART, et bloquait donc les vraies
+   variations en même temps que les fausses — d'autant plus fort que la
+   correction était nécessaire. Seules les bornes absolues MIN/MAX_TTC
+   subsistent.
 
 ### Notes
 - **`dryRun=0`** = applique les prix (marge 15 % sur le TTC affiché, promo comprise).
@@ -113,26 +113,23 @@ au milieu et couvrent tout le catalogue.
 
 ---
 
-## 🔓 Débloquer un prix signalé — `&allow=`
+## 🔓 Plus rien à débloquer — le plafond de variation est retiré
 
-Le traqueur **refuse** d'écrire un prix qui bouge de plus de 25 % par rapport
-au dernier relevé. Ce plafond protège d'une page mal lue : une lecture
-aberrante repeindrait le catalogue sans que personne ne le voie.
+**Décision D-015, 31/07/2026.** Le traqueur refusait un prix s'écartant de plus
+de 25 % du dernier relevé. Ce verrou est **supprimé**.
 
-Mais une grosse variation est parfois **réelle** — le fournisseur a changé son
-tarif. Dans ce cas :
+Motif, et il est de l'user : *le traqueur lit ce que la page du fournisseur
+affiche — c'est exactement ce qui sera payé.* Une hausse de 29 % n'est pas une
+anomalie de lecture, c'est le tarif réel.
 
-1. **vérifier le coût à la source**, chez cotébrico, produit par produit ;
-2. relancer le relevé en NOMMANT les références vérifiées :
+Ce que ce verrou a coûté : `DVC560Z` est resté à un prix qui faisait **perdre
+8,31 € par vente**, parce que la correction dépassait le seuil.
 
-```
-…/api/admin?type=price-watch&brand=MAKITA&dryRun=0&allow=DJR188ZJ,DVC560Z
-```
+**Ce qui reste** : les bornes absolues `MIN_TTC` / `MAX_TTC` — elles jugent une
+valeur impossible, pas un écart. Et le verrou `priceLocked`, produit par produit.
 
-⚠️ L'autorisation est **nominative** et ne vaut que pour ce relevé. Elle lève
-UNIQUEMENT le plafond de variation : les bornes de prix aberrant et le verrou
-`priceLocked` restent actifs — eux ne se vérifient pas à l'œil.
-
-⛔ Ne jamais élargir le plafond globalement pour éviter cette étape : le jour
-où cotébrico changera la structure de ses pages, c'est ce plafond qui empêchera
-le catalogue entier de partir de travers.
+⚠️ **Contrepartie assumée** : si cotébrico change la structure de ses pages et
+que le parseur associe un prix à la mauvaise référence, plus rien ne l'arrête.
+La trace reste (`applied` dans la réponse, `price_watch_log` en base), mais elle
+se lit APRÈS. **Relire le rapport à chaque relevé** est désormais le seul
+contre-poids.
