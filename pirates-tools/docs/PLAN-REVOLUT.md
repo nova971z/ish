@@ -382,12 +382,54 @@ optimisation de latence, plus la seule source de vérité.
 
 C'est une décision d'architecture, pas un détail. À trancher avec la réponse.
 
-## 4.2 🟠 Référence du widget RevolutCheckout.js
-`developer.revolut.com/docs/revolut-checkout-js/`
+## 4.2 ✅ RÉSOLU le 31/07/2026 — le widget
 
-Signature de `createCardField` / `payWithPopup`, options, événements
-(`onSuccess`, `onError`, `onCancel`), styles, gestion des erreurs de validation.
-Remplace `stripe.elements()` + `confirmPayment()`.
+Contrat lu **dans les définitions TypeScript du paquet npm officiel**
+(`@revolut/checkout@1.1.25`, publié le 04/03/2026) — c'est l'API réellement
+livrée, pas une page de documentation qui peut avoir pris du retard.
+
+```js
+const instance  = await RevolutCheckout(orderToken, 'prod' | 'sandbox');
+const cardField = instance.createCardField({ target, styles, classes, theme,
+                                             onSuccess, onError, onCancel,
+                                             onValidation, onStatusChange,
+                                             hidePostcodeField, locale });
+cardField.submit({ name, email, phone, billingAddress, shippingAddress });
+cardField.validate();
+instance.destroy();
+```
+
+Correspondance avec l'existant :
+
+| Aujourd'hui (`app.js`) | Demain |
+|---|---|
+| `stripe.elements({clientSecret})` (`:10191`) | `RevolutCheckout(token, mode)` |
+| `elements.create('payment')` | `instance.createCardField({ target })` |
+| `paymentElement.on('change', …)` | `onValidation(errors[])` + `onStatusChange(status)` |
+| `stripe.confirmPayment({return_url})` (`:10313`) | `cardField.submit({…})` + `onSuccess` / `onError` / `onCancel` |
+| `paymentElement.destroy()` | `instance.destroy()` |
+
+`onStatusChange` renvoie `{ focused, invalid, empty, autofilled, completed }` —
+`completed` remplace exactement le drapeau `_stripeReady`.
+
+**Différence à ne pas rater** : Stripe redirige vers `return_url` ; Revolut
+rappelle `onSuccess` **sans quitter la page**. La navigation vers `#/merci`
+devient notre responsabilité, dans le callback. Le repli client de `/merci`
+(étape A5) doit donc être revérifié : il s'appuyait sur un retour de redirection.
+
+### ⛔ Le SDK client n'expose JAMAIS l'origine de la carte
+
+Vérifié en fouillant **tous** les fichiers de types du paquet : aucun champ
+`bin`, `brand`, `funding`, `issuer`, ni pays de carte. Le seul `countryCode` qui
+existe appartient à `Address` — l'adresse de facturation que le **client saisit
+lui-même**, pas la carte.
+
+Le pays de la carte n'apparaît qu'**après** le paiement, côté serveur
+(`GET /api/payments/{id}` → `payment_method.card_country_code`).
+
+Conséquence : la « notification carte internationale » demandée le 31/07 était
+**techniquement impossible en plus d'être illégale** (voir §4.6 bis). Les deux
+raisons sont indépendantes ; la juridique suffisait déjà.
 
 ## 4.3 ✅ RÉSOLU le 31/07/2026 — quel état signifie « l'argent est acquis »
 
@@ -556,17 +598,34 @@ connaître la règle évite de la saisir à chaque fois.
 
 ---
 
-## Le prochain document, un seul
+## Plus rien ne bloque l'écriture
 
-### `RevolutCheckout.js`
+État au 31/07/2026, après la lecture des types du paquet npm :
 
-C'est le titre exact de la page. Il n'existe qu'une seule page portant ce nom
-sur tout le site — aucun risque de tomber sur le Crypto Ramp ou la Business API.
+| | |
+|---|---|
+| Signature webhook | ✅ vérifiée sur vecteur officiel |
+| État « argent acquis » | ✅ tranché (`ORDER_COMPLETED`) |
+| Widget | ✅ contrat lu dans le paquet livré |
+| Commission réelle | ✅ `payments[].fees[]` |
+| Remboursement | ✅ endpoint + `Idempotency-Key` |
 
-Ce qu'elle doit contenir : la signature de `createCardField` et
-`payWithPopup`, les options acceptées, les callbacks (`onSuccess`, `onError`,
-`onCancel`), la mise en forme du champ carte, et la gestion des erreurs de
-validation.
+Les inconnues restantes ne bloquent plus, et voici pourquoi :
 
-C'est la dernière pièce bloquante. Elle remplace `stripe.elements()` +
-`confirmPayment()` (`app.js:10191` et `10313`), soit l'étape 4 en entier.
+| Inconnue | Pourquoi ça n'arrête pas l'écriture |
+|---|---|
+| Limites de `metadata` | on garde le découpage actuel (450 car.). Plus permissif → sans effet ; plus strict → le bac à sable le dit tout de suite |
+| Hôte API du bac à sable | nécessaire pour **tester**, pas pour écrire. Arrive avec les clés |
+| Politique de re-livraison | on construit le rattrapage par réconciliation **dans tous les cas** — strictement plus sûr, quelle que soit la réponse |
+| Taux de commission | ce n'est pas une constante à deviner : c'est un **réglage** que l'user saisit (voir §4.6) |
+
+**Décision de l'user, 31/07/2026** : on retient **le taux le plus haut de la
+grille classique**, pas les 2,8 % des cartes internationales — *« aucun artisan
+ne possède une carte internationale, ou alors il ne paie pas avec »*. Le
+surcoût éventuel est assumé et rare.
+
+**Il manque donc UN chiffre, pas un document** : la valeur exacte du taux le
+plus haut de la grille classique, plus le fixe par transaction. L'user l'a sous
+les yeux dans son espace Revolut.
+
+Prochaine étape : **l'étape 1, la couture**. Elle ne dépend d'aucune inconnue.
