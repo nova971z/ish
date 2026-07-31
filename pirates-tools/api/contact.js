@@ -9,6 +9,7 @@
 const rl = require('./_lib/ratelimit');
 const { getFirebase, verifyUid, verifyIdentity } = require('./_lib/firebase');
 const coursesLib = require('./_lib/courses');
+const paiementSocle = require('./_lib/paiement');   // couture : fournisseur actif
 
 module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(204).end();
@@ -753,13 +754,17 @@ async function handleCourses(req, body, cfg, res) {
   if (body.type === 'course-create') {
     if (!isTester) return res.status(403).json({ ok: false, error: 'Service en test — ouverture le 1er janvier.' });
     const piId = String(body.paymentIntentId || '').trim().slice(0, 80);
-    const stripeKey = process.env.STRIPE_SECRET_KEY;
+    // ⚠️ COUTURE PAIEMENT : on ne parle plus au SDK. `etat === 'paye'` remplace
+    // `status === 'succeeded'` — la traduction vit dans le module du
+    // fournisseur, pas ici, et un etat inconnu ne vaut JAMAIS « paye ».
+    const paiement = paiementSocle.fournisseur();
     if (!piId) return res.status(400).json({ ok: false, error: 'Paiement requis — la course est créée après le paiement de la commande.' });
-    if (!stripeKey) return res.status(503).json({ ok: false, error: 'Paiement non configuré.' });
-    let pi = null;
-    try { pi = await require('stripe')(stripeKey).paymentIntents.retrieve(piId); }
+    if (!paiement.estConfigure()) return res.status(503).json({ ok: false, error: 'Paiement non configuré.' });
+    let paye = null;
+    try { paye = await paiement.lirePaiement(piId); }
     catch (e) { return res.status(404).json({ ok: false, error: 'Paiement introuvable.' }); }
-    if (!pi || pi.status !== 'succeeded') return res.status(400).json({ ok: false, error: 'Paiement non abouti.' });
+    if (!paye || paye.etat !== paiementSocle.ETAT_ACQUIS) return res.status(400).json({ ok: false, error: 'Paiement non abouti.' });
+    const pi = { id: paye.id, amount: paye.montantCents, metadata: paye.metadata || {} };
     if (!pi.metadata || pi.metadata.source !== 'pirates-tools' || !pi.metadata.courseZone) {
       return res.status(400).json({ ok: false, error: 'Ce paiement ne correspond pas à une commande avec livraison.' });
     }
@@ -1031,13 +1036,14 @@ async function handleCourses(req, body, cfg, res) {
     const id = String(body.id || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 64);
     const piId = String(body.paymentIntentId || '').trim().slice(0, 80);
     if (!id || !piId) return res.status(400).json({ ok: false, error: 'id et paiement requis' });
-    const stripeKey = process.env.STRIPE_SECRET_KEY;
-    if (!stripeKey) return res.status(503).json({ ok: false, error: 'Paiement non configuré.' });
-    let pi = null;
-    try { pi = await require('stripe')(stripeKey).paymentIntents.retrieve(piId); }
+    // ⚠️ COUTURE PAIEMENT — voir le bloc course-create ci-dessus.
+    const paiement = paiementSocle.fournisseur();
+    if (!paiement.estConfigure()) return res.status(503).json({ ok: false, error: 'Paiement non configuré.' });
+    let paye = null;
+    try { paye = await paiement.lirePaiement(piId); }
     catch (e) { return res.status(404).json({ ok: false, error: 'Paiement introuvable.' }); }
-    if (!pi || pi.status !== 'succeeded') return res.status(400).json({ ok: false, error: 'Paiement non abouti.' });
-    const md = pi.metadata || {};
+    if (!paye || paye.etat !== paiementSocle.ETAT_ACQUIS) return res.status(400).json({ ok: false, error: 'Paiement non abouti.' });
+    const md = paye.metadata || {};
     if (md.source !== 'pirates-tools' || md.courseRef !== id) {
       return res.status(400).json({ ok: false, error: 'Ce paiement ne correspond pas à cette livraison.' });
     }
@@ -1483,7 +1489,23 @@ async function handleCourses(req, body, cfg, res) {
     }
     let escrow = course.paid ? 'liberable' : null;
     if (course.paid && course.feeCents > 0) {
-      // Versement automatique si le livreur a un compte Stripe Connect lié.
+      /* ⛔ SEUL APPEL DIRECT AU SDK STRIPE QUI SUBSISTE DANS TOUT LE SITE.
+         Recensé le 31/07/2026 pendant la migration Revolut, et laissé EN L'ÉTAT
+         volontairement. Trois raisons :
+
+         1. C'est **Stripe Connect** — un versement à un TIERS. La Merchant API
+            de Revolut n'a aucun équivalent : son `/api/payouts` ne fait que
+            CONSULTER les virements de notre propre compte vers notre banque.
+         2. Le module livreur est **inactif** (`COURIER_ENABLED=false`).
+         3. La décision du 27/07/2026 a renversé le principe : la plateforme ne
+            fixe plus le prix de la course et ne l'encaisse plus (règle
+            livraison, art. L7342-1 — présomption de salariat). Ce bloc est donc
+            un reliquat de l'ancien modèle, conservé mais plus branché.
+
+         ⚠️ À TRANCHER AVANT toute réouverture du service de livraison, pas le
+         jour même : autre produit Revolut, virement manuel, ou Stripe conservé
+         pour ce seul flux. `check-paiement.js` tient un cliquet : ce fichier a
+         droit à UN appel direct, celui-ci, et pas un de plus. */
       let released = false;
       try {
         const stripeKey = process.env.STRIPE_SECRET_KEY;

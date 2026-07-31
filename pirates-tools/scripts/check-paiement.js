@@ -201,6 +201,66 @@ module.exports = function () {
       + 'même conséquence sur le compte de résultat.');
   });
 
+  /* ── 8. ⛔⛔ LE FILET POSÉ AVANT LE CODE : billingAddress ───────────────
+     La doc Revolut le dit explicitement :
+
+       « Some sandbox payments MAY STILL SUCCEED WITHOUT billingAddress.
+         DO NOT treat that as production-ready behaviour. »
+
+     Autrement dit : le bac à sable passe au vert sans l'adresse de
+     facturation, et la PRODUCTION refuse les cartes. C'est le mode de panne
+     que ce projet combat depuis le début — un test vert pour la mauvaise
+     raison. On validerait tout en sandbox, on basculerait, et les paiements
+     commenceraient à échouer sans qu'aucun contrôle n'ait bougé.
+
+     Ce contrôle DORT tant que `createCardField` n'existe pas dans app.js, et
+     MORD à la seconde où quelqu'un l'écrit sans les trois champs obligatoires.
+     Le poser maintenant, c'est le seul moment où l'on est sûr de ne pas
+     l'oublier. */
+  /* ── 9. CLIQUET sur contact.js : UN seul appel direct toléré ───────────
+     contact.js garde un `require('stripe')` : `transfers.create`, le versement
+     au livreur via Stripe Connect. La Merchant API de Revolut n'a AUCUN
+     équivalent (son /api/payouts ne fait que consulter nos propres virements),
+     le module livreur est inactif, et la décision du 27/07/2026 a de toute
+     façon renversé le principe — la plateforme n'encaisse plus la course.
+
+     On ne le supprime pas, on l'ENCADRE : un cliquet à exactement 1. Toute
+     nouvelle dépendance directe au SDK dans ce fichier fera rougir la CI. */
+  var CONTACT = path.join(RACINE, 'api', 'contact.js');
+  if (fs.existsSync(CONTACT)) {
+    var cSrc = fs.readFileSync(CONTACT, 'utf8');
+    var directs = (cSrc.match(/require\(\s*['"]stripe['"]\s*\)/g) || []).length;
+    ok(directs <= 1,
+      '⛔ api/contact.js contient ' + directs + ' appels directs au SDK Stripe. '
+      + 'UN SEUL est toléré (transfers.create — Stripe Connect, sans équivalent '
+      + 'Revolut connu). Tout appel supplémentaire est un endroit de plus à '
+      + 'réécrire le jour de la bascule.');
+    if (directs === 1) {
+      ok(/transfers\.create/.test(cSrc),
+        'api/contact.js garde un appel direct au SDK, mais ce n\'est plus '
+        + '`transfers.create` : le cliquet protégeait une exception précise, pas '
+        + 'un droit général à appeler Stripe depuis ce fichier.');
+    }
+  }
+
+  var APP = path.join(RACINE, 'app.js');
+  if (fs.existsSync(APP)) {
+    var appSrc = fs.readFileSync(APP, 'utf8');
+    if (/createCardField/.test(appSrc)) {
+      [
+        ['billingAddress', 'l\'adresse de FACTURATION — sans elle, la production refuse '
+          + 'les cartes alors que le bac à sable les accepte'],
+        ['email', 'l\'e-mail du client'],
+        ['name', 'le nom du porteur (il n\'existe PAS de champ cardholderName séparé '
+          + 'pour le card field)']
+      ].forEach(function (c) {
+        ok(new RegExp('\\b' + c[0] + '\\b').test(appSrc),
+          '⛔ app.js appelle createCardField mais ne mentionne nulle part `' + c[0] + '` : '
+          + c[1] + '. Revolut l\'exige en production.');
+      });
+    }
+  }
+
   return errors;
 };
 

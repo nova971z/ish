@@ -417,6 +417,57 @@ rappelle `onSuccess` **sans quitter la page**. La navigation vers `#/merci`
 devient notre responsabilité, dans le callback. Le repli client de `/merci`
 (étape A5) doit donc être revérifié : il s'appuyait sur un retour de redirection.
 
+### ⛔⛔ LE PIÈGE LE PLUS DANGEREUX DE TOUTE LA MIGRATION
+
+Documenté noir sur blanc sur la page *Accept payments via Card field* :
+
+> *« Some sandbox payments **may still succeed without billingAddress**. **Do
+> not treat that as production-ready behaviour.** For reliable production card
+> acceptance, include `name`, `email`, and `billingAddress` in the widget
+> flow. »*
+
+**Le bac à sable passe au vert sans l'adresse de facturation. La production
+refuse les paiements.** C'est exactement le mode de panne que le projet
+combat depuis le début : un test vert pour la mauvaise raison. On validerait
+tout en sandbox, on basculerait, et les cartes commenceraient à être refusées
+sans qu'aucun contrôle n'ait rougi.
+
+Trois champs obligatoires en production, à fournir dans `createCardField()` ou
+dans `submit()` :
+
+| Champ | Contenu |
+|---|---|
+| `name` | nom du porteur — ⚠️ pas de champ `cardholderName` séparé pour le card field |
+| `email` | e-mail du client |
+| `billingAddress` | `{ countryCode, postcode, city, streetLine1 }` |
+
+`shippingAddress` reste facultatif ; s'il est fourni, il lui faut **au moins**
+`countryCode` et `postcode`.
+
+✅ **Bonne nouvelle** : la modale de paiement du site collecte DÉJÀ nom, ligne 1,
+ville et code postal (`validatePayAddress`). Rien de neuf à demander au client —
+il faut juste ne pas oublier de transmettre ces valeurs au widget.
+
+⛔ **Filet posé AVANT le code** : `check-paiement.js` refuse tout `app.js` qui
+appellerait `createCardField` sans `billingAddress`. Le contrôle dort tant que
+la ligne n'existe pas, et mord dès qu'elle apparaît.
+
+### Le contrat exact du champ carte (page Card field, Web)
+
+```js
+const { createCardField } = await RevolutCheckout(orderToken, 'sandbox');
+const cardField = createCardField({
+  target: document.getElementById('card-field'),
+  name, email, billingAddress,          // ⛔ obligatoires en production
+  onSuccess, onError, onCancel, onValidation,
+  locale, theme, styles, classes, savePaymentMethodFor
+});
+cardField.submit(meta);   // meta peut porter name/email/billingAddress à la place
+```
+
+Le HTML se réduit à un `<div>` vide + un bouton qui appelle `submit()`. Les
+conteneurs actuels (`#stripePaymentElement`, `#stripeCardError`) se recyclent.
+
 ### ⛔ Le SDK client n'expose JAMAIS l'origine de la carte
 
 Vérifié en fouillant **tous** les fichiers de types du paquet : aucun champ
