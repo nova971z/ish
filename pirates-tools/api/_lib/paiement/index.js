@@ -57,6 +57,35 @@ var ETATS = ['en_attente', 'autorise', 'paye', 'echoue', 'annule', 'rembourse', 
    `if (etat === 'payé')` avec un accent est passé une fois et n'a rien fait. */
 var ETAT_ACQUIS = 'paye';
 
+/* ── LE GENRE D'UN ÉVÉNEMENT DE WEBHOOK ───────────────────────────────────
+   Le webhook aiguillait sur les noms d'événements de Stripe
+   (`payment_intent.succeeded`…). Revolut en a d'autres (`ORDER_COMPLETED`…), et
+   surtout une SÉMANTIQUE différente. On aiguille donc sur un GENRE commun.
+
+     'encaisse'        · l'argent est acquis → le SEUL genre qui déclenche des
+                         effets (journal, facture, email, expédition).
+     'autorise'        · autorisé mais RÉVERSIBLE → on journalise, on n'expédie pas.
+     'tentative_ratee' · ⛔⛔ UNE TENTATIVE a échoué, PAS la commande.
+                         Chez Revolut, le client peut réessayer sur le MÊME
+                         ordre : ORDER_PAYMENT_DECLINED et ORDER_PAYMENT_FAILED
+                         n'enterrent rien. Traduire ça en « commande morte » —
+                         le réflexe hérité de `payment_intent.payment_failed` —
+                         tuerait une vente en cours de sauvetage.
+     'abandonne'       · la commande est morte pour de bon (annulée ou expirée).
+     'autre'           · non traité : journalisé, ignoré.
+
+   ⛔ Un événement inconnu vaut 'autre', JAMAIS 'encaisse'. Même règle que pour
+   les états : l'inconnu ne déclenche rien. */
+var GENRES = ['encaisse', 'autorise', 'tentative_ratee', 'abandonne', 'autre'];
+var GENRE_ACQUIS = 'encaisse';
+
+function normaliserGenre(brut, table) {
+  var k = String(brut == null ? '' : brut).trim();
+  if (!k) return 'autre';
+  var v = table && Object.prototype.hasOwnProperty.call(table, k) ? table[k] : null;
+  return (v && GENRES.indexOf(v) !== -1) ? v : 'autre';
+}
+
 /* Les opérations que TOUT fournisseur doit exposer. `check-paiement.js` vérifie
    que chaque module les fournit toutes — un fournisseur incomplet échouerait
    au premier paiement réel, pas au déploiement. */
@@ -124,6 +153,9 @@ function paiementVide() {
 module.exports = {
   ETATS: ETATS,
   ETAT_ACQUIS: ETAT_ACQUIS,
+  GENRES: GENRES,
+  GENRE_ACQUIS: GENRE_ACQUIS,
+  normaliserGenre: normaliserGenre,
   OPERATIONS: OPERATIONS,
   nomFournisseur: nomFournisseur,
   fournisseur: fournisseur,

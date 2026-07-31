@@ -30,6 +30,18 @@ var ETATS_STRIPE = {
   'cancelled': 'annule'
 };
 
+/* Genres d'evenements — vocabulaire commun (voir index.js).
+   `payment_intent.payment_failed` vaut 'tentative_ratee' et NON 'abandonne' :
+   chez Stripe aussi le client peut re-tenter sa carte sur le meme intent. */
+var GENRES_STRIPE = {
+  'payment_intent.succeeded': 'encaisse',
+  'checkout.session.completed': 'encaisse',
+  'payment_intent.amount_capturable_updated': 'autorise',
+  'payment_intent.payment_failed': 'tentative_ratee',
+  'payment_intent.canceled': 'abandonne',
+  'checkout.session.expired': 'abandonne'
+};
+
 function nom() { return 'stripe'; }
 
 function cle() { return process.env.STRIPE_SECRET_KEY || ''; }
@@ -217,7 +229,8 @@ function verifierSignature(corpsBrut, entetes) {
       // ⚠️ Revolut n'en fournit AUCUN — sa clé devra être dérivée de
       // event + order_id. D'où ce champ dans le contrat plutôt qu'un
       // `event.id` recopié partout.
-      cle: evenement.id
+      cle: evenement.id,
+      genre: socle.normaliserGenre(evenement.type, GENRES_STRIPE)
     };
   } catch (e) {
     return { ok: false, erreur: e.message };
@@ -245,5 +258,6 @@ module.exports = {
   depuisIntent: depuisIntent,
   lireSession: lireSession,   // ⚠️ hors contrat commun — voir son commentaire
   creerSession: creerSession, // ⚠️ hors contrat commun — disparaît avec Revolut
-  ETATS_STRIPE: ETATS_STRIPE
+  ETATS_STRIPE: ETATS_STRIPE,
+  GENRES_STRIPE: GENRES_STRIPE
 };

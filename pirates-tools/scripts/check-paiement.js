@@ -175,6 +175,90 @@ module.exports = function () {
     if (avantCles.m === undefined) delete process.env.REVOLUT_MODE; else process.env.REVOLUT_MODE = avantCles.m;
   }
 
+  /* ── 4 bis. ⛔⛔ LE GENRE DES ÉVÉNEMENTS — un ratage n'est pas un abandon ─
+     Le webhook aiguille désormais sur le GENRE, pas sur le nom d'événement.
+     C'est là que se joue la distinction la plus coûteuse de la migration :
+     chez Revolut, un paiement refusé n'enterre PAS la commande — le client
+     peut réessayer sur le MÊME ordre. La documentation est formelle :
+
+       « Receiving ORDER_PAYMENT_FAILED or ORDER_PAYMENT_DECLINED does not mean
+         the order has reached a final unsuccessful state. »
+
+     Confondre 'tentative_ratee' et 'abandonne' tuerait une vente en cours de
+     sauvetage, sans qu'aucun test fonctionnel ne bronche. */
+  [['stripe', stripe.GENRES_STRIPE], ['revolut', revolut.GENRES_REVOLUT]].forEach(function (f) {
+    var table = f[1];
+    ok(table && typeof table === 'object',
+      'le fournisseur ' + f[0] + ' n\'expose pas de table de GENRES d\'événements — '
+      + 'le webhook ne saurait pas quoi faire de ses notifications.');
+    if (!table) return;
+    Object.keys(table).forEach(function (k) {
+      ok((socle.GENRES || []).indexOf(table[k]) !== -1,
+        f[0] + ' traduit l\'événement « ' + k + ' » en « ' + table[k] + ' », hors du '
+        + 'vocabulaire commun. Un genre inventé ne serait traité nulle part.');
+    });
+    var encaissent = Object.keys(table).filter(function (k) { return table[k] === socle.GENRE_ACQUIS; });
+    ok(encaissent.length > 0,
+      '⛔ aucun événement de ' + f[0] + ' ne vaut « encaisse » : plus rien ne '
+      + 'déclencherait jamais de commande.');
+  });
+
+  /* Les cas nommés, un par un — ce sont ceux qui coûtent. */
+  var GR = revolut.GENRES_REVOLUT || {};
+  ok(GR.ORDER_COMPLETED === socle.GENRE_ACQUIS,
+    'ORDER_COMPLETED doit valoir « encaisse » — sinon aucune commande ne part jamais.');
+  ok(GR.ORDER_AUTHORISED === 'autorise',
+    '⛔ ORDER_AUTHORISED ne vaut pas « autorise ». S\'il valait « encaisse », on '
+    + 'expédierait sur de l\'argent RÉVERSIBLE : les fonds retournent au client si '
+    + 'l\'ordre n\'est pas capturé.');
+  ['ORDER_PAYMENT_DECLINED', 'ORDER_PAYMENT_FAILED'].forEach(function (e) {
+    ok(GR[e] === 'tentative_ratee',
+      '⛔⛔ ' + e + ' vaut « ' + GR[e] + ' » au lieu de « tentative_ratee ». '
+      + 'C\'est UNE TENTATIVE qui échoue, pas la commande : le client peut réessayer '
+      + 'sur le MÊME ordre. L\'enterrer ici tue une vente en cours de sauvetage, et '
+      + 'le ORDER_COMPLETED suivant arrive sur un dossier déjà clos.');
+  });
+  ['ORDER_CANCELLED', 'ORDER_FAILED'].forEach(function (e) {
+    ok(GR[e] === 'abandonne',
+      e + ' doit valoir « abandonne » : ce sont les deux SEULS événements qui tuent '
+      + 'définitivement une commande chez Revolut.');
+  });
+  var GS = stripe.GENRES_STRIPE || {};
+  ok(GS['payment_intent.payment_failed'] === 'tentative_ratee',
+    '⛔ payment_intent.payment_failed vaut « ' + GS['payment_intent.payment_failed']
+    + ' ». Chez Stripe aussi le client peut re-tenter sa carte sur le même intent.');
+
+  /* Un événement inconnu ne devient JAMAIS « encaisse ». */
+  ['inexistant', 'ORDER_', 'constructor', '__proto__', 'toString', '', null, undefined, 0, {}]
+    .forEach(function (v) {
+      [GR, GS].forEach(function (t) {
+        ok(socle.normaliserGenre(v, t) === 'autre',
+          '⛔ l\'événement inconnu (' + String(v) + ') ne vaut pas « autre ». Un genre '
+          + 'non cartographié qui déclencherait quelque chose, c\'est une commande '
+          + 'expédiée sur une notification qu\'on n\'a pas comprise.');
+      });
+    });
+
+  /* ── 4 ter. Le webhook aiguille bien sur le GENRE ─────────────────────
+     TROU DÉCOUVERT PAR SABOTAGE le 31/07/2026 : remettre `switch (event.type)`
+     dans le webhook ne faisait rougir AUCUN contrôle. Or c'est le retour
+     exact à l'état d'avant — les noms d'événements Stripe en dur — et le jour
+     de la bascule, Revolut n'émettant aucun de ces noms, TOUS les paiements
+     tomberaient dans le `default` : encaissés, jamais traités. Le client
+     paierait et ne recevrait rien. */
+  var WH = path.join(RACINE, 'api', 'webhook.js');
+  if (fs.existsSync(WH)) {
+    var whSrc = fs.readFileSync(WH, 'utf8');
+    ok(/switch\s*\(\s*verif\.genre\s*\)/.test(whSrc),
+      '⛔ api/webhook.js n\'aiguille plus sur `verif.genre`. S\'il est revenu à '
+      + '`switch (event.type)`, il attend des noms d\'événements Stripe : le jour de '
+      + 'la bascule, Revolut n\'en émet aucun et TOUS les paiements tomberaient dans '
+      + 'le cas par défaut — encaissés, jamais traités.');
+    ok(!/case\s*'payment_intent\.succeeded'/.test(whSrc),
+      '⛔ api/webhook.js contient encore un `case \'payment_intent.succeeded\'` : '
+      + 'un nom d\'événement propre à Stripe est redevenu une décision.');
+  }
+
   /* ── 5. Le paiement normalisé n'a aucun champ `undefined` ──────────────
      `undefined` disparaît d'un JSON et d'un document Firestore. Un champ
      manquant doit se VOIR, donc valoir null. */

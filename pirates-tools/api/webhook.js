@@ -144,26 +144,42 @@ async function handler(req, res) {
     // ctx.emailsSent : une reprise ne renvoie JAMAIS les emails déjà partis.
     var ctx = { claimRef: claimRef, emailsSent: !!(claimPrev && claimPrev.emailsSent) };
     try {
-      switch (event.type) {
-        case 'checkout.session.completed':
-          await handleSessionCompleted(paiement, fb, event.data.object, ctx);
+      /* ⚠️ AIGUILLAGE PAR GENRE, plus par nom d'événement (31/07/2026).
+         Les noms appartiennent au fournisseur (`payment_intent.succeeded` chez
+         Stripe, `ORDER_COMPLETED` chez Revolut) ; le GENRE est commun, et c'est
+         lui qui porte la décision.
+
+         ⛔⛔ La distinction qui coûte de l'argent : 'tentative_ratee' n'est PAS
+         'abandonne'. Chez Revolut, ORDER_PAYMENT_DECLINED signale l'échec d'UNE
+         tentative — le client peut réessayer sur le MÊME ordre. Enterrer la
+         commande à ce moment-là tuerait une vente en train d'être sauvée. */
+      switch (verif.genre) {
+        case paiementSocle.GENRE_ACQUIS:
+          // Le SEUL genre qui déclenche des effets : journal, facture, emails.
+          if (event.type === 'checkout.session.completed') {
+            await handleSessionCompleted(paiement, fb, event.data.object, ctx);
+          } else {
+            await handleIntentSucceeded(paiement, fb, event.data.object, ctx);
+          }
           break;
 
-        case 'payment_intent.succeeded':
-          await handleIntentSucceeded(paiement, fb, event.data.object, ctx);
-          break;
-
-        case 'payment_intent.payment_failed':
+        case 'tentative_ratee':
+          // ⛔ On journalise, on n'enterre RIEN : la commande reste vivante.
           await handleIntentFailed(fb, event.data.object);
           break;
 
-        case 'checkout.session.expired': {
-          console.log('[webhook] Session expired:', event.data.object.id);
+        case 'autorise':
+          // Argent RÉSERVÉ, pas encaissé. Trace utile, aucun effet.
+          console.log('[webhook] Autorisé (réversible), aucun effet:', cleEvenement);
           break;
-        }
+
+        case 'abandonne':
+          console.log('[webhook] Commande abandonnée (annulée ou expirée):', cleEvenement);
+          break;
 
         default:
-          console.log('[webhook] Unhandled event type:', event.type);
+          // ⛔ Genre inconnu : journalisé et IGNORÉ, jamais traité en succès.
+          console.log('[webhook] Événement non traité:', event.type, '(genre ' + verif.genre + ')');
       }
     } catch (procErr) {
       console.error('[webhook] Traitement en echec (le fournisseur re-livrera):', cleEvenement, procErr.message);

@@ -110,6 +110,21 @@ var ETATS_PAIEMENT = {
   'refunded': 'rembourse'
 };
 
+/* Genres d'evenements — vocabulaire commun (voir index.js).
+   ⛔⛔ ORDER_PAYMENT_DECLINED et ORDER_PAYMENT_FAILED valent 'tentative_ratee',
+   PAS 'abandonne'. La documentation est formelle : « Receiving
+   ORDER_PAYMENT_FAILED or ORDER_PAYMENT_DECLINED does not mean the order has
+   reached a final unsuccessful state. The customer can retry payment on the
+   same order. » Les enterrer tuerait une vente en cours de sauvetage. */
+var GENRES_REVOLUT = {
+  'ORDER_COMPLETED': 'encaisse',
+  'ORDER_AUTHORISED': 'autorise',
+  'ORDER_PAYMENT_DECLINED': 'tentative_ratee',
+  'ORDER_PAYMENT_FAILED': 'tentative_ratee',
+  'ORDER_CANCELLED': 'abandonne',
+  'ORDER_FAILED': 'abandonne'
+};
+
 /* Un paiement est-il celui qui a réellement abouti ? */
 function estAbouti(p) {
   return !!p && socle.normaliserEtat(p.state, ETATS_PAIEMENT) === socle.ETAT_ACQUIS;
@@ -321,7 +336,8 @@ function verifierSignature(corpsBrut, entetes, maintenantMs) {
        se dérive donc de event + order_id. Sans ça, deux événements différents
        du même ordre se marcheraient dessus, ou une re-livraison serait
        retraitée. */
-    cle: String(evenement.event) + ':' + String(evenement.order_id)
+    cle: String(evenement.event) + ':' + String(evenement.order_id),
+    genre: socle.normaliserGenre(evenement.event, GENRES_REVOLUT)
   };
 }
 
@@ -374,6 +390,7 @@ module.exports = {
   calculerSignature: calculerSignature,
   comparerSignatures: comparerSignatures,
   ETATS_ORDRE: ETATS_ORDRE,
+  GENRES_REVOLUT: GENRES_REVOLUT,
   ETATS_PAIEMENT: ETATS_PAIEMENT,
   FENETRE_MS: FENETRE_MS,
   _modeProd: modeProd,
