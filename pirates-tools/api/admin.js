@@ -43,6 +43,46 @@ module.exports = async function handler(req, res) {
   // ── GET : list overrides OR recent orders ────────────────
   if (req.method === 'GET') {
     const type = (req.query && req.query.type) || 'overrides';
+
+    // ── GET ?type=export-catalogue : le catalogue FUSIONNÉ, prêt à remplacer
+    //    products.json ───────────────────────────────────────────────────────
+    // POURQUOI CE POINT D'ENTRÉE EXISTE
+    // Le site a DEUX sources de prix : `products.json` (versionné, servi par le
+    // CDN) et `product_overrides` (Firestore, écrit par le traqueur). Le client
+    // peint d'abord le fichier statique, puis passe à /api/products sous 6 s —
+    // si l'API traîne ou échoue, le visiteur GARDE le prix du fichier. Comme
+    // rien ne renvoie jamais les overrides vers le fichier, l'écart ne fait que
+    // croître : c'est la cause des « prix différents partout ».
+    //
+    // Cet export rend la fusion telle qu'elle doit être écrite dans le fichier.
+    // On la récupère, on la commite, et le statique cesse de mentir.
+    //
+    // ⚠️ `loadPublicCatalog()` et non `loadCatalog()` : les champs internes
+    // (coût d'achat fournisseur, marge appliquée) ne doivent JAMAIS entrer dans
+    // un fichier servi publiquement. Publier `priceSrcTTC`, ce serait publier
+    // le prix d'achat de chaque produit — et ce serait irréversible, le fichier
+    // partant sur le CDN puis dans l'historique git.
+    if (type === 'export-catalogue') {
+      try {
+        const fusion = await catalog.loadPublicCatalog();
+        const INTERNES = ['priceSource', 'priceSrcTTC', 'priceCheckedAt', 'priceMarkup',
+          'priceMode', 'priceRecomputedAt', 'priceCostOrigin', 'hidden'];
+        const fuites = [];
+        fusion.forEach(function (p) {
+          INTERNES.forEach(function (k) { if (k in p && fuites.indexOf(k) === -1) fuites.push(k); });
+        });
+        if (fuites.length) {
+          return res.status(500).json({
+            ok: false,
+            error: 'Export refusé : champs internes présents (' + fuites.join(', ')
+              + '). Publier le prix d\'achat serait irréversible.'
+          });
+        }
+        return res.status(200).json({ ok: true, count: fusion.length, products: fusion });
+      } catch (err) {
+        return res.status(500).json({ ok: false, error: err.message });
+      }
+    }
     // FAIL-LOUD : price-watch est POST uniquement (corps JSON {text} + en-tête
     // x-admin-secret — voir docs/TRAQUEUR-URLS.md). Avant, un GET retombait
     // SILENCIEUSEMENT sur la liste des overrides → un raccourci iPad mal

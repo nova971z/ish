@@ -81,6 +81,13 @@ var reqInterd   = safeRequire('./interdits',         'check-interdits');
 // La porte du traqueur : elle doit ouvrir price-watch, et RIEN d'autre.
 // Le 31/07 elle s'est refermee en silence et les prix ont cesse d'etre releves.
 var reqWatchAu  = safeRequire('./check-watch-auth',  'check-watch-auth');
+// Le prix AFFICHE doit etre celui qui sera DEBITE. Le serveur calcule depuis
+// price_ht ; `price` n'est qu'un affichage. 27 fiches divergeaient le 31/07.
+var reqPrixAff  = safeRequire('./check-prix-affiches','check-prix-affiches');
+// products.json est SERVI PUBLIQUEMENT : le prix d'achat fournisseur ne doit
+// jamais s'y trouver. 3 fiches l'exposaient le 31/07 — irreversible une fois
+// sur le CDN et dans l'historique git.
+var reqPrixFui  = safeRequire('./check-prix-fuite',  'check-prix-fuite');
 
 // NOTE 25/07/2026 : l'étape lint-products.js (fichier jamais versionné,
 // silencieusement sautée à chaque run) est SUPPRIMÉE — ses invariants réels
@@ -140,6 +147,8 @@ var reqWatchAu  = safeRequire('./check-watch-auth',  'check-watch-auth');
   await runOne(reqCouv,     'check-couverture');
   await runOne(reqInterd,   'check-interdits');
   await runOne(reqWatchAu,  'check-watch-auth');
+  await runOne(reqPrixAff,  'check-prix-affiches');
+  await runOne(reqPrixFui,  'check-prix-fuite');
 
   var dur = Math.max(1, Date.now() - started);
   if (errors.length){
