@@ -487,3 +487,25 @@ les champs `stripe*` des paiements déjà encaissés. C'est l'historique
 comptable, il se conserve.
 
 ---
+
+**Appliqué le 31/07/2026 (volet 2).** Un TROISIÈME mode de règlement entre dans
+le vocabulaire du livreur : `especes` · `virement` · **`lien`**. Le livreur émet
+lui-même son lien de paiement, le client règle en direct, l'argent arrive sur
+son compte tout de suite. Rien ne transite par Pirates Tools.
+
+⛔ **Ce n'est PAS une obligation, et le texte de l'écran le dit noir sur blanc** :
+les espèces et le virement restent là, et le choix ne change rien à l'accès aux
+courses, à l'annuaire ni au classement. Revolut Business est cité comme *ce que
+nous utilisons nous-mêmes*, avec « il en existe d'autres, prends celui que tu
+veux, ou n'en prends aucun ». Une formulation qui laisserait croire qu'un compte
+est exigé serait fausse — et ressemblerait à une condition déguisée.
+
+**Le piège que ça a créé, et la porte posée dessus.** Quatre écrans écrivaient
+chacun leur `paiement === 'virement' ? … : …`. Un troisième mode retombe
+silencieusement dans le « sinon » : le livreur coche « lien de paiement », et
+l'accord annonce des **espèces** au client. Rien ne plante — ça ment, et on ne
+s'en aperçoit qu'au litige. Les quatre copies passent maintenant par
+`lvPaiementLabel`, source unique, et `check-paiement` **interdit** le ternaire à
+deux branches sur ce champ. Le vocabulaire serveur est vérifié par appel réel :
+chaque mode doit être accepté par `sanitizePaiement` et porter un libellé **non
+vide et distinct** ; un mode inventé doit être refusé.

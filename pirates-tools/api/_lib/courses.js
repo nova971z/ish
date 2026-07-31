@@ -101,7 +101,15 @@ function sanitizeLines(raw) {
 // livreur, la date, l'heure et le point de dépôt.
 // ⚖️ Le prix n'est ni proposé ni borné par la plateforme : le champ est libre,
 // les bornes ci-dessous ne sont qu'un garde-fou anti-faute de frappe.
-const ACCORD_PAIEMENTS = ['virement', 'especes'];
+/* ⚖️ D-016 volet 2 (31/07/2026) — TROIS modes, et le troisième est le seul qui
+   paie le livreur INSTANTANÉMENT. `lien` : le livreur émet lui-même son lien de
+   paiement, le client le règle en direct, l'argent arrive sur SON compte. Rien
+   ne transite par Pirates Tools — ce qui renforce D-009 (art. L7342-1) plutôt
+   que de l'affaiblir : la plateforme ne fixe pas le prix ET ne touche pas
+   l'argent de la course.
+   ⛔ Le livreur n'est JAMAIS obligé d'ouvrir quoi que ce soit : c'est une
+   option parmi trois, et « espèces » reste le défaut. */
+const ACCORD_PAIEMENTS = ['virement', 'especes', 'lien'];
 const ACCORD_PRIX_MIN = 1;
 const ACCORD_PRIX_MAX = 2000;
 
@@ -143,9 +151,9 @@ function sanitizeAccord(raw, course, paiementLivreur) {
 }
 
 function accordPaiementLabel(p) {
-  return p === 'virement'
-    ? 'Facturation classique — virement au livreur'
-    : 'Espèces, en main propre à la livraison';
+  if (p === 'virement') return 'Facturation classique — virement au livreur';
+  if (p === 'lien') return 'Lien de paiement envoyé par le livreur — réglé en direct';
+  return 'Espèces, en main propre à la livraison';
 }
 
 // Résumé lisible de l'accord (chat, emails, récapitulatif).

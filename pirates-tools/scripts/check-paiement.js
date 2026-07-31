@@ -752,6 +752,56 @@ module.exports = async function () {
       + 'nom par `encodeURIComponent` : le `&` devient `%26`, le serveur reçoit un type qui '
       + 'n\'existe pas et répond autre chose — sans la moindre erreur à l\'écran. Les '
       + 'paramètres passent par le 2ᵉ argument.');
+
+    /* ── d) LE MODE DE RÈGLEMENT DU LIVREUR — trois modes, un seul libellé ──
+       D-016 volet 2 a ajouté `lien` (le livreur émet son propre lien, il est
+       payé tout de suite, rien ne transite par la plateforme).
+
+       ⛔ Le danger n'est PAS qu'un écran plante : c'est qu'il MENTE. Chaque
+       écran écrivait son propre `paiement === 'virement' ? … : …` — quatre
+       copies. Un troisième mode retombe silencieusement dans le « sinon » :
+       le livreur coche « lien de paiement », et l'accord annonce des ESPÈCES
+       au client. Personne ne voit rien, jusqu'au litige sur la livraison.
+       On interdit donc le ternaire à deux branches sur ce champ. */
+    var ternairesPaiement = (appSrc.match(/paiement\s*===\s*'virement'\s*\?/g) || []).length;
+    ok(ternairesPaiement === 0,
+      '⛔⛔ app.js teste encore `paiement === \'virement\' ?` en ternaire ('
+      + ternairesPaiement + ' fois). Un mode de règlement qui n\'est ni « virement » ni '
+      + '« espèces » retombe alors dans le « sinon » : le livreur choisit le paiement par '
+      + 'lien, et l\'accord annonce des ESPÈCES au client. Rien ne plante — ça ment. '
+      + 'Passer par `lvPaiementLabel`, source unique.');
+  }
+
+  /* ── Le vocabulaire serveur doit couvrir CHAQUE mode ────────────────────
+     Appel réel, pas lecture de source : pour chaque mode accepté par
+     `sanitizePaiement`, le libellé doit être non vide ET distinct des autres.
+     Un mode accepté à l'écriture mais sans libellé produit un accord, un e-mail
+     et une facture qui décrivent le règlement de travers. */
+  var crs = null;
+  try { crs = require(path.join(RACINE, 'api', '_lib', 'courses.js')); } catch (eC) {
+    ok(false, '⛔ api/_lib/courses.js illisible : ' + (eC && eC.message));
+  }
+  if (crs && typeof crs.accordPaiementLabel === 'function' && typeof crs.sanitizePaiement === 'function') {
+    var modes = ['especes', 'virement', 'lien'];
+    var vus = {};
+    modes.forEach(function (m) {
+      ok(crs.sanitizePaiement(m) === m,
+        '⛔ le mode de règlement « ' + m + ' » est REFUSÉ par `sanitizePaiement` : le choix '
+        + 'du livreur serait remplacé par « espèces » sans qu\'il le sache.');
+      var lib = crs.accordPaiementLabel(m);
+      ok(lib && lib.length > 5,
+        '⛔ le mode « ' + m + ' » n\'a pas de libellé : l\'accord, l\'e-mail et le '
+        + 'récapitulatif décriraient le règlement de travers.');
+      ok(!vus[lib],
+        '⛔⛔ le mode « ' + m + ' » partage son libellé avec un autre mode (« ' + lib + ' »). '
+        + 'Deux modes indiscernables à l\'écran : le client croit qu\'il paiera autrement '
+        + 'qu\'il ne paiera.');
+      vus[lib] = m;
+    });
+    /* Et une valeur inventée doit être REFUSÉE, pas traduite. */
+    ok(crs.sanitizePaiement('bitcoin') === '',
+      '⛔ `sanitizePaiement` accepte un mode inventé. Un accord pourrait annoncer un '
+      + 'règlement que rien n\'implémente.');
   }
 
   return errors;

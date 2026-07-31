@@ -6142,13 +6142,48 @@
       + '</ul>';
   }
 
+  /* Les modes de règlement OFFERTS au livreur. Même vocabulaire que
+     `ACCORD_PAIEMENTS` dans api/_lib/courses.js — un mode offert ici mais
+     refusé là-bas se ferait remplacer par « espèces » à l'enregistrement, sans
+     un mot, et le livreur croirait son choix pris en compte. */
+  var LV_PAIEMENTS = [
+    { v: 'especes',  t: '💵 Espèces, en main propre à la livraison' },
+    { v: 'virement', t: '🏦 Facturation classique — virement sur mon compte' },
+    { v: 'lien',     t: '⚡️ Lien de paiement — je l\'envoie moi-même, je suis payé tout de suite' }
+  ];
+  // Mode réellement retenu : tout ce qui n'est pas connu retombe sur « espèces »
+  // — le défaut historique, celui qui n'engage à rien.
+  function lvPaiementActif(v) {
+    for (var i = 0; i < LV_PAIEMENTS.length; i++) if (LV_PAIEMENTS[i].v === v) return v;
+    return 'especes';
+  }
+
+  /* Libellés du mode de règlement — TROIS modes depuis D-016 (31/07/2026).
+     ⚠️ Une seule source. Les quatre écrans qui l'affichaient écrivaient chacun
+     leur ternaire `=== 'virement' ? … : …` : ajouter un troisième mode aurait
+     fait dire « espèces » à quatre endroits pour un paiement par lien, sans que
+     rien ne casse. Quatre copies, quatre mensonges possibles. */
+  function lvPaiementLabel(p, forme) {
+    if (p === 'virement') {
+      return forme === 'court' ? 'Facturation classique — virement'
+        : (forme === 'passif' ? 'par virement, sur facture' : 'par virement sur sa facture');
+    }
+    if (p === 'lien') {
+      return forme === 'court' ? 'Lien de paiement — réglé en direct'
+        : (forme === 'passif' ? 'par le lien de paiement que tu envoies'
+          : 'par le lien de paiement qu\'il t\'envoie');
+    }
+    return forme === 'court' ? 'Espèces, en main propre'
+      : (forme === 'passif' ? 'en espèces, en main propre' : 'en espèces à la livraison');
+  }
+
   // Récapitulatif d'un accord PROPOSÉ : le prix et le règlement du livreur,
   // au-dessus des conditions du client (qui n'ont pas bougé).
   function lvAccordRecapHTML(c, a) {
     return '<ul class="lv-accord__list">'
       + '<li><span>💶 Prix de la course</span><strong>' + a.prix + ' €</strong></li>'
       + '<li><span>💳 Règlement du livreur</span><strong>'
-      + (a.paiement === 'virement' ? 'Facturation classique — virement' : 'Espèces, en main propre') + '</strong></li>'
+      + lvPaiementLabel(a.paiement, 'court') + '</strong></li>'
       + '</ul>'
       + '<p class="lv-hint">Conditions que tu as posées à la commande :</p>'
       + lvConditionsHTML(c)
@@ -6185,7 +6220,7 @@
         + '<input type="number" id="acPrix" inputmode="numeric" min="1" max="2000" step="1" '
         + 'value="' + lvMyPrice(c.zone) + '"></label>'
         + '<p class="lv-hint">Pré-rempli avec <strong>ton tarif zone ' + c.zone + '</strong>. '
-        + 'Tu seras payé <strong>' + (lvMyPaiement() === 'virement' ? 'par virement, sur facture' : 'en espèces, en main propre')
+        + 'Tu seras payé <strong>' + lvPaiementLabel(lvMyPaiement(), 'passif')
         + '</strong> — c\'est ton réglage : tu le changes dans <strong>⚙️ Paramètres</strong>.</p>'
         + '<div class="lv-cta"><button type="button" class="btn primary" id="acPropose">📝 Proposer ce prix</button>'
         + '<span class="lv-cta__note" id="acSt" aria-live="polite"></span></div>';
@@ -6238,7 +6273,7 @@
         + 'Ton livreur est prévenu. Il te remettra le colis contre ton code à 6 chiffres.</div>'
         + '<p class="lv-hint">Montant réglé : <strong>' + formatPrice((c.goodsAmountCents || 0) / 100) + '</strong> '
         + '(marchandise uniquement). La course (' + a.prix + ' €) se règle directement au livreur '
-        + (a.paiement === 'virement' ? 'par virement, sur sa facture.' : 'en espèces, à la livraison.') + '</p>';
+        + lvPaiementLabel(a.paiement, 'client') + '.</p>';
     }
     var lignes = lvPayLignes(c);
     var lines = lignes.lignes;
@@ -6246,7 +6281,7 @@
     return '<h4 class="lv-panel__t">💳 Régler ma marchandise</h4>'
       + '<p class="lv-hint">Tu règles <strong>uniquement tes articles</strong> à Pirates Tools. '
       + 'Les <strong>' + a.prix + ' €</strong> de la course vont directement au livreur, '
-      + (a.paiement === 'virement' ? 'par virement sur sa facture' : 'en espèces à la livraison')
+      + lvPaiementLabel(a.paiement, 'client')
       + ' — ils ne passent pas par nous.</p>'
       + (lines.length
         ? '<ul class="lv-accord__list">' + lines.map(function (l) {
@@ -6668,7 +6703,12 @@
   }
   // Mode de règlement du livreur connecté. Défaut « espèces » : jamais vide,
   // sinon l'accord ne pourrait pas dire comment il sera payé.
-  function lvMyPaiement() { return _lvMyPaiement === 'virement' ? 'virement' : 'especes'; }
+  /* ⛔ Écrasait TOUT ce qui n'était pas « virement » en « especes ». Le
+     troisième mode (lien de paiement, D-016) serait donc devenu « espèces » en
+     silence : le livreur aurait coché le paiement instantané et l'accord aurait
+     annoncé du liquide au client. Passe par `lvPaiementActif`, qui lit la liste
+     des modes — une seule liste, donc rien à oublier de mettre à jour. */
+  function lvMyPaiement() { return lvPaiementActif(_lvMyPaiement); }
   // Panneau « ma fiche livreur » : interrupteur de disponibilité, horaires,
   // carte des zones avec SES tarifs, identité et photo. Sorti de
   // renderCourierTarifPanel, qui dépassait le plafond de 150 lignes — et
@@ -6736,10 +6776,33 @@
         // automatiquement dans l'accord — le client ne le choisit jamais.
         + '<label class="lv-field"><span>💳 Comment veux-tu être payé ? *</span>'
         + '<select id="lvPfPaiement">'
-        + '<option value="especes"' + (p.paiement === 'virement' ? '' : ' selected') + '>💵 Espèces, en main propre à la livraison</option>'
-        + '<option value="virement"' + (p.paiement === 'virement' ? ' selected' : '') + '>🏦 Facturation classique — virement sur mon compte</option>'
+        /* Menu construit à partir de LV_PAIEMENTS, pas écrit trois fois à la
+           main : ajouter un mode sans l'offrir au livreur (ou l'inverse) donne
+           un réglage impossible à choisir, ou un choix que le serveur refuse. */
+        + LV_PAIEMENTS.map(function (m) {
+            return '<option value="' + m.v + '"' + (lvPaiementActif(p.paiement) === m.v ? ' selected' : '') + '>'
+              + escapeHTML(m.t) + '</option>';
+          }).join('')
         + '</select>'
         + '<em class="lv-hint">Ce choix s\'inscrit tout seul dans chaque accord : tu n\'as plus à le redire à chaque course. Le client ne peut pas l\'imposer — s\'il préfère autre chose, il t\'en parle dans la discussion et tu changes ici.</em></label>'
+        /* ⚖️ D-016 volet 2 — l'argent de la course ne passe JAMAIS par nous.
+           ⛔ Le ton compte autant que le fond : on explique un avantage, on
+           n'impose rien. Aucune formulation ici ne doit laisser croire qu'un
+           compte quelque part est exigé pour accéder aux courses — ce serait
+           faux, et ça ressemblerait à une condition déguisée. */
+        + '<div class="lv-banner" style="margin-top:.6rem">'
+        + '<p><strong>⚡️ Le paiement par lien, en deux mots.</strong> Tu envoies au client un lien, '
+        + 'il paie par carte depuis son téléphone, et l\'argent arrive <strong>sur ton compte, tout de suite</strong>. '
+        + 'Pas de facture à faire, pas de virement à attendre, pas de liquide à transporter.</p>'
+        + '<p>Aujourd\'hui, les comptes professionnels qui savent créer ce genre de lien en quelques secondes '
+        + 'ne sont pas nombreux — <strong>Revolut Business</strong> est celui que nous utilisons nous-mêmes, '
+        + 'et l\'ouverture est gratuite. Il en existe d\'autres : prends celui que tu veux, '
+        + 'ou n\'en prends aucun.</p>'
+        + '<p class="lv-hint"><strong>Ce n\'est pas obligatoire.</strong> Les espèces et le virement restent '
+        + 'là, et <strong>rien</strong> ne change pour toi dans les courses, l\'annuaire ou ton classement '
+        + 'selon ce que tu choisis. Dans tous les cas, l\'argent de la course va <strong>directement</strong> '
+        + 'du client à toi : Pirates Tools n\'y touche jamais et ne prend aucune commission dessus.</p>'
+        + '</div>'
         + '<label class="lv-field"><span>Ta présentation <em>(visible des clients)</em></span>'
         + '<textarea id="lvPfBio" maxlength="400" rows="3" placeholder="Quelques mots : ton expérience, tes horaires, ce que tu transportes…">' + escapeHTML(p.bio || '') + '</textarea></label>'
         + '<div class="lv-field"><span>Ta photo <em>(facultatif)</em></span>'
