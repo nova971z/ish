@@ -22,8 +22,47 @@ var DEFAULT_CONFIG = {
   tvaFR: 0.20,                // TVA France récupérée (coût réel = TTC cotébrico / 1,20)
   is: 0.15,                   // impôt sociétés (≤ 42 500 € bénéfice ; 0,25 au-delà)
   targetNet: 0.15,            // marge NETTE cible APRÈS IS
-  stripePct: 0.015,
-  stripeFix: 0.25,
+  /* COMMISSION D'ENCAISSEMENT — clés historiquement nommées « stripe », gardées
+     telles quelles parce qu'elles sont déjà écrites dans la config Firestore
+     `pricing_config` : les renommer ferait retomber silencieusement sur les
+     valeurs par défaut, donc changerait TOUS les prix sans que personne ne
+     l'ait demandé. Le nom ment un peu, la valeur est juste. Renommage à
+     l'étape 7 du plan Revolut, avec une migration explicite.
+
+     ⚠️ VALEUR CHANGÉE LE 31/07/2026 — grille Revolut Business France, paiements
+     EN LIGNE (relevée par l'user sur la page tarifs publique) :
+
+       Visa / Mastercard  cartes conso nationales et européennes  1,0 % + 0,20 €
+       Visa / Mastercard  cartes COMMERCIALES nationales          2,8 % + 0,20 €
+       Visa / Mastercard  toutes cartes internationales           2,8 % + 0,20 €
+       American Express   conso nationales                        1,7 % + 0,20 €
+       American Express   commerciales / internationales          2,8 % + 0,20 €
+       Revolut Pay personnel                                      1,0 % + 0,20 €
+       Virement Open Banking              1,0 % + 0,20 € (plafonné à 5 €)
+       Rétrofacturation contestée                                 15 €
+       Remboursement                                       sans frais
+
+     ⛔ ON RETIENT LE PLUS HAUT : 2,8 % + 0,20 €. Décision de l'user, et elle
+     est plus fondée qu'il n'y paraît. Le vrai risque n'est PAS la carte
+     internationale — c'est la carte COMMERCIALE NATIONALE, au même taux. Or les
+     clients de Pirates Tools sont des ARTISANS : une carte professionnelle est
+     leur moyen de paiement normal, pas une exception.
+
+     Mesuré : coût 200 € HT, port 20 €, markup 45 %, Guadeloupe. Un prix calculé
+     sur l'ancienne hypothèse de 1,5 % prévoit 5,42 € de commission ; une carte
+     commerciale en prélève 9,85 €. 4,43 € perdus par vente, invisibles jusqu'au
+     relevé bancaire.
+
+     ⚠️ Le « 0,8 % + 0,02 € » affiché en tête de la page tarifs concerne les
+     paiements EN PERSONNE (terminal). Il ne s'applique pas à une boutique en
+     ligne : le minimum en ligne est 1,0 % + 0,20 €.
+
+     Ce taux n'est pas gravé : il se corrige depuis la config admin, et la
+     comptabilité lit de toute façon la commission RÉELLE de chaque vente
+     (payments[].fees[]) — le compte de résultat reste exact même si ce chiffre
+     vieillit. */
+  stripePct: 0.028,
+  stripeFix: 0.20,
   packaging: 0.5,             // emballage (carton/bulles récupérés)
   fixedAnnual: 1000,          // CFE + assurance + banque (sans comptable), €/an
   ordersPerYear: 400,         // pour répartir les frais fixes par commande

@@ -484,12 +484,29 @@ découpe en tranches de 450 caractères **pour tenir les limites Stripe**. Si
 Revolut est plus large, le découpage disparaît ; s'il est plus étroit, il faut
 le réécrire. On ne devine pas : on lit.
 
-## 4.5 🟡 Clés API et hôte du bac à sable
-`developer.revolut.com` → *Generate API keys*
+## 4.5 ✅ RÉSOLU le 31/07/2026 — clés API et bac à sable
 
-L'URL de base sandbox de l'**API** (le paquet npm donne
-`sandbox-merchant.revolut.com` pour le **widget** ; ce n'est pas la même chose),
-et si la clé publique sert ailleurs que dans le widget.
+Fourni par l'user (page *Merchant → Get started*) :
+
+| | |
+|---|---|
+| API bac à sable | `sandbox-merchant.revolut.com/` |
+| API production | `merchant.revolut.com/api` |
+| Clé **publique** | côté client, avec les moyens de paiement au checkout |
+| Clé **secrète** | en-tête `Authorization` de tous les appels serveur |
+| Où les générer | Revolut Business → Merchant overview → Merchant API → *Generate* |
+
+⚠️ *« Use Production keys only in the production environment. »* Les deux jeux
+ne sont pas interchangeables. Sur Vercel, deux variables distinctes, et
+l'environnement du widget doit correspondre à celui où l'ordre a été créé —
+*« The order must be created in the same environment where the widget is
+loaded. »* Un ordre créé en production affiché dans un widget bac à sable ne
+marchera pas, et le message d'erreur ne le dira pas clairement.
+
+✅ **Bonne nouvelle** : *« To try the Merchant API in a test environment without
+signing up for a real Revolut Business and Merchant account, create a Revolut
+Sandbox account. »* Les étapes 2, 3 et 5 peuvent donc être développées **et
+testées** avant même que l'entreprise existe.
 
 ## 4.6 🟠 La commission entre dans le CALCUL DES PRIX — et elle y est en dur
 
@@ -515,16 +532,37 @@ Revolut carte EEE               commission 2,78 €  net après IS 60,24 €  ma
 Revolut carte internationale    commission 9,67 €  net après IS 54,39 €  marge 17,1 %
 ```
 
-⚠️ **Le modèle n'accepte qu'UN taux.** Avec Stripe l'écart était étroit ; avec
-Revolut il va du simple au triple. Trois options, et c'est une décision de
-l'user :
+### ✅ TRANCHÉ le 31/07/2026 — la grille réelle, et la surprise qu'elle contient
 
-1. **Taux EEE (0,8 %)** — prix les plus bas, mais chaque vente par carte
-   internationale rogne la marge sans qu'on l'ait prévu.
-2. **Taux international (2,8 %)** — jamais de mauvaise surprise, mais tous les
-   clients guadeloupéens paient une protection dont ils n'ont pas besoin.
-3. **Taux moyen pondéré**, révisé sur les commissions RÉELLEMENT relevées dans
-   `payments/*.fees` après quelques semaines. Demande d'attendre des données.
+Grille Revolut Business France, **paiements en ligne** (relevée par l'user) :
+
+| Moyen | Taux |
+|---|---|
+| Visa/Mastercard — conso nationales et européennes | **1,0 % + 0,20 €** |
+| Visa/Mastercard — **cartes COMMERCIALES nationales** | **2,8 % + 0,20 €** |
+| Visa/Mastercard — toutes cartes internationales | 2,8 % + 0,20 € |
+| Amex — conso nationales | 1,7 % + 0,20 € |
+| Amex — commerciales / internationales | 2,8 % + 0,20 € |
+| Revolut Pay personnel | 1,0 % + 0,20 € |
+| Virement Open Banking | 1,0 % + 0,20 € (plafonné à 5 €) |
+| Rétrofacturation contestée | **15 €** |
+
+⚠️ **Le « 0,8 % + 0,02 € » de la page d'accueil est le tarif EN PERSONNE.** Le
+minimum en ligne est 1,0 % + 0,20 €.
+
+⛔ **LA SURPRISE : la carte COMMERCIALE NATIONALE est au même taux que
+l'internationale — 2,8 %.** Toute la discussion portait sur les cartes
+internationales, dont l'user disait à raison qu'aucun artisan guadeloupéen n'en
+a. Mais une **carte professionnelle**, c'est exactement ce qu'un artisan sort
+pour acheter son outillage. Le cas « rare » ne l'est pas du tout.
+
+**Décision retenue : 2,8 % + 0,20 €**, le plus haut de la grille classique.
+Appliqué dans `api/_lib/pricing-model.js`.
+
+Coût de l'erreur qu'on évite, mesuré (200 € HT, port 20 €, markup 45 %,
+Guadeloupe) : un prix calculé sur 1,5 % prévoit **5,42 €** de commission ; une
+carte commerciale en prélève **9,85 €**. **4,43 € par vente**, invisibles
+jusqu'au relevé.
 
 **La comptabilité, elle, n'a aucun chiffre en dur** : elle lit la commission
 réelle dans `payments[].fees[]`. Quel que soit le taux choisi pour le calcul des
@@ -591,10 +629,23 @@ précontractuelle), et le site la respecte déjà : le montant affiché est le
 montant débité, aligné au centime par `check-prix-affiches`. Rien à ajouter à
 l'écran de paiement — ce serait afficher un frais qui n'existe pas.
 
-## 4.7 🟢 Commission en cas de remboursement
-La commission est-elle rendue ? Le champ `stripeFeeRendu` du panneau
-comptabilité existe justement pour ne rien supposer (0 par défaut), mais
-connaître la règle évite de la saisir à chaque fois.
+## 4.7 🟡 Commission en cas de remboursement — À MOITIÉ résolu
+
+La page tarifs dit : *« Remboursements — Traitez les remboursements rapidement,
+**sans frais supplémentaires**. »*
+
+⚠️ **Cela répond à une autre question que la nôtre.** « Sans frais
+supplémentaires » signifie que **rembourser ne coûte rien de plus**. Ça ne dit
+PAS si la commission d'encaissement **initiale** est restituée. Ce sont deux
+choses différentes, et c'est la seconde qui alimente `stripeFeeRendu`.
+
+On garde donc **0 par défaut** — l'hypothèse la plus défavorable — et l'user
+saisit ce que son relevé montre au premier remboursement réel. Un seul
+remboursement tranchera la question mieux que n'importe quelle page.
+
+À noter au passage, tiré de la même grille : une **rétrofacturation contestée
+coûte 15 €**. Ce n'est ni une charge de la catégorie « banque » ni un
+remboursement : c'est une ligne à part, à saisir en charge quand elle arrive.
 
 ---
 
