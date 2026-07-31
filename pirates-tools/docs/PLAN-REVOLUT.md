@@ -389,12 +389,50 @@ Signature de `createCardField` / `payWithPopup`, options, événements
 (`onSuccess`, `onError`, `onCancel`), styles, gestion des erreurs de validation.
 Remplace `stripe.elements()` + `confirmPayment()`.
 
-## 4.3 🟠 Cycle de vie de l'ordre et du paiement
-`developer.revolut.com` → *Order and payment lifecycle*
+## 4.3 ✅ RÉSOLU le 31/07/2026 — quel état signifie « l'argent est acquis »
 
-La liste **exhaustive** des états d'ordre et de paiement, et surtout : **quel
-état signifie que l'argent est acquis**. Aujourd'hui `payment_intent.succeeded`
-répond à cette question ; il faut son équivalent exact, pas une supposition.
+**La réponse était déjà dans la référence Merchant API fournie.** Je la cherchais
+sur une page dédiée alors que quatre phrases de la référence la donnent, et une
+seule suffit à trancher. Citations exactes :
+
+> *« Refunds can only be initiated for orders that are in a **completed** state.
+> Orders in any other state are not eligible for refunds. »*
+
+> `capture_mode: automatic` — *« The order is captured automatically after
+> payment authorisation. No further actions are needed. »*
+
+> `capture_mode: manual` — *« The order is not captured automatically and stays
+> in **authorised** state. »*
+
+> *« By default, uncaptured orders with final authorisation remain in
+> **authorised** state for 7 days. **If not captured within this period, the
+> funds are returned to the customer's original payment method.** »*
+
+Et l'exemple de capture renvoie `state: "completed"` sur l'ordre,
+`state: "captured"` sur le paiement — le même paiement qui porte `fees[]` et
+`settled_amount`.
+
+### La règle qui en découle, et elle ne se discute pas
+
+| État | Ce qu'il vaut | Ce qu'on fait |
+|---|---|---|
+| `pending` | rien | on attend |
+| `authorised` | **réversible** — les fonds repartent au client sous 7 jours si non capturé | ⛔ **on n'expédie RIEN** |
+| `processing` | en cours | on attend |
+| `completed` | remboursable, donc encaissé | ✅ **c'est là qu'on agit** |
+
+**On traite `ORDER_COMPLETED`. Jamais `ORDER_AUTHORISED`.** Notre `capture_mode`
+sera `automatic` (le défaut), donc la capture est immédiate et cette distinction
+ne devrait jamais poser problème — mais elle est écrite ici pour que personne ne
+« simplifie » un jour en écoutant l'événement le plus précoce.
+
+`ORDER_AUTHORISED` reste utile à journaliser : il donne une trace de tentative,
+sans jamais déclencher d'expédition ni de facture.
+
+⚠️ **Réserve** : la liste exhaustive des états intermédiaires n'a pas été lue.
+Le bac à sable la révélera, et un état inconnu doit être **journalisé et
+ignoré**, jamais traité comme un succès. C'est une règle d'implémentation, pas
+une supposition.
 
 ## 4.4 🟡 Limites de `metadata`
 Cherché dans « Create an order » — non précisé.
@@ -450,6 +488,67 @@ l'user :
 réelle dans `payments[].fees[]`. Quel que soit le taux choisi pour le calcul des
 prix, le compte de résultat restera exact.
 
+## 4.6 bis ⛔ SURCOÛT « CARTE INTERNATIONALE » — INTERDIT EN FRANCE
+
+**Demande de l'user (31/07/2026)** : détecter une carte internationale à la
+saisie, afficher « une commission de 2,8 % s'applique », et la facturer.
+
+**Ce n'est pas faisable légalement.** Ce n'est pas une objection technique.
+
+> **Code monétaire et financier, article L112-12** — le bénéficiaire d'un
+> paiement **ne peut pas appliquer de frais pour l'usage d'un instrument de
+> paiement donné**. Une dérogation n'est possible que dans des conditions
+> fixées par décret.
+>
+> Sanctions administratives relevées : jusqu'à **3 000 €** (personne physique)
+> et **15 000 €** (personne morale). La **DGCCRF** contrôle spécifiquement
+> l'application de cette interdiction chez les commerçants.
+
+⚠️ **Sourcé mais non lu à la source** : `legifrance.gouv.fr` et
+`economie.gouv.fr` répondent **403** depuis l'environnement de travail. Les
+éléments ci-dessus viennent d'un index de moteur de recherche portant sur ces
+deux sites — numéro d'article, teneur de l'interdiction, montants des amendes et
+autorité de contrôle concordent. **À confirmer sur legifrance avant toute
+décision définitive**, mais le risque est trop net pour construire dessus.
+
+⚠️ Le texte français ne distingue **pas** l'origine de la carte. La directive
+européenne DSP2 laisse une porte entrouverte pour les cartes émises hors EEE ;
+le texte français, lui, vise « un instrument de paiement donné » sans réserve.
+Miser sur cette porte, c'est parier contre la DGCCRF.
+
+### Ce que la loi autorise, en revanche
+
+La même section du code prévoit expressément le sens inverse : *« lorsque le
+bénéficiaire propose une **réduction** au payeur pour l'usage d'un instrument
+donné, il doit l'en informer avant d'initier l'opération »*. Une **remise** est
+légale ; un **surcoût** ne l'est pas.
+
+⛔ Mais afficher tous les prix à +2,8 % pour « offrir une remise » aux cartes
+européennes serait le même surcoût déguisé, et ça heurterait D-004 (pas de prix
+de référence artificiel). **Écarté.**
+
+### La solution retenue — et elle sert le même objectif
+
+1. **Un seul prix pour tout le monde**, calculé avec un taux unique dans
+   `pricing-model.js`.
+2. **Ce taux se choisit sur des données réelles, pas sur une intuition.** Chaque
+   vente enregistre déjà la commission exacte (`payments[].fees[]`). On ajoute
+   au panneau comptabilité le **taux de commission réellement constaté** et la
+   **part des ventes par carte hors EEE**.
+3. Si cette part devient matérielle, le taux du modèle se relève d'un cran —
+   une décision de prix, prise sur des chiffres, appliquée à tous, légale.
+
+L'user l'a dit lui-même : *« personne ne paye avec une carte internationale en
+Guadeloupe »*. Le risque est donc rare **et mesuré**, au lieu d'être rare et
+sanctionnable.
+
+### Ce qui reste vrai de son intuition
+
+Informer le client de ce qu'il paie est une **obligation** (information
+précontractuelle), et le site la respecte déjà : le montant affiché est le
+montant débité, aligné au centime par `check-prix-affiches`. Rien à ajouter à
+l'écran de paiement — ce serait afficher un frais qui n'existe pas.
+
 ## 4.7 🟢 Commission en cas de remboursement
 La commission est-elle rendue ? Le champ `stripeFeeRendu` du panneau
 comptabilité existe justement pour ne rien supposer (0 par défaut), mais
@@ -457,20 +556,17 @@ connaître la règle évite de la saisir à chaque fois.
 
 ---
 
-## Le prochain lien, un seul
+## Le prochain document, un seul
 
-**`developer.revolut.com` → Accept payments → *Order and payment lifecycle*.**
+### `RevolutCheckout.js`
 
-Il faut la liste exhaustive des états d'ordre et de paiement, et surtout :
-**quel état signifie que l'argent est acquis.**
+C'est le titre exact de la page. Il n'existe qu'une seule page portant ce nom
+sur tout le site — aucun risque de tomber sur le Crypto Ramp ou la Business API.
 
-Pourquoi celui-ci passe devant les autres : c'est le seul trou restant dont
-l'erreur est **silencieuse**. Se tromper d'état, c'est expédier un outil sur un
-paiement seulement autorisé — donc annulable — et découvrir la perte des
-semaines plus tard. Les autres inconnues (widget, limites de `metadata`, hôte du
-bac à sable) échouent bruyamment : ça ne compile pas, ça ne s'affiche pas, ça
-renvoie une erreur. Une panne bruyante ne coûte que du temps ; une panne
-silencieuse coûte de la marchandise.
+Ce qu'elle doit contenir : la signature de `createCardField` et
+`payWithPopup`, les options acceptées, les callbacks (`onSuccess`, `onError`,
+`onCancel`), la mise en forme du champ carte, et la gestion des erreurs de
+validation.
 
-Aujourd'hui c'est `payment_intent.succeeded` qui répond à cette question. Il
-faut son équivalent **exact**, pas le plus vraisemblable.
+C'est la dernière pièce bloquante. Elle remplace `stripe.elements()` +
+`confirmPayment()` (`app.js:10191` et `10313`), soit l'étape 4 en entier.
