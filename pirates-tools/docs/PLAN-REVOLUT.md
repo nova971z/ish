@@ -305,6 +305,105 @@ qui reste à faire côté user.
 
 ---
 
+# CE QUI A ÉTÉ FAIT — 31/07/2026, soir
+
+**R1 ✅ côté code.** `creerWebhook()` / `listerWebhooks()` dans le module
+Revolut, exposés par `GET /api/admin?type=revolut-webhook`. Idempotent sur
+l'URL (deux abonnements identiques doubleraient chaque notification, donc
+chaque tentative de traitement), refuse quand `REVOLUT_MODE` vaut `prod`, et
+rend le `signing_secret` **une seule fois**, avec la consigne de le poser sur
+Vercel. ⚠️ **Reste à faire côté user** : cliquer le bouton, puis poser le
+secret. Tant que ce n'est pas fait, un paiement réussi ne produit rien.
+
+**R2 ✅.** `objetPaiement()` fait la bascule entre les deux formes de charge
+utile. La lecture normalisée est attachée sous `_dejaLu` : le handler la
+réutilise au lieu de relire — un aller-retour de moins, et zéro risque que les
+deux lectures divergent.
+
+**Trois défauts trouvés en relisant mon propre code**, chacun corrigé et prouvé
+faillible par sabotage :
+
+1. **La commande de diagnostic serait devenue une vente.** Elle porte
+   `source: pirates-tools` — elle *doit* le porter. Sans exclusion du marqueur
+   `test`, son webhook produisait une écriture comptable, **consommait un numéro
+   de facture** (séquence légale : on ne le rend pas) et envoyait des e-mails de
+   confirmation pour une vente inexistante.
+2. **La garde d'état était inconditionnelle.** Chez Revolut, une tentative
+   refusée laisse l'ordre en `pending` — `objetPaiement` rendait donc `null`,
+   `handleIntentFailed` n'était jamais appelée, et **aucun échec n'était
+   journalisé**. Chez Stripe si, chez Revolut non : exactement la divergence que
+   la couture existe pour empêcher.
+3. **La relecture réseau se faisait pour tous les genres**, y compris ceux sans
+   aucun effet.
+
+**R3 ✅.** `GET /api/admin?type=reconciliation` + bouton dans le panneau
+comptabilité (7 ou 30 jours). Passe par la couture : marche pour les deux
+fournisseurs, sans retouche le jour de la bascule. Lecture seule des deux côtés.
+**Aucune garde de production** — contrairement aux trois diagnostics, c'est en
+production qu'il sert.
+
+**Quatre défauts trouvés en l'écrivant :**
+
+1. **La commande de diagnostic et tout ordre créé hors du site sortaient en
+   orphelins.** Aucune commande ne leur correspondra *jamais* : l'alerte aurait
+   été permanente, et on aurait appris à ne plus la regarder. La règle
+   « qu'est-ce qui est à nous » vit maintenant dans le module pur, **une seule
+   fois** — pas recopiée dans chaque fournisseur.
+2. **`payments/` porte aussi les tentatives ratées**, sous le *même* identifiant
+   que la commande (chez Revolut, le client réessaie sur le même ordre). Sans
+   filtre `status == succeeded`, un ordre échoué puis payé dont le webhook de
+   succès se perd passait pour « déjà traité » : **invisible pour toujours**,
+   dans le seul cas où le filet devait servir.
+3. **`adminGet` encode son argument** : `reconciliation&jours=7` partait en
+   `reconciliation%26jours%3D7`. Le serveur lisait un type inexistant et
+   répondait à côté, **sans erreur visible**.
+4. **Une de mes propres assertions était fausse** : la regex « le bouton est
+   branché » matchait aussi la *définition* de la fonction, donc retirer l'appel
+   la laissait verte. Démasquée par sabotage, réécrite.
+
+**R4 ✅ — mesures, chacune avec la commande qui l'a produite :**
+
+| Mesure | Commande | Résultat |
+|---|---|---|
+| Barrières CI | `grep -c "^\s*await runOne(" scripts/ci.js` | **45** |
+| CI complète | `node scripts/ci.js` | **verte** |
+| Noyau | `node tests/lancer.mjs --noyau` | **138/138, 7/7 harnais** |
+| Assertions exécutées, `check-paiement` | assistant `ok` instrumenté | **171** |
+| Assertions exécutées, `check-revolut` | idem | **72** |
+| Assertions exécutées, `check-reconciliation` | idem | **29** |
+
+**Dix-sept sabotages joués, chacun rouge puis restauré** — et deux d'entre eux ont
+démasqué une **assertion fautive** plutôt qu'un défaut du produit, ce qui est
+exactement leur raison d'être :
+
+1. garde `test` retirée du webhook
+2. marqueur `test` retiré de l'émetteur
+3. garde d'état redevenue inconditionnelle
+4. garde d'état supprimée
+5. `_objetPaiement` plus exposé
+6. périmètre supprimé
+7. périmètre trop large (avale les vraies ventes)
+8. filtre `succeeded` retiré
+9. avertissement d'échec retiré côté serveur
+10. e-mail client remis dans la réponse
+11. appel du bouton retiré — **⛔ passé au VERT** : ma regex matchait aussi la
+    *définition* de la fonction. Assertion réécrite, puis rejouée rouge.
+12. bouton retiré du HTML
+13. échec redevenu silencieux à l'écran
+14. paramètre recollé dans le nom du type
+15. accès direct à `event.data.object` hors de la bascule — **⛔ a démasqué une
+    assertion fausse** : elle exigeait « exactement une occurrence », alors que
+    la ligne légitime en porte deux. Elle rougissait donc sur du code correct.
+    Réécrite en « aucune hors de `objetPaiement` », qui est la règle réelle.
+16. `objetPaiement` renommée (la bascule disparaît)
+17. retour à `event.type` — **un défaut latent trouvé en relisant**, pas en
+    testant : ce champ n'existe que chez Stripe. Chez Revolut il vaut
+    `undefined`, que Firestore refuse d'écrire, et l'exception se faisait avaler
+    par le `catch` du claim. Rien ne cassait visiblement, l'idempotence tenait
+    **par accident**, et la piste d'audit perdait le type de l'événement.
+
+---
+
 ## Étape 5 — Bac à sable de bout en bout
 Paiement réel en sandbox : montant débité = montant affiché au centime,
 `payments/` écrit, facture numérotée, emails partis, commission réelle enregistrée.

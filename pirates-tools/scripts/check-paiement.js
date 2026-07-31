@@ -258,6 +258,51 @@ module.exports = async function () {
       '⛔ api/webhook.js contient encore un `case \'payment_intent.succeeded\'` : '
       + 'un nom d\'événement propre à Stripe est redevenu une décision.');
 
+    /* ⛔ UN SEUL ENDROIT LIT `event.data.object` — la bascule entre les deux
+       formes de charge utile. Chaque autre lecture serait un chemin qui
+       fonctionne chez Stripe et rend `undefined` chez Revolut : le handler ne
+       verrait ni montant, ni metadata, ni adresse. Il ne planterait même pas —
+       il traiterait une commande vide. On compte les occurrences hors
+       commentaire, et AUCUNE ne doit tomber hors de `objetPaiement`.
+
+       ⚠️ 1ʳᵉ VERSION FAUSSE : elle exigeait « exactement une occurrence ». Or la
+       ligne légitime en porte DEUX — `if (… && event.data.object) return
+       event.data.object;` — et le contrôle rougissait sur du code correct. On
+       ne compte pas les occurrences : on retire la fonction autorisée et on
+       vérifie qu'il n'en reste aucune ailleurs. C'est la règle réelle. */
+    var sansCommentaires = whSrc
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+    /* ⛔ `event.type` N'EXISTE PAS CHEZ REVOLUT — sa charge utile est
+       `{ event, order_id }`. Le nom de l'événement est un champ du CONTRAT
+       (`verif.type`), pas de la charge utile.
+
+       Ce que ça coûtait, trouvé le 31/07/2026 : `claimRef.create({ type:
+       event.type })` écrivait `undefined`, que le SDK Admin Firestore REFUSE.
+       L'exception tombait dans le `catch (dupErr)` voisin, qui l'avalait — le
+       claim finissait posé par le `set` de reprise, l'idempotence tenait PAR
+       ACCIDENT, et le type de l'événement disparaissait de la piste d'audit.
+       Aucun symptôme visible : tout « marchait ». */
+    var lecturesType = (sansCommentaires.match(/event\.type/g) || []).length;
+    ok(lecturesType === 0,
+      '⛔⛔ api/webhook.js lit `event.type` (' + lecturesType + ' fois). Ce champ '
+      + 'n\'existe QUE chez Stripe : la charge utile de Revolut est `{ event, order_id }`. '
+      + 'Chez lui la valeur vaut `undefined`, que Firestore refuse d\'écrire — et '
+      + 'l\'exception se fait avaler par le `catch` du claim. Rien ne casse visiblement, '
+      + 'l\'idempotence tient par accident, et la piste d\'audit perd le type de '
+      + 'l\'événement. Le contrat fournit `verif.type`.');
+
+    var mObjet = sansCommentaires.match(/async function objetPaiement[\s\S]*?\n\}/);
+    ok(!!mObjet, '⛔ `objetPaiement` a disparu de api/webhook.js : plus rien ne relit la '
+      + 'commande chez Revolut, dont la charge utile ne contient qu\'un identifiant.');
+    var ailleurs = sansCommentaires.replace(mObjet ? mObjet[0] : '', '');
+    var horsBascule = (ailleurs.match(/event\.data\.object/g) || []).length;
+    ok(horsBascule === 0,
+      '⛔ `event.data.object` est lu HORS de `objetPaiement` (' + horsBascule + ' fois). '
+      + 'Toute lecture ailleurs est un chemin qui marche chez Stripe et rend `undefined` '
+      + 'chez Revolut : ni montant, ni metadata, ni adresse. Ça ne planterait même pas — '
+      + 'ça traiterait une commande vide.');
+
     /* ⛔⛔ LA COMMANDE DE DIAGNOSTIC NE DOIT JAMAIS DEVENIR UNE VENTE.
        `api/admin.js ?type=revolut-commande-test` crée un ordre à 30 € portant
        `source: pirates-tools` — il DOIT le porter, c'est ce qui prouve que la

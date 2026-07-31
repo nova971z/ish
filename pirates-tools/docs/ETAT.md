@@ -1,6 +1,6 @@
 # ÉTAT VIVANT — ce qui reste à faire
 
-**Mis à jour le 29/07/2026.** Ce fichier ne contient ni règle, ni récit, ni
+**Mis à jour le 31/07/2026.** Ce fichier ne contient ni règle, ni récit, ni
 décision : uniquement des **choses à faire**, chacune avec sa **preuve
 vérifiable**.
 
@@ -28,6 +28,31 @@ vérifiable**.
 > organisme agréé.
 
 ## 🔴 BLOQUANT — encaissement par carte
+
+> ⚠️ **Réécrit le 31/07/2026 : l'encaisseur a changé.** D-016 remplace Stripe
+> par Revolut (fonds sous 24 h contre 3 à 7 jours ouvrés, commissions plus
+> basses). Les entrées P1–P3 ci-dessous ne sont **pas supprimées** : Stripe
+> reste branché derrière la couture pendant toute la transition, et c'est
+> exactement ce qui permet de revenir en arrière sans redéployer dans
+> l'urgence. Elles sont **suspendues**, pas caduques.
+
+### Chemin Revolut — c'est LUI qui bloque aujourd'hui
+
+| # | À faire | Preuve que ce n'est pas fait |
+|---|---|---|
+| R-a | Cliquer **🔌 Diagnostic paiement → enregistrer le webhook** dans l'admin, puis poser le secret rendu sur Vercel sous `REVOLUT_WEBHOOK_SECRET_SANDBOX`, et **redéployer** | `revolut-ping` répond, mais aucun webhook n'est enregistré côté Revolut |
+| R-b | Refaire un paiement de test **après** R-a, et vérifier que `payments/` porte l'écriture, qu'une facture est numérotée et que les e-mails partent | aujourd'hui le paiement réussit chez Revolut et **rien** n'arrive côté site : c'est précisément ce que R-a débloque |
+| R-c | Basculer `PAYMENT_PROVIDER=revolut` sur Vercel, garder Stripe branché au moins une semaine | la variable vaut encore `stripe` (défaut du contrat) |
+| R-d | Passer `REVOLUT_MODE` en `prod` et poser la clé de production, **après** R-b vert | les trois diagnostics refusent en mode `prod` — par construction |
+
+> ⛔ **R-a n'est pas une formalité.** Sans webhook, un paiement réussi ne
+> produit **ni commande, ni facture, ni e-mail** : l'argent arrive, le client
+> attend, et rien n'alerte. C'est le trou le plus large qui reste.
+> Filet en attendant : **🧷 Contrôle des paiements encaissés**, dans le panneau
+> comptabilité — il compare ce que Revolut a encaissé à ce que le site a
+> enregistré (`node scripts/check-reconciliation.js` : **29 assertions**).
+
+### Chemin Stripe — SUSPENDU (D-016), conservé pour le retour arrière
 
 | # | À faire | Preuve |
 |---|---|---|

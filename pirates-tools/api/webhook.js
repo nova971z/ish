@@ -109,9 +109,17 @@ async function handler(req, res) {
       claimRef = fb.db.collection('stripe_events').doc(cleEvenement);
       var claimed = false;
       try {
-        // create() est atomique : échoue si le doc existe déjà.
+        /* create() est atomique : échoue si le doc existe déjà.
+           ⛔ `verif.type` et NON `event.type` : le nom de l'événement est un
+           champ du CONTRAT, pas de la charge utile. Chez Stripe les deux
+           coïncident ; chez Revolut la charge utile est `{ event, order_id }`
+           et `event.type` vaut `undefined` — que le SDK Admin Firestore REFUSE
+           d'écrire. L'exception tombait alors dans le `catch (dupErr)`
+           juste en dessous, qui l'avalait : le claim finissait posé par le
+           `set` de reprise, l'idempotence tenait PAR ACCIDENT, et le type de
+           l'événement disparaissait de la piste d'audit. */
         await claimRef.create({
-          type: event.type,
+          type: verif.type || null,
           status: 'processing',
           attempts: 1,
           receivedAt: fb.admin.firestore.FieldValue.serverTimestamp()
@@ -169,7 +177,10 @@ async function handler(req, res) {
           // Le SEUL genre qui déclenche des effets : journal, facture, emails.
           objet = await objetPaiement(paiement, event, verif);
           if (!objet) { console.log('[webhook] Charge utile inexploitable, aucun effet:', cleEvenement); break; }
-          if (event.type === 'checkout.session.completed') {
+          /* ⛔ `verif.type`, pas `event.type` — même raison qu'au claim : le nom
+             de l'événement appartient au contrat. Revolut n'émet jamais ce nom,
+             son chemin part donc toujours dans `handleIntentSucceeded`. */
+          if (verif.type === 'checkout.session.completed') {
             await handleSessionCompleted(paiement, fb, objet, ctx);
           } else {
             await handleIntentSucceeded(paiement, fb, objet, ctx);
@@ -194,7 +205,7 @@ async function handler(req, res) {
 
         default:
           // ⛔ Genre inconnu : journalisé et IGNORÉ, jamais traité en succès.
-          console.log('[webhook] Événement non traité:', event.type, '(genre ' + verif.genre + ')');
+          console.log('[webhook] Événement non traité:', verif.type, '(genre ' + verif.genre + ')');
       }
     } catch (procErr) {
       console.error('[webhook] Traitement en echec (le fournisseur re-livrera):', cleEvenement, procErr.message);
