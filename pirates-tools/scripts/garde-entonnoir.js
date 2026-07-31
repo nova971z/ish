@@ -215,10 +215,15 @@ try {
     var cmd = String((d.tool_input && d.tool_input.command) || '');
     if (/\bou\.js\b/.test(cmd)) fs.writeFileSync(t, String(Date.now()));
     /* `node scripts/juridique.js J2` ⇒ la fiche J2 a été AFFICHÉE, donc lue.
-       On ne pose le témoin que pour le domaine effectivement demandé. */
-    var j = cmd.match(/juridique\.js\s+(J\d+)/i);
-    if (j && JUR && JUR.DOMAINES[j[1].toUpperCase()]) {
-      fs.writeFileSync(temoinJur(d, j[1].toUpperCase()), String(Date.now()));
+       On ne pose le témoin que pour les domaines effectivement demandés.
+       ⚠️ TOUTES les occurrences, pas la première : une commande composée
+       (`… J3 && … J5`) n'en posait qu'un seul, et la porte refusait ensuite
+       une écriture pourtant préparée. Défaut constaté DEUX FOIS le 31/07 —
+       la seconde a suffi à le corriger. */
+    var j, re = /juridique\.js\s+(J\d+)/gi;
+    while ((j = re.exec(cmd)) !== null) {
+      var dom = j[1].toUpperCase();
+      if (JUR && JUR.DOMAINES[dom]) fs.writeFileSync(temoinJur(d, dom), String(Date.now()));
     }
     process.exit(0);
   }

@@ -110,3 +110,29 @@ au milieu et couvrent tout le catalogue.
   pagination = pas de « Combiner » = pas de blocage iOS). 200 laisse de la marge.
 - La marque par défaut de l'endpoint est `DEWALT` ; on la met quand même en clair
   (`brand=DEWALT`) pour que chaque raccourci soit explicite.
+
+---
+
+## 🔓 Débloquer un prix signalé — `&allow=`
+
+Le traqueur **refuse** d'écrire un prix qui bouge de plus de 25 % par rapport
+au dernier relevé. Ce plafond protège d'une page mal lue : une lecture
+aberrante repeindrait le catalogue sans que personne ne le voie.
+
+Mais une grosse variation est parfois **réelle** — le fournisseur a changé son
+tarif. Dans ce cas :
+
+1. **vérifier le coût à la source**, chez cotébrico, produit par produit ;
+2. relancer le relevé en NOMMANT les références vérifiées :
+
+```
+…/api/admin?type=price-watch&brand=MAKITA&dryRun=0&allow=DJR188ZJ,DVC560Z
+```
+
+⚠️ L'autorisation est **nominative** et ne vaut que pour ce relevé. Elle lève
+UNIQUEMENT le plafond de variation : les bornes de prix aberrant et le verrou
+`priceLocked` restent actifs — eux ne se vérifient pas à l'œil.
+
+⛔ Ne jamais élargir le plafond globalement pour éviter cette étape : le jour
+où cotébrico changera la structure de ses pages, c'est ce plafond qui empêchera
+le catalogue entier de partir de travers.

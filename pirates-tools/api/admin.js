@@ -1163,6 +1163,18 @@ async function handlePriceWatch(req, res, admin, db) {
     const applied = [], flagged = [], unchanged = [], unknown = [], lockedW = [];
     const now = admin.firestore.FieldValue.serverTimestamp();
 
+    // Références dont on accepte NOMMÉMENT une variation hors plafond, parce
+    // qu'on est allé vérifier le coût à la source. Accepté dans l'URL ou dans
+    // le corps ; les deux sont fusionnés, aucun ne l'emporte silencieusement.
+    const autorises = {};
+    [(req.query && req.query.allow), body.allow].forEach(function (v) {
+      if (!v) return;
+      String(v).split(/[,\s]+/).forEach(function (s) {
+        var k = s.trim().toUpperCase();
+        if (k) autorises[k] = true;
+      });
+    });
+
     // Prix parsés indexés par SKU (pour la règle « min des sources » srcAltSkus).
     const parsedBySku = {};
     parsed.forEach((it) => { parsedBySku[String(it.sku).toUpperCase()] = it.price; });
@@ -1208,8 +1220,26 @@ async function handlePriceWatch(req, res, admin, db) {
       // est au contraire attendu (le prix venait d'une estimation) — le bloquer
       // reviendrait à figer définitivement un prix faux. Les bornes MIN/MAX_TTC
       // restent actives dans tous les cas.
+      // ⚠️ AUTORISATION NOMMÉE — `&allow=SKU1,SKU2`
+      // Une variation au-delà du plafond est parfois RÉELLE : le fournisseur a
+      // vraiment changé son tarif. Le 31/07/2026, deux produits ont été bloqués
+      // (−31 % et +29 %) alors que les coûts relevés étaient exacts, vérifiés à
+      // la source par l'user. Sans cette voie, il ne restait qu'à saisir le prix
+      // À LA MAIN — ce que la règle produits interdit, et pour une bonne raison :
+      // un prix saisi ne repose sur aucun coût traçable.
+      //
+      // L'autorisation est NOMINATIVE et ne vaut que pour ce relevé : on déclare
+      // les références qu'on a vérifiées, jamais « tout laisser passer ». Elle ne
+      // lève QUE le plafond de variation — les bornes MIN/MAX_TTC et le verrou
+      // `priceLocked` restent actifs : eux ne se vérifient pas à l'œil.
       else if (dejaReleve && cur != null && cur > 0 && Math.abs(newPrice - cur) / cur > PW.MAX_MOVE) {
-        reason = 'variation ' + Math.round(Math.abs(newPrice - cur) / cur * 100) + ' % > ' + Math.round(PW.MAX_MOVE * 100) + ' %';
+        var variation = Math.round(Math.abs(newPrice - cur) / cur * 100);
+        if (autorises[item.sku]) {
+          rec.autorise = 'variation ' + variation + ' % acceptée nommément';
+        } else {
+          reason = 'variation ' + variation + ' % > ' + Math.round(PW.MAX_MOVE * 100) + ' %'
+            + ' — vérifier le coût à la source, puis relancer avec &allow=' + item.sku;
+        }
       }
       if (reason) { rec.reason = reason; flagged.push(rec); continue; }
 
