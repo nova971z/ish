@@ -11397,6 +11397,19 @@
     html += '<div class="compta-actions" style="margin-bottom:8px"><button type="button" class="btn primary" id="comptaExportPdf">📄 Exporter en PDF</button><button type="button" class="btn btn--ghost" id="comptaReloadAcc">↻ Rafraîchir</button></div>';
     html += '<div id="comptaReport"><p class="admin-loading">Chargement des comptes…</p></div>';
 
+    /* ── Diagnostic du fournisseur de paiement ────────────────────────────
+       ⚠️ POURQUOI UN BOUTON ET PAS UNE ADRESSE À TAPER : /api/admin s'autorise
+       par un jeton Firebase envoyé en EN-TÊTE. Une adresse ouverte dans la
+       barre du navigateur n'en envoie aucun — elle ne peut que se faire
+       refuser (« Invalid admin credentials », constaté le 31/07/2026).
+       `adminGet` attache le jeton ; la barre d'adresse, jamais. */
+    html += '<h2 class="admin-subtitle">🔌 Diagnostic paiement</h2>';
+    html += '<div class="compta-card">'
+      + '<p class="compta-line">Vérifie que le site sait parler au fournisseur de paiement. '
+      + 'L\'appel est en <b>lecture seule</b> : il ne crée rien et ne débite rien.</p>'
+      + '<div class="compta-actions"><button type="button" class="btn primary" id="revolutPing">🔌 Tester la connexion Revolut</button></div>'
+      + '<div id="revolutPingOut" class="compta-calc-out"></div></div>';
+
     // ── Bloc 0 : calculateur & prix automatiques (rempli après chargement config) ─
     html += '<h2 class="admin-subtitle">🧮 Calculateur &amp; prix automatiques</h2>';
     html += '<div id="comptaCalc"><p class="admin-loading">Chargement de la config…</p></div>';
@@ -11465,6 +11478,46 @@
     if (pdfBtn) pdfBtn.onclick = function () { window.print(); };
     var reloadBtn = document.getElementById('comptaReloadAcc');
     if (reloadBtn) reloadBtn.onclick = function () { comptaLoadAccounting(); };
+    comptaBrancherPing();
+  }
+
+  /* Diagnostic du fournisseur de paiement.
+     ⚠️ Passe par `adminGet`, qui attache le jeton Firebase. C'est LA raison
+     d'être de ce bouton : la même adresse tapée dans la barre du navigateur
+     n'envoie aucun en-tête et se fait refuser. */
+  function comptaBrancherPing() {
+    var btn = document.getElementById('revolutPing');
+    var out = document.getElementById('revolutPingOut');
+    if (!btn || !out) return;
+    btn.onclick = function () {
+      btn.disabled = true;
+      out.innerHTML = '<p class="admin-loading">Appel de Revolut…</p>';
+      adminGet('revolut-ping').then(function (d) {
+        btn.disabled = false;
+        if (d && d.ok) {
+          out.innerHTML = '<div class="compta-res">'
+            + '<div class="compta-res__price" style="font-size:1.1rem">✅ Revolut répond</div>'
+            + '<div class="compta-res__brk">'
+            + '<span>Environnement : <b>' + escapeHTML(String(d.base || '')) + '</b></span>'
+            + '<span>Fournisseur actif : <b>' + escapeHTML(String(d.fournisseurActif || '')) + '</b></span>'
+            + '<span>Longueur de la clé : ' + escapeHTML(String(d.longueurCle)) + ' caractères</span>'
+            + '<span>Commandes sur 24 h : ' + escapeHTML(String(d.ordresDernieres24h)) + '</span>'
+            + '</div></div>';
+          return;
+        }
+        // Échec : on montre l'étape ET l'indice, jamais un « erreur » nu.
+        out.innerHTML = '<p class="admin-error"><b>❌ Étape « '
+          + escapeHTML(String((d && d.etape) || '?')) + ' » — '
+          + escapeHTML(String((d && d.erreur) || 'raison inconnue')) + '</b>'
+          + ((d && d.indice) ? '<br>👉 ' + escapeHTML(String(d.indice)) : '')
+          + ((d && d.longueurCle != null) ? '<br><small>Longueur de la clé lue : '
+              + escapeHTML(String(d.longueurCle)) + ' caractères (0 = variable absente)</small>' : '')
+          + '</p>';
+      }).catch(function (e) {
+        btn.disabled = false;
+        out.innerHTML = '<p class="admin-error">Erreur réseau : ' + escapeHTML(e.message || String(e)) + '</p>';
+      });
+    };
   }
 
   // Charge la synthèse comptable (revenus réels + résultat estimé).

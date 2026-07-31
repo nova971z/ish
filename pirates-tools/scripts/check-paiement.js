@@ -371,6 +371,20 @@ module.exports = function () {
       ok(!/(REVOLUT_SECRET_KEY[A-Z_]*)[^;\n]*\.(slice|substr|substring)\(/.test(bloc),
         '⛔ le diagnostic extrait un MORCEAU de la clé secrète. Un extrait de secret '
         + 'reste un secret : cette réponse s\'affiche à l\'écran et finit copiée-collée.');
+
+      /* ⛔ IL DOIT ÊTRE ATTEIGNABLE. Un diagnostic derrière `requireAdmin` ne
+         se joint PAS en tapant son adresse dans le navigateur : l'autorisation
+         passe par un jeton Firebase en EN-TÊTE, qu'une barre d'adresse n'envoie
+         jamais. Constaté le 31/07/2026 — « Invalid admin credentials » sur une
+         URL ouverte à la main. Il faut donc un bouton qui passe par `adminGet`. */
+      var appSrc2 = fs.existsSync(path.join(RACINE, 'app.js'))
+        ? fs.readFileSync(path.join(RACINE, 'app.js'), 'utf8') : '';
+      ok(/adminGet\(\s*['"]revolut-ping['"]\s*\)/.test(appSrc2),
+        '⛔ le diagnostic revolut-ping existe côté serveur mais AUCUN bouton de '
+        + 'l\'admin ne l\'appelle via `adminGet`. Il serait donc injoignable : une '
+        + 'adresse tapée dans le navigateur n\'envoie pas le jeton Firebase et se '
+        + 'fait refuser. Un outil de diagnostic qu\'on ne peut pas déclencher ne '
+        + 'diagnostique rien.');
     }
   }
 
