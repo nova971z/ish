@@ -40,7 +40,8 @@ vérifiable**.
 
 | # | À faire | Preuve que ce n'est pas fait |
 |---|---|---|
-| R-a | Cliquer **🔌 Diagnostic paiement → enregistrer le webhook** dans l'admin, puis poser le secret rendu sur Vercel sous `REVOLUT_WEBHOOK_SECRET_SANDBOX`, et **redéployer** | `revolut-ping` répond, mais aucun webhook n'est enregistré côté Revolut |
+| R-0 | Poser **`ALLOWED_ORIGINS`** = `https://pirates-tools.com` (ou `PUBLIC_BASE_URL` = la même valeur) sur Vercel, puis **redéployer** | sans ça, le site ne peut PAS fabriquer d'adresse publique sûre : le bouton du webhook refuse, et aucune adresse de retour après paiement n'est déclarée |
+| R-a | Cliquer **🔌 Diagnostic paiement → 🔔 Enregistrer le webhook**, puis poser le secret rendu sur Vercel sous `REVOLUT_WEBHOOK_SECRET_SANDBOX`, et **redéployer** | `revolut-ping` répond, mais aucun webhook n'est enregistré côté Revolut |
 | R-b | Refaire un paiement de test **après** R-a, et vérifier que `payments/` porte l'écriture, qu'une facture est numérotée et que les e-mails partent | aujourd'hui le paiement réussit chez Revolut et **rien** n'arrive côté site : c'est précisément ce que R-a débloque |
 | R-c | Basculer `PAYMENT_PROVIDER=revolut` sur Vercel, garder Stripe branché au moins une semaine | la variable vaut encore `stripe` (défaut du contrat) |
 | R-d | Passer `REVOLUT_MODE` en `prod` et poser la clé de production, **après** R-b vert | les trois diagnostics refusent en mode `prod` — par construction |

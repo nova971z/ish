@@ -205,9 +205,23 @@ module.exports = async function handler(req, res) {
         return res.status(400).json({ ok: false, etape: 'cle',
           erreur: 'REVOLUT_SECRET_KEY_SANDBOX absente.' });
       }
-      const origine = (req.headers && (req.headers.origin
-        || String(req.headers.referer || '').replace(/\/(#.*)?$/, ''))) || '';
-      const cible = String(origine).replace(/\/+$/, '') + '/api/webhook';
+      /* ⛔ L'ADRESSE DÉCLARÉE CHEZ REVOLUT NE SE DEVINE PAS. Elle était
+         fabriquée en recopiant l'en-tête `Origin` du navigateur : sans lui
+         (et il manque plus souvent qu'on ne croit), la cible valait
+         « /api/webhook » — une adresse relative que Revolut refuse, avec un
+         message qui ne dit pas pourquoi. Et la recopier telle quelle, c'est
+         laisser un tiers choisir où partiront les notifications de paiement.
+         `origineSure` la valide contre ALLOWED_ORIGINS, ou rend `null`. */
+      const origine = http.origineSure(req);
+      if (!origine) {
+        return res.status(400).json({ ok: false, etape: 'origine',
+          erreur: 'Impossible de déterminer l\'adresse publique du site de façon sûre.',
+          indice: 'Poser sur Vercel soit ALLOWED_ORIGINS (qui doit contenir '
+            + 'https://pirates-tools.com), soit PUBLIC_BASE_URL = https://pirates-tools.com, '
+            + 'puis redéployer. Sans ça, on enverrait à Revolut une adresse fabriquée '
+            + 'au hasard — et aucune notification de paiement n\'arriverait.' });
+      }
+      const cible = origine + '/api/webhook';
       try {
         const deja = await rev.listerWebhooks();
         const memeUrl = deja.filter(function (w) { return w && w.url === cible; });

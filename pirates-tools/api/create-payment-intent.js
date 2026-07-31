@@ -17,6 +17,7 @@ var loyalty = require('./_lib/loyalty');
 var postal = require('./_lib/postal');
 var coursesLib = require('./_lib/courses');
 var fbLib = require('./_lib/firebase');
+var http = require('./_lib/http');   // origineSure : d'où revient le client après paiement
 var getFirebase = fbLib.getFirebase;
 
 var MAX_QTY_PER_LINE = 99;
@@ -211,9 +212,25 @@ module.exports = async function handler(req, res) {
 
     // Contrat NEUTRE (couture) : le fournisseur reçoit un montant déjà arrêté
     // et des données à transporter. Il ne décide de rien.
+    /* ⛔ OÙ LE CLIENT ATTERRIT APRÈS AVOIR PAYÉ — le trou du 01/08/2026.
+       Personne ne passait `urlRetour`, donc aucun `redirect_url` ne partait
+       chez Revolut. Conséquence : le client qui paie sur la PAGE HÉBERGÉE
+       (le repli quand le champ carte ne charge pas, et le seul chemin sur
+       certains navigateurs) restait sur checkout.revolut.com. Il ne revenait
+       jamais, ne voyait jamais /merci, et sa commande n'était pas finalisée
+       côté navigateur. Le webhook sauvait la vente côté serveur — le client,
+       lui, voyait une page qui n'était pas la nôtre et repartait.
+
+       ⚠️ Sans origine sûre, on n'invente rien : pas de `redirect_url`. Le
+       paiement fonctionne toujours, seul le retour manque — dégradation, pas
+       panne. Stripe ignore ce paramètre (sa redirection passe par
+       `return_url`, posé côté navigateur) : la couture l'absorbe. */
+    var origineRetour = http.origineSure(req);
+
     var cree = await paiement.creerPaiement({
       montantCents: amountCents,
       devise: 'eur',
+      urlRetour: origineRetour ? (origineRetour + '/#/merci') : null,
       description: description.join(', ').substring(0, 500),
       email: customerEmail || null,
       livraison: shipping ? {
@@ -254,6 +271,15 @@ module.exports = async function handler(req, res) {
          refuse de se charger. */
       fournisseur: paiement.nom(),
       urlHebergee: cree.urlHebergee || null,
+      /* ⛔ QUEL ENVIRONNEMENT — le front le DEVINAIT, en cherchant la
+         sous-chaîne « sandbox » dans `urlHebergee`. Deux façons de se tromper,
+         aucune visible : si `urlHebergee` est absente (le fournisseur ne la
+         renvoie pas, ou le champ change de nom), on chargeait le SDK de
+         PRODUCTION avec un jeton de bac à sable — formulaire mort — et le
+         repli n'avait pas d'URL non plus, donc double panne muette.
+         Le serveur sait ; il le dit. Ce n'est pas un secret : le domaine du
+         script le révèle de toute façon au premier coup d'œil. */
+      modeTest: paiement.modeTest(),
       amount: amountCents,   // montant DÉBITÉ (remise déduite + livraison) — le client DOIT afficher celui-ci
       gross: totalCents,     // total plein tarif avant remise (produits seuls)
       deliveryCents: deliveryCents,

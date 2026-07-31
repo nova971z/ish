@@ -10042,6 +10042,11 @@
      Jamais deviné côté client : voir le commentaire au point de branchement. */
   var _paiementFournisseur = 'stripe';
   var _urlPaiementHebergee = null;   // repli Revolut si le widget ne charge pas
+  /* Environnement ANNONCÉ par le serveur (true = bac à sable). `null` tant
+     qu'aucune commande n'a été créée. ⛔ Ne jamais le re-déduire d'une URL :
+     c'est ce que faisait la 1ʳᵉ version, et une `urlHebergee` absente envoyait
+     alors sur le SDK de production avec un jeton de bac à sable. */
+  var _paiementModeTest = null;
   var _revolutCardField = null;      // instance du champ carte Revolut montée
   var _revolutSDK = null;            // promesse de chargement du script Revolut
   var _quoteTerritory = null;   // territoire du PaymentIntent en cours (dérivé du CP)
@@ -10179,6 +10184,15 @@
      bloqué et le formulaire reste vide sans message exploitable. Les deux
      domaines (production et bac à sable) y sont, et check-paiement le vérifie
      directive par directive. */
+  /* Bac à sable ou production — LE SERVEUR décide, le front n'interprète pas.
+     ⚠️ Repli sur l'URL hébergée UNIQUEMENT si le serveur n'a rien annoncé
+     (déploiement plus ancien que ce champ) : mieux vaut l'ancienne heuristique
+     que rien, mais elle ne doit plus être le chemin normal. */
+  function revolutEnBacASable() {
+    if (typeof _paiementModeTest === 'boolean') return _paiementModeTest;
+    return !!(_urlPaiementHebergee && /sandbox/.test(_urlPaiementHebergee));
+  }
+
   function chargerSDKRevolut() {
     if (_revolutSDK) return _revolutSDK;
     _revolutSDK = new Promise(function (resolve, reject) {
@@ -10186,7 +10200,7 @@
       var s = document.createElement('script');
       // Le bac à sable et la production servent le MÊME rôle depuis deux
       // domaines distincts. On suit ce que le serveur a annoncé.
-      s.src = (_urlPaiementHebergee && /sandbox/.test(_urlPaiementHebergee))
+      s.src = revolutEnBacASable()
         ? 'https://sandbox-merchant.revolut.com/embed.js'
         : 'https://merchant.revolut.com/embed.js';
       s.async = true;
@@ -10219,7 +10233,7 @@
         + '<span>Chargement du formulaire de paiement…</span></div>';
     }
     return chargerSDKRevolut().then(function (RevolutCheckout) {
-      var mode = (_urlPaiementHebergee && /sandbox/.test(_urlPaiementHebergee)) ? 'sandbox' : 'prod';
+      var mode = revolutEnBacASable() ? 'sandbox' : 'prod';
       return RevolutCheckout(jeton, mode);
     }).then(function (instance) {
       if (container) container.innerHTML = '';
@@ -10421,6 +10435,7 @@
          formulaire vide et une erreur qui n'expliquerait rien. */
       _paiementFournisseur = String(data.fournisseur || 'stripe');
       _urlPaiementHebergee = data.urlHebergee || null;
+      _paiementModeTest = (typeof data.modeTest === 'boolean') ? data.modeTest : null;
 
       // Le serveur est la SEULE vérité du montant débité : il applique la
       // remise fidélité vérifiée (journal payments/, infalsifiable). On
@@ -10521,6 +10536,42 @@
     }
   }
 
+  /* ⛔⛔ REVOLUT ACTIF MAIS CHAMP CARTE ABSENT — la vente se perdait EN
+     SILENCE (trouvé le 01/08/2026 en remontant le chemin du clic).
+
+     Le champ n'est pas monté quand le script Revolut n'a pas pu charger :
+     bloqueur de publicité, réseau d'entreprise, coupure. Le clic tombait alors
+     dans les tests Stripe qui suivent `confirmPayment`, et AUCUN ne matchait :
+       · `_stripeElements` est nul — il n'est jamais créé en mode Revolut ;
+       · `_stripeClientSecret` porte le jeton Revolut, donc « non vide » ;
+       · `stripe` est vrai — js.stripe.com est encore servi à tout le monde.
+     Le clic finissait au tout dernier repli, sur un message FAUX (« Paiement
+     carte non configuré ») suivi d'une bascule vers la crypto, désactivée. Le
+     client se retrouvait dans une impasse, alors que la page de paiement
+     Revolut était affichée juste au-dessus et fonctionnait parfaitement.
+
+     ⛔ On ne bascule JAMAIS sur un chemin Stripe quand le fournisseur actif est
+     Revolut : les deux jetons n'ont rien à voir. On envoie le client là où il
+     peut vraiment payer, ou on lui dit la vérité. */
+  function secoursRevolut(total, errorEl) {
+    sauverCommandeEnAttente(total);
+    if (_urlPaiementHebergee) {
+      window.open(_urlPaiementHebergee, '_blank', 'noopener');
+      if (errorEl) {
+        errorEl.textContent = 'Le formulaire n\'a pas pu s\'afficher ici : le paiement '
+          + 's\'ouvre dans un nouvel onglet, sur la page sécurisée.';
+        errorEl.hidden = false;
+      }
+      return;
+    }
+    if (errorEl) {
+      errorEl.textContent = 'Le formulaire de paiement n\'a pas pu se charger. Vérifie ta '
+        + 'connexion, désactive un éventuel bloqueur, puis rouvre cette page.';
+      errorEl.hidden = false;
+    }
+    reactiverBoutonPayer();
+  }
+
   function confirmPayment() {
     if (!_payItems || !_payItems.length) return;
     // Consentement explicite aux CGV avant tout débit (preuve du consentement
@@ -10544,6 +10595,10 @@
     if (_paiementFournisseur === 'revolut' && _revolutCardField) {
       return confirmerPaiementRevolut(total, errorEl);
     }
+
+    // ⛔ Revolut actif sans champ carte : on ne descend JAMAIS dans les
+    //    branches Stripe qui suivent. Voir `secoursRevolut`.
+    if (_paiementFournisseur === 'revolut') return secoursRevolut(total, errorEl);
 
     // ── Stripe Elements flow (embedded card form) ──
     if (stripe && _stripeElements && _stripeClientSecret) {
@@ -11663,6 +11718,14 @@
       + '<div class="compta-actions">'
       + '<button type="button" class="btn primary" id="revolutPing">🔌 Tester la connexion Revolut</button>'
       + '<button type="button" class="btn btn--ghost" id="revolutOrdre">🧾 Créer une commande de test (30 €)</button>'
+      /* ⛔⛔ CE BOUTON MANQUAIT (constaté le 01/08/2026). Le point d'entrée
+         `?type=revolut-webhook` existait depuis la veille, et je l'ai annoncé
+         comme « clique le bouton » — il n'y avait AUCUN bouton. Récidive exacte
+         du défaut du `revolut-ping` : /api/admin s'autorise par un jeton en
+         EN-TÊTE, donc l'adresse tapée dans la barre du navigateur se fait
+         refuser. Un point d'entrée sans bouton n'existe pas pour l'user.
+         `check-paiement` vérifie désormais l'atteignabilité des TROIS. */
+      + '<button type="button" class="btn btn--ghost" id="revolutWebhook">🔔 Enregistrer le webhook</button>'
       + '</div>'
       + '<p class="compta-line"><small>La commande de test est créée dans le <b>bac à sable</b>, '
       + 'en fausse monnaie, et n\'apparaît pas dans ta comptabilité. 30 € et pas moins : '
@@ -11909,6 +11972,56 @@
     };
   }
 
+  /* Enregistre le webhook chez Revolut et rend son secret de signature.
+
+     ⛔ LE SECRET NE S'AFFICHE QU'UNE FOIS — c'est Revolut qui en décide, pas
+     nous : il n'est jamais ré-obtenable. On l'affiche donc en clair, derrière
+     l'authentification admin, avec la consigne exacte, et on ne le journalise
+     nulle part. Le perdre oblige à supprimer le webhook et à recommencer.
+
+     ⚠️ Idempotent : si un webhook pointe déjà sur cette adresse, le serveur ne
+     crée rien. Deux abonnements identiques doubleraient chaque notification,
+     donc chaque tentative de traitement. */
+  function comptaBrancherWebhook(out) {
+    var b = document.getElementById('revolutWebhook');
+    if (!b || !out) return;
+    b.onclick = function () {
+      b.disabled = true;
+      out.innerHTML = '<p class="admin-loading">Enregistrement du webhook…</p>';
+      adminGet('revolut-webhook').then(function (d) {
+        b.disabled = false;
+        if (!d || !d.ok) {
+          out.innerHTML = '<p class="admin-error"><b>❌ Étape « '
+            + escapeHTML(String((d && d.etape) || '?')) + ' » — '
+            + escapeHTML(String((d && d.erreur) || 'raison inconnue')) + '</b>'
+            + ((d && d.indice) ? '<br>👉 ' + escapeHTML(String(d.indice)) : '') + '</p>';
+          return;
+        }
+        var html = '<div class="compta-res">'
+          + '<div class="compta-res__price" style="font-size:1.05rem">'
+          + (d.etape === 'existant' ? '✅ Webhook déjà en place' : '✅ Webhook enregistré')
+          + '</div>'
+          + '<div class="compta-res__brk"><span>Adresse : <b>' + escapeHTML(String(d.url || '')) + '</b></span></div>';
+        if (d.secretSignature) {
+          /* Le secret est SÉLECTIONNABLE (champ lecture seule) : sur iPad, un
+             appui long sur du texte libre sélectionne le mot, pas la chaîne
+             entière — et un secret copié à moitié est un secret perdu. */
+          html += '<p class="compta-line"><b>⚠️ Copie ce secret MAINTENANT — il ne sera plus jamais affiché.</b></p>'
+            + '<input type="text" readonly aria-label="Secret de signature du webhook"'
+            + ' style="width:100%;font-family:monospace;padding:.5rem;border-radius:6px"'
+            + ' value="' + escapeHTML(String(d.secretSignature)) + '" onclick="this.select()">'
+            + '<p class="compta-line">' + escapeHTML(String(d.aFaire || '')) + '</p>';
+        } else if (d.rappel) {
+          html += '<p class="compta-line">' + escapeHTML(String(d.rappel)) + '</p>';
+        }
+        out.innerHTML = html + '</div>';
+      }).catch(function (e) {
+        b.disabled = false;
+        out.innerHTML = '<p class="admin-error">Erreur réseau : ' + escapeHTML(e.message || String(e)) + '</p>';
+      });
+    };
+  }
+
   /* Diagnostic du fournisseur de paiement.
      ⚠️ Passe par `adminGet`, qui attache le jeton Firebase. C'est LA raison
      d'être de ce bouton : la même adresse tapée dans la barre du navigateur
@@ -11918,6 +12031,7 @@
     var out = document.getElementById('revolutPingOut');
     if (!btn || !out) return;
     comptaBrancherOrdreTest(out);
+    comptaBrancherWebhook(out);
     btn.onclick = function () {
       btn.disabled = true;
       out.innerHTML = '<p class="admin-loading">Appel de Revolut…</p>';

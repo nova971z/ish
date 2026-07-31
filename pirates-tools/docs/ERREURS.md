@@ -14,14 +14,14 @@
 
 | Origine | Mécanisme | Cas | Antidote | Porte |
 |---|---|---|---|---|
-| **O1** | Affirmer avant de mesurer | 9 | §3 · §8 | `garde-sortie.js` *(hook Stop)* |
-| **O2** | L'instrument de mesure est faux | 13 | §4.3 | sabotage obligatoire |
+| **O1** | Affirmer avant de mesurer | 10 | §3 · §8 | `garde-sortie.js` *(hook Stop)* |
+| **O2** | L'instrument de mesure est faux | 15 | §4.3 | sabotage obligatoire |
 | **O3** | Réutiliser sans vérifier le contexte | 7 | §1.4 | `check-lecons.js` |
 | **O4** | Contrainte connue, non appliquée | 3 | §1 | `garde-entonnoir.js` |
 | **O5** | Outil artisanal au lieu de l'outil existant | 1 | §1.4 | aucune — humaine |
 | **O6** | Copie périmée au lieu de la source vivante | 2 | §4.4 | `p7-architecture.js` |
 
-**35 erreurs, 6 mécanismes.** O1 et O2 en concentrent **22 à elles deux** :
+**38 erreurs, 6 mécanismes.** O1 et O2 en concentrent **25 à elles deux** :
 c'est là qu'il faut regarder en premier, toujours.
 
 ---
@@ -37,6 +37,7 @@ confiance dans tout ce que je dis.*
 | **E-102** | « TTL fonctionne sur Spark, aucune demande de facturation » | Refusé | `403: billing disabled` à l'envoi |
 | **E-103** | « D1 : du gain pur, sans risque » | 45 liaisons dont 7 pièges | analyse `esprima` |
 | **E-104** | « aucune mention de médiateur dans index.html » | **3** occurrences | `grep -ci` |
+| **E-110** | « clique le bouton qui enregistre le webhook » | **aucun bouton n'existait** — seul le point d'entrée serveur était écrit | `grep -c "revolut-webhook" app.js` → **0**. Récidive du `revolut-ping` : un point d'entrée admin sans bouton n'existe pas pour l'user |
 | **E-105** | « la plage 64.29.17.x est cassée » | `ish-ebon` y répondait | comparaison des 3 adresses |
 | **E-106** | la porte juridique « couvre ce qui engage » | 8 fichiers sur **20** | sondes sur le code : `contact.js` = 91 marqueurs |
 | **E-107** | l'entonnoir « protège ce qui est servi » | `manifest.webmanifest` servi sans protection ; **21 fichiers serveur sur 28** sans liste de contrôle | `scripts/couverture.js` |
@@ -87,6 +88,8 @@ confiance qui n'existe pas.*
 | **E-210** | mon assertion « le bouton de réconciliation est branché » | vert après suppression de l'appel | la regex matchait aussi la **définition** `function X()` : une fonction jamais appelée passait pour branchée |
 | **E-211** | mon assertion « un seul accès à `event.data.object` » | **refus à tort** sur du code correct | je comptais les OCCURRENCES ; la ligne légitime en porte deux (`if (… && x) return x;`). La règle réelle est « aucune hors de la bascule », pas « exactement une » |
 | **E-212** | mon assertion « la réponse porte `modeTest` » | vert après retrait du champ | je cherchais le MOT dans le bloc — l'appel `paiement.modeTest()` suffisait à le satisfaire. Récidive exacte d'E-210 : chercher une ressemblance au lieu d'énoncer la règle (`modeTest\s*:`) |
+| **E-214** | mon assertion « le secours ouvre la page hébergée » | vert avec `if (false)` | je cherchais la MENTION de la variable, pas son rôle de garde. Troisième récidive du même mécanisme (E-210, E-212) : chercher une ressemblance au lieu d'énoncer la règle |
+| **E-215** | mon assertion « confirmPayment traite Revolut » | **refus à tort** après extraction | elle exigeait le code à un EMPLACEMENT précis ; sortir le bloc dans une fonction — ce que la barrière des fonctions gelées imposait — la faisait rougir sur un code meilleur |
 | **E-213** | la réconciliation elle-même | « 317,79 € encaissés, un client attend » | **VRAI sur le fond, FAUX sur la gravité** : deux paiements Stripe en mode TEST. Le filet ne savait pas distinguer l'argent réel de la fausse monnaie — et une alerte qui crie sur des essais apprend à ne plus être regardée |
 
 **Antidote** : §4.3 — **sabotage obligatoire**. On réintroduit le défaut ; si le

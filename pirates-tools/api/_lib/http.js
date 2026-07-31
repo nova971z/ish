@@ -27,7 +27,41 @@ function applyCors(req, res, methods) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Admin-Secret');
 }
 
+/* ⛔ L'ORIGINE PUBLIQUE DU SITE — pour fabriquer une URL qu'un TIERS appellera.
+   ─────────────────────────────────────────────────────────────────────────
+   Deux besoins, une seule règle : l'adresse de retour après paiement
+   (`redirect_url` chez Revolut) et l'adresse du webhook à déclarer chez le
+   fournisseur. Les deux sortent du site et reviennent de l'extérieur.
+
+   ⛔ L'en-tête `Origin` vient du CLIENT. On ne le recopie donc jamais tel
+   quel : ce serait laisser un tiers décider où nos clients atterrissent après
+   avoir payé, et où le fournisseur enverra ses notifications. On le VALIDE
+   contre `ALLOWED_ORIGINS`, la liste blanche qui existe déjà pour le CORS.
+
+   ⚠️ Rend `null` quand rien n'est sûr — jamais une valeur « au mieux ». Un
+   appelant qui reçoit `null` doit se dégrader proprement ou refuser en
+   expliquant quoi poser : une URL fabriquée à partir d'une chaîne vide donne
+   « /api/webhook », que le fournisseur rejette avec un message qui ne dit rien.
+
+   `PUBLIC_BASE_URL` sert de repli pour les appels SANS navigateur (tâche
+   planifiée, appel serveur à serveur) : il n'y a alors aucun `Origin` à lire.
+   Il est lui aussi vérifié — une variable mal collée ne doit pas devenir une
+   adresse de redirection. */
+function origineSure(req) {
+  var listee = allowedOrigins();
+  var brute = (req && req.headers && (req.headers.origin
+    || String(req.headers.referer || '').replace(/^(https?:\/\/[^/]+).*$/, '$1'))) || '';
+  brute = String(brute).replace(/\/+$/, '');
+  if (brute && listee.indexOf(brute) !== -1) return brute;
+
+  var repli = String(process.env.PUBLIC_BASE_URL || '').trim().replace(/\/+$/, '');
+  if (repli && /^https:\/\/[^/\s]+$/.test(repli)) return repli;
+
+  return null;
+}
+
 module.exports = {
   allowedOrigins: allowedOrigins,
-  applyCors: applyCors
+  applyCors: applyCors,
+  origineSure: origineSure
 };

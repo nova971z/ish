@@ -833,6 +833,75 @@ module.exports = async function () {
       + 'ventes encaissées et jamais enregistrées s\'afficheraient comme des essais sans '
       + 'importance. Dans le doute, on traite comme RÉEL.');
 
+    /* ── d) ⛔⛔ LES TROIS OUTILS REVOLUT DOIVENT ÊTRE ATTEIGNABLES ────────
+       Constaté le 01/08/2026 : `?type=revolut-webhook` existait depuis la
+       veille, et je l'ai annoncé à l'user comme « clique le bouton ». Il n'y
+       avait AUCUN bouton. Récidive exacte du défaut du `revolut-ping` :
+       /api/admin s'autorise par un jeton en EN-TÊTE, donc l'adresse tapée dans
+       la barre du navigateur ne peut que se faire refuser.
+
+       ⛔ Un point d'entrée sans bouton N'EXISTE PAS pour l'user. Et celui-là
+       est le plus cher de tous : sans webhook enregistré, un paiement réussi
+       ne produit ni commande, ni facture, ni e-mail. Le mode de panne le plus
+       silencieux du site. */
+    ['revolut-ping', 'revolut-commande-test', 'revolut-webhook', 'reconciliation'].forEach(function (t) {
+      ok(appSrc.indexOf("adminGet('" + t + "'") !== -1,
+        '⛔⛔ aucun appel `adminGet(\'' + t + '\')` dans app.js : ce point d\'entrée admin '
+        + 'n\'est atteignable par AUCUN bouton. Il peut être parfait côté serveur — pour '
+        + 'l\'user il n\'existe pas, et /api/admin refuse une adresse tapée dans la barre '
+        + 'du navigateur (jeton attendu en EN-TÊTE).');
+    });
+
+    /* ── e) ⛔⛔ REVOLUT ACTIF NE RETOMBE JAMAIS SUR UN CHEMIN STRIPE ──────
+       Le clic sur « Commander » se perdait EN SILENCE quand le champ carte
+       Revolut n'était pas monté (script bloqué, réseau) : aucun des tests
+       Stripe qui suivent ne matchait, et le clic finissait au dernier repli,
+       sur le message FAUX « Paiement carte non configuré » suivi d'une bascule
+       vers la crypto, désactivée. Le client se retrouvait dans une impasse
+       alors que la page de paiement Revolut était affichée juste au-dessus. */
+    /* ⚠️ 1ʳᵉ VERSION FRAGILE, démasquée dans la minute : elle exigeait
+       `_urlPaiementHebergee` DANS le corps de `confirmPayment`. Sortir ce bloc
+       dans une fonction dédiée — ce que la barrière des fonctions gelées
+       imposait — la faisait rougir sur un code strictement meilleur. Elle
+       testait un EMPLACEMENT, pas une règle.
+       La règle est : `confirmPayment` SORT dès que le fournisseur est Revolut,
+       sans condition sur le champ carte, et ce qu'elle appelle propose la page
+       hébergée. On suit donc le nom de la fonction appelée, quel qu'il soit. */
+    var mConfirm = appSrc.match(/function confirmPayment\(\)[\s\S]*?\n  \}/);
+    var sortieRev = mConfirm
+      && /if \(_paiementFournisseur === 'revolut'\)\s*return\s+(\w+)/.exec(mConfirm[0]);
+    ok(!!sortieRev,
+      '⛔⛔ `confirmPayment` ne sort plus INCONDITIONNELLEMENT quand le fournisseur actif '
+      + 'est Revolut. Le clic traverse alors les branches Stripe, n\'en satisfait aucune, '
+      + 'et finit sur « Paiement carte non configuré » + bascule crypto — un message FAUX '
+      + 'et une impasse, alors que la page de paiement hébergée fonctionne. La vente est '
+      + 'perdue sans que rien ne casse.');
+    if (sortieRev) {
+      var mSecours = appSrc.match(new RegExp('function ' + sortieRev[1] + '\\([\\s\\S]*?\\n  \\}'));
+      /* ⚠️ 1ʳᵉ VERSION FAIBLE, démasquée par sabotage : elle se contentait de
+         trouver `_urlPaiementHebergee` quelque part dans la fonction. Un
+         `if (false) { window.open(_urlPaiementHebergee…) }` la laissait VERTE —
+         la variable était bien là, elle ne servait simplement plus à rien.
+         On exige les DEUX : la garde porte sur l'URL, et c'est cette URL qui
+         est ouverte. */
+      ok(mSecours && /if \(_urlPaiementHebergee\)/.test(mSecours[0])
+         && /window\.open\(_urlPaiementHebergee/.test(mSecours[0]),
+        '⛔⛔ `' + sortieRev[1] + '` n\'ouvre plus la page de paiement hébergée sous la '
+        + 'garde de son URL. C\'est le SEUL chemin qui reste au client quand le champ '
+        + 'carte n\'a pas pu se monter : sans elle, il lit un message et repart sans '
+        + 'avoir payé.');
+    }
+
+    /* ── f) ⛔ L'ENVIRONNEMENT NE SE DEVINE PAS DEPUIS UNE URL ────────────
+       Chercher « sandbox » dans `urlHebergee` : si ce champ est absent, on
+       charge le SDK de PRODUCTION avec un jeton de bac à sable — formulaire
+       mort — et le repli n'a pas d'URL non plus. Double panne muette. */
+    ok(!/\/sandbox\/\.test\(_urlPaiementHebergee\)\s*\)\s*\?/.test(appSrc),
+      '⛔ le front DÉDUIT l\'environnement Revolut en cherchant « sandbox » dans une URL, '
+      + 'au lieu de lire ce que le serveur annonce (`modeTest`). Si `urlHebergee` manque, '
+      + 'on charge le SDK de production avec un jeton de bac à sable : formulaire mort, '
+      + 'et aucun repli.');
+
     /* c) Le paramètre de fenêtre ne doit PAS être concaténé dans le type :
        `adminGet` fait `encodeURIComponent(type)`, donc « recon&jours=7 »
        part en « recon%26jours%3D7 ». Le serveur lit un type inconnu et répond
@@ -860,6 +929,88 @@ module.exports = async function () {
       + '« espèces » retombe alors dans le « sinon » : le livreur choisit le paiement par '
       + 'lien, et l\'accord annonce des ESPÈCES au client. Rien ne plante — ça ment. '
       + 'Passer par `lvPaiementLabel`, source unique.');
+  }
+
+  /* ── g) ⛔ L'ORIGINE PUBLIQUE NE SE RECOPIE PAS DEPUIS LE CLIENT ───────
+     Deux URL sortent du site et reviennent de l'extérieur : l'adresse de
+     retour après paiement, et l'adresse du webhook déclarée chez Revolut.
+     Toutes deux étaient fabriquées en recopiant l'en-tête `Origin` — qui
+     vient du navigateur. Deux conséquences distinctes :
+       · sans `Origin` (il manque plus souvent qu'on ne croit), la cible valait
+         « /api/webhook », une adresse relative que Revolut refuse ;
+       · avec un `Origin` forgé, un tiers choisirait où atterrissent nos
+         clients après avoir payé, et où partent les notifications.
+     Test par APPEL réel, pas par lecture de source. */
+  var httpLib = null;
+  try { httpLib = require(path.join(RACINE, 'api', '_lib', 'http.js')); } catch (eH) {
+    ok(false, '⛔ api/_lib/http.js illisible : ' + (eH && eH.message));
+  }
+  if (httpLib && typeof httpLib.origineSure === 'function') {
+    var ao = process.env.ALLOWED_ORIGINS, pb = process.env.PUBLIC_BASE_URL;
+    try {
+      process.env.ALLOWED_ORIGINS = 'https://exemple-liste.test';
+      delete process.env.PUBLIC_BASE_URL;
+
+      ok(httpLib.origineSure({ headers: { origin: 'https://exemple-liste.test' } })
+        === 'https://exemple-liste.test',
+        '⛔ une origine POURTANT LISTÉE est refusée : ni l\'URL de retour après paiement '
+        + 'ni l\'adresse du webhook ne pourraient plus être fabriquées.');
+
+      [
+        ['https://pirate.test', 'origine non listée'],
+        ['http://exemple-liste.test', 'même hôte mais en clair (http)'],
+        ['https://exemple-liste.test.pirate.test', 'suffixe trompeur'],
+        ['null', 'origine « null » (iframe bac à sable)']
+      ].forEach(function (c) {
+        ok(httpLib.origineSure({ headers: { origin: c[0] } }) === null,
+          '⛔⛔ `origineSure` accepte « ' + c[0] + ' » (' + c[1] + '). Un tiers choisirait '
+          + 'alors où atterrissent nos clients après avoir payé, et où Revolut envoie ses '
+          + 'notifications de paiement.');
+      });
+
+      ok(httpLib.origineSure({ headers: {} }) === null,
+        '⛔ sans origine ET sans PUBLIC_BASE_URL, `origineSure` doit rendre `null`, pas une '
+        + 'chaîne vide. Une chaîne vide fabrique « /api/webhook » — une adresse relative '
+        + 'que le fournisseur refuse, avec un message qui ne dit pas pourquoi.');
+
+      /* Le repli serveur-à-serveur est lui aussi vérifié : une variable mal
+         collée ne doit pas devenir une adresse de redirection. */
+      process.env.PUBLIC_BASE_URL = 'https://repli.test/';
+      ok(httpLib.origineSure({ headers: {} }) === 'https://repli.test',
+        'PUBLIC_BASE_URL doit servir de repli quand aucun navigateur n\'est en jeu '
+        + '(tâche planifiée, appel serveur à serveur), barre finale retirée.');
+      ['pirates-tools.com', 'http://repli.test', 'https://repli.test/chemin', 'n\'importe quoi'].forEach(function (v) {
+        process.env.PUBLIC_BASE_URL = v;
+        ok(httpLib.origineSure({ headers: {} }) === null,
+          '⛔ PUBLIC_BASE_URL = « ' + v + ' » est accepté sans être une origine https valide. '
+          + 'Une variable mal collée deviendrait une adresse de redirection.');
+      });
+    } finally {
+      if (ao === undefined) delete process.env.ALLOWED_ORIGINS; else process.env.ALLOWED_ORIGINS = ao;
+      if (pb === undefined) delete process.env.PUBLIC_BASE_URL; else process.env.PUBLIC_BASE_URL = pb;
+    }
+  }
+
+  /* ── h) ⛔ LE CLIENT DOIT POUVOIR REVENIR APRÈS AVOIR PAYÉ ─────────────
+     Aucune `urlRetour` n'était passée : le client qui paie sur la page
+     hébergée restait sur checkout.revolut.com, ne voyait jamais /merci et sa
+     commande n'était pas finalisée côté navigateur. Le webhook sauvait la
+     vente ; le client, lui, repartait. */
+  var CPI = path.join(RACINE, 'api', 'create-payment-intent.js');
+  if (fs.existsSync(CPI)) {
+    var cpiSrc = fs.readFileSync(CPI, 'utf8');
+    ok(/urlRetour\s*:/.test(cpiSrc),
+      '⛔⛔ `create-payment-intent.js` ne passe plus `urlRetour` : aucune adresse de '
+      + 'retour n\'est déclarée chez le fournisseur. Le client qui paie sur la page '
+      + 'hébergée reste chez lui, ne revient jamais sur le site et ne voit jamais sa '
+      + 'confirmation. La vente est encaissée, le client croit qu\'elle a échoué.');
+    ok(/origineSure/.test(cpiSrc),
+      '⛔ l\'adresse de retour est fabriquée sans passer par `origineSure` : elle recopie '
+      + 'donc une valeur venue du client. C\'est un tiers qui choisirait où atterrissent '
+      + 'nos clients après avoir payé.');
+    ok(/modeTest\s*:/.test(cpiSrc),
+      '⛔ le serveur n\'annonce plus l\'environnement (`modeTest`) : le front est contraint '
+      + 'de le deviner depuis une URL, et se trompe dès que `urlHebergee` manque.');
   }
 
   /* ── Le vocabulaire serveur doit couvrir CHAQUE mode ────────────────────
