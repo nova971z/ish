@@ -78,6 +78,9 @@ var reqFrais    = modFrais && modFrais.controle ? modFrais.controle : null;
 var reqCouv     = safeRequire('./couverture',        'check-couverture');
 // Le filet qui mord sur les MOTS DE LA DEMANDE, pas sur l'aiguillage.
 var reqInterd   = safeRequire('./interdits',         'check-interdits');
+// La porte du traqueur : elle doit ouvrir price-watch, et RIEN d'autre.
+// Le 31/07 elle s'est refermee en silence et les prix ont cesse d'etre releves.
+var reqWatchAu  = safeRequire('./check-watch-auth',  'check-watch-auth');
 
 // NOTE 25/07/2026 : l'étape lint-products.js (fichier jamais versionné,
 // silencieusement sautée à chaque run) est SUPPRIMÉE — ses invariants réels
@@ -136,6 +139,7 @@ var reqInterd   = safeRequire('./interdits',         'check-interdits');
   await runOne(reqFrais,    'check-fraicheur');
   await runOne(reqCouv,     'check-couverture');
   await runOne(reqInterd,   'check-interdits');
+  await runOne(reqWatchAu,  'check-watch-auth');
 
   var dur = Math.max(1, Date.now() - started);
   if (errors.length){

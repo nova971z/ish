@@ -63,7 +63,12 @@ var HORS_PORTEE = {
   'pirates-tools/api/health.js': 'sonde de disponibilité, aucune donnée',
   'pirates-tools/api/test-email.js': 'outil de diagnostic, jamais servi aux clients',
   'pirates-tools/api/instagram.js': 'relais de médias publics, aucune donnée personnelle',
-  'pirates-tools/api/products.js': 'lecture du catalogue, les prix sont fixés ailleurs'
+  'pirates-tools/api/products.js': 'lecture du catalogue, les prix sont fixés ailleurs',
+  /* auth.js ne décide d'aucun prix : il authentifie. Ses mentions de « prix »
+     sont les commentaires qui expliquent pourquoi le traqueur a sa propre clé
+     (31/07/2026). L'écarter NOMMÉMENT vaut mieux que le rattacher à J4 : un
+     rappel qui se déclenche à tort finit ignoré, et emporte les vrais avec lui. */
+  'pirates-tools/api/_lib/auth.js': 'authentification seule — aucune décision de prix ni de TVA'
 };
 
 /** Les domaines qu'un fichier engage. Vide = aucune obligation juridique. */

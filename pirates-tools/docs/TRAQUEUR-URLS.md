@@ -9,10 +9,28 @@
 > 3. **POST** → `…/api/admin?type=price-watch&brand=…` : Méthode **POST**, Corps
 >    **JSON**, champ **`text`** = variable **« Contenu de l'URL »** (la ligne
 >    cotébrico juste au-dessus). **En-tête obligatoire** (section « En-têtes ») :
->    Clé = **`x-admin-secret`**, Valeur = **ta clé `ADMIN_SECRET` complète**
->    (celle définie sur Vercel → Settings → Environment Variables ; JAMAIS écrite
->    dans le repo). Sans cet en-tête, le serveur renvoie « non autorisé ».
+>    Clé = **`x-watch-secret`**, Valeur = **ta clé `WATCH_SECRET` complète**
+>    (Vercel → Settings → Environment Variables ; JAMAIS écrite dans le repo).
 >    Coller la clé EN ENTIER, sans rien collé en trop autour.
+
+> 🔑 **CHANGEMENT DU 31/07/2026 — `x-admin-secret` → `x-watch-secret`.**
+> L'étape A5 a retiré `ADMIN_SECRET` de Vercel : l'administration passe
+> désormais par le claim Firebase, plus fort et révocable. Mais un raccourci
+> iPad ne peut pas produire de jeton Firebase — il expire chaque heure. Le
+> traqueur est donc tombé en `401 Invalid admin credentials`, et **les prix
+> fournisseur ont cessé d'être relevés en silence**.
+>
+> Remettre `ADMIN_SECRET` aurait rouvert TOUTE l'administration — commandes,
+> clients, overrides — à un secret rejouable. Le traqueur a donc sa propre clé :
+> elle n'ouvre que `price-watch`, ne peut écrire que des prix fournisseur, et se
+> révoque seule sans toucher à l'accès administrateur.
+>
+> **À faire une fois** : Vercel → Settings → Environment Variables → ajouter
+> `WATCH_SECRET` avec une longue suite aléatoire, puis redéployer. Mettre la
+> même valeur dans l'en-tête `x-watch-secret` des deux raccourcis.
+> ⚠️ Tant que `WATCH_SECRET` n'existe pas, l'ancien couple
+> `ADMIN_SECRET` / `x-admin-secret` reste accepté **s'il est encore défini** :
+> aucun raccourci qui marchait ne casse à cause de ce changement.
 >
 > ⚠️ NE PAS remettre d'action « Ajouter à Pages » / « Combiner » : c'est ce qui
 > déclenchait le blocage « contenu web » d'iOS. Le contenu cotébrico va DIRECT

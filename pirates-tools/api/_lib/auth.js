@@ -49,7 +49,54 @@ async function requireAdmin(req) {
   return { status: 503, error: 'Admin not configured. Set ADMIN_SECRET or a Firebase admin claim.' };
 }
 
+// Autorise UNIQUEMENT le traqueur de prix (POST ?type=price-watch).
+//
+// POURQUOI UN SECRET À PART, ET PAS `ADMIN_SECRET`
+// A5 a retiré `ADMIN_SECRET` de Vercel : l'administration passe désormais par
+// le claim Firebase, plus fort et révocable. Mais le raccourci iPad du traqueur
+// ne peut PAS s'authentifier ainsi — un jeton Firebase expire chaque heure et
+// un raccourci ne sait pas en fabriquer. Le traqueur est donc tombé en
+// `401 Invalid admin credentials`, et les prix fournisseur ont cessé d'être
+// relevés (constaté le 31/07/2026).
+//
+// Remettre `ADMIN_SECRET` rouvrirait TOUTE l'administration — commandes,
+// clients, overrides — à un secret rejouable, et annulerait A5. On donne donc
+// au traqueur sa propre clé, qui n'ouvre qu'une seule porte :
+//   · portée : le seul point d'entrée `price-watch` ;
+//   · pouvoir : écrire des prix fournisseur, rien d'autre ;
+//   · révocable seule, sans toucher à l'accès administrateur.
+//
+// ⚠️ Le claim admin reste accepté ici : le propriétaire connecté peut toujours
+// déclencher un relevé depuis l'interface.
+async function requireWatch(req) {
+  if (await fbLib.verifyAdmin(req)) return null;             // propriétaire connecté
+
+  var expected = process.env.WATCH_SECRET;
+  if (expected) {
+    var provided = (req && req.headers && req.headers['x-watch-secret']) || '';
+    if (timingSafeEqualStr(provided, expected)) return null;
+    return { status: 401, error: 'Invalid watch credentials' };
+  }
+
+  // Repli : tant que WATCH_SECRET n'est pas posé sur Vercel, on accepte encore
+  // l'ancien couple ADMIN_SECRET/x-admin-secret s'il existe — pour ne pas
+  // casser un raccourci qui marcherait déjà. Aucun des deux : refus explicite,
+  // avec le nom de la variable à créer (une erreur muette ferait perdre une
+  // heure ; c'est exactement ce qui vient d'arriver).
+  var legacy = process.env.ADMIN_SECRET;
+  if (legacy) {
+    var prov2 = (req && req.headers && req.headers['x-admin-secret']) || '';
+    if (timingSafeEqualStr(prov2, legacy)) return null;
+  }
+  return {
+    status: 401,
+    error: 'Traqueur non autorisé. Définir WATCH_SECRET sur Vercel et envoyer '
+      + 'l\'en-tête x-watch-secret (voir docs/TRAQUEUR-URLS.md).'
+  };
+}
+
 module.exports = {
   timingSafeEqualStr: timingSafeEqualStr,
-  requireAdmin: requireAdmin
+  requireAdmin: requireAdmin,
+  requireWatch: requireWatch
 };

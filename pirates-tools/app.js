@@ -12809,15 +12809,16 @@
 
   function afficherPorteAdmin(view) {
     view.innerHTML = adminLoginTemplate();
-    var form = document.getElementById('adminLoginForm');
-    var input = document.getElementById('adminSecretInput');
-    if (form && input) {
-      form.onsubmit = function (e) {
-        e.preventDefault();
-        var val = (input.value || '').trim();
-        if (!val) return;
-        setAdminSecret(val);
-        renderAdmin();
+    var btn = document.getElementById('adminGoLogin');
+    if (btn) {
+      btn.onclick = function () {
+        /* ⚠️ `lvRedirect`, JAMAIS `location.hash =` : l'affectation directe
+           empile une entrée d'historique, et le bouton Retour du navigateur
+           renvoie alors sur la porte qu'on vient de quitter (piège déjà payé,
+           voir le commentaire d'onRouteChange).
+           Destination : /auth, pas /compte — l'user n'est pas connecté, et
+           /compte le renverrait de toute façon vers /auth. */
+        lvRedirect('#/auth');
       };
     }
   }
@@ -13332,17 +13333,22 @@
     return '<option value="' + value + '"' + sel + '>' + label + '</option>';
   }
 
+  /* Porte de l'administration.
+     ⚠️ LE CHAMP « CLÉ ADMIN » A ÉTÉ RETIRÉ le 31/07/2026, et ce n'est pas une
+     simplification d'interface : depuis A5, `ADMIN_SECRET` n'existe plus sur
+     Vercel. Le serveur ne pouvait donc PLUS RIEN faire de ce qu'on tapait ici.
+     Un champ qui ne peut rien ouvrir n'est pas neutre — il fait chercher une
+     clé qui n'existe plus, et il laisse croire qu'une seconde voie subsiste.
+     La seule voie réelle est le compte propriétaire porteur du claim admin. */
   function adminLoginTemplate() {
     return '<div class="admin-login">'
       + '<div class="admin-login__card">'
       + '<h1>Administration</h1>'
-      + '<p>Entre ta clé admin pour gérer le catalogue.</p>'
-      + '<form id="adminLoginForm">'
-      + '<label for="adminSecretInput">Clé admin</label>'
-      + '<input type="password" id="adminSecretInput" autocomplete="current-password" required>'
-      + '<button type="submit" class="btn primary">Se connecter</button>'
-      + '</form>'
-      + '<p class="admin-login__hint">La clé doit correspondre à la variable <code>ADMIN_SECRET</code> sur Vercel.</p>'
+      + '<p>Réservée au compte propriétaire. Connecte-toi à ton compte : '
+      + 'l\'accès s\'ouvre tout seul, sans aucun code à saisir.</p>'
+      + '<button type="button" id="adminGoLogin" class="btn primary">Se connecter à mon compte</button>'
+      + '<p class="admin-login__hint">Aucune clé n\'est demandée : l\'autorisation '
+      + 'est portée par ton compte et vérifiée par le serveur.</p>'
       + '</div>'
       + '</div>';
   }

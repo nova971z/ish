@@ -16,8 +16,19 @@ module.exports = async function handler(req, res) {
   http.applyCors(req, res);
   if (req.method === 'OPTIONS') return res.status(204).end();
 
-  // ── Auth (constant-time admin secret) ─────────────────────
-  const denied = await auth.requireAdmin(req);
+  // ── Auth ──────────────────────────────────────────────────
+  // ⚠️ Le traqueur de prix a sa PROPRE porte, traitée AVANT celle de
+  // l'administration. Raison mesurée le 31/07/2026 : `requireAdmin` s'exécutait
+  // ici, en tête, et refusait le raccourci iPad depuis le retrait
+  // d'`ADMIN_SECRET` (A5). Le raccourci recevait « Invalid admin credentials »
+  // et n'atteignait JAMAIS le reste du fichier — pas même le message « POST
+  // uniquement ». Les prix fournisseur ont cessé d'être relevés EN SILENCE.
+  //
+  // ⚠️ J4 — ce point d'entrée décide de PRIX DE VENTE. Le prix relevé chez le
+  // fournisseur est un COÛT, jamais un prix de référence affichable : rien ici
+  // ne doit produire un prix barré ni une réduction annoncée (D-004).
+  const estWatch = (req.query && req.query.type) === 'price-watch';
+  const denied = estWatch ? await auth.requireWatch(req) : await auth.requireAdmin(req);
   if (denied) return res.status(denied.status).json({ ok: false, error: denied.error });
 
   // ── Firestore (shared initializer) ────────────────────────

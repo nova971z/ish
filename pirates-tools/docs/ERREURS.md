@@ -14,14 +14,14 @@
 
 | Origine | Mécanisme | Cas | Antidote | Porte |
 |---|---|---|---|---|
-| **O1** | Affirmer avant de mesurer | 8 | §3 · §8 | `garde-sortie.js` *(hook Stop)* |
+| **O1** | Affirmer avant de mesurer | 9 | §3 · §8 | `garde-sortie.js` *(hook Stop)* |
 | **O2** | L'instrument de mesure est faux | 9 | §4.3 | sabotage obligatoire |
 | **O3** | Réutiliser sans vérifier le contexte | 7 | §1.4 | `check-lecons.js` |
 | **O4** | Contrainte connue, non appliquée | 3 | §1 | `garde-entonnoir.js` |
 | **O5** | Outil artisanal au lieu de l'outil existant | 1 | §1.4 | aucune — humaine |
 | **O6** | Copie périmée au lieu de la source vivante | 2 | §4.4 | `p7-architecture.js` |
 
-**30 erreurs, 6 mécanismes.** O1 et O2 en concentrent **17 à elles deux** :
+**31 erreurs, 6 mécanismes.** O1 et O2 en concentrent **18 à elles deux** :
 c'est là qu'il faut regarder en premier, toujours.
 
 ---
@@ -40,6 +40,7 @@ confiance dans tout ce que je dis.*
 | **E-105** | « la plage 64.29.17.x est cassée » | `ish-ebon` y répondait | comparaison des 3 adresses |
 | **E-106** | la porte juridique « couvre ce qui engage » | 8 fichiers sur **20** | sondes sur le code : `contact.js` = 91 marqueurs |
 | **E-107** | l'entonnoir « protège ce qui est servi » | `manifest.webmanifest` servi sans protection ; **21 fichiers serveur sur 28** sans liste de contrôle | `scripts/couverture.js` |
+| **E-109** | « le site vend 275,44 € » | le site sert **291,81 €** : j'avais lu `products.json`, pas les overrides Firestore qui font foi | l'user, capture d'écran à l'appui |
 | **E-108** | « les trois invariants tombent **par construction** » | faux : **1684 échecs sur 3000** | oracle de propriétés indépendant, manche 1 |
 
 **Antidote** : §3 — la commande **dans le même message**. §8 — un écran qui ne
