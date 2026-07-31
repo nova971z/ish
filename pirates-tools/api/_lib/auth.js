@@ -75,7 +75,30 @@ async function requireWatch(req) {
   if (expected) {
     var provided = (req && req.headers && req.headers['x-watch-secret']) || '';
     if (timingSafeEqualStr(provided, expected)) return null;
-    return { status: 401, error: 'Invalid watch credentials' };
+
+    /* ⚠️ LE REFUS DOIT DIRE DANS LEQUEL DES DEUX CAS ON EST.
+       « Invalid watch credentials » tout court ne distingue pas « en-tête
+       absent » de « valeur fausse » — deux causes, deux gestes différents, et
+       on cherche à l'aveugle. On distingue donc, SANS jamais rien révéler du
+       secret attendu : on ne renvoie que ce que l'appelant a envoyé lui-même,
+       et seulement sa LONGUEUR. */
+    if (!provided) {
+      var ancien = (req && req.headers && req.headers['x-admin-secret'])
+        ? ' Un en-tête x-admin-secret est présent : c\'est l\'ANCIEN nom, le renommer.'
+        : '';
+      return {
+        status: 401,
+        error: 'En-tête x-watch-secret ABSENT de la requête.' + ancien
+          + ' Dans le raccourci : section « En-têtes », Clé = x-watch-secret, '
+          + 'Valeur = la clé WATCH_SECRET définie sur Vercel.'
+      };
+    }
+    return {
+      status: 401,
+      error: 'En-tête x-watch-secret présent (' + provided.length + ' caractères) '
+        + 'mais différent de WATCH_SECRET. Recoller la valeur EN ENTIER depuis '
+        + 'Vercel, sans espace ni retour à la ligne avant ou après.'
+    };
   }
 
   // Repli : tant que WATCH_SECRET n'est pas posé sur Vercel, on accepte encore

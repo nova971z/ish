@@ -54,6 +54,33 @@ module.exports = async function () {
     /* ── 3. sans en-tête : refus, et le refus dit quoi faire ───────────── */
     var nu = await auth.requireWatch(req({}));
     if (!nu || nu.status !== 401) errors.push('check-watch-auth : une requête SANS clé passe.');
+    else if (!/ABSENT/.test(String(nu.error || ''))) {
+      errors.push('check-watch-auth : le refus ne dit pas que l\'en-tête est ABSENT. '
+        + '« clé invalide » ne distingue pas « en-tête manquant » de « valeur fausse » : '
+        + 'deux causes, deux gestes, et on cherche à l\'aveugle.');
+    }
+
+    /* ── 3 bis. l'ancien nom d'en-tête doit être signalé nommément ──────── */
+    var vieux = await auth.requireWatch(req({ 'x-admin-secret': 'peu-importe-la-valeur' }));
+    if (!vieux || !/ANCIEN nom/.test(String(vieux.error || ''))) {
+      errors.push('check-watch-auth : un raccourci resté sur x-admin-secret n\'est pas '
+        + 'orienté vers le nouveau nom. C\'est LE cas de migration le plus probable.');
+    }
+
+    /* ── 3 ter. ⛔ le refus ne doit JAMAIS contenir le secret attendu ───── */
+    var mauvais = await auth.requireWatch(req({ 'x-watch-secret': 'valeur-fausse-mais-longue' }));
+    ['cle-de-controle-1234567890'].forEach(function (s) {
+      [nu, vieux, mauvais].forEach(function (r) {
+        if (r && String(r.error || '').indexOf(s) !== -1) {
+          errors.push('check-watch-auth : ⛔ le message de refus CONTIENT le secret attendu. '
+            + 'Un message d\'erreur part dans les journaux et sur l\'écran de l\'appelant.');
+        }
+      });
+    });
+    if (!mauvais || !/caractères/.test(String(mauvais.error || ''))) {
+      errors.push('check-watch-auth : le refus sur valeur fausse ne donne pas la longueur '
+        + 'reçue — c\'est le seul indice qui révèle un copier-coller tronqué.');
+    }
 
     /* ── 4. la clé du traqueur n'ouvre PAS l'administration ──────────────
        ⚠️ PREMIER JET FAUSSEMENT VERT : il testait avec `ADMIN_SECRET` absent.
