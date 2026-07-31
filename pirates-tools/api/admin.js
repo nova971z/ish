@@ -237,6 +237,89 @@ module.exports = async function handler(req, res) {
       }
     }
 
+    /* ── GET ?type=reconciliation : LE FILET SOUS LE WEBHOOK ────────────────
+       Compare ce que le fournisseur dit avoir encaissé à ce que notre journal
+       `payments/` contient. Tout ce qui est dans le premier et pas dans le
+       second est de l'argent encaissé pour lequel un client attend une commande
+       qui n'existe pas — le pire mode de panne du site, parce qu'il est
+       SILENCIEUX : rien ne casse, rien n'alerte, personne ne le sait.
+
+       ⚠️ CE POINT D'ENTRÉE N'EST PAS UN DIAGNOSTIC — il n'a donc AUCUNE garde
+       de production, contrairement aux trois outils Revolut au-dessus. C'est
+       exactement en production qu'il sert. Il ne fait que LIRE, des deux côtés,
+       et n'écrit rien nulle part.
+
+       ⛔ IL MARCHE POUR LES DEUX FOURNISSEURS. Il passe par la couture, jamais
+       par un SDK : le jour de la bascule, il continue de tourner sans qu'on y
+       touche. C'est le seul filet qui restera si la politique de re-livraison
+       de Revolut est plus courte que celle de Stripe — elle n'est pas
+       documentée, et on ne parie pas là-dessus.
+
+       ⛔ AUCUNE DONNÉE PERSONNELLE NE SORT (règle J3, audit p6-rgpd) : la
+       réponse ne porte que des identifiants, des montants et des dates. Les
+       ordres relus contiennent pourtant e-mail, nom et adresse — on les jette
+       délibérément ici, au lieu de les laisser passer « au cas où ». */
+    if (type === 'reconciliation') {
+      const recon = require('./_lib/paiement/reconciliation');
+      const socle = require('./_lib/paiement');
+      const paiement = socle.fournisseur();
+      if (!paiement.estConfigure()) {
+        return res.status(400).json({ ok: false,
+          erreur: 'Fournisseur « ' + paiement.nom() + ' » non configuré : sa clé secrète '
+            + 'est absente. Sans elle on ne peut pas demander ce qu\'il a encaissé.' });
+      }
+      /* Fenêtre bornée à 30 jours : une fenêtre plus large ferait expirer la
+         fonction avant de rendre quoi que ce soit, et un rattrapage qui
+         n'aboutit jamais ne rattrape rien. Plusieurs passages courts valent
+         mieux qu'un passage unique qui meurt. */
+      const jours = Math.min(30, Math.max(1, parseInt((req.query && req.query.jours), 10) || 7));
+      const jusqua = Date.now();
+      const depuis = jusqua - jours * 24 * 60 * 60 * 1000;
+      try {
+        const ordres = await paiement.listerPaiements(depuis, jusqua);
+
+        /* ⛔⛔ SEULS LES PAIEMENTS ABOUTIS COMPTENT COMME « DÉJÀ TRAITÉS ».
+           `payments/{id}` porte AUSSI les tentatives ratées (status 'failed'),
+           sous le MÊME identifiant que la commande — c'est le même ordre chez
+           Revolut, le client réessaie dessus. Prendre tous les documents
+           reviendrait à dire : « cet ordre est dans le journal, donc il est
+           traité ». Un client dont la 1ʳᵉ tentative échoue, dont la 2ᵉ réussit,
+           et dont le webhook de succès se perd, serait alors DÉFINITIVEMENT
+           invisible pour le filet — le seul cas où il devait servir. */
+        const journalSnap = await db.collection('payments').where('status', '==', 'succeeded').get();
+        const idsAboutis = [];
+        journalSnap.forEach(function (doc) { idsAboutis.push(doc.id); });
+
+        const r = recon.comparer(ordres, idsAboutis, {});
+        return res.status(200).json({
+          ok: true,
+          fournisseur: paiement.nom(),
+          fenetreJours: jours,
+          resume: recon.resume(r),
+          // Identifiants, montants, dates. Rien d'autre ne sort d'ici.
+          orphelins: r.orphelins.map(function (o) {
+            return { id: o.id, montantCents: o.montantCents, devise: o.devise, creeAMs: o.creeAMs };
+          }),
+          comptes: {
+            examines: r.total,
+            dejaTraites: r.dejaTraites.length,
+            tropRecents: r.ignoresTropRecents.length,
+            nonEncaisses: r.nonEncaisses.length,
+            horsPerimetre: r.horsPerimetre.length,
+            journalAboutis: idsAboutis.length
+          }
+        });
+      } catch (e) {
+        /* ⛔ On dit que la réconciliation N'A PAS EU LIEU. Rendre « 0 orphelin »
+           sur une erreur serait le mensonge le plus cher du fichier : un filet
+           qui rassure sans avoir regardé. */
+        return res.status(200).json({ ok: false,
+          erreur: String(e.message || e).slice(0, 400),
+          avertissement: 'La réconciliation N\'A PAS TOURNÉ. Ce n\'est pas « aucun '
+            + 'orphelin » : c\'est « on ne sait pas ». À relancer.' });
+      }
+    }
+
     if (type === 'export-catalogue') {
       try {
         const fusion = await catalog.loadPublicCatalog();

@@ -34,8 +34,14 @@ module.exports = function () {
   var RECENT = T0 - 60 * 1000;         // 1 min — le webhook est peut-être en route
   var opts = { maintenantMs: T0 };
 
+  /* ⚠️ `metadata.source` est OBLIGATOIRE sur un jeu d'essai : la réconciliation
+     écarte du périmètre tout ordre qui n'est pas une vente du site. Un fixture
+     sans metadata ne tomberait plus dans aucune des catégories testées ici —
+     et le contrôle rougirait sur un module parfaitement correct. */
+  var NOTRE = { source: 'pirates-tools' };
   function ordre(id, etat, ms, montant) {
-    return { id: id, etat: etat, creeAMs: ms, montantCents: montant || 10000, devise: 'EUR' };
+    return { id: id, etat: etat, creeAMs: ms, montantCents: montant || 10000,
+      devise: 'EUR', metadata: NOTRE };
   }
 
   /* ── 1. ⛔ L'ORPHELIN EST TROUVÉ ──────────────────────────────────────── */
@@ -70,7 +76,7 @@ module.exports = function () {
     + 'passeraient pour orphelins et seraient retraités.');
 
   /* Comparaison par CHAÎNE : un identifiant numérique ne doit pas échapper. */
-  var r4 = R.comparer([{ id: 123, etat: 'paye', creeAMs: VIEUX }], ['123'], opts);
+  var r4 = R.comparer([{ id: 123, etat: 'paye', creeAMs: VIEUX, metadata: NOTRE }], ['123'], opts);
   ok(r4.orphelins.length === 0,
     'un identifiant numérique côté fournisseur et texte côté journal doit se '
     + 'reconnaître — sinon on retraiterait un paiement déjà traité.');
@@ -111,10 +117,53 @@ module.exports = function () {
   /* Un ordre SANS date ne doit pas être protégé par le délai : on ne peut pas
      prouver qu'il est récent, et un orphelin silencieux coûte plus cher qu'une
      alerte de trop. */
-  var sansDate = R.comparer([{ id: 'x', etat: 'paye' }], [], opts);
+  var sansDate = R.comparer([{ id: 'x', etat: 'paye', metadata: NOTRE }], [], opts);
   ok(sansDate.orphelins.length === 1,
     'un ordre sans date de création est signalé : faute de pouvoir prouver qu\'il '
     + 'est récent, on préfère alerter à tort que taire un paiement perdu.');
+
+  /* ── 4 bis. ⛔ LE PÉRIMÈTRE — deux faux orphelins qui crieraient à vie ───
+     Le filet ne compare pas « tout ce que le fournisseur a encaissé » à notre
+     journal : il compare NOS VENTES. Deux ordres n'en sont pas, et chacun
+     produirait une alerte que rien ne pourrait jamais éteindre — puisque
+     aucune commande ne leur correspondra jamais :
+
+       · un ordre créé HORS du site (à la main dans le tableau de bord) ;
+       · la commande de DIAGNOSTIC à 30 €, qui porte volontairement
+         `source: pirates-tools` et que le webhook exclut déjà.
+
+     Une alerte permanente est pire qu'aucune alerte : elle apprend à ne plus
+     regarder, et le jour où un vrai orphelin sort, il se noie dedans. */
+  var hors = R.comparer([
+    { id: 'externe', etat: 'paye', creeAMs: VIEUX, montantCents: 5000, metadata: { source: 'autre-outil' } },
+    { id: 'sans-meta', etat: 'paye', creeAMs: VIEUX, montantCents: 5000 },
+    { id: 'diagnostic', etat: 'paye', creeAMs: VIEUX, montantCents: 3000, metadata: { source: 'pirates-tools', test: '1' } }
+  ], [], opts);
+  ok(hors.orphelins.length === 0,
+    '⛔⛔ la réconciliation signale comme orphelins des ordres qui ne sont PAS des '
+    + 'ventes du site (' + hors.orphelins.map(function (o) { return o.id; }).join(', ')
+    + '). Aucune commande ne leur correspondra jamais : l\'alerte serait permanente, '
+    + 'et on apprendrait à ne plus la regarder — jusqu\'au jour où un vrai orphelin '
+    + 'se noie dedans.');
+  ok(hors.horsPerimetre.length === 3,
+    'les trois ordres hors périmètre doivent être COMPTÉS à part, pas effacés : un '
+    + 'chiffre qui disparaît est un chiffre qu\'on ne peut plus recouper.');
+
+  /* Et le symétrique, sans quoi l'exclusion pourrait tout avaler : une vraie
+     vente orpheline, elle, DOIT continuer à sortir. */
+  var vraie = R.comparer([
+    ordre('vraie-vente', 'paye', VIEUX, 12900),
+    { id: 'diagnostic', etat: 'paye', creeAMs: VIEUX, montantCents: 3000, metadata: { source: 'pirates-tools', test: '1' } }
+  ], [], opts);
+  var idsVraie = vraie.orphelins.map(function (o) { return o.id; });
+  ok(idsVraie.indexOf('vraie-vente') !== -1,
+    '⛔⛔ l\'exclusion du périmètre a MANGÉ une vraie vente orpheline. Le filet ne '
+    + 'prend plus rien et se contente de rassurer — le mode de panne exact que ce '
+    + 'module existe pour empêcher.');
+  ok(idsVraie.indexOf('diagnostic') === -1,
+    '⛔ la commande de diagnostic ressort en orphelin à côté d\'une vraie vente : '
+    + 'l\'exclusion ne s\'applique pas quand il y a du vrai trafic. Elle serait donc '
+    + 'inutile exactement le jour où elle compte. Orphelins vus : ' + idsVraie.join(', '));
 
   /* ── 5. Entrées aberrantes : ne jamais planter ───────────────────────── */
   [null, undefined, [], [null], [{}], [{ etat: 'paye' }]].forEach(function (v) {
@@ -145,7 +194,7 @@ module.exports = function () {
   /* ⛔ RGPD (J3) : le résumé part par e-mail et dans les journaux serveur.
      Il ne doit contenir ni e-mail, ni nom, ni adresse. */
   var msgPerso = R.resume(R.comparer([{
-    id: 'o-2', etat: 'paye', creeAMs: VIEUX, montantCents: 1000,
+    id: 'o-2', etat: 'paye', creeAMs: VIEUX, montantCents: 1000, metadata: NOTRE,
     email: 'client@example.com', nom: 'Prénom Nom',
     adresse: { ligne1: '1 rue X', ville: 'Sainte-Anne' }
   }], [], opts));

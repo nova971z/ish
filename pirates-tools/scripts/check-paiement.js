@@ -286,6 +286,40 @@ module.exports = async function () {
       '⛔⛔ la commande de diagnostic Revolut ne porte plus `test: \'1\'` dans sa '
       + 'metadata. La garde du webhook s\'appuie dessus pour ne pas la traiter comme '
       + 'une vraie vente : sans ce marqueur, elle en devient une.');
+
+    /* ── LE FILET, CÔTÉ SERVEUR ─────────────────────────────────────────── */
+    var mRec = admSrc.match(/type === 'reconciliation'[\s\S]{0,6000}?\n    \}/);
+    ok(!!mRec,
+      '⛔ /api/admin n\'expose plus `?type=reconciliation`. Le bouton du panneau '
+      + 'comptabilité appellerait une adresse qui n\'existe pas : le filet ne tourne plus, '
+      + 'et un paiement encaissé dont le webhook s\'est perdu redevient invisible.');
+    if (mRec) {
+      /* ⛔⛔ Le journal `payments/` porte AUSSI les tentatives ratées, sous le
+         MÊME identifiant que la commande (chez Revolut le client réessaie sur
+         le même ordre). Sans le filtre `status == succeeded`, un ordre présent
+         en « failed » passerait pour « déjà traité » : le client dont la 1ʳᵉ
+         tentative échoue, dont la 2ᵉ réussit et dont le webhook de succès se
+         perd deviendrait DÉFINITIVEMENT invisible — le seul cas qui compte. */
+      ok(/where\(\s*'status'\s*,\s*'=='\s*,\s*'succeeded'\s*\)/.test(mRec[0]),
+        '⛔⛔ la réconciliation compare TOUT le journal `payments/`, tentatives ratées '
+        + 'comprises. Or elles portent le même identifiant que la commande : un ordre '
+        + 'échoué puis payé, dont le webhook de succès se perd, passerait pour « déjà '
+        + 'traité » et ne serait JAMAIS rattrapé. Seuls les paiements aboutis comptent.');
+
+      /* ⛔ RGPD (J3) : la réponse s'affiche, se copie, part en capture d'écran. */
+      ['\\bemail\\b', '\\bnom\\b', 'adresse'].forEach(function (champ) {
+        ok(!(new RegExp(champ + '\\s*:', 'i')).test(mRec[0]),
+          '⛔ la réponse de réconciliation renvoie un champ « ' + champ.replace(/\\b/g, '')
+          + ' ». Les ordres relus portent e-mail, nom et adresse : ils ne doivent PAS '
+          + 'ressortir. Identifiants, montants et dates seulement (règle J3, audit p6).');
+      });
+
+      /* ⛔ Un échec doit se DIRE. Renvoyer un résultat vide sur erreur, c'est
+         afficher « aucun orphelin » alors que rien n'a été comparé. */
+      ok(/avertissement/.test(mRec[0]),
+        '⛔⛔ en cas d\'échec, la réconciliation ne dit plus qu\'elle N\'A PAS TOURNÉ. '
+        + 'L\'écran afficherait « rien à signaler » sans que rien n\'ait été comparé.');
+    }
   }
 
   /* ── 4 ter bis. LA GARDE D'ÉTAT NE VAUT QUE POUR L'ENCAISSEMENT ─────────
@@ -636,6 +670,43 @@ module.exports = async function () {
         + 'le client paie, /merci ne finalise rien, et seul le journal serveur garde '
         + 'la trace.');
     }
+
+    /* ── LE FILET DOIT ÊTRE ATTEIGNABLE, ET NE JAMAIS RASSURER À TORT ──────
+       Trois défauts distincts, chacun rendant le filet inutile SANS rien
+       casser de visible. */
+
+    /* a) Le bouton existe, et il est branché au démarrage du panneau.
+       ⚠️ 1ʳᵉ VERSION FAUSSE, démasquée par sabotage le 31/07/2026 : elle
+       cherchait `comptaBrancherReconciliation()` n'importe où — ce qui matche
+       aussi la DÉFINITION `function comptaBrancherReconciliation()`. Retirer
+       l'appel laissait donc le contrôle VERT : il certifiait qu'un bouton était
+       branché alors que plus rien ne le branchait. On efface les définitions
+       avant de chercher ; ce qui reste ne peut être qu'un appel. */
+    var appelsRecon = appSrc.replace(/function\s+comptaBrancherReconciliation/g, '');
+    ok(/id="reconLancer"/.test(appSrc) && /comptaBrancherReconciliation\s*\(\s*\)/.test(appelsRecon),
+      '⛔ le contrôle des paiements encaissés n\'est plus atteignable depuis le panneau '
+      + 'comptabilité (bouton absent, ou `comptaBrancherReconciliation` jamais appelée). '
+      + 'Le code du filet peut être parfait : s\'il ne se déclenche jamais, il ne rattrape '
+      + 'rien. Et /api/admin s\'autorise par un jeton en EN-TÊTE — l\'adresse tapée dans la '
+      + 'barre du navigateur se fait refuser.');
+
+    // b) ⛔ Un échec d'appel ne doit JAMAIS s'afficher comme « tout va bien ».
+    var mRecon = appSrc.match(/function comptaBrancherReconciliation[\s\S]*?\n  \}/);
+    ok(mRecon && /n'a pas tourné|n\\'a pas tourné/.test(mRecon[0]),
+      '⛔⛔ le contrôle des paiements encaissés ne distingue plus « aucun orphelin » de '
+      + '« le contrôle n\'a pas tourné ». Un appel en échec affiché comme rassurant, c\'est '
+      + 'un filet qui certifie sans avoir regardé — pire que pas de filet, parce qu\'on le '
+      + 'croit.');
+
+    /* c) Le paramètre de fenêtre ne doit PAS être concaténé dans le type :
+       `adminGet` fait `encodeURIComponent(type)`, donc « recon&jours=7 »
+       part en « recon%26jours%3D7 ». Le serveur lit un type inconnu et répond
+       à côté — sans erreur visible. Écrit puis corrigé le 31/07/2026. */
+    ok(!/adminGet\(\s*'[^']*&/.test(appSrc) && !/adminGet\(\s*"[^"]*&/.test(appSrc),
+      '⛔ un appel `adminGet` colle un paramètre dans le nom du type. `adminGet` passe ce '
+      + 'nom par `encodeURIComponent` : le `&` devient `%26`, le serveur reçoit un type qui '
+      + 'n\'existe pas et répond autre chose — sans la moindre erreur à l\'écran. Les '
+      + 'paramètres passent par le 2ᵉ argument.');
   }
 
   return errors;

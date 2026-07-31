@@ -11047,8 +11047,18 @@
       + ' (réseau coupé, requête refusée par le navigateur, ou fonction serveur plantée)');
   }
 
-  function adminGet(type) {
+  /* `params` : paramètres SUPPLÉMENTAIRES, en objet.
+     ⛔ Ne JAMAIS les coller dans `type` — il passe par `encodeURIComponent`,
+     qui transforme « recon&jours=7 » en « recon%26jours%3D7 ». Le serveur lit
+     alors un type qui n'existe pas et répond à côté, sans erreur visible.
+     (Défaut écrit puis corrigé le 31/07/2026, avant tout déploiement.) */
+  function adminGet(type, params) {
     var url = apiBaseUrl() + '/api/admin?type=' + encodeURIComponent(type);
+    if (params) {
+      Object.keys(params).forEach(function (k) {
+        url += '&' + encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
+      });
+    }
     return adminAuthHeaders().then(function (headers) {
       return fetch(url, { method: 'GET', headers: headers })
         .catch(function (e) { throw adminNetworkError(url, e); });
@@ -11596,6 +11606,28 @@
       + 'en dessous, le 3-D Secure est contourné et la carte de test « échec » réussirait.</small></p>'
       + '<div id="revolutPingOut" class="compta-calc-out"></div></div>';
 
+    /* ── Contrôle des paiements encaissés ─────────────────────────────────
+       ⚠️ CE BLOC N'EST PAS UN DIAGNOSTIC. Les deux boutons au-dessus ne servent
+       qu'à l'installation, en bac à sable. Celui-ci sert EN PRODUCTION, et
+       c'est le seul qui puisse rattraper de l'argent perdu : il compare ce que
+       le fournisseur a encaissé à ce que le site a enregistré. Un webhook qui
+       n'arrive jamais ne casse RIEN et n'alerte personne — le client a payé, sa
+       commande n'existe pas, et sans ce bouton on ne l'apprend que par sa
+       réclamation. */
+    html += '<h2 class="admin-subtitle">🧷 Contrôle des paiements encaissés</h2>';
+    html += '<div class="compta-card">'
+      + '<p class="compta-line">Compare l\'argent <b>réellement encaissé</b> chez le fournisseur '
+      + 'à ce que le site a enregistré. S\'il manque quelque chose, c\'est un client qui a payé '
+      + 'et dont la commande n\'a jamais été créée.</p>'
+      + '<div class="compta-actions">'
+      + '<button type="button" class="btn primary" id="reconLancer">🧷 Vérifier les 7 derniers jours</button>'
+      + '<button type="button" class="btn btn--ghost" id="reconLancer30">📆 Les 30 derniers jours</button>'
+      + '</div>'
+      + '<p class="compta-line"><small>Lecture seule des deux côtés : rien n\'est créé, rien n\'est '
+      + 'modifié. Les paiements de <b>moins de 15 minutes</b> sont mis de côté — leur notification '
+      + 'est probablement encore en route.</small></p>'
+      + '<div id="reconOut" class="compta-calc-out"></div></div>';
+
     // ── Bloc 0 : calculateur & prix automatiques (rempli après chargement config) ─
     html += '<h2 class="admin-subtitle">🧮 Calculateur &amp; prix automatiques</h2>';
     html += '<div id="comptaCalc"><p class="admin-loading">Chargement de la config…</p></div>';
@@ -11665,6 +11697,85 @@
     var reloadBtn = document.getElementById('comptaReloadAcc');
     if (reloadBtn) reloadBtn.onclick = function () { comptaLoadAccounting(); };
     comptaBrancherPing();
+    comptaBrancherReconciliation();
+  }
+
+  /* ── LE FILET SOUS LE WEBHOOK, côté écran ────────────────────────────────
+     Le seul bouton de cette page qui puisse retrouver de l'argent perdu.
+
+     ⛔ TROIS ÉTATS, ET LE TROISIÈME EST LE PLUS IMPORTANT :
+       · orphelins trouvés  → alerte rouge, montant et références ;
+       · aucun orphelin     → confirmation sobre ;
+       · ⛔ le contrôle N'A PAS TOURNÉ → ni l'un ni l'autre. Afficher « aucun
+         orphelin » quand l'appel a échoué serait le mensonge le plus cher de
+         l'interface : ça rassure sans avoir regardé. On dit « on ne sait pas ».
+
+     ⚠️ Passe par `adminGet` (jeton Firebase en en-tête). La même adresse tapée
+     dans la barre du navigateur se ferait refuser — constaté le 31/07/2026. */
+  function comptaBrancherReconciliation() {
+    var out = document.getElementById('reconOut');
+    if (!out) return;
+    var b7 = document.getElementById('reconLancer');
+    var b30 = document.getElementById('reconLancer30');
+
+    function lancer(jours) {
+      if (b7) b7.disabled = true;
+      if (b30) b30.disabled = true;
+      out.innerHTML = '<p class="admin-loading">Comparaison en cours sur ' + jours + ' jours…</p>';
+      adminGet('reconciliation', { jours: jours }).then(function (d) {
+        if (b7) b7.disabled = false;
+        if (b30) b30.disabled = false;
+
+        if (!d || !d.ok) {
+          out.innerHTML = '<p class="admin-error"><b>⚠️ Le contrôle n\'a pas tourné — '
+            + escapeHTML(String((d && d.erreur) || 'raison inconnue')) + '</b><br>'
+            + escapeHTML(String((d && d.avertissement)
+              || 'Ce n\'est PAS « aucun problème » : c\'est « on ne sait pas ». À relancer.'))
+            + '</p>';
+          return;
+        }
+
+        var c = d.comptes || {};
+        var pied = '<div class="compta-res__brk">'
+          + '<span>Fournisseur : <b>' + escapeHTML(String(d.fournisseur || '')) + '</b></span>'
+          + '<span>Encaissements examinés : ' + escapeHTML(String(c.examines)) + '</span>'
+          + '<span>Déjà enregistrés : ' + escapeHTML(String(c.dejaTraites)) + '</span>'
+          + '<span>Trop récents pour conclure : ' + escapeHTML(String(c.tropRecents)) + '</span>'
+          + '</div>';
+
+        var orph = d.orphelins || [];
+        if (!orph.length) {
+          out.innerHTML = '<div class="compta-res">'
+            + '<div class="compta-res__price" style="font-size:1.1rem">✅ Tout est enregistré</div>'
+            + pied + '</div>';
+          return;
+        }
+
+        var somme = 0;
+        var lignes = '';
+        orph.forEach(function (o) {
+          var cents = (typeof o.montantCents === 'number') ? o.montantCents : 0;
+          somme += cents;
+          lignes += '<p class="compta-line"><b>' + escapeHTML(String(o.id || '?')) + '</b> — '
+            + escapeHTML(formatPrice(cents / 100))
+            + (o.creeAMs ? ' — ' + escapeHTML(new Date(o.creeAMs).toLocaleString('fr-FR')) : '')
+            + '</p>';
+        });
+        out.innerHTML = '<p class="admin-error"><b>⛔ ' + orph.length + ' paiement(s) encaissé(s) '
+          + 'SANS commande enregistrée — ' + escapeHTML(formatPrice(somme / 100)) + '</b><br>'
+          + 'Un client a payé et attend. À traiter à la main : retrouver la référence chez le '
+          + 'fournisseur, créer la commande, puis le prévenir.</p>' + lignes;
+      }).catch(function (e) {
+        if (b7) b7.disabled = false;
+        if (b30) b30.disabled = false;
+        out.innerHTML = '<p class="admin-error"><b>⚠️ Le contrôle n\'a pas tourné — '
+          + escapeHTML(e.message || String(e)) + '</b><br>Ce n\'est PAS « aucun problème » : '
+          + 'c\'est « on ne sait pas ». À relancer.</p>';
+      });
+    }
+
+    if (b7) b7.onclick = function () { lancer(7); };
+    if (b30) b30.onclick = function () { lancer(30); };
   }
 
   /* Crée une commande de test dans le BAC À SABLE et rend son lien de paiement.

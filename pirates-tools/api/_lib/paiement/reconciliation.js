@@ -51,7 +51,29 @@ var socle = require('./index');
    options.maintenantMs : injecté pour que les contrôles soient reproductibles.
 
    Retourne :
-     { orphelins, ignoresTropRecents, dejaTraites, nonEncaisses, total } */
+     { orphelins, ignoresTropRecents, dejaTraites, nonEncaisses, horsPerimetre, total } */
+
+/* ⛔ QU'EST-CE QUI EST « À NOUS » — LA RÈGLE VIT ICI, UNE SEULE FOIS.
+   C'est une règle MÉTIER, pas un détail de fournisseur : la mettre dans chaque
+   module fournisseur, c'est deux copies qui divergeront au premier correctif
+   appliqué à une seule. Deux cas à écarter, et ils ne sont pas du même genre :
+
+     · `source !== 'pirates-tools'` — un ordre créé ailleurs (à la main dans le
+       tableau de bord Revolut, par un autre outil). Le signaler en orphelin
+       ferait crier la réconciliation sur de l'argent parfaitement en règle, et
+       une alerte qui crie pour rien finit par ne plus être lue.
+     · `test` — la commande de diagnostic à 30 €. Elle porte volontairement
+       `source: pirates-tools`, et le webhook l'exclut déjà (api/webhook.js).
+       Sans la même exclusion ici, le filet la rattraperait comme un paiement
+       encaissé jamais traité — un faux orphelin à chaque passage, indélébile,
+       puisqu'aucune commande ne lui correspondra jamais. */
+function estANous(o) {
+  var m = (o && o.metadata) || {};
+  if (m.source !== 'pirates-tools') return false;
+  if (m.test) return false;
+  return true;
+}
+
 function comparer(ordresFournisseur, idsJournalises, options) {
   var opts = options || {};
   var ageMin = (typeof opts.ageMinMs === 'number') ? opts.ageMinMs : 15 * 60 * 1000;
@@ -67,12 +89,16 @@ function comparer(ordresFournisseur, idsJournalises, options) {
 
   var res = {
     orphelins: [], ignoresTropRecents: [], dejaTraites: [], nonEncaisses: [],
-    total: 0
+    horsPerimetre: [], total: 0
   };
 
   (ordresFournisseur || []).forEach(function (o) {
     if (!o || o.id == null) return;
     res.total++;
+
+    /* Écarté AVANT tout le reste : ni orphelin, ni déjà traité, ni rien. Ce
+       n'est pas une vente du site, il n'y a donc rien à réconcilier. */
+    if (!estANous(o)) { res.horsPerimetre.push(o); return; }
 
     /* ⛔ Seul un paiement ACQUIS mérite d'être réconcilié. Un ordre `autorise`
        est réversible, un `en_attente` n'a rien encaissé : les traiter
@@ -105,7 +131,8 @@ function resume(r) {
     return 'Réconciliation : ' + r.total + ' ordres examinés, AUCUN orphelin. '
       + '(' + r.dejaTraites.length + ' déjà traités, '
       + r.ignoresTropRecents.length + ' trop récents pour conclure, '
-      + r.nonEncaisses.length + ' non encaissés.)';
+      + r.nonEncaisses.length + ' non encaissés, '
+      + (r.horsPerimetre ? r.horsPerimetre.length : 0) + ' hors périmètre.)';
   }
   var somme = r.orphelins.reduce(function (s, o) {
     return s + (typeof o.montantCents === 'number' ? o.montantCents : 0);
@@ -116,4 +143,4 @@ function resume(r) {
     + r.orphelins.map(function (o) { return o.id; }).join(', ');
 }
 
-module.exports = { comparer: comparer, resume: resume };
+module.exports = { comparer: comparer, resume: resume, estANous: estANous };
