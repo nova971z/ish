@@ -344,6 +344,36 @@ module.exports = function () {
       + 'bloqué.');
   }
 
+  /* ── 4 sexies. Le diagnostic Revolut ne fuit rien et ne touche pas la prod ─
+     `?type=revolut-ping` fait un appel RÉEL. Deux façons dont il pourrait
+     coûter cher :
+       · renvoyer la clé secrète — cette réponse s'affiche, se copie, se colle
+         dans une conversation. Même tronquée, un extrait de secret reste un
+         secret ;
+       · s'exécuter en PRODUCTION — un diagnostic qui tape sur l'API réelle
+         n'est plus un diagnostic. */
+  var ADM = path.join(RACINE, 'api', 'admin.js');
+  if (fs.existsSync(ADM)) {
+    var admSrc = fs.readFileSync(ADM, 'utf8');
+    if (/revolut-ping/.test(admSrc)) {
+      var bloc = admSrc.slice(admSrc.indexOf("type === 'revolut-ping'"),
+        admSrc.indexOf("type === 'export-catalogue'"));
+      ok(/_modeProd\(\)/.test(bloc),
+        '⛔ le diagnostic revolut-ping ne vérifie pas le mode. Il pourrait taper sur '
+        + 'l\'API de PRODUCTION — un appel non prévu sur le chemin de l\'argent réel.');
+      ok(!/REVOLUT_SECRET_KEY_SANDBOX\s*\|\|\s*''\s*\)[^;]*\bcle\s*:/.test(bloc),
+        'le diagnostic ne doit pas renvoyer la clé.');
+      ok(/longueurCle/.test(bloc),
+        'le diagnostic doit renvoyer la LONGUEUR de la clé : c\'est le seul indice '
+        + 'qui révèle un copier-coller tronqué, et il ne révèle rien du secret.');
+      /* ⛔ Aucune sous-chaîne de la clé ne doit sortir : ni slice, ni substring,
+         ni les 4 derniers caractères « pour aider à identifier ». */
+      ok(!/(REVOLUT_SECRET_KEY[A-Z_]*)[^;\n]*\.(slice|substr|substring)\(/.test(bloc),
+        '⛔ le diagnostic extrait un MORCEAU de la clé secrète. Un extrait de secret '
+        + 'reste un secret : cette réponse s\'affiche à l\'écran et finit copiée-collée.');
+    }
+  }
+
   /* ── 5. Le paiement normalisé n'a aucun champ `undefined` ──────────────
      `undefined` disparaît d'un JSON et d'un document Firestore. Un champ
      manquant doit se VOIR, donc valoir null. */

@@ -63,6 +63,68 @@ module.exports = async function handler(req, res) {
     // un fichier servi publiquement. Publier `priceSrcTTC`, ce serait publier
     // le prix d'achat de chaque produit — et ce serait irréversible, le fichier
     // partant sur le CDN puis dans l'historique git.
+    /* ── GET ?type=revolut-ping : PREMIER contact réseau avec Revolut ──────
+       Diagnostic d'installation. Il répond à trois questions dans l'ordre où
+       elles se posent, et une seule à la fois :
+         1. la clé secrète est-elle posée sur Vercel ?
+         2. est-elle ACCEPTÉE par Revolut ? (c'est un appel réel, en LECTURE)
+         3. quel environnement répond ?
+
+       ⛔ REFUSE EN PRODUCTION. Un diagnostic qui tape sur l'API de production
+       n'est plus un diagnostic : c'est un appel non prévu sur le chemin de
+       l'argent réel. Il ne s'exécute qu'en bac à sable.
+
+       ⛔ NE RENVOIE JAMAIS LA CLÉ, ni entière ni tronquée. Un extrait de secret
+       reste un secret : cette réponse s'affiche à l'écran, se copie, se colle
+       dans une conversation. On ne renvoie que sa LONGUEUR — le seul indice
+       utile, celui qui révèle un copier-coller tronqué. */
+    if (type === 'revolut-ping') {
+      const paiementSocle = require('./_lib/paiement');
+      const rev = require('./_lib/paiement/revolut');
+      const longueur = String(process.env.REVOLUT_SECRET_KEY_SANDBOX || '').length;
+
+      if (rev._modeProd()) {
+        return res.status(400).json({
+          ok: false,
+          etape: 'garde',
+          erreur: 'REVOLUT_MODE vaut « prod ». Ce diagnostic ne tape JAMAIS sur '
+            + 'l\'API de production. Repasser la variable à « sandbox ».'
+        });
+      }
+      if (!rev.estConfigure()) {
+        return res.status(400).json({
+          ok: false, etape: 'cle',
+          erreur: 'REVOLUT_SECRET_KEY_SANDBOX absente ou vide sur Vercel. '
+            + '⚠️ Une variable ajoutée ne prend effet QU\'AU DÉPLOIEMENT SUIVANT.',
+          longueurCle: longueur
+        });
+      }
+      try {
+        // Appel RÉEL, en lecture seule : on ne crée rien, on ne débite rien.
+        // S'il passe, l'authentification et l'URL de base sont bonnes.
+        const ordres = await rev.listerPaiements(Date.now() - 24 * 3600 * 1000, Date.now());
+        return res.status(200).json({
+          ok: true,
+          etape: 'reseau',
+          message: 'Revolut a répondu. La clé est acceptée.',
+          base: rev._base(),
+          fournisseurActif: paiementSocle.nomFournisseur(),
+          longueurCle: longueur,
+          ordresDernieres24h: ordres.length
+        });
+      } catch (e) {
+        return res.status(200).json({
+          ok: false, etape: 'reseau',
+          erreur: String(e.message || e).slice(0, 400),
+          base: rev._base(),
+          longueurCle: longueur,
+          indice: /401|403/.test(String(e.message))
+            ? 'Clé refusée : recoller la clé SECRET (pas la Public) en entier, sans espace, puis REDÉPLOYER.'
+            : 'Vérifier que le compte Merchant du bac à sable est bien activé.'
+        });
+      }
+    }
+
     if (type === 'export-catalogue') {
       try {
         const fusion = await catalog.loadPublicCatalog();
