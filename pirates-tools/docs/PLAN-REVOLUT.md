@@ -352,6 +352,36 @@ indéfiniment**. On retiendra **5 minutes**, valeur à écrire en clair dans le
 code avec ce commentaire : *chiffre choisi par nous, pas lu chez Revolut, à
 corriger si la doc le précise un jour.*
 
+## 4.1 bis 🔴 NOUVEAU — combien de fois Revolut RE-LIVRE-T-IL un webhook ?
+
+Découvert le 31/07/2026 en lisant la page webhooks du **Crypto Ramp** (produit
+différent, mais le signal est trop gros pour être ignoré) :
+
+> *« If a request sent to your webhook URL returns an HTTP error response or
+> times out and the delivery of the events fails, Revolut will retry sending
+> the webhook event **3 more times**. »*
+
+⚠️ **Ce chiffre est celui du Crypto Ramp. Il n'est PAS transposable tel quel à
+la Merchant API** — c'est exactement l'erreur à ne pas commettre. Mais il oblige
+à poser la question, parce que **toute notre stratégie de reprise en dépend**.
+
+`api/webhook.js:88-98` repose sur ceci : en cas d'échec d'un effet critique, on
+marque le claim `failed` et **on répond 500 pour que le fournisseur re-livre**.
+Chez Stripe, la re-livraison s'étale sur ~3 jours — c'est notre mécanisme de
+retry, et il est généreux.
+
+Si Revolut ne réessaie que 3 fois sur quelques minutes, ce mécanisme **ne suffit
+plus** : une panne Firestore de dix minutes, et le paiement est encaissé sans
+commande, sans facture, sans email — définitivement.
+
+**Conséquence sur le plan** : si la Merchant API ne garantit pas une re-livraison
+longue, l'étape 3 doit inclure un **rattrapage par réconciliation** — une tâche
+qui liste `GET /api/orders?state=completed&from=…` et compare au journal
+`payments/` pour retrouver ce qui n'a jamais été traité. Le webhook devient une
+optimisation de latence, plus la seule source de vérité.
+
+C'est une décision d'architecture, pas un détail. À trancher avec la réponse.
+
 ## 4.2 🟠 Référence du widget RevolutCheckout.js
 `developer.revolut.com/docs/revolut-checkout-js/`
 
@@ -381,10 +411,49 @@ L'URL de base sandbox de l'**API** (le paquet npm donne
 `sandbox-merchant.revolut.com` pour le **widget** ; ce n'est pas la même chose),
 et si la clé publique sert ailleurs que dans le widget.
 
-## 4.6 🟢 Tarifs réels, pour la compta
-Grille de commission carte pour un compte **France**, et le comportement de la
-commission **en cas de remboursement** (rendue ou non). Ce dernier point alimente
-directement le champ `stripeFeeRendu` du panneau comptabilité.
+## 4.6 🟠 La commission entre dans le CALCUL DES PRIX — et elle y est en dur
+
+**Ce n'est pas un point de comptabilité, c'est un point de prix.** Mesuré :
+
+```
+$ grep -n "stripe" api/_lib/pricing-model.js
+25:  stripePct: 0.015,
+26:  stripeFix: 0.25,
+86:  var stripe = ttc * cfg.stripePct + cfg.stripeFix;
+88:  var costs = costHT + ship + octroiPaid + stripe + …
+```
+
+Tous les prix affichés sur le site sont calculés en supposant **1,5 % + 0,25 €**
+de commission. L'user annonce pour Revolut une fourchette allant jusqu'à **2,8 %
+sur les cartes internationales**.
+
+Impact mesuré (coût neutre 200 € HT, port 20 €, markup 45 %, Guadeloupe) :
+
+```
+Stripe (hypothèse actuelle)     commission 5,42 €  net après IS 58,00 €  marge 18,3 %
+Revolut carte EEE               commission 2,78 €  net après IS 60,24 €  marge 19,0 %
+Revolut carte internationale    commission 9,67 €  net après IS 54,39 €  marge 17,1 %
+```
+
+⚠️ **Le modèle n'accepte qu'UN taux.** Avec Stripe l'écart était étroit ; avec
+Revolut il va du simple au triple. Trois options, et c'est une décision de
+l'user :
+
+1. **Taux EEE (0,8 %)** — prix les plus bas, mais chaque vente par carte
+   internationale rogne la marge sans qu'on l'ait prévu.
+2. **Taux international (2,8 %)** — jamais de mauvaise surprise, mais tous les
+   clients guadeloupéens paient une protection dont ils n'ont pas besoin.
+3. **Taux moyen pondéré**, révisé sur les commissions RÉELLEMENT relevées dans
+   `payments/*.fees` après quelques semaines. Demande d'attendre des données.
+
+**La comptabilité, elle, n'a aucun chiffre en dur** : elle lit la commission
+réelle dans `payments[].fees[]`. Quel que soit le taux choisi pour le calcul des
+prix, le compte de résultat restera exact.
+
+## 4.7 🟢 Commission en cas de remboursement
+La commission est-elle rendue ? Le champ `stripeFeeRendu` du panneau
+comptabilité existe justement pour ne rien supposer (0 par défaut), mais
+connaître la règle évite de la saisir à chaque fois.
 
 ---
 
