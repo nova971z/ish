@@ -53,14 +53,19 @@ var INDEX = [
     fini: 'check-pricing et check-loyalty verts, et un paiement de bout en bout rejoué.'
   },
   {
-    intention: 'Paiement par carte, Stripe, webhook',
-    mots: ['paiement', 'stripe', 'carte', 'webhook', 'payer', 'checkout'],
-    fichiers: ['api/create-payment-intent.js', 'api/webhook.js', 'api/checkout.js', 'app.js'],
+    intention: 'Paiement par carte, Stripe, Revolut, webhook',
+    mots: ['paiement', 'stripe', 'revolut', 'carte', 'webhook', 'payer', 'checkout',
+           'merchant', 'encaisser', 'versement', 'payout'],
+    fichiers: ['api/create-payment-intent.js', 'api/webhook.js', 'api/checkout.js', 'app.js',
+               'docs/PLAN-REVOLUT.md'],
     fonctions: ['openPayModal'],
     protege: ['tests/course-pay.mjs', 'scripts/audit/p5-money.js'],
     regles: ['.claude/rules/donnees.md'],
     pieges: ['La clé publique vit dans un script inline autorisé par empreinte sha256 : la changer sans recalculer la CSP BLOQUE le script et tue le site.',
-             'Le webhook doit lire le corps BRUT — un corps parsé invalide la signature.'],
+             'Le webhook doit lire le corps BRUT — un corps parsé invalide la signature.',
+             'MIGRATION REVOLUT EN COURS (docs/PLAN-REVOLUT.md) : la charge utile du webhook Revolut ne contient QUE {event, order_id} — ni montant, ni commission, ni metadata. Tout se relit par GET /api/orders puis GET /api/payments.',
+             'Revolut ne fournit AUCUN identifiant d\'événement : la clé d\'idempotence doit être dérivée de event + order_id, pas copiée du modèle Stripe.',
+             'La commission réelle est dans payments[].fees[] — un TABLEAU. On somme, on ne prend pas fees[0].'],
     decisions: ['D-009', 'D-013'],
     fini: 'scripts/check-csp.js vert, et le montant débité égal au montant affiché.'
   },

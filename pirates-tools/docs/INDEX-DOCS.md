@@ -41,6 +41,7 @@ désigné ici, soit il est rangé.
 | `PLAN-ACTION-EN-ATTENTE.md` | décisions produit qui attendent l'user |
 | `PLAN-ABONNEMENTS.md` | fonctionnalité non lancée, spécification conservée |
 | `PLAN-SERVICE-COURSIER.md` | cadre du service de livraison, encore appliqué |
+| `PLAN-REVOLUT.md` | migration du paiement Stripe → Revolut : inventaire 1=1, correspondance des API, étapes, et **ce qui manque encore à lire à la source** |
 | `TRAQUEUR-URLS.md` | raccourcis du traqueur de prix, utilisés en production |
 | `MAKITA-POSTERS-TODO.md` | posters restant à produire |
 | `entreprise-sasu.md` | fiche d'identité de la société |
