@@ -97,6 +97,11 @@ var reqPaiement = safeRequire('./check-paiement',    'check-paiement');
 // reessaye, table des etats) s'eprouve ici, sinon la 1re verification aurait
 // lieu sur un vrai paiement — c'est-a-dire trop tard.
 var reqRevolut  = safeRequire('./check-revolut',     'check-revolut');
+// Le filet SOUS le webhook : un paiement encaisse dont la notification n'arrive
+// jamais est le pire mode de panne du site — silencieux et couteux. La
+// reconciliation le rattrape ; ce controle verifie qu'elle ne laisse rien
+// passer ET qu'elle n'invente rien (un doublon coute aussi cher qu'un oubli).
+var reqReconc   = safeRequire('./check-reconciliation', 'check-reconciliation');
 
 // NOTE 25/07/2026 : l'étape lint-products.js (fichier jamais versionné,
 // silencieusement sautée à chaque run) est SUPPRIMÉE — ses invariants réels
@@ -160,6 +165,7 @@ var reqRevolut  = safeRequire('./check-revolut',     'check-revolut');
   await runOne(reqPrixFui,  'check-prix-fuite');
   await runOne(reqPaiement, 'check-paiement');
   await runOne(reqRevolut,  'check-revolut');
+  await runOne(reqReconc,   'check-reconciliation');
 
   var dur = Math.max(1, Date.now() - started);
   if (errors.length){
