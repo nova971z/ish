@@ -1,6 +1,22 @@
 'use strict';
-// Parseur des pages « marque » de cotébrico → [{ sku, price, name }].
-// price = prix TTC **HORS PROMO** (si « Prix de base X € » présent, on prend X).
+// Parseur des pages « marque » de cotébrico → [{ sku, price, name, promo }].
+//
+// price = le prix TTC **RÉELLEMENT AFFICHÉ, PROMO COMPRISE**.
+// ⚠️ CE COMMENTAIRE DISAIT L'INVERSE JUSQU'AU 31/07/2026 (« HORS PROMO, on
+// prend le Prix de base »). C'était faux, et prouvé faux en exécutant le
+// parseur sur un bloc promo : il renvoie 149,90 là où « Prix de base
+// 199,00 € » figure dans le même bloc. Un commentaire qui ment sur du calcul
+// de prix est pire que pas de commentaire — on le croit sans le vérifier.
+//
+// Le comportement, lui, est VOULU (décision produit du traqueur) : si
+// cotébrico solde, l'user achète soldé, donc il vend soldé. Le relevé tourne
+// 2×/jour et se réajuste dès la fin de la promo.
+//
+// `promo` est un simple booléen « ce bloc contenait un Prix de base ».
+// ⛔ L'ANCIEN PRIX N'EST PAS CAPTURÉ — seulement le fait qu'il existait. Il ne
+// doit JAMAIS servir de prix de référence barré sur le site : un tarif
+// fournisseur n'est pas notre prix de référence (registre J4, décision D-004).
+//
 // Robuste : accepte du texte propre OU du HTML brut (on nettoie les balises avant).
 // Générique : la marque est paramétrable (DEWALT, MAKITA, BOSCH…) car sur cotébrico
 // la réf est toujours préfixée par le nom de marque (« … - DEWALT DCF887P2 »).
