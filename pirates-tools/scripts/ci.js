@@ -92,6 +92,11 @@ var reqPrixFui  = safeRequire('./check-prix-fuite',  'check-prix-fuite');
 // toujours designer celui qui ENCAISSE, et aucun etat inconnu ne doit pouvoir
 // passer pour « paye » — c'est le seul defaut ici qui couterait de la marchandise.
 var reqPaiement = safeRequire('./check-paiement',    'check-paiement');
+// Le module Revolut est ecrit AVANT d'avoir pu appeler le reseau : tout ce qui
+// est PUR (signature contre le vecteur officiel, commission d'un ordre
+// reessaye, table des etats) s'eprouve ici, sinon la 1re verification aurait
+// lieu sur un vrai paiement — c'est-a-dire trop tard.
+var reqRevolut  = safeRequire('./check-revolut',     'check-revolut');
 
 // NOTE 25/07/2026 : l'étape lint-products.js (fichier jamais versionné,
 // silencieusement sautée à chaque run) est SUPPRIMÉE — ses invariants réels
@@ -154,6 +159,7 @@ var reqPaiement = safeRequire('./check-paiement',    'check-paiement');
   await runOne(reqPrixAff,  'check-prix-affiches');
   await runOne(reqPrixFui,  'check-prix-fuite');
   await runOne(reqPaiement, 'check-paiement');
+  await runOne(reqRevolut,  'check-revolut');
 
   var dur = Math.max(1, Date.now() - started);
   if (errors.length){

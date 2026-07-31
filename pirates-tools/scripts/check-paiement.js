@@ -132,23 +132,48 @@ module.exports = function () {
     else process.env.PAYMENT_PROVIDER = avant;
   }
 
-  /* ── 4. Le module Revolut refuse FORT tant qu'il est vide ──────────────
-     Un module qui rendrait des valeurs vides ferait croire qu'on encaisse. */
-  ok(revolut.estConfigure() === false,
-    'le module Revolut se déclare configuré alors qu\'il est vide — un point d\'entrée '
-    + 'pourrait croire qu\'il peut encaisser.');
-  ['creerPaiement', 'lirePaiement', 'rembourser'].forEach(function (op) {
-    var aLeve = false;
-    try { revolut[op]('x'); } catch (e) {
-      aLeve = /pas encore|not implemented|étape/i.test(e.message);
-    }
-    ok(aLeve, 'revolut.' + op + '() ne lève pas d\'erreur explicite. Un module vide qui '
-      + 'rend une valeur au lieu de refuser est pire que pas de module.');
-  });
-  var sig = revolut.verifierSignature(Buffer.from('{}'), {});
-  ok(sig && sig.ok === false,
-    'revolut.verifierSignature() doit REFUSER, pas lever : un webhook qui explose '
-    + 'renvoie 500 et invite à re-livrer une requête qu\'on ne saura jamais traiter.');
+  /* ── 4. Sans clé, le module Revolut REFUSE — il ne fait jamais semblant ──
+     ⚠️ Bloc RÉÉCRIT le 31/07/2026. Il vérifiait qu'un module VIDE levait
+     « pas encore implémenté ». Le module est écrit maintenant, mais la
+     protection ne change pas d'un pouce : sans clé, on doit ÉCHOUER
+     BRUYAMMENT, jamais rendre une valeur qui ferait croire qu'on encaisse. */
+  var avantCles = {
+    p: process.env.REVOLUT_SECRET_KEY,
+    s: process.env.REVOLUT_SECRET_KEY_SANDBOX,
+    m: process.env.REVOLUT_MODE
+  };
+  try {
+    delete process.env.REVOLUT_SECRET_KEY;
+    delete process.env.REVOLUT_SECRET_KEY_SANDBOX;
+    delete process.env.REVOLUT_MODE;
+
+    ok(revolut.estConfigure() === false,
+      '⛔ le module Revolut se déclare configuré SANS clé secrète. Un point d\'entrée '
+      + 'croirait pouvoir encaisser et laisserait passer une commande impayée.');
+
+    ['creerPaiement', 'lirePaiement', 'rembourser'].forEach(function (op) {
+      var refuse = false;
+      try {
+        var r = revolut[op]('x', 1, 'eur');
+        // Fonctions async : l'absence de clé doit REJETER la promesse.
+        if (r && typeof r.then === 'function') { r.then(function () {}, function () {}); refuse = true; }
+      } catch (e) { refuse = /clé secrète absente|REVOLUT_SECRET_KEY/i.test(e.message); }
+      ok(refuse, '⛔ revolut.' + op + '() ne refuse pas quand la clé manque. Rendre une '
+        + 'valeur au lieu d\'échouer est pire que ne rien faire : on croirait avoir encaissé.');
+    });
+
+    var sig = revolut.verifierSignature(Buffer.from('{}'), {});
+    ok(sig && sig.ok === false,
+      'revolut.verifierSignature() doit REFUSER, pas lever : un webhook qui explose '
+      + 'renvoie 500 et invite à re-livrer une requête qu\'on ne saura jamais traiter.');
+    ok(sig && /REVOLUT_WEBHOOK_SECRET/.test(String(sig.erreur || '')),
+      'le refus doit NOMMER la variable manquante. Un « non autorisé » nu a déjà coûté '
+      + 'une journée de prix non relevés (voir check-watch-auth).');
+  } finally {
+    if (avantCles.p === undefined) delete process.env.REVOLUT_SECRET_KEY; else process.env.REVOLUT_SECRET_KEY = avantCles.p;
+    if (avantCles.s === undefined) delete process.env.REVOLUT_SECRET_KEY_SANDBOX; else process.env.REVOLUT_SECRET_KEY_SANDBOX = avantCles.s;
+    if (avantCles.m === undefined) delete process.env.REVOLUT_MODE; else process.env.REVOLUT_MODE = avantCles.m;
+  }
 
   /* ── 5. Le paiement normalisé n'a aucun champ `undefined` ──────────────
      `undefined` disparaît d'un JSON et d'un document Firestore. Un champ
