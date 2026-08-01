@@ -44,7 +44,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=551">
+  <link rel="stylesheet" href="styles.css?v=552">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -776,8 +776,20 @@
                 <label>Téléphone
                   <input id="accPhone" type="tel" class="search" placeholder="06 90 00 00 00" autocomplete="tel" />
                 </label>
-                <label>Adresse
-                  <input id="accAddress" type="text" class="search" placeholder="Rue, ville, code postal" autocomplete="street-address" />
+                <label>Adresse &mdash; n&deg; et voie
+                  <input id="accAddrLine1" type="text" class="search" placeholder="12 rue des Manguiers" autocomplete="address-line1" maxlength="200" />
+                </label>
+                <label>Code postal
+                  <input id="accAddrPostal" type="text" class="search" inputmode="numeric" placeholder="971xx" autocomplete="postal-code" maxlength="5" pattern="97[1-6][0-9][0-9]" />
+                </label>
+                <label>Ville
+                  <input id="accAddrCity" type="text" class="search" placeholder="Les Abymes" autocomplete="address-level2" maxlength="120" />
+                </label>
+                <label>D&eacute;partement
+                  <select id="accTerritory" class="search">
+                    <option value="">&mdash; choisir &mdash;</option>
+                  </select>
+                  <em class="admin-hint">Si tu d&eacute;m&eacute;nages, change-le ici : les prix affich&eacute;s suivront. Le taux de taxe d&rsquo;une commande, lui, vient toujours du code postal de LIVRAISON que tu saisis au moment de payer.</em>
                 </label>
                 <div class="actions">
                   <button id="accSave" class="btn primary" type="button" data-action="account-save">Enregistrer</button>
@@ -1796,6 +1808,10 @@
                 <input id="payAddrName" name="name" type="text" autocomplete="name" required maxlength="120" placeholder="Pr&eacute;nom Nom">
               </label>
               <label class="pay-address__field pay-address__field--full">
+                <span>T&eacute;l&eacute;phone</span>
+                <input id="payAddrPhone" name="tel" type="tel" autocomplete="tel" required maxlength="24" placeholder="0690 00 00 00">
+              </label>
+              <label class="pay-address__field pay-address__field--full">
                 <span>Adresse</span>
                 <input id="payAddrLine1" name="address-line1" type="text" autocomplete="address-line1" required maxlength="200" placeholder="N&deg; et voie, lieu-dit&hellip;">
               </label>
@@ -2230,7 +2246,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=551"></script>
+  <script defer src="app.js?v=552"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

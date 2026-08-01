@@ -1308,6 +1308,69 @@ module.exports = async function () {
       + 'LIVRAISON fait foi.');
   }
 
+  /* ── ⛔ LES CHAMPS DU PROFIL DOIVENT ÊTRE AUTORISÉS PAR LES RÈGLES ──────
+     `firestore.rules` impose une allowlist stricte sur users/{uid}. Un champ
+     écrit par le front mais absent de cette liste fait refuser l'écriture
+     ENTIÈRE — pas seulement ce champ. Le client voit « profil non enregistré »
+     et perd aussi son nom et son téléphone, sans comprendre.
+     ⚠️ Et une règle modifiée n'a d'effet qu'une fois DÉPLOYÉE. */
+  var RULES = path.join(RACINE, 'firestore.rules');
+  var APPSRC = fs.existsSync(APP) ? fs.readFileSync(APP, 'utf8') : '';
+  if (fs.existsSync(RULES) && APPSRC) {
+    var rulesSrc = fs.readFileSync(RULES, 'utf8');
+    var mAllow = rulesSrc.match(/match \/users\/\{userId\}[\s\S]*?hasOnly\(\s*\[([^\]]*)\]/);
+    var autorises = mAllow ? mAllow[1].replace(/['\s]/g, '').split(',').filter(Boolean) : [];
+    ok(autorises.length > 0,
+      '⛔ impossible de lire l\'allowlist des champs de profil dans firestore.rules : le '
+      + 'contrôle ne peut plus vérifier qu\'un champ écrit est autorisé.');
+    ['addrLine1', 'addrPostal', 'addrCity', 'territory'].forEach(function (champ) {
+      ok(autorises.indexOf(champ) !== -1,
+        '⛔⛔ le champ de profil « ' + champ + ' » n\'est pas dans l\'allowlist de '
+        + 'firestore.rules. Firestore refusera l\'écriture ENTIÈRE du profil : le client '
+        + 'perdra aussi son nom et son téléphone en enregistrant, sans comprendre pourquoi.');
+    });
+    /* ⛔ Le territoire du profil est BORNÉ. Une chaîne libre finit toujours par
+       être imprimée quelque part. */
+    ok(/territory in \['971', '972', '973', '974', '976'\]/.test(rulesSrc),
+      '⛔ le `territory` du profil n\'est plus borné aux cinq codes livrés : n\'importe '
+      + 'quelle chaîne pourrait y être écrite.');
+  }
+
+  /* ── ⛔ LE TÉLÉPHONE EST EXIGÉ À LA COMMANDE ────────────────────────────
+     Il manquait entièrement du parcours (grep : 0 occurrence le 01/08/2026).
+     Un livreur devant une porte fermée n'a alors AUCUN moyen de joindre le
+     client : le colis repart, et la vente est à refaire. */
+  if (APPSRC) {
+    ok(/id="payAddrPhone"/.test(fs.readFileSync(path.join(RACINE, 'index.html'), 'utf8')),
+      '⛔⛔ le champ téléphone a disparu du formulaire de livraison. Un livreur devant une '
+      + 'porte fermée ne peut plus joindre personne : le colis repart et la vente est à '
+      + 'refaire.');
+    var mValide = APPSRC.match(/function validatePayAddress[\s\S]*?\n  \}/);
+    ok(mValide && /addr\.phone/.test(mValide[0]),
+      '⛔⛔ le téléphone n\'est plus exigé pour valider l\'adresse de livraison. Le champ '
+      + 'peut exister et rester vide : on croit l\'avoir demandé, on ne l\'a pas.');
+    ok(/phone: ship\.addr\.phone/.test(APPSRC),
+      '⛔ le téléphone saisi n\'est plus transmis au serveur : il serait demandé au client '
+      + 'puis jeté, ce qui est pire que ne pas le demander.');
+
+    /* ── ⛔ PRÉ-REMPLIR N'EST PAS IMPOSER ─────────────────────────────────
+       On livre souvent ailleurs que chez soi : un chantier, un client, une
+       famille. Les champs doivent rester modifiables, et le pré-remplissage
+       suivre l'ordre voulu — dernière adresse livrée, puis compte, puis rien. */
+    ok(/prof\.addrLine1 \|\| prof\.address/.test(APPSRC),
+      '⛔ le pré-remplissage ne suit plus l\'ordre « dernière adresse livrée, sinon celle '
+      + 'du compte, sinon rien ». Un client qui n\'a jamais commandé et n\'a pas d\'adresse '
+      + 'au profil doit voir des champs VIDES, pas une valeur inventée.');
+    ok(/function memoriserAdresseLivraison/.test(APPSRC),
+      '⛔ l\'adresse validée n\'est plus mémorisée : le client retapera tout à chaque '
+      + 'commande, alors qu\'il vient de nous la donner.');
+    var mMem = APPSRC.match(/function memoriserAdresseLivraison[\s\S]*?\n  \}/);
+    ok(mMem && /catch\s*\(/.test(mMem[0]),
+      '⛔⛔ la mémorisation de l\'adresse peut interrompre un paiement en cours. Le confort '
+      + 'ne passe JAMAIS devant l\'encaissement : un profil qui refuse l\'écriture doit '
+      + 'échouer en silence.');
+  }
+
   /* ── Le vocabulaire serveur doit couvrir CHAQUE mode ────────────────────
      Appel réel, pas lecture de source : pour chaque mode accepté par
      `sanitizePaiement`, le libellé doit être non vide ET distinct des autres.

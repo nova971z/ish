@@ -90,6 +90,13 @@ module.exports = async function handler(req, res) {
     // webhook pour le contrôle détectif). Chaînes bornées, jamais bloquant.
     function cleanStr(s, max) { return typeof s === 'string' ? s.trim().slice(0, max) : ''; }
     var shipIn = body.shipping || {};
+    /* ⛔ TÉLÉPHONE DE LIVRAISON (01/08/2026). Il manquait entièrement du
+       parcours : un livreur devant une porte fermée n'avait aucun moyen de
+       joindre le client, le colis repartait, et la vente était à refaire.
+       ⚠️ Donnée personnelle (J3) : elle voyage avec la COMMANDE parce que
+       l'exécution du contrat l'exige, et nulle part ailleurs — surtout pas
+       dans un journal serveur. Bornée à 24 caractères. */
+    var shipPhone = cleanStr(shipIn.phone, 24);
     var shipping = null;
     if (postalCode && cleanStr(shipIn.line1, 200)) {
       shipping = {
@@ -250,7 +257,8 @@ module.exports = async function handler(req, res) {
         grossTotalEur: (totalCents / 100).toFixed(2),
         loyaltyPct: String(loyaltyQuote.pct),
         loyaltyDiscountCents: String(loyaltyQuote.discountCents)
-      }, uid ? { uid: uid } : {}, courseMeta, courseRefMeta, itemsMeta)
+      }, uid ? { uid: uid } : {}, shipPhone ? { shipPhone: shipPhone } : {},
+         courseMeta, courseRefMeta, itemsMeta)
     });
 
     return res.status(200).json({

@@ -851,6 +851,7 @@
       'regName','regEmail','regPwd',
       'authForgotBtn','authForgotPanel','authForgotClose','forgotForm','forgotEmail','forgotSubmit',
       'accountForm','accSave','accName','accEmail','accPhone','accAddress',
+      'accAddrLine1','accAddrPostal','accAddrCity','accTerritory',
       'accAvatar','accAvatarImg','accCartMiniTxt','accLogout','accHistory','accLoyaltyTxt',
       'accSlider','accFill','accCursor','accVerifyBanner','accResendVerify',
       'pwdChangeForm','pwdCurrent','pwdNew','pwdConfirm',
@@ -8630,6 +8631,17 @@
     return _fb.getDoc(ref).then(function (snap) {
       if (snap.exists()) {
         _userProfile = snap.data();
+        /* ⛔ LE TERRITOIRE SUIT LE COMPTE, PAS LE NAVIGATEUR (01/08/2026).
+           Il ne vivait que dans `localStorage` — donc PERDU à chaque visite en
+           navigation privée, alors qu'il décide des prix AFFICHÉS. Un client
+           qui a dit « Martinique » dans son compte retombait sur le territoire
+           par défaut à la visite suivante, et voyait des prix qui n'étaient pas
+           les siens sans jamais comprendre pourquoi.
+           ⚠️ Affichage seulement. Le taux FACTURÉ vient du code postal de
+           livraison, re-dérivé côté serveur (garde A1) — jamais d'ici. */
+        if (_userProfile.territory && getTerritory(_userProfile.territory)) {
+          setTerritory(_userProfile.territory);
+        }
       } else {
         _userProfile = {
           name: _currentUser.displayName || '',
@@ -8904,7 +8916,27 @@
     if (dom.accName) dom.accName.value = p.name || _currentUser.displayName || '';
     if (dom.accEmail) dom.accEmail.value = p.email || _currentUser.email || '';
     if (dom.accPhone) dom.accPhone.value = p.phone || '';
-    if (dom.accAddress) dom.accAddress.value = p.address || '';
+    /* ⚠️ MIGRATION DOUCE. Les comptes créés avant le 01/08/2026 n'ont qu'un
+       champ libre `address` (« Rue, ville, code postal » en une seule ligne).
+       On ne le jette pas : faute de mieux, il alimente la voie, et le client
+       corrige en deux gestes. Le perdre serait lui faire retaper une donnée
+       qu'il nous avait déjà donnée. */
+    if (dom.accAddrLine1) dom.accAddrLine1.value = p.addrLine1 || p.address || '';
+    if (dom.accAddrPostal) dom.accAddrPostal.value = p.addrPostal || '';
+    if (dom.accAddrCity) dom.accAddrCity.value = p.addrCity || '';
+    if (dom.accTerritory) {
+      /* Le menu se construit depuis TERRITORIES : ajouter un territoire un jour
+         ne doit pas demander de retoucher ce formulaire. */
+      if (!dom.accTerritory.options.length || dom.accTerritory.options.length === 1) {
+        TERRITORIES.forEach(function (t) {
+          var o = document.createElement('option');
+          o.value = t.code;
+          o.textContent = t.flag + ' ' + t.name + ' (' + t.code + ')';
+          dom.accTerritory.appendChild(o);
+        });
+      }
+      dom.accTerritory.value = p.territory || '';
+    }
     if (p.avatar && dom.accAvatarImg) dom.accAvatarImg.src = p.avatar;
 
     updateCartUI();
@@ -8988,7 +9020,10 @@
     var name = (dom.accName ? dom.accName.value : '').trim();
     var newEmail = (dom.accEmail ? dom.accEmail.value : '').trim().toLowerCase();
     var phone = (dom.accPhone ? dom.accPhone.value : '').trim();
-    var address = (dom.accAddress ? dom.accAddress.value : '').trim();
+    var addrLine1 = (dom.accAddrLine1 ? dom.accAddrLine1.value : '').trim().slice(0, 200);
+    var addrPostal = (dom.accAddrPostal ? dom.accAddrPostal.value : '').trim().slice(0, 12);
+    var addrCity = (dom.accAddrCity ? dom.accAddrCity.value : '').trim().slice(0, 120);
+    var territoryChoisi = (dom.accTerritory ? dom.accTerritory.value : '').trim();
 
     // C5 — ORDRE STRICT pour l'email : Auth D'ABORD, Firestore ENSUITE.
     // L'ancienne version écrivait le nouvel email dans Firestore puis appelait
@@ -8997,7 +9032,21 @@
     // connexion. Désormais le doc n'est mis à jour qu'après succès Auth, et un
     // échec email n'annule pas l'enregistrement du reste du profil (feedback
     // distinct pour chaque issue).
-    var profileUpdates = { name: name, phone: phone, address: address };
+    /* ⛔ Les clés écrites ici doivent TOUTES figurer dans l'allowlist de
+       `firestore.rules` (users/{uid}) — sinon Firestore refuse l'écriture
+       ENTIÈRE, et le client voit « profil non enregistré » sans comprendre.
+       ⚠️ Et une règle modifiée n'a d'effet qu'une fois DÉPLOYÉE. */
+    var profileUpdates = {
+      name: name, phone: phone,
+      addrLine1: addrLine1, addrPostal: addrPostal, addrCity: addrCity
+    };
+    /* Territoire : n'écrire que s'il est CONNU. Une chaîne vide passerait la
+       règle mais afficherait « — choisir — » à vie ; mieux vaut ne rien poser.
+       ⛔ Ce champ ne décide JAMAIS d'un taux de taxe : celui de la commande
+       vient du code postal de LIVRAISON, re-dérivé côté serveur (garde A1). */
+    if (territoryChoisi && getTerritory(territoryChoisi)) {
+      profileUpdates.territory = territoryChoisi;
+    }
     var emailChanged = !!(newEmail && newEmail !== _currentUser.email);
 
     var ref = _fb.doc(_fb.db, 'users', _currentUser.uid);
@@ -9985,12 +10034,34 @@
     setupPayAddressForm();
     // Course : l'adresse du CHANTIER (déjà géocodée sur la carte) préremplit
     // le formulaire — le formulaire carte se charge immédiatement.
+    var pf = function (id, v) { var el = document.getElementById(id); if (el && v) el.value = v; };
     if (_payCourse) {
-      var pf = function (id, v) { var el = document.getElementById(id); if (el && v) el.value = v; };
       pf('payAddrName', (_currentUser && (_currentUser.displayName || _currentUser.email)) || '');
       pf('payAddrLine1', _payCourse.street || _payCourse.address || '');
       pf('payAddrPostal', _payCourse.postal || '');
       pf('payAddrCity', _payCourse.city || '');
+    } else {
+      /* ── PRÉ-REMPLISSAGE DE L'ADRESSE DE LIVRAISON (01/08/2026) ──────────
+         Ordre demandé par l'user, et c'est le bon : la DERNIÈRE adresse
+         réellement livrée d'abord, l'adresse du compte ensuite, rien du tout
+         si aucune des deux n'existe.
+
+         ⛔ ON PRÉ-REMPLIT, ON N'IMPOSE PAS. Les champs restent entièrement
+         modifiables, et rien n'est envoyé sans que le client ait vu ce qu'il
+         valide : on livre souvent ailleurs que chez soi — un chantier, un
+         client, une famille. Un formulaire qui décide à la place du client
+         fait expédier au mauvais endroit, et c'est le genre d'erreur qui coûte
+         un colis entier.
+
+         ⛔ Le code postal pré-rempli ne décide de RIEN côté argent : le
+         territoire facturé est re-dérivé de ce que le client valide vraiment,
+         côté serveur (garde A1). */
+      var prof = _userProfile || {};
+      pf('payAddrName', prof.name || (_currentUser && (_currentUser.displayName || '')) || '');
+      pf('payAddrLine1', prof.addrLine1 || prof.address || '');
+      pf('payAddrPostal', prof.addrPostal || '');
+      pf('payAddrCity', prof.addrCity || '');
+      pf('payAddrPhone', prof.phone || '');
     }
     handlePayAddressChange();
 
@@ -10069,7 +10140,8 @@
       var el = document.getElementById(id);
       return el ? el.value.trim() : '';
     }
-    return { name: val('payAddrName'), line1: val('payAddrLine1'), postal: val('payAddrPostal'), city: val('payAddrCity') };
+    return { name: val('payAddrName'), line1: val('payAddrLine1'),
+      postal: val('payAddrPostal'), city: val('payAddrCity'), phone: val('payAddrPhone') };
   }
 
   // Valide le formulaire, met à jour les hints/classes. Retourne
@@ -10080,7 +10152,12 @@
     var postalEl = document.getElementById('payAddrPostal');
     var terr = territoryFromPostalClient(addr.postal);
     var postalFilled = addr.postal.length >= 5;
-    var complete = !!(addr.name && addr.line1 && addr.city && postalFilled);
+    /* ⛔ Le TÉLÉPHONE fait partie du minimum exigé (01/08/2026). Sans lui, un
+       livreur devant une porte fermée n'a aucun moyen de joindre le client :
+       le colis repart, et la vente est à refaire. Il manquait purement et
+       simplement du formulaire — `grep` n'en trouvait pas une occurrence. */
+    var complete = !!(addr.name && addr.line1 && addr.city && postalFilled
+      && addr.phone && addr.phone.replace(/[^0-9+]/g, '').length >= 8);
 
     if (postalEl) postalEl.classList.toggle('is-invalid', postalFilled && !terr);
     if (hint) {
@@ -10365,6 +10442,30 @@
   // Pré-requis : adresse de livraison valide (handlePayAddressChange est le
   // seul appelant). Le territoire fiscal envoyé est DÉRIVÉ du code postal —
   // et le serveur le re-dérive lui-même depuis postalCode (autoritaire).
+  /* ── MÉMORISER LA DERNIÈRE ADRESSE DE LIVRAISON ────────────────────────
+     Appelée quand le serveur vient de VALIDER l'adresse (code postal DOM
+     reconnu, montant calculé dessus). Mémoriser plus tôt garderait des saisies
+     incomplètes ; plus tard, on raterait les clients qui abandonnent après
+     avoir bien renseigné leur adresse — et qui reviendront.
+
+     ⛔ BEST-EFFORT SILENCIEUX : un profil qui refuse l'écriture ne doit JAMAIS
+     interrompre un paiement en cours. Le confort ne passe pas devant
+     l'encaissement.
+     ⚠️ Ces quatre champs figurent dans l'allowlist de `firestore.rules`. Une
+     règle NON DÉPLOYÉE ferait refuser l'écriture entière — d'où le `.catch`
+     muet plutôt qu'une erreur jetée à la figure d'un client en train de payer. */
+  function memoriserAdresseLivraison(ship) {
+    if (!_fb || !_currentUser || !ship || !ship.addr || !ship.addr.line1) return;
+    try {
+      _fb.updateDoc(_fb.doc(_fb.db, 'users', _currentUser.uid), {
+        addrLine1: String(ship.addr.line1 || '').slice(0, 200),
+        addrPostal: String(ship.addr.postal || '').slice(0, 12),
+        addrCity: String(ship.addr.city || '').slice(0, 120),
+        phone: String(ship.addr.phone || '').slice(0, 24)
+      }).catch(function () {});
+    } catch (_) {}
+  }
+
   function initStripeElements() {
     var ship = validatePayAddress();
     if (!ship.valid) return;
@@ -10408,7 +10509,8 @@
       // postalCode (source autoritaire) — celui-ci prime toujours.
       territory: ship.territory,
       postalCode: ship.addr.postal,
-      shipping: { name: ship.addr.name, line1: ship.addr.line1, city: ship.addr.city },
+      shipping: { name: ship.addr.name, line1: ship.addr.line1, city: ship.addr.city,
+        phone: ship.addr.phone },
       // Course quincaillerie : le serveur recalcule zone + frais depuis lat/lng
       // et les AJOUTE au montant débité (reversés au livreur après confirmation).
       course: _payCourse ? {
@@ -10433,6 +10535,8 @@
          jamais une déduction du front. Lui seul sait quel jeton il vient de
          fabriquer : un jeton Revolut monté dans le widget Stripe donnerait un
          formulaire vide et une erreur qui n'expliquerait rien. */
+      memoriserAdresseLivraison(ship);
+
       _paiementFournisseur = String(data.fournisseur || 'stripe');
       _urlPaiementHebergee = data.urlHebergee || null;
       _paiementModeTest = (typeof data.modeTest === 'boolean') ? data.modeTest : null;
@@ -10677,7 +10781,7 @@
           : 'Renseignez d\'abord votre adresse de livraison (code postal 971xx–976xx).';
         errorEl.hidden = false;
       }
-      var firstEmpty = ['payAddrName', 'payAddrLine1', 'payAddrPostal', 'payAddrCity'].map(function (id) {
+      var firstEmpty = ['payAddrName', 'payAddrPhone', 'payAddrLine1', 'payAddrPostal', 'payAddrCity'].map(function (id) {
         return document.getElementById(id);
       }).filter(function (el) { return el && !el.value.trim(); })[0];
       if (firstEmpty) firstEmpty.focus();

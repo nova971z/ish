@@ -65,9 +65,33 @@ service cloud.firestore {
     // jamais depuis ce champ.
     match /users/{userId} {
       allow read: if isOwner(userId);
+      // ⚠️ 01/08/2026 — l'adresse devient STRUCTUREE (voie / code postal / ville)
+      // pour pouvoir prefiller la modale de commande, et `territory` rejoint le
+      // profil pour survivre a la navigation privee. `address` reste dans la
+      // liste : c'est l'ancien champ libre des comptes deja crees, on ne casse
+      // pas leur donnee.
+      //
+      // ⛔ `territory` est BORNE aux cinq codes livres. Ce n'est PAS ce qui
+      // decide du taux de taxe — celui-la vient du code postal de LIVRAISON,
+      // cote serveur (garde A1) — mais une valeur libre ici finirait par etre
+      // affichee quelque part, et une chaine arbitraire dans un profil est une
+      // porte ouverte a l'injection le jour ou quelqu'un l'imprime sans
+      // echapper.
       allow create, update: if isOwner(userId)
         && request.resource.data.keys().hasOnly(
-             ['name', 'email', 'phone', 'address', 'avatar', 'loyalty', 'createdAt']);
+             ['name', 'email', 'phone', 'address', 'avatar', 'loyalty', 'createdAt',
+              'addrLine1', 'addrPostal', 'addrCity', 'territory'])
+        && (!('territory' in request.resource.data)
+            || request.resource.data.territory in ['971', '972', '973', '974', '976'])
+        && (!('addrLine1' in request.resource.data)
+            || (request.resource.data.addrLine1 is string
+                && request.resource.data.addrLine1.size() <= 200))
+        && (!('addrPostal' in request.resource.data)
+            || (request.resource.data.addrPostal is string
+                && request.resource.data.addrPostal.size() <= 12))
+        && (!('addrCity' in request.resource.data)
+            || (request.resource.data.addrCity is string
+                && request.resource.data.addrCity.size() <= 120));
       // Droit à l'oubli (M4) : le titulaire peut supprimer SON propre profil
       // (flux « supprimer mon compte » : purge orders + profil + Auth). Le
       // journal comptable payments/ (server-only) reste conservé au titre des
