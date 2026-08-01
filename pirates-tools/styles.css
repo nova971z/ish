@@ -63,6 +63,13 @@ overflow-x: hidden;
 touch-action: manipulation;
 background: #0a0f14;
 color: var(--fg);
+/* ⚠️ La réserve pour le dock flottant existe DÉJÀ, plus bas :
+   `padding-bottom: calc(var(--dockH) + var(--safe-bottom) + 16px)`.
+   Ne pas en rajouter une ici — le 01/08/2026 une règle dupliquée a été posée
+   puis retirée : elle était écrasée par la vraie et ne faisait que mentir.
+   Preuve que la réserve suffit : tests/chevauchement.mjs, qui mesure le VRAI
+   bas de page (défilement instantané + stabilisation, sinon on photographie
+   le milieu du trajet — c'est ce qui a produit la fausse alerte). */
 font: 500 16px/1.6 system-ui, -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Arial, sans-serif;
 -webkit-font-smoothing: antialiased;
 -moz-osx-font-smoothing: grayscale;
@@ -7119,9 +7126,14 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 
 :root{ --safe-top:70px; --dock-bottom:14px; }
 #app{ padding-top: calc(var(--safe-top) + 10px); }
-#dock{ position:fixed!important; left:50%!important; right:auto!important;
-  bottom: calc(var(--dock-bottom) + var(--safe-bottom,0px))!important;
-  transform:translateX(-50%)!important; width:auto!important; padding:0!important; z-index:999; }
+/* ⛔ ICI VIVAIT UN DOUBLON `#dock{…}` TOUT EN !important — retiré le 01/08/2026.
+   Il écrasait EN SILENCE la règle entretenue (position, bottom, transform) :
+   modifier `#dock, .dock` ne changeait RIEN à l'écran, l'animation de repli
+   `dock--hidden` (translateY) était morte, et `env(safe-area-inset-bottom)`
+   ignoré. Prouvé par sabotage : dock déplacé de 230 px dans la règle
+   principale → pixel-identique à l'écran. Même maladie que `.acc-logout-btn`
+   écrasé par `.actions .btn` : le doublon qui gagne fait mentir la règle
+   qu'on maintient. La position vient désormais du seul bloc `#dock, .dock`. */
 
 .hero-logo-container {
   will-change: transform, opacity;

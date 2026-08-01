@@ -81,6 +81,10 @@ harnais, et pour eux seuls. Ni la CI ni mes commandes de vérification n'y
 étaient soumises. *Une règle vraie appliquée à un seul endroit ne protège que
 cet endroit.* C'est l'origine **O7** du registre des erreurs.
 
+| Date | Ce qui a cassé | La cause | La porte |
+|---|---|---|---|
+| 01/08/2026 | La règle entretenue du dock (`#dock, .dock`) ne commandait RIEN : la déplacer de 230 px ne changeait pas un pixel, et l'animation de repli `dock--hidden` était morte | Un bloc de secours historique `#dock{…}` TOUT en `!important`, 3 400 lignes plus loin, écrasait position, bottom et transform en silence — même maladie que `.acc-logout-btn` écrasé par `.actions .btn`. Découvert en sabordant la vraie règle : quatre sabotages sans effet ont fini par le trahir | `tests/chevauchement.mjs` |
+
 ⚠️ **Ce que `check-ancres` ne fait PAS.** Elle vérifie qu'un identifiant visé
 EXISTE. Elle ne dit rien de sa **visibilité** — `verify-h5` mourait sur un champ
 bien présent, mais dans un onglet masqué — ni des ancres de **données**
