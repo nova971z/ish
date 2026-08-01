@@ -10059,13 +10059,18 @@
          s'empilerait. Une assignation remplace, elle ne cumule pas. */
       cgvBox.onchange = majBoutonPayer;
     }
+    var sameCarte = document.getElementById('payCardSame');
+    if (sameCarte) {
+      sameCarte.checked = true;      // cas le plus fréquent : la carte est à son nom
+      sameCarte.onchange = majNomCarte;
+    }
     var nomCarte = document.getElementById('payCardName');
     if (nomCarte) {
       nomCarte.oninput = majBoutonPayer;
     }
     var cgvMsg = document.getElementById('payCgvNote');
     if (cgvMsg) cgvMsg.hidden = true;
-    majBoutonPayer();
+    majNomCarte();
     setupPayAddressForm();
     // Course : l'adresse du CHANTIER (déjà géocodée sur la carte) préremplit
     // le formulaire — le formulaire carte se charge immédiatement.
@@ -10098,9 +10103,9 @@
       pf('payAddrCity', prof.addrCity || '');
       pf('payAddrPhone', prof.phone || '');
       pf('payAddrEmail', prof.email || (_currentUser && _currentUser.email) || '');
-      /* Le titulaire est le plus souvent la personne livrée : on pré-remplit,
-         et il corrige si sa carte porte un autre nom (entreprise, conjoint). */
-      pf('payCardName', prof.name || (_currentUser && _currentUser.displayName) || '');
+      /* Pas de pré-remplissage du nom de carte : la case « la carte est à mon
+         nom » couvre le cas courant, et pré-remplir un champ MASQUÉ ferait
+         partir une valeur que le client n'a jamais vue. */
     }
     handlePayAddressChange();
 
@@ -10588,9 +10593,23 @@
      production, alors qu'un nom qui ne correspond pas peut encore passer selon
      la banque. Mais le champ est `required` : le repli ne devrait jamais servir. */
   function nomTitulaireCarte(adr) {
+    /* Case cochée = « la carte est à mon nom » : on reprend le nom saisi dans
+       l'adresse de livraison, le client n'a rien à retaper. Décochée, seul le
+       champ dédié fait foi — sinon on renverrait le nom du destinataire à la
+       banque, exactement le défaut qu'on vient de corriger. */
+    var same = document.getElementById('payCardSame');
+    if (!same || same.checked) return (adr && adr.name) || '';
     var el = document.getElementById('payCardName');
-    var saisi = el ? String(el.value || '').trim() : '';
-    return saisi || (adr && adr.name) || '';
+    return el ? String(el.value || '').trim() : '';
+  }
+
+  /* Affiche ou masque le champ « Nom inscrit sur la carte » selon la case, et
+     remet le bouton à jour — le nom devient obligatoire dès qu'on décoche. */
+  function majNomCarte() {
+    var same = document.getElementById('payCardSame');
+    var wrap = document.getElementById('payCardNameWrap');
+    if (wrap) wrap.hidden = !same || same.checked;
+    majBoutonPayer();
   }
 
   // Remet le bouton de paiement dans son état initial après un échec.
@@ -10625,8 +10644,12 @@
     var carteOk = btn.dataset.attenteCarte !== '1';
     /* Le nom du titulaire est `required` dans le formulaire, mais un champ
        `required` hors <form> n'empêche rien : c'est ici que ça se joue. */
+    var same = document.getElementById('payCardSame');
     var nomEl = document.getElementById('payCardName');
-    var nomOk = !nomEl || String(nomEl.value || '').trim().length >= 2;
+    /* Case cochée : le nom vient de l'adresse, déjà exigée par `validatePayAddress`
+       — rien de plus à vérifier ici. Décochée : le champ dédié devient obligatoire. */
+    var nomOk = (same && same.checked)
+      || !nomEl || String(nomEl.value || '').trim().length >= 2;
     btn.disabled = !(cgvOk && carteOk && nomOk);
 
     /* ⛔ ÉTEINDRE SANS DIRE POURQUOI est un défaut symétrique — et c'est le

@@ -6828,6 +6828,12 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
    casser ce qu'on ne touche pas. */
 /* Nom du titulaire : meme habillage que les champs d'adresse, pour que le bloc
    carte forme un tout coherent. */
+.pay-card-same {
+  display: flex; align-items: center; gap: .55rem; margin: 12px 0 4px;
+  font-size: 14px; color: #c9d3e0; cursor: pointer;
+}
+.pay-card-same input { width: 18px; height: 18px; accent-color: var(--accent); flex: none; }
+
 .pay-card-name {
   background: #1a2332; border: 1px solid rgba(255,255,255,.12); border-radius: 10px;
   color: #e6edf5; padding: 12px; font-size: 15px; width: 100%; box-sizing: border-box;

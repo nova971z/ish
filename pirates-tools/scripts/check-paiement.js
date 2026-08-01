@@ -1459,6 +1459,46 @@ module.exports = async function () {
       + 'vérification anti-fraude — une donnée collectée sans usage n\'aurait pas dû '
       + 'être demandée.');
 
+    /* ── ⛔ LA CASE « LA CARTE EST À MON NOM » CHOISIT LA SOURCE ─────────
+       Cochée, le nom du titulaire vient de l'adresse saisie : le client ne
+       retape rien. Décochée, SEUL le champ dédié fait foi — sinon on renverrait
+       le nom du destinataire à la banque, c'est-à-dire exactement le défaut
+       qu'on venait de corriger, réintroduit par un raccourci de confort. */
+    var mNomT = APPSRC.match(/function nomTitulaireCarte[\s\S]*?\n  \}/);
+    ok(mNomT && /payCardSame/.test(mNomT[0]),
+      '⛔ `nomTitulaireCarte` ne consulte plus la case « la carte est à mon nom » : soit '
+      + 'le client doit retaper son nom pour rien, soit on envoie le nom du destinataire '
+      + 'à la banque.');
+    /* ⚠️ Chercher la garde ne suffit PAS : un repli ajouté APRÈS elle la laisse
+       intacte et rétablit le défaut. Démasqué par sabotage. On exécute donc la
+       vraie fonction sur les deux états de la case. */
+    if (mNomT) {
+      var fabNom = new Function('return (' + mNomT[0].replace(/^\s*function nomTitulaireCarte/, 'function') + ')');
+      function nomAvec(coche, saisi) {
+        var faux = { getElementById: function (id) {
+          if (id === 'payCardSame') return { checked: coche };
+          if (id === 'payCardName') return { value: saisi };
+          return null;
+        } };
+        var vrai = global.document; global.document = faux;
+        try { return fabNom()({ name: 'DESTINATAIRE Livraison' }); }
+        finally { global.document = vrai; }
+      }
+      ok(nomAvec(true, '') === 'DESTINATAIRE Livraison',
+        '⛔ case COCHÉE : le nom du titulaire devrait reprendre celui de l\'adresse. Le '
+        + 'client aurait à retaper une information qu\'il vient de saisir.');
+      ok(nomAvec(false, 'SOCIETE Martin') === 'SOCIETE Martin',
+        '⛔ case DÉCOCHÉE : c\'est le champ dédié qui doit faire foi.');
+      ok(nomAvec(false, '') === '',
+        '⛔⛔ case DÉCOCHÉE et champ vide : le nom du DESTINATAIRE est renvoyé en repli. '
+        + 'Le client a explicitement dit que la carte n\'est PAS à son nom — lui '
+        + 'substituer l\'autre nom annule sa correction, en silence, et la banque peut '
+        + 'refuser la carte.');
+    }
+    ok(/id="payCardSame"/.test(fs.readFileSync(path.join(RACINE, 'index.html'), 'utf8')),
+      '⛔ la case « la carte est à mon nom » a disparu : le client devra retaper son nom '
+      + 'à chaque commande, alors qu\'il vient de le saisir juste au-dessus.');
+
     /* ── ⛔ LE BOUTON « COMMANDER » NE MENT PAS ───────────────────────────
        Il restait LUMINEUX même quand le clic ne pouvait rien faire :
        `confirmPayment` refusait poliment si les CGV n'étaient pas cochées. Un
@@ -1473,16 +1513,18 @@ module.exports = async function () {
       + 'de paiement, et les conditions se contrediraient à nouveau.');
     if (mMaj) {
       var fab = new Function('doc', 'return (' + mMaj[0].replace(/^\s*function majBoutonPayer/, 'function') + ')');
-      function essai(cgvCoche, carteEnAttente, enCours, nomSaisi) {
+      function essai(cgvCoche, carteEnAttente, enCours, nomSaisi, memeNom) {
         var btn = { dataset: {}, disabled: false };
         if (carteEnAttente) btn.dataset.attenteCarte = '1';
         if (enCours) btn.dataset.enCours = '1';
         var cgv = { checked: cgvCoche };
         var nom = { value: (nomSaisi === undefined) ? 'Prenom Nom' : nomSaisi };
+        var same = { checked: (memeNom === undefined) ? false : memeNom };
         var faux = { getElementById: function (id) {
           if (id === 'payModalConfirm') return btn;
           if (id === 'payCgvOk') return cgv;
           if (id === 'payCardName') return nom;
+          if (id === 'payCardSame') return same;
           return null;
         } };
         var vraiDoc = global.document;
@@ -1506,6 +1548,13 @@ module.exports = async function () {
       ok(essai(true, false, false, '') === true,
         '⛔⛔ le bouton est actif alors que le nom du TITULAIRE est vide. Revolut le reçoit '
         + 'alors vide, et la banque peut refuser la carte sans que le client comprenne.');
+      /* ⛔ Case « la carte est à mon nom » COCHÉE : le champ dédié est masqué et
+         vide, et c'est NORMAL — le nom vient de l'adresse. Exiger le champ dans
+         ce cas bloquerait tout le monde sur un champ qu'ils ne voient même pas. */
+      ok(essai(true, false, false, '', true) === false,
+        '⛔⛔ le bouton reste ÉTEINT alors que la case « la carte est à mon nom » est '
+        + 'cochée. Le client ne voit AUCUN champ à remplir et ne peut pas commander : '
+        + 'blocage total, sans explication possible.');
     }
 
     /* ── ⛔⛔ LE PANIER SE VIDE APRÈS UN ACHAT PAYÉ ────────────────────────

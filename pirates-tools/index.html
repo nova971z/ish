@@ -44,7 +44,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=560">
+  <link rel="stylesheet" href="styles.css?v=561">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -1837,9 +1837,15 @@
                  complet », « Telephone » et « Adresse » en ont un. Il donnait
                  l'impression d'un bloc etranger colle au milieu du formulaire —
                  juste avant l'ecran ou le client donne son numero de carte. -->
-            <label class="pay-card-label" for="payCardName">Nom inscrit sur la carte</label>
-            <input id="payCardName" class="pay-card-name" type="text" autocomplete="cc-name"
-                   maxlength="120" placeholder="Pr&eacute;nom Nom" required>
+            <label class="pay-card-same">
+              <input type="checkbox" id="payCardSame" checked>
+              <span>La carte est &agrave; mon nom &mdash; celui saisi ci-dessus</span>
+            </label>
+            <div id="payCardNameWrap" hidden>
+              <label class="pay-card-label" for="payCardName">Nom inscrit sur la carte</label>
+              <input id="payCardName" class="pay-card-name" type="text" autocomplete="cc-name"
+                     maxlength="120" placeholder="Pr&eacute;nom Nom">
+            </div>
             <span class="pay-card-label" id="payCardLabel">Num&eacute;ro de carte</span>
             <div id="stripePaymentElement" class="stripe-payment-element">
               <!-- Le widget du fournisseur se monte ici -->
@@ -2259,7 +2265,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=560"></script>
+  <script defer src="app.js?v=561"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->
