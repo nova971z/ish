@@ -1274,6 +1274,40 @@ module.exports = async function () {
       + 'de le deviner depuis une URL, et se trompe dès que `urlHebergee` manque.');
   }
 
+  /* ── ⛔⛔ LE TERRITOIRE FISCAL NE VIENT QUE DU CODE POSTAL DE LIVRAISON ─
+     Garde posée le 01/08/2026, AVANT d'ajouter un champ « département » au
+     compte client. C'est l'ordre qui compte : le filet d'abord, la
+     fonctionnalité ensuite.
+
+     Le trou déjà payé (A1) : `body.territory` servait au calcul, donc un appel
+     direct pouvait déclarer Mayotte — TVA 0 %, octroi 0 % — et payer ≈ 19 % de
+     moins sur n'importe quelle livraison. Il a été fermé en dérivant le
+     territoire du CODE POSTAL, côté serveur.
+
+     ⛔ Un « département » stocké dans le profil est une donnée DÉCLARATIVE de
+     plus. Pratique pour l'affichage et le contact ; mortelle si elle entre un
+     jour dans le calcul du montant. Le client changerait son profil et
+     paierait moins. Ce contrôle interdit à quoi que ce soit d'autre que le
+     code postal de décider du territoire facturé. */
+  var CPI2 = path.join(RACINE, 'api', 'create-payment-intent.js');
+  if (fs.existsSync(CPI2)) {
+    var src2 = fs.readFileSync(CPI2, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '')
+      .replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+    ok(/var territory = postal\.territoryFromPostal\(postalCode\)/.test(src2),
+      '⛔⛔ le territoire facturé ne vient plus de `postal.territoryFromPostal(postalCode)`. '
+      + 'C\'est le trou A1 rouvert : une valeur déclarée par le client (corps de requête, '
+      + 'profil, préférence d\'affichage) déciderait du taux de taxe, et une livraison '
+      + 'déclarée à Mayotte paierait ≈ 19 % de moins.');
+    ok(!/territory\s*=\s*[^;]*body\.territory/.test(src2),
+      '⛔⛔ `body.territory` est réutilisé pour décider du territoire FACTURÉ. C\'est '
+      + 'exactement le défaut A1 : le client choisit son taux de taxe.');
+    /* Le profil ne doit pas non plus s'inviter dans ce calcul. */
+    ok(!/territory\s*=\s*[^;]*(profil|profile|departement|département)/i.test(src2),
+      '⛔⛔ un champ de PROFIL décide du territoire facturé. Le département du compte est '
+      + 'déclaratif : le client le change, et il paie moins. Seul le code postal de '
+      + 'LIVRAISON fait foi.');
+  }
+
   /* ── Le vocabulaire serveur doit couvrir CHAQUE mode ────────────────────
      Appel réel, pas lecture de source : pour chaque mode accepté par
      `sanitizePaiement`, le libellé doit être non vide ET distinct des autres.
