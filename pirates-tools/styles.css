@@ -8433,3 +8433,12 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   .pm-ligne__date { order: 3; }
   .pm-ligne__prix { order: 4; margin-left: auto; }
 }
+
+/* Remise à zéro de la comptabilité : action DESTRUCTRICE, isolée du reste des
+   commandes de l'écran pour ne pas se cliquer par mégarde. */
+.compta-actions--danger {
+  margin-top: 1.4rem; padding-top: 1rem;
+  border-top: 1px solid rgba(244,67,54,.25);
+  display: flex; align-items: center; gap: .8rem; flex-wrap: wrap;
+}
+.compta-actions--danger .admin-hint { margin: 0; flex: 1 1 16rem; }

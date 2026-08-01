@@ -512,6 +512,69 @@ module.exports = async function handler(req, res) {
          composite requis, mais l'entrée est tout de même versionnée dans
          `firestore.indexes.json` — l'émulateur ne signale jamais un index
          manquant, et on ne veut pas l'apprendre en production. */
+      /* ── REMISE À ZÉRO DE LA COMPTABILITÉ ─────────────────────────────
+         Demandée par l'user le 01/08/2026, deux fois, en toutes lettres :
+         « je m'en fous que ça casse les informations dans la comptabilité, on
+         vire tout, on remet l'historique à zéro, on refera des tests ».
+
+         J'avais soulevé le caractère irréversible ; il a tranché. Ces écritures
+         sont celles de la phase de TEST (fausse monnaie du bac à sable), pas
+         des recettes réelles déclarées.
+
+         ⛔ CE QUE ÇA EFFACE, DÉFINITIVEMENT :
+           · `payments`       — le journal des encaissements (compte de
+                                résultat, TVA, fidélité et historique client en
+                                dépendent tous) ;
+           · `charges`        — les charges saisies ;
+           · `refunds`        — les avoirs et remboursements ;
+           · `stripe_events`  — les notifications déjà traitées ;
+           · `config/invoice` — le compteur de numéros de facture, remis à 0.
+
+         ⛔ CE QUE ÇA N'EFFACE PAS, et ce n'est pas négociable : les COMPTES
+         CLIENTS, les COURSES DE LIVRAISON et le CATALOGUE. Effacer un compte
+         client détruirait les données personnelles de TIERS (J3) — c'est une
+         autre décision, elle ne se prend pas dans le même geste.
+
+         ⚠️ ESSAI PAR DÉFAUT : sans `confirmer: "OUI"` dans le corps, on COMPTE
+         et on rend le compte, sans rien supprimer. Un geste irréversible ne
+         part jamais sur un clic isolé. */
+      if (type === 'raz-compta') {
+        const COLLECTIONS = ['payments', 'charges', 'refunds', 'stripe_events'];
+        const compte = {};
+        for (const c of COLLECTIONS) {
+          try { compte[c] = (await db.collection(c).get()).size; }
+          catch (e) { compte[c] = -1; }
+        }
+        if (String((body && body.confirmer) || '') !== 'OUI') {
+          return res.status(200).json({
+            ok: true, essai: true, compte: compte,
+            message: 'Rien n\'a ete supprime.'
+          });
+        }
+        const efface = {};
+        for (const c of COLLECTIONS) {
+          let n = 0;
+          try {
+            /* Par lots de 400 : une écriture groupée Firestore plafonne à 500
+               opérations et échoue EN ENTIER au-delà — on perdrait la moitié
+               d'une suppression sans savoir laquelle. */
+            for (;;) {
+              const snap = await db.collection(c).limit(400).get();
+              if (snap.empty) break;
+              const lot = db.batch();
+              snap.forEach((d) => lot.delete(d.ref));
+              await lot.commit();
+              n += snap.size;
+              if (snap.size < 400) break;
+            }
+          } catch (e) { /* collection absente : rien a effacer */ }
+          efface[c] = n;
+        }
+        try { await db.collection('config').doc('invoice').set({ last: 0, year: null }, { merge: true }); }
+        catch (e) { /* compteur absent */ }
+        return res.status(200).json({ ok: true, essai: false, efface: efface });
+      }
+
       if (type === 'price-moves') {
         const jours = Math.min(365, Math.max(1, Number(req.query.jours) || 30));
         const depuis = Date.now() - jours * 24 * 3600 * 1000;

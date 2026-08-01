@@ -12187,6 +12187,13 @@
     // ── Bloc SYNTHÈSE COMPTABLE (rempli après chargement) ──────
     html += '<h2 class="admin-subtitle">📊 Synthèse comptable</h2>';
     html += '<div class="compta-actions" style="margin-bottom:8px"><button type="button" class="btn primary" id="comptaExportPdf">📄 Exporter en PDF</button><button type="button" class="btn btn--ghost" id="comptaReloadAcc">↻ Rafraîchir</button></div>';
+    /* ⛔ REMISE À ZÉRO — bouton, pas script. L'user travaille sur iPad : un
+       outil en ligne de commande lui est INUTILISABLE. Une consigne
+       inapplicable chez lui est une consigne fausse (leçon du 01/08/2026).
+       Placé en dernier et à part, pour ne pas se cliquer par erreur. */
+    html += '<div class="compta-actions compta-actions--danger">'
+      + '<button type="button" class="btn acc-logout-btn" id="comptaRaz">🗑️ Remettre la comptabilité à zéro</button>'
+      + '<span class="admin-hint" id="comptaRazEtat"></span></div>';
     html += '<div id="comptaReport"><p class="admin-loading">Chargement des comptes…</p></div>';
 
     /* ── Diagnostic du fournisseur de paiement ────────────────────────────
@@ -12304,6 +12311,47 @@
 
     comptaLoadCalc();
     comptaLoadAccounting();
+    /* Deux clics OBLIGATOIRES, et le premier COMPTE ce qui va disparaître.
+       Un effacement définitif ne part jamais sur un clic isolé : le premier
+       appel est un essai côté serveur, qui ne supprime rien. */
+    var razBtn = document.getElementById('comptaRaz');
+    var razEtat = document.getElementById('comptaRazEtat');
+    if (razBtn) razBtn.addEventListener('click', function () {
+      if (razBtn.dataset.arme !== '1') {
+        razBtn.disabled = true;
+        adminPostType('raz-compta', {}).then(function (d) {
+          var c = (d && d.compte) || {};
+          var tot = Object.keys(c).reduce(function (s2, k) { return s2 + Math.max(0, c[k]); }, 0);
+          razBtn.dataset.arme = '1';
+          razBtn.disabled = false;
+          razBtn.textContent = '⚠️ CONFIRMER la suppression de ' + tot + ' écriture(s)';
+          if (razEtat) razEtat.textContent = 'paiements ' + (c.payments || 0)
+            + ' · charges ' + (c.charges || 0) + ' · avoirs ' + (c.refunds || 0)
+            + ' · notifications ' + (c.stripe_events || 0)
+            + ' — clique à nouveau pour effacer DÉFINITIVEMENT. Les comptes clients et le catalogue ne sont PAS touchés.';
+        }).catch(function (e) {
+          razBtn.disabled = false;
+          if (razEtat) razEtat.textContent = 'Comptage impossible : ' + ((e && e.message) || 'erreur');
+        });
+        return;
+      }
+      razBtn.disabled = true;
+      razBtn.textContent = 'Suppression…';
+      adminPostType('raz-compta', { confirmer: 'OUI' }).then(function (d) {
+        var e2 = (d && d.efface) || {};
+        var tot = Object.keys(e2).reduce(function (s2, k) { return s2 + e2[k]; }, 0);
+        razBtn.textContent = '✅ ' + tot + ' écriture(s) effacée(s)';
+        razBtn.dataset.arme = '';
+        if (razEtat) razEtat.textContent = 'Comptabilité remise à zéro. Recharge la page.';
+        renderAdminCompta();
+      }).catch(function (e) {
+        razBtn.disabled = false;
+        razBtn.textContent = '🗑️ Remettre la comptabilité à zéro';
+        razBtn.dataset.arme = '';
+        if (razEtat) razEtat.textContent = 'Échec : ' + ((e && e.message) || 'erreur');
+      });
+    });
+
     var pdfBtn = document.getElementById('comptaExportPdf');
     if (pdfBtn) pdfBtn.onclick = function () { window.print(); };
     var reloadBtn = document.getElementById('comptaReloadAcc');
