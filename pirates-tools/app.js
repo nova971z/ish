@@ -10059,6 +10059,10 @@
          s'empilerait. Une assignation remplace, elle ne cumule pas. */
       cgvBox.onchange = majBoutonPayer;
     }
+    var nomCarte = document.getElementById('payCardName');
+    if (nomCarte) {
+      nomCarte.oninput = majBoutonPayer;
+    }
     var cgvMsg = document.getElementById('payCgvNote');
     if (cgvMsg) cgvMsg.hidden = true;
     majBoutonPayer();
@@ -10093,6 +10097,9 @@
       pf('payAddrPostal', prof.addrPostal || '');
       pf('payAddrCity', prof.addrCity || '');
       pf('payAddrPhone', prof.phone || '');
+      /* Le titulaire est le plus souvent la personne livrée : on pré-remplit,
+         et il corrige si sa carte porte un autre nom (entreprise, conjoint). */
+      pf('payCardName', prof.name || (_currentUser && _currentUser.displayName) || '');
     }
     handlePayAddressChange();
 
@@ -10539,8 +10546,19 @@
        l'adresse au moment du CLIC, pas au moment du montage — le client a pu
        la corriger entre les deux. */
     _revolutCardField.submit({
-      name: adr.name || '',
+      /* ⛔ `name` = NOM DU TITULAIRE DE LA CARTE. Les types officiels sont
+         explicites : « Cardholder name in form of 'FirstName LastName' ».
+         On y envoyait le nom de LIVRAISON — ce n'est pas la même chose. Un
+         artisan qui paie avec la carte de son entreprise, ou qui fait livrer
+         chez son client, aurait vu sa carte refusée par la banque sans jamais
+         comprendre pourquoi. Le champ est désormais saisi à part, pré-rempli
+         avec le nom de livraison (le cas le plus fréquent) et modifiable. */
+      name: nomTitulaireCarte(adr),
       email: (_currentUser && _currentUser.email) || '',
+      /* Le téléphone était collecté, rendu obligatoire… et jamais transmis au
+         fournisseur, alors que `CustomerDetails.phone` l'accepte. C'est une
+         donnée de plus pour la vérification anti-fraude de la banque. */
+      phone: adr.phone || '',
       billingAddress: {
         countryCode: 'FR',
         postcode: adr.postal || '',
@@ -10548,6 +10566,17 @@
         streetLine1: adr.line1 || ''
       }
     });
+  }
+
+  /* Nom du titulaire de la carte.
+     ⚠️ Repli sur le nom de livraison si le champ est vide : mieux vaut envoyer
+     un nom probable que rien du tout — un `name` absent est refusé en
+     production, alors qu'un nom qui ne correspond pas peut encore passer selon
+     la banque. Mais le champ est `required` : le repli ne devrait jamais servir. */
+  function nomTitulaireCarte(adr) {
+    var el = document.getElementById('payCardName');
+    var saisi = el ? String(el.value || '').trim() : '';
+    return saisi || (adr && adr.name) || '';
   }
 
   // Remet le bouton de paiement dans son état initial après un échec.
@@ -10580,7 +10609,11 @@
     var cgv = document.getElementById('payCgvOk');
     var cgvOk = !cgv || cgv.checked;
     var carteOk = btn.dataset.attenteCarte !== '1';
-    btn.disabled = !(cgvOk && carteOk);
+    /* Le nom du titulaire est `required` dans le formulaire, mais un champ
+       `required` hors <form> n'empêche rien : c'est ici que ça se joue. */
+    var nomEl = document.getElementById('payCardName');
+    var nomOk = !nomEl || String(nomEl.value || '').trim().length >= 2;
+    btn.disabled = !(cgvOk && carteOk && nomOk);
 
     /* ⛔ ÉTEINDRE SANS DIRE POURQUOI est un défaut symétrique — et c'est le
        harnais `course-pay` qui l'a attrapé, pas moi. Avant, le message

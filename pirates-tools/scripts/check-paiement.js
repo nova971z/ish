@@ -1397,6 +1397,33 @@ module.exports = async function () {
     ok(mValide && /addr\.phone/.test(mValide[0]),
       '⛔⛔ le téléphone n\'est plus exigé pour valider l\'adresse de livraison. Le champ '
       + 'peut exister et rester vide : on croit l\'avoir demandé, on ne l\'a pas.');
+    /* ── ⛔⛔ LE NOM DU TITULAIRE N'EST PAS LE NOM DE LIVRAISON ───────────
+       Les types officiels de Revolut sont explicites : `name` est le
+       « Cardholder name in form of 'FirstName LastName' ». On y envoyait
+       `adr.name`, c'est-à-dire le nom du DESTINATAIRE de la livraison.
+
+       Ce n'est pas la même personne : un artisan paie souvent avec la carte de
+       son entreprise, ou fait livrer chez son client. La banque compare le nom
+       transmis à celui du porteur — un écart peut faire refuser la carte, et le
+       client n'a alors aucun moyen de comprendre pourquoi. Une vente perdue en
+       silence, en production seulement.
+
+       Le champ est donc saisi à part, et il conditionne le bouton : `required`
+       hors d'un <form> n'empêche rien. */
+    ok(/id="payCardName"/.test(fs.readFileSync(path.join(RACINE, 'index.html'), 'utf8')),
+      '⛔⛔ le champ « Nom inscrit sur la carte » a disparu. On renverrait le nom de '
+      + 'LIVRAISON comme nom du porteur : la banque peut refuser la carte, et le client '
+      + 'ne saura jamais pourquoi.');
+    ok(/name:\s*nomTitulaireCarte\(/.test(APPSRC),
+      '⛔⛔ le submit n\'envoie plus le nom du TITULAIRE mais autre chose. Les types '
+      + 'Revolut disent « Cardholder name » : y mettre le nom de livraison expose à un '
+      + 'refus bancaire silencieux.');
+    ok(/phone:\s*adr\.phone/.test(APPSRC),
+      '⛔ le téléphone n\'est plus transmis au fournisseur alors qu\'on l\'exige du '
+      + 'client. `CustomerDetails.phone` l\'accepte, et c\'est une donnée de plus pour la '
+      + 'vérification anti-fraude — une donnée collectée sans usage n\'aurait pas dû '
+      + 'être demandée.');
+
     /* ── ⛔ LE BOUTON « COMMANDER » NE MENT PAS ───────────────────────────
        Il restait LUMINEUX même quand le clic ne pouvait rien faire :
        `confirmPayment` refusait poliment si les CGV n'étaient pas cochées. Un
@@ -1411,13 +1438,17 @@ module.exports = async function () {
       + 'de paiement, et les conditions se contrediraient à nouveau.');
     if (mMaj) {
       var fab = new Function('doc', 'return (' + mMaj[0].replace(/^\s*function majBoutonPayer/, 'function') + ')');
-      function essai(cgvCoche, carteEnAttente, enCours) {
+      function essai(cgvCoche, carteEnAttente, enCours, nomSaisi) {
         var btn = { dataset: {}, disabled: false };
         if (carteEnAttente) btn.dataset.attenteCarte = '1';
         if (enCours) btn.dataset.enCours = '1';
         var cgv = { checked: cgvCoche };
+        var nom = { value: (nomSaisi === undefined) ? 'Prenom Nom' : nomSaisi };
         var faux = { getElementById: function (id) {
-          return id === 'payModalConfirm' ? btn : (id === 'payCgvOk' ? cgv : null);
+          if (id === 'payModalConfirm') return btn;
+          if (id === 'payCgvOk') return cgv;
+          if (id === 'payCardName') return nom;
+          return null;
         } };
         var vraiDoc = global.document;
         global.document = faux;
@@ -1437,6 +1468,9 @@ module.exports = async function () {
       ok(essai(true, false, true) === true,
         '⛔⛔ le bouton se rallume pendant un paiement EN COURS. Un second clic partirait '
         + 'sur un paiement déjà en vol — double débit.');
+      ok(essai(true, false, false, '') === true,
+        '⛔⛔ le bouton est actif alors que le nom du TITULAIRE est vide. Revolut le reçoit '
+        + 'alors vide, et la banque peut refuser la carte sans que le client comprenne.');
     }
 
     /* ── ⛔⛔ LE PANIER SE VIDE APRÈS UN ACHAT PAYÉ ────────────────────────

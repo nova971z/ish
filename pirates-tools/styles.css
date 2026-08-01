@@ -6826,6 +6826,17 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
    ne lui passe RIEN : lui envoyer un objet `classes` partiel a cassé le
    chargement du champ le 01/08/2026. Styliser de l'extérieur ne peut pas
    casser ce qu'on ne touche pas. */
+/* Nom du titulaire : meme habillage que les champs d'adresse, pour que le bloc
+   carte forme un tout coherent. */
+.pay-card-name {
+  background: #1a2332; border: 1px solid rgba(255,255,255,.12); border-radius: 10px;
+  color: #e6edf5; padding: 12px; font-size: 15px; width: 100%; box-sizing: border-box;
+}
+.pay-card-name:focus {
+  outline: none; border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(var(--accent-rgb), .25);
+}
+
 .rc-card-field {
   background: #1a2332; border: 1px solid rgba(255,255,255,.12);
   border-radius: 10px; box-sizing: border-box;
