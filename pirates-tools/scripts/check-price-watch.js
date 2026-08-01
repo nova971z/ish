@@ -151,6 +151,43 @@ module.exports = function () {
       'ancien format (sans carte) toujours lu — aucun override existant ne casse');
   }
 
+  /* ═══ DIAGNOSTIC `parsed: 0` (01/08/2026) ════════════════════════════════
+     Premier essai du traqueur clickoutil : `parsed: 0` et un JSON muet — ni
+     la source qui tournait, ni ce que la page contenait. Or le serveur TENAIT
+     le HTML complet, seule occasion de lire un format inconnu (sites
+     fournisseurs injoignables du dépôt, CONNECT 403 mesuré). Le diagnostic
+     mesure chaque hypothèse du parseur et rend un verdict + extraits.
+     ⛔ Pages SYNTHÉTIQUES : un harnais ne nomme jamais une donnée réelle. */
+  var diag = pp.diagnostiquerPage;
+  ok(typeof diag === 'function', 'diagnostiquerPage exportée');
+  if (diag) {
+    var d1 = diag('<html>Chargement…</html>', 'MAKITA');
+    ok(d1.occurrencesMarque === 0 && /apparaît nulle part/.test(d1.verdict),
+      'marque absente → verdict « nulle part » (page vide ou construite en JS)');
+    /* ⚠️ Le motif réf du parseur est INSENSIBLE À LA CASSE : « MAKITA propose »
+       compte comme une réf (appris en écrivant ce test — le diagnostic doit
+       refléter le parseur, pas une version idéalisée). D'où le « : » après la
+       marque, qui bloque le motif. */
+    var d2 = diag('la marque MAKITA : réf. ZZZ111 à 129,00 €', 'MAKITA');
+    ok(d2.occurrencesMarque === 1 && d2.refsMarque === 0 && /titres autrement/.test(d2.verdict),
+      'marque présente sans « MARQUE RÉF » → verdict « titres autrement » (' + d2.verdict + ')');
+    var d3 = diag('MAKITA ZZZ111 visseuse 299,00 € Ajouter au panier', 'MAKITA');
+    ok(d3.refsMarque === 1 && d3.prixAvecMot === 0 && d3.prixVirgule === 1
+      && /sans le mot « Prix »/.test(d3.verdict),
+      'prix écrit sans le mot « Prix » → compté dans prixVirgule et dit tel quel');
+    ok(Array.isArray(d3.extraits) && d3.extraits.length >= 1
+      && d3.extraits[0].indexOf('MAKITA ZZZ111') !== -1,
+      'les extraits montrent le texte BRUT autour de la marque — c\'est eux qui apprennent le format');
+    ok(typeof d1.octetsRecus === 'number' && typeof d1.boutonsPanier === 'number',
+      'les comptes sont des NOMBRES mesurés, pas des impressions');
+  }
+
+  // Branchement réel : le retour `parsed: 0` d'admin.js porte source + diagnostic.
+  ok(/parsed:\s*0,\s*\n\s*note:[\s\S]{0,200}diagnostic:\s*priceParse\.diagnostiquerPage\(/.test(adminSrc)
+    && /source:\s*sourceSlug,\s*parsed:\s*0/.test(adminSrc),
+    '⛔ le retour `parsed: 0` de handlePriceWatch doit renvoyer `source` ET `diagnostic` — '
+    + 'sans eux, un format inconnu est indiagnosticable (clickoutil, 01/08/2026)');
+
   return errors;
 };
 

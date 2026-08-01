@@ -109,6 +109,20 @@ prix » (⛔ gelés) et dans la réponse du traqueur (`rupture`).
 site l'écrit autrement, une capture d'une carte en rupture suffit à ajuster
 `RUPTURE_RE` dans `api/_lib/price-parse.js`.
 
+## 🟤 DeWALT — clickoutil (2ᵉ source, créé par l'user le 01/08/2026)
+1. `https://pirates-tools.com/api/health`
+2. `https://www.clickoutil.com/recherche?controller=search&s=Dewalt&order=product.price.desc&resultsPerPage=600`
+3. `https://pirates-tools.com/api/admin?type=price-watch&brand=DEWALT&source=clickoutil&dryRun=1`
+
+> Retranscrit depuis SES captures du 01/08/2026 (IMG_5578 → IMG_5579 : il a
+> ajouté `&source=clickoutil` lui-même entre les deux).
+> ⚠️ **Premier essai : `parsed: 0`** — le format de clickoutil n'est pas celui
+> de cotébrico. Le serveur renvoie désormais un champ `diagnostic` sur ce
+> chemin : relancer le raccourci en `dryRun=1` et lire `diagnostic.verdict` +
+> `diagnostic.extraits` — c'est LUI qui dit comment ce site écrit ses cartes
+> (la page est injoignable depuis le dépôt, CONNECT 403 mesuré).
+> Le parseur sera adapté sur ce mesuré, puis passage en `dryRun=0`.
+
 ## 🟠 Flex · Wera · Facom (À CRÉER — 5 produits jamais traqués)
 Même structure, seules la page cotébrico et le `brand=` changent. Le parseur est
 agnostique de la marque (il cherche « MARQUE + référence » dans les titres).

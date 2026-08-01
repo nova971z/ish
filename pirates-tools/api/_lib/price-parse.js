@@ -131,6 +131,71 @@ function pickCheapestSource(ownPrice, altSkus, parsedBySku) {
    c'est LE motif à ajuster si une capture montre un autre libellé. */
 var RUPTURE_RE = /rupture|indisponible|\u00e9puis\u00e9|hors\s+stock|non\s+disponible/i;
 
+/* \u2500\u2500 QUAND RIEN N'EST RECONNU, LA PAGE DOIT PARLER \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+   N\u00e9 le 01/08/2026 : le premier essai du traqueur clickoutil a rendu
+   `parsed: 0` avec pour seule explication \u00ab mauvaise page ou format
+   chang\u00e9 ? \u00bb. Or \u00e0 cet instant le serveur TENAIT le HTML complet de la page \u2014
+   et il l'a jet\u00e9 sans rien mesurer. Les sites fournisseurs sont injoignables
+   depuis le d\u00e9p\u00f4t (CONNECT 403, mesur\u00e9 le jour m\u00eame) : ce texte-l\u00e0 est la
+   SEULE occasion d'apprendre comment un nouveau site \u00e9crit ses cartes.
+   Deviner le format \u00e0 la place, c'est l'origine O6 du registre (inventer ce
+   qu'on ne peut pas lire).
+
+   Cette fonction mesure donc, sur le texte re\u00e7u, chaque hypoth\u00e8se du
+   parseur \u2014 s\u00e9parateur de cartes, motif \u00ab MARQUE R\u00c9F \u00bb, motif \u00ab Prix
+   X,XX \u20ac \u00bb \u2014 et rapporte des COMPTES plus trois extraits bruts autour de la
+   marque. Un `dryRun=1` suffit alors \u00e0 diagnostiquer un format inconnu, sans
+   rien demander d'autre \u00e0 l'user que le geste qu'il fait d\u00e9j\u00e0.
+
+   PURE (texte \u2192 objet), test\u00e9e par check-price-watch, sabotage compris.
+   \u26d4 Elle ne renvoie que des morceaux de la page fournisseur re\u00e7ue \u2014 jamais
+   un en-t\u00eate, un secret ou une donn\u00e9e du site. */
+function diagnostiquerPage(rawText, brand) {
+  brand = brand || 'DEWALT';
+  var texte = stripHtml(rawText).replace(/[ \t   ]+/g, ' ');
+  function compter(re) { var m = texte.match(re); return m ? m.length : 0; }
+  var d = {
+    octetsRecus: String(rawText || '').length,
+    texteNettoye: texte.length,
+    boutonsPanier: compter(/Ajouter au panier/gi),
+    occurrencesMarque: compter(new RegExp(escapeRe(brand), 'gi')),
+    refsMarque: compter(new RegExp(escapeRe(brand) + '\\s+[A-Z0-9][A-Z0-9.\\/\\-]*[A-Z0-9]', 'gi')),
+    prixAvecMot: compter(/Prix\s+[\d\s   ]+,\d{2}\s*\u20ac/g),
+    prixVirgule: compter(/\d[\d\s   ]*,\d{2}\s*\u20ac/g),
+    prixPoint: compter(/\d+\.\d{2}\s*\u20ac/g),
+    extraits: []
+  };
+  /* Trois fen\u00eatres de texte brut autour de la marque \u2014 d\u00e9but, milieu, fin de
+     page \u2014 pour VOIR comment le site \u00e9crit titre, r\u00e9f et prix. */
+  var pos = [], re = new RegExp(escapeRe(brand), 'gi'), m;
+  while ((m = re.exec(texte)) !== null) pos.push(m.index);
+  [0, Math.floor(pos.length / 2), pos.length - 1].forEach(function (i) {
+    if (i < 0 || i >= pos.length) return;
+    var ext = texte.slice(Math.max(0, pos[i] - 60), pos[i] + 140).trim();
+    if (d.extraits.indexOf(ext) === -1) d.extraits.push(ext);
+  });
+  /* Verdict MESUR\u00c9 \u2014 chaque phrase d\u00e9coule d'un compte ci-dessus, dans
+     l'ordre o\u00f9 le parseur \u00e9choue. */
+  if (!d.occurrencesMarque) {
+    d.verdict = 'la marque \u00ab ' + brand + ' \u00bb n\'appara\u00eet nulle part dans le texte re\u00e7u \u2014 '
+      + 'mauvaise page, ou contenu construit par JavaScript (le raccourci ne re\u00e7oit que le HTML brut)';
+  } else if (!d.refsMarque) {
+    d.verdict = 'la marque appara\u00eet (' + d.occurrencesMarque + '\u00d7) mais JAMAIS suivie d\'une '
+      + 'r\u00e9f\u00e9rence \u00ab ' + brand + ' XXX \u00bb \u2014 ce site \u00e9crit ses titres autrement (les extraits le montrent)';
+  } else if (!d.prixAvecMot) {
+    d.verdict = 'des r\u00e9f\u00e9rences sont l\u00e0 (' + d.refsMarque + '), mais aucun \u00ab Prix X,XX \u20ac \u00bb \u2014 '
+      + 'ce site \u00e9crit ses prix sans le mot \u00ab Prix \u00bb (' + d.prixVirgule + ' prix \u00e0 virgule, '
+      + d.prixPoint + ' \u00e0 point, dans le texte)';
+  } else if (!d.boutonsPanier) {
+    d.verdict = 'r\u00e9f\u00e9rences et prix pr\u00e9sents, mais aucun \u00ab Ajouter au panier \u00bb \u2014 '
+      + 'le d\u00e9coupage en cartes ne peut pas fonctionner sur ce site';
+  } else {
+    d.verdict = 'tous les motifs existent s\u00e9par\u00e9ment mais aucune carte ne les r\u00e9unit \u2014 '
+      + 'les extraits montrent l\'agencement r\u00e9el';
+  }
+  return d;
+}
+
 /* ── PLUSIEURS TRAQUEURS, UN SEUL COÛT : LE MOINS CHER DES SOURCES VALIDES ──
    Demandé par l'user le 01/08/2026 : un deuxième site va être traqué, puis
    d'autres. Le calculateur doit TOUJOURS s'appuyer sur le moins cher — mais
@@ -162,4 +227,4 @@ function choisirCoutSource(sources, nowMs, maxAgeMs) {
   return best;
 }
 
-module.exports = { parseCotebrico: parseCotebrico, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, SOURCE_FRESH_MS: SOURCE_FRESH_MS, RUPTURE_RE: RUPTURE_RE };
+module.exports = { parseCotebrico: parseCotebrico, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, SOURCE_FRESH_MS: SOURCE_FRESH_MS, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage };

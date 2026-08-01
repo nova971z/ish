@@ -1770,8 +1770,32 @@ async function handlePriceWatch(req, res, admin, db) {
     const dryRun = body.dryRun === true || (req.query && (req.query.dryRun === '1' || req.query.dryRun === 'true'));
     if (!text || text.length < 200) return res.status(400).json({ ok: false, error: 'text manquant ou trop court' });
 
+    /* ── IDENTITÉ DE LA SOURCE (01/08/2026) ─────────────────────────────────
+       Un deuxième site va être traqué, puis d'autres : chaque raccourci passe
+       `&source=<slug>`. Sans le paramètre : 'cotebrico' — aucun raccourci
+       existant ne change. ⛔ Le slug devient une CLÉ Firestore : alphabet
+       fermé, longueur bornée — rien d'arbitraire n'entre en base.
+       ⚠️ Calculé AVANT le retour `parsed: 0` : le premier essai clickoutil a
+       rendu un JSON muet sur la source qui tournait — indiagnosticable. */
+    const sourceSlug = (String((req.query && req.query.source) || 'cotebrico')
+      .toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 24)) || 'cotebrico';
+
     const parsed = priceParse.parseCotebrico(text, brand);
-    if (!parsed.length) return res.status(200).json({ ok: true, brand, parsed: 0, note: 'aucun produit reconnu (mauvaise page ou format changé ?)' });
+    if (!parsed.length) {
+      /* Rien de reconnu — mais la page est LÀ, entre nos mains : on la mesure
+         au lieu de la jeter. Le diagnostic dit laquelle des hypothèses du
+         parseur casse sur ce site (séparateur de cartes, motif réf, motif
+         prix), avec trois extraits bruts de la page fournisseur. C'est la
+         SEULE voie d'apprentissage d'un format inconnu : ces sites sont
+         injoignables depuis le dépôt (CONNECT 403, mesuré), et deviner un
+         balisage est interdit (O6). Aucune donnée personnelle ici : la page
+         est une grille produits publique. */
+      return res.status(200).json({
+        ok: true, brand, source: sourceSlug, parsed: 0,
+        note: 'aucun produit reconnu — le champ diagnostic mesure ce que la page contient',
+        diagnostic: priceParse.diagnostiquerPage(text, brand)
+      });
+    }
 
     const products = await catalog.loadCatalog();
     const bySku = {};
@@ -1795,13 +1819,6 @@ async function handlePriceWatch(req, res, admin, db) {
     const parsedBySku = {};
     parsed.forEach((it) => { parsedBySku[String(it.sku).toUpperCase()] = it.price; });
 
-    /* ── IDENTITÉ DE LA SOURCE (01/08/2026) ─────────────────────────────────
-       Un deuxième site va être traqué, puis d'autres : chaque raccourci passe
-       `&source=<slug>`. Sans le paramètre : 'cotebrico' — aucun raccourci
-       existant ne change. ⛔ Le slug devient une CLÉ Firestore : alphabet
-       fermé, longueur bornée — rien d'arbitraire n'entre en base. */
-    const sourceSlug = (String((req.query && req.query.source) || 'cotebrico')
-      .toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 24)) || 'cotebrico';
     /* Produits vus EN RUPTURE sur cette page : leur prix ne sert JAMAIS de
        coût (on ne peut pas acheter là), mais la rupture est ENREGISTRÉE pour
        que le coût effectif se recalcule sans cette source. */
