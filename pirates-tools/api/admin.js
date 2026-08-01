@@ -1883,10 +1883,50 @@ async function handlePriceWatch(req, res, admin, db) {
 
     if (!dryRun && applied.length) catalog.invalidateOverrides();
 
+    /* ⛔⛔ LE TROU QUE PERSONNE NE VOYAIT — ajouté le 01/08/2026.
+       ─────────────────────────────────────────────────────────────────────
+       Le traqueur rendait `unknown` : les références de la PAGE absentes du
+       catalogue. Utile — mais c'est l'INVERSE qui coûte de l'argent.
+
+       Ce qu'il ne disait PAS : quelles fiches DU CATALOGUE la page n'a pas
+       montrées. Celles-là n'ont jamais de coût relevé, donc leur prix se
+       calcule sur un coût DEVINÉ à partir du prix — un cercle qui confirme
+       toujours ce qui existe déjà. Et rien, nulle part, ne le signalait.
+
+       L'user l'a découvert seul, après coup, sur son écran d'admin : « 541
+       estimés ». Un automatisme doit dire ça tout seul, à chaque passage.
+
+       Causes possibles d'une absence, toutes actionnables :
+         · la page fournisseur est plafonnée (`resultsPerPage`) et coupe la
+           queue de liste ;
+         · la référence n'est pas vendue par ce fournisseur ;
+         · la référence du catalogue ne correspond pas à celle de la page ;
+         · le raccourci tourne en `dryRun=1` et n'écrit donc jamais rien.
+       On les rend VISIBLES au lieu de les laisser deviner. */
+    const vusSurLaPage = new Set(parsed.map((it) => String(it.sku).toUpperCase()));
+    const absents = products
+      .filter((p) => String(p.brand || '').toUpperCase() === String(brand).toUpperCase())
+      .filter((p) => !vusSurLaPage.has(String(p.sku || '').toUpperCase()))
+      .map((p) => {
+        const o = ovW[p.id] || {};
+        /* ⚠️ « absent de CETTE page » ≠ « jamais relevé ». Une fiche vue lors
+           d'un passage précédent garde son coût réel. Seules les secondes
+           vivent sur une supposition — ce sont elles qui comptent. */
+        const releve = (o.priceSource === 'cotebrico'
+          && typeof o.priceSrcTTC === 'number' && o.priceSrcTTC > 0);
+        return { sku: p.sku, id: p.id, name: p.title || p.name, dejaReleve: releve };
+      });
+    const jamaisReleves = absents.filter((a) => !a.dejaReleve);
+
     return res.status(200).json({
       ok: true, brand, dryRun: !!dryRun,
-      counts: { parsed: parsed.length, applied: applied.length, flagged: flagged.length, unchanged: unchanged.length, unknown: unknown.length, locked: lockedW.length },
-      applied, flagged, unknown: unknown.slice(0, 800)
+      counts: {
+        parsed: parsed.length, applied: applied.length, flagged: flagged.length,
+        unchanged: unchanged.length, unknown: unknown.length, locked: lockedW.length,
+        absents: absents.length, absentsJamaisReleves: jamaisReleves.length
+      },
+      applied, flagged, unknown: unknown.slice(0, 800),
+      absents: absents.slice(0, 800)
     });
   } catch (err) {
     console.error('[api/admin] price-watch failed:', err.message);

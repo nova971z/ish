@@ -41,8 +41,9 @@ réflexe à garder : **une demande entendue s'écrit ici AVANT d'être traitée.
 
 | # | Demande | Date | État | Preuve / motif |
 |---|---|---|---|---|
-| D-51 | Coûts d'achat réels injectés dans le traqueur pour les 541 Makita importées | 01/08 | `RENDU` | Liste au format traqueur produite et **relue au centime par le vrai analyseur** (541/541). L'injection est un geste admin : Firestore est injoignable du dépôt. |
+| D-51 | Coûts d'achat réels des Makita importées | 01/08 | `FAIT` | ⚠️ **Ma réponse d'abord était fausse** : j'ai proposé un collage manuel. Le traqueur écrit les coûts TOUT SEUL, y compris quand le prix ne bouge pas (`price-watch`, branche `unchanged`). Le relevé du 01/08 porte `dryRun:false` et `unchanged:615` : **615 coûts réels écrits** sur 620 fiches Makita. Rien à coller. |
 | D-52 | Les 79 Makita restantes et les 304 Quincaillerie n'ont **aucun** coût relevé | 01/08 | `RENDU` | ⛔ **Bloqué sur une donnée que je ne peux pas inventer** : leur prix d'achat. Il me faut le relevé fournisseur de ces références (même format que les autres). Sans lui, leur prix reste une supposition — et la règle produits dit qu'un produit sans coût relevé ne reste pas au catalogue. Deux issues : fournir les coûts, ou retirer ces fiches. |
+| D-54 | Le traqueur doit couvrir tout seul — rien à coller à la main | 01/08 | `FAIT` | Festool sorti de `dryRun=1` (il tournait en simulation depuis la création de ses 50 fiches) · le traqueur rend désormais `absents` et `absentsJamaisReleves` à chaque passage · porte `check-traqueur` : 3 sabotages, 3 rouges |
 | D-53 | Recalculer le catalogue au taux 1 % | 01/08 | `RENDU` | Taux passé à 1 % (`pricing-model.js`), champ ajouté à l'écran admin. Le recalcul lui-même est un geste admin (deux boutons). |
 
 ---

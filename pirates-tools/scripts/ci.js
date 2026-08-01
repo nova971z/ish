@@ -143,6 +143,10 @@ var reqAncres = safeRequire('./check-ancres', 'check-ancres');
 // Angle mort de tout le dispositif jusqu'au 01/08/2026 — aucune autre porte
 // ne sait ce qui a été DEMANDÉ, elles ne vérifient que la cohérence du code.
 var reqDemandes = safeRequire('./check-demandes', 'check-demandes');
+// Le traqueur est un AUTOMATISME : s'il ne couvre pas une marque, ou s'il
+// tourne en simulation, il répond ok:true et ne relève rien. 541 prix ont
+// vécu sur une supposition à cause de ça (01/08/2026).
+var reqTraqueur = safeRequire('./check-traqueur', 'check-traqueur');
 // Le module Revolut est ecrit AVANT d'avoir pu appeler le reseau : tout ce qui
 // est PUR (signature contre le vecteur officiel, commission d'un ordre
 // reessaye, table des etats) s'eprouve ici, sinon la 1re verification aurait
@@ -220,6 +224,7 @@ var reqReconc   = safeRequire('./check-reconciliation', 'check-reconciliation');
   await runOne(reqFuites,   'check-fuites');
   await runOne(reqAncres,   'check-ancres');
   await runOne(reqDemandes, 'check-demandes');
+  await runOne(reqTraqueur, 'check-traqueur');
   await runOne(reqRevolut,  'check-revolut');
   await runOne(reqReconc,   'check-reconciliation');
 

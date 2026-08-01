@@ -64,7 +64,14 @@ La **1ʳᵉ URL (health) est identique pour les 3 marques** :
 ## ⚫ Festool
 1. `https://pirates-tools.com/api/health`
 2. `https://www.cotebrico.fr/8-outils-electroportatifs/s-1/marque-festool/categories_2-outils_electroportatifs?resultsPerPage=100`
-3. `https://pirates-tools.com/api/admin?type=price-watch&brand=FESTOOL&dryRun=1`
+3. `https://pirates-tools.com/api/admin?type=price-watch&brand=FESTOOL&dryRun=0`
+
+> ⛔ **CORRIGÉ le 01/08/2026 : `dryRun=1` → `dryRun=0`.** La note ci-dessous
+> disait « ses produits n'existent pas au catalogue » — c'était vrai à
+> l'écriture, ça ne l'est plus : **50 fiches Festool** y sont depuis. Le
+> raccourci tournait donc deux fois par jour en SIMULATION, sans jamais rien
+> écrire, et ces 50 produits n'ont jamais eu de coût relevé. Une note qui se
+> périme devient un mensonge qui tourne tout seul.
 
 ---
 
@@ -103,9 +110,10 @@ au milieu et couvrent tout le catalogue.
 ### Notes
 - **`dryRun=0`** = applique les prix (marge 15 % sur le TTC affiché, promo comprise).
   **`dryRun=1`** = simulation, n'écrit rien (utile au 1er test d'une nouvelle marque).
-- Festool est encore à `dryRun=1` : ses produits n'existent pas au catalogue → le
-  traqueur les remonte dans la liste `unknown` pour création. Passer à `0` une fois
-  les fiches créées et validées.
+- ⛔ **Un raccourci ne reste JAMAIS en `dryRun=1`.** C'est un mode d'essai pour un
+  premier passage, pas un état de repos : il tourne, il consomme, et il n'écrit
+  rien. Festool y est resté après que ses 50 fiches ont été créées — personne ne
+  s'en est aperçu pendant des jours. Porte : `scripts/check-traqueur.js`.
 - Le paramètre `resultsPerPage` force TOUS les produits sur une seule page (pas de
   pagination = pas de « Combiner » = pas de blocage iOS). 200 laisse de la marge.
 - La marque par défaut de l'endpoint est `DEWALT` ; on la met quand même en clair
