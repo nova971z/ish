@@ -17,12 +17,12 @@
 | **O1** | Affirmer avant de mesurer | 10 | §3 · §8 | `garde-sortie.js` *(hook Stop)* |
 | **O2** | L'instrument de mesure est faux | 25 | §4.3 | sabotage obligatoire |
 | **O3** | Réutiliser sans vérifier le contexte | 8 | §1.4 | `check-lecons.js` |
-| **O4** | Contrainte connue, non appliquée | 3 | §1 | `garde-entonnoir.js` |
+| **O4** | Contrainte connue, non appliquée | 4 | §1 | `garde-entonnoir.js` |
 | **O5** | Outil artisanal au lieu de l'outil existant | 1 | §1.4 | aucune — humaine |
 | **O6** | Copie périmée au lieu de la source vivante | 4 | §4.4 | `p7-architecture.js` |
 | **O7** | **Lire le silence comme un succès** | 7 | §3 · §4.3 | `sabotage.mjs` · `ci.js` · `check-ancres.js` |
 
-**58 erreurs, 7 mécanismes.** O1 et O2 en concentrent **35 à elles deux** :
+**59 erreurs, 7 mécanismes.** O1 et O2 en concentrent **35 à elles deux** :
 c'est là qu'il faut regarder en premier, toujours.
 
 ⚠️ **O7 est né le 01/08/2026**, et il est né d'une règle qui existait déjà :
@@ -163,6 +163,7 @@ utilisée. La plus rageante : rien n'était à découvrir.*
 | **E-401** | « l'user navigue TOUJOURS en privé » | traqué un défaut de Service Worker qui ne pouvait pas le toucher |
 | **E-402** | l'entreprise est en Guadeloupe, **pas** l'user | déduit qu'il y était, orienté tout un diagnostic réseau à côté |
 | **E-403** | `scripts/ou.js` construit le matin | utilisé **zéro fois** de la journée |
+| **E-404** | « Vercel ne déploie que `master` » — première ligne de la mémoire projet | poussé **15 commits** sur la branche de travail en annonçant deux fois à l'user « relance quand c'est déployé ». Rien ne se déployait : il a retesté contre l'ancien code, et la réponse identique était inévitable. Le déploiement fait partie de « livré » — pousser la branche n'est pas livrer |
 
 **Antidote** : §1 — l'entonnoir, **avant** de réfléchir.
 **Porte** : `scripts/garde-entonnoir.js` refuse désormais l'édition d'un fichier
