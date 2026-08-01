@@ -1002,6 +1002,29 @@ module.exports = async function () {
         + 'résultat devient fausse — avec des chiffres parfaitement plausibles.');
     });
 
+    /* ── d quinquies) ⛔⛔ L'ADRESSE FAIT VIVRE LE CONTRÔLE FISCAL ────────
+       `taxCheck` compare le territoire déclaré au code postal RÉELLEMENT
+       collecté. Sans code postal, `expected` vaut `null`, `mismatch` reste faux
+       quoi qu'il arrive : la garde A1 est SILENCIEUSEMENT morte. Tout marche,
+       rien ne casse, et une protection ne protège plus rien.
+
+       La commande de diagnostic doit donc porter une adresse — sinon le test
+       ne prouve pas l'aller-retour, et on ne découvrirait le trou qu'en
+       production, sur une vraie vente au mauvais taux. */
+    var mTestAdr = admSrc.match(/type === 'revolut-commande-test'[\s\S]{0,2600}?metadata:[^\n]*/);
+    ok(mTestAdr && /livraison:\s*\{/.test(mTestAdr[0]),
+      '⛔⛔ la commande de diagnostic n\'envoie plus d\'adresse. Le test ne prouve donc '
+      + 'plus que le code postal fait l\'aller-retour — or c\'est LUI qui fait vivre le '
+      + 'contrôle fiscal détectif. Sans lui, `taxCheck` ne compare rien, `mismatch` reste '
+      + 'faux, et on n\'apprend l\'erreur de taxe qu\'au contrôle.');
+    ok(mTestAdr && /CP_DIAGNOSTIC/.test(mTestAdr[0]),
+      '⛔ le code postal du diagnostic est écrit en dur au lieu de passer par la constante. '
+      + 'Deux valeurs recopiées divergeront, et c\'est leur ÉGALITÉ qui prouve l\'aller-retour.');
+    ok(/codePostalRetrouve/.test(admSrc),
+      '⛔⛔ la relecture ne vérifie plus que le code postal revient IDENTIQUE. Elle dirait '
+      + '« adresse ✅ » sur une adresse tronquée ou mal lue, et la garde fiscale serait '
+      + 'muette en production sans que rien ne l\'annonce.');
+
     /* ── e) ⛔⛔ REVOLUT ACTIF NE RETOMBE JAMAIS SUR UN CHEMIN STRIPE ──────
        Le clic sur « Commander » se perdait EN SILENCE quand le champ carte
        Revolut n'était pas monté (script bloqué, réseau) : aucun des tests

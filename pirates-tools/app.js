@@ -12104,11 +12104,21 @@
           + (d.aEmail ? 'e-mail ✅' : 'e-mail ❌') + ' · '
           + (d.aNom ? 'nom ✅' : 'nom ❌') + ' · '
           + (d.aAdresse ? 'adresse ✅' : 'adresse ❌') + '</span>'
+          /* ⛔ LE POINT QUI DÉCIDE DU CONTRÔLE FISCAL. Sans code postal
+             récupéré, `taxCheck` ne peut RIEN comparer : `mismatch` reste faux
+             quoi qu'il arrive, et la garde A1 est morte sans que rien ne le
+             signale. Une protection muette est pire qu'aucune protection. */
+          + '<span>Code postal retrouvé : <b>'
+          + (d.codePostalRetrouve ? '✅ identique à l\'envoi' : '❌ PERDU') + '</b></span>'
           + '<span>Données rattachées : ' + escapeHTML((d.metadataVues || []).join(', ') || 'aucune') + '</span>'
           + '</div>'
           + (okCom ? '' : '<p class="compta-line"><b>⚠️ Sans commission réelle, la marge de '
               + 'chaque vente serait fausse.</b> Ne bascule pas tant que ce point n\'est pas '
               + 'vert : envoie-moi cet écran.</p>')
+          + (d.codePostalRetrouve ? '' : '<p class="compta-line"><b>⛔ Le code postal n\'est '
+              + 'pas revenu.</b> Le contrôle fiscal compare le territoire déclaré au code '
+              + 'postal réellement collecté : sans lui, il ne compare plus rien et ne '
+              + 'signalera JAMAIS d\'erreur de taxe. Ne bascule pas — envoie-moi cet écran.</p>')
           + '</div>';
       }).catch(function (e) {
         b.disabled = false;

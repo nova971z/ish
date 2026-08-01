@@ -13,6 +13,15 @@ const priceModel = require('./_lib/pricing-model');
 const priceConfig = require('./_lib/pricing-config');
 const pricing = require('./_lib/pricing');   // territoires (taux TVA/octroi) — saisie remboursement
 
+/* Code postal de l'adresse FICTIVE du diagnostic Revolut. Au niveau du module,
+   pas dans un bloc : la création de la commande et sa relecture vivent dans
+   deux `if` différents, et une constante déclarée dans l'un ne serait pas
+   forcément visible dans l'autre. Deux valeurs recopiées à la main
+   divergeraient un jour — et c'est justement leur ÉGALITÉ qui prouve que le
+   code postal fait l'aller-retour, donc que le contrôle fiscal aura de quoi
+   travailler en production. */
+const CP_DIAGNOSTIC = '97139';
+
 module.exports = async function handler(req, res) {
   http.applyCors(req, res);
   if (req.method === 'OPTIONS') return res.status(204).end();
@@ -157,6 +166,25 @@ module.exports = async function handler(req, res) {
           devise: 'eur',
           description: 'Commande de test Pirates Tools (bac a sable)',
           reference: 'TEST-' + Date.now(),
+          /* ⛔ ADRESSE OBLIGATOIRE DANS LE DIAGNOSTIC — sans elle, le test ne
+             prouvait pas l'aller-retour d'adresse, et c'est ce qui fait vivre
+             le CONTRÔLE FISCAL DÉTECTIF (A1) : `taxCheck` compare le territoire
+             déclaré au code postal RÉELLEMENT collecté. Si `depuisOrdre` lisait
+             mal ce champ, `expected` vaudrait `null`, `mismatch` serait
+             toujours faux, et la garde serait SILENCIEUSEMENT morte — tout
+             marcherait, rien ne casserait, et une protection ne protégerait
+             plus rien.
+             ⚠️ Adresse FICTIVE, en Guadeloupe (971) : c'est le territoire réel
+             du site, donc le cas qui compte. `pays: FR` et non GP — le site
+             identifie les DOM par le code postal, pas par le code pays (voir
+             `monterChampCarteRevolut`). */
+          livraison: {
+            nom: 'Diagnostic Pirates Tools',
+            ligne1: '1 rue du Diagnostic',
+            ville: 'Les Abymes',
+            codePostal: CP_DIAGNOSTIC,
+            pays: 'FR'
+          },
           metadata: { source: 'pirates-tools', test: '1' }
         });
         return res.status(200).json({
@@ -386,6 +414,11 @@ module.exports = async function handler(req, res) {
           aEmail: !!p.email,
           aNom: !!p.nom,
           aAdresse: !!(p.adresse && p.adresse.codePostal),
+          /* ⛔ LE POINT QUI COMPTE : le code postal revient-il IDENTIQUE ?
+             C'est lui, et lui seul, qui permet au contrôle fiscal de comparer
+             le territoire déclaré au territoire réel. S'il ne revient pas, la
+             garde A1 est muette en production sans que rien ne le signale. */
+          codePostalRetrouve: !!(p.adresse && p.adresse.codePostal === CP_DIAGNOSTIC),
           metadataVues: Object.keys(p.metadata || {})
         });
       } catch (e) {
