@@ -161,19 +161,30 @@ module.exports = function () {
   var pc = pp.parseClickoutil;
   ok(typeof pc === 'function', 'parseClickoutil exportée');
   if (pc) {
+    /* ⛔ RÉGRESSION DU 01/08/2026 AU SOIR, gravée dans la forme même de ce
+       gabarit : AUCUN « Ajouter au panier » n'y figure. Le flux de
+       production n'en contient pas (`boutonsPanier: 0` mesuré par le
+       diagnostic) — le 1er jet découpait sur ce bouton et rendait 0. La
+       carte est une SUITE DE LIGNES : titre · marque seule · « € TTC ». */
     function carte(titre, prix, barre) {
-      return 'Ajouter au panier Afficher plus ' + titre + ' MAKITA MAKITA '
-        + prix + ' € TTC ' + (barre ? barre + ' € ' : '') + '833,25 € HT '
-        + 'Description qui répète ' + titre + '. Livraison 24 h ';
+      return titre + ' MAKITA\nMAKITA\n\n'
+        + prix + ' € TTC' + (barre ? ' ' + barre + ' €' : '') + '\n833,25 € HT\n'
+        + 'Livraison 24 / 48 Heures\n+ Option disponible\n';
     }
-    var page = carte('Visseuse ZZT123-QW', '999,90')
+    var page = 'RECHERCHER\nMakita\n'
+      + carte('Visseuse ZZT123-QW', '999,90')
       + carte('Scie pendulaire ZZT456-XJ lame 250 mm', '449,90', '599,00')
       + carte('Meuleuse ZZT789 + 2 batteries 5 Ah + 1 chargeur ZZTC99-QW', '333,00')
       + carte('Raboteuse de chantier 1800 W 317 mm', '111,00')
-      + 'Ajouter au panier Afficher plus + Option disponible ';
+      /* Variante où le HT partage la LIGNE du TTC — c'est le seul cas où la
+         garde `(?!HT)` travaille encore en mode lignes ; sans ce gabarit,
+         elle serait invérifiable (sabotage resté vert le 01/08). */
+      + 'Ponceuse ZZT654-QS MAKITA\nMAKITA\n222,00 € TTC 185,00 € HT\nLivraison 24 h\n';
     var rc = pc(page, 'MAKITA');
     var cSku = {}; rc.items.forEach(function (x) { cSku[x.sku] = x; });
-    ok(rc.items.length === 2, 'deux titres simples lus, pack et sans-réf écartés (' + rc.items.length + ')');
+    ok(rc.items.length === 3, 'trois titres simples lus, pack et sans-réf écartés (' + rc.items.length + ')');
+    ok(cSku['ZZT654-QS'] && cSku['ZZT654-QS'].price === 222.00 && cSku['ZZT654-QS'].promo === false,
+      '⛔ un HT sur la MÊME ligne que le TTC n\'est ni un prix pris ni une promo (garde `(?!HT)`)');
     ok(cSku['ZZT123-QW'] && cSku['ZZT123-QW'].price === 999.90,
       'réf AVANT la marque lue, prix TTC pris — jamais le HT qui suit');
     ok(cSku['ZZT123-QW'] && cSku['ZZT123-QW'].promo === false,
@@ -200,7 +211,7 @@ module.exports = function () {
     var a1 = pa(pageCote, 'MAKITA');
     ok(a1.format === 'cotebrico' && a1.items.length === 1,
       'gabarit cotébrico → parseur cotébrico (' + a1.format + ', ' + a1.items.length + ')');
-    var a2 = pa('Ajouter au panier Afficher plus Visseuse ZZT123-QW MAKITA MAKITA 999,90 € TTC 833,25 € HT', 'MAKITA');
+    var a2 = pa('Visseuse ZZT123-QW MAKITA\nMAKITA\n999,90 € TTC\n833,25 € HT', 'MAKITA');
     ok(a2.format === 'clickoutil' && a2.items.length === 1,
       'gabarit clickoutil → parseur clickoutil (' + a2.format + ', ' + a2.items.length + ')');
     var a3 = pa('<html>Chargement…</html>', 'MAKITA');

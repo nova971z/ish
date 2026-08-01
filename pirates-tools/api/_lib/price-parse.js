@@ -162,54 +162,68 @@ var RUPTURE_RE = /rupture|indisponible|\u00e9puis\u00e9|hors\s+stock|non\s+dispo
    chantier 1800 W \u00bb) ou plusieurs \u2192 \u00e9cart\u00e9 et compt\u00e9 (sansRef). Rien de
    silencieux : les deux listes sortent dans la r\u00e9ponse du traqueur.
 
+   \u26a0\ufe0f R\u00c9\u00c9CRIT PAR LIGNES le 01/08/2026 au soir, sur le DIAGNOSTIC DE LA
+   PRODUCTION : le texte que le raccourci envoie r\u00e9ellement ne contient
+   AUCUN \u00ab Ajouter au panier \u00bb (`boutonsPanier: 0` sur 92 255 octets re\u00e7us \u2014
+   le raccourci livre le TEXTE de la page, pas son HTML ; le premier jet,
+   prouv\u00e9 sur le document Pages, d\u00e9coupait sur un bouton qui n'existe pas
+   dans le flux r\u00e9el). Le seul ancrage pr\u00e9sent dans LES DEUX corpus mesur\u00e9s
+   (document Pages ET diagnostic production) :
+
+     TITRE \u2026 R\u00c9F \u2026 DEWALT      \u2190 la ligne juste au-dessus (ou s\u00e9par\u00e9e par
+     DEWALT                      l'\u00e9tiquette marque seule)
+     279,90 \u20ac TTC [barr\u00e9]      \u2190 la ligne d'ancrage
+     233,25 \u20ac HT               \u2190 jamais prise (pas \u00ab TTC \u00bb)
+
    Rend { items: [...], packs: [titres], sansRef: [titres] }. */
 function parseClickoutil(rawText, brand) {
   var out = { items: [], packs: [], sansRef: [] };
   if (!rawText) return out;
   brand = (brand || 'DEWALT');
-  var text = stripHtml(rawText).replace(/[ \t   ]+/g, ' ');
-  var blocks = text.split(/Ajouter au panier/);
-  var prixTTC = /([\d\s   ]+,\d{2})\s*\u20ac\s*TTC/;
+  var brandUp = brand.toUpperCase();
+  /* Les SAUTS DE LIGNE portent la structure : on les garde, on ne replie
+     que les espaces \u00c0 L'INT\u00c9RIEUR des lignes. */
+  var lignes = stripHtml(rawText).split(/\n+/).map(function (l) {
+    return l.replace(/[ \t   ]+/g, ' ').trim();
+  }).filter(Boolean);
+  var prixLigne = /^([\d\s   ]*\d,\d{2})\s*\u20ac\s*TTC\b(.*)$/;
   var candidatRe = /[A-Z0-9][A-Z0-9.\/-]{3,}[A-Z0-9]/g;
+  var finMarque = new RegExp(escapeRe(brand) + '\\s*$', 'i');
   var seen = {};
-  for (var i = 0; i < blocks.length; i++) {
-    var b = blocks[i];
-    var pm = b.match(prixTTC);
-    if (!pm) continue;                       // en-t\u00eate, pied, ou entre-cartes
+  for (var i = 1; i < lignes.length; i++) {
+    var pm = lignes[i].match(prixLigne);
+    if (!pm) continue;
     var price = parsePriceFR(pm[1]);
     if (price == null || price <= 0) continue;
-    /* La zone TITRE s'arr\u00eate au prix : la description (qui r\u00e9p\u00e8te la r\u00e9f et
-       peut contenir des \u00ab + \u00bb) vit APR\u00c8S et ne doit pas peser. */
-    var zoneTitre = b.slice(0, pm.index);
-    if (zoneTitre.indexOf(' + ') !== -1) {
-      out.packs.push(zoneTitre.replace(/^\s*Afficher plus\s*/i, '').trim().slice(0, 120));
+    // Au-dessus du prix : l'\u00e9tiquette marque seule, puis le TITRE.
+    var j = i - 1;
+    if (j >= 0 && lignes[j].toUpperCase() === brandUp) j--;
+    var titre = j >= 0 ? lignes[j] : '';
+    /* Un prix \u00ab \u20ac TTC \u00bb dont la ligne du dessus ne finit pas par la marque
+       n'est pas une carte de cette marque (panier, en-t\u00eate\u2026) : \u00e9cart\u00e9, dit. */
+    if (!finMarque.test(titre)) {
+      out.sansRef.push((titre || '(rien au-dessus du prix)').slice(0, 120));
       continue;
     }
+    if (/\s\+\s/.test(titre)) { out.packs.push(titre.slice(0, 120)); continue; }
     var candidats = [], cm;
     candidatRe.lastIndex = 0;
-    while ((cm = candidatRe.exec(zoneTitre)) !== null) {
+    while ((cm = candidatRe.exec(titre)) !== null) {
       var t = cm[0].toUpperCase();
-      if (t === brand.toUpperCase()) continue;
+      if (t === brandUp) continue;
       if (!/\d/.test(t) || !/[A-Z].*[A-Z]/.test(t)) continue;  // \u22651 chiffre, \u22652 lettres
       if (candidats.indexOf(t) === -1) candidats.push(t);
     }
-    if (candidats.length !== 1) {
-      out.sansRef.push(zoneTitre.replace(/^\s*Afficher plus\s*/i, '').trim().slice(0, 120));
-      continue;
-    }
+    if (candidats.length !== 1) { out.sansRef.push(titre.slice(0, 120)); continue; }
     var sku = candidats[0];
     if (seen[sku]) continue;
     seen[sku] = true;
-    /* Promo : un second prix suit imm\u00e9diatement \u00ab \u20ac TTC \u00bb (le barr\u00e9). On ne
-       le capture pas \u2014 un tarif fournisseur barr\u00e9 n'est pas un prix de
-       r\u00e9f\u00e9rence (J4, D-004) \u2014 on note seulement qu'il existait.
-       \u26a0\ufe0f 1er jet FAUX, mesur\u00e9 sur la vraie page : 147 promos sur 147. Le
-       prix HT (\u00ab 1449,17 \u20ac HT \u00bb) suit TOUJOURS le TTC \u2014 le barr\u00e9 est le
-       seul prix qui suive SANS le suffixe HT. */
-    var apres = b.slice(pm.index + pm[0].length);
-    var promo = /^\s*[\d\s   ]+,\d{2}\s*\u20ac(?!\s*HT)/.test(apres);
-    var name = zoneTitre.replace(/^\s*Afficher plus\s*/i, '')
-      .replace(new RegExp('\\s*' + escapeRe(brand) + '\\s*$', 'i'), '').trim().slice(0, 120);
+    /* Promo : le prix barr\u00e9 vit SUR LA LIGNE DU TTC, apr\u00e8s lui. On ne le
+       capture pas (J4, D-004) \u2014 on note seulement qu'il existait.
+       \u26a0\ufe0f 1er jet FAUX, mesur\u00e9 : 147 promos sur 147 \u2014 le prix HT suit
+       TOUJOURS le TTC ; le barr\u00e9 est le seul prix SANS le suffixe HT. */
+    var promo = /\d,\d{2}\s*\u20ac(?!\s*HT)/.test(pm[2]);
+    var name = titre.replace(finMarque, '').trim().slice(0, 120);
     out.items.push({ sku: sku, price: price, name: name, promo: promo, enStock: null });
   }
   return out;

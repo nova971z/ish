@@ -19,10 +19,10 @@
 | **O3** | Réutiliser sans vérifier le contexte | 8 | §1.4 | `check-lecons.js` |
 | **O4** | Contrainte connue, non appliquée | 4 | §1 | `garde-entonnoir.js` |
 | **O5** | Outil artisanal au lieu de l'outil existant | 1 | §1.4 | aucune — humaine |
-| **O6** | Copie périmée au lieu de la source vivante | 4 | §4.4 | `p7-architecture.js` |
+| **O6** | Copie périmée au lieu de la source vivante | 5 | §4.4 | `p7-architecture.js` |
 | **O7** | **Lire le silence comme un succès** | 7 | §3 · §4.3 | `sabotage.mjs` · `ci.js` · `check-ancres.js` |
 
-**59 erreurs, 7 mécanismes.** O1 et O2 en concentrent **35 à elles deux** :
+**60 erreurs, 7 mécanismes.** O1 et O2 en concentrent **35 à elles deux** :
 c'est là qu'il faut regarder en premier, toujours.
 
 ⚠️ **O7 est né le 01/08/2026**, et il est né d'une règle qui existait déjà :
@@ -192,6 +192,7 @@ d'écrire. Un analyseur maison est faux à 95 %, et 95 % suffit à casser.
 | **E-602** | `_adminClaimOk` non remis à faux | tombe au changement de compte |
 | **E-604** | le document du dépôt, pour affirmer que « les produits Festool n'existent pas au catalogue » | sa page fournisseur en affiche **50**, et l'analyseur reconnaît leurs références (`205721`, `577840`) — vérifié en repassant le format exact de sa capture dans `parseCotebrico`. Troisième invention de la même soirée, même mécanisme |
 | **E-603** | `docs/TRAQUEUR-URLS.md`, pris pour la configuration réelle des raccourcis iPad | l'app Raccourcis de l'user — sa capture montrait `dryRun=0` là où le document disait `1`. J'ai bâti un diagnostic ENTIER et une porte sur cette lecture, et je le lui ai annoncé comme un fait. Commis le jour même où je consignais O7 |
+| **E-605** | le document Pages de l'user (page clickoutil passée par presse-papier + collage + décompression), pris pour LE flux du traqueur | le flux réel, que seul le `diagnostic` en production pouvait montrer : **aucun « Ajouter au panier »** dedans (`boutonsPanier: 0`) — le raccourci livre le TEXTE de la page, pas son HTML. Le parseur, prouvé sur la copie, découpait sur un bouton absent du vivant et rendait 0. Réécrit PAR LIGNES sur l'ancrage présent dans les deux corpus ; le gabarit de la porte ne contient plus ce bouton |
 
 **Antidote** : §4.4 — le pire cas inclut « la donnée a changé depuis ».
 

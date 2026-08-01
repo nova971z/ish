@@ -117,18 +117,21 @@ site l'écrit autrement, une capture d'une carte en rupture suffit à ajuster
 > Retranscrit depuis SES captures du 01/08/2026 (IMG_5578 → IMG_5579 : il a
 > ajouté `&source=clickoutil` lui-même entre les deux).
 >
-> **Le format est lu depuis le 01/08/2026 au soir** — mesuré sur la page
-> réelle envoyée par le raccourci (collée dans un document Pages, 554 titres
-> décompressés) : réf AVANT la marque, prix « X,XX € TTC » (le HT juste
-> derrière n'est jamais pris ; en promo le barré suit le TTC), aucun badge de
-> stock par carte. Sur cette page : **147 produits lisibles**, **278 packs
-> montés par le site écartés** (leur prix ne s'écrit jamais sur la réf d'un
-> composant — c'est un coût qui serait corrompu), **138 titres sans réf sûre
-> écartés**. Les écartés sortent dans la réponse (`packsIgnores`, `sansRef`),
-> rien n'est silencieux.
+> **Le format est lu depuis le 01/08/2026 au soir**, en deux temps :
+> le parseur a d'abord été prouvé sur le document Pages (554 titres) — puis
+> le `diagnostic` DU FLUX RÉEL a montré que le raccourci n'envoie pas le
+> HTML mais le TEXTE de la page, **sans aucun « Ajouter au panier »**
+> (`boutonsPanier: 0` — E-605 : la copie n'était pas le flux). Le parseur
+> travaille donc PAR LIGNES, sur l'ancrage présent dans les deux corpus :
+> titre `… RÉF … DEWALT` · ligne marque seule · ligne « X,XX € TTC »
+> (le « € HT » n'est jamais pris ; en promo le barré suit le TTC sur sa
+> ligne). Aucun badge de stock par carte sur cette grille.
+> **Packs montés par le site écartés et listés** (`packsIgnores` — leur prix
+> ne s'écrit jamais sur la réf d'un composant), titres sans réf sûre écartés
+> et listés (`sansRef`). Rien n'est silencieux.
 >
 > **Prochain geste** : un passage en `dryRun=1` pour confirmer le bout-en-bout
-> (attendu : `format: "clickoutil"`, `parsed` ≈ 147), puis `dryRun=0`.
+> (attendu : `format: "clickoutil"`, `parsed` ≈ 145–150), puis `dryRun=0`.
 
 ## 🟠 Flex · Wera · Facom (À CRÉER — 5 produits jamais traqués)
 Même structure, seules la page cotébrico et le `brand=` changent. Le parseur est
