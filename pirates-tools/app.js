@@ -11751,6 +11751,7 @@
          refuser. Un point d'entrée sans bouton n'existe pas pour l'user.
          `check-paiement` vérifie désormais l'atteignabilité des TROIS. */
       + '<button type="button" class="btn btn--ghost" id="revolutWebhook">🔔 Enregistrer le webhook</button>'
+      + '<button type="button" class="btn btn--ghost" id="webhookSante">📡 Le fournisseur nous parle-t-il ?</button>'
       + '</div>'
       + '<p class="compta-line"><small>La commande de test est créée dans le <b>bac à sable</b>, '
       + 'en fausse monnaie, et n\'apparaît pas dans ta comptabilité. 30 € et pas moins : '
@@ -12053,6 +12054,75 @@
     };
   }
 
+  /* Le fournisseur nous parle-t-il, et sa signature est-elle acceptée ?
+
+     ⛔ TROIS ÉTATS, TROIS GESTES DIFFÉRENTS — les confondre coûterait des
+     heures de recherche du mauvais côté :
+       · rien reçu     → le webhook n'est pas déclaré, ou son adresse est fausse ;
+       · reçu ACCEPTÉ  → la chaîne est bonne ;
+       · reçu REFUSÉ   → le secret de signature ne correspond pas. Le cas le
+         plus vicieux : le fournisseur ET le site ont l'air corrects chacun de
+         leur côté, et pourtant aucune vente n'est enregistrée. */
+  function comptaBrancherSante(out) {
+    var b = document.getElementById('webhookSante');
+    if (!b || !out) return;
+    function ilYA(ms) {
+      if (!ms) return '—';
+      var d = Math.max(0, Date.now() - ms);
+      if (d < 60000) return 'il y a moins d\'une minute';
+      if (d < 3600000) return 'il y a ' + Math.round(d / 60000) + ' min';
+      if (d < 86400000) return 'il y a ' + Math.round(d / 3600000) + ' h';
+      return 'le ' + new Date(ms).toLocaleString('fr-FR');
+    }
+    b.onclick = function () {
+      b.disabled = true;
+      out.innerHTML = '<p class="admin-loading">Lecture du journal des notifications…</p>';
+      adminGet('webhook-sante').then(function (d) {
+        b.disabled = false;
+        if (d.jamaisRecu) {
+          out.innerHTML = '<p class="admin-error"><b>📡 Aucune notification n\'est JAMAIS arrivée.</b><br>'
+            + 'Le fournisseur ne nous a pas encore parlé. Soit le webhook n\'est pas enregistré '
+            + 'chez lui, soit son adresse ne pointe pas sur ce site, soit aucun paiement n\'a '
+            + 'encore eu lieu depuis son enregistrement.</p>';
+          return;
+        }
+        /* Un refus PLUS RÉCENT que le dernier succès = le problème est ACTUEL.
+           Un vieux refus suivi de succès est de l'histoire ancienne : le dire
+           en rouge ferait chercher une panne déjà réparée. */
+        var refusActuel = d.dernierRefusMs && (!d.dernierAccepteMs || d.dernierRefusMs > d.dernierAccepteMs);
+        var pied = '<div class="compta-res__brk">'
+          + '<span>Fournisseur : <b>' + escapeHTML(String(d.fournisseur || '?')) + '</b></span>'
+          + '<span>Reçues : ' + escapeHTML(String(d.recus)) + '</span>'
+          + '<span>Acceptées : ' + escapeHTML(String(d.acceptes)) + '</span>'
+          + '<span>Refusées : ' + escapeHTML(String(d.refuses)) + '</span>'
+          + '</div>';
+        if (refusActuel) {
+          out.innerHTML = '<p class="admin-error"><b>⛔ La dernière notification a été REFUSÉE ('
+            + escapeHTML(ilYA(d.dernierRefusMs)) + ').</b><br>'
+            + 'Motif : ' + escapeHTML(String(d.dernierRefusMotif || 'inconnu')) + '<br>'
+            + 'Le fournisseur nous parle bien, mais nous ne le reconnaissons pas : le secret de '
+            + 'signature posé sur Vercel ne correspond pas à celui du webhook enregistré chez '
+            + 'lui. Tant que c\'est le cas, <b>aucune vente ne sera enregistrée</b>. Supprime le '
+            + 'webhook côté Revolut, recrée-le avec le bouton ci-dessus, et repose le nouveau '
+            + 'secret.</p>' + pied;
+          return;
+        }
+        out.innerHTML = '<div class="compta-res">'
+          + '<div class="compta-res__price" style="font-size:1.05rem">✅ Notifications reçues et acceptées</div>'
+          + '<p class="compta-line">Dernière acceptée ' + escapeHTML(ilYA(d.dernierAccepteMs))
+          + (d.dernierGenre ? ' — événement : <b>' + escapeHTML(String(d.dernierGenre)) + '</b>' : '')
+          + '.</p>'
+          + (d.refuses ? '<p class="compta-line"><small>⚠️ ' + escapeHTML(String(d.refuses))
+              + ' refus plus ancien(s), déjà réglé(s) : dernier ' + escapeHTML(ilYA(d.dernierRefusMs))
+              + '.</small></p>' : '')
+          + pied + '</div>';
+      }).catch(function (e) {
+        b.disabled = false;
+        out.innerHTML = '<p class="admin-error">❌ ' + escapeHTML(e.message || String(e)) + '</p>';
+      });
+    };
+  }
+
   /* Diagnostic du fournisseur de paiement.
      ⚠️ Passe par `adminGet`, qui attache le jeton Firebase. C'est LA raison
      d'être de ce bouton : la même adresse tapée dans la barre du navigateur
@@ -12063,6 +12133,7 @@
     if (!btn || !out) return;
     comptaBrancherOrdreTest(out);
     comptaBrancherWebhook(out);
+    comptaBrancherSante(out);
     btn.onclick = function () {
       btn.disabled = true;
       out.innerHTML = '<p class="admin-loading">Appel de Revolut…</p>';

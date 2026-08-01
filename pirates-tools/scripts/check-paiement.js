@@ -852,6 +852,90 @@ module.exports = async function () {
         + 'du navigateur (jeton attendu en EN-TÊTE).');
     });
 
+    /* ── d bis) ⛔⛔ UN REFUS DE SIGNATURE DOIT LAISSER UNE TRACE VISIBLE ──
+       C'est le point le plus fragile de la migration : algorithme, fenêtre de
+       rejeu, secret mal collé. Et c'est aussi le plus silencieux — le webhook
+       répond 400, le fournisseur réessaie puis abandonne, la vente est
+       encaissée et rien n'est enregistré. L'unique trace partait dans les
+       journaux Vercel, que personne ne lit.
+
+       ⛔ Le témoin doit être posé sur les DEUX chemins. N'écrire que sur le
+       succès donnerait un tableau de bord qui ne montre jamais l'échec — le
+       genre de rassurance qui coûte cher. */
+    var mSig = whSrc.match(/if \(!verif \|\| !verif\.ok\) \{[\s\S]{0,900}?\}/);
+    ok(mSig && /noterSante/.test(mSig[0]),
+      '⛔⛔ un refus de signature ne laisse plus aucune trace lisible depuis '
+      + 'l\'administration. Le fournisseur réessaie quelques fois puis abandonne : la vente '
+      + 'est encaissée, rien n\'est enregistré, et personne ne l\'apprend avant la '
+      + 'réconciliation. C\'est le mode de panne le plus silencieux de la migration.');
+    /* ⚠️ Un `[^)]*` s'arrête au premier `)` — celui de `paiement.nom()` — et
+       ratait donc l'appel légitime. Encore un motif qui décrit une forme au
+       lieu d'énoncer la règle : on cherche l'appel, pas sa ponctuation. */
+    ok(/noterSante\([\s\S]{0,80}?refus: false/.test(whSrc),
+      '⛔ le témoin n\'est plus écrit sur les signatures ACCEPTÉES : le tableau de bord ne '
+      + 'pourrait plus dire « le fournisseur nous parle », seulement « il ne nous parle '
+      + 'pas ». Un témoin qui ne connaît que l\'échec ne prouve jamais que ça marche.');
+    /* ⛔ Et il ne doit JAMAIS faire échouer un encaissement. */
+    var mNote = whSrc.match(/async function noterSante[\s\S]*?\n\}/);
+    /* ⚠️ Ne PAS se contenter de chercher `catch (_)` : `catch (_) { throw _; }`
+       le satisfait et relance quand même — démasqué par sabotage. On fait donc
+       RÉELLEMENT exploser Firestore et on regarde si quelque chose remonte. */
+    /* ⛔ ON REMPLACE LE MODULE FIREBASE DANS LE CACHE, pas sa propriété.
+       1ʳᵉ version : je réassignais `fbMod.getFirebase` après coup. Sans effet —
+       `webhook.js` fait `var getFirebase = require(...).getFirebase` AU
+       CHARGEMENT et garde la référence. Le vrai Firebase était donc appelé,
+       `fb.db` valait `null` faute de compte de service, la fonction sortait
+       avant toute écriture, et le test passait VERT sans avoir rien franchi.
+       Deuxième fois ce soir (E-217) : un test qui ne traverse pas son chemin
+       ne prouve rien, même quand il « passe ».
+
+       D'où le PRÉALABLE : si le faux Firestore n'a pas été touché, le contrôle
+       ÉCHOUE au lieu de verdir à vide. */
+    var cheminFb = require.resolve(path.join(RACINE, 'api', '_lib', 'firebase.js'));
+    var cheminWh = require.resolve(path.join(RACINE, 'api', 'webhook.js'));
+    var sauveFb = require.cache[cheminFb];
+    var sauveWh = require.cache[cheminWh];
+    var touche = 0;
+    require.cache[cheminFb] = {
+      id: cheminFb, filename: cheminFb, loaded: true, exports: {
+        getFirebase: function () {
+          return {
+            admin: { firestore: { FieldValue: { increment: function () { return 1; } } } },
+            db: { collection: function () { touche++; throw new Error('Firestore indisponible (simulé)'); } }
+          };
+        }
+      }
+    };
+    delete require.cache[cheminWh];
+    var whTest = null, aExplose = false;
+    try {
+      whTest = require(cheminWh);
+      if (typeof whTest._noterSante === 'function') {
+        try { await whTest._noterSante('revolut', { refus: true, motif: 'test' }); }
+        catch (e) { aExplose = true; }
+      }
+    } catch (e) { /* signalé par le préalable ci-dessous */ }
+    if (sauveFb) require.cache[cheminFb] = sauveFb; else delete require.cache[cheminFb];
+    if (sauveWh) require.cache[cheminWh] = sauveWh; else delete require.cache[cheminWh];
+
+    ok(whTest && typeof whTest._noterSante === 'function',
+      '⛔ api/webhook.js n\'expose plus `_noterSante` : impossible de prouver que le témoin '
+      + 'avale les pannes. Une lecture de source ne suffit pas — `catch (_) { throw _; }` a '
+      + 'l\'air correct et relance quand même.');
+    ok(touche > 0,
+      '⛔⛔ PRÉALABLE NON FRANCHI : `noterSante` n\'a même pas tenté d\'écrire dans '
+      + 'Firestore. Le test ne prouve donc RIEN — il serait vert quoi qu\'il arrive. '
+      + '(C\'est le piège qui a fait passer ce contrôle deux fois de suite.)');
+    ok(!aExplose,
+      '⛔⛔ `noterSante` propage une panne Firestore : elle ferait échouer le webhook, donc '
+      + 'PERDRE un paiement, pour une simple écriture de diagnostic. Mieux vaut un paiement '
+      + 'traité sans trace qu\'un paiement perdu à cause de la trace.');
+    /* ⛔ RGPD (J3) : ce document s'affiche et se copie en capture d'écran. */
+    ok(mNote && !/email|receipt_email|adresse|\bnom\b/i.test(mNote[0]),
+      '⛔ `noterSante` écrit une donnée personnelle dans le témoin. Ce document s\'affiche '
+      + 'à l\'écran et part en capture : horodatages, compteurs et motif technique '
+      + 'seulement (règle J3, audit p6-rgpd).');
+
     /* ── e) ⛔⛔ REVOLUT ACTIF NE RETOMBE JAMAIS SUR UN CHEMIN STRIPE ──────
        Le clic sur « Commander » se perdait EN SILENCE quand le champ carte
        Revolut n'était pas monté (script bloqué, réseau) : aucun des tests
@@ -891,6 +975,19 @@ module.exports = async function () {
         + 'carte n\'a pas pu se monter : sans elle, il lit un message et repart sans '
         + 'avoir payé.');
     }
+
+    /* L'écran doit distinguer les TROIS états, et surtout ne pas crier sur un
+       refus déjà réglé : un vieux refus suivi de succès est de l'histoire
+       ancienne, l'afficher en rouge ferait chercher une panne réparée. */
+    var mSante = appSrc.match(/function comptaBrancherSante[\s\S]*?\n  \}/);
+    ok(mSante && /jamaisRecu/.test(mSante[0]) && /dernierRefusMotif/.test(mSante[0]),
+      '⛔⛔ l\'écran de santé ne distingue plus « rien reçu » de « reçu mais refusé ». Ces '
+      + 'deux cas demandent des gestes OPPOSÉS : recréer le webhook dans un cas, refaire '
+      + 'le secret dans l\'autre. Les confondre envoie chercher la panne du mauvais côté.');
+    ok(mSante && /dernierRefusMs\s*>\s*d\.dernierAccepteMs/.test(mSante[0]),
+      '⛔ l\'écran ne compare plus la date du dernier refus à celle du dernier succès : un '
+      + 'refus déjà réglé s\'afficherait en alerte rouge à chaque passage, et on '
+      + 'apprendrait à ne plus la regarder.');
 
     /* ── f) ⛔ L'ENVIRONNEMENT NE SE DEVINE PAS DEPUIS UNE URL ────────────
        Chercher « sandbox » dans `urlHebergee` : si ce champ est absent, on

@@ -342,6 +342,44 @@ module.exports = async function handler(req, res) {
       }
     }
 
+    /* ── GET ?type=webhook-sante : LE FOURNISSEUR NOUS PARLE-T-IL ? ────────
+       La question à laquelle rien ne répondait. Un webhook dont la signature
+       est refusée renvoie 400 : le fournisseur réessaie quelques fois, puis
+       abandonne. La vente est encaissée, rien n'est enregistré, et l'unique
+       trace partait dans les journaux Vercel — que personne ne lit.
+
+       ⛔ Distinguer les trois états, parce qu'ils appellent trois gestes
+       différents : jamais rien reçu (le webhook n'est pas déclaré, ou l'adresse
+       est fausse) · reçu et ACCEPTÉ (tout va bien) · reçu et REFUSÉ (le secret
+       de signature ne correspond pas — c'est le cas le plus vicieux, parce que
+       le fournisseur ET le site ont l'air corrects chacun de leur côté).
+
+       ⛔ Lecture seule, aucune donnée personnelle : horodatages, compteurs,
+       genre d'événement et motif technique. Rien d'autre n'est stocké. */
+    if (type === 'webhook-sante') {
+      try {
+        const doc = await db.collection('config').doc('webhook_sante').get();
+        const d = doc.exists ? (doc.data() || {}) : {};
+        return res.status(200).json({
+          ok: true,
+          jamaisRecu: !doc.exists || !d.dernierRecuMs,
+          fournisseur: d.fournisseur || null,
+          recus: d.recus || 0,
+          acceptes: d.acceptes || 0,
+          refuses: d.refuses || 0,
+          dernierRecuMs: d.dernierRecuMs || null,
+          dernierAccepteMs: d.dernierAccepteMs || null,
+          dernierGenre: d.dernierGenre || null,
+          dernierRefusMs: d.dernierRefusMs || null,
+          dernierRefusMotif: d.dernierRefusMotif || null
+        });
+      } catch (e) {
+        return res.status(200).json({ ok: false, etape: 'lecture',
+          erreur: String(e.message || e).slice(0, 300),
+          indice: 'Firestore doit être configuré (FIREBASE_SERVICE_ACCOUNT).' });
+      }
+    }
+
     if (type === 'export-catalogue') {
       try {
         const fusion = await catalog.loadPublicCatalog();

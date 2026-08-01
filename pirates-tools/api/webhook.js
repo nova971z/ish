@@ -83,8 +83,20 @@ async function handler(req, res) {
     var verif = paiement.verifierSignature(rawBody, req.headers || {});
     if (!verif || !verif.ok) {
       console.error('[webhook] Signature refusée:', (verif && verif.erreur) || 'raison inconnue');
+      /* ⛔ UN REFUS DE SIGNATURE NE LAISSAIT AUCUNE TRACE VISIBLE (01/08/2026).
+         Il partait dans les journaux Vercel, que l'exploitant ne lit pas. Or
+         c'est le point le PLUS fragile de la migration : algorithme, fenêtre de
+         rejeu, secret mal collé. En cas d'échec, le fournisseur réessaie
+         quelques fois puis abandonne — et la vente n'est enregistrée nulle
+         part, sans que personne ne l'apprenne avant la réconciliation.
+         On pose donc une trace lisible depuis l'administration. */
+      await noterSante(paiement.nom(), {
+        refus: true,
+        motif: String((verif && verif.erreur) || 'raison inconnue').slice(0, 200)
+      });
       return res.status(400).json({ ok: false, error: 'Invalid signature' });
     }
+    await noterSante(paiement.nom(), { refus: false, genre: verif.genre || 'inconnu' });
     var event = verif.evenement;
     /* Clé d'idempotence FOURNIE par le fournisseur, plus lue en dur.
        Stripe donne un identifiant d'événement unique ; Revolut n'en fournit
@@ -236,6 +248,41 @@ async function handler(req, res) {
   }
 }
 
+/* ── TÉMOIN DE SANTÉ DU WEBHOOK ──────────────────────────────────────────
+   Répond à UNE question que rien ne permettait de poser : « le fournisseur
+   nous parle-t-il, et sa signature est-elle acceptée ? »
+
+   ⛔ BEST-EFFORT ABSOLU. Ce témoin ne doit JAMAIS faire échouer un webhook :
+   il vaut mieux un paiement traité sans trace de diagnostic qu'un paiement
+   perdu parce que le diagnostic a planté. D'où le try/catch total.
+
+   ⛔ AUCUNE DONNÉE PERSONNELLE (règle J3, audit p6) : ni e-mail, ni nom, ni
+   adresse, ni même l'identifiant de commande. Des horodatages, des compteurs,
+   un genre d'événement et un motif de refus technique — rien d'autre. Ce
+   document s'affiche à l'écran et se copie dans des captures. */
+async function noterSante(fournisseur, info) {
+  try {
+    var fb = getFirebase();
+    if (!fb.db) return;
+    var inc = fb.admin.firestore.FieldValue.increment(1);
+    var patch = {
+      fournisseur: String(fournisseur || '?'),
+      recus: inc,
+      dernierRecuMs: Date.now()
+    };
+    if (info && info.refus) {
+      patch.refuses = inc;
+      patch.dernierRefusMs = Date.now();
+      patch.dernierRefusMotif = String(info.motif || '').slice(0, 200);
+    } else {
+      patch.acceptes = inc;
+      patch.dernierAccepteMs = Date.now();
+      patch.dernierGenre = String((info && info.genre) || 'inconnu');
+    }
+    await fb.db.collection('config').doc('webhook_sante').set(patch, { merge: true });
+  } catch (_) { /* le diagnostic ne casse jamais l'encaissement */ }
+}
+
 // Décision de reprise d'un claim existant (PURE — testée par check-webhook-claim).
 // 'skip'  : déjà traité (done) ou traitement concurrent récent (processing frais).
 // 'retry' : échec précédent (failed), run tué (processing plus vieux que
@@ -263,6 +310,12 @@ module.exports.config = { api: { bodyParser: false } };
    seulement à quoi le code ressemble ; ceci dit ce qu'il FAIT.
    Vérifié par scripts/check-paiement.js. */
 module.exports._objetPaiement = objetPaiement;
+/* Exposé pour la PREUVE : `noterSante` doit AVALER toute panne Firestore.
+   Une lecture de source ne suffit pas — `catch (_) { throw _; }` a l'air
+   correct et relance quand même (démasqué par sabotage le 01/08/2026). Le
+   contrôle lui fait donc réellement exploser Firestore et vérifie qu'elle
+   ne propage rien. */
+module.exports._noterSante = noterSante;
 
 // ════════════════════════════════════════════════════════════════
 // Event handlers
