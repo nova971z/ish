@@ -60,7 +60,7 @@ module.exports = async function handler(req, res) {
   // (allowlist ci-dessous) peuvent créer/accepter des courses, le temps de
   // valider toute la chaîne de bout en bout. Auth Bearer OBLIGATOIRE.
   if (body.type === 'course-create' || body.type === 'course-list' || body.type === 'course-accept'
-      || body.type === 'courier-status' || body.type === 'course-rate'
+      || body.type === 'courier-status' || body.type === 'mes-commandes' || body.type === 'course-rate'
       || body.type === 'course-deliver' || body.type === 'course-confirm' || body.type === 'course-proof'
       || body.type === 'course-scene' || body.type === 'course-video' || body.type === 'course-dispute'
       || body.type === 'courier-profile' || body.type === 'courier-profile-save'
@@ -430,7 +430,7 @@ const COURSE_TEST_EMAILS = coursesLib.TEST_EMAILS;
 // chaque affichage de page, et elles doivent donc avoir leur propre quota,
 // bien plus large que celui des opérations qui écrivent.
 const COURSE_READS = new Set([
-  'course-list', 'courier-status', 'courier-profile', 'course-proof', 'conv-list'
+  'course-list', 'courier-status', 'mes-commandes', 'courier-profile', 'course-proof', 'conv-list'
 ]);
 
 // ── ADRESSE E-MAIL VÉRIFIÉE EXIGÉE (28/07/2026, décision user) ──────────────
@@ -533,6 +533,56 @@ async function handleCourses(req, body, cfg, res) {
      ⚠️ Ces booléens restent un CONFORT D'AFFICHAGE. La décision se reprend
      ici, à chaque action engageante : un client qui les forcerait à `true` ne
      gagnerait rien. */
+  /* ── MES COMMANDES — LA MÊME SOURCE QUE L'ADMINISTRATION ──────────────
+     ⛔⛔ DÉFAUT DE FOND CORRIGÉ LE 01/08/2026. L'historique du compte était
+     écrit PAR LE NAVIGATEUR dans `users/{uid}/orders`, tandis que
+     l'administration lit le journal serveur `payments/`. Deux sources pour un
+     même fait : elles ne pouvaient que diverger, et elles ont divergé — l'user
+     voyait ses achats côté admin et un compte vide côté client.
+
+     Et l'écriture par le navigateur ne pouvait PAS être fiable : il navigue en
+     privé, l'onglet peut se fermer avant /merci, la navigation peut échouer,
+     les règles Firestore peuvent refuser. Chacun de ces cas perd la commande,
+     silencieusement.
+
+     Le journal `payments/` est écrit par le WEBHOOK — donc par le fournisseur
+     lui-même — et c'est la trace comptable autoritaire. On le lit ici, filtré
+     sur l'uid du jeton VÉRIFIÉ, jamais sur un uid transmis par le client
+     (J3 : chacun ne voit que ses propres commandes). Le compte affiche
+     désormais exactement ce que l'administration compte.
+
+     ⚠️ Rien ici ne touche à la livraison : ni prix de course, ni statut de
+     livreur. C'est l'achat de marchandise, et lui seul. */
+  if (body.type === 'mes-commandes') {
+    let snap;
+    try {
+      snap = await db.collection('payments').where('uid', '==', uid).limit(100).get();
+    } catch (e) {
+      return res.status(503).json({ ok: false, error: 'Historique momentanément indisponible.' });
+    }
+    const commandes = [];
+    snap.forEach((d) => {
+      const p = d.data() || {};
+      /* Seul un paiement ACQUIS entre dans l'historique. Un refus ou une
+         tentative abandonnée n'est pas une commande. */
+      if (p.status !== 'succeeded' && p.status !== 'paid') return;
+      commandes.push({
+        id: d.id,
+        date: Number(p.invoiceDateMs)
+          || (p.recordedAt && p.recordedAt.toMillis ? p.recordedAt.toMillis() : 0),
+        totalCents: Number(p.amountCents) || 0,
+        facture: p.invoiceNumber || null,
+        lignes: (p.linesDetail || []).map((l) => ({
+          nom: l.name || '', qty: Number(l.qty) || 1,
+          prix: (Number(l.unitCents) || 0) / 100, marque: l.brand || ''
+        }))
+      });
+    });
+    commandes.sort((a, b) => b.date - a.date);
+    const totalCents = commandes.reduce((s, c) => s + c.totalCents, 0);
+    return res.status(200).json({ ok: true, commandes: commandes, totalCents: totalCents });
+  }
+
   if (body.type === 'courier-status') {
     return res.status(200).json({
       ok: true,

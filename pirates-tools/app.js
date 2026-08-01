@@ -9219,26 +9219,51 @@
       el.innerHTML = '<p class="acc-order__msg">Chargement…</p>';
     });
 
-    var ordersRef = _fb.collection(_fb.db, 'users', _currentUser.uid, 'orders');
-    var q = _fb.query(ordersRef, _fb.orderBy('date', 'desc'), _fb.limit(20));
+    /* ⛔⛔ L'HISTORIQUE VIENT DU SERVEUR, PLUS DU NAVIGATEUR (01/08/2026).
+       Il lisait `users/{uid}/orders`, écrit par le navigateur au retour de
+       paiement, pendant que l'administration lit le journal serveur. Deux
+       sources pour un même fait : elles ont divergé, et l'user a vu ses achats
+       côté admin avec un compte VIDE côté client.
 
-    _fb.getDocs(q).then(function (snap) {
-      if (dom.accSeeAllOrders) dom.accSeeAllOrders.hidden = snap.size <= ACC_APERCU_N;
-      if (snap.empty) {
+       Le journal serveur est écrit par le webhook — donc par le fournisseur —
+       et c'est la trace comptable autoritaire. Il ne peut PAS manquer une
+       commande : ni un onglet fermé, ni une navigation ratée, ni une règle
+       Firestore ne l'en empêchent. C'est la seule source qui puisse
+       correspondre à l'administration par CONSTRUCTION, pas par coïncidence. */
+    jsonAuthHeaders().then(function (headers) {
+      return fetch(apiBaseUrl() + '/api/contact', {
+        method: 'POST', headers: headers, body: JSON.stringify({ type: 'mes-commandes' })
+      });
+    }).then(function (r) { return r.json(); }).then(function (d) {
+      if (!d || !d.ok) throw new Error((d && d.error) || 'historique indisponible');
+      var cmds = d.commandes || [];
+      if (dom.accSeeAllOrders) dom.accSeeAllOrders.hidden = cmds.length <= ACC_APERCU_N;
+      if (!cmds.length) {
         cibles.forEach(function (el) {
           el.innerHTML = '<p class="acc-order__msg">Aucune commande pour le moment.</p>';
         });
         return;
       }
-      var cartes = [];
-      var total = snap.size;
-      snap.forEach(function (docSnap) {
-        cartes.push(carteCommandeHTML(docSnap.data(), total - cartes.length));
+      var nb = cmds.length;
+      var cartes = cmds.map(function (c, i) {
+        /* `carteCommandeHTML` attend le format du panier : on adapte ici
+           plutôt que de dupliquer la carte. La clé sert à retrouver l'image au
+           catalogue ; le serveur ne renvoie que le nom — une image introuvable
+           donne le gabarit par défaut, jamais une erreur. */
+        return carteCommandeHTML({
+          date: c.date,
+          items: (c.lignes || []).length,
+          total: (c.totalCents || 0) / 100,
+          status: 'paid',
+          lines: (c.lignes || []).map(function (l) {
+            return { key: l.nom, title: l.nom, price: l.prix, qty: l.qty };
+          })
+        }, nb - i);
       });
       if (dom.accHistory) dom.accHistory.innerHTML = cartes.join('');
       if (dom.accRecentOrders) dom.accRecentOrders.innerHTML = cartes.slice(0, ACC_APERCU_N).join('');
     }).catch(function (err) {
-      console.warn('[Auth] order history failed:', err);
+      console.warn('[compte] historique indisponible :', err && err.message);
       if (dom.accSeeAllOrders) dom.accSeeAllOrders.hidden = true;
       cibles.forEach(function (el) {
         el.innerHTML = '<p class="acc-order__msg acc-order__msg--err">Historique non chargé. Recharge la page.</p>';
