@@ -272,7 +272,8 @@ var INDEX = [
   {
     intention: 'Traqueur de prix — sources fournisseur, ruptures, relevés',
     mots: ['traqueur', 'tracker', 'relevé', 'releve', 'rupture', 'stock',
-           'cotebrico', 'source', 'fournisseur', 'price-watch', 'coût', 'cout'],
+           'cotebrico', 'clickoutil', 'source', 'fournisseur', 'price-watch', 'coût', 'cout',
+           'parseur', 'format'],
     fichiers: ['api/_lib/price-parse.js', 'api/admin.js', 'docs/TRAQUEUR-URLS.md'],
     fonctions: [],
     protege: ['scripts/check-price-watch.js', 'scripts/check-traqueur.js'],
@@ -282,7 +283,10 @@ var INDEX = [
              '⛔ Un produit EN RUPTURE ne fait jamais bouger un prix : source écartée, et GEL si aucune source achetable ne reste.',
              'Plusieurs traqueurs : `&source=<slug>` ; le coût effectif = MIN des sources fraîches (14 j) ET en stock (`choisirCoutSource`, pure, sabotée).',
              'Le slug de source devient une CLÉ Firestore : alphabet fermé [a-z0-9_-], longueur bornée.',
-             'Le « Prix de base » barré est le PREMIER piège du parseur : le prix courant est le 1er match « Prix X,XX € », jamais le dernier.'],
+             'Le « Prix de base » barré est le PREMIER piège du parseur : le prix courant est le 1er match « Prix X,XX € », jamais le dernier.',
+             'Chaque site a SON gabarit — `parseAuto` aiguille. clickoutil (mesuré sur la page réelle) : réf AVANT la marque, prix « X,XX € TTC » (le HT suit TOUJOURS — 1er jet : 147 promos sur 147), barré APRÈS le TTC en promo, aucun badge de stock.',
+             '⛔ ARGENT : un prix de PACK ne s\'écrit JAMAIS sur la réf d\'un composant — titres à « + » écartés ET listés (`packsIgnores`), réf douteuse écartée ET listée (`sansRef`).',
+             'Quand `parsed: 0`, la réponse porte `diagnostic` : comptes des motifs + extraits de la page reçue — c\'est elle qui apprend un format inconnu, pas l\'imagination.'],
     decisions: ['D-015'],
     fini: 'check-price-watch vert (ruptures, min multi-sources, gel, héritage), chaque promesse sabotée et rouge.'
   },

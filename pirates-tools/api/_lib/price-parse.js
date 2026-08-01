@@ -131,6 +131,109 @@ function pickCheapestSource(ownPrice, altSkus, parsedBySku) {
    c'est LE motif à ajuster si une capture montre un autre libellé. */
 var RUPTURE_RE = /rupture|indisponible|\u00e9puis\u00e9|hors\s+stock|non\s+disponible/i;
 
+/* \u2500\u2500 PARSEUR CLICKOUTIL (01/08/2026) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+   Le site est injoignable depuis le d\u00e9p\u00f4t (CONNECT 403, mesur\u00e9). TOUT ce qui
+   suit est mesur\u00e9 sur la page r\u00e9elle envoy\u00e9e par le raccourci de l'user,
+   coll\u00e9e par lui dans un document Pages et d\u00e9compress\u00e9e ici (554 titres lus).
+
+   Une carte clickoutil, dans l'ordre du texte :
+     Ajouter au panier \u00b7 Afficher plus \u00b7 TITRE \u2026 R\u00c9F [\u2026 ] DEWALT \u00b7 DEWALT
+     \u00b7 \u00ab 1 739,00 \u20ac TTC \u00bb [prix barr\u00e9 APR\u00c8S si promo] \u00b7 \u00ab 1449,17 \u20ac HT \u00bb
+     \u00b7 description \u00b7 \u00ab Livraison \u2026 \u00bb \u00b7 [queue de carte : + Option
+     disponible / OFFRE DU MOMENT / -429,10 \u20ac]
+   Diff\u00e9rences avec cot\u00e9brico, toutes mesur\u00e9es :
+     \u00b7 la r\u00e9f est AVANT la marque (\u00ab DCE079D1G-QW DEWALT \u00bb), parfois au
+       MILIEU du titre (\u00ab DW743N-QS \u00d8250 mm DEWALT \u00bb, 126 cas sur 554) ;
+     \u00b7 le prix s'\u00e9crit \u00ab X,XX \u20ac TTC \u00bb \u2014 jamais le mot \u00ab Prix \u00bb ; le HT est
+       juste dessous (\u00ab \u20ac HT \u00bb) et ne doit JAMAIS \u00eatre pris ; en promo, le
+       prix barr\u00e9 vient APR\u00c8S \u00ab \u20ac TTC \u00bb sur la m\u00eame ligne \u2192 le 1er match
+       \u00ab \u20ac TTC \u00bb est le prix courant (et on ne capture pas le barr\u00e9, J4) ;
+     \u00b7 AUCUN badge de stock par carte sur cette grille \u2192 enStock = null ;
+     \u00b7 275 titres sur 554 sont des PACKS mont\u00e9s par le site
+       (\u00ab \u2026 + 2 batteries + 1 chargeur DCB118-QW DEWALT \u00bb) : la r\u00e9f coll\u00e9e \u00e0
+       la marque y est celle d'un COMPOSANT. \u26d4 \u00c9crire le prix d'un pack sur
+       la r\u00e9f d'un composant pr\u00e9sent au catalogue, c'est corrompre un co\u00fbt \u2014
+       l'argent passe avant la couverture : tout titre \u00e0 \u00ab + \u00bb est \u00c9CART\u00c9 et
+       LIST\u00c9 (packs), jamais devin\u00e9.
+
+   La r\u00e9f d'un titre simple = l'UNIQUE candidat \u00ab \u22652 lettres, \u22651 chiffre,
+   \u22655 caract\u00e8res \u00bb \u2014 mesur\u00e9 : isole DCE079D1G-QW / DW743N-QS et rejette
+   \u00ab 18V \u00bb, \u00ab 250 \u00bb, \u00ab 1800 \u00bb, \u00ab ROLLCAGE \u00bb. Z\u00e9ro candidat (\u00ab Raboteuse de
+   chantier 1800 W \u00bb) ou plusieurs \u2192 \u00e9cart\u00e9 et compt\u00e9 (sansRef). Rien de
+   silencieux : les deux listes sortent dans la r\u00e9ponse du traqueur.
+
+   Rend { items: [...], packs: [titres], sansRef: [titres] }. */
+function parseClickoutil(rawText, brand) {
+  var out = { items: [], packs: [], sansRef: [] };
+  if (!rawText) return out;
+  brand = (brand || 'DEWALT');
+  var text = stripHtml(rawText).replace(/[ \t   ]+/g, ' ');
+  var blocks = text.split(/Ajouter au panier/);
+  var prixTTC = /([\d\s   ]+,\d{2})\s*\u20ac\s*TTC/;
+  var candidatRe = /[A-Z0-9][A-Z0-9.\/-]{3,}[A-Z0-9]/g;
+  var seen = {};
+  for (var i = 0; i < blocks.length; i++) {
+    var b = blocks[i];
+    var pm = b.match(prixTTC);
+    if (!pm) continue;                       // en-t\u00eate, pied, ou entre-cartes
+    var price = parsePriceFR(pm[1]);
+    if (price == null || price <= 0) continue;
+    /* La zone TITRE s'arr\u00eate au prix : la description (qui r\u00e9p\u00e8te la r\u00e9f et
+       peut contenir des \u00ab + \u00bb) vit APR\u00c8S et ne doit pas peser. */
+    var zoneTitre = b.slice(0, pm.index);
+    if (zoneTitre.indexOf(' + ') !== -1) {
+      out.packs.push(zoneTitre.replace(/^\s*Afficher plus\s*/i, '').trim().slice(0, 120));
+      continue;
+    }
+    var candidats = [], cm;
+    candidatRe.lastIndex = 0;
+    while ((cm = candidatRe.exec(zoneTitre)) !== null) {
+      var t = cm[0].toUpperCase();
+      if (t === brand.toUpperCase()) continue;
+      if (!/\d/.test(t) || !/[A-Z].*[A-Z]/.test(t)) continue;  // \u22651 chiffre, \u22652 lettres
+      if (candidats.indexOf(t) === -1) candidats.push(t);
+    }
+    if (candidats.length !== 1) {
+      out.sansRef.push(zoneTitre.replace(/^\s*Afficher plus\s*/i, '').trim().slice(0, 120));
+      continue;
+    }
+    var sku = candidats[0];
+    if (seen[sku]) continue;
+    seen[sku] = true;
+    /* Promo : un second prix suit imm\u00e9diatement \u00ab \u20ac TTC \u00bb (le barr\u00e9). On ne
+       le capture pas \u2014 un tarif fournisseur barr\u00e9 n'est pas un prix de
+       r\u00e9f\u00e9rence (J4, D-004) \u2014 on note seulement qu'il existait.
+       \u26a0\ufe0f 1er jet FAUX, mesur\u00e9 sur la vraie page : 147 promos sur 147. Le
+       prix HT (\u00ab 1449,17 \u20ac HT \u00bb) suit TOUJOURS le TTC \u2014 le barr\u00e9 est le
+       seul prix qui suive SANS le suffixe HT. */
+    var apres = b.slice(pm.index + pm[0].length);
+    var promo = /^\s*[\d\s   ]+,\d{2}\s*\u20ac(?!\s*HT)/.test(apres);
+    var name = zoneTitre.replace(/^\s*Afficher plus\s*/i, '')
+      .replace(new RegExp('\\s*' + escapeRe(brand) + '\\s*$', 'i'), '').trim().slice(0, 120);
+    out.items.push({ sku: sku, price: price, name: name, promo: promo, enStock: null });
+  }
+  return out;
+}
+
+/* \u2500\u2500 AIGUILLAGE DE FORMAT \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+   Deux sites, deux gabarits \u2014 et d'autres viendront. On ne devine pas au
+   slug : on fait tourner CHAQUE parseur et on garde celui qui reconna\u00eet le
+   plus de produits. Mesur\u00e9 : la page clickoutil ne contient aucun
+   \u00ab Prix X,XX \u20ac \u00bb (cot\u00e9brico y rend 0) et une grille cot\u00e9brico se lit par
+   son propre parseur bien mieux que par l'autre \u2014 l'aiguillage est donc
+   d\u00e9terministe sur les vraies pages. Rend { format, items, packs, sansRef }. */
+function parseAuto(rawText, brand) {
+  var cote = parseCotebrico(rawText, brand);
+  var clic = parseClickoutil(rawText, brand);
+  if (!cote.length && !clic.items.length) {
+    return { format: 'aucun', items: [], packs: clic.packs, sansRef: clic.sansRef };
+  }
+  if (clic.items.length > cote.length) {
+    return { format: 'clickoutil', items: clic.items, packs: clic.packs, sansRef: clic.sansRef };
+  }
+  return { format: 'cotebrico', items: cote, packs: [], sansRef: [] };
+}
+
 /* \u2500\u2500 QUAND RIEN N'EST RECONNU, LA PAGE DOIT PARLER \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
    N\u00e9 le 01/08/2026 : le premier essai du traqueur clickoutil a rendu
    `parsed: 0` avec pour seule explication \u00ab mauvaise page ou format
@@ -227,4 +330,4 @@ function choisirCoutSource(sources, nowMs, maxAgeMs) {
   return best;
 }
 
-module.exports = { parseCotebrico: parseCotebrico, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, SOURCE_FRESH_MS: SOURCE_FRESH_MS, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage };
+module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickoutil, parseAuto: parseAuto, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, SOURCE_FRESH_MS: SOURCE_FRESH_MS, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage };

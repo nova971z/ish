@@ -151,6 +151,69 @@ module.exports = function () {
       'ancien format (sans carte) toujours lu — aucun override existant ne casse');
   }
 
+  /* ═══ FORMAT CLICKOUTIL (01/08/2026) ═════════════════════════════════════
+     Mesuré sur la page réelle envoyée par le raccourci de l'user (554 titres,
+     décompressés de son document Pages) : réf AVANT la marque, prix
+     « X,XX € TTC » suivi du HT, prix barré APRÈS le TTC en promo, et 275
+     PACKS montés par le site dont la réf adjacente est celle d'un COMPOSANT.
+     ⛔ Gabarits synthétiques ici — un harnais ne nomme jamais une donnée
+     réelle — mais chaque forme reproduit une carte mesurée. */
+  var pc = pp.parseClickoutil;
+  ok(typeof pc === 'function', 'parseClickoutil exportée');
+  if (pc) {
+    function carte(titre, prix, barre) {
+      return 'Ajouter au panier Afficher plus ' + titre + ' MAKITA MAKITA '
+        + prix + ' € TTC ' + (barre ? barre + ' € ' : '') + '833,25 € HT '
+        + 'Description qui répète ' + titre + '. Livraison 24 h ';
+    }
+    var page = carte('Visseuse ZZT123-QW', '999,90')
+      + carte('Scie pendulaire ZZT456-XJ lame 250 mm', '449,90', '599,00')
+      + carte('Meuleuse ZZT789 + 2 batteries 5 Ah + 1 chargeur ZZTC99-QW', '333,00')
+      + carte('Raboteuse de chantier 1800 W 317 mm', '111,00')
+      + 'Ajouter au panier Afficher plus + Option disponible ';
+    var rc = pc(page, 'MAKITA');
+    var cSku = {}; rc.items.forEach(function (x) { cSku[x.sku] = x; });
+    ok(rc.items.length === 2, 'deux titres simples lus, pack et sans-réf écartés (' + rc.items.length + ')');
+    ok(cSku['ZZT123-QW'] && cSku['ZZT123-QW'].price === 999.90,
+      'réf AVANT la marque lue, prix TTC pris — jamais le HT qui suit');
+    ok(cSku['ZZT123-QW'] && cSku['ZZT123-QW'].promo === false,
+      '⛔ RÉGRESSION 147/147 : le prix HT qui suit TOUJOURS le TTC n\'est PAS un prix barré');
+    ok(cSku['ZZT456-XJ'] && cSku['ZZT456-XJ'].price === 449.90 && cSku['ZZT456-XJ'].promo === true,
+      'promo : le prix courant est AVANT « € TTC », le barré après est détecté sans être pris '
+      + '(réf au MILIEU du titre — 126 cas mesurés sur 554)');
+    ok(cSku['ZZT456-XJ'] && !('oldPrice' in cSku['ZZT456-XJ']) && !('basePrice' in cSku['ZZT456-XJ']),
+      '⛔ le prix barré fournisseur n\'est jamais capturé (J4, D-004)');
+    ok(!cSku['ZZTC99-QW'] && !cSku['ZZT789'] && rc.packs.length === 1,
+      '⛔ ARGENT : un PACK monté par le site est écarté ET listé — son prix ne s\'écrit '
+      + 'ni sur la réf du composant ni sur celle de l\'outil nu (' + JSON.stringify(rc.packs) + ')');
+    ok(rc.sansRef.length === 1 && /Raboteuse/.test(rc.sansRef[0]),
+      'un titre SANS réf sûre est écarté et listé, jamais deviné (« 1800 » n\'est pas une réf)');
+    ok(rc.items.every(function (x) { return x.enStock === null; }),
+      'aucun badge de stock par carte sur cette grille (mesuré) → enStock reste inconnu, jamais inventé');
+  }
+
+  // L'aiguillage : chaque gabarit part vers son parseur, le vide est dit.
+  var pa = pp.parseAuto;
+  ok(typeof pa === 'function', 'parseAuto exportée');
+  if (pa && pc) {
+    var pageCote = 'Outil - MAKITA ZZT111 Prix 100,00 € Ajouter au panier En stock';
+    var a1 = pa(pageCote, 'MAKITA');
+    ok(a1.format === 'cotebrico' && a1.items.length === 1,
+      'gabarit cotébrico → parseur cotébrico (' + a1.format + ', ' + a1.items.length + ')');
+    var a2 = pa('Ajouter au panier Afficher plus Visseuse ZZT123-QW MAKITA MAKITA 999,90 € TTC 833,25 € HT', 'MAKITA');
+    ok(a2.format === 'clickoutil' && a2.items.length === 1,
+      'gabarit clickoutil → parseur clickoutil (' + a2.format + ', ' + a2.items.length + ')');
+    var a3 = pa('<html>Chargement…</html>', 'MAKITA');
+    ok(a3.format === 'aucun' && a3.items.length === 0,
+      'rien de reconnu → format « aucun », jamais un mensonge');
+  }
+  // Branchement réel : handlePriceWatch passe par l'aiguillage, plus jamais
+  // par un parseur unique en dur.
+  ok(/const\s+auto\s*=\s*priceParse\.parseAuto\(text,\s*brand\)/.test(adminSrc)
+    && /const\s+parsed\s*=\s*auto\.items/.test(adminSrc),
+    '⛔ handlePriceWatch doit lire la page via parseAuto — un parseur unique en dur '
+    + 'rend muet tout site au gabarit différent (clickoutil, 01/08/2026)');
+
   /* ═══ DIAGNOSTIC `parsed: 0` (01/08/2026) ════════════════════════════════
      Premier essai du traqueur clickoutil : `parsed: 0` et un JSON muet — ni
      la source qui tournait, ni ce que la page contenait. Or le serveur TENAIT
@@ -183,7 +246,7 @@ module.exports = function () {
   }
 
   // Branchement réel : le retour `parsed: 0` d'admin.js porte source + diagnostic.
-  ok(/parsed:\s*0,\s*\n\s*note:[\s\S]{0,200}diagnostic:\s*priceParse\.diagnostiquerPage\(/.test(adminSrc)
+  ok(/parsed:\s*0,\s*format:[\s\S]{0,220}diagnostic:\s*priceParse\.diagnostiquerPage\(/.test(adminSrc)
     && /source:\s*sourceSlug,\s*parsed:\s*0/.test(adminSrc),
     '⛔ le retour `parsed: 0` de handlePriceWatch doit renvoyer `source` ET `diagnostic` — '
     + 'sans eux, un format inconnu est indiagnosticable (clickoutil, 01/08/2026)');

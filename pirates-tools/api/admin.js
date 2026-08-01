@@ -1780,7 +1780,14 @@ async function handlePriceWatch(req, res, admin, db) {
     const sourceSlug = (String((req.query && req.query.source) || 'cotebrico')
       .toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 24)) || 'cotebrico';
 
-    const parsed = priceParse.parseCotebrico(text, brand);
+    /* Aiguillage de format (01/08/2026) : chaque parseur tourne, le plus
+       fécond gagne — cotébrico et clickoutil n'écrivent ni leurs prix ni
+       leurs réfs pareil (mesuré sur la page réelle des deux). Les PACKS
+       montés par le site et les titres sans réf sûre sont ÉCARTÉS et
+       LISTÉS, jamais devinés : un prix de pack écrit sur la réf d'un
+       composant corromprait un coût d'achat. */
+    const auto = priceParse.parseAuto(text, brand);
+    const parsed = auto.items;
     if (!parsed.length) {
       /* Rien de reconnu — mais la page est LÀ, entre nos mains : on la mesure
          au lieu de la jeter. Le diagnostic dit laquelle des hypothèses du
@@ -1791,7 +1798,7 @@ async function handlePriceWatch(req, res, admin, db) {
          balisage est interdit (O6). Aucune donnée personnelle ici : la page
          est une grille produits publique. */
       return res.status(200).json({
-        ok: true, brand, source: sourceSlug, parsed: 0,
+        ok: true, brand, source: sourceSlug, parsed: 0, format: auto.format,
         note: 'aucun produit reconnu — le champ diagnostic mesure ce que la page contient',
         diagnostic: priceParse.diagnostiquerPage(text, brand)
       });
@@ -1993,9 +2000,13 @@ async function handlePriceWatch(req, res, admin, db) {
         const o = ovW[p.id] || {};
         /* ⚠️ « absent de CETTE page » ≠ « jamais relevé ». Une fiche vue lors
            d'un passage précédent garde son coût réel. Seules les secondes
-           vivent sur une supposition — ce sont elles qui comptent. */
-        const releve = (o.priceSource === 'cotebrico'
-          && typeof o.priceSrcTTC === 'number' && o.priceSrcTTC > 0);
+           vivent sur une supposition — ce sont elles qui comptent.
+           ⚠️ Corrigé au passage multi-sources : la version d'avant ne
+           reconnaissait que `priceSource === 'cotebrico'` — un relevé venu
+           d'un AUTRE traqueur aurait compté « jamais relevé ». */
+        const srcs = o.priceSources || {};
+        const releve = Object.keys(srcs).some((s) => Number((srcs[s] || {}).ttc) > 0)
+          || (typeof o.priceSrcTTC === 'number' && o.priceSrcTTC > 0);
         return { sku: p.sku, id: p.id, name: p.title || p.name, dejaReleve: releve };
       });
     const jamaisReleves = absents.filter((a) => !a.dejaReleve);
@@ -2006,12 +2017,17 @@ async function handlePriceWatch(req, res, admin, db) {
         parsed: parsed.length, applied: applied.length, flagged: flagged.length,
         unchanged: unchanged.length, unknown: unknown.length, locked: lockedW.length,
         absents: absents.length, absentsJamaisReleves: jamaisReleves.length,
-        rupture: enRupture.length
+        rupture: enRupture.length,
+        packsIgnores: auto.packs.length, sansRef: auto.sansRef.length
       },
-      source: sourceSlug,
+      source: sourceSlug, format: auto.format,
       applied, flagged, unknown: unknown.slice(0, 800),
       absents: absents.slice(0, 800),
-      rupture: enRupture.slice(0, 400)
+      rupture: enRupture.slice(0, 400),
+      /* Écartés VOLONTAIRES, jamais silencieux : packs montés par le site
+         (prix de pack ≠ coût d'un composant) et titres sans réf sûre. */
+      packsIgnores: auto.packs.slice(0, 100),
+      sansRef: auto.sansRef.slice(0, 100)
     });
   } catch (err) {
     console.error('[api/admin] price-watch failed:', err.message);
