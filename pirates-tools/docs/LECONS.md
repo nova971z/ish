@@ -44,6 +44,31 @@
 | 29/07/2026 | Six erreurs O1 — chiffres, fichiers et lignes inventés — sans qu'aucun mécanisme ne puisse les intercepter avant la réponse | Les portes ne surveillaient que l'ÉCRITURE de fichiers ; ma prose sortait sans contrôle | `scripts/garde-sortie.js` |
 | 29/07/2026 | Un sabotage cru annulé restait en place : `git checkout` sur un fichier non suivi, échec avalé par un `ou-vrai` de complaisance | La restauration est un instrument comme un autre, et il n'était pas relu | `docs/ERREURS.md` |
 
+## Leçons du 01/08/2026
+
+| Date | Ce qui a cassé | La cause | La porte |
+|---|---|---|---|
+| 01/08/2026 | Les règles Firestore **déployées** étaient en retard sur le dépôt — il leur manquait `refunds/`, ajoutée des jours plus tôt | Rien ne compare ce qui est PUBLIÉ à ce qui est versionné. On l'a découvert par hasard, en diffant un copier-coller de l'user. Sans ce hasard, un champ ajouté au profil aurait fait échouer TOUT l'enregistrement en production, avec un fichier local parfaitement correct | `scripts/check-paiement.js` |
+| 01/08/2026 | J'ai donné à l'user une commande de terminal (`npx firebase deploy`) alors qu'il travaille exclusivement sur iPad | Même mécanisme que « ouvre cette adresse dans ton navigateur » : je propose un geste sans vérifier qu'il est exécutable chez LUI. Une consigne inapplicable est une consigne fausse | `docs/ERREURS.md` |
+
+⚠️ **La première leçon n'est protégée qu'à MOITIÉ, et il faut le dire.**
+`check-paiement` vérifie que tout champ écrit par le front figure dans
+l'allowlist du **fichier** `firestore.rules`. Il ne peut PAS vérifier ce qui est
+réellement **déployé** — la CI n'a aucun accès à la console Firebase.
+
+Le seul contrôle qui prouverait le déployé devrait tourner **dans le navigateur
+d'un utilisateur connecté**, avec le SDK client (le seul soumis aux règles) :
+tenter une écriture de profil et rapporter le refus. Tant qu'il n'existe pas,
+le déploiement des règles reste une **étape humaine non vérifiée**, et c'est
+écrit ici pour que personne ne croie le contraire.
+
+⚠️ **La seconde n'a AUCUNE porte mécanique, et il faut le dire aussi.**
+`docs/ERREURS.md` est un registre relu à chaque intention (`node scripts/erreurs.js`),
+pas un contrôle : rien ne rougit si je propose demain une commande de terminal
+à quelqu'un qui n'en a pas. La seule dent réelle est la mémoire projet, qui dit
+noir sur blanc que l'user travaille **sur iPad, en navigation privée**. Une
+consigne se vérifie donc contre CE contexte avant d'être donnée — pas après.
+
 ---
 
 ## Comment on s'en sert

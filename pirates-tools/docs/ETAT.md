@@ -40,6 +40,7 @@ vérifiable**.
 
 | # | À faire | Preuve que ce n'est pas fait |
 |---|---|---|
+| R-r | ⚠️ **Redéployer `firestore.rules` après CHAQUE modification** — depuis la console Firebase (onglet Règles → Publier), l'user n'ayant pas de terminal | constaté le 01/08/2026 : les règles publiées avaient des jours de retard sur le dépôt (`refunds/` manquait). Aucun contrôle ne peut le détecter — voir `docs/LECONS.md` |
 | R-0 | Poser **`ALLOWED_ORIGINS`** = `https://pirates-tools.com` (ou `PUBLIC_BASE_URL` = la même valeur) sur Vercel, puis **redéployer** | sans ça, le site ne peut PAS fabriquer d'adresse publique sûre : le bouton du webhook refuse, et aucune adresse de retour après paiement n'est déclarée |
 | R-a | Cliquer **🔌 Diagnostic paiement → 🔔 Enregistrer le webhook**, puis poser le secret rendu sur Vercel sous `REVOLUT_WEBHOOK_SECRET_SANDBOX`, et **redéployer** | `revolut-ping` répond, mais aucun webhook n'est enregistré côté Revolut |
 | R-b | Refaire un paiement de test **après** R-a, et vérifier que `payments/` porte l'écriture, qu'une facture est numérotée et que les e-mails partent | aujourd'hui le paiement réussit chez Revolut et **rien** n'arrive côté site : c'est précisément ce que R-a débloque |
