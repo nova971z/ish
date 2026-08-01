@@ -757,6 +757,31 @@ module.exports = async function () {
           + c[1] + '. Revolut l\'exige en production.');
       });
 
+      /* ⛔⛔ ON NE PASSE AUCUNE OPTION D'APPARENCE AU SDK REVOLUT.
+         Le 01/08/2026, ajouter `styles`, `classes` et `hidePostcodeField` à
+         `createCardField` a fait CESSER DE SE CHARGER le champ carte : le
+         client tombait sur « Le formulaire ne s'est pas chargé » et ne pouvait
+         plus payer sur le site. Le suspect le plus net est `classes` — la doc
+         annonce SIX clés par défaut et un objet partiel écrase les cinq autres.
+
+         L'habillage se fait donc entièrement en CSS, sur les classes que
+         Revolut pose lui-même (`rc-card-field*`). Styliser de l'extérieur ne
+         peut pas casser ce qu'on ne touche pas.
+
+         ⚠️ Cette règle n'est pas une préférence de style : c'est un paiement
+         qui marche contre un paiement qui ne marche pas. */
+      /* ⚠️ Défini ICI, avant le premier usage : placé plus bas, il rendait
+         `undefined` et le contrôle EXPLOSAIT au lieu de rapporter — ce qui
+         masque toutes les assertions suivantes. Un contrôle qui plante ne
+         contrôle plus rien (leçon déjà payée : sabotage S5). */
+      var appSansCom = appSrc.replace(/\/\*[\s\S]*?\*\//g, '');
+      var mCard = appSansCom.match(/createCardField\(\{[\s\S]*?\n      \}\)/);
+      ok(mCard && !/\bstyles\s*:/.test(mCard[0]) && !/\bclasses\s*:/.test(mCard[0]),
+        '⛔⛔ `createCardField` reçoit à nouveau des options d\'apparence (`styles` ou '
+        + '`classes`). Le 01/08/2026, exactement ça a empêché le champ carte de se '
+        + 'charger : plus aucun client ne pouvait payer sur le site. L\'habillage passe '
+        + 'par le CSS, sur les classes `rc-card-field*` que Revolut pose lui-même.');
+
       /* ⛔⛔ TROU DÉCOUVERT PAR SABOTAGE le 31/07/2026 : vider `onSuccess` ne
          faisait rougir aucun contrôle.
 
@@ -771,7 +796,6 @@ module.exports = async function () {
          poussé l'appel hors de la fenêtre. On retire les commentaires et on
          lit le corps réel — la règle est « onSuccess navigue », pas « onSuccess
          navigue dans les 400 premiers caractères ». */
-      var appSansCom = appSrc.replace(/\/\*[\s\S]*?\*\//g, '');
       var mSucces = appSansCom.match(/onSuccess\s*:\s*function[^{]*\{([\s\S]{0,600}?)\n\s*\},/);
       ok(mSucces && /lvRedirect|location\.hash|#\/merci/.test(mSucces[1]),
         '⛔⛔ le callback `onSuccess` du champ carte Revolut ne navigue nulle part. '

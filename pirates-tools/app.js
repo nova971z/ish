@@ -10357,36 +10357,33 @@
 
       var adr = (ship && ship.addr) || {};
       /* ── APPARENCE DU CHAMP CARTE ────────────────────────────────────────
-         ⛔ CE QUI EST IMPOSSIBLE, ET POURQUOI. Revolut ne fournit PAS de champs
-         séparés : les définitions du paquet officiel (@revolut/checkout@1.1.25)
-         ne contiennent ni `createCardNumberField`, ni `createExpiryField`, ni
-         `createCvvField` — vérifié dans les types eux-mêmes. Il n'existe qu'un
-         champ combiné, servi dans une iframe. C'est précisément ce qui fait
-         qu'aucun numéro de carte ne touche jamais notre domaine, et donc ce qui
-         nous évite la certification PCI-DSS lourde. On ne contourne pas ça.
+         ⛔ CE QUI EST IMPOSSIBLE. Revolut ne fournit PAS de champs séparés :
+         les types du paquet officiel (@revolut/checkout@1.1.25) ne contiennent
+         ni `createCardNumberField`, ni `createExpiryField`, ni `createCvvField`.
+         Un seul champ combiné, servi dans une iframe — c'est ce qui fait
+         qu'aucun numéro de carte ne touche notre domaine.
 
-         CE QUI EST POSSIBLE : `styles` accepte du CSS par ÉTAT (default,
-         focused, invalid, empty, autofilled, completed) et `classes` pose nos
-         propres classes sur le conteneur. On aligne donc le champ sur les
-         autres champs du formulaire — même police, même taille, même couleur —
-         et le conteneur prend l'habillage en CSS. */
+         ⛔⛔ ET CE QU'ON NE LUI PASSE PLUS. Le 01/08/2026 j'ai ajouté `styles`,
+         `classes` et `hidePostcodeField` pour l'habiller : le champ a CESSÉ DE
+         SE CHARGER, et le client tombait sur « Le formulaire ne s'est pas
+         chargé ». Le suspect le plus net est `classes` : la doc annonce un
+         objet à SIX clés par défaut (default, focused, invalid, empty,
+         autofilled, completed) et je n'en fournissais qu'une — fournir l'objet
+         partiel écrase les cinq autres.
+
+         Je n'ai pas pu le prouver d'ici (pas de navigateur, pas de compte
+         Revolut en local). Donc on applique la règle qui ne se discute pas :
+         un champ moche qui MARCHE vaut infiniment mieux qu'un beau champ cassé.
+         On ne passe plus AUCUNE option d'apparence au SDK.
+
+         ✅ L'habillage se fait entièrement en CSS, sur les classes que Revolut
+         pose LUI-MÊME (`rc-card-field`, `rc-card-field--focused`,
+         `rc-card-field--invalid`). Même rendu, zéro risque : on ne touche pas
+         à ce qu'on lui envoie. */
       _revolutCardField = instance.createCardField({
         target: container,
         locale: 'fr',
         theme: 'dark',
-        /* Aligné sur `.pay-address__field input` (styles.css) : 15 px, même
-           couleur de texte. Un champ carte qui ne ressemble pas aux autres
-           donne l'impression d'un formulaire étranger collé au milieu. */
-        styles: {
-          default: { color: '#e6edf5', fontSize: '15px', fontFamily: 'inherit' },
-          empty: { color: '#8b98a9', fontSize: '15px' },
-          invalid: { color: '#fca5a5' }
-        },
-        classes: { default: 'rc-card-field pt-card-field' },
-        /* Le code postal est déjà saisi dans l'adresse de livraison juste
-           au-dessus, et il part dans `billingAddress` au `submit`. L'afficher
-           une seconde fois demanderait au client de le retaper. */
-        hidePostcodeField: true,
         name: adr.name || '',
         email: (_currentUser && _currentUser.email) || '',
         billingAddress: {
@@ -10438,18 +10435,58 @@
         }
       });
       _stripeReady = true;
+      /* Le champ est monté : on rend la main au bouton principal s'il avait été
+         désactivé par un échec précédent. */
+      var btnOk = document.getElementById('payModalConfirm');
+      if (btnOk && btnOk.dataset.attenteCarte === '1') {
+        btnOk.disabled = false;
+        delete btnOk.dataset.attenteCarte;
+      }
     }).catch(function (err) {
       _stripeReady = false;
       /* Repli : Revolut fournit une page de paiement hébergée dès la création
          de la commande. Un script bloqué ne doit pas coûter la vente. */
+      /* ⛔ ON RESTE SUR LE SITE. Le repli envoyait vers la page Revolut DÈS le
+         premier échec — un client qui voulait payer chez nous se retrouvait sur
+         un domaine qu'il ne connaît pas, ce qui fait abandonner. Or un échec de
+         chargement est le plus souvent passager : réseau, script bloqué une
+         fraction de seconde, onglet mis en veille.
+
+         L'ordre est donc : RÉESSAYER ici d'abord, et ne proposer la page
+         externe qu'en second, en petit. Le lien reste — il ne coûte rien et
+         sauve la vente quand un bloqueur empêche définitivement le script de
+         charger — mais il n'est plus le premier réflexe. */
       if (container) {
         container.innerHTML = '<div class="stripe-fallback">'
-          + '<p>Le formulaire ne s\'est pas chargé.</p>'
+          + '<p>Le formulaire de carte n\'a pas pu s\'afficher.</p>'
+          + '<p><button type="button" class="btn primary" id="revolutReessayer">'
+          + '↻ Réessayer</button></p>'
           + (_urlPaiementHebergee
-              ? '<p><a class="btn primary" href="' + escapeHTML(_urlPaiementHebergee)
-                + '" target="_blank" rel="noopener">💳 Payer sur la page sécurisée</a></p>'
-              : '<p>' + escapeHTML(err.message || 'Erreur réseau') + '</p>')
+              ? '<p><small>Si ça ne revient pas : '
+                + '<a href="' + escapeHTML(_urlPaiementHebergee) + '" target="_blank" '
+                + 'rel="noopener">payer sur la page sécurisée de Revolut</a>.</small></p>'
+              : '<p><small>' + escapeHTML(err.message || 'Erreur réseau') + '</small></p>')
           + '</div>';
+        /* ⛔ DEUX BOUTONS QUI S'ANNULENT. Le bouton principal « Commander »
+           restait actif alors que le champ carte n'existait pas : le client
+           voyait deux boutons verts et cliquait naturellement le plus gros —
+           celui qui ne pouvait rien faire. On le désactive et on dit pourquoi,
+           au lieu de le laisser mentir. */
+        var btnPrinc = document.getElementById('payModalConfirm');
+        if (btnPrinc) {
+          btnPrinc.disabled = true;
+          btnPrinc.dataset.attenteCarte = '1';
+        }
+        var btnRetry = document.getElementById('revolutReessayer');
+        if (btnRetry) {
+          btnRetry.onclick = function () {
+            /* ⚠️ Vider le cache du SDK : sans ça, la promesse EN ÉCHEC est
+               rendue telle quelle et « réessayer » ne réessaie rien. */
+            _revolutSDK = null;
+            var ship = validatePayAddress();
+            monterChampCarteRevolut(_stripeClientSecret, ship, container, errorEl);
+          };
+        }
       }
     });
   }
