@@ -149,6 +149,43 @@ module.exports = function () {
     var her = pw({}, { priceSource: 'cotebrico', priceSrcTTC: 150 }, {}, null);
     ok(her && her.srcTTC === 150 && her.origin === 'traqueur',
       'ancien format (sans carte) toujours lu — aucun override existant ne casse');
+
+    /* ═══ HÉRITAGE DANS LE MIN (01/08/2026, soir) ══════════════════════════
+       Mesuré au premier dryRun clickoutil : 12 hausses proposées, dont
+       +136 % — la carte née du seul passage clickoutil ignorait le relevé
+       cotébrico moins cher, resté au format d'avant (sans carte). */
+    var fus = adm._internals.pwSourcesConnues;
+    ok(typeof fus === 'function', 'pwSourcesConnues exposée aux portes');
+    if (fus) {
+      var T = Date.now();
+      var f1 = fus({ priceSource: 'cotebrico', priceSrcTTC: 200, priceCheckedAt: T });
+      ok(f1.cotebrico && f1.cotebrico.ttc === 200 && f1.cotebrico.at === T,
+        'l\'héritage cotébrico (marqué) entre dans la carte fusionnée');
+      ok(!fus({ priceSrcTTC: 200, priceCheckedAt: T }).cotebrico,
+        '⛔ un coût SANS la marque `cotebrico` (ex. estimé) ne se ressème JAMAIS');
+      ok(fus({ priceSource: 'cotebrico', priceSrcTTC: 200, priceCheckedAt: T,
+        priceSources: { cotebrico: { ttc: 180, at: T } } }).cotebrico.ttc === 180,
+        'une entrée de carte existante n\'est jamais écrasée par l\'héritage');
+      var minHer = pw({}, {
+        priceSources: { clickoutil: { ttc: 389, at: T } },
+        priceSource: 'cotebrico', priceSrcTTC: 200, priceCheckedAt: T
+      }, {}, null);
+      ok(minHer && minHer.srcTTC === 200 && minHer.source === 'cotebrico',
+        '⛔ LA HAUSSE FANTÔME : carte {clickoutil: 389} + héritage cotébrico 200 frais '
+        + '→ le min est 200, jamais 389 (' + JSON.stringify(minHer) + ')');
+      var minVieux = pw({}, {
+        priceSources: { clickoutil: { ttc: 389, at: T } },
+        priceSource: 'cotebrico', priceSrcTTC: 200, priceCheckedAt: T - 20 * 24 * 3600 * 1000
+      }, {}, null);
+      ok(minVieux && minVieux.srcTTC === 389,
+        'un héritage PÉRIMÉ (> 14 j) ne pèse rien : le produit a quitté la page cotébrico');
+    }
+    // Branchement réel : le relevé fusionne l'héritage avant de choisir.
+    var adminSrc2 = fs.readFileSync(path.join(__dirname, '..', 'api', 'admin.js'), 'utf8');
+    ok(/const\s+srcsMaj\s*=\s*pwSourcesConnues\(oW\)/.test(adminSrc2)
+      && /const\s+srcsR\s*=\s*pwSourcesConnues\(/.test(adminSrc2),
+      '⛔ handlePriceWatch doit construire ses cartes via pwSourcesConnues — sans l\'héritage, '
+      + 'le premier passage d\'un nouveau site propose des hausses fantômes (mesuré : 12, dont +136 %)');
   }
 
   /* ═══ FORMAT CLICKOUTIL (01/08/2026) ═════════════════════════════════════

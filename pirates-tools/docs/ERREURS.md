@@ -15,14 +15,14 @@
 | Origine | Mécanisme | Cas | Antidote | Porte |
 |---|---|---|---|---|
 | **O1** | Affirmer avant de mesurer | 10 | §3 · §8 | `garde-sortie.js` *(hook Stop)* |
-| **O2** | L'instrument de mesure est faux | 25 | §4.3 | sabotage obligatoire |
+| **O2** | L'instrument de mesure est faux | 26 | §4.3 | sabotage obligatoire |
 | **O3** | Réutiliser sans vérifier le contexte | 8 | §1.4 | `check-lecons.js` |
 | **O4** | Contrainte connue, non appliquée | 4 | §1 | `garde-entonnoir.js` |
 | **O5** | Outil artisanal au lieu de l'outil existant | 1 | §1.4 | aucune — humaine |
 | **O6** | Copie périmée au lieu de la source vivante | 5 | §4.4 | `p7-architecture.js` |
 | **O7** | **Lire le silence comme un succès** | 7 | §3 · §4.3 | `sabotage.mjs` · `ci.js` · `check-ancres.js` |
 
-**60 erreurs, 7 mécanismes.** O1 et O2 en concentrent **35 à elles deux** :
+**61 erreurs, 7 mécanismes.** O1 et O2 en concentrent **36 à elles deux** :
 c'est là qu'il faut regarder en premier, toujours.
 
 ⚠️ **O7 est né le 01/08/2026**, et il est né d'une règle qui existait déjà :
@@ -83,6 +83,7 @@ confiance qui n'existe pas.*
 
 | N° | L'instrument | Ce qu'il annonçait | La faute |
 |---|---|---|---|
+| **E-227** | le « moins cher des sources », face aux overrides d'AVANT le format carte | 12 hausses proposées au 1er dryRun clickoutil, dont **+136 %** | la carte `priceSources` naissait avec la SEULE entrée clickoutil ; le relevé cotébrico moins cher, resté au format d'avant (`priceSrcTTC`/`priceSource`), n'entrait pas dans le min. Attrapé par le `dryRun=1` — c'est exactement son rôle. Corrigé : `pwSourcesConnues` ressème l'héritage MARQUÉ `cotebrico` (jamais un estimé), fraîcheur 14 j toujours juge |
 | **E-226** | `parseClickoutil`, 1er jet du drapeau `promo` | **147 promos sur 147** cartes lues | « un prix suit le TTC → c'est un barré » — or le prix **HT** suit TOUJOURS le TTC sur cette grille. Le motif était vrai sur la carte promo qui l'avait inspiré, faux sur toutes les autres. Attrapé en exécutant sur la PAGE RÉELLE (114 promos après `(?!\s*HT)`) : un motif se valide sur la carte qui le casse, pas sur celle qui l'a inspiré |
 | **E-201** | `tests/lancer.mjs` | 71/71 pour plan8 | comptait sa propre ligne de bilan |
 | **E-202** | `tests/mfa-cle-largeur.mjs` | 6/6 sous sabotage | comparait deux largeurs toujours égales |

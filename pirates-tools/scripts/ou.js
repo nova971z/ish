@@ -286,7 +286,8 @@ var INDEX = [
              'Le « Prix de base » barré est le PREMIER piège du parseur : le prix courant est le 1er match « Prix X,XX € », jamais le dernier.',
              'Chaque site a SON gabarit — `parseAuto` aiguille. clickoutil (mesuré sur la page réelle) : réf AVANT la marque, prix « X,XX € TTC » (le HT suit TOUJOURS — 1er jet : 147 promos sur 147), barré APRÈS le TTC en promo, aucun badge de stock.',
              '⛔ ARGENT : un prix de PACK ne s\'écrit JAMAIS sur la réf d\'un composant — titres à « + » écartés ET listés (`packsIgnores`), réf douteuse écartée ET listée (`sansRef`).',
-             'Quand `parsed: 0`, la réponse porte `diagnostic` : comptes des motifs + extraits de la page reçue — c\'est elle qui apprend un format inconnu, pas l\'imagination.'],
+             'Quand `parsed: 0`, la réponse porte `diagnostic` : comptes des motifs + extraits de la page reçue — c\'est elle qui apprend un format inconnu, pas l\'imagination.',
+             '⛔ Les overrides d\'AVANT le format carte portent leur relevé dans priceSrcTTC/priceSource : `pwSourcesConnues` les ressème dans le min (E-227 — sans ça, 1er passage d\'un site plus cher = hausses fantômes, mesuré : 12 dont +136 %).'],
     decisions: ['D-015'],
     fini: 'check-price-watch vert (ruptures, min multi-sources, gel, héritage), chaque promesse sabotée et rouge.'
   },

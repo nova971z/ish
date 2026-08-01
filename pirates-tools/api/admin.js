@@ -1593,6 +1593,28 @@ function pwBuildVariantCosts(products, ov) {
 //  4. dérivé de price_ht    → ESTIMATION (le prix catalogue est supposé être
 //     l'ancien coût ×1,15). À remplacer par un vrai prix dès que possible.
 // Retourne { srcTTC, origin } — origin est affiché dans l'aperçu admin.
+/* ── CARTE + HÉRITAGE : toutes les sources RÉELLEMENT connues d'un override ──
+   Les relevés d'avant le 01/08/2026 vivent dans l'ancien format
+   (`priceSrcTTC` / `priceSource` / `priceCheckedAt`), SANS carte
+   `priceSources`. Sans cette fusion, le premier passage d'un NOUVEAU site ne
+   voyait que lui-même et « le moins cher des sources » proposait des
+   hausses : mesuré au premier `dryRun=1` clickoutil — 12 hausses proposées,
+   dont +136 % sur un produit dont le relevé cotébrico était moins cher.
+   ⛔ Seul `cotebrico` se ressème, et seulement s'il porte sa marque : un
+   coût ESTIMÉ n'a jamais porté `priceSource: 'cotebrico'` (même garde que
+   le chemin de lecture d'en dessous). La fraîcheur (14 j) reste jugée par
+   `choisirCoutSource` — un héritage périmé ne pèse rien.
+   PURE — testée par check-price-watch via _internals, sabotage compris. */
+function pwSourcesConnues(o) {
+  const srcs = Object.assign({}, o && o.priceSources);
+  if (o && o.priceSource === 'cotebrico' && !srcs.cotebrico
+      && typeof o.priceSrcTTC === 'number' && o.priceSrcTTC > 0
+      && Number(o.priceCheckedAt) > 0) {
+    srcs.cotebrico = { ttc: o.priceSrcTTC, at: Number(o.priceCheckedAt) };
+  }
+  return srcs;
+}
+
 function pwSourceCost(p, o, cfg, byGroup) {
   /* ── PLUSIEURS TRAQUEURS (01/08/2026) : la carte `priceSources` fait foi ──
      Chaque passage de traqueur écrit sa propre entrée { ttc, at, enStock }.
@@ -1604,7 +1626,13 @@ function pwSourceCost(p, o, cfg, byGroup) {
      où l'on ne peut pas acheter n'est pas un coût d'approvisionnement. */
   if (o && o.priceSources && typeof o.priceSources === 'object'
       && Object.keys(o.priceSources).length) {
-    var choixPS = priceParse.choisirCoutSource(o.priceSources, Date.now());
+    /* L'HÉRITAGE cotébrico entre dans le min (pwSourcesConnues) : sans lui,
+       une carte née d'un seul passage clickoutil ignorait un relevé
+       cotébrico moins cher encore au format d'avant. ⚠️ La fusion ne
+       s'applique QUE si la carte existe — un override sans carte garde le
+       chemin d'héritage pur d'en dessous, qui ne juge pas la fraîcheur :
+       en juger ici aurait GELÉ des produits au relevé ancien mais réel. */
+    var choixPS = priceParse.choisirCoutSource(pwSourcesConnues(o), Date.now());
     if (choixPS) return { srcTTC: choixPS.ttc, origin: 'traqueur', source: choixPS.source };
     return { srcTTC: null, origin: 'rupture' };
   }
@@ -1837,7 +1865,7 @@ async function handlePriceWatch(req, res, admin, db) {
       if (item.enStock === false) {
         enRupture.push({ sku: item.sku, id: p.id, name: p.title || p.name, srcTTC: item.price });
         if (!dryRun) {
-          const srcsR = Object.assign({}, (ovW[p.id] || {}).priceSources);
+          const srcsR = pwSourcesConnues(ovW[p.id] || {});   // carte + héritage
           srcsR[sourceSlug] = { ttc: item.price, at: now, enStock: false };
           const choixR = priceParse.choisirCoutSource(srcsR, now);
           await db.collection('product_overrides').doc(p.id).set({
@@ -1862,7 +1890,7 @@ async function handlePriceWatch(req, res, admin, db) {
          (01/08/2026) Cette source-ci, fraîchement relevée, rejoint la carte
          `priceSources` ; le prix du site se calcule sur le minimum des
          sources fraîches ET en stock — quel que soit le traqueur qui parle. */
-      const srcsMaj = Object.assign({}, oW.priceSources);
+      const srcsMaj = pwSourcesConnues(oW);   // carte + héritage cotébrico
       srcsMaj[sourceSlug] = { ttc: src, at: now, enStock: true };
       const choix = priceParse.choisirCoutSource(srcsMaj, now);
       const effSrc = choix ? choix.ttc : src;
@@ -2042,4 +2070,4 @@ async function handlePriceWatch(req, res, admin, db) {
 // cale. Au-delà, découper la marque en 2 pages (voir docs/TRAQUEUR-URLS.md).
 module.exports.config = { api: { bodyParser: { sizeLimit: '4.5mb' } } };
 // Pour les portes UNIQUEMENT : tester le vrai chemin, jamais une copie (O6).
-module.exports._internals = { pwSourceCost: pwSourceCost };
+module.exports._internals = { pwSourceCost: pwSourceCost, pwSourcesConnues: pwSourcesConnues };
