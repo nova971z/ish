@@ -40,6 +40,20 @@ tombe souvent à l'intérieur d'un `try/catch` existant.
 
 ## Pièges de mesure — chacun a produit un faux résultat
 
+**Un délai FIXE posé au milieu d'une animation est un tirage au sort.**
+`pdp-specs` lisait l'opacité des lignes à 1500 ms — mesuré : 0,615 à 500 ms,
+**0,901** à 1500 ms, 0,917 à 3000 ms — avec un seuil d'assertion à **0,9**.
+Deux exécutions du même code ont donné 68/68 puis 67/68. On attend que la
+valeur **cesse de bouger** (deux relevés identiques, borne de sécurité), on ne
+devine pas une durée.
+⚠️ Et un seuil posé exactement là où la valeur se trouve n'est pas un seuil :
+tester les **deux bouts** avec de la marge vaut mieux qu'un couteau au milieu.
+
+**Ne jamais lancer deux lots de harnais EN PARALLÈLE.** Ils se disputent le
+processeur, et une mesure sensible au temps bascule. C'est ce qui a révélé le
+défaut ci-dessus — mais par accident, et ça aurait tout aussi bien pu en
+fabriquer un faux.
+
 **`behavior: 'instant'` est obligatoire** sur tout `scrollIntoView`. Le
 défilement doux global du site fausse les lectures : la mesure part avant
 l'arrivée.

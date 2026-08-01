@@ -69,7 +69,38 @@ try {
     const t = document.querySelector('.pdp-specs-table');
     if (t) t.scrollIntoView({ behavior: 'instant', block: 'center' });
   });
-  await page.waitForTimeout(1500);
+  /* ⚠️ ON ATTEND LA FIN DE L'ANIMATION, on ne la devine pas.
+     ─────────────────────────────────────────────────────────────────────
+     Défaut trouvé le 01/08/2026 : deux exécutions du MÊME code donnaient
+     68/68 et 67/68. Cause mesurée — l'opacité est une apparition progressive,
+     et ce harnais lisait à 1500 ms fixes :
+
+         500 ms → min 0,615    1500 ms → min 0,901    3000 ms → min 0,917
+
+     Le seuil de l'assertion valait 0,9. À 1500 ms la mesure tombe PILE
+     dessus : sous charge (deux lots de harnais en parallèle), elle passe à
+     0,89 et le harnais accuse le produit. Un délai fixe posé au milieu d'une
+     animation est un tirage au sort.
+     On attend donc que la valeur CESSE DE BOUGER — deux relevés identiques
+     à 300 ms d'intervalle — avec une borne pour ne jamais tourner sans fin. */
+  const lireOpacites = () => page.evaluate(() => {
+    const L = [...document.querySelectorAll('.pdp-specs-table tr')];
+    const hautes = L.filter((l) => {
+      const r = l.getBoundingClientRect();
+      return r.top > 0 && r.top < window.innerHeight * 0.5;
+    });
+    const op = (l) => parseFloat(getComputedStyle(l).opacity) || 0;
+    return hautes.length ? hautes.map(op) : [];
+  });
+  let precedent = null, stable = false;
+  for (let i = 0; i < 20 && !stable; i++) {
+    await page.waitForTimeout(300);
+    const maintenant = (await lireOpacites()).map((x) => x.toFixed(3)).join(',');
+    stable = precedent !== null && maintenant === precedent && maintenant !== '';
+    precedent = maintenant;
+  }
+  c.T('PRÉALABLE : l\'apparition des lignes s\'est stabilisée avant la mesure',
+    stable, stable ? 'valeurs figées' : 'TOUJOURS EN MOUVEMENT après 6 s — mesure non fiable');
 
   const vu = await page.evaluate(() => {
     const t = document.querySelector('.pdp-specs-table');
@@ -95,6 +126,15 @@ try {
           ? Math.min(...hautes.map((l) => parseFloat(getComputedStyle(l).opacity) || 0))
           : -1;
       })(),
+      opaciteMax: (function () {
+        const hautes = [...lignes].filter((l) => {
+          const r = l.getBoundingClientRect();
+          return r.top > 0 && r.top < window.innerHeight * 0.5;
+        });
+        return hautes.length
+          ? Math.max(...hautes.map((l) => parseFloat(getComputedStyle(l).opacity) || 0))
+          : -1;
+      })(),
       nbHautes: [...lignes].filter((l) => {
         const r = l.getBoundingClientRect();
         return r.top > 0 && r.top < window.innerHeight * 0.5;
@@ -112,8 +152,18 @@ try {
   /* ── 2. Les lignes sont VISIBLES — le piège du bug v334 ───────────────── */
   c.T('des lignes atteignent le haut de la fenêtre après défilement',
     vu.nbHautes > 0, vu.nbHautes + ' ligne(s)');
-  c.T('elles y sont PLEINEMENT visibles, pas seulement présentes dans le DOM (panne v334 : opacity 0 jamais levée)',
-    vu.opaciteHaut >= 0.9, 'opacité minimale en haut de fenêtre=' + vu.opaciteHaut.toFixed(2));
+  /* ⛔ CE QUE LA PANNE v334 PRODUISAIT : toutes les lignes bloquées à 0.
+     L'assertion portait sur le MINIMUM d'une bande à mi-dégradé, avec un
+     seuil à 0,9 — arbitraire, et posé exactement là où la valeur se trouve.
+     On teste maintenant les deux bouts, chacun avec de la marge (mesuré,
+     une fois stabilisé : min 0,917 · max 1,000) :
+       · au moins une ligne est PLEINEMENT révélée (max ≈ 1) ;
+       · aucune ligne du haut n'est restée près de zéro (min > 0,5).
+     Sous v334, max valait 0 : les deux tombent. */
+  c.T('au moins une ligne du haut est PLEINEMENT révélée (panne v334 : opacity 0 jamais levée)',
+    vu.opaciteMax >= 0.99, 'opacité maximale en haut de fenêtre=' + vu.opaciteMax.toFixed(3));
+  c.T('aucune ligne du haut n\'est restée près de zéro',
+    vu.opaciteHaut > 0.5, 'opacité minimale en haut de fenêtre=' + vu.opaciteHaut.toFixed(3));
 
   /* ── 3. Un produit SANS specs ne montre pas un bloc vide ──────────────── */
   if (sansSpecs.length) {

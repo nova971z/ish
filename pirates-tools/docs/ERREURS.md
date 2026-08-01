@@ -20,9 +20,9 @@
 | **O4** | Contrainte connue, non appliquée | 3 | §1 | `garde-entonnoir.js` |
 | **O5** | Outil artisanal au lieu de l'outil existant | 1 | §1.4 | aucune — humaine |
 | **O6** | Copie périmée au lieu de la source vivante | 2 | §4.4 | `p7-architecture.js` |
-| **O7** | **Lire le silence comme un succès** | 6 | §3 · §4.3 | `sabotage.mjs` · `ci.js` · `check-ancres.js` |
+| **O7** | **Lire le silence comme un succès** | 7 | §3 · §4.3 | `sabotage.mjs` · `ci.js` · `check-ancres.js` |
 
-**52 erreurs, 7 mécanismes.** O1 et O2 en concentrent **32 à elles deux** :
+**53 erreurs, 7 mécanismes.** O1 et O2 en concentrent **32 à elles deux** :
 c'est là qu'il faut regarder en premier, toujours.
 
 ⚠️ **O7 est né le 01/08/2026**, et il est né d'une règle qui existait déjà :
@@ -211,6 +211,7 @@ règle qui ne couvre qu'un endroit se fait contourner par tous les autres.
 | **E-704** | « les 19 empreintes sont identiques » | vrai des 14 fichiers touchés par l'outil seul ; **5 avaient été édités à la main** ensuite | `diff` des empreintes, qui a montré 5 écarts |
 | **E-705** | « CI verte, donc les portes tournent » | `safeRequire` avalait toute porte **présente mais cassée** sous un `ℹ️ module manquant ignoré` — `audit/p3-endpoints` (authentification des points d'entrée) était **mort depuis la migration** | sabotage de la porte : CI restée **verte** |
 | **E-706** | « commande non exécutée » | mon propre outil cherchait `Cannot find module` **n'importe où** dans la sortie : une commande qui tourne parfaitement peut l'imprimer. Fausse alerte de mon détecteur | la commande avait tourné, code 1, sortie complète |
+| **E-707** | « lot complet : 68/68 harnais, 1115/1115 » | une SEULE exécution, annoncée comme un fait acquis. La seconde, sur le MÊME code, a rendu 67/68 : `pdp-specs` lisait une opacité animée à 1500 ms fixes, pile sur son seuil de 0,9 — et j'avais lancé deux lots EN PARALLÈLE, ce qui a suffi à faire basculer la mesure | seconde exécution du même code · mesure de l'opacité à 500/1500/3000/5000 ms |
 
 **Antidote** : ne jamais conclure d'une **absence de signal**. Exiger une preuve
 **positive** que la mesure a eu lieu — empreinte avant/après pour une écriture,
