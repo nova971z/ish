@@ -6860,8 +6860,12 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .stripe-elements-wrap {
   margin-bottom: 16px;
 }
+/* ⛔ 120 px etait calibre pour STRIPE ELEMENTS, qui empilait plusieurs champs.
+   Le champ Revolut tient sur UNE ligne : il restait 74 px de vide sous lui, et
+   le bloc « Carte bancaire » avait l'air cassé. 56 px = de quoi loger la ligne
+   du champ OU l'indicateur de chargement, sans trou. */
 .stripe-payment-element {
-  min-height: 120px;
+  min-height: 56px;
   padding: 4px 0;
 }
 .stripe-card-error {
