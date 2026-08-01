@@ -834,12 +834,13 @@
     return p && String(p.stock_status || '').toLowerCase() === 'out_of_stock';
   }
 
-  function $(sel, ctx) { return (ctx || document).querySelector(sel); }
-  function $$(sel, ctx) { return Array.from((ctx || document).querySelectorAll(sel)); }
 
   // ── DOM references ──────────────────────────────────────────
 
   var dom = {};
+  function $(sel, ctx) { return (ctx || document).querySelector(sel); }
+  function $$(sel, ctx) { return Array.from((ctx || document).querySelectorAll(sel)); }
+
   function cacheDom() {
     var ids = [
       'menu-toggle','topbarLogo','homeLink',
