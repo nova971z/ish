@@ -53,6 +53,18 @@ var CHEMIN = /(?:^|[\s`'"(])((?:pirates-tools\/|scripts\/|tests\/|docs\/|api\/|\
    être jugée sur son existence. On ne devine pas : on s'abstient. */
 var CONTEXTE_ABSENCE = /crée|créé|créer|création|à venir|futur|n'existe pas|inexistant|absent|supprim|renomm|manquant|proposer|il faudrait|serait/i;
 
+/* ── S6 : les tournures qui affirment un fait sur SON environnement ───────
+   On ne vise QUE l'affirmation catégorique au présent sur une chose qui vit
+   hors du dépôt. Une question, un conditionnel ou une demande passent : le
+   but est d'empêcher la déduction déguisée en constat, pas de bâillonner. */
+var ENVIRONNEMENT_USER = new RegExp(
+  '(?:^|[.!?]\\s+)[^.!?\\n]{0,80}\\b(?:ton|ta|tes|votre|vos)\\s+'
+  + '(?:raccourcis?|shortcuts?|firestore|base|configuration|config|variables?|'
+  + 'r[ée]glages?|automatisations?)\\b[^.!?\\n]{0,60}'
+  + '\\b(?:tourne|tournent|est|sont|vaut|valent|contient|contiennent|porte|portent|'
+  + 'n\'[ée]crit|n\'[ée]crivent|ne\\s+couvre|ne\\s+couvrent)\\b',
+  'i');
+
 /* ── S4 : les mots qui DÉCLARENT une chose faite ──────────────────────────
    ⚠️ Uniquement des formules qui ne peuvent pas être autre chose qu'une
    déclaration de travail accompli. Le premier jet listait aussi des
@@ -232,6 +244,56 @@ function controler(msg, tour) {
     griefs.push('« c\'est fait / ça marche / tout est vert » est affirmé alors '
       + 'qu\'AUCUN outil n\'a été lancé de tout le tour. Protocole §8, interdit '
       + 'n°2 : rien n\'est fait sans preuve produite et montrée.');
+  }
+
+  /* ── S6 : AFFIRMER UN FAIT SUR L'ENVIRONNEMENT DE L'USER ──────────────
+     ⛔ LA FAUTE DU 01/08/2026, COMMISE TROIS FOIS DANS LA MÊME SOIRÉE.
+
+     J'ai affirmé, comme des faits :
+       · que son raccourci Festool tournait en simulation — sa capture montrait
+         `dryRun=0` ; c'est le document du dépôt qui était périmé ;
+       · qu'il devait coller 541 coûts à la main — le traqueur les écrivait
+         déjà tout seul ;
+       · que les produits Festool n'existaient pas chez le fournisseur — sa
+         page en affiche 50, et l'analyseur les reconnaît.
+
+     Les trois ont la MÊME forme : j'ai lu un fichier du DÉPÔT et j'en ai
+     déduit l'état de SON installation. Or ces choses-là vivent ailleurs —
+     l'app Raccourcis de son iPad, sa base Firestore, la page du fournisseur.
+     Le dépôt n'en contient que des copies, et une copie ne prouve rien.
+
+     ⛔ AUCUNE des trente portes ne pouvait attraper ça : elles vérifient
+     toutes le dépôt contre lui-même. Celle-ci vérifie MA PAROLE.
+
+     Règle : une affirmation sur son environnement exige une source venue de
+     SON côté dans le tour — une capture, un relevé qu'il a collé. Sans ça,
+     on demande. On ne déduit pas. */
+  /* La preuve ne peut venir que de SON côté : une capture qu'il a envoyée
+     (lue depuis `uploads/`), ou un relevé qu'il a collé et qu'on a relu.
+     Sans cette trace dans le tour, toute affirmation sur son installation est
+     une déduction — et c'est exactement ce qui a produit E-603. */
+  var preuveVenueDeLUser = !!(tour && tour.sorties
+    && /\/uploads\/|uploads\/[0-9a-f-]{8}/i.test(tour.sorties));
+  var nuEnv = horsCitations(msg);
+  var mEnv = nuEnv.match(ENVIRONNEMENT_USER);
+  /* ⚠️ UNE QUESTION N'EST PAS UNE AFFIRMATION — corrigé sur-le-champ, le
+     premier essai bloquait « Est-ce que ton raccourci tourne en dryRun 0 ? ».
+     C'est E-208 : une porte qui refuse le légitime se fait désactiver, donc
+     ne protège plus rien. Demander est exactement le comportement voulu ici :
+     on ne peut pas le punir. */
+  if (mEnv) {
+    var apres = nuEnv.slice(nuEnv.indexOf(mEnv[0]));
+    var finPhrase = apres.search(/[.!?\n]/);
+    var estQuestion = finPhrase !== -1 && apres.charAt(finPhrase) === '?';
+    if (estQuestion || /^(?:est-ce|peux-tu|pourrais-tu|quel|quelle|combien|as-tu|sais-tu)\b/i
+        .test(mEnv[0].replace(/^[^A-Za-zÀ-ÿ]+/, ''))) mEnv = null;
+  }
+  if (mEnv && !preuveVenueDeLUser) {
+    griefs.push('« ' + mEnv[0].trim() + ' » affirme un fait sur l\'environnement de '
+      + 'l\'user — raccourci, Firestore, page fournisseur, variable Vercel — sans '
+      + 'qu\'aucune capture ni relevé venu de LUI n\'ait été fourni dans ce tour. '
+      + 'Le dépôt n\'en contient que des COPIES, et une copie périmée se lit comme '
+      + 'la réalité (E-603). Demander, ou attendre une capture. Jamais déduire.');
   }
 
   /* ── S5 : certitude sur ce qui n'est pas encore arrivé ────────────────── */
