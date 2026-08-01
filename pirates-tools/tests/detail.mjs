@@ -86,7 +86,7 @@ for (const [hash, sel, quoi] of [
         if(!f.length) return 0;
         const ys=[...new Set(f.map(x=>Math.round(x.getBoundingClientRect().y)))];
         return f.length / ys.length;})(),
-      qrInline: det.querySelectorAll('.lv-handcode, #clientCodeQR').length,
+      qrInline: det.querySelectorAll('.lv-handcode, .lv-handcode__qr').length   /* #clientCodeQR mort : le QR est `.lv-handcode__qr` */,
       codeEnClair: /Code de remise\s*\d/.test((det.textContent||'').replace(/\s+/g,' ')),
       rangees: (()=>{const b=[...det.querySelectorAll('.lv-cbtn')];
         if(!b.length) return null;

@@ -167,7 +167,16 @@ const E2 = await page.evaluate(() => {
   return {
     etape2: !(document.getElementById('mfaStep2') || {}).hidden,
     qr: !!img, src: img ? img.getAttribute('src').slice(0, 30) : null,
-    cle: (document.querySelector('.lv-handcode__num') || {}).textContent,
+    /* ⚠️ ANCRE CORRIGÉE LE 01/08/2026. Le harnais lisait `.lv-handcode__num`,
+       la classe du code de remise d'une livraison — 6 chiffres. La clé TOTP en
+       fait 32 : à cette taille elle sortait de l'écran de l'iPad, et `mfa.js`
+       lui a donné sa propre classe `.mfa-cle` (id `mfaCle`) le 29/07/2026.
+       L'ancienne classe existe toujours pour les livraisons, donc rien ne
+       plantait : la lecture rendait simplement `undefined`, et le harnais
+       annonçait « la clé n'est plus donnée en toutes lettres » — une fausse
+       alerte sur la seule voie utilisable par l'user, qui n'a pas de
+       téléphone pour scanner un QR. */
+    cle: (document.getElementById('mfaCle') || {}).textContent,
     code: !!document.getElementById('mfaCode')
   };
 });

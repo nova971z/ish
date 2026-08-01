@@ -29,6 +29,9 @@ const initial = await pg.locator('.product-card').count();
 console.log('cartes sur la page 1 :', initial);
 ok(initial > 0, 'la page 1 du catalogue affiche des cartes — n=' + initial);
 ok(initial <= 40, 'la page 1 ne dépasse pas PAGE_SIZE (40) — n=' + initial);
+/* Le défilement infini a été remplacé par une pagination : on PROUVE que sa
+   sentinelle a bien disparu, elle ne doit plus jamais revenir.
+   ancres-absentes-voulues: gridSentinel */
 ok((await pg.locator('#gridSentinel').count()) === 0,
    'plus aucune sentinelle de défilement infini (mécanisme retiré)');
 
@@ -50,13 +53,40 @@ ok(titresP2.length > 0, 'la page 2 affiche des cartes — n=' + titresP2.length)
 ok(titresP2.join('|') !== titresP1.join('|'),
    'la page 2 montre des produits DIFFÉRENTS de la page 1');
 
-// filtre -> reset (categorie Scies)
+/* ── FILTRER REPART D'UNE PAGE 1, il ne CUMULE pas ────────────────────────
+   ⚠️ DEUX DÉFAUTS CORRIGÉS ICI LE 01/08/2026, et le harnais se contredisait
+   lui-même :
+
+   ① Le seuil était `<= 35`, hérité du défilement infini. Or ce même fichier
+      écrit vingt lignes plus haut que la page vaut PAGE_SIZE = 40. Mesuré :
+      40 cartes après filtre. Le harnais annonçait donc un défaut de cumul là
+      où la pagination faisait exactement son travail. Un chiffre recopié se
+      périme ; on lit maintenant PAGE_SIZE DANS `app.js`, à l'exécution.
+   ② Il cliquait la puce « Scies », donc il NOMMAIT une catégorie du
+      catalogue — interdit par la règle des harnais (dix-huit sont morts pour
+      ça), et l'user a justement regroupé ses familles. Le `.catch(()=>{})`
+      masquait en plus l'échec du clic. On prend une puce RÉELLE, choisie à
+      l'exécution, et on vérifie qu'elle a bien été cliquée. */
+const PAGE_SIZE = Number(
+  (fs.readFileSync(path.join(ROOT, 'app.js'), 'utf8').match(/PAGE_SIZE\s*=\s*(\d+)/) || [])[1]
+);
+ok(Number.isFinite(PAGE_SIZE) && PAGE_SIZE > 0,
+   'PRÉALABLE : PAGE_SIZE relu dans app.js — ' + PAGE_SIZE
+   + ' (sans lui, le seuil serait une supposition)');
+
 await pg.evaluate(()=>window.scrollTo(0,0));
-await pg.locator('.cat-chip',{hasText:'Scies'}).first().click().catch(()=>{});
+const puce = await pg.evaluate(()=>{
+  const c=[...document.querySelectorAll('#catList .cat-chip')].find(x=>x.getAttribute('data-cat'));
+  if(!c) return null;
+  c.click();
+  return c.getAttribute('data-cat');
+});
 await pg.waitForTimeout(600);
+ok(!!puce, 'PRÉALABLE : une puce de catégorie a été cliquée — ' + (puce||'AUCUNE'));
 const afterFilter=await pg.locator('.product-card').count();
-console.log('cartes apres filtre Scies (lot initial):',afterFilter);
-ok(afterFilter>0 && afterFilter<=35,'filtre => repart sur un lot initial (pas cumul)');
+console.log('cartes apres filtre («'+puce+'») :',afterFilter);
+ok(afterFilter>0 && afterFilter<=PAGE_SIZE,
+   'filtre => repart sur une page 1 (pas de cumul) — n='+afterFilter+' pour PAGE_SIZE='+PAGE_SIZE);
 
 console.log(`\n${fail===0?'✅ ALL PASS':'❌ FAIL'} — ${pass} ok, ${fail} ko`);
 await br.close();srv.close();process.exit(fail?1:0);

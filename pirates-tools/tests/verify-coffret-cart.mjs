@@ -51,19 +51,41 @@ const modal=await pg.evaluate(()=>{
 ok(modal.open,'modale de paiement ouverte');
 ok(/493[,.]26/.test(modal.text)||/667[,.]08/.test(modal.text),'la modale inclut le montant coffret (493,26 visible ou total 667,08) — extrait: '+modal.text.slice(0,200));
 // le PI part quand le formulaire adresse est valide ; on force l'appel en remplissant si présent
-const cp=await pg.$('#payAddrCp, input[name=cp], input[autocomplete="postal-code"]');
-if(cp){
-  await pg.fill('#payAddrName, input[name=name], input[autocomplete="name"]','Test Client').catch(()=>{});
-  await pg.fill('#payAddrLine1, input[name=line1], input[autocomplete="address-line1"]','1 rue du Port').catch(()=>{});
-  await pg.fill('#payAddrCity, input[name=city], input[autocomplete="address-level2"]','Pointe-à-Pitre').catch(()=>{});
-  await cp.fill('97110'); await pg.waitForTimeout(1500);
+/* ⚠️ DEUX DÉFAUTS CORRIGÉS LE 01/08/2026, et le second est le plus grave.
+
+   ① Le harnais visait `#payAddrCp`, qui n'a jamais existé — le champ est
+      `#payAddrPostal`. `elementHandle.fill` attendait donc 30 s puis TUAIT le
+      harnais : zéro assertion rendue.
+   ② Il ne remplissait que QUATRE des SIX champs obligatoires de l'adresse
+      (ni e-mail ni téléphone). Le formulaire n'était jamais valide, la
+      commande ne partait pas au serveur — et l'assertion la plus importante
+      du fichier, « le serveur reçoit bien coffret:true », se transformait en
+      un `ℹ️` poli. Un contrôle qui se contente d'un message quand il ne peut
+      pas conclure est un contrôle qui ne contrôle rien.
+
+   On remplit donc TOUT ce que le produit déclare obligatoire, relu du DOM :
+   ajouter un champ requis demain ne pourra plus désarmer ce contrôle. */
+const requis = await pg.evaluate(() =>
+  [...document.querySelectorAll('#payAddress [required]')].map(e => e.id).filter(Boolean));
+ok(requis.length >= 4, 'PRÉALABLE : le formulaire d\'adresse déclare ses champs obligatoires — ' + JSON.stringify(requis));
+const VALEURS = {
+  payAddrName: 'Client de démonstration', payAddrEmail: 'client@exemple.invalid',
+  payAddrPhone: '0690123456', payAddrLine1: '1 rue du Port',
+  payAddrPostal: '97110', payAddrCity: 'Pointe-à-Pitre'
+};
+for (const id of requis) {
+  const v = VALEURS[id];
+  ok(v !== undefined, 'champ obligatoire « ' + id + ' » connu du harnais (sinon il ne peut pas valider le formulaire)');
+  if (v === undefined) continue;
+  await pg.fill('#' + id, v);
+  await pg.dispatchEvent('#' + id, 'change');
 }
-if(piBody){
-  const it=(piBody.items||[]).find(x=>/dhr283z/.test(x.key||''));
+await pg.waitForTimeout(1800);
+
+ok(!!piBody, 'PRÉALABLE : la commande est bien partie au serveur — sans elle, rien de ce qui suit ne serait vérifié');
+if (piBody) {
+  const it=(piBody.items||[]).find(x=>/dhr283z/i.test(x.key||''));
   ok(it && it.coffret===true, 'payload serveur : items[] DHR283Z porte coffret:true — reçu: '+JSON.stringify(piBody.items));
-} else {
-  A.push('ℹ️ PI non déclenché dans le harnais (formulaire adresse non atteint) — vérif payload via source: ');
-  // repli statique : le mapping devisPay contient coffret
 }
 ok(errs.length===0,'0 erreur JS — '+JSON.stringify(errs));
 console.log(A.join('\n'));

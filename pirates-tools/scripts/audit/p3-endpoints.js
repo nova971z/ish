@@ -30,7 +30,20 @@ const VERBOSE = require.main === module;
 const LOG = function () { if (VERBOSE) console.log.apply(console, arguments); };
 const problems = [];
 
-const read = (f) => fs.readFileSync(path.join(API, f), 'utf8');
+/* ⚠️ LECTURE DÉFENSIVE — corrigé le 01/08/2026, après avoir découvert que
+   CETTE PORTE ÉTAIT MORTE DEPUIS LA MIGRATION.
+   Elle lisait `api/checkout.js`, supprimé avec le tunnel de l'ancien
+   encaisseur. `readFileSync` jetait au CHARGEMENT du module, et le
+   `safeRequire` de la CI avalait l'erreur sous un « ℹ️ Module manquant
+   ignoré ». Résultat : l'audit de sécurité des points d'entrée ne tournait
+   plus, et la CI restait verte. Un fichier disparu de la table est une
+   INFORMATION (retrait volontaire à entériner, ou disparition accidentelle) :
+   il se REMONTE, il ne fait pas taire tout le contrôle. */
+const absents = [];
+const read = (f) => {
+  try { return fs.readFileSync(path.join(API, f), 'utf8'); }
+  catch (e) { absents.push(f); return ''; }
+};
 const uniq = (a) => [...new Set(a)].sort();
 
 // ═══ CONTRÔLE 1 — routage ↔ implémentation ════════════════════════════════
@@ -75,7 +88,6 @@ const EXPECTED = {
   'admin.js':                 { auth: 'admin',   cors: true,  method: true },
   'contact.js':               { auth: 'mixte',   cors: true,  method: true },
   'create-payment-intent.js': { auth: 'public',  cors: true,  method: true },
-  'checkout.js':              { auth: 'public',  cors: true,  method: true },
   'newsletter.js':            { auth: 'public',  cors: true,  method: true },
   'events.js':                { auth: 'public',  cors: true,  method: true },
   'products.js':              { auth: 'public',  cors: true,  method: true },
@@ -126,6 +138,10 @@ for (const f of Object.keys(EXPECTED)) {
     rl: hasRl ? '✅' : '·'
   });
 }
+absents.forEach((f) => problems.push(
+  f + ' : point d\'entrée ATTENDU mais introuvable dans api/. '
+  + 'Soit il a été retiré et la table de cet audit doit l\'entériner, soit il a '
+  + 'disparu par accident. Dans les deux cas ce contrôle ne vérifie plus rien pour lui.'));
 LOG('  fichier                      auth      méthode  CORS  garde  débit');
 rows.forEach((r) => LOG('  ' + r.f.padEnd(28) + r.auth.padEnd(9)
   + '   ' + r.method + '      ' + r.cors.padEnd(9) + '  ' + r.gate + '     ' + r.rl));
@@ -134,7 +150,9 @@ rows.forEach((r) => LOG('  ' + r.f.padEnd(28) + r.auth.padEnd(9)
 LOG('\n' + '━'.repeat(74));
 LOG('  P3.3 — ÉCRITURES PUBLIQUES : limitation de débit');
 LOG('━'.repeat(74));
-const PUBLIC_WRITE = ['contact.js', 'newsletter.js', 'events.js', 'create-payment-intent.js', 'checkout.js'];
+// `checkout.js` retiré le 01/08/2026 : le tunnel hébergé de l'ancien
+// encaisseur n'existe plus. Le laisser ici tuait la porte au chargement.
+const PUBLIC_WRITE = ['contact.js', 'newsletter.js', 'events.js', 'create-payment-intent.js'];
 PUBLIC_WRITE.forEach((f) => {
   const src = read(f);
   const n = (src.match(/rl\.allow\(/g) || []).length;

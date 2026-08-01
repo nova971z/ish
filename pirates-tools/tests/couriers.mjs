@@ -394,6 +394,9 @@ r = await page.evaluate(()=>{
   const p = document.getElementById('lvChatPanel');
   return {
     prix: !!p.querySelector('#acPrix'),
+    /* Même exigence que plan9 : ces champs ne doivent PAS exister côté
+       client. On compte pour prouver le zéro.
+       ancres-absentes-voulues: acPaiement, acLieu */
     modes: [...p.querySelectorAll('input[name="acPaiement"], #acPaiement')].length,
     lieu: !!p.querySelector('#acLieu'),
     propose: !!p.querySelector('#acPropose'),

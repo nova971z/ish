@@ -11,10 +11,40 @@ var fs   = require('fs');
 var path = require('path');
 var cp   = require('child_process');
 
+/* ⛔ UNE PORTE QUI REFUSE DE SE CHARGER FAIT ÉCHOUER LA CI — on ne l'ignore plus.
+   ─────────────────────────────────────────────────────────────────────────
+   Corrigé le 01/08/2026, après l'avoir PROUVÉ par sabotage : une syntaxe
+   cassée dans `check-ancres.js`, et la CI annonçait « ✅ tous les contrôles
+   sont passés ». Le fichier était là, la porte ne s'exécutait pas, et rien ne
+   le disait au-delà d'un `ℹ️` noyé dans la sortie.
+
+   Ce n'est pas une hypothèse : c'est déjà arrivé sur `check-paiement.js`,
+   c'est-à-dire sur le chemin de l'argent. Le projet a une maxime pour ça —
+   « non exécuté n'est PAS vert » — mais elle n'était écrite que pour les
+   harnais. La CI, elle, continuait d'avaler ses propres portes en silence.
+
+   On distingue donc DEUX situations que l'ancien code confondait :
+     · le fichier N'EXISTE PAS → contrôle optionnel, on le signale, on passe ;
+     · le fichier EXISTE mais refuse de se charger → PORTE MORTE. Elle est
+       censée protéger quelque chose et ne protège plus rien. Échec net.
+
+   ⚠️ La différence se mesure sur le DISQUE, jamais sur le message d'erreur :
+   un `MODULE_NOT_FOUND` peut très bien venir d'un `require` interne au
+   module, et se faire passer pour un fichier absent. */
+var portesMortes = [];
+
 function safeRequire(p, label){
+  var base = path.join(__dirname, String(p).replace(/^\.\//, ''));
+  var present = fs.existsSync(base) || fs.existsSync(base + '.js')
+    || fs.existsSync(path.join(base, 'index.js'));
   try { return require(p); }
-  catch(e){ 
-    console.warn('ℹ️  Module manquant ignoré:', label || p);
+  catch(e){
+    if (present) {
+      portesMortes.push((label || p) + ' — ' + String((e && e.message) || e).split('\n')[0]);
+      console.error('⛔ PORTE MORTE :', label || p, '— le fichier existe et ne se charge PAS.');
+      return null;
+    }
+    console.warn('ℹ️  Contrôle optionnel absent (fichier introuvable) :', label || p);
     return null;
   }
 }
@@ -106,6 +136,9 @@ var reqEcrans = safeRequire('./check-ecrans', 'check-ecrans');
    personnelle de l'user écrite DEUX FOIS dans app.js — et cette adresse
    désignait le compte dispensé de pièces justificatives. */
 var reqFuites = safeRequire('./check-fuites', 'check-fuites');
+// Ancres des harnais : un harnais qui vise un identifiant mort meurt sur un
+// délai, sans rendre d'assertion — ou accuse le produit à tort (01/08/2026).
+var reqAncres = safeRequire('./check-ancres', 'check-ancres');
 // Le module Revolut est ecrit AVANT d'avoir pu appeler le reseau : tout ce qui
 // est PUR (signature contre le vecteur officiel, commission d'un ordre
 // reessaye, table des etats) s'eprouve ici, sinon la 1re verification aurait
@@ -181,10 +214,21 @@ var reqReconc   = safeRequire('./check-reconciliation', 'check-reconciliation');
   await runOne(reqTunnel,   'check-tunnel-paiement');
   await runOne(reqEcrans,   'check-ecrans');
   await runOne(reqFuites,   'check-fuites');
+  await runOne(reqAncres,   'check-ancres');
   await runOne(reqRevolut,  'check-revolut');
   await runOne(reqReconc,   'check-reconciliation');
 
   var dur = Math.max(1, Date.now() - started);
+
+  /* Une porte présente mais illisible n'est pas un détail de confort : c'est
+     une protection qu'on croit avoir. On la remonte AVANT tout le reste. */
+  if (portesMortes.length){
+    console.error('\n⛔ ' + portesMortes.length + ' PORTE(S) MORTE(S) — présentes sur le disque, incapables de se charger :');
+    portesMortes.forEach(function(x, i){ console.error('   ' + (i+1) + '. ' + x); });
+    console.error('   Ces contrôles n\'ont RIEN vérifié. Non exécuté n\'est pas vert.');
+    process.exit(1);
+  }
+
   if (errors.length){
     console.error('\n❌ CI FAILED — problèmes détectés ('+errors.length+'):\n');
     errors.forEach(function(e, i){ console.error((i+1)+'. '+e); });

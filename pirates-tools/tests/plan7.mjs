@@ -117,7 +117,7 @@ await boot('#/mode-livraison');
 r = await page.evaluate(()=>{
   const al=document.getElementById('courseAlert');
   const rb=al&&!al.hidden? al.getBoundingClientRect():null;
-  const top=document.querySelector('.topbar,#topbar,header.topbar');
+  const top=document.querySelector('.topbar')   /* seul `.topbar` existe ; les deux autres formes étaient mortes et masquaient la vraie cible */;
   return { visible: !!al && !al.hidden, txt:(document.getElementById('courseAlertTxt')||{}).textContent,
     y: rb?Math.round(rb.y):null, croix: !!document.getElementById('courseAlertX'),
     ficheAttente: !!document.querySelector('#courierDispo:not([hidden])'),

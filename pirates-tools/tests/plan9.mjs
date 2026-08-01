@@ -182,6 +182,13 @@ console.log('\n━━ 2/3. LE CLIENT NE FIXE NI PRIX NI RÈGLEMENT ━━');
 COURSES = { ok: true, courier: true, dispo: [], mine: [Object.assign({}, baseC, { accord: null })] };
 await boot('#/mes-livraisons');
 await ouvrirSignet('#clientDelivEnCours .lv-signet');
+/* ⛔ CES CHAMPS DOIVENT ÊTRE ABSENTS — ce n'est pas un oubli, c'est la règle.
+   L'accord ENTÉRINE, il ne renégocie pas : date, créneau, dépôt et précisions
+   viennent de la course (le client les a posés une fois), le règlement vient
+   du profil du livreur. Les redemander rouvrirait la porte à une plateforme
+   qui « organise » la prestation — art. L7342-1, présomption de salariat.
+   Les assertions ci-dessous vérifient donc leur ABSENCE.
+   ancres-absentes-voulues: acPaiement, acDate, acHour, acLieu, acNotes */
 await ouvrirPanneau('accord');
 const C = await page.evaluate(() => {
   const p = document.getElementById('lvChatPanel');
@@ -390,7 +397,27 @@ const S = await page.evaluate(() => {
 });
 T('Le réglage « comment veux-tu être payé » existe', S.present === true, JSON.stringify(S));
 T('Il reflète son profil (virement)', S.valeur === 'virement', String(S.valeur));
-T('Deux modes proposés', S.options.length === 2 && S.options.includes('especes') && S.options.includes('virement'), JSON.stringify(S.options));
+/* ⚠️ ASSERTION REFAITE LE 01/08/2026 — elle comptait, elle ne vérifiait rien.
+   Elle exigeait EXACTEMENT deux modes, nommés en dur (« especes »,
+   « virement »). Un troisième a été ajouté depuis, délibérément (le lien de
+   paiement, pour que le livreur soit réglé tout de suite). Le harnais criait
+   donc au défaut sur une fonctionnalité voulue — et il aurait crié pareil au
+   RETRAIT d'un mode, sans jamais dire lequel.
+
+   On teste maintenant l'INVARIANT que le code énonce lui-même, deux lignes
+   au-dessus du menu : « ajouter un mode sans l'offrir au livreur (ou
+   l'inverse) donne un réglage impossible à choisir, ou un choix que le
+   serveur refuse ». Le menu doit donc refléter LV_PAIEMENTS À L'IDENTIQUE.
+   Aucun mode nommé ici : la liste de référence est relue dans `app.js`. */
+const MODES_ATTENDUS = (function (src) {
+  const bloc = (src.match(/var LV_PAIEMENTS = \[([\s\S]*?)\];/) || [])[1] || '';
+  return [...bloc.matchAll(/v:\s*'([^']+)'/g)].map((m) => m[1]);
+})(await readFile(join(RACINE, 'app.js'), 'utf8'));
+T('PRÉALABLE : la liste des modes est relue dans app.js',
+  MODES_ATTENDUS.length > 0, MODES_ATTENDUS.length + ' mode(s) — ' + JSON.stringify(MODES_ATTENDUS));
+T('Le menu offre EXACTEMENT les modes déclarés par le produit, ni plus ni moins',
+  S.options.join('|') === MODES_ATTENDUS.join('|'),
+  'menu=' + JSON.stringify(S.options) + ' attendu=' + JSON.stringify(MODES_ATTENDUS));
 posted = [];
 await page.evaluate(() => {
   const sel = document.getElementById('lvPfPaiement'); if (sel) sel.value = 'especes';

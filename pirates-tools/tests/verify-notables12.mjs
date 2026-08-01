@@ -30,7 +30,7 @@ await pg.click('#pdpBuy');
 await pg.waitForTimeout(150);
 const r=await pg.evaluate(async()=>{
   const modal=document.getElementById('payModal');
-  const closeBtn=modal.querySelector('.pay-modal__close,[data-close],button[aria-label*="ermer"],#payModalClose');
+  const closeBtn=modal.querySelector('.pay-modal__close, [data-pay-close]')   /* #payModalClose et [data-close] morts ; la vraie prise est [data-pay-close] */;
   if(closeBtn) closeBtn.click(); else return {err:'close btn introuvable'};
   await new Promise(r=>setTimeout(r,80));           // < 250 ms
   // rouvre via le bouton Acheter

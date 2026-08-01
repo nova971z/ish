@@ -10,7 +10,7 @@
 
 ---
 
-## SOMMAIRE — six origines, rien de plus
+## SOMMAIRE — sept origines, rien de plus
 
 | Origine | Mécanisme | Cas | Antidote | Porte |
 |---|---|---|---|---|
@@ -20,9 +20,16 @@
 | **O4** | Contrainte connue, non appliquée | 3 | §1 | `garde-entonnoir.js` |
 | **O5** | Outil artisanal au lieu de l'outil existant | 1 | §1.4 | aucune — humaine |
 | **O6** | Copie périmée au lieu de la source vivante | 2 | §4.4 | `p7-architecture.js` |
+| **O7** | **Lire le silence comme un succès** | 6 | §3 · §4.3 | `sabotage.mjs` · `ci.js` · `check-ancres.js` |
 
-**46 erreurs, 6 mécanismes.** O1 et O2 en concentrent **32 à elles deux** :
+**52 erreurs, 7 mécanismes.** O1 et O2 en concentrent **32 à elles deux** :
 c'est là qu'il faut regarder en premier, toujours.
+
+⚠️ **O7 est né le 01/08/2026**, et il est né d'une règle qui existait déjà :
+« non exécuté n'est PAS vert » — mais écrite pour les seuls harnais. Six
+erreurs en une session, dont **un audit de sécurité mort sans que rien ne le
+dise**. Une règle vraie appliquée à un seul endroit ne protège que cet
+endroit ; il faut chercher où elle vaut AUSSI.
 
 ---
 
@@ -186,14 +193,56 @@ réinitialisé — c'est lui qui a attrapé E-602 **sur moi**.
 
 ---
 
+## O7 — LIRE LE SILENCE COMME UN SUCCÈS
+*Mécanisme : la mesure **n'a pas eu lieu**, rien ne le dit, et j'appelle ça un
+résultat. Distinct de O2, où l'instrument mesure — mal. Ici il ne mesure pas du
+tout, et son silence ressemble trait pour trait à un succès.*
+
+*Pourquoi il a échappé aux six premiers :* le projet avait déjà la maxime
+« **non exécuté n'est PAS vert** »… écrite pour les **harnais** seulement. Ni
+mes commandes de vérification, ni la CI elle-même n'y étaient soumises. Une
+règle qui ne couvre qu'un endroit se fait contourner par tous les autres.
+
+| N° | Ce que j'ai conclu | Ce qui s'était réellement passé | Ce qui l'a démenti |
+|---|---|---|---|
+| **E-701** | « la garde a mordu » | le `perl -0pi -e "s/^…/…/m"` n'a **jamais accroché** : fichier inchangé, contrôle vert faute d'avoir quoi que ce soit à attraper | `grep` du sabotage → **0** occurrence |
+| **E-702** | « la garde a mordu » | la copie de l'outil, lancée depuis un autre dossier, est morte sur `ERR_MODULE_NOT_FOUND` **avant la première ligne utile** | le message d'erreur, que mon `grep "❌"` ne pouvait pas voir |
+| **E-703** | « 7 harnais sur 8 étaient déjà rouges » | relevé lancé sur `x.mjs` là où le fichier s'appelle `x.js` → `MODULE_NOT_FOUND`, compté **vert** | relevé refait avec la vraie extension : **8 sur 8** |
+| **E-704** | « les 19 empreintes sont identiques » | vrai des 14 fichiers touchés par l'outil seul ; **5 avaient été édités à la main** ensuite | `diff` des empreintes, qui a montré 5 écarts |
+| **E-705** | « CI verte, donc les portes tournent » | `safeRequire` avalait toute porte **présente mais cassée** sous un `ℹ️ module manquant ignoré` — `audit/p3-endpoints` (authentification des points d'entrée) était **mort depuis la migration** | sabotage de la porte : CI restée **verte** |
+| **E-706** | « commande non exécutée » | mon propre outil cherchait `Cannot find module` **n'importe où** dans la sortie : une commande qui tourne parfaitement peut l'imprimer. Fausse alerte de mon détecteur | la commande avait tourné, code 1, sortie complète |
+
+**Antidote** : ne jamais conclure d'une **absence de signal**. Exiger une preuve
+**positive** que la mesure a eu lieu — empreinte avant/après pour une écriture,
+code de sortie **et** contenu pour une commande, nombre d'assertions rendues
+pour un harnais.
+
+**Portes** :
+- `outils/sabotage.mjs` — refuse de conclure si la substitution n'a rien changé
+  ou si la commande n'a pas tourné ; restaure et **vérifie** la restauration.
+  *(Ferme E-701, E-702, E-703. E-706 est sa propre correction.)*
+- `scripts/ci.js` — `safeRequire` distingue **fichier absent** (optionnel) de
+  **porte présente et cassée** (échec net). *(Ferme E-705.)*
+- `scripts/check-ancres.js` — attrape la cause n°1 des harnais qui meurent
+  avant d'avoir testé quoi que ce soit.
+
+⚠️ **E-704 n'a pas de porte** : ce n'est pas une mesure fausse, c'est un
+**périmètre d'affirmation** trop large. L'antidote est §3 — dire sur quoi porte
+exactement le chiffre qu'on annonce, dans la même phrase que le chiffre.
+
+---
+
 ## Comment ce registre s'utilise
 
 1. **Avant d'affirmer** quoi que ce soit d'engageant → relire **O1**.
 2. **Avant de déclarer un contrôle vert** → relire **O2**.
 3. **Avant de réutiliser** un motif, une classe, une regex → relire **O3**.
-4. **Une nouvelle erreur** → la classer dans une origine **existante**. Si
-   aucune ne convient, c'est un mécanisme neuf : créer **O7**, et se demander
-   pourquoi il a échappé aux six premiers.
+4. **Avant de conclure d'un silence** — commande sans erreur, sortie vide,
+   contrôle qui n'a rien dit → relire **O7**. Une mesure qui n'a pas eu lieu
+   ressemble à un succès.
+5. **Une nouvelle erreur** → la classer dans une origine **existante**. Si
+   aucune ne convient, c'est un mécanisme neuf : créer **O8**, et se demander
+   pourquoi il a échappé aux sept premières.
 
 ⛔ **Ce registre ne grossit pas indéfiniment.** Une erreur qui répète un cas déjà
 listé n'ajoute pas de ligne : elle incrémente le compteur de sa classe. On

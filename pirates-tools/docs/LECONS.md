@@ -69,6 +69,25 @@ ce qui est fonctionnellement et légalement requis pour encaisser une carte —
 elle ne dit pas si le formulaire est agréable. Un tunnel peut cocher ses quinze
 cases et rester pénible. Elle empêche de livrer INCOMPLET, rien de plus.
 
+| Date | Ce qui a cassé | La cause | La porte |
+|---|---|---|---|
+| 01/08/2026 | `audit/p3-endpoints` — l'audit d'**authentification des points d'entrée** — ne s'exécutait plus **depuis la migration Revolut**, et la CI affichait « ✅ tous les contrôles sont passés » | Il lisait `api/checkout.js` **au chargement du module** ; le fichier a été supprimé avec le tunnel de l'ancien encaisseur, `readFileSync` a jeté, et le `safeRequire` de la CI a rangé ça sous « ℹ️ module manquant ignoré ». Une porte présente mais illisible était traitée comme une porte optionnelle absente | `scripts/ci.js` |
+| 01/08/2026 | Cinq harnais rouges depuis des jours, dont deux **morts avant de rendre une seule assertion** — zéro couverture sur le changement d'e-mail et sur le paiement avec coffret | Ils visaient des identifiants disparus (`#stripeCard`, `#payAddrCp`, `#acDate`) ou nommaient une catégorie du catalogue que l'user avait regroupée. L'interface bougeait sur SES décisions ; les harnais attendaient l'ancien monde et accusaient le produit | `scripts/check-ancres.js` |
+| 01/08/2026 | Trois de mes propres sabotages ont **menti dans la même session** : j'ai annoncé « la porte mord » sur des mesures qui n'avaient jamais eu lieu | Deux motifs `perl` qui n'accrochaient pas (fichier inchangé), une commande lancée avec la mauvaise extension (`.mjs` contre `.js`). Aucune sortie ne contenait « ❌ », et j'ai lu ce silence comme un succès | `outils/sabotage.mjs` |
+
+⚠️ **La leçon commune aux trois, et c'est la plus utile :** le projet possédait
+déjà la règle — « **non exécuté n'est PAS vert** ». Elle était écrite pour les
+harnais, et pour eux seuls. Ni la CI ni mes commandes de vérification n'y
+étaient soumises. *Une règle vraie appliquée à un seul endroit ne protège que
+cet endroit.* C'est l'origine **O7** du registre des erreurs.
+
+⚠️ **Ce que `check-ancres` ne fait PAS.** Elle vérifie qu'un identifiant visé
+EXISTE. Elle ne dit rien de sa **visibilité** — `verify-h5` mourait sur un champ
+bien présent, mais dans un onglet masqué — ni des ancres de **données**
+(catégorie, marque), invérifiables puisque le catalogue change tous les jours.
+C'est un plancher : « le harnais ne vise pas un fantôme », pas « le harnais est
+juste ».
+
 ⚠️ **Et elle n'a pas pu consulter les références externes** : `stripe.com`,
 `legifrance.gouv.fr` et `economie.gouv.fr` répondent 403 depuis l'environnement
 de travail. Ses exigences viennent du PROJET — `docs/JURIDIQUE.md`, harnais

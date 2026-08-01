@@ -230,15 +230,41 @@ var INDEX = [
   {
     intention: 'Écrire ou corriger un harnais de test',
     mots: ['test', 'harnais', 'playwright', 'assertion', 'sabotage'],
-    fichiers: ['tests', 'tests/_socle.mjs', 'tests/lancer.mjs'],
+    fichiers: ['tests', 'tests/_socle.mjs', 'tests/lancer.mjs', 'outils/sabotage.mjs'],
     fonctions: [],
-    protege: ['scripts/check-harnais.js'],
+    protege: ['scripts/check-harnais.js', 'scripts/check-ancres.js', 'outils/sabotage.mjs'],
     regles: ['.claude/rules/harnais.md'],
-    pieges: ['Une vérification qu\'on ne parvient pas à faire échouer ne vérifie rien : sabotage obligatoire.',
+    pieges: ['Une vérification qu\'on ne parvient pas à faire échouer ne vérifie rien : sabotage obligatoire — et par `node outils/sabotage.mjs`, plus à la main. Trois sabotages sur cinq ont MENTI le 01/08/2026 (motif jamais accroché, mauvaise extension de fichier).',
+             '⛔ Un harnais ne nomme JAMAIS une donnée du catalogue — référence, titre, prix, CATÉGORIE, MARQUE. Le sujet se choisit à l\'exécution.',
+             '⛔ Un harnais ne vise jamais un identifiant mort : il meurt sur un délai SANS rendre d\'assertion, ou accuse le produit à tort. Porte : check-ancres. Une ancre visée pour prouver son ABSENCE se déclare : `// ancres-absentes-voulues: x, y`.',
+             'Vert sans rien vérifier — trois formes vues le 01/08 : `|| true` en fin d\'assertion ; le repli poli (`ℹ️ non déclenché`) au lieu d\'un échec ; `!(getElementById(x)||{}).hidden` qui rend toujours true.',
+             'Un seuil recopié du produit se périme (35 contre PAGE_SIZE=40). On relit la valeur à l\'exécution, ou on teste l\'invariant plutôt que le chiffre.',
+             'Depuis la pagination, COMPTER LES CARTES ne prouve plus rien : la page 1 en montre PAGE_SIZE quoi qu\'il arrive. Mesurer le nombre de PAGES.',
+             'Un état résiduel fausse tout : une puce restée active a fait rendre 0 à la recherche, et le harnais a accusé le produit.',
              'context.route() n\'intercepte PAS les requêtes émises depuis un Service Worker.',
              'Deux goto() sur la même URL ne rechargent pas la page.'],
     decisions: [],
-    fini: 'le harnais est vert ET prouvé faillible par sabotage délibéré.'
+    fini: 'le harnais est vert, check-ancres vert, ET prouvé faillible par `outils/sabotage.mjs` — qui refuse de conclure si le sabotage n\'a pas été appliqué ou si la commande n\'a pas tourné.'
+  },
+  {
+    /* Ajoutée le 01/08/2026 : cinq harnais rouges et un audit de sécurité mort
+       tombaient tous sur la même cause, et l'entonnoir n'avait rien à en dire.
+       Un rouge ancien qu'on ne diagnostique pas devient un rouge qu'on ignore. */
+    intention: 'Un harnais est rouge, ou une porte ne s\'exécute plus',
+    mots: ['rouge', 'harnais rouge', 'porte morte', 'timeout', 'délai',
+           'echec', 'échec', 'casse', 'cassé', 'reparer', 'réparer', 'diagnostic'],
+    fichiers: ['tests/lancer.mjs', 'scripts/ci.js', 'scripts/check-ancres.js', 'outils/sabotage.mjs'],
+    fonctions: [],
+    protege: ['scripts/check-ancres.js', 'scripts/ci.js (safeRequire distingue absent / cassé)'],
+    regles: ['.claude/rules/harnais.md'],
+    pieges: ['⛔ AVANT de corriger, MESURER SI C\'ÉTAIT DÉJÀ ROUGE AVANT : `git worktree add <tmp> <commit>` puis rejouer le harnais là-bas. Sinon on s\'attribue une casse qu\'on n\'a pas faite, ou on masque celle qu\'on a faite.',
+             '⚠️ Et lancer le harnais avec sa VRAIE extension : `.mjs` contre `.js`. Un MODULE_NOT_FOUND ne contient pas « ❌ » et se lit comme un vert.',
+             'Un harnais à 0/0 n\'est pas « rouge sur le fond » : il est MORT AVANT DE TESTER. Zéro couverture, et un rouge qu\'on finit par ignorer.',
+             'Cause n°1 mesurée le 01/08 : une ancre périmée (identifiant renommé, catégorie regroupée, champ retiré par décision). Lancer `node scripts/check-ancres.js` en premier.',
+             '⛔ Une porte PRÉSENTE mais qui ne se charge pas ne se voit pas : `audit/p3-endpoints` était mort depuis la migration (il lisait un fichier supprimé) et la CI restait verte. Une porte ne lit JAMAIS un fichier au chargement du module.',
+             'Un harnais réparé doit gagner des assertions, pas seulement passer au vert : audit-buttons est passé de 0 à 44, verify-h5 de 0 à 5.'],
+    decisions: [],
+    fini: 'le harnais rend PLUS d\'assertions qu\'avant, check-ancres vert, et la correction est prouvée par sabotage.'
   },
   {
     intention: 'Mémoire du projet, règles, documentation',

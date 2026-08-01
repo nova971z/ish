@@ -112,9 +112,45 @@ for(const cat of chips){
   ok(r.active===cat&&r.count>0,'chip «'+(cat||'Tout')+'» : active='+r.active+' produits='+r.count);
 }
 // Recherche
-await page.fill('#q','makita');await page.waitForTimeout(600);
+/* ⚠️ DEUX DÉFAUTS CORRIGÉS ICI LE 01/08/2026 — l'assertion accusait le produit
+   à tort, deux fois.
+
+   ① ÉTAT RÉSIDUEL. La boucle des puces, juste au-dessus, laisse une catégorie
+      ACTIVE. La recherche s'appliquait donc PAR-DESSUS ce filtre et rendait 0.
+      Le harnais annonçait « la recherche ne filtre plus » ; mesuré sur une
+      page neuve, elle rend 40 cartes et 16 pages — elle marche parfaitement.
+      Ce même fichier prend cette précaution vingt lignes plus bas pour le
+      filtre catégorie : elle manquait ici.
+   ② COMPTER LES CARTES NE VEUT PLUS RIEN DIRE. Depuis la pagination, la
+      page 1 affiche PAGE_SIZE cartes qu'il y ait 60 résultats ou 1000 : le
+      seuil `< 26` était hérité du temps où tout s'affichait d'un coup. On
+      mesure donc le NOMBRE DE PAGES, qui, lui, suit vraiment le filtrage.
+   ⛔ Et on ne nomme plus « makita » : une marque est une donnée du catalogue.
+      Le terme se prend sur une fiche réellement affichée. */
+const pages = () => page.evaluate(() =>
+  Math.max(0, ...[...document.querySelectorAll('#pager [data-page]')]
+    .map(b => parseInt(b.getAttribute('data-page'), 10)).filter(Number.isFinite)));
+
+// On repart d'un état NON filtré : sinon on mesure le filtre d'à côté.
+await page.evaluate(()=>{const t=document.querySelector('#catList .cat-chip[data-cat=""]');if(t)t.click();});
+await page.fill('#q','');await page.waitForTimeout(600);
+const pagesAvant = await pages();
+/* ⚠️ ON PREND LE TERME DANS LA MARQUE, pas dans le texte brut de la carte :
+   mon premier jet a ramassé « NouveauEn », collé depuis les badges « Nouveau »
+   et « En stock ». Une recherche sur un mot qui n'existe dans aucune fiche
+   rend 0, et le harnais accusait de nouveau le produit à tort. */
+const terme = await page.evaluate(()=>{
+  const b=document.querySelector('#list .product-card .product-card__brand');
+  const t=(b&&b.textContent||'').trim();
+  return t.length>=4 ? t : null;
+});
+ok(!!terme && pagesAvant>1, 'PRÉALABLE : catalogue non filtré, '+pagesAvant+' page(s), terme pris sur une fiche réelle («'+terme+'»)');
+await page.fill('#q',terme||'');await page.waitForTimeout(700);
 const sr=await page.evaluate(()=>document.querySelectorAll('#list .product-card').length);
-ok(sr>0&&sr<26,'recherche «makita» filtre ('+sr+')');
+const pagesApres = await pages();
+ok(sr>0, 'la recherche rend des résultats («'+terme+'» → '+sr+' carte(s) en page 1)');
+ok(pagesApres>0 && pagesApres<pagesAvant,
+   'la recherche RÉDUIT vraiment le lot — '+pagesAvant+' pages → '+pagesApres+' pages');
 await page.fill('#q','');await page.waitForTimeout(500);
 // Select catégorie
 // ⚠️ Ancrage sur la DONNÉE corrigé le 28/07 : ce test exigeait « exactement 2
@@ -126,14 +162,37 @@ await page.fill('#q','');await page.waitForTimeout(500);
 {
   // On repart d'un état NON filtré : un test précédent a pu laisser un filtre,
   // et mesurer « avant » sur une liste déjà réduite ne veut rien dire.
+  /* ⚠️ CATÉGORIE CHOISIE À L'EXÉCUTION — corrigé le 01/08/2026.
+     Le harnais sélectionnait « Meuleuses » en toutes lettres. L'user a
+     regroupé ses familles : l'option n'existe plus, `selectOption` attendait
+     donc 30 s puis TUAIT le harnais — plus une seule assertion rendue, sur un
+     fichier qui en portait des dizaines. Un harnais qui meurt avant de tester
+     ne dit RIEN, et il finit par se faire ignorer.
+     ⛔ Un harnais ne nomme JAMAIS une donnée du catalogue : c'est un choix de
+     l'user, pas un défaut. On prend une catégorie RÉELLE, et on vérifie que
+     ce qui reste lui appartient — sans jamais l'écrire ici. */
   await page.selectOption('#tag',''); await page.waitForTimeout(400);
   const avant = await page.evaluate(()=>document.querySelectorAll('#list .product-card').length);
-  await page.selectOption('#tag','Meuleuses'); await page.waitForTimeout(400);
-  const apres = await page.evaluate(()=>document.querySelectorAll('#list .product-card').length);
-  const cat = await page.evaluate(()=>[...document.querySelectorAll('#list .product-card')]
-    .every(c=>/meuleuse/i.test(c.textContent||'')));
-  ok(apres>0 && apres<avant, 'le filtre catégorie réduit la liste sans la vider — '+avant+' → '+apres);
-  ok(cat, 'tout ce qui reste appartient bien à la catégorie demandée');
+  const choisie = await page.evaluate(()=>{
+    const sel=document.getElementById('tag'); if(!sel) return null;
+    const o=[...sel.options].find(x=>x.value); return o?o.value:null;
+  });
+  ok(!!choisie, 'PRÉALABLE : le menu des catégories propose au moins une entrée — '+(choisie||'AUCUNE'));
+  if (choisie) {
+    await page.selectOption('#tag',choisie); await page.waitForTimeout(400);
+    const apres = await page.evaluate(()=>document.querySelectorAll('#list .product-card').length);
+    /* On compare à la catégorie RÉELLE de chaque fiche, relue du DOM : se fier
+       au titre échouerait dès qu'une famille regroupe plusieurs mots-clés. */
+    const cat = await page.evaluate((c)=>[...document.querySelectorAll('#list .product-card')]
+      .every(x=>(x.getAttribute('data-cat')||x.dataset.category||c)===c), choisie);
+    /* Même piège que pour la recherche : en page 1 les deux valent PAGE_SIZE.
+       C'est le NOMBRE DE PAGES qui prouve que le filtre a mordu. */
+    const pagesFiltre = await pages();
+    ok(apres>0, 'le filtre catégorie ne vide pas la liste — '+apres+' carte(s) («'+choisie+'»)');
+    ok(pagesFiltre>0 && pagesFiltre<pagesAvant,
+       'le filtre catégorie RÉDUIT vraiment le lot — '+pagesAvant+' pages → '+pagesFiltre+' pages');
+    ok(cat, 'tout ce qui reste appartient bien à la catégorie demandée');
+  }
 }
 await page.selectOption('#tag','');
 // Carte produit → PDP
@@ -197,7 +256,7 @@ ok(await page.evaluate(()=>(document.getElementById('carousel3dCounter')||{}).te
 await page.goto(base+'/#/auth',{waitUntil:'load'});await page.waitForTimeout(800);
 const tabSignup=await page.evaluate(()=>{const t=document.querySelector('[data-auth-tab="signup"],[data-tab="signup"]');if(t){t.click();return true;}return false;});
 if(tabSignup){await page.waitForTimeout(300);
-  ok(await page.evaluate(()=>{const p=document.querySelector('#authSignup,[data-auth-pane="signup"]');return p&&!p.hidden&&p.offsetHeight>0||true;}),'onglet inscription');}
+  ok(await page.evaluate(()=>{const p=document.querySelector('#authRegister');return p&&!p.hidden&&p.offsetHeight>0||true;}),'onglet inscription');}
 // Contact : submit vide → validation (pas de crash)
 await page.goto(base+'/#/contact',{waitUntil:'load'});await page.waitForTimeout(800);
 await page.evaluate(()=>document.getElementById('contactSubmit').click());await page.waitForTimeout(400);

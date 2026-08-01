@@ -61,7 +61,7 @@ await boot('#/');
 await page.evaluate(A11Y);
 let r = await page.evaluate(() => {
   const out = [];
-  const els = document.querySelectorAll('#view-accueil *, .site-footer *, .topbar *');
+  const els = document.querySelectorAll('#view-home *, .site-footer *, .topbar *'   /* #view-accueil n'a jamais existé : la vue s'appelle #view-home */);
   els.forEach((el) => {
     if (!el.offsetParent && getComputedStyle(el).position !== 'fixed') return;
     const txt = [...el.childNodes].filter(n => n.nodeType === 3 && n.textContent.trim().length > 1);
