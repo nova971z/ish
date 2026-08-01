@@ -31,10 +31,6 @@
        paint (WhatsApp n'est ouvert que sur clic utilisateur). -->
   <link rel="preconnect" href="https://ajax.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://ajax.googleapis.com">
-  <!-- js.stripe.com : script CLASSIQUE (no-CORS) → preconnect SANS crossorigin,
-       sinon la connexion préchauffée (pool CORS) n'est pas celle utilisée. -->
-  <link rel="preconnect" href="https://js.stripe.com">
-  <link rel="dns-prefetch" href="https://js.stripe.com">
   <!-- www.gstatic.com : Firebase (app+auth+firestore, ~500 Ko) est importé en
        ES module par firebase-init.js — l'origine n'était découverte qu'APRÈS
        le téléchargement de firebase-init.js → DNS+TLS+RTT sériels sur le chemin
@@ -44,7 +40,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=567">
+  <link rel="stylesheet" href="styles.css?v=568">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -88,12 +84,6 @@
        origin (e.g. GitHub Pages) where /api/* does not exist. -->
   <script>
   window.PT_API_BASE = '';
-  // MODE TEST Stripe (avant lancement) : paiements simulés, carte 4242 4242
-  // 4242 4242. La clé secrète correspondante (sk_test_) est sur Vercel.
-  // AU LANCEMENT : remettre la clé LIVE ci-dessous, remettre sk_live_ sur
-  // Vercel, et recalculer l'empreinte CSP (node scripts/check-csp.js).
-  // LIVE = pk_live_51TJYJVPynqHG9OETsHfRsfZbs8NWjeo4RO1sVltr9LVqvbL1IsAI13Wgw3YFglVYGQD6kBFOw5pKBPCUovdJ9OV300rHNF9ppi
-  window.PT_STRIPE_PK = 'pk_test_51TJYJVPynqHG9OETUy7WH3TE6rMc4XSN3k95tQrRiGsGNjeAtlUJEQZIHwnZssaat689xRbXCmFpnwA9A1MlCtjH003fzcmzXD';
   </script>
 
   <!-- Crypto payment config — CE BLOC INLINE EST LA SOURCE UNIQUE.
@@ -1637,7 +1627,7 @@
         <ul>
           <li><strong>Compte client :</strong> nom, adresse email, téléphone, adresse de livraison.</li>
           <li><strong>Commandes :</strong> produits commandés, montants, historique.</li>
-          <li><strong>Paiement :</strong> traité directement par Stripe. <strong>Aucune donnée de carte bancaire n'est stockée sur nos serveurs.</strong></li>
+          <li><strong>Paiement :</strong> traité directement par Revolut. <strong>Aucune donnée de carte bancaire n'est stockée sur nos serveurs.</strong></li>
           <li><strong>Formulaire de contact / newsletter :</strong> nom, email, message.</li>
           <li><strong>Navigation :</strong> le site n'utilise <strong>actuellement aucun cookie de mesure d'audience ni publicitaire</strong>. Seules des données <strong>fonctionnelles</strong> (panier, préférences, session de connexion) sont stockées localement sur votre appareil. Si une mesure d'audience (Google Analytics&nbsp;4) ou publicitaire (Meta&nbsp;Pixel) venait à être activée, elle ne le serait <strong>qu'après votre consentement</strong>, via un bandeau dédié.</li>
           <li><strong>Paiement crypto :</strong> seule une adresse publique de portefeuille est affichée ; aucune donnée personnelle n'est traitée.</li>
@@ -1670,7 +1660,7 @@
         <p>Vos données ne sont jamais vendues. Elles sont partagées uniquement avec les prestataires nécessaires au fonctionnement du service :</p>
         <ul>
           <li><strong>Google / Firebase</strong> — authentification et base de données (Google Ireland Limited).</li>
-          <li><strong>Stripe</strong> — paiement par carte (Stripe Payments Europe Ltd, Irlande).</li>
+          <li><strong>Revolut</strong> — paiement par carte (Revolut Payments UAB, Lituanie).</li>
           <li><strong>Resend</strong> — envoi des emails transactionnels (Resend Inc., États-Unis).</li>
           <li><strong>Vercel</strong> — hébergement (Vercel Inc., États-Unis).</li>
           <li><strong>Meta</strong> — liens vers notre compte Instagram (Meta Platforms Ireland Ltd). Le Meta&nbsp;Pixel n'est <strong>pas déployé actuellement</strong> ; il ne le serait que sous votre consentement.</li>
@@ -1678,7 +1668,7 @@
         </ul>
 
         <h2>5. Transferts hors Union européenne</h2>
-        <p>Certains prestataires (Google, Stripe, Resend, Vercel, Meta) peuvent traiter des données aux États-Unis. Ces transferts sont encadrés par les <strong>Clauses Contractuelles Types</strong> de la Commission européenne et/ou par le <strong>EU-US Data Privacy Framework</strong>, garantissant un niveau de protection adéquat.</p>
+        <p>Certains prestataires (Google, Revolut, Resend, Vercel, Meta) peuvent traiter des données aux États-Unis. Ces transferts sont encadrés par les <strong>Clauses Contractuelles Types</strong> de la Commission européenne et/ou par le <strong>EU-US Data Privacy Framework</strong>, garantissant un niveau de protection adéquat.</p>
 
         <h2>6. Durées de conservation</h2>
         <ul>
@@ -1708,7 +1698,7 @@
         </ul>
 
         <h2>9. Sécurité</h2>
-        <p>Nous mettons en œuvre des mesures techniques et organisationnelles pour protéger vos données : connexions chiffrées (HTTPS), accès restreints, prix calculés côté serveur, et prestataires de paiement certifiés (Stripe, conforme PCI-DSS).</p>
+        <p>Nous mettons en œuvre des mesures techniques et organisationnelles pour protéger vos données : connexions chiffrées (HTTPS), accès restreints, prix calculés côté serveur, et prestataires de paiement certifiés (Revolut, conforme PCI-DSS).</p>
 
         <h2>10. Contact</h2>
         <p>Pour toute question relative à cette politique : <a href="mailto:contact@pirates-tools.com">contact@pirates-tools.com</a>.</p>
@@ -1740,7 +1730,7 @@
         <h2>5. Paiement</h2>
         <p>Le paiement s'effectue :</p>
         <ul>
-          <li><strong>Par carte bancaire</strong> via <strong>Stripe</strong>, prestataire certifié PCI-DSS. Aucune donnée de carte n'est stockée par le Vendeur.</li>
+          <li><strong>Par carte bancaire</strong> via <strong>Revolut</strong>, prestataire certifié PCI-DSS. Aucune donnée de carte n'est stockée par le Vendeur.</li>
           <li><strong>En crypto-monnaie</strong> (Bitcoin, Ethereum, USDC, USDT, Solana), le cas échéant, par virement vers l'adresse affichée. Les transferts en crypto sont irréversibles : le Client doit vérifier le réseau et l'adresse avant tout envoi.</li>
         </ul>
         <p>La commande n'est traitée qu'après encaissement effectif du paiement.</p>
@@ -1836,7 +1826,7 @@
           <strong id="payModalTotal">0,00 €</strong>
         </div>
 
-        <!-- ── Panneau CARTE (Stripe Elements) ── -->
+        <!-- ── Panneau CARTE ── -->
         <div class="pay-pane is-active" data-pay-pane="card">
           <!-- Adresse de livraison AVANT paiement : le code postal fixe le
                territoire fiscal cote serveur (971xx-976xx). Le formulaire
@@ -1871,9 +1861,9 @@
             </div>
             <p id="payAddrHint" class="pay-address__hint" role="status">Nous livrons en Guadeloupe, Martinique, Guyane, La R&eacute;union et Mayotte (code postal 971xx&ndash;976xx).</p>
           </form>
-          <!-- Point de montage du formulaire de carte (Stripe OU Revolut selon
+          <!-- Point de montage du formulaire de carte (Revolut, selon
                le fournisseur actif — c'est le serveur qui l'annonce). -->
-          <div id="stripeElementsWrap" class="stripe-elements-wrap">
+          <div id="carteWrap" class="carte-wrap">
             <!-- ⛔ Le champ carte n'avait AUCUN intitule, alors que « Nom
                  complet », « Telephone » et « Adresse » en ont un. Il donnait
                  l'impression d'un bloc etranger colle au milieu du formulaire —
@@ -1888,10 +1878,10 @@
                      maxlength="120" placeholder="Pr&eacute;nom Nom">
             </div>
             <span class="pay-card-label" id="payCardLabel">Num&eacute;ro de carte</span>
-            <div id="stripePaymentElement" class="stripe-payment-element">
+            <div id="carteMontage" class="carte-montage">
               <!-- Le widget du fournisseur se monte ici -->
             </div>
-            <div id="stripeCardError" class="stripe-card-error" role="alert" hidden></div>
+            <div id="carteErreur" class="carte-erreur" role="alert" hidden></div>
           </div>
           <div class="pay-modal__trust">
             <div class="pay-modal__trust-row">
@@ -2047,7 +2037,7 @@
              annoncé QUI encaisse. Le texte statique ne doit donc nommer
              PERSONNE : nommer un fournisseur ici, c'est afficher une marque
              fausse pendant la fraction de seconde qui précède la réponse —
-             et c'en était une, « Stripe », alors que Revolut encaisse. -->
+             et c'en était une : un nom de fournisseur qui n'encaisse plus. -->
         <p class="pay-modal__powered" id="payModalPowered"><span>Paiement sécurisé — vos données de carte ne transitent jamais par nos serveurs</span></p>
       </div>
     </div>
@@ -2313,9 +2303,7 @@
   </noscript>
 
   <!-- =================== JS =================== -->
-  <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
-  <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=567"></script>
+  <script defer src="app.js?v=568"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

@@ -152,9 +152,13 @@ module.exports = async function () {
     }
   });
 
-  /* ── 3. Le fournisseur par défaut est celui qui FONCTIONNE ─────────────
-     Une variable mal orthographiée sur Vercel ne doit pas basculer le site sur
-     un fournisseur non validé : elle doit le laisser où il est. */
+  /* ── 3. UN SEUL FOURNISSEUR ENCAISSE, QUOI QU'ON METTE DANS L'ENVIRONNEMENT
+     Stripe a été retiré du site le 01/08/2026 (demande de l'user). Le code
+     client de Stripe n'existe plus : si `PAYMENT_PROVIDER` pouvait encore
+     basculer dessus, le serveur fabriquerait un jeton que PLUS AUCUN widget ne
+     sait monter — formulaire mort, ventes perdues, sans rien qui casse.
+     On exige donc que TOUTES les valeurs, y compris « stripe » écrit
+     explicitement, donnent Revolut. */
   var avant = process.env.PAYMENT_PROVIDER;
   try {
     var cas = [
@@ -162,22 +166,20 @@ module.exports = async function () {
       ['', 'variable vide'],
       ['revolute', 'faute de frappe'],
       ['REVOLUT_', 'faute de frappe'],
-      ['stripe', 'valeur explicite'],
-      ['n\'importe quoi', 'valeur absurde']
+      ['stripe', 'ancien fournisseur, écrit explicitement'],
+      ['n\'importe quoi', 'valeur absurde'],
+      ['revolut', 'valeur nominale'],
+      ['REVOLUT', 'casse haute'],
+      [' Revolut ', 'espaces autour']
     ];
     cas.forEach(function (c) {
       if (c[0] === undefined) delete process.env.PAYMENT_PROVIDER;
       else process.env.PAYMENT_PROVIDER = c[0];
-      ok(socle.nomFournisseur() === 'stripe',
-        '⛔ PAYMENT_PROVIDER = « ' + String(c[0]) + ' » (' + c[1] + ') bascule le site '
-        + 'ailleurs que sur Stripe. Le défaut doit TOUJOURS désigner le fournisseur '
-        + 'qui encaisse réellement.');
-    });
-    ['revolut', 'REVOLUT', ' Revolut '].forEach(function (v) {
-      process.env.PAYMENT_PROVIDER = v;
       ok(socle.nomFournisseur() === 'revolut',
-        'PAYMENT_PROVIDER = « ' + v + ' » doit bien sélectionner Revolut (la bascule '
-        + 'doit être possible, sinon la couture ne sert à rien).');
+        '⛔⛔ PAYMENT_PROVIDER = « ' + String(c[0]) + ' » (' + c[1] + ') ne donne pas '
+        + 'Revolut. Depuis le retrait de Stripe, AUCUNE valeur d\'environnement ne doit '
+        + 'pouvoir désigner un autre fournisseur : son code client n\'existe plus, le '
+        + 'formulaire de carte serait mort et la vente perdue sans erreur visible.');
     });
   } finally {
     if (avant === undefined) delete process.env.PAYMENT_PROVIDER;
@@ -1088,15 +1090,19 @@ module.exports = async function () {
        La règle est : `confirmPayment` SORT dès que le fournisseur est Revolut,
        sans condition sur le champ carte, et ce qu'elle appelle propose la page
        hébergée. On suit donc le nom de la fonction appelée, quel qu'il soit. */
+    /* ⚠️ RÈGLE RÉÉCRITE LE 01/08/2026, après le retrait de Stripe. Il n'y a
+       plus de « branches Stripe » à éviter : elles n'existent plus. Ce qui
+       reste vrai, et qui compte, c'est qu'un clic sur Payer aboutisse TOUJOURS
+       à l'un des deux chemins Revolut — le champ carte, ou la page hébergée —
+       et jamais à une impasse silencieuse. */
     var mConfirm = appSrc.match(/function confirmPayment\(\)[\s\S]*?\n  \}/);
     var sortieRev = mConfirm
-      && /if \(_paiementFournisseur === 'revolut'\)\s*return\s+(\w+)/.exec(mConfirm[0]);
-    ok(!!sortieRev,
-      '⛔⛔ `confirmPayment` ne sort plus INCONDITIONNELLEMENT quand le fournisseur actif '
-      + 'est Revolut. Le clic traverse alors les branches Stripe, n\'en satisfait aucune, '
-      + 'et finit sur « Paiement carte non configuré » + bascule crypto — un message FAUX '
-      + 'et une impasse, alors que la page de paiement hébergée fonctionne. La vente est '
-      + 'perdue sans que rien ne casse.');
+      && /return\s+(secoursRevolut)\(/.exec(mConfirm[0]);
+    ok(!!(mConfirm && /confirmerPaiementRevolut\(/.test(mConfirm[0])) && !!sortieRev,
+      '⛔⛔ `confirmPayment` n\'aboutit plus systématiquement à un chemin Revolut. Il doit '
+      + 'appeler `confirmerPaiementRevolut` quand le champ carte est monté, et retomber sur '
+      + '`secoursRevolut` sinon. Toute autre issue est une impasse : le client clique, rien '
+      + 'n\'aboutit, la vente est perdue sans que rien ne casse.');
     if (sortieRev) {
       var mSecours = appSrc.match(new RegExp('function ' + sortieRev[1] + '\\([\\s\\S]*?\\n  \\}'));
       /* ⚠️ 1ʳᵉ VERSION FAIBLE, démasquée par sabotage : elle se contentait de

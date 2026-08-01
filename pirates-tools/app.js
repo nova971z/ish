@@ -3670,7 +3670,7 @@
 
       // CTA — pré-lancement : souscription via contact (WhatsApp si numéro
       // configuré, sinon formulaire de contact). Le paiement en ligne de
-      // l'abonnement arrive en Phase 3 (Stripe Subscriptions).
+      // l'abonnement arrive en Phase 3.
       + '<div class="abo-cta-wrap">'
       + (data.places ? '<p class="abo-places">' + data.places + ' places au total — programme limité</p>' : '')
       + '<button class="abo-cta abo-cta--' + escapeHTML(data.theme) + '" id="aboCtaBtn"' + (data.rules ? ' disabled aria-disabled="true"' : '') + '>Demander ma place \u2014 ' + data.price + '\u20ac/mois</button>'
@@ -3692,7 +3692,7 @@
         if (ctaBtn.disabled) return;
         // Redirige vers le formulaire de pré-inscription structuré (Phase 3a) :
         // il collecte tout (métier, tailles, logo…) + l'acceptation horodatée
-        // des règles. Aucun paiement (Stripe gelé tant que l'entreprise n'existe
+        // des règles. Aucun paiement (gelé tant que l'entreprise n'existe
         // pas). Le tier choisi est pré-sélectionné via le slug.
         if (typeof track === 'function') track('abo_request', { plan: slug });
         location.hash = '#/rejoindre/' + encodeURIComponent(slug);
@@ -6577,7 +6577,7 @@
   // Widget « Mes gains » de l'espace livreur. Trois états de l'argent, calculés
   // depuis les courses que le livreur a acceptées :
   //   • GELÉ      : payé par le client, retenu tant qu'il n'a pas confirmé ;
-  //   • À VERSER  : confirmé, en attente du virement (ou de Stripe Connect) ;
+  //   • À VERSER  : confirmé, en attente du virement ;
   //   • VERSÉ     : parti sur le compte du livreur.
   // Seules les courses PAYÉES comptent — une course non payée ne représente
   // aucun argent réel et ne doit jamais gonfler un total affiché.
@@ -8128,7 +8128,7 @@
 
   function parseHash() {
     var hash = location.hash.replace(/^#/, '') || '/';
-    // Strip any query string carried in the hash (e.g. Stripe Checkout returns
+    // Retire la chaîne de requête portée par le hash (retour de paiement)
     // to #/merci?session_id=…) so it doesn't break the exact ROUTES match.
     var qIndex = hash.indexOf('?');
     if (qIndex !== -1) hash = hash.substring(0, qIndex) || '/';
@@ -9631,7 +9631,7 @@
 
   // ── Bootstrap ──────────────────────────────────────────────
 
-  // ── Stripe Payment Modal ───────────────────────────────────
+  // ── Fenêtre de paiement ────────────────────────────────────
   var _payItems = null;
   // Course de livraison quincaillerie attachée au paiement en cours :
   // { address, lat, lng, postal, city, date, when, hour, zone, prix } ou null.
@@ -9648,7 +9648,7 @@
   // ── INTERRUPTEUR canal crypto ──────────────────────────────
   // Décision 16/07/2026 : le paiement crypto est un flux DÉCLARATIF (le client
   // annonce « j'ai payé » → commande 'declared' à vérifier à la main sur la
-  // blockchain), non vérifiable par le serveur comme l'est la carte via Stripe.
+  // blockchain), non vérifiable par le serveur comme l'est la carte.
   // Risque de fraude au lancement → on le fait DISPARAÎTRE sans rien effacer :
   // tout le code crypto ci-dessous RESTE intact, mais l'onglet et le chemin
   // 'declared' sont neutralisés. RÉACTIVER = passer ce flag à true ICI **et**
@@ -9923,7 +9923,7 @@
     // client. Elle envoyait la clé API de compte (x-api-key) à chaque visiteur —
     // n'importe qui pouvait l'extraire et créer des factures sur le compte
     // marchand. Pour réactiver NOWPayments, passer par un endpoint serverless
-    // (/api/nowpayments) qui garde la clé côté serveur, comme pour Stripe.
+    // (/api/nowpayments) qui garde la clé côté serveur.
     // Le lien de paiement pré-généré (co.url) ci-dessus reste, lui, sûr.
     toast("Le paiement crypto dynamique n'est pas encore disponible.", 'info');
   }
@@ -10015,7 +10015,7 @@
       if (btnCrypto) btnCrypto.hidden = true;
       if (btnCard)   btnCard.hidden = false;
       /* ⛔ LE NOM DU FOURNISSEUR ÉTAIT ÉCRIT EN DUR (constaté le 01/08/2026).
-         Le site encaissait par Revolut et affichait « Propulsé par Stripe » au
+         Le site encaissait par Revolut et affichait un AUTRE nom au
          bas de la fenêtre de paiement. Ce n'est pas qu'une coquille : dire au
          client qui traite sa carte est une INFORMATION, pas une décoration —
          elle figure aussi dans les CGV et la politique de confidentialité, où
@@ -10163,8 +10163,8 @@
     // Adresse d'abord : le formulaire carte (et le PaymentIntent) ne sont
     // créés qu'après une adresse de livraison valide — le code postal fixe le
     // territoire fiscal côté serveur (préventif A1).
-    _stripeReady = false;
-    _stripeClientSecret = null;
+    _carteMontee = false;
+    _jetonPaiement = null;
     _quoteTerritory = null;
     var cgvBox = document.getElementById('payCgvOk');
     if (cgvBox) {
@@ -10261,9 +10261,6 @@
         + ' width="18" height="18" alt="" loading="lazy" decoding="async">'
         + '<span>Paiement sécurisé par <strong>Revolut</strong></span>';
     }
-    if (_paiementFournisseur === 'stripe') {
-      return '<span>Paiement sécurisé par <strong>Stripe</strong></span>';
-    }
     return '<span>Paiement sécurisé — vos données de carte ne transitent jamais par nos serveurs</span>';
   }
 
@@ -10281,19 +10278,17 @@
     }, 250);
   }
 
-  // ── Stripe Elements integration ─────────────────────────────
+  // ── Champ carte du tunnel de paiement ──────────────────────
   //
   // Flow:
-  // 1. openPayModal → initStripeElements() creates PaymentIntent via API
-  // 2. Stripe Payment Element mounts in #stripePaymentElement
+  // 1. openPayModal → monterChampCarte() creates PaymentIntent via API
+  // 2. le champ carte du fournisseur se monte dans #carteMontage
   // 3. User fills card details inside the embedded form
-  // 4. confirmPayment() calls stripe.confirmPayment() client-side
+  // 4. confirmPayment() déclenche le paiement côté client
   // 5. On success → inline redirect to /merci (no external redirect)
 
-  var _stripe = null;       // Stripe instance
-  var _stripeElements = null; // Stripe Elements instance
-  var _stripeClientSecret = null;
-  var _stripeReady = false;
+  var _jetonPaiement = null;
+  var _carteMontee = false;
   /* ⛔⛔ IDENTIFIANT DE LA COMMANDE CRÉÉE PAR LE SERVEUR (`paymentIntentId`).
      Le serveur le renvoyait depuis toujours ; le front ne le gardait NULLE
      PART — `grep -n "data.paymentIntentId" app.js` → 0 occurrence.
@@ -10414,63 +10409,20 @@
   // au bon territoire.
   function handlePayAddressChange() {
     var v = validatePayAddress();
-    var container = document.getElementById('stripePaymentElement');
+    var container = document.getElementById('carteMontage');
     if (!v.valid) {
-      if (!_stripeClientSecret && container) {
-        container.innerHTML = '<div class="stripe-fallback">'
+      if (!_jetonPaiement && container) {
+        container.innerHTML = '<div class="carte-repli">'
           + '<p>Renseignez votre adresse de livraison ci-dessus pour afficher le paiement par carte.</p>'
           + '</div>';
       }
       return;
     }
-    if (_stripeClientSecret && v.territory === _quoteTerritory) return;
-    initStripeElements();
+    if (_jetonPaiement && v.territory === _quoteTerritory) return;
+    monterChampCarte();
   }
 
   // Appearance matching Pirates Tools dark theme
-  var STRIPE_APPEARANCE = {
-    theme: 'night',
-    variables: {
-      colorPrimary: '#8B5CF6',
-      colorBackground: '#0f1722',
-      colorText: '#e6edf5',
-      colorDanger: '#ef4444',
-      fontFamily: '"Inter", system-ui, -apple-system, sans-serif',
-      borderRadius: '10px',
-      spacingUnit: '4px'
-    },
-    rules: {
-      '.Input': {
-        backgroundColor: '#1a2332',
-        border: '1px solid rgba(255, 255, 255, 0.12)',
-        boxShadow: 'none',
-        color: '#e6edf5',
-        padding: '12px'
-      },
-      '.Input:focus': {
-        border: '1px solid #8B5CF6',
-        boxShadow: '0 0 0 2px rgba(139, 92, 246, 0.25)'
-      },
-      '.Label': {
-        color: '#cdd6e0',
-        fontSize: '13px',
-        fontWeight: '600'
-      },
-      '.Tab': {
-        backgroundColor: '#1a2332',
-        border: '1px solid rgba(255, 255, 255, 0.08)',
-        color: '#cdd6e0'
-      },
-      '.Tab--selected': {
-        backgroundColor: '#8B5CF6',
-        border: '1px solid #8B5CF6',
-        color: '#fff'
-      },
-      '.Tab:hover': {
-        color: '#fff'
-      }
-    }
-  };
 
   /* ── Widget carte REVOLUT ────────────────────────────────────────────────
      Chargement À LA DEMANDE, jamais dans index.html.
@@ -10538,8 +10490,8 @@
      tout appel à createCardField qui ne les mentionnerait pas. */
   function monterChampCarteRevolut(jeton, ship, container, errorEl) {
     if (container) {
-      container.innerHTML = '<div class="stripe-loading">'
-        + '<div class="stripe-loading__spinner"></div>'
+      container.innerHTML = '<div class="carte-attente">'
+        + '<div class="carte-attente__rond"></div>'
         + '<span>Chargement du formulaire de paiement…</span></div>';
     }
     return chargerSDKRevolut().then(function (RevolutCheckout) {
@@ -10602,7 +10554,7 @@
           errorEl.textContent = msg;
           errorEl.hidden = !msg;
         },
-        /* ⚠️ DIFFÉRENCE MAJEURE AVEC STRIPE : Stripe REDIRIGE vers `return_url`.
+        /* ⚠️ AUCUNE REDIRECTION ICI, contrairement à un tunnel 3-D Secure.
            Revolut rappelle `onSuccess` SANS quitter la page. La navigation vers
            /merci devient donc NOTRE responsabilité — sans ça, le client paie et
            reste bloqué sur le formulaire, persuadé que rien ne s'est passé. */
@@ -10614,7 +10566,7 @@
              visibles. Le client venait de payer et voyait un écran qui lui
              disait de payer — il pouvait recliquer.
 
-             Le chemin Stripe, lui, appelait bien `closePayModal()`. La couture
+             L'ancien chemin, lui, appelait bien `closePayModal()`. La couture
              existe justement pour que les deux fournisseurs se comportent
              pareil : ici elle avait été oubliée d'un seul côté.
 
@@ -10630,7 +10582,7 @@
         onError: function (err) { issueCarteRevolut(errorEl, (err && err.message) || 'Le paiement a échoué.'); },
         onCancel: function () { issueCarteRevolut(errorEl, 'Paiement interrompu. Tu peux réessayer.'); }
       });
-      _stripeReady = true;
+      _carteMontee = true;
       /* Le champ est monté : on rend la main au bouton principal s'il avait été
          désactivé par un échec précédent. */
       var btnOk = document.getElementById('payModalConfirm');
@@ -10639,7 +10591,7 @@
         majBoutonPayer();
       }
     }).catch(function (err) {
-      _stripeReady = false;
+      _carteMontee = false;
       /* Repli : Revolut fournit une page de paiement hébergée dès la création
          de la commande. Un script bloqué ne doit pas coûter la vente. */
       /* ⛔ ON RESTE SUR LE SITE. Le repli envoyait vers la page Revolut DÈS le
@@ -10653,7 +10605,7 @@
          sauve la vente quand un bloqueur empêche définitivement le script de
          charger — mais il n'est plus le premier réflexe. */
       if (container) {
-        container.innerHTML = '<div class="stripe-fallback">'
+        container.innerHTML = '<div class="carte-repli">'
           + '<p>Le formulaire de carte n\'a pas pu s\'afficher.</p>'
           + '<p><button type="button" class="btn primary" id="revolutReessayer">'
           + '↻ Réessayer</button></p>'
@@ -10680,7 +10632,7 @@
                rendue telle quelle et « réessayer » ne réessaie rien. */
             _revolutSDK = null;
             var ship = validatePayAddress();
-            monterChampCarteRevolut(_stripeClientSecret, ship, container, errorEl);
+            monterChampCarteRevolut(_jetonPaiement, ship, container, errorEl);
           };
         }
       }
@@ -10688,7 +10640,7 @@
   }
 
   /* Mémorise la commande AVANT de déclencher le paiement.
-     ⚠️ Extrait du bloc Stripe le 31/07/2026 pour que les DEUX fournisseurs
+     ⚠️ Extrait du bloc de l'ancien fournisseur pour que TOUT chemin de paiement
      l'appellent. Sans ça, un paiement Revolut aboutirait sans que /merci sache
      quoi finaliser : le client paie, la commande n'existe pas côté client, et
      seul le journal serveur garderait la trace. Le genre d'oubli qu'aucun test
@@ -10726,7 +10678,7 @@
       /* Repli sur le jeton de commande si le serveur n'a pas renvoyé d'`id` :
          les deux désignent la MÊME commande, et une preuve absente ferait
          retomber `/merci` dans le `no_proof` qu'on vient de corriger. */
-      p.paymentIntentId = _paiementId || _stripeClientSecret || null;
+      p.paymentIntentId = _paiementId || _jetonPaiement || null;
       p.method = fournisseur || _paiementFournisseur || '';
       p.ts = Date.now();   // la fenêtre de validité repart du paiement réel
       localStorage.setItem('pt_pending_order', JSON.stringify(p));
@@ -10867,13 +10819,6 @@
     if (note) note.hidden = !(carteOk && !cgvOk);
   }
 
-  function getStripe() {
-    if (_stripe) return _stripe;
-    var pk = window.PT_STRIPE_PK;
-    if (!pk || typeof window.Stripe !== 'function') return null;
-    _stripe = window.Stripe(pk);
-    return _stripe;
-  }
 
   // Create PaymentIntent and mount Elements.
   // Pré-requis : adresse de livraison valide (handlePayAddressChange est le
@@ -10903,31 +10848,30 @@
     } catch (_) {}
   }
 
-  function initStripeElements() {
+  function monterChampCarte() {
     var ship = validatePayAddress();
     if (!ship.valid) return;
-    var container = document.getElementById('stripePaymentElement');
-    var errorEl = document.getElementById('stripeCardError');
+    var container = document.getElementById('carteMontage');
+    var errorEl = document.getElementById('carteErreur');
     if (errorEl) { errorEl.hidden = true; errorEl.textContent = ''; }
     _quoteTerritory = ship.territory;
 
     /* ⛔⛔ AUCUN TEST DU SDK STRIPE ICI (01/08/2026). Ce bloc commençait par
-       `if (!getStripe()) return;` et abandonnait la commande avant même
-       d'appeler le serveur — or c'est le serveur qui dit qui encaisse. Sous
-       REVOLUT, un navigateur bloquant `js.stripe.com` perdait la vente.
-       Le test vit désormais dans `monterChampCarteStripe`. */
+       un test du SDK de l'autre fournisseur et abandonnait la commande AVANT
+       d'appeler le serveur — or c'est le serveur qui dit qui encaisse.
+       Retiré avec Stripe le 01/08/2026 : plus rien à tester ici. */
 
     // Show loading state
     if (container) {
-      container.innerHTML = '<div class="stripe-loading">'
-        + '<div class="stripe-loading__spinner"></div>'
+      container.innerHTML = '<div class="carte-attente">'
+        + '<div class="carte-attente__rond"></div>'
         + '<span>Chargement du formulaire de paiement…</span>'
         + '</div>';
     }
 
     var apiBase = apiBaseUrl();
     var piBody = JSON.stringify({
-      // Marqueur de course : le serveur le recopie dans la metadata Stripe et
+      // Marqueur de course : le serveur le recopie dans la metadata du paiement et
       // s'en sert pour vérifier que ce paiement règle bien CETTE livraison.
       courseId: _payGoodsCourseId || undefined,
       // Server resolves prices from the catalogue by key — no price is sent.
@@ -10963,10 +10907,10 @@
       if (!data.ok || !data.clientSecret) {
         throw new Error(data.error || 'Erreur création du paiement');
       }
-      _stripeClientSecret = data.clientSecret;
+      _jetonPaiement = data.clientSecret;
       /* ⚠️ QUEL WIDGET MONTER — c'est le SERVEUR qui le dit (`fournisseur`),
          jamais une déduction du front. Lui seul sait quel jeton il vient de
-         fabriquer : un jeton Revolut monté dans le widget Stripe donnerait un
+         fabriquer : un jeton monté dans le mauvais widget donnerait un
          formulaire vide et une erreur qui n'expliquerait rien. */
       memoriserAdresseLivraison(ship);
 
@@ -10974,7 +10918,7 @@
          même que le webhook utilisera : il fait donc le lien entre ce que le
          client voit et ce que la comptabilité enregistre. */
       _paiementId = data.paymentIntentId || null;
-      _paiementFournisseur = String(data.fournisseur || 'stripe');
+      _paiementFournisseur = String(data.fournisseur || '');
       _urlPaiementHebergee = data.urlHebergee || null;
       _paiementModeTest = (typeof data.modeTest === 'boolean') ? data.modeTest : null;
       /* Le serveur vient de dire QUI encaisse : la mention se remet à jour
@@ -10989,15 +10933,19 @@
       renderServerQuote(data);
 
       if (_paiementFournisseur === 'revolut') {
-        return monterChampCarteRevolut(_stripeClientSecret, ship, container, errorEl);
+        return monterChampCarteRevolut(_jetonPaiement, ship, container, errorEl);
       }
 
-      return monterChampCarteStripe(container, errorEl);
+      /* ⛔ Le serveur n'annonce plus que « revolut » : Stripe a été retiré du
+         site le 01/08/2026. Si un jour un autre fournisseur revient, c'est ICI
+         qu'il se branche — pas dans le bouton, pas dans le bandeau. */
+      issueCarteRevolut(errorEl, 'Fournisseur de paiement non reconnu : ' + _paiementFournisseur);
+      return;
     })
     .catch(function (err) {
-      _stripeReady = false;
+      _carteMontee = false;
       if (container) {
-        container.innerHTML = '<div class="stripe-fallback">'
+        container.innerHTML = '<div class="carte-repli">'
           + '<p>Impossible de charger le formulaire de paiement.</p>'
           + '<p>' + escapeHTML(err.message || 'Erreur réseau') + '</p>'
           + '<p>Utilisez <strong>WhatsApp</strong> ou <strong>Crypto</strong> pour commander.</p>'
@@ -11006,45 +10954,6 @@
     });
   }
 
-  /* Monte le formulaire de carte STRIPE. Pendant de `monterChampCarteRevolut` :
-     un fournisseur, une fonction. Extraite le 01/08/2026 quand la barrière P7
-     a refusé `initStripeElements` à 158 lignes.
-
-     ⛔ Le SDK est exigé ICI, pas avant l'appel serveur : c'est le serveur qui
-     dit qui encaisse. Le tester plus tôt privait de carte les clients sous
-     Revolut dont le navigateur bloque `js.stripe.com`. */
-  function monterChampCarteStripe(container, errorEl) {
-    var stripe = getStripe();
-    if (!stripe) {
-      if (container) {
-        container.innerHTML = '<div class="stripe-fallback">'
-          + '<p>Le paiement par carte sera bientôt disponible.</p>'
-          + '<p>En attendant, utilisez <strong>WhatsApp</strong> ou <strong>Crypto</strong> pour commander.</p>'
-          + '</div>';
-      }
-      _stripeReady = false;
-      return;
-    }
-    if (_stripeElements) {
-      try { _stripeElements.getElement('payment').destroy(); } catch (_) {}
-    }
-    _stripeElements = stripe.elements({
-      clientSecret: _stripeClientSecret,
-      appearance: STRIPE_APPEARANCE,
-      locale: 'fr'
-    });
-    var paymentElement = _stripeElements.create('payment', {
-      layout: { type: 'tabs', defaultCollapsed: false }
-    });
-    if (container) container.innerHTML = '';
-    paymentElement.mount('#stripePaymentElement');
-    paymentElement.on('ready', function () { _stripeReady = true; });
-    paymentElement.on('change', function (ev) {
-      if (!errorEl) return;
-      errorEl.textContent = ev.error ? ev.error.message : '';
-      errorEl.hidden = !ev.error;
-    });
-  }
 
   // Réaligne la modale de paiement sur la réponse serveur : total débité
   // (remise fidélité déduite) + ligne de remise + synchronisation du cache
@@ -11086,23 +10995,11 @@
     }
   }
 
-  /* ⛔⛔ REVOLUT ACTIF MAIS CHAMP CARTE ABSENT — la vente se perdait EN
-     SILENCE (trouvé le 01/08/2026 en remontant le chemin du clic).
-
-     Le champ n'est pas monté quand le script Revolut n'a pas pu charger :
-     bloqueur de publicité, réseau d'entreprise, coupure. Le clic tombait alors
-     dans les tests Stripe qui suivent `confirmPayment`, et AUCUN ne matchait :
-       · `_stripeElements` est nul — il n'est jamais créé en mode Revolut ;
-       · `_stripeClientSecret` porte le jeton Revolut, donc « non vide » ;
-       · `stripe` est vrai — js.stripe.com est encore servi à tout le monde.
-     Le clic finissait au tout dernier repli, sur un message FAUX (« Paiement
-     carte non configuré ») suivi d'une bascule vers la crypto, désactivée. Le
-     client se retrouvait dans une impasse, alors que la page de paiement
-     Revolut était affichée juste au-dessus et fonctionnait parfaitement.
-
-     ⛔ On ne bascule JAMAIS sur un chemin Stripe quand le fournisseur actif est
-     Revolut : les deux jetons n'ont rien à voir. On envoie le client là où il
-     peut vraiment payer, ou on lui dit la vérité. */
+  /* Repli quand le champ carte Revolut ne s'est pas monté : on envoie le client
+     sur la page de paiement hébergée par Revolut plutôt que de le laisser
+     devant un bouton qui ne peut rien faire.
+     ⛔ Il n'existe plus AUCUN autre chemin : Stripe a été retiré du site le
+     01/08/2026. Un fournisseur inconnu ne bascule sur rien — il le dit. */
   function secoursRevolut(total, errorEl) {
     sauverCommandeEnAttente(total);
     if (_urlPaiementHebergee) {
@@ -11135,161 +11032,23 @@
     }
     if (cgvNote) cgvNote.hidden = true;
     var total = payTotalCents(_payItems) / 100;
-    var stripe = getStripe();
-    var errorEl = document.getElementById('stripeCardError');
+    var errorEl = document.getElementById('carteErreur');
 
-    /* ── Champ carte REVOLUT ──────────────────────────────────────────────
-       Le même bouton, deux fournisseurs. Chez Revolut, `submit()` déclenche le
-       paiement et le résultat revient par les callbacks posés au montage —
-       il n'y a rien à enchaîner ici. */
-    if (_paiementFournisseur === 'revolut' && _revolutCardField) {
-      return confirmerPaiementRevolut(total, errorEl);
-    }
+    /* ⛔ STRIPE RETIRÉ DU SITE — demande de l'user, 01/08/2026 : « toute la
+       partie Stripe ne doit plus être présente sur le site, ni nulle part ».
+       Ce qui vivait ici et a disparu : le flux Stripe Elements, le repli
+       Checkout par redirection, et les « Payment Links » hérités.
 
-    // ⛔ Revolut actif sans champ carte : on ne descend JAMAIS dans les
-    //    branches Stripe qui suivent. Voir `secoursRevolut`.
-    if (_paiementFournisseur === 'revolut') return secoursRevolut(total, errorEl);
+       ⚠️ CE QUI N'A PAS ÉTÉ EFFACÉ, ET POURQUOI : les écritures comptables des
+       paiements DÉJÀ ENCAISSÉS par Stripe restent en base. Ce sont des pièces
+       justificatives de recettes déclarées — les détruire, c'est détruire la
+       preuve d'un chiffre d'affaires. Elles ne sont plus produites, seulement
+       relues. Voir `docs/LECONS.md`.
 
-    // ── Stripe Elements flow (embedded card form) ──
-    if (stripe && _stripeElements && _stripeClientSecret) {
-      var btn = document.getElementById('payModalConfirm');
-    if (btn) { btn.dataset.enCours = '1'; btn.disabled = true; btn.innerHTML = '<span class="pay-modal__pay-main"><span class="pay-modal__btn-icon">⏳</span> Traitement en cours…</span>'; }
-      if (errorEl) { errorEl.hidden = true; }
-
-      sauverCommandeEnAttente(total);
-
-      stripe.confirmPayment({
-        elements: _stripeElements,
-        confirmParams: {
-          return_url: location.origin + location.pathname + '#/merci'
-        },
-        redirect: 'if_required'
-      })
-      .then(function (result) {
-        if (result.error) {
-          // Payment failed — show error
-          if (errorEl) {
-            errorEl.textContent = result.error.message || 'Le paiement a échoué.';
-            errorEl.hidden = false;
-          }
-          if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = '<span class="pay-modal__btn-icon">💳</span> Commander avec obligation de paiement';
-          }
-          toast(result.error.message || 'Le paiement a échoué', 'error');
-        } else {
-          // Payment succeeded (or requires redirect handled by Stripe)
-          var pi = result.paymentIntent;
-          if (pi && pi.status === 'succeeded') {
-            // Update pending order with payment intent ID
-            try {
-              var pending = JSON.parse(localStorage.getItem('pt_pending_order') || '{}');
-              pending.paymentIntentId = pi.id;
-              pending.method = 'stripe_elements';
-              localStorage.setItem('pt_pending_order', JSON.stringify(pending));
-            } catch (_) {}
-
-            if (typeof track === 'function') {
-              track('payment_success', { value: total, method: 'card', paymentIntentId: pi.id });
-            }
-
-            closePayModal();
-            toast('Paiement réussi !', 'success');
-            location.hash = '#/merci';
-          }
-        }
-      })
-      .catch(function (err) {
-        // Réseau coupé / SDK Stripe en erreur : réactiver le bouton, sinon il
-        // reste bloqué sur « Traitement en cours… » avec une rejection non gérée.
-        console.error('[confirmPayment]', err && err.message);
-        if (btn) {
-          btn.disabled = false;
-          btn.innerHTML = '<span class="pay-modal__btn-icon">💳</span> Commander avec obligation de paiement';
-        }
-        if (errorEl) {
-          errorEl.textContent = 'Le paiement n\'a pas pu aboutir. Vérifiez votre connexion et réessayez.';
-          errorEl.hidden = false;
-        }
-        toast('Erreur réseau — paiement non abouti', 'error');
-      });
-      return;
-    }
-
-    // Stripe est chargé mais aucun PaymentIntent : l'adresse de livraison
-    // n'est pas (encore) valide — guider l'utilisateur au lieu de basculer
-    // silencieusement sur un autre moyen de paiement.
-    if (stripe && !_stripeClientSecret) {
-      var shipCheck = validatePayAddress();
-      if (errorEl) {
-        errorEl.textContent = shipCheck.valid
-          ? 'Le formulaire de paiement se charge — patientez un instant puis réessayez.'
-          : 'Renseignez d\'abord votre adresse de livraison (code postal 971xx–976xx).';
-        errorEl.hidden = false;
-      }
-      var firstEmpty = ['payAddrName', 'payAddrEmail', 'payAddrPhone', 'payAddrLine1', 'payAddrPostal', 'payAddrCity'].map(function (id) {
-        return document.getElementById(id);
-      }).filter(function (el) { return el && !el.value.trim(); })[0];
-      if (firstEmpty) firstEmpty.focus();
-      return;
-    }
-
-    // ── Fallback: server-side Stripe Checkout (redirect) ──
-    var apiConfigured = typeof window.PT_API_BASE === 'string';
-    var apiBase = apiBaseUrl();
-    if (apiConfigured && !stripe) {
-      var btn2 = document.getElementById('payModalConfirm');
-      if (btn2) { btn2.disabled = true; btn2.textContent = 'Redirection…'; }
-
-      var coBody = JSON.stringify({
-        // Server resolves prices from the catalogue by key — no price is sent.
-        items: _payItems.map(function (it) {
-          return { key: it.key, title: it.title, qty: it.qty || 1, coffret: !!it.coffret };
-        }),
-        customerEmail: (readPayAddress().email) || (_currentUser && _currentUser.email) || undefined,
-        territory: _currentTerritory
-        // uid retiré du corps (S2) : dérivé de l'ID token vérifié côté serveur.
-      });
-      jsonAuthHeaders().then(function (headers) {
-        return fetch(apiBase + '/api/checkout', { method: 'POST', headers: headers, body: coBody });
-      })
-      .then(function (r) { return r.json(); })
-      .then(function (data) {
-        if (data.ok && data.url) {
-          try {
-            localStorage.setItem('pt_pending_order', JSON.stringify({
-              items: _payItems.map(function (it) { return { key: it.key, title: it.title, price: payUnitCents(it) / 100, qty: it.qty }; }),
-              total: total, sessionId: data.sessionId, ts: Date.now()
-            }));
-          } catch (_) {}
-          window.location.href = data.url;
-        } else {
-          toast(data.error || 'Erreur paiement', 'error');
-          if (btn2) { btn2.disabled = false; btn2.textContent = 'Payer par carte'; }
-        }
-      })
-      .catch(function () {
-        toast('Erreur réseau — réessayez', 'error');
-        if (btn2) { btn2.disabled = false; btn2.textContent = 'Payer par carte'; }
-      });
-      return;
-    }
-
-    // ── Fallback: legacy Payment Links ──
-    var first = _payItems[0];
-    if (!first || !first.paymentLink) {
-      toast('Paiement carte non configuré — bascule sur Crypto.', 'info');
-      cryptoSwitchTab('crypto');
-      return;
-    }
-    try {
-      localStorage.setItem('pt_pending_order', JSON.stringify({
-        items: _payItems.map(function (it) { return { key: it.key, title: it.title, price: payUnitCents(it) / 100, qty: it.qty }; }),
-        total: total, ts: Date.now()
-      }));
-    } catch (_) {}
-    window.open(first.paymentLink, '_blank', 'noopener');
-    closePayModal();
+       Un seul chemin subsiste donc : Revolut, avec son champ carte, et son
+       repli sur la page hébergée si le champ ne se monte pas. */
+    if (_revolutCardField) return confirmerPaiementRevolut(total, errorEl);
+    return secoursRevolut(total, errorEl);
   }
 
   function setupPayModal() {
@@ -11336,7 +11095,7 @@
   }
 
   // A5 — PREUVE de paiement pour /merci. Avant, un simple pt_pending_order
-  // suffisait à écrire « paid » — or il est posé AVANT la confirmation Stripe
+  // suffisait à écrire « paid » — or il est posé AVANT la confirmation du fournisseur
   // (paiement abandonné → pending fantôme). Trois preuves acceptées :
   //  1. inline   : pending.paymentIntentId (écrit seulement si succeeded) ;
   //  2. redirect : ?redirect_status=succeeded&payment_intent=… (retour 3DS) ;
@@ -11371,7 +11130,7 @@
 
      `clearCart()` n'avait qu'un seul appelant dans tout le fichier — le bouton
      « Vider le panier ». Ce défaut est ANTÉRIEUR à Revolut : il existait déjà
-     du temps de Stripe, il n'était simplement jamais apparu faute d'un achat
+     du temps de l'ancien fournisseur, il n'était jamais apparu faute d'un achat
      complet.
 
      ⛔ APPELÉE UNIQUEMENT depuis la branche « paiement carte PROUVÉ », celle
@@ -11417,7 +11176,7 @@
     var totalNum = Number(pending.total) || 0;
 
     // MARCHANDISE d'une demande de livraison réglée (flux courant depuis le
-    // 27/07) : le serveur vérifie chez Stripe que ce paiement porte bien le
+    // 27/07) : le serveur vérifie chez le fournisseur que ce paiement porte bien le
     // marqueur de CETTE course, puis passe la course en « confirmée » — elle
     // est alors réellement commandée. ⚠️ Le prix de la course, lui, se règle
     // directement entre le client et le livreur (virement ou espèces).
@@ -11437,7 +11196,7 @@
     }
 
     // Course de livraison quincaillerie PAYÉE : finaliser sa création avec la
-    // preuve (paymentIntentId). Le serveur vérifie le paiement chez Stripe et
+    // preuve (paymentIntentId). Le serveur vérifie le paiement chez le fournisseur et
     // crée la course depuis la metadata — idempotent avec le webhook (doc id
     // = pi.id), donc aucun doublon si les deux chemins passent.
     // ⚠️ LEGACY : plus rien ne déclenche ce chemin depuis le passage à la
@@ -11505,22 +11264,20 @@
         total: totalNum,
         date: _fb.serverTimestamp(),
         // S3 : le client N'ÉCRIT JAMAIS 'paid'. 'pending' = paiement carte
-        // initié (le webhook Stripe le confirmera en 'paid' via l'Admin SDK,
+        // initié (le webhook le confirmera en 'paid' via l'Admin SDK,
         // seule source autoritaire) ; 'declared' = crypto à vérifier. Ainsi
         // un utilisateur ne peut plus forger une fausse commande « payée »
         // dans le tableau de bord admin (règle Firestore l'interdit aussi).
         status: isCrypto ? 'declared' : 'pending',
-        method: pending.method || 'stripe',
-        paymentIntentId: proof.paymentIntentId || pending.paymentIntentId || null,
+        method: pending.method || 'revolut',
+        paymentIntentId: proof.paymentIntentId || pending.paymentIntentId || null
         // Permet au webhook checkout.session.completed de retrouver et
-        // confirmer cette commande (updateOrderWhere stripeSessionId).
-        stripeSessionId: proof.sessionId || pending.sessionId || null
       }).catch(function (err) {
         console.warn('[merci] order save failed:', err && err.message);
       });
     }
 
-    // Nettoie les paramètres de retour Stripe de l'URL (?payment_intent=…) :
+    // Nettoie les paramètres de retour de paiement dans l'URL (?payment_intent=…) :
     // évite tout retraitement au refresh et n'expose pas le client_secret
     // dans l'historique/partage d'URL.
     if (location.search) {
@@ -12895,7 +12652,8 @@
      Séparé des charges À DESSEIN. Un remboursement annule une vente : il
      retire du CA et de la TVA COLLECTÉE. Saisi comme une charge, il gonflerait
      la TVA DÉDUCTIBLE — on réclamerait au fisc une taxe jamais payée.
-     Le site ne rembourse RIEN tout seul : on rembourse depuis Stripe, puis on
+     Le site ne rembourse RIEN tout seul : on rembourse depuis le tableau de bord
+     du fournisseur, puis on
      saisit ici ce qu'on a réellement constaté. Aucun champ n'est deviné. */
   function comptaRemboursementsHtml(refunds, eur) {
     var html = '<h3 class="compta-card__title" style="margin-top:1.4rem">Enregistrer un remboursement</h3>'
@@ -12905,9 +12663,9 @@
       + '<label>Montant remboursé TTC (€)<input type="number" id="rfAmount" step="0.01" placeholder="ce qui est reparti chez le client"></label>'
       + '<label>Référence de l\'avoir<input type="text" id="rfAvoir" placeholder="ex. AV-2026-001"></label>'
       + '<label>Coût d\'achat annulé HT (€)<input type="number" id="rfCogs" step="0.01" value="0" placeholder="0 si l\'outil est déjà commandé"></label>'
-      + '<label>Commission Stripe rendue (€)<input type="number" id="rfFee" step="0.01" value="0" placeholder="0 si Stripe ne rend rien"></label>'
+      + '<label>Commission d\'encaissement rendue (€)<input type="number" id="rfFee" step="0.01" value="0" placeholder="0 si le fournisseur ne rend rien"></label>'
       + '<label>Motif (sans nom de client)<input type="text" id="rfLabel" placeholder="ex. promo fournisseur terminée"></label>'
-      + '<label>Référence de la vente<input type="text" id="rfPayment" placeholder="n° de commande ou identifiant Stripe"></label>'
+      + '<label>Référence de la vente<input type="text" id="rfPayment" placeholder="n° de commande ou identifiant du paiement"></label>'
       + '</div>'
       + '<p class="compta-line"><b>Sans référence d\'avoir, la TVA reste due.</b> Sa récupération est subordonnée à la rectification de la facture initiale : le calcul ne la retirera donc pas, et te le signalera.</p>'
       + '<div class="compta-actions"><button type="button" class="btn primary" id="rfAdd">＋ Enregistrer le remboursement</button></div></div>';
@@ -12937,7 +12695,7 @@
         amountTtc: amount,
         avoirRef: document.getElementById('rfAvoir').value,
         cogsAnnuleHt: parseFloat(document.getElementById('rfCogs').value) || 0,
-        stripeFeeRendu: parseFloat(document.getElementById('rfFee').value) || 0,
+        commissionRendue: parseFloat(document.getElementById('rfFee').value) || 0,
         label: document.getElementById('rfLabel').value,
         paymentId: document.getElementById('rfPayment').value,
         dateMs: Date.now()
@@ -12966,7 +12724,7 @@
     var html = '<div id="comptaPrintable">';
     html += '<div class="compta-print-head"><b>Pirates Tools — Compte de résultat</b><span>Édité le ' + now + '</span></div>';
     if (!a.nb_ventes) {
-      html += '<div class="compta-card"><p class="compta-line">Aucune vente encaissée pour l\'instant. Dès la 1ʳᵉ vente (paiement Stripe confirmé), tout se remplit ici — chiffres 100 % réels.</p></div>';
+      html += '<div class="compta-card"><p class="compta-line">Aucune vente encaissée pour l\'instant. Dès la 1ʳᵉ vente (paiement confirmé), tout se remplit ici — chiffres 100 % réels.</p></div>';
     }
     html += '<div class="compta-kpis">'
       + kpi('Chiffre d\'affaires', eur(a.ca_ttc) + ' TTC', eur(a.ca_ht) + ' HT') + kpi('Ventes', (a.nb_ventes || 0) + '')
@@ -12975,7 +12733,7 @@
 
     html += '<h3 class="compta-card__title" style="margin-top:1rem">Compte de résultat (réel)</h3>';
     html += '<table class="compta-table">'
-      + row('Ventes encaissées (Stripe)', eur((a.brut && a.brut.ca_ttc) || a.ca_ttc) + ' TTC · ' + eur((a.brut && a.brut.ca_ht) || a.ca_ht) + ' HT')
+      + row('Ventes encaissées', eur((a.brut && a.brut.ca_ttc) || a.ca_ttc) + ' TTC · ' + eur((a.brut && a.brut.ca_ht) || a.ca_ht) + ' HT')
       // Les remboursements ne s'ajoutent pas aux charges : ils RETIRENT du CA.
       // On ne montre la ligne que s'il y en a — un zéro permanent devient du bruit.
       + ((a.remboursements && a.remboursements.nb > 0)
@@ -12987,7 +12745,7 @@
       + row('= Chiffre d\'affaires HT', eur(a.ca_ht), true)
       + row('− Coût des marchandises vendues', eur(a.cogs))
       + row('= Marge brute', eur(a.marge_brute), true)
-      + row('− Frais Stripe (réels)', eur(a.frais_stripe))
+      + row('− Commission d\'encaissement (réelle)', eur(a.frais_encaissement != null ? a.frais_encaissement : a.frais_stripe))
       + row('− Charges saisies (transport, octroi, CFE, assurance…)', eur(a.charges_saisies))
       + row('= Résultat d\'exploitation', eur(a.resultat_exploitation), true)
       // Mécénat (art. 238 bis CGI) : le don est réintégré fiscalement puis
@@ -13062,7 +12820,7 @@
     if (a.complet === false) {
       html += '<p class="compta-print-note">⚠️ Certaines ventes n\'ont pas de coût d\'achat enregistré (données partielles). Le coût réel sera complet pour toutes les ventes à venir.</p>';
     }
-    html += '<p class="compta-print-note"><b>Chiffres réels</b> (revenus Stripe, coût d\'achat snapshoté, frais Stripe, charges saisies). <b>Outil de gestion</b> : il ne remplace pas la tenue officielle des comptes ni tes factures d\'origine (à conserver 10 ans). À faire viser par un expert-comptable.</p>';
+    html += '<p class="compta-print-note"><b>Chiffres réels</b> (recettes encaissées, coût d\'achat snapshoté, commissions réelles, charges saisies). <b>Outil de gestion</b> : il ne remplace pas la tenue officielle des comptes ni tes factures d\'origine (à conserver 10 ans). À faire viser par un expert-comptable.</p>';
     html += '</div>'; // fin imprimable
 
     // ── Saisies hors PDF : charges, puis remboursements. Les deux formulaires
@@ -13333,7 +13091,7 @@
     function mcls(m) { return m <= 0 ? 'mg-crit' : (m < 10 ? 'mg-warn' : 'mg-good'); }
 
     var html = '';
-    html += '<p class="admin-hint">Marge nette réelle au <b>prix actuel du site</b> (catalogue live, mis à jour après chaque scan du traqueur), après envoi + octroi + Stripe + frais fixes + IS. Territoire 971 · '
+    html += '<p class="admin-hint">Marge nette réelle au <b>prix actuel du site</b> (catalogue live, mis à jour après chaque scan du traqueur), après envoi + octroi + commission d\'encaissement + frais fixes + IS. Territoire 971 · '
       + 'envoi <b>' + escapeHTML(cfg.mode || 'colissimo') + '</b> · cible <b>' + Math.round((cfg.targetNet || 0.15) * 100) + ' % net</b> · traqueur auto <b>' + (cfg.autoPrice ? 'ON' : 'OFF') + '</b>.</p>';
 
     html += '<div class="compta-kpis">'

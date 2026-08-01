@@ -114,23 +114,24 @@ var OPERATIONS = [
   'listerPaiements'
 ];
 
-/* Choix du fournisseur. Par défaut STRIPE — c'est ce qui encaisse aujourd'hui.
-   ⚠️ Le défaut n'est pas neutre : il doit toujours désigner le fournisseur qui
-   FONCTIONNE. Une variable mal orthographiée sur Vercel ne doit pas basculer le
-   site sur un fournisseur non validé, elle doit le laisser où il est. */
+/* ⛔ UN SEUL FOURNISSEUR ENCAISSE : REVOLUT (01/08/2026, demande de l'user —
+   « toute la partie Stripe ne doit plus être présente »).
+
+   `PAYMENT_PROVIDER` n'est plus lu : quelle que soit sa valeur, y compris
+   absente ou mal orthographiée, le site encaisse par Revolut. C'est le
+   contraire d'une régression — une variable d'environnement ne peut plus
+   basculer l'encaissement sur un fournisseur dont le code n'existe plus côté
+   client, ce qui donnerait un formulaire mort et des ventes perdues. */
 function nomFournisseur() {
-  var v = String(process.env.PAYMENT_PROVIDER || '').trim().toLowerCase();
-  return (v === 'revolut') ? 'revolut' : 'stripe';
+  return 'revolut';
 }
 
 /* Retourne le module du fournisseur actif.
    ⚠️ `require` paresseux : charger le module Revolut alors qu'on tourne sur
    Stripe (ou l'inverse) coûte du démarrage à froid sur chaque appel de
    fonction serverless, pour rien. */
-function fournisseur(nom) {
-  var n = nom || nomFournisseur();
-  if (n === 'revolut') return require('./revolut');
-  return require('./stripe');
+function fournisseur() {
+  return require('./revolut');
 }
 
 /* Normalise un état brut en l'un des six. Table EXPLICITE, jamais de repli
@@ -188,6 +189,14 @@ function paiementVide() {
 function fournisseurParEntetes(entetes) {
   var h = entetes || {};
   if (h['revolut-signature'] || h['Revolut-Signature']) return require('./revolut');
+  /* ⚠️ SEUL VESTIGE DE STRIPE, ET IL EST DÉLIBÉRÉ. Ce n'est PAS un chemin
+     d'encaissement : c'est le vérificateur de signature des notifications
+     TARDIVES. Le backoff de re-livraison s'étale sur ~3 jours ; refuser une
+     re-livraison d'un paiement DÉJÀ ENCAISSÉ, c'est perdre la trace comptable
+     d'un argent réellement reçu. Priorité : argent d'abord.
+     Ce fichier n'est jamais servi au navigateur et ne peut créer aucune
+     commande. À supprimer quand plus aucune notification tardive n'est
+     possible — voir la liste d'actions remise à l'user le 01/08/2026. */
   if (h['stripe-signature'] || h['Stripe-Signature']) return require('./stripe');
   return null;
 }

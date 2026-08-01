@@ -97,8 +97,22 @@ hash. Sans ça, la CSP **bloque le script en production** et le site est mort.
 
 ## Budgets de performance
 
-**Les plafonds ne se relèvent pas.** Quand `scripts/ci.js` bloque, on retire du
-poids — on ne déplace pas la limite.
+⛔ **RÈGLE RENVERSÉE le 01/08/2026, par décision de l'user.** Elle disait :
+« Les plafonds ne se relèvent pas — quand `ci.js` bloque, on retire du poids ».
+Elle ne s'applique plus. Motif donné : *« vire-moi tous ces plafonds, tu m'as
+dit toi-même qu'ils sont au dixième des plus gros sites de e-commerce ; si tu
+livres du code de qualité institutionnelle ils ne servent à rien. Si ça bugue,
+on trouvera une solution. »*
+
+**Ce qui reste, et ce qui change.** Les poids sont toujours **mesurés et
+affichés** à chaque `ci.js` — poids par fichier, total servi à froid, image la
+plus lourde, longueur des fonctions. Ce qui disparaît, c'est le **refus** :
+aucun de ces chiffres ne bloque plus une livraison.
+
+⚠️ Ce que ça coûte, écrit une fois pour qu'on ne le redécouvre pas : l'user
+navigue en privé, donc **aucun cache** n'amortit ces octets — chaque visite les
+repaie, la sienne comme celles de ses clients. Le chiffre reste donc affiché
+pour rester une décision, pas un oubli.
 
 **Avant toute purge CSS, vérifier les classes construites par concaténation.**
 `'toast--' + type`, `abo-page--*`, `plan-detail--*`, `partner-card--*`,

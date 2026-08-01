@@ -200,9 +200,9 @@ module.exports = function () {
        `app.js` cite `if (!stripe)` en toutes lettres et satisfaisait la regex
        (E-218, chercher une forme au lieu d'une règle). */
   var appSansCom = app.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/(^|[^:])\/\/[^\n]*/g, '$1');
-  var iInit = appSansCom.indexOf('function initStripeElements(');
+  var iInit = appSansCom.indexOf('function monterChampCarte(');
   ok(iInit !== -1,
-    '⛔ PRÉALABLE MANQUANT : `initStripeElements(` est introuvable dans app.js — renommée ? '
+    '⛔ PRÉALABLE MANQUANT : `monterChampCarte(` est introuvable dans app.js — renommée ? '
     + 'Ce contrôle ne vérifie plus rien tant que ce nom n\'est pas remis à jour.');
   if (iInit !== -1) {
     var iFetch = appSansCom.indexOf('create-payment-intent', iInit);

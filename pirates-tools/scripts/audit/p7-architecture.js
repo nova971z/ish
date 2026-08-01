@@ -175,15 +175,12 @@ let depassements = 0;
 [...tailles.entries()].filter(([, l]) => l > SEUIL).sort((a, b) => b[1] - a[1]).forEach(([nom, len]) => {
   const plafond = PLAFONDS[nom];
   if (plafond === undefined) {
-    depassements++;
-    problems.push('NOUVELLE fonction de ' + len + ' lignes : « ' + nom + ' ». Au-delà de '
-      + SEUIL + ' lignes, découper AVANT de livrer — la dette existante est gelée, pas extensible.');
-    LOG('  ❌ ' + String(len).padStart(4) + ' l.  ' + nom + '  ⟵ NOUVELLE');
+    /* ⛔ PLAFOND RETIRÉ — décision de l'user, 01/08/2026 (« vire-moi tous ces
+       plafonds »). On MESURE et on AFFICHE toujours : une fonction de 300
+       lignes reste visible à chaque CI. C'est le REFUS qui disparaît. */
+    LOG('  ⚠️ ' + String(len).padStart(4) + ' l.  ' + nom + '  ⟵ NOUVELLE (au-dessus de ' + SEUIL + ')');
   } else if (len > plafond) {
-    depassements++;
-    problems.push('« ' + nom + ' » est passée de ' + plafond + ' à ' + len + ' lignes. '
-      + 'Les fonctions démesurées sont gelées : elles ne doivent plus grossir.');
-    LOG('  ❌ ' + String(len).padStart(4) + ' l.  ' + nom + '  ⟵ +' + (len - plafond));
+    LOG('  ⚠️ ' + String(len).padStart(4) + ' l.  ' + nom + '  ⟵ +' + (len - plafond) + ' (information)');
   } else {
     LOG('  ' + (len < plafond ? '🔽' : '✅') + ' ' + String(len).padStart(4) + ' l.  ' + nom
       + (len < plafond ? '  (−' + (plafond - len) + ', plafond ' + plafond + ')' : ''));

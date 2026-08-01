@@ -76,7 +76,11 @@ function applyRefunds(refunds, cfg) {
     if (r.avoirRef) t.tva += taxe;
     else { t.tvaSansAvoir += taxe; t.nbSansAvoir += 1; }
     t.cogsAnnule += Math.max(0, Number(r.cogsAnnuleHt) || 0);
-    t.stripeRendu += Math.max(0, Number(r.stripeFeeRendu) || 0);
+    /* ⚠️ DEUX NOMS ACCEPTÉS. `commissionRendue` est le nom courant depuis le
+       01/08/2026 ; `stripeFeeRendu` est celui des avoirs DÉJÀ ENREGISTRÉS.
+       Les renommer en base détruirait la lecture de pièces comptables
+       existantes — on lit donc les deux, on n'écrit plus que le premier. */
+    t.stripeRendu += Math.max(0, Number(r.commissionRendue != null ? r.commissionRendue : r.stripeFeeRendu) || 0);
     var k = monthKey(r.dateMs);
     (t.parMois[k] = t.parMois[k] || { ttc: 0, ht: 0, cogs: 0, nb: 0 });
     t.parMois[k].ttc += ttc; t.parMois[k].ht += ht;
@@ -175,7 +179,8 @@ function synthesize(payments, charges, cfg, refunds) {
     ca_ht: round2(caHt),
     cogs: round2(cogs),
     marge_brute: round2(margeBrute),
-    frais_stripe: round2(stripe),
+    frais_encaissement: round2(stripe),
+    frais_stripe: round2(stripe),   // alias hérité — lu par d'anciens écrans
     charges_saisies: round2(chargesTotal),
     charges_par_categorie: chargesParCat,
     resultat_exploitation: round2(resultatExpl),
@@ -191,7 +196,7 @@ function synthesize(payments, charges, cfg, refunds) {
     // Totaux AVANT remboursements — pour pouvoir vérifier l'écart soi-même.
     brut: {
       ca_ttc: round2(caTtcBrut), ca_ht: round2(caHtBrut), tva_collectee: round2(tvaBrute),
-      cogs: round2(cogsBrut), frais_stripe: round2(stripeBrut)
+      cogs: round2(cogsBrut), frais_encaissement: round2(stripeBrut), frais_stripe: round2(stripeBrut)
     },
     remboursements: {
       nb: rb.nb,

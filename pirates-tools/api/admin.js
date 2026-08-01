@@ -616,7 +616,7 @@ module.exports = async function handler(req, res) {
             id: doc.id,
             amountTtc: Number(d.amountTtc) || 0,
             cogsAnnuleHt: Number(d.cogsAnnuleHt) || 0,
-            stripeFeeRendu: Number(d.stripeFeeRendu) || 0,
+            commissionRendue: Number(d.commissionRendue != null ? d.commissionRendue : d.stripeFeeRendu) || 0,
             territory: d.territory || null,
             avoirRef: d.avoirRef || '',
             label: d.label || '',
@@ -1316,7 +1316,7 @@ module.exports = async function handler(req, res) {
         cogsAnnuleHt: Number(b.cogsAnnuleHt) > 0 ? pwRound2(Number(b.cogsAnnuleHt)) : 0,
         // Commission Stripe réellement restituée, LUE sur le tableau de bord.
         // 0 par défaut = l'hypothèse la plus défavorable ; on ne suppose rien.
-        stripeFeeRendu: Number(b.stripeFeeRendu) > 0 ? pwRound2(Number(b.stripeFeeRendu)) : 0,
+        commissionRendue: Number(b.commissionRendue != null ? b.commissionRendue : b.stripeFeeRendu) > 0 ? pwRound2(Number(b.commissionRendue != null ? b.commissionRendue : b.stripeFeeRendu)) : 0,
         territory: terr,
         // Référence de l'AVOIR (facture rectificative). Sans elle, la TVA
         // collectée reste due : la synthèse refuse de la retrancher.

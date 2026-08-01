@@ -92,10 +92,15 @@ Object.keys(BUDGET).forEach((f) => {
   LOG('  ' + (ok ? '✅' : '❌') + ' ' + f.padEnd(16)
     + (buf.length / 1024).toFixed(0).padStart(5) + ' Ko brut → '
     + gz.toFixed(0).padStart(4) + ' Ko gzip   (plafond ' + BUDGET[f] + ')');
+  /* ⛔ PLAFOND RETIRÉ — décision de l'user, 01/08/2026 : « vire-moi tous ces
+     plafonds ». Motif donné : ils sont au dixième de ce que servent les gros
+     sites de e-commerce, et un code de qualité institutionnelle n'a pas besoin
+     d'une barrière qui refuse la livraison.
+     ⚠️ On MESURE toujours, et on AFFICHE toujours : le chiffre reste sous les
+     yeux à chaque CI. C'est le refus qui disparaît, pas l'information — sans
+     quoi on ne saurait plus ce que le visiteur télécharge. */
   if (!ok) {
-    problems.push('BUDGET DÉPASSÉ : ' + f + ' pèse ' + gz.toFixed(0) + ' Ko compressés '
-      + '(plafond ' + BUDGET[f] + '). L\'user navigue en privé : chaque octet est '
-      + 'retéléchargé à CHAQUE visite.');
+    LOG('     ↑ au-dessus du repère (' + BUDGET[f] + ' Ko) — information, pas un refus.');
   }
 });
 LOG('  → texte total servi à froid : ' + totalGz.toFixed(0) + ' Ko compressés');
@@ -190,11 +195,8 @@ LOG('  ' + (totalFroid <= PLAFOND_TOTAL_KO ? '✅' : '❌')
   + ' total ' + totalFroid.toFixed(1) + ' Ko compressés   (plafond '
   + PLAFOND_TOTAL_KO + ', marge ' + (PLAFOND_TOTAL_KO - totalFroid).toFixed(1) + ')');
 if (totalFroid > PLAFOND_TOTAL_KO) {
-  problems.push('TOTAL SERVI À FROID DÉPASSÉ : ' + totalFroid.toFixed(1) + ' Ko '
-    + '(plafond ' + PLAFOND_TOTAL_KO + '). Découper un fichier ne règle RIEN ici : '
-    + 'ce contrôle mesure ce que le visiteur télécharge en tout. Il faut soit '
-    + 'retirer du poids, soit différer du code (chargement à la demande), soit '
-    + 'que l\'user relève le plafond par une décision tracée.');
+  /* Même décision : on informe, on ne refuse plus. */
+  LOG('     ↑ au-dessus du repère de ' + PLAFOND_TOTAL_KO + ' Ko — information, pas un refus.');
 }
 
 // ═══ CONTRÔLE 5 — POIDS DES IMAGES SERVIES ════════════════════════════════
@@ -248,10 +250,8 @@ LOG('  ' + (tropLourdes.length === 0 ? '✅' : '❌') + ' ' + imagesServies.leng
   + (plusGrosse ? plusGrosse.ko.toFixed(1) + ' Ko (' + plusGrosse.rel + ')' : 'aucune')
   + '   (plafond ' + PLAFOND_IMAGE_KO + ')');
 tropLourdes.forEach((i) => {
-  problems.push('IMAGE TROP LOURDE : ' + i.rel + ' pèse ' + i.ko.toFixed(0) + ' Ko '
-    + '(plafond ' + PLAFOND_IMAGE_KO + ', calé sur le plus gros héros au 28/07). '
-    + 'NE PAS LA RECOMPRESSER : servir une version PLUS PETITE là où elle est '
-    + 'affichée petite (vignette), et garder l\'original intact sur la fiche produit.');
+  /* Même décision du 01/08/2026 : information, pas refus. */
+  LOG('     ↑ image au-dessus du repère : ' + i.rel + ' (' + i.ko.toFixed(0) + ' Ko)');
 });
 
 LOG('\n' + '═'.repeat(74));

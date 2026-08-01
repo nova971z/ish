@@ -6607,15 +6607,15 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   .pay-address__grid { grid-template-columns: 1fr; }
 }
 
-.stripe-elements-wrap {
+.carte-wrap {
   margin-bottom: 16px;
 }
 
-.stripe-payment-element {
+.carte-montage {
   min-height: 48px;
   padding: 0;
 }
-.stripe-card-error {
+.carte-erreur {
   color: #ef4444;
   font-size: 13px;
   margin-top: 8px;
@@ -6624,7 +6624,7 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   border: 1px solid rgba(239, 68, 68, 0.3);
   border-radius: 8px;
 }
-.stripe-loading {
+.carte-attente {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -6633,25 +6633,25 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   color: #cdd6e0;
   font-size: 14px;
 }
-.stripe-loading__spinner {
+.carte-attente__rond {
   width: 22px;
   height: 22px;
   border: 2px solid rgba(var(--accent-rgb), 0.25);
   border-top-color: var(--accent);
   border-radius: 50%;
-  animation: stripe-spin .7s linear infinite;
+  animation: carte-spin .7s linear infinite;
 }
-@keyframes stripe-spin {
+@keyframes carte-spin {
   to { transform: rotate(360deg); }
 }
-.stripe-fallback {
+.carte-repli {
   text-align: center;
   padding: 24px 16px;
   color: #cdd6e0;
   line-height: 1.6;
 }
-.stripe-fallback p { margin: 4px 0; }
-.stripe-fallback strong { color: #fff; }
+.carte-repli p { margin: 4px 0; }
+.carte-repli strong { color: #fff; }
 
 .ig-admin {
   display: flex;
