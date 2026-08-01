@@ -270,6 +270,23 @@ var INDEX = [
     fini: 'le harnais rend PLUS d\'assertions qu\'avant, check-ancres vert, et la correction est prouvée par sabotage.'
   },
   {
+    intention: 'Traqueur de prix — sources fournisseur, ruptures, relevés',
+    mots: ['traqueur', 'tracker', 'relevé', 'releve', 'rupture', 'stock',
+           'cotebrico', 'source', 'fournisseur', 'price-watch', 'coût', 'cout'],
+    fichiers: ['api/_lib/price-parse.js', 'api/admin.js', 'docs/TRAQUEUR-URLS.md'],
+    fonctions: [],
+    protege: ['scripts/check-price-watch.js', 'scripts/check-traqueur.js'],
+    regles: [],
+    pieges: ['⛔ La page fournisseur est INJOIGNABLE depuis le dépôt (proxy 403) : le balisage se lit sur une CAPTURE de l\'user, jamais d\'imagination.',
+             'Le badge « En stock »/« Rupture » d\'une carte vit APRÈS le bouton « Ajouter au panier » — donc EN TÊTE DU BLOC SUIVANT après découpage.',
+             '⛔ Un produit EN RUPTURE ne fait jamais bouger un prix : source écartée, et GEL si aucune source achetable ne reste.',
+             'Plusieurs traqueurs : `&source=<slug>` ; le coût effectif = MIN des sources fraîches (14 j) ET en stock (`choisirCoutSource`, pure, sabotée).',
+             'Le slug de source devient une CLÉ Firestore : alphabet fermé [a-z0-9_-], longueur bornée.',
+             'Le « Prix de base » barré est le PREMIER piège du parseur : le prix courant est le 1er match « Prix X,XX € », jamais le dernier.'],
+    decisions: ['D-015'],
+    fini: 'check-price-watch vert (ruptures, min multi-sources, gel, héritage), chaque promesse sabotée et rouge.'
+  },
+  {
     intention: 'Ce que l\'user a demandé — registre et solde',
     mots: ['demande', 'demandes', 'demandé', 'promis', 'reste a faire', 'reste à faire',
            'oublié', 'oubli', 'pas fait', 'solde', 'livrer', 'livraison'],

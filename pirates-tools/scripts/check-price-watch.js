@@ -92,6 +92,65 @@ module.exports = function () {
     });
   });
 
+  /* ═══ MULTI-TRAQUEURS + RUPTURES (01/08/2026) ═══════════════════════════
+     Demandes de l'user, le jour où dix produits EN RUPTURE chez le
+     fournisseur allaient faire MONTER les prix du site :
+       · un prix relevé là où l'on ne peut PAS acheter ne sert JAMAIS de coût ;
+       · avec plusieurs traqueurs, le coût est TOUJOURS le moins cher des
+         sources fraîches ET en stock ;
+       · s'il ne reste AUCUNE source achetable, le prix est GELÉ — pas
+         recalculé, pas estimé en douce. */
+  var choisir = pp.choisirCoutSource;
+  ok(typeof choisir === 'function', 'choisirCoutSource exportée');
+  var NOW = 1700000000000, J = 24 * 3600 * 1000;
+  if (choisir) {
+    var deux = { cotebrico: { ttc: 200, at: NOW - J }, nouveau: { ttc: 180, at: NOW - J } };
+    var c1 = choisir(deux, NOW);
+    ok(c1 && c1.ttc === 180 && c1.source === 'nouveau',
+      'deux traqueurs → le MOINS CHER gagne, quel que soit son nom (' + JSON.stringify(c1) + ')');
+    var c2 = choisir({ cotebrico: { ttc: 150, at: NOW - J, enStock: false }, nouveau: { ttc: 180, at: NOW - J } }, NOW);
+    ok(c2 && c2.ttc === 180,
+      '⛔ une source EN RUPTURE ne compte pas, même moins chère : on ne peut pas y acheter (' + JSON.stringify(c2) + ')');
+    var c3 = choisir({ cotebrico: { ttc: 150, at: NOW - 20 * J }, nouveau: { ttc: 180, at: NOW - J } }, NOW);
+    ok(c3 && c3.ttc === 180,
+      'une source PÉRIMÉE (> 14 j) ne compte pas : le produit a quitté sa page (' + JSON.stringify(c3) + ')');
+    ok(choisir({ cotebrico: { ttc: 150, at: NOW - J, enStock: false } }, NOW) === null,
+      'AUCUNE source achetable → null : le produit doit être GELÉ, jamais recalculé');
+    ok(choisir(null, NOW) === null && choisir({}, NOW) === null, 'carte absente ou vide → null, sans planter');
+  }
+
+  /* La grille fournisseur : le badge de stock d'une carte vit APRÈS le bouton
+     « Ajouter au panier », donc EN TÊTE DU BLOC SUIVANT (mesuré sur la capture
+     de l'user du 01/08/2026 — la page est injoignable depuis le dépôt). */
+  var page = 'MAKITA AAA111 Prix 100,00 € Ajouter au panier En stock ♥ '
+    + 'MAKITA BBB222 Prix 200,00 € Ajouter au panier Rupture de stock ♥ '
+    + 'MAKITA CCC333 Prix 300,00 € Ajouter au panier En stock';
+  var lus = pp.parseCotebrico(page, 'MAKITA');
+  var parSku = {}; lus.forEach(function (x) { parSku[x.sku] = x; });
+  ok(lus.length === 3, 'les trois cartes sont lues, rupture comprise (' + lus.length + ')');
+  ok(parSku.AAA111 && parSku.AAA111.enStock === true, 'carte en stock → enStock=true');
+  ok(parSku.BBB222 && parSku.BBB222.enStock === false,
+    '⛔ carte EN RUPTURE détectée par la tête du bloc SUIVANT — c\'est elle qui allait faire monter les prix');
+  ok(parSku.CCC333 && parSku.CCC333.enStock === true,
+    'la rupture de la carte précédente ne CONTAMINE pas la suivante (défaut du 1er jet, corrigé)');
+
+  /* Le chemin de LECTURE réel (celui du recalcul), via les internes d'admin —
+     jamais une copie de la logique (leçon O6). */
+  var adm = require('../api/admin.js');
+  var pw = adm._internals && adm._internals.pwSourceCost;
+  ok(typeof pw === 'function', 'pwSourceCost exposée aux portes via _internals');
+  if (pw) {
+    var gel = pw({}, { priceSources: { cotebrico: { ttc: 200, at: Date.now(), enStock: false } } }, {}, null);
+    ok(gel && gel.origin === 'rupture' && gel.srcTTC === null,
+      '⛔ relevés présents mais AUCUN achetable → origin \'rupture\', prix GELÉ (' + JSON.stringify(gel) + ')');
+    var deux2 = pw({}, { priceSources: { cotebrico: { ttc: 200, at: Date.now() }, nouveau: { ttc: 180, at: Date.now() } } }, {}, null);
+    ok(deux2 && deux2.srcTTC === 180 && deux2.origin === 'traqueur',
+      'le recalcul lit le MIN multi-sources (' + JSON.stringify(deux2) + ')');
+    var her = pw({}, { priceSource: 'cotebrico', priceSrcTTC: 150 }, {}, null);
+    ok(her && her.srcTTC === 150 && her.origin === 'traqueur',
+      'ancien format (sans carte) toujours lu — aucun override existant ne casse');
+  }
+
   return errors;
 };
 

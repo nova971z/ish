@@ -1594,6 +1594,20 @@ function pwBuildVariantCosts(products, ov) {
 //     l'ancien coût ×1,15). À remplacer par un vrai prix dès que possible.
 // Retourne { srcTTC, origin } — origin est affiché dans l'aperçu admin.
 function pwSourceCost(p, o, cfg, byGroup) {
+  /* ── PLUSIEURS TRAQUEURS (01/08/2026) : la carte `priceSources` fait foi ──
+     Chaque passage de traqueur écrit sa propre entrée { ttc, at, enStock }.
+     Le coût effectif est le MOINS CHER des sources ACHETABLES : fraîches
+     (moins de 14 jours) ET pas en rupture. S'il existe des relevés mais
+     qu'AUCUN n'est achetable, on rend `origin: 'rupture'` : le produit est
+     GELÉ — demandé par l'user après que dix produits en rupture chez le
+     fournisseur allaient faire MONTER les prix du site. Un prix affiché là
+     où l'on ne peut pas acheter n'est pas un coût d'approvisionnement. */
+  if (o && o.priceSources && typeof o.priceSources === 'object'
+      && Object.keys(o.priceSources).length) {
+    var choixPS = priceParse.choisirCoutSource(o.priceSources, Date.now());
+    if (choixPS) return { srcTTC: choixPS.ttc, origin: 'traqueur', source: choixPS.source };
+    return { srcTTC: null, origin: 'rupture' };
+  }
   // ⚠️ Un coût n'est « relevé » que s'il porte priceSource='cotebrico', la
   // marque du traqueur. Sans ce contrôle, un coût ESTIMÉ écrit par un ancien
   // « Appliquer » se faisait passer pour un relevé réel : la supposition
@@ -1665,8 +1679,12 @@ async function handleRepriceAll(req, res, admin, db) {
     // Santé des coûts d'achat : sur quoi reposent RÉELLEMENT les prix du site.
     // Affiché même quand rien ne change — « 0 à changer » ne veut rien dire si
     // les prix sont bâtis sur des estimations.
-    const origins = { traqueur: 0, fiche: 0, variante: 0, 'estimé': 0 };
+    const origins = { traqueur: 0, fiche: 0, variante: 0, 'estimé': 0, rupture: 0 };
     const estimes = [];
+    /* Produits GELÉS : des relevés existent mais aucun n'est achetable
+       (rupture partout, ou relevés périmés). On ne recalcule PAS leur prix —
+       et on le DIT, au lieu de les fondre dans « coût inconnu ». */
+    const gels = [];
     let lockedCount = 0;   // produits à prix verrouillé (jamais recalculés)
 
     for (const p of products) {
@@ -1680,6 +1698,11 @@ async function handleRepriceAll(req, res, admin, db) {
       // Coût source TTC : traqueur > fiche > variante jumelle ±20 € > estimation.
       const srcInfo = pwSourceCost(p, o, cfg, variantCosts);
       const srcTTC = srcInfo.srcTTC;
+      if (srcInfo.origin === 'rupture') {
+        origins.rupture++;
+        if (gels.length < 250) gels.push({ sku: p.sku, brand: p.brand || '', name: p.title || p.name });
+        continue;   // prix GELÉ : aucune source achetable, on n'y touche pas
+      }
       if (!(srcTTC > 0)) { skipped.push({ id: p.id, sku: p.sku, reason: 'coût source inconnu' }); continue; }
       if (srcTTC < PW.MIN_TTC || srcTTC > PW.MAX_TTC) { skipped.push({ id: p.id, sku: p.sku, reason: 'hors fourchette' }); continue; }
       if (origins[srcInfo.origin] !== undefined) origins[srcInfo.origin]++;
@@ -1724,7 +1747,7 @@ async function handleRepriceAll(req, res, admin, db) {
     return res.status(200).json({
       ok: true, dryRun: !!dryRun, mode: cfg.mode, autoPrice: !!cfg.autoPrice,
       counts: { total: products.length, changed: changed.length, skipped: skipped.length, locked: lockedCount },
-      origins: origins, estimes: estimes,
+      origins: origins, estimes: estimes, gels: gels,
       changed: changed.slice(0, 500), skipped: skipped.slice(0, 100)
     });
   } catch (err) {
@@ -1772,24 +1795,64 @@ async function handlePriceWatch(req, res, admin, db) {
     const parsedBySku = {};
     parsed.forEach((it) => { parsedBySku[String(it.sku).toUpperCase()] = it.price; });
 
+    /* ── IDENTITÉ DE LA SOURCE (01/08/2026) ─────────────────────────────────
+       Un deuxième site va être traqué, puis d'autres : chaque raccourci passe
+       `&source=<slug>`. Sans le paramètre : 'cotebrico' — aucun raccourci
+       existant ne change. ⛔ Le slug devient une CLÉ Firestore : alphabet
+       fermé, longueur bornée — rien d'arbitraire n'entre en base. */
+    const sourceSlug = (String((req.query && req.query.source) || 'cotebrico')
+      .toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 24)) || 'cotebrico';
+    /* Produits vus EN RUPTURE sur cette page : leur prix ne sert JAMAIS de
+       coût (on ne peut pas acheter là), mais la rupture est ENREGISTRÉE pour
+       que le coût effectif se recalcule sans cette source. */
+    const enRupture = [];
+
     for (const item of parsed) {
       const p = bySku[item.sku];
       if (!p) { unknown.push({ sku: item.sku, srcTTC: item.price, name: item.name }); continue; }
+      if (item.enStock === false) {
+        enRupture.push({ sku: item.sku, id: p.id, name: p.title || p.name, srcTTC: item.price });
+        if (!dryRun) {
+          const srcsR = Object.assign({}, (ovW[p.id] || {}).priceSources);
+          srcsR[sourceSlug] = { ttc: item.price, at: now, enStock: false };
+          const choixR = priceParse.choisirCoutSource(srcsR, now);
+          await db.collection('product_overrides').doc(p.id).set({
+            priceSources: { [sourceSlug]: { ttc: item.price, at: now, enStock: false } },
+            // Le coût effectif se recalcule SANS cette source. S'il ne reste
+            // rien d'achetable, le produit passe en GEL (origin 'rupture').
+            priceSrcTTC: choixR ? choixR.ttc : null,
+            priceSource: choixR ? choixR.source : 'rupture',
+            priceCheckedAt: now
+          }, { merge: true });
+        }
+        continue;
+      }
       // Règle 25/07 : si le produit référence des déclinaisons fournisseur
       // (srcAltSkus, ex. DBS180Z ← DBS180ZJ), on achète TOUJOURS la moins
       // chère → source effective = min des prix présents sur la page.
       // 🔒 Prix verrouillé : le traqueur relève, mais n'écrit JAMAIS.
       if (p.priceLocked === true) { lockedW.push({ sku: item.sku, id: p.id, name: p.title || p.name }); continue; }
-      const src = priceParse.pickCheapestSource(item.price, p.srcAltSkus, parsedBySku);
-      const priced = pwComputePrice(p, src, cfg);
-      const newPrice = priced.newPrice, newHt = priced.newHt;
       const oW = ovW[p.id] || {};
+      const src = priceParse.pickCheapestSource(item.price, p.srcAltSkus, parsedBySku);
+      /* ── COÛT EFFECTIF = LE MOINS CHER DE TOUTES LES SOURCES VALIDES ──────
+         (01/08/2026) Cette source-ci, fraîchement relevée, rejoint la carte
+         `priceSources` ; le prix du site se calcule sur le minimum des
+         sources fraîches ET en stock — quel que soit le traqueur qui parle. */
+      const srcsMaj = Object.assign({}, oW.priceSources);
+      srcsMaj[sourceSlug] = { ttc: src, at: now, enStock: true };
+      const choix = priceParse.choisirCoutSource(srcsMaj, now);
+      const effSrc = choix ? choix.ttc : src;
+      const effFrom = choix ? choix.source : sourceSlug;
+      const priced = pwComputePrice(p, effSrc, cfg);
+      const newPrice = priced.newPrice, newHt = priced.newHt;
       const cur = (typeof oW.price === 'number') ? oW.price
         : (typeof p.price === 'number' ? p.price : null);
-      const rec = { sku: item.sku, id: p.id, name: p.title || p.name, srcTTC: src, newPrice, newHt, markup: priced.markup, oldPrice: cur };
+      const rec = { sku: item.sku, id: p.id, name: p.title || p.name, srcTTC: effSrc, source: effFrom, newPrice, newHt, markup: priced.markup, oldPrice: cur };
 
-      // Le produit a-t-il DÉJÀ un coût réel relevé ? (marque du traqueur)
-      const dejaReleve = (oW.priceSource === 'cotebrico' && typeof oW.priceSrcTTC === 'number' && oW.priceSrcTTC > 0);
+      // Cette source a-t-elle DÉJÀ ce relevé, et le coût effectif est-il déjà bon ?
+      const entreeSrc = (oW.priceSources || {})[sourceSlug];
+      const dejaAJour = !!entreeSrc && Math.abs((entreeSrc.ttc || 0) - src) < 0.01
+        && Math.abs((oW.priceSrcTTC || 0) - effSrc) < 0.01 && entreeSrc.enStock !== false;
 
       if (cur != null && Math.abs(newPrice - cur) < 0.02) {
         unchanged.push(rec);
@@ -1798,9 +1861,10 @@ async function handlePriceWatch(req, res, admin, db) {
         // réel en base : il compte comme « estimé », le garde-fou coffret ne
         // peut pas s'appuyer dessus, et la marge affichée repose sur une
         // supposition alors que le vrai prix fournisseur est connu.
-        if (!dryRun && (!dejaReleve || Math.abs((oW.priceSrcTTC || 0) - src) >= 0.01)) {
+        if (!dryRun && !dejaAJour) {
           await db.collection('product_overrides').doc(p.id).set({
-            priceSource: 'cotebrico', priceSrcTTC: src, priceCheckedAt: now
+            priceSources: { [sourceSlug]: { ttc: src, at: now, enStock: true } },
+            priceSource: effFrom, priceSrcTTC: effSrc, priceCheckedAt: now
           }, { merge: true });
         }
         continue;
@@ -1870,11 +1934,12 @@ async function handlePriceWatch(req, res, admin, db) {
         }
         await db.collection('product_overrides').doc(p.id).set(Object.assign({
           price: newPrice, price_ht: newHt,
-          priceSource: 'cotebrico', priceSrcTTC: src, priceCheckedAt: now,
+          priceSources: { [sourceSlug]: { ttc: src, at: now, enStock: true } },
+          priceSource: effFrom, priceSrcTTC: effSrc, priceCheckedAt: now,
           priceMarkup: priced.markup, priceMode: priced.mode
         }, promo), { merge: true });
         await db.collection('price_watch_log').add({
-          sku: item.sku, id: p.id, oldPrice: cur, newPrice, srcTTC: src, brand, at: now,
+          sku: item.sku, id: p.id, oldPrice: cur, newPrice, srcTTC: effSrc, source: sourceSlug, brand, at: now,
           markup: priced.markup, mode: priced.mode
         });
       }
@@ -1923,10 +1988,13 @@ async function handlePriceWatch(req, res, admin, db) {
       counts: {
         parsed: parsed.length, applied: applied.length, flagged: flagged.length,
         unchanged: unchanged.length, unknown: unknown.length, locked: lockedW.length,
-        absents: absents.length, absentsJamaisReleves: jamaisReleves.length
+        absents: absents.length, absentsJamaisReleves: jamaisReleves.length,
+        rupture: enRupture.length
       },
+      source: sourceSlug,
       applied, flagged, unknown: unknown.slice(0, 800),
-      absents: absents.slice(0, 800)
+      absents: absents.slice(0, 800),
+      rupture: enRupture.slice(0, 400)
     });
   } catch (err) {
     console.error('[api/admin] price-watch failed:', err.message);
@@ -1940,3 +2008,5 @@ async function handlePriceWatch(req, res, admin, db) {
 // 4,5 Mo = plafond de Vercel pour le corps d'une requête serverless — on s'y
 // cale. Au-delà, découper la marque en 2 pages (voir docs/TRAQUEUR-URLS.md).
 module.exports.config = { api: { bodyParser: { sizeLimit: '4.5mb' } } };
+// Pour les portes UNIQUEMENT : tester le vrai chemin, jamais une copie (O6).
+module.exports._internals = { pwSourceCost: pwSourceCost };

@@ -87,6 +87,28 @@ La **1ʳᵉ URL (health) est identique pour les 3 marques** :
 
 ---
 
+## ➕ AJOUTER UN TRAQUEUR (autre site) — depuis le 01/08/2026
+
+Même raccourci en 3 actions, avec **deux différences** :
+
+1. l'URL 2 = la page « marque » du NOUVEAU site (tous les produits, une page) ;
+2. l'URL 3 porte **`&source=<slug>`** — un nom court pour ce site, en
+   minuscules : `…/api/admin?type=price-watch&brand=MAKITA&source=nouveausite&dryRun=1`
+   *(premier passage en `dryRun=1` pour lire ce qui est reconnu, puis `0`.)*
+
+**Le calculateur prend TOUJOURS le moins cher des sources valides** — fraîches
+(moins de 14 jours) ET en stock. Chaque site écrit sa propre entrée ; aucun
+n'écrase l'autre. Sans `source=`, c'est `cotebrico` : les raccourcis existants
+ne changent pas.
+
+⛔ **Un produit EN RUPTURE ne fait jamais bouger un prix.** Sa rupture est
+enregistrée, sa source est écartée du choix, et s'il ne reste AUCUNE source
+achetable, le produit est **GELÉ** — visible dans « Sur quoi reposent tes
+prix » (⛔ gelés) et dans la réponse du traqueur (`rupture`).
+⚠️ La détection lit le badge « En stock » / « Rupture » de la grille ; si un
+site l'écrit autrement, une capture d'une carte en rupture suffit à ajuster
+`RUPTURE_RE` dans `api/_lib/price-parse.js`.
+
 ## 🟠 Flex · Wera · Facom (À CRÉER — 5 produits jamais traqués)
 Même structure, seules la page cotébrico et le `brand=` changent. Le parseur est
 agnostique de la marque (il cherche « MARQUE + référence » dans les titres).

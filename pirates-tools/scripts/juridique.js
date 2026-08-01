@@ -71,6 +71,12 @@ var SEUIL = 5;
 
 /* Écartés en connaissance de cause — chacun justifié, jamais « oublié ». */
 var HORS_PORTEE = {
+  /* price-parse lit les prix du FOURNISSEUR (coûts d'achat) : il ne fixe ni
+     TVA ni prix client — la fiscalité se joue dans pricing.js (couvert J5) et
+     l'affichage promo dans admin.js/catalog.js (couverts J4). Ses mots « ttc/
+     Prix » sont ceux de la grille fournisseur qu'il déchiffre. Écarté
+     NOMMÉMENT le 01/08/2026, quand le contrôle de couverture l'a signalé. */
+  'pirates-tools/api/_lib/price-parse.js': 'déchiffre les prix du fournisseur (coûts d\'achat) — ne fixe ni TVA ni prix client',
   'pirates-tools/api/health.js': 'sonde de disponibilité, aucune donnée',
   'pirates-tools/api/test-email.js': 'outil de diagnostic, jamais servi aux clients',
   'pirates-tools/api/instagram.js': 'relais de médias publics, aucune donnée personnelle',

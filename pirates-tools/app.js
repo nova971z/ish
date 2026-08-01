@@ -13189,7 +13189,19 @@
         + '🔗 ' + (o.variante || 0) + ' déduits de la variante (± 20 €) · '
         + (est ? '<span class="admin-error">⚠️ ' + est + ' estimés</span>' : '✅ 0 estimé')
         + (locked ? ' · 🔒 ' + locked + ' à prix verrouillé (jamais recalculé)' : '')
+        /* Produits GELÉS (01/08/2026) : des relevés existent mais AUCUN n'est
+           achetable — rupture chez toutes les sources, ou relevés périmés.
+           Leur prix n'est PAS recalculé : demandé par l'user après que dix
+           produits en rupture allaient faire MONTER les prix du site. */
+        + ((o.rupture || 0) ? ' · <span class="admin-error">⛔ ' + o.rupture
+          + ' gelés — en rupture chez toutes les sources, prix intouchés</span>' : '')
         + '</div>';
+      if ((o.rupture || 0) && d.gels && d.gels.length) {
+        h += '<p class="admin-hint">Produits gelés (aucune source achetable) :</p>'
+          + '<ul class="compta-sample">' + d.gels.map(function (x) {
+            return '<li>' + escapeHTML(x.sku || '') + ' — ' + escapeHTML((x.name || '').slice(0, 70)) + '</li>';
+          }).join('') + '</ul>';
+      }
       if (est && d.estimes && d.estimes.length) {
         // Liste COMPLÈTE (plus de troncature) et regroupée par marque : c'est
         // l'inventaire exact des produits que le traqueur ne voit pas.

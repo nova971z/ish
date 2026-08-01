@@ -113,6 +113,11 @@ async function loadCatalog() {
 var PRIVATE_FIELDS = [
   'priceSource', 'priceSrcTTC', 'priceCheckedAt',
   'priceMarkup', 'priceMode', 'priceRecomputedAt', 'priceCostOrigin',
+  /* ⛔ `priceSources` (01/08/2026) : la carte multi-traqueurs — chaque entrée
+     porte un COÛT D'ACHAT FOURNISSEUR (`ttc`). La servir publiquement serait
+     la fuite irréversible (CDN + historique) que check-prix-fuite interdit.
+     C'est check-catalog-public qui a attrapé l'oubli, avant tout déploiement. */
+  'priceSources',
   'hidden'
 ];
 

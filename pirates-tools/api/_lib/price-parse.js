@@ -57,6 +57,32 @@ function parseCotebrico(rawText, brand) {
   var seen = {};
   for (var i = 0; i < blocks.length; i++) {
     var b = blocks[i];
+    /* ── ÉTAT DE STOCK DE CETTE CARTE ──────────────────────────────────────
+       Demandé par l'user le 01/08/2026 : dix produits EN RUPTURE chez le
+       fournisseur allaient faire MONTER les prix du site — un prix affiché
+       chez un vendeur où l'on ne peut pas acheter n'est pas un coût
+       d'approvisionnement.
+
+       ⚠️ D'OÙ VIENT CE DÉCOUPAGE — mesuré sur SA capture de la grille
+       (01/08/2026), la page étant injoignable depuis le dépôt : le badge
+       « ✔ En stock » est affiché SOUS le bouton « Ajouter au panier ».
+       Comme on découpe les blocs SUR ce bouton, le badge d'une carte tombe
+       AU DÉBUT DU BLOC SUIVANT. On lit donc la tête du bloc i+1.
+
+       Trois états, et l'inconnu est assumé :
+         true  → « En stock » lu en tête du bloc suivant, sans mot de rupture
+         false → un mot de rupture dans la carte ou en tête du bloc suivant
+         null  → aucun signal : comportement d'avant, on ne casse rien.
+       ⛔ Si cotébrico écrit la rupture autrement, une capture d'une carte en
+       rupture suffit à ajuster RUPTURE_RE — le motif est CE constant-ci. */
+    /* ⚠️ ON NE LIT QUE LA TÊTE DU BLOC SUIVANT — premier jet corrigé sur
+       preuve : tester aussi la fin du bloc COURANT faisait hériter la rupture
+       de la carte précédente (son badge vit en tête de NOTRE bloc). Une carte
+       n'a JAMAIS son propre badge dans son bloc : il est après le bouton. */
+    var teteSuivante = (blocks[i + 1] || '').slice(0, 160);
+    var enStock = null;
+    if (RUPTURE_RE.test(teteSuivante)) enStock = false;
+    else if (/en\s+stock/i.test(teteSuivante)) enStock = true;
     var skus = [], m;
     brandRe.lastIndex = 0;
     while ((m = brandRe.exec(b)) !== null) skus.push(m[1].toUpperCase());
@@ -79,7 +105,7 @@ function parseCotebrico(rawText, brand) {
     var name = '';
     var nm = b.match(new RegExp('([^\\n.]{4,120}?)\\s*-\\s*' + escapeRe(brand) + '\\s+' + escapeRe(sku), 'i'));
     if (nm) name = nm[1].trim();
-    out.push({ sku: sku, price: price, name: name, promo: promo });
+    out.push({ sku: sku, price: price, name: name, promo: promo, enStock: enStock });
   }
   return out;
 }
@@ -101,4 +127,39 @@ function pickCheapestSource(ownPrice, altSkus, parsedBySku) {
   return best;
 }
 
-module.exports = { parseCotebrico: parseCotebrico, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource };
+/* Mots qui signalent une RUPTURE sur la grille fournisseur. Centralisé ici :
+   c'est LE motif à ajuster si une capture montre un autre libellé. */
+var RUPTURE_RE = /rupture|indisponible|\u00e9puis\u00e9|hors\s+stock|non\s+disponible/i;
+
+/* ── PLUSIEURS TRAQUEURS, UN SEUL COÛT : LE MOINS CHER DES SOURCES VALIDES ──
+   Demandé par l'user le 01/08/2026 : un deuxième site va être traqué, puis
+   d'autres. Le calculateur doit TOUJOURS s'appuyer sur le moins cher — mais
+   seulement parmi les sources où l'on peut RÉELLEMENT acheter :
+
+     · une source EN RUPTURE (enStock === false) ne compte pas — on ne peut
+       pas s'approvisionner à ce prix ;
+     · une source PÉRIMÉE ne compte pas non plus : les traqueurs passent
+       2×/jour ; un relevé plus vieux que SOURCE_FRESH_MS veut dire que le
+       produit a quitté la page (souvent : rupture retirée de la grille).
+
+   `sources` : { slug: { ttc, at, enStock } } — la carte `priceSources` d'un
+   override. Rend { ttc, source } ou null s'il n'existe AUCUNE source achetable.
+   PURE — testée par check-price-watch, sabotage compris. */
+var SOURCE_FRESH_MS = 14 * 24 * 3600 * 1000;   // 14 jours ≈ 28 passages manqués
+
+function choisirCoutSource(sources, nowMs, maxAgeMs) {
+  if (!sources || typeof sources !== 'object') return null;
+  var age = (typeof maxAgeMs === 'number' && maxAgeMs > 0) ? maxAgeMs : SOURCE_FRESH_MS;
+  var best = null;
+  Object.keys(sources).forEach(function (slug) {
+    var e = sources[slug] || {};
+    var ttc = Number(e.ttc);
+    if (!(ttc > 0)) return;
+    if (e.enStock === false) return;                    // en rupture : inachetable
+    if (!(Number(e.at) > 0) || (nowMs - Number(e.at)) > age) return;  // périmée
+    if (!best || ttc < best.ttc) best = { ttc: ttc, source: slug };
+  });
+  return best;
+}
+
+module.exports = { parseCotebrico: parseCotebrico, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, SOURCE_FRESH_MS: SOURCE_FRESH_MS, RUPTURE_RE: RUPTURE_RE };
