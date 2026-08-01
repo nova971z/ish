@@ -902,6 +902,73 @@ module.exports = async function () {
       + 'on charge le SDK de production avec un jeton de bac à sable : formulaire mort, '
       + 'et aucun repli.');
 
+    /* ── i) ⛔⛔ LE LECTEUR DE RÉPONSE NE DOIT PAS JETER LE MODE D'EMPLOI ──
+       Vécu le 01/08/2026, sur un vrai clic : le bouton du webhook a affiché
+       « Erreur réseau : HTTP 400 ». Le serveur avait pourtant répondu quoi
+       corriger, mot pour mot. Deux défauts empilés :
+         · `adminReadResponse` ne lisait que `data.error` (anglais), alors que
+           tous les diagnostics paiement répondent `erreur` (français) ;
+         · du coup il JETAIT avant le `.then`, donc le code de mise en forme de
+           `etape` et `indice` — écrit exprès pour ça — n'était jamais atteint.
+       Un outil de diagnostic dont le diagnostic est mort. */
+    var mLect = appSrc.match(/function adminReadResponse[\s\S]*?\n  \}/);
+    ok(mLect && /data\.erreur/.test(mLect[0]),
+      '⛔⛔ `adminReadResponse` ne lit plus `data.erreur` (français). Les diagnostics '
+      + 'paiement répondent dans ce vocabulaire : leur message serait jeté et l\'écran '
+      + 'n\'afficherait qu\'un numéro HTTP. C\'est ce qui a fait perdre du temps le '
+      + '01/08/2026.');
+    ok(mLect && /data\.indice/.test(mLect[0]),
+      '⛔ `adminReadResponse` jette l\'`indice` renvoyé par le serveur. C\'est justement '
+      + 'la phrase qui dit QUOI FAIRE — sans elle il reste un code d\'erreur nu.');
+    /* ⚠️ Les deux lignes au-dessus lisent le SOURCE. On exécute maintenant la
+       fonction pour de vrai : on lui sert la réponse exacte que le serveur a
+       envoyée le 01/08/2026, et on regarde ce qu'elle produit. Une regex dit à
+       quoi le code ressemble ; cet appel dit ce qu'il FAIT. */
+    if (mLect) {
+      var fabrique = new Function('return (' + mLect[0].replace(/^\s*function adminReadResponse/, 'function') + ')');
+      var lecteur = fabrique();
+      var fausseReponse = {
+        ok: false, status: 400,
+        headers: { get: function () { return 'application/json'; } },
+        text: function () {
+          return Promise.resolve(JSON.stringify({
+            ok: false, etape: 'origine',
+            erreur: 'Impossible de determiner l\'adresse publique du site.',
+            indice: 'Poser ALLOWED_ORIGINS sur Vercel puis redeployer.'
+          }));
+        }
+      };
+      /* ⛔ `await` OBLIGATOIRE. Sans lui, ce bloc rendait la main avant que la
+         promesse ne se résolve : les erreurs étaient poussées APRÈS le `return
+         errors`, donc jamais lues. Vérifié par sabotage le 01/08/2026 — le
+         lecteur cassé ne faisait rougir QUE l'assertion par regex, la preuve
+         comportementale restait muette. Un harnais vert sans avoir rien
+         franchi, exactement ce que la règle des harnais interdit. */
+      await lecteur(fausseReponse, '/api/admin?type=revolut-webhook').then(function () {
+        errors.push('[check-paiement] ⛔ `adminReadResponse` ACCEPTE une réponse 400 : '
+          + 'une erreur serveur passerait pour un succès.');
+      }, function (e) {
+        var m = String((e && e.message) || '');
+        if (m.indexOf('adresse publique') === -1) {
+          errors.push('[check-paiement] ⛔⛔ le message produit par `adminReadResponse` ne '
+            + 'contient PAS l\'erreur du serveur. Vu : « ' + m + ' ». C\'est exactement le '
+            + '« HTTP 400 » qui a fait chercher la panne du mauvais côté le 01/08/2026.');
+        }
+        if (m.indexOf('ALLOWED_ORIGINS') === -1) {
+          errors.push('[check-paiement] ⛔⛔ le message produit ne contient PAS l\'indice du '
+            + 'serveur — la phrase qui dit QUOI FAIRE. Vu : « ' + m + ' ».');
+        }
+        if (!e || !e.reponse || e.reponse.etape !== 'origine') {
+          errors.push('[check-paiement] ⛔ le corps de la réponse n\'est plus attaché à '
+            + 'l\'erreur (`err.reponse`) : aucun appelant ne peut mettre en forme l\'étape.');
+        }
+      });
+    }
+
+    ok(!/Erreur réseau : ' \+ escapeHTML\(e\.message/.test(appSrc),
+      '⛔ un bouton admin annonce « Erreur réseau » sur une réponse du serveur. Un 400 '
+      + 'n\'est pas une coupure : ce libellé envoie chercher la panne du mauvais côté.');
+
     /* c) Le paramètre de fenêtre ne doit PAS être concaténé dans le type :
        `adminGet` fait `encodeURIComponent(type)`, donc « recon&jours=7 »
        part en « recon%26jours%3D7 ». Le serveur lit un type inconnu et répond

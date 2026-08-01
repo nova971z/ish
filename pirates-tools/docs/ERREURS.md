@@ -15,13 +15,13 @@
 | Origine | Mécanisme | Cas | Antidote | Porte |
 |---|---|---|---|---|
 | **O1** | Affirmer avant de mesurer | 10 | §3 · §8 | `garde-sortie.js` *(hook Stop)* |
-| **O2** | L'instrument de mesure est faux | 15 | §4.3 | sabotage obligatoire |
+| **O2** | L'instrument de mesure est faux | 17 | §4.3 | sabotage obligatoire |
 | **O3** | Réutiliser sans vérifier le contexte | 7 | §1.4 | `check-lecons.js` |
 | **O4** | Contrainte connue, non appliquée | 3 | §1 | `garde-entonnoir.js` |
 | **O5** | Outil artisanal au lieu de l'outil existant | 1 | §1.4 | aucune — humaine |
 | **O6** | Copie périmée au lieu de la source vivante | 2 | §4.4 | `p7-architecture.js` |
 
-**38 erreurs, 6 mécanismes.** O1 et O2 en concentrent **25 à elles deux** :
+**40 erreurs, 6 mécanismes.** O1 et O2 en concentrent **27 à elles deux** :
 c'est là qu'il faut regarder en premier, toujours.
 
 ---
@@ -88,6 +88,8 @@ confiance qui n'existe pas.*
 | **E-210** | mon assertion « le bouton de réconciliation est branché » | vert après suppression de l'appel | la regex matchait aussi la **définition** `function X()` : une fonction jamais appelée passait pour branchée |
 | **E-211** | mon assertion « un seul accès à `event.data.object` » | **refus à tort** sur du code correct | je comptais les OCCURRENCES ; la ligne légitime en porte deux (`if (… && x) return x;`). La règle réelle est « aucune hors de la bascule », pas « exactement une » |
 | **E-212** | mon assertion « la réponse porte `modeTest` » | vert après retrait du champ | je cherchais le MOT dans le bloc — l'appel `paiement.modeTest()` suffisait à le satisfaire. Récidive exacte d'E-210 : chercher une ressemblance au lieu d'énoncer la règle (`modeTest\s*:`) |
+| **E-216** | `adminReadResponse` | « Erreur réseau : HTTP 400 » | ne lisait que `data.error` (anglais) ; les diagnostics répondent `erreur`/`etape`/`indice` (français). Il JETAIT avant le `.then`, rendant MORT tout le code de mise en forme des trois boutons Revolut — du diagnostic mort dans l'outil de diagnostic |
+| **E-217** | ma preuve comportementale du lecteur | verte à vide | promesse non `await`ée dans un module async : les erreurs étaient poussées APRÈS le `return errors`. Démasquée par sabotage — seule l'assertion par regex rougissait |
 | **E-214** | mon assertion « le secours ouvre la page hébergée » | vert avec `if (false)` | je cherchais la MENTION de la variable, pas son rôle de garde. Troisième récidive du même mécanisme (E-210, E-212) : chercher une ressemblance au lieu d'énoncer la règle |
 | **E-215** | mon assertion « confirmPayment traite Revolut » | **refus à tort** après extraction | elle exigeait le code à un EMPLACEMENT précis ; sortir le bloc dans une fonction — ce que la barrière des fonctions gelées imposait — la faisait rougir sur un code meilleur |
 | **E-213** | la réconciliation elle-même | « 317,79 € encaissés, un client attend » | **VRAI sur le fond, FAUX sur la gravité** : deux paiements Stripe en mode TEST. Le filet ne savait pas distinguer l'argent réel de la fausse monnaie — et une alerte qui crie sur des essais apprend à ne plus être regardée |

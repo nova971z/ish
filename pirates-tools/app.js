@@ -11155,7 +11155,32 @@
         throw new Error('HTTP ' + r.status + ' sur ' + url + ' — réponse non-JSON (' + ct + ') : '
           + (txt ? txt.slice(0, 200) : 'CORPS VIDE'));
       }
-      if (!r.ok || !data.ok) throw new Error((data && data.error) || ('HTTP ' + r.status));
+      /* ⛔⛔ DEUX VOCABULAIRES, UN SEUL LECTEUR — trouvé le 01/08/2026 sur un
+         vrai clic. Cette ligne ne lisait que `data.error` (anglais). Or les
+         diagnostics paiement répondent `erreur` / `etape` / `indice` (français),
+         avec le mode d'emploi exact de ce qu'il faut corriger. Tout était jeté,
+         et l'écran affichait « HTTP 400 » — un nombre qui ne dit rien.
+
+         Pire : le `.then` des trois boutons Revolut, qui sait justement mettre
+         en forme `etape` et `indice`, n'était JAMAIS atteint puisque cette
+         ligne jetait avant. Du code de diagnostic MORT, dans l'outil de
+         diagnostic.
+
+         ⚠️ On construit un message COMPLET, parce que la plupart des appelants
+         n'affichent que `e.message`, ET on attache le corps sous `err.reponse`
+         pour ceux qui veulent le détail. Aucun appelant existant n'est cassé.
+         ⛔ Rien de personnel ne transite ici : ces champs sont des consignes
+         techniques écrites par nos propres points d'entrée (règle J3). */
+      if (!r.ok || !data.ok) {
+        var motif = (data && (data.error || data.erreur)) || ('HTTP ' + r.status);
+        if (data && data.etape) motif = 'étape « ' + data.etape + ' » — ' + motif;
+        if (data && data.indice) motif += '  👉 ' + data.indice;
+        if (data && data.avertissement) motif += '  ⚠️ ' + data.avertissement;
+        var err = new Error(motif);
+        err.reponse = data;
+        err.statut = r.status;
+        throw err;
+      }
       return data;
     });
   }
@@ -11967,7 +11992,10 @@
           + '</div>';
       }).catch(function (e) {
         b.disabled = false;
-        out.innerHTML = '<p class="admin-error">Erreur réseau : ' + escapeHTML(e.message || String(e)) + '</p>';
+        /* ⛔ Ne PAS annoncer « erreur réseau » : un 400 est une réponse du
+           serveur, pas une coupure. Le message porte désormais l'étape et
+           l'indice — c'est lui qui dit quoi corriger. */
+        out.innerHTML = '<p class="admin-error">❌ ' + escapeHTML(e.message || String(e)) + '</p>';
       });
     };
   }
@@ -12017,7 +12045,10 @@
         out.innerHTML = html + '</div>';
       }).catch(function (e) {
         b.disabled = false;
-        out.innerHTML = '<p class="admin-error">Erreur réseau : ' + escapeHTML(e.message || String(e)) + '</p>';
+        /* ⛔ Ne PAS annoncer « erreur réseau » : un 400 est une réponse du
+           serveur, pas une coupure. Le message porte désormais l'étape et
+           l'indice — c'est lui qui dit quoi corriger. */
+        out.innerHTML = '<p class="admin-error">❌ ' + escapeHTML(e.message || String(e)) + '</p>';
       });
     };
   }
@@ -12058,7 +12089,10 @@
           + '</p>';
       }).catch(function (e) {
         btn.disabled = false;
-        out.innerHTML = '<p class="admin-error">Erreur réseau : ' + escapeHTML(e.message || String(e)) + '</p>';
+        /* ⛔ Ne PAS annoncer « erreur réseau » : un 400 est une réponse du
+           serveur, pas une coupure. Le message porte désormais l'étape et
+           l'indice — c'est lui qui dit quoi corriger. */
+        out.innerHTML = '<p class="admin-error">❌ ' + escapeHTML(e.message || String(e)) + '</p>';
       });
     };
   }
