@@ -92,13 +92,22 @@ module.exports = function checkPricing() {
   var nouveauNom = commissionPour({ commissionPct: 0.015, commissionFix: 0.25 });
   var defaut = commissionPour({});
 
-  if (!(ancienNom < defaut - 0.5)) {
+  /* ⚠️ ON MESURE UN ÉCART, PAS UN SENS — corrigé le 01/08/2026, le jour même.
+     Première version : `ancienNom < defaut - 0.5`. Elle supposait que la
+     valeur enregistrée (1,5 %) serait TOUJOURS sous le défaut, parce qu'à
+     l'écriture le défaut valait 2,8 %. Le défaut est passé à 1,0 % dans la
+     même journée, et la porte a rougi sur du code sain.
+     C'est exactement le piège que je venais de consigner : un seuil qui
+     recopie une valeur du produit se périme avec elle. Ce qui compte n'est
+     pas que le taux enregistré soit plus bas — c'est qu'il CHANGE le
+     résultat. On mesure donc un écart, dans les deux sens. */
+  if (!(Math.abs(Number(ancienNom) - Number(defaut)) > 0.5)) {
     errors.push('[check-pricing] ⛔ un taux de commission enregistré sous `stripePct` est IGNORÉ : '
-      + 'commission ' + Number(ancienNom).toFixed(2) + ' € alors que la valeur par défaut en donne '
-      + Number(defaut).toFixed(2) + ' €. Le réglage admin ne fait rien, et les prix sont calculés '
+      + 'commission ' + Number(ancienNom).toFixed(2) + ' €, identique à la valeur par défaut ('
+      + Number(defaut).toFixed(2) + ' €). Le réglage admin ne fait rien, et les prix sont calculés '
       + 'sur une hypothèse que personne n\'a choisie.');
   }
-  if (!(nouveauNom < defaut - 0.5)) {
+  if (!(Math.abs(Number(nouveauNom) - Number(defaut)) > 0.5)) {
     errors.push('[check-pricing] ⛔ un taux enregistré sous `commissionPct` est IGNORÉ — '
       + Number(nouveauNom).toFixed(2) + ' € contre ' + Number(defaut).toFixed(2) + ' € par défaut.');
   }
@@ -113,6 +122,53 @@ module.exports = function checkPricing() {
     var patch = {}; patch[k] = 0.011;
     if (pcfg.sanitize(patch)[k] === undefined) {
       errors.push('[check-pricing] ⛔ `' + k + '` n\'est pas enregistrable : l\'admin ne peut pas régler la commission sous ce nom.');
+    }
+  });
+
+  /* ═══ LE TAUX DOIT ÊTRE RÉGLABLE DEPUIS L'ÉCRAN ═════════════════════════
+     Constaté le 01/08/2026 : la commission entre dans le prix de CHAQUE outil
+     et n'existait NULLE PART dans l'écran admin — ni en lecture, ni en
+     écriture. Elle ne se changeait qu'en modifiant le code, donc pas depuis
+     l'iPad de l'exploitant, donc pas du tout.
+     ⛔ C'est la leçon E-110 : un réglage sans champ n'existe pas pour lui. */
+  var fs = require('fs'), path = require('path');
+  var RACINE = path.join(__dirname, '..');
+  var appSrc = fs.readFileSync(path.join(RACINE, 'app.js'), 'utf8');
+  ['cfgCommPct', 'cfgCommFix'].forEach(function (id) {
+    if (appSrc.indexOf('id="' + id + '"') === -1) {
+      errors.push('[check-pricing] ⛔ le champ `' + id + '` a disparu de l\'écran admin : '
+        + 'la commission entre dans TOUS les prix et ne serait plus ni visible ni réglable.');
+    }
+  });
+  /* Et il doit VRAIMENT partir au serveur : un champ qu'on remplit sans que
+     rien ne soit envoyé est pire qu'un champ absent — il fait croire au
+     réglage. On vérifie les DEUX noms : n'en écrire qu'un laisserait l'autre
+     périmé en base, et la priorité de lecture ferait gagner le mauvais. */
+  /* ⚠️ ON ANCRE SUR LE VRAI APPEL, pas sur la première occurrence du mot.
+     `pricing-config` apparaît plusieurs fois dans app.js ; ma fenêtre tombait
+     sur une autre et signalait des champs pourtant bien envoyés. */
+  var iSave = appSrc.indexOf('adminPostType(\'pricing-config\'');
+  if (iSave === -1) {
+    errors.push('[check-pricing] ⛔ PRÉALABLE : l\'appel `adminPostType(\'pricing-config\'` est '
+      + 'introuvable dans app.js — ce contrôle ne vérifie plus rien tant que ce nom n\'est pas à jour.');
+  }
+  /* ⚠️ DEUX CORRECTIONS, APRÈS QUE LE SABOTAGE A MONTRÉ QUE CETTE PORTE
+     NE MORDAIT PAS (01/08/2026) :
+
+     ① ON RETIRE LES COMMENTAIRES de la fenêtre examinée. Ma première version
+        cherchait le mot `commissionPct` — il apparaissait DEUX fois : dans
+        l'envoi, et dans la note explicative posée juste au-dessus. Retirer
+        l'envoi laissait la mention, et la porte restait verte sur un réglage
+        devenu mort. C'est le piège E-218 du registre, que je viens de rejouer.
+     ② ON CHERCHE LA CLÉ, PAS LE MOT : `commissionPct:` avec ses deux points.
+        Une phrase qui cite un champ ne prouve pas qu'on l'envoie. */
+  var bloc = iSave === -1 ? '' : appSrc.slice(iSave, iSave + 1400)
+    .replace(/\/\*[\s\S]*?\*\//g, ' ')
+    .replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+  ['commissionPct', 'commissionFix', 'stripePct', 'stripeFix'].forEach(function (champ) {
+    if (bloc.indexOf(champ + ':') === -1) {
+      errors.push('[check-pricing] ⛔ `' + champ + '` n\'est pas envoyé par le bouton '
+        + '« Enregistrer la config » : le réglage resterait à l\'écran sans jamais être appliqué.');
     }
   });
 

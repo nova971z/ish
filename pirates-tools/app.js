@@ -13097,7 +13097,22 @@
       + '<label>Mode d\'expédition<select id="cfgMode"><option value="colissimo"' + (mode === 'colissimo' ? ' selected' : '') + '>Colissimo (démarrage)</option><option value="container"' + (mode === 'container' ? ' selected' : '') + '>Container (prix baissés)</option></select></label>'
       + '<label>Marge nette cible (%)<input type="number" id="cfgTarget" step="0.5" value="' + pct(cfg.targetNet) + '"></label>'
       + '<label>IS (%)<input type="number" id="cfgIS" step="0.5" value="' + pct(cfg.is) + '"></label>'
+      /* ⚠️ CHAMPS AJOUTÉS LE 01/08/2026 — ils MANQUAIENT, et ça se payait double.
+         Ce taux entre dans le prix de CHAQUE outil, et il n'existait nulle part
+         dans cet écran : il ne se changeait qu'en modifiant le code.
+         Pire, depuis la correction de la priorité (« un réglage enregistré
+         l'emporte sur un défaut »), une valeur restée en base l'emporterait en
+         silence sur celle du code — sans aucun moyen de la voir.
+         Un réglage qui pèse sur tous les prix et qu'on ne peut ni lire ni
+         corriger depuis l'écran n'existe pas pour l'exploitant (leçon E-110). */
+      + '<label>Commission d\'encaissement (%)<input type="number" id="cfgCommPct" step="0.1" min="0" value="'
+        + pct(cfg.commissionPct != null ? cfg.commissionPct : cfg.stripePct) + '"></label>'
+      + '<label>Commission — part fixe (€)<input type="number" id="cfgCommFix" step="0.01" min="0" value="'
+        + (Number(cfg.commissionFix != null ? cfg.commissionFix : cfg.stripeFix) || 0).toFixed(2) + '"></label>'
       + '</div>'
+      + '<p class="admin-hint">Revolut en ligne : <b>1 %</b> carte grand public européenne, '
+        + '<b>2,8 %</b> carte professionnelle ou internationale. Le prix provisionne CE taux ; '
+        + 'la comptabilité, elle, lit toujours la commission réellement prélevée sur chaque vente.</p>'
       + '<div class="compta-actions"><button type="button" class="btn primary" id="cfgSave">💾 Enregistrer la config</button></div>'
       + '<hr class="compta-hr">'
       + '<h3 class="compta-card__title" style="margin-top:.4rem">Tester un prix</h3>'
@@ -13123,7 +13138,16 @@
         autoPrice: document.getElementById('cfgAuto').checked,
         mode: document.getElementById('cfgMode').value,
         targetNet: (parseFloat(document.getElementById('cfgTarget').value) || 15) / 100,
-        is: (parseFloat(document.getElementById('cfgIS').value) || 15) / 100
+        is: (parseFloat(document.getElementById('cfgIS').value) || 15) / 100,
+        /* ⚠️ ON ENVOIE LES DEUX NOMS, et ce n'est pas de la superstition.
+           Le modèle lit `commissionPct` ; `stripePct` est le nom déjà présent
+           dans `config/pricing`. N'écrire que l'un des deux laisserait l'autre
+           en base avec une valeur périmée — et la priorité de lecture ferait
+           gagner celle qu'on n'a pas voulue. On les aligne. */
+        commissionPct: (parseFloat(document.getElementById('cfgCommPct').value) || 0) / 100,
+        commissionFix: parseFloat(document.getElementById('cfgCommFix').value) || 0,
+        stripePct: (parseFloat(document.getElementById('cfgCommPct').value) || 0) / 100,
+        stripeFix: parseFloat(document.getElementById('cfgCommFix').value) || 0
       }).then(function () { toast('Config enregistrée', 'success'); btn.disabled = false; })
         .catch(function (e) { toast('Erreur : ' + e.message, 'error'); btn.disabled = false; });
     };

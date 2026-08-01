@@ -42,16 +42,36 @@ var DEFAULT_CONFIG = {
        Rétrofacturation contestée                                 15 €
        Remboursement                                       sans frais
 
-     ⛔ ON RETIENT LE PLUS HAUT : 2,8 % + 0,20 €. Décision de l'user, et elle
-     est plus fondée qu'il n'y paraît. Le vrai risque n'est PAS la carte
-     internationale — c'est la carte COMMERCIALE NATIONALE, au même taux. Or les
-     clients de Pirates Tools sont des ARTISANS : une carte professionnelle est
-     leur moyen de paiement normal, pas une exception.
+     ⛔⛔ DÉCISION RENVERSÉE LE 01/08/2026 — ON RETIENT 1,0 % + 0,20 €.
+     ─────────────────────────────────────────────────────────────────────
+     La règle précédente disait « on retient le PLUS HAUT : 2,8 % », au motif
+     que les clients sont des artisans et paient par carte professionnelle,
+     facturée 2,8 % comme l'international. ELLE NE S'APPLIQUE PLUS.
 
-     Mesuré : coût 200 € HT, port 20 €, markup 45 %, Guadeloupe. Un prix calculé
-     sur l'ancienne hypothèse de 1,5 % prévoit 5,42 € de commission ; une carte
-     commerciale en prélève 9,85 €. 4,43 € perdus par vente, invisibles jusqu'au
-     relevé bancaire.
+     Motif donné par l'user, les deux grilles en capture à l'appui : le site
+     affichait plus cher qu'au temps de l'ancien encaisseur alors que Revolut
+     prend MOINS sur chaque taux comparable (conso 1,0 % contre 1,5 % ;
+     international 2,8 % contre 3,25 %). Le modèle comparait en réalité le
+     MEILLEUR taux de l'ancien au PIRE taux de Revolut — deux hypothèses qui
+     ne se comparent pas.
+
+     Mesuré, outil à 100 € HT de coût, 2,7 kg, Guadeloupe :
+       hypothèse 2,8 % ............. 211,00 € TTC · commission 6,11 €
+       hypothèse 1,0 % ............. 206,01 € TTC · commission 2,26 €
+       (ancien encaisseur, 1,5 %) .. 207,08 € TTC · commission 3,36 €
+
+     ⚠️ CE QUE CE CHOIX COÛTE, écrit une fois pour ne pas le redécouvrir au
+     relevé bancaire : sur une vente réglée par carte PROFESSIONNELLE, Revolut
+     prélèvera bien 2,8 %. Le prix n'en aura provisionné que 1,0 %. L'écart
+     sort de la marge — sur l'exemple ci-dessus, 6,11 − 2,26 = 3,85 € par
+     vente concernée.
+
+     C'est un arbitrage ASSUMÉ, pas un oubli : afficher un prix juste pour la
+     majorité plutôt qu'un prix de précaution pour tout le monde. Le compte de
+     résultat reste exact quoi qu'il arrive — il lit la commission RÉELLE de
+     chaque vente (`payments[].fees[]`), jamais cette estimation. Si les
+     relevés montrent une majorité de cartes pro, ce taux se remonte depuis
+     l'écran admin, sans toucher au code.
 
      ⚠️ Le « 0,8 % + 0,02 € » affiché en tête de la page tarifs concerne les
      paiements EN PERSONNE (terminal). Il ne s'applique pas à une boutique en
@@ -66,7 +86,7 @@ var DEFAULT_CONFIG = {
      configuration DÉJÀ ENREGISTRÉE en base. Renommer sans lire l'ancien
      remettrait silencieusement la commission à sa valeur par défaut — donc
      fausserait tous les prix calculés. */
-  commissionPct: 0.028,
+  commissionPct: 0.010,
   commissionFix: 0.20,
   packaging: 0.5,             // emballage (carton/bulles récupérés)
   /* ⚠️ ABONNEMENT DU FOURNISSEUR D'ENCAISSEMENT — 10 €/mois, soit 120 €/an
