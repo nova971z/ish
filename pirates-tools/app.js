@@ -10070,6 +10070,9 @@
     }
     var cgvMsg = document.getElementById('payCgvNote');
     if (cgvMsg) cgvMsg.hidden = true;
+    _carteComplete = false;   // rien n'est saisi tant que le champ n'a pas parlé
+    var btnPay = document.getElementById('payModalConfirm');
+    if (btnPay) btnPay.innerHTML = libelleBoutonPayer();   // montant à jour
     majNomCarte();
     setupPayAddressForm();
     // Course : l'adresse du CHANTIER (déjà géocodée sur la carte) préremplit
@@ -10177,6 +10180,9 @@
      c'est ce que faisait la 1ʳᵉ version, et une `urlHebergee` absente envoyait
      alors sur le SDK de production avec un jeton de bac à sable. */
   var _paiementModeTest = null;
+  /* Validité du champ carte, telle que le fournisseur la déclare
+     (`onStatusChange.completed`). Faux tant qu'il n'a rien dit. */
+  var _carteComplete = false;
   var _revolutCardField = null;      // instance du champ carte Revolut montée
   var _revolutSDK = null;            // promesse de chargement du script Revolut
   var _quoteTerritory = null;   // territoire du PaymentIntent en cours (dérivé du CP)
@@ -10366,6 +10372,18 @@
     return _revolutSDK;
   }
 
+  /* Issue NON aboutie du champ carte (refus banque, 3-D Secure abandonné,
+     fenêtre fermée). Un seul endroit : le message change, le geste non — on
+     affiche la raison ET on rend la main au bouton, sinon le client reste
+     devant « Traitement en cours… » sur un paiement qui ne viendra jamais. */
+  function issueCarteRevolut(errorEl, message) {
+    if (errorEl) {
+      errorEl.textContent = message;
+      errorEl.hidden = false;
+    }
+    reactiverBoutonPayer();
+  }
+
   /* Monte le champ carte Revolut dans le conteneur du formulaire.
 
      ⛔⛔ `billingAddress`, `name` et `email` sont OBLIGATOIRES EN PRODUCTION.
@@ -10425,6 +10443,16 @@
           city: adr.city || '',
           streetLine1: adr.line1 || ''
         },
+        /* ⛔ LE BOUTON SUIT LA VALIDITÉ RÉELLE DE LA CARTE. Sans ça, il
+           s'allumait dès les CGV cochées, même avec un numéro incomplet ou faux :
+           le client cliquait, la banque refusait, et il croyait sa carte en
+           cause. `completed` est le drapeau que Revolut lève quand les trois
+           parties (numéro, date, CVV) sont valides — c'est LEUR validation, pas
+           une règle que j'inventerais sur les numéros de carte. */
+        onStatusChange: function (statut) {
+          _carteComplete = !!(statut && statut.completed);
+          majBoutonPayer();
+        },
         onValidation: function (erreurs) {
           if (!errorEl) return;
           var msg = (erreurs && erreurs.length && erreurs[0].message) || '';
@@ -10452,20 +10480,8 @@
           closePayModal();
           lvRedirect('#/merci');
         },
-        onError: function (err) {
-          if (errorEl) {
-            errorEl.textContent = (err && err.message) || 'Le paiement a échoué.';
-            errorEl.hidden = false;
-          }
-          reactiverBoutonPayer();
-        },
-        onCancel: function () {
-          if (errorEl) {
-            errorEl.textContent = 'Paiement interrompu. Tu peux réessayer.';
-            errorEl.hidden = false;
-          }
-          reactiverBoutonPayer();
-        }
+        onError: function (err) { issueCarteRevolut(errorEl, (err && err.message) || 'Le paiement a échoué.'); },
+        onCancel: function () { issueCarteRevolut(errorEl, 'Paiement interrompu. Tu peux réessayer.'); }
       });
       _stripeReady = true;
       /* Le champ est monté : on rend la main au bouton principal s'il avait été
@@ -10556,7 +10572,7 @@
        ça, un `majBoutonPayer()` déclenché pendant le paiement (la case CGV
        recochée, par exemple) le rallumerait — et un second clic partirait sur
        un paiement déjà en vol. */
-    if (btn) { btn.dataset.enCours = '1'; btn.disabled = true; btn.innerHTML = '<span class="pay-modal__btn-icon">⏳</span> Traitement en cours…'; }
+    if (btn) { btn.dataset.enCours = '1'; btn.disabled = true; btn.innerHTML = '<span class="pay-modal__pay-main"><span class="pay-modal__btn-icon">⏳</span> Traitement en cours…</span>'; }
     if (errorEl) errorEl.hidden = true;
     sauverCommandeEnAttente(total);
     var adr = (validatePayAddress() || {}).addr || {};
@@ -10613,10 +10629,27 @@
   }
 
   // Remet le bouton de paiement dans son état initial après un échec.
+  /* Libellé du bouton de paiement, fabriqué à UN seul endroit.
+     ⚠️ « Payer » en gros, mais la mention « commande avec obligation de
+     paiement » RESTE, au mot près : c'est une obligation légale en vente à
+     distance, elle
+     doit figurer sur le bouton lui-même (voir docs/JURIDIQUE.md, J1). Le
+     harnais `course-pay` la vérifie — la retirer ferait rougir la CI, et c'est
+     voulu.
+     Le MONTANT y figure aussi : un client doit voir ce qu'il va payer à
+     l'instant où il l'engage, pas seulement plus haut dans la fenêtre. */
+  function libelleBoutonPayer() {
+    var total = _payItems && _payItems.length ? payTotalCents(_payItems) / 100 : 0;
+    return '<span class="pay-modal__pay-main">'
+      + '<span class="pay-modal__btn-icon">💳</span> Payer'
+      + (total > 0 ? ' ' + formatPrice(total) : '') + '</span>'
+      + '<span class="pay-modal__pay-legal">Commander avec obligation de paiement</span>';
+  }
+
   function reactiverBoutonPayer() {
     var btn = document.getElementById('payModalConfirm');
     if (!btn) return;
-    btn.innerHTML = '<span class="pay-modal__btn-icon">💳</span> Commander avec obligation de paiement';
+    btn.innerHTML = libelleBoutonPayer();
     delete btn.dataset.enCours;
     majBoutonPayer();
   }
@@ -10650,7 +10683,8 @@
        — rien de plus à vérifier ici. Décochée : le champ dédié devient obligatoire. */
     var nomOk = (same && same.checked)
       || !nomEl || String(nomEl.value || '').trim().length >= 2;
-    btn.disabled = !(cgvOk && carteOk && nomOk);
+    /* La carte doit être COMPLÈTE et valide — pas seulement le champ monté. */
+    btn.disabled = !(cgvOk && carteOk && nomOk && _carteComplete);
 
     /* ⛔ ÉTEINDRE SANS DIRE POURQUOI est un défaut symétrique — et c'est le
        harnais `course-pay` qui l'a attrapé, pas moi. Avant, le message
@@ -10947,7 +10981,7 @@
     // ── Stripe Elements flow (embedded card form) ──
     if (stripe && _stripeElements && _stripeClientSecret) {
       var btn = document.getElementById('payModalConfirm');
-    if (btn) { btn.dataset.enCours = '1'; btn.disabled = true; btn.innerHTML = '<span class="pay-modal__btn-icon">⏳</span> Traitement en cours…'; }
+    if (btn) { btn.dataset.enCours = '1'; btn.disabled = true; btn.innerHTML = '<span class="pay-modal__pay-main"><span class="pay-modal__btn-icon">⏳</span> Traitement en cours…</span>'; }
       if (errorEl) { errorEl.hidden = true; }
 
       sauverCommandeEnAttente(total);

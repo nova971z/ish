@@ -44,7 +44,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=561">
+  <link rel="stylesheet" href="styles.css?v=562">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -1990,9 +1990,13 @@
           <span>J'ai lu et j'accepte les <a href="#/cgv" target="_blank" rel="noopener">conditions générales de vente</a>
           et la <a href="#/confidentialite" target="_blank" rel="noopener">politique de confidentialité</a>.</span></label>
         <p class="pay-modal__cgv-note" id="payCgvNote" role="alert" hidden>Coche cette case pour valider ta commande.</p>
-        <button id="payModalConfirm" class="btn primary btn--lg" type="button" aria-label="Commander avec obligation de paiement">
-          <span class="pay-modal__btn-icon">💳</span>
-          Commander avec obligation de paiement
+        <!-- ⚠️ La mention « commande avec obligation de paiement » est une
+             OBLIGATION LEGALE en vente a distance : elle doit figurer SUR le
+             bouton. On la garde donc, mais hierarchisee — « Payer » en gros,
+             la formule en dessous, lisible. Voir docs/JURIDIQUE.md (J1). -->
+        <button id="payModalConfirm" class="btn primary btn--lg pay-modal__pay" type="button" aria-label="Payer — commande avec obligation de paiement">
+          <span class="pay-modal__pay-main"><span class="pay-modal__btn-icon">&#128179;</span> Payer <span id="payModalAmount"></span></span>
+          <span class="pay-modal__pay-legal">Commander avec obligation de paiement</span>
         </button>
         <button id="payModalCryptoConfirm" class="btn primary btn--lg" type="button" hidden aria-label="Confirmer le paiement crypto">
           <span class="pay-modal__btn-icon">✅</span>
@@ -2265,7 +2269,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=561"></script>
+  <script defer src="app.js?v=562"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

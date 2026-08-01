@@ -62,6 +62,19 @@ tenter une écriture de profil et rapporter le refus. Tant qu'il n'existe pas,
 le déploiement des règles reste une **étape humaine non vérifiée**, et c'est
 écrit ici pour que personne ne croie le contraire.
 
+| 01/08/2026 | Le tunnel de paiement livré **six fois** de suite avec un manque, trouvé par l'user à chaque fois : nom du titulaire, e-mail, téléphone, panier non vidé, fenêtre qui ne se ferme pas, bouton qui ment | Je corrigeais le point signalé et je livrais, sans jamais reculer pour lister ce qu'un tunnel DOIT contenir. Aucun de ces défauts n'était une panne : tout « marchait » | `scripts/check-tunnel-paiement.js` |
+
+⚠️ **Cette porte est un PLANCHER, pas un plafond.** Elle vérifie la présence de
+ce qui est fonctionnellement et légalement requis pour encaisser une carte —
+elle ne dit pas si le formulaire est agréable. Un tunnel peut cocher ses quinze
+cases et rester pénible. Elle empêche de livrer INCOMPLET, rien de plus.
+
+⚠️ **Et elle n'a pas pu consulter les références externes** : `stripe.com`,
+`legifrance.gouv.fr` et `economie.gouv.fr` répondent 403 depuis l'environnement
+de travail. Ses exigences viennent du PROJET — `docs/JURIDIQUE.md`, harnais
+existants, décisions écrites — et des types du paquet officiel Revolut. Ce qui
+n'a pas pu être vérifié à la source y est dit comme tel.
+
 ⚠️ **La seconde n'a AUCUNE porte mécanique, et il faut le dire aussi.**
 `docs/ERREURS.md` est un registre relu à chaque intention (`node scripts/erreurs.js`),
 pas un contrôle : rien ne rougit si je propose demain une commande de terminal

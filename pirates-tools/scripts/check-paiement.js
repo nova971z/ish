@@ -1513,7 +1513,11 @@ module.exports = async function () {
       + 'de paiement, et les conditions se contrediraient à nouveau.');
     if (mMaj) {
       var fab = new Function('doc', 'return (' + mMaj[0].replace(/^\s*function majBoutonPayer/, 'function') + ')');
-      function essai(cgvCoche, carteEnAttente, enCours, nomSaisi, memeNom) {
+      /* `_carteComplete` est une variable de module dans app.js ; `new Function`
+         s'exécute au niveau global et l'y cherchera. On la pose donc là, et on
+         la retire après — un test qui laisse traîner un global fausse le
+         suivant. */
+      function essai(cgvCoche, carteEnAttente, enCours, nomSaisi, memeNom, carteFinie) {
         var btn = { dataset: {}, disabled: false };
         if (carteEnAttente) btn.dataset.attenteCarte = '1';
         if (enCours) btn.dataset.enCours = '1';
@@ -1529,7 +1533,9 @@ module.exports = async function () {
         } };
         var vraiDoc = global.document;
         global.document = faux;
-        try { fab()(); } finally { global.document = vraiDoc; }
+        global._carteComplete = (carteFinie === undefined) ? true : carteFinie;
+        try { fab()(); }
+        finally { global.document = vraiDoc; delete global._carteComplete; }
         return btn.disabled;
       }
       ok(essai(false, false, false) === true,
@@ -1551,6 +1557,11 @@ module.exports = async function () {
       /* ⛔ Case « la carte est à mon nom » COCHÉE : le champ dédié est masqué et
          vide, et c'est NORMAL — le nom vient de l'adresse. Exiger le champ dans
          ce cas bloquerait tout le monde sur un champ qu'ils ne voient même pas. */
+      ok(essai(true, false, false, '', true, false) === true,
+        '⛔⛔ le bouton est ALLUMÉ alors que le champ carte n\'est pas complet. Le client '
+        + 'clique avec un numéro incomplet ou faux, la banque refuse, et il croit sa carte '
+        + 'en cause. Revolut lève `onStatusChange.completed` quand les trois parties sont '
+        + 'valides — c\'est SA validation, la seule qui fasse foi.');
       ok(essai(true, false, false, '', true) === false,
         '⛔⛔ le bouton reste ÉTEINT alors que la case « la carte est à mon nom » est '
         + 'cochée. Le client ne voit AUCUN champ à remplir et ne peut pas commander : '

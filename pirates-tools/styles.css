@@ -6861,6 +6861,10 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
    l'air actif et ne répond pas, c'est un client qui clique, ne comprend pas,
    et s'en va. On éteint le dégradé et le halo, et le curseur le dit aussi.
    Sélecteur ciblé sur CE bouton : aucun effet de bord ailleurs. */
+.pay-modal__pay { flex-direction: column; gap: 2px; line-height: 1.25; }
+.pay-modal__pay-main { font-size: 1.05em; font-weight: 800; }
+.pay-modal__pay-legal { font-size: .72em; font-weight: 600; opacity: .85; }
+
 #payModalConfirm:disabled {
   background: #2a3444; color: #98a3b2; box-shadow: none; cursor: not-allowed;
   opacity: 1; /* pas de transparence : on veut « éteint », pas « fantôme » */

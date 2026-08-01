@@ -92,6 +92,10 @@ var reqPrixFui  = safeRequire('./check-prix-fuite',  'check-prix-fuite');
 // toujours designer celui qui ENCAISSE, et aucun etat inconnu ne doit pouvoir
 // passer pour « paye » — c'est le seul defaut ici qui couterait de la marchandise.
 var reqPaiement = safeRequire('./check-paiement',    'check-paiement');
+/* ⛔ PORTE DEMANDÉE PAR L'USER le 01/08/2026 : le tunnel de paiement a été livré
+   six fois de suite avec un manque, et c'est LUI qui les a trouvés à chaque fois.
+   Elle vérifie la PRÉSENCE de ce qu'un tunnel doit contenir — pas l'esthétique. */
+var reqTunnel = safeRequire('./check-tunnel-paiement', 'check-tunnel-paiement');
 // Le module Revolut est ecrit AVANT d'avoir pu appeler le reseau : tout ce qui
 // est PUR (signature contre le vecteur officiel, commission d'un ordre
 // reessaye, table des etats) s'eprouve ici, sinon la 1re verification aurait
@@ -164,6 +168,7 @@ var reqReconc   = safeRequire('./check-reconciliation', 'check-reconciliation');
   await runOne(reqPrixAff,  'check-prix-affiches');
   await runOne(reqPrixFui,  'check-prix-fuite');
   await runOne(reqPaiement, 'check-paiement');
+  await runOne(reqTunnel,   'check-tunnel-paiement');
   await runOne(reqRevolut,  'check-revolut');
   await runOne(reqReconc,   'check-reconciliation');
 
