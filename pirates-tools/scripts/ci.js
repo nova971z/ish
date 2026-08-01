@@ -139,6 +139,10 @@ var reqFuites = safeRequire('./check-fuites', 'check-fuites');
 // Ancres des harnais : un harnais qui vise un identifiant mort meurt sur un
 // délai, sans rendre d'assertion — ou accuse le produit à tort (01/08/2026).
 var reqAncres = safeRequire('./check-ancres', 'check-ancres');
+// Registre des demandes : on ne livre pas tant qu'une ligne est OUVERTE.
+// Angle mort de tout le dispositif jusqu'au 01/08/2026 — aucune autre porte
+// ne sait ce qui a été DEMANDÉ, elles ne vérifient que la cohérence du code.
+var reqDemandes = safeRequire('./check-demandes', 'check-demandes');
 // Le module Revolut est ecrit AVANT d'avoir pu appeler le reseau : tout ce qui
 // est PUR (signature contre le vecteur officiel, commission d'un ordre
 // reessaye, table des etats) s'eprouve ici, sinon la 1re verification aurait
@@ -215,6 +219,7 @@ var reqReconc   = safeRequire('./check-reconciliation', 'check-reconciliation');
   await runOne(reqEcrans,   'check-ecrans');
   await runOne(reqFuites,   'check-fuites');
   await runOne(reqAncres,   'check-ancres');
+  await runOne(reqDemandes, 'check-demandes');
   await runOne(reqRevolut,  'check-revolut');
   await runOne(reqReconc,   'check-reconciliation');
 

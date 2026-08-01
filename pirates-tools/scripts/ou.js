@@ -270,6 +270,22 @@ var INDEX = [
     fini: 'le harnais rend PLUS d\'assertions qu\'avant, check-ancres vert, et la correction est prouvée par sabotage.'
   },
   {
+    intention: 'Ce que l\'user a demandé — registre et solde',
+    mots: ['demande', 'demandes', 'demandé', 'promis', 'reste a faire', 'reste à faire',
+           'oublié', 'oubli', 'pas fait', 'solde', 'livrer', 'livraison'],
+    fichiers: ['docs/DEMANDES.md'],
+    fonctions: [],
+    protege: ['scripts/check-demandes.js'],
+    regles: [],
+    pieges: ['⛔ Une demande s\'écrit dans le registre AVANT d\'être traitée. Écrite après, elle a déjà pu être oubliée — c\'est comme ça qu\'on livre à moitié.',
+             'Trois états seulement : OUVERT (bloque la livraison) · FAIT (avec sa preuve) · RENDU (dépend de l\'user, avec le motif).',
+             '⛔ Une ligne ne passe pas à FAIT sans preuve vérifiable — une commande, un compteur, un harnais nommé. « C\'est fait » n\'est pas une preuve.',
+             'Une ligne SANS état est pire qu\'une ligne ouverte : elle se lit comme faite. La porte la refuse aussi.',
+             '⚠️ La porte ne lit PAS les conversations : une demande non consignée lui reste invisible. Elle empêche qu\'une demande RECONNUE se perde, rien de plus.'],
+    decisions: [],
+    fini: 'aucune ligne OUVERT, chaque FAIT porte sa preuve, et check-demandes vert.'
+  },
+  {
     intention: 'Mémoire du projet, règles, documentation',
     mots: ['memoire', 'mémoire', 'claude.md', 'doc', 'documentation', 'regle', 'règle'],
     fichiers: ['../CLAUDE.md', 'docs/JOURNAL.md', 'docs/DECISIONS.md', 'docs/ETAT.md', '.claude/rules'],

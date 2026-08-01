@@ -29,7 +29,8 @@ désigné ici, soit il est rangé.
 | `IMPORT-REFUSES.md` | les références du relevé fournisseur **écartées** à l'import, avec leur motif (nom vide, libellé tronqué par l'analyse de la source, doublon de SKU ou de référence alternative). Écrites plutôt qu'avalées en silence — régénéré par `node outils/importer-catalogue.mjs` |
 | `CSS-CARTE.md` | **tous** les commentaires retirés de `styles.css`, rattachés à leur sélecteur — ils coûtaient 20 795 octets gzip **à chaque visite** (navigation privée : aucun cache ne les amortit). Régénéré par `node outils/purge-css.mjs` |
 | `LECONS.md` | registre des pannes et de la porte que chacune a produite |
-| `ERREURS.md` | mes erreurs classées par **origine** — 6 mécanismes, lus par le sommaire seul (`scripts/erreurs.js`) |
+| `DEMANDES.md` | **ce que l'user a demandé, et où ça en est** — trois états, et la CI REFUSE de livrer tant qu'une ligne est `OUVERT` (`scripts/check-demandes.js`) |
+| `ERREURS.md` | mes erreurs classées par **origine** — 7 mécanismes, lus par le sommaire seul (`scripts/erreurs.js`) |
 | `JURIDIQUE.md` | les 5 domaines qui engagent la responsabilité — porte à ouvrir avant d'éditer (`scripts/juridique.js`) |
 | `EPREUVES.md` | trois épreuves en environnement isolé : ce que le dispositif attrape et ce qu'il laisse passer |
 | `PRIX-SOURCE-UNIQUE.md` | pourquoi le site avait plusieurs prix, et la boucle qui referme l'écart |

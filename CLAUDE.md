@@ -25,6 +25,7 @@ décisions en vigueur · « fini » ici. Intention inconnue : elle le dit et dem
 | L'histoire complète du projet | `pirates-tools/docs/JOURNAL.md` |
 | Où en est le chantier | `pirates-tools/docs/AVANCEMENT-FONDATIONS.md` |
 | Une panne, sa cause, la porte posée | `pirates-tools/docs/LECONS.md` |
+| **Ce que l'user a demandé, et où ça en est** | `pirates-tools/docs/DEMANDES.md` *(porte : `check-demandes`)* |
 | **D'où viennent mes erreurs**, par mécanisme | `pirates-tools/docs/ERREURS.md` *(`node scripts/erreurs.js`)* |
 | **Ce qui engage juridiquement** — la porte à ouvrir | `pirates-tools/docs/JURIDIQUE.md` *(`node scripts/juridique.js`)* |
 | La liste de tous les documents | `pirates-tools/docs/INDEX-DOCS.md` |

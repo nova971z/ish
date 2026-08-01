@@ -231,6 +231,49 @@ await writeFile(join(RACINE, 'products.json'), JSON.stringify(sortie, null, 1));
    dans .gitignore ET dans .vercelignore par construction — il n'est pas suivi). */
 await writeFile(join(RACINE, 'scratchpad', 'couts-import-' + MARQUE.toLowerCase() + '.json'),
   JSON.stringify(couts, null, 1));
+
+/* ⛔⛔ LA MOITIÉ QUI MANQUAIT — corrigé le 01/08/2026, après que l'user l'a vu
+   avant moi sur son écran d'admin.
+   ─────────────────────────────────────────────────────────────────────────
+   Cet outil relevait bien les coûts d'achat et les rangeait à l'abri. Ce
+   qu'il ne faisait PAS : les rendre INJECTABLES. Le fichier JSON restait là,
+   personne ne le chargeait, et le catalogue vivait avec des prix dont le coût
+   d'origine était perdu.
+
+   Conséquence mesurée sur l'écran de recalcul : **541 prix « estimés »** —
+   c'est-à-dire un coût REMONTÉ À L'ENVERS depuis le prix affiché, puis servant
+   à recalculer ce même prix. Un raisonnement circulaire qui confirme toujours
+   ce qui existe déjà, et 250 fiches signalées « absentes du traqueur ».
+
+   ⚠️ Et la règle produits est explicite : « un produit dont le coût d'achat
+   n'est pas relevé ne reste pas au catalogue ». On avait donc importé en
+   violation d'une règle, sans que rien ne le dise.
+
+   On écrit maintenant, À CÔTÉ, un fichier au FORMAT EXACT que le traqueur sait
+   avaler (`parseCotebrico`) : il suffit de le coller dans l'écran admin pour
+   que chaque coût redevienne un RELEVÉ, et non une supposition.
+   ⛔ Ce fichier ne part JAMAIS au dépôt : il porte des prix fournisseur, et
+   les publier est irréversible (CDN + historique git). `scratchpad/` n'est ni
+   suivi ni déployé. */
+const lignesTraqueur = Object.entries(couts)
+  .filter(([, c]) => Number(c) > 0)
+  .map(([sku, c]) => MARQUE.toUpperCase() + ' ' + String(sku).toUpperCase()
+    + ' Prix ' + Number(c).toFixed(2).replace('.', ',') + ' € Ajouter au panier');
+const cheminTraqueur = join(RACINE, 'scratchpad',
+  'coller-traqueur-' + MARQUE.toLowerCase() + '.txt');
+await writeFile(cheminTraqueur, lignesTraqueur.join('\n'));
+
+/* ⚠️ PREUVE AVANT DE LE DIRE : on repasse le texte produit dans le VRAI
+   analyseur du traqueur. Annoncer « collez ce fichier » sans avoir vérifié
+   qu'il se relit serait exactement le genre de consigne qui fait perdre une
+   heure à l'user. */
+const { parseCotebrico } = await import('file://' + join(RACINE, 'api/_lib/price-parse.js'))
+  .then((m) => m.default || m).catch(() => ({ parseCotebrico: null }));
+let relus = null;
+if (typeof parseCotebrico === 'function') {
+  try { relus = parseCotebrico(lignesTraqueur.join('\n'), MARQUE.toUpperCase()).length; }
+  catch (e) { relus = null; }
+}
 await writeFile(join(RACINE, 'docs', 'IMPORT-REFUSES.md'),
   '# Références REFUSÉES à l\'import du ' + MARQUE + '\n\n'
   + '> Écrites ici plutôt qu\'avalées en silence. Chacune a un motif.\n\n'
@@ -238,3 +281,19 @@ await writeFile(join(RACINE, 'docs', 'IMPORT-REFUSES.md'),
   + refuses.map((r) => '| `' + r.sku + '` | ' + (r.nom || '—').replace(/\|/g, '/') + ' | ' + r.motif + ' |').join('\n')
   + '\n');
 l('\nécrit : products.json (' + fusion.length + ' fiches) et docs/IMPORT-REFUSES.md');
+l('');
+l('⛔ CE N\'EST PAS FINI — LES PRIX REPOSENT SUR UNE SUPPOSITION TANT QUE CECI');
+l('   N\'EST PAS FAIT. Le catalogue vient de recevoir ' + retenus.length + ' fiches dont le');
+l('   coût d\'achat n\'existe QUE dans le fichier ci-dessous. Sans injection, le');
+l('   recalcul de prix devine un coût à partir du prix — un cercle qui confirme');
+l('   toujours ce qui existe déjà.');
+l('');
+l('   1. ouvrir  : ' + cheminTraqueur.replace(RACINE + '/', ''));
+l('   2. copier tout le contenu');
+l('   3. Admin → Traqueur de prix → marque ' + MARQUE.toUpperCase() + ' → coller → lancer');
+l('');
+l('   lignes prêtes à coller : ' + lignesTraqueur.length
+  + (relus === null ? '  (analyseur non vérifiable ici)'
+     : relus === lignesTraqueur.length ? '  · ' + relus + ' relues par le VRAI analyseur ✅'
+     : '  ⛔ SEULEMENT ' + relus + ' relues — le format ne passe pas, NE PAS COLLER'));
+if (relus !== null && relus !== lignesTraqueur.length) process.exitCode = 1;
