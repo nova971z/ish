@@ -570,6 +570,13 @@ async function handleIntentSucceeded(paiement, fb, pi, ctx) {
     customerEmail: customerEmail,
     customerName: custName,
     customerAddress: custAddr,
+    /* ⛔ TÉLÉPHONE DE LIVRAISON — sans lui, ce champ était collecté, rendu
+       OBLIGATOIRE au client, transporté jusqu'ici… et jeté. Une donnée exigée
+       qui ne sert à rien est pire que pas de donnée : elle fait perdre du temps
+       au client, elle n'aide personne, et elle contrevient au principe de
+       minimisation (J3 — on ne collecte que ce dont on a l'usage).
+       Son usage réel : le livreur devant une porte fermée. */
+    customerPhone: (pi.metadata && pi.metadata.shipPhone) || null,
     paymentIntentId: pi.id,
     uid: piUid,
     territoryDeclared: declaredTerritory,
@@ -613,7 +620,7 @@ async function handleIntentSucceeded(paiement, fb, pi, ctx) {
   // Le bloc facture de l'email reste best-effort : un email sans bloc facture
   // vaut mieux qu'un email bloqué (le n° et le détail vivent dans payments/).
   if (!ctx || !ctx.emailsSent) {
-    var emailModel = modelFromIntent(pi, custName, rebuilt, tax, customerEmail);
+    var emailModel = modelFromIntent(pi, custName, rebuilt, tax, customerEmail, custAddr);
     try {
       var seller = await loadSeller(fb);
       var inv = invoiceLib.buildInvoice({
@@ -868,13 +875,22 @@ function modelFromSession(session, tax) {
    `charge` de Stripe UNIQUEMENT pour en extraire le nom du porteur. La couche
    paiement le fournit deja, normalise — on passe donc le nom, pas un objet
    propre a un fournisseur. */
-function modelFromIntent(pi, nomClient, rebuilt, tax, customerEmail) {
+function modelFromIntent(pi, nomClient, rebuilt, tax, customerEmail, adresse) {
   return {
     orderRef: (pi.id || '').slice(-8).toUpperCase(),
     totalCents: pi.amount != null ? pi.amount : null,
     currency: (pi.currency || 'eur').toUpperCase(),
     customerEmail: customerEmail || '',
     customerName: nomClient || '',
+    /* ⛔ OÙ LIVRER, ET COMMENT JOINDRE. L'e-mail de commande donnait l'e-mail
+       du client et rien d'autre : il fallait ouvrir l'administration pour
+       chaque colis. Et le téléphone, rendu OBLIGATOIRE au client, n'arrivait
+       nulle part — une donnée exigée sans usage est un manquement à la
+       minimisation (J3), en plus d'être une perte de temps pour tout le monde.
+       ⚠️ Ces deux champs ne partent QUE dans l'e-mail du responsable, jamais
+       dans celui du client (qui connaît sa propre adresse) ni dans un journal. */
+    shipAddress: adresse || '',
+    shipPhone: (pi.metadata && pi.metadata.shipPhone) || '',
     lines: rebuilt.lines,
     ownerWarnings: buildTaxWarnings(tax, pi.metadata && pi.metadata.territory)
       .concat(rebuilt.ok ? [] : ['Détail des lignes indisponible — le total débité fait foi.'])
@@ -1006,7 +1022,10 @@ async function sendOrderEmails(model) {
   // Owner notification email (avec les alertes taxe/intégrité)
   if (ownerEmail) {
     const intro = 'Nouvelle commande payée sur le site. '
-      + (model.customerEmail ? 'Client : <strong>' + escape(model.customerEmail) + '</strong>' + (model.customerName ? ' (' + escape(model.customerName) + ')' : '') + '.' : 'Email client non fourni.');
+      + (model.customerEmail ? 'Client : <strong>' + escape(model.customerEmail) + '</strong>' + (model.customerName ? ' (' + escape(model.customerName) + ')' : '') + '.' : 'Email client non fourni.')
+      /* De quoi préparer et expédier le colis SANS ouvrir l'administration. */
+      + (model.shipAddress ? '<br>📦 Livrer à : <strong>' + escape(model.shipAddress) + '</strong>' : '')
+      + (model.shipPhone ? '<br>📞 Joindre au : <strong>' + escape(model.shipPhone) + '</strong>' : '');
     await resendSend(apiKey, {
       from: from,
       to: ownerEmail,

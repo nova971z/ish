@@ -1353,6 +1353,24 @@ module.exports = async function () {
       '⛔ le téléphone saisi n\'est plus transmis au serveur : il serait demandé au client '
       + 'puis jeté, ce qui est pire que ne pas le demander.');
 
+    /* ⛔⛔ ET IL DOIT SERVIR. Le 01/08/2026 il était collecté, rendu
+       OBLIGATOIRE, transporté jusqu'à la metadata… et jeté : `grep shipPhone`
+       ne trouvait AUCUN usage en aval. Une donnée exigée sans usage fait perdre
+       du temps au client, n'aide personne, et contrevient à la minimisation
+       (J3). Son usage réel : le livreur devant une porte fermée. */
+    var whSrc2 = fs.readFileSync(WH, 'utf8');
+    ok(/customerPhone/.test(whSrc2),
+      '⛔⛔ le téléphone n\'entre plus dans le journal des paiements : il est demandé au '
+      + 'client, puis perdu. Une donnée obligatoire sans usage est une donnée qu\'il ne '
+      + 'fallait pas collecter (minimisation, J3).');
+    ok(/shipPhone: \(pi\.metadata/.test(whSrc2) && /model\.shipPhone/.test(whSrc2),
+      '⛔⛔ l\'e-mail de commande ne porte plus le téléphone de livraison. Il faudrait '
+      + 'rouvrir l\'administration pour chaque colis — et le champ qu\'on impose au client '
+      + 'redeviendrait décoratif.');
+    ok(/model\.shipAddress/.test(whSrc2),
+      '⛔ l\'e-mail de commande ne dit plus OÙ livrer. Préparer un colis exigerait de '
+      + 'rouvrir l\'administration à chaque fois.');
+
     /* ── ⛔ PRÉ-REMPLIR N'EST PAS IMPOSER ─────────────────────────────────
        On livre souvent ailleurs que chez soi : un chantier, un client, une
        famille. Les champs doivent rester modifiables, et le pré-remplissage
