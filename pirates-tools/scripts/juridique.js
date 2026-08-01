@@ -43,6 +43,11 @@ var DOMAINES = {
         motifs: [/pirates-tools\/products\.json$/,
                  /pirates-tools\/api\/(contact|checkout|create-payment-intent|webhook|admin)\.js$/,
                  /pirates-tools\/api\/_lib\/(pricing|pricing-model|price-parse|courses)\.js$/,
+                 // ⛔ AJOUTÉ le 01/08/2026 : `catalog.js` décide désormais si une
+                 // promotion est ACTIVE et efface le prix de référence quand elle
+                 // expire. C'est donc lui qui rend une annonce de réduction
+                 // conforme — ou trompeuse. La porte l'a réclamé d'elle-même.
+                 /pirates-tools\/api\/_lib\/catalog\.js$/,
                  // Couture paiement : c'est par là que passe le montant
                  // réellement débité — le prix opposable au client.
                  /pirates-tools\/api\/_lib\/paiement\/.+\.js$/] },

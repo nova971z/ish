@@ -104,8 +104,16 @@ const profil = {
   addrPostal: '97139', addrCity: 'Les Abymes', territory: '971', avatar: ''
 };
 const J = 86400000;
+/* Lignes réelles : le bandeau dépliable ne se voit qu'avec du détail. Les
+   clés sont bidon À DESSEIN — un harnais ne nomme jamais un produit du
+   catalogue (dix-huit sont morts pour ça). */
+const lignes = [
+  { key: 'SANDBOX-1', title: 'Boulonneuse à chocs 18V LXT 700 Nm (machine seule)', price: 248.68, qty: 1 },
+  { key: 'SANDBOX-2', title: 'Meuleuse d angle 18V Ø125 mm brushless en coffret', price: 189.9, qty: 2 },
+  { key: 'SANDBOX-3', title: 'Coffret 6 douilles à queue Impact', price: 51.32, qty: 1 }
+];
 const commandes = [
-  { items: 3, total: 489.9,  status: 'paid',     date: Date.now() - 2 * J },
+  { items: 3, total: 489.9,  status: 'paid',     date: Date.now() - 2 * J, lines: lignes },
   { items: 1, total: 129,    status: 'pending',  date: Date.now() - 9 * J },
   { items: 2, total: 254.8,  status: 'quote',    date: Date.now() - 21 * J },
   { items: 5, total: 1120.5, status: 'paid',     date: Date.now() - 40 * J }

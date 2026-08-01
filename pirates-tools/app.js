@@ -1354,14 +1354,42 @@
       + productCardVisual(p)
       + (p.tag && opts.tag !== false ? '<span class="product-card__tag">' + escapeHTML(p.tag) + '</span>' : '')
       + stockBadge(p)
+      + badgePromo(p)
       + (opts.wishlist === false ? '' : wishlistButton(p))
       + '</div>'
       + '<div class="product-card__body">'
       + '<span class="product-card__brand">' + escapeHTML(p.brand) + '</span>'
       + '<h3 class="product-card__title">' + escapeHTML(p.title) + '</h3>'
-      + '<span class="product-card__price">' + formatPrice(price.ttc) + ' <small>TTC</small></span>'
+      + '<span class="product-card__price">' + formatPrice(price.ttc) + ' <small>TTC</small>'
+      + prixBarrePromo(p) + '</span>'
       + '</div>'
       + '</a>';
+  }
+
+  /* ── PRIX BARRÉ D'UNE PROMOTION ────────────────────────────────────────
+     ⛔ On n'affiche RIEN si le serveur n'a pas dit `promoActive`. Le front ne
+     décide jamais qu'il y a promotion : c'est le catalogue qui le calcule, et
+     lui seul connaît le prix le plus bas des 30 derniers jours — la référence
+     qu'exige la loi pour toute annonce de réduction (J4). Un barré inventé
+     côté client serait une annonce trompeuse.
+
+     ⚠️ Le montant barré est le PRIX DE RÉFÉRENCE, pas le prix de la veille.
+     `promoAncienPrix` est calculé à l'écriture (api/admin.js) comme le minimum
+     réellement pratiqué sur 30 jours, et remis à `null` dès que la promotion
+     expire — deux mois — pour qu'aucun barré périmé ne puisse survivre. */
+  function prixBarrePromo(p) {
+    if (!p || !p.promoActive) return '';
+    var ref = Number(p.promoAncienPrix);
+    if (!(ref > 0)) return '';
+    return ' <s class="product-card__prix-ref">' + formatPrice(ref) + '</s>';
+  }
+
+  /* Étiquette « En promo » posée sur la vignette, à côté du badge de stock. */
+  function badgePromo(p) {
+    if (!p || !p.promoActive) return '';
+    var ref = Number(p.promoAncienPrix), prix = Number(p.price);
+    var pct = (ref > 0 && prix > 0 && ref > prix) ? Math.round((1 - prix / ref) * 100) : 0;
+    return '<span class="promo-badge">' + (pct > 0 ? '−' + pct + ' %' : 'En promo') + '</span>';
   }
 
   // Liste compacte de numéros de page : 1 … (p-1) p (p+1) … N
@@ -9090,21 +9118,60 @@
     return ['Devis envoyé', 'off'];
   }
 
+  /* Une ligne de commande = une fiche produit MINIATURE.
+     ⚠️ L'image ne vient PAS de la commande : elle est relue au CATALOGUE par
+     la clé. Recopier une URL dans un document la fige — le jour où le visuel
+     change, l'historique afficherait encore l'ancien.
+     ⚠️ `loading="lazy"` : un client à vingt commandes ouvrirait sinon vingt
+     images d'un coup, en navigation privée, donc sans aucun cache. */
+  function ligneCommandeHTML(li) {
+    var p = findProductByKey(li.key);
+    var img = (p && p.img) || 'images/placeholder.svg';
+    var ref = (p && p.sku) || li.key || '—';
+    var titre = li.title || (p && p.title) || ref;
+    var q = Number(li.qty) || 1;
+    return '<div class="acc-ligne">'
+      + '<img class="acc-ligne__img" src="' + escapeHTML(img) + '" alt="" width="44" height="44"'
+      + ' loading="lazy" decoding="async">'
+      + '<span class="acc-ligne__txt">'
+      + '<span class="acc-ligne__ref">' + escapeHTML(String(ref)) + '</span>'
+      + '<span class="acc-ligne__nom">' + escapeHTML(String(titre)) + '</span>'
+      + '</span>'
+      + '<span class="acc-ligne__prix">'
+      + (q > 1 ? '<em>×' + q + '</em> ' : '') + formatPrice(li.price) + '</span>'
+      + '</div>';
+  }
+
+  /* ⚠️ `<details>` / `<summary>` plutôt qu'un bouton et du JavaScript : le
+     navigateur donne gratuitement l'ouverture au clavier, l'état annoncé aux
+     lecteurs d'écran et la recherche dans la page. L'écrire à la main, c'est
+     réécrire moins bien ce que la plateforme fait déjà. */
   function carteCommandeHTML(o, numero) {
     var dateMs = o.date && o.date.toMillis ? o.date.toMillis() : (o.date || Date.now());
     var st = libelleStatutCommande(o.status);
     var n = Number(o.items) || 0;
     var estDevis = o.status === 'quote' || !o.status;
-    return '<div class="acc-order">'
-      + '<div class="acc-order__top">'
+    var lignes = Array.isArray(o.lines) ? o.lines : [];
+    var entete = '<span class="acc-order__top">'
       + '<strong>' + (estDevis ? 'Devis' : 'Commande') + ' #' + numero + '</strong>'
       + '<span class="acc-order__date">' + escapeHTML(formatReviewDate(dateMs)) + '</span>'
-      + '</div>'
-      + '<div class="acc-order__bot">'
+      + '</span>'
+      + '<span class="acc-order__bot">'
       + '<span class="acc-order__sum">' + n + ' article' + (n > 1 ? 's' : '') + ' — ' + formatPrice(o.total) + '</span>'
       + '<span class="acc-order__st acc-order__st--' + st[1] + '">' + st[0] + '</span>'
-      + '</div>'
-      + '</div>';
+      + '</span>';
+
+    /* ⛔ Sans détail enregistré, on ne fabrique PAS un bandeau qui s'ouvre sur
+       du vide : les commandes antérieures à l'enregistrement des lignes
+       restent des cartes simples. Un dépliant vide ferait croire à une panne. */
+    if (!lignes.length) return '<div class="acc-order">' + entete + '</div>';
+
+    return '<details class="acc-order acc-order--pliable">'
+      + '<summary class="acc-order__resume">' + entete
+      + '<span class="acc-order__chevron" aria-hidden="true">▾</span></summary>'
+      + '<div class="acc-order__detail">'
+      + lignes.map(ligneCommandeHTML).join('')
+      + '</div></details>';
   }
 
   function renderOrderHistory() {
@@ -13069,6 +13136,62 @@
 
   // ── Marges nettes LIVE (branché sur les prix RÉELS du site) ─────────────
   var _marginsLoaded = false;
+  /* ── ÉCRAN « MOUVEMENT DES PRIX » ───────────────────────────────────────
+     Demandé par l'user le 01/08/2026 : un tableau des prix qui ont bougé, sur
+     un nombre de jours qu'il choisit, avec l'ancien ET le nouveau prix, la
+     vignette du produit, le nouveau prix en VERT lumineux s'il a baissé et en
+     ROUGE lumineux s'il a monté.
+
+     ⚠️ La couleur n'est PAS la seule information : la variation en pourcentage
+     est écrite, et une flèche donne le sens. Un tableau qui ne dirait le sens
+     que par la couleur serait illisible pour un daltonien — et c'est une part
+     non négligeable des artisans. */
+  function ligneMouvementPrix(m) {
+    var baisse = m.nouveau < m.ancien;
+    var sens = baisse ? 'baisse' : 'hausse';
+    return '<div class="pm-ligne">'
+      + '<img class="pm-ligne__img" src="' + escapeHTML(m.img) + '" alt="" width="46" height="46"'
+      + ' loading="lazy" decoding="async">'
+      + '<span class="pm-ligne__txt">'
+      + '<span class="pm-ligne__ref">' + escapeHTML(String(m.sku)) + '</span>'
+      + '<span class="pm-ligne__nom">' + escapeHTML(String(m.titre)) + '</span>'
+      + '</span>'
+      + '<span class="pm-ligne__date">' + escapeHTML(formatReviewDate(m.at)) + '</span>'
+      + '<span class="pm-ligne__prix">'
+      + '<s class="pm-ligne__avant">' + formatPrice(m.ancien) + '</s>'
+      + '<span class="pm-ligne__fleche" aria-hidden="true">' + (baisse ? '↓' : '↑') + '</span>'
+      + '<strong class="pm-ligne__apres pm-ligne__apres--' + sens + '">' + formatPrice(m.nouveau) + '</strong>'
+      + '<span class="pm-ligne__pct pm-ligne__pct--' + sens + '">'
+      + (m.variation > 0 ? '+' : '') + m.variation + ' %</span>'
+      + '</span>'
+      + '</div>';
+  }
+
+  function loadAdminPriceMoves() {
+    var hote = document.getElementById('adminPriceMoves');
+    if (!hote) return;
+    var sel = document.getElementById('pmJours');
+    var jours = sel ? sel.value : '30';
+    hote.innerHTML = '<p class="admin-loading">Chargement…</p>';
+    adminGet('price-moves', { jours: jours })
+      .then(function (d) {
+        var moves = (d && d.moves) || [];
+        if (!moves.length) {
+          hote.innerHTML = '<p class="admin-hint">Aucun mouvement de prix sur cette période. '
+            + 'Le journal se remplit à chaque passage du traqueur.</p>';
+          return;
+        }
+        var baisses = moves.filter(function (m) { return m.nouveau < m.ancien; }).length;
+        hote.innerHTML = '<p class="admin-hint"><strong>' + moves.length + '</strong> mouvement(s) sur '
+          + d.jours + ' jours — ' + baisses + ' baisse(s), ' + (moves.length - baisses) + ' hausse(s).</p>'
+          + '<div class="pm-liste">' + moves.map(ligneMouvementPrix).join('') + '</div>';
+      })
+      .catch(function (e) {
+        hote.innerHTML = '<p class="admin-hint admin-hint--err">Mouvements non chargés : '
+          + escapeHTML((e && e.message) || 'erreur') + '</p>';
+      });
+  }
+
   function loadAdminMargins(force) {
     var el = document.getElementById('adminMarginsBody');
     if (!el) return;
@@ -14071,6 +14194,7 @@
       + '<button type="button" class="admin-tab is-active" data-admin-tab="products" role="tab" aria-selected="true">Produits</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="compta" role="tab" aria-selected="false">Comptabilité</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="margins" role="tab" aria-selected="false">Marges</button>'
+      + '<button type="button" class="admin-tab" data-admin-tab="pricemoves" role="tab" aria-selected="false">Mouvement des prix</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="fisc" role="tab" aria-selected="false">Fiscalité</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="invoices" role="tab" aria-selected="false">Factures</button>'
       + '<button type="button" class="admin-tab" data-admin-tab="stats" role="tab" aria-selected="false">Statistiques</button>'
@@ -14086,6 +14210,18 @@
       + '<div class="admin-pane is-active" data-admin-pane="products">'
       + '<p class="admin-hint">Édite le stock et le prix de chaque produit. Les modifications sont enregistrées dans Firestore et visibles en production après rafraîchissement du cache (≤30 s).</p>'
       + '<div id="adminProductList" class="admin-list"><p class="admin-loading">Chargement…</p></div>'
+      + '</div>'
+
+      + '<div class="admin-pane" data-admin-pane="pricemoves" hidden>'
+      + '<p class="admin-hint">Tous les prix qui ont bougé, relus du journal du traqueur — ce qui a réellement été appliqué, jamais un recalcul.</p>'
+      + '<div class="pm-barre">'
+      + '<label>Sur les <select id="pmJours" class="search">'
+      + '<option value="7">7 jours</option><option value="30" selected>30 jours</option>'
+      + '<option value="90">90 jours</option><option value="180">6 mois</option>'
+      + '<option value="365">1 an</option></select></label>'
+      + '<button type="button" id="pmRefresh" class="btn">Actualiser</button>'
+      + '</div>'
+      + '<div id="adminPriceMoves"><p class="admin-loading">Chargement…</p></div>'
       + '</div>'
 
       + '<div class="admin-pane" data-admin-pane="compta" hidden>'
@@ -14293,6 +14429,7 @@
         if (target === 'orders') loadAdminOrders();
         if (target === 'compta') renderAdminCompta();
         if (target === 'margins') loadAdminMargins();
+        if (target === 'pricemoves') loadAdminPriceMoves();
         if (target === 'fisc') renderAdminFisc();
         if (target === 'invoices') renderAdminInvoices();
         if (target === 'instagram') initAdminInstagram();
@@ -14304,6 +14441,13 @@
         if (target !== 'stats') destroyAdminGlobe(); // libère le contexte WebGL
       });
     });
+
+    /* Le sélecteur de période et le bouton rechargent le tableau. `change`
+       sur le menu : sur iPad, changer la valeur ne déclenche aucun clic. */
+    var pmJours = document.getElementById('pmJours');
+    if (pmJours) pmJours.addEventListener('change', loadAdminPriceMoves);
+    var pmRefresh = document.getElementById('pmRefresh');
+    if (pmRefresh) pmRefresh.addEventListener('click', loadAdminPriceMoves);
 
     var statsRefresh = document.getElementById('adminStatsRefresh');
     if (statsRefresh) statsRefresh.onclick = function () { loadAdminStats(true); };

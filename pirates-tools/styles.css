@@ -4467,6 +4467,65 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .acc-order__msg { opacity: .6; text-align: center; padding: .5rem 0; margin: 0; }
 .acc-order__msg--err { color: #f88; }
 
+/* Bandeau de commande DÉPLIABLE. La hauteur du bandeau FERMÉ est celle qui
+   existait déjà : seul un chevron s'ajoute, dans la marge droite. */
+.acc-order--pliable { padding: 0; }
+.acc-order__resume {
+  display: block;
+  padding: .8rem 2.2rem .8rem 1rem;
+  cursor: pointer;
+  position: relative;
+  list-style: none;
+}
+.acc-order__resume::-webkit-details-marker { display: none; }
+.acc-order__resume:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.acc-order--pliable .acc-order__top,
+.acc-order--pliable .acc-order__bot { display: flex; }
+.acc-order__chevron {
+  position: absolute; right: 1rem; top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted); font-size: .9rem;
+  transition: transform .2s ease;
+}
+.acc-order--pliable[open] .acc-order__chevron { transform: translateY(-50%) rotate(180deg); }
+/* Zone dépliée : haute, mais BORNÉE et à défilement interne — sinon une
+   commande de trente lignes repousse tout le reste de la page hors de vue. */
+.acc-order__detail {
+  max-height: 17rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-top: 1px solid rgba(var(--accent-rgb),.16);
+  padding: .35rem .6rem .5rem;
+  display: grid;
+  gap: .3rem;
+}
+/* Une ligne = un bandeau HORIZONTAL : vignette · référence et nom · prix. */
+.acc-ligne {
+  display: flex; align-items: center; gap: .7rem;
+  padding: .4rem .45rem; border-radius: 10px;
+  background: rgba(255,255,255,.03);
+}
+.acc-ligne__img {
+  flex: 0 0 auto; width: 44px; height: 44px;
+  border-radius: 8px; object-fit: contain; background: rgba(0,0,0,.35);
+}
+.acc-ligne__txt { display: flex; flex-direction: column; gap: .08rem; min-width: 0; flex: 1 1 auto; }
+.acc-ligne__ref {
+  font-size: .68rem; font-weight: 700; letter-spacing: .05em;
+  color: var(--muted); text-transform: uppercase;
+}
+.acc-ligne__nom {
+  font-size: .82rem; color: #fff;
+  /* Deux lignes au maximum : au-delà, une ligne pousse la vignette suivante
+     hors de la zone visible et le défilement devient illisible. */
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.acc-ligne__prix {
+  flex: 0 0 auto; font-size: .85rem; font-weight: 700; color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+.acc-ligne__prix em { font-style: normal; color: var(--muted); font-weight: 500; }
+
 .acc-danger { border-color: rgba(244,67,54,.25); }
 .acc-logout-btn {
   background: rgba(244,67,54,.15);
@@ -8293,4 +8352,84 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   background: rgba(255, 255, 255, .10);
   border-color: rgba(255, 255, 255, .32);
   color: #fff;
+}
+
+/* ── PROMOTION ─────────────────────────────────────────────────────────────
+   Étiquette et prix barré. ⛔ Ils ne s'affichent QUE si le serveur a posé
+   `promoActive` : la référence barrée est le prix le plus bas des 30 derniers
+   jours, seule référence légale d'une annonce de réduction (J4). Le front
+   n'invente jamais une promotion. */
+.promo-badge {
+  position: absolute;
+  top: .55rem;
+  left: .55rem;
+  z-index: 2;
+  padding: .2rem .5rem;
+  border-radius: 999px;
+  font-size: .7rem;
+  font-weight: 800;
+  letter-spacing: .02em;
+  color: #04140a;
+  background: linear-gradient(135deg, #6ee7a0, #22c55e);
+  box-shadow: 0 2px 10px rgba(34,197,94,.45);
+}
+.product-card__prix-ref {
+  margin-left: .4rem;
+  font-size: .78em;
+  font-weight: 500;
+  color: var(--muted);
+  text-decoration-thickness: 1px;
+}
+
+/* ── ADMIN — MOUVEMENT DES PRIX ────────────────────────────────────────────
+   Un bandeau HORIZONTAL par mouvement : vignette · référence et nom · date ·
+   ancien prix barré, flèche, nouveau prix.
+   ⛔ La couleur ne porte JAMAIS l'information seule : la flèche et le
+   pourcentage disent le sens sans elle. */
+.pm-barre { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; margin: 0 0 1rem; }
+.pm-barre label { display: flex; align-items: center; gap: .5rem; color: var(--muted); font-size: .9rem; }
+.pm-barre .search { width: auto; min-width: 8rem; }
+.pm-liste { display: grid; gap: .45rem; }
+.pm-ligne {
+  display: flex; align-items: center; gap: .8rem;
+  padding: .5rem .7rem; border-radius: 12px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.07);
+}
+.pm-ligne__img {
+  flex: 0 0 auto; width: 46px; height: 46px;
+  border-radius: 8px; object-fit: contain; background: rgba(0,0,0,.35);
+}
+.pm-ligne__txt { display: flex; flex-direction: column; gap: .1rem; min-width: 0; flex: 1 1 auto; }
+.pm-ligne__ref {
+  font-size: .68rem; font-weight: 700; letter-spacing: .05em;
+  text-transform: uppercase; color: var(--muted);
+}
+.pm-ligne__nom {
+  font-size: .85rem; color: #fff;
+  display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;
+}
+.pm-ligne__date { flex: 0 0 auto; font-size: .75rem; color: var(--muted); white-space: nowrap; }
+.pm-ligne__prix {
+  flex: 0 0 auto; display: flex; align-items: baseline; gap: .45rem;
+  font-variant-numeric: tabular-nums;
+}
+.pm-ligne__avant { color: var(--muted); font-size: .82rem; }
+.pm-ligne__fleche { color: var(--muted); font-size: .9rem; }
+/* « Lumineux » : la lueur vient d'un halo porté, pas d'une couleur saturée —
+   un texte fluo pur tombe sous le seuil de contraste. */
+.pm-ligne__apres { font-size: 1rem; font-weight: 800; }
+.pm-ligne__apres--baisse { color: #6ee7a0; text-shadow: 0 0 12px rgba(34,197,94,.75); }
+.pm-ligne__apres--hausse { color: #ff8f8f; text-shadow: 0 0 12px rgba(239,68,68,.75); }
+.pm-ligne__pct {
+  font-size: .72rem; font-weight: 700;
+  padding: .12rem .45rem; border-radius: 999px;
+}
+.pm-ligne__pct--baisse { background: rgba(34,197,94,.16); color: #6ee7a0; }
+.pm-ligne__pct--hausse { background: rgba(239,68,68,.16); color: #ff8f8f; }
+.admin-hint--err { color: #f88; }
+@media (max-width: 640px) {
+  .pm-ligne { flex-wrap: wrap; }
+  .pm-ligne__date { order: 3; }
+  .pm-ligne__prix { order: 4; margin-left: auto; }
 }

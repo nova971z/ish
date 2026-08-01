@@ -64,7 +64,27 @@ function applyOverrides(products, overrides) {
     .map(function (p) {
       var patch = overrides[p.id] || overrides[p.slug] || null;
       if (!patch) return p;
-      return Object.assign({}, p, patch);
+      var fusion = Object.assign({}, p, patch);
+      /* ── L'ÉTIQUETTE « EN PROMO » EXPIRE À LA LECTURE ────────────────────
+         Demande de l'user : au bout de deux mois au même prix, ce n'est plus
+         une promotion, c'est le nouveau prix — on retire la mention.
+
+         ⛔ Calculé ICI, à chaque lecture, et JAMAIS par une tâche planifiée.
+         Une promo dont l'expiration dépend d'un cron reste affichée le jour où
+         le cron ne tourne pas — et annoncer une réduction qui n'en est plus
+         une est une pratique commerciale trompeuse (J4), pas un détail
+         d'affichage. Ici, l'oubli est impossible : il n'y a rien à oublier.
+
+         ⚠️ `promoAncienPrix` n'est PAS le prix de la veille : c'est le prix le
+         plus bas pratiqué sur les 30 jours précédents, calculé à l'écriture
+         (voir api/admin.js). C'est ce que J4 exige comme référence. */
+      var DEUX_MOIS = 60 * 24 * 3600 * 1000;
+      var debut = Number(fusion.promoDepuis || 0);
+      fusion.promoActive = !!(debut > 0
+        && (Date.now() - debut) < DEUX_MOIS
+        && Number(fusion.promoAncienPrix) > Number(fusion.price));
+      if (!fusion.promoActive) { fusion.promoAncienPrix = null; fusion.promoDepuis = null; }
+      return fusion;
     })
     .filter(function (p) { return !p.hidden; }); // hidden → not listed, not purchasable
 }

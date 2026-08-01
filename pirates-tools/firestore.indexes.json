@@ -1,6 +1,24 @@
 {
   "//": "Index Firestore versionnés. Déploiement : `firebase deploy --only firestore:indexes` (ou création 1-clic via l'URL loguée par le webhook au premier FAILED_PRECONDITION). Nécessaires UNIQUEMENT pour le REPLI collectionGroup du webhook (paiements sans uid en metadata — anciens paiements) : le chemin normal users/{uid}/orders est couvert par les index automatiques. Un fieldOverride REMPLACE l'indexation par défaut du champ : les entrées COLLECTION ci-dessous la conservent à l'identique, on ne fait qu'AJOUTER la portée COLLECTION_GROUP.",
-  "indexes": [],
+  "indexes": [
+    {
+      "//": "⛔ INDEX COMPOSITE OBLIGATOIRE (01/08/2026). Le prix de référence d'une promo se calcule par `price_watch_log.where('id','==',…).where('at','>=',…)` — deux champs, donc index composite. L'ÉMULATEUR NE LE SIGNALERA JAMAIS : la panne n'apparaît qu'en production, sur un FAILED_PRECONDITION, et la promo retomberait alors silencieusement sur le prix de la veille — soit une annonce de réduction trompeuse (J4).",
+      "collectionGroup": "price_watch_log",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "id", "order": "ASCENDING" },
+        { "fieldPath": "at", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "//": "Écran admin « Mouvement des prix » : `price_watch_log.where('at','>=',…).orderBy('at','desc')`.",
+      "collectionGroup": "price_watch_log",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "at", "order": "DESCENDING" }
+      ]
+    }
+  ],
   "fieldOverrides": [
     {
       "collectionGroup": "orders",

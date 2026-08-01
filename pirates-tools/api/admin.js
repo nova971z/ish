@@ -499,6 +499,47 @@ module.exports = async function handler(req, res) {
       });
     }
     try {
+      /* ── MOUVEMENT DES PRIX ───────────────────────────────────────────
+         Demandé par l'user le 01/08/2026 : « une page mouvement des prix, un
+         tableau avec les prix qui ont bougé, je choisis sur combien de jours ».
+
+         Source : `price_watch_log`, écrit par le traqueur à chaque
+         application de prix. On ne recalcule RIEN ici — on relit ce qui a
+         réellement été appliqué. Un tableau qui recalculerait les prix
+         montrerait ce qu'ils DEVRAIENT être, pas ce qu'ils ont ÉTÉ.
+
+         ⚠️ `where('at','>=') + orderBy('at')` sur le même champ : pas d'index
+         composite requis, mais l'entrée est tout de même versionnée dans
+         `firestore.indexes.json` — l'émulateur ne signale jamais un index
+         manquant, et on ne veut pas l'apprendre en production. */
+      if (type === 'price-moves') {
+        const jours = Math.min(365, Math.max(1, Number(req.query.jours) || 30));
+        const depuis = Date.now() - jours * 24 * 3600 * 1000;
+        const snap = await db.collection('price_watch_log')
+          .where('at', '>=', depuis).orderBy('at', 'desc').limit(500).get();
+        const cat = await catalog.loadCatalog();
+        const parId = {};
+        cat.forEach((p) => { parId[p.id] = p; });
+        const moves = [];
+        snap.forEach((d) => {
+          const v = d.data();
+          const p = parId[v.id] || null;
+          const ancien = Number(v.oldPrice) || 0;
+          const nouveau = Number(v.newPrice) || 0;
+          if (!(ancien > 0) || !(nouveau > 0) || ancien === nouveau) return;
+          moves.push({
+            id: v.id, sku: v.sku || (p && p.sku) || v.id,
+            titre: (p && p.title) || v.sku || v.id,
+            img: (p && p.img) || 'images/placeholder.svg',
+            marque: v.brand || (p && p.brand) || '',
+            ancien: ancien, nouveau: nouveau,
+            variation: Math.round((nouveau / ancien - 1) * 1000) / 10,
+            at: Number(v.at) || 0
+          });
+        });
+        return res.status(200).json({ ok: true, jours: jours, moves: moves });
+      }
+
       if (type === 'orders') {
         // 50 dernières commandes, TOUS clients (collectionGroup).
         // Tri sur `date` : c'est LE champ horodatage que le client écrit
@@ -1726,11 +1767,49 @@ async function handlePriceWatch(req, res, admin, db) {
       if (reason) { rec.reason = reason; flagged.push(rec); continue; }
 
       if (!dryRun) {
-        await db.collection('product_overrides').doc(p.id).set({
+        /* ── ÉTIQUETTE « EN PROMO » ─────────────────────────────────────
+           Demandée par l'user le 01/08/2026 : « lorsque le prix baisse, il
+           faut le notifier en promo ; si le prix remonte on enlève ; et si le
+           prix reste à ce prix-là plus de deux mois, ça devient son nouveau
+           prix, on enlève la notification ».
+
+           ⛔⛔ LE PRIX DE RÉFÉRENCE N'EST PAS « CELUI D'AVANT ». La porte J4 le
+           dit : « une réduction annoncée se réfère au PRIX LE PLUS BAS
+           PRATIQUÉ SUR LES 30 JOURS PRÉCÉDENTS ». Barrer le prix de la veille
+           alors qu'on a vendu moins cher il y a trois semaines, c'est une
+           annonce de réduction trompeuse — une infraction, pas une
+           approximation. On relit donc le journal des mouvements et on prend
+           le MINIMUM réellement pratiqué.
+
+           Et s'il n'y a aucune réduction face à ce minimum, il n'y a PAS de
+           promo, même si le prix vient de baisser : c'est le cas d'un prix
+           remonté puis rebaissé — rien de nouveau n'est offert au client.
+
+           L'expiration à deux mois se calcule à l'AFFICHAGE (`promoActive`) :
+           une promo qui dépendrait d'une tâche planifiée resterait affichée le
+           jour où la tâche ne tourne pas, et une réduction périmée affichée
+           est le même délit. */
+        var promo = { promoDepuis: null, promoAncienPrix: null };
+        if (newPrice < cur) {
+          var depuis30 = now - 30 * 24 * 3600 * 1000;
+          var refMin = cur;
+          try {
+            var hist = await db.collection('price_watch_log')
+              .where('id', '==', p.id).where('at', '>=', depuis30).get();
+            hist.forEach(function (d) {
+              var v = d.data();
+              [Number(v.oldPrice), Number(v.newPrice)].forEach(function (x) {
+                if (x > 0 && x < refMin) refMin = x;
+              });
+            });
+          } catch (e) { /* journal illisible → on reste sur le prix courant */ }
+          if (newPrice < refMin) promo = { promoDepuis: now, promoAncienPrix: refMin };
+        }
+        await db.collection('product_overrides').doc(p.id).set(Object.assign({
           price: newPrice, price_ht: newHt,
           priceSource: 'cotebrico', priceSrcTTC: src, priceCheckedAt: now,
           priceMarkup: priced.markup, priceMode: priced.mode
-        }, { merge: true });
+        }, promo), { merge: true });
         await db.collection('price_watch_log').add({
           sku: item.sku, id: p.id, oldPrice: cur, newPrice, srcTTC: src, brand, at: now,
           markup: priced.markup, mode: priced.mode
