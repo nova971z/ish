@@ -12097,14 +12097,33 @@
           + '<span>Refusées : ' + escapeHTML(String(d.refuses)) + '</span>'
           + '</div>';
         if (refusActuel) {
+          /* ⛔ LE CONSEIL DÉPEND DU MOTIF — sans ça, l'écran envoie faire une
+             fausse manœuvre. Le 01/08/2026, il a conseillé de supprimer et
+             recréer le webhook alors que le vrai problème était tout autre
+             (une clé absente, pas une signature invalide). Supprimer un webhook
+             fait perdre son secret pour toujours : un mauvais conseil ici coûte
+             une manipulation irréversible. */
+          var motif = String(d.dernierRefusMotif || 'inconnu');
+          var quoiFaire;
+          if (/absente|absent/i.test(motif)) {
+            quoiFaire = 'Une <b>clé manque sur Vercel</b> pour le fournisseur qui nous écrit. '
+              + 'Ce n\'est PAS un problème de signature : ne touche pas au webhook côté '
+              + 'Revolut, tu perdrais son secret. Pose la variable que le motif nomme, '
+              + 'puis redéploie.';
+          } else if (/signature|invalide|invalid/i.test(motif)) {
+            quoiFaire = 'Le fournisseur nous parle bien, mais nous ne le reconnaissons pas : '
+              + 'le secret de signature posé sur Vercel ne correspond pas à celui du webhook '
+              + 'enregistré chez lui. Supprime le webhook côté Revolut, recrée-le avec le '
+              + 'bouton ci-dessus, et repose le nouveau secret.';
+          } else {
+            quoiFaire = 'Lis le motif ci-dessus : il dit précisément ce qui bloque. '
+              + 'Ne supprime rien tant que tu ne l\'as pas compris.';
+          }
           out.innerHTML = '<p class="admin-error"><b>⛔ La dernière notification a été REFUSÉE ('
             + escapeHTML(ilYA(d.dernierRefusMs)) + ').</b><br>'
-            + 'Motif : ' + escapeHTML(String(d.dernierRefusMotif || 'inconnu')) + '<br>'
-            + 'Le fournisseur nous parle bien, mais nous ne le reconnaissons pas : le secret de '
-            + 'signature posé sur Vercel ne correspond pas à celui du webhook enregistré chez '
-            + 'lui. Tant que c\'est le cas, <b>aucune vente ne sera enregistrée</b>. Supprime le '
-            + 'webhook côté Revolut, recrée-le avec le bouton ci-dessus, et repose le nouveau '
-            + 'secret.</p>' + pied;
+            + 'Motif : <b>' + escapeHTML(motif) + '</b><br>'
+            + quoiFaire + '<br>Tant que c\'est le cas, <b>aucune vente ne sera '
+            + 'enregistrée</b>.</p>' + pied;
           return;
         }
         out.innerHTML = '<div class="compta-res">'

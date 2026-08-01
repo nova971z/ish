@@ -852,6 +852,38 @@ module.exports = async function () {
         + 'du navigateur (jeton attendu en EN-TÊTE).');
     });
 
+    /* ── d ter) ⛔⛔ C'EST L'ÉMETTEUR QUI VÉRIFIE, PAS LE FOURNISSEUR ACTIF ─
+       Mesuré le 01/08/2026 : Revolut a envoyé deux notifications, Stripe (alors
+       fournisseur actif) a tenté de les vérifier, et a répondu « secret
+       absent ». Deux reçues, ZÉRO acceptée, avec une configuration Revolut
+       parfaite. Le défaut est symétrique et le second sens coûte plus cher :
+       après la bascule, une re-livraison Stripe tardive (backoff ~3 jours)
+       serait refusée par Revolut et l'encaissement perdu en silence. */
+    ok(/fournisseurParEntetes\(req\.headers\)/.test(whSrc),
+      '⛔⛔ le webhook ne choisit plus le vérificateur d\'après l\'en-tête de signature. '
+      + 'Il demande à un fournisseur de reconnaître la signature de l\'autre : toutes les '
+      + 'notifications sont refusées, aucune vente n\'est enregistrée, et la configuration '
+      + 'a pourtant l\'air correcte des deux côtés.');
+    ok(!/var paiement = paiementSocle\.fournisseur\(\)/.test(whSrc),
+      '⛔⛔ le webhook est revenu au FOURNISSEUR ACTIF pour vérifier la signature. C\'est le '
+      + 'défaut du 01/08/2026 : pendant la transition les deux fournisseurs écrivent à la '
+      + 'même adresse, et celui qui n\'a pas émis ne saura jamais vérifier.');
+
+    /* Preuve par APPEL : le routage doit choisir juste, et refuser l'inconnu. */
+    [['revolut-signature', 'revolut'], ['stripe-signature', 'stripe'],
+     ['Revolut-Signature', 'revolut'], ['Stripe-Signature', 'stripe']].forEach(function (c) {
+      var h = {}; h[c[0]] = 'peu-importe';
+      var mod = socle.fournisseurParEntetes(h);
+      ok(mod && mod.nom() === c[1],
+        '⛔ l\'en-tête « ' + c[0] + ' » ne route pas vers ' + c[1] + '. La notification '
+        + 'serait vérifiée par le mauvais fournisseur, donc refusée.');
+    });
+    ok(socle.fournisseurParEntetes({}) === null
+       && socle.fournisseurParEntetes({ 'x-autre': '1' }) === null,
+      '⛔⛔ une requête SANS en-tête de signature est routée vers un fournisseur. Elle doit '
+      + 'être refusée d\'emblée : accepter de vérifier n\'importe quoi ouvre la porte à des '
+      + 'notifications forgées.');
+
     /* ── d bis) ⛔⛔ UN REFUS DE SIGNATURE DOIT LAISSER UNE TRACE VISIBLE ──
        C'est le point le plus fragile de la migration : algorithme, fenêtre de
        rejeu, secret mal collé. Et c'est aussi le plus silencieux — le webhook
@@ -984,6 +1016,14 @@ module.exports = async function () {
       '⛔⛔ l\'écran de santé ne distingue plus « rien reçu » de « reçu mais refusé ». Ces '
       + 'deux cas demandent des gestes OPPOSÉS : recréer le webhook dans un cas, refaire '
       + 'le secret dans l\'autre. Les confondre envoie chercher la panne du mauvais côté.');
+    /* ⛔ Le conseil doit dépendre du MOTIF. Le 01/08/2026 l'écran a conseillé de
+       supprimer et recréer le webhook alors que le problème était une clé
+       absente — et supprimer un webhook fait perdre son secret POUR TOUJOURS.
+       Un mauvais conseil ici coûte une manipulation irréversible. */
+    ok(mSante && /absente\|absent/.test(mSante[0]),
+      '⛔⛔ l\'écran de santé donne le MÊME conseil quel que soit le motif du refus. Sur une '
+      + 'clé manquante, il enverrait supprimer le webhook — geste IRRÉVERSIBLE, le secret '
+      + 'de signature ne se ré-obtient jamais — pour un problème qui n\'a rien à voir.');
     ok(mSante && /dernierRefusMs\s*>\s*d\.dernierAccepteMs/.test(mSante[0]),
       '⛔ l\'écran ne compare plus la date du dernier refus à celle du dernier succès : un '
       + 'refus déjà réglé s\'afficherait en alerte rouge à chaque passage, et on '

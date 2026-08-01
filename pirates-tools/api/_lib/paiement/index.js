@@ -166,7 +166,34 @@ function paiementVide() {
   };
 }
 
+/* ⛔⛔ QUI A ENVOYÉ CETTE NOTIFICATION ? — trouvé le 01/08/2026 sur un test réel.
+   ─────────────────────────────────────────────────────────────────────────
+   Le webhook faisait vérifier la signature par le fournisseur ACTIF. Revolut a
+   envoyé ses notifications, Stripe a tenté de les vérifier, et a répondu
+   « STRIPE_WEBHOOK_SECRET absente ». Deux notifications reçues, zéro acceptée.
+
+   Le défaut n'est pas la configuration : c'est de demander à A de reconnaître
+   la signature de B. Et il est SYMÉTRIQUE — après la bascule, une re-livraison
+   Stripe tardive (son backoff s'étale sur ~3 jours) serait refusée par Revolut,
+   et l'encaissement correspondant perdu.
+
+   On identifie donc l'ÉMETTEUR par son en-tête, et on lui applique SA
+   vérification. Pendant toute la transition, les deux fonctionnent en parallèle
+   sur la même adresse.
+
+   ⛔ Ceci n'affaiblit RIEN. L'en-tête choisit l'ALGORITHME, jamais le droit
+   d'entrer : la vérification cryptographique reste faite ensuite, avec le
+   secret correspondant. Poser un en-tête `revolut-signature` sans savoir signer
+   avec le secret Revolut ne mène nulle part. */
+function fournisseurParEntetes(entetes) {
+  var h = entetes || {};
+  if (h['revolut-signature'] || h['Revolut-Signature']) return require('./revolut');
+  if (h['stripe-signature'] || h['Stripe-Signature']) return require('./stripe');
+  return null;
+}
+
 module.exports = {
+  fournisseurParEntetes: fournisseurParEntetes,
   ETATS: ETATS,
   ETAT_ACQUIS: ETAT_ACQUIS,
   GENRES: GENRES,

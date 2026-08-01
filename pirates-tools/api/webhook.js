@@ -64,11 +64,37 @@ async function handler(req, res) {
     return res.status(405).json({ ok: false, error: 'Method not allowed' });
   }
 
-  // ⚠️ COUTURE PAIEMENT (31/07/2026) — la signature n'est plus vérifiée par un
-  // appel direct au SDK Stripe mais par le fournisseur actif. Voir
-  // api/_lib/paiement/index.js et docs/PLAN-REVOLUT.md.
-  var paiement = paiementSocle.fournisseur();
+  /* ⛔⛔ C'EST L'ÉMETTEUR QUI VÉRIFIE, PAS LE FOURNISSEUR ACTIF.
+     Défaut mesuré le 01/08/2026 sur un test réel : Revolut a envoyé DEUX
+     notifications, `PAYMENT_PROVIDER` valait encore `stripe`, et c'est donc
+     Stripe qui a tenté de vérifier la signature de Revolut. Réponse :
+     « STRIPE_WEBHOOK_SECRET absente ». Deux reçues, ZÉRO acceptée, et la
+     configuration Revolut était pourtant parfaite.
+
+     Le défaut est SYMÉTRIQUE, et le second sens coûte de l'argent réel : après
+     la bascule, une re-livraison Stripe tardive — son backoff s'étale sur
+     ~3 jours — serait refusée par Revolut, et l'encaissement correspondant
+     perdu sans que personne ne le voie.
+
+     On identifie donc l'émetteur par son en-tête de signature. Les deux
+     fournisseurs cohabitent sur la même adresse pendant toute la transition.
+     ⛔ L'en-tête choisit l'ALGORITHME, jamais le droit d'entrer : la
+     vérification cryptographique suit, avec le secret correspondant. */
+  var paiement = paiementSocle.fournisseurParEntetes(req.headers);
+  if (!paiement) {
+    console.error('[webhook] Aucun en-tête de signature reconnu — notification ignorée.');
+    await noterSante('inconnu', {
+      refus: true,
+      motif: 'Aucun en-tête de signature reconnu (ni Revolut, ni Stripe).'
+    });
+    return res.status(400).json({ ok: false, error: 'Unsigned webhook' });
+  }
   if (!paiement.estConfigure()) {
+    await noterSante(paiement.nom(), {
+      refus: true,
+      motif: 'Clé secrète absente pour ' + paiement.nom() + ' — ce fournisseur nous écrit '
+        + 'mais n\'est pas configuré ici.'
+    });
     return res.status(503).json({ ok: false, error: 'Webhook paiement non configuré (' + paiement.nom() + ')' });
   }
 
