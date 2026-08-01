@@ -145,6 +145,50 @@ module.exports = function () {
     '⛔ le tunnel ne dit plus QUI traite la carte. C\'est une information — elle figure '
     + 'aussi dans les CGV et la politique de confidentialité, où le sous-traitant doit '
     + 'être nommé (J3).');
+
+  /* ⛔ AUCUNE MARQUE AVANT QUE LE SERVEUR AIT PARLÉ. `_paiementFournisseur`
+     valait `'stripe'` au départ : la fenêtre s'ouvrait donc en annonçant
+     « Paiement sécurisé par Stripe » pendant que Revolut encaissait. Vu en bac
+     à sable le 01/08/2026, APRÈS avoir cru n'avoir corrigé qu'un texte
+     statique — le mensonge avait deux sources. */
+  ok(/var _paiementFournisseur\s*=\s*''/.test(app),
+    '⛔⛔ `_paiementFournisseur` démarre sur un nom de fournisseur. La fenêtre de paiement '
+    + 'annoncera CETTE marque avant que le serveur ait dit qui encaisse — et ce sera faux '
+    + 'à chaque fois que l\'autre fournisseur est actif. La valeur de départ doit être vide.');
+  ok(!/id="payModalPowered"[^>]*>\s*(?:[^<]*<strong>)?\s*(?:Propulsé par\s*)?<strong>\s*(?:Stripe|Revolut)/.test(html),
+    '⛔⛔ le texte STATIQUE du pied de la modale nomme un fournisseur. Il s\'affiche avant '
+    + 'toute réponse serveur : c\'est une marque potentiellement fausse montrée au client au '
+    + 'moment précis où il décide de donner son numéro de carte.');
+
+  /* ⛔ LE SDK STRIPE NE COMMANDE PLUS TOUT LE TUNNEL. `initStripePayment`
+     commençait par `if (!stripe) { … return; }` AVANT l'appel serveur : un
+     client dont le navigateur ne charge pas `js.stripe.com` (bloqueur, proxy
+     d'entreprise) se voyait refuser la carte alors que REVOLUT encaisse. Une
+     vente perdue pour l'absence d'un fournisseur qui n'encaisse plus. */
+  /* ⚠️ DEUX PIÈGES ÉVITÉS ICI, tous deux déjà payés ailleurs :
+     · le nom de la fonction est `initStripeElements` — la première version
+       cherchait `initStripePayment`, qui n'existe pas : `indexOf` rendait −1 et
+       l'assertion rougissait sur du code sain (E-210, ancrer sur un nom non
+       vérifié). D'où le PRÉALABLE ci-dessous : si la fonction est introuvable,
+       on le dit, on ne verdit pas à vide.
+     · on lit le code SANS ses commentaires : la note explicative posée dans
+       `app.js` cite `if (!stripe)` en toutes lettres et satisfaisait la regex
+       (E-218, chercher une forme au lieu d'une règle). */
+  var appSansCom = app.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+  var iInit = appSansCom.indexOf('function initStripeElements(');
+  ok(iInit !== -1,
+    '⛔ PRÉALABLE MANQUANT : `initStripeElements(` est introuvable dans app.js — renommée ? '
+    + 'Ce contrôle ne vérifie plus rien tant que ce nom n\'est pas remis à jour.');
+  if (iInit !== -1) {
+    var iFetch = appSansCom.indexOf('create-payment-intent', iInit);
+    var avantFetch = appSansCom.slice(iInit, iFetch === -1 ? iInit : iFetch);
+    ok(!/if\s*\(\s*!\s*stripe\s*\)/.test(avantFetch),
+      '⛔⛔ le tunnel ABANDONNE quand le SDK Stripe est absent, AVANT même d\'appeler le '
+      + 'serveur. Or c\'est le serveur qui dit qui encaisse : sous Revolut, un navigateur qui '
+      + 'bloque `js.stripe.com` perd la vente sans raison — « paiement bientôt disponible » '
+      + 'pour l\'absence d\'un fournisseur qui n\'encaisse plus. Le SDK Stripe ne s\'exige '
+      + 'qu\'APRÈS une réponse serveur disant « stripe ».');
+  }
   ok(/payCgvOk/.test(modale),
     '⛔⛔ la case d\'acceptation des CGV a disparu du tunnel. Le consentement doit être '
     + 'recueilli AVANT tout débit : c\'est sa preuve en vente à distance.');

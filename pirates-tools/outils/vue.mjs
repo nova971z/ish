@@ -61,7 +61,33 @@ const large = args.includes('--large');
 const tel = args.includes('--tel');
 const iClic = args.indexOf('--clic');
 const clic = iClic !== -1 ? args[iClic + 1] : null;
+/* `--vers` : amène un élément dans le champ avant la capture. Indispensable
+   pour les zones à défilement PROPRE — le pied de la modale de paiement ne
+   sort jamais sur une capture pleine page, il défile à l'intérieur d'elle. */
+const iVers = args.indexOf('--vers');
+const vers = iVers !== -1 ? args[iVers + 1] : null;
+/* `--element` : ne capturer QUE cet élément, au lieu de la page entière. */
+const iEl = args.indexOf('--element');
+const element = iEl !== -1 ? args[iEl + 1] : null;
 const connecte = args.includes('--connecte');
+const paiement = args.includes('--paiement');
+
+/* ── `--paiement` : voir le tunnel de carte POUR DE VRAI ──────────────────
+   Le pied de la modale n'affiche le fournisseur qu'après que le SERVEUR a dit
+   qui encaisse (`data.fournisseur`). Sans réponse d'API, `mentionFournisseur()`
+   n'est jamais rappelée et on ne verrait jamais le logo.
+
+   On simule donc la réponse — et RIEN d'autre. Le panier est semé dans
+   `localStorage`, puis on suit le vrai parcours : #/devis → « Payer ». C'est
+   `openPayModal()` du produit qui s'exécute, pas une copie du balisage.
+
+   ⚠️ Ce que ça ne prouve pas : que le champ carte Revolut se monte. Son SDK
+   est coupé avec le reste du réseau externe. On regarde la MISE EN PAGE. */
+const FAUX_PAIEMENT = {
+  ok: true, clientSecret: 'sandbox', fournisseur: 'revolut',
+  urlHebergee: 'https://exemple.invalid/hors-ligne', modeTest: true,
+  publicKey: 'sandbox', orderId: 'sandbox'
+};
 
 /* Faux `firebase-init.js` : même contrat que le vrai, données inventées.
    Les valeurs sont volontairement LONGUES (email, rue) — c'est ce qui casse
@@ -114,6 +140,10 @@ const MIME = {
 const server = http.createServer(async (req, res) => {
   try {
     let p = decodeURIComponent(req.url.split('?')[0]);
+    if (paiement && p.startsWith('/api/')) {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify(FAUX_PAIEMENT));
+    }
     if (p === '/') p = '/index.html';
     const fp = normalize(join(RACINE, p));
     if (!fp.startsWith(RACINE)) { res.writeHead(403); return res.end(); }
@@ -150,6 +180,25 @@ const page = await ctx.newPage();
 const erreurs = [];
 page.on('pageerror', (e) => erreurs.push(String(e.message || e)));
 
+if (paiement) {
+  /* Le panier est semé AVANT le premier rendu — `addInitScript` se rejoue à
+     chaque navigation, mais l'application lit `pt_cart` à son démarrage. La
+     référence est volontairement bidon : ⛔ un harnais ne nomme JAMAIS une
+     donnée du catalogue (règle des harnais, dix-huit harnais morts pour ça). */
+  await page.addInitScript(() => {
+    try {
+      localStorage.setItem('pt_cart', JSON.stringify({
+        version: '1',
+        items: [{ ref: 'SANDBOX-1', title: 'Article de bac à sable', price: 199.9, qty: 1 }]
+      }));
+      /* Clé RELUE dans app.js (`ANALYTICS_CONSENT_KEY`), pas devinée : sans
+         elle le bandeau cookies reste affiché et masque le pied de la modale,
+         qui est précisément ce qu'on vient regarder. */
+      localStorage.setItem('pt:analytics-consent', 'denied');
+    } catch (_) {}
+  });
+}
+
 await page.goto(base + '/index.html' + route, { waitUntil: 'domcontentloaded' });
 /* ⚠️ `domcontentloaded` et non `commit` : lire le DOM juste après `commit`
    renvoie une page non parsée (piège consigné dans les règles des harnais). */
@@ -161,12 +210,60 @@ if (clic) {
   else { await el.click(); await page.waitForTimeout(900); }
 }
 
+if (paiement) {
+  /* Le fournisseur n'est connu qu'une fois la commande créée côté serveur, et
+     le serveur n'est appelé qu'une fois l'adresse complète. Sans ce
+     remplissage, on regarderait un pied qui n'a jamais reçu sa réponse — et
+     c'est exactement l'erreur qu'on vient de payer : croire avoir corrigé le
+     texte alors que la valeur par défaut mentait toujours. */
+  const champs = {
+    '#payAddrName': 'Client de démonstration',
+    '#payAddrEmail': 'client@exemple.invalid',
+    '#payAddrPhone': '0690123456',
+    '#payAddrLine1': '12 rue de démonstration',
+    '#payAddrPostal': '97139',
+    '#payAddrCity': 'Les Abymes'
+  };
+  for (const [sel, val] of Object.entries(champs)) {
+    const el = await page.$(sel);
+    if (!el) { console.error('⚠️  champ introuvable : ' + sel); continue; }
+    await el.fill(val);
+    await el.dispatchEvent('change');
+  }
+  await page.waitForTimeout(1600);
+}
+
+if (vers) {
+  /* ⚠️ `behavior: 'instant'` OBLIGATOIRE : le défilement doux global du site
+     fait partir la mesure avant l'arrivée (règle des harnais). */
+  const ok = await page.evaluate((s) => {
+    const e = document.querySelector(s);
+    if (!e) return false;
+    e.scrollIntoView({ behavior: 'instant', block: 'center' });
+    return true;
+  }, vers);
+  if (!ok) console.error('⚠️  sélecteur introuvable : ' + vers);
+  await page.waitForTimeout(500);
+}
+
 const sortie = join(RACINE, 'tests', '_sortie');
 await mkdir(sortie, { recursive: true });
 const nom = 'vue' + route.replace(/[^a-z0-9]/gi, '-') + (tel ? '-tel' : '')
-  + (connecte ? '-connecte' : '') + '.png';
+  + (connecte ? '-connecte' : '') + (paiement ? '-paiement' : '') + '.png';
 const fichier = join(sortie, nom);
-await page.screenshot({ path: fichier, fullPage: true });
+if (element) {
+  /* Capture d'un SEUL élément : pour regarder un détail — un pied de modale,
+     un bouton — sans le noyer dans une page entière illisible. */
+  const el = await page.$(element);
+  if (!el) {
+    console.error('⚠️  sélecteur introuvable : ' + element + ' — capture pleine page à la place.');
+    await page.screenshot({ path: fichier, fullPage: true });
+  } else {
+    await el.screenshot({ path: fichier });
+  }
+} else {
+  await page.screenshot({ path: fichier, fullPage: true });
+}
 
 console.log('capture : ' + fichier);
 if (erreurs.length) {

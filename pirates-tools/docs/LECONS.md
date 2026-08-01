@@ -78,6 +78,25 @@ n'a pas pu être vérifié à la source y est dit comme tel.
 | 01/08/2026 | Je livrais des écrans que je n'avais **jamais regardés tourner** — six allers-retours sur le tunnel de paiement, chaque défaut visuel trouvé par l'user sur son iPad | Playwright et Chromium sont installés, les harnais s'en servent déjà : rien n'empêchait de lancer la page et de la regarder. Paresse de méthode, pas limite technique | `outils/vue.mjs` |
 | 01/08/2026 | Deux boutons **étirés en pavés de couleur** sur la page compte (« Se déconnecter », « Gérer la double authentification »), présents dans le dépôt sans que personne les voie | `.actions` imbriqué dans `.specs`, qui est un `display:flex` : le bouton s'étire sur toute la hauteur de la carte. Aucun test ne regarde un écran, et aucune règle ne disait où va `.actions` | `scripts/check-ecrans.js` |
 
+| 01/08/2026 | Le tunnel abandonnait la commande — « Le paiement par carte sera bientôt disponible » — quand `window.Stripe` était absent, **alors que Revolut encaisse**. Un client dont le navigateur bloque `js.stripe.com` (bloqueur, proxy d'entreprise) perdait la vente, sans message utile ni trace | `initStripeElements` testait `getStripe()` AVANT d'appeler le serveur. Or c'est le serveur qui dit qui encaisse : le front n'a aucun moyen de le savoir avant sa réponse. Le SDK d'un fournisseur ne peut pas conditionner le tunnel de l'autre | `scripts/check-tunnel-paiement.js` |
+| 01/08/2026 | La fenêtre de paiement annonçait « Paiement sécurisé par **Stripe** » pendant que Revolut encaissait, à l'instant précis où le client donne son numéro de carte | DEUX sources, corrigées séparément : le texte statique d'`index.html`, **et** `var _paiementFournisseur = 'stripe'` — j'avais cru n'avoir qu'un texte à changer. Vu en bac à sable, pas en relisant | `scripts/check-tunnel-paiement.js` |
+
+⚠️ **Le logo Revolut n'a PAS été dessiné.** `revolut.com` et
+`assets.revolut.com` répondent `000` (CONNECT refusé par la politique réseau),
+et le paquet officiel `@revolut/checkout@1.1.25` ne contient aucune image —
+`tar tzf … | grep -icE '\.svg|\.png'` → 0. Redessiner une marque de mémoire,
+c'est l'inventer. C'est l'user qui a fourni le R ; `outils/icone-revolut.mjs`
+le compose sans le retoucher, sur des couleurs ÉCHANTILLONNÉES sur sa capture
+d'écran (#313131 → #141414).
+
+⚠️ **Cet outil porte un DÉTECTEUR DE FORMAT, exigé par l'user**, après que
+j'eus commencé à écrire un détourage par luminance inutile : le fichier reçu
+était un WebP au damier aplati (`alphaMin: 255`), pas le PNG envoyé — la
+conversion s'était faite dans le tuyau, en silence. Il constate désormais la
+signature (octets magiques), le type de couleur IHDR, **et** l'alpha réel
+pixel par pixel — un RGBA dont tous les alpha valent 255 est un fichier opaque
+déguisé. Sans alpha exploitable, il s'ARRÊTE au lieu de bricoler.
+
 ⚠️ **`outils/vue.mjs` ne prouve PAS la conformité.** Il montre l'écran d'un
 Chromium, sur une machine, réseau externe coupé. Il ne dit rien du rendu sur
 iPad en navigation privée. C'est un garde-fou contre le grossier — la seule

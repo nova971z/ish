@@ -10225,14 +10225,22 @@
      deviné : c'est lui qui sait quel jeton il vient de fabriquer. Tant qu'aucun
      paiement n'a été préparé, on ne nomme personne plutôt que de nommer le
      mauvais — une mention fausse est pire qu'une mention absente. */
+  /* ⚠️ Le logo n'accompagne QUE le fournisseur réellement actif. Afficher la
+     marque de qui ne traite pas la carte serait une affirmation fausse au seul
+     endroit du parcours où le client se demande à qui il donne son numéro.
+     `alt=""` : le mot « Revolut » est juste à côté — un lecteur d'écran ne doit
+     pas l'annoncer deux fois. `width`/`height` posés pour qu'aucun décalage de
+     mise en page ne survienne pendant le chargement. */
   function mentionFournisseur() {
     if (_paiementFournisseur === 'revolut') {
-      return 'Paiement sécurisé par <strong>Revolut</strong>';
+      return '<img class="pay-modal__provider-logo" src="images/brands/revolut.webp"'
+        + ' width="18" height="18" alt="" loading="lazy" decoding="async">'
+        + '<span>Paiement sécurisé par <strong>Revolut</strong></span>';
     }
     if (_paiementFournisseur === 'stripe') {
-      return 'Paiement sécurisé par <strong>Stripe</strong>';
+      return '<span>Paiement sécurisé par <strong>Stripe</strong></span>';
     }
-    return 'Paiement sécurisé — vos données de carte ne transitent jamais par nos serveurs';
+    return '<span>Paiement sécurisé — vos données de carte ne transitent jamais par nos serveurs</span>';
   }
 
   function closePayModal() {
@@ -10263,8 +10271,17 @@
   var _stripeClientSecret = null;
   var _stripeReady = false;
   /* Fournisseur de paiement ANNONCÉ PAR LE SERVEUR pour la commande en cours.
-     Jamais deviné côté client : voir le commentaire au point de branchement. */
-  var _paiementFournisseur = 'stripe';
+     Jamais deviné côté client : voir le commentaire au point de branchement.
+
+     ⛔ LA VALEUR DE DÉPART EST « INCONNU », PAS « stripe ». Elle valait
+     `'stripe'`, et la fenêtre de paiement s'ouvrait donc en annonçant
+     « Paiement sécurisé par Stripe » — pendant que Revolut encaissait. Vu en
+     bac à sable le 01/08/2026, après avoir cru n'avoir corrigé qu'un texte
+     statique dans `index.html` : le mensonge venait AUSSI d'ici.
+     Les trois autres lectures (`=== 'revolut'`) s'exécutent toutes APRÈS
+     l'affectation par la réponse serveur — une chaîne vide ne peut donc pas
+     détourner le chemin Stripe. */
+  var _paiementFournisseur = '';
   var _urlPaiementHebergee = null;   // repli Revolut si le widget ne charge pas
   /* Environnement ANNONCÉ par le serveur (true = bac à sable). `null` tant
      qu'aucune commande n'a été créée. ⛔ Ne jamais le re-déduire d'une URL :
@@ -10827,23 +10844,16 @@
   function initStripeElements() {
     var ship = validatePayAddress();
     if (!ship.valid) return;
-    var stripe = getStripe();
     var container = document.getElementById('stripePaymentElement');
     var errorEl = document.getElementById('stripeCardError');
     if (errorEl) { errorEl.hidden = true; errorEl.textContent = ''; }
     _quoteTerritory = ship.territory;
 
-    if (!stripe) {
-      // Stripe not configured — show fallback message
-      if (container) {
-        container.innerHTML = '<div class="stripe-fallback">'
-          + '<p>Le paiement par carte sera bientôt disponible.</p>'
-          + '<p>En attendant, utilisez <strong>WhatsApp</strong> ou <strong>Crypto</strong> pour commander.</p>'
-          + '</div>';
-      }
-      _stripeReady = false;
-      return;
-    }
+    /* ⛔⛔ AUCUN TEST DU SDK STRIPE ICI (01/08/2026). Ce bloc commençait par
+       `if (!getStripe()) return;` et abandonnait la commande avant même
+       d'appeler le serveur — or c'est le serveur qui dit qui encaisse. Sous
+       REVOLUT, un navigateur bloquant `js.stripe.com` perdait la vente.
+       Le test vit désormais dans `monterChampCarteStripe`. */
 
     // Show loading state
     if (container) {
@@ -10916,42 +10926,7 @@
         return monterChampCarteRevolut(_stripeClientSecret, ship, container, errorEl);
       }
 
-      // Unmount previous elements if any
-      if (_stripeElements) {
-        try { _stripeElements.getElement('payment').destroy(); } catch (_) {}
-      }
-
-      _stripeElements = stripe.elements({
-        clientSecret: _stripeClientSecret,
-        appearance: STRIPE_APPEARANCE,
-        locale: 'fr'
-      });
-
-      var paymentElement = _stripeElements.create('payment', {
-        layout: {
-          type: 'tabs',
-          defaultCollapsed: false
-        }
-      });
-
-      if (container) container.innerHTML = '';
-      paymentElement.mount('#stripePaymentElement');
-
-      paymentElement.on('ready', function () {
-        _stripeReady = true;
-      });
-
-      paymentElement.on('change', function (ev) {
-        if (errorEl) {
-          if (ev.error) {
-            errorEl.textContent = ev.error.message;
-            errorEl.hidden = false;
-          } else {
-            errorEl.hidden = true;
-            errorEl.textContent = '';
-          }
-        }
-      });
+      return monterChampCarteStripe(container, errorEl);
     })
     .catch(function (err) {
       _stripeReady = false;
@@ -10962,6 +10937,46 @@
           + '<p>Utilisez <strong>WhatsApp</strong> ou <strong>Crypto</strong> pour commander.</p>'
           + '</div>';
       }
+    });
+  }
+
+  /* Monte le formulaire de carte STRIPE. Pendant de `monterChampCarteRevolut` :
+     un fournisseur, une fonction. Extraite le 01/08/2026 quand la barrière P7
+     a refusé `initStripeElements` à 158 lignes.
+
+     ⛔ Le SDK est exigé ICI, pas avant l'appel serveur : c'est le serveur qui
+     dit qui encaisse. Le tester plus tôt privait de carte les clients sous
+     Revolut dont le navigateur bloque `js.stripe.com`. */
+  function monterChampCarteStripe(container, errorEl) {
+    var stripe = getStripe();
+    if (!stripe) {
+      if (container) {
+        container.innerHTML = '<div class="stripe-fallback">'
+          + '<p>Le paiement par carte sera bientôt disponible.</p>'
+          + '<p>En attendant, utilisez <strong>WhatsApp</strong> ou <strong>Crypto</strong> pour commander.</p>'
+          + '</div>';
+      }
+      _stripeReady = false;
+      return;
+    }
+    if (_stripeElements) {
+      try { _stripeElements.getElement('payment').destroy(); } catch (_) {}
+    }
+    _stripeElements = stripe.elements({
+      clientSecret: _stripeClientSecret,
+      appearance: STRIPE_APPEARANCE,
+      locale: 'fr'
+    });
+    var paymentElement = _stripeElements.create('payment', {
+      layout: { type: 'tabs', defaultCollapsed: false }
+    });
+    if (container) container.innerHTML = '';
+    paymentElement.mount('#stripePaymentElement');
+    paymentElement.on('ready', function () { _stripeReady = true; });
+    paymentElement.on('change', function (ev) {
+      if (!errorEl) return;
+      errorEl.textContent = ev.error ? ev.error.message : '';
+      errorEl.hidden = !ev.error;
     });
   }
 

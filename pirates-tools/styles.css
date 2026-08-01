@@ -4943,8 +4943,23 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   margin: .8rem 0 0;
   font-size: .72rem;
   color: var(--muted);
+  /* Rangée : logo du fournisseur puis mention. `inline-flex` et non `flex`,
+     pour que l'ensemble reste centré par le `text-align: center` du pied. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
 }
-.pay-modal__powered strong { color: #635bff; }
+.pay-modal__powered strong { color: #fff; font-weight: 700; }
+/* Le logo est fourni avec sa tuile et ses angles déjà arrondis : on ne
+   redécoupe rien ici. `flex: 0 0 auto` l'empêche d'être compressé quand la
+   mention passe sur deux lignes en 390 px. */
+.pay-modal__provider-logo {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  display: block;
+}
 
 /* ── Onglets de paiement ─────────────────────────────────────── */
 .pay-tabs{

@@ -44,7 +44,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=563">
+  <link rel="stylesheet" href="styles.css?v=565">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -2043,7 +2043,12 @@
           <span class="pay-modal__btn-icon">✅</span>
           J'ai effectué le paiement
         </button>
-        <p class="pay-modal__powered" id="payModalPowered">Propulsé par <strong>Stripe</strong> — leader mondial du paiement en ligne</p>
+        <!-- Contenu remplacé par `mentionFournisseur()` dès que le serveur a
+             annoncé QUI encaisse. Le texte statique ne doit donc nommer
+             PERSONNE : nommer un fournisseur ici, c'est afficher une marque
+             fausse pendant la fraction de seconde qui précède la réponse —
+             et c'en était une, « Stripe », alors que Revolut encaisse. -->
+        <p class="pay-modal__powered" id="payModalPowered"><span>Paiement sécurisé — vos données de carte ne transitent jamais par nos serveurs</span></p>
       </div>
     </div>
   </div>
@@ -2310,7 +2315,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=563"></script>
+  <script defer src="app.js?v=565"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->
