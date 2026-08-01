@@ -189,15 +189,16 @@ function paiementVide() {
 function fournisseurParEntetes(entetes) {
   var h = entetes || {};
   if (h['revolut-signature'] || h['Revolut-Signature']) return require('./revolut');
-  /* ⚠️ SEUL VESTIGE DE STRIPE, ET IL EST DÉLIBÉRÉ. Ce n'est PAS un chemin
-     d'encaissement : c'est le vérificateur de signature des notifications
-     TARDIVES. Le backoff de re-livraison s'étale sur ~3 jours ; refuser une
-     re-livraison d'un paiement DÉJÀ ENCAISSÉ, c'est perdre la trace comptable
-     d'un argent réellement reçu. Priorité : argent d'abord.
-     Ce fichier n'est jamais servi au navigateur et ne peut créer aucune
-     commande. À supprimer quand plus aucune notification tardive n'est
-     possible — voir la liste d'actions remise à l'user le 01/08/2026. */
-  if (h['stripe-signature'] || h['Stripe-Signature']) return require('./stripe');
+  /* ⛔ PLUS AUCUN AUTRE FOURNISSEUR. Le vérificateur de signature de l'ancien
+     encaisseur a été SUPPRIMÉ le 01/08/2026 sur décision explicite de l'user,
+     répétée : « quand je dis éradiquer tout ce qu'il y a sur Stripe, c'est
+     TOUT ». J'avais soulevé le risque — une re-livraison tardive d'un paiement
+     déjà encaissé n'est plus reconnue — et il a tranché.
+     Conséquence assumée, écrite ici pour qu'elle ne se redécouvre pas : une
+     notification signée par l'ancien fournisseur est désormais REFUSÉE, pas
+     avalée en silence. Le journal de santé du webhook la comptera en refus,
+     avec son en-tête — donc visible, et rattrapable à la main par la
+     réconciliation si le cas se présentait. */
   return null;
 }
 

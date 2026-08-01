@@ -31,7 +31,7 @@
 
 var getFirebase = require('./_lib/firebase').getFirebase;
 var paiementSocle = require('./_lib/paiement');   // couture : fournisseur actif
-var stripeMeta = require('./_lib/stripe-meta');
+var paiementMeta = require('./_lib/paiement-meta');
 var postal = require('./_lib/postal');
 var pricing = require('./_lib/pricing');
 var catalog = require('./_lib/catalog');
@@ -774,7 +774,7 @@ async function rebuildLines(pi, territory) {
       subCents: pi.amount != null ? pi.amount : null
     }]
   };
-  var metaItems = stripeMeta.readItems(pi.metadata);
+  var metaItems = paiementMeta.readItems(pi.metadata);
   if (!metaItems || !metaItems.length) return fallback;
   try {
     var products = await catalog.loadCatalog();

@@ -45,7 +45,7 @@ module.exports = async function handler(req, res) {
     + '<h2 style="margin:0 0 8px;font-size:20px;color:#fff">✅ Resend fonctionne</h2>'
     + '<p style="margin:0 0 20px;color:#9aa4b2;font-size:14px;line-height:1.6">'
     + 'Si tu vois cet email, ça veut dire que Resend est correctement configuré sur Vercel. '
-    + 'Les confirmations de commande Stripe seront envoyées automatiquement après chaque paiement.'
+    + 'Les confirmations de commande seront envoyées automatiquement après chaque paiement.'
     + '</p>'
     + '<div style="background:#0a0f14;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px;margin:16px 0">'
     + '<p style="margin:0;color:#9aa4b2;font-size:12px;text-transform:uppercase;letter-spacing:.06em">Environnement</p>'

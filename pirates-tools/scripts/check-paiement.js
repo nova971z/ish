@@ -27,10 +27,9 @@ module.exports = async function () {
   function ok(c, m) { if (!c) errors.push('[check-paiement] ' + m); }
 
   var RACINE = path.join(__dirname, '..');
-  var socle, stripe, revolut;
+  var socle, revolut;
   try {
     socle = require(path.join(RACINE, 'api', '_lib', 'paiement', 'index.js'));
-    stripe = require(path.join(RACINE, 'api', '_lib', 'paiement', 'stripe.js'));
     revolut = require(path.join(RACINE, 'api', '_lib', 'paiement', 'revolut.js'));
   } catch (e) {
     return ['check-paiement : la couche paiement est illisible — ' + e.message];
@@ -40,8 +39,6 @@ module.exports = async function () {
      Sans ça, la bascule échoue au premier appel manquant, en production, sur
      le chemin de l'argent. */
   (socle.OPERATIONS || []).forEach(function (op) {
-    ok(typeof stripe[op] !== 'undefined',
-      'le fournisseur STRIPE n\'expose pas « ' + op +' » — la couture est incomplète.');
     ok(typeof revolut[op] !== 'undefined',
       'le fournisseur REVOLUT n\'expose pas « ' + op + ' » — on découvrirait le trou '
       + 'le jour de la bascule, pas avant.');
@@ -60,26 +57,14 @@ module.exports = async function () {
     rm: process.env.REVOLUT_MODE
   };
   try {
-    process.env.STRIPE_SECRET_KEY = 'sk_test_ceciNestPasUneCle';
-    ok(stripe.modeTest() === true,
-      '⛔ une clé `sk_test_` n\'est pas reconnue comme registre de TEST. Les essais '
-      + 'seraient annoncés comme des ventes perdues, à chaque passage : on apprendrait '
-      + 'à ne plus regarder l\'alerte, donc à la manquer le jour où elle est vraie.');
-
-    process.env.STRIPE_SECRET_KEY = 'sk_live_ceciNestPasUneCle';
-    ok(stripe.modeTest() === false,
-      '⛔⛔ une clé `sk_live_` est prise pour du TEST. C\'est le pire sens de l\'erreur : '
-      + 'de VRAIES ventes encaissées et jamais enregistrées s\'afficheraient comme des '
-      + 'essais sans importance. Un client aurait payé, personne ne le saurait.');
-
-    ['', 'rk_live_autre_chose', 'sk_', 'SK_LIVE_MAJUSCULES', 'pk_test_cle_publique'].forEach(function (v) {
-      process.env.STRIPE_SECRET_KEY = v;
-      ok(stripe.modeTest() === null,
-        '⛔ `modeTest()` DEVINE sur une clé inattendue (« ' + (v || '(vide)') + ' ») au lieu '
-        + 'de rendre `null`. Deviner du côté rassurant, c\'est présenter de l\'argent réel '
-        + 'comme de la fausse monnaie.');
-    });
-
+    /* ⛔ LES TROIS CAS « PRÉFIXE DE CLÉ » ONT ÉTÉ RETIRÉS avec le module de
+       l'ancien fournisseur, supprimé le 01/08/2026 sur décision de l'user
+       (« éradiquer tout ce qu'il y a sur Stripe, c'est TOUT »). SUPPRIMÉS, pas
+       neutralisés : une assertion qui tournerait sur un objet factice serait
+       verte pour la mauvaise raison — et rassurerait à tort.
+       Le mode de panne qu'ils couvraient — de la fausse monnaie prise pour de
+       l'argent réel — reste couvert juste en dessous, sur le seul fournisseur
+       dont l'argent dépend désormais. */
     process.env.REVOLUT_MODE = 'prod';
     ok(revolut.modeTest() === false,
       '⛔⛔ Revolut se déclare en TEST alors que REVOLUT_MODE vaut « prod ». Les vraies '
@@ -135,21 +120,15 @@ module.exports = async function () {
     'requires_capture doit valoir « autorise », JAMAIS « paye » : l\'argent est '
     + 'réservé, pas encaissé.');
 
-  /* Aucune table de fournisseur ne doit produire un état hors vocabulaire. */
-  Object.keys(stripe.ETATS_STRIPE || {}).forEach(function (k) {
-    var v = stripe.ETATS_STRIPE[k];
+  /* Aucune table de fournisseur ne doit produire un état hors vocabulaire.
+     ⛔ Les deux blocs qui vérifiaient les tables de l'ANCIEN fournisseur ont été
+     SUPPRIMÉS le 01/08/2026 avec son module — pas neutralisés : une assertion
+     qui boucle sur un objet vide passe toujours, et fait croire à un contrôle. */
+  Object.keys(revolut.ETATS_REVOLUT || {}).forEach(function (k) {
+    var v = revolut.ETATS_REVOLUT[k];
     ok((socle.ETATS || []).indexOf(v) !== -1,
-      'la table Stripe traduit « ' + k + ' » en « ' + v + ' », qui n\'est pas du '
+      'la table Revolut traduit « ' + k + ' » en « ' + v + ' », qui n\'est pas du '
       + 'vocabulaire commun. Un septième état inventé en douce ne serait traité nulle part.');
-  });
-
-  /* ⛔ Aucun état Stripe ne doit valoir « paye » à part `succeeded`. */
-  Object.keys(stripe.ETATS_STRIPE || {}).forEach(function (k) {
-    if (stripe.ETATS_STRIPE[k] === socle.ETAT_ACQUIS) {
-      ok(k === 'succeeded',
-        '⛔ l\'état Stripe « ' + k + ' » est traduit en « payé ». Seul `succeeded` '
-        + 'prouve l\'encaissement chez Stripe.');
-    }
   });
 
   /* ── 3. UN SEUL FOURNISSEUR ENCAISSE, QUOI QU'ON METTE DANS L'ENVIRONNEMENT
@@ -240,7 +219,7 @@ module.exports = async function () {
 
      Confondre 'tentative_ratee' et 'abandonne' tuerait une vente en cours de
      sauvetage, sans qu'aucun test fonctionnel ne bronche. */
-  [['stripe', stripe.GENRES_STRIPE], ['revolut', revolut.GENRES_REVOLUT]].forEach(function (f) {
+  [['revolut', revolut.GENRES_REVOLUT]].forEach(function (f) {
     var table = f[1];
     ok(table && typeof table === 'object',
       'le fournisseur ' + f[0] + ' n\'expose pas de table de GENRES d\'événements — '
@@ -277,15 +256,10 @@ module.exports = async function () {
       e + ' doit valoir « abandonne » : ce sont les deux SEULS événements qui tuent '
       + 'définitivement une commande chez Revolut.');
   });
-  var GS = stripe.GENRES_STRIPE || {};
-  ok(GS['payment_intent.payment_failed'] === 'tentative_ratee',
-    '⛔ payment_intent.payment_failed vaut « ' + GS['payment_intent.payment_failed']
-    + ' ». Chez Stripe aussi le client peut re-tenter sa carte sur le même intent.');
-
   /* Un événement inconnu ne devient JAMAIS « encaisse ». */
   ['inexistant', 'ORDER_', 'constructor', '__proto__', 'toString', '', null, undefined, 0, {}]
     .forEach(function (v) {
-      [GR, GS].forEach(function (t) {
+      [GR].forEach(function (t) {
         ok(socle.normaliserGenre(v, t) === 'autre',
           '⛔ l\'événement inconnu (' + String(v) + ') ne vaut pas « autre ». Un genre '
           + 'non cartographié qui déclencherait quelque chose, c\'est une commande '
@@ -536,9 +510,6 @@ module.exports = async function () {
         if (t.length) directives[t[0]] = ' ' + t.slice(1).join(' ') + ' ';
       });
       [
-        ['script-src', 'https://js.stripe.com', 'le widget Stripe — il encaisse ENCORE aujourd\'hui'],
-        ['connect-src', 'https://api.stripe.com', 'les appels du widget Stripe'],
-        ['frame-src', 'https://js.stripe.com', 'l\'iframe du formulaire Stripe'],
         ['script-src', 'https://merchant.revolut.com', 'le widget Revolut en production'],
         ['script-src', 'https://sandbox-merchant.revolut.com', 'le widget Revolut en bac à sable — sans lui, impossible de TESTER'],
         ['connect-src', 'https://merchant.revolut.com', 'les appels du widget Revolut'],
@@ -669,7 +640,7 @@ module.exports = async function () {
   /* ── 6. Aucun appel direct au SDK là où la couture est censée passer ───
      Cliquet : les fichiers déjà migrés ne doivent pas voir revenir un
      require('stripe') en douce. La liste grandit à chaque étape. */
-  var MIGRES = ['api/create-payment-intent.js', 'api/webhook.js', 'api/checkout.js'];
+  var MIGRES = ['api/create-payment-intent.js', 'api/webhook.js'];
   MIGRES.forEach(function (f) {
     var abs = path.join(RACINE, f);
     if (!fs.existsSync(abs)) { ok(false, 'check-paiement : ' + f + ' introuvable.'); return; }
@@ -921,14 +892,6 @@ module.exports = async function () {
       + 'même adresse, et celui qui n\'a pas émis ne saura jamais vérifier.');
 
     /* Preuve par APPEL : le routage doit choisir juste, et refuser l'inconnu. */
-    [['revolut-signature', 'revolut'], ['stripe-signature', 'stripe'],
-     ['Revolut-Signature', 'revolut'], ['Stripe-Signature', 'stripe']].forEach(function (c) {
-      var h = {}; h[c[0]] = 'peu-importe';
-      var mod = socle.fournisseurParEntetes(h);
-      ok(mod && mod.nom() === c[1],
-        '⛔ l\'en-tête « ' + c[0] + ' » ne route pas vers ' + c[1] + '. La notification '
-        + 'serait vérifiée par le mauvais fournisseur, donc refusée.');
-    });
     ok(socle.fournisseurParEntetes({}) === null
        && socle.fournisseurParEntetes({ 'x-autre': '1' }) === null,
       '⛔⛔ une requête SANS en-tête de signature est routée vers un fournisseur. Elle doit '

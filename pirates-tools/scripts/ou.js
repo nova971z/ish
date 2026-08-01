@@ -53,10 +53,10 @@ var INDEX = [
     fini: 'check-pricing et check-loyalty verts, et un paiement de bout en bout rejoué.'
   },
   {
-    intention: 'Paiement par carte, Stripe, Revolut, webhook',
+    intention: 'Paiement par carte, Revolut, webhook',
     mots: ['paiement', 'stripe', 'revolut', 'carte', 'webhook', 'payer', 'checkout',
            'merchant', 'encaisser', 'versement', 'payout'],
-    fichiers: ['api/create-payment-intent.js', 'api/webhook.js', 'api/checkout.js', 'app.js',
+    fichiers: ['api/create-payment-intent.js', 'api/webhook.js', 'app.js',
                'docs/PLAN-REVOLUT.md'],
     fonctions: ['openPayModal'],
     protege: ['tests/course-pay.mjs', 'scripts/audit/p5-money.js'],
@@ -64,7 +64,7 @@ var INDEX = [
     pieges: ['La clé publique vit dans un script inline autorisé par empreinte sha256 : la changer sans recalculer la CSP BLOQUE le script et tue le site.',
              'Le webhook doit lire le corps BRUT — un corps parsé invalide la signature.',
              'MIGRATION REVOLUT EN COURS (docs/PLAN-REVOLUT.md) : la charge utile du webhook Revolut ne contient QUE {event, order_id} — ni montant, ni commission, ni metadata. Tout se relit par GET /api/orders puis GET /api/payments.',
-             'Revolut ne fournit AUCUN identifiant d\'événement : la clé d\'idempotence doit être dérivée de event + order_id, pas copiée du modèle Stripe.',
+             'Revolut ne fournit AUCUN identifiant d\'événement : la clé d\'idempotence se dérive de event + order_id.',
              'La commission réelle est dans payments[].fees[] — un TABLEAU. On somme, on ne prend pas fees[0].'],
     decisions: ['D-009', 'D-013'],
     fini: 'scripts/check-csp.js vert, et le montant débité égal au montant affiché.'
@@ -155,7 +155,7 @@ var INDEX = [
       'Un remboursement n\'est PAS une charge : il diminue la TVA COLLECTÉE. Le saisir en charge gonflerait la TVA DÉDUCTIBLE — on réclamerait une taxe jamais payée.',
       'La TVA d\'une vente annulée ne se récupère QU\'AVEC un avoir (facture rectificative). Sans avoir, elle reste due malgré le remboursement.',
       'Un remboursement n\'annule le coût d\'achat que si l\'outil n\'a PAS été commandé. Sinon il part en stock, et le coût reste.',
-      'La commission Stripe n\'est pas supposée rendue : elle se saisit d\'après le tableau de bord, jamais d\'après une hypothèse.'
+      'La commission d\'encaissement n\'est pas supposée rendue : elle se saisit d\'après le tableau de bord du fournisseur, jamais d\'après une hypothèse.'
     ],
     decisions: [],
     fini: 'check-accounting vert (dont les cas remboursement), p5-money vert, et chaque nouvelle assertion prouvée faillible par sabotage.'

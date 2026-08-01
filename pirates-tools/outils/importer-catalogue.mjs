@@ -66,22 +66,59 @@ produits.forEach((p) => {
   liste.forEach((a) => { const k = String(a || '').trim().toUpperCase(); if (k) skusExistants.add(k); });
 });
 
-/* Catégorie déduite du libellé fournisseur. Table EXPLICITE : un mot inconnu
-   tombe dans « Outillage », il n'invente pas une famille. */
+/* ⛔⛔ LES CATÉGORIES VIENNENT DU CATALOGUE, ON N'EN INVENTE PAS.
+   Faute commise au 1er import (01/08/2026) : j'avais écrit ma propre table et
+   fabriqué `Perceuses visseuses` à côté de `Perceuses-visseuses`,
+   `Defonceuses` à côté de `Défonceuses`, `Coffrets` au lieu de `Rangements`.
+   Le menu du site se construit à partir des catégories PRÉSENTES dans
+   products.json : douze familles fantômes sont donc apparues, chacune coupant
+   en deux une famille existante. Le client cherchant une défonceuse n'en
+   voyait plus que la moitié.
+
+   Chaque motif pointe désormais vers un nom EXISTANT, vérifié plus bas : si
+   la cible n'est pas au catalogue, l'outil REFUSE de tourner. */
 const FAMILLES = [
-  [/boulonneuse/i, 'Boulonneuses a chocs'], [/visseuse à chocs|visseuse a chocs/i, 'Visseuses a chocs'],
-  [/perceuse|perceuse-visseuse|visseuse/i, 'Perceuses visseuses'], [/meuleuse/i, 'Meuleuses'],
-  [/scie circulaire/i, 'Scies circulaires'], [/scie sauteuse/i, 'Scies sauteuses'],
-  [/scie|tronçonneuse|tronconneuse/i, 'Scies'], [/perfo|burineur|marteau/i, 'Perforateurs burineurs'],
-  [/ponceuse/i, 'Ponceuses'], [/rabot/i, 'Rabots'], [/défonceuse|defonceuse|affleureuse/i, 'Defonceuses'],
-  [/aspirateur|souffleur/i, 'Aspirateurs souffleurs'], [/batterie|chargeur|accu/i, 'Batteries et chargeurs'],
-  [/coffret|makpac|valise|mallette/i, 'Coffrets'], [/douille|embout|foret|lame|disque|mèche|meche/i, 'Accessoires'],
-  [/projecteur|lampe|éclairage|eclairage/i, 'Eclairage'], [/compresseur/i, 'Compresseurs'],
-  [/malaxeur|mélangeur|melangeur/i, 'Malaxeurs'], [/cloueur|agrafeuse/i, 'Cloueurs'],
-  [/taille-haie|débroussailleuse|debroussailleuse|tondeuse/i, 'Jardin'],
-  [/multifonction|oscillant/i, 'Outils multifonctions'], [/pistolet|colle|mastic/i, 'Pistolets']
+  [/boulonneuse/i, 'Boulonneuses a chocs'],
+  [/visseuse à chocs|visseuse a chocs|cliquet/i, 'Visseuses a chocs'],
+  [/perceuse|visseuse/i, 'Perceuses-visseuses'],
+  [/meuleuse/i, 'Meuleuses'],
+  [/découpeuse|decoupeuse/i, 'Découpeuses'],
+  [/scie|tronçonneuse|tronconneuse/i, 'Scies'],
+  [/perfo|burineur|marteau|piqueur/i, 'Perforateurs'],
+  [/ponceuse/i, 'Ponceuses'],
+  [/rabot/i, 'Rabots'],
+  [/défonceuse|defonceuse|affleureuse/i, 'Défonceuses'],
+  [/souffleur/i, 'Souffleurs'],
+  [/aspirateur/i, 'Aspirateurs'],
+  [/batterie|chargeur|accu|adaptateur secteur/i, 'Batteries et chargeurs'],
+  [/coffret|makpac|valise|mallette|sac|caisse/i, 'Rangements'],
+  [/lamelleuse/i, 'Lamelleuses'],
+  [/riveteuse/i, 'Riveteuses'],
+  [/tarière|tariere/i, 'Tarières'],
+  [/malaxeur|mélangeur|melangeur/i, 'Malaxeurs'],
+  [/cloueur|agrafeuse/i, 'Cloueurs'],
+  [/multifonction|oscillant/i, 'Outils multifonctions'],
+  [/taille-haie|débroussailleuse|debroussailleuse|tondeuse|élagueuse|elagueuse|sécateur|secateur/i, 'Élagage'],
+  [/combo|pack|kit/i, 'Combos'],
+  /* Tout le reste — douilles, embouts, forets, lames, disques, lampes,
+     pistolets, compresseurs — tombe dans « Accessoires », qui existe déjà.
+     Mieux vaut une famille large et VISIBLE qu'une famille juste et fantôme. */
 ];
-const famille = (n) => (FAMILLES.find(([re]) => re.test(n)) || [null, 'Outillage'])[1];
+const famille = (n) => (FAMILLES.find(([re]) => re.test(n)) || [null, 'Accessoires'])[1];
+
+/* ⛔ PRÉALABLE : chaque cible doit EXISTER au catalogue. Sans ce contrôle,
+   une faute de frappe recréerait une famille fantôme sans que rien ne le dise. */
+{
+  const connues = new Set(produits.map((p) => p.category).filter(Boolean));
+  const inconnues = [...new Set(FAMILLES.map(([, c]) => c).concat(['Accessoires']))]
+    .filter((c) => !connues.has(c));
+  if (inconnues.length) {
+    console.error('⛔ REFUS : ces catégories cibles n\'existent PAS au catalogue — '
+      + inconnues.join(', ') + '. Corrige la table avant d\'importer : une famille '
+      + 'inventée coupe en deux une famille existante et devient invisible.');
+    process.exit(1);
+  }
+}
 
 const slugifier = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
   .replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '').slice(0, 90);
@@ -101,21 +138,28 @@ for (const it of liste) {
   const cout = Number(it.srcTTC || 0);
   if (!sku) { refuses.push({ sku, nom, motif: 'référence absente' }); continue; }
   if (skusExistants.has(sku)) { refuses.push({ sku, nom, motif: 'DOUBLON — SKU ou référence alternative déjà au catalogue' }); continue; }
-  if (!nom) { refuses.push({ sku, nom, motif: 'nom vide — une fiche sans nom n\'est pas publiable' }); continue; }
-  if (tronque(nom)) { refuses.push({ sku, nom, motif: 'nom tronqué par l\'analyse de la source' }); continue; }
+  /* ⚠️ NOM ABSENT OU TRONQUÉ : ON N'ÉCARTE PLUS (décision de l'user,
+     01/08/2026 — « lorsque l'on va ajouter les photos, je te donnerai la fiche
+     technique à chaque fois »). Le motif de refus reposait sur l'idée qu'on ne
+     pourrait jamais compléter la fiche ; il ne tient plus.
+     La fiche entre avec un libellé EXPLICITEMENT provisoire — jamais un nom
+     inventé — et le drapeau `ficheAcompleter` dit exactement lesquelles
+     attendent leur descriptif. */
+  const nomManquant = !nom || tronque(nom);
+  const libelle = nomManquant ? ('Référence ' + sku + ' — descriptif à compléter') : nom;
   if (!(cout > 0)) { refuses.push({ sku, nom, motif: 'coût d\'achat absent — prix impossible sans supposition' }); continue; }
 
-  const titre = MARQUE + ' ' + sku + ' — ' + nom;
+  const titre = MARQUE + ' ' + sku + ' — ' + libelle;
   const fiche = {
     id: MARQUE.toLowerCase() + '-' + sku.toLowerCase(),
-    slug: slugifier(MARQUE + '-' + sku + '-' + nom),
+    slug: slugifier(MARQUE + '-' + sku + '-' + libelle),
     sku: sku,
     name: sku,
     brand: MARQUE,
-    category: famille(nom),
+    category: famille(libelle),
     title: titre,
     tag: 'Nouveau',
-    desc: nom + '. Fiche technique à compléter.',
+    desc: libelle + '.',
     img: 'images/placeholder.svg',
     currency: 'EUR',
     vat: 0.2,
@@ -134,7 +178,8 @@ for (const it of liste) {
        `poidsSuppose` dit que ce n'est PAS un relevé : le prix qui en découle
        est à revoir dès que le poids réel est connu. */
     weight_kg: 2,
-    poidsSuppose: true
+    poidsSuppose: true,
+    ficheAcompleter: nomManquant
   };
   /* ⛔ LE COÛT D'ACHAT NE VA PAS DANS LE FICHIER SERVI. `products.json` est
      téléchargé par tout le monde ; y publier un prix fournisseur est

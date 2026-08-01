@@ -36,8 +36,8 @@ module.exports = function handler(req, res) {
     timestamp: new Date().toISOString(),
     env: {
       // Stripe
-      stripe: !!process.env.STRIPE_SECRET_KEY,
-      webhookSecret: !!process.env.STRIPE_WEBHOOK_SECRET,
+      revolut: !!process.env.REVOLUT_SECRET_KEY,
+      webhookSecret: !!process.env.REVOLUT_WEBHOOK_SECRET,
       // Firebase
       firebase: !!process.env.FIREBASE_SERVICE_ACCOUNT,
       // Resend (transactional email)

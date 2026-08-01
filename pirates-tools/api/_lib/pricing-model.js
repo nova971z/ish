@@ -61,8 +61,13 @@ var DEFAULT_CONFIG = {
      comptabilité lit de toute façon la commission RÉELLE de chaque vente
      (payments[].fees[]) — le compte de résultat reste exact même si ce chiffre
      vieillit. */
-  stripePct: 0.028,
-  stripeFix: 0.20,
+  /* ⚠️ DEUX NOMS ACCEPTÉS. `commissionPct`/`commissionFix` sont les noms
+     courants depuis le 01/08/2026 ; `stripePct`/`stripeFix` sont ceux de la
+     configuration DÉJÀ ENREGISTRÉE en base. Renommer sans lire l'ancien
+     remettrait silencieusement la commission à sa valeur par défaut — donc
+     fausserait tous les prix calculés. */
+  commissionPct: 0.028,
+  commissionFix: 0.20,
   packaging: 0.5,             // emballage (carton/bulles récupérés)
   fixedAnnual: 1000,          // CFE + assurance + banque (sans comptable), €/an
   ordersPerYear: 400,         // pour répartir les frais fixes par commande
@@ -122,14 +127,16 @@ function evaluate(costHT, markup, ship, octroi, tvaDom, cfg, douane) {
   var priceHt = costHT * (1 + markup);
   var ttc = priceHt * (1 + octroi) * (1 + tvaDom);
   var revenueHT = priceHt * (1 + octroi);            // octroi = revenu (payé à l'import)
-  var stripe = ttc * cfg.stripePct + cfg.stripeFix;
+  var pct = (cfg.commissionPct != null) ? cfg.commissionPct : cfg.stripePct;
+  var fix = (cfg.commissionFix != null) ? cfg.commissionFix : cfg.stripeFix;
+  var commission = ttc * pct + fix;
   var octroiPaid = octroi * (costHT + ship);          // à l'import, non récupérable
-  var costs = costHT + ship + octroiPaid + stripe + cfg.packaging + fixedPerOrder(cfg) + douane;
+  var costs = costHT + ship + octroiPaid + commission + cfg.packaging + fixedPerOrder(cfg) + douane;
   var netOp = revenueHT - costs;
   var netAfterIS = netOp * (1 - cfg.is);
   return {
     markup: markup, priceHt: round2(priceHt), ttc: round2(ttc),
-    transport: round2(ship), octroiPaid: round2(octroiPaid), stripe: round2(stripe),
+    transport: round2(ship), octroiPaid: round2(octroiPaid), commission: round2(commission), stripe: round2(commission),
     douane: round2(douane),
     fixed: round2(cfg.packaging + fixedPerOrder(cfg)),
     is: round2(netOp * cfg.is), netOp: round2(netOp),

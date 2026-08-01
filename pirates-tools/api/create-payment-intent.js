@@ -11,7 +11,7 @@
 var catalog = require('./_lib/catalog');
 var pricing = require('./_lib/pricing');
 var paiementSocle = require('./_lib/paiement');
-var stripeMeta = require('./_lib/stripe-meta');
+var paiementMeta = require('./_lib/paiement-meta');
 var rl = require('./_lib/ratelimit');
 var loyalty = require('./_lib/loyalty');
 var postal = require('./_lib/postal');
@@ -215,7 +215,7 @@ module.exports = async function handler(req, res) {
     // Stripe 500 car./valeur). Le webhook payment_intent.succeeded les relit
     // pour reconstruire la commande côté serveur (email détaillé + journal),
     // ce qu'un PaymentIntent ne permet pas nativement (pas de line_items).
-    var itemsMeta = stripeMeta.chunkItems(validatedLines) || {};
+    var itemsMeta = paiementMeta.chunkItems(validatedLines) || {};
 
     // Contrat NEUTRE (couture) : le fournisseur reçoit un montant déjà arrêté
     // et des données à transporter. Il ne décide de rien.
