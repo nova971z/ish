@@ -1,10 +1,10 @@
 // api/_lib/accounting.js — Compte de résultat 100 % RÉEL (aucune estimation).
 //
 // Tout est calculé sur des données réelles :
-//   • Revenus  = journal `payments` (Stripe) — montant encaissé exact.
+//   • Revenus  = journal `payments` (l ancien fournisseur) — montant encaissé exact.
 //   • Coût des marchandises vendues (COGS) = coût d'achat RÉEL snapshoté à la vente
 //     (payments.cogsHtCents, écrit par le webhook).
-//   • Frais Stripe = commission RÉELLE prélevée (payments.stripeFeeCents).
+//   • Frais l ancien fournisseur = commission RÉELLE prélevée (payments.stripeFeeCents).
 //   • Autres charges (transport payé, octroi, CFE, assurance…) = SAISIES par
 //     l'exploitant dans la collection `charges` (comme tout logiciel de compta).
 //   • IS = barème réel (15 % jusqu'à 42 500 € de bénéfice, 25 % au-delà).
@@ -46,8 +46,8 @@ function computeIS(benefice, cfg) {
    · Il n'annule PAS forcément le coût d'achat : si l'outil a déjà été commandé
      chez le fournisseur, le coût reste — l'outil part en stock, pas en fumée.
      D'où `cogsAnnuleHt`, saisi au cas par cas.
-   · La commission Stripe n'est PAS supposée rendue. `stripeFeeRendu` se saisit
-     d'après ce que le tableau de bord Stripe montre RÉELLEMENT (0 par défaut,
+   · La commission l ancien fournisseur n'est PAS supposée rendue. `stripeFeeRendu` se saisit
+     d'après ce que le tableau de bord l ancien fournisseur montre RÉELLEMENT (0 par défaut,
      l'hypothèse la plus défavorable). Ce fichier ne calcule que du réel : une
      supposition polie y serait un mensonge.
 
@@ -62,7 +62,7 @@ function computeIS(benefice, cfg) {
    refunds : [{ amountTtc, cogsAnnuleHt, stripeFeeRendu, territory, dateMs,
                 label, paymentId, avoirRef }]  — montants en EUROS. */
 function applyRefunds(refunds, cfg) {
-  var t = { ttc: 0, ht: 0, tva: 0, tvaSansAvoir: 0, cogsAnnule: 0, stripeRendu: 0,
+  var t = { ttc: 0, ht: 0, tva: 0, tvaSansAvoir: 0, cogsAnnule: 0, commissionRendueTot: 0,
             nb: 0, nbSansAvoir: 0, parMois: {} };
   (refunds || []).forEach(function (r) {
     var ttc = Number(r && r.amountTtc) || 0;
@@ -80,7 +80,7 @@ function applyRefunds(refunds, cfg) {
        01/08/2026 ; `stripeFeeRendu` est celui des avoirs DÉJÀ ENREGISTRÉS.
        Les renommer en base détruirait la lecture de pièces comptables
        existantes — on lit donc les deux, on n'écrit plus que le premier. */
-    t.stripeRendu += Math.max(0, Number(r.commissionRendue != null ? r.commissionRendue : r.stripeFeeRendu) || 0);
+    t.commissionRendueTot += Math.max(0, Number(r.commissionRendue != null ? r.commissionRendue : r.stripeFeeRendu) || 0);
     var k = monthKey(r.dateMs);
     (t.parMois[k] = t.parMois[k] || { ttc: 0, ht: 0, cogs: 0, nb: 0 });
     t.parMois[k].ttc += ttc; t.parMois[k].ht += ht;
@@ -99,7 +99,7 @@ function synthesize(payments, charges, cfg, refunds) {
 
   var succeeded = (payments || []).filter(function (p) { return p && p.status === 'succeeded' && p.amountCents > 0; });
 
-  var caTtc = 0, tvaCollectee = 0, caHt = 0, cogs = 0, stripe = 0;
+  var caTtc = 0, tvaCollectee = 0, caHt = 0, cogs = 0, commission = 0;
   var byMonth = {};
   var cogsConnu = true;
   succeeded.forEach(function (p) {
@@ -108,7 +108,7 @@ function synthesize(payments, charges, cfg, refunds) {
     var ht = ttc / (1 + tva);
     caTtc += ttc; caHt += ht; tvaCollectee += (ttc - ht);
     cogs += c2e(p.cogsHtCents);
-    stripe += c2e(p.stripeFeeCents);
+    commission += c2e(p.stripeFeeCents);
     if (p.cogsHtCents == null) cogsConnu = false;   // au moins une vente sans coût snapshoté
     var key = monthKey(p.recordedAtMs);
     (byMonth[key] = byMonth[key] || { ca_ttc: 0, ca_ht: 0, cogs: 0, ventes: 0 });
@@ -138,15 +138,15 @@ function synthesize(payments, charges, cfg, refunds) {
      combien est un chiffre qu'on ne peut pas contrôler. */
   var rb = applyRefunds(refunds, cfg);
   var caTtcBrut = caTtc, caHtBrut = caHt, tvaBrute = tvaCollectee;
-  var cogsBrut = cogs, stripeBrut = stripe;
+  var cogsBrut = cogs, commissionBrute = commission;
   caTtc -= rb.ttc;
   caHt -= rb.ht;
   tvaCollectee -= rb.tva;              // uniquement la part couverte par un avoir
   cogs -= rb.cogsAnnule;               // outil jamais commandé → coût annulé
-  stripe -= rb.stripeRendu;            // commission réellement rendue, saisie
+  commission -= rb.commissionRendueTot;            // commission réellement rendue, saisie
 
   var margeBrute = caHt - cogs;
-  var resultatExpl = margeBrute - stripe - chargesTotal;   // comptable (dons en charge)
+  var resultatExpl = margeBrute - commission - chargesTotal;   // comptable (dons en charge)
   // Fiscal : dons réintégrés dans la base IS, puis réduction 60 % plafonnée.
   var baseIS = resultatExpl + dons;
   var plafondMecenat = Math.max(20000, 0.005 * caHt);
@@ -179,8 +179,8 @@ function synthesize(payments, charges, cfg, refunds) {
     ca_ht: round2(caHt),
     cogs: round2(cogs),
     marge_brute: round2(margeBrute),
-    frais_encaissement: round2(stripe),
-    frais_stripe: round2(stripe),   // alias hérité — lu par d'anciens écrans
+    frais_encaissement: round2(commission),
+    frais_stripe: round2(commission),   // alias hérité — lu par d'anciens écrans
     charges_saisies: round2(chargesTotal),
     charges_par_categorie: chargesParCat,
     resultat_exploitation: round2(resultatExpl),
@@ -196,7 +196,7 @@ function synthesize(payments, charges, cfg, refunds) {
     // Totaux AVANT remboursements — pour pouvoir vérifier l'écart soi-même.
     brut: {
       ca_ttc: round2(caTtcBrut), ca_ht: round2(caHtBrut), tva_collectee: round2(tvaBrute),
-      cogs: round2(cogsBrut), frais_encaissement: round2(stripeBrut), frais_stripe: round2(stripeBrut)
+      cogs: round2(cogsBrut), frais_encaissement: round2(commissionBrute), frais_stripe: round2(commissionBrute)
     },
     remboursements: {
       nb: rb.nb,
@@ -204,7 +204,7 @@ function synthesize(payments, charges, cfg, refunds) {
       total_ht: round2(rb.ht),
       tva_recuperee: round2(rb.tva),
       cogs_annule: round2(rb.cogsAnnule),
-      stripe_rendu: round2(rb.stripeRendu),
+      commission_rendue: round2(rb.commissionRendueTot),
       // ⚠️ Remboursements SANS avoir : la TVA correspondante reste DUE. Ce
       // n'est pas un détail de présentation — c'est de l'argent à reverser.
       sans_avoir: rb.nbSansAvoir,
@@ -221,7 +221,7 @@ function synthesize(payments, charges, cfg, refunds) {
     par_mois: months,
     ventes_par_marque: brandStats(payments, cfg),   // preuve partenariat fournisseur
     complet: cogsConnu,   // false si une vente n'a pas de coût snapshoté (données partielles)
-    meta: { source: 'RÉEL — paiements Stripe + coûts snapshotés + charges et remboursements saisis' }
+    meta: { source: 'RÉEL — paiements encaissés + coûts snapshotés + charges et remboursements saisis' }
   };
 }
 

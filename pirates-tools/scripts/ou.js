@@ -54,7 +54,7 @@ var INDEX = [
   },
   {
     intention: 'Paiement par carte, Revolut, webhook',
-    mots: ['paiement', 'stripe', 'revolut', 'carte', 'webhook', 'payer', 'checkout',
+    mots: ['paiement', 'revolut', 'carte', 'webhook', 'payer', 'checkout',
            'merchant', 'encaisser', 'versement', 'payout'],
     fichiers: ['api/create-payment-intent.js', 'api/webhook.js', 'app.js',
                'docs/PLAN-REVOLUT.md'],

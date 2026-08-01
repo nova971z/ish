@@ -83,7 +83,7 @@ const EXPECTED = {
   'instagram.js':             { auth: 'admin',   cors: true,  method: true },
   'test-email.js':            { auth: 'admin',   cors: true,  method: true },
   'cron-report.js':           { auth: 'secret',  cors: false, method: false },
-  'webhook.js':               { auth: 'stripe',  cors: false, method: true }
+  'webhook.js':               { auth: 'signature', cors: false, method: true }
 };
 
 const rows = [];
@@ -107,7 +107,7 @@ for (const f of Object.keys(EXPECTED)) {
 
   const authOk = exp.auth === 'admin' ? hasAdmin
     : exp.auth === 'secret' ? (hasSecret || hasAdmin)
-    : exp.auth === 'stripe' ? hasSig
+    : exp.auth === 'signature' ? hasSig
     : exp.auth === 'mixte' ? (hasUid || hasAdmin)
     : true;
 

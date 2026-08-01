@@ -98,7 +98,7 @@ var LISTES = [
     quand: /pirates-tools\/api\/((create-payment-intent|webhook|checkout)\.js|_lib\/(pricing|pricing-model|pricing-config|price-parse|accounting|invoice|loyalty|paiement-meta|postal)\.js)$/,
     points: [
       'Le SERVEUR est autoritaire sur le montant : un prix venu du client est ignoré.',
-      'Le webhook lit le corps BRUT — un corps parsé invalide la signature Stripe.',
+      'Le webhook lit le corps BRUT — un corps parsé invalide la signature.',
       'Idempotence : le même événement rejoué deux fois ne débite pas deux fois.',
       'Le montant AFFICHÉ et le montant DÉBITÉ tombent au centime.',
       'Le territoire fiscal vient du CODE POSTAL, jamais d\'un champ déclaré.',

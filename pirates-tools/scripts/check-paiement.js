@@ -45,12 +45,12 @@ module.exports = async function () {
   });
   /* ── `modeTest` : le verdict « est-ce de l'argent ? », par APPEL RÉEL ───
      Faux positif vécu le 01/08/2026 : la réconciliation a annoncé
-     « 317,79 € encaissés, un client attend » sur deux paiements Stripe de TEST.
+     « 317,79 € encaissés, un client attend » sur deux paiements l ancien fournisseur de TEST.
      Le constat était juste, la gravité fausse. Trois façons de re-casser ça,
      et aucune ne se voit en fonctionnement normal :
-       · Stripe rend `true` sur une clé LIVE → de vraies ventes perdues
+       · l ancien fournisseur rend `true` sur une clé LIVE → de vraies ventes perdues
          s'afficheraient comme des essais sans importance. Le pire des deux ;
-       · Stripe DEVINE sur une clé au format inattendu au lieu de rendre `null` ;
+       · l ancien fournisseur DEVINE sur une clé au format inattendu au lieu de rendre `null` ;
        · Revolut rend `true` en production. */
   var envAvant = {
     sk: process.env.STRIPE_SECRET_KEY,
@@ -59,7 +59,7 @@ module.exports = async function () {
   try {
     /* ⛔ LES TROIS CAS « PRÉFIXE DE CLÉ » ONT ÉTÉ RETIRÉS avec le module de
        l'ancien fournisseur, supprimé le 01/08/2026 sur décision de l'user
-       (« éradiquer tout ce qu'il y a sur Stripe, c'est TOUT »). SUPPRIMÉS, pas
+       (« éradiquer tout ce qu'il y a sur l ancien fournisseur, c'est TOUT »). SUPPRIMÉS, pas
        neutralisés : une assertion qui tournerait sur un objet factice serait
        verte pour la mauvaise raison — et rassurerait à tort.
        Le mode de panne qu'ils couvraient — de la fausse monnaie prise pour de
@@ -132,11 +132,11 @@ module.exports = async function () {
   });
 
   /* ── 3. UN SEUL FOURNISSEUR ENCAISSE, QUOI QU'ON METTE DANS L'ENVIRONNEMENT
-     Stripe a été retiré du site le 01/08/2026 (demande de l'user). Le code
-     client de Stripe n'existe plus : si `PAYMENT_PROVIDER` pouvait encore
+     l ancien fournisseur a été retiré du site le 01/08/2026 (demande de l'user). Le code
+     client de l ancien fournisseur n'existe plus : si `PAYMENT_PROVIDER` pouvait encore
      basculer dessus, le serveur fabriquerait un jeton que PLUS AUCUN widget ne
      sait monter — formulaire mort, ventes perdues, sans rien qui casse.
-     On exige donc que TOUTES les valeurs, y compris « stripe » écrit
+     On exige donc que TOUTES les valeurs, y compris « l ancien fournisseur » écrit
      explicitement, donnent Revolut. */
   var avant = process.env.PAYMENT_PROVIDER;
   try {
@@ -145,7 +145,7 @@ module.exports = async function () {
       ['', 'variable vide'],
       ['revolute', 'faute de frappe'],
       ['REVOLUT_', 'faute de frappe'],
-      ['stripe', 'ancien fournisseur, écrit explicitement'],
+      ['stripe', 'nom de l ancien fournisseur, ecrit explicitement'],
       ['n\'importe quoi', 'valeur absurde'],
       ['revolut', 'valeur nominale'],
       ['REVOLUT', 'casse haute'],
@@ -156,7 +156,7 @@ module.exports = async function () {
       else process.env.PAYMENT_PROVIDER = c[0];
       ok(socle.nomFournisseur() === 'revolut',
         '⛔⛔ PAYMENT_PROVIDER = « ' + String(c[0]) + ' » (' + c[1] + ') ne donne pas '
-        + 'Revolut. Depuis le retrait de Stripe, AUCUNE valeur d\'environnement ne doit '
+        + 'Revolut. Depuis le retrait de l\'ancien fournisseur, AUCUNE valeur d\'environnement ne doit '
         + 'pouvoir désigner un autre fournisseur : son code client n\'existe plus, le '
         + 'formulaire de carte serait mort et la vente perdue sans erreur visible.');
     });
@@ -270,7 +270,7 @@ module.exports = async function () {
   /* ── 4 ter. Le webhook aiguille bien sur le GENRE ─────────────────────
      TROU DÉCOUVERT PAR SABOTAGE le 31/07/2026 : remettre `switch (event.type)`
      dans le webhook ne faisait rougir AUCUN contrôle. Or c'est le retour
-     exact à l'état d'avant — les noms d'événements Stripe en dur — et le jour
+     exact à l'état d'avant — les noms d'événements l ancien fournisseur en dur — et le jour
      de la bascule, Revolut n'émettant aucun de ces noms, TOUS les paiements
      tomberaient dans le `default` : encaissés, jamais traités. Le client
      paierait et ne recevrait rien. */
@@ -279,16 +279,16 @@ module.exports = async function () {
     var whSrc = fs.readFileSync(WH, 'utf8');
     ok(/switch\s*\(\s*verif\.genre\s*\)/.test(whSrc),
       '⛔ api/webhook.js n\'aiguille plus sur `verif.genre`. S\'il est revenu à '
-      + '`switch (event.type)`, il attend des noms d\'événements Stripe : le jour de '
+      + '`switch (event.type)`, il attend les noms d\'événements de l\'ancien fournisseur : le jour de '
       + 'la bascule, Revolut n\'en émet aucun et TOUS les paiements tomberaient dans '
       + 'le cas par défaut — encaissés, jamais traités.');
     ok(!/case\s*'payment_intent\.succeeded'/.test(whSrc),
       '⛔ api/webhook.js contient encore un `case \'payment_intent.succeeded\'` : '
-      + 'un nom d\'événement propre à Stripe est redevenu une décision.');
+      + 'un nom d\'événement propre à l\'ancien fournisseur est redevenu une décision.');
 
     /* ⛔ UN SEUL ENDROIT LIT `event.data.object` — la bascule entre les deux
        formes de charge utile. Chaque autre lecture serait un chemin qui
-       fonctionne chez Stripe et rend `undefined` chez Revolut : le handler ne
+       fonctionne chez l ancien fournisseur et rend `undefined` chez Revolut : le handler ne
        verrait ni montant, ni metadata, ni adresse. Il ne planterait même pas —
        il traiterait une commande vide. On compte les occurrences hors
        commentaire, et AUCUNE ne doit tomber hors de `objetPaiement`.
@@ -314,7 +314,7 @@ module.exports = async function () {
     var lecturesType = (sansCommentaires.match(/event\.type/g) || []).length;
     ok(lecturesType === 0,
       '⛔⛔ api/webhook.js lit `event.type` (' + lecturesType + ' fois). Ce champ '
-      + 'n\'existe QUE chez Stripe : la charge utile de Revolut est `{ event, order_id }`. '
+      + 'n\'existait QUE chez l\'ancien fournisseur : la charge utile de Revolut est `{ event, order_id }`. '
       + 'Chez lui la valeur vaut `undefined`, que Firestore refuse d\'écrire — et '
       + 'l\'exception se fait avaler par le `catch` du claim. Rien ne casse visiblement, '
       + 'l\'idempotence tient par accident, et la piste d\'audit perd le type de '
@@ -327,7 +327,7 @@ module.exports = async function () {
     var horsBascule = (ailleurs.match(/event\.data\.object/g) || []).length;
     ok(horsBascule === 0,
       '⛔ `event.data.object` est lu HORS de `objetPaiement` (' + horsBascule + ' fois). '
-      + 'Toute lecture ailleurs est un chemin qui marche chez Stripe et rend `undefined` '
+      + 'Toute lecture ailleurs est un chemin qui marchait chez l ancien fournisseur et rend `undefined` '
       + 'chez Revolut : ni montant, ni metadata, ni adresse. Ça ne planterait même pas — '
       + 'ça traiterait une commande vide.');
 
@@ -418,7 +418,7 @@ module.exports = async function () {
      « état ≠ payé → null » était INCONDITIONNELLE. Chez Revolut, une tentative
      refusée laisse l'ordre en `pending` (le client peut réessayer dessus) — donc
      `objetPaiement` rendait `null`, `handleIntentFailed` n'était jamais appelée,
-     et AUCUN échec de paiement n'était journalisé. Chez Stripe si, chez Revolut
+     et AUCUN échec de paiement n'était journalisé. Chez l ancien fournisseur si, chez Revolut
      non : deux niveaux de traçabilité selon le fournisseur, exactement ce que la
      couture existe pour empêcher. Rien ne l'aurait montré — pas un euro perdu,
      juste un journal muet le jour où on en aurait eu besoin.
@@ -451,7 +451,7 @@ module.exports = async function () {
       '⛔⛔ `objetPaiement` rend `null` pour une TENTATIVE RATÉE dont l\'ordre est '
       + 'resté en attente. C\'est le cas NORMAL chez Revolut (le client peut réessayer '
       + 'sur le même ordre) : aucun échec de paiement ne serait journalisé, alors que '
-      + 'chez Stripe ils le sont tous. La garde d\'état ne doit valoir que pour le '
+      + 'chez l ancien fournisseur ils l etaient tous. La garde d\'état ne doit valoir que pour le '
       + 'genre qui encaisse.');
 
     // 2) Encaissement annoncé, ordre réellement payé → l'objet DOIT exister.
@@ -493,7 +493,7 @@ module.exports = async function () {
      transition — c'est ce qui permet de revenir en arrière sans redéployer une
      CSP dans l'urgence. */
   /* ⚠️ 1ʳᵉ VERSION TROP GROSSIÈRE : elle cherchait le domaine N'IMPORTE OÙ dans
-     vercel.json. Le sabotage « retirer Stripe de la CSP » est passé au VERT,
+     vercel.json. Le sabotage « retirer l ancien fournisseur de la CSP » est passé au VERT,
      parce qu'une occurrence survivait dans un AUTRE en-tête
      (`Permissions-Policy`). Un domaine autorisé dans la mauvaise directive
      n'autorise rien. On vérifie donc DIRECTIVE PAR DIRECTIVE. */
@@ -548,7 +548,7 @@ module.exports = async function () {
      TROU DÉCOUVERT PAR SABOTAGE : retirer `fournisseur: paiement.nom()` de la
      réponse ne faisait rougir aucun contrôle. Or c'est le seul moyen pour le
      front de savoir quel widget charger. Sans ce champ, il devinerait — et le
-     jour de la bascule il monterait le widget Stripe sur un jeton Revolut :
+     jour de la bascule il monterait le widget l ancien fournisseur sur un jeton Revolut :
      formulaire vide, message d'erreur inutile, client incapable de payer. */
   var CPI = path.join(RACINE, 'api', 'create-payment-intent.js');
   if (fs.existsSync(CPI)) {
@@ -556,7 +556,7 @@ module.exports = async function () {
     ok(/fournisseur\s*:\s*paiement\.nom\(\)/.test(cpiSrc),
       '⛔ /api/create-payment-intent ne renvoie plus `fournisseur`. Le front ne peut '
       + 'plus savoir quel widget monter : il devinerait, et monterait un jour le '
-      + 'formulaire Stripe sur un jeton Revolut.');
+      + 'formulaire de l ancien fournisseur sur un jeton Revolut.');
     ok(/urlHebergee\s*:/.test(cpiSrc),
       '⛔ la réponse ne porte plus `urlHebergee`. C\'est le repli quand le widget '
       + 'refuse de se charger : chez Revolut, la page de paiement existe dès la '
@@ -639,7 +639,7 @@ module.exports = async function () {
 
   /* ── 6. Aucun appel direct au SDK là où la couture est censée passer ───
      Cliquet : les fichiers déjà migrés ne doivent pas voir revenir un
-     require('stripe') en douce. La liste grandit à chaque étape. */
+     require('l ancien fournisseur') en douce. La liste grandit à chaque étape. */
   var MIGRES = ['api/create-payment-intent.js', 'api/webhook.js'];
   MIGRES.forEach(function (f) {
     var abs = path.join(RACINE, f);
@@ -689,8 +689,8 @@ module.exports = async function () {
      Le poser maintenant, c'est le seul moment où l'on est sûr de ne pas
      l'oublier. */
   /* ── 9. CLIQUET sur contact.js : UN seul appel direct toléré ───────────
-     contact.js garde un `require('stripe')` : `transfers.create`, le versement
-     au livreur via Stripe Connect. La Merchant API de Revolut n'a AUCUN
+     contact.js garde un `require('l ancien fournisseur')` : `transfers.create`, le versement
+     au livreur via virement direct. La Merchant API de Revolut n'a AUCUN
      équivalent (son /api/payouts ne fait que consulter nos propres virements),
      le module livreur est inactif, et la décision du 27/07/2026 a de toute
      façon renversé le principe — la plateforme n'encaisse plus la course.
@@ -758,7 +758,7 @@ module.exports = async function () {
       /* ⛔⛔ TROU DÉCOUVERT PAR SABOTAGE le 31/07/2026 : vider `onSuccess` ne
          faisait rougir aucun contrôle.
 
-         C'est LA différence entre les deux fournisseurs. Stripe REDIRIGE vers
+         C'est LA différence entre les deux fournisseurs. l ancien fournisseur REDIRIGE vers
          `return_url` ; Revolut rappelle `onSuccess` SANS quitter la page. Si
          `onSuccess` ne navigue pas, le client paie, reste devant le formulaire,
          croit que rien ne s'est passé — et repaie. Le paiement, lui, a
@@ -782,7 +782,7 @@ module.exports = async function () {
          bouton « Commander » encore visibles. Le client venait de payer et
          voyait un écran qui lui disait de payer. Il pouvait recliquer.
 
-         Le chemin Stripe, lui, appelait `closePayModal()`. La couture existe
+         Le chemin l ancien fournisseur, lui, appelait `closePayModal()`. La couture existe
          pour que les deux fournisseurs se comportent pareil : ici elle avait
          été oubliée d'un seul côté, et aucun test ne le voyait — le paiement,
          lui, avait parfaitement fonctionné. */
@@ -875,11 +875,11 @@ module.exports = async function () {
     });
 
     /* ── d ter) ⛔⛔ C'EST L'ÉMETTEUR QUI VÉRIFIE, PAS LE FOURNISSEUR ACTIF ─
-       Mesuré le 01/08/2026 : Revolut a envoyé deux notifications, Stripe (alors
+       Mesuré le 01/08/2026 : Revolut a envoyé deux notifications, l ancien fournisseur (alors
        fournisseur actif) a tenté de les vérifier, et a répondu « secret
        absent ». Deux reçues, ZÉRO acceptée, avec une configuration Revolut
        parfaite. Le défaut est symétrique et le second sens coûte plus cher :
-       après la bascule, une re-livraison Stripe tardive (backoff ~3 jours)
+       après la bascule, une re-livraison l ancien fournisseur tardive (backoff ~3 jours)
        serait refusée par Revolut et l'encaissement perdu en silence. */
     ok(/fournisseurParEntetes\(req\.headers\)/.test(whSrc),
       '⛔⛔ le webhook ne choisit plus le vérificateur d\'après l\'en-tête de signature. '
@@ -1038,10 +1038,10 @@ module.exports = async function () {
       + '« adresse ✅ » sur une adresse tronquée ou mal lue, et la garde fiscale serait '
       + 'muette en production sans que rien ne l\'annonce.');
 
-    /* ── e) ⛔⛔ REVOLUT ACTIF NE RETOMBE JAMAIS SUR UN CHEMIN STRIPE ──────
+    /* ── e) ⛔⛔ REVOLUT ACTIF NE RETOMBE JAMAIS SUR UN CHEMIN L ANCIEN FOURNISSEUR ──────
        Le clic sur « Commander » se perdait EN SILENCE quand le champ carte
        Revolut n'était pas monté (script bloqué, réseau) : aucun des tests
-       Stripe qui suivent ne matchait, et le clic finissait au dernier repli,
+       l ancien fournisseur qui suivent ne matchait, et le clic finissait au dernier repli,
        sur le message FAUX « Paiement carte non configuré » suivi d'une bascule
        vers la crypto, désactivée. Le client se retrouvait dans une impasse
        alors que la page de paiement Revolut était affichée juste au-dessus. */
@@ -1053,8 +1053,8 @@ module.exports = async function () {
        La règle est : `confirmPayment` SORT dès que le fournisseur est Revolut,
        sans condition sur le champ carte, et ce qu'elle appelle propose la page
        hébergée. On suit donc le nom de la fonction appelée, quel qu'il soit. */
-    /* ⚠️ RÈGLE RÉÉCRITE LE 01/08/2026, après le retrait de Stripe. Il n'y a
-       plus de « branches Stripe » à éviter : elles n'existent plus. Ce qui
+    /* ⚠️ RÈGLE RÉÉCRITE LE 01/08/2026, après le retrait de l ancien fournisseur. Il n'y a
+       plus de « branches l ancien fournisseur » à éviter : elles n'existent plus. Ce qui
        reste vrai, et qui compte, c'est qu'un clic sur Payer aboutisse TOUJOURS
        à l'un des deux chemins Revolut — le champ carte, ou la page hébergée —
        et jamais à une impasse silencieuse. */
@@ -1543,7 +1543,7 @@ module.exports = async function () {
        AU PANIER. Rien ne l'empêchait de repayer la même chose.
 
        ⚠️ Le défaut était ANTÉRIEUR à Revolut : il a traversé toute la période
-       Stripe sans être vu, parce qu'aucun achat n'avait jamais été mené
+       l ancien fournisseur sans être vu, parce qu'aucun achat n'avait jamais été mené
        jusqu'au bout. C'est le genre de trou qu'aucun test unitaire n'attrape —
        il ne se voit qu'en faisant vraiment le parcours.
 

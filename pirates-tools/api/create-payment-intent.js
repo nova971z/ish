@@ -1,4 +1,4 @@
-// POST /api/create-payment-intent — Creates a Stripe PaymentIntent for Elements.
+// POST /api/create-payment-intent — Creates a l ancien fournisseur PaymentIntent for Elements.
 // Requires STRIPE_SECRET_KEY on Vercel.
 //
 // SECURITY: prices are resolved SERVER-SIDE from the catalogue. The client sends
@@ -29,8 +29,8 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ ok: false, error: 'Method not allowed' });
   }
 
-  // ⚠️ COUTURE PAIEMENT (31/07/2026) — on ne parle plus à Stripe directement.
-  // Le fournisseur actif est choisi par PAYMENT_PROVIDER (défaut : stripe).
+  // ⚠️ COUTURE PAIEMENT (31/07/2026) — on ne parle plus à l ancien fournisseur directement.
+  // Le fournisseur actif est choisi par PAYMENT_PROVIDER (défaut : l ancien fournisseur).
   // Voir api/_lib/paiement/index.js et docs/PLAN-REVOLUT.md.
   //
   // ⛔ Cette couche ne touche NI au prix, NI au territoire fiscal, NI à la
@@ -45,7 +45,7 @@ module.exports = async function handler(req, res) {
     });
   }
 
-  // A4 — endpoint public : borne la création d'objets Stripe (pollution
+  // A4 — endpoint public : borne la création d'objets l ancien fournisseur (pollution
   // dashboard, alertes fraude). 20/h/IP = généreux pour un client légitime
   // qui re-essaie sa carte ; fail-open si Firestore indisponible (documenté).
   if (!(await rl.allow('payment', rl.clientIp(req), 20, 3600))) {
@@ -86,7 +86,7 @@ module.exports = async function handler(req, res) {
     var territorySource = 'postal';
 
     // Adresse de livraison (facultative côté API, envoyée par la modale) :
-    // attachée au PaymentIntent (visible Stripe/antifraude, relue par le
+    // attachée au PaymentIntent (visible l ancien fournisseur/antifraude, relue par le
     // webhook pour le contrôle détectif). Chaînes bornées, jamais bloquant.
     function cleanStr(s, max) { return typeof s === 'string' ? s.trim().slice(0, max) : ''; }
     var shipIn = body.shipping || {};
@@ -172,7 +172,7 @@ module.exports = async function handler(req, res) {
       : { pct: 0, discountCents: 0, verifiedSpendCents: 0, tierKey: 'bronze', tierLabel: 'Bronze' };
     var amountCents = totalCents - loyaltyQuote.discountCents;
     if (amountCents < 50) {
-      // Remise ramenant sous le minimum Stripe : on la tronque plutôt que
+      // Remise ramenant sous le minimum l ancien fournisseur : on la tronque plutôt que
       // d'échouer un paiement légitime.
       loyaltyQuote = { pct: 0, discountCents: 0, verifiedSpendCents: loyaltyQuote.verifiedSpendCents, tierKey: loyaltyQuote.tierKey, tierLabel: loyaltyQuote.tierLabel };
       amountCents = totalCents;
@@ -212,7 +212,7 @@ module.exports = async function handler(req, res) {
     if (courseRefIn) courseRefMeta = { courseRef: courseRefIn };
 
     // A2 : les lignes {key, qty} voyagent dans la metadata (chunkées — limite
-    // Stripe 500 car./valeur). Le webhook payment_intent.succeeded les relit
+    // l ancien fournisseur 500 car./valeur). Le webhook payment_intent.succeeded les relit
     // pour reconstruire la commande côté serveur (email détaillé + journal),
     // ce qu'un PaymentIntent ne permet pas nativement (pas de line_items).
     var itemsMeta = paiementMeta.chunkItems(validatedLines) || {};
@@ -230,7 +230,7 @@ module.exports = async function handler(req, res) {
 
        ⚠️ Sans origine sûre, on n'invente rien : pas de `redirect_url`. Le
        paiement fonctionne toujours, seul le retour manque — dégradation, pas
-       panne. Stripe ignore ce paramètre (sa redirection passe par
+       panne. l ancien fournisseur ignore ce paramètre (sa redirection passe par
        `return_url`, posé côté navigateur) : la couture l'absorbe. */
     var origineRetour = http.origineSure(req);
 
@@ -272,10 +272,10 @@ module.exports = async function handler(req, res) {
          Le front ne doit PAS deviner le fournisseur : c'est le serveur qui
          décide (PAYMENT_PROVIDER), et lui seul sait quel jeton il vient de
          fabriquer. Un front qui choisirait tout seul monterait un jour le
-         widget Stripe sur un jeton Revolut : le formulaire ne s'afficherait
+         widget l ancien fournisseur sur un jeton Revolut : le formulaire ne s'afficherait
          pas, et le message d'erreur ne dirait pas pourquoi.
          `urlHebergee` : Revolut fournit une page de paiement dès la création de
-         l'ordre ; Stripe Elements n'en a pas (null). Repli utile si le widget
+         l'ordre ; le champ carte n'en a pas (null). Repli utile si le widget
          refuse de se charger. */
       fournisseur: paiement.nom(),
       urlHebergee: cree.urlHebergee || null,
@@ -301,7 +301,7 @@ module.exports = async function handler(req, res) {
       }
     });
   } catch (err) {
-    console.error('[api/create-payment-intent] Stripe error:', err.message);
+    console.error('[api/create-payment-intent] erreur fournisseur :', err.message);
     return res.status(500).json({ ok: false, error: 'Erreur création du paiement' });
   }
 };

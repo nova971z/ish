@@ -1,29 +1,29 @@
-// POST /api/webhook — Stripe webhook for payment confirmation
+// POST /api/webhook — l ancien fournisseur webhook for payment confirmation
 // Requires STRIPE_SECRET_KEY + STRIPE_WEBHOOK_SECRET env vars.
 // Optional: RESEND_API_KEY + RESEND_FROM + OWNER_EMAIL for transactional email.
 //
 // Correctness requirements handled here:
-//  1. RAW BODY — Stripe signs the exact request bytes. Vercel's default parser
+//  1. RAW BODY — l ancien fournisseur signs the exact request bytes. Vercel's default parser
 //     would turn the body into an object; re-stringifying it does NOT reproduce
 //     the signed bytes and breaks (or masks) signature verification. We disable
 //     the body parser (config below) and read the raw stream ourselves.
-//  2. IDEMPOTENCY — Stripe delivers each event at-least-once. We claim each
+//  2. IDEMPOTENCY — l ancien fournisseur delivers each event at-least-once. We claim each
 //     event.id in Firestore before processing so a redelivery is acknowledged
 //     without re-sending confirmation emails.
-//  3. COVERAGE (A2) — the site has TWO payment flows. Stripe Checkout emits
-//     checkout.session.completed ; Stripe Elements (create-payment-intent)
+//  3. COVERAGE (A2) — the site has TWO payment flows. la page de paiement hebergee emits
+//     checkout.session.completed ; le champ carte (create-payment-intent)
 //     emits payment_intent.succeeded and NEVER a session event. Both are
 //     handled. The PI handler only processes intents WE created directly
 //     (metadata.source === 'pirates-tools') : the PaymentIntent under a
 //     Checkout Session does not carry our metadata, so a card payment via
 //     Checkout can never trigger a double email.
 //  4. SERVER TRACE (A2) — every processed payment is journaled in the
-//     Firestore `payments/{stripeId}` collection. Even if no client-side
+//     Firestore `payments/{idFournisseur}` collection. Even if no client-side
 //     order document ever appears (tab closed, Firestore client offline),
 //     the money always leaves a server-side trace.
 //  5. TAX CHECK (A1, détectif) — the charged tax territory comes from client
 //     declaration. We compare it against the postal code of the real address
-//     Stripe collected (shipping for Checkout, card billing for Elements) and
+//     l ancien fournisseur collected (shipping for Checkout, card billing for Elements) and
 //     flag any mismatch in the payments journal + owner email so the order is
 //     verified BEFORE shipping.
 
@@ -66,13 +66,13 @@ async function handler(req, res) {
 
   /* ⛔⛔ C'EST L'ÉMETTEUR QUI VÉRIFIE, PAS LE FOURNISSEUR ACTIF.
      Défaut mesuré le 01/08/2026 sur un test réel : Revolut a envoyé DEUX
-     notifications, `PAYMENT_PROVIDER` valait encore `stripe`, et c'est donc
-     Stripe qui a tenté de vérifier la signature de Revolut. Réponse :
+     notifications, `PAYMENT_PROVIDER` valait encore `l ancien fournisseur`, et c'est donc
+     l ancien fournisseur qui a tenté de vérifier la signature de Revolut. Réponse :
      « STRIPE_WEBHOOK_SECRET absente ». Deux reçues, ZÉRO acceptée, et la
      configuration Revolut était pourtant parfaite.
 
      Le défaut est SYMÉTRIQUE, et le second sens coûte de l'argent réel : après
-     la bascule, une re-livraison Stripe tardive — son backoff s'étale sur
+     la bascule, une re-livraison l ancien fournisseur tardive — son backoff s'étale sur
      ~3 jours — serait refusée par Revolut, et l'encaissement correspondant
      perdu sans que personne ne le voie.
 
@@ -85,7 +85,7 @@ async function handler(req, res) {
     console.error('[webhook] Aucun en-tête de signature reconnu — notification ignorée.');
     await noterSante('inconnu', {
       refus: true,
-      motif: 'Aucun en-tête de signature reconnu (ni Revolut, ni Stripe).'
+      motif: 'Aucun en-tête de signature reconnu.'
     });
     return res.status(400).json({ ok: false, error: 'Unsigned webhook' });
   }
@@ -103,7 +103,7 @@ async function handler(req, res) {
     // ⛔ `readRawBody` est ce qui rend cette vérification possible : le
     // bodyParser est désactivé (voir `config` en bas de fichier). Un corps
     // parsé puis re-sérialisé produit des octets DIFFÉRENTS — prouvé sur six
-    // formes de JSON — et invaliderait la signature chez Stripe comme chez
+    // formes de JSON — et invaliderait la signature chez l ancien fournisseur comme chez
     // Revolut. Cette ligne ne se « simplifie » jamais.
     var rawBody = await readRawBody(req);
     var verif = paiement.verifierSignature(rawBody, req.headers || {});
@@ -125,7 +125,7 @@ async function handler(req, res) {
     await noterSante(paiement.nom(), { refus: false, genre: verif.genre || 'inconnu' });
     var event = verif.evenement;
     /* Clé d'idempotence FOURNIE par le fournisseur, plus lue en dur.
-       Stripe donne un identifiant d'événement unique ; Revolut n'en fournit
+       l ancien fournisseur donne un identifiant d'événement unique ; Revolut n'en fournit
        AUCUN et devra la dériver de `event + order_id`. En passant par le
        contrat, le jour de la bascule ne demande pas de retoucher ce fichier. */
     var cleEvenement = verif.cle;
@@ -134,9 +134,9 @@ async function handler(req, res) {
     // États : 'processing' (en vol) → 'done' (succès) / 'failed' (RETRYABLE).
     // AVANT : le claim était posé puis jamais relâché — si un effet critique
     // (journal payments/, mise à jour de commande) échouait, on répondait 200 et
-    // la re-livraison Stripe tombait sur « duplicate » → l'événement était
+    // la re-livraison l ancien fournisseur tombait sur « duplicate » → l'événement était
     // PERDU pour toujours (commande bloquée 'pending', pas d'email, pas de
-    // trace). Désormais : échec → claim 'failed' + 500 → Stripe RE-LIVRE (sa
+    // trace). Désormais : échec → claim 'failed' + 500 → l ancien fournisseur RE-LIVRE (sa
     // re-livraison est notre mécanisme de retry, backoff ~3 jours) et la
     // reprise est autorisée. Les effets sont idempotents (set merge, update,
     // n° de facture réutilisé, emails dédupliqués via emailsSent).
@@ -149,7 +149,7 @@ async function handler(req, res) {
       try {
         /* create() est atomique : échoue si le doc existe déjà.
            ⛔ `verif.type` et NON `event.type` : le nom de l'événement est un
-           champ du CONTRAT, pas de la charge utile. Chez Stripe les deux
+           champ du CONTRAT, pas de la charge utile. Chez l ancien fournisseur les deux
            coïncident ; chez Revolut la charge utile est `{ event, order_id }`
            et `event.type` vaut `undefined` — que le SDK Admin Firestore REFUSE
            d'écrire. L'exception tombait alors dans le `catch (dupErr)`
@@ -192,7 +192,7 @@ async function handler(req, res) {
     try {
       /* ⚠️ AIGUILLAGE PAR GENRE, plus par nom d'événement (31/07/2026).
          Les noms appartiennent au fournisseur (`payment_intent.succeeded` chez
-         Stripe, `ORDER_COMPLETED` chez Revolut) ; le GENRE est commun, et c'est
+         l ancien fournisseur, `ORDER_COMPLETED` chez Revolut) ; le GENRE est commun, et c'est
          lui qui porte la décision.
 
          ⛔⛔ La distinction qui coûte de l'argent : 'tentative_ratee' n'est PAS
@@ -200,7 +200,7 @@ async function handler(req, res) {
          tentative — le client peut réessayer sur le MÊME ordre. Enterrer la
          commande à ce moment-là tuerait une vente en train d'être sauvée. */
       /* ⚠️ DEUX FORMES DE CHARGE UTILE, UNE SEULE LOGIQUE MÉTIER.
-         Stripe livre l'objet complet dans l'événement (`event.data.object`).
+         l ancien fournisseur livre l'objet complet dans l'événement (`event.data.object`).
          Revolut n'envoie QUE `{ event, order_id }` : il faut RELIRE la commande
          chez lui, puis la présenter sous la même forme au handler.
          `objetPaiement` fait exactement cette bascule, et rien d'autre : la
@@ -325,7 +325,7 @@ function claimDecision(existing, nowMs) {
   return 'retry';
 }
 
-// Disable Vercel's automatic body parsing so we receive the raw bytes Stripe
+// Disable Vercel's automatic body parsing so we receive the raw bytes l ancien fournisseur
 // signed (required for constructEvent). CommonJS equivalent of
 // `export const config = { api: { bodyParser: false } }`.
 module.exports = handler;
@@ -348,12 +348,12 @@ module.exports._noterSante = noterSante;
 // ════════════════════════════════════════════════════════════════
 
 /* ── LA BASCULE ENTRE LES DEUX FORMES DE CHARGE UTILE ────────────────────────
-   Stripe met tout l'objet dans l'événement. Revolut n'envoie que
+   l ancien fournisseur met tout l'objet dans l'événement. Revolut n'envoie que
    `{ event, order_id }` — il faut aller relire la commande.
 
    Cette fonction rend TOUJOURS un objet de forme « PaymentIntent », parce que
    c'est ce que les handlers savent lire. Ce n'est pas de la nostalgie de
-   Stripe : c'est le refus de dupliquer la facture, le journal, le contrôle
+   l ancien fournisseur : c'est le refus de dupliquer la facture, le journal, le contrôle
    fiscal et les e-mails en deux versions qui divergeraient au premier
    correctif appliqué à une seule.
 
@@ -362,14 +362,14 @@ module.exports._noterSante = noterSante;
    fonds peuvent repartir chez le client. Mais une TENTATIVE RATÉE laisse
    l'ordre en `pending` (le client peut réessayer dessus) : exiger l'état acquis
    là aussi renverrait `null` et l'échec ne serait JAMAIS journalisé chez
-   Revolut, alors qu'il l'est chez Stripe. Deux fournisseurs, deux niveaux de
+   Revolut, alors qu'il l'est chez l ancien fournisseur. Deux fournisseurs, deux niveaux de
    traçabilité — exactement ce que la couture existe pour empêcher.
 
    ⚠️ La commission n'est demandée que sur le chemin encaissé : c'est un
    aller-retour réseau de plus, et une tentative ratée n'en a aucune. La lecture
    normalisée est attachée sous `_dejaLu` pour que le handler ne relise pas. */
 async function objetPaiement(paiement, event, verif) {
-  // Stripe : l'objet est déjà là, rien à faire.
+  // l ancien fournisseur : l'objet est déjà là, rien à faire.
   if (event && event.data && event.data.object) return event.data.object;
 
   var idOrdre = event && event.order_id;
@@ -433,7 +433,7 @@ async function markEmailsSent(ctx) {
   try { await ctx.claimRef.set({ emailsSent: true }, { merge: true }); } catch (_) {}
 }
 
-// ── Stripe Checkout (redirect) : checkout.session.completed ──
+// ── la page de paiement hebergee (redirect) : checkout.session.completed ──
 async function handleSessionCompleted(paiement, fb, sessionLite, ctx) {
   console.log('[webhook] Payment confirmed (session):', sessionLite.id, 'Amount:', sessionLite.amount_total);
 
@@ -478,11 +478,11 @@ async function handleSessionCompleted(paiement, fb, sessionLite, ctx) {
   // Le champ stripeSessionId est écrit par le client sur /merci (étape A5).
   await updateOrderWhere(fb, sessionUid, 'stripeSessionId', fullSession.id, {
     status: 'paid',
-    stripePaymentIntent: typeof fullSession.payment_intent === 'string' ? fullSession.payment_intent : null
+    paiementFournisseur: typeof fullSession.payment_intent === 'string' ? fullSession.payment_intent : null
   });
 
   // Emails de confirmation — RETRYABLE : un échec Resend fait échouer le hook
-  // (claim 'failed' + 500) → Stripe re-livre et l'email finit par partir.
+  // (claim 'failed' + 500) → l ancien fournisseur re-livre et l'email finit par partir.
   // Dédup : une reprise dont les emails sont déjà partis (emailsSent sur le
   // claim) ne renvoie rien. Les effets critiques ci-dessus sont idempotents.
   if (!ctx || !ctx.emailsSent) {
@@ -491,7 +491,7 @@ async function handleSessionCompleted(paiement, fb, sessionLite, ctx) {
   }
 }
 
-// ── Stripe Elements : payment_intent.succeeded ──
+// ── le champ carte : payment_intent.succeeded ──
 async function handleIntentSucceeded(paiement, fb, pi, ctx) {
   // Ne traiter QUE les PaymentIntents créés par create-payment-intent.js.
   // Le PI créé en interne par une Checkout Session ne porte pas notre metadata
@@ -584,7 +584,7 @@ async function handleIntentSucceeded(paiement, fb, pi, ctx) {
     postalCode: tax.postalCode,
     taxMismatch: tax.mismatch,
     linesRebuilt: rebuilt.ok,
-    // Compta 100 % réel : coût d'achat snapshoté + commission Stripe réelle.
+    // Compta 100 % réel : coût d'achat snapshoté + commission l ancien fournisseur réelle.
     cogsHtCents: (rebuilt.cogsHtCents != null ? rebuilt.cogsHtCents : null),
     stripeFeeCents: stripeFeeCents,
     // Facture : détail des lignes + numéro + date, pour générer la facture conforme.
@@ -635,7 +635,7 @@ async function handleIntentSucceeded(paiement, fb, pi, ctx) {
   }
 }
 
-// ── Stripe Elements : payment_intent.payment_failed ──
+// ── le champ carte : payment_intent.payment_failed ──
 async function handleIntentFailed(fb, pi) {
   if (!pi.metadata || pi.metadata.source !== 'pirates-tools') return;
   // Même exclusion qu'au succès : la commande de diagnostic ne pollue pas le
@@ -665,7 +665,7 @@ async function handleIntentFailed(fb, pi) {
 // contredit la déclaration (une adresse absente/hors-DOM donne expected=null :
 // signalé comme « invérifiable », pas comme fraude).
 function taxCheck(declaredTerritory, address) {
-  var pc = postal.postalFromStripeAddress(address);
+  var pc = postal.postalDepuisAdresseFournisseur(address);
   var expected = pc ? postal.territoryFromPostal(pc) : null;
   return {
     postalCode: pc,
@@ -675,16 +675,16 @@ function taxCheck(declaredTerritory, address) {
 }
 
 // Numéro de facture séquentiel, sans trou (compteur transactionnel Firestore).
-// Format Fyyyy-NNNN. IDEMPOTENT par paiement : si payments/{stripeId} porte
+// Format Fyyyy-NNNN. IDEMPOTENT par paiement : si payments/{idFournisseur} porte
 // déjà un invoiceNumber (reprise après échec partiel), on le RÉUTILISE au lieu
 // d'en consommer un nouveau (sinon chaque re-livraison créait un trou dans la
 // séquence = non-conformité facturation). Échec du compteur = CRITIQUE (throw)
-// → claim 'failed' + 500 → Stripe re-livre, le numéro finit par être attribué.
-async function assignInvoiceNumber(fb, dateMs, stripeId) {
+// → claim 'failed' + 500 → l ancien fournisseur re-livre, le numéro finit par être attribué.
+async function assignInvoiceNumber(fb, dateMs, idFournisseur) {
   if (!fb.db) return null;
-  if (stripeId) {
+  if (idFournisseur) {
     try {
-      var prevPay = await fb.db.collection('payments').doc(String(stripeId)).get();
+      var prevPay = await fb.db.collection('payments').doc(String(idFournisseur)).get();
       var prevNum = prevPay.exists && (prevPay.data() || {}).invoiceNumber;
       if (prevNum) return prevNum;
     } catch (_) { /* lecture best-effort, la transaction reste la référence */ }
@@ -708,23 +708,23 @@ function formatAddr(a) {
     .filter(Boolean).join(', ');
 }
 
-// A2 — journal Firestore payments/{stripeId} = LA trace comptable autoritaire
+// A2 — journal Firestore payments/{idFournisseur} = LA trace comptable autoritaire
 // (P&L, factures, fidélité s'appuient dessus). CRITIQUE : un échec JETTE →
-// claim 'failed' + 500 → Stripe re-livre (set merge = idempotent en reprise).
+// claim 'failed' + 500 → l ancien fournisseur re-livre (set merge = idempotent en reprise).
 // L'ancien comportement « best-effort » pouvait perdre la trace pour toujours.
-async function logPayment(fb, stripeId, data) {
+async function logPayment(fb, idFournisseur, data) {
   if (!fb.db) return;
-  await fb.db.collection('payments').doc(String(stripeId)).set(
+  await fb.db.collection('payments').doc(String(idFournisseur)).set(
     Object.assign({}, data, {
       recordedAt: fb.admin.firestore.FieldValue.serverTimestamp()
     }),
     { merge: true }
   );
-  console.log('[webhook] Payment journaled:', stripeId, data.status, data.taxMismatch ? '⚠ TAX MISMATCH' : '');
+  console.log('[webhook] Payment journaled:', idFournisseur, data.status, data.taxMismatch ? '⚠ TAX MISMATCH' : '');
 }
 
 // Met à jour la commande client correspondante.
-// Chemin PRIVILÉGIÉ : users/{uid}/orders (uid depuis la metadata Stripe) —
+// Chemin PRIVILÉGIÉ : users/{uid}/orders (uid depuis la metadata l ancien fournisseur) —
 // requête de collection simple couverte par les index AUTOMATIQUES Firestore,
 // aucun index à créer. REPLI (uid absent — anciens paiements) : collectionGroup,
 // qui exige un index collection-group sur le champ interrogé (défini dans
@@ -872,7 +872,7 @@ function modelFromSession(session, tax) {
 }
 
 /* ⚠️ Signature changee le 31/07/2026 (couture) : ce modele recevait l'objet
-   `charge` de Stripe UNIQUEMENT pour en extraire le nom du porteur. La couche
+   `charge` de l ancien fournisseur UNIQUEMENT pour en extraire le nom du porteur. La couche
    paiement le fournit deja, normalise — on passe donc le nom, pas un objet
    propre a un fournisseur. */
 function modelFromIntent(pi, nomClient, rebuilt, tax, customerEmail, adresse) {

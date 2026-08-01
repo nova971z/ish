@@ -294,7 +294,7 @@ module.exports = async function handler(req, res) {
        ⛔ IL MARCHE POUR LES DEUX FOURNISSEURS. Il passe par la couture, jamais
        par un SDK : le jour de la bascule, il continue de tourner sans qu'on y
        touche. C'est le seul filet qui restera si la politique de re-livraison
-       de Revolut est plus courte que celle de Stripe — elle n'est pas
+       de Revolut est plus courte que celle de l ancien fournisseur — elle n'est pas
        documentée, et on ne parie pas là-dessus.
 
        ⛔ AUCUNE DONNÉE PERSONNELLE NE SORT (règle J3, audit p6-rgpd) : la
@@ -334,7 +334,7 @@ module.exports = async function handler(req, res) {
 
         const r = recon.comparer(ordres, idsAboutis, {});
         /* ⛔ EST-CE DE L'ARGENT ? La réponse change la NATURE du message, pas
-           sa véracité. Deux paiements Stripe en mode test ont été signalés
+           sa véracité. Deux paiements l ancien fournisseur en mode test ont été signalés
            comme « 317,79 € encaissés, un client attend » le 01/08/2026 : le
            filet disait vrai (absents du journal) et mentait sur la gravité.
            `null` = indéterminable → l'écran doit se comporter comme si c'était
@@ -622,7 +622,7 @@ module.exports = async function handler(req, res) {
       }
 
       // ── Synthèse comptable (compte de résultat) ────────────────
-      // Revenus RÉELS lus du journal `payments` (Stripe) ; structure de résultat
+      // Revenus RÉELS lus du journal `payments` (l ancien fournisseur) ; structure de résultat
       // ESTIMÉE par le modèle de marge (à valider par l'expert-comptable).
       if (type === 'accounting') {
         const accounting = require('./_lib/accounting');
@@ -1340,7 +1340,7 @@ module.exports = async function handler(req, res) {
      collections restent séparées pour que la confusion soit impossible
      (démonstration chiffrée dans _lib/accounting.js et check-accounting.js).
 
-     Le site ne rembourse RIEN tout seul : l'user rembourse depuis Stripe, puis
+     Le site ne rembourse RIEN tout seul : l'user rembourse depuis l ancien fournisseur, puis
      saisit ici ce qu'il a réellement constaté. Aucun champ n'est deviné. */
   if (req.method === 'POST' && ((req.query && req.query.type) === 'refund')) {
     try {
@@ -1355,14 +1355,14 @@ module.exports = async function handler(req, res) {
         // Coût d'achat annulé : 0 si l'outil a DÉJÀ été commandé au
         // fournisseur — il part en stock, la dépense reste bien réelle.
         cogsAnnuleHt: Number(b.cogsAnnuleHt) > 0 ? pwRound2(Number(b.cogsAnnuleHt)) : 0,
-        // Commission Stripe réellement restituée, LUE sur le tableau de bord.
+        // Commission l ancien fournisseur réellement restituée, LUE sur le tableau de bord.
         // 0 par défaut = l'hypothèse la plus défavorable ; on ne suppose rien.
         commissionRendue: Number(b.commissionRendue != null ? b.commissionRendue : b.stripeFeeRendu) > 0 ? pwRound2(Number(b.commissionRendue != null ? b.commissionRendue : b.stripeFeeRendu)) : 0,
         territory: terr,
         // Référence de l'AVOIR (facture rectificative). Sans elle, la TVA
         // collectée reste due : la synthèse refuse de la retrancher.
         avoirRef: String(b.avoirRef || '').slice(0, 60),
-        // Lien vers la vente : un identifiant Stripe/commande, PAS un nom de
+        // Lien vers la vente : un identifiant l ancien fournisseur/commande, PAS un nom de
         // client. Minimisation RGPD (J3) — ce document n'a aucun besoin
         // d'identifier une personne pour faire de la comptabilité juste.
         paymentId: String(b.paymentId || '').slice(0, 120),

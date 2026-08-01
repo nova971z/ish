@@ -35,7 +35,7 @@ module.exports = function handler(req, res) {
     version: 'v1',
     timestamp: new Date().toISOString(),
     env: {
-      // Stripe
+      // l ancien fournisseur
       revolut: !!process.env.REVOLUT_SECRET_KEY,
       webhookSecret: !!process.env.REVOLUT_WEBHOOK_SECRET,
       // Firebase

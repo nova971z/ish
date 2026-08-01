@@ -16,7 +16,7 @@
 // ARGENT (décision user 26/07) : le client paie TOUT en une fois (produits +
 // frais de livraison). Les frais de livraison sont GELÉS (escrow:'gele') sur
 // notre solde jusqu'à la confirmation de réception par le client — puis
-// reversés au livreur (Stripe Connect si branché, sinon virement manuel
+// reversés au livreur (virement direct si branché, sinon virement manuel
 // signalé par email à l'owner). Zéro bénéfice plateforme sur la course.
 
 'use strict';

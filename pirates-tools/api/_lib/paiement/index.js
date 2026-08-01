@@ -2,12 +2,12 @@
    ─────────────────────────────────────────────────────────────────────────
    POURQUOI CETTE COUCHE EXISTE
 
-   Le 31/07/2026, l'user décide de quitter Stripe pour Revolut : les fonds
+   Le 31/07/2026, l'user décide de quitter l ancien fournisseur pour Revolut : les fonds
    arrivent sur le compte Merchant sous 24 h au lieu de 7 jours ouvrés au
    premier virement, donc plus besoin d'avancer la trésorerie de chaque
    commande. (Voir docs/PLAN-REVOLUT.md.)
 
-   Avant cette couche, `stripe` était appelé DIRECTEMENT depuis 5 fichiers, à
+   Avant cette couche, `l ancien fournisseur` était appelé DIRECTEMENT depuis 5 fichiers, à
    10 endroits. Basculer aurait voulu dire réécrire les 10 en même temps, sans
    filet, sur le chemin de l'argent — et sans aucun moyen de revenir en arrière
    autrement qu'en redéployant du code de paiement dans l'urgence.
@@ -24,11 +24,11 @@
    défaut : elle devient `inconnu`, se journalise, et ne déclenche rien.
 
      'en_attente' · le client n'a pas (encore) payé
-     'autorise'   · ⛔ RÉVERSIBLE. Stripe : requires_capture. Revolut :
+     'autorise'   · ⛔ RÉVERSIBLE. l ancien fournisseur : requires_capture. Revolut :
                     `authorised` — la doc dit que les fonds RETOURNENT au client
                     si l'ordre n'est pas capturé sous 7 jours. On n'expédie
                     RIEN sur cet état.
-     'paye'       · ✅ l'argent est acquis. Stripe : succeeded. Revolut :
+     'paye'       · ✅ l'argent est acquis. l ancien fournisseur : succeeded. Revolut :
                     order `completed` (le seul état d'où un remboursement est
                     possible — donc le seul qui prouve l'encaissement).
      'echoue'     · refus définitif
@@ -58,7 +58,7 @@ var ETATS = ['en_attente', 'autorise', 'paye', 'echoue', 'annule', 'rembourse', 
 var ETAT_ACQUIS = 'paye';
 
 /* ── LE GENRE D'UN ÉVÉNEMENT DE WEBHOOK ───────────────────────────────────
-   Le webhook aiguillait sur les noms d'événements de Stripe
+   Le webhook aiguillait sur les noms d'événements de l ancien fournisseur
    (`payment_intent.succeeded`…). Revolut en a d'autres (`ORDER_COMPLETED`…), et
    surtout une SÉMANTIQUE différente. On aiguille donc sur un GENRE commun.
 
@@ -95,7 +95,7 @@ var OPERATIONS = [
   /* () → true (test) | false (argent réel) | null (indéterminable)
      ⚠️ Entré au contrat le 01/08/2026, après un faux positif RÉEL : la
      réconciliation a crié « 317,79 € encaissés, un client attend » sur deux
-     paiements Stripe en mode TEST. Le filet disait vrai — ils ne sont pas dans
+     paiements l ancien fournisseur en mode TEST. Le filet disait vrai — ils ne sont pas dans
      le journal — et mentait sur la GRAVITÉ : ce n'est pas de l'argent, et
      personne n'attend. Une alerte qui crie sur de la fausse monnaie apprend à
      ne plus être regardée, donc à être manquée le jour où elle est vraie.
@@ -115,7 +115,7 @@ var OPERATIONS = [
 ];
 
 /* ⛔ UN SEUL FOURNISSEUR ENCAISSE : REVOLUT (01/08/2026, demande de l'user —
-   « toute la partie Stripe ne doit plus être présente »).
+   « toute la partie l ancien fournisseur ne doit plus être présente »).
 
    `PAYMENT_PROVIDER` n'est plus lu : quelle que soit sa valeur, y compris
    absente ou mal orthographiée, le site encaisse par Revolut. C'est le
@@ -128,7 +128,7 @@ function nomFournisseur() {
 
 /* Retourne le module du fournisseur actif.
    ⚠️ `require` paresseux : charger le module Revolut alors qu'on tourne sur
-   Stripe (ou l'inverse) coûte du démarrage à froid sur chaque appel de
+   l ancien fournisseur (ou l'inverse) coûte du démarrage à froid sur chaque appel de
    fonction serverless, pour rien. */
 function fournisseur() {
   return require('./revolut');
@@ -170,12 +170,12 @@ function paiementVide() {
 /* ⛔⛔ QUI A ENVOYÉ CETTE NOTIFICATION ? — trouvé le 01/08/2026 sur un test réel.
    ─────────────────────────────────────────────────────────────────────────
    Le webhook faisait vérifier la signature par le fournisseur ACTIF. Revolut a
-   envoyé ses notifications, Stripe a tenté de les vérifier, et a répondu
+   envoyé ses notifications, l ancien fournisseur a tenté de les vérifier, et a répondu
    « STRIPE_WEBHOOK_SECRET absente ». Deux notifications reçues, zéro acceptée.
 
    Le défaut n'est pas la configuration : c'est de demander à A de reconnaître
    la signature de B. Et il est SYMÉTRIQUE — après la bascule, une re-livraison
-   Stripe tardive (son backoff s'étale sur ~3 jours) serait refusée par Revolut,
+   l ancien fournisseur tardive (son backoff s'étale sur ~3 jours) serait refusée par Revolut,
    et l'encaissement correspondant perdu.
 
    On identifie donc l'ÉMETTEUR par son en-tête, et on lui applique SA
@@ -191,7 +191,7 @@ function fournisseurParEntetes(entetes) {
   if (h['revolut-signature'] || h['Revolut-Signature']) return require('./revolut');
   /* ⛔ PLUS AUCUN AUTRE FOURNISSEUR. Le vérificateur de signature de l'ancien
      encaisseur a été SUPPRIMÉ le 01/08/2026 sur décision explicite de l'user,
-     répétée : « quand je dis éradiquer tout ce qu'il y a sur Stripe, c'est
+     répétée : « quand je dis éradiquer tout ce qu'il y a sur l ancien fournisseur, c'est
      TOUT ». J'avais soulevé le risque — une re-livraison tardive d'un paiement
      déjà encaissé n'est plus reconnue — et il a tranché.
      Conséquence assumée, écrite ici pour qu'elle ne se redécouvre pas : une

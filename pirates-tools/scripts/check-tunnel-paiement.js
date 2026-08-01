@@ -29,8 +29,7 @@
    quinze cases et rester pénible à remplir. Elle empêche seulement de livrer
    un tunnel INCOMPLET — c'est un plancher, pas un plafond.
 
-   ⚠️ Elle ne peut pas consulter les sites de référence : `stripe.com`,
-   `legifrance.gouv.fr` et `economie.gouv.fr` répondent 403 depuis
+   ⚠️ Elle ne peut pas consulter les sites de référence : `legifrance.gouv.fr` et `economie.gouv.fr` répondent 403 depuis
    l'environnement de travail. Les exigences ci-dessous viennent donc du
    PROJET (docs/JURIDIQUE.md, harnais existants, décisions écrites) et des
    types du paquet officiel `@revolut/checkout`, pas d'une page lue en ligne.
@@ -172,8 +171,8 @@ module.exports = function () {
     + 'être nommé (J3).');
 
   /* ⛔ AUCUNE MARQUE AVANT QUE LE SERVEUR AIT PARLÉ. `_paiementFournisseur`
-     valait `'stripe'` au départ : la fenêtre s'ouvrait donc en annonçant
-     « Paiement sécurisé par Stripe » pendant que Revolut encaissait. Vu en bac
+     valait `'l ancien fournisseur'` au départ : la fenêtre s'ouvrait donc en annonçant
+     « Paiement sécurisé par l ancien fournisseur » pendant que Revolut encaissait. Vu en bac
      à sable le 01/08/2026, APRÈS avoir cru n'avoir corrigé qu'un texte
      statique — le mensonge avait deux sources. */
   ok(/var _paiementFournisseur\s*=\s*''/.test(app),
@@ -185,9 +184,9 @@ module.exports = function () {
     + 'toute réponse serveur : c\'est une marque potentiellement fausse montrée au client au '
     + 'moment précis où il décide de donner son numéro de carte.');
 
-  /* ⛔ LE SDK STRIPE NE COMMANDE PLUS TOUT LE TUNNEL. `initStripePayment`
-     commençait par `if (!stripe) { … return; }` AVANT l'appel serveur : un
-     client dont le navigateur ne charge pas `js.stripe.com` (bloqueur, proxy
+  /* ⛔ LE SDK L ANCIEN FOURNISSEUR NE COMMANDE PLUS TOUT LE TUNNEL. `initStripePayment`
+     commençait par `if (!l ancien fournisseur) { … return; }` AVANT l'appel serveur : un
+     client dont le navigateur ne charge pas `le SDK de l ancien fournisseur` (bloqueur, proxy
      d'entreprise) se voyait refuser la carte alors que REVOLUT encaisse. Une
      vente perdue pour l'absence d'un fournisseur qui n'encaisse plus. */
   /* ⚠️ DEUX PIÈGES ÉVITÉS ICI, tous deux déjà payés ailleurs :
@@ -197,7 +196,7 @@ module.exports = function () {
        vérifié). D'où le PRÉALABLE ci-dessous : si la fonction est introuvable,
        on le dit, on ne verdit pas à vide.
      · on lit le code SANS ses commentaires : la note explicative posée dans
-       `app.js` cite `if (!stripe)` en toutes lettres et satisfaisait la regex
+       `app.js` cite `if (!l ancien fournisseur)` en toutes lettres et satisfaisait la regex
        (E-218, chercher une forme au lieu d'une règle). */
   var appSansCom = app.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/(^|[^:])\/\/[^\n]*/g, '$1');
   var iInit = appSansCom.indexOf('function monterChampCarte(');

@@ -103,7 +103,7 @@ module.exports = function () {
   near(sansR.ca_ttc, 108.50, 0.01, 'témoin : CA TTC sans remboursement');
   near(sansR.tva_collectee, 8.50, 0.02, 'témoin : TVA collectée 8,5 % (971)');
 
-  // 1) Remboursement TOTAL, avoir émis, outil jamais commandé, Stripe ne rend rien.
+  // 1) Remboursement TOTAL, avoir émis, outil jamais commandé, l ancien fournisseur ne rend rien.
   var rTotal = [{ amountTtc: 108.50, cogsAnnuleHt: 60, stripeFeeRendu: 0,
     territory: '971', avoirRef: 'AV-2026-001', dateMs: Date.UTC(2026, 2, 12) }];
   var s1 = acc.synthesize([base1], [], { refTerritory: '971' }, rTotal);

@@ -7,7 +7,7 @@
 // Pourquoi serveur : l'état fidélité client vit en localStorage — falsifiable
 // en 10 s via la console. La dépense prise en compte pour la remise est donc
 // recalculée depuis le journal Firestore `payments/` (écrit UNIQUEMENT par le
-// webhook Stripe via l'Admin SDK ; les règles Firestore n'ouvrent pas cette
+// webhook l ancien fournisseur via l'Admin SDK ; les règles Firestore n'ouvrent pas cette
 // collection aux clients). Un client ne peut augmenter son palier qu'en payant
 // réellement.
 //

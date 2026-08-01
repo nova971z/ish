@@ -1,6 +1,6 @@
-// scripts/check-webhook-claim.js — Idempotence du webhook Stripe (chemin de l'argent).
+// scripts/check-webhook-claim.js — Idempotence du webhook l ancien fournisseur (chemin de l'argent).
 // Vérifie la machine à états stripe_events (claimDecision, PURE), le caractère
-// CRITIQUE du journal payments/ (throw → 500 → re-livraison Stripe) et
+// CRITIQUE du journal payments/ (throw → 500 → re-livraison l ancien fournisseur) et
 // l'idempotence du numéro de facture en reprise (réutilisation, pas de trou).
 'use strict';
 var I = require('../api/webhook')._internals;
@@ -12,7 +12,7 @@ module.exports = async function () {
 
   // 1) Matrice claimDecision.
   ok(I.claimDecision({ status: 'done' }, NOW) === 'skip', 'done → skip (jamais retraité)');
-  ok(I.claimDecision({ status: 'failed' }, NOW) === 'retry', 'failed → retry (la re-livraison Stripe est le mécanisme de retry)');
+  ok(I.claimDecision({ status: 'failed' }, NOW) === 'retry', 'failed → retry (la re-livraison du fournisseur est le mécanisme de retry)');
   ok(I.claimDecision({ status: 'processing', receivedAtMs: NOW - 1000 }, NOW) === 'skip', 'processing frais → skip (livraison concurrente)');
   ok(I.claimDecision({ status: 'processing', receivedAtMs: NOW - STALE - 1 }, NOW) === 'retry', 'processing figé > CLAIM_STALE_MS → retry (run tué)');
   ok(I.claimDecision({ status: 'processing' }, NOW) === 'retry', 'processing sans horodatage → retry (âge inconnu = Infinity)');

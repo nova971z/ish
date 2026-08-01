@@ -3,7 +3,7 @@
 // Contrôle d'intégrité A1 : le client déclare son territoire (body.territory)
 // pour l'affichage ET le calcul du montant débité. Ce module permet au webhook
 // de confronter ce territoire déclaré à l'adresse réellement collectée par
-// Stripe (livraison Checkout / facturation carte) et de signaler toute
+// l ancien fournisseur (livraison Checkout / facturation carte) et de signaler toute
 // divergence (ex. déclaré 976 Mayotte 0 % taxe, adresse 97110 Guadeloupe).
 //
 // Codes postaux DOM : 971xx Guadeloupe (inclut 97133 St-Barthélemy et
@@ -29,9 +29,9 @@ function territoryFromPostal(postalCode) {
   return PREFIX_TO_TERRITORY[digits.slice(0, 3)] || null;
 }
 
-// Extrait le meilleur code postal disponible d'un objet adresse Stripe
+// Extrait le meilleur code postal disponible d'un objet adresse l ancien fournisseur
 // ({ postal_code, country, … }) — null si absent.
-function postalFromStripeAddress(address) {
+function postalDepuisAdresseFournisseur(address) {
   if (!address || typeof address !== 'object') return null;
   var pc = address.postal_code;
   return (typeof pc === 'string' && pc.trim()) ? pc.trim() : null;
@@ -39,5 +39,5 @@ function postalFromStripeAddress(address) {
 
 module.exports = {
   territoryFromPostal: territoryFromPostal,
-  postalFromStripeAddress: postalFromStripeAddress
+  postalDepuisAdresseFournisseur: postalDepuisAdresseFournisseur
 };

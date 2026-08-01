@@ -59,7 +59,7 @@ const INVENTAIRE = [
   { coll: 'users',                quoi: 'profil client (nom, email, téléphone, adresse)', sort: 'supprimé' },
   { coll: 'orders',               quoi: 'commandes du client',                            sort: 'supprimé' },
   { coll: 'couriers_public',      quoi: 'fiche PUBLIQUE (nom, photo, commune, avis)',     sort: 'supprimé' },
-  { coll: 'couriers',             quoi: 'dossier livreur (email, Stripe Connect)',        sort: 'supprimé' },
+  { coll: 'couriers',             quoi: 'dossier livreur (email, coordonnées bancaires)',        sort: 'supprimé' },
   { coll: 'courier_applications', quoi: 'pièces justificatives (identité, SIRET…)',       sort: 'supprimé' },
   { coll: 'courses',              quoi: 'adresse de chantier, GPS, emails, code',         sort: 'supprimé/anonymisé' },
   { coll: 'messages',             quoi: 'conversations client ↔ livreur',                 sort: 'supprimé' },
@@ -118,7 +118,7 @@ LOG('  P6.3 — MINIMISATION : la fiche PUBLIQUE ne doit porter aucune identité
 LOG('━'.repeat(74));
 const saveBloc = CONTACT.slice(CONTACT.indexOf("body.type === 'courier-profile-save'"),
   CONTACT.indexOf("body.type === 'courier-available'"));
-const INTERDITS = ['email', 'kyc', 'siret', 'iban', 'stripeAccountId', 'phone', 'birth', 'piece'];
+const INTERDITS = ['email', 'kyc', 'siret', 'iban', 'compteFournisseurId', 'phone', 'birth', 'piece'];
 const fuites = INTERDITS.filter((f) => new RegExp('\\b' + f + '\\b', 'i').test(
   saveBloc.slice(saveBloc.indexOf('const pub ='), saveBloc.indexOf('mirrorCourierPublic'))));
 LOG('  champs interdits recherchés : ' + INTERDITS.join(', '));

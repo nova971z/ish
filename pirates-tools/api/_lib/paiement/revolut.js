@@ -65,7 +65,7 @@ function modeProd() {
 /* Contrat commun — voir OPERATIONS dans index.js.
    ⚠️ Chez Revolut la réponse est CERTAINE, jamais `null` : le bac à sable est
    le défaut, et il faut écrire `prod` en toutes lettres pour en sortir. Il n'y
-   a donc pas d'état « indéterminable » à gérer, contrairement à Stripe où le
+   a donc pas d'état « indéterminable » à gérer, contrairement à l ancien fournisseur où le
    verdict se lit sur le préfixe d'une clé qui peut être mal collée. */
 function modeTest() { return !modeProd(); }
 
@@ -230,9 +230,9 @@ async function creerPaiement(params) {
   var o = await appel('POST', '/orders', corps);
   return {
     id: o.id,
-    // Même rôle que le `client_secret` de Stripe : ce qui arme le widget.
+    // Même rôle que le `client_secret` de l ancien fournisseur : ce qui arme le widget.
     jetonClient: o.token,
-    // Revolut fournit EN PLUS la page hébergée, dès la création. Stripe
+    // Revolut fournit EN PLUS la page hébergée, dès la création. l ancien fournisseur
     // exigeait un objet Session distinct — un aller-retour de moins.
     urlHebergee: o.checkout_url || null
   };

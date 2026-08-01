@@ -28,7 +28,7 @@
        node outils/vue.mjs "#/laroute" [--tel] [--connecte]
 
    ⚠️ Elle ne peut pas consulter de référence extérieure : les sites des
-   grandes institutions (stripe.com, economie.gouv.fr, legifrance.gouv.fr)
+   grandes institutions (economie.gouv.fr, legifrance.gouv.fr)
    répondent 403 depuis l'environnement de travail. Les règles ci-dessous
    viennent donc du DÉPÔT et de pannes vécues, jamais d'une page lue en ligne.
    Ce qui n'a pas pu être vérifié à la source est dit comme tel.

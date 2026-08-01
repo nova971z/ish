@@ -1,10 +1,10 @@
-// api/_lib/stripe-meta.js — Lignes de commande {key, qty} dans la metadata Stripe.
+// api/_lib/l ancien fournisseur-meta.js — Lignes de commande {key, qty} dans la metadata l ancien fournisseur.
 //
 // Un PaymentIntent (flux Elements) n'a pas de line_items : sans ça, le webhook
 // ne peut ni reconstruire la commande, ni envoyer un email détaillé, ni la
 // réconcilier. On sérialise donc les lignes dans la metadata à la création.
 //
-// Contraintes Stripe : ≤50 clés, clé ≤40 car., valeur ≤500 car. On sérialise
+// Contraintes l ancien fournisseur : ≤50 clés, clé ≤40 car., valeur ≤500 car. On sérialise
 // en JSON compact [{"k":"slug","q":2},…] découpé en tranches ≤450 car.
 // (items_0, items_1, …) + items_chunks (nombre de tranches). 50 lignes × slug
 // ~50 car. ≈ 3000 car. ≈ 7 tranches — loin des 50 clés.
@@ -12,7 +12,7 @@
 'use strict';
 
 var CHUNK_SIZE = 450;
-var MAX_CHUNKS = 40; // garde-fou : au-delà, metadata refusée par Stripe de toute façon
+var MAX_CHUNKS = 40; // garde-fou : au-delà, metadata refusée par l ancien fournisseur de toute façon
 
 // items : [{ key, qty }] (déjà validés par l'endpoint) → objet metadata à
 // fusionner. Retourne null si la sérialisation ne tient pas dans les limites.
@@ -33,7 +33,7 @@ function chunkItems(items) {
   return meta;
 }
 
-// metadata Stripe → [{ k, q }] ou null si absent/corrompu. Ne jette jamais :
+// metadata l ancien fournisseur → [{ k, q }] ou null si absent/corrompu. Ne jette jamais :
 // le webhook doit dégrader proprement (email sans détail de lignes) plutôt
 // qu'échouer.
 function readItems(metadata) {

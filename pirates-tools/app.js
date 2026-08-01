@@ -1276,7 +1276,45 @@
       if (p.category) catSet[p.category] = true;
       if (p.brand) brandSet[p.brand] = true;
     });
-    allCategories = Object.keys(catSet).sort();
+    /* ⛔ ORDRE MÉTIER, PAS ALPHABÉTIQUE (demande de l'user, 01/08/2026).
+       Le tri alphabétique éparpillait les familles : « Meulage, découpe et
+       polissage » tombait entre « Malaxeurs » et « Outils multifonctions »,
+       et « Perçage, vissage et boulonnage » entre « Perforateurs » et
+       « Quincaillerie ». Un client cherche par MÉTIER, pas par initiale.
+
+       Les grandes familles d'outils d'abord, dans l'ordre d'un chantier ;
+       puis les outils spécialisés ; puis ce qui se consomme et se range.
+       Une catégorie absente de cette liste passe à la fin, par ordre
+       alphabétique — elle reste donc VISIBLE, jamais perdue. */
+    var ORDRE_CATEGORIES = [
+      'Perçage, vissage et boulonnage',
+      'Meulage, découpe et polissage',
+      'Perforateurs',
+      'Scies',
+      'Tronçonnage et élagage',
+      'Rabots',
+      'Défonceuses',
+      'Lamelleuses',
+      'Outils multifonctions',
+      'Cloueurs',
+      'Riveteuses',
+      'Malaxeurs',
+      'Tarières',
+      'Aspirateurs',
+      'Souffleurs',
+      'Combos',
+      'Batteries et chargeurs',
+      'Rangements',
+      'Accessoires',
+      'Quincaillerie'
+    ];
+    allCategories = Object.keys(catSet).sort(function (a, b) {
+      var ia = ORDRE_CATEGORIES.indexOf(a), ib = ORDRE_CATEGORIES.indexOf(b);
+      if (ia === -1 && ib === -1) return a.localeCompare(b, 'fr');
+      if (ia === -1) return 1;
+      if (ib === -1) return -1;
+      return ia - ib;
+    });
     allBrands = Object.keys(brandSet).sort();
   }
 
@@ -10371,14 +10409,14 @@
   /* Fournisseur de paiement ANNONCÉ PAR LE SERVEUR pour la commande en cours.
      Jamais deviné côté client : voir le commentaire au point de branchement.
 
-     ⛔ LA VALEUR DE DÉPART EST « INCONNU », PAS « stripe ». Elle valait
-     `'stripe'`, et la fenêtre de paiement s'ouvrait donc en annonçant
-     « Paiement sécurisé par Stripe » — pendant que Revolut encaissait. Vu en
+     ⛔ LA VALEUR DE DÉPART EST « INCONNU », PAS « l ancien fournisseur ». Elle valait
+     `'l ancien fournisseur'`, et la fenêtre de paiement s'ouvrait donc en annonçant
+     « Paiement sécurisé par l ancien fournisseur » — pendant que Revolut encaissait. Vu en
      bac à sable le 01/08/2026, après avoir cru n'avoir corrigé qu'un texte
      statique dans `index.html` : le mensonge venait AUSSI d'ici.
      Les trois autres lectures (`=== 'revolut'`) s'exécutent toutes APRÈS
      l'affectation par la réponse serveur — une chaîne vide ne peut donc pas
-     détourner le chemin Stripe. */
+     détourner le chemin l ancien fournisseur. */
   var _paiementFournisseur = '';
   var _urlPaiementHebergee = null;   // repli Revolut si le widget ne charge pas
   /* Environnement ANNONCÉ par le serveur (true = bac à sable). `null` tant
@@ -10924,10 +10962,10 @@
     if (errorEl) { errorEl.hidden = true; errorEl.textContent = ''; }
     _quoteTerritory = ship.territory;
 
-    /* ⛔⛔ AUCUN TEST DU SDK STRIPE ICI (01/08/2026). Ce bloc commençait par
+    /* ⛔⛔ AUCUN TEST DU SDK L ANCIEN FOURNISSEUR ICI (01/08/2026). Ce bloc commençait par
        un test du SDK de l'autre fournisseur et abandonnait la commande AVANT
        d'appeler le serveur — or c'est le serveur qui dit qui encaisse.
-       Retiré avec Stripe le 01/08/2026 : plus rien à tester ici. */
+       Retiré avec l ancien fournisseur le 01/08/2026 : plus rien à tester ici. */
 
     // Show loading state
     if (container) {
@@ -11004,7 +11042,7 @@
         return monterChampCarteRevolut(_jetonPaiement, ship, container, errorEl);
       }
 
-      /* ⛔ Le serveur n'annonce plus que « revolut » : Stripe a été retiré du
+      /* ⛔ Le serveur n'annonce plus que « revolut » : l ancien fournisseur a été retiré du
          site le 01/08/2026. Si un jour un autre fournisseur revient, c'est ICI
          qu'il se branche — pas dans le bouton, pas dans le bandeau. */
       issueCarteRevolut(errorEl, 'Fournisseur de paiement non reconnu : ' + _paiementFournisseur);
@@ -11066,7 +11104,7 @@
   /* Repli quand le champ carte Revolut ne s'est pas monté : on envoie le client
      sur la page de paiement hébergée par Revolut plutôt que de le laisser
      devant un bouton qui ne peut rien faire.
-     ⛔ Il n'existe plus AUCUN autre chemin : Stripe a été retiré du site le
+     ⛔ Il n'existe plus AUCUN autre chemin : l ancien fournisseur a été retiré du site le
      01/08/2026. Un fournisseur inconnu ne bascule sur rien — il le dit. */
   function secoursRevolut(total, errorEl) {
     sauverCommandeEnAttente(total);
@@ -11102,13 +11140,13 @@
     var total = payTotalCents(_payItems) / 100;
     var errorEl = document.getElementById('carteErreur');
 
-    /* ⛔ STRIPE RETIRÉ DU SITE — demande de l'user, 01/08/2026 : « toute la
-       partie Stripe ne doit plus être présente sur le site, ni nulle part ».
-       Ce qui vivait ici et a disparu : le flux Stripe Elements, le repli
+    /* ⛔ L ANCIEN FOURNISSEUR RETIRÉ DU SITE — demande de l'user, 01/08/2026 : « toute la
+       partie l ancien fournisseur ne doit plus être présente sur le site, ni nulle part ».
+       Ce qui vivait ici et a disparu : le flux le champ carte, le repli
        Checkout par redirection, et les « Payment Links » hérités.
 
        ⚠️ CE QUI N'A PAS ÉTÉ EFFACÉ, ET POURQUOI : les écritures comptables des
-       paiements DÉJÀ ENCAISSÉS par Stripe restent en base. Ce sont des pièces
+       paiements DÉJÀ ENCAISSÉS par l ancien fournisseur restent en base. Ce sont des pièces
        justificatives de recettes déclarées — les détruire, c'est détruire la
        preuve d'un chiffre d'affaires. Elles ne sont plus produites, seulement
        relues. Voir `docs/LECONS.md`.

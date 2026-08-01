@@ -3,7 +3,7 @@
 // Rôle : à partir du COÛT fournisseur + du POIDS d'un produit, calcule le
 // `price_ht` (base métropole) qui garantit une marge NETTE cible APRÈS IS,
 // une fois TOUT payé : transport (Colissimo ou container), octroi de mer (payé
-// à l'import, non récupérable), frais Stripe, emballage, quote-part de frais
+// à l'import, non récupérable), frais l ancien fournisseur, emballage, quote-part de frais
 // fixes annuels (CFE + assurance, sans comptable). Client = 0 à l'arrivée (DDP).
 //
 // ⚠️ Ce module NE lit ni n'écrit rien : il est PUR (config injectée). Le calcul
@@ -22,7 +22,7 @@ var DEFAULT_CONFIG = {
   tvaFR: 0.20,                // TVA France récupérée (coût réel = TTC cotébrico / 1,20)
   is: 0.15,                   // impôt sociétés (≤ 42 500 € bénéfice ; 0,25 au-delà)
   targetNet: 0.15,            // marge NETTE cible APRÈS IS
-  /* COMMISSION D'ENCAISSEMENT — clés historiquement nommées « stripe », gardées
+  /* COMMISSION D'ENCAISSEMENT — clés historiquement nommées « l ancien fournisseur », gardées
      telles quelles parce qu'elles sont déjà écrites dans la config Firestore
      `pricing_config` : les renommer ferait retomber silencieusement sur les
      valeurs par défaut, donc changerait TOUS les prix sans que personne ne
@@ -136,7 +136,7 @@ function evaluate(costHT, markup, ship, octroi, tvaDom, cfg, douane) {
   var netAfterIS = netOp * (1 - cfg.is);
   return {
     markup: markup, priceHt: round2(priceHt), ttc: round2(ttc),
-    transport: round2(ship), octroiPaid: round2(octroiPaid), commission: round2(commission), stripe: round2(commission),
+    transport: round2(ship), octroiPaid: round2(octroiPaid), commission: round2(commission),
     douane: round2(douane),
     fixed: round2(cfg.packaging + fixedPerOrder(cfg)),
     is: round2(netOp * cfg.is), netOp: round2(netOp),

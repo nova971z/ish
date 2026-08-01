@@ -13,7 +13,7 @@
 
    C'est le pire mode de panne du site : **silencieux et coûteux**.
 
-   Chez Stripe, la re-livraison s'étale sur ~3 jours et sauve presque tous les
+   Chez l ancien fournisseur, la re-livraison s'étale sur ~3 jours et sauve presque tous les
    cas. Chez Revolut, la politique de re-livraison n'est pas documentée — la
    page équivalente d'un autre produit Revolut annonce « 3 more times », ce qui
    serait BEAUCOUP plus court. On ne parie pas : on construit le rattrapage

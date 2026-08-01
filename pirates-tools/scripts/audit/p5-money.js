@@ -110,7 +110,7 @@ LOG('━'.repeat(74));
 const GARANTIES = [
   ['création de course (webhook ↔ /merci)', 'api/_lib/courses.js', /ref\.create\(course\)/,
    'doc id = id du PaymentIntent ; create() échoue si le doc existe'],
-  ['événements Stripe', 'api/webhook.js', /collection\('stripe_events'\)/,
+  ['événements de paiement journalisés', 'api/webhook.js', /collection\('stripe_events'\)/,
    'claim atomique de event.id avant tout effet'],
   ['marchandise payée', 'api/contact.js', /if \(c\.goodsPaid\) return c;/,
    'sortie anticipée si déjà réglée'],

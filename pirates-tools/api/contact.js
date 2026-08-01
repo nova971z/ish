@@ -544,7 +544,7 @@ async function handleCourses(req, body, cfg, res) {
 
   // ══ PROFIL LIVREUR ════════════════════════════════════════════════════════
   // Deux documents, deux niveaux de confidentialité :
-  //   couriers/{uid}        → PRIVÉ (KYC, email, Stripe Connect) — jamais lu par le client
+  //   couriers/{uid}        → PRIVÉ (KYC, email, virement direct) — jamais lu par le client
   //   couriers_public/{uid} → PUBLIC (fiche annuaire : nom, photo, tarifs, note,
   //                           disponibilité) — lecture ouverte, écriture serveur seule
   // ⚠️ Les TARIFS appartiennent au LIVREUR (voir _lib/courses.js § TARIFS) :
@@ -765,7 +765,7 @@ async function handleCourses(req, body, cfg, res) {
   // ── Créer une course (artisan) — sur PREUVE DE PAIEMENT ──
   // Le client PAIE d'abord (produits + frais de livraison, modale carte —
   // create-payment-intent pose la metadata course*). Il envoie ensuite son
-  // paymentIntentId : le serveur VÉRIFIE chez Stripe que le paiement est
+  // paymentIntentId : le serveur VÉRIFIE chez l ancien fournisseur que le paiement est
   // abouti, qu'il porte bien une course, et qu'il appartient à cet uid, puis
   // crée la course depuis la METADATA (jamais depuis le corps client). Doc id
   // = pi.id → idempotent avec le webhook (aucun doublon, aucune double alerte).
@@ -1049,7 +1049,7 @@ async function handleCourses(req, body, cfg, res) {
   // ── MARCHANDISE PAYÉE → la course est réellement commandée ────────────────
   // Le client règle SES ARTICLES à Pirates Tools (c'est notre vente). Le prix
   // de la course, lui, ne passe pas par nous. On vérifie le paiement chez
-  // Stripe : abouti, à ce compte, et marqué pour CETTE course (courseRef).
+  // l ancien fournisseur : abouti, à ce compte, et marqué pour CETTE course (courseRef).
   if (body.type === 'course-goods-paid') {
     const id = String(body.id || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 64);
     const piId = String(body.paymentIntentId || '').trim().slice(0, 80);
@@ -1467,7 +1467,7 @@ async function handleCourses(req, body, cfg, res) {
   }
 
   // ── Confirmer la réception (client) → DÉGEL des frais livreur ──
-  // Escrow : 'gele' → 'libere' si Stripe Connect du livreur est branché
+  // Escrow : 'gele' → 'libere' si virement direct du livreur est branché
   // (transfer automatique), sinon 'liberable' + email owner (virement manuel
   // en attendant l'onboarding Connect — activation au lancement).
   if (body.type === 'course-confirm') {
@@ -1507,11 +1507,11 @@ async function handleCourses(req, body, cfg, res) {
     }
     let escrow = course.paid ? 'liberable' : null;
     if (course.paid && course.feeCents > 0) {
-      /* ⛔ SEUL APPEL DIRECT AU SDK STRIPE QUI SUBSISTE DANS TOUT LE SITE.
+      /* ⛔ SEUL APPEL DIRECT AU SDK L ANCIEN FOURNISSEUR QUI SUBSISTE DANS TOUT LE SITE.
          Recensé le 31/07/2026 pendant la migration Revolut, et laissé EN L'ÉTAT
          volontairement. Trois raisons :
 
-         1. C'est **Stripe Connect** — un versement à un TIERS. La Merchant API
+         1. C'est **virement direct** — un versement à un TIERS. La Merchant API
             de Revolut n'a aucun équivalent : son `/api/payouts` ne fait que
             CONSULTER les virements de notre propre compte vers notre banque.
          2. Le module livreur est **inactif** (`COURIER_ENABLED=false`).
@@ -1521,23 +1521,23 @@ async function handleCourses(req, body, cfg, res) {
             un reliquat de l'ancien modèle, conservé mais plus branché.
 
          ⚠️ À TRANCHER AVANT toute réouverture du service de livraison, pas le
-         jour même : autre produit Revolut, virement manuel, ou Stripe conservé
+         jour même : autre produit Revolut, virement manuel, ou l ancien fournisseur conservé
          pour ce seul flux. `check-paiement.js` tient un cliquet : ce fichier a
          droit à UN appel direct, celui-ci, et pas un de plus. */
+      /* ⛔ VIREMENT AUTOMATIQUE SUPPRIMÉ (01/08/2026, demande de l'user :
+         « éradiquer tout ce qui porte le nom de l'ancien fournisseur, c'est
+         TOUT »). Ce bloc appelait son SDK pour virer sa course au livreur.
+
+         Il était DÉJÀ mort, et le commentaire d'origine le disait : depuis le
+         27/07/2026 la plateforme n'encaisse plus la course — le client règle
+         le livreur en direct (art. L7342-1, présomption de salariat). Sa clé
+         d'environnement n'existe plus non plus : la condition ne pouvait donc
+         jamais être vraie, et c'est le repli ci-dessous qui s'exécutait à tous
+         les coups.
+
+         Le repli EST le modèle actuel : l'owner reçoit un e-mail et vire à la
+         main. Rien n'est perdu, une dépendance de moins. */
       let released = false;
-      try {
-        const stripeKey = process.env.STRIPE_SECRET_KEY;
-        const cd = course.courierUid ? await db.collection('couriers').doc(course.courierUid).get() : null;
-        const acct = cd && cd.exists ? cd.data().stripeAccountId : null;
-        if (stripeKey && acct) {
-          const tr = await require('stripe')(stripeKey).transfers.create({
-            amount: course.feeCents, currency: 'eur', destination: acct,
-            transfer_group: id, metadata: { course: id }
-          });
-          await ref.update({ escrow: 'libere', transferId: tr.id, releasedAt: new Date() });
-          escrow = 'libere'; released = true;
-        }
-      } catch (e) { console.error('[courses] transfer failed:', e.message); }
       if (!released && cfg.ownerEmail) {
         // Pas de Connect : l'owner verse à la main (trace email + doc course).
         await coursesLib.sendMail(cfg.ownerEmail,
@@ -1546,14 +1546,14 @@ async function handleCourses(req, body, cfg, res) {
           + '<p>Livreur : ' + coursesLib.escapeHtml(course.courierEmail || course.courierUid || '?')
           + '<br>Montant gelé à verser : <strong>' + course.prix + ' €</strong>'
           + '<br>Course : ' + coursesLib.escapeHtml(id) + '<br>📍 ' + coursesLib.escapeHtml(course.address || '') + '</p>'
-          + '<p>Stripe Connect du livreur non branché → virement manuel, puis marquer versé.</p>');
+          + '<p>Coordonnées bancaires du livreur non branchées → virement manuel, puis marquer versé.</p>');
       }
       if (course.courierEmail) {
         await coursesLib.sendMail(course.courierEmail,
           '✅ Livraison confirmée — tes ' + course.prix + ' € sont débloqués',
           '<p>Le client a confirmé la réception (photo validée).</p>'
           + '<p>💶 <strong>' + course.prix + ' €</strong> — '
-          + (escrow === 'libere' ? 'virement Stripe envoyé vers ton compte.' : 'versement en cours de traitement.') + '</p>');
+          + (escrow === 'libere' ? 'virement envoyé vers ton compte.' : 'versement en cours de traitement.') + '</p>');
       }
     }
     return res.status(200).json({ ok: true, id, status: 'terminee', escrow });
