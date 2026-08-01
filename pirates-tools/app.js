@@ -10097,6 +10097,7 @@
       pf('payAddrPostal', prof.addrPostal || '');
       pf('payAddrCity', prof.addrCity || '');
       pf('payAddrPhone', prof.phone || '');
+      pf('payAddrEmail', prof.email || (_currentUser && _currentUser.email) || '');
       /* Le titulaire est le plus souvent la personne livrée : on pré-remplit,
          et il corrige si sa carte porte un autre nom (entreprise, conjoint). */
       pf('payCardName', prof.name || (_currentUser && _currentUser.displayName) || '');
@@ -10194,7 +10195,8 @@
       return el ? el.value.trim() : '';
     }
     return { name: val('payAddrName'), line1: val('payAddrLine1'),
-      postal: val('payAddrPostal'), city: val('payAddrCity'), phone: val('payAddrPhone') };
+      postal: val('payAddrPostal'), city: val('payAddrCity'), phone: val('payAddrPhone'),
+      email: val('payAddrEmail') };
   }
 
   // Valide le formulaire, met à jour les hints/classes. Retourne
@@ -10209,8 +10211,20 @@
        livreur devant une porte fermée n'a aucun moyen de joindre le client :
        le colis repart, et la vente est à refaire. Il manquait purement et
        simplement du formulaire — `grep` n'en trouvait pas une occurrence. */
+    /* ⛔ L'E-MAIL MANQUAIT ENTIÈREMENT du formulaire (01/08/2026). On peut
+       commander SANS COMPTE : l'adresse envoyée au fournisseur valait alors
+       `''`, et `customerEmail` restait indéfini côté serveur. Conséquences,
+       toutes silencieuses : Revolut l'exige en production (refus de carte), et
+       le client ne recevait NI confirmation, NI facture. Il payait, et plus
+       personne ne pouvait le joindre.
+       Contrôle volontairement minimal — la vraie validation est celle du
+       navigateur (`type="email"`) puis celle du fournisseur. On refuse
+       l'évidemment faux, on n'invente pas de règle sur les adresses. */
+    var emailOk = !!(addr.email && addr.email.indexOf('@') > 0
+      && addr.email.indexOf('.', addr.email.indexOf('@')) > 0);
     var complete = !!(addr.name && addr.line1 && addr.city && postalFilled
-      && addr.phone && addr.phone.replace(/[^0-9+]/g, '').length >= 8);
+      && addr.phone && addr.phone.replace(/[^0-9+]/g, '').length >= 8
+      && emailOk);
 
     if (postalEl) postalEl.classList.toggle('is-invalid', postalFilled && !terr);
     if (hint) {
@@ -10399,7 +10413,7 @@
         locale: 'fr',
         theme: 'dark',
         name: adr.name || '',
-        email: (_currentUser && _currentUser.email) || '',
+        email: adr.email || (_currentUser && _currentUser.email) || '',
         billingAddress: {
           countryCode: 'FR',            // DOM : code postal 97x, pays FR
           postcode: adr.postal || '',
@@ -10554,7 +10568,7 @@
          comprendre pourquoi. Le champ est désormais saisi à part, pré-rempli
          avec le nom de livraison (le cas le plus fréquent) et modifiable. */
       name: nomTitulaireCarte(adr),
-      email: (_currentUser && _currentUser.email) || '',
+      email: adr.email || (_currentUser && _currentUser.email) || '',
       /* Le téléphone était collecté, rendu obligatoire… et jamais transmis au
          fournisseur, alors que `CustomerDetails.phone` l'accepte. C'est une
          donnée de plus pour la vérification anti-fraude de la banque. */
@@ -10700,7 +10714,10 @@
       items: _payItems.map(function (it) {
         return { key: it.key, title: it.title, qty: it.qty || 1, coffret: !!it.coffret };
       }),
-      customerEmail: (_currentUser && _currentUser.email) || undefined,
+      /* ⛔ Du FORMULAIRE d'abord : un client sans compte n'a pas de
+         `_currentUser`, et son e-mail restait `undefined` — donc aucune
+         facture, aucune confirmation, et un refus possible chez Revolut. */
+      customerEmail: ship.addr.email || (_currentUser && _currentUser.email) || undefined,
       // Territoire dérivé du CP de livraison ; le serveur re-dérive depuis
       // postalCode (source autoritaire) — celui-ci prime toujours.
       territory: ship.territory,
@@ -10981,7 +10998,7 @@
           : 'Renseignez d\'abord votre adresse de livraison (code postal 971xx–976xx).';
         errorEl.hidden = false;
       }
-      var firstEmpty = ['payAddrName', 'payAddrPhone', 'payAddrLine1', 'payAddrPostal', 'payAddrCity'].map(function (id) {
+      var firstEmpty = ['payAddrName', 'payAddrEmail', 'payAddrPhone', 'payAddrLine1', 'payAddrPostal', 'payAddrCity'].map(function (id) {
         return document.getElementById(id);
       }).filter(function (el) { return el && !el.value.trim(); })[0];
       if (firstEmpty) firstEmpty.focus();
@@ -11000,7 +11017,7 @@
         items: _payItems.map(function (it) {
           return { key: it.key, title: it.title, qty: it.qty || 1, coffret: !!it.coffret };
         }),
-        customerEmail: (_currentUser && _currentUser.email) || undefined,
+        customerEmail: (readPayAddress().email) || (_currentUser && _currentUser.email) || undefined,
         territory: _currentTerritory
         // uid retiré du corps (S2) : dérivé de l'ID token vérifié côté serveur.
       });

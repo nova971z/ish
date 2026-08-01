@@ -1397,6 +1397,41 @@ module.exports = async function () {
     ok(mValide && /addr\.phone/.test(mValide[0]),
       '⛔⛔ le téléphone n\'est plus exigé pour valider l\'adresse de livraison. Le champ '
       + 'peut exister et rester vide : on croit l\'avoir demandé, on ne l\'a pas.');
+    /* ── ⛔⛔ L'E-MAIL EST EXIGÉ, MÊME SANS COMPTE ────────────────────────
+       On peut commander sans être connecté — mesuré : aucune garde n'exige un
+       compte pour ouvrir le paiement. Or l'e-mail envoyé au fournisseur valait
+       `(_currentUser && _currentUser.email) || ''`, donc VIDE pour un invité.
+
+       Trois conséquences, toutes silencieuses :
+         · Revolut exige l'e-mail en production → carte refusée ;
+         · `customerEmail` restait indéfini côté serveur → aucune facture ;
+         · aucune confirmation envoyée → le client a payé, et plus personne ne
+           peut le joindre.
+       Le bac à sable ne montrait rien : l'user était connecté à chaque test. */
+    ok(/id="payAddrEmail"/.test(fs.readFileSync(path.join(RACINE, 'index.html'), 'utf8')),
+      '⛔⛔ le champ e-mail a disparu du formulaire de paiement. Un client sans compte '
+      + 'paierait sans qu\'on puisse lui envoyer sa facture ni sa confirmation — et '
+      + 'Revolut peut refuser la carte, faute d\'e-mail.');
+    var mValid2 = APPSRC.match(/function validatePayAddress[\s\S]*?\n  \}/);
+    /* ⚠️ Chercher `emailOk` ne suffit PAS : la variable reste définie même si
+       on la retire de la condition. Démasqué par sabotage. On vérifie qu'elle
+       entre RÉELLEMENT dans le calcul de `complete`. */
+    ok(mValid2 && /var complete = [^;]*emailOk/.test(mValid2[0]),
+      '⛔⛔ l\'e-mail n\'entre plus dans la validation de la commande : le champ peut '
+      + 'exister, être vide, et la commande partir quand même. On croit l\'avoir demandé, '
+      + 'on ne l\'a pas.');
+    ok(/customerEmail:\s*ship\.addr\.email/.test(APPSRC),
+      '⛔⛔ l\'e-mail du FORMULAIRE n\'est plus envoyé au serveur. Pour un client sans '
+      + 'compte il redevient indéfini : ni facture, ni confirmation.');
+    /* DEUX endroits l'envoient : au montage du champ carte et au submit. Les
+       deux comptent — la doc autorise les deux, et un seul suffirait à ce que
+       l'autre parte vide. */
+    var envoisEmail = (APPSRC.match(/email:\s*adr\.email/g) || []).length;
+    ok(envoisEmail === 2,
+      '⛔ l\'e-mail du formulaire part au fournisseur à ' + envoisEmail + ' endroit(s) au '
+      + 'lieu de 2 (montage du champ carte + submit). Revolut l\'exige en production : la '
+      + 'carte serait refusée sans explication.');
+
     /* ── ⛔⛔ LE NOM DU TITULAIRE N'EST PAS LE NOM DE LIVRAISON ───────────
        Les types officiels de Revolut sont explicites : `name` est le
        « Cardholder name in form of 'FirstName LastName' ». On y envoyait

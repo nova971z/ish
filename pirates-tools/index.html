@@ -44,7 +44,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=559">
+  <link rel="stylesheet" href="styles.css?v=560">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -1808,6 +1808,10 @@
                 <input id="payAddrName" name="name" type="text" autocomplete="name" required maxlength="120" placeholder="Pr&eacute;nom Nom">
               </label>
               <label class="pay-address__field pay-address__field--full">
+                <span>E-mail</span>
+                <input id="payAddrEmail" name="email" type="email" autocomplete="email" required maxlength="200" placeholder="vous@exemple.com">
+              </label>
+              <label class="pay-address__field pay-address__field--full">
                 <span>T&eacute;l&eacute;phone</span>
                 <input id="payAddrPhone" name="tel" type="tel" autocomplete="tel" required maxlength="24" placeholder="0690 00 00 00">
               </label>
@@ -2255,7 +2259,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=559"></script>
+  <script defer src="app.js?v=560"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->
