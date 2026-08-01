@@ -139,6 +139,31 @@ module.exports = function () {
     '⛔⛔ APRÈS-VENTE non traité : le panier n\'est pas vidé. Le client retrouve son outil '
     + 'au panier après l\'avoir payé — rien ne l\'empêche de repayer.');
 
+  /* ⛔⛔ LA PREUVE DE PAIEMENT DOIT ÊTRE POSÉE AU SUCCÈS, ET LÀ SEULEMENT.
+     Revolut encaisse EN LIGNE, sans redirection : `/merci` ne reçoit ni
+     `redirect_status`, ni `session_id`. Sans preuve écrite par `onSuccess`,
+     `merciPaymentProof()` rend `no_proof` et `handleMerciPage()` sort AVANT
+     tout — panier non vidé, fidélité non créditée, commande jamais écrite,
+     historique vide. Trois symptômes signalés séparément par l'user le
+     01/08/2026, pour une seule et même cause. */
+  ok(/function marquerPreuvePaiement\(/.test(app),
+    '⛔⛔ plus rien n\'écrit la PREUVE de paiement dans la commande en attente. Revolut '
+    + 'n\'ajoute aucun paramètre d\'URL : sans elle, /merci sort en `no_proof` et n\'exécute '
+    + 'RIEN — le client paie, garde son panier, ne voit aucune commande, et sa fidélité '
+    + 'n\'est pas créditée.');
+  ok(/_paiementId\s*=\s*data\.paymentIntentId/.test(app),
+    '⛔⛔ l\'identifiant de commande renvoyé par le serveur (`paymentIntentId`) n\'est plus '
+    + 'capté. C\'est lui qui relie ce que le client voit à ce que le webhook enregistre : '
+    + 'sans lui, la preuve posée à /merci ne désigne aucune commande.');
+  /* A5 : ne persister QUE sur paiement prouvé. Poser la preuve avant le
+     paiement ferait passer un refus pour une réussite. */
+  var iSauver = app.indexOf('function sauverCommandeEnAttente');
+  var blocSauver = iSauver === -1 ? '' : app.slice(iSauver, iSauver + 900);
+  ok(iSauver !== -1 && !/paymentIntentId\s*:/.test(blocSauver),
+    '⛔⛔ `sauverCommandeEnAttente` écrit une preuve de paiement AVANT le paiement (ou la '
+    + 'fonction a disparu). Un paiement refusé passerait alors pour abouti à /merci — '
+    + 'exactement le défaut qu\'A5 a corrigé. La preuve s\'écrit dans `onSuccess`, jamais avant.');
+
   /* ── 5. CE QUI RASSURE AU MOMENT DE DONNER SA CARTE ────────────────────
      Le seul instant du parcours où le client se demande s'il a raison. */
   ok(/Paiement sécurisé par|mentionFournisseur/.test(app),

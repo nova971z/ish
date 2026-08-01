@@ -10294,6 +10294,17 @@
   var _stripeElements = null; // Stripe Elements instance
   var _stripeClientSecret = null;
   var _stripeReady = false;
+  /* ⛔⛔ IDENTIFIANT DE LA COMMANDE CRÉÉE PAR LE SERVEUR (`paymentIntentId`).
+     Le serveur le renvoyait depuis toujours ; le front ne le gardait NULLE
+     PART — `grep -n "data.paymentIntentId" app.js` → 0 occurrence.
+
+     Conséquence, constatée le 01/08/2026 sur un achat de test : Revolut
+     encaisse EN LIGNE, sans redirection, donc `/merci` ne recevait ni
+     `redirect_status`, ni `session_id`, ni `paymentIntentId`. Son contrôle de
+     preuve rendait `no_proof` et sortait AVANT tout : panier non vidé,
+     fidélité non créditée, commande jamais enregistrée, historique vide.
+     Trois symptômes, une seule cause. */
+  var _paiementId = null;
   /* Fournisseur de paiement ANNONCÉ PAR LE SERVEUR pour la commande en cours.
      Jamais deviné côté client : voir le commentaire au point de branchement.
 
@@ -10609,6 +10620,10 @@
 
              ⚠️ ORDRE IMPORTANT : fermer D'ABORD, naviguer ENSUITE. L'inverse
              laisse l'animation de fermeture se jouer sur la page suivante. */
+          /* ⛔⛔ Sans cette preuve, /merci sort en `no_proof` et n'exécute
+             RIEN (panier, fidélité, commande). Ici et nulle part avant — A5.
+             Motif complet : `scripts/check-tunnel-paiement.js`. */
+          marquerPreuvePaiement('revolut');
           closePayModal();
           lvRedirect('#/merci');
         },
@@ -10692,6 +10707,29 @@
       if (_payCourse && _payCourse.scenePhoto) {
         sessionStorage.setItem('pt_course_scene', _payCourse.scenePhoto);
       }
+    } catch (_) {}
+  }
+
+  /* Ajoute la PREUVE de paiement à la commande en attente, sans rien écraser
+     de ce que `sauverCommandeEnAttente` y a mis (articles, total, course).
+
+     ⚠️ Relire-modifier-réécrire, jamais réécrire à l'aveugle : la photo du
+     chantier et l'identifiant de course voyagent dans le même objet, et les
+     perdre coûterait la preuve que le livreur utilise pour trouver le dépôt.
+     ⚠️ Best-effort silencieux : en navigation privée, un quota plein ne doit
+     JAMAIS interrompre un paiement qui vient d'aboutir. */
+  function marquerPreuvePaiement(fournisseur) {
+    try {
+      var brut = localStorage.getItem('pt_pending_order');
+      var p = brut ? JSON.parse(brut) : null;
+      if (!p) return;
+      /* Repli sur le jeton de commande si le serveur n'a pas renvoyé d'`id` :
+         les deux désignent la MÊME commande, et une preuve absente ferait
+         retomber `/merci` dans le `no_proof` qu'on vient de corriger. */
+      p.paymentIntentId = _paiementId || _stripeClientSecret || null;
+      p.method = fournisseur || _paiementFournisseur || '';
+      p.ts = Date.now();   // la fenêtre de validité repart du paiement réel
+      localStorage.setItem('pt_pending_order', JSON.stringify(p));
     } catch (_) {}
   }
 
@@ -10932,6 +10970,10 @@
          formulaire vide et une erreur qui n'expliquerait rien. */
       memoriserAdresseLivraison(ship);
 
+      /* L'identifiant de LA commande que le serveur vient de créer. C'est le
+         même que le webhook utilisera : il fait donc le lien entre ce que le
+         client voit et ce que la comptabilité enregistre. */
+      _paiementId = data.paymentIntentId || null;
       _paiementFournisseur = String(data.fournisseur || 'stripe');
       _urlPaiementHebergee = data.urlHebergee || null;
       _paiementModeTest = (typeof data.modeTest === 'boolean') ? data.modeTest : null;
