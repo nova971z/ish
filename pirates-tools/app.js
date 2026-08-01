@@ -10052,9 +10052,16 @@
     _stripeClientSecret = null;
     _quoteTerritory = null;
     var cgvBox = document.getElementById('payCgvOk');
-    if (cgvBox) cgvBox.checked = false;          // consentement redemandé à chaque commande
+    if (cgvBox) {
+      cgvBox.checked = false;        // consentement redemandé à chaque commande
+      /* ⚠️ `onchange` et pas `addEventListener` : `openPayModal` peut être
+         appelée plusieurs fois, et un écouteur ajouté à chaque ouverture
+         s'empilerait. Une assignation remplace, elle ne cumule pas. */
+      cgvBox.onchange = majBoutonPayer;
+    }
     var cgvMsg = document.getElementById('payCgvNote');
     if (cgvMsg) cgvMsg.hidden = true;
+    majBoutonPayer();
     setupPayAddressForm();
     // Course : l'adresse du CHANTIER (déjà géocodée sur la carte) préremplit
     // le formulaire — le formulaire carte se charge immédiatement.
@@ -10439,8 +10446,8 @@
          désactivé par un échec précédent. */
       var btnOk = document.getElementById('payModalConfirm');
       if (btnOk && btnOk.dataset.attenteCarte === '1') {
-        btnOk.disabled = false;
         delete btnOk.dataset.attenteCarte;
+        majBoutonPayer();
       }
     }).catch(function (err) {
       _stripeReady = false;
@@ -10474,8 +10481,8 @@
            au lieu de le laisser mentir. */
         var btnPrinc = document.getElementById('payModalConfirm');
         if (btnPrinc) {
-          btnPrinc.disabled = true;
           btnPrinc.dataset.attenteCarte = '1';
+          majBoutonPayer();
         }
         var btnRetry = document.getElementById('revolutReessayer');
         if (btnRetry) {
@@ -10519,7 +10526,11 @@
      onCancel). Rien à enchaîner, donc — et surtout rien à supposer. */
   function confirmerPaiementRevolut(total, errorEl) {
     var btn = document.getElementById('payModalConfirm');
-    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="pay-modal__btn-icon">⏳</span> Traitement en cours…'; }
+    /* `enCours` verrouille le bouton par-dessus toute autre condition : sans
+       ça, un `majBoutonPayer()` déclenché pendant le paiement (la case CGV
+       recochée, par exemple) le rallumerait — et un second clic partirait sur
+       un paiement déjà en vol. */
+    if (btn) { btn.dataset.enCours = '1'; btn.disabled = true; btn.innerHTML = '<span class="pay-modal__btn-icon">⏳</span> Traitement en cours…'; }
     if (errorEl) errorEl.hidden = true;
     sauverCommandeEnAttente(total);
     var adr = (validatePayAddress() || {}).addr || {};
@@ -10543,8 +10554,43 @@
   function reactiverBoutonPayer() {
     var btn = document.getElementById('payModalConfirm');
     if (!btn) return;
-    btn.disabled = false;
     btn.innerHTML = '<span class="pay-modal__btn-icon">💳</span> Commander avec obligation de paiement';
+    delete btn.dataset.enCours;
+    majBoutonPayer();
+  }
+
+  /* ── LE BOUTON « COMMANDER » DIT-IL LA VÉRITÉ ? ──────────────────────────
+     ⛔ Il était TOUJOURS allumé, même quand le clic ne pouvait rien faire :
+     `confirmPayment` refusait poliment si les CGV n'étaient pas cochées. Un
+     bouton qui a l'air actif et ne fait rien, c'est un client qui clique, qui
+     ne comprend pas, et qui s'en va.
+
+     ⚠️ TROIS raisons de le désactiver, une SEULE propriété `disabled` : sans un
+     endroit unique qui tranche, la dernière ligne exécutée gagne, et le bouton
+     se rallume au mauvais moment. Tout passe donc par ici.
+
+       · CGV non cochées — consentement exigé AVANT tout débit (vente à
+         distance : c'est la preuve du consentement) ;
+       · champ carte pas monté — le paiement n'a rien pour partir ;
+       · traitement déjà en cours — sinon double débit au double-clic. */
+  function majBoutonPayer() {
+    var btn = document.getElementById('payModalConfirm');
+    if (!btn) return;
+    if (btn.dataset.enCours === '1') { btn.disabled = true; return; }
+    var cgv = document.getElementById('payCgvOk');
+    var cgvOk = !cgv || cgv.checked;
+    var carteOk = btn.dataset.attenteCarte !== '1';
+    btn.disabled = !(cgvOk && carteOk);
+
+    /* ⛔ ÉTEINDRE SANS DIRE POURQUOI est un défaut symétrique — et c'est le
+       harnais `course-pay` qui l'a attrapé, pas moi. Avant, le message
+       n'apparaissait qu'APRÈS un clic ; maintenant le clic ne part plus, donc
+       le message ne venait jamais et le client restait devant un bouton mort
+       sans savoir quoi faire.
+       Il s'affiche donc dès que les CGV sont la SEULE chose qui manque : ni
+       avant (le reproche serait prématuré), ni après un clic impossible. */
+    var note = document.getElementById('payCgvNote');
+    if (note) note.hidden = !(carteOk && !cgvOk);
   }
 
   function getStripe() {
@@ -10828,7 +10874,7 @@
     // ── Stripe Elements flow (embedded card form) ──
     if (stripe && _stripeElements && _stripeClientSecret) {
       var btn = document.getElementById('payModalConfirm');
-      if (btn) { btn.disabled = true; btn.innerHTML = '<span class="pay-modal__btn-icon">⏳</span> Traitement en cours…'; }
+    if (btn) { btn.dataset.enCours = '1'; btn.disabled = true; btn.innerHTML = '<span class="pay-modal__btn-icon">⏳</span> Traitement en cours…'; }
       if (errorEl) { errorEl.hidden = true; }
 
       sauverCommandeEnAttente(total);

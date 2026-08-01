@@ -1397,6 +1397,48 @@ module.exports = async function () {
     ok(mValide && /addr\.phone/.test(mValide[0]),
       '⛔⛔ le téléphone n\'est plus exigé pour valider l\'adresse de livraison. Le champ '
       + 'peut exister et rester vide : on croit l\'avoir demandé, on ne l\'a pas.');
+    /* ── ⛔ LE BOUTON « COMMANDER » NE MENT PAS ───────────────────────────
+       Il restait LUMINEUX même quand le clic ne pouvait rien faire :
+       `confirmPayment` refusait poliment si les CGV n'étaient pas cochées. Un
+       bouton qui a l'air actif et ne répond pas, c'est un client qui clique,
+       ne comprend pas, et s'en va.
+
+       Trois raisons de le désactiver, UNE seule propriété `disabled` : sans un
+       endroit unique qui tranche, la dernière ligne exécutée gagne et le bouton
+       se rallume au mauvais moment. On exécute donc la vraie fonction. */
+    var mMaj = APPSRC.match(/function majBoutonPayer\(\)[\s\S]*?\n  \}/);
+    ok(!!mMaj, '⛔ `majBoutonPayer` a disparu : plus rien ne décide de l\'état du bouton '
+      + 'de paiement, et les conditions se contrediraient à nouveau.');
+    if (mMaj) {
+      var fab = new Function('doc', 'return (' + mMaj[0].replace(/^\s*function majBoutonPayer/, 'function') + ')');
+      function essai(cgvCoche, carteEnAttente, enCours) {
+        var btn = { dataset: {}, disabled: false };
+        if (carteEnAttente) btn.dataset.attenteCarte = '1';
+        if (enCours) btn.dataset.enCours = '1';
+        var cgv = { checked: cgvCoche };
+        var faux = { getElementById: function (id) {
+          return id === 'payModalConfirm' ? btn : (id === 'payCgvOk' ? cgv : null);
+        } };
+        var vraiDoc = global.document;
+        global.document = faux;
+        try { fab()(); } finally { global.document = vraiDoc; }
+        return btn.disabled;
+      }
+      ok(essai(false, false, false) === true,
+        '⛔⛔ le bouton « Commander » reste ACTIF alors que les CGV ne sont pas cochées. '
+        + 'Le clic sera refusé : le client clique, rien ne se passe, il ne comprend pas. '
+        + 'Le consentement est aussi exigé AVANT tout débit en vente à distance.');
+      ok(essai(true, false, false) === false,
+        '⛔ le bouton reste ÉTEINT alors que tout est en ordre (CGV cochées, champ carte '
+        + 'monté) : plus personne ne peut payer.');
+      ok(essai(true, true, false) === true,
+        '⛔ le bouton est actif alors que le champ carte n\'est pas monté : le clic ne peut '
+        + 'rien envoyer.');
+      ok(essai(true, false, true) === true,
+        '⛔⛔ le bouton se rallume pendant un paiement EN COURS. Un second clic partirait '
+        + 'sur un paiement déjà en vol — double débit.');
+    }
+
     /* ── ⛔⛔ LE PANIER SE VIDE APRÈS UN ACHAT PAYÉ ────────────────────────
        Constaté le 01/08/2026 sur le premier achat mené de bout en bout : le
        client payait, arrivait sur la page Merci, et retrouvait son outil ENCORE

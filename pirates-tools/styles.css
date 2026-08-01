@@ -6839,6 +6839,16 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   border-color: var(--accent); box-shadow: 0 0 0 2px rgba(var(--accent-rgb), .25);
 }
 .rc-card-field--invalid { border-color: rgba(239,68,68,.6); }
+/* ⛔ Le bouton « Commander » restait LUMINEUX alors que le clic ne pouvait
+   rien faire — CGV non cochées, ou champ carte pas monté. Un bouton qui a
+   l'air actif et ne répond pas, c'est un client qui clique, ne comprend pas,
+   et s'en va. On éteint le dégradé et le halo, et le curseur le dit aussi.
+   Sélecteur ciblé sur CE bouton : aucun effet de bord ailleurs. */
+#payModalConfirm:disabled {
+  background: #2a3444; color: #98a3b2; box-shadow: none; cursor: not-allowed;
+  opacity: 1; /* pas de transparence : on veut « éteint », pas « fantôme » */
+}
+
 .pay-card-label {
   display: block; font-size: 13px; font-weight: 600; color: #9aa4b2; margin: 14px 0 6px;
 }
