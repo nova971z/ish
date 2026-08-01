@@ -75,6 +75,28 @@ de travail. Ses exigences viennent du PROJET — `docs/JURIDIQUE.md`, harnais
 existants, décisions écrites — et des types du paquet officiel Revolut. Ce qui
 n'a pas pu être vérifié à la source y est dit comme tel.
 
+| 01/08/2026 | Je livrais des écrans que je n'avais **jamais regardés tourner** — six allers-retours sur le tunnel de paiement, chaque défaut visuel trouvé par l'user sur son iPad | Playwright et Chromium sont installés, les harnais s'en servent déjà : rien n'empêchait de lancer la page et de la regarder. Paresse de méthode, pas limite technique | `outils/vue.mjs` |
+| 01/08/2026 | Deux boutons **étirés en pavés de couleur** sur la page compte (« Se déconnecter », « Gérer la double authentification »), présents dans le dépôt sans que personne les voie | `.actions` imbriqué dans `.specs`, qui est un `display:flex` : le bouton s'étire sur toute la hauteur de la carte. Aucun test ne regarde un écran, et aucune règle ne disait où va `.actions` | `scripts/check-ecrans.js` |
+
+⚠️ **`outils/vue.mjs` ne prouve PAS la conformité.** Il montre l'écran d'un
+Chromium, sur une machine, réseau externe coupé. Il ne dit rien du rendu sur
+iPad en navigation privée. C'est un garde-fou contre le grossier — la seule
+preuve qui vaille reste l'écran de l'user. Son option `--connecte` ne pose
+aucune béquille dans le produit : elle intercepte la requête vers
+`firebase-init.js` et sert un module qui remplit le même contrat.
+
+⚠️ **`check-ecrans.js`, c'est `check-tunnel-paiement.js` étendu à tout le
+site**, demandé le 01/08/2026 : « à chaque fois qu'on va créer quelque chose
+sur le site, on se réfère à ce qui existe déjà sur les plus grandes
+institutions et notre CSS doit être en accord ». Il ne juge **rien** de
+l'esthétique : identifiants uniques, `.actions` bien placé, champs étiquetés,
+boutons nommés, style en dur qui ne remonte pas. Le reste se REGARDE.
+
+⚠️ **Il s'est trompé DEUX FOIS avant d'être juste** (E-221 puis E-222) : vert
+par construction, puis refusant à tort trois blocs sains. Les deux sens du faux
+instrument, dans le même contrôle, à quelques minutes d'écart. C'est le
+sabotage qui a tranché les deux fois — pas la relecture.
+
 ⚠️ **La seconde n'a AUCUNE porte mécanique, et il faut le dire aussi.**
 `docs/ERREURS.md` est un registre relu à chaque intention (`node scripts/erreurs.js`),
 pas un contrôle : rien ne rougit si je propose demain une commande de terminal

@@ -44,7 +44,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=562">
+  <link rel="stylesheet" href="styles.css?v=563">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -763,8 +763,83 @@
 
         <!-- Onglet Profil -->
         <div class="acc-pane active" data-acc-pane="profile">
+          <!-- Informations personnelles — LECTURE SEULE.
+               Les champs de saisie vivent dans l'onglet Paramètres, et nulle
+               part ailleurs : deux formulaires portant les mêmes identifiants
+               sur une même page, c'est le second qui gagne silencieusement. -->
           <div class="card">
             <div class="head"><h3 class="title">Informations personnelles</h3><span class="badge">Profil</span></div>
+            <div class="specs">
+              <dl class="acc-id" id="accIdGrid"></dl>
+            </div>
+            <!-- ⚠️ `.actions` est un FRÈRE de `.specs`, jamais un enfant : son
+                 retrait (`padding: 0 1.1rem 1.1rem`) est calculé pour la carte,
+                 et imbriqué dans le `display:flex` de `.specs` il devient une
+                 colonne étirée sur toute la hauteur — le bouton se change en
+                 pavé. Constaté en bac à sable le 01/08/2026. -->
+            <div class="actions">
+              <button class="btn" type="button" data-acc-goto="settings">&#9998; Modifier mes informations</button>
+            </div>
+          </div>
+
+          <div class="card acc-card-next">
+            <div class="head"><h3 class="title">Mon panier</h3><span class="badge">Resume</span></div>
+            <div class="specs">
+              <p id="accCartMiniTxt" style="opacity:.9">0 article — total 0 &#8364;</p>
+            </div>
+            <div class="actions"><a class="btn" href="#/devis" data-nav="/devis">Voir le panier</a></div>
+          </div>
+
+          <!-- Aperçu des dernières commandes. La liste COMPLÈTE reste dans
+               l'onglet Commandes : ici on n'en montre que les trois plus
+               récentes, et le bouton « Voir tout » n'apparaît que s'il y a
+               réellement plus à voir. Une seule lecture Firestore alimente
+               les deux affichages. -->
+          <div class="card acc-card-next">
+            <div class="head"><h3 class="title">Mes derni&egrave;res commandes</h3><span class="badge">Historique</span></div>
+            <div class="specs">
+              <div id="accRecentOrders" class="acc-orders"></div>
+            </div>
+            <div class="actions">
+              <button class="btn" type="button" id="accSeeAllOrders" data-acc-goto="orders" hidden>Voir toutes mes commandes</button>
+            </div>
+          </div>
+
+          <!-- Ma carte artisan (self-service partenaires) : visible UNIQUEMENT
+               si la carte annuaire de l'utilisateur est liée à son compte. -->
+          <div class="card acc-card-next" id="accPartnerCard" hidden>
+            <div class="head"><h3 class="title">Ma carte artisan</h3><span class="badge">Partenaire</span></div>
+            <div class="specs" id="accPartnerBody"></div>
+          </div>
+
+          <!-- Devenir Livreur (service coursier — en préparation). Placé EN BAS. -->
+          <div class="card lv-cta-card acc-card-next">
+            <div class="head"><h3 class="title">🛵 Devenir Livreur</h3><span class="badge">Nouveau</span></div>
+            <div class="specs">
+              <p class="lv-cta-txt">Tu as un <strong>vélo électrique, une trottinette électrique, un scooter ou une moto</strong>&nbsp;? Gagne de l'argent en livrant de la quincaillerie aux artisans sur leurs chantiers. On te <strong>mâche toutes les démarches</strong> pour être en règle.</p>
+              <a class="btn primary" href="#/livreur">Voir comment devenir livreur →</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Onglet Commandes -->
+        <div class="acc-pane" data-acc-pane="orders" hidden>
+          <div class="card">
+            <div class="head"><h3 class="title">Historique des devis</h3><span class="badge">Commandes</span></div>
+            <div class="specs">
+              <div id="accHistory" class="acc-orders">
+                <p class="acc-order__msg">Aucune commande pour le moment.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Onglet Parametres -->
+        <div class="acc-pane" data-acc-pane="settings" hidden>
+          <!-- SEUL endroit du site où les informations personnelles se
+               modifient. L'onglet Profil ne fait que les afficher. -->
+          <div class="card">
+            <div class="head"><h3 class="title">Informations personnelles</h3><span class="badge">Modifier</span></div>
             <div class="specs">
               <form id="accountForm" style="display:grid;gap:.6rem;max-width:520px">
                 <label>Nom complet
@@ -798,46 +873,7 @@
             </div>
           </div>
 
-          <div class="card" style="margin-top:1.2rem">
-            <div class="head"><h3 class="title">Mon panier</h3><span class="badge">Resume</span></div>
-            <div class="specs">
-              <p id="accCartMiniTxt" style="opacity:.9">0 article — total 0 &#8364;</p>
-              <div class="actions"><a class="btn" href="#/devis" data-nav="/devis">Voir le panier</a></div>
-            </div>
-          </div>
-
-          <!-- Ma carte artisan (self-service partenaires) : visible UNIQUEMENT
-               si la carte annuaire de l'utilisateur est liée à son compte. -->
-          <div class="card" style="margin-top:1.2rem" id="accPartnerCard" hidden>
-            <div class="head"><h3 class="title">Ma carte artisan</h3><span class="badge">Partenaire</span></div>
-            <div class="specs" id="accPartnerBody"></div>
-          </div>
-
-          <!-- Devenir Livreur (service coursier — en préparation). Placé EN BAS. -->
-          <div class="card lv-cta-card" style="margin-top:1.2rem">
-            <div class="head"><h3 class="title">🛵 Devenir Livreur</h3><span class="badge">Nouveau</span></div>
-            <div class="specs">
-              <p class="lv-cta-txt">Tu as un <strong>vélo électrique, une trottinette électrique, un scooter ou une moto</strong>&nbsp;? Gagne de l'argent en livrant de la quincaillerie aux artisans sur leurs chantiers. On te <strong>mâche toutes les démarches</strong> pour être en règle.</p>
-              <a class="btn primary" href="#/livreur">Voir comment devenir livreur →</a>
-            </div>
-          </div>
-        </div>
-
-        <!-- Onglet Commandes -->
-        <div class="acc-pane" data-acc-pane="orders" hidden>
-          <div class="card">
-            <div class="head"><h3 class="title">Historique des devis</h3><span class="badge">Commandes</span></div>
-            <div class="specs">
-              <div id="accHistory" style="display:grid;gap:.6rem">
-                <p style="opacity:.6;text-align:center;padding:.5rem 0">Aucun devis envoyé pour le moment.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Onglet Parametres -->
-        <div class="acc-pane" data-acc-pane="settings" hidden>
-          <div class="card">
+          <div class="card acc-card-next">
             <div class="head"><h3 class="title">Sécurité</h3><span class="badge">Mot de passe</span></div>
             <div class="specs">
               <p style="opacity:.75;margin:0 0 .8rem;font-size:.9rem">Modifie ton mot de passe régulièrement pour garder ton compte en sécurité.</p>
@@ -858,20 +894,20 @@
             </div>
           </div>
 
-          <div class="card acc-danger" style="margin-top:1.2rem">
+          <div class="card acc-danger acc-card-next">
             <div class="head"><h3 class="title">Session</h3><span class="badge">Compte</span></div>
             <div class="specs">
               <p style="opacity:.75;margin:0 0 .8rem;font-size:.9rem">Deconnecte-toi de cet appareil. Tu pourras te reconnecter a tout moment.</p>
-              <div class="actions">
-                <button id="accLogout" class="btn acc-logout-btn" type="button">Se déconnecter</button>
-              </div>
+            </div>
+            <div class="actions">
+              <button id="accLogout" class="btn acc-logout-btn" type="button">Se déconnecter</button>
             </div>
           </div>
 
           <!-- DOUBLE AUTHENTIFICATION (TOTP). Tout le contenu est injecté par
                app.js APRÈS chargement à la demande de mfa.js : la page ne
                télécharge rien tant qu'on n'ouvre pas ce bloc. -->
-          <div class="card" id="mfaCard" style="margin-top:1.2rem">
+          <div class="card acc-card-next" id="mfaCard">
             <div class="head"><h3 class="title">🔐 Double authentification</h3>
               <span class="badge" id="mfaBadge">…</span></div>
             <div class="specs" id="mfaBody">
@@ -879,7 +915,12 @@
                 Ajoute un code à 6 chiffres, changeant toutes les 30 secondes, en plus de ton
                 mot de passe. Même si quelqu'un te vole ton mot de passe, il ne peut pas entrer.
               </p>
-              <div class="actions"><button id="mfaOpen" class="btn primary" type="button">Gérer la double authentification</button></div>
+              <!-- `.lv-cta` et non `.actions` : ce bouton DOIT rester dans
+                   `#mfaBody`, dont `mfa.js` remplace tout le contenu quand le
+                   panneau s'ouvre — le sortir le laisserait affiché à côté du
+                   panneau. Or `.actions` enfant de `.specs` s'étire. C'est
+                   d'ailleurs la classe que `mfa.js` injecte lui-même. -->
+              <div class="lv-cta"><button id="mfaOpen" class="btn primary" type="button">Gérer la double authentification</button></div>
             </div>
           </div>
 
@@ -2119,7 +2160,7 @@
     </header>
     <div class="chat-win__body" id="chatWinBody"><p class="lv-hint">Chargement…</p></div>
     <div class="chat-win__send" id="chatWinSend" hidden>
-      <input type="text" id="chatWinInput" maxlength="800" placeholder="Écris ton message…" autocomplete="off">
+      <input type="text" id="chatWinInput" maxlength="800" placeholder="Écris ton message…" autocomplete="off" aria-label="Votre message">
       <button type="button" class="btn primary" id="chatWinGo">Envoyer</button>
     </div>
   </section>
@@ -2269,7 +2310,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=562"></script>
+  <script defer src="app.js?v=563"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

@@ -173,6 +173,23 @@ var INDEX = [
     fini: 'plan10 vert, dont le cas « fiche produit + panier vide ».'
   },
   {
+    intention: 'Écran, interface, CSS, mise en page, UI/UX',
+    mots: ['écran', 'ecran', 'interface', 'ui', 'ux', 'css', 'style', 'mise en page',
+           'affichage', 'bouton', 'carte', 'onglet', 'formulaire', 'profil', 'paramètres',
+           'parametres', 'réglages', 'reglages', 'visuel', 'design'],
+    fichiers: ['index.html', 'styles.css', 'app.js'],
+    fonctions: ['renderAccount', 'renderIdCard', 'setupAccountTabs'],
+    protege: ['scripts/check-ecrans.js', 'outils/vue.mjs (REGARDER l\'écran)', 'tests/a11y.mjs'],
+    regles: ['.claude/rules/front.md'],
+    pieges: ['⛔ On ne livre PAS un écran qu\'on n\'a pas regardé : `node outils/vue.mjs "#/laroute" [--tel] [--connecte]`. Six livraisons du tunnel de paiement ont été corrigées par l\'user, une par une, sur son iPad.',
+             '`.actions` est un FRÈRE de `.specs`, jamais un enfant : `.specs` est un display:flex, le bouton s\'étire en pavé de couleur.',
+             'Un `placeholder` n\'est pas une étiquette : il disparaît à la première frappe.',
+             'Le style va dans styles.css, pas dans un attribut `style=` — sinon il ne suit pas les jetons de la charte. Le compte est un cliquet : il descend.',
+             'Deux éléments ne portent JAMAIS le même identifiant : getElementById ne rend que le premier, et la moitié de l\'écran reste muette sans lever d\'erreur.'],
+    decisions: [],
+    fini: 'check-ecrans vert, ET une capture regardée pour chaque écran touché — en 1194 px ET en 390 px.'
+  },
+  {
     intention: 'Authentification, compte, double facteur',
     mots: ['auth', 'compte', 'connexion', 'mfa', 'totp', '2fa', 'mot de passe'],
     fichiers: ['mfa.js', 'firebase-init.js', 'api/_lib/firebase.js', 'app.js'],

@@ -857,6 +857,7 @@
       'accountForm','accSave','accName','accEmail','accPhone','accAddress',
       'accAddrLine1','accAddrPostal','accAddrCity','accTerritory',
       'accAvatar','accAvatarImg','accCartMiniTxt','accLogout','accHistory','accLoyaltyTxt',
+      'accIdGrid','accRecentOrders','accSeeAllOrders',
       'accSlider','accFill','accCursor','accVerifyBanner','accResendVerify',
       'pwdChangeForm','pwdCurrent','pwdNew','pwdConfirm',
       'toasts','installBtn'
@@ -8956,6 +8957,8 @@
     }
     if (p.avatar && dom.accAvatarImg) dom.accAvatarImg.src = p.avatar;
 
+    renderIdCard(p);
+
     updateCartUI();
 
     // Fidélité — SOURCE UNIQUE : la dépense vérifiée (pt:loyalty = cache
@@ -8991,37 +8994,125 @@
     loadMyPartnerCard();
   }
 
+  /* ── Carte d'identité du compte (onglet Profil, LECTURE SEULE) ──────────
+     Elle affiche ce que le site sait de la personne. Un champ vide n'est pas
+     masqué : il est montré comme MANQUANT, parce qu'une adresse absente se
+     paie au moment de payer — pas ici. Le masquer donnerait l'illusion d'un
+     profil complet.
+
+     Le rendu passe par `escapeHTML` sur chaque valeur : ce sont des chaînes
+     saisies par l'utilisateur, injectées en innerHTML. */
+  var ACC_ID_CHAMPS = [
+    ['Nom complet', 'name', 'ton nom'],
+    ['Email', 'email', 'ton email'],
+    ['Téléphone', 'phone', 'ton téléphone'],
+    ['Adresse', 'addrLine1', 'ta rue'],
+    ['Code postal', 'addrPostal', 'ton code postal'],
+    ['Ville', 'addrCity', 'ta ville'],
+    ['Département', 'territory', 'ton département']
+  ];
+
+  function renderIdCard(p) {
+    if (!dom.accIdGrid) return;
+    p = p || {};
+    var vals = {
+      name: p.name || (_currentUser && _currentUser.displayName) || '',
+      email: p.email || (_currentUser && _currentUser.email) || '',
+      phone: p.phone || '',
+      /* Même migration douce que le formulaire : un compte d'avant le
+         01/08/2026 n'a qu'un `address` en une ligne. On l'affiche plutôt que
+         d'annoncer « manquant » une donnée qu'on possède. */
+      addrLine1: p.addrLine1 || p.address || '',
+      addrPostal: p.addrPostal || '',
+      addrCity: p.addrCity || '',
+      territory: territoireLisible(p.territory)
+    };
+    dom.accIdGrid.innerHTML = ACC_ID_CHAMPS.map(function (c) {
+      var v = vals[c[1]];
+      return '<div class="acc-id__f">'
+        + '<dt>' + c[0] + '</dt>'
+        + (v
+          ? '<dd>' + escapeHTML(String(v)) + '</dd>'
+          : '<dd class="is-empty">Ajoute ' + c[2] + '</dd>')
+        + '</div>';
+    }).join('');
+  }
+
+  function territoireLisible(code) {
+    if (!code) return '';
+    for (var i = 0; i < TERRITORIES.length; i++) {
+      if (TERRITORIES[i].code === code) {
+        return TERRITORIES[i].flag + ' ' + TERRITORIES[i].name + ' (' + TERRITORIES[i].code + ')';
+      }
+    }
+    return code;
+  }
+
+  /* ── Historique des commandes ───────────────────────────────────────────
+     UNE lecture Firestore alimente DEUX affichages : l'aperçu du Profil (3
+     dernières) et la liste complète de l'onglet Commandes. Deux appels
+     séparés doubleraient les lectures facturées pour montrer les mêmes
+     documents. */
+  var ACC_APERCU_N = 3;
+
+  function libelleStatutCommande(s) {
+    if (s === 'paid') return ['Payée', 'ok'];
+    if (s === 'pending') return ['Paiement en cours', 'wait'];
+    if (s === 'declared') return ['Virement crypto déclaré', 'wait'];
+    if (s === 'refunded') return ['Remboursée', 'off'];
+    /* 'quote' et tout statut inconnu : un devis WhatsApp n'est pas une vente,
+       on ne le présente pas comme telle. */
+    return ['Devis envoyé', 'off'];
+  }
+
+  function carteCommandeHTML(o, numero) {
+    var dateMs = o.date && o.date.toMillis ? o.date.toMillis() : (o.date || Date.now());
+    var st = libelleStatutCommande(o.status);
+    var n = Number(o.items) || 0;
+    var estDevis = o.status === 'quote' || !o.status;
+    return '<div class="acc-order">'
+      + '<div class="acc-order__top">'
+      + '<strong>' + (estDevis ? 'Devis' : 'Commande') + ' #' + numero + '</strong>'
+      + '<span class="acc-order__date">' + escapeHTML(formatReviewDate(dateMs)) + '</span>'
+      + '</div>'
+      + '<div class="acc-order__bot">'
+      + '<span class="acc-order__sum">' + n + ' article' + (n > 1 ? 's' : '') + ' — ' + formatPrice(o.total) + '</span>'
+      + '<span class="acc-order__st acc-order__st--' + st[1] + '">' + st[0] + '</span>'
+      + '</div>'
+      + '</div>';
+  }
+
   function renderOrderHistory() {
-    if (!dom.accHistory || !_fb || !_currentUser) return;
-    dom.accHistory.innerHTML = '<p style="opacity:.5;text-align:center;padding:.5rem 0">Chargement...</p>';
+    var cibles = [dom.accHistory, dom.accRecentOrders].filter(Boolean);
+    if (!cibles.length || !_fb || !_currentUser) return;
+    cibles.forEach(function (el) {
+      el.innerHTML = '<p class="acc-order__msg">Chargement…</p>';
+    });
 
     var ordersRef = _fb.collection(_fb.db, 'users', _currentUser.uid, 'orders');
     var q = _fb.query(ordersRef, _fb.orderBy('date', 'desc'), _fb.limit(20));
 
     _fb.getDocs(q).then(function (snap) {
+      if (dom.accSeeAllOrders) dom.accSeeAllOrders.hidden = snap.size <= ACC_APERCU_N;
       if (snap.empty) {
-        dom.accHistory.innerHTML = '<p style="opacity:.6;text-align:center;padding:.5rem 0">Aucun devis envoyé pour le moment.</p>';
+        cibles.forEach(function (el) {
+          el.innerHTML = '<p class="acc-order__msg">Aucune commande pour le moment.</p>';
+        });
         return;
       }
-      var html = '';
-      var idx = 0;
+      var cartes = [];
       var total = snap.size;
       snap.forEach(function (docSnap) {
-        var o = docSnap.data();
-        var dateMs = o.date && o.date.toMillis ? o.date.toMillis() : (o.date || Date.now());
-        html += '<div style="background:rgba(139,92,246,.04);border:1px solid rgba(139,92,246,.12);border-radius:12px;padding:.8rem 1rem">'
-          + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem">'
-          + '<strong style="font-size:.9rem">Devis #' + (total - idx) + '</strong>'
-          + '<span style="font-size:.78rem;color:var(--muted)">' + formatReviewDate(dateMs) + '</span>'
-          + '</div>'
-          + '<p style="font-size:.85rem;opacity:.8;margin:0">' + o.items + ' article' + (o.items > 1 ? 's' : '') + ' — ' + formatPrice(o.total) + '</p>'
-          + '</div>';
-        idx++;
+        cartes.push(carteCommandeHTML(docSnap.data(), total - cartes.length));
       });
-      dom.accHistory.innerHTML = html;
+      if (dom.accHistory) dom.accHistory.innerHTML = cartes.join('');
+      if (dom.accRecentOrders) dom.accRecentOrders.innerHTML = cartes.slice(0, ACC_APERCU_N).join('');
     }).catch(function (err) {
       console.warn('[Auth] order history failed:', err);
-      dom.accHistory.innerHTML = '<p style="opacity:.6;text-align:center;padding:.5rem 0;color:#f88">Erreur de chargement.</p>';
+      if (dom.accSeeAllOrders) dom.accSeeAllOrders.hidden = true;
+      cibles.forEach(function (el) {
+        el.innerHTML = '<p class="acc-order__msg acc-order__msg--err">Historique non chargé. Recharge la page.</p>';
+      });
     });
   }
 
@@ -15807,19 +15898,40 @@
     var panes = document.querySelectorAll('.acc-pane');
     tabs.forEach(function (tab) {
       tab.addEventListener('click', function () {
-        var target = tab.getAttribute('data-acc-tab');
-        tabs.forEach(function (t) {
-          var active = t === tab;
-          t.classList.toggle('active', active);
-          t.setAttribute('aria-selected', active ? 'true' : 'false');
-        });
-        panes.forEach(function (p) {
-          var active = p.getAttribute('data-acc-pane') === target;
-          p.classList.toggle('active', active);
-          p.hidden = !active;
-        });
+        ouvrirOngletCompte(tab.getAttribute('data-acc-tab'));
       });
     });
+
+    /* Renvois internes (« Modifier mes informations » → Paramètres, « Voir
+       toutes mes commandes » → Commandes). Ils passent par le MÊME chemin que
+       le clic sur l'onglet : un second mécanisme d'ouverture finirait par
+       diverger de celui des onglets. Le focus suit, sinon la page a l'air de
+       n'avoir rien fait pour qui navigue au clavier. */
+    document.querySelectorAll('[data-acc-goto]').forEach(function (el) {
+      el.addEventListener('click', function () {
+        var cible = el.getAttribute('data-acc-goto');
+        ouvrirOngletCompte(cible);
+        var onglet = document.querySelector('.acc-tab[data-acc-tab="' + cible + '"]');
+        if (onglet) {
+          try { onglet.focus(); } catch (_) {}
+          onglet.scrollIntoView({ behavior: 'instant', block: 'center' });
+        }
+      });
+    });
+
+    function ouvrirOngletCompte(target) {
+      if (!target) return;
+      tabs.forEach(function (t) {
+        var active = t.getAttribute('data-acc-tab') === target;
+        t.classList.toggle('active', active);
+        t.setAttribute('aria-selected', active ? 'true' : 'false');
+      });
+      panes.forEach(function (p) {
+        var active = p.getAttribute('data-acc-pane') === target;
+        p.classList.toggle('active', active);
+        p.hidden = !active;
+      });
+    }
   }
 
   function init() {

@@ -96,6 +96,11 @@ var reqPaiement = safeRequire('./check-paiement',    'check-paiement');
    six fois de suite avec un manque, et c'est LUI qui les a trouvés à chaque fois.
    Elle vérifie la PRÉSENCE de ce qu'un tunnel doit contenir — pas l'esthétique. */
 var reqTunnel = safeRequire('./check-tunnel-paiement', 'check-tunnel-paiement');
+/* ⛔ LA MÊME PORTE, ÉTENDUE À TOUT L'ÉCRAN — demandée le 01/08/2026 : « à chaque
+   fois qu'on va créer quelque chose sur le site, on se réfère à ce qui existe
+   déjà sur les plus grandes institutions et notre CSS doit être en accord ».
+   Dès sa pose elle a trouvé deux boutons étirés DÉJÀ présents dans le dépôt. */
+var reqEcrans = safeRequire('./check-ecrans', 'check-ecrans');
 // Le module Revolut est ecrit AVANT d'avoir pu appeler le reseau : tout ce qui
 // est PUR (signature contre le vecteur officiel, commission d'un ordre
 // reessaye, table des etats) s'eprouve ici, sinon la 1re verification aurait
@@ -169,6 +174,7 @@ var reqReconc   = safeRequire('./check-reconciliation', 'check-reconciliation');
   await runOne(reqPrixFui,  'check-prix-fuite');
   await runOne(reqPaiement, 'check-paiement');
   await runOne(reqTunnel,   'check-tunnel-paiement');
+  await runOne(reqEcrans,   'check-ecrans');
   await runOne(reqRevolut,  'check-revolut');
   await runOne(reqReconc,   'check-reconciliation');
 

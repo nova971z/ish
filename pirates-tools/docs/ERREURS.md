@@ -15,13 +15,13 @@
 | Origine | Mécanisme | Cas | Antidote | Porte |
 |---|---|---|---|---|
 | **O1** | Affirmer avant de mesurer | 10 | §3 · §8 | `garde-sortie.js` *(hook Stop)* |
-| **O2** | L'instrument de mesure est faux | 19 | §4.3 | sabotage obligatoire |
+| **O2** | L'instrument de mesure est faux | 22 | §4.3 | sabotage obligatoire |
 | **O3** | Réutiliser sans vérifier le contexte | 8 | §1.4 | `check-lecons.js` |
 | **O4** | Contrainte connue, non appliquée | 3 | §1 | `garde-entonnoir.js` |
 | **O5** | Outil artisanal au lieu de l'outil existant | 1 | §1.4 | aucune — humaine |
 | **O6** | Copie périmée au lieu de la source vivante | 2 | §4.4 | `p7-architecture.js` |
 
-**43 erreurs, 6 mécanismes.** O1 et O2 en concentrent **29 à elles deux** :
+**46 erreurs, 6 mécanismes.** O1 et O2 en concentrent **32 à elles deux** :
 c'est là qu'il faut regarder en premier, toujours.
 
 ---
@@ -88,6 +88,9 @@ confiance qui n'existe pas.*
 | **E-210** | mon assertion « le bouton de réconciliation est branché » | vert après suppression de l'appel | la regex matchait aussi la **définition** `function X()` : une fonction jamais appelée passait pour branchée |
 | **E-211** | mon assertion « un seul accès à `event.data.object` » | **refus à tort** sur du code correct | je comptais les OCCURRENCES ; la ligne légitime en porte deux (`if (… && x) return x;`). La règle réelle est « aucune hors de la bascule », pas « exactement une » |
 | **E-212** | mon assertion « la réponse porte `modeTest` » | vert après retrait du champ | je cherchais le MOT dans le bloc — l'appel `paiement.modeTest()` suffisait à le satisfaire. Récidive exacte d'E-210 : chercher une ressemblance au lieu d'énoncer la règle (`modeTest\s*:`) |
+| **E-221** | ma famille « `.actions` dans `.specs` » de `check-ecrans.js` | verte sous sabotage | la regex du bloc était `([\s\S]*?)(?=<div class="(?:specs\|actions\|head)")` : la **capture s'arrêtait juste avant `.actions`**, donc ne le contenait jamais. Verte **par construction**, sur un dépôt qui portait le défaut à 2 endroits. Corrigée en comptant réellement la profondeur des `<div>` |
+| **E-222** | la même famille, version suivante | **refus à tort** sur 3 blocs sains | elle comptait la profondeur des `<div>` — or un `<form>` n'est **pas** un `<div>` : un `.actions` posé dans un formulaire (qui pose sa propre grille, donc ne s'étire pas) passait pour enfant direct de `.specs`. Les deux sens d'E-208 dans le même contrôle, à deux minutes d'écart |
+| **E-223** | `grep -o 'style="[^"]*"' index.html \| wc -l` → **31** | le vrai compte était **32** | `grep` travaille **ligne par ligne** : un attribut `style=` qui court sur deux lignes lui échappe, là où `[^"]*` en JavaScript traverse les sauts de ligne. Un chiffre faux qui a l'air précis — et il partait devenir un cliquet |
 | **E-220** | l'écran de santé du webhook | conseillait de supprimer et recréer le webhook | conseil UNIQUE quel que soit le motif. Sur une clé manquante il envoyait faire un geste **irréversible** — le secret de signature ne se ré-obtient jamais — pour un problème sans rapport |
 | **E-218** | ma preuve « noterSante avale les pannes » | verte, **deux fois de suite** | (a) `catch (_)` cherché en source : `catch (_) { throw _; }` le satisfait et relance ; (b) je réassignais `fbMod.getFirebase` APRÈS coup, sans effet — `webhook.js` capture la référence au chargement. Le vrai Firebase répondait `db: null`, la fonction sortait avant d'écrire. Corrigé par remplacement du module dans `require.cache` **et un PRÉALABLE** qui échoue si le chemin n'a pas été traversé |
 | **E-216** | `adminReadResponse` | « Erreur réseau : HTTP 400 » | ne lisait que `data.error` (anglais) ; les diagnostics répondent `erreur`/`etape`/`indice` (français). Il JETAIT avant le `.then`, rendant MORT tout le code de mise en forme des trois boutons Revolut — du diagnostic mort dans l'outil de diagnostic |

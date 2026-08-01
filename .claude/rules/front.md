@@ -7,7 +7,46 @@ paths:
   - pirates-tools/vercel.json
 ---
 
-# Règles du front — Service Worker, CSP, budgets
+# Règles du front — écrans, Service Worker, CSP, budgets
+
+## Écrans — vaut pour TOUT ce qu'on construit, pas seulement le paiement
+
+*Posé le 01/08/2026, à la demande de l'user : « à chaque fois qu'on va créer
+quelque chose sur le site, on se réfère à ce qui existe déjà sur les plus
+grandes institutions et notre CSS doit être en accord ».*
+
+**On ne livre pas un écran qu'on n'a pas regardé.** Chromium et Playwright sont
+installés ; l'outil existe et prend deux secondes :
+
+```bash
+node outils/vue.mjs "#/laroute" [--tel] [--connecte] [--clic "#sel"]
+```
+
+Six livraisons du tunnel de paiement ont été corrigées par l'user, une par une,
+sur son iPad, parce que je livrais du code que je n'avais jamais vu tourner.
+La capture sort dans `tests/_sortie/`, **jamais** à la racine du site.
+
+**`.actions` est un FRÈRE de `.specs`, jamais un enfant.** `.specs` est un
+`display:flex` : un `.actions` posé dedans devient un élément flex étiré sur
+toute la hauteur, et son bouton se change en pavé de couleur. Deux boutons de
+la page compte vivaient ainsi sans que personne les voie. *(Exception : à
+l'intérieur d'un `<form>`, qui pose sa propre grille — ou quand le bloc doit
+être remplacé par du contenu injecté, auquel cas on prend `.lv-cta`.)*
+
+**Un `placeholder` n'est pas une étiquette.** Il disparaît à la première
+frappe. Tout champ visible porte un `<label>` ou un `aria-label` ; tout bouton
+sans texte porte un `aria-label`.
+
+**Le style va dans `styles.css`, pas dans un attribut `style=`.** Une valeur
+écrite en dur ne suit aucun jeton de la charte (`--accent`, `--muted`) : le
+jour où la charte bouge, ces écrans-là restent en arrière. Le compte est un
+**cliquet** : il descend, il ne monte pas.
+
+**Porte** : `scripts/check-ecrans.js`, branché dans `scripts/ci.js`.
+⛔ C'est un **plancher**. Le franchir ne veut pas dire « c'est bien fait », mais
+« ce n'est pas grossièrement cassé ». Le reste se regarde.
+
+## Service Worker, CSP, budgets
 
 *Extraites de la mémoire projet le 29/07/2026 (`docs/EXTRACTION-REGLES.md`,
 groupes C, D, I-perf). Chacune vient d'une panne réellement vécue.*
