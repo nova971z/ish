@@ -18,10 +18,17 @@
       raccourci : ce n'est pas une marque du fournisseur. Ces produits ne
       pouvaient PAS avoir de coût relevé, et rien ne le disait.
 
-   ② **Un raccourci resté en simulation.** `dryRun=1` n'écrit RIEN. Festool y
-      est resté après la création de ses 50 fiches, parce que la note qui
-      justifiait ce mode s'était périmée sans que personne la relise. Le
-      raccourci tournait deux fois par jour, pour rien.
+   ② **Un document qui MENT sur la configuration réelle.** `docs/TRAQUEUR-URLS.md`
+      portait encore `dryRun=1` pour Festool — j'en ai déduit, et ANNONCÉ à
+      l'user, que son raccourci tournait en simulation depuis des jours.
+      Sa capture d'écran montrait `dryRun=0`. **Le document était en retard,
+      pas son installation.** J'ai bâti un diagnostic entier, et cette porte,
+      sur la lecture d'une COPIE prise pour la source.
+
+      ⛔ C'est l'origine O6 du registre — « copie périmée au lieu de la source
+      vivante » — commise le jour même où je consignais O7. Une configuration
+      qui vit dans l'app Raccourcis d'un iPad n'est PAS lisible depuis le
+      dépôt : elle se demande, ou elle se lit sur une capture.
 
    ⛔ Le point commun : dans les deux cas l'automatisme tournait, répondait
    `ok: true`, et ne couvrait pas. **Un automatisme qui échoue en silence est
@@ -86,6 +93,18 @@ module.exports = function () {
     return errors;
   }
 
+  /* ⛔ LA COPIE DOIT SE DÉCLARER COMME TELLE.
+     Sans cet avertissement en tête, le prochain qui lit ce fichier — moi
+     compris — le prendra pour la configuration réelle et affirmera des faits
+     sur l'installation de l'user. C'est exactement ce qui s'est passé le
+     01/08/2026. La porte exige donc que la mise en garde y figure. */
+  if (doc.indexOf('IL NE PROUVE RIEN') === -1) {
+    errors.push('[check-traqueur] ⛔ `docs/TRAQUEUR-URLS.md` ne porte plus son avertissement '
+      + '« CE FICHIER EST UNE COPIE DE SECOURS. IL NE PROUVE RIEN. » — sans lui, il sera relu '
+      + 'comme la configuration réelle des raccourcis, et un diagnostic entier peut se bâtir '
+      + 'sur une copie périmée (c\'est arrivé le 01/08/2026).');
+  }
+
   Object.keys(parMarque).forEach(function (marque) {
     var n = parMarque[marque];
     if (SANS_SOURCE[marque]) return;   // trou assumé, motivé, documenté
@@ -106,9 +125,11 @@ module.exports = function () {
     }
     if (m[1] !== '0') {
       errors.push('[check-traqueur] ⛔ le raccourci de `' + marque + '` (' + n + ' fiche(s)) '
-        + 'tourne en `dryRun=' + m[1] + '` : il LIT la page et n\'écrit RIEN. '
-        + 'C\'est un mode d\'essai, pas un état de repos — Festool y est resté après la '
-        + 'création de ses fiches, et ses prix sont restés des suppositions pendant des jours.');
+        + 'est DOCUMENTÉ en `dryRun=' + m[1] + '` : dans ce mode il LIT la page et n\'écrit '
+        + 'RIEN. C\'est un mode d\'essai, pas un état de repos.\n      '
+        + '⚠️ Cette porte lit le DOCUMENT, pas les raccourcis de l\'iPad — elle ne peut '
+        + 'donc signaler qu\'une INCOHÉRENCE DE LA DOC. Vérifier auprès de l\'user avant '
+        + 'd\'affirmer quoi que ce soit sur ce qui tourne vraiment chez lui.');
     }
   });
 

@@ -1,5 +1,19 @@
 # 🔁 Traqueur de prix — URL des raccourcis iPad (sauvegarde)
 
+> ⛔⛔ **CE FICHIER EST UNE COPIE DE SECOURS. IL NE PROUVE RIEN.**
+> La configuration qui TOURNE vit dans l'app Raccourcis de l'iPad de l'user.
+> Ce document ne peut que la retranscrire — et il se périme sans prévenir.
+>
+> **Le 01/08/2026, je l'ai lu et j'ai affirmé à l'user que son raccourci
+> Festool tournait en simulation.** C'était faux : sa capture d'écran montrait
+> `dryRun=0`. Le document était en retard, pas son installation. J'ai construit
+> un diagnostic entier, et une porte, sur cette lecture — et je le lui ai
+> annoncé comme un fait.
+>
+> ⛔ **On ne déduit JAMAIS l'état réel des raccourcis depuis ce fichier.**
+> On le demande, ou on le lit sur une capture. Écart connu au 01/08/2026 :
+> `resultsPerPage` de Festool valait 100 ici, 112 en vrai.
+
 > Si l'app **Raccourcis** bugge et efface les shortcuts, tout est ici pour les
 > reconstruire à l'identique. Chaque raccourci = **3 actions « Obtenir le contenu
 > de l'URL »** dans cet ordre :
@@ -63,15 +77,13 @@ La **1ʳᵉ URL (health) est identique pour les 3 marques** :
 
 ## ⚫ Festool
 1. `https://pirates-tools.com/api/health`
-2. `https://www.cotebrico.fr/8-outils-electroportatifs/s-1/marque-festool/categories_2-outils_electroportatifs?resultsPerPage=100`
+2. `https://www.cotebrico.fr/8-outils-electroportatifs/s-1/marque-festool/categories_2-outils_electroportatifs?resultsPerPage=112`
 3. `https://pirates-tools.com/api/admin?type=price-watch&brand=FESTOOL&dryRun=0`
 
-> ⛔ **CORRIGÉ le 01/08/2026 : `dryRun=1` → `dryRun=0`.** La note ci-dessous
-> disait « ses produits n'existent pas au catalogue » — c'était vrai à
-> l'écriture, ça ne l'est plus : **50 fiches Festool** y sont depuis. Le
-> raccourci tournait donc deux fois par jour en SIMULATION, sans jamais rien
-> écrire, et ces 50 produits n'ont jamais eu de coût relevé. Une note qui se
-> périme devient un mensonge qui tourne tout seul.
+> ⚠️ **CE DOCUMENT ÉTAIT EN RETARD, PAS LE RACCOURCI.** Il portait encore
+> `dryRun=1` et `resultsPerPage=100` le 01/08/2026, alors que le raccourci
+> réel de l'user était déjà en `dryRun=0` avec `resultsPerPage=112`.
+> Corrigé d'après SA capture d'écran — la seule source qui fasse foi ici.
 
 ---
 
