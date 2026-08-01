@@ -72,5 +72,35 @@ module.exports = function () {
       + 'Corriger `price`, jamais `price_ht`.\n    ' + incoherents.slice(0, 12).join('\n    ')
       + (incoherents.length > 12 ? '\n    … et ' + (incoherents.length - 12) + ' autres' : ''));
   }
+  /* ── ⛔ AUCUN FRAIS DE PORT NE S'ANNONCE — ils sont DANS le prix ────────
+     Trouvé le 01/08/2026 sur une capture de l'user : la page devis affichait
+     « Gratuit » en haut et « à partir de 29,90 € » en bas. Deux affirmations
+     contradictoires, dont une seule était vraie.
+
+     Le fait, mesurable : `api/_lib/pricing-model.js` calcule le prix « une fois
+     TOUT payé : transport (Colissimo ou container), octroi de mer… ». Et
+     `deliveryCents` vaut 0 sauf pour une COURSE de coursier, qui n'est pas
+     l'expédition.
+
+     Annoncer un supplément qui n'existe pas, c'est un prix inexact au sens de
+     J4 — et un frein à l'achat pour rien. Trois écrans le faisaient : la page
+     devis, le message WhatsApp, et la fiche territoire (celle-là avant même
+     qu'un outil soit au panier). */
+  var APPJS = path.join(__dirname, '..', 'app.js');
+  if (fs.existsSync(APPJS)) {
+    var src = fs.readFileSync(APPJS, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+    var annonces = (src.match(/(Frais de port|Livraison estimée)[^\n]{0,120}(à partir de|formatPrice\(est\.price\))/g) || []);
+    if (!annonces.length) {
+      annonces = (src.match(/formatPrice\(est\.price\)/g) || []);
+    }
+    if (annonces.length) {
+      errors.push('[check-prix-affiches] ⛔⛔ un écran annonce à nouveau des frais de port ('
+        + annonces.length + ' occurrence(s)). Le transport est DÉJÀ compris dans le prix de '
+        + 'chaque outil — voir `api/_lib/pricing-model.js`. Annoncer un supplément inexistant '
+        + 'contredit le « Gratuit » affiché ailleurs, donne un prix inexact au sens de J4, et '
+        + 'fait fuir le client pour une somme qu\'il ne paiera jamais.');
+    }
+  }
+
   return errors;
 };

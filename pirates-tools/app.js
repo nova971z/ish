@@ -765,8 +765,12 @@
     });
     lines.push('');
     lines.push('*Total TTC : ' + formatPrice(total) + '*');
+    /* ⛔ Même correction qu'à l'écran (01/08/2026) : le message annonçait
+       « à partir de 29,90 € » alors que le transport est DÉJÀ dans le prix de
+       chaque outil. Le client lisait « Gratuit » sur le site et un supplément
+       dans son message — la contradiction survivait au copier-coller. */
     var est = shippingEstimateFor(t.code);
-    lines.push('Livraison estimée : ' + est.days + ' (à partir de ' + formatPrice(est.price) + ')');
+    lines.push('Livraison incluse — délai estimé : ' + est.days);
     lines.push('\nMerci de confirmer la disponibilité et le délai de livraison.');
     return lines.join('\n');
   }
@@ -1088,8 +1092,21 @@
     var shippingEl = document.getElementById('devisShipping');
     if (shippingEl) {
       shippingEl.hidden = false;
+      /* ⛔ « à partir de 29,90 € » A ÉTÉ RETIRÉ (01/08/2026) — c'était FAUX.
+         Le transport est déjà compris dans le prix de chaque outil : voir
+         `api/_lib/pricing-model.js` en tête — « une fois TOUT payé : transport
+         (Colissimo ou container), octroi de mer… ». Et `deliveryCents` vaut 0
+         sauf pour une COURSE de coursier, qui n'a rien à voir avec l'expédition.
+
+         L'écran affichait donc « Gratuit » en haut et « à partir de 29,90 € »
+         en bas : deux affirmations contradictoires, dont une seule était vraie.
+         Annoncer un supplément qui n'existe pas, c'est un prix inexact au sens
+         de J4 — et un frein à l'achat pour rien.
+
+         Le DÉLAI, lui, reste : c'est la seule chose que le client ne peut pas
+         deviner, et il en a besoin. */
       shippingEl.innerHTML = '<span class="devis-shipping__label">🚢 Livraison ' + escapeHTML(terrInfo.name) + '</span>'
-        + '<span class="devis-shipping__value">à partir de ' + formatPrice(shipping.price) + '</span>'
+        + '<span class="devis-shipping__value">incluse</span>'
         + '<span class="devis-shipping__delay">' + shipping.days + '</span>';
     }
 
@@ -15371,7 +15388,12 @@
         + '</div>'
         + '<div class="terr-ship-card">'
         + '<div class="terr-ship-card__icon" aria-hidden="true">📦</div>'
-        + '<div><strong>Frais de port estimés</strong><p>à partir de ' + formatPrice(est.price) + '</p></div>'
+        /* ⛔ Troisième et dernier endroit qui annonçait des frais de port
+           inexistants (01/08/2026). Le transport est compris dans le prix de
+           chaque outil — trois écrans le contredisaient, dont celui-ci qui
+           accueille le visiteur avant même qu'il ait mis un outil au panier.
+           C'est celui qui coûtait le plus de ventes. */
+        + '<div><strong>Frais de port</strong><p>Inclus dans le prix</p></div>'
         + '</div>'
         + '<div class="terr-ship-card">'
         + '<div class="terr-ship-card__icon" aria-hidden="true">🛡️</div>'
