@@ -69,6 +69,15 @@ var DEFAULT_CONFIG = {
   commissionPct: 0.028,
   commissionFix: 0.20,
   packaging: 0.5,             // emballage (carton/bulles récupérés)
+  /* ⚠️ ABONNEMENT DU FOURNISSEUR D'ENCAISSEMENT — 10 €/mois, soit 120 €/an
+     (demande de l'user, 01/08/2026 : « il faut que ça comptabilise
+     l'abonnement à dix euros par mois ainsi que les frais de vente »).
+     Il est SÉPARÉ des autres frais fixes pour rester lisible et modifiable
+     seul le jour où le tarif change. Les FRAIS DE VENTE, eux, ne sont pas
+     estimés ici : chaque paiement porte sa commission RÉELLE, relue chez le
+     fournisseur — voir `commissionPct` pour la seule estimation, utilisée au
+     calcul de prix AVANT la vente. */
+  abonnementMensuel: 10,      // €/mois, encaissement
   fixedAnnual: 1000,          // CFE + assurance + banque (sans comptable), €/an
   ordersPerYear: 400,         // pour répartir les frais fixes par commande
   // Lettre suivie Outre-mer pour les petits objets légers (≤ 500 g) : ~8 €,
@@ -106,7 +115,8 @@ function colissimoCost(weightKg, grid) {
 
 // Quote-part de frais fixes par commande.
 function fixedPerOrder(cfg) {
-  return (cfg.ordersPerYear > 0) ? (cfg.fixedAnnual / cfg.ordersPerYear) : 0;
+  var annuel = (cfg.fixedAnnual || 0) + 12 * (cfg.abonnementMensuel || 0);
+  return (cfg.ordersPerYear > 0) ? (annuel / cfg.ordersPerYear) : 0;
 }
 
 // Taux d'octroi (externe+régional) applicable au produit sur le territoire de réf.

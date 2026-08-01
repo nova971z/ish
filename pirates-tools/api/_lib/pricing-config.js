@@ -15,7 +15,11 @@ var TTL = 30000; // 30 s
 var ALLOWED = [
   'autoPrice', 'mode', 'targetNet', 'is', 'tvaFR',
   'stripePct', 'stripeFix', 'packaging', 'fixedAnnual', 'ordersPerYear',
-  'colissimo', 'containerPerUnit', 'lettre', 'heavyKg', 'refTerritory', 'douanePerParcel'
+  'colissimo', 'containerPerUnit', 'lettre', 'heavyKg', 'refTerritory', 'douanePerParcel',
+  // Abonnement encaissement (Revolut) : le montant mensuel et, si on le
+  // connaît, la date d'ouverture. Sans date, la compta part du premier
+  // encaissement — jamais d'un mois inventé (voir accounting.moisAbonnes).
+  'abonnementMensuel', 'abonnementDebutMs'
 ];
 
 function defaults() {

@@ -1,10 +1,12 @@
 // api/_lib/accounting.js — Compte de résultat 100 % RÉEL (aucune estimation).
 //
 // Tout est calculé sur des données réelles :
-//   • Revenus  = journal `payments` (l ancien fournisseur) — montant encaissé exact.
+//   • Revenus  = journal `payments` (Revolut) — montant encaissé exact.
 //   • Coût des marchandises vendues (COGS) = coût d'achat RÉEL snapshoté à la vente
 //     (payments.cogsHtCents, écrit par le webhook).
-//   • Frais l ancien fournisseur = commission RÉELLE prélevée (payments.stripeFeeCents).
+//   • Frais de VENTE Revolut = commission RÉELLE prélevée sur chaque encaissement
+//     (payments.stripeFeeCents — nom de champ hérité, contenu bien réel).
+//   • ABONNEMENT Revolut = 10 €/mois, compté mois par mois (voir moisAbonnes()).
 //   • Autres charges (transport payé, octroi, CFE, assurance…) = SAISIES par
 //     l'exploitant dans la collection `charges` (comme tout logiciel de compta).
 //   • IS = barème réel (15 % jusqu'à 42 500 € de bénéfice, 25 % au-delà).
@@ -46,8 +48,8 @@ function computeIS(benefice, cfg) {
    · Il n'annule PAS forcément le coût d'achat : si l'outil a déjà été commandé
      chez le fournisseur, le coût reste — l'outil part en stock, pas en fumée.
      D'où `cogsAnnuleHt`, saisi au cas par cas.
-   · La commission l ancien fournisseur n'est PAS supposée rendue. `stripeFeeRendu` se saisit
-     d'après ce que le tableau de bord l ancien fournisseur montre RÉELLEMENT (0 par défaut,
+   · La commission Revolut n'est PAS supposée rendue. `commissionRendue` se saisit
+     d'après ce que le tableau de bord Revolut montre RÉELLEMENT (0 par défaut,
      l'hypothèse la plus défavorable). Ce fichier ne calcule que du réel : une
      supposition polie y serait un mensonge.
 
@@ -88,6 +90,53 @@ function applyRefunds(refunds, cfg) {
     t.parMois[k].nb += 1;
   });
   return t;
+}
+
+/* ABONNEMENT REVOLUT — la charge qu'on ne voit jamais passer
+   ─────────────────────────────────────────────────────────────────────────
+   Revolut prélève DEUX choses, et pas au même endroit :
+     · une commission par VENTE, retenue sur l'encaissement — elle est déjà
+       dans `payments.stripeFeeCents`, montant réel écrit par le webhook ;
+     · un ABONNEMENT MENSUEL, débité du compte, qui ne touche AUCUN paiement
+       et n'apparaît donc dans aucune ligne de `payments`.
+
+   Le second est invisible du journal des ventes : sans cette fonction, il
+   manquerait au résultat 12 × 10 € par an. Un compte de résultat auquel il
+   manque une charge fixe n'est pas « approximatif », il est faux — et il est
+   faux dans le sens qui flatte.
+
+   ⚠️ CE N'EST PAS UNE ESTIMATION, et ça ne doit jamais le devenir. On ne
+   compte que des mois RÉELLEMENT abonnés :
+     · le départ est `cfg.abonnementDebutMs` s'il est saisi ;
+     · sinon, le mois du PREMIER encaissement — un paiement a forcément
+       transité par un compte ouvert ;
+     · sans aucun des deux, la réponse est ZÉRO mois, pas un chiffre inventé.
+   Le nombre de mois est renvoyé à côté du montant : un total qu'on ne peut
+   pas recalculer soi-même n'est pas vérifiable.
+
+   Renvoie { mois, mensuel, total, depuis } — montants en euros. */
+function moisAbonnes(succeeded, cfg) {
+  var mensuel = Number(cfg && cfg.abonnementMensuel) || 0;
+  var vide = { mois: 0, mensuel: mensuel, total: 0, depuis: '' };
+  if (!(mensuel > 0)) return vide;
+
+  var debut = Number(cfg && cfg.abonnementDebutMs) || 0;
+  if (!debut) {
+    (succeeded || []).forEach(function (p) {
+      var ms = Number(p && p.recordedAtMs) || 0;
+      if (ms > 0 && (!debut || ms < debut)) debut = ms;
+    });
+  }
+  if (!debut) return vide;                 // rien de réel à compter
+
+  var fin = Number(cfg && cfg.nowMs) || Date.now();
+  if (fin < debut) return vide;
+  var a = new Date(debut), b = new Date(fin);
+  // Mois entamé = mois facturé : un abonnement se paie d'avance, pas au prorata.
+  var nb = (b.getUTCFullYear() - a.getUTCFullYear()) * 12
+    + (b.getUTCMonth() - a.getUTCMonth()) + 1;
+  if (!(nb > 0)) return vide;
+  return { mois: nb, mensuel: mensuel, total: round2(nb * mensuel), depuis: monthKey(debut) };
 }
 
 // payments : [{ amountCents, cogsHtCents, stripeFeeCents, status, territoryDeclared, recordedAtMs }]
@@ -145,8 +194,13 @@ function synthesize(payments, charges, cfg, refunds) {
   cogs -= rb.cogsAnnule;               // outil jamais commandé → coût annulé
   commission -= rb.commissionRendueTot;            // commission réellement rendue, saisie
 
+  // Abonnement Revolut : charge FIXE, invisible du journal des ventes.
+  var abo = moisAbonnes(succeeded, cfg);
+
   var margeBrute = caHt - cogs;
-  var resultatExpl = margeBrute - commission - chargesTotal;   // comptable (dons en charge)
+  // ⚠️ L'abonnement se retranche AU MÊME TITRE que la commission : c'est de
+  // l'argent sorti du compte. L'oublier ici gonflerait le résultat, donc l'IS.
+  var resultatExpl = margeBrute - commission - abo.total - chargesTotal;   // comptable (dons en charge)
   // Fiscal : dons réintégrés dans la base IS, puis réduction 60 % plafonnée.
   var baseIS = resultatExpl + dons;
   var plafondMecenat = Math.max(20000, 0.005 * caHt);
@@ -181,6 +235,11 @@ function synthesize(payments, charges, cfg, refunds) {
     marge_brute: round2(margeBrute),
     frais_encaissement: round2(commission),
     frais_stripe: round2(commission),   // alias hérité — lu par d'anciens écrans
+    // Les DEUX coûts Revolut, séparés : la commission suit les ventes,
+    // l'abonnement tombe même un mois sans vente. Les mélanger empêcherait
+    // de voir lequel des deux coûte le plus.
+    abonnement_encaissement: abo.total,
+    abonnement_detail: abo,
     charges_saisies: round2(chargesTotal),
     charges_par_categorie: chargesParCat,
     resultat_exploitation: round2(resultatExpl),
@@ -266,4 +325,4 @@ function monthKey(ms) {
 }
 
 module.exports = { synthesize: synthesize, brandStats: brandStats, computeIS: computeIS,
-  applyRefunds: applyRefunds, _round2: round2, _tvaFor: tvaFor };
+  applyRefunds: applyRefunds, moisAbonnes: moisAbonnes, _round2: round2, _tvaFor: tvaFor };

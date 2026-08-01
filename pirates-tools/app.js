@@ -9271,6 +9271,46 @@
     });
   }
 
+  /* ── REMISE À ZÉRO DE L'HISTORIQUE, CÔTÉ CLIENT ────────────────────────
+     Demandée par l'user le 01/08/2026, pour TOUS les clients.
+
+     ⛔⛔ ÇA NE SUPPRIME AUCUNE ÉCRITURE COMPTABLE, et ce n'est pas un détail
+     d'implémentation : le journal `payments/` est la trace des recettes de
+     l'entreprise. Si un client pouvait l'effacer depuis son compte, n'importe
+     lequel de ses clients pourrait détruire ses livres — et il ne s'en
+     apercevrait qu'en fin d'exercice.
+
+     Le serveur pose donc une DATE DE MASQUAGE sur le profil : l'historique
+     n'affiche plus que ce qui est postérieur. Les livres restent intacts, la
+     comptabilité aussi, et le client repart d'un écran vide. C'est ce que fait
+     n'importe quel espace client sérieux.
+
+     ⚠️ DEUX CONFIRMATIONS, comme demandé : la fenêtre native s'ouvre, puis une
+     seconde. Sur iPad c'est un vrai dialogue système, impossible à rater. */
+  function razHistoriqueClient() {
+    if (!window.confirm(
+      'Vider ton historique de commandes ?\n\n'
+      + 'Il disparaîtra de ton compte. Tes factures et la comptabilité de la '
+      + 'boutique ne sont PAS touchées.')) return;
+    if (!window.confirm('Dernière confirmation : on vide ton historique ?')) return;
+    var btn = document.getElementById('accRazHisto');
+    if (btn) { btn.disabled = true; btn.textContent = 'Nettoyage…'; }
+    jsonAuthHeaders().then(function (headers) {
+      return fetch(apiBaseUrl() + '/api/contact', {
+        method: 'POST', headers: headers,
+        body: JSON.stringify({ type: 'raz-mon-historique' })
+      });
+    }).then(function (r) { return r.json(); }).then(function (d) {
+      if (!d || !d.ok) throw new Error((d && d.error) || 'échec');
+      toast('Historique vidé', 'success');
+      renderOrderHistory();
+    }).catch(function (e) {
+      toast('Historique non vidé : ' + ((e && e.message) || 'erreur'), 'error');
+    }).then(function () {
+      if (btn) { btn.disabled = false; btn.textContent = '🗑️ Vider mon historique'; }
+    });
+  }
+
   function updateLoyaltyBar(val) {
     if (dom.accFill) dom.accFill.style.width = val + '%';
     if (dom.accCursor) dom.accCursor.style.left = val + '%';
@@ -9753,6 +9793,9 @@
 
     // Logout
     if (dom.accLogout) dom.accLogout.addEventListener('click', handleLogout);
+    // Vider son historique — masque l'affichage, n'efface aucune facture.
+    var razHistoBtn = document.getElementById('accRazHisto');
+    if (razHistoBtn) razHistoBtn.addEventListener('click', razHistoriqueClient);
     var delForm = document.getElementById('deleteAccountForm');
     if (delForm) delForm.addEventListener('submit', handleDeleteAccount);
 
@@ -12311,43 +12354,53 @@
 
     comptaLoadCalc();
     comptaLoadAccounting();
-    /* Deux clics OBLIGATOIRES, et le premier COMPTE ce qui va disparaître.
-       Un effacement définitif ne part jamais sur un clic isolé : le premier
-       appel est un essai côté serveur, qui ne supprime rien. */
+    /* DEUX FENÊTRES DE CONFIRMATION, comme côté client — un effacement
+       définitif ne part jamais sur un clic isolé.
+
+       ⚠️ Pourquoi une fenêtre plutôt qu'un bouton qui change de texte : un
+       bouton armé reste armé, et un doigt qui repasse dessus efface les
+       livres sans rien relire. La fenêtre native d'iPad, elle, se lit.
+
+       Le premier appel serveur est un ESSAI : il ne supprime rien, il COMPTE.
+       Le chiffre part dans la fenêtre — on ne confirme pas à l'aveugle. */
     var razBtn = document.getElementById('comptaRaz');
     var razEtat = document.getElementById('comptaRazEtat');
     if (razBtn) razBtn.addEventListener('click', function () {
-      if (razBtn.dataset.arme !== '1') {
-        razBtn.disabled = true;
-        adminPostType('raz-compta', {}).then(function (d) {
-          var c = (d && d.compte) || {};
-          var tot = Object.keys(c).reduce(function (s2, k) { return s2 + Math.max(0, c[k]); }, 0);
-          razBtn.dataset.arme = '1';
-          razBtn.disabled = false;
-          razBtn.textContent = '⚠️ CONFIRMER la suppression de ' + tot + ' écriture(s)';
-          if (razEtat) razEtat.textContent = 'paiements ' + (c.payments || 0)
-            + ' · charges ' + (c.charges || 0) + ' · avoirs ' + (c.refunds || 0)
-            + ' · notifications ' + (c.stripe_events || 0)
-            + ' — clique à nouveau pour effacer DÉFINITIVEMENT. Les comptes clients et le catalogue ne sont PAS touchés.';
-        }).catch(function (e) {
-          razBtn.disabled = false;
-          if (razEtat) razEtat.textContent = 'Comptage impossible : ' + ((e && e.message) || 'erreur');
-        });
-        return;
-      }
       razBtn.disabled = true;
-      razBtn.textContent = 'Suppression…';
-      adminPostType('raz-compta', { confirmer: 'OUI' }).then(function (d) {
-        var e2 = (d && d.efface) || {};
-        var tot = Object.keys(e2).reduce(function (s2, k) { return s2 + e2[k]; }, 0);
-        razBtn.textContent = '✅ ' + tot + ' écriture(s) effacée(s)';
-        razBtn.dataset.arme = '';
-        if (razEtat) razEtat.textContent = 'Comptabilité remise à zéro. Recharge la page.';
-        renderAdminCompta();
+      razBtn.textContent = 'Comptage…';
+      adminPostType('raz-compta', {}).then(function (d) {
+        var c = (d && d.compte) || {};
+        var tot = Object.keys(c).reduce(function (s2, k) { return s2 + Math.max(0, c[k]); }, 0);
+        razBtn.disabled = false;
+        razBtn.textContent = '🗑️ Remettre la comptabilité à zéro';
+        var detail = 'paiements ' + (c.payments || 0)
+          + ' · charges ' + (c.charges || 0) + ' · avoirs ' + (c.refunds || 0)
+          + ' · notifications ' + (c.stripe_events || 0);
+        if (razEtat) razEtat.textContent = detail;
+        if (!tot) {
+          if (razEtat) razEtat.textContent = 'Rien à effacer : la comptabilité est déjà vide.';
+          return;
+        }
+        if (!window.confirm(
+          'Remettre la comptabilité à ZÉRO ?\n\n'
+          + tot + ' écriture(s) seront effacées DÉFINITIVEMENT :\n' + detail
+          + '\n\nLes comptes clients et le catalogue ne sont PAS touchés.')) return;
+        if (!window.confirm(
+          'Dernière confirmation : on efface les ' + tot + ' écriture(s) ?\n\n'
+          + 'Cette action est irréversible.')) return;
+        razBtn.disabled = true;
+        razBtn.textContent = 'Suppression…';
+        return adminPostType('raz-compta', { confirmer: 'OUI' }).then(function (d2) {
+          var e2 = (d2 && d2.efface) || {};
+          var n = Object.keys(e2).reduce(function (s2, k) { return s2 + e2[k]; }, 0);
+          razBtn.disabled = false;
+          razBtn.textContent = '🗑️ Remettre la comptabilité à zéro';
+          if (razEtat) razEtat.textContent = n + ' écriture(s) effacée(s). Comptabilité remise à zéro.';
+          renderAdminCompta();
+        });
       }).catch(function (e) {
         razBtn.disabled = false;
         razBtn.textContent = '🗑️ Remettre la comptabilité à zéro';
-        razBtn.dataset.arme = '';
         if (razEtat) razEtat.textContent = 'Échec : ' + ((e && e.message) || 'erreur');
       });
     });
@@ -12924,7 +12977,15 @@
       + row('= Chiffre d\'affaires HT', eur(a.ca_ht), true)
       + row('− Coût des marchandises vendues', eur(a.cogs))
       + row('= Marge brute', eur(a.marge_brute), true)
-      + row('− Commission d\'encaissement (réelle)', eur(a.frais_encaissement != null ? a.frais_encaissement : a.frais_stripe))
+      // Les deux coûts Revolut, séparés : la commission suit les ventes,
+      // l'abonnement tombe même un mois sans vente.
+      + row('− Frais de vente Revolut (commission réelle)', eur(a.frais_encaissement != null ? a.frais_encaissement : a.frais_stripe))
+      + row('− Abonnement Revolut'
+          + ((a.abonnement_detail && a.abonnement_detail.mois > 0)
+            ? ' (' + a.abonnement_detail.mois + ' mois × ' + eur(a.abonnement_detail.mensuel)
+              + ', depuis ' + a.abonnement_detail.depuis + ')'
+            : ''),
+        eur(a.abonnement_encaissement || 0))
       + row('− Charges saisies (transport, octroi, CFE, assurance…)', eur(a.charges_saisies))
       + row('= Résultat d\'exploitation', eur(a.resultat_exploitation), true)
       // Mécénat (art. 238 bis CGI) : le don est réintégré fiscalement puis

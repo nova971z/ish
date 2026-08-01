@@ -1,4 +1,4 @@
-// api/_lib/l ancien fournisseur-meta.js — Lignes de commande {key, qty} dans la metadata l ancien fournisseur.
+// api/_lib/paiement-meta.js — Lignes de commande {key, qty} dans la metadata du paiement.
 //
 // Un PaymentIntent (flux Elements) n'a pas de line_items : sans ça, le webhook
 // ne peut ni reconstruire la commande, ni envoyer un email détaillé, ni la

@@ -1,4 +1,4 @@
-// scripts/check-webhook-claim.js — Idempotence du webhook l ancien fournisseur (chemin de l'argent).
+// scripts/check-webhook-claim.js — Idempotence du webhook de paiement (chemin de l'argent).
 // Vérifie la machine à états stripe_events (claimDecision, PURE), le caractère
 // CRITIQUE du journal payments/ (throw → 500 → re-livraison l ancien fournisseur) et
 // l'idempotence du numéro de facture en reprise (réutilisation, pas de trou).

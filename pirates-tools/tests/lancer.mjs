@@ -28,7 +28,10 @@ const NOYAU = [
   'plan12-serveur.mjs',  // adresse e-mail vérifiée exigée
   'course-pay.mjs',      // la modale de paiement des outils
   'plan10.mjs',          // panier rendu à l'annulation
-  'accordE2E.mjs'        // l'accord de bout en bout
+  'accordE2E.mjs',       // l'accord de bout en bout
+  // Un effacement mal gardé ne se répare pas après coup : la garde se prouve
+  // avant, pas le jour où quelqu'un a vidé quelque chose par erreur.
+  'raz-deux-clics.mjs'
 ];
 
 const args = process.argv.slice(2);

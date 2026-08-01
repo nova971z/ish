@@ -4527,12 +4527,29 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .acc-ligne__prix em { font-style: normal; color: var(--muted); font-weight: 500; }
 
 .acc-danger { border-color: rgba(244,67,54,.25); }
-.acc-logout-btn {
+/* ⚠️ Une action DESTRUCTRICE ne se colle pas à la liste qu'elle efface :
+   collée, elle se clique en visant la dernière commande. On l'isole. */
+.acc-actions--danger {
+  margin-top: 1.6rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid rgba(244,67,54,.2);
+}
+/* ⚠️ SPÉCIFICITÉ — pourquoi le sélecteur est doublé.
+   `.actions .btn` (0,2,0) peint TOUT bouton d'un `.actions` en dégradé cyan,
+   celui de l'appel à l'action principal. `.acc-logout-btn` seul ne pèse que
+   (0,1,0) : il perdait, en silence. Résultat constaté à la capture du
+   01/08/2026 : « Vider mon historique » et « Se déconnecter » s'affichaient
+   exactement comme « Mes livraisons ». Une action DESTRUCTRICE déguisée en
+   bouton principal, c'est un clic par erreur qui attend son tour. */
+.acc-logout-btn,
+.actions .acc-logout-btn {
   background: rgba(244,67,54,.15);
   color: #f44;
   border: 1px solid rgba(244,67,54,.3);
+  box-shadow: none;
 }
-.acc-logout-btn:hover {
+.acc-logout-btn:hover,
+.actions .acc-logout-btn:hover {
   background: rgba(244,67,54,.25);
 }
 
@@ -8437,7 +8454,10 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 /* Remise à zéro de la comptabilité : action DESTRUCTRICE, isolée du reste des
    commandes de l'écran pour ne pas se cliquer par mégarde. */
 .compta-actions--danger {
-  margin-top: 1.4rem; padding-top: 1rem;
+  /* ⚠️ 1,4 rem ne suffisait pas : le bouton touchait les indicateurs du haut,
+     et une action DESTRUCTRICE collée à des chiffres se clique par erreur.
+     On l'isole franchement. */
+  margin-top: 3rem; padding-top: 1.4rem;
   border-top: 1px solid rgba(244,67,54,.25);
   display: flex; align-items: center; gap: .8rem; flex-wrap: wrap;
 }

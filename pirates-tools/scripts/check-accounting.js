@@ -193,6 +193,42 @@ module.exports = function () {
      === JSON.stringify(acc.synthesize([base1], [], { refTerritory: '971' }, [])),
     'synthesize sans 4e argument == avec une liste vide (aucun appel existant cassé)');
 
+  /* ── ABONNEMENT REVOLUT — la charge fixe qui n'apparaît dans aucune vente ──
+     Revolut prélève une commission par vente (déjà dans `payments`) ET un
+     abonnement mensuel débité du compte, invisible du journal des ventes.
+     Sans ces contrôles, 120 €/an disparaîtraient du résultat — et l'IS serait
+     calculé sur un bénéfice trop élevé. */
+  var payAbo = [{ amountCents: 12000, cogsHtCents: 6000, stripeFeeCents: 200,
+    status: 'succeeded', territoryDeclared: '971', recordedAtMs: Date.UTC(2026, 0, 10) }];
+  var cfgAbo = { refTerritory: '971', abonnementMensuel: 10, nowMs: Date.UTC(2026, 7, 1) };
+
+  // a) Sans date d'ouverture : on part du PREMIER encaissement (janv. → août = 8 mois).
+  var a1 = acc.moisAbonnes(payAbo, cfgAbo);
+  ok(a1.mois === 8, 'abonnement : 8 mois de janvier à août inclus (obtenu ' + a1.mois + ')');
+  near(a1.total, 80, 0.01, 'abonnement : 8 × 10 €');
+  ok(a1.depuis === '2026-01', 'abonnement : le mois de départ est rendu, donc vérifiable');
+
+  // b) Date d'ouverture saisie : elle PRIME sur le premier paiement.
+  var a2 = acc.moisAbonnes(payAbo, Object.assign({}, cfgAbo, { abonnementDebutMs: Date.UTC(2025, 11, 1) }));
+  ok(a2.mois === 9 && a2.depuis === '2025-12', 'abonnement : la date saisie prime sur le premier paiement');
+
+  // c) ⛔ Aucun paiement, aucune date → ZÉRO. Jamais un mois inventé.
+  var a3 = acc.moisAbonnes([], cfgAbo);
+  ok(a3.mois === 0 && a3.total === 0, 'abonnement : rien de réel à compter → 0, pas d\'estimation');
+
+  // d) Montant mensuel à 0 → rien, et pas de division ni de NaN.
+  var a4 = acc.moisAbonnes(payAbo, { nowMs: cfgAbo.nowMs, abonnementMensuel: 0 });
+  ok(a4.total === 0, 'abonnement : montant nul → aucune charge');
+
+  // e) L'abonnement est RETRANCHÉ du résultat, à hauteur exacte de son total.
+  var sAbo = acc.synthesize(payAbo, [], cfgAbo, []);
+  var sSans = acc.synthesize(payAbo, [], { refTerritory: '971', nowMs: cfgAbo.nowMs }, []);
+  near(sAbo.abonnement_encaissement, 80, 0.01, 'abonnement exposé dans la synthèse');
+  near(sSans.resultat_exploitation - sAbo.resultat_exploitation, 80, 0.01,
+    'le résultat baisse EXACTEMENT du montant de l\'abonnement (sinon il est compté à moitié, ou deux fois)');
+  // f) Les frais de VENTE restent comptés à part — deux coûts, deux lignes.
+  near(sAbo.frais_encaissement, 2, 0.01, 'commission de vente réelle, distincte de l\'abonnement');
+
   return errors;
 };
 

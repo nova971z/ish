@@ -685,7 +685,7 @@ module.exports = async function handler(req, res) {
       }
 
       // ── Synthèse comptable (compte de résultat) ────────────────
-      // Revenus RÉELS lus du journal `payments` (l ancien fournisseur) ; structure de résultat
+      // Revenus RÉELS lus du journal `payments` (Revolut) ; structure de résultat
       // ESTIMÉE par le modèle de marge (à valider par l'expert-comptable).
       if (type === 'accounting') {
         const accounting = require('./_lib/accounting');

@@ -60,7 +60,7 @@ module.exports = async function handler(req, res) {
   // (allowlist ci-dessous) peuvent créer/accepter des courses, le temps de
   // valider toute la chaîne de bout en bout. Auth Bearer OBLIGATOIRE.
   if (body.type === 'course-create' || body.type === 'course-list' || body.type === 'course-accept'
-      || body.type === 'courier-status' || body.type === 'mes-commandes' || body.type === 'course-rate'
+      || body.type === 'courier-status' || body.type === 'mes-commandes' || body.type === 'raz-mon-historique' || body.type === 'course-rate'
       || body.type === 'course-deliver' || body.type === 'course-confirm' || body.type === 'course-proof'
       || body.type === 'course-scene' || body.type === 'course-video' || body.type === 'course-dispute'
       || body.type === 'courier-profile' || body.type === 'courier-profile-save'
@@ -553,6 +553,28 @@ async function handleCourses(req, body, cfg, res) {
 
      ⚠️ Rien ici ne touche à la livraison : ni prix de course, ni statut de
      livreur. C'est l'achat de marchandise, et lui seul. */
+  /* ── VIDER SON HISTORIQUE, CÔTÉ CLIENT ────────────────────────────────
+     ⛔⛔ ON NE SUPPRIME AUCUNE ÉCRITURE. `payments/` est la trace des recettes
+     de l'ENTREPRISE : si un client pouvait l'effacer depuis son compte,
+     n'importe lequel d'entre eux pourrait détruire les livres du marchand, et
+     celui-ci ne s'en apercevrait qu'en fin d'exercice.
+
+     On pose donc une DATE DE MASQUAGE sur SON profil, et `mes-commandes` ne
+     rend plus que ce qui lui est postérieur. Le client repart d'un écran vide,
+     la comptabilité est intacte, et rien n'est irréversible côté marchand.
+
+     ⚠️ L'uid vient du jeton VÉRIFIÉ : personne ne peut masquer l'historique
+     d'un autre. */
+  if (body.type === 'raz-mon-historique') {
+    try {
+      await db.collection('users').doc(uid).set(
+        { historiqueMasqueAvant: Date.now() }, { merge: true });
+    } catch (e) {
+      return res.status(503).json({ ok: false, error: 'Historique non vidé, réessaie.' });
+    }
+    return res.status(200).json({ ok: true });
+  }
+
   if (body.type === 'mes-commandes') {
     let snap;
     try {
@@ -560,12 +582,23 @@ async function handleCourses(req, body, cfg, res) {
     } catch (e) {
       return res.status(503).json({ ok: false, error: 'Historique momentanément indisponible.' });
     }
+    /* Date de masquage posée par le client lui-même. Sans elle, 0 : rien
+       n'est caché. */
+    let masqueAvant = 0;
+    try {
+      const u = await db.collection('users').doc(uid).get();
+      masqueAvant = Number((u.exists && u.data().historiqueMasqueAvant) || 0);
+    } catch (e) { /* profil illisible : on n'invente pas de masquage */ }
+
     const commandes = [];
     snap.forEach((d) => {
       const p = d.data() || {};
       /* Seul un paiement ACQUIS entre dans l'historique. Un refus ou une
          tentative abandonnée n'est pas une commande. */
       if (p.status !== 'succeeded' && p.status !== 'paid') return;
+      const quand = Number(p.invoiceDateMs)
+        || (p.recordedAt && p.recordedAt.toMillis ? p.recordedAt.toMillis() : 0);
+      if (masqueAvant && quand && quand <= masqueAvant) return;
       commandes.push({
         id: d.id,
         date: Number(p.invoiceDateMs)
