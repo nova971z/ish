@@ -6828,7 +6828,12 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
    casser ce qu'on ne touche pas. */
 .rc-card-field {
   background: #1a2332; border: 1px solid rgba(255,255,255,.12);
-  border-radius: 10px; padding: 12px; min-height: 46px; box-sizing: border-box;
+  border-radius: 10px; box-sizing: border-box;
+  /* ⛔ Le contenu collait EN HAUT du cadre : `padding: 12px` fixe ne centre
+     rien quand la hauteur du cadre dépasse celle de la ligne. On centre pour
+     de vrai — le champ se place au milieu quelle que soit la hauteur. */
+  display: flex; align-items: center;
+  min-height: 48px; padding: 0 12px;
 }
 .rc-card-field--focused {
   border-color: var(--accent); box-shadow: 0 0 0 2px rgba(var(--accent-rgb), .25);
@@ -6865,8 +6870,8 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
    le bloc « Carte bancaire » avait l'air cassé. 56 px = de quoi loger la ligne
    du champ OU l'indicateur de chargement, sans trou. */
 .stripe-payment-element {
-  min-height: 56px;
-  padding: 4px 0;
+  min-height: 48px;
+  padding: 0;
 }
 .stripe-card-error {
   color: #ef4444;

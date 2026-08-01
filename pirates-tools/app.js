@@ -11039,6 +11039,25 @@
     return { ok: false, reason: 'no_proof' };
   }
 
+  /* ⛔⛔ VIDER LE PANIER APRÈS UN ACHAT — il ne l'était NULLE PART (constaté le
+     01/08/2026 sur le premier achat réel mené de bout en bout). Le client
+     payait, arrivait sur la page Merci, et retrouvait son outil encore au
+     panier : rien ne l'empêchait de repayer la même chose.
+
+     `clearCart()` n'avait qu'un seul appelant dans tout le fichier — le bouton
+     « Vider le panier ». Ce défaut est ANTÉRIEUR à Revolut : il existait déjà
+     du temps de Stripe, il n'était simplement jamais apparu faute d'un achat
+     complet.
+
+     ⛔ APPELÉE UNIQUEMENT depuis la branche « paiement carte PROUVÉ », celle
+     qui crédite aussi la fidélité. Vider au clic sur « Commander » ferait
+     perdre son panier à un client dont la carte est refusée : il devrait tout
+     reprendre, et il ne le ferait pas. */
+  function viderPanierApresAchat() {
+    clearCart();
+    updateCartUI();
+  }
+
   function handleMerciPage() {
     // Called when route changes to /merci
     var pending = null;
@@ -11147,6 +11166,8 @@
       // crypto sera valorisée après vérification humaine du TXID.
       addLoyaltyPurchase(totalNum);
       if (typeof track === 'function') track('purchase', { value: totalNum });
+
+      viderPanierApresAchat();
     }
 
     if (_currentUser && _fb) {

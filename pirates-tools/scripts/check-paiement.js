@@ -1397,6 +1397,37 @@ module.exports = async function () {
     ok(mValide && /addr\.phone/.test(mValide[0]),
       '⛔⛔ le téléphone n\'est plus exigé pour valider l\'adresse de livraison. Le champ '
       + 'peut exister et rester vide : on croit l\'avoir demandé, on ne l\'a pas.');
+    /* ── ⛔⛔ LE PANIER SE VIDE APRÈS UN ACHAT PAYÉ ────────────────────────
+       Constaté le 01/08/2026 sur le premier achat mené de bout en bout : le
+       client payait, arrivait sur la page Merci, et retrouvait son outil ENCORE
+       AU PANIER. Rien ne l'empêchait de repayer la même chose.
+
+       ⚠️ Le défaut était ANTÉRIEUR à Revolut : il a traversé toute la période
+       Stripe sans être vu, parce qu'aucun achat n'avait jamais été mené
+       jusqu'au bout. C'est le genre de trou qu'aucun test unitaire n'attrape —
+       il ne se voit qu'en faisant vraiment le parcours.
+
+       ⛔ Et il doit être vidé au BON endroit : dans la branche « paiement
+       prouvé », jamais au clic sur « Commander ». Un client dont la carte est
+       refusée doit retrouver son panier intact — sinon il devrait tout
+       reprendre, et il ne le ferait pas. */
+    var mVider = APPSRC.match(/function viderPanierApresAchat[\s\S]*?\n  \}/);
+    ok(mVider && /clearCart\s*\(/.test(mVider[0]),
+      '⛔⛔ le panier n\'est plus vidé après un achat payé. Le client paie, arrive sur la '
+      + 'page Merci, et retrouve son outil au panier : rien ne l\'empêche de repayer la '
+      + 'même chose.');
+    /* Elle doit être APPELÉE, pas seulement exister — et depuis la branche qui
+       crédite la fidélité, celle du paiement prouvé. */
+    var appelsVider = APPSRC.replace(/function\s+viderPanierApresAchat/g, '');
+    ok(/viderPanierApresAchat\s*\(\s*\)/.test(appelsVider),
+      '⛔⛔ `viderPanierApresAchat` existe mais n\'est appelée nulle part. Le code peut '
+      + 'être parfait : s\'il ne tourne jamais, le panier reste plein après paiement.');
+    var mMerci = APPSRC.match(/addLoyaltyPurchase\(totalNum\)[\s\S]{0,400}?\n    \}/);
+    ok(mMerci && /viderPanierApresAchat/.test(mMerci[0]),
+      '⛔ le panier n\'est plus vidé DANS la branche du paiement prouvé. Vidé ailleurs — '
+      + 'au clic sur « Commander », par exemple — un client dont la carte est refusée '
+      + 'perdrait son panier et devrait tout reprendre.');
+
     ok(/phone: ship\.addr\.phone/.test(APPSRC),
       '⛔ le téléphone saisi n\'est plus transmis au serveur : il serait demandé au client '
       + 'puis jeté, ce qui est pire que ne pas le demander.');
