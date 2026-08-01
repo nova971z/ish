@@ -519,9 +519,27 @@ async function handleCourses(req, body, cfg, res) {
     }
   }
 
-  // ── Statut de rôle (léger — pilote le bouton du compte) ──
+  /* ── Statut de rôle (léger — pilote le bouton du compte) ──
+     ⛔ FUITE CORRIGÉE LE 01/08/2026. Le front portait `LV_TEST_EMAILS` et
+     `LV_PIECES_BYPASS` EN DUR dans `app.js` : l'adresse personnelle de l'user
+     était lisible par quiconque ouvrait le fichier, et surtout le code
+     DÉSIGNAIT NOMMÉMENT le compte dispensé de pièces justificatives. Publier
+     « cette adresse est exemptée », c'est désigner la cible.
+
+     Le serveur répond désormais pour LE SEUL COMPTE AUTHENTIFIÉ : deux
+     booléens, aucun nom. Il n'énumère rien — un autre compte reçoit `false` et
+     n'apprend l'existence de personne. C'est aussi la minimisation attendue par
+     J3 : on ne publie pas une donnée personnelle dont on n'a pas l'usage.
+     ⚠️ Ces booléens restent un CONFORT D'AFFICHAGE. La décision se reprend
+     ici, à chaque action engageante : un client qui les forcerait à `true` ne
+     gagnerait rien. */
   if (body.type === 'courier-status') {
-    return res.status(200).json({ ok: true, courier: isCourier });
+    return res.status(200).json({
+      ok: true,
+      courier: isCourier,
+      compteTest: isTester,
+      piecesDispense: coursesLib.PIECES_BYPASS_EMAILS.includes(email)
+    });
   }
 
   // ══ PROFIL LIVREUR ════════════════════════════════════════════════════════

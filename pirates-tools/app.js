@@ -3935,23 +3935,34 @@
     { zone: 3, emoji: '🟡', km: '22-34', prix: 74 },
     { zone: 4, emoji: '🔴', km: '34-46', prix: 100 }
   ];
-  // Comptes de TEST (chaîne complète courses actives pour eux seuls — décision
-  // user : son compte perso teste artisan ET livreur, sans documents).
-  var LV_TEST_EMAILS = ['justforwada@icloud.com'];
-  // Comptes DISPENSÉS de pièces justificatives (miroir exact de
-  // PIECES_BYPASS_EMAILS côté serveur — c'est LUI qui décide, ceci n'est que
-  // le confort d'affichage : le serveur refuserait de toute façon).
-  var LV_PIECES_BYPASS = ['justforwada@icloud.com'];
-  function lvPiecesDispense() {
-    try {
-      return !!(_currentUser && _currentUser.email
-        && LV_PIECES_BYPASS.indexOf(String(_currentUser.email).toLowerCase()) !== -1);
-    } catch (_) { return false; }
+  /* ⛔⛔ AUCUNE ADRESSE E-MAIL EN DUR ICI. JAMAIS. (fuite corrigée le 01/08/2026)
+
+     Ce bloc portait deux fois l'adresse personnelle de l'user, dans un fichier
+     SERVI À TOUT LE MONDE. Deux dommages distincts :
+       ① une adresse réelle, moissonnable par n'importe quel robot ;
+       ② surtout, le code DÉSIGNAIT NOMMÉMENT le compte dispensé de pièces
+          justificatives — autrement dit il publiait la cible à viser.
+
+     Les deux verdicts viennent désormais du SERVEUR, pour le seul compte
+     authentifié (`courier-status` → `compteTest`, `piecesDispense`). Le front
+     ne connaît plus aucune liste, donc il ne peut plus en fuiter.
+
+     ⚠️ Valeur de repos : `false`, c'est-à-dire l'état le plus EXIGEANT. Tant
+     que le serveur n'a pas répondu, on demande les pièces. Se tromper dans ce
+     sens fait voir un formulaire de trop à un ayant droit ; se tromper dans
+     l'autre laisserait passer un dossier vide. */
+  var _lvCompteTest = false;
+  var _lvPiecesDispense = false;
+  /* Les deux verdicts se lisent à SIX endroits pour TROIS demandes au serveur :
+     une lecture pouvait donc tomber avant l'arrivée de la réponse. Chaque
+     lecture déclenche donc la demande si elle n'a jamais eu lieu — `lvGetRole`
+     se dédoublonne lui-même (verdict en cache + requête en vol), il n'y a pas
+     de rafale possible. En attendant, la valeur rendue reste `false`. */
+  function lvAssureVerdict() {
+    try { if (typeof lvGetRole === 'function') lvGetRole(); } catch (_) {}
   }
-  function lvIsTester() {
-    try { return !!(_currentUser && _currentUser.email && LV_TEST_EMAILS.indexOf(String(_currentUser.email).toLowerCase()) !== -1); }
-    catch (_) { return false; }
-  }
+  function lvPiecesDispense() { lvAssureVerdict(); return _lvPiecesDispense; }
+  function lvIsTester() { lvAssureVerdict(); return _lvCompteTest; }
 
   var LV_FUEL_DEFAULT = 1.87;  // €/L sans plomb Guadeloupe (réglementé, révisé
                                // chaque mois — modifiable dans Admin → Livreurs)
@@ -5817,6 +5828,12 @@
       return r.json();
     }).then(function (d) {
       if (!d || typeof d.courier !== 'boolean') return null;
+      /* Compte de test et dispense de pièces : le SERVEUR les dit, pour ce
+         compte-ci seulement. Le front n'a plus aucune liste d'adresses — c'est
+         ce qui a fuité le 01/08/2026. On ne grave que des booléens explicites :
+         un champ absent laisse la valeur la plus exigeante (`false`). */
+      _lvCompteTest = d.compteTest === true;
+      _lvPiecesDispense = d.piecesDispense === true;
       return d.courier;
     }).catch(function () {
       return null;                                          // réseau coupé → inconnu
@@ -5827,7 +5844,14 @@
     });
     return _lvRoleInflight;
   }
-  function lvResetRole() { _lvRoleVerdict = null; _lvRoleInflight = null; _lvRoleAt = 0; }
+  /* ⚠️ Les deux verdicts de compte tombent AUSSI : ils sont attachés à une
+     identité. Les laisser survivre à une déconnexion dispenserait le compte
+     suivant des pièces justificatives — exactement le défaut de droit d'accès
+     survivant déjà corrigé pour l'admin. */
+  function lvResetRole() {
+    _lvRoleVerdict = null; _lvRoleInflight = null; _lvRoleAt = 0;
+    _lvCompteTest = false; _lvPiecesDispense = false;
+  }
 
   // Boutons du compte (colonne droite) : « Mes livraisons » pour TOUS ;
   // « Mode livraison » UNIQUEMENT pour les livreurs acceptés (ou testeur).

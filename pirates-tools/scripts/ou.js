@@ -179,7 +179,7 @@ var INDEX = [
            'parametres', 'réglages', 'reglages', 'visuel', 'design'],
     fichiers: ['index.html', 'styles.css', 'app.js'],
     fonctions: ['renderAccount', 'renderIdCard', 'setupAccountTabs'],
-    protege: ['scripts/check-ecrans.js', 'outils/vue.mjs (REGARDER l\'écran)', 'tests/a11y.mjs'],
+    protege: ['scripts/check-ecrans.js', 'outils/vue.mjs (REGARDER l\'écran)', 'tests/a11y.mjs', 'docs/CSS-CARTE.md (les commentaires du CSS y vivent)'],
     regles: ['.claude/rules/front.md'],
     pieges: ['⛔ On ne livre PAS un écran qu\'on n\'a pas regardé : `node outils/vue.mjs "#/laroute" [--tel] [--connecte]`. Six livraisons du tunnel de paiement ont été corrigées par l\'user, une par une, sur son iPad.',
              '`.actions` est un FRÈRE de `.specs`, jamais un enfant : `.specs` est un display:flex, le bouton s\'étire en pavé de couleur.',

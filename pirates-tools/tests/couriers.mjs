@@ -455,8 +455,16 @@ T('Le panneau rappelle que la course va DIRECTEMENT au livreur',
 // Le paiement de la marchandise ouvre bien la modale carte, marquée pour cette course
 await page.click('#acPay');
 await page.waitForTimeout(500);
-// L'adresse valide déclenche la création du PaymentIntent (handlePayAddressChange).
+/* L'adresse valide déclenche la création du PaymentIntent (handlePayAddressChange).
+   ⚠️ E-MAIL ET TÉLÉPHONE SONT OBLIGATOIRES depuis le 01/08/2026 : sans eux
+   `validatePayAddress()` rend `valid: false`, aucune commande n'est créée, et
+   cette assertion tombait sur « aucun ». Le harnais était périmé, pas le code —
+   il testait un formulaire qui n'existait plus.
+   ⛔ Un harnais qui rougit sans qu'on sache s'il accuse le code ou lui-même ne
+   protège plus rien : c'est pour ça qu'il est remis à jour, pas contourné. */
 await page.fill('#payAddrName', 'Kevin L.');
+await page.fill('#payAddrEmail', 'kevin@exemple.invalid');
+await page.fill('#payAddrPhone', '0690112233');
 await page.fill('#payAddrLine1', '12 Rue des Alizés');
 await page.fill('#payAddrPostal', '97180');
 await page.fill('#payAddrCity', 'Sainte-Anne');

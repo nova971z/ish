@@ -1,37 +1,6 @@
-/* =========================================================
-Pirates Tools — styles.css (HARMONISÉ v8 - FINAL)
-• Correction animation et espacement du logo
-• Suppression du logo de fond global
-=========================================================
-
-ÉCHELLE Z-INDEX (référence — valeurs EFFECTIVES ; les règles de la section 45,
-ex-styles inline, l'emportent sur les valeurs de base qu'elles surchargent)
-Couches, du plus bas au plus haut :
-  -1 .......... hero masqué (hero-out) — passe derrière le contenu
-  0–2 ......... halo hero, conteneur logo, fonds de section
-  10–11 ....... #hero (fond) puis #heroLogo (logo au-dessus du halo)
-  15–25 ....... éléments flottants intra-contenu (flèches carrousel, etc.)
-  100–130 ..... petites UI flottantes (badges)
-  999 ......... #dock (barre d'action flottante — §45)
-  1000 ........ .topbar / .backdrop (voile drawer : base 998 surchargée à 1000
-                par §45)
-  1001 ........ .drawer (menu latéral — §45 ; base 999 surchargée)
-  1002 ........ #menu-toggle (toujours cliquable au-dessus du drawer)
-  9000 ........ .pay-modal (paiement)
-  9500 ........ .terr-menu (sélecteur de territoire) / overlays plein écran
-  9600 ........ .consent-bar (bandeau cookies)
-  9700 ........ .wa-float (bouton WhatsApp)
-  10000 ....... #toasts (base 9500 surchargée par §45), .pt-loadbar,
-                .skip-link (feedback tout en haut)
-Règle : ne pas introduire de valeur « magique » hors de ces paliers ; réutiliser
-le palier de la couche concernée.
-========================================================= */
-
-/* ========== 01) THÈME & VARIABLES GLOBALES ========== */
 :root {
 color-scheme: dark;
 
-/* Couleurs */
 --bg: #0a0f14;
 --panel: #0e151c;
 --card: #121b24;
@@ -41,12 +10,6 @@ color-scheme: dark;
 --brand: #19d3ff;
 --brand-2: #00e1b4;
 
-/* Accent violet — la famille dominante du site (C7). Changer l'accent global
-   = éditer ces 5 valeurs (avant : ~300 littéraux éparpillés). --accent-rgb
-   alimente les rgba(var(--accent-rgb), α). NOTE : les textures canvas
-   (BRAND_COLORS, app.js) et les emails serveur (webhook.js, HTML autonome
-   hors CSS du site) gardent leurs littéraux — un canvas et un email ne
-   résolvent pas les custom properties du DOM. */
 --accent: #8B5CF6;
 --accent-rgb: 139, 92, 246;
 --accent-deep: #7C3AED;
@@ -55,34 +18,27 @@ color-scheme: dark;
 --wa-1: #25d366;
 --wa-2: #128c7e;
 
-/* UI */
 --radius: 14px;
 --shadow: 0 10px 24px rgba(0,0,0,.35);
 --container-w: 1100px;
 
-/* Layout dynamiques (pilotés par JS) */
---listGap: 4vh; /* Réduction de l'espacement excessif */
+--listGap: 4vh;
 --heroFadeH: 26vh;
 --safe-top: 70px;
 --app-vh: 1vh;
 
-/* Dock & safe areas */
 --dock-bottom: 14px;
 --dockH: 64px;
 --safe-bottom: env(safe-area-inset-bottom, 0px);
 
-/* Hero États + transitions */
 --hero-scale: 1.06;
 --hero-blur: 8px;
 --hero-duration: 420ms;
 }
 
-/* Upgrade si clamp() dispo (vieux WebKit safe) */
 @supports (height: clamp(18vh,26vh,32vh)) {
 :root { --heroFadeH: clamp(18vh,26vh,32vh); }
 }
-
-/* ========== 02) RESET, BASE & TYPO ========== */
 
 * { box-sizing: border-box; }
 [hidden], .hidden { display: none !important; }
@@ -115,8 +71,6 @@ overscroll-behavior-y: auto;
 -webkit-overflow-scrolling: touch;
 }
 
-/* Couche de masquage du hero après scroll — désactivée */
-
 img, svg, video { max-width: 100%; height: auto; display: block; }
 a { color: inherit; text-decoration: none; }
 a:focus-visible, button:focus-visible {
@@ -141,13 +95,11 @@ box-sizing: border-box;
 #view-home .container { z-index: 1; }
 .empty { opacity: .6; text-align: center; padding: 2rem 0; width: 100%; display: flex; align-items: center; justify-content: center; }
 
-/* Titres */
 h1, h2, h3 { font-weight: 900; letter-spacing: .2px; }
 h1 { font-size: clamp(1.4rem, 1.2rem + 1.5vw, 2rem); }
 h2 { font-size: clamp(1.2rem, 1.05rem + 1vw, 1.6rem); }
 h3 { font-size: 1.05rem; }
 
-/* Catalogue header */
 .catalogue-header {
     margin-bottom: 1.5rem;
     padding-bottom: 1rem;
@@ -165,7 +117,6 @@ h3 { font-size: 1.05rem; }
     opacity: .7;
 }
 
-/* ========== 03) TOPBAR ========== */
 .topbar, #topbar {
 position: fixed;
 top: 0;
@@ -214,7 +165,6 @@ opacity: .95;
 transition: .25s;
 }
 
-/* LOGO TOPBAR */
 .topbar-logo-link {
 display: inline-flex;
 align-items: center;
@@ -234,7 +184,6 @@ backface-visibility: hidden;
 transform: translateZ(0);
 }
 
-/* FORCER la visibilité du logo sur toutes les pages */
 body.page-catalogue .topbar-logo-link,
 body.page-devis .topbar-logo-link,
 body.page-compte .topbar-logo-link,
@@ -254,7 +203,6 @@ flex: 0 1 auto;
 min-width: 0;
 }
 
-/* ========== 04) BOUTONS - COULEURS FORCÉES ========== */
 .btn {
 display: inline-flex;
 align-items: center;
@@ -287,10 +235,7 @@ transition: transform .2s ease, box-shadow .2s ease;
 .btn.btn-social svg { width: 20px; height: 20px; }
 
 .btn.btn-fb {
-/* Bleu Facebook assombri d'un cran : #1877F2 ne donnait que 4.23:1 sous du
-   blanc, #1773E9 donne 4.50:1 (WCAG 1.4.3 AA). Ecart percu DeltaE2000 = 1,77
-   — invisible a l'oeil nu. MEME valeur ici et au pied de page : un seul bleu
-   Facebook sur tout le site. */
+
 background: #1773E9;
 color: #fff;
 box-shadow: 0 4px 12px rgba(23, 115, 233, .35);
@@ -318,7 +263,6 @@ height: 38px;
 .btn.btn-social svg { width: 18px; height: 18px; }
 }
 
-/* ========== 05) MENU LATÉRAL ========== */
 .backdrop {
 position: fixed;
 top: 0;
@@ -469,7 +413,6 @@ body.menu-open { overflow: hidden; }
 .drawer { width: 280px; }
 }
 
-/* ========== 06) HÉRO ========== */
 #hero, .hero-full {
     position: relative;
     height: 100vh;
@@ -479,17 +422,10 @@ body.menu-open { overflow: hidden; }
     overflow: visible;
 }
 
-/* Halo doré derrière le logo hero (accueil uniquement).
-   Ancré au CONTENEUR du logo (.hero-logo-container), pas au viewport : il suit
-   donc exactement le logo et disparaît avec le hero (les règles display:none sur
-   .hero-logo-container hors accueil / au scroll l'emportent avec lui).
-   Localisé (cercle ~logo, pas plein écran) → lit comme une lueur, pas un fond.
-   Voir .hero-logo-container::before plus bas. */
 #hero::before, .hero-full::before {
     display: none;
 }
 
-/* Smooth transition from hero to content */
 #hero::after, .hero-full::after {
     content: '';
     position: absolute;
@@ -517,10 +453,6 @@ body.menu-open { overflow: hidden; }
     box-sizing: border-box;
 }
 
-/* Lueur dorée localisée, pile derrière le logo. Positionnée au centre du
-   conteneur avec la même correction verticale que le flex-centrage (le
-   padding-top décale le logo vers le bas de safe-top/2) → reste centrée sur le
-   logo à toutes tailles. z-index 0 < #heroLogo (11) → toujours derrière. */
 .hero-logo-container::before {
     content: '';
     position: absolute;
@@ -579,7 +511,6 @@ display: none !important;
     transform: scale(1) translateY(0);
 }
 
-/* Masquer le hero sur toutes les pages sauf accueil */
 body:not(.page-home) #hero,
 body:not(.page-home) #heroLogo,
 body:not(.page-home) .hero-logo-container {
@@ -612,13 +543,11 @@ opacity: 1 !important;
 }
 }
 
-/* ========== 07) ACCUEIL — ESPACEMENT ========== */
 #view-home .container {
     margin-top: 0;
     padding-top: 1rem;
 }
 
-/* ========== 08) TOOLBAR & CHAMPS ========== */
 .toolbar {
 position: relative;
 z-index: 20;
@@ -670,7 +599,6 @@ gap: .5rem;
 .select { min-width: auto; }
 }
 
-/* ========== 09) LISTES & CARTES AVEC EFFET NÉON VIOLET ========== */
 .list {
     display: grid;
     gap: 1.2rem;
@@ -680,7 +608,6 @@ gap: .5rem;
     padding: .5rem 0;
 }
 
-/* Pagination catalogue : boutons de page (DOM borné à PAGE_SIZE cartes). */
 .pager {
     display: flex;
     flex-wrap: wrap;
@@ -714,7 +641,6 @@ gap: .5rem;
 .pager__nav { font-size: 1.25rem; line-height: 1; }
 .pager__ellipsis { color: rgba(255,255,255,.4); padding: 0 .2rem; }
 
-/* ── Product Cards ── */
 .product-card {
     display: flex;
     flex-direction: column;
@@ -762,10 +688,7 @@ gap: .5rem;
 
 .product-card__tag {
     position: absolute;
-    /* Bas-gauche (était haut-gauche) : sur cartes étroites, un tag long
-       (BEST-SELLER, ULTRA-COMPACT) en haut chevauchait "EN STOCK" (haut-droite).
-       En bas-gauche, EN STOCK reste seul en haut ; le plafond de largeur + ellipsis
-       garantit qu'il ne rejoint jamais le cœur favori (bas-droite). */
+
     bottom: .6rem;
     left: .6rem;
     max-width: calc(100% - 3.5rem);
@@ -827,7 +750,6 @@ gap: .5rem;
     vertical-align: baseline;
 }
 
-/* Small variant for related products */
 .product-card--sm {
     border-radius: 12px;
 }
@@ -838,7 +760,6 @@ gap: .5rem;
     padding: .5rem .7rem .7rem;
 }
 
-/* Related products grid */
 .related-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -846,7 +767,6 @@ gap: .5rem;
     margin-top: .8rem;
 }
 
-/* No results state */
 .no-results {
     grid-column: 1 / -1;
     text-align: center;
@@ -856,7 +776,6 @@ gap: .5rem;
     opacity: .7;
 }
 
-/* ── Category chips ── */
 .cat-chip {
     display: inline-flex;
     align-items: center;
@@ -886,7 +805,6 @@ gap: .5rem;
     text-shadow: 0 0 8px rgba(var(--accent-rgb), 0.5);
 }
 
-/* CARTES AVEC EFFET NÉON VIOLET */
 .card {
 background: rgba(var(--accent-rgb), 0.05);
 border: 2px solid var(--accent);
@@ -899,7 +817,7 @@ box-shadow:
 0 0 30px rgba(var(--accent-rgb), 0.1),
 inset 0 1px 0 rgba(var(--accent-rgb), 0.2);
 transition: all 0.3s ease;
-/* content-visibility:auto retiré (même bug de peinture skip iOS que .view). */
+
 }
 
 .card:hover {
@@ -993,8 +911,6 @@ white-space: nowrap;
 }
 }
 
-/* ========== 10) PAGE DEVIS ========== */
-
 body.page-devis #view-devis {
   display: block !important;
   visibility: visible !important;
@@ -1014,7 +930,6 @@ body.page-devis #view-devis {
   letter-spacing: -.02em;
 }
 
-/* ── Stats Banner ── */
 .devis-stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1059,14 +974,12 @@ body.page-devis #view-devis {
   margin-top: .2rem;
 }
 
-/* ── Cart Items List ── */
 .devis-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-/* ── Single Cart Item ── */
 .devis-item {
   display: flex;
   gap: .8rem;
@@ -1112,7 +1025,6 @@ body.page-devis #view-devis {
   to { opacity: 0; transform: translateX(40px) scale(.95); height: 0; padding: 0; margin: 0; }
 }
 
-/* ── Item Image ── */
 .devis-item__img-wrap {
   flex-shrink: 0;
   width: 72px;
@@ -1129,7 +1041,6 @@ body.page-devis #view-devis {
   object-fit: cover;
 }
 
-/* ── Item Body ── */
 .devis-item__body {
   flex: 1;
   display: flex;
@@ -1160,20 +1071,15 @@ body.page-devis #view-devis {
   letter-spacing: .04em;
 }
 
-/* ── Item Bottom Row ── */
 .devis-item__bottom {
   display: flex;
   align-items: center;
   gap: .6rem;
   margin-top: .3rem;
-  /* wrap : sur mobile étroit, sous-total + boutons Payer/Supprimer débordaient
-     SUR le stepper quantité (subtotal nowrap + margin-left:auto) et avalaient
-     les taps +/− — détecté par hit-test audit. Avec wrap, la ligne se replie
-     proprement ; aucun effet desktop (l'espace suffit). */
+
   flex-wrap: wrap;
 }
 
-/* ── Qty Stepper ── */
 .devis-item__qty-wrap {
   display: flex;
   align-items: center;
@@ -1217,7 +1123,6 @@ body.page-devis #view-devis {
   color: #fff;
 }
 
-/* ── Subtotal ── */
 .devis-item__subtotal {
   font-size: .9rem;
   font-weight: 700;
@@ -1227,7 +1132,6 @@ body.page-devis #view-devis {
   white-space: nowrap;
 }
 
-/* ── Remove Button ── */
 .devis-remove {
   width: 32px;
   height: 32px;
@@ -1250,7 +1154,6 @@ body.page-devis #view-devis {
   box-shadow: 0 0 12px rgba(239,68,68,.2);
 }
 
-/* ── Empty State ── */
 .devis-empty {
   text-align: center;
   padding: 3rem 1.5rem;
@@ -1279,7 +1182,6 @@ body.page-devis #view-devis {
   margin: 0 0 1.2rem;
 }
 
-/* ── Sticky Footer ── */
 .devis-footer {
   position: sticky;
   bottom: calc(var(--dockH) + var(--safe-bottom) + 20px);
@@ -1316,7 +1218,6 @@ body.page-devis #view-devis {
   gap: 10px;
 }
 
-/* ── Devis Buttons ── */
 .devis-btn {
   flex: 1;
   display: flex;
@@ -1383,9 +1284,6 @@ body.page-devis #view-devis {
   box-shadow: 0 6px 20px rgba(var(--accent-rgb),.4);
 }
 
-
-
-/* ========== 10b) BANDEAU SCROLL PRODUITS (accueil) ========== */
 .home-products-strip {
     width: 100%;
     margin: 3rem 0 2rem;
@@ -1424,8 +1322,6 @@ body.page-devis #view-devis {
     aspect-ratio: 1 / 1;
 }
 
-/* Carte « Voir tout le catalogue » en fin de bandeau (vitrine bornée à
-   HOME_STRIP_MAX cartes — le reste vit dans le catalogue paginé). */
 .product-card--more {
     display: flex;
     flex-direction: column;
@@ -1459,8 +1355,6 @@ body.page-devis #view-devis {
         padding: 0 1rem;
     }
 }
-
-/* ========== 10c) ABONNEMENTS & SERVICES ========== */
 
 .plans-section {
   position: relative;
@@ -1507,7 +1401,6 @@ body.page-devis #view-devis {
   margin: 0;
 }
 
-/* ── Round Orbs ── */
 .plan-orbs {
   display: flex;
   justify-content: center;
@@ -1555,7 +1448,6 @@ body.page-devis #view-devis {
   transition: all .35s ease;
 }
 
-/* Pulse ring animation (hidden by default) */
 .plan-orb__pulse {
   position: absolute;
   inset: -6px;
@@ -1575,7 +1467,6 @@ body.page-devis #view-devis {
   50% { transform: scale(1.12); opacity: 0; }
 }
 
-/* ── Basique — Cool Teal ── */
 .plan-orb--basique .plan-orb__circle {
   border-color: rgba(45,212,191,.2);
   background: rgba(45,212,191,.06);
@@ -1591,7 +1482,6 @@ body.page-devis #view-devis {
 .plan-orb--basique .plan-orb__price { color: #2dd4bf; }
 .plan-orb--basique .plan-orb__emoji { filter: drop-shadow(0 0 6px rgba(45,212,191,.3)); }
 
-/* ── Pro — Electric Blue ── */
 .plan-orb--pro .plan-orb__circle {
   border-color: rgba(59,130,246,.2);
   background: rgba(59,130,246,.06);
@@ -1607,7 +1497,6 @@ body.page-devis #view-devis {
 .plan-orb--pro .plan-orb__price { color: #60a5fa; }
 .plan-orb--pro .plan-orb__emoji { filter: drop-shadow(0 0 6px rgba(59,130,246,.35)); }
 
-/* ── Gold — Luxe Amber ── */
 .plan-orb--gold .plan-orb__circle {
   border-color: rgba(251,191,36,.22);
   background: linear-gradient(135deg, rgba(251,191,36,.08), rgba(245,158,11,.04));
@@ -1636,7 +1525,6 @@ body.page-devis #view-devis {
   50% { filter: drop-shadow(0 0 14px rgba(251,191,36,.6)); }
 }
 
-/* ── Black Metal — Dark Premium ── */
 .plan-orb--black .plan-orb__circle {
   border-color: rgba(192,132,252,.2);
   background: linear-gradient(135deg, rgba(15,10,25,.95), rgba(80,40,120,.15));
@@ -1675,7 +1563,6 @@ body.page-devis #view-devis {
   filter: drop-shadow(0 0 8px rgba(168,85,247,.5));
 }
 
-/* Common active states */
 .plan-orb.is-active .plan-orb__name { color: #fff; }
 .plan-orb.is-active .plan-orb__price { opacity: 1; }
 
@@ -1702,7 +1589,6 @@ body.page-devis #view-devis {
   transition: opacity .3s ease;
 }
 
-/* Tags */
 .plan-orb__tag {
   position: absolute;
   top: -4px; right: -8px;
@@ -1729,7 +1615,6 @@ body.page-devis #view-devis {
   border: 1px solid rgba(192,132,252,.25);
 }
 
-/* ── Chart — Modern Glassmorphism ── */
 .plans-chart {
   border-radius: 16px;
   border: 1px solid rgba(255,255,255,.06);
@@ -1809,7 +1694,6 @@ body.page-devis #view-devis {
   touch-action: none;
 }
 
-/* ── Detail panel ── */
 .plan-detail {
   overflow: hidden;
   max-height: 0;
@@ -1883,7 +1767,6 @@ body.page-devis #view-devis {
   border: 1px solid rgba(52,211,153,.2);
 }
 
-/* Tier-specific detail colors */
 .plan-detail--basique .plan-detail__inner {
   border-color: rgba(45,212,191,.15);
   background: rgba(45,212,191,.04);
@@ -1936,7 +1819,6 @@ body.page-devis #view-devis {
   color: rgba(192,132,252,.8);
 }
 
-/* CTA button in detail panel */
 .plan-detail__cta {
   display: inline-block;
   margin-top: .5rem;
@@ -1971,10 +1853,6 @@ body.page-devis #view-devis {
 }
 .plan-detail__cta:active { transform: scale(.96); }
 
-/* ══════════════════════════════════════════════════════════════
-   ABONNEMENT PAGE — 4 themes distincts
-   ══════════════════════════════════════════════════════════════ */
-
 .abo-page {
   padding: 1rem 1.2rem 3rem;
   min-height: 100vh;
@@ -1996,7 +1874,6 @@ body.page-devis #view-devis {
 }
 .abo-back:hover { color: rgba(255,255,255,.7); }
 
-/* ── Hero header ── */
 .abo-hero {
   text-align: center;
   padding: 2rem 1rem 1.5rem;
@@ -2056,7 +1933,6 @@ body.page-devis #view-devis {
   opacity: .5;
 }
 
-/* ── Features list ── */
 .abo-features {
   margin-bottom: 1.5rem;
 }
@@ -2099,7 +1975,6 @@ body.page-devis #view-devis {
   line-height: 1.4;
 }
 
-/* ── CTA bottom ── */
 .abo-cta-wrap {
   text-align: center;
   padding: 1rem 0 2rem;
@@ -2124,9 +1999,6 @@ body.page-devis #view-devis {
   margin-top: .4rem;
 }
 
-/* ════════════════════════════════════════════════════════════
-   THEME: BASIQUE — Teal / Minimalist Clean
-   ════════════════════════════════════════════════════════════ */
 .abo-page--basique {
   background: linear-gradient(180deg, rgba(45,212,191,.04) 0%, transparent 40%);
 }
@@ -2153,9 +2025,6 @@ body.page-devis #view-devis {
   box-shadow: 0 4px 20px rgba(45,212,191,.3);
 }
 
-/* ════════════════════════════════════════════════════════════
-   THEME: PRO — Electric Blue / Corporate Tech
-   ════════════════════════════════════════════════════════════ */
 .abo-page--pro {
   background: linear-gradient(180deg, rgba(59,130,246,.05) 0%, transparent 40%);
 }
@@ -2182,9 +2051,6 @@ body.page-devis #view-devis {
   box-shadow: 0 4px 20px rgba(59,130,246,.3);
 }
 
-/* ════════════════════════════════════════════════════════════
-   THEME: GOLD — Luxe Amber / Warm Premium
-   ════════════════════════════════════════════════════════════ */
 .abo-page--gold {
   background: linear-gradient(180deg, rgba(251,191,36,.05) 0%, rgba(245,158,11,.02) 30%, transparent 50%);
 }
@@ -2223,9 +2089,6 @@ body.page-devis #view-devis {
   box-shadow: 0 4px 20px rgba(251,191,36,.35);
 }
 
-/* ════════════════════════════════════════════════════════════
-   THEME: BLACK METAL — Dark Iridescent / Ultra Premium
-   ════════════════════════════════════════════════════════════ */
 .abo-page--black {
   background: linear-gradient(180deg, rgba(var(--accent-rgb),.06) 0%, rgba(88,28,135,.03) 30%, transparent 50%);
 }
@@ -2277,7 +2140,6 @@ body.page-devis #view-devis {
   .plan-orbs { gap: 10px; }
 }
 
-/* ========== 10b) AVIS CLIENTS — ACCUEIL ========== */
 .home-reviews {
     width: 100%;
     margin: 2rem 0 0;
@@ -2329,8 +2191,6 @@ body.page-devis #view-devis {
     background-clip: text;
 }
 
-/* ========== 11) BANNIÈRE OUTILS 3D ========== */
-
 .tools-banner {
 width: min(800px, 92vw);
 margin: 3rem auto 2rem;
@@ -2347,7 +2207,6 @@ font-weight: 900;
 text-shadow: 0 0 20px rgba(var(--accent-rgb), 0.6);
 }
 
-/* --- 3D Viewer Carousel --- */
 .tools-3d-viewer {
 position: relative;
 display: flex;
@@ -2375,7 +2234,6 @@ box-shadow:
 --poster-color: transparent;
 }
 
-/* Label overlay */
 .tools-3d-label {
 position: absolute;
 bottom: 16px;
@@ -2405,7 +2263,6 @@ text-shadow: 0 2px 12px rgba(0,0,0,0.7), 0 0 20px rgba(var(--accent-rgb),0.4);
 white-space: nowrap;
 }
 
-/* Counter (e.g. 3 / 12) */
 .tools-3d-counter {
 position: absolute;
 top: 14px;
@@ -2418,7 +2275,6 @@ pointer-events: none;
 z-index: 5;
 }
 
-/* Arrow buttons */
 .tools-3d-arrow {
 flex-shrink: 0;
 width: 44px;
@@ -2450,7 +2306,6 @@ transform: scale(0.95);
 .tools-3d-prev { margin-right: -22px; }
 .tools-3d-next { margin-left: -22px; }
 
-/* Dots navigation */
 .tools-3d-dots {
 position: absolute;
 bottom: -28px;
@@ -2482,12 +2337,10 @@ transform: scale(1.3);
 background: rgba(var(--accent-rgb),0.6);
 }
 
-/* Add bottom margin for dots */
 .tools-banner {
 margin-bottom: 3.5rem;
 }
 
-/* ========== 13) CATALOGUE ========== */
 .cat-list {
 display: flex;
 flex-wrap: wrap;
@@ -2496,10 +2349,6 @@ margin: 0 0 1rem;
 padding: 0;
 }
 
-/* Mobile : RANGÉE UNIQUE défilante (pattern e-commerce standard). En wrap,
-   les 8 chips s'empilaient sur 4 rangées jusqu'au bas de l'écran — la
-   dernière tombait sous le bandeau cookies qui avalait les taps (bug
-   « les boutons catégorie ne marchent pas »). */
 @media (max-width: 640px) {
   .cat-list {
     flex-wrap: nowrap;
@@ -2512,9 +2361,6 @@ padding: 0;
   .cat-list .cat-chip { flex: 0 0 auto; white-space: nowrap; }
 }
 
-/* ========== 14) PDP — LANDING INTERACTIVE (Apple-style) ========== */
-
-/* Navigation retour */
 .pdp-nav {
     position: fixed;
     top: calc(var(--safe-top, 70px) + 8px);
@@ -2540,14 +2386,10 @@ padding: 0;
     border-color: rgba(var(--accent-rgb), 0.6);
 }
 
-/* ── HERO : model-viewer plein ecran ── */
 .pdp-hero {
     position: relative;
     width: 100%;
-    /* Hauteur = fenêtre MOINS le padding-top de #app (calc(--safe-top + 10px),
-       §46). Le héros vit sous la topbar : à 100dvh son bas débordait de 80px
-       sous l'écran → bloc info (ancré en bas) et bandeau « Économisez » coupés,
-       et le produit centré trop bas. Même formule que #app = jamais désynchro. */
+
     height: calc(100vh - var(--safe-top, 70px) - 10px);
     height: calc(100dvh - var(--safe-top, 70px) - 10px);
     display: flex;
@@ -2559,7 +2401,6 @@ padding: 0;
     padding: 0;
 }
 
-/* Glow ambiant derriere le model 3D */
 .pdp-hero::after {
     content: '';
     position: absolute;
@@ -2579,13 +2420,12 @@ padding: 0;
     50% { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
 }
 
-/* Conteneur du poster héros (cible de la parallaxe au scroll) */
 #pdp3d {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
-    overflow: hidden;      /* rogne la partie remontée hors cadre */
+    overflow: hidden;
     will-change: transform, opacity, filter;
     z-index: 1;
     animation: pdpModelAppear 1.2s cubic-bezier(0.22, 1, 0.36, 1) .1s both;
@@ -2594,10 +2434,7 @@ padding: 0;
     from { opacity: 0; transform: scale(0.9) translateY(30px); filter: blur(4px); }
     to   { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
 }
-/* Poster produit : taille d'origine, LÉGÈREMENT remontée pour dégager le titre
-   tout en gardant une marge sous la topbar (le bas vide est rogné par le
-   conteneur en overflow:hidden). -12% = compromis vérifié : marge topbar
-   conservée ET produit au-dessus du titre. Vaut aussi pour les futurs PNG. */
+
 .pdp-hero__img {
     width: 100%;
     height: 100%;
@@ -2608,7 +2445,6 @@ padding: 0;
     display: block;
 }
 
-/* Gradient en bas du hero */
 .pdp-hero__gradient {
     position: absolute;
     bottom: 0;
@@ -2620,17 +2456,13 @@ padding: 0;
     z-index: 2;
 }
 
-/* Info en bas du hero (titre + prix) */
 .pdp-hero__info {
     position: relative;
     z-index: 3;
     text-align: center;
-    width: 100%;                 /* titre sur toute la largeur de l'écran… */
+    width: 100%;
     box-sizing: border-box;
-    /* Le bloc info est ancré au BAS du héros (align-items:flex-end). Avec un
-       padding-bas de 40px, le contenu le plus bas (le switch Solo/Coffret) tombait
-       SOUS le dock fixe (hauteur 64px + safe-area) → clics avalés par le dock, zone
-       cliquable réduite au haut du bouton. On dégage tout le bloc AU-DESSUS du dock. */
+
     padding: 0 1.5rem calc(var(--dockH, 64px) + var(--dock-bottom, 14px) + var(--safe-bottom, 0px) + 16px);
     will-change: transform, opacity;
     animation: pdpInfoAppear 1s cubic-bezier(0.22, 1, 0.36, 1) .5s both;
@@ -2641,10 +2473,7 @@ padding: 0;
 }
 
 .pdp-hero__title {
-    /* Lettres réduites (produit gardé à sa taille d'origine) : le titre plus
-       petit dégage le produit et se resserre en bas. Le clamp reste fluide en
-       largeur (téléphone → desktop) ; le titre prend toute la largeur (info en
-       width:100% + padding latéral = marge de sécurité, jamais collé aux bords). */
+
     font-size: clamp(1.02rem, 0.62rem + 1.7vw, 1.75rem);
     font-weight: 900;
     margin: 0 0 .3rem;
@@ -2674,10 +2503,6 @@ padding: 0;
     color: rgba(255,255,255,.4);
 }
 
-/* ── Switch de variante Solo / Coffret (héros fiche produit) ─────────────────
-   Deux segments côte à côte : chacun porte son libellé (« Sans coffret » /
-   « Avec coffret ») ET son prix → sert de bouton ET d'écriteau. Le segment actif
-   est mis en avant (accent). Le gros prix au-dessus reflète la sélection. */
 .pdp-variant {
     margin-top: .9rem;
     display: flex;
@@ -2728,8 +2553,6 @@ padding: 0;
     box-shadow: 0 0 18px rgba(var(--accent-rgb), 0.35);
 }
 
-/* Badges en haut à droite du héros (stock + tag), comme sur les cartes.
-   Libère le centre : le titre descend, le poster remonte. */
 .pdp-hero__badges {
     position: absolute;
     top: 1rem;
@@ -2742,7 +2565,7 @@ padding: 0;
     pointer-events: none;
 }
 .pdp-hero__badges .stock-badge {
-    position: static;      /* dans le flux du conteneur, pas en absolu (cartes) */
+    position: static;
     top: auto; right: auto;
     font-size: .72rem;
 }
@@ -2763,18 +2586,13 @@ padding: 0;
     white-space: nowrap;
 }
 
-/* Poster/produit remonté au MAXIMUM vers le haut du héros (juste sous la topbar),
-   pour dégager le produit du titre et laisser la place en bas au titre + prix +
-   bandeau vert. S'applique au poster comme aux futurs PNG. */
-
-/* Scroll hint */
 .pdp-hero__scroll-hint {
     position: absolute;
     bottom: 1.2rem;
     left: 50%;
     transform: translateX(-50%);
     z-index: 10;
-    pointer-events: none;   /* purement décoratif → ne jamais capturer un clic */
+    pointer-events: none;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -2796,7 +2614,6 @@ padding: 0;
     50% { transform: translateX(-50%) translateY(8px); opacity: 1; }
 }
 
-/* ── KEYFRAMES ── */
 @keyframes pdpFadeUp {
     from { opacity: 0; transform: translateY(80px); }
     to { opacity: 1; transform: translateY(0); }
@@ -2806,24 +2623,16 @@ padding: 0;
     to { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
 }
 
-
 @keyframes pdpGlow {
     from { box-shadow: 0 0 0 rgba(var(--accent-rgb),0); }
     to { box-shadow: 0 0 60px rgba(var(--accent-rgb),0.25), 0 20px 80px rgba(0,0,0,.6); }
 }
 
-
-/* pdpGlowPulse SUPPRIMÉ (25/07) : remplacé par le halo statique du viewer
-   (voir .pdp-section.visible .pdp-split__viewer) — l'animation box-shadow
-   repeignait en continu. goldShimmer/blackTextShine/blackRing conservés :
-   surfaces minuscules, coût de repaint négligeable (décision documentée). */
 @keyframes pdpGlowLine {
     0% { transform: scaleX(0); opacity: 0; }
     100% { transform: scaleX(1); opacity: 1; }
 }
 
-
-/* ── GLOW DIVIDERS between sections ── */
 .pdp-section + .pdp-section::before {
     content: '';
     display: block;
@@ -2842,7 +2651,6 @@ padding: 0;
     transform: scaleX(1);
 }
 
-/* ── SECTIONS — base (JS handles transforms via scroll) ── */
 .pdp-section {
     opacity: 0;
     transform: translateY(80px) scale(0.95);
@@ -2851,12 +2659,10 @@ padding: 0;
     position: relative;
 }
 
-/* Visible state for IntersectionObserver (stagger children) */
 .pdp-section.visible {
     animation: pdpFadeUp 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-/* Scale-up variant (discover, CTA) — JS drives the heading, CSS for the container */
 .pdp-section[data-animate="scale-up"] {
     transform: translateY(100px) scale(0.75);
 }
@@ -2864,7 +2670,6 @@ padding: 0;
     animation: pdpFadeScale 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-/* Parallax variant (media) */
 .pdp-section[data-animate="parallax"] {
     transform: translateY(120px) scale(0.85);
 }
@@ -2872,7 +2677,6 @@ padding: 0;
     animation: pdpFadeScale 1.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-/* Stagger variant (features, kit) */
 .pdp-section[data-animate="stagger"] {
     transform: translateY(60px);
 }
@@ -2880,12 +2684,10 @@ padding: 0;
     animation: pdpFadeUp 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-/* Fade-up variant */
 .pdp-section[data-animate="fade-up"].visible {
     animation: pdpFadeUp 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-/* ── SECTION INNER ── */
 .pdp-section__inner {
     max-width: 800px;
     margin: 0 auto;
@@ -2907,7 +2709,6 @@ padding: 0;
     margin-bottom: 2rem;
 }
 
-/* ── DISCOVER SECTION ── */
 .pdp-section--discover {
     padding: 8rem 0;
     background: linear-gradient(180deg, #0a0f14 0%, #0e151c 50%, #0a0f14 100%);
@@ -2954,7 +2755,6 @@ padding: 0;
     will-change: transform, opacity, filter;
 }
 
-/* ── SPLIT SECTION : 3D + SPECS ── */
 .pdp-section--split {
     padding: 4rem 0;
     background: linear-gradient(180deg, #0a0f14 0%, rgba(var(--accent-rgb), 0.03) 50%, #0a0f14 100%);
@@ -2980,11 +2780,7 @@ padding: 0;
     opacity: 0;
 }
 .pdp-section.visible .pdp-split__viewer {
-    /* Halo STATIQUE (intensité moyenne de l'ancien pdpGlowPulse). L'animation
-       box-shadow 20→100px de blur repeignait en continu le plus grand bloc de
-       la fiche (coût iPad réel). Un pseudo-élément compositor est impossible :
-       overflow:hidden clippe ::before/::after, et toucher au conteneur 3D est
-       invérifiable en sandbox (leçon v318). Halo conservé, repaint supprimé. */
+
     box-shadow: 0 0 35px rgba(var(--accent-rgb), 0.2), 0 0 70px rgba(var(--accent-rgb), 0.08);
 }
 #pdp3dSecondary {
@@ -3007,14 +2803,12 @@ padding: 0;
     text-align: left;
     margin-bottom: 1.5rem;
 }
-/* Produit sans caractéristiques : le bloc specs est masqué (JS) et la 3D se
-   recentre en colonne unique au lieu de laisser une moitié droite vide. */
+
 .pdp-split--solo {
     grid-template-columns: minmax(0, 620px);
     justify-content: center;
 }
 
-/* ── SPECS TABLE ── */
 .pdp-specs-table {
     width: 100%;
     border-radius: 16px;
@@ -3046,7 +2840,6 @@ padding: 0;
     color: var(--fg);
 }
 
-/* ── PHOTO PRODUIT ── */
 .pdp-section--media {
     padding: 2rem 0;
 }
@@ -3073,7 +2866,6 @@ padding: 0;
     display: block;
 }
 
-/* ── FEATURES — grille ── */
 .pdp-section--features {
     padding: 5rem 0;
     background: linear-gradient(180deg, #0a0f14 0%, #0e151c 50%, #0a0f14 100%);
@@ -3133,7 +2925,6 @@ padding: 0;
     color: #A855F7;
 }
 
-/* ── KIT ── */
 .pdp-section--kit {
     padding: 3rem 0;
 }
@@ -3170,7 +2961,6 @@ padding: 0;
     font-weight: 700;
 }
 
-/* ── CTA ── */
 .pdp-section--cta {
     padding: 5rem 0;
     text-align: center;
@@ -3193,7 +2983,7 @@ padding: 0;
     gap: 1rem;
     justify-content: center;
 }
-/* PDP CTA buttons — override .btn base styles for product page theme */
+
 .pdp-landing__actions .btn--lg {
     padding: 1rem 2.2rem;
     font-size: 1.05rem;
@@ -3211,7 +3001,7 @@ padding: 0;
 .pdp-landing__actions .btn--lg:hover {
     transform: translateY(-3px);
 }
-/* Primary — violet gradient */
+
 .pdp-landing__actions .btn--lg.primary {
     background: linear-gradient(135deg, var(--accent), #A855F7);
     color: #fff;
@@ -3220,7 +3010,7 @@ padding: 0;
 .pdp-landing__actions .btn--lg.primary:hover {
     box-shadow: 0 0 40px rgba(var(--accent-rgb), 0.6), 0 8px 24px rgba(0,0,0,.4);
 }
-/* WhatsApp — green */
+
 .pdp-landing__actions .btn--lg.btn-wa {
     background: linear-gradient(135deg, #25d366, #128c7e);
     color: #fff;
@@ -3229,7 +3019,7 @@ padding: 0;
 .pdp-landing__actions .btn--lg.btn-wa:hover {
     box-shadow: 0 0 36px rgba(37, 211, 102, 0.5), 0 8px 24px rgba(0,0,0,.4);
 }
-/* Share — outline style */
+
 .pdp-landing__actions .btn--lg:not(.primary):not(.btn-wa) {
     background: rgba(255,255,255,.06);
     color: #e6edf5;
@@ -3242,14 +3032,12 @@ padding: 0;
     box-shadow: 0 0 28px rgba(var(--accent-rgb), 0.3), 0 8px 24px rgba(0,0,0,.3);
 }
 
-/* ── AVIS CLIENTS ── */
 .pdp-reviews {
     display: flex;
     flex-direction: column;
     gap: 2rem;
 }
 
-/* Résumé note moyenne */
 .pdp-reviews__summary {
     text-align: center;
     padding: 2rem;
@@ -3283,7 +3071,6 @@ padding: 0;
     margin-top: .25rem;
 }
 
-/* Liste des avis */
 .pdp-reviews__list {
     display: flex;
     flex-direction: column;
@@ -3345,7 +3132,6 @@ padding: 0;
     margin: 0;
 }
 
-/* Formulaire */
 .pdp-reviews__form-wrapper {
     background: rgba(var(--accent-rgb), 0.03);
     border: 1px solid rgba(var(--accent-rgb), 0.12);
@@ -3448,7 +3234,6 @@ padding: 0;
     border-radius: 12px;
 }
 
-/* ── RESPONSIVE PDP ── */
 @media (max-width: 768px) {
     .pdp-split {
         grid-template-columns: 1fr;
@@ -3467,12 +3252,8 @@ padding: 0;
     .pdp-discover__heading { font-size: clamp(1.6rem, 1rem + 3vw, 2.4rem); }
 }
 
-/* Legacy fallbacks */
 .pdp { padding: .5rem 0 1.2rem; }
 
-/* ========== 15) (legacy devis cleared) ========== */
-
-/* ========== 16) JAUGE FIDÉLITÉ ========== */
 .meter { display: grid; gap: .4rem; }
 
 .meter__rail {
@@ -3544,7 +3325,6 @@ border: 2px solid #0a0f14;
 box-shadow: 0 0 12px rgba(25,211,255,.8);
 }
 
-/* ========== 17) COMPTE — onglets & sections ========== */
 .tabs { display: flex; gap: .5rem; flex-wrap: wrap; margin: .6rem 0 1rem; }
 
 .tab {
@@ -3566,8 +3346,6 @@ background: linear-gradient(180deg, rgba(25,211,255,.22), rgba(0,225,180,.10));
 border-color: rgba(25,211,255,.45);
 color: #e6f7ff;
 }
-
-/* ========== 18) AUTH ========== */
 
 .auth-card {
   position: relative;
@@ -3621,8 +3399,6 @@ color: #e6f7ff;
   color: var(--muted);
   margin: 0;
 }
-
-/* ── Auth Tabs ── */
 
 .auth-tabs {
   position: relative;
@@ -3683,8 +3459,6 @@ color: #e6f7ff;
   background: rgba(var(--accent-rgb),.08);
 }
 
-/* ── Auth Form ── */
-
 .auth-card__body {
   position: relative;
   z-index: 1;
@@ -3730,8 +3504,6 @@ color: #e6f7ff;
     0 0 0 3px rgba(var(--accent-rgb),.15),
     0 0 16px rgba(var(--accent-rgb),.1);
 }
-
-/* ── Auth Submit Button ── */
 
 .auth-submit {
   display: flex;
@@ -3779,7 +3551,6 @@ color: #e6f7ff;
   transform: translateX(3px);
 }
 
-/* Loading state on auth submit buttons */
 .auth-submit__spinner {
   display: none;
   width: 18px;
@@ -3804,7 +3575,6 @@ color: #e6f7ff;
   display: inline-block;
 }
 
-/* Forgot password row + link */
 .auth-forgot-row {
   display: flex;
   justify-content: flex-end;
@@ -3826,7 +3596,6 @@ color: #e6f7ff;
   text-shadow: 0 0 12px rgba(var(--accent-rgb),.6);
 }
 
-/* Forgot password panel (slides in over login form) */
 .auth-forgot-panel {
   margin-top: 1rem;
   padding: 1.2rem 1.1rem 1rem;
@@ -3875,7 +3644,6 @@ color: #e6f7ff;
   line-height: 1.4;
 }
 
-/* Email verification banner on the account page */
 .acc-verify-banner {
   display: flex;
   align-items: center;
@@ -3942,7 +3710,6 @@ color: #e6f7ff;
   }
 }
 
-/* ========== 20) CHIPS ========== */
 .chip {
 display: inline-flex;
 align-items: center;
@@ -3959,7 +3726,6 @@ box-shadow: inset 0 -1px 0 rgba(255,255,255,.05);
 
 .chip:hover { background: rgba(255,255,255,.07); }
 
-/* ========== 23) DOCK ========== */
 #dock, .dock {
 position: fixed;
 left: 50%;
@@ -4041,8 +3807,7 @@ box-shadow: 0 0 16px rgba(37, 211, 102, 0.3);
   height: 18px;
   padding: 0 5px;
   border-radius: 9px;
-  /* WCAG 1.4.3 AA : le chiffre fait 11 px, il lui faut 4.5:1. Le rouge iOS
-     #ff3b30 ne donnait que 3.55:1 sous du blanc. #df342a = 4.50:1. */
+
   background: #df342a;
   color: #fff;
   font-size: 11px;
@@ -4057,19 +3822,12 @@ box-shadow: 0 0 16px rgba(37, 211, 102, 0.3);
   display: none;
 }
 
-/* ========== 24) VUES / ROUTER ========== */
 .view {
 width: min(var(--container-w), 92vw);
 margin: 0 auto 1.2rem;
-/* content-visibility:auto RETIRÉ (bug page vide iOS Safari) : sur iPad, une vue
-   dont le sous-arbre est remplacé (re-render #list au clic d'une catégorie) ou
-   révélée via bascule display restait « skipped » → seul le placeholder
-   contain-intrinsic-size (≈800×600) était peint = zone noire, topbar/dock fixes
-   visibles, mais AUCUN contenu de vue (ni barre de recherche, ni chips). Gain
-   perf nul ici (SPA = une seule vue affichée, les autres sont display:none). */
+
 }
 
-/* Vue produit : pleine largeur, pas de content-visibility (casse sticky) */
 #view-produit {
     width: 100%;
     max-width: 100%;
@@ -4081,7 +3839,6 @@ margin: 0 auto 1.2rem;
 
 .view.hidden { display: none !important; }
 
-/* ========== 25) TOASTS ========== */
 #toasts {
 position: fixed;
 z-index: 9500;
@@ -4106,15 +3863,12 @@ gap: .6rem;
 animation: toast-in .18s ease-out both;
 }
 
-
 @keyframes toast-in { from { transform: translateY(8px); opacity: 0; } to { transform: none; opacity: 1; } }
-
 
 @media (max-width: 480px) {
 #toasts { right: 8px; width: min(94vw, 420px); }
 }
 
-/* ========== 26) A11Y ========== */
 .sr-only, #sr-live {
 position: absolute !important;
 width: 1px;
@@ -4130,8 +3884,7 @@ border: 0;
 .skip-link {
 position: fixed;
 left: 8px;
-/* -80px : entièrement hors écran, ombre comprise (à -42px le bas de la boîte
-   + box-shadow dépassait en haut de page — liseré blanc visible). */
+
 top: -80px;
 z-index: 10000;
 padding: .5rem .7rem;
@@ -4145,7 +3898,6 @@ transition: top .18s ease;
 
 .skip-link:focus { top: 8px; outline: 2px solid var(--brand); }
 
-/* ========== 27) BANNIÈRES ========== */
 #updateBanner {
 position: fixed;
 left: 50%;
@@ -4160,24 +3912,12 @@ z-index: 130;
 box-shadow: var(--shadow);
 }
 
-/* CSS mort retiré (item 12) : #a2hsTip / #a2hsTriangle / .a2hs-tip__* +
-   @keyframes a2hs-in (astuce « Ajouter à l'écran d'accueil ») et #netBanner
-   (bannière hors-ligne). Aucun de ces id/classes n'est référencé dans le HTML,
-   app.js, sw.js ni les autres scripts servis — vérifié à 0 référence. */
-
-/* ========== 28) ANIMATIONS ========== */
-
-
-
 @media (prefers-reduced-motion: reduce) {
 html { scroll-behavior: auto; }
 .toast { animation: none; }
 .dock__btn--cart { animation: none; }
 }
 
-/* ========== 29) MARQUES — Showcase Premium ========== */
-
-/* ── Section wrapper ── */
 .brands-section {
   margin: 0 0 2rem;
 }
@@ -4205,7 +3945,6 @@ html { scroll-behavior: auto; }
   margin: 0;
 }
 
-/* ── Grid ── */
 .brands-showcase {
   display: flex;
   flex-wrap: wrap;
@@ -4218,7 +3957,6 @@ html { scroll-behavior: auto; }
   .brands-showcase { gap: 20px 32px; }
 }
 
-/* ── Single Brand Card ── */
 .brand-card {
   display: flex;
   flex-direction: column;
@@ -4241,7 +3979,6 @@ html { scroll-behavior: auto; }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* ── Rotating ring ── */
 .brand-card__ring {
   position: relative;
   width: 88px;
@@ -4284,7 +4021,6 @@ html { scroll-behavior: auto; }
   to { transform: rotate(360deg); }
 }
 
-/* ── Bubble (inner circle) ── */
 .brand-card__bubble {
   width: 100%;
   height: 100%;
@@ -4310,7 +4046,6 @@ html { scroll-behavior: auto; }
   pointer-events: none;
 }
 
-/* ── Logo ── */
 .brand-card__logo {
   width: calc(100% - 12px);
   height: calc(100% - 12px);
@@ -4324,7 +4059,6 @@ html { scroll-behavior: auto; }
   transition: transform .35s cubic-bezier(.4,0,.2,1), filter .35s ease;
 }
 
-/* ── Label ── */
 .brand-card__name {
   font-weight: 700;
   font-size: .82rem;
@@ -4337,7 +4071,6 @@ html { scroll-behavior: auto; }
   transition: color .3s ease;
 }
 
-/* ── Hover States ── */
 .brand-card:hover .brand-card__ring,
 .brand-card:focus-visible .brand-card__ring {
   background: conic-gradient(
@@ -4371,7 +4104,6 @@ html { scroll-behavior: auto; }
 
 .brand-card:focus-visible .brand-card__ring { outline: 2px solid var(--accent); outline-offset: 3px; }
 
-/* ── Active / Press ── */
 .brand-card:active .brand-card__ring {
   transform: scale(.95);
   transition-duration: .1s;
@@ -4391,14 +4123,12 @@ html { scroll-behavior: auto; }
   100% { opacity: 0; transform: scale(1.4); }
 }
 
-/* ── Responsive ── */
 @media (max-width: 420px) {
   .brand-card__ring { width: 76px; height: 76px; }
   .brand-card__name { font-size: .75rem; }
   .brands-showcase { gap: 12px; }
 }
 
-/* ========== 30) RESPONSIF GÉNÉRIQUE ========== */
 @media (max-width: 768px) {
 .btn { padding: .54rem .8rem; }
 .ratings { margin: 1.4rem auto .6rem; }
@@ -4408,7 +4138,6 @@ html { scroll-behavior: auto; }
 .product-card__title { font-size: .85rem; }
 .product-card__price { font-size: 1rem; }
 
-/* Responsive 3D carousel */
 .tools-3d-arrow {
 width: 36px;
 height: 36px;
@@ -4417,7 +4146,6 @@ font-size: 18px;
 .tools-3d-prev { margin-right: -18px; }
 .tools-3d-next { margin-left: -18px; }
 
-/* Responsive devis - mobile */
 .devis-item__name { font-size: .82rem; }
 .devis-stats { gap: 6px; }
 .devis-stat { padding: .6rem .4rem; }
@@ -4425,7 +4153,7 @@ font-size: 18px;
 }
 
 @media (max-width: 480px) {
-/* Responsive 3D carousel */
+
 .tools-3d-arrow {
 width: 32px;
 height: 32px;
@@ -4438,7 +4166,6 @@ font-size: 16px;
 
 }
 
-/* ========== 31) FOOTER ========== */
 .site-footer {
   background: #0a0f14;
   border-top: 1px solid rgba(var(--accent-rgb), 0.2);
@@ -4486,7 +4213,6 @@ font-size: 16px;
   color: var(--brand);
 }
 
-/* Footer — Social banner */
 .footer-social {
   text-align: center;
   padding: 2rem 0 1.5rem;
@@ -4521,7 +4247,7 @@ font-size: 16px;
 .footer-social__link:active { transform: scale(.95); }
 .footer-social__link svg { flex-shrink: 0; }
 .footer-social__link--fb {
-  background: #1773E9;   /* voir .btn.btn-fb : 4.50:1 avec le libelle blanc */
+  background: #1773E9;
   box-shadow: 0 4px 16px rgba(23, 115, 233, .3);
 }
 .footer-social__link--ig {
@@ -4553,15 +4279,10 @@ font-size: 16px;
   opacity: .7;
 }
 
-/* ========== 32) PATCHES & ANCRAGES ========== */
-/* (overrides #a2hsTip/#a2hsTriangle retirés — CSS mort, voir item 12 plus haut) */
 #list, #contact, #pdp, #view-catalogue, #view-devis, #view-compte {
 scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 }
 
-/* ============================================================
-   ACCOUNT — Refonte (hero + onglets)
-   ============================================================ */
 .acc-hero {
   display: flex;
   align-items: center;
@@ -4623,7 +4344,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 }
 .acc-hero__meter { max-width: 320px; }
 
-/* Tabs */
 .acc-tabs {
   display: flex;
   gap: .35rem;
@@ -4669,23 +4389,10 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Écart entre deux cartes empilées dans un onglet du compte. Remplace sept
-   `style="margin-top:1.2rem"` écrits en dur : une valeur dans un attribut
-   `style=` ne suit aucun jeton de la charte, et il fallait la corriger sept
-   fois pour la changer une. */
 .acc-card-next { margin-top: 1.2rem; }
 
-/* Carte d'identité du compte — LECTURE SEULE (onglet Profil).
-   Disposition HORIZONTALE : les champs se rangent en colonnes tant que la
-   largeur le permet (auto-fit), et retombent en une colonne sur téléphone.
-   Le libellé est au-dessus de la valeur, en capitales fines : c'est la forme
-   retenue par les espaces clients qui affichent une identité sans la rendre
-   modifiable sur place. Ici RIEN n'est saisissable — on modifie dans
-   Paramètres. */
 .acc-id {
-  /* `.specs` est un `display:flex` : sans cette base à 100 %, la grille se
-     réduit à la largeur de son contenu et `auto-fit` ne donne qu'UNE colonne —
-     donc pas de disposition horizontale du tout. */
+
   flex: 1 1 100%;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
@@ -4712,8 +4419,7 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   font-size: .95rem;
   font-weight: 500;
   color: #fff;
-  /* Un email long ne doit pas élargir la grille au point de faire défiler
-     la page horizontalement. */
+
   overflow-wrap: anywhere;
 }
 .acc-id__f dd.is-empty {
@@ -4722,7 +4428,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   font-style: italic;
 }
 
-/* Commandes — aperçu (Profil) et liste complète (onglet Commandes) */
 .acc-orders { flex: 1 1 100%; display: grid; gap: .6rem; }
 .acc-order {
   background: rgba(var(--accent-rgb),.04);
@@ -4747,8 +4452,7 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   flex-wrap: wrap;
 }
 .acc-order__sum { font-size: .85rem; opacity: .85; }
-/* L'état se lit à la forme autant qu'au mot : une pastille colorée distingue
-   « Payée » d'un « Paiement en cours » sans avoir à lire. */
+
 .acc-order__st {
   font-size: .72rem;
   font-weight: 700;
@@ -4763,7 +4467,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .acc-order__msg { opacity: .6; text-align: center; padding: .5rem 0; margin: 0; }
 .acc-order__msg--err { color: #f88; }
 
-/* Danger card */
 .acc-danger { border-color: rgba(244,67,54,.25); }
 .acc-logout-btn {
   background: rgba(244,67,54,.15);
@@ -4783,9 +4486,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   .acc-tab svg { width: 20px; height: 20px; }
 }
 
-/* ============================================================
-   PAYMENT MODAL — Stripe checkout
-   ============================================================ */
 .pay-modal {
   position: fixed;
   inset: 0;
@@ -4943,17 +4643,14 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   margin: .8rem 0 0;
   font-size: .72rem;
   color: var(--muted);
-  /* Rangée : logo du fournisseur puis mention. `inline-flex` et non `flex`,
-     pour que l'ensemble reste centré par le `text-align: center` du pied. */
+
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: .45rem;
 }
 .pay-modal__powered strong { color: #fff; font-weight: 700; }
-/* Le logo est fourni avec sa tuile et ses angles déjà arrondis : on ne
-   redécoupe rien ici. `flex: 0 0 auto` l'empêche d'être compressé quand la
-   mention passe sur deux lignes en 390 px. */
+
 .pay-modal__provider-logo {
   flex: 0 0 auto;
   width: 18px;
@@ -4961,7 +4658,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   display: block;
 }
 
-/* ── Onglets de paiement ─────────────────────────────────────── */
 .pay-tabs{
   display:flex; gap:.5rem;
   padding: 0 1.4rem;
@@ -4990,10 +4686,8 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .pay-pane{ display:none; }
 .pay-pane.is-active{ display:block; }
 
-/* ── Portail crypto (étapes numérotées) ──────────────────────── */
 .cryptopay{ display:flex; flex-direction:column; gap:1.2rem; }
 
-/* Encadré d'étape */
 .cryptostep{
   background: rgba(255,255,255,.02);
   border:1px solid rgba(255,255,255,.08);
@@ -5039,7 +4733,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 }
 .cryptostep__hint strong{ color:#fff; }
 
-/* Grille de réseaux */
 .cryptopay__nets{
   display:grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -5121,7 +4814,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .cryptopay-token__sym{ font-weight:800; font-size:.85rem; color:var(--accent-soft); letter-spacing:.04em; }
 .cryptopay-token__name{ font-weight:600; font-size:.78rem; color:rgba(255,255,255,.78); }
 
-/* Détail (QR + adresse + montant) */
 .cryptopay__detail{
   display:grid;
   grid-template-columns: 160px 1fr;
@@ -5251,7 +4943,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   border-radius:9px; padding:.5rem .7rem;
 }
 
-/* Devis "Payer" button per line */
 .devis-buy {
   background: linear-gradient(135deg, #635bff, var(--accent));
   color: #fff;
@@ -5269,7 +4960,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   box-shadow: 0 6px 18px rgba(99,91,255,.4);
 }
 
-/* Merci page */
 .merci-card {
   max-width: 560px;
   margin: 0 auto;
@@ -5317,7 +5007,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   flex-wrap: wrap;
 }
 
-/* 3D model on product cards */
 .product-card__model {
   width: 100%;
   height: 100%;
@@ -5336,7 +5025,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   background: transparent;
 }
 
-/* 3D brand spheres */
 .brand-card__bubble { position: relative; }
 .brand-card__canvas {
   position: absolute;
@@ -5349,9 +5037,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   transition: opacity .4s ease;
 }
 
-/* ============================================================
-   SECTION REVEAL — Entrance/exit animations on home page
-   ============================================================ */
 [data-reveal] {
   opacity: 0;
   transition: opacity .9s cubic-bezier(.2,.7,.2,1), transform .9s cubic-bezier(.2,.7,.2,1), filter .9s ease;
@@ -5370,7 +5055,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   filter: blur(0);
 }
 
-/* Stagger reveal — children pop in one by one */
 [data-reveal-stagger] > * {
   opacity: 0;
   transform: translateY(40px) scale(.7);
@@ -5400,7 +5084,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   }
 }
 
-/* Brand bubbles entrance — disable initial auto-anim, replay on reveal */
 .brands-showcase .brand-card { animation: none; opacity: 0; transform: translateY(50px) scale(.5); }
 .brands-showcase.is-visible .brand-card {
   animation: brandBubbleIn .9s cubic-bezier(.18,1.25,.4,1.05) both;
@@ -5420,7 +5103,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   100% { box-shadow: 0 0 0 0 rgba(var(--accent-rgb),0); }
 }
 
-/* ========== ACCESSIBILITÉ : reduced-motion global ========== */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -5430,11 +5112,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   }
 }
 
-/* ========== TOUCH : neutraliser les hover sticky ==========
-   Sur iPad / mobile, un :hover reste collé après un tap jusqu'au
-   prochain tap ailleurs, provoquant des transforms/scale persistants.
-   On retire les transforms de hover pour les éléments interactifs
-   principaux — les :active/focus gèrent le feedback tactile. */
 @media (hover: none) {
   .product-card:hover,
   .brand-card:hover,
@@ -5446,9 +5123,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   }
 }
 
-/* ========== STOCK BADGES ==========
-   Shown on product cards (top-right of image) and inline on PDP price block.
-   Statuses : in_stock (green), low_stock (orange), out_of_stock (red), preorder (blue). */
 .stock-badge {
   position: absolute;
   top: .6rem;
@@ -5506,7 +5180,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   50% { opacity: .72; }
 }
 
-/* Out-of-stock card : dim the image so users feel the unavailability */
 .product-card--out .product-card__img-wrap img,
 .product-card--out .product-card__img-wrap model-viewer {
   filter: grayscale(0.7) brightness(0.75);
@@ -5517,7 +5190,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   opacity: .65;
 }
 
-/* Inline badge in PDP price block — not absolute, flows with text */
 .pdp-price .stock-badge,
 #pdpPrice .stock-badge {
   position: static;
@@ -5525,7 +5197,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   vertical-align: middle;
 }
 
-/* Disabled buy/quote buttons when stock_status = out_of_stock */
 #pdpQuote[disabled],
 #pdpBuy[disabled],
 #pdpQuote[aria-disabled="true"],
@@ -5540,7 +5211,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   .stock-badge--low { animation: none; }
 }
 
-/* ========== ADMIN PANEL (#/admin) ========== */
 #view-admin {
   padding: 2rem 1rem 6rem;
   min-height: 100vh;
@@ -5697,7 +5367,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .admin-row__status--ok { color: #4ade80; }
 .admin-row__status--err { color: #f87171; }
 
-/* Admin login gate */
 .admin-login {
   min-height: 60vh;
   display: flex;
@@ -5776,20 +5445,18 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   font-size: .85em;
 }
 
-/* Admin : tabs */
 .admin-tabs {
   display: flex;
   gap: .5rem;
   border-bottom: 1px solid rgba(var(--accent-rgb), 0.2);
   margin: 0 0 1.5rem;
-  /* Trop d'onglets pour la largeur (mobile/iPad) → défilement horizontal au
-     lieu d'un débordement hors-zone (« Instagram » coupé). Swipe sur tactile. */
+
   overflow-x: auto;
   flex-wrap: nowrap;
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;            /* Firefox : barre masquée (on swipe) */
+  scrollbar-width: none;
 }
-.admin-tabs::-webkit-scrollbar { height: 0; }   /* WebKit/iOS : barre masquée */
+.admin-tabs::-webkit-scrollbar { height: 0; }
 
 .admin-tab {
   background: transparent;
@@ -5803,7 +5470,7 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
   transition: color .2s, border-color .2s;
-  flex: 0 0 auto;                   /* jamais rétréci → libellé entier, pas coupé */
+  flex: 0 0 auto;
   white-space: nowrap;
 }
 
@@ -5816,7 +5483,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .admin-pane { display: none; }
 .admin-pane.is-active { display: block; }
 
-/* ── Dashboard analytics (Statistiques + Clients) ───────────────────── */
 .admin-stats-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .7rem; margin-top: 1rem; }
 .admin-empty, .admin-error, .admin-count { color: rgba(255,255,255,.6); font-size: .9rem; margin: .4rem 0; }
 .admin-error { color: #ff8a8a; }
@@ -5898,7 +5564,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 
 .admin-subtitle:first-child { margin-top: 0; }
 
-/* ── Comptabilité & Veille (admin) — pensé lisible/simple (dyspraxie) ─────── */
 .compta-cards { display: grid; gap: 14px; grid-template-columns: 1fr; }
 @media (min-width: 720px) { .compta-cards { grid-template-columns: 1fr 1fr; } }
 .compta-card {
@@ -5943,7 +5608,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .compta-sample { font-size: .84rem; color: rgba(255,255,255,.85); margin: 6px 0; padding-left: 1.2rem; }
 .compta-sample li { margin: 3px 0; }
 
-/* Synthèse comptable */
 .compta-kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 @media (min-width: 560px) { .compta-kpis { grid-template-columns: repeat(4, 1fr); } }
 .compta-kpi { background: rgba(var(--accent-rgb),0.06); border: 1px solid rgba(var(--accent-rgb),0.25); border-radius: 12px; padding: 12px; }
@@ -5951,7 +5615,7 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .compta-kpi__sub { font-size: .82rem; color: var(--accent-soft); font-weight: 600; margin-top: -1px; }
 .compta-kpi__lbl { font-size: .74rem; color: rgba(255,255,255,.7); margin-top: 2px; }
 .compta-res__ht { font-size: .95rem; color: var(--accent-soft); font-weight: 600; }
-/* Objectif partenariat marque (ex. DeWALT 10 000 €) — barre de progression */
+
 .brand-goal { margin: 12px 0; }
 .brand-goal__head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-size: .9rem; color: #fff; margin-bottom: 5px; }
 .brand-goal__head span { color: #FEBD17; font-weight: 700; font-variant-numeric: tabular-nums; }
@@ -5959,7 +5623,7 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .brand-goal__bar span { display: block; height: 100%; background: linear-gradient(90deg,#FEBD17,#e0a500); border-radius: 7px; transition: width .4s ease; }
 .brand-goal__ok { font-size: .82rem; color: #34d17a; font-weight: 600; margin-top: 5px; }
 .brand-goal__sub { font-size: .82rem; color: rgba(255,255,255,.7); margin-top: 5px; }
-/* Onglet Marges (admin) — tableau des marges nettes live */
+
 .mg-controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin: 14px 0 10px; }
 .mg-chips { display: flex; gap: 7px; flex-wrap: wrap; }
 .mg-chip { background: rgba(255,255,255,.05); border: 1px solid var(--border); color: rgba(255,255,255,.7); padding: 6px 13px; border-radius: 999px; font-size: .84rem; font-weight: 600; cursor: pointer; }
@@ -5970,13 +5634,13 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .mg-table thead th { position: sticky; top: 0; background: var(--card); z-index: 1; }
 .mg-table th.mg-l, .mg-table td.mg-l { text-align: left; }
 .mg-table td.mg-ship { color: rgba(255,255,255,.55); font-size: .82rem; }
-/* Marqueur « coût estimé » (pas encore relevé par le traqueur) dans Marges. */
+
 .mg-est { color: #fbbf24; font-weight: 700; cursor: help; }
 .mg-good { color: #34d17a; font-weight: 700; }
 .mg-warn { color: #FEBD17; font-weight: 700; }
 .mg-crit { color: #ff6a54; font-weight: 700; }
 .mg-pk { display: inline-block; background: #FEBD17; color: #1b1e24; font-size: .62rem; font-weight: 800; text-transform: uppercase; letter-spacing: .03em; padding: 1px 6px; border-radius: 5px; vertical-align: middle; }
-/* Fiscalité — cartes déclarations */
+
 .fisc-card { background: rgba(var(--accent-rgb),0.05); border: 1px solid rgba(var(--accent-rgb),0.25); border-radius: 14px; padding: 16px; margin: 10px 0; }
 .fisc-card h3 { margin: 0 0 6px; font-size: 1.05rem; color: #fff; }
 .fisc-when { display: inline-block; font-size: .72rem; font-weight: 800; padding: 2px 9px; border-radius: 999px; background: rgba(var(--accent-rgb),.16); color: var(--accent-soft); margin-bottom: 6px; }
@@ -5992,12 +5656,11 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .compta-print-head, .compta-print-note { display: none; }
 .compta-print-note { font-size: .8rem; color: rgba(255,255,255,.6); margin-top: 10px; }
 
-/* Impression → PDF (iPad : Partager → Enregistrer dans Fichiers en PDF) */
 @media print {
   body * { visibility: hidden !important; }
   #comptaPrintable, #comptaPrintable *, #ptInvoice, #ptInvoice * { visibility: visible !important; }
   #ptInvoice { position: absolute; left: 0; top: 0; width: 100%; }
-  /* Conserver les aplats jaune/anthracite + le filigrane à l'impression PDF. */
+
   #ptInvoice, #ptInvoice * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
   #comptaPrintable {
     position: absolute; left: 0; top: 0; width: 100%;
@@ -6048,10 +5711,9 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   font-size: .85em;
 }
 
-/* ========== WISHLIST (heart button on cards) ========== */
 .wishlist-btn {
   position: absolute;
-  /* Bas-droite : coin dédié au cœur favori (le tag promo occupe le haut-gauche). */
+
   bottom: .55rem;
   right: .55rem;
   width: 34px;
@@ -6096,7 +5758,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   .wishlist-btn.is-active svg { animation: none; }
 }
 
-/* Wishlist view */
 .wishlist-header {
   padding: 2rem 0 1.5rem;
   text-align: center;
@@ -6142,7 +5803,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   color: rgba(230, 237, 245, 0.55);
 }
 
-/* ========== CONTACT FORM (/contact) ========== */
 #view-contact {
   padding: 2rem 1rem 6rem;
 }
@@ -6330,7 +5990,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .contact-form__status--ok { color: #4ade80; }
 .contact-form__status--err { color: #f87171; }
 
-/* ========== NEWSLETTER (home) ========== */
 .home-newsletter {
   padding: 4rem 1rem 3rem;
 }
@@ -6444,16 +6103,10 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .home-newsletter__status--ok { color: #4ade80; }
 .home-newsletter__status--err { color: #f87171; }
 
-/* Recently viewed strip uses same layout as home-products-strip */
 .home-products-strip--recent {
   padding-top: 2rem;
 }
 
-/* ========================================================================
-   GLOBAL A11Y : reduced-motion + hover guards
-   -------------------------------------------
-   Last-word rules so respect for user preferences wins everywhere.
-   ======================================================================== */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -6465,9 +6118,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   }
 }
 
-/* Protect translate/scale hover effects from sticky touch-highlights on
-   devices without a real hover. Disables the "lift" only (no functionality
-   lost). Targets high-traffic interactive cards. */
 @media (hover: none) {
   .product-card:hover,
   .brand-card:hover,
@@ -6479,7 +6129,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   }
 }
 
-/* ========== 33) TERRITORY SELECTOR (DOM-TOM) ========== */
 .terr-wrap { position: relative; display: inline-flex; }
 .terr-btn {
   display: inline-flex; align-items: center; gap: 6px;
@@ -6546,12 +6195,9 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   .terr-btn__label { max-width: 90px; }
 }
 
-/* ========== 35) PRODUCT DOM-TOM BADGES ========== */
 .pt-badges {
   position: absolute;
-  /* Bas-gauche de l'image : coin dédié aux badges DOM-TOM. Le tag promo est en
-     haut-gauche, EN STOCK en haut-droite, le cœur favori en bas-droite → 4 zones
-     distinctes, aucune superposition possible. */
+
   bottom: 0.6rem;
   left: 0.6rem;
   display: flex;
@@ -6580,7 +6226,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .pt-badge--cordless { background: rgba(59, 130, 246, 0.22); border-color: rgba(59, 130, 246, 0.5); }
 .pt-badge--mayotte  { background: rgba(251, 146, 60, 0.22); border-color: rgba(251, 146, 60, 0.5); }
 
-/* Flow variant on PDP discover section — show label text */
 .pt-badges--pdp {
   position: static;
   justify-content: center;
@@ -6617,7 +6262,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .pdp-more[open] summary::before { transform: rotate(90deg); }
 .pdp-more p { margin: 12px 0 0; color: #cdd6e0; line-height: 1.6; }
 
-/* ========== 36) TERRITORY LANDING VIEW ========== */
 .terr-view { padding: 24px 16px 60px; }
 .terr-view__hero {
   text-align: center;
@@ -6666,7 +6310,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .terr-ship-card strong { color: #fff; }
 .terr-ship-card p { margin: 2px 0 0; color: #cdd6e0; font-size: 13px; }
 
-/* FAQ list (used on territory view and anywhere .faq-list appears) */
 .faq-list { display: flex; flex-direction: column; gap: 10px; }
 .faq-item {
   background: rgba(255, 255, 255, 0.04);
@@ -6695,7 +6338,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .faq-item[open] summary::after { transform: rotate(45deg); }
 .faq-item p { margin: 10px 0 0; color: #cdd6e0; line-height: 1.55; }
 
-/* ========== 37) CONSENT BAR ========== */
 .consent-bar {
   position: fixed;
   left: 16px;
@@ -6726,18 +6368,9 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .consent-bar__deny:hover { opacity: 1; }
 
 @media (max-width: 640px) {
-  /* BUG corrigé : remonté de 96px (dock) + texte long empilé sur ~8 lignes,
-     le bandeau formait un pavé ~350px qui recouvrait les filtres du catalogue
-     et AVALAIT les taps (fixed, z 9700) tant que l'utilisateur n'avait pas
-     répondu — soit à chaque session en navigation privée. Version compacte :
-     typo réduite + garde-fou max-height à défilement interne. Le bandeau ne
-     peut plus manger que ~le quart bas de l'écran. */
+
   .consent-bar {
-    /* Tout en bas (8px), PAS remonté au-dessus du dock : la remontée de 96px
-       plaçait le pavé pile sur les filtres du catalogue (viewport ~664px).
-       Le bandeau peut recouvrir le dock TEMPORAIREMENT (z 9700 > dock 999) —
-       on lui répond une fois et il disparaît ; le contenu de la page, lui,
-       doit rester tapable en permanence. */
+
     left: 8px;
     right: 8px;
     bottom: calc(8px + env(safe-area-inset-bottom, 0));
@@ -6746,8 +6379,7 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
-  /* Pile verticale : texte pleine largeur (2 lignes) puis boutons — sinon les
-     boutons écrasaient le texte en colonne étroite de ~8 lignes. */
+
   .consent-bar__inner { padding: 8px 10px; gap: 6px; flex-direction: column; align-items: stretch; }
   .consent-bar__text { line-height: 1.35; min-width: 0; }
   .consent-bar__text strong { display: inline; font-size: 12px; margin: 0 4px 0 0; }
@@ -6755,7 +6387,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   .consent-bar .btn { padding: 6px 10px; font-size: 12px; }
 }
 
-/* ========== 38) WHATSAPP FLOTTANT ========== */
 .wa-float {
   position: fixed;
   right: 18px;
@@ -6764,10 +6395,7 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   align-items: center;
   gap: 8px;
   padding: 12px 18px;
-  /* Le vert WhatsApp reste EXACTEMENT le vert de marque. C'est le texte qui
-     passe en foncé : blanc sur #25D366 ne donnait que 1.98:1, très loin des
-     4.5:1 exigés. #042016 donne 8.66:1 — et c'est déjà ce que fait le bouton
-     WhatsApp du pied de page (.footer-social__link--wa). */
+
   background: #25D366;
   color: #042016;
   text-decoration: none;
@@ -6801,7 +6429,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   .wa-float { padding: 12px 14px; }
 }
 
-/* ========== 39) DEVIS FIDÉLITÉ ========== */
 .devis-loyalty {
   display: flex;
   align-items: center;
@@ -6839,7 +6466,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   transition: width .4s ease;
 }
 
-/* ========== 40) DEVIS LIVRAISON ========== */
 .devis-shipping {
   display: flex;
   align-items: center;
@@ -6857,7 +6483,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .devis-shipping__value { color: var(--accent); font-weight: 700; }
 .devis-shipping__delay { color: #cdd6e0; font-size: 12px; }
 
-/* ========== 41) COMPARATEUR PRIX LOCAL ========== */
 .pt-local-compare {
   display: flex;
   align-items: center;
@@ -6881,11 +6506,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   font-weight: 700;
 }
 
-/* ========== 42) STRIPE ELEMENTS ========== */
-
-/* Adresse de livraison (avant le formulaire carte). Style aligné sur
-   l'apparence Stripe Elements (fond #1a2332, focus violet) pour une
-   continuité visuelle dans la modale. */
 .pay-address {
   margin: 0 0 16px;
   padding: 14px;
@@ -6927,16 +6547,7 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   width: 100%;
   box-sizing: border-box;
 }
-/* Champ carte Revolut : l'INTÉRIEUR est une iframe qui lui appartient (la
-   carte ne touche jamais notre domaine). On habille le conteneur pour qu'il
-   ressemble aux autres champs — sinon il fait « site étranger » au moment de
-   payer.
-   ⛔ On vise les classes que Revolut pose LUI-MÊME (`rc-card-field*`), et on
-   ne lui passe RIEN : lui envoyer un objet `classes` partiel a cassé le
-   chargement du champ le 01/08/2026. Styliser de l'extérieur ne peut pas
-   casser ce qu'on ne touche pas. */
-/* Nom du titulaire : meme habillage que les champs d'adresse, pour que le bloc
-   carte forme un tout coherent. */
+
 .pay-card-same {
   display: flex; align-items: center; gap: .55rem; margin: 12px 0 4px;
   font-size: 14px; color: #c9d3e0; cursor: pointer;
@@ -6955,9 +6566,7 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .rc-card-field {
   background: #1a2332; border: 1px solid rgba(255,255,255,.12);
   border-radius: 10px; box-sizing: border-box;
-  /* ⛔ Le contenu collait EN HAUT du cadre : `padding: 12px` fixe ne centre
-     rien quand la hauteur du cadre dépasse celle de la ligne. On centre pour
-     de vrai — le champ se place au milieu quelle que soit la hauteur. */
+
   display: flex; align-items: center;
   min-height: 48px; padding: 0 12px;
 }
@@ -6965,18 +6574,14 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   border-color: var(--accent); box-shadow: 0 0 0 2px rgba(var(--accent-rgb), .25);
 }
 .rc-card-field--invalid { border-color: rgba(239,68,68,.6); }
-/* ⛔ Le bouton « Commander » restait LUMINEUX alors que le clic ne pouvait
-   rien faire — CGV non cochées, ou champ carte pas monté. Un bouton qui a
-   l'air actif et ne répond pas, c'est un client qui clique, ne comprend pas,
-   et s'en va. On éteint le dégradé et le halo, et le curseur le dit aussi.
-   Sélecteur ciblé sur CE bouton : aucun effet de bord ailleurs. */
+
 .pay-modal__pay { flex-direction: column; gap: 2px; line-height: 1.25; }
 .pay-modal__pay-main { font-size: 1.05em; font-weight: 800; }
 .pay-modal__pay-legal { font-size: .72em; font-weight: 600; opacity: .85; }
 
 #payModalConfirm:disabled {
   background: #2a3444; color: #98a3b2; box-shadow: none; cursor: not-allowed;
-  opacity: 1; /* pas de transparence : on veut « éteint », pas « fantôme » */
+  opacity: 1;
 }
 
 .pay-card-label {
@@ -7005,10 +6610,7 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .stripe-elements-wrap {
   margin-bottom: 16px;
 }
-/* ⛔ 120 px etait calibre pour STRIPE ELEMENTS, qui empilait plusieurs champs.
-   Le champ Revolut tient sur UNE ligne : il restait 74 px de vide sous lui, et
-   le bloc « Carte bancaire » avait l'air cassé. 56 px = de quoi loger la ligne
-   du champ OU l'indicateur de chargement, sans trou. */
+
 .stripe-payment-element {
   min-height: 48px;
   padding: 0;
@@ -7051,7 +6653,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .stripe-fallback p { margin: 4px 0; }
 .stripe-fallback strong { color: #fff; }
 
-/* ========== 43) INSTAGRAM ADMIN ========== */
 .ig-admin {
   display: flex;
   flex-direction: column;
@@ -7072,7 +6673,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   border-radius: 8px;
 }
 
-/* Account card */
 .ig-account-card {
   display: flex;
   gap: 16px;
@@ -7117,7 +6717,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   line-height: 1.5;
 }
 
-/* Token */
 .ig-token-card {
   margin-top: 14px;
   padding: 16px;
@@ -7142,7 +6741,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   margin: 8px 0;
 }
 
-/* Media grid */
 .ig-media-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -7203,7 +6801,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   color: #9ca3af;
 }
 
-/* Publish form */
 .ig-publish-form {
   display: flex;
   flex-direction: column;
@@ -7261,7 +6858,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   width: 100%;
 }
 
-/* Comments */
 .ig-comments-lookup {
   display: flex;
   gap: 8px;
@@ -7341,7 +6937,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   padding: 6px 12px;
 }
 
-/* Insights */
 .ig-insights-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -7373,7 +6968,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   line-height: 1.4;
 }
 
-/* Responsive */
 @media (max-width: 600px) {
   .ig-media-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -7392,7 +6986,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   }
 }
 
-/* ========== 44) PAGES LÉGALES (mentions + confidentialité) ========== */
 .legal-page { padding: 2rem 0 4rem; }
 .legal-container {
   max-width: 820px;
@@ -7429,7 +7022,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .legal-page strong { color: #e6edf5; }
 .legal-links { margin-top: 2.5rem; font-weight: 600; }
 
-/* Liens légaux dans le footer */
 .footer-legal {
   display: flex; flex-wrap: wrap; gap: .5rem;
   justify-content: center; align-items: center;
@@ -7439,7 +7031,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .footer-legal a:hover { color: #e6edf5; text-decoration: underline; }
 .footer-legal span { color: #4b5563; }
 
-/* Encadré formulaire type de rétractation (CGV) */
 .legal-form {
   background: rgba(255, 255, 255, .03);
   border: 1px solid rgba(255, 255, 255, .1);
@@ -7450,27 +7041,16 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 }
 .legal-form p { margin: 0 0 .6rem; }
 
-/* ========== 45) EX-STYLES INLINE (index.html) — fusion C4 ==========
-   Déplacés VERBATIM depuis les <style id="pt-fix|hero-scroll-animation|pt-ui">
-   du <head>. Ils étaient chargés APRÈS styles.css : placés en FIN de fichier,
-   la cascade est équivalente par construction (mêmes règles, même ordre,
-   toujours après tout le reste). Dédoublonnage volontairement NON fait ici
-   (fusion sans risque d'abord, simplification éventuelle ensuite). */
-
-/* ── ex <style id="pt-fix"> ── */
 :root{ --safe-top:70px; --dock-bottom:14px; }
 #app{ padding-top: calc(var(--safe-top) + 10px); }
 #dock{ position:fixed!important; left:50%!important; right:auto!important;
   bottom: calc(var(--dock-bottom) + var(--safe-bottom,0px))!important;
   transform:translateX(-50%)!important; width:auto!important; padding:0!important; z-index:999; }
-/* brand styles now in styles.css */
 
-/* ── ex <style id="hero-scroll-animation"> ── */
 .hero-logo-container {
   will-change: transform, opacity;
 }
 
-/* ── ex <style id="pt-ui"> ── */
 .hero-full.hero-out{
   z-index: -1;
   height: 0 !important;
@@ -7479,8 +7059,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   pointer-events: none !important;
 }
 .list{ margin-top: 1rem; }
-
-/* brand grid styles now in styles.css */
 
 .chips{ display:flex; flex-wrap:wrap; gap:.4rem; }
 .chip{ border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.04); border-radius:999px; padding:.35rem .7rem; }
@@ -7491,8 +7069,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .toast--success{ background:rgba(23,135,44,.9); }
 .toast--info{ background:rgba(39,96,201,.9); }
 
-
-/* ── Top loading bar ───────────────────────────────── */
 .pt-loadbar{
   position:fixed; left:0; right:0;
   top: var(--safe-top, 0px);
@@ -7523,7 +7099,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 
 .sr-only{ position:absolute !important; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,1px); white-space:nowrap; border:0; }
 
-/* Drawer (menu lateral) */
 .drawer{
   position:fixed; top:0; bottom:0; left:0; right:auto;
   width:min(86vw,360px); max-width:92vw; box-sizing:border-box;
@@ -7551,7 +7126,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   100% { transform:translateX(-50%) translateY(0) scale(1) }
 }
 
-/* Force menu states */
 #side-menu.open,
 .menu-open #side-menu { transform: translateX(0) !important; }
 
@@ -7564,8 +7138,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 
 .fisc-card--done { opacity: .72; border-color: rgba(52,211,153,.4) !important; }
 
-/* ── Abonnements remaster (25/07) : règles du programme + acceptation ───────
-   (Phase 1 du plan docs/PLAN-ABONNEMENTS.md) */
 .abo-rules {
   max-width: 720px;
   margin: 2rem auto 0;
@@ -7587,7 +7159,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .abo-places { color: #fbbf24; font-weight: 700; letter-spacing: .04em; margin: 0 0 .6rem; }
 .abo-cta[disabled] { opacity: .45; cursor: not-allowed; filter: saturate(.4); }
 
-/* Switcher de packs en tête de page abonnement (comparaison directe). */
 .abo-switch {
   display: flex; gap: .5rem; flex-wrap: nowrap;
   overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
@@ -7605,11 +7176,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .abo-switch__pill.is-active { border-color: var(--accent); background: rgba(var(--accent-rgb), .14); }
 .abo-switch__pill--gold.is-active { border-color: #fbbf24; background: rgba(251, 191, 36, .12); }
 .abo-switch__pill--black.is-active { border-color: #c084fc; background: rgba(192, 132, 252, .12); }
-
-/* ========== 46) ANNUAIRE ARTISANS (Phase 2 abonnements) ==========
-   Vitrine des partenaires : page #/artisans (grille, 4 designs par tier
-   dégressifs) + bandeau accueil réservé aux Black (même mécanique de scroll
-   horizontal que « Nos produits »). Photos = data-URLs compressées (admin). */
 
 .artisans-header { text-align: center; padding: 1rem 0 1.6rem; }
 .artisans-header h1 {
@@ -7649,7 +7215,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 }
 .artisans-join p { margin: 0 0 .9rem; font-weight: 600; }
 
-/* ── Cartes (dégressif par tier) ── */
 .partner-card {
   position: relative;
   display: flex;
@@ -7692,17 +7257,14 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .partner-card__btn:hover { border-color: var(--accent); background: rgba(var(--accent-rgb), .12); }
 .partner-card__btn--wa:hover { border-color: #25d366; background: rgba(37, 211, 102, .12); }
 
-/* Tier Pro : liseré accent discret. */
 .partner-card--pro { border-color: rgba(var(--accent-rgb), .4); }
 
-/* Tier Gold : liseré doré. */
 .partner-card--gold {
   border-color: rgba(251, 191, 36, .5);
   box-shadow: 0 0 24px rgba(251, 191, 36, .08);
 }
 .partner-card--gold .partner-card__metier { color: #fbbf24; }
 
-/* Tier Black : carte premium (badge, halo violet, fond dégradé). */
 .partner-card--black {
   border-color: rgba(192, 132, 252, .55);
   background: linear-gradient(160deg, rgba(192, 132, 252, .10), rgba(13, 17, 23, .9) 55%);
@@ -7717,7 +7279,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   box-shadow: 0 2px 10px rgba(0, 0, 0, .4);
 }
 
-/* ── Bandeau accueil « Nos artisans partenaires » (Black uniquement) ── */
 .partner-strip-card {
   position: relative;
   flex: 0 0 210px; min-width: 210px;
@@ -7762,7 +7323,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   .partner-strip-card { flex: 0 0 170px; min-width: 170px; }
 }
 
-/* ── Admin : galerie photos du formulaire partenaire ── */
 .admin-partner-photos { display: flex; gap: .5rem; flex-wrap: wrap; margin: .4rem 0 .8rem; }
 .admin-partner-photo { position: relative; display: inline-block; }
 .admin-partner-photo img {
@@ -7772,12 +7332,11 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .admin-partner-photo button {
   position: absolute; top: -6px; right: -6px;
   width: 22px; height: 22px; border-radius: 50%;
-  /* WCAG 1.4.3 AA : #ef4444 ne donnait que 3.76:1 sous le ✕ blanc. */
+
   border: none; background: #d83d3d; color: #fff;
   font-size: .7rem; line-height: 1; cursor: pointer;
 }
 
-/* Avertissement index Firestore manquant (admin Commandes) — lien 1-tap. */
 .admin-index-warn {
   padding: 1.2rem; border-radius: 14px;
   border: 1px solid rgba(251, 191, 36, .45);
@@ -7787,7 +7346,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .admin-index-warn .btn { display: inline-block; }
 .admin-index-warn .admin-hint { margin: .8rem 0 0; }
 
-/* ========== 47) PRÉ-INSCRIPTION PARTENAIRE (Phase 3a) ========== */
 .rejoindre-header { text-align: center; padding: 1rem 0 1.4rem; max-width: 620px; margin: 0 auto; }
 .rejoindre-header h1 {
   margin: 0 0 .6rem; font-size: clamp(1.5rem, 1.1rem + 2vw, 2.2rem);
@@ -7850,7 +7408,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   .pj-grid { grid-template-columns: 1fr; }
 }
 
-/* Admin — cartes de candidatures (pré-inscriptions artisans, Phase 3a). */
 .admin-app {
   border: 1px solid rgba(255, 255, 255, .12); border-radius: 12px;
   background: rgba(255, 255, 255, .03); padding: .9rem 1rem; margin-bottom: .8rem;
@@ -7869,9 +7426,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .admin-app__line a { color: var(--accent); }
 .admin-app__foot { margin-top: .5rem; font-size: .75rem; opacity: .6; }
 
-/* Carte d'un LIVREUR ACTIF dans l'administration : sa photo et son identité,
-   telles que les clients les voient. Un dossier validé n'est plus une
-   candidature à traiter — il doit se présenter comme une fiche. */
 .admin-courier-fiche { display: flex; align-items: center; gap: .85rem; margin-bottom: .6rem; }
 .admin-courier-fiche__ph {
   width: 64px; height: 64px; flex: 0 0 64px; border-radius: 50%;
@@ -7887,7 +7441,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .admin-courier-fiche__id .admin-app__tier { align-self: flex-start; }
 .admin-courier-fiche__id .admin-hint { margin: 0; font-size: .8rem; }
 
-/* Bouton retour du formulaire de pré-inscription. */
 .pj-back {
   display: inline-flex; align-items: center; gap: .4rem;
   margin: .4rem 0 0; padding: .55rem 1rem; border-radius: 10px;
@@ -7897,7 +7450,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 }
 .pj-back:hover { border-color: var(--accent); background: rgba(var(--accent-rgb), .12); }
 
-/* Chip d'attente pendant la compression d'une image (logo/photos). */
 .img-busy {
   display: inline-flex; align-items: center; gap: .35rem;
   padding: .45rem .7rem; border-radius: 10px;
@@ -7907,7 +7459,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 }
 @keyframes imgBusyPulse { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
 
-/* Note « vendu sans batterie ni chargeur » sur la fiche (machine seule). */
 .pdp-batt-note {
   display: inline-flex; align-items: center; gap: .45rem;
   margin-top: .7rem; padding: .5rem .85rem; border-radius: 10px;
@@ -7917,7 +7468,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 }
 .pdp-batt-note__tri { font-size: 1rem; line-height: 1; }
 
-/* ═══ §47 — DEVENIR LIVREUR (service coursier, formulaire adaptatif) ═══════════ */
 .lv-cta-card .lv-cta-txt { margin: 0 0 .8rem; color: var(--muted, #b7b7c9); line-height: 1.5; }
 .lv-header { text-align: center; max-width: 760px; margin: 0 auto 1.4rem; }
 .lv-sub { color: var(--muted, #b7b7c9); line-height: 1.55; }
@@ -7925,14 +7475,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-banner { background: rgba(251,191,36,.12); border: 1px solid rgba(251,191,36,.4); color: #fde68a; padding: .8rem 1rem; border-radius: 12px; line-height: 1.5; }
 .lv-card { background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 1.1rem 1.2rem; }
 
-/* ── RYTHME VERTICAL DES ESPACES LIVRAISON ──────────────────────────────────
-   🐛 DÉFAUT SIGNALÉ (user 27/07/2026) : « la plupart des widgets se collent,
-   ils se touchent tous, même avec la carte au-dessus ». Cause : .lv-card n'a
-   AUCUNE marge — deux cartes consécutives se retrouvaient bord à bord, et
-   l'écran devenait illisible.
-   On pose l'espacement sur le CONTENEUR (règle « lobotomised owl » : entre
-   deux frères, jamais avant le premier ni après le dernier). Aucun risque de
-   double marge avec les grilles, qui gèrent leur propre `gap`. */
 .courier-space > * + *,
 #courierWork > * + *,
 #courierParams > * + *,
@@ -7940,11 +7482,10 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 #clientDelivList > * + *,
 #courierDispo > * + *,
 #courierMine > * + * { margin-top: 1.1rem; }
-/* Les titres de sous-section respirent au-dessus, pas en dessous. */
+
 #courierMine > .lv-h3 + *, #clientDelivList > .lv-h3 + * { margin-top: .7rem; }
 #courierMine > * + .lv-h3 { margin-top: 1.6rem; }
-/* Le panneau de l'accord et le fil de discussion ne doivent jamais toucher
-   la carte de course qui les précède. */
+
 .lv-chat, .lv-panel, .lv-proof, .lv-rate { margin-top: 1.1rem; }
 .lv-h2 { font-size: 1.15rem; margin: 0 0 .8rem; }
 .lv-h3 { font-size: .98rem; margin: 1rem 0 .5rem; color: var(--accent, #a78bfa); }
@@ -7955,8 +7496,7 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-age--ok { background: rgba(52,211,153,.12); color: #6ee7b7; }
 .lv-age--ko { background: rgba(248,113,113,.12); color: #fca5a5; }
 .lv-hint { color: var(--muted, #9a9ab0); font-size: .88rem; margin: .4rem 0 0; }
-/* Flex + wrap + centré : la 3e carte (Scooter/Moto) se centre seule sur sa
-   ligne au lieu de rester bloquée dans la colonne gauche d'une grille. */
+
 .lv-vehicles { display: flex; flex-wrap: wrap; justify-content: center; gap: .7rem; }
 .lv-vehicles .lv-veh { flex: 1 1 200px; max-width: 48%; }
 .lv-vehicles[aria-disabled=true] { opacity: .45; }
@@ -7985,7 +7525,7 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-cta { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
 .lv-cta__note { color: var(--muted, #9a9ab0); font-size: .88rem; }
 @media (max-width: 560px) { .lv-vehicles .lv-veh { max-width: 100%; } .lv-cta { flex-direction: column; align-items: stretch; } }
-/* Boutons assureurs (encadré assurance moto — mâche le travail) */
+
 .lv-insurers { display: grid; grid-template-columns: repeat(2, 1fr); gap: .5rem; margin: .5rem 0 .3rem; }
 .lv-ins { display: grid; gap: .1rem; padding: .6rem .7rem; border-radius: 12px; border: 1px solid rgba(255,255,255,.14); background: rgba(0,0,0,.28); text-decoration: none; transition: border-color .15s, background .15s; }
 .lv-ins:hover { border-color: rgba(var(--accent-rgb,167,139,250),.6); background: rgba(var(--accent-rgb,167,139,250),.1); }
@@ -7994,7 +7534,7 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-ins__price { font-size: .82rem; font-weight: 700; color: var(--accent, #a78bfa); margin-top: .15rem; }
 .lv-ins__note { display: block; font-size: .76rem; color: var(--muted, #9a9ab0); font-style: italic; margin-top: .2rem; }
 @media (max-width: 560px) { .lv-insurers { grid-template-columns: 1fr; } }
-/* Mon dossier livreur : progression + pièces à déposer */
+
 .lv-progress { display: flex; align-items: center; gap: .7rem; margin-bottom: 1rem; }
 .lv-progress__bar { flex: 1; height: 8px; background: rgba(255,255,255,.1); border-radius: 6px; overflow: hidden; }
 .lv-progress__bar span { display: block; height: 100%; background: var(--accent, #a78bfa); border-radius: 6px; transition: width .3s; }
@@ -8005,17 +7545,17 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-piece__file { font-size: .78rem; color: var(--muted, #a9a9be); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lv-piece__btn { cursor: pointer; font-size: .82rem; font-weight: 600; color: var(--accent, #a78bfa); border: 1px solid rgba(var(--accent-rgb,167,139,250),.4); padding: .35rem .7rem; border-radius: 9px; white-space: nowrap; }
 .lv-piece__btn:hover { background: rgba(var(--accent-rgb,167,139,250),.12); }
-/* Bloc coût estimé (démarches livreur) */
+
 .lv-cost__grp { margin-bottom: .8rem; }
 .lv-cost__title { display: block; font-size: .82rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: var(--accent, #a78bfa); margin-bottom: .35rem; }
 .lv-cost__row { display: flex; justify-content: space-between; gap: 1rem; padding: .4rem 0; border-bottom: 1px solid rgba(255,255,255,.06); }
 .lv-cost__row:last-child { border-bottom: 0; }
 .lv-cost__v { font-weight: 700; white-space: nowrap; color: #fff; }
 .lv-cost__sum { margin: .6rem 0 0; padding: .7rem .9rem; background: rgba(var(--accent-rgb,167,139,250),.1); border-radius: 12px; line-height: 1.55; }
-/* Actions admin dossier livreur */
+
 .admin-app__actions { display: flex; gap: .6rem; margin-top: .7rem; flex-wrap: wrap; }
 .admin-app--courier { border-left: 3px solid #34d399; }
-/* Boutons démarche / formulaire par pièce (dossier livreur) */
+
 .lv-piece__actions { display: flex; align-items: center; gap: .4rem; flex-wrap: wrap; margin-left: auto; }
 .lv-piece__demarche, .lv-piece__form { font-size: .8rem; font-weight: 600; text-decoration: none; padding: .35rem .6rem; border-radius: 9px; white-space: nowrap; }
 .lv-piece__demarche { color: #93c5fd; border: 1px solid rgba(147,197,253,.4); }
@@ -8023,13 +7563,13 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-piece__form { color: #6ee7b7; border: 1px solid rgba(110,231,183,.4); }
 .lv-piece__form:hover { background: rgba(110,231,183,.12); }
 @media (max-width: 560px) { .lv-piece__actions { margin-left: 0; width: 100%; } }
-/* Bandeau budget + délai (en tête du bloc coût livreur) */
+
 .lv-cost__headline { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin-bottom: 1rem; }
 .lv-cost__big { display: grid; gap: .2rem; padding: .7rem .8rem; background: rgba(var(--accent-rgb,167,139,250),.12); border: 1px solid rgba(var(--accent-rgb,167,139,250),.3); border-radius: 12px; }
 .lv-cost__biglbl { font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted, #b7b7c9); }
 .lv-cost__bigv { font-size: 1.05rem; font-weight: 800; color: #fff; }
 @media (max-width: 480px) { .lv-cost__headline { grid-template-columns: 1fr; } }
-/* Livreur : bandeau vert, cartes centrées, bouton rémunération, coordonnées, consentement */
+
 .lv-banner--green { background: rgba(52,211,153,.12); border-color: rgba(52,211,153,.5); color: #6ee7b7; }
 .lv-remun { display: block; width: 100%; margin: 0 0 1rem; padding: .95rem 1rem; border: 0; border-radius: 14px; cursor: pointer;
   font-size: 1rem; font-weight: 800; color: #05271a; letter-spacing: .01em;
@@ -8045,7 +7585,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-consent a { color: var(--accent, #a78bfa); }
 @media (max-width: 560px) { .lv-grid2 { grid-template-columns: 1fr; } }
 
-/* ═══ §48 — SÉLECTEUR D'ÎLE (inscription) : contours DORÉS lumineux ══════════ */
 .isl-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: .6rem; }
 .isl { flex: 1 1 30%; max-width: 32%; min-width: 92px; display: flex; flex-direction: column; align-items: center; gap: .25rem;
   padding: .6rem .3rem .5rem; background: rgba(0,0,0,.25); border: 1px solid rgba(255,255,255,.08); border-radius: 14px;
@@ -8061,7 +7600,7 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .isl--on svg path { stroke: #ffd76a; fill: rgba(242,193,78,.12);
   filter: drop-shadow(0 0 5px rgba(255,215,106,1)) drop-shadow(0 0 14px rgba(242,193,78,.8)); }
 .isl--on span { color: #ffd76a; }
-/* Bandeau livreur : îles dorées + bouton fermer */
+
 .lv-banner { position: relative; }
 .lv-banner__close { position: absolute; top: .4rem; right: .55rem; width: 26px; height: 26px; border: 0; border-radius: 50%;
   background: rgba(255,255,255,.12); color: inherit; font-size: 1.05rem; line-height: 1; cursor: pointer; }
@@ -8071,24 +7610,22 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-banner__isles svg path { fill: none; stroke: #f2c14e; stroke-width: 2.4; stroke-linejoin: round; stroke-linecap: round;
   filter: drop-shadow(0 0 3px rgba(242,193,78,.9)) drop-shadow(0 0 7px rgba(242,193,78,.4)); }
 @media (max-width: 480px) { .lv-banner__isles svg { width: 30px; height: 30px; } .lv-banner__isles { gap: .5rem; } }
-/* Panneau tarifs livreur : l'île du client (grand contour doré, futur support des zones) */
+
 .lv-remun-isle { display: flex; justify-content: center; margin: .3rem 0 .2rem; }
-/* Île maximisée : pleine largeur du panneau, hauteur plafonnée (le panneau ne
-   grossit pas) ; le viewBox est recadré au contenu par le JS. Trait FIN façon
-   globe (vector-effect : reste fin quel que soit le zoom du viewBox). */
+
 .lv-remun-isle svg { width: 100%; height: auto; max-height: 250px; overflow: visible; display: block; }
 .lv-remun-isle svg path { fill: none; stroke: #f2c14e; stroke-width: 1.1; vector-effect: non-scaling-stroke;
   stroke-linejoin: round; stroke-linecap: round;
   filter: drop-shadow(0 0 2px rgba(242,193,78,.75)); }
 .lv-remun-isle__name { text-align: center; margin: 0; font-weight: 800; color: #ffd76a; letter-spacing: .03em; }
-/* Détail consommation cylindrée (livreur) */
+
 .lv-conso { margin: .2rem 0 .8rem; padding: .6rem .8rem; background: rgba(0,0,0,.22); border: 1px solid rgba(255,255,255,.08); border-radius: 12px; }
-/* Barème livreur : liste des zones (panneau public) */
+
 .lv-bareme { margin-top: .6rem; display: grid; gap: .35rem; }
 .lv-bareme__row { display: flex; justify-content: space-between; align-items: center; padding: .45rem .7rem; background: rgba(0,0,0,.25); border: 1px solid rgba(255,255,255,.08); border-radius: 10px; }
 .lv-bareme__row em { font-style: normal; color: var(--muted, #9a9ab0); font-size: .85rem; }
 .lv-bareme__prix { font-weight: 800; color: #6ee7b7; font-size: 1.05rem; }
-/* Admin : barème & carburant */
+
 .admin-bareme__zones { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: .5rem; }
 .admin-bareme__zone { display: grid; gap: .05rem; padding: .5rem .8rem; background: rgba(0,0,0,.25); border: 1px solid rgba(255,255,255,.1); border-radius: 10px; text-align: center; }
 .admin-bareme__zone em { font-style: normal; font-size: .75rem; color: var(--muted, #9a9ab0); }
@@ -8102,12 +7639,12 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .admin-bareme__table th { color: var(--accent, #a78bfa); font-size: .78rem; text-transform: uppercase; letter-spacing: .02em; }
 .admin-bareme__table small { color: var(--muted, #9a9ab0); text-transform: none; letter-spacing: 0; }
 .admin-bareme__net { color: #6ee7b7; font-weight: 700; }
-/* Page Livraison quincaillerie + bulle accueil */
+
 #view-livraison .container { max-width: 780px; display: grid; gap: 1rem; }
 .liv-steps { margin: 0; padding-left: 1.3rem; display: grid; gap: .6rem; line-height: 1.55; }
 .brand-card__bubble--liv { display: grid; place-items: center; font-size: 2.3rem;
   background: radial-gradient(circle at 35% 30%, rgba(52,211,153,.35), rgba(16,25,20,.9)); }
-/* Fiche quincaillerie : bloc livraison chantier */
+
 .pdp-deliv-map { position: relative; width: 100%; aspect-ratio: 1 / 1; border-radius: 16px; overflow: hidden;
   background: #0a0f14; border: 1px solid rgba(242,193,78,.25); display: grid; place-items: center; margin-bottom: 1rem; }
 .pdp-deliv-map--fallback svg { width: 70%; height: 70%; overflow: visible; }
@@ -8117,39 +7654,37 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .pdp-deliv-form input[type=text], .pdp-deliv-form input[type=date], .pdp-deliv-form input[type=time] {
   padding: .6rem .8rem; border-radius: 10px; border: 1px solid rgba(255,255,255,.15); background: rgba(0,0,0,.25); color: #fff; font: inherit; width: 100%; box-sizing: border-box; }
 .pdp-deliv-when { display: flex; gap: .9rem; flex-wrap: wrap; padding-top: .4rem; }
-/* Espacement des blocs dynamiques du formulaire livreur (fix blocs collés) */
+
 #lvDynamic { display: grid; gap: 1rem; }
 #lvDynamic .lv-remun { margin: 0; }
-/* Leaflet dans notre thème sombre */
+
 .pdp-deliv-map .leaflet-container { width: 100%; height: 100%; border-radius: 16px; background: #0a0f14; }
-/* Leaflet est LA racine du conteneur (L.map(mapEl)) : neutralise le centrage grid */
+
 .pdp-deliv-map.leaflet-container { display: block; width: 100%; height: auto; aspect-ratio: 1 / 1; border-radius: 16px; background: #0a0f14; }
-/* Cartes de course (espace livreur, mode test) */
+
 .lv-course { padding: .8rem .9rem; background: rgba(0,0,0,.22); border: 1px solid rgba(255,255,255,.1); border-radius: 12px; margin-bottom: .6rem; display: grid; gap: .45rem; }
 .lv-course--done { opacity: .75; }
 .lv-course__head { display: flex; justify-content: space-between; gap: .6rem; flex-wrap: wrap; }
 .lv-course__status { font-size: .82rem; color: #6ee7b7; font-weight: 700; }
 .lv-course__body { font-size: .9rem; line-height: 1.5; color: var(--muted, #c9c9d9); }
 .lv-course__body em { color: var(--muted, #9a9ab0); font-style: normal; }
-/* Formulaire livraison : COLONNE UNIQUE (fix radios qui empiétaient sur la date) */
+
 .pdp-deliv-fields { display: grid; grid-template-columns: 1fr; gap: .8rem; }
 .pdp-deliv-fields .lv-field { min-width: 0; }
-/* ═══ §49 — MODE LIVRAISON (espace livreur) ═══════════════════════════════════ */
+
 .courier-space { max-width: 780px; display: grid; gap: 1rem; }
 .acc-hero__actions { margin-left: auto; align-self: center; display: flex; flex-direction: column; gap: .55rem; }
 .acc-hero__actions .btn { white-space: nowrap; text-align: center; }
 @media (max-width: 560px) { .acc-hero__actions { margin-left: 0; width: 100%; } }
 .lv-course--btn { width: 100%; text-align: left; cursor: pointer; border: 1px solid rgba(255,255,255,.1); background: rgba(0,0,0,.22); color: inherit; font: inherit; transition: border-color .15s; }
 .lv-course--btn:hover { border-color: rgba(var(--accent-rgb,167,139,250),.6); }
-/* Notation du livreur (environnement client) */
+
 .lv-rate { margin-top: .8rem; display: grid; gap: .6rem; }
 .lv-rate__stars { display: flex; gap: .3rem; }
 .lv-rate__star { font-size: 1.9rem; line-height: 1; background: none; border: 0; cursor: pointer; color: #f2c14e; padding: .1rem; transition: transform .12s; }
 .lv-rate__star:hover { transform: scale(1.15); }
 .lv-rate__comment { width: 100%; box-sizing: border-box; padding: .6rem .8rem; border-radius: 10px; border: 1px solid rgba(255,255,255,.15); background: rgba(0,0,0,.25); color: #fff; font: inherit; resize: vertical; }
 
-/* ═══ §50 — PAIEMENT COURSE + QUANTITÉ + PREUVE PHOTO ════════════════════════ */
-/* Sélecteur de quantité (fiches quincaillerie) : pilule moderne, gros taps */
 .qty-step { display: flex; align-items: center; justify-content: center; gap: .9rem; margin: 0 0 1.1rem; }
 .qty-step__label { font-size: .95rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--muted, #c9c9d9); }
 .qty-step__ctrl { display: inline-flex; align-items: center; border: 1px solid rgba(242,193,78,.45); border-radius: 999px; background: rgba(0,0,0,.3); overflow: hidden; box-shadow: 0 0 18px rgba(242,193,78,.12); }
@@ -8158,42 +7693,42 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .qty-step__btn:active { transform: scale(.92); }
 .qty-step__btn:disabled { opacity: .3; cursor: default; }
 .qty-step__val { min-width: 2.4ch; text-align: center; font-size: 1.25rem; font-weight: 800; font-variant-numeric: tabular-nums; color: #fff; padding: 0 .55rem; }
-/* Ligne livraison dans la modale de paiement */
+
 .pay-modal__line--deliv .pay-modal__line-title { color: #f2c14e; }
 .pay-modal__line--deliv .pay-modal__line-title em { font-style: normal; font-size: .8em; color: var(--muted, #c9c9d9); }
-/* Preuve de livraison (photo) — espace livreur + espace client */
+
 .lv-proof { margin-top: .8rem; padding: .8rem .9rem; border: 1px dashed rgba(242,193,78,.5); border-radius: 12px; display: grid; gap: .6rem; background: rgba(242,193,78,.05); }
 .lv-proof__img { min-height: 60px; font-size: .85rem; color: var(--muted, #c9c9d9); }
 .lv-proof__img img { max-width: 100%; border-radius: 12px; display: block; border: 1px solid rgba(255,255,255,.15); }
-/* Code de remise (espace client) : gros chiffres dorés + QR local */
+
 .lv-handcode { margin-top: .8rem; padding: .9rem 1rem; border: 1px solid rgba(242,193,78,.55); border-radius: 14px; background: rgba(242,193,78,.07); display: grid; gap: .6rem; justify-items: start; }
 .lv-handcode__row { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; }
 .lv-handcode__key { font-weight: 700; }
 .lv-handcode__num { font-size: 1.9rem; font-weight: 800; letter-spacing: .35em; color: #f2c14e; font-variant-numeric: tabular-nums; }
-/* Clé TOTP 32 car. — pourquoi pas .lv-handcode__num : voir mfa.js */
+
 .mfa-cle{font:700 clamp(.95rem,3.4vw,1.2rem)/1.5 ui-monospace,Menlo,monospace;letter-spacing:.06em;color:#f2c14e;word-break:break-all;overflow-wrap:anywhere;max-width:100%;display:block;user-select:all;-webkit-user-select:all}
 .lv-handcode__qr img { width: 132px; height: 132px; border-radius: 10px; background: #fff; padding: 4px; display: block; }
-/* Saisie du code côté livreur */
+
 .lv-code-input { width: 9ch; font-size: 1.4rem; font-weight: 800; letter-spacing: .3em; text-align: center; font-variant-numeric: tabular-nums; padding: .45rem .5rem; border-radius: 10px; border: 1px solid rgba(242,193,78,.5); background: rgba(0,0,0,.3); color: #fff; }
-/* Grille des photos de preuve (client : remise + chantier + sa photo) */
+
 .lv-proof__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .7rem; font-size: .85rem; color: var(--muted, #c9c9d9); }
 .lv-proof__cell { margin: 0; display: grid; gap: .3rem; }
 .lv-proof__cell img { width: 100%; border-radius: 10px; border: 1px solid rgba(255,255,255,.15); display: block; }
 .lv-proof__cell figcaption { font-size: .78rem; color: var(--muted, #c9c9d9); }
 .lv-scenefield .lv-proof__img img { max-width: 220px; }
-/* Vidéo de remise + litige (protection mutuelle client/livreur) */
+
 .lv-vid { margin-top: .8rem; padding: .8rem .9rem; border: 1px solid rgba(255,255,255,.14); border-radius: 12px; display: grid; gap: .55rem; background: rgba(0,0,0,.18); }
 .lv-dispute { margin-top: .2rem; }
 .lv-dispute summary { cursor: pointer; color: #f87171; font-weight: 700; font-size: .9rem; }
 .lv-dispute .lv-dispute__msg { width: 100%; box-sizing: border-box; margin-top: .55rem; padding: .6rem .8rem; border-radius: 10px; border: 1px solid rgba(248,113,113,.45); background: rgba(0,0,0,.25); color: #fff; font: inherit; resize: vertical; }
 .lv-consent--film { border: 1px dashed rgba(242,193,78,.45); border-radius: 10px; padding: .6rem .7rem; background: rgba(242,193,78,.05); }
-/* Santé des coûts d'achat (admin → recalcul des prix) */
+
 .reprice-health { margin: .7rem 0; padding: .7rem .85rem; border: 1px solid rgba(255,255,255,.14); border-radius: 10px; background: rgba(0,0,0,.22); font-size: .9rem; line-height: 1.7; }
-/* Livraison qui attend une action du client (à confirmer) */
+
 .lv-course--todo { border-color: rgba(110,231,183,.6); box-shadow: 0 0 16px rgba(110,231,183,.18); }
 .lv-course__todo { display: block; margin-top: .35rem; font-size: .84rem; font-weight: 700; color: #6ee7b7; }
 .lv-proof__img--none { font-style: italic; opacity: .75; }
-/* Widget « Mes gains » (espace livreur) */
+
 .lv-earn { padding: 1rem 1.1rem; border: 1px solid rgba(110,231,183,.35); border-radius: 16px; background: linear-gradient(160deg, rgba(110,231,183,.10), rgba(0,0,0,.25)); display: grid; gap: .9rem; }
 .lv-earn--empty { text-align: center; color: var(--muted, #c9c9d9); font-size: .92rem; border-style: dashed; }
 .lv-earn__total { display: flex; align-items: baseline; gap: .6rem; flex-wrap: wrap; }
@@ -8208,29 +7743,15 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-earn__cell--gele strong { color: #facc15; }
 .lv-earn__cell--todo strong { color: #60a5fa; }
 .lv-earn__cell--ok strong { color: #6ee7b7; }
-/* Acceptation des CGV avant paiement (art. L221-14 C. conso) */
+
 .pay-modal__cgv { display: flex; gap: .6rem; align-items: flex-start; margin: 0 0 .7rem; font-size: .86rem; line-height: 1.5; color: var(--muted, #c9c9d9); text-align: left; }
 .pay-modal__cgv input { margin-top: .2rem; flex: 0 0 auto; width: 18px; height: 18px; accent-color: #8B5CF6; }
 .pay-modal__cgv a { color: #c4b5fd; }
 .pay-modal__cgv-note { margin: -.4rem 0 .6rem; color: #ff8a8a; font-size: .84rem; font-weight: 600; }
 
-/* ═══ §51 — LIVREURS : TARIFS PAR ZONE, FICHES PUBLIQUES, CHAT ═══════════════
-   Le livreur fixe LUI-MÊME ses prix (garde-fou juridique : la plateforme
-   n'impose aucun montant et ne trie jamais sur le prix — voir
-   docs/METHODE-ENTREPRISE-FISCALITE.md § 5 bis). Ces styles couvrent :
-   la grande carte des zones éditable, les cartes livreurs (accueil + annuaire
-   + fiche publique) et le fil de discussion client ↔ livreur. */
-
-/* — Grande carte des zones : pleine largeur, format généreux (iPad/mobile) — */
 .lv-tarifs__map { width: 100%; margin: .2rem 0 1rem; border-radius: 16px; background: radial-gradient(120% 120% at 50% 0%, rgba(139,92,246,.12), rgba(0,0,0,.32)); border: 1px solid rgba(255,255,255,.10); overflow: hidden; }
 .lv-tarifs__map svg { display: block; width: 100%; height: auto; max-height: 62vh; }
-/* ⚠️ RÈGLE INDISPENSABLE — sans elle, l'île est NOIRE et masque les anneaux.
-   Les tracés de l'île sont CLONÉS depuis #regIslands ; en changeant de parent
-   ils perdent « .isl svg path { fill:none } » et retombent sur le fill par
-   défaut du SVG, c'est-à-dire NOIR OPAQUE. Comme ils sont peints APRÈS les
-   anneaux, ils recouvrent toute la carte. Même trait doré que .lv-remun-isle.
-   Les anneaux, eux, portent leur couleur en style INLINE : ils gagnent sur
-   cette règle et ne sont donc pas effacés. */
+
 .lv-tarifs__map svg path { fill: none; stroke: #f2c14e; stroke-width: 1.1;
   vector-effect: non-scaling-stroke; stroke-linejoin: round; stroke-linecap: round;
   filter: drop-shadow(0 0 2px rgba(242,193,78,.75)); }
@@ -8248,7 +7769,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-tarif__in input { width: 100%; min-width: 0; padding: .45rem .55rem; border-radius: 10px; border: 1px solid rgba(255,255,255,.22); background: rgba(0,0,0,.35); color: #fff; font: 800 1.05rem/1.2 inherit; font-variant-numeric: tabular-nums; text-align: right; }
 .lv-tarif__in em { font-style: normal; font-weight: 800; opacity: .8; }
 
-/* — Interrupteur « je suis disponible » — */
 .lv-dispo { display: grid; gap: .4rem; margin-bottom: 1rem; }
 .lv-dispo__btn { display: inline-flex; align-items: center; gap: .6rem; width: 100%; padding: .85rem 1rem; border-radius: 14px; border: 1px solid rgba(255,255,255,.16); background: rgba(0,0,0,.3); color: #fff; font: 800 1rem/1.2 inherit; cursor: pointer; transition: background .18s, border-color .18s, box-shadow .18s; }
 .lv-dispo__btn .lv-dispo__dot { width: 12px; height: 12px; border-radius: 50%; background: #6b7280; flex: 0 0 auto; }
@@ -8256,7 +7776,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-dispo__btn.is-on .lv-dispo__dot { background: #6ee7b7; box-shadow: 0 0 10px rgba(110,231,183,.9); }
 .lv-dispo__btn[disabled] { opacity: .6; cursor: default; }
 
-/* — Cartes livreurs (grille annuaire + bandeau accueil) — */
 .couriers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: .8rem; }
 .courier-card { display: grid; gap: .3rem; padding: .85rem .9rem 1rem; border-radius: 16px; background: rgba(0,0,0,.3); border: 1px solid rgba(255,255,255,.10); color: inherit; text-decoration: none; transition: border-color .18s, transform .18s, box-shadow .18s; }
 .courier-card:hover, .courier-card:focus-visible { border-color: rgba(242,193,78,.5); transform: translateY(-2px); }
@@ -8276,34 +7795,19 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-stars { color: #f2c14e; letter-spacing: .06em; }
 .home-products-strip--couriers .courier-card { flex: 0 0 200px; scroll-snap-align: start; }
 
-/* — Fiche publique du livreur — */
 .courier-prof__head { display: flex; align-items: center; gap: 1rem; margin: .4rem 0 1rem; flex-wrap: wrap; }
 .courier-prof__ph { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; background: rgba(255,255,255,.06); display: grid; place-items: center; font-size: 2.4rem; flex: 0 0 auto; }
 .courier-prof__id h1 { margin: 0 0 .2rem; }
 .courier-prof__meta { margin: 0; font-size: .9rem; color: var(--muted, #c9c9d9); }
 
-/* Discussion directe : le fil occupe toute la largeur (pas de colonne de
-   boutons comme dans le chat d'une course — il n'y a ni accord ni paiement
-   ici, c'est une simple mise en relation). */
-/* Bouton « Discuter » : sur la carte comme sur la fiche. Hors service il
-   reste VISIBLE mais éteint et non cliquable — le faire disparaître laisserait
-   croire que la fonction n'existe pas. */
 .courier-card__cta { margin-top: .5rem; display: block; }
 .courier-card__cta .btn { width: 100%; font-size: .82rem; padding: .5rem .6rem; }
 .courier-prof__cta { margin-top: .6rem; }
 .lv-discuter[disabled] { opacity: .55; cursor: not-allowed; box-shadow: none; }
-/* Regle generale : un bouton desactive ne doit JAMAIS avoir l'air cliquable
-   (defaut vecu le 28/07/2026 sur « Payer ma marchandise »). */
+
 .btn[disabled], .btn:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; filter: grayscale(.5); }
 .lv-discuter__no { font-weight: 600; opacity: .8; font-size: .78em; }
 
-/* En-tête de l'espace livreur : titre à gauche, ⚙️ Paramètres à DROITE et
-   parfaitement visible (demande user 27/07/2026). */
-/* ⚠️ Le bouton doit rester EN HAUT À DROITE, y compris quand le texte est
-   long. Avec flex-wrap seul il passait à la ligne et se retrouvait À GAUCHE
-   (mesuré x=126 au lieu de ~720) — « margin-left:auto » le colle à droite
-   dans TOUS les cas, enroulé ou non. Le bloc de texte peut rétrécir
-   (min-width:0), sinon il pousse le bouton hors de l'en-tête. */
 .lv-header--tools {
   display: flex; align-items: flex-start; justify-content: space-between;
   gap: 1rem; flex-wrap: wrap; text-align: left; max-width: 980px;
@@ -8321,14 +7825,10 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-gear:hover { background: rgba(var(--accent-rgb), .24); transform: translateY(-1px); }
 .lv-gear:active { transform: scale(.97); }
 .lv-gear__i { font-size: 1.1rem; line-height: 1; }
-/* Variante neutre : même gabarit, sans la couleur d'accent (action secondaire
-   comme « Rafraîchir » — elle ne doit pas rivaliser avec l'action principale). */
+
 .lv-gear--plain { border-color: rgba(255,255,255,.18); background: rgba(255,255,255,.06); color: #e6edf5; }
 .lv-gear--plain:hover { background: rgba(255,255,255,.12); }
 
-/* ── BANDEAU « À FAIRE MAINTENANT » (modèle Uber) ───────────────────────────
-   Une seule chose à l'écran doit crier. S'il y a une action attendue de moi,
-   elle est ICI, en haut, avec son bouton — et rien d'autre ne lui ressemble. */
 .lv-todo {
   display: flex; align-items: center; gap: .9rem; flex-wrap: wrap;
   padding: 1rem 1.1rem; border-radius: 16px;
@@ -8343,20 +7843,12 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-todo .btn { flex: 0 0 auto; }
 @media (max-width: 520px) { .lv-gear__t { display: none; } .lv-gear { padding: .6rem .8rem; } }
 
-/* La carte du livreur telle que les clients la voient, dans son espace. */
 .courier-mycard { max-width: 260px; margin: .6rem 0; }
 .courier-mycard .courier-card { pointer-events: none; }
 
-/* ══ BULLE DE DISCUSSION (façon Messenger) ════════════════════════════════
-   En bas à GAUCHE — le dock des raccourcis est centré, le bouton WhatsApp est
-   à droite : les trois ne se croisent jamais. z-index 9600 : au-dessus du dock
-   (1001) et des overlays (9500), en dessous du WhatsApp (9700) et des
-   messages système (10000). */
 .chat-bubble {
   position: fixed; left: 16px; z-index: 9600;
-  /* --consent-h : hauteur RÉELLE du bandeau cookies, publiée par app.js. Sans
-     ce décalage, le bandeau recouvre la bulle et avale les clics — piège déjà
-     vécu le 15/07/2026 avec les chips du catalogue. 0 le reste du temps. */
+
   bottom: calc(16px + var(--consent-h, 0px) + env(safe-area-inset-bottom, 0px));
   transition: bottom .25s ease;
   width: 56px; height: 56px; border-radius: 50%; border: 0; cursor: pointer;
@@ -8368,14 +7860,14 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .chat-bubble:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(109,40,217,.7); }
 .chat-bubble:active { transform: scale(.94); }
 .chat-bubble__i { font-size: 24px; line-height: 1; }
-/* Pastille du nombre de discussions. */
+
 .chat-bubble__n {
   position: absolute; top: -2px; right: -2px; min-width: 20px; height: 20px;
   padding: 0 5px; border-radius: 10px; background: #df342a; color: #fff;
   font-size: 11px; font-weight: 800; line-height: 20px; text-align: center;
   box-shadow: 0 0 0 2px #0a0f14;
 }
-/* La FENÊTRE : petite, ancrée au-dessus de la bulle, comme Messenger. */
+
 .chat-win {
   position: fixed; left: 16px; z-index: 9600;
   bottom: calc(84px + var(--consent-h, 0px) + env(safe-area-inset-bottom, 0px));
@@ -8409,7 +7901,7 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   border: 1px solid rgba(255, 255, 255, .16); background: rgba(0, 0, 0, .3); color: #e6edf5;
 }
 .chat-win__send .btn { flex: 0 0 auto; padding: .55rem .9rem; font-size: .85rem; }
-/* Une entrée de la liste des discussions. */
+
 .chat-item {
   display: flex; flex-direction: column; gap: .15rem; width: 100%; text-align: left;
   padding: .6rem .7rem; border-radius: 12px; cursor: pointer;
@@ -8420,14 +7912,12 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .chat-item:hover { background: rgba(139, 92, 246, .14); border-color: rgba(139, 92, 246, .45); }
 .chat-item__t { font-weight: 700; font-size: .9rem; }
 .chat-item__s { font-size: .78rem; color: var(--muted, #c9c9d9); }
-/* Sur petit écran, la fenêtre prend presque tout l'espace. */
+
 @media (max-width: 480px) {
   .chat-win { left: 8px; right: 8px; width: auto; max-height: 74vh; }
   .chat-bubble { left: 12px; }
 }
 
-/* Actions secondaires d'une course (vidéo, litige) : repliées par défaut.
-   Elles ne servent qu'en cas de problème et ne doivent pas encombrer l'écran. */
 .lv-vid__sum {
   cursor: pointer; list-style: none; padding: .6rem .8rem; border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, .12); background: rgba(255, 255, 255, .04);
@@ -8441,12 +7931,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-chat--solo { display: block; }
 .lv-chat--solo .lv-chat__log { min-height: 46vh; }
 
-/* ── BANDEAU « EN SERVICE » + POINT LUMINEUX ────────────────────────────────
-   L'état se lit d'un coup d'œil, sans avoir à lire : le bandeau ET le point
-   s'allument ensemble ou s'éteignent ensemble. Le vert est celui du reste du
-   site (#34d399) ; hors service, tout retombe en gris neutre — pas en rouge,
-   qui signalerait un problème alors que le livreur a simplement fini sa
-   journée. */
 .lv-service {
   display: flex; align-items: center; gap: .55rem; flex-wrap: wrap;
   margin: .5rem 0 0; padding: .5rem .8rem; border-radius: 999px;
@@ -8463,7 +7947,7 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   background: rgba(255, 255, 255, .28);
   transition: background .35s ease, box-shadow .35s ease;
 }
-/* ALLUMÉ : le bandeau se teinte, le point s'illumine et respire. */
+
 .lv-service.is-on {
   border-color: rgba(52, 211, 153, .55);
   background: rgba(52, 211, 153, .12);
@@ -8479,13 +7963,13 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   0%, 100% { box-shadow: 0 0 8px rgba(52, 211, 153, .95), 0 0 16px rgba(52, 211, 153, .55); }
   50%      { box-shadow: 0 0 12px rgba(52, 211, 153, 1),  0 0 26px rgba(52, 211, 153, .8); }
 }
-/* ÉTEINT : aucune animation, aucune lueur. */
+
 .lv-service.is-off .lv-service__dot { background: rgba(255, 255, 255, .28); box-shadow: none; }
-/* Respect du réglage système « réduire les animations ». */
+
 @media (prefers-reduced-motion: reduce) {
   .lv-service.is-on .lv-service__dot { animation: none; }
 }
-/* La pastille de la CARTE reprend exactement le même point. */
+
 .courier-card__dispo { display: inline-flex; align-items: center; gap: .35rem; }
 .courier-card--on .lv-service__dot {
   background: #34d399;
@@ -8506,13 +7990,9 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .courier-avis__d { margin-left: .5rem; font-size: .76rem; color: var(--muted, #c9c9d9); }
 .courier-avis__c { margin: .3rem 0 0; font-size: .9rem; line-height: 1.5; }
 
-/* — Fil de discussion client ↔ livreur — */
 .lv-chat { margin-top: .9rem; padding: .8rem .85rem; border-radius: 14px; border: 1px solid rgba(139,92,246,.35); background: rgba(139,92,246,.06); }
 .lv-chat__log { max-height: 320px; overflow-y: auto; display: grid; gap: .4rem; padding: .5rem; margin: .5rem 0; border-radius: 10px; background: rgba(0,0,0,.28); }
-/* 🐛 Les bulles se touchaient : .lv-msg n'avait aucune marge, les messages
-   se collaient les uns aux autres et le fil devenait illisible. On respire
-   entre chaque, un peu plus quand l'interlocuteur change (regroupement visuel
-   des messages consécutifs d'une même personne, comme dans les messageries). */
+
 .lv-msg { display: flex; }
 .lv-msg + .lv-msg { margin-top: .35rem; }
 .lv-msg--me + .lv-msg--them,
@@ -8528,24 +8008,12 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-chat__send { display: flex; gap: .5rem; }
 .lv-chat__send input { flex: 1 1 auto; min-width: 0; padding: .6rem .75rem; border-radius: 10px; border: 1px solid rgba(255,255,255,.22); background: rgba(0,0,0,.35); color: #fff; font: inherit; }
 
-/* — Demande de course : sortie de secours (remise en ligne) et annulation — */
 .btn--danger { border-color: rgba(248,113,113,.55); color: #ffb4b4; background: rgba(248,113,113,.10); }
 .btn--danger:hover, .btn--danger:focus-visible { border-color: rgba(248,113,113,.85); background: rgba(248,113,113,.18); }
 .lv-cancel { margin-top: .9rem; padding-top: .8rem; border-top: 1px dashed rgba(255,255,255,.14); display: grid; gap: .35rem; justify-items: start; }
 
-/* — Chat en 2 colonnes : fil à gauche, colonne d'actions à droite — */
-/* Le fil ayant quitté ce bloc (28/07/2026), il n'y a plus de colonne
-   principale à côté : les actions occupent toute la largeur, sur UNE RANGÉE. */
 .lv-chat__body { display: block; }
-/* ── FICHES D'INFORMATION : une info = une fiche, côte à côte ──────────────
-   Remplace cinq lignes de texte brut empilées (demande user 28/07/2026).
-   Elles s'enroulent d'elles-mêmes ; sur téléphone, deux par rangée. */
-/* Annulation d'une demande : action grave et rare — centrée, seule sur sa
-   ligne, pour qu'on ne la touche jamais par accident (demande user 28/07). */
-/* ── BANDEAU « NOUVELLE COURSE » ────────────────────────────────────────────
-   Sous la barre du haut, pleine largeur, vert. Il glisse depuis le haut, on
-   touche pour accepter, la croix l'écarte. z-index 9550 : au-dessus du contenu
-   et de la barre haute, en dessous de la bulle (9600) et des messages (10000). */
+
 .course-alert {
   position: fixed; left: 0; right: 0; z-index: 9550;
   top: calc(var(--safe-top, 70px) - 6px);
@@ -8584,10 +8052,7 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
 }
 .course-alert__x:hover { background: rgba(255,255,255,.14); }
-/* CLIGNOTEMENT (user 28/07/2026) : tant qu'une course attend, le bandeau
-   respire — c'est ce qui le fait remarquer quand on ne regarde pas l'écran.
-   Il s'ARRÊTE dès que les détails sont dépliés : le clignotement appelle
-   l'attention, il ne doit pas gêner la lecture. */
+
 @keyframes course-alert-blink {
   0%, 100% { box-shadow: 0 8px 28px rgba(0,0,0,.5), 0 0 22px rgba(52,211,153,.28); border-color: rgba(52,211,153,.55); }
   50%      { box-shadow: 0 8px 30px rgba(0,0,0,.55), 0 0 34px rgba(52,211,153,.75); border-color: rgba(52,211,153,1); }
@@ -8596,7 +8061,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   .course-alert--blink .course-alert__go { animation: course-alert-blink 1.2s ease-in-out infinite; }
 }
 
-/* Détails du client, dépliés au clic. */
 .course-alert__det {
   margin-top: .5rem; padding: .9rem 1rem; border-radius: 14px;
   border: 1px solid rgba(52,211,153,.45); background: rgba(10,15,20,.92);
@@ -8609,9 +8073,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .course-alert__st { display: block; margin-top: .45rem; font-size: .8rem; color: var(--muted, #c9c9d9); }
 @media (max-width: 480px) { .course-alert__cta { display: none; } }
 
-/* ── « MES COURSES » — présentation haut de gamme ──────────────────────────
-   Une course = une carte avec un liseré d'état à gauche, une ligne de titre
-   forte (zone + prix), et ses détails en dessous. Fini la liste plate. */
 #courierMine .lv-h3, #courierEnCours .lv-h3 {
   display: flex; align-items: center; gap: .5rem; margin: 1.4rem 0 .6rem;
   font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted, #9aa4b2);
@@ -8643,8 +8104,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 }
 #courierMine .lv-course__body, #courierEnCours .lv-course__body { display: block; margin-top: .35rem; font-size: .84rem; color: var(--muted, #c9c9d9); line-height: 1.5; }
 
-/* Historique replié : le résumé se lit comme un titre de carte, avec un
-   chevron qui dit clairement que ça s'ouvre. */
 .lv-histo { padding: 0; }
 .lv-histo__sum {
   cursor: pointer; list-style: none; display: flex; align-items: center; gap: .6rem;
@@ -8658,10 +8117,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-histo > #clientDelivList,
 .lv-histo > #courierMine { padding: 1rem 1.2rem 1.2rem; }
 
-/* ── BANDEAU DE STATUT (pleine largeur de la grosse fiche) ─────────────────
-   Demande user 28/07/2026 : le statut doit se lire d'un coup d'œil, en néon.
-   VERT = c'est acté · ORANGE = ça attend quelqu'un. Il traverse toute la
-   fiche, juste sous le titre — impossible de le manquer. */
 .lv-statut {
   display: flex; align-items: center; gap: .6rem; width: 100%;
   margin: .1rem 0 1rem; padding: .7rem 1rem; border-radius: 14px;
@@ -8685,25 +8140,16 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   .lv-statut--wait .lv-statut__dot { animation: lv-pulse 1.8s ease-in-out infinite; }
 }
 
-/* Défi TOTP à la connexion : révélé seulement si Firebase le réclame. */
 .mfa-challenge { display: block; }
 .mfa-challenge__hint { margin: .3rem 0 .6rem; font-size: .8rem; color: var(--muted, #9aa4b2); }
 .mfa-challenge__err:empty { display: none; }
 .mfa-challenge__err { margin: .5rem 0 0; font-size: .84rem; color: #fca5a5; }
 
-/* Pastilles de STATUT sur les cartes de course. Avant, toute course « à moi »
-   affichait « ✅ Par toi » : une annulée et une terminée se lisaient pareil.
-   La couleur porte l'information autant que le mot (défaut vécu 28/07/2026). */
 .lv-st--wait { background: rgba(251,146,60,.18) !important; color: #fdba74 !important; }
 .lv-st--go   { background: rgba(96,165,250,.18) !important; color: #93c5fd !important; }
 .lv-st--ok   { background: rgba(52,211,153,.18) !important; color: #6ee7b7 !important; }
 .lv-st--no   { background: rgba(248,113,113,.18) !important; color: #fca5a5 !important; }
 
-/* ── SIGNET « en cours » ───────────────────────────────────────────────────
-   Le petit marqueur orange néon qui porte la course tant qu'elle tourne
-   (user 28/07/2026). Il est CLIQUABLE — c'est lui qui ouvre la grosse fiche,
-   qui ne s'affiche donc plus d'elle-même. Liseré orange à gauche pour qu'on
-   le repère sans lire. */
 .lv-signet {
   display: flex; align-items: center; gap: .8rem; flex-wrap: wrap;
   width: 100%; text-align: left; cursor: pointer;
@@ -8725,35 +8171,20 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-signet__t { font-size: .98rem; color: #e6edf5; }
 .lv-signet__s { font-size: .84rem; color: var(--muted, #c9c9d9); }
 
-/* ── DUO : signet « en cours » à GAUCHE, carte du livreur à DROITE ─────────
-   Demande user 28/07/2026 : « mets-le en carré rangé sur la gauche et à ses
-   côtés la carte du livreur, ils doivent avoir exactement la même hauteur ».
-   La hauteur identique vient de `align-items: stretch` + `height: 100%` sur
-   les enfants : elle reste vraie quel que soit le contenu, sans valeur figée.
-   DEUX colonnes EXACTEMENT (`1fr 1fr`), pas `auto-fit` : celui-ci déclarait
-   autant de pistes que la largeur en permettait (4 sur desktop, dont 2 vides
-   et collapsées). Le rendu était juste, mais la règle ne disait pas ce qu'on
-   voulait — et une règle qui se trouve juste par accident finit par se tromper.
-   Sous 360 px seulement, on empile : deux colonnes y deviendraient illisibles. */
 .lv-duo {
   display: grid; grid-template-columns: 1fr 1fr;
   gap: .8rem; align-items: stretch;
 }
 @media (max-width: 359px) { .lv-duo { grid-template-columns: 1fr; } }
 .lv-duo + .lv-duo { margin-top: .8rem; }
-/* Deux mécanismes REDONDANTS, et c'est voulu : `align-items: stretch` égalise
-   les items de la grille, `height: 100%` propage la hauteur aux enfants
-   (.courier-card, .lv-duo__wait) qui, eux, ne sont pas des items de grille.
-   Retirer l'un seul ne casse rien ; retirer les deux casse l'alignement — le
-   harnais le prouve (plan9.mjs, sabotage F3). */
+
 .lv-duo > * { height: 100%; min-width: 0; }
-/* Le signet passe en TUILE (colonne) : c'est le « carré » demandé. */
+
 .lv-duo .lv-signet {
   flex-direction: column; align-items: flex-start; justify-content: center;
   gap: .55rem; margin: 0;
 }
-/* Dans la tuile (≈155 px sur iPhone), la pastille en `nowrap` débordait de
-   31 px mesurés. Elle doit pouvoir se replier et ne jamais dépasser son bloc. */
+
 .lv-duo .lv-signet .lv-pill {
   margin-left: 0; max-width: 100%; white-space: normal; text-align: left;
 }
@@ -8769,12 +8200,9 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-duo__waitt { font-weight: 800; color: #e6edf5; font-size: .95rem; }
 .lv-duo__waits { font-size: .8rem; color: var(--muted, #c9c9d9); line-height: 1.45; }
 
-/* En-tête de la grosse fiche livreur : titre à gauche, PASTILLE à droite. */
 .lv-dhead { display: flex; align-items: flex-start; justify-content: space-between; gap: .8rem; flex-wrap: wrap; }
 .lv-dhead .lv-h2 { margin: 0; flex: 1 1 14rem; }
-/* `margin-left:auto` : la pastille reste collée À DROITE même quand elle passe
-   à la ligne sous le titre sur un écran étroit (iPhone) — sinon elle se
-   recollait à gauche et ne se lisait plus comme un état. */
+
 .lv-pill {
   flex: 0 0 auto; margin-left: auto; display: inline-flex; align-items: center; gap: .45rem;
   padding: .35rem .8rem; border-radius: 999px;
@@ -8815,7 +8243,7 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   transition: border-color .2s ease, box-shadow .2s ease;
 }
 .lv-fact:hover { border-color: rgba(var(--accent-rgb), .7); box-shadow: 0 0 24px rgba(var(--accent-rgb), .3); }
-/* Le titre est SÉPARÉ de la valeur par un trait lumineux, pas par du vide. */
+
 .lv-fact__k {
   font-size: .68rem; font-weight: 800; letter-spacing: .07em; text-transform: uppercase;
   color: #c4b5fd; padding-bottom: .35rem;
@@ -8839,21 +8267,12 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .lv-chat__panel { margin-top: .8rem; padding: .85rem .9rem; border-radius: 14px; border: 1px solid rgba(242,193,78,.35); background: rgba(0,0,0,.3); display: grid; gap: .55rem; }
 .lv-panel__t { margin: 0; font-size: 1.02rem; font-weight: 800; }
 .lv-accord__list { list-style: none; margin: 0; padding: 0; display: grid; gap: .3rem; }
-/* Intitulé à gauche, valeur à droite. Sur écran étroit, une valeur longue
-   (« 2 articles de quincaillerie × 3 ») s'enroulait AU MILIEU de l'intitulé :
-   on lisait « 📦 … × » puis « Marchandise 3 ». `flex-wrap` + bases de largeur
-   font passer la valeur À LA LIGNE ENTIÈRE plutôt que de couper l'intitulé. */
+
 .lv-accord__list li { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: .2rem .8rem; padding: .4rem .55rem; border-radius: 8px; background: rgba(0,0,0,.28); font-size: .9rem; }
 .lv-accord__list li span { color: var(--muted, #c9c9d9); flex: 0 0 auto; }
 .lv-accord__list li strong { flex: 1 1 auto; min-width: 0; text-align: right; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .lv-accord__sign { margin: .2rem 0 0; font-size: .92rem; font-weight: 700; letter-spacing: .02em; }
 
-/* ═══ §52 — CORRECTIFS AUDIT P1 (intégrité statique) ═════════════════════════
-   `.product-grid` était utilisée sur #terrViewProducts (pages territoire
-   #/guadeloupe, #/martinique, #/guyane, #/reunion, #/mayotte) SANS AUCUNE
-   règle : les 8 produits mis en avant s'empilaient en pleine largeur au lieu
-   de former une grille. Alignée sur `.list` (la grille du catalogue) pour que
-   les cartes soient rigoureusement identiques d'une page à l'autre. */
 .product-grid {
   display: grid;
   gap: 1.2rem;
@@ -8863,11 +8282,6 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   padding: .5rem 0;
 }
 
-/* `.btn--ghost` : variante SECONDAIRE, utilisée 29 fois (28 boutons d'admin +
-   « Voir les formules ») mais JAMAIS définie — tous ces boutons secondaires
-   étaient donc rendus comme l'action principale (dégradé bleu plein, ombre
-   portée), ce qui écrasait la hiérarchie visuelle. Défaut trouvé à l'audit P1,
-   même famille que `.btn--primary` (étape C1). */
 .btn--ghost {
   background: rgba(255, 255, 255, .05);
   color: var(--muted, #c9c9d9);

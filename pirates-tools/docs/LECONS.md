@@ -81,6 +81,22 @@ n'a pas pu être vérifié à la source y est dit comme tel.
 | 01/08/2026 | Le tunnel abandonnait la commande — « Le paiement par carte sera bientôt disponible » — quand `window.Stripe` était absent, **alors que Revolut encaisse**. Un client dont le navigateur bloque `js.stripe.com` (bloqueur, proxy d'entreprise) perdait la vente, sans message utile ni trace | `initStripeElements` testait `getStripe()` AVANT d'appeler le serveur. Or c'est le serveur qui dit qui encaisse : le front n'a aucun moyen de le savoir avant sa réponse. Le SDK d'un fournisseur ne peut pas conditionner le tunnel de l'autre | `scripts/check-tunnel-paiement.js` |
 | 01/08/2026 | La fenêtre de paiement annonçait « Paiement sécurisé par **Stripe** » pendant que Revolut encaissait, à l'instant précis où le client donne son numéro de carte | DEUX sources, corrigées séparément : le texte statique d'`index.html`, **et** `var _paiementFournisseur = 'stripe'` — j'avais cru n'avoir qu'un texte à changer. Vu en bac à sable, pas en relisant | `scripts/check-tunnel-paiement.js` |
 
+| 01/08/2026 | L'adresse personnelle de l'user était écrite **deux fois en dur** dans `app.js`, fichier servi à tous les visiteurs — et elle **désignait nommément le compte dispensé de pièces justificatives** | Le front portait une copie de la liste serveur « pour le confort d'affichage ». Une liste d'exemption dans un fichier public ne fuit pas seulement une adresse : elle publie la cible à viser. Le serveur répond désormais deux booléens pour le seul compte authentifié | `scripts/check-fuites.js` |
+| 01/08/2026 | Une assertion du harnais `couriers` était **rouge en silence** : « le paiement porte le marqueur de la course » → *aucun*. Elle l'était depuis que l'e-mail et le téléphone sont devenus obligatoires | Le harnais remplissait un formulaire qui n'existait plus. `validatePayAddress()` rendait `valid:false`, aucune commande n'était créée — et rien ne disait si le rouge accusait le code ou le test | `tests/couriers.mjs`|
+| 01/08/2026 | `styles.css` servait **20 795 octets gzip de commentaires** à chaque visite — et l'user navigue en privé, donc aucun cache ne les amortit : retéléchargés à chaque fois, par lui et par ses clients | Rien ne mesurait la part de commentaire dans un fichier servi. Le budget total était saturé à 400,1 Ko sur 400, ce qui bloquait tout ajout | `outils/purge-css.mjs` + `docs/CSS-CARTE.md` |
+
+⚠️ **Rien n'a été perdu du CSS.** Les 382 blocs sont dans `docs/CSS-CARTE.md`,
+rattachés à leur **sélecteur** — jamais à un numéro de ligne, qui se périme.
+L'outil refuse d'écrire si la liste des déclarations CSS change : **7 803
+avant, 7 803 après**, vérifié à chaque exécution et prouvé par sabotage.
+
+⚠️ **`check-fuites.js` s'est trompé en refusant à tort** avant d'être juste :
+son critère de gabarit téléphonique attendait les zéros juste après
+l'indicatif (`^0[67]0{8}$`), alors que le gabarit du site est `06 90 00 00 00`.
+Il refusait donc un gabarit légitime — et un refus à tort finit par faire
+désactiver la porte (E-208). Le critère réel est une longue suite de chiffres
+identiques : aucun numéro attribué n'en porte six.
+
 ⚠️ **Le logo Revolut n'a PAS été dessiné.** `revolut.com` et
 `assets.revolut.com` répondent `000` (CONNECT refusé par la politique réseau),
 et le paquet officiel `@revolut/checkout@1.1.25` ne contient aucune image —

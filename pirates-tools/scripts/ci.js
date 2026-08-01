@@ -101,6 +101,11 @@ var reqTunnel = safeRequire('./check-tunnel-paiement', 'check-tunnel-paiement');
    déjà sur les plus grandes institutions et notre CSS doit être en accord ».
    Dès sa pose elle a trouvé deux boutons étirés DÉJÀ présents dans le dépôt. */
 var reqEcrans = safeRequire('./check-ecrans', 'check-ecrans');
+/* ⛔ PORTE DE FUITE — demandée le 01/08/2026 (« cherche tout ce qui pourrait
+   être compromettant pour nous »). Elle a trouvé, dès sa pose, l'adresse
+   personnelle de l'user écrite DEUX FOIS dans app.js — et cette adresse
+   désignait le compte dispensé de pièces justificatives. */
+var reqFuites = safeRequire('./check-fuites', 'check-fuites');
 // Le module Revolut est ecrit AVANT d'avoir pu appeler le reseau : tout ce qui
 // est PUR (signature contre le vecteur officiel, commission d'un ordre
 // reessaye, table des etats) s'eprouve ici, sinon la 1re verification aurait
@@ -175,6 +180,7 @@ var reqReconc   = safeRequire('./check-reconciliation', 'check-reconciliation');
   await runOne(reqPaiement, 'check-paiement');
   await runOne(reqTunnel,   'check-tunnel-paiement');
   await runOne(reqEcrans,   'check-ecrans');
+  await runOne(reqFuites,   'check-fuites');
   await runOne(reqRevolut,  'check-revolut');
   await runOne(reqReconc,   'check-reconciliation');
 
