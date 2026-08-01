@@ -11752,6 +11752,7 @@
          `check-paiement` vérifie désormais l'atteignabilité des TROIS. */
       + '<button type="button" class="btn btn--ghost" id="revolutWebhook">🔔 Enregistrer le webhook</button>'
       + '<button type="button" class="btn btn--ghost" id="webhookSante">📡 Le fournisseur nous parle-t-il ?</button>'
+      + '<button type="button" class="btn btn--ghost" id="revolutRelire">🔍 Relire la commande de test</button>'
       + '</div>'
       + '<p class="compta-line"><small>La commande de test est créée dans le <b>bac à sable</b>, '
       + 'en fausse monnaie, et n\'apparaît pas dans ta comptabilité. 30 € et pas moins : '
@@ -11977,6 +11978,7 @@
           return;
         }
         var url = String(d.urlPaiement || '');
+        _revolutDerniereCommande = String(d.id || '') || null;
         out.innerHTML = '<div class="compta-res">'
           + '<div class="compta-res__price" style="font-size:1.1rem">✅ Commande créée — '
           + escapeHTML(String(d.montant || '')) + '</div>'
@@ -12049,6 +12051,67 @@
         /* ⛔ Ne PAS annoncer « erreur réseau » : un 400 est une réponse du
            serveur, pas une coupure. Le message porte désormais l'étape et
            l'indice — c'est lui qui dit quoi corriger. */
+        out.innerHTML = '<p class="admin-error">❌ ' + escapeHTML(e.message || String(e)) + '</p>';
+      });
+    };
+  }
+
+  // Référence de la dernière commande de test créée — sert à la relire.
+  var _revolutDerniereCommande = null;
+
+  /* Relit la commande de test chez Revolut, AVEC sa commission.
+
+     ⛔ POURQUOI CE BOUTON EXISTE : `depuisOrdre` et `commissionCents` n'ont
+     jamais tourné sur une VRAIE réponse Revolut — seulement sur des jeux
+     d'essai que j'ai écrits, donc conformes à ce que je CROIS de leur API. Un
+     champ nommé autrement donnerait un montant, une adresse ou une commission
+     faux. Le découvrir au moment où une facture est émise coûterait un numéro
+     de séquence, qui ne se rend pas. On le prouve avant, en lecture seule. */
+  function comptaBrancherRelire(out) {
+    var b = document.getElementById('revolutRelire');
+    if (!b || !out) return;
+    b.onclick = function () {
+      if (!_revolutDerniereCommande) {
+        out.innerHTML = '<p class="admin-error">Crée d\'abord une commande de test, '
+          + 'puis paie-la — c\'est elle qu\'on relira.</p>';
+        return;
+      }
+      b.disabled = true;
+      out.innerHTML = '<p class="admin-loading">Relecture chez Revolut…</p>';
+      adminGet('revolut-relire', { id: _revolutDerniereCommande }).then(function (d) {
+        b.disabled = false;
+        if (!d || !d.ok) {
+          out.innerHTML = '<p class="admin-error">❌ '
+            + escapeHTML(String((d && d.erreur) || 'raison inconnue')) + '</p>';
+          return;
+        }
+        /* ⛔ La commission est LE point à vérifier. `null` veut dire « pas
+           lue » — pas « zéro ». Une commission absente rendue à zéro ferait
+           croire à une vente sans frais et fausserait chaque marge. */
+        var okCom = d.commissionLue;
+        out.innerHTML = '<div class="compta-res">'
+          + '<div class="compta-res__price" style="font-size:1.05rem">'
+          + (okCom ? '✅ Commande relue, commission lue' : '⚠️ Commande relue, commission INTROUVABLE')
+          + '</div>'
+          + '<div class="compta-res__brk">'
+          + '<span>État : <b>' + escapeHTML(String(d.etat)) + '</b> (' + escapeHTML(String(d.etatBrut)) + ')</span>'
+          + '<span>Montant : <b>' + escapeHTML(formatPrice((d.montantCents || 0) / 100)) + '</b></span>'
+          + '<span>Commission réelle : <b>'
+          + (okCom ? escapeHTML(formatPrice(d.commissionCents / 100)) : '— non lue —') + '</b></span>'
+          + '<span>Carte : ' + escapeHTML(String(d.marqueCarte || '?'))
+          + ' (' + escapeHTML(String(d.paysCarte || '?')) + ')</span>'
+          + '<span>Coordonnées reçues : '
+          + (d.aEmail ? 'e-mail ✅' : 'e-mail ❌') + ' · '
+          + (d.aNom ? 'nom ✅' : 'nom ❌') + ' · '
+          + (d.aAdresse ? 'adresse ✅' : 'adresse ❌') + '</span>'
+          + '<span>Données rattachées : ' + escapeHTML((d.metadataVues || []).join(', ') || 'aucune') + '</span>'
+          + '</div>'
+          + (okCom ? '' : '<p class="compta-line"><b>⚠️ Sans commission réelle, la marge de '
+              + 'chaque vente serait fausse.</b> Ne bascule pas tant que ce point n\'est pas '
+              + 'vert : envoie-moi cet écran.</p>')
+          + '</div>';
+      }).catch(function (e) {
+        b.disabled = false;
         out.innerHTML = '<p class="admin-error">❌ ' + escapeHTML(e.message || String(e)) + '</p>';
       });
     };
@@ -12153,6 +12216,7 @@
     comptaBrancherOrdreTest(out);
     comptaBrancherWebhook(out);
     comptaBrancherSante(out);
+    comptaBrancherRelire(out);
     btn.onclick = function () {
       btn.disabled = true;
       out.innerHTML = '<p class="admin-loading">Appel de Revolut…</p>';

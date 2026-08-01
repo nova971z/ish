@@ -342,6 +342,59 @@ module.exports = async function handler(req, res) {
       }
     }
 
+    /* ── GET ?type=revolut-relire : LE MAILLON JAMAIS EXÉCUTÉ ─────────────
+       `depuisOrdre` et `commissionCents` n'ont jamais tourné sur une VRAIE
+       réponse Revolut — seulement sur des jeux d'essai que j'ai écrits
+       moi-même, donc conformes à ce que je CROIS de leur API. Si un champ
+       s'appelle autrement, le montant, l'adresse ou la commission seront faux.
+
+       ⛔ Découvrir ça au moment où une facture est émise coûterait un numéro de
+       séquence — qui ne se rend pas. On le prouve donc AVANT la bascule, sur la
+       commande de test déjà payée : lecture seule, aucune facture, aucun
+       e-mail, aucune écriture.
+
+       ⛔ Refuse en production, comme les autres diagnostics. */
+    if (type === 'revolut-relire') {
+      const rev = require('./_lib/paiement/revolut');
+      if (rev._modeProd()) {
+        return res.status(400).json({ ok: false, etape: 'garde',
+          erreur: 'REVOLUT_MODE vaut « prod ». Cet outil ne touche que le bac à sable.' });
+      }
+      const idOrdre = String((req.query && req.query.id) || '').trim().slice(0, 80);
+      if (!idOrdre) {
+        return res.status(400).json({ ok: false, etape: 'id',
+          erreur: 'Référence de commande manquante.',
+          indice: 'Crée d\'abord une commande de test : sa référence s\'affiche ici.' });
+      }
+      try {
+        const p = await rev.lirePaiement(idOrdre, { avecCommission: true });
+        return res.status(200).json({
+          ok: true,
+          id: p.id,
+          etat: p.etat,
+          etatBrut: p.etatBrut,
+          montantCents: p.montantCents,
+          devise: p.devise,
+          /* ⛔ `null` n'est PAS `0`. Une commission inconnue rendue à zéro
+             ferait croire à une vente sans frais et fausserait la marge de
+             chaque ligne du compte de résultat. */
+          commissionCents: p.commissionCents,
+          commissionLue: p.commissionCents !== null,
+          marqueCarte: p.marqueCarte,
+          paysCarte: p.paysCarte,
+          /* Présence seulement — jamais la valeur : cet écran se photographie. */
+          aEmail: !!p.email,
+          aNom: !!p.nom,
+          aAdresse: !!(p.adresse && p.adresse.codePostal),
+          metadataVues: Object.keys(p.metadata || {})
+        });
+      } catch (e) {
+        return res.status(200).json({ ok: false, etape: 'lecture',
+          erreur: String(e.message || e).slice(0, 400),
+          indice: 'La référence doit être celle d\'une commande créée dans CE bac à sable.' });
+      }
+    }
+
     /* ── GET ?type=webhook-sante : LE FOURNISSEUR NOUS PARLE-T-IL ? ────────
        La question à laquelle rien ne répondait. Un webhook dont la signature
        est refusée renvoie 400 : le fournisseur réessaie quelques fois, puis

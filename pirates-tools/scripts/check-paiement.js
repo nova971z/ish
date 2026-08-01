@@ -844,7 +844,8 @@ module.exports = async function () {
        est le plus cher de tous : sans webhook enregistré, un paiement réussi
        ne produit ni commande, ni facture, ni e-mail. Le mode de panne le plus
        silencieux du site. */
-    ['revolut-ping', 'revolut-commande-test', 'revolut-webhook', 'reconciliation'].forEach(function (t) {
+    ['revolut-ping', 'revolut-commande-test', 'revolut-webhook', 'webhook-sante',
+     'revolut-relire', 'reconciliation'].forEach(function (t) {
       ok(appSrc.indexOf("adminGet('" + t + "'") !== -1,
         '⛔⛔ aucun appel `adminGet(\'' + t + '\')` dans app.js : ce point d\'entrée admin '
         + 'n\'est atteignable par AUCUN bouton. Il peut être parfait côté serveur — pour '
@@ -967,6 +968,39 @@ module.exports = async function () {
       '⛔ `noterSante` écrit une donnée personnelle dans le témoin. Ce document s\'affiche '
       + 'à l\'écran et part en capture : horodatages, compteurs et motif technique '
       + 'seulement (règle J3, audit p6-rgpd).');
+
+    /* ── d quater) ⛔ `null` N'EST PAS `0` POUR UNE COMMISSION ────────────
+       Une commission inconnue rendue à zéro ferait croire à une vente sans
+       frais : la marge de CHAQUE ligne du compte de résultat serait fausse, et
+       rien ne le signalerait — les chiffres auraient l'air parfaitement
+       plausibles. L'écran doit donc distinguer « lue » de « introuvable ». */
+    var mRelire = appSrc.match(/function comptaBrancherRelire[\s\S]*?\n  \}/);
+    ok(mRelire && /commissionLue/.test(mRelire[0]),
+      '⛔⛔ l\'écran de relecture ne distingue plus « commission lue » de « commission '
+      + 'introuvable ». Une commission absente affichée comme 0 € ferait croire à une '
+      + 'vente sans frais : la marge de chaque ligne du compte de résultat serait fausse, '
+      + 'et les chiffres auraient l\'air plausibles.');
+    /* ⚠️ 1ʳᵉ VERSION INCOMPLÈTE : elle ne regardait que l'écran. Le sabotage
+       « le serveur écrase null en 0 » est passé au VERT — or c'est le côté le
+       plus dangereux, puisqu'il est EN AMONT : l'écran ne pourrait même plus
+       distinguer les deux cas. La règle vaut partout où la commission
+       transite, pas à l'endroit où je l'ai écrite. */
+    var fichiersCom = [APP, path.join(RACINE, 'api', 'admin.js'),
+      path.join(RACINE, 'api', 'webhook.js'),
+      path.join(RACINE, 'api', '_lib', 'paiement', 'revolut.js'),
+      path.join(RACINE, 'api', '_lib', 'paiement', 'stripe.js')];
+    fichiersCom.forEach(function (f) {
+      if (!fs.existsSync(f)) return;
+      var src = fs.readFileSync(f, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+      /* ⚠️ Un `commissionCents\s*\|\|` ratait `commissionCents(o.payments) || 0` —
+         l'appel s'intercale. On accepte donc ce qui suit le mot jusqu'au `||`,
+         sans traverser de fin d'instruction. */
+      ok(!/commissionCents[^;\n]*\|\|\s*0/.test(src),
+        '⛔⛔ ' + path.basename(f) + ' applique `|| 0` à la commission. C\'est le sabotage '
+        + 'S10 qui avait démasqué ce trou : un zéro se confond avec une vraie commission '
+        + 'nulle, la vente paraît sans frais, et la marge de chaque ligne du compte de '
+        + 'résultat devient fausse — avec des chiffres parfaitement plausibles.');
+    });
 
     /* ── e) ⛔⛔ REVOLUT ACTIF NE RETOMBE JAMAIS SUR UN CHEMIN STRIPE ──────
        Le clic sur « Commander » se perdait EN SILENCE quand le champ carte
