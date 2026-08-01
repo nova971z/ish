@@ -24,6 +24,15 @@ await page.addInitScript(()=>{
   localStorage.setItem('pt_consent','accepted');
 });
 await page.goto(base+'/#/compte',{waitUntil:'load'});await page.waitForTimeout(1200);
+/* ⚠️ ONGLET PARAMÈTRES OBLIGATOIRE (corrigé 01/08/2026). La page compte a été
+   réorganisée : « Profil » n'AFFICHE plus que les informations, et le seul
+   endroit où on les MODIFIE est l'onglet « Paramètres ». `#accEmail` vit donc
+   dans un panneau masqué, et `page.fill` attendait indéfiniment un champ non
+   éditable — le harnais plantait sur un TimeoutError, sans jamais rendre une
+   seule assertion. Un harnais qui meurt avant de tester n'est pas rouge sur
+   le fond : il ne dit RIEN. On ouvre l'onglet, comme le fait un client. */
+await page.click('.acc-tab[data-acc-tab="settings"]');
+await page.waitForSelector('#accEmail',{state:'visible',timeout:5000});
 await page.fill('#accEmail','nouveau@mail.fr');
 await page.evaluate(()=>{const f=document.getElementById('accForm')||document.querySelector('#view-compte form');if(f)f.requestSubmit();});
 await page.waitForTimeout(800);

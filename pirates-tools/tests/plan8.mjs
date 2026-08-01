@@ -212,7 +212,7 @@ for (const [titre, accord, attendu] of [
       const mo = document.getElementById('payModal');
       return {
         ouverte: !!mo && !mo.hidden && getComputedStyle(mo).display !== 'none',
-        carte: !!document.querySelector('#payModal #stripeCard, #payModal #payAddrForm, #payModal [id*="stripe" i]'),
+        carte: !!document.querySelector('#payModal #carteMontage, #payModal #payAddress'),
         hash: location.hash
       };
     });
@@ -279,7 +279,7 @@ await page.waitForTimeout(700);
 const V4 = await page.evaluate(() => {
   const mo = document.getElementById('payModal');
   return { ouverte: !!mo && !mo.hidden && getComputedStyle(mo).display !== 'none',
-    carte: !!document.querySelector('#payModal #stripeCard, #payModal #payAddrForm, #payModal [id*="stripe" i]') };
+    carte: !!document.querySelector('#payModal #carteMontage, #payModal #payAddress') };
 });
 T('La MODALE CARTE s\'ouvre pour cette demande ancienne', V4.ouverte && V4.carte, JSON.stringify(V4));
 

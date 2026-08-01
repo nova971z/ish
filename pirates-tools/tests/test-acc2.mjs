@@ -31,7 +31,16 @@ await pg.locator('.admin-tab[data-admin-tab="compta"]').click();await pg.waitFor
 const rep=await pg.locator('#comptaReport').textContent();
 ok(/Coût des marchandises vendues/.test(rep),'ligne COGS (réel)');
 ok(/Marge brute/.test(rep),'ligne marge brute');
-ok(/Frais Stripe/.test(rep),'ligne frais Stripe réels');
+/* ⛔ ANCRAGE CORRIGÉ (01/08/2026). Ce contrôle exigeait le texte exact
+   « Frais Stripe ». Le libellé est devenu « Frais de vente Revolut » le jour
+   où l'abonnement a été séparé de la commission — et le harnais est passé au
+   rouge sans qu'aucun comportement n'ait cassé.
+   C'est la règle des harnais : on ne s'ancre JAMAIS sur une formulation
+   d'interface, elle change ; on s'ancre sur le CONCEPT COMPTABLE, qui ne
+   change pas. Les deux coûts d'encaissement doivent apparaître, séparément —
+   les fondre en une ligne serait le vrai défaut. */
+ok(/commission|frais de vente/i.test(rep), 'ligne commission d\'encaissement (réelle)');
+ok(/abonnement/i.test(rep), 'ligne abonnement d\'encaissement, distincte de la commission');
 ok(!/estimé/.test(rep),'aucun mot "estimé" (100% réel)');
 ok(/151,80/.test(rep),'marge brute 151,80 (CA HT 331,80 − COGS 180)');
 ok(await pg.locator('#chgAdd').count()===1,'formulaire saisie de charge');

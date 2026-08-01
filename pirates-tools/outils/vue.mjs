@@ -189,22 +189,41 @@ const erreurs = [];
 page.on('pageerror', (e) => erreurs.push(String(e.message || e)));
 
 if (paiement) {
-  /* Le panier est semé AVANT le premier rendu — `addInitScript` se rejoue à
-     chaque navigation, mais l'application lit `pt_cart` à son démarrage. La
-     référence est volontairement bidon : ⛔ un harnais ne nomme JAMAIS une
-     donnée du catalogue (règle des harnais, dix-huit harnais morts pour ça). */
-  await page.addInitScript(() => {
+  /* ⚠️ DEUX DÉFAUTS CORRIGÉS ICI LE 01/08/2026, et ils s'additionnaient.
+
+     ① Le champ s'appelle `key`, pas `ref`. L'application lisait donc une
+        ligne sans clé et la jetait.
+     ② La clé était INVENTÉE (« SANDBOX-1 »). Or les prix et les titres sont
+        TOUJOURS relus au catalogue serveur : une clé absente est ignorée,
+        jamais rendue en ligne fantôme (règle livraison). La ligne partait
+        donc à la poubelle même avec le bon nom de champ.
+
+     Résultat cumulé : panier vide, modale de paiement qui ne s'ouvre pas, et
+     l'outil plantait sur un `fill` de 30 s au lieu de rendre une capture. La
+     règle « on ne livre pas un écran qu'on n'a pas regardé » devenait
+     inapplicable précisément sur l'écran qui touche à l'argent.
+
+     ⛔ On ne NOMME toujours pas de produit — on prend la PREMIÈRE clé
+     réellement présente au catalogue, choisie à l'exécution. Aucune purge de
+     fiches ne peut plus casser cet outil. */
+  const cleReelle = JSON.parse(
+    await readFile(join(RACINE, 'products.json'), 'utf8')
+  ).map((p) => p.slug || p.id).filter(Boolean)[0];
+  if (!cleReelle) {
+    console.error('⚠️  products.json ne rend aucune clé : panier impossible à semer.');
+  }
+  await page.addInitScript((cle) => {
     try {
       localStorage.setItem('pt_cart', JSON.stringify({
         version: '1',
-        items: [{ ref: 'SANDBOX-1', title: 'Article de bac à sable', price: 199.9, qty: 1 }]
+        items: [{ key: cle, qty: 1 }]
       }));
       /* Clé RELUE dans app.js (`ANALYTICS_CONSENT_KEY`), pas devinée : sans
          elle le bandeau cookies reste affiché et masque le pied de la modale,
          qui est précisément ce qu'on vient regarder. */
       localStorage.setItem('pt:analytics-consent', 'denied');
     } catch (_) {}
-  });
+  }, cleReelle);
 }
 
 await page.goto(base + '/index.html' + route, { waitUntil: 'domcontentloaded' });
@@ -219,6 +238,23 @@ if (clic) {
 }
 
 if (paiement) {
+  /* ⚠️ OUVRIR LA MODALE — ÉTAPE QUI MANQUAIT (corrigée le 01/08/2026).
+     Les champs d'adresse vivent DANS `#payModal`, `hidden` tant que personne
+     n'a cliqué « Payer ». L'outil sautait ce clic et remplissait donc des
+     champs invisibles : Playwright attendait 30 s, puis plantait, et AUCUNE
+     capture ne sortait. L'en-tête promettait pourtant « on suit le vrai
+     parcours : #/devis → Payer » — la promesse était fausse.
+     On clique le VRAI bouton du produit : c'est `openPayModal()` qui
+     s'exécute, pas une copie du balisage. */
+  const dejaOuverte = await page.evaluate(() => {
+    const m = document.getElementById('payModal');
+    return !!m && !m.hidden;
+  });
+  if (!dejaOuverte) {
+    const bouton = await page.$('#devisPay');
+    if (!bouton) console.error('⚠️  bouton de paiement introuvable (#devisPay) — modale non ouverte.');
+    else { await bouton.click(); await page.waitForTimeout(900); }
+  }
   /* Le fournisseur n'est connu qu'une fois la commande créée côté serveur, et
      le serveur n'est appelé qu'une fois l'adresse complète. Sans ce
      remplissage, on regarderait un pied qui n'a jamais reçu sa réponse — et

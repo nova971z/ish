@@ -171,8 +171,8 @@ module.exports = function () {
     + 'être nommé (J3).');
 
   /* ⛔ AUCUNE MARQUE AVANT QUE LE SERVEUR AIT PARLÉ. `_paiementFournisseur`
-     valait `'l ancien fournisseur'` au départ : la fenêtre s'ouvrait donc en annonçant
-     « Paiement sécurisé par l ancien fournisseur » pendant que Revolut encaissait. Vu en bac
+     valait `'l'ancien fournisseur'` au départ : la fenêtre s'ouvrait donc en annonçant
+     « Paiement sécurisé par l'ancien fournisseur » pendant que Revolut encaissait. Vu en bac
      à sable le 01/08/2026, APRÈS avoir cru n'avoir corrigé qu'un texte
      statique — le mensonge avait deux sources. */
   ok(/var _paiementFournisseur\s*=\s*''/.test(app),
@@ -184,20 +184,20 @@ module.exports = function () {
     + 'toute réponse serveur : c\'est une marque potentiellement fausse montrée au client au '
     + 'moment précis où il décide de donner son numéro de carte.');
 
-  /* ⛔ LE SDK L ANCIEN FOURNISSEUR NE COMMANDE PLUS TOUT LE TUNNEL. `initStripePayment`
-     commençait par `if (!l ancien fournisseur) { … return; }` AVANT l'appel serveur : un
-     client dont le navigateur ne charge pas `le SDK de l ancien fournisseur` (bloqueur, proxy
+  /* ⛔ AUCUN SDK TIERS NE COMMANDE LE TUNNEL. La fonction qui monte le champ
+     carte commençait par `if (!<sdk>) { … return; }` AVANT l'appel serveur :
+     un client dont le navigateur ne charge pas ce SDK (bloqueur, proxy
      d'entreprise) se voyait refuser la carte alors que REVOLUT encaisse. Une
      vente perdue pour l'absence d'un fournisseur qui n'encaisse plus. */
   /* ⚠️ DEUX PIÈGES ÉVITÉS ICI, tous deux déjà payés ailleurs :
-     · le nom de la fonction est `initStripeElements` — la première version
-       cherchait `initStripePayment`, qui n'existe pas : `indexOf` rendait −1 et
-       l'assertion rougissait sur du code sain (E-210, ancrer sur un nom non
-       vérifié). D'où le PRÉALABLE ci-dessous : si la fonction est introuvable,
-       on le dit, on ne verdit pas à vide.
+     · ON ANCRE SUR LE NOM RÉEL, vérifié. Une première version cherchait un nom
+       de fonction qui n'existait pas : `indexOf` rendait −1 et l'assertion
+       rougissait sur du code sain (E-210, ancrer sur un nom non vérifié).
+       D'où le PRÉALABLE ci-dessous : si la fonction est introuvable, on le
+       DIT, on ne verdit pas à vide.
      · on lit le code SANS ses commentaires : la note explicative posée dans
-       `app.js` cite `if (!l ancien fournisseur)` en toutes lettres et satisfaisait la regex
-       (E-218, chercher une forme au lieu d'une règle). */
+       `app.js` cite la condition fautive en toutes lettres et satisfaisait la
+       regex (E-218, chercher une forme au lieu d'une règle). */
   var appSansCom = app.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/(^|[^:])\/\/[^\n]*/g, '$1');
   var iInit = appSansCom.indexOf('function monterChampCarte(');
   ok(iInit !== -1,
@@ -207,11 +207,11 @@ module.exports = function () {
     var iFetch = appSansCom.indexOf('create-payment-intent', iInit);
     var avantFetch = appSansCom.slice(iInit, iFetch === -1 ? iInit : iFetch);
     ok(!/if\s*\(\s*!\s*stripe\s*\)/.test(avantFetch),
-      '⛔⛔ le tunnel ABANDONNE quand le SDK Stripe est absent, AVANT même d\'appeler le '
-      + 'serveur. Or c\'est le serveur qui dit qui encaisse : sous Revolut, un navigateur qui '
-      + 'bloque `js.stripe.com` perd la vente sans raison — « paiement bientôt disponible » '
-      + 'pour l\'absence d\'un fournisseur qui n\'encaisse plus. Le SDK Stripe ne s\'exige '
-      + 'qu\'APRÈS une réponse serveur disant « stripe ».');
+      '⛔⛔ le tunnel ABANDONNE quand un SDK tiers est absent, AVANT même d\'appeler le '
+      + 'serveur. Or c\'est le serveur qui dit qui encaisse : un navigateur qui bloque le '
+      + 'domaine de ce SDK perd la vente sans raison — « paiement bientôt disponible » pour '
+      + 'l\'absence d\'un fournisseur qui n\'encaisse plus. Un SDK ne s\'exige qu\'APRÈS la '
+      + 'réponse serveur, et seulement si elle désigne CE fournisseur-là.');
   }
   ok(/payCgvOk/.test(modale),
     '⛔⛔ la case d\'acceptation des CGV a disparu du tunnel. Le consentement doit être '

@@ -45,7 +45,23 @@ async function run(){
   await page.goto(base+'/',{waitUntil:'domcontentloaded'}); await page.waitForTimeout(400);
   // naviguer catalogue → produit (view_item + time_on_item), cliquer un chip + dock
   await page.evaluate(()=>{ location.hash='#/catalogue'; }); await page.waitForTimeout(500);
-  await page.evaluate(()=>{ var c=document.querySelector('#catList .cat-chip[data-cat="Meuleuses"]'); if(c) c.click(); }); await page.waitForTimeout(300);
+  /* ⚠️ MÊME DÉFAUT QUE CI-DESSOUS, RESTÉ SUR LA CATÉGORIE (corrigé 01/08/2026).
+     Ce harnais cliquait `[data-cat="Meuleuses"]`, une catégorie nommée en dur.
+     L'user a regroupé ses familles — « Meuleuses » est devenue « Meulage,
+     découpe et polissage ». La puce n'existait donc plus, `if(c)` ne cliquait
+     RIEN, et le harnais annonçait « le clic sur une puce n'est plus mesuré »
+     alors que la mesure d'audience marchait parfaitement.
+     ⛔ Un harnais ne nomme JAMAIS une donnée du catalogue : c'est un choix
+     délibéré de l'user, pas un défaut. On prend la PREMIÈRE puce réellement
+     rendue (hors « Tout », qui ne filtre rien) et on vérifie que SON clic
+     remonte. Aucun renommage de famille ne peut plus le casser. */
+  const chipCat = await page.evaluate(()=>{
+    var c=[...document.querySelectorAll('#catList .cat-chip')].find(x=>x.getAttribute('data-cat'));
+    if(!c) return null;
+    c.click();
+    return c.getAttribute('data-track');
+  });
+  await page.waitForTimeout(300);
   // ⚠️ ANCRAGE SUR UN PRODUIT NOMMÉ, SUPPRIMÉ LE 28/07 : ce harnais ouvrait
   // « makita-dga504z », retiré du catalogue lors de la purge voulue par l'user.
   // Il annonçait donc « view_item n'est plus émis » — une fausse alerte de
@@ -70,7 +86,10 @@ async function run(){
   check('page_view émis', names.includes('page_view'));
   check('view_item émis avec id produit', ev.some(e=>e.event==='view_item'&&e.id===PRODUIT), 'produit='+PRODUIT);
   check('time_on_item émis avec ms>0', ev.some(e=>e.event==='time_on_item'&&e.id===PRODUIT&&e.ms>0), JSON.stringify(ev.find(e=>e.event==='time_on_item')||{}));
-  check('click chip:Meuleuses capturé', ev.some(e=>e.event==='click'&&e.t==='chip:Meuleuses'));
+  // PRÉALABLE : sans puce rendue, l'assertion suivante ne vérifierait rien.
+  check('préalable : une puce de catégorie est rendue au catalogue', !!chipCat, chipCat||'AUCUNE');
+  check('click sur une puce de catégorie capturé',
+    !!chipCat && ev.some(e=>e.event==='click'&&e.t===chipCat), chipCat||'—');
   check('click dock:catalogue capturé', ev.some(e=>e.event==='click'&&e.t==='dock:catalogue'));
   check('device=mobile détecté', ev.every(e=>e._device==='mobile'));
   check('ANONYME : consent=false partout', ev.every(e=>e._consent===false));

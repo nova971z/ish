@@ -35,7 +35,8 @@ module.exports = function handler(req, res) {
     version: 'v1',
     timestamp: new Date().toISOString(),
     env: {
-      // l ancien fournisseur
+      // Revolut (encaissement) — l'étiquette nommait encore l'ancien
+      // fournisseur au-dessus de variables qui sont celles de Revolut.
       revolut: !!process.env.REVOLUT_SECRET_KEY,
       webhookSecret: !!process.env.REVOLUT_WEBHOOK_SECRET,
       // Firebase

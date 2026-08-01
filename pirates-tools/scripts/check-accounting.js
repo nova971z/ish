@@ -24,7 +24,7 @@ module.exports = function () {
   near(s.tva_collectee, 28.20, 0.05, 'TVA collectée');
   near(s.cogs, 180, 0.01, 'COGS réel (coûts snapshotés)');
   near(s.marge_brute, 151.80, 0.05, 'marge brute = CA HT − COGS');
-  near(s.frais_stripe, 6, 0.01, 'frais Stripe réels');
+  near(s.frais_stripe, 6, 0.01, 'commission d\'encaissement réelle');
   near(s.charges_saisies, 80, 0.01, 'charges saisies totalisées');
   near(s.resultat_exploitation, 65.80, 0.05, 'résultat exploitation');
   near(s.is, 65.80 * 0.15, 0.02, 'IS 15 % sous le seuil');
@@ -103,7 +103,7 @@ module.exports = function () {
   near(sansR.ca_ttc, 108.50, 0.01, 'témoin : CA TTC sans remboursement');
   near(sansR.tva_collectee, 8.50, 0.02, 'témoin : TVA collectée 8,5 % (971)');
 
-  // 1) Remboursement TOTAL, avoir émis, outil jamais commandé, l ancien fournisseur ne rend rien.
+  // 1) Remboursement TOTAL, avoir émis, outil jamais commandé, l'ancien fournisseur ne rend rien.
   var rTotal = [{ amountTtc: 108.50, cogsAnnuleHt: 60, stripeFeeRendu: 0,
     territory: '971', avoirRef: 'AV-2026-001', dateMs: Date.UTC(2026, 2, 12) }];
   var s1 = acc.synthesize([base1], [], { refTerritory: '971' }, rTotal);
@@ -111,7 +111,7 @@ module.exports = function () {
   near(s1.tva_collectee, 0, 0.02, 'remboursement total avec avoir → TVA collectée annulée');
   near(s1.cogs, 0, 0.01, 'outil jamais commandé → COGS annulé');
   near(s1.frais_stripe, 2, 0.01,
-    '⛔ la commission Stripe NON rendue doit RESTER une charge. La supposer '
+    '⛔ la commission d\'encaissement NON rendue doit RESTER une charge. La supposer '
     + 'restituée ferait apparaître un résultat qui n\'existe pas.');
   near(s1.resultat_exploitation, -2, 0.01, 'il reste exactement la perte de commission');
   near(s1.brut.ca_ttc, 108.50, 0.01, 'le CA BRUT reste visible à côté du net');

@@ -49,7 +49,7 @@ var EMAILS_AUTORISES = /^(?:contact|bonjour|hello|support|noreply|no-reply)@pira
 var EMAILS_EXEMPLES = /(?:exemple|example|vous@|ton@|votre@|test@|artisan@email|prenom\.nom)/i;
 
 var SECRETS = [
-  ['clé secrète Stripe', /sk_(?:live|test)_[A-Za-z0-9]{16,}/],
+  ['clé secrète d\'encaisseur (format sk_)', /sk_(?:live|test)_[A-Za-z0-9]{16,}/],
   ['secret de webhook', /whsec_[A-Za-z0-9]{16,}/],
   ['clé privée PEM', /-----BEGIN (?:RSA |EC )?PRIVATE KEY-----/],
   ['compte de service Google', /"type"\s*:\s*"service_account"/],

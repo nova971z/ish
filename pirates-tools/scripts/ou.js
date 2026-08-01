@@ -252,6 +252,28 @@ var INDEX = [
              'Ne jamais promouvoir une règle renversée — elle contredirait la règle vivante.'],
     decisions: [],
     fini: 'check-memoire vert, CLAUDE.md sous 80 lignes, aucun document orphelin.'
+  },
+  {
+    /* Ajoutée le 01/08/2026. L'entonnoir n'avait RIEN à dire sur une
+       réécriture de commentaires en masse — alors que c'est exactement le
+       geste qui a coûté une annulation complète le même jour. Une intention
+       absente de l'index n'est pas une intention sans danger : c'est un
+       danger sans porte. */
+    intention: 'Réécrire des commentaires en masse sans toucher au code',
+    mots: ['commentaire', 'commentaires', 'purge', 'purger', 'renommer', 'renommage',
+           'remplacement', 'remplacer', 'sed', 'reecriture', 'réécriture',
+           'apostrophe', 'orthographe', 'typo', 'en masse'],
+    fichiers: ['outils/purge-commentaires.mjs', 'node_modules/esprima'],
+    fonctions: [],
+    protege: ['scripts/ci.js', 'scripts/check-fuites.js', 'tests/lancer.mjs --noyau'],
+    regles: ['.claude/rules/harnais.md'],
+    pieges: ['⛔ Un remplacement de texte ne distingue PAS un commentaire d\'une chaîne de caractères. Le 01/08/2026 : apostrophe insérée dans une chaîne à quotes simples → fichier qui ne se parse plus ; nom de domaine mué en phrase française ; et CI restée VERTE parce que le chargeur avalait le module cassé.',
+             'Passer par le PARSEUR (esprima, déjà présent) et ne réécrire QUE les plages de commentaires qu\'il rend — jamais une plage calculée à la main.',
+             '⛔ « Ça se parse encore » ne prouve RIEN : un fichier peut se parser et avoir changé de sens. La seule preuve qui vaut : retirer TOUS les commentaires avant et après, et comparer le reste OCTET PAR OCTET.',
+             'Les identifiants de DONNÉES (champs qui existent en base) ne se réécrivent pas, même dans un commentaire : il mentirait sur la donnée réelle.',
+             'esprima ne connaît pas `for await` : le neutraliser par des espaces de MÊME LONGUEUR, sinon toutes les positions glissent.'],
+    decisions: [],
+    fini: 'le code hors commentaires est identique à l\'octet près (empreinte affichée avant/après), CI verte, noyau vert.'
   }
 ];
 

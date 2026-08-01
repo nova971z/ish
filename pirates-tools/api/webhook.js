@@ -1,13 +1,13 @@
-// POST /api/webhook — l ancien fournisseur webhook for payment confirmation
+// POST /api/webhook — Payment provider webhook for payment confirmation
 // Requires STRIPE_SECRET_KEY + STRIPE_WEBHOOK_SECRET env vars.
 // Optional: RESEND_API_KEY + RESEND_FROM + OWNER_EMAIL for transactional email.
 //
 // Correctness requirements handled here:
-//  1. RAW BODY — l ancien fournisseur signs the exact request bytes. Vercel's default parser
+//  1. RAW BODY — The payment provider signs the exact request bytes. Vercel's default parser
 //     would turn the body into an object; re-stringifying it does NOT reproduce
 //     the signed bytes and breaks (or masks) signature verification. We disable
 //     the body parser (config below) and read the raw stream ourselves.
-//  2. IDEMPOTENCY — l ancien fournisseur delivers each event at-least-once. We claim each
+//  2. IDEMPOTENCY — The payment provider delivers each event at-least-once. We claim each
 //     event.id in Firestore before processing so a redelivery is acknowledged
 //     without re-sending confirmation emails.
 //  3. COVERAGE (A2) — the site has TWO payment flows. la page de paiement hebergee emits
@@ -23,7 +23,7 @@
 //     the money always leaves a server-side trace.
 //  5. TAX CHECK (A1, détectif) — the charged tax territory comes from client
 //     declaration. We compare it against the postal code of the real address
-//     l ancien fournisseur collected (shipping for Checkout, card billing for Elements) and
+//     the payment provider collected (shipping for Checkout, card billing for Elements) and
 //     flag any mismatch in the payments journal + owner email so the order is
 //     verified BEFORE shipping.
 
@@ -66,13 +66,13 @@ async function handler(req, res) {
 
   /* ⛔⛔ C'EST L'ÉMETTEUR QUI VÉRIFIE, PAS LE FOURNISSEUR ACTIF.
      Défaut mesuré le 01/08/2026 sur un test réel : Revolut a envoyé DEUX
-     notifications, `PAYMENT_PROVIDER` valait encore `l ancien fournisseur`, et c'est donc
-     l ancien fournisseur qui a tenté de vérifier la signature de Revolut. Réponse :
+     notifications, `PAYMENT_PROVIDER` valait encore `l'ancien fournisseur`, et c'est donc
+     l'ancien fournisseur qui a tenté de vérifier la signature de Revolut. Réponse :
      « STRIPE_WEBHOOK_SECRET absente ». Deux reçues, ZÉRO acceptée, et la
      configuration Revolut était pourtant parfaite.
 
      Le défaut est SYMÉTRIQUE, et le second sens coûte de l'argent réel : après
-     la bascule, une re-livraison l ancien fournisseur tardive — son backoff s'étale sur
+     la bascule, une re-livraison notification tardive de l'ancien fournisseur — son backoff s'étale sur
      ~3 jours — serait refusée par Revolut, et l'encaissement correspondant
      perdu sans que personne ne le voie.
 
@@ -103,7 +103,7 @@ async function handler(req, res) {
     // ⛔ `readRawBody` est ce qui rend cette vérification possible : le
     // bodyParser est désactivé (voir `config` en bas de fichier). Un corps
     // parsé puis re-sérialisé produit des octets DIFFÉRENTS — prouvé sur six
-    // formes de JSON — et invaliderait la signature chez l ancien fournisseur comme chez
+    // formes de JSON — et invaliderait la signature chez l'ancien fournisseur comme chez
     // Revolut. Cette ligne ne se « simplifie » jamais.
     var rawBody = await readRawBody(req);
     var verif = paiement.verifierSignature(rawBody, req.headers || {});
@@ -125,7 +125,7 @@ async function handler(req, res) {
     await noterSante(paiement.nom(), { refus: false, genre: verif.genre || 'inconnu' });
     var event = verif.evenement;
     /* Clé d'idempotence FOURNIE par le fournisseur, plus lue en dur.
-       l ancien fournisseur donne un identifiant d'événement unique ; Revolut n'en fournit
+       L'ancien fournisseur donne un identifiant d'événement unique ; Revolut n'en fournit
        AUCUN et devra la dériver de `event + order_id`. En passant par le
        contrat, le jour de la bascule ne demande pas de retoucher ce fichier. */
     var cleEvenement = verif.cle;
@@ -134,9 +134,9 @@ async function handler(req, res) {
     // États : 'processing' (en vol) → 'done' (succès) / 'failed' (RETRYABLE).
     // AVANT : le claim était posé puis jamais relâché — si un effet critique
     // (journal payments/, mise à jour de commande) échouait, on répondait 200 et
-    // la re-livraison l ancien fournisseur tombait sur « duplicate » → l'événement était
+    // la re-livraison du fournisseur tombait sur « duplicate » → l'événement était
     // PERDU pour toujours (commande bloquée 'pending', pas d'email, pas de
-    // trace). Désormais : échec → claim 'failed' + 500 → l ancien fournisseur RE-LIVRE (sa
+    // trace). Désormais : échec → claim 'failed' + 500 → l'ancien fournisseur RE-LIVRE (sa
     // re-livraison est notre mécanisme de retry, backoff ~3 jours) et la
     // reprise est autorisée. Les effets sont idempotents (set merge, update,
     // n° de facture réutilisé, emails dédupliqués via emailsSent).
@@ -149,7 +149,7 @@ async function handler(req, res) {
       try {
         /* create() est atomique : échoue si le doc existe déjà.
            ⛔ `verif.type` et NON `event.type` : le nom de l'événement est un
-           champ du CONTRAT, pas de la charge utile. Chez l ancien fournisseur les deux
+           champ du CONTRAT, pas de la charge utile. Chez l'ancien fournisseur les deux
            coïncident ; chez Revolut la charge utile est `{ event, order_id }`
            et `event.type` vaut `undefined` — que le SDK Admin Firestore REFUSE
            d'écrire. L'exception tombait alors dans le `catch (dupErr)`
@@ -192,7 +192,7 @@ async function handler(req, res) {
     try {
       /* ⚠️ AIGUILLAGE PAR GENRE, plus par nom d'événement (31/07/2026).
          Les noms appartiennent au fournisseur (`payment_intent.succeeded` chez
-         l ancien fournisseur, `ORDER_COMPLETED` chez Revolut) ; le GENRE est commun, et c'est
+         l'ancien fournisseur, `ORDER_COMPLETED` chez Revolut) ; le GENRE est commun, et c'est
          lui qui porte la décision.
 
          ⛔⛔ La distinction qui coûte de l'argent : 'tentative_ratee' n'est PAS
@@ -200,7 +200,7 @@ async function handler(req, res) {
          tentative — le client peut réessayer sur le MÊME ordre. Enterrer la
          commande à ce moment-là tuerait une vente en train d'être sauvée. */
       /* ⚠️ DEUX FORMES DE CHARGE UTILE, UNE SEULE LOGIQUE MÉTIER.
-         l ancien fournisseur livre l'objet complet dans l'événement (`event.data.object`).
+         L'ancien fournisseur livre l'objet complet dans l'événement (`event.data.object`).
          Revolut n'envoie QUE `{ event, order_id }` : il faut RELIRE la commande
          chez lui, puis la présenter sous la même forme au handler.
          `objetPaiement` fait exactement cette bascule, et rien d'autre : la
@@ -325,7 +325,7 @@ function claimDecision(existing, nowMs) {
   return 'retry';
 }
 
-// Disable Vercel's automatic body parsing so we receive the raw bytes l ancien fournisseur
+// Disable Vercel's automatic body parsing so we receive the raw bytes the payment provider
 // signed (required for constructEvent). CommonJS equivalent of
 // `export const config = { api: { bodyParser: false } }`.
 module.exports = handler;
@@ -348,12 +348,12 @@ module.exports._noterSante = noterSante;
 // ════════════════════════════════════════════════════════════════
 
 /* ── LA BASCULE ENTRE LES DEUX FORMES DE CHARGE UTILE ────────────────────────
-   l ancien fournisseur met tout l'objet dans l'événement. Revolut n'envoie que
+   l'ancien fournisseur met tout l'objet dans l'événement. Revolut n'envoie que
    `{ event, order_id }` — il faut aller relire la commande.
 
    Cette fonction rend TOUJOURS un objet de forme « PaymentIntent », parce que
    c'est ce que les handlers savent lire. Ce n'est pas de la nostalgie de
-   l ancien fournisseur : c'est le refus de dupliquer la facture, le journal, le contrôle
+   l'ancien fournisseur : c'est le refus de dupliquer la facture, le journal, le contrôle
    fiscal et les e-mails en deux versions qui divergeraient au premier
    correctif appliqué à une seule.
 
@@ -362,14 +362,14 @@ module.exports._noterSante = noterSante;
    fonds peuvent repartir chez le client. Mais une TENTATIVE RATÉE laisse
    l'ordre en `pending` (le client peut réessayer dessus) : exiger l'état acquis
    là aussi renverrait `null` et l'échec ne serait JAMAIS journalisé chez
-   Revolut, alors qu'il l'est chez l ancien fournisseur. Deux fournisseurs, deux niveaux de
+   Revolut, alors qu'il l'est chez l'ancien fournisseur. Deux fournisseurs, deux niveaux de
    traçabilité — exactement ce que la couture existe pour empêcher.
 
    ⚠️ La commission n'est demandée que sur le chemin encaissé : c'est un
    aller-retour réseau de plus, et une tentative ratée n'en a aucune. La lecture
    normalisée est attachée sous `_dejaLu` pour que le handler ne relise pas. */
 async function objetPaiement(paiement, event, verif) {
-  // l ancien fournisseur : l'objet est déjà là, rien à faire.
+  // l'ancien fournisseur : l'objet est déjà là, rien à faire.
   if (event && event.data && event.data.object) return event.data.object;
 
   var idOrdre = event && event.order_id;
@@ -482,7 +482,7 @@ async function handleSessionCompleted(paiement, fb, sessionLite, ctx) {
   });
 
   // Emails de confirmation — RETRYABLE : un échec Resend fait échouer le hook
-  // (claim 'failed' + 500) → l ancien fournisseur re-livre et l'email finit par partir.
+  // (claim 'failed' + 500) → l'ancien fournisseur re-livre et l'email finit par partir.
   // Dédup : une reprise dont les emails sont déjà partis (emailsSent sur le
   // claim) ne renvoie rien. Les effets critiques ci-dessus sont idempotents.
   if (!ctx || !ctx.emailsSent) {
@@ -584,7 +584,7 @@ async function handleIntentSucceeded(paiement, fb, pi, ctx) {
     postalCode: tax.postalCode,
     taxMismatch: tax.mismatch,
     linesRebuilt: rebuilt.ok,
-    // Compta 100 % réel : coût d'achat snapshoté + commission l ancien fournisseur réelle.
+    // Compta 100 % réel : coût d'achat snapshoté + commission du fournisseur réelle.
     cogsHtCents: (rebuilt.cogsHtCents != null ? rebuilt.cogsHtCents : null),
     stripeFeeCents: stripeFeeCents,
     // Facture : détail des lignes + numéro + date, pour générer la facture conforme.
@@ -679,7 +679,7 @@ function taxCheck(declaredTerritory, address) {
 // déjà un invoiceNumber (reprise après échec partiel), on le RÉUTILISE au lieu
 // d'en consommer un nouveau (sinon chaque re-livraison créait un trou dans la
 // séquence = non-conformité facturation). Échec du compteur = CRITIQUE (throw)
-// → claim 'failed' + 500 → l ancien fournisseur re-livre, le numéro finit par être attribué.
+// → claim 'failed' + 500 → l'ancien fournisseur re-livre, le numéro finit par être attribué.
 async function assignInvoiceNumber(fb, dateMs, idFournisseur) {
   if (!fb.db) return null;
   if (idFournisseur) {
@@ -710,7 +710,7 @@ function formatAddr(a) {
 
 // A2 — journal Firestore payments/{idFournisseur} = LA trace comptable autoritaire
 // (P&L, factures, fidélité s'appuient dessus). CRITIQUE : un échec JETTE →
-// claim 'failed' + 500 → l ancien fournisseur re-livre (set merge = idempotent en reprise).
+// claim 'failed' + 500 → l'ancien fournisseur re-livre (set merge = idempotent en reprise).
 // L'ancien comportement « best-effort » pouvait perdre la trace pour toujours.
 async function logPayment(fb, idFournisseur, data) {
   if (!fb.db) return;
@@ -724,7 +724,7 @@ async function logPayment(fb, idFournisseur, data) {
 }
 
 // Met à jour la commande client correspondante.
-// Chemin PRIVILÉGIÉ : users/{uid}/orders (uid depuis la metadata l ancien fournisseur) —
+// Chemin PRIVILÉGIÉ : users/{uid}/orders (uid depuis la metadata du fournisseur) —
 // requête de collection simple couverte par les index AUTOMATIQUES Firestore,
 // aucun index à créer. REPLI (uid absent — anciens paiements) : collectionGroup,
 // qui exige un index collection-group sur le champ interrogé (défini dans
@@ -872,7 +872,7 @@ function modelFromSession(session, tax) {
 }
 
 /* ⚠️ Signature changee le 31/07/2026 (couture) : ce modele recevait l'objet
-   `charge` de l ancien fournisseur UNIQUEMENT pour en extraire le nom du porteur. La couche
+   `charge` de l'ancien fournisseur UNIQUEMENT pour en extraire le nom du porteur. La couche
    paiement le fournit deja, normalise — on passe donc le nom, pas un objet
    propre a un fournisseur. */
 function modelFromIntent(pi, nomClient, rebuilt, tax, customerEmail, adresse) {

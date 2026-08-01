@@ -47,7 +47,7 @@ module.exports = function checkPricing() {
       errors.push('[check-pricing] ' + c.nc + '/' + c.code +
         ' : attendu TTC ' + c.ttc.toFixed(4) + ' € mais obtenu ' + got.toFixed(4) + ' €');
     }
-    // Per-unit cents rounding must match too (this is what l ancien fournisseur is charged).
+    // Per-unit cents rounding must match too (this is what the payment provider is charged).
     var expectedCents = Math.round(c.ttc * 100);
     var gotCents = pricing.unitCents(product, c.code);
     if (gotCents !== expectedCents) {

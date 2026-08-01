@@ -10477,14 +10477,14 @@
   /* Fournisseur de paiement ANNONCÉ PAR LE SERVEUR pour la commande en cours.
      Jamais deviné côté client : voir le commentaire au point de branchement.
 
-     ⛔ LA VALEUR DE DÉPART EST « INCONNU », PAS « l ancien fournisseur ». Elle valait
-     `'l ancien fournisseur'`, et la fenêtre de paiement s'ouvrait donc en annonçant
-     « Paiement sécurisé par l ancien fournisseur » — pendant que Revolut encaissait. Vu en
-     bac à sable le 01/08/2026, après avoir cru n'avoir corrigé qu'un texte
-     statique dans `index.html` : le mensonge venait AUSSI d'ici.
+     ⛔ LA VALEUR DE DÉPART EST VIDE — surtout pas un NOM DE FOURNISSEUR.
+     Elle contenait le nom de l'ancien encaisseur, et la fenêtre de paiement
+     s'ouvrait donc en annonçant ce nom-là — pendant que Revolut encaissait.
+     Vu en bac à sable le 01/08/2026, après avoir cru n'avoir corrigé qu'un
+     texte statique dans `index.html` : le mensonge venait AUSSI d'ici.
      Les trois autres lectures (`=== 'revolut'`) s'exécutent toutes APRÈS
      l'affectation par la réponse serveur — une chaîne vide ne peut donc pas
-     détourner le chemin l ancien fournisseur. */
+     détourner le chemin de l'ancien fournisseur. */
   var _paiementFournisseur = '';
   var _urlPaiementHebergee = null;   // repli Revolut si le widget ne charge pas
   /* Environnement ANNONCÉ par le serveur (true = bac à sable). `null` tant
@@ -11030,10 +11030,10 @@
     if (errorEl) { errorEl.hidden = true; errorEl.textContent = ''; }
     _quoteTerritory = ship.territory;
 
-    /* ⛔⛔ AUCUN TEST DU SDK L ANCIEN FOURNISSEUR ICI (01/08/2026). Ce bloc commençait par
+    /* ⛔⛔ AUCUN TEST DU SDK L'ANCIEN FOURNISSEUR ICI (01/08/2026). Ce bloc commençait par
        un test du SDK de l'autre fournisseur et abandonnait la commande AVANT
        d'appeler le serveur — or c'est le serveur qui dit qui encaisse.
-       Retiré avec l ancien fournisseur le 01/08/2026 : plus rien à tester ici. */
+       Retiré avec l'ancien fournisseur le 01/08/2026 : plus rien à tester ici. */
 
     // Show loading state
     if (container) {
@@ -11110,7 +11110,7 @@
         return monterChampCarteRevolut(_jetonPaiement, ship, container, errorEl);
       }
 
-      /* ⛔ Le serveur n'annonce plus que « revolut » : l ancien fournisseur a été retiré du
+      /* ⛔ Le serveur n'annonce plus que « revolut » : l'ancien fournisseur a été retiré du
          site le 01/08/2026. Si un jour un autre fournisseur revient, c'est ICI
          qu'il se branche — pas dans le bouton, pas dans le bandeau. */
       issueCarteRevolut(errorEl, 'Fournisseur de paiement non reconnu : ' + _paiementFournisseur);
@@ -11172,7 +11172,7 @@
   /* Repli quand le champ carte Revolut ne s'est pas monté : on envoie le client
      sur la page de paiement hébergée par Revolut plutôt que de le laisser
      devant un bouton qui ne peut rien faire.
-     ⛔ Il n'existe plus AUCUN autre chemin : l ancien fournisseur a été retiré du site le
+     ⛔ Il n'existe plus AUCUN autre chemin : l'ancien fournisseur a été retiré du site le
      01/08/2026. Un fournisseur inconnu ne bascule sur rien — il le dit. */
   function secoursRevolut(total, errorEl) {
     sauverCommandeEnAttente(total);
@@ -11208,13 +11208,13 @@
     var total = payTotalCents(_payItems) / 100;
     var errorEl = document.getElementById('carteErreur');
 
-    /* ⛔ L ANCIEN FOURNISSEUR RETIRÉ DU SITE — demande de l'user, 01/08/2026 : « toute la
-       partie l ancien fournisseur ne doit plus être présente sur le site, ni nulle part ».
+    /* ⛔ L'ANCIEN FOURNISSEUR RETIRÉ DU SITE — demande de l'user, 01/08/2026 : « toute la
+       partie de l'ancien fournisseur ne doit plus être présente sur le site, ni nulle part ».
        Ce qui vivait ici et a disparu : le flux le champ carte, le repli
        Checkout par redirection, et les « Payment Links » hérités.
 
        ⚠️ CE QUI N'A PAS ÉTÉ EFFACÉ, ET POURQUOI : les écritures comptables des
-       paiements DÉJÀ ENCAISSÉS par l ancien fournisseur restent en base. Ce sont des pièces
+       paiements DÉJÀ ENCAISSÉS par l'ancien fournisseur restent en base. Ce sont des pièces
        justificatives de recettes déclarées — les détruire, c'est détruire la
        preuve d'un chiffre d'affaires. Elles ne sont plus produites, seulement
        relues. Voir `docs/LECONS.md`.

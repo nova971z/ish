@@ -1,6 +1,6 @@
 // POST /api/test-email — Send a test email via Resend (admin-gated).
 // Used to verify that RESEND_API_KEY, RESEND_FROM and OWNER_EMAIL are set
-// correctly without needing a real l ancien fournisseur checkout.
+// correctly without needing a real provider checkout.
 //
 // Auth : header "x-admin-secret" must match env ADMIN_SECRET.
 // Body : { to?: "email@example.com" }  — defaults to OWNER_EMAIL.

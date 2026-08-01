@@ -848,7 +848,7 @@ async function handleCourses(req, body, cfg, res) {
   // ── Créer une course (artisan) — sur PREUVE DE PAIEMENT ──
   // Le client PAIE d'abord (produits + frais de livraison, modale carte —
   // create-payment-intent pose la metadata course*). Il envoie ensuite son
-  // paymentIntentId : le serveur VÉRIFIE chez l ancien fournisseur que le paiement est
+  // paymentIntentId : le serveur VÉRIFIE chez l'ancien fournisseur que le paiement est
   // abouti, qu'il porte bien une course, et qu'il appartient à cet uid, puis
   // crée la course depuis la METADATA (jamais depuis le corps client). Doc id
   // = pi.id → idempotent avec le webhook (aucun doublon, aucune double alerte).
@@ -1132,7 +1132,7 @@ async function handleCourses(req, body, cfg, res) {
   // ── MARCHANDISE PAYÉE → la course est réellement commandée ────────────────
   // Le client règle SES ARTICLES à Pirates Tools (c'est notre vente). Le prix
   // de la course, lui, ne passe pas par nous. On vérifie le paiement chez
-  // l ancien fournisseur : abouti, à ce compte, et marqué pour CETTE course (courseRef).
+  // l'ancien fournisseur : abouti, à ce compte, et marqué pour CETTE course (courseRef).
   if (body.type === 'course-goods-paid') {
     const id = String(body.id || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 64);
     const piId = String(body.paymentIntentId || '').trim().slice(0, 80);
@@ -1590,23 +1590,6 @@ async function handleCourses(req, body, cfg, res) {
     }
     let escrow = course.paid ? 'liberable' : null;
     if (course.paid && course.feeCents > 0) {
-      /* ⛔ SEUL APPEL DIRECT AU SDK L ANCIEN FOURNISSEUR QUI SUBSISTE DANS TOUT LE SITE.
-         Recensé le 31/07/2026 pendant la migration Revolut, et laissé EN L'ÉTAT
-         volontairement. Trois raisons :
-
-         1. C'est **virement direct** — un versement à un TIERS. La Merchant API
-            de Revolut n'a aucun équivalent : son `/api/payouts` ne fait que
-            CONSULTER les virements de notre propre compte vers notre banque.
-         2. Le module livreur est **inactif** (`COURIER_ENABLED=false`).
-         3. La décision du 27/07/2026 a renversé le principe : la plateforme ne
-            fixe plus le prix de la course et ne l'encaisse plus (règle
-            livraison, art. L7342-1 — présomption de salariat). Ce bloc est donc
-            un reliquat de l'ancien modèle, conservé mais plus branché.
-
-         ⚠️ À TRANCHER AVANT toute réouverture du service de livraison, pas le
-         jour même : autre produit Revolut, virement manuel, ou l ancien fournisseur conservé
-         pour ce seul flux. `check-paiement.js` tient un cliquet : ce fichier a
-         droit à UN appel direct, celui-ci, et pas un de plus. */
       /* ⛔ VIREMENT AUTOMATIQUE SUPPRIMÉ (01/08/2026, demande de l'user :
          « éradiquer tout ce qui porte le nom de l'ancien fournisseur, c'est
          TOUT »). Ce bloc appelait son SDK pour virer sa course au livreur.
