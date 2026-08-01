@@ -765,12 +765,36 @@ module.exports = async function () {
          `onSuccess` ne navigue pas, le client paie, reste devant le formulaire,
          croit que rien ne s'est passé — et repaie. Le paiement, lui, a
          parfaitement fonctionné : aucun test fonctionnel ne verrait le défaut. */
-      var mSucces = appSrc.match(/onSuccess\s*:\s*function[^{]*\{([\s\S]{0,400}?)\}/);
+      /* ⚠️ FENÊTRE FIXE = MESURE FRAGILE. La 1ʳᵉ version lisait les 400
+         premiers caractères après `onSuccess` : documenter le callback l'a
+         fait rougir sur du code strictement correct, le commentaire ayant
+         poussé l'appel hors de la fenêtre. On retire les commentaires et on
+         lit le corps réel — la règle est « onSuccess navigue », pas « onSuccess
+         navigue dans les 400 premiers caractères ». */
+      var appSansCom = appSrc.replace(/\/\*[\s\S]*?\*\//g, '');
+      var mSucces = appSansCom.match(/onSuccess\s*:\s*function[^{]*\{([\s\S]{0,600}?)\n\s*\},/);
       ok(mSucces && /lvRedirect|location\.hash|#\/merci/.test(mSucces[1]),
         '⛔⛔ le callback `onSuccess` du champ carte Revolut ne navigue nulle part. '
         + 'Contrairement à Stripe, Revolut NE REDIRIGE PAS : sans navigation, le client '
         + 'paie et reste bloqué sur le formulaire, persuadé que rien ne s\'est passé. '
         + 'Il repaiera. Et le paiement aura parfaitement fonctionné — aucun test ne le verra.');
+
+      /* ⛔⛔ ET ELLE DOIT SE FERMER. Constaté le 01/08/2026 sur le premier
+         vrai achat : le paiement passait, la page Merci s'affichait, mais la
+         fenêtre de paiement restait OUVERTE par-dessus — formulaire de carte et
+         bouton « Commander » encore visibles. Le client venait de payer et
+         voyait un écran qui lui disait de payer. Il pouvait recliquer.
+
+         Le chemin Stripe, lui, appelait `closePayModal()`. La couture existe
+         pour que les deux fournisseurs se comportent pareil : ici elle avait
+         été oubliée d'un seul côté, et aucun test ne le voyait — le paiement,
+         lui, avait parfaitement fonctionné. */
+      ok(mSucces && /closePayModal\s*\(/.test(mSucces[1]),
+        '⛔⛔ le callback `onSuccess` du champ carte Revolut ne FERME pas la fenêtre de '
+        + 'paiement. Le client paie, arrive sur la page Merci, et voit encore le '
+        + 'formulaire de carte et le bouton « Commander » par-dessus. Il peut recliquer. '
+        + 'Le chemin Stripe, lui, ferme — les deux fournisseurs doivent se comporter '
+        + 'pareil, c\'est toute la raison d\'être de la couture.');
 
       /* La commande doit être mémorisée AVANT le paiement, sur les DEUX chemins :
          sinon /merci ne sait pas quoi finaliser. */

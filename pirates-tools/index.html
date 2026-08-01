@@ -44,7 +44,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=553">
+  <link rel="stylesheet" href="styles.css?v=554">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -1826,10 +1826,16 @@
             </div>
             <p id="payAddrHint" class="pay-address__hint" role="status">Nous livrons en Guadeloupe, Martinique, Guyane, La R&eacute;union et Mayotte (code postal 971xx&ndash;976xx).</p>
           </form>
-          <!-- Stripe Payment Element mount point -->
+          <!-- Point de montage du formulaire de carte (Stripe OU Revolut selon
+               le fournisseur actif — c'est le serveur qui l'annonce). -->
           <div id="stripeElementsWrap" class="stripe-elements-wrap">
+            <!-- ⛔ Le champ carte n'avait AUCUN intitule, alors que « Nom
+                 complet », « Telephone » et « Adresse » en ont un. Il donnait
+                 l'impression d'un bloc etranger colle au milieu du formulaire —
+                 juste avant l'ecran ou le client donne son numero de carte. -->
+            <span class="pay-card-label" id="payCardLabel">Carte bancaire</span>
             <div id="stripePaymentElement" class="stripe-payment-element">
-              <!-- Stripe Elements will mount here -->
+              <!-- Le widget du fournisseur se monte ici -->
             </div>
             <div id="stripeCardError" class="stripe-card-error" role="alert" hidden></div>
           </div>
@@ -2246,7 +2252,7 @@
   <!-- =================== JS =================== -->
   <!-- Stripe.js (chargé async pour ne pas bloquer le rendu) -->
   <script src="https://js.stripe.com/v3/" async></script>
-  <script defer src="app.js?v=553"></script>
+  <script defer src="app.js?v=554"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

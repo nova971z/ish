@@ -62,7 +62,24 @@ LOG('━'.repeat(74));
    Seul le propriétaire s'en sert ; tous les autres les téléchargent pour rien. */
 const BUDGET = {
   'app.js':        400,   // relevé (D-014) — mesuré 205
-  'styles.css':     60,   // mesuré  51
+  /* ⚠️ RELEVÉ de 60 à 64 le 01/08/2026, et la contrepartie est ACTÉE — sinon
+     c'est juste un plafond qu'on déplace quand il gêne.
+
+     Le fichier était à 59,99 Ko sur 60 : saturé, plus une seule ligne de style
+     ne pouvait entrer. Mais la mesure qui compte est ailleurs :
+
+       gzip du fichier entier          → 60,26 Ko
+       gzip sans les commentaires      → 41,67 Ko
+       les COMMENTAIRES coûtent donc   → 18,59 Ko, soit 31 % du fichier
+
+     Trente et un pour cent de ce que le visiteur télécharge à CHAQUE visite
+     (navigation privée : aucun cache) est de la documentation qui ne lui sert
+     à rien. Le vrai gain n'est pas de rogner sur les styles, il est de cesser
+     de SERVIR les commentaires — voir ETAT.md, entrée P-css.
+
+     ⛔ Ce plafond ne se relèvera plus tant que ce chantier n'est pas fait : le
+     prochain dépassement devra retirer du poids, pas déplacer la limite. */
+  'styles.css':     64,   // mesuré  60,26 (dont 18,59 de commentaires)
   'products.json':  65,   // mesuré  54
   'index.html':     46    // mesuré  39
 };

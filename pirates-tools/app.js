@@ -9899,7 +9899,14 @@
       if (card) { card.classList.add('is-active'); card.hidden = false; }
       if (btnCrypto) btnCrypto.hidden = true;
       if (btnCard)   btnCard.hidden = false;
-      if (powered)   powered.innerHTML = 'Propulsé par <strong>Stripe</strong> — leader mondial du paiement en ligne';
+      /* ⛔ LE NOM DU FOURNISSEUR ÉTAIT ÉCRIT EN DUR (constaté le 01/08/2026).
+         Le site encaissait par Revolut et affichait « Propulsé par Stripe » au
+         bas de la fenêtre de paiement. Ce n'est pas qu'une coquille : dire au
+         client qui traite sa carte est une INFORMATION, pas une décoration —
+         elle figure aussi dans les CGV et la politique de confidentialité, où
+         le sous-traitant doit être nommé (J3). Elle suit donc le fournisseur
+         réellement actif, annoncé par le serveur. */
+      if (powered) powered.innerHTML = mentionFournisseur();
     }
   }
 
@@ -10098,6 +10105,21 @@
   // fermer puis rouvrir en < 250 ms laissait le vieux timer masquer la modale
   // fraîchement ouverte et réactiver le scroll du body sous elle.
   var _payCloseTimer = null;
+
+  /* Qui traite réellement la carte, en une phrase.
+     ⚠️ `_paiementFournisseur` est renseigné par la RÉPONSE du serveur, pas
+     deviné : c'est lui qui sait quel jeton il vient de fabriquer. Tant qu'aucun
+     paiement n'a été préparé, on ne nomme personne plutôt que de nommer le
+     mauvais — une mention fausse est pire qu'une mention absente. */
+  function mentionFournisseur() {
+    if (_paiementFournisseur === 'revolut') {
+      return 'Paiement sécurisé par <strong>Revolut</strong>';
+    }
+    if (_paiementFournisseur === 'stripe') {
+      return 'Paiement sécurisé par <strong>Stripe</strong>';
+    }
+    return 'Paiement sécurisé — vos données de carte ne transitent jamais par nos serveurs';
+  }
 
   function closePayModal() {
     var modal = document.getElementById('payModal');
@@ -10334,10 +10356,37 @@
       if (_revolutCardField) { try { _revolutCardField.destroy(); } catch (_) {} }
 
       var adr = (ship && ship.addr) || {};
+      /* ── APPARENCE DU CHAMP CARTE ────────────────────────────────────────
+         ⛔ CE QUI EST IMPOSSIBLE, ET POURQUOI. Revolut ne fournit PAS de champs
+         séparés : les définitions du paquet officiel (@revolut/checkout@1.1.25)
+         ne contiennent ni `createCardNumberField`, ni `createExpiryField`, ni
+         `createCvvField` — vérifié dans les types eux-mêmes. Il n'existe qu'un
+         champ combiné, servi dans une iframe. C'est précisément ce qui fait
+         qu'aucun numéro de carte ne touche jamais notre domaine, et donc ce qui
+         nous évite la certification PCI-DSS lourde. On ne contourne pas ça.
+
+         CE QUI EST POSSIBLE : `styles` accepte du CSS par ÉTAT (default,
+         focused, invalid, empty, autofilled, completed) et `classes` pose nos
+         propres classes sur le conteneur. On aligne donc le champ sur les
+         autres champs du formulaire — même police, même taille, même couleur —
+         et le conteneur prend l'habillage en CSS. */
       _revolutCardField = instance.createCardField({
         target: container,
         locale: 'fr',
         theme: 'dark',
+        /* Aligné sur `.pay-address__field input` (styles.css) : 15 px, même
+           couleur de texte. Un champ carte qui ne ressemble pas aux autres
+           donne l'impression d'un formulaire étranger collé au milieu. */
+        styles: {
+          default: { color: '#e6edf5', fontSize: '15px', fontFamily: 'inherit' },
+          empty: { color: '#8b98a9', fontSize: '15px' },
+          invalid: { color: '#fca5a5' }
+        },
+        classes: { default: 'rc-card-field pt-card-field' },
+        /* Le code postal est déjà saisi dans l'adresse de livraison juste
+           au-dessus, et il part dans `billingAddress` au `submit`. L'afficher
+           une seconde fois demanderait au client de le retaper. */
+        hidePostcodeField: true,
         name: adr.name || '',
         email: (_currentUser && _currentUser.email) || '',
         billingAddress: {
@@ -10357,6 +10406,20 @@
            /merci devient donc NOTRE responsabilité — sans ça, le client paie et
            reste bloqué sur le formulaire, persuadé que rien ne s'est passé. */
         onSuccess: function () {
+          /* ⛔⛔ FERMER LA FENÊTRE AVANT DE NAVIGUER (constaté le 01/08/2026
+             sur le premier vrai achat). `onSuccess` ne faisait que naviguer :
+             la fenêtre de paiement restait OUVERTE par-dessus la page Merci,
+             avec le formulaire de carte et le bouton « Commander » encore
+             visibles. Le client venait de payer et voyait un écran qui lui
+             disait de payer — il pouvait recliquer.
+
+             Le chemin Stripe, lui, appelait bien `closePayModal()`. La couture
+             existe justement pour que les deux fournisseurs se comportent
+             pareil : ici elle avait été oubliée d'un seul côté.
+
+             ⚠️ ORDRE IMPORTANT : fermer D'ABORD, naviguer ENSUITE. L'inverse
+             laisse l'animation de fermeture se jouer sur la page suivante. */
+          closePayModal();
           lvRedirect('#/merci');
         },
         onError: function (err) {
@@ -10557,6 +10620,10 @@
       _paiementFournisseur = String(data.fournisseur || 'stripe');
       _urlPaiementHebergee = data.urlHebergee || null;
       _paiementModeTest = (typeof data.modeTest === 'boolean') ? data.modeTest : null;
+      /* Le serveur vient de dire QUI encaisse : la mention se remet à jour
+         maintenant, pas au prochain changement d'onglet. */
+      var poweredEl = document.getElementById('payModalPowered');
+      if (poweredEl) poweredEl.innerHTML = mentionFournisseur();
 
       // Le serveur est la SEULE vérité du montant débité : il applique la
       // remise fidélité vérifiée (journal payments/, infalsifiable). On

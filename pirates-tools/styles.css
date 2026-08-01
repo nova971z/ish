@@ -6818,6 +6818,22 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   width: 100%;
   box-sizing: border-box;
 }
+/* Champ carte Revolut : l'INTÉRIEUR est une iframe qui lui appartient (la
+   carte ne touche jamais notre domaine). On habille le conteneur pour qu'il
+   ressemble aux autres champs — sinon il fait « site étranger » au moment de
+   payer. Classe posée par `classes.default` dans createCardField. */
+.pt-card-field {
+  background: #1a2332; border: 1px solid rgba(255,255,255,.12);
+  border-radius: 10px; padding: 12px; min-height: 46px; box-sizing: border-box;
+}
+.pt-card-field--focused {
+  border-color: var(--accent); box-shadow: 0 0 0 2px rgba(var(--accent-rgb), .25);
+}
+.pt-card-field--invalid { border-color: rgba(239,68,68,.6); }
+.pay-card-label {
+  display: block; font-size: 13px; font-weight: 600; color: #9aa4b2; margin: 14px 0 6px;
+}
+
 .pay-address__field input:focus {
   outline: none;
   border-color: var(--accent);

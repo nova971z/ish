@@ -67,6 +67,24 @@ vérifiable**.
 > `node scripts/check-csp.js` et reporter le nouveau hash dans `vercel.json`
 > fait **bloquer le script par la CSP** : plus aucun `PT_STRIPE_PK`, site cassé.
 
+## 🟠 Poids servi — le chantier qui débloque tout le CSS
+
+| # | À faire | Preuve / mesure |
+|---|---|---|
+| P-css | **Cesser de SERVIR les commentaires CSS.** Les garder dans la source, ne pas les envoyer au navigateur | `gzip` du fichier entier → **60,26 Ko** · sans les commentaires → **41,67 Ko**. Les commentaires coûtent **18,59 Ko, soit 31 %** de ce que chaque visiteur télécharge à CHAQUE visite (navigation privée = aucun cache) |
+
+> ⚠️ **Le plafond a été relevé de 60 à 64 Ko le 01/08/2026, une seule fois, et
+> la contrepartie est écrite dans `scripts/audit/p8-perf.js`.** Le fichier était
+> à 59,99 sur 60 : plus une ligne de style ne pouvait entrer. Relever était le
+> seul geste possible sur le moment, mais ça ne règle rien — ça décale.
+>
+> ⛔ **Le prochain dépassement devra retirer du poids, pas déplacer la limite.**
+> Le vrai gain est ici : 18,59 Ko de documentation servis pour rien. Le projet
+> n'a pas d'étape de construction (choix assumé — PWA sans framework), donc la
+> solution devra soit en introduire une minimale, soit déplacer les
+> commentaires hors du fichier servi. C'est une décision de structure : elle se
+> prend à froid, pas au milieu d'une migration de paiement.
+
 ## 🟠 Variables d'environnement Vercel manquantes
 
 | # | Variable | Conséquence de l'absence |
