@@ -1607,10 +1607,15 @@ function pwBuildVariantCosts(products, ov) {
    PURE — testée par check-price-watch via _internals, sabotage compris. */
 function pwSourcesConnues(o) {
   const srcs = Object.assign({}, o && o.priceSources);
+  /* `priceCheckedAt` relu de Firestore est un objet Timestamp, pas un nombre :
+     `enMillis` le ramène en millisecondes réelles (Number() donnait des
+     secondes d'une autre ère — 63 889 596 800 — et l'héritage paraissait
+     toujours périmé face à Date.now()). */
+  var atHeritage = priceParse.enMillis(o && o.priceCheckedAt);
   if (o && o.priceSource === 'cotebrico' && !srcs.cotebrico
       && typeof o.priceSrcTTC === 'number' && o.priceSrcTTC > 0
-      && Number(o.priceCheckedAt) > 0) {
-    srcs.cotebrico = { ttc: o.priceSrcTTC, at: Number(o.priceCheckedAt) };
+      && atHeritage > 0) {
+    srcs.cotebrico = { ttc: o.priceSrcTTC, at: atHeritage };
   }
   return srcs;
 }
@@ -1835,6 +1840,22 @@ async function handlePriceWatch(req, res, admin, db) {
     const products = await catalog.loadCatalog();
     const bySku = {};
     products.forEach((p) => { if (p.sku) bySku[String(p.sku).toUpperCase()] = p; });
+    /* Les RÉFÉRENCES ALTERNATIVES (`srcAltSkus`) pointent vers leur fiche :
+       un site peut n'afficher QUE la déclinaison — clickoutil écrit
+       « DCN930N-XJ » là où la fiche dit « DCN930N », et l'user a tranché :
+       le suffixe -XJ est un marquage de commercialisation géographique, pas
+       une identité. Sans cet index, l'alias tombait dans `unknown` et la
+       fiche n'était jamais mise à jour par ce site.
+       ⛔ Un alias n'écrase JAMAIS un sku principal — et une alternative ne
+       se déclare qu'après vérification du CONTENU (nu vs pack) : c'est la
+       mise en garde de l'user, un prix de pack sur une fiche d'outil nu
+       corromprait le coût. */
+    products.forEach((p) => {
+      (Array.isArray(p.srcAltSkus) ? p.srcAltSkus : []).forEach((a) => {
+        const k = String(a || '').trim().toUpperCase();
+        if (k && !bySku[k]) bySku[k] = p;
+      });
+    });
 
     // Overrides relus À LA SOURCE : le catalogue fusionné peut avoir jusqu'à
     // 30 s de retard, et ici un prix actuel périmé fausserait AUSSI la garde
@@ -1849,6 +1870,13 @@ async function handlePriceWatch(req, res, admin, db) {
 
     const applied = [], flagged = [], unchanged = [], unknown = [], lockedW = [];
     const now = admin.firestore.FieldValue.serverTimestamp();
+    /* ⚠️ DEUX HORLOGES, DEUX USAGES — appris en production (E-228) :
+       `now` est un SENTINEL serverTimestamp, bon pour les champs d'affichage
+       (priceCheckedAt…) mais Number(now) = NaN : glissé dans un `at` de
+       `priceSources`, il rendait l'entrée du passage EN COURS invisible au
+       min (D25033K-QS : clickoutil 119,90 € perdu contre 126,72 €). Tout ce
+       qui sert à l'ARITHMÉTIQUE de fraîcheur prend `nowMs`, un nombre. */
+    const nowMs = Date.now();
 
     // Prix parsés indexés par SKU (pour la règle « min des sources » srcAltSkus).
     const parsedBySku = {};
@@ -1859,17 +1887,24 @@ async function handlePriceWatch(req, res, admin, db) {
        que le coût effectif se recalcule sans cette source. */
     const enRupture = [];
 
+    /* Une fiche peut être vue DEUX fois sur la même page — par son sku et par
+       un alias (`srcAltSkus`). On ne l'écrit qu'une fois : la première
+       rencontre gagne, et le choix du moins cher regarde de toute façon
+       TOUTES les déclinaisons présentes sur la page. */
+    const fichesVues = new Set();
     for (const item of parsed) {
       const p = bySku[item.sku];
       if (!p) { unknown.push({ sku: item.sku, srcTTC: item.price, name: item.name }); continue; }
+      if (fichesVues.has(p.id)) continue;
+      fichesVues.add(p.id);
       if (item.enStock === false) {
         enRupture.push({ sku: item.sku, id: p.id, name: p.title || p.name, srcTTC: item.price });
         if (!dryRun) {
           const srcsR = pwSourcesConnues(ovW[p.id] || {});   // carte + héritage
-          srcsR[sourceSlug] = { ttc: item.price, at: now, enStock: false };
-          const choixR = priceParse.choisirCoutSource(srcsR, now);
+          srcsR[sourceSlug] = { ttc: item.price, at: nowMs, enStock: false };
+          const choixR = priceParse.choisirCoutSource(srcsR, nowMs);
           await db.collection('product_overrides').doc(p.id).set({
-            priceSources: { [sourceSlug]: { ttc: item.price, at: now, enStock: false } },
+            priceSources: { [sourceSlug]: { ttc: item.price, at: nowMs, enStock: false } },
             // Le coût effectif se recalcule SANS cette source. S'il ne reste
             // rien d'achetable, le produit passe en GEL (origin 'rupture').
             priceSrcTTC: choixR ? choixR.ttc : null,
@@ -1885,14 +1920,19 @@ async function handlePriceWatch(req, res, admin, db) {
       // 🔒 Prix verrouillé : le traqueur relève, mais n'écrit JAMAIS.
       if (p.priceLocked === true) { lockedW.push({ sku: item.sku, id: p.id, name: p.title || p.name }); continue; }
       const oW = ovW[p.id] || {};
-      const src = priceParse.pickCheapestSource(item.price, p.srcAltSkus, parsedBySku);
+      /* Le PROPRE sku de la fiche entre dans la liste des candidats : quand la
+         fiche est atteinte par un ALIAS (clickoutil n'affiche que DCN930N-XJ),
+         `item` est l'alias — sans cet ajout, un prix du sku principal présent
+         ailleurs sur la page échapperait au min. */
+      const src = priceParse.pickCheapestSource(item.price,
+        [p.sku].concat(Array.isArray(p.srcAltSkus) ? p.srcAltSkus : []), parsedBySku);
       /* ── COÛT EFFECTIF = LE MOINS CHER DE TOUTES LES SOURCES VALIDES ──────
          (01/08/2026) Cette source-ci, fraîchement relevée, rejoint la carte
          `priceSources` ; le prix du site se calcule sur le minimum des
          sources fraîches ET en stock — quel que soit le traqueur qui parle. */
       const srcsMaj = pwSourcesConnues(oW);   // carte + héritage cotébrico
-      srcsMaj[sourceSlug] = { ttc: src, at: now, enStock: true };
-      const choix = priceParse.choisirCoutSource(srcsMaj, now);
+      srcsMaj[sourceSlug] = { ttc: src, at: nowMs, enStock: true };
+      const choix = priceParse.choisirCoutSource(srcsMaj, nowMs);
       const effSrc = choix ? choix.ttc : src;
       const effFrom = choix ? choix.source : sourceSlug;
       const priced = pwComputePrice(p, effSrc, cfg);
@@ -1915,7 +1955,7 @@ async function handlePriceWatch(req, res, admin, db) {
         // supposition alors que le vrai prix fournisseur est connu.
         if (!dryRun && !dejaAJour) {
           await db.collection('product_overrides').doc(p.id).set({
-            priceSources: { [sourceSlug]: { ttc: src, at: now, enStock: true } },
+            priceSources: { [sourceSlug]: { ttc: src, at: nowMs, enStock: true } },
             priceSource: effFrom, priceSrcTTC: effSrc, priceCheckedAt: now
           }, { merge: true });
         }
@@ -1986,7 +2026,7 @@ async function handlePriceWatch(req, res, admin, db) {
         }
         await db.collection('product_overrides').doc(p.id).set(Object.assign({
           price: newPrice, price_ht: newHt,
-          priceSources: { [sourceSlug]: { ttc: src, at: now, enStock: true } },
+          priceSources: { [sourceSlug]: { ttc: src, at: nowMs, enStock: true } },
           priceSource: effFrom, priceSrcTTC: effSrc, priceCheckedAt: now,
           priceMarkup: priced.markup, priceMode: priced.mode
         }, promo), { merge: true });

@@ -51,10 +51,18 @@ if (!source) { console.error('usage : node outils/importer-catalogue.mjs <releve
 const releve = JSON.parse(await readFile(source, 'utf8'));
 const liste = releve.unknown || releve.items || (Array.isArray(releve) ? releve : []);
 const marque = String(releve.brand || 'Makita');
-const MARQUE = marque.charAt(0) + marque.slice(1).toLowerCase();
 
 const cat = JSON.parse(await readFile(join(RACINE, 'products.json'), 'utf8'));
 const produits = Array.isArray(cat) ? cat : (cat.products || []);
+/* ⚠️ LA GRAPHIE DE LA MARQUE VIENT DU CATALOGUE, PAS D'UN CALCUL — attrapé
+   avant le 1er import DEWALT (01/08/2026) : « DEWALT » se serait écrit
+   « Dewalt » là où 43 fiches disent « DeWALT ». Deux graphies = deux
+   familles dans les filtres du site, et la moitié du catalogue invisible
+   pour le client qui filtre par marque. Si une fiche porte déjà la marque,
+   sa graphie fait foi ; sinon seulement, repli sur la forme calculée. */
+const grapheePortee = produits.map((p) => String(p.brand || ''))
+  .find((b) => b.toUpperCase() === marque.toUpperCase());
+const MARQUE = grapheePortee || (marque.charAt(0) + marque.slice(1).toLowerCase());
 const skusExistants = new Set(produits.map((p) => String(p.sku || '').toUpperCase()));
 /* ⛔ UN DOUBLON NE SE LIT PAS QUE SUR LE SKU PRINCIPAL. Le traqueur de prix
    déclare des RÉFÉRENCES ALTERNATIVES (`srcAltSkus`) : une fiche « DBS180Z »
@@ -77,31 +85,31 @@ produits.forEach((p) => {
 
    Chaque motif pointe désormais vers un nom EXISTANT, vérifié plus bas : si
    la cible n'est pas au catalogue, l'outil REFUSE de tourner. */
+/* ⚠️ TABLE RÉALIGNÉE le 01/08/2026 au soir : les familles ont été REGROUPÉES
+   depuis le 1er import (demande D-45 de l'user — 20 familles). L'ancienne
+   table visait « Meuleuses », « Ponceuses », « Élagage »… qui n'existent
+   plus : la porte d'entrée de cet outil a refusé de tourner — c'est son
+   rôle. Chaque cible ci-dessous est MESURÉE dans products.json. */
 const FAMILLES = [
-  [/boulonneuse/i, 'Boulonneuses a chocs'],
-  [/visseuse à chocs|visseuse a chocs|cliquet/i, 'Visseuses a chocs'],
-  [/perceuse|visseuse/i, 'Perceuses-visseuses'],
-  [/meuleuse/i, 'Meuleuses'],
-  [/découpeuse|decoupeuse/i, 'Découpeuses'],
-  [/scie|tronçonneuse|tronconneuse/i, 'Scies'],
+  [/boulonneuse|visseuse|perceuse|cliquet/i, 'Perçage, vissage et boulonnage'],
+  [/meuleuse|découpeuse|decoupeuse|ponceuse|polisseuse|lime à bande|lime a bande/i, 'Meulage, découpe et polissage'],
+  [/tronçonneuse|tronconneuse|taille[- ]haie|débroussailleuse|debroussailleuse|tondeuse|élagueuse|elagueuse|sécateur|secateur|souffleur/i, 'Tronçonnage et élagage'],
+  [/scie|multicutter/i, 'Scies'],
   [/perfo|burineur|marteau|piqueur/i, 'Perforateurs'],
-  [/ponceuse/i, 'Ponceuses'],
   [/rabot/i, 'Rabots'],
-  [/défonceuse|defonceuse|affleureuse/i, 'Défonceuses'],
-  [/souffleur/i, 'Souffleurs'],
+  [/défonceuse|defonceuse|affleureuse|fraiseuse/i, 'Défonceuses'],
   [/aspirateur/i, 'Aspirateurs'],
   [/batterie|chargeur|accu|adaptateur secteur/i, 'Batteries et chargeurs'],
-  [/coffret|makpac|valise|mallette|sac|caisse/i, 'Rangements'],
+  [/coffret|makpac|tstak|toughsystem|valise|mallette|sac|caisse/i, 'Rangements'],
   [/lamelleuse/i, 'Lamelleuses'],
   [/riveteuse/i, 'Riveteuses'],
   [/tarière|tariere/i, 'Tarières'],
   [/malaxeur|mélangeur|melangeur/i, 'Malaxeurs'],
   [/cloueur|agrafeuse/i, 'Cloueurs'],
   [/multifonction|oscillant/i, 'Outils multifonctions'],
-  [/taille-haie|débroussailleuse|debroussailleuse|tondeuse|élagueuse|elagueuse|sécateur|secateur/i, 'Élagage'],
-  [/combo|pack|kit/i, 'Combos'],
-  /* Tout le reste — douilles, embouts, forets, lames, disques, lampes,
-     pistolets, compresseurs — tombe dans « Accessoires », qui existe déjà.
+  [/combo|pack |kit /i, 'Combos'],
+  /* Tout le reste — lasers, télémètres, radios, projecteurs, compresseurs,
+     nettoyeurs, ventouses… — tombe dans « Accessoires », qui existe déjà.
      Mieux vaut une famille large et VISIBLE qu'une famille juste et fantôme. */
 ];
 const famille = (n) => (FAMILLES.find(([re]) => re.test(n)) || [null, 'Accessoires'])[1];

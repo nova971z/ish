@@ -78,8 +78,18 @@ module.exports = function () {
 
   // Branchement réel dans handlePriceWatch.
   var adminSrc = fs.readFileSync(path.join(__dirname, '..', 'api', 'admin.js'), 'utf8');
-  ok(/pickCheapestSource\s*\(\s*item\.price\s*,\s*p\.srcAltSkus/.test(adminSrc),
-    'handlePriceWatch applique pickCheapestSource(item.price, p.srcAltSkus, …)');
+  ok(/pickCheapestSource\(item\.price,\s*\n?\s*\[p\.sku\]\.concat\(/.test(adminSrc),
+    'handlePriceWatch applique pickCheapestSource avec le PROPRE sku dans les candidats — '
+    + 'une fiche atteinte par un alias doit quand même voir le prix du sku principal');
+  /* ═══ ALIAS → FICHE (01/08/2026, demande de l'user) ═══════════════════════
+     clickoutil n'affiche que la déclinaison (DCN930N-XJ) là où la fiche dit
+     DCN930N — le -XJ est un marquage géographique, a tranché l'user. Sans
+     l'index des alias, ces relevés tombaient dans `unknown` pour toujours. */
+  ok(/srcAltSkus\)\s*\?\s*p\.srcAltSkus\s*:\s*\[\]\)\.forEach\(\(a\)\s*=>\s*\{\s*\n\s*const k = String\(a \|\| ''\)\.trim\(\)\.toUpperCase\(\);\s*\n\s*if \(k && !bySku\[k\]\) bySku\[k\] = p;/.test(adminSrc),
+    '⛔ les srcAltSkus doivent être indexés vers leur fiche SANS écraser un sku principal — '
+    + 'sans cet index, un site qui n\'affiche que la déclinaison ne met jamais la fiche à jour');
+  ok(/const fichesVues = new Set\(\)/.test(adminSrc) && /fichesVues\.has\(p\.id\)/.test(adminSrc),
+    'une fiche vue par son sku ET par un alias sur la même page ne s\'écrit qu\'une fois');
 
   // Cohérence catalogue : un srcAltSkus ne doit jamais référencer un SKU
   // encore AU catalogue (la déclinaison doit être fusionnée, pas dupliquée).
@@ -117,7 +127,48 @@ module.exports = function () {
     ok(choisir({ cotebrico: { ttc: 150, at: NOW - J, enStock: false } }, NOW) === null,
       'AUCUNE source achetable → null : le produit doit être GELÉ, jamais recalculé');
     ok(choisir(null, NOW) === null && choisir({}, NOW) === null, 'carte absente ou vide → null, sans planter');
+
+    /* ═══ HORODATAGES EN MILLISECONDES (E-228, 01/08/2026 au soir) ══════════
+       En production, les `at` partaient en SENTINEL serverTimestamp
+       (Number → NaN : l'entrée du passage EN COURS invisible au min —
+       mesuré : D25033K-QS, clickoutil 119,90 € perdu contre cotébrico
+       126,72 €) et revenaient en objet Timestamp (Number → des secondes
+       d'une autre ère : tout paraissait périmé au recalcul → gel fantôme). */
+    var em = pp.enMillis;
+    ok(typeof em === 'function', 'enMillis exportée');
+    if (em) {
+      ok(em(1700000000000) === 1700000000000, 'un nombre en ms passe tel quel');
+      ok(em({ toMillis: function () { return 1700000000000; } }) === 1700000000000,
+        'un objet Timestamp est lu par son .toMillis() — les cartes relues de Firestore redeviennent datables');
+      ok(em({}) === 0 && em(undefined) === 0 && em(NaN) === 0,
+        'un sentinel ou n\'importe quoi d\'autre vaut 0 : écarté, jamais deviné');
+    }
+    var d25 = choisir({ cotebrico: { ttc: 126.72, at: NOW - J },
+      clickoutil: { ttc: 119.90, at: NOW - J } }, NOW);
+    ok(d25 && d25.ttc === 119.90 && d25.source === 'clickoutil',
+      '⛔ RÉGRESSION D25033K : les deux sources datées en ms → le MOINS CHER gagne '
+      + 'vraiment (' + JSON.stringify(d25) + ')');
+    var d25b = choisir({ cotebrico: { ttc: 126.72, at: NOW - J },
+      clickoutil: { ttc: 119.90, at: {} } }, NOW);
+    ok(d25b && d25b.ttc === 126.72,
+      'une entrée dont le `at` n\'est pas datable est ÉCARTÉE — c\'est le bogue sentinel rendu visible');
+    ok(choisir({ cotebrico: { ttc: 126.72, at: NOW - J } }, {}) === null,
+      'un « maintenant » non numérique ne date rien → null, jamais un choix au hasard');
+    var d25c = choisir({ cotebrico: { ttc: 126.72,
+      at: { toMillis: function () { return NOW - J; } } } }, NOW);
+    ok(d25c && d25c.ttc === 126.72,
+      'une carte RELUE de Firestore (at = Timestamp) reste fraîche — fin du gel fantôme au recalcul');
   }
+  // Branchement réel : l'arithmétique de fraîcheur reçoit des NOMBRES.
+  var adminSrcMs = fs.readFileSync(path.join(__dirname, '..', 'api', 'admin.js'), 'utf8');
+  ok(/srcsMaj\[sourceSlug\] = \{ ttc: src, at: nowMs, enStock: true \}/.test(adminSrcMs)
+    && /choisirCoutSource\(srcsMaj, nowMs\)/.test(adminSrcMs)
+    && /choisirCoutSource\(srcsR, nowMs\)/.test(adminSrcMs),
+    '⛔ handlePriceWatch doit dater et juger `priceSources` en MILLISECONDES (nowMs) — '
+    + 'un sentinel rendait le passage en cours invisible au min (E-228, D25033K-QS)');
+  ok(!/priceSources: \{ \[sourceSlug\]: \{ ttc: [^}]*, at: now,/.test(adminSrcMs),
+    '⛔ un sentinel serverTimestamp n\'entre plus JAMAIS dans un `at` de priceSources '
+    + '(Number(sentinel) = NaN : l\'entrée devient invisible au choix du moins cher)');
 
   /* La grille fournisseur : le badge de stock d'une carte vit APRÈS le bouton
      « Ajouter au panier », donc EN TÊTE DU BLOC SUIVANT (mesuré sur la capture

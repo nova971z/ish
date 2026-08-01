@@ -329,8 +329,24 @@ function diagnostiquerPage(rawText, brand) {
    PURE — testée par check-price-watch, sabotage compris. */
 var SOURCE_FRESH_MS = 14 * 24 * 3600 * 1000;   // 14 jours ≈ 28 passages manqués
 
+/* ⚠️ HORODATAGES : MILLISECONDES, ET RIEN D'AUTRE — appris en production le
+   01/08/2026 au soir. Les `at` écrits via `serverTimestamp()` partaient en
+   SENTINEL (Number → NaN : l'entrée du passage EN COURS était invisible au
+   min — mesuré sur D25033K-QS : clickoutil 119,90 € perdu contre cotébrico
+   126,72 €) et revenaient de Firestore en objet `Timestamp` (Number →
+   63 889 596 800, des secondes d'une autre ère : comparé à Date.now() en ms,
+   tout paraissait périmé → GEL fantôme au recalcul). D'où `enMillis` : un
+   nombre est pris tel quel, un Timestamp est lu par son `.toMillis()`, tout
+   le reste vaut 0 — donc écarté, jamais deviné. */
+function enMillis(v) {
+  if (v && typeof v.toMillis === 'function') { try { return Number(v.toMillis()) || 0; } catch (e) { return 0; } }
+  var n = Number(v);
+  return (isFinite(n) && n > 0) ? n : 0;
+}
+
 function choisirCoutSource(sources, nowMs, maxAgeMs) {
   if (!sources || typeof sources !== 'object') return null;
+  if (!(Number(nowMs) > 0)) return null;   // un « maintenant » non numérique ne date rien
   var age = (typeof maxAgeMs === 'number' && maxAgeMs > 0) ? maxAgeMs : SOURCE_FRESH_MS;
   var best = null;
   Object.keys(sources).forEach(function (slug) {
@@ -338,10 +354,11 @@ function choisirCoutSource(sources, nowMs, maxAgeMs) {
     var ttc = Number(e.ttc);
     if (!(ttc > 0)) return;
     if (e.enStock === false) return;                    // en rupture : inachetable
-    if (!(Number(e.at) > 0) || (nowMs - Number(e.at)) > age) return;  // périmée
+    var at = enMillis(e.at);
+    if (!(at > 0) || (nowMs - at) > age) return;        // périmée ou indatable
     if (!best || ttc < best.ttc) best = { ttc: ttc, source: slug };
   });
   return best;
 }
 
-module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickoutil, parseAuto: parseAuto, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, SOURCE_FRESH_MS: SOURCE_FRESH_MS, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage };
+module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickoutil, parseAuto: parseAuto, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, enMillis: enMillis, SOURCE_FRESH_MS: SOURCE_FRESH_MS, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage };
