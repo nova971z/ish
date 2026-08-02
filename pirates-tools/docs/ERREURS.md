@@ -14,7 +14,7 @@
 
 | Origine | Mécanisme | Cas | Antidote | Porte |
 |---|---|---|---|---|
-| **O1** | Affirmer avant de mesurer | 10 | §3 · §8 | `garde-sortie.js` *(hook Stop)* |
+| **O1** | Affirmer avant de mesurer | 11 | §3 · §8 | `garde-sortie.js` *(hook Stop)* |
 | **O2** | L'instrument de mesure est faux | 27 | §4.3 | sabotage obligatoire |
 | **O3** | Réutiliser sans vérifier le contexte | 8 | §1.4 | `check-lecons.js` |
 | **O4** | Contrainte connue, non appliquée | 4 | §1 | `garde-entonnoir.js` |
@@ -22,7 +22,7 @@
 | **O6** | Copie périmée au lieu de la source vivante | 5 | §4.4 | `p7-architecture.js` |
 | **O7** | **Lire le silence comme un succès** | 7 | §3 · §4.3 | `sabotage.mjs` · `ci.js` · `check-ancres.js` |
 
-**62 erreurs, 7 mécanismes.** O1 et O2 en concentrent **37 à elles deux** :
+**63 erreurs, 7 mécanismes.** O1 et O2 en concentrent **38 à elles deux** :
 c'est là qu'il faut regarder en premier, toujours.
 
 ⚠️ **O7 est né le 01/08/2026**, et il est né d'une règle qui existait déjà :
@@ -45,6 +45,7 @@ confiance dans tout ce que je dis.*
 | **E-103** | « D1 : du gain pur, sans risque » | 45 liaisons dont 7 pièges | analyse `esprima` |
 | **E-104** | « aucune mention de médiateur dans index.html » | **3** occurrences | `grep -ci` |
 | **E-110** | « clique le bouton qui enregistre le webhook » | **aucun bouton n'existait** — seul le point d'entrée serveur était écrit | `grep -c "revolut-webhook" app.js` → **0**. Récidive du `revolut-ping` : un point d'entrée admin sans bouton n'existe pas pour l'user |
+| **E-111** | « Failed to load » lu comme le message RÉSEAU de Safari — panne admin diagnostiquée « la requête meurt avant les fonctions » | c'était MON PROPRE texte, `api/admin.js:1079` : le catch du GET répondait `500 { error: 'Failed to load' }` en avalant la vraie cause | un `grep` du message dans le dépôt AVANT d'attribuer une erreur à la plateforme — l'user a testé /api/health pour rien. Le catch nomme désormais le type + le message réel |
 | **E-105** | « la plage 64.29.17.x est cassée » | `ish-ebon` y répondait | comparaison des 3 adresses |
 | **E-106** | la porte juridique « couvre ce qui engage » | 8 fichiers sur **20** | sondes sur le code : `contact.js` = 91 marqueurs |
 | **E-107** | l'entonnoir « protège ce qui est servi » | `manifest.webmanifest` servi sans protection ; **21 fichiers serveur sur 28** sans liste de contrôle | `scripts/couverture.js` |

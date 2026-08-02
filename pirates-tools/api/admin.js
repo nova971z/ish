@@ -1076,7 +1076,17 @@ module.exports = async function handler(req, res) {
         const indexUrl = m ? m[0].replace(/[).,\s]+$/, '') : '';
         return res.status(200).json({ ok: true, orders: [], hint: 'Firestore index required — check console', indexUrl: indexUrl });
       }
-      return res.status(500).json({ ok: false, error: 'Failed to load' });
+      /* ⛔ PLUS JAMAIS « Failed to load » NU — panne du 02/08/2026 : ce texte
+         générique a caché la vraie cause à l'user ET m'a fait diagnostiquer
+         un faux problème réseau (je l'ai pris pour le message de Safari).
+         On nomme le type demandé et le message réel de l'erreur — un message
+         d'erreur Firestore/Node ne contient pas de secret, et 200 caractères
+         suffisent à désigner la cause (quota, index, délai…). */
+      return res.status(500).json({
+        ok: false,
+        error: 'GET admin (' + ((req.query && req.query.type) || 'overrides') + ') : '
+          + String(err.message || err).slice(0, 200)
+      });
     }
   }
 
