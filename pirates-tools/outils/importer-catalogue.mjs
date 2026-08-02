@@ -52,6 +52,20 @@ const releve = JSON.parse(await readFile(source, 'utf8'));
 const liste = releve.unknown || releve.items || (Array.isArray(releve) ? releve : []);
 const marque = String(releve.brand || 'Makita');
 
+/* ── ACCESSOIRES SANS RÉF : ILS ENTRENT PAR LEUR NOM (règle user, 02/08) ──
+   « Ce qui est important, c'est les références exactes et comment sont
+   NOMMÉS les produits s'il n'y a pas de référence. » Le relevé porte
+   `sansRef: [{ titre, prix }]` : l'identité de ces fiches est le TITRE
+   EXACT du site, posé en `srcNom` — c'est lui que le traqueur appariera à
+   chaque passage. ⛔ Un titre vu PLUSIEURS fois sur la page (trois « Lame …
+   Ø184 mm » mesurées) n'identifie rien : refusé, avec motif. */
+const sansRefBruts = (Array.isArray(releve.sansRef) ? releve.sansRef : [])
+  .map((e) => ({ _nom: true, titre: String((e && e.titre) || '').trim(), srcTTC: Number((e && e.prix) || 0) }));
+const freqTitres = {};
+sansRefBruts.forEach((e) => { if (e.titre) freqTitres[e.titre] = (freqTitres[e.titre] || 0) + 1; });
+/* Empreinte stable d'un nom → pseudo-sku interne (jamais montré comme réf). */
+const hash8 = (s) => { let h = 5381; for (let i = 0; i < s.length; i++) h = ((h * 33) ^ s.charCodeAt(i)) >>> 0; return h.toString(16).padStart(8, '0'); };
+
 const cat = JSON.parse(await readFile(join(RACINE, 'products.json'), 'utf8'));
 const produits = Array.isArray(cat) ? cat : (cat.products || []);
 /* ⚠️ LA GRAPHIE DE LA MARQUE VIENT DU CATALOGUE, PAS D'UN CALCUL — attrapé
@@ -95,7 +109,7 @@ const FAMILLES = [
      relève de la quincaillerie — lames, mèches, fraises… — on garde, et ça
      va dans la partie Quincaillerie ». AVANT /scie/ sinon « Lame de scie
      circulaire » tomberait dans les Scies. */
-  [/lame|mèche|meche|fraise de|fraises de|foret|douille|embout|scie[- ]cloche|burin|taillant|plateau de surfaçage|disque/i, 'Quincaillerie'],
+  [/lame|mèche|meche|fraise de|fraises de|foret|douille|embout|scie[- ]cloche|burin|taillant|plateau de surfaçage|disque|chaîne|chaine|\bvis\b|recharge de fil|bobine avec fil|toughcase|pi[èe]ces de vissage|pi[èe]ces de per[çc]age/i, 'Quincaillerie'],
   [/boulonneuse|visseuse|perceuse|cliquet/i, 'Perçage, vissage et boulonnage'],
   [/meuleuse|découpeuse|decoupeuse|ponceuse|polisseuse|lime à bande|lime a bande/i, 'Meulage, découpe et polissage'],
   [/tronçonneuse|tronconneuse|taille[- ]haie|débroussailleuse|debroussailleuse|tondeuse|élagueuse|elagueuse|sécateur|secateur|souffleur/i, 'Tronçonnage et élagage'],
@@ -144,10 +158,24 @@ const tronque = (n) => /^[\d.,]+\s*(ah|v|mm|cm|nm|w|kg|j|l)\b/i.test(n.trim())
 const retenus = [];
 const refuses = [];
 const couts = {};   // SKU → coût d'achat, jamais servi
-for (const it of liste) {
+for (const it of liste.concat(sansRefBruts)) {
   if (retenus.length >= combien) break;
-  const sku = String(it.sku || '').trim().toUpperCase();
-  const nom = String(it.name || '').trim();
+  let sku, nom;
+  if (it._nom) {
+    nom = it.titre;
+    /* Une entrée par NOM doit finir par la marque — « GRABO », « BOSCH » ou
+       un titre orphelin ne sont pas des fiches de cette marque. */
+    if (!new RegExp(marque.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*$', 'i').test(nom)) {
+      refuses.push({ sku: '(nom)', nom, motif: 'titre sans la marque en fin — pas une fiche ' + MARQUE }); continue;
+    }
+    if (freqTitres[nom] > 1) {
+      refuses.push({ sku: '(nom)', nom, motif: 'nom en DOUBLON sur la page — n\'identifie aucun produit précis' }); continue;
+    }
+    sku = 'AC-' + hash8(nom.toUpperCase()).toUpperCase();
+  } else {
+    sku = String(it.sku || '').trim().toUpperCase();
+    nom = String(it.name || '').trim();
+  }
   const cout = Number(it.srcTTC || 0);
   if (!sku) { refuses.push({ sku, nom, motif: 'référence absente' }); continue; }
   if (skusExistants.has(sku)) { refuses.push({ sku, nom, motif: 'DOUBLON — SKU ou référence alternative déjà au catalogue' }); continue; }
@@ -167,8 +195,21 @@ for (const it of liste) {
      cite une, est souvent celle de L'OUTIL qu'il épouse (vu : « Moulage
      TSTAK II pour meuleuse DCG405 »). */
   if (/moulage|insert\b/i.test(libelle)) { refuses.push({ sku, nom, motif: 'moulage/insert de coffret — jamais un produit (règle user 02/08)' }); continue; }
+  /* ⛔ RÈGLE DE L'USER (02/08/2026) : « il ne faut absolument pas mettre en
+     ligne les coffrets TSTAK » — les boîtes de rangement vides (« Coffret
+     TSTAK … », « Coffret de transport TSTAK »…). Les coffrets GARNIS de
+     quincaillerie (« Coffret de 29 forets », Toughcase) restent : c'est du
+     consommable, pas du rangement. */
+  if (/coffret/i.test(libelle) && /tstak|toughsystem|t[- ]stak/i.test(libelle)) {
+    refuses.push({ sku, nom, motif: 'coffret TSTAK/TOUGHSYSTEM — jamais mis en ligne (règle user 02/08)' }); continue;
+  }
 
-  const titre = MARQUE + ' ' + sku + ' — ' + libelle;
+  /* Entrée par NOM : le libellé est le titre du site SANS la marque finale,
+     et le pseudo-sku interne n'apparaît jamais comme une référence. */
+  const libelleNet = it._nom
+    ? libelle.replace(new RegExp('\\s*' + marque.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*$', 'i'), '').trim()
+    : libelle;
+  const titre = it._nom ? (MARQUE + ' — ' + libelleNet) : (MARQUE + ' ' + sku + ' — ' + libelleNet);
   const fiche = {
     id: MARQUE.toLowerCase() + '-' + sku.toLowerCase(),
     slug: slugifier(MARQUE + '-' + sku + '-' + libelle),
@@ -200,6 +241,18 @@ for (const it of liste) {
     poidsSuppose: true,
     ficheAcompleter: nomManquant
   };
+  fiche.desc = libelleNet + '.';
+  /* Entrée par NOM : `srcNom` est l'identité de suivi (le titre EXACT du
+     site), et le pseudo-sku ne s'affiche jamais comme référence. */
+  if (it._nom) { fiche.srcNom = nom; fiche.specs = { Marque: MARQUE }; }
+  /* ⚠️ QUINCAILLERIE (règle user, 02/08) : envoi en LETTRE, 6 à 8 € —
+     le modèle facture 8 € (borne haute, la marge ne se sous-estime pas)
+     dès que le poids passe sous son seuil lettre. Délai annoncé : 7 à
+     14 jours. Poids supposé, comme le reste, à revoir au réel. */
+  if (fiche.category === 'Quincaillerie') {
+    fiche.weight_kg = 0.4;
+    fiche.desc += ' Envoi en lettre suivie — livraison 7 à 14 jours.';
+  }
   /* ⛔ LE COÛT D'ACHAT NE VA PAS DANS LE FICHIER SERVI. `products.json` est
      téléchargé par tout le monde ; y publier un prix fournisseur est
      IRRÉVERSIBLE — CDN, puis historique git. La porte `check-prix-fuite`
