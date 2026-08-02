@@ -672,6 +672,38 @@ module.exports = async function () {
           + appelsLoadCatalog + '/2) — le comportement historique ne change pas');
         catMod.loadCatalog = vraiLoadCatalog;
 
+        /* ── BALAYAGE : LES COMPTEURS SANS LES LISTES ────────────────────────
+           67 pages × listes détaillées ≈ un Mo dans le presse-papier du
+           raccourci : incollable, donc invérifiable par l'user. En scan les
+           listes sortent vides — mais ⛔ AUCUN chiffre ne disparaît, et la
+           réponse DIT où retrouver le détail (`note`). Sans cette égalité des
+           compteurs, alléger reviendrait à effacer des inconnues en silence.
+           ⛔ Réf témoin SYNTHÉTIQUE, et son absence est un PRÉALABLE vérifié :
+           un harnais ne nomme jamais une donnée du catalogue. */
+        var refInconnue = 'ZZQ9998';
+        ok(!prods.some(function (p) {
+          return String(p.sku || '').toUpperCase().indexOf(refInconnue) !== -1;
+        }), 'préalable : la réf témoin n\'est ni au catalogue ni racine d\'un alias');
+        scanReset();
+        var rL1 = fauxRes();
+        await admFn(reqPage(refInconnue, {}), rL1, fauxAdmin, fauxDb({}, []));
+        ok(rL1.out && rL1.out.counts.unknown === 1 && rL1.out.unknown.length === 1
+          && rL1.out.note === undefined,
+          'hors balayage, la liste `unknown` sort ENTIÈRE (c\'est elle qui nourrit '
+          + 'l\'importateur) — obtenu : ' + JSON.stringify(rL1.out && rL1.out.unknown));
+        scanReset();
+        var rL2 = fauxRes();
+        await admFn(reqPage(refInconnue, { scan: '1' }), rL2, fauxAdmin, fauxDb({}, []));
+        ok(rL2.out && rL2.out.counts.unknown === 1 && rL2.out.unknown.length === 0
+          && typeof rL2.out.note === 'string' && /sans\s+&scan=1/i.test(rL2.out.note),
+          '⛔ en balayage, la liste part mais le COMPTEUR reste exact, et la réponse '
+          + 'dit où retrouver le détail — sinon une réf inconnue disparaît en silence '
+          + '(compteur: ' + (rL2.out && rL2.out.counts.unknown) + ', liste: '
+          + (rL2.out && rL2.out.unknown.length) + ', note: ' + (rL2.out && !!rL2.out.note) + ')');
+        ok(rL2.out && Array.isArray(rL2.out.applied),
+          '⛔ `applied` reste rendu en balayage : c\'est la liste des prix qui bougent, '
+          + 'donc de l\'argent — jamais masquée pour raccourcir une réponse');
+
         // ── J4 : l'ancien prix barré = MINIMUM 30 j du journal ──
         scanReset();
         var maintenant = Date.now();

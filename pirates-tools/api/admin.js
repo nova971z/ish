@@ -2281,20 +2281,37 @@ async function handlePriceWatch(req, res, admin, db) {
         sansRef: apparie.restants.length, sansRefSuivis: apparie.items.length
       },
       source: sourceSlug, format: auto.format,
-      applied, flagged, unknown: unknown.slice(0, 800),
-      /* En balayage, « absent de CETTE page » ne veut rien dire : une page
-         idealo montre ~60 produits sur ~1 200 fiches — la liste serait tout
-         le catalogue, répétée 67 fois dans les résultats du raccourci. Les
-         COMPTES restent ; la liste ne sort qu'en relevé isolé. */
+      /* ── BALAYAGE : LES COMPTEURS, PAS LES LISTES (02/08/2026) ────────────
+         67 pages × les listes détaillées ≈ un Mo de texte dans le
+         presse-papier du raccourci : illisible, incollable, donc invérifiable.
+         En `&scan=1` les listes sortent VIDES et seuls les compteurs de
+         `counts` parlent — aucun chiffre n'est perdu, et `note` le dit au lieu
+         de le taire.
+         ⛔ `applied` reste ENTIER quel que soit le mode : c'est la liste des
+         prix qui bougent, donc de l'argent. Une réponse qui cacherait ce
+         qu'elle vient de changer serait pire qu'une réponse trop longue.
+         ⚠️ Conséquence assumée : un relevé de balayage ne nourrit PAS
+         l'importateur (il lit `unknown`/`sansRef`/`packsIgnores`). Pour créer
+         des fiches, refaire un passage SANS `&scan=1` sur la page voulue. */
+      note: scanMode
+        ? 'balayage : listes détaillées omises (les compteurs de `counts` restent exacts). '
+          + 'Pour obtenir unknown / sansRef / packsIgnores et créer des fiches, '
+          + 'refaire un passage SANS &scan=1 sur la page voulue.'
+        : undefined,
+      applied, flagged,
+      unknown: scanMode ? [] : unknown.slice(0, 800),
+      /* En balayage, « absent de CETTE page » ne veut rien dire non plus : une
+         page idealo montre ~60 produits sur ~1 200 fiches — la liste serait
+         tout le catalogue, répété 67 fois. */
       absents: scanMode ? [] : absents.slice(0, 800),
-      rupture: enRupture.slice(0, 400),
-      /* Restent listés, jamais silencieux : packs et titres sans réf NON
-         appariés par nom (`srcNom`). Plafond 400 (et non 100) : c'est cette
-         liste, AVEC les prix, qui sert à créer les fiches des packs —
-         plafonnée à 100, l'import aurait été borgne (275 packs sur la page,
-         mesurés le 02/08). */
-      packsIgnores: appariePacks.restants.slice(0, 400),
-      sansRef: apparie.restants.slice(0, 200)
+      rupture: scanMode ? [] : enRupture.slice(0, 400),
+      /* Hors balayage, restent listés et jamais silencieux : packs et titres
+         sans réf NON appariés par nom (`srcNom`). Plafond 400 (et non 100) :
+         c'est cette liste, AVEC les prix, qui sert à créer les fiches des
+         packs — plafonnée à 100, l'import aurait été borgne (275 packs sur la
+         page, mesurés le 02/08). */
+      packsIgnores: scanMode ? [] : appariePacks.restants.slice(0, 400),
+      sansRef: scanMode ? [] : apparie.restants.slice(0, 200)
     });
   } catch (err) {
     console.error('[api/admin] price-watch failed:', err.message);
