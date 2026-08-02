@@ -42,7 +42,10 @@ var DOMAINES = {
   J4: { titre: 'Prix et promotions',
         motifs: [/pirates-tools\/products\.json$/,
                  /pirates-tools\/api\/(contact|checkout|create-payment-intent|webhook|admin)\.js$/,
-                 /pirates-tools\/api\/_lib\/(pricing|pricing-model|price-parse|courses)\.js$/,
+                 /* pricing-config rattaché le 02/08/2026 : il porte le drapeau
+                    _sourceIllisible qui INTERDIT toute écriture de prix quand la
+                    config n'est pas lisible — c'est une décision de prix. */
+                 /pirates-tools\/api\/_lib\/(pricing|pricing-model|pricing-config|price-parse|courses)\.js$/,
                  // ⛔ AJOUTÉ le 01/08/2026 : `catalog.js` décide désormais si une
                  // promotion est ACTIVE et efface le prix de référence quand elle
                  // expire. C'est donc lui qui rend une annonce de réduction

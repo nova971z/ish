@@ -1750,6 +1750,13 @@ async function handleRepriceAll(req, res, admin, db) {
     const body = (req.body && typeof req.body === 'object') ? req.body : {};
     const dryRun = body.dryRun === true || (req.query && (req.query.dryRun === '1' || req.query.dryRun === 'true'));
     const cfg = await priceConfig.load();
+    /* ⛔ CONFIG ILLISIBLE = AUCUN PRIX ÉCRIT — même garde que le traqueur :
+       recalculer tout le catalogue avec les réglages PAR DÉFAUT au lieu des
+       siens serait une écriture non voulue (crainte de l'user, 02/08/2026,
+       au lendemain du quota Firestore épuisé). */
+    if (cfg._sourceIllisible && !dryRun) {
+      return res.status(503).json({ ok: false, error: 'config de prix illisible (Firestore indisponible) — aucun prix écrit, réessayer plus tard' });
+    }
 
     // Overrides existants (pour le coût source connu).
     const ovSnap = await db.collection('product_overrides').get();
@@ -1920,6 +1927,15 @@ async function handlePriceWatch(req, res, admin, db) {
     // Config de tarification : si autoPrice, on applique le MODÈLE de marge cible
     // (markup adaptatif poids/mode pour 15 % net après IS) ; sinon repli ×1,15.
     const cfg = await priceConfig.load();
+    /* ⛔ CONFIG ILLISIBLE (quota Firestore, réseau) = AUCUN PRIX ÉCRIT.
+       Crainte de l'user le 02/08/2026, au lendemain du quota épuisé : un
+       passage qui écrirait avec les RÉGLAGES PAR DÉFAUT au lieu des siens.
+       Les marges resteraient pleines (autoPrice vrai par défaut), mais une
+       écriture sous réglages non voulus reste une écriture non voulue :
+       on refuse, le raccourci repassera dans 12 h. */
+    if (cfg._sourceIllisible && !dryRun) {
+      return res.status(503).json({ ok: false, error: 'config de prix illisible (Firestore indisponible) — aucun prix écrit, repasser plus tard' });
+    }
 
     const applied = [], flagged = [], unchanged = [], unknown = [], lockedW = [];
     const now = admin.firestore.FieldValue.serverTimestamp();

@@ -76,7 +76,20 @@ async function load() {
         cfg = fusionner(cfg, doc.data() || {});
       }
     }
-  } catch (e) { /* défauts si Firestore indisponible */ }
+  } catch (e) {
+    /* Firestore INDISPONIBLE (quota épuisé, réseau…) : on rend les défauts,
+       marqués ILLISIBLES, et on ne les met PAS en cache — sinon l'état
+       dégradé survivrait au retour de Firestore pendant tout le TTL.
+       ⛔ Crainte de l'user (02/08/2026) : « si le quota est atteint, les prix
+       baissent quasiment à ceux des fournisseurs ? » — le repli ×1,15
+       n'arrive jamais par ici (autoPrice reste vrai dans les défauts), mais
+       des prix aux RÉGLAGES PAR DÉFAUT au lieu des siens restent une
+       écriture qu'on n'a pas voulue : les écrivains vérifient ce drapeau et
+       REFUSENT d'écrire. */
+    var degrade = defaults();
+    degrade._sourceIllisible = true;
+    return degrade;
+  }
   _cache = cfg; _cacheTime = now;
   return cfg;
 }

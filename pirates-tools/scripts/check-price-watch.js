@@ -122,6 +122,34 @@ module.exports = function () {
     '⛔ handlePriceWatch doit apparier les sansRef par nom AVANT la boucle — '
     + 'sans ça, les accessoires sans réf ne seront jamais suivis');
 
+  /* ═══ CONFIG ILLISIBLE = AUCUN PRIX ÉCRIT (02/08/2026) ═══════════════════
+     Crainte de l'user au lendemain du quota Firestore épuisé : « les prix
+     baissent quasiment à ceux des fournisseurs ? ». Deux verrous, tous deux
+     vérifiés ici :
+       · le repli ×1,15 n'arrive JAMAIS par une panne : defaults() porte
+         autoPrice: true, et pwComputePrice ne rétrograde que sur
+         autoPrice === false EXPLICITE ;
+       · une config marquée _sourceIllisible interdit TOUTE écriture de prix
+         (traqueur ET recalcul), et ne s'installe jamais dans le cache. */
+  var pcSrc = fs.readFileSync(path.join(__dirname, '..', 'api', '_lib', 'pricing-config.js'), 'utf8');
+  var pcfg = require('../api/_lib/pricing-config.js');
+  if (pcfg && typeof pcfg.defaults === 'function') {
+    ok(pcfg.defaults().autoPrice === true,
+      '⛔ defaults() doit porter autoPrice: true — sans lui, une config illisible ferait '
+      + 'retomber les prix au repli ×1,15, quasiment au coût fournisseur');
+  } else {
+    ok(/autoPrice:\s*true/.test(pcSrc),
+      'defaults() porte autoPrice: true (lu à la source, defaults non exportée)');
+  }
+  ok(/degrade\._sourceIllisible = true;\s*\n\s*return degrade;/.test(pcSrc),
+    '⛔ une config illisible est MARQUÉE et rendue SANS passer par le cache — '
+    + 'sinon l\'état dégradé survivrait au retour de Firestore pendant tout le TTL');
+  var gardes = adminSrc.match(/cfg\._sourceIllisible && !dryRun/g) || [];
+  ok(gardes.length >= 2,
+    '⛔ les DEUX écrivains de prix (traqueur, recalcul) refusent d\'écrire quand la config '
+    + 'est illisible (' + gardes.length + '/2 gardes trouvées) — des prix aux réglages par '
+    + 'défaut au lieu des siens sont une écriture non voulue');
+
   // Cohérence catalogue : un srcAltSkus ne doit jamais référencer un SKU
   // encore AU catalogue (la déclinaison doit être fusionnée, pas dupliquée).
   var products = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'products.json'), 'utf8'));
