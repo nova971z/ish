@@ -363,6 +363,46 @@ module.exports = function () {
       'aucun badge de stock par carte sur cette grille (mesuré) → enStock reste inconnu, jamais inventé');
   }
 
+  /* ═══ FORMAT IDEALO (02/08/2026) ═════════════════════════════════════════
+     Comparateur : « MARQUE RÉF » seuls sur leur ligne, puis description,
+     note, « N offres », « à partir deX,XX € » (PARFOIS COLLÉ). Mesuré sur le
+     diagnostic de SON dryRun — le site bloque tout accès non-navigateur.
+     Pièges gravés : prix parfois collé à « de » ; blocs hors sujet
+     (« Produits favoris » : téléphones) avec « à partir de » orphelin ;
+     une carte SANS prix ne doit jamais voler celui de la suivante. */
+  var pi = pp.parseIdealo;
+  ok(typeof pi === 'function', 'parseIdealo exportée');
+  if (pi) {
+    var pageI = [
+      'Tronçonneuses',
+      'MAKITA ZZI805',
+      'Perceuse-visseuse à percussion sans fil, Couple max. 90 Nm',
+      '5', '94 offres', 'à partir de118,86 €',
+      'MAKITA ZZI922N-XJ',
+      'Visseuse à choc sans fil', '35', '14 offres', 'à partir de 1 132,43 €',
+      'MAKITA ZZISANSPRIX9',
+      'Carte sans prix (rupture de flux)',
+      'MAKITA ZZI850',
+      'Visseuse compacte', '12', '27 offres', 'à partir de99,00 €',
+      'Produits favoris', 'Smartphone 5G', 'Apple iPhone 17',
+      '168', 'à partir de', '774,99 €'
+    ].join('\n');
+    var ri = pi(pageI, 'MAKITA');
+    var iSku = {}; ri.forEach(function (x) { iSku[x.sku] = x; });
+    ok(ri.length === 3, 'trois cartes à prix lues (' + ri.length + ')');
+    ok(iSku.ZZI805 && iSku.ZZI805.price === 118.86,
+      'prix COLLÉ à « de » lu quand même (à partir de118,86)');
+    ok(iSku['ZZI922N-XJ'] && iSku['ZZI922N-XJ'].price === 1132.43,
+      'prix à espace de milliers lu (1 132,43)');
+    ok(!iSku.ZZISANSPRIX9 && iSku.ZZI850 && iSku.ZZI850.price === 99.00,
+      '⛔ une carte SANS prix ne vole JAMAIS le prix de la carte suivante '
+      + '(la fenêtre s\'arrête au titre suivant)');
+    ok(ri.every(function (x) { return x.price !== 774.99; }),
+      '⛔ un « à partir de » orphelin (bloc favoris, téléphones) n\'est attribué à rien');
+    ok(ri.every(function (x) { return x.promo === false && x.enStock === null; }),
+      'comparateur : jamais de promo ni de stock inventés');
+  }
+
   // L'aiguillage : chaque gabarit part vers son parseur, le vide est dit.
   var pa = pp.parseAuto;
   ok(typeof pa === 'function', 'parseAuto exportée');
@@ -377,6 +417,10 @@ module.exports = function () {
     var a3 = pa('<html>Chargement…</html>', 'MAKITA');
     ok(a3.format === 'aucun' && a3.items.length === 0,
       'rien de reconnu → format « aucun », jamais un mensonge');
+    var a4 = pa('MAKITA ZZI805\ndescription\n5\n94 offres\nà partir de118,86 €', 'MAKITA');
+    ok(a4.format === 'idealo' && a4.items.length === 1 && a4.items[0].price === 118.86,
+      'gabarit idealo → parseur idealo (' + a4.format + ', ' + a4.items.length + ') — '
+      + 'sans cet aiguillage, un relevé comparateur rendrait « aucun »');
   }
   // Branchement réel : handlePriceWatch passe par l'aiguillage, plus jamais
   // par un parseur unique en dur.

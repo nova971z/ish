@@ -249,6 +249,60 @@ function parseClickoutil(rawText, brand) {
   return out;
 }
 
+/* \u2500\u2500 PARSEUR IDEALO (02/08/2026) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+   Comparateur de prix : chaque carte porte \u00ab \u00e0 partir de X \u20ac \u00bb \u2014 LE MOINS
+   CHER parmi \u00ab N offres \u00bb de marchands fran\u00e7ais. C'est pr\u00e9cis\u00e9ment le co\u00fbt
+   recherch\u00e9 (d\u00e9cision user : ses achats sont livr\u00e9s en France m\u00e9tropolitaine,
+   le port marchand est le plus souvent gratuit).
+
+   Format MESUR\u00c9 sur le diagnostic de SON dryRun (le site bloque les acc\u00e8s
+   non-navigateur \u2014 403 sur mes outils \u2014 mais r\u00e9pond aux Raccourcis) :
+
+     DeWalt DCD805                     \u2190 MARQUE puis R\u00c9F, seules sur la ligne
+     Perceuse-visseuse \u00e0 percussion\u2026   \u2190 description
+     5                                 \u2190 note
+     94 offres                         \u2190 nombre de marchands
+     \u00e0 partir de118,86 \u20ac               \u2190 le prix, PARFOIS COLL\u00c9 \u00e0 \u00ab de \u00bb
+
+   \u26a0\ufe0f La page porte aussi des blocs hors sujet (\u00ab Produits favoris \u00bb :
+   t\u00e9l\u00e9phones) avec \u00ab \u00e0 partir de \u00bb : le prix n'est accept\u00e9 que dans une
+   FEN\u00caTRE born\u00e9e sous un titre \u00ab MARQUE R\u00c9F \u00bb \u2014 jamais orphelin.
+   Pas de badge de stock ni de prix barr\u00e9 sur une liste de comparateur :
+   enStock = null, promo = false. */
+function parseIdealo(rawText, brand) {
+  var out = [];
+  if (!rawText) return out;
+  brand = (brand || 'DEWALT');
+  var lignes = stripHtml(rawText).split(/\n+/).map(function (l) {
+    return l.replace(/[ \t   ]+/g, ' ').trim();
+  }).filter(Boolean);
+  var titreRe = new RegExp('^' + escapeRe(brand) + '\\s+([A-Z0-9][A-Z0-9.\\/-]{2,}[A-Z0-9])$', 'i');
+  var prixRe = /\u00e0\s*partir\s*de\s*([\d\s   ]*\d,\d{2})\s*\u20ac/i;
+  var seen = {};
+  for (var i = 0; i < lignes.length; i++) {
+    var tm = lignes[i].match(titreRe);
+    if (!tm) continue;
+    var sku = tm[1].toUpperCase();
+    if (!/\d/.test(sku) || UNITE_RE.test(sku)) continue;   // une r\u00e9f porte un chiffre, jamais une unit\u00e9
+    if (seen[sku]) continue;
+    /* Fen\u00eatre born\u00e9e : le prix de CETTE carte vit dans les quelques lignes
+       qui suivent, avant le titre suivant. 8 lignes = description + note +
+       offres + prix, avec de la marge. */
+    for (var j = i + 1; j <= i + 8 && j < lignes.length; j++) {
+      if (titreRe.test(lignes[j])) break;                  // carte suivante : pas de prix ici
+      var pm = lignes[j].match(prixRe);
+      if (!pm) continue;
+      var price = parsePriceFR(pm[1]);
+      if (price != null && price > 0) {
+        seen[sku] = true;
+        out.push({ sku: sku, price: price, name: brand + ' ' + sku, promo: false, enStock: null });
+      }
+      break;
+    }
+  }
+  return out;
+}
+
 /* \u2500\u2500 AIGUILLAGE DE FORMAT \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
    Deux sites, deux gabarits \u2014 et d'autres viendront. On ne devine pas au
    slug : on fait tourner CHAQUE parseur et on garde celui qui reconna\u00eet le
@@ -259,8 +313,14 @@ function parseClickoutil(rawText, brand) {
 function parseAuto(rawText, brand) {
   var cote = parseCotebrico(rawText, brand);
   var clic = parseClickoutil(rawText, brand);
-  if (!cote.length && !clic.items.length) {
+  var idea = parseIdealo(rawText, brand);
+  if (!cote.length && !clic.items.length && !idea.length) {
     return { format: 'aucun', items: [], packs: clic.packs, sansRef: clic.sansRef };
+  }
+  // Le plus fécond gagne — trois gabarits mutuellement exclusifs sur les
+  // vraies pages (mesuré : idealo rend 0 chez les deux autres, et vice versa).
+  if (idea.length > cote.length && idea.length > clic.items.length) {
+    return { format: 'idealo', items: idea, packs: [], sansRef: [] };
   }
   if (clic.items.length > cote.length) {
     return { format: 'clickoutil', items: clic.items, packs: clic.packs, sansRef: clic.sansRef };
@@ -381,4 +441,4 @@ function choisirCoutSource(sources, nowMs, maxAgeMs) {
   return best;
 }
 
-module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickoutil, parseAuto: parseAuto, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, enMillis: enMillis, SOURCE_FRESH_MS: SOURCE_FRESH_MS, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage };
+module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickoutil, parseIdealo: parseIdealo, parseAuto: parseAuto, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, enMillis: enMillis, SOURCE_FRESH_MS: SOURCE_FRESH_MS, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage };
