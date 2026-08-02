@@ -41,6 +41,14 @@ aucun service worker, aucun cache, stockage local vide entre deux visites — au
 diagnostic le concernant ne peut s'appuyer là-dessus. Il n'a **ni téléphone ni données
 cellulaires** : jamais de test en 4G, ni de code à scanner depuis un autre appareil.
 
+**Ses achats fournisseurs sont livrés en FRANCE MÉTROPOLITAINE, pas en Guadeloupe**
+*(gravé le 02/08/2026, à sa demande — j'avais objecté à tort des frais de port DOM)* :
+chez les marchands français, la livraison est le plus souvent gratuite ; des frais
+n'existent que sur les machines très lourdes et sont alors **écrits sur la carte
+produit** (parfois le délai aussi). L'acheminement France → Guadeloupe est l'affaire
+du modèle de prix (colissimo/lettre/container), jamais un critère pour juger un
+fournisseur.
+
 **Que du quantifiable.** Aucun chiffre sans la commande qui l'a produit, aucun
 exemple sans l'avoir exécuté. Un chiffre estimé présenté comme mesuré est un mensonge.
 
