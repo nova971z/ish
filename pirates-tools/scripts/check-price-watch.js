@@ -640,6 +640,14 @@ module.exports = async function () {
         ok(dbS._compte.lecturesOv === 1,
           '⛔ BALAYAGE : deux pages scan=1 = UNE lecture de product_overrides ('
           + dbS._compte.lecturesOv + ') — sans cache, 67 pages ≈ 160 000 lectures et le quota meurt');
+        /* La réponse DIT si le relevé a été réutilisé. Sans ce champ, « le cache
+           a servi » resterait une supposition : il vit dans la mémoire d'UNE
+           instance serverless, et une instance froide relit tout sans que rien
+           ne le signale — le raccourci de l'user doit pouvoir le lire. */
+        ok(rS1.out && rS1.out.scanCache === false && rS2.out && rS2.out.scanCache === true,
+          '⛔ chaque page de balayage doit RENDRE `scanCache` (page 1 false, page 2 true) — '
+          + 'sinon la réutilisation du relevé est invérifiable depuis le raccourci (obtenu : '
+          + JSON.stringify([rS1.out && rS1.out.scanCache, rS2.out && rS2.out.scanCache]) + ')');
         ok((dbS._compte.ecrituresParId[cible.id] || 0) === ecritsPage1
           && rS2.out && rS2.out.counts && rS2.out.counts.unchanged === 1,
           '⛔ BALAYAGE : l\'écriture de la page 1 est VISIBLE page 2 — même prix revu = '

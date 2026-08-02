@@ -1974,8 +1974,18 @@ async function handlePriceWatch(req, res, admin, db) {
        rafale (voir CACHE DE BALAYAGE ci-dessus) — une lecture pour 67 pages
        au lieu de deux par page, et le catalogue se fusionne SUR CE relevé. */
     let ovW;
+    /* ⚠️ `cacheReutilise` est RENDU dans la réponse (`scanCache`), et ce n'est
+       pas de la décoration : le cache vit dans la mémoire d'UNE instance
+       serverless. Vercel réutilise normalement l'instance chaude entre deux
+       requêtes qui se suivent — mais rien ne le garantit, et une instance
+       froide relit tout. Annoncer « ~1 500 lectures par balayage » sans le
+       mesurer serait une supposition présentée comme un fait : chaque page
+       dit donc elle-même si elle a réutilisé le relevé. Un balayage sain
+       affiche `scanCache: false` à la page 1 et `true` ensuite. */
+    let cacheReutilise = false;
     if (scanMode && pwScanCache && (Date.now() - pwScanCache.at) < PW_SCAN_TTL) {
       ovW = pwScanCache.map;
+      cacheReutilise = true;
     } else {
       const ovSnapW = await db.collection('product_overrides').get();
       ovW = {};
@@ -2260,6 +2270,8 @@ async function handlePriceWatch(req, res, admin, db) {
 
     return res.status(200).json({
       ok: true, brand, dryRun: !!dryRun, scan: !!scanMode,
+      // Mesure, pas promesse : le relevé a-t-il été réutilisé sur CETTE page ?
+      scanCache: scanMode ? cacheReutilise : undefined,
       counts: {
         parsed: parsed.length, applied: applied.length, flagged: flagged.length,
         unchanged: unchanged.length, unknown: unknown.length, locked: lockedW.length,
