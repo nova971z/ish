@@ -288,6 +288,7 @@ var INDEX = [
              '⛔ ARGENT : un prix de PACK ne s\'écrit JAMAIS sur la réf d\'un composant — titres à « + » écartés ET listés (`packsIgnores`), réf douteuse écartée ET listée (`sansRef`).',
              'Quand `parsed: 0`, la réponse porte `diagnostic` : comptes des motifs + extraits de la page reçue — c\'est elle qui apprend un format inconnu, pas l\'imagination.',
              '⛔ Règles user 02/08 : un MOULAGE/INSERT de coffret n\'est JAMAIS un produit (l\'importateur refuse) ; lames/mèches/fraises → catégorie Quincaillerie ; un accessoire SANS réf se suit par son NOM exact (`srcNom`), jamais si le nom est en doublon sur la page.',
+             '⛔ Un COÛT FOURNISSEUR se LIT, jamais ne s\'infère : il est affiché dans l\'admin, section MARGE (dit par l\'user, 02/08). Demander une capture plutôt qu\'inverser le modèle — D-68 : l\'inversion a « mesuré » 152 € là où la page disait 149,90 €.',
              '⛔ Les overrides d\'AVANT le format carte portent leur relevé dans priceSrcTTC/priceSource : `pwSourcesConnues` les ressème dans le min (E-227 — sans ça, 1er passage d\'un site plus cher = hausses fantômes, mesuré : 12 dont +136 %).'],
     decisions: ['D-015'],
     fini: 'check-price-watch vert (ruptures, min multi-sources, gel, héritage), chaque promesse sabotée et rouge.'
