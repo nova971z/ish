@@ -9,6 +9,7 @@
 
 var fs = require('fs');
 var path = require('path');
+var priceParse = require('./price-parse');
 
 var _cache = null;
 var _cacheTime = 0;
@@ -79,7 +80,13 @@ function applyOverrides(products, overrides) {
          plus bas pratiqué sur les 30 jours précédents, calculé à l'écriture
          (voir api/admin.js). C'est ce que J4 exige comme référence. */
       var DEUX_MOIS = 60 * 24 * 3600 * 1000;
-      var debut = Number(fusion.promoDepuis || 0);
+      /* ⛔ CORRIGÉ le 02/08/2026 : `promoDepuis` est écrit par le traqueur
+         comme serverTimestamp → relu de Firestore, c'est un OBJET Timestamp,
+         et Number(Timestamp) = NaN (E-228, même mécanisme que `priceSources`).
+         `debut` restait NaN, `promoActive` restait FAUX pour toujours :
+         l'étiquette promo ne s'est jamais affichée. `enMillis` ramène nombre,
+         Timestamp ou sentinel en millisecondes réelles. */
+      var debut = priceParse.enMillis(fusion.promoDepuis);
       fusion.promoActive = !!(debut > 0
         && (Date.now() - debut) < DEUX_MOIS
         && Number(fusion.promoAncienPrix) > Number(fusion.price));
@@ -103,6 +110,16 @@ async function loadCatalog() {
   var products = loadProducts();
   var overrides = await loadOverrides();
   return applyOverrides(products, overrides);
+}
+
+// Même fusion, mais avec une carte d'overrides DÉJÀ EN MAIN — aucune lecture
+// Firestore. Sert au mode balayage du traqueur (&scan=1) : 67 pages en rafale
+// relisaient la collection entière à CHAQUE page (≈ 160 000 lectures par
+// balayage, plus de trois fois le quota gratuit quotidien — celui qui s'est
+// épuisé le 01/08 et a fermé l'admin). L'appelant est responsable de la
+// fraîcheur de la carte qu'il passe.
+function loadCatalogAvec(overrides) {
+  return applyOverrides(loadProducts(), overrides || {});
 }
 
 // Champs INTERNES écrits par le traqueur de prix / reprice dans product_overrides
@@ -146,6 +163,7 @@ function findByKey(catalog, key) {
 
 module.exports = {
   loadCatalog: loadCatalog,
+  loadCatalogAvec: loadCatalogAvec,
   loadPublicCatalog: loadPublicCatalog,
   findByKey: findByKey,
   invalidateOverrides: invalidateOverrides,

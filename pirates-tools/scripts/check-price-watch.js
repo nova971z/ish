@@ -9,7 +9,7 @@ var fs = require('fs');
 var path = require('path');
 var pp = require('../api/_lib/price-parse');
 
-module.exports = function () {
+module.exports = async function () {
   var errors = [];
   function ok(c, m) { if (!c) errors.push('[check-price-watch] ' + m); }
 
@@ -502,11 +502,248 @@ module.exports = function () {
     '⛔ le retour `parsed: 0` de handlePriceWatch doit renvoyer `source` ET `diagnostic` — '
     + 'sans eux, un format inconnu est indiagnosticable (clickoutil, 01/08/2026)');
 
+  /* ═══ MODE BALAYAGE (&scan=1) + FENÊTRE PROMO 30 J (02/08/2026) ═══════════
+     La liste idealo DeWALT fait 67 pages, balayées par UN raccourci en
+     rafale. Sans cache, chaque page relisait `product_overrides` en entier :
+     ≈ 160 000 lectures Firestore par balayage — le quota GRATUIT (50 000/j)
+     s'est épuisé le 01/08 et a fermé l'admin. On prouve en appelant le
+     handler RÉEL avec une base factice qui compte lectures et écritures :
+       · 2 pages scan=1 → la collection n'est lue qu'UNE fois ;
+       · l'écriture de la page 1 est VISIBLE page 2 (aucune ré-écriture) ;
+       · sans scan → relecture pleine à chaque appel (comportement historique) ;
+       · J4 : promoAncienPrix = MINIMUM 30 j du journal, jamais le prix courant.
+     ⛔ Fiche choisie À L'EXÉCUTION dans le catalogue, prix synthétiques —
+     un harnais ne nomme jamais une donnée du catalogue. */
+  var admFn = adm._internals && adm._internals.handlePriceWatch;
+  var scanReset = adm._internals && adm._internals.pwScanReset;
+  ok(typeof admFn === 'function' && typeof scanReset === 'function',
+    'handlePriceWatch et pwScanReset exposés aux portes via _internals');
+  ok(!process.env.FIREBASE_SERVICE_ACCOUNT,
+    'préalable : FIREBASE_SERVICE_ACCOUNT ne doit pas être posé pendant ce harnais — '
+    + 'la base est FACTICE, un vrai Firestore fausserait les comptes de lectures');
+  if (admFn && scanReset && !process.env.FIREBASE_SERVICE_ACCOUNT) {
+    var catJson = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'products.json'), 'utf8'));
+    var prods = catJson.products || catJson;
+    var cible = null;
+    for (var ci = 0; ci < prods.length; ci++) {
+      var pc = prods[ci];
+      if (String(pc.brand || '').toUpperCase() !== 'DEWALT') continue;
+      if (!pc.sku || pc.priceLocked || pc.hidden || !(Number(pc.price) > 0)) continue;
+      if (!/^[A-Z][A-Z0-9.\/-]{2,}[A-Z0-9]$/.test(String(pc.sku)) || !/\d/.test(pc.sku)) continue;
+      cible = pc; break;
+    }
+    ok(!!cible, 'préalable : une fiche DeWALT à réf sûre existe au catalogue');
+
+    var fauxAdmin = { firestore: { FieldValue: { serverTimestamp: function () { return { _sentinelle: true }; } } } };
+    function fauxRes() {
+      return { code: 0, out: null,
+        status: function (c) { this.code = c; return this; },
+        json: function (o) { this.out = o; return this; } };
+    }
+    /* La base factice émule DEUX réalités Firestore que l'émulateur officiel
+       cache : (1) chaque get() sur la collection se COMPTE ; (2) chaîner un
+       second where (id == + at >=) exigerait un index composite (règle E) —
+       ici il JETTE, comme la production jette FAILED_PRECONDITION. */
+    function fauxDb(seedOv, seedLog) {
+      var compte = { lecturesOv: 0, ecrituresParId: {}, patchsParId: {} };
+      return {
+        _compte: compte,
+        collection: function (nom) {
+          if (nom === 'product_overrides') {
+            return {
+              get: function () {
+                compte.lecturesOv++;
+                return Promise.resolve({ forEach: function (fn) {
+                  Object.keys(seedOv).forEach(function (id) {
+                    fn({ id: id, data: function () { return JSON.parse(JSON.stringify(seedOv[id])); } });
+                  });
+                } });
+              },
+              doc: function (id) {
+                return { set: function (patch) {
+                  compte.ecrituresParId[id] = (compte.ecrituresParId[id] || 0) + 1;
+                  compte.patchsParId[id] = patch;
+                  return Promise.resolve();
+                } };
+              }
+            };
+          }
+          if (nom === 'price_watch_log') {
+            return {
+              where: function (champ, op, val) {
+                return {
+                  get: function () {
+                    return Promise.resolve({ forEach: function (fn) {
+                      (seedLog || []).forEach(function (l) {
+                        if (champ === 'id' && op === '==' && l.id !== val) return;
+                        fn({ data: function () { return l; } });
+                      });
+                    } });
+                  },
+                  where: function () { throw new Error('index composite requis (id + at) — règle E'); }
+                };
+              },
+              add: function () { return Promise.resolve(); }
+            };
+          }
+          throw new Error('collection inattendue : ' + nom);
+        }
+      };
+    }
+    function pageIdealo(sku, prixTxt) {
+      var lignes = ['DEWALT ' + sku, 'description outil', '5', '94 offres', 'à partir de ' + prixTxt + ' €'];
+      while (lignes.join('\n').length < 220) lignes.push('ligne de bourrage sans marque ni prix pour le seuil du corps');
+      return lignes.join('\n');
+    }
+    function reqPage(sku, extras) {
+      var q = Object.assign({ type: 'price-watch', brand: 'DEWALT', source: 'idealo' }, extras || {});
+      return { method: 'POST', query: q, body: { text: pageIdealo(sku, '450,00') } };
+    }
+
+    if (cible) {
+      /* Le newPrice s'APPREND du modèle réel (dryRun) — un seuil recopié se
+         périme (règle harnais) et le modèle de marge évolue avec la config. */
+      var rApp = fauxRes();
+      await admFn(reqPage(cible.sku, { dryRun: '1' }), rApp, fauxAdmin, fauxDb({}, []));
+      var rec0 = rApp.out && rApp.out.applied && rApp.out.applied[0];
+      if (!rec0) rec0 = rApp.out && rApp.out.unchanged && rApp.out.unchanged[0];
+      ok(!!(rec0 && rec0.newPrice > 0), 'préalable : newPrice appris du modèle réel ('
+        + JSON.stringify(rApp.out && rApp.out.counts) + ')');
+
+      if (rec0 && rec0.newPrice > 0) {
+        var courantHaut = Math.round((rec0.newPrice + 100) * 100) / 100;
+
+        /* Espion sur catalog.loadCatalog : en production, cet appel relit LUI
+           AUSSI la collection entière (via son propre Firestore, invisible à
+           la base factice). Le mode balayage doit fusionner sur le relevé du
+           cache (loadCatalogAvec) et ne JAMAIS passer par loadCatalog. */
+        var catMod = require('../api/_lib/catalog.js');
+        var vraiLoadCatalog = catMod.loadCatalog;
+        var appelsLoadCatalog = 0;
+        catMod.loadCatalog = function () { appelsLoadCatalog++; return vraiLoadCatalog.apply(this, arguments); };
+
+        // ── Balayage : une seule lecture pour deux pages, écriture visible ──
+        scanReset();
+        var seedScan = {}; seedScan[cible.id] = { price: courantHaut };
+        var dbS = fauxDb(seedScan, []);
+        var rS1 = fauxRes();
+        await admFn(reqPage(cible.sku, { scan: '1' }), rS1, fauxAdmin, dbS);
+        ok(rS1.code === 200 && rS1.out && rS1.out.ok === true && rS1.out.scan === true,
+          'préalable balayage : page 1 traitée et la réponse porte scan:true ('
+          + rS1.code + ', ' + JSON.stringify(rS1.out && rS1.out.counts) + ')');
+        ok(rS1.out && rS1.out.counts && rS1.out.counts.applied === 1,
+          'préalable balayage : la baisse page 1 est APPLIQUÉE (écart forcé de 100 €)');
+        var ecritsPage1 = (dbS._compte.ecrituresParId[cible.id] || 0);
+        ok(ecritsPage1 >= 1, 'page 1 : le relevé s\'écrit');
+        var rS2 = fauxRes();
+        await admFn(reqPage(cible.sku, { scan: '1' }), rS2, fauxAdmin, dbS);
+        ok(dbS._compte.lecturesOv === 1,
+          '⛔ BALAYAGE : deux pages scan=1 = UNE lecture de product_overrides ('
+          + dbS._compte.lecturesOv + ') — sans cache, 67 pages ≈ 160 000 lectures et le quota meurt');
+        ok((dbS._compte.ecrituresParId[cible.id] || 0) === ecritsPage1
+          && rS2.out && rS2.out.counts && rS2.out.counts.unchanged === 1,
+          '⛔ BALAYAGE : l\'écriture de la page 1 est VISIBLE page 2 — même prix revu = '
+          + 'aucune ré-écriture (écrits: ' + (dbS._compte.ecrituresParId[cible.id] || 0)
+          + ', page 2: ' + JSON.stringify(rS2.out && rS2.out.counts) + ')');
+
+        ok(appelsLoadCatalog === 0,
+          '⛔ BALAYAGE : le catalogue se fusionne sur le relevé du cache (loadCatalogAvec) — '
+          + 'loadCatalog appelé ' + appelsLoadCatalog + ' fois, or chaque appel relit la '
+          + 'collection entière en production');
+
+        // ── Sans scan : relecture pleine à chaque appel (comportement historique) ──
+        scanReset();
+        var dbN = fauxDb({}, []);
+        await admFn(reqPage(cible.sku, {}), fauxRes(), fauxAdmin, dbN);
+        await admFn(reqPage(cible.sku, {}), fauxRes(), fauxAdmin, dbN);
+        ok(dbN._compte.lecturesOv === 2,
+          'sans &scan=1, relecture pleine à CHAQUE appel (' + dbN._compte.lecturesOv
+          + ') — un relevé isolé garde la fraîcheur maximale');
+        ok(appelsLoadCatalog === 2,
+          'sans &scan=1, le catalogue fusionné passe toujours par loadCatalog ('
+          + appelsLoadCatalog + '/2) — le comportement historique ne change pas');
+        catMod.loadCatalog = vraiLoadCatalog;
+
+        // ── J4 : l'ancien prix barré = MINIMUM 30 j du journal ──
+        scanReset();
+        var maintenant = Date.now();
+        var minJournal = Math.round((rec0.newPrice + 10) * 100) / 100;
+        var seedOvP = {}; seedOvP[cible.id] = { price: courantHaut };
+        var dbP = fauxDb(seedOvP, [
+          { id: cible.id, at: maintenant - 5 * 86400000, oldPrice: minJournal, newPrice: minJournal + 10 },
+          { id: cible.id, at: maintenant - 40 * 86400000, oldPrice: rec0.newPrice - 50, newPrice: rec0.newPrice - 50 },
+          { id: 'fiche-etrangere', at: maintenant - 2 * 86400000, oldPrice: 1, newPrice: 1 }
+        ]);
+        var rP = fauxRes();
+        await admFn(reqPage(cible.sku, {}), rP, fauxAdmin, dbP);
+        ok(rP.out && rP.out.ok === true && rP.out.counts.applied === 1, 'préalable promo : baisse appliquée');
+        var patchP = dbP._compte.patchsParId[cible.id];
+        ok(!!(patchP && patchP.promoAncienPrix != null
+          && Math.abs(patchP.promoAncienPrix - minJournal) < 0.01),
+          '⛔ J4 : promoAncienPrix doit être le MINIMUM 30 j du journal (' + minJournal
+          + '), pas le prix courant (' + courantHaut + '), et JAMAIS une entrée hors fenêtre '
+          + 'ou d\'une autre fiche — obtenu : ' + (patchP && patchP.promoAncienPrix)
+          + '. L\'ancien calcul (sentinel - 30 j = NaN) ne trouvait jamais le journal.');
+
+        // ── J4 : prix remonté puis rebaissé — rien de nouveau → PAS de promo ──
+        var seedOvE = {}; seedOvE[cible.id] = { price: courantHaut };
+        var dbE = fauxDb(seedOvE, [
+          { id: cible.id, at: maintenant - 3 * 86400000, oldPrice: rec0.newPrice - 5, newPrice: rec0.newPrice - 5 }
+        ]);
+        var rE = fauxRes();
+        await admFn(reqPage(cible.sku, {}), rE, fauxAdmin, dbE);
+        var patchE = dbE._compte.patchsParId[cible.id];
+        ok(rE.out && rE.out.counts.applied === 1 && !!patchE
+          && patchE.promoDepuis == null && patchE.promoAncienPrix == null,
+          'J4 : le journal 30 j contient déjà MOINS cher → pas de promo (rien de nouveau '
+          + 'n\'est offert) — obtenu : ' + (patchE && JSON.stringify({ d: patchE.promoDepuis, a: patchE.promoAncienPrix })));
+      }
+    }
+
+    // Les TROIS écrivains (rupture, inchangé, appliqué) répercutent leur patch
+    // dans le relevé local — sans ça, un doublon inter-pages réécrit à l'infini.
+    var nbMaj = (adminSrc.match(/if \(scanMode\) pwMajLocale\(ovW, p\.id, patch[RUA], nowMs\);/g) || []).length;
+    ok(nbMaj === 3, 'les trois écrivains du traqueur répercutent leur patch en local (' + nbMaj + '/3)');
+
+    // pwMajLocale = même sémantique que set(merge:true), carte comprise (E-227 local).
+    var maj = adm._internals.pwMajLocale;
+    ok(typeof maj === 'function', 'pwMajLocale exposée aux portes');
+    if (maj) {
+      var carte = { f1: { priceSources: { cotebrico: { ttc: 100, at: 5 } }, autre: 1 } };
+      maj(carte, 'f1', { priceSources: { idealo: { ttc: 90, at: 6, enStock: true } }, priceSrcTTC: 90 }, 777);
+      ok(carte.f1.priceSources.cotebrico && carte.f1.priceSources.cotebrico.ttc === 100
+        && carte.f1.priceSources.idealo && carte.f1.priceSources.idealo.ttc === 90
+        && carte.f1.priceCheckedAt === 777 && carte.f1.autre === 1 && carte.f1.priceSrcTTC === 90,
+        'pwMajLocale fusionne comme set(merge:true) : les AUTRES sources de la carte survivent '
+        + '(sinon E-227 en local) et priceCheckedAt devient un NOMBRE');
+    }
+  }
+
+  /* ═══ PROMO AFFICHÉE : promoDepuis est un TIMESTAMP à la relecture ════════
+     Écrit en serverTimestamp par le traqueur → relu de Firestore en objet
+     Timestamp. `Number(Timestamp)` = NaN : `promoActive` restait FAUX pour
+     toujours et l'étiquette promo ne s'est JAMAIS affichée (même mécanisme
+     que E-228). L'expiration à 2 mois (J4) doit marcher dans les DEUX sens. */
+  var cat = require('../api/_lib/catalog.js');
+  var ap = cat._internals && cat._internals.applyOverrides;
+  ok(typeof ap === 'function', 'applyOverrides exposée aux portes');
+  if (ap) {
+    var fichesT = [{ id: 'x1', price: 100 }];
+    var m1 = ap(fichesT, { x1: { promoDepuis: { toMillis: function () { return Date.now() - 86400000; } }, promoAncienPrix: 120 } })[0];
+    ok(!!(m1 && m1.promoActive === true),
+      '⛔ promoDepuis relu de Firestore est un TIMESTAMP : sans enMillis, Number() = NaN '
+      + 'et la promo ne s\'affiche JAMAIS (obtenu promoActive=' + (m1 && m1.promoActive) + ')');
+    var m2 = ap(fichesT, { x1: { promoDepuis: { toMillis: function () { return Date.now() - 61 * 86400000; } }, promoAncienPrix: 120 } })[0];
+    ok(!!(m2 && m2.promoActive === false && m2.promoAncienPrix == null),
+      'au-delà de 2 mois au même prix, la promo EXPIRE à la lecture (J4), Timestamp compris');
+  }
+
   return errors;
 };
 
 if (require.main === module) {
-  var e = module.exports();
-  if (e.length) { e.forEach(function (x) { console.error('  ❌ ' + x); }); process.exit(1); }
-  console.log('✅ check-price-watch OK');
+  Promise.resolve(module.exports()).then(function (e) {
+    if (e.length) { e.forEach(function (x) { console.error('  ❌ ' + x); }); process.exit(1); }
+    console.log('✅ check-price-watch OK');
+  }, function (err) { console.error('  ❌ [check-price-watch] harnais mort : ' + err.message); process.exit(1); });
 }

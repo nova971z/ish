@@ -133,6 +133,60 @@ site l'écrit autrement, une capture d'une carte en rupture suffit à ajuster
 > **Prochain geste** : un passage en `dryRun=1` pour confirmer le bout-en-bout
 > (attendu : `format: "clickoutil"`, `parsed` ≈ 145–150), puis `dryRun=0`.
 
+## 🧭 DeWALT — idealo, BALAYAGE DES 67 PAGES (3ᵉ source, construction du 02/08/2026)
+
+> **Sa demande, mot pour mot : « il y a 67 pages, il faut absolument toutes les
+> scanner » — avec SES URL** (liste filtrée DeWALT, tri `maxPrice` décroissant).
+> Ses pages 4/5/67 ont confirmé la loi : page N = offset `(N−1)×15` dans le
+> chemin (page 67 = `100I16-990`, et 990 = 66×15 ✓).
+>
+> **Un seul raccourci, une boucle « Répéter ». Actions dans cet ordre :**
+>
+> 1. **Obtenir le contenu de l'URL** → `https://pirates-tools.com/api/health`
+>    (GET — réveille le serveur et autorise le domaine).
+> 2. **Obtenir le contenu de l'URL** → page 1, SON URL exacte :
+>    `https://www.idealo.fr/prechcat/100oM122663.html?q=dewalt&sortKey=maxPrice`
+> 3. **Obtenir le contenu de l'URL** → POST
+>    `https://pirates-tools.com/api/admin?type=price-watch&brand=DEWALT&source=idealo&scan=1&dryRun=1`
+>    — Méthode **POST**, Corps **JSON**, champ **`text`** = « Contenu de l'URL »
+>    (l'action 2). En-tête : `x-watch-secret` = la clé complète.
+> 4. **Répéter 66 fois** — et DANS la répétition :
+>    5. **Calculer** : « Indice de répétition » **× 15** (l'indice 1 → 15 = la
+>       page 2 … l'indice 66 → 990 = la page 67).
+>    6. **Formater le nombre** : le résultat du calcul, **0 décimale** (sans ça,
+>       iOS peut écrire « 15,0 » dans l'URL).
+>    7. **Texte** :
+>       `https://www.idealo.fr/prechcat/100I16-[Nombre formaté]oM122663.html?q=dewalt&sortKey=maxPrice`
+>    8. **Obtenir le contenu de l'URL** → le Texte (GET, comme l'action 2).
+>    9. **Obtenir le contenu de l'URL** → le MÊME POST que l'action 3 (mêmes
+>       réglages, même en-tête), champ `text` = « Contenu de l'URL » de l'action 8.
+>    (fin de répétition)
+>
+> ⚠️ **Pas d'action « Combiner » ni « Ajouter à Pages »** (blocage « contenu
+> web » iOS, déjà payé). Les réponses des 67 POST restent lisibles dans les
+> **Résultats de Répéter** à la fin de l'exécution.
+>
+> **`&scan=1` est OBLIGATOIRE sur ce raccourci.** C'est le mode balayage côté
+> serveur : sans lui, chaque page relit la collection des overrides en entier
+> et 67 pages ≈ **160 000 lectures Firestore** — plus de trois fois le quota
+> gratuit quotidien (celui qui s'est épuisé le 01/08 et a fermé l'admin). Avec,
+> le balayage entier coûte ~1 500 lectures. En contrepartie : **ne pas modifier
+> de prix à la main dans l'admin pendant qu'un balayage tourne** (le serveur
+> travaille sur son relevé de rafale jusqu'à 20 min).
+>
+> **Doublons entre pages** : la même réf apparaît sur plusieurs pages à des prix
+> différents — c'est SA raison d'exiger le tri décroissant : les pages tardives
+> sont moins chères, la dernière écriture converge vers le MIN, et une écriture
+> déjà à jour n'est pas répétée (prouvé par la porte).
+>
+> **Premier passage en `dryRun=1`** (la boucle entière, sans rien écrire) pour
+> vérifier `format: "idealo"` page à page. Puis passer l'URL de l'action 3 ET
+> celle de l'action 9 en `dryRun=0`. ⛔ Un raccourci ne reste JAMAIS en dryRun=1
+> (règle plus bas — Festool y est resté des jours).
+>
+> Durée attendue : plusieurs minutes (134 requêtes web). Ne pas lancer deux
+> traqueurs en même temps.
+
 ## 🟠 Flex · Wera · Facom (À CRÉER — 5 produits jamais traqués)
 Même structure, seules la page cotébrico et le `brand=` changent. Le parseur est
 agnostique de la marque (il cherche « MARQUE + référence » dans les titres).

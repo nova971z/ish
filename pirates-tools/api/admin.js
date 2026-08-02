@@ -1888,12 +1888,51 @@ function hashCodeStr(str) {
   return h;
 }
 
+/* ── CACHE DE BALAYAGE (&scan=1) — 02/08/2026, demande de l'user ────────────
+   La liste idealo DeWALT fait 67 PAGES (tri maxPrice décroissant), balayées
+   par UN SEUL raccourci en rafale. Sans cache, CHAQUE page relisait la
+   collection `product_overrides` entière DEUX fois (catalogue fusionné +
+   relecture « à la source ») : ≈ 160 000 lectures Firestore par balayage —
+   plus de trois fois le quota GRATUIT quotidien, celui-là même qui s'est
+   épuisé le 01/08 et a fermé l'admin (E-111).
+   En mode balayage : la PREMIÈRE page lit tout, les suivantes réutilisent le
+   relevé en mémoire, et CHAQUE écriture est répercutée dedans (pwMajLocale) —
+   sans cette répercussion, `dejaAJour` mentirait et chaque doublon
+   inter-pages réécrirait le même prix.
+   ⚠️ Uniquement sur `&scan=1` : un relevé isolé garde la relecture pleine.
+   La relecture « à la source » protégeait la garde « variation > 25 % » —
+   retirée depuis (D-015) : rien dans le chemin d'écriture n'exige plus une
+   fraîcheur sous 30 s. Limite assumée : pendant un balayage, une modification
+   admin faite à la main peut rester invisible jusqu'à 20 min → on ne modifie
+   pas les prix à la main pendant qu'un balayage tourne. */
+let pwScanCache = null;
+const PW_SCAN_TTL = 20 * 60 * 1000;
+function pwScanReset() { pwScanCache = null; }
+
+/* Répercute une écriture Firestore dans le relevé local du balayage : même
+   sémantique que `set(..., { merge: true })` — fusion par clé, et fusion par
+   sous-clé pour la carte `priceSources`. `priceCheckedAt` local devient un
+   NOMBRE (nowMs) : le sentinel serverTimestamp vaut NaN en arithmétique
+   (E-228) et rendrait le relevé invisible à la page suivante. */
+function pwMajLocale(ovW, id, patch, nowMs) {
+  const avant = ovW[id] || {};
+  const apres = Object.assign({}, avant, patch, { priceCheckedAt: nowMs });
+  if (patch && patch.priceSources) {
+    apres.priceSources = Object.assign({}, avant.priceSources, patch.priceSources);
+  }
+  // `promoDepuis` s'écrit en Firestore comme sentinel serverTimestamp :
+  // localement il devient le même instant, en nombre.
+  if (patch && patch.promoDepuis) apres.promoDepuis = nowMs;
+  ovW[id] = apres;
+}
+
 async function handlePriceWatch(req, res, admin, db) {
   try {
     const body = (req.body && typeof req.body === 'object') ? req.body : {};
     let text = (typeof req.body === 'string') ? req.body : (body.text || '');
     const brand = String(body.brand || (req.query && req.query.brand) || 'DEWALT').toUpperCase();
     const dryRun = body.dryRun === true || (req.query && (req.query.dryRun === '1' || req.query.dryRun === 'true'));
+    const scanMode = body.scan === true || (req.query && (req.query.scan === '1' || req.query.scan === 'true'));
     if (!text || text.length < 200) return res.status(400).json({ ok: false, error: 'text manquant ou trop court' });
 
     /* ── IDENTITÉ DE LA SOURCE (01/08/2026) ─────────────────────────────────
@@ -1930,7 +1969,20 @@ async function handlePriceWatch(req, res, admin, db) {
       });
     }
 
-    const products = await catalog.loadCatalog();
+    /* Overrides relus À LA SOURCE : le catalogue fusionné peut avoir jusqu'à
+       30 s de retard. En mode balayage (&scan=1), le relevé vient du cache de
+       rafale (voir CACHE DE BALAYAGE ci-dessus) — une lecture pour 67 pages
+       au lieu de deux par page, et le catalogue se fusionne SUR CE relevé. */
+    let ovW;
+    if (scanMode && pwScanCache && (Date.now() - pwScanCache.at) < PW_SCAN_TTL) {
+      ovW = pwScanCache.map;
+    } else {
+      const ovSnapW = await db.collection('product_overrides').get();
+      ovW = {};
+      ovSnapW.forEach((d) => { ovW[d.id] = d.data() || {}; });
+      if (scanMode) pwScanCache = { map: ovW, at: Date.now() };
+    }
+    const products = scanMode ? catalog.loadCatalogAvec(ovW) : await catalog.loadCatalog();
     const bySku = {};
     products.forEach((p) => { if (p.sku) bySku[String(p.sku).toUpperCase()] = p; });
     /* Les RÉFÉRENCES ALTERNATIVES (`srcAltSkus`) pointent vers leur fiche :
@@ -1950,13 +2002,6 @@ async function handlePriceWatch(req, res, admin, db) {
       });
     });
     pwAliasNomenclature(products, brand, bySku);
-
-    // Overrides relus À LA SOURCE : le catalogue fusionné peut avoir jusqu'à
-    // 30 s de retard, et ici un prix actuel périmé fausserait AUSSI la garde
-    // « variation > 25 % » (produit bloqué à tort, ou laissé passer à tort).
-    const ovSnapW = await db.collection('product_overrides').get();
-    const ovW = {};
-    ovSnapW.forEach((d) => { ovW[d.id] = d.data() || {}; });
 
     // Config de tarification : si autoPrice, on applique le MODÈLE de marge cible
     // (markup adaptatif poids/mode pour 15 % net après IS) ; sinon repli ×1,15.
@@ -2018,14 +2063,16 @@ async function handlePriceWatch(req, res, admin, db) {
           const srcsR = pwSourcesConnues(ovW[p.id] || {});   // carte + héritage
           srcsR[sourceSlug] = { ttc: item.price, at: nowMs, enStock: false };
           const choixR = priceParse.choisirCoutSource(srcsR, nowMs);
-          await db.collection('product_overrides').doc(p.id).set({
+          const patchR = {
             priceSources: { [sourceSlug]: { ttc: item.price, at: nowMs, enStock: false } },
             // Le coût effectif se recalcule SANS cette source. S'il ne reste
             // rien d'achetable, le produit passe en GEL (origin 'rupture').
             priceSrcTTC: choixR ? choixR.ttc : null,
-            priceSource: choixR ? choixR.source : 'rupture',
-            priceCheckedAt: now
-          }, { merge: true });
+            priceSource: choixR ? choixR.source : 'rupture'
+          };
+          await db.collection('product_overrides').doc(p.id).set(
+            Object.assign({}, patchR, { priceCheckedAt: now }), { merge: true });
+          if (scanMode) pwMajLocale(ovW, p.id, patchR, nowMs);
         }
         continue;
       }
@@ -2069,10 +2116,13 @@ async function handlePriceWatch(req, res, admin, db) {
         // peut pas s'appuyer dessus, et la marge affichée repose sur une
         // supposition alors que le vrai prix fournisseur est connu.
         if (!dryRun && !dejaAJour) {
-          await db.collection('product_overrides').doc(p.id).set({
+          const patchU = {
             priceSources: { [sourceSlug]: { ttc: src, at: nowMs, enStock: true } },
-            priceSource: effFrom, priceSrcTTC: effSrc, priceCheckedAt: now
-          }, { merge: true });
+            priceSource: effFrom, priceSrcTTC: effSrc
+          };
+          await db.collection('product_overrides').doc(p.id).set(
+            Object.assign({}, patchU, { priceCheckedAt: now }), { merge: true });
+          if (scanMode) pwMajLocale(ovW, p.id, patchU, nowMs);
         }
         continue;
       }
@@ -2125,13 +2175,24 @@ async function handlePriceWatch(req, res, admin, db) {
            est le même délit. */
         var promo = { promoDepuis: null, promoAncienPrix: null };
         if (newPrice < cur) {
-          var depuis30 = now - 30 * 24 * 3600 * 1000;
+          /* ⛔ CORRIGÉ le 02/08/2026 — la fenêtre était calculée avec le
+             SENTINEL : `now - 30 j` = NaN (E-228, même mécanisme), et la
+             requête `where('at' >= NaN)` ne rendait JAMAIS rien — le catch
+             avalait tout et `refMin` retombait sur le prix courant. Résultat :
+             un prix remonté puis rebaissé s'affichait « promo » face au prix
+             de la veille — précisément l'annonce trompeuse que J4 interdit.
+             Fenêtre désormais en NOMBRES (nowMs), et filtrée EN MÉMOIRE sur
+             un seul `where` : `id ==` + `at >=` exigerait un index composite
+             que l'émulateur ne signalerait jamais (règle E). Le journal d'un
+             seul produit tient en quelques documents. */
+          var depuis30 = nowMs - 30 * 24 * 3600 * 1000;
           var refMin = cur;
           try {
             var hist = await db.collection('price_watch_log')
-              .where('id', '==', p.id).where('at', '>=', depuis30).get();
+              .where('id', '==', p.id).get();
             hist.forEach(function (d) {
               var v = d.data();
+              if (priceParse.enMillis(v.at) < depuis30) return; // hors fenêtre 30 j
               [Number(v.oldPrice), Number(v.newPrice)].forEach(function (x) {
                 if (x > 0 && x < refMin) refMin = x;
               });
@@ -2139,12 +2200,15 @@ async function handlePriceWatch(req, res, admin, db) {
           } catch (e) { /* journal illisible → on reste sur le prix courant */ }
           if (newPrice < refMin) promo = { promoDepuis: now, promoAncienPrix: refMin };
         }
-        await db.collection('product_overrides').doc(p.id).set(Object.assign({
+        const patchA = Object.assign({
           price: newPrice, price_ht: newHt,
           priceSources: { [sourceSlug]: { ttc: src, at: nowMs, enStock: true } },
-          priceSource: effFrom, priceSrcTTC: effSrc, priceCheckedAt: now,
+          priceSource: effFrom, priceSrcTTC: effSrc,
           priceMarkup: priced.markup, priceMode: priced.mode
-        }, promo), { merge: true });
+        }, promo);
+        await db.collection('product_overrides').doc(p.id).set(
+          Object.assign({}, patchA, { priceCheckedAt: now }), { merge: true });
+        if (scanMode) pwMajLocale(ovW, p.id, patchA, nowMs);
         await db.collection('price_watch_log').add({
           sku: item.sku, id: p.id, oldPrice: cur, newPrice, srcTTC: effSrc, source: sourceSlug, brand, at: now,
           markup: priced.markup, mode: priced.mode
@@ -2195,7 +2259,7 @@ async function handlePriceWatch(req, res, admin, db) {
     const jamaisReleves = absents.filter((a) => !a.dejaReleve);
 
     return res.status(200).json({
-      ok: true, brand, dryRun: !!dryRun,
+      ok: true, brand, dryRun: !!dryRun, scan: !!scanMode,
       counts: {
         parsed: parsed.length, applied: applied.length, flagged: flagged.length,
         unchanged: unchanged.length, unknown: unknown.length, locked: lockedW.length,
@@ -2206,7 +2270,11 @@ async function handlePriceWatch(req, res, admin, db) {
       },
       source: sourceSlug, format: auto.format,
       applied, flagged, unknown: unknown.slice(0, 800),
-      absents: absents.slice(0, 800),
+      /* En balayage, « absent de CETTE page » ne veut rien dire : une page
+         idealo montre ~60 produits sur ~1 200 fiches — la liste serait tout
+         le catalogue, répétée 67 fois dans les résultats du raccourci. Les
+         COMPTES restent ; la liste ne sort qu'en relevé isolé. */
+      absents: scanMode ? [] : absents.slice(0, 800),
       rupture: enRupture.slice(0, 400),
       /* Restent listés, jamais silencieux : packs et titres sans réf NON
          appariés par nom (`srcNom`). Plafond 400 (et non 100) : c'est cette
@@ -2229,4 +2297,10 @@ async function handlePriceWatch(req, res, admin, db) {
 // cale. Au-delà, découper la marque en 2 pages (voir docs/TRAQUEUR-URLS.md).
 module.exports.config = { api: { bodyParser: { sizeLimit: '4.5mb' } } };
 // Pour les portes UNIQUEMENT : tester le vrai chemin, jamais une copie (O6).
-module.exports._internals = { pwSourceCost: pwSourceCost, pwSourcesConnues: pwSourcesConnues, pwApparierParNom: pwApparierParNom, pwAliasNomenclature: pwAliasNomenclature };
+module.exports._internals = {
+  pwSourceCost: pwSourceCost, pwSourcesConnues: pwSourcesConnues,
+  pwApparierParNom: pwApparierParNom, pwAliasNomenclature: pwAliasNomenclature,
+  // Exposés pour check-price-watch : le mode balayage se prouve en APPELANT
+  // le handler avec une base factice qui compte lectures et écritures.
+  handlePriceWatch: handlePriceWatch, pwMajLocale: pwMajLocale, pwScanReset: pwScanReset
+};
