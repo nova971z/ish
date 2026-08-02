@@ -29,3 +29,14 @@
 | `(nom)` | Lame de scie circulaire Elite Bois Ø184 mm DEWALT | nom en DOUBLON sur la page — n'identifie aucun produit précis |
 | `(nom)` | Lame de scie circulaire Elite Bois Ø165 mm DEWALT | nom en DOUBLON sur la page — n'identifie aucun produit précis |
 | `(nom)` | BOSCH | titre sans la marque en fin — pas une fiche DeWALT |
+| `AC-1FE35251` | Coffret TSTAK pour perceuse-visseuse DCD DEWALT | coffret TSTAK/TOUGHSYSTEM — jamais mis en ligne (règle user 02/08) |
+| `AC-91DEAC1F` | Coffret TSTAK pour perceuse visseuse DEWALT | coffret TSTAK/TOUGHSYSTEM — jamais mis en ligne (règle user 02/08) |
+| `(nom)` | BRENNENSTHUL | titre sans la marque en fin — pas une fiche DeWALT |
+| `(nom)` | BOSCH | titre sans la marque en fin — pas une fiche DeWALT |
+| `(nom)` | BOSCH | titre sans la marque en fin — pas une fiche DeWALT |
+| `(nom)` | Pack 2 batteries 18-54V Flexvolt 12-4 Ah + Chargeur DCB118 DEWALT | nom en DOUBLON sur la page — n'identifie aucun produit précis |
+| `(nom)` | Pack 2 batteries 18-54V Flexvolt 12-4 Ah + Chargeur DCB118 DEWALT | nom en DOUBLON sur la page — n'identifie aucun produit précis |
+| `(nom)` | Pack 2 outils 18V Perceuse-visseuse à percussion DCD796 + Visseuse à chocs DCF887 DEWALT | nom en DOUBLON sur la page — n'identifie aucun produit précis |
+| `(nom)` | Pack 2 outils 18V Perceuse-visseuse DCD791 + Meuleuse DCG405 DEWALT | nom en DOUBLON sur la page — n'identifie aucun produit précis |
+| `(nom)` | Pack 2 outils 18V Perceuse-visseuse DCD791 + Meuleuse DCG405 DEWALT | nom en DOUBLON sur la page — n'identifie aucun produit précis |
+| `(nom)` | Pack 2 outils 18V Perceuse-visseuse à percussion DCD796 + Visseuse à chocs DCF887 DEWALT | nom en DOUBLON sur la page — n'identifie aucun produit précis |
