@@ -1620,6 +1620,38 @@ function pwSourcesConnues(o) {
   return srcs;
 }
 
+/* ── SUIVI PAR NOM (02/08/2026, règle posée par l'user) ────────────────────
+   « Ce qui est important, c'est les références exactes et comment sont
+   NOMMÉS les produits s'il n'y a pas de référence. » Un accessoire sans réf
+   (lame, mèche, fraise…) se suit par son NOM EXACT : la fiche porte
+   `srcNom` — le titre tel que le site fournisseur l'écrit — et chaque
+   entrée sansRef du relevé qui correspond devient un relevé normal.
+   ⛔ Deux gardes, toutes deux mesurées sur la vraie page :
+     · un nom vu PLUSIEURS fois sur la page (« Lame de scie circulaire Elite
+       Bois Ø184 mm » ×3) n'identifie RIEN → jamais apparié ;
+     · un `srcNom` revendiqué par DEUX fiches → conflit → jamais apparié.
+   PURE — testée par check-price-watch via _internals, sabotage compris. */
+function pwApparierParNom(sansRef, products) {
+  const norme = (s) => String(s || '').replace(/\s+/g, ' ').trim().toUpperCase();
+  const parNom = {};
+  products.forEach((p) => {
+    const n = norme(p && p.srcNom);
+    if (!n) return;
+    parNom[n] = Object.prototype.hasOwnProperty.call(parNom, n) ? false : p;
+  });
+  const vusPage = {};
+  (sansRef || []).forEach((e) => { const n = norme(e && e.titre); if (n) vusPage[n] = (vusPage[n] || 0) + 1; });
+  const items = [], restants = [];
+  (sansRef || []).forEach((e) => {
+    const n = norme(e && e.titre);
+    const p = (n && vusPage[n] === 1) ? parNom[n] : null;
+    if (p && Number(e.prix) > 0) {
+      items.push({ sku: p.sku, price: Number(e.prix), name: String(e.titre), promo: false, enStock: null });
+    } else restants.push(e);
+  });
+  return { items, restants };
+}
+
 function pwSourceCost(p, o, cfg, byGroup) {
   /* ── PLUSIEURS TRAQUEURS (01/08/2026) : la carte `priceSources` fait foi ──
      Chaque passage de traqueur écrit sa propre entrée { ttc, at, enStock }.
@@ -1878,6 +1910,12 @@ async function handlePriceWatch(req, res, admin, db) {
        qui sert à l'ARITHMÉTIQUE de fraîcheur prend `nowMs`, un nombre. */
     const nowMs = Date.now();
 
+    /* Les accessoires SANS RÉF s'apparient par leur NOM EXACT (`srcNom` sur
+       la fiche — règle de l'user) : chaque apparié devient un relevé normal,
+       les autres restent listés. */
+    const apparie = pwApparierParNom(auto.sansRef, products);
+    apparie.items.forEach((it) => parsed.push(it));
+
     // Prix parsés indexés par SKU (pour la règle « min des sources » srcAltSkus).
     const parsedBySku = {};
     parsed.forEach((it) => { parsedBySku[String(it.sku).toUpperCase()] = it.price; });
@@ -2086,16 +2124,18 @@ async function handlePriceWatch(req, res, admin, db) {
         unchanged: unchanged.length, unknown: unknown.length, locked: lockedW.length,
         absents: absents.length, absentsJamaisReleves: jamaisReleves.length,
         rupture: enRupture.length,
-        packsIgnores: auto.packs.length, sansRef: auto.sansRef.length
+        packsIgnores: auto.packs.length,
+        sansRef: apparie.restants.length, sansRefSuivis: apparie.items.length
       },
       source: sourceSlug, format: auto.format,
       applied, flagged, unknown: unknown.slice(0, 800),
       absents: absents.slice(0, 800),
       rupture: enRupture.slice(0, 400),
       /* Écartés VOLONTAIRES, jamais silencieux : packs montés par le site
-         (prix de pack ≠ coût d'un composant) et titres sans réf sûre. */
+         (prix de pack ≠ coût d'un composant) et titres sans réf sûre NON
+         appariés par nom (`srcNom`). */
       packsIgnores: auto.packs.slice(0, 100),
-      sansRef: auto.sansRef.slice(0, 100)
+      sansRef: apparie.restants.slice(0, 100)
     });
   } catch (err) {
     console.error('[api/admin] price-watch failed:', err.message);
@@ -2110,4 +2150,4 @@ async function handlePriceWatch(req, res, admin, db) {
 // cale. Au-delà, découper la marque en 2 pages (voir docs/TRAQUEUR-URLS.md).
 module.exports.config = { api: { bodyParser: { sizeLimit: '4.5mb' } } };
 // Pour les portes UNIQUEMENT : tester le vrai chemin, jamais une copie (O6).
-module.exports._internals = { pwSourceCost: pwSourceCost, pwSourcesConnues: pwSourcesConnues };
+module.exports._internals = { pwSourceCost: pwSourceCost, pwSourcesConnues: pwSourcesConnues, pwApparierParNom: pwApparierParNom };

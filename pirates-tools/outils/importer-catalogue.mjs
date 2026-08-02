@@ -91,6 +91,11 @@ produits.forEach((p) => {
    plus : la porte d'entrée de cet outil a refusé de tourner — c'est son
    rôle. Chaque cible ci-dessous est MESURÉE dans products.json. */
 const FAMILLES = [
+  /* ⛔ RÈGLE DE L'USER (02/08/2026), et son ordre compte : « tout ce qui
+     relève de la quincaillerie — lames, mèches, fraises… — on garde, et ça
+     va dans la partie Quincaillerie ». AVANT /scie/ sinon « Lame de scie
+     circulaire » tomberait dans les Scies. */
+  [/lame|mèche|meche|fraise de|fraises de|foret|douille|embout|scie[- ]cloche|burin|taillant|plateau de surfaçage|disque/i, 'Quincaillerie'],
   [/boulonneuse|visseuse|perceuse|cliquet/i, 'Perçage, vissage et boulonnage'],
   [/meuleuse|découpeuse|decoupeuse|ponceuse|polisseuse|lime à bande|lime a bande/i, 'Meulage, découpe et polissage'],
   [/tronçonneuse|tronconneuse|taille[- ]haie|débroussailleuse|debroussailleuse|tondeuse|élagueuse|elagueuse|sécateur|secateur|souffleur/i, 'Tronçonnage et élagage'],
@@ -156,6 +161,12 @@ for (const it of liste) {
   const nomManquant = !nom || tronque(nom);
   const libelle = nomManquant ? ('Référence ' + sku + ' — descriptif à compléter') : nom;
   if (!(cout > 0)) { refuses.push({ sku, nom, motif: 'coût d\'achat absent — prix impossible sans supposition' }); continue; }
+  /* ⛔ RÈGLE DE L'USER (02/08/2026) : « les moulages de coffrets, il ne faut
+     absolument pas les ajouter en produits ». Un moulage/insert est une pièce
+     interne de rangement, pas un produit du magasin — et sa réf, quand il en
+     cite une, est souvent celle de L'OUTIL qu'il épouse (vu : « Moulage
+     TSTAK II pour meuleuse DCG405 »). */
+  if (/moulage|insert\b/i.test(libelle)) { refuses.push({ sku, nom, motif: 'moulage/insert de coffret — jamais un produit (règle user 02/08)' }); continue; }
 
   const titre = MARQUE + ' ' + sku + ' — ' + libelle;
   const fiche = {

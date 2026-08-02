@@ -91,6 +91,37 @@ module.exports = function () {
   ok(/const fichesVues = new Set\(\)/.test(adminSrc) && /fichesVues\.has\(p\.id\)/.test(adminSrc),
     'une fiche vue par son sku ET par un alias sur la même page ne s\'écrit qu\'une fois');
 
+  /* ═══ SUIVI PAR NOM (02/08/2026, règle de l'user) ═════════════════════════
+     Un accessoire sans réf se suit par son NOM EXACT (`srcNom`). Gardes
+     mesurées sur la vraie page : nom en doublon sur la page (« Lame …
+     Ø184 mm » ×3) → jamais apparié ; srcNom revendiqué par 2 fiches →
+     conflit → jamais apparié. */
+  var adm = require('../api/admin.js');
+  var apparier = adm._internals && adm._internals.pwApparierParNom;
+  ok(typeof apparier === 'function', 'pwApparierParNom exposée aux portes');
+  if (apparier) {
+    var fiches = [{ sku: 'ZZLAME1', srcNom: 'Lame de test Ø999 mm' }, { sku: 'ZZAUTRE' }];
+    var a1n = apparier([{ titre: 'Lame de test Ø999 mm', prix: 49.90 }], fiches);
+    ok(a1n.items.length === 1 && a1n.items[0].sku === 'ZZLAME1' && a1n.items[0].price === 49.90,
+      'un nom UNIQUE sur la page + une fiche srcNom → relevé normal pour cette fiche');
+    var a2n = apparier([{ titre: 'Lame de test Ø999 mm', prix: 49.90 },
+      { titre: 'Lame de test Ø999 mm', prix: 89.90 }], fiches);
+    ok(a2n.items.length === 0 && a2n.restants.length === 2,
+      '⛔ un nom vu DEUX fois sur la page n\'identifie rien — aucun prix écrit, les deux listés '
+      + '(mesuré : trois « Lame … Ø184 mm » à des prix différents sur la vraie page)');
+    var a3n = apparier([{ titre: 'Lame de test Ø999 mm', prix: 49.90 }],
+      [{ sku: 'A1', srcNom: 'Lame de test Ø999 mm' }, { sku: 'A2', srcNom: 'Lame de test Ø999 mm' }]);
+    ok(a3n.items.length === 0 && a3n.restants.length === 1,
+      '⛔ un srcNom revendiqué par DEUX fiches est un conflit — jamais apparié');
+    ok(apparier([{ titre: '  lame   de test ø999 MM ', prix: 10 }],
+      [{ sku: 'ZZLAME1', srcNom: 'Lame de test Ø999 mm' }]).items.length === 1,
+      'l\'appariement tolère casse et espaces — jamais deux identités pour un même nom');
+  }
+  ok(/const apparie = pwApparierParNom\(auto\.sansRef, products\)/.test(adminSrc)
+    && /apparie\.items\.forEach\(\(it\) => parsed\.push\(it\)\)/.test(adminSrc),
+    '⛔ handlePriceWatch doit apparier les sansRef par nom AVANT la boucle — '
+    + 'sans ça, les accessoires sans réf ne seront jamais suivis');
+
   // Cohérence catalogue : un srcAltSkus ne doit jamais référencer un SKU
   // encore AU catalogue (la déclinaison doit être fusionnée, pas dupliquée).
   var products = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'products.json'), 'utf8'));
@@ -285,8 +316,15 @@ module.exports = function () {
     ok(!cSku['ZZTC99-QW'] && !cSku['ZZT789'] && rc.packs.length === 1,
       '⛔ ARGENT : un PACK monté par le site est écarté ET listé — son prix ne s\'écrit '
       + 'ni sur la réf du composant ni sur celle de l\'outil nu (' + JSON.stringify(rc.packs) + ')');
-    ok(rc.sansRef.length === 1 && /Raboteuse/.test(rc.sansRef[0]),
-      'un titre SANS réf sûre est écarté et listé, jamais deviné (« 1800 » n\'est pas une réf)');
+    ok(rc.sansRef.length === 1 && /Raboteuse/.test(rc.sansRef[0].titre)
+      && rc.sansRef[0].prix === 111.00,
+      'un titre SANS réf sûre est écarté et listé AVEC SON PRIX — c\'est lui qui permet '
+      + 'le suivi par nom (« 1800 » n\'est pas une réf)');
+    /* Le filtre d'UNITÉS : « 18V-54V » et « 12Ah-4Ah » ressemblent à des réfs
+       et n'en sont pas — mesuré sur la vraie page, 5 réfs réelles récupérées. */
+    var rcU = pc('Batterie XR 18V-54V 12Ah-4Ah Flexvolt ZZB548-XJ MAKITA\nMAKITA\n219,90 € TTC\n183,25 € HT\n', 'MAKITA');
+    ok(rcU.items.length === 1 && rcU.items[0].sku === 'ZZB548-XJ',
+      'les suites d\'unités (18V-54V, 12AH-4AH) ne sont pas des candidats réf — la vraie réf reste seule');
     ok(rc.items.every(function (x) { return x.enStock === null; }),
       'aucun badge de stock par carte sur cette grille (mesuré) → enStock reste inconnu, jamais inventé');
   }

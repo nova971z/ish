@@ -131,6 +131,11 @@ function pickCheapestSource(ownPrice, altSkus, parsedBySku) {
    c'est LE motif à ajuster si une capture montre un autre libellé. */
 var RUPTURE_RE = /rupture|indisponible|\u00e9puis\u00e9|hors\s+stock|non\s+disponible/i;
 
+/* Une SUITE D'UNIT\u00c9S (tensions, capacit\u00e9s, dimensions) qui ressemble \u00e0 une
+   r\u00e9f sans en \u00eatre une : \u00ab 18V-54V \u00bb, \u00ab 12AH-4AH \u00bb, \u00ab 9AH-3AH \u00bb\u2026 Mesur\u00e9 sur
+   la vraie page clickoutil \u2014 voir le commentaire au point d'usage. */
+var UNITE_RE = /^[0-9]+([.,][0-9]+)?(V|AH|MM|CM|NM|W|KG|GA|L)([-X\/][0-9]+([.,][0-9]+)?(V|AH|MM|CM|NM|W|KG|GA|L)?)*$/;
+
 /* \u2500\u2500 PARSEUR CLICKOUTIL (01/08/2026) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
    Le site est injoignable depuis le d\u00e9p\u00f4t (CONNECT 403, mesur\u00e9). TOUT ce qui
    suit est mesur\u00e9 sur la page r\u00e9elle envoy\u00e9e par le raccourci de l'user,
@@ -202,7 +207,7 @@ function parseClickoutil(rawText, brand) {
     /* Un prix \u00ab \u20ac TTC \u00bb dont la ligne du dessus ne finit pas par la marque
        n'est pas une carte de cette marque (panier, en-t\u00eate\u2026) : \u00e9cart\u00e9, dit. */
     if (!finMarque.test(titre)) {
-      out.sansRef.push((titre || '(rien au-dessus du prix)').slice(0, 120));
+      out.sansRef.push({ titre: (titre || '(rien au-dessus du prix)').slice(0, 120), prix: price });
       continue;
     }
     if (/\s\+\s/.test(titre)) { out.packs.push(titre.slice(0, 120)); continue; }
@@ -212,9 +217,18 @@ function parseClickoutil(rawText, brand) {
       var t = cm[0].toUpperCase();
       if (t === brandUp) continue;
       if (!/\d/.test(t) || !/[A-Z].*[A-Z]/.test(t)) continue;  // \u22651 chiffre, \u22652 lettres
+      /* \u26a0\ufe0f Une SUITE D'UNIT\u00c9S n'est pas une r\u00e9f \u2014 mesur\u00e9 sur la vraie page :
+         \u00ab Batterie XR 18V-54V 12Ah-4Ah Flexvolt DCB548-XJ \u00bb portait trois
+         candidats (18V-54V, 12AH-4AH, DCB548-XJ) et tombait en sansRef.
+         Le filtre r\u00e9cup\u00e8re 5 r\u00e9fs r\u00e9elles (3 batteries Flexvolt, le laser
+         DCE089NG18-XJ, le chargeur DCB1104-QW) sans en inventer aucune. */
+      if (UNITE_RE.test(t)) continue;
       if (candidats.indexOf(t) === -1) candidats.push(t);
     }
-    if (candidats.length !== 1) { out.sansRef.push(titre.slice(0, 120)); continue; }
+    /* sansRef porte le PRIX : c'est lui qui permet de suivre par NOM les
+       accessoires sans r\u00e9f\u00e9rence (r\u00e8gle de l'user : \u00ab comment sont nomm\u00e9s
+       les produits s'il n'y a pas de r\u00e9f\u00e9rence \u00bb). */
+    if (candidats.length !== 1) { out.sansRef.push({ titre: titre.slice(0, 120), prix: price }); continue; }
     var sku = candidats[0];
     if (seen[sku]) continue;
     seen[sku] = true;
