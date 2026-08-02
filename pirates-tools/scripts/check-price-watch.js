@@ -126,6 +126,42 @@ module.exports = function () {
     '⛔ les PACKS s\'apparient aussi par NOM (décision user 02/08 : ils entrent au '
     + 'catalogue) — sans ce branchement, leurs fiches Combos ne seraient jamais suivies');
 
+  /* ═══ NOMENCLATURE DeWALT (02/08/2026, règle de l'user, vérifiée par lui
+     jusqu'au fournisseur officiel) ══════════════════════════════════════════
+     Réf courte = machine NUE (N = nu, -XJ = géo) ; NT = nu + coffret TSTAK,
+     un AUTRE contenu ; ambiguïté = aucun rapprochement. */
+  var nomen = adm._internals && adm._internals.pwAliasNomenclature;
+  ok(typeof nomen === 'function', 'pwAliasNomenclature exposée aux portes');
+  if (nomen) {
+    function idx(fiches, marque) {
+      var by = {};
+      fiches.forEach(function (p) { if (p.sku) by[String(p.sku).toUpperCase()] = p; });
+      nomen(fiches, marque, by);
+      return by;
+    }
+    var nue = { sku: 'ZZD805N-XJ', brand: 'DeWALT' };
+    var tstak = { sku: 'ZZD805NT-XJ', brand: 'DeWALT' };
+    var b1 = idx([nue, tstak], 'DEWALT');
+    ok(b1.ZZD805 === nue && b1['ZZD805N'] === nue && b1['ZZD805-XJ'] === nue,
+      'réf courte, forme N et forme -XJ → LA MACHINE NUE (ZZD805 ≡ ZZD805N ≡ ZZD805N-XJ)');
+    ok(b1.ZZD805NT === tstak && b1.ZZD805 !== tstak,
+      '⛔ un NT (nu + coffret TSTAK) ne capte JAMAIS la réf courte — autre contenu, autre coût');
+    var b2 = idx([{ sku: 'ZZD9N', brand: 'DeWALT' }, { sku: 'ZZD9N-XJ', brand: 'DeWALT' }], 'DEWALT');
+    ok(!b2.ZZD9,
+      '⛔ AMBIGUÏTÉ (deux fiches nues pour la même base) → aucun alias : écrire le coût '
+      + 'sur la mauvaise fiche coûte plus cher que ne rien écrire');
+    var principale = { sku: 'ZZD7', brand: 'DeWALT' };
+    var b3 = idx([principale, { sku: 'ZZD7N-XJ', brand: 'DeWALT' }], 'DEWALT');
+    ok(b3.ZZD7 === principale,
+      'un sku PRINCIPAL existant n\'est jamais écrasé par un alias de nomenclature');
+    var b4 = idx([{ sku: 'ZZD805N-XJ', brand: 'Makita' }], 'MAKITA');
+    ok(!b4.ZZD805,
+      'la nomenclature ne s\'applique qu\'à DeWALT — celle de Makita (Z, ZJ) n\'a pas été tranchée');
+  }
+  ok(/pwAliasNomenclature\(products, brand, bySku\);/.test(adminSrc),
+    '⛔ handlePriceWatch doit indexer la nomenclature — sans elle, les réfs courtes '
+    + 'd\'idealo (39 mesurées) restent inconnues pour toujours');
+
   /* ═══ CONFIG ILLISIBLE = AUCUN PRIX ÉCRIT (02/08/2026) ═══════════════════
      Crainte de l'user au lendemain du quota Firestore épuisé : « les prix
      baissent quasiment à ceux des fournisseurs ? ». Deux verrous, tous deux

@@ -1673,6 +1673,39 @@ function pwApparierParNom(sansRef, products) {
   return { items, restants };
 }
 
+/* ── NOMENCLATURE DeWALT (02/08/2026, règle posée par l'user — vérifiée par
+   lui « sur tous les sites, même chez le fournisseur officiel ») ──────────
+     · réf COURTE (DCD805) = LA MACHINE NUE : « N » = nu, « -XJ » =
+       commercialisation européenne → DCD805 ≡ DCD805N ≡ DCD805N-XJ ;
+     · « NT » = machine nue AVEC COFFRET TSTAK : un AUTRE contenu — une réf
+       courte ne pointe JAMAIS vers un NT (l'envoi favorisé est sans
+       coffret, le coffret garde son surplus via le modèle de variantes) ;
+     · AMBIGUÏTÉ (deux fiches nues revendiquent la même base) → AUCUN
+       rapprochement : écrire un coût sur la mauvaise fiche coûte plus cher
+       que ne rien écrire.
+   Portée : les fiches DeWALT, quand la marque DEMANDÉE est DEWALT — la
+   nomenclature Makita (Z, ZJ…) n'a pas été tranchée par l'user.
+   Mutations : ajoute des clés d'alias à `bySku`, sans JAMAIS écraser une
+   entrée existante (sku principal et srcAltSkus priment).
+   Testée par check-price-watch via _internals, sabotage compris. */
+function pwAliasNomenclature(products, brand, bySku) {
+  if (String(brand || '').toUpperCase() !== 'DEWALT') return;
+  const claims = {};
+  products.forEach((p) => {
+    if (String(p.brand || '').toUpperCase() !== 'DEWALT' || !p.sku) return;
+    const sku = String(p.sku).toUpperCase();
+    const aliases = [];
+    if (/-XJ$/.test(sku)) aliases.push(sku.slice(0, -3));        // RN-XJ → RN (géo)
+    const m = sku.match(/^([A-Z0-9\/.-]*\d)N(?:-XJ)?$/);         // fiche NUE seulement
+    if (m) { aliases.push(m[1]); aliases.push(m[1] + '-XJ'); }   // base et base-XJ
+    aliases.forEach((a) => {
+      if (!a || bySku[a]) return;                                // jamais écraser
+      claims[a] = (Object.prototype.hasOwnProperty.call(claims, a) && claims[a] !== p) ? false : p;
+    });
+  });
+  Object.keys(claims).forEach((a) => { if (claims[a] && !bySku[a]) bySku[a] = claims[a]; });
+}
+
 function pwSourceCost(p, o, cfg, byGroup) {
   /* ── PLUSIEURS TRAQUEURS (01/08/2026) : la carte `priceSources` fait foi ──
      Chaque passage de traqueur écrit sa propre entrée { ttc, at, enStock }.
@@ -1916,6 +1949,7 @@ async function handlePriceWatch(req, res, admin, db) {
         if (k && !bySku[k]) bySku[k] = p;
       });
     });
+    pwAliasNomenclature(products, brand, bySku);
 
     // Overrides relus À LA SOURCE : le catalogue fusionné peut avoir jusqu'à
     // 30 s de retard, et ici un prix actuel périmé fausserait AUSSI la garde
@@ -2195,4 +2229,4 @@ async function handlePriceWatch(req, res, admin, db) {
 // cale. Au-delà, découper la marque en 2 pages (voir docs/TRAQUEUR-URLS.md).
 module.exports.config = { api: { bodyParser: { sizeLimit: '4.5mb' } } };
 // Pour les portes UNIQUEMENT : tester le vrai chemin, jamais une copie (O6).
-module.exports._internals = { pwSourceCost: pwSourceCost, pwSourcesConnues: pwSourcesConnues, pwApparierParNom: pwApparierParNom };
+module.exports._internals = { pwSourceCost: pwSourceCost, pwSourcesConnues: pwSourcesConnues, pwApparierParNom: pwApparierParNom, pwAliasNomenclature: pwAliasNomenclature };
