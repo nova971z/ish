@@ -737,6 +737,24 @@ module.exports = async function () {
           '⛔ `applied` reste rendu en balayage : c\'est la liste des prix qui bougent, '
           + 'donc de l\'argent — jamais masquée pour raccourcir une réponse');
 
+        /* ── UN PLANTAGE MUET EST UN MUR (02/08/2026, 3ᵉ fois) ───────────────
+           « price-watch failed » ne disait ni quelle opération, ni quel objet :
+           un aller-retour entier avec l'user pour une information que le
+           serveur tenait déjà. ⛔ Mais la PILE ne sort jamais vers le client :
+           elle renseignerait sur la structure du serveur (compromis d'E-111).
+           Réf témoin SYNTHÉTIQUE, base factice qui jette à la 1ʳᵉ lecture. */
+        var dbBoom = { collection: function () { throw new Error('ZZBOOM-TEMOIN-DE-PORTE'); } };
+        var rBoom = fauxRes();
+        await admFn(reqPage(refInconnue, {}), rBoom, fauxAdmin, dbBoom);
+        ok(rBoom.code === 500 && rBoom.out && /ZZBOOM-TEMOIN-DE-PORTE/.test(String(rBoom.out.error)),
+          '⛔ un plantage du traqueur doit NOMMER son erreur — sinon le diagnostic '
+          + 'passe par l\'user (obtenu : ' + JSON.stringify(rBoom.out) + ')');
+        ok(rBoom.out && String(rBoom.out.error).length <= 220
+          && !/\n/.test(String(rBoom.out.error))
+          && !/\bat\s+\S+\s*\(/.test(String(rBoom.out.error)),
+          '⛔ SÉCURITÉ : la réponse d\'erreur ne rend JAMAIS la pile d\'appels, et reste '
+          + 'bornée — le journal serveur la garde, le client non');
+
         // ── J4 : l'ancien prix barré = MINIMUM 30 j du journal ──
         scanReset();
         var maintenant = Date.now();

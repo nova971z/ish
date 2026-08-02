@@ -2344,8 +2344,20 @@ async function handlePriceWatch(req, res, admin, db) {
       sansRef: scanMode ? [] : apparie.restants.slice(0, 200)
     });
   } catch (err) {
-    console.error('[api/admin] price-watch failed:', err.message);
-    return res.status(500).json({ ok: false, error: 'price-watch failed' });
+    /* ⛔ UN PLANTAGE MUET EST UN MUR (02/08/2026, troisième fois) ───────────
+       « price-watch failed » ne disait RIEN : ni quelle opération, ni quel
+       objet. Sur le balayage 67 pages, ce message a coûté un aller-retour
+       complet avec l'user pour une information que le serveur tenait déjà.
+       Même leçon que le `parsed: 0` muet (01/08) et que le refus 400 muet
+       (plus haut dans ce fichier) : quand on TIENT l'information, on la rend.
+       ⚠️ Message TRONQUÉ à 200 caractères, pile JAMAIS rendue (journal
+       serveur seulement) : une trace complète renseigne sur la structure du
+       serveur. Même compromis que le catch du GET admin (E-111). */
+    console.error('[api/admin] price-watch failed:', err && err.stack);
+    return res.status(500).json({
+      ok: false,
+      error: 'price-watch : ' + String((err && err.message) || err).slice(0, 200)
+    });
   }
 }
 
