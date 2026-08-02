@@ -26,7 +26,10 @@ const T = (n, ok, x = '') => { ok ? pass++ : fail++; console.log((ok ? '✅' : '
 
 const cat = JSON.parse(await readFile(join(ROOT, 'products.json'), 'utf8'));
 const prods = Array.isArray(cat) ? cat : (cat.products || []);
-const quinc = prods.filter(p => p.brand === 'Quincaillerie').slice(0, 2);
+/* Par CATÉGORIE, comme l'app (estQuincaillerie) : la marque « Quincaillerie »
+   est morte le 02/08/2026 avec le retrait des 304 fiches maison — la
+   quincaillerie vivante vient du traqueur (marque DeWALT/Makita). */
+const quinc = prods.filter(p => p.category === 'Quincaillerie').slice(0, 2);
 const K1 = quinc[0].id || quinc[0].sku, K2 = quinc[1].id || quinc[1].sku;
 // Un produit qui n'est PLUS au catalogue : il doit être ignoré sans casser.
 const KMORT = 'produit-supprime-9999';

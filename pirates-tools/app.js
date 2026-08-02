@@ -1347,6 +1347,19 @@
     });
   }
 
+  /* ── QU'EST-CE QUE « LA QUINCAILLERIE » ? UN SEUL CRITÈRE, ICI. ──────────
+     Jusqu'au 02/08/2026 : `brand === 'Quincaillerie'` — les 304 fiches
+     saisies à la main. L'user les a RETIRÉES (« on les rentrera à l'aide du
+     traqueur, on aura des vraies références ») : la quincaillerie vivante
+     est désormais celle du traqueur — marque DeWALT/Makita, CATÉGORIE
+     Quincaillerie. Le critère suit. Quatre usages en dépendent : sélecteur
+     de quantité, bloc « Livraison sur ton chantier », panier coursier,
+     lignes payables d'une course. Un critère par usage = des fiches qui
+     divergent en silence ; il n'y en a qu'un, et il est ici. */
+  function estQuincaillerie(p) {
+    return !!p && p.category === 'Quincaillerie';
+  }
+
   function filteredProducts() {
     var q = currentFilter.query.toLowerCase().trim();
     var cat = currentFilter.category;
@@ -1826,15 +1839,24 @@
     $$('.brand-card', dom.brandGrid).forEach(function (btn) {
       btn.addEventListener('click', function () {
         var brand = btn.dataset.brand;
-        // Bulle Quincaillerie : même mécanique que les marques — catalogue avec
-        // la recherche pré-remplie « Quincaillerie » (les 304 fiches QC- matchent
-        // par brand/catégorie). La page #/livraison reste accessible via le menu.
-        if (brand === '__livraison') brand = 'Quincaillerie';
+        /* Bulle Quincaillerie : filtre par CATÉGORIE, plus par texte. La
+           recherche ne matche que titre/marque/descriptif — depuis le retrait
+           des 304 fiches maison (02/08/2026, décision de l'user), la
+           quincaillerie vivante (lames, forets DeWALT du traqueur) ne porte
+           « Quincaillerie » dans AUCUN de ces champs : la recherche pré-remplie
+           rendait zéro résultat. */
+        var estBulleQuinc = (brand === '__livraison');
         location.hash = '#/catalogue';
         // Slight delay so route change renders catalogue first
         setTimeout(function () {
-          currentFilter.query = brand;
-          if (dom.q) dom.q.value = brand;
+          if (estBulleQuinc) {
+            currentFilter.query = '';
+            if (dom.q) dom.q.value = '';
+            currentFilter.category = 'Quincaillerie';
+          } else {
+            currentFilter.query = brand;
+            if (dom.q) dom.q.value = brand;
+          }
           renderProductList();
         }, 50);
       });
@@ -2329,7 +2351,7 @@
     // ── Fiches QUINCAILLERIE : le split 3D/specs est REMPLACÉ par le bloc
     // « Livraison sur ton chantier » (carte de l'île + adresse + créneau). Le
     // reste de la fiche (prix, achat, WhatsApp…) est inchangé.
-    var isQuinc = (product.brand === 'Quincaillerie');
+    var isQuinc = estQuincaillerie(product);
     var splitSection = document.querySelector('.pdp-section--split');
     var delivSection = document.getElementById('pdpDelivery');
     // Testeur (allowlist) : bloc livraison AUSSI sur les machines (chaîne de
@@ -5435,7 +5457,7 @@
     if (!orderSec) return;
     var quincItems = getCart().filter(function (it) {
       var p = findProductByKey(it.key);
-      return p && p.brand === 'Quincaillerie';
+      return estQuincaillerie(p);
     });
     var has = quincItems.length > 0;
     orderSec.hidden = !has;
@@ -5458,7 +5480,7 @@
         // Lignes PAYABLES = la quincaillerie du panier (modale carte).
         var items = getCart().filter(function (it) {
           var p = findProductByKey(it.key);
-          return p && p.brand === 'Quincaillerie';
+          return estQuincaillerie(p);
         });
         if (!items.length) return null;
         return {
@@ -6433,7 +6455,7 @@
     if (!src.length) {
       src = getCart().filter(function (it) {
         var p = findProductByKey(it.key);
-        return p && p.brand === 'Quincaillerie';
+        return estQuincaillerie(p);
       }).map(function (it) { return { key: it.key, qty: it.qty || 1 }; });
       depuisPanier = src.length > 0;
     }

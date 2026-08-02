@@ -54,9 +54,12 @@ var RACINE = path.join(__dirname, '..');
    ⛔ Cette liste ne s'allonge pas pour faire taire la porte : une entrée sans
    motif vérifiable, c'est un trou qu'on se cache à soi-même. */
 var SANS_SOURCE = {
-  Quincaillerie: 'catégorie maison, pas une marque du fournisseur — ces fiches '
-    + 'n\'ont pas de page à traquer. Leur coût doit venir d\'ailleurs (relevé saisi), '
-    + 'sinon leur prix reste une supposition.'
+  /* ⚠️ `Quincaillerie` a vécu ici du 01 au 02/08/2026 : 304 fiches maison sans
+     page fournisseur à traquer. RETIRÉES du catalogue le 02/08 par décision de
+     l'user (« on les rentrera à l'aide du traqueur, on aura des vraies
+     références ») — sauvegarde complète dans l'historique git et
+     scratchpad/retraits-quincaillerie-20260802.json. Une dispense sans fiches
+     derrière serait un trou masqué : elle part avec elles. */
 };
 
 module.exports = function () {

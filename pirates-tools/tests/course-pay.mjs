@@ -28,7 +28,15 @@ const page = await ctx.newPage();
 let pass=0, fail=0;
 const T = (name, ok, extra='') => { ok?pass++:fail++; console.log((ok?'✅':'❌')+' '+name+(extra?' — '+extra:'')); };
 
-await page.goto(base+'/index.html#/produit/quincaillerie-0001',{waitUntil:'domcontentloaded'});
+/* Fiche choisie À L'EXÉCUTION par CATÉGORIE — la règle des harnais interdit de
+   nommer une donnée du catalogue, et ce fichier l'a payé : il visait
+   `quincaillerie-0001` en dur, morte au retrait des 304 fiches maison
+   (02/08/2026). Même critère que l'app (estQuincaillerie). */
+const catQ = JSON.parse(await readFile(join(ROOT, 'products.json'), 'utf8'));
+const prodsQ = Array.isArray(catQ) ? catQ : (catQ.products || []);
+const ficheQ = prodsQ.find(p => p.category === 'Quincaillerie' && (p.id || p.slug));
+if (!ficheQ) { console.log('❌ PRÉALABLE : aucune fiche de catégorie Quincaillerie au catalogue'); process.exit(1); }
+await page.goto(base+'/index.html#/produit/'+(ficheQ.id||ficheQ.slug),{waitUntil:'domcontentloaded'});
 await page.waitForFunction(()=>window.PT_BOOTED===true,{timeout:15000}).catch(()=>{});
 await page.waitForTimeout(800);
 
@@ -62,25 +70,45 @@ r = await page.evaluate(()=>{
 T('Ajout panier → qty 3 en une fois', JSON.stringify(r).includes('"qty":3'), JSON.stringify(r));
 
 // 3. Modale paiement avec contexte course
-r = await page.evaluate(()=>{
-  window.openPayModal([{ key:'quincaillerie-0001', title:'Quincaillerie #0001', price:1, qty:2 }],
+/* La clé est celle de la fiche RÉELLE choisie plus haut : une clé morte ne
+   résout plus vers un produit, et le prix territorial (971) ne s'applique
+   alors pas — c'est ce qui a rougi ce test au retrait des fiches maison. */
+r = await page.evaluate((cleFiche)=>{
+  window.openPayModal([{ key:cleFiche, title:'Article de contrôle', price:1, qty:2 }],
     { address:'12 Rue des Alizés 97180 Sainte-Anne', street:'12 Rue des Alizés', postal:'97180', city:'Sainte-Anne',
       lat:16.24, lng:-61.36, date:'2026-07-28', when:'matin', hour:'', zone:1, prix:22 });
   const modal=document.getElementById('payModal');
   const items=document.getElementById('payModalItems');
   const deliv=items.querySelector('.pay-modal__line--deliv');
+  /* Somme des lignes PRODUITS lue dans la modale elle-même : recopier la
+     table fiscale 971 dans un harnais serait un seuil recopié (il se
+     périme) — l'invariant testable est « total = produits + livraison ». */
+  const lignesProduits = [...items.querySelectorAll('.pay-modal__line:not(.pay-modal__line--deliv) .pay-modal__line-price')]
+    .map(el => { const m = el.textContent.replace(/\s/g,'').match(/(\d+(?:[.,]\d{2}))€/); return m ? parseFloat(m[1].replace(',','.')) : 0; });
   return {
     open: modal && modal.hidden===false,
     delivLine: deliv ? deliv.textContent.replace(/\s+/g,' ').trim() : null,
+    sommeProduits: lignesProduits.reduce((s,x)=>s+x, 0),
     total: document.getElementById('payModalTotal').textContent,
     postal: document.getElementById('payAddrPostal').value,
     line1: document.getElementById('payAddrLine1').value,
     city: document.getElementById('payAddrCity').value
   };
-});
+}, ficheQ.id || ficheQ.slug);
 T('Modale de paiement OUVERTE', r.open===true);
 T('Ligne livraison zone 1 — 22 € affichée', !!r.delivLine && r.delivLine.includes('zone 1') && r.delivLine.includes('22'), r.delivLine||'absente');
-T('Total = produits (prix territorial 971 : 2×0,95 €) + livraison 22 € = 23,90 €', /23[,.]90/.test(r.total), r.total);
+{
+  /* Jusqu'au 02/08/2026 ce test attendait « 23,90 € » en dur, calculé sur une
+     clé produit morte : la modale utilise le prix RÉEL de la fiche (serveur
+     autoritaire), pas celui passé en ligne. L'invariant qui ne se périme
+     pas : le total affiché = somme des lignes produits + livraison, au
+     centime. */
+  const totalNum = parseFloat(String(r.total).replace(/[^0-9,.]/g,'').replace(',','.'));
+  const attendu = Math.round((r.sommeProduits + 22) * 100) / 100;
+  T('Total = somme des lignes produits + livraison 22 €, au centime',
+    r.sommeProduits > 0 && Math.abs(totalNum - attendu) <= 0.01,
+    r.total + ' vs produits ' + r.sommeProduits + ' + 22');
+}
 T('Adresse chantier préremplie (CP 97180)', r.postal==='97180' && r.city==='Sainte-Anne' && r.line1.length>3, JSON.stringify({postal:r.postal,city:r.city,line1:r.line1}));
 
 // 3b. Photo du chantier : setInputFiles → compression + aperçu + statut
