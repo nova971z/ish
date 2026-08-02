@@ -14354,8 +14354,8 @@
   // Claim admin prouvé par le serveur. Voir .claude/rules/donnees.md.
   var _adminClaimOk = false;
 
-  function afficherPorteAdmin(view) {
-    view.innerHTML = adminLoginTemplate();
+  function afficherPorteAdmin(view, raison) {
+    view.innerHTML = adminLoginTemplate(raison);
     var btn = document.getElementById('adminGoLogin');
     if (btn) {
       btn.onclick = function () {
@@ -14376,7 +14376,10 @@
     if (!_currentUser) { afficherPorteAdmin(v); return true; }
     v.innerHTML = '<p>Vérification…</p>';
     adminFetch('GET').then(function () { _adminClaimOk = true; renderAdmin(); })
-      .catch(function () { afficherPorteAdmin(v); });
+      /* La RAISON de l'échec s'affiche sur la porte — un refus muet a rendu
+         la panne du 02/08 indiagnosticable (porte vue par le propriétaire
+         connecté, sans un mot sur le pourquoi). */
+      .catch(function (e) { afficherPorteAdmin(v, (e && e.message) || 'erreur inconnue'); });
     return true;
   }
 
@@ -14908,7 +14911,13 @@
      Un champ qui ne peut rien ouvrir n'est pas neutre — il fait chercher une
      clé qui n'existe plus, et il laisse croire qu'une seconde voie subsiste.
      La seule voie réelle est le compte propriétaire porteur du claim admin. */
-  function adminLoginTemplate() {
+  /* `raison` : pourquoi la vérification a ÉCHOUÉ, mot pour mot. Ajoutée le
+     02/08/2026 : l'user, connecté et propriétaire, s'est retrouvé devant
+     cette porte SANS AUCUNE EXPLICATION — le `catch` avalait l'erreur, et
+     personne ne pouvait dire si c'était un 401 (claim non vu), un 500
+     (serveur cassé) ou une coupure réseau. Une porte qui refuse sans dire
+     pourquoi rend la panne indiagnosticable. */
+  function adminLoginTemplate(raison) {
     return '<div class="admin-login">'
       + '<div class="admin-login__card">'
       + '<h1>Administration</h1>'
@@ -14917,6 +14926,11 @@
       + '<button type="button" id="adminGoLogin" class="btn primary">Se connecter à mon compte</button>'
       + '<p class="admin-login__hint">Aucune clé n\'est demandée : l\'autorisation '
       + 'est portée par ton compte et vérifiée par le serveur.</p>'
+      + (raison
+        ? '<p class="admin-login__hint" id="adminPorteRaison">⚠️ Dernière vérification refusée : '
+          + String(raison).replace(/&/g, '&amp;').replace(/</g, '&lt;').slice(0, 300)
+          + '</p>'
+        : '')
       + '</div>'
       + '</div>';
   }
