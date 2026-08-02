@@ -210,7 +210,13 @@ function parseClickoutil(rawText, brand) {
       out.sansRef.push({ titre: (titre || '(rien au-dessus du prix)').slice(0, 120), prix: price });
       continue;
     }
-    if (/\s\+\s/.test(titre)) { out.packs.push(titre.slice(0, 120)); continue; }
+    /* Un PACK monté par le site (titre à « + ») ne s'identifie JAMAIS par une
+       réf — la seule réf du titre est celle d'un COMPOSANT, et écrire le prix
+       du pack dessus corromprait un coût. Mais il s'identifie très bien par
+       son NOM : depuis le 02/08/2026 (décision de l'user, qui VEUT ces packs
+       au catalogue), il sort avec son prix et s'apparie par `srcNom`, comme
+       les accessoires sans réf. Le verrou composant reste entier. */
+    if (/\s\+\s/.test(titre)) { out.packs.push({ titre: titre.slice(0, 160), prix: price }); continue; }
     var candidats = [], cm;
     candidatRe.lastIndex = 0;
     while ((cm = candidatRe.exec(titre)) !== null) {

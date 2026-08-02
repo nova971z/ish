@@ -121,6 +121,10 @@ module.exports = function () {
     && /apparie\.items\.forEach\(\(it\) => parsed\.push\(it\)\)/.test(adminSrc),
     '⛔ handlePriceWatch doit apparier les sansRef par nom AVANT la boucle — '
     + 'sans ça, les accessoires sans réf ne seront jamais suivis');
+  ok(/const appariePacks = pwApparierParNom\(auto\.packs, products\)/.test(adminSrc)
+    && /appariePacks\.items\.forEach\(\(it\) => parsed\.push\(it\)\)/.test(adminSrc),
+    '⛔ les PACKS s\'apparient aussi par NOM (décision user 02/08 : ils entrent au '
+    + 'catalogue) — sans ce branchement, leurs fiches Combos ne seraient jamais suivies');
 
   /* ═══ CONFIG ILLISIBLE = AUCUN PRIX ÉCRIT (02/08/2026) ═══════════════════
      Crainte de l'user au lendemain du quota Firestore épuisé : « les prix
@@ -341,9 +345,11 @@ module.exports = function () {
       + '(réf au MILIEU du titre — 126 cas mesurés sur 554)');
     ok(cSku['ZZT456-XJ'] && !('oldPrice' in cSku['ZZT456-XJ']) && !('basePrice' in cSku['ZZT456-XJ']),
       '⛔ le prix barré fournisseur n\'est jamais capturé (J4, D-004)');
-    ok(!cSku['ZZTC99-QW'] && !cSku['ZZT789'] && rc.packs.length === 1,
-      '⛔ ARGENT : un PACK monté par le site est écarté ET listé — son prix ne s\'écrit '
-      + 'ni sur la réf du composant ni sur celle de l\'outil nu (' + JSON.stringify(rc.packs) + ')');
+    ok(!cSku['ZZTC99-QW'] && !cSku['ZZT789'] && rc.packs.length === 1
+      && /ZZT789/.test(rc.packs[0].titre) && rc.packs[0].prix === 333.00,
+      '⛔ ARGENT : le prix d\'un PACK ne s\'écrit JAMAIS sur la réf d\'un composant ni de '
+      + 'l\'outil nu — il sort AVEC titre et prix pour être suivi PAR NOM (décision user '
+      + '02/08 : les packs entrent au catalogue) (' + JSON.stringify(rc.packs) + ')');
     ok(rc.sansRef.length === 1 && /Raboteuse/.test(rc.sansRef[0].titre)
       && rc.sansRef[0].prix === 111.00,
       'un titre SANS réf sûre est écarté et listé AVEC SON PRIX — c\'est lui qui permet '

@@ -60,6 +60,12 @@ const marque = String(releve.brand || 'Makita');
    chaque passage. ⛔ Un titre vu PLUSIEURS fois sur la page (trois « Lame …
    Ø184 mm » mesurées) n'identifie rien : refusé, avec motif. */
 const sansRefBruts = (Array.isArray(releve.sansRef) ? releve.sansRef : [])
+  /* Les PACKS entrent par la même porte depuis le 02/08/2026 (décision de
+     l'user : il les VEUT au catalogue). Leur identité est le titre exact —
+     jamais la réf d'un composant. Les vieux relevés portaient des CHAÎNES
+     sans prix : filtrées, un import sans coût est interdit plus bas. */
+  .concat(Array.isArray(releve.packsIgnores) ? releve.packsIgnores : [])
+  .filter((e) => e && typeof e === 'object' && e.titre)
   .map((e) => ({ _nom: true, titre: String((e && e.titre) || '').trim(), srcTTC: Number((e && e.prix) || 0) }));
 const freqTitres = {};
 sansRefBruts.forEach((e) => { if (e.titre) freqTitres[e.titre] = (freqTitres[e.titre] || 0) + 1; });
@@ -245,6 +251,10 @@ for (const it of liste.concat(sansRefBruts)) {
   /* Entrée par NOM : `srcNom` est l'identité de suivi (le titre EXACT du
      site), et le pseudo-sku ne s'affiche jamais comme référence. */
   if (it._nom) { fiche.srcNom = nom; fiche.specs = { Marque: MARQUE }; }
+  /* Un PACK (titre à « + ») va TOUJOURS en Combos — la famille dédiée aux
+     lots. Sans ce forçage, « Scie … + 2 batteries » partait dans les Scies
+     et le lot se mélangeait aux machines seules. */
+  if (it._nom && /\s\+\s/.test(nom)) fiche.category = 'Combos';
   /* ⚠️ QUINCAILLERIE (règle user, 02/08) : envoi en LETTRE, 6 à 8 € —
      le modèle facture 8 € (borne haute, la marge ne se sous-estime pas)
      dès que le poids passe sous son seuil lettre. Délai annoncé : 7 à

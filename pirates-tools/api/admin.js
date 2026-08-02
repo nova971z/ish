@@ -1952,6 +1952,12 @@ async function handlePriceWatch(req, res, admin, db) {
        les autres restent listés. */
     const apparie = pwApparierParNom(auto.sansRef, products);
     apparie.items.forEach((it) => parsed.push(it));
+    /* Les PACKS aussi (02/08/2026, décision de l'user — il les VEUT au
+       catalogue) : identité = le titre exact (`srcNom`), jamais la réf d'un
+       composant. Le verrou d'argent reste entier : un pack non apparié
+       reste listé, son prix ne s'écrit sur AUCUNE fiche. */
+    const appariePacks = pwApparierParNom(auto.packs, products);
+    appariePacks.items.forEach((it) => parsed.push(it));
 
     // Prix parsés indexés par SKU (pour la règle « min des sources » srcAltSkus).
     const parsedBySku = {};
@@ -2161,18 +2167,20 @@ async function handlePriceWatch(req, res, admin, db) {
         unchanged: unchanged.length, unknown: unknown.length, locked: lockedW.length,
         absents: absents.length, absentsJamaisReleves: jamaisReleves.length,
         rupture: enRupture.length,
-        packsIgnores: auto.packs.length,
+        packsIgnores: appariePacks.restants.length, packsSuivis: appariePacks.items.length,
         sansRef: apparie.restants.length, sansRefSuivis: apparie.items.length
       },
       source: sourceSlug, format: auto.format,
       applied, flagged, unknown: unknown.slice(0, 800),
       absents: absents.slice(0, 800),
       rupture: enRupture.slice(0, 400),
-      /* Écartés VOLONTAIRES, jamais silencieux : packs montés par le site
-         (prix de pack ≠ coût d'un composant) et titres sans réf sûre NON
-         appariés par nom (`srcNom`). */
-      packsIgnores: auto.packs.slice(0, 100),
-      sansRef: apparie.restants.slice(0, 100)
+      /* Restent listés, jamais silencieux : packs et titres sans réf NON
+         appariés par nom (`srcNom`). Plafond 400 (et non 100) : c'est cette
+         liste, AVEC les prix, qui sert à créer les fiches des packs —
+         plafonnée à 100, l'import aurait été borgne (275 packs sur la page,
+         mesurés le 02/08). */
+      packsIgnores: appariePacks.restants.slice(0, 400),
+      sansRef: apparie.restants.slice(0, 200)
     });
   } catch (err) {
     console.error('[api/admin] price-watch failed:', err.message);
