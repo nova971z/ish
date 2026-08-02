@@ -600,6 +600,39 @@ module.exports = async function () {
       return { method: 'POST', query: q, body: { text: pageIdealo(sku, '450,00') } };
     }
 
+    /* ── UN REFUS MUET EST UN MUR (02/08/2026) ───────────────────────────────
+       Le balayage 67 pages a rendu « text manquant ou trop court » à chaque
+       tour, sans rien d'autre : impossible de distinguer une variable mal
+       pointée d'une page vide. Le serveur tient le corps → il le mesure.
+       ⛔ ET IL NE REFLÈTE JAMAIS UN EN-TÊTE : la clé du traqueur y vit. */
+    var refusVide = fauxRes();
+    await admFn({ method: 'POST', query: { type: 'price-watch', source: 'idealo' }, body: {},
+      headers: { 'x-watch-secret': 'ZZSECRET-TEMOIN-NE-DOIT-JAMAIS-SORTIR' } },
+      refusVide, fauxAdmin, fauxDb({}, []));
+    ok(refusVide.code === 400 && refusVide.out && refusVide.out.diagnostic
+      && refusVide.out.diagnostic.caracteresRecus === 0
+      && /VIDE ou absent/.test(refusVide.out.diagnostic.lecture)
+      && refusVide.out.source === 'idealo',
+      '⛔ corps sans `text` → le refus doit MESURER (0 caractère) et nommer la source, '
+      + 'pas opposer un mur — obtenu : ' + JSON.stringify(refusVide.out && refusVide.out.diagnostic));
+
+    var refusCourt = fauxRes();
+    await admFn({ method: 'POST', query: { type: 'price-watch', source: 'idealo' }, body: { text: '15' },
+      headers: { 'x-watch-secret': 'ZZSECRET-TEMOIN-NE-DOIT-JAMAIS-SORTIR' } },
+      refusCourt, fauxAdmin, fauxDb({}, []));
+    ok(refusCourt.out && refusCourt.out.diagnostic
+      && refusCourt.out.diagnostic.caracteresRecus === 2
+      && refusCourt.out.diagnostic.debutRecu === '15'
+      && /TRÈS court/.test(refusCourt.out.diagnostic.lecture),
+      '⛔ un corps de 2 caractères (la variable pointe sur un NOMBRE) doit se lire tel quel '
+      + 'dans le diagnostic — c\'est ce qui distingue « mauvaise variable » de « page vide » '
+      + '(obtenu : ' + JSON.stringify(refusCourt.out && refusCourt.out.diagnostic) + ')');
+
+    var fuite = JSON.stringify(refusVide.out) + JSON.stringify(refusCourt.out);
+    ok(fuite.indexOf('ZZSECRET-TEMOIN') === -1 && !/watch-secret/i.test(fuite),
+      '⛔⛔ SECRET : le diagnostic d\'erreur ne reflète JAMAIS un en-tête — la clé du '
+      + 'traqueur y vit, et un extrait de secret reste un secret');
+
     if (cible) {
       /* Le newPrice s'APPREND du modèle réel (dryRun) — un seuil recopié se
          périme (règle harnais) et le modèle de marge évolue avec la config. */

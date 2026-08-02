@@ -1933,17 +1933,47 @@ async function handlePriceWatch(req, res, admin, db) {
     const brand = String(body.brand || (req.query && req.query.brand) || 'DEWALT').toUpperCase();
     const dryRun = body.dryRun === true || (req.query && (req.query.dryRun === '1' || req.query.dryRun === 'true'));
     const scanMode = body.scan === true || (req.query && (req.query.scan === '1' || req.query.scan === 'true'));
-    if (!text || text.length < 200) return res.status(400).json({ ok: false, error: 'text manquant ou trop court' });
-
     /* ── IDENTITÉ DE LA SOURCE (01/08/2026) ─────────────────────────────────
        Un deuxième site va être traqué, puis d'autres : chaque raccourci passe
        `&source=<slug>`. Sans le paramètre : 'cotebrico' — aucun raccourci
        existant ne change. ⛔ Le slug devient une CLÉ Firestore : alphabet
        fermé, longueur bornée — rien d'arbitraire n'entre en base.
-       ⚠️ Calculé AVANT le retour `parsed: 0` : le premier essai clickoutil a
-       rendu un JSON muet sur la source qui tournait — indiagnosticable. */
+       ⚠️ Calculé AVANT TOUT RETOUR, erreurs comprises : le premier essai
+       clickoutil a rendu un JSON muet sur la source qui tournait —
+       indiagnosticable. */
     const sourceSlug = (String((req.query && req.query.source) || 'cotebrico')
       .toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 24)) || 'cotebrico';
+
+    /* ⛔ UN REFUS MUET EST UN MUR (02/08/2026) ──────────────────────────────
+       « text manquant ou trop court » n'a longtemps rien dit d'autre. Sur le
+       raccourci de balayage 67 pages, ce mur s'est levé à chaque tour sans une
+       seule information exploitable : impossible de distinguer « la variable
+       du corps JSON pointe vers la mauvaise action » (on reçoit alors « 15 »,
+       ou une réponse d'API) de « la page fournisseur n'a rien renvoyé »
+       (rafale coupée, URL construite invalide). C'est le MÊME défaut que le
+       `parsed: 0` muet du 01/08, et le même remède : le serveur TIENT le
+       corps, il le MESURE au lieu de le jeter.
+       ⚠️ On ne reflète que ce qui vient du corps de SA propre requête, plafonné
+       à 200 caractères — une page fournisseur publique, ou son propre relevé.
+       ⛔ Aucun en-tête n'est reflété : la clé du traqueur y vit, et un extrait
+       de secret reste un secret. */
+    if (!text || text.length < 200) {
+      const recu = String(text || '');
+      return res.status(400).json({
+        ok: false, error: 'text manquant ou trop court', source: sourceSlug,
+        diagnostic: {
+          caracteresRecus: recu.length,
+          typeDuCorps: typeof req.body,
+          clesDuCorps: (req.body && typeof req.body === 'object') ? Object.keys(req.body).slice(0, 12) : [],
+          debutRecu: recu.slice(0, 200),
+          lecture: !recu.length
+            ? 'champ `text` VIDE ou absent — la variable du corps JSON ne se résout pas, ou la page n\'a rien renvoyé'
+            : (recu.length < 40
+              ? 'contenu TRÈS court — la variable du corps JSON pointe vers un nombre ou une URL, pas vers la page'
+              : 'contenu court — page fournisseur tronquée, vide, ou réponse d\'un autre point d\'entrée')
+        }
+      });
+    }
 
     /* Aiguillage de format (01/08/2026) : chaque parseur tourne, le plus
        fécond gagne — cotébrico et clickoutil n'écrivent ni leurs prix ni
