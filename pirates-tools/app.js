@@ -14375,7 +14375,13 @@
     if (getAdminSecret() || _adminClaimOk) return false;
     if (!_currentUser) { afficherPorteAdmin(v); return true; }
     v.innerHTML = '<p>Vérification…</p>';
-    adminFetch('GET').then(function () { _adminClaimOk = true; renderAdmin(); })
+    /* `type=moi` : vérification du claim à ZÉRO lecture Firestore. L'ancien
+       appel (GET par défaut) listait TOUTE la collection des overrides juste
+       pour savoir si l'user est propriétaire — quota Firestore épuisé, la
+       porte refusait d'ouvrir (« 8 RESOURCE_EXHAUSTED », mesuré le
+       02/08/2026 sur son écran). Entrer ne coûte plus rien ; chaque panneau
+       dit ensuite ses propres erreurs. */
+    adminGet('moi').then(function () { _adminClaimOk = true; renderAdmin(); })
       /* La RAISON de l'échec s'affiche sur la porte — un refus muet a rendu
          la panne du 02/08 indiagnosticable (porte vue par le propriétaire
          connecté, sans un mot sur le pourquoi). */

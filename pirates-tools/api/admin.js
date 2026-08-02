@@ -54,6 +54,17 @@ module.exports = async function handler(req, res) {
   if (req.method === 'GET') {
     const type = (req.query && req.query.type) || 'overrides';
 
+    /* ── GET ?type=moi : « suis-je le propriétaire ? » — ZÉRO lecture ──────
+       Panne du 02/08/2026, mesurée sur l'écran de l'user : « 8
+       RESOURCE_EXHAUSTED: Quota exceeded ». La porte admin vérifiait le
+       claim en appelant le GET par défaut… qui lit TOUTE la collection des
+       overrides. Quota Firestore épuisé = impossible même d'ENTRER dans
+       l'admin. Or `requireAdmin` a déjà tranché plus haut, sans une seule
+       lecture Firestore : arrivé ici, la réponse est oui. Ce point d'entrée
+       ne touche à rien — la porte doit s'ouvrir même quand le quota est à
+       sec (les panneaux, eux, diront leurs propres erreurs). */
+    if (type === 'moi') return res.status(200).json({ ok: true, moi: true });
+
     // ── GET ?type=export-catalogue : le catalogue FUSIONNÉ, prêt à remplacer
     //    products.json ───────────────────────────────────────────────────────
     // POURQUOI CE POINT D'ENTRÉE EXISTE
