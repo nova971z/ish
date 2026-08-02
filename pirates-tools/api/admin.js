@@ -1933,6 +1933,8 @@ async function handlePriceWatch(req, res, admin, db) {
     const brand = String(body.brand || (req.query && req.query.brand) || 'DEWALT').toUpperCase();
     const dryRun = body.dryRun === true || (req.query && (req.query.dryRun === '1' || req.query.dryRun === 'true'));
     const scanMode = body.scan === true || (req.query && (req.query.scan === '1' || req.query.scan === 'true'));
+    // Mode d'essai à coût nul — voir le bloc « MODE À SEC » plus bas.
+    const secMode = body.sec === true || (req.query && (req.query.sec === '1' || req.query.sec === 'true'));
     /* ── IDENTITÉ DE LA SOURCE (01/08/2026) ─────────────────────────────────
        Un deuxième site va être traqué, puis d'autres : chaque raccourci passe
        `&source=<slug>`. Sans le paramètre : 'cotebrico' — aucun raccourci
@@ -1996,6 +1998,52 @@ async function handlePriceWatch(req, res, admin, db) {
         ok: true, brand, source: sourceSlug, parsed: 0, format: auto.format,
         note: 'aucun produit reconnu — le champ diagnostic mesure ce que la page contient',
         diagnostic: priceParse.diagnostiquerPage(text, brand)
+      });
+    }
+
+    /* ── MODE À SEC (&sec=1) — 02/08/2026, écrit APRÈS le quota épuisé ──────
+       ⛔ Ce mode existe parce que j'ai eu tort. L'user a passé la soirée à
+       mettre au point le CÂBLAGE de son raccourci (la page part-elle ? est-elle
+       lue ?), et chacun de mes essais relisait la collection `product_overrides`
+       ENTIÈRE — plus la config. Une quinzaine d'essais ont suffi à épuiser le
+       quota gratuit, et son administration s'est refermée. Aucun de ces essais
+       n'avait besoin de Firestore.
+       Ici : `products.json` est lu SUR LE DISQUE (gratuit, aucun quota),
+       AUCUNE lecture ni écriture Firestore, AUCUN prix calculé. On rend ce que
+       le câblage doit prouver : le format reconnu, le nombre d'articles lus, et
+       lesquels correspondent à une fiche.
+       ⛔ Ne peut RIEN écrire par construction : il rend ici, avant que le moindre
+       chemin d'écriture n'existe. Le mode d'essai ne peut pas coûter d'argent.
+       ⚠️ Les prix affichés sont ceux du FICHIER, pas les prix vivants : ce mode
+       ne sert JAMAIS à décider d'un tarif, seulement à valider un raccourci. */
+    if (secMode) {
+      const produitsSec = catalog.loadCatalogAvec({});   // fichier seul, zéro Firestore
+      const bySkuSec = {};
+      produitsSec.forEach((p) => { if (p.sku) bySkuSec[String(p.sku).toUpperCase()] = p; });
+      produitsSec.forEach((p) => {
+        (Array.isArray(p.srcAltSkus) ? p.srcAltSkus : []).forEach((a) => {
+          const k = String(a || '').trim().toUpperCase();
+          if (k && !bySkuSec[k]) bySkuSec[k] = p;
+        });
+      });
+      pwAliasNomenclature(produitsSec, brand, bySkuSec);
+      const reconnusSec = [], inconnusSec = [];
+      parsed.forEach((it) => {
+        const p = bySkuSec[String(it.sku).toUpperCase()];
+        if (p) reconnusSec.push({ sku: it.sku, srcTTC: it.price, fiche: p.title || p.name });
+        else inconnusSec.push({ sku: it.sku, srcTTC: it.price, name: it.name });
+      });
+      return res.status(200).json({
+        ok: true, sec: true, brand, source: sourceSlug, format: auto.format,
+        counts: {
+          parsed: parsed.length,
+          reconnus: reconnusSec.length, inconnus: inconnusSec.length,
+          packs: (auto.packs || []).length, sansRef: (auto.sansRef || []).length
+        },
+        note: 'MODE À SEC : aucune lecture ni écriture Firestore, aucun prix calculé, '
+          + 'aucun quota consommé. Sert à vérifier qu\'un raccourci envoie bien sa page. '
+          + 'Retirer &sec=1 pour un vrai relevé.',
+        reconnus: reconnusSec.slice(0, 60), inconnus: inconnusSec.slice(0, 60)
       });
     }
 

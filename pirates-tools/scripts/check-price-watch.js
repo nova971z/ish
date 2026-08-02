@@ -705,6 +705,50 @@ module.exports = async function () {
           + appelsLoadCatalog + '/2) — le comportement historique ne change pas');
         catMod.loadCatalog = vraiLoadCatalog;
 
+        /* ── MODE À SEC (&sec=1) : ZÉRO FIRESTORE, ZÉRO ÉCRITURE ─────────────
+           ⛔ Écrit après une faute réelle : mettre au point le câblage d'un
+           raccourci a épuisé le quota gratuit de l'user et refermé son
+           administration, alors qu'aucun de ces essais n'avait besoin de
+           Firestore. La promesse « ce mode ne coûte rien » ne se croit pas :
+           on la PROUVE avec une base qui EXPLOSE au premier contact — si le
+           mode y touche, la porte devient rouge. */
+        var dbInterdite = { collection: function (nom) {
+          throw new Error('MODE A SEC : Firestore touche (' + nom + ')');
+        } };
+        /* ⚠️ La base factice NE SUFFIT PAS, et un sabotage me l'a prouvé :
+           `catalog.loadCatalog()` a son PROPRE accès Firestore, invisible au
+           `db` passé en paramètre — et sans clé d'environnement il rend {}
+           sans rien toucher. La porte restait donc verte alors qu'en
+           production ce chemin lit la collection entière. On espionne donc
+           AUSSI l'appel lui-même : en mode à sec, il doit valoir ZÉRO. */
+        var vraiLC = catMod.loadCatalog;
+        var appelsLCsec = 0;
+        catMod.loadCatalog = function () { appelsLCsec++; return vraiLC.apply(this, arguments); };
+        var rSec = fauxRes();
+        await admFn(reqPage(cible.sku, { sec: '1' }), rSec, fauxAdmin, dbInterdite);
+        ok(appelsLCsec === 0,
+          '⛔ MODE À SEC : loadCatalog ne doit JAMAIS être appelé (' + appelsLCsec
+          + ') — en production il relit toute la collection d\'overrides, et c\'est '
+          + 'exactement le coût que ce mode existe pour supprimer');
+        ok(rSec.code === 200 && rSec.out && rSec.out.ok === true && rSec.out.sec === true,
+          '⛔ MODE À SEC : doit répondre 200 SANS toucher Firestore — une base qui '
+          + 'explose au contact prouve qu\'il n\'y accède jamais (obtenu : '
+          + rSec.code + ', ' + JSON.stringify(rSec.out && rSec.out.error) + ')');
+        ok(rSec.out && rSec.out.counts && rSec.out.counts.parsed >= 1
+          && rSec.out.counts.reconnus >= 1 && rSec.out.format === 'idealo',
+          'MODE À SEC : rend ce que le câblage doit prouver — format lu et articles '
+          + 'reconnus (' + JSON.stringify(rSec.out && rSec.out.counts) + ')');
+        ok(rSec.out && typeof rSec.out.note === 'string' && /sec/i.test(rSec.out.note)
+          && rSec.out.applied === undefined && rSec.out.scanCache === undefined,
+          '⛔ MODE À SEC : la réponse DIT qu\'elle n\'a rien calculé, et ne rend aucun '
+          + 'prix appliqué — un mode d\'essai ne doit jamais ressembler à un vrai relevé');
+        var rSecInc = fauxRes();
+        await admFn(reqPage('ZZQ9997', { sec: '1' }), rSecInc, fauxAdmin, dbInterdite);
+        ok(rSecInc.out && rSecInc.out.counts.reconnus === 0 && rSecInc.out.counts.inconnus === 1,
+          'MODE À SEC : une réf absente du catalogue est comptée INCONNUE, pas reconnue ('
+          + JSON.stringify(rSecInc.out && rSecInc.out.counts) + ')');
+        catMod.loadCatalog = vraiLC;
+
         /* ── BALAYAGE : LES COMPTEURS SANS LES LISTES ────────────────────────
            67 pages × listes détaillées ≈ un Mo dans le presse-papier du
            raccourci : incollable, donc invérifiable par l'user. En scan les
