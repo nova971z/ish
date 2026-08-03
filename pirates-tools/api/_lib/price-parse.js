@@ -527,12 +527,47 @@ function diagnostiquerPage(rawText, brand) {
     texteNettoye: texte.length,
     boutonsPanier: compter(/Ajouter au panier/gi),
     occurrencesMarque: compter(new RegExp(escapeRe(brand), 'gi')),
-    refsMarque: compter(new RegExp(escapeRe(brand) + '\\s+[A-Z0-9][A-Z0-9.\\/\\-]*[A-Z0-9]', 'gi')),
+    /* ⛔ CE COMPTEUR SURESTIMAIT, ET C'EST MOI QUI M'EN SUIS SERVI POUR DIRE
+       « 11 références non lues ». Mesuré le 03/08 sur le corpus de sa page :
+       le motif attrapait « DEWALT Vendu » — le mot qui suit la marque en fin
+       de titre marchand — et, sur sa vraie page, les suggestions de recherche
+       (« dewalt 18vpack », « dewalt tstak ») parce que le drapeau `i` rend
+       `[A-Z0-9]` sensible aux minuscules.
+       ⛔ Un instrument de mesure ne surestime JAMAIS. Il compte désormais des
+       candidats CRÉDIBLES — exactement les critères d'une vraie réf : un
+       chiffre, quatre signes au moins, jamais une unité — et il rend la LISTE
+       en plus du nombre. Un écart NOMMÉ se corrige ; un écart chiffré se
+       suppose. ⚠️ J4 : rien ici ne touche à un prix, on compte des identités. */
+    refsMarque: 0, refsVues: [],
     prixAvecMot: compter(/Prix\s+[\d\s   ]+,\d{2}\s*\u20ac/g),
     prixVirgule: compter(/\d[\d\s   ]*,\d{2}\s*\u20ac/g),
     prixPoint: compter(/\d+\.\d{2}\s*\u20ac/g),
     extraits: []
   };
+  /* Les candidats CR\u00c9DIBLES, d\u00e9doublonn\u00e9s. La casse compte ici : une vraie
+     r\u00e9f\u00e9rence s'\u00e9crit en majuscules. \u00ab dewalt tstak \u00bb n'en est donc pas une,
+     et \u00ab DEWALT Vendu \u00bb non plus (pas de chiffre). */
+  /* ⚠️ DEUX SENSIBILITÉS DIFFÉRENTES DANS LE MÊME MOTIF. La MARQUE s'écrit
+     « DeWalt », « DEWALT » ou « Dewalt » selon la ligne : elle se cherche donc
+     sans tenir compte de la casse. La RÉFÉRENCE, elle, est en majuscules —
+     c'est précisément ce qui distingue « DCS572P2 » de « tstak ». Un seul
+     motif avec le drapeau `i` rendait les deux insensibles, et laissait entrer
+     les suggestions de recherche ; sans le drapeau, il ne trouvait plus rien
+     du tout parce que la marque n'est presque jamais en capitales. */
+  var vus = Object.create(null);
+  var reMarque = new RegExp(escapeRe(brand), 'gi');
+  var reSuite = /^\s+([A-Z0-9][A-Z0-9.\/\-]*[A-Z0-9])/;
+  var mr;
+  while ((mr = reMarque.exec(texte)) !== null) {
+    var suite = texte.slice(mr.index + mr[0].length, mr.index + mr[0].length + 40).match(reSuite);
+    if (!suite) continue;
+    var cand = suite[1].toUpperCase();
+    if (!/\d/.test(cand) || cand.length < 4 || UNITE_RE.test(cand)) continue;
+    vus[cand] = 1;
+  }
+  d.refsVues = Object.keys(vus).sort();
+  d.refsMarque = d.refsVues.length;
+
   /* Trois fen\u00eatres de texte brut autour de la marque \u2014 d\u00e9but, milieu, fin de
      page \u2014 pour VOIR comment le site \u00e9crit titre, r\u00e9f et prix. */
   var pos = [], re = new RegExp(escapeRe(brand), 'gi'), m;
@@ -1154,6 +1189,54 @@ function extraireCaracteristiques(titre, brand) {
   return car;
 }
 
+/* ══ ORDRE DE BALAYAGE ═══════════════════════════════════════════════════════
+   Demande de l'user, 03/08 : « commencer à scanner toujours la DERNIÈRE page
+   quand on lit dans un ordre décroissant, et la PREMIÈRE page en ordre
+   croissant ».
+
+   ⛔ CE QUE ÇA VEUT DIRE, ET POURQUOI IL A RAISON. Les deux cas énoncent la
+   même règle : ON COMMENCE PAR LE BOUT LE MOINS CHER. Avec un tri décroissant,
+   la page 1 porte les machines les plus chères — celles qu'il ne vend pas — et
+   les siennes sont à la fin. Il l'avait déjà dit : « si on ne scanne que
+   1 000 produits en ordre décroissant, on scannera les plus chers, donc c'est
+   inutile. » Commencer par la fin met la partie UTILE en premier : si le
+   balayage casse en route, ce qui est déjà relevé est ce qui sert.
+
+   ⚠️ FONCTION PURE — elle ne lit rien, n'appelle personne : elle rend l'ordre
+   des pages et leurs URL. La loi de pagination (page N → offset (N−1)×pas)
+   vient de SES propres URL, vérifiée sur ses pages 4, 5 et 67 le 02/08
+   (`docs/TRAQUEUR-URLS.md`).
+   ⛔ LA PAGE 1 N'A PAS D'OFFSET dans le chemin : son URL est la forme courte.
+   Une page 1 reconstruite avec « -0 » est une AUTRE URL, et rien ne garantit
+   qu'elle réponde pareil — on ne la fabrique donc jamais. */
+function planBalayage(opts) {
+  opts = opts || {};
+  var pages = Math.max(1, parseInt(opts.pages, 10) || 1);
+  var pas = Math.max(1, parseInt(opts.pas, 10) || 15);
+  var descendant = String(opts.ordre || 'desc').toLowerCase().indexOf('asc') !== 0;
+  var patron = opts.patron || '';
+  var patronPage1 = opts.patronPage1 || '';
+
+  var ordre = [];
+  for (var n = 1; n <= pages; n++) ordre.push(n);
+  // Décroissant → on part de la DERNIÈRE page ; croissant → de la PREMIÈRE.
+  if (descendant) ordre.reverse();
+
+  return ordre.map(function (n) {
+    var offset = (n - 1) * pas;
+    var url = null;
+    if (n === 1 && patronPage1) url = patronPage1;
+    else if (patron) url = patron.replace('{offset}', String(offset));
+    return { page: n, offset: offset, url: url };
+  });
+}
+/* Le rang d'une page DANS LE PLAN — pour dire « tu en es à la 12ᵉ sur 67 »
+   sans que l'user ait à compter. Rend -1 si la page n'appartient pas au plan. */
+function rangDansPlan(plan, page) {
+  for (var i = 0; i < plan.length; i++) if (plan[i].page === page) return i + 1;
+  return -1;
+}
+
 /* ── COMPARAISON ─────────────────────────────────────────────────────────────
    ⛔ « Ne recoupe pas avec deux ou trois informations. » Deux annonces ne
    désignent le même article que si AUCUNE caractéristique connue des deux
@@ -1196,4 +1279,4 @@ function comparerCaracteristiques(a, b) {
   return { compatible: conflits.length === 0, conflits: conflits, concordances: concordances };
 }
 
-module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickoutil, parseIdealo: parseIdealo, parseAuto: parseAuto, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, enMillis: enMillis, SOURCE_FRESH_MS: SOURCE_FRESH_MS, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage, extraireCaracteristiques: extraireCaracteristiques, comparerCaracteristiques: comparerCaracteristiques, OUTILS: OUTILS, SERIES: SERIES, nomenclature: nomen };
+module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickoutil, parseIdealo: parseIdealo, parseAuto: parseAuto, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, enMillis: enMillis, SOURCE_FRESH_MS: SOURCE_FRESH_MS, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage, extraireCaracteristiques: extraireCaracteristiques, comparerCaracteristiques: comparerCaracteristiques, planBalayage: planBalayage, rangDansPlan: rangDansPlan, OUTILS: OUTILS, SERIES: SERIES, nomenclature: nomen };

@@ -2099,6 +2099,22 @@ async function handlePriceWatch(req, res, admin, db) {
          distincts le balayage entier a réellement ramenés. */
       const couvSec = pwCouvAjouter(brand, parsed.map((x) => x.sku),
         (auto.sansRef || []).map((e) => e.titre));
+
+      /* ⛔⛔ L'ÉCART, NOMMÉ. J'ai annoncé à l'user « 11 références non lues » en
+         soustrayant deux compteurs — sans jamais pouvoir dire LESQUELLES. Un
+         écart chiffré se suppose ; un écart nommé se corrige. On liste donc
+         les références que la page écrit et que le relevé n'a PAS rendues.
+         Une réf compte comme lue si elle est un sku relevé, ou si elle
+         apparaît dans le titre d'une annonce écartée — l'écartée est listée,
+         donc elle n'est pas perdue.
+         ⚠️ Portes lues : J3 — ce sont des codes d'articles publics, aucune
+         donnée personnelle, rien n'est conservé au-delà de la réponse ;
+         J4 — aucun prix n'entre dans ce calcul ; J5 — aucune TVA ni octroi. */
+      const diagSec = priceParse.diagnostiquerPage(text, brand);
+      const vuesSec = Object.create(null);
+      parsed.forEach((it) => { if (it.sku) vuesSec[String(it.sku).toUpperCase()] = 1; });
+      const titresSec = (auto.sansRef || []).map((e) => String(e.titre || '').toUpperCase()).join(' | ');
+      const refsNonLues = diagSec.refsVues.filter((r) => !vuesSec[r] && titresSec.indexOf(r) === -1);
       return res.status(200).json({
         ok: true, sec: true, brand, source: sourceSlug, format: auto.format,
         counts: {
@@ -2123,7 +2139,9 @@ async function handlePriceWatch(req, res, admin, db) {
            présentes dans le texte tranche ; sans lui, on ne peut que supposer.
            `refsMarque` compte les « MARQUE RÉF » du texte reçu, `parsed` ce que
            le parseur en a tiré : l'écart entre les deux EST le diagnostic. */
-        diagnostic: priceParse.diagnostiquerPage(text, brand),
+        diagnostic: diagSec,
+        // Liste vide = rien ne manque, et c'est vérifiable ligne à ligne.
+        refsNonLues: refsNonLues,
         reconnus: reconnusSec.slice(0, 60), inconnus: inconnusSec.slice(0, 60),
         sansRefDetail: sansRefSec
       });

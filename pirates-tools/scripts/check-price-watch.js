@@ -900,6 +900,50 @@ module.exports = async function () {
       'l\'empreinte porte sa TAILLE : un TX20 et un TX25 sont deux articles');
   }
 
+  /* ═══ ORDRE DE BALAYAGE (03/08/2026) ══════════════════════════════════════
+     Demande de l'user : « commencer à scanner toujours la DERNIÈRE page quand
+     on lit dans un ordre décroissant, et la PREMIÈRE page en ordre croissant ».
+     Les deux cas disent la même chose : on commence par le bout LE MOINS CHER,
+     parce que c'est là que sont les outils qu'il vend. */
+  var pb = pp.planBalayage;
+  ok(typeof pb === 'function', 'planBalayage exportée');
+  if (pb) {
+    var PAT = 'https://exemple.test/liste-{offset}.html?tri=prix';
+    var PAT1 = 'https://exemple.test/liste.html?tri=prix';
+    var desc = pb({ pages: 67, pas: 15, ordre: 'desc', patron: PAT, patronPage1: PAT1 });
+    var asc = pb({ pages: 67, pas: 15, ordre: 'asc', patron: PAT, patronPage1: PAT1 });
+    ok(desc.length === 67 && asc.length === 67,
+      'le plan couvre TOUTES les pages, quel que soit le sens (' + desc.length + ')');
+    ok(desc[0].page === 67 && desc[desc.length - 1].page === 1,
+      '⛔ TRI DÉCROISSANT : on commence par la DERNIÈRE page. C\'est là que sont '
+      + 'les outils les moins chers — ceux qu\'il vend. Si le balayage casse en '
+      + 'route, la partie déjà relevée est la partie utile');
+    ok(asc[0].page === 1 && asc[asc.length - 1].page === 67,
+      '⛔ TRI CROISSANT : on commence par la PREMIÈRE — même règle, autre bout');
+    ok(desc[0].offset === 66 * 15 && asc[1].offset === 15,
+      'la loi de pagination tient : page N → offset (N−1)×pas (mesurée sur SES '
+      + 'pages 4, 5 et 67 le 02/08)');
+    /* ⛔ La page 1 n'a PAS d'offset dans le chemin. Une page 1 reconstruite
+       avec « -0 » est une AUTRE URL, et rien ne dit qu'elle réponde pareil. */
+    ok(desc[desc.length - 1].url === PAT1 && asc[0].url === PAT1,
+      '⛔ la PAGE 1 garde son URL courte, jamais une URL fabriquée avec « -0 »');
+    // ⚠️ La page 1 est exclue : c'est justement celle qui n'a pas d'offset.
+    var autresQue1 = desc.filter(function (x) { return x.page !== 1; });
+    ok(autresQue1.length === 66
+      && autresQue1.every(function (x) { return x.url.indexOf('-' + x.offset + '.') !== -1; }),
+      'chacune des 66 AUTRES pages porte SON offset dans l\'URL');
+    /* Préalable : les deux sens doivent visiter le MÊME ensemble de pages —
+       sinon « commencer par la fin » aurait pu vouloir dire « en oublier ». */
+    var vuD = desc.map(function (x) { return x.page; }).sort(function (a, b) { return a - b; });
+    var vuA = asc.map(function (x) { return x.page; }).sort(function (a, b) { return a - b; });
+    ok(JSON.stringify(vuD) === JSON.stringify(vuA),
+      '⛔ PRÉALABLE : les deux sens couvrent EXACTEMENT les mêmes pages. Changer '
+      + 'l\'ordre ne doit jamais changer la couverture');
+    ok(pp.rangDansPlan(desc, 67) === 1 && pp.rangDansPlan(desc, 1) === 67
+      && pp.rangDansPlan(desc, 999) === -1,
+      'le rang dans le plan se lit sans compter, et une page hors plan rend -1');
+  }
+
   /* ⛔ « NE RECOUPE PAS AVEC DEUX OU TROIS INFORMATIONS » — le cœur du reproche.
      Deux annonces peuvent partager réf, type, voltage ET gamme et désigner
      pourtant deux articles au prix très différent : la machine nue et le lot. */
@@ -1257,6 +1301,57 @@ module.exports = async function () {
           + 'quoi une erreur d\'extraction est indétectable depuis l\'iPad');
         ok(Array.isArray(rSec.out.sansRefDetail),
           'les annonces sans réf sûre sortent QUALIFIÉES (sansRefDetail), plus seulement comptées');
+
+        /* ═══ L'ÉCART SE NOMME, IL NE SE SOUSTRAIT PAS (03/08/2026) ════════
+           ⛔ J'ai annoncé à l'user « 11 références non lues » en soustrayant
+           deux compteurs, sans jamais pouvoir dire LESQUELLES. Pire : le
+           compteur `refsMarque` attrapait « DEWALT Vendu » et les suggestions
+           de recherche (« dewalt tstak »), parce que le drapeau `i` rendait le
+           motif de RÉFÉRENCE insensible à la casse. Un instrument de mesure ne
+           surestime jamais. */
+        ok(Array.isArray(rSec.out.refsNonLues),
+          '⛔ la réponse NOMME les références que la page écrit et que le relevé '
+          + 'n\'a pas rendues — un écart chiffré se suppose, un écart nommé se corrige');
+        ok(rSec.out.refsNonLues.length === 0,
+          '⛔ sur une page dont TOUTES les réfs sont lues, la liste est VIDE ('
+          + JSON.stringify(rSec.out.refsNonLues) + ')');
+        /* ⛔ PRÉALABLE : une liste toujours vide ne vérifierait rien. On
+           fabrique une page où une réf est écrite SANS prix — le parseur ne
+           peut donc pas la rendre — et on exige qu'elle soit NOMMÉE. */
+        /* ⚠️ Au moins 200 signes : en dessous, le serveur refuse le corps AVANT
+           d'analyser quoi que ce soit, et l'assertion testerait un refus. */
+        var pageTrou = 'Tronçonneuses et accessoires — comparateur\n'
+          + 'MAKITA ZZT001A\nVisseuse sans fil, couple 90 Nm, 1 batterie\n'
+          + '12\n47 offres\nà partir de100,00 €\nDétails du produit\n'
+          + 'MAKITA ZZT002B\nCarte volontairement SANS prix — le parseur ne peut pas la rendre\n'
+          /* ⚠️ CE BLOC DE SUGGESTIONS EST LE CŒUR DU TEST. « makita zzt777x »
+             en MINUSCULES porte un chiffre et fait quatre signes : seule la
+             sensibilité à la casse le rejette. Un premier essai n'utilisait que
+             « Vendu » et « 18v », tous deux écartés par d'autres règles — le
+             sabotage restait vert et ne prouvait rien. */
+          + 'Détails du produit\nrecherches associées : makita zzt777x, pack makita, makita 18v\n';
+        var rTrou = fauxRes();
+        // ⚠️ La marque se lit dans la REQUÊTE, pas dans le corps (comme reqPage).
+        await admFn({ method: 'POST',
+          query: { type: 'price-watch', brand: 'MAKITA', source: 'idealo', sec: '1' },
+          body: { text: pageTrou } }, rTrou, fauxAdmin, dbInterdite);
+        ok(rTrou.out && rTrou.out.refsNonLues.indexOf('ZZT002B') !== -1,
+          '⛔⛔ PRÉALABLE : une réf que la page écrit et que le relevé ne rend PAS '
+          + 'est nommée. Sans ce cas, l\'assertion « liste vide » passerait pour la '
+          + 'mauvaise raison — une liste toujours vide ne vérifie rien ('
+          + JSON.stringify(rTrou.out && rTrou.out.refsNonLues) + ')');
+        ok(rTrou.out.refsNonLues.indexOf('ZZT001A') === -1,
+          'et la réf LUE, elle, n\'est pas dans la liste');
+        ok(rTrou.out.diagnostic.refsVues.indexOf('ZZT777X') === -1,
+          '⛔⛔ UNE SUGGESTION DE RECHERCHE N\'EST PAS UNE RÉFÉRENCE. « makita '
+          + 'zzt777x » en minuscules porte un chiffre et fait quatre signes : '
+          + 'seule la CASSE le distingue d\'une vraie réf. Avec le drapeau `i`, '
+          + 'ces suggestions gonflaient le compteur — et c\'est ce compteur '
+          + 'gonflé qui m\'a fait annoncer « 11 références non lues » ('
+          + JSON.stringify(rTrou.out.diagnostic.refsVues) + ')');
+        ok(rTrou.out.diagnostic.refsVues.indexOf('ZZT001A') !== -1,
+          'préalable : une VRAIE référence, elle, est bien comptée — sans quoi '
+          + 'l\'assertion ci-dessus passerait sur un compteur toujours vide');
 
         /* ═══ COUVERTURE D'UN BALAYAGE (03/08/2026) ════════════════════════
            Demande de l'user : « il faut arriver à scanner tout le catalogue
