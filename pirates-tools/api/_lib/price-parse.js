@@ -1255,6 +1255,21 @@ function motEntier(basseCasse, mot) {
    « kit » dans « maKITa » — c'est ce piège-là qui avait typé « kit » toutes
    les machines de la marque. Ni lettre ni chiffre de chaque côté. */
 var MOT_LOT = new RegExp('(?:^|[^' + LETTRE + '])(kits?|packs?|lots?|ensembles?|combos?|sets?|juegos?|conjuntos?)(?![' + LETTRE + '])');
+/* ⛔ SÉRIE LIMITÉE — le texte est comparé SANS ACCENTS et en minuscules (`bas`),
+   d'où « limitee » sans accent ici. Les trois langues du corpus sont couvertes :
+   idealo mélange des annonces françaises, anglaises et allemandes sur la même
+   page, et une garde qui ne tient que dans une langue ne tient pas.
+   ⚠️ DEUX protections indépendantes contre « unlimited », et il faut les DEUX :
+   on exige la LOCUTION (« limited edition », jamais « limited » seul) ET une
+   borne de mot en tête. Mesuré au sabotage le 03/08 : retirer l'une OU l'autre
+   laisse le contrôle vert — seul le retrait des deux le fait rougir. Ce n'est
+   pas de la redondance mais de la défense en profondeur : l'une couvre un motif
+   raccourci, l'autre un ancrage trop lâche. Retirer une seule des deux est donc
+   invisible aux portes : les changer demande de relire cette note. */
+var EDITION_LIMITEE = new RegExp('(?:^|[^' + LETTRE + '])('
+  + 'editions?\\s+limitees?|limited\\s+editions?|sonderedition|limitierte\\s+auflage'
+  + '|serie\\s+limitee|mclaren'
+  + ')(?![' + LETTRE + '])');
 /* Le pluriel se met sur CHAQUE mot du terme : « lames de scie sabre » doit
    accrocher « lame de scie sabre ». Un `s?` global à la fin ne suffisait pas. */
 function reMot(mot) {
@@ -1537,6 +1552,36 @@ function extraireCaracteristiques(titre, brand) {
   else if (car.nbOutils != null && car.nbOutils > 1 && MOT_LOT.test(bas)) {
     car.famille = 'machine'; car.rayon = 'combo'; car.type = 'pack d\'outils';
   }
+  /* ⛔⛔ « ÉDITION LIMITÉE » N'EST PAS UN HABILLAGE, C'EST UN AUTRE ARTICLE.
+     Règle donnée par l'user le 03/08 : « chez DeWALT il y a des outils en
+     édition limitée et même des packs ; quand il y a écrit édition limitée,
+     souvent — même 99,9 % du temps — c'est un pack McLaren, il faut faire très
+     attention à ça car la différence de prix est notable ».
+     ⛔ POURQUOI C'EST DE L'ARGENT. PORTE J4 LUE (`node scripts/juridique.js J4`) :
+     le prix annoncé doit être exact et complet. Deux annonces peuvent porter la
+     MÊME référence constructeur sans être le même produit — la série limitée se
+     vend nettement plus cher que la version courante. Les rapprocher, c'est
+     écrire un coût d'achat de série limitée sur une fiche ordinaire, donc
+     afficher un prix qui ne correspond à rien ; ou l'inverse, et l'inverse fait
+     vendre à perte. C'est la faute que la règle « un prix de PACK ne s'écrit
+     jamais sur la réf d'un composant » interdit déjà ; l'édition limitée en
+     était une variante que RIEN ne détectait.
+     ⚠️ Ce marqueur ne FIXE aucun prix et n'annonce aucune réduction : il
+     EMPÊCHE un rapprochement. Le prix de référence des 30 jours reste calculé
+     ailleurs, sur le journal réel.
+     ⚠️ ON MARQUE, ON NE DEVINE PAS. `editionLimitee` devient un champ BLOQUANT :
+     deux annonces qui ne s'accordent pas dessus ne peuvent plus être déclarées
+     compatibles. On ne touche ni au type ni à la famille — une meuleuse en
+     série limitée reste une meuleuse.
+     ⚠️ « McLaren » entre aussi dans le motif : c'est le nom que porte la série,
+     et il arrive qu'il soit écrit sans la mention « édition limitée ». */
+  /* ⛔ TOUJOURS UN BOOLÉEN, JAMAIS `undefined` QUAND C'EST FAUX. Un champ absent
+     est une IGNORANCE et une ignorance NE VOTE PAS (règle du rapprochement) :
+     laisser `undefined` sur la version courante aurait rendu la garde
+     décorative — mesuré à l'écriture, `compatible: true` entre une série
+     limitée et sa version ordinaire. Ici l'absence de mention EST une
+     information : le titre décrit la version courante. */
+  car.editionLimitee = EDITION_LIMITEE.test(bas);
   /* ⛔ DEUX RÉFÉRENCES DE MACHINE DANS UN TITRE = UN LOT DE MACHINES. Mesuré
      sur SON relevé du 03/08 : « Kit DeWALT DCS570 + DCS334 (2 x 5.0 Ah +
      DCB115 + TSTAK II) » sortait SANS TYPE — aucun mot du vocabulaire ne le
@@ -1849,6 +1894,11 @@ var CHAMPS_BLOQUANTS = [
   'famille', 'rayon', 'type',
   // machines
   'voltage', 'nbBatteries', 'nbOutils', 'pack', 'sansFil', 'coffret', 'ah', 'serie', 'watts',
+  /* ⛔ Une SÉRIE LIMITÉE et sa version courante portent la même référence
+     constructeur et ne valent pas le même prix (règle de l'user, 03/08). Un
+     champ bloquant les sépare ; sans lui, le coût de l'une s'écrivait sur
+     l'autre — et dans un sens, ça fait vendre à perte. */
+  'editionLimitee',
   /* quincaillerie — mot de l'user : « il y aura la taille, ou l'alésage des
      circulaires avec le diamètre ». Deux lames de même Ø et d'alésage
      différent ne montent pas sur la même machine. */

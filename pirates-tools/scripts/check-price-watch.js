@@ -1284,6 +1284,42 @@ module.exports = async function () {
     ok(pp.comparerCaracteristiques(e1, e1b).compatible === false,
       '⛔ ARGENT : une pointure 43 et une 44 sont DEUX articles. Les apparier '
       + 'écrirait le coût de l\'un sur la fiche de l\'autre');
+    /* ══ SÉRIE LIMITÉE — MÊME RÉFÉRENCE, AUTRE PRODUIT, AUTRE PRIX ═══════════
+       ⛔⛔ Règle de l'user, 03/08 : « chez DeWALT il y a des outils en édition
+       limitée et même des packs ; quand il y a écrit édition limitée, 99,9 %
+       du temps c'est un pack McLaren, il faut faire très attention car la
+       différence de prix est notable ».
+       ⛔ C'est de l'argent : deux annonces portant la MÊME référence
+       constructeur ne sont pas le même produit. Écrire le coût de la série
+       limitée sur la fiche ordinaire affiche un prix qui ne correspond à rien ;
+       l'inverse fait vendre à perte.
+       ⚠️ Référence volontairement synthétique — un harnais ne nomme jamais une
+       donnée du catalogue. */
+    var lim1 = ec('MARQUEZZ ZZL7777 perceuse 18V', 'MARQUEZZ');
+    var lim2 = ec('MARQUEZZ ZZL7777 perceuse 18V edition limitee McLaren', 'MARQUEZZ');
+    ok(lim1.editionLimitee === false && lim2.editionLimitee === true,
+      '⛔ « édition limitée » est RELEVÉE, et son absence vaut FAUX — pas `undefined` : '
+      + 'un champ absent est une ignorance, et une ignorance ne vote pas (obtenu '
+      + JSON.stringify([lim1.editionLimitee, lim2.editionLimitee]) + ')');
+    var duel = pp.comparerCaracteristiques(lim1, lim2);
+    ok(duel.compatible === false && duel.conflits.indexOf('editionLimitee') !== -1,
+      '⛔⛔ ARGENT : une SÉRIE LIMITÉE et sa version courante portent la même référence '
+      + 'et ne valent pas le même prix. Les apparier écrirait le coût de l\'une sur la '
+      + 'fiche de l\'autre — et dans un sens, ça fait vendre à perte (obtenu '
+      + JSON.stringify(duel) + ')');
+    ok(pp.comparerCaracteristiques(lim2,
+      ec('MARQUEZZ ZZL7777 perceuse 18V McLaren', 'MARQUEZZ')).compatible === true,
+      '⛔ …mais deux séries limitées restent compatibles entre elles : « McLaren » seul '
+      + 'suffit à nommer la série, elle n\'écrit pas toujours « édition limitée »');
+    ok(ec('MARQUEZZ ZZL7777 batterie unlimited runtime', 'MARQUEZZ').editionLimitee === false,
+      '⛔ « unlimited » ne contient PAS « limited » au sens des bornes de mot — sans '
+      + 'elles, la garde marquerait des machines ordinaires et bloquerait de vrais '
+      + 'rapprochements');
+    ok(ec('MARQUEZZ ZZL7777 Bohrschrauber 18V Sonderedition', 'MARQUEZZ').editionLimitee === true
+      && ec('MARQUEZZ ZZL7777 drill 18V Limited Edition', 'MARQUEZZ').editionLimitee === true,
+      '⛔ idealo mélange les langues sur une même page : une garde qui ne tient qu\'en '
+      + 'français ne tient pas');
+
     var e2 = ec('Pantalon de travail taille XL', 'MAKITA');
     ok(e2.famille === 'epi' && e2.type === 'pantalon de travail' && e2.taille === 'XL',
       'un pantalon de travail porte une TAILLE, ni voltage ni référence');
