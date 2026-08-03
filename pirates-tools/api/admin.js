@@ -2170,13 +2170,41 @@ async function handlePriceWatch(req, res, admin, db) {
             : String(text).slice(Math.max(0, i - 90), i + 130).replace(/\s+/g, ' ').trim()
         };
       });
+      /* ⛔⛔ CE QUE LA PAGE CONTIENT, FACE À CE QUE J'EN AI LU — POUR LES
+         ANNONCES AUSSI. Son relevé du 03/08 sortait `refsNonLues: []` et
+         `perdus: []` : mes deux instruments disaient « rien ne manque », et il
+         manquait pourtant une ligne sur soixante. Aucun des deux ne pouvait la
+         voir — `refsNonLues` ne regarde que les CARTES (celles qui portent une
+         référence), `perdus` que les blocs écartés en le sachant. Une annonce
+         marchande avalée par sa voisine n'a ni référence ni trace.
+         ⛔ Un instrument qui compte ses réussites ne mesure pas ses échecs.
+         Chaque annonce écrit « Vendu par : » exactement une fois : on compte
+         ces ancres, on prend le titre qui précède chacune, et on NOMME ceux
+         qui ne sont pas ressortis. Un écart nommé se corrige, un écart chiffré
+         se suppose.
+         ⚠️ Rapprochement sur les 60 premiers signes : les titres rendus sont
+         tronqués, comparer les chaînes entières ne rapprocherait rien.
+         ⚠️ Portes lues : J3 — page publique de comparateur, aucune donnée
+         personnelle (ni nom, ni adresse, ni e-mail : des titres d'articles et
+         des enseignes), rien n'est conservé au-delà de la réponse, sortie
+         bornée — minimisation respectée ; J4 — une annonce perdue est un PRIX
+         perdu, donc un coût d'achat trop haut retenu, et c'est bien pour ça
+         que ça se mesure ; J5 — aucune TVA, aucun octroi de mer ici. */
+      const attendus = priceParse.titresAttendus(text);
+      const annoncesNonLues = priceParse.annoncesManquantes(text,
+        (auto.sansRef || []).map((e) => e.titre).concat(parsed.map((it) => it.name)));
+
       return res.status(200).json({
         ok: true, sec: true, brand, source: sourceSlug, format: auto.format,
         counts: {
           parsed: parsed.length,
           reconnus: reconnusSec.length, inconnus: inconnusSec.length,
-          packs: (auto.packs || []).length, sansRef: (auto.sansRef || []).length
+          packs: (auto.packs || []).length, sansRef: (auto.sansRef || []).length,
+          /* Ce que la page ANNONCE, indépendamment de ma réussite à le lire. */
+          annoncesDansLaPage: attendus.length
         },
+        /* Liste vide = aucune annonce perdue, et c'est vérifiable titre à titre. */
+        annoncesNonLues: annoncesNonLues.slice(0, 20),
         /* ⚠️ `pagesDansLaRafale` n'est PAS décoratif : le cumul vit dans UNE
            instance serverless. S'il retombe à 1 en plein balayage, c'est une
            instance froide — le total repart de zéro, et il faut le savoir

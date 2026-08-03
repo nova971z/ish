@@ -743,6 +743,82 @@ module.exports = async function () {
       '⛔ et le RAYON est rempli comme sur les deux autres chemins vers ce type — '
       + 'un type juste dans un rayon vide se range mal et se compare mal');
 
+    /* ⛔⛔ MES DEUX INSTRUMENTS DISAIENT « RIEN NE MANQUE » — ET IL MANQUAIT
+       UNE LIGNE SUR SOIXANTE. Relevé du 03/08 : `refsNonLues: []`,
+       `perdus: []`, et pourtant 59 lignes lues là où la page en portait 60.
+       Ni l'un ni l'autre ne pouvait la voir : `refsNonLues` ne regarde que les
+       CARTES — celles qui portent une référence —, `perdus` que les blocs
+       écartés en le sachant. Une ANNONCE MARCHANDE avalée par sa voisine n'a
+       ni référence ni trace : elle sort des deux filets.
+       ⛔ Un instrument qui compte ses réussites ne mesure pas ses échecs.
+       `titresAttendus` compte les ANCRES de la page — « Vendu par : », écrit
+       une fois par annonce — et rend le titre qui précède chacune. C'est le
+       seul compteur du lot qui ne dépende PAS de la réussite du parseur.
+       ⚠️ J4 : une annonce perdue est un prix perdu. Le coût d'achat retenu est
+       le MINIMUM des sources ; en manquer une, c'est retenir un coût trop
+       haut, donc vendre trop cher. */
+    var pageAncres = [
+      'MAKITA ZZP111X1 - Nettoyeur haute pression 190 bars',
+      'Vendu par : UnMarchand.fr', 'Détails de l’offre',
+      '3 à 6 jours ouvrés', 'Livraison gratuite', '695,00 € TVA incluse',
+      'Meuleuse compacte 125 mm ZZ 18V - MAKITA - ZZG404S2T-QW',
+      '',
+      'Vendu par : AutreMarchand.fr', 'Détails de l’offre',
+      '1-2 jours ouvrables', 'Livraison gratuite', '693,49 € TVA incluse',
+      'Scie plongeante ZZS520T1-QW 54V FLEXVOLT',
+      'Vendu par : TroisiemeMarchand.fr', 'Détails de l’offre',
+      '24/48 heures', 'Livraison gratuite', '611,00 € TVA incluse'
+    ].join('\n');
+    var att = pp.titresAttendus(pageAncres);
+    ok(att.length === 3,
+      '⛔⛔ le compteur d\'ANCRES voit les 3 annonces que la page contient, sans '
+      + 'rien devoir au parseur (' + att.length + '/3)');
+    ok(att[1] === 'Meuleuse compacte 125 mm ZZ 18V - MAKITA - ZZG404S2T-QW',
+      '⛔ et il SAUTE LES LIGNES VIDES pour retrouver le titre : idealo en '
+      + 'intercale, et un titre vide ne se rapproche de rien (' + JSON.stringify(att[1]) + ')');
+    /* ⛔ LE COMPTEUR DOIT VOIR CE QUE LE PARSEUR RATE — c'est toute sa raison
+       d'être. On lui donne donc une page où une annonce EST perdue, et on
+       exige que l'écart soit visible. Sans ce cas, il resterait vert en
+       comptant exactement ce que le parseur a déjà su lire, et il ne
+       servirait à rien. */
+    var lues = pi(pageAncres, 'MAKITA').sansRef.map(function (x) { return x.titre; });
+    var clef = function (s) { return String(s || '').replace(/\s+/g, ' ').trim().slice(0, 60).toUpperCase(); };
+    var vus = {}; lues.forEach(function (t) { vus[clef(t)] = 1; });
+    ok(att.filter(function (t) { return !vus[clef(t)]; }).length === 0,
+      '⛔⛔ ARGENT : sur cette page, aucune annonce attendue ne manque à l\'appel — '
+      + 'attendues ' + att.length + ', lues ' + lues.length);
+    ok(pp.annoncesManquantes(pageAncres, lues).length === 0,
+      '⛔⛔ ARGENT : le rapprochement ne signale RIEN quand tout est lu — sinon il '
+      + 'crierait au loup et finirait ignoré ('
+      + JSON.stringify(pp.annoncesManquantes(pageAncres, lues)) + ')');
+    /* ⛔ ET IL DOIT VOIR CE QUE LE PARSEUR RATE — c'est toute sa raison d'être.
+       Sans ce cas, il resterait vert en comptant exactement ce que le parseur
+       a déjà su lire, et ne servirait à rien. */
+    ok(pp.annoncesManquantes(pageAncres, lues.slice(1)).length === 1,
+      '⛔ PRÉALABLE : quand une annonce manque à l\'appel, le compteur la NOMME. '
+      + 'Un instrument qui ne sait pas voir un trou n\'est pas un instrument');
+    /* ⛔⛔ ON COMPTE, ON NE COCHE PAS. Deux marchands vendant le MÊME article
+       écrivent le même titre — le cas NORMAL d'un comparateur, et sa page en
+       portait déjà (31 annonces pour 30 noms distincts). Cocher « ce titre
+       est-il ressorti ? » déclarerait la paire complète alors qu'une des deux
+       manque : le trou deviendrait invisible, et c'est le défaut qu'on répare. */
+    var pageJumelles = [
+      'Meuleuse compacte 125 mm ZZ 18V - MAKITA - ZZG404S2T-QW',
+      'Vendu par : PremierMarchand.fr', 'Détails de l’offre',
+      '24/48 heures', 'Livraison gratuite', '693,49 € TVA incluse',
+      'Meuleuse compacte 125 mm ZZ 18V - MAKITA - ZZG404S2T-QW',
+      'Vendu par : SecondMarchand.fr', 'Détails de l’offre',
+      '3 à 6 jours ouvrés', 'Livraison gratuite', '679,00 € TVA incluse'
+    ].join('\n');
+    var deuxTitres = pp.titresAttendus(pageJumelles);
+    ok(deuxTitres.length === 2,
+      '⛔ deux annonces du MÊME article comptent DEUX fois : ce sont deux prix '
+      + 'différents chez deux marchands (' + deuxTitres.length + '/2)');
+    ok(pp.annoncesManquantes(pageJumelles, [deuxTitres[0]]).length === 1,
+      '⛔⛔ ARGENT : une seule des deux jumelles lue ⇒ il en MANQUE une. Cocher au '
+      + 'lieu de compter rendrait ce trou invisible — et le coût d\'achat retenu '
+      + 'est le MINIMUM des sources : en manquer une, c\'est acheter trop cher');
+
     var sansTout = pi(sansAncres(pageI, 'tout'), 'MAKITA');
     ok(sansTout.items.length === ri.length
       && sansTout.sansRef.length === rid.sansRef.length,

@@ -651,6 +651,66 @@ function parseAuto(rawText, brand) {
    PURE (texte \u2192 objet), test\u00e9e par check-price-watch, sabotage compris.
    \u26d4 Elle ne renvoie que des morceaux de la page fournisseur re\u00e7ue \u2014 jamais
    un en-t\u00eate, un secret ou une donn\u00e9e du site. */
+/* ⛔⛔ COMPTER CE QUE LA PAGE CONTIENT, PAS CE QU'ON A RÉUSSI À EN LIRE.
+   Son relevé du 03/08 sortait `refsNonLues: 0` et `perdus: 0` — donc « tout
+   est lu » — alors qu'il manquait une ligne sur soixante. Les deux compteurs
+   ne mentaient pas : ils ne pouvaient pas voir ce trou-là. `refsNonLues` ne
+   couvre que les CARTES, celles qui portent une référence ; `perdus` ne
+   couvre que les blocs écartés en le sachant. Une ANNONCE MARCHANDE avalée
+   par sa voisine n'apparaît dans ni l'un ni l'autre : elle n'a pas de
+   référence, et aucun bloc ne s'est déclaré perdu.
+   ⛔ Un instrument qui compte ce qu'il a réussi ne mesure pas son échec. Ici
+   on compte les ANCRES de la page — chaque annonce marchande écrit « Vendu
+   par : » exactement une fois — et on rend le TITRE attendu de chacune : la
+   ligne non vide qui la précède. Le rapprochement se fait ensuite sur les
+   titres réellement rendus, et l'écart est NOMMÉ, pas chiffré.
+   ⚠️ J4 : une annonce perdue est un PRIX perdu. Le coût d'achat retenu est le
+   minimum des sources ; en manquer une, c'est retenir un coût trop haut. */
+function titresAttendus(rawText) {
+  var VP = /^vendu\s+par\s*:/i;
+  var lignes = stripHtml(rawText).split('\n').map(function (l) { return l.trim(); });
+  var out = [];
+  for (var i = 0; i < lignes.length; i++) {
+    if (!VP.test(lignes[i])) continue;
+    /* Le titre est la dernière ligne NON VIDE avant l'ancre. Les pages en
+       intercalent plusieurs : les sauter n'est pas une supposition, c'est la
+       seule lecture possible d'une ligne vide. Fenêtre bornée — au-delà, on
+       ne saurait plus dire à quoi on rattache. */
+    for (var j = i - 1; j >= 0 && j >= i - 6; j--) {
+      if (!lignes[j]) continue;
+      out.push(lignes[j]);
+      break;
+    }
+  }
+  return out;
+}
+
+/* ⛔ ON COMPTE, ON NE COCHE PAS. Deux marchands vendant le MÊME article
+   écrivent le même titre — c'est le cas normal d'un comparateur, et sa page
+   en portait déjà (31 annonces pour 30 noms distincts). Un simple « ce titre
+   est-il ressorti ? » déclarerait la paire complète alors qu'une des deux
+   manque : le trou serait invisible, et c'est exactement le défaut qu'on
+   répare. On rapproche donc des MULTISETS.
+   ⚠️ Extraite du point d'entrée pour être GARDÉE : tant qu'elle vivait en
+   ligne dans la réponse, aucun sabotage ne pouvait mordre dessus. */
+function annoncesManquantes(rawText, titresRendus) {
+  var clef = function (s) {
+    return String(s || '').replace(/\s+/g, ' ').trim().slice(0, 60).toUpperCase();
+  };
+  var reste = Object.create(null);
+  (titresRendus || []).forEach(function (t) {
+    var k = clef(t);
+    if (k) reste[k] = (reste[k] || 0) + 1;
+  });
+  var manquants = [];
+  titresAttendus(rawText).forEach(function (t) {
+    var k = clef(t);
+    if (reste[k] > 0) { reste[k]--; return; }
+    manquants.push(String(t).slice(0, 110));
+  });
+  return manquants;
+}
+
 function diagnostiquerPage(rawText, brand) {
   brand = brand || 'DEWALT';
   var texte = stripHtml(rawText).replace(/[ \t   ]+/g, ' ');
@@ -1497,4 +1557,4 @@ function comparerCaracteristiques(a, b) {
   return { compatible: conflits.length === 0, conflits: conflits, concordances: concordances };
 }
 
-module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickoutil, parseIdealo: parseIdealo, parseAuto: parseAuto, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, raisonAucuneSource: raisonAucuneSource, enMillis: enMillis, SOURCE_FRESH_MS: SOURCE_FRESH_MS, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage, extraireCaracteristiques: extraireCaracteristiques, comparerCaracteristiques: comparerCaracteristiques, planBalayage: planBalayage, rangDansPlan: rangDansPlan, OUTILS: OUTILS, SERIES: SERIES, nomenclature: nomen };
+module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickoutil, parseIdealo: parseIdealo, parseAuto: parseAuto, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, raisonAucuneSource: raisonAucuneSource, enMillis: enMillis, SOURCE_FRESH_MS: SOURCE_FRESH_MS, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage, titresAttendus: titresAttendus, annoncesManquantes: annoncesManquantes, extraireCaracteristiques: extraireCaracteristiques, comparerCaracteristiques: comparerCaracteristiques, planBalayage: planBalayage, rangDansPlan: rangDansPlan, OUTILS: OUTILS, SERIES: SERIES, nomenclature: nomen };
