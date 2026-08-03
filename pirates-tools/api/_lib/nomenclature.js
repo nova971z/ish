@@ -644,6 +644,23 @@ var PREFIXES_DEWALT = {
      main). Le préfixe y désigne un catalogue commercial, pas une famille
      d'objet. Ils servent donc uniquement de SECOURS quand aucun mot n'a
      parlé — jamais à contredire un mot qui, lui, a parlé. */
+  /* ⛔⛔ DWK EST UN KIT DE MACHINES, PAS UN COFFRET. Trouvé le 03/08 en
+     auditant son relevé : DWK301, DWK300 et DWK223 sortaient tous les trois
+     « rangement / coffret », parce que le sous-titre de la carte nomme les
+     TSTAK du lot — et le contenant volait la place du contenu, exactement
+     comme « Coffret DE 29 forets » avant lui. Trois lignes sur cinquante-neuf.
+     Vérifié chez cinq revendeurs, tous rubrique « kits d'outils
+     électroportatif » : DWK301 = DCD796 + DCS334 + DCS570 ; DWK300 = DCD796 +
+     DCS331 + DCS391 ; DWK223 = DCD996 + DCH273 — chacun avec 2 batteries
+     5,0 Ah, un chargeur DCB115 et ses coffrets TSTAK VI.
+     Sources : todotaladros.com · leroymerlin.fr · tecnomat.fr · cdiscount.com
+     · manomano.fr (consultées le 03/08/2026).
+     ⚠️ J4 : c'est de l'argent. Le prix d'un lot de trois machines écrit sur un
+     coffret de rangement fausse tout ce qui en découle.
+     ⛔ Et il ARBITRE — pas d'`incertain` ici : le K de DeWALT Kit désigne
+     l'objet vendu, comme DCK. C'est lui qui doit renverser le mot du
+     sous-titre, pas l'inverse. */
+  DWK:  { famille: 'machine', rayon: 'combo', type: 'pack d\'outils', note: 'DeWALT Kit — lot de machines, jamais le coffret qui les porte' },
   DWST: { famille: 'rangement', rayon: 'coffret', incertain: true, note: 'coffret et organiseur, mais AUSSI la radio de chantier' },
   DWHT: { famille: 'consommable', incertain: true, note: 'outillage à main, mais AUSSI le télémètre laser' },
   DWMT: { famille: 'consommable', incertain: true, note: 'outillage de mécanicien' },

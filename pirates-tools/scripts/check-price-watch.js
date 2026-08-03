@@ -819,6 +819,74 @@ module.exports = async function () {
       + 'lieu de compter rendrait ce trou invisible — et le coût d\'achat retenu '
       + 'est le MINIMUM des sources : en manquer une, c\'est acheter trop cher');
 
+    /* ⛔ UNE BALISE DE BLOC EST UNE FIN DE LIGNE, PAS UNE ESPACE. Mesuré en
+       éprouvant les pages limites : le MÊME contenu envoyé en HTML rendait
+       `items: 0` là où le texte rendait 1. Toutes les balises devenaient des
+       espaces, donc titre, sous-titre et prix se retrouvaient collés sur UNE
+       ligne — et ce parseur travaille par lignes. Son raccourci envoie du
+       texte aujourd'hui ; le jour où il enverra du HTML, il aurait eu un zéro
+       sans cause visible.
+       ⚠️ Le harnais compare les DEUX formes du même contenu au lieu de fixer
+       un attendu : ce qui doit être vrai, c'est l'égalité, pas un chiffre. */
+    var memeContenuTexte = [
+      'MAKITA ZZS572P2', 'Scie circulaire portative, 1 batterie, 3,5 kg',
+      '1 offre', 'à partir de649,00 €'
+    ].join('\n');
+    var memeContenuHtml = '<div class="carte"><h2>MAKITA ZZS572P2</h2>'
+      + '<p>Scie circulaire portative, 1 batterie, 3,5 kg</p>'
+      + '<li>1 offre</li><span>à partir de649,00 €</span></div>';
+    var rTexte = pi(memeContenuTexte, 'MAKITA');
+    var rHtml = pi(memeContenuHtml, 'MAKITA');
+    ok(rHtml.items.length === rTexte.items.length && rTexte.items.length === 1,
+      '⛔ le même contenu en HTML et en texte donne le MÊME nombre de lignes ('
+      + rHtml.items.length + ' vs ' + rTexte.items.length + ')');
+    ok(rHtml.items[0] && rTexte.items[0] && rHtml.items[0].sku === rTexte.items[0].sku
+      && rHtml.items[0].price === rTexte.items[0].price,
+      '⛔⛔ ARGENT : et la MÊME référence au MÊME prix — un format d\'envoi ne '
+      + 'change pas ce qu\'on achète (' + JSON.stringify(rHtml.items[0]) + ')');
+    /* ⛔ Mais on ne coupe QUE sur les balises de bloc : couper sur un `<b>` au
+       milieu d'un titre le briserait en deux, et le titre est ce qui porte le
+       type ET la référence. */
+    var titreEnrichi = pi('<p>MAKITA <b>ZZS572P2</b> Scie circulaire</p><li>1 offre</li>'
+      + '<span>à partir de649,00 €</span>', 'MAKITA');
+    ok(titreEnrichi.items.length === 1 && titreEnrichi.items[0].sku === 'ZZS572P2',
+      '⛔ une balise INLINE au milieu d\'un titre ne le coupe pas en deux — sinon '
+      + 'la référence se détacherait de la marque ('
+      + JSON.stringify(titreEnrichi.items.map(function (x) { return x.sku; })) + ')');
+
+    /* ⛔⛔ DWK EST UN KIT DE MACHINES, PAS LE COFFRET QUI LES PORTE. Trouvé en
+       auditant son relevé du 03/08 : DWK301, DWK300 et DWK223 sortaient tous
+       les trois `rangement / coffret` — TROIS lignes sur cinquante-neuf —
+       parce que le sous-titre de la carte nomme les TSTAK du lot. Le contenant
+       volait la place du contenu, exactement comme « Coffret DE 29 forets ».
+       Vérifié chez cinq revendeurs (todotaladros, leroymerlin, tecnomat,
+       cdiscount, manomano) : DWK301 = DCD796 + DCS334 + DCS570, DWK300 =
+       DCD796 + DCS331 + DCS391, DWK223 = DCD996 + DCH273.
+       ⚠️ J4 : le prix d'un lot de trois machines écrit sur un coffret de
+       rangement fausse tout ce qui en découle.
+       ⚠️ La marque est ici DEWALT et pas le témoin habituel : la table des
+       préfixes n'existe QUE pour elle, et c'est précisément ce qu'on éprouve.
+       Les références restent synthétiques partout ailleurs. */
+    function typeDewalt(t) {
+      var c = pp.extraireCaracteristiques(t, 'DEWALT');
+      return c.famille + '/' + c.rayon + '/' + c.type;
+    }
+    var kits = ['DEWALT DWK301 Coffret modulaire', 'DEWALT DWK300 Kit, 2 x TSTAK VI',
+      'DEWALT DWK223 Coffret TSTAK VI'];
+    var kitsOk = kits.filter(function (t) { return typeDewalt(t) === 'machine/combo/pack d\'outils'; });
+    ok(kitsOk.length === kits.length,
+      '⛔⛔ un DWK est un LOT DE MACHINES, même quand son sous-titre ne parle que '
+      + 'du coffret (' + kitsOk.length + '/' + kits.length + ' — obtenu '
+      + JSON.stringify(kits.map(typeDewalt)) + ')');
+    ok(pp.extraireCaracteristiques(kits[0], 'DEWALT').typeRejete === 'coffret',
+      '⛔ et le type écarté est CONSERVÉ à part : une correction qu\'on ne peut pas '
+      + 'relire n\'est pas vérifiable');
+    /* ⛔ PRÉALABLE — le vrai coffret reste un coffret. Sans ce cas, une règle qui
+       typerait « pack d'outils » tout ce qui commence par DW resterait verte. */
+    ok(typeDewalt('DEWALT DWST83345-1 Coffret TOUGHSYSTEM') === 'rangement/coffret/coffret modulaire',
+      '⛔ PRÉALABLE : DWST reste du RANGEMENT — sinon la règle ne distingue plus '
+      + 'un lot de machines d\'une caisse vide (' + typeDewalt('DEWALT DWST83345-1 Coffret TOUGHSYSTEM') + ')');
+
     var sansTout = pi(sansAncres(pageI, 'tout'), 'MAKITA');
     ok(sansTout.items.length === ri.length
       && sansTout.sansRef.length === rid.sansRef.length,

@@ -25,8 +25,17 @@
 function stripHtml(input) {
   var s = String(input || '');
   s = s.replace(/<script[\s\S]*?<\/script>/gi, ' ')
-       .replace(/<style[\s\S]*?<\/style>/gi, ' ')
-       .replace(/<[^>]+>/g, ' ');                 // toutes les balises
+       .replace(/<style[\s\S]*?<\/style>/gi, ' ');
+  /* ⛔ UNE BALISE DE BLOC EST UNE FIN DE LIGNE, PAS UNE ESPACE. Mesuré sur les
+     pages limites : un même contenu envoyé en HTML rendait `items: 0` là où le
+     texte rendait 1. Toutes les balises devenaient des espaces, donc titre,
+     sous-titre et prix se retrouvaient collés sur UNE ligne — et tout ce
+     parseur travaille par lignes. Le raccourci de l'user envoie du texte, mais
+     un jour où il enverra du HTML, il aurait eu un zéro sans cause visible.
+     ⚠️ On ne coupe QUE sur les balises qui font vraiment un bloc : couper sur
+     un `<b>` au milieu d'un titre le briserait en deux. */
+  s = s.replace(/<\/?(?:p|div|li|ul|ol|tr|td|th|h[1-6]|br|section|article|header|footer|nav|table|thead|tbody|option|dt|dd|figure|figcaption|blockquote)\b[^>]*>/gi, '\n')
+       .replace(/<[^>]+>/g, ' ');                 // le reste des balises
   s = s.replace(/&nbsp;|&#160;|&#0*160;|&#8239;|&#0*8239;|&#8201;/gi, ' ')
        .replace(/&euro;|&#8364;|&#0*8364;/gi, '€')
        .replace(/&amp;/gi, '&')

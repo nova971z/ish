@@ -327,6 +327,7 @@ annonces donnent préfixe par préfixe exactement la même correspondance.*
 | `DT` | consommable | — | accessoire et consommable ⚠️ **n'arbitre pas** |
 | `DWE` | machine | — | électroportatif filaire, plusieurs rayons |
 | `DWHT` | consommable | — | outillage à main, mais AUSSI le télémètre laser ⚠️ **n'arbitre pas** |
+| `DWK` | machine | combo | DeWALT **K**it — lot de machines, jamais le coffret qui les porte |
 | `DWMT` | consommable | — | outillage de mécanicien ⚠️ **n'arbitre pas** |
 | `DWS` | machine | sciage | scie filaire |
 | `DWST` | rangement | coffret | coffret et organiseur, mais AUSSI la radio de chantier ⚠️ **n'arbitre pas** |
@@ -339,14 +340,25 @@ annonces donnent préfixe par préfixe exactement la même correspondance.*
 1. **Le préfixe n'invente jamais de type.** Un type est un nom précis, il
    vient des mots. Le préfixe donne la famille, et le rayon seulement quand il
    n'en désigne qu'un. `DCF` couvre riveteuse **et** clé à chocs ; `DCE` est un
-   fourre-tout maison. Seul `DCK` porte son type : « combo kit » *est* le sens
-   du préfixe. 
+   fourre-tout maison. Seuls `DCK` et `DWK` portent leur type : le **K** de
+   « kit » *est* le sens du préfixe. 
 2. **La table est celle de DeWALT, et d'elle seule.** À la minute où je l'ai
    branchée sans vérifier la marque, le catalogue est tombé de **1 119 fiches
    typées à 1 049** : « Makita **DT**W700Z » était lu « DT », accessoire DeWALT. 
 3. **Deux préfixes n'arbitrent pas.** DeWALT range sa **radio** sous `DWST`
    (rangement) et son **télémètre laser** sous `DWHT` (outil à main) : là, le
    préfixe désigne un catalogue commercial, pas une famille d'objet.
+4. **`DWK` arbitre, lui, et il le doit.** Trouvé le 03/08/2026 en auditant un
+   relevé réel : `DWK301`, `DWK300` et `DWK223` sortaient tous les trois
+   *rangement / coffret* — **trois lignes sur cinquante-neuf** — parce que le
+   sous-titre de la carte nomme les **TSTAK** du lot. Le contenant volait la
+   place du contenu, comme « Coffret **DE** 29 forets » avant lui. Vérifié chez
+   cinq revendeurs, tous rubrique « kits d'outils électroportatif » :
+   `DWK301` = DCD796 + DCS334 + DCS570 · `DWK300` = DCD796 + DCS331 + DCS391 ·
+   `DWK223` = DCD996 + DCH273, chacun avec 2 batteries 5,0 Ah, un chargeur
+   DCB115 et ses coffrets TSTAK VI.
+   *Sources : todotaladros.com · leroymerlin.fr · tecnomat.fr · cdiscount.com ·
+   manomano.fr — consultées le 03/08/2026.*
 
 ### 5.2 Le SUFFIXE dit ce qu'il y a dans la boîte
 
