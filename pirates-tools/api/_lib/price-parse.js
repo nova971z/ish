@@ -374,6 +374,25 @@ function parseIdealo(rawText, brand) {
      conditions que le typage plus bas. ⚠️ Un titre d'offre marchande porte sa
      marque à la FIN (« … 1 chargeur DEWALT ») : il ne peut donc pas déclencher
      de coupure ici, et les offres restent entières. */
+  /* ⛔ TROIS PREUVES POSSIBLES, UNE SEULE SUFFIT — mais il en faut une.
+     ① la marque est écrite ; ② un type d'article est reconnu (dans n'importe
+     laquelle des trois langues) ; ③ une référence crédible est présente.
+     « 3 à 6 jours ouvrés » n'en a aucune. « Borne de recharge murale » n'a pas
+     la marque et n'a pas de réf, mais son TYPE est reconnu : elle passe, et
+     c'est voulu — le comparateur liste aussi des articles hors marque. */
+  function titrePlausible(ligne) {
+    var s = String(ligne || '').trim();
+    if (s.length < 6) return false;
+    if (new RegExp(escapeRe(brand), 'i').test(s)) return true;
+    if (typerTitre(s.toLowerCase())) return true;
+    var refs = s.match(/\b[A-Z][A-Z0-9]{2,}(?:[-\/.][A-Z0-9]+)*\b/g) || [];
+    for (var i = 0; i < refs.length; i++) {
+      var r = refs[i].toUpperCase();
+      if (/\d/.test(r) && r.length >= 5 && !UNITE_RE.test(r)) return true;
+    }
+    return false;
+  }
+
   function estTitreCarte(ligne) {
     var m = ligne.match(titreRe);
     if (m) {
@@ -400,8 +419,19 @@ function parseIdealo(rawText, brand) {
         var m = b[k].match(/([\d\s   ]*\d,\d{2})\s*\u20ac/);
         if (m) { px = parsePriceFR(m[1]); break; }
       }
-      // Sans titre s\u00fbr, on ne liste RIEN : un titre faux est pire qu'un vide.
-      if (titre && px != null && px > 0) {
+      /* \u26d4\u26d4 ARGENT \u2014 UN TITRE FAUX AVEC UN PRIX DESSUS EST PIRE QU'UN VIDE.
+         Trouv\u00e9 dans SON relev\u00e9 du 03/08 : l'annonce \u00ab 3 \u00e0 6 jours ouvr\u00e9s \u00bb
+         sortait avec un prix de 674 \u20ac. Un D\u00c9LAI DE LIVRAISON pris pour un nom
+         de produit \u2014 et un co\u00fbt d'achat qui, adopt\u00e9, ne correspondrait \u00e0
+         RIEN. Une garde existait, mais elle listait des formulations
+         (\u00ab 24/48 \u00bb, \u00ab Livraison \u00bb) : un site en \u00e9crit dix autres.
+         \u26d4 On ne blackliste plus des phrases \u2014 on exige que le titre soit
+         PLAUSIBLE. Un vrai titre porte au moins l'une de ces trois choses : la
+         marque, un type d'article reconnu, ou une r\u00e9f\u00e9rence cr\u00e9dible. Un d\u00e9lai
+         de livraison n'en a aucune, et n'en aura jamais.
+         \u26a0\ufe0f J4 \u2014 c'est une garde de JUSTESSE du co\u00fbt d'achat : un prix rattach\u00e9
+         \u00e0 un titre qui ne d\u00e9signe rien fausserait tout ce qui en d\u00e9coule. */
+      if (titre && px != null && px > 0 && titrePlausible(titre)) {
         ecartes.push({ titre: titre, prix: px, car: extraireCaracteristiques(titre, brand) });
         titreOffre = null;
       }

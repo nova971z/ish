@@ -478,6 +478,37 @@ module.exports = async function () {
     ok(!rid.sansRef.some(function (x) { return /^(24\/48|Livraison)/.test(x.titre); }),
       '⛔ jamais un titre FAUX : une ligne de délai ou de livraison n\'est pas un '
       + 'nom de produit (un titre faux est pire qu\'une absence)');
+
+    /* ⛔⛔ ARGENT — TITRE FAUX AVEC PRIX DESSUS (03/08/2026, SON RELEVÉ).
+       L'annonce « 3 à 6 jours ouvrés » est sortie avec un prix de 674 €. La
+       garde d'alors listait des FORMULATIONS (« 24/48 », « Livraison ») — un
+       site en écrit dix autres, et celle-là passait. On exige désormais qu'un
+       titre soit PLAUSIBLE : la marque, OU un type reconnu, OU une référence
+       crédible. Ces quatre-là n'ont rien de tout ça. */
+    function offreAvec(titre) {
+      return pi('MAKITA ZZX999X9\nMachine\n1 offre\n50,00 €\nDétails du produit\n'
+        + titre + '\nVendu par : UnMarchand.fr\nDétails de l’offre\n'
+        + '674,00 € TVA incluse\nDétails de l’offre\n', 'MAKITA');
+    }
+    var fauxTitres = ['3 à 6 jours ouvrés', 'Frais de port : 9,95 €', 'En stock', '1-2 jours ouvrables'];
+    var passes = fauxTitres.filter(function (t) {
+      return offreAvec(t).sansRef.some(function (x) { return x.titre === t; });
+    });
+    ok(passes.length === 0,
+      '⛔⛔ ARGENT : aucun délai, frais de port ou état de stock ne devient une '
+      + 'annonce avec un prix. Mesuré sur SON relevé : « 3 à 6 jours ouvrés » '
+      + 'sortait à 674 € (' + JSON.stringify(passes) + ')');
+    /* PRÉALABLE — sans lui, la garde pourrait tout refuser et rester verte. */
+    var vraisTitres = ['MAKITA ZZG404S2T-QW Meuleuse compacte 125 mm',
+      'Borne de recharge murale véhicule électrique 7,4 kW',
+      'Kit MAKITA ZZS570 + ZZS334 (2 x 5.0 Ah)'];
+    var gardes = vraisTitres.filter(function (t) {
+      return offreAvec(t).sansRef.some(function (x) { return x.titre === t; });
+    });
+    ok(gardes.length === vraisTitres.length,
+      '⛔ PRÉALABLE : les VRAIES annonces passent toujours — y compris celle qui '
+      + 'n\'a ni marque ni référence mais dont le TYPE est reconnu (' + gardes.length
+      + '/' + vraisTitres.length + ')');
     ok(ri.every(function (x) { return x.promo === false && x.enStock === null; }),
       'comparateur : jamais de promo ni de stock inventés');
 
