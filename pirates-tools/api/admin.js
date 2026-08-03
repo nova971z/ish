@@ -2071,8 +2071,20 @@ const PW_INSTANCE = {
    rétention de 20 min en mémoire seule, jamais persistée ; J4 — ce sont des
    COMPTES, aucun prix n'y entre et rien ici ne peut servir de prix de
    référence à une réduction ; J5 — aucune TVA, aucun octroi de mer. */
-function pwCouvAjouter(brand, skus, titres, nbTuiles, nbLues, pagesDuPlan, empreinte) {
+/* ⚠️ `extra` porte ce qui s'est ajouté après coup — empreinte de page, articles
+   RAPPROCHÉS d'une fiche, taille du catalogue de la marque. Un objet plutôt
+   qu'une file de paramètres positionnels : au septième, une inversion d'ordre
+   ne se voit plus.
+   ⚠️ Portes lues avant d'écrire : J3 — n'y entrent que des références d'outils
+   publiques et des compteurs, aucune donnée personnelle, rien de persisté ;
+   J4 — AUCUN PRIX n'entre dans ce cumul : il compte des IDENTITÉS d'articles,
+   il ne peut donc ni annoncer un prix, ni servir de prix de référence à une
+   réduction ; J5 — aucune TVA, aucun octroi de mer, le territoire fiscal
+   continue de se dériver du code postal. */
+function pwCouvAjouter(brand, skus, titres, nbTuiles, nbLues, pagesDuPlan, extra) {
   const nowMs = Date.now();
+  extra = extra || {};
+  const empreinte = extra.empreinte;
   /* ⛔⛔ UNE NOUVELLE RAFALE REPART DE ZÉRO — SINON LE TOTAL GONFLE À CHAQUE
      ESSAI. Mesuré le 03/08 sur son deuxième balayage : `pagesDansLaRafale:
      120` au lieu de 67, parce que les deux lancements sont tombés dans la
@@ -2086,12 +2098,26 @@ function pwCouvAjouter(brand, skus, titres, nbTuiles, nbLues, pagesDuPlan, empre
   if (pwCouv && pagesPlan > 0 && pwCouv.pages >= pagesPlan) pwCouv = null;
   if (!pwCouv || (nowMs - pwCouv.at) > PW_SCAN_TTL || pwCouv.brand !== brand) {
     pwCouv = { brand: brand, refs: Object.create(null), noms: Object.create(null),
-      empreintes: Object.create(null), pages: 0, tuiles: 0, lues: 0,
-      debut: nowMs, at: nowMs };
+      empreintes: Object.create(null), fiches: Object.create(null),
+      pages: 0, tuiles: 0, lues: 0, debut: nowMs, at: nowMs };
   }
   pwCouv.at = nowMs;
   pwCouv.pages += 1;
   if (empreinte) pwCouv.empreintes[String(empreinte)] = 1;
+  /* ⛔⛔ COMBIEN DE SES FICHES LE BALAYAGE A-T-IL RETROUVÉES ? La question qu'il
+     a posée le 03/08 — « où sont les produits ? » — et à laquelle AUCUN
+     compteur ne répondait. Le cumul comptait les tuiles de la PAGE et les
+     références VUES ; il ne comptait pas les RAPPROCHEMENTS avec son catalogue.
+     Or c'est le seul chiffre qui dise si un balayage sert à quelque chose : une
+     référence vue chez le fournisseur mais absente de ses fiches ne fera jamais
+     bouger un prix. `reconnus: 0` s'affichait page par page, et une page peut
+     légitimement n'en avoir aucun — sur les 67, l'absence de cumul rendait la
+     question SANS RÉPONSE POSSIBLE.
+     ⚠️ J4 : ce sont des IDENTITÉS d'articles rapprochées, aucun prix n'entre
+     ici et rien ne peut servir de prix de référence à une réduction. */
+  (extra.reconnus || []).forEach(function (s) {
+    if (s) pwCouv.fiches[String(s).toUpperCase()] = 1;
+  });
   pwCouv.tuiles += Math.max(0, parseInt(nbTuiles, 10) || 0);
   pwCouv.lues += Math.max(0, parseInt(nbLues, 10) || 0);
   (skus || []).forEach(function (s) { if (s) pwCouv.refs[String(s).toUpperCase()] = 1; });
@@ -2154,6 +2180,17 @@ function pwCouvAjouter(brand, skus, titres, nbTuiles, nbLues, pagesDuPlan, empre
     lignesLues: pwCouv.lues,
     refsDistinctes: Object.keys(pwCouv.refs).length,
     nomsDistincts: Object.keys(pwCouv.noms).length,
+    /* ⛔⛔ « OÙ SONT LES PRODUITS ? » — SA QUESTION, ET VOICI LES TROIS CHIFFRES
+       QUI Y RÉPONDENT. `fichesDeLaMarque` : ce que SON catalogue contient pour
+       cette marque. `fichesRetrouvees` : combien le balayage en a rapprochées.
+       `fichesJamaisVues` : la différence, et c'est elle qui dit ce qui reste
+       sans coût d'achat relevé.
+       ⚠️ `null` tant que l'appelant ne dit pas la taille de son catalogue : on
+       ne rend pas un zéro qui aurait l'air d'une mesure. */
+    fichesDeLaMarque: extra.fichesMarque != null ? extra.fichesMarque : null,
+    fichesRetrouvees: Object.keys(pwCouv.fiches).length,
+    fichesJamaisVues: extra.fichesMarque != null
+      ? Math.max(0, extra.fichesMarque - Object.keys(pwCouv.fiches).length) : null,
     /* ⛔⛔ QUI A COMPTÉ, ET DEPUIS QUAND. Sans ces deux valeurs, un cumul
        amputé par une instance neuve est indiscernable d'un cumul amputé par
        des pages perdues — et les deux remèdes sont opposés. Si l'identifiant
@@ -2177,8 +2214,8 @@ function pwCouvRefus(brand) {
   const nowMs = Date.now();
   if (!pwCouv || (nowMs - pwCouv.at) > PW_SCAN_TTL || pwCouv.brand !== brand) {
     pwCouv = { brand: brand, refs: Object.create(null), noms: Object.create(null),
-      empreintes: Object.create(null), pages: 0, tuiles: 0, lues: 0, refus: 0,
-      debut: nowMs, at: nowMs };
+      empreintes: Object.create(null), fiches: Object.create(null),
+      pages: 0, tuiles: 0, lues: 0, refus: 0, debut: nowMs, at: nowMs };
   }
   pwCouv.at = nowMs;
   pwCouv.refus = (pwCouv.refus || 0) + 1;
@@ -2412,10 +2449,18 @@ async function handlePriceWatch(req, res, admin, db) {
          dans la réponse : c'est elle qui permet de totaliser un balayage sur
          le FICHIER des réponses, sans dépendre de la mémoire d'une instance. */
       const empreinteSec = priceParse.empreintePage(text);
+      /* ⛔ CE QUE SON CATALOGUE CONTIENT POUR CETTE MARQUE — lu sur le fichier,
+         zéro Firestore, zéro quota. C'est le dénominateur sans lequel
+         « 84 fiches retrouvées » ne veut rien dire. */
+      const fichesMarqueSec = produitsSec.filter(function (p) {
+        return String(p.brand || '').toUpperCase() === brand;
+      }).length;
       const couvSec = pwCouvAjouter(brand, parsed.map((x) => x.sku),
         (auto.sansRef || []).map((e) => e.titre),
         tuiles.total, parsed.length + (auto.sansRef || []).length,
-        planCourant && planCourant.pages, empreinteSec);
+        planCourant && planCourant.pages,
+        { empreinte: empreinteSec, reconnus: reconnusSec.map((r) => r.sku),
+          fichesMarque: fichesMarqueSec });
 
       /* ⛔⛔ L'ÉCART, NOMMÉ. J'ai annoncé à l'user « 11 références non lues » en
          soustrayant deux compteurs — sans jamais pouvoir dire LESQUELLES. Un
@@ -2919,7 +2964,13 @@ async function handlePriceWatch(req, res, admin, db) {
         priceParse.compterTuiles(text).total,
         parsed.length + (auto.sansRef || []).length,
         (plans.plan(brand, sourceSlug) || {}).pages,
-        priceParse.empreintePage(text)),
+        /* Un article est RAPPROCHÉ s'il tombe sur une fiche du catalogue — même
+           critère qu'à sec, pour que les deux modes disent la même chose. */
+        { empreinte: priceParse.empreintePage(text),
+          reconnus: parsed.map((it) => String(it.sku || '').toUpperCase())
+            .filter((s) => !!bySku[s]),
+          fichesMarque: products.filter((p) => String(p.brand || '').toUpperCase()
+            === String(brand).toUpperCase()).length }),
       /* La même ligne locale qu'à sec : trois valeurs, aucune mémoire. C'est
          elle qui se totalise sur le fichier des 67 réponses, quand le cumul
          d'instance, lui, peut avoir été tronqué par une instance neuve. */

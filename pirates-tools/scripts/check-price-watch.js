@@ -2245,6 +2245,88 @@ module.exports = async function () {
         ok(cE2 && cE3 && cE2.instance === cE3.instance,
           '⛔ …et il ne change pas d\'une requête à l\'autre dans le même processus : '
           + 'sinon il désignerait un changement d\'instance à chaque page');
+        /* ══ « OÙ SONT LES PRODUITS ? » ════════════════════════════════════
+           ⛔⛔ Sa question du 03/08, après 24 h de travail sur ce balayage. Le
+           cumul comptait les tuiles de la page et les références VUES chez le
+           fournisseur — jamais les RAPPROCHEMENTS avec son catalogue. Or c'est
+           le seul chiffre qui dise si un balayage sert à quelque chose : une
+           référence vue chez idealo mais absente de ses fiches ne fera JAMAIS
+           bouger un prix d'achat. `reconnus` existait page par page, et une
+           page peut légitimement n'en avoir aucun ; sur 67 pages, l'absence de
+           cumul rendait la question **sans réponse possible**.
+           ⚠️ Le harnais ne nomme AUCUNE référence du catalogue : il envoie une
+           page bâtie sur les vraies fiches de la marque la plus fournie,
+           choisies à l'exécution. */
+        var catT = require('../api/_lib/catalog.js').loadCatalogAvec({});
+        var parMarque = Object.create(null);
+        catT.forEach(function (p) {
+          var b = String(p.brand || '').toUpperCase();
+          if (b && p.sku) (parMarque[b] = parMarque[b] || []).push(String(p.sku).toUpperCase());
+        });
+        var marqueT = Object.keys(parMarque).sort(function (a, b) {
+          return parMarque[b].length - parMarque[a].length;
+        })[0];
+        ok(!!marqueT && parMarque[marqueT].length >= 3,
+          '⛔ PRÉALABLE : le catalogue porte au moins 3 fiches pour la marque la plus '
+          + 'fournie — sans ça ce contrôle ne vérifie rien (marque ' + marqueT + ', '
+          + (marqueT ? parMarque[marqueT].length : 0) + ' fiches)');
+        if (marqueT && parMarque[marqueT].length >= 3) {
+          var troisRefs = parMarque[marqueT].slice(0, 3);
+          function pageDeFiches(refs, base) {
+            var l = [];
+            refs.forEach(function (r, idx) {
+              l.push(marqueT + ' ' + r, 'Machine', '2 offres',
+                'à partir de' + (base + idx) + ',00 €');
+            });
+            for (var w = 0; w < 40; w++) l.push('pied de page ligne ' + w);
+            return l.join('\n');
+          }
+          adm._internals.pwScanReset();
+          var rF1 = fauxRes();
+          await admFn({ method: 'POST',
+            query: { type: 'price-watch', brand: marqueT, source: 'idealo', sec: '1', scan: '1' },
+            /* ⛔ LA PAGE MÉLANGE DEUX DE SES FICHES ET UNE RÉFÉRENCE QU'IL NE
+               VEND PAS — c'est le cas réel : idealo liste tout le marché, pas
+               son catalogue. Sans cette intruse, « rapproché » et « vu » sont
+               le même nombre et le contrôle ne distingue rien. */
+            body: { text: pageDeFiches(troisRefs.slice(0, 2).concat(['ZZINTRUS9999']), 100) } },
+            rF1, fauxAdmin, dbInterdite);
+          ok(rF1.out && rF1.out.counts && rF1.out.counts.parsed === 3,
+            '⛔ PRÉALABLE : les trois références de la page sont bien LUES, dont '
+            + 'l\'intruse (obtenu ' + JSON.stringify(rF1.out && rF1.out.counts
+              && rF1.out.counts.parsed) + '/3)');
+          var cF1 = rF1.out && rF1.out.couverture;
+          ok(cF1 && cF1.fichesDeLaMarque === parMarque[marqueT].length,
+            '⛔⛔ le cumul dit ce que SON CATALOGUE contient pour la marque — sans ce '
+            + 'dénominateur, « 84 fiches retrouvées » ne veut rien dire (obtenu '
+            + JSON.stringify(cF1 && cF1.fichesDeLaMarque) + ', attendu '
+            + parMarque[marqueT].length + ')');
+          ok(cF1 && cF1.fichesRetrouvees === 2,
+            '⛔⛔ …et combien le balayage en a RAPPROCHÉES. C\'est le seul chiffre qui '
+            + 'réponde à « où sont les produits » : une référence vue chez le '
+            + 'fournisseur mais absente de ses fiches ne fera jamais bouger un prix '
+            + '(obtenu ' + JSON.stringify(cF1 && cF1.fichesRetrouvees) + ', attendu 2)');
+          /* ⛔ LE RAPPROCHEMENT SE CUMULE D'UNE PAGE À L'AUTRE, ET NE COMPTE
+             QU'UNE FOIS. Une fiche vue sur deux pages du même balayage reste
+             une seule fiche retrouvée — sinon le total dépasserait le
+             catalogue et `fichesJamaisVues` tomberait à zéro à tort. */
+          var rF2 = fauxRes();
+          await admFn({ method: 'POST',
+            query: { type: 'price-watch', brand: marqueT, source: 'idealo', sec: '1', scan: '1' },
+            body: { text: pageDeFiches([troisRefs[1], troisRefs[2]], 900) } }, rF2, fauxAdmin, dbInterdite);
+          var cF2 = rF2.out && rF2.out.couverture;
+          ok(cF2 && cF2.fichesRetrouvees === 3,
+            '⛔⛔ deux pages, une fiche COMMUNE aux deux : 3 retrouvées, pas 4. Compter '
+            + 'deux fois la même ferait dépasser le catalogue et annoncerait une '
+            + 'couverture qui n\'existe pas (obtenu '
+            + JSON.stringify(cF2 && cF2.fichesRetrouvees) + ')');
+          ok(cF2 && cF2.fichesJamaisVues === parMarque[marqueT].length - 3,
+            '⛔⛔ …et ce qui RESTE sans coût d\'achat relevé, en clair. C\'est de '
+            + 'l\'argent : une fiche jamais vue garde un coût supposé (obtenu '
+            + JSON.stringify(cF2 && cF2.fichesJamaisVues) + ', attendu '
+            + (parMarque[marqueT].length - 3) + ')');
+          adm._internals.pwScanReset();
+        }
         ok(cE3 && typeof cE3.cause === 'string' && !!cE3.lecture,
           '⛔⛔ un cumul incomplet dit sa CAUSE en clair, pas seulement son écart : '
           + 'un « il manque 14 pages » sans cause se termine toujours en supposition — '
