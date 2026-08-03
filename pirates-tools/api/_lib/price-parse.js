@@ -858,6 +858,122 @@ function compterTuiles(rawText) {
   return { annonces: annonces, fiches: fiches, total: annonces + fiches };
 }
 
+/* ══ APPARIER PAR LE NOM — SOUPLE SUR LES MOTS, INTRAITABLE SUR LES MESURES ══
+   ⛔⛔ LE PROBLÈME, MESURÉ LE 03/08. 379 fiches de son catalogue — 30,9 %, et
+   166 485,89 € de prix affichés — n'ont AUCUNE référence constructeur : elles
+   portent un code interne (`AC-00100736`) et se suivent par leur nom exact
+   (`srcNom`). L'appariement exigeait une égalité MOT POUR MOT entre ce nom et
+   le titre du comparateur. Résultat : **3 fiches sur 379**. Or idealo n'écrit
+   pas ses titres comme clickoutil. Les produits SONT là ; c'est le
+   rapprochement qui ne les voit pas.
+   ⛔ L'user a posé le choix : réparer, ou supprimer les 379. Supprimer, ce
+   serait effacer un tiers du catalogue pour une limite d'appariement — pas
+   pour une absence de produit. On répare.
+
+   ⛔⛔ SOUPLE NE VEUT PAS DIRE APPROXIMATIF, et c'est toute la difficulté. Sa
+   consigne, mot pour mot : « il faut que tu crées une certaine souplesse […]
+   mais il faut qu'ils soient précis toujours, c'est le plus important, car
+   sinon le traqueur ne marchera pas bien ». Un rapprochement trop large écrit
+   le coût d'un article sur la fiche d'un autre — la faute la plus chère du
+   projet, et elle ne se voit pas : le prix reste plausible.
+
+   ⛔ LA SOUPLESSE PORTE SUR LES MOTS, JAMAIS SUR LES MESURES. On ne compare pas
+   des chaînes de caractères, on compare les CARACTÉRISTIQUES déjà extraites et
+   déjà éprouvées — protocole §1.4, le bon outil existe déjà. Deux verrous, et
+   aucun n'est facultatif :
+   · AUCUNE caractéristique connue des deux côtés ne doit diverger
+     (`comparerCaracteristiques`) — une 1800 W n'est pas une 2000 W, une
+     raboteuse n'est pas une scie, et le coffret comme l'édition limitée y font
+     barrage ;
+   · il faut au moins CONCORDANCES_MIN mesures concordantes EN PLUS des trois
+     champs d'entonnoir, sinon « perceuse 18V » rapprocherait quarante fiches.
+   ⚠️ L'INDEX PAR TYPE N'EST PAS UN TROISIÈME VERROU, et le sabotage l'a montré :
+   le retirer laisse le contrôle VERT, parce que `type` est déjà un champ
+   bloquant de `comparerCaracteristiques`. C'est une OPTIMISATION — sans lui,
+   379 fiches × 60 annonces font 22 740 comparaisons par page. Le dire évite
+   qu'on le prenne pour une garde, et qu'on relâche l'autre en le croyant
+   suffisant.
+   ⛔ ET L'AMBIGUÏTÉ NE S'ARBITRE JAMAIS : deux fiches candidates pour un titre,
+   ou deux titres pour une fiche, et on ne rapproche RIEN. Ne rien écrire coûte
+   un relevé ; écrire faux coûte une vente à perte.
+
+   ⚠️ L'ÉGALITÉ EXACTE GARDE LA PRIORITÉ ABSOLUE — cette fonction ne voit que ce
+   que l'appariement exact n'a pas su placer.
+   ⚠️ FONCTION PURE, aucune entrée/sortie, aucun état.
+
+   ⚠️ PORTE J4 LUE (`node scripts/juridique.js J4`) : le prix annoncé doit être
+   exact et complet, et une réduction se réfère au prix le plus bas des 30 jours
+   précédents. Ce que cette fonction engage est en amont : elle décide QUEL COÛT
+   se rattache à QUELLE FICHE, donc quel prix sera affiché. ⛔ AUCUN PRIX
+   N'ENTRE DANS LA DÉCISION — ni comme critère, ni comme départage : un prix qui
+   départagerait choisirait le moins cher et fabriquerait une aubaine qui
+   n'existe pas. Le prix n'est LU qu'après, une fois l'identité établie.
+   ⚠️ J3 — des libellés d'outils publics, aucune donnée personnelle. J5 — aucune
+   TVA, aucun octroi de mer. */
+var CONCORDANCES_MIN = 2;
+function apparierParNomSouple(annonces, fiches, marque) {
+  var res = { items: [], restants: [], ambigus: [] };
+  var fichesUtiles = (fiches || []).filter(function (p) { return p && p.srcNom && p.sku; });
+  if (!fichesUtiles.length) {
+    res.restants = (annonces || []).slice();
+    return res;
+  }
+  /* Index par TYPE : sans lui, 379 fiches × 60 annonces font 22 740
+     comparaisons par page. Le type étant le premier verrou, il sert de clé. */
+  var parType = Object.create(null);
+  fichesUtiles.forEach(function (p) {
+    var car = extraireCaracteristiques(p.srcNom, marque);
+    if (!car.type) return;                       // sans type, rien à indexer
+    (parType[car.type] = parType[car.type] || []).push({ fiche: p, car: car });
+  });
+
+  /* ⛔ On COMPTE d'abord, on écrit ensuite. Une fiche réclamée par deux
+     annonces différentes doit être écartée des DEUX ; décider au fil de l'eau
+     laisserait l'ORDRE des annonces trancher, ce qui est un hasard. */
+  var pretendants = Object.create(null);
+  var choix = [];
+  (annonces || []).forEach(function (e) {
+    var titre = e && (e.titre || e.name);
+    if (!titre || !(Number(e.prix) > 0)) { res.restants.push(e); return; }
+    var carA = extraireCaracteristiques(titre, marque);
+    var cands = carA.type ? (parType[carA.type] || []) : [];
+    var retenus = [];
+    for (var i = 0; i < cands.length; i++) {
+      var cmp = comparerCaracteristiques(carA, cands[i].car);
+      if (!cmp.compatible) continue;
+      /* Les trois champs d'entonnoir ne sont pas des mesures : les compter
+         ferait passer « machine / perçage / perceuse » pour trois preuves. */
+      var mesures = cmp.concordances.filter(function (c) {
+        return c !== 'famille' && c !== 'rayon' && c !== 'type';
+      });
+      if (mesures.length < CONCORDANCES_MIN) continue;
+      retenus.push(cands[i].fiche);
+    }
+    if (retenus.length !== 1) {
+      if (retenus.length > 1) {
+        res.ambigus.push({ titre: String(titre).slice(0, 90), candidats: retenus.length });
+      }
+      res.restants.push(e);
+      return;
+    }
+    var id = String(retenus[0].sku).toUpperCase();
+    pretendants[id] = (pretendants[id] || 0) + 1;
+    choix.push({ id: id, p: retenus[0], e: e, titre: titre });
+  });
+
+  choix.forEach(function (c) {
+    if (pretendants[c.id] !== 1) {
+      res.ambigus.push({ titre: String(c.titre).slice(0, 90), fiche: c.p.sku,
+        candidats: pretendants[c.id] });
+      res.restants.push(c.e);
+      return;
+    }
+    res.items.push({ sku: c.p.sku, price: Number(c.e.prix), name: String(c.titre),
+      promo: false, enStock: null, parNomSouple: true });
+  });
+  return res;
+}
+
 /* ══ LA RACINE D'UNE RÉFÉRENCE — le suffixe commercial ne fait pas l'identité ══
    Décision de l'user, 03/08, mot pour mot : « DCE079D1G-QW = DCE079D1G, ce sont
    exactement les mêmes produits. Le préfixe ne veut pas dire grand-chose si la
@@ -1560,6 +1676,21 @@ function extraireCaracteristiques(titre, brand) {
      articles. C'est un nombre de PIÈCES, pas une caractéristique de l'article. */
   var mmul = t.match(/^\s*(\d{1,4})\s*[x×]\s+/i);
   if (mmul && car.nbPieces == null) car.nbPieces = parseInt(mmul[1], 10);
+  /* ⛔⛔ « 5 LAMES » DIT CINQ, MÊME SANS LE MOT « LOT ». Mesuré le 03/08 en
+     éprouvant l'appariement souple : deux faux positifs, tous deux parce que
+     « de 5 lames 30x43 mm » ressortait à UNE pièce — le décompte n'était lu
+     que derrière « lot de N » ou « N x ». Un comparateur réordonne les mots ;
+     exiger une tournure précise, c'est perdre l'information qui SÉPARE un lot
+     de cinq d'une pièce à l'unité. Et cette information vaut cinq fois le prix.
+     ⛔ VOCABULAIRE FERMÉ, pas un mot au pluriel quelconque : « 18 v batteries »
+     ou « 30x43 mm lames » ne doivent pas se lire comme des décomptes de
+     n'importe quoi. On ne compte que des pièces de quincaillerie nommées.
+     ⚠️ Le nombre doit précéder IMMÉDIATEMENT le mot, et rester sous 999 : un
+     nombre à quatre chiffres est une puissance ou une référence. */
+  var PIECES_DENOMBRABLES = '(?:lames?|forets?|meches?|disques?|embouts?|douilles?'
+    + '|cles?|pointes?|clous?|vis|fraises?|scies?|burins?|ciseaux|brosses?|tetes?)';
+  var mPieces = bas.match(new RegExp('\\b(\\d{1,3})\\s+' + PIECES_DENOMBRABLES + '\\b'));
+  if (mPieces && car.nbPieces == null) car.nbPieces = parseInt(mPieces[1], 10);
   /* Un LOT de N batteries contient N batteries — ce n'est pas une déduction
      hasardeuse, c'est la même information dite deux fois. Sans ça, « 10 x …
      batteries » ressortait à 1 après correction du 184, et un lot de dix se
@@ -1825,6 +1956,29 @@ function extraireCaracteristiques(titre, brand) {
     || (car.nbOutils != null && car.nbOutils > 1)
     || (car.nbPieces != null && car.nbPieces > 1);
 
+  /* ⛔⛔ SUR UNE PIÈCE DE QUINCAILLERIE, « PAS DE DÉCOMPTE ÉCRIT » VEUT DIRE UNE.
+     Mesuré le 03/08 en éprouvant l'appariement souple sur ses 379 fiches sans
+     référence : DEUX faux positifs, et les deux du même mécanisme —
+     « Lot de 5 lames 30x43 mm pour multi-cutter Métal » apparié à
+     « Lame 30x43 mm pour multi-cutter Métal ». Toutes les autres mesures
+     concordaient (dimensions, matière, machine visée) ; seul le NOMBRE séparait
+     les deux articles, et il valait `null` d'un côté.
+     ⛔ Un champ absent est une IGNORANCE, et une ignorance NE VOTE PAS : le
+     décompte ne pouvait donc rien contredire. C'est la troisième fois que ce
+     mécanisme coûte — après `coffret` et `editionLimitee`. La règle est
+     désormais générale : quand l'absence d'une mention a un SENS, on l'écrit.
+     ⚠️ UNIQUEMENT sur les consommables et la quincaillerie, où l'unité est le
+     défaut naturel, et seulement si le TYPE est connu — sinon on inventerait
+     une caractéristique sur un texte qu'on n'a pas compris.
+     ⚠️ Sens de l'erreur assumé (J4) : un lot dont le titre tait la quantité
+     sera jugé incompatible et son prix ne sera PAS écrit. Un prix de lot de
+     cinq lames sur une fiche de lame à l'unité diviserait le coût par cinq et
+     ferait vendre à perte. On préfère ne rien écrire. */
+  if ((car.famille === 'consommable' || car.famille === 'quincaillerie')
+      && car.nbPieces == null && car.type) {
+    car.nbPieces = 1;
+  }
+
   /* ══ LE SUFFIXE DE RÉFÉRENCE, DERNIER MOT SUR LE CONTENU ═══════════════
      Table vérifiée le 03/08 sur support.dewalt.com (voir `nomenclature.js`).
      ⛔⛔ C'EST LA MESURE QUI RAPPORTE LE PLUS. « DCD805P2 » et « DCD805N »
@@ -1996,4 +2150,4 @@ function comparerCaracteristiques(a, b) {
   return { compatible: conflits.length === 0, conflits: conflits, concordances: concordances };
 }
 
-module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickoutil, parseIdealo: parseIdealo, parseAuto: parseAuto, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, raisonAucuneSource: raisonAucuneSource, enMillis: enMillis, SOURCE_FRESH_MS: SOURCE_FRESH_MS, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage, estMaPropreReponse: estMaPropreReponse, titresAttendus: titresAttendus, compterTuiles: compterTuiles, empreintePage: empreintePage, racineRef: racineRef, annoncesManquantes: annoncesManquantes, extraireCaracteristiques: extraireCaracteristiques, comparerCaracteristiques: comparerCaracteristiques, planBalayage: planBalayage, rangDansPlan: rangDansPlan, OUTILS: OUTILS, SERIES: SERIES, nomenclature: nomen };
+module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickoutil, parseIdealo: parseIdealo, parseAuto: parseAuto, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, raisonAucuneSource: raisonAucuneSource, enMillis: enMillis, SOURCE_FRESH_MS: SOURCE_FRESH_MS, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage, estMaPropreReponse: estMaPropreReponse, titresAttendus: titresAttendus, compterTuiles: compterTuiles, empreintePage: empreintePage, racineRef: racineRef, apparierParNomSouple: apparierParNomSouple, CONCORDANCES_MIN: CONCORDANCES_MIN, annoncesManquantes: annoncesManquantes, extraireCaracteristiques: extraireCaracteristiques, comparerCaracteristiques: comparerCaracteristiques, planBalayage: planBalayage, rangDansPlan: rangDansPlan, OUTILS: OUTILS, SERIES: SERIES, nomenclature: nomen };

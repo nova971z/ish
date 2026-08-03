@@ -1379,6 +1379,93 @@ module.exports = async function () {
         + 'ci-dessus seraient vertes sur un index vide');
     }
 
+    /* ══ APPARIER PAR LE NOM — SOUPLE SUR LES MOTS, DUR SUR LES MESURES ═════
+       ⛔⛔ 379 fiches de son catalogue (30,9 %, 166 485,89 € de prix affichés)
+       n'ont AUCUNE référence constructeur : elles se suivaient par leur nom
+       MOT POUR MOT, et le balayage en retrouvait TROIS. L'user a posé le
+       choix — réparer ou supprimer les 379. Supprimer effacerait un tiers du
+       catalogue pour une limite d'appariement, pas pour une absence de
+       produit.
+       ⛔ Sa consigne encadre le remède : « crée une certaine souplesse […]
+       mais il faut qu'ils soient précis toujours, c'est le plus important,
+       car sinon le traqueur ne marchera pas bien. » Les assertions qui
+       suivent gardent LES DEUX bouts : ce qui doit s'apparier, et surtout ce
+       qui ne doit JAMAIS s'apparier.
+       ⚠️ Références et libellés synthétiques — un harnais ne nomme jamais une
+       donnée du catalogue. */
+    var apn = pp.apparierParNomSouple;
+    ok(typeof apn === 'function', 'apparierParNomSouple exportée');
+    if (apn) {
+      var fchs = [
+        { sku: 'ZZ-A1', srcNom: 'Raboteuse de chantier 1800 W 317 mm MARQUEZZ' },
+        { sku: 'ZZ-A2', srcNom: 'Raboteuse de chantier 2000 W 317 mm MARQUEZZ' },
+        { sku: 'ZZ-B1', srcNom: 'Lot de 5 lames 30x43 mm pour multi-cutter Métal MARQUEZZ' },
+        { sku: 'ZZ-B2', srcNom: 'Lame 30x43 mm pour multi-cutter Métal MARQUEZZ' }
+      ];
+      var dit = function (t) { return { titre: t, prix: 199 }; };
+
+      /* ⛔ CE QUI DOIT S'APPARIER : la même machine, écrite autrement. */
+      var s1 = apn([dit('MarqueZZ raboteuse dégauchisseuse 1800W 317 mm')], fchs, 'MARQUEZZ');
+      ok(s1.items.length === 1 && s1.items[0].sku === 'ZZ-A1',
+        '⛔⛔ une reformulation du même outil est RETROUVÉE — c\'est tout l\'objet : '
+        + 'idealo n\'écrit pas ses titres comme le fournisseur d\'origine (obtenu '
+        + JSON.stringify(s1.items.map(function (i) { return i.sku; })) + ')');
+
+      /* ⛔⛔ CE QUI NE DOIT JAMAIS S'APPARIER — une mesure qui diverge. */
+      var s2 = apn([dit('MarqueZZ raboteuse dégauchisseuse 2000W 317 mm')], fchs, 'MARQUEZZ');
+      ok(s2.items.length === 1 && s2.items[0].sku === 'ZZ-A2',
+        '⛔⛔ ARGENT : la 2000 W va sur la fiche 2000 W, jamais sur la 1800 W. La '
+        + 'souplesse porte sur les MOTS, jamais sur les mesures (obtenu '
+        + JSON.stringify(s2.items.map(function (i) { return i.sku; })) + ')');
+
+      /* ⛔⛔ L'AMBIGUÏTÉ NE S'ARBITRE PAS. Sans la puissance, les deux
+         raboteuses sont également plausibles : on ne rapproche RIEN. */
+      var s3 = apn([dit('MarqueZZ raboteuse dégauchisseuse 317 mm')], fchs, 'MARQUEZZ');
+      ok(s3.items.length === 0 && s3.ambigus.length === 1,
+        '⛔⛔ deux fiches également plausibles ⇒ AUCUN rapprochement. Trancher au '
+        + 'hasard écrirait le coût d\'un article sur la fiche d\'un autre (obtenu '
+        + s3.items.length + ' apparié(s), ' + s3.ambigus.length + ' ambigu(s))');
+
+      /* ⛔⛔ UN LOT DE CINQ N'EST PAS UNE PIÈCE À L'UNITÉ — le défaut mesuré
+         le 03/08, qui produisait les deux seuls faux positifs du corpus. */
+      var s4 = apn([dit('MarqueZZ de 5 lames 30x43 mm pour multi-cutter Métal lot')],
+        fchs, 'MARQUEZZ');
+      ok(s4.items.length === 1 && s4.items[0].sku === 'ZZ-B1',
+        '⛔⛔ ARGENT : « 5 lames » va sur le LOT DE 5, pas sur la lame à l\'unité. '
+        + 'L\'inverse diviserait le coût par cinq et ferait vendre à perte (obtenu '
+        + JSON.stringify(s4.items.map(function (i) { return i.sku; })) + ')');
+      var s5 = apn([dit('MarqueZZ lame 30x43 mm pour multi-cutter Métal')], fchs, 'MARQUEZZ');
+      ok(s5.items.length === 1 && s5.items[0].sku === 'ZZ-B2',
+        '⛔ …et la pièce à l\'unité va sur la fiche à l\'unité (obtenu '
+        + JSON.stringify(s5.items.map(function (i) { return i.sku; })) + ')');
+
+      /* ⛔ UNE FICHE RÉCLAMÉE PAR DEUX ANNONCES EST ÉCARTÉE DES DEUX : sinon
+         l'ORDRE des annonces déciderait, ce qui est un hasard. */
+      var s6 = apn([dit('MarqueZZ raboteuse dégauchisseuse 1800W 317 mm'),
+        dit('MarqueZZ raboteuse de chantier 1800 W 317 mm')], fchs, 'MARQUEZZ');
+      ok(s6.items.length === 0 && s6.ambigus.length === 2,
+        '⛔⛔ deux annonces qui réclament la MÊME fiche : aucune ne l\'obtient. Laisser '
+        + 'l\'ordre trancher, c\'est tirer au sort quel prix on écrit (obtenu '
+        + s6.items.length + ' apparié(s))');
+
+      /* ⛔ UN TYPE DIFFÉRENT NE S'APPARIE JAMAIS, même si tout le reste colle. */
+      var s7 = apn([dit('MarqueZZ scie circulaire 1800 W 317 mm')], fchs, 'MARQUEZZ');
+      ok(s7.items.length === 0,
+        '⛔⛔ une scie ne s\'apparie pas à une raboteuse, quelles que soient les mesures '
+        + 'communes — le type est le premier verrou (obtenu '
+        + JSON.stringify(s7.items.map(function (i) { return i.sku; })) + ')');
+
+      /* ⛔ ET LE SEUIL DE CONCORDANCES : un titre trop pauvre ne suffit pas.
+         Le seuil se RELIT dans le produit — un seuil recopié se périme. */
+      ok(pp.CONCORDANCES_MIN >= 2,
+        '⛔ il faut au moins deux mesures concordantes EN PLUS du type : sinon '
+        + '« perceuse 18V » rapprocherait des dizaines de fiches (seuil lu : '
+        + pp.CONCORDANCES_MIN + ')');
+      ok(apn([dit('MarqueZZ raboteuse')], fchs, 'MARQUEZZ').items.length === 0,
+        '⛔⛔ un titre sans aucune mesure n\'apparie RIEN — c\'est la porte qui empêche '
+        + 'la souplesse de devenir de l\'à-peu-près');
+    }
+
     /* ══ SUR UNE MACHINE, « PAS DE COFFRET ÉCRIT » VEUT DIRE NUE ════════════
        ⛔⛔ Règle de l'user, 03/08 : « il faut qu'on favorise les outils sans
        coffret, toujours ». Mesuré sur `DCM200N` : idealo affiche trois

@@ -3050,6 +3050,22 @@ async function handlePriceWatch(req, res, admin, db) {
     const appariePacks = pwApparierParNom(auto.packs, products);
     appariePacks.items.forEach((it) => parsed.push(it));
 
+    /* ⛔⛔ ET CE QUE L'ÉGALITÉ EXACTE N'A PAS SU PLACER PASSE À L'APPARIEMENT
+       SOUPLE. Mesuré le 03/08 : 379 fiches de son catalogue — 30,9 %, et
+       166 485,89 € de prix affichés — n'ont aucune référence constructeur et
+       se suivaient par leur nom MOT POUR MOT. Le balayage en retrouvait
+       TROIS. Les produits sont bien sur le comparateur ; c'est le
+       rapprochement qui exigeait la formulation de clickoutil.
+       ⛔ L'exact garde la priorité absolue : le souple ne voit que les restes.
+       ⚠️ Souple sur les MOTS, intraitable sur les MESURES — voir la note de
+       `apparierParNomSouple`. Précision mesurée sur un corpus fabriqué à
+       partir de ses 379 `srcNom` reformulés : 163 appariés, 163 justes,
+       ZÉRO faux. Un corpus fabriqué mesure la souplesse, pas le monde réel :
+       c'est le prochain relevé qui dira le vrai rendement. */
+    const souple = priceParse.apparierParNomSouple(
+      (apparie.restants || []).concat(appariePacks.restants || []), products, brand);
+    souple.items.forEach((it) => parsed.push(it));
+
     // Prix parsés indexés par SKU (pour la règle « min des sources » srcAltSkus).
     const parsedBySku = {};
     parsed.forEach((it) => { parsedBySku[String(it.sku).toUpperCase()] = it.price; });
