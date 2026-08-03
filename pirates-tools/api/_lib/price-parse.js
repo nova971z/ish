@@ -354,7 +354,7 @@ function parseIdealo(rawText, brand) {
       }
       // Sans titre s\u00fbr, on ne liste RIEN : un titre faux est pire qu'un vide.
       if (titre && px != null && px > 0) {
-        ecartes.push({ titre: titre, prix: px });
+        ecartes.push({ titre: titre, prix: px, car: extraireCaracteristiques(titre, brand) });
         titreOffre = null;
       }
       return;
@@ -379,22 +379,36 @@ function parseIdealo(rawText, brand) {
         if (mq) { pxx = parsePriceFR(mq[1]); break; }
       }
       if (b[0] && pxx != null && pxx > 0 && new RegExp(escapeRe(brand), 'i').test(b.join(' '))) {
-        ecartes.push({ titre: b[0], prix: pxx });
+        /* R\u00e9f \u00e9clat\u00e9e par des espaces (\u00ab DeWalt DCS 579 T2T \u00bb) : on ne devine
+           toujours pas de `sku`, mais on QUALIFIE \u2014 c'est ce qui permettra de
+           rapprocher l'annonce d'une fiche sans jamais \u00e9crire son prix. */
+        var descEc = b.slice(0, Math.min(b.length, 4)).join(' ');
+        ecartes.push({ titre: b[0], prix: pxx, car: extraireCaracteristiques(descEc, brand) });
       }
       return;
     }
     if (seen[sku]) return;
     // Prix : on cherche APR\u00c8S le titre, du plus explicite au plus simple.
-    var prix = null;
+    var prix = null, iPrix = -1;
     for (var p = iTitre + 1; p < b.length; p++) {
       var ma = b[p].match(prixApartir);
-      if (ma) { prix = parsePriceFR(ma[1]); break; }
+      if (ma) { prix = parsePriceFR(ma[1]); iPrix = p; break; }
       var ms = b[p].match(prixSeul);
-      if (ms) { prix = parsePriceFR(ms[1]); break; }
+      if (ms) { prix = parsePriceFR(ms[1]); iPrix = p; break; }
     }
     if (prix == null || !(prix > 0)) return;
     seen[sku] = true;
-    out.push({ sku: sku, price: prix, name: brand + ' ' + sku, promo: false, enStock: null });
+    /* \u26a0\ufe0f LE TITRE SEUL NE SUFFIT PAS. Mesur\u00e9 sur la page r\u00e9elle : idealo \u00e9crit
+       \u00ab DeWalt DCS572P2 \u00bb sur une ligne et \u00ab Scie circulaire portative, 1
+       batterie, 3,5 kg \u00bb sur la SUIVANTE. Le type d'outil, le nombre de
+       batteries et le poids vivent tous dans ce sous-titre. Ne lire que la
+       premi\u00e8re ligne, c'est jeter la moiti\u00e9 de ce que la page dit. On donne
+       donc \u00e0 l'extracteur tout ce qui va du titre au prix. */
+    var desc = b.slice(iTitre, iPrix < 0 ? b.length : iPrix).join(' ');
+    out.push({
+      sku: sku, price: prix, name: brand + ' ' + sku, promo: false, enStock: null,
+      car: extraireCaracteristiques(desc, brand)
+    });
   }
 
   return { items: out, sansRef: ecartes };
@@ -541,4 +555,213 @@ function choisirCoutSource(sources, nowMs, maxAgeMs) {
   return best;
 }
 
-module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickoutil, parseIdealo: parseIdealo, parseAuto: parseAuto, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, enMillis: enMillis, SOURCE_FRESH_MS: SOURCE_FRESH_MS, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage };
+/* ══ CARACTÉRISTIQUES D'UN TITRE FOURNISSEUR ═══════════════════════════════
+   Écrit le 03/08/2026, et la critique de l'user était juste : « il doit
+   comparer le voltage, le nom propre d'un outil, la référence, si c'est un
+   pack ou pas, avec fil ou à batterie, le nombre de batteries… ne recoupe pas
+   avec deux ou trois informations. »
+
+   Le parseur ne lisait que réf + prix. Conséquence : la moitié d'une page —
+   les OFFRES MARCHANDES, dont les titres sont pourtant les plus riches —
+   partait à la poubelle par prudence, faute de pouvoir décider. Or ces titres
+   portent tout ce qu'il faut pour décider vraiment :
+
+     Débroussailleuse 54V DCMST922N-XJ + 1 batterie 54V 12 Ah + 1 chargeur DCB118
+        ↑ type        ↑ V   ↑ réf        ↑ lot ↑ nb        ↑ Ah    ↑ chargeur
+
+   ⛔ CE QUE ÇA CHANGE POUR L'ARGENT. On ne jette plus : on QUALIFIE. Un titre
+   marqué `pack:true` porte batterie et chargeur ; son prix ne peut donc
+   s'écrire que sur une fiche elle-même vendue en pack. La règle « un prix de
+   pack ne s'écrit jamais sur la réf d'un composant » cesse d'être un pari sur
+   la forme du titre : elle devient une comparaison de caractéristiques.
+
+   ⚠️ Rend `null` sur tout champ NON TROUVÉ. Un champ absent n'est jamais un
+   champ à zéro : « voltage inconnu » et « 0 V » ne se comparent pas de la même
+   façon, et les confondre ferait apparier n'importe quoi. */
+var OUTILS = [
+  // Le nom propre de l'outil. Ordre important : le plus spécifique d'abord —
+  // « scie circulaire » avant « scie », sinon le générique gagne toujours.
+  'perceuse-visseuse', 'perceuse à percussion', 'perceuse d\'angle', 'perceuse',
+  'visseuse à chocs', 'visseuse à choc', 'visseuse', 'boulonneuse',
+  'clé à chocs', 'clé à choc', 'cliquet',
+  'meuleuse d\'angle', 'meuleuse droite', 'meuleuse', 'disqueuse', 'tronçonneuse',
+  'scie circulaire', 'scie plongeante', 'scie sabre', 'scie à onglet', 'scie sauteuse',
+  'scie égoïne', 'scie à ruban', 'scie-cloche', 'scie',
+  'marteau perforateur', 'marteau de démolition', 'marteau', 'perforateur', 'burineur',
+  'cloueuse', 'cloueur', 'agrafeuse', 'riveteuse',
+  'ponceuse', 'polisseuse', 'défonceuse', 'dégauchisseuse', 'raboteuse', 'fraiseuse',
+  'aspirateur', 'souffleur', 'nettoyeur haute pression', 'nettoyeur',
+  'compresseur', 'générateur', 'groupe électrogène', 'vibrateur',
+  'débroussailleuse', 'taille-haie', 'coupe-bordure', 'tondeuse',
+  'laser', 'télémètre', 'projecteur', 'lampe', 'radio',
+  'chargeur', 'batterie', 'coffret', 'pack outillage', 'kit'
+];
+
+var SERIES = ['flexvolt', 'powerstack', 'xtreme', 'atomic', 'powerdetect', 'xr', 'lxt', 'cxt', 'xgt'];
+var BOITES = /\b(t-?\s?stak|tough\s?system|makpac|systainer|l-?boxx|tanos)\b/;
+
+/* ⛔ `\b` NE MARCHE PAS SUR DU FRANÇAIS : il est ASCII, donc « \bégoïne » ou
+   « débroussailleuse\b » se comportent autrement qu'on croit dès qu'un accent
+   touche la bordure. Et `indexOf` tout court est pire : il a trouvé « kit »
+   dans « maKITa » et rendu le type « kit » pour toute machine de la marque.
+   D'où cette borne explicite : ni lettre latine, ni chiffre, de chaque côté. */
+var LETTRE = 'a-zà-öø-ÿ0-9';
+function motEntier(basseCasse, mot) {
+  return new RegExp('(?:^|[^' + LETTRE + '])' + escapeRe(mot) + '(?![' + LETTRE + '])')
+    .test(basseCasse);
+}
+
+function extraireCaracteristiques(titre, brand) {
+  var t = String(titre || '').replace(/[ \t   ]+/g, ' ');
+  var bas = t.toLowerCase();
+  var car = {
+    sku: null, skuEclate: null, type: null, serie: null,
+    voltage: null, voltageSecteur: null, ah: null,
+    nbBatteries: null, nbOutils: null, chargeur: false, coffret: null,
+    pack: false, sansFil: null, brushless: null,
+    poidsKg: null, diametreMm: null, bars: null
+  };
+  if (!t) return car;
+
+  /* ── Référence contiguë : un bloc majuscules+chiffres, assez long, jamais
+     une unité ni un nom de gamme (« FLEXVOLT », « T-STAK » ne sont pas des
+     réfs). C'est la SEULE forme qu'on ose appeler `sku`. */
+  var refs = t.match(/\b[A-Z][A-Z0-9]{2,}(?:[-\/.][A-Z0-9]+)*\b/g) || [];
+  for (var r = 0; r < refs.length; r++) {
+    var cand = refs[r].toUpperCase();
+    if (cand === String(brand || '').toUpperCase()) continue;      // la marque
+    if (!/\d/.test(cand) || cand.length < 5) continue;             // une réf porte un chiffre
+    if (UNITE_RE.test(cand)) continue;                             // « 18V-54V » n'est pas une réf
+    if (/^(TSTAK|T-STAK|TOUGHSYSTEM|MAKPAC|SYSTAINER|FLEXVOLT|POWERSTACK|LI-?ION|XGT|LXT)/.test(cand)) continue;
+    car.sku = cand; break;
+  }
+
+  /* ⚠️ Référence ÉCLATÉE PAR DES ESPACES : « DXPW 003 E », « DCS 579 T2T ».
+     Mesuré sur la page réelle : 2 cartes sur 9. On la recolle, mais dans un
+     champ SÉPARÉ et jamais dans `sku` — parce qu'on ne sait pas si le vrai
+     code est DCS579T2T ou DCS579T2. Un recollage sert à RAPPROCHER deux
+     annonces entre elles ; il ne sert jamais à écrire un prix sur une fiche. */
+  if (!car.sku) {
+    var me = t.match(/\b([A-Z]{2,5})\s+(\d{2,4})\s*([A-Z][A-Z0-9]{0,4})?\b/);
+    if (me) car.skuEclate = (me[1] + me[2] + (me[3] || '')).toUpperCase();
+  }
+
+  // ── Nom propre de l'outil : le premier de la liste qui apparaît, EN MOT
+  //    ENTIER. `indexOf` seul trouvait « kit » dans « ma-KIT-a ».
+  for (var o = 0; o < OUTILS.length; o++) {
+    if (motEntier(bas, OUTILS[o])) { car.type = OUTILS[o]; break; }
+  }
+
+  // ── Gamme : elle commande la compatibilité batterie, donc le prix d'un lot.
+  for (var s = 0; s < SERIES.length; s++) {
+    if (motEntier(bas, SERIES[s])) { car.serie = SERIES[s].toUpperCase(); break; }
+  }
+
+  /* ── Voltage. Un titre en mélange DEUX : celui de l'outil (≤ 60 V) et celui
+     du secteur (« chargeur 230 V »). Prendre le maximum brut ferait passer une
+     visseuse 18 V pour du 230 V. On sépare les deux domaines. */
+  var volts = [], mv, reV = /(\d{1,3})\s*V\b/gi;
+  while ((mv = reV.exec(t)) !== null) {
+    var v = parseInt(mv[1], 10);
+    if (v >= 4 && v <= 400) volts.push(v);
+  }
+  var surBatterie = volts.filter(function (x) { return x <= 60; });
+  var surSecteur  = volts.filter(function (x) { return x >= 100; });
+  if (surBatterie.length) car.voltage = Math.max.apply(null, surBatterie);
+  if (surSecteur.length) car.voltageSecteur = Math.max.apply(null, surSecteur);
+
+  // ── Capacité : « 5 Ah », « 2.0Ah », « 12 Ah ». La plus grande annoncée.
+  var ahs = [], ma, reA = /(\d+(?:[.,]\d+)?)\s*Ah\b/gi;
+  while ((ma = reA.exec(t)) !== null) ahs.push(parseFloat(ma[1].replace(',', '.')));
+  if (ahs.length) car.ah = Math.max.apply(null, ahs);
+
+  /* ── Nombre de batteries. Trois écritures mesurées sur la page réelle :
+       « 2 batteries », « 1X2.0Ah », « 2x 5,0 Ah ». Et « outil nu » vaut ZÉRO
+       explicitement — ce n'est pas une absence d'information, c'est une
+       information : la machine se vend sans batterie. */
+  var mb = bas.match(/(\d+)\s*(?:x\s*)?batterie/);
+  if (mb) car.nbBatteries = parseInt(mb[1], 10);
+  else if (/\bbatterie/.test(bas)) car.nbBatteries = 1;
+  var mx = t.match(/\b(\d+)\s*[xX×]\s*\d+(?:[.,]\d+)?\s*Ah\b/);
+  if (mx) car.nbBatteries = parseInt(mx[1], 10);
+  if (/\b(outil nu|machine nue|sans batterie|body only)\b/.test(bas)) car.nbBatteries = 0;
+
+  // ── Combo : « pack 3 outils », « 5 machines ».
+  var mo = bas.match(/(\d+)\s*(?:outils|machines)\b/);
+  if (mo) car.nbOutils = parseInt(mo[1], 10);
+
+  car.chargeur = /\bchargeurs?\b|\bcharger\b/.test(bas);
+
+  /* ── Coffret. Sa MARQUE compte (l'user facture le coffret à part), et le mot
+     générique « coffret » précède souvent la marque dans le titre — « en
+     coffret T-STAK ». Une alternance unique donnerait donc « COFFRET » pour un
+     T-STAK : on cherche la marque D'ABORD, le générique seulement en repli. */
+  var mc = bas.match(BOITES);
+  if (mc) car.coffret = mc[1].replace(/[-\s]/g, '').toUpperCase();
+  else if (/\b(coffret|mallette|malette|valise)\b/.test(bas)) car.coffret = 'GENERIQUE';
+
+  car.brushless = /\bbrushless\b|sans\s+charbon/.test(bas) ? true : null;
+
+  // ── Poids, diamètre, pression : ils sont dans le sous-titre idealo.
+  var mp = t.match(/(\d+(?:[.,]\d+)?)\s*kg\b/i);
+  if (mp) car.poidsKg = parseFloat(mp[1].replace(',', '.'));
+  var md = t.match(/(\d{2,4})\s*mm\b/i);
+  if (md) car.diametreMm = parseInt(md[1], 10);
+  var mba = t.match(/(\d{2,4})\s*bars?\b/i);
+  if (mba) car.bars = parseInt(mba[1], 10);
+
+  /* ── Avec fil ou sur batterie : jamais deviné sans un mot explicite, sauf
+     quand le titre annonce lui-même une batterie. « 230 V » seul suffit à dire
+     filaire — mais pas s'il y a aussi un voltage de batterie (le chargeur). */
+  if (/\bsans fil\b|\bsans-fil\b|\bcordless\b/.test(bas) || car.serie) car.sansFil = true;
+  else if (car.nbBatteries != null && car.nbBatteries > 0) car.sansFil = true;
+  // ⚠️ `\b` est ASCII : « \bélectrique » ne peut JAMAIS accrocher, « é » n'est
+  //    pas un caractère de mot. La borne se met à droite seulement.
+  else if (/\bfilaire\b|\bthermique\b|\bessence\b|[ée]lectrique\b/.test(bas)) car.sansFil = false;
+  else if (car.voltageSecteur && car.voltage == null) car.sansFil = false;
+
+  /* ── Lot. ⛔ RÈGLE D'ARGENT : ce drapeau dit « ce prix couvre PLUS que la
+     machine seule ». Il n'est donc pas un pari sur le mot « pack » : toute
+     batterie, tout chargeur, tout coffret, tout « + » le lève. `outil nu en
+     coffret` reste un lot — son prix inclut la boîte. */
+  car.pack = /\+/.test(t)
+    || /\b(kit|pack|combo|set|lot de|ensemble)\b/.test(bas)
+    || (car.nbBatteries != null && car.nbBatteries > 0)
+    || car.chargeur === true
+    || car.coffret != null
+    || (car.nbOutils != null && car.nbOutils > 1);
+
+  return car;
+}
+
+/* ── COMPARAISON ─────────────────────────────────────────────────────────────
+   ⛔ « Ne recoupe pas avec deux ou trois informations. » Deux annonces ne
+   désignent le même article que si AUCUNE caractéristique connue des deux
+   côtés ne les sépare. Un champ `null` d'un côté n'est pas une concordance :
+   c'est une ignorance, et une ignorance ne vote pas.
+
+   Rend { compatible, conflits, concordances }. `compatible:false` dès UN
+   conflit — parce qu'un prix de lot écrit sur une machine nue est une perte
+   sèche, et qu'on préfère ne rien écrire à écrire faux. */
+var CHAMPS_BLOQUANTS = ['type', 'voltage', 'nbBatteries', 'nbOutils', 'pack', 'sansFil', 'coffret', 'ah', 'serie'];
+
+function comparerCaracteristiques(a, b) {
+  var conflits = [], concordances = [];
+  a = a || {}; b = b || {};
+
+  // Une réf identique des deux côtés ne DISPENSE pas des autres contrôles :
+  // les vendeurs collent la réf du composant sur l'annonce du lot.
+  var refA = a.sku || a.skuEclate, refB = b.sku || b.skuEclate;
+  if (refA && refB) (refA === refB ? concordances : conflits).push('reference');
+
+  for (var i = 0; i < CHAMPS_BLOQUANTS.length; i++) {
+    var c = CHAMPS_BLOQUANTS[i];
+    var va = a[c], vb = b[c];
+    if (va == null || vb == null) continue;       // ignorance : ne vote pas
+    if (va === vb) { concordances.push(c); continue; }
+    conflits.push(c);
+  }
+  return { compatible: conflits.length === 0, conflits: conflits, concordances: concordances };
+}
+
+module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickoutil, parseIdealo: parseIdealo, parseAuto: parseAuto, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, enMillis: enMillis, SOURCE_FRESH_MS: SOURCE_FRESH_MS, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage, extraireCaracteristiques: extraireCaracteristiques, comparerCaracteristiques: comparerCaracteristiques, OUTILS: OUTILS, SERIES: SERIES };

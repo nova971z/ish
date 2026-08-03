@@ -2030,9 +2030,22 @@ async function handlePriceWatch(req, res, admin, db) {
       const reconnusSec = [], inconnusSec = [];
       parsed.forEach((it) => {
         const p = bySkuSec[String(it.sku).toUpperCase()];
-        if (p) reconnusSec.push({ sku: it.sku, srcTTC: it.price, fiche: p.title || p.name });
-        else inconnusSec.push({ sku: it.sku, srcTTC: it.price, name: it.name });
+        /* ⛔ `car` EST RENDU EN MODE À SEC, et c'est le seul moyen de VOIR ce
+           que le parseur a compris de chaque annonce. Sans ça, un extracteur
+           qui typerait tout « kit » resterait invisible : le relevé aurait
+           l'air juste, parce que le prix, lui, est bon.
+           ⚠️ Rien de personnel ici (J3) : ce sont des caractéristiques
+           d'outil — voltage, type, nombre de batteries. */
+        if (p) reconnusSec.push({ sku: it.sku, srcTTC: it.price, fiche: p.title || p.name, car: it.car || null });
+        else inconnusSec.push({ sku: it.sku, srcTTC: it.price, name: it.name, car: it.car || null });
       });
+      /* Une offre marchande n'est plus seulement COMPTÉE, elle est QUALIFIÉE.
+         Sans réf sûre elle reste inexploitable pour écrire un prix — mais ses
+         caractéristiques disent de quoi il s'agit, et c'est ce qui permettra
+         de la rapprocher d'une fiche au lieu de la jeter. */
+      const sansRefSec = (auto.sansRef || []).slice(0, 40).map((e) => ({
+        titre: String(e.titre || '').slice(0, 120), prix: e.prix, car: e.car || null
+      }));
       return res.status(200).json({
         ok: true, sec: true, brand, source: sourceSlug, format: auto.format,
         counts: {
@@ -2053,7 +2066,8 @@ async function handlePriceWatch(req, res, admin, db) {
            `refsMarque` compte les « MARQUE RÉF » du texte reçu, `parsed` ce que
            le parseur en a tiré : l'écart entre les deux EST le diagnostic. */
         diagnostic: priceParse.diagnostiquerPage(text, brand),
-        reconnus: reconnusSec.slice(0, 60), inconnus: inconnusSec.slice(0, 60)
+        reconnus: reconnusSec.slice(0, 60), inconnus: inconnusSec.slice(0, 60),
+        sansRefDetail: sansRefSec
       });
     }
 

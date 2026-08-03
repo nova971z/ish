@@ -471,6 +471,103 @@ module.exports = async function () {
       + 'nom de produit (un titre faux est pire qu\'une absence)');
     ok(ri.every(function (x) { return x.promo === false && x.enStock === null; }),
       'comparateur : jamais de promo ni de stock inventés');
+
+    /* ⛔ LE SOUS-TITRE FAIT PARTIE DE LA FICHE. Mesuré le 03/08 : idealo écrit
+       la réf sur une ligne et « Scie circulaire portative, 1 batterie, 3,5 kg »
+       sur la SUIVANTE. Un extracteur qui ne lit que la ligne de titre jette le
+       type d'outil, le nombre de batteries et le poids — la moitié de ce que
+       la page dit. Ces trois assertions échouent si on revient au titre seul. */
+    ok(iSku.ZZI777P2 && iSku.ZZI777P2.car && iSku.ZZI777P2.car.type === 'scie circulaire',
+      '⛔ le TYPE d\'outil est lu dans le SOUS-TITRE, pas seulement dans le titre');
+    ok(iSku.ZZI777P2 && iSku.ZZI777P2.car && iSku.ZZI777P2.car.poidsKg === 3.5,
+      'le poids annoncé au sous-titre est relevé (3,5 kg)');
+    ok(iSku.ZZI777P2 && iSku.ZZI777P2.car && iSku.ZZI777P2.car.nbBatteries === 1,
+      'le nombre de batteries du sous-titre est relevé');
+    ok(iSku.ZZI333 && iSku.ZZI333.car && iSku.ZZI333.car.ah === 9
+      && iSku.ZZI333.car.chargeur === true && iSku.ZZI333.car.pack === true,
+      '⛔ ARGENT : « (1x Batterie 9 Ah + Chargeur) » est un LOT — le drapeau `pack` '
+      + 'se lève, donc ce prix ne pourra jamais s\'écrire sur une machine nue');
+    var offre = rid.sansRef.filter(function (x) { return x.prix === 694.90; })[0];
+    ok(offre && offre.car && offre.car.type === 'débroussailleuse'
+      && offre.car.voltage === 54 && offre.car.chargeur === true,
+      'une offre marchande écartée est QUALIFIÉE (type, voltage, chargeur) — '
+      + 'écartée ne veut plus dire perdue');
+  }
+
+  /* ═══ EXTRACTION DE CARACTÉRISTIQUES (03/08/2026) ═════════════════════════
+     Reproche de l'user, mot pour mot : « il doit comparer le voltage, le nom
+     propre d'un outil, la référence, si c'est un pack ou pas, si c'est avec
+     fil ou à batterie, le nombre de batterie — absolument tout, ne recoupe pas
+     avec deux ou trois informations ».
+     Chaque assertion ci-dessous correspond à un défaut MESURÉ sur les titres
+     réels de sa page, puis corrigé. ⛔ Références synthétiques. */
+  var ec = pp.extraireCaracteristiques;
+  ok(typeof ec === 'function', 'extraireCaracteristiques exportée');
+  if (ec) {
+    var cA = ec('Meuleuse compacte 125 mm XR 18V MAKITA ZZC405NT outil nu en coffret T-STAK', 'MAKITA');
+    ok(cA.coffret === 'TSTAK',
+      '⛔ « coffret T-STAK » rend TSTAK, pas GENERIQUE : le mot générique arrive '
+      + 'AVANT la marque dans le titre, et une alternance unique élit le premier '
+      + 'trouvé. La marque du coffret est facturée à part — la confondre coûte');
+    ok(cA.nbBatteries === 0,
+      '⛔ « outil nu » vaut ZÉRO batterie — une information, pas une absence');
+    ok(cA.pack === true,
+      'un outil nu EN COFFRET reste un lot : son prix inclut la boîte');
+    ok(cA.serie === 'XR' && cA.voltage === 18 && cA.diametreMm === 125,
+      'gamme, voltage et diamètre relevés ensemble');
+
+    var cB = ec('MAKITA ZZPW 003 E\nNettoyeur haute pression électrique, 120 bars', 'MAKITA');
+    ok(cB.sku === null && cB.skuEclate === 'ZZPW003E',
+      '⛔ une réf ÉCLATÉE par des espaces ne devient JAMAIS `sku` : on ne sait pas '
+      + 'si le vrai code s\'arrête au 003 ou au E. Elle part dans `skuEclate`, qui '
+      + 'sert à RAPPROCHER deux annonces, jamais à écrire un prix');
+    ok(cB.bars === 120 && cB.type === 'nettoyeur haute pression', 'pression et type relevés');
+    ok(cB.sansFil === false,
+      '⛔ « électrique » se lit malgré l\'accent : `\\b` est ASCII, « \\bélectrique » '
+      + 'ne peut jamais accrocher — la borne ne va qu\'à droite');
+
+    var cC = ec('Visseuse ZZF414D1-QW sans fil 18 V + chargeur 230 V - 1X2.0Ah Batterie', 'MAKITA');
+    ok(cC.voltage === 18 && cC.voltageSecteur === 230,
+      '⛔ un titre mélange DEUX voltages : celui de l\'outil et celui du secteur. '
+      + 'Prendre le maximum ferait passer une visseuse 18 V pour du 230 V');
+    ok(cC.nbBatteries === 1 && cC.ah === 2, '« 1X2.0Ah » : une batterie de 2 Ah');
+    ok(cC.sansFil === true, '« sans fil » l\'emporte sur la présence d\'un 230 V (le chargeur)');
+
+    var cD = ec('MAKITA ZZI850', 'MAKITA');
+    ok(cD.type !== 'kit',
+      '⛔ DÉFAUT MESURÉ PAR CETTE PORTE : « kit » se trouve DANS « maKITa ». Un '
+      + '`indexOf` sans borne de mot typait « kit » toute machine de la marque. '
+      + 'La borne ne peut pas être `\\b` non plus — il est ASCII, et les noms '
+      + 'd\'outils sont accentués');
+    ok(cD.voltage === null && cD.ah === null && cD.nbBatteries === null
+      && cD.type === null && cD.sansFil === null,
+      '⛔ tout champ non trouvé rend `null`, JAMAIS zéro : « voltage inconnu » et '
+      + '« 0 V » ne se comparent pas pareil, et les confondre apparierait n\'importe quoi');
+  }
+
+  /* ⛔ « NE RECOUPE PAS AVEC DEUX OU TROIS INFORMATIONS » — le cœur du reproche.
+     Deux annonces peuvent partager réf, type, voltage ET gamme et désigner
+     pourtant deux articles au prix très différent : la machine nue et le lot. */
+  var cmp = pp.comparerCaracteristiques;
+  ok(typeof cmp === 'function', 'comparerCaracteristiques exportée');
+  if (cmp && pp.extraireCaracteristiques) {
+    var nu  = pp.extraireCaracteristiques('Meuleuse 125 mm XR 18V MAKITA ZZC405NT outil nu', 'MAKITA');
+    var lot = pp.extraireCaracteristiques('Meuleuse XR 18V MAKITA ZZC405NT + 2 batteries 5.0Ah + chargeur', 'MAKITA');
+    var v = cmp(nu, lot);
+    ok(v.compatible === false,
+      '⛔⛔ ARGENT : même RÉFÉRENCE, même type, même voltage, même gamme — et '
+      + 'REFUSÉ, parce que l\'un est nu et l\'autre porte deux batteries. Quatre '
+      + 'concordances ne valent rien face à un seul conflit');
+    ok(v.concordances.indexOf('reference') !== -1 && v.conflits.indexOf('nbBatteries') !== -1
+      && v.conflits.indexOf('pack') !== -1,
+      'le verdict NOMME ce qui concorde et ce qui sépare (' + JSON.stringify(v.conflits) + ')');
+    ok(cmp(nu, nu).compatible === true && cmp(nu, nu).conflits.length === 0,
+      'préalable : deux fois le même titre sont compatibles — sans quoi le refus '
+      + 'ci-dessus serait un refus systématique, donc sans valeur');
+    var flou = cmp(nu, { type: 'meuleuse', sku: null, voltage: null, nbBatteries: null, pack: null });
+    ok(flou.concordances.indexOf('voltage') === -1 && flou.concordances.indexOf('nbBatteries') === -1,
+      '⛔ un champ `null` d\'un côté n\'est PAS une concordance : c\'est une '
+      + 'ignorance, et une ignorance ne vote pas');
   }
 
   // L'aiguillage : chaque gabarit part vers son parseur, le vide est dit.
@@ -795,6 +892,16 @@ module.exports = async function () {
 
         var rSecInc = fauxRes();
         await admFn(reqPage('ZZQ9997', { sec: '1' }), rSecInc, fauxAdmin, dbInterdite);
+        /* ⛔ Le mode à sec doit MONTRER ce que le parseur a compris, pas
+           seulement combien il a lu. Un extracteur qui se tromperait de type
+           sur tout resterait invisible tant que le prix, lui, est bon — et
+           l'user n'a que cette réponse JSON pour voir depuis son iPad. */
+        var toutSec = (rSec.out.reconnus || []).concat(rSec.out.inconnus || []);
+        ok(toutSec.length > 0 && toutSec.every(function (x) { return x.car && typeof x.car === 'object'; }),
+          '⛔ chaque ligne du relevé à sec porte ses CARACTÉRISTIQUES (car) — sans '
+          + 'quoi une erreur d\'extraction est indétectable depuis l\'iPad');
+        ok(Array.isArray(rSec.out.sansRefDetail),
+          'les annonces sans réf sûre sortent QUALIFIÉES (sansRefDetail), plus seulement comptées');
         ok(rSecInc.out && rSecInc.out.counts.reconnus === 0 && rSecInc.out.counts.inconnus === 1,
           'MODE À SEC : une réf absente du catalogue est comptée INCONNUE, pas reconnue ('
           + JSON.stringify(rSecInc.out && rSecInc.out.counts) + ')');
