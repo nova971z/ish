@@ -117,24 +117,75 @@ function bilan(objets, pagesAttendues) {
   };
 }
 
+/* ⛔⛔ 67 RÉPONSES, 67 FICHIERS — c'est ce que son iPad a produit le 03/08 :
+   `admin-131.json` … `admin-150.json`, un fichier par élément de la liste,
+   1 à 5 Ko chacun. Le bloc « Enregistrer » de Raccourcis, quand on lui donne
+   une LISTE, écrit un fichier par élément ; il ne concatène pas.
+   ⛔ Exiger un fichier unique reviendrait à lui faire refaire son raccourci
+   pour une contrainte qui est la NÔTRE. L'outil accepte donc plusieurs
+   chemins, ET un dossier — c'est à lui de choisir ce qui est le plus simple
+   de son côté, pas l'inverse.
+   ⚠️ Les entrées système sont ignorées (`.DS_Store`), et un chemin illisible
+   est SIGNALÉ au lieu d'être sauté en silence : une réponse manquante fait un
+   trou dans le total, et un trou silencieux se lit comme un succès. */
+function fichiersDe(chemins, lecteur) {
+  const l = lecteur || {
+    estDossier: (p) => { try { return fs.statSync(p).isDirectory(); } catch (e) { return false; } },
+    lister: (p) => fs.readdirSync(p),
+    joindre: path.join
+  };
+  const out = [];
+  (chemins || []).forEach((c) => {
+    if (!c) return;
+    if (l.estDossier(c)) {
+      l.lister(c).slice().sort().forEach((n) => {
+        if (/^\./.test(n)) return;                       // .DS_Store et compagnie
+        out.push(l.joindre(c, n));
+      });
+      return;
+    }
+    out.push(c);
+  });
+  return out;
+}
+
 function principal(argv) {
-  const fichier = argv[0];
-  if (!fichier) {
-    console.error('usage : node scripts/bilan-balayage.js <fichier> [pagesAttendues]');
+  /* Le dernier argument est le nombre de pages attendues s'il est purement
+     numérique — sinon tout est un chemin. Un fichier nommé « 67 » n'existe
+     pas ; un dossier de 67 réponses, si. */
+  const args = (argv || []).slice();
+  let attendues = null;
+  if (args.length > 1 && /^\d+$/.test(String(args[args.length - 1]))) attendues = args.pop();
+  if (!args.length) {
+    console.error('usage : node scripts/bilan-balayage.js <fichier|dossier> [autres...] [pagesAttendues]');
     return 2;
   }
-  let texte;
-  try { texte = fs.readFileSync(path.resolve(fichier), 'utf8'); } catch (e) {
-    console.error('❌ fichier illisible : ' + e.message);
+  const fichiers = fichiersDe(args);
+  const morceaux = [];
+  let illisibles = 0;
+  fichiers.forEach((f) => {
+    try { morceaux.push(fs.readFileSync(path.resolve(f), 'utf8')); } catch (e) {
+      illisibles++;
+      console.error('⚠️ illisible, NON compté : ' + f + ' — ' + e.message);
+    }
+  });
+  if (!morceaux.length) {
+    console.error('❌ rien de lisible dans ' + args.join(', '));
     return 2;
   }
+  const texte = morceaux.join('\n');
+  const fichier = args.length === 1 ? args[0] : (args.length + ' entrées');
   const objets = objetsJson(texte);
   if (!objets.length) {
     console.error('❌ aucun objet JSON trouvé dans ' + fichier
       + ' — le raccourci a-t-il bien enregistré les RÉPONSES ?');
     return 1;
   }
-  const b = bilan(objets, argv[1]);
+  if (illisibles) {
+    console.log('');
+    console.log('⚠️ ' + illisibles + ' fichier(s) illisibles : le total ci-dessous les IGNORE.');
+  }
+  const b = bilan(objets, attendues);
   console.log('');
   console.log('═══ BILAN DU BALAYAGE — ' + path.basename(fichier) + ' ═══');
   console.log('');
@@ -170,6 +221,6 @@ function principal(argv) {
   return 0;
 }
 
-module.exports = { objetsJson: objetsJson, bilan: bilan };
+module.exports = { objetsJson: objetsJson, bilan: bilan, fichiersDe: fichiersDe };
 
 if (require.main === module) process.exit(principal(process.argv.slice(2)));

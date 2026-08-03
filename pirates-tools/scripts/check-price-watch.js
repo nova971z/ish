@@ -3084,6 +3084,28 @@ module.exports = async function () {
       '⛔ une accolade DÉSÉQUILIBRÉE dans un titre ne découpe pas l\'objet — sinon la '
       + 'réponse est illisible et ses 60 produits disparaissent du total (obtenu '
       + bb.objetsJson(avecAccolade).length + ' objet(s))');
+    /* ⛔⛔ 67 RÉPONSES, 67 FICHIERS. C'est ce que son iPad a produit le 03/08 :
+       le bloc « Enregistrer » de Raccourcis, quand il reçoit une LISTE, écrit
+       un fichier par élément — il ne concatène pas. Exiger un fichier unique
+       reviendrait à lui faire refaire son raccourci pour une contrainte qui
+       est la NÔTRE. L'outil accepte donc un DOSSIER.
+       ⚠️ Lecteur injecté : le harnais ne touche pas au disque, et il n'écrit
+       jamais à la racine du site. */
+    var lecteurFactice = {
+      estDossier: function (p) { return p === 'dossier'; },
+      lister: function () { return ['admin-2.json', '.DS_Store', 'admin-1.json']; },
+      joindre: function (a, b) { return a + '/' + b; }
+    };
+    var listes = bb.fichiersDe(['dossier'], lecteurFactice);
+    ok(listes.length === 2 && listes[0] === 'dossier/admin-1.json',
+      '⛔⛔ un DOSSIER se déploie en ses fichiers, triés — sinon il lui faudrait '
+      + 'passer 67 chemins à la main (obtenu ' + JSON.stringify(listes) + ')');
+    ok(listes.indexOf('dossier/.DS_Store') === -1,
+      '⛔ …et les entrées système sont écartées : un `.DS_Store` n\'est pas du JSON, '
+      + 'il ferait un faux « fichier illisible » à chaque balayage');
+    ok(bb.fichiersDe(['a.json', 'b.json'], lecteurFactice).length === 2,
+      '⛔ plusieurs fichiers nommés un par un restent acceptés');
+
     var avecGuillemet = '{"titre":"lame 8\\" dents","page":{"empreinte":"y","tuiles":60,"lues":60}}';
     ok(bb.objetsJson(avecGuillemet).length === 1
       && bb.bilan(bb.objetsJson(avecGuillemet), 1).tuilesVues === 60,
