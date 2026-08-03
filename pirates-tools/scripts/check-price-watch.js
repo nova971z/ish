@@ -548,6 +548,57 @@ module.exports = async function () {
       '⛔ PRÉALABLE : les VRAIES annonces passent toujours — y compris celle qui '
       + 'n\'a ni marque ni référence mais dont le TYPE est reconnu (' + gardes.length
       + '/' + vraisTitres.length + ')');
+    /* ⛔⛔ ARGENT — LA MÊME GARDE, SUR L'AUTRE CHEMIN (03/08/2026, SON RELEVÉ).
+       Le délai « 3 à 6 jours ouvrés » ressortait ENCORE à 674 € alors que la
+       garde ci-dessus était déjà en place : elle ne couvrait que la branche
+       ANNONCE (« Vendu par »). Ce bloc-là n'en avait pas — il passait par la
+       branche CARTE, où le titre était `b[0]`, la première ligne quelle
+       qu'elle soit. Signature qui l'a démasqué dans son JSON : le `car`
+       portait `sku: DCE800H1-SK`, une référence que la chaîne « 3 à 6 jours
+       ouvrés » ne peut pas contenir — donc le titre et la description ne
+       venaient PAS de la même ligne.
+       ⚠️ Une garde posée sur un seul chemin ne garde rien : le défaut prend
+       l'autre. Ces assertions rejouent le chemin CARTE, sans « Vendu par ». */
+    var queueCarte = pi([
+      '3 à 6 jours ouvrés', 'Livraison gratuite', '674,00 €',
+      'Ponceuse à plâtre 18V sans fil - MAKITA - ZZE800H1-SK',
+      'Détails du produit'
+    ].join('\n'), 'MAKITA');
+    ok(!queueCarte.sansRef.some(function (x) { return /jours\s+ouvr/i.test(x.titre); }),
+      '⛔⛔ ARGENT : un délai de livraison ne devient pas une annonce à 674 € par '
+      + 'la branche CARTE non plus — c\'est le trou resté ouvert après la garde '
+      + 'de la branche ANNONCE (' + JSON.stringify(queueCarte.sansRef.map(function (x) {
+        return x.titre; })) + ')');
+    ok(!queueCarte.sansRef.some(function (x) { return x.prix === 674; }),
+      '⛔⛔ ARGENT : et ce prix ne se recolle PAS sur la ponceuse d\'en dessous — '
+      + 'il appartient à l\'offre précédente. Le prix d\'une carte se lit APRÈS son '
+      + 'titre, jamais avant. Un prix décalé a l\'air juste, c\'est pire qu\'absent');
+    ok((queueCarte.perdus || []).some(function (x) { return /ZZE800H1-SK/.test(x.raison); }),
+      '⛔ …et le refus est CONSIGNÉ en nommant le titre réellement retenu. Premier '
+      + 'jet : le registre disait « sans la marque » alors que la marque était '
+      + 'écrite trois lignes plus bas — un registre qui ment sur la cause ne '
+      + 'm\'apprendra jamais le prochain gabarit ('
+      + JSON.stringify((queueCarte.perdus || []).map(function (x) { return x.raison; })) + ')');
+    /* PRÉALABLE — sans lui, la garde pourrait tout refuser et rester verte.
+       Et elle vérifie plus que « une entrée sort » : que le titre est la ligne
+       PRODUIT et non le bandeau « Meilleure vente » qui la précède. Avant la
+       correction, `b[0]` faisait de ce badge le nom de l'article. */
+    var badgeAvant = pi([
+      'Meilleure vente',
+      'Ponceuse à plâtre 18V sans fil - MAKITA - ZZE800H1-SK',
+      'Livraison gratuite', '674,00 €',
+      'Détails du produit'
+    ].join('\n'), 'MAKITA');
+    var eBadge = badgeAvant.sansRef[0] || {};
+    ok(badgeAvant.sansRef.length === 1 && /Ponceuse/.test(eBadge.titre || '')
+      && eBadge.prix === 674,
+      '⛔ PRÉALABLE : une VRAIE carte précédée d\'un bandeau reste lue, avec son '
+      + 'titre produit et son prix — pas « Meilleure vente » à 674 € ('
+      + JSON.stringify(eBadge.titre) + ' / ' + eBadge.prix + ')');
+    ok((eBadge.car || {}).sku === 'ZZE800H1-SK' && (eBadge.car || {}).type === 'ponceuse',
+      '⛔ …et la qualification part de CE titre-là : réf et type lus sur la ligne '
+      + 'produit, pas sur le bandeau');
+
     ok(ri.every(function (x) { return x.promo === false && x.enStock === null; }),
       'comparateur : jamais de promo ni de stock inventés');
 

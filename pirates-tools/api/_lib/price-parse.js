@@ -505,22 +505,48 @@ function parseIdealo(rawText, brand) {
          prix d'un T\u00c9L\u00c9PHONE (774,99 \u20ac) sur une scie. Un prix faux sur un titre
          juste est pire qu'une ligne absente. Le prix d'une carte SUIT son
          titre \u2014 on s'arr\u00eate au premier trouv\u00e9 apr\u00e8s lui. */
+      /* ⛔⛔ LE TITRE D'UNE CARTE N'EST PAS « LA PREMIÈRE LIGNE » — C'EST LA
+         PREMIÈRE LIGNE PLAUSIBLE. Son relevé du 03/08 sortait encore
+         « 3 à 6 jours ouvrés » à 674 € : la garde de plausibilité existait,
+         mais seulement sur la branche ANNONCE. Ici le titre était `b[0]`,
+         quelle que soit la ligne — et la queue d'une offre commence toujours
+         par un délai. Signature de ce chemin dans son JSON : le `car` portait
+         un `sku` que la chaîne « 3 à 6 jours ouvrés » ne peut pas contenir.
+         ⚠️ Une garde posée sur un seul chemin ne garde rien : le défaut prend
+         l'autre. */
+      var iTit = -1;
+      for (var w = 0; w < b.length; w++) { if (titrePlausible(b[w])) { iTit = w; break; } }
       var pxx = null;
-      for (var q = 1; q < b.length; q++) {
+      for (var q = iTit + 1; q >= 1 && q < b.length; q++) {
         var ma2 = b[q].match(prixApartir);
         if (ma2) { pxx = parsePriceFR(ma2[1]); break; }
         var ms2 = b[q].match(prixSeul);
         if (ms2) { pxx = parsePriceFR(ms2[1]); break; }
       }
-      if (b[0] && pxx != null && pxx > 0 && new RegExp(escapeRe(brand), 'i').test(b.join(' '))) {
+      /* ⛔ Et le prix se lit TOUJOURS APRÈS ce titre-là. Quand la queue d'une
+         offre traîne (délai · livraison · prix) AVANT un vrai titre, ce prix
+         appartient à l'offre PRÉCÉDENTE : le chercher à partir du titre le
+         laisse donc de côté, et le bloc part au registre des pertes au lieu
+         de coller 674 € sur la ponceuse d'en dessous. J4 : un prix rattaché à
+         un article qui n'est pas le sien est un prix inexact. */
+      if (iTit !== -1 && pxx != null && pxx > 0
+          && new RegExp(escapeRe(brand), 'i').test(b.join(' '))) {
         /* R\u00e9f \u00e9clat\u00e9e par des espaces (\u00ab DeWalt DCS 579 T2T \u00bb) : on ne devine
            toujours pas de `sku`, mais on QUALIFIE \u2014 c'est ce qui permettra de
            rapprocher l'annonce d'une fiche sans jamais \u00e9crire son prix. */
-        var descEc = b.slice(0, Math.min(b.length, 4)).join(' ');
-        ecartes.push({ titre: b[0], prix: pxx, car: extraireCaracteristiques(descEc, brand) });
+        var descEc = b.slice(iTit, Math.min(b.length, iTit + 4)).join(' ');
+        ecartes.push({ titre: b[iTit], prix: pxx, car: extraireCaracteristiques(descEc, brand) });
       } else {
-        noter(b, (pxx == null || !(pxx > 0)) ? 'bloc sans référence ET sans prix lisible après le titre'
-          : 'bloc sans référence et sans la marque');
+        /* ⚠️ LA RAISON DOIT NOMMER LE VRAI MOTIF. Premier jet : la garde de
+           plausibilité mordait, mais le registre annonçait « sans la marque »
+           alors que la marque était écrite trois lignes plus bas — un registre
+           de pertes qui ment sur la cause vaut à peine mieux que pas de
+           registre : c'est lui qui doit m'apprendre le prochain gabarit. */
+        noter(b, iTit === -1
+          ? 'bloc sans référence, aucune ligne plausible comme titre : ' + String(b[0]).slice(0, 60)
+          : (pxx == null || !(pxx > 0))
+            ? 'bloc sans référence ET sans prix lisible après le titre « ' + String(b[iTit]).slice(0, 60) + ' »'
+            : 'bloc sans référence et sans la marque');
       }
       return;
     }

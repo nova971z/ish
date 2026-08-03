@@ -17,19 +17,19 @@
 | **O1** | Affirmer avant de mesurer | 12 | §3 · §8 | `garde-sortie.js` *(hook Stop)* |
 | **O2** | L'instrument de mesure est faux | 28 | §4.3 | sabotage obligatoire |
 | **O3** | Réutiliser sans vérifier le contexte | 10 | §1.4 | `check-lecons.js` |
-| **O4** | Contrainte connue, non appliquée | 4 | §1 | `garde-entonnoir.js` |
+| **O4** | Contrainte connue, non appliquée | 5 | §1 | `garde-entonnoir.js` |
 | **O5** | Outil artisanal au lieu de l'outil existant | 1 | §1.4 | aucune — humaine |
 | **O6** | Copie périmée au lieu de la source vivante | 5 | §4.4 | `p7-architecture.js` |
 | **O7** | **Lire le silence comme un succès** | 7 | §3 · §4.3 | `sabotage.mjs` · `ci.js` · `check-ancres.js` |
 
-**67 erreurs, 7 mécanismes.** O1 et O2 en concentrent **40 à elles deux** :
+**68 erreurs, 7 mécanismes.** O1 et O2 en concentrent **40 à elles deux** :
 c'est là qu'il faut regarder en premier, toujours.
 
-⚠️ **O7 est né le 01/08/2026**, et il est né d'une règle qui existait déjà :
-« non exécuté n'est PAS vert » — mais écrite pour les seuls harnais. Six
-erreurs en une session, dont **un audit de sécurité mort sans que rien ne le
-dise**. Une règle vraie appliquée à un seul endroit ne protège que cet
-endroit ; il faut chercher où elle vaut AUSSI.
+⚠️ **O7 est né le 01/08/2026** d'une règle qui existait déjà — « non exécuté
+n'est PAS vert », écrite pour les seuls harnais : six erreurs en une session,
+dont un audit de sécurité mort sans que rien ne le dise. **Une règle vraie
+appliquée à un seul endroit ne protège que cet endroit**, et je l'ai enfreinte
+deux jours plus tard (E-405). Les chemins s'ÉNUMÈRENT, ils ne se supposent pas.
 
 ---
 
@@ -179,6 +179,13 @@ utilisée. La plus rageante : rien n'était à découvrir.*
 | **E-402** | l'entreprise est en Guadeloupe, **pas** l'user | déduit qu'il y était, orienté tout un diagnostic réseau à côté |
 | **E-403** | `scripts/ou.js` construit le matin | utilisé **zéro fois** de la journée |
 | **E-404** | « Vercel ne déploie que `master` » — première ligne de la mémoire projet | poussé **15 commits** sur la branche de travail en annonçant deux fois à l'user « relance quand c'est déployé ». Rien ne se déployait : il a retesté contre l'ancien code, et la réponse identique était inévitable. Le déploiement fait partie de « livré » — pousser la branche n'est pas livrer |
+| **E-405** | « un titre doit être PLAUSIBLE avant qu'un prix s'y attache » — garde que je venais d'écrire, avec son harnais et son sabotage | posée sur **un seul des deux chemins** du parseur. Le délai « 3 à 6 jours ouvrés » à **674 €** est ressorti dans son relevé suivant : il ne passait pas par la branche ANNONCE que je gardais, mais par la branche CARTE, où le titre était `b[0]` — la première ligne du bloc, quelle qu'elle soit. Le harnais était vert, le sabotage rouge, la règle juste : **elle ne couvrait que la moitié du code**. Ce qui l'a démasqué n'est pas un test mais une INCOHÉRENCE dans sa sortie — le `car` portait un `sku` que la chaîne « 3 à 6 jours ouvrés » ne peut pas contenir, donc titre et description ne venaient pas de la même ligne |
+
+⛔ **E-405 : UNE GARDE POSÉE SUR UN SEUL CHEMIN NE GARDE RIEN — LE DÉFAUT PREND
+L'AUTRE.** Avant de déclarer une règle de justesse en place, énumérer **tous**
+les chemins par lesquels la donnée qu'elle protège peut sortir, et vérifier
+qu'elle est sur chacun. Ici : `ecartes.push` apparaissait **deux fois** dans le
+même fichier — un `grep` de la sortie protégée l'aurait dit en une seconde.
 
 **Antidote** : §1 — l'entonnoir, **avant** de réfléchir.
 **Porte** : `scripts/garde-entonnoir.js` refuse désormais l'édition d'un fichier
