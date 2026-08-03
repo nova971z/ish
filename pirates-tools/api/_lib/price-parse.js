@@ -304,7 +304,8 @@ function parseClickoutil(rawText, brand) {
 function parseIdealo(rawText, brand) {
   var out = [];
   var ecartes = [];
-  if (!rawText) return { items: out, sansRef: ecartes };
+  var perdus = [];
+  if (!rawText) return { items: out, sansRef: ecartes, perdus: perdus };
   brand = (brand || 'DEWALT');
   var lignes = stripHtml(rawText).split(/\n+/).map(function (l) {
     return l.replace(/[ \t   ]+/g, ' ').trim();
@@ -408,6 +409,30 @@ function parseIdealo(rawText, brand) {
     return new RegExp('^' + escapeRe(brand) + '\\s+[A-Z]{2,5}\\s+\\d{2,4}\\b', 'i').test(ligne);
   }
 
+  /* ⛔⛔ AUCUN BLOC PORTANT UN PRIX NE DISPARAÎT EN SILENCE. Cinq références
+     sont ressorties « non lues » sur SA page le 03/08, et je n'ai pas pu dire
+     pourquoi : le parseur les avait écartées sans laisser de trace. C'est le
+     même défaut que le `parsed: 0` muet du 01/08 et que le refus muet du
+     02/08 — à chaque fois, le remède a été de MESURER au lieu de jeter.
+     Tout bloc qui contient un prix et ne produit ni carte ni annonce est
+     désormais consigné, avec sa raison et ses premières lignes. */
+  function noter(b, raison, force) {
+    if (perdus.length >= 25) return;                 // borne : on informe, on n'inonde pas
+    /* ⚠️ `force` sert aux CARTES : une carte porte une RÉFÉRENCE, et c'est
+       exactement elle qui ressort dans `refsNonLues`. La consigner même sans
+       prix ferme la boucle — sinon la réf apparaît « vue mais non lue » sans
+       qu'aucune trace n'explique pourquoi. Pour les blocs sans référence, on
+       exige un prix : sans lui, rien n'était à gagner. */
+    if (!force) {
+      var aPrix = b.some(function (x) { return /\d,\d{2}\s*€/.test(x); });
+      if (!aPrix) return;
+    }
+    perdus.push({
+      raison: raison,
+      lignes: b.slice(0, 4).map(function (x) { return String(x).slice(0, 90); })
+    });
+  }
+
   function traiter(b, estOffre) {
     if (!b.length) return;
     /* Une offre marchande se reconna\u00eet \u00e0 \u00ab Vendu par : \u00bb \u2014 et ses titres sont
@@ -434,6 +459,10 @@ function parseIdealo(rawText, brand) {
       if (titre && px != null && px > 0 && titrePlausible(titre)) {
         ecartes.push({ titre: titre, prix: px, car: extraireCaracteristiques(titre, brand) });
         titreOffre = null;
+      } else {
+        noter(b, !titre ? 'offre sans titre utilisable'
+          : (px == null || !(px > 0)) ? 'offre sans prix lisible'
+          : 'titre jugé non plausible : ' + String(titre).slice(0, 60));
       }
       return;
     }
@@ -471,6 +500,9 @@ function parseIdealo(rawText, brand) {
            rapprocher l'annonce d'une fiche sans jamais \u00e9crire son prix. */
         var descEc = b.slice(0, Math.min(b.length, 4)).join(' ');
         ecartes.push({ titre: b[0], prix: pxx, car: extraireCaracteristiques(descEc, brand) });
+      } else {
+        noter(b, (pxx == null || !(pxx > 0)) ? 'bloc sans référence ET sans prix lisible après le titre'
+          : 'bloc sans référence et sans la marque');
       }
       return;
     }
@@ -483,7 +515,12 @@ function parseIdealo(rawText, brand) {
       var ms = b[p].match(prixSeul);
       if (ms) { prix = parsePriceFR(ms[1]); iPrix = p; break; }
     }
-    if (prix == null || !(prix > 0)) return;
+    if (prix == null || !(prix > 0)) {
+      /* Une carte dont le prix n'est pas lisible APRÈS son titre : cause la
+         plus probable d'une référence « vue mais non lue ». On la nomme. */
+      noter(b, 'carte « ' + sku + ' » : aucun prix lisible après le titre', true);
+      return;
+    }
     seen[sku] = true;
     /* \u26a0\ufe0f LE TITRE SEUL NE SUFFIT PAS. Mesur\u00e9 sur la page r\u00e9elle : idealo \u00e9crit
        \u00ab DeWalt DCS572P2 \u00bb sur une ligne et \u00ab Scie circulaire portative, 1
@@ -498,7 +535,7 @@ function parseIdealo(rawText, brand) {
     });
   }
 
-  return { items: out, sansRef: ecartes };
+  return { items: out, sansRef: ecartes, perdus: perdus };
 }
 
 /* \u2500\u2500 AIGUILLAGE DE FORMAT \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
@@ -513,7 +550,7 @@ function parseAuto(rawText, brand) {
   var clic = parseClickoutil(rawText, brand);
   var idea = parseIdealo(rawText, brand);   // { items, sansRef }
   if (!cote.length && !clic.items.length && !idea.items.length) {
-    return { format: 'aucun', items: [], packs: clic.packs, sansRef: clic.sansRef };
+    return { format: 'aucun', items: [], packs: clic.packs, sansRef: clic.sansRef, perdus: idea.perdus };
   }
   // Le plus fécond gagne — trois gabarits mutuellement exclusifs sur les
   // vraies pages (mesuré : idealo rend 0 chez les deux autres, et vice versa).
@@ -521,7 +558,7 @@ function parseAuto(rawText, brand) {
     /* Les offres marchandes d'idealo (« Vendu par : ») sortent en `sansRef` :
        ce sont des LOTS, leur prix ne s'écrit sur aucune réf tant que l'user
        n'a pas créé la fiche et posé son `srcNom`. Listés, jamais devinés. */
-    return { format: 'idealo', items: idea.items, packs: [], sansRef: idea.sansRef };
+    return { format: 'idealo', items: idea.items, packs: [], sansRef: idea.sansRef, perdus: idea.perdus };
   }
   if (clic.items.length > cote.length) {
     return { format: 'clickoutil', items: clic.items, packs: clic.packs, sansRef: clic.sansRef };

@@ -2165,6 +2165,13 @@ async function handlePriceWatch(req, res, admin, db) {
         diagnostic: diagSec,
         // Liste vide = rien ne manque, et c'est vérifiable ligne à ligne.
         refsNonLues: refsNonLues, refsNonLuesDetail: refsNonLuesDetail,
+        /* ⛔⛔ AUCUN BLOC PORTANT UN PRIX NE DISPARAÎT EN SILENCE. Cinq réfs
+           sont ressorties « non lues » le 03/08 sans que rien n'explique
+           pourquoi : le parseur les écartait sans laisser de trace. Chaque
+           écart porte désormais SA RAISON et ses premières lignes — c'est le
+           même remède que le `parsed: 0` muet du 01/08 : mesurer au lieu de
+           jeter. ⚠️ Borné à 25 entrées, 4 lignes de 90 signes chacune. */
+        perdus: (auto.perdus || []).slice(0, 25),
         reconnus: reconnusSec.slice(0, 60), inconnus: inconnusSec.slice(0, 60),
         sansRefDetail: sansRefSec
       });

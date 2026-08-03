@@ -1412,6 +1412,28 @@ module.exports = async function () {
           'la fenêtre reste bornée : on montre de quoi diagnostiquer, pas la page');
         ok(!/x-watch-secret/i.test(JSON.stringify(rTrou.out)),
           '⛔ et JAMAIS un en-tête dans la réponse : la clé du traqueur y vit');
+
+        /* ⛔⛔ AUCUN BLOC NE DISPARAÎT EN SILENCE (03/08/2026). Cinq réfs sont
+           ressorties « non lues » sur SA page sans qu'aucune trace n'explique
+           pourquoi. Le parseur les écartait sans rien dire — même défaut que
+           le `parsed: 0` muet du 01/08. Chaque écart porte désormais SA
+           RAISON. Ici la carte ZZT002B n'a pas de prix : elle doit être
+           NOMMÉE, avec la cause. */
+        var pd = rTrou.out.perdus || [];
+        var pdRef = pd.filter(function (x) { return /ZZT002B/.test(x.raison); })[0];
+        ok(pdRef && /prix/i.test(pdRef.raison),
+          '⛔ une carte écartée faute de prix est CONSIGNÉE avec sa raison — sans '
+          + 'ça sa référence ressort « non lue » et rien n\'explique pourquoi ('
+          + JSON.stringify(pd.map(function (x) { return x.raison; })) + ')');
+        ok(pdRef && Array.isArray(pdRef.lignes) && pdRef.lignes.length > 0
+          && pdRef.lignes.join(' ').indexOf('ZZT002B') !== -1,
+          'et avec les LIGNES de page qui l\'entourent : une raison sans le texte '
+          + 'ne se vérifie pas');
+        /* PRÉALABLE — sans lui, un registre qui consigne TOUT serait aussi
+           inutile qu'un registre vide : il faut que le normal ne bruite pas. */
+        ok(pd.length <= 3,
+          'préalable : une page dont presque tout est lu ne produit qu\'une poignée '
+          + 'd\'écarts — un registre qui consigne tout ne se lit plus (' + pd.length + ')');
         ok(rTrou.out.diagnostic.refsVues.indexOf('ZZT777X') === -1,
           '⛔⛔ UNE SUGGESTION DE RECHERCHE N\'EST PAS UNE RÉFÉRENCE. « makita '
           + 'zzt777x » en minuscules porte un chiffre et fait quatre signes : '
