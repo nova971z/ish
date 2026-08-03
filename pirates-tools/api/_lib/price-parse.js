@@ -343,14 +343,32 @@ function parseIdealo(rawText, brand) {
   for (var i = 0; i < lignes.length; i++) {
     var l = lignes[i];
     if (VENDU_PAR.test(l)) {
+      // ⚠️ Retenu AVANT d'écraser : c'est lui qui possède la queue qui traîne.
+      var titrePrecedent = titreOffre;
       titreOffre = (bloc.length ? bloc[bloc.length - 1] : null) || titreOffre;
       /* ⛔ « Vendu par : » désigne le titre juste au-dessus — donc TOUT ce qui
          précède ce titre appartient à la carte d'avant, et doit être traité
          comme telle. Mesuré le 03/08 sans les ancres : la carte qui précédait
          une offre marchande était avalée par l'offre et perdue (2 produits lus
          au lieu de 3). On coupe ici, le titre de l'offre restant seul. */
+      /* ⛔⛔ CE QUI PRÉCÈDE N'EST PAS TOUJOURS UNE CARTE. Défaut trouvé le
+         03/08 grâce à `refsNonLuesDetail`, et reproduit à l'identique : idealo
+         n'écrit plus qu'UNE ancre par offre, juste après « Vendu par ». La
+         queue d'une offre — délai · livraison · prix — traîne donc jusqu'au
+         titre suivant. Quand ce titre ne commence PAS par la marque
+         (« Meuleuse … - DEWALT - DCG404S2T-QW »), rien ne coupe avant, et
+         c'est ICI que la coupe se fait. En passant `false`, j'envoyais la
+         queue de l'offre précédente dans le chemin des CARTES, où elle n'a ni
+         référence ni prix lisible : cinq annonces perdues par relevé, avec
+         LEUR PRIX. Si un titre d'offre était en attente, la queue lui
+         appartient — `titrePrecedent` le dit.
+         ⚠️ J4 : on ne fabrique aucun prix, on rend son prix à l'annonce qui
+         l'a réellement affiché. */
       if (bloc.length > 1) {
-        traiter(bloc.slice(0, bloc.length - 1), false);
+        var gardeTitre = titreOffre;
+        titreOffre = titrePrecedent;                   // la queue appartient à LUI
+        traiter(bloc.slice(0, bloc.length - 1), !!titrePrecedent);
+        titreOffre = gardeTitre;                       // puis on rend la main au nouveau
         bloc = [bloc[bloc.length - 1]];
       }
     }

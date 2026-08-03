@@ -587,6 +587,42 @@ module.exports = async function () {
       '⛔ …y compris SANS la ligne « Détails du produit » : c\'est le titre qui '
       + 'ouvre la carte, pas l\'étiquette');
 
+    /* ⛔⛔ ARGENT — CINQ ANNONCES PERDUES PAR RELEVÉ, AVEC LEUR PRIX (03/08).
+       Gabarit RÉEL de sa page, lu dans `refsNonLuesDetail` et reproduit à
+       l'identique : idealo n'écrit plus qu'UNE ancre par offre, juste après
+       « Vendu par ». La queue d'une offre — délai · livraison · prix — traîne
+       donc jusqu'au titre suivant. Quand ce titre ne commence PAS par la
+       marque (« Meuleuse … - MAKITA - ZZG404 »), la seule coupe possible est
+       celle de « Vendu par » — et elle envoyait cette queue dans le chemin
+       des CARTES, où elle n'a ni référence ni prix lisible. */
+    var deuxOffres = pi([
+      'MAKITA ZZP111X1 - Nettoyeur haute pression 190 bars',
+      'Vendu par : UnMarchand.fr', 'Détails de l’offre',
+      '3 à 6 jours ouvrés', 'Livraison gratuite', '695,00 € TVA incluse',
+      'Meuleuse compacte 125 mm ZZ 18V - MAKITA - ZZG404S2T-QW',
+      'Vendu par : AutreMarchand.fr', 'Détails de l’offre',
+      '1-2 jours ouvrables', 'Livraison gratuite', '693,49 € TVA incluse'
+    ].join('\n'), 'MAKITA');
+    ok(deuxOffres.sansRef.length === 2,
+      '⛔⛔ DEUX offres qui se suivent sans ancre de fin sont lues TOUTES LES DEUX '
+      + '(' + deuxOffres.sansRef.length + '/2) — c\'est la perte mesurée sur SA page');
+    /* ⛔⛔ LE PRIX DOIT ÊTRE SUR LE BON TITRE, pas seulement présent. Un
+       premier jet vérifiait que les deux prix EXISTENT : un sabotage qui
+       rendait la queue au MAUVAIS titre laissait donc tout vert, alors qu'il
+       écrivait 695 € sur l'annonce d'à côté. Un prix présent mais décalé est
+       pire qu'un prix absent : il a l'air juste. */
+    function prixDe(motTitre) {
+      var e = deuxOffres.sansRef.filter(function (x) { return x.titre.indexOf(motTitre) !== -1; })[0];
+      return e ? e.prix : null;
+    }
+    ok(prixDe('Nettoyeur') === 695.00 && prixDe('Meuleuse') === 693.49,
+      '⛔⛔ ARGENT : chaque prix est APPARIÉ à SON annonce — 695 € au nettoyeur, '
+      + '693,49 € à la meuleuse (' + prixDe('Nettoyeur') + ' / ' + prixDe('Meuleuse') + ')');
+    ok((deuxOffres.perdus || []).length === 0,
+      'et plus rien n\'est consigné comme perdu : le registre des pertes doit '
+      + 'redevenir VIDE quand le défaut est corrigé ('
+      + JSON.stringify((deuxOffres.perdus || []).map(function (x) { return x.raison; })) + ')');
+
     var sansTout = pi(sansAncres(pageI, 'tout'), 'MAKITA');
     ok(sansTout.items.length === ri.length
       && sansTout.sansRef.length === rid.sansRef.length,
