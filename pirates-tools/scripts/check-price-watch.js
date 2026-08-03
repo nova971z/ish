@@ -2104,6 +2104,40 @@ module.exports = async function () {
             + 'distingue « tout est lu » de « trois pages ne sont jamais arrivées » '
             + '(obtenu ' + JSON.stringify(couvPartielle && couvPartielle.pagesManquantes)
             + ', attendu ' + (nbPages - 3) + ')');
+          /* ⛔⛔ UNE PAGE QUI ARRIVE VIDE N'EST PAS UNE PAGE QUI N'ARRIVE
+             JAMAIS — et les deux appellent des remèdes OPPOSÉS. Mesuré sur
+             ses deux balayages : 64 pages sur 67, puis 65 sur 67. Le nombre
+             VARIE, donc c'est intermittent. Mais une page vide repart en 400
+             sans toucher au cumul : elle était indiscernable d'une page
+             perdue en route. `pagesRefusees > 0` ⇒ le fournisseur n'a rien
+             rendu, on corrige la lecture ; `= 0` avec des manquantes ⇒ le
+             POST se perd avant nous, on corrige le réseau.
+             ⚠️ Une page vide n'incrémente PAS `pages` : la compter comme lue
+             gonflerait le total et masquerait le trou. */
+          adm._internals.pwScanReset();
+          var rPleine = fauxRes();
+          await admFn({ method: 'POST',
+            query: { type: 'price-watch', brand: 'DEWALT', source: 'idealo', sec: '1', scan: '1' },
+            body: { text: pageBref.replace(/MAKITA/g, 'DEWALT') } }, rPleine, fauxAdmin, dbInterdite);
+          var rVide = fauxRes();
+          await admFn({ method: 'POST',
+            query: { type: 'price-watch', brand: 'DEWALT', source: 'idealo', sec: '1', scan: '1' },
+            body: { text: '' } }, rVide, fauxAdmin, dbInterdite);
+          var rApres = fauxRes();
+          await admFn({ method: 'POST',
+            query: { type: 'price-watch', brand: 'DEWALT', source: 'idealo', sec: '1', scan: '1' },
+            body: { text: pageBref.replace(/MAKITA/g, 'DEWALT') } }, rApres, fauxAdmin, dbInterdite);
+          var cv = rApres.out && rApres.out.couverture;
+          ok(rVide.code === 400,
+            '⛔ PRÉALABLE : une page vide est bien REFUSÉE (obtenu ' + rVide.code + ')');
+          ok(cv && cv.pagesRefusees === 1,
+            '⛔⛔ …et COMPTÉE : c\'est le seul chiffre qui distingue « la page est '
+            + 'arrivée vide » de « la page n\'est jamais arrivée » — deux remèdes '
+            + 'opposés (obtenu ' + JSON.stringify(cv && cv.pagesRefusees) + ')');
+          ok(cv && cv.pagesDansLaRafale === 2,
+            '⛔⛔ …sans gonfler le total des pages LUES : compter une page vide comme '
+            + 'lue masquerait le trou au lieu de le montrer (obtenu '
+            + JSON.stringify(cv && cv.pagesDansLaRafale) + ', attendu 2)');
           adm._internals.pwScanReset();
         }
         adm._internals.pwScanReset();

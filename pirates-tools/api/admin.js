@@ -2088,6 +2088,12 @@ function pwCouvAjouter(brand, skus, titres, nbTuiles, nbLues, pagesDuPlan) {
        donc des coûts d'achat qui restent au niveau précédent sans raison. */
     pagesAttendues: pagesPlan || null,
     pagesManquantes: pagesPlan ? Math.max(0, pagesPlan - pwCouv.pages) : null,
+    /* ⛔ CE CHIFFRE TRANCHE ENTRE LES DEUX CAUSES D'UNE PAGE ABSENTE :
+       > 0 ⇒ elle est ARRIVÉE VIDE (le fournisseur n'a rien rendu, le POST est
+       parti quand même) ; = 0 avec des manquantes ⇒ le POST ne nous a jamais
+       atteints. Deux remèdes opposés, et sans ce compteur on ne pouvait que
+       supposer lequel. */
+    pagesRefusees: pwCouv.refus || 0,
     /* ⛔ LES DEUX CHIFFRES QU'IL DEMANDE, dans cet ordre : ce que les pages
        contenaient, ce qu'on en a lu. Doublons COMPRIS — c'est voulu. */
     tuilesVues: pwCouv.tuiles,
@@ -2095,6 +2101,22 @@ function pwCouvAjouter(brand, skus, titres, nbTuiles, nbLues, pagesDuPlan) {
     refsDistinctes: Object.keys(pwCouv.refs).length,
     nomsDistincts: Object.keys(pwCouv.noms).length
   };
+}
+/* ⛔⛔ COMPTER LES PAGES QUI ARRIVENT VIDES. Elles repartent en 400 sans
+   toucher au cumul, donc elles étaient jusqu'ici INDISCERNABLES des pages qui
+   ne sont jamais arrivées — et les deux appellent des remèdes opposés.
+   ⚠️ On n'incrémente PAS `pages` : une page vide n'a rien apporté, la compter
+   comme lue gonflerait le total et masquerait le trou. Elle a son compteur à
+   elle, et c'est l'écart entre les deux qui parle. */
+function pwCouvRefus(brand) {
+  const nowMs = Date.now();
+  if (!pwCouv || (nowMs - pwCouv.at) > PW_SCAN_TTL || pwCouv.brand !== brand) {
+    pwCouv = { brand: brand, refs: Object.create(null), noms: Object.create(null),
+      pages: 0, tuiles: 0, lues: 0, refus: 0, at: nowMs };
+  }
+  pwCouv.at = nowMs;
+  pwCouv.refus = (pwCouv.refus || 0) + 1;
+  return pwCouv.refus;
 }
 function pwScanReset() { pwScanCache = null; pwCouv = null; }
 
@@ -2156,6 +2178,22 @@ async function handlePriceWatch(req, res, admin, db) {
        de secret reste un secret. */
     if (!text || text.length < 200) {
       const recu = String(text || '');
+      /* ⛔⛔ UNE PAGE REFUSÉE SE COMPTE — SINON ELLE EST INDISCERNABLE D'UNE
+         PAGE JAMAIS ARRIVÉE. Mesuré sur ses deux balayages : 64 pages sur 67,
+         puis 65 sur 67. Le nombre VARIE, donc c'est intermittent — mais rien
+         ne disait laquelle des deux causes : soit le fournisseur n'a rien
+         rendu et le POST est parti vide (il arrive ici et repart en 400 sans
+         laisser la moindre trace), soit le POST n'a jamais atteint le serveur.
+         ⛔ Ce compteur tranche. `pagesRefusees > 0` ⇒ les pages ARRIVENT mais
+         vides, le remède est côté lecture. `pagesRefusees = 0` avec des pages
+         manquantes ⇒ le POST se perd avant nous, le remède est côté réseau.
+         Sans lui on ne pouvait que supposer, et une supposition ne se corrige
+         pas.
+         ⚠️ Portes lues : J3 — un entier, aucune donnée personnelle, rien
+         conservé au-delà de la fenêtre de rafale ; J4 — aucun prix n'entre
+         ici ; J5 — aucune TVA, aucun octroi de mer. */
+      pwCouvRefus(String((req.body && req.body.brand)
+        || (req.query && req.query.brand) || 'DEWALT').toUpperCase());
       return res.status(400).json({
         ok: false, error: 'text manquant ou trop court', source: sourceSlug,
         diagnostic: {
