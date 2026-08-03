@@ -76,6 +76,21 @@ module.exports = function () {
     ok(page1 && p.patronPage1 && page1.url === p.patronPage1,
       '⛔ ' + clef + ' : la page 1 utilise son patron PROPRE, jamais un décalage à '
       + 'zéro fabriqué (' + JSON.stringify(page1 && page1.url) + ')');
+    /* ⛔⛔ ET CE PATRON NE SE DÉDUIT PAS DU VOISIN — c'est l'erreur exacte que
+       j'ai commise le 03/08 : j'avais écrit la page 1 en retirant le décalage
+       du patron des autres pages, par SYMÉTRIE. Sa capture d'écran a montré
+       une adresse différente. Une adresse déduite est une adresse inventée ;
+       celle-là doit venir d'un écran, et l'assertion refuse les deux
+       fabrications possibles. */
+    var parSymetrie = [
+      String(p.patron || '').replace('{offset}', ''),
+      String(p.patron || '').replace('-{offset}', ''),
+      String(p.patron || '').replace('{offset}', '0')
+    ];
+    ok(parSymetrie.indexOf(String(p.patronPage1)) === -1,
+      '⛔⛔ ' + clef + ' : la page 1 n\'est PAS le patron des autres pages amputé de '
+      + 'son décalage. Une adresse déduite par symétrie est une adresse inventée — '
+      + 'elle se lit sur un écran (' + JSON.stringify(p.patronPage1) + ')');
 
     /* ⛔⛔ SÉCURITÉ — AUCUN SECRET DANS UNE ADRESSE. La clé du traqueur vit
        dans un en-tête ; une URL se journalise, se partage, se colle dans un

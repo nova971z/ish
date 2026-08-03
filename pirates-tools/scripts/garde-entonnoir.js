@@ -95,7 +95,7 @@ function temoinJur(d, dom) {
    Chaque point vient d'un défaut RÉELLEMENT constaté sur ce projet. */
 var LISTES = [
   { nom: 'PAIEMENT',
-    quand: /pirates-tools\/api\/((create-payment-intent|webhook|checkout)\.js|_lib\/(pricing|pricing-model|pricing-config|price-parse|accounting|invoice|loyalty|paiement-meta|postal)\.js)$/,
+    quand: /pirates-tools\/api\/((create-payment-intent|webhook|checkout)\.js|_lib\/(pricing|pricing-model|pricing-config|price-parse|barriere-achat|accounting|invoice|loyalty|paiement-meta|postal)\.js)$/,
     points: [
       'Le SERVEUR est autoritaire sur le montant : un prix venu du client est ignoré.',
       'Le webhook lit le corps BRUT — un corps parsé invalide la signature.',

@@ -17,12 +17,12 @@
 | **O1** | Affirmer avant de mesurer | 12 | §3 · §8 | `garde-sortie.js` *(hook Stop)* |
 | **O2** | L'instrument de mesure est faux | 28 | §4.3 | sabotage obligatoire |
 | **O3** | Réutiliser sans vérifier le contexte | 10 | §1.4 | `check-lecons.js` |
-| **O4** | Contrainte connue, non appliquée | 6 | §1 | `garde-entonnoir.js` |
+| **O4** | Contrainte connue, non appliquée | 7 | §1 | `garde-entonnoir.js` |
 | **O5** | Outil artisanal au lieu de l'outil existant | 1 | §1.4 | aucune — humaine |
 | **O6** | Copie périmée au lieu de la source vivante | 5 | §4.4 | `p7-architecture.js` |
 | **O7** | **Lire le silence comme un succès** | 7 | §3 · §4.3 | `sabotage.mjs` · `ci.js` · `check-ancres.js` |
 
-**69 erreurs, 7 mécanismes.** O1 et O2 en concentrent **40 à elles deux** :
+**70 erreurs, 7 mécanismes.** O1 et O2 en concentrent **40 à elles deux** :
 c'est là qu'il faut regarder en premier, toujours.
 
 ⚠️ **O7 est né le 01/08/2026** d'une règle qui existait déjà — « non exécuté
@@ -179,6 +179,7 @@ utilisée. La plus rageante : rien n'était à découvrir.*
 | **E-402** | l'entreprise est en Guadeloupe, **pas** l'user | déduit qu'il y était, orienté tout un diagnostic réseau à côté |
 | **E-403** | `scripts/ou.js` construit le matin | utilisé **zéro fois** de la journée |
 | **E-404** | « Vercel ne déploie que `master` » — première ligne de la mémoire projet | poussé **15 commits** sur la branche de travail en annonçant deux fois à l'user « relance quand c'est déployé ». Rien ne se déployait : il a retesté contre l'ancien code, et la réponse identique était inévitable. Le déploiement fait partie de « livré » — pousser la branche n'est pas livrer |
+| **E-407** | l'aiguillage de format ET le repli « rien reconnu », tous deux jugeant une page sur ses SEULES fiches | décider qu'une page n'a rien donné | ⛔⛔ **ARGENT — UNE PAGE FAITE UNIQUEMENT D'ANNONCES MARCHANDES ÉTAIT JETÉE ENTIÈRE.** `parseAuto` testait `!idea.items.length` et rendait alors les écartées de l'AUTRE gabarit (`clic.sansRef`), donc rien ; le point d'entrée testait `!parsed.length` et repartait en « aucun produit reconnu ». Zéro fiche ⇒ les 60 annonces et leurs prix disparaissaient **sans une trace**. Trouvé le 03/08 **par la porte**, sur un corpus de deux offres et zéro fiche — pas sur ses vraies pages, où il y a toujours des fiches : le défaut attendait le premier jour où il n'y en aurait pas. ⚠️ Même mécanisme aux DEUX étages, écrit à deux moments différents : **« ce que j'ai reconnu » n'est pas « ce que j'ai obtenu »**. Une page est reconnue si on en tire QUELQUE CHOSE — une fiche **ou** une annonce |
 | **E-406** | « on ne blackliste plus des formulations, on raisonne sur la structure » — ma propre règle, écrite deux jours plus tôt en corrigeant E-309 | fermer une tuile d'annonce « sur le premier prix rencontré » | ⛔⛔ **ARGENT — DOUZE ANNONCES SUR TRENTE-DEUX SONT SORTIES AVEC LEURS FRAIS DE PORT EN GUISE DE PRIX** : 3,23 €, 9,95 €, 8,00 €, 18,50 € là où l'article valait 691,53 €, 677,57 €… Idealo écrit « Frais de port : 3,23 € » **avant** « 691,53 € TVA incluse », et « le premier prix » attrapait le port. Un coût d'achat de 3 € au lieu de 691 € ne fausse pas un prix de vente, il le détruit. ⚠️ Le défaut est né d'un CORRECTIF : en fermant la tuile pour ne plus perdre d'annonce, j'ai introduit pire que ce que je réparais. **Un correctif se remesure sur le relevé SUIVANT, pas sur le corpus qui l'a motivé** — mon corpus de test écrivait « Livraison gratuite », jamais un port chiffré. Remède : la règle structurelle qui manquait — **un total commence par son montant, des frais commencent par leur étiquette** —, valable dans les trois langues et qui ne périme pas |
 | **E-405** | « un titre doit être PLAUSIBLE avant qu'un prix s'y attache » — garde que je venais d'écrire, avec son harnais et son sabotage | posée sur **un seul des deux chemins** du parseur. Le délai « 3 à 6 jours ouvrés » à **674 €** est ressorti dans son relevé suivant : il ne passait pas par la branche ANNONCE que je gardais, mais par la branche CARTE, où le titre était `b[0]` — la première ligne du bloc, quelle qu'elle soit. Le harnais était vert, le sabotage rouge, la règle juste : **elle ne couvrait que la moitié du code**. Ce qui l'a démasqué n'est pas un test mais une INCOHÉRENCE dans sa sortie — le `car` portait un `sku` que la chaîne « 3 à 6 jours ouvrés » ne peut pas contenir, donc titre et description ne venaient pas de la même ligne |
 

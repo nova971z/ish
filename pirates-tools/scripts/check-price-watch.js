@@ -1996,6 +1996,90 @@ module.exports = async function () {
         ok(!/x-watch-secret/i.test(JSON.stringify(rTrou.out)),
           '⛔ et JAMAIS un en-tête dans la réponse : la clé du traqueur y vit');
 
+        /* ⛔⛔ LA BARRIÈRE D'ACHAT — ELLE ÉCARTE, ELLE N'EFFACE PAS.
+           Demande de l'user du 03/08 : « tous les articles qui dépassent un
+           délai de livraison de 8 jours devront être écartés MAIS
+           temporairement […] il faut créer une barrière mais facile à enlever
+           ou à modifier ». Et une fourchette de prix, 50 € – 50 000 €.
+           ⚠️ J4 : le coût retenu est le MINIMUM des sources valables. Écarter
+           à tort le remonte ; laisser passer à tort adosse un prix de vente à
+           une offre qui ne peut pas l'honorer.
+           ⚠️ Le harnais ne recopie AUCUN seuil : il les relit dans le module,
+           et fabrique ses cas AUTOUR de la valeur en vigueur. Un seuil recopié
+           se périme, et celui-ci est fait pour changer. */
+        var brr = require('../api/_lib/barriere-achat.js');
+        var seuilJ = brr.SEUILS.delaiMaxJours;
+        var pageBarriere = [
+          'Défonceuse sans fil MAKITA ZZW620H1T 18 V',
+          'Vendu par : UnMarchand.fr', 'Détails de l’offre',
+          seuilJ + ' jours ouvrés', 'Livraison gratuite', '691,53 € TVA incluse',
+          '',
+          'Cloueuse sans fil MAKITA ZZN930P2 18 V',
+          'Vendu par : AutreMarchand.fr', 'Détails de l’offre',
+          (seuilJ + 1) + ' jours ouvrés', 'Livraison gratuite', '677,57 € TVA incluse'
+        ].join('\n');
+        var rBar = fauxRes();
+        await admFn({ method: 'POST',
+          query: { type: 'price-watch', brand: 'MAKITA', source: 'idealo', sec: '1' },
+          body: { text: pageBarriere } }, rBar, fauxAdmin, dbInterdite);
+        var bar = (rBar.out && rBar.out.barriere) || {};
+        var ecar = bar.ecartes || [];
+        ok(ecar.length === 1 && ecar[0].delaiJours === seuilJ + 1,
+          '⛔⛔ ARGENT : l\'offre à ' + (seuilJ + 1) + ' jours est ÉCARTÉE, celle à '
+          + seuilJ + ' jours PASSE — la barrière mord juste au-dessus du seuil, pas '
+          + 'à côté (' + JSON.stringify(ecar.map(function (x) { return x.delaiJours; })) + ')');
+        ok(ecar.length === 1 && /jours/.test(String(ecar[0].motif))
+          && /barriere-achat/.test(String(ecar[0].motif)),
+          '⛔ …et l\'écartée dit POURQUOI et OÙ se lève la barrière — sans ça, l\'user '
+          + 'ne sait pas laquelle des deux règles l\'a retenue ('
+          + JSON.stringify(ecar[0] && ecar[0].motif) + ')');
+        /* ⛔⛔ ÉCARTER N'EST PAS EFFACER. Le jour où il lève la barrière, il doit
+           retrouver EXACTEMENT ce qu'elle retenait — donc la ligne reste dans
+           le relevé, avec son prix. */
+        ok((rBar.out.sansRefDetail || []).length === 2,
+          '⛔⛔ la ligne écartée RESTE listée avec son prix : une barrière écarte, '
+          + 'elle n\'efface pas — sinon on ne peut plus la lever ('
+          + (rBar.out.sansRefDetail || []).length + '/2)');
+        ok(bar.seuils && bar.seuils.delaiMaxJours === seuilJ,
+          '⛔ les seuils EN VIGUEUR sont rendus avec le verdict : lire un refus sans '
+          + 'connaître la règle qui l\'a produit ne sert à rien');
+        /* PRÉALABLE — sans lui, une barrière qui refuserait TOUT resterait verte. */
+        ok(ecar.length < (rBar.out.sansRefDetail || []).length,
+          '⛔ PRÉALABLE : la barrière ne refuse pas tout — sinon elle serait verte en '
+          + 'écartant le catalogue entier');
+
+        /* ⛔⛔ UNE FOURCHETTE SE LIT PAR SON PIRE BOUT. « 3 à 9 jours ouvrés »,
+           c'est neuf jours pour qui attend le colis. Lire « 3 » laisserait
+           passer une offre que l'user veut écarter, en croyant compter trois.
+           Un premier sabotage — min à la place de max — est resté VERT : mon
+           corpus n'avait que des valeurs simples, jamais de fourchette. Le
+           cas qui discrimine, c'est celui-là.
+           ⚠️ Les deux bornes s'écrivent AUTOUR du seuil en vigueur : un seuil
+           recopié se périme, et celui-ci est fait pour changer. */
+        var basSeuil = Math.max(1, seuilJ - 5);
+        ok(brr.delaiEnJours(basSeuil + ' à ' + (seuilJ + 1) + ' jours ouvrés') === seuilJ + 1,
+          '⛔⛔ ARGENT : « ' + basSeuil + ' à ' + (seuilJ + 1) + ' jours » vaut '
+          + (seuilJ + 1) + ', le PIRE bout — c\'est ce qu\'on subit (obtenu '
+          + brr.delaiEnJours(basSeuil + ' à ' + (seuilJ + 1) + ' jours ouvrés') + ')');
+        ok(brr.juger({ prix: 500, delaiJours: brr.delaiEnJours(basSeuil + '-' + (seuilJ + 1) + ' jours') }).retenu === false,
+          '⛔ …et une offre annoncée « ' + basSeuil + '-' + (seuilJ + 1) + ' jours » est '
+          + 'donc ÉCARTÉE, pas retenue sur la foi de son meilleur bout');
+        /* ⛔ UNE IGNORANCE NE REFUSE PAS. Sans délai écrit, la barrière du
+           délai ne tranche pas : écarter faute d'information viderait le
+           relevé des sites avares en détails, et remonterait le coût d'achat
+           sans qu'aucun fait ne le justifie. */
+        ok(brr.juger({ prix: 500, delaiJours: null }).retenu === true,
+          '⛔ un délai INCONNU ne fait pas écarter : une ignorance ne vote pas');
+        /* ⛔ La fourchette de prix, aux DEUX bouts, avec de la marge — un
+           seuil testé pile sur sa valeur n'est pas un seuil. */
+        var pMin = brr.SEUILS.prixMinEuros, pMax = brr.SEUILS.prixMaxEuros;
+        ok(brr.juger({ prix: pMin - 1, delaiJours: 1 }).retenu === false
+          && brr.juger({ prix: pMax + 1, delaiJours: 1 }).retenu === false
+          && brr.juger({ prix: (pMin + pMax) / 2, delaiJours: 1 }).retenu === true,
+          '⛔⛔ ARGENT : la fourchette de prix mord aux DEUX bouts et laisse passer '
+          + 'le milieu — c\'est elle qui a écarté les frais de port pris pour des '
+          + 'prix d\'article (plancher ' + pMin + ' €, plafond ' + pMax + ' €)');
+
         /* ⛔⛔ AUCUN BLOC NE DISPARAÎT EN SILENCE (03/08/2026). Cinq réfs sont
            ressorties « non lues » sur SA page sans qu'aucune trace n'explique
            pourquoi. Le parseur les écartait sans rien dire — même défaut que

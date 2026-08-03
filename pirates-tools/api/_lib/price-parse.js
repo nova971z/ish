@@ -1,4 +1,10 @@
 'use strict';
+/* ⛔ La barrière d'achat est requise EN TÊTE, avec les autres dépendances, et
+   pas au milieu du fichier : `parseIdealo` s'en sert bien avant la ligne où
+   `nomenclature` est chargée. Ça marcherait quand même — le module se charge
+   entièrement avant le premier appel — mais une dépendance qu'on ne voit pas
+   en ouvrant le fichier est une dépendance qu'on casse sans le savoir. */
+var barriere = require('./barriere-achat.js');
 // Parseur des pages « marque » de cotébrico → [{ sku, price, name, promo }].
 //
 // price = le prix TTC **RÉELLEMENT AFFICHÉ, PROMO COMPRISE**.
@@ -588,7 +594,21 @@ function parseIdealo(rawText, brand) {
          \u26a0\ufe0f J4 \u2014 c'est une garde de JUSTESSE du co\u00fbt d'achat : un prix rattach\u00e9
          \u00e0 un titre qui ne d\u00e9signe rien fausserait tout ce qui en d\u00e9coule. */
       if (titre && px != null && px > 0 && titrePlausible(titre)) {
-        ecartes.push({ titre: titre, prix: px, car: extraireCaracteristiques(titre, brand) });
+        /* ⛔ LE DÉLAI SE LIT DANS LA TUILE, PAS AILLEURS. Demande de l'user du
+           03/08 : écarter TEMPORAIREMENT ce qui dépasse huit jours, parce
+           qu'il ne fait aujourd'hui que de l'envoi. La ligne de délai vit
+           entre « Vendu par » et le prix — c'est le bloc qu'on tient ici, et
+           le seul endroit où elle est rattachable à SON annonce.
+           ⚠️ On RELÈVE, on ne juge pas : la barrière vit ailleurs, dans un
+           fichier fait pour être modifié. Un parseur qui juge est un parseur
+           qu'il faut rouvrir à chaque changement d'avis.
+           ⚠️ J4 : ce délai ne touche à aucun prix. Il sert à décider quelles
+           sources entrent dans le coût d'achat — une offre à trois semaines ne
+           peut pas honorer une commande déjà encaissée. */
+        var delai = null;
+        for (var d = 0; d < b.length && delai == null; d++) delai = barriere.delaiEnJours(b[d]);
+        ecartes.push({ titre: titre, prix: px, delaiJours: delai,
+          car: extraireCaracteristiques(titre, brand) });
         titreOffre = null;
       } else {
         noter(b, !titre ? 'offre sans titre utilisable'
@@ -707,6 +727,20 @@ function parseAuto(rawText, brand) {
   var clic = parseClickoutil(rawText, brand);
   var idea = parseIdealo(rawText, brand);   // { items, sansRef }
   if (!cote.length && !clic.items.length && !idea.items.length) {
+    /* ⛔⛔ ARGENT — UNE PAGE PEUT N'ÊTRE FAITE QUE D'ANNONCES MARCHANDES, et
+       cet aiguillage la jetait entière. Le repli ne regardait que `items` :
+       zéro fiche ⇒ « format aucun », et il rendait `clic.sansRef` — les
+       écartées de l'AUTRE gabarit, donc rien. Toutes les annonces d'idealo
+       partaient avec, prix compris, sans une trace.
+       Trouvé le 03/08 PAR LA PORTE, sur un corpus fait de deux offres et
+       d'aucune fiche : 2 annonces lues par le parseur, 0 rendues par
+       l'aiguillage. Sur ses vraies pages il y a toujours des fiches — le
+       défaut attendait le premier jour où il n'y en aurait pas.
+       ⛔ Une page reconnue, c'est une page dont on tire QUELQUE CHOSE : une
+       fiche ou une annonce. Pas seulement une fiche. */
+    if ((idea.sansRef || []).length) {
+      return { format: 'idealo', items: [], packs: [], sansRef: idea.sansRef, perdus: idea.perdus };
+    }
     return { format: 'aucun', items: [], packs: clic.packs, sansRef: clic.sansRef, perdus: idea.perdus };
   }
   // Le plus fécond gagne — trois gabarits mutuellement exclusifs sur les

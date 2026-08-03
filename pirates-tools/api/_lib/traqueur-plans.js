@@ -36,8 +36,14 @@ var PLANS = {
     pas: 15,
     parPage: 60,
     ordre: 'desc',
-    patron: 'https://www.idealo.fr/prechcat/100I16-{offset}oM122663.html?q=dewalt&qr=false&sortKey=maxPrice',
-    patronPage1: 'https://www.idealo.fr/prechcat/100I16oM122663.html?q=dewalt&qr=false&sortKey=maxPrice',
+    /* ⛔ LA PAGE 1 N'A PAS LE MÊME CHEMIN QUE LES AUTRES — et je m'étais
+       trompé. J'avais fabriqué `100I16oM122663` par SYMÉTRIE avec les pages
+       suivantes ; sa capture du 03/08 (raccourci « Teste full pag… ») montre
+       que la première page s'écrit `100oM122663`, SANS le `I16`. Ce segment
+       n'apparaît qu'avec un décalage. Une adresse déduite par symétrie est une
+       adresse inventée : celle-ci vient de son écran. */
+    patron: 'https://www.idealo.fr/prechcat/100I16-{offset}oM122663.html?q=dewalt&sortKey=maxPrice',
+    patronPage1: 'https://www.idealo.fr/prechcat/100oM122663.html?q=dewalt&sortKey=maxPrice',
     aVerifier: 'le PAS de la pagination (15) est déduit de deux points : page 7 → 90. '
       + 'Le balayage le prouve seul — si le pas est juste, le nombre de références '
       + 'DISTINCTES cumulées croît d\'environ 60 par page ; s\'il est trop petit, les '

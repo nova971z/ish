@@ -11,6 +11,8 @@ const catalog = require('./_lib/catalog');
 const priceParse = require('./_lib/price-parse');
 // Les pages à balayer, déclarées une fois — jamais dans une URL tapée à la main.
 const plans = require('./_lib/traqueur-plans');
+// Ce qu'on refuse d'acheter, et pourquoi. Un seul fichier, fait pour changer.
+const barriere = require('./_lib/barriere-achat');
 const priceModel = require('./_lib/pricing-model');
 const priceConfig = require('./_lib/pricing-config');
 const pricing = require('./_lib/pricing');   // territoires (taux TVA/octroi) — saisie remboursement
@@ -2127,7 +2129,17 @@ async function handlePriceWatch(req, res, admin, db) {
        composant corromprait un coût d'achat. */
     const auto = priceParse.parseAuto(text, brand);
     const parsed = auto.items;
-    if (!parsed.length) {
+    /* ⛔⛔ ARGENT — « AUCUNE FICHE » N'EST PAS « RIEN RECONNU ». Ce test ne
+       regardait que `items` : une page faite UNIQUEMENT d'annonces marchandes
+       repartait en « aucun produit reconnu », et ses annonces — leurs prix
+       compris — étaient jetées sans une trace. Trouvé le 03/08 par la porte,
+       sur un corpus de deux offres et zéro fiche. Sur ses vraies pages il y a
+       toujours des fiches ; le défaut attendait le premier jour où il n'y en
+       aurait pas.
+       ⛔ On ne rend « rien reconnu » que si on n'a RIEN — ni fiche, ni
+       annonce. Sinon on continue : une annonce écartée reste une annonce
+       listée, avec son prix. */
+    if (!parsed.length && !(auto.sansRef || []).length) {
       /* Rien de reconnu — mais la page est LÀ, entre nos mains : on la mesure
          au lieu de la jeter. Le diagnostic dit laquelle des hypothèses du
          parseur casse sur ce site (séparateur de cartes, motif réf, motif
@@ -2253,6 +2265,26 @@ async function handlePriceWatch(req, res, admin, db) {
          bornée — minimisation respectée ; J4 — une annonce perdue est un PRIX
          perdu, donc un coût d'achat trop haut retenu, et c'est bien pour ça
          que ça se mesure ; J5 — aucune TVA, aucun octroi de mer ici. */
+      /* ⛔⛔ LA BARRIÈRE D'ACHAT — ELLE ÉCARTE, ELLE N'EFFACE PAS. Demande de
+         l'user du 03/08 : ne pas retenir ce qui dépasse huit jours de délai
+         (il ne fait que de l'envoi aujourd'hui), ni ce qui sort de la
+         fourchette 50 € – 50 000 €. Chaque ligne porte donc son verdict ET son
+         motif : le jour où il lève la barrière, il doit retrouver EXACTEMENT
+         ce qu'elle retenait, et savoir laquelle des deux l'a retenu.
+         ⚠️ Tous les seuils vivent dans `api/_lib/barriere-achat.js`, un seul
+         fichier fait pour être modifié — « facile à enlever ou à modifier »,
+         ce sont ses mots.
+         ⚠️ Portes lues : J4 — le coût retenu est le MINIMUM des sources
+         valables ; écarter à tort le remonte, laisser passer à tort adosse un
+         prix de vente à une offre qui ne peut pas l'honorer. J3 — des titres
+         d'articles et des délais publics, aucune donnée personnelle, rien
+         conservé au-delà de la réponse. J5 — aucune TVA, aucun octroi. */
+      (auto.sansRef || []).forEach((e) => { e.barriere = barriere.juger(e); });
+      const ecartesBarriere = (auto.sansRef || [])
+        .filter((e) => e.barriere && e.barriere.retenu === false)
+        .map((e) => ({ titre: String(e.titre || '').slice(0, 90), prix: e.prix,
+          delaiJours: e.delaiJours, motif: e.barriere.motif }));
+
       const attendus = priceParse.titresAttendus(text);
       /* ⛔ LE COMPTE BRUT DES TUILES — il ne dépend d'aucun titre, d'aucun
          repli, d'aucun vocabulaire : juste les deux ancres que la page ne peut
@@ -2300,6 +2332,12 @@ async function handlePriceWatch(req, res, admin, db) {
         },
         /* Liste vide = aucune tuile perdue, et c'est vérifiable titre à titre. */
         annoncesNonLues: annoncesNonLues.slice(0, 20),
+        /* ⛔ CE QUE LA BARRIÈRE A RETENU — listé, jamais effacé, avec le motif
+           de chacun. Le jour où l'user la lève, il doit retrouver exactement
+           ce qu'elle écartait. Les seuils en vigueur sont rendus AVEC : lire
+           un refus sans connaître la règle qui l'a produit ne sert à rien. */
+        barriere: { seuils: barriere.SEUILS, ecartes: ecartesBarriere.slice(0, 40),
+          nbEcartes: ecartesBarriere.length },
         /* ⚠️ Une ancre dont je n'ai pas su tirer de titre exploitable n'est PAS
            un produit perdu : c'est mon extraction qui a raté. Comptée à part
            pour ne rien taire, mais hors de la liste des pertes — sinon elle

@@ -46,6 +46,13 @@ var DOMAINES = {
                     _sourceIllisible qui INTERDIT toute écriture de prix quand la
                     config n'est pas lisible — c'est une décision de prix. */
                  /pirates-tools\/api\/_lib\/(pricing|pricing-model|pricing-config|price-parse|courses)\.js$/,
+                 /* ⛔ `barriere-achat` rattaché le 03/08/2026, et la porte l'a
+                    réclamé d'elle-même : il décide QUELLES sources entrent dans
+                    le coût d'achat. Le coût retenu étant le MINIMUM des sources
+                    valables, écarter à tort le remonte — et laisser passer à
+                    tort adosse un prix de vente à une offre qui ne peut pas
+                    l'honorer. Dans les deux cas, c'est le prix client qui bouge. */
+                 /pirates-tools\/api\/_lib\/barriere-achat\.js$/,
                  // ⛔ AJOUTÉ le 01/08/2026 : `catalog.js` décide désormais si une
                  // promotion est ACTIVE et efface le prix de référence quand elle
                  // expire. C'est donc lui qui rend une annonce de réduction
