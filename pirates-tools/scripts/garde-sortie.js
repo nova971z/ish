@@ -124,6 +124,33 @@ var RECHERCHE_FAITE = new RegExp(
   + 'sources? consultée?s?|j\'ai lu (?:la doc|le code|la source)|hypothèse|'
   + 'reproduit|je reprends|je recommence|je corrige)', 'i');
 
+/* I-5 — une question fermée appelle OUI ou NON, pas un compte rendu.
+   ⛔ Mot pour mot le 03/08/2026 : « tu me fais une réponse de 3 km alors que
+   t'avais juste à répondre oui ou non ». Ça lui coûte son forfait, et le
+   détail noie la réponse au lieu de l'éclairer.
+   ⚠️ Le motif est ÉTROIT à dessein, dans les deux dimensions : il faut que SA
+   question soit courte ET fermée, et que MA réponse soit longue ET ne
+   commence pas par oui/non. Un seul de ces quatre manque → on laisse passer.
+   Une porte qui refuse à tort finit désactivée, et ne protège alors rien. */
+var QUESTION_FERMEE = new RegExp(
+  '^\\s*(?:et\\s+)?(?:alors\\s+)?(?:est[- ]ce\\s+qu|c\'est\\s+(?:bon|fini|fait|ok)|'
+  + 'ç?a\\s+(?:marche|y\\s+est)|tu\\s+(?:peux|as)\\s|peux[- ]tu\\s|as[- ]tu\\s|'
+  + 'il\\s+(?:y\\s+a|reste)\\s)', 'i');
+var REPOND_OUI_NON = /^[\s*_#>-]*(oui|non|yes|no)\b/i;
+var LONGUEUR_QUESTION_FERMEE = 220;   // au-delà, ce n'est plus une question d'un mot
+var LONGUEUR_REPONSE_TOLEREE = 900;   // au-delà, c'est un compte rendu
+
+/* I-6 — on ne remet pas à plus tard ce qui est dans la demande.
+   ⛔ Mot pour mot : « tu ne t'arrêtes pas tant que la mission n'est pas
+   réussie ». On ne détecte pas une intention : on détecte les formulations
+   qui REPORTENT explicitement un travail déjà demandé. */
+var REPORT = new RegExp(
+  '(?:je (?:le |la |les )?(?:corrigerai|ferai|traiterai|regarderai)\\b|'
+  + '(?:il )?(?:reste|restera) (?:donc )?à (?:corriger|faire|traiter)\\b|'
+  + 'il (?:faudra|faudrait) (?:ensuite )?(?:corriger|traiter|reprendre)\\b|'
+  + 'on (?:pourra|verra) (?:ça |cela )?(?:plus tard|ensuite|au prochain)|'
+  + '(?:au|dans un) prochain (?:tour|passage|coup))', 'i');
+
 /* Une citation n'est pas une affirmation. Le registre CONTIENT « du gain pur,
    sans risque » : sans cette précaution, le citer se bloquerait lui-même —
    et une porte qui empêche de parler de ses propres erreurs est absurde. */
@@ -212,8 +239,17 @@ function tourDansFenetre(chemin, fenetreVoulue) {
       }
     });
   });
+  /* I-5 a besoin de la QUESTION pour juger la réponse : « oui ou non » ne se
+     mesure pas sur la seule sortie. On ne garde que du texte de l'user. */
+  var dem = '';
+  var cd = L[debut] && L[debut].message && L[debut].message.content;
+  if (typeof cd === 'string') dem = cd;
+  else if (Array.isArray(cd)) {
+    cd.forEach(function (x) { if (x && x.type === 'text' && typeof x.text === 'string') dem += x.text + ' '; });
+  }
+
   return {
-    tour: { appels: appels, resultats: resultats, sorties: sorties },
+    tour: { appels: appels, resultats: resultats, sorties: sorties, demande: dem.trim() },
     complet: complet, taille: taille
   };
 }
@@ -367,6 +403,26 @@ function controler(msg, tour) {
       + 'été cherché et ce qui manque exactement.');
   }
 
+  /* I-5 — la longueur de la réponse se règle sur la question, pas sur ce que
+     j'ai envie de raconter. Les QUATRE conditions doivent tenir ensemble. */
+  var q = String((tour && tour.demande) || '').trim();
+  if (q && q.length <= LONGUEUR_QUESTION_FERMEE && q.indexOf('?') !== -1
+      && QUESTION_FERMEE.test(q)
+      && msg.length > LONGUEUR_REPONSE_TOLEREE && !REPOND_OUI_NON.test(msg)) {
+    griefs.push('Sa question est fermée (' + q.length + ' signes) et la réponse fait '
+      + msg.length + ' signes sans commencer par oui ou non. I-5 : question fermée ⇒ '
+      + 'OUI ou NON en premier mot, puis le strict nécessaire ; question chiffrée ⇒ '
+      + 'le chiffre, rien devant. Le détail ne se donne que s\'il change ce qu\'il va '
+      + 'faire — sinon il vit dans DEMANDES.md, pas dans la réponse.');
+  }
+  var c76 = nu.match(REPORT);
+  if (c76) {
+    griefs.push('« ' + c76[0] + ' » remet à plus tard un travail déjà demandé. '
+      + 'I-6 : tant que la mission n\'est pas réussie, on ne rend pas de bilan — on '
+      + 'FAIT le reste, maintenant. On ne s\'arrête que quand la mesure atteint la '
+      + 'cible, ou qu\'on démontre chiffres à l\'appui qu\'elle est inatteignable.');
+  }
+
   return griefs;
 }
 
@@ -446,7 +502,39 @@ var CAS = [
   { nom: 'I-2/I-4 — le même aveu APRÈS avoir cherché', bloque: false,
     msg: 'J\'ai cherché la cause : reproduit sur le corpus, hypothèse tuée. '
       + 'Je ne vois pas pourquoi ces trois références manquent — il me faut le '
-      + 'texte brut de la page pour trancher.' }
+      + 'texte brut de la page pour trancher.' },
+
+  /* ── I-5 et I-6, ajoutées le 03/08/2026 dans le même mouvement ────────────
+     I-5 exige QUATRE conditions simultanées : sa question courte, fermée, ma
+     réponse longue, et sans oui/non en tête. Chacune est donc éprouvée seule,
+     pour prouver qu'aucune ne refuse à elle toute seule. */
+  { nom: 'I-5 — question fermée, réponse de trois kilomètres', bloque: true,
+    msg: 'Le déploiement dépend de plusieurs choses. ' + 'x'.repeat(1000),
+    tour: { appels: 0, resultats: 0, sorties: '', demande: 'Est-ce que c\'est déployé et je peux lancer le tracker ?' } },
+  { nom: 'I-5 — la MÊME longueur, mais la réponse commence par oui', bloque: false,
+    msg: 'Oui. ' + 'x'.repeat(1000),
+    tour: { appels: 0, resultats: 0, sorties: '', demande: 'Est-ce que c\'est déployé et je peux lancer le tracker ?' } },
+  { nom: 'I-5 — question fermée, réponse COURTE', bloque: false,
+    msg: 'Le commit déployé est celui de master, tu peux lancer.',
+    tour: { appels: 0, resultats: 0, sorties: '', demande: 'Est-ce que c\'est déployé ?' } },
+  { nom: 'I-5 — question OUVERTE : la longueur est légitime', bloque: false,
+    msg: 'Voici comment le parseur découpe la page. ' + 'x'.repeat(1000),
+    tour: { appels: 0, resultats: 0, sorties: '', demande: 'Explique-moi comment ton parseur découpe la page et pourquoi il perd la dernière carte ?' } },
+  { nom: 'I-5 — demande LONGUE : ce n\'est plus une question d\'un mot', bloque: false,
+    msg: 'Voilà le détail. ' + 'x'.repeat(1000),
+    tour: { appels: 0, resultats: 0, sorties: '',
+      demande: 'Est-ce que tu peux me dire si c\'est déployé, et pendant que tu y es reprends '
+        + 'le parseur, ajoute l\'espagnol, corrige les deux titres qui sortent sans type, et '
+        + 'vérifie que la dernière carte de la page est bien lue jusqu\'au bout ?' } },
+  { nom: 'I-5 — aucune question de l\'user : la porte se tait', bloque: false,
+    msg: 'Rapport complet du relevé. ' + 'x'.repeat(1000),
+    tour: { appels: 0, resultats: 0, sorties: '', demande: '' } },
+  { nom: 'I-6 — reporter un travail demandé', bloque: true,
+    msg: 'Les deux titres sont faux, je les corrigerai au prochain tour.' },
+  { nom: 'I-6 — variante « il reste à corriger »', bloque: true,
+    msg: 'Il reste à corriger la dernière carte de la page.' },
+  { nom: 'I-6 — le travail est FAIT, pas reporté', bloque: false,
+    msg: 'Les deux titres étaient faux : corrigés, mesurés, 30 annonces sur 30.' }
 ];
 
 function autoControle() {

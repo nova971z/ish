@@ -385,7 +385,29 @@ function parseIdealo(rawText, brand) {
       bloc = [];
     }
     bloc.push(l);
-    if (bloc.length > 40) bloc.shift();   // garde-fou : un bloc reste court
+    /* ⛔⛔ LE GARDE-FOU MANGEAIT LA DERNIÈRE CARTE DE CHAQUE PAGE.
+       `shift()` retire bloc[0] — c'est-à-dire LE TITRE. Tant qu'une carte est
+       suivie d'une autre, son bloc se ferme tôt et personne ne le voit. Mais
+       la DERNIÈRE carte de la page n'est fermée par rien : son bloc avale la
+       pagination, « Produits favoris », le pied de page… et au-delà de 40
+       lignes son titre est éjecté. Elle devient un bloc sans référence, et sa
+       réf ressort « vue mais non lue ».
+       Mesuré sur SA page du 03/08 (`D25899K`, marteau de démolition à
+       633,59 €) et reproduit en faisant varier la seule longueur de la queue :
+       36 lignes après le titre → lu ; 37 → PLUS RIEN. Le défaut ne tenait à
+       rien d'autre qu'au nombre de lignes du pied de page.
+       ⚠️ J4 : le danger n'est pas seulement la perte. Titre éjecté, le bloc
+       tombe dans le chemin sans référence et va chercher un prix plus bas —
+       celui du bandeau « Produits favoris », un TÉLÉPHONE. Un prix d'iPhone
+       sur un marteau, c'est un coût d'achat faux, donc un prix de vente faux.
+       ⛔ Deux fenêtres, parce que deux besoins opposés : un bloc QUI A DÉJÀ SON
+       TITRE n'a plus rien à gagner de ce qui suit — le titre et son prix sont
+       derrière nous, on cesse d'empiler. Un bloc SANS titre est une queue
+       d'offre : là c'est le plus RÉCENT qu'il faut garder, donc on glisse. */
+    if (bloc.length > 40) {
+      if (estTitreCarte(bloc[0])) bloc.pop();   // fenêtre FIGÉE : le titre ne part jamais
+      else bloc.shift();                        // fenêtre GLISSANTE : on garde le plus récent
+    }
   }
   traiter(bloc, !!titreOffre);            // dernier bloc, sans ancre finale
 
@@ -870,6 +892,11 @@ function sansAccents(s) {
 function motEntier(basseCasse, mot) {
   return reMot(mot).test(sansAccents(basseCasse));
 }
+/* Les mots qui annoncent un LOT, dans les trois langues de ses pages.
+   ⛔ Bornés comme tout le reste : « pack » se trouve dans « PowerSTACK » et
+   « kit » dans « maKITa » — c'est ce piège-là qui avait typé « kit » toutes
+   les machines de la marque. Ni lettre ni chiffre de chaque côté. */
+var MOT_LOT = new RegExp('(?:^|[^' + LETTRE + '])(kits?|packs?|lots?|ensembles?|combos?|sets?|juegos?|conjuntos?)(?![' + LETTRE + '])');
 /* Le pluriel se met sur CHAQUE mot du terme : « lames de scie sabre » doit
    accrocher « lame de scie sabre ». Un `s?` global à la fin ne suffisait pas. */
 function reMot(mot) {
@@ -1106,8 +1133,28 @@ function extraireCaracteristiques(titre, brand) {
      vocabulaire : c'est le NOMBRE qui le désigne. Mesuré — 11 fiches de son
      catalogue restaient sans type pour cette seule raison, et un combo sans
      type ne peut être distingué d'une machine seule au moment de comparer. */
+  /* ⚠️ Le rayon aussi : « Pack 3 outils » sortait `machine / null / pack
+     d'outils` là où les deux autres chemins vers ce même type disent `combo`.
+     Un type juste avec un rayon vide se range mal, et se compare mal. */
   if (!car.type && car.nbOutils != null && car.nbOutils > 1) {
-    car.famille = 'machine'; car.type = 'pack d\'outils';
+    car.famille = 'machine'; car.rayon = 'combo'; car.type = 'pack d\'outils';
+  }
+  /* ⛔⛔ UN KIT QUI ANNONCE SON NOMBRE D'OUTILS L'EMPORTE SUR LE NOM DES OUTILS
+     QU'IL CONTIENT. Mesuré sur SA page du 03/08 : « - Kit 2 Outils Perceuse
+     Visseuse et Perforateur SDS-Plus 18V 5AH - DCK22… » sortait
+     `percage / perceuse-visseuse`. La règle ci-dessus ne s'applique qu'à
+     défaut de type — or ici le type EST trouvé, puisque le titre nomme les
+     deux outils du lot. Le parseur retenait donc le PREMIER contenu au lieu
+     du contenant.
+     ⚠️ J4 — c'est de l'argent : un lot de deux machines rapproché d'une fiche
+     de perceuse seule compare deux choses différentes, et le coût d'achat
+     d'un pack devient le coût d'une machine.
+     ⛔ On exige les DEUX : un mot de lot ET un décompte supérieur à 1. Le mot
+     seul ne suffit pas — « Kit DCS570 + DCS334 » est déjà traité plus bas par
+     les deux références —, et le décompte seul non plus : « compatible avec 3
+     outils » n'est pas un pack. */
+  else if (car.nbOutils != null && car.nbOutils > 1 && MOT_LOT.test(bas)) {
+    car.famille = 'machine'; car.rayon = 'combo'; car.type = 'pack d\'outils';
   }
   /* ⛔ DEUX RÉFÉRENCES DE MACHINE DANS UN TITRE = UN LOT DE MACHINES. Mesuré
      sur SON relevé du 03/08 : « Kit DeWALT DCS570 + DCS334 (2 x 5.0 Ah +

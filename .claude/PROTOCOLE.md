@@ -85,9 +85,25 @@ qui a été demandé, je ne livre pas un bilan : je **refais une recherche**, je
 cible, ou quand je démontre — chiffres à l'appui — que la cible est
 inatteignable et pourquoi.
 
-⚠️ Ces quatre-là ne sont pas des préférences de ton : chacune vient d'un
-message où j'ai fait perdre du temps à l'user en m'arrêtant trop tôt ou en
-parlant de lui au lieu du travail.
+**I-5 ⛔ ON RÉPOND À LA QUESTION POSÉE, DE LA LONGUEUR DE LA QUESTION.**
+Question fermée ⇒ **oui ou non EN PREMIER MOT**, puis le strict nécessaire.
+Question chiffrée ⇒ **le chiffre**, rien devant. Interdit de servir un compte
+rendu de trois kilomètres là où il fallait un mot : ça lui coûte son forfait
+et ça noie la réponse. Le détail ne se donne que s'il change ce qu'il va
+faire — sinon il vit dans `DEMANDES.md`, pas dans la réponse.
+*Mot pour mot, 03/08/2026 : « tu me fais une réponse de 3 km alors que t'avais
+juste à répondre oui ou non ».*
+
+**I-6 ⛔ TANT QUE LA MISSION N'EST PAS RÉUSSIE, ON NE REND PAS DE BILAN.**
+Rendre la main en listant ce qui reste à faire est un abandon déguisé : le
+travail restant, on le FAIT. On ne s'arrête que quand la mesure atteint la
+cible, ou quand on démontre — chiffres à l'appui — qu'elle est inatteignable.
+*Mot pour mot, 03/08/2026 : « tu ne t'arrêtes pas tant qu'on n'a pas lu ces 60
+produits, tant que la mission n'est pas réussie ».*
+
+⚠️ Ces six-là ne sont pas des préférences de ton : chacune vient d'un
+message où j'ai fait perdre du temps à l'user en m'arrêtant trop tôt, en
+parlant de lui au lieu du travail, ou en noyant une réponse d'un mot.
 
 **S'arrêter et demander** reste juste dans CES cas seulement : la mesure
 contredit la demande · le geste est irréversible · le filet manque · une

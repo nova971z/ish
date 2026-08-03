@@ -674,6 +674,75 @@ module.exports = async function () {
       + 'redevenir VIDE quand le défaut est corrigé ('
       + JSON.stringify((deuxOffres.perdus || []).map(function (x) { return x.raison; })) + ')');
 
+    /* ⛔⛔ LA DERNIÈRE CARTE DE CHAQUE PAGE ÉTAIT MANGÉE PAR LE GARDE-FOU.
+       Trouvé dans SON relevé du 03/08 : `D25899K` — un marteau de démolition à
+       633,59 € — ressortait « vue mais non lue ». Cause isolée en ne faisant
+       varier QUE la longueur du pied de page : 36 lignes après le titre → lu ;
+       37 → plus rien. Le bloc glissait de 40 lignes en éjectant bloc[0], donc
+       LE TITRE. Une carte suivie d'une autre ne le voit jamais — son bloc se
+       ferme tôt ; la DERNIÈRE n'est fermée par rien et avale tout le pied de
+       page.
+       ⚠️ J4 : sans son titre, le bloc part dans le chemin sans référence et va
+       chercher un prix plus bas — celui du bandeau « Produits favoris », un
+       TÉLÉPHONE. Un prix d'iPhone sur un marteau fausse le coût d'achat.
+       ⚠️ Le harnais ne recopie PAS le seuil de 40 : il balaie de part et
+       d'autre. Un seuil recopié se périme, et un seuil posé pile là où la
+       valeur se trouve n'est pas un seuil. */
+    function pageAvecQueue(n) {
+      var q = [];
+      for (var i = 0; i < n; i++) q.push('pied de page ligne ' + i);
+      return pi([
+        'MAKITA ZZ25899K',
+        'Marteau de démolition, SDS-Max, 1 500 W',
+        '10 offres',
+        'à partir de633,59 €'
+      ].concat(q).join('\n'), 'MAKITA');
+    }
+    var queues = [0, 5, 20, 39, 40, 41, 80, 200];
+    var lues = queues.filter(function (n) {
+      var r = pageAvecQueue(n);
+      return r.items.length === 1 && r.items[0].sku === 'ZZ25899K' && r.items[0].price === 633.59;
+    });
+    ok(lues.length === queues.length,
+      '⛔⛔ la DERNIÈRE carte d\'une page est lue quelle que soit la longueur du '
+      + 'pied de page qui la suit — c\'est la réf que SA page perdait à chaque '
+      + 'relevé (lues pour les queues ' + JSON.stringify(lues) + ' sur '
+      + JSON.stringify(queues) + ')');
+    ok(pageAvecQueue(200).items.every(function (x) { return x.price === 633.59; }),
+      '⛔⛔ ARGENT : et jamais un autre prix. Titre éjecté, le bloc allait chercher '
+      + 'le prix du bandeau « Produits favoris » — un téléphone sur un marteau');
+    /* PRÉALABLE : sans lui, un parseur qui ne lirait plus RIEN passerait, et le
+       filtre ci-dessus serait vert sur une liste vide des deux côtés. */
+    ok(queues.length >= 4 && pageAvecQueue(0).items.length === 1,
+      '⛔ PRÉALABLE : le cas sans queue est lu — sinon les assertions ci-dessus '
+      + 'ne compareraient que des vides');
+
+    /* ⛔⛔ UN KIT QUI DIT SON NOMBRE D'OUTILS EST UN LOT, MÊME S'IL NOMME CE
+       QU'IL CONTIENT. Mesuré sur SA page : « Kit 2 Outils Perceuse Visseuse et
+       Perforateur SDS-Plus » sortait `perceuse-visseuse` — le premier CONTENU
+       pris pour le CONTENANT. J4 : comparer un lot de deux machines à une
+       fiche de machine seule fausse le coût d'achat. */
+    function typeDe(t) {
+      var c = pp.extraireCaracteristiques(t, 'MAKITA');
+      return c.famille + '/' + c.rayon + '/' + c.type;
+    }
+    ok(typeDe('- Kit 2 Outils Perceuse Visseuse et Perforateur SDS-Plus 18V 5AH - ZZK220P2T')
+      === 'machine/combo/pack d\'outils',
+      '⛔⛔ un « Kit N Outils » est un pack, pas la première machine qu\'il nomme ('
+      + typeDe('- Kit 2 Outils Perceuse Visseuse et Perforateur SDS-Plus 18V 5AH - ZZK220P2T') + ')');
+    /* PRÉALABLES — la règle exige les DEUX conditions, et chacune se prouve
+       insuffisante seule. Sans ça, une règle qui typerait « pack » tout ce qui
+       contient un chiffre resterait verte. */
+    ok(typeDe('Perceuse compatible avec 3 outils de la gamme') === 'machine/percage/perceuse',
+      '⛔ PRÉALABLE : un DÉCOMPTE sans mot de lot n\'est pas un pack — sinon '
+      + '« compatible avec 3 outils » deviendrait un pack d\'outils');
+    ok(/vibrateur$/.test(typeDe('Vibrateur à béton ZZE531N-XJ + 2 batteries 18V 5 Ah + 1 Chargeur ZZB1104')),
+      '⛔ PRÉALABLE : un MOT DE LOT sans décompte d\'outils n\'est pas un pack — '
+      + 'un nom écrit l\'emporte toujours sur un comptage');
+    ok(typeDe('Pack 3 outils 18V (ZZP458 + ZZD154 + ZZG460)') === 'machine/combo/pack d\'outils',
+      '⛔ et le RAYON est rempli comme sur les deux autres chemins vers ce type — '
+      + 'un type juste dans un rayon vide se range mal et se compare mal');
+
     var sansTout = pi(sansAncres(pageI, 'tout'), 'MAKITA');
     ok(sansTout.items.length === ri.length
       && sansTout.sansRef.length === rid.sansRef.length,
