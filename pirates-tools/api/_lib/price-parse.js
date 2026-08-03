@@ -858,6 +858,53 @@ function compterTuiles(rawText) {
   return { annonces: annonces, fiches: fiches, total: annonces + fiches };
 }
 
+/* ══ LA RACINE D'UNE RÉFÉRENCE — le suffixe commercial ne fait pas l'identité ══
+   Décision de l'user, 03/08, mot pour mot : « DCE079D1G-QW = DCE079D1G, ce sont
+   exactement les mêmes produits. Le préfixe ne veut pas dire grand-chose si la
+   référence au début est exactement la même […] sur idealo on n'a pas besoin de
+   regarder le suffixe, car tous les sites qui sont dessus sont européens ».
+
+   ⛔ CE QUE ÇA DÉBLOQUE, MESURÉ LE 03/08 : sur ses 177 vraies références DeWALT,
+   **150 portent un suffixe** (-XJ 115, -QS 18, -QW 16, -QZ 1). Une comparaison
+   qui exige le suffixe exact rate donc l'article dès que le marchand écrit
+   `DW743N` là où la fiche dit `DW743N-QS` — et c'est le cas le plus courant.
+   ⛔ ET AUCUNE COLLISION : ces 177 références se réduisent à 177 racines
+   DISTINCTES. Neutraliser le suffixe ne peut donc confondre aucune de ses
+   fiches. Ce n'est pas une supposition, c'est un comptage — et l'appelant
+   REVÉRIFIE quand même l'unicité, parce qu'un catalogue change.
+
+   ⛔ ON NE COUPE QU'UN SUFFIXE DE LETTRES, EN FIN DE CHAÎNE. Trois pièges que
+   cette règle évite, tous présents dans son catalogue :
+   · `DCD709NT-XJ` et `DCD709N-XJ` diffèrent AVANT le tiret — NT désigne la
+     version coffret. Couper au premier tiret les confondrait, et un prix
+     d'outil nu s'écrirait sur une fiche à coffret ;
+   · `DWST1-81078` finit par des CHIFFRES : c'est un numéro d'article, pas un
+     marquage. On ne coupe jamais un segment qui contient un chiffre ;
+   · `DCLE14361GB-XJ` porte « GB » à l'intérieur : seul le DERNIER segment part.
+
+   ⚠️ PORTE J4 LUE (`node scripts/juridique.js J4`) : le prix annoncé doit être
+   exact et complet, et une réduction se réfère au prix le plus bas des 30 jours
+   précédents. Cette fonction ne touche à AUCUN prix — elle rend une chaîne de
+   caractères qui sert à reconnaître un article. Ce qu'elle engage est ailleurs,
+   et il faut le dire : élargir un rapprochement, c'est risquer d'écrire le coût
+   d'un article sur la fiche d'un autre. C'est pourquoi elle ne coupe QUE le
+   marquage commercial, jamais un segment porteur de sens, et pourquoi les
+   caractéristiques bloquantes (coffret, édition limitée, nombre d'outils)
+   continuent de trancher APRÈS elle.
+   ⚠️ FONCTION PURE. J3 — des références d'outils publiques, aucune donnée
+   personnelle. J5 — aucune TVA, aucun octroi de mer. */
+var SUFFIXE_COMMERCIAL = /-[A-Z]{2,3}$/;
+function racineRef(sku) {
+  var s = String(sku || '').trim().toUpperCase();
+  if (!s) return '';
+  var r = s.replace(SUFFIXE_COMMERCIAL, '');
+  /* Une racine trop courte n'identifie plus rien : `AB-XJ` deviendrait `AB` et
+     accrocherait n'importe quoi. En dessous de cinq signes on garde l'écriture
+     complète — même seuil que partout ailleurs pour juger une référence
+     crédible. */
+  return r.length >= 5 ? r : s;
+}
+
 /* ⛔⛔ L'IDENTITÉ D'UNE PAGE, TIRÉE DE SON CONTENU — parce que le raccourci ne
    dit JAMAIS quelle page il envoie. Sans ça, le serveur ne peut ni reconnaître
    une page envoyée deux fois, ni dire LAQUELLE des 67 manque : il ne sait que
@@ -1811,6 +1858,27 @@ function extraireCaracteristiques(titre, brand) {
     }
   }
 
+  /* ⛔⛔ SUR UNE MACHINE, « PAS DE COFFRET ÉCRIT » VEUT DIRE NUE.
+     Règle de l'user, 03/08 : « il faut qu'on favorise les outils sans coffret,
+     toujours ; celle que tu as choisie ne contient pas NT-XJ mais elle est en
+     coffret aussi ». Mesuré le même jour sur `DCM200N` : idealo affiche trois
+     variantes de 226,88 € à 348,99 €, et le traqueur a retenu 249,99 € — une
+     variante à coffret rapprochée d'une fiche d'outil nu.
+     ⛔ POURQUOI LE `null` NE SUFFISAIT PAS. Un champ absent est une IGNORANCE,
+     et une ignorance NE VOTE PAS au rapprochement : l'annonce nue rendait
+     `coffret: null`, donc elle ne pouvait rien contredire. Seul `pack` la
+     sauvait par accident. C'est exactement la faute déjà payée sur
+     `editionLimitee` — un marqueur qui ne dit rien quand c'est faux est
+     décoratif.
+     ⚠️ UNIQUEMENT SUR LES MACHINES : une lame ou un vêtement n'a pas de
+     coffret, et l'affirmer inventerait une caractéristique.
+     ⚠️ SENS DE L'ERREUR ASSUMÉ : si un marchand vend un outil en coffret sans
+     l'écrire, l'annonce sera jugée incompatible et le prix ne sera PAS écrit.
+     On préfère ne rien écrire à écrire faux — un prix de coffret sur une fiche
+     nue gonfle le prix de vente d'un article qu'il n'a pas acheté (J4).
+     ⚠️ J3 — aucune donnée personnelle. J5 — aucune TVA, aucun octroi de mer. */
+  if (car.famille === 'machine' && car.coffret == null) car.coffret = 'AUCUN';
+
   /* ══ LE VERROU DE L'ENTONNOIR ══════════════════════════════════════════
      ⛔ DERNIÈRE ÉTAPE, ET LA PLUS IMPORTANTE. Tout ce qui précède cherche
      large ; ici on efface ce qui n'a aucun sens dans le rayon trouvé. Une
@@ -1928,4 +1996,4 @@ function comparerCaracteristiques(a, b) {
   return { compatible: conflits.length === 0, conflits: conflits, concordances: concordances };
 }
 
-module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickoutil, parseIdealo: parseIdealo, parseAuto: parseAuto, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, raisonAucuneSource: raisonAucuneSource, enMillis: enMillis, SOURCE_FRESH_MS: SOURCE_FRESH_MS, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage, estMaPropreReponse: estMaPropreReponse, titresAttendus: titresAttendus, compterTuiles: compterTuiles, empreintePage: empreintePage, annoncesManquantes: annoncesManquantes, extraireCaracteristiques: extraireCaracteristiques, comparerCaracteristiques: comparerCaracteristiques, planBalayage: planBalayage, rangDansPlan: rangDansPlan, OUTILS: OUTILS, SERIES: SERIES, nomenclature: nomen };
+module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickoutil, parseIdealo: parseIdealo, parseAuto: parseAuto, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, raisonAucuneSource: raisonAucuneSource, enMillis: enMillis, SOURCE_FRESH_MS: SOURCE_FRESH_MS, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage, estMaPropreReponse: estMaPropreReponse, titresAttendus: titresAttendus, compterTuiles: compterTuiles, empreintePage: empreintePage, racineRef: racineRef, annoncesManquantes: annoncesManquantes, extraireCaracteristiques: extraireCaracteristiques, comparerCaracteristiques: comparerCaracteristiques, planBalayage: planBalayage, rangDansPlan: rangDansPlan, OUTILS: OUTILS, SERIES: SERIES, nomenclature: nomen };

@@ -1759,6 +1759,43 @@ function pwApparierParNom(sansRef, products) {
    Mutations : ajoute des clés d'alias à `bySku`, sans JAMAIS écraser une
    entrée existante (sku principal et srcAltSkus priment).
    Testée par check-price-watch via _internals, sabotage compris. */
+/* ⛔⛔ LE SUFFIXE COMMERCIAL NE FAIT PAS L'IDENTITÉ — INDEX DES RACINES.
+   Décision de l'user, 03/08 : « DCE079D1G-QW = DCE079D1G, ce sont exactement
+   les mêmes produits […] sur idealo on n'a pas besoin de regarder le suffixe,
+   tous les sites qui y sont sont européens ». Mesuré le même jour : 150 de ses
+   177 vraies références DeWALT portent un suffixe. Exiger le suffixe exact,
+   c'est rater l'article dès que le marchand écrit la référence nue — et c'est
+   le cas le plus courant.
+
+   ⛔ DEUX GARDES, ET AUCUNE N'EST FACULTATIVE :
+   · une racine ne s'installe JAMAIS par-dessus une référence principale — une
+     fiche écrite en toutes lettres l'emporte toujours sur une racine ;
+   · une racine réclamée par DEUX fiches différentes est ÉCARTÉE, pas arbitrée.
+     Choisir au hasard écrirait le coût d'un article sur la fiche d'un autre.
+     Le comptage du 03/08 n'en trouve aucune sur son catalogue ; on le
+     revérifie quand même à chaque exécution, parce qu'un catalogue change.
+   ⚠️ Portes lues : J3 — des références d'outils publiques ; J4 — aucun prix
+   n'entre ici, les caractéristiques bloquantes (coffret, édition limitée)
+   continuent de trancher APRÈS ce rapprochement ; J5 — aucune TVA. */
+function pwIndexerRacines(produits, index) {
+  const parRacine = Object.create(null);
+  (produits || []).forEach((p) => {
+    if (!p || !p.sku) return;
+    const r = priceParse.racineRef(p.sku);
+    if (!r || r === String(p.sku).toUpperCase()) return;   // rien à gagner
+    (parRacine[r] = parRacine[r] || []).push(p);
+  });
+  let poses = 0, ecartes = 0;
+  Object.keys(parRacine).forEach((r) => {
+    const fiches = parRacine[r];
+    if (index[r]) return;                       // une réf principale gagne
+    if (fiches.length > 1) { ecartes++; return; }   // ambiguë : on n'arbitre pas
+    index[r] = fiches[0];
+    poses++;
+  });
+  return { poses: poses, ecartes: ecartes };
+}
+
 function pwAliasNomenclature(products, brand, bySku) {
   if (String(brand || '').toUpperCase() !== 'DEWALT') return;
   const claims = {};
@@ -2672,9 +2709,15 @@ async function handlePriceWatch(req, res, admin, db) {
         });
       });
       pwAliasNomenclature(produitsSec, brand, bySkuSec);
+      pwIndexerRacines(produitsSec, bySkuSec);
       const reconnusSec = [], inconnusSec = [];
       parsed.forEach((it) => {
-        const p = bySkuSec[String(it.sku).toUpperCase()];
+        /* ⛔ RECHERCHE EN DEUX TEMPS : l'écriture EXACTE d'abord, la RACINE
+           ensuite. Le marchand peut écrire la référence avec ou sans son
+           suffixe commercial ; les deux sens doivent aboutir. L'exact garde la
+           priorité — une fiche écrite en toutes lettres l'emporte toujours. */
+        const p = bySkuSec[String(it.sku).toUpperCase()]
+          || bySkuSec[priceParse.racineRef(it.sku)];
         /* ⛔ `car` EST RENDU EN MODE À SEC, et c'est le seul moyen de VOIR ce
            que le parseur a compris de chaque annonce. Sans ça, un extracteur
            qui typerait tout « kit » resterait invisible : le relevé aurait
@@ -2970,6 +3013,7 @@ async function handlePriceWatch(req, res, admin, db) {
       });
     });
     pwAliasNomenclature(products, brand, bySku);
+    pwIndexerRacines(products, bySku);
 
     // Config de tarification : si autoPrice, on applique le MODÈLE de marge cible
     // (markup adaptatif poids/mode pour 15 % net après IS) ; sinon repli ×1,15.
@@ -3027,7 +3071,10 @@ async function handlePriceWatch(req, res, admin, db) {
        ferait écraser par la plus chère des deux. */
     pwRafaleOuvrir(brand, (plans.plan(brand, sourceSlug) || {}).pages, nowMs);
     for (const item of parsed) {
-      const p = bySku[item.sku];
+      /* ⛔ Même règle que sur le chemin à sec : l'écriture exacte d'abord, la
+         racine ensuite. Une règle vraie appliquée à un seul endroit ne protège
+         que cet endroit — et ici l'autre endroit est celui qui ÉCRIT les prix. */
+      const p = bySku[item.sku] || bySku[priceParse.racineRef(item.sku)];
       if (!p) { unknown.push({ sku: item.sku, srcTTC: item.price, name: item.name }); continue; }
       if (fichesVues.has(p.id)) continue;
       fichesVues.add(p.id);
@@ -3361,6 +3408,7 @@ module.exports.config = { api: { bodyParser: { sizeLimit: '4.5mb' } } };
 module.exports._internals = {
   pwSourceCost: pwSourceCost, pwSourcesConnues: pwSourcesConnues, pwEstGel: pwEstGel,
   pwApparierParNom: pwApparierParNom, pwAliasNomenclature: pwAliasNomenclature,
+  pwIndexerRacines: pwIndexerRacines,
   // Exposés pour check-price-watch : le mode balayage se prouve en APPELANT
   // le handler avec une base factice qui compte lectures et écritures.
   handlePriceWatch: handlePriceWatch, pwMajLocale: pwMajLocale, pwScanReset: pwScanReset

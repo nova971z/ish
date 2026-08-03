@@ -1295,6 +1295,114 @@ module.exports = async function () {
        l'inverse fait vendre à perte.
        ⚠️ Référence volontairement synthétique — un harnais ne nomme jamais une
        donnée du catalogue. */
+    /* ══ LE SUFFIXE COMMERCIAL NE FAIT PAS L'IDENTITÉ ═══════════════════════
+       ⛔⛔ Décision de l'user, 03/08 : « DCE079D1G-QW = DCE079D1G, ce sont
+       exactement les mêmes produits […] sur idealo on n'a pas besoin de
+       regarder le suffixe, tous les sites qui y sont sont européens ». Mesuré
+       le même jour : 150 de ses 177 vraies références DeWALT portent un
+       suffixe. Exiger le suffixe exact, c'est rater l'article dès que le
+       marchand écrit la référence nue — le cas le plus courant. */
+    var rr = pp.racineRef;
+    ok(typeof rr === 'function', 'racineRef exportée');
+    if (rr) {
+      ok(rr('ZZE12345-QW') === 'ZZE12345' && rr('ZZE12345-QS') === 'ZZE12345'
+        && rr('ZZE12345-XJ') === 'ZZE12345',
+        '⛔ les marquages commerciaux tombent, la racine reste (obtenu '
+        + JSON.stringify([rr('ZZE12345-QW'), rr('ZZE12345-QS'), rr('ZZE12345-XJ')]) + ')');
+      ok(rr('zze12345-qw') === 'ZZE12345', 'la casse n\'entre pas en ligne de compte');
+      /* ⛔⛔ TROIS PIÈGES, TOUS PRÉSENTS DANS SON CATALOGUE. */
+      ok(rr('ZZD709NT-XJ') !== rr('ZZD709N-XJ'),
+        '⛔⛔ ARGENT : « NT » et « N » diffèrent AVANT le tiret — NT désigne la version '
+        + 'coffret. Couper au premier tiret les confondrait et écrirait un prix d\'outil '
+        + 'nu sur une fiche à coffret (obtenu ' + rr('ZZD709NT-XJ') + ' contre '
+        + rr('ZZD709N-XJ') + ')');
+      ok(rr('ZZST1-81078') === 'ZZST1-81078',
+        '⛔ un segment final de CHIFFRES est un numéro d\'article, pas un marquage : on '
+        + 'ne le coupe jamais (obtenu ' + rr('ZZST1-81078') + ')');
+      ok(rr('ZZLE14361GB-XJ') === 'ZZLE14361GB',
+        '⛔ seul le DERNIER segment part : un « GB » à l\'intérieur reste (obtenu '
+        + rr('ZZLE14361GB-XJ') + ')');
+      ok(rr('AB-XJ') === 'AB-XJ',
+        '⛔ une racine de moins de cinq signes n\'identifie plus rien : on garde '
+        + 'l\'écriture complète plutôt que d\'accrocher n\'importe quoi');
+      /* ⛔ PRÉALABLE MESURÉ SUR SON CATALOGUE, pas supposé : neutraliser le
+         suffixe ne doit confondre AUCUNE de ses fiches. Le jour où deux fiches
+         partagent une racine, l'index doit l'écarter — jamais l'arbitrer. */
+      var vues = Object.create(null), collisions = 0;
+      require('../api/_lib/catalog.js').loadCatalogAvec({}).forEach(function (p) {
+        if (!p.sku) return;
+        var r = rr(p.sku);
+        if (r === String(p.sku).toUpperCase()) return;
+        if (vues[r] && vues[r] !== p.id) collisions++;
+        vues[r] = p.id;
+      });
+      ok(collisions === 0,
+        '⛔⛔ aucune racine réclamée par deux fiches différentes dans le catalogue réel — '
+        + 'sinon le rapprochement souple écrirait le coût d\'un article sur la fiche d\'un '
+        + 'autre (obtenu ' + collisions + ' collision(s))');
+    }
+
+    /* ⛔⛔ LES DEUX GARDES DE L'INDEX DE RACINES, SUR DES DONNÉES FABRIQUÉES.
+       Le catalogue réel n'en contient aucun cas — c'est une bonne nouvelle,
+       mais un contrôle qui ne peut pas se déclencher ne vérifie rien. On monte
+       donc les deux situations à la main.
+       ⚠️ Références synthétiques : un harnais ne nomme jamais une donnée du
+       catalogue. */
+    var idxR = adm._internals && adm._internals.pwIndexerRacines;
+    ok(typeof idxR === 'function', 'pwIndexerRacines exposée aux portes');
+    if (idxR) {
+      /* Cas 1 — la racine tombe sur une RÉFÉRENCE PRINCIPALE existante. */
+      var fA = { id: 'a', sku: 'ZZR12345' }, fB = { id: 'b', sku: 'ZZR12345-QW' };
+      var ix1 = Object.create(null);
+      ix1[fA.sku] = fA; ix1[fB.sku] = fB;
+      idxR([fA, fB], ix1);
+      ok(ix1['ZZR12345'] === fA,
+        '⛔⛔ ARGENT : une racine n\'écrase JAMAIS une référence principale. La fiche '
+        + 'écrite en toutes lettres l\'emporte, sinon le coût de la variante s\'écrirait '
+        + 'sur elle (obtenu ' + JSON.stringify(ix1['ZZR12345'] && ix1['ZZR12345'].id) + ')');
+      /* Cas 2 — DEUX fiches réclament la même racine. */
+      var fC = { id: 'c', sku: 'ZZR77777-QW' }, fD = { id: 'd', sku: 'ZZR77777-XJ' };
+      var ix2 = Object.create(null);
+      ix2[fC.sku] = fC; ix2[fD.sku] = fD;
+      var bilanR = idxR([fC, fD], ix2);
+      ok(ix2['ZZR77777'] === undefined && bilanR.ecartes === 1,
+        '⛔⛔ ARGENT : une racine réclamée par DEUX fiches est ÉCARTÉE, jamais arbitrée. '
+        + 'Trancher au hasard écrirait le coût d\'un article sur la fiche d\'un autre '
+        + '(obtenu ' + JSON.stringify(ix2['ZZR77777'] && ix2['ZZR77777'].id) + ', écartées '
+        + bilanR.ecartes + ')');
+      /* Cas 3 — le cas utile marche vraiment. */
+      var fE = { id: 'e', sku: 'ZZR99999-QS' };
+      var ix3 = Object.create(null); ix3[fE.sku] = fE;
+      idxR([fE], ix3);
+      ok(ix3['ZZR99999'] === fE,
+        '⛔ PRÉALABLE : une racine libre est bien posée — sans ça les deux gardes '
+        + 'ci-dessus seraient vertes sur un index vide');
+    }
+
+    /* ══ SUR UNE MACHINE, « PAS DE COFFRET ÉCRIT » VEUT DIRE NUE ════════════
+       ⛔⛔ Règle de l'user, 03/08 : « il faut qu'on favorise les outils sans
+       coffret, toujours ». Mesuré sur `DCM200N` : idealo affiche trois
+       variantes de 226,88 € à 348,99 €, et le traqueur a retenu 249,99 € —
+       une variante à coffret rapprochée d'une fiche d'outil nu. */
+    var mNu = ec('MARQUEZZ ZZC8888 lime a bande 18V sans batterie', 'MARQUEZZ');
+    var mCof = ec('MARQUEZZ ZZC8888 lime a bande 18V avec coffret TSTAK', 'MARQUEZZ');
+    ok(mNu.coffret === 'AUCUN' && mCof.coffret && mCof.coffret !== 'AUCUN',
+      '⛔ sur une MACHINE, l\'absence de coffret écrit vaut « AUCUN », pas `null` : un '
+      + 'champ absent est une ignorance et une ignorance NE VOTE PAS (obtenu '
+      + JSON.stringify([mNu.coffret, mCof.coffret]) + ')');
+    var duelCof = pp.comparerCaracteristiques(mNu, mCof);
+    ok(duelCof.compatible === false && duelCof.conflits.indexOf('coffret') !== -1,
+      '⛔⛔ ARGENT : une annonce À COFFRET ne s\'apparie plus à une fiche d\'outil NU. '
+      + 'Un prix de coffret sur une fiche nue gonfle le prix de vente d\'un article '
+      + 'qu\'il n\'a pas acheté (obtenu ' + JSON.stringify(duelCof) + ')');
+    ok(pp.comparerCaracteristiques(mNu,
+      ec('MARQUEZZ ZZC8888 lime a bande 18V', 'MARQUEZZ')).compatible === true,
+      '⛔ …et deux annonces NUES restent compatibles : la garde ne doit pas bloquer le '
+      + 'cas normal, sinon plus aucun prix ne s\'écrit');
+    ok(ec('Lame de scie circulaire 190 mm 24 dents', 'MARQUEZZ').coffret === null,
+      '⛔ une LAME n\'a pas de coffret : l\'affirmer inventerait une caractéristique, et '
+      + 'un champ inventé fait conflit avec du vide');
+
     var lim1 = ec('MARQUEZZ ZZL7777 perceuse 18V', 'MARQUEZZ');
     var lim2 = ec('MARQUEZZ ZZL7777 perceuse 18V edition limitee McLaren', 'MARQUEZZ');
     ok(lim1.editionLimitee === false && lim2.editionLimitee === true,
