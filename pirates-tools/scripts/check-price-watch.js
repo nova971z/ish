@@ -887,6 +887,53 @@ module.exports = async function () {
       '⛔ PRÉALABLE : DWST reste du RANGEMENT — sinon la règle ne distingue plus '
       + 'un lot de machines d\'une caisse vide (' + typeDewalt('DEWALT DWST83345-1 Coffret TOUGHSYSTEM') + ')');
 
+    /* ⛔⛔ UN TITRE DE MARCHAND PEUT ÊTRE FAUX ; UNE RÉFÉRENCE, NON. Trouvé le
+       03/08 en faisant auditer ses 59 lignes contre la réalité DeWALT, source
+       par source. DEUX lignes vendaient une « Dégauchisseuse sans fil DCW 620 »
+       — une machine d'atelier — pour une DÉFONCEUSE plongeante, mauvaise
+       traduction de l'allemand « Oberfräse » ; une TROISIÈME, même référence,
+       disait « Défonceuse » et avait raison. Une même réf donnait donc deux
+       outils différents. Idem pour « Coupe-bordures … DCMBC723N, avec
+       guidon » : DeWALT le vend comme « 54V Clearing Saw with Bull Handle »,
+       lame forestière de 25 cm, arbres jusqu'à 10 cm — une débroussailleuse.
+       ⚠️ J'ai d'abord cherché une règle générale — « une dégauchisseuse est
+       stationnaire, il n'en existe pas sur batterie » — et je l'ai TUÉE en
+       mesurant : il en existe. Une hypothèse morte se déclare morte.
+       ⛔ Le remède est une entrée `precis` : elle nomme UN produit exact, avec
+       sa source et sa date, et renverse le mot du titre. Les trois préalables
+       ci-dessous prouvent qu'une entrée de FAMILLE ne le fait jamais — sinon
+       DCS, DCF ou DCW écraseraient des types justes par dizaines. */
+    var faussesTraductions = [
+      ['DeWalt DCW 620 P2T Dégauchisseuse sans fil 18 V 12 mm Brushless + 2 batteries', 'machine/bois/défonceuse'],
+      ['DeWalt DCW 620 M2T Dégauchisseuse sans fil 18 V 12 mm Brushless + 2 batteries', 'machine/bois/défonceuse'],
+      ['Défonceuse sans fil DeWalt DCW 620 H1T 18 V 12 mm Brushless + 1 batterie', 'machine/bois/défonceuse'],
+      ['DEWALT Coupe-bordures sans fil 54V, modèle DCMBC723N, avec guidon', 'machine/jardin/débroussailleuse']
+    ];
+    var redressees = faussesTraductions.filter(function (c) { return typeDewalt(c[0]) === c[1]; });
+    ok(redressees.length === faussesTraductions.length,
+      '⛔⛔ la RÉFÉRENCE l\'emporte sur un mot de titre faux ('
+      + redressees.length + '/' + faussesTraductions.length + ' — obtenu '
+      + JSON.stringify(faussesTraductions.map(function (c) { return typeDewalt(c[0]); })) + ')');
+    ok(pp.extraireCaracteristiques(faussesTraductions[0][0], 'DEWALT').typeRejete === 'dégauchisseuse',
+      '⛔ …et le mot écarté reste consultable : une correction qu\'on ne peut pas '
+      + 'relire n\'est pas vérifiable');
+    /* PRÉALABLES — une entrée de FAMILLE ne renverse rien. Sans eux, poser
+       `precis` partout resterait vert tout en écrasant des types justes. */
+    var famillesIntactes = [
+      ['DEWALT DCS389X2-QW Scie sabre', 'machine/sciage/scie sabre'],
+      ['DEWALT DCW210D2 Ponceuse excentrique 18V', 'machine/bois/ponceuse'],
+      ['DEWALT DCF887 Visseuse à chocs 18V', 'machine/vissage-choc/visseuse à chocs']
+    ];
+    var intactes = famillesIntactes.filter(function (c) { return typeDewalt(c[0]) === c[1]; });
+    ok(intactes.length === famillesIntactes.length,
+      '⛔ PRÉALABLE : un préfixe de FAMILLE laisse le nom écrit gagner — DCW couvre '
+      + 'défonceuse ET ponceuse, DCF riveteuse ET clé à chocs ('
+      + intactes.length + '/' + famillesIntactes.length + ' — obtenu '
+      + JSON.stringify(famillesIntactes.map(function (c) { return typeDewalt(c[0]); })) + ')');
+    ok(pp.extraireCaracteristiques('DEWALT DCW210D2 Ponceuse excentrique 18V', 'DEWALT').typeRejete === null,
+      '⛔ PRÉALABLE : et rien n\'est écarté quand rien n\'est contredit — un '
+      + '`typeRejete` qui se remplit tout seul rendrait la trace illisible');
+
     var sansTout = pi(sansAncres(pageI, 'tout'), 'MAKITA');
     ok(sansTout.items.length === ri.length
       && sansTout.sansRef.length === rid.sansRef.length,

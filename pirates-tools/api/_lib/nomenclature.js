@@ -664,7 +664,43 @@ var PREFIXES_DEWALT = {
   DWST: { famille: 'rangement', rayon: 'coffret', incertain: true, note: 'coffret et organiseur, mais AUSSI la radio de chantier' },
   DWHT: { famille: 'consommable', incertain: true, note: 'outillage à main, mais AUSSI le télémètre laser' },
   DWMT: { famille: 'consommable', incertain: true, note: 'outillage de mécanicien' },
-  DT:   { famille: 'consommable', incertain: true, note: 'accessoire et consommable' }
+  DT:   { famille: 'consommable', incertain: true, note: 'accessoire et consommable' },
+
+  /* ── RÉFÉRENCES PRÉCISES — elles renversent le mot d'un titre marchand ────
+     ⛔⛔ UN TITRE DE MARCHAND PEUT ÊTRE FAUX ; UNE RÉFÉRENCE, NON. Trouvé le
+     03/08/2026 en auditant son relevé : DEUX lignes annonçaient une
+     « Dégauchisseuse sans fil DeWalt DCW 620 » — une machine d'atelier — pour
+     une DÉFONCEUSE plongeante. Une troisième ligne, MÊME référence, disait
+     « Défonceuse » et avait raison. C'est une mauvaise traduction de
+     l'allemand « Oberfräse », recopiée par plusieurs marchands.
+     Source la plus haute possible, DeWALT lui-même :
+     cee.dewalt.global/product/dcw620nt-xj — « 18V XR Brushless 70mm 1/2"
+     Plunge Router » (consulté le 03/08/2026). Confirmé chez tooled-up.com,
+     powertoolworld.co.uk, misterworker.com.
+     ⚠️ J'ai d'abord cherché une règle générale — « une dégauchisseuse est
+     stationnaire, il n'en existe pas sur batterie » — et je l'ai TUÉE en
+     mesurant : il en existe (Peugeot EnergyHub 18 V). Une hypothèse morte se
+     déclare morte ; on ne la garde pas parce qu'elle arrangeait.
+     ⛔ LE `type` EST LE CRITÈRE, ET IL SE MÉRITE. Une entrée n'en porte un que
+     si elle NOMME un produit exact, avec sa source et sa date — et elle
+     arbitre alors contre le mot du titre. Une entrée de famille (DCS, DCF,
+     DCW…) n'en porte JAMAIS : elle couvre des dizaines d'outils différents, et
+     renverserait des types justes. La lecture se faisant du plus LONG au plus
+     court, `DCW620` passe avant `DCW` sans machinerie de plus.
+     ⚠️ Premier jet : un drapeau `precis` séparé du `type`. Le sabotage qui le
+     retirait est resté VERT — il ne distinguait rien, puisque seules ces
+     entrées-là portent un type. Supprimé : un drapeau qu'aucune mesure ne
+     sépare de son voisin donne une confiance qui n'existe pas. */
+  DCW620: { famille: 'machine', rayon: 'bois', type: 'défonceuse',
+    note: 'défonceuse plongeante 18V XR — des marchands la disent « dégauchisseuse » (Oberfräse mal traduit)' },
+  /* ⛔ Même forme, autre outil : « DEWALT Coupe-bordures sans fil 54V, modèle
+     DCMBC723N, avec guidon ». Un coupe-bordure n'a pas de guidon et ne coupe
+     pas des arbres. DeWALT lui-même : « 54V Clearing Saw with Bull Handle »,
+     lame forestière 24 dents de 25 cm, arbres jusqu'à 10 cm de diamètre —
+     c'est une DÉBROUSSAILLEUSE. Sources : dewalt.com.au/product/dcmbc723n-xe ·
+     screwfix.com · forestandarb.com (consultées le 03/08/2026). */
+  DCMBC723: { famille: 'machine', rayon: 'jardin', type: 'débroussailleuse',
+    note: 'débroussailleuse forestière 54V à guidon — des marchands la disent « coupe-bordures »' }
 };
 /* Les clés triées du plus LONG au plus court — l'ordre de lecture. */
 var PREFIXES_DEWALT_ORDRE = Object.keys(PREFIXES_DEWALT).sort(function (a, b) { return b.length - a.length; });
@@ -906,7 +942,8 @@ function prefixeDeReference(ref) {
     var p = PREFIXES_DEWALT_ORDRE[i];
     if (r.indexOf(p) === 0) {
       var d = PREFIXES_DEWALT[p];
-      return { prefixe: p, famille: d.famille, rayon: d.rayon || null, type: d.type || null, incertain: !!d.incertain };
+      return { prefixe: p, famille: d.famille, rayon: d.rayon || null, type: d.type || null,
+        incertain: !!d.incertain };
     }
   }
   return null;

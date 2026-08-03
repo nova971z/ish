@@ -1123,7 +1123,30 @@ function extraireCaracteristiques(titre, brand) {
   var pref = estDewalt ? nomen.prefixeDeReference(car.sku || car.skuEclate || '') : null;
   if (pref) {
     car.prefixe = pref.prefixe;
-    if (!car.type) {
+    /* ⛔⛔ UN TITRE DE MARCHAND PEUT ÊTRE FAUX ; UNE RÉFÉRENCE, NON. Trouvé le
+       03/08 en auditant son relevé contre la réalité DeWALT : deux lignes
+       vendaient une « Dégauchisseuse sans fil DCW 620 » — machine d'atelier —
+       pour une DÉFONCEUSE plongeante (« Oberfräse » mal traduit), et une
+       troisième, MÊME référence, disait « Défonceuse » et avait raison. Idem
+       pour « Coupe-bordures … DCMBC723N, avec guidon », qui est une
+       débroussailleuse forestière. Trois lignes sur cinquante-neuf.
+       ⛔ LE CRITÈRE EST SIMPLE : une entrée qui porte un `type` NOMME l'objet,
+       sourcée et datée. Elle arbitre donc, même quand la famille concorde. Les
+       entrées de FAMILLE (DCS, DCF, DCW…) n'en portent pas — elles couvrent
+       des dizaines d'outils — et laissent le nom écrit gagner. La lecture du
+       plus LONG au plus court fait le reste : `DCW620` passe avant `DCW`.
+       ⚠️ Premier jet : un drapeau `precis` séparé. Le sabotage qui le retirait
+       est RESTÉ VERT — normal, seules les entrées précises portent un type, et
+       le drapeau ne distinguait donc rien. Un drapeau qu'aucune mesure ne
+       sépare de son voisin est une décoration : supprimé.
+       ⚠️ Le type écarté reste dans `typeRejete` : une correction qu'on ne peut
+       pas relire n'est pas vérifiable. */
+    if (pref.type && car.type !== pref.type) {
+      if (car.type) car.typeRejete = car.type;
+      car.famille = pref.famille;
+      car.rayon = pref.rayon || null;
+      car.type = pref.type;
+    } else if (!car.type) {
       car.famille = pref.famille;
       if (pref.rayon) car.rayon = pref.rayon;
       if (pref.type) car.type = pref.type;

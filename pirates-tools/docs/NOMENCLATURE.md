@@ -359,6 +359,23 @@ annonces donnent préfixe par préfixe exactement la même correspondance.*
    DCB115 et ses coffrets TSTAK VI.
    *Sources : todotaladros.com · leroymerlin.fr · tecnomat.fr · cdiscount.com ·
    manomano.fr — consultées le 03/08/2026.*
+5. **Un titre de marchand peut être faux ; une référence, non.** Certaines
+   entrées ne visent pas une famille mais **un produit exact**. Elles portent
+   un `type`, et ce type **renverse le mot du titre**. Les entrées de famille
+   n'en portent jamais — elles couvrent des dizaines d'outils. La lecture du
+   plus **long** au plus court suffit : `DCW620` passe avant `DCW`.
+
+| Référence | Vraie nature | Ce que des marchands écrivent | Source |
+|---|---|---|---|
+| `DCW620` | défonceuse plongeante 18V XR | « dégauchisseuse » — *Oberfräse* mal traduit | `cee.dewalt.global/product/dcw620nt-xj` |
+| `DCMBC723` | débroussailleuse forestière 54V à guidon | « coupe-bordures » | `dewalt.com.au/product/dcmbc723n-xe` |
+
+   *Trouvées le 03/08/2026 en faisant auditer 59 lignes d'un relevé réel contre
+   la documentation constructeur, chaque grief soumis ensuite à un
+   contradicteur : **6 griefs levés, 6 confirmés, 0 réfuté**.*
+   ⚠️ J'ai d'abord cherché une règle générale — « une dégauchisseuse est
+   stationnaire, il n'en existe pas sur batterie » — et je l'ai **tuée en
+   mesurant** : il en existe. Une hypothèse morte se déclare morte.
 
 ### 5.2 Le SUFFIXE dit ce qu'il y a dans la boîte
 
