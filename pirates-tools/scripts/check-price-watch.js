@@ -2006,7 +2006,77 @@ module.exports = async function () {
            détail des 66 autres est déjà perdu quand il me la colle. Le total
            doit donc VIVRE DANS LE CUMUL, pas dans un calcul que je ferais
            après coup. Ces assertions rejouent une rafale de trois pages. */
+        /* ⛔⛔ MODE BILAN — LE DÉTAIL PÈSE 93 % DE LA RÉPONSE. Mesuré le 03/08
+           sur SA réponse : 50 480 signes, dont 37 107 pour `inconnus` et
+           10 064 pour `sansRefDetail`. Sur 67 pages ça fait 3,4 MILLIONS de
+           signes — ses mots : « je ne pourrai pas te coller 10 000 produits,
+           tu vas me faire planter l'iPad ».
+           ⛔ Ce qui doit SURVIVRE au raccourcissement, ce sont les ÉCARTS :
+           non lues, perdues, écartées, compteurs. Les couper rendrait le mode
+           bref RASSURANT au lieu d'être court — et un rapport rassurant qui
+           cache un trou est pire que pas de rapport. */
         adm._internals.pwScanReset();
+        var piedB = [];
+        for (var pb = 0; pb < 40; pb++) piedB.push('pied de page ' + pb);
+        var pageBref = ['MAKITA ZZD4444', 'Machine', '2 offres', 'à partir de100,00 €']
+          .concat(piedB).join('\n');
+        async function envoiBref(drapeaux) {
+          var rr = fauxRes();
+          await admFn({ method: 'POST',
+            query: Object.assign({ type: 'price-watch', brand: 'MAKITA', source: 'idealo',
+              sec: '1', scan: '1' }, drapeaux),
+            body: { text: pageBref } }, rr, fauxAdmin, dbInterdite);
+          return rr.out;
+        }
+        var repPleine = await envoiBref({});
+        var repBreve = await envoiBref({ bref: '1' });
+        ok(JSON.stringify(repBreve).length < JSON.stringify(repPleine).length,
+          '⛔⛔ `bref=1` raccourcit vraiment la réponse ('
+          + JSON.stringify(repBreve).length + ' contre '
+          + JSON.stringify(repPleine).length + ' signes)');
+        ok(repBreve && repBreve.inconnus === undefined && repBreve.sansRefDetail === undefined
+          && repBreve.diagnostic === undefined,
+          '⛔ …en retirant le DÉTAIL produit par produit, qui est ce qui pèse');
+        var ecartsGardes = repBreve && repBreve.counts && repBreve.couverture
+          && repBreve.refsNonLues !== undefined && repBreve.annoncesNonLues !== undefined
+          && repBreve.perdus !== undefined && repBreve.barriere !== undefined;
+        ok(ecartsGardes,
+          '⛔⛔ …et JAMAIS les écarts : compteurs, non lues, perdues, écartées restent. '
+          + 'Un mode bref qui les couperait serait RASSURANT au lieu d\'être court — '
+          + 'et un rapport qui cache un trou est pire que pas de rapport');
+
+        /* ⛔⛔ UNE NOUVELLE RAFALE REPART DE ZÉRO. Mesuré sur son deuxième
+           balayage : `pagesDansLaRafale: 120` au lieu de 67 — les deux
+           lancements sont tombés dans la même fenêtre de vingt minutes et se
+           sont additionnés. Le chiffre par page restait juste, le TOTAL ne
+           voulait plus rien dire. Et c'est le total qu'il lit.
+           ⚠️ Le harnais ne recopie AUCUN nombre de pages : il le relit dans le
+           plan. Un seuil recopié se périme. */
+        adm._internals.pwScanReset();
+        var planT = require('../api/_lib/traqueur-plans.js').plan('MAKITA', 'idealo')
+          || require('../api/_lib/traqueur-plans.js').plan('DEWALT', 'idealo');
+        var nbPages = planT && planT.pages;
+        ok(nbPages > 1, '⛔ PRÉALABLE : un plan déclare bien un nombre de pages');
+        if (nbPages > 1) {
+          var derCouv = null;
+          for (var kp = 0; kp < nbPages + 1; kp++) {
+            var rk = fauxRes();
+            await admFn({ method: 'POST',
+              query: { type: 'price-watch', brand: 'DEWALT', source: 'idealo', sec: '1', scan: '1' },
+              body: { text: pageBref.replace(/MAKITA/g, 'DEWALT') } }, rk, fauxAdmin, dbInterdite);
+            derCouv = rk.out && rk.out.couverture;
+          }
+          ok(derCouv && derCouv.pagesDansLaRafale === 1,
+            '⛔⛔ passé les ' + nbPages + ' pages du plan, la suivante ouvre une rafale '
+            + 'NEUVE — sinon deux lancements s\'additionnent et le total devient faux '
+            + 'tout en ayant l\'air juste (obtenu '
+            + JSON.stringify(derCouv && derCouv.pagesDansLaRafale) + ')');
+          ok(derCouv && derCouv.tuilesVues < nbPages,
+            '⛔ …et les tuiles repartent de zéro avec elle ('
+            + JSON.stringify(derCouv && derCouv.tuilesVues) + ')');
+        }
+        adm._internals.pwScanReset();
+
         /* ⚠️ Le point d'entrée refuse un corps trop court — un texte de
            cinquante signes n'est pas une page, et ce refus est voulu. On
            allonge donc avec du pied de page, comme une vraie page en porte. */

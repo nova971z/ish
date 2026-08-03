@@ -2049,8 +2049,19 @@ let pwCouv = null;
    rétention de 20 min en mémoire seule, jamais persistée ; J4 — ce sont des
    COMPTES, aucun prix n'y entre et rien ici ne peut servir de prix de
    référence à une réduction ; J5 — aucune TVA, aucun octroi de mer. */
-function pwCouvAjouter(brand, skus, titres, nbTuiles, nbLues) {
+function pwCouvAjouter(brand, skus, titres, nbTuiles, nbLues, pagesDuPlan) {
   const nowMs = Date.now();
+  /* ⛔⛔ UNE NOUVELLE RAFALE REPART DE ZÉRO — SINON LE TOTAL GONFLE À CHAQUE
+     ESSAI. Mesuré le 03/08 sur son deuxième balayage : `pagesDansLaRafale:
+     120` au lieu de 67, parce que les deux lancements sont tombés dans la
+     même fenêtre de vingt minutes et se sont additionnés. Le chiffre par page
+     restait juste, mais le total, lui, ne voulait plus rien dire — et c'est
+     le total qu'il lit.
+     ⛔ Le plan sait combien de pages il compte. Dès qu'on les a toutes vues,
+     la page suivante ouvre une rafale neuve. Aucune horloge, aucun réglage :
+     la borne vient du plan lui-même. */
+  const pagesPlan = Math.max(0, parseInt(pagesDuPlan, 10) || 0);
+  if (pwCouv && pagesPlan > 0 && pwCouv.pages >= pagesPlan) pwCouv = null;
   if (!pwCouv || (nowMs - pwCouv.at) > PW_SCAN_TTL || pwCouv.brand !== brand) {
     pwCouv = { brand: brand, refs: Object.create(null), noms: Object.create(null),
       pages: 0, tuiles: 0, lues: 0, at: nowMs };
@@ -2102,6 +2113,12 @@ async function handlePriceWatch(req, res, admin, db) {
     const scanMode = body.scan === true || (req.query && (req.query.scan === '1' || req.query.scan === 'true'));
     // Mode d'essai à coût nul — voir le bloc « MODE À SEC » plus bas.
     const secMode = body.sec === true || (req.query && (req.query.sec === '1' || req.query.sec === 'true'));
+    /* ⛔ MODE BILAN : les compteurs et les écarts, pas le détail produit par
+       produit. Mesuré le 03/08 : une réponse pleine fait 50 480 signes, dont
+       93 % de détail — sur 67 pages ça fait 3,4 millions de signes, que son
+       iPad ne peut ni écrire ni recopier. Ses mots : « je ne pourrai pas te
+       coller 10 000 produits ». Le détail reste accessible sans le drapeau. */
+    const bref = body.bref === true || (req.query && (req.query.bref === '1' || req.query.bref === 'true'));
     /* ── IDENTITÉ DE LA SOURCE (01/08/2026) ─────────────────────────────────
        Un deuxième site va être traqué, puis d'autres : chaque raccourci passe
        `&source=<slug>`. Sans le paramètre : 'cotebrico' — aucun raccourci
@@ -2268,9 +2285,11 @@ async function handlePriceWatch(req, res, admin, db) {
          ingrédient. Le laisser plus bas, c'était cumuler zéro à chaque page
          et rendre un total faux qui a l'air juste. */
       const tuiles = priceParse.compterTuiles(text);
+      const planCourant = plans.plan(brand, sourceSlug);
       const couvSec = pwCouvAjouter(brand, parsed.map((x) => x.sku),
         (auto.sansRef || []).map((e) => e.titre),
-        tuiles.total, parsed.length + (auto.sansRef || []).length);
+        tuiles.total, parsed.length + (auto.sansRef || []).length,
+        planCourant && planCourant.pages);
 
       /* ⛔⛔ L'ÉCART, NOMMÉ. J'ai annoncé à l'user « 11 références non lues » en
          soustrayant deux compteurs — sans jamais pouvoir dire LESQUELLES. Un
@@ -2426,9 +2445,18 @@ async function handlePriceWatch(req, res, admin, db) {
            présentes dans le texte tranche ; sans lui, on ne peut que supposer.
            `refsMarque` compte les « MARQUE RÉF » du texte reçu, `parsed` ce que
            le parseur en a tiré : l'écart entre les deux EST le diagnostic. */
-        diagnostic: diagSec,
+        /* ⛔⛔ EN MODE BREF, LE DÉTAIL PARTIT — PAS LES ÉCARTS. Mesuré le
+           03/08 sur SA réponse : 50 480 signes, dont 37 107 pour `inconnus`
+           et 10 064 pour `sansRefDetail`. Multiplié par 67 pages, 3,4 MILLIONS
+           de signes. Ses mots : « je ne pourrai pas te coller 10 000 produits,
+           tu vas me faire planter l'iPad ».
+           ⛔ Ce qui reste est ce qui DIT SI LE BALAYAGE A TOUT RAMENÉ : les
+           compteurs, les non lues, les perdues, les écartées. Tronquer ceux-là
+           rendrait le mode bref rassurant au lieu d'être court — et un rapport
+           rassurant qui cache un trou est pire que pas de rapport. */
+        diagnostic: bref ? undefined : diagSec,
         // Liste vide = rien ne manque, et c'est vérifiable ligne à ligne.
-        refsNonLues: refsNonLues, refsNonLuesDetail: refsNonLuesDetail,
+        refsNonLues: refsNonLues, refsNonLuesDetail: bref ? undefined : refsNonLuesDetail,
         /* ⛔⛔ AUCUN BLOC PORTANT UN PRIX NE DISPARAÎT EN SILENCE. Cinq réfs
            sont ressorties « non lues » le 03/08 sans que rien n'explique
            pourquoi : le parseur les écartait sans laisser de trace. Chaque
@@ -2436,8 +2464,9 @@ async function handlePriceWatch(req, res, admin, db) {
            même remède que le `parsed: 0` muet du 01/08 : mesurer au lieu de
            jeter. ⚠️ Borné à 25 entrées, 4 lignes de 90 signes chacune. */
         perdus: (auto.perdus || []).slice(0, 25),
-        reconnus: reconnusSec.slice(0, 60), inconnus: inconnusSec.slice(0, 60),
-        sansRefDetail: sansRefSec
+        reconnus: bref ? undefined : reconnusSec.slice(0, 60),
+        inconnus: bref ? undefined : inconnusSec.slice(0, 60),
+        sansRefDetail: bref ? undefined : sansRefSec
       });
     }
 
@@ -2750,7 +2779,8 @@ async function handlePriceWatch(req, res, admin, db) {
       couverture: pwCouvAjouter(brand, parsed.map((x) => x.sku),
         (auto.sansRef || []).map((e) => e.titre),
         priceParse.compterTuiles(text).total,
-        parsed.length + (auto.sansRef || []).length),
+        parsed.length + (auto.sansRef || []).length,
+        (plans.plan(brand, sourceSlug) || {}).pages),
       counts: {
         parsed: parsed.length, applied: applied.length, flagged: flagged.length,
         unchanged: unchanged.length, unknown: unknown.length, locked: lockedW.length,
