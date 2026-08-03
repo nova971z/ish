@@ -1188,6 +1188,38 @@ module.exports = async function () {
           + 'quoi une erreur d\'extraction est indétectable depuis l\'iPad');
         ok(Array.isArray(rSec.out.sansRefDetail),
           'les annonces sans réf sûre sortent QUALIFIÉES (sansRefDetail), plus seulement comptées');
+
+        /* ═══ COUVERTURE D'UN BALAYAGE (03/08/2026) ════════════════════════
+           Demande de l'user : « il faut arriver à scanner tout le catalogue
+           DeWALT ». ⛔ Un total obtenu en MULTIPLIANT les pages par le rendu
+           d'une page ne vaut rien : les pages d'un comparateur peuvent se
+           chevaucher. Seul le cumul des réfs DISTINCTES répond.
+           On rejoue donc la MÊME page deux fois : le cumul doit compter deux
+           pages mais PAS deux fois les mêmes articles. */
+        ok(rSec.out.couverture && typeof rSec.out.couverture.refsDistinctes === 'number',
+          'le mode à sec rend la COUVERTURE cumulée — c\'est ce qui permet de mesurer '
+          + 'les 67 pages sans dépenser un seul quota');
+        /* ⚠️ DEUX APPELS ADJACENTS, ici et pas ailleurs. Une première version
+           comparait `rSec` à un appel plus loin — un troisième appel s'était
+           glissé entre les deux, et l'assertion mesurait autre chose que ce
+           qu'elle annonçait. Le cumul est un état partagé : on ne compare que
+           des relevés qui se suivent VRAIMENT. */
+        var rC1 = fauxRes();
+        await admFn(reqPage(cible.sku, { sec: '1' }), rC1, fauxAdmin, dbInterdite);
+        var rC2 = fauxRes();
+        await admFn(reqPage(cible.sku, { sec: '1' }), rC2, fauxAdmin, dbInterdite);
+        var couvAvant = rC1.out.couverture, couvApres = rC2.out.couverture;
+        ok(couvApres.pagesDansLaRafale === couvAvant.pagesDansLaRafale + 1,
+          '⚠️ le compte de PAGES avance à chaque appel — s\'il retombe à 1 en plein '
+          + 'balayage, c\'est une instance froide, et ça doit SE VOIR');
+        ok(couvApres.refsDistinctes === couvAvant.refsDistinctes,
+          '⛔⛔ LA MÊME PAGE DEUX FOIS N\'AJOUTE AUCUNE RÉFÉRENCE : le cumul compte des '
+          + 'articles DISTINCTS. Sans ça, « 67 pages balayées » pourrait annoncer 67 × 25 '
+          + 'articles là où le comparateur en répète la moitié — et l\'user croirait avoir '
+          + 'couvert un catalogue qu\'il n\'a pas couvert (' + couvApres.refsDistinctes + ')');
+        ok(couvApres.refsDistinctes > 0,
+          'préalable : le cumul compte VRAIMENT quelque chose — sans lui, l\'égalité '
+          + 'ci-dessus serait vraie entre deux zéros');
         ok(rSecInc.out && rSecInc.out.counts.reconnus === 0 && rSecInc.out.counts.inconnus === 1,
           'MODE À SEC : une réf absente du catalogue est comptée INCONNUE, pas reconnue ('
           + JSON.stringify(rSecInc.out && rSecInc.out.counts) + ')');

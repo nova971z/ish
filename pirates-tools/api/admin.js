@@ -1907,7 +1907,54 @@ function hashCodeStr(str) {
    pas les prix à la main pendant qu'un balayage tourne. */
 let pwScanCache = null;
 const PW_SCAN_TTL = 20 * 60 * 1000;
-function pwScanReset() { pwScanCache = null; }
+/* ══ COMPTEUR DE COUVERTURE D'UN BALAYAGE ════════════════════════════════
+   Demande de l'user, 03/08 : « il faut arriver à scanner tout le catalogue
+   DeWALT ». La question à trancher n'est pas « combien cette page rend-elle »
+   mais « combien de références DISTINCTES un balayage complet ramène-t-il ».
+   Une fiche vue sur deux pages ne compte qu'une fois.
+
+   ⛔ ON NE DEVINE PAS UN TOTAL EN MULTIPLIANT. « 67 pages × 25 lus » n'est pas
+   une couverture : le comparateur peut chevaucher ses pages, en sauter, ou
+   répéter les mêmes fiches. Seul le cumul des références VUES le dit.
+
+   ⚠️ CE COMPTEUR VIT DANS UNE INSTANCE. Vercel peut démarrer une instance
+   froide au milieu du balayage, et le cumul repartirait de zéro. C'est
+   pourquoi la réponse rend AUSSI `pagesDansLaRafale` : un retour à 1 en plein
+   balayage SE VOIT, au lieu de rendre un total faux avec l'air d'être juste.
+   ⛔ Alimenté MÊME en mode à sec — c'est tout son intérêt : mesurer la
+   couverture des 67 pages sans consommer une seule lecture Firestore.
+
+   ⚠️ PORTES JURIDIQUES, lues avant d'écrire.
+   · J3 — n'y transitent QUE des références d'outils et des titres d'annonces
+     publiques : aucune donnée personnelle. Minimisation respectée (on garde
+     des clés, pas des textes), rétention bornée à 20 min, en mémoire seule,
+     jamais persistée, jamais journalisée.
+   · J4 — AUCUN PRIX n'entre ici. Ce compteur ne compte que des IDENTITÉS
+     d'articles ; il ne peut donc ni annoncer un prix, ni servir de prix de
+     référence à une réduction. Le minimum 30 jours reste calculé ailleurs,
+     sur le journal réel.
+   · J5 — aucune TVA, aucun octroi de mer : le territoire fiscal continue de
+     se dériver du code postal, ce compteur n'y touche pas. */
+let pwCouv = null;
+function pwCouvAjouter(brand, skus, titres) {
+  const nowMs = Date.now();
+  if (!pwCouv || (nowMs - pwCouv.at) > PW_SCAN_TTL || pwCouv.brand !== brand) {
+    pwCouv = { brand: brand, refs: Object.create(null), noms: Object.create(null), pages: 0, at: nowMs };
+  }
+  pwCouv.at = nowMs;
+  pwCouv.pages += 1;
+  (skus || []).forEach(function (s) { if (s) pwCouv.refs[String(s).toUpperCase()] = 1; });
+  (titres || []).forEach(function (n) {
+    var k = String(n || '').trim().toLowerCase();
+    if (k) pwCouv.noms[k] = 1;
+  });
+  return {
+    pagesDansLaRafale: pwCouv.pages,
+    refsDistinctes: Object.keys(pwCouv.refs).length,
+    nomsDistincts: Object.keys(pwCouv.noms).length
+  };
+}
+function pwScanReset() { pwScanCache = null; pwCouv = null; }
 
 /* Répercute une écriture Firestore dans le relevé local du balayage : même
    sémantique que `set(..., { merge: true })` — fusion par clé, et fusion par
@@ -2046,6 +2093,12 @@ async function handlePriceWatch(req, res, admin, db) {
       const sansRefSec = (auto.sansRef || []).slice(0, 40).map((e) => ({
         titre: String(e.titre || '').slice(0, 120), prix: e.prix, car: e.car || null
       }));
+      /* ⛔ LA COUVERTURE SE CUMULE, MÊME À SEC. C'est ce qui permet de mesurer
+         les 67 pages sans dépenser un seul quota : chaque page ajoute ses réfs
+         au cumul de la rafale, et la DERNIÈRE réponse dit combien d'articles
+         distincts le balayage entier a réellement ramenés. */
+      const couvSec = pwCouvAjouter(brand, parsed.map((x) => x.sku),
+        (auto.sansRef || []).map((e) => e.titre));
       return res.status(200).json({
         ok: true, sec: true, brand, source: sourceSlug, format: auto.format,
         counts: {
@@ -2053,6 +2106,11 @@ async function handlePriceWatch(req, res, admin, db) {
           reconnus: reconnusSec.length, inconnus: inconnusSec.length,
           packs: (auto.packs || []).length, sansRef: (auto.sansRef || []).length
         },
+        /* ⚠️ `pagesDansLaRafale` n'est PAS décoratif : le cumul vit dans UNE
+           instance serverless. S'il retombe à 1 en plein balayage, c'est une
+           instance froide — le total repart de zéro, et il faut le savoir
+           plutôt que de lire un chiffre faux qui a l'air juste. */
+        couverture: couvSec,
         note: 'MODE À SEC : aucune lecture ni écriture Firestore, aucun prix calculé, '
           + 'aucun quota consommé. Sert à vérifier qu\'un raccourci envoie bien sa page. '
           + 'Retirer &sec=1 pour un vrai relevé.',
@@ -2374,6 +2432,11 @@ async function handlePriceWatch(req, res, admin, db) {
       ok: true, brand, dryRun: !!dryRun, scan: !!scanMode,
       // Mesure, pas promesse : le relevé a-t-il été réutilisé sur CETTE page ?
       scanCache: scanMode ? cacheReutilise : undefined,
+      /* Couverture cumulée de la rafale — la seule réponse à « ai-je balayé
+         TOUT le catalogue ? ». Un total obtenu en multipliant les pages par
+         le rendu d'une page ne vaut rien : les pages peuvent se chevaucher. */
+      couverture: pwCouvAjouter(brand, parsed.map((x) => x.sku),
+        (auto.sansRef || []).map((e) => e.titre)),
       counts: {
         parsed: parsed.length, applied: applied.length, flagged: flagged.length,
         unchanged: unchanged.length, unknown: unknown.length, locked: lockedW.length,
