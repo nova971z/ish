@@ -2234,10 +2234,15 @@ function pwBaissesBilan(store, combien) {
   };
 }
 
-/* Assez pour porter TOUT ce qui manque sur sa marque la plus fournie (mesuré :
-   556 fiches DeWALT), pas assez pour qu'un catalogue qui triple fasse exploser
-   la réponse. Une troncature se voit : `fichesJamaisVues` donne le compte réel. */
-const PW_MANQUANTS_MAX = 600;
+/* Assez pour porter TOUT ce qui manque sur sa marque la plus fournie — mesuré
+   le 03/08 : 620 fiches MAKITA, 556 DeWALT — sans qu'un catalogue qui triple
+   fasse exploser la réponse.
+   ⛔ ET UNE TRONCATURE SE DIT. Un premier réglage à 600 coupait la liste MAKITA
+   à 600 pour un compte de 619, et RIEN ne le signalait : le rapport se lisait
+   « voici tout ce qui manque » en ayant tu 19 fiches. Un plafond silencieux
+   ment exactement comme un compteur faux. La réponse porte donc
+   `fichesJamaisVuesListeTronquee`, et une porte l'exige. */
+const PW_MANQUANTS_MAX = 1200;
 const PW_QUASI_MAX = 60;
 function pwQuasiRapprochements(skusMarque, fichesVues, refsVues) {
   if (!Array.isArray(skusMarque) || !skusMarque.length) return null;
@@ -2419,6 +2424,15 @@ function pwCouvAjouter(brand, skus, titres, nbTuiles, nbLues, pagesDuPlan, extra
       ? pwCouv.fichesDetail
         .filter(function (f) { return !pwCouv.fiches[String(f.sku).toUpperCase()]; })
         .slice(0, PW_MANQUANTS_MAX)
+      : undefined,
+    /* ⛔ UNE TRONCATURE SE DIT. Sans ce drapeau, une liste coupée se lit
+       « voici tout ce qui manque » — et l'user cherche 600 produits en croyant
+       les avoir tous. Le compte, lui, reste juste : c'est l'écart entre les
+       deux qui doit être NOMMÉ, jamais laissé à deviner. */
+    fichesJamaisVuesListeTronquee: (extra.manquants && Array.isArray(pwCouv.fichesDetail))
+      ? (pwCouv.fichesDetail
+        .filter(function (f) { return !pwCouv.fiches[String(f.sku).toUpperCase()]; })
+        .length > PW_MANQUANTS_MAX)
       : undefined,
     fichesQuasiRapprochees: quasi ? quasi.nb : null,
     fichesQuasiRapprocheesDetail: quasi ? quasi.exemples : null,
@@ -2667,7 +2681,19 @@ async function handlePriceWatch(req, res, admin, db) {
            l'air juste, parce que le prix, lui, est bon.
            ⚠️ Rien de personnel ici (J3) : ce sont des caractéristiques
            d'outil — voltage, type, nombre de batteries. */
-        if (p) reconnusSec.push({ sku: it.sku, srcTTC: it.price, fiche: p.title || p.name, car: it.car || null });
+        /* ⛔⛔ `ficheSku` — LA RÉFÉRENCE DE LA FICHE, PAS CELLE VUE CHEZ LE
+           FOURNISSEUR. Mesuré le 03/08 sur son balayage : le compteur annonçait
+           333 fiches jamais vues, la liste nommée en donnait 419. L'écart
+           venait d'ici : une fiche atteinte par un ALIAS (`DCN660N` pour
+           `DCN660N-XJ`) était comptée trouvée sous la référence VUE, tandis que
+           la liste la cherchait sous celle du CATALOGUE. Le compte et la liste
+           ne parlaient pas de la même identité — et une liste qui nomme des
+           produits déjà trouvés envoie l'user les chercher pour rien.
+           ⚠️ Portes lues : J3 — des références d'outils publiques, aucune donnée
+           personnelle ; J5 — aucune TVA ni octroi de mer, le territoire fiscal
+           continue de se dériver du code postal. */
+        if (p) reconnusSec.push({ sku: it.sku, ficheSku: p.sku, srcTTC: it.price,
+          fiche: p.title || p.name, car: it.car || null });
         else inconnusSec.push({ sku: it.sku, srcTTC: it.price, name: it.name, car: it.car || null });
       });
       /* Une offre marchande n'est plus seulement COMPTÉE, elle est QUALIFIÉE.
@@ -2703,7 +2729,7 @@ async function handlePriceWatch(req, res, admin, db) {
         (auto.sansRef || []).map((e) => e.titre),
         tuiles.total, parsed.length + (auto.sansRef || []).length,
         planCourant && planCourant.pages,
-        { empreinte: empreinteSec, reconnus: reconnusSec.map((r) => r.sku),
+        { empreinte: empreinteSec, reconnus: reconnusSec.map((r) => r.ficheSku),
           fichesMarque: fichesMarqueSec,
           skusMarque: fichesDeLaMarqueSec.map((p) => p.sku).filter(Boolean),
           manquants: manquants,
@@ -3246,8 +3272,8 @@ async function handlePriceWatch(req, res, admin, db) {
         /* Un article est RAPPROCHÉ s'il tombe sur une fiche du catalogue — même
            critère qu'à sec, pour que les deux modes disent la même chose. */
         { empreinte: priceParse.empreintePage(text),
-          reconnus: parsed.map((it) => String(it.sku || '').toUpperCase())
-            .filter((s) => !!bySku[s]),
+          reconnus: parsed.map((it) => bySku[String(it.sku || '').toUpperCase()])
+            .filter(Boolean).map((p) => p.sku),
           fichesMarque: products.filter((p) => String(p.brand || '').toUpperCase()
             === String(brand).toUpperCase()).length,
           skusMarque: products.filter((p) => String(p.brand || '').toUpperCase()

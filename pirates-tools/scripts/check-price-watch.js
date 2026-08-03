@@ -2094,6 +2094,46 @@ module.exports = async function () {
           }
         }
 
+        /* ══ L'ALIAS COMPTE POUR SA FICHE — AUSSI SUR LE CHEMIN QUI ÉCRIT ═══
+           ⛔⛔ La même garde existe en mode à sec ; un sabotage a montré qu'elle
+           ne couvrait QUE lui. Or c'est le chemin réel qui écrit les prix : y
+           laisser le défaut, c'est le laisser là où il coûte. Deux chemins, deux
+           contrôles — « une règle vraie appliquée à un seul endroit ne protège
+           que cet endroit ».
+           ⚠️ La fiche à alias est choisie À L'EXÉCUTION, jamais nommée. */
+        var alReel = null;
+        for (var ar = 0; ar < prods.length; ar++) {
+          var pa = prods[ar];
+          if (!pa.sku || !Array.isArray(pa.srcAltSkus) || !pa.srcAltSkus.length) continue;
+          if (String(pa.brand || '').toUpperCase() !== 'DEWALT') continue;
+          alReel = pa; break;
+        }
+        ok(!!alReel,
+          '⛔ PRÉALABLE : une fiche DeWALT déclare un `srcAltSkus` — sans elle, le '
+          + 'chemin réel ne peut pas être vérifié sur l\'appariement par alias');
+        if (alReel) {
+          scanReset();
+          var rAlR = fauxRes();
+          await admFn({ method: 'POST',
+            query: { type: 'price-watch', brand: 'DEWALT', source: 'idealo',
+              dryRun: '1', scan: '1', manquants: '1' },
+            // La page n'écrit QUE l'alias, jamais la référence de la fiche.
+            body: { text: pageIdealo(String(alReel.srcAltSkus[0]), '450,00') } },
+            rAlR, fauxAdmin, fauxDb({}, []));
+          var cAlR = rAlR.out && rAlR.out.couverture;
+          ok(cAlR && cAlR.fichesRetrouvees === 1,
+            '⛔ PRÉALABLE : sur le chemin réel aussi, la fiche est retrouvée par son '
+            + 'alias (obtenu ' + JSON.stringify(cAlR && cAlR.fichesRetrouvees) + ')');
+          var fantomeR = (cAlR && cAlR.fichesJamaisVuesDetail || []).filter(function (f) {
+            return String(f.sku).toUpperCase() === String(alReel.sku).toUpperCase();
+          });
+          ok(fantomeR.length === 0,
+            '⛔⛔ …et elle ne figure PAS dans les jamais vues du chemin réel. Compter '
+            + 'sous la référence VUE et lister sous celle du CATALOGUE, c\'est envoyer '
+            + 'chercher un produit déjà trouvé (obtenu ' + fantomeR.length + ')');
+          scanReset();
+        }
+
         /* ══ MÊME FICHE, DEUX PAGES : ON GARDE LE MOINS CHER ════════════════
            ⛔⛔ DÉCISION DE L'USER, 03/08, mot pour mot : « c'est totalement
            normal qu'il y ait le même produit plusieurs fois, on peut même le
@@ -2606,6 +2646,77 @@ module.exports = async function () {
             + 'l\'argent : une fiche jamais vue garde un coût supposé (obtenu '
             + JSON.stringify(cF2 && cF2.fichesJamaisVues) + ', attendu '
             + (parMarque[marqueT].length - 3) + ')');
+          /* ⛔⛔ LE COMPTE ET LA LISTE DOIVENT PARLER DE LA MÊME IDENTITÉ.
+             Mesuré le 03/08 sur son balayage : `fichesJamaisVues: 333` face à
+             une liste nommée de 419 entrées. Cause : une fiche atteinte par un
+             ALIAS était comptée trouvée sous la référence VUE chez le
+             fournisseur, alors que la liste la cherchait sous celle du
+             CATALOGUE. Deux vérités pour un seul fait — et une liste qui nomme
+             des produits déjà trouvés envoie chercher pour rien.
+             ⚠️ Le harnais choisit l'alias À L'EXÉCUTION : une fiche du catalogue
+             qui déclare un `srcAltSkus`. Sans elle, le contrôle ne vérifie
+             rien, donc c'est un PRÉALABLE, pas un repli poli. */
+          var ficheAlias = null;
+          for (var fa = 0; fa < catT.length; fa++) {
+            if (catT[fa].sku && Array.isArray(catT[fa].srcAltSkus) && catT[fa].srcAltSkus.length
+                && String(catT[fa].brand || '').toUpperCase() === marqueT) {
+              ficheAlias = catT[fa]; break;
+            }
+          }
+          ok(!!ficheAlias,
+            '⛔ PRÉALABLE : une fiche de la marque déclare un `srcAltSkus` — sans elle, '
+            + 'l\'accord entre le compte et la liste ne peut pas être vérifié');
+          if (ficheAlias) {
+            adm._internals.pwScanReset();
+            var rAl = fauxRes();
+            await admFn({ method: 'POST',
+              query: { type: 'price-watch', brand: marqueT, source: 'idealo', sec: '1',
+                scan: '1', manquants: '1' },
+              // La page n'écrit QUE l'alias, jamais la référence de la fiche.
+              body: { text: pageDeFiches([String(ficheAlias.srcAltSkus[0]).toUpperCase()], 800) } },
+              rAl, fauxAdmin, dbInterdite);
+            var cAl = rAl.out && rAl.out.couverture;
+            ok(cAl && cAl.fichesRetrouvees === 1,
+              '⛔ PRÉALABLE : la fiche est bien retrouvée par son alias (obtenu '
+              + JSON.stringify(cAl && cAl.fichesRetrouvees) + ')');
+            var encoreListee = (cAl && cAl.fichesJamaisVuesDetail || []).filter(function (f) {
+              return String(f.sku).toUpperCase() === String(ficheAlias.sku).toUpperCase();
+            });
+            ok(encoreListee.length === 0,
+              '⛔⛔ …et elle DISPARAÎT de la liste des jamais vues. Compter sous la '
+              + 'référence vue et lister sous celle du catalogue donnait deux vérités '
+              + 'pour un seul fait — 333 contre 419 sur son balayage du 03/08 (obtenu '
+              + encoreListee.length + ' entrée(s) fantômes)');
+            /* ⛔⛔ LE COMPTE ET LA LISTE TOMBENT AU MÊME CHIFFRE — ou la
+               troncature est DÉCLARÉE. Un plafond silencieux ment exactement
+               comme un compteur faux : la liste se lit « voici tout ce qui
+               manque » alors qu'elle en a tu une partie. Le plafond se RELIT
+               dans le produit, jamais recopié — un seuil recopié se périme. */
+            var plafond = /const PW_MANQUANTS_MAX = (\d+)/.exec(adminSrc);
+            ok(!!plafond, '⛔ PRÉALABLE : le plafond de la liste se relit dans api/admin.js');
+            var nLis = (cAl && cAl.fichesJamaisVuesDetail || []).length;
+            var nCpt = cAl && cAl.fichesJamaisVues;
+            var cap = plafond ? parseInt(plafond[1], 10) : 0;
+            ok(cap > 0 && nLis === Math.min(nCpt, cap),
+              '⛔⛔ la LISTE porte exactement ce que le COMPTE annonce, à concurrence du '
+              + 'plafond — un écart muet, c\'est l\'un des deux qui ment sans qu\'on sache '
+              + 'lequel (obtenu compte=' + JSON.stringify(nCpt) + ', liste=' + nLis
+              + ', plafond=' + cap + ')');
+            ok(cAl && cAl.fichesJamaisVuesListeTronquee === (nCpt > cap),
+              '⛔ …et le drapeau de troncature dit la vérité dans les DEUX sens : un '
+              + 'plafond silencieux ment comme un compteur faux (obtenu '
+              + JSON.stringify(cAl && cAl.fichesJamaisVuesListeTronquee)
+              + ', attendu ' + (nCpt > cap) + ')');
+            /* ⚠️ CE QUE CETTE PORTE NE COUVRE PAS, et il faut le dire : avec le
+               catalogue actuel (mesuré le 03/08 : 619 fiches manquantes pour un
+               plafond de 1200), la branche TRONQUÉE n'est jamais atteinte. Les
+               deux assertions ci-dessus gardent l'invariant — liste = min(compte,
+               plafond), drapeau = (compte > plafond) — et elles mordront le jour
+               où le catalogue dépassera le plafond. Aucun sabotage ne peut les
+               faire rougir sur la branche tronquée aujourd'hui : ce n'est pas un
+               oubli, c'est une limite de ce que les données permettent. */
+            adm._internals.pwScanReset();
+          }
 
           /* ══ NOMMER LES FICHES QUI ONT FAILLI ÊTRE RAPPROCHÉES ═══════════
              ⛔⛔ « 14 vraies références introuvables » n'est pas actionnable :
