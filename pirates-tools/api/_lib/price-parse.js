@@ -858,6 +858,64 @@ function compterTuiles(rawText) {
   return { annonces: annonces, fiches: fiches, total: annonces + fiches };
 }
 
+/* ⛔⛔ L'IDENTITÉ D'UNE PAGE, TIRÉE DE SON CONTENU — parce que le raccourci ne
+   dit JAMAIS quelle page il envoie. Sans ça, le serveur ne peut ni reconnaître
+   une page envoyée deux fois, ni dire LAQUELLE des 67 manque : il ne sait que
+   compter des requêtes. Mesuré le 03/08 : `pagesDansLaRafale: 53` sur 67 — un
+   compte de requêtes, pas un compte de pages.
+
+   ⛔ CE QU'ON PREND, ET POURQUOI PAS AUTRE CHOSE. Les montants de la page,
+   ÉCHANTILLONNÉS SUR TOUTE SA HAUTEUR. Ni les premiers seuls, ni les derniers
+   seuls : la tête et le pied de page portent des blocs communs à toutes les
+   pages (l'user l'a dit le 03/08 — « il y a des produits en tête de page et au
+   pied de page, mais cela ne compte pas »), et deux pages différentes s'y
+   ressembleraient. Le milieu, lui, est propre à la page. Le nombre de tuiles
+   entre aussi dans la graine.
+   ⚠️ LIMITE ASSUMÉE, écrite pour ne pas être découverte plus tard : deux
+   relevés de la MÊME page à deux jours d'écart n'ont pas la même empreinte si
+   un prix a bougé. C'est sans effet sur l'usage — l'empreinte ne sert qu'à
+   distinguer les pages D'UNE MÊME rafale — mais elle ne peut PAS servir de
+   clé de suivi dans le temps.
+   ⚠️ Une collision ferait SOUS-compter les pages (deux pages vues comme une) :
+   elle se signale donc toute seule par un total inférieur, jamais par un total
+   flatteur. C'est le bon sens de l'erreur.
+
+   ⚠️ PORTE J4 LUE AVANT D'ÉCRIRE (`node scripts/juridique.js J4`). Le prix
+   annoncé doit être exact et complet, et une réduction se réfère au prix le
+   plus bas des 30 jours précédents. Cette fonction est HORS de ce chemin : elle
+   ne rend qu'un entier de 32 bits, elle ne restitue aucun montant, n'en écrit
+   aucun, et son résultat n'entre dans aucun calcul de prix ni de réduction —
+   il ne sert qu'à distinguer deux pages l'une de l'autre. Elle ne peut donc
+   pas fabriquer un prix de référence.
+   ⚠️ J3 — dérivée de prix publics affichés par un comparateur, aucune donnée
+   personnelle, jamais persistée. J5 — aucune TVA, aucun octroi de mer. */
+var MONTANT_QUELCONQUE = /(\d[\d\s  ]*,\d{2})\s*€/;
+var EMPREINTE_ECHANTILLONS = 16;
+function empreintePage(rawText) {
+  var lignes = stripHtml(rawText).split('\n');
+  var montants = [];
+  for (var i = 0; i < lignes.length; i++) {
+    var m = MONTANT_QUELCONQUE.exec(lignes[i]);
+    if (m) montants.push(m[1].replace(/[\s  ]/g, ''));
+  }
+  // Moins de quatre montants : ce n'est pas une page de comparateur, on ne
+  // fabrique pas une identité sur du vide — l'appelant retombe sur son compte
+  // de requêtes, en le sachant.
+  if (montants.length < 4) return null;
+  var n = Math.min(EMPREINTE_ECHANTILLONS, montants.length);
+  var graine = [];
+  for (var k = 0; k < n; k++) graine.push(montants[Math.floor(k * montants.length / n)]);
+  graine.push('#' + compterTuiles(rawText).total);
+  // FNV-1a 32 bits : court, stable, sans dépendance.
+  var h = 0x811c9dc5;
+  var s = graine.join('|');
+  for (var j = 0; j < s.length; j++) {
+    h ^= s.charCodeAt(j);
+    h = (h + ((h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24))) >>> 0;
+  }
+  return ('0000000' + h.toString(16)).slice(-8);
+}
+
 /* ⛔⛔ UN INSTRUMENT QUI CRIE AU LOUP FINIT IGNORÉ — ET LE JOUR OÙ IL A RAISON,
    PERSONNE NE L'ÉCOUTE. Son relevé du 03/08 : 60 tuiles sur 60 lues, tout
    juste, et ce rapprochement en annonçait DIX « non lues ». Toutes fausses.
@@ -1820,4 +1878,4 @@ function comparerCaracteristiques(a, b) {
   return { compatible: conflits.length === 0, conflits: conflits, concordances: concordances };
 }
 
-module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickoutil, parseIdealo: parseIdealo, parseAuto: parseAuto, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, raisonAucuneSource: raisonAucuneSource, enMillis: enMillis, SOURCE_FRESH_MS: SOURCE_FRESH_MS, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage, estMaPropreReponse: estMaPropreReponse, titresAttendus: titresAttendus, compterTuiles: compterTuiles, annoncesManquantes: annoncesManquantes, extraireCaracteristiques: extraireCaracteristiques, comparerCaracteristiques: comparerCaracteristiques, planBalayage: planBalayage, rangDansPlan: rangDansPlan, OUTILS: OUTILS, SERIES: SERIES, nomenclature: nomen };
+module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickoutil, parseIdealo: parseIdealo, parseAuto: parseAuto, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, raisonAucuneSource: raisonAucuneSource, enMillis: enMillis, SOURCE_FRESH_MS: SOURCE_FRESH_MS, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage, estMaPropreReponse: estMaPropreReponse, titresAttendus: titresAttendus, compterTuiles: compterTuiles, empreintePage: empreintePage, annoncesManquantes: annoncesManquantes, extraireCaracteristiques: extraireCaracteristiques, comparerCaracteristiques: comparerCaracteristiques, planBalayage: planBalayage, rangDansPlan: rangDansPlan, OUTILS: OUTILS, SERIES: SERIES, nomenclature: nomen };

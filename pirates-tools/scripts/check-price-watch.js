@@ -2185,6 +2185,73 @@ module.exports = async function () {
             distinctes: dernierCumul && dernierCumul.refsDistinctes }) + ')');
         adm._internals.pwScanReset();
 
+        /* ══ UNE PAGE ENVOYÉE DEUX FOIS N'EST PAS DEUX PAGES ═══════════════
+           ⛔⛔ Le cumul ne comptait que des REQUÊTES ACCEPTÉES. Le raccourci,
+           lui, ne dit jamais QUELLE page il envoie : si un tour rejoue la
+           même URL, le compteur avançait quand même et le trou correspondant
+           disparaissait du rapport — « 67 sur 67 » avec une page jamais vue.
+           Depuis `empreintePage`, une page porte une identité tirée de son
+           contenu, et c'est elle qui compte.
+           ⚠️ Pages du harnais volontairement synthétiques, avec assez de
+           montants pour qu'une empreinte existe (moins de quatre, la fonction
+           rend `null` — et c'est voulu). */
+        function pageEmpreinte(base) {
+          var l = [];
+          for (var z = 0; z < 6; z++) {
+            l.push('MARQUEZZ ZZE' + (5000 + z), 'Machine', '2 offres',
+              'à partir de' + (base + z) + ',00 €');
+          }
+          for (var w = 0; w < 40; w++) l.push('pied de page ligne ' + w);
+          return l.join('\n');
+        }
+        async function envoiPage(txt) {
+          var rp = fauxRes();
+          await admFn({ method: 'POST',
+            query: { type: 'price-watch', brand: 'MARQUEZZ', source: 'idealo', sec: '1', scan: '1' },
+            body: { text: txt } }, rp, fauxAdmin, dbInterdite);
+          return rp.out;
+        }
+        adm._internals.pwScanReset();
+        var pE1 = pageEmpreinte(100), pE2 = pageEmpreinte(900);
+        var rE1 = await envoiPage(pE1);
+        ok(rE1 && rE1.page && typeof rE1.page.empreinte === 'string'
+          && rE1.page.tuiles === 6,
+          '⛔⛔ chaque réponse porte SA PROPRE ligne `page` — empreinte, tuiles, lues. '
+          + 'C\'est elle qui permet de totaliser un balayage sur le FICHIER des '
+          + 'réponses, sans dépendre de la mémoire d\'une instance serverless (obtenu '
+          + JSON.stringify(rE1 && rE1.page) + ')');
+        var rE2 = await envoiPage(pE1);               // LA MÊME page, rejouée
+        var cE2 = rE2 && rE2.couverture;
+        ok(cE2 && cE2.pagesDistinctes === 1 && cE2.pagesEnDouble === 1,
+          '⛔⛔ la MÊME page envoyée deux fois compte pour UNE : sinon un raccourci qui '
+          + 'rejoue une URL comble un trou qui existe toujours (obtenu distinctes='
+          + JSON.stringify(cE2 && cE2.pagesDistinctes) + ', doubles='
+          + JSON.stringify(cE2 && cE2.pagesEnDouble) + ')');
+        var rE3 = await envoiPage(pE2);               // une AUTRE page
+        var cE3 = rE3 && rE3.couverture;
+        ok(cE3 && cE3.pagesDistinctes === 2,
+          '⛔ …et une page DIFFÉRENTE compte pour une de plus (obtenu '
+          + JSON.stringify(cE3 && cE3.pagesDistinctes) + ', attendu 2)');
+        /* ⛔⛔ QUI A COMPTÉ. Sans l'identifiant d'instance, un cumul amputé par
+           une instance neuve est indiscernable d'un cumul amputé par des pages
+           perdues — j'ai écrit la mauvaise conclusion le 03/08 faute de ce
+           chiffre. Il doit être présent, et STABLE tant qu'on ne change pas
+           d'instance : un identifiant qui bouge à chaque requête ne dirait
+           plus rien. */
+        ok(cE3 && typeof cE3.instance === 'string' && cE3.instance.length >= 4,
+          '⛔⛔ le cumul dit QUELLE INSTANCE l\'a compté — sans lui, « 53 pages sur 67 » '
+          + 'ne distingue pas un compteur redémarré de quatorze pages perdues (obtenu '
+          + JSON.stringify(cE3 && cE3.instance) + ')');
+        ok(cE2 && cE3 && cE2.instance === cE3.instance,
+          '⛔ …et il ne change pas d\'une requête à l\'autre dans le même processus : '
+          + 'sinon il désignerait un changement d\'instance à chaque page');
+        ok(cE3 && typeof cE3.cause === 'string' && !!cE3.lecture,
+          '⛔⛔ un cumul incomplet dit sa CAUSE en clair, pas seulement son écart : '
+          + 'un « il manque 14 pages » sans cause se termine toujours en supposition — '
+          + 'et j\'en ai déjà écrit une fausse (obtenu cause='
+          + JSON.stringify(cE3 && cE3.cause) + ')');
+        adm._internals.pwScanReset();
+
         /* ⛔⛔ LE RACCOURCI PEUT ME RENVOYER MA PROPRE RÉPONSE — et le
            diagnostic générique désignait alors le mauvais coupable. Mesuré le
            03/08 sur son premier balayage des 67 pages : `octetsRecus: 1195`
@@ -2574,6 +2641,136 @@ module.exports = async function () {
     var m2 = ap(fichesT, { x1: { promoDepuis: { toMillis: function () { return Date.now() - 61 * 86400000; } }, promoAncienPrix: 120 } })[0];
     ok(!!(m2 && m2.promoActive === false && m2.promoAncienPrix == null),
       'au-delà de 2 mois au même prix, la promo EXPIRE à la lecture (J4), Timestamp compris');
+  }
+
+  /* ═══ IDENTITÉ D'UNE PAGE, CAUSE D'UNE RAFALE AMPUTÉE, TOTAL SUR FICHIER ══
+     Trois briques nées du même défaut, 03/08/2026 : le cumul de couverture
+     rendait 53 pages sur 67 avec `pagesRefusees: 0`, et j'en ai conclu « les
+     POST n'atteignent jamais le serveur ». Conclusion non mesurée : le cumul
+     vit dans la mémoire d'UNE instance serverless, et une instance neuve au
+     milieu du balayage produit exactement ce chiffre sans perdre une page.
+     ⛔ Ce qui suit garde les trois remèdes : une page a une IDENTITÉ tirée de
+     son contenu, une rafale amputée dit sa CAUSE, et le total se calcule sur
+     le FICHIER des réponses — sans dépendre d'aucune instance. */
+  var emp = pp.empreintePage;
+  ok(typeof emp === 'function', 'empreintePage exportée');
+  if (emp) {
+    var pageSynth = function (base, n) {
+      var l = [];
+      for (var i = 0; i < (n || 60); i++) {
+        l.push('Outil de controle - MARQUEZZ ZZTEST' + (100 + i));
+        l.push('3 offres', 'à partir de', (base + i) + ',99 €');
+      }
+      return l.join('\n');
+    };
+    var pA = pageSynth(100), pB = pageSynth(900);
+    ok(emp(pA) === emp(pA), 'la même page rend deux fois la même empreinte');
+    ok(!!emp(pA) && emp(pA) !== emp(pB),
+      '⛔ deux pages DIFFÉRENTES ne peuvent pas rendre la même empreinte : sinon le '
+      + 'balayage croit avoir vu une page alors qu\'il en a vu deux');
+    ok(emp('bonjour, aucune tuile ici') === null,
+      'un texte sans montants ne fabrique PAS une identité (null, pas une empreinte creuse)');
+    /* ⛔ CE QUI SÉPARE DEUX PAGES EST AU MILIEU, PAS EN TÊTE. L'user l'a dit :
+       « il y a des produits en tête de page et au pied de page, mais cela ne
+       compte pas ». Deux pages qui partagent leur en-tête et leur pied doivent
+       rester distinctes — une empreinte prise sur les premiers montants seuls
+       les confondrait. */
+    var entete = ['Nos suggestions', '19,99 €', '29,99 €', '39,99 €', '49,99 €'].join('\n');
+    var pied = ['Vus récemment', '9,99 €', '8,99 €', '7,99 €'].join('\n');
+    ok(emp(entete + '\n' + pA + '\n' + pied) !== emp(entete + '\n' + pB + '\n' + pied),
+      '⛔ même en-tête et même pied : deux pages restent distinctes (l\'échantillon '
+      + 'court toute la hauteur, il ne s\'arrête pas aux premiers montants)');
+  }
+
+  var dr = require('../api/_lib/diag-rafale.js');
+  ok(typeof dr.expliquerRafale === 'function', 'expliquerRafale exportée');
+  if (dr.expliquerRafale) {
+    var T = 1754200000000, cad = 4000;   // 4 s par page, comme ses balayages
+    // 53 pages vues, 14 manquantes, instance née APRÈS le début du balayage.
+    var froid = dr.expliquerRafale({
+      pagesDansLaRafale: 53, pagesManquantes: 14, pagesRefusees: 0,
+      debutRafale: T, finRafale: T + 52 * cad, demarrageInstance: T - 1000
+    });
+    ok(froid.cause === 'instance-froide',
+      '⛔ instance née APRÈS le début estimé du balayage ⇒ les pages absentes ont été '
+      + 'traitées ailleurs, elles ont été LUES (obtenu : ' + froid.cause + ')');
+    // Même rafale, mais l'instance existait bien avant : les pages se sont perdues.
+    var perdu = dr.expliquerRafale({
+      pagesDansLaRafale: 53, pagesManquantes: 14, pagesRefusees: 0,
+      debutRafale: T, finRafale: T + 52 * cad, demarrageInstance: T - 14 * cad - 60000
+    });
+    ok(perdu.cause === 'jamais-arrivees',
+      '⛔ instance plus VIEILLE que le début du balayage ⇒ elle aurait dû voir ces pages : '
+      + 'elles ne sont jamais arrivées (obtenu : ' + perdu.cause + ')');
+    ok(froid.lecture !== perdu.lecture && !!froid.lecture && !!perdu.lecture,
+      'les deux causes ne rendent PAS la même phrase — sinon le diagnostic ne diagnostique rien');
+    // Une page arrivée VIDE est mesurée : elle prime sur toute estimation.
+    ok(dr.expliquerRafale({
+      pagesDansLaRafale: 60, pagesManquantes: 7, pagesRefusees: 7,
+      debutRafale: T, finRafale: T + 59 * cad, demarrageInstance: T - 1000
+    }).cause === 'pages-vides',
+      '⛔ une page ARRIVÉE VIDE est mesurée : elle prime sur la date estimée');
+    ok(dr.expliquerRafale({
+      pagesDansLaRafale: 67, pagesManquantes: 0, pagesRefusees: 0,
+      debutRafale: T, finRafale: T + 66 * cad, demarrageInstance: T - 1000
+    }).cause === 'complet', 'rien ne manque → cause « complet »');
+    ok(dr.expliquerRafale({
+      pagesDansLaRafale: 1, pagesManquantes: 66, pagesRefusees: 0,
+      debutRafale: T, finRafale: T, demarrageInstance: T
+    }).cause === 'indeterminable',
+      '⛔ une seule page : aucune cadence, donc AUCUNE conclusion — on le dit au lieu '
+      + 'de trancher au hasard');
+  }
+
+  var bb = require('./bilan-balayage.js');
+  ok(typeof bb.bilan === 'function' && typeof bb.objetsJson === 'function',
+    'bilan-balayage expose bilan et objetsJson');
+  if (bb.bilan) {
+    var rep = function (e, t, l) { return { ok: true, page: { empreinte: e, tuiles: t, lues: l } }; };
+    var b1 = bb.bilan([rep('aaa', 60, 59), rep('bbb', 60, 60), rep('ccc', 60, 58)], 3);
+    ok(b1.pagesDifferentes === 3 && b1.tuilesVues === 180 && b1.produitsLus === 177,
+      'trois pages différentes → 180 tuiles, 177 lues (obtenu ' + b1.tuilesVues + '/' + b1.produitsLus + ')');
+    ok(b1.pagesManquantes === 0, 'les 3 pages attendues sont là');
+    /* ⛔ LA MÊME PAGE ENVOYÉE DEUX FOIS N'AJOUTE AUCUN PRODUIT. Sans ça, un
+       raccourci qui rejoue une page gonflerait le total et masquerait un trou :
+       le rapport annoncerait « tout est là » avec une page manquante. */
+    var b2 = bb.bilan([rep('aaa', 60, 60), rep('aaa', 60, 60), rep('bbb', 60, 60)], 3);
+    ok(b2.pagesDifferentes === 2 && b2.tuilesVues === 120 && b2.pagesEnvoyeesDeuxFois === 1,
+      '⛔ page rejouée : 2 pages différentes et 120 tuiles, pas 3 et 180 (obtenu '
+      + b2.pagesDifferentes + ' et ' + b2.tuilesVues + ')');
+    ok(b2.pagesManquantes === 1,
+      '⛔ un doublon ne comble PAS un trou : il manque toujours une page');
+    /* ⛔ UNE RÉPONSE SANS EMPREINTE NE DISPARAÎT PAS — ses produits ont été lus. */
+    var b3 = bb.bilan([rep(null, 60, 60), rep(null, 60, 60)], 2);
+    ok(b3.pagesDifferentes === 2 && b3.tuilesVues === 120 && b3.pagesSansEmpreinte === 2,
+      'deux réponses sans empreinte comptent quand même leurs 120 tuiles');
+    // Le total ne dépend PAS de l'instance : deux instances, même total.
+    var b4 = bb.bilan([
+      Object.assign(rep('aaa', 60, 60), { couverture: { instance: 'i1' } }),
+      Object.assign(rep('bbb', 60, 60), { couverture: { instance: 'i2' } })
+    ], 2);
+    ok(b4.tuilesVues === 120 && b4.instances.length === 2,
+      '⛔ deux instances ont répondu et le total reste juste — c\'est TOUT l\'intérêt : '
+      + 'il se calcule sur le fichier, pas sur la mémoire d\'un serveur');
+    ok(bb.objetsJson('[' + JSON.stringify(rep('a', 1, 1)) + ',' + JSON.stringify(rep('b', 1, 1)) + ']').length === 2,
+      'un tableau JSON est lu comme deux réponses');
+    ok(bb.objetsJson(JSON.stringify(rep('a', 1, 1)) + '\n' + JSON.stringify(rep('b', 1, 1))).length === 2,
+      'deux objets collés bout à bout sont lus comme deux réponses');
+    /* ⛔ UNE ACCOLADE SEULE DANS UN TITRE. Une paire équilibrée ne prouve rien
+       — elle se referme toute seule. Ce qui casse un découpage naïf, c'est
+       l'accolade DÉSÉQUILIBRÉE : sans respect des chaînes, l'objet se ferme
+       trop tôt, le JSON devient invalide, et la réponse DISPARAÎT du total. */
+    var avecAccolade = '{"titre":"perceuse } 20V","page":{"empreinte":"z","tuiles":60,"lues":60}}';
+    ok(bb.objetsJson(avecAccolade).length === 1
+      && bb.bilan(bb.objetsJson(avecAccolade), 1).tuilesVues === 60,
+      '⛔ une accolade DÉSÉQUILIBRÉE dans un titre ne découpe pas l\'objet — sinon la '
+      + 'réponse est illisible et ses 60 produits disparaissent du total (obtenu '
+      + bb.objetsJson(avecAccolade).length + ' objet(s))');
+    var avecGuillemet = '{"titre":"lame 8\\" dents","page":{"empreinte":"y","tuiles":60,"lues":60}}';
+    ok(bb.objetsJson(avecGuillemet).length === 1
+      && bb.bilan(bb.objetsJson(avecGuillemet), 1).tuilesVues === 60,
+      '⛔ un guillemet ÉCHAPPÉ ne referme pas la chaîne — les titres d\'outils en pouces '
+      + 'en portent (obtenu ' + bb.objetsJson(avecGuillemet).length + ' objet(s))');
   }
 
   return errors;

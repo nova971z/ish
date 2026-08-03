@@ -13,6 +13,12 @@ const priceParse = require('./_lib/price-parse');
 const plans = require('./_lib/traqueur-plans');
 // Ce qu'on refuse d'acheter, et pourquoi. Un seul fichier, fait pour changer.
 const barriere = require('./_lib/barriere-achat');
+/* Pourquoi une rafale rend moins de pages qu'elle n'en a envoyé. Fonction pure.
+   ⚠️ Portes lues : J3 — n'y entrent que des horodatages techniques et des
+   compteurs, aucune donnée personnelle, rien de persisté ni de journalisé ;
+   J5 — aucune TVA, aucun octroi de mer : le territoire fiscal continue de se
+   dériver du code postal, ce diagnostic n'y touche pas. */
+const diagRafale = require('./_lib/diag-rafale');
 const priceModel = require('./_lib/pricing-model');
 const priceConfig = require('./_lib/pricing-config');
 const pricing = require('./_lib/pricing');   // territoires (taux TVA/octroi) — saisie remboursement
@@ -2033,6 +2039,22 @@ const PW_SCAN_TTL = 20 * 60 * 1000;
    · J5 — aucune TVA, aucun octroi de mer : le territoire fiscal continue de
      se dériver du code postal, ce compteur n'y touche pas. */
 let pwCouv = null;
+/* ⛔⛔ QUI COMPTE ? L'INSTANCE ELLE-MÊME, ET ELLE NE LE DISAIT PAS. J'ai lu
+   « pagesRefusees: 0 avec 14 manquantes » et j'en ai conclu « les POST ne nous
+   atteignent jamais ». Cette conclusion suppose que les 67 requêtes tombent
+   dans la MÊME instance — hypothèse que rien ne mesurait. Le cumul vit dans la
+   mémoire d'une instance serverless : une instance neuve au milieu du balayage
+   repart de zéro et rend le nombre de pages DE LA FIN, sans qu'une seule page
+   ait été perdue. 53 = 67 − 14 exactement, et 3 179 tuiles ÷ 53 = 59,98 : ça
+   ressemble bien plus à un compteur qui redémarre qu'à quatorze pertes.
+   ⛔ Une instance porte donc désormais son IDENTITÉ et sa DATE DE NAISSANCE.
+   Comparées à la cadence de la rafale, elles tranchent (voir _lib/diag-rafale).
+   ⚠️ J3 : un identifiant de PROCESSUS tiré au sort au démarrage et un
+   horodatage. Aucun lien avec une personne, aucune persistance, aucun journal. */
+const PW_INSTANCE = {
+  id: Math.random().toString(36).slice(2, 10),
+  demarrage: Date.now()
+};
 /* ⛔⛔ « COMBIEN DE PRODUITS ONT ÉTÉ LUS AU TOTAL ? » — LA QUESTION LA PLUS
    SIMPLE, ET AUCUN COMPTEUR N'Y RÉPONDAIT. Le 03/08, après son premier
    balayage complet des 67 pages, je n'ai pas pu la lui dire : ce cumul ne
@@ -2049,7 +2071,7 @@ let pwCouv = null;
    rétention de 20 min en mémoire seule, jamais persistée ; J4 — ce sont des
    COMPTES, aucun prix n'y entre et rien ici ne peut servir de prix de
    référence à une réduction ; J5 — aucune TVA, aucun octroi de mer. */
-function pwCouvAjouter(brand, skus, titres, nbTuiles, nbLues, pagesDuPlan) {
+function pwCouvAjouter(brand, skus, titres, nbTuiles, nbLues, pagesDuPlan, empreinte) {
   const nowMs = Date.now();
   /* ⛔⛔ UNE NOUVELLE RAFALE REPART DE ZÉRO — SINON LE TOTAL GONFLE À CHAQUE
      ESSAI. Mesuré le 03/08 sur son deuxième balayage : `pagesDansLaRafale:
@@ -2064,16 +2086,31 @@ function pwCouvAjouter(brand, skus, titres, nbTuiles, nbLues, pagesDuPlan) {
   if (pwCouv && pagesPlan > 0 && pwCouv.pages >= pagesPlan) pwCouv = null;
   if (!pwCouv || (nowMs - pwCouv.at) > PW_SCAN_TTL || pwCouv.brand !== brand) {
     pwCouv = { brand: brand, refs: Object.create(null), noms: Object.create(null),
-      pages: 0, tuiles: 0, lues: 0, at: nowMs };
+      empreintes: Object.create(null), pages: 0, tuiles: 0, lues: 0,
+      debut: nowMs, at: nowMs };
   }
   pwCouv.at = nowMs;
   pwCouv.pages += 1;
+  if (empreinte) pwCouv.empreintes[String(empreinte)] = 1;
   pwCouv.tuiles += Math.max(0, parseInt(nbTuiles, 10) || 0);
   pwCouv.lues += Math.max(0, parseInt(nbLues, 10) || 0);
   (skus || []).forEach(function (s) { if (s) pwCouv.refs[String(s).toUpperCase()] = 1; });
   (titres || []).forEach(function (n) {
     var k = String(n || '').trim().toLowerCase();
     if (k) pwCouv.noms[k] = 1;
+  });
+  const nbDistinctes = Object.keys(pwCouv.empreintes).length;
+  const base = nbDistinctes || pwCouv.pages;
+  const manquantes = pagesPlan ? Math.max(0, pagesPlan - base) : null;
+  /* ⛔ LA CAUSE, PAS SEULEMENT LE CHIFFRE. Un « il manque 14 pages » sans cause
+     se termine toujours en supposition — et j'en ai déjà écrit une fausse. */
+  const explication = diagRafale.expliquerRafale({
+    pagesDansLaRafale: base,
+    pagesManquantes: manquantes,
+    pagesRefusees: pwCouv.refus || 0,
+    debutRafale: pwCouv.debut,
+    finRafale: pwCouv.at,
+    demarrageInstance: PW_INSTANCE.demarrage
   });
   return {
     pagesDansLaRafale: pwCouv.pages,
@@ -2087,19 +2124,47 @@ function pwCouvAjouter(brand, skus, titres, nbTuiles, nbLues, pagesDuPlan) {
        ⚠️ J4 : trois pages absentes, ce sont ~180 sources de prix jamais vues,
        donc des coûts d'achat qui restent au niveau précédent sans raison. */
     pagesAttendues: pagesPlan || null,
-    pagesManquantes: pagesPlan ? Math.max(0, pagesPlan - pwCouv.pages) : null,
-    /* ⛔ CE CHIFFRE TRANCHE ENTRE LES DEUX CAUSES D'UNE PAGE ABSENTE :
-       > 0 ⇒ elle est ARRIVÉE VIDE (le fournisseur n'a rien rendu, le POST est
-       parti quand même) ; = 0 avec des manquantes ⇒ le POST ne nous a jamais
-       atteints. Deux remèdes opposés, et sans ce compteur on ne pouvait que
-       supposer lequel. */
+    /* ⛔⛔ COMBIEN DE PAGES DIFFÉRENTES, PAS COMBIEN DE REQUÊTES. `pages` ne
+       comptait que des POST acceptés : la même page envoyée deux fois valait
+       deux pages, et le trou correspondant disparaissait du compte. Depuis
+       `empreintePage`, une page porte une identité tirée de son contenu — le
+       raccourci, lui, ne dit jamais laquelle il envoie.
+       ⚠️ `null` quand aucune empreinte n'a pu être calculée : on le dit au
+       lieu de rendre un zéro qui aurait l'air d'une mesure. */
+    pagesDistinctes: nbDistinctes || null,
+    pagesEnDouble: nbDistinctes ? Math.max(0, pwCouv.pages - nbDistinctes) : null,
+    /* ⛔ LE MANQUE SE COMPTE SUR LES PAGES DIFFÉRENTES. Le compter sur les
+       requêtes ferait disparaître un trou dès qu'une page part en double. */
+    pagesManquantes: manquantes,
+    /* ⛔ CE CHIFFRE NOMME UNE CAUSE, IL N'EN ÉLIMINE PAS DEUX. `> 0` ⇒ la page
+       est ARRIVÉE VIDE (le fournisseur n'a rien rendu, le POST est parti quand
+       même) : c'est MESURÉ, et ça se corrige côté lecture de la page.
+       ⛔⛔ MAIS `= 0` AVEC DES MANQUANTES NE VEUT PAS DIRE « le POST ne nous a
+       jamais atteints ». C'est exactement ce que j'avais écrit ici le 03/08, et
+       c'était FAUX (E-113) : cette lecture suppose que les 67 requêtes tombent
+       dans la MÊME instance. Le cumul vit dans la mémoire d'UNE instance — une
+       instance neuve en plein balayage repart de zéro et rend le nombre de
+       pages DE LA FIN, sans qu'une seule page ne se perde. Il reste donc TROIS
+       causes possibles, et c'est `cause` ci-dessous qui tranche, sur la cadence
+       de la rafale. */
     pagesRefusees: pwCouv.refus || 0,
     /* ⛔ LES DEUX CHIFFRES QU'IL DEMANDE, dans cet ordre : ce que les pages
        contenaient, ce qu'on en a lu. Doublons COMPRIS — c'est voulu. */
     tuilesVues: pwCouv.tuiles,
     lignesLues: pwCouv.lues,
     refsDistinctes: Object.keys(pwCouv.refs).length,
-    nomsDistincts: Object.keys(pwCouv.noms).length
+    nomsDistincts: Object.keys(pwCouv.noms).length,
+    /* ⛔⛔ QUI A COMPTÉ, ET DEPUIS QUAND. Sans ces deux valeurs, un cumul
+       amputé par une instance neuve est indiscernable d'un cumul amputé par
+       des pages perdues — et les deux remèdes sont opposés. Si l'identifiant
+       change d'une page à l'autre du MÊME balayage, le cumul est éclaté entre
+       plusieurs instances et il ne faut PAS le lire comme un total. */
+    instance: PW_INSTANCE.id,
+    instanceAgeSecondes: Math.round((nowMs - PW_INSTANCE.demarrage) / 1000),
+    rafaleSecondes: Math.round((pwCouv.at - pwCouv.debut) / 1000),
+    cadenceSecondes: explication.cadenceSecondes,
+    cause: explication.cause,
+    lecture: explication.lecture
   };
 }
 /* ⛔⛔ COMPTER LES PAGES QUI ARRIVENT VIDES. Elles repartent en 400 sans
@@ -2112,7 +2177,8 @@ function pwCouvRefus(brand) {
   const nowMs = Date.now();
   if (!pwCouv || (nowMs - pwCouv.at) > PW_SCAN_TTL || pwCouv.brand !== brand) {
     pwCouv = { brand: brand, refs: Object.create(null), noms: Object.create(null),
-      pages: 0, tuiles: 0, lues: 0, refus: 0, at: nowMs };
+      empreintes: Object.create(null), pages: 0, tuiles: 0, lues: 0, refus: 0,
+      debut: nowMs, at: nowMs };
   }
   pwCouv.at = nowMs;
   pwCouv.refus = (pwCouv.refus || 0) + 1;
@@ -2184,11 +2250,16 @@ async function handlePriceWatch(req, res, admin, db) {
          ne disait laquelle des deux causes : soit le fournisseur n'a rien
          rendu et le POST est parti vide (il arrive ici et repart en 400 sans
          laisser la moindre trace), soit le POST n'a jamais atteint le serveur.
-         ⛔ Ce compteur tranche. `pagesRefusees > 0` ⇒ les pages ARRIVENT mais
-         vides, le remède est côté lecture. `pagesRefusees = 0` avec des pages
-         manquantes ⇒ le POST se perd avant nous, le remède est côté réseau.
-         Sans lui on ne pouvait que supposer, et une supposition ne se corrige
-         pas.
+         ⛔ Ce compteur nomme UNE cause : `pagesRefusees > 0` ⇒ les pages
+         ARRIVENT mais vides, le remède est côté lecture. C'est mesuré.
+         ⛔⛔ IL N'EN NOMME PAS DEUX. J'avais écrit ici que `= 0` avec des pages
+         manquantes signifiait « le POST se perd avant nous » : c'était FAUX
+         (E-113). Cette lecture ne tient que si les 67 requêtes tombent dans la
+         MÊME instance, et rien ne le mesurait — une instance neuve en plein
+         balayage remet le cumul à zéro sans qu'une page ne se perde. La
+         troisième cause se tranche sur la cadence (`_lib/diag-rafale.js`), et
+         le TOTAL, lui, ne doit plus rien à aucune instance : il se calcule sur
+         le fichier des réponses (`scripts/bilan-balayage.js`).
          ⚠️ Portes lues : J3 — un entier, aucune donnée personnelle, rien
          conservé au-delà de la fenêtre de rafale ; J4 — aucun prix n'entre
          ici ; J5 — aucune TVA, aucun octroi de mer. */
@@ -2335,10 +2406,16 @@ async function handlePriceWatch(req, res, admin, db) {
          et rendre un total faux qui a l'air juste. */
       const tuiles = priceParse.compterTuiles(text);
       const planCourant = plans.plan(brand, sourceSlug);
+      /* ⛔ L'IDENTITÉ DE LA PAGE, TIRÉE DE SON CONTENU — le raccourci ne dit
+         jamais laquelle des 67 il envoie, et sans identité le serveur ne
+         compte que des requêtes. Calculée UNE fois, servie au cumul ET rendue
+         dans la réponse : c'est elle qui permet de totaliser un balayage sur
+         le FICHIER des réponses, sans dépendre de la mémoire d'une instance. */
+      const empreinteSec = priceParse.empreintePage(text);
       const couvSec = pwCouvAjouter(brand, parsed.map((x) => x.sku),
         (auto.sansRef || []).map((e) => e.titre),
         tuiles.total, parsed.length + (auto.sansRef || []).length,
-        planCourant && planCourant.pages);
+        planCourant && planCourant.pages, empreinteSec);
 
       /* ⛔⛔ L'ÉCART, NOMMÉ. J'ai annoncé à l'user « 11 références non lues » en
          soustrayant deux compteurs — sans jamais pouvoir dire LESQUELLES. Un
@@ -2482,6 +2559,18 @@ async function handlePriceWatch(req, res, admin, db) {
            instance froide — le total repart de zéro, et il faut le savoir
            plutôt que de lire un chiffre faux qui a l'air juste. */
         couverture: couvSec,
+        /* ⛔⛔ LA LIGNE QUI PERMET DE TOTALISER SANS LE SERVEUR. Le cumul
+           ci-dessus vit dans la mémoire d'UNE instance : une instance neuve au
+           milieu du balayage le tronque, et il rend alors un total faux qui a
+           l'air juste. Cette ligne-ci, elle, est LOCALE À LA PAGE — trois
+           valeurs, aucune mémoire. Le raccourci enregistre les 67 réponses
+           dans un fichier ; `scripts/bilan-balayage.js` les additionne et rend
+           le vrai total, quelles que soient les instances traversées.
+           ⛔ C'est la SEULE réponse fiable à sa question « combien de produits
+           ont été lus au total ». Le compteur d'instance reste utile pour
+           voir un balayage en direct — il ne fait pas foi. */
+        page: { empreinte: empreinteSec, tuiles: tuiles.total,
+          lues: parsed.length + (auto.sansRef || []).length },
         note: 'MODE À SEC : aucune lecture ni écriture Firestore, aucun prix calculé, '
           + 'aucun quota consommé. Sert à vérifier qu\'un raccourci envoie bien sa page. '
           + 'Retirer &sec=1 pour un vrai relevé.',
@@ -2829,7 +2918,14 @@ async function handlePriceWatch(req, res, admin, db) {
         (auto.sansRef || []).map((e) => e.titre),
         priceParse.compterTuiles(text).total,
         parsed.length + (auto.sansRef || []).length,
-        (plans.plan(brand, sourceSlug) || {}).pages),
+        (plans.plan(brand, sourceSlug) || {}).pages,
+        priceParse.empreintePage(text)),
+      /* La même ligne locale qu'à sec : trois valeurs, aucune mémoire. C'est
+         elle qui se totalise sur le fichier des 67 réponses, quand le cumul
+         d'instance, lui, peut avoir été tronqué par une instance neuve. */
+      page: { empreinte: priceParse.empreintePage(text),
+        tuiles: priceParse.compterTuiles(text).total,
+        lues: parsed.length + (auto.sansRef || []).length },
       counts: {
         parsed: parsed.length, applied: applied.length, flagged: flagged.length,
         unchanged: unchanged.length, unknown: unknown.length, locked: lockedW.length,

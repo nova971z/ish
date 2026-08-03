@@ -170,7 +170,19 @@ var HORS_LISTE = {
      `price-parse.js`. Et ce fichier a sa PROPRE porte, `check-plan-traqueur`,
      qui exige entre autres qu'aucune adresse ne porte de secret et que ce qui
      reste supposé soit écrit comme tel. Écarté le 03/08/2026. */
-  'pirates-tools/api/_lib/traqueur-plans.js': 'adresses de pages publiques — aucune règle exécutée, couvert par check-plan-traqueur'
+  'pirates-tools/api/_lib/traqueur-plans.js': 'adresses de pages publiques — aucune règle exécutée, couvert par check-plan-traqueur',
+  /* ⛔ Écarté SCIEMMENT, et voici pourquoi ce n'est pas un contournement.
+     `diag-rafale.js` ne décide RIEN : il reçoit des compteurs et deux
+     horodatages, et rend une phrase qui dit pourquoi un balayage a rendu moins
+     de pages qu'il n'en a envoyé. Aucun prix n'y entre (J4), aucune donnée
+     personnelle (J3), aucune TVA ni octroi de mer (J5) — le rattacher à la
+     liste PAIEMENT ferait cocher sept points dont aucun ne le concerne, et une
+     liste qui ne s'applique jamais apprend à ignorer les listes.
+     ⚠️ Ce qu'il risque à la place — se tromper de cause et envoyer corriger au
+     mauvais endroit — est gardé par `check-price-watch` : ses deux causes
+     opposées y sont montées sur des données mesurées, et chacune sabotée.
+     Écarté le 03/08/2026. */
+  'pirates-tools/api/_lib/diag-rafale.js': 'fonction pure sur des compteurs et des horodatages — aucune règle métier, couvert par check-price-watch'
 };
 
 module.exports = { PROTEGES: PROTEGES, LISTES: LISTES, HORS_LISTE: HORS_LISTE };
