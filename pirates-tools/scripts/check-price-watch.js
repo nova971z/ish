@@ -513,8 +513,12 @@ module.exports = async function () {
       '⛔ « outil nu » vaut ZÉRO batterie — une information, pas une absence');
     ok(cA.pack === true,
       'un outil nu EN COFFRET reste un lot : son prix inclut la boîte');
-    ok(cA.serie === 'XR' && cA.voltage === 18 && cA.diametreMm === 125,
-      'gamme, voltage et diamètre relevés ensemble');
+    ok(cA.serie === 'XR' && cA.voltage === 18 && cA.cotesMm === 125,
+      '⛔ « 125 mm » SANS Ø n\'est pas déclaré diamètre : le titre ne dit pas ce '
+      + 'que la cote mesure, et la nommer serait faux une fois sur deux (« Lame '
+      + 'Alligator 430 mm » est une longueur). Elle est relevée, pas interprétée');
+    ok(cA.diametreMm === null,
+      'aucun diamètre affirmé là où le titre n\'écrit pas Ø');
 
     var cB = ec('MAKITA ZZPW 003 E\nNettoyeur haute pression électrique, 120 bars', 'MAKITA');
     ok(cB.sku === null && cB.skuEclate === 'ZZPW003E',
@@ -532,6 +536,90 @@ module.exports = async function () {
       + 'Prendre le maximum ferait passer une visseuse 18 V pour du 230 V');
     ok(cC.nbBatteries === 1 && cC.ah === 2, '« 1X2.0Ah » : une batterie de 2 Ah');
     ok(cC.sansFil === true, '« sans fil » l\'emporte sur la présence d\'un 230 V (le chargeur)');
+
+    /* ═══ QUINCAILLERIE — ni réf, ni voltage, ni batterie ═══════════════════
+       Reproche de l'user, 03/08 : « pour la quincaillerie c'est pareil, il n'y
+       aura pas de référence, il n'y aura pas de voltage ni rien de tout ça ; il
+       y aura la taille, ou l'alésage des circulaires avec le diamètre. »
+       ⛔ Titres SYNTHÉTIQUES bâtis sur les gabarits mesurés de son catalogue —
+       un harnais ne nomme jamais une donnée réelle. */
+    var q1 = ec('Coffret de 29 forets métal HSS-G', 'MAKITA');
+    ok(q1.famille === 'consommable' && q1.type === 'foret métal',
+      '⛔ « Coffret DE 29 forets » est un LOT DE FORETS, pas un coffret : le '
+      + 'contenant ne vole pas la place du contenu (mesuré : 38 titres de sa '
+      + 'Quincaillerie sur 69 commencent par cette forme)');
+    ok(q1.nbPieces === 29 && q1.conditionnement === 'coffret' && q1.pack === true,
+      'le nombre de pièces et son conditionnement sont relevés');
+    ok(q1.coffret === null,
+      '⛔ un LOT en coffret ne porte pas en plus un `coffret` facturable : ce '
+      + 'serait compter deux fois le même emballage');
+    ok(q1.nuance === 'HSS-G' && q1.matiere === 'métal',
+      'la nuance de coupe est relevée — HSS-Co coûte le double d\'un HSS ordinaire');
+    ok(q1.sku === null && q1.voltage === null && q1.nbBatteries === null,
+      '⛔ aucune référence ni aucun voltage INVENTÉS là où le titre n\'en porte pas');
+
+    var q2 = ec('Lot de 5 lames 30x43 mm pour multi-cutter Bois dur', 'MAKITA');
+    ok(q2.type !== 'multi-cutter' && q2.famille === 'consommable',
+      '⛔⛔ ARGENT : « lames POUR multi-cutter » désigne des LAMES, pas la '
+      + 'machine. Mesuré sur son catalogue : ces titres étaient typés machine — '
+      + 'un jeu de lames pouvait donc s\'apparier à la machine elle-même');
+    ok(q2.pourMachine !== null && /multi/.test(q2.pourMachine),
+      'la machine de destination est gardée à part, jamais confondue avec l\'article');
+    ok(q2.dimensionsMm === '30x43' && q2.diametreMm === null,
+      '⛔ « 30x43 mm » sont des COTES, pas un diamètre. Le premier jet annonçait '
+      + 'un Ø de 30 mm sur une lame plate qui n\'a pas de diamètre');
+    ok(q2.matiere === 'bois dur',
+      'la matière est lue en entier : « bois dur » et « bois » ne se coupent pas pareil');
+
+    var q3 = ec('Lame de scie circulaire Ø190 mm alésage 30 mm 40 dents', 'MAKITA');
+    ok(q3.diametreMm === 190 && q3.alesageMm === 30 && q3.nbDents === 40,
+      '⛔ Ø ET ALÉSAGE, mot de l\'user : deux lames de même diamètre et '
+      + 'd\'alésage différent ne montent pas sur la même machine');
+    var q3b = ec('Lame de scie circulaire Ø190 mm alésage 20 mm 40 dents', 'MAKITA');
+    ok(cmpDispo() && pp.comparerCaracteristiques(q3, q3b).compatible === false,
+      '⛔⛔ ARGENT : même Ø, même nombre de dents, même type — et REFUSÉ, parce '
+      + 'que l\'alésage diffère. C\'est exactement le recoupement « sur deux ou '
+      + 'trois informations » que l\'user refuse');
+    function cmpDispo() { return typeof pp.comparerCaracteristiques === 'function'; }
+
+    var f1 = ec('Recharge de fil pour débroussailleuses 2mm x 68,6m', 'MAKITA');
+    var f2 = ec('Recharge de fil pour débroussailleuses 2,5mm x 68,6m', 'MAKITA');
+    ok(f1.diametreMm === 2 && f2.diametreMm === 2.5 && f1.longueurM === 68.6,
+      '⛔⛔ ARGENT : « 2,5mm x 68,6m » — l\'unité mm est AU MILIEU du titre. '
+      + 'Aucune règle ne l\'accrochait, et la grosseur du fil disparaissait');
+    ok(pp.comparerCaracteristiques(f1, f2).compatible === false,
+      '⛔ deux bobines de MÊME longueur et de fil DIFFÉRENT sont deux articles : '
+      + 'sans la grosseur du fil, elles ressortaient rigoureusement identiques');
+
+    var q4 = ec('Elagueuse sur perche 18V ZZE567N-XJ', 'MAKITA');
+    ok(q4.type === 'élagueuse sur perche',
+      '⛔ « Elagueuse » SANS ACCENT doit accrocher « élagueuse » : un titre '
+      + 'fournisseur n\'accentue pas de façon fiable (mesuré sur son catalogue)');
+
+    /* ═══ EPI ET VÊTEMENT DE TRAVAIL ════════════════════════════════════════
+       « Pour les chaussures de sécurité c'est pareil, les pantalons de travail
+       c'est pareil. » ⚠️ Les codes de la norme EN ISO 20345 ont changé en
+       2022 (S6, S7, suffixes S/L) — vérifiés en ligne, pas cités de mémoire. */
+    var e1 = ec('Chaussures de sécurité S3S hautes pointure 43', 'MAKITA');
+    ok(e1.famille === 'epi' && e1.type === 'chaussure de sécurité',
+      'une chaussure de sécurité est typée comme telle, pas laissée sans famille');
+    ok(e1.pointure === 43 && e1.normeEpi === 'S3S',
+      '⛔ pointure ET norme relevées — « S3S » est un code de la révision 2022, '
+      + 'que je n\'aurais pas su de mémoire');
+    var e1b = ec('Chaussures de sécurité S3S hautes pointure 44', 'MAKITA');
+    ok(pp.comparerCaracteristiques(e1, e1b).compatible === false,
+      '⛔ ARGENT : une pointure 43 et une 44 sont DEUX articles. Les apparier '
+      + 'écrirait le coût de l\'un sur la fiche de l\'autre');
+    var e2 = ec('Pantalon de travail taille XL', 'MAKITA');
+    ok(e2.famille === 'epi' && e2.type === 'pantalon de travail' && e2.taille === 'XL',
+      'un pantalon de travail porte une TAILLE, ni voltage ni référence');
+    ok(e2.voltage === null && e2.sku === null && e2.nbBatteries === null,
+      '⛔ aucun champ de machine inventé sur un vêtement');
+    var e3 = ec('Ceinture porte-outils en cuir 18 compartiments', 'MAKITA');
+    ok(e3.famille !== 'epi',
+      '⛔ une CEINTURE PORTE-OUTILS n\'est pas un équipement de protection : '
+      + 'mesuré, 6 fiches de son catalogue étaient rangées en EPI et se seraient '
+      + 'comparées à des vêtements de travail');
 
     var cD = ec('MAKITA ZZI850', 'MAKITA');
     ok(cD.type !== 'kit',

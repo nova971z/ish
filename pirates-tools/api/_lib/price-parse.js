@@ -578,24 +578,144 @@ function choisirCoutSource(sources, nowMs, maxAgeMs) {
    ⚠️ Rend `null` sur tout champ NON TROUVÉ. Un champ absent n'est jamais un
    champ à zéro : « voltage inconnu » et « 0 V » ne se comparent pas de la même
    façon, et les confondre ferait apparier n'importe quoi. */
-var OUTILS = [
-  // Le nom propre de l'outil. Ordre important : le plus spécifique d'abord —
-  // « scie circulaire » avant « scie », sinon le générique gagne toujours.
-  'perceuse-visseuse', 'perceuse à percussion', 'perceuse d\'angle', 'perceuse',
-  'visseuse à chocs', 'visseuse à choc', 'visseuse', 'boulonneuse',
-  'clé à chocs', 'clé à choc', 'cliquet',
-  'meuleuse d\'angle', 'meuleuse droite', 'meuleuse', 'disqueuse', 'tronçonneuse',
-  'scie circulaire', 'scie plongeante', 'scie sabre', 'scie à onglet', 'scie sauteuse',
-  'scie égoïne', 'scie à ruban', 'scie-cloche', 'scie',
-  'marteau perforateur', 'marteau de démolition', 'marteau', 'perforateur', 'burineur',
-  'cloueuse', 'cloueur', 'agrafeuse', 'riveteuse',
-  'ponceuse', 'polisseuse', 'défonceuse', 'dégauchisseuse', 'raboteuse', 'fraiseuse',
-  'aspirateur', 'souffleur', 'nettoyeur haute pression', 'nettoyeur',
-  'compresseur', 'générateur', 'groupe électrogène', 'vibrateur',
-  'débroussailleuse', 'taille-haie', 'coupe-bordure', 'tondeuse',
-  'laser', 'télémètre', 'projecteur', 'lampe', 'radio',
-  'chargeur', 'batterie', 'coffret', 'pack outillage', 'kit'
+/* ⛔ CE N'EST PAS UNE BOUTIQUE DE VISSEUSES. Reproche de l'user, 03/08 :
+   « pour la quincaillerie il n'y aura pas de référence, pas de voltage ni rien
+   de tout ça ; il y aura la taille, ou l'alésage des circulaires avec le
+   diamètre. Pour les chaussures de sécurité c'est pareil, les pantalons de
+   travail c'est pareil. »
+
+   Il a raison, et son catalogue le prouve — 1 226 fiches relues avant d'écrire
+   une ligne : 69 Quincaillerie, 218 Accessoires, 29 Rangements. Leurs titres
+   n'ont NI référence NI voltage :
+
+     « Lot de 5 lames Ø100 mm moyeu déporté pour multi-cutter Bois »
+     « Coffret de 29 forets métal HSS-G »
+     « Foret métal HSS-Co Extreme 6 x 57 x 93 mm »
+     « Disque à lamelles type 27 grain 60 Ø125 mm »
+     « Recharge de fil pour débroussailleuses 2,5mm x 68,6m »
+
+   Un extracteur qui ne sait lire que « 18 V » et « 2 batteries » est aveugle à
+   TROIS des cinq plus grosses familles du catalogue. D'où quatre familles, et
+   des mesures propres à chacune. ⚠️ Chaque terme ci-dessous vient d'un titre
+   RÉEL du catalogue ou d'une famille que l'user a nommée lui-même.
+
+   ⚠️ J4 — rien ici ne touche à un prix ni à une réduction : ce sont des
+   caractéristiques d'article. Le prix reste lu par `parsePriceFR`, et le prix
+   de référence d'une promo reste le minimum des 30 jours du journal réel. */
+var VOCABULAIRE = [
+  // ── CONSOMMABLES : ce qui s'use et se rachète. Testé AVANT les machines,
+  //    sinon « lame de scie sabre » serait typé « scie ».
+  ['consommable', 'lame de scie circulaire'], ['consommable', 'lame de scie sabre'],
+  ['consommable', 'lame de scie sauteuse'], ['consommable', 'lame de scie stationnaire'],
+  ['consommable', 'lame de scie'], ['consommable', 'lame'],
+  ['consommable', 'foret à bois'], ['consommable', 'foret béton'], ['consommable', 'foret métal'],
+  ['consommable', 'foret'], ['consommable', 'mèche'], ['consommable', 'trépan'],
+  ['consommable', 'fraise de défonceuse'], ['consommable', 'fraise'],
+  ['consommable', 'disque à tronçonner'], ['consommable', 'disque à lamelles'],
+  ['consommable', 'disque diamant'], ['consommable', 'disque'], ['consommable', 'meule'],
+  ['consommable', 'douille à chocs'], ['consommable', 'douille'], ['consommable', 'embout de vissage'],
+  ['consommable', 'porte embout'], ['consommable', 'porte-embout'], ['consommable', 'embout'],
+  ['consommable', 'burin'], ['consommable', 'pointe'], ['consommable', 'ciseau'],
+  ['consommable', 'chaîne tronçonneuse'], ['consommable', 'chaîne'], ['consommable', 'guide'],
+  ['consommable', 'vis à bande'], ['consommable', 'vis'], ['consommable', 'clou'],
+  ['consommable', 'agrafe'], ['consommable', 'rivet'], ['consommable', 'cheville'],
+  ['consommable', 'bobine avec fil'], ['consommable', 'recharge de fil'], ['consommable', 'fil'],
+  ['consommable', 'papier abrasif'], ['consommable', 'feuille abrasive'], ['consommable', 'abrasif'],
+  ['consommable', 'brosse'], ['consommable', 'scie-cloche'], ['consommable', 'scie cloche'],
+  ['consommable', 'filtre'], ['consommable', 'sac'], ['consommable', 'accessoire'],
+  ['consommable', 'pièce de vissage'], ['consommable', 'pièce'],
+
+  // ── ÉQUIPEMENT DE PROTECTION ET VÊTEMENT DE TRAVAIL. Familles nommées par
+  //    l'user (chaussures de sécurité, pantalons de travail).
+  ['epi', 'chaussure de sécurité'], ['epi', 'basket de sécurité'], ['epi', 'botte'],
+  ['epi', 'chaussure'], ['epi', 'pantalon de travail'], ['epi', 'pantalon'],
+  ['epi', 'short'], ['epi', 'bermuda'], ['epi', 'salopette'], ['epi', 'combinaison'],
+  ['epi', 'veste'], ['epi', 'blouson'], ['epi', 'parka'], ['epi', 'sweat'],
+  ['epi', 'polo'], ['epi', 't-shirt'], ['epi', 'gilet'],
+  ['epi', 'gant'], ['epi', 'casque anti-bruit'], ['epi', 'casque'],
+  ['epi', 'lunette de protection'], ['epi', 'lunette'], ['epi', 'visière'],
+  ['epi', 'masque'], ['epi', 'bouchon d\'oreille'], ['epi', 'genouillère'],
+  ['epi', 'harnais'], ['epi', 'ceinture de sécurité'], ['epi', 'protection auditive'],
+  /* ⛔ « Ceinture porte-outils en cuir 18 compartiments » N'EST PAS un EPI :
+     c'est un porte-outils. Mesuré — 6 fiches de son catalogue étaient rangées
+     en équipement de protection, ce qui les aurait comparées à des vêtements
+     de travail. Seule « ceinture de sécurité » protège quelqu'un. */
+  ['consommable', 'ceinture porte-outils'], ['consommable', 'porte-outils'],
+  ['consommable', 'sac à clous'], ['consommable', 'bretelles'],
+
+  // ── MACHINES.
+  ['machine', 'perceuse-visseuse'], ['machine', 'perceuse à percussion'],
+  ['machine', 'perceuse d\'angle'], ['machine', 'perceuse'], ['machine', 'carotteuse'],
+  ['machine', 'visseuse à chocs'], ['machine', 'visseuse à choc'], ['machine', 'visseuse'],
+  ['machine', 'boulonneuse'], ['machine', 'clé à chocs'], ['machine', 'clé à choc'],
+  ['machine', 'cliquet'], ['machine', 'meuleuse d\'angle'], ['machine', 'meuleuse droite'],
+  ['machine', 'meuleuse'], ['machine', 'disqueuse'], ['machine', 'tronçonneuse'],
+  ['machine', 'rainureuse'], ['machine', 'grignoteuse'], ['machine', 'cisaille'],
+  ['machine', 'scie circulaire'], ['machine', 'scie plongeante'], ['machine', 'scie sabre'],
+  ['machine', 'scie à onglet'], ['machine', 'scie sauteuse'], ['machine', 'scie à ruban'],
+  ['machine', 'scie'], ['machine', 'marteau perforateur'], ['machine', 'marteau de démolition'],
+  ['machine', 'marteau'], ['machine', 'perforateur'], ['machine', 'burineur'],
+  ['machine', 'cloueur de charpente'], ['machine', 'cloueur de finition'],
+  ['machine', 'cloueuse'], ['machine', 'cloueur'], ['machine', 'agrafeuse'],
+  ['machine', 'riveteuse'], ['machine', 'mortaiseuse'], ['machine', 'lamelleuse'],
+  ['machine', 'ponceuse'], ['machine', 'polisseuse'], ['machine', 'défonceuse'],
+  ['machine', 'dégauchisseuse'], ['machine', 'raboteuse'], ['machine', 'rabot'],
+  ['machine', 'fraiseuse'], ['machine', 'affleureuse'], ['machine', 'malaxeur'],
+  ['machine', 'tarière'], ['machine', 'aspirateur'], ['machine', 'souffleur'],
+  ['machine', 'nettoyeur haute pression'], ['machine', 'nettoyeur'],
+  ['machine', 'compresseur'], ['machine', 'groupe électrogène'], ['machine', 'générateur'],
+  ['machine', 'vibrateur'], ['machine', 'débroussailleuse'], ['machine', 'taille-haie'],
+  ['machine', 'coupe-bordure'], ['machine', 'tondeuse'], ['machine', 'élagueuse'],
+  ['machine', 'outil multifonctions'], ['machine', 'multi-cutter'],
+  ['machine', 'laser'], ['machine', 'télémètre'], ['machine', 'détecteur'],
+  ['machine', 'projecteur'], ['machine', 'lampe'], ['machine', 'radio'],
+  ['machine', 'glacière'], ['machine', 'ventilateur'],
+  /* ⚠️ Ajoutés APRÈS mesure, pas avant : 73 titres de son catalogue restaient
+     sans type, listés un par un. Aucun n'est inventé. */
+  ['machine', 'découpeuse'], ['machine', 'surfaceuse'], ['machine', 'plaqueuse de chants'],
+  ['machine', 'plaqueuse'], ['machine', 'broyeur'], ['machine', 'motobineuse'],
+  ['machine', 'pulvérisateur'], ['machine', 'gonfleur'], ['machine', 'pompe à graisse'],
+  ['machine', 'pompe submersible'], ['machine', 'pompe'], ['machine', 'pistolet à mastic'],
+  ['machine', 'pistolet'], ['machine', 'décapeur thermique'], ['machine', 'décapeur'],
+  ['machine', 'taille haie'], ['machine', 'bouilloire'], ['machine', 'four micro-ondes'],
+  ['machine', 'micro-ondes'], ['machine', 'cafetière'], ['machine', 'treuil'], ['machine', 'palan'],
+  ['machine', 'combopack'], ['machine', 'pack d\'outils'], ['machine', 'pack outils'],
+  ['machine', 'système d\'alimentation'], ['machine', 'système d\'aspiration'],
+  ['machine', 'système de collecte'], ['machine', 'station'],
+  ['consommable', 'serre-joint'], ['consommable', 'serre joint'], ['consommable', 'pelle'],
+  ['consommable', 'trépied'], ['consommable', 'rail de guidage'], ['consommable', 'rail'],
+  ['consommable', 'extension'], ['consommable', 'adaptateur'], ['consommable', 'connexion'],
+  ['consommable', 'tuyau'], ['consommable', 'piètement'], ['consommable', 'tête fil'],
+  ['consommable', 'plateau de surfaçage'], ['consommable', 'plateau'],
+  ['consommable', 'renvoi d\'angle'], ['consommable', 'joint d\'étanchéité'],
+  ['rangement', 'module de rangement'], ['rangement', 'set organisateur'],
+  ['rangement', 'organisateur'],
+  ['machine', 'lime à bande'], ['machine', 'lime'], ['machine', 'ventouse'],
+  ['machine', 'sécateur sur perche'], ['machine', 'sécateur'],
+  ['machine', 'élagueuse sur perche'], ['machine', 'outil multifonction'],
+  ['machine', 'multicutter'], ['machine', 'enceinte bluetooth'], ['machine', 'enceinte'],
+
+  // ── ÉNERGIE ET RANGEMENT. En dernier : « en coffret MAKPAC » termine la
+  //    moitié des titres de machines, et gagnerait sur tout le reste.
+  ['energie', 'chargeur'], ['energie', 'batterie'],
+  ['rangement', 'coffret de transport'], ['rangement', 'servante'], ['rangement', 'chariot'],
+  ['rangement', 'trolley'], ['rangement', 'établi'], ['rangement', 'sac à outils'],
+  ['rangement', 'valise'], ['rangement', 'mallette'], ['rangement', 'coffret'], ['rangement', 'caisse']
 ];
+var OUTILS = VOCABULAIRE.map(function (v) { return v[1]; });
+
+/* Conditionnement : « Coffret de 29 forets », « Lot de 5 lames », « Pack de
+   5000 vis ». ⛔ Sans cette coupe, « Coffret de 29 forets métal » serait typé
+   RANGEMENT — le contenant volerait la place du contenu. Mesuré : 38 titres
+   Quincaillerie sur 69 commencent par cette forme. */
+var CONDITIONNEMENT = /\b(coffret|lot|pack|jeu|set|assortiment|bo[îi]te|paquet)s?\s+de\s+(\d+)\s*/i;
+
+/* Nuance de coupe : elle décide du prix bien plus que la marque. HSS-Co (cobalt)
+   coûte le double d'un HSS ordinaire ; BiM (bi-métal) et carbure de même. */
+var NUANCES = ['hss-co', 'hss-g', 'hss', 'bim', 'bi-métal', 'bi-metal', 'carbure', 'diamant', 'titane', 'cobalt'];
+var MATIERES = ['bois dur', 'multi-matériaux', 'cloison sèche', 'bois', 'métal', 'inox', 'acier',
+  'béton', 'pierre', 'carrelage', 'plexiglas', 'fonte', 'aluminium'];
+var EMMANCHEMENTS = ['sds-max', 'sds-plus', 'sds', 'hexagonal', 'moyeu déporté', 'starlock', 'e-cut'];
 
 var SERIES = ['flexvolt', 'powerstack', 'xtreme', 'atomic', 'powerdetect', 'xr', 'lxt', 'cxt', 'xgt'];
 var BOITES = /\b(t-?\s?stak|tough\s?system|makpac|systainer|l-?boxx|tanos)\b/;
@@ -606,20 +726,56 @@ var BOITES = /\b(t-?\s?stak|tough\s?system|makpac|systainer|l-?boxx|tanos)\b/;
    dans « maKITa » et rendu le type « kit » pour toute machine de la marque.
    D'où cette borne explicite : ni lettre latine, ni chiffre, de chaque côté. */
 var LETTRE = 'a-zà-öø-ÿ0-9';
+/* ⛔ LES ACCENTS NE SONT PAS FIABLES DANS UN TITRE FOURNISSEUR. Mesuré sur
+   son catalogue : « Elagueuse sur perche 18V » — sans accent — n'était jamais
+   reconnue, alors que « élagueuse » figure au vocabulaire. Les deux côtés sont
+   donc dépouillés de leurs signes avant comparaison ; le type RENDU garde,
+   lui, son orthographe correcte. */
+function sansAccents(s) {
+  return String(s).normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
 function motEntier(basseCasse, mot) {
-  return new RegExp('(?:^|[^' + LETTRE + '])' + escapeRe(mot) + '(?![' + LETTRE + '])')
-    .test(basseCasse);
+  return reMot(mot).test(sansAccents(basseCasse));
+}
+/* Le pluriel se met sur CHAQUE mot du terme : « lames de scie sabre » doit
+   accrocher « lame de scie sabre ». Un `s?` global à la fin ne suffisait pas. */
+function reMot(mot) {
+  var corps = escapeRe(sansAccents(mot)).split(/\s+/).join('s?\\s+') + 's?';
+  return new RegExp('(?:^|[^' + LETTRE + '])' + corps + '(?![' + LETTRE + '])');
+}
+/* ⛔ LE TYPE SE CHOISIT PAR LA CORRESPONDANCE LA PLUS LONGUE, jamais par
+   l'ordre de la liste. Mesuré sur son catalogue : « Rainureuse à double disque
+   Ø180 mm en coffret » contient trois termes (rainureuse · disque · coffret).
+   Un ordre fixe se trompe forcément sur l'un des trois titres ; le terme le
+   plus long est celui qui décrit vraiment l'article. */
+function typerTitre(bas) {
+  var meilleur = null, nu = sansAccents(bas);
+  for (var i = 0; i < VOCABULAIRE.length; i++) {
+    var fam = VOCABULAIRE[i][0], mot = VOCABULAIRE[i][1];
+    if (!reMot(mot).test(nu)) continue;
+    if (!meilleur || mot.length > meilleur.type.length) meilleur = { famille: fam, type: mot };
+  }
+  return meilleur;
 }
 
 function extraireCaracteristiques(titre, brand) {
   var t = String(titre || '').replace(/[ \t   ]+/g, ' ');
   var bas = t.toLowerCase();
   var car = {
-    sku: null, skuEclate: null, type: null, serie: null,
+    famille: null, type: null, sku: null, skuEclate: null, serie: null,
+    // — machines
     voltage: null, voltageSecteur: null, ah: null,
     nbBatteries: null, nbOutils: null, chargeur: false, coffret: null,
-    pack: false, sansFil: null, brushless: null,
-    poidsKg: null, diametreMm: null, bars: null
+    pack: false, sansFil: null, brushless: null, watts: null,
+    // — consommables et quincaillerie
+    nbPieces: null, conditionnement: null, pourMachine: null,
+    diametreMm: null, alesageMm: null,
+    dimensionsMm: null, cotesMm: null, longueurMm: null, longueurM: null, pouces: null,
+    nbDents: null, grain: null, nuance: null, matiere: null, emmanchement: null,
+    // — EPI et vêtement de travail
+    taille: null, pointure: null, normeEpi: null,
+    // — commun
+    poidsKg: null, bars: null, litres: null
   };
   if (!t) return car;
 
@@ -646,11 +802,32 @@ function extraireCaracteristiques(titre, brand) {
     if (me) car.skuEclate = (me[1] + me[2] + (me[3] || '')).toUpperCase();
   }
 
-  // ── Nom propre de l'outil : le premier de la liste qui apparaît, EN MOT
-  //    ENTIER. `indexOf` seul trouvait « kit » dans « ma-KIT-a ».
-  for (var o = 0; o < OUTILS.length; o++) {
-    if (motEntier(bas, OUTILS[o])) { car.type = OUTILS[o]; break; }
+  /* ── Conditionnement. « Coffret de 29 forets métal » : le NOMBRE est celui
+     des pièces, et le mot « coffret » est le CONTENANT — pas le type. On le
+     retire du texte AVANT de typer, sans quoi tout lot de consommables serait
+     rangé dans « rangement ». */
+  var sansCond = bas, mCond = bas.match(CONDITIONNEMENT);
+  if (mCond) {
+    car.conditionnement = mCond[1].toLowerCase();
+    car.nbPieces = parseInt(mCond[2], 10);
+    sansCond = bas.replace(CONDITIONNEMENT, ' ');
   }
+
+  /* ⛔ « POUR X » DÉSIGNE LA MACHINE DE DESTINATION, PAS L'ARTICLE. Mesuré
+     sur son catalogue : « Lot de 5 lames 30x43 mm pour multi-cutter Métal »
+     était typé MULTI-CUTTER, famille machine — donc un jeu de lames à 20 €
+     pouvait s'apparier à une machine à 300 €. Le segment « pour … » sort du
+     typage et devient son propre champ. */
+  var mPour = sansCond.match(/\bpour\s+([^,(]{2,45})/);
+  var aTyper = sansCond;
+  if (mPour) {
+    car.pourMachine = mPour[1].replace(/\s+\S*\d\S*.*$/, '').trim() || null;
+    aTyper = sansCond.replace(/\bpour\s+[^,(]{2,45}/, ' ');
+  }
+  // ── Nom propre de l'article, par correspondance la plus longue (mot entier).
+  var typ = typerTitre(aTyper) || typerTitre(sansCond) || typerTitre(bas);
+  if (typ) { car.famille = typ.famille; car.type = typ.type; }
+  else if (car.conditionnement) { car.famille = 'rangement'; car.type = car.conditionnement; }
 
   // ── Gamme : elle commande la compatibilité batterie, donc le prix d'un lot.
   for (var s = 0; s < SERIES.length; s++) {
@@ -689,6 +866,13 @@ function extraireCaracteristiques(titre, brand) {
   // ── Combo : « pack 3 outils », « 5 machines ».
   var mo = bas.match(/(\d+)\s*(?:outils|machines)\b/);
   if (mo) car.nbOutils = parseInt(mo[1], 10);
+  /* ⛔ « Pack 2 outils 18V (DHP458 + DTD154) » n'est typé par AUCUN mot du
+     vocabulaire : c'est le NOMBRE qui le désigne. Mesuré — 11 fiches de son
+     catalogue restaient sans type pour cette seule raison, et un combo sans
+     type ne peut être distingué d'une machine seule au moment de comparer. */
+  if (!car.type && car.nbOutils != null && car.nbOutils > 1) {
+    car.famille = 'machine'; car.type = 'pack d\'outils';
+  }
 
   car.chargeur = /\bchargeurs?\b|\bcharger\b/.test(bas);
 
@@ -698,17 +882,110 @@ function extraireCaracteristiques(titre, brand) {
      T-STAK : on cherche la marque D'ABORD, le générique seulement en repli. */
   var mc = bas.match(BOITES);
   if (mc) car.coffret = mc[1].replace(/[-\s]/g, '').toUpperCase();
-  else if (/\b(coffret|mallette|malette|valise)\b/.test(bas)) car.coffret = 'GENERIQUE';
+  /* ⛔ « Coffret DE 29 forets » n'est pas « un article livré EN coffret » :
+     c'est un LOT dont le coffret est l'emballage, déjà dit par
+     `conditionnement`. Le marquer aussi en `coffret` ferait croire à un
+     supplément de rangement facturable là où il n'y en a pas. */
+  else if (car.conditionnement == null && /\b(coffret|mallette|malette|valise)\b/.test(bas)) {
+    car.coffret = 'GENERIQUE';
+  }
 
   car.brushless = /\bbrushless\b|sans\s+charbon/.test(bas) ? true : null;
 
-  // ── Poids, diamètre, pression : ils sont dans le sous-titre idealo.
   var mp = t.match(/(\d+(?:[.,]\d+)?)\s*kg\b/i);
   if (mp) car.poidsKg = parseFloat(mp[1].replace(',', '.'));
-  var md = t.match(/(\d{2,4})\s*mm\b/i);
-  if (md) car.diametreMm = parseInt(md[1], 10);
   var mba = t.match(/(\d{2,4})\s*bars?\b/i);
   if (mba) car.bars = parseInt(mba[1], 10);
+  var mli = t.match(/(\d+(?:[.,]\d+)?)\s*[lL]\b/);
+  if (mli) car.litres = parseFloat(mli[1].replace(',', '.'));
+  var mw = t.match(/(\d{3,5})\s*W\b/);
+  if (mw) car.watts = parseInt(mw[1], 10);
+
+  /* ══ QUINCAILLERIE : LES MESURES QUI FONT LE PRIX ═══════════════════════
+     Mot de l'user : « il y aura la taille, ou l'alésage des circulaires avec
+     le diamètre ». Deux lames de scie circulaire de même diamètre mais
+     d'alésage différent ne se montent pas sur la même machine — les apparier
+     écrirait un coût sur la mauvaise fiche. */
+
+  /* ⛔ Ø EXPLICITE SEULEMENT. Le premier jet prenait le premier « N mm »
+     venu : sur « Lame 30x43 mm » il annonçait un diamètre de 30 mm, alors
+     que 30×43 sont les DIMENSIONS d'une lame plate qui n'a pas de diamètre. */
+  var mdia = t.match(/[ØØø⌀]\s*(\d+(?:[.,]\d+)?)/) || bas.match(/diam[èe]tre\s*(?:de\s*)?(\d+(?:[.,]\d+)?)/);
+  if (mdia) car.diametreMm = parseFloat(mdia[1].replace(',', '.'));
+
+  // Alésage : le trou central. Écrit « alésage 30 mm » ou « 190x30 mm ».
+  var mal = bas.match(/al[ée]sage\s*(?:de\s*)?(\d+(?:[.,]\d+)?)/);
+  if (mal) car.alesageMm = parseFloat(mal[1].replace(',', '.'));
+
+  /* Dimensions : « 30x43 mm », « 6 x 57 x 93 mm ». On exige l'unité mm à la
+     fin, faute de quoi « 2x5,0 Ah » (des batteries) serait pris pour des
+     dimensions. Rendues telles quelles : ce sont des cotes, pas un nombre. */
+  var mdim = t.match(/(\d+(?:[.,]\d+)?)\s*[x×]\s*(\d+(?:[.,]\d+)?)(?:\s*[x×]\s*(\d+(?:[.,]\d+)?))?\s*mm\b/i);
+  if (mdim) car.dimensionsMm = mdim[0].replace(/\s+/g, '').replace(/mm$/i, '');
+
+  /* ⛔ UNE COTE NUE NE DIT PAS CE QU'ELLE MESURE. « Meuleuse 125 mm » est un
+     diamètre de disque, « Lame Alligator 430 mm » une longueur : le titre ne
+     tranche pas, et deviner nommerait faux la moitié du temps. Elle part donc
+     dans `cotesMm` — une mesure présente, de nature non dite. Le Ø explicite
+     va dans `diametreMm`, les centimètres dans `longueurMm` (ils ne servent
+     qu'aux longueurs : guides, chaînes, perches). */
+  if (car.diametreMm == null && car.dimensionsMm == null) {
+    var mlmm = t.match(/(\d{2,4})\s*mm\b/i);
+    if (mlmm) car.cotesMm = parseInt(mlmm[1], 10);
+  }
+  var mcm = t.match(/(\d+(?:[.,]\d+)?)\s*cm\b/i);
+  if (mcm) car.longueurMm = Math.round(parseFloat(mcm[1].replace(',', '.')) * 10);
+  var mlg = bas.match(/longueur\s*(?:de\s*)?(\d+(?:[.,]\d+)?)\s*mm\b/);
+  if (mlg) car.longueurMm = Math.round(parseFloat(mlg[1].replace(',', '.')));
+  var mlm = t.match(/(\d+(?:[.,]\d+)?)\s*m(?![a-z])/i);
+  if (mlm) car.longueurM = parseFloat(mlm[1].replace(',', '.'));
+
+  /* ⛔⛔ ARGENT — DÉFAUT VU DANS MA PROPRE SORTIE, 03/08. Le fil de
+     débroussailleuse s'écrit « 2,5mm x 68,6m » : l'unité mm est AU MILIEU et
+     l'unité m à la fin. Aucune règle ci-dessus n'accrochait cette forme, et la
+     GROSSEUR DU FIL disparaissait — si bien que « 2mm x 68,6m » et
+     « 2,5mm x 68,6m », deux bobines de prix différents, ressortaient
+     rigoureusement identiques. C'est précisément le recoupement à l'aveugle
+     que l'user refuse. */
+  var mfil = t.match(/(\d+(?:[.,]\d+)?)\s*mm\s*[x×]\s*(\d+(?:[.,]\d+)?)\s*m(?![a-z])/i);
+  if (mfil) {
+    car.diametreMm = parseFloat(mfil[1].replace(',', '.'));
+    car.longueurM = parseFloat(mfil[2].replace(',', '.'));
+  }
+
+  var mpo = t.match(/(\d+\/\d+)\s*["″]/);
+  if (mpo) car.pouces = mpo[1];
+  var mdt = bas.match(/(\d{1,3})\s*dents?\b/);
+  if (mdt) car.nbDents = parseInt(mdt[1], 10);
+  var mgr = bas.match(/grain\s*(\d{1,4})\b/);
+  if (mgr) car.grain = parseInt(mgr[1], 10);
+
+  for (var n = 0; n < NUANCES.length; n++) {
+    if (motEntier(bas, NUANCES[n])) { car.nuance = NUANCES[n].toUpperCase(); break; }
+  }
+  for (var mt = 0; mt < MATIERES.length; mt++) {
+    if (motEntier(bas, MATIERES[mt])) { car.matiere = MATIERES[mt]; break; }
+  }
+  for (var em = 0; em < EMMANCHEMENTS.length; em++) {
+    if (motEntier(bas, EMMANCHEMENTS[em])) { car.emmanchement = EMMANCHEMENTS[em].toUpperCase(); break; }
+  }
+
+  /* ══ EPI ET VÊTEMENT DE TRAVAIL ════════════════════════════════════════
+     ⚠️ Les codes de la norme chaussures ont CHANGÉ en 2022 (EN ISO 20345) :
+     S6 et S7 sont apparus, et les suffixes S / L distinguent la plaque
+     anti-perforation testée à la petite pointe (3 mm) de celle testée à la
+     large (4,5 mm). Vérifié en ligne le 03/08/2026 avant d'écrire cette
+     liste — de mémoire j'aurais rendu S1..S3 et rien d'autre, donc faux. */
+  var mno = t.match(/\b(S[1-7]P?[SL]?|SB|SRA|SRB|SRC|WRU?|HRO|HI|CI|ESD)\b/);
+  if (mno) car.normeEpi = mno[1].toUpperCase();
+  var mpt = bas.match(/\b(?:pointure|taille)\s*:?\s*(3[5-9]|4[0-9]|5[0-2])\b/);
+  if (mpt) car.pointure = parseInt(mpt[1], 10);
+  var mta = t.match(/\btaille\s*:?\s*(XXS|XS|S|M|L|XL|XXL|3XL|4XL)\b/i);
+  if (mta) car.taille = mta[1].toUpperCase();
+  else if (!car.pointure) {
+    var mtn = bas.match(/\btaille\s*:?\s*(\d{2})\b/);
+    if (mtn) car.taille = mtn[1];
+  }
 
   /* ── Avec fil ou sur batterie : jamais deviné sans un mot explicite, sauf
      quand le titre annonce lui-même une batterie. « 230 V » seul suffit à dire
@@ -729,7 +1006,8 @@ function extraireCaracteristiques(titre, brand) {
     || (car.nbBatteries != null && car.nbBatteries > 0)
     || car.chargeur === true
     || car.coffret != null
-    || (car.nbOutils != null && car.nbOutils > 1);
+    || (car.nbOutils != null && car.nbOutils > 1)
+    || (car.nbPieces != null && car.nbPieces > 1);
 
   return car;
 }
@@ -743,7 +1021,18 @@ function extraireCaracteristiques(titre, brand) {
    Rend { compatible, conflits, concordances }. `compatible:false` dès UN
    conflit — parce qu'un prix de lot écrit sur une machine nue est une perte
    sèche, et qu'on préfère ne rien écrire à écrire faux. */
-var CHAMPS_BLOQUANTS = ['type', 'voltage', 'nbBatteries', 'nbOutils', 'pack', 'sansFil', 'coffret', 'ah', 'serie'];
+var CHAMPS_BLOQUANTS = [
+  'famille', 'type',
+  // machines
+  'voltage', 'nbBatteries', 'nbOutils', 'pack', 'sansFil', 'coffret', 'ah', 'serie', 'watts',
+  /* quincaillerie — mot de l'user : « il y aura la taille, ou l'alésage des
+     circulaires avec le diamètre ». Deux lames de même Ø et d'alésage
+     différent ne montent pas sur la même machine. */
+  'nbPieces', 'diametreMm', 'alesageMm', 'dimensionsMm', 'cotesMm', 'longueurMm', 'longueurM',
+  'pouces', 'nbDents', 'grain', 'nuance', 'matiere', 'emmanchement',
+  // EPI — une pointure 42 et une 44 sont deux articles, jamais un seul
+  'taille', 'pointure', 'normeEpi'
+];
 
 function comparerCaracteristiques(a, b) {
   var conflits = [], concordances = [];
