@@ -728,7 +728,8 @@ function extraireCaracteristiques(titre, brand) {
   var t = String(titre || '').replace(/[ \t   ]+/g, ' ');
   var bas = t.toLowerCase();
   var car = {
-    famille: null, rayon: null, type: null, sku: null, skuEclate: null, serie: null,
+    famille: null, rayon: null, type: null, prefixe: null, typeRejete: null,
+    sku: null, skuEclate: null, serie: null,
     // — machines
     voltage: null, voltageSecteur: null, ah: null,
     nbBatteries: null, nbOutils: null, chargeur: false, coffret: null,
@@ -796,11 +797,66 @@ function extraireCaracteristiques(titre, brand) {
     car.pourMachine = mPour[1].replace(/\s+\S*\d\S*.*$/, '').trim() || null;
     aTyper = sansCond.replace(/\bpour\s+[^,(]{2,45}/, ' ');
   }
+
+  /* ⛔⛔ CE QUI SUIT UN « + » EST LE LOT, PAS L'ARTICLE. Défaut mesuré le
+     03/08 sur son catalogue : « Scie sauteuse DCS335NT-XJ + 2 batteries +
+     1 chargeur rapide » était typée CHARGEUR, et « Laser 3 lignes + 1
+     batterie » typée BATTERIE — 13 fiches au total. Le mot le plus long
+     gagnait, et il appartenait au lot. Une parenthèse joue le même rôle :
+     « DCH333 (1x Batterie 9 Ah + Chargeur DCB118) ».
+     ⚠️ SEUL LE TYPAGE utilise ce texte élagué. Les batteries, le chargeur,
+     le coffret et les Ah continuent de se lire sur le titre ENTIER — sinon
+     on perdrait précisément ce qui fait le prix d'un lot. */
+  var elague = aTyper.replace(/\([^)]*\)/g, ' ').replace(/\s\+.*$/, ' ').trim();
+  if (elague.length >= 8) aTyper = elague;
   // ── Nom propre de l'article, par correspondance la plus longue (mot entier).
   var typ = typerTitre(aTyper) || typerTitre(sansCond) || typerTitre(bas);
   if (typ) { car.famille = typ.famille; car.rayon = typ.rayon; car.type = typ.type; }
   else if (car.conditionnement) {
     car.famille = 'rangement'; car.rayon = 'coffret'; car.type = car.conditionnement;
+  }
+
+  /* ══ LE PRÉFIXE DE RÉFÉRENCE ARBITRE ══════════════════════════════════
+     Reproche de l'user, 03/08 : « je n'ai absolument rien vu qui référence
+     le DÉBUT des références ». Le préfixe est écrit par le CONSTRUCTEUR :
+     il ne change pas de langue, et il survit là où le vocabulaire échoue.
+
+     Deux emplois, dans cet ordre :
+     ① SECOURS — aucun mot reconnu (titre en espagnol, en anglais, ou réduit
+        à sa seule référence) : le préfixe donne la famille, et le rayon
+        quand il n'en désigne qu'un. Il n'invente JAMAIS de type.
+     ② ARBITRE — le vocabulaire a répondu, mais dans une AUTRE FAMILLE que
+        le préfixe. Mesuré sur sa page : « DEWALT Martillo Electroneumático
+        … y maletín TSTAK » était typé COFFRET, parce que « TSTAK » était le
+        seul mot que je savais lire. Un marteau rangé dans une boîte reste
+        un marteau ; le préfixe, lui, ne se trompe pas de famille.
+
+     ⚠️ J4 — aucun prix ici : on classe un article, on n'en fixe pas la
+     valeur. Le coût d'achat reste celui que la page annonce. */
+  /* ⛔⛔ CETTE TABLE EST CELLE DE DeWALT, ET D'ELLE SEULE. Défaut mesuré à la
+     minute où je l'ai branchée : le catalogue est tombé de 1 119 fiches
+     typées à 1 049. Cause — « Makita DTW700Z » commence par « DT », que la
+     table DeWALT lit « accessoire » ; l'arbitre effaçait donc le type
+     « boulonneuse » sur des dizaines de fiches Makita. Un préfixe n'a de sens
+     que dans la nomenclature de SA marque. */
+  var estDewalt = /^dewalt$/i.test(String(brand || '').replace(/[\s-]/g, ''));
+  var pref = estDewalt ? nomen.prefixeDeReference(car.sku || car.skuEclate || '') : null;
+  if (pref) {
+    car.prefixe = pref.prefixe;
+    if (!car.type) {
+      car.famille = pref.famille;
+      if (pref.rayon) car.rayon = pref.rayon;
+      if (pref.type) car.type = pref.type;
+    } else if (car.famille !== pref.famille && !pref.incertain) {
+      /* ⚠️ On ne garde pas un type qui appartient à la famille contredite :
+         il serait faux. On rend la famille du constructeur et on EFFACE le
+         type — un vide se voit, un type faux se propage. Le type rejeté est
+         conservé à part, pour que la correction soit vérifiable. */
+      car.typeRejete = car.type;
+      car.famille = pref.famille;
+      car.rayon = pref.rayon || null;
+      car.type = pref.type || null;
+    }
   }
 
   // ── Gamme : elle commande la compatibilité batterie, donc le prix d'un lot.

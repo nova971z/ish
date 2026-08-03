@@ -710,6 +710,75 @@ module.exports = async function () {
       && ec('MAKITA ZZ7104L Mortaiseuse 1140 W', 'MAKITA').watts === 1140,
       'préalable : les comptes et puissances LÉGITIMES passent toujours');
 
+    /* ═══ PRÉFIXES DE RÉFÉRENCE ET LANGUES (03/08/2026) ═══════════════════
+       Demande de l'user : « avant ça tu vas chercher comment fonctionnent les
+       références de cette marque […] tant que tu ne sais pas catégoriser les
+       lettres de début, tu ne commences pas », puis « ajoute l'espagnol et
+       l'anglais ». ⚠️ Les NUMÉROS sont synthétiques ; seuls les PRÉFIXES sont
+       réels — c'est eux qui sont testés, et ils appartiennent à la
+       nomenclature du constructeur, pas au catalogue de l'user. */
+    var pk = ec('DEWALT DCK999X9', 'DEWALT');
+    ok(pk.prefixe === 'DCK' && pk.type === 'pack d\'outils',
+      '⛔ « DCK » = combo kit : le préfixe EST le sens, il porte donc son type. '
+      + 'Sans lui, une référence seule ne se catégorise pas du tout');
+    ok(ec('DEWALT DCH999X9', 'DEWALT').rayon === 'perforation'
+      && ec('DEWALT DXPW999', 'DEWALT').rayon === 'chantier'
+      && ec('DEWALT DCB999', 'DEWALT').famille === 'energie',
+      'le préfixe donne le RAYON quand il n\'en désigne qu\'un seul');
+    ok(ec('DEWALT DCF999X9', 'DEWALT').rayon === null,
+      '⛔ « DCF » couvre riveteuse ET clé à chocs : DEUX rayons, donc AUCUN. '
+      + 'Un préfixe ambigu ne tranche pas — il rend la famille, rien de plus');
+    ok(ec('DEWALT DCE999X9', 'DEWALT').type === null,
+      '⛔ un préfixe n\'invente JAMAIS de type : un type est un nom précis, il '
+      + 'vient des mots');
+
+    /* ⛔⛔ LA TABLE EST CELLE DE DeWALT, ET D'ELLE SEULE. Défaut mesuré à la
+       minute où je l'ai branchée : le catalogue est tombé de 1 119 fiches
+       typées à 1 049, parce que « DTW… » (Makita) était lu « DT », accessoire
+       DeWALT, ce qui effaçait le type de dizaines de boulonneuses. */
+    var mk = ec('MAKITA DTW999Z Boulonneuse à chocs 18V', 'MAKITA');
+    ok(mk.prefixe === null && mk.famille === 'machine' && mk.type !== null,
+      '⛔⛔ une référence d\'une AUTRE marque n\'est jamais lue avec la table '
+      + 'DeWALT — sinon « DTW… » passerait pour un accessoire, et le type de la '
+      + 'machine serait effacé (préfixe=' + mk.prefixe + ', famille=' + mk.famille + ')');
+    ok(ec('DEWALT DT99999 Foret béton', 'DEWALT').prefixe === 'DT',
+      'préalable : le MÊME début de référence EST lu quand la marque est bien '
+      + 'DeWALT — sans quoi l\'assertion ci-dessus passerait pour la mauvaise raison');
+
+    // ── Espagnol et anglais
+    var esp = ec('DEWALT Martillo Electroneumático sin escobillas XR 18V SDS plus 2,1J y maletín TSTAK', 'DEWALT');
+    ok(esp.type === 'marteau perforateur',
+      '⛔ ESPAGNOL : « martillo electroneumático … maletín TSTAK » était typé '
+      + 'COFFRET — « TSTAK » était le seul mot que je savais lire. Un marteau '
+      + 'rangé dans une boîte reste un marteau (' + esp.type + ')');
+    ok(ec('DEWALT Riveter XR 18 V 4,8 mm', 'DEWALT').type === 'riveteuse',
+      '⛔ ANGLAIS : « Riveter » se lit comme « riveteuse »');
+    ok(ec('Cordless circular saw 54 V brushless', 'DEWALT').type === 'scie circulaire'
+      && ec('Sierra de calar 18V', 'DEWALT').type === 'scie sauteuse',
+      'anglais et espagnol rendent le MÊME type canonique que le français — '
+      + 'sinon deux annonces du même outil ne se compareraient jamais');
+
+    /* ⛔⛔ CE QUI SUIT UN « + » EST LE LOT, PAS L'ARTICLE. 13 fiches de son
+       catalogue étaient typées CHARGEUR ou BATTERIE pour cette seule raison. */
+    var lotT = ec('DEWALT Scie sauteuse 18V DCS999NT-XJ + 2 batteries 18V 5 Ah + 1 chargeur rapide', 'DEWALT');
+    ok(lotT.type === 'scie sauteuse',
+      '⛔⛔ « Scie sauteuse + 2 batteries + 1 chargeur » est une SCIE. Le mot le '
+      + 'plus long gagnait, et il appartenait au lot (' + lotT.type + ')');
+    ok(lotT.nbBatteries === 2 && lotT.chargeur === true,
+      '⛔ PRÉALABLE D\'ARGENT : le lot reste compté ENTIER. Élaguer pour typer ne '
+      + 'doit rien retirer de ce qui fait le prix — sinon on aurait échangé une '
+      + 'erreur de type contre une erreur de coût');
+    var par = ec('DEWALT DCH999X9 (1x Batterie 9 Ah + Chargeur DCB118) Marteau perforateur combiné', 'DEWALT');
+    ok(par.type === 'marteau perforateur' && par.nbBatteries === 1 && par.chargeur === true,
+      'une parenthèse joue le même rôle qu\'un « + » : elle décrit le lot, pas l\'article');
+
+    /* ⚠️ Deux préfixes ne sont PAS fiables : DeWALT range sa radio sous DWST
+       et son télémètre sous DWHT. Ils ne doivent donc jamais contredire un mot. */
+    var rad = ec('DEWALT DWST9-99999 Radio de chantier Bluetooth 18V', 'DEWALT');
+    ok(rad.type === 'radio de chantier',
+      '⛔ un préfixe INCERTAIN ne contredit pas un mot explicite : DeWALT range '
+      + 'sa RADIO sous DWST (rangement) — le mot du titre l\'emporte (' + rad.type + ')');
+
     var cD = ec('MAKITA ZZI850', 'MAKITA');
     ok(cD.type !== 'kit',
       '⛔ DÉFAUT MESURÉ PAR CETTE PORTE : « kit » se trouve DANS « maKITa ». Un '

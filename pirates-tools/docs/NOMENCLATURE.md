@@ -17,15 +17,15 @@
 |---|---|
 | Familles | **5** |
 | Rayons | **39** |
-| Types (noms canoniques) | **220** |
-| Écritures reconnues | **725** |
+| Types (noms canoniques) | **221** |
+| Écritures reconnues | **1075** |
 | Mesures déclarées | **34** |
 | Codes de norme EPI | **50** |
 
-**Couverture sur le catalogue réel** — **1119 fiches typées sur 1226**.
-Des 107 restantes, **106** portent un titre qui dit
+**Couverture sur le catalogue réel** — **1118 fiches typées sur 1226**.
+Des 108 restantes, **106** portent un titre qui dit
 littéralement « descriptif à compléter » : il n'y a rien à lire dedans. Reste
-**1** fiche sans type — un titre sans aucun nom d'objet.
+**2** fiche sans type — un titre sans aucun nom d'objet.
 
 ---
 
@@ -150,121 +150,121 @@ reste est effacé en sortie.
 *Le nombre entre parenthèses est le nombre d'écritures reconnues pour ce type.*
 
 **`percage`** — Perçage et vissage  
-· perceuse-visseuse *(3)* · perceuse à percussion *(3)* · perceuse d'angle *(2)* · perceuse à colonne *(2)* · perceuse *(2)* · visseuse à placo *(4)* · visseuse *(3)* · carotteuse *(3)* · taraudeuse *(1)* · malaxeur *(3)* · tarière *(2)*
+· perceuse-visseuse *(6)* · perceuse à percussion *(6)* · perceuse d'angle *(2)* · perceuse à colonne *(2)* · perceuse *(4)* · visseuse à placo *(7)* · visseuse *(5)* · carotteuse *(6)* · taraudeuse *(1)* · malaxeur *(6)* · tarière *(2)*
 
 **`vissage-choc`** — Vissage et boulonnage à chocs  
-· visseuse à chocs *(4)* · clé à chocs *(4)* · boulonneuse *(2)* · cliquet *(2)*
+· visseuse à chocs *(5)* · clé à chocs *(5)* · boulonneuse *(2)* · cliquet *(5)*
 
 **`perforation`** — Perforation et démolition  
-· marteau perforateur *(4)* · marteau de démolition *(4)* · perforateur *(3)* · burineur *(2)*
+· marteau perforateur *(10)* · marteau de démolition *(8)* · perforateur *(4)* · burineur *(4)*
 
 **`meulage`** — Meulage, tronçonnage, polissage  
-· meuleuse d'angle *(4)* · meuleuse droite *(2)* · meuleuse *(3)* · découpeuse *(4)* · polisseuse *(2)* · surfaceuse *(4)* · rainureuse *(3)* · grignoteuse *(2)* · cisaille *(2)* · lime à bande *(2)* · ébavureuse *(2)*
+· meuleuse d'angle *(5)* · meuleuse droite *(2)* · meuleuse *(5)* · découpeuse *(8)* · polisseuse *(4)* · surfaceuse *(7)* · rainureuse *(5)* · grignoteuse *(3)* · cisaille *(5)* · lime à bande *(2)* · ébavureuse *(2)*
 
 **`sciage`** — Sciage  
-· scie circulaire *(3)* · scie plongeante *(2)* · scie sabre *(4)* · scie sauteuse *(2)* · scie à onglet *(4)* · scie sur table *(5)* · scie à ruban *(2)* · scie à matériaux *(4)* · scie à diamant *(2)* · scie égoïne *(2)* · scie *(1)*
+· scie circulaire *(4)* · scie plongeante *(5)* · scie sabre *(6)* · scie sauteuse *(4)* · scie à onglet *(7)* · scie sur table *(7)* · scie à ruban *(4)* · scie à matériaux *(4)* · scie à diamant *(4)* · scie égoïne *(2)* · scie *(3)*
 
 **`bois`** — Travail du bois  
-· défonceuse *(3)* · affleureuse *(3)* · raboteuse *(2)* · dégauchisseuse *(1)* · rabot *(2)* · ponceuse *(9)* · lamelleuse *(3)* · mortaiseuse *(2)* · plaqueuse de chants *(2)* · fraiseuse *(4)* · toupie *(2)* · outil multifonctions *(6)*
+· défonceuse *(5)* · affleureuse *(5)* · raboteuse *(5)* · dégauchisseuse *(4)* · rabot *(5)* · ponceuse *(14)* · lamelleuse *(4)* · mortaiseuse *(4)* · plaqueuse de chants *(2)* · fraiseuse *(4)* · toupie *(2)* · outil multifonctions *(10)*
 
 **`fixation`** — Clouage, agrafage, rivetage  
-· cloueur de charpente *(2)* · cloueur de finition *(3)* · cloueur *(4)* · agrafeuse *(3)* · riveteuse *(2)* · pistolet à mastic *(4)* · cercleuse *(2)*
+· cloueur de charpente *(4)* · cloueur de finition *(6)* · cloueur *(6)* · agrafeuse *(5)* · riveteuse *(6)* · pistolet à mastic *(7)* · cercleuse *(2)*
 
 **`aspiration`** — Aspiration et soufflage  
-· aspirateur *(5)* · souffleur *(3)* · système d'aspiration *(4)*
+· aspirateur *(10)* · souffleur *(6)* · système d'aspiration *(4)*
 
 **`jardin`** — Jardin et espaces verts  
-· tronçonneuse *(3)* · élagueuse sur perche *(3)* · élagueuse *(1)* · sécateur sur perche *(1)* · sécateur *(2)* · débroussailleuse *(2)* · coupe-bordure *(2)* · taille-haie *(3)* · tondeuse *(3)* · scarificateur *(2)* · motobineuse *(2)* · broyeur *(2)* · pulvérisateur *(2)*
+· tronçonneuse *(5)* · élagueuse sur perche *(6)* · élagueuse *(1)* · sécateur sur perche *(1)* · sécateur *(5)* · débroussailleuse *(5)* · coupe-bordure *(7)* · taille-haie *(5)* · tondeuse *(6)* · scarificateur *(2)* · motobineuse *(2)* · broyeur *(2)* · pulvérisateur *(2)*
 
 **`chantier`** — Énergie et fluides de chantier  
-· nettoyeur haute pression *(3)* · nettoyeur *(2)* · compresseur *(2)* · groupe électrogène *(3)* · poste à souder *(3)* · vibrateur *(3)* · pompe à graisse *(2)* · pompe *(4)* · gonfleur *(2)* · décapeur thermique *(3)* · treuil *(3)* · ventouse à vide *(3)* · station d'alimentation *(4)*
+· nettoyeur haute pression *(7)* · nettoyeur *(4)* · compresseur *(5)* · groupe électrogène *(6)* · poste à souder *(6)* · vibrateur *(5)* · pompe à graisse *(2)* · pompe *(7)* · gonfleur *(5)* · décapeur thermique *(5)* · treuil *(3)* · ventouse à vide *(6)* · borne de recharge *(6)* · station d'alimentation *(4)*
 
 **`mesure`** — Mesure, détection, éclairage  
-· niveau laser *(5)* · télémètre laser *(3)* · détecteur *(4)* · caméra d'inspection *(2)* · caméra thermique *(2)* · projecteur *(3)* · lampe *(4)* · niveau *(3)* · système sans fil *(3)*
+· niveau laser *(10)* · télémètre laser *(7)* · détecteur *(7)* · caméra d'inspection *(2)* · caméra thermique *(2)* · projecteur *(8)* · lampe *(9)* · niveau *(3)* · système sans fil *(3)*
 
 **`confort`** — Confort de chantier  
-· radio de chantier *(4)* · glacière *(3)* · ventilateur *(2)* · chauffage *(3)* · bouilloire *(1)* · four micro-ondes *(3)* · cafetière *(2)*
+· radio de chantier *(8)* · glacière *(6)* · ventilateur *(5)* · chauffage *(3)* · bouilloire *(1)* · four micro-ondes *(3)* · cafetière *(2)*
 
 **`combo`** — Lots de plusieurs machines  
-· pack d'outils *(8)*
+· pack d'outils *(13)*
 
 **`lame-circulaire`** — Lames de scie circulaire  
-· lame de scie circulaire *(6)*
+· lame de scie circulaire *(8)*
 
 **`lame-alternative`** — Lames de scie sabre, sauteuse, ruban  
-· lame de scie sabre *(3)* · lame de scie sauteuse *(2)* · lame de scie à ruban *(2)* · scie-cloche *(4)* · lame de scie *(2)*
+· lame de scie sabre *(5)* · lame de scie sauteuse *(4)* · lame de scie à ruban *(2)* · scie-cloche *(6)* · lame de scie *(2)*
 
 **`lame-oscillante`** — Lames pour outil multifonctions  
 · lame pour outil multifonctions *(5)*
 
 **`foret`** — Forets, mèches, trépans  
-· foret multi-matériaux *(3)* · foret béton *(3)* · foret métal *(4)* · foret à bois *(6)* · foret étagé *(3)* · couronne diamantée *(3)* · taraud *(2)* · foret *(4)*
+· foret multi-matériaux *(3)* · foret béton *(6)* · foret métal *(7)* · foret à bois *(9)* · foret étagé *(3)* · couronne diamantée *(3)* · taraud *(2)* · foret *(5)*
 
 **`fraise`** — Fraises de défonceuse  
-· fraise de défonceuse *(10)* · fraise *(2)*
+· fraise de défonceuse *(13)* · fraise *(2)*
 
 **`disque`** — Disques de meuleuse  
-· disque à tronçonner *(3)* · disque à ébarber *(3)* · disque à lamelles *(3)* · disque diamant *(2)* · plateau de surfaçage *(3)* · brosse métallique *(4)* · disque *(2)*
+· disque à tronçonner *(6)* · disque à ébarber *(5)* · disque à lamelles *(4)* · disque diamant *(5)* · plateau de surfaçage *(3)* · brosse métallique *(4)* · disque *(2)*
 
 **`abrasif`** — Abrasifs de ponçage  
 · disque abrasif *(4)* · bande abrasive *(2)* · feuille abrasive *(6)* · éponge abrasive *(3)*
 
 **`vissage-embout`** — Embouts, douilles, clés  
-· embout de vissage *(6)* · porte-embout *(3)* · douille à chocs *(3)* · douille *(3)* · clé mixte *(6)* · rallonge de douille *(3)*
+· embout de vissage *(10)* · porte-embout *(3)* · douille à chocs *(5)* · douille *(5)* · clé mixte *(6)* · rallonge de douille *(3)*
 
 **`burin`** — Burins, pointes, pelles  
 · burin plat *(3)* · burin pointu *(3)* · burin *(2)* · pelle *(3)*
 
 **`visserie`** — Visserie, boulonnerie, fixations  
-· vis à bande *(3)* · vis autoperceuse *(3)* · vis à bois *(4)* · vis *(2)* · tirefond *(2)* · boulon *(3)* · écrou *(4)* · rondelle *(3)* · cheville *(7)* · clou *(4)* · agrafe *(1)* · rivet *(2)* · équerre *(3)*
+· vis à bande *(3)* · vis autoperceuse *(3)* · vis à bois *(4)* · vis *(6)* · tirefond *(2)* · boulon *(3)* · écrou *(4)* · rondelle *(3)* · cheville *(10)* · clou *(8)* · agrafe *(5)* · rivet *(2)* · équerre *(3)*
 
 **`chaine`** — Chaînes, guides, fils de coupe  
-· chaîne de tronçonneuse *(3)* · guide-chaîne *(3)* · fil de débroussailleuse *(6)*
+· chaîne de tronçonneuse *(6)* · guide-chaîne *(6)* · fil de débroussailleuse *(9)*
 
 **`filtration`** — Filtres, sacs, tuyaux  
-· filtre *(4)* · sac aspirateur *(4)* · tuyau d'aspiration *(3)*
+· filtre *(7)* · sac aspirateur *(7)* · tuyau d'aspiration *(3)*
 
 **`accessoire`** — Accessoires et pièces  
 · rail de guidage *(4)* · serre-joint *(4)* · trépied *(3)* · piètement *(3)* · adaptateur *(5)* · joint d'étanchéité *(3)* · charbon *(3)* · courroie *(3)* · accessoire *(6)*
 
 **`batterie`** — Batteries  
-· batterie *(5)*
+· batterie *(10)*
 
 **`chargeur`** — Chargeurs et stations  
-· chargeur *(5)* · adaptateur secteur *(3)*
+· chargeur *(9)* · adaptateur secteur *(3)*
 
 **`coffret`** — Coffrets et valises  
-· coffret modulaire *(10)* · coffret *(7)*
+· coffret modulaire *(10)* · coffret *(14)*
 
 **`mobilier`** — Chariots, servantes, établis  
-· servante *(2)* · chariot *(3)* · établi *(3)* · armoire à outils *(3)*
+· servante *(5)* · chariot *(5)* · établi *(3)* · armoire à outils *(3)*
 
 **`portage`** — Sacs, ceintures, porte-outils  
-· sac à outils *(4)* · ceinture porte-outils *(5)*
+· sac à outils *(7)* · ceinture porte-outils *(5)*
 
 **`chaussure`** — Chaussures et bottes de sécurité  
-· chaussure de sécurité *(7)* · botte de sécurité *(5)* · sur-chaussure *(3)* · semelle *(3)*
+· chaussure de sécurité *(12)* · botte de sécurité *(8)* · sur-chaussure *(3)* · semelle *(3)*
 
 **`vetement`** — Vêtements de travail  
-· pantalon de travail *(4)* · short de travail *(3)* · salopette *(4)* · combinaison *(3)* · veste de travail *(4)* · parka *(4)* · softshell *(3)* · polaire *(3)* · sweat *(4)* · polo *(2)* · t-shirt *(4)* · chemise *(2)* · gilet haute visibilité *(3)* · gilet *(3)* · veste de pluie *(4)* · tablier *(2)* · bonnet *(4)* · chaussette *(2)*
+· pantalon de travail *(8)* · short de travail *(3)* · salopette *(4)* · combinaison *(3)* · veste de travail *(7)* · parka *(4)* · softshell *(3)* · polaire *(3)* · sweat *(4)* · polo *(2)* · t-shirt *(4)* · chemise *(2)* · gilet haute visibilité *(3)* · gilet *(3)* · veste de pluie *(4)* · tablier *(2)* · bonnet *(4)* · chaussette *(2)*
 
 **`main`** — Protection des mains  
-· gant de protection *(11)* · manchette *(2)*
+· gant de protection *(16)* · manchette *(2)*
 
 **`tete`** — Protection de la tête et du visage  
-· casque de chantier *(3)* · casquette anti-heurt *(2)* · lunettes de protection *(6)* · écran facial *(4)* · masque de soudeur *(3)*
+· casque de chantier *(7)* · casquette anti-heurt *(2)* · lunettes de protection *(10)* · écran facial *(4)* · masque de soudeur *(3)*
 
 **`auditif`** — Protection auditive  
-· casque anti-bruit *(5)* · bouchon d'oreille *(3)*
+· casque anti-bruit *(9)* · bouchon d'oreille *(3)*
 
 **`respiratoire`** — Protection respiratoire  
-· masque respiratoire *(7)* · cartouche respiratoire *(2)*
+· masque respiratoire *(11)* · cartouche respiratoire *(2)*
 
 **`hauteur`** — Travail en hauteur  
-· harnais antichute *(3)* · longe antichute *(5)* · ligne de vie *(3)*
+· harnais antichute *(7)* · longe antichute *(5)* · ligne de vie *(3)*
 
 **`genou`** — Protection des genoux  
-· genouillère *(3)*
+· genouillère *(6)*
 
 
 ---
@@ -279,6 +279,76 @@ reste est effacé en sortie.
 
 *Source : support.dewalt.com, croisée avec la règle déjà gravée par l'user le
 02/08 (D-74), qu'elle confirme.*
+
+### 5.1 Le PRÉFIXE dit CE QU'EST l'outil
+
+> ⛔ **Ce qui manquait au premier jet, et l'user l'a vu** : « je n'ai
+> absolument rien vu qui référence le DÉBUT des références ; en général c'est
+> les trois premières lettres, il peut y en avoir moins ou plus. » Exact.
+> J'avais documenté ce qu'il y a **dans la boîte** et rien sur ce **qu'est**
+> l'outil.
+
+Le préfixe est ce qu'il y a de plus solide dans un titre : c'est le
+constructeur qui l'écrit, **il ne change pas d'une langue à l'autre**, et il
+survit là où le vocabulaire échoue.
+
+*Sources : toolguyd.com · housedigest.com · ukplanettools.co.uk ·
+forum.toolsinaction.com — **et vérifié sur sa page du 03/08**, dont les 46
+annonces donnent préfixe par préfixe exactement la même correspondance.*
+
+| Préfixe | Famille | Rayon | Ce qu'il désigne |
+|---|---|---|---|
+| `D25` | machine | perforation | marteau filaire |
+| `D26` | machine | — | ponçage et défonçage filaires, plusieurs rayons |
+| `D27` | machine | — | machines d'atelier, plusieurs rayons |
+| `D28` | machine | meulage | meuleuse filaire |
+| `D51` | machine | fixation | cloueur pneumatique |
+| `D55` | machine | chantier | compresseur |
+| `DCB` | energie | batterie | batterie |
+| `DCBP` | energie | batterie | batterie compacte |
+| `DCC` | machine | jardin | tronçonneuse |
+| `DCD` | machine | percage | perceuse, visseuse, malaxeur |
+| `DCE` | machine | — | fourre-tout maison : laser, vibrateur, souffleur, ponceuse à plâtre… aucun rayon sûr |
+| `DCF` | machine | — | fixation au sens large : visseuse à chocs, clé à chocs, riveteuse — DEUX rayons, donc aucun |
+| `DCG` | machine | meulage | meuleuse |
+| `DCH` | machine | perforation | marteau perforateur |
+| `DCK` | machine | combo | combo kit — le préfixe EST le sens |
+| `DCL` | machine | mesure | éclairage |
+| `DCM` | machine | jardin | extérieur et enlèvement de matière |
+| `DCMB` | machine | jardin | coupe-bordure |
+| `DCMP` | machine | chantier | nettoyeur à pression sans fil |
+| `DCMST` | machine | jardin | débroussailleuse, coupe-fil |
+| `DCMW` | machine | jardin | tondeuse |
+| `DCN` | machine | fixation | cloueur, agrafeuse |
+| `DCS` | machine | sciage | scie, et outil oscillant |
+| `DCT` | machine | mesure | Tool Connect, mesure et détection |
+| `DCV` | machine | aspiration | aspirateur |
+| `DCW` | machine | bois | travail du bois |
+| `DT` | consommable | — | accessoire et consommable ⚠️ **n'arbitre pas** |
+| `DWE` | machine | — | électroportatif filaire, plusieurs rayons |
+| `DWHT` | consommable | — | outillage à main, mais AUSSI le télémètre laser ⚠️ **n'arbitre pas** |
+| `DWMT` | consommable | — | outillage de mécanicien ⚠️ **n'arbitre pas** |
+| `DWS` | machine | sciage | scie filaire |
+| `DWST` | rangement | coffret | coffret et organiseur, mais AUSSI la radio de chantier ⚠️ **n'arbitre pas** |
+| `DWV` | machine | aspiration | aspirateur |
+| `DXGN` | machine | chantier | groupe électrogène |
+| `DXPW` | machine | chantier | nettoyeur haute pression |
+
+**Trois règles, chacune payée par un défaut mesuré :**
+
+1. **Le préfixe n'invente jamais de type.** Un type est un nom précis, il
+   vient des mots. Le préfixe donne la famille, et le rayon seulement quand il
+   n'en désigne qu'un. `DCF` couvre riveteuse **et** clé à chocs ; `DCE` est un
+   fourre-tout maison. Seul `DCK` porte son type : « combo kit » *est* le sens
+   du préfixe. 
+2. **La table est celle de DeWALT, et d'elle seule.** À la minute où je l'ai
+   branchée sans vérifier la marque, le catalogue est tombé de **1 119 fiches
+   typées à 1 049** : « Makita **DT**W700Z » était lu « DT », accessoire DeWALT. 
+3. **Deux préfixes n'arbitrent pas.** DeWALT range sa **radio** sous `DWST`
+   (rangement) et son **télémètre laser** sous `DWHT` (outil à main) : là, le
+   préfixe désigne un catalogue commercial, pas une famille d'objet.
+
+### 5.2 Le SUFFIXE dit ce qu'il y a dans la boîte
 
 | Suffixe | Batteries | Capacité | Coffret | Note |
 |---|---|---|---|---|

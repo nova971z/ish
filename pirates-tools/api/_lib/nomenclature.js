@@ -218,105 +218,105 @@ var RAYONS = {
    « elagueuse » à côté d'« élagueuse ». */
 var TYPES = [
   // ═══ MACHINES — PERÇAGE ET VISSAGE ══════════════════════════════════
-  ['percage', 'perceuse-visseuse', ['perceuse-visseuse', 'perceuse visseuse', 'perceuse/visseuse']],
-  ['percage', 'perceuse à percussion', ['perceuse à percussion', 'perceuse percussion', 'perceuse à choc']],
+  ['percage', 'perceuse-visseuse', ['perceuse-visseuse', 'perceuse visseuse', 'perceuse/visseuse', 'taladro atornillador', 'drill driver', 'cordless drill driver']],
+  ['percage', 'perceuse à percussion', ['perceuse à percussion', 'perceuse percussion', 'perceuse à choc', 'taladro percutor', 'hammer drill', 'percussion drill']],
   ['percage', 'perceuse d\'angle', ['perceuse d\'angle', 'perceuse angulaire']],
   ['percage', 'perceuse à colonne', ['perceuse à colonne', 'perceuse d\'établi']],
-  ['percage', 'perceuse', ['perceuse', 'drill']],
-  ['percage', 'visseuse à placo', ['visseuse à placo', 'visseuse plaquiste', 'visseuse à bande', 'visseuse cloison']],
-  ['percage', 'visseuse', ['visseuse', 'tournevis électrique', 'screwdriver']],
-  ['percage', 'carotteuse', ['carotteuse', 'carotteuse à eau', 'carotteuse diamant']],
+  ['percage', 'perceuse', ['perceuse', 'drill', 'taladro', 'bohrmaschine']],
+  ['percage', 'visseuse à placo', ['visseuse à placo', 'visseuse plaquiste', 'visseuse à bande', 'visseuse cloison', 'atornillador para pladur', 'drywall screwdriver', 'drywall screwgun']],
+  ['percage', 'visseuse', ['visseuse', 'tournevis électrique', 'screwdriver', 'atornillador', 'screwdriver drill']],
+  ['percage', 'carotteuse', ['carotteuse', 'carotteuse à eau', 'carotteuse diamant', 'perforadora de diamante', 'core drill', 'diamond core drill']],
   ['percage', 'taraudeuse', ['taraudeuse']],
-  ['percage', 'malaxeur', ['malaxeur', 'mélangeur', 'agitateur']],
+  ['percage', 'malaxeur', ['malaxeur', 'mélangeur', 'agitateur', 'mezclador', 'paddle mixer', 'mixer']],
   ['percage', 'tarière', ['tarière', 'tarière de sol']],
 
   // ═══ MACHINES — VISSAGE À CHOCS ═════════════════════════════════════
-  ['vissage-choc', 'visseuse à chocs', ['visseuse à chocs', 'visseuse à choc', 'visseuse à impulsions', 'impact driver']],
-  ['vissage-choc', 'clé à chocs', ['clé à chocs', 'clé à choc', 'boulonneuse à chocs', 'impact wrench']],
+  ['vissage-choc', 'visseuse à chocs', ['visseuse à chocs', 'visseuse à choc', 'visseuse à impulsions', 'impact driver', 'atornillador de impacto']],
+  ['vissage-choc', 'clé à chocs', ['clé à chocs', 'clé à choc', 'boulonneuse à chocs', 'impact wrench', 'llave de impacto']],
   ['vissage-choc', 'boulonneuse', ['boulonneuse', 'déboulonneuse']],
-  ['vissage-choc', 'cliquet', ['cliquet', 'clé à cliquet']],
+  ['vissage-choc', 'cliquet', ['cliquet', 'clé à cliquet', 'carraca', 'ratchet', 'cordless ratchet']],
 
   // ═══ MACHINES — PERFORATION ET DÉMOLITION ═══════════════════════════
   ['perforation', 'marteau perforateur', ['marteau perforateur', 'marteau perforateur burineur',
-    'marteau combiné', 'perforateur burineur']],
+    'marteau combiné', 'perforateur burineur', 'martillo electroneumático', 'martillo perforador', 'martillo combinado', 'rotary hammer', 'combi hammer', 'sds hammer']],
   ['perforation', 'marteau de démolition', ['marteau de démolition', 'marteau piqueur', 'brise-béton',
-    'demolition hammer']],
-  ['perforation', 'perforateur', ['perforateur', 'perfo', 'rotary hammer']],
-  ['perforation', 'burineur', ['burineur', 'marteau burineur']],
+    'demolition hammer', 'martillo demoledor', 'martillo de demolición', 'breaker', 'pavement breaker']],
+  ['perforation', 'perforateur', ['perforateur', 'perfo', 'rotary hammer', 'perforador']],
+  ['perforation', 'burineur', ['burineur', 'marteau burineur', 'cincelador', 'chipping hammer']],
 
   // ═══ MACHINES — MEULAGE, TRONÇONNAGE, POLISSAGE ═════════════════════
-  ['meulage', 'meuleuse d\'angle', ['meuleuse d\'angle', 'meuleuse angulaire', 'disqueuse d\'angle', 'angle grinder']],
+  ['meulage', 'meuleuse d\'angle', ['meuleuse d\'angle', 'meuleuse angulaire', 'disqueuse d\'angle', 'angle grinder', 'amoladora angular']],
   ['meulage', 'meuleuse droite', ['meuleuse droite', 'meuleuse crayon']],
-  ['meulage', 'meuleuse', ['meuleuse', 'disqueuse', 'meuleuse compacte']],
-  ['meulage', 'découpeuse', ['découpeuse', 'découpeuse thermique', 'tronçonneuse à disque', 'cut-off saw']],
-  ['meulage', 'polisseuse', ['polisseuse', 'lustreuse']],
-  ['meulage', 'surfaceuse', ['surfaceuse', 'surfaceuse à béton', 'ponceuse à béton', 'rénovateur de surface']],
-  ['meulage', 'rainureuse', ['rainureuse', 'rainureuse à disque', 'saigneuse']],
-  ['meulage', 'grignoteuse', ['grignoteuse', 'nibbler']],
-  ['meulage', 'cisaille', ['cisaille', 'cisaille à tôle']],
+  ['meulage', 'meuleuse', ['meuleuse', 'disqueuse', 'meuleuse compacte', 'amoladora', 'grinder']],
+  ['meulage', 'découpeuse', ['découpeuse', 'découpeuse thermique', 'tronçonneuse à disque', 'cut-off saw', 'cortadora', 'tronzadora', 'cut off saw', 'cutter']],
+  ['meulage', 'polisseuse', ['polisseuse', 'lustreuse', 'pulidora', 'polisher']],
+  ['meulage', 'surfaceuse', ['surfaceuse', 'surfaceuse à béton', 'ponceuse à béton', 'rénovateur de surface', 'fresadora de hormigón', 'concrete grinder', 'surface planer']],
+  ['meulage', 'rainureuse', ['rainureuse', 'rainureuse à disque', 'saigneuse', 'rozadora', 'wall chaser']],
+  ['meulage', 'grignoteuse', ['grignoteuse', 'nibbler', 'roedora']],
+  ['meulage', 'cisaille', ['cisaille', 'cisaille à tôle', 'cizalla', 'shear', 'metal shear']],
   ['meulage', 'lime à bande', ['lime à bande', 'lime électrique']],
   ['meulage', 'ébavureuse', ['ébavureuse', 'ébarbeuse']],
 
   // ═══ MACHINES — SCIAGE ══════════════════════════════════════════════
-  ['sciage', 'scie circulaire', ['scie circulaire', 'scie circulaire portative', 'circular saw']],
-  ['sciage', 'scie plongeante', ['scie plongeante', 'scie sur rail']],
-  ['sciage', 'scie sabre', ['scie sabre', 'scie alligator', 'scie récipro', 'reciprocating saw']],
-  ['sciage', 'scie sauteuse', ['scie sauteuse', 'jigsaw']],
-  ['sciage', 'scie à onglet', ['scie à onglet', 'scie radiale', 'scie à coupe d\'onglet', 'mitre saw']],
+  ['sciage', 'scie circulaire', ['scie circulaire', 'scie circulaire portative', 'circular saw', 'sierra circular']],
+  ['sciage', 'scie plongeante', ['scie plongeante', 'scie sur rail', 'sierra de incisión', 'plunge saw', 'track saw']],
+  ['sciage', 'scie sabre', ['scie sabre', 'scie alligator', 'scie récipro', 'reciprocating saw', 'sierra sable', 'recip saw']],
+  ['sciage', 'scie sauteuse', ['scie sauteuse', 'jigsaw', 'sierra de calar', 'jig saw']],
+  ['sciage', 'scie à onglet', ['scie à onglet', 'scie radiale', 'scie à coupe d\'onglet', 'mitre saw', 'ingletadora', 'sierra ingletadora', 'miter saw']],
   ['sciage', 'scie sur table', ['scie sur table', 'scie de table', 'scie stationnaire',
-    'scie circulaire stationnaire', 'scie d\'établi']],
-  ['sciage', 'scie à ruban', ['scie à ruban', 'band saw']],
+    'scie circulaire stationnaire', 'scie d\'établi', 'sierra de mesa', 'table saw']],
+  ['sciage', 'scie à ruban', ['scie à ruban', 'band saw', 'sierra de cinta', 'bandsaw']],
   ['sciage', 'scie à matériaux', ['scie à matériaux', 'scie de maçon', 'scie à carrelage', 'coupe-carreaux']],
-  ['sciage', 'scie à diamant', ['scie à diamant', 'scie diamant']],
+  ['sciage', 'scie à diamant', ['scie à diamant', 'scie diamant', 'sierra de diamante', 'diamond saw']],
   ['sciage', 'scie égoïne', ['scie égoïne', 'scie à main']],
   /* ⚠️ Le terme NU en dernier recours. Il a été oublié au premier jet et
      4 machines de son catalogue sont sorties sans type pour cette seule
      raison — « Scie pour matériaux isolants », « Scie semi-stationnaire »… */
-  ['sciage', 'scie', ['scie']],
+  ['sciage', 'scie', ['scie', 'sierra', 'saw']],
 
   // ═══ MACHINES — TRAVAIL DU BOIS ═════════════════════════════════════
-  ['bois', 'défonceuse', ['défonceuse', 'défonceuse plongeante', 'router']],
-  ['bois', 'affleureuse', ['affleureuse', 'défonceuse affleureuse', 'trim router']],
-  ['bois', 'raboteuse', ['raboteuse', 'raboteuse dégauchisseuse']],
-  ['bois', 'dégauchisseuse', ['dégauchisseuse']],
-  ['bois', 'rabot', ['rabot', 'rabot électrique']],
+  ['bois', 'défonceuse', ['défonceuse', 'défonceuse plongeante', 'router', 'fresadora', 'plunge router']],
+  ['bois', 'affleureuse', ['affleureuse', 'défonceuse affleureuse', 'trim router', 'fresadora de perfilar', 'palm router']],
+  ['bois', 'raboteuse', ['raboteuse', 'raboteuse dégauchisseuse', 'cepilladora', 'thicknesser', 'thickness planer']],
+  ['bois', 'dégauchisseuse', ['dégauchisseuse', 'regruesadora', 'jointer', 'planer jointer']],
+  ['bois', 'rabot', ['rabot', 'rabot électrique', 'cepillo', 'cepillo eléctrico', 'planer']],
   ['bois', 'ponceuse', ['ponceuse', 'ponceuse orbitale', 'ponceuse excentrique', 'ponceuse vibrante',
-    'ponceuse à bande', 'ponceuse delta', 'ponceuse girafe', 'ponceuse multifonction', 'ponceuse de plâtre']],
-  ['bois', 'lamelleuse', ['lamelleuse', 'fraiseuse à lamelles', 'biscuit jointer']],
-  ['bois', 'mortaiseuse', ['mortaiseuse', 'mortaiseuse à chaîne']],
+    'ponceuse à bande', 'ponceuse delta', 'ponceuse girafe', 'ponceuse multifonction', 'ponceuse de plâtre', 'lijadora', 'sander', 'orbital sander', 'belt sander', 'random orbit sander']],
+  ['bois', 'lamelleuse', ['lamelleuse', 'fraiseuse à lamelles', 'biscuit jointer', 'engalletadora']],
+  ['bois', 'mortaiseuse', ['mortaiseuse', 'mortaiseuse à chaîne', 'mortajadora', 'chain mortiser']],
   ['bois', 'plaqueuse de chants', ['plaqueuse de chants', 'plaqueuse']],
   ['bois', 'fraiseuse', ['fraiseuse', 'fraiseuse domino', 'fraiseuse pour placo', 'fraiseuse à rainurer']],
   ['bois', 'toupie', ['toupie', 'toupie à bois']],
   ['bois', 'outil multifonctions', ['outil multifonctions', 'outil multifonction', 'multi-cutter',
-    'multicutter', 'outil oscillant', 'multitool']],
+    'multicutter', 'outil oscillant', 'multitool', 'herramienta multifunción', 'multi tool', 'oscillating tool', 'oscillating multi tool']],
 
   // ═══ MACHINES — CLOUAGE, AGRAFAGE, RIVETAGE ═════════════════════════
-  ['fixation', 'cloueur de charpente', ['cloueur de charpente', 'cloueuse de charpente']],
-  ['fixation', 'cloueur de finition', ['cloueur de finition', 'cloueuse de finition', 'cloueur à brads']],
-  ['fixation', 'cloueur', ['cloueur', 'cloueuse', 'nailer', 'cloueur à gaz']],
-  ['fixation', 'agrafeuse', ['agrafeuse', 'agrafeur', 'stapler']],
-  ['fixation', 'riveteuse', ['riveteuse', 'pistolet à riveter']],
+  ['fixation', 'cloueur de charpente', ['cloueur de charpente', 'cloueuse de charpente', 'clavadora de estructuras', 'framing nailer']],
+  ['fixation', 'cloueur de finition', ['cloueur de finition', 'cloueuse de finition', 'cloueur à brads', 'clavadora de acabado', 'finish nailer', 'brad nailer']],
+  ['fixation', 'cloueur', ['cloueur', 'cloueuse', 'nailer', 'cloueur à gaz', 'clavadora', 'nail gun']],
+  ['fixation', 'agrafeuse', ['agrafeuse', 'agrafeur', 'stapler', 'grapadora', 'staple gun']],
+  ['fixation', 'riveteuse', ['riveteuse', 'pistolet à riveter', 'remachadora', 'riveter', 'rivet tool', 'rivet gun']],
   ['fixation', 'pistolet à mastic', ['pistolet à mastic', 'pistolet à colle', 'pistolet extrudeur',
-    'pistolet à cartouche']],
+    'pistolet à cartouche', 'pistola de silicona', 'caulk gun', 'adhesive gun']],
   ['fixation', 'cercleuse', ['cercleuse', 'appareil de cerclage']],
 
   // ═══ MACHINES — ASPIRATION ET SOUFFLAGE ═════════════════════════════
   ['aspiration', 'aspirateur', ['aspirateur', 'aspirateur de chantier', 'aspirateur eau et poussière',
-    'aspirateur dorsal', 'extracteur de poussière']],
-  ['aspiration', 'souffleur', ['souffleur', 'souffleur de feuilles', 'aspirateur souffleur']],
+    'aspirateur dorsal', 'extracteur de poussière', 'aspirador', 'aspiradora', 'vacuum', 'dust extractor', 'wet dry vacuum']],
+  ['aspiration', 'souffleur', ['souffleur', 'souffleur de feuilles', 'aspirateur souffleur', 'soplador', 'blower', 'leaf blower']],
   ['aspiration', 'système d\'aspiration', ['système d\'aspiration', 'système de collecte',
     'collecteur de poussière', 'kit d\'aspiration']],
 
   // ═══ MACHINES — JARDIN ══════════════════════════════════════════════
-  ['jardin', 'tronçonneuse', ['tronçonneuse', 'tronçonneuse à chaîne', 'chainsaw']],
-  ['jardin', 'élagueuse sur perche', ['élagueuse sur perche', 'perche élagueuse', 'ébrancheur sur perche']],
+  ['jardin', 'tronçonneuse', ['tronçonneuse', 'tronçonneuse à chaîne', 'chainsaw', 'motosierra', 'chain saw']],
+  ['jardin', 'élagueuse sur perche', ['élagueuse sur perche', 'perche élagueuse', 'ébrancheur sur perche', 'podadora de altura', 'pole saw', 'pole pruner']],
   ['jardin', 'élagueuse', ['élagueuse']],
   ['jardin', 'sécateur sur perche', ['sécateur sur perche']],
-  ['jardin', 'sécateur', ['sécateur', 'sécateur électrique']],
-  ['jardin', 'débroussailleuse', ['débroussailleuse', 'coupe-herbe']],
-  ['jardin', 'coupe-bordure', ['coupe-bordure', 'rotofil']],
-  ['jardin', 'taille-haie', ['taille-haie', 'taille haie', 'taille-haies']],
-  ['jardin', 'tondeuse', ['tondeuse', 'tondeuse à gazon', 'robot tondeuse']],
+  ['jardin', 'sécateur', ['sécateur', 'sécateur électrique', 'tijera de podar', 'pruner', 'secateur']],
+  ['jardin', 'débroussailleuse', ['débroussailleuse', 'coupe-herbe', 'desbrozadora', 'brushcutter', 'brush cutter']],
+  ['jardin', 'coupe-bordure', ['coupe-bordure', 'rotofil', 'cortabordes', 'recortadora', 'string trimmer', 'line trimmer', 'grass trimmer']],
+  ['jardin', 'taille-haie', ['taille-haie', 'taille haie', 'taille-haies', 'cortasetos', 'hedge trimmer']],
+  ['jardin', 'tondeuse', ['tondeuse', 'tondeuse à gazon', 'robot tondeuse', 'cortacésped', 'lawn mower', 'mower']],
   ['jardin', 'scarificateur', ['scarificateur', 'aérateur de pelouse']],
   ['jardin', 'motobineuse', ['motobineuse', 'motoculteur']],
   ['jardin', 'broyeur', ['broyeur', 'broyeur de végétaux']],
@@ -324,36 +324,38 @@ var TYPES = [
 
   // ═══ MACHINES — CHANTIER, ÉNERGIE, FLUIDES ══════════════════════════
   ['chantier', 'nettoyeur haute pression', ['nettoyeur haute pression', 'nettoyeur haute-pression',
-    'laveur haute pression']],
-  ['chantier', 'nettoyeur', ['nettoyeur', 'laveur']],
-  ['chantier', 'compresseur', ['compresseur', 'compresseur d\'air']],
-  ['chantier', 'groupe électrogène', ['groupe électrogène', 'générateur', 'génératrice']],
-  ['chantier', 'poste à souder', ['poste à souder', 'poste de soudure', 'soudeuse']],
-  ['chantier', 'vibrateur', ['vibrateur', 'aiguille vibrante', 'vibreur à béton']],
+    'laveur haute pression', 'hidrolimpiadora', 'limpiadora de alta presión', 'pressure washer', 'power washer']],
+  ['chantier', 'nettoyeur', ['nettoyeur', 'laveur', 'limpiadora', 'washer']],
+  ['chantier', 'compresseur', ['compresseur', 'compresseur d\'air', 'compresor', 'air compressor', 'compressor']],
+  ['chantier', 'groupe électrogène', ['groupe électrogène', 'générateur', 'génératrice', 'generador', 'grupo electrógeno', 'generator']],
+  ['chantier', 'poste à souder', ['poste à souder', 'poste de soudure', 'soudeuse', 'soldadora', 'welder', 'welding machine']],
+  ['chantier', 'vibrateur', ['vibrateur', 'aiguille vibrante', 'vibreur à béton', 'vibrador de hormigón', 'concrete vibrator']],
   ['chantier', 'pompe à graisse', ['pompe à graisse', 'graisseur']],
-  ['chantier', 'pompe', ['pompe', 'pompe submersible', 'pompe à eau', 'pompe vide-cave']],
-  ['chantier', 'gonfleur', ['gonfleur', 'compresseur portatif']],
-  ['chantier', 'décapeur thermique', ['décapeur thermique', 'pistolet à air chaud', 'décapeur']],
+  ['chantier', 'pompe', ['pompe', 'pompe submersible', 'pompe à eau', 'pompe vide-cave', 'bomba', 'pump', 'submersible pump']],
+  ['chantier', 'gonfleur', ['gonfleur', 'compresseur portatif', 'inflador', 'inflator', 'tyre inflator']],
+  ['chantier', 'décapeur thermique', ['décapeur thermique', 'pistolet à air chaud', 'décapeur', 'pistola de calor', 'heat gun']],
   ['chantier', 'treuil', ['treuil', 'palan', 'palan électrique']],
-  ['chantier', 'ventouse à vide', ['ventouse à vide', 'ventouse à vide d\'air', 'lève-plaque à ventouse']],
+  ['chantier', 'ventouse à vide', ['ventouse à vide', 'ventouse à vide d\'air', 'lève-plaque à ventouse', 'ventosa', 'vacuum lifter', 'suction cup lifter']],
+  ['chantier', 'borne de recharge', ['borne de recharge', 'borne de charge', 'wallbox',
+    'punto de recarga', 'charging station', 'ev charger']],
   ['chantier', 'station d\'alimentation', ['système d\'alimentation', 'station d\'alimentation',
     'station électrique', 'powerstation']],
 
   // ═══ MACHINES — MESURE, DÉTECTION, ÉCLAIRAGE ════════════════════════
-  ['mesure', 'niveau laser', ['niveau laser', 'laser rotatif', 'laser croix', 'laser lignes', 'laser']],
-  ['mesure', 'télémètre laser', ['télémètre laser', 'télémètre', 'mesureur de distance']],
-  ['mesure', 'détecteur', ['détecteur', 'détecteur de métaux', 'détecteur de matériaux', 'scanner mural']],
+  ['mesure', 'niveau laser', ['niveau laser', 'laser rotatif', 'laser croix', 'laser lignes', 'laser', 'nivel láser', 'laser level', 'rotary laser', 'line laser', 'cross line laser']],
+  ['mesure', 'télémètre laser', ['télémètre laser', 'télémètre', 'mesureur de distance', 'medidor láser', 'telémetro láser', 'laser distance measure', 'laser measure']],
+  ['mesure', 'détecteur', ['détecteur', 'détecteur de métaux', 'détecteur de matériaux', 'scanner mural', 'detector', 'stud detector', 'wall scanner']],
   ['mesure', 'caméra d\'inspection', ['caméra d\'inspection', 'endoscope']],
   ['mesure', 'caméra thermique', ['caméra thermique', 'thermomètre infrarouge']],
-  ['mesure', 'projecteur', ['projecteur', 'projecteur de chantier', 'phare de chantier']],
-  ['mesure', 'lampe', ['lampe', 'lampe torche', 'baladeuse', 'lampe frontale']],
+  ['mesure', 'projecteur', ['projecteur', 'projecteur de chantier', 'phare de chantier', 'foco', 'proyector', 'work light', 'area light', 'floodlight']],
+  ['mesure', 'lampe', ['lampe', 'lampe torche', 'baladeuse', 'lampe frontale', 'linterna', 'light', 'torch', 'flashlight', 'head torch']],
   ['mesure', 'niveau', ['niveau', 'niveau à bulle', 'règle de maçon']],
   ['mesure', 'système sans fil', ['système sans fil', 'module bluetooth', 'récepteur bluetooth']],
 
   // ═══ MACHINES — CONFORT DE CHANTIER ═════════════════════════════════
-  ['confort', 'radio de chantier', ['radio de chantier', 'radio', 'enceinte bluetooth', 'enceinte']],
-  ['confort', 'glacière', ['glacière', 'glacière réchaud', 'réfrigérateur portable']],
-  ['confort', 'ventilateur', ['ventilateur', 'brasseur d\'air']],
+  ['confort', 'radio de chantier', ['radio de chantier', 'radio', 'enceinte bluetooth', 'enceinte', 'radio de obra', 'jobsite radio', 'site radio', 'bluetooth speaker']],
+  ['confort', 'glacière', ['glacière', 'glacière réchaud', 'réfrigérateur portable', 'nevera', 'cooler', 'cool box']],
+  ['confort', 'ventilateur', ['ventilateur', 'brasseur d\'air', 'ventilador', 'fan', 'jobsite fan']],
   ['confort', 'chauffage', ['chauffage', 'chauffage de chantier', 'canon à air chaud']],
   ['confort', 'bouilloire', ['bouilloire']],
   ['confort', 'four micro-ondes', ['four micro-ondes', 'micro-ondes', 'micro ondes']],
@@ -361,41 +363,42 @@ var TYPES = [
 
   // ═══ MACHINES — COMBOS ══════════════════════════════════════════════
   ['combo', 'pack d\'outils', ['combopack', 'combo pack', 'pack d\'outils', 'pack outils',
-    'kit d\'outils', 'ensemble d\'outils', 'lot de machines', 'pack machines']],
+    'kit d\'outils', 'ensemble d\'outils', 'lot de machines', 'pack machines',
+    'kit de herramientas', 'combo kit', 'tool kit', 'twin pack', 'power tool kit']],
 
   // ═══ CONSOMMABLES — LAMES ═══════════════════════════════════════════
   ['lame-circulaire', 'lame de scie circulaire', ['lame de scie circulaire', 'lame circulaire',
-    'lame de scie stationnaire', 'lame de scie à onglet', 'lame carbure', 'disque de scie']],
-  ['lame-alternative', 'lame de scie sabre', ['lame de scie sabre', 'lame de scie récipro', 'lame sabre']],
-  ['lame-alternative', 'lame de scie sauteuse', ['lame de scie sauteuse', 'lame sauteuse']],
+    'lame de scie stationnaire', 'lame de scie à onglet', 'lame carbure', 'disque de scie', 'hoja de sierra circular', 'circular saw blade']],
+  ['lame-alternative', 'lame de scie sabre', ['lame de scie sabre', 'lame de scie récipro', 'lame sabre', 'hoja de sierra sable', 'reciprocating saw blade']],
+  ['lame-alternative', 'lame de scie sauteuse', ['lame de scie sauteuse', 'lame sauteuse', 'hoja de sierra de calar', 'jigsaw blade']],
   ['lame-alternative', 'lame de scie à ruban', ['lame de scie à ruban', 'lame de ruban']],
-  ['lame-alternative', 'scie-cloche', ['scie-cloche', 'scie cloche', 'trépan cloche', 'holesaw']],
+  ['lame-alternative', 'scie-cloche', ['scie-cloche', 'scie cloche', 'trépan cloche', 'holesaw', 'sierra de corona', 'hole saw']],
   ['lame-alternative', 'lame de scie', ['lame de scie', 'lame']],
   ['lame-oscillante', 'lame pour outil multifonctions', ['lame pour multi-cutter', 'lame multi-cutter',
     'lame oscillante', 'lame starlock', 'lame e-cut']],
 
   // ═══ CONSOMMABLES — FORETS ET MÈCHES ════════════════════════════════
   ['foret', 'foret multi-matériaux', ['foret multi-matériaux', 'mèche multi-matériaux', 'foret universel']],
-  ['foret', 'foret béton', ['foret béton', 'foret à béton', 'mèche béton']],
-  ['foret', 'foret métal', ['foret métal', 'foret à métaux', 'foret acier', 'mèche métal']],
+  ['foret', 'foret béton', ['foret béton', 'foret à béton', 'mèche béton', 'broca para hormigón', 'masonry bit', 'concrete bit']],
+  ['foret', 'foret métal', ['foret métal', 'foret à métaux', 'foret acier', 'mèche métal', 'broca para metal', 'metal drill bit', 'hss bit']],
   ['foret', 'foret à bois', ['foret à bois', 'mèche à bois', 'mèche plate', 'mèche hélicoïdale',
-    'mèche à trois pointes', 'foret bois']],
+    'mèche à trois pointes', 'foret bois', 'broca para madera', 'wood drill bit', 'auger bit']],
   ['foret', 'foret étagé', ['foret étagé', 'foret conique', 'foret à étages']],
   ['foret', 'couronne diamantée', ['couronne diamantée', 'couronne de carottage', 'trépan diamant']],
   ['foret', 'taraud', ['taraud', 'filière']],
-  ['foret', 'foret', ['foret', 'mèche', 'trépan', 'drill bit']],
+  ['foret', 'foret', ['foret', 'mèche', 'trépan', 'drill bit', 'broca']],
 
   // ═══ CONSOMMABLES — FRAISES ═════════════════════════════════════════
   ['fraise', 'fraise de défonceuse', ['fraise de défonceuse', 'fraise à défoncer', 'fraise droite',
     'fraise à affleurer', 'fraise à moulurer', 'fraise à feuillure', 'fraise à languetter',
-    'fraise à abouter', 'fraise multi-profils', 'fraise quart de rond']],
+    'fraise à abouter', 'fraise multi-profils', 'fraise quart de rond', 'fresa', 'router bit', 'router cutter']],
   ['fraise', 'fraise', ['fraise', 'fraise carbure']],
 
   // ═══ CONSOMMABLES — DISQUES ═════════════════════════════════════════
-  ['disque', 'disque à tronçonner', ['disque à tronçonner', 'disque de tronçonnage', 'disque à couper']],
-  ['disque', 'disque à ébarber', ['disque à ébarber', 'disque de meulage', 'meule à ébarber']],
-  ['disque', 'disque à lamelles', ['disque à lamelles', 'disque lamelle', 'flap disc']],
-  ['disque', 'disque diamant', ['disque diamant', 'disque diamanté']],
+  ['disque', 'disque à tronçonner', ['disque à tronçonner', 'disque de tronçonnage', 'disque à couper', 'disco de corte', 'cutting disc', 'cut off wheel']],
+  ['disque', 'disque à ébarber', ['disque à ébarber', 'disque de meulage', 'meule à ébarber', 'disco de desbaste', 'grinding disc']],
+  ['disque', 'disque à lamelles', ['disque à lamelles', 'disque lamelle', 'flap disc', 'disco de láminas']],
+  ['disque', 'disque diamant', ['disque diamant', 'disque diamanté', 'disco de diamante', 'diamond blade', 'diamond disc']],
   ['disque', 'plateau de surfaçage', ['plateau de surfaçage', 'plateau de ponçage', 'plateau support']],
   ['disque', 'brosse métallique', ['brosse métallique', 'brosse coupe', 'brosse circulaire', 'brosse']],
   ['disque', 'disque', ['disque', 'meule']],
@@ -410,10 +413,10 @@ var TYPES = [
 
   // ═══ CONSOMMABLES — EMBOUTS, DOUILLES, CLÉS ═════════════════════════
   ['vissage-embout', 'embout de vissage', ['embout de vissage', 'embout de tournevis',
-    'embout torsion', 'embout impact', 'bit de vissage', 'embout']],
+    'embout torsion', 'embout impact', 'bit de vissage', 'embout', 'punta de atornillar', 'screwdriver bit', 'driver bit', 'impact bit']],
   ['vissage-embout', 'porte-embout', ['porte-embout', 'porte embout', 'adaptateur d\'embout']],
-  ['vissage-embout', 'douille à chocs', ['douille à chocs', 'douille impact', 'douille à choc']],
-  ['vissage-embout', 'douille', ['douille', 'douille longue', 'douille courte']],
+  ['vissage-embout', 'douille à chocs', ['douille à chocs', 'douille impact', 'douille à choc', 'vaso de impacto', 'impact socket']],
+  ['vissage-embout', 'douille', ['douille', 'douille longue', 'douille courte', 'vaso', 'socket']],
   ['vissage-embout', 'clé mixte', ['clé mixte', 'clé plate', 'clé à pipe', 'clé allen', 'clé mâle',
     'jeu de clés']],
   ['vissage-embout', 'rallonge de douille', ['rallonge de douille', 'cardan', 'rallonge']],
@@ -428,27 +431,27 @@ var TYPES = [
   ['visserie', 'vis à bande', ['vis à bande', 'vis en bande', 'vis pour visseuse à bande']],
   ['visserie', 'vis autoperceuse', ['vis autoperceuse', 'vis autoforeuse', 'vis tôle']],
   ['visserie', 'vis à bois', ['vis à bois', 'vis bois', 'vis à tête fraisée', 'vis terrasse']],
-  ['visserie', 'vis', ['vis', 'visserie']],
+  ['visserie', 'vis', ['vis', 'visserie', 'tornillo', 'tornillos', 'screw', 'screws']],
   ['visserie', 'tirefond', ['tirefond', 'tire-fond']],
   ['visserie', 'boulon', ['boulon', 'boulonnerie', 'goujon']],
   ['visserie', 'écrou', ['écrou', 'écrou autobloquant', 'écrou papillon', 'écrou borgne']],
   ['visserie', 'rondelle', ['rondelle', 'rondelle plate', 'rondelle éventail']],
   ['visserie', 'cheville', ['cheville', 'cheville à frapper', 'cheville nylon', 'cheville métallique',
-    'cheville chimique', 'cheville à expansion', 'cheville molly']],
-  ['visserie', 'clou', ['clou', 'clouterie', 'pointe de charpente', 'brad']],
-  ['visserie', 'agrafe', ['agrafe']],
+    'cheville chimique', 'cheville à expansion', 'cheville molly', 'taco', 'anchor', 'wall plug']],
+  ['visserie', 'clou', ['clou', 'clouterie', 'pointe de charpente', 'brad', 'clavo', 'clavos', 'nail', 'nails']],
+  ['visserie', 'agrafe', ['agrafe', 'grapa', 'grapas', 'staple', 'staples']],
   ['visserie', 'rivet', ['rivet', 'rivet aveugle']],
   ['visserie', 'équerre', ['équerre', 'sabot de charpente', 'connecteur métallique']],
 
   // ═══ CONSOMMABLES — CHAÎNES ET FILS ═════════════════════════════════
-  ['chaine', 'chaîne de tronçonneuse', ['chaîne de tronçonneuse', 'chaîne tronçonneuse', 'chaîne de coupe']],
-  ['chaine', 'guide-chaîne', ['guide-chaîne', 'guide chaîne', 'guide de tronçonneuse']],
+  ['chaine', 'chaîne de tronçonneuse', ['chaîne de tronçonneuse', 'chaîne tronçonneuse', 'chaîne de coupe', 'cadena de motosierra', 'saw chain', 'chainsaw chain']],
+  ['chaine', 'guide-chaîne', ['guide-chaîne', 'guide chaîne', 'guide de tronçonneuse', 'espada', 'guide bar', 'chainsaw bar']],
   ['chaine', 'fil de débroussailleuse', ['fil de débroussailleuse', 'fil de coupe', 'recharge de fil',
-    'bobine avec fil', 'bobine de fil', 'tête fil']],
+    'bobine avec fil', 'bobine de fil', 'tête fil', 'hilo de corte', 'trimmer line', 'strimmer line']],
 
   // ═══ CONSOMMABLES — FILTRATION ══════════════════════════════════════
-  ['filtration', 'filtre', ['filtre', 'filtre hepa', 'cartouche filtrante', 'filtre à air']],
-  ['filtration', 'sac aspirateur', ['sac aspirateur', 'sac à poussière', 'sac filtre', 'sac de collecte']],
+  ['filtration', 'filtre', ['filtre', 'filtre hepa', 'cartouche filtrante', 'filtre à air', 'filtro', 'filter', 'hepa filter']],
+  ['filtration', 'sac aspirateur', ['sac aspirateur', 'sac à poussière', 'sac filtre', 'sac de collecte', 'bolsa de aspirador', 'dust bag', 'vacuum bag']],
   ['filtration', 'tuyau d\'aspiration', ['tuyau d\'aspiration', 'flexible d\'aspiration', 'tuyau']],
 
   // ═══ CONSOMMABLES — ACCESSOIRES ET PIÈCES ═══════════════════════════
@@ -464,38 +467,38 @@ var TYPES = [
     'pièce de vissage', 'pièce', 'extension']],
 
   // ═══ ÉNERGIE ════════════════════════════════════════════════════════
-  ['batterie', 'batterie', ['batterie', 'accu', 'pack batterie', 'batterie li-ion', 'batterie lithium']],
+  ['batterie', 'batterie', ['batterie', 'accu', 'pack batterie', 'batterie li-ion', 'batterie lithium', 'batería', 'baterías', 'battery', 'battery pack', 'akku']],
   ['chargeur', 'chargeur', ['chargeur', 'chargeur rapide', 'chargeur double', 'station de charge',
-    'chargeur de voiture']],
+    'chargeur de voiture', 'cargador', 'charger', 'fast charger', 'dual charger']],
   ['chargeur', 'adaptateur secteur', ['adaptateur secteur', 'convertisseur', 'onduleur']],
 
   // ═══ RANGEMENT ══════════════════════════════════════════════════════
   ['coffret', 'coffret modulaire', ['t-stak', 'tstak', 'toughsystem', 'tough system', 'makpac',
     'systainer', 'l-boxx', 'module de rangement', 'set organisateur', 'organisateur']],
   ['coffret', 'coffret', ['coffret', 'coffret de transport', 'mallette', 'malette', 'valise',
-    'caisse à outils', 'boîte à outils']],
-  ['mobilier', 'servante', ['servante', 'servante d\'atelier']],
-  ['mobilier', 'chariot', ['chariot', 'trolley', 'diable']],
+    'caisse à outils', 'boîte à outils', 'maletín', 'maleta', 'caja de herramientas', 'tool case', 'tool box', 'carry case', 'kit box']],
+  ['mobilier', 'servante', ['servante', 'servante d\'atelier', 'carro de taller', 'tool chest', 'roller cabinet']],
+  ['mobilier', 'chariot', ['chariot', 'trolley', 'diable', 'carro', 'cart']],
   ['mobilier', 'établi', ['établi', 'table de travail', 'tréteau']],
   ['mobilier', 'armoire à outils', ['armoire à outils', 'armoire', 'casier']],
-  ['portage', 'sac à outils', ['sac à outils', 'sac de transport', 'sacoche', 'sac à dos porte-outils']],
+  ['portage', 'sac à outils', ['sac à outils', 'sac de transport', 'sacoche', 'sac à dos porte-outils', 'bolsa de herramientas', 'tool bag', 'backpack']],
   ['portage', 'ceinture porte-outils', ['ceinture porte-outils', 'porte-outils', 'baudrier porte-outils',
     'sac à clous', 'bretelles']],
 
   // ═══ EPI — PIEDS ════════════════════════════════════════════════════
   ['chaussure', 'chaussure de sécurité', ['chaussure de sécurité', 'basket de sécurité', 'brodequin',
-    'chaussure basse de sécurité', 'chaussure haute de sécurité', 'chaussure montante', 'chaussure']],
-  ['chaussure', 'botte de sécurité', ['botte de sécurité', 'botte pvc', 'cuissarde', 'waders', 'botte']],
+    'chaussure basse de sécurité', 'chaussure haute de sécurité', 'chaussure montante', 'chaussure', 'calzado de seguridad', 'zapato de seguridad', 'safety shoe', 'safety boot', 'safety trainer']],
+  ['chaussure', 'botte de sécurité', ['botte de sécurité', 'botte pvc', 'cuissarde', 'waders', 'botte', 'bota de seguridad', 'wellington', 'rigger boot']],
   ['chaussure', 'sur-chaussure', ['sur-chaussure', 'surchaussure', 'couvre-chaussure']],
   ['chaussure', 'semelle', ['semelle', 'semelle intérieure', 'semelle anti-perforation']],
 
   // ═══ EPI — VÊTEMENTS ════════════════════════════════════════════════
   ['vetement', 'pantalon de travail', ['pantalon de travail', 'pantalon multipoches',
-    'pantalon à genouillères', 'pantalon']],
+    'pantalon à genouillères', 'pantalon', 'pantalón de trabajo', 'work trouser', 'work pant', 'holster trouser']],
   ['vetement', 'short de travail', ['short de travail', 'bermuda', 'short']],
   ['vetement', 'salopette', ['salopette', 'cotte à bretelles', 'cotte de travail', 'bleu de travail']],
   ['vetement', 'combinaison', ['combinaison', 'combinaison jetable', 'combinaison de peinture']],
-  ['vetement', 'veste de travail', ['veste de travail', 'blouson de travail', 'blouson', 'veste']],
+  ['vetement', 'veste de travail', ['veste de travail', 'blouson de travail', 'blouson', 'veste', 'chaqueta de trabajo', 'work jacket', 'jacket']],
   ['vetement', 'parka', ['parka', 'parka de travail', 'doudoune', 'veste hiver']],
   ['vetement', 'softshell', ['softshell', 'veste softshell', 'coupe-vent']],
   ['vetement', 'polaire', ['polaire', 'veste polaire', 'sweat polaire']],
@@ -513,34 +516,34 @@ var TYPES = [
   // ═══ EPI — MAINS ════════════════════════════════════════════════════
   ['main', 'gant de protection', ['gant de protection', 'gant anti-coupure', 'gant enduit',
     'gant nitrile', 'gant cuir', 'gant anti-vibration', 'gant jetable', 'gant de manutention',
-    'gant thermique', 'gant de soudeur', 'gant']],
+    'gant thermique', 'gant de soudeur', 'gant', 'guante', 'guantes', 'glove', 'gloves', 'work glove']],
   ['main', 'manchette', ['manchette', 'manchette anti-coupure']],
 
   // ═══ EPI — TÊTE ET VISAGE ═══════════════════════════════════════════
-  ['tete', 'casque de chantier', ['casque de chantier', 'casque de protection', 'casque de sécurité']],
+  ['tete', 'casque de chantier', ['casque de chantier', 'casque de protection', 'casque de sécurité', 'casco', 'casco de obra', 'hard hat', 'safety helmet']],
   ['tete', 'casquette anti-heurt', ['casquette anti-heurt', 'casquette de sécurité']],
   ['tete', 'lunettes de protection', ['lunettes de protection', 'lunette de protection',
-    'lunettes de sécurité', 'sur-lunettes', 'lunettes-masque', 'lunette']],
+    'lunettes de sécurité', 'sur-lunettes', 'lunettes-masque', 'lunette', 'gafas de protección', 'gafas de seguridad', 'safety glasses', 'safety goggles']],
   ['tete', 'écran facial', ['écran facial', 'visière de protection', 'écran de protection', 'visière']],
   ['tete', 'masque de soudeur', ['masque de soudeur', 'cagoule de soudage', 'masque de soudage']],
 
   // ═══ EPI — AUDITIF ══════════════════════════════════════════════════
   ['auditif', 'casque anti-bruit', ['casque anti-bruit', 'casque antibruit', 'coquille anti-bruit',
-    'casque de protection auditive', 'protection auditive']],
+    'casque de protection auditive', 'protection auditive', 'orejeras', 'ear defender', 'ear muff', 'hearing protection']],
   ['auditif', 'bouchon d\'oreille', ['bouchon d\'oreille', 'bouchon anti-bruit', 'protection auditive jetable']],
 
   // ═══ EPI — RESPIRATOIRE ═════════════════════════════════════════════
   ['respiratoire', 'masque respiratoire', ['masque respiratoire', 'masque ffp', 'demi-masque',
-    'masque à cartouche', 'masque anti-poussière', 'masque jetable', 'masque']],
+    'masque à cartouche', 'masque anti-poussière', 'masque jetable', 'masque', 'mascarilla', 'respirator', 'dust mask', 'face mask']],
   ['respiratoire', 'cartouche respiratoire', ['cartouche respiratoire', 'filtre respiratoire']],
 
   // ═══ EPI — HAUTEUR ══════════════════════════════════════════════════
-  ['hauteur', 'harnais antichute', ['harnais antichute', 'harnais de sécurité', 'harnais']],
+  ['hauteur', 'harnais antichute', ['harnais antichute', 'harnais de sécurité', 'harnais', 'arnés', 'arnés anticaídas', 'safety harness', 'fall arrest harness']],
   ['hauteur', 'longe antichute', ['longe antichute', 'absorbeur d\'énergie', 'stop-chute', 'antichute', 'longe']],
   ['hauteur', 'ligne de vie', ['ligne de vie', 'point d\'ancrage', 'ancrage']],
 
   // ═══ EPI — GENOUX ═══════════════════════════════════════════════════
-  ['genou', 'genouillère', ['genouillère', 'coussin de genoux', 'protège-genoux']]
+  ['genou', 'genouillère', ['genouillère', 'coussin de genoux', 'protège-genoux', 'rodillera', 'knee pad', 'knee pads']]
 ];
 
 /* ══ TABLES DE DÉCODAGE ═══════════════════════════════════════════════════
@@ -568,6 +571,83 @@ var SUFFIXES_DEWALT = {
   X1: { nbBatteries: 1, ah: 9.0 }, X2: { nbBatteries: 2, ah: 9.0 },
   Y1: { nbBatteries: 1, ah: 12.0 }, Y2: { nbBatteries: 2, ah: 12.0 }
 };
+/* ── PRÉFIXES DE RÉFÉRENCE DeWALT ────────────────────────────────────────
+   ⛔ CE QUI MANQUAIT AU PREMIER JET, ET L'USER L'A VU : « dans ton document
+   je n'ai absolument rien vu qui référence le DÉBUT des références ; en
+   général c'est les trois premières lettres, il peut y en avoir moins ou
+   plus. » Exact — j'avais documenté les suffixes (ce qu'il y a DANS la
+   boîte) et rien sur les préfixes (ce QU'EST l'outil).
+
+   Or le préfixe est ce qu'il y a de plus solide dans un titre : c'est le
+   constructeur qui l'écrit, il ne change pas d'une langue à l'autre, et il
+   survit à un titre en espagnol ou en anglais là où le vocabulaire échoue.
+
+   ⚠️ DEUX SOURCES CONCORDANTES. ① En ligne : toolguyd.com, housedigest.com,
+   ukplanettools.co.uk, forum.toolsinaction.com. ② SA PAGE DU 03/08 : les 46
+   annonces relevées donnent, préfixe par préfixe, exactement la même
+   correspondance — D25→marteau de démolition, DCB→batterie, DCE→laser ET
+   vibrateur (fourre-tout confirmé), DCF→riveteuse ET clé à chocs, DCG→
+   meuleuse, DCH→marteau perforateur, DCN→cloueur ET agrafeuse, DCS→scies,
+   DCV et DWV→aspirateur, DCW→dégauchisseuse, DXPW→nettoyeur haute pression.
+   Une table confirmée par la donnée réelle vaut mieux qu'une table citée.
+
+   ⛔ CE QUE LE PRÉFIXE NE FAIT JAMAIS : inventer un TYPE. Un type est un nom
+   précis, il vient des mots. Le préfixe donne la FAMILLE, et le RAYON
+   seulement quand il n'en désigne qu'un seul. DCF couvre riveteuse ET clé à
+   chocs, DCE est un fourre-tout maison : ces deux-là ne donnent aucun rayon.
+   Seule exception, `DCK` — « combo kit » EST le sens du préfixe, pas une
+   déduction : il peut donc porter son type.
+   ⚠️ La lecture se fait du préfixe le PLUS LONG au plus court (DCMST avant
+   DCM avant DC), sinon « DCMST922N » serait lu « DCM ». */
+var PREFIXES_DEWALT = {
+  // ── Sans fil (DC…)
+  DCD:  { famille: 'machine', rayon: 'percage',      note: 'perceuse, visseuse, malaxeur' },
+  DCF:  { famille: 'machine',                        note: 'fixation au sens large : visseuse à chocs, clé à chocs, riveteuse — DEUX rayons, donc aucun' },
+  DCG:  { famille: 'machine', rayon: 'meulage',      note: 'meuleuse' },
+  DCH:  { famille: 'machine', rayon: 'perforation',  note: 'marteau perforateur' },
+  DCS:  { famille: 'machine', rayon: 'sciage',       note: 'scie, et outil oscillant' },
+  DCN:  { famille: 'machine', rayon: 'fixation',     note: 'cloueur, agrafeuse' },
+  DCV:  { famille: 'machine', rayon: 'aspiration',   note: 'aspirateur' },
+  DCW:  { famille: 'machine', rayon: 'bois',         note: 'travail du bois' },
+  DCL:  { famille: 'machine', rayon: 'mesure',       note: 'éclairage' },
+  DCC:  { famille: 'machine', rayon: 'jardin',       note: 'tronçonneuse' },
+  DCMW: { famille: 'machine', rayon: 'jardin',       note: 'tondeuse' },
+  DCMST:{ famille: 'machine', rayon: 'jardin',       note: 'débroussailleuse, coupe-fil' },
+  DCMB: { famille: 'machine', rayon: 'jardin',       note: 'coupe-bordure' },
+  DCMP: { famille: 'machine', rayon: 'chantier',     note: 'nettoyeur à pression sans fil' },
+  DCM:  { famille: 'machine', rayon: 'jardin',       note: 'extérieur et enlèvement de matière' },
+  DCB:  { famille: 'energie', rayon: 'batterie',     note: 'batterie' },
+  DCBP: { famille: 'energie', rayon: 'batterie',     note: 'batterie compacte' },
+  DCK:  { famille: 'machine', rayon: 'combo', type: 'pack d\'outils', note: 'combo kit — le préfixe EST le sens' },
+  DCE:  { famille: 'machine',                        note: 'fourre-tout maison : laser, vibrateur, souffleur, ponceuse à plâtre… aucun rayon sûr' },
+  DCT:  { famille: 'machine', rayon: 'mesure',       note: 'Tool Connect, mesure et détection' },
+  // ── Filaires et gammes historiques
+  DWE:  { famille: 'machine',                        note: 'électroportatif filaire, plusieurs rayons' },
+  DWS:  { famille: 'machine', rayon: 'sciage',       note: 'scie filaire' },
+  DWV:  { famille: 'machine', rayon: 'aspiration',   note: 'aspirateur' },
+  D25:  { famille: 'machine', rayon: 'perforation',  note: 'marteau filaire' },
+  D28:  { famille: 'machine', rayon: 'meulage',      note: 'meuleuse filaire' },
+  D26:  { famille: 'machine',                        note: 'ponçage et défonçage filaires, plusieurs rayons' },
+  D27:  { famille: 'machine',                        note: 'machines d\'atelier, plusieurs rayons' },
+  D51:  { famille: 'machine', rayon: 'fixation',     note: 'cloueur pneumatique' },
+  D55:  { famille: 'machine', rayon: 'chantier',     note: 'compresseur' },
+  // ── Extérieur thermique
+  DXPW: { famille: 'machine', rayon: 'chantier',     note: 'nettoyeur haute pression' },
+  DXGN: { famille: 'machine', rayon: 'chantier',     note: 'groupe électrogène' },
+  // ── Rangement, main, accessoires
+  /* ⚠️ CES QUATRE-LÀ N'ARBITRENT PAS. Mesuré : DeWALT range sa RADIO de
+     chantier sous DWST (rangement) et son TÉLÉMÈTRE LASER sous DWHT (outil à
+     main). Le préfixe y désigne un catalogue commercial, pas une famille
+     d'objet. Ils servent donc uniquement de SECOURS quand aucun mot n'a
+     parlé — jamais à contredire un mot qui, lui, a parlé. */
+  DWST: { famille: 'rangement', rayon: 'coffret', incertain: true, note: 'coffret et organiseur, mais AUSSI la radio de chantier' },
+  DWHT: { famille: 'consommable', incertain: true, note: 'outillage à main, mais AUSSI le télémètre laser' },
+  DWMT: { famille: 'consommable', incertain: true, note: 'outillage de mécanicien' },
+  DT:   { famille: 'consommable', incertain: true, note: 'accessoire et consommable' }
+};
+/* Les clés triées du plus LONG au plus court — l'ordre de lecture. */
+var PREFIXES_DEWALT_ORDRE = Object.keys(PREFIXES_DEWALT).sort(function (a, b) { return b.length - a.length; });
+
 /* Un T ajouté APRÈS le code batterie signale le coffret TSTAK :
    « DCK368P3T » = 3 batteries 5,0 Ah + TSTAK. */
 var SUFFIXE_COFFRET = 'T';
@@ -796,6 +876,21 @@ var MACHINE_NUE = ['outil nu', 'machine nue', 'machine seule', 'produit seul', '
    ⚠️ Un rayon inconnu fait ÉCHOUER le chargement, exprès. Une nomenclature
    à moitié valide qui se charge quand même est pire qu'une porte morte : le
    parseur typerait dans le vide sans que rien ne le dise. */
+/* Rend ce que le PRÉFIXE d'une référence dit de l'article, ou null. La
+   lecture va du préfixe le plus long au plus court : « DCMST922N » doit
+   donner DCMST (débroussailleuse), pas DCM. */
+function prefixeDeReference(ref) {
+  var r = String(ref || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  for (var i = 0; i < PREFIXES_DEWALT_ORDRE.length; i++) {
+    var p = PREFIXES_DEWALT_ORDRE[i];
+    if (r.indexOf(p) === 0) {
+      var d = PREFIXES_DEWALT[p];
+      return { prefixe: p, famille: d.famille, rayon: d.rayon || null, type: d.type || null, incertain: !!d.incertain };
+    }
+  }
+  return null;
+}
+
 function construireIndex() {
   var index = [];
   for (var i = 0; i < TYPES.length; i++) {
@@ -827,6 +922,8 @@ function mesureAutorisee(rayon, cle) {
 module.exports = {
   FAMILLES: FAMILLES, RAYONS: RAYONS, TYPES: TYPES, MESURES: MESURES, INDEX: INDEX,
   SUFFIXES_DEWALT: SUFFIXES_DEWALT, SUFFIXE_COFFRET: SUFFIXE_COFFRET,
+  PREFIXES_DEWALT: PREFIXES_DEWALT, PREFIXES_DEWALT_ORDRE: PREFIXES_DEWALT_ORDRE,
+  prefixeDeReference: prefixeDeReference,
   EXTENSIONS_REGION: EXTENSIONS_REGION, GAMMES: GAMMES,
   EMMANCHEMENTS: EMMANCHEMENTS, NUANCES: NUANCES, MATIERES: MATIERES,
   EMPREINTES: EMPREINTES, FORMES_DISQUE: FORMES_DISQUE, DENTURES: DENTURES,
