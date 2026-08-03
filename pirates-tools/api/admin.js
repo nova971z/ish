@@ -2077,6 +2077,17 @@ function pwCouvAjouter(brand, skus, titres, nbTuiles, nbLues, pagesDuPlan) {
   });
   return {
     pagesDansLaRafale: pwCouv.pages,
+    /* ⛔⛔ COMBIEN DE PAGES LE PLAN EN ATTENDAIT — SANS ÇA, « 64 » A L'AIR
+       D'UN SUCCÈS. Mesuré le 03/08 sur son balayage : `pagesDansLaRafale: 64`
+       pour un plan de 67. Les tuiles par page étaient parfaites (3 838 ÷ 64 =
+       59,97), donc RIEN ne signalait que TROIS PAGES n'avaient jamais atteint
+       le serveur — requête échouée chez idealo, ou POST refusé avant d'entrer
+       ici. Un compteur qui ne dit pas ce qu'il attendait ne peut pas dire
+       qu'il manque quelque chose.
+       ⚠️ J4 : trois pages absentes, ce sont ~180 sources de prix jamais vues,
+       donc des coûts d'achat qui restent au niveau précédent sans raison. */
+    pagesAttendues: pagesPlan || null,
+    pagesManquantes: pagesPlan ? Math.max(0, pagesPlan - pwCouv.pages) : null,
     /* ⛔ LES DEUX CHIFFRES QU'IL DEMANDE, dans cet ordre : ce que les pages
        contenaient, ce qu'on en a lu. Doublons COMPRIS — c'est voulu. */
     tuilesVues: pwCouv.tuiles,

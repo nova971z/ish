@@ -2074,6 +2074,37 @@ module.exports = async function () {
           ok(derCouv && derCouv.tuilesVues < nbPages,
             '⛔ …et les tuiles repartent de zéro avec elle ('
             + JSON.stringify(derCouv && derCouv.tuilesVues) + ')');
+
+          /* ⛔⛔ UN BALAYAGE INCOMPLET DOIT SE DÉNONCER LUI-MÊME. Mesuré le
+             03/08 : `pagesDansLaRafale: 64` pour un plan de 67, et les tuiles
+             par page étaient PARFAITES (3 838 ÷ 64 = 59,97). Rien ne disait
+             que trois pages n'avaient jamais atteint le serveur — requête
+             échouée chez le fournisseur, ou POST refusé avant d'entrer dans le
+             cumul. Un compteur qui ne dit pas ce qu'il ATTENDAIT ne peut pas
+             dire qu'il manque quelque chose, et « 64 » a l'air d'un succès.
+             ⚠️ J4 : trois pages absentes, ce sont ~180 sources de prix jamais
+             vues — donc des coûts d'achat qui restent au niveau précédent
+             sans qu'aucun fait ne le justifie. */
+          adm._internals.pwScanReset();
+          var couvPartielle = null;
+          for (var kq = 0; kq < 3; kq++) {
+            var rq = fauxRes();
+            await admFn({ method: 'POST',
+              query: { type: 'price-watch', brand: 'DEWALT', source: 'idealo', sec: '1', scan: '1' },
+              body: { text: pageBref.replace(/MAKITA/g, 'DEWALT') } }, rq, fauxAdmin, dbInterdite);
+            couvPartielle = rq.out && rq.out.couverture;
+          }
+          ok(couvPartielle && couvPartielle.pagesAttendues === nbPages,
+            '⛔⛔ le cumul dit combien de pages le PLAN en attendait — sans ça, un '
+            + 'balayage tronqué a l\'air d\'un succès (obtenu '
+            + JSON.stringify(couvPartielle && couvPartielle.pagesAttendues)
+            + ', attendu ' + nbPages + ')');
+          ok(couvPartielle && couvPartielle.pagesManquantes === nbPages - 3,
+            '⛔⛔ …et combien il en MANQUE, en clair. C\'est le seul chiffre qui '
+            + 'distingue « tout est lu » de « trois pages ne sont jamais arrivées » '
+            + '(obtenu ' + JSON.stringify(couvPartielle && couvPartielle.pagesManquantes)
+            + ', attendu ' + (nbPages - 3) + ')');
+          adm._internals.pwScanReset();
         }
         adm._internals.pwScanReset();
 
