@@ -2071,6 +2071,68 @@ const PW_INSTANCE = {
    rétention de 20 min en mémoire seule, jamais persistée ; J4 — ce sont des
    COMPTES, aucun prix n'y entre et rien ici ne peut servir de prix de
    référence à une réduction ; J5 — aucune TVA, aucun octroi de mer. */
+/* ⛔⛔ NOMMER LES FICHES QUI ONT FAILLI ÊTRE RAPPROCHÉES — SANS ÇA, « 14 »
+   N'EST PAS ACTIONNABLE. Mesuré le 03/08 sur son balayage : 163 de ses fiches
+   DeWALT retrouvées, 393 jamais vues. Le détail du catalogue montre que 379 de
+   ces 393 portent un CODE INTERNE (`AC-00100736`) et non une référence
+   constructeur : aucun fournisseur ne les écrira jamais. Restent 14 vraies
+   références introuvables — et un écart de 14 qu'on ne sait pas NOMMER se
+   termine en supposition (E-113, et avant lui l'écart de 11 « références non
+   lues » que j'avais annoncé sans jamais pouvoir dire lesquelles).
+
+   ⛔ CE QUE CETTE FONCTION TRANCHE. Deux causes opposées à une fiche
+   introuvable, et un seul remède chacune :
+   · le fournisseur écrit la MÊME référence autrement — `DCE530N-XJ` chez lui,
+     `DCE530N` chez nous, ou l'inverse. C'est une ÉCRITURE, ça se répare avec
+     `srcAltSkus`, et c'est de l'argent : chaque fiche réparée est un coût
+     d'achat réel de plus.
+   · le fournisseur ne vend pas l'article. Rien à réparer, et surtout rien à
+     chercher.
+   Le rapprochement par PRÉFIXE normalisé sépare les deux : il ne rend que les
+   fiches dont une référence VUE partage le début. Les autres ne remontent pas.
+
+   ⚠️ LIMITE ASSUMÉE : un préfixe commun n'est PAS une preuve d'identité —
+   `DCD796` et `DCD7961` peuvent être deux outils. Cette liste dit « à
+   vérifier », jamais « à écrire ». ⛔ Aucun `srcAltSkus` ne se déclare sans
+   contrôle du CONTENU (nu contre pack) : c'est la mise en garde de l'user, un
+   prix de pack sur un outil nu corromprait le coût.
+   ⚠️ FONCTION PURE. Portes lues : J3 — ne circulent ici que des références
+   d'outils publiques, aucune donnée personnelle, rien de persisté ; J4 — AUCUN
+   prix n'y entre ni n'en sort, elle ne peut donc pas fabriquer un prix de
+   référence ; J5 — aucune TVA, aucun octroi de mer. */
+const PW_QUASI_MAX = 60;
+function pwQuasiRapprochements(skusMarque, fichesVues, refsVues) {
+  if (!Array.isArray(skusMarque) || !skusMarque.length) return null;
+  const norm = (s) => String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  /* Index des références VUES par leurs six premiers signes : sans lui, 556
+     fiches × 1 559 références font 867 000 comparaisons À CHAQUE PAGE. */
+  const index = Object.create(null);
+  Object.keys(refsVues || {}).forEach((r) => {
+    const n = norm(r);
+    if (n.length < 5) return;
+    const k = n.slice(0, 6);
+    (index[k] = index[k] || []).push({ brut: r, norm: n });
+  });
+  const exemples = [];
+  let nb = 0;
+  skusMarque.forEach((sku) => {
+    if ((fichesVues || {})[String(sku).toUpperCase()]) return;   // déjà rapprochée
+    const n = norm(sku);
+    if (n.length < 5) return;
+    const cands = index[n.slice(0, 6)];
+    if (!cands) return;
+    for (let i = 0; i < cands.length; i++) {
+      const c = cands[i];
+      if (c.norm.indexOf(n) === 0 || n.indexOf(c.norm) === 0) {
+        nb += 1;
+        if (exemples.length < PW_QUASI_MAX) exemples.push({ fiche: sku, refVue: c.brut });
+        break;
+      }
+    }
+  });
+  return { nb: nb, exemples: exemples };
+}
+
 /* ⚠️ `extra` porte ce qui s'est ajouté après coup — empreinte de page, articles
    RAPPROCHÉS d'une fiche, taille du catalogue de la marque. Un objet plutôt
    qu'une file de paramètres positionnels : au septième, une inversion d'ordre
@@ -2125,6 +2187,8 @@ function pwCouvAjouter(brand, skus, titres, nbTuiles, nbLues, pagesDuPlan, extra
     var k = String(n || '').trim().toLowerCase();
     if (k) pwCouv.noms[k] = 1;
   });
+  if (Array.isArray(extra.skusMarque)) pwCouv.skusMarque = extra.skusMarque;
+  const quasi = pwQuasiRapprochements(pwCouv.skusMarque, pwCouv.fiches, pwCouv.refs);
   const nbDistinctes = Object.keys(pwCouv.empreintes).length;
   const base = nbDistinctes || pwCouv.pages;
   const manquantes = pagesPlan ? Math.max(0, pagesPlan - base) : null;
@@ -2191,6 +2255,18 @@ function pwCouvAjouter(brand, skus, titres, nbTuiles, nbLues, pagesDuPlan, extra
     fichesRetrouvees: Object.keys(pwCouv.fiches).length,
     fichesJamaisVues: extra.fichesMarque != null
       ? Math.max(0, extra.fichesMarque - Object.keys(pwCouv.fiches).length) : null,
+    /* ⛔⛔ …ET LESQUELLES ONT FAILLI L'ÊTRE, NOMMÉES. Un écart chiffré se
+       suppose, un écart nommé se corrige. Chaque ligne ici est une fiche dont
+       une référence VUE chez le fournisseur partage le début : soit la même
+       référence écrite autrement (réparable par `srcAltSkus`, donc un coût
+       d'achat réel de plus), soit un homonyme à écarter. Les fiches sans aucun
+       voisin ne remontent pas — le fournisseur ne les vend pas, il n'y a rien
+       à chercher.
+       ⚠️ « À vérifier », jamais « à écrire » : un préfixe commun n'est pas une
+       preuve d'identité, et un prix de pack sur un outil nu corromprait le
+       coût. Le contrôle du contenu reste obligatoire. */
+    fichesQuasiRapprochees: quasi ? quasi.nb : null,
+    fichesQuasiRapprocheesDetail: quasi ? quasi.exemples : null,
     /* ⛔⛔ QUI A COMPTÉ, ET DEPUIS QUAND. Sans ces deux valeurs, un cumul
        amputé par une instance neuve est indiscernable d'un cumul amputé par
        des pages perdues — et les deux remèdes sont opposés. Si l'identifiant
@@ -2452,15 +2528,17 @@ async function handlePriceWatch(req, res, admin, db) {
       /* ⛔ CE QUE SON CATALOGUE CONTIENT POUR CETTE MARQUE — lu sur le fichier,
          zéro Firestore, zéro quota. C'est le dénominateur sans lequel
          « 84 fiches retrouvées » ne veut rien dire. */
-      const fichesMarqueSec = produitsSec.filter(function (p) {
+      const fichesDeLaMarqueSec = produitsSec.filter(function (p) {
         return String(p.brand || '').toUpperCase() === brand;
-      }).length;
+      });
+      const fichesMarqueSec = fichesDeLaMarqueSec.length;
       const couvSec = pwCouvAjouter(brand, parsed.map((x) => x.sku),
         (auto.sansRef || []).map((e) => e.titre),
         tuiles.total, parsed.length + (auto.sansRef || []).length,
         planCourant && planCourant.pages,
         { empreinte: empreinteSec, reconnus: reconnusSec.map((r) => r.sku),
-          fichesMarque: fichesMarqueSec });
+          fichesMarque: fichesMarqueSec,
+          skusMarque: fichesDeLaMarqueSec.map((p) => p.sku).filter(Boolean) });
 
       /* ⛔⛔ L'ÉCART, NOMMÉ. J'ai annoncé à l'user « 11 références non lues » en
          soustrayant deux compteurs — sans jamais pouvoir dire LESQUELLES. Un
@@ -2970,7 +3048,9 @@ async function handlePriceWatch(req, res, admin, db) {
           reconnus: parsed.map((it) => String(it.sku || '').toUpperCase())
             .filter((s) => !!bySku[s]),
           fichesMarque: products.filter((p) => String(p.brand || '').toUpperCase()
-            === String(brand).toUpperCase()).length }),
+            === String(brand).toUpperCase()).length,
+          skusMarque: products.filter((p) => String(p.brand || '').toUpperCase()
+            === String(brand).toUpperCase()).map((p) => p.sku).filter(Boolean) }),
       /* La même ligne locale qu'à sec : trois valeurs, aucune mémoire. C'est
          elle qui se totalise sur le fichier des 67 réponses, quand le cumul
          d'instance, lui, peut avoir été tronqué par une instance neuve. */

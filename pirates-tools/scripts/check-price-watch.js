@@ -2325,7 +2325,66 @@ module.exports = async function () {
             + 'l\'argent : une fiche jamais vue garde un coût supposé (obtenu '
             + JSON.stringify(cF2 && cF2.fichesJamaisVues) + ', attendu '
             + (parMarque[marqueT].length - 3) + ')');
-          adm._internals.pwScanReset();
+
+          /* ══ NOMMER LES FICHES QUI ONT FAILLI ÊTRE RAPPROCHÉES ═══════════
+             ⛔⛔ « 14 vraies références introuvables » n'est pas actionnable :
+             un écart chiffré se suppose, un écart NOMMÉ se corrige. Deux
+             causes opposées derrière une fiche introuvable — le fournisseur
+             écrit la même référence autrement (réparable par `srcAltSkus`,
+             donc un coût d'achat réel de plus), ou il ne vend pas l'article
+             (rien à chercher). Le voisinage par préfixe normalisé les sépare.
+             ⚠️ La référence de travail est CHOISIE À L'EXÉCUTION sur un
+             critère — une fiche à suffixe — jamais nommée dans le harnais. */
+          var refSuffixee = null;
+          for (var rs = 0; rs < parMarque[marqueT].length; rs++) {
+            if (/^[A-Z0-9]{5,}-[A-Z0-9]{2,3}$/.test(parMarque[marqueT][rs])) {
+              refSuffixee = parMarque[marqueT][rs]; break;
+            }
+          }
+          ok(!!refSuffixee,
+            '⛔ PRÉALABLE : le catalogue porte au moins une référence à suffixe '
+            + '(forme RÉF-XX) — sans elle ce contrôle ne vérifie rien');
+          if (refSuffixee) {
+            var refNue = refSuffixee.split('-')[0];
+            adm._internals.pwScanReset();
+            var rQ = fauxRes();
+            await admFn({ method: 'POST',
+              query: { type: 'price-watch', brand: marqueT, source: 'idealo', sec: '1', scan: '1' },
+              /* Le fournisseur écrit la version NUE ; le catalogue porte la
+                 suffixée. C'est exactement le cas `-XJ` du projet. */
+              body: { text: pageDeFiches([refNue, troisRefs[0], 'ZZINTRUS9999'], 400) } },
+              rQ, fauxAdmin, dbInterdite);
+            var cQ = rQ.out && rQ.out.couverture;
+            var vise = (cQ && cQ.fichesQuasiRapprocheesDetail || []).filter(function (e) {
+              return e.fiche === refSuffixee;
+            });
+            ok(vise.length === 1 && String(vise[0].refVue).toUpperCase().indexOf(refNue) === 0,
+              '⛔⛔ une fiche que le fournisseur écrit SANS son suffixe est NOMMÉE, avec '
+              + 'la référence vue en face : c\'est ce qui rend les 14 réparables au lieu '
+              + 'd\'être un chiffre (obtenu '
+              + JSON.stringify((cQ && cQ.fichesQuasiRapprocheesDetail || []).slice(0, 3)) + ')');
+            /* ⛔ ET SURTOUT : LA LISTE NE DÉVERSE PAS TOUT LE CATALOGUE. Une
+               fiche sans aucun voisin chez le fournisseur ne remonte PAS —
+               sinon on enverrait chercher 393 réparations dont 379 n'existent
+               pas, et la liste deviendrait du bruit qu'on cesse de lire. */
+            ok(cQ && cQ.fichesQuasiRapprochees < cQ.fichesJamaisVues,
+              '⛔⛔ les fiches SANS voisin chez le fournisseur ne remontent pas : '
+              + JSON.stringify(cQ && cQ.fichesQuasiRapprochees) + ' quasi sur '
+              + JSON.stringify(cQ && cQ.fichesJamaisVues) + ' jamais vues');
+            /* ⛔ Une fiche DÉJÀ rapprochée n'a rien à faire dans les quasi :
+               elle est trouvée, il n'y a rien à réparer. */
+            ok(cQ && cQ.fichesRetrouvees >= 1,
+              '⛔ PRÉALABLE : la page porte une référence EXACTE du catalogue, elle est '
+              + 'donc rapprochée (obtenu ' + JSON.stringify(cQ && cQ.fichesRetrouvees) + ')');
+            var dejaVues = (cQ && cQ.fichesQuasiRapprocheesDetail || []).filter(function (e) {
+              return String(e.fiche).toUpperCase() === String(troisRefs[0]).toUpperCase();
+            });
+            ok(dejaVues.length === 0,
+              '⛔⛔ une fiche déjà RAPPROCHÉE ne figure PAS dans les quasi — elle est '
+              + 'trouvée, il n\'y a rien à réparer sur elle, et l\'y laisser gonflerait la '
+              + 'liste de faux chantiers (obtenu ' + dejaVues.length + ' entrée(s))');
+            adm._internals.pwScanReset();
+          }
         }
         ok(cE3 && typeof cE3.cause === 'string' && !!cE3.lecture,
           '⛔⛔ un cumul incomplet dit sa CAUSE en clair, pas seulement son écart : '
