@@ -990,6 +990,28 @@ function extraireCaracteristiques(titre, brand) {
   if (!car.type && car.nbOutils != null && car.nbOutils > 1) {
     car.famille = 'machine'; car.type = 'pack d\'outils';
   }
+  /* ⛔ DEUX RÉFÉRENCES DE MACHINE DANS UN TITRE = UN LOT DE MACHINES. Mesuré
+     sur SON relevé du 03/08 : « Kit DeWALT DCS570 + DCS334 (2 x 5.0 Ah +
+     DCB115 + TSTAK II) » sortait SANS TYPE — aucun mot du vocabulaire ne le
+     nomme, et le préfixe DCS ne dit que « sciage ».
+     ⚠️ La règle ne s'applique que si AUCUN type n'a été trouvé : « Vibrateur
+     DCE531N-XJ + 1 chargeur DCB1104-QW » porte lui aussi deux références, mais
+     c'est un vibrateur — son nom est écrit, et un nom écrit l'emporte toujours
+     sur un comptage. */
+  if (!car.type) {
+    var refsTitre = Object.create(null);
+    (t.match(/\b[A-Z][A-Z0-9]{2,}(?:[-\/.][A-Z0-9]+)*\b/g) || []).forEach(function (x) {
+      var r = x.toUpperCase();
+      if (!/\d/.test(r) || r.length < 5 || UNITE_RE.test(r)) return;
+      // Les batteries et coffrets d'un lot ne comptent pas comme des machines.
+      var pr = nomen.prefixeDeReference(r);
+      if (pr && (pr.famille === 'energie' || pr.famille === 'rangement')) return;
+      refsTitre[r.replace(/-(XJ|QW|QS|GB|LX|B1|QZ)$/i, '')] = 1;
+    });
+    if (Object.keys(refsTitre).length >= 2) {
+      car.famille = 'machine'; car.rayon = 'combo'; car.type = 'pack d\'outils';
+    }
+  }
 
   car.chargeur = /\bchargeurs?\b|\bcharger\b/.test(bas);
 

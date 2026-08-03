@@ -810,6 +810,33 @@ module.exports = async function () {
       '⛔ un préfixe INCERTAIN ne contredit pas un mot explicite : DeWALT range '
       + 'sa RADIO sous DWST (rangement) — le mot du titre l\'emporte (' + rad.type + ')');
 
+    /* ═══ DEUX TITRES SANS TYPE, RELEVÉS SUR SA PAGE (03/08) ══════════════
+       Aucun mot du vocabulaire ne les nomme — il a fallu deux règles neuves. */
+    var kit2 = ec('Kit DEWALT DCS999X9 + DCS888X8 (2 x 5.0 Ah + DCB115 + TSTAK II)', 'DEWALT');
+    ok(kit2.type === 'pack d\'outils' && kit2.rayon === 'combo',
+      '⛔ DEUX RÉFÉRENCES DE MACHINE = UN LOT DE MACHINES. « Kit … DCS999X9 + '
+      + 'DCS888X8 » ne porte aucun mot qui le nomme, et le préfixe ne dit que '
+      + '« sciage » : il sortait SANS TYPE (' + kit2.type + ')');
+    var vib = ec('Vibrateur à béton DCE999X9-XJ + 2 batteries 18V 5 Ah + 1 Chargeur DCB999-QW DEWALT', 'DEWALT');
+    ok(vib.type === 'vibrateur',
+      '⛔ PRÉALABLE : un titre qui porte DEUX références mais dont le NOM est '
+      + 'écrit reste ce que son nom dit. Un nom écrit l\'emporte toujours sur un '
+      + 'comptage de références (' + vib.type + ')');
+    /* ⛔ UNE MACHINE LIVRÉE AVEC SA BATTERIE ET SON COFFRET N'EST PAS UN LOT
+       DE MACHINES. Le titre porte trois références — mais deux sont de
+       l'énergie et du rangement. ⚠️ Un premier essai testait « Lot de
+       batteries 10 x DCB999 » : une SEULE référence, donc la règle des deux
+       ne s'exerçait pas et le sabotage restait vert. */
+    var uneSeule = ec('DEWALT DCS999X9-XJ DCB999-QW DWST999', 'DEWALT');
+    ok(uneSeule.type !== 'pack d\'outils',
+      '⛔ trois références dont une batterie et un coffret = UNE machine avec ses '
+      + 'accessoires, pas un lot de machines (' + uneSeule.type + ')');
+    ok(ec('Lot de batteries 10 x DCB999 18V Li-Ion XR - 10 X 5.0Ah', 'DEWALT').type === 'batterie',
+      'préalable : un lot de batteries reste des batteries');
+    ok(ec('DEWALT DCD999X9 Diamètre de l\'hélice 160 mm, M14', 'DEWALT').type === 'malaxeur',
+      '⛔ idealo décrit le malaxeur par son OUTIL — « diamètre de l\'hélice » — et '
+      + 'jamais par son nom : la fiche sortait sans type pour cette seule raison');
+
     var cD = ec('MAKITA ZZI850', 'MAKITA');
     ok(cD.type !== 'kit',
       '⛔ DÉFAUT MESURÉ PAR CETTE PORTE : « kit » se trouve DANS « maKITa ». Un '
@@ -1373,6 +1400,18 @@ module.exports = async function () {
           + JSON.stringify(rTrou.out && rTrou.out.refsNonLues) + ')');
         ok(rTrou.out.refsNonLues.indexOf('ZZT001A') === -1,
           'et la réf LUE, elle, n\'est pas dans la liste');
+        /* ⛔ NOMMER NE SUFFIT PAS. Trois réfs sont ressorties non lues sur SA
+           page le 03/08, et je n'ai PAS pu reproduire la cause — la page vit
+           chez lui. La réponse porte donc le MORCEAU DE PAGE autour de chaque
+           réf manquante : c'est lui qui tranche, pas une supposition. */
+        var det = (rTrou.out.refsNonLuesDetail || []).filter(function (x) { return x.ref === 'ZZT002B'; })[0];
+        ok(det && typeof det.contexte === 'string' && det.contexte.indexOf('ZZT002B') !== -1,
+          '⛔ chaque réf non lue vient AVEC son contexte de page — sans lui, la '
+          + 'cause reste une supposition, et une supposition ne se corrige pas');
+        ok(det && det.contexte.length <= 230,
+          'la fenêtre reste bornée : on montre de quoi diagnostiquer, pas la page');
+        ok(!/x-watch-secret/i.test(JSON.stringify(rTrou.out)),
+          '⛔ et JAMAIS un en-tête dans la réponse : la clé du traqueur y vit');
         ok(rTrou.out.diagnostic.refsVues.indexOf('ZZT777X') === -1,
           '⛔⛔ UNE SUGGESTION DE RECHERCHE N\'EST PAS UNE RÉFÉRENCE. « makita '
           + 'zzt777x » en minuscules porte un chiffre et fait quatre signes : '

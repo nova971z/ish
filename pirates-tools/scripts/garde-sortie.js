@@ -90,6 +90,40 @@ var DECLARE_FAIT = /(c'est fait|c'est bon|ça marche|tout est vert|c'est déploy
    est vérifiable, la seconde est une humeur déguisée en fait. */
 var CERTITUDE = /(sans risque|aucun risque|du gain pur|ça devrait (marcher|fonctionner|passer)|ne peut pas casser|c'est trivial|il suffit de)/i;
 
+/* ══ S7 — LES QUATRE INTERDICTIONS DU 03/08/2026 ═════════════════════════
+   Posées par l'user après le cinquantième essai sur le même parseur, mot
+   pour mot : « tu dois te corriger bordel de merde ». Elles étaient déjà
+   écrites au protocole — et j'avais déjà enfreint la première. ⛔ Une règle
+   qu'aucune porte n'applique n'est qu'un vœu : elles deviennent exécutables.
+
+   ⚠️ Chaque motif est ÉTROIT, pour la raison écrite plus haut : une porte qui
+   refuse à tort finit désactivée, et ne protège alors plus rien. On ne vise
+   que des formulations qui ne peuvent pas être autre chose. */
+
+/* I-1 — jamais un mot sur SON état. */
+var ETAT_USER = new RegExp(
+  '\\b(?:tu (?:es|as l\'air|dois être|sembles) (?:fatigu|crev|épuis)|'
+  + 'va (?:te )?(?:dormir|coucher)|tu veux (?:aller )?(?:te coucher|dormir)|'
+  + 'repose-toi|prends du repos|il est tard|à cette heure-ci|bonne nuit)\\b', 'i');
+
+/* I-3 — on ne demande pas par où commencer quand tout est dans le périmètre. */
+var DEMANDE_ORIENTATION = new RegExp(
+  '(?:dis-moi (?:si|par quoi|lequel|laquelle)|tu (?:veux|préfères) que je (?:commence|attaque|fasse)|'
+  + 'je (?:commence|attaque) par (?:quoi|lequel)|par (?:quoi|où) (?:je )?(?:commence|on commence)|'
+  + 'lequel (?:je fais|on fait|veux-tu)|(?:ça|celui-ci) ou (?:ça|celui-là)\\s*\\?)', 'i');
+
+/* I-2 et I-4 — un aveu d'échec ne vaut qu'APRÈS avoir cherché. On ne détecte
+   pas l'intention : on détecte l'aveu NON accompagné d'une trace de recherche
+   ou de reprise. Le remède est écrit dans le grief, pas deviné. */
+var AVEU_ECHEC = new RegExp(
+  '(?:je n\'?y arrive pas|je n\'?ai pas (?:réussi|pu) (?:à )?(?:le |la |les )?(?:faire|corriger|résoudre)|'
+  + 'ça (?:ne )?marche (?:toujours )?pas et je (?:ne )?sais pas|'
+  + 'je (?:ne )?vois pas (?:comment|pourquoi)|c\'est au-dessus de mes)', 'i');
+var RECHERCHE_FAITE = new RegExp(
+  '(?:j\'ai cherché|recherche (?:faite|en ligne)|j\'ai mesuré|mesuré (?:sur|le|la)|'
+  + 'sources? consultée?s?|j\'ai lu (?:la doc|le code|la source)|hypothèse|'
+  + 'reproduit|je reprends|je recommence|je corrige)', 'i');
+
 /* Une citation n'est pas une affirmation. Le registre CONTIENT « du gain pur,
    sans risque » : sans cette précaution, le citer se bloquerait lui-même —
    et une porte qui empêche de parler de ses propres erreurs est absurde. */
@@ -307,6 +341,32 @@ function controler(msg, tour) {
       + 'qu\'une humeur déguisée en fait.');
   }
 
+  /* ── S7 : LES QUATRE INTERDICTIONS (03/08/2026) ───────────────────────── */
+  var c71 = nu.match(ETAT_USER);
+  if (c71) {
+    griefs.push('« ' + c71[0] + ' » parle de l\'état de l\'user, pas du travail. '
+      + 'I-1 : ni fatigue, ni sommeil, ni heure chez lui, ni ce qu\'il devrait faire '
+      + 'de son temps. Retirer la phrase — elle n\'ajoute rien, et il l\'a interdit '
+      + 'deux fois.');
+  }
+  var c73 = nu.match(DEMANDE_ORIENTATION);
+  if (c73) {
+    griefs.push('« ' + c73[0] + ' » demande à l\'user de choisir par où commencer. '
+      + 'I-3 : tant que sa demande n\'est pas remplie, on CONTINUE — et si deux '
+      + 'chantiers sont dans le périmètre, on fait LES DEUX. Une question ne se pose '
+      + 'que dans les cas de §7 : mesure contredisant la demande, geste irréversible, '
+      + 'filet manquant, décision tracée contraire, ou deux hypothèses à égalité '
+      + 'APRÈS mesure.');
+  }
+  var c72 = nu.match(AVEU_ECHEC);
+  if (c72 && !RECHERCHE_FAITE.test(nu)) {
+    griefs.push('« ' + c72[0] + ' » constate un échec sans dire ce qui a été CHERCHÉ '
+      + 'pour le lever. I-2 et I-4 : bloqué ⇒ on cherche (Web, doc constructeur, '
+      + 'source officielle, code existant), on corrige, on remesure. « Je n\'y arrive '
+      + 'pas » n\'est une réponse qu\'APRÈS la recherche — et alors elle dit ce qui a '
+      + 'été cherché et ce qui manque exactement.');
+  }
+
   return griefs;
 }
 
@@ -363,7 +423,30 @@ var CAS = [
   { nom: 'la même formule dans un extrait de code', bloque: false,
     msg: 'Le motif `sans risque` figure dans la liste des formules interdites.' },
   { nom: 'un constat MESURÉ à la place de la promesse', bloque: false,
-    msg: 'Les 138 assertions passent et la CI est verte : rien ne régresse.' }
+    msg: 'Les 138 assertions passent et la CI est verte : rien ne régresse.' },
+
+  /* ── S7 : les quatre interdictions du 03/08/2026 ─────────────────────────
+     Chacune dans LES DEUX directions : ce qui doit être refusé, et ce qui
+     doit passer. Une porte qui refuse à tort finit désactivée. */
+  { nom: 'I-1 — un mot sur son état', bloque: true,
+    msg: 'Il est tard, on reprendra ça demain.' },
+  { nom: 'I-1 — variante sommeil', bloque: true,
+    msg: 'Tu veux aller te coucher ? On continue demain.' },
+  { nom: 'I-1 — « tard » qui parle du CODE, pas de lui', bloque: false,
+    msg: 'Le contrôle arrive trop tard dans la chaîne : il lit après l\'écriture.' },
+  { nom: 'I-3 — demander par où commencer', bloque: true,
+    msg: 'Dis-moi si j\'attaque les 3 non lues ou les 2 sans type.' },
+  { nom: 'I-3 — variante « tu veux que je »', bloque: true,
+    msg: 'Tu veux que je commence par le parseur ?' },
+  { nom: 'I-3 — une question LÉGITIME de §7 passe', bloque: false,
+    msg: 'La mesure contredit la demande : le catalogue tombe de 1119 à 1049. '
+      + 'Je ne peux pas trancher seul, la décision t\'appartient.' },
+  { nom: 'I-2/I-4 — aveu d\'échec SANS recherche', bloque: true,
+    msg: 'Je ne vois pas pourquoi ces trois références manquent.' },
+  { nom: 'I-2/I-4 — le même aveu APRÈS avoir cherché', bloque: false,
+    msg: 'J\'ai cherché la cause : reproduit sur le corpus, hypothèse tuée. '
+      + 'Je ne vois pas pourquoi ces trois références manquent — il me faut le '
+      + 'texte brut de la page pour trancher.' }
 ];
 
 function autoControle() {

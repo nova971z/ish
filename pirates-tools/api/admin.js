@@ -2115,6 +2115,29 @@ async function handlePriceWatch(req, res, admin, db) {
       parsed.forEach((it) => { if (it.sku) vuesSec[String(it.sku).toUpperCase()] = 1; });
       const titresSec = (auto.sansRef || []).map((e) => String(e.titre || '').toUpperCase()).join(' | ');
       const refsNonLues = diagSec.refsVues.filter((r) => !vuesSec[r] && titresSec.indexOf(r) === -1);
+      /* ⛔ NOMMER NE SUFFIT PAS : IL FAUT POUVOIR DIAGNOSTIQUER. Trois réfs
+         sont ressorties non lues le 03/08 et je n'ai PAS pu reproduire la
+         cause — la page vit chez lui, pas dans le dépôt (piège déjà payé :
+         CONNECT 403 mesuré depuis le serveur). Plutôt que de supposer, la
+         réponse porte le MORCEAU DE PAGE autour de chaque réf manquante :
+         c'est lui qui dira si le prix manque, si le bloc est coupé, ou si mon
+         découpage rate — sans un aller-retour de plus.
+         ⚠️ Fenêtre bornée à 220 signes, prise UNIQUEMENT dans le corps de sa
+         propre requête — jamais un en-tête, jamais un secret (même règle que
+         `extraits`, gravée le 02/08).
+         ⚠️ Portes lues : J3 — c'est une page publique de comparateur, aucune
+         donnée personnelle, rien n'est conservé au-delà de la réponse et la
+         minimisation est respectée (12 fenêtres au plus) ; J4 — on n'annonce
+         aucun prix, on montre pourquoi une ligne n'a pas été lue ; J5 — aucune
+         TVA, aucun octroi de mer. */
+      const refsNonLuesDetail = refsNonLues.slice(0, 12).map((r) => {
+        const i = String(text).indexOf(r);
+        return {
+          ref: r,
+          contexte: i < 0 ? null
+            : String(text).slice(Math.max(0, i - 90), i + 130).replace(/\s+/g, ' ').trim()
+        };
+      });
       return res.status(200).json({
         ok: true, sec: true, brand, source: sourceSlug, format: auto.format,
         counts: {
@@ -2141,7 +2164,7 @@ async function handlePriceWatch(req, res, admin, db) {
            le parseur en a tiré : l'écart entre les deux EST le diagnostic. */
         diagnostic: diagSec,
         // Liste vide = rien ne manque, et c'est vérifiable ligne à ligne.
-        refsNonLues: refsNonLues,
+        refsNonLues: refsNonLues, refsNonLuesDetail: refsNonLuesDetail,
         reconnus: reconnusSec.slice(0, 60), inconnus: inconnusSec.slice(0, 60),
         sansRefDetail: sansRefSec
       });

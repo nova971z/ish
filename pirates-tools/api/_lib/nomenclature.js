@@ -227,7 +227,11 @@ var TYPES = [
   ['percage', 'visseuse', ['visseuse', 'tournevis électrique', 'screwdriver', 'atornillador', 'screwdriver drill']],
   ['percage', 'carotteuse', ['carotteuse', 'carotteuse à eau', 'carotteuse diamant', 'perforadora de diamante', 'core drill', 'diamond core drill']],
   ['percage', 'taraudeuse', ['taraudeuse']],
-  ['percage', 'malaxeur', ['malaxeur', 'mélangeur', 'agitateur', 'mezclador', 'paddle mixer', 'mixer']],
+  /* ⚠️ « Diamètre de l'hélice 160 mm, M14 » : idealo décrit le malaxeur par
+     son OUTIL, pas par son nom. Mesuré sur sa page — la fiche sortait sans
+     type pour cette seule raison. */
+  ['percage', 'malaxeur', ['malaxeur', 'mélangeur', 'agitateur', 'mezclador', 'paddle mixer', 'mixer',
+    'hélice de malaxage', 'hélice']],
   ['percage', 'tarière', ['tarière', 'tarière de sol']],
 
   // ═══ MACHINES — VISSAGE À CHOCS ═════════════════════════════════════
