@@ -153,6 +153,10 @@ var reqTraqueur = safeRequire('./check-traqueur', 'check-traqueur');
 // cette porte prouve AUSSI qu'aucune valeur d'environnement n'en sort, pas
 // meme dix signes du compte de service par un message d'erreur de JSON.parse.
 var reqDeploi   = safeRequire('./check-deploiement', 'check-deploiement');
+// Le balayage des 67 pages : 67 adresses fabriquees par le serveur, plus une
+// seule tapee a la main. Si le plan est faux, ce sont 67 pages qui partent a
+// cote — et des couts d'achat qui ne descendent pas.
+var reqPlanTrq  = safeRequire('./check-plan-traqueur', 'check-plan-traqueur');
 // Le module Revolut est ecrit AVANT d'avoir pu appeler le reseau : tout ce qui
 // est PUR (signature contre le vecteur officiel, commission d'un ordre
 // reessaye, table des etats) s'eprouve ici, sinon la 1re verification aurait
@@ -232,6 +236,7 @@ var reqReconc   = safeRequire('./check-reconciliation', 'check-reconciliation');
   await runOne(reqDemandes, 'check-demandes');
   await runOne(reqTraqueur, 'check-traqueur');
   await runOne(reqDeploi,   'check-deploiement');
+  await runOne(reqPlanTrq,  'check-plan-traqueur');
   await runOne(reqRevolut,  'check-revolut');
   await runOne(reqReconc,   'check-reconciliation');
 

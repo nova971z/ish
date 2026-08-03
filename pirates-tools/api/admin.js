@@ -9,6 +9,8 @@ const firebase = require('./_lib/firebase');
 const analytics = require('./_lib/analytics');
 const catalog = require('./_lib/catalog');
 const priceParse = require('./_lib/price-parse');
+// Les pages à balayer, déclarées une fois — jamais dans une URL tapée à la main.
+const plans = require('./_lib/traqueur-plans');
 const priceModel = require('./_lib/pricing-model');
 const priceConfig = require('./_lib/pricing-config');
 const pricing = require('./_lib/pricing');   // territoires (taux TVA/octroi) — saisie remboursement
@@ -37,9 +39,70 @@ module.exports = async function handler(req, res) {
   // ⚠️ J4 — ce point d'entrée décide de PRIX DE VENTE. Le prix relevé chez le
   // fournisseur est un COÛT, jamais un prix de référence affichable : rien ici
   // ne doit produire un prix barré ni une réduction annoncée (D-004).
-  const estWatch = (req.query && req.query.type) === 'price-watch';
+  /* ⛔ LE PLAN DE BALAYAGE PASSE PAR LA MÊME PORTE QUE LE RELEVÉ, et il le
+     doit : c'est le MÊME raccourci iPad qui l'appelle, et un raccourci ne
+     peut pas produire de jeton Firebase (il expire chaque heure). Le laisser
+     tomber sur `requireAdmin` l'aurait refusé en silence — exactement la
+     panne du 31/07 où les prix ont cessé d'être relevés sans un mot.
+     ⚠️ Portes lues : J3 — ce plan ne rend que des ADRESSES de pages publiques,
+     aucune donnée personnelle, rien conservé ; J4 — aucun prix n'y transite,
+     et rien n'y produit de prix barré ni de réduction annoncée (D-004) ;
+     J5 — aucune TVA, aucun octroi de mer.
+     ⚠️ Sécurité : `requireWatch` n'ouvre que le traqueur, et ce plan ne lit ni
+     n'écrit rien. Le secret vit dans un EN-TÊTE, jamais dans une URL. */
+  const typeDemande = (req.query && req.query.type) || '';
+  const estWatch = typeDemande === 'price-watch' || typeDemande === 'price-watch-plan';
   const denied = estWatch ? await auth.requireWatch(req) : await auth.requireAdmin(req);
   if (denied) return res.status(denied.status).json({ ok: false, error: denied.error });
+
+  /* ── GET ?type=price-watch-plan : LES 67 PAGES, DANS L'ORDRE ──────────────
+     ⛔ MOTIF, dit et redit par l'user : « arrête de me demander de rajouter
+     quelque chose dans une URL ». Une page fournisseur paginée demande 67
+     adresses différentes ; les lui faire taper une par une est une garantie
+     d'erreur, et une erreur d'URL ici, c'est un prix qui ne descend pas.
+     Le raccourci demande donc son plan, et boucle dessus. Rien à éditer.
+     ⛔ PLACÉ AVANT FIRESTORE, ET C'EST VOULU : ce plan ne lit ni n'écrit
+     rien. Le faire tomber sur le 503 « Firestore not configured » le rendrait
+     indisponible pour une raison qui ne le concerne pas — et l'user
+     chercherait la panne du côté du traqueur.
+     ⚠️ Portes lues : J3 — des adresses de pages publiques, aucune donnée
+     personnelle, rien conservé ; J4 — aucun prix ; J5 — aucune fiscalité. */
+  if (req.method === 'GET' && typeDemande === 'price-watch-plan') {
+    const brand = String((req.query && req.query.brand) || '').toUpperCase();
+    const source = String((req.query && req.query.source) || '').toLowerCase();
+    const p = plans.plan(brand, source);
+    if (!p) {
+      /* ⛔ UN REFUS QUI NE DIT PAS QUOI FAIRE EST UN MUR. On nomme les plans
+         qui existent : l'écart entre ce qu'il a demandé et ce qui est déclaré
+         saute aux yeux, sans un aller-retour de plus. */
+      return res.status(404).json({
+        ok: false,
+        error: 'Aucun plan de balayage déclaré pour ' + (brand || '?') + '@' + (source || '?')
+          + '. Plans connus : ' + plans.plansConnus().join(', ')
+          + '. Ils se déclarent dans api/_lib/traqueur-plans.js, jamais dans une URL.'
+      });
+    }
+    const etapes = priceParse.planBalayage(p);
+    /* L'adresse du RELEVÉ, prête à l'emploi et en mode rafale : c'est elle que
+       le raccourci met dans son POST. `scan=1` fait vivre le cache de
+       balayage — sans lui, 67 pages coûteraient ~160 000 lectures Firestore. */
+    const postUrl = '/api/admin?type=price-watch&brand=' + encodeURIComponent(brand)
+      + '&source=' + encodeURIComponent(source) + '&scan=1&dryRun=0';
+    return res.status(200).json({
+      ok: true,
+      brand: brand, source: source,
+      pages: p.pages, parPage: p.parPage, ordre: p.ordre,
+      /* ⚠️ Ce que le plan SUPPOSE encore, écrit noir sur blanc plutôt que tu
+         (E-112 : une grammaire déduite de deux points est une invention). */
+      aVerifier: p.aVerifier || null,
+      note: p.note || null,
+      postUrl: postUrl,
+      /* Les adresses, DANS L'ORDRE DE BALAYAGE — décroissant ⇒ on part de la
+         dernière page, là où les prix bougent le plus. */
+      urls: etapes.map((e) => e.url),
+      etapes: etapes
+    });
+  }
 
   // ── Firestore (shared initializer) ────────────────────────
   const { admin, db } = firebase.getFirebase();

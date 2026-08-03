@@ -87,6 +87,49 @@ La **1ʳᵉ URL (health) est identique pour les 3 marques** :
 
 ---
 
+## 🔁 DeWALT — idealo, 67 PAGES EN BOUCLE (03/08/2026)
+
+> ⛔ **PLUS AUCUNE URL À TAPER.** Les 67 adresses sont fabriquées par le
+> serveur, dans l'ordre de balayage, et le raccourci boucle dessus. Le jour où
+> la pagination du site change, elle change **à un seul endroit** —
+> `api/_lib/traqueur-plans.js` — sous le contrôle de la CI.
+
+Le raccourci a **quatre** actions au lieu de trois :
+
+1. **health** — `https://pirates-tools.com/api/health`
+   *(GET. Il rend aussi `build.commit` : c'est lui qui dit quel code tourne.)*
+2. **le plan** — `https://pirates-tools.com/api/admin?type=price-watch-plan&brand=DEWALT&source=idealo`
+   GET, **en-tête `x-watch-secret`** = la clé `WATCH_SECRET`.
+   Rend `{ urls: [ …67 adresses… ], postUrl, pages, aVerifier }`.
+3. **Répéter pour chaque** élément de `urls` :
+   a. « Obtenir le contenu de l'URL » sur l'élément courant *(GET, la page)* ;
+   b. « Obtenir le contenu de l'URL » sur
+      `https://pirates-tools.com/api/admin?type=price-watch&brand=DEWALT&source=idealo&scan=1&dryRun=0`
+      — **POST**, corps **JSON**, champ **`text`** = le contenu obtenu en (a),
+      en-tête **`x-watch-secret`**.
+      *(C'est exactement la valeur de `postUrl` rendue à l'étape 2.)*
+
+> ⛔ **`&scan=1` N'EST PAS FACULTATIF.** Sans le cache de balayage, 67 pages
+> relisent la collection à chaque page : le quota Firestore a déjà sauté une
+> fois (02/08, « 8 RESOURCE_EXHAUSTED » sur son écran). L'adresse rendue par
+> le plan le porte déjà — il n'y a rien à ajouter.
+
+> ⛔ **L'ORDRE EST VOULU.** La page est triée par prix **décroissant**, donc le
+> balayage part de la **dernière** page : c'est là que sont les articles les
+> moins chers, ceux dont le prix bouge le plus. En tri croissant, on partirait
+> de la première.
+
+> ⚠️ **CE QUI RESTE SUPPOSÉ, ET COMMENT LE TRANCHER.** Le **pas** de la
+> pagination (15 par page) est déduit de deux points seulement : l'URL envoyée
+> pour « la page sept » porte `-90`, et la page déclare 67 pages.
+> **Deux points de données ne font pas une grammaire** — c'est E-112, déjà
+> payée. Le balayage le prouve tout seul : si le pas est juste,
+> `couverture.refsDistinctes` croît d'environ **60 par page** ; s'il est trop
+> petit, les pages se recouvrent et le compteur **stagne**. Aucun calcul à
+> faire : c'est le premier balayage qui répond.
+
+---
+
 ## ➕ AJOUTER UN TRAQUEUR (autre site) — depuis le 01/08/2026
 
 Même raccourci en 3 actions, avec **deux différences** :

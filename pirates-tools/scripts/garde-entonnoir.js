@@ -164,7 +164,13 @@ var HORS_LISTE = {
      référence. Aucune règle métier ne s'y exécute — la logique qui S'EN SERT
      est `price-parse.js`, rattachée au traqueur et couverte par
      `check-price-watch`. Écarté le 03/08/2026. */
-  'pirates-tools/api/_lib/nomenclature.js': 'dictionnaire de vocabulaire — aucune règle exécutée, la logique vit dans price-parse.js'
+  'pirates-tools/api/_lib/nomenclature.js': 'dictionnaire de vocabulaire — aucune règle exécutée, la logique vit dans price-parse.js',
+  /* Même nature : des ADRESSES de pages publiques et un nombre de pages.
+     Aucune règle ne s'y exécute — celle qui s'en sert est `planBalayage`, dans
+     `price-parse.js`. Et ce fichier a sa PROPRE porte, `check-plan-traqueur`,
+     qui exige entre autres qu'aucune adresse ne porte de secret et que ce qui
+     reste supposé soit écrit comme tel. Écarté le 03/08/2026. */
+  'pirates-tools/api/_lib/traqueur-plans.js': 'adresses de pages publiques — aucune règle exécutée, couvert par check-plan-traqueur'
 };
 
 module.exports = { PROTEGES: PROTEGES, LISTES: LISTES, HORS_LISTE: HORS_LISTE };
