@@ -2100,6 +2100,80 @@ const PW_INSTANCE = {
    d'outils publiques, aucune donnée personnelle, rien de persisté ; J4 — AUCUN
    prix n'y entre ni n'en sort, elle ne peut donc pas fabriquer un prix de
    référence ; J5 — aucune TVA, aucun octroi de mer. */
+/* ══ LES BAISSES D'UN BALAYAGE, CUMULÉES SUR SES 67 PAGES ═══════════════════
+   Demande de l'user, 03/08 : « la moyenne de baisse qu'on a pu faire pour tous
+   ces produits », et « dix produits qui auront une baisse la plus élevée, je
+   vais aller les vérifier AVANT de modifier les prix de la boutique ».
+
+   ⛔ SA PHRASE EST LE CAHIER DES CHARGES : vérifier AVANT d'écrire. Ce cumul
+   est donc fait pour être lu en `&dryRun=1` — le mode qui calcule les nouveaux
+   prix et n'en écrit aucun. Il fonctionne aussi sur un vrai relevé, mais c'est
+   l'ordre inverse de celui qu'il a demandé.
+   ⛔ POURQUOI UN CUMUL, ET PAS UNE LECTURE PAGE PAR PAGE : son raccourci ne lui
+   rend que la DERNIÈRE des 67 réponses. Les dix plus fortes baisses du
+   balayage ne sont pas les dix plus fortes de la dernière page — sans cumul,
+   la question n'a tout simplement pas de réponse.
+   ⚠️ On ne compte QUE ce que le traqueur a validé (`applied`). Un prix écarté
+   (`flagged`, hors fourchette) n'est pas une baisse : le faire entrer dans une
+   moyenne la ferait mentir dans le sens qui plaît.
+   ⚠️ Un produit vu sur deux pages ne compte qu'une fois — même article, même
+   résultat ; deux fois pondérerait la moyenne au hasard.
+   ⛔ LES HAUSSES SONT COMPTÉES AUSSI, et rendues. Il demande les baisses ; ne
+   montrer que les baisses ferait d'un rapport un argumentaire.
+
+   ⚠️ PORTE J4 LUE (`node scripts/juridique.js J4`). L'obligation : le prix
+   annoncé doit être exact et complet, et une réduction annoncée se réfère au
+   prix le plus bas pratiqué sur les 30 jours précédents. Ce cumul est HORS de
+   ce chemin : il ne fixe aucun prix, n'en annonce aucun, et ne fait que
+   RÉCAPITULER ce que le traqueur a déjà calculé, pour qu'il soit vérifié avant
+   d'être écrit. ⛔ « ancien » n'est PAS un prix de référence au sens de cette
+   règle — c'est l'état actuel de la fiche. Le minimum 30 jours se calcule
+   ailleurs, sur le journal réel. Rien de ce qui sort d'ici ne doit servir à
+   barrer un prix ni à afficher une réduction.
+   ⚠️ J3 — aucune donnée personnelle : des références, des noms d'outils, des
+   montants. J5 — aucune TVA ni octroi de mer ne se décide ici, le territoire
+   fiscal continue de se dériver du code postal. */
+const PW_TOP_BAISSES = 10;
+function pwBaissesAjouter(store, recs) {
+  (recs || []).forEach(function (r) {
+    if (!r) return;
+    const anc = Number(r.oldPrice), nouv = Number(r.newPrice);
+    if (!isFinite(anc) || !isFinite(nouv) || anc <= 0) return;
+    const k = String(r.sku || r.id || '').toUpperCase();
+    if (!k) return;
+    store[k] = {
+      sku: r.sku, nom: String(r.name || '').slice(0, 90),
+      ancien: Math.round(anc * 100) / 100,
+      nouveau: Math.round(nouv * 100) / 100,
+      euros: Math.round((anc - nouv) * 100) / 100,
+      pct: Math.round(((anc - nouv) / anc) * 1000) / 10
+    };
+  });
+}
+function pwBaissesBilan(store, combien) {
+  const tous = Object.keys(store || {}).map(function (k) { return store[k]; });
+  if (!tous.length) return null;
+  const enBaisse = tous.filter(function (x) { return x.euros > 0.005; });
+  const enHausse = tous.filter(function (x) { return x.euros < -0.005; });
+  const somPct = enBaisse.reduce(function (s, x) { return s + x.pct; }, 0);
+  const somEur = enBaisse.reduce(function (s, x) { return s + x.euros; }, 0);
+  /* ⛔ CLASSÉ PAR POURCENTAGE, PAS PAR EUROS. Une baisse de 400 € sur une
+     machine à 5 000 € est banale ; une baisse de 60 % est soit une aubaine,
+     soit une erreur de lecture — et c'est celle-là qu'il doit aller voir en
+     premier. Les deux chiffres figurent sur chaque ligne. */
+  const top = enBaisse.slice().sort(function (a, b) {
+    return (b.pct - a.pct) || (b.euros - a.euros);
+  }).slice(0, Math.max(1, combien || PW_TOP_BAISSES));
+  return {
+    produitsCompares: tous.length,
+    enBaisse: enBaisse.length,
+    enHausse: enHausse.length,
+    baisseMoyennePct: enBaisse.length ? Math.round((somPct / enBaisse.length) * 10) / 10 : null,
+    baisseMoyenneEuros: enBaisse.length ? Math.round((somEur / enBaisse.length) * 100) / 100 : null,
+    plusFortesBaisses: top
+  };
+}
+
 const PW_QUASI_MAX = 60;
 function pwQuasiRapprochements(skusMarque, fichesVues, refsVues) {
   if (!Array.isArray(skusMarque) || !skusMarque.length) return null;
@@ -2161,6 +2235,7 @@ function pwCouvAjouter(brand, skus, titres, nbTuiles, nbLues, pagesDuPlan, extra
   if (!pwCouv || (nowMs - pwCouv.at) > PW_SCAN_TTL || pwCouv.brand !== brand) {
     pwCouv = { brand: brand, refs: Object.create(null), noms: Object.create(null),
       empreintes: Object.create(null), fiches: Object.create(null),
+      baisses: Object.create(null),
       pages: 0, tuiles: 0, lues: 0, debut: nowMs, at: nowMs };
   }
   pwCouv.at = nowMs;
@@ -2187,6 +2262,7 @@ function pwCouvAjouter(brand, skus, titres, nbTuiles, nbLues, pagesDuPlan, extra
     var k = String(n || '').trim().toLowerCase();
     if (k) pwCouv.noms[k] = 1;
   });
+  pwBaissesAjouter(pwCouv.baisses, extra.baisses);
   if (Array.isArray(extra.skusMarque)) pwCouv.skusMarque = extra.skusMarque;
   const quasi = pwQuasiRapprochements(pwCouv.skusMarque, pwCouv.fiches, pwCouv.refs);
   const nbDistinctes = Object.keys(pwCouv.empreintes).length;
@@ -2267,6 +2343,11 @@ function pwCouvAjouter(brand, skus, titres, nbTuiles, nbLues, pagesDuPlan, extra
        coût. Le contrôle du contenu reste obligatoire. */
     fichesQuasiRapprochees: quasi ? quasi.nb : null,
     fichesQuasiRapprocheesDetail: quasi ? quasi.exemples : null,
+    /* ⛔⛔ CE QUE LE BALAYAGE FERAIT AUX PRIX, CUMULÉ SUR SES 67 PAGES — et les
+       dix à vérifier AVANT d'écrire quoi que ce soit. `null` en mode à sec :
+       aucun prix n'y est calculé, et rendre un zéro laisserait croire à une
+       mesure. C'est `&dryRun=1` qui remplit ce bloc sans rien écrire. */
+    baisses: pwBaissesBilan(pwCouv.baisses, PW_TOP_BAISSES),
     /* ⛔⛔ QUI A COMPTÉ, ET DEPUIS QUAND. Sans ces deux valeurs, un cumul
        amputé par une instance neuve est indiscernable d'un cumul amputé par
        des pages perdues — et les deux remèdes sont opposés. Si l'identifiant
@@ -2291,6 +2372,7 @@ function pwCouvRefus(brand) {
   if (!pwCouv || (nowMs - pwCouv.at) > PW_SCAN_TTL || pwCouv.brand !== brand) {
     pwCouv = { brand: brand, refs: Object.create(null), noms: Object.create(null),
       empreintes: Object.create(null), fiches: Object.create(null),
+      baisses: Object.create(null),
       pages: 0, tuiles: 0, lues: 0, refus: 0, debut: nowMs, at: nowMs };
   }
   pwCouv.at = nowMs;
@@ -3050,7 +3132,11 @@ async function handlePriceWatch(req, res, admin, db) {
           fichesMarque: products.filter((p) => String(p.brand || '').toUpperCase()
             === String(brand).toUpperCase()).length,
           skusMarque: products.filter((p) => String(p.brand || '').toUpperCase()
-            === String(brand).toUpperCase()).map((p) => p.sku).filter(Boolean) }),
+            === String(brand).toUpperCase()).map((p) => p.sku).filter(Boolean),
+          /* ⛔ SEULEMENT `applied` : ce que le traqueur a VALIDÉ. `unchanged`
+             ne bouge pas, `flagged` a été REFUSÉ — les faire entrer dans une
+             moyenne de baisse la ferait mentir dans le sens qui plaît. */
+          baisses: applied }),
       /* La même ligne locale qu'à sec : trois valeurs, aucune mémoire. C'est
          elle qui se totalise sur le fichier des 67 réponses, quand le cumul
          d'instance, lui, peut avoir été tronqué par une instance neuve. */

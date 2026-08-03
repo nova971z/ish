@@ -1876,6 +1876,183 @@ module.exports = async function () {
           + appelsLoadCatalog + '/2) — le comportement historique ne change pas');
         catMod.loadCatalog = vraiLoadCatalog;
 
+        /* ══ LA MOYENNE DE BAISSE, ET LES DIX À VÉRIFIER AVANT D'ÉCRIRE ═════
+           ⛔⛔ Demande de l'user, 03/08 : « la moyenne de baisse qu'on a pu
+           faire pour tous ces produits », et « dix produits qui auront une
+           baisse la plus élevée, je vais aller les vérifier AVANT de modifier
+           les prix ». Aucune de ces deux réponses n'existait : son raccourci
+           ne lui rend que la DERNIÈRE des 67 réponses, et les dix plus fortes
+           baisses du balayage ne sont pas celles de la dernière page.
+           ⚠️ Deux fiches CHOISIES À L'EXÉCUTION, jamais nommées ; leurs prix
+           courants sont fabriqués à partir du newPrice que le modèle réel
+           vient de rendre — un seuil recopié se périme. */
+        var cible2 = null;
+        for (var c2 = 0; c2 < prods.length; c2++) {
+          var pc2 = prods[c2];
+          if (pc2 === cible || String(pc2.brand || '').toUpperCase() !== 'DEWALT') continue;
+          if (!pc2.sku || pc2.priceLocked || pc2.hidden || !(Number(pc2.price) > 0)) continue;
+          if (!/^[A-Z][A-Z0-9.\/-]{2,}[A-Z0-9]$/.test(String(pc2.sku)) || !/\d/.test(pc2.sku)) continue;
+          cible2 = pc2; break;
+        }
+        ok(!!cible2 && cible2.sku !== cible.sku,
+          '⛔ PRÉALABLE : deux fiches DeWALT distinctes à réf sûre — sans deux produits, '
+          + 'une moyenne et un classement ne vérifient rien');
+        if (cible2) {
+          // Le newPrice de la 2ᵉ fiche s'apprend lui aussi du modèle réel.
+          scanReset();
+          var rApp2 = fauxRes();
+          await admFn({ method: 'POST',
+            query: { type: 'price-watch', brand: 'DEWALT', source: 'idealo', dryRun: '1' },
+            body: { text: pageIdealo(cible2.sku, '450,00') } }, rApp2, fauxAdmin, fauxDb({}, []));
+          var rec2 = (rApp2.out && rApp2.out.applied && rApp2.out.applied[0])
+            || (rApp2.out && rApp2.out.unchanged && rApp2.out.unchanged[0]);
+          ok(!!(rec2 && rec2.newPrice > 0),
+            '⛔ PRÉALABLE : newPrice de la 2ᵉ fiche appris du modèle réel ('
+            + JSON.stringify(rApp2.out && rApp2.out.counts) + ')');
+
+          if (rec2 && rec2.newPrice > 0) {
+            /* Fiche A : prix courant = 2 × le nouveau → baisse de 50 %.
+               Fiche B : prix courant = 1,25 × le nouveau → baisse de 20 %. */
+            /* ⛔ ET UNE TROISIÈME FICHE QUI MONTE. Sans elle, « produits vus »
+               et « produits en baisse » sont le même nombre : la moyenne
+               pourrait être divisée par le mauvais dénominateur sans que rien
+               ne le montre — et elle paraîtrait alors plus douce qu'elle
+               n'est. Elle prouve aussi que les HAUSSES sont comptées : ne
+               montrer que les baisses ferait d'un rapport un argumentaire. */
+            var cible3 = null;
+            for (var c3 = 0; c3 < prods.length; c3++) {
+              var pc3 = prods[c3];
+              if (pc3 === cible || pc3 === cible2) continue;
+              if (String(pc3.brand || '').toUpperCase() !== 'DEWALT') continue;
+              if (!pc3.sku || pc3.priceLocked || pc3.hidden || !(Number(pc3.price) > 0)) continue;
+              if (!/^[A-Z][A-Z0-9.\/-]{2,}[A-Z0-9]$/.test(String(pc3.sku)) || !/\d/.test(pc3.sku)) continue;
+              cible3 = pc3; break;
+            }
+            /* Une QUATRIÈME fiche, jamais vue par les pages précédentes : le
+               contrôle du prix écarté doit porter sur un produit ABSENT du
+               cumul, sinon il ne ferait qu'écraser une entrée existante et le
+               nombre de produits comparés ne bougerait pas — la porte
+               resterait verte pour la mauvaise raison. */
+            var cible4 = null;
+            for (var c4 = 0; c4 < prods.length; c4++) {
+              var pc4 = prods[c4];
+              if (pc4 === cible || pc4 === cible2 || pc4 === cible3) continue;
+              if (String(pc4.brand || '').toUpperCase() !== 'DEWALT') continue;
+              if (!pc4.sku || pc4.priceLocked || pc4.hidden || !(Number(pc4.price) > 0)) continue;
+              if (!/^[A-Z][A-Z0-9.\/-]{2,}[A-Z0-9]$/.test(String(pc4.sku)) || !/\d/.test(pc4.sku)) continue;
+              cible4 = pc4; break;
+            }
+            var seedB = {};
+            seedB[cible.id] = { price: Math.round(rec0.newPrice * 2 * 100) / 100 };
+            seedB[cible2.id] = { price: Math.round(rec2.newPrice * 1.25 * 100) / 100 };
+            if (cible3) seedB[cible3.id] = { price: Math.round(rec0.newPrice * 0.5 * 100) / 100 };
+            var dbB = fauxDb(seedB, []);
+            scanReset();
+            var rB1 = fauxRes();
+            await admFn({ method: 'POST',
+              query: { type: 'price-watch', brand: 'DEWALT', source: 'idealo', scan: '1', dryRun: '1' },
+              body: { text: pageIdealo(cible.sku, '450,00') } }, rB1, fauxAdmin, dbB);
+            var rB2 = fauxRes();
+            await admFn({ method: 'POST',
+              query: { type: 'price-watch', brand: 'DEWALT', source: 'idealo', scan: '1', dryRun: '1' },
+              body: { text: pageIdealo(cible2.sku, '450,00') } }, rB2, fauxAdmin, dbB);
+            if (cible3) {
+              var rBh = fauxRes();
+              await admFn({ method: 'POST',
+                query: { type: 'price-watch', brand: 'DEWALT', source: 'idealo', scan: '1', dryRun: '1' },
+                body: { text: pageIdealo(cible3.sku, '450,00') } }, rBh, fauxAdmin, dbB);
+              var bilH = rBh.out && rBh.out.couverture && rBh.out.couverture.baisses;
+              ok(bilH && bilH.enHausse === 1 && bilH.produitsCompares === 3,
+                '⛔⛔ une HAUSSE est comptée et rendue : ne montrer que les baisses ferait '
+                + 'd\'un rapport un argumentaire (obtenu ' + JSON.stringify(bilH
+                  && bilH.enHausse) + ' hausse(s) sur ' + JSON.stringify(bilH
+                  && bilH.produitsCompares) + ' comparés)');
+              ok(bilH && (bilH.plusFortesBaisses || []).every(function (x) { return x.euros > 0; }),
+                '⛔ …et elle n\'entre PAS dans la liste des plus fortes BAISSES');
+            }
+            /* ⛔⛔ UN PRIX ÉCARTÉ N'EST PAS UNE BAISSE. Une source hors des
+               bornes absolues part en `flagged` : le traqueur REFUSE de
+               l'écrire. La faire entrer dans la moyenne ferait mentir le
+               rapport dans le sens qui plaît — et c'est de l'argent : il
+               irait vérifier dix produits dont un que le traqueur a déjà
+               rejeté. La borne haute se relit dans le produit, jamais
+               recopiée : un seuil recopié se périme. */
+            var bornes = /MAX_TTC:\s*(\d+)/.exec(adminSrc);
+            ok(!!bornes, '⛔ PRÉALABLE : la borne haute se relit dans api/admin.js');
+            if (bornes && cible4) {
+              var horsBorne = (parseInt(bornes[1], 10) + 500) + ',00';
+              var rBf = fauxRes();
+              await admFn({ method: 'POST',
+                query: { type: 'price-watch', brand: 'DEWALT', source: 'idealo', scan: '1', dryRun: '1' },
+                body: { text: pageIdealo(cible4.sku, horsBorne) } }, rBf, fauxAdmin, dbB);
+              ok(rBf.out && rBf.out.counts && rBf.out.counts.flagged === 1,
+                '⛔ PRÉALABLE : un prix hors fourchette est bien ÉCARTÉ (obtenu '
+                + JSON.stringify(rBf.out && rBf.out.counts) + ')');
+              var bilF = rBf.out && rBf.out.couverture && rBf.out.couverture.baisses;
+              ok(bilF && bilF.produitsCompares === 3,
+                '⛔⛔ …et il n\'entre PAS dans le bilan : le traqueur a refusé de l\'écrire, '
+                + 'le compter reviendrait à envoyer vérifier un produit déjà rejeté '
+                + '(obtenu ' + JSON.stringify(bilF && bilF.produitsCompares) + ', attendu 3)');
+            }
+            var rB2b = fauxRes();
+            await admFn({ method: 'POST',
+              query: { type: 'price-watch', brand: 'DEWALT', source: 'idealo', scan: '1', dryRun: '1' },
+              body: { text: pageIdealo(cible2.sku, '450,00') } }, rB2b, fauxAdmin, dbB);
+            var bil = rB2b.out && rB2b.out.couverture && rB2b.out.couverture.baisses;
+
+            ok(!!bil && bil.enBaisse === 2,
+              '⛔⛔ les baisses des DEUX pages sont CUMULÉES — sans cumul, la dernière '
+              + 'réponse ne connaît que sa propre page et la question n\'a pas de réponse '
+              + '(obtenu ' + JSON.stringify(bil && bil.enBaisse) + '/2)');
+            var top = (bil && bil.plusFortesBaisses) || [];
+            ok(top.length === 2 && top[0].pct > top[1].pct,
+              '⛔⛔ classées de la PLUS FORTE à la moins forte, en pourcentage : c\'est '
+              + 'l\'ordre dans lequel il ira vérifier (obtenu '
+              + JSON.stringify(top.map(function (x) { return x.pct; })) + ')');
+            ok(top[0] && Math.abs(top[0].pct - 50) < 1.5,
+              '⛔ la plus forte est bien celle dont le prix courant valait DEUX FOIS le '
+              + 'nouveau — 50 % (obtenu ' + JSON.stringify(top[0] && top[0].pct) + ')');
+            ok(top[0] && top[0].ancien > top[0].nouveau && top[0].euros > 0 && !!top[0].nom,
+              '⛔ chaque ligne porte l\'ancien prix, le nouveau, l\'écart en euros et le '
+              + 'NOM — une référence seule ne se vérifie pas sur une boutique (obtenu '
+              + JSON.stringify(top[0]) + ')');
+            ok(bil && Math.abs(bil.baisseMoyennePct - (top[0].pct + top[1].pct) / 2) < 0.06,
+              '⛔⛔ la moyenne porte sur les produits EN BAISSE, pas sur les produits vus : '
+              + 'diviser par les seconds la ferait paraître plus douce qu\'elle n\'est '
+              + '(obtenu ' + JSON.stringify(bil && bil.baisseMoyennePct) + ')');
+
+            /* ⛔ LA MÊME FICHE REVUE SUR UNE AUTRE PAGE NE COMPTE QU'UNE FOIS.
+               Sinon un article présent sur deux pages pèserait double dans la
+               moyenne, au hasard de la pagination du fournisseur. */
+            var rB3 = fauxRes();
+            await admFn({ method: 'POST',
+              query: { type: 'price-watch', brand: 'DEWALT', source: 'idealo', scan: '1', dryRun: '1' },
+              body: { text: pageIdealo(cible.sku, '450,00') } }, rB3, fauxAdmin, dbB);
+            var bil3 = rB3.out && rB3.out.couverture && rB3.out.couverture.baisses;
+            var comparesAttendus = cible3 ? 3 : 2;
+            ok(bil3 && bil3.enBaisse === 2 && bil3.produitsCompares === comparesAttendus,
+              '⛔⛔ une fiche revue sur une autre page ne compte qu\'UNE fois : deux fois '
+              + 'la pondérerait au hasard de la pagination (obtenu '
+              + JSON.stringify(bil3 && bil3.enBaisse) + ' en baisse, '
+              + JSON.stringify(bil3 && bil3.produitsCompares) + ' comparés)');
+
+            /* ⛔ EN MODE À SEC, AUCUN PRIX N'EST CALCULÉ : le bilan doit être
+               `null`, jamais un zéro qui aurait l'air d'une mesure. */
+            scanReset();
+            var rBsec = fauxRes();
+            await admFn({ method: 'POST',
+              query: { type: 'price-watch', brand: 'DEWALT', source: 'idealo', sec: '1', scan: '1' },
+              body: { text: pageIdealo(cible.sku, '450,00') } }, rBsec, fauxAdmin,
+              { collection: function (n) { throw new Error('MODE A SEC : Firestore touche (' + n + ')'); } });
+            ok(rBsec.out && rBsec.out.couverture && rBsec.out.couverture.baisses === null,
+              '⛔⛔ à sec, aucun prix n\'est calculé : le bilan des baisses vaut `null` et '
+              + 'non zéro — un zéro se lirait « aucune baisse » au lieu de « pas mesuré » '
+              + '(obtenu ' + JSON.stringify(rBsec.out && rBsec.out.couverture
+                && rBsec.out.couverture.baisses) + ')');
+            scanReset();
+          }
+        }
+
         /* ── MODE À SEC (&sec=1) : ZÉRO FIRESTORE, ZÉRO ÉCRITURE ─────────────
            ⛔ Écrit après une faute réelle : mettre au point le câblage d'un
            raccourci a épuisé le quota gratuit de l'user et refermé son
