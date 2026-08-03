@@ -46,6 +46,7 @@ désigné ici, soit il est rangé.
 | `PLAN-SERVICE-COURSIER.md` | cadre du service de livraison, encore appliqué |
 | `PLAN-REVOLUT.md` | migration du paiement Stripe → Revolut : inventaire 1=1, correspondance des API, étapes, et **ce qui manque encore à lire à la source** |
 | `TRAQUEUR-URLS.md` | raccourcis du traqueur de prix, utilisés en production |
+| `NOMENCLATURE.md` | **comment les fournisseurs nomment outillage, quincaillerie et EPI** — 220 types, 725 écritures, 39 rayons, rangés en entonnoir ; suffixes de référence DeWALT, normes EPI, emmanchements, nuances, dentures. Contrepartie lisible de `api/_lib/nomenclature.js` |
 | `MAKITA-POSTERS-TODO.md` | posters restant à produire |
 | `entreprise-sasu.md` | fiche d'identité de la société |
 | `D1-EXTRACTION-ADMIN.md` | analyse préalable de l'extraction de l'administration — chantier suspendu |

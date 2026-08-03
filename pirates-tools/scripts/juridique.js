@@ -88,7 +88,16 @@ var HORS_PORTEE = {
      sont les commentaires qui expliquent pourquoi le traqueur a sa propre clé
      (31/07/2026). L'écarter NOMMÉMENT vaut mieux que le rattacher à J4 : un
      rappel qui se déclenche à tort finit ignoré, et emporte les vrais avec lui. */
-  'pirates-tools/api/_lib/auth.js': 'authentification seule — aucune décision de prix ni de TVA'
+  'pirates-tools/api/_lib/auth.js': 'authentification seule — aucune décision de prix ni de TVA',
+  /* nomenclature.js est un DICTIONNAIRE : familles, rayons, noms d'outils,
+     normes EPI, suffixes de référence. Il ne lit aucun prix, n'en calcule
+     aucun, n'en écrit aucun — ses douze occurrences de « prix » sont les
+     commentaires qui expliquent POURQUOI telle caractéristique compte (un
+     alésage différent = un autre article = un autre prix). Écarté NOMMÉMENT
+     le 03/08/2026, dès que le contrôle l'a signalé : le rattacher à J4 ferait
+     sonner un rappel de conformité tarifaire à chaque ajout de vocabulaire,
+     et un rappel qui sonne à tort finit ignoré — emportant les vrais avec. */
+  'pirates-tools/api/_lib/nomenclature.js': 'dictionnaire de vocabulaire — aucun prix lu, calculé ni écrit'
 };
 
 /** Les domaines qu'un fichier engage. Vide = aucune obligation juridique. */

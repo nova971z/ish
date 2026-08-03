@@ -159,7 +159,12 @@ var HORS_LISTE = {
   'pirates-tools/api/health.js': 'sonde de disponibilité — ne lit ni n\'écrit rien',
   'pirates-tools/api/test-email.js': 'outil de diagnostic, jamais atteint par un client',
   'pirates-tools/api/instagram.js': 'relais de médias publics, aucune règle métier',
-  'pirates-tools/api/_lib/http.js': 'transport pur — statuts et en-têtes, aucune décision métier'
+  'pirates-tools/api/_lib/http.js': 'transport pur — statuts et en-têtes, aucune décision métier',
+  /* Données pures : familles, rayons, noms d'outils, normes EPI, suffixes de
+     référence. Aucune règle métier ne s'y exécute — la logique qui S'EN SERT
+     est `price-parse.js`, rattachée au traqueur et couverte par
+     `check-price-watch`. Écarté le 03/08/2026. */
+  'pirates-tools/api/_lib/nomenclature.js': 'dictionnaire de vocabulaire — aucune règle exécutée, la logique vit dans price-parse.js'
 };
 
 module.exports = { PROTEGES: PROTEGES, LISTES: LISTES, HORS_LISTE: HORS_LISTE };

@@ -633,6 +633,115 @@ module.exports = async function () {
       + '« 0 V » ne se comparent pas pareil, et les confondre apparierait n\'importe quoi');
   }
 
+  /* ═══ NOMENCLATURE ET ENTONNOIR (03/08/2026) ══════════════════════════════
+     Demande de l'user : « une grosse recherche sur Internet de comment sont
+     nommés les outillages, la quincaillerie et les équipements de protection
+     […] un document massif et parfaitement rangé avec une chronologie en
+     entonnoir pour que ton parseur ne se trompe pas. »
+     ⛔ Ces assertions gardent la STRUCTURE, pas le contenu : elles ne citent
+     aucun produit du catalogue, elles vérifient que l'entonnoir tient. */
+  var nom = pp.nomenclature;
+  ok(nom && typeof nom === 'object', 'la nomenclature est exposée par le parseur');
+  if (nom) {
+    ok(Object.keys(nom.FAMILLES).length === 5,
+      'cinq familles, et pas une de plus : machine · consommable · energie · rangement · epi');
+    ok(nom.INDEX.length > 600,
+      'le vocabulaire est large — ' + nom.INDEX.length + ' écritures indexées');
+    /* ⛔ PRÉALABLE : chaque rayon cité par un type DOIT exister, et chaque
+       mesure citée par un rayon DOIT être déclarée. Sans ce contrôle, une
+       faute de frappe ferait typer dans le vide sans que rien ne le dise. */
+    var rayonsOrphelins = nom.TYPES.filter(function (t) { return !nom.RAYONS[t[0]]; });
+    ok(rayonsOrphelins.length === 0,
+      '⛔ aucun type ne cite un rayon inexistant (' + rayonsOrphelins.length + ')');
+    var mesuresInconnues = [];
+    Object.keys(nom.RAYONS).forEach(function (r) {
+      nom.RAYONS[r].mesures.forEach(function (m) {
+        if (!nom.MESURES[m] && mesuresInconnues.indexOf(m) === -1) mesuresInconnues.push(m);
+      });
+    });
+    ok(mesuresInconnues.length === 0,
+      '⛔ aucun rayon ne cite une mesure non déclarée (' + mesuresInconnues.join(', ') + ')');
+    /* ⛔ LE VERROU LUI-MÊME. C'est LA raison d'être de l'entonnoir. */
+    ok(nom.mesureAutorisee('chaussure', 'voltage') === false
+      && nom.mesureAutorisee('vetement', 'ah') === false
+      && nom.mesureAutorisee('lame-circulaire', 'nbBatteries') === false,
+      '⛔⛔ une chaussure n\'a pas de voltage, un vêtement pas d\'ampères-heures, '
+      + 'une lame pas de batterie — ce n\'est plus une espérance, c\'est une règle');
+    ok(nom.mesureAutorisee('chaussure', 'pointure') === true
+      && nom.mesureAutorisee('lame-circulaire', 'alesageMm') === true,
+      'préalable : le verrou LAISSE PASSER ce qui a cours dans le rayon — sinon '
+      + 'l\'assertion ci-dessus serait un refus systématique, donc sans valeur');
+    ok(nom.mesureAutorisee('rayon-qui-n-existe-pas', 'voltage') === true,
+      '⛔ rayon INCONNU ⇒ on n\'efface rien : un trou de vocabulaire ne doit pas '
+      + 'faire perdre des mesures justes, il doit se voir');
+  }
+  if (ec && nom) {
+    /* ⚠️ CE TITRE EST CHOISI POUR QUE LE VERROU AIT QUELQUE CHOSE À EFFACER.
+       Un premier essai portait sur une chaussure sans « mm » ni « kg » : les
+       champs étaient vides de toute façon, l'assertion passait verrou ou pas,
+       et LE SABOTAGE EST RESTÉ VERT. Une vérification qu'on ne parvient pas à
+       faire échouer ne vérifie rien — ici « 380 mm » et « 1,2 kg » SONT lus
+       par les règles générales, et c'est le rayon qui doit les refuser. */
+    var vr = ec('Chaussures de sécurité S3S hautes tige 380 mm 1,2 kg pointure 43', 'MAKITA');
+    ok(vr.cotesMm === null && vr.poidsKg === null,
+      '⛔⛔ VERROU EN ACTION : sur une chaussure, ni cote ni poids ne ressortent — '
+      + 'ces mesures ne sont pas déclarées dans le rayon, donc elles sont effacées');
+    ok(vr.pointure === 43 && vr.normeEpi === 'S3S',
+      'préalable : les mesures qui ONT cours dans le rayon, elles, restent — sans '
+      + 'quoi le verrou serait un effaceur aveugle');
+    var vrLibre = ec('Tige 380 mm 1,2 kg', 'MAKITA');
+    ok(vrLibre.cotesMm === 380 && vrLibre.poidsKg === 1.2,
+      '⛔ PREUVE QUE LES DEUX MESURES SONT BIEN LUES hors rayon : sans elle, '
+      + 'l\'assertion ci-dessus serait vraie même avec le verrou débranché');
+
+    /* ⛔⛔ LA MESURE QUI RAPPORTE LE PLUS : le suffixe de référence. Table
+       relevée sur support.dewalt.com le 03/08. Réfs SYNTHÉTIQUES. */
+    var sN = ec('DEWALT ZZD805N-XJ', 'DEWALT');
+    var sP2 = ec('DEWALT ZZD805P2', 'DEWALT');
+    ok(sN.nbBatteries === 0 && sP2.nbBatteries === 2 && sP2.ah === 5,
+      '⛔⛔ ARGENT : « …N » est la machine NUE, « …P2 » la MÊME machine avec deux '
+      + 'batteries 5,0 Ah. Un comparateur n\'écrit souvent QUE la référence — sans '
+      + 'cette lecture, le prix du lot s\'écrit sur la machine nue');
+    ok(pp.comparerCaracteristiques(sN, sP2).compatible === false,
+      'et les deux sont donc REFUSÉES l\'une pour l\'autre');
+    var sP3T = ec('DEWALT ZZK368P3T', 'DEWALT');
+    ok(sP3T.nbBatteries === 3 && sP3T.coffret === 'TSTAK',
+      '⛔ « P3T » : TROIS batteries et un coffret TSTAK. Une table fermée à 1 et 2 '
+      + 'lisait ce lot comme s\'il n\'en portait aucune — la lettre donne la '
+      + 'capacité, le chiffre donne le nombre, ils se lisent séparément');
+    var sXJ = ec('DEWALT ZZD805P2-XJ', 'DEWALT');
+    ok(sXJ.nbBatteries === 2,
+      'l\'extension régionale (-XJ) ne masque pas le suffixe : elle ne dit que le '
+      + 'marché, jamais le contenu');
+
+    var gant = ec('Gant anti-coupure taille 9 EN 388', 'MAKITA');
+    ok(gant.tailleGant === 9 && gant.taille === null && gant.pointure === null,
+      '⛔ « taille 9 » sur un GANT est une taille de gant — pas une pointure, pas '
+      + 'une taille de vêtement. C\'est le RAYON qui tranche, le nombre ne suffit pas');
+    ok(gant.skuEclate === null && gant.normeEpi === 'EN 388',
+      '⛔ « EN 388 » est une NORME, pas une référence : elle sortait en sku « EN388 », '
+      + 'et deux gants se seraient comparés par un code qu\'aucun fabricant n\'écrit');
+    var pant = ec('Pantalon de travail taille 48', 'MAKITA');
+    ok(pant.taille === '48' && pant.pointure === null,
+      '⛔ « taille 48 » sur un PANTALON n\'est pas une pointure 48. Mesuré avant '
+      + 'correction : le titre sortait avec `pointure: 48`, puis perdait tout au verrou');
+
+    var lame = ec('Lame de scie circulaire Ø190 mm 40 dents ATB bois dur', 'MAKITA');
+    ok(lame.rayon === 'lame-circulaire' && lame.denture === 'ATB' && lame.matiere === 'bois dur',
+      'denture et matière relevées — « bois dur » l\'emporte sur « bois », deux prix');
+    var fmax = ec('Foret béton SDS-max Ø 20 mm', 'MAKITA');
+    ok(fmax.emmanchement === 'SDS-MAX',
+      '⛔ « SDS-max » doit battre « SDS » : ils ne sont PAS interchangeables '
+      + '(queue Ø 10 mm à 2 rainures contre Ø 18 mm à 3 rainures), et un `break` au '
+      + 'premier trouvé rendait « SDS » selon l\'ordre de la table');
+    var dsq = ec('Disque à tronçonner Inox Ø125 mm type 41', 'MAKITA');
+    ok(dsq.formeDisque === 'TYPE 41' && dsq.rayon === 'disque',
+      'la forme normalisée EN 12413 est relevée (type 27 / 41 / 42)');
+    var emb = ec('Coffret de 30 embouts de vissage TX20 Torsion', 'MAKITA');
+    ok(emb.empreinte === 'TX20' && emb.nbPieces === 30,
+      'l\'empreinte porte sa TAILLE : un TX20 et un TX25 sont deux articles');
+  }
+
   /* ⛔ « NE RECOUPE PAS AVEC DEUX OU TROIS INFORMATIONS » — le cœur du reproche.
      Deux annonces peuvent partager réf, type, voltage ET gamme et désigner
      pourtant deux articles au prix très différent : la machine nue et le lot. */
