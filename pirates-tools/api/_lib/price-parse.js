@@ -346,6 +346,11 @@ function parseIdealo(rawText, brand) {
   // Prix : \u00ab \u00e0 partir de X,XX \u20ac \u00bb OU un montant seul (cas \u00ab 1 offre \u00bb).
   var prixApartir = /\u00e0\s*partir\s*de\s*([\d\s   ]*\d,\d{2})\s*\u20ac/i;
   var prixSeul    = /^([\d\s   ]*\d,\d{2})\s*\u20ac$/;
+  /* \u26d4\u26d4 UN TOTAL S'\u00c9CRIT EN T\u00caTE DE LIGNE, DES FRAIS S'ANNONCENT PAR LEUR
+     \u00c9TIQUETTE. C'est la seule chose qui s\u00e9pare \u00ab 691,53 \u20ac TVA incluse \u00bb de
+     \u00ab Frais de port : 3,23 \u20ac \u00bb sans recopier une formulation \u2014 et donc la
+     seule qui tienne dans les trois langues de ses pages. */
+  var MONTANT_EN_TETE = /^[\d\s   ]*\d,\d{2}\s*\u20ac/;
 
   /* \u26a0\ufe0f \u00ab D\u00e9tails de l'offre \u00bb appara\u00eet DEUX fois par offre (apr\u00e8s le vendeur,
      puis apr\u00e8s le prix). Couper dessus hachait le bloc et faisait passer une
@@ -438,9 +443,23 @@ function parseIdealo(rawText, brand) {
        de prix d'une annonce remonte depuis la fin du bloc ; sans borne, cette
        fin n'est plus la sienne. C'est le même défaut que le téléphone posé
        sur une scie (E-309), resté vivant sur l'autre chemin.
-       ⛔ Une annonce écrit son prix APRÈS « Vendu par », une fois : le premier
-       prix rencontré clôt la tuile. Symétrique de la fiche ci-dessus. */
-    else if (vuVenduPar && /\d,\d{2}\s*€/.test(l)) {
+       ⛔⛔ MAIS PAS SUR N'IMPORTE QUEL PRIX — ET J'AI PAYÉ CETTE NUANCE.
+       Premier jet : « le premier prix rencontré clôt la tuile ». Mesuré sur
+       SON relevé suivant : DOUZE annonces sur trente-deux sont ressorties à
+       3,23 €, 9,95 €, 8,00 €, 18,50 € — LES FRAIS DE PORT. Idealo écrit
+       « Frais de port : 3,23 € » AVANT « 691,53 € TVA incluse », et je
+       fermais sur le premier. Un coût d'achat de 3 € au lieu de 691 € ne
+       fausse pas un prix de vente, il le détruit.
+       ⛔ La règle n'est pas une liste de formulations — j'ai déjà payé
+       celle-là aussi (E-309 : on ne s'ancre jamais sur un libellé). Elle est
+       STRUCTURELLE : **un total s'écrit en tête de ligne, des frais
+       s'annoncent d'abord par leur étiquette**. « 691,53 € TVA incluse »
+       commence par son montant ; « Frais de port : 3,23 € » commence par un
+       mot. Ça vaut dans les trois langues de ses pages, et ça ne périme pas.
+       ⚠️ J4 : le prix retenu doit être celui de l'article, exact et complet —
+       des frais de port pris pour un prix d'article ne sont ni l'un ni
+       l'autre. */
+    else if (vuVenduPar && MONTANT_EN_TETE.test(l)) {
       traiter(bloc, true);
       titreOffre = null;
       vuVenduPar = false;
@@ -542,8 +561,18 @@ function parseIdealo(rawText, brand) {
     if (estOffre || b.some(function (x) { return VENDU_PAR.test(x); })) {
       var titre = titreOffre || '';
       var px = null;
+      /* \u26d4\u26d4 ARGENT \u2014 ON NE RAMASSE PAS N'IMPORTE QUEL MONTANT. Ce motif-ci
+         acceptait \u00ab Frais de port : 3,23 \u20ac \u00bb aussi bien que \u00ab 691,53 \u20ac TVA
+         incluse \u00bb : sur SON relev\u00e9, douze annonces sur trente-deux sont
+         sorties avec leurs frais de port en guise de prix d'article. M\u00eame
+         r\u00e8gle structurelle qu'\u00e0 la fermeture de tuile \u2014 un total commence par
+         son montant, des frais commencent par leur \u00e9tiquette.
+         \u26a0\ufe0f Aucun repli vers \u00ab n'importe quel prix \u00bb : se rabattre sur les
+         frais de port serait pr\u00e9cis\u00e9ment le d\u00e9faut. Sans montant en t\u00eate, il
+         n'y a pas de prix, et le bloc part au registre des pertes avec sa
+         raison. Un vide se voit ; un prix faux se propage. */
       for (var k = b.length - 1; k >= 0; k--) {
-        var m = b[k].match(/([\d\s   ]*\d,\d{2})\s*\u20ac/);
+        var m = b[k].match(/^([\d\s   ]*\d,\d{2})\s*\u20ac/);
         if (m) { px = parsePriceFR(m[1]); break; }
       }
       /* \u26d4\u26d4 ARGENT \u2014 UN TITRE FAUX AVEC UN PRIX DESSUS EST PIRE QU'UN VIDE.

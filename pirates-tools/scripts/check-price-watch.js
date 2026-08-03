@@ -1025,6 +1025,70 @@ module.exports = async function () {
       '⛔⛔ ARGENT : et 784,99 € n\'apparaît NULLE PART — un prix qui n\'est celui '
       + 'd\'aucun outil de la marque ne doit devenir aucun coût d\'achat');
 
+    /* ⛔⛔ ARGENT — LES FRAIS DE PORT PRIS POUR LE PRIX DE L'ARTICLE.
+       Défaut que J'AI INTRODUIT en fermant la tuile sur « le premier prix
+       rencontré ». Mesuré sur SON relevé suivant : DOUZE annonces sur
+       trente-deux sont ressorties à 3,23 €, 9,95 €, 8,00 €, 18,50 € — le
+       port. Idealo écrit « Frais de port : 3,23 € » AVANT « 691,53 € TVA
+       incluse ». Un coût d'achat de 3 € au lieu de 691 € ne fausse pas un
+       prix de vente, il le détruit.
+       ⛔ Le remède n'est pas une liste de formulations (E-309 : on ne s'ancre
+       jamais sur un libellé) mais une règle STRUCTURELLE — un total commence
+       par son montant, des frais commencent par leur étiquette. Elle tient
+       dans les trois langues de ses pages.
+       ⚠️ Le harnais rejoue le gabarit EXACT de sa page, port compris. */
+    var avecPort = [
+      'Défonceuse sans fil MAKITA ZZW 620 H1T 18 V 12 mm Brushless + 1 batterie',
+      'Vendu par : UnMarchand.fr', 'Détails de l’offre',
+      '3 à 6 jours ouvrés', 'Frais de port : 3,23 €', '691,53 € TVA incluse',
+      '',
+      'Cloueuse sans fil MAKITA ZZN 930 P2 18 V 50 - 90 mm sans balais',
+      'Vendu par : AutreMarchand.fr', 'Détails de l’offre',
+      '24/48 heures', 'Frais de port : 9,95 €', '677,57 € TVA incluse'
+    ].join('\n');
+    var rPort = pi(avecPort, 'MAKITA');
+    var prixPort = rPort.sansRef.map(function (x) { return x.prix; });
+    ok(prixPort.length === 2 && prixPort.indexOf(691.53) !== -1 && prixPort.indexOf(677.57) !== -1,
+      '⛔⛔ ARGENT : le prix retenu est celui de L\'ARTICLE, jamais les frais de '
+      + 'port écrits juste au-dessus (' + JSON.stringify(prixPort) + ')');
+    ok(prixPort.indexOf(3.23) === -1 && prixPort.indexOf(9.95) === -1,
+      '⛔⛔ ARGENT : et aucun montant de port ne devient un coût d\'achat — 3 € au '
+      + 'lieu de 691 € ne fausse pas un prix de vente, il le détruit');
+    ok((rPort.perdus || []).length === 0,
+      '⛔ et rien ne part au registre des pertes : le total ferme la tuile, donc '
+      + 'aucun morceau d\'annonce ne traîne derrière ('
+      + JSON.stringify((rPort.perdus || []).map(function (x) { return x.raison; })) + ')');
+    /* ⛔ PRÉALABLE — une annonce SANS ligne de port reste lue. Sans lui, une
+       règle qui exigerait un port avant le total passerait inaperçue. */
+    var sansPort = pi([
+      'Meuleuse compacte 125 mm - MAKITA - ZZG404S2T-QW',
+      'Vendu par : UnMarchand.fr', 'Détails de l’offre',
+      '24/48 heures', 'Livraison gratuite', '694,80 € TVA incluse'
+    ].join('\n'), 'MAKITA');
+    ok(sansPort.sansRef.length === 1 && sansPort.sansRef[0].prix === 694.80,
+      '⛔ PRÉALABLE : une annonce à livraison gratuite garde son prix ('
+      + JSON.stringify(sansPort.sansRef.map(function (x) { return x.prix; })) + ')');
+    /* ⛔⛔ ET QUAND IL N'Y A QUE DES FRAIS, IL N'Y A PAS DE PRIX. Cas
+       discriminant : une annonce en rupture affiche son port et jamais son
+       total. Un premier sabotage est resté VERT sans lui — la tuile étant
+       déjà bornée, relâcher la recherche à rebours ne changeait rien sur les
+       autres corpus. Ici, elle ramasserait 3,23 € et l'écrirait comme coût
+       d'achat. ⛔ Aucun repli : sans montant en tête, pas de prix, et le bloc
+       part au registre avec sa raison. Un vide se voit, un prix faux se
+       propage. */
+    var quePort = pi([
+      'Perforateur SDS-Plus - MAKITA - ZZH273P2',
+      'Vendu par : UnMarchand.fr', 'Détails de l’offre',
+      'Frais de port : 3,23 €', 'Rupture de stock'
+    ].join('\n'), 'MAKITA');
+    ok(!quePort.sansRef.some(function (x) { return x.prix === 3.23; }),
+      '⛔⛔ ARGENT : une annonce qui n\'affiche QUE ses frais de port n\'a pas de '
+      + 'prix — on ne se rabat pas sur le port ('
+      + JSON.stringify(quePort.sansRef.map(function (x) { return x.prix; })) + ')');
+    ok((quePort.perdus || []).length >= 1,
+      '⛔ …et elle est CONSIGNÉE plutôt que jetée : un vide se voit, un prix faux '
+      + 'se propage');
+
     var sansTout = pi(sansAncres(pageI, 'tout'), 'MAKITA');
     ok(sansTout.items.length === ri.length
       && sansTout.sansRef.length === rid.sansRef.length,
