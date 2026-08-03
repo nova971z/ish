@@ -742,6 +742,23 @@ module.exports = async function () {
           && rSec.out.applied === undefined && rSec.out.scanCache === undefined,
           '⛔ MODE À SEC : la réponse DIT qu\'elle n\'a rien calculé, et ne rend aucun '
           + 'prix appliqué — un mode d\'essai ne doit jamais ressembler à un vrai relevé');
+        /* ⛔ COMBIEN LA PAGE EN CONTIENT, COMBIEN J'EN LIS (03/08/2026) ──────
+           L'user a mesuré qu'une page affichant ~60 produits n'en rend qu'une
+           vingtaine au relevé, toujours ceux du MILIEU. Sans le compte des
+           réfs PRÉSENTES dans le texte, impossible de dire si c'est idealo qui
+           tronque ou mon parseur qui rate — et supposer coûterait un coût
+           d'achat faux. La réponse du mode à sec porte donc les deux. */
+        ok(rSec.out && rSec.out.diagnostic
+          && typeof rSec.out.diagnostic.refsMarque === 'number',
+          '⛔ MODE À SEC : la réponse doit porter le DIAGNOSTIC de page — sans lui, '
+          + '« la page contient-elle plus que ce que je lis ? » reste une supposition');
+        ok(rSec.out && rSec.out.diagnostic
+          && rSec.out.diagnostic.refsMarque >= rSec.out.counts.parsed,
+          'réfs vues dans le texte au moins égales aux réfs lues ('
+          + (rSec.out && rSec.out.diagnostic && rSec.out.diagnostic.refsMarque)
+          + ' vues / ' + (rSec.out && rSec.out.counts.parsed) + ' lues) — c\'est '
+          + 'l\'écart entre ces deux nombres qui dira où est le défaut');
+
         var rSecInc = fauxRes();
         await admFn(reqPage('ZZQ9997', { sec: '1' }), rSecInc, fauxAdmin, dbInterdite);
         ok(rSecInc.out && rSecInc.out.counts.reconnus === 0 && rSecInc.out.counts.inconnus === 1,

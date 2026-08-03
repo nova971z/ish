@@ -2043,6 +2043,16 @@ async function handlePriceWatch(req, res, admin, db) {
         note: 'MODE À SEC : aucune lecture ni écriture Firestore, aucun prix calculé, '
           + 'aucun quota consommé. Sert à vérifier qu\'un raccourci envoie bien sa page. '
           + 'Retirer &sec=1 pour un vrai relevé.',
+        /* ⛔ COMBIEN LA PAGE EN CONTIENT-ELLE, ET COMBIEN EN AI-JE LU ?
+           Question posée par l'user le 03/08 : sur une page qui affiche une
+           soixantaine de produits, le relevé n'en rend qu'une vingtaine, et
+           toujours ceux du MILIEU. Deux causes opposées sont possibles — soit
+           le HTML reçu ne contient que ceux-là (limite d'idealo), soit MON
+           parseur rate le début et la fin (mon défaut). Le compte des réfs
+           présentes dans le texte tranche ; sans lui, on ne peut que supposer.
+           `refsMarque` compte les « MARQUE RÉF » du texte reçu, `parsed` ce que
+           le parseur en a tiré : l'écart entre les deux EST le diagnostic. */
+        diagnostic: priceParse.diagnostiquerPage(text, brand),
         reconnus: reconnusSec.slice(0, 60), inconnus: inconnusSec.slice(0, 60)
       });
     }
