@@ -918,6 +918,30 @@ function annoncesManquantes(rawText, titresRendus, refsRendues) {
   return manquants;
 }
 
+/* ⛔⛔ LE RACCOURCI PEUT ME RENVOYER MA PROPRE RÉPONSE. Mesuré le 03/08 sur
+   son premier balayage des 67 pages : `octetsRecus: 1195` là où une page en
+   fait treize mille, et les trois extraits du diagnostic étaient du JSON
+   `{"ok":true,…,"diagnostic":…}` ré-échappé à chaque tour de boucle. Dans son
+   raccourci, le champ `text` du POST pointait sur « Contenu de l'URL » — une
+   variable qui, au tour suivant, désigne la sortie du POST PRÉCÉDENT et non
+   la page qu'on vient de lire.
+   ⛔ Sans cette détection, le diagnostic répondait « la marque apparaît 5×
+   mais jamais suivie d'une référence — ce site écrit ses titres autrement » :
+   une phrase juste sur le texte reçu, et une piste TOTALEMENT fausse. Elle
+   l'aurait envoyé chercher du côté du parseur alors que le défaut est dans le
+   câblage du raccourci. Un diagnostic qui désigne le mauvais coupable coûte
+   plus cher que pas de diagnostic.
+   ⚠️ On reconnaît la boucle à ce qu'elle a d'inimitable : notre propre
+   réponse porte `"ok"` ET l'un de nos champs de sortie. Une page de
+   comparateur n'écrit jamais ça. */
+function estMaPropreReponse(rawText) {
+  var s = String(rawText || '');
+  if (s.length > 20000) return false;                 // une vraie page est longue
+  var t = s.replace(/\\+/g, '').slice(0, 4000);       // le ré-échappement s'empile
+  return /"ok"\s*:/.test(t)
+    && /"(diagnostic|refsNonLues|annoncesNonLues|tuilesDansLaPage|sansRefDetail)"\s*:/.test(t);
+}
+
 function diagnostiquerPage(rawText, brand) {
   brand = brand || 'DEWALT';
   var texte = stripHtml(rawText).replace(/[ \t   ]+/g, ' ');
@@ -1787,4 +1811,4 @@ function comparerCaracteristiques(a, b) {
   return { compatible: conflits.length === 0, conflits: conflits, concordances: concordances };
 }
 
-module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickoutil, parseIdealo: parseIdealo, parseAuto: parseAuto, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, raisonAucuneSource: raisonAucuneSource, enMillis: enMillis, SOURCE_FRESH_MS: SOURCE_FRESH_MS, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage, titresAttendus: titresAttendus, compterTuiles: compterTuiles, annoncesManquantes: annoncesManquantes, extraireCaracteristiques: extraireCaracteristiques, comparerCaracteristiques: comparerCaracteristiques, planBalayage: planBalayage, rangDansPlan: rangDansPlan, OUTILS: OUTILS, SERIES: SERIES, nomenclature: nomen };
+module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickoutil, parseIdealo: parseIdealo, parseAuto: parseAuto, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, raisonAucuneSource: raisonAucuneSource, enMillis: enMillis, SOURCE_FRESH_MS: SOURCE_FRESH_MS, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage, estMaPropreReponse: estMaPropreReponse, titresAttendus: titresAttendus, compterTuiles: compterTuiles, annoncesManquantes: annoncesManquantes, extraireCaracteristiques: extraireCaracteristiques, comparerCaracteristiques: comparerCaracteristiques, planBalayage: planBalayage, rangDansPlan: rangDansPlan, OUTILS: OUTILS, SERIES: SERIES, nomenclature: nomen };

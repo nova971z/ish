@@ -1996,6 +1996,101 @@ module.exports = async function () {
         ok(!/x-watch-secret/i.test(JSON.stringify(rTrou.out)),
           '⛔ et JAMAIS un en-tête dans la réponse : la clé du traqueur y vit');
 
+        /* ⛔⛔ LE RACCOURCI PEUT ME RENVOYER MA PROPRE RÉPONSE — et le
+           diagnostic générique désignait alors le mauvais coupable. Mesuré le
+           03/08 sur son premier balayage des 67 pages : `octetsRecus: 1195`
+           là où une page en fait treize mille, et les extraits étaient du
+           JSON `{"ok":true,…}` ré-échappé à chaque tour. Dans son raccourci,
+           le champ `text` du POST pointait sur « Contenu de l'URL » — une
+           variable qui, au tour suivant, désigne la sortie du POST PRÉCÉDENT.
+           ⛔ Le diagnostic répondait « la marque apparaît 5× mais jamais
+           suivie d'une référence : ce site écrit ses titres autrement ».
+           Exact sur le texte reçu, et une piste TOTALEMENT fausse — elle
+           envoie chercher dans le parseur un défaut qui est dans le câblage
+           du raccourci. Un diagnostic qui désigne le mauvais coupable coûte
+           plus cher que pas de diagnostic.
+           ⚠️ Le harnais fabrique la boucle comme elle se produit VRAIMENT :
+           on prend une réponse du point d'entrée et on la renvoie. */
+        var rBoucle1 = fauxRes();
+        await admFn({ method: 'POST',
+          query: { type: 'price-watch', brand: 'MAKITA', source: 'idealo', sec: '1' },
+          body: { text: 'MAKITA ZZQ1234\nMachine\n1 offre\nà partir de100,00 €' } },
+          rBoucle1, fauxAdmin, dbInterdite);
+        var rBoucle2 = fauxRes();
+        await admFn({ method: 'POST',
+          query: { type: 'price-watch', brand: 'MAKITA', source: 'idealo', sec: '1' },
+          body: { text: JSON.stringify(rBoucle1.out) } }, rBoucle2, fauxAdmin, dbInterdite);
+        ok(rBoucle2.out && rBoucle2.out.format === 'boucle',
+          '⛔⛔ renvoyer MA PROPRE RÉPONSE au lieu de la page est reconnu et NOMMÉ — '
+          + 'sinon le diagnostic accuse le parseur d\'un défaut de câblage (format '
+          + JSON.stringify(rBoucle2.out && rBoucle2.out.format) + ')');
+        ok(rBoucle2.out && /Définir une variable/.test(String(rBoucle2.out.note)),
+          '⛔ …et la réponse dit QUOI FAIRE, avec le nom exact de l\'action. Un refus '
+          + 'qui ne dit pas quoi faire est un mur');
+        /* ⛔⛔ PRÉALABLE — une VRAIE page ne doit jamais être prise pour une
+           boucle. Sans lui, une détection qui répondrait « boucle » à tout
+           resterait verte en rendant le traqueur inutilisable. */
+        ok(rBoucle1.out && rBoucle1.out.format !== 'boucle',
+          '⛔ PRÉALABLE : une vraie page n\'est JAMAIS prise pour une boucle — sinon '
+          + 'le traqueur refuserait tout en croyant se protéger');
+        /* ⛔ Et rien du corps reçu ne ressort : c'est une longueur et un mode
+           d'emploi, jamais un extrait de ce qu'on nous a envoyé (J3). */
+        ok(rBoucle2.out && typeof rBoucle2.out.octetsRecus === 'number'
+          && !rBoucle2.out.diagnostic,
+          '⛔ la réponse de boucle rend une LONGUEUR, pas d\'extraits du corps reçu');
+        /* ⛔⛔ ET UNE VRAIE PAGE, LONGUE, QUI CONTIENDRAIT CES MOTS PAR HASARD
+           NE DOIT PAS ÊTRE PRISE POUR UNE BOUCLE. Un comparateur affiche des
+           forums, des FAQ, du code : « "ok": » et « "diagnostic": » peuvent
+           s'y trouver. Sans la borne de taille, une page entière serait
+           refusée et le traqueur mourrait sur une page parfaitement valide —
+           en annonçant un défaut de câblage qui n'existe pas.
+           ⚠️ Le cas se construit AUTOUR de la borne, sans la recopier : on
+           prend une vraie page et on l'allonge jusqu'à la dépasser largement. */
+        /* ⚠️ La page NE DOIT RIEN DONNER au parseur : la détection de boucle
+           ne s'atteint que là. Un premier jet mettait un produit reconnaissable
+           dedans — l'assertion passait sans jamais franchir la branche, verte
+           pour la mauvaise raison. C'est le cas RÉEL d'un site au gabarit
+           inconnu, long, dont on ne tire encore rien. */
+        var bruit = [];
+        for (var q = 0; q < 900; q++) bruit.push('avis client ' + q + ' : "ok": tres bon outil');
+        var pageLongue = ['foire aux questions : le champ "diagnostic": explique tout']
+          .concat(bruit).join('\n');
+        var rLongue = fauxRes();
+        await admFn({ method: 'POST',
+          query: { type: 'price-watch', brand: 'MAKITA', source: 'idealo', sec: '1' },
+          body: { text: pageLongue } }, rLongue, fauxAdmin, dbInterdite);
+        /* ⛔⛔ ET UNE PAGE COURTE DONT ON NE TIRE RIEN N'EST PAS UNE BOUCLE
+           NON PLUS : c'est le cas d'un SITE INCONNU, celui pour lequel le
+           diagnostic existe. Le confondre avec un raccourci mal câblé ferait
+           perdre la seule voie d'apprentissage d'un nouveau gabarit — ces
+           sites sont injoignables depuis le dépôt, ce texte est tout ce qu'on
+           aura jamais. */
+        var rInconnue = fauxRes();
+        await admFn({ method: 'POST',
+          query: { type: 'price-watch', brand: 'MAKITA', source: 'idealo', sec: '1' },
+          body: { text: 'Bienvenue sur notre boutique\nNos rayons\nContactez-nous' } },
+          rInconnue, fauxAdmin, dbInterdite);
+        /* ⛔ ET DU JSON QUI N'EST PAS LE MIEN N'EST PAS UNE BOUCLE. Un site
+           peut renvoyer une erreur d'API, un flux, un objet quelconque : le
+           signe d'une boucle n'est pas « c'est du JSON », c'est « ce sont MES
+           champs de sortie ». Sans ce cas, la seconde condition ne serait
+           gardée par rien. */
+        ok(pp.estMaPropreReponse('{"ok":true,"produits":[],"message":"rien"}') === false,
+          '⛔ du JSON étranger n\'est pas une boucle — ce qui la signe, ce sont MES '
+          + 'champs de sortie, pas la forme JSON');
+        ok(pp.estMaPropreReponse(JSON.stringify(rBoucle1.out)) === true,
+          '⛔ PRÉALABLE : et MA réponse, elle, est bien reconnue — sinon la ligne '
+          + 'ci-dessus passerait sur une fonction qui dit toujours non');
+        ok(rInconnue.out && rInconnue.out.format !== 'boucle' && rInconnue.out.diagnostic,
+          '⛔⛔ une page d\'un site INCONNU garde son diagnostic — la confondre avec '
+          + 'une boucle ferait perdre la seule voie d\'apprentissage d\'un gabarit '
+          + 'neuf (format ' + JSON.stringify(rInconnue.out && rInconnue.out.format) + ')');
+        ok(rLongue.out && rLongue.out.format !== 'boucle',
+          '⛔⛔ une VRAIE page, longue, qui contient ces mots par hasard n\'est PAS '
+          + 'une boucle — sinon le traqueur meurt sur une page valide en accusant le '
+          + 'raccourci (format ' + JSON.stringify(rLongue.out && rLongue.out.format)
+          + ', ' + pageLongue.length + ' signes)');
+
         /* ⛔⛔ LA BARRIÈRE D'ACHAT — ELLE ÉCARTE, ELLE N'EFFACE PAS.
            Demande de l'user du 03/08 : « tous les articles qui dépassent un
            délai de livraison de 8 jours devront être écartés MAIS

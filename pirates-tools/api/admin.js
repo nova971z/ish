@@ -2148,6 +2148,35 @@ async function handlePriceWatch(req, res, admin, db) {
          injoignables depuis le dépôt (CONNECT 403, mesuré), et deviner un
          balisage est interdit (O6). Aucune donnée personnelle ici : la page
          est une grille produits publique. */
+      /* ⛔⛔ AVANT TOUT AUTRE DIAGNOSTIC : EST-CE MA PROPRE RÉPONSE ?
+         Mesuré le 03/08 sur son premier balayage des 67 pages —
+         `octetsRecus: 1195` là où une page en fait treize mille, et les trois
+         extraits étaient du JSON `{"ok":true,…}` ré-échappé à chaque tour.
+         Dans le raccourci, le champ `text` du POST pointait sur « Contenu de
+         l'URL », une variable qui au tour suivant désigne la sortie du POST
+         PRÉCÉDENT et non la page qu'on vient de lire.
+         ⛔ Le diagnostic générique répondait alors « la marque apparaît 5×
+         mais jamais suivie d'une référence — ce site écrit ses titres
+         autrement » : exact sur le texte reçu, et une piste TOTALEMENT
+         fausse. Elle envoie chercher dans le parseur un défaut qui est dans
+         le câblage du raccourci. Un diagnostic qui désigne le mauvais
+         coupable coûte plus cher que pas de diagnostic.
+         ⚠️ Portes lues : J3 — on ne rend qu'une longueur et un mode d'emploi,
+         aucun extrait du corps reçu, donc aucune donnée personnelle même si
+         le raccourci envoyait n'importe quoi ; J4 — aucun prix n'entre ici ;
+         J5 — aucune TVA, aucun octroi de mer. */
+      if (priceParse.estMaPropreReponse(text)) {
+        return res.status(200).json({
+          ok: true, brand, source: sourceSlug, parsed: 0, format: 'boucle',
+          note: '⛔ LE RACCOURCI M\'A RENVOYÉ MA PROPRE RÉPONSE, pas la page. '
+            + 'Dans l\'action POST, le champ « text » pointe sur « Contenu de l\'URL » — '
+            + 'or au tour suivant cette variable désigne la sortie du POST précédent. '
+            + 'Remède : juste après l\'action qui lit la page (dans la boucle), ajouter '
+            + '« Définir une variable » nommée par exemple `page`, puis mettre CETTE '
+            + 'variable dans le champ « text » du POST. Rien d\'autre à changer.',
+          octetsRecus: String(text || '').length
+        });
+      }
       return res.status(200).json({
         ok: true, brand, source: sourceSlug, parsed: 0, format: auto.format,
         note: 'aucun produit reconnu — le champ diagnostic mesure ce que la page contient',
