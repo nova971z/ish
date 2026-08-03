@@ -260,7 +260,12 @@ module.exports = async function () {
   }
   // Branchement réel : l'arithmétique de fraîcheur reçoit des NOMBRES.
   var adminSrcMs = fs.readFileSync(path.join(__dirname, '..', 'api', 'admin.js'), 'utf8');
-  ok(/srcsMaj\[sourceSlug\] = \{ ttc: src, at: nowMs, enStock: true \}/.test(adminSrcMs)
+  /* ⚠️ Le NOM de la variable de coût n'est pas le sujet — il a changé le 03/08
+     quand le minimum de rafale est arrivé (`src` → `srcRetenu`), et ce contrôle
+     est devenu rouge pour une raison qui n'était pas la sienne. Ce qu'il garde,
+     c'est la DATATION EN MILLISECONDES. Un harnais ne s'ancre pas sur une
+     écriture exacte quand l'invariant est ailleurs. */
+  ok(/srcsMaj\[sourceSlug\] = \{ ttc: \w+, at: nowMs, enStock: true \}/.test(adminSrcMs)
     && /choisirCoutSource\(srcsMaj, nowMs\)/.test(adminSrcMs)
     && /choisirCoutSource\(srcsR, nowMs\)/.test(adminSrcMs),
     '⛔ handlePriceWatch doit dater et juger `priceSources` en MILLISECONDES (nowMs) — '
@@ -2053,6 +2058,69 @@ module.exports = async function () {
           }
         }
 
+        /* ══ MÊME FICHE, DEUX PAGES : ON GARDE LE MOINS CHER ════════════════
+           ⛔⛔ DÉCISION DE L'USER, 03/08, mot pour mot : « c'est totalement
+           normal qu'il y ait le même produit plusieurs fois, on peut même le
+           retrouver jusqu'à 10 fois car ils comparent plus de 15 sites
+           différents […] on récupère TOUJOURS le moins cher ».
+           ⛔ Mesuré sur son balayage du même jour : CINQ fiches atteintes deux
+           fois avec des coûts très écartés (226,04 € puis 341,22 € sur la même
+           fiche). La carte des sources était ÉCRASÉE à chaque page : le prix
+           final dépendait de quelle page était passée en dernier — 323,92 € ou
+           465,77 € au tirage au sort de la pagination.
+           ⚠️ LES DEUX ORDRES SONT TESTÉS. Le seul qui démasque le défaut est
+           « moins cher d'abord, plus cher ensuite » : dans l'autre sens, le
+           dernier vu se trouve être le bon et le contrôle passerait pour la
+           mauvaise raison. */
+        async function pageAuPrix(sku, prixTxt, db) {
+          var r = fauxRes();
+          await admFn({ method: 'POST',
+            /* ⚠️ SANS `scan=1` : le mode balayage VIDE les listes de la réponse
+               (c'est voulu, 67 pages de détail sont incollables), et ce
+               contrôle a besoin de LIRE le coût retenu ligne par ligne. La
+               mémoire de rafale, elle, ne dépend pas de ce drapeau. */
+            query: { type: 'price-watch', brand: 'DEWALT', source: 'idealo' },
+            body: { text: pageIdealo(sku, prixTxt) } }, r, fauxAdmin, db);
+          return r.out;
+        }
+        var CHER = '600,00', MOINS = '300,00';
+        scanReset();
+        var dbM1 = fauxDb({}, []);
+        await pageAuPrix(cible.sku, CHER, dbM1);
+        var apresBaisse = await pageAuPrix(cible.sku, MOINS, dbM1);
+        var recBaisse = (apresBaisse.applied || []).concat(apresBaisse.unchanged || [])[0];
+        ok(!!recBaisse && Math.abs(recBaisse.srcTTC - 300) < 0.01,
+          '⛔ PRÉALABLE : cher puis moins cher → le coût retenu est le moins cher (obtenu '
+          + JSON.stringify(recBaisse && recBaisse.srcTTC) + ')');
+
+        scanReset();
+        var dbM2 = fauxDb({}, []);
+        await pageAuPrix(cible.sku, MOINS, dbM2);
+        var apresHausse = await pageAuPrix(cible.sku, CHER, dbM2);
+        var recHausse = (apresHausse.applied || []).concat(apresHausse.unchanged || [])[0];
+        ok(!!recHausse && Math.abs(recHausse.srcTTC - 300) < 0.01,
+          '⛔⛔ ARGENT — moins cher d\'abord, plus cher ensuite : le coût retenu reste le '
+          + 'MOINS CHER. Sans ça le prix final dépend de l\'ordre des pages, et l\'user '
+          + 'vend 465,77 € un outil qu\'il pouvait acheter pour 323,92 € (obtenu '
+          + JSON.stringify(recHausse && recHausse.srcTTC) + ', attendu 300)');
+        scanReset();
+
+        /* ⛔ ET LE MINIMUM NE VAUT QUE DANS LA RAFALE. Hors rafale, une hausse
+           réelle du fournisseur DOIT pouvoir remonter le coût — sinon le prix
+           ne descendrait plus jamais que vers le bas, et ce serait contraire à
+           D-015 : le traqueur lit ce que la page AFFICHE, c'est ce que l'user
+           paiera. `scanReset()` ferme la rafale ; la hausse doit passer. */
+        var dbM3 = fauxDb({}, []);
+        await pageAuPrix(cible.sku, MOINS, dbM3);
+        scanReset();                                   // la rafale se termine
+        var horsRafale = await pageAuPrix(cible.sku, CHER, dbM3);
+        var recHors = (horsRafale.applied || []).concat(horsRafale.unchanged || [])[0];
+        ok(!!recHors && Math.abs(recHors.srcTTC - 600) < 0.01,
+          '⛔⛔ …mais HORS rafale, une hausse réelle du fournisseur remonte bien le coût : '
+          + 'un minimum éternel ferait vendre à perte le jour où le fournisseur augmente '
+          + '(obtenu ' + JSON.stringify(recHors && recHors.srcTTC) + ', attendu 600)');
+        scanReset();
+
         /* ── MODE À SEC (&sec=1) : ZÉRO FIRESTORE, ZÉRO ÉCRITURE ─────────────
            ⛔ Écrit après une faute réelle : mettre au point le câblage d'un
            raccourci a épuisé le quota gratuit de l'user et refermé son
@@ -2562,7 +2630,51 @@ module.exports = async function () {
               + 'liste de faux chantiers (obtenu ' + dejaVues.length + ' entrée(s))');
             adm._internals.pwScanReset();
           }
+        /* ══ LA LISTE NOMMÉE DE CE QUI N'A PAS ÉTÉ TROUVÉ ══════════════════
+           ⛔⛔ Sa demande du 03/08 : « je veux la liste des produits qui n'ont
+           pas été trouvés, je vais aller chercher sur idealo pour vérifier
+           s'ils n'y sont pas vraiment ». Le compteur disait 333 ; il ne disait
+           PAS lesquelles — donc il ne permettait aucune vérification. */
+        adm._internals.pwScanReset();
+        var rMq = fauxRes();
+        await admFn({ method: 'POST',
+          query: { type: 'price-watch', brand: marqueT, source: 'idealo', sec: '1',
+            scan: '1', manquants: '1' },
+          body: { text: pageDeFiches(troisRefs.slice(0, 2), 700) } },
+          rMq, fauxAdmin, dbInterdite);
+        var cMq = rMq.out && rMq.out.couverture;
+        var listeMq = cMq && cMq.fichesJamaisVuesDetail;
+        ok(Array.isArray(listeMq) && listeMq.length > 0,
+          '⛔⛔ `&manquants=1` rend la LISTE NOMMÉE, pas seulement le compte : un écart '
+          + 'chiffré se suppose, un écart nommé se va chercher (obtenu '
+          + JSON.stringify(Array.isArray(listeMq) ? listeMq.length : listeMq) + ')');
+        if (Array.isArray(listeMq)) {
+          ok(listeMq.every(function (f) { return f && f.sku && typeof f.nom === 'string'; }),
+            '⛔ chaque ligne porte la RÉFÉRENCE et le LIBELLÉ — une référence seule ne se '
+            + 'cherche pas sur un comparateur');
+          var trouvees = listeMq.filter(function (f) {
+            return troisRefs.slice(0, 2).indexOf(String(f.sku).toUpperCase()) !== -1;
+          });
+          ok(trouvees.length === 0,
+            '⛔⛔ les fiches que le balayage A RETROUVÉES ne figurent PAS dans la liste : '
+            + 'l\'y laisser l\'enverrait chercher des produits déjà trouvés (obtenu '
+            + trouvees.length + ')');
         }
+        /* ⛔ ET SANS LE DRAPEAU, RIEN. 333 lignes rendues 67 fois seraient
+           incollables sur son iPad — c'est le problème que `bref` a réglé. */
+        adm._internals.pwScanReset();
+        var rSansMq = fauxRes();
+        await admFn({ method: 'POST',
+          query: { type: 'price-watch', brand: marqueT, source: 'idealo', sec: '1', scan: '1' },
+          body: { text: pageDeFiches(troisRefs.slice(0, 2), 700) } },
+          rSansMq, fauxAdmin, dbInterdite);
+        ok(rSansMq.out && rSansMq.out.couverture
+          && rSansMq.out.couverture.fichesJamaisVuesDetail === undefined,
+          '⛔ sans `&manquants=1`, la liste ne sort PAS — sinon chaque page du balayage '
+          + 'la traînerait, et le mode bref ne servirait plus à rien');
+        adm._internals.pwScanReset();
+        }
+
         ok(cE3 && typeof cE3.cause === 'string' && !!cE3.lecture,
           '⛔⛔ un cumul incomplet dit sa CAUSE en clair, pas seulement son écart : '
           + 'un « il manque 14 pages » sans cause se termine toujours en supposition — '

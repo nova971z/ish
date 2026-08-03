@@ -2133,6 +2133,66 @@ const PW_INSTANCE = {
    ⚠️ J3 — aucune donnée personnelle : des références, des noms d'outils, des
    montants. J5 — aucune TVA ni octroi de mer ne se décide ici, le territoire
    fiscal continue de se dériver du code postal. */
+/* ⛔⛔ OUVRIR LA RAFALE AVANT D'ÉCRIRE, PAS APRÈS. Le cumul de couverture était
+   alimenté à la FIN du traitement d'une page : la rafale n'existait donc pas
+   encore pendant que la page 1 écrivait ses prix. Or c'est PENDANT l'écriture
+   qu'il faut savoir si la fiche a déjà été vue moins cher dans ce balayage.
+   Cette fonction porte la création et la remise à zéro ; `pwCouvAjouter` s'en
+   sert, et le chemin d'écriture aussi.
+   ⚠️ Portes lues : J3 — des références d'outils et des compteurs, aucune donnée
+   personnelle, rien de persisté ; J4 — voir `pwRafaleCoutMin` ; J5 — aucune
+   TVA, aucun octroi de mer. */
+function pwRafaleOuvrir(brand, pagesDuPlan, nowMs) {
+  const pagesPlan = Math.max(0, parseInt(pagesDuPlan, 10) || 0);
+  if (pwCouv && pagesPlan > 0 && pwCouv.pages >= pagesPlan) pwCouv = null;
+  if (!pwCouv || (nowMs - pwCouv.at) > PW_SCAN_TTL || pwCouv.brand !== brand) {
+    pwCouv = { brand: brand, refs: Object.create(null), noms: Object.create(null),
+      empreintes: Object.create(null), fiches: Object.create(null),
+      baisses: Object.create(null), coutMin: Object.create(null),
+      pages: 0, tuiles: 0, lues: 0, debut: nowMs, at: nowMs };
+  }
+  return pwCouv;
+}
+
+/* ⛔⛔ DANS UNE MÊME RAFALE, ON GARDE LE COÛT LE MOINS CHER — JAMAIS LE DERNIER
+   VU. Décision de l'user, 03/08, mot pour mot : « c'est totalement normal qu'il
+   y ait le même produit plusieurs fois, on peut même le retrouver jusqu'à 10
+   fois car ils comparent plus de 15 sites différents […] on récupère TOUJOURS
+   le moins cher ».
+   ⛔ Mesuré sur son balayage du même jour (67 pages) : CINQ fiches atteintes
+   deux fois avec des coûts très écartés — `dewalt-dch273nt-xj` à 226,04 € puis
+   341,22 €, `dewalt-dcn660n-xj` à 311,83 € puis 349,38 €. La carte des sources
+   était ÉCRASÉE à chaque page : le prix final dépendait de QUELLE PAGE ÉTAIT
+   PASSÉE EN DERNIER. Sur DCH273NT, 323,92 € ou 465,77 € au tirage au sort de
+   la pagination — pour le même outil, le même jour.
+
+   ⛔ LA MÉMOIRE EST CELLE DE LA RAFALE, PAS UNE COMPARAISON DE DATES. Un
+   premier essai bornait le minimum aux entrées « écrites après le début de la
+   rafale » : il mordait aussi sur des relevés DÉJÀ EN BASE, et faisait tomber
+   une garde existante (E-228). Ce qui compte n'est pas quand l'entrée a été
+   écrite, c'est si c'est CE balayage qui l'a écrite — donc on s'en souvient
+   explicitement, fiche par fiche.
+   ⚠️ Hors rafale, une hausse réelle du fournisseur doit pouvoir remonter le
+   coût : un minimum éternel ferait vendre à perte le jour où le fournisseur
+   augmente, et ce serait contraire à D-015 — le traqueur lit ce que la page
+   AFFICHE, c'est exactement ce que l'user paiera.
+
+   ⚠️ PORTE J4 LUE. Le prix annoncé doit être exact et complet ; une réduction
+   se réfère au prix le plus bas des 30 jours précédents. Ici on ne fabrique
+   aucun prix de référence : on retient le COÛT D'ACHAT le plus bas parmi ceux
+   que le comparateur affiche pour le même article — celui que l'user paierait
+   réellement. Le minimum 30 jours reste calculé ailleurs, sur le journal réel. */
+function pwRafaleCoutMin(brand, id, src) {
+  const cout = Number(src);
+  if (!pwCouv || pwCouv.brand !== brand || !isFinite(cout) || cout <= 0) return src;
+  const m = pwCouv.coutMin || (pwCouv.coutMin = Object.create(null));
+  const clef = String(id || '');
+  const ancien = Number(m[clef]);
+  const retenu = (isFinite(ancien) && ancien > 0) ? Math.min(ancien, cout) : cout;
+  m[clef] = retenu;
+  return retenu;
+}
+
 const PW_TOP_BAISSES = 10;
 function pwBaissesAjouter(store, recs) {
   (recs || []).forEach(function (r) {
@@ -2174,6 +2234,10 @@ function pwBaissesBilan(store, combien) {
   };
 }
 
+/* Assez pour porter TOUT ce qui manque sur sa marque la plus fournie (mesuré :
+   556 fiches DeWALT), pas assez pour qu'un catalogue qui triple fasse exploser
+   la réponse. Une troncature se voit : `fichesJamaisVues` donne le compte réel. */
+const PW_MANQUANTS_MAX = 600;
 const PW_QUASI_MAX = 60;
 function pwQuasiRapprochements(skusMarque, fichesVues, refsVues) {
   if (!Array.isArray(skusMarque) || !skusMarque.length) return null;
@@ -2231,13 +2295,7 @@ function pwCouvAjouter(brand, skus, titres, nbTuiles, nbLues, pagesDuPlan, extra
      la page suivante ouvre une rafale neuve. Aucune horloge, aucun réglage :
      la borne vient du plan lui-même. */
   const pagesPlan = Math.max(0, parseInt(pagesDuPlan, 10) || 0);
-  if (pwCouv && pagesPlan > 0 && pwCouv.pages >= pagesPlan) pwCouv = null;
-  if (!pwCouv || (nowMs - pwCouv.at) > PW_SCAN_TTL || pwCouv.brand !== brand) {
-    pwCouv = { brand: brand, refs: Object.create(null), noms: Object.create(null),
-      empreintes: Object.create(null), fiches: Object.create(null),
-      baisses: Object.create(null),
-      pages: 0, tuiles: 0, lues: 0, debut: nowMs, at: nowMs };
-  }
+  pwRafaleOuvrir(brand, pagesDuPlan, nowMs);
   pwCouv.at = nowMs;
   pwCouv.pages += 1;
   if (empreinte) pwCouv.empreintes[String(empreinte)] = 1;
@@ -2264,6 +2322,7 @@ function pwCouvAjouter(brand, skus, titres, nbTuiles, nbLues, pagesDuPlan, extra
   });
   pwBaissesAjouter(pwCouv.baisses, extra.baisses);
   if (Array.isArray(extra.skusMarque)) pwCouv.skusMarque = extra.skusMarque;
+  if (Array.isArray(extra.fichesDetail)) pwCouv.fichesDetail = extra.fichesDetail;
   const quasi = pwQuasiRapprochements(pwCouv.skusMarque, pwCouv.fiches, pwCouv.refs);
   const nbDistinctes = Object.keys(pwCouv.empreintes).length;
   const base = nbDistinctes || pwCouv.pages;
@@ -2341,6 +2400,26 @@ function pwCouvAjouter(brand, skus, titres, nbTuiles, nbLues, pagesDuPlan, extra
        ⚠️ « À vérifier », jamais « à écrire » : un préfixe commun n'est pas une
        preuve d'identité, et un prix de pack sur un outil nu corromprait le
        coût. Le contrôle du contenu reste obligatoire. */
+    /* ⛔⛔ LA LISTE NOMMÉE DE CE QUI N'A PAS ÉTÉ TROUVÉ. Sa demande du 03/08 :
+       « je veux la liste des produits qui n'ont pas été trouvés, je vais aller
+       chercher sur idealo pour vérifier s'ils n'y sont pas vraiment ». Le
+       compteur disait 333 ; il ne disait PAS lesquelles — donc il ne permettait
+       aucune vérification. Un écart chiffré se suppose, un écart nommé se va
+       chercher.
+       ⛔ ELLE NE SORT QUE SUR `&manquants=1`. Rendue à chaque page, elle
+       pèserait des centaines de lignes × 67 pages — et le mode bref existe
+       précisément parce que 3,4 millions de signes ne se collent pas sur un
+       iPad. Une seule réponse suffit à la lire : c'est un cumul de rafale.
+       ⚠️ `sku` ET `nom` : une référence seule ne se cherche pas sur un
+       comparateur, il faut le libellé pour reconnaître l'article.
+       ⚠️ Portes lues : J3 — des références et des libellés d'outils, aucune
+       donnée personnelle ; J4 — aucun prix n'y figure ; J5 — aucune TVA,
+       aucun octroi de mer. */
+    fichesJamaisVuesDetail: (extra.manquants && Array.isArray(pwCouv.fichesDetail))
+      ? pwCouv.fichesDetail
+        .filter(function (f) { return !pwCouv.fiches[String(f.sku).toUpperCase()]; })
+        .slice(0, PW_MANQUANTS_MAX)
+      : undefined,
     fichesQuasiRapprochees: quasi ? quasi.nb : null,
     fichesQuasiRapprocheesDetail: quasi ? quasi.exemples : null,
     /* ⛔⛔ CE QUE LE BALAYAGE FERAIT AUX PRIX, CUMULÉ SUR SES 67 PAGES — et les
@@ -2413,6 +2492,12 @@ async function handlePriceWatch(req, res, admin, db) {
        iPad ne peut ni écrire ni recopier. Ses mots : « je ne pourrai pas te
        coller 10 000 produits ». Le détail reste accessible sans le drapeau. */
     const bref = body.bref === true || (req.query && (req.query.bref === '1' || req.query.bref === 'true'));
+    /* ⛔ `&manquants=1` : la LISTE NOMMÉE des fiches de la marque qu'aucune page
+       du balayage n'a retrouvées. Hors de ce drapeau elle ne sort pas — 333
+       lignes rendues 67 fois seraient incollables, et c'est exactement le
+       problème que `bref` a réglé. */
+    const manquants = body.manquants === true
+      || (req.query && (req.query.manquants === '1' || req.query.manquants === 'true'));
     /* ── IDENTITÉ DE LA SOURCE (01/08/2026) ─────────────────────────────────
        Un deuxième site va être traqué, puis d'autres : chaque raccourci passe
        `&source=<slug>`. Sans le paramètre : 'cotebrico' — aucun raccourci
@@ -2620,7 +2705,10 @@ async function handlePriceWatch(req, res, admin, db) {
         planCourant && planCourant.pages,
         { empreinte: empreinteSec, reconnus: reconnusSec.map((r) => r.sku),
           fichesMarque: fichesMarqueSec,
-          skusMarque: fichesDeLaMarqueSec.map((p) => p.sku).filter(Boolean) });
+          skusMarque: fichesDeLaMarqueSec.map((p) => p.sku).filter(Boolean),
+          manquants: manquants,
+          fichesDetail: fichesDeLaMarqueSec.map((p) => ({
+            sku: p.sku, nom: String(p.title || p.name || '').slice(0, 90) })) });
 
       /* ⛔⛔ L'ÉCART, NOMMÉ. J'ai annoncé à l'user « 11 références non lues » en
          soustrayant deux compteurs — sans jamais pouvoir dire LESQUELLES. Un
@@ -2906,6 +2994,12 @@ async function handlePriceWatch(req, res, admin, db) {
        rencontre gagne, et le choix du moins cher regarde de toute façon
        TOUTES les déclinaisons présentes sur la page. */
     const fichesVues = new Set();
+    /* ⛔ LA RAFALE S'OUVRE AVANT LA BOUCLE, PAS APRÈS. C'est pendant l'écriture
+       qu'on a besoin de savoir si cette fiche a déjà été vue MOINS CHER dans ce
+       balayage — l'ouvrir à la fin (avec le cumul de couverture) laisserait la
+       page 1 écrire sans mémoire, et une fiche vue page 1 puis page 40 se
+       ferait écraser par la plus chère des deux. */
+    pwRafaleOuvrir(brand, (plans.plan(brand, sourceSlug) || {}).pages, nowMs);
     for (const item of parsed) {
       const p = bySku[item.sku];
       if (!p) { unknown.push({ sku: item.sku, srcTTC: item.price, name: item.name }); continue; }
@@ -2947,7 +3041,32 @@ async function handlePriceWatch(req, res, admin, db) {
          `priceSources` ; le prix du site se calcule sur le minimum des
          sources fraîches ET en stock — quel que soit le traqueur qui parle. */
       const srcsMaj = pwSourcesConnues(oW);   // carte + héritage cotébrico
-      srcsMaj[sourceSlug] = { ttc: src, at: nowMs, enStock: true };
+      /* ⛔⛔ DANS UNE MÊME RAFALE, ON GARDE LE MOINS CHER — JAMAIS LE DERNIER VU.
+         Décision de l'user, 03/08, mot pour mot : « c'est totalement normal
+         qu'il y ait le même produit plusieurs fois, on peut même le retrouver
+         jusqu'à 10 fois car ils comparent plus de 15 sites différents […] on
+         récupère TOUJOURS le moins cher ».
+         ⛔ Mesuré sur son balayage du 03/08 (67 pages, dryRun) : CINQ fiches
+         atteintes deux fois avec des coûts très écartés — `dewalt-dch273nt-xj`
+         à 226,04 € puis 341,22 €, `dewalt-dcn660n-xj` à 311,83 € puis
+         349,38 €. Cette ligne ÉCRASAIT la carte à chaque page : le prix final
+         dépendait de QUELLE PAGE ÉTAIT PASSÉE EN DERNIER. Sur DCH273NT, c'était
+         323,92 € ou 465,77 € au tirage au sort de la pagination.
+         ⚠️ Le minimum ne vaut QUE DANS LA RAFALE EN COURS. Hors rafale, une
+         hausse réelle du fournisseur doit pouvoir remonter le coût — sinon le
+         prix descendrait pour toujours sans jamais remonter, et ce serait
+         contraire à D-015 : « le traqueur lit ce que la page AFFICHE, c'est
+         exactement ce que l'user paiera ». La borne vient du début de la
+         rafale, pas d'une horloge arbitraire.
+         ⚠️ PORTES LUES. J4 : le prix annoncé doit être exact et complet, et une
+         réduction se réfère au prix le plus bas des 30 jours précédents. Ici on
+         ne fixe pas un prix de référence — on retient le COÛT D'ACHAT réel le
+         plus bas parmi ceux que le comparateur affiche pour le même article,
+         c'est-à-dire celui que l'user paierait. Le minimum 30 jours reste
+         calculé ailleurs, sur le journal réel. J3 : aucune donnée personnelle.
+         J5 : aucune TVA ni octroi de mer, le territoire vient du code postal. */
+      const srcRetenu = pwRafaleCoutMin(brand, p.id, src);
+      srcsMaj[sourceSlug] = { ttc: srcRetenu, at: nowMs, enStock: true };
       const choix = priceParse.choisirCoutSource(srcsMaj, nowMs);
       const effSrc = choix ? choix.ttc : src;
       const effFrom = choix ? choix.source : sourceSlug;
@@ -2959,7 +3078,7 @@ async function handlePriceWatch(req, res, admin, db) {
 
       // Cette source a-t-elle DÉJÀ ce relevé, et le coût effectif est-il déjà bon ?
       const entreeSrc = (oW.priceSources || {})[sourceSlug];
-      const dejaAJour = !!entreeSrc && Math.abs((entreeSrc.ttc || 0) - src) < 0.01
+      const dejaAJour = !!entreeSrc && Math.abs((entreeSrc.ttc || 0) - srcRetenu) < 0.01
         && Math.abs((oW.priceSrcTTC || 0) - effSrc) < 0.01 && entreeSrc.enStock !== false;
 
       if (cur != null && Math.abs(newPrice - cur) < 0.02) {
@@ -2971,7 +3090,7 @@ async function handlePriceWatch(req, res, admin, db) {
         // supposition alors que le vrai prix fournisseur est connu.
         if (!dryRun && !dejaAJour) {
           const patchU = {
-            priceSources: { [sourceSlug]: { ttc: src, at: nowMs, enStock: true } },
+            priceSources: { [sourceSlug]: { ttc: srcRetenu, at: nowMs, enStock: true } },
             priceSource: effFrom, priceSrcTTC: effSrc
           };
           await db.collection('product_overrides').doc(p.id).set(
@@ -3056,7 +3175,7 @@ async function handlePriceWatch(req, res, admin, db) {
         }
         const patchA = Object.assign({
           price: newPrice, price_ht: newHt,
-          priceSources: { [sourceSlug]: { ttc: src, at: nowMs, enStock: true } },
+          priceSources: { [sourceSlug]: { ttc: srcRetenu, at: nowMs, enStock: true } },
           priceSource: effFrom, priceSrcTTC: effSrc,
           priceMarkup: priced.markup, priceMode: priced.mode
         }, promo);
@@ -3133,6 +3252,10 @@ async function handlePriceWatch(req, res, admin, db) {
             === String(brand).toUpperCase()).length,
           skusMarque: products.filter((p) => String(p.brand || '').toUpperCase()
             === String(brand).toUpperCase()).map((p) => p.sku).filter(Boolean),
+          manquants: manquants,
+          fichesDetail: products.filter((p) => String(p.brand || '').toUpperCase()
+            === String(brand).toUpperCase() && p.sku)
+            .map((p) => ({ sku: p.sku, nom: String(p.title || p.name || '').slice(0, 90) })),
           /* ⛔ SEULEMENT `applied` : ce que le traqueur a VALIDÉ. `unchanged`
              ne bouge pas, `flagged` a été REFUSÉ — les faire entrer dans une
              moyenne de baisse la ferait mentir dans le sens qui plaît. */
