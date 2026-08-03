@@ -436,6 +436,15 @@ module.exports = async function () {
       'Débroussailleuse 54V ZZIMST922N-XJ + 1 batterie + 1 chargeur MAKITA',
       'Vendu par : UnMarchand.fr', 'Détails de l’offre',
       '24/48 heures', 'Livraison gratuite', '694,90 € TVA incluse', 'Détails de l’offre',
+      /* ⑧ RÉF ÉCLATÉE PAR DES ESPACES — gabarit mesuré sur sa page réelle
+         (2 cartes sur 9). Elle ne donnera jamais un `sku` (on ne devine pas un
+         recollage), mais elle OUVRE une carte : sans ça, et sans les ancres,
+         elle était absorbée par sa voisine et disparaissait même des écartées.
+         ⚠️ Ce gabarit manquait au corpus : la règle qui l'ouvre est restée
+         NON GARDÉE jusqu'au 03/08 — un sabotage l'a prouvé en restant vert. */
+      'MAKITA ZZI 579 T2T Cordless circular saw 54 V',
+      'Scie circulaire portative, 2 batteries', '3 offres', 'à partir de628,37 €',
+      'Détails du produit',
       // ⑦ bloc hors sujet : « à partir de » orphelin
       'Produits favoris', 'Smartphone 5G', 'Apple iPhone 17',
       '168', 'à partir de', '774,99 €'
@@ -471,6 +480,52 @@ module.exports = async function () {
       + 'nom de produit (un titre faux est pire qu\'une absence)');
     ok(ri.every(function (x) { return x.promo === false && x.enStock === null; }),
       'comparateur : jamais de promo ni de stock inventés');
+
+    /* ⛔⛔ PANNE DU 03/08/2026 — `parsed: 0` SUR UNE PAGE DE 57 RÉFÉRENCES.
+       Le découpage s'ancrait sur « Détails du produit », une ÉTIQUETTE
+       D'INTERFACE. Idealo ne l'a pas envoyée ce jour-là, et le relevé entier
+       est tombé à zéro : `format: "aucun"`. Cause reproduite en retirant cette
+       seule ligne du corpus réel (3 produits → 0).
+       Ces trois assertions rejouent EXACTEMENT le même corpus privé de ses
+       ancres, et exigent le MÊME résultat. Elles échouent dès que le parseur
+       redevient dépendant d'un libellé d'affichage. */
+    function sansAncres(txt, quoi) {
+      return txt.split('\n').filter(function (l) {
+        var t = l.trim();
+        if (quoi === 'produit') return !/^d[ée]tails\s+du\s+produit$/i.test(t);
+        return !/^d[ée]tails\s+(du\s+produit|de\s+l[’']?offre)$/i.test(t);
+      }).join('\n');
+    }
+    var sansP = pi(sansAncres(pageI, 'produit'), 'MAKITA');
+    ok(sansP.items.length === ri.length,
+      '⛔⛔ SANS la ligne « Détails du produit », le MÊME nombre de produits est '
+      + 'lu (' + sansP.items.length + '/' + ri.length + '). C\'est exactement la '
+      + 'panne du 03/08 : un découpage ne dépend JAMAIS d\'une étiquette d\'interface');
+    var mSansP = {}; sansP.items.forEach(function (x) { mSansP[x.sku] = x.price; });
+    ok(ri.every(function (x) { return mSansP[x.sku] === x.price; }),
+      '⛔ ARGENT : et ce sont les MÊMES prix sur les MÊMES réfs — un découpage de '
+      + 'secours qui décale les prix serait pire que la panne qu\'il répare');
+    /* ⛔ La carte à réf ÉCLATÉE doit être listée AVEC SON PRIX, ancres ou pas.
+       Sans la règle qui la fait ouvrir un bloc, elle est avalée par sa
+       voisine — et l'user perd une ligne sans jamais le savoir. */
+    ok(rid.sansRef.some(function (x) { return x.prix === 628.37; }),
+      'une réf éclatée par des espaces est ÉCARTÉE mais LISTÉE avec son prix');
+    ok(!ri.some(function (x) { return /^ZZI$/.test(x.sku) || x.price === 628.37; }),
+      '⛔ ARGENT : et elle ne devient JAMAIS un produit — « ZZI 579 T2T » ne se '
+      + 'recolle pas, on ne sait pas si le vrai code s\'arrête au 579 ou au T2T');
+    ok(sansP.sansRef.some(function (x) { return x.prix === 628.37; }),
+      '⛔ …y compris SANS la ligne « Détails du produit » : c\'est le titre qui '
+      + 'ouvre la carte, pas l\'étiquette');
+
+    var sansTout = pi(sansAncres(pageI, 'tout'), 'MAKITA');
+    ok(sansTout.items.length === ri.length
+      && sansTout.sansRef.length === rid.sansRef.length,
+      'sans AUCUNE des deux ancres, produits ET offres écartées restent au complet '
+      + '(' + sansTout.items.length + ' + ' + sansTout.sansRef.length + ')');
+    ok(sansTout.items.every(function (x) { return x.price !== 694.90; }),
+      '⛔⛔ ARGENT : même sans ancre, le prix d\'une OFFRE MARCHANDE (un lot) ne '
+      + 'devient jamais un produit. Un découpage plus tolérant ne doit surtout pas '
+      + 'être plus tolérant SUR L\'ARGENT');
 
     /* ⛔ LE SOUS-TITRE FAIT PARTIE DE LA FICHE. Mesuré le 03/08 : idealo écrit
        la réf sur une ligne et « Scie circulaire portative, 1 batterie, 3,5 kg »

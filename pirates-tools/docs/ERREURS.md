@@ -16,13 +16,13 @@
 |---|---|---|---|---|
 | **O1** | Affirmer avant de mesurer | 12 | §3 · §8 | `garde-sortie.js` *(hook Stop)* |
 | **O2** | L'instrument de mesure est faux | 28 | §4.3 | sabotage obligatoire |
-| **O3** | Réutiliser sans vérifier le contexte | 8 | §1.4 | `check-lecons.js` |
+| **O3** | Réutiliser sans vérifier le contexte | 9 | §1.4 | `check-lecons.js` |
 | **O4** | Contrainte connue, non appliquée | 4 | §1 | `garde-entonnoir.js` |
 | **O5** | Outil artisanal au lieu de l'outil existant | 1 | §1.4 | aucune — humaine |
 | **O6** | Copie périmée au lieu de la source vivante | 5 | §4.4 | `p7-architecture.js` |
 | **O7** | **Lire le silence comme un succès** | 7 | §3 · §4.3 | `sabotage.mjs` · `ci.js` · `check-ancres.js` |
 
-**65 erreurs, 7 mécanismes.** O1 et O2 en concentrent **40 à elles deux** :
+**66 erreurs, 7 mécanismes.** O1 et O2 en concentrent **40 à elles deux** :
 c'est là qu'il faut regarder en premier, toujours.
 
 ⚠️ **O7 est né le 01/08/2026**, et il est né d'une règle qui existait déjà :
@@ -147,6 +147,7 @@ va contenir ici.*
 | **E-306** | `require()` sur un script conçu pour un hook | lire sa table de motifs | son `process.exit(0)` de haut niveau **tuait l'appelant sans un mot** |
 | **E-307** | l'entonnoir interrogé avec MES mots | router une demande commerciale | « trier par prix » routait vers **D-012**, jamais vers D-009 qui l'interdit |
 | **E-308** | `fournisseur()` — « qui encaisse ? » | répondre à « qui a SIGNÉ cette notification ? » | Revolut écrivait, Stripe tentait de le reconnaître : 2 reçues, **0 acceptée**, avec une configuration Revolut parfaite. Symétrique : après bascule, une re-livraison Stripe tardive serait refusée par Revolut |
+| **E-309** | la ligne « Détails du produit » comme **frontière de bloc** | découper les cartes d'une page idealo | ⛔ La règle de harnais dit déjà « on ne s'ancre jamais sur une formulation exacte d'interface » — je l'ai appliquée aux TESTS et **pas au parseur**. Idealo ne l'a pas envoyée le 03/08 : relevé de l'user à **`parsed: 0`, `format: "aucun"`** sur une page de **57 références**. Cause reproduite en retirant cette seule ligne du corpus réel : 3 produits → 0. Corrigé en s'ancrant sur ce que la page ne peut pas ne pas écrire — le titre « MARQUE RÉF », qui annonce la carte lui-même. La porte a ensuite trouvé PIRE : sans ancre de fin, le prix cherché à rebours ramenait celui d'un **téléphone** du bandeau « Produits favoris » sur une scie |
 
 **Antidote** : §1.4 — regarder **ce que le motif va contenir**, pas ce à quoi il
 ressemble.

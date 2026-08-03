@@ -324,11 +324,34 @@ function parseIdealo(rawText, brand) {
      ligne de d\u00e9lai \u2014 \u00ab 24/48 heures \u00bb \u2014 pour un titre de produit. On m\u00e9morise
      donc le titre au moment o\u00f9 \u00ab Vendu par : \u00bb le d\u00e9signe : c'est la ligne
      juste avant, et elle seule. */
+  /* ⛔⛔ NE JAMAIS FAIRE DÉPENDRE UN DÉCOUPAGE D'UNE ÉTIQUETTE D'INTERFACE.
+     Payé le 03/08/2026 : le relevé de l'user est revenu `parsed: 0`,
+     `format: "aucun"` sur une page qui contenait 57 références. Cause MESURÉE
+     en retirant la seule ligne « Détails du produit » du corpus réel — les
+     3 produits lus deviennent 0, et le format devient « aucun ». Idealo ne
+     l'avait pas envoyée ce jour-là ; sans elle le bloc n'était jamais vidé, et
+     un seul appel avait lieu, en toute fin de texte.
+
+     UNE CARTE S'ANNONCE ELLE-MÊME : sa première ligne est « MARQUE RÉF ».
+     C'est cette ligne, et non un libellé d'affichage, qui ouvre une carte et
+     clôt la précédente. Les deux ancres d'origine restent en RENFORT — elles
+     servent encore aux offres marchandes — mais plus rien ne dépend d'elles
+     seules. Une règle de secours ne coûte rien ; son absence a coûté un
+     relevé entier. */
   var bloc = [], seen = {}, titreOffre = null;
   for (var i = 0; i < lignes.length; i++) {
     var l = lignes[i];
     if (VENDU_PAR.test(l)) {
       titreOffre = (bloc.length ? bloc[bloc.length - 1] : null) || titreOffre;
+      /* ⛔ « Vendu par : » désigne le titre juste au-dessus — donc TOUT ce qui
+         précède ce titre appartient à la carte d'avant, et doit être traité
+         comme telle. Mesuré le 03/08 sans les ancres : la carte qui précédait
+         une offre marchande était avalée par l'offre et perdue (2 produits lus
+         au lieu de 3). On coupe ici, le titre de l'offre restant seul. */
+      if (bloc.length > 1) {
+        traiter(bloc.slice(0, bloc.length - 1), false);
+        bloc = [bloc[bloc.length - 1]];
+      }
     }
     if (FIN_PRODUIT.test(l) || FIN_OFFRE.test(l)) {
       traiter(bloc, FIN_OFFRE.test(l) || !!titreOffre);
@@ -336,10 +359,35 @@ function parseIdealo(rawText, brand) {
       bloc = [];
       continue;
     }
+    // Nouvelle carte : on ferme celle qui précède AVANT d'empiler ce titre.
+    if (bloc.length && estTitreCarte(l)) {
+      traiter(bloc, !!titreOffre);
+      titreOffre = null;
+      bloc = [];
+    }
     bloc.push(l);
     if (bloc.length > 40) bloc.shift();   // garde-fou : un bloc reste court
   }
   traiter(bloc, !!titreOffre);            // dernier bloc, sans ancre finale
+
+  /* Une ligne n'ouvre une carte que si elle porte une RÉF CRÉDIBLE — mêmes
+     conditions que le typage plus bas. ⚠️ Un titre d'offre marchande porte sa
+     marque à la FIN (« … 1 chargeur DEWALT ») : il ne peut donc pas déclencher
+     de coupure ici, et les offres restent entières. */
+  function estTitreCarte(ligne) {
+    var m = ligne.match(titreRe);
+    if (m) {
+      var cand = m[1].toUpperCase();
+      if (/\d/.test(cand) && cand.length >= 4 && !UNITE_RE.test(cand)) return true;
+    }
+    /* Réf ÉCLATÉE par des espaces (« DeWalt DCS 579 T2T ») : elle ne donnera
+       jamais un `sku` — on ne devine pas un recollage — mais elle ouvre bien
+       une carte. Sans ça, et sans les ancres, ces cartes étaient absorbées par
+       leur voisine et disparaissaient même de la liste des écartées : mesuré,
+       4 offres listées tombaient à 2. Une carte perdue n'est pas une erreur
+       d'argent, mais c'est une information que l'user ne voit plus. */
+    return new RegExp('^' + escapeRe(brand) + '\\s+[A-Z]{2,5}\\s+\\d{2,4}\\b', 'i').test(ligne);
+  }
 
   function traiter(b, estOffre) {
     if (!b.length) return;
@@ -373,10 +421,19 @@ function parseIdealo(rawText, brand) {
       sku = cand; iTitre = t; break;
     }
     if (!sku) {
+      /* \u26d4\u26d4 ARGENT \u2014 LE PRIX SE LIT EN DESCENDANT DEPUIS LE TITRE, JAMAIS EN
+         REMONTANT DEPUIS LA FIN DU BLOC. Trouv\u00e9 PAR LA PORTE le 03/08 : sans
+         l'ancre de fin, le bloc d'une carte se prolonge jusqu'au bandeau
+         \u00ab Produits favoris \u00bb de la page, et la recherche \u00e0 rebours ramenait le
+         prix d'un T\u00c9L\u00c9PHONE (774,99 \u20ac) sur une scie. Un prix faux sur un titre
+         juste est pire qu'une ligne absente. Le prix d'une carte SUIT son
+         titre \u2014 on s'arr\u00eate au premier trouv\u00e9 apr\u00e8s lui. */
       var pxx = null;
-      for (var q = b.length - 1; q >= 0; q--) {
-        var mq = b[q].match(/([\d\s   ]*\d,\d{2})\s*\u20ac/);
-        if (mq) { pxx = parsePriceFR(mq[1]); break; }
+      for (var q = 1; q < b.length; q++) {
+        var ma2 = b[q].match(prixApartir);
+        if (ma2) { pxx = parsePriceFR(ma2[1]); break; }
+        var ms2 = b[q].match(prixSeul);
+        if (ms2) { pxx = parsePriceFR(ms2[1]); break; }
       }
       if (b[0] && pxx != null && pxx > 0 && new RegExp(escapeRe(brand), 'i').test(b.join(' '))) {
         /* R\u00e9f \u00e9clat\u00e9e par des espaces (\u00ab DeWalt DCS 579 T2T \u00bb) : on ne devine
