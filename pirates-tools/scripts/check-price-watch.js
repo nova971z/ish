@@ -1996,6 +1996,60 @@ module.exports = async function () {
         ok(!/x-watch-secret/i.test(JSON.stringify(rTrou.out)),
           '⛔ et JAMAIS un en-tête dans la réponse : la clé du traqueur y vit');
 
+        /* ⛔⛔ « COMBIEN DE PRODUITS ONT ÉTÉ LUS AU TOTAL ? » — la question la
+           plus simple, et aucun compteur n'y répondait. Le 03/08, après son
+           balayage complet des 67 pages, je n'ai pas pu la lui dire : le cumul
+           ne portait que des IDENTITÉS DISTINCTES. Or il demande des TUILES,
+           mot pour mot : « même si sur la même page il existe deux fois le
+           même produit, on doit lire les 60 produits de chaque page ».
+           ⛔ Son raccourci ne garde que la DERNIÈRE des 67 réponses — le
+           détail des 66 autres est déjà perdu quand il me la colle. Le total
+           doit donc VIVRE DANS LE CUMUL, pas dans un calcul que je ferais
+           après coup. Ces assertions rejouent une rafale de trois pages. */
+        adm._internals.pwScanReset();
+        /* ⚠️ Le point d'entrée refuse un corps trop court — un texte de
+           cinquante signes n'est pas une page, et ce refus est voulu. On
+           allonge donc avec du pied de page, comme une vraie page en porte. */
+        var pied = [];
+        for (var f = 0; f < 40; f++) pied.push('pied de page ligne ' + f);
+        var pageA = ['MAKITA ZZA1111', 'Machine', '2 offres', 'à partir de100,00 €']
+          .concat(pied).join('\n');
+        var pageB = ['MAKITA ZZB2222', 'Machine', '2 offres', 'à partir de200,00 €', '',
+          'MAKITA ZZC3333', 'Machine', '2 offres', 'à partir de300,00 €']
+          .concat(pied).join('\n');
+        var dernierCumul = null;
+        for (var pg = 0; pg < 3; pg++) {
+          var rPg = fauxRes();
+          await admFn({ method: 'POST',
+            query: { type: 'price-watch', brand: 'MAKITA', source: 'idealo', sec: '1', scan: '1' },
+            body: { text: pg === 1 ? pageB : pageA } }, rPg, fauxAdmin, dbInterdite);
+          dernierCumul = rPg.out && rPg.out.couverture;
+        }
+        ok(dernierCumul && dernierCumul.pagesDansLaRafale === 3,
+          '⛔ PRÉALABLE : les trois pages sont bien cumulées ('
+          + JSON.stringify(dernierCumul && dernierCumul.pagesDansLaRafale) + '/3)');
+        /* 1 tuile + 2 tuiles + 1 tuile = 4, et autant de lignes lues. */
+        ok(dernierCumul && dernierCumul.tuilesVues === 4,
+          '⛔⛔ le cumul dit combien de TUILES les pages contenaient au total — c\'est '
+          + 'LA réponse à « combien de produits sur les 60 de chaque page » (obtenu '
+          + JSON.stringify(dernierCumul && dernierCumul.tuilesVues) + ', attendu 4)');
+        ok(dernierCumul && dernierCumul.lignesLues === 4,
+          '⛔⛔ …et combien on en a LU, doublons compris. L\'écart entre les deux est '
+          + 'le seul chiffre qui dise si le balayage a tout ramené (obtenu '
+          + JSON.stringify(dernierCumul && dernierCumul.lignesLues) + ', attendu 4)');
+        /* ⛔ PRÉALABLE — les DOUBLONS comptent. C'est sa demande explicite :
+           deux fois le même produit sur une page font deux lignes. Un cumul
+           qui dédoublonne rendrait un total plus bas que la réalité, et
+           ferait chercher des pages manquantes qui n'existent pas. */
+        ok(dernierCumul && dernierCumul.refsDistinctes === 3
+          && dernierCumul.lignesLues > dernierCumul.refsDistinctes,
+          '⛔⛔ les DOUBLONS comptent dans `lignesLues` mais pas dans '
+          + '`refsDistinctes` : la même page vue deux fois ajoute des lignes, pas des '
+          + 'identités — confondre les deux ferait chercher des pages qui ne manquent '
+          + 'pas (' + JSON.stringify({ lues: dernierCumul && dernierCumul.lignesLues,
+            distinctes: dernierCumul && dernierCumul.refsDistinctes }) + ')');
+        adm._internals.pwScanReset();
+
         /* ⛔⛔ LE RACCOURCI PEUT ME RENVOYER MA PROPRE RÉPONSE — et le
            diagnostic générique désignait alors le mauvais coupable. Mesuré le
            03/08 sur son premier balayage des 67 pages : `octetsRecus: 1195`

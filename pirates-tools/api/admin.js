@@ -2033,13 +2033,32 @@ const PW_SCAN_TTL = 20 * 60 * 1000;
    · J5 — aucune TVA, aucun octroi de mer : le territoire fiscal continue de
      se dériver du code postal, ce compteur n'y touche pas. */
 let pwCouv = null;
-function pwCouvAjouter(brand, skus, titres) {
+/* ⛔⛔ « COMBIEN DE PRODUITS ONT ÉTÉ LUS AU TOTAL ? » — LA QUESTION LA PLUS
+   SIMPLE, ET AUCUN COMPTEUR N'Y RÉPONDAIT. Le 03/08, après son premier
+   balayage complet des 67 pages, je n'ai pas pu la lui dire : ce cumul ne
+   comptait que des IDENTITÉS DISTINCTES (1 581 réfs, 1 951 noms). Or il
+   demande des TUILES — mot pour mot : « même si sur la même page il existe
+   deux fois le même produit, on doit lire les 60 produits de chaque page ».
+   Ce sont deux choses différentes, et la sienne est la bonne : une tuile non
+   lue est une source de prix perdue, qu'elle fasse doublon ou non.
+   ⛔ On cumule donc AUSSI les totaux bruts : ce que les pages contenaient, ce
+   qu'on en a rendu. Sans eux la seule réponse honnête était « je ne sais
+   pas » — et son raccourci ne garde que la DERNIÈRE des 67 réponses, donc le
+   détail des 66 autres est déjà perdu au moment où il me la colle.
+   ⚠️ Portes lues : J3 — deux entiers de plus, aucune donnée personnelle, même
+   rétention de 20 min en mémoire seule, jamais persistée ; J4 — ce sont des
+   COMPTES, aucun prix n'y entre et rien ici ne peut servir de prix de
+   référence à une réduction ; J5 — aucune TVA, aucun octroi de mer. */
+function pwCouvAjouter(brand, skus, titres, nbTuiles, nbLues) {
   const nowMs = Date.now();
   if (!pwCouv || (nowMs - pwCouv.at) > PW_SCAN_TTL || pwCouv.brand !== brand) {
-    pwCouv = { brand: brand, refs: Object.create(null), noms: Object.create(null), pages: 0, at: nowMs };
+    pwCouv = { brand: brand, refs: Object.create(null), noms: Object.create(null),
+      pages: 0, tuiles: 0, lues: 0, at: nowMs };
   }
   pwCouv.at = nowMs;
   pwCouv.pages += 1;
+  pwCouv.tuiles += Math.max(0, parseInt(nbTuiles, 10) || 0);
+  pwCouv.lues += Math.max(0, parseInt(nbLues, 10) || 0);
   (skus || []).forEach(function (s) { if (s) pwCouv.refs[String(s).toUpperCase()] = 1; });
   (titres || []).forEach(function (n) {
     var k = String(n || '').trim().toLowerCase();
@@ -2047,6 +2066,10 @@ function pwCouvAjouter(brand, skus, titres) {
   });
   return {
     pagesDansLaRafale: pwCouv.pages,
+    /* ⛔ LES DEUX CHIFFRES QU'IL DEMANDE, dans cet ordre : ce que les pages
+       contenaient, ce qu'on en a lu. Doublons COMPRIS — c'est voulu. */
+    tuilesVues: pwCouv.tuiles,
+    lignesLues: pwCouv.lues,
     refsDistinctes: Object.keys(pwCouv.refs).length,
     nomsDistincts: Object.keys(pwCouv.noms).length
   };
@@ -2241,8 +2264,13 @@ async function handlePriceWatch(req, res, admin, db) {
          les 67 pages sans dépenser un seul quota : chaque page ajoute ses réfs
          au cumul de la rafale, et la DERNIÈRE réponse dit combien d'articles
          distincts le balayage entier a réellement ramenés. */
+      /* ⛔ LE COMPTE DES TUILES SE FAIT AVANT LE CUMUL — il en est un
+         ingrédient. Le laisser plus bas, c'était cumuler zéro à chaque page
+         et rendre un total faux qui a l'air juste. */
+      const tuiles = priceParse.compterTuiles(text);
       const couvSec = pwCouvAjouter(brand, parsed.map((x) => x.sku),
-        (auto.sansRef || []).map((e) => e.titre));
+        (auto.sansRef || []).map((e) => e.titre),
+        tuiles.total, parsed.length + (auto.sansRef || []).length);
 
       /* ⛔⛔ L'ÉCART, NOMMÉ. J'ai annoncé à l'user « 11 références non lues » en
          soustrayant deux compteurs — sans jamais pouvoir dire LESQUELLES. Un
@@ -2330,8 +2358,9 @@ async function handlePriceWatch(req, res, admin, db) {
          quand la page n'a pas de lignes vides ; ce compte-là, non.
          ⚠️ Portes lues : J3 — ce sont des comptes d'ancres, aucune donnée
          personnelle, rien conservé au-delà de la réponse ; J5 — aucune TVA,
-         aucun octroi de mer. */
-      const tuiles = priceParse.compterTuiles(text);
+         aucun octroi de mer.
+         ⚠️ Il est calculé PLUS HAUT, avant le cumul de rafale, parce que le
+         cumul s'en nourrit. Une seule déclaration, un seul compte. */
       /* ⛔ ON RAPPROCHE D'ABORD PAR RÉFÉRENCE. Son relevé du 03/08 : 60 tuiles
          sur 60 lues, et ce rapprochement en annonçait DIX « non lues » —
          toutes fausses. La page écrit « DeWalt DWK301 (2 x 5,0 Ah + 2 x TSTAK
@@ -2719,7 +2748,9 @@ async function handlePriceWatch(req, res, admin, db) {
          TOUT le catalogue ? ». Un total obtenu en multipliant les pages par
          le rendu d'une page ne vaut rien : les pages peuvent se chevaucher. */
       couverture: pwCouvAjouter(brand, parsed.map((x) => x.sku),
-        (auto.sansRef || []).map((e) => e.titre)),
+        (auto.sansRef || []).map((e) => e.titre),
+        priceParse.compterTuiles(text).total,
+        parsed.length + (auto.sansRef || []).length),
       counts: {
         parsed: parsed.length, applied: applied.length, flagged: flagged.length,
         unchanged: unchanged.length, unknown: unknown.length, locked: lockedW.length,
