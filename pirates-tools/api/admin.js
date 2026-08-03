@@ -2168,6 +2168,14 @@ async function handlePriceWatch(req, res, admin, db) {
       if (priceParse.estMaPropreReponse(text)) {
         return res.status(200).json({
           ok: true, brand, source: sourceSlug, parsed: 0, format: 'boucle',
+          /* ⛔ CE MARQUEUR N'EST PAS DÉCORATIF : sans lui, cette réponse-ci ne
+             se reconnaît pas elle-même quand le raccourci me la renvoie au
+             tour suivant. Mesuré le 03/08 — le message d'aide sortait UNE
+             fois, puis le tour d'après retombait sur le diagnostic générique
+             qui accuse le parseur. L'user recevait la mauvaise piste juste
+             après la bonne. Une réponse qui décrit un défaut doit survivre à
+             son propre aller-retour. */
+          boucleDetectee: true,
           note: '⛔ LE RACCOURCI M\'A RENVOYÉ MA PROPRE RÉPONSE, pas la page. '
             + 'Dans l\'action POST, le champ « text » pointe sur « Contenu de l\'URL » — '
             + 'or au tour suivant cette variable désigne la sortie du POST précédent. '

@@ -938,8 +938,17 @@ function estMaPropreReponse(rawText) {
   var s = String(rawText || '');
   if (s.length > 20000) return false;                 // une vraie page est longue
   var t = s.replace(/\\+/g, '').slice(0, 4000);       // le ré-échappement s'empile
+  /* ⛔⛔ `boucleDetectee` EST LE MARQUEUR QUI MANQUAIT — ET SON ABSENCE A
+     COÛTÉ UN ALLER-RETOUR À L'USER. Mesuré le 03/08 : ma réponse « boucle »
+     ne porte AUCUN des autres champs de cette liste. Donc au tour suivant,
+     quand le raccourci me la renvoyait à son tour, je ne la reconnaissais
+     plus — le message d'aide sortait UNE fois, puis laissait la place au
+     diagnostic générique qui accuse le parseur. Il recevait la mauvaise piste
+     juste après avoir reçu la bonne.
+     ⛔ Une réponse qui décrit un défaut doit se reconnaître ELLE-MÊME quand
+     elle revient : sinon le diagnostic s'efface au moment où il sert le plus. */
   return /"ok"\s*:/.test(t)
-    && /"(diagnostic|refsNonLues|annoncesNonLues|tuilesDansLaPage|sansRefDetail)"\s*:/.test(t);
+    && /"(boucleDetectee|diagnostic|refsNonLues|annoncesNonLues|tuilesDansLaPage|sansRefDetail)"\s*:/.test(t);
 }
 
 function diagnostiquerPage(rawText, brand) {

@@ -2081,6 +2081,26 @@ module.exports = async function () {
         ok(pp.estMaPropreReponse(JSON.stringify(rBoucle1.out)) === true,
           '⛔ PRÉALABLE : et MA réponse, elle, est bien reconnue — sinon la ligne '
           + 'ci-dessus passerait sur une fonction qui dit toujours non');
+        /* ⛔⛔ ET LA RÉPONSE « BOUCLE » DOIT SE RECONNAÎTRE ELLE-MÊME. Défaut
+           mesuré le 03/08 : elle ne portait AUCUN des champs cherchés. Donc au
+           tour suivant, quand le raccourci me la renvoyait à son tour, je ne
+           la voyais plus — le message d'aide sortait UNE fois, puis le tour
+           d'après retombait sur le diagnostic générique qui accuse le parseur.
+           L'user recevait la mauvaise piste juste après la bonne.
+           ⛔ Une réponse qui décrit un défaut doit survivre à son propre
+           aller-retour, sinon elle s'efface au moment où elle sert le plus. */
+        ok(pp.estMaPropreReponse(JSON.stringify(rBoucle2.out)) === true,
+          '⛔⛔ la réponse « boucle » se reconnaît ELLE-MÊME quand elle revient — '
+          + 'sinon le diagnostic juste s\'efface au deuxième tour et laisse la place '
+          + 'à celui qui accuse le mauvais coupable');
+        var rBoucle3 = fauxRes();
+        await admFn({ method: 'POST',
+          query: { type: 'price-watch', brand: 'MAKITA', source: 'idealo', sec: '1' },
+          body: { text: JSON.stringify(rBoucle2.out) } }, rBoucle3, fauxAdmin, dbInterdite);
+        ok(rBoucle3.out && rBoucle3.out.format === 'boucle',
+          '⛔⛔ …et au TROISIÈME tour aussi : le message d\'aide ne doit pas '
+          + 'disparaître au bout d\'un aller-retour (format '
+          + JSON.stringify(rBoucle3.out && rBoucle3.out.format) + ')');
         ok(rInconnue.out && rInconnue.out.format !== 'boucle' && rInconnue.out.diagnostic,
           '⛔⛔ une page d\'un site INCONNU garde son diagnostic — la confondre avec '
           + 'une boucle ferait perdre la seule voie d\'apprentissage d\'un gabarit '
