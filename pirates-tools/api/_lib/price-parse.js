@@ -824,21 +824,63 @@ function compterTuiles(rawText) {
   return { annonces: annonces, fiches: fiches, total: annonces + fiches };
 }
 
-function annoncesManquantes(rawText, titresRendus) {
+/* ⛔⛔ UN INSTRUMENT QUI CRIE AU LOUP FINIT IGNORÉ — ET LE JOUR OÙ IL A RAISON,
+   PERSONNE NE L'ÉCOUTE. Son relevé du 03/08 : 60 tuiles sur 60 lues, tout
+   juste, et ce rapprochement en annonçait DIX « non lues ». Toutes fausses.
+   Cause : une FICHE ne se rapproche pas par son titre. La page écrit
+   « DeWalt DWK301 (2 x 5,0 Ah + 2 x TSTAK VI) », le relevé rend
+   « DEWALT DWK301 » — deux écritures du même article. Ce qui est stable entre
+   les deux, c'est la RÉFÉRENCE.
+   ⛔ On rapproche donc d'abord par référence, puis par titre. Et une ancre
+   dont on n'a pas su tirer un titre exploitable (le repli est tombé sur « 35 »)
+   n'est pas un produit perdu : c'est MON extraction qui a échoué. La compter
+   comme une perte enverrait l'user chercher au mauvais endroit — elle est donc
+   comptée à part, jamais tue.
+   ⚠️ J4 : ce rapprochement ne touche à AUCUN prix. Il dit seulement ce qui n'a
+   pas été lu — mais c'est bien de l'argent qu'il protège, puisqu'une tuile
+   manquée est une source de prix manquée, donc un coût d'achat trop haut. */
+function annoncesManquantes(rawText, titresRendus, refsRendues) {
   var clef = function (s) {
     return String(s || '').replace(/\s+/g, ' ').trim().slice(0, 60).toUpperCase();
   };
+  var normRef = function (r) { return String(r || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); };
+  /* Les références CRÉDIBLES d'un titre — mêmes critères que partout ailleurs :
+     un chiffre, cinq signes au moins, jamais une unité. */
+  var refsDe = function (s) {
+    return (String(s || '').match(/\b[A-Z][A-Z0-9]{2,}(?:[-\/.][A-Z0-9]+)*\b/g) || [])
+      .filter(function (r) {
+        return /\d/.test(r) && r.length >= 5 && !UNITE_RE.test(r);
+      }).map(normRef);
+  };
+
   var reste = Object.create(null);
   (titresRendus || []).forEach(function (t) {
     var k = clef(t);
     if (k) reste[k] = (reste[k] || 0) + 1;
   });
-  var manquants = [];
+  var vues = Object.create(null);
+  (refsRendues || []).forEach(function (r) {
+    var n = normRef(r);
+    if (n) vues[n] = (vues[n] || 0) + 1;
+  });
+
+  var manquants = [], sansTitreExploitable = 0;
   titresAttendus(rawText).forEach(function (t) {
+    var refs = refsDe(t);
+    for (var i = 0; i < refs.length; i++) {
+      if (vues[refs[i]] > 0) { vues[refs[i]]--; return; }        // rapproché par sa RÉFÉRENCE
+    }
     var k = clef(t);
-    if (reste[k] > 0) { reste[k]--; return; }
+    if (reste[k] > 0) { reste[k]--; return; }                    // sinon par son TITRE
+    /* Ni référence crédible, ni assez de lettres pour être un nom : ce n'est
+       pas un produit, c'est mon repli qui a mal atterri. */
+    if (!refs.length && String(t).replace(/[^A-Za-zÀ-ÿ]/g, '').length < 4) {
+      sansTitreExploitable++;
+      return;
+    }
     manquants.push(String(t).slice(0, 110));
   });
+  manquants.sansTitreExploitable = sansTitreExploitable;
   return manquants;
 }
 

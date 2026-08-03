@@ -2200,8 +2200,23 @@ async function handlePriceWatch(req, res, admin, db) {
          personnelle, rien conservé au-delà de la réponse ; J5 — aucune TVA,
          aucun octroi de mer. */
       const tuiles = priceParse.compterTuiles(text);
+      /* ⛔ ON RAPPROCHE D'ABORD PAR RÉFÉRENCE. Son relevé du 03/08 : 60 tuiles
+         sur 60 lues, et ce rapprochement en annonçait DIX « non lues » —
+         toutes fausses. La page écrit « DeWalt DWK301 (2 x 5,0 Ah + 2 x TSTAK
+         VI) », le relevé rend « DEWALT DWK301 » : même article, deux
+         écritures. Ce qui est stable entre les deux, c'est la RÉFÉRENCE. On
+         lui passe donc AUSSI les réfs lues — celles des fiches et celles que
+         la qualification a tirées des annonces écartées.
+         ⚠️ Portes lues : J3 — des codes d'articles publics, aucune donnée
+         personnelle, rien conservé au-delà de la réponse ; J5 — aucune TVA,
+         aucun octroi de mer ici. */
+      const refsLues = parsed.map((it) => it.sku)
+        .concat((auto.sansRef || []).map((e) => (e.car || {}).sku))
+        .concat((auto.sansRef || []).map((e) => (e.car || {}).skuEclate))
+        .filter(Boolean);
       const annoncesNonLues = priceParse.annoncesManquantes(text,
-        (auto.sansRef || []).map((e) => e.titre).concat(parsed.map((it) => it.name)));
+        (auto.sansRef || []).map((e) => e.titre).concat(parsed.map((it) => it.name)),
+        refsLues);
 
       return res.status(200).json({
         ok: true, sec: true, brand, source: sourceSlug, format: auto.format,
@@ -2220,8 +2235,13 @@ async function handlePriceWatch(req, res, admin, db) {
           tuilesAnnonces: tuiles.annonces,
           annoncesDansLaPage: attendus.length
         },
-        /* Liste vide = aucune annonce perdue, et c'est vérifiable titre à titre. */
+        /* Liste vide = aucune tuile perdue, et c'est vérifiable titre à titre. */
         annoncesNonLues: annoncesNonLues.slice(0, 20),
+        /* ⚠️ Une ancre dont je n'ai pas su tirer de titre exploitable n'est PAS
+           un produit perdu : c'est mon extraction qui a raté. Comptée à part
+           pour ne rien taire, mais hors de la liste des pertes — sinon elle
+           enverrait chercher au mauvais endroit. */
+        ancresSansTitre: annoncesNonLues.sansTitreExploitable || 0,
         /* ⚠️ `pagesDansLaRafale` n'est PAS décoratif : le cumul vit dans UNE
            instance serverless. S'il retombe à 1 en plein balayage, c'est une
            instance froide — le total repart de zéro, et il faut le savoir

@@ -1089,6 +1089,48 @@ module.exports = async function () {
       '⛔ …et elle est CONSIGNÉE plutôt que jetée : un vide se voit, un prix faux '
       + 'se propage');
 
+    /* ⛔⛔ UN INSTRUMENT QUI CRIE AU LOUP FINIT IGNORÉ — et le jour où il a
+       raison, personne ne l'écoute. Son relevé du 03/08 : 60 tuiles sur 60
+       lues, tout juste, et le rapprochement en annonçait DIX « non lues ».
+       Toutes fausses. Une FICHE ne se rapproche pas par son titre : la page
+       écrit « DeWalt DWK301 (2 x 5,0 Ah + 2 x TSTAK VI) », le relevé rend
+       « DEWALT DWK301 ». Même article, deux écritures — ce qui est stable
+       entre les deux, c'est la RÉFÉRENCE.
+       ⚠️ Le harnais rejoue ce gabarit exact et compare AVEC et SANS les réfs :
+       ce qui doit être vrai, c'est l'écart entre les deux, pas un chiffre. */
+    var pageEnrichie = [
+      'MAKITA ZZK301 (2 x 5,0 Ah + 2 x TSTAK VI)', 'Pack outillage sans fil, 18 V',
+      '12 offres', 'à partir de689,00 €', '',
+      'MAKITA ZZH333 (1x Batterie 9 Ah + Chargeur ZZB118 + T-Stak VI)', 'Marteau perforateur',
+      '7 offres', 'à partir de655,00 €', '',
+      '35', '', '2 offres', 'à partir de640,00 €'
+    ].join('\n');
+    var rendusCourts = ['MAKITA ZZK301', 'MAKITA ZZH333'];
+    var sansRefs = pp.annoncesManquantes(pageEnrichie, rendusCourts, []);
+    var avecRefs = pp.annoncesManquantes(pageEnrichie, rendusCourts, ['ZZK301', 'ZZH333']);
+    ok(avecRefs.length === 0,
+      '⛔⛔ deux écritures du MÊME article se rapprochent par leur RÉFÉRENCE — '
+      + 'sinon le compteur annonce des pertes qui n\'existent pas ('
+      + JSON.stringify(avecRefs) + ')');
+    /* PRÉALABLE — sans lui, une fonction qui ne signalerait plus JAMAIS rien
+       passerait : c'est l'écart entre les deux appels qui prouve la règle. */
+    ok(sansRefs.length === 2,
+      '⛔ PRÉALABLE : sans les références, ces deux-là RESSORTENT — c\'est bien '
+      + 'le rapprochement par réf qui les ferme, pas un silence général ('
+      + sansRefs.length + '/2)');
+    ok(avecRefs.sansTitreExploitable === 1,
+      '⛔ et l\'ancre dont aucun titre exploitable n\'a pu être tiré (« 35 ») est '
+      + 'comptée À PART : ce n\'est pas un produit perdu, c\'est mon extraction '
+      + 'qui a raté — la ranger dans les pertes enverrait chercher au mauvais '
+      + 'endroit (' + avecRefs.sansTitreExploitable + ')');
+    /* ⛔ ET UNE TUILE RÉELLEMENT MANQUANTE DOIT ENCORE ÊTRE NOMMÉE. Sans ce
+       cas, rapprocher par réf pourrait tout absorber et l'instrument
+       redeviendrait muet — ce qu'on répare est le bruit, pas la vigilance. */
+    var vraiTrou = pp.annoncesManquantes(pageEnrichie, ['MAKITA ZZK301'], ['ZZK301']);
+    ok(vraiTrou.length === 1 && /ZZH333/.test(vraiTrou[0]),
+      '⛔⛔ une tuile réellement non lue est TOUJOURS nommée — on supprime le '
+      + 'bruit, jamais la vigilance (' + JSON.stringify(vraiTrou) + ')');
+
     var sansTout = pi(sansAncres(pageI, 'tout'), 'MAKITA');
     ok(sansTout.items.length === ri.length
       && sansTout.sansRef.length === rid.sansRef.length,
