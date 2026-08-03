@@ -409,32 +409,66 @@ module.exports = async function () {
   var pi = pp.parseIdealo;
   ok(typeof pi === 'function', 'parseIdealo exportée');
   if (pi) {
+    /* ⛔ CORPUS REPRODUISANT LES FORMATS MESURÉS SUR LA PAGE RÉELLE (03/08).
+       Le premier jet ne lisait qu'UN de ces cinq gabarits : 13 produits lus
+       sur 57 présents. Chaque bloc ci-dessous EXISTE sur la vraie page ;
+       seules les références sont synthétiques (un harnais ne nomme jamais
+       une donnée réelle). */
     var pageI = [
       'Tronçonneuses',
-      'MAKITA ZZI805',
-      'Perceuse-visseuse à percussion sans fil, Couple max. 90 Nm',
-      '5', '94 offres', 'à partir de118,86 €',
-      'MAKITA ZZI922N-XJ',
-      'Visseuse à choc sans fil', '35', '14 offres', 'à partir de 1 132,43 €',
-      'MAKITA ZZISANSPRIX9',
-      'Carte sans prix (rupture de flux)',
-      'MAKITA ZZI850',
-      'Visseuse compacte', '12', '27 offres', 'à partir de99,00 €',
+      // ① réf seule + « à partir de » COLLÉ
+      'MAKITA ZZI805', 'Perceuse-visseuse sans fil, Couple max. 90 Nm',
+      '5', '94 offres', 'à partir de118,86 €', 'Détails du produit',
+      // ② prix à espace de milliers
+      'MAKITA ZZI922N-XJ', 'Visseuse à choc sans fil',
+      '35', '14 offres', 'à partir de 1 132,43 €', 'Détails du produit',
+      // ③ UNE SEULE OFFRE : prix nu, sans « à partir de » — raté par le 1er jet
+      'MAKITA ZZI777P2', 'Scie circulaire portative, 1 batterie, 3,5 kg',
+      '1 offre', '685,95 €', 'Détails du produit',
+      // ④ TEXTE APRÈS LA RÉF (parenthèses) — raté par le 1er jet
+      'MAKITA ZZI333 (1x Batterie 9 Ah + Chargeur ZZB118)',
+      'Marteau perforateur combiné sans fil', '1 offre', '666,00 €', 'Détails du produit',
+      // ⑤ carte SANS prix : ne doit voler celui de personne
+      'MAKITA ZZISANSPRIX9', 'Carte sans prix (rupture de flux)', 'Détails du produit',
+      'MAKITA ZZI850', 'Visseuse compacte', '12', '27 offres',
+      'à partir de99,00 €', 'Détails du produit',
+      // ⑥ OFFRE MARCHANDE : un LOT. Jamais captée comme produit.
+      'Débroussailleuse 54V ZZIMST922N-XJ + 1 batterie + 1 chargeur MAKITA',
+      'Vendu par : UnMarchand.fr', 'Détails de l’offre',
+      '24/48 heures', 'Livraison gratuite', '694,90 € TVA incluse', 'Détails de l’offre',
+      // ⑦ bloc hors sujet : « à partir de » orphelin
       'Produits favoris', 'Smartphone 5G', 'Apple iPhone 17',
       '168', 'à partir de', '774,99 €'
     ].join('\n');
-    var ri = pi(pageI, 'MAKITA');
+    var rid = pi(pageI, 'MAKITA');
+    var ri = rid.items;
     var iSku = {}; ri.forEach(function (x) { iSku[x.sku] = x; });
-    ok(ri.length === 3, 'trois cartes à prix lues (' + ri.length + ')');
+    ok(ri.length === 5, 'les CINQ gabarits de carte produit sont lus (' + ri.length + '/5)');
     ok(iSku.ZZI805 && iSku.ZZI805.price === 118.86,
       'prix COLLÉ à « de » lu quand même (à partir de118,86)');
     ok(iSku['ZZI922N-XJ'] && iSku['ZZI922N-XJ'].price === 1132.43,
       'prix à espace de milliers lu (1 132,43)');
+    ok(iSku.ZZI777P2 && iSku.ZZI777P2.price === 685.95,
+      '⛔ « 1 offre » puis prix NU, sans « à partir de » — le gabarit le plus '
+      + 'fréquent de la page, et le premier jet le ratait entièrement');
+    ok(iSku.ZZI333 && iSku.ZZI333.price === 666.00,
+      '⛔ réf suivie de TEXTE entre parenthèses : la réf est le premier mot, '
+      + 'le reste ne doit pas faire échouer la lecture');
     ok(!iSku.ZZISANSPRIX9 && iSku.ZZI850 && iSku.ZZI850.price === 99.00,
-      '⛔ une carte SANS prix ne vole JAMAIS le prix de la carte suivante '
-      + '(la fenêtre s\'arrête au titre suivant)');
+      '⛔ une carte SANS prix ne vole JAMAIS le prix de la carte suivante');
     ok(ri.every(function (x) { return x.price !== 774.99; }),
       '⛔ un « à partir de » orphelin (bloc favoris, téléphones) n\'est attribué à rien');
+    ok(ri.every(function (x) { return x.price !== 694.90; })
+      && !ri.some(function (x) { return /MST922N/.test(x.sku); }),
+      '⛔⛔ ARGENT : une OFFRE MARCHANDE (« Vendu par : ») est un LOT — batterie '
+      + 'et chargeur inclus. Son prix ne devient JAMAIS un produit, sinon un coût '
+      + 'de pack s\'écrirait sur la réf d\'un composant');
+    ok(rid.sansRef.some(function (x) { return x.prix === 694.90 && /Débroussailleuse/.test(x.titre); }),
+      'l\'offre marchande est ÉCARTÉE mais LISTÉE avec son vrai titre et son prix — '
+      + 'rien n\'est silencieux, et l\'user peut en faire une fiche s\'il le veut');
+    ok(!rid.sansRef.some(function (x) { return /^(24\/48|Livraison)/.test(x.titre); }),
+      '⛔ jamais un titre FAUX : une ligne de délai ou de livraison n\'est pas un '
+      + 'nom de produit (un titre faux est pire qu\'une absence)');
     ok(ri.every(function (x) { return x.promo === false && x.enStock === null; }),
       'comparateur : jamais de promo ni de stock inventés');
   }

@@ -269,38 +269,135 @@ function parseClickoutil(rawText, brand) {
    FEN\u00caTRE born\u00e9e sous un titre \u00ab MARQUE R\u00c9F \u00bb \u2014 jamais orphelin.
    Pas de badge de stock ni de prix barr\u00e9 sur une liste de comparateur :
    enStock = null, promo = false. */
+/* \u26d4 R\u00c9\u00c9CRIT LE 03/08/2026, SUR LE TEXTE COMPLET D'UNE PAGE ENVOY\u00c9 PAR L'USER.
+   \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+   Le premier jet ne lisait qu'UN format et ratait tout le reste : mesur\u00e9
+   13 produits lus sur 57 pr\u00e9sents dans le texte (77 % perdus), et toujours
+   les m\u00eames \u2014 ceux du milieu, seuls \u00e9crits au format que je reconnaissais.
+   L'user l'a vu \u00e0 l'\u0153il avant que le moindre chiffre ne le dise.
+
+   CE QUE LA PAGE CONTIENT R\u00c9ELLEMENT \u2014 deux natures de blocs, et la
+   distinction porte de l'ARGENT :
+
+   \u2460 CARTE PRODUIT idealo (le prix agr\u00e9g\u00e9 de N marchands) \u2014 se termine
+      TOUJOURS par \u00ab D\u00e9tails du produit \u00bb :
+        DeWalt DCG460X2-QW              \u2190 r\u00e9f seule
+        Meuleuse d'angle sans fil, 54 V \u2190 description
+        11 offres
+        \u00e0 partir de669,90 \u20ac             \u2190 prix, parfois COLL\u00c9 \u00e0 \u00ab de \u00bb
+        D\u00e9tails du produit
+      Variantes mesur\u00e9es, toutes rat\u00e9es par le premier jet :
+        \u00b7 \u00ab 1 offre \u00bb puis \u00ab 685,95 \u20ac \u00bb \u2014 SANS \u00ab \u00e0 partir de \u00bb
+        \u00b7 \u00ab DeWalt DCH333 (1x Batterie 9 Ah + \u2026) \u00bb \u2014 texte APR\u00c8S la r\u00e9f
+
+   \u2461 OFFRE D'UN MARCHAND \u2014 porte \u00ab Vendu par : \u00bb et \u00ab D\u00e9tails de l'offre \u00bb :
+        D\u00e9broussailleuse 54V DCMST922N-XJ + 1 batterie + 1 chargeur DEWALT
+        Vendu par : Clickoutil.com
+        694,90 \u20ac TVA incluse
+      \u26d4 JAMAIS CAPT\u00c9E, et c'est d\u00e9lib\u00e9r\u00e9 : ces titres sont des LOTS
+      (\u00ab + 1 batterie + 1 chargeur \u00bb). \u00c9crire ce prix sur la r\u00e9f d'un
+      composant corromprait un co\u00fbt d'achat \u2014 c'est la r\u00e8gle d'argent la plus
+      ancienne du traqueur. Ces blocs partent dans `sansRef`, list\u00e9s.
+
+   Le d\u00e9coupage se fait donc sur ces deux ancres, pas sur une fen\u00eatre de
+   lignes : une fen\u00eatre devine, une ancre constate. */
 function parseIdealo(rawText, brand) {
   var out = [];
-  if (!rawText) return out;
+  var ecartes = [];
+  if (!rawText) return { items: out, sansRef: ecartes };
   brand = (brand || 'DEWALT');
   var lignes = stripHtml(rawText).split(/\n+/).map(function (l) {
     return l.replace(/[ \t   ]+/g, ' ').trim();
   }).filter(Boolean);
-  var titreRe = new RegExp('^' + escapeRe(brand) + '\\s+([A-Z0-9][A-Z0-9.\\/-]{2,}[A-Z0-9])$', 'i');
-  var prixRe = /\u00e0\s*partir\s*de\s*([\d\s   ]*\d,\d{2})\s*\u20ac/i;
-  var seen = {};
+
+  var FIN_PRODUIT = /^d[\u00e9e]tails\s+du\s+produit$/i;
+  var FIN_OFFRE   = /^d[\u00e9e]tails\s+de\s+l[\u2019']?offre$/i;
+  var VENDU_PAR   = /^vendu\s+par\s*:/i;
+  // Titre : la marque, puis la r\u00e9f en PREMIER mot. Ce qui suit est ignor\u00e9.
+  var titreRe = new RegExp('^' + escapeRe(brand) + '\\s+([A-Z0-9][A-Z0-9.\\/-]*[A-Z0-9])\\b', 'i');
+  // Prix : \u00ab \u00e0 partir de X,XX \u20ac \u00bb OU un montant seul (cas \u00ab 1 offre \u00bb).
+  var prixApartir = /\u00e0\s*partir\s*de\s*([\d\s   ]*\d,\d{2})\s*\u20ac/i;
+  var prixSeul    = /^([\d\s   ]*\d,\d{2})\s*\u20ac$/;
+
+  /* \u26a0\ufe0f \u00ab D\u00e9tails de l'offre \u00bb appara\u00eet DEUX fois par offre (apr\u00e8s le vendeur,
+     puis apr\u00e8s le prix). Couper dessus hachait le bloc et faisait passer une
+     ligne de d\u00e9lai \u2014 \u00ab 24/48 heures \u00bb \u2014 pour un titre de produit. On m\u00e9morise
+     donc le titre au moment o\u00f9 \u00ab Vendu par : \u00bb le d\u00e9signe : c'est la ligne
+     juste avant, et elle seule. */
+  var bloc = [], seen = {}, titreOffre = null;
   for (var i = 0; i < lignes.length; i++) {
-    var tm = lignes[i].match(titreRe);
-    if (!tm) continue;
-    var sku = tm[1].toUpperCase();
-    if (!/\d/.test(sku) || UNITE_RE.test(sku)) continue;   // une r\u00e9f porte un chiffre, jamais une unit\u00e9
-    if (seen[sku]) continue;
-    /* Fen\u00eatre born\u00e9e : le prix de CETTE carte vit dans les quelques lignes
-       qui suivent, avant le titre suivant. 8 lignes = description + note +
-       offres + prix, avec de la marge. */
-    for (var j = i + 1; j <= i + 8 && j < lignes.length; j++) {
-      if (titreRe.test(lignes[j])) break;                  // carte suivante : pas de prix ici
-      var pm = lignes[j].match(prixRe);
-      if (!pm) continue;
-      var price = parsePriceFR(pm[1]);
-      if (price != null && price > 0) {
-        seen[sku] = true;
-        out.push({ sku: sku, price: price, name: brand + ' ' + sku, promo: false, enStock: null });
-      }
-      break;
+    var l = lignes[i];
+    if (VENDU_PAR.test(l)) {
+      titreOffre = (bloc.length ? bloc[bloc.length - 1] : null) || titreOffre;
     }
+    if (FIN_PRODUIT.test(l) || FIN_OFFRE.test(l)) {
+      traiter(bloc, FIN_OFFRE.test(l) || !!titreOffre);
+      if (FIN_PRODUIT.test(l)) titreOffre = null;
+      bloc = [];
+      continue;
+    }
+    bloc.push(l);
+    if (bloc.length > 40) bloc.shift();   // garde-fou : un bloc reste court
   }
-  return out;
+  traiter(bloc, !!titreOffre);            // dernier bloc, sans ancre finale
+
+  function traiter(b, estOffre) {
+    if (!b.length) return;
+    /* Une offre marchande se reconna\u00eet \u00e0 \u00ab Vendu par : \u00bb \u2014 et ses titres sont
+       des lots. On la LISTE au lieu de la deviner. */
+    if (estOffre || b.some(function (x) { return VENDU_PAR.test(x); })) {
+      var titre = titreOffre || '';
+      var px = null;
+      for (var k = b.length - 1; k >= 0; k--) {
+        var m = b[k].match(/([\d\s   ]*\d,\d{2})\s*\u20ac/);
+        if (m) { px = parsePriceFR(m[1]); break; }
+      }
+      // Sans titre s\u00fbr, on ne liste RIEN : un titre faux est pire qu'un vide.
+      if (titre && px != null && px > 0) {
+        ecartes.push({ titre: titre, prix: px });
+        titreOffre = null;
+      }
+      return;
+    }
+    // Carte produit : le titre est la PREMI\u00c8RE ligne qui commence par la marque.
+    var sku = null, iTitre = -1;
+    for (var t = 0; t < b.length; t++) {
+      var tm = b[t].match(titreRe);
+      if (!tm) continue;
+      var cand = tm[1].toUpperCase();
+      /* \u26d4 Une r\u00e9f porte un chiffre et n'est jamais une unit\u00e9 (\u00ab 18V \u00bb).
+         Si le premier mot apr\u00e8s la marque n'en est pas une \u2014 \u00ab DeWalt DCS 579
+         T2T \u00bb, o\u00f9 la r\u00e9f est \u00e9clat\u00e9e par des espaces \u2014 on N'INVENTE PAS de
+         recollage : le bloc part dans les \u00e9cart\u00e9s, list\u00e9, jamais devin\u00e9. */
+      if (!/\d/.test(cand) || cand.length < 4 || UNITE_RE.test(cand)) continue;
+      sku = cand; iTitre = t; break;
+    }
+    if (!sku) {
+      var pxx = null;
+      for (var q = b.length - 1; q >= 0; q--) {
+        var mq = b[q].match(/([\d\s   ]*\d,\d{2})\s*\u20ac/);
+        if (mq) { pxx = parsePriceFR(mq[1]); break; }
+      }
+      if (b[0] && pxx != null && pxx > 0 && new RegExp(escapeRe(brand), 'i').test(b.join(' '))) {
+        ecartes.push({ titre: b[0], prix: pxx });
+      }
+      return;
+    }
+    if (seen[sku]) return;
+    // Prix : on cherche APR\u00c8S le titre, du plus explicite au plus simple.
+    var prix = null;
+    for (var p = iTitre + 1; p < b.length; p++) {
+      var ma = b[p].match(prixApartir);
+      if (ma) { prix = parsePriceFR(ma[1]); break; }
+      var ms = b[p].match(prixSeul);
+      if (ms) { prix = parsePriceFR(ms[1]); break; }
+    }
+    if (prix == null || !(prix > 0)) return;
+    seen[sku] = true;
+    out.push({ sku: sku, price: prix, name: brand + ' ' + sku, promo: false, enStock: null });
+  }
+
+  return { items: out, sansRef: ecartes };
 }
 
 /* \u2500\u2500 AIGUILLAGE DE FORMAT \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
@@ -313,14 +410,17 @@ function parseIdealo(rawText, brand) {
 function parseAuto(rawText, brand) {
   var cote = parseCotebrico(rawText, brand);
   var clic = parseClickoutil(rawText, brand);
-  var idea = parseIdealo(rawText, brand);
-  if (!cote.length && !clic.items.length && !idea.length) {
+  var idea = parseIdealo(rawText, brand);   // { items, sansRef }
+  if (!cote.length && !clic.items.length && !idea.items.length) {
     return { format: 'aucun', items: [], packs: clic.packs, sansRef: clic.sansRef };
   }
   // Le plus fécond gagne — trois gabarits mutuellement exclusifs sur les
   // vraies pages (mesuré : idealo rend 0 chez les deux autres, et vice versa).
-  if (idea.length > cote.length && idea.length > clic.items.length) {
-    return { format: 'idealo', items: idea, packs: [], sansRef: [] };
+  if (idea.items.length > cote.length && idea.items.length > clic.items.length) {
+    /* Les offres marchandes d'idealo (« Vendu par : ») sortent en `sansRef` :
+       ce sont des LOTS, leur prix ne s'écrit sur aucune réf tant que l'user
+       n'a pas créé la fiche et posé son `srcNom`. Listés, jamais devinés. */
+    return { format: 'idealo', items: idea.items, packs: [], sansRef: idea.sansRef };
   }
   if (clic.items.length > cote.length) {
     return { format: 'clickoutil', items: clic.items, packs: clic.packs, sansRef: clic.sansRef };
