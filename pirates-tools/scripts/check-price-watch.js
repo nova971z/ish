@@ -2289,6 +2289,49 @@ module.exports = async function () {
           }
         }
 
+        /* ══ UN COMPTEUR NE SURESTIME JAMAIS ════════════════════════════════
+           ⛔⛔ Mesuré le 03/08 sur son balayage : `lues: 4033` pour
+           `tuiles: 4018` — **100,4 %**, sur 31 pages des 67. Une annonce
+           appariée par le nom entrait dans `parsed` tout en restant dans
+           `auto.sansRef` ; additionner les deux listes la comptait deux fois.
+           Le défaut est né de l'appariement souple livré le matin même : un
+           correctif qui casse un compteur, c'est E-406 à nouveau.
+           ⛔ La porte ne recopie AUCUN chiffre du produit : elle vérifie
+           l'invariant — on ne peut pas lire plus de lignes qu'il n'y a de
+           tuiles sur la page. */
+        /* ⚠️ LA PAGE DOIT PORTER UNE ANNONCE SANS RÉFÉRENCE, sinon le
+           double comptage ne peut pas se produire et le contrôle serait vert
+           pour la mauvaise raison — un sabotage me l'a montré. La fiche à
+           `srcNom` est choisie à l'exécution, jamais nommée. */
+        var ficheNom = null;
+        for (var fn = 0; fn < prods.length; fn++) {
+          if (prods[fn].srcNom && String(prods[fn].brand || '').toUpperCase() === 'DEWALT') {
+            ficheNom = prods[fn]; break;
+          }
+        }
+        ok(!!ficheNom,
+          '⛔ PRÉALABLE : une fiche DeWALT se suit par son NOM — sans elle, le double '
+          + 'comptage ne peut pas se produire et ce contrôle ne vérifie rien');
+        scanReset();
+        var rCpt = fauxRes();
+        var pageNom = [String(ficheNom && ficheNom.srcNom), 'description', '3 offres',
+          'à partir de 450,00 €'];
+        while (pageNom.join('\n').length < 260) pageNom.push('ligne de bourrage sans prix');
+        await admFn({ method: 'POST',
+          query: { type: 'price-watch', brand: 'DEWALT', source: 'idealo', dryRun: '1' },
+          body: { text: pageNom.join('\n') } }, rCpt, fauxAdmin, fauxDb({}, []));
+        var pgCpt = rCpt.out && rCpt.out.page;
+        ok(pgCpt && pgCpt.tuiles === 1 && (rCpt.out.counts.parsed + rCpt.out.counts.sansRef) >= 1,
+          '⛔ PRÉALABLE : la page porte UNE tuile sans référence (obtenu tuiles='
+          + JSON.stringify(pgCpt && pgCpt.tuiles) + ', parsed='
+          + JSON.stringify(rCpt.out && rCpt.out.counts && rCpt.out.counts.parsed)
+          + ', sansRef=' + JSON.stringify(rCpt.out && rCpt.out.counts && rCpt.out.counts.sansRef) + ')');
+        ok(pgCpt && pgCpt.lues <= pgCpt.tuiles,
+          '⛔⛔ un compteur ne SURESTIME jamais : on ne peut pas lire plus de lignes '
+          + 'qu\'il n\'y a de tuiles sur la page (obtenu lues=' + JSON.stringify(pgCpt && pgCpt.lues)
+          + ' pour tuiles=' + JSON.stringify(pgCpt && pgCpt.tuiles) + ')');
+        scanReset();
+
         /* ══ L'ALIAS COMPTE POUR SA FICHE — AUSSI SUR LE CHEMIN QUI ÉCRIT ═══
            ⛔⛔ La même garde existe en mode à sec ; un sabotage a montré qu'elle
            ne couvrait QUE lui. Or c'est le chemin réel qui écrit les prix : y

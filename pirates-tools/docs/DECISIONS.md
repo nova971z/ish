@@ -509,3 +509,50 @@ s'en aperçoit qu'au litige. Les quatre copies passent maintenant par
 deux branches sur ce champ. Le vocabulaire serveur est vérifié par appel réel :
 chaque mode doit être accepté par `sanitizePaiement` et porter un libellé **non
 vide et distinct** ; un mode inventé doit être refusé.
+
+---
+
+## D-017 — La quincaillerie se vendra en LOTS, et le coût d'un lot se CALCULE
+
+**Décidé par l'user le 03/08/2026.** « On ne vendra pas juste une boîte de vis,
+on vendra des packs de cinq ou de 10 », puis, sur l'objection du coût :
+« même si le fournisseur ne vend que des boîtes à l'unité, on peut créer un
+petit algorithme qui prend le prix à l'unité et qui fait fois cinq, tout
+simplement. On établira un tableau avec des règles, ce sera peut-être long mais
+faisable. »
+
+**Ce qui est déjà en place, et qui protège cette décision.** Mesuré le jour
+même : une annonce fournisseur à l'**unité** est **ÉCARTÉE** face à une fiche
+« lot de 5 », et une annonce « lot de 5 » est appariée. La garde vient de deux
+règles posées le 03/08 — « 5 lames » se lit comme cinq, et sur une pièce de
+quincaillerie l'absence de décompte vaut **une**. Sans elles, le coût d'une
+boîte s'écrivait sur un lot de cinq : **coût divisé par cinq, vente à perte**.
+
+⛔ **Conséquence assumée tant que la multiplication n'existe pas** : une fiche
+« lot de N » dont le fournisseur ne vend que l'unité ne reçoit **aucun** coût.
+Elle reste sur une supposition, et le traqueur la signale comme jamais relevée.
+C'est le bon sens de l'erreur — ne rien écrire plutôt qu'écrire faux — mais ce
+n'est pas un état d'arrivée.
+
+**Ce que la règle de multiplication devra respecter le jour où on l'écrira.**
+Ce n'est pas un simple `× N`, et c'est pour ça que la note existe :
+
+1. **N se lit sur la FICHE, jamais sur l'annonce.** L'annonce dit ce que le
+   fournisseur vend ; la fiche dit ce que l'user vend. Prendre N sur l'annonce
+   ferait varier le prix du lot au gré des formulations du marchand.
+2. **Le coût multiplié n'est PAS un coût relevé.** Il doit rester distinguable
+   d'un prix réellement vu — sinon on ne saura plus, dans six mois, quels coûts
+   sont mesurés et lesquels sont calculés. Une source dérivée se nomme.
+3. **Le port ne se multiplie pas par N.** Cinq boîtes tiennent dans un colis ;
+   appliquer cinq fois le transport gonflerait le prix de vente d'un montant
+   que l'user ne paie pas — et un prix qui ne correspond à rien est
+   exactement ce que la porte J4 interdit.
+4. **Une remise de quantité fournisseur casse la proportionnalité.** Si le
+   fournisseur vend le lot de 5 moins cher que cinq unités, le calcul surestime.
+   La règle doit donc **céder la place** dès qu'un coût de lot est réellement
+   relevé : le mesuré l'emporte toujours sur le calculé.
+
+⚠️ **Pourquoi c'est rangé ici et pas ailleurs.** `DEMANDES.md` suit ce qui est
+dû ; ce fichier-ci garde les décisions qui doivent **ressortir au bon moment**.
+Le jour où on ouvrira la quincaillerie en lots, ces quatre points sont ce qui
+sépare une tarification juste d'une tarification qui a l'air juste.

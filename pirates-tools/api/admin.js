@@ -3066,6 +3066,18 @@ async function handlePriceWatch(req, res, admin, db) {
       (apparie.restants || []).concat(appariePacks.restants || []), products, brand);
     souple.items.forEach((it) => parsed.push(it));
 
+    /* ⛔⛔ CE QUI RESTE APRÈS TOUS LES APPARIEMENTS — PAS DEUX LISTES ADDITIONNÉES.
+       Mesuré le 03/08 sur son balayage : `lues: 4033` pour `tuiles: 4018`, soit
+       **100,4 %** — 31 pages sur 67 annonçaient plus de lignes lues que la page
+       n'a de tuiles. Un instrument de mesure ne surestime JAMAIS.
+       ⛔ Cause : une annonce appariée par le nom entre dans `parsed` MAIS reste
+       dans `auto.sansRef`, qui est la liste d'origine. Les additionner la comptait
+       deux fois. Le défaut est né de l'appariement souple livré le matin même —
+       un correctif qui casse un compteur, c'est E-406 à nouveau.
+       ⚠️ `souple.restants` porte déjà ce que NI l'exact NI le souple n'ont placé :
+       c'est le seul reste, et `parsed` + ce reste = les tuiles exploitées. */
+    const luesReelles = parsed.length + ((souple && souple.restants) || []).length;
+
     // Prix parsés indexés par SKU (pour la règle « min des sources » srcAltSkus).
     const parsedBySku = {};
     parsed.forEach((it) => { parsedBySku[String(it.sku).toUpperCase()] = it.price; });
@@ -3330,7 +3342,7 @@ async function handlePriceWatch(req, res, admin, db) {
       couverture: pwCouvAjouter(brand, parsed.map((x) => x.sku),
         (auto.sansRef || []).map((e) => e.titre),
         priceParse.compterTuiles(text).total,
-        parsed.length + (auto.sansRef || []).length,
+        luesReelles,
         (plans.plan(brand, sourceSlug) || {}).pages,
         /* Un article est RAPPROCHÉ s'il tombe sur une fiche du catalogue — même
            critère qu'à sec, pour que les deux modes disent la même chose. */
@@ -3354,7 +3366,7 @@ async function handlePriceWatch(req, res, admin, db) {
          d'instance, lui, peut avoir été tronqué par une instance neuve. */
       page: { empreinte: priceParse.empreintePage(text),
         tuiles: priceParse.compterTuiles(text).total,
-        lues: parsed.length + (auto.sansRef || []).length },
+        lues: luesReelles },
       counts: {
         parsed: parsed.length, applied: applied.length, flagged: flagged.length,
         unchanged: unchanged.length, unknown: unknown.length, locked: lockedW.length,
