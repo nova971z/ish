@@ -147,6 +147,12 @@ var reqDemandes = safeRequire('./check-demandes', 'check-demandes');
 // tourne en simulation, il répond ok:true et ne relève rien. 541 prix ont
 // vécu sur une supposition à cause de ça (01/08/2026).
 var reqTraqueur = safeRequire('./check-traqueur', 'check-traqueur');
+// « Est-ce que c'est deploye ? » : la question a coute deux releves a l'user,
+// qui a teste un parseur deja corrige (E-404). /api/health rend desormais le
+// commit que Vercel fait tourner — et comme ce point d'entree est PUBLIC,
+// cette porte prouve AUSSI qu'aucune valeur d'environnement n'en sort, pas
+// meme dix signes du compte de service par un message d'erreur de JSON.parse.
+var reqDeploi   = safeRequire('./check-deploiement', 'check-deploiement');
 // Le module Revolut est ecrit AVANT d'avoir pu appeler le reseau : tout ce qui
 // est PUR (signature contre le vecteur officiel, commission d'un ordre
 // reessaye, table des etats) s'eprouve ici, sinon la 1re verification aurait
@@ -225,6 +231,7 @@ var reqReconc   = safeRequire('./check-reconciliation', 'check-reconciliation');
   await runOne(reqAncres,   'check-ancres');
   await runOne(reqDemandes, 'check-demandes');
   await runOne(reqTraqueur, 'check-traqueur');
+  await runOne(reqDeploi,   'check-deploiement');
   await runOne(reqRevolut,  'check-revolut');
   await runOne(reqReconc,   'check-reconciliation');
 

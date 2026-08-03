@@ -228,6 +228,22 @@ var INDEX = [
     fini: 'les deux adresses s\'ouvrent, et le site est plus rapide qu\'avant.'
   },
   {
+    intention: 'Savoir QUEL code tourne en production (est-ce déployé ?)',
+    mots: ['deploye', 'déployé', 'est-ce deploye', 'quel commit', 'en production',
+           'mis en ligne', 'a jour', 'à jour', 'version deployee', 'version déployée',
+           'code perime', 'code périmé', 'je peux tester', 'je peux lancer'],
+    fichiers: ['api/health.js'],
+    fonctions: [],
+    protege: ['scripts/check-deploiement.js'],
+    regles: [],
+    pieges: ['⛔ E-404 : « Vercel ne déploie que master ». Pousser la branche de travail N\'EST PAS livrer — 15 commits poussés à côté, et l\'user a retesté deux fois contre l\'ancien code.',
+             '⛔ Le dépôt ne peut PAS voir ce que Vercel a déployé : ni GitHub, ni la CI, ni aucune commande d\'ici ne le disent. La seule réponse honnête vient de la PRODUCTION elle-même.',
+             '⛔ `GET /api/health` porte `build.commit` (VERCEL_GIT_COMMIT_SHA, 7 signes) et `build.branch` : c\'est LA réponse, et le raccourci de l\'user appelle déjà ce point d\'entrée en première étape.',
+             '⚠️ Un identifiant de commit est un ÉTAT, pas un secret — mais rien d\'autre de l\'environnement ne sort par là : jamais une valeur, seulement des booléens.'],
+    decisions: [],
+    fini: '`GET /api/health` renvoie le commit attendu — comparé à `git rev-parse --short HEAD`, pas supposé.'
+  },
+  {
     intention: 'Écrire ou corriger un harnais de test',
     mots: ['test', 'harnais', 'playwright', 'assertion', 'sabotage'],
     fichiers: ['tests', 'tests/_socle.mjs', 'tests/lancer.mjs', 'outils/sabotage.mjs'],
