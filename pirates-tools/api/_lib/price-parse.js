@@ -830,7 +830,15 @@ function extraireCaracteristiques(titre, brand) {
        « 2 batteries », « 1X2.0Ah », « 2x 5,0 Ah ». Et « outil nu » vaut ZÉRO
        explicitement — ce n'est pas une absence d'information, c'est une
        information : la machine se vend sans batterie. */
-  var mb = bas.match(/(\d+)\s*(?:x\s*)?batterie/);
+  /* ⛔⛔ UN CHIFFRE COLLÉ À DES LETTRES APPARTIENT À UNE RÉFÉRENCE, PAS À UN
+     COMPTE. Mesuré sur SON relevé du 03/08 : « 10 x DEWALT DCB184 batteries »
+     rendait **184 batteries** — les trois chiffres de la réf DCB184. Le compte
+     doit donc être précédé d'autre chose qu'une lettre ou un chiffre.
+     ⚠️ Et le compte n'est pas toujours accolé au mot : « 2x Powerstack
+     batterie » en sépare les deux par un nom de gamme — mesuré au même
+     endroit, rendu « 1 batterie » au lieu de 2. On tolère jusqu'à deux mots
+     entre le nombre et « batterie », jamais un chiffre. */
+  var mb = bas.match(new RegExp('(?:^|[^' + LETTRE + '])(\\d+)\\s*[x×]?\\s*(?:[a-zà-öø-ÿ-]+\\s+){0,2}batterie'));
   if (mb) car.nbBatteries = parseInt(mb[1], 10);
   else if (/\bbatterie/.test(bas)) car.nbBatteries = 1;
   var mx = t.match(/\b(\d+)\s*[xX×]\s*\d+(?:[.,]\d+)?\s*Ah\b/);
@@ -838,8 +846,21 @@ function extraireCaracteristiques(titre, brand) {
   // Toutes les écritures de « sans batterie » vivent dans la nomenclature.
   if (MACHINE_NUE_RE.test(bas)) car.nbBatteries = 0;
 
-  // ── Combo : « pack 3 outils », « 5 machines ».
-  var mo = bas.match(/(\d+)\s*(?:outils|machines)\b/);
+  /* Multiplicateur de tête : « 10 x DEWALT DCB184 … » annonce un LOT de dix
+     articles. C'est un nombre de PIÈCES, pas une caractéristique de l'article. */
+  var mmul = t.match(/^\s*(\d{1,4})\s*[x×]\s+/i);
+  if (mmul && car.nbPieces == null) car.nbPieces = parseInt(mmul[1], 10);
+  /* Un LOT de N batteries contient N batteries — ce n'est pas une déduction
+     hasardeuse, c'est la même information dite deux fois. Sans ça, « 10 x …
+     batteries » ressortait à 1 après correction du 184, et un lot de dix se
+     serait comparé à une batterie seule. */
+  if (car.rayon === 'batterie' && car.nbPieces > 1
+      && (car.nbBatteries == null || car.nbBatteries === 1)) {
+    car.nbBatteries = car.nbPieces;
+  }
+
+  // ── Combo : « pack 3 outils », « 5 machines ». Même garde que ci-dessus.
+  var mo = bas.match(new RegExp('(?:^|[^' + LETTRE + '])(\\d+)\\s*(?:outils|machines)\\b'));
   if (mo) car.nbOutils = parseInt(mo[1], 10);
   /* ⛔ « Pack 2 outils 18V (DHP458 + DTD154) » n'est typé par AUCUN mot du
      vocabulaire : c'est le NOMBRE qui le désigne. Mesuré — 11 fiches de son
@@ -867,14 +888,24 @@ function extraireCaracteristiques(titre, brand) {
 
   car.brushless = /\bbrushless\b|sans\s+charbon/.test(bas) ? true : null;
 
+  /* ⛔ UNE MESURE À ZÉRO EST UNE MESURE FAUSSE, PAS UNE MESURE. Aucun outil ne
+     pèse 0 kg ni ne consomme 0 W ; un zéro vient toujours d'un motif qui a
+     accroché la mauvaise portion du titre. Il vaut mieux ne rien annoncer.
+     Vu sur SON relevé du 03/08 : un aspirateur ressorti à `watts: 0`. */
+  function posit(v) { return (typeof v === 'number' && isFinite(v) && v > 0) ? v : null; }
+
   var mp = t.match(/(\d+(?:[.,]\d+)?)\s*kg\b/i);
-  if (mp) car.poidsKg = parseFloat(mp[1].replace(',', '.'));
+  if (mp) car.poidsKg = posit(parseFloat(mp[1].replace(',', '.')));
   var mba = t.match(/(\d{2,4})\s*bars?\b/i);
-  if (mba) car.bars = parseInt(mba[1], 10);
+  if (mba) car.bars = posit(parseInt(mba[1], 10));
   var mli = t.match(/(\d+(?:[.,]\d+)?)\s*[lL]\b/);
-  if (mli) car.litres = parseFloat(mli[1].replace(',', '.'));
-  var mw = t.match(/(\d{3,5})\s*W\b/);
-  if (mw) car.watts = parseInt(mw[1], 10);
+  if (mli) car.litres = posit(parseFloat(mli[1].replace(',', '.')));
+  /* ⛔ LE SÉPARATEUR DE MILLIERS COUPE LA PUISSANCE EN DEUX. Mesuré sur son
+     relevé : « SDS-Max 1 500 W » rendait **500 W** — le motif ne voyait que
+     les trois derniers chiffres. Une machine annoncée trois fois moins
+     puissante qu'elle ne l'est ne se compare plus à la bonne fiche. */
+  var mw = t.match(/(\d{1,2}[\s  .]\d{3}|\d{3,5})\s*W\b/);
+  if (mw) car.watts = posit(parseInt(mw[1].replace(/[\s  .]/g, ''), 10));
 
   /* ══ QUINCAILLERIE : LES MESURES QUI FONT LE PRIX ═══════════════════════
      Mot de l'user : « il y aura la taille, ou l'alésage des circulaires avec

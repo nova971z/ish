@@ -676,6 +676,40 @@ module.exports = async function () {
       + 'mesuré, 6 fiches de son catalogue étaient rangées en EPI et se seraient '
       + 'comparées à des vêtements de travail');
 
+    /* ═══ DÉFAUTS VUS DANS SON RELEVÉ DU 03/08 ════════════════════════════
+       Trois mesures fausses, relevées dans le JSON qu'il m'a renvoyé, chacune
+       reproduite ici avant correction. ⛔ Réfs synthétiques. */
+    var lot = ec('10 x MAKITA ZZB184 batteries 18v 5Ah Li-ion', 'MAKITA');
+    ok(lot.nbBatteries !== 184,
+      '⛔⛔ ARGENT : les chiffres d\'une RÉFÉRENCE ne sont pas un compte. Mesuré '
+      + 'sur son relevé — « 10 x … ZZB184 batteries » rendait 184 BATTERIES. Un '
+      + 'compte doit être précédé d\'autre chose qu\'une lettre ou un chiffre');
+    ok(lot.nbPieces === 10 && lot.nbBatteries === 10,
+      'un lot de dix batteries en contient dix — le multiplicateur de tête est lu');
+
+    var deuxB = ec('MAKITA ZZF961H2T Clé à choc 18 V + 2x Powerstack batterie 5,0 Ah + chargeur', 'MAKITA');
+    ok(deuxB.nbBatteries === 2,
+      '⛔ « 2x Powerstack batterie » : le compte est séparé du mot par un nom de '
+      + 'gamme. Mesuré sur son relevé — rendu 1 au lieu de 2, donc un lot pris '
+      + 'pour la moitié de ce qu\'il contient');
+
+    var kw = ec('MAKITA ZZ25899K Marteau de démolition SDS-Max 1 500 W', 'MAKITA');
+    ok(kw.watts === 1500,
+      '⛔ LE SÉPARATEUR DE MILLIERS COUPE LA PUISSANCE : « 1 500 W » rendait 500 W '
+      + 'sur son relevé. Une machine annoncée trois fois moins puissante ne se '
+      + 'compare plus à la bonne fiche');
+    ok(ec('MAKITA ZZ586MT2 Aspirateur 0 W', 'MAKITA').watts === null,
+      '⛔ une mesure à ZÉRO est une mesure fausse, pas une mesure : aucun outil ne '
+      + 'consomme 0 W, et un zéro vient d\'un motif qui a mordu au mauvais endroit '
+      + '(vu sur son relevé)');
+
+    /* Préalables : sans eux, les gardes ci-dessus pourraient être de simples
+       refus systématiques — ce qui ne vérifierait rien. */
+    ok(ec('MAKITA ZZI333 (1x Batterie 9 Ah + Chargeur ZZB118)', 'MAKITA').nbBatteries === 1
+      && ec('Meuleuse XR 18V MAKITA ZZC405NT outil nu', 'MAKITA').nbBatteries === 0
+      && ec('MAKITA ZZ7104L Mortaiseuse 1140 W', 'MAKITA').watts === 1140,
+      'préalable : les comptes et puissances LÉGITIMES passent toujours');
+
     var cD = ec('MAKITA ZZI850', 'MAKITA');
     ok(cD.type !== 'kit',
       '⛔ DÉFAUT MESURÉ PAR CETTE PORTE : « kit » se trouve DANS « maKITa ». Un '
