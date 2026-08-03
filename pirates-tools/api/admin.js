@@ -1706,6 +1706,14 @@ function pwAliasNomenclature(products, brand, bySku) {
   Object.keys(claims).forEach((a) => { if (claims[a] && !bySku[a]) bySku[a] = claims[a]; });
 }
 
+/* ⛔ UNE SEULE DÉCISION DE GEL, À UN SEUL ENDROIT. Deux raisons — « rupture »
+   (le fournisseur ne l'a plus) et « perime » (plus vu depuis la fenêtre de
+   fraîcheur, parce que la page change tous les jours) — mais UN comportement :
+   on ne touche pas au prix. ⚠️ Écrit en fonction pour être testable : tant que
+   la condition vivait en ligne dans le recalcul, un oubli d'un des deux cas
+   faisait DISPARAÎTRE le produit du rapport sans qu'aucun sabotage ne morde. */
+function pwEstGel(origin) { return origin === 'rupture' || origin === 'perime'; }
+
 function pwSourceCost(p, o, cfg, byGroup) {
   /* ── PLUSIEURS TRAQUEURS (01/08/2026) : la carte `priceSources` fait foi ──
      Chaque passage de traqueur écrit sa propre entrée { ttc, at, enStock }.
@@ -1725,7 +1733,20 @@ function pwSourceCost(p, o, cfg, byGroup) {
        en juger ici aurait GELÉ des produits au relevé ancien mais réel. */
     var choixPS = priceParse.choisirCoutSource(pwSourcesConnues(o), Date.now());
     if (choixPS) return { srcTTC: choixPS.ttc, origin: 'traqueur', source: choixPS.source };
-    return { srcTTC: null, origin: 'rupture' };
+    /* ⛔ « RUPTURE » ET « PÉRIMÉ » NE SONT PAS LA MÊME CHOSE, et l'user l'a
+       fait apparaître le 03/08 : « les articles sur ces pages peuvent changer
+       chaque jour, mais l'URL reste la bonne ». Sa liste est triée par prix ;
+       les prix bougent tous les jours ; un article sort donc de la fenêtre
+       balayée sans que le fournisseur ait cessé de le vendre. Au bout de
+       14 jours son relevé se périme et le produit est GELÉ — c'est juste : un
+       coût vieux de deux semaines n'est plus un coût. Mais l'appeler
+       « rupture » était FAUX, et un diagnostic faux envoie chercher au
+       mauvais endroit. Le gel reste identique ; seule la raison devient vraie.
+       ⚠️ Portes lues — J3 : aucune donnée personnelle, on qualifie un état de
+       stock. J4 : AUCUN prix ne bouge, un produit gelé reste gelé, et rien
+       ici ne sert de prix de référence. J5 : ni TVA ni octroi de mer. */
+    var pourquoi = priceParse.raisonAucuneSource(pwSourcesConnues(o), Date.now());
+    return { srcTTC: null, origin: pourquoi === 'perime' ? 'perime' : 'rupture', raisonGel: pourquoi };
   }
   // ⚠️ Un coût n'est « relevé » que s'il porte priceSource='cotebrico', la
   // marque du traqueur. Sans ce contrôle, un coût ESTIMÉ écrit par un ancien
@@ -1824,9 +1845,20 @@ async function handleRepriceAll(req, res, admin, db) {
       // Coût source TTC : traqueur > fiche > variante jumelle ±20 € > estimation.
       const srcInfo = pwSourceCost(p, o, cfg, variantCosts);
       const srcTTC = srcInfo.srcTTC;
-      if (srcInfo.origin === 'rupture') {
+      /* ⛔ DEUX RAISONS DE GELER, UN SEUL COMPORTEMENT. « rupture » (le
+         fournisseur ne l'a plus) et « perime » (plus vu depuis 14 jours,
+         parce que la page change tous les jours) gèlent tous les deux le
+         prix — c'est la bonne réaction dans les deux cas. Mais elles ne se
+         soignent pas pareil : l'une demande de changer de fournisseur,
+         l'autre juste de rebalayer. ⚠️ Sans ce `||`, un produit « perime »
+         serait tombé dans « coût source inconnu » et aurait DISPARU de la
+         liste des gelés — gelé quand même, mais invisible au rapport. */
+      if (pwEstGel(srcInfo.origin)) {
         origins.rupture++;
-        if (gels.length < 250) gels.push({ sku: p.sku, brand: p.brand || '', name: p.title || p.name });
+        if (gels.length < 250) {
+          gels.push({ sku: p.sku, brand: p.brand || '', name: p.title || p.name,
+            raison: srcInfo.raisonGel || srcInfo.origin });
+        }
         continue;   // prix GELÉ : aucune source achetable, on n'y touche pas
       }
       if (!(srcTTC > 0)) { skipped.push({ id: p.id, sku: p.sku, reason: 'coût source inconnu' }); continue; }
@@ -2552,7 +2584,7 @@ async function handlePriceWatch(req, res, admin, db) {
 module.exports.config = { api: { bodyParser: { sizeLimit: '4.5mb' } } };
 // Pour les portes UNIQUEMENT : tester le vrai chemin, jamais une copie (O6).
 module.exports._internals = {
-  pwSourceCost: pwSourceCost, pwSourcesConnues: pwSourcesConnues,
+  pwSourceCost: pwSourceCost, pwSourcesConnues: pwSourcesConnues, pwEstGel: pwEstGel,
   pwApparierParNom: pwApparierParNom, pwAliasNomenclature: pwAliasNomenclature,
   // Exposés pour check-price-watch : le mode balayage se prouve en APPELANT
   // le handler avec une base factice qui compte lectures et écritures.

@@ -293,6 +293,45 @@ module.exports = async function () {
     var gel = pw({}, { priceSources: { cotebrico: { ttc: 200, at: Date.now(), enStock: false } } }, {}, null);
     ok(gel && gel.origin === 'rupture' && gel.srcTTC === null,
       '⛔ relevés présents mais AUCUN achetable → origin \'rupture\', prix GELÉ (' + JSON.stringify(gel) + ')');
+    /* ═══ RUPTURE ≠ PÉRIMÉ (03/08/2026) ═══════════════════════════════════
+       ⛔ Défaut nommé par l'user : « les articles sur ces pages peuvent
+       changer chaque jour, mais l'URL reste la bonne ». Sa liste est triée
+       par prix ; les prix bougent ; un article sort de la fenêtre balayée
+       sans que le fournisseur ait cessé de le vendre. Au bout de 14 jours
+       son relevé se périme et le produit est GELÉ — c'est juste. Mais on
+       l'appelait « rupture », ce qui envoie chercher un problème de stock
+       là où il n'y en a pas. Le gel ne change PAS ; la raison devient vraie. */
+    var vieux = Date.now() - (pp.SOURCE_FRESH_MS + 24 * 3600 * 1000);
+    var per = pw({}, { priceSources: { unSite: { ttc: 200, at: vieux, enStock: true } } }, {}, null);
+    ok(per && per.srcTTC === null,
+      '⛔ ARGENT INCHANGÉ : un relevé plus vieux que la fenêtre de fraîcheur ne '
+      + 'sert plus de coût — le produit reste GELÉ (' + JSON.stringify(per) + ')');
+    ok(per && per.origin === 'perime' && per.raisonGel === 'perime',
+      '⛔ …mais la raison dit « perime », PAS « rupture » : l\'article a quitté la '
+      + 'fenêtre de prix balayée, le fournisseur le vend peut-être toujours. Un '
+      + 'diagnostic faux fait chercher au mauvais endroit');
+    ok(gel && gel.raisonGel === 'rupture',
+      'préalable : une VRAIE rupture (hors stock explicite) dit toujours « rupture » '
+      + '— sans quoi la distinction ci-dessus n\'en serait pas une');
+    /* ⛔ LES DEUX RAISONS GÈLENT, ET LE RECALCUL DOIT LES ATTRAPER TOUTES LES
+       DEUX. Tant que la condition vivait en ligne dans le recalcul, oublier
+       « perime » faisait tomber le produit dans « coût source inconnu » : gelé
+       quand même, mais DISPARU du rapport — et aucun sabotage ne mordait. */
+    var estGel = adm._internals && adm._internals.pwEstGel;
+    ok(typeof estGel === 'function', 'la décision de gel est une fonction UNIQUE, testable');
+    if (estGel) {
+      ok(estGel('rupture') === true && estGel('perime') === true,
+        '⛔ les DEUX raisons de gel sont attrapées par le recalcul');
+      ok(estGel('traqueur') === false && estGel('estimé') === false && estGel(undefined) === false,
+        'préalable : un coût normal n\'est PAS gelé — sinon plus rien ne serait recalculé');
+    }
+
+    var mixte = pw({}, { priceSources: {
+      a: { ttc: 200, at: Date.now(), enStock: false },
+      b: { ttc: 180, at: vieux, enStock: true } } }, {}, null);
+    ok(mixte && mixte.srcTTC === null && mixte.raisonGel === 'mixte',
+      'les deux causes à la fois se disent « mixte », jamais l\'une des deux au hasard');
+
     var deux2 = pw({}, { priceSources: { cotebrico: { ttc: 200, at: Date.now() }, nouveau: { ttc: 180, at: Date.now() } } }, {}, null);
     ok(deux2 && deux2.srcTTC === 180 && deux2.origin === 'traqueur',
       'le recalcul lit le MIN multi-sources (' + JSON.stringify(deux2) + ')');

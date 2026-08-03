@@ -714,6 +714,44 @@ function choisirCoutSource(sources, nowMs, maxAgeMs) {
   return best;
 }
 
+/* ══ POURQUOI AUCUNE SOURCE N'A ÉTÉ RETENUE ═══════════════════════════════
+   ⛔ Défaut nommé par l'user le 03/08 : « les articles sur ces pages peuvent
+   changer chaque jour, mais l'URL reste la bonne ». Conséquence directe, et
+   MESURÉE : sa liste est triée par prix, les prix bougent tous les jours, et
+   un article sort donc de la fenêtre balayée sans rien avoir de particulier.
+   Au bout de 14 jours sans le revoir, son relevé se périme et le produit est
+   GELÉ — ce qui est le BON comportement : un coût vieux de deux semaines
+   n'est plus un coût.
+
+   ⛔ MAIS IL ÉTAIT ÉTIQUETÉ « rupture ». Or « rupture » veut dire : le
+   fournisseur ne l'a plus. Un article qui a simplement quitté la fenêtre de
+   prix n'est pas en rupture, et l'écran d'admin l'affirmait à tort. Le gel
+   reste identique — c'est la RAISON qui devient vraie. Un diagnostic faux
+   fait chercher au mauvais endroit, et ça coûte du temps à chaque fois.
+
+   Rend : 'rupture' (des relevés existent, tous marqués hors stock) ·
+   'perime' (des relevés existent, tous plus vieux que la fenêtre) ·
+   'mixte' (les deux causes présentes) · null (rien d'exploitable, ou il
+   restait une source valable — dans les deux cas il n'y a rien à expliquer). */
+function raisonAucuneSource(sources, nowMs, maxAgeMs) {
+  if (!sources || typeof sources !== 'object') return null;
+  var age = (typeof maxAgeMs === 'number' && maxAgeMs > 0) ? maxAgeMs : SOURCE_FRESH_MS;
+  var horsStock = 0, perimes = 0, exploitables = 0;
+  Object.keys(sources).forEach(function (slug) {
+    var e = sources[slug] || {};
+    if (!(Number(e.ttc) > 0)) return;
+    exploitables += 1;
+    if (e.enStock === false) { horsStock += 1; return; }
+    var at = enMillis(e.at);
+    if (!(at > 0) || (Number(nowMs) - at) > age) perimes += 1;
+  });
+  if (!exploitables) return null;
+  if (horsStock && perimes) return 'mixte';
+  if (horsStock) return 'rupture';
+  if (perimes) return 'perime';
+  return null;
+}
+
 /* ══ CARACTÉRISTIQUES D'UN TITRE FOURNISSEUR ═══════════════════════════════
    Écrit le 03/08/2026, et la critique de l'user était juste : « il doit
    comparer le voltage, le nom propre d'un outil, la référence, si c'est un
@@ -1368,4 +1406,4 @@ function comparerCaracteristiques(a, b) {
   return { compatible: conflits.length === 0, conflits: conflits, concordances: concordances };
 }
 
-module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickoutil, parseIdealo: parseIdealo, parseAuto: parseAuto, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, enMillis: enMillis, SOURCE_FRESH_MS: SOURCE_FRESH_MS, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage, extraireCaracteristiques: extraireCaracteristiques, comparerCaracteristiques: comparerCaracteristiques, planBalayage: planBalayage, rangDansPlan: rangDansPlan, OUTILS: OUTILS, SERIES: SERIES, nomenclature: nomen };
+module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickoutil, parseIdealo: parseIdealo, parseAuto: parseAuto, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, raisonAucuneSource: raisonAucuneSource, enMillis: enMillis, SOURCE_FRESH_MS: SOURCE_FRESH_MS, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage, extraireCaracteristiques: extraireCaracteristiques, comparerCaracteristiques: comparerCaracteristiques, planBalayage: planBalayage, rangDansPlan: rangDansPlan, OUTILS: OUTILS, SERIES: SERIES, nomenclature: nomen };

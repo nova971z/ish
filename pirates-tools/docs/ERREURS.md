@@ -16,13 +16,13 @@
 |---|---|---|---|---|
 | **O1** | Affirmer avant de mesurer | 12 | §3 · §8 | `garde-sortie.js` *(hook Stop)* |
 | **O2** | L'instrument de mesure est faux | 28 | §4.3 | sabotage obligatoire |
-| **O3** | Réutiliser sans vérifier le contexte | 9 | §1.4 | `check-lecons.js` |
+| **O3** | Réutiliser sans vérifier le contexte | 10 | §1.4 | `check-lecons.js` |
 | **O4** | Contrainte connue, non appliquée | 4 | §1 | `garde-entonnoir.js` |
 | **O5** | Outil artisanal au lieu de l'outil existant | 1 | §1.4 | aucune — humaine |
 | **O6** | Copie périmée au lieu de la source vivante | 5 | §4.4 | `p7-architecture.js` |
 | **O7** | **Lire le silence comme un succès** | 7 | §3 · §4.3 | `sabotage.mjs` · `ci.js` · `check-ancres.js` |
 
-**66 erreurs, 7 mécanismes.** O1 et O2 en concentrent **40 à elles deux** :
+**67 erreurs, 7 mécanismes.** O1 et O2 en concentrent **40 à elles deux** :
 c'est là qu'il faut regarder en premier, toujours.
 
 ⚠️ **O7 est né le 01/08/2026**, et il est né d'une règle qui existait déjà :
@@ -149,8 +149,17 @@ va contenir ici.*
 | **E-308** | `fournisseur()` — « qui encaisse ? » | répondre à « qui a SIGNÉ cette notification ? » | Revolut écrivait, Stripe tentait de le reconnaître : 2 reçues, **0 acceptée**, avec une configuration Revolut parfaite. Symétrique : après bascule, une re-livraison Stripe tardive serait refusée par Revolut |
 | **E-309** | la ligne « Détails du produit » comme **frontière de bloc** | découper les cartes d'une page idealo | ⛔ La règle de harnais dit déjà « on ne s'ancre jamais sur une formulation exacte d'interface » — je l'ai appliquée aux TESTS et **pas au parseur**. Idealo ne l'a pas envoyée le 03/08 : relevé de l'user à **`parsed: 0`, `format: "aucun"`** sur une page de **57 références**. Cause reproduite en retirant cette seule ligne du corpus réel : 3 produits → 0. Corrigé en s'ancrant sur ce que la page ne peut pas ne pas écrire — le titre « MARQUE RÉF », qui annonce la carte lui-même. La porte a ensuite trouvé PIRE : sans ancre de fin, le prix cherché à rebours ramenait celui d'un **téléphone** du bandeau « Produits favoris » sur une scie |
 
+| **E-310** | DEUX relevés du traqueur comparés **article par article** | conclure « D25899K était lu hier, il ne l'est plus : le parseur a régressé » | ⛔ **La page change TOUS LES JOURS.** L'user l'a dit le 03/08 : « les articles sur ces pages peuvent changer chaque jour, mais l'URL reste la bonne ». Sa liste est triée par prix, les prix bougent, les articles entrent et sortent de la fenêtre balayée. Comparer deux relevés ligne à ligne compare donc **deux pages différentes** — et j'en ai tiré un diagnostic de régression qui ne reposait sur rien. Une page fournisseur est un **INSTANTANÉ MOUVANT** : le seul écart qui veut dire quelque chose est INTERNE à un relevé — « ce que cette page contient » face à « ce que j'en ai lu » (`refsNonLues`). Conséquence corrigée dans le produit : un article absent depuis plus de 14 jours était étiqueté « rupture » alors qu'il avait seulement quitté la fenêtre de prix — il dit désormais « perime » |
+
 **Antidote** : §1.4 — regarder **ce que le motif va contenir**, pas ce à quoi il
 ressemble.
+
+⛔ **E-310 : UNE PAGE FOURNISSEUR EST UN INSTANTANÉ MOUVANT.** On ne compare
+jamais deux relevés entre eux pour juger le parseur : ils portent sur des
+contenus différents. Toute mesure de qualité du parseur se prend **à
+l'intérieur d'un seul relevé** — réfs présentes contre réfs lues — ou sur un
+corpus figé du dépôt. Et aucun harnais ne s'ancre sur le contenu de la page :
+il se fabrique le sien.
 
 ⛔ **E-305 : ne jamais réparer un document avec `String.replace` en ligne de
 commande.** Certaines séquences du texte de remplacement sont interprétées par
