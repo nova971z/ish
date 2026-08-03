@@ -2191,6 +2191,15 @@ async function handlePriceWatch(req, res, admin, db) {
          perdu, donc un coût d'achat trop haut retenu, et c'est bien pour ça
          que ça se mesure ; J5 — aucune TVA, aucun octroi de mer ici. */
       const attendus = priceParse.titresAttendus(text);
+      /* ⛔ LE COMPTE BRUT DES TUILES — il ne dépend d'aucun titre, d'aucun
+         repli, d'aucun vocabulaire : juste les deux ancres que la page ne peut
+         pas ne pas écrire. C'est lui qui répond à « la page en a-t-elle 60 ? »
+         sans rien devoir au parseur. Le rapprochement NOMMÉ peut sous-estimer
+         quand la page n'a pas de lignes vides ; ce compte-là, non.
+         ⚠️ Portes lues : J3 — ce sont des comptes d'ancres, aucune donnée
+         personnelle, rien conservé au-delà de la réponse ; J5 — aucune TVA,
+         aucun octroi de mer. */
+      const tuiles = priceParse.compterTuiles(text);
       const annoncesNonLues = priceParse.annoncesManquantes(text,
         (auto.sansRef || []).map((e) => e.titre).concat(parsed.map((it) => it.name)));
 
@@ -2200,7 +2209,15 @@ async function handlePriceWatch(req, res, admin, db) {
           parsed: parsed.length,
           reconnus: reconnusSec.length, inconnus: inconnusSec.length,
           packs: (auto.packs || []).length, sansRef: (auto.sansRef || []).length,
-          /* Ce que la page ANNONCE, indépendamment de ma réussite à le lire. */
+          /* Ce que la page ANNONCE, indépendamment de ma réussite à le lire.
+             ⛔ `tuilesDansLaPage` est LE chiffre à comparer à ce qu'il compte
+             à l'écran : chaque tuile cliquable écrit soit « Vendu par : »,
+             soit « N offres ». `annoncesDansLaPage` reste le nombre de tuiles
+             dont j'ai su NOMMER le titre — il peut être plus bas, jamais plus
+             haut, et l'écart entre les deux se voit. */
+          tuilesDansLaPage: tuiles.total,
+          tuilesFiches: tuiles.fiches,
+          tuilesAnnonces: tuiles.annonces,
           annoncesDansLaPage: attendus.length
         },
         /* Liste vide = aucune annonce perdue, et c'est vérifiable titre à titre. */

@@ -323,6 +323,24 @@ function parseIdealo(rawText, brand) {
   var FIN_PRODUIT = /^d[\u00e9e]tails\s+du\s+produit$/i;
   var FIN_OFFRE   = /^d[\u00e9e]tails\s+de\s+l[\u2019']?offre$/i;
   var VENDU_PAR   = /^vendu\s+par\s*:/i;
+  /* ⛔⛔ L'ANCRE QUI MANQUAIT — ET AVEC ELLE, UNE TUILE PAR PAGE.
+     L'user : « il y a 60 cartes produits avec 60 prix et les 60 sont
+     cliquables ». J'en lisais 59 et mes deux compteurs disaient « rien ne
+     manque » : ils ne pouvaient pas voir celle-là. Une tuile-FICHE ne
+     s'ouvrait que sur un titre commençant par « MARQUE RÉF » ; quand idealo
+     écrit « Meuleuse compacte 125 mm - DEWALT - DCG404S2T-QW », la tuile
+     entière est avalée par sa voisine — invisible dans `items`, dans
+     `sansRef`, dans `perdus` ET dans `refsVues` (le motif y cherche la marque
+     SUIVIE de la réf, or ici un tiret les sépare).
+     Reproduit : trois tuiles d'affilée, la deuxième au titre sans marque en
+     tête → 2 lues sur 3, et 693,49 € perdus sans une trace.
+     ⛔ Or chaque tuile-fiche s'annonce elle-même : « 12 offres » puis
+     « à partir de X € ». C'est un COMPTE suivi d'un PRIX — la page ne peut pas
+     ne pas les écrire, contrairement à un libellé d'interface (E-309). On
+     ferme donc la tuile sur son prix, et la suivante démarre propre.
+     ⚠️ J4 : une tuile perdue est un prix perdu. Le coût d'achat retenu est le
+     MINIMUM des sources ; en manquer une, c'est retenir un coût trop haut. */
+  var NB_OFFRES   = /^\d+\s+offres?\b/i;
   // Titre : la marque, puis la r\u00e9f en PREMIER mot. Ce qui suit est ignor\u00e9.
   var titreRe = new RegExp('^' + escapeRe(brand) + '\\s+([A-Z0-9][A-Z0-9.\\/-]*[A-Z0-9])\\b', 'i');
   // Prix : \u00ab \u00e0 partir de X,XX \u20ac \u00bb OU un montant seul (cas \u00ab 1 offre \u00bb).
@@ -348,10 +366,11 @@ function parseIdealo(rawText, brand) {
      servent encore aux offres marchandes — mais plus rien ne dépend d'elles
      seules. Une règle de secours ne coûte rien ; son absence a coûté un
      relevé entier. */
-  var bloc = [], seen = {}, titreOffre = null;
+  var bloc = [], seen = {}, titreOffre = null, vuNbOffres = false, vuVenduPar = false;
   for (var i = 0; i < lignes.length; i++) {
     var l = lignes[i];
     if (VENDU_PAR.test(l)) {
+      vuVenduPar = true;
       // ⚠️ Retenu AVANT d'écraser : c'est lui qui possède la queue qui traîne.
       var titrePrecedent = titreOffre;
       titreOffre = (bloc.length ? bloc[bloc.length - 1] : null) || titreOffre;
@@ -394,6 +413,40 @@ function parseIdealo(rawText, brand) {
       bloc = [];
     }
     bloc.push(l);
+    /* ⛔⛔ UNE TUILE-FICHE SE FERME SUR SON PRIX — sinon la suivante n'existe
+       pas. Tant qu'un titre commençait par « MARQUE RÉF », la tuile suivante
+       ouvrait le bloc et tout allait bien. Mais idealo écrit aussi
+       « Meuleuse compacte 125 mm - DEWALT - DCG404S2T-QW » : plus de marque en
+       tête, donc plus d'ouverture, donc la tuile ENTIÈRE est avalée par sa
+       voisine — invisible partout, prix compris.
+       ⛔ On s'ancre sur ce que la page ne peut PAS ne pas écrire : le compte
+       d'offres puis le prix. Deux lignes, dans cet ordre, et jamais un libellé
+       d'interface (la leçon de E-309). Le compte seul ne ferme rien : c'est le
+       PRIX qui clôt, parce que c'est lui qu'on est venu chercher. */
+    if (NB_OFFRES.test(l)) vuNbOffres = true;
+    else if (vuNbOffres && (prixApartir.test(l) || prixSeul.test(l))) {
+      traiter(bloc, !!titreOffre);
+      titreOffre = null;
+      vuNbOffres = false;
+      bloc = [];
+      continue;
+    }
+    /* ⛔⛔ ARGENT — UNE ANNONCE SE FERME AUSSI SUR SON PRIX. Trouvé en
+       éprouvant une page mixte reconstituée : la DERNIÈRE annonce, que rien
+       ne fermait, avalait le bandeau « Produits favoris » et ressortait à
+       784,99 € — LE PRIX DE L'iPHONE — au lieu de ses 695,00 €. La recherche
+       de prix d'une annonce remonte depuis la fin du bloc ; sans borne, cette
+       fin n'est plus la sienne. C'est le même défaut que le téléphone posé
+       sur une scie (E-309), resté vivant sur l'autre chemin.
+       ⛔ Une annonce écrit son prix APRÈS « Vendu par », une fois : le premier
+       prix rencontré clôt la tuile. Symétrique de la fiche ci-dessus. */
+    else if (vuVenduPar && /\d,\d{2}\s*€/.test(l)) {
+      traiter(bloc, true);
+      titreOffre = null;
+      vuVenduPar = false;
+      bloc = [];
+      continue;
+    }
     /* ⛔⛔ LE GARDE-FOU MANGEAIT LA DERNIÈRE CARTE DE CHAQUE PAGE.
        `shift()` retire bloc[0] — c'est-à-dire LE TITRE. Tant qu'une carte est
        suivie d'une autre, son bloc se ferme tôt et personne ne le voit. Mais
@@ -675,21 +728,47 @@ function parseAuto(rawText, brand) {
    titres réellement rendus, et l'écart est NOMMÉ, pas chiffré.
    ⚠️ J4 : une annonce perdue est un PRIX perdu. Le coût d'achat retenu est le
    minimum des sources ; en manquer une, c'est retenir un coût trop haut. */
+/* ⛔⛔ DEUX SORTES DE TUILES, DEUX ANCRES — ET J'EN COMPTAIS UNE SEULE.
+   L'user, mot pour mot : « il y a 60 cartes produits avec 60 prix et les 60
+   sont cliquables ». Je n'en lisais que 59, et ce compteur-ci disait pourtant
+   « rien ne manque » : il ne regardait que « Vendu par : ». Une tuile-FICHE
+   — « 12 offres » puis « à partir de X € » — n'y était pour rien.
+   Une page en porte les deux, mélangées. On compte donc les DEUX ancres. */
+var ANCRE_ANNONCE = /^vendu\s+par\s*:/i;
+var ANCRE_FICHE   = /^\d+\s+offres?\b/i;
+
+/* ⛔ LES DEUX ANCRES NE SE LISENT PAS PAREIL, ET VOULOIR LES UNIFIER CASSE
+   L'AUTRE. Premier jet : « on remonte au début de la tuile » pour les deux —
+   quatre assertions rouges d'un coup, dont celles de D-90 qui prouvaient déjà
+   le cas des annonces.
+   · Une ANNONCE écrit « Vendu par : » juste sous son titre : le titre est la
+     dernière ligne non vide au-dessus. Mesuré, éprouvé, on n'y touche pas.
+   · Une FICHE écrit titre PUIS sous-titre PUIS « 12 offres » : s'arrêter à la
+     ligne du dessus rendrait le SOUS-TITRE. On remonte donc jusqu'au début de
+     la tuile — borné par une ligne vide, un prix, ou une autre ancre,
+     c'est-à-dire par la fin de la tuile précédente. */
+function titreDeTuile(lignes, i, estFiche) {
+  var vues = [];
+  for (var j = i - 1; j >= 0 && j >= i - 8; j--) {
+    var ligne = lignes[j];
+    if (!ligne) { if (vues.length) break; continue; }
+    if (!estFiche) return ligne;                       // annonce : la ligne du dessus
+    if (vues.length && (/\d,\d{2}\s*€/.test(ligne)
+      || ANCRE_ANNONCE.test(ligne) || ANCRE_FICHE.test(ligne))) break;
+    vues.push(ligne);
+  }
+  return vues.length ? vues[vues.length - 1] : null;
+}
+
 function titresAttendus(rawText) {
-  var VP = /^vendu\s+par\s*:/i;
   var lignes = stripHtml(rawText).split('\n').map(function (l) { return l.trim(); });
   var out = [];
   for (var i = 0; i < lignes.length; i++) {
-    if (!VP.test(lignes[i])) continue;
-    /* Le titre est la dernière ligne NON VIDE avant l'ancre. Les pages en
-       intercalent plusieurs : les sauter n'est pas une supposition, c'est la
-       seule lecture possible d'une ligne vide. Fenêtre bornée — au-delà, on
-       ne saurait plus dire à quoi on rattache. */
-    for (var j = i - 1; j >= 0 && j >= i - 6; j--) {
-      if (!lignes[j]) continue;
-      out.push(lignes[j]);
-      break;
-    }
+    var estAnnonce = ANCRE_ANNONCE.test(lignes[i]);
+    var estFiche = !estAnnonce && ANCRE_FICHE.test(lignes[i]);
+    if (!estAnnonce && !estFiche) continue;
+    var t = titreDeTuile(lignes, i, estFiche);
+    if (t) out.push(t);
   }
   return out;
 }
@@ -702,6 +781,20 @@ function titresAttendus(rawText) {
    répare. On rapproche donc des MULTISETS.
    ⚠️ Extraite du point d'entrée pour être GARDÉE : tant qu'elle vivait en
    ligne dans la réponse, aucun sabotage ne pouvait mordre dessus. */
+/* ⛔ LE COMPTE BRUT DES TUILES — il ne dépend d'AUCUN titre, d'aucun repli,
+   d'aucun vocabulaire. C'est lui qui répond à « la page en a-t-elle 60 ? »
+   sans rien devoir au parseur. Le rapprochement nommé peut sous-estimer quand
+   la page n'a pas de lignes vides ; ce compte-là, non. */
+function compterTuiles(rawText) {
+  var lignes = stripHtml(rawText).split('\n').map(function (l) { return l.trim(); });
+  var annonces = 0, fiches = 0;
+  for (var i = 0; i < lignes.length; i++) {
+    if (ANCRE_ANNONCE.test(lignes[i])) annonces++;
+    else if (ANCRE_FICHE.test(lignes[i])) fiches++;
+  }
+  return { annonces: annonces, fiches: fiches, total: annonces + fiches };
+}
+
 function annoncesManquantes(rawText, titresRendus) {
   var clef = function (s) {
     return String(s || '').replace(/\s+/g, ' ').trim().slice(0, 60).toUpperCase();
@@ -1589,4 +1682,4 @@ function comparerCaracteristiques(a, b) {
   return { compatible: conflits.length === 0, conflits: conflits, concordances: concordances };
 }
 
-module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickoutil, parseIdealo: parseIdealo, parseAuto: parseAuto, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, raisonAucuneSource: raisonAucuneSource, enMillis: enMillis, SOURCE_FRESH_MS: SOURCE_FRESH_MS, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage, titresAttendus: titresAttendus, annoncesManquantes: annoncesManquantes, extraireCaracteristiques: extraireCaracteristiques, comparerCaracteristiques: comparerCaracteristiques, planBalayage: planBalayage, rangDansPlan: rangDansPlan, OUTILS: OUTILS, SERIES: SERIES, nomenclature: nomen };
+module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickoutil, parseIdealo: parseIdealo, parseAuto: parseAuto, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, raisonAucuneSource: raisonAucuneSource, enMillis: enMillis, SOURCE_FRESH_MS: SOURCE_FRESH_MS, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage, titresAttendus: titresAttendus, compterTuiles: compterTuiles, annoncesManquantes: annoncesManquantes, extraireCaracteristiques: extraireCaracteristiques, comparerCaracteristiques: comparerCaracteristiques, planBalayage: planBalayage, rangDansPlan: rangDansPlan, OUTILS: OUTILS, SERIES: SERIES, nomenclature: nomen };

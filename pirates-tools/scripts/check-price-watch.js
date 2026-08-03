@@ -934,6 +934,97 @@ module.exports = async function () {
       '⛔ PRÉALABLE : et rien n\'est écarté quand rien n\'est contredit — un '
       + '`typeRejete` qui se remplit tout seul rendrait la trace illisible');
 
+    /* ⛔⛔ UNE TUILE PAR PAGE DISPARAISSAIT SANS LAISSER DE TRACE — ni dans les
+       fiches, ni dans les écartées, ni dans les perdues, ni dans les réfs vues.
+       L'user, mot pour mot : « il y a 60 cartes produits avec 60 prix et les 60
+       sont cliquables ». J'en lisais 59 et mes DEUX compteurs disaient « rien
+       ne manque » : ils ne regardaient que « Vendu par : » et les titres
+       commençant par « MARQUE RÉF ».
+       Cause : une tuile-fiche ne s'ouvrait que sur « MARQUE RÉF ». Quand
+       idealo écrit « Meuleuse compacte 125 mm - MARQUE - RÉF », la tuile
+       entière est avalée par sa voisine — et son prix avec.
+       ⛔ Remède : chaque tuile s'annonce elle-même. Une fiche écrit « N offres »
+       puis son prix ; une annonce écrit « Vendu par : » puis son prix. On ferme
+       sur le PRIX, parce que c'est lui qu'on est venu chercher.
+       ⚠️ Le harnais donne TROIS tuiles dont la deuxième a un titre sans marque
+       en tête : c'est exactement le gabarit qui la faisait disparaître. */
+    var troisTuiles = [
+      'MAKITA ZZK368P3T', 'Pack outillage sans fil, 18 V, Li-Ion', '12 offres', 'à partir de649,68 €', '',
+      'Meuleuse compacte 125 mm - MAKITA - ZZG404S2T-QW', 'Meuleuse d’angle, 1 batterie', '3 offres', 'à partir de693,49 €', '',
+      'MAKITA ZZS572P2', 'Scie circulaire portative, 1 batterie', '5 offres', 'à partir de299,00 €'
+    ].join('\n');
+    var rTuiles = pi(troisTuiles, 'MAKITA');
+    ok(rTuiles.items.length + rTuiles.sansRef.length === 3,
+      '⛔⛔ TROIS tuiles sur la page, TROIS lignes lues — celle dont le titre ne '
+      + 'commence pas par la marque comprise (' + rTuiles.items.length + ' + '
+      + rTuiles.sansRef.length + ')');
+    ok(rTuiles.sansRef.some(function (x) { return x.prix === 693.49; }),
+      '⛔⛔ ARGENT : et elle sort AVEC SON PRIX. Avant, la tuile entière était '
+      + 'avalée par sa voisine et 693,49 € disparaissaient sans une trace ('
+      + JSON.stringify(rTuiles.sansRef.map(function (x) { return x.prix; })) + ')');
+    ok(rTuiles.items.length === 2 && rTuiles.items[0].price === 649.68
+      && rTuiles.items[1].price === 299.00,
+      '⛔⛔ ARGENT : et les voisines gardent LEUR prix — une tuile qu\'on ouvre ne '
+      + 'doit pas décaler celles d\'à côté ('
+      + JSON.stringify(rTuiles.items.map(function (x) { return x.price; })) + ')');
+
+    /* ⛔ LE COMPTE BRUT DES TUILES — c'est LUI qui répond à « la page en a-t-elle
+       60 ? ». Il ne dépend d'aucun titre, d'aucun repli, d'aucun vocabulaire :
+       seulement des deux ancres que la page ne peut pas ne pas écrire. */
+    var tui = pp.compterTuiles(troisTuiles);
+    ok(tui.total === 3 && tui.fiches === 3 && tui.annonces === 0,
+      '⛔ le compte brut voit les 3 tuiles-fiches sans rien devoir au parseur ('
+      + JSON.stringify(tui) + ')');
+    /* ⛔ PRÉALABLE — le bandeau « Produits favoris » écrit lui aussi « à partir
+       de » et un prix, mais JAMAIS « N offres ». Sans ce cas, un compteur qui
+       gonflerait de deux tuiles par page resterait vert, et l'user chercherait
+       un trou qui n'existe pas. */
+    var avecBandeau = troisTuiles + '\n\nProduits favoris\n\nSmartphone 5G\nApple iPhone 17\n\n168\nNote ∅ 18/20\nà partir de\n784,99 €';
+    var tuiB = pp.compterTuiles(avecBandeau);
+    ok(tuiB.total === 3,
+      '⛔ PRÉALABLE : le bandeau de produits favoris ne compte pas comme une tuile '
+      + '— il écrit « à partir de » mais jamais « N offres » (' + tuiB.total + '/3)');
+    /* ⛔ ET LE TITRE ATTENDU D'UNE FICHE EST SON TITRE, PAS SON SOUS-TITRE.
+       Une fiche écrit titre PUIS sous-titre PUIS « N offres » : s'arrêter à la
+       ligne du dessus rend « Pack outillage sans fil, 18 V, Li-Ion », qui ne
+       se rapproche d'AUCUN titre rendu — et le compteur crierait au loup à
+       chaque fiche. Un sabotage était resté vert faute de ce cas : la règle
+       existait, rien ne la mesurait. */
+    var attTuiles = pp.titresAttendus(troisTuiles);
+    ok(attTuiles.indexOf('MAKITA ZZK368P3T') !== -1
+      && attTuiles.indexOf('MAKITA ZZS572P2') !== -1,
+      '⛔ le titre attendu d\'une fiche est SON TITRE, pas le sous-titre qui le '
+      + 'suit (' + JSON.stringify(attTuiles) + ')');
+    ok(pp.annoncesManquantes(troisTuiles,
+      rTuiles.items.map(function (x) { return x.name; })
+        .concat(rTuiles.sansRef.map(function (x) { return x.titre; }))).length === 0,
+      '⛔ …et le rapprochement retombe donc à ZÉRO manquante sur une page dont '
+      + 'tout est lu — un compteur qui crie au loup finit ignoré ('
+      + JSON.stringify(pp.annoncesManquantes(troisTuiles,
+        rTuiles.items.map(function (x) { return x.name; })
+          .concat(rTuiles.sansRef.map(function (x) { return x.titre; })))) + ')');
+    /* ⛔⛔ ARGENT — ET SON PRIX NE DOIT PAS ATTERRIR SUR LA DERNIÈRE ANNONCE.
+       Trouvé en éprouvant une page mixte : la dernière annonce, que rien ne
+       fermait, avalait ce bandeau et ressortait à 784,99 € — LE PRIX DE
+       L'iPHONE — au lieu de ses 695,00 €. Même défaut que le téléphone posé
+       sur une scie (E-309), resté vivant sur le chemin des annonces. */
+    var derniereAnnonce = [
+      'Nettoyeur haute pression 190 bars - MAKITA - ZZP111X1',
+      'Vendu par : UnMarchand.fr', 'Détails de l’offre',
+      '3 à 6 jours ouvrés', 'Livraison gratuite', '695,00 € TVA incluse',
+      '', 'Produits favoris', '', 'Smartphone 5G', 'Apple iPhone 17',
+      '', '168', 'Note ∅ 18/20', 'à partir de', '784,99 €'
+    ].join('\n');
+    var rDer = pi(derniereAnnonce, 'MAKITA');
+    ok(rDer.sansRef.length === 1 && rDer.sansRef[0].prix === 695.00,
+      '⛔⛔ ARGENT : la DERNIÈRE annonce garde son prix (695,00 €) et n\'attrape '
+      + 'pas celui du bandeau qui la suit — un prix d\'iPhone sur un nettoyeur ('
+      + JSON.stringify(rDer.sansRef.map(function (x) { return x.prix; })) + ')');
+    ok(!rDer.items.some(function (x) { return x.price === 784.99; })
+      && !rDer.sansRef.some(function (x) { return x.prix === 784.99; }),
+      '⛔⛔ ARGENT : et 784,99 € n\'apparaît NULLE PART — un prix qui n\'est celui '
+      + 'd\'aucun outil de la marque ne doit devenir aucun coût d\'achat');
+
     var sansTout = pi(sansAncres(pageI, 'tout'), 'MAKITA');
     ok(sansTout.items.length === ri.length
       && sansTout.sansRef.length === rid.sansRef.length,
