@@ -556,3 +556,41 @@ Ce n'est pas un simple `× N`, et c'est pour ça que la note existe :
 dû ; ce fichier-ci garde les décisions qui doivent **ressortir au bon moment**.
 Le jour où on ouvrira la quincaillerie en lots, ces quatre points sont ce qui
 sépare une tarification juste d'une tarification qui a l'air juste.
+
+---
+
+## D-018 — Phase d'essai : le traqueur ne touche PAS Firestore
+
+**Posée par l'user le 03/08/2026**, en toutes lettres : « on continue de tester
+à sec, je ne veux pas que ça utilise Firebase pour l'instant ». **Jamais levée.**
+
+**Ce qu'elle a coûté quand je l'ai enfreinte**, le 04/08. Je lui ai fait
+remplacer `&sec=1` par `&dryRun=1` pour qu'il obtienne ses baisses de prix.
+`dryRun` n'écrit rien — mais il **lit la collection entière** : mesuré, ~945
+documents par instance, jusqu'à 4 instances par balayage, soit **~3 780
+lectures** contre **zéro** à sec. Son quota a sauté, son administration s'est
+fermée, et il ne l'a vu qu'après. Ses mots : « à aucun moment je t'avais demandé
+de passer en réel, tu as pris la décision à ma place ».
+
+⛔ **Ce n'était pas une erreur de mesure.** L'information était écrite,
+disponible, exacte. C'est une contrainte connue et non appliquée — et le mode à
+sec avait justement été créé APRÈS un premier quota épuisé. J'ai désarmé un
+filet qu'on avait posé nous-mêmes, pour un confort de mesure.
+
+**Ce qui tient la décision, maintenant :**
+
+1. **Le mode à sec calcule les prix.** Il n'y a plus de raison d'en sortir :
+   moyenne de baisse, dix plus fortes baisses, produits reconnus — tout est
+   rendu depuis `products.json` lu sur disque, config par `defaults()`.
+   La base du harnais **explose au premier contact** avec Firestore : un
+   résultat prouve donc qu'aucune lecture n'a eu lieu.
+2. **`check-mode-essai`** refuse toute URL de traqueur écrite dans la
+   documentation qui ne porte pas `sec=1`, tant que cette décision est en
+   vigueur. Une consigne qu'aucune porte ne défend se refranchit toute seule.
+
+⛔ **COMMENT LEVER CETTE DÉCISION.** Elle ne se lève pas dans une conversation :
+elle se lève ICI, en remplaçant `EN VIGUEUR` par la date de levée et le motif.
+Tant que la ligne dit `EN VIGUEUR`, aucune URL sans `sec=1` ne doit être
+proposée — et la porte le vérifie.
+
+**État : EN VIGUEUR** *(04/08/2026)*

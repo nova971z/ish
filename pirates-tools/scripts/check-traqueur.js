@@ -115,7 +115,7 @@ module.exports = function () {
     /* On cherche un raccourci `brand=MARQUE` dans la doc. La comparaison est
        insensible à la casse : la doc écrit MAKITA, le catalogue écrit Makita. */
     var re = new RegExp('brand=' + marque.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-      + '&dryRun=(\\d)', 'i');
+      + '&(?:[a-z0-9=&]*?)(dryRun=\\d|sec=1)', 'i');
     var m = doc.match(re);
 
     if (!m) {
@@ -126,7 +126,16 @@ module.exports = function () {
         + 'Soit on lui crée une source, soit on l\'inscrit dans SANS_SOURCE avec son motif.');
       return;
     }
-    if (m[1] !== '0') {
+    /* ⛔⛔ `sec=1` EST UN MODE DOCUMENTÉ VALIDE — et c'est la décision D-018.
+       Le 04/08, cette porte exigeait `dryRun=N` : en corrigeant la doc pour la
+       phase d'essai, j'ai rendu la porte rouge sur une doc devenue JUSTE. Une
+       porte qui refuse la vérité est une porte à corriger, pas une doc à
+       tordre. `sec=1` dit explicitement le mode, ne lit ni n'écrit rien, et
+       c'est exactement ce que l'user a demandé.
+       ⚠️ Ce qui reste gardé : chaque marque doit avoir un raccourci DOCUMENTÉ,
+       et son mode doit être ÉCRIT. Un mode tu ne se distingue pas d'un oubli. */
+    if (/^sec=/i.test(m[1])) return;
+    if (m[1].slice(-1) !== '0') {
       errors.push('[check-traqueur] ⛔ le raccourci de `' + marque + '` (' + n + ' fiche(s)) '
         + 'est DOCUMENTÉ en `dryRun=' + m[1] + '` : dans ce mode il LIT la page et n\'écrit '
         + 'RIEN. C\'est un mode d\'essai, pas un état de repos.\n      '

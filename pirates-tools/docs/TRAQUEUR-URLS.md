@@ -1,5 +1,17 @@
 # 🔁 Traqueur de prix — URL des raccourcis iPad (sauvegarde)
 
+> ⛔⛔ **PHASE D'ESSAI — TOUTES LES ADRESSES CI-DESSOUS PORTENT `&sec=1`.**
+> Décision D-018 de l'user, 03/08/2026 : « on continue de tester à sec, je ne
+> veux pas que ça utilise Firebase pour l'instant ». Le 04/08, je lui ai fait
+> remplacer ce drapeau par `&dryRun=1` pour obtenir ses baisses de prix :
+> `dryRun` n'écrit rien, mais il **lit la collection entière** — mesuré, ~3 780
+> lectures par balayage contre **zéro** à sec. Son quota a sauté et son
+> administration s'est fermée.
+> ⛔ Le mode à sec **calcule désormais les prix** : il n'y a plus aucune raison
+> d'en sortir. `check-mode-essai` refuse toute adresse écrite ici sans `sec=1`
+> tant que D-018 dit `EN VIGUEUR` dans `docs/DECISIONS.md`.
+
+
 > ⛔⛔ **CE FICHIER EST UNE COPIE DE SECOURS. IL NE PROUVE RIEN.**
 > La configuration qui TOURNE vit dans l'app Raccourcis de l'iPad de l'user.
 > Ce document ne peut que la retranscrire — et il se périme sans prévenir.
@@ -20,7 +32,7 @@
 >
 > 1. **health** → autorise `pirates-tools.com` (GET, ne rien changer).
 > 2. **cotébrico** → la page marque, tous les produits sur UNE page (GET).
-> 3. **POST** → `…/api/admin?type=price-watch&brand=…` : Méthode **POST**, Corps
+> 3. **POST** → `…/api/admin?type=price-watch&brand=…&sec=1` : Méthode **POST**, Corps
 >    **JSON**, champ **`text`** = variable **« Contenu de l'URL »** (la ligne
 >    cotébrico juste au-dessus). **En-tête obligatoire** (section « En-têtes ») :
 >    Clé = **`x-watch-secret`**, Valeur = **ta clé `WATCH_SECRET` complète**
@@ -60,12 +72,12 @@ La **1ʳᵉ URL (health) est identique pour les 3 marques** :
 ## 🟡 DeWALT
 1. `https://pirates-tools.com/api/health`
 2. `https://www.cotebrico.fr/4/dewalt?order=product.price.desc&resultsPerPage=200`
-3. `https://pirates-tools.com/api/admin?type=price-watch&brand=DEWALT&dryRun=0`
+3. `https://pirates-tools.com/api/admin?type=price-watch&brand=DEWALT&sec=1`
 
 ## 🔵 Makita
 1. `https://pirates-tools.com/api/health`
 2. `https://www.cotebrico.fr/1/makita?order=product.price.desc&resultsPerPage=800`
-3. `https://pirates-tools.com/api/admin?type=price-watch&brand=MAKITA&dryRun=0`
+3. `https://pirates-tools.com/api/admin?type=price-watch&brand=MAKITA&sec=1`
 
 > ⚠️ **URL CORRIGÉE le 26/07/2026.** L'ancienne était filtrée
 > (`nombre_de_batteries_fournies-aucune` + `type_de_moteur-brushless` +
@@ -78,7 +90,7 @@ La **1ʳᵉ URL (health) est identique pour les 3 marques** :
 ## ⚫ Festool
 1. `https://pirates-tools.com/api/health`
 2. `https://www.cotebrico.fr/8-outils-electroportatifs/s-1/marque-festool/categories_2-outils_electroportatifs?resultsPerPage=112`
-3. `https://pirates-tools.com/api/admin?type=price-watch&brand=FESTOOL&dryRun=0`
+3. `https://pirates-tools.com/api/admin?type=price-watch&brand=FESTOOL&sec=1`
 
 > ⚠️ **CE DOCUMENT ÉTAIT EN RETARD, PAS LE RACCOURCI.** Il portait encore
 > `dryRun=1` et `resultsPerPage=100` le 01/08/2026, alors que le raccourci
@@ -104,7 +116,7 @@ Le raccourci a **quatre** actions au lieu de trois :
 3. **Répéter pour chaque** élément de `urls` :
    a. « Obtenir le contenu de l'URL » sur l'élément courant *(GET, la page)* ;
    b. « Obtenir le contenu de l'URL » sur
-      `https://pirates-tools.com/api/admin?type=price-watch&brand=DEWALT&source=idealo&scan=1&dryRun=0`
+      `https://pirates-tools.com/api/admin?type=price-watch&brand=DEWALT&source=idealo&scan=1&sec=1`
       — **POST**, corps **JSON**, champ **`text`** = le contenu obtenu en (a),
       en-tête **`x-watch-secret`**.
       *(C'est exactement la valeur de `postUrl` rendue à l'étape 2.)*
@@ -136,7 +148,7 @@ Même raccourci en 3 actions, avec **deux différences** :
 
 1. l'URL 2 = la page « marque » du NOUVEAU site (tous les produits, une page) ;
 2. l'URL 3 porte **`&source=<slug>`** — un nom court pour ce site, en
-   minuscules : `…/api/admin?type=price-watch&brand=MAKITA&source=nouveausite&dryRun=1`
+   minuscules : `…/api/admin?type=price-watch&brand=MAKITA&source=nouveausite&sec=1`
    *(premier passage en `dryRun=1` pour lire ce qui est reconnu, puis `0`.)*
 
 **Le calculateur prend TOUJOURS le moins cher des sources valides** — fraîches
@@ -155,7 +167,7 @@ site l'écrit autrement, une capture d'une carte en rupture suffit à ajuster
 ## 🟤 DeWALT — clickoutil (2ᵉ source, créé par l'user le 01/08/2026)
 1. `https://pirates-tools.com/api/health`
 2. `https://www.clickoutil.com/recherche?controller=search&s=Dewalt&order=product.price.desc&resultsPerPage=600`
-3. `https://pirates-tools.com/api/admin?type=price-watch&brand=DEWALT&source=clickoutil&dryRun=1`
+3. `https://pirates-tools.com/api/admin?type=price-watch&brand=DEWALT&source=clickoutil&sec=1`
 
 > Retranscrit depuis SES captures du 01/08/2026 (IMG_5578 → IMG_5579 : il a
 > ajouté `&source=clickoutil` lui-même entre les deux).
@@ -190,7 +202,7 @@ site l'écrit autrement, une capture d'une carte en rupture suffit à ajuster
 > 2. **Obtenir le contenu de l'URL** → page 1, SON URL exacte :
 >    `https://www.idealo.fr/prechcat/100oM122663.html?q=dewalt&sortKey=maxPrice`
 > 3. **Obtenir le contenu de l'URL** → POST
->    `https://pirates-tools.com/api/admin?type=price-watch&brand=DEWALT&source=idealo&scan=1&dryRun=1`
+>    `https://pirates-tools.com/api/admin?type=price-watch&brand=DEWALT&source=idealo&scan=1&sec=1`
 >    — Méthode **POST**, Corps **JSON**, champ **`text`** = « Contenu de l'URL »
 >    (l'action 2). En-tête : `x-watch-secret` = la clé complète.
 > 4. **Répéter 66 fois** — et DANS la répétition :
@@ -236,7 +248,7 @@ agnostique de la marque (il cherche « MARQUE + référence » dans les titres).
 Faire un 1er passage en `dryRun=1` pour vérifier ce qui est reconnu.
 
 - Flex : page marque cotébrico + `?order=product.price.desc&resultsPerPage=400`
-  → `…/api/admin?type=price-watch&brand=FLEX&dryRun=1`
+  → `…/api/admin?type=price-watch&brand=FLEX&sec=1`
 - Wera : idem → `brand=WERA`
 - Facom : idem → `brand=FACOM`
 

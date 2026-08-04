@@ -158,6 +158,7 @@ var reqDeploi   = safeRequire('./check-deploiement', 'check-deploiement');
 // cote — et des couts d'achat qui ne descendent pas.
 var reqPlanTrq  = safeRequire('./check-plan-traqueur', 'check-plan-traqueur');
 var reqVisuels  = safeRequire('./check-visuels', 'check-visuels');
+var reqEssai    = safeRequire('./check-mode-essai', 'check-mode-essai');
 // Le module Revolut est ecrit AVANT d'avoir pu appeler le reseau : tout ce qui
 // est PUR (signature contre le vecteur officiel, commission d'un ordre
 // reessaye, table des etats) s'eprouve ici, sinon la 1re verification aurait
@@ -238,6 +239,7 @@ var reqReconc   = safeRequire('./check-reconciliation', 'check-reconciliation');
   await runOne(reqTraqueur, 'check-traqueur');
   await runOne(reqDeploi,   'check-deploiement');
   await runOne(reqVisuels,  'check-visuels');
+  await runOne(reqEssai,    'check-mode-essai');
   await runOne(reqPlanTrq,  'check-plan-traqueur');
   await runOne(reqRevolut,  'check-revolut');
   await runOne(reqReconc,   'check-reconciliation');
