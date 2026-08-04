@@ -20,9 +20,9 @@
 | **O4** | Contrainte connue, non appliquée | 8 | §1 | `garde-entonnoir.js` |
 | **O5** | Outil artisanal au lieu de l'outil existant | 1 | §1.4 | aucune — humaine |
 | **O6** | Copie périmée au lieu de la source vivante | 5 | §4.4 | `p7-architecture.js` |
-| **O7** | **Lire le silence comme un succès** | 7 | §3 · §4.3 | `sabotage.mjs` · `ci.js` · `check-ancres.js` |
+| **O7** | **Lire le silence comme un succès** | 8 | §3 · §4.3 | `sabotage.mjs` · `ci.js` · `check-ancres.js` |
 
-**73 erreurs, 7 mécanismes.** O1 et O2 en concentrent **43 à elles deux** :
+**74 erreurs, 7 mécanismes.** O1 et O2 en concentrent **43 à elles deux** :
 c'est là qu'il faut regarder en premier, toujours.
 
 ⚠️ **O7 est né le 01/08/2026** d'une règle qui existait déjà — « non exécuté
@@ -262,6 +262,7 @@ règle qui ne couvre qu'un endroit se fait contourner par tous les autres.
 | **E-705** | « CI verte, donc les portes tournent » | `safeRequire` avalait toute porte **présente mais cassée** sous un `ℹ️ module manquant ignoré` — `audit/p3-endpoints` (authentification des points d'entrée) était **mort depuis la migration** | sabotage de la porte : CI restée **verte** |
 | **E-706** | « commande non exécutée » | mon propre outil cherchait `Cannot find module` **n'importe où** dans la sortie : une commande qui tourne parfaitement peut l'imprimer. Fausse alerte de mon détecteur | la commande avait tourné, code 1, sortie complète |
 | **E-707** | « lot complet : 68/68 harnais, 1115/1115 » | une SEULE exécution, annoncée comme un fait acquis. La seconde, sur le MÊME code, a rendu 67/68 : `pdp-specs` lisait une opacité animée à 1500 ms fixes, pile sur son seuil de 0,9 — et j'avais lancé deux lots EN PARALLÈLE, ce qui a suffi à faire basculer la mesure | seconde exécution du même code · mesure de l'opacité à 500/1500/3000/5000 ms |
+| **E-708** | le noyau a rendu « ❌ à reprendre : accordE2E » — un harnais vert à toutes les exécutions précédentes — et **j'ai poussé le commit quand même**, sans ouvrir le rouge | E-707 **par l'autre bout** : là j'annonçais un vert unique comme acquis, ici j'ai laissé passer un rouge unique sans le vérifier. Deux fautes empilées : (1) `node scripts/ci.js \| tail -3 && git commit` — `tail` rend **son** code de sortie, jamais celui de la CI, donc la conjonction ne garde rien ; (2) un rouge inattendu est une **information**, pas un aléa à contourner : le seul geste correct est de le relancer SEUL avant de conclure. Depuis, la sortie va dans un fichier et le code est relevé à part (`node scripts/ci.js > f 2>&1; echo $?`) | relance du noyau seul, sans lot parallèle : **accordE2E 18/18**, 99/99 assertions, 6/6 harnais verts. Bascule de mesure, comme E-707 — mais je ne pouvais pas le savoir au moment où j'ai poussé, et c'est exactement ça, la faute |
 
 **Antidote** : ne jamais conclure d'une **absence de signal**. Exiger une preuve
 **positive** que la mesure a eu lieu — empreinte avant/après pour une écriture,
