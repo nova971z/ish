@@ -37,7 +37,6 @@
 Électro portatif;jardin;DCMH3285;DEWALT DCMH3285 Tuyau d'arrosage robuste de qualité professionnelle 15,2 m x 1,6 cm pour jardin, jaune, noir;86,21;seul;;;AUCUN;;;;;;sans-ref;famille:machine;REF:DCMH3285|OUTIL;référence;OUTIL;1;;
 Électro portatif;batterie;DCB206;Batterie d'outil électrique 100% originale DeWALT 20V 6000mAh DCB206 DCB205 DCB200 DCF887 DCG405 DCD791 DCF922 DCF850 DC;86,39;pack;batterie;60;;9;;1;;;sans-ref;famille:energie;REF:DCB206|PACK;référence;PACK;6;;
 Électro portatif;sciage;;Induit moteur n093107 pour Scie a onglets;86,61;seul;scie à onglet;;AUCUN;;;;;;sans-ref;famille:machine;TIT:induit moteur n093107 pour scie a onglets;titre;OUTIL;4;;
-Électro portatif;meulage;SDFP01;Outils électriques multifonctionnels DeWalt sans fil, meuleuse d'angle sans balais, coupeur, clé électrique, polisseuse,;86,99;seul;meuleuse d'angle;18;AUCUN;;;;;;sans-ref;famille:machine;REF:SDFP01|OUTIL;référence;OUTIL;1;;
 Électro portatif;fixation;DCN890;DeWalt Chasse-clous de rechange pour Cloueur à béton sans fil DCN890 (DCN8901-XJ);87,02;seul;cloueur;18;AUCUN;;;;;;sans-ref;famille:machine;REF:DCN890|ACCESSOIRE;référence;ACCESSOIRE;1;;
 Électro portatif;fixation;DCN930P2;34° DNW clous en bande 2,8x50mm anneau galvanisé Cloueur sans fil DeWalt DCN930P2 DCN930N DV 2,2M;87,19;pack;cloueur;;AUCUN;5;;2;;;sans-ref;famille:machine;REF:DCN930|PACK;référence;PACK;13;;
 Électro portatif;meulage;DCG409;DEWALT-meuleuse d'angle DCG409, outil électrique sans fil sans balais 20V, machine de découpe, polisseuse portable recha;87,39;seul;meuleuse d'angle;20;AUCUN;;;;;;sans-ref;famille:machine;REF:DCG409|OUTIL;référence;OUTIL;9;;
@@ -88,7 +87,6 @@
 Électro portatif;percage;DCDW101;DEWALT DCDW101;101,76;seul;;;AUCUN;;;;;;inconnu;famille:machine;REF:DCDW101|OUTIL;référence;OUTIL;1;;
 Électro portatif;aspiration;DCV517N-XJ;DEWALT DCV517N-XJ;101,90;seul;aspirateur;;AUCUN;;;0;;;inconnu;famille:machine;REF:DCV517|OUTIL;référence;OUTIL;2;;
 Électro portatif;vissage-choc;DCF85M;Perceuse et visseuse à chocs sans balais DEWALT DCF85M 20V | Outil électrique avec couple de 205 Nm, 0-3250 tr/min, mand;101,99;pack;visseuse à chocs;20;AUCUN;;;;;;sans-ref;famille:machine;REF:DCF85|PACK;référence;PACK;2;;
-Électro portatif;percage;DCD805;100% Original DEWALT 20V 6.0Ah Batterie au lithium rechargeable sans balais, tournevis électrique compact, perceuse à ma;102,10;pack;perceuse à percussion;20;AUCUN;6;;0;;;sans-ref;famille:machine;REF:DCD805|PACK;référence;PACK;35;;
 Électro portatif;mesure;DC528N;DeWalt DC 528N;102,10;seul;projecteur;;AUCUN;;;;;;sans-ref;famille:machine;REF:DC528|OUTIL;référence;OUTIL;1;;
 Électro portatif;confort;DCR011;DeWALT DCR011-XJ — Enceinte bluetooth 18V DCR011-XJ;102,90;pack;radio de chantier;;AUCUN;;;;;;reconnu;famille:machine;REF:DCR011|PACK;référence;PACK;1;DCR011-XJ;178,36
 Électro portatif;batterie;DCBP518;DEWALT DCBP518;103,20;pack;batterie;18;;5;;1;;;inconnu;famille:energie;REF:DCBP518|PACK;référence;PACK;5;;
@@ -164,7 +162,6 @@
 Électro portatif;percage;DCF620N;DEWALT DCF620N;125,12;seul;perceuse-visseuse;;AUCUN;;;0;;;inconnu;famille:machine;REF:DCF620|OUTIL;référence;OUTIL;12;;
 Électro portatif;combo;DWMT45424;DEWALT DWMT45424 Ensemble d'outils de mécanicien, 84 pièces SAE/métriques avec cliquet à profil bas 72 dents, entraîneme;125,67;pack;pack d'outils;;AUCUN;;;;;;sans-ref;famille:machine;REF:DWMT45424|PACK;référence;PACK;1;;
 Électro portatif;meulage;DWE4257;DEWALT DWE4257;125,99;seul;meuleuse d'angle;;AUCUN;;;;;;inconnu;famille:machine;REF:DWE4257|OUTIL;référence;OUTIL;4;;
-Électro portatif;;DWE60V;Batterie Dewalt originale 60V/20V, batterie 5AH 6AH 9AH, batterie pour outils électriques DeWalt série DCF DCD DCG DCS D;125,99;pack;;60;AUCUN;9;;1;;;sans-ref;famille:machine;REF:DWE60|PACK;référence;PACK;3;;
 Électro portatif;fixation;DPN1850PP-XJ;DEWALT DPN1850PP-XJ;127,03;seul;cloueur;;AUCUN;;;;;;inconnu;famille:machine;REF:DPN1850|OUTIL;référence;OUTIL;2;;
 Électro portatif;jardin;DCMBL562N-XJ;DeWALT DCMBL562N-XJ — Souffleur 18V DCMBL562N-XJ;127,15;seul;;18;AUCUN;;;0;;;reconnu;famille:machine;REF:DCMBL562|OUTIL;référence;OUTIL;1;DCMBL562N-XJ;217,82
 Électro portatif;meulage;DWE4233-QS;DEWALT DWE4233-QS Meuleuse Ø 125 mm - 1400W - Interrupteur palette filaire & Coffret de 10 Disques Pour Meuleuse - Dimen;127,54;pack;meuleuse;;AUCUN;;;;10;;sans-ref;famille:machine;REF:DWE4233|PACK;référence;PACK;1;;
@@ -270,7 +267,6 @@
 Électro portatif;batterie;DWHT78200-XJ;DeWalt Télémètre laser 60m, batterie lithium rechargeable (DWHT78200-XJ);159,00;pack;batterie;;;;;1;;;sans-ref;famille:energie;REF:DWHT78200|PACK;référence;PACK;1;;
 Électro portatif;batterie;DCP580N-XJ;DEWALT Rabot Brushless XR 18V sans Batterie ni Chargeur DCP580N-XJ - Coffret TSTAK & Dt3905 lame rabot HSS 82mm;159,38;pack;batterie;18;TSTAK;;;0;;;sans-ref;famille:energie;REF:DCP580|PACK;référence;PACK;15;;
 Électro portatif;vissage-choc;DCF903B;DEWALT DCF903B XTREME 12V MAX Brushless 3/8 in. Cordless Impact Wrench (Tool Only);159,58;seul;clé à chocs;12;AUCUN;;;;;;sans-ref;famille:machine;REF:DCF903|OUTIL;référence;OUTIL;3;;
-Électro portatif;sciage;DWE560-GB;DeWALT DWE560-QS — Scie circulaire 1350W Ø184 mm DWE560-QS;160,40;pack;scie circulaire;;AUCUN;;;1;;;reconnu;famille:machine;REF:DWE560|PACK;référence;PACK;1;DWE560-QS;376,60
 Électro portatif;chargeur;DCB104-QW;DEWALT DCB104-QW;160,65;pack;chargeur;;;;;;;;inconnu;famille:energie;REF:DCB104|PACK;référence;PACK;1;;
 Électro portatif;percage;DCF622;DEWALT DCF622;160,87;seul;visseuse à placo;;AUCUN;;;;;;inconnu;famille:machine;REF:DCF622|OUTIL;référence;OUTIL;3;;
 Électro portatif;aspiration;DXV234P;DEWALT DXV234P;161,99;seul;aspirateur;;AUCUN;;;;;;inconnu;famille:machine;REF:DXV234|OUTIL;référence;OUTIL;1;;
@@ -500,10 +496,8 @@
 Électro portatif;chantier;DXCMS156RE;DEWALT DXCMS156RE;249,90;seul;compresseur;;AUCUN;;;;;;inconnu;famille:machine;REF:DXCMS156|OUTIL;référence;OUTIL;1;;
 Électro portatif;chantier;;Compresseur électrique DeWalt 6L 203V;249,99;seul;compresseur;;AUCUN;;;;;;sans-ref;famille:machine;TIT:compresseur lectrique 6l 203v;titre;OUTIL;1;;
 Électro portatif;vissage-choc;DCF520;DEWALT DCF520;250,00;seul;cliquet;18;AUCUN;;;;;;inconnu;famille:machine;REF:DCF520|OUTIL;référence;OUTIL;1;;
-Électro portatif;confort;DCR029;DeWALT DCR029-QW — Radio de chantier 18V DCR029-QW Bluetooth;250,13;pack;radio de chantier;54;AUCUN;;;;;;reconnu;famille:machine;REF:DCR029|PACK;référence;PACK;1;DCR029-QW;297,72
 Électro portatif;mesure;DCL079-XJ;DEWALT DCL079-XJ;250,99;pack;projecteur;;AUCUN;;;1;;;inconnu;famille:machine;REF:DCL079|PACK;référence;PACK;1;;
 Électro portatif;meulage;;Dewalt Duo de meuleuses 125/230 mm;251,15;seul;meuleuse;;AUCUN;;;;;;sans-ref;famille:machine;TIT:duo de meuleuses 125 230 mm;titre;OUTIL;1;;
-Électro portatif;perforation;DCH172;DeWALT DCH172N-XJ — Perforateur SDS Plus 18V DCH172N-XJ;251,24;pack;perforateur;;TSTAK;2;;1;;;reconnu;famille:machine;REF:DCH172|PACK;référence;PACK;10;DCH172N-XJ;266,98
 Électro portatif;combo;DCK2067D2T-QW;DEWALT - Kit 2 outils XR 18V 2Ah Li-Ion : Perceuse visseuse Compact Brushless + Gonfleur - DCK2067D2T-QW;251,45;pack;pack d'outils;18;TSTAK;2;2;2;;;sans-ref;famille:machine;REF:DCK2067|PACK;référence;PACK;2;;
 Électro portatif;meulage;;"DEWALT Meuleuse d'angle électronique ""Le Béton 125 mm - 1500 W - 240 V & Coffret de 10 Disques Pour Meuleuse - Dimension";251,90;pack;meuleuse d'angle;;AUCUN;;;;10;;sans-ref;famille:machine;TIT:meuleuse d angle lectronique le b ton 125 mm 1500 w 240 v coffret de 10 disques pour meuleuse dimension;titre;PACK;1;;
 Électro portatif;bois;DCW220NT-XJ;DeWALT DCW220NT-XJ — Ponceuse à bande 18V DCW220NT-XJ;252,00;seul;;18;TSTAK;;;0;;;reconnu;famille:machine;REF:DCW220|OUTIL;référence;OUTIL;3;DCW220NT-XJ;384,04
@@ -518,7 +512,6 @@
 Électro portatif;vissage-choc;DCF902;DEWALT DCF902;255,16;seul;visseuse à chocs;;AUCUN;;;;;;inconnu;famille:machine;REF:DCF902|OUTIL;référence;OUTIL;1;;
 Électro portatif;batterie;DCB205;DeWALT DCB205 Non-Batterie Rechargeable-Piles;255,42;pack;batterie;;;;;1;;;sans-ref;famille:energie;REF:DCB205|PACK;référence;PACK;1;;
 Électro portatif;perforation;D25333K;DEWALT D25333K;256,00;seul;marteau perforateur;;AUCUN;;;;;;inconnu;famille:machine;REF:D25333|OUTIL;référence;OUTIL;1;;
-Électro portatif;meulage;DCG426;DeWALT DCG426N-XJ — Meuleuse droite XR 18V DCG426N-XJ;256,72;pack;meuleuse droite;18;AUCUN;4;;1;;;reconnu;famille:machine;REF:DCG426|PACK;référence;PACK;10;DCG426N-XJ;248,51
 Électro portatif;combo;DCK2062D2T-QW;DEWALT DCK2062D2T-QW;256,74;pack;pack d'outils;18;TSTAK;2;;2;;;inconnu;famille:machine;REF:DCK2062|PACK;référence;PACK;5;;
 Électro portatif;vissage-choc;DCF503D1-QW;DEWALT DCF503D1-QW;257,95;pack;cliquet;;AUCUN;2;;1;;;inconnu;famille:machine;REF:DCF503|PACK;référence;PACK;1;;
 Électro portatif;batterie;;Dewalt kit de batteries 18V 5,0Ah - lot de 2;258,28;pack;batterie;18;;5;;2;2;;sans-ref;famille:energie;TIT:kit de batteries 18v 5 0ah lot de 2;titre;PACK;1;;
@@ -526,7 +519,6 @@
 Électro portatif;chantier;DCE050N-XJ;DEWALT DCE050N-XJ;258,68;seul;pompe;;AUCUN;;;0;;;inconnu;famille:machine;REF:DCE050|OUTIL;référence;OUTIL;1;;
 Électro portatif;meulage;DCG404NT-XJ;DeWALT DCG404NT-XJ Corps De Meuleuse D'angle Compacte Sans Fil 18 V Li-ion Dans Un Coffret TSTAK - 125 Mm;258,83;pack;meuleuse d'angle;18;TSTAK;;;0;;;sans-ref;famille:machine;REF:DCG404|PACK;référence;PACK;9;;
 Électro portatif;percage;;DEWALT DEWALT Présentoir de comptoir Set de visseuses 12xDT71516M Quantité:1;258,99;pack;visseuse;;AUCUN;;;;;;sans-ref;famille:machine;TIT:pr sentoir de comptoir set de visseuses 12xdt71516m quantit 1;titre;PACK;1;;
-Électro portatif;sciage;DCS570;DeWALT DCS570N — Scie circulaire 18V XR Brushless Ø184 mm (machine seule);259,09;pack;scie circulaire;;AUCUN;4;;1;;;reconnu;famille:machine;REF:DCS570|PACK;référence;PACK;23;DCS570N;211,49
 Électro portatif;sciage;DCS578NT-XJ;DEWALT DCS578NT-XJ;259,18;seul;scie circulaire;;TSTAK;;;0;;;inconnu;famille:machine;REF:DCS578|OUTIL;référence;OUTIL;3;;
 Électro portatif;sciage;;DeWalt D1 (1x batterie 2 Ah avec chargeur en mallette);259,53;pack;scie sauteuse;;GENERIQUE;2;;1;;;sans-ref;famille:machine;TIT:d1 1x batterie 2 ah avec chargeur en mallette;titre;PACK;1;;
 Électro portatif;percage;DCD85MM2T;DeWalt McLaren DCD85MM2T Impact Drill incl. 2nd Battery, incl. Charger;259,90;pack;perceuse-visseuse;18;TSTAK;4;;2;;oui;sans-ref;famille:machine;REF:DCD85|PACK;référence;PACK;3;;
@@ -634,7 +626,6 @@
 Électro portatif;chargeur;DCB1104-12;Pack de 12 chargeurs DeWALT DCB1104-12 (DCB1104 - 12V 18V);335,00;pack;chargeur;18;;;;;12;;sans-ref;famille:energie;REF:DCB1104-12|PACK;référence;PACK;1;;
 Électro portatif;percage;D21520;DEWALT D21520;335,50;seul;perceuse à percussion;;AUCUN;;;;;;inconnu;famille:machine;REF:D21520|OUTIL;référence;OUTIL;1;;
 Électro portatif;percage;DCD999X1-QW;DEWALT DCD999X1-QW;335,50;pack;perceuse-visseuse;;AUCUN;9;;1;;;inconnu;famille:machine;REF:DCD999|PACK;référence;PACK;6;;
-Électro portatif;bois;DCE555;DeWALT DCE555N-XJ — Fraiseuse pour placo 18V DCE555N-XJ;337,00;pack;fraiseuse;18;AUCUN;1.7;;2;;;reconnu;famille:machine;REF:DCE555|PACK;référence;PACK;1;DCE555N-XJ;231,32
 Électro portatif;combo;DWK211;DEWALT DWK211;337,00;pack;pack d'outils;18;GENERIQUE;2;;2;;;inconnu;famille:machine;REF:DWK211|PACK;référence;PACK;1;;
 Électro portatif;sciage;DCS575N-XJ;DeWalt DCS575N-XJ Scie Circulaire XR Flexvolt 54V Brushless 190 mm sans Batterie ni Chargeur, Jaune, Taille Unique;337,48;pack;scie circulaire;54;AUCUN;;;0;;;sans-ref;famille:machine;REF:DCS575|PACK;référence;PACK;3;;
 Électro portatif;bois;DW621-QS;DEWALT DW621-QS;338,66;seul;défonceuse;;AUCUN;;;;;;inconnu;famille:machine;REF:DW621|OUTIL;référence;OUTIL;3;;
@@ -821,7 +812,6 @@
 Électro portatif;jardin;DCMBC823N-XJ;DEWALT DCMBC823N-XJ;514,00;seul;;54;AUCUN;;;0;;;inconnu;famille:machine;REF:DCMBC823|OUTIL;référence;OUTIL;1;;
 Électro portatif;;;Dewalt zszywacz 18v 2x2,0ah dcn701d2;515,90;seul;;18;;2;;;;;sans-ref;titre;TIT:zszywacz 18v 2x2 0ah dcn701d2;titre;OUTIL;1;;
 Électro portatif;jardin;DCMCS575X1-QW;DEWALT DCMCS575X1-QW;517,92;pack;tronçonneuse;54;AUCUN;9;;1;;;inconnu;famille:machine;REF:DCMCS575|PACK;référence;PACK;4;;
-Électro portatif;jardin;DCMCS574N-XJ;DEWALT DCMCS574N-XJ;518,42;pack;tronçonneuse;54;AUCUN;;;1;;;inconnu;famille:machine;REF:DCMCS574|PACK;référence;PACK;3;;
 Électro portatif;combo;DCK2068P2T;DEWALT DCK2068P2T;520,64;pack;pack d'outils;18;TSTAK;5;;2;;;inconnu;famille:machine;REF:DCK2068|PACK;référence;PACK;1;;
 Électro portatif;sciage;DWS774-QS;DEWALT - Scie à Onglet Radiale 230V - DWS774-QS - Scie Haute Performance avec Système XPS & Piètement Polyvalent pour Sc;521,87;seul;scie à onglet;;AUCUN;;;;;;sans-ref;famille:machine;REF:DWS774|ACCESSOIRE;référence;ACCESSOIRE;1;;
 Électro portatif;combo;DWK221;DEWALT DWK221;522,00;pack;pack d'outils;18;TSTAK;5;;2;;;inconnu;famille:machine;REF:DWK221|PACK;référence;PACK;1;;
@@ -940,7 +930,6 @@
 Électro portatif;combo;DWK402;DEWALT DWK402;777,00;pack;pack d'outils;18;AUCUN;5;;2;;;inconnu;famille:machine;REF:DWK402|PACK;référence;PACK;1;;
 Électro portatif;fixation;DCFS950P2-QW;DEWALT DCFS950P2-QW;778,38;pack;cloueur;;AUCUN;5;;2;;;inconnu;famille:machine;REF:DCFS950|PACK;référence;PACK;2;;
 Électro portatif;chantier;DXGNP35E;DEWALT DXGNP35E;778,40;seul;groupe électrogène;;AUCUN;;;;;;inconnu;famille:machine;REF:DXGNP35|OUTIL;référence;OUTIL;1;;
-Électro portatif;sciage;DWE7492;DeWALT DWE7492-QS — Scie sur table DWE7492-QS Ø250 mm;783,00;pack;scie circulaire;;AUCUN;;;;;;reconnu;famille:machine;REF:DWE7492|PACK;référence;PACK;1;DWE7492-QS;889,00
 Électro portatif;sciage;DCS727N;DEWALT DCS727N;783,08;seul;scie à onglet;;AUCUN;;;0;;;inconnu;famille:machine;REF:DCS727|OUTIL;référence;OUTIL;2;;
 Électro portatif;mesure;DCLE05211R;DEWALT DCLE05211R;792,16;pack;niveau laser;;TSTAK;;;;;;inconnu;famille:machine;REF:DCLE05211|PACK;référence;PACK;5;;
 Électro portatif;mesure;DCLE34035D1-QW;DEWALT DCLE34035D1-QW;805,01;pack;niveau laser;;AUCUN;2;;1;;;inconnu;famille:machine;REF:DCLE34035|PACK;référence;PACK;1;;

@@ -1,7 +1,7 @@
 ﻿Famille;Rayon;Référence;Titre;Prix idealo (€);Pack;Type;Voltage;Coffret;Ah;Nb outils;Nb batteries;Nb pièces;Édition limitée;Origine;Signal de classement;Clé de doublon;Niveau de clé;Variante;Doublons fusionnés;Réf. fiche du site;Prix actuel du site (€)
 Électro portatif;sciage;DCS355N-XJ;DeWALT DCS355N-XJ — Multicutter Outil multifonction DCS355N-XJ;105,99;seul;;;AUCUN;;;0;;;reconnu;famille:machine;REF:DCS355|OUTIL;référence;OUTIL;8;DCS355N-XJ;205,50
 Électro portatif;vissage-choc;DCF513N-XJ;DEWALT DCF513N-XJ;174,65;seul;cliquet;;AUCUN;;;0;;;inconnu;famille:machine;REF:DCF513|OUTIL;référence;OUTIL;4;;
-Électro portatif;percage;DCD805;100% Original DEWALT 20V 6.0Ah Batterie au lithium rechargeable sans balais, tournevis électrique compact, perceuse à ma;102,10;pack;perceuse à percussion;20;AUCUN;6;;0;;;sans-ref;famille:machine;REF:DCD805|PACK;référence;PACK;35;;
+Électro portatif;percage;DCD805;100% Original DEWALT 20V 6.0Ah Batterie au lithium rechargeable sans balais, tournevis électrique compact, perceuse à ma;80,69;seul;perceuse à percussion;20;AUCUN;6;;0;;;sans-ref;famille:machine;REF:DCD805|OUTIL;référence;OUTIL;11;;
 Électro portatif;jardin;DCM565N;DeWALT DCM565N-XJ — Tronçonneuse 18V 30 cm DCM565N-XJ;177,58;pack;tronçonneuse;18;AUCUN;;;1;;;reconnu;famille:machine;REF:DCM565|PACK;référence;PACK;7;DCM565N-XJ;388,93
 Électro portatif;combo;DCK795S2T;DEWALT DCK795S2T;247,98;seul;pack d'outils;;AUCUN;;;;;;inconnu;famille:machine;REF:DCK795|OUTIL;référence;OUTIL;2;;
 Électro portatif;percage;DCDW108;DEWALT DCDW108;247,50;seul;;;AUCUN;;;;;;inconnu;famille:machine;REF:DCDW108|OUTIL;référence;OUTIL;1;;
@@ -41,9 +41,8 @@
 Électro portatif;bois;DCW200D1;Dewalt DCW200D1 Ponceuse vibrante sans fil 18 V 108x115 mm + 1 x 2,0Ah Batteries + Chargeur + Coffret T-STAK;232,45;pack;ponceuse;18;TSTAK;2;;1;;;sans-ref;famille:machine;REF:DCW200|PACK;référence;PACK;8;;
 Électro portatif;sciage;DCS573NT;DeWALT DCS573NT-XJ — Scie circulaire 18V Ø190 mm DCS573NT-XJ;252,91;pack;scie circulaire;;TSTAK;;;0;;;reconnu;famille:machine;REF:DCS573|PACK;référence;PACK;4;DCS573NT-XJ;402,38
 Électro portatif;bois;DCW220NT-XJ;DeWALT DCW220NT-XJ — Ponceuse à bande 18V DCW220NT-XJ;252,00;seul;;18;TSTAK;;;0;;;reconnu;famille:machine;REF:DCW220|OUTIL;référence;OUTIL;3;DCW220NT-XJ;384,04
-Électro portatif;perforation;DCH172;DeWALT DCH172N-XJ — Perforateur SDS Plus 18V DCH172N-XJ;251,24;pack;perforateur;;TSTAK;2;;1;;;reconnu;famille:machine;REF:DCH172|PACK;référence;PACK;10;DCH172N-XJ;266,98
-Électro portatif;percage;DCD805;100% Original DEWALT 20V 6.0Ah Batterie au lithium rechargeable sans balais, tournevis électrique compact, perceuse à ma;80,69;seul;perceuse à percussion;20;AUCUN;6;;0;;;sans-ref;famille:machine;REF:DCD805|OUTIL;référence;OUTIL;11;;
-Électro portatif;confort;DCR029;DeWALT DCR029-QW — Radio de chantier 18V DCR029-QW Bluetooth;250,13;pack;radio de chantier;54;AUCUN;;;;;;reconnu;famille:machine;REF:DCR029|PACK;référence;PACK;1;DCR029-QW;297,72
+Électro portatif;perforation;DCH172N-XJ;DeWALT DCH172N-XJ — Perforateur SDS Plus 18V DCH172N-XJ;149,99;seul;perforateur;;AUCUN;;;0;;;reconnu;famille:machine;REF:DCH172|OUTIL;référence;OUTIL;4;DCH172N-XJ;266,98
+Électro portatif;confort;DCR029-QW;DeWALT DCR029-QW — Radio de chantier 18V DCR029-QW Bluetooth;189,62;seul;radio de chantier;;AUCUN;;;;;;reconnu;famille:machine;REF:DCR029|OUTIL;référence;OUTIL;1;DCR029-QW;297,72
 Électro portatif;jardin;DCM200N-XJ;DeWALT DCM200N — Lime à bande 18V DCM200N;226,88;seul;;18;AUCUN;;;0;;;reconnu;famille:machine;REF:DCM200|OUTIL;référence;OUTIL;3;DCM200N;573,58
 Électro portatif;sciage;DCS386NT-XJ;DeWALT DCS386NT-XJ — Scie sabre 18V DCS386NT-XJ;249,07;seul;scie sabre;;TSTAK;;;0;;;reconnu;famille:machine;REF:DCS386|OUTIL;référence;OUTIL;1;DCS386NT-XJ;363,12
 Électro portatif;combo;DCK2110L2T-QW;DEWALT DCK2110L2T-QW;253,87;pack;pack d'outils;18;TSTAK;3;;2;;;inconnu;famille:machine;REF:DCK2110|PACK;référence;PACK;1;;
@@ -75,8 +74,8 @@
 Électro portatif;vissage-choc;DCF86MP1T;DeWalt McLaren F1 Team DCF86MP1T 18V 1x 5,0 Ah und Ladegerät in TSTAK;249,59;pack;visseuse à chocs;18;TSTAK;5;;1;;oui;sans-ref;famille:machine;REF:DCF86|PACK;référence;PACK;3;;
 Électro portatif;percage;DCD86MP1T-QW;DeWalt Cordless Impact Drill/Driver DCD86MP1T-QW;249,54;pack;perceuse-visseuse;;TSTAK;5;;1;;;sans-ref;famille:machine;REF:DCD86|PACK;référence;PACK;3;;
 Électro portatif;combo;DT70523TM-QZ;DEWALT DT70523TM-QZ DT70523TM-QZ-Expositor Merchandiser DT70523T x 12;249,06;seul;pack d'outils;;AUCUN;;;;;;sans-ref;famille:machine;REF:DT70523|OUTIL;référence;OUTIL;2;;
-Électro portatif;sciage;DCS570;DeWALT DCS570N — Scie circulaire 18V XR Brushless Ø184 mm (machine seule);259,09;pack;scie circulaire;;AUCUN;4;;1;;;reconnu;famille:machine;REF:DCS570|PACK;référence;PACK;23;DCS570N;211,49
-Électro portatif;meulage;DCG426;DeWALT DCG426N-XJ — Meuleuse droite XR 18V DCG426N-XJ;256,72;pack;meuleuse droite;18;AUCUN;4;;1;;;reconnu;famille:machine;REF:DCG426|PACK;référence;PACK;10;DCG426N-XJ;248,51
+Électro portatif;sciage;DCS570N;DeWALT DCS570N — Scie circulaire 18V XR Brushless Ø184 mm (machine seule);184,50;seul;scie circulaire;;AUCUN;;;0;;;reconnu;famille:machine;REF:DCS570|OUTIL;référence;OUTIL;3;DCS570N;211,49
+Électro portatif;meulage;DCG426N;DeWALT DCG426N-XJ — Meuleuse droite XR 18V DCG426N-XJ;140,14;seul;meuleuse droite;18;AUCUN;;;0;;;reconnu;famille:machine;REF:DCG426|OUTIL;référence;OUTIL;2;DCG426N-XJ;248,51
 Électro portatif;percage;DCD444N-XJ;DeWALT DCD444N-XJ — Perceuse-visseuse d'angle 18V XR Brushless (solo);253,98;seul;perceuse d'angle;;AUCUN;;;0;;;reconnu;famille:machine;REF:DCD444|OUTIL;référence;OUTIL;1;DCD444N-XJ;319,88
 Électro portatif;sciage;DCS578NT-XJ;DEWALT DCS578NT-XJ;259,18;seul;scie circulaire;;TSTAK;;;0;;;inconnu;famille:machine;REF:DCS578|OUTIL;référence;OUTIL;3;;
 Électro portatif;sciage;DCS373N;DEWALT DCS373N;194,27;seul;scie circulaire;;AUCUN;;;0;;;inconnu;famille:machine;REF:DCS373|OUTIL;référence;OUTIL;4;;
@@ -263,7 +262,7 @@
 Électro portatif;percage;DCD1007P1T-QW;Dewalt DCD1007P1T-QW Perceuse-visseuse a percussion sans fil 18 V 169Nm XRP - 1X5.0Ah Batterie + chargeur en T-STAK;324,13;pack;perceuse-visseuse;18;TSTAK;5;;1;;;sans-ref;famille:machine;REF:DCD1007|PACK;référence;PACK;4;;
 Électro portatif;meulage;DWE4257;DEWALT DWE4257;125,99;seul;meuleuse d'angle;;AUCUN;;;;;;inconnu;famille:machine;REF:DWE4257|OUTIL;référence;OUTIL;4;;
 Électro portatif;sciage;DCS572;DeWalt DCS 572 Scie circulaire sans fil 18V 184mm Brushless (DCS 572);331,02;pack;scie circulaire;18;AUCUN;;;;572;;sans-ref;famille:machine;REF:DCS572|PACK;référence;PACK;16;;
-Électro portatif;bois;DCE555;DeWALT DCE555N-XJ — Fraiseuse pour placo 18V DCE555N-XJ;337,00;pack;fraiseuse;18;AUCUN;1.7;;2;;;reconnu;famille:machine;REF:DCE555|PACK;référence;PACK;1;DCE555N-XJ;231,32
+Électro portatif;bois;DCE555N-XJ;DeWALT DCE555N-XJ — Fraiseuse pour placo 18V DCE555N-XJ;111,33;seul;fraiseuse;;AUCUN;;;0;;;reconnu;famille:machine;REF:DCE555|OUTIL;référence;OUTIL;1;DCE555N-XJ;231,32
 Électro portatif;chantier;DCMPW1600N-XJ;DeWALT DCMPW1600N-XJ — Nettoyeur haute pression XR 2 X 18V DCMPW1600N-XJ;330,25;seul;nettoyeur haute pression;;AUCUN;;;0;;;reconnu;famille:machine;REF:DCMPW1600|OUTIL;référence;OUTIL;1;DCMPW1600N-XJ;562,25
 Électro portatif;mesure;DCLE14301GB-XJ;DEWALT DCLE14301GB-XJ;340,18;seul;niveau laser;;AUCUN;;;;;;inconnu;famille:machine;REF:DCLE14301|OUTIL;référence;OUTIL;1;;
 Électro portatif;bois;DW621-QS;DEWALT DW621-QS;338,66;seul;défonceuse;;AUCUN;;;;;;inconnu;famille:machine;REF:DW621|OUTIL;référence;OUTIL;3;;
@@ -503,7 +502,6 @@
 Électro portatif;combo;DWK221;DEWALT DWK221;522,00;pack;pack d'outils;18;TSTAK;5;;2;;;inconnu;famille:machine;REF:DWK221|PACK;référence;PACK;1;;
 Électro portatif;jardin;DCMWP500N-XJ;DEWALT DCMWP500N-XJ;522,00;pack;tondeuse;;AUCUN;;;1;;;inconnu;famille:machine;REF:DCMWP500|PACK;référence;PACK;1;;
 Électro portatif;combo;DCK2068P2T;DEWALT DCK2068P2T;520,64;pack;pack d'outils;18;TSTAK;5;;2;;;inconnu;famille:machine;REF:DCK2068|PACK;référence;PACK;1;;
-Électro portatif;jardin;DCMCS574N-XJ;DEWALT DCMCS574N-XJ;518,42;pack;tronçonneuse;54;AUCUN;;;1;;;inconnu;famille:machine;REF:DCMCS574|PACK;référence;PACK;3;;
 Électro portatif;bois;;DeWalt - Laser Multilignes 3x360° 12V Li-Ion 2Ah - Niveau Laser Autonivelant 4° sans Fil avec Faisceaux Rouges & Outil O;543,84;seul;outil multifonctions;18;AUCUN;2;;;;;sans-ref;famille:machine;TIT:laser multilignes 3x360 12v li ion 2ah niveau laser autonivelant 4 sans fil avec faisceaux rouges outil o;titre;OUTIL;1;;
 Électro portatif;bois;DCW620NT-XJ;Défonceuse XR 18V DCW620NT-XJ + 1 batterie 18V 5 Ah + 1 Chargeur DCB1104-QW DEWALT;539,90;pack;défonceuse;18;TSTAK;5;;1;;;sans-ref;famille:machine;REF:DCW620|PACK;référence;PACK;12;;
 Électro portatif;combo;DCK440P2T;Ensemble d'outils sans fil Dewalt 18 V, quatre pièces DCK440P2T;522,13;pack;pack d'outils;18;TSTAK;5;;2;;;sans-ref;famille:machine;REF:DCK440|PACK;référence;PACK;2;;
@@ -603,7 +601,6 @@
 Électro portatif;chantier;;Compresseur électrique DeWalt 90L 230V;699,99;seul;compresseur;;AUCUN;;;;;;sans-ref;famille:machine;TIT:compresseur lectrique 90l 230v;titre;OUTIL;1;;
 Électro portatif;combo;DCK424M3-QW;DEWALT Kit Combiné 18V 4 Outils (Perceuse à Percussion Compacte, Visseuse à Impact, Marteau Rotatif SDS-Plus 18V, Meuleu;697,71;pack;pack d'outils;18;AUCUN;4;4;3;;;sans-ref;famille:machine;REF:DCK424|PACK;référence;PACK;1;;
 Électro portatif;sciage;DWS780;DeWALT DWS780-QS — Scie à onglet radiale Ø305 mm DWS780-QS;812,30;seul;scie à onglet;;AUCUN;;;;;;reconnu;famille:machine;REF:DWS780|OUTIL;référence;OUTIL;3;DWS780-QS;1171,99
-Électro portatif;sciage;DWE7492;DeWALT DWE7492-QS — Scie sur table DWE7492-QS Ø250 mm;783,00;pack;scie circulaire;;AUCUN;;;;;;reconnu;famille:machine;REF:DWE7492|PACK;référence;PACK;1;DWE7492-QS;889,00
 Électro portatif;sciage;DCS777T2;DEWALT DCS777T2;880,00;pack;scie à onglet;;AUCUN;6;;2;;;inconnu;famille:machine;REF:DCS777|PACK;référence;PACK;1;;
 Électro portatif;combo;DWK304PS;DEWALT DWK304PS;876,00;pack;pack d'outils;18;GENERIQUE;1.7;;2;;;inconnu;famille:machine;REF:DWK304|PACK;référence;PACK;1;;
 Électro portatif;combo;DWK403;DEWALT DWK403;861,00;pack;pack d'outils;18;TSTAK;5;;2;;;inconnu;famille:machine;REF:DWK403|PACK;référence;PACK;1;;
@@ -789,7 +786,6 @@
 Électro portatif;jardin;N510599;OEM N510599 Poulie de rechange pour tondeuse à gazon DeWalt DCMW220X2 DCMW290H1 DCMW220P2;87,45;seul;tondeuse;;AUCUN;;;;;;sans-ref;famille:machine;REF:N510599|ACCESSOIRE;référence;ACCESSOIRE;1;;
 Électro portatif;mesure;DW0802;DEWALT DW0802 33'. Laser Square;87,40;seul;niveau laser;;AUCUN;;;;;;sans-ref;famille:machine;REF:DW0802|OUTIL;référence;OUTIL;1;;
 Électro portatif;fixation;DCN890;DeWalt Chasse-clous de rechange pour Cloueur à béton sans fil DCN890 (DCN8901-XJ);87,02;seul;cloueur;18;AUCUN;;;;;;sans-ref;famille:machine;REF:DCN890|ACCESSOIRE;référence;ACCESSOIRE;1;;
-Électro portatif;meulage;SDFP01;Outils électriques multifonctionnels DeWalt sans fil, meuleuse d'angle sans balais, coupeur, clé électrique, polisseuse,;86,99;seul;meuleuse d'angle;18;AUCUN;;;;;;sans-ref;famille:machine;REF:SDFP01|OUTIL;référence;OUTIL;1;;
 Électro portatif;sciage;;Induit moteur n093107 pour Scie a onglets;86,61;seul;scie à onglet;;AUCUN;;;;;;sans-ref;famille:machine;TIT:induit moteur n093107 pour scie a onglets;titre;OUTIL;4;;
 Électro portatif;batterie;DCB206;Batterie d'outil électrique 100% originale DeWALT 20V 6000mAh DCB206 DCB205 DCB200 DCF887 DCG405 DCD791 DCF922 DCF850 DC;86,39;pack;batterie;60;;9;;1;;;sans-ref;famille:energie;REF:DCB206|PACK;référence;PACK;6;;
 Électro portatif;jardin;DCMH3285;DEWALT DCMH3285 Tuyau d'arrosage robuste de qualité professionnelle 15,2 m x 1,6 cm pour jardin, jaune, noir;86,21;seul;;;AUCUN;;;;;;sans-ref;famille:machine;REF:DCMH3285|OUTIL;référence;OUTIL;1;;
@@ -853,7 +849,6 @@
 Électro portatif;batterie;DCB203;DeWALT DCB203 Lithium-ION 2000mAh 20V Batterie Rechargeable - Batteries Rechargeables (2000 mAh, Lithium-ION (Li-ION), 2;106,70;pack;batterie;20;;;;20;;;sans-ref;famille:energie;REF:DCB203|PACK;référence;PACK;1;;
 Électro portatif;batterie;DCB112D2;Dewalt DCB112D2 Pack de batteries DEWALT 18V 2.0Ah Li-Ion - 2 batteries + Chargeur DCB112;106,52;pack;batterie;18;;2;;2;;;sans-ref;famille:energie;REF:DCB112|PACK;référence;PACK;1;;
 Électro portatif;;DXMA1902092;DeWalt Écouteurs True Wireless Bluetooth 37h IP56 Jaune (DXMA1902092);105,99;seul;;;;;;;;;sans-ref;titre;REF:DXMA1902092|OUTIL;référence;OUTIL;1;;
-Électro portatif;bois;DCE555N-XJ;DeWALT DCE555N-XJ — Fraiseuse pour placo 18V DCE555N-XJ;111,33;seul;fraiseuse;;AUCUN;;;0;;;reconnu;famille:machine;REF:DCE555|OUTIL;référence;OUTIL;1;DCE555N-XJ;231,32
 Électro portatif;sciage;DT90353;DEWALT DT90353;113,98;seul;scie;;AUCUN;;;;;;inconnu;famille:machine;REF:DT90353|OUTIL;référence;OUTIL;1;;
 Électro portatif;percage;DCD710;DEWALT DCD710;112,74;seul;perceuse-visseuse;;AUCUN;;;;;;inconnu;famille:machine;REF:DCD710|OUTIL;référence;OUTIL;2;;
 Électro portatif;percage;DCD710D2;DEWALT DCD710D2;112,74;pack;perceuse-visseuse;;AUCUN;2;;2;;;inconnu;famille:machine;REF:DCD710|PACK;référence;PACK;3;;
@@ -891,7 +886,6 @@
 Électro portatif;fixation;DPN1850PP-XJ;DEWALT DPN1850PP-XJ;127,03;seul;cloueur;;AUCUN;;;;;;inconnu;famille:machine;REF:DPN1850|OUTIL;référence;OUTIL;2;;
 Électro portatif;;DWE315-QS;DEWALT DWE315-QS;123,55;seul;;;AUCUN;;;;;;inconnu;famille:machine;REF:DWE315|OUTIL;référence;OUTIL;5;;
 Électro portatif;meulage;DWE4233-QS;DEWALT DWE4233-QS Meuleuse Ø 125 mm - 1400W - Interrupteur palette filaire & Coffret de 10 Disques Pour Meuleuse - Dimen;127,54;pack;meuleuse;;AUCUN;;;;10;;sans-ref;famille:machine;REF:DWE4233|PACK;référence;PACK;1;;
-Électro portatif;;DWE60V;Batterie Dewalt originale 60V/20V, batterie 5AH 6AH 9AH, batterie pour outils électriques DeWalt série DCF DCD DCG DCS D;125,99;pack;;60;AUCUN;9;;1;;;sans-ref;famille:machine;REF:DWE60|PACK;référence;PACK;3;;
 Électro portatif;combo;DWMT45424;DEWALT DWMT45424 Ensemble d'outils de mécanicien, 84 pièces SAE/métriques avec cliquet à profil bas 72 dents, entraîneme;125,67;pack;pack d'outils;;AUCUN;;;;;;sans-ref;famille:machine;REF:DWMT45424|PACK;référence;PACK;1;;
 Électro portatif;;DCE560;DEWALT Kit de conversion du tube d'extrusion en acrylique DEWALT (pour sachets de 600 ml) pour DCE 560 Quantité:1;123,99;pack;;;AUCUN;;;;600;;sans-ref;famille:machine;REF:DCE560|ACCESSOIRE;référence;ACCESSOIRE;1;;
 Électro portatif;mesure;DCL040E1;DeWalt DCL 040 E1 Lampe LED sans fil 18 V 110 lm + 1x Powerstack batterie 1,7 Ah + chargeur;123,35;pack;lampe;18;AUCUN;1.7;;1;;;sans-ref;famille:machine;REF:DCL040|PACK;référence;PACK;3;;
@@ -905,7 +899,6 @@
 Électro portatif;mesure;DW03050;DEWALT DW03050;129,99;seul;télémètre laser;;AUCUN;;;;;;inconnu;famille:machine;REF:DW03050|OUTIL;référence;OUTIL;1;;
 Électro portatif;meulage;DWE4238;DEWALT DWE4238;129,00;seul;meuleuse d'angle;;AUCUN;;;;;;inconnu;famille:machine;REF:DWE4238|OUTIL;référence;OUTIL;1;;
 Électro portatif;chargeur;DCB1106;DeWALT DCB1106 12V/20V 6 Amp Max Corded Compact Charger;128,76;pack;chargeur;20;;;;;;;sans-ref;famille:energie;REF:DCB1106|PACK;référence;PACK;2;;
-Électro portatif;meulage;DCG426N;DeWALT DCG426N-XJ — Meuleuse droite XR 18V DCG426N-XJ;140,14;seul;meuleuse droite;18;AUCUN;;;0;;;reconnu;famille:machine;REF:DCG426|OUTIL;référence;OUTIL;2;DCG426N-XJ;248,51
 Électro portatif;jardin;DCMHT562N-XJ;DeWALT DCMHT562N-XJ — Taille haie 18V 55cm DCMHT562N-XJ;137,90;pack;taille-haie;;AUCUN;;;0;;;reconnu;famille:machine;REF:DCMHT562|PACK;référence;PACK;2;DCMHT562N-XJ;278,21
 Électro portatif;fixation;DPN2330-XJ;DEWALT DPN2330-XJ;140,96;seul;cloueur;;AUCUN;;;;;;inconnu;famille:machine;REF:DPN2330|OUTIL;référence;OUTIL;1;;
 Électro portatif;sciage;DCS356N;DEWALT DCS356N;140,83;seul;;18;AUCUN;;;0;;;inconnu;famille:machine;REF:DCS356|OUTIL;référence;OUTIL;3;;
@@ -935,7 +928,6 @@
 Électro portatif;percage;DCD716;DEWALT DCD716;141,24;seul;perceuse-visseuse;;AUCUN;;;;;;inconnu;famille:machine;REF:DCD716|OUTIL;référence;OUTIL;1;;
 Électro portatif;;;DEWALT Jobsite Écouteurs Ouverts très résistants Bluetooth 5.3 sans Fil avec 44 Heures d'autonomie, Son de qualité supér;145,99;seul;;;;;;;;;sans-ref;titre;TIT:jobsite couteurs ouverts tr s r sistants bluetooth 5 3 sans fil avec 44 heures d autonomie son de qualit sup r;titre;OUTIL;1;;
 Électro portatif;batterie;DCB090;DeWALT DCB090 Câble Noir, Jaune;141,05;seul;;;;;;;;;sans-ref;famille:energie;REF:DCB090|OUTIL;référence;OUTIL;1;;
-Électro portatif;perforation;DCH172N-XJ;DeWALT DCH172N-XJ — Perforateur SDS Plus 18V DCH172N-XJ;149,99;seul;perforateur;;AUCUN;;;0;;;reconnu;famille:machine;REF:DCH172|OUTIL;référence;OUTIL;4;DCH172N-XJ;266,98
 Électro portatif;jardin;DCMHT564N-XJ;DeWALT DCMHT564N-XJ — Taille haie 18V 55cm DCMHT564N-XJ;148,20;seul;taille-haie;;AUCUN;;;0;;;reconnu;famille:machine;REF:DCMHT564|OUTIL;référence;OUTIL;1;DCMHT564N-XJ;254,68
 Électro portatif;meulage;DWE494-QS;DEWALT DWE494-QS;152,39;seul;meuleuse d'angle;;AUCUN;;;;;;inconnu;famille:machine;REF:DWE494|OUTIL;référence;OUTIL;1;;
 Électro portatif;perforation;DCH072N;DEWALT DCH072N;152,19;seul;perforateur;;AUCUN;;;0;;;inconnu;famille:machine;REF:DCH072|OUTIL;référence;OUTIL;4;;
@@ -948,7 +940,6 @@
 Électro portatif;jardin;DCMASED9N-XJ;DeWALT DCMASED9N-XJ Tête De Coupe À Bras Articulé Pour Coupe-bordures;150,12;seul;coupe-bordure;;AUCUN;;;0;;;sans-ref;famille:machine;REF:DCMASED9|OUTIL;référence;OUTIL;2;;
 Électro portatif;;DXBC90006;DEWALT DXBC90006 Kit de récupération de Corde de remorquage cinétique Robuste de 2,2 cm x 9,2 m avec 2 manilles Souples ;149,76;pack;;;;;;;;;sans-ref;titre;REF:DXBC90006|PACK;référence;PACK;1;;
 Électro portatif;percage;;DEWALT Perceuse à aspiration DEWALT SDS-max 24x400x600mm Quantité:1;147,98;seul;perceuse;;AUCUN;;;;;;sans-ref;famille:machine;TIT:perceuse aspiration sds max 24x400x600mm quantit 1;titre;OUTIL;1;;
-Électro portatif;sciage;DWE560-GB;DeWALT DWE560-QS — Scie circulaire 1350W Ø184 mm DWE560-QS;160,40;pack;scie circulaire;;AUCUN;;;1;;;reconnu;famille:machine;REF:DWE560|PACK;référence;PACK;1;DWE560-QS;376,60
 Électro portatif;vissage-choc;DCF870N-XJ;DeWALT DCF870N-XJ — Visseuse à chocs hydraulique 18V XR (machine seule);157,87;seul;visseuse à chocs;;AUCUN;;;0;;;reconnu;famille:machine;REF:DCF870|OUTIL;référence;OUTIL;3;DCF870N-XJ;185,74
 Électro portatif;bois;DCP580N;DeWALT DCP580N — Rabot sans fil 18V XR Brushless (machine seule);156,64;seul;rabot;;AUCUN;;;0;;;reconnu;famille:machine;REF:DCP580|OUTIL;référence;OUTIL;3;DCP580N;195,76
 Électro portatif;chargeur;DCB104-QW;DEWALT DCB104-QW;160,65;pack;chargeur;;;;;;;;inconnu;famille:energie;REF:DCB104|PACK;référence;PACK;1;;
@@ -1004,7 +995,6 @@
 Électro portatif;meulage;DCG413N;Meuleuse d'angle sans fil DeWalt 115 mm avec interrupteur à bascule 18 V, sans batterie DCG413N;179,92;seul;meuleuse d'angle;18;AUCUN;;;0;;;sans-ref;famille:machine;REF:DCG413|OUTIL;référence;OUTIL;2;;
 Électro portatif;vissage-choc;DWMT19230;DeWalt Ensemble de clés à cliquet métriques, 12 pièces (DWMT19230);176,87;pack;cliquet;;AUCUN;;;;;;sans-ref;famille:machine;REF:DWMT19230|PACK;référence;PACK;1;;
 Électro portatif;jardin;;DeWalt Débroussailleuse sans Fil sans Balais;176,50;pack;débroussailleuse;;AUCUN;;;1;;;sans-ref;famille:machine;TIT:d broussailleuse sans fil sans balais;titre;PACK;1;;
-Électro portatif;sciage;DCS570N;DeWALT DCS570N — Scie circulaire 18V XR Brushless Ø184 mm (machine seule);184,50;seul;scie circulaire;;AUCUN;;;0;;;reconnu;famille:machine;REF:DCS570|OUTIL;référence;OUTIL;3;DCS570N;211,49
 Électro portatif;jardin;DCMCS565N-XJ;DeWALT DCMCS565N-XJ — Tronçonneuse 18V 30cm DCMCS565N-XJ;182,52;seul;tronçonneuse;18;AUCUN;;;0;;;reconnu;famille:machine;REF:DCMCS565|OUTIL;référence;OUTIL;1;DCMCS565N-XJ;310,10
 Électro portatif;meulage;D28492S;DEWALT D28492S;186,96;seul;meuleuse d'angle;;AUCUN;;;;;;inconnu;famille:machine;REF:D28492|OUTIL;référence;OUTIL;2;;
 Électro portatif;percage;DCDW105;DEWALT DCDW105;186,34;seul;;;AUCUN;;;;;;inconnu;famille:machine;REF:DCDW105|OUTIL;référence;OUTIL;1;;
@@ -1012,7 +1002,6 @@
 Électro portatif;sciage;DWE575K;DEWALT DWE575K;185,28;seul;scie circulaire;;AUCUN;;;;;;inconnu;famille:machine;REF:DWE575|OUTIL;référence;OUTIL;1;;
 Électro portatif;percage;DW264K;DEWALT DW264K;181,92;seul;visseuse;;AUCUN;;;;;;inconnu;famille:machine;REF:DW264|OUTIL;référence;OUTIL;1;;
 Électro portatif;percage;;DEWALT Perceuse à aspiration DEWALT SDS-max 28x400x600mm Quantité:1;186,99;seul;perceuse;;AUCUN;;;;;;sans-ref;famille:machine;TIT:perceuse aspiration sds max 28x400x600mm quantit 1;titre;OUTIL;1;;
-Électro portatif;confort;DCR029-QW;DeWALT DCR029-QW — Radio de chantier 18V DCR029-QW Bluetooth;189,62;seul;radio de chantier;;AUCUN;;;;;;reconnu;famille:machine;REF:DCR029|OUTIL;référence;OUTIL;1;DCR029-QW;297,72
 Électro portatif;vissage-choc;DCF840E1T-XJ;DEWALT DCF840E1T-XJ;193,66;pack;visseuse à chocs;;TSTAK;1.7;;1;;;inconnu;famille:machine;REF:DCF840|PACK;référence;PACK;2;;
 Électro portatif;sciage;DEWDCS565N;DEWALT DEWDCS565N;193,13;seul;scie circulaire;;AUCUN;;;0;;;inconnu;famille:machine;REF:DEWDCS565|OUTIL;référence;OUTIL;1;;
 Électro portatif;percage;DCDW107;DEWALT DCDW107;192,02;seul;;;AUCUN;;;;;;inconnu;famille:machine;REF:DCDW107|OUTIL;référence;OUTIL;1;;

@@ -135,6 +135,22 @@ function corps(ok) {
   ok(cl.classer({}, 'Sac à dos lumineux avec 33 poches pour outils').rayon === 'VETEMENTS',
     'le portage passe AVANT l\'outil dans un titre qui contient les deux');
 
+  /* ── LE TITRE TRANCHE CE QUE LA VARIANTE A MAL SÉPARÉ ───────────────────── */
+  /* Mesuré sur le balayage réel : 11 annonces IDENTIQUES (même titre) avaient
+     survécu sous deux clés, OUTIL et PACK, parce que `pack` avait été lu
+     différemment selon la page. Même description = même produit. */
+  const t1 = ligne('ZZH172N-XJ', 'ZZ Perforateur SDS Plus 18V ZZH172N-XJ', 251.24, { famille: 'machine', pack: true });
+  const t2 = ligne('ZZH172N-XJ', 'ZZ Perforateur SDS Plus 18V ZZH172N-XJ', 149.99, { famille: 'machine', pack: false });
+  t1.rayonCommercial = 'ELECTRO_PORTATIF'; t2.rayonCommercial = 'ELECTRO_PORTATIF';
+  t1.signalClassement = t2.signalClassement = 'famille:machine';
+  const bil = cl.bilanParRayon([t1, t2]);
+  const restants = (bil.ELECTRO_PORTATIF || {}).lignes || [];
+  ok(restants.length === 1 && restants[0].prix === 149.99,
+    '⛔⛔ deux annonces au MÊME TITRE ne survivent jamais toutes les deux, même '
+    + 'si le parseur a lu `pack` différemment selon la page : le titre est la '
+    + 'description, et le moins cher gagne (' + restants.length + ' restante(s), '
+    + (restants[0] || {}).prix + ' €)');
+
   /* ── LE COMPTE OUTILS SEULS / PACKS ─────────────────────────────────────── */
   const c = cl.compter([{ pack: true }, { pack: false }, { pack: false }]);
   ok(c.total === 3 && c.packs === 1 && c.seuls === 2 && c.seuls + c.packs === c.total,
@@ -152,10 +168,10 @@ function corps(ok) {
     '⛔ …et les guillemets internes sont DOUBLÉS, sinon Numbers coupe la cellule');
 }
 
-/* ⛔ Mesuré, pas estimé : `assertions rendues : 24` (corps instrumenté). Mon
-   premier seuil disait 21 — un chiffre écrit de tête, avec 3 assertions de
-   marge dans lesquelles une amputation serait passée inaperçue. */
-const ASSERTIONS_ATTENDUES = 24;
+/* ⛔ Mesuré, pas estimé : `assertions rendues : 25` (corps instrumenté après
+   l'ajout de la fusion par titre). Un seuil écrit de tête laisse une marge où
+   une amputation passe inaperçue — il se remesure à chaque assertion neuve. */
+const ASSERTIONS_ATTENDUES = 25;
 
 module.exports = function () {
   const errors = [];

@@ -310,7 +310,25 @@ function bilanParRayon(lignes) {
       e.signalClassement = 'hérité du doublon classé';
     }
   });
-  const apresGlobal = dedoublonner(lignes);
+  let apresGlobal = dedoublonner(lignes);
+  /* ⛔⛔ SECONDE PASSE : LE TITRE TRANCHE CE QUE LA VARIANTE A MAL SÉPARÉ.
+     Mesuré après la première passe : 11 groupes portaient un titre
+     STRICTEMENT identique sous deux clés (OUTIL et PACK), parce que le
+     parseur avait lu `pack` différemment selon la page — pour la MÊME
+     annonce. Deux lignes au même titre décrivent le même produit : c'est la
+     règle de l'user (« tu te bases sur la description »), donc on fusionne,
+     et le moins cher gagne, comme partout. */
+  const parTitre = new Map();
+  apresGlobal.forEach((e) => {
+    const t = normaliserTitre(e.titre);
+    if (!t) { parTitre.set('∅' + parTitre.size, e); return; }
+    const prec = parTitre.get(t);
+    if (!prec) { parTitre.set(t, e); return; }
+    const pn = (typeof e.prix === 'number' && e.prix > 0) ? e.prix : Infinity;
+    const pp = (typeof prec.prix === 'number' && prec.prix > 0) ? prec.prix : Infinity;
+    parTitre.set(t, pn < pp ? e : prec);
+  });
+  apresGlobal = Array.from(parTitre.values());
   const par = {}, parApres = {};
   lignes.forEach((e) => { (par[e.rayonCommercial] = par[e.rayonCommercial] || []).push(e); });
   apresGlobal.forEach((e) => { (parApres[e.rayonCommercial] = parApres[e.rayonCommercial] || []).push(e); });
@@ -483,7 +501,8 @@ module.exports = {
   classer: classer, cleDoublon: cleDoublon, dedoublonner: dedoublonner,
   normaliserTitre: normaliserTitre, compter: compter, aplatir: aplatir,
   ligneCsv: ligneCsv, COLONNES: COLONNES, FAMILLE_VERS_RAYON: FAMILLE_VERS_RAYON,
-  sansAccents: sansAccents, varianteProduit: varianteProduit
+  sansAccents: sansAccents, varianteProduit: varianteProduit,
+  bilanParRayon: bilanParRayon
 };
 
 if (require.main === module) process.exit(principal(process.argv.slice(2)));
