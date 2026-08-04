@@ -1789,6 +1789,23 @@ function pwApparierParNom(sansRef, products) {
    ⚠️ Portes lues : J3 — des références d'outils publiques ; J4 — aucun prix
    n'entre ici, les caractéristiques bloquantes (coffret, édition limitée)
    continuent de trancher APRÈS ce rapprochement ; J5 — aucune TVA. */
+/* ⛔⛔ BORNER SANS MASQUER. Mesuré le 04/08 : une page sur 67 rendait `lues: 60`
+   pour `tuiles: 59`. Ce n'est PAS le décompte des lignes qui est faux — c'est le
+   compte d'ANCRES qui a raté une tuile, les 66 autres pages en trouvent 60.
+   ⛔ Deux fautes symétriques, et il faut éviter les DEUX : ne pas borner laisse
+   un instrument surestimer (« un instrument de mesure ne surestime jamais ») ;
+   borner en silence efface le symptôme et laisse le sous-comptage d'ancres
+   vivre sa vie. On borne, ET l'écart repart dans la réponse.
+   ⚠️ Fonction pure, pour être éprouvable seule : le cas ne se reproduit qu'une
+   fois sur 67 pages réelles, et une garde qu'on ne peut pas déclencher ne
+   garde rien. */
+function pwBornerLues(brutes, tuiles) {
+  const b = Math.max(0, Number(brutes) || 0);
+  const t = Math.max(0, Number(tuiles) || 0);
+  if (!t) return { lues: b, ecart: 0 };
+  return { lues: Math.min(b, t), ecart: Math.max(0, b - t) };
+}
+
 function pwIndexerRacines(produits, index) {
   const parRacine = Object.create(null);
   (produits || []).forEach((p) => {
@@ -3077,6 +3094,23 @@ async function handlePriceWatch(req, res, admin, db) {
     const souple = priceParse.apparierParNomSouple(
       (apparie.restants || []).concat(appariePacks.restants || []), products, brand);
     souple.items.forEach((it) => parsed.push(it));
+    /* ⛔⛔ POURQUOI SI PEU ? SANS CE COMPTE, LA QUESTION N'A PAS DE RÉPONSE.
+       Mesuré le 04/08 : l'appariement souple ne ramène que 10 des 379 fiches
+       sans référence, alors que le corpus fabriqué en rendait 163. L'écart
+       peut venir de DEUX endroits opposés — des titres trop pauvres pour
+       atteindre le seuil de concordances, ou au contraire des titres qui
+       désignent PLUSIEURS fiches à la fois et qu'on écarte par prudence. Les
+       remèdes sont inverses : baisser une exigence, ou enrichir les fiches.
+       ⛔ Tant que ces deux cas ne sont pas COMPTÉS séparément, on ne peut que
+       supposer — et une supposition ne se corrige pas. C'est le même remède
+       qu'au `parsed: 0` muet du 01/08 : on mesure au lieu de jeter.
+       ⚠️ Rendu même en mode bref : c'est un ÉCART, pas un détail produit. */
+    const souplePourquoi = {
+      apparies: souple.items.length,
+      ambigus: (souple.ambigus || []).length,
+      sansCandidat: Math.max(0, ((souple.restants || []).length) - ((souple.ambigus || []).length)),
+      exemplesAmbigus: (souple.ambigus || []).slice(0, 8)
+    };
 
     /* ⛔⛔ CE QUI RESTE APRÈS TOUS LES APPARIEMENTS — PAS DEUX LISTES ADDITIONNÉES.
        Mesuré le 03/08 sur son balayage : `lues: 4033` pour `tuiles: 4018`, soit
@@ -3088,7 +3122,17 @@ async function handlePriceWatch(req, res, admin, db) {
        un correctif qui casse un compteur, c'est E-406 à nouveau.
        ⚠️ `souple.restants` porte déjà ce que NI l'exact NI le souple n'ont placé :
        c'est le seul reste, et `parsed` + ce reste = les tuiles exploitées. */
-    const luesReelles = parsed.length + ((souple && souple.restants) || []).length;
+    const luesBrutes = parsed.length + ((souple && souple.restants) || []).length;
+    /* ⛔⛔ ET ON BORNE, SANS MASQUER. Mesuré le 04/08 : une page sur 67 rendait
+       `lues: 60` pour `tuiles: 59`. Ce n'est PAS le décompte des lignes qui est
+       faux, c'est le compte d'ANCRES qui a raté une tuile — les 66 autres pages
+       en trouvent 60. Borner seul ferait disparaître le symptôme et laisserait
+       le sous-comptage vivre ; ne pas borner laisse un instrument surestimer.
+       On fait donc les DEUX : on borne, et l'écart est RENDU pour qu'il se voie. */
+    const tuilesPage = priceParse.compterTuiles(text).total;
+    const borne = pwBornerLues(luesBrutes, tuilesPage);
+    const luesReelles = borne.lues;
+    const ecartComptageTuiles = borne.ecart;
 
     // Prix parsés indexés par SKU (pour la règle « min des sources » srcAltSkus).
     const parsedBySku = {};
@@ -3365,7 +3409,7 @@ async function handlePriceWatch(req, res, admin, db) {
          le rendu d'une page ne vaut rien : les pages peuvent se chevaucher. */
       couverture: pwCouvAjouter(brand, parsed.map((x) => x.sku),
         (auto.sansRef || []).map((e) => e.titre),
-        priceParse.compterTuiles(text).total,
+        tuilesPage,
         luesReelles,
         (plans.plan(brand, sourceSlug) || {}).pages,
         /* Un article est RAPPROCHÉ s'il tombe sur une fiche du catalogue — même
@@ -3389,8 +3433,13 @@ async function handlePriceWatch(req, res, admin, db) {
          elle qui se totalise sur le fichier des 67 réponses, quand le cumul
          d'instance, lui, peut avoir été tronqué par une instance neuve. */
       page: { empreinte: priceParse.empreintePage(text),
-        tuiles: priceParse.compterTuiles(text).total,
-        lues: luesReelles },
+        tuiles: tuilesPage,
+        lues: luesReelles,
+        /* > 0 : le compte d'ancres a raté une tuile que le parseur, lui, a
+           bien découpée. Rendu pour que ça ne se perde pas dans une borne. */
+        ecartComptageTuiles: ecartComptageTuiles || undefined },
+      /* Ce que l'appariement par le NOM a su faire, et ce qui l'a arrêté. */
+      appariementNom: souplePourquoi,
       counts: {
         parsed: parsed.length, applied: applied.length, flagged: flagged.length,
         unchanged: unchanged.length, unknown: unknown.length, locked: lockedW.length,
@@ -3460,7 +3509,7 @@ module.exports.config = { api: { bodyParser: { sizeLimit: '4.5mb' } } };
 module.exports._internals = {
   pwSourceCost: pwSourceCost, pwSourcesConnues: pwSourcesConnues, pwEstGel: pwEstGel,
   pwApparierParNom: pwApparierParNom, pwAliasNomenclature: pwAliasNomenclature,
-  pwIndexerRacines: pwIndexerRacines,
+  pwIndexerRacines: pwIndexerRacines, pwBornerLues: pwBornerLues,
   // Exposés pour check-price-watch : le mode balayage se prouve en APPELANT
   // le handler avec une base factice qui compte lectures et écritures.
   handlePriceWatch: handlePriceWatch, pwMajLocale: pwMajLocale, pwScanReset: pwScanReset

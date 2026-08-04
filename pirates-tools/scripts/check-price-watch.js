@@ -2326,6 +2326,36 @@ module.exports = async function () {
           + JSON.stringify(pgCpt && pgCpt.tuiles) + ', parsed='
           + JSON.stringify(rCpt.out && rCpt.out.counts && rCpt.out.counts.parsed)
           + ', sansRef=' + JSON.stringify(rCpt.out && rCpt.out.counts && rCpt.out.counts.sansRef) + ')');
+        /* ⛔ ET LE DIAGNOSTIC DE L'APPARIEMENT PAR NOM : sans lui, « 10 fiches
+           sur 379 » ne dit pas s'il faut baisser une exigence ou enrichir les
+           fiches — deux remèdes inverses. Un écart qu'on ne sait pas ventiler
+           se termine en supposition, et une supposition ne se corrige pas. */
+        /* ⛔⛔ LA BORNE, ÉPROUVÉE SEULE. Le cas ne se produit qu'une fois sur
+           67 pages réelles : une garde qu'on ne peut pas déclencher ne garde
+           rien, donc on la monte sur des valeurs. */
+        var bl = adm._internals && adm._internals.pwBornerLues;
+        ok(typeof bl === 'function', 'pwBornerLues exposée aux portes');
+        if (bl) {
+          ok(bl(60, 59).lues === 59,
+            '⛔⛔ un instrument de mesure ne SURESTIME jamais : 60 lignes pour 59 tuiles '
+            + 'ressort borné à 59 (obtenu ' + JSON.stringify(bl(60, 59)) + ')');
+          ok(bl(60, 59).ecart === 1,
+            '⛔⛔ …et l\'écart est RENDU, pas efface : borner en silence effacerait le '
+            + 'symptôme et laisserait le sous-comptage d\'ancres vivre (obtenu écart='
+            + JSON.stringify(bl(60, 59).ecart) + ')');
+          ok(bl(59, 60).lues === 59 && bl(59, 60).ecart === 0,
+            '⛔ le cas NORMAL n\'invente aucun écart : lire moins que les tuiles est '
+            + 'attendu, ce n\'est pas un défaut');
+          ok(bl(7, 0).lues === 7 && bl(7, 0).ecart === 0,
+            '⛔ sans tuiles comptées, on ne borne PAS : borner sur zéro effacerait tout '
+            + 'ce que la page a rendu');
+        }
+        var apnDiag = rCpt.out && rCpt.out.appariementNom;
+        ok(apnDiag && typeof apnDiag.apparies === 'number'
+          && typeof apnDiag.ambigus === 'number' && typeof apnDiag.sansCandidat === 'number',
+          '⛔⛔ l\'appariement par nom dit ce qui l\'a ARRÊTÉ : trop ambigu, ou aucun '
+          + 'candidat. Les deux remèdes sont inverses — sans ces compteurs on ne peut que '
+          + 'supposer (obtenu ' + JSON.stringify(apnDiag) + ')');
         ok(pgCpt && pgCpt.lues <= pgCpt.tuiles,
           '⛔⛔ un compteur ne SURESTIME jamais : on ne peut pas lire plus de lignes '
           + 'qu\'il n\'y a de tuiles sur la page (obtenu lues=' + JSON.stringify(pgCpt && pgCpt.lues)
