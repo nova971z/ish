@@ -179,56 +179,101 @@ const ACCESSOIRE = /(kit de conversion|raccord|couplage|support|pi[eè]tement|ad
    produit (deux lignes à l'œil, gênant) ; un discriminant de moins CONFOND
    deux produits et écrit un prix pour un autre (de l'argent perdu). On penche
    du côté qui ne coûte pas d'argent. */
+/* ⛔ Faisceau de laser : le vert vaut plusieurs centaines d'euros de plus. */
 const DISCRIMINANTS = [
-  /* Faisceau de laser : le vert vaut plusieurs centaines d'euros de plus. */
   ['VERT', /\b(vert|verte|green)\b/],
-  ['ROUGE', /\b(rouge|red)\b/],
-  /* Contenant : un coffret se paie. */
-  ['COFFRET', /\b(coffret|tstak|t-?stak|toughsystem|mallette|kitbox|case)\b/],
-  /* Chargeur inclus. */
-  ['CHARGEUR', /\bchargeurs?\b|\bcharger\b/]
+  ['ROUGE', /\b(rouge|red)\b/]
 ];
 
-/* « 2x5,0 Ah », « 1 x 2.0Ah », « 3x 4Ah » : la configuration de batteries est
-   LE premier facteur de prix sur un outil sans fil. Normalisée pour que
-   « 2x5,0Ah » et « 2 X 5.0 AH » donnent la même signature. */
+/* ⛔⛔⛔ LE COFFRET N'EST PAS UNE IDENTITÉ, C'EST UN INTERRUPTEUR.
+   RÈGLE DE L'USER, 04/08/2026, mot pour mot : « quand il y a N ou un T à la
+   fin, le N correspond à nu et le T correspond à la MÊME machine avec le
+   coffret ; si le début de la référence est pareil, et s'il n'y a rien de plus
+   dans le titre à part ce putain de coffret, on est censé avoir ce même
+   produit avec coffret et sans coffret sur la MÊME CARTE PRODUIT. »
+   Mesuré : DCD800N-XJ et DCD800NT-XJ font deux cartes séparées, DCF850N /
+   DCF850NT-XJ aussi — l'interrupteur de variante du site (`variantGroup`,
+   `variantRole`, `coffretSku`, déjà utilisé par 38 fiches) ne servait à rien.
+   ⛔ Le coffret sort donc de la clé d'identité et devient un RÔLE. */
+const COFFRET = /\b(coffret|tstak|t-?stak|toughsystem|mallette|kitbox|case|koffer)\b/;
+
+function roleCoffret(titre) {
+  return COFFRET.test(sansAccents(titre)) ? 'coffret' : 'solo';
+}
+
+/* ⛔⛔ « SANS BATTERIE NI CHARGEUR » N'EST PAS « AVEC CHARGEUR ».
+   Défaut mesuré le 04/08 : `DCD800N-XJ — sans batterie ni chargeur` sortait en
+   `PACK+CHARGEUR`, parce que je cherchais le MOT « chargeur » sans regarder ce
+   qui le nie. Lire un mot n'est pas comprendre une phrase — c'est exactement
+   ce que l'user reprochait : « réfléchir à ce que ça veut dire, pas juste le
+   lire, sinon ça ne sert à rien ». */
+const NEGATION = /\b(sans|ni|ohne|without|excl\.?|non fourni|non inclus|nu|nue|solo|body only|bare tool|machine seule|outil seul|appareil seul)\b/;
+
+function nieApres(t, motif) {
+  const m = t.match(motif);
+  if (!m) return false;
+  /* La négation porte sur ce qui SUIT : on regarde les 34 signes qui précèdent
+     le mot, bornés à la ponctuation forte qui fermerait la proposition. */
+  const avant = t.slice(Math.max(0, m.index - 34), m.index).split(/[.;(]/).pop();
+  return NEGATION.test(avant);
+}
+
+/* ⛔⛔ « 2x batterie 2,0 Ah » VAUT DEUX BATTERIES, PAS UNE.
+   Défaut mesuré : ma signature exigeait « 2x2,0Ah » collés ; dès qu'un mot
+   s'intercale (« 2x **batterie** 2,0 Ah », « 2x **Batterie Powerstack** 1,7 Ah »)
+   elle retombait sur la branche « une seule batterie » et écrivait 1X2.0 pour
+   un pack de deux. Deux batteries de 5 Ah, ce n'est pas le même prix qu'une. */
 function signatureBatteries(t) {
-  const m = t.match(/(\d)\s*[x×]\s*(\d+(?:[.,]\d)?)\s*ah/);
+  if (nieApres(t, /batter/)) return 'SANSBAT';
+  const m = t.match(/(\d)\s*[x×]\s*(?:[a-zà-ÿ\s]{0,24}?)?(\d+(?:[.,]\d)?)\s*ah\b/);
   if (m) return m[1] + 'X' + m[2].replace(',', '.');
-  const seul = t.match(/(\d+(?:[.,]\d)?)\s*ah/);
+  const seul = t.match(/(\d+(?:[.,]\d)?)\s*ah\b/);
   return seul ? '1X' + seul[1].replace(',', '.') : '';
 }
 
+/* ⛔ L'IDENTITÉ DU PRODUIT : la racine de modèle + CE QUE CONTIENT LA BOÎTE,
+   lu dans le titre. Le coffret en est EXCLU (c'est un rôle, pas un produit). */
 function varianteProduit(titre, car) {
   const c = car || {};
   const t = sansAccents(titre);
-  /* ⛔ « AVEC support », « + coffret » : le mot d'accessoire annonce ici un
-     CONTENU LIVRÉ avec la machine, pas une pièce vendue seule. Mesuré :
-     « D24000 Wet Tile Saw avec support de roue » partait en accessoire — c'est
-     la scie complète, à 1 504,98 €. */
   const m = t.match(ACCESSOIRE);
   if (m) {
     const avant = t.slice(Math.max(0, m.index - 8), m.index);
     if (!/(avec|with|mit|inkl\.?|\+)\s*$/.test(avant)) return 'ACCESSOIRE';
   }
-  const parts = [c.pack === true ? 'PACK' : 'OUTIL'];
   const bat = signatureBatteries(t);
-  if (bat) parts.push(bat);
+  const chargeur = /\bchargeurs?\b|\bcharger\b|\blader\b/.test(t) && !nieApres(t, /chargeur|charger|lader/);
+  const parts = [];
+  /* Ni batterie ni chargeur ⇒ machine seule, quelle que soit la lettre finale
+     de la référence. C'est le titre qui fait foi, comme l'a demandé l'user. */
+  if ((!bat || bat === 'SANSBAT') && !chargeur) parts.push('NU');
+  else {
+    if (bat && bat !== 'SANSBAT') parts.push(bat);
+    if (chargeur) parts.push('CHARGEUR');
+  }
+  /* ⛔⛔ LES DISCRIMINANTS S'APPLIQUENT AUSSI À UNE MACHINE NUE. Régression
+     attrapée par la porte le 04/08 : un `return 'NU'` anticipé les sautait, et
+     les deux lasers — rouge et vert, 430 € d'écart — redevenaient identiques.
+     Ce qui distingue deux produits ne dépend pas de ce qu'il y a dans la
+     boîte. */
   DISCRIMINANTS.forEach(function (d) { if (d[1].test(t)) parts.push(d[0]); });
-  return parts.join('+');
+  return parts.length ? parts.join('+') : 'NU';
 }
 
 function cleDoublon(e) {
   const c = e.car || {};
   const ref = e.sku || c.sku || c.skuEclate || null;
   const variante = varianteProduit(e.titre, c);
+  const role = roleCoffret(e.titre);
   if (ref) {
     const racine = priceParse.racineModele(String(ref).toUpperCase());
-    return { cle: 'REF:' + racine + '|' + variante, niveau: 'référence', variante: variante };
+    return { cle: 'REF:' + racine + '|' + variante, niveau: 'référence',
+      variante: variante, roleCoffret: role };
   }
   const n = normaliserTitre(e.titre);
-  if (n) return { cle: 'TIT:' + n, niveau: 'titre', variante: variante };
-  return { cle: 'BRUT:' + JSON.stringify(e).slice(0, 120), niveau: 'aucun', variante: variante };
+  if (n) return { cle: 'TIT:' + n, niveau: 'titre', variante: variante, roleCoffret: role };
+  return { cle: 'BRUT:' + JSON.stringify(e).slice(0, 120), niveau: 'aucun',
+    variante: variante, roleCoffret: role };
 }
 
 /* ⛔ « LES MOINS CHERS » — la consigne, appliquée telle quelle. Un prix absent
@@ -540,6 +585,7 @@ module.exports = {
   normaliserTitre: normaliserTitre, compter: compter, aplatir: aplatir,
   ligneCsv: ligneCsv, COLONNES: COLONNES, FAMILLE_VERS_RAYON: FAMILLE_VERS_RAYON,
   sansAccents: sansAccents, varianteProduit: varianteProduit,
+  roleCoffret: roleCoffret, signatureBatteries: signatureBatteries,
   bilanParRayon: bilanParRayon
 };
 

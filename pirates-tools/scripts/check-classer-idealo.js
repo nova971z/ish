@@ -40,6 +40,7 @@ function corps(ok) {
     const e = { sku: sku, titre: titre, prix: prix, car: car || null };
     const k = cl.cleDoublon(e);
     e.cleDoublon = k.cle; e.niveauCle = k.niveau; e.variante = k.variante;
+    e.roleCoffret = k.roleCoffret;
     e.pack = !!(car && car.pack);
     return e;
   }
@@ -171,6 +172,42 @@ function corps(ok) {
   ok(g2.length === 1 && g2[0].prix === 399,
     '⛔ …et le moins cher gagne (' + (g2[0] || {}).prix + ' €)');
 
+  /* ── LE COFFRET EST UN INTERRUPTEUR, PAS UN PRODUIT ─────────────────────── */
+  /* Règle de l'user, 04/08 : « N / NT / NT-XJ, si la référence est la même au
+     début, on a qu'UNE SEULE carte produit et la personne peut switcher
+     version sans coffret et version avec coffret ; XJ c'est pour la région ».
+     Mesuré : 0 fiche DeWALT sur 1105 utilisait le switch, et la carte coffret
+     recevait son PROPRE coût — DCH273NT à 586,07 € contre 264,37 € pour la
+     nue, quand le switch facture 15 €. */
+  const nuSolo = ligne('ZZD800N-XJ', 'ZZ perceuse 18V 90 Nm sans batterie ni chargeur', 112.02, { famille: 'machine' });
+  const nuCoffret = ligne('ZZD800NT-XJ', 'ZZ perceuse 18V 90 Nm, coffret TSTAK, sans batterie', 145.00, { famille: 'machine' });
+  ok(nuSolo.cleDoublon === nuCoffret.cleDoublon,
+    '⛔⛔ ARGENT : la version NUE et la version COFFRET du même modèle partagent '
+    + 'la MÊME clé — une seule carte produit, le coffret est un interrupteur ('
+    + nuSolo.cleDoublon + ' vs ' + nuCoffret.cleDoublon + ')');
+  ok(nuSolo.roleCoffret === 'solo' && nuCoffret.roleCoffret === 'coffret',
+    '⛔ …et le RÔLE les distingue pour alimenter le switch (' + nuSolo.roleCoffret
+    + ' / ' + nuCoffret.roleCoffret + ')');
+
+  /* ── « SANS BATTERIE NI CHARGEUR » N'EST PAS « AVEC » ───────────────────── */
+  const nie = cl.varianteProduit('ZZ perceuse 18V XR 90 Nm - sans batterie ni chargeur', { pack: true });
+  ok(nie === 'NU',
+    '⛔⛔ lire un mot n\'est pas comprendre une phrase : « sans batterie NI '
+    + 'chargeur » doit donner une machine NUE, pas un pack avec chargeur ('
+    + nie + ')');
+  const avec = cl.varianteProduit('ZZ perceuse 18V avec 1x2,0Ah et chargeur', { pack: true });
+  ok(/CHARGEUR/.test(avec),
+    '⛔ …mais un chargeur RÉELLEMENT inclus est bien vu — une négation qui '
+    + 'mordrait toujours effacerait tous les packs (' + avec + ')');
+
+  /* ── « 2x batterie 2,0 Ah » VAUT DEUX BATTERIES ─────────────────────────── */
+  ok(cl.signatureBatteries('perceuse + 2x batterie 2,0 ah + chargeur') === '2X2.0',
+    '⛔⛔ ARGENT : un mot intercalé (« 2x BATTERIE 2,0 Ah ») ne doit pas faire '
+    + 'lire une seule batterie — deux 5 Ah ne valent pas une ('
+    + cl.signatureBatteries('perceuse + 2x batterie 2,0 ah + chargeur') + ')');
+  ok(cl.signatureBatteries('perceuse 18v sans batterie') === 'SANSBAT',
+    '⛔ …et « sans batterie » se dit SANSBAT, jamais une quantité inventée');
+
   /* ── LE TITRE TRANCHE CE QUE LA VARIANTE A MAL SÉPARÉ ───────────────────── */
   /* Mesuré sur le balayage réel : 11 annonces IDENTIQUES (même titre) avaient
      survécu sous deux clés, OUTIL et PACK, parce que `pack` avait été lu
@@ -207,7 +244,7 @@ function corps(ok) {
 /* ⛔ Mesuré, pas estimé : `assertions rendues : 25` (corps instrumenté après
    l'ajout de la fusion par titre). Un seuil écrit de tête laisse une marge où
    une amputation passe inaperçue — il se remesure à chaque assertion neuve. */
-const ASSERTIONS_ATTENDUES = 30;
+const ASSERTIONS_ATTENDUES = 36;
 
 module.exports = function () {
   const errors = [];
