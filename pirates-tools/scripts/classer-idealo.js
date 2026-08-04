@@ -108,9 +108,24 @@ const FRAGMENTS = [
    c'est lui qui permet de contester un classement sans relire tout le code. */
 function classer(car, titre) {
   const c = car || {};
+  const t = sansAccents(titre);
+  /* ⛔⛔⛔ CE QUE L'ARTICLE **EST** PRIME SUR CE POUR QUOI IL SERT.
+     Défaut attrapé à l'essai le 04/08, avant écriture : « 34° Clous en bande
+     2,8x70mm … Cloueur sans fil DeWalt DCN930P2 » était rangé en ÉLECTRO
+     PORTATIF — le parseur avait vu « cloueur » et conclu « machine ». Ce sont
+     des CLOUS. Leur coût de 87,19 € allait devenir celui du cloueur, vendu
+     465,30 €.
+     ⛔ La règle : un mot de quincaillerie dans la TÊTE du titre (les 45
+     premiers signes, là où un titre dit ce qu'il vend) l'emporte sur la
+     famille devinée. La queue du titre, elle, nomme souvent la machine
+     compatible — c'est ce qui trompait la mesure. */
+  const tete = t.slice(0, 45);
+  const motQuinc = MOTS.find((m) => m[0] === 'QUINCAILLERIE');
+  if (motQuinc && motQuinc[1].test(tete)) {
+    return { rayon: 'QUINCAILLERIE', signal: 'tête du titre (consommable)' };
+  }
   const parFamille = FAMILLE_VERS_RAYON[String(c.famille || '')];
   if (parFamille) return { rayon: parFamille, signal: 'famille:' + c.famille };
-  const t = sansAccents(titre);
   for (let i = 0; i < MOTS.length; i++) {
     if (MOTS[i][1].test(t)) return { rayon: MOTS[i][0], signal: 'titre' };
   }
@@ -197,7 +212,23 @@ const DISCRIMINANTS = [
    ⛔ Le coffret sort donc de la clé d'identité et devient un RÔLE. */
 const COFFRET = /\b(coffret|tstak|t-?stak|toughsystem|mallette|kitbox|case|koffer)\b/;
 
-function roleCoffret(titre) {
+/* ⛔⛔⛔ LE COFFRET SE LIT D'ABORD DANS LA RÉFÉRENCE — RÈGLE DE L'USER :
+   « N correspond à nu et T correspond à la MÊME machine avec le coffret ».
+   Défaut mesuré le 04/08 : je ne cherchais le coffret que dans le TITRE, or
+   les titres du catalogue sont du genre « DeWALT DCD800NT-XJ — Perceuse-
+   visseuse 18V DCD800NT-XJ » : pas un mot sur le coffret. Résultat, 1 seul
+   groupe fusionnable détecté sur 29. La lettre finale de la référence, elle,
+   le dit toujours.
+   ⚠️ On retire d'abord le marquage géographique (`-XJ`, `-QW`…) : c'est la
+   région, jamais le produit. Ce qui reste après la racine est le suffixe
+   commercial ; s'il finit par T, c'est la version coffret.
+   ⚠️ Le titre reste consulté en RENFORT — une annonce marchande qui écrit
+   « coffret TSTAK » sans le T dans la référence est bien un coffret. */
+function roleCoffret(titre, sku) {
+  const s = String(sku || '').toUpperCase().replace(/-[A-Z]{2,3}$/, '');
+  const racine = priceParse.racineModele(s);
+  const suffixe = s.indexOf(racine) === 0 ? s.slice(racine.length) : '';
+  if (/T$/.test(suffixe)) return 'coffret';
   return COFFRET.test(sansAccents(titre)) ? 'coffret' : 'solo';
 }
 
@@ -233,9 +264,32 @@ function signatureBatteries(t) {
 
 /* ⛔ L'IDENTITÉ DU PRODUIT : la racine de modèle + CE QUE CONTIENT LA BOÎTE,
    lu dans le titre. Le coffret en est EXCLU (c'est un rôle, pas un produit). */
-function varianteProduit(titre, car) {
+/* ⛔⛔⛔ « POUR <RÉFÉRENCE> » — L'ANNONCE PORTE LA RÉFÉRENCE D'UNE AUTRE
+   MACHINE. L'user me l'avait corrigé le 04/08 : « bien sûr que c'est une
+   référence produit, mais il faut LIRE LA DESCRIPTION avant ». La référence se
+   GARDE — elle dit pour quelle machine l'article est fait — mais l'article
+   n'est PAS cette machine.
+   ⛔ ARGENT, attrapé à l'essai avant toute écriture : « 34° Clous en bande
+   2,8x70mm POUR cloueur sans fil DeWalt DCN692 » à 95,50 € allait devenir le
+   coût du cloueur DCN692N, vendu 1 076,33 € — le prix de vente serait tombé à
+   163,12 €, un cinquième du coût réel de la machine. Idem « Rail de guidage
+   1,5 m POUR DWS520KR » à 115,59 € pour une scie plongeante à 819,59 €.
+   ⚠️ La garde ne mord QUE si la référence trouvée derrière « pour » est celle
+   de l'article lui-même : sans ça, « batterie compatible avec tous les XR »
+   ferait sortir des machines légitimes. */
+function estPourAutreMachine(t, ref) {
+  const r = String(ref || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (r.length < 5) return false;
+  const nu = t.toUpperCase().replace(/[^A-Z0-9\s]/g, ' ');
+  const re = new RegExp('\\b(POUR|FUR|FOR|COMPATIBLE(?:\\s+AVEC)?|PASSEND)\\s+(?:[A-Z\\s]{0,34}?)?'
+    + r.slice(0, 6), 'i');
+  return re.test(nu.replace(/\s+/g, ' '));
+}
+
+function varianteProduit(titre, car, ref) {
   const c = car || {};
   const t = sansAccents(titre);
+  if (ref && estPourAutreMachine(titre, ref)) return 'ACCESSOIRE';
   const m = t.match(ACCESSOIRE);
   if (m) {
     const avant = t.slice(Math.max(0, m.index - 8), m.index);
@@ -263,8 +317,8 @@ function varianteProduit(titre, car) {
 function cleDoublon(e) {
   const c = e.car || {};
   const ref = e.sku || c.sku || c.skuEclate || null;
-  const variante = varianteProduit(e.titre, c);
-  const role = roleCoffret(e.titre);
+  const variante = varianteProduit(e.titre, c, e.sku || c.sku || c.skuEclate);
+  const role = roleCoffret(e.titre, ref);
   if (ref) {
     const racine = priceParse.racineModele(String(ref).toUpperCase());
     return { cle: 'REF:' + racine + '|' + variante, niveau: 'référence',
@@ -586,6 +640,7 @@ module.exports = {
   ligneCsv: ligneCsv, COLONNES: COLONNES, FAMILLE_VERS_RAYON: FAMILLE_VERS_RAYON,
   sansAccents: sansAccents, varianteProduit: varianteProduit,
   roleCoffret: roleCoffret, signatureBatteries: signatureBatteries,
+  estPourAutreMachine: estPourAutreMachine,
   bilanParRayon: bilanParRayon
 };
 

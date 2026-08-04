@@ -105,10 +105,7 @@
    "Batterie / chargeur": "Non inclus"
   },
   "description_long": "La boulonneuse à chocs compacte DeWALT DCF922N-XJ délivre 406 Nm de couple de serrage et jusqu'à 1898 Nm de desserrage dans un format ultra-court, parfait pour travailler en espace restreint. Son moteur brushless, sa vitesse variable et son démarrage progressif offrent un contrôle précis (0–2500 tr/min, 0–3500 cps/min), avec éclairage LED intégré et emmanchement carré 1/2''. Compatible batteries 18V XR et FlexVolt 18/54 V. Livrée en machine seule (sans batterie ni chargeur). Livraison DOM-TOM ; octroi de mer calculé automatiquement selon ton territoire.",
-  "heroImg": "images/posters/dcf922n-hero.webp",
-  "variantGroup": "DCF922",
-  "variantRole": "solo",
-  "coffretSku": "DCF922NT-XJ"
+  "heroImg": "images/posters/dcf922n-hero.webp"
  },
  {
   "id": "dewalt-dcf899p2",
@@ -274,10 +271,7 @@
    "Batterie / chargeur": "Non inclus"
   },
   "description_long": "La visseuse à chocs DeWALT DCF887N est l'un des outils de fixation préférés des professionnels. Son moteur sans charbon délivre jusqu'à 205 Nm de couple : de quoi venir à bout des vis à bois, tirefonds et boulons les plus récalcitrants. Trois vitesses te laissent doser la frappe, du mode doux pour ne pas abîmer une petite vis à la pleine puissance pour le serrage lourd. Le porte-embout 1/4'' se recharge d'une seule main et l'éclairage LED illumine ta zone de travail. Compacte et bien équilibrée, elle se glisse dans les espaces confinés sans fatiguer le poignet. Vendue en machine seule, elle rejoint directement ton parc de batteries 18V XR. Adaptée aux chantiers tropicaux des Antilles (humidité, chaleur, air salin). Livrée dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
-  "heroImg": "images/posters/dcf887n-hero.webp",
-  "variantGroup": "DCF887",
-  "variantRole": "solo",
-  "coffretSku": "DCF887NT-XJ"
+  "heroImg": "images/posters/dcf887n-hero.webp"
  },
  {
   "id": "dewalt-dcf850p2t",
@@ -384,10 +378,7 @@
   "heroImg": "images/posters/dcf850n-hero.webp",
   "srcAltSkus": [
    "DCF850N-XJ"
-  ],
-  "variantGroup": "DCF850",
-  "variantRole": "solo",
-  "coffretSku": "DCF850NT-XJ"
+  ]
  },
  {
   "id": "dewalt-dcf870n-xj",
@@ -439,10 +430,7 @@
    "Batterie / chargeur": "Non inclus"
   },
   "description_long": "La visseuse à chocs hydraulique DeWALT DCF870N-XJ utilise un mécanisme à impulsion hydraulique qui la rend nettement plus silencieuse qu'une visseuse à chocs mécanique classique, tout en restant compacte et pratique. Son moteur brushless et ses 3 vitesses avec gâchette à variation de vitesse permettent de doser précisément la puissance (jusqu'à 3000 tr/min et 4200 coups/min), avec un éclairage LED intégré. Machine seule (sans batterie ni chargeur) à rejoindre ton parc 18V XR. Livrée dans toute la zone DOM-TOM ; octroi de mer calculé automatiquement selon ton territoire.",
-  "heroImg": "images/posters/dcf870n-hero.webp",
-  "variantGroup": "DCF870",
-  "variantRole": "solo",
-  "coffretSku": "DCF870NT-XJ"
+  "heroImg": "images/posters/dcf870n-hero.webp"
  },
  {
   "id": "makita-dtw300z",
@@ -607,10 +595,7 @@
    "Batterie / chargeur": "Non inclus"
   },
   "description_long": "La scie sabre compacte DeWALT DCS367N-XJ embarque un moteur brushless 18V XR pour scier bois (jusqu'à 300 mm), acier et tuyaux (jusqu'à 100 mm) partout où l'accès est difficile. Compacte et bien équilibrée (2,3 kg), rapide (2900 courses/min, course 28,6 mm), elle dispose d'un éclairage LED et d'une semelle pivotante. Livrée en machine seule (sans batterie ni chargeur), à rejoindre ton parc 18V XR. Livraison DOM-TOM ; octroi de mer calculé automatiquement selon ton territoire.",
-  "heroImg": "images/posters/dcs367n-hero.webp",
-  "variantGroup": "DCS367",
-  "variantRole": "solo",
-  "coffretSku": "DCS367NT-XJ"
+  "heroImg": "images/posters/dcs367n-hero.webp"
  },
  {
   "id": "dewalt-dcs391m2-qw",
@@ -764,10 +749,7 @@
    "Poignée latérale 2 positions et grille anti-poussière moteur",
    "Machine nue (batterie et chargeur non inclus, gamme 18V XR)"
   ],
-  "heroImg": "images/posters/dcg405n-hero.webp",
-  "variantGroup": "DCG405",
-  "variantRole": "solo",
-  "coffretSku": "DCG405NT-XJ"
+  "heroImg": "images/posters/dcg405n-hero.webp"
  },
  {
   "id": "dewalt-dcp580n",
@@ -821,10 +803,7 @@
   "heroImg": "images/posters/dcp580n-hero.webp",
   "srcAltSkus": [
    "DCP580N-XJ"
-  ],
-  "variantGroup": "DCP580",
-  "variantRole": "solo",
-  "coffretSku": "DCP580NT-XJ"
+  ]
  },
  {
   "id": "dewalt-dcv100-xj",
@@ -1239,10 +1218,7 @@
    "Batterie / chargeur": "Non inclus"
   },
   "description_long": "Le perforateur burineur DeWALT DCH273N-XJ combine un moteur brushless 18V XR et un mandrin SDS-Plus délivrant 2,1 J d'énergie d'impact, pour percer le béton (jusqu'à 24 mm), le métal et le bois, et buriner grâce au rotation stop. Compact et léger (2,5 kg), il bénéficie de la technologie PERFORM+PROTECT qui limite les vibrations (6,6 m/s² en perçage, 5,4 m/s² en burinage) pour un confort de travail prolongé. Livré en machine seule (sans batterie ni chargeur), à rejoindre ton parc 18V XR. Livraison DOM-TOM ; octroi de mer calculé automatiquement selon ton territoire.",
-  "heroImg": "images/posters/dch273n-hero.webp",
-  "variantGroup": "DCH273",
-  "variantRole": "solo",
-  "coffretSku": "DCH273NT-XJ"
+  "heroImg": "images/posters/dch273n-hero.webp"
  },
  {
   "id": "dewalt-d25134k",
@@ -1400,10 +1376,7 @@
    "Batterie / chargeur": "Non inclus"
   },
   "description_long": "La perceuse à percussion DeWALT DCD996N (gamme XRP) associe un moteur brushless et 3 vitesses mécaniques pour couvrir tous les travaux, du vissage délicat au perçage béton. Elle délivre jusqu'à 95 Nm de couple, 2000 tr/min et 38 250 coups/min en percussion, avec un mandrin métallique 13 mm et une bague de couple à 11 positions. Perçage jusqu'à 55 mm dans le bois, 16 mm dans le béton et 15 mm dans le métal. Machine seule à rejoindre ton parc de batteries 18V XR (batterie et chargeur non inclus). Livrée dans toute la zone DOM-TOM ; octroi de mer calculé automatiquement selon ton territoire.",
-  "heroImg": "images/posters/dcd996n-hero.webp",
-  "variantGroup": "DCD996",
-  "variantRole": "solo",
-  "coffretSku": "DCD996NT-XJ"
+  "heroImg": "images/posters/dcd996n-hero.webp"
  },
  {
   "id": "dewalt-dcf620nt-xj",
@@ -1755,11 +1728,7 @@
    "Batterie / chargeur": "Non inclus"
   },
   "description_long": "L'outil multifonctions oscillant DeWALT DCS355NT-XJ est le couteau suisse du chantier : il scie, ponce, gratte, découpe et affleure selon l'accessoire monté. Son moteur brushless atteint 20 000 oscillations par minute pour un travail rapide et précis, et son porte-outils Starlock permet de changer d'accessoire sans clé, d'un simple geste. L'éclairage LED intégré éclaire la zone de travail. Il est livré avec 25 feuilles de ponçage et des accessoires, le tout rangé dans un coffret TSTAK empilable. Compact (1,1 kg) et maniable, il rend service partout. Vendu solo pour rejoindre ton parc de batteries 18V XR. Livré dans toute la zone DOM-TOM. Octroi de mer calculé automatiquement selon ton territoire.",
-  "heroImg": "images/posters/dcs355nt-hero.webp",
-  "variantGroup": "DCS355",
-  "variantRole": "coffret",
-  "soloSku": "DCS355N-XJ",
-  "variantSecondary": true
+  "heroImg": "images/posters/dcs355nt-hero.webp"
  },
  {
   "id": "dewalt-dcf620p2k",
@@ -25553,11 +25522,7 @@
   "poidsSuppose": true,
   "ficheAcompleter": false,
   "price_ht": 147.63,
-  "price": 177.16,
-  "variantGroup": "DCH273",
-  "variantRole": "coffret",
-  "soloSku": "DCH273N-XJ",
-  "variantSecondary": true
+  "price": 177.16
  },
  {
   "id": "dewalt-dcm200n",
@@ -26005,11 +25970,7 @@
   "poidsSuppose": true,
   "ficheAcompleter": false,
   "price_ht": 204.22,
-  "price": 245.06,
-  "variantGroup": "DCD996",
-  "variantRole": "coffret",
-  "soloSku": "DCD996N",
-  "variantSecondary": true
+  "price": 245.06
  },
  {
   "id": "dewalt-dcd1007nt-xj",
@@ -26329,11 +26290,7 @@
   "poidsSuppose": true,
   "ficheAcompleter": false,
   "price_ht": 165.41,
-  "price": 198.49,
-  "variantGroup": "DCD800",
-  "variantRole": "coffret",
-  "soloSku": "DCD800N-XJ",
-  "variantSecondary": true
+  "price": 198.49
  },
  {
   "id": "dewalt-dcd805nt-xj",
@@ -26365,11 +26322,7 @@
   "poidsSuppose": true,
   "ficheAcompleter": false,
   "price_ht": 173.24,
-  "price": 207.89,
-  "variantGroup": "DCD805",
-  "variantRole": "coffret",
-  "soloSku": "DCD805N-XJ",
-  "variantSecondary": true
+  "price": 207.89
  },
  {
   "id": "dewalt-dcle34021n-xj",
@@ -26593,10 +26546,7 @@
   "poidsSuppose": true,
   "ficheAcompleter": false,
   "price_ht": 152.91,
-  "price": 183.49,
-  "variantGroup": "DCD800",
-  "variantRole": "solo",
-  "coffretSku": "DCD800NT-XJ"
+  "price": 183.49
  },
  {
   "id": "dewalt-dcg416vsn-xj",
@@ -26756,11 +26706,7 @@
   "poidsSuppose": true,
   "ficheAcompleter": false,
   "price_ht": 147.1,
-  "price": 176.52,
-  "variantGroup": "DCD796",
-  "variantRole": "coffret",
-  "soloSku": "DCD796N-XJ",
-  "variantSecondary": true
+  "price": 176.52
  },
  {
   "id": "dewalt-dcg420n-xj",
@@ -27048,10 +26994,7 @@
   "poidsSuppose": true,
   "ficheAcompleter": false,
   "price_ht": 134.6,
-  "price": 161.52,
-  "variantGroup": "DCD796",
-  "variantRole": "solo",
-  "coffretSku": "DCD796NT-XJ"
+  "price": 161.52
  },
  {
   "id": "dewalt-dcs367nt-xj",
@@ -27083,11 +27026,7 @@
   "poidsSuppose": true,
   "ficheAcompleter": false,
   "price_ht": 249.56,
-  "price": 299.47,
-  "variantGroup": "DCS367",
-  "variantRole": "coffret",
-  "soloSku": "DCS367N-XJ",
-  "variantSecondary": true
+  "price": 299.47
  },
  {
   "id": "dewalt-dcf899nt-xj",
@@ -27151,11 +27090,7 @@
   "poidsSuppose": true,
   "ficheAcompleter": false,
   "price_ht": 206.11,
-  "price": 247.33,
-  "variantGroup": "DCS334",
-  "variantRole": "coffret",
-  "soloSku": "DCS334N-XJ",
-  "variantSecondary": true
+  "price": 247.33
  },
  {
   "id": "dewalt-dcp580nt-xj",
@@ -27187,11 +27122,7 @@
   "poidsSuppose": true,
   "ficheAcompleter": false,
   "price_ht": 223.44,
-  "price": 268.13,
-  "variantGroup": "DCP580",
-  "variantRole": "coffret",
-  "soloSku": "DCP580N",
-  "variantSecondary": true
+  "price": 268.13
  },
  {
   "id": "dewalt-dcmcs565n-xj",
@@ -27287,10 +27218,7 @@
   "poidsSuppose": true,
   "ficheAcompleter": false,
   "price_ht": 137.85,
-  "price": 165.42,
-  "variantGroup": "DCD791",
-  "variantRole": "solo",
-  "coffretSku": "DCD791NT-XJ"
+  "price": 165.42
  },
  {
   "id": "dewalt-dwht78200-xj",
@@ -27354,11 +27282,7 @@
   "poidsSuppose": true,
   "ficheAcompleter": false,
   "price_ht": 212.47,
-  "price": 254.96,
-  "variantGroup": "DCF870",
-  "variantRole": "coffret",
-  "soloSku": "DCF870N-XJ",
-  "variantSecondary": true
+  "price": 254.96
  },
  {
   "id": "dewalt-dcr029-qw",
@@ -27582,10 +27506,7 @@
   "poidsSuppose": true,
   "ficheAcompleter": false,
   "price_ht": 193.61,
-  "price": 232.33,
-  "variantGroup": "DCS334",
-  "variantRole": "solo",
-  "coffretSku": "DCS334NT-XJ"
+  "price": 232.33
  },
  {
   "id": "dewalt-dcg408nt-xj",
@@ -27649,11 +27570,7 @@
   "poidsSuppose": true,
   "ficheAcompleter": false,
   "price_ht": 188.72,
-  "price": 226.46,
-  "variantGroup": "DCH172",
-  "variantRole": "coffret",
-  "soloSku": "DCH172N-XJ",
-  "variantSecondary": true
+  "price": 226.46
  },
  {
   "id": "dewalt-dcmht562n-xj",
@@ -27781,10 +27698,7 @@
   "poidsSuppose": true,
   "ficheAcompleter": false,
   "price_ht": 176.22,
-  "price": 211.46,
-  "variantGroup": "DCH172",
-  "variantRole": "solo",
-  "coffretSku": "DCH172NT-XJ"
+  "price": 211.46
  },
  {
   "id": "dewalt-dcd794n-xj",
@@ -27816,10 +27730,7 @@
   "poidsSuppose": true,
   "ficheAcompleter": false,
   "price_ht": 148.93,
-  "price": 178.72,
-  "variantGroup": "DCD794",
-  "variantRole": "solo",
-  "coffretSku": "DCD794NT-XJ"
+  "price": 178.72
  },
  {
   "id": "dewalt-dcs438n-xj",
@@ -27883,11 +27794,7 @@
   "poidsSuppose": true,
   "ficheAcompleter": false,
   "price_ht": 182.69,
-  "price": 219.23,
-  "variantGroup": "DCG405",
-  "variantRole": "coffret",
-  "soloSku": "DCG405N",
-  "variantSecondary": true
+  "price": 219.23
  },
  {
   "id": "dewalt-de7033-xj",
@@ -27983,11 +27890,7 @@
   "poidsSuppose": true,
   "ficheAcompleter": false,
   "price_ht": 149.98,
-  "price": 179.98,
-  "variantGroup": "DCF850",
-  "variantRole": "coffret",
-  "soloSku": "DCF850N",
-  "variantSecondary": true
+  "price": 179.98
  },
  {
   "id": "dewalt-dcg406n-xj",
@@ -28051,11 +27954,7 @@
   "poidsSuppose": true,
   "ficheAcompleter": false,
   "price_ht": 174.95,
-  "price": 209.94,
-  "variantGroup": "DCF922",
-  "variantRole": "coffret",
-  "soloSku": "DCF922N-XJ",
-  "variantSecondary": true
+  "price": 209.94
  },
  {
   "id": "dewalt-dcg426n-xj",
@@ -28119,10 +28018,7 @@
   "poidsSuppose": true,
   "ficheAcompleter": false,
   "price_ht": 147.03,
-  "price": 176.44,
-  "variantGroup": "DCW210",
-  "variantRole": "solo",
-  "coffretSku": "DCW210NT-XJ"
+  "price": 176.44
  },
  {
   "id": "dewalt-dcs369nt-xj",
@@ -28154,11 +28050,7 @@
   "poidsSuppose": true,
   "ficheAcompleter": false,
   "price_ht": 167.84,
-  "price": 201.41,
-  "variantGroup": "DCS369",
-  "variantRole": "coffret",
-  "soloSku": "DCS369N-XJ",
-  "variantSecondary": true
+  "price": 201.41
  },
  {
   "id": "dewalt-dcs331n-xj",
@@ -28286,10 +28178,7 @@
   "poidsSuppose": true,
   "ficheAcompleter": false,
   "price_ht": 155.34,
-  "price": 186.41,
-  "variantGroup": "DCS369",
-  "variantRole": "solo",
-  "coffretSku": "DCS369NT-XJ"
+  "price": 186.41
  },
  {
   "id": "dewalt-dcv501ln-xj",
@@ -28353,11 +28242,7 @@
   "poidsSuppose": true,
   "ficheAcompleter": false,
   "price_ht": 159.53,
-  "price": 191.44,
-  "variantGroup": "DCW210",
-  "variantRole": "coffret",
-  "soloSku": "DCW210N-XJ",
-  "variantSecondary": true
+  "price": 191.44
  },
  {
   "id": "dewalt-dcm563pb-xj",
@@ -28613,10 +28498,7 @@
   "poidsSuppose": true,
   "ficheAcompleter": false,
   "price_ht": 146.71,
-  "price": 176.05,
-  "variantGroup": "DCS355",
-  "variantRole": "solo",
-  "coffretSku": "DCS355NT-XJ"
+  "price": 176.05
  },
  {
   "id": "dewalt-dcd805n-xj",
@@ -28648,10 +28530,7 @@
   "poidsSuppose": true,
   "ficheAcompleter": false,
   "price_ht": 160.74,
-  "price": 192.89,
-  "variantGroup": "DCD805",
-  "variantRole": "solo",
-  "coffretSku": "DCD805NT-XJ"
+  "price": 192.89
  },
  {
   "id": "dewalt-dcd794nt-xj",
@@ -28683,11 +28562,7 @@
   "poidsSuppose": true,
   "ficheAcompleter": false,
   "price_ht": 161.43,
-  "price": 193.72,
-  "variantGroup": "DCD794",
-  "variantRole": "coffret",
-  "soloSku": "DCD794N-XJ",
-  "variantSecondary": true
+  "price": 193.72
  },
  {
   "id": "dewalt-dcd799nt-xj",
@@ -28719,11 +28594,7 @@
   "poidsSuppose": true,
   "ficheAcompleter": false,
   "price_ht": 176.56,
-  "price": 211.87,
-  "variantGroup": "DCD799",
-  "variantRole": "coffret",
-  "soloSku": "DCD799N-XJ",
-  "variantSecondary": true
+  "price": 211.87
  },
  {
   "id": "dewalt-dcd791nt-xj",
@@ -28755,11 +28626,7 @@
   "poidsSuppose": true,
   "ficheAcompleter": false,
   "price_ht": 150.35,
-  "price": 180.42,
-  "variantGroup": "DCD791",
-  "variantRole": "coffret",
-  "soloSku": "DCD791N",
-  "variantSecondary": true
+  "price": 180.42
  },
  {
   "id": "dewalt-dcf6202-xj",
@@ -28855,11 +28722,7 @@
   "poidsSuppose": true,
   "ficheAcompleter": false,
   "price_ht": 140.31,
-  "price": 168.37,
-  "variantGroup": "DCF887",
-  "variantRole": "coffret",
-  "soloSku": "DCF887N",
-  "variantSecondary": true
+  "price": 168.37
  },
  {
   "id": "dewalt-dce530n-xj",
@@ -28987,10 +28850,7 @@
   "poidsSuppose": true,
   "ficheAcompleter": false,
   "price_ht": 164.06,
-  "price": 196.87,
-  "variantGroup": "DCD799",
-  "variantRole": "solo",
-  "coffretSku": "DCD799NT-XJ"
+  "price": 196.87
  },
  {
   "id": "dewalt-dcd777nt",
