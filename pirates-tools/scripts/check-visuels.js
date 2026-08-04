@@ -157,6 +157,53 @@ module.exports = async function () {
       + 'les autres fiches qui s\'en servent');
   }
 
+  /* ══ TRIER LES ARCHIVES — UN CHAMP REMPLI N'EST PAS UN CHAMP QUI DIT ═══
+     ⛔ Règle de l'user, 04/08 : « ceux qui n'ont pas de fiche technique NI de
+     PNG, on les supprime ; ceux qui ont l'un des deux, on les isole ».
+     ⛔⛔ Le piège, mesuré : `specs` était renseigné sur 391 fiches sur 391 — de
+     quoi croire qu'elles étaient toutes documentées. La plupart ne portaient
+     que `{"Marque"}`, neuf autres que `{"Référence"}`. Compter ces
+     identifiants faisait passer 12 fiches vides pour documentées contre 3
+     réellement renseignées. C'est de la suppression : une erreur ici ne se
+     rattrape pas. */
+  var tri = require('./trier-archives.js');
+  ok(typeof tri.aFicheTechnique === 'function' && typeof tri.aVisuel === 'function',
+    'trier-archives expose ses deux critères');
+  if (tri.aFicheTechnique) {
+    ok(tri.aFicheTechnique({ specs: { Marque: 'ZZ' } }) === false,
+      '⛔⛔ une `specs` qui ne porte que la MARQUE n\'est pas une fiche technique : '
+      + 'la compter sauverait des centaines de fiches vides');
+    ok(tri.aFicheTechnique({ specs: { 'Référence': 'ZZ1' } }) === false,
+      '⛔⛔ …ni celle qui ne porte que la RÉFÉRENCE : un identifiant dit LEQUEL, '
+      + 'jamais COMMENT c\'est fait');
+    ok(tri.aFicheTechnique({ specs: { Marque: 'ZZ', Tension: '18V' } }) === true,
+      '⛔ …mais une caractéristique réelle compte, même à côté d\'un identifiant');
+    ok(tri.aFicheTechnique({ features: ['un point'] }) === true
+      && tri.aFicheTechnique({ description_long: 'un texte' }) === true,
+      '⛔ `features` et `description_long` valent fiche technique');
+    ok(tri.aFicheTechnique({ specs: {} }) === false && tri.aFicheTechnique({}) === false,
+      '⛔ et le vide reste le vide');
+
+    ok(tri.aVisuel({ img: 'images/placeholder.svg' }) === false,
+      '⛔⛔ le PLACEHOLDER n\'est pas un visuel : 388 fiches le portaient, les prendre '
+      + 'pour illustrées aurait sauvé exactement ce qu\'il fallait supprimer');
+    ok(tri.aVisuel({ heroImg: 'images/posters/zz.webp' }) === true
+      && tri.aVisuel({ img: 'images/posters/zz.webp' }) === true,
+      '⛔ une vraie image compte, qu\'elle soit en heroImg ou en img');
+
+    /* ⛔ L'UN DES DEUX SUFFIT — c'est sa règle, mot pour mot. */
+    var t = tri.trierArchives([
+      { sku: 'A', specs: { Tension: '18V' } },            // fiche technique seule
+      { sku: 'B', heroImg: 'images/zz.webp' },            // visuel seul
+      { sku: 'C', specs: { Marque: 'ZZ' }, img: 'images/placeholder.svg' }  // rien
+    ]);
+    ok(t.garde.length === 2 && t.jete.length === 1 && t.jete[0].sku === 'C',
+      '⛔⛔ l\'UN des deux suffit à garder une fiche, et seule celle qui n\'a NI l\'un '
+      + 'NI l\'autre part (obtenu gardées ' + JSON.stringify(t.garde.map(function (x) {
+        return x.sku; })) + ', jetées ' + JSON.stringify(t.jete.map(function (x) {
+        return x.sku; })) + ')');
+  }
+
   return errors;
 };
 
