@@ -30,11 +30,13 @@
    des deux signaux ne tranche part dans « À TRANCHER » et n'est PAS distribué
    au hasard dans une des trois familles : une ignorance ne vote pas.
 
-   ⛔ LA CLÉ DE DOUBLON SUIT LA GRAMMAIRE DE L'USER, 04/08 : « DCF = type
-   d'outil, 620 = modèle, N = nu / T = coffret, -XJ = zone géographique ».
-   La zone géographique se retire (`racineRef`), le N/T JAMAIS : la version
-   coffret vaut ~50 € de plus que la nue, les confondre ferait écrire un prix
-   de nu sur une fiche de coffret. C'est de l'argent, donc priorité 1.
+   ⛔ LA CLÉ DE DOUBLON SUIT LA RÈGLE DE L'USER, 04/08 — seconde version, qui
+   ANNULE la première (celle qui gardait les lettres après les chiffres) :
+   « tu ne regardes plus les lettres après les numéros — tu te bases sur la
+   description du produit et sur les premières lettres, ainsi que les numéros
+   qui viennent après ». Racine de modèle (lettres + chiffres, `racineModele`)
+   + VARIANTE lue dans la description (outil / pack / accessoire), doublons
+   virés, le moins cher gagne. Voir `cleDoublon` plus bas.
 
    ⚠️ Portes lues : J3 — des annonces publiques d'outillage, aucune donnée
    personnelle ; J4 — aucun prix n'est recalculé ni écrit, on relève ceux des
@@ -133,44 +135,62 @@ function normaliserTitre(t) {
     .trim();
 }
 
-/* ⛔⛔ UNE RÉFÉRENCE NUE SE COMPLÈTE PAR LE TITRE, ELLE NE SE DEVINE PAS.
-   Mesuré sur le balayage : idealo publie parfois « DCM200 » là où l'outil est
-   un DCM200N, et 1 308 lignes portent ainsi une référence qui s'arrête sur un
-   chiffre. Quand le TITRE de l'annonce nomme UNE SEULE référence plus longue
-   commençant par celle-là, on prend la longue — c'est une LECTURE, pas une
-   déduction. Deux candidates différentes : on ne tranche pas.
+/* ⛔⛔⛔ LA RÈGLE DE L'USER, 04/08/2026, MOT POUR MOT — elle REMPLACE ma
+   première clé, qui gardait les lettres après les chiffres et qui a produit
+   des paires fantômes (DCM200 / DCM200N comptés comme deux produits) :
+   « tu ne regardes plus les lettres après les numéros !!! tu te bases sur la
+   description du produit et sur les premières lettres, ainsi que les numéros
+   qui viennent après !!! et tu me vires les doublons, tu prends le moins cher »
 
-   ⛔ CE QU'ON NE FAIT PAS : rabattre « DCM200 » sur « DCM200N » par principe.
-   Mesuré sur les 112 paires X / XN du balayage, le seau nu MÉLANGE les
-   variantes — `DCE560` sort à 123,99 € AVEC batteries quand `DCE560N` est nu à
-   244,86 €, `DCLE34031` à 791,98 € en kit quand `DCLE34031N` est nu à
-   367,63 €. Fusionner écrirait un prix de kit sur une fiche d'outil nu, ou
-   l'inverse. C'est de l'argent, donc priorité 1 : on s'abstient et on SIGNALE
-   (colonne « Réf. ambiguë » du CSV). */
-function refDansLeTitre(racine, titre) {
-  const t = String(titre || '').toUpperCase().replace(/[^A-Z0-9]/g, ' ');
-  const re = new RegExp('\\b' + racine.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[A-Z][A-Z0-9]*\\b', 'g');
-  const vus = Array.from(new Set(t.match(re) || []));
-  return vus.length === 1 ? vus[0] : null;
+   Donc DEUX ingrédients, et seulement deux :
+   ① la RACINE DE MODÈLE — lettres de tête + chiffres (`racineModele`) :
+     DCE560N-XJ, DCE560D1-QW et « DCE 560 » sont le même modèle ;
+   ② la DESCRIPTION, qui dit CE QU'ON ACHÈTE pour ce modèle : la machine
+     seule, la machine en pack (batteries/chargeur/coffret), ou un ACCESSOIRE
+     fait pour elle. C'est lui qui me l'a appris sur le DCE560 : « Kit de
+     conversion du tube d'extrusion … pour DCE 560 » à 123,99 € n'est pas le
+     pistolet à 244,86 € — la référence est la même, la description tranche.
+
+   La clé est donc racine + variante lue dans la description. À l'intérieur
+   d'une même clé : doublons virés, LE MOINS CHER gagne. */
+
+/* Les mots d'accessoire, tirés des annonces réellement vues dans le balayage
+   (raccords DCE5801, supports DCE5601, kit de conversion DCE560, dust box
+   DWH302DH, piètements DE7033…). Un accessoire cite la référence de SA
+   machine : sans cette variante, il écraserait le prix de la machine. */
+const ACCESSOIRE = /(kit de conversion|raccord|couplage|support|pi[eè]tement|adaptateur|rechange|remplacement|replacement|dust box|sac d.aspirat|filtre|batterie de remplacement|moulage|insert|tube d.extrusion|ensemble de supports|legstand|coiffe|embase|semelle|carter|charbons?|courroie|mandrin de rechange|ersatz|zubeh[öo]r)/i;
+
+function varianteProduit(titre, car) {
+  const c = car || {};
+  const t = sansAccents(titre);
+  /* ⛔ « AVEC support », « with stand », « + coffret » : le mot d'accessoire
+     annonce ici un CONTENU LIVRÉ AVEC la machine, pas une pièce vendue seule.
+     Mesuré : « D24000-gb Wet Tile Saw avec support de roue » partait en
+     accessoire — c'est la scie complète, à 1 504,98 €. Le mot qui précède
+     tranche : une inclusion n'est pas une pièce détachée. */
+  const m = t.match(ACCESSOIRE);
+  if (m) {
+    const avant = t.slice(Math.max(0, m.index - 8), m.index);
+    const inclusion = /(avec|with|mit|inkl\.?|\+)\s*$/.test(avant);
+    if (!inclusion) return 'ACCESSOIRE';
+  }
+  /* Le pack se lit dans la description : « 2x5,0Ah », « + chargeur »,
+     « + coffret TSTAK »… — le parseur l'a déjà mesuré dans `car.pack`. */
+  if (c.pack === true) return 'PACK';
+  return 'OUTIL';
 }
 
 function cleDoublon(e) {
   const c = e.car || {};
   const ref = e.sku || c.sku || c.skuEclate || null;
+  const variante = varianteProduit(e.titre, c);
   if (ref) {
-    const racine = priceParse.racineRef(String(ref).toUpperCase());
-    if (/[0-9]$/.test(racine)) {
-      const longue = refDansLeTitre(racine, e.titre);
-      if (longue) {
-        return { cle: 'REF:' + priceParse.racineRef(longue), niveau: 'référence lue dans le titre' };
-      }
-      return { cle: 'REF:' + racine, niveau: 'référence nue' };
-    }
-    return { cle: 'REF:' + racine, niveau: 'référence' };
+    const racine = priceParse.racineModele(String(ref).toUpperCase());
+    return { cle: 'REF:' + racine + '|' + variante, niveau: 'référence', variante: variante };
   }
   const n = normaliserTitre(e.titre);
-  if (n) return { cle: 'TIT:' + n, niveau: 'titre' };
-  return { cle: 'BRUT:' + JSON.stringify(e).slice(0, 120), niveau: 'aucun' };
+  if (n) return { cle: 'TIT:' + n, niveau: 'titre', variante: variante };
+  return { cle: 'BRUT:' + JSON.stringify(e).slice(0, 120), niveau: 'aucun', variante: variante };
 }
 
 /* ⛔ « LES MOINS CHERS » — la consigne, appliquée telle quelle. Un prix absent
@@ -261,26 +281,6 @@ function collecter(dossier, pagesAttendues) {
     pagesPlafonnees: pagesPlafonnees, pagesEnDouble: pagesEnDouble };
 }
 
-/* ⛔ MARQUER LES RÉFÉRENCES AMBIGUËS — l'ambiguïté se voit, elle ne se corrige
-   pas en douce. Une clé qui s'arrête sur un chiffre est ambiguë dès qu'il
-   existe, dans le même balayage, une clé identique prolongée d'une lettre :
-   « DCM200 » à côté de « DCM200N » peut désigner le nu comme le coffret, et
-   c'est à l'user de trancher, pas à moi. */
-function marquerAmbigues(lignes) {
-  const cles = new Set(lignes.map((e) => e.cleDoublon));
-  let n = 0;
-  lignes.forEach((e) => {
-    const k = e.cleDoublon;
-    e.refAmbigue = false;
-    if (!/^REF:.*[0-9]$/.test(k)) return;
-    for (const autre of cles) {
-      if (autre !== k && autre.indexOf(k) === 0 && /^[A-Z]/.test(autre.slice(k.length))) {
-        e.refAmbigue = true; n++; return;
-      }
-    }
-  });
-  return n;
-}
 
 /* ══ 4. LE BILAN — AVANT ET APRÈS, PAR FAMILLE ═════════════════════════════ */
 function compter(liste) {
@@ -289,13 +289,35 @@ function compter(liste) {
   return { total: liste.length, seuls: seuls, packs: packs };
 }
 
+/* ⛔⛔ LE DÉDOUBLONNAGE EST GLOBAL, PAS PAR FAMILLE. Mesuré : « DEWALT D24000 »
+   — un titre réduit à sa référence — partait en « À trancher » pendant que
+   « D24000 Wet Tile Saw … » était classé en électro. Même clé, deux lignes
+   survivantes, parce que chaque famille dédoublonnait dans son coin. Même
+   clé = même produit : on fusionne D'ABORD, et la ligne qui a une VRAIE
+   famille la donne au groupe — l'annonce muette hérite du classement de
+   l'annonce bavarde, jamais l'inverse. */
 function bilanParRayon(lignes) {
-  const par = {};
+  /* La famille résolue par groupe : la première non-« À trancher » du groupe. */
+  const rayonParCle = new Map();
+  lignes.forEach((e) => {
+    if (e.rayonCommercial !== 'A_TRANCHER' && !rayonParCle.has(e.cleDoublon)) {
+      rayonParCle.set(e.cleDoublon, e.rayonCommercial);
+    }
+  });
+  lignes.forEach((e) => {
+    if (e.rayonCommercial === 'A_TRANCHER' && rayonParCle.has(e.cleDoublon)) {
+      e.rayonCommercial = rayonParCle.get(e.cleDoublon);
+      e.signalClassement = 'hérité du doublon classé';
+    }
+  });
+  const apresGlobal = dedoublonner(lignes);
+  const par = {}, parApres = {};
   lignes.forEach((e) => { (par[e.rayonCommercial] = par[e.rayonCommercial] || []).push(e); });
+  apresGlobal.forEach((e) => { (parApres[e.rayonCommercial] = parApres[e.rayonCommercial] || []).push(e); });
   const res = {};
   Object.keys(par).forEach((r) => {
     const avant = par[r];
-    const apres = dedoublonner(avant);
+    const apres = parApres[r] || [];
     res[r] = { avant: compter(avant), apres: compter(apres), lignes: apres, brutes: avant };
   });
   return res;
@@ -314,7 +336,7 @@ function prixFr(v) {
 const COLONNES = ['Famille', 'Rayon', 'Référence', 'Titre', 'Prix idealo (€)',
   'Pack', 'Type', 'Voltage', 'Coffret', 'Ah', 'Nb outils', 'Nb batteries',
   'Nb pièces', 'Édition limitée', 'Origine', 'Signal de classement',
-  'Clé de doublon', 'Niveau de clé', 'Réf. ambiguë', 'Doublons fusionnés',
+  'Clé de doublon', 'Niveau de clé', 'Variante', 'Doublons fusionnés',
   'Réf. fiche du site', 'Prix actuel du site (€)'];
 
 function ligneCsv(e) {
@@ -327,7 +349,7 @@ function ligneCsv(e) {
     c.ah == null ? '' : c.ah, c.nbOutils == null ? '' : c.nbOutils,
     c.nbBatteries == null ? '' : c.nbBatteries, c.nbPieces == null ? '' : c.nbPieces,
     c.editionLimitee ? 'oui' : '', e.origine, e.signalClassement,
-    e.cleDoublon, e.niveauCle, e.refAmbigue ? 'oui' : '',
+    e.cleDoublon, e.niveauCle, e.variante || '',
     e.doublonsFusionnes == null ? '' : e.doublonsFusionnes,
     e.ficheSku || '', prixFr(e.prixSiteActuel)
   ].map(csvChamp).join(';');
@@ -364,6 +386,7 @@ function principal(argv) {
     const k = cleDoublon(e);
     e.cleDoublon = k.cle;
     e.niveauCle = k.niveau;
+    e.variante = k.variante;
     /* ⛔ `pack` VIENT DU PARSEUR, il ne se redevine pas ici. Une seconde
        définition du mot « pack » divergerait de celle du traqueur au premier
        correctif, et les deux chiffres se contrediraient sans qu'on sache
@@ -371,7 +394,6 @@ function principal(argv) {
     e.pack = !!(e.car && e.car.pack);
   });
 
-  const ambigues = marquerAmbigues(rec.lignes);
   const bilan = bilanParRayon(rec.lignes);
 
   /* Combien d'annonces chaque ligne retenue représente — c'est ce qui prouve
@@ -448,11 +470,6 @@ function principal(argv) {
   l('     AVANT : ' + tA + '   outils seuls : ' + sA + '   packs : ' + kA);
   l('     APRÈS : ' + tP + '   outils seuls : ' + sP + '   packs : ' + kP);
   l('');
-  l('  ⚠️ ' + ambigues + ' ligne(s) portent une référence AMBIGUË (elle s\'arrête sur un');
-  l('     chiffre alors qu\'une version suffixée existe : « DCM200 » à côté de');
-  l('     « DCM200N »). Elles ne sont PAS fusionnées — un prix de kit écrit sur');
-  l('     une fiche d\'outil nu coûterait de l\'argent. Colonne « Réf. ambiguë ».');
-  l('');
   l('  Fichiers écrits :');
   ecrits.forEach((e) => l('     · ' + path.relative(path.join(__dirname, '..'), e.fichier)
     + '   (' + e.lignes + ' lignes)'));
@@ -466,8 +483,7 @@ module.exports = {
   classer: classer, cleDoublon: cleDoublon, dedoublonner: dedoublonner,
   normaliserTitre: normaliserTitre, compter: compter, aplatir: aplatir,
   ligneCsv: ligneCsv, COLONNES: COLONNES, FAMILLE_VERS_RAYON: FAMILLE_VERS_RAYON,
-  sansAccents: sansAccents, marquerAmbigues: marquerAmbigues,
-  refDansLeTitre: refDansLeTitre
+  sansAccents: sansAccents, varianteProduit: varianteProduit
 };
 
 if (require.main === module) process.exit(principal(process.argv.slice(2)));

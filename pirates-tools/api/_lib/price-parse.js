@@ -1043,6 +1043,41 @@ function racineRef(sku) {
   return r.length >= 5 ? r : s;
 }
 
+/* ⛔⛔⛔ LA RACINE DE MODÈLE — RÈGLE DE L'USER, 04/08/2026, MOT POUR MOT :
+   « tu ne regardes plus les lettres après les numéros !!! tu te bases sur la
+   description du produit et sur les premières lettres, ainsi que les numéros
+   qui viennent après !!! et tu me vires les doublons, tu prends le moins cher »
+
+   Donc : LETTRES DE TÊTE + CHIFFRES QUI SUIVENT, et on s'arrête à la première
+   lettre qui vient après un chiffre. `DCE560N-XJ`, `DCE560D1-QW` et `DCE560`
+   sont le MÊME modèle — c'est lui qui l'a établi sur son propre catalogue,
+   après que je me sois trompé en les séparant.
+
+   ⚠️ POURQUOI ON NE COUPE PAS AU PREMIER GROUPE DE CHIFFRES TOUT COURT.
+   `DWST1-81078` (rangement) deviendrait `DWST1`, et TOUS les coffrets DWST1-…
+   se confondraient en un seul produit. Un groupe `-chiffres` qui suit fait
+   donc partie du modèle ; seule une LETTRE après un chiffre ferme la racine.
+
+   Vérifié à l'écriture :
+     DCE560N-XJ → DCE560    DCE560D1-QW → DCE560    DCM200NT-XJ → DCM200
+     D24000     → D24000    DWST1-81078 → DWST1-81078    DT4763-QZ → DT4763
+   ⚠️ Une écriture qui ne commence pas par des lettres (`2-910`, `AT-DXAM2250`)
+   est rendue TELLE QUELLE : mieux vaut ne pas regrouper que regrouper faux.
+
+   ⛔ Cette racine ne suffit JAMAIS à elle seule pour un prix : elle réunit le
+   nu, le coffret et le kit avec batteries. C'est la DESCRIPTION qui les
+   sépare — voir `varianteProduit` dans scripts/classer-idealo.js. */
+function racineModele(sku) {
+  var s = String(sku || '').trim().toUpperCase();
+  if (!s) return '';
+  var m = s.match(/^([A-Z]+)(\d+)((?:-\d+)*)/);
+  if (!m) return s;
+  var racine = m[1] + m[2] + (m[3] || '');
+  /* Même garde que `racineRef` : en dessous de quatre signes, une racine
+     n'identifie plus rien et accrocherait n'importe quoi. */
+  return racine.length >= 4 ? racine : s;
+}
+
 /* ⛔⛔ L'IDENTITÉ D'UNE PAGE, TIRÉE DE SON CONTENU — parce que le raccourci ne
    dit JAMAIS quelle page il envoie. Sans ça, le serveur ne peut ni reconnaître
    une page envoyée deux fois, ni dire LAQUELLE des 67 manque : il ne sait que
@@ -1539,6 +1574,15 @@ function extraireCaracteristiques(titre, brand) {
     /* ⛔ UNE NORME N'EST PAS UNE RÉFÉRENCE. « EN 388 » sur un gant devenait
        le sku « EN388 » — et deux gants de normes différentes se seraient
        comparés par une réf que le fabricant n'a jamais écrite. */
+    /* ⛔ RÈGLE DE L'USER, 04/08/2026, après une fausse route corrigée deux fois
+       dans la même heure : « Kit de conversion … pour DCE 560 » PORTE bien la
+       référence DCE560 — elle dit pour quelle machine l'accessoire est fait,
+       et elle se GARDE. Ce qui distingue l'accessoire de la machine, c'est la
+       DESCRIPTION (« kit de conversion », « raccord », « support »), jamais la
+       position de la référence dans la phrase. J'avais d'abord voulu jeter la
+       référence derrière « pour » : faux, ça aurait rendu l'annonce muette.
+       La séparation accessoire/machine se fait au CLASSEMENT — `varianteProduit`
+       dans scripts/classer-idealo.js — sur le texte de l'annonce. */
     if (me && !/^(EN|ISO|NF|CE|FFP|DIN|ANSI)$/i.test(me[1])) {
       car.skuEclate = (me[1] + me[2] + (me[3] || '')).toUpperCase();
     }
@@ -2172,4 +2216,4 @@ function comparerCaracteristiques(a, b) {
   return { compatible: conflits.length === 0, conflits: conflits, concordances: concordances };
 }
 
-module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickoutil, parseIdealo: parseIdealo, parseAuto: parseAuto, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, raisonAucuneSource: raisonAucuneSource, enMillis: enMillis, SOURCE_FRESH_MS: SOURCE_FRESH_MS, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage, estMaPropreReponse: estMaPropreReponse, titresAttendus: titresAttendus, compterTuiles: compterTuiles, empreintePage: empreintePage, racineRef: racineRef, apparierParNomSouple: apparierParNomSouple, CONCORDANCES_MIN: CONCORDANCES_MIN, annoncesManquantes: annoncesManquantes, extraireCaracteristiques: extraireCaracteristiques, comparerCaracteristiques: comparerCaracteristiques, planBalayage: planBalayage, rangDansPlan: rangDansPlan, OUTILS: OUTILS, SERIES: SERIES, nomenclature: nomen };
+module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickoutil, parseIdealo: parseIdealo, parseAuto: parseAuto, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, raisonAucuneSource: raisonAucuneSource, enMillis: enMillis, SOURCE_FRESH_MS: SOURCE_FRESH_MS, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage, estMaPropreReponse: estMaPropreReponse, titresAttendus: titresAttendus, compterTuiles: compterTuiles, empreintePage: empreintePage, racineRef: racineRef, racineModele: racineModele, apparierParNomSouple: apparierParNomSouple, CONCORDANCES_MIN: CONCORDANCES_MIN, annoncesManquantes: annoncesManquantes, extraireCaracteristiques: extraireCaracteristiques, comparerCaracteristiques: comparerCaracteristiques, planBalayage: planBalayage, rangDansPlan: rangDansPlan, OUTILS: OUTILS, SERIES: SERIES, nomenclature: nomen };
