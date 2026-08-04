@@ -3108,15 +3108,29 @@ module.exports = async function () {
              (rien à chercher). Le voisinage par préfixe normalisé les sépare.
              ⚠️ La référence de travail est CHOISIE À L'EXÉCUTION sur un
              critère — une fiche à suffixe — jamais nommée dans le harnais. */
+          /* ⛔⛔ LE SUJET DOIT ÊTRE INTROUVABLE PAR SA FORME NUE — sinon ce
+             contrôle ne teste PAS le quasi-rapprochement.
+             Défaut trouvé le 04/08/2026, après un import qui a fait passer une
+             marque devant l'autre : le harnais a changé de sujet et a pris une
+             fiche en `-XJ`. Or `racineRef` RETIRE le marquage géographique :
+             la forme nue s'apparie alors EXACTEMENT, la fiche est trouvée — le
+             bon résultat — et n'apparaît donc jamais dans la liste des
+             quasi-rapprochements que l'assertion inspecte. Le harnais rougissait
+             sur un comportement JUSTE.
+             ⚠️ Le critère manquant : la forme nue ne doit pas être la racine.
+             `199483-0X` la satisfait (suffixe numérique, non retiré) ;
+             `DCF922N-XJ` non. On l'exige, au lieu de le supposer. */
           var refSuffixee = null;
           for (var rs = 0; rs < parMarque[marqueT].length; rs++) {
-            if (/^[A-Z0-9]{5,}-[A-Z0-9]{2,3}$/.test(parMarque[marqueT][rs])) {
-              refSuffixee = parMarque[marqueT][rs]; break;
-            }
+            var cand = parMarque[marqueT][rs];
+            if (!/^[A-Z0-9]{5,}-[A-Z0-9]{2,3}$/.test(cand)) continue;
+            if (pp.racineRef(cand) === cand.split('-')[0]) continue;   // trouvable exactement
+            refSuffixee = cand; break;
           }
           ok(!!refSuffixee,
             '⛔ PRÉALABLE : le catalogue porte au moins une référence à suffixe '
-            + '(forme RÉF-XX) — sans elle ce contrôle ne vérifie rien');
+            + '(forme RÉF-XX) dont la forme NUE ne suffit pas à la retrouver — '
+            + 'sans elle ce contrôle ne vérifie rien');
           if (refSuffixee) {
             var refNue = refSuffixee.split('-')[0];
             adm._internals.pwScanReset();

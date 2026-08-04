@@ -41,6 +41,9 @@ import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 const modele = require(join(RACINE, 'api/_lib/pricing-model.js'));
+/* La racine de modèle vit dans le parseur du traqueur : une seconde copie ici
+   divergerait au premier correctif (O6, la copie périmée). */
+const priceParse = require(join(RACINE, 'api/_lib/price-parse.js'));
 
 const args = process.argv.slice(2);
 const source = args.find((a) => !a.startsWith('--') && a.endsWith('.json'));
@@ -94,6 +97,25 @@ produits.forEach((p) => {
   liste.forEach((a) => { const k = String(a || '').trim().toUpperCase(); if (k) skusExistants.add(k); });
 });
 
+/* ⛔⛔ LE DOUBLON SE LIT SUR LA RACINE DE MODÈLE, PAS SUR L'ÉCRITURE EXACTE.
+   RÈGLE DE L'USER, 04/08/2026 : « tu ne regardes plus les lettres après les
+   numéros — tu te bases sur la description du produit et sur les premières
+   lettres, ainsi que les numéros qui viennent après. »
+   MESURÉ sur l'import DeWALT du jour : le contrôle par SKU exact voyait
+   67 doublons ; il en RATAIT 133. Passaient à travers `DE7035` alors que
+   `DE7035-XJ` est au catalogue, `DCD709N-XJ` face à `DCD709NT-XJ`,
+   `DCV100XJ` face à `DCV100-XJ`. Chacune aurait créé une seconde fiche pour
+   le même outil — deux prix, deux stocks, un client qui ne sait plus laquelle
+   acheter, et le traqueur qui écrit sur l'une pendant que l'autre dérive.
+   ⚠️ La racine seule ne suffit pas à trancher : elle réunit le nu, le coffret
+   et le kit. C'est pourquoi le refus ci-dessous NOMME la fiche déjà présente,
+   pour qu'un rapprochement discutable se voie au lieu de disparaître. */
+const racinesExistantes = new Map();   // racine de modèle → sku de la fiche
+[...skusExistants].forEach((s) => {
+  const r = priceParse.racineModele(s);
+  if (r && !racinesExistantes.has(r)) racinesExistantes.set(r, s);
+});
+
 /* ⛔⛔ LES CATÉGORIES VIENNENT DU CATALOGUE, ON N'EN INVENTE PAS.
    Faute commise au 1er import (01/08/2026) : j'avais écrit ma propre table et
    fabriqué `Perceuses visseuses` à côté de `Perceuses-visseuses`,
@@ -139,18 +161,42 @@ const FAMILLES = [
 ];
 const famille = (n) => (FAMILLES.find(([re]) => re.test(n)) || [null, 'Accessoires'])[1];
 
-/* ⛔ PRÉALABLE : chaque cible doit EXISTER au catalogue. Sans ce contrôle,
-   une faute de frappe recréerait une famille fantôme sans que rien ne le dise. */
+/* ⛔⛔ FAMILLES DÉLIBÉRÉMENT ROUVERTES — déclarées ICI, une par une, avec la
+   raison. Rien d'autre ne passe.
+   Le 04/08/2026, la porte ci-dessous a refusé l'import DeWALT sur
+   « Quincaillerie » et « Combos ». Elle avait raison de parler, mais pas de
+   conclure : ces deux familles ne sont PAS des fautes de frappe. Elles sont à
+   ZÉRO fiche parce qu'on les a vidées le jour même — la Quincaillerie en
+   supprimant les fiches clickoutil, les Combos en archivant les 281 packs
+   (`archives/packs-archives.json`, tout est récupérable).
+   ⛔ Une famille vidée n'est pas une famille inexistante : la première se
+   rouvre, la seconde est un bug d'orthographe. La porte ne savait pas les
+   distinguer — maintenant si, et seulement sur déclaration explicite.
+   ⚠️ Demande de l'user, 04/08/2026 : « fais attention à … créer les bonnes
+   catégories », et pour la quincaillerie : « la quincaillerie avec la
+   quincaillerie … on vendra des packs de cinq ou de 10 ». */
+const FAMILLES_ROUVERTES = {
+  'Quincaillerie': 'vidée le 04/08 avec les fiches clickoutil ; l\'user la veut explicitement',
+  'Combos': 'vidée le 04/08 par l\'archivage des 281 packs (récupérables) ; les packs idealo y retournent'
+};
+
+/* ⛔ PRÉALABLE : chaque cible doit EXISTER au catalogue, ou être déclarée
+   rouverte ci-dessus. Sans ce contrôle, une faute de frappe recréerait une
+   famille fantôme sans que rien ne le dise. */
 {
   const connues = new Set(produits.map((p) => p.category).filter(Boolean));
   const inconnues = [...new Set(FAMILLES.map(([, c]) => c).concat(['Accessoires']))]
-    .filter((c) => !connues.has(c));
+    .filter((c) => !connues.has(c) && !FAMILLES_ROUVERTES[c]);
   if (inconnues.length) {
     console.error('⛔ REFUS : ces catégories cibles n\'existent PAS au catalogue — '
       + inconnues.join(', ') + '. Corrige la table avant d\'importer : une famille '
-      + 'inventée coupe en deux une famille existante et devient invisible.');
+      + 'inventée coupe en deux une famille existante et devient invisible.\n'
+      + '   (Si elle a été VIDÉE et doit rouvrir, déclare-la dans FAMILLES_ROUVERTES '
+      + 'avec sa raison — jamais en silence.)');
     process.exit(1);
   }
+  const rouvertes = Object.keys(FAMILLES_ROUVERTES).filter((c) => !connues.has(c));
+  rouvertes.forEach((c) => console.log('⚠️  famille ROUVERTE : ' + c + ' — ' + FAMILLES_ROUVERTES[c]));
 }
 
 const slugifier = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
@@ -185,6 +231,13 @@ for (const it of liste.concat(sansRefBruts)) {
   const cout = Number(it.srcTTC || 0);
   if (!sku) { refuses.push({ sku, nom, motif: 'référence absente' }); continue; }
   if (skusExistants.has(sku)) { refuses.push({ sku, nom, motif: 'DOUBLON — SKU ou référence alternative déjà au catalogue' }); continue; }
+  /* ⛔ ARGENT : même racine de modèle ⇒ même outil. Le refus NOMME la fiche
+     déjà au catalogue, pour qu'un rapprochement discutable reste visible. */
+  const racineSku = priceParse.racineModele(sku);
+  if (racinesExistantes.has(racineSku)) {
+    refuses.push({ sku, nom, motif: 'DOUBLON par racine de modèle — le catalogue porte déjà ' + racinesExistantes.get(racineSku) });
+    continue;
+  }
   /* ⚠️ NOM ABSENT OU TRONQUÉ : ON N'ÉCARTE PLUS (décision de l'user,
      01/08/2026 — « lorsque l'on va ajouter les photos, je te donnerai la fiche
      technique à chaque fois »). Le motif de refus reposait sur l'idée qu'on ne
@@ -275,6 +328,7 @@ for (const it of liste.concat(sansRefBruts)) {
   fiche.price = reco.priceHtFor.price;
   couts[sku] = coutPrive;
   skusExistants.add(sku);
+  racinesExistantes.set(racineSku, sku);   // deux entrées du MÊME relevé ne passent pas deux fois
   retenus.push(fiche);
 }
 

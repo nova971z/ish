@@ -277,6 +277,51 @@ Autres scripts NON en CI : `set-admin-claim.js`, `test-rules.js` (émulateur Fir
 `images/_originals/` (HD, **exclu du deploy** via `.vercelignore`), `icons/` (PWA),
 **`models/products/`** (46 `.glb`, nommés par SKU, packs en `-pack.glb`).
 
+### 7.1 ⛔ AJOUTER DES PRODUITS — LA SEULE MÉTHODE (gravé 04/08/2026)
+
+*Écrit parce que je l'ai redemandé à l'user au lieu de le chercher ici, alors
+que l'outil existait et avait déjà servi. Cette recette ne se redemande pas.*
+
+**On n'écrit JAMAIS `products.json` à la main. Un seul outil :**
+
+```bash
+node outils/importer-catalogue.mjs <releve.json> [combien] [--essai]
+```
+
+**Le relevé d'entrée** — `{ brand, unknown: [ { sku, srcTTC, name } ] }` :
+- `sku` — la référence constructeur ;
+- **`srcTTC` — le COÛT D'ACHAT TTC**, jamais un prix de vente ni un prix
+  concurrent. C'est lui qui entre dans le calculateur ;
+- `name` — le libellé. Absent → la fiche entre quand même, avec
+  `ficheAcompleter: true` et un libellé explicitement provisoire.
+- Accessoires sans référence : `sansRef: [ { titre, prix } ]` → sku interne
+  `AC-<hash>`, identité de suivi `srcNom` = le titre exact.
+
+**Le calculateur fait le prix, et lui seul** :
+`modele.recommend(fiche, { costTTC, mode: 'colissimo' })` de
+`api/_lib/pricing-model.js` → `price` (TTC) + `price_ht`. Marge cible : net
+15 % après IS, transport choisi par `shipFor` d'après `weight_kg`.
+⚠️ Poids inconnu → `weight_kg: 2` + **`poidsSuppose: true`** écrit dans la
+fiche : le port fait le prix, une valeur implicite ne se corrige jamais.
+⚠️ Famille `Quincaillerie` → `weight_kg: 0.4` (lettre suivie, 7-14 j).
+
+**Les catégories ne s'inventent pas** : table `FAMILLES` dans l'outil, chaque
+cible est VÉRIFIÉE présente dans `products.json` avant de tourner — sinon
+REFUS. *(12 familles fantômes créées au 1er import pour l'avoir ignoré.)*
+
+**Refus automatiques** : SKU déjà au catalogue · coût ≤ 0 · moulage/insert de
+coffret · coffret TSTAK/TOUGHSYSTEM vide · titre sans la marque · nom en
+doublon sur la page. Tous ÉCRITS dans le rapport, jamais avalés.
+
+**⛔ Le coût d'achat ne va JAMAIS dans `products.json`** (fichier servi au
+CDN → fuite irréversible, `check-prix-fuite` l'interdit). Il part dans
+`scratchpad/couts-import-<marque>.json` **et** dans un fichier au format que
+le traqueur sait avaler, à coller dans l'admin pour que le coût redevienne un
+RELEVÉ et non une supposition.
+
+**Fini veut dire** : `--essai` d'abord, puis `node scripts/ci.js` vert et
+`node tests/lancer.mjs --noyau` vert.
+
 ---
 
 ## 8. Variables d'environnement (Vercel)
