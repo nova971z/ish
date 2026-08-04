@@ -132,8 +132,38 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ ok: false, error: 'Too many items' });
     }
 
+    /* ⛔⛔⛔ ON NE VEND PAS À UN PRIX QU'ON NE PEUT PAS CONFIRMER.
+       Faute mesurée le 04/08/2026, signalée par l'user : « lorsque Firebase
+       n'est plus disponible parce qu'on a explosé la limite gratuite, les prix
+       des produits baissent considérablement, c'est n'importe quoi ».
+       Cause : `loadOverrides()` rendait `{}` aussi bien pour « aucun override »
+       que pour « lecture impossible ». Le catalogue redevenait `products.json`
+       brut — un fichier que le traqueur ne réécrit JAMAIS. Mesuré sur le
+       balayage du même jour, 49 fiches sur 141 : **−23,9 % en moyenne**,
+       jusqu'à **−70,7 %** (DCF887N à 94,48 € au lieu de 322,07 €). Et cette
+       ligne-ci résolvait ses prix par le même appel : le site VENDAIT à ces
+       prix-là.
+       ⛔ Le repli n'est pas une option. Un prix faussement bas peut passer SOUS
+       le coût d'achat, et la porte J4 exige un prix « exact et complet ». Un
+       paiement refusé se rattrape ; une vente à perte, non.
+       ⚠️ Le cache d'overrides sert de filet : tant qu'une carte de moins de
+       15 minutes existe, `prixConfirmes` reste vrai et la vente continue. Le
+       refus ne tombe que si plus RIEN n'est fiable.
+       ⚠️ J3 : le journal ne porte qu'un motif fixe (`lecture-echouee`…), jamais
+       un panier, un identifiant client ni un message d'erreur du fournisseur. */
+    var etatCatalogue = await catalog.loadCatalogEtat();
+    if (!etatCatalogue.prixConfirmes) {
+      console.error('[create-payment-intent] prix NON confirmes (' + etatCatalogue.raison + ') - paiement refuse');
+      return res.status(503).json({
+        ok: false,
+        error: 'Les prix ne sont pas confirmés pour le moment. Rien n\'a été débité et '
+          + 'aucune commande n\'a été enregistrée. Merci de réessayer dans quelques minutes.',
+        code: 'PRIX_NON_CONFIRMES'
+      });
+    }
+
     // Resolve every line against the server catalogue.
-    var products = await catalog.loadCatalog();
+    var products = etatCatalogue.produits;
     var totalCents = 0;
     var description = [];
     var validatedLines = []; // lignes {key, qty} VALIDÉES (clé résolue, qty bornée)

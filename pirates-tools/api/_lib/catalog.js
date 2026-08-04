@@ -31,18 +31,63 @@ function loadProducts() {
   return _cache;
 }
 
-async function loadOverrides() {
+/* ⛔⛔ COMBIEN DE TEMPS UNE CARTE D'OVERRIDES RESTE-T-ELLE UNE VÉRITÉ EN PANNE.
+   Quand Firestore ne répond plus, la carte déjà en mémoire vaut infiniment
+   mieux que le fichier : ce sont les VRAIS prix, seulement un peu vieux. Mais
+   un « un peu vieux » sans borne devient un mensonge. Quinze minutes : plus
+   long que toute panne passagère, plus court que la vie d'une instance chaude. */
+var CACHE_PANNE_MAX = 15 * 60 * 1000;
+
+/* ⛔⛔⛔ LA PANNE ET LE VIDE NE DONNENT PLUS LA MÊME RÉPONSE. C'EST DE L'ARGENT.
+   Jusqu'au 04/08/2026 cette fonction rendait `{}` dans les DEUX cas : « il n'y
+   a aucun override » et « je n'ai PAS PU les lire ». `applyOverrides` sort
+   aussitôt sur une carte vide, le catalogue redevenait `products.json` brut —
+   et ce fichier n'est JAMAIS réécrit par le traqueur, donc l'écart ne fait que
+   grandir.
+
+   MESURÉ sur le balayage du 04/08, 141 fiches comparables : 49 ont un prix de
+   fichier EN DESSOUS du prix recalculé, de **23,9 % en moyenne**, jusqu'à
+   **−70,7 %** (DCF887N à 94,48 € au lieu de 322,07 €).
+   ⛔ Et ce n'est pas de l'affichage : `create-payment-intent` résout ses prix
+   par le MÊME `loadCatalog()`. Quand le quota Firestore sautait, le site
+   VENDAIT à ces prix-là.
+   ⚠️ Porte J4 lue : « le prix annoncé doit être exact et complet ». Un prix
+   qu'on ne peut pas confirmer n'est pas un prix exact — et à −70 % il peut
+   passer sous le coût d'achat. On préfère ne pas vendre plutôt que vendre faux.
+
+   Ce qui est rendu :
+     · `overrides`  la carte, comme avant
+     · `disponible` FAUX uniquement quand Firebase est configuré et qu'aucune
+                    carte fiable n'a pu être obtenue. Non configuré = mode
+                    fichier DÉLIBÉRÉ, donc disponible.
+     · `raison`     de quoi diagnostiquer sans deviner
+     · `ageMs`      âge de la carte rendue ; 0 si elle vient d'être lue */
+async function loadOverridesEtat() {
   var serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT;
-  if (!serviceAccount) return {};
+  /* Pas de Firebase du tout : rien à charger, donc rien qui manque. Le fichier
+     EST la source, par construction et non par accident. */
+  if (!serviceAccount) {
+    return { overrides: {}, disponible: true, raison: 'firebase-non-configure', ageMs: 0 };
+  }
 
   var now = Date.now();
   if (_overridesCache && now - _overridesCacheTime < OVERRIDES_TTL) {
-    return _overridesCache;
+    return { overrides: _overridesCache, disponible: true, raison: 'cache', ageMs: now - _overridesCacheTime };
+  }
+
+  /* Le repli commun aux deux modes de panne : la carte en mémoire tant qu'elle
+     n'est pas trop vieille, l'aveu d'ignorance sinon. */
+  function repli(raison) {
+    var age = _overridesCache ? (Date.now() - _overridesCacheTime) : Infinity;
+    if (_overridesCache && age < CACHE_PANNE_MAX) {
+      return { overrides: _overridesCache, disponible: true, raison: raison + '-cache', ageMs: age };
+    }
+    return { overrides: {}, disponible: false, raison: raison, ageMs: age };
   }
 
   try {
     var db = require('./firebase').getFirebase().db;
-    if (!db) return _overridesCache || {};
+    if (!db) return repli('firebase-indisponible');
     var snap = await db.collection('product_overrides').get();
     var map = {};
     snap.forEach(function (doc) {
@@ -51,12 +96,21 @@ async function loadOverrides() {
       map[doc.id] = data;
     });
     _overridesCache = map;
-    _overridesCacheTime = now;
-    return map;
+    _overridesCacheTime = Date.now();
+    return { overrides: map, disponible: true, raison: 'lu', ageMs: 0 };
   } catch (err) {
+    /* ⚠️ Le message part dans les journaux Vercel, jamais dans une réponse :
+       il peut porter un identifiant de projet. */
     console.error('[catalog] Overrides load failed:', err.message);
-    return _overridesCache || {};
+    return repli('lecture-echouee');
   }
+}
+
+/* Compatibilité pour les appelants qui n'ont pas besoin de l'état.
+   ⛔ AUCUN CHEMIN D'ARGENT NE PASSE PAR ICI : la panne y redevient invisible,
+   et c'est précisément ce qu'on vient de corriger. */
+async function loadOverrides() {
+  return (await loadOverridesEtat()).overrides;
 }
 
 function applyOverrides(products, overrides) {
@@ -105,11 +159,24 @@ function invalidateOverrides() {
   _overridesCacheTime = 0;
 }
 
+/* ⛔⛔ LA FORME À UTILISER SUR TOUT CHEMIN D'ARGENT. Elle rend le catalogue ET
+   la question qui décide : les prix sont-ils CONFIRMÉS ? `loadCatalog()`
+   au-dessous ne rend que le tableau — pratique pour afficher, aveugle pour
+   vendre. Le nom dit lequel est lequel, parce qu'un appelant pressé prendra
+   toujours le plus court. */
+async function loadCatalogEtat() {
+  var etat = await loadOverridesEtat();
+  return {
+    produits: applyOverrides(loadProducts(), etat.overrides),
+    prixConfirmes: etat.disponible,
+    raison: etat.raison,
+    ageMs: etat.ageMs
+  };
+}
+
 // Merged catalogue (products.json + overrides, hidden removed).
 async function loadCatalog() {
-  var products = loadProducts();
-  var overrides = await loadOverrides();
-  return applyOverrides(products, overrides);
+  return (await loadCatalogEtat()).produits;
 }
 
 // Même fusion, mais avec une carte d'overrides DÉJÀ EN MAIN — aucune lecture
@@ -150,6 +217,17 @@ async function loadPublicCatalog() {
   return merged.map(toPublic);
 }
 
+// Même chose, mais l'appelant sait si les prix sont confirmés.
+async function loadPublicCatalogEtat() {
+  var etat = await loadCatalogEtat();
+  return {
+    produits: etat.produits.map(toPublic),
+    prixConfirmes: etat.prixConfirmes,
+    raison: etat.raison,
+    ageMs: etat.ageMs
+  };
+}
+
 // Resolve a product by its client key. Mirrors findProductByKey() in app.js:
 // matches on id, slug, or sku.
 function findByKey(catalog, key) {
@@ -163,10 +241,14 @@ function findByKey(catalog, key) {
 
 module.exports = {
   loadCatalog: loadCatalog,
+  loadCatalogEtat: loadCatalogEtat,
   loadCatalogAvec: loadCatalogAvec,
   loadPublicCatalog: loadPublicCatalog,
+  loadPublicCatalogEtat: loadPublicCatalogEtat,
+  loadOverridesEtat: loadOverridesEtat,
   findByKey: findByKey,
   invalidateOverrides: invalidateOverrides,
   // Exposés pour les tests CI (fonctions pures).
-  _internals: { applyOverrides: applyOverrides, toPublic: toPublic, PRIVATE_FIELDS: PRIVATE_FIELDS }
+  _internals: { applyOverrides: applyOverrides, toPublic: toPublic,
+    PRIVATE_FIELDS: PRIVATE_FIELDS, CACHE_PANNE_MAX: CACHE_PANNE_MAX }
 };
