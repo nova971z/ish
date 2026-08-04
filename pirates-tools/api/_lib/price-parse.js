@@ -910,6 +910,28 @@ function compterTuiles(rawText) {
    n'existe pas. Le prix n'est LU qu'après, une fois l'identité établie.
    ⚠️ J3 — des libellés d'outils publics, aucune donnée personnelle. J5 — aucune
    TVA, aucun octroi de mer. */
+/* ⛔⛔ CE QUE LE SEUIL COÛTE VRAIMENT, MESURÉ SUR SES 379 FICHES LE 04/08.
+   Quiconque touchera à `CONCORDANCES_MIN` doit lire ces trois chiffres — ils
+   disent où est le problème, et surtout où il n'est PAS :
+   ·  15 fiches (4,0 %) portent MOINS de deux mesures exploitables : pour
+      elles l'appariement est ARITHMÉTIQUEMENT impossible, aucun titre
+      fournisseur même parfait n'y changera rien (« Ceinture porte-outils en
+      cuir 18 compartiments » n'a que son décompte). Baisser le seuil à 1 les
+      rendrait appariables — et rendrait aussi appariables des dizaines de
+      fiches sur une seule mesure commune. Ce n'est pas un réglage, c'est un
+      arbitrage entre 15 fiches gagnées et un risque d'écrire faux ;
+   ·  43 fiches (11 %) sont INDISCERNABLES entre elles au sens de cet
+      appariement — quatre rails de guidage qui ne diffèrent que par une
+      longueur non extraite. Aucun titre ne pourra jamais les séparer : le
+      remède est dans la FICHE, pas dans le seuil ;
+   ·  336 fiches (89 %) sont DISCERNABLES. Le catalogue n'est donc pas le
+      goulot.
+   ⛔ ET POURTANT le relevé réel du 04/08 n'en apparie que DIX. Ni le seuil ni
+   l'ambiguïté n'expliquent l'écart — la cause restante est en amont, du côté
+   des titres que le comparateur rend pour ces annonces. C'est ce que compte
+   désormais `appariementNom` dans la réponse (`ambigus` contre `sansCandidat`).
+   ⚠️ Tant que ce compte n'est pas revenu d'un vrai balayage, toucher au seuil
+   serait régler un cadran au hasard. */
 var CONCORDANCES_MIN = 2;
 function apparierParNomSouple(annonces, fiches, marque) {
   var res = { items: [], restants: [], ambigus: [] };
