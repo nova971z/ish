@@ -2578,6 +2578,17 @@ async function handlePriceWatch(req, res, admin, db) {
        problème que `bref` a réglé. */
     const manquants = body.manquants === true
       || (req.query && (req.query.manquants === '1' || req.query.manquants === 'true'));
+    /* ⛔ `&inconnus=1` : les références VUES chez le fournisseur qu'aucune fiche
+       du catalogue n'a réclamées, avec leur TITRE. Sans elles, « pourquoi cette
+       référence n'est-elle pas reconnue ? » n'a pas de réponse — le mode
+       balayage vide `unknown` pour tenir dans un presse-papier, et j'ai buté
+       dessus le 04/08 : compteur à 1 456, liste à 0.
+       ⚠️ Le presse-papier n'est plus le canal : il enregistre dans un FICHIER,
+       page par page. Mesuré : 1 456 inconnus sur 67 pages, soit ~22 par page —
+       quelques Ko. Le drapeau reste explicite pour que le balayage courant ne
+       s'alourdisse pas sans qu'on l'ait voulu. */
+    const inconnusVoulus = body.inconnus === true
+      || (req.query && (req.query.inconnus === '1' || req.query.inconnus === 'true'));
     /* ── IDENTITÉ DE LA SOURCE (01/08/2026) ─────────────────────────────────
        Un deuxième site va être traqué, puis d'autres : chaque raccourci passe
        `&source=<slug>`. Sans le paramètre : 'cotebrico' — aucun raccourci
@@ -3467,7 +3478,10 @@ async function handlePriceWatch(req, res, admin, db) {
           + 'refaire un passage SANS &scan=1 sur la page voulue.'
         : undefined,
       applied, flagged,
-      unknown: scanMode ? [] : unknown.slice(0, 800),
+      /* ⛔ En balayage, `unknown` sort VIDE — sauf si on l'a demandé. C'est la
+         seule donnée qui dise POURQUOI une fiche n'est pas reconnue : ce que le
+         fournisseur affichait, et que rien n'a réclamé. */
+      unknown: (scanMode && !inconnusVoulus) ? [] : unknown.slice(0, 800),
       /* En balayage, « absent de CETTE page » ne veut rien dire non plus : une
          page idealo montre ~60 produits sur ~1 200 fiches — la liste serait
          tout le catalogue, répété 67 fois. */

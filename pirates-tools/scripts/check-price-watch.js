@@ -2350,6 +2350,42 @@ module.exports = async function () {
             '⛔ sans tuiles comptées, on ne borne PAS : borner sur zéro effacerait tout '
             + 'ce que la page a rendu');
         }
+        /* ══ POURQUOI UNE RÉFÉRENCE N'EST PAS RECONNUE ═════════════════
+           ⛔⛔ Buté dessus le 04/08 : il demande pourquoi 12 de ses fiches à
+           visuel ne sont pas reconnues, et la réponse était introuvable — le
+           mode balayage vide `unknown`, compteur à 1 456 et liste à 0. Une
+           donnée comptée mais jamais nommée ne permet aucun diagnostic.
+           ⛔ `&inconnus=1` la rend, avec le TITRE : une référence seule ne dit
+           pas pourquoi elle n'a pas été rattachée. */
+        scanReset();
+        var rInc = fauxRes();
+        await admFn({ method: 'POST',
+          query: { type: 'price-watch', brand: 'DEWALT', source: 'idealo',
+            dryRun: '1', scan: '1', inconnus: '1' },
+          body: { text: pageIdealo('ZZINCONNU9999', '450,00') } },
+          rInc, fauxAdmin, fauxDb({}, []));
+        ok(rInc.out && rInc.out.counts && rInc.out.counts.unknown >= 1,
+          '⛔ PRÉALABLE : la page porte une référence qu\'aucune fiche ne réclame '
+          + '(obtenu ' + JSON.stringify(rInc.out && rInc.out.counts && rInc.out.counts.unknown) + ')');
+        ok(rInc.out && (rInc.out.unknown || []).length >= 1,
+          '⛔⛔ avec `&inconnus=1`, la liste est RENDUE même en balayage : sans elle, '
+          + '« pourquoi cette référence n\'est pas reconnue » n\'a aucune réponse — '
+          + 'compteur à 1 456 et liste à 0, c\'est le mur du 04/08 (obtenu '
+          + JSON.stringify((rInc.out && rInc.out.unknown || []).length) + ' ligne(s))');
+        ok((rInc.out && rInc.out.unknown || []).every(function (u) {
+          return u && u.sku && typeof u.name === 'string';
+        }), '⛔ chaque ligne porte la RÉFÉRENCE et le TITRE — une référence seule ne dit '
+          + 'pas pourquoi elle n\'a pas été rattachée');
+        scanReset();
+        var rSansInc = fauxRes();
+        await admFn({ method: 'POST',
+          query: { type: 'price-watch', brand: 'DEWALT', source: 'idealo', dryRun: '1', scan: '1' },
+          body: { text: pageIdealo('ZZINCONNU9999', '450,00') } },
+          rSansInc, fauxAdmin, fauxDb({}, []));
+        ok(rSansInc.out && (rSansInc.out.unknown || []).length === 0,
+          '⛔ sans le drapeau, la liste reste VIDE en balayage : 67 pages de détail ne '
+          + 'se chargent pas sans qu\'on l\'ait voulu');
+        scanReset();
         var apnDiag = rCpt.out && rCpt.out.appariementNom;
         ok(apnDiag && typeof apnDiag.apparies === 'number'
           && typeof apnDiag.ambigus === 'number' && typeof apnDiag.sansCandidat === 'number',
