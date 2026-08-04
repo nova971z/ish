@@ -152,7 +152,10 @@ function corps(ok) {
     '⛔ …et les guillemets internes sont DOUBLÉS, sinon Numbers coupe la cellule');
 }
 
-const ASSERTIONS_ATTENDUES = 21;
+/* ⛔ Mesuré, pas estimé : `assertions rendues : 24` (corps instrumenté). Mon
+   premier seuil disait 21 — un chiffre écrit de tête, avec 3 assertions de
+   marge dans lesquelles une amputation serait passée inaperçue. */
+const ASSERTIONS_ATTENDUES = 24;
 
 module.exports = function () {
   const errors = [];
