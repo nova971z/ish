@@ -30,6 +30,15 @@ const prods = Array.isArray(cat) ? cat : (cat.products || []);
    est morte le 02/08/2026 avec le retrait des 304 fiches maison — la
    quincaillerie vivante vient du traqueur (marque DeWALT/Makita). */
 const quinc = prods.filter(p => p.category === 'Quincaillerie').slice(0, 2);
+if (quinc.length < 2) {
+  /* ⛔ Même cause, même règle que `course-pay` : le rayon Quincaillerie s'est
+     vidé le 04/08 quand l'user a fait archiver les fiches venues de clickoutil.
+     Prérequis absent → code 2, IGNORÉ. Planter sur `quinc[0].id` accusait le
+     code d'un choix de catalogue, et le message ne disait rien. */
+  console.log('⏭  IGNORÉ : moins de deux fiches Quincaillerie au catalogue '
+    + '(rayon vidé le 04/08 avec l\'archivage des fiches clickoutil).');
+  process.exit(2);
+}
 const K1 = quinc[0].id || quinc[0].sku, K2 = quinc[1].id || quinc[1].sku;
 // Un produit qui n'est PLUS au catalogue : il doit être ignoré sans casser.
 const KMORT = 'produit-supprime-9999';

@@ -35,7 +35,20 @@ const T = (name, ok, extra='') => { ok?pass++:fail++; console.log((ok?'✅':'❌
 const catQ = JSON.parse(await readFile(join(ROOT, 'products.json'), 'utf8'));
 const prodsQ = Array.isArray(catQ) ? catQ : (catQ.products || []);
 const ficheQ = prodsQ.find(p => p.category === 'Quincaillerie' && (p.id || p.slug));
-if (!ficheQ) { console.log('❌ PRÉALABLE : aucune fiche de catégorie Quincaillerie au catalogue'); process.exit(1); }
+if (!ficheQ) {
+  /* ⛔ PRÉREQUIS ABSENT ≠ ÉCHEC. Le 04/08, l'user a fait archiver toutes les
+     fiches venues de clickoutil : les 69 Quincaillerie en faisaient partie, et
+     le rayon s'est vidé. Le code testé ici n'a pas bougé — c'est son SUJET qui
+     n'existe plus au catalogue.
+     ⚠️ Règle du projet : un harnais dont le prérequis manque sort en code 2 et
+     compte comme IGNORÉ, jamais comme réussi ni comme cassé. Le rougir
+     accuserait le code d'un choix de catalogue ; le verdir cacherait qu'il n'a
+     rien vérifié. */
+  console.log('⏭  IGNORÉ : aucune fiche de catégorie Quincaillerie au catalogue '
+    + '(rayon vidé le 04/08 avec l\'archivage des fiches clickoutil). '
+    + 'Le code testé est intact — il n\'a plus de sujet.');
+  process.exit(2);
+}
 await page.goto(base+'/index.html#/produit/'+(ficheQ.id||ficheQ.slug),{waitUntil:'domcontentloaded'});
 await page.waitForFunction(()=>window.PT_BOOTED===true,{timeout:15000}).catch(()=>{});
 await page.waitForTimeout(800);

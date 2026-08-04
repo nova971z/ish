@@ -128,6 +128,30 @@ module.exports = async function () {
     ok(v.length === 1,
       '⛔ un visuel cité deux fois (heroImg et img) ne compte qu\'une fois (obtenu '
       + JSON.stringify(v) + ')');
+    /* ⛔ LE PRÉFIXE DE RÉFÉRENCE : « vire tous les produits de clickoutil,
+       déplace-les dans un environnement qui ne pollue pas le site » (04/08).
+       Ces fiches ne se reconnaissent pas à leur catégorie — elles sont
+       éparpillées sur huit rayons — mais à leur RÉFÉRENCE. Le critère doit
+       mordre au DÉBUT, jamais n'importe où : une référence qui contiendrait
+       le motif au milieu partirait avec, et ce serait une fiche détruite par
+       erreur. */
+    ok(typeof arch.critereSkuPrefixe === 'function',
+      '⛔ le critère par référence vient du PRODUIT, pas d\'une copie écrite ici : une '
+      + 'porte qui teste sa propre copie est verte sans rien vérifier');
+    var parPrefixe = arch.critereSkuPrefixe;
+    var lotPre = [
+      { sku: 'ZZ-001' }, { sku: 'ZZ-002' },
+      { sku: 'DCB-ZZ-003' },       // contient le motif, mais PAS au début
+      { sku: 'DCD709N' }
+    ];
+    var tp = arch.trier(lotPre, parPrefixe('ZZ-'));
+    ok(tp.archive.length === 2,
+      '⛔⛔ le préfixe mord au DÉBUT de la référence, jamais au milieu : sinon une '
+      + 'fiche qui contient le motif ailleurs serait archivée par erreur (obtenu '
+      + JSON.stringify(tp.archive.map(function (x) { return x.sku; })) + ')');
+    ok(tp.garde.length === 2 && tp.garde.some(function (x) { return x.sku === 'DCB-ZZ-003'; }),
+      '⛔ …et celle qui le porte au milieu RESTE au catalogue');
+
     ok(arch.visuelsDe({ img: 'images/placeholder.svg' }).length === 0,
       '⛔ le placeholder n\'est PAS un visuel de fiche : le déplacer casserait toutes '
       + 'les autres fiches qui s\'en servent');

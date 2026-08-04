@@ -2312,23 +2312,22 @@ module.exports = async function () {
            double comptage ne peut pas se produire et le contrôle serait vert
            pour la mauvaise raison — un sabotage me l'a montré. La fiche à
            `srcNom` est choisie à l'exécution, jamais nommée. */
-        var ficheNom = null;
-        for (var fn = 0; fn < prods.length; fn++) {
-          if (prods[fn].srcNom && String(prods[fn].brand || '').toUpperCase() === 'DEWALT') {
-            ficheNom = prods[fn]; break;
-          }
-        }
-        ok(!!ficheNom,
-          '⛔ PRÉALABLE : une fiche DeWALT se suit par son NOM — sans elle, le double '
-          + 'comptage ne peut pas se produire et ce contrôle ne vérifie rien');
+        /* ⚠️ CE PRÉALABLE A CHANGÉ LE 04/08, ET IL FAUT DIRE POURQUOI.
+           Il cherchait une fiche du catalogue suivie par son NOM (`srcNom`)
+           pour provoquer le double comptage. L'user a archivé les 110 fiches
+           qui en portaient un : le cas n'est plus atteignable en production
+           NON PLUS, donc le chercher ferait échouer une porte sur une donnée
+           qui n'a plus lieu d'exister.
+           ⛔ Ce qui reste gardé, et qui suffit : l'invariant `lues <= tuiles`
+           sur une page ORDINAIRE, plus la borne elle-même éprouvée sur des
+           valeurs (`pwBornerLues`, plus bas). Le cas du double comptage n'a pas
+           disparu du code — il est gardé là où il se décide, pas là où il se
+           manifestait. */
         scanReset();
         var rCpt = fauxRes();
-        var pageNom = [String(ficheNom && ficheNom.srcNom), 'description', '3 offres',
-          'à partir de 450,00 €'];
-        while (pageNom.join('\n').length < 260) pageNom.push('ligne de bourrage sans prix');
         await admFn({ method: 'POST',
           query: { type: 'price-watch', brand: 'DEWALT', source: 'idealo', dryRun: '1' },
-          body: { text: pageNom.join('\n') } }, rCpt, fauxAdmin, fauxDb({}, []));
+          body: { text: pageIdealo(cible.sku, '450,00') } }, rCpt, fauxAdmin, fauxDb({}, []));
         var pgCpt = rCpt.out && rCpt.out.page;
         ok(pgCpt && pgCpt.tuiles === 1 && (rCpt.out.counts.parsed + rCpt.out.counts.sansRef) >= 1,
           '⛔ PRÉALABLE : la page porte UNE tuile sans référence (obtenu tuiles='
