@@ -2775,8 +2775,34 @@ async function handlePriceWatch(req, res, admin, db) {
            ⚠️ Portes lues : J3 — des références d'outils publiques, aucune donnée
            personnelle ; J5 — aucune TVA ni octroi de mer, le territoire fiscal
            continue de se dériver du code postal. */
-        if (p) reconnusSec.push({ sku: it.sku, ficheSku: p.sku, srcTTC: it.price,
-          fiche: p.title || p.name, car: it.car || null });
+        if (p) {
+          /* ⛔⛔ LE MODE À SEC CALCULE MAINTENANT LES PRIX — SANS UNE LECTURE
+             FIRESTORE. Faute mesurée le 04/08, et elle est de moi : je lui ai
+             fait remplacer `&sec=1` par `&dryRun=1` pour obtenir ses baisses,
+             sans dire que `dryRun` LIT la collection entière. Mesuré : ~945
+             documents par instance, jusqu'à 4 instances par balayage, soit
+             ~3 780 lectures là où le mode à sec en consommait ZÉRO. Son quota
+             a sauté, et son administration avec.
+             ⛔ Le mode à sec avait justement été créé après un premier quota
+             épuisé. L'avoir contourné pour un confort de mesure, c'est avoir
+             désarmé le filet qu'on avait posé — et c'est exactement ce que la
+             règle du projet interdit : jamais de béquille de test dans ce que
+             verra le produit.
+             ⚠️ La config des marges vient des VALEURS PAR DÉFAUT : `load()`
+             interroge Firestore, `defaults()` non. Le prix calculé ici vaut
+             donc pour COMPARER et décider, jamais pour écrire — et rien dans
+             ce chemin n'écrit (J4). L'écart affiché peut différer de quelques
+             centimes du prix réel si l'user a réglé sa marge : c'est dit, ce
+             n'est pas caché. */
+          var priceSec = null;
+          try {
+            priceSec = pwComputePrice(p, it.price, priceConfig.defaults());
+          } catch (e) { priceSec = null; }
+          reconnusSec.push({ sku: it.sku, ficheSku: p.sku, srcTTC: it.price,
+            fiche: p.title || p.name, car: it.car || null,
+            ancien: (typeof p.price === 'number') ? p.price : null,
+            nouveau: priceSec ? priceSec.newPrice : null });
+        }
         else inconnusSec.push({ sku: it.sku, srcTTC: it.price, name: it.name, car: it.car || null });
       });
       /* Une offre marchande n'est plus seulement COMPTÉE, elle est QUALIFIÉE.
@@ -2813,6 +2839,12 @@ async function handlePriceWatch(req, res, admin, db) {
         tuiles.total, parsed.length + (auto.sansRef || []).length,
         planCourant && planCourant.pages,
         { empreinte: empreinteSec, reconnus: reconnusSec.map((r) => r.ficheSku),
+          /* Les baisses se cumulent AUSSI à sec : c'est tout l'intérêt de la
+             réparation — il obtient sa moyenne et ses dix produits sans
+             consommer un seul quota. */
+          baisses: reconnusSec.filter((r) => r.ancien > 0 && r.nouveau > 0)
+            .map((r) => ({ sku: r.ficheSku, name: r.fiche,
+              oldPrice: r.ancien, newPrice: r.nouveau })),
           fichesMarque: fichesMarqueSec,
           skusMarque: fichesDeLaMarqueSec.map((p) => p.sku).filter(Boolean),
           manquants: manquants,

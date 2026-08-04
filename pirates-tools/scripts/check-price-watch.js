@@ -2272,19 +2272,28 @@ module.exports = async function () {
               + JSON.stringify(bil3 && bil3.enBaisse) + ' en baisse, '
               + JSON.stringify(bil3 && bil3.produitsCompares) + ' comparés)');
 
-            /* ⛔ EN MODE À SEC, AUCUN PRIX N'EST CALCULÉ : le bilan doit être
-               `null`, jamais un zéro qui aurait l'air d'une mesure. */
+            /* ⛔⛔ CETTE ASSERTION A CHANGÉ DE SENS LE 04/08, ET C'EST VOULU.
+               Elle exigeait qu'À SEC le bilan vaille `null` — « aucun prix
+               calculé ». C'était vrai, et c'est précisément ce qui m'a fait
+               conseiller `&dryRun=1` pour obtenir ses baisses… mode qui LIT
+               toute la collection Firestore. Son quota a sauté.
+               ⛔ Le mode à sec calcule désormais les prix sur `products.json`,
+               lu sur disque. L'invariant gardé n'est plus « pas de bilan »,
+               c'est « un bilan SANS accès Firestore » — la vraie promesse.
+               ⚠️ La base du harnais explose au premier contact : un résultat
+               prouve donc qu'aucune lecture n'a eu lieu. */
             scanReset();
             var rBsec = fauxRes();
             await admFn({ method: 'POST',
               query: { type: 'price-watch', brand: 'DEWALT', source: 'idealo', sec: '1', scan: '1' },
               body: { text: pageIdealo(cible.sku, '450,00') } }, rBsec, fauxAdmin,
               { collection: function (n) { throw new Error('MODE A SEC : Firestore touche (' + n + ')'); } });
-            ok(rBsec.out && rBsec.out.couverture && rBsec.out.couverture.baisses === null,
-              '⛔⛔ à sec, aucun prix n\'est calculé : le bilan des baisses vaut `null` et '
-              + 'non zéro — un zéro se lirait « aucune baisse » au lieu de « pas mesuré » '
-              + '(obtenu ' + JSON.stringify(rBsec.out && rBsec.out.couverture
-                && rBsec.out.couverture.baisses) + ')');
+            var bilSec = rBsec.out && rBsec.out.couverture && rBsec.out.couverture.baisses;
+            ok(rBsec.code === 200 && bilSec && bilSec.produitsCompares >= 1,
+              '⛔⛔ à sec, le bilan des baisses EXISTE et aucune lecture Firestore n\'a eu '
+              + 'lieu — c\'est ce qui lui évite de passer en `dryRun` et de brûler son '
+              + 'quota (obtenu code ' + rBsec.code + ', bilan '
+              + JSON.stringify(bilSec && bilSec.produitsCompares) + ')');
             scanReset();
           }
         }
@@ -2350,6 +2359,37 @@ module.exports = async function () {
             '⛔ sans tuiles comptées, on ne borne PAS : borner sur zéro effacerait tout '
             + 'ce que la page a rendu');
         }
+        /* ══ LE MODE À SEC CALCULE LES PRIX, ET NE LIT RIEN ════════════
+           ⛔⛔ Faute du 04/08, et elle est de moi : je lui ai fait remplacer
+           `&sec=1` par `&dryRun=1` pour obtenir ses baisses, sans dire que
+           `dryRun` LIT la collection entière. Mesuré : ~945 documents par
+           instance, jusqu'à 4 instances, soit ~3 780 lectures par balayage là
+           où le mode à sec en consommait ZÉRO. Son quota a sauté.
+           ⛔ Le mode à sec existait justement pour ça. La porte vérifie
+           maintenant les DEUX promesses ensemble : il calcule les baisses, ET
+           il ne touche pas à Firestore. Vérifier l'une sans l'autre laisserait
+           revenir exactement la faute d'aujourd'hui. */
+        var dbExplose = { collection: function (n) {
+          throw new Error('MODE A SEC : Firestore touche (' + n + ')');
+        } };
+        adm._internals.pwScanReset();
+        var rSecPrix = fauxRes();
+        await admFn({ method: 'POST',
+          query: { type: 'price-watch', brand: 'DEWALT', source: 'idealo', sec: '1', scan: '1' },
+          body: { text: pageIdealo(cible.sku, '80,00') } }, rSecPrix, fauxAdmin, dbExplose);
+        ok(rSecPrix.code === 200,
+          '⛔⛔ le mode à sec ne touche PAS Firestore — la base du harnais EXPLOSE au '
+          + 'premier contact, donc un 200 prouve qu\'il n\'y a eu aucun accès (obtenu '
+          + rSecPrix.code + ')');
+        var bSec = rSecPrix.out && rSecPrix.out.couverture && rSecPrix.out.couverture.baisses;
+        ok(bSec && bSec.produitsCompares >= 1,
+          '⛔⛔ …et il CALCULE quand même les baisses : c\'est ce qui lui évite de passer '
+          + 'en `dryRun` pour les obtenir, et donc de brûler son quota (obtenu '
+          + JSON.stringify(bSec && bSec.produitsCompares) + ' produit(s) comparé(s))');
+        ok(bSec && Array.isArray(bSec.plusFortesBaisses),
+          '⛔ …y compris les plus fortes baisses, nommées');
+        adm._internals.pwScanReset();
+
         /* ══ POURQUOI UNE RÉFÉRENCE N'EST PAS RECONNUE ═════════════════
            ⛔⛔ Buté dessus le 04/08 : il demande pourquoi 12 de ses fiches à
            visuel ne sont pas reconnues, et la réponse était introuvable — le
