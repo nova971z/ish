@@ -3439,6 +3439,51 @@ module.exports = async function () {
     }
   }
 
+  /* ═══ MOUVEMENT DES PRIX : LA DATE DOIT SURVIVRE À LA RELECTURE ══════════
+     ⛔⛔ Signalé par l'user le 03/08 : « la section mouvement des prix, il ne
+     marche pas ». Cause trouvée dans le code, pas devinée : le traqueur
+     écrivait `at: serverTimestamp()`, et la page fait `Number(v.at)` puis
+     `where('at','>=', <nombre>)`. À la relecture, un sentinel devient un OBJET
+     Timestamp — `Number()` rend NaN, donc la date s'affiche vide ; et dans
+     l'ordre des types Firestore, TOUT timestamp est supérieur à N'IMPORTE
+     QUEL nombre, donc le choix « sur combien de jours » ne filtrait plus rien.
+     La page paraissait fonctionner et mentait sur ses deux seules colonnes
+     utiles.
+     ⛔ C'est E-228 pour la TROISIÈME fois, après `priceCheckedAt` et
+     `promoDepuis`. Et cette page n'avait AUCUNE porte — c'est pour ça que le
+     défaut a survécu. Elle en a une maintenant.
+     ⚠️ Le contrôle porte sur l'invariant, pas sur une écriture exacte : ce qui
+     sera lu en arithmétique doit être un NOMBRE au moment de l'écriture. */
+  var srcMoves = fs.readFileSync(path.join(__dirname, '..', 'api', 'admin.js'), 'utf8');
+  var iLog = srcMoves.indexOf("collection('price_watch_log').add({");
+  var blocLog = iLog === -1 ? null : [srcMoves.slice(iLog, iLog + 1400)];
+  ok(!!blocLog, '⛔ PRÉALABLE : le bloc d\'écriture du journal des prix est lisible');
+  if (blocLog) {
+    ok(/\bat:\s*nowMs\b/.test(blocLog[0]),
+      '⛔⛔ le journal des prix date en MILLISECONDES : un serverTimestamp relu devient un '
+      + 'objet, `Number()` rend NaN, la date s\'affiche vide et le filtre « sur combien de '
+      + 'jours » cesse de filtrer (E-228, 3ᵉ récidive)');
+    ok(!/\bat:\s*now\b/.test(blocLog[0]),
+      '⛔ …et surtout PAS le sentinel `now` : c\'est lui qui a cassé la page');
+  }
+  /* ⛔ ET LA LECTURE DOIT TOLÉRER LES DEUX. Les entrées écrites AVANT la
+     correction portent un Timestamp ; les jeter effacerait l'historique, les
+     laisser passer sans les dater afficherait l'historique entier quel que
+     soit le nombre de jours demandé. `enMillis` lit les deux. */
+  var blocMoves = srcMoves.match(/if \(type === 'price-moves'\)[\s\S]{0,2600}?\n      \}/);
+  ok(!!blocMoves, '⛔ PRÉALABLE : le bloc `price-moves` est lisible');
+  if (blocMoves) {
+    ok(/enMillis\(v\.at\)/.test(blocMoves[0]),
+      '⛔⛔ la lecture passe par `enMillis` : sans elle, une entrée ancienne (Timestamp) '
+      + 'ressort à NaN et échappe au filtre de période');
+    ok(/quand >= depuis/.test(blocMoves[0]),
+      '⛔⛔ …et la période est REFILTRÉE en mémoire : le `where` Firestore laisse passer '
+      + 'tous les Timestamps face à un nombre, donc « 7 jours » afficherait tout');
+    ok(/moves\.sort\(/.test(blocMoves[0]),
+      '⛔ …et le tri se refait en mémoire, pour la même raison : l\'ordre Firestore mêle '
+      + 'deux types et place tous les timestamps avant tous les nombres');
+  }
+
   /* ═══ PROMO AFFICHÉE : promoDepuis est un TIMESTAMP à la relecture ════════
      Écrit en serverTimestamp par le traqueur → relu de Firestore en objet
      Timestamp. `Number(Timestamp)` = NaN : `promoActive` restait FAUX pour

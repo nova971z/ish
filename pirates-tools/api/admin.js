@@ -662,6 +662,12 @@ module.exports = async function handler(req, res) {
         const depuis = Date.now() - jours * 24 * 3600 * 1000;
         const snap = await db.collection('price_watch_log')
           .where('at', '>=', depuis).orderBy('at', 'desc').limit(500).get();
+        /* ⚠️ LE FILTRE FIRESTORE NE SUFFIT PAS, ET IL FAUT LE DIRE. Les
+           entrées écrites AVANT la correction portent un Timestamp : dans
+           l'ordre des types Firestore, elles passent toutes le `>=` numérique
+           ci-dessus. Le tri en mémoire les remet à leur place, et le filtre en
+           mémoire les juge sur leur vraie date. Sans ça, « 7 jours »
+           afficherait l'historique entier. */
         const cat = await catalog.loadCatalog();
         const parId = {};
         cat.forEach((p) => { parId[p.id] = p; });
@@ -671,6 +677,10 @@ module.exports = async function handler(req, res) {
           const p = parId[v.id] || null;
           const ancien = Number(v.oldPrice) || 0;
           const nouveau = Number(v.newPrice) || 0;
+          /* `enMillis` lit indifféremment un nombre ou un Timestamp relu de
+             Firestore — c'est la fonction née d'E-228, on ne la réécrit pas. */
+          const quand = priceParse.enMillis(v.at);
+          if (!(quand >= depuis)) return;
           if (!(ancien > 0) || !(nouveau > 0) || ancien === nouveau) return;
           moves.push({
             id: v.id, sku: v.sku || (p && p.sku) || v.id,
@@ -679,9 +689,11 @@ module.exports = async function handler(req, res) {
             marque: v.brand || (p && p.brand) || '',
             ancien: ancien, nouveau: nouveau,
             variation: Math.round((nouveau / ancien - 1) * 1000) / 10,
-            at: Number(v.at) || 0
+            at: quand
           });
         });
+        // Le tri final se fait ici : voir la note sur l'ordre des types.
+        moves.sort((a, b) => b.at - a.at);
         return res.status(200).json({ ok: true, jours: jours, moves: moves });
       }
 
@@ -3284,7 +3296,19 @@ async function handlePriceWatch(req, res, admin, db) {
           Object.assign({}, patchA, { priceCheckedAt: now }), { merge: true });
         if (scanMode) pwMajLocale(ovW, p.id, patchA, nowMs);
         await db.collection('price_watch_log').add({
-          sku: item.sku, id: p.id, oldPrice: cur, newPrice, srcTTC: effSrc, source: sourceSlug, brand, at: now,
+          sku: item.sku, id: p.id, oldPrice: cur, newPrice, srcTTC: effSrc, source: sourceSlug, brand,
+          /* ⛔⛔ `at` EN MILLISECONDES, PAS EN serverTimestamp. La page
+             « Mouvement des prix » filtre `where('at','>=', <nombre>)` et
+             affiche `Number(v.at)`. Un sentinel serverTimestamp devient un
+             OBJET Timestamp à la relecture : `Number()` rend NaN, la date
+             s'affiche vide, et le filtre « sur combien de jours » ne filtre
+             plus rien — dans l'ordre des types Firestore, TOUT timestamp est
+             supérieur à N'IMPORTE QUEL nombre. La page paraissait marcher et
+             mentait sur les deux colonnes qui font son intérêt.
+             ⛔ C'est E-228 pour la troisième fois — après `priceCheckedAt` et
+             `promoDepuis`. Le remède est le même partout : ce qui sera LU EN
+             ARITHMÉTIQUE s'écrit en nombre. `priceSources.at` l'est déjà. */
+          at: nowMs,
           markup: priced.markup, mode: priced.mode
         });
       }

@@ -14,7 +14,7 @@
 
 | Origine | Mécanisme | Cas | Antidote | Porte |
 |---|---|---|---|---|
-| **O1** | Affirmer avant de mesurer | 13 | §3 · §8 | `garde-sortie.js` *(hook Stop)* |
+| **O1** | Affirmer avant de mesurer | 14 | §3 · §8 | `garde-sortie.js` *(hook Stop)* |
 | **O2** | L'instrument de mesure est faux | 28 | §4.3 | sabotage obligatoire |
 | **O3** | Réutiliser sans vérifier le contexte | 10 | §1.4 | `check-lecons.js` |
 | **O4** | Contrainte connue, non appliquée | 7 | §1 | `garde-entonnoir.js` |
@@ -22,7 +22,7 @@
 | **O6** | Copie périmée au lieu de la source vivante | 5 | §4.4 | `p7-architecture.js` |
 | **O7** | **Lire le silence comme un succès** | 7 | §3 · §4.3 | `sabotage.mjs` · `ci.js` · `check-ancres.js` |
 
-**71 erreurs, 7 mécanismes.** O1 et O2 en concentrent **41 à elles deux** :
+**72 erreurs, 7 mécanismes.** O1 et O2 en concentrent **42 à elles deux** :
 c'est là qu'il faut regarder en premier, toujours.
 
 ⚠️ **O7 est né le 01/08/2026** d'une règle qui existait déjà — « non exécuté
@@ -52,6 +52,7 @@ confiance dans tout ce que je dis.*
 | **E-107** | l'entonnoir « protège ce qui est servi » | `manifest.webmanifest` servi sans protection ; **21 fichiers serveur sur 28** sans liste de contrôle | `scripts/couverture.js` |
 | **E-109** | « le site vend 275,44 € » | le site sert **291,81 €** : j'avais lu `products.json`, pas les overrides Firestore qui font foi | l'user, capture d'écran à l'appui |
 | **E-108** | « les trois invariants tombent **par construction** » | faux : **1684 échecs sur 3000** | oracle de propriétés indépendant, manche 1 |
+| **E-114** | la page « Mouvement des prix » était livrée SANS AUCUNE PORTE — donc réputée bonne | le traqueur écrivait `at: serverTimestamp()` et la page faisait `Number(v.at)` + `where('at','>=', <nombre>)`. Relu de Firestore, le sentinel devient un **objet Timestamp** : `Number()` rend **NaN**, la date s'affiche vide, et dans l'ordre des types Firestore **tout timestamp est supérieur à n'importe quel nombre** — le choix « sur combien de jours » ne filtrait donc RIEN. La page paraissait marcher et mentait sur ses deux seules colonnes utiles | l'user : « la section mouvement des prix, il ne marche pas ». ⚠️ **E-228 pour la troisième fois**, après `priceCheckedAt` et `promoDepuis` : ce qui sera lu en arithmétique s'écrit en NOMBRE. Ce n'est plus une erreur de code, c'est une erreur de COUVERTURE — les deux premières récidives ont été gardées chacune à leur endroit, jamais en règle générale. Remède : écriture en ms, lecture par `enMillis`, période et tri REFAITS en mémoire (les anciennes entrées Timestamp passeraient sinon toutes le filtre), et 7 assertions neuves, 3 sabotages rouges |
 | **E-113** | « `pagesRefusees: 0` avec 14 manquantes ⇒ **les POST n'atteignent jamais le serveur** » — et je l'avais gravé dans le code, en commentaire, comme une règle de lecture | conclusion tirée d'un compteur dont la validité reposait sur une hypothèse **jamais mesurée** : que les 67 requêtes tombent dans la MÊME instance serverless. Le cumul vit dans la mémoire d'une instance ; une instance neuve en plein balayage repart de zéro et rend le nombre de pages **de la fin**, sans qu'une seule page ne se perde. 53 = 67 − 14 exactement, et 3 179 tuiles ÷ 53 = **59,98** — chaque page arrivée était complète | les chiffres eux-mêmes, relus : un reliquat rigoureusement égal à la queue du balayage n'est pas une signature de perte. ⚠️ **Le compteur ne disait pas QUI comptait** : sans identité d'instance, les deux causes sont indiscernables, et j'ai comblé le vide par une déduction. Remède : `instance` + `cause` rendus par le cumul (`_lib/diag-rafale.js`), et surtout un total qui **ne dépend plus d'aucune instance** — `scripts/bilan-balayage.js`, calculé sur le fichier des réponses |
 
 **Antidote** : §3 — la commande **dans le même message**. §8 — un écran qui ne
