@@ -161,6 +161,54 @@ const FAMILLES = [
 ];
 const famille = (n) => (FAMILLES.find(([re]) => re.test(n)) || [null, 'Accessoires'])[1];
 
+/* ⛔⛔ LE RAYON MESURÉ PAR LE CLASSEMENT PRIME SUR LE TITRE — gravé le
+   04/08/2026 après une faute chiffrée. L'import DeWALT a rangé **779 fiches
+   sur 931 dans « Accessoires »**, le fourre-tout : des clous, des forets
+   SDS-max, des agrafes, des jeux de tournevis. Cause : la table FAMILLES
+   ci-dessus lit le LIBELLÉ, or 725 titres sur 1254 ne sont que la référence —
+   aucun motif ne pouvait mordre.
+   ⛔ Le classement, lui, avait déjà tranché : chaque ligne du CSV porte sa
+   famille et son rayon, mesurés sur l'annonce et validés par l'user. Les jeter
+   pour les redeviner moins bien, c'est O5 — l'outil artisanal à la place de
+   l'outil existant.
+   ⚠️ Une famille « Quincaillerie » l'emporte quel que soit le rayon : c'est la
+   demande de l'user (« la quincaillerie avec la quincaillerie »). Un rayon
+   inconnu ne tombe PAS en silence dans Accessoires — il est compté et dit. */
+const RAYON_VERS_FAMILLE = {
+  percage: 'Perçage, vissage et boulonnage',
+  'vissage-choc': 'Perçage, vissage et boulonnage',
+  fixation: 'Perçage, vissage et boulonnage',
+  sciage: 'Scies',
+  bois: 'Scies',
+  meulage: 'Meulage, découpe et polissage',
+  perforation: 'Perforateurs',
+  jardin: 'Tronçonnage et élagage',
+  aspiration: 'Aspirateurs',
+  batterie: 'Batteries et chargeurs',
+  chargeur: 'Batteries et chargeurs',
+  combo: 'Combos',
+  /* `mesure` (lasers, télémètres), `chantier` (règle vibrante, pilonneuse) et
+     `confort` n'ont pas de famille dédiée au catalogue : Accessoires est ici
+     un choix, pas un repli — et il est écrit. */
+  mesure: 'Accessoires',
+  chantier: 'Accessoires',
+  confort: 'Accessoires'
+};
+
+let rayonsInconnus = {};
+function familleDepuisClassement(it) {
+  if (!it) return null;
+  const fam = String(it.familleIdealo || '');
+  if (/quincaillerie/i.test(fam)) return 'Quincaillerie';
+  if (/v[êe]tement/i.test(fam)) return null;      // pas de famille vêtements au catalogue
+  const r = String(it.rayonIdealo || '').toLowerCase();
+  if (!r) return null;
+  if (RAYON_VERS_FAMILLE[r]) return RAYON_VERS_FAMILLE[r];
+  rayonsInconnus[r] = (rayonsInconnus[r] || 0) + 1;
+  return null;
+}
+
+
 /* ⛔⛔ FAMILLES DÉLIBÉRÉMENT ROUVERTES — déclarées ICI, une par une, avec la
    raison. Rien d'autre ne passe.
    Le 04/08/2026, la porte ci-dessous a refusé l'import DeWALT sur
@@ -275,7 +323,8 @@ for (const it of liste.concat(sansRefBruts)) {
     sku: sku,
     name: sku,
     brand: MARQUE,
-    category: famille(libelle),
+    /* Le rayon mesuré d'abord ; la table de libellés seulement s'il manque. */
+    category: familleDepuisClassement(it) || famille(libelle),
     title: titre,
     tag: 'Nouveau',
     desc: libelle + '.',
@@ -341,6 +390,14 @@ const parMotif = {};
 refuses.forEach((r) => { parMotif[r.motif] = (parMotif[r.motif] || 0) + 1; });
 Object.keys(parMotif).forEach((m) => l('   · ' + parMotif[m] + '  ' + m));
 l('');
+{
+  const inc = Object.keys(rayonsInconnus);
+  if (inc.length) {
+    l('⚠️  rayons du classement NON mappés (repli sur le libellé) :');
+    inc.sort((a, b) => rayonsInconnus[b] - rayonsInconnus[a])
+      .forEach((r) => l('     · ' + rayonsInconnus[r] + '  ' + r));
+  }
+}
 l('catalogue         : ' + produits.length + ' → ' + (produits.length + retenus.length) + ' fiches');
 if (retenus.length) {
   l('exemple (1ʳᵉ)     : ' + retenus[0].sku + ' · coût ' + couts[retenus[0].sku]

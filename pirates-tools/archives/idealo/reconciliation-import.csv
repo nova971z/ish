@@ -1,0 +1,13 @@
+﻿Étape;Compte;Explication
+Ton tableau : TOTAL après dédoublonnage;1623;les 3 familles + à trancher
+  − Vêtements & EPI;-140;CSV non fourni pour l import : pas de famille vêtements au catalogue
+  − À trancher;-24;CSV non fourni : produits qu aucun signal ne classe
+= Les 2 CSV que tu m as donnés;1459;quincaillerie 380 + électro 1079
+  − aucune référence lisible — suivi par nom non couvert par ce relevé;-162;écarté à la construction du relevé
+  − après-marché ou vendeur tiers;-13;écarté à la construction du relevé
+  − référence en doublon dans les CSV;-30;écarté à la construction du relevé
+= Références présentées à l importateur;1254;
+  − doublon SKU exact déjà au catalogue;-67;la fiche existe déjà
+  − doublon par RACINE de modèle;-253;ta règle : DE7035 = DE7035-XJ
+  − coffret TSTAK vide;-3;règle user 02/08 : jamais en ligne
+= FICHES RÉELLEMENT AJOUTÉES;931;catalogue 835 → 1766

@@ -105,6 +105,15 @@ function construireReleve(lignes) {
     const ref = String(r['Référence'] || '').trim().toUpperCase();
     const prix = prixFr(r['Prix idealo (€)']);
     const variante = r['Variante'] || '';
+    /* ⛔⛔ LA FAMILLE ET LE RAYON DU CSV SUIVENT LA RÉFÉRENCE. Défaut mesuré le
+       04/08/2026 : sans eux, l'importateur devine la famille depuis le TITRE —
+       or 725 titres sur 1254 ne sont que la référence. Résultat : 779 fiches
+       sur 931 tombées dans le fourre-tout « Accessoires », dont des clous, des
+       forets SDS-max, des agrafes et des jeux de tournevis. Le classement
+       existait déjà, validé par l'user ; le jeter pour le redeviner moins bien
+       était une faute. */
+    const famille = r['Famille'] || '';
+    const rayon = r['Rayon'] || '';
 
     if (APRES_MARCHE.test(titre)) {
       ecartes.push({ ref: ref, titre: titre, motif: 'après-marché ou vendeur tiers' });
@@ -135,7 +144,9 @@ function construireReleve(lignes) {
       sku: ref,
       srcTTC: prix,
       name: libelleDepuisTitre(titre),
-      varianteIdealo: variante
+      varianteIdealo: variante,
+      familleIdealo: famille,
+      rayonIdealo: rayon
     });
   });
 
