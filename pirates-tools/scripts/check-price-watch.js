@@ -2425,6 +2425,44 @@ module.exports = async function () {
           '⛔ sans le drapeau, la liste reste VIDE en balayage : 67 pages de détail ne '
           + 'se chargent pas sans qu\'on l\'ait voulu');
         scanReset();
+        /* ══ `&inconnus=1` PRIME SUR `bref`, SUR LES DEUX CHEMINS ══════
+           ⛔⛔ Mesuré le 04/08, deux fois de suite : il lance son balayage
+           complet en `sec=1&bref=1&inconnus=1`, 4 018 tuiles lues, et reçoit
+           ZÉRO produit nommé. Le drapeau que j'avais posé n'agissait que sur
+           le chemin réel ; sur le chemin À SEC — le seul qu'il utilise, parce
+           que c'est le seul qui ne coûte pas de quota — `bref` coupait tout.
+           ⛔ E-405 encore : une garde posée sur un seul chemin ne garde rien.
+           La porte vérifie donc LES DEUX chemins, dans le même contrôle. */
+        scanReset();
+        var rSecInc = fauxRes();
+        await admFn({ method: 'POST',
+          query: { type: 'price-watch', brand: 'DEWALT', source: 'idealo',
+            sec: '1', scan: '1', bref: '1', inconnus: '1' },
+          body: { text: pageIdealo(cible.sku, '450,00') } }, rSecInc, fauxAdmin,
+          { collection: function (n) { throw new Error('MODE A SEC : Firestore touche (' + n + ')'); } });
+        ok(rSecInc.code === 200 && Array.isArray(rSecInc.out && rSecInc.out.reconnus),
+          '⛔⛔ À SEC et en `bref`, `&inconnus=1` rend quand même les listes de produits : '
+          + 'sans ça il lit 4 018 tuiles et reçoit zéro nom — deux balayages complets '
+          + 'perdus le 04/08 (obtenu reconnus='
+          + JSON.stringify(rSecInc.out && rSecInc.out.reconnus && rSecInc.out.reconnus.length) + ')');
+        ok(rSecInc.out && Array.isArray(rSecInc.out.inconnus)
+          && Array.isArray(rSecInc.out.sansRefDetail),
+          '⛔⛔ …les TROIS listes, pas une seule : `inconnus` (ce qu\'idealo vend et '
+          + 'qu\'il n\'a pas), `reconnus` (ce qu\'il a déjà, pour ne pas le rajouter en '
+          + 'double) et `sansRefDetail`. Classer 4 018 produits exige les trois');
+        scanReset();
+        var rSecBref = fauxRes();
+        await admFn({ method: 'POST',
+          query: { type: 'price-watch', brand: 'DEWALT', source: 'idealo',
+            sec: '1', scan: '1', bref: '1' },
+          body: { text: pageIdealo(cible.sku, '450,00') } }, rSecBref, fauxAdmin,
+          { collection: function (n) { throw new Error('MODE A SEC : Firestore touche (' + n + ')'); } });
+        ok(rSecBref.out && rSecBref.out.reconnus === undefined
+          && rSecBref.out.inconnus === undefined,
+          '⛔ …et SANS le drapeau, `bref` coupe toujours : 67 pages de détail ne se '
+          + 'chargent pas sans qu\'on l\'ait voulu');
+        scanReset();
+
         var apnDiag = rCpt.out && rCpt.out.appariementNom;
         ok(apnDiag && typeof apnDiag.apparies === 'number'
           && typeof apnDiag.ambigus === 'number' && typeof apnDiag.sansCandidat === 'number',

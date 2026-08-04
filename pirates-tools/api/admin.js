@@ -3036,9 +3036,22 @@ async function handlePriceWatch(req, res, admin, db) {
            même remède que le `parsed: 0` muet du 01/08 : mesurer au lieu de
            jeter. ⚠️ Borné à 25 entrées, 4 lignes de 90 signes chacune. */
         perdus: (auto.perdus || []).slice(0, 25),
-        reconnus: bref ? undefined : reconnusSec.slice(0, 60),
-        inconnus: bref ? undefined : inconnusSec.slice(0, 60),
-        sansRefDetail: bref ? undefined : sansRefSec
+        /* ⛔⛔ `&inconnus=1` PRIME SUR `bref`, ET SUR LES DEUX CHEMINS. Le
+           04/08 j'ai posé ce drapeau sur le seul chemin réel (`unknown`) : sur
+           le chemin À SEC — celui qu'il utilise, celui qui ne coûte aucun
+           quota — les trois listes restaient coupées par `bref`. Il a relancé
+           DEUX fois son balayage complet et reçu, deux fois, zéro produit
+           nommé pour 4 018 tuiles lues.
+           ⛔ C'est E-405 à nouveau : une garde posée sur un seul chemin ne
+           garde rien, le défaut prend l'autre. Les chemins s'ÉNUMÈRENT.
+           ⚠️ Les trois listes partent ensemble parce qu'elles se complètent :
+           `inconnus` = ce qu'idealo vend et qu'il n'a pas, `reconnus` = ce
+           qu'il a déjà (pour ne pas le rajouter en double), `sansRefDetail` =
+           les annonces sans référence. Classer les 4 018 produits exige les
+           trois ; n'en rendre qu'une le laisserait deviner le reste. */
+        reconnus: (bref && !inconnusVoulus) ? undefined : reconnusSec.slice(0, 60),
+        inconnus: (bref && !inconnusVoulus) ? undefined : inconnusSec.slice(0, 60),
+        sansRefDetail: (bref && !inconnusVoulus) ? undefined : sansRefSec
       });
     }
 
