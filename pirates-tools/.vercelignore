@@ -33,3 +33,8 @@ crypto-config.js
 # n'ont rien à faire dans le déploiement.
 tests/
 outils/
+
+# archives/ : fiches produit retirees du site et rangees (decision user 04/08).
+# Presentes dans git pour etre recuperables, JAMAIS deployees — meme mecanisme
+# que images/_originals/. Elles ne doivent ni alourdir le site ni y reapparaitre.
+archives/

@@ -96,6 +96,43 @@ module.exports = async function () {
     + 'sauter en silence laisserait une image perdue passer pour intacte (obtenu '
     + avecOpt.illisibles.length + ')');
 
+  /* ══ ARCHIVER, PAS DÉTRUIRE ═══════════════════════════════════════════
+     ⛔ Décision de l'user, 04/08 : « au lieu de les supprimer, les ranger dans
+     un fichier externe qui ne pollue pas le site, comme ça si on a besoin de
+     récupérer quelque chose ce sera facile ». Le tri est la seule partie qui
+     décide QUI part : elle s'éprouve seule, sur des fiches fabriquées. */
+  var arch = require('./archiver-fiches.js');
+  ok(typeof arch.trier === 'function' && typeof arch.visuelsDe === 'function',
+    'archiver-fiches expose trier et visuelsDe');
+  if (arch.trier) {
+    var lot = [
+      { sku: 'ZZ1', category: 'Scies' },
+      { sku: 'ZZ2', category: 'Combos' },
+      { sku: 'ZZ3', category: 'combos multi-outils' },
+      { sku: 'ZZ4' }
+    ];
+    var t = arch.trier(lot, function (x) { return /combo/i.test(String(x.category || '')); });
+    ok(t.archive.length === 2 && t.garde.length === 2,
+      '⛔⛔ le tri sépare exactement ce qui part de ce qui reste — un critère trop large '
+      + 'emporterait des fiches que l\'user n\'a pas désignées (obtenu '
+      + t.archive.length + ' archivée(s), ' + t.garde.length + ' gardée(s))');
+    ok(t.garde.concat(t.archive).length === lot.length,
+      '⛔⛔ AUCUNE fiche ne se perd entre les deux tas : leur somme fait le catalogue '
+      + 'd\'origine. Une fiche qui disparaîtrait des deux côtés serait détruite en '
+      + 'silence (obtenu ' + (t.garde.length + t.archive.length) + '/' + lot.length + ')');
+    ok(t.archive.every(function (x) { return /combo/i.test(String(x.category || '')); }),
+      '⛔ rien d\'autre que le critère ne part');
+    /* ⛔ Un visuel cité DEUX fois ne se déplace qu'une fois : le second
+       déplacement échouerait, et l'outil s'arrêterait sans raison. */
+    var v = arch.visuelsDe({ heroImg: 'images/a.webp', img: 'images/a.webp' });
+    ok(v.length === 1,
+      '⛔ un visuel cité deux fois (heroImg et img) ne compte qu\'une fois (obtenu '
+      + JSON.stringify(v) + ')');
+    ok(arch.visuelsDe({ img: 'images/placeholder.svg' }).length === 0,
+      '⛔ le placeholder n\'est PAS un visuel de fiche : le déplacer casserait toutes '
+      + 'les autres fiches qui s\'en servent');
+  }
+
   return errors;
 };
 
