@@ -160,24 +160,62 @@ function normaliserTitre(t) {
    machine : sans cette variante, il écraserait le prix de la machine. */
 const ACCESSOIRE = /(kit de conversion|raccord|couplage|support|pi[eè]tement|adaptateur|rechange|remplacement|replacement|dust box|sac d.aspirat|filtre|batterie de remplacement|moulage|insert|tube d.extrusion|ensemble de supports|legstand|coiffe|embase|semelle|carter|charbons?|courroie|mandrin de rechange|ersatz|zubeh[öo]r)/i;
 
+/* ⛔⛔⛔ CE QUI CHANGE LE PRIX SÉPARE LES PRODUITS — LU DANS LA DESCRIPTION.
+   Défaut trouvé par l'user le 04/08/2026, sur son propre catalogue :
+   « le laser rotatif DCE079D1G est à 1312,09 € et nous on le vend plus de
+   2100 € … il n'est pas dans le tableau ». Il n'y était pas parce que ma clé
+   l'avait FUSIONNÉ avec le DCE079D1R : même racine `DCE079`, même variante
+   PACK, et le moins cher gagne — le laser à faisceau ROUGE (1098,88 €) a
+   effacé le VERT (1312,09 €). Deux produits, deux prix, une seule ligne.
+   MESURÉ : 299 groupes fusionnaient ainsi des annonces aux titres réellement
+   différents avec plus de 25 % d'écart de prix.
+
+   ⛔ Le parseur ne pouvait pas trancher : sur ces deux lasers il rend des
+   caractéristiques IDENTIQUES (pack, batteries, Ah, coffret, type). Seule la
+   DESCRIPTION les distingue — c'est exactement ce que l'user demandait :
+   « tu te bases sur la description du produit ».
+
+   ⚠️ ARBITRAGE ASSUMÉ : un discriminant de trop SÉPARE deux annonces du même
+   produit (deux lignes à l'œil, gênant) ; un discriminant de moins CONFOND
+   deux produits et écrit un prix pour un autre (de l'argent perdu). On penche
+   du côté qui ne coûte pas d'argent. */
+const DISCRIMINANTS = [
+  /* Faisceau de laser : le vert vaut plusieurs centaines d'euros de plus. */
+  ['VERT', /\b(vert|verte|green)\b/],
+  ['ROUGE', /\b(rouge|red)\b/],
+  /* Contenant : un coffret se paie. */
+  ['COFFRET', /\b(coffret|tstak|t-?stak|toughsystem|mallette|kitbox|case)\b/],
+  /* Chargeur inclus. */
+  ['CHARGEUR', /\bchargeurs?\b|\bcharger\b/]
+];
+
+/* « 2x5,0 Ah », « 1 x 2.0Ah », « 3x 4Ah » : la configuration de batteries est
+   LE premier facteur de prix sur un outil sans fil. Normalisée pour que
+   « 2x5,0Ah » et « 2 X 5.0 AH » donnent la même signature. */
+function signatureBatteries(t) {
+  const m = t.match(/(\d)\s*[x×]\s*(\d+(?:[.,]\d)?)\s*ah/);
+  if (m) return m[1] + 'X' + m[2].replace(',', '.');
+  const seul = t.match(/(\d+(?:[.,]\d)?)\s*ah/);
+  return seul ? '1X' + seul[1].replace(',', '.') : '';
+}
+
 function varianteProduit(titre, car) {
   const c = car || {};
   const t = sansAccents(titre);
-  /* ⛔ « AVEC support », « with stand », « + coffret » : le mot d'accessoire
-     annonce ici un CONTENU LIVRÉ AVEC la machine, pas une pièce vendue seule.
-     Mesuré : « D24000-gb Wet Tile Saw avec support de roue » partait en
-     accessoire — c'est la scie complète, à 1 504,98 €. Le mot qui précède
-     tranche : une inclusion n'est pas une pièce détachée. */
+  /* ⛔ « AVEC support », « + coffret » : le mot d'accessoire annonce ici un
+     CONTENU LIVRÉ avec la machine, pas une pièce vendue seule. Mesuré :
+     « D24000 Wet Tile Saw avec support de roue » partait en accessoire — c'est
+     la scie complète, à 1 504,98 €. */
   const m = t.match(ACCESSOIRE);
   if (m) {
     const avant = t.slice(Math.max(0, m.index - 8), m.index);
-    const inclusion = /(avec|with|mit|inkl\.?|\+)\s*$/.test(avant);
-    if (!inclusion) return 'ACCESSOIRE';
+    if (!/(avec|with|mit|inkl\.?|\+)\s*$/.test(avant)) return 'ACCESSOIRE';
   }
-  /* Le pack se lit dans la description : « 2x5,0Ah », « + chargeur »,
-     « + coffret TSTAK »… — le parseur l'a déjà mesuré dans `car.pack`. */
-  if (c.pack === true) return 'PACK';
-  return 'OUTIL';
+  const parts = [c.pack === true ? 'PACK' : 'OUTIL'];
+  const bat = signatureBatteries(t);
+  if (bat) parts.push(bat);
+  DISCRIMINANTS.forEach(function (d) { if (d[1].test(t)) parts.push(d[0]); });
+  return parts.join('+');
 }
 
 function cleDoublon(e) {

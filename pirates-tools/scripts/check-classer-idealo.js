@@ -135,6 +135,42 @@ function corps(ok) {
   ok(cl.classer({}, 'Sac à dos lumineux avec 33 poches pour outils').rayon === 'VETEMENTS',
     'le portage passe AVANT l\'outil dans un titre qui contient les deux');
 
+  /* ── CE QUI CHANGE LE PRIX SÉPARE LES PRODUITS ──────────────────────────── */
+  /* Défaut trouvé par l'user le 04/08 sur son catalogue : deux lasers de même
+     racine, l'un à faisceau rouge, l'autre vert — 430 € d'écart au catalogue —
+     avaient FUSIONNÉ, et le moins cher avait effacé l'autre. */
+  const rouge = ligne('ZZE079D1R', 'ZZ Laser rotatif faisceau rouge 18V', 1098.88, { famille: 'machine', pack: false });
+  const vert = ligne('ZZE079D1G', 'ZZ Laser rotatif faisceau vert 18V', 1312.09, { famille: 'machine', pack: false });
+  ok(rouge.cleDoublon !== vert.cleDoublon,
+    '⛔⛔ ARGENT : deux versions d\'un même modèle que seule la DESCRIPTION '
+    + 'distingue (faisceau rouge / vert) ne partagent JAMAIS une clé — sinon le '
+    + 'moins cher efface l\'autre et son prix passe sur la mauvaise fiche ('
+    + rouge.cleDoublon + ' vs ' + vert.cleDoublon + ')');
+  ok(cl.dedoublonner([rouge, vert]).length === 2,
+    '⛔ …et les deux SURVIVENT au dédoublonnage');
+
+  /* La configuration de batteries est le premier facteur de prix. */
+  /* ⚠️ LES DEUX TITRES NE DIFFÈRENT QUE PAR LES BATTERIES. Premier jet : ils
+     disaient aussi « + chargeur » d'un seul côté — les clés différaient grâce
+     au chargeur, et neutraliser la signature de batteries laissait la porte
+     VERTE. Une assertion qui passe pour une autre raison que celle qu'elle
+     annonce ne vérifie rien. */
+  const p2 = ligne('ZZD796P2', 'ZZ perceuse 18V avec 2x5,0Ah', 400, { famille: 'machine', pack: true });
+  const d1 = ligne('ZZD796D1', 'ZZ perceuse 18V avec 1x2,0Ah', 250, { famille: 'machine', pack: true });
+  ok(p2.cleDoublon !== d1.cleDoublon,
+    '⛔⛔ ARGENT : « 2x5,0Ah » et « 1x2,0Ah » ne sont pas le même produit — '
+    + 'les batteries font le prix (' + p2.cleDoublon + ' vs ' + d1.cleDoublon + ')');
+
+  const memeConfigA = ligne('ZZD796P2-XJ', 'ZZ perceuse 18V avec 2x5,0Ah', 420, { famille: 'machine', pack: true });
+  const memeConfigB = ligne('ZZD796P2-QW', 'ZZ perceuse 18V avec 2 X 5.0 AH', 399, { famille: 'machine', pack: true });
+  ok(memeConfigA.cleDoublon === memeConfigB.cleDoublon,
+    '⛔ …mais « 2x5,0Ah » et « 2 X 5.0 AH » sont la MÊME configuration : une '
+    + 'signature sensible à la casse ou à la virgule séparerait le même produit ('
+    + memeConfigA.cleDoublon + ')');
+  const g2 = cl.dedoublonner([memeConfigA, memeConfigB]);
+  ok(g2.length === 1 && g2[0].prix === 399,
+    '⛔ …et le moins cher gagne (' + (g2[0] || {}).prix + ' €)');
+
   /* ── LE TITRE TRANCHE CE QUE LA VARIANTE A MAL SÉPARÉ ───────────────────── */
   /* Mesuré sur le balayage réel : 11 annonces IDENTIQUES (même titre) avaient
      survécu sous deux clés, OUTIL et PACK, parce que `pack` avait été lu
@@ -171,7 +207,7 @@ function corps(ok) {
 /* ⛔ Mesuré, pas estimé : `assertions rendues : 25` (corps instrumenté après
    l'ajout de la fusion par titre). Un seuil écrit de tête laisse une marge où
    une amputation passe inaperçue — il se remesure à chaque assertion neuve. */
-const ASSERTIONS_ATTENDUES = 25;
+const ASSERTIONS_ATTENDUES = 30;
 
 module.exports = function () {
   const errors = [];

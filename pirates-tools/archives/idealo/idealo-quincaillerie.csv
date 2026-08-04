@@ -1,381 +1,379 @@
 ﻿Famille;Rayon;Référence;Titre;Prix idealo (€);Pack;Type;Voltage;Coffret;Ah;Nb outils;Nb batteries;Nb pièces;Édition limitée;Origine;Signal de classement;Clé de doublon;Niveau de clé;Variante;Doublons fusionnés;Réf. fiche du site;Prix actuel du site (€)
-Quincaillerie;lame-circulaire;DT1473-QZ;DEWALT DT1473-QZ;79,99;seul;lame de scie circulaire;;;;;;1;;inconnu;famille:consommable;REF:DT1473|OUTIL;référence;OUTIL;1;;
-Quincaillerie;foret;DT60826-QZ;DeWalt SDS-max 25x920x790 mm DT60826-QZ;79,99;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT60826|OUTIL;référence;OUTIL;1;;
-Quincaillerie;vissage-embout;;DEWALT Carlisle Bottes de travail en cuir nubuck pour homme, avec embout en acier de sécurité, légères, stone, 42 2/3 EU;80,00;seul;embout de vissage;;;;;;1;;sans-ref;famille:consommable;TIT:carlisle bottes de travail en cuir nubuck pour homme avec embout en acier de s curit l g res stone 42 2 3 eu;titre;OUTIL;1;;
-Quincaillerie;vissage-embout;;DEWALT Carlisle Bottes de travail en cuir nubuck pour homme, avec embout en acier de sécurité, légères, stone, 39 EU;80,08;seul;embout de vissage;;;;;;1;;sans-ref;famille:consommable;TIT:carlisle bottes de travail en cuir nubuck pour homme avec embout en acier de s curit l g res stone 39 eu;titre;OUTIL;1;;
-Quincaillerie;visserie;DNN2045E;DEWALT DNN2045E Coil Clou 2.03-45 Plain 17,5 m;80,34;seul;clou;;;;;;1;;sans-ref;famille:consommable;REF:DNN2045|OUTIL;référence;OUTIL;1;;
-Quincaillerie;burin;DNPT3190G12Z;Dewalt DNPT3190G12Z Pointes en bande papier 33° éléctro-zinguées 3.1x90mm;80,36;seul;burin pointu;;;;;;1;;sans-ref;famille:consommable;REF:DNPT3190|OUTIL;référence;OUTIL;3;;
-Quincaillerie;;DNPT28R63G12Z;DNPT28R63G12Z - Cabeza redonda galvanizada 2.8x63mm;80,55;seul;;;;;;;;;sans-ref;titre;REF:DNPT28|OUTIL;référence;OUTIL;4;;
-Quincaillerie;foret;DT3885;DEWALT DT3885;80,73;seul;foret;;;;;;1;;inconnu;famille:consommable;REF:DT3885|OUTIL;référence;OUTIL;1;;
-Quincaillerie;burin;DNW31R90E;DeWalt DNW31R90E Pointes en Bande Métal 34° Crantées, 3.1mm x 90mm, Argent;81,35;seul;burin pointu;;;;;;1;;sans-ref;famille:consommable;REF:DNW31|OUTIL;référence;OUTIL;9;;
-Quincaillerie;foret;DT5466;DEWALT DT5466;81,52;seul;foret;;;;;;1;;inconnu;famille:consommable;REF:DT5466|OUTIL;référence;OUTIL;1;;
-Quincaillerie;accessoire;DNPT31R90G12Z;Dewalt DNPT31R90G12Z 34° Clous lisses 3,1 x 90 mm 2200 pièces;81,66;seul;accessoire;;;;;;1;;sans-ref;famille:consommable;REF:DNPT31|OUTIL;référence;OUTIL;8;;
+Quincaillerie;foret;DT3885;DeWALT DT3885 — DT3885;80,73;seul;foret;;;;;;1;;reconnu;famille:consommable;REF:DT3885|OUTIL;référence;OUTIL;1;DT3885;122,80
+Quincaillerie;accessoire;;Serre-joint Xl 900 Mm Dewalt Dwht0-83187;81,21;seul;serre-joint;;;;;;1;;sans-ref;famille:consommable;TIT:serre joint xl 900 mm dwht0 83187;titre;OUTIL;1;;
+Quincaillerie;burin;DNPT31R90Z;DeWalt DNPT31R90Z Pointes en bande papier 33° crantées 3.1x90mm Argent;81,24;seul;burin pointu;;;;;;1;;sans-ref;famille:consommable;REF:DNPT31|OUTIL;référence;OUTIL;11;;
+Quincaillerie;burin;DNW31R90E;DeWalt DNW31R90E Pointes en Bande Métal 34° Crantées, 3.1mm x 90mm, Argent;81,35;seul;burin pointu;;;;;;1;;sans-ref;famille:consommable;REF:DNW31|OUTIL;référence;OUTIL;7;;
+Quincaillerie;foret;DT5466;DeWALT DT5466 — DT5466;81,52;seul;foret;;;;;;1;;reconnu;famille:consommable;REF:DT5466|OUTIL;référence;OUTIL;1;DT5466;123,74
+Quincaillerie;visserie;;Pack de 5000 vis à bande Ø 3,5mm DEWALT;81,90;pack;vis à bande;;;;;;5000;;sans-ref;famille:consommable;TIT:pack de 5000 vis bande 3 5mm;titre;PACK;2;;
+Quincaillerie;coffret;DWST550112;DEWALT Ceinture à outils en cuir, durable, ceinture professionnelle à 11 poches (DWST550112);81,90;seul;;;;;;;;;sans-ref;famille:rangement;REF:DWST550112|OUTIL;référence;OUTIL;4;;
 Quincaillerie;foret;;Foret hélicoïdal pour perceuse avec hélice en carbure de tungstène de haute qualité, emmanchement SDS Plus DEWALT - Ø12 ;81,90;seul;foret;;;;;;1;;sans-ref;famille:consommable;TIT:foret h lico dal pour perceuse avec h lice en carbure de tungst ne de haute qualit emmanchement sds plus 12;titre;OUTIL;1;;
 Quincaillerie;foret;DT9442-QZ;DeWalt SDS-max 38x570x450 mm DT9442-QZ;81,98;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT9442|OUTIL;référence;OUTIL;1;;
-Quincaillerie;accessoire;DT99591-QZ;DEWALT DT99591-QZ;81,99;pack;accessoire;;;;;;1;;inconnu;famille:consommable;REF:DT99591|PACK;référence;PACK;1;;
+Quincaillerie;accessoire;DT99591-QZ;DeWALT DT99591-QZ — DT99591-QZ;81,99;pack;accessoire;;;;;;1;;reconnu;famille:consommable;REF:DT99591|PACK;référence;PACK;1;DT99591-QZ;124,38
 Quincaillerie;visserie;;DEWALT Clou en bande DEWALT DNPT 2,8 x 75 mm 33 degrés tige annulaire Galvanisé G12 Quantité:2000;81,99;seul;clou;;;;;;1;;sans-ref;famille:consommable;TIT:clou en bande dnpt 2 8 x 75 mm 33 degr s tige annulaire galvanis g12 quantit 2000;titre;OUTIL;1;;
-Quincaillerie;lame-circulaire;DT99576;DEWALT DT99576;82,01;seul;lame de scie circulaire;;;;;;1;;inconnu;famille:consommable;REF:DT99576|OUTIL;référence;OUTIL;1;;
+Quincaillerie;lame-circulaire;DT99576;DeWALT DT99576 — DT99576;82,01;seul;lame de scie circulaire;;;;;;1;;reconnu;famille:consommable;REF:DT99576|OUTIL;référence;OUTIL;1;DT99576;124,33
 Quincaillerie;visserie;DFS9200B1G-QZ;DEWALT DFS9200B1G-QZ Grapas 50mm x 960;82,36;seul;agrafe;;;;;;1;;sans-ref;famille:consommable;REF:DFS9200|OUTIL;référence;OUTIL;7;;
-Quincaillerie;accessoire;DNW28R63G12E;DEWALT DNW28R63G12E Clou, Argent, Taille 34/63 mm, Set de 2200 Pièces;82,37;pack;accessoire;;;;;;2200;;sans-ref;famille:consommable;REF:DNW28|PACK;référence;PACK;4;;
-Quincaillerie;accessoire;DNW2863E;DeWalt DNW2863E Clous, Argent, Taille 34 63mm, Set de 2200 Pièces;82,48;pack;accessoire;;;;;;2200;;sans-ref;famille:consommable;REF:DNW2863|PACK;référence;PACK;1;;
+Quincaillerie;accessoire;DNW28R63G12E;DEWALT DNW28R63G12E Clou, Argent, Taille 34/63 mm, Set de 2200 Pièces;82,37;pack;accessoire;;;;;;2200;;sans-ref;famille:consommable;REF:DNW28|PACK;référence;PACK;2;;
+Quincaillerie;accessoire;DNW2863E;DeWalt DNW2863E Clous, Argent, Taille 34 63mm, Set de 2200 Pièces;82,39;pack;accessoire;;;;;;2200;;sans-ref;famille:consommable;REF:DNW2863|PACK;référence;PACK;1;;
 Quincaillerie;accessoire;DNW3190E;DeWALT Clous 34º, lisse, 90 mm, 2200 pièces - DNW3190E;82,50;seul;accessoire;;;;;;1;;sans-ref;famille:consommable;REF:DNW3190|OUTIL;référence;OUTIL;1;;
-Quincaillerie;coffret;DWST60102-1;DEWALT DWST60102-1;82,55;seul;;;;;;;;;inconnu;famille:rangement;REF:DWST60102-1|OUTIL;référence;OUTIL;1;;
+Quincaillerie;coffret;DWST60102-1;DeWALT DWST60102-1 — DWST60102-1;82,55;seul;;;;;;;;;reconnu;famille:rangement;REF:DWST60102-1|OUTIL;référence;OUTIL;1;DWST60102-1;125,06
 Quincaillerie;visserie;DNN20R45E;DEWALT DNN20R45E Coil Clous 2.03-45 Ring, 17,5 m;82,60;seul;clou;;;;;;1;;sans-ref;famille:consommable;REF:DNN20|OUTIL;référence;OUTIL;9;;
-Quincaillerie;vissage-embout;DWMT74733;DEWALT Ensemble de clés mixtes à cliquet SAE, technologie à couple direct, étui verrouillable inclus, 8 pièces (DWMT7473;82,90;pack;clé mixte;;;;;;1;;sans-ref;famille:consommable;REF:DWMT74733|PACK;référence;PACK;1;;
+Quincaillerie;vissage-embout;DWMT74733;DEWALT Ensemble de clés mixtes à cliquet SAE, technologie à couple direct, étui verrouillable inclus, 8 pièces (DWMT7473;82,85;pack;clé mixte;;;;;;1;;sans-ref;famille:consommable;REF:DWMT74733|PACK;référence;PACK;1;;
 Quincaillerie;;DWMT19238;"Jeu de tournevis DeWalt DWMT19238; 37 unités";82,95;seul;;;;;;;;;sans-ref;famille:consommable;REF:DWMT19238|OUTIL;référence;OUTIL;1;;
-Quincaillerie;foret;DT60840-QZ;DeWalt SDS-max 36x570x440 mm DT60840-QZ;82,99;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT60840|OUTIL;référence;OUTIL;1;;
 Quincaillerie;burin;DT8091-QZ;DeWalt 90 x 400 mm (DT8091-QZ);83,04;seul;burin plat;;;;;;1;;sans-ref;famille:consommable;REF:DT8091|OUTIL;référence;OUTIL;1;;
-Quincaillerie;visserie;DT9973;DEWALT DT9973;83,10;seul;clou;;;;;;1;;inconnu;famille:consommable;REF:DT9973|OUTIL;référence;OUTIL;1;;
-Quincaillerie;burin;DNPT28R;Pack de 2200 pointes crantées électro-zinguées 33° DEWALT DNPT28R;83,19;pack;burin pointu;;;;;;2200;;sans-ref;famille:consommable;REF:DNPT28|PACK;référence;PACK;8;;
-Quincaillerie;coffret;DWST171194;DeWalt TSTAK V (DWST171194);83,40;pack;coffret;;TSTAK;;;;;;sans-ref;famille:rangement;REF:DWST171194|PACK;référence;PACK;1;;
-Quincaillerie;lame-circulaire;305X30;DEWALT 305X30;83,53;seul;lame de scie circulaire;;;;;;1;;inconnu;famille:consommable;REF:305X30|OUTIL;référence;OUTIL;1;;
+Quincaillerie;visserie;DT9973;DeWALT DT9973 — DT9973;83,10;seul;clou;;;;;;1;;reconnu;famille:consommable;REF:DT9973|OUTIL;référence;OUTIL;1;DT9973;125,74
+Quincaillerie;burin;DNPT28R;Pack de 2200 pointes crantées électro-zinguées 33° DEWALT DNPT28R;83,19;pack;burin pointu;;;;;;2200;;sans-ref;famille:consommable;REF:DNPT28|PACK;référence;PACK;7;;
+Quincaillerie;coffret;DWST171194;DeWalt TSTAK V (DWST171194);83,40;pack;coffret;;TSTAK;;;;;;sans-ref;famille:rangement;REF:DWST171194|PACK+COFFRET;référence;PACK+COFFRET;1;;
+Quincaillerie;lame-circulaire;305X30;DeWALT 305X30 — 305X30;83,53;seul;lame de scie circulaire;;;;;;1;;reconnu;famille:consommable;REF:305X30|OUTIL;référence;OUTIL;1;305X30;126,22
 Quincaillerie;;DNW2890E;DEWALT DNW2890E;83,68;seul;;;;;;;;;sans-ref;hérité du doublon classé;REF:DNW2890|OUTIL;référence;OUTIL;3;;
-Quincaillerie;vissage-embout;DWMT86090-0;"DeWalt Jeu de douilles à impact 1/2"" 13-24mm, 8 pièces (DWMT86090-0)";83,85;seul;clé mixte;;;;;;1;;sans-ref;famille:consommable;REF:DWMT86090-0|OUTIL;référence;OUTIL;1;;
 Quincaillerie;foret;DT6762-QZ;DeWalt SDS-max 65x107 mm DT6762-QZ;83,99;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT6762|OUTIL;référence;OUTIL;1;;
 Quincaillerie;vissage-embout;;DEWALT Carlisle Bottes de travail en cuir nubuck pour homme, avec embout en acier de sécurité, légères, stone, 44 EU;84,02;seul;embout de vissage;;;;;;1;;sans-ref;famille:consommable;TIT:carlisle bottes de travail en cuir nubuck pour homme avec embout en acier de s curit l g res stone 44 eu;titre;OUTIL;1;;
-Quincaillerie;visserie;DFS9175B1G-QZ;DEWALT DFS9175B1G-QZ Grapas 45mm x 960;84,23;seul;agrafe;;;;;;1;;sans-ref;famille:consommable;REF:DFS9175|OUTIL;référence;OUTIL;6;;
+Quincaillerie;visserie;DFS9175B1G-QZ;DEWALT DFS9175B1G-QZ Grapas 45mm x 960;84,23;seul;agrafe;;;;;;1;;sans-ref;famille:consommable;REF:DFS9175|OUTIL;référence;OUTIL;4;;
 Quincaillerie;accessoire;;Dewalt Accessoire pour routeur de rails de guidage;84,24;seul;accessoire;;;;;;1;;sans-ref;famille:consommable;TIT:accessoire pour routeur de rails de guidage;titre;OUTIL;1;;
 Quincaillerie;foret;DT9559-QZ;DEWALT Foret SDS-Plus Extreme 2 taillants 12 x 950 mm - DT9559-QZ;84,24;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT9559|OUTIL;référence;OUTIL;2;;
 Quincaillerie;;DE7035;DeWalt DE 7035 Heavy Duty Legstand;84,32;seul;;;;;;;;;sans-ref;titre;REF:DE7035|ACCESSOIRE;référence;ACCESSOIRE;1;;
 Quincaillerie;lame-alternative;;DeWALT Dw5258 6-1/5,1 cm par 48T Ultra Fine Finition Tracksaw Lame;84,38;seul;lame de scie;;;;;;1;;sans-ref;famille:consommable;TIT:dw5258 6 1 5 1 cm par 48t ultra fine finition tracksaw lame;titre;OUTIL;2;;
-Quincaillerie;vissage-embout;;Forets & Embouts de vissage;84,55;pack;embout de vissage;;;;;;1;;sans-ref;famille:consommable;TIT:forets embouts de vissage;titre;PACK;7;;
 Quincaillerie;accessoire;DT71517T;Accessoire d'angle DEWALT (90°, inclut 9 embouts de vissage à couple élevé, adapté à une utilisation avec des visseuses ;84,65;pack;accessoire;;;;;;9;;sans-ref;famille:consommable;REF:DT71517|PACK;référence;PACK;1;;
 Quincaillerie;visserie;;Agrafes crantées électro zinguées DEWALT - DFS;84,65;seul;agrafe;;;;;;1;;sans-ref;famille:consommable;TIT:agrafes crant es lectro zingu es dfs;titre;OUTIL;1;;
 Quincaillerie;foret;DT9572-QZ;DeWalt SDS-plus 14x1000x950 mm DT9572-QZ;84,83;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT9572|OUTIL;référence;OUTIL;1;;
 Quincaillerie;coffret;DWST60122-1;DeWalt McLaren Sac à dos d'outillage noir/jaune (DWST60122-1);84,94;seul;;;;;;;;oui;sans-ref;famille:rangement;REF:DWST60122-1|OUTIL;référence;OUTIL;1;;
-Quincaillerie;portage;DWST83522-9;DEWALT DWST83522-9;84,98;seul;sac à outils;;;;;;;;inconnu;famille:rangement;REF:DWST83522-9|OUTIL;référence;OUTIL;1;;
+Quincaillerie;portage;DWST83522-9;DeWALT DWST83522-9 — DWST83522-9;84,98;seul;sac à outils;;;;;;;;reconnu;famille:rangement;REF:DWST83522-9|OUTIL;référence;OUTIL;1;DWST83522-9;127,98
 Quincaillerie;foret;DT20452-QZ;DeWalt EXTREME Full Carbide SDS-plus Set Forets à Percussion 10x160x100mm (DT20452-QZ);84,98;pack;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT20452|PACK;référence;PACK;1;;
-Quincaillerie;lame-circulaire;DT4281-QZ;DEWALT DT4281-QZ;85,04;seul;lame de scie circulaire;;;;;;1;;inconnu;famille:consommable;REF:DT4281|OUTIL;référence;OUTIL;1;;
-Quincaillerie;accessoire;UC4200;DEWALT UC4200;85,05;pack;adaptateur;;;;;;1;;inconnu;famille:consommable;REF:UC4200|PACK;référence;PACK;1;;
+Quincaillerie;lame-circulaire;DT4281-QZ;DeWALT DT4281-QZ — DT4281-QZ;85,04;seul;lame de scie circulaire;;;;;;1;;reconnu;famille:consommable;REF:DT4281|OUTIL;référence;OUTIL;1;DT4281-QZ;128,08
+Quincaillerie;accessoire;UC4200;DeWALT UC4200 — UC4200;85,05;pack;adaptateur;;;;;;1;;reconnu;famille:consommable;REF:UC4200|PACK;référence;PACK;1;UC4200;128,09
 Quincaillerie;accessoire;DNBA1644SZ;DNBA1644SZ Clous 20, Gris, Taille SS 44mm, Set de 2500 Pièces;85,22;pack;accessoire;;;;;;2500;;sans-ref;famille:consommable;REF:DNBA1644|PACK;référence;PACK;3;;
-Quincaillerie;burin;;Dewalt Pointes crantées galvanisées - 2200 pièces;85,49;seul;burin pointu;;;;;;1;;sans-ref;famille:consommable;TIT:pointes crant es galvanis es 2200 pi ces;titre;OUTIL;1;;
-Quincaillerie;accessoire;DNW2870E;DeWalt DNW2870E Clous, Argent, Taille 34 70mm, Set de 2200 Pièces;85,58;pack;accessoire;;;;;;2200;;sans-ref;famille:consommable;REF:DNW2870|PACK;référence;PACK;1;;
-Quincaillerie;accessoire;DE3474;DEWALT DE3474;85,68;seul;accessoire;;;;;;1;;inconnu;famille:consommable;REF:DE3474|OUTIL;référence;OUTIL;1;;
-Quincaillerie;accessoire;DT20775;DEWALT DT20775;85,90;pack;accessoire;;;;;;5;;inconnu;famille:consommable;REF:DT20775|PACK;référence;PACK;1;;
-Quincaillerie;portage;DWST83522-1;DEWALT DWST83522-1;85,90;seul;sac à outils;;;;;;;;inconnu;famille:rangement;REF:DWST83522-1|OUTIL;référence;OUTIL;1;;
+Quincaillerie;accessoire;DE3474;DeWALT DE3474 — DE3474;85,68;seul;accessoire;;;;;;1;;reconnu;famille:consommable;REF:DE3474|OUTIL;référence;OUTIL;1;DE3474;128,87
+Quincaillerie;accessoire;DT20775;DeWALT DT20775 — DT20775;85,90;pack;accessoire;;;;;;5;;reconnu;famille:consommable;REF:DT20775|PACK;référence;PACK;1;DT20775;129,19
+Quincaillerie;portage;DWST83522-1;DeWALT DWST83522-1 — DWST83522-1;85,90;seul;sac à outils;;;;;;;;reconnu;famille:rangement;REF:DWST83522-1|OUTIL;référence;OUTIL;1;DWST83522-1;129,19
 Quincaillerie;foret;;Foret hélicoïdal pour perceuse avec hélice en carbure de tungstène de haute qualité, emmanchement SDS Plus DEWALT - Ø14 ;85,90;seul;foret;;;;;;1;;sans-ref;famille:consommable;TIT:foret h lico dal pour perceuse avec h lice en carbure de tungst ne de haute qualit emmanchement sds plus 14;titre;OUTIL;1;;
 Quincaillerie;lame-circulaire;DW3112;"DEWALT Lame de scie à onglet 25,4 cm (10"") - ATB - Entaille fine - Mandrin de 1,5 cm - 24 dents (DW3112)";85,90;seul;lame de scie circulaire;;;;;;1;;sans-ref;famille:consommable;REF:DW3112|OUTIL;référence;OUTIL;2;;
-Quincaillerie;;DWMT75462-0;DEWALT DWMT75462-0;85,99;seul;;;;;;;;;inconnu;famille:consommable;REF:DWMT75462-0|OUTIL;référence;OUTIL;1;;
+Quincaillerie;;DWMT75462-0;DeWALT DWMT75462-0 — DWMT75462-0;85,99;seul;;;;;;;;;reconnu;famille:consommable;REF:DWMT75462-0|OUTIL;référence;OUTIL;1;DWMT75462-0;129,24
 Quincaillerie;foret;DT6761-QZ;DeWalt HB SDS-max 50x107 mm DT6761-QZ;85,99;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT6761|OUTIL;référence;OUTIL;1;;
-Quincaillerie;coffret;DS150;DEWALT DS150;86,00;pack;coffret;;;;;;2;;inconnu;famille:rangement;REF:DS150|PACK;référence;PACK;2;;
+Quincaillerie;coffret;DS150;DeWALT DS150 — DS150;86,00;pack;coffret;;;;;;2;;reconnu;famille:rangement;REF:DS150|PACK;référence;PACK;2;DS150;129,26
 Quincaillerie;accessoire;DNBA1650SZ;DEWALT DNBA1650SZ Clous 20, Gris, Taille SS 50mm, Set de 2500 Pièces;86,35;pack;accessoire;;;;;;2500;;sans-ref;famille:consommable;REF:DNBA1650|PACK;référence;PACK;4;;
-Quincaillerie;coffret;DWST550114;DEWALT DWST550114 Pochette à Outils en Cuir pour électricien 8 Poches avec Boucles pour Marteau et chaîne à Ruban Marron;86,41;seul;;;;;;;;;sans-ref;famille:rangement;REF:DWST550114|OUTIL;référence;OUTIL;1;;
+Quincaillerie;coffret;DWST550114;DEWALT DWST550114 Pochette à Outils en Cuir pour électricien 8 Poches avec Boucles pour Marteau et chaîne à Ruban Marron;86,40;seul;;;;;;;;;sans-ref;famille:rangement;REF:DWST550114|OUTIL;référence;OUTIL;1;;
 Quincaillerie;foret;DT9816-QZ;DeWalt SDS-plus 6x160x100 mm 50 pièces DT9816-QZ;86,58;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT9816|OUTIL;référence;OUTIL;1;;
-Quincaillerie;foret;DWA1790IR;DEWALT DWA1790IR Lot de 3 forets étagés;86,74;pack;foret étagé;;;;;;3;;sans-ref;famille:consommable;REF:DWA1790|PACK;référence;PACK;1;;
-Quincaillerie;lame-alternative;DT8374-QZ;DEWALT DT8374-QZ;86,76;seul;scie-cloche;;;;;;1;;inconnu;famille:consommable;REF:DT8374|OUTIL;référence;OUTIL;1;;
-Quincaillerie;coffret;DWST40603-1;DEWALT DWST40603-1;86,82;seul;;;;;;;;;inconnu;famille:rangement;REF:DWST40603-1|OUTIL;référence;OUTIL;1;;
-Quincaillerie;foret;DWA1789IR;"DEWALT Jeu de forets étagés, 7/8"" à 1-1/8"" (DWA1789IR)";86,98;seul;foret étagé;;;;;;1;;sans-ref;famille:consommable;REF:DWA1789|OUTIL;référence;OUTIL;1;;
-Quincaillerie;lame-alternative;;DEWALT Scie cloche bi-métal extrême 168mm DEWALT Quantité:1;86,99;seul;scie-cloche;;;;;;1;;sans-ref;famille:consommable;TIT:scie cloche bi m tal extr me 168mm quantit 1;titre;OUTIL;1;;
+Quincaillerie;lame-alternative;DT8374-QZ;DeWALT DT8374-QZ — DT8374-QZ;86,76;seul;scie-cloche;;;;;;1;;reconnu;famille:consommable;REF:DT8374|OUTIL;référence;OUTIL;1;DT8374-QZ;130,22
+Quincaillerie;coffret;DWST40603-1;DeWALT DWST40603-1 — DWST40603-1;86,82;seul;;;;;;;;;reconnu;famille:rangement;REF:DWST40603-1|OUTIL;référence;OUTIL;1;DWST40603-1;130,32
 Quincaillerie;portage;DWST60106-1;DeWalt Panier porte-outils 51 cm DWST60106-1;87,04;seul;sac à outils;;;;;;;;sans-ref;famille:rangement;REF:DWST60106-1|OUTIL;référence;OUTIL;1;;
-Quincaillerie;visserie;DNBDA1538SZ;DeWALT DNBDA1538SZ Clavos 1,8mm x 38mm 15GA;87,17;seul;clou;;;;;;1;;sans-ref;famille:consommable;REF:DNBDA1538|OUTIL;référence;OUTIL;1;;
-Quincaillerie;burin;DT6946-QZ;DEWALT DT6946-QZ;87,48;seul;burin plat;;;;;;1;;inconnu;famille:consommable;REF:DT6946|OUTIL;référence;OUTIL;1;;
-Quincaillerie;coffret;DWHT82811-0;DeWalt Coffret Pinces VDE, 3 Pièces (DWHT82811-0);87,53;pack;coffret;;GENERIQUE;;;;;;sans-ref;famille:rangement;REF:DWHT82811-0|PACK;référence;PACK;1;;
-Quincaillerie;foret;DT8972-QZ;DEWALT DT8972-QZ;88,03;seul;foret;;;;;;1;;inconnu;famille:consommable;REF:DT8972|OUTIL;référence;OUTIL;1;;
+Quincaillerie;visserie;DNBDA1538SZ;DeWALT DNBDA1538SZ Clavos 1,8mm x 38mm 15GA;87,17;seul;clou;;;;;;1;;sans-ref;famille:consommable;REF:DNBDA1538|OUTIL;référence;OUTIL;2;;
+Quincaillerie;burin;DT6946-QZ;DeWALT DT6946-QZ — DT6946-QZ;87,48;seul;burin plat;;;;;;1;;reconnu;famille:consommable;REF:DT6946|OUTIL;référence;OUTIL;1;DT6946-QZ;131,14
+Quincaillerie;coffret;DWHT82811-0;DeWalt Coffret Pinces VDE, 3 Pièces (DWHT82811-0);87,53;pack;coffret;;GENERIQUE;;;;;;sans-ref;famille:rangement;REF:DWHT82811-0|PACK+COFFRET;référence;PACK+COFFRET;1;;
+Quincaillerie;lame-alternative;DXTT-2-916;DeWalt Lame de lissage 406mm flexible en acier inoxydable (DXTT-2-916);87,84;seul;lame de scie;;;;;;1;;sans-ref;famille:consommable;REF:DXTT-2-916|OUTIL;référence;OUTIL;1;;
+Quincaillerie;foret;DT9436-QZ;DeWalt SDS-max 32x920x800 mm DT9436-QZ;87,98;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT9436|OUTIL;référence;OUTIL;1;;
+Quincaillerie;foret;DT8972-QZ;DeWALT DT8972-QZ — DT8972-QZ;88,03;seul;foret;;;;;;1;;reconnu;famille:consommable;REF:DT8972|OUTIL;référence;OUTIL;1;DT8972-QZ;131,78
+Quincaillerie;coffret;DT9679-QZ;DEWALT Jeu de 15 forets et burins SDS-plus DT9679-QZ & Coffret de 100 Pièces de Perçage et Vissage Haute Performance - D;88,20;pack;coffret;;;;;;15;;sans-ref;famille:rangement;REF:DT9679|PACK+COFFRET;référence;PACK+COFFRET;1;;
+Quincaillerie;vissage-embout;DWMT86090-0;"DeWalt Jeu de douilles à impact 1/2"" 13-24mm, 8 pièces (DWMT86090-0)";88,26;seul;clé mixte;;;;;;1;;sans-ref;famille:consommable;REF:DWMT86090-0|OUTIL;référence;OUTIL;1;;
+Quincaillerie;coffret;;DeWALT Dcs16150 Lot de 2 1-1/5,1 cm en Calibre 16 Finition Vernis à ongles (2 500 par boîte);88,50;pack;lot;;;;;;2;;sans-ref;famille:rangement;TIT:dcs16150 lot de 2 1 1 5 1 cm en calibre 16 finition vernis ongles 2 500 par bo te;titre;PACK;1;;
+Quincaillerie;lame-alternative;;Lames pour fraiseuses à lamelles Ø 102 mm;88,68;seul;lame de scie;;;;;;1;;sans-ref;famille:consommable;TIT:lames pour fraiseuses lamelles 102 mm;titre;OUTIL;1;;
 Quincaillerie;vissage-embout;DWMT19261-0;DEWALT DWMT19261-0 fr Jeu de clés à douilles métriques de cliquet, 7 pcs.;88,71;seul;clé mixte;;;;;;1;;sans-ref;famille:consommable;REF:DWMT19261-0|OUTIL;référence;OUTIL;1;;
 Quincaillerie;foret;DT5563;DeWalt EXTREME 2 HSS-G Foret métal 13 x 151 x 98 mm Grand pack (DT5563);88,88;pack;foret métal;;;;;;1;;sans-ref;famille:consommable;REF:DT5563|PACK;référence;PACK;1;;
-Quincaillerie;lame-alternative;DT2186-QZ;DEWALT DT2186-QZ;88,90;seul;lame de scie sauteuse;;;;;;1;;inconnu;famille:consommable;REF:DT2186|OUTIL;référence;OUTIL;1;;
+Quincaillerie;lame-alternative;DT2186-QZ;DeWALT DT2186-QZ — DT2186-QZ;88,90;seul;lame de scie sauteuse;;;;;;1;;reconnu;famille:consommable;REF:DT2186|OUTIL;référence;OUTIL;1;DT2186-QZ;132,82
 Quincaillerie;visserie;;Boîte de 960 Agrafes pour clôture DEWALT;89,00;pack;agrafe;;;;;;960;;sans-ref;famille:consommable;TIT:bo te de 960 agrafes pour cl ture;titre;PACK;1;;
 Quincaillerie;accessoire;DW087K;DEWALT Trépied Mini Léger Métal Renforcé Compatible avec DW087K, DW088K, DW089K, DW082K, DW084K - Rotation 360° - Montag;89,04;seul;trépied;;;;;;1;;sans-ref;famille:consommable;REF:DW087|OUTIL;référence;OUTIL;2;;
-Quincaillerie;accessoire;DT9943;DEWALT DT9943;89,51;seul;accessoire;;;;;;1;;inconnu;famille:consommable;REF:DT9943|OUTIL;référence;OUTIL;1;;
+Quincaillerie;accessoire;DT9943;DeWALT DT9943 — DT9943;89,51;seul;accessoire;;;;;;1;;reconnu;famille:consommable;REF:DT9943|OUTIL;référence;OUTIL;1;DT9943;133,64
 Quincaillerie;burin;DT6837-QZ;DeWalt 38 x 280mm (DT6837-QZ);89,51;seul;burin;;;;;;1;;sans-ref;famille:consommable;REF:DT6837|OUTIL;référence;OUTIL;1;;
 Quincaillerie;;DT3889-QZ;DEWALT DT3889-QZ DT3889-QZ-Coronas de Diamante en Seco;89,58;seul;;;;;;;;;sans-ref;famille:consommable;REF:DT3889|OUTIL;référence;OUTIL;1;;
-Quincaillerie;foret;DT3888;DEWALT DT3888;89,65;seul;foret;;;;;;1;;inconnu;famille:consommable;REF:DT3888|OUTIL;référence;OUTIL;1;;
+Quincaillerie;foret;DT3888;DeWALT DT3888 — DT3888;89,65;seul;foret;;;;;;1;;reconnu;famille:consommable;REF:DT3888|OUTIL;référence;OUTIL;1;DT3888;133,75
 Quincaillerie;coffret;DWST60101-9;DeWalt McLaren sac à dos d'outillage avec roulettes et poignée télescopique (DWST60101-9);89,75;pack;coffret;;GENERIQUE;;;;;oui;sans-ref;famille:rangement;REF:DWST60101-9|PACK;référence;PACK;1;;
 Quincaillerie;accessoire;DEWDE0733;DeWalt Trépied pour DEWDE0733 et DE0733-XJ;90,10;seul;trépied;;;;;;1;;sans-ref;famille:consommable;REF:DEWDE0733|OUTIL;référence;OUTIL;1;;
-Quincaillerie;foret;DT5929-QZ;DEWALT DT5929-QZ;90,68;seul;foret;;;;;;1;;inconnu;famille:consommable;REF:DT5929|OUTIL;référence;OUTIL;1;;
+Quincaillerie;disque;DT20460-QZ;DeWalt Elite Series Meule Diamant Polyvalente 305x25,4mm (DT20460-QZ);90,27;seul;disque à tronçonner;;;;;;1;;sans-ref;famille:consommable;REF:DT20460|OUTIL;référence;OUTIL;1;;
+Quincaillerie;foret;DT5031-QZ;DeWalt HSS-G 20-34 mm DT5031-QZ;90,34;seul;foret étagé;;;;;;1;;sans-ref;famille:consommable;REF:DT5031|OUTIL;référence;OUTIL;1;;
+Quincaillerie;foret;DT5929-QZ;DeWALT DT5929-QZ — DT5929-QZ;90,68;seul;foret;;;;;;1;;reconnu;famille:consommable;REF:DT5929|OUTIL;référence;OUTIL;1;DT5929-QZ;135,02
 Quincaillerie;;;"DEWALT Corona de diamante para perforar en húmedo 52x400mm, acoplamiento 1 1/4"" UNC hembra universal, para materiales es";90,70;seul;;;;;;;;;sans-ref;titre;TIT:corona de diamante para perforar en h medo 52x400mm acoplamiento 1 1 4 unc hembra universal para materiales es;titre;OUTIL;1;;
 Quincaillerie;;;"Spachtel DeWalt 2-910; 254 mm";90,73;seul;;;;;;;;;sans-ref;titre-fragment;TIT:spachtel 2 910 254 mm;titre;OUTIL;1;;
-Quincaillerie;lame-circulaire;DT4376-QZ;DEWALT DT4376-QZ;90,87;seul;lame de scie circulaire;;;;;;1;;inconnu;famille:consommable;REF:DT4376|OUTIL;référence;OUTIL;1;;
+Quincaillerie;lame-circulaire;DT4376-QZ;DeWALT DT4376-QZ — DT4376-QZ;90,87;seul;lame de scie circulaire;;;;;;1;;reconnu;famille:consommable;REF:DT4376|OUTIL;référence;OUTIL;1;DT4376-QZ;135,30
 Quincaillerie;foret;DT9444-QZ;DeWalt SDS-max 40x380x250 mm DT9444-QZ;90,99;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT9444|OUTIL;référence;OUTIL;1;;
 Quincaillerie;lame-alternative;DT2976;DeWalt Lame alligator brique DT2976;91,19;seul;lame de scie;;;;;;1;;sans-ref;famille:consommable;REF:DT2976|OUTIL;référence;OUTIL;1;;
 Quincaillerie;accessoire;DNM40R40GZ;DeWALT DNM40R40GZ Clous anneau GAL, Argent, 4x40mm Set de 2000 Pieces;91,27;pack;accessoire;;;;;;2000;;sans-ref;famille:consommable;REF:DNM40|PACK;référence;PACK;2;;
-Quincaillerie;coffret;DWST550112;DEWALT Ceinture à outils en cuir, durable, ceinture professionnelle à 11 poches (DWST550112);91,70;seul;;;;;;;;;sans-ref;famille:rangement;REF:DWST550112|OUTIL;référence;OUTIL;3;;
-Quincaillerie;foret;DT9436-QZ;DeWalt SDS-max 32x920x800 mm DT9436-QZ;91,99;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT9436|OUTIL;référence;OUTIL;1;;
 Quincaillerie;accessoire;DNBA1632SZ;DeWALT Clous pour cloueurs de finition sans fil SS, inoxydable, 32 mm, 2500 pièces - DNBA1632SZ;92,14;seul;accessoire;;;;;;1;;sans-ref;famille:consommable;REF:DNBA1632|OUTIL;référence;OUTIL;1;;
-Quincaillerie;lame-alternative;;Lame pour scie plongeante - 48 Dents - 165x20 mm DEWALT;92,48;seul;lame de scie;;;;;;1;;sans-ref;famille:consommable;TIT:lame pour scie plongeante 48 dents 165x20 mm;titre;OUTIL;1;;
-Quincaillerie;accessoire;DT8412-XJ;DEWALT DT8412-XJ;92,62;seul;accessoire;;;;;;1;;inconnu;famille:consommable;REF:DT8412|OUTIL;référence;OUTIL;1;;
-Quincaillerie;accessoire;DE0736;DEWALT DE0736;93,13;seul;trépied;;;;;;1;;inconnu;famille:consommable;REF:DE0736|OUTIL;référence;OUTIL;1;;
+Quincaillerie;accessoire;DT8412-XJ;DeWALT DT8412-XJ — DT8412-XJ;92,62;seul;accessoire;;;;;;1;;reconnu;famille:consommable;REF:DT8412|OUTIL;référence;OUTIL;1;DT8412-XJ;137,45
+Quincaillerie;accessoire;DE0736;DeWALT DE0736 — DE0736;93,13;seul;trépied;;;;;;1;;reconnu;famille:consommable;REF:DE0736|OUTIL;référence;OUTIL;1;DE0736;138,02
 Quincaillerie;disque;DT20461-QZ;DeWalt ELITE SERIES™ Disque Diamant All Purpose 355x25,4mm (DT20461-QZ);93,13;seul;disque à tronçonner;;;;;;1;;sans-ref;famille:consommable;REF:DT20461|OUTIL;référence;OUTIL;1;;
 Quincaillerie;vissage-embout;;DEWALT DWASHRIR Impact Ready Embout pour cisaille à métaux;93,23;seul;embout de vissage;;;;;;1;;sans-ref;famille:consommable;TIT:dwashrir impact ready embout pour cisaille m taux;titre;OUTIL;2;;
-Quincaillerie;lame-alternative;DT8353-QZ;DEWALT DT8353-QZ;93,26;seul;scie-cloche;;;;;;1;;inconnu;famille:consommable;REF:DT8353|OUTIL;référence;OUTIL;1;;
-Quincaillerie;coffret;DWST550115;DeWalt DWST550115 Pochette à outils en cuir et ceinture - Quantité 5;93,46;seul;;;;;;;;;sans-ref;famille:rangement;REF:DWST550115|OUTIL;référence;OUTIL;1;;
+Quincaillerie;lame-alternative;DT8353-QZ;DeWALT DT8353-QZ — DT8353-QZ;93,26;seul;scie-cloche;;;;;;1;;reconnu;famille:consommable;REF:DT8353|OUTIL;référence;OUTIL;1;DT8353-QZ;138,22
+Quincaillerie;coffret;DWST550115;DeWalt DWST550115 Pochette à outils en cuir et ceinture - Quantité 5;93,46;seul;;;;;;;;;sans-ref;famille:rangement;REF:DWST550115|OUTIL;référence;OUTIL;2;;
 Quincaillerie;;DT6771-QZ;DeWalt DT6771-QZ - Adaptador para corona perforadora SDS-Max 400mm;93,99;seul;;;;;;;;;sans-ref;famille:consommable;REF:DT6771|OUTIL;référence;OUTIL;1;;
 Quincaillerie;accessoire;DNW2870E;DeWALT Clous 34°, lisse, 70 mm, 2200 pièces - DNW2870E;94,03;seul;accessoire;;;;;;1;;sans-ref;famille:consommable;REF:DNW2870|OUTIL;référence;OUTIL;1;;
 Quincaillerie;lame-alternative;DWA4204;DeWALT Dwa4204 Large Titanium oscillant Lame de bois avec des Clous, DWA4204;94,39;seul;lame de scie;;;;;;1;;sans-ref;famille:consommable;REF:DWA4204|OUTIL;référence;OUTIL;1;;
 Quincaillerie;accessoire;DNR3125GZ;DeWalt Clou de bobine DNR3125GZ 25mm galvanisé, 7200 pièces (DNR3125GZ);94,63;seul;accessoire;;;;;;1;;sans-ref;famille:consommable;REF:DNR3125|OUTIL;référence;OUTIL;1;;
 Quincaillerie;accessoire;DNBT1840SZ;DEWALT DNBT1840SZ Clous DNBT, Argent, 40mm, Set de 5000 Pièces;94,87;pack;accessoire;;;;;;5000;;sans-ref;famille:consommable;REF:DNBT1840|PACK;référence;PACK;1;;
-Quincaillerie;lame-circulaire;DT4346-QZ;DEWALT DT4346-QZ;94,98;seul;lame de scie circulaire;;;;;;1;;inconnu;famille:consommable;REF:DT4346|OUTIL;référence;OUTIL;1;;
+Quincaillerie;lame-circulaire;DT4346-QZ;DeWALT DT4346-QZ — DT4346-QZ;94,98;seul;lame de scie circulaire;;;;;;1;;reconnu;famille:consommable;REF:DT4346|OUTIL;référence;OUTIL;1;DT4346-QZ;140,28
 Quincaillerie;foret;DT20451-QZ;DeWalt EXTREME Full Carbide SDS-plus Set Forets à Percussion 8x160x100mm (DT20451-QZ);94,99;pack;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT20451|PACK;référence;PACK;1;;
-Quincaillerie;lame-alternative;DT8356-QZ;DEWALT DT8356-QZ;95,62;seul;scie-cloche;;;;;;1;;inconnu;famille:consommable;REF:DT8356|OUTIL;référence;OUTIL;1;;
-Quincaillerie;;DXTT-2-942;DeWalt Ausziehbarer Griff pour Trockenbauwände 94 cm - 160 cm DXTT-2-942;95,75;seul;;;;;;;;;sans-ref;titre;REF:DXTT-2-942|OUTIL;référence;OUTIL;1;;
+Quincaillerie;foret;DT60809-QZ;DEWALT DT60809-QZ - Broca SDS-Max XLR 16x340mm 4 cortes G;95,23;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT60809|OUTIL;référence;OUTIL;1;;
+Quincaillerie;coffret;AW489;"Dewalt - Caisse à outils ""Tstak IP54"" (pack de 2) AW489 (taille unique) (Noir/Jaune)";95,35;pack;coffret;;TSTAK;;;;2;;sans-ref;famille:rangement;REF:AW489|PACK+COFFRET;référence;PACK+COFFRET;1;;
+Quincaillerie;lame-alternative;DT8356-QZ;DeWALT DT8356-QZ — DT8356-QZ;95,62;seul;scie-cloche;;;;;;1;;reconnu;famille:consommable;REF:DT8356|OUTIL;référence;OUTIL;1;DT8356-QZ;141,13
+Quincaillerie;;DXTT-2-942;DeWalt Ausziehbarer Griff pour Trockenbauwände 94 cm - 160 cm DXTT-2-942;95,75;seul;;;;;;;;;sans-ref;titre;REF:DXTT-2-942|OUTIL;référence;OUTIL;2;;
 Quincaillerie;foret;;Foret hélicoïdal pour perceuse avec hélice en carbure de tungstène de haute qualité, emmanchement SDS Plus DEWALT - Ø16 ;95,90;seul;foret;;;;;;1;;sans-ref;famille:consommable;TIT:foret h lico dal pour perceuse avec h lice en carbure de tungst ne de haute qualit emmanchement sds plus 16;titre;OUTIL;1;;
 Quincaillerie;vissage-embout;DWMT19237-1;DeWalt Jeu de clés mixtes 18 pièces métriques (DWMT19237-1);96,04;seul;clé mixte;;;;;;1;;sans-ref;famille:consommable;REF:DWMT19237-1|OUTIL;référence;OUTIL;1;;
 Quincaillerie;visserie;DFS9150B1G-QZ;DEWALT DFS9150B1G-QZ Grapas 40mm x 960;96,24;seul;agrafe;;;;;;1;;sans-ref;famille:consommable;REF:DFS9150|OUTIL;référence;OUTIL;5;;
 Quincaillerie;accessoire;DNF55;DEWALT PowerCoil ongles DNF 55 mm 12.6 KST. Bague Tige, 1 pièce, dnf23r55e;96,33;seul;accessoire;;;;;;1;;sans-ref;famille:consommable;REF:DNF55|OUTIL;référence;OUTIL;3;;
 Quincaillerie;;DE1000;DEWALT DE1000 Support universel (Import Grande Bretagne);96,42;seul;;;;;;;;;sans-ref;titre;REF:DE1000|ACCESSOIRE;référence;ACCESSOIRE;1;;
-Quincaillerie;visserie;;DEWALT dnf25r50e - Clous tête Ronde Strass en Bobine 2,5 x 50 mm;96,62;seul;clou;;;;;;1;;sans-ref;famille:consommable;TIT:dnf25r50e clous t te ronde strass en bobine 2 5 x 50 mm;titre;OUTIL;4;;
-Quincaillerie;foret;DT70620T;DEWALT DT70620T;96,73;seul;foret;;;;;;1;;inconnu;famille:consommable;REF:DT70620|OUTIL;référence;OUTIL;1;;
+Quincaillerie;foret;DT70620T;DeWALT DT70620T — DT70620T;96,73;seul;foret;;;;;;1;;reconnu;famille:consommable;REF:DT70620|OUTIL;référence;OUTIL;1;DT70620T;142,49
 Quincaillerie;foret;DT9687;Foret SDS-plus 4 TAILLANTS 22x450x400mm DT9687;96,82;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT9687|OUTIL;référence;OUTIL;1;;
 Quincaillerie;visserie;DNBT1850SZ;DEWALT DNBT1850SZ - Puntas Brad 1,25mm x 50mm 18GA Acero inox316;97,02;seul;clou;;;;;;1;;sans-ref;famille:consommable;REF:DNBT1850|OUTIL;référence;OUTIL;1;;
 Quincaillerie;coffret;DNF64;DEWALT dnf23r64e PowerCoil ongles DNF 64 mm 10,5 KST. Anneau Tige, Lot de 6;97,12;pack;lot;;;;;;6;;sans-ref;famille:rangement;REF:DNF64|PACK;référence;PACK;1;;
-Quincaillerie;coffret;DWST83395-1;Boîte à outils vide DEWALT DWST83395-1 noir, jaune 1 pc(s);97,15;seul;coffret;;;;;;;;sans-ref;famille:rangement;REF:DWST83395-1|OUTIL;référence;OUTIL;1;;
 Quincaillerie;lame-alternative;DT8266;DeWalt Scie cloche bi-métal 177 mm (DT8266);97,32;seul;scie-cloche;;;;;;1;;sans-ref;famille:consommable;REF:DT8266|OUTIL;référence;OUTIL;1;;
 Quincaillerie;foret;DT6764-QZ;DeWalt HB SDS-max 90x107 mm DT6764-QZ;97,37;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT6764|OUTIL;référence;OUTIL;1;;
 Quincaillerie;lame-circulaire;DT4358QZ;DeWalt Extreme 315 x 30 x 3,0 72WZ (DT4358QZ);97,63;seul;lame de scie circulaire;;;;;;1;;sans-ref;famille:consommable;REF:DT4358|OUTIL;référence;OUTIL;1;;
-Quincaillerie;lame-alternative;DT2979;DEWALT DT2979;97,90;seul;lame de scie;;;;;;1;;inconnu;famille:consommable;REF:DT2979|OUTIL;référence;OUTIL;1;;
+Quincaillerie;lame-alternative;DT2979;DeWALT DT2979 — DT2979;97,90;seul;lame de scie;;;;;;1;;reconnu;famille:consommable;REF:DT2979|OUTIL;référence;OUTIL;1;DT2979;143,92
 Quincaillerie;;;"Spachtel DeWalt 2-907; 177 8 mm";97,90;seul;;;;;;;;;sans-ref;titre-fragment;TIT:spachtel 2 907 177 8 mm;titre;OUTIL;1;;
 Quincaillerie;visserie;;DEWALT Clou en bande DNPT 3,1 x 90 mm 33 degrés Lisse Galvanisé G12 DEWALT Quantité:2000;97,99;seul;clou;;;;;;1;;sans-ref;famille:consommable;TIT:clou en bande dnpt 3 1 x 90 mm 33 degr s lisse galvanis g12 quantit 2000;titre;OUTIL;1;;
-Quincaillerie;foret;DT4942-QZ;DEWALT DT4942-QZ;99,17;seul;foret métal;;;;;;1;;inconnu;famille:consommable;REF:DT4942|OUTIL;référence;OUTIL;1;;
+Quincaillerie;coffret;DWST83395-1;Boîte à outils vide DEWALT DWST83395-1 noir, jaune 1 pc(s);98,22;seul;coffret;;;;;;;;sans-ref;famille:rangement;REF:DWST83395-1|OUTIL;référence;OUTIL;1;;
+Quincaillerie;filtration;;DEWALT Enrouleur de tuyau à air manuel, 0,95 cm x 15,2 m, résistant à l'huile et aux torsions avec plomb de 1,2 m, outil;98,81;seul;tuyau d'aspiration;;;;;;1;;sans-ref;famille:consommable;TIT:enrouleur de tuyau air manuel 0 95 cm x 15 2 m r sistant l huile et aux torsions avec plomb de 1 2 m outil;titre;OUTIL;1;;
+Quincaillerie;foret;DT9445-QZ;DeWalt SDS-max 40x570x450 mm DT9445-QZ;98,99;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT9445|OUTIL;référence;OUTIL;1;;
+Quincaillerie;foret;DT4942-QZ;DeWALT DT4942-QZ — DT4942-QZ;99,17;seul;foret métal;;;;;;1;;reconnu;famille:consommable;REF:DT4942|OUTIL;référence;OUTIL;1;DT4942-QZ;145,49
+Quincaillerie;burin;DNPT28R75G12Z;Dewalt DNPT28R75G12Z Pointes en bande papier 33° crantées éléctro-zinguées 2.8x75mm;99,35;seul;burin pointu;;;;;;1;;sans-ref;famille:consommable;REF:DNPT28|OUTIL;référence;OUTIL;2;;
 Quincaillerie;burin;DT6934-QZ;DeWalt 127 x 445 mm (DT6934-QZ);99,82;seul;burin plat;;;;;;1;;sans-ref;famille:consommable;REF:DT6934|OUTIL;référence;OUTIL;1;;
-Quincaillerie;burin;;Pointes en bande papier 33° crantées - acier - 3,1 x 90 mm - par 2200 DEWALT;99,90;seul;burin pointu;;;;;;1;;sans-ref;famille:consommable;TIT:pointes en bande papier 33 crant es acier 3 1 x 90 mm par 2200;titre;OUTIL;1;;
-Quincaillerie;lame-alternative;DT8267;DeWalt Scie Cloche Bi-Métallique 210 mm (DT8267);99,99;seul;scie-cloche;;;;;;1;;sans-ref;famille:consommable;REF:DT8267|OUTIL;référence;OUTIL;1;;
-Quincaillerie;lame-alternative;;Coffret de 10 scies cloches Extreme BIM bois/métal/plastique DeWalt;99,99;pack;scie-cloche;;;;;;10;;sans-ref;famille:consommable;TIT:coffret de 10 scies cloches extreme bim bois m tal plastique;titre;PACK;1;;
+Quincaillerie;vissage-embout;;Forets & Embouts de vissage;99,90;pack;embout de vissage;;;;;;1;;sans-ref;famille:consommable;TIT:forets embouts de vissage;titre;PACK;4;;
 Quincaillerie;accessoire;DW5891;DEWALT Adaptateur SDS Max vers SDS+ (DW5891);100,04;pack;adaptateur;;;;;;1;;sans-ref;famille:consommable;REF:DW5891|ACCESSOIRE;référence;ACCESSOIRE;2;;
-Quincaillerie;foret;DW1361;DEWALT DW1361;101,68;seul;foret;;;;;;1;;inconnu;famille:consommable;REF:DW1361|OUTIL;référence;OUTIL;1;;
-Quincaillerie;lame-circulaire;350/30;DEWALT 350/30;101,92;seul;lame de scie circulaire;;;;;;1;;inconnu;famille:consommable;REF:350/30|OUTIL;référence;OUTIL;1;;
-Quincaillerie;accessoire;DT20562-QZ;DEWALT DT20562-QZ Adaptateur/tête de taraudage Adapté pour (perceuses) Dewalt;102,04;seul;adaptateur;;;;;;1;;sans-ref;famille:consommable;REF:DT20562|ACCESSOIRE;référence;ACCESSOIRE;2;;
+Quincaillerie;foret;DW1361;DeWALT DW1361 — DW1361;101,68;seul;foret;;;;;;1;;reconnu;famille:consommable;REF:DW1361|OUTIL;référence;OUTIL;1;DW1361;148,56
+Quincaillerie;lame-circulaire;350/30;DeWALT 350/30 — 350/30;101,92;seul;lame de scie circulaire;;;;;;1;;reconnu;famille:consommable;REF:350/30|OUTIL;référence;OUTIL;1;350/30;148,91
 Quincaillerie;;DT20500-QZ;DEWALT - Renvoi d’angle droit compact, DT20500-QZ;102,04;seul;;;;;;;;;sans-ref;famille:consommable;REF:DT20500|OUTIL;référence;OUTIL;5;;
+Quincaillerie;accessoire;DT20562-QZ;DEWALT DT20562-QZ Adaptateur/tête de taraudage Adapté pour (perceuses) Dewalt;102,04;seul;adaptateur;;;;;;1;;sans-ref;famille:consommable;REF:DT20562|ACCESSOIRE;référence;ACCESSOIRE;2;;
 Quincaillerie;lame-oscillante;DWA427SET;DEWALT Lot de 7 lames oscillantes à usage général pour bois avec clous (DWA427SET);102,14;pack;lame pour outil multifonctions;;;;;;7;;sans-ref;famille:consommable;REF:DWA427|PACK;référence;PACK;1;;
 Quincaillerie;foret;;Dewalt - Forets Béton Sds Longueur Utile 200 Mm - Modèle: Dt9684 G;102,33;seul;foret béton;;;;;;1;;sans-ref;famille:consommable;TIT:forets b ton sds longueur utile 200 mm mod le dt9684 g;titre;OUTIL;1;;
 Quincaillerie;foret;DT9443-QZ;DeWalt SDS-max 38x670x550 mm DT9443-QZ;102,45;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT9443|OUTIL;référence;OUTIL;1;;
 Quincaillerie;accessoire;DNF65;DEWALT PowerCoil ongles DNF 65 mm 6 Kst. lisse, 1 pièce, dnf2865e;102,60;seul;accessoire;;;;;;1;;sans-ref;famille:consommable;REF:DNF65|OUTIL;référence;OUTIL;2;;
 Quincaillerie;accessoire;DNF64;DEWALT PowerCoil ongles DNF 64 mm 7.2 KST. Bague Galv., 1 pièce, dnf25r64g12e;102,71;seul;accessoire;;;;;;1;;sans-ref;famille:consommable;REF:DNF64|OUTIL;référence;OUTIL;1;;
 Quincaillerie;foret;DT6763-QZ;DeWalt SDS-max 80x107 mm DT6763-QZ;102,79;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT6763|OUTIL;référence;OUTIL;1;;
-Quincaillerie;disque;DT40256-QZ;DEWALT DT40256-QZ;102,99;seul;disque à tronçonner;;;;;;1;;inconnu;famille:consommable;REF:DT40256|OUTIL;référence;OUTIL;1;;
-Quincaillerie;;AW3517;Dewalt - Caisse de rangement AW3517 (taille unique) (grise);103,54;seul;;;;;;;;;sans-ref;titre;REF:AW3517|OUTIL;référence;OUTIL;1;;
-Quincaillerie;accessoire;DN275-XJ;DeWALT DN275-XJ Clou Duplex 21° (8D) À Liant Plastique - 57/70 X 3,3 Mm - 2000 Pièces;103,69;seul;accessoire;;;;;;1;;sans-ref;famille:consommable;REF:DN275|OUTIL;référence;OUTIL;1;;
-Quincaillerie;accessoire;;Cable D'Extension Pour Caméra D'Inspection Dewalt - Dct4103 G;103,92;seul;accessoire;;;;;;1;;sans-ref;famille:consommable;TIT:cable d extension pour cam ra d inspection dct4103 g;titre;OUTIL;1;;
+Quincaillerie;disque;DT40256-QZ;DeWALT DT40256-QZ — DT40256-QZ;102,99;seul;disque à tronçonner;;;;;;1;;reconnu;famille:consommable;REF:DT40256|OUTIL;référence;OUTIL;1;DT40256-QZ;150,16
 Quincaillerie;vissage-embout;DWMT73813;"DEWALT DWMT73813, Jeu de Douilles SAE/métrique, 1/2"", 23 pièces";104,34;seul;douille;;;;;;1;;sans-ref;famille:consommable;REF:DWMT73813|OUTIL;référence;OUTIL;3;;
-Quincaillerie;lame-circulaire;DT1926-QZ;DEWALT DT1926-QZ;104,58;seul;lame de scie circulaire;;;;;;1;;inconnu;famille:consommable;REF:DT1926|OUTIL;référence;OUTIL;1;;
-Quincaillerie;accessoire;DNF70;DEWALT PowerCoil ongles DNF 70 mm 6 KST. Bague Tige, 1 pièce, dnf28r70e;104,70;seul;accessoire;;;;;;1;;sans-ref;famille:consommable;REF:DNF70|OUTIL;référence;OUTIL;2;;
-Quincaillerie;coffret;DWST60101-1;DEWALT DWST60101-1;104,91;seul;;;;;;;;;inconnu;famille:rangement;REF:DWST60101-1|OUTIL;référence;OUTIL;1;;
+Quincaillerie;lame-circulaire;DT1926-QZ;DeWALT DT1926-QZ — DT1926-QZ;104,58;seul;lame de scie circulaire;;;;;;1;;reconnu;famille:consommable;REF:DT1926|OUTIL;référence;OUTIL;1;DT1926-QZ;152,16
+Quincaillerie;coffret;DWST60101-1;DeWALT DWST60101-1 — DWST60101-1;104,91;seul;;;;;;;;;reconnu;famille:rangement;REF:DWST60101-1|OUTIL;référence;OUTIL;1;DWST60101-1;152,54
 Quincaillerie;foret;DT60842-QZ;DeWalt SDS-max 38x570x440 mm DT60842-QZ;104,98;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT60842|OUTIL;référence;OUTIL;1;;
 Quincaillerie;;DT20907-QZ;DEWALT DT20907-QZ Kit de conversion;104,99;pack;;;;;;;;;sans-ref;famille:consommable;REF:DT20907|ACCESSOIRE;référence;ACCESSOIRE;1;;
 Quincaillerie;foret;DT60836-QZ;DeWalt SDS-max 32x920x790 mm DT60836-QZ;104,99;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT60836|OUTIL;référence;OUTIL;1;;
-Quincaillerie;portage;DWST83542-1;"DeWALT DWST83542-1 Sac À Outils McLaren À Roulettes Pour TOUGHSYSTEM - 22""";104,99;pack;sac à outils;;TOUGHSYSTEM;;;;;oui;sans-ref;famille:rangement;REF:DWST83542-1|PACK;référence;PACK;1;;
-Quincaillerie;lame-circulaire;DT4217-QZ;DEWALT DT4217-QZ;106,04;seul;lame de scie circulaire;;;;;;1;;inconnu;famille:consommable;REF:DT4217|OUTIL;référence;OUTIL;1;;
+Quincaillerie;portage;DWST83542-1;"DeWALT DWST83542-1 Sac À Outils McLaren À Roulettes Pour TOUGHSYSTEM - 22""";104,99;pack;sac à outils;;TOUGHSYSTEM;;;;;oui;sans-ref;famille:rangement;REF:DWST83542-1|PACK+COFFRET;référence;PACK+COFFRET;1;;
+Quincaillerie;accessoire;DXVA13-0801;DEWALT DXVA13-0801 Kit d'accessoires pour tuyau d'aspiration de voiture 8 pièces;105,73;pack;accessoire;;;;;;1;;sans-ref;famille:consommable;REF:DXVA13-0801|PACK;référence;PACK;1;;
+Quincaillerie;lame-circulaire;DT4217-QZ;DeWALT DT4217-QZ — DT4217-QZ;106,04;seul;lame de scie circulaire;;;;;;1;;reconnu;famille:consommable;REF:DT4217|OUTIL;référence;OUTIL;1;DT4217-QZ;153,97
+Quincaillerie;accessoire;DNF70;DEWALT PowerCoil ongles DNF 70 mm 6 KST. Bague Tige, 1 pièce, dnf28r70e;106,22;seul;accessoire;;;;;;1;;sans-ref;famille:consommable;REF:DNF70|OUTIL;référence;OUTIL;2;;
 Quincaillerie;burin;;Pointes pour cloueur 18GA en inox - 1,02 mm x 50 mm - 5000 pièces DEWALT;106,41;seul;burin pointu;;;;;;1;;sans-ref;famille:consommable;TIT:pointes pour cloueur 18ga en inox 1 02 mm x 50 mm 5000 pi ces;titre;OUTIL;1;;
-Quincaillerie;coffret;AW2600;Dewalt - Boîte à outils « Toughsystem 2.0 » AW2600 (taille unique) (noir/jaune);106,61;pack;coffret;;TOUGHSYSTEM;;;;;;sans-ref;famille:rangement;REF:AW2600|PACK;référence;PACK;1;;
+Quincaillerie;coffret;AW2600;Dewalt - Boîte à outils « Toughsystem 2.0 » AW2600 (taille unique) (noir/jaune);106,61;pack;coffret;;TOUGHSYSTEM;;;;;;sans-ref;famille:rangement;REF:AW2600|PACK+COFFRET;référence;PACK+COFFRET;1;;
 Quincaillerie;accessoire;DNBA1632SZ;DEWALT DNBA1632SZ Clous 20, Gris, Taille SS 32mm, Set de 2500 Pièces;106,84;pack;accessoire;;;;;;2500;;sans-ref;famille:consommable;REF:DNBA1632|PACK;référence;PACK;1;;
 Quincaillerie;;;DEWALT Coilnagel DNF 50mm 9.9kSt. Ringschaft;106,95;seul;;;;;;;;;sans-ref;titre-fragment;TIT:coilnagel dnf 50mm 9 9kst ringschaft;titre;OUTIL;1;;
+Quincaillerie;burin;DW1969;DeWalt DW1969 Lot de 29 forets à pointe pilote, avec index en métal;107,01;pack;burin pointu;;;;;;29;;sans-ref;famille:consommable;REF:DW1969|PACK;référence;PACK;1;;
 Quincaillerie;;;Dewalt - Support Plat De Pce Dw777/71/11/07/01/00 Dewalt;107,03;seul;;;;;;;;;sans-ref;titre;TIT:support plat de pce dw777 71 11 07 01 00;titre;ACCESSOIRE;1;;
-Quincaillerie;burin;DW1969;DeWalt DW1969 Lot de 29 forets à pointe pilote, avec index en métal;107,25;pack;burin pointu;;;;;;29;;sans-ref;famille:consommable;REF:DW1969|PACK;référence;PACK;1;;
-Quincaillerie;filtration;DXMH3288;STANLEY DXMH3288 DEWALT Tuyau d'arrosage robuste de qualité professionnelle, 30,5 m x 1,6 cm, jaune, noir;107,48;seul;tuyau d'aspiration;;;;;;1;;sans-ref;famille:consommable;REF:DXMH3288|OUTIL;référence;OUTIL;1;;
-Quincaillerie;lame-alternative;DT2977;DEWALT DT2977;107,50;seul;lame de scie;;;;;;1;;inconnu;famille:consommable;REF:DT2977|OUTIL;référence;OUTIL;1;;
+Quincaillerie;foret;DT9617-QZ;DeWalt SDS-plus 26x800x750 mm DT9617-QZ;107,03;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT9617|OUTIL;référence;OUTIL;1;;
+Quincaillerie;lame-alternative;DT2977;DeWALT DT2977 — DT2977;107,50;seul;lame de scie;;;;;;1;;reconnu;famille:consommable;REF:DT2977|OUTIL;référence;OUTIL;1;DT2977;155,77
 Quincaillerie;portage;DWST50113-1;DeWalt Ceinture porte-outils en cuir (DWST50113-1);107,70;seul;ceinture porte-outils;;;;;;;;sans-ref;famille:rangement;REF:DWST50113-1|OUTIL;référence;OUTIL;1;;
-Quincaillerie;accessoire;DE0737;DEWALT DE0737;107,75;seul;accessoire;;;;;;1;;inconnu;famille:consommable;REF:DE0737|OUTIL;référence;OUTIL;1;;
+Quincaillerie;accessoire;DE0737;DeWALT DE0737 — DE0737;107,75;seul;accessoire;;;;;;1;;reconnu;famille:consommable;REF:DE0737|OUTIL;référence;OUTIL;1;DE0737;156,02
 Quincaillerie;accessoire;DNW2880E;DeWALT Clous 34º, lisse, 80 mm, 2200 pièces - DNW2880E;107,78;seul;accessoire;;;;;;1;;sans-ref;famille:consommable;REF:DNW2880|OUTIL;référence;OUTIL;1;;
+Quincaillerie;filtration;DXMH3288;STANLEY DXMH3288 DEWALT Tuyau d'arrosage robuste de qualité professionnelle, 30,5 m x 1,6 cm, jaune, noir;107,79;seul;tuyau d'aspiration;;;;;;1;;sans-ref;famille:consommable;REF:DXMH3288|OUTIL;référence;OUTIL;1;;
 Quincaillerie;visserie;DNBDA38;DEWALT Clou à tête refoulé DNBDA 38 mm DEWALT acier inoxydable Quantité:4000;107,99;seul;clou;;;;;;1;;sans-ref;famille:consommable;REF:DNBDA38|OUTIL;référence;OUTIL;1;;
-Quincaillerie;coffret;DWST83529-1;DeWalt ToughSystem 2.0 (DWST83529-1);107,99;pack;coffret modulaire;;TOUGHSYSTEM;;;;;;sans-ref;famille:rangement;REF:DWST83529-1|PACK;référence;PACK;1;;
-Quincaillerie;accessoire;;DEWALT Coffret TSTAK avec 100 Accessoires de Perçage et de Vissage - Spécial Béton & Mallette de Transport TSTAK Box IV ;108,27;pack;accessoire;;TSTAK;;;;1;;sans-ref;famille:consommable;TIT:coffret tstak avec 100 accessoires de per age et de vissage sp cial b ton mallette de transport tstak box iv;titre;PACK;1;;
-Quincaillerie;foret;DT9617-QZ;DeWalt SDS-plus 26x800x750 mm DT9617-QZ;108,47;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT9617|OUTIL;référence;OUTIL;1;;
+Quincaillerie;coffret;DWST83529-1;DeWalt ToughSystem 2.0 (DWST83529-1);107,99;pack;coffret modulaire;;TOUGHSYSTEM;;;;;;sans-ref;famille:rangement;REF:DWST83529-1|PACK+COFFRET;référence;PACK+COFFRET;1;;
+Quincaillerie;visserie;;DEWALT dnf25r50e - Clous tête Ronde Strass en Bobine 2,5 x 50 mm;108,19;seul;clou;;;;;;1;;sans-ref;famille:consommable;TIT:dnf25r50e clous t te ronde strass en bobine 2 5 x 50 mm;titre;OUTIL;3;;
+Quincaillerie;accessoire;;DEWALT Coffret TSTAK avec 100 Accessoires de Perçage et de Vissage - Spécial Béton & Mallette de Transport TSTAK Box IV ;108,27;pack;accessoire;;TSTAK;;;;1;;sans-ref;famille:consommable;TIT:coffret tstak avec 100 accessoires de per age et de vissage sp cial b ton mallette de transport tstak box iv;titre;PACK+COFFRET;1;;
 Quincaillerie;burin;DT6810-QZ;DeWalt 32 x 200 mm (DT6810-QZ);108,48;seul;burin;;;;;;1;;sans-ref;famille:consommable;REF:DT6810|OUTIL;référence;OUTIL;1;;
 Quincaillerie;;;"Tige télescopique DeWalt 2-942; 94-160 cm";108,52;seul;;;;;;;;;sans-ref;titre;TIT:tige t lescopique 2 942 94 160 cm;titre;OUTIL;1;;
 Quincaillerie;accessoire;DWST82823;DEWALT Organiseur d'outils, Support pour Outils électriques, se Monte sur des Rails métalliques, Compatible avec Le syst;108,78;seul;rail de guidage;;;;;;1;;sans-ref;famille:consommable;REF:DWST82823|ACCESSOIRE;référence;ACCESSOIRE;1;;
 Quincaillerie;vissage-embout;DT70775-QZ;DeWalt Toughcase Medium Set de Vissage 80 pièces avec Accouplement Angulaire (DT70775-QZ);109,00;pack;embout de vissage;;;;;;1;;sans-ref;famille:consommable;REF:DT70775|PACK;référence;PACK;1;;
 Quincaillerie;;EU2-973;DeWalt Taloche de finition courbée pour cloison sèche, acier inoxydable doré, 16in (EU2-973);109,14;seul;;;;;;;;;sans-ref;titre;REF:EU2-973|OUTIL;référence;OUTIL;1;;
-Quincaillerie;burin;DT6928-QZ;DEWALT DT6928-QZ;109,28;seul;burin plat;;;;;;1;;inconnu;famille:consommable;REF:DT6928|OUTIL;référence;OUTIL;1;;
+Quincaillerie;burin;DT6928-QZ;DeWALT DT6928-QZ — DT6928-QZ;109,28;seul;burin plat;;;;;;1;;reconnu;famille:consommable;REF:DT6928|OUTIL;référence;OUTIL;1;DT6928-QZ;157,91
 Quincaillerie;vissage-embout;DWMT19261;"Jeu de clés DeWalt DWMT19261; 7 unités";109,50;seul;clé mixte;;;;;;1;;sans-ref;famille:consommable;REF:DWMT19261|OUTIL;référence;OUTIL;1;;
+Quincaillerie;accessoire;;Cable D'Extension Pour Caméra D'Inspection Dewalt - Dct4103 G;109,76;seul;accessoire;;;;;;1;;sans-ref;famille:consommable;TIT:cable d extension pour cam ra d inspection dct4103 g;titre;OUTIL;1;;
 Quincaillerie;;;DeWALT Dw5902 2-1/5,1 cm par 10,2 cm Core Bit Corps;109,87;seul;;;;;;;;;sans-ref;titre;TIT:dw5902 2 1 5 1 cm par 10 2 cm core bit corps;titre;OUTIL;1;;
 Quincaillerie;;;DeWalt Taloche plate FLEX acier inoxydable 0,4mm manche cuir 14 pouces (DDW2);110,17;seul;;;;;;;;;sans-ref;titre;TIT:taloche plate flex acier inoxydable 0 4mm manche cuir 14 pouces ddw2;titre;OUTIL;1;;
 Quincaillerie;;;DEWALT Stauchkopfn. DNBT 50mm 5kSt. Edelst;110,40;seul;;;;;;;;;sans-ref;titre-fragment;TIT:stauchkopfn dnbt 50mm 5kst edelst;titre;OUTIL;1;;
 Quincaillerie;foret;;Foret hélicoïdal pour perceuse avec hélice en carbure de tungstène de haute qualité, emmanchement SDS Plus DEWALT - Ø18 ;110,90;seul;foret;;;;;;1;;sans-ref;famille:consommable;TIT:foret h lico dal pour perceuse avec h lice en carbure de tungst ne de haute qualit emmanchement sds plus 18;titre;OUTIL;1;;
-Quincaillerie;vissage-embout;DT7926-XJ;DEWALT Foret métal HSS-G Coffret 29 pièces - DT7926-XJ & Coffret de 32 Embouts de Vissage de 25mm Robustes et Précis - A;111,07;pack;embout de vissage;;;;;;32;;sans-ref;famille:consommable;REF:DT7926|PACK;référence;PACK;4;;
-Quincaillerie;lame-circulaire;DT1474-QZ;DEWALT DT1474-QZ;111,98;seul;lame de scie circulaire;;;;;;1;;inconnu;famille:consommable;REF:DT1474|OUTIL;référence;OUTIL;1;;
-Quincaillerie;coffret;DWST83295-1;DEWALT DWST83295-1;111,98;pack;coffret;;GENERIQUE;;;;;;inconnu;famille:rangement;REF:DWST83295-1|PACK;référence;PACK;1;;
+Quincaillerie;vissage-embout;DT7926-XJ;DEWALT Foret métal HSS-G Coffret 29 pièces - DT7926-XJ & Coffret de 32 Embouts de Vissage de 25mm Robustes et Précis - A;111,07;pack;embout de vissage;;;;;;32;;sans-ref;famille:consommable;REF:DT7926|PACK+COFFRET;référence;PACK+COFFRET;4;;
+Quincaillerie;lame-circulaire;DT1474-QZ;DeWALT DT1474-QZ — DT1474-QZ;111,98;seul;lame de scie circulaire;;;;;;1;;reconnu;famille:consommable;REF:DT1474|OUTIL;référence;OUTIL;1;DT1474-QZ;161,26
+Quincaillerie;coffret;DWST83295-1;DeWALT DWST83295-1 — DWST83295-1;111,98;pack;coffret;;GENERIQUE;;;;;;reconnu;famille:rangement;REF:DWST83295-1|PACK;référence;PACK;1;DWST83295-1;161,26
 Quincaillerie;coffret;DWST1-75676;DeWalt Tréteaux 2 pcs - DWST1-75676;112,18;seul;;;;;;;;;sans-ref;famille:rangement;REF:DWST1-75676|OUTIL;référence;OUTIL;1;;
-Quincaillerie;coffret;DWST08017-9;DeWalt Kit Toughsystem-Tstak 3 pièces DWST08017-9;112,49;pack;coffret;;TOUGHSYSTEM;;;;;;sans-ref;famille:rangement;REF:DWST08017-9|PACK;référence;PACK;1;;
 Quincaillerie;visserie;;17500 clous en rouleaux galvanisés à tige annelée DeWalt 2,03x38mm;112,49;seul;clou;;;;;;1;;sans-ref;famille:consommable;TIT:17500 clous en rouleaux galvanis s tige annel e 2 03x38mm;titre;OUTIL;1;;
-Quincaillerie;accessoire;;DEWALT Impact Connect DWACPRIR Coupe-tuyau de cuivre, accessoire de visseuse à percussion;113,05;seul;accessoire;;;;;;1;;sans-ref;famille:consommable;TIT:impact connect dwacprir coupe tuyau de cuivre accessoire de visseuse percussion;titre;OUTIL;1;;
-Quincaillerie;visserie;;Pack de 5000 vis à bande Ø 3,5mm DEWALT;113,90;pack;vis à bande;;;;;;5000;;sans-ref;famille:consommable;TIT:pack de 5000 vis bande 3 5mm;titre;PACK;1;;
+Quincaillerie;coffret;DWST08017-9;DeWalt Kit Toughsystem-Tstak 3 pièces DWST08017-9;112,99;pack;coffret;;TOUGHSYSTEM;;;;;;sans-ref;famille:rangement;REF:DWST08017-9|PACK+COFFRET;référence;PACK+COFFRET;1;;
+Quincaillerie;accessoire;;DEWALT Impact Connect DWACPRIR Coupe-tuyau de cuivre, accessoire de visseuse à percussion;113,06;seul;accessoire;;;;;;1;;sans-ref;famille:consommable;TIT:impact connect dwacprir coupe tuyau de cuivre accessoire de visseuse percussion;titre;OUTIL;1;;
+Quincaillerie;visserie;DT20562-QZ;Adaptation pour vissage d'écrous impact connect - DEWALT - DT20562-QZ;113,08;seul;écrou;;;;;;1;;sans-ref;famille:consommable;REF:DT20562|OUTIL;référence;OUTIL;3;;
 Quincaillerie;foret;DT60845-QZ;DeWalt SDS-max 40x570x440 mm DT60845-QZ;113,99;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT60845|OUTIL;référence;OUTIL;1;;
+Quincaillerie;visserie;DNW3190E;DeWalt DNW3190E Clou à 34 degrés pour Cloueuses sans Fil, clous à tête en D, relié par fil 3,1 x 90 mm lisse, paquet de ;114,38;pack;clou;;;;;;2200;;sans-ref;famille:consommable;REF:DNW3190|PACK;référence;PACK;1;;
 Quincaillerie;accessoire;DNF2570E;DeWALT Clous à rouleau DNF 70 mm, lisse, 7200 pièces - DNF2570E;114,46;seul;accessoire;;;;;;1;;sans-ref;famille:consommable;REF:DNF2570|OUTIL;référence;OUTIL;1;;
-Quincaillerie;visserie;DNW3190E;DeWalt DNW3190E Clou à 34 degrés pour Cloueuses sans Fil, clous à tête en D, relié par fil 3,1 x 90 mm lisse, paquet de ;114,56;pack;clou;;;;;;2200;;sans-ref;famille:consommable;REF:DNW3190|PACK;référence;PACK;1;;
 Quincaillerie;;EU2-971;DeWalt Taloche de finition courbée, acier inoxydable doré, 12in (EU2-971);114,64;seul;;;;;;;;;sans-ref;titre;REF:EU2-971|OUTIL;référence;OUTIL;1;;
 Quincaillerie;foret;;DeWALT Dw1369 29 Titanium Pilot-point de forets;114,91;seul;foret;;;;;;1;;sans-ref;famille:consommable;TIT:dw1369 29 titanium pilot point de forets;titre;OUTIL;1;;
 Quincaillerie;;;"DeWalt Taloche plate FLEX 0,4mm acier inoxydable manche cuir 16"" (EU 2-993)";114,92;seul;;;;;;;;;sans-ref;titre;TIT:taloche plate flex 0 4mm acier inoxydable manche cuir 16 eu 2 993;titre;OUTIL;1;;
-Quincaillerie;portage;DGL573;DEWALT DGL573;115,24;seul;sac à outils;;;;;;;;inconnu;famille:rangement;REF:DGL573|OUTIL;référence;OUTIL;1;;
+Quincaillerie;portage;DGL573;DeWALT DGL573 — DGL573;115,24;seul;sac à outils;;;;;;;;reconnu;famille:rangement;REF:DGL573|OUTIL;référence;OUTIL;1;DGL573;165,25
 Quincaillerie;burin;DNPT31R90HDZ;Pointes crantées galvanisées à chaud DEWALT 3,1 x 90 mm - Boite de 1200 - DNPT31R90HDZ;115,28;pack;burin pointu;;;;;;1200;;sans-ref;famille:consommable;REF:DNPT31|PACK;référence;PACK;4;;
-Quincaillerie;;DWHT56032-0;DEWALT DWHT56032-0;115,64;seul;;;;;;;;;inconnu;famille:consommable;REF:DWHT56032-0|OUTIL;référence;OUTIL;1;;
-Quincaillerie;accessoire;DNBDA1550SZ;DEWALT DNBDA1550SZ;115,94;seul;accessoire;;;;;;1;;inconnu;famille:consommable;REF:DNBDA1550|OUTIL;référence;OUTIL;1;;
-Quincaillerie;coffret;DWST1-75694;DeWalt TOUGHSYSTEM Système de rangement mural (DWST1-75694);116,00;pack;coffret modulaire;;TOUGHSYSTEM;;;;;;sans-ref;famille:rangement;REF:DWST1-75694|PACK;référence;PACK;1;;
-Quincaillerie;coffret;DWST08330-1;DeWalt ToughSystem 2.0 DWST08330-1;116,33;pack;coffret;;TOUGHSYSTEM;;;;;;sans-ref;famille:rangement;REF:DWST08330-1|PACK;référence;PACK;1;;
-Quincaillerie;vissage-embout;DWMT74739;"DEWALT DWMT74739 Coffret de douilles à choc 1/2"" 23 pièces";116,37;pack;douille à chocs;;GENERIQUE;;;;1;;sans-ref;famille:consommable;REF:DWMT74739|PACK;référence;PACK;1;;
+Quincaillerie;;DWHT56032-0;DeWALT DWHT56032-0 — DWHT56032-0;115,64;seul;;;;;;;;;reconnu;famille:consommable;REF:DWHT56032-0|OUTIL;référence;OUTIL;1;DWHT56032-0;165,71
+Quincaillerie;accessoire;DNBDA1550SZ;DeWALT DNBDA1550SZ — DNBDA1550SZ;115,94;seul;accessoire;;;;;;1;;reconnu;famille:consommable;REF:DNBDA1550|OUTIL;référence;OUTIL;1;DNBDA1550SZ;166,14
+Quincaillerie;coffret;DWST1-75694;DeWalt TOUGHSYSTEM Système de rangement mural (DWST1-75694);116,00;pack;coffret modulaire;;TOUGHSYSTEM;;;;;;sans-ref;famille:rangement;REF:DWST1-75694|PACK+COFFRET;référence;PACK+COFFRET;1;;
+Quincaillerie;coffret;DWST08330-1;DeWalt ToughSystem 2.0 DWST08330-1;116,33;pack;coffret;;TOUGHSYSTEM;;;;;;sans-ref;famille:rangement;REF:DWST08330-1|PACK+COFFRET;référence;PACK+COFFRET;1;;
 Quincaillerie;accessoire;DE0882;DeWalt Mire graduée DE0882;116,41;seul;accessoire;;;;;;1;;sans-ref;famille:consommable;REF:DE0882|OUTIL;référence;OUTIL;1;;
-Quincaillerie;coffret;DWST17871;DEWALT DWST17871;116,74;pack;coffret;;GENERIQUE;;;;;;inconnu;famille:rangement;REF:DWST17871|PACK;référence;PACK;1;;
+Quincaillerie;coffret;DWST17871;DeWALT DWST17871 — DWST17871;116,74;pack;coffret;;GENERIQUE;;;;;;reconnu;famille:rangement;REF:DWST17871|PACK;référence;PACK;1;DWST17871;167,17
 Quincaillerie;lame-alternative;;DeWALT Dw7666 80T Lame non ferreux, 30,5 cm;116,86;seul;lame de scie;;;;;;1;;sans-ref;famille:consommable;TIT:dw7666 80t lame non ferreux 30 5 cm;titre;OUTIL;1;;
-Quincaillerie;lame-circulaire;DT1916-QZ;DEWALT DT1916-QZ;116,99;seul;lame de scie circulaire;;;;;;1;;inconnu;famille:consommable;REF:DT1916|OUTIL;référence;OUTIL;1;;
-Quincaillerie;;DT90017-QZ;DEWALT DT90017-QZ;117,26;seul;;;;;;;;;inconnu;famille:consommable;REF:DT90017|OUTIL;référence;OUTIL;1;;
+Quincaillerie;lame-circulaire;DT1916-QZ;DeWALT DT1916-QZ — DT1916-QZ;116,99;seul;lame de scie circulaire;;;;;;1;;reconnu;famille:consommable;REF:DT1916|OUTIL;référence;OUTIL;1;DT1916-QZ;167,41
+Quincaillerie;;DT90017-QZ;DeWALT DT90017-QZ — DT90017-QZ;117,26;seul;;;;;;;;;reconnu;famille:consommable;REF:DT90017|OUTIL;référence;OUTIL;1;DT90017-QZ;167,80
+Quincaillerie;vissage-embout;DWMT74739;"DEWALT DWMT74739 Coffret de douilles à choc 1/2"" 23 pièces";117,55;pack;douille à chocs;;GENERIQUE;;;;1;;sans-ref;famille:consommable;REF:DWMT74739|PACK+COFFRET;référence;PACK+COFFRET;1;;
 Quincaillerie;fraise;HSS40;DEWALT-fraise à carotter HSS 40 mm;117,74;seul;fraise;;;;;;1;;sans-ref;famille:consommable;REF:HSS40|OUTIL;référence;OUTIL;1;;
 Quincaillerie;vissage-embout;;Jeu de clés à douilles de mécanicien 1/4 et 3/8 84 pièces DeWalt;117,74;seul;clé mixte;;;;;;1;;sans-ref;famille:consommable;TIT:jeu de cl s douilles de m canicien 1 4 et 3 8 84 pi ces;titre;OUTIL;1;;
 Quincaillerie;accessoire;DCA1820;DeWalt Adaptateur de batterie pour outil de 18 V, DCA1820;118,21;pack;adaptateur;;;;;;1;;sans-ref;famille:consommable;REF:DCA1820|ACCESSOIRE;référence;ACCESSOIRE;1;;
 Quincaillerie;accessoire;DN350-XJ;DeWALT DN350-XJ Clou Duplex 21° (16D) À Tige En Plastique - 76/89 X 3,3 Mm - 2 000 Pièces;118,69;seul;accessoire;;;;;;1;;sans-ref;famille:consommable;REF:DN350|OUTIL;référence;OUTIL;1;;
-Quincaillerie;;DT4612-QZ;DEWALT DT4612-QZ;118,87;seul;;;;;;;;;inconnu;famille:consommable;REF:DT4612|OUTIL;référence;OUTIL;1;;
-Quincaillerie;visserie;DT20562-QZ;Adaptation pour vissage d'écrous impact connect - DEWALT - DT20562-QZ;119,00;seul;écrou;;;;;;1;;sans-ref;famille:consommable;REF:DT20562|OUTIL;référence;OUTIL;3;;
+Quincaillerie;;DT4612-QZ;DeWALT DT4612-QZ — DT4612-QZ;118,87;seul;;;;;;;;;reconnu;famille:consommable;REF:DT4612|OUTIL;référence;OUTIL;1;DT4612-QZ;169,75
 Quincaillerie;;EU2-972;DeWalt Truelle de finition en acier inoxydable dorée courbée 14in (EU2-972);119,11;seul;;;;;;;;;sans-ref;titre;REF:EU2-972|OUTIL;référence;OUTIL;1;;
 Quincaillerie;accessoire;DNF60;DEWALT PowerCoil ongles DNF 60 mm 9.9 KST. Bague Tige, 1 pièce, dnf25r60e;119,17;seul;accessoire;;;;;;1;;sans-ref;famille:consommable;REF:DNF60|OUTIL;référence;OUTIL;2;;
 Quincaillerie;disque;DT3752;DeWalt Disque de Coupe Diamant (DT3752);119,22;seul;disque à tronçonner;;;;;;1;;sans-ref;famille:consommable;REF:DT3752|OUTIL;référence;OUTIL;1;;
-Quincaillerie;coffret;DWST1-70702;DeWalt Combo TSTAK (DWST1-70702);119,27;pack;coffret;;TSTAK;;;;;;sans-ref;famille:rangement;REF:DWST1-70702|PACK;référence;PACK;1;;
+Quincaillerie;coffret;DWST1-70702;DeWalt Combo TSTAK (DWST1-70702);119,27;pack;coffret;;TSTAK;;;;;;sans-ref;famille:rangement;REF:DWST1-70702|PACK+COFFRET;référence;PACK+COFFRET;1;;
 Quincaillerie;vissage-embout;DT70706M-QZ;DeWALT DT70706M-QZ Ensemble de forets et d’embouts avec mug thermique - 25 pieces;119,69;pack;embout de vissage;;;;;;1;;sans-ref;famille:consommable;REF:DT70706|PACK;référence;PACK;1;;
 Quincaillerie;lame-alternative;;DEWALT Jeu de scies cloches d'électricien BIM DEWALT, 11 pièces. Quantité:1;119,99;seul;scie-cloche;;;;;;1;;sans-ref;famille:consommable;TIT:jeu de scies cloches d lectricien bim 11 pi ces quantit 1;titre;OUTIL;1;;
 Quincaillerie;visserie;;21000 clous en rouleaux galvanisés à tige annelée DeWalt 2,03x35mm;119,99;seul;clou;;;;;;1;;sans-ref;famille:consommable;TIT:21000 clous en rouleaux galvanis s tige annel e 2 03x35mm;titre;OUTIL;1;;
 Quincaillerie;;DT20699-QZ;DEWALT DT20699-QZ Bandoulière;119,99;seul;;;;;;;;;sans-ref;famille:consommable;REF:DT20699|OUTIL;référence;OUTIL;1;;
-Quincaillerie;vissage-embout;DT70736TM-QZ;DeWalt FLEXTORQ ToughCase Coffret 32 Embouts de Vissage avec Mug (DT70736TM-QZ);120,57;pack;embout de vissage;;GENERIQUE;;;;32;;sans-ref;famille:consommable;REF:DT70736|PACK;référence;PACK;1;;
-Quincaillerie;coffret;DWST83411-1;DEWALT DWST83411-1;121,73;pack;coffret;;GENERIQUE;;;;;;inconnu;famille:rangement;REF:DWST83411-1|PACK;référence;PACK;1;;
+Quincaillerie;vissage-embout;DT70736TM-QZ;DeWalt FLEXTORQ ToughCase Coffret 32 Embouts de Vissage avec Mug (DT70736TM-QZ);120,57;pack;embout de vissage;;GENERIQUE;;;;32;;sans-ref;famille:consommable;REF:DT70736|PACK+COFFRET;référence;PACK+COFFRET;1;;
+Quincaillerie;coffret;DWST83411-1;DeWALT DWST83411-1 — DWST83411-1;121,73;pack;coffret;;GENERIQUE;;;;;;reconnu;famille:rangement;REF:DWST83411-1|PACK;référence;PACK;1;DWST83411-1;173,22
 Quincaillerie;lame-alternative;DT90354;DeWalt Bim Electrician's Hole Saw 11-piece Set DT90354;121,99;pack;scie-cloche;;;;;;1;;sans-ref;famille:consommable;REF:DT90354|PACK;référence;PACK;1;;
-Quincaillerie;foret;DT60847-QZ;DEWALT DT60847-QZ;122,46;seul;foret;;;;;;1;;inconnu;famille:consommable;REF:DT60847|OUTIL;référence;OUTIL;1;;
-Quincaillerie;coffret;DT90356-QZ;DeWalt Extreme Ensemble de Scies-Cloches Bi-Métal Électricien 11 pièces en Coffret (DT90356-QZ);122,98;pack;coffret;;GENERIQUE;;;;;;sans-ref;famille:rangement;REF:DT90356|PACK;référence;PACK;1;;
+Quincaillerie;foret;DT60847-QZ;DeWALT DT60847-QZ — DT60847-QZ;122,46;seul;foret;;;;;;1;;reconnu;famille:consommable;REF:DT60847|OUTIL;référence;OUTIL;1;DT60847-QZ;174,14
+Quincaillerie;coffret;DT90356-QZ;DeWalt Extreme Ensemble de Scies-Cloches Bi-Métal Électricien 11 pièces en Coffret (DT90356-QZ);122,98;pack;coffret;;GENERIQUE;;;;;;sans-ref;famille:rangement;REF:DT90356|PACK+COFFRET;référence;PACK+COFFRET;1;;
 Quincaillerie;;;DEWALT Diamant-Nassbohrkrone 61x400mm 1 1/4Z;122,99;seul;;;;;;;;;sans-ref;titre-fragment;TIT:diamant nassbohrkrone 61x400mm 1 1 4z;titre;OUTIL;1;;
-Quincaillerie;mobilier;DWST1-71196;DeWalt Chariot T-Stak (DWST1-71196);124,00;pack;chariot;;TSTAK;;;;;;sans-ref;famille:rangement;REF:DWST1-71196|PACK;référence;PACK;1;;
+Quincaillerie;foret;DT9448-QZ;DeWalt SDS-max 45x570x450 mm DT9448-QZ;123,98;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT9448|OUTIL;référence;OUTIL;1;;
+Quincaillerie;mobilier;DWST1-71196;DeWalt Chariot T-Stak (DWST1-71196);124,00;pack;chariot;;TSTAK;;;;;;sans-ref;famille:rangement;REF:DWST1-71196|PACK+COFFRET;référence;PACK+COFFRET;1;;
 Quincaillerie;burin;;Pointes inox pour cloueur 15GA 34° - 1.4x38mm - par 4000 DEWALT;124,25;seul;burin pointu;;;;;;1;;sans-ref;famille:consommable;TIT:pointes inox pour cloueur 15ga 34 1 4x38mm par 4000;titre;OUTIL;1;;
-Quincaillerie;lame-alternative;DT2966;DEWALT DT2966;124,28;seul;lame de scie;;;;;;1;;inconnu;famille:consommable;REF:DT2966|OUTIL;référence;OUTIL;1;;
-Quincaillerie;disque;DT40257-QZ;DEWALT DT40257-QZ;124,75;seul;disque à tronçonner;;;;;;1;;inconnu;famille:consommable;REF:DT40257|OUTIL;référence;OUTIL;1;;
+Quincaillerie;lame-alternative;DT2966;DeWALT DT2966 — DT2966;124,28;seul;lame de scie;;;;;;1;;reconnu;famille:consommable;REF:DT2966|OUTIL;référence;OUTIL;1;DT2966;176,35
+Quincaillerie;disque;DT40257-QZ;DeWALT DT40257-QZ — DT40257-QZ;124,75;seul;disque à tronçonner;;;;;;1;;reconnu;famille:consommable;REF:DT40257|OUTIL;référence;OUTIL;1;DT40257-QZ;177,02
 Quincaillerie;foret;DT60231-QZ;DeWalt Foret aspirant SDS-Max Ø18mm, 400/600mm (DT60231-QZ);126,30;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT60231|OUTIL;référence;OUTIL;1;;
 Quincaillerie;;;DEWALT Streifennagel 34Gr. Ring 75mm 2200Stk;126,45;seul;;;;;;;;;sans-ref;titre-fragment;TIT:streifennagel 34gr ring 75mm 2200stk;titre;OUTIL;1;;
-Quincaillerie;lame-alternative;DT8351-QZ;DEWALT DT8351-QZ;126,66;seul;scie-cloche;;;;;;1;;inconnu;famille:consommable;REF:DT8351|OUTIL;référence;OUTIL;1;;
-Quincaillerie;coffret;DT4957-QZ;DeWalt Coffret de forets métaux HSS-CO 29 pièces (DT4957-QZ);127,03;pack;coffret;;GENERIQUE;;;;;;sans-ref;famille:rangement;REF:DT4957|PACK;référence;PACK;1;;
+Quincaillerie;lame-alternative;DT8351-QZ;DeWALT DT8351-QZ — DT8351-QZ;126,66;seul;scie-cloche;;;;;;1;;reconnu;famille:consommable;REF:DT8351|OUTIL;référence;OUTIL;1;DT8351-QZ;179,35
+Quincaillerie;coffret;DT4957-QZ;DeWalt Coffret de forets métaux HSS-CO 29 pièces (DT4957-QZ);127,03;pack;coffret;;GENERIQUE;;;;;;sans-ref;famille:rangement;REF:DT4957|PACK+COFFRET;référence;PACK+COFFRET;1;;
 Quincaillerie;;;DEWALT Lochsaegen-Set BIM Elektriker, 11-tlg.;127,18;pack;;;;;;;;;sans-ref;titre-fragment;TIT:lochsaegen set bim elektriker 11 tlg;titre;PACK;1;;
 Quincaillerie;disque;DT20463-QZ;DeWalt Elite Series Disque Diamant Segmenté Tout Usage 300mm (DT20463-QZ);128,52;seul;disque à tronçonner;;;;;;1;;sans-ref;famille:consommable;REF:DT20463|OUTIL;référence;OUTIL;1;;
 Quincaillerie;disque;DT20467-QZ;DeWalt Elite Series Disque Diamant Segmenté Asphalte 350x25,4mm (DT20467-QZ);128,52;seul;disque à tronçonner;;;;;;1;;sans-ref;famille:consommable;REF:DT20467|OUTIL;référence;OUTIL;1;;
 Quincaillerie;foret;;Foret hélicoïdal pour perceuse avec hélice en carbure de tungstène de haute qualité, emmanchement SDS Plus DEWALT - Ø20 ;128,90;seul;foret;;;;;;1;;sans-ref;famille:consommable;TIT:foret h lico dal pour perceuse avec h lice en carbure de tungst ne de haute qualit emmanchement sds plus 20;titre;OUTIL;1;;
 Quincaillerie;disque;DT20465-QZ;DeWalt Disque Diamant pour Béton Renforcé Ø355x25,4mm (DT20465-QZ);129,44;seul;disque à tronçonner;;;;;;1;;sans-ref;famille:consommable;REF:DT20465|OUTIL;référence;OUTIL;1;;
 Quincaillerie;foret;DT60234-QZ;Dewalt DT60234-QZ Foret aspirant SDS-Max diamètre 28mm longueur 400mm;129,69;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT60234|OUTIL;référence;OUTIL;1;;
-Quincaillerie;foret;DT9448-QZ;DeWalt SDS-max 45x570x450 mm DT9448-QZ;129,98;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT9448|OUTIL;référence;OUTIL;1;;
-Quincaillerie;portage;DWST60107-1;DEWALT DWST60107-1;132,74;seul;sac à outils;;;;;;;;inconnu;famille:rangement;REF:DWST60107-1|OUTIL;référence;OUTIL;1;;
+Quincaillerie;portage;DWST60107-1;DeWALT DWST60107-1 — DWST60107-1;132,74;seul;sac à outils;;;;;;;;reconnu;famille:rangement;REF:DWST60107-1|OUTIL;référence;OUTIL;1;DWST60107-1;186,77
 Quincaillerie;accessoire;DNBA1644SZ;DeWALT Clous pour cloueurs de finition sans fil SS, inoxydable, 44 mm, 2500 pièces - DNBA1644SZ;134,13;seul;accessoire;;;;;;1;;sans-ref;famille:consommable;REF:DNBA1644|OUTIL;référence;OUTIL;1;;
-Quincaillerie;chaine;XR18V;DEWALT Souffleur Brushless XR 18V 5Ah Li-ION - Souffleur Électrique Portable sans Fil & Recharge de Fil Coupe Bordure 2,;134,44;seul;fil de débroussailleuse;;;;;;1;;sans-ref;famille:consommable;REF:XR18|OUTIL;référence;OUTIL;1;;
-Quincaillerie;vissage-embout;DT70777-QZ;DEWALT DT70777-QZ;134,48;pack;embout de vissage;;GENERIQUE;;;;1;;inconnu;famille:consommable;REF:DT70777|PACK;référence;PACK;1;;
+Quincaillerie;chaine;XR18V;DEWALT Souffleur Brushless XR 18V 5Ah Li-ION - Souffleur Électrique Portable sans Fil & Recharge de Fil Coupe Bordure 2,;134,44;seul;fil de débroussailleuse;;;;;;1;;sans-ref;famille:consommable;REF:XR18|OUTIL+1X5;référence;OUTIL+1X5;1;;
+Quincaillerie;vissage-embout;DT70777-QZ;DeWALT DT70777-QZ — DT70777-QZ;134,48;pack;embout de vissage;;GENERIQUE;;;;1;;reconnu;famille:consommable;REF:DT70777|PACK;référence;PACK;1;DT70777-QZ;188,94
 Quincaillerie;;;DEWALT Streifennagel 34Gr. Glatt 80mm 2200Stk;135,20;seul;;;;;;;;;sans-ref;titre-fragment;TIT:streifennagel 34gr glatt 80mm 2200stk;titre;OUTIL;1;;
-Quincaillerie;accessoire;DCR020;DEWALT DCR020;137,15;seul;accessoire;;;;;;1;;inconnu;famille:consommable;REF:DCR020|OUTIL;référence;OUTIL;1;;
+Quincaillerie;accessoire;DCR020;DeWALT DCR020 — DCR020;137,15;seul;accessoire;;;;;;1;;reconnu;famille:consommable;REF:DCR020|OUTIL;référence;OUTIL;1;DCR020;192,29
 Quincaillerie;foret;DT60846-QZ;DeWalt SDS-max 40x920x790 mm DT60846-QZ;138,98;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT60846|OUTIL;référence;OUTIL;1;;
-Quincaillerie;portage;DWST540601;DEWALT DWST540601;139,68;seul;sac à outils;;;;;;;;inconnu;famille:rangement;REF:DWST540601|OUTIL;référence;OUTIL;1;;
-Quincaillerie;lame-circulaire;355/25;DEWALT 355/25;139,85;seul;lame de scie circulaire;;;;;;1;;inconnu;famille:consommable;REF:355/25|OUTIL;référence;OUTIL;1;;
-Quincaillerie;lame-circulaire;DT1921-QZ;DEWALT DT1921-QZ;139,99;seul;lame de scie circulaire;;;;;;1;;inconnu;famille:consommable;REF:DT1921|OUTIL;référence;OUTIL;1;;
+Quincaillerie;portage;DWST540601;DeWALT DWST540601 — DWST540601;139,68;seul;sac à outils;;;;;;;;reconnu;famille:rangement;REF:DWST540601|OUTIL;référence;OUTIL;1;DWST540601;195,41
+Quincaillerie;lame-circulaire;355/25;DeWALT 355/25 — 355/25;139,85;seul;lame de scie circulaire;;;;;;1;;reconnu;famille:consommable;REF:355/25|OUTIL;référence;OUTIL;1;355/25;195,52
+Quincaillerie;lame-circulaire;DT1921-QZ;DeWALT DT1921-QZ — DT1921-QZ;139,99;seul;lame de scie circulaire;;;;;;1;;reconnu;famille:consommable;REF:DT1921|OUTIL;référence;OUTIL;1;DT1921-QZ;195,71
 Quincaillerie;foret;DT9447-QZ;DeWalt SDS-max 42x570x450 mm DT9447-QZ;139,99;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT9447|OUTIL;référence;OUTIL;1;;
+Quincaillerie;;DE7033;DeWALT DE7033-XJ — Piètement DE7033-XJ;140,54;seul;;;;;;;;;reconnu;titre;REF:DE7033|ACCESSOIRE;référence;ACCESSOIRE;1;DE7033-XJ;254,68
 Quincaillerie;fraise;DWAC02018;DEWALT DWAC02018 Fraise annulaire HSS 3,8 x 5,1 cm Soudure 1,9 cm;140,60;seul;fraise;;;;;;1;;sans-ref;famille:consommable;REF:DWAC02018|OUTIL;référence;OUTIL;1;;
-Quincaillerie;coffret;DWST1-72339;DEWALT DWST1-72339;140,68;seul;coffret;;;;;;;;inconnu;famille:rangement;REF:DWST1-72339|OUTIL;référence;OUTIL;1;;
+Quincaillerie;coffret;DWST1-72339;DeWALT DWST1-72339 — DWST1-72339;140,68;seul;coffret;;;;;;;;reconnu;famille:rangement;REF:DWST1-72339|OUTIL;référence;OUTIL;1;DWST1-72339;196,52
 Quincaillerie;lame-alternative;DT90361-QZ;DeWalt Jeu de scies cloches universelles BIM, 13 pièces (DT90361-QZ);140,99;seul;scie-cloche;;;;;;1;;sans-ref;famille:consommable;REF:DT90361|OUTIL;référence;OUTIL;1;;
-Quincaillerie;;DE7033;DeWALT DE7033-XJ — Piètement DE7033-XJ;141,78;seul;;;;;;;;;reconnu;titre;REF:DE7033|ACCESSOIRE;référence;ACCESSOIRE;1;DE7033-XJ;254,68
 Quincaillerie;foret;DT3894;DeWalt Couronne de forage sec diamant, G 1/2 pouce, 107 mm (DT3894);141,93;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT3894|OUTIL;référence;OUTIL;1;;
 Quincaillerie;foret;DT60230-QZ;DeWalt Foret Creux SDS-Max 16mm, Longueur 600mm (DT60230-QZ);141,98;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT60230|OUTIL;référence;OUTIL;1;;
 Quincaillerie;portage;DWST550113;DeWalt Ceinture Porte-Outils en Cuir 18 Poches Réglable (DWST550113);143,83;seul;ceinture porte-outils;;;;;;;;sans-ref;famille:rangement;REF:DWST550113|OUTIL;référence;OUTIL;1;;
 Quincaillerie;portage;DWST560102;DeWalt Sac à Dos Porte-Outils Résistant à l'Eau (DWST560102);144,25;seul;sac à outils;;;;;;;;sans-ref;famille:rangement;REF:DWST560102|OUTIL;référence;OUTIL;1;;
 Quincaillerie;foret;DT9449-QZ;DeWalt SDS-max 50x570x450 mm DT9449-QZ;144,98;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT9449|OUTIL;référence;OUTIL;1;;
-Quincaillerie;coffret;;Pack de 4 valises DeWALT TSTAK VI;145,00;pack;coffret;;TSTAK;;;;4;;sans-ref;famille:rangement;TIT:pack de 4 valises tstak vi;titre;PACK;1;;
+Quincaillerie;coffret;;Pack de 4 valises DeWALT TSTAK VI;145,00;pack;coffret;;TSTAK;;;;4;;sans-ref;famille:rangement;TIT:pack de 4 valises tstak vi;titre;PACK+COFFRET;1;;
 Quincaillerie;foret;DT60233-QZ;Dewalt DT60233-QZ Foret aspirant SDS-Max diamètre 24mm longueur 400mm;145,63;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT60233|OUTIL;référence;OUTIL;1;;
-Quincaillerie;lame-circulaire;DT1475-QZ;DEWALT DT1475-QZ;146,82;seul;lame de scie circulaire;;;;;;1;;inconnu;famille:consommable;REF:DT1475|OUTIL;référence;OUTIL;1;;
+Quincaillerie;lame-circulaire;DT1475-QZ;DeWALT DT1475-QZ — DT1475-QZ;146,82;seul;lame de scie circulaire;;;;;;1;;reconnu;famille:consommable;REF:DT1475|OUTIL;référence;OUTIL;1;DT1475-QZ;204,08
 Quincaillerie;foret;DT9763;DeWalt Couronne de forage humide diamant, 1 1/4 pouce UNC, universel, 72 mm (DT9763);148,25;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT9763|OUTIL;référence;OUTIL;1;;
-Quincaillerie;vissage-embout;DT70762-QZ;DeWalt DT70762-QZ Coffret TOUGHCASE 85 Pièces - Forets Béton et Métal et Embouts de Vissage - Pour Perceuse-Visseuse et ;148,96;pack;embout de vissage;;GENERIQUE;;;;1;;sans-ref;famille:consommable;REF:DT70762|PACK;référence;PACK;2;;
+Quincaillerie;vissage-embout;DT70762-QZ;DeWalt DT70762-QZ Coffret TOUGHCASE 85 Pièces - Forets Béton et Métal et Embouts de Vissage - Pour Perceuse-Visseuse et ;148,96;pack;embout de vissage;;GENERIQUE;;;;1;;sans-ref;famille:consommable;REF:DT70762|PACK+COFFRET;référence;PACK+COFFRET;2;;
 Quincaillerie;;DWHT51064;DeWalt DWHT51064 Marteau de charpentier 625 g;149,18;seul;;;;;;;;;sans-ref;famille:consommable;REF:DWHT51064|OUTIL;référence;OUTIL;2;;
-Quincaillerie;;DWHT83550;DEWALT DWHT83550;150,61;seul;;;;;;;;;inconnu;famille:consommable;REF:DWHT83550|OUTIL;référence;OUTIL;1;;
-Quincaillerie;lame-circulaire;DT1922-QZ;DEWALT DT1922-QZ;151,98;seul;lame de scie circulaire;;;;;;1;;inconnu;famille:consommable;REF:DT1922|OUTIL;référence;OUTIL;1;;
-Quincaillerie;foret;DT9446-QZ;DEWALT DT9446-QZ;152,99;seul;foret;;;;;;1;;inconnu;famille:consommable;REF:DT9446|OUTIL;référence;OUTIL;1;;
+Quincaillerie;;DWHT83550;DeWALT DWHT83550 — DWHT83550;150,56;seul;;;;;;;;;reconnu;famille:consommable;REF:DWHT83550|OUTIL;référence;OUTIL;1;DWHT83550;208,74
+Quincaillerie;lame-circulaire;DT1922-QZ;DeWALT DT1922-QZ — DT1922-QZ;151,98;seul;lame de scie circulaire;;;;;;1;;reconnu;famille:consommable;REF:DT1922|OUTIL;référence;OUTIL;1;DT1922-QZ;210,49
+Quincaillerie;foret;DT9446-QZ;DeWALT DT9446-QZ — DT9446-QZ;152,99;seul;foret;;;;;;1;;reconnu;famille:consommable;REF:DT9446|OUTIL;référence;OUTIL;1;DT9446-QZ;211,74
 Quincaillerie;foret;DT6765-QZ;DeWalt HBS DS-max 100x107 mm DT6765-QZ;152,99;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT6765|OUTIL;référence;OUTIL;1;;
 Quincaillerie;foret;DT60232-QZ;DeWalt Foret aspirant SDS-Max 20mm x 600mm (DT60232-QZ);153,98;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT60232|OUTIL;référence;OUTIL;1;;
-Quincaillerie;coffret;DWST60452-1;DeWalt Tour TSTAK 3 en 1 Édition McLaren (DWST60452-1);154,67;pack;coffret;;TSTAK;;;;;oui;sans-ref;famille:rangement;REF:DWST60452-1|PACK;référence;PACK;1;;
-Quincaillerie;;;DEWALT Diamant-Nassbohrkrone 82x400mm 1 1/4Z;155,99;seul;;;;;;;;;sans-ref;titre-fragment;TIT:diamant nassbohrkrone 82x400mm 1 1 4z;titre;OUTIL;1;;
-Quincaillerie;coffret;DWMT73802-1;DEWALT DWMT73802-1;157,36;seul;coffret;;;;;;;;inconnu;famille:rangement;REF:DWMT73802-1|OUTIL;référence;OUTIL;1;;
+Quincaillerie;coffret;DWST60452-1;DeWalt Tour TSTAK 3 en 1 Édition McLaren (DWST60452-1);154,67;pack;coffret;;TSTAK;;;;;oui;sans-ref;famille:rangement;REF:DWST60452-1|PACK+COFFRET;référence;PACK+COFFRET;1;;
+Quincaillerie;foret;DT9766;DeWalt Couronne de forage humide diamant 1 1/4 pouce UNC universel 91 mm (DT9766);155,10;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT9766|OUTIL;référence;OUTIL;1;;
+Quincaillerie;coffret;DWMT73802-1;DeWALT DWMT73802-1 — DWMT73802-1;157,36;seul;coffret;;;;;;;;reconnu;famille:rangement;REF:DWMT73802-1|OUTIL;référence;OUTIL;1;DWMT73802-1;217,15
+Quincaillerie;accessoire;DNPT3190G12Z;DeWALT Clous en bande papier DNPT, lisse, galvanisé G12, 90 mm, 2200 pièces - DNPT3190G12Z;158,53;seul;accessoire;;;;;;1;;sans-ref;famille:consommable;REF:DNPT3190|OUTIL;référence;OUTIL;1;;
 Quincaillerie;foret;DT6766-QZ;DeWalt HB SDS-max 125x107 mm DT6766-QZ;159,60;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT6766|OUTIL;référence;OUTIL;1;;
-Quincaillerie;coffret;;DeWalt Toughsystem Chariot à roulettes Transp charge max. 150 kg (1-70-324);160,43;pack;coffret modulaire;;TOUGHSYSTEM;;;;;;sans-ref;famille:rangement;TIT:toughsystem chariot roulettes transp charge max 150 kg 1 70 324;titre;PACK;1;;
-Quincaillerie;coffret;DWST83517-1;DEWALT DWST83517-1;161,34;pack;coffret;;GENERIQUE;;;;;;inconnu;famille:rangement;REF:DWST83517-1|PACK;référence;PACK;1;;
+Quincaillerie;foret;;Dewalt - Forets Béton Dewalt Grande Longueur Sds - Diamètre Mm: 22 G;160,43;seul;foret béton;;;;;;1;;sans-ref;famille:consommable;TIT:forets b ton grande longueur sds diam tre mm 22 g;titre;OUTIL;1;;
+Quincaillerie;coffret;;DeWalt Toughsystem Chariot à roulettes Transp charge max. 150 kg (1-70-324);160,43;pack;coffret modulaire;;TOUGHSYSTEM;;;;;;sans-ref;famille:rangement;TIT:toughsystem chariot roulettes transp charge max 150 kg 1 70 324;titre;PACK+COFFRET;1;;
+Quincaillerie;coffret;DWST83517-1;DeWALT DWST83517-1 — DWST83517-1;161,34;pack;coffret;;GENERIQUE;;;;;;reconnu;famille:rangement;REF:DWST83517-1|PACK;référence;PACK;1;DWST83517-1;222,00
 Quincaillerie;accessoire;DT2323-QZ;DeWalt 203 Métal 3-8 mm 100 pcs (DT2323-QZ);162,48;pack;accessoire;;;;;;1;;sans-ref;famille:consommable;REF:DT2323|PACK;référence;PACK;1;;
-Quincaillerie;disque;DT20464-QZ;DeWalt ELITE Series Disque Diamant Segmenté Ø350mm, Tous Usages (DT20464-QZ);162,57;seul;disque à tronçonner;;;;;;1;;sans-ref;famille:consommable;REF:DT20464|OUTIL;référence;OUTIL;1;;
 Quincaillerie;visserie;;DEWALT DEWALT Clou à bande DNPT 3,1 x 90 mm 33° Anneau Galvanisé Quantité:2000;162,98;seul;clou;;;;;;1;;sans-ref;famille:consommable;TIT:clou bande dnpt 3 1 x 90 mm 33 anneau galvanis quantit 2000;titre;OUTIL;1;;
+Quincaillerie;disque;DT20464-QZ;DeWalt ELITE Series Disque Diamant Segmenté Ø350mm, Tous Usages (DT20464-QZ);163,31;seul;disque à tronçonner;;;;;;1;;sans-ref;famille:consommable;REF:DT20464|OUTIL;référence;OUTIL;1;;
 Quincaillerie;portage;DWST540602;DeWalt Ceinture Porte-Outils avec Bretelles, 25 Poches (DWST540602);163,56;seul;ceinture porte-outils;;;;;;;;sans-ref;famille:rangement;REF:DWST540602|OUTIL;référence;OUTIL;1;;
-Quincaillerie;foret;DT9814-QZ;DEWALT DT9814-QZ;166,74;seul;foret;;;;;;1;;inconnu;famille:consommable;REF:DT9814|OUTIL;référence;OUTIL;1;;
+Quincaillerie;foret;DT9814-QZ;DeWALT DT9814-QZ — DT9814-QZ;166,74;seul;foret;;;;;;1;;reconnu;famille:consommable;REF:DT9814|OUTIL;référence;OUTIL;1;DT9814-QZ;228,60
 Quincaillerie;;DT9764-QZ;"DEWALT DT9764-QZ Corona de Diamante perforar en húmedo 78x400mm, acoplamiento 1 1/4"" UNC hembra Universal, Para material";167,16;seul;;;;;;;;;sans-ref;famille:consommable;REF:DT9764|OUTIL;référence;OUTIL;1;;
 Quincaillerie;;;"Spachtel DeWalt 2-924; 609 6 mm";167,80;seul;;;;;;;;;sans-ref;titre-fragment;TIT:spachtel 2 924 609 6 mm;titre;OUTIL;1;;
-Quincaillerie;lame-alternative;DT8354-QZ;DEWALT DT8354-QZ;167,83;seul;scie-cloche;;;;;;1;;inconnu;famille:consommable;REF:DT8354|OUTIL;référence;OUTIL;1;;
+Quincaillerie;lame-alternative;DT8354-QZ;DeWALT DT8354-QZ — DT8354-QZ;167,83;seul;scie-cloche;;;;;;1;;reconnu;famille:consommable;REF:DT8354|OUTIL;référence;OUTIL;1;DT8354-QZ;229,93
 Quincaillerie;foret;DT6784-QZ;DeWalt HB SDS-max 80x300 mm DT6784-QZ;167,90;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT6784|OUTIL;référence;OUTIL;1;;
 Quincaillerie;foret;DT9607-QZ;DeWalt SDS-plus 22x1000x950 mm DT9607-QZ;167,95;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT9607|OUTIL;référence;OUTIL;1;;
-Quincaillerie;foret;DT3896;DEWALT DT3896;168,74;seul;foret;;;;;;1;;inconnu;famille:consommable;REF:DT3896|OUTIL;référence;OUTIL;1;;
+Quincaillerie;foret;DT3896;DeWALT DT3896 — DT3896;168,74;seul;foret;;;;;;1;;reconnu;famille:consommable;REF:DT3896|OUTIL;référence;OUTIL;1;DT3896;231,17
 Quincaillerie;coffret;AW2460;Dewalt - Boîte à outils, plastique ABS AW2460 (taille unique) (noir/jaune);169,11;seul;coffret;;;;;;;;sans-ref;famille:rangement;REF:AW2460|OUTIL;référence;OUTIL;1;;
 Quincaillerie;visserie;DSTSX35SE;DeWalt DSTSX35SE Agrafes Inox, 5.6mm x 35mm;169,32;seul;agrafe;;;;;;1;;sans-ref;famille:consommable;REF:DSTSX35|OUTIL;référence;OUTIL;1;;
-Quincaillerie;coffret;DWST08530-1;DeWalt ToughSystem 2.0 DXL (DWST08530-1);169,55;pack;coffret modulaire;;TOUGHSYSTEM;;;;;;sans-ref;famille:rangement;REF:DWST08530-1|PACK;référence;PACK;1;;
+Quincaillerie;coffret;DWST08530-1;DeWalt ToughSystem 2.0 DXL (DWST08530-1);169,55;pack;coffret modulaire;;TOUGHSYSTEM;;;;;;sans-ref;famille:rangement;REF:DWST08530-1|PACK+COFFRET;référence;PACK+COFFRET;1;;
 Quincaillerie;foret;DT9450-QZ;DeWalt SDS-max 52x570x450 mm DT9450-QZ;169,99;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT9450|OUTIL;référence;OUTIL;1;;
-Quincaillerie;coffret;AW2734;Dewalt - Boîte à outils « Toughsystem 2.0 » AW2734 (305 mm x 330 mm x 535 mm) (noir);170,59;pack;coffret;;TOUGHSYSTEM;;;;;;sans-ref;famille:rangement;REF:AW2734|PACK;référence;PACK;1;;
-Quincaillerie;coffret;;DeWALT TSTAK VI - Étui rigide pour boîte à outils G;172,06;pack;coffret modulaire;;TSTAK;;;;;;sans-ref;famille:rangement;TIT:tstak vi tui rigide pour bo te outils g;titre;PACK;1;;
+Quincaillerie;coffret;AW2734;Dewalt - Boîte à outils « Toughsystem 2.0 » AW2734 (305 mm x 330 mm x 535 mm) (noir);170,59;pack;coffret;;TOUGHSYSTEM;;;;;;sans-ref;famille:rangement;REF:AW2734|PACK+COFFRET;référence;PACK+COFFRET;1;;
+Quincaillerie;coffret;;DeWALT TSTAK VI - Étui rigide pour boîte à outils G;172,06;pack;coffret modulaire;;TSTAK;;;;;;sans-ref;famille:rangement;TIT:tstak vi tui rigide pour bo te outils g;titre;PACK+COFFRET;1;;
 Quincaillerie;;DWHT71843;DeWalt DWHT71843 16-in-1 Multi-Tool by DEWALT;173,01;seul;;;;;;;;;sans-ref;famille:consommable;REF:DWHT71843|OUTIL;référence;OUTIL;1;;
 Quincaillerie;;;"DEWALT Combination Wrench 1 1/2"" SAE";174,67;seul;;;;;;;;;sans-ref;titre;TIT:combination wrench 1 1 2 sae;titre;OUTIL;1;;
-Quincaillerie;coffret;;Cutii de transport si depozitare DeWALT TSTAK McLaren Edition 3 in 1;175,00;pack;coffret modulaire;;TSTAK;;;;;oui;sans-ref;famille:rangement;TIT:cutii de transport si depozitare tstak mclaren edition 3 in 1;titre;PACK;3;;
+Quincaillerie;coffret;;Cutii de transport si depozitare DeWALT TSTAK McLaren Edition 3 in 1;175,00;pack;coffret modulaire;;TSTAK;;;;;oui;sans-ref;famille:rangement;TIT:cutii de transport si depozitare tstak mclaren edition 3 in 1;titre;PACK+COFFRET;3;;
 Quincaillerie;lame-alternative;DXTT-2-932;DeWalt Lame à enduire pro 813mm, acier inoxydable, flexible (DXTT-2-932);175,33;seul;lame de scie;;;;;;1;;sans-ref;famille:consommable;REF:DXTT-2-932|OUTIL;référence;OUTIL;1;;
-Quincaillerie;mobilier;DWST83448-1;Servante de chantier 3-en-1 DeWalt TSTAK DWST83448-1;179,99;pack;servante;;TSTAK;;;;;;sans-ref;famille:rangement;REF:DWST83448-1|PACK;référence;PACK;1;;
-Quincaillerie;coffret;;DEWALT Scie Sabre Électrique avec Vitesse Variable et Coffret de Transport + DEWALT Lame pour Scies Sabre, Argent, Set d;181,20;pack;coffret;;;;;;6;;sans-ref;famille:rangement;TIT:scie sabre lectrique avec vitesse variable et coffret de transport lame pour scies sabre argent set d;titre;PACK;1;;
-Quincaillerie;coffret;AW2265;Dewalt - Boîte à outils « Toughsystem 2.0 » AW2265 (taille unique) (noir/jaune);181,53;pack;coffret;;TOUGHSYSTEM;;;;;;sans-ref;famille:rangement;REF:AW2265|PACK;référence;PACK;1;;
+Quincaillerie;mobilier;DWST83448-1;Servante de chantier 3-en-1 DeWalt TSTAK DWST83448-1;179,99;pack;servante;;TSTAK;;;;;;sans-ref;famille:rangement;REF:DWST83448-1|PACK+COFFRET;référence;PACK+COFFRET;1;;
+Quincaillerie;coffret;;DEWALT Scie Sabre Électrique avec Vitesse Variable et Coffret de Transport + DEWALT Lame pour Scies Sabre, Argent, Set d;181,20;pack;coffret;;;;;;6;;sans-ref;famille:rangement;TIT:scie sabre lectrique avec vitesse variable et coffret de transport lame pour scies sabre argent set d;titre;PACK+COFFRET;1;;
+Quincaillerie;coffret;AW2265;Dewalt - Boîte à outils « Toughsystem 2.0 » AW2265 (taille unique) (noir/jaune);181,53;pack;coffret;;TOUGHSYSTEM;;;;;;sans-ref;famille:rangement;REF:AW2265|PACK+COFFRET;référence;PACK+COFFRET;1;;
 Quincaillerie;foret;HSS50;DEWALT DEWALT Mèche HSS 50 mm;181,66;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:HSS50|OUTIL;référence;OUTIL;1;;
 Quincaillerie;abrasif;D125/8;DeWalt STF D125/8 125G 40 mm (200 pcs);182,51;seul;disque abrasif;;;;;;1;;sans-ref;famille:consommable;REF:D125|OUTIL;référence;OUTIL;1;;
 Quincaillerie;foret;DT9767;DeWalt Couronne de forage humide diamantée, 1 1/4 pouces UNC, universel, 102 mm (DT9767);183,49;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT9767|OUTIL;référence;OUTIL;1;;
 Quincaillerie;burin;;Pointes en bande papier 33° crantées - inox - 2,8 x 63 mm - par 1200 DEWALT;184,90;seul;burin pointu;;;;;;1;;sans-ref;famille:consommable;TIT:pointes en bande papier 33 crant es inox 2 8 x 63 mm par 1200;titre;OUTIL;1;;
-Quincaillerie;mobilier;DXWT-504;DEWALT DXWT-504;184,99;seul;chariot;;;;;;;;inconnu;famille:rangement;REF:DXWT-504|OUTIL;référence;OUTIL;1;;
+Quincaillerie;mobilier;DXWT-504;DeWALT DXWT-504 — DXWT-504;184,99;seul;chariot;;;;;;;;reconnu;famille:rangement;REF:DXWT-504|OUTIL;référence;OUTIL;1;DXWT-504;251,22
 Quincaillerie;;;DeWALT Dwa7889 100 dents de coupe Aluminium 2,5 cm Tonnelle, 35,6 cm;185,75;seul;;;;;;;;;sans-ref;titre;TIT:dwa7889 100 dents de coupe aluminium 2 5 cm tonnelle 35 6 cm;titre;OUTIL;1;;
 Quincaillerie;;DE7023;DeWALT DE7023-XJ — Piètement universel pour scies à onglets (repliable, 227 kg);185,98;seul;;;;;;;;;reconnu;titre;REF:DE7023|ACCESSOIRE;référence;ACCESSOIRE;1;DE7023-XJ;222,02
-Quincaillerie;accessoire;DE0735;DEWALT DE0735;186,23;seul;trépied;;;;;;1;;inconnu;famille:consommable;REF:DE0735|OUTIL;référence;OUTIL;1;;
+Quincaillerie;accessoire;DE0735;DeWALT DE0735 — DE0735;186,23;seul;trépied;;;;;;1;;reconnu;famille:consommable;REF:DE0735|OUTIL;référence;OUTIL;1;DE0735;252,72
 Quincaillerie;foret;DT3898;DeWalt Couronne de forage à sec diamantée, G 1/2 pouce, 152 mm (DT3898);186,47;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT3898|OUTIL;référence;OUTIL;1;;
-Quincaillerie;coffret;DWST08061-1;DEWALT DWST08061-1;188,99;seul;coffret;;;;;;;;inconnu;famille:rangement;REF:DWST08061-1|OUTIL;référence;OUTIL;1;;
+Quincaillerie;coffret;DWST08061-1;DeWALT DWST08061-1 — DWST08061-1;188,99;seul;coffret;;;;;;;;reconnu;famille:rangement;REF:DWST08061-1|OUTIL;référence;OUTIL;1;DWST08061-1;256,08
 Quincaillerie;foret;DT8973-QZ;DeWalt SDS-plus 14x200x150 mm DT8973-QZ;189,91;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT8973|OUTIL;référence;OUTIL;1;;
-Quincaillerie;coffret;DWST83471;DEWALT DWST83471;190,60;pack;coffret modulaire;;TOUGHSYSTEM;;;;;;inconnu;famille:rangement;REF:DWST83471|PACK;référence;PACK;1;;
+Quincaillerie;coffret;DWST83471;DeWALT DWST83471 — DWST83471;190,60;pack;coffret modulaire;;TOUGHSYSTEM;;;;;;reconnu;famille:rangement;REF:DWST83471|PACK;référence;PACK;1;DWST83471;258,07
 Quincaillerie;filtration;DXIR1FFMLP3;DeWalt DXIR1FFMLP3 Masque Complet Léger Réutilisable Avec Filtres P3 - Taille L;191,99;pack;filtre;;;;;;1;;sans-ref;famille:consommable;REF:DXIR1|PACK;référence;PACK;4;;
-Quincaillerie;accessoire;DE3472;DEWALT DE3472;196,99;seul;accessoire;;;;;;1;;inconnu;famille:consommable;REF:DE3472|OUTIL;référence;OUTIL;1;;
-Quincaillerie;mobilier;DWST83402-1;DeWalt Tool Trolley DWST83402-1;199,90;pack;chariot;;GENERIQUE;;;;;;sans-ref;famille:rangement;REF:DWST83402-1|PACK;référence;PACK;2;;
+Quincaillerie;accessoire;DE3472;DeWALT DE3472 — DE3472;196,99;seul;accessoire;;;;;;1;;reconnu;famille:consommable;REF:DE3472|OUTIL;référence;OUTIL;1;DE3472;265,93
+Quincaillerie;mobilier;DWST83402-1;DeWalt Tool Trolley DWST83402-1;199,90;pack;chariot;;GENERIQUE;;;;;;sans-ref;famille:rangement;REF:DWST83402-1|PACK;référence;PACK;1;;
 Quincaillerie;mobilier;DXWT-507LS;DeWALT DXWT-507LS Diable Load Shift - Acier - 400 Kg;199,99;seul;chariot;;;;;;;;sans-ref;famille:rangement;REF:DXWT-507LS|OUTIL;référence;OUTIL;1;;
 Quincaillerie;visserie;DNF25R70S316E;DeWalt Clou en bobine DNF 70mm 3,6kSt. anneau (DNF25R70S316E);200,10;seul;clou;;;;;;1;;sans-ref;famille:consommable;REF:DNF25|OUTIL;référence;OUTIL;1;;
 Quincaillerie;foret;DT60844-QZ;DeWalt SDS-max 40x380x250 mm DT60844-QZ;205,31;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT60844|OUTIL;référence;OUTIL;1;;
 Quincaillerie;;;DeWalt Ébrancheur 60 cm bypass;207,32;seul;;;;;;;;;sans-ref;titre;TIT:brancheur 60 cm bypass;titre;OUTIL;1;;
-Quincaillerie;foret;;Dewalt - Forets Béton Dewalt Grande Longueur Sds - Diamètre Mm: 22 G;210,99;seul;foret béton;;;;;;1;;sans-ref;famille:consommable;TIT:forets b ton grande longueur sds diam tre mm 22 g;titre;OUTIL;1;;
 Quincaillerie;;DT9773-QZ;"DEWALT DT9773-QZ Corona de Diamante perforar en húmedo 152x400mm, acoplamiento 1 1/4"" UNC hembra Universal, Para materia";213,68;seul;;;;;;;;;sans-ref;famille:consommable;REF:DT9773|OUTIL;référence;OUTIL;1;;
-Quincaillerie;mobilier;DXWT-FT512;DEWALT DXWT-FT512;214,83;seul;chariot;;;;;;;;inconnu;famille:rangement;REF:DXWT-FT512|OUTIL;référence;OUTIL;1;;
-Quincaillerie;coffret;DT71516M-QZ;DeWalt DT71516M-QZ Coffret de 24 Tournevis pour Tableau de Bord;215,94;pack;coffret;;;;;;24;;sans-ref;famille:rangement;REF:DT71516|PACK;référence;PACK;1;;
-Quincaillerie;vissage-embout;DT70585T;DEWALT DT70585T;219,24;seul;embout de vissage;;;;;;1;;inconnu;famille:consommable;REF:DT70585|OUTIL;référence;OUTIL;1;;
+Quincaillerie;mobilier;DXWT-FT512;DeWALT DXWT-FT512 — DXWT-FT512;214,83;seul;chariot;;;;;;;;reconnu;famille:rangement;REF:DXWT-FT512|OUTIL;référence;OUTIL;1;DXWT-FT512;287,87
+Quincaillerie;coffret;DT71516M-QZ;DeWalt DT71516M-QZ Coffret de 24 Tournevis pour Tableau de Bord;215,94;pack;coffret;;;;;;24;;sans-ref;famille:rangement;REF:DT71516|PACK+COFFRET;référence;PACK+COFFRET;1;;
+Quincaillerie;vissage-embout;DT70585T;DeWALT DT70585T — DT70585T;219,24;seul;embout de vissage;;;;;;1;;reconnu;famille:consommable;REF:DT70585|OUTIL;référence;OUTIL;1;DT70585T;293,34
 Quincaillerie;accessoire;DT2400-QZ;DeWalt 228 mm 100 pièces (DT2400-QZ);221,59;pack;accessoire;;;;;;1;;sans-ref;famille:consommable;REF:DT2400|PACK;référence;PACK;1;;
 Quincaillerie;accessoire;DT9774-QZ;"DEWALT DT9774-QZ - Corona de diamante para perforar en húmedo 162x400mm, acoplamiento 1 1/4"" UNC hembra universal, para ";222,56;seul;accessoire;;;;;;1;;sans-ref;famille:consommable;REF:DT9774|OUTIL;référence;OUTIL;1;;
 Quincaillerie;lame-alternative;;Jeu De Scies Cloches D'électricien Bim Dewalt 11 Pièces.;223,23;seul;scie-cloche;;;;;;1;;sans-ref;famille:consommable;TIT:jeu de scies cloches d lectricien bim 11 pi ces;titre;OUTIL;1;;
 Quincaillerie;;DT9771-QZ;DEWALT DT9771-QZ Couronne Diamant Forage en Eau, Jaune, 127 x 400 mm;223,44;seul;;;;;;;;;sans-ref;famille:consommable;REF:DT9771|OUTIL;référence;OUTIL;1;;
-Quincaillerie;foret;DT9765;DEWALT DT9765;224,08;seul;foret;;;;;;1;;inconnu;famille:consommable;REF:DT9765|OUTIL;référence;OUTIL;1;;
+Quincaillerie;foret;DT9765;DeWALT DT9765 — DT9765;224,08;seul;foret;;;;;;1;;reconnu;famille:consommable;REF:DT9765|OUTIL;référence;OUTIL;1;DT9765;299,15
 Quincaillerie;mobilier;STTDXWTPC710;DEWALT Chariot de transport pliable - STTDXWTPC710;229,90;seul;chariot;;;;;;;;sans-ref;famille:rangement;REF:STTDXWTPC710|OUTIL;référence;OUTIL;1;;
-Quincaillerie;mobilier;DWST60490-1;Ensemble de chariots Tstak DEWALT DWST60490-1;229,99;pack;chariot;;TSTAK;;;;;;sans-ref;famille:rangement;REF:DWST60490-1|PACK;référence;PACK;1;;
+Quincaillerie;mobilier;DWST60490-1;Ensemble de chariots Tstak DEWALT DWST60490-1;229,99;pack;chariot;;TSTAK;;;;;;sans-ref;famille:rangement;REF:DWST60490-1|PACK+COFFRET;référence;PACK+COFFRET;1;;
 Quincaillerie;;DT9768-QZ;"DEWALT DT9768-QZ-Couronne diamant de forage sur peau humide 107 x 400 mm raccordement 1 1/4"" c un femelle universelle et";233,58;seul;;;;;;;;;sans-ref;famille:consommable;REF:DT9768|ACCESSOIRE;référence;ACCESSOIRE;1;;
-Quincaillerie;;DWMT81534-1;DEWALT DWMT81534-1;233,71;seul;;;;;;;;;inconnu;famille:consommable;REF:DWMT81534-1|OUTIL;référence;OUTIL;1;;
+Quincaillerie;;DWMT81534-1;DeWALT DWMT81534-1 — DWMT81534-1;233,71;seul;;;;;;;;;reconnu;famille:consommable;REF:DWMT81534-1|OUTIL;référence;OUTIL;1;DWMT81534-1;311,06
 Quincaillerie;lame-alternative;;DeWalt Lame supérieure 199314-3;236,71;seul;lame de scie;;;;;;1;;sans-ref;famille:consommable;TIT:lame sup rieure 199314 3;titre;OUTIL;1;;
-Quincaillerie;coffret;;DeWalt 4 Forets SDS-max et 2 Burins en Coffret (SDSMAXKIT-DE);239,98;pack;coffret;;GENERIQUE;;;;4;;sans-ref;famille:rangement;TIT:4 forets sds max et 2 burins en coffret sdsmaxkit de;titre;PACK;1;;
+Quincaillerie;coffret;;DeWalt 4 Forets SDS-max et 2 Burins en Coffret (SDSMAXKIT-DE);239,98;pack;coffret;;GENERIQUE;;;;4;;sans-ref;famille:rangement;TIT:4 forets sds max et 2 burins en coffret sdsmaxkit de;titre;PACK+COFFRET;1;;
 Quincaillerie;;;"Spachtel DeWalt 2-940; 101 6 cm";240,92;seul;;;;;;;;;sans-ref;titre-fragment;TIT:spachtel 2 940 101 6 cm;titre;OUTIL;1;;
-Quincaillerie;coffret;;DeWalt ToughSystem DXL (15176);240,99;pack;coffret;;TOUGHSYSTEM;;;;;;sans-ref;famille:rangement;TIT:toughsystem dxl 15176;titre;PACK;1;;
+Quincaillerie;coffret;;DeWalt ToughSystem DXL (15176);240,99;pack;coffret;;TOUGHSYSTEM;;;;;;sans-ref;famille:rangement;TIT:toughsystem dxl 15176;titre;PACK+COFFRET;1;;
 Quincaillerie;foret;DT60235-QZ;Dewalt DT60235-QZ Foret aspirant SDS-Max diamètre 32mm longueur 400mm;241,15;seul;foret;;;;;;1;;sans-ref;famille:consommable;REF:DT60235|OUTIL;référence;OUTIL;1;;
-Quincaillerie;coffret;DWST83412-1;DeWalt Tour Tstak DWST83412-1;245,52;pack;coffret;;TSTAK;;;;;;sans-ref;famille:rangement;REF:DWST83412-1|PACK;référence;PACK;1;;
-Quincaillerie;coffret;DT2296-QZ;DEWALT Coffret plastique de 10 lames XPC HCS BIM Spéciale Bois DT2296-QZ + DEWALT - Scie Sauteuse à Prise par le Corps B;246,11;pack;coffret;;TSTAK;;;;10;;sans-ref;famille:rangement;REF:DT2296|PACK;référence;PACK;1;;
-Quincaillerie;filtration;DWH161D1-QW;DEWALT DWH161D1-QW;247,62;pack;filtre;;;;;;1;;inconnu;famille:consommable;REF:DWH161|PACK;référence;PACK;3;;
+Quincaillerie;coffret;DT2296-QZ;DEWALT Coffret plastique de 10 lames XPC HCS BIM Spéciale Bois DT2296-QZ + DEWALT - Scie Sauteuse à Prise par le Corps B;246,11;pack;coffret;;TSTAK;;;;10;;sans-ref;famille:rangement;REF:DT2296|PACK+COFFRET;référence;PACK+COFFRET;1;;
+Quincaillerie;filtration;DWH161D1-QW;DeWALT DWH161D1-QW — DWH161D1-QW;247,62;pack;filtre;;;;;;1;;reconnu;famille:consommable;REF:DWH161|PACK;référence;PACK;3;DWH161D1-QW;328,34
 Quincaillerie;vissage-embout;DWMT81535-1;"DeWalt Jeu de douilles 1/4"", 3/8"" et 1/2"", 247 pièces (DWMT81535-1)";259,76;pack;douille;;GENERIQUE;;;;1;;sans-ref;famille:consommable;REF:DWMT81535-1|PACK;référence;PACK;1;;
-Quincaillerie;foret;DT9772;DEWALT DT9772;264,00;seul;foret;;;;;;1;;inconnu;famille:consommable;REF:DT9772|OUTIL;référence;OUTIL;1;;
-Quincaillerie;coffret;DWST08061-1;DeWalt DWST08061-1 Boîte à outils avec lampes intégrées 395 x 352 x 255 mm ToughSystem 2.0 + 1x batterie 2,0 Ah - sans c;265,72;pack;coffret;;TOUGHSYSTEM;;;;;;sans-ref;famille:rangement;REF:DWST08061-1|PACK;référence;PACK;11;;
+Quincaillerie;foret;DT9772;DeWALT DT9772 — DT9772;264,00;seul;foret;;;;;;1;;reconnu;famille:consommable;REF:DT9772|OUTIL;référence;OUTIL;1;DT9772;348,48
+Quincaillerie;coffret;DWST08061-1;DeWalt DWST08061-1 Boîte à outils avec lampes intégrées 395 x 352 x 255 mm ToughSystem 2.0 + 1x batterie 2,0 Ah - sans c;265,72;pack;coffret;;TOUGHSYSTEM;;;;;;sans-ref;famille:rangement;REF:DWST08061-1|PACK+1X2.0+COFFRET;référence;PACK+1X2.0+COFFRET;3;;
 Quincaillerie;vissage-embout;DWMT45341-1;Jeu de douilles Dewalt 341 pièces 1/4, 3/8 et 1/2 DWMT45341-1;268,82;seul;douille;;;;;;1;;sans-ref;famille:consommable;REF:DWMT45341-1|OUTIL;référence;OUTIL;2;;
 Quincaillerie;;;DEWALT 341-tlg. Werkzeugset in 3 Modulen;268,82;seul;;;;;;;;;sans-ref;titre-fragment;TIT:341 tlg werkzeugset in 3 modulen;titre;OUTIL;1;;
-Quincaillerie;mobilier;DXWT-502;DEWALT DXWT-502;271,00;seul;chariot;;;;;;;;inconnu;famille:rangement;REF:DXWT-502|OUTIL;référence;OUTIL;1;;
-Quincaillerie;burin;;DEWALT - Perforateur-Burineur SDS-PLUS Brushless 2.6J 18V 4Ah Li-Ion - Sans Fil avec Coffret TSTAK & Jeu de 3 Burins SDS;279,57;pack;burin pointu;;TSTAK;;;;3;;sans-ref;famille:consommable;TIT:perforateur burineur sds plus brushless 2 6j 18v 4ah li ion sans fil avec coffret tstak jeu de 3 burins sds;titre;PACK;1;;
-Quincaillerie;filtration;DWXAF201;DEWALT DWXAF201;280,00;seul;filtre;;;;;;1;;inconnu;famille:consommable;REF:DWXAF201|OUTIL;référence;OUTIL;1;;
+Quincaillerie;coffret;DWST08061-1;DeWalt DWST08061-1 Boîte à outils avec lampes intégrées 395 x 352 x 255 mm ToughSystem 2.0 + 1x batterie 4,0 Ah - sans c;270,53;pack;coffret;;TOUGHSYSTEM;;;;;;sans-ref;famille:rangement;REF:DWST08061-1|PACK+1X4.0+COFFRET;référence;PACK+1X4.0+COFFRET;1;;
+Quincaillerie;mobilier;DXWT-502;DeWALT DXWT-502 — DXWT-502;271,00;seul;chariot;;;;;;;;reconnu;famille:rangement;REF:DXWT-502|OUTIL;référence;OUTIL;1;DXWT-502;356,90
+Quincaillerie;coffret;DWST08061-1;DeWalt DWST08061-1 Boîte à outils avec lampes intégrées 395 x 352 x 255 mm ToughSystem 2.0 + 1x batterie Powerstack 1,7 ;276,96;pack;coffret;;TOUGHSYSTEM;;;;;;sans-ref;famille:rangement;REF:DWST08061-1|PACK+COFFRET;référence;PACK+COFFRET;4;;
+Quincaillerie;coffret;DWST08061-1;DeWalt DWST08061-1 Boîte à outils avec lampes intégrées 395 x 352 x 255 mm ToughSystem 2.0 + 1x batterie 5,0 Ah - sans c;278,57;pack;coffret;;TOUGHSYSTEM;;;;;;sans-ref;famille:rangement;REF:DWST08061-1|PACK+1X5.0+COFFRET;référence;PACK+1X5.0+COFFRET;3;;
+Quincaillerie;burin;;DEWALT - Perforateur-Burineur SDS-PLUS Brushless 2.6J 18V 4Ah Li-Ion - Sans Fil avec Coffret TSTAK & Jeu de 3 Burins SDS;279,57;pack;burin pointu;;TSTAK;;;;3;;sans-ref;famille:consommable;TIT:perforateur burineur sds plus brushless 2 6j 18v 4ah li ion sans fil avec coffret tstak jeu de 3 burins sds;titre;PACK+1X4+COFFRET;1;;
+Quincaillerie;filtration;DWXAF201;DeWALT DWXAF201 — DWXAF201;280,00;seul;filtre;;;;;;1;;reconnu;famille:consommable;REF:DWXAF201|OUTIL;référence;OUTIL;1;DWXAF201;368,20
 Quincaillerie;accessoire;;DEWALT PowerCoil ongles DNF Anneau 90 mm 2.7 KST.. s3116, 1 pièce, dnf31r90s316e;290,81;seul;accessoire;;;;;;1;;sans-ref;famille:consommable;TIT:powercoil ongles dnf anneau 90 mm 2 7 kst s3116 1 pi ce dnf31r90s316e;titre;OUTIL;1;;
-Quincaillerie;coffret;DWST83401-1;DeWalt DSTROLLEY ToughSystem 2.0 DS complet (DWST83401-1);294,61;pack;coffret;;TOUGHSYSTEM;;;;;;sans-ref;famille:rangement;REF:DWST83401-1|PACK;référence;PACK;1;;
-Quincaillerie;visserie;P121-23;DeWalt Boulon de remplacement pour sécateurs P121-23;295,68;seul;boulon;;;;;;1;;sans-ref;famille:consommable;REF:P121-23|ACCESSOIRE;référence;ACCESSOIRE;1;;
+Quincaillerie;coffret;DWST83401-1;DeWalt DSTROLLEY ToughSystem 2.0 DS complet (DWST83401-1);294,61;pack;coffret;;TOUGHSYSTEM;;;;;;sans-ref;famille:rangement;REF:DWST83401-1|PACK+COFFRET;référence;PACK+COFFRET;1;;
+Quincaillerie;coffret;DWST83402-1;DEWALT Kit 3 en 1 TOUGHSYSTEM DWST83402-1 - 2 Coffrets Petite et Moyenne Contenance et 1 Coffret Mobile Grande Contenanc;303,33;pack;coffret modulaire;;TOUGHSYSTEM;;;;;;sans-ref;famille:rangement;REF:DWST83402-1|PACK+COFFRET;référence;PACK+COFFRET;1;;
 Quincaillerie;accessoire;DNF50;DEWALT PowerCoil ongles DNF 50 mm 5.94 KST. Bague Tige, 1 pièce, dnf25r50s316e;312,21;seul;accessoire;;;;;;1;;sans-ref;famille:consommable;REF:DNF50|OUTIL;référence;OUTIL;1;;
-Quincaillerie;vissage-embout;DT71706;DEWALT DT71706;315,66;pack;embout de vissage;;;;;;1;;inconnu;famille:consommable;REF:DT71706|PACK;référence;PACK;1;;
+Quincaillerie;vissage-embout;DT71706;DeWALT DT71706 — DT71706;315,66;pack;embout de vissage;;;;;;1;;reconnu;famille:consommable;REF:DT71706|PACK;référence;PACK;1;DT71706;411,94
 Quincaillerie;accessoire;;Adaptateur SDS-Max - 400mm;325,12;seul;adaptateur;;;;;;1;;sans-ref;famille:consommable;TIT:adaptateur sds max 400mm;titre;ACCESSOIRE;1;;
 Quincaillerie;coffret;DWST08260;DEWALT Tough System DWST08260 Étagère de rangement pour garage Noir;338,75;pack;coffret modulaire;;TOUGHSYSTEM;;;;;;sans-ref;famille:rangement;REF:DWST08260|PACK;référence;PACK;3;;
 Quincaillerie;;;DEWALT dt6790 DEWALT DEWALT DEWALT 55 mm de forage Bit (55) dt6790-qz - Argent;381,05;seul;;;;;;;;;sans-ref;titre;TIT:dt6790 55 mm de forage bit 55 dt6790 qz argent;titre;OUTIL;1;;
-Quincaillerie;foret;DT9778;DEWALT DT9778;391,86;seul;foret;;;;;;1;;inconnu;famille:consommable;REF:DT9778|OUTIL;référence;OUTIL;1;;
+Quincaillerie;foret;DT9778;DeWALT DT9778 — DT9778;391,86;seul;foret;;;;;;1;;reconnu;famille:consommable;REF:DT9778|OUTIL;référence;OUTIL;1;DT9778;505,90
 Quincaillerie;foret;;DEWALT percée Foret SDS-max 65 x 390 x 550 mm, dt6791 QZ;403,74;seul;foret;;;;;;1;;sans-ref;famille:consommable;TIT:perc e foret sds max 65 x 390 x 550 mm dt6791 qz;titre;OUTIL;1;;
 Quincaillerie;;R009P;DeWalt KS Tools 515.3250-R009P enclume 3/4 pouce;435,44;seul;;;;;;;;;sans-ref;titre;REF:R009|OUTIL;référence;OUTIL;1;;
-Quincaillerie;fraise;DT90017-QZ;DEWALT - Affleureuse Défonceuse Brushless XR 18V - Plongée 55mm & Coffret 22 Fraises de Défonceuse - DT90017-QZ - Set de;438,24;pack;fraise de défonceuse;;GENERIQUE;;;;22;;sans-ref;famille:consommable;REF:DT90017|PACK;référence;PACK;1;;
-Quincaillerie;coffret;;Dewalt rozszerzacz do rur pex dce400nt tstak;471,63;pack;coffret modulaire;;TSTAK;;;;;;sans-ref;famille:rangement;TIT:rozszerzacz do rur pex dce400nt tstak;titre;PACK;1;;
+Quincaillerie;fraise;DT90017-QZ;DEWALT - Affleureuse Défonceuse Brushless XR 18V - Plongée 55mm & Coffret 22 Fraises de Défonceuse - DT90017-QZ - Set de;438,24;pack;fraise de défonceuse;;GENERIQUE;;;;22;;sans-ref;famille:consommable;REF:DT90017|PACK+COFFRET;référence;PACK+COFFRET;1;;
+Quincaillerie;coffret;;Dewalt rozszerzacz do rur pex dce400nt tstak;471,63;pack;coffret modulaire;;TSTAK;;;;;;sans-ref;famille:rangement;TIT:rozszerzacz do rur pex dce400nt tstak;titre;PACK+COFFRET;1;;
 Quincaillerie;;;Dewalt Dce6820n-Xj Jerricane De Camping 15 L;503,99;seul;;;;;;;;;sans-ref;titre;TIT:dce6820n xj jerricane de camping 15 l;titre;OUTIL;1;;
-Quincaillerie;coffret;DWST17820;DeWalt TSTAK Boîte à Outils avec Roulettes, Boîte Profonde (DWST17820);560,64;pack;coffret;;TSTAK;;;;;;sans-ref;famille:rangement;REF:DWST17820|PACK;référence;PACK;1;;
+Quincaillerie;coffret;DWST17820;DeWalt TSTAK Boîte à Outils avec Roulettes, Boîte Profonde (DWST17820);560,64;pack;coffret;;TSTAK;;;;;;sans-ref;famille:rangement;REF:DWST17820|PACK+COFFRET;référence;PACK+COFFRET;1;;
 Quincaillerie;mobilier;DWST98236-1;DeWalt Servante d'Atelier McLaren F1 Team 5 Tiroirs 900mm (DWST98236-1);580,00;seul;servante;;;;;;;oui;sans-ref;famille:rangement;REF:DWST98236-1|OUTIL;référence;OUTIL;1;;
-Quincaillerie;mobilier;;DeWalt ToughSystem DXL Tower 4-in-1;616,90;pack;servante;;TOUGHSYSTEM;;;;;;sans-ref;famille:rangement;TIT:toughsystem dxl tower 4 in 1;titre;PACK;1;;
-Quincaillerie;lame-circulaire;DT20737B-QZ;DEWALT DT20737B-QZ;623,71;seul;lame de scie circulaire;;;;;;1;;inconnu;famille:consommable;REF:DT20737|OUTIL;référence;OUTIL;1;;
+Quincaillerie;mobilier;;DeWalt ToughSystem DXL Tower 4-in-1;616,90;pack;servante;;TOUGHSYSTEM;;;;;;sans-ref;famille:rangement;TIT:toughsystem dxl tower 4 in 1;titre;PACK+COFFRET;1;;
+Quincaillerie;lame-circulaire;DT20737B-QZ;DeWALT DT20737B-QZ — DT20737B-QZ;623,71;seul;lame de scie circulaire;;;;;;1;;reconnu;famille:consommable;REF:DT20737|OUTIL;référence;OUTIL;1;DT20737B-QZ;791,48
 Quincaillerie;lame-alternative;DT20735B-QZ;DEWALT Multi outil Lame de scie 100 Comprimés, 1 pièce, noir, noir, DT20735B-QZ 0 wattsW, 0 voltsV;712,73;seul;lame de scie;;;;;;1;;sans-ref;famille:consommable;REF:DT20735|OUTIL;référence;OUTIL;1;;
 Quincaillerie;lame-alternative;;DEWALT Multi outil Lame de scie, 67 x 30 mm, 100 pièces, noir, dt20734b/qz;801,77;seul;lame de scie;;;;;;1;;sans-ref;famille:consommable;TIT:multi outil lame de scie 67 x 30 mm 100 pi ces noir dt20734b qz;titre;OUTIL;1;;
-Quincaillerie;mobilier;;DeWalt Toughsystem DXL Tower 5-in-1;822,00;pack;servante;;TOUGHSYSTEM;;;;;;sans-ref;famille:rangement;TIT:toughsystem dxl tower 5 in 1;titre;PACK;1;;
-Quincaillerie;lame-circulaire;DT20732B-QZ;DEWALT DT20732B-QZ;890,80;seul;lame de scie circulaire;;;;;;1;;inconnu;famille:consommable;REF:DT20732|OUTIL;référence;OUTIL;1;;
-Quincaillerie;coffret;FVK271T2-QW;DeWALT Kit FVK271T2-QW 54V/18V (DCH333 + DCG418 + 2 x 6.0 Ah + DCB118 + TSTAK II + TSTAK VI);1030,00;pack;coffret modulaire;;TSTAK;;;;;;sans-ref;famille:rangement;REF:FVK271|PACK;référence;PACK;1;;
-Quincaillerie;lame-alternative;D36000-QS;DEWALT D36000-QS;1061,57;seul;lame de scie;;;;;;1;;inconnu;famille:consommable;REF:D36000|OUTIL;référence;OUTIL;1;;
-Quincaillerie;coffret;FVK381T2-QW;DeWALT Kit FVK381T2-QW 54V/18V (DCH333 + DCD796 + DCG418 + 2 x 6.0 Ah + DCB118 + 2 x TSTAK II + TSTAK VI);1142,00;pack;coffret modulaire;;TSTAK;;;;;;sans-ref;famille:rangement;REF:FVK381|PACK;référence;PACK;2;;
+Quincaillerie;mobilier;;DeWalt Toughsystem DXL Tower 5-in-1;822,00;pack;servante;;TOUGHSYSTEM;;;;;;sans-ref;famille:rangement;TIT:toughsystem dxl tower 5 in 1;titre;PACK+COFFRET;1;;
+Quincaillerie;lame-circulaire;DT20732B-QZ;DeWALT DT20732B-QZ — DT20732B-QZ;890,80;seul;lame de scie circulaire;;;;;;1;;reconnu;famille:consommable;REF:DT20732|OUTIL;référence;OUTIL;1;DT20732B-QZ;1119,73
+Quincaillerie;coffret;FVK271T2-QW;DeWALT Kit FVK271T2-QW 54V/18V (DCH333 + DCG418 + 2 x 6.0 Ah + DCB118 + TSTAK II + TSTAK VI);1030,00;pack;coffret modulaire;;TSTAK;;;;;;sans-ref;famille:rangement;REF:FVK271|PACK+2X6.0+COFFRET;référence;PACK+2X6.0+COFFRET;1;;
+Quincaillerie;lame-alternative;D36000-QS;DeWALT D36000-QS — D36000-QS;1061,57;seul;lame de scie;;;;;;1;;reconnu;famille:consommable;REF:D36000|OUTIL;référence;OUTIL;1;D36000-QS;1330,15
+Quincaillerie;coffret;FVK381T2-QW;DeWALT Kit FVK381T2-QW 54V/18V (DCH333 + DCD796 + DCG418 + 2 x 6.0 Ah + DCB118 + 2 x TSTAK II + TSTAK VI);1142,00;pack;coffret modulaire;;TSTAK;;;;;;sans-ref;famille:rangement;REF:FVK381|PACK+2X6.0+COFFRET;référence;PACK+2X6.0+COFFRET;1;;
+Quincaillerie;coffret;FVK381T3-QW;DeWALT Kit FVK381T3-QW 54V/18V (DCH333 + DCD796 + DCG418 + 3 x 6.0 Ah + DCB118 + 2 x TSTAK II + TSTAK VI);1283,00;pack;coffret modulaire;;TSTAK;;;;;;sans-ref;famille:rangement;REF:FVK381|PACK+3X6.0+COFFRET;référence;PACK+3X6.0+COFFRET;1;;
 Quincaillerie;lame-alternative;;DEWALT Multi outil Lame de scie, 43 x 65 mm, 100 pièces, noir, dt20736b/qz;1392,14;seul;lame de scie;;;;;;1;;sans-ref;famille:consommable;TIT:multi outil lame de scie 43 x 65 mm 100 pi ces noir dt20736b qz;titre;OUTIL;1;;
 Quincaillerie;lame-circulaire;;DeWalt Multi-Outil Titan 55 x 44 mm 100 Pièces;1514,50;seul;lame de scie circulaire;;;;;;1;;sans-ref;famille:consommable;TIT:multi outil titan 55 x 44 mm 100 pi ces;titre;OUTIL;1;;
-Quincaillerie;foret;DT50002-QZ;DEWALT DT50002-QZ;9985,00;seul;foret métal;;;;;;1;;inconnu;famille:consommable;REF:DT50002|OUTIL;référence;OUTIL;1;;
+Quincaillerie;foret;DT50002-QZ;DeWALT DT50002-QZ — DT50002-QZ;9985,00;seul;foret métal;;;;;;1;;reconnu;famille:consommable;REF:DT50002|OUTIL;référence;OUTIL;1;DT50002-QZ;12311,51
