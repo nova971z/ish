@@ -343,26 +343,92 @@ function parseClickoutil(rawText, brand) {
    ⚠️ PORTE J4 LUE : rien ici ne fixe un prix. On rattache un montant déjà
    affiché à la référence que le titre NOMME — et on refuse dès qu'un doute
    subsiste, parce qu'un coût faux se propage à toute la chaîne. */
-var OFFRE_LOT = /(\s[+&]\s|\bsets?\b|\bkits?\b|\blots?\b|\bpower ?set\b|\bcombo\b)/i;
-var OFFRE_POUR = /\b(pour|f[üu]r|compatible|adapt[ée]|passend|convient|fits)\b/i;
-var OFFRE_OCCASION = /\b(occasion|reconditionn|refurb|gebraucht|d.?occasion|used|seconde main)\b/i;
-var OFFRE_UNITE = /^\d+(\.\d+)?(V|AH|MM|CM|W|NM|KG|MAX)?([-\/]\d+(\.\d+)?(V|AH|MM|CM|W|NM|KG|MAX)?)*$/i;
+/* ⛔⛔⛔ « POUR » NE VEUT PAS DIRE LA MÊME CHOSE SELON CE QUI SUIT.
+   Défaut démontré par l'user le 04/08/2026, captures d'écran à l'appui, et il
+   avait raison sur les trois cas :
+     · « DCB117-QW — Chargeur de piles, POUR technologie de batterie Li-Ion »
+       est un CHARGEUR, pas un accessoire. « pour » y introduit une
+       CARACTÉRISTIQUE, pas une machine.
+     · « Tête d'outil réglable en cuivre 2,2 cm POUR DCE4500 (DCE450078) »
+       porte DEUX références : celle de la MACHINE (DCE4500, après « pour ») et
+       la SIENNE (DCE450078, entre parenthèses). Ma règle « plusieurs
+       candidats ⇒ on refuse » la jetait, alors que le titre dit tout.
+     · « Barre POUR scie Stationnaire DeWALT N233859 » : sa référence est
+       N233859, et « pour scie » dit que c'est un accessoire.
+   Mesuré sur ces cinq titres : 5 échecs sur 5. Je lisais un MOT, pas une
+   phrase — exactement le reproche.
 
-function refUniqueDuTitre(titre, brand) {
+   ⛔ CE QUE FAIT LA LECTURE MAINTENANT, dans l'ordre :
+     ① relever tous les candidats de référence avec leur position ;
+     ② marquer COMPATIBILITÉ ceux qu'un « pour / für / for / compatible »
+       introduit directement — ce sont les machines visées, jamais l'article ;
+     ③ ce qui reste est la référence PROPRE de l'article. Une seule ⇒ on la
+       prend ; zéro ou plusieurs ⇒ on refuse, comme avant.
+   ⚠️ ARGENT, ET PORTE J4 LUE : c'est la garde qui empêche d'écrire le prix
+   d'une tête de cuivre à 80,84 € sur la machine DCE4500. Elle ne s'assouplit
+   pas, elle devient JUSTE — on distingue enfin les deux références au lieu de
+   tout jeter. */
+var OFFRE_LOT = /(\s[+&]\s|\bsets?\b|\bkits?\b|\blots?\b|\bpower ?set\b|\bcombo\b)/i;
+var OFFRE_OCCASION = /\b(occasion|reconditionn|refurb|gebraucht|d.?occasion|\bused\b|seconde main)\b/i;
+/* ⛔ LES UNITÉS NE SONT JAMAIS DES RÉFÉRENCES. Table élargie le 04/08/2026
+   après avoir accepté « N233859 » (une lettre, six chiffres) : ce même
+   assouplissement laissait passer « 600ML », « 250PCS », « 18GA ». Une unité
+   reconnue est écartée quelle que soit la forme de la référence. */
+var OFFRE_UNITE = /^\d+(\.\d+)?(V|AH|MM|CM|M|W|KW|NM|KG|G|ML|L|MAX|PCS|PC|GA|MIN|H|BAR|PSI|RPM|TR|DB|IN|FT|°)?([-\/]\d+(\.\d+)?(V|AH|MM|CM|M|W|KW|NM|KG|G|ML|L|MAX|PCS|PC|GA|MIN|H|BAR|PSI|RPM|TR|DB|IN|FT|°)?)*$/i;
+/* Les mots qui introduisent une COMPATIBILITÉ, et rien d'autre. */
+var MOT_COMPAT = /\b(pour|f[üu]r|for|compatible\s+avec|compatible|adapt[ée]e?s?\s+(?:[àa]|pour)|passend\s+f[üu]r|convient\s+(?:[àa]|pour)|fits)\s*$/i;
+
+function candidatsAvecPosition(titre, brand) {
   var t = String(titre || '');
-  if (!t) return null;
-  if (OFFRE_LOT.test(t) || OFFRE_POUR.test(t) || OFFRE_OCCASION.test(t)) return null;
   var marqueUp = String(brand || '').toUpperCase();
   var re = /[A-Z0-9][A-Z0-9.\/-]{3,}/gi;
-  var vus = [], m;
+  var out = [], m;
   while ((m = re.exec(t)) !== null) {
     var c = m[0].toUpperCase();
     if (c === marqueUp) continue;
-    if (!/\d/.test(c) || !/[A-Z].*[A-Z]/.test(c)) continue;   // ≥1 chiffre, ≥2 lettres
+    /* ⛔ DEUX FORMES DE RÉFÉRENCE, ET LA SECONDE MANQUAIT. « DCB117-QW » a
+       deux lettres ; « N233859 » — une pièce détachée montrée par l'user —
+       n'en a QU'UNE, suivie de six chiffres, et c'est une référence DeWALT
+       parfaitement valide. Exiger deux lettres la jetait.
+       ⚠️ Le seuil de quatre chiffres évite qu'un « 600ML » ou un « L120 »
+       passe pour une référence : une lettre seule ne suffit que si elle est
+       suivie d'un numéro long. */
+    var nbLettres = (c.match(/[A-Z]/g) || []).length;
+    var nbChiffres = (c.match(/\d/g) || []).length;
+    if (!nbChiffres) continue;
+    if (nbLettres < 2 && !(nbLettres === 1 && nbChiffres >= 4)) continue;
     if (OFFRE_UNITE.test(c)) continue;                        // « 18V-54V » n'est pas une réf
-    if (vus.indexOf(c) === -1) vus.push(c);
+    if (out.some(function (x) { return x.ref === c; })) continue;
+    out.push({ ref: c, index: m.index });
   }
-  return vus.length === 1 ? vus[0] : null;
+  return out;
+}
+
+/* Rend { ref, pourMachines } — `ref` est la référence PROPRE de l'article,
+   `pourMachines` la liste de celles qu'il dit servir. `ref` vaut null quand
+   rien ne peut être tranché sans deviner. */
+function lireReferenceDuTitre(titre, brand) {
+  var t = String(titre || '');
+  var vide = { ref: null, pourMachines: [] };
+  if (!t) return vide;
+  if (OFFRE_LOT.test(t) || OFFRE_OCCASION.test(t)) return vide;
+  var cands = candidatsAvecPosition(t, brand);
+  if (!cands.length) return vide;
+  var propres = [], compat = [];
+  cands.forEach(function (c) {
+    /* Les 24 signes qui précèdent, bornés à la ponctuation forte : un
+       « pour » d'une autre proposition ne doit pas mordre ici. */
+    var avant = t.slice(Math.max(0, c.index - 24), c.index);
+    avant = avant.split(/[.;,)(]/).pop();
+    if (MOT_COMPAT.test(avant)) compat.push(c.ref); else propres.push(c.ref);
+  });
+  if (propres.length !== 1) return { ref: null, pourMachines: compat };
+  return { ref: propres[0], pourMachines: compat };
+}
+
+/* Compatibilité d'appel : l'ancienne forme ne rendait que la référence. */
+function refUniqueDuTitre(titre, brand) {
+  return lireReferenceDuTitre(titre, brand).ref;
 }
 
 function parseIdealo(rawText, brand) {
@@ -2470,4 +2536,5 @@ function comparerCaracteristiques(a, b) {
 module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickoutil, parseIdealo: parseIdealo, parseAuto: parseAuto, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, raisonAucuneSource: raisonAucuneSource, enMillis: enMillis, SOURCE_FRESH_MS: SOURCE_FRESH_MS, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage, estMaPropreReponse: estMaPropreReponse, titresAttendus: titresAttendus, compterTuiles: compterTuiles, empreintePage: empreintePage, racineRef: racineRef, racineModele: racineModele,
   varianteProduit: varianteProduit, roleCoffret: roleCoffret,
   signatureBatteries: signatureBatteries, estPourAutreMachine: estPourAutreMachine,
-  sansAccentsTitre: sansAccentsTitre, refUniqueDuTitre: refUniqueDuTitre, apparierParNomSouple: apparierParNomSouple, CONCORDANCES_MIN: CONCORDANCES_MIN, annoncesManquantes: annoncesManquantes, extraireCaracteristiques: extraireCaracteristiques, comparerCaracteristiques: comparerCaracteristiques, planBalayage: planBalayage, rangDansPlan: rangDansPlan, OUTILS: OUTILS, SERIES: SERIES, nomenclature: nomen };
+  sansAccentsTitre: sansAccentsTitre, refUniqueDuTitre: refUniqueDuTitre,
+  lireReferenceDuTitre: lireReferenceDuTitre, candidatsAvecPosition: candidatsAvecPosition, apparierParNomSouple: apparierParNomSouple, CONCORDANCES_MIN: CONCORDANCES_MIN, annoncesManquantes: annoncesManquantes, extraireCaracteristiques: extraireCaracteristiques, comparerCaracteristiques: comparerCaracteristiques, planBalayage: planBalayage, rangDansPlan: rangDansPlan, OUTILS: OUTILS, SERIES: SERIES, nomenclature: nomen };

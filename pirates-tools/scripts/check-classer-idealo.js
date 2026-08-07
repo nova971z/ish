@@ -288,36 +288,57 @@ function corps(ok) {
     + 'supposition (' + JSON.stringify(inconnu.inconnus) + ')');
 
 
-  /* ── L'OFFRE MARCHANDE DONNE SA RÉFÉRENCE QUAND LE TITRE LA NOMME ───────── */
-  /* ⛔ Demande de l'user, 04/08/2026 : « dans le titre tu n'es pas capable de
-     comprendre ce que c'est ? Moi en un coup d'œil j'y arrive. » Mesuré : sur
-     2 162 offres du balayage, 999 portent une référence unique et lisible, et
-     332 fiches importées ne pouvaient pas être suivies faute de les lire. */
-  ok(priceParse.refUniqueDuTitre('ZZBRAND Foret métal HSS-G Coffret 29 pièces - ZZ7926-XJ', 'ZZBRAND') === 'ZZ7926-XJ',
-    '⛔ une offre dont le titre NOMME une seule référence la donne — c\'est ce '
-    + 'qu\'un humain lit d\'un coup d\'œil');
-  ok(priceParse.refUniqueDuTitre('ZZBRAND ceinture porte-outils (ZZST50113-1)', 'ZZBRAND') === 'ZZST50113-1',
-    '⛔ …y compris entre parenthèses en fin de titre');
+  /* ── LIRE LE TITRE COMME UN HUMAIN LE LIT ────────────────────────────────
+     ⛔⛔ QUATRE CAS APPORTÉS PAR L'USER LE 04/08/2026, CAPTURES À L'APPUI.
+     Mesuré avant correctif : 5 échecs sur 5. Je cherchais un MOT (« pour ») au
+     lieu de lire la PHRASE — « il faut arrêter de prendre les gens pour des
+     cons », et il avait raison. Chacun de ces cas est ici pour ne plus jamais
+     repasser. Préfixe ZZ : on éprouve la grammaire, jamais son catalogue. */
 
-  /* ⛔⛔ ARGENT — LES QUATRE GARDES. Chacune vient d'un piège mesuré. */
+  /* ① « pour » qui introduit une CARACTÉRISTIQUE, pas une machine. */
+  ok(priceParse.lireReferenceDuTitre('ZZB117-QW Chargeur de piles, Pour technologie de batterie Li-Ion, Affichage LED', 'ZZBRAND').ref === 'ZZB117-QW',
+    '⛔⛔ « Chargeur de piles, POUR technologie de batterie Li-Ion » est un '
+    + 'CHARGEUR : « pour » y annonce une caractéristique, pas une compatibilité. '
+    + 'Le rejeter perdait un produit entier ('
+    + priceParse.lireReferenceDuTitre('ZZB117-QW Chargeur de piles, Pour technologie de batterie Li-Ion', 'ZZBRAND').ref + ')');
+
+  /* ② DEUX références : celle de la machine visée, et la SIENNE. */
+  var tete = priceParse.lireReferenceDuTitre(
+    'ZZBRAND Tête d\'outil réglable en cuivre de 2,2 cm pour ZZE4500 (ZZE450078)', 'ZZBRAND');
+  ok(tete.ref === 'ZZE450078',
+    '⛔⛔ ARGENT : la référence PROPRE de l\'article est celle qui n\'est PAS '
+    + 'introduite par « pour ». La confondre écrirait le prix d\'une tête de '
+    + 'cuivre sur la machine entière (' + tete.ref + ')');
+  ok(tete.pourMachines.indexOf('ZZE4500') !== -1,
+    '⛔ …et la machine visée est RELEVÉE, pas jetée : c\'est elle qui dit que '
+    + 'l\'article est un accessoire (' + JSON.stringify(tete.pourMachines) + ')');
+
+  /* ③ Une référence de pièce détachée n'a qu'UNE lettre. */
+  ok(priceParse.lireReferenceDuTitre('Barre pour scie Stationnaire ZZBRAND N233859', 'ZZBRAND').ref === 'N233859',
+    '⛔ une référence à UNE seule lettre suivie d\'un long numéro est valide — '
+    + 'exiger deux lettres jetait toutes les pièces détachées');
+
+  /* ④ …mais une UNITÉ ne devient jamais une référence pour autant. */
+  ok(priceParse.lireReferenceDuTitre('ZZBRAND bidon 600ML de graisse', 'ZZBRAND').ref === null
+    && priceParse.lireReferenceDuTitre('ZZBRAND clous 250PCS 18GA', 'ZZBRAND').ref === null,
+    '⛔⛔ « 600ML », « 250PCS », « 18GA » sont des UNITÉS : sans ce garde-fou, '
+    + 'l\'assouplissement du cas ③ en aurait fait des références');
+
+  /* ⑤ Plusieurs machines visées et aucune référence propre ⇒ on refuse. */
+  var multi = priceParse.lireReferenceDuTitre('Batterie de remplacement pour ZZB184 ZZB181 ZZB182', 'ZZBRAND');
+  ok(multi.ref === null,
+    '⛔⛔ ARGENT : une batterie « pour » trois machines n\'a PAS de référence '
+    + 'propre — lui en attribuer une écrirait son prix sur un outil');
+
+  /* ── LES AUTRES GARDES TIENNENT TOUJOURS ─────────────────────────────────── */
+  ok(priceParse.refUniqueDuTitre('ZZBRAND Foret métal HSS-G Coffret 29 pièces - ZZ7926-XJ', 'ZZBRAND') === 'ZZ7926-XJ',
+    '⛔ une offre dont le titre NOMME une seule référence la donne');
   ok(priceParse.refUniqueDuTitre('ZZBRAND Power Set 1 x 18V 5,0 Ah + ZZB107', 'ZZBRAND') === null,
-    '⛔⛔ un LOT (« + ») ne donne PAS sa référence : elle n\'y est qu\'un '
-    + 'COMPOSANT, et le prix de l\'ensemble se poserait sur le chargeur seul');
-  ok(priceParse.refUniqueDuTitre('Kit de conversion du tube pour ZZE 560', 'ZZBRAND') === null,
-    '⛔⛔ un article vendu POUR une machine est un ACCESSOIRE : son prix ne doit '
-    + 'jamais devenir le coût de la machine (le piège du pistolet à mastic)');
+    '⛔⛔ un LOT (« + ») ne donne PAS sa référence : elle n\'y est qu\'un COMPOSANT');
   ok(priceParse.refUniqueDuTitre('ZZBRAND ZZD796 reconditionné', 'ZZBRAND') === null,
-    '⛔ une offre d\'OCCASION ou reconditionnée n\'est pas notre produit neuf');
-  ok(priceParse.refUniqueDuTitre('Batterie 20V 6.0Ah ZZB184 ZZB181 ZZB182', 'ZZBRAND') === null,
-    '⛔ PLUSIEURS références dans un titre : on n\'arbitre pas, on refuse');
-  /* ⚠️ CE TITRE PORTE UNE UNITÉ **ET** UNE VRAIE RÉFÉRENCE. Premier jet : il
-     n'avait que deux unités — désarmer le filtre laissait donc DEUX candidats,
-     donc un refus pour ambiguïté, et l'assertion passait sans rien vérifier.
-     Ici, filtre actif ⇒ un seul candidat (la réf) ; filtre désarmé ⇒ deux
-     candidats ⇒ null. Le sabotage mord. */
+    '⛔ une offre d\'OCCASION n\'est pas notre produit neuf');
   ok(priceParse.refUniqueDuTitre('ZZBRAND Batterie XR 18V-54V ZZB548-XJ', 'ZZBRAND') === 'ZZB548-XJ',
-    '⛔ « 18V-54V » est une UNITÉ, jamais une référence : sans ce filtre elle '
-    + 'ferait un second candidat et la vraie référence serait perdue ('
+    '⛔ « 18V-54V » est une UNITÉ, jamais une référence ('
     + priceParse.refUniqueDuTitre('ZZBRAND Batterie XR 18V-54V ZZB548-XJ', 'ZZBRAND') + ')');
 
   /* ── LE COMPTE OUTILS SEULS / PACKS ─────────────────────────────────────── */
