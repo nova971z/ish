@@ -1,0 +1,9 @@
+{
+  "marque": "DeWALT",
+  "_pourquoi": "Suite de la demande « supprime tout ce qui n'est pas détecté ». Ces DEUX-LÀ auraient dû partir avec les 24 : mesuré à la loupe, AUCUNE annonce du balayage ne les nomme telles quelles. Mon classement les avait ratées parce qu'il cherchait la référence en SOUS-CHAÎNE : « DCB140 » se trouve dans « DCB1404-QW », « DCH334 » dans « DCH334X2-QW ». Deux produits différents à chaque fois — un chargeur QUADPORT contre une batterie, un pack 2×9 Ah contre une machine nue.",
+  "renommer": [],
+  "retirer": [
+    { "sku": "DCB140", "motif": "nommée telle quelle dans 0 annonce sur les 67 pages. Les 3 annonces qui « matchaient » disent DCB1404-QW — un chargeur QUADPORT, quand DCB140 est une batterie" },
+    { "sku": "DCH334", "motif": "nommée telle quelle dans 0 annonce. Les 2 annonces qui « matchaient » disent DCH334X2-QW — le pack 2×9 Ah à 1441,75 €, pas la machine nue" }
+  ]
+}

@@ -38886,38 +38886,6 @@
     "price": 166.07
   },
   {
-    "id": "dewalt-dcb140",
-    "slug": "dewalt-dcb140-dcb140",
-    "sku": "DCB140",
-    "name": "DCB140",
-    "brand": "DeWALT",
-    "category": "Batteries et chargeurs",
-    "title": "DeWALT DCB140 — DCB140",
-    "tag": "Nouveau",
-    "desc": "DCB140.",
-    "img": "images/placeholder.svg",
-    "currency": "EUR",
-    "vat": 0.2,
-    "stock_status": "in_stock",
-    "stock_label": "En stock",
-    "model": "",
-    "ncCategory": "power_tool",
-    "productType": "pro",
-    "tags": [
-      "cordless"
-    ],
-    "features": [],
-    "specs": {
-      "Marque": "DeWALT",
-      "Référence": "DCB140"
-    },
-    "weight_kg": 2,
-    "poidsSuppose": true,
-    "ficheAcompleter": false,
-    "price_ht": 138.65,
-    "price": 166.38
-  },
-  {
     "id": "dewalt-dwd024ks",
     "slug": "dewalt-dwd024ks-dwd024ks",
     "sku": "DWD024KS",
@@ -55903,38 +55871,6 @@
     "price_ht": 1257.79,
     "price": 1509.35,
     "sourceDescriptif": "nomenclature"
-  },
-  {
-    "id": "dewalt-dch334",
-    "slug": "dewalt-dch334-dch334",
-    "sku": "DCH334",
-    "name": "DCH334",
-    "brand": "DeWALT",
-    "category": "Perforateurs",
-    "title": "DeWALT DCH334 — DCH334",
-    "tag": "Nouveau",
-    "desc": "DCH334.",
-    "img": "images/placeholder.svg",
-    "currency": "EUR",
-    "vat": 0.2,
-    "stock_status": "in_stock",
-    "stock_label": "En stock",
-    "model": "",
-    "ncCategory": "power_tool",
-    "productType": "pro",
-    "tags": [
-      "cordless"
-    ],
-    "features": [],
-    "specs": {
-      "Marque": "DeWALT",
-      "Référence": "DCH334"
-    },
-    "weight_kg": 2,
-    "poidsSuppose": true,
-    "ficheAcompleter": false,
-    "price_ht": 1261.33,
-    "price": 1513.6
   },
   {
     "id": "dewalt-dck665p3t",
