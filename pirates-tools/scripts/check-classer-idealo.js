@@ -394,9 +394,11 @@ function corps(ok) {
      candidat, pas d'un titre muet. Chaque cas ci-dessous est un de ces faux
      candidats, et chacun coûtait un article entier. */
 
-  /* ⑨ Une QUANTITÉ ou une COTE en tête de mot n'est pas une référence. */
+  /* ⑨ Une QUANTITÉ ou une COTE en tête de mot n'est pas une référence.
+     ⛔⛔ LA RÈGLE EST : UNE RÉFÉRENCE COMMENCE PAR UNE LETTRE. Mesuré sur les
+     1105 fiches DeWALT du catalogue — aucune n'ouvre sur un chiffre. */
   ok(priceParse.lireReferenceDuTitre('ZZBRAND Bim Hole Saw 11-piece Set ZZ90354', 'ZZBRAND').ref === 'ZZ90354',
-    '⛔ « 11-piece » commence par un chiffre et porte des minuscules : c\'est '
+    '⛔ « 11-piece » commence par un chiffre : c\'est '
     + 'une quantité. Elle comptait pour une SECONDE référence, donc refus ('
     + priceParse.lireReferenceDuTitre('ZZBRAND Bim Hole Saw 11-piece Set ZZ90354', 'ZZBRAND').ref + ')');
   ok(priceParse.lireReferenceDuTitre('Servante de chantier 3-en-1 ZZBRAND ZZST83448-1', 'ZZBRAND').ref === 'ZZST83448-1',
@@ -414,24 +416,28 @@ function corps(ok) {
     + 'part s\'écrire sur une fiche fantôme ('
     + priceParse.lireReferenceDuTitre('ZZBRAND Lochsaegen-Set BIM Universal, 12-tlg.', 'ZZBRAND').ref + ')');
 
-  /* ⑨bis LES UNITÉS QUI MANQUAIENT À LA TABLE, chacune relevée sur une annonce
-     réelle du balayage : « 10000mAh », « 1/2inch », « 72WZ » (denture, sigle
-     allemand). Chacune comptait pour une SECONDE référence, donc refus, et
-     l'article partait à la poubelle avec sa référence écrite en clair. */
-  /* ⚠️ LES DEUX PREMIERS SONT ÉCRITS EN CAPITALES, ET C'EST VOULU. En casse
-     ordinaire (« 10000mAh », « 1/2inch ») la garde des chiffres en tête suffit
-     déjà : sabordée, la table d'unités restait VERTE et ne prouvait rien. Des
-     marchands titrent en majuscules — là, seule la table peut trancher. */
-  [['ZZBRAND POWERBANK 2 PORTS 10000MAH (ZZT2151643)', 'ZZT2151643'],
-    ['ZZBRAND ZZ215804-XJ EXTRACTEUR DE POUSSIERE, NOIR, 1/2INCH', 'ZZ215804-XJ'],
-    ['ZZBRAND Extreme 315 x 30 x 3,0 72WZ (ZZ4358QZ)', 'ZZ4358QZ'],
-    ['ZZBRAND ZZV010 HEPA DUST EXTRACTOR 8-GALLON', 'ZZV010']
-  ].forEach(function (p) {
-    ok(priceParse.lireReferenceDuTitre(p[0], 'ZZBRAND').ref === p[1],
-      '⛔ une UNITÉ non reconnue dans « ' + p[0] + ' » passe pour une seconde '
-      + 'référence, et l\'article est perdu ('
-      + priceParse.lireReferenceDuTitre(p[0], 'ZZBRAND').ref + ')');
-  });
+  /* ⑨ter ⛔⛔ ET CE QUI COMMENCE PAR UN CHIFFRE EST SOUVENT UNE RÉFÉRENCE
+     AMPUTÉE DE SA TÊTE. « DeWalt ZZS 334M1 » : le marchand a mis une espace,
+     la passe stricte ne voit que « 334M1 » — un morceau. Le prendre pour la
+     référence fabriquait une fiche « 334M1 » qui ne correspond à rien ; le
+     recollage, lui, rend la vraie. Onze annonces du balayage étaient dans ce
+     cas, plus quatre nettoyeurs « ZZPW 00xCE ». */
+  ok(priceParse.lireReferenceDuTitre('ZZBRAND ZZS 334M1 scie sans fil', 'ZZBRAND').ref === 'ZZS334M1',
+    '⛔ « ZZS 334M1 » se recolle : « 334M1 » seul n\'est pas une référence ('
+    + priceParse.lireReferenceDuTitre('ZZBRAND ZZS 334M1 scie sans fil', 'ZZBRAND').ref + ')');
+  /* ⚠️ ET LE RECOLLAGE PART SUR L'ABSENCE DE RÉFÉRENCE PROPRE, pas sur
+     l'absence de candidat : ici il reste ZZB115, mais c'est du CONTENU. */
+  ok(priceParse.lireReferenceDuTitre('ZZBRAND ZZS 331P1 (1 x 5,0 Ah + ZZB115 + TSTAK II)', 'ZZBRAND').ref === 'ZZS331P1',
+    '⛔⛔ un candidat qui n\'est QUE du contenu ne doit pas empêcher le '
+    + 'recollage : la machine était perdue alors que sa référence est écrite, '
+    + 'à une espace près ('
+    + priceParse.lireReferenceDuTitre('ZZBRAND ZZS 331P1 (1 x 5,0 Ah + ZZB115 + TSTAK II)', 'ZZBRAND').ref + ')');
+  /* ⚠️ …et une COTE se lit par morceaux : « 160 bars/500L/H » commence par une
+     LETTRE une fois découpé sur l'espace, donc aucune garde de tête ne le
+     voit. Chaque morceau doit être un nombre ou une unité. */
+  ok(priceParse.lireReferenceDuTitre('Nettoyeur ZZBRAND ZZPW 001CE KART de 160 bars/500L/H max', 'ZZBRAND').ref === 'ZZPW001CE',
+    '⛔ « bars/500L/H » est une COTE, morceau par morceau ('
+    + priceParse.lireReferenceDuTitre('Nettoyeur ZZBRAND ZZPW 001CE KART de 160 bars/500L/H max', 'ZZBRAND').ref + ')');
 
   /* ⑩ Une NORME ou un indice de protection reste une caractéristique. */
   ok(priceParse.lireReferenceDuTitre('ZZBRAND Écouteurs Bluetooth 37h IP56 Jaune (ZZMA1902092)', 'ZZBRAND').ref === 'ZZMA1902092',
@@ -545,11 +551,11 @@ function corps(ok) {
     '⛔ …et les guillemets internes sont DOUBLÉS, sinon Numbers coupe la cellule');
 }
 
-/* ⛔ Mesuré, pas estimé : `assertions rendues : 89` (corps instrumenté le
+/* ⛔ Mesuré, pas estimé : `assertions rendues : 88` (corps instrumenté le
    05/08/2026, après les seize cas de lecture de titre). Un seuil écrit de tête
    laisse une marge où une amputation passe inaperçue — il se remesure à chaque
    assertion neuve, avec la commande, jamais de mémoire. */
-const ASSERTIONS_ATTENDUES = 89;
+const ASSERTIONS_ATTENDUES = 88;
 
 module.exports = function () {
   const errors = [];

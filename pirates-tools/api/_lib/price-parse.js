@@ -398,10 +398,31 @@ var OFFRE_OCCASION = /\b(occasion|reconditionn|refurb|gebraucht|d.?occasion|\bus
    après avoir accepté « N233859 » (une lettre, six chiffres) : ce même
    assouplissement laissait passer « 600ML », « 250PCS », « 18GA ». Une unité
    reconnue est écartée quelle que soit la forme de la référence. */
-var UNITES = 'GALLON|INCH|MAH|PCS|BAR|PSI|RPM|MIN|MAX|KWH|KW|KG|NM|ML|AH|MM|CM|VBL|WWZ|TFZ|WZ|HZ|GA|PC|DB|TR|IN|FT|V|W|M|L|G|H|°';
-/* ⚠️ Le trait d'union entre le nombre et l'unité — « 8-GALLON » — fait
-   partie de l'écriture courante ; sans lui, la cote n'était pas reconnue. */
-var OFFRE_UNITE = new RegExp('^\\d+(\\.\\d+)?-?(' + UNITES + ')?([-\\/x×]\\d+(\\.\\d+)?-?(' + UNITES + ')?)*$', 'i');
+/* ⚠️ TABLE VOLONTAIREMENT COURTE. J'y avais ajouté MAH, INCH, GALLON, WZ,
+   VBL… puis mesuré qu'AUCUN sabotage ne les faisait tomber : la règle
+   « une référence commence par une lettre » les couvrait déjà toutes. Une
+   garde qu'on ne peut pas faire échouer ne garde rien — elles sont parties.
+   Ne reste ici que ce qui peut apparaître EN TÊTE d'un candidat, donc
+   derrière une lettre : « bars/500L/H ». */
+var UNITES = 'PCS|BAR|PSI|RPM|MIN|MAX|KWH|KW|KG|NM|ML|AH|MM|CM|GA|PC|DB|TR|IN|FT|V|W|M|L|G|H|°';
+/* ⛔ UNE COTE SE LIT PAR MORCEAUX, PAS D'UN SEUL TENANT. L'ancienne écriture
+   — une seule expression régulière du début à la fin — exigeait que la chaîne
+   COMMENCE par un nombre. « 160 bars/500L/H » donnait donc le candidat
+   « bars/500L/H », qui commence par une lettre : elle passait au travers et
+   devenait la référence de l'article. On découpe sur les séparateurs de cote
+   (« - », « / », « x »), et l'expression est une cote si CHAQUE morceau est un
+   nombre ou une unité — pluriel compris. Même famille de défaut qu'en E-406 :
+   une règle qui décrit la forme entière rate les formes qu'on n'a pas prévues,
+   là où une règle par morceau les couvre toutes. */
+var UNITE_SEULE = new RegExp('^\\d*([.,]\\d+)?(' + UNITES + ')S?$', 'i');
+var NOMBRE_SEUL = /^\d+([.,]\d+)?$/;
+function estExpressionUnite(c) {
+  var morceaux = String(c || '').split(/[-\/x×]/i).filter(Boolean);
+  if (!morceaux.length) return false;
+  return morceaux.every(function (m) {
+    return NOMBRE_SEUL.test(m) || UNITE_SEULE.test(m);
+  });
+}
 /* ⛔ UNE NORME N'EST PAS UNE RÉFÉRENCE. « IP56 » dans « Écouteurs Bluetooth
    37h IP56 Jaune (DXMA1902092) » comptait pour une seconde référence, donc
    deux candidats, donc refus — et l'article était perdu alors que sa référence
@@ -483,23 +504,29 @@ function candidatsAvecPosition(titre, brand) {
     var nbChiffres = (c.match(/\d/g) || []).length;
     if (!nbChiffres) continue;
     if (nbLettres < 2 && !(nbLettres === 1 && nbChiffres >= 4)) continue;
-    if (OFFRE_UNITE.test(c)) continue;                        // « 18V-54V » n'est pas une réf
+    if (estExpressionUnite(c)) continue;                      // « 18V-54V » n'est pas une réf
     if (NOTATION_NORME.test(c)) continue;                     // « IP56 », « EN388 »
     if (LISTE_MODELES.test(c)) continue;                      // « DW616/618 » = deux machines
-    /* ⛔⛔ UNE RÉFÉRENCE DeWALT COMMENCE PAR DES LETTRES. Ce qui commence par
-       un CHIFFRE et porte des minuscules est une quantité ou une cote, jamais
-       un code : « 11-piece », « 3-en-1 », « 80-Piece », « 8-Gallon »,
-       « 341-tlg. », « 9.9kSt. », « 9000tr/min », « 3200cps/min », « 59mm- »,
-       « 12xDT71516M ». Chacun comptait pour une SECONDE référence — donc deux
-       candidats, donc refus — alors que la vraie était écrite dans le même
-       titre. Mesuré sur les 1105 fiches DeWALT du catalogue : aucune référence
-       ne commence par un chiffre.
+    /* ⛔⛔ UNE RÉFÉRENCE DeWALT COMMENCE PAR DES LETTRES, SANS EXCEPTION.
+       Mesuré sur les 1105 fiches DeWALT du catalogue : aucune n'ouvre sur un
+       chiffre — les trois « 350/30 », « 355/25 », « D125/8 » qui portent une
+       barre oblique sont des COTES de lame, pas des codes.
+       Ce qui commence par un chiffre est donc une quantité, une cote ou un
+       morceau de référence coupé : « 11-piece », « 3-en-1 », « 341-tlg. »,
+       « 9.9kSt. », « 9000tr/min », « 59mm- », « 12xDT71516M », « 305X30 »,
+       et surtout « 334M1 », « 002CE » — des références AMPUTÉES de leur tête
+       (« DCS 334M1 », « DXPW 002CE ») que le recollage sait reconstituer.
+       ⚠️ PREMIÈRE VERSION, PLUS TIMIDE : la garde n'écartait que les mots
+       portant aussi des minuscules. Elle laissait « 334M1 » et « 002CE »
+       devenir des références à part entière, et elle obligeait à décrire une
+       à une les unités écrites en capitales. Une seule règle nette remplace
+       les cinq précédentes.
        ⚠️ ET LA RÈGLE NE VA PAS PLUS LOIN QUE ÇA. Première version essayée le
        05/08/2026 : « tout candidat portant une minuscule est écarté ». Elle a
        coûté 53 lectures justes en une passe — « Dcs16150 », « Dw0521 »,
        « dnf25r50e », « dt20736b/qz », « Dcg418Shdx2 » sont de VRAIES
        références, simplement mises en casse de titre par le marchand. */
-    if (/^\d/.test(brut) && /[a-z]/.test(brut)) continue;
+    if (/^\d/.test(brut)) continue;
     if (out.some(function (x) { return x.ref === c; })) continue;
     out.push({ ref: c, ecrit: brut, index: m.index, fin: m.index + brut.length });
   }
@@ -589,7 +616,7 @@ function lireReferenceDuTitre(titre, brand) {
      donnerait « XR18V », qui n'est pas une référence mais la gamme suivie du
      voltage. Écrire un prix dessus rattacherait n'importe quel outil XR au
      même article. Les gammes connues sont refusées d'office. */
-  if (!cands.length) {
+  function recoller() {
     /* Le suffixe peut être séparé lui aussi : « DCS 355 D2 ». On l'accepte,
        mais jamais si c'est une UNITÉ — « HSS 40 MM » ne donne pas HSS40MM. */
     /* ⛔⛔ LE PRÉFIXE DOIT ÊTRE EN MAJUSCULES DANS LE TITRE D'ORIGINE.
@@ -606,14 +633,14 @@ function lireReferenceDuTitre(titre, brand) {
       if (/^(EN|ISO|NF|CE|FFP|DIN|ANSI|SDS|IP)$/.test(tete)) continue;
       var queue = m2[3] || '';
       if (queue && /^(MM|CM|M|V|W|KW|AH|NM|KG|G|ML|L|PCS|PC|GA|MIN|H|BAR|PSI|RPM|TR|DB|IN|FT|MAX|SET|KIT|LOT)$/.test(queue)) queue = '';
-      cands.push({ ref: tete + m2[2] + queue, index: m2.index, recolle: true });
-      break;                                                     // une seule tentative
+      return { ref: tete + m2[2] + queue, index: m2.index,
+        fin: m2.index + m2[0].length, ecrit: (tete + m2[2] + queue), recolle: true };
     }
+    return null;
   }
-  if (!cands.length) return vide;
-  cands.sort(function (a, b) { return a.index - b.index; });
+
   var propres = [], compat = [], contenu = [], precedent = null;
-  cands.forEach(function (c) {
+  function classer(c) {
     /* Les 60 signes qui précèdent, bornés à la ponctuation forte : un
        « pour » d'une autre proposition ne doit pas mordre ici. La virgule
        n'est PAS une borne — elle sépare les membres d'une même énumération. */
@@ -635,7 +662,20 @@ function lireReferenceDuTitre(titre, brand) {
     if (estCompat) compat.push(c.ref);
     else if (estContenu) contenu.push(c.ref);
     else propres.push(c.ref);
-  });
+  }
+  cands.sort(function (a, b) { return a.index - b.index; });
+  cands.forEach(classer);
+  /* ⛔⛔ LE RECOLLAGE SE DÉCLENCHE SUR L'ABSENCE DE RÉFÉRENCE PROPRE, PAS SUR
+     L'ABSENCE DE CANDIDAT. Défaut mesuré le 05/08/2026 :
+     « DeWalt DCS 331P1 (1 x 5,0 Ah + DCB115 + TSTAK II) » — la seule chose que
+     la passe stricte trouve est DCB115, qui est du CONTENU. Il restait donc un
+     candidat, le recollage ne partait pas, et la machine était perdue alors
+     que sa référence est écrite en toutes lettres, à une espace près. */
+  if (!propres.length) {
+    var recolle = recoller();
+    if (recolle) { cands.push(recolle); classer(recolle); }
+  }
+  if (!cands.length) return vide;
   /* ⛔ LA MÊME RÉFÉRENCE ÉCRITE DEUX FOIS, EN COURT ET EN LONG. Mesuré :
      « Pack de 6 chargeurs DeWALT DCB1104-6 (DCB1104 - 12V 18V) »,
      « DCB112D2 … + Chargeur DCB112 », « DCHJ080B-XL DCHJ080B Sweat … »,
