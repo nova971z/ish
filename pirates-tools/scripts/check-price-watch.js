@@ -3886,6 +3886,29 @@ module.exports = async function () {
       '⛔ deux fiches pour la même clé de modèle : on n\'ARBITRE PAS, on écarte — '
       + 'écrire un coût sur l\'une des deux au hasard serait pire que ne rien '
       + 'écrire (' + JSON.stringify(poseA) + ')');
+
+    /* ⛔⛔ UN RELEVÉ QUI NE GARDE PAS LE TITRE DE L'ANNONCE N'EST PAS
+       REJOUABLE. Défaut mesuré le 08/08/2026 : `reconnus` archivait `fiche` —
+       le titre de NOTRE carte — sans jamais garder `name`, celui du MARCHAND.
+       Or c'est de ce texte-là que la référence est tirée. Conséquence réelle :
+       une annonce à 229,00 € en 1-2 jours, la meilleure du lot, dormait dans
+       le relevé sous un SKU soudé de travers, et rien ne permettait de le
+       voir — 1533 tuiles sur 2319 sans titre. On a cherché pendant des jours
+       une annonce absente qui ne l'était pas.
+       ⚠️ Le contrôle lit la SOURCE parce que ce chemin n'est atteignable
+       qu'avec Firestore : ce qu'on vérifie, c'est que le champ est bien poussé.
+       `inconnus` le gardait déjà — les deux doivent le garder. */
+    var srcAdmin = fs.readFileSync(path.join(__dirname, '..', 'api', 'admin.js'), 'utf8');
+    var blocRec = srcAdmin.slice(srcAdmin.indexOf('reconnusSec.push({'));
+    blocRec = blocRec.slice(0, blocRec.indexOf('});') + 3);
+    ok(/\bname:\s*it\.name\b/.test(blocRec),
+      '⛔⛔ `reconnus` doit archiver `name: it.name` — le titre de l\'ANNONCE, '
+      + 'pas seulement celui de notre fiche. Sans lui, aucun relevé ne peut '
+      + 'être rejoué et une référence lue de travers reste invisible');
+    var blocInc = srcAdmin.slice(srcAdmin.indexOf('inconnusSec.push({'));
+    blocInc = blocInc.slice(0, blocInc.indexOf('});') + 3);
+    ok(/\bname:\s*it\.name\b/.test(blocInc),
+      '⛔ …et `inconnus` aussi, qui le gardait déjà');
   }
 
   return errors;

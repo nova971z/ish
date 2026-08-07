@@ -2997,8 +2997,28 @@ async function handlePriceWatch(req, res, admin, db) {
           try {
             priceSec = pwComputePrice(p, it.price, priceConfig.defaults());
           } catch (e) { priceSec = null; }
+          /* ⛔⛔ LE TITRE DE L'ANNONCE SE GARDE, PAS SEULEMENT CELUI DE NOTRE
+             FICHE. `fiche` dit ce que NOUS appelons ce produit ; `name` dit ce
+             que le MARCHAND a écrit — et c'est de ce texte-là que la référence
+             a été tirée. Sans lui, un relevé n'est pas rejouable : on voit le
+             SKU retenu sans jamais pouvoir vérifier sur quoi il a été lu.
+             ⚠️ CE QUE ÇA A COÛTÉ, mesuré le 08/08/2026. L'user montre une
+             annonce « Aspirateur eau et poussière DeWalt DXVP-QT 960W 34L » à
+             229,00 €, la moins chère ET la plus rapide (1-2 jours). Elle ÉTAIT
+             dans le relevé — mais sous le SKU « QT960 », soudé par le
+             recollage à partir du « QT » de DXVP-QT et du « 960 » de 960W.
+             Impossible de le voir : sur 2319 tuiles, 1533 n'avaient aucun
+             titre conservé. J'ai cherché une annonce absente qui ne l'était pas.
+             ⚠️ `inconnus` gardait déjà `name` — c'est `reconnus`, le plus gros
+             des deux, qui était aveugle.
+             ⚠️ Portes lues. J3 : un titre d'annonce marchande est une donnée
+             PUBLIQUE de produit, aucune personne n'y figure. J4 : aucun prix
+             n'est calculé ni modifié ici — on archive le texte qui a servi, ce
+             qui rend au contraire le prix VÉRIFIABLE. J5 : aucun taux, aucune
+             TVA, aucun octroi de mer n'entre dans ce champ ; le territoire
+             continue de se dériver du code postal de livraison, ailleurs. */
           reconnusSec.push({ sku: it.sku, ficheSku: p.sku, srcTTC: it.price,
-            fiche: p.title || p.name, car: it.car || null,
+            fiche: p.title || p.name, name: it.name, car: it.car || null,
             ancien: (typeof p.price === 'number') ? p.price : null,
             nouveau: priceSec ? priceSec.newPrice : null });
         }
