@@ -474,6 +474,23 @@ function corps(ok) {
     + 'recollage et la référence serait perdue au profit de la famille ('
     + priceParse.lireReferenceDuTitre('DeWalt DXPW 002CE Nettoyeur Haute Pression', 'ZZBRAND').ref + ')');
 
+  /* ⑨quinquies ⛔ UNE PIÈCE DÉTACHÉE N'EST JAMAIS LA MACHINE VISÉE.
+     Mesuré le 08/08/2026 : « Barre pour scie Stationnaire ZZBRAND N233859 » —
+     la barre coûte 82,99 €, et le « pour » la faisait passer pour la scie.
+     Le fabricant numérote ses composants « N » + numéro long : cette forme ne
+     peut pas désigner une machine qu'un accessoire équiperait. */
+  ok(priceParse.lireReferenceDuTitre('Barre pour scie Stationnaire ZZBRAND N233859', 'ZZBRAND').ref === 'N233859',
+    '⛔ une pièce détachée (N + numéro) reste l\'ARTICLE, même derrière un '
+    + '« pour » ('
+    + priceParse.lireReferenceDuTitre('Barre pour scie Stationnaire ZZBRAND N233859', 'ZZBRAND').ref + ')');
+  /* ⚠️ ET ÇA N'OUVRE PAS LE « POUR ». Une MACHINE citée après lui reste la
+     machine visée — c'est la garde qui empêche le prix d'une boîte de clous
+     de partir sur un cloueur. */
+  ok(priceParse.lireReferenceDuTitre('Clous en bande 2,8x70mm pour cloueur sans fil ZZBRAND ZZN692', 'ZZBRAND').ref === null,
+    '⛔⛔ ARGENT : seule la forme N+numéro échappe au « pour » ; une référence '
+    + 'de machine reste une machine visée ('
+    + priceParse.lireReferenceDuTitre('Clous en bande 2,8x70mm pour cloueur sans fil ZZBRAND ZZN692', 'ZZBRAND').ref + ')');
+
   /* ⑩ Une NORME ou un indice de protection reste une caractéristique. */
   ok(priceParse.lireReferenceDuTitre('ZZBRAND Écouteurs Bluetooth 37h IP56 Jaune (ZZMA1902092)', 'ZZBRAND').ref === 'ZZMA1902092',
     '⛔ « IP56 » est un indice de protection. Le compter pour une référence '
@@ -586,11 +603,11 @@ function corps(ok) {
     '⛔ …et les guillemets internes sont DOUBLÉS, sinon Numbers coupe la cellule');
 }
 
-/* ⛔ Mesuré, pas estimé : `assertions rendues : 93` (corps instrumenté le
+/* ⛔ Mesuré, pas estimé : `assertions rendues : 95` (corps instrumenté le
    05/08/2026, après les seize cas de lecture de titre). Un seuil écrit de tête
    laisse une marge où une amputation passe inaperçue — il se remesure à chaque
    assertion neuve, avec la commande, jamais de mémoire. */
-const ASSERTIONS_ATTENDUES = 93;
+const ASSERTIONS_ATTENDUES = 95;
 
 module.exports = function () {
   const errors = [];

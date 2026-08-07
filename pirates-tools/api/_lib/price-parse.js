@@ -461,6 +461,9 @@ var SUITE_ENUMERATION = /^[\s,;\/]*(et|and|und|y|o|ou|of)?[\s,;\/]*$/i;
    Un titre de kit NOMME les machines qu'il contient ; sans cette règle, chaque
    machine citée comptait pour une annonce concurrente et le kit était perdu. */
 var PREFIXES_KIT = /^(DCK|FVK)[0-9-]/;
+/* Pièce détachée DeWALT : « N » suivi d'un numéro long. Mesuré sur le
+   catalogue : deux fiches, N233859 et N510599, toutes deux des composants. */
+var PIECE_DETACHEE = /^N\d{5,}$/;
 
 /* La tête d'un candidat : ses lettres initiales. Rend vrai quand elles
    forment un préfixe que le fabricant emploie réellement — on essaie du plus
@@ -679,6 +682,17 @@ function lireReferenceDuTitre(titre, brand) {
        début mordait jusqu'au bout du titre et l'article était perdu. */
     avant = avant.split(SEPARATEUR_FORT).pop();
     var estCompat = MOT_COMPAT.test(avant);
+    /* ⛔⛔ UNE PIÈCE DÉTACHÉE N'EST JAMAIS LA MACHINE VISÉE. Mesuré le
+       08/08/2026 : « Barre pour scie Stationnaire DeWALT N233859 » — la barre
+       coûte 82,99 €, et le « pour » la faisait passer pour la scie. Elle
+       restait donc hors du traqueur.
+       DeWALT numérote ses pièces détachées « N » suivi d'un long numéro ; ce
+       sont des composants, jamais des machines qu'un accessoire équiperait.
+       Une référence de cette forme est donc l'ARTICLE, quoi qu'il y ait devant.
+       ⚠️ Ce n'est pas un assouplissement du « pour » : les machines citées
+       après lui restent compat. Seule la forme N+numéro échappe, parce qu'elle
+       ne peut pas désigner une machine. */
+    if (estCompat && PIECE_DETACHEE.test(c.ref)) estCompat = false;
     /* ⛔ « pour DCD785, DCD985, DCF885 » NE DIT « pour » QU'UNE FOIS. Sans
        propagation, les deux suivantes passaient pour des références propres —
        trois candidats, refus, et la batterie DCB183 était perdue. Une liste ne
