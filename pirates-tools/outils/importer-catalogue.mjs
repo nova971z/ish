@@ -75,7 +75,8 @@ sansRefBruts.forEach((e) => { if (e.titre) freqTitres[e.titre] = (freqTitres[e.t
 /* Empreinte stable d'un nom → pseudo-sku interne (jamais montré comme réf). */
 const hash8 = (s) => { let h = 5381; for (let i = 0; i < s.length; i++) h = ((h * 33) ^ s.charCodeAt(i)) >>> 0; return h.toString(16).padStart(8, '0'); };
 
-const cat = JSON.parse(await readFile(join(RACINE, 'products.json'), 'utf8'));
+const texteCat = await readFile(join(RACINE, 'products.json'), 'utf8');
+const cat = JSON.parse(texteCat);
 const produits = Array.isArray(cat) ? cat : (cat.products || []);
 /* ⚠️ LA GRAPHIE DE LA MARQUE VIENT DU CATALOGUE, PAS D'UN CALCUL — attrapé
    avant le 1er import DEWALT (01/08/2026) : « DEWALT » se serait écrit
@@ -419,7 +420,11 @@ if (doublons.length) {
   process.exit(1);
 }
 const sortie = Array.isArray(cat) ? fusion : Object.assign({}, cat, { products: fusion });
-await writeFile(join(RACINE, 'products.json'), JSON.stringify(sortie, null, 1));
+/* ⛔ L'indentation se MESURE sur le fichier : l'écrire en 1 alors qu'il vit
+   en 2 rend le diff illisible — 57 795 lignes remuées pour une fiche, mesuré
+   le 08/08/2026. Fonction commune : `scripts/_format-catalogue.js`. */
+const fmtCat = require('../scripts/_format-catalogue.js');
+fmtCat.ecrireCommeAvant(join(RACINE, 'products.json'), sortie, texteCat);
 /* Relevé des coûts : hors du site, hors du déploiement (`scratchpad/` est
    dans .gitignore ET dans .vercelignore par construction — il n'est pas suivi). */
 await writeFile(join(RACINE, 'scratchpad', 'couts-import-' + MARQUE.toLowerCase() + '.json'),

@@ -40,6 +40,7 @@
    J5 — aucune TVA touchée, le territoire reste dérivé du code postal. */
 
 const fs = require('fs');
+const fmtCat = require('./_format-catalogue.js');
 const path = require('path');
 const modele = require('../api/_lib/pricing-model.js');
 const priceParse = require('../api/_lib/price-parse.js');
@@ -212,7 +213,7 @@ function principal(argv) {
 
   const sauve = path.join(RACINE, 'archives', 'products-avant-alignement-prix.json');
   fs.mkdirSync(path.dirname(sauve), { recursive: true });
-  fs.writeFileSync(sauve, JSON.stringify(brut, null, 1));
+  fmtCat.ecrireCommeAvant(sauve, brut, fs.readFileSync(fCat, 'utf8'));
 
   aAppliquer.forEach((c) => { c.p.price = c.apres; c.p.price_ht = c.ht; });
 
@@ -248,7 +249,7 @@ function principal(argv) {
   }
 
   const sortie = Array.isArray(brut) ? tous : Object.assign({}, brut, { products: tous });
-  fs.writeFileSync(fCat, JSON.stringify(sortie, null, 1));
+  fmtCat.ecrireCommeAvant(fCat, sortie);
   l('');
   l('  ✅ ' + aAppliquer.length + ' prix alignés par le calculateur');
   l('  ✅ ' + cofMaj + ' carte(s) coffret recalées sur « nu + supplément »');

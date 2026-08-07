@@ -16,13 +16,13 @@
 |---|---|---|---|---|
 | **O1** | Affirmer avant de mesurer | 14 | §3 · §8 | `garde-sortie.js` *(hook Stop)* |
 | **O2** | L'instrument de mesure est faux | 28 | §4.3 | sabotage obligatoire |
-| **O3** | Réutiliser sans vérifier le contexte | 10 | §1.4 | `check-lecons.js` |
+| **O3** | Réutiliser sans vérifier le contexte | 11 | §1.4 | `check-lecons.js` |
 | **O4** | Contrainte connue, non appliquée | 9 | §1 | `garde-entonnoir.js` |
 | **O5** | Outil artisanal au lieu de l'outil existant | 1 | §1.4 | aucune — humaine |
 | **O6** | Copie périmée au lieu de la source vivante | 5 | §4.4 | `p7-architecture.js` |
 | **O7** | **Lire le silence comme un succès** | 8 | §3 · §4.3 | `sabotage.mjs` · `ci.js` · `check-ancres.js` |
 
-**75 erreurs, 7 mécanismes.** O1 et O2 en concentrent **43 à elles deux** :
+**76 erreurs, 7 mécanismes.** O1 et O2 en concentrent **43 à elles deux** :
 c'est là qu'il faut regarder en premier, toujours.
 
 ⚠️ **O7 est né le 01/08/2026** d'une règle qui existait déjà — « non exécuté
@@ -151,6 +151,7 @@ va contenir ici.*
 | **E-308** | `fournisseur()` — « qui encaisse ? » | répondre à « qui a SIGNÉ cette notification ? » | Revolut écrivait, Stripe tentait de le reconnaître : 2 reçues, **0 acceptée**, avec une configuration Revolut parfaite. Symétrique : après bascule, une re-livraison Stripe tardive serait refusée par Revolut |
 | **E-309** | la ligne « Détails du produit » comme **frontière de bloc** | découper les cartes d'une page idealo | ⛔ La règle de harnais dit déjà « on ne s'ancre jamais sur une formulation exacte d'interface » — je l'ai appliquée aux TESTS et **pas au parseur**. Idealo ne l'a pas envoyée le 03/08 : relevé de l'user à **`parsed: 0`, `format: "aucun"`** sur une page de **57 références**. Cause reproduite en retirant cette seule ligne du corpus réel : 3 produits → 0. Corrigé en s'ancrant sur ce que la page ne peut pas ne pas écrire — le titre « MARQUE RÉF », qui annonce la carte lui-même. La porte a ensuite trouvé PIRE : sans ancre de fin, le prix cherché à rebours ramenait celui d'un **téléphone** du bandeau « Produits favoris » sur une scie |
 
+| **E-311** | `JSON.stringify(…, null, 1)` recopié d'un outil voisin | réécrire `products.json` après avoir posé UNE photo et UNE description | ⛔ **`products.json` vit en indentation 2.** Écrit en 1, `git diff --stat` a rendu **57 795 insertions et 57 772 suppressions** pour une seule fiche modifiée. Ce n'est pas de l'esthétique : le fichier qui porte TOUS LES PRIX devient irrelisible en relecture, et l'historique de chaque ligne est noyé — on ne peut plus voir qu'un prix a bougé. ⚠️ **HUIT endroits du dépôt portaient le même motif** (`fusionner-variantes`, `aligner-prix-idealo`, `completer-titres`, `importer-catalogue`, et mes deux outils du jour) : le premier qui aurait tourné aurait fait le dégât. Le format ne se recopie pas d'un fichier voisin, il se **MESURE** sur celui qu'on va réécrire. Remède : `scripts/_format-catalogue.js`, plus une porte dans `check-products-json` qui compare l'indentation du disque à celle de `git show HEAD:` — ⛔ ma PREMIÈRE version de cette porte comparait le fichier à lui-même et restait **verte** sur un fichier entièrement réindenté ; la référence ne pouvait pas venir du fichier |
 | **E-310** | DEUX relevés du traqueur comparés **article par article** | conclure « D25899K était lu hier, il ne l'est plus : le parseur a régressé » | ⛔ **La page change TOUS LES JOURS.** L'user l'a dit le 03/08 : « les articles sur ces pages peuvent changer chaque jour, mais l'URL reste la bonne ». Sa liste est triée par prix, les prix bougent, les articles entrent et sortent de la fenêtre balayée. Comparer deux relevés ligne à ligne compare donc **deux pages différentes** — et j'en ai tiré un diagnostic de régression qui ne reposait sur rien. Une page fournisseur est un **INSTANTANÉ MOUVANT** : le seul écart qui veut dire quelque chose est INTERNE à un relevé — « ce que cette page contient » face à « ce que j'en ai lu » (`refsNonLues`). Conséquence corrigée dans le produit : un article absent depuis plus de 14 jours était étiqueté « rupture » alors qu'il avait seulement quitté la fenêtre de prix — il dit désormais « perime » |
 
 **Antidote** : §1.4 — regarder **ce que le motif va contenir**, pas ce à quoi il

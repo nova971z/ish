@@ -30,9 +30,10 @@ module.exports = function () {
   var errors = [];
   function err(m) { errors.push('[check-products-json] ' + m); }
 
-  var list;
+  var list, raw, data;
   try {
-    var data = JSON.parse(fs.readFileSync(PRODUCTS, 'utf8'));
+    raw = fs.readFileSync(PRODUCTS, 'utf8');
+    data = JSON.parse(raw);
     list = Array.isArray(data) ? data : (data && data.products);
     if (!Array.isArray(list)) throw new Error('ni tableau ni {products:[]}');
   } catch (e) {
@@ -99,6 +100,52 @@ module.exports = function () {
       if (!p[k] || typeof p[k] !== 'string' || !p[k].trim()) err(ref + ' : champ "' + k + '" manquant/vide');
     });
   });
+
+  /* ── 7. LE FICHIER RESTE RELISIBLE ──────────────────────────────────────
+     ⛔ POURQUOI, ET CE QUE ÇA A COÛTÉ. Le 08/08/2026, deux outils écrivaient
+     `products.json` avec `JSON.stringify(…, null, 1)` alors que le fichier vit
+     en indentation 2. Pour UNE fiche modifiée, `git diff --stat` a rendu
+     **57 795 insertions et 57 772 suppressions** : le diff devient illisible,
+     la relecture impossible, et l'historique de chaque ligne du catalogue est
+     noyé. Ce n'est pas de l'esthétique — c'est la capacité de VOIR ce qui
+     change dans le fichier qui porte tous les prix.
+     ⛔⛔ ET MA PREMIÈRE VERSION DE CETTE PORTE NE VÉRIFIAIT RIEN. Elle mesurait
+     l'indentation DANS le fichier puis exigeait qu'il soit son propre point
+     fixe. Un fichier entièrement réindenté en 1 est son propre point fixe :
+     sabotage passé, porte restée VERTE. « Une vérification qu'on ne parvient
+     pas à faire échouer ne vérifie rien. » La référence ne peut pas venir du
+     fichier lui-même — elle vient de la version EN DÉPÔT, celle contre
+     laquelle le diff sera lu.
+     ⚠️ Aucun chiffre n'est gravé ici pour autant : on lit l'indentation de
+     `HEAD`. Changer volontairement le format du catalogue reste possible — il
+     faut le faire dans un commit qui ne fait QUE ça, et la porte se réaligne
+     toute seule au commit suivant. */
+  var indent = ((raw.split('\n')[1] || '').match(/^ */) || [''])[0].length;
+  if (!indent) {
+    err('products.json : indentation du premier niveau introuvable — le fichier '
+      + 'est-il sur une seule ligne ? Un diff y serait illisible.');
+  }
+  var relatif = path.relative(ROOT, PRODUCTS).split(path.sep).join('/');
+  var enDepot = null;
+  try {
+    enDepot = require('child_process').execFileSync('git',
+      ['show', 'HEAD:./' + relatif], { cwd: ROOT, encoding: 'utf8', maxBuffer: 1 << 28 });
+  } catch (e) { enDepot = null; }
+  if (enDepot == null) {
+    /* ⛔ « Non exécuté n'est PAS vert » : sans la version en dépôt, cette règle
+       n'a rien mesuré. On le dit, on ne verdit pas à vide. */
+    err('products.json : impossible de lire la version en dépôt (git show HEAD) — '
+      + 'le format du catalogue n\'a donc PAS été vérifié.');
+  } else {
+    var indentDepot = ((enDepot.split('\n')[1] || '').match(/^ */) || [''])[0].length;
+    if (indentDepot && indent !== indentDepot) {
+      err('products.json a changé d\'INDENTATION : ' + indentDepot + ' en dépôt, '
+        + indent + ' sur le disque. Pour une seule fiche modifiée, le diff afficherait '
+        + 'les ' + raw.split('\n').length + ' lignes du catalogue — plus personne ne '
+        + 'verrait ce qui change vraiment. Un outil écrit dans le mauvais format : '
+        + 'le corriger, puis réindenter le fichier en ' + indentDepot + '.');
+    }
+  }
 
   return errors;
 };

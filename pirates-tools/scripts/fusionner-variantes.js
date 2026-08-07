@@ -39,6 +39,7 @@
    écrit ni recalculé ; J5 — aucune TVA, aucun octroi de mer. */
 
 const fs = require('fs');
+const fmtCat = require('./_format-catalogue.js');
 const path = require('path');
 const priceParse = require('../api/_lib/price-parse.js');
 const classer = require('./classer-idealo.js');
@@ -157,7 +158,7 @@ function principal(argv) {
   const sauve = path.join(RACINE, 'archives',
     'products-avant-fusion-variantes.json');
   fs.mkdirSync(path.dirname(sauve), { recursive: true });
-  fs.writeFileSync(sauve, JSON.stringify(brut, null, 1));
+  fmtCat.ecrireCommeAvant(sauve, brut, fs.readFileSync(fCat, 'utf8'));
 
   const groupes = g.fusionnables.map(lier);
 
@@ -186,7 +187,7 @@ function principal(argv) {
   }
 
   const sortie = Array.isArray(brut) ? tous : Object.assign({}, brut, { products: tous });
-  fs.writeFileSync(fCat, JSON.stringify(sortie, null, 1));
+  fmtCat.ecrireCommeAvant(fCat, sortie);
 
   l('');
   l('  ✅ ' + groupes.length + ' groupe(s) fusionné(s) — ' + groupes.length

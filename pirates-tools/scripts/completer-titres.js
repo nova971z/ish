@@ -32,6 +32,7 @@
    J4 — aucun prix touché ; J5 — aucune TVA. */
 
 const fs = require('fs');
+const fmtCat = require('./_format-catalogue.js');
 const path = require('path');
 const priceParse = require('../api/_lib/price-parse.js');
 const aligner = require('./aligner-prix-idealo.js');
@@ -134,13 +135,13 @@ function principal(argv) {
   }
   const sauve = path.join(RACINE, 'archives', 'products-avant-titres.json');
   fs.mkdirSync(path.dirname(sauve), { recursive: true });
-  fs.writeFileSync(sauve, JSON.stringify(brut, null, 1));
+  fmtCat.ecrireCommeAvant(sauve, brut, fs.readFileSync(fCat, 'utf8'));
   faits.forEach((f) => {
     f.p.title = f.apres;
     f.p.name = f.apres;
     if (f.p.ficheAcompleter) delete f.p.ficheAcompleter;
   });
-  fs.writeFileSync(fCat, JSON.stringify(brut, null, 1));
+  fmtCat.ecrireCommeAvant(fCat, brut);
   l('  ✅ ' + faits.length + ' titres repris de l\'annonce marchande');
   l('  sauvegarde : ' + path.relative(RACINE, sauve));
   l('');

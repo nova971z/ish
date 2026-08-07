@@ -205,7 +205,16 @@ async function lireDossier(chemin) {
   return res;
 }
 
-const brut = JSON.parse(await readFile(join(RACINE, 'products.json'), 'utf8'));
+const texteCat = await readFile(join(RACINE, 'products.json'), 'utf8');
+const brut = JSON.parse(texteCat);
+
+/* ⛔ L'INDENTATION SE LIT DANS LE FICHIER, ELLE NE SE DEVINE PAS. Cet outil
+   écrivait en indentation 1 alors que `products.json` vit en 2 : mesuré le
+   08/08/2026 sur une modification d'UNE SEULE fiche, le diff annonçait
+   **57 795 lignes ajoutées et 57 772 supprimées**. Un diff pareil est
+   irrelisible — plus personne ne voit ce qui a changé. */
+const INDENT = ((texteCat.split('\n')[1] || '').match(/^ */) || [''])[0].length || 2;
+const FIN_LIGNE = /\n$/.test(texteCat) ? '\n' : '';
 const enveloppe = !Array.isArray(brut);
 const produits = enveloppe ? brut.products : brut;
 const parSku = new Map();
@@ -353,8 +362,8 @@ if (!confirmer) {
   process.exit(0);
 }
 const sauve = join(RACINE, 'archives', 'products-avant-dossiers.json');
-await writeFile(sauve, JSON.stringify(brut, null, 1));
-await writeFile(join(RACINE, 'products.json'), JSON.stringify(brut, null, 1));
+await writeFile(sauve, JSON.stringify(brut, null, INDENT) + FIN_LIGNE);
+await writeFile(join(RACINE, 'products.json'), JSON.stringify(brut, null, INDENT) + FIN_LIGNE);
 l('  ✅ ' + faits.length + ' fiche(s) enrichie(s)');
 l('  sauvegarde : archives/products-avant-dossiers.json');
 l('');

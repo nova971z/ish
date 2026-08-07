@@ -26568,15 +26568,15 @@
   },
   {
     "id": "dewalt-dcg416vsn-xj",
-    "slug": "dewalt-dcg416vsn-xj-meuleuse-125-mm-18v-dcg416vsn-xj",
+    "slug": "dewalt-dcg416vsn-xj-meuleuse-125mm-18v-vitesse-variable-nue",
     "sku": "DCG416VSN-XJ",
     "name": "DCG416VSN-XJ",
     "brand": "DeWALT",
     "category": "Meulage, découpe et polissage",
-    "title": "DeWALT DCG416VSN-XJ — Meuleuse Ø125 mm 18V DCG416VSN-XJ",
+    "title": "DeWALT DCG416VSN-XJ — Meuleuse d'angle 125 mm 18V XR Advantage Brushless, vitesse variable (machine nue)",
     "tag": "Nouveau",
-    "desc": "Meuleuse Ø125 mm 18V DCG416VSN-XJ.",
-    "img": "images/placeholder.svg",
+    "desc": "Meuleuse 125 mm à vitesse variable 3000–9000 tr/min, frein et embrayage électroniques. Machine nue.",
+    "img": "images/posters/dcg416vsn-xj.webp",
     "currency": "EUR",
     "vat": 0.2,
     "stock_status": "in_stock",
@@ -26587,16 +26587,39 @@
     "tags": [
       "cordless"
     ],
-    "features": [],
+    "features": [
+      "Moteur brushless XR 18V Advantage, plus compact et plus endurant",
+      "Vitesse variable sur 6 niveaux, de 3000 à 9000 tr/min",
+      "Perform&Protect : frein électronique, embrayage anti-blocage, démarrage progressif",
+      "Interrupteur à palette « homme mort » : arrêt dès que l'interrupteur est relâché",
+      "Enroulements blindés en résine époxy et grille de protection des fentes d'air",
+      "Wireless Tool Connect : déclenchement sans fil d'un aspirateur compatible",
+      "Écrou de serrage rapide et réglage du capot de protection sans outil",
+      "Machine nue : compatible batteries 18 V XR et 54 V XR FLEXVOLT"
+    ],
     "specs": {
       "Marque": "DeWALT",
+      "Type": "Meuleuse d'angle 125 mm XR Advantage à vitesse variable (machine nue)",
+      "Tension": "18 V XR",
+      "Moteur": "Brushless (sans charbon)",
+      "Ø disque": "125 mm",
+      "Filetage de broche": "M14",
+      "Vitesse à vide": "3000 – 9000 tr/min",
+      "Réglages de vitesse": "6 niveaux",
+      "Frein électronique": "Oui (Perform&Protect)",
+      "Embrayage électronique": "Oui, anti-blocage",
+      "Démarrage progressif": "Oui",
+      "Connectivité": "Wireless Tool Connect (WTC)",
+      "Poids": "2,45 kg",
+      "Batterie / chargeur": "Non inclus",
+      "Livré avec": "Poignée antivibrations, écrou de serrage rapide, capot de protection pour le ponçage",
       "Référence": "DCG416VSN-XJ"
     },
-    "weight_kg": 2,
-    "poidsSuppose": true,
+    "weight_kg": 2.45,
     "ficheAcompleter": false,
     "price_ht": 240.12,
-    "price": 288.14
+    "price": 288.14,
+    "description_long": "Meuleuse d'angle 125 mm de la gamme XR 18V Advantage, à moteur brushless et vitesse variable réglable sur 6 niveaux, de 3000 à 9000 tr/min. La sécurité repose sur la chaîne Perform&Protect de DEWALT : frein électronique qui immobilise le disque en quelques secondes, embrayage électronique qui coupe la machine en cas de blocage, démarrage progressif qui évite l'à-coup au déclenchement, et protection contre les surcharges. L'interrupteur à palette à fonction « homme mort » arrête l'outil dès qu'il est relâché. Les enroulements sont blindés en résine époxy et les fentes d'air protégées par une grille : deux barrières contre les particules abrasives, qui sont ce qui tue un moteur de meuleuse. La fonction Wireless Tool Connect permet de déclencher sans fil un aspirateur compatible. Écrou de serrage rapide et réglage du capot sans outil. Machine nue : ni batterie ni chargeur, à monter sur les batteries 18 V XR ou 54 V XR FLEXVOLT déjà en place."
   },
   {
     "id": "dewalt-dcd803nt-xj",

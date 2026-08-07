@@ -168,7 +168,7 @@ function principal(argv) {
   }
 
   if (Array.isArray(brut)) fs.writeFileSync(fCat, JSON.stringify(tri.garde, null, 2));
-  else { brut.products = tri.garde; fs.writeFileSync(fCat, JSON.stringify(brut, null, 2)); }
+  else { brut.products = tri.garde; fs.writeFileSync(fCat, JSON.stringify(brut, null, 2) + '\n'); }
 
   console.log('');
   console.log('  fiches rangées dans ........ ' + path.relative(RACINE, dest));
