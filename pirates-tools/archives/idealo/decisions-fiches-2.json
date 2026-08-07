@@ -1,0 +1,14 @@
+{
+  "marque": "DeWALT",
+  "_pourquoi": "Second passage, 07/08/2026. Déclenché par l'user : « AW3517 ça n'a rien à voir, c'est une housse de couette ». Mesuré : sur 1083 fiches DeWALT, 1052 commencent par D ; les 31 autres ont été relues une par une, et le balayage a été interrogé pour CHACUNE afin de savoir quelle écriture idealo emploie réellement.",
+  "_ce_que_j_ai_failli_casser": "J'avais d'abord pris AT-, AR-, EU, STT, W pour des préfixes de marchand collés devant la vraie référence, et j'ai renommé onze fiches. Mesure faite APRÈS : idealo écrit lui-même AT-DXV20PC, AR-DXPW008E, EUDXV34P, STTDXWTPC710, WDCK796D2KX-QW — sept appariements qui marchaient sont tombés. Tout a été annulé. Ne restent ici que les cas où le balayage PROUVE que l'écriture n'est pas celle d'idealo.",
+
+  "retirer": [
+    { "sku": "AW3517", "motif": "code de MARCHAND, pas une référence DeWALT — l'user l'a identifié comme une housse de couette, et aucune des 67 pages ne la nomme" },
+    { "sku": "AW2265", "motif": "même code marchand : l'annonce est une « Boîte à outils ToughSystem 2.0 », AW2265 n'est pas sa référence constructeur" },
+    { "sku": "AW2460", "motif": "idem : « Boîte à outils, plastique ABS »" },
+    { "sku": "AW2600", "motif": "idem : « Boîte à outils ToughSystem 2.0 »" },
+    { "sku": "AW2734", "motif": "idem : « Boîte à outils ToughSystem 2.0 » (305 x 330 x 535 mm)" }
+  ],
+  "renommer": []
+}

@@ -33025,38 +33025,6 @@
     "price": 150.16
   },
   {
-    "id": "dewalt-aw3517",
-    "slug": "dewalt-aw3517-reference-aw3517-descriptif-a-completer",
-    "sku": "AW3517",
-    "name": "AW3517",
-    "brand": "DeWALT",
-    "category": "Quincaillerie",
-    "title": "DeWALT AW3517 — Référence AW3517 — descriptif à compléter",
-    "tag": "Nouveau",
-    "desc": "Référence AW3517 — descriptif à compléter. Envoi en lettre suivie — livraison 7 à 14 jours.",
-    "img": "images/placeholder.svg",
-    "currency": "EUR",
-    "vat": 0.2,
-    "stock_status": "in_stock",
-    "stock_label": "En stock",
-    "model": "",
-    "ncCategory": "power_tool",
-    "productType": "pro",
-    "tags": [
-      "cordless"
-    ],
-    "features": [],
-    "specs": {
-      "Marque": "DeWALT",
-      "Référence": "AW3517"
-    },
-    "weight_kg": 0.4,
-    "poidsSuppose": true,
-    "ficheAcompleter": true,
-    "price_ht": 125.71,
-    "price": 150.85
-  },
-  {
     "id": "dewalt-dn275-xj",
     "slug": "dewalt-dn275-xj-dn275-xj-clou-duplex-21-8d-a-liant-plastique-57-70-x-3-3-mm-2000-pieces",
     "sku": "DN275-XJ",
@@ -33375,38 +33343,6 @@
     "ficheAcompleter": false,
     "price_ht": 128.31,
     "price": 153.97
-  },
-  {
-    "id": "dewalt-aw2600",
-    "slug": "dewalt-aw2600-reference-aw2600-descriptif-a-completer",
-    "sku": "AW2600",
-    "name": "AW2600",
-    "brand": "DeWALT",
-    "category": "Quincaillerie",
-    "title": "DeWALT AW2600 — Référence AW2600 — descriptif à compléter",
-    "tag": "Nouveau",
-    "desc": "Référence AW2600 — descriptif à compléter. Envoi en lettre suivie — livraison 7 à 14 jours.",
-    "img": "images/placeholder.svg",
-    "currency": "EUR",
-    "vat": 0.2,
-    "stock_status": "in_stock",
-    "stock_label": "En stock",
-    "model": "",
-    "ncCategory": "power_tool",
-    "productType": "pro",
-    "tags": [
-      "cordless"
-    ],
-    "features": [],
-    "specs": {
-      "Marque": "DeWALT",
-      "Référence": "AW2600"
-    },
-    "weight_kg": 0.4,
-    "poidsSuppose": true,
-    "ficheAcompleter": true,
-    "price_ht": 128.91,
-    "price": 154.69
   },
   {
     "id": "dewalt-dw1969",
@@ -36449,38 +36385,6 @@
     "price": 231.17
   },
   {
-    "id": "dewalt-aw2460",
-    "slug": "dewalt-aw2460-reference-aw2460-descriptif-a-completer",
-    "sku": "AW2460",
-    "name": "AW2460",
-    "brand": "DeWALT",
-    "category": "Quincaillerie",
-    "title": "DeWALT AW2460 — Référence AW2460 — descriptif à compléter",
-    "tag": "Nouveau",
-    "desc": "Référence AW2460 — descriptif à compléter. Envoi en lettre suivie — livraison 7 à 14 jours.",
-    "img": "images/placeholder.svg",
-    "currency": "EUR",
-    "vat": 0.2,
-    "stock_status": "in_stock",
-    "stock_label": "En stock",
-    "model": "",
-    "ncCategory": "power_tool",
-    "productType": "pro",
-    "tags": [
-      "cordless"
-    ],
-    "features": [],
-    "specs": {
-      "Marque": "DeWALT",
-      "Référence": "AW2460"
-    },
-    "weight_kg": 0.4,
-    "poidsSuppose": true,
-    "ficheAcompleter": true,
-    "price_ht": 192.93,
-    "price": 231.52
-  },
-  {
     "id": "dewalt-dstsx35se",
     "slug": "dewalt-dstsx35se-dstsx35se-agrafes-inox-5-6mm-x-35mm",
     "sku": "DSTSX35SE",
@@ -36577,38 +36481,6 @@
     "price": 232.72
   },
   {
-    "id": "dewalt-aw2734",
-    "slug": "dewalt-aw2734-reference-aw2734-descriptif-a-completer",
-    "sku": "AW2734",
-    "name": "AW2734",
-    "brand": "DeWALT",
-    "category": "Quincaillerie",
-    "title": "DeWALT AW2734 — Référence AW2734 — descriptif à compléter",
-    "tag": "Nouveau",
-    "desc": "Référence AW2734 — descriptif à compléter. Envoi en lettre suivie — livraison 7 à 14 jours.",
-    "img": "images/placeholder.svg",
-    "currency": "EUR",
-    "vat": 0.2,
-    "stock_status": "in_stock",
-    "stock_label": "En stock",
-    "model": "",
-    "ncCategory": "power_tool",
-    "productType": "pro",
-    "tags": [
-      "cordless"
-    ],
-    "features": [],
-    "specs": {
-      "Marque": "DeWALT",
-      "Référence": "AW2734"
-    },
-    "weight_kg": 0.4,
-    "poidsSuppose": true,
-    "ficheAcompleter": true,
-    "price_ht": 194.47,
-    "price": 233.36
-  },
-  {
     "id": "dewalt-dwht71843",
     "slug": "dewalt-dwht71843-dwht71843-16-in-1-multi-tool-by-dewalt",
     "sku": "DWHT71843",
@@ -36703,38 +36575,6 @@
     "ficheAcompleter": false,
     "price_ht": 204.14,
     "price": 244.97
-  },
-  {
-    "id": "dewalt-aw2265",
-    "slug": "dewalt-aw2265-reference-aw2265-descriptif-a-completer",
-    "sku": "AW2265",
-    "name": "AW2265",
-    "brand": "DeWALT",
-    "category": "Quincaillerie",
-    "title": "DeWALT AW2265 — Référence AW2265 — descriptif à compléter",
-    "tag": "Nouveau",
-    "desc": "Référence AW2265 — descriptif à compléter. Envoi en lettre suivie — livraison 7 à 14 jours.",
-    "img": "images/placeholder.svg",
-    "currency": "EUR",
-    "vat": 0.2,
-    "stock_status": "in_stock",
-    "stock_label": "En stock",
-    "model": "",
-    "ncCategory": "power_tool",
-    "productType": "pro",
-    "tags": [
-      "cordless"
-    ],
-    "features": [],
-    "specs": {
-      "Marque": "DeWALT",
-      "Référence": "AW2265"
-    },
-    "weight_kg": 0.4,
-    "poidsSuppose": true,
-    "ficheAcompleter": true,
-    "price_ht": 205.73,
-    "price": 246.88
   },
   {
     "id": "dewalt-hss50",
