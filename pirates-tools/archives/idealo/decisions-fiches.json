@@ -1,0 +1,146 @@
+{
+  "marque": "DeWALT",
+  "_pourquoi": "Relecture du titre SOURCE de chacune des 931 fiches importées d'idealo avec le parseur corrigé du 05/08/2026. Ces fiches portent une référence que leur propre titre ne dit pas : le traqueur ne les retrouvera jamais, elles garderaient leur prix d'import pour toujours.",
+  "renommer": [
+    {
+      "sku": "DNF50",
+      "vers": "DNF25R50S316E",
+      "motif": "« DNF 50 » est la famille et la longueur du clou, pas une référence — le titre porte dnf25r50s316e"
+    },
+    {
+      "sku": "DNF55",
+      "vers": "DNF23R55E",
+      "motif": "idem : le titre porte dnf23r55e"
+    },
+    {
+      "sku": "DNF60",
+      "vers": "DNF25R60E",
+      "motif": "idem : le titre porte dnf25r60e"
+    },
+    {
+      "sku": "DNF64",
+      "vers": "DNF23R64E",
+      "motif": "idem : le titre porte dnf23r64e"
+    },
+    {
+      "sku": "DNF65",
+      "vers": "DNF2865E",
+      "motif": "idem : le titre porte dnf2865e"
+    },
+    {
+      "sku": "DNF70",
+      "vers": "DNF28R70E",
+      "motif": "idem : le titre porte dnf28r70e"
+    },
+    {
+      "sku": "DCM575X1",
+      "vers": "DCM575X1-QW",
+      "motif": "le titre écrit la référence complète, suffixe de région compris"
+    },
+    {
+      "sku": "DCN890",
+      "vers": "DCN8901-XJ",
+      "motif": "ARGENT : la fiche est un CHASSE-CLOUS de rechange (DCN8901-XJ), pas le cloueur DCN890 qu'il équipe"
+    },
+    {
+      "sku": "QT960W",
+      "vers": "DXVP-QT",
+      "motif": "« 960W » est une puissance ; la référence de l'aspirateur est DXVP-QT"
+    },
+    {
+      "sku": "DCE4500",
+      "vers": "DCE450078",
+      "motif": "ARGENT, cas montré par l'user en capture : la carte porte le prix d'une TÊTE D'OUTIL EN CUIVRE « pour DCE4500 (DCE450078) », pas celui de la machine DCE4500"
+    }
+  ],
+  "retirer": [
+    {
+      "sku": "305X30",
+      "motif": "ce n'est pas une référence mais une COTE de lame (305 × 30 mm) — fiche non identifiable"
+    },
+    {
+      "sku": "350/30",
+      "motif": "cote de lame, pas une référence"
+    },
+    {
+      "sku": "355/25",
+      "motif": "cote de lame, pas une référence"
+    },
+    {
+      "sku": "48-0026",
+      "motif": "code interne d'un marchand, aucune référence DeWALT ne commence par un chiffre"
+    },
+    {
+      "sku": "2-PACK",
+      "motif": "« 2-PACK » est un conditionnement, pas une référence"
+    },
+    {
+      "sku": "4250887742883",
+      "motif": "c'est un code-barres EAN, pas une référence produit"
+    },
+    {
+      "sku": "XR18V",
+      "motif": "ARGENT : « XR 18V » est une GAMME suivie d'un voltage. Trois annonces sans rapport (multi-outil, perceuse, souffleur) s'étaient rattachées à cette seule carte"
+    },
+    {
+      "sku": "R009P",
+      "motif": "produit KS TOOLS (« KS Tools 515.3250-R009P »), rangé sous DeWALT par le marchand — ce n'est pas notre marque"
+    },
+    {
+      "sku": "GBH18V",
+      "motif": "produit BOSCH (« Bosch Professional GBH 18V-21 ») — ce n'est pas notre marque"
+    },
+    {
+      "sku": "DCE560",
+      "motif": "ARGENT, cas signalé par l'user : la carte porte le prix d'un KIT DE CONVERSION du tube d'extrusion (198,13 €), pas celui du pistolet DCE560 — que l'user a relevé à 244,86 €"
+    },
+    {
+      "sku": "DEWDE0733",
+      "motif": "ARGENT : l'annonce est un TRÉPIED « pour DEWDE0733 et DE0733-XJ » — la fiche porte le nom de la machine visée, pas du trépied"
+    },
+    {
+      "sku": "DT7926-XJ",
+      "motif": "ARGENT : le prix vient d'une annonce qui vend DEUX produits (« Coffret 29 pièces DT7926-XJ & Coffret de 32 embouts »)"
+    },
+    {
+      "sku": "DT2296-QZ",
+      "motif": "ARGENT : annonce à deux produits (« Coffret 10 lames DT2296-QZ + Scie sauteuse »)"
+    },
+    {
+      "sku": "DT40251-QZ",
+      "motif": "ARGENT : annonce à deux produits (« Scie circulaire XR 18V & DT40251-QZ Extreme Metal »)"
+    },
+    {
+      "sku": "DT71563-QZ",
+      "motif": "ARGENT, le pire du lot : 2 278,22 € — le prix d'un « Kit Premium 8 Outils XR 18V » écrit sur une fiche nommée d'après le coffret de 100 pièces vendu avec"
+    },
+    {
+      "sku": "DT60302-QZ",
+      "motif": "ARGENT : 391,07 € — prix d'un « Perforateur-Burineur SDS-PLUS & Jeu de 6 forets », sur une fiche nommée d'après les forets"
+    },
+    {
+      "sku": "DT3115-QZ",
+      "motif": "ARGENT : 261,67 € — prix d'une PONCEUSE excentrique sur une fiche nommée d'après un disque abrasif, et classée en « Scies »"
+    },
+    {
+      "sku": "DCL043-XJ",
+      "motif": "ARGENT : annonce à deux produits (« Projecteur de chantier compact & Lampe projecteur LED »)"
+    },
+    {
+      "sku": "DWS5021",
+      "motif": "ARGENT : 518,89 € — prix d'une scie plongeante DWS520KT sur une fiche nommée d'après les serre-joints vendus avec"
+    },
+    {
+      "sku": "HYQ01",
+      "motif": "code de vendeur, pas une référence DeWALT — le titre ne décrit qu'une gamme (« outils multifonctionnels sans fil »)"
+    },
+    {
+      "sku": "DWE20V",
+      "motif": "« DWE » + « 20V » : une gamme et un voltage. L'annonce vend une batterie compatible d'après-marché, sans référence propre"
+    },
+    {
+      "sku": "XR2WP2T",
+      "motif": "ARGENT : 717,44 € sur un morceau de référence (« DCK XR2WP2T », titre tronqué par le marchand) — la carte n'identifie aucun produit"
+    }
+  ]
+}
