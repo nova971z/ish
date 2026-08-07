@@ -1,0 +1,34 @@
+﻿Code;Ce que ça veut dire;Ampères-heures;Gamme de batterie;Exemple;Vu dans ton balayage;Établi ?
+C1 / C2 / C3;le chiffre = COMBIEN de batteries;1,5 Ah;XR;DCD800C2;3;oui — web + ta capture
+D1 / D2 / D3;le chiffre = COMBIEN de batteries;2 Ah;XR;DCD800D2;130;oui — web + ta capture
+F1 / F2 / F3;le chiffre = COMBIEN de batteries;2 Ah;XR;DCD800F2;0;oui — web + ta capture
+E1 / E2 / E3;le chiffre = COMBIEN de batteries;1,7 Ah;POWERSTACK;DCD800E2;48;oui — web + ta capture
+G1 / G2 / G3;le chiffre = COMBIEN de batteries;3 Ah;XR;DCD800G2;22;oui — web + ta capture
+L1 / L2 / L3;le chiffre = COMBIEN de batteries;3 Ah;XR;DCD800L2;0;oui — web + ta capture
+M1 / M2 / M3;le chiffre = COMBIEN de batteries;4 Ah;XR;DCD800M2;74;oui — web + ta capture
+Q1 / Q2 / Q3;le chiffre = COMBIEN de batteries;4 Ah;XR;DCD800Q2;0;oui — web + ta capture
+H1 / H2 / H3;le chiffre = COMBIEN de batteries;5 Ah;POWERSTACK;DCD800H2;36;oui — web + ta capture
+P1 / P2 / P3;le chiffre = COMBIEN de batteries;5 Ah;XR;DCD800P2;210;oui — web + ta capture
+R1 / R2 / R3;le chiffre = COMBIEN de batteries;6 Ah;XR;DCD800R2;0;oui — web + ta capture
+T1 / T2 / T3;le chiffre = COMBIEN de batteries;6 Ah;FLEXVOLT;DCD800T2;36;oui — web + ta capture
+W1 / W2 / W3;le chiffre = COMBIEN de batteries;8 Ah;XR;DCD800W2;3;oui — web + ta capture
+X1 / X2 / X3;le chiffre = COMBIEN de batteries;9 Ah;FLEXVOLT;DCD800X2;43;oui — web + ta capture
+U1 / U2 / U3;le chiffre = COMBIEN de batteries;10 Ah;XR;DCD800U2;0;oui — web + ta capture
+Y1 / Y2 / Y3;le chiffre = COMBIEN de batteries;12 Ah;FLEXVOLT;DCD800Y2;3;oui — web + ta capture
+Z1 / Z2 / Z3;le chiffre = COMBIEN de batteries;15 Ah;FLEXVOLT;DCD800Z2;1;oui — web + ta capture
+N (sans chiffre);machine nue, sans batterie ni chargeur;;;DCD800N;;oui
+T (sans chiffre);livré en coffret TSTAK (T FINAL, sans chiffre);;;DCD800T;;oui
+M (sans chiffre);édition limitée McLaren — vu sur DCK2223MP2T et DCK200MP2T;;;DCD800M;;oui
+G (sans chiffre);faisceau VERT sur un laser (DCE079D1G) — ailleurs, sens non établi;;;DCD800G;;partiel — vert sur laser
+K;non établi — apparaît sans chiffre, donc jamais compté comme batterie;;;;95;NON — à confirmer, jamais deviné
+S;non établi — apparaît sans chiffre, donc jamais compté comme batterie;;;;39;NON — à confirmer, jamais deviné
+P;non établi — apparaît sans chiffre, donc jamais compté comme batterie;;;;38;NON — à confirmer, jamais deviné
+R;non établi — apparaît sans chiffre, donc jamais compté comme batterie;;;;26;NON — à confirmer, jamais deviné
+E;non établi — apparaît sans chiffre, donc jamais compté comme batterie;;;;24;NON — à confirmer, jamais deviné
+H;non établi — apparaît sans chiffre, donc jamais compté comme batterie;;;;14;NON — à confirmer, jamais deviné
+D;non établi — apparaît sans chiffre, donc jamais compté comme batterie;;;;13;NON — à confirmer, jamais deviné
+A;non établi — apparaît sans chiffre, donc jamais compté comme batterie;;;;13;NON — à confirmer, jamais deviné
+B;non établi — apparaît sans chiffre, donc jamais compté comme batterie;;;;13;NON — à confirmer, jamais deviné
+C;non établi — apparaît sans chiffre, donc jamais compté comme batterie;;;;11;NON — à confirmer, jamais deviné
+L;non établi — apparaît sans chiffre, donc jamais compté comme batterie;;;;10;NON — à confirmer, jamais deviné
+2;non établi — apparaît sans chiffre, donc jamais compté comme batterie;;;;8;NON — à confirmer, jamais deviné

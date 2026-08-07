@@ -224,6 +224,69 @@ function corps(ok) {
     + 'description, et le moins cher gagne (' + restants.length + ' restante(s), '
     + (restants[0] || {}).prix + ' €)');
 
+
+  /* ── LES SUFFIXES DE BATTERIE DeWALT, LUS SUR LA RÉFÉRENCE ──────────────── */
+  /* ⛔ Demande de l'user, 04/08/2026 : « il faut absolument connaître TOUTES
+     les références de pack avec batterie qui existent. » Table cherchée sur le
+     web (toolguyd, slicehardware, housedigest) et recoupée avec sa capture de
+     32 kits DCK. Les cas ci-dessous portent un préfixe ZZ : on éprouve la
+     GRAMMAIRE, jamais un produit du catalogue. */
+  const nomen = priceParse.nomenclature;
+  const lus = {
+    'ZZK2050E2T-QW': { nb: 2, ah: 1.7, gamme: 'POWERSTACK', coffret: 'TSTAK' },
+    'ZZK2050H2T-QW': { nb: 2, ah: 5.0, gamme: 'POWERSTACK', coffret: 'TSTAK' },
+    'ZZK212D2T-QW':  { nb: 2, ah: 2.0, gamme: 'XR', coffret: 'TSTAK' },
+    'ZZK2101L2T-QW': { nb: 2, ah: 3.0, gamme: 'XR', coffret: 'TSTAK' },
+    'ZZK324T2-QW':   { nb: 2, ah: 6.0, gamme: 'FLEXVOLT', coffret: null },
+    'ZZK422P3T-QW':  { nb: 3, ah: 5.0, gamme: 'XR', coffret: 'TSTAK' }
+  };
+  Object.keys(lus).forEach(function (ref) {
+    const att = lus[ref];
+    const r = nomen.lireSuffixeDewalt(ref);
+    ok(r.nbBatteries === att.nb && r.batteries.length === 1
+      && r.batteries[0].ah === att.ah && r.batteries[0].gamme === att.gamme
+      && r.coffret === att.coffret,
+      '⛔⛔ ARGENT : « ' + ref + ' » doit se lire ' + att.nb + '×' + att.ah + ' Ah '
+      + att.gamme + (att.coffret ? ' + coffret' : ' sans coffret')
+      + ' — confondre deux capacités, c\'est offrir des batteries à chaque vente ('
+      + JSON.stringify({ nb: r.nbBatteries, bat: r.batteries, coffret: r.coffret }) + ')');
+  });
+
+  /* ⛔ Le « T » est AMBIGU et c'est le CHIFFRE qui tranche : `T2` est une
+     batterie FLEXVOLT 6 Ah, un `T` final sans chiffre est le coffret TSTAK. */
+  const tBat = nomen.lireSuffixeDewalt('ZZK324T2-QW');
+  const tCof = nomen.lireSuffixeDewalt('ZZD800NT-XJ');
+  ok(tBat.nbBatteries === 2 && tBat.coffret === null
+    && tCof.nbBatteries === 0 && tCof.coffret === 'TSTAK',
+    '⛔⛔ le « T » suivi d\'un CHIFFRE est une batterie FLEXVOLT ; un « T » FINAL '
+    + 'est le coffret TSTAK. Les confondre ferait payer un coffret pour deux '
+    + 'batteries 6 Ah, ou l\'inverse');
+
+  /* Deux capacités dans la même boîte : les deux se lisent. */
+  const mixte = nomen.lireSuffixeDewalt('ZZK317P1D1-QW');
+  ok(mixte.nbBatteries === 2 && mixte.batteries.length === 2,
+    '⛔ « P1D1 » = UNE 5 Ah ET UNE 2 Ah : une table figée n\'aurait jamais couvert '
+    + 'ces assemblages, il faut les LIRE (' + JSON.stringify(mixte.batteries) + ')');
+
+  /* ⛔ LE TITRE PRIME SUR LA RÉFÉRENCE, DANS LES DEUX SENS. */
+  ok(priceParse.varianteProduit('ZZ machine', {}, 'ZZD800D2-QW') === '2X2',
+    '⛔ titre MUET : la référence parle et annonce 2×2 Ah ('
+    + priceParse.varianteProduit('ZZ machine', {}, 'ZZD800D2-QW') + ')');
+  ok(priceParse.varianteProduit('ZZ perceuse 18V sans batterie ni chargeur', {}, 'ZZD800D2-QW') === 'NU',
+    '⛔⛔ titre EXPLICITE « sans batterie ni chargeur » : il GAGNE contre le '
+    + 'suffixe D2 de la référence — sinon le prix d\'un kit tomberait sur une '
+    + 'machine nue (' + priceParse.varianteProduit('ZZ perceuse 18V sans batterie ni chargeur', {}, 'ZZD800D2-QW') + ')');
+  ok(priceParse.varianteProduit('ZZ perceuse 18V + 2x5,0Ah + chargeur', {}, 'ZZD800N-XJ') !== 'NU',
+    '⛔ …et dans l\'autre sens : un titre qui annonce deux batteries gagne contre '
+    + 'le « N » de la référence');
+
+  /* Une lettre inconnue est RENDUE, jamais devinée ni avalée. */
+  const inconnu = nomen.lireSuffixeDewalt('ZZD800J2-XJ');
+  ok(inconnu.inconnus.indexOf('J') !== -1,
+    '⛔ une lettre de batterie INCONNUE est remontée dans `inconnus` — c\'est ce '
+    + 'qui permettra d\'agrandir la table sur des faits, jamais sur une '
+    + 'supposition (' + JSON.stringify(inconnu.inconnus) + ')');
+
   /* ── LE COMPTE OUTILS SEULS / PACKS ─────────────────────────────────────── */
   const c = cl.compter([{ pack: true }, { pack: false }, { pack: false }]);
   ok(c.total === 3 && c.packs === 1 && c.seuls === 2 && c.seuls + c.packs === c.total,

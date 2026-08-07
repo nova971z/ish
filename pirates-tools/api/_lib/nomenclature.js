@@ -561,6 +561,103 @@ var TYPES = [
    la boîte. DCD805N et DCD805P2 sont la MÊME machine — l'une nue, l'autre
    avec deux batteries 5,0 Ah. Écrire le prix de la seconde sur la première
    ferait perdre le prix de deux batteries à chaque vente. */
+
+/* ══ LETTRES DE BATTERIE DeWALT — TABLE COMPLÈTE ════════════════════════════
+   ⛔ DEMANDE DE L'USER, 04/08/2026 : « est-ce que la connaissance des
+   références avec batterie et chargeur sont connues ? sinon cherche sur le
+   Web et intègre-les — il faut absolument connaître TOUTES les références de
+   pack avec batterie qui existent. »
+
+   SOURCES, cherchées le 04/08/2026 et concordantes sur les capacités :
+     · toolguyd.com/dewalt-model-numbers-explained
+     · slicehardware.com — Understanding DEWALT Model Numbers
+     · housedigest.com — What Your DeWalt Tool's Model Number Really Means
+   Recoupées avec la capture d'écran de l'user (32 kits DCK…), qui confirme
+   E = POWERSTACK compacte 1,7 Ah et H = POWERSTACK 5,0 Ah.
+
+   ⛔⛔ CE QUE ÇA VAUT EN ARGENT. La lettre dit combien d'ampères-heures il y a
+   dans la boîte, et le chiffre COMBIEN de batteries. Confondre `P2` (2×5,0 Ah)
+   avec `D1` (1×2,0 Ah), c'est offrir trois batteries à chaque vente.
+
+   ⚠️ AMBIGUÏTÉ RÉELLE DU « T », et elle est piégeuse : `T2` est une batterie
+   FLEXVOLT 6 Ah, mais un `T` FINAL sans chiffre est le coffret TSTAK. C'est le
+   CHIFFRE qui tranche — jamais la lettre seule. */
+var BATTERIES_DEWALT = {
+  C: { ah: 1.5, gamme: 'XR' },
+  D: { ah: 2.0, gamme: 'XR' },
+  F: { ah: 2.0, gamme: 'XR' },
+  E: { ah: 1.7, gamme: 'POWERSTACK' },
+  G: { ah: 3.0, gamme: 'XR' },
+  L: { ah: 3.0, gamme: 'XR' },
+  M: { ah: 4.0, gamme: 'XR' },
+  Q: { ah: 4.0, gamme: 'XR' },
+  H: { ah: 5.0, gamme: 'POWERSTACK' },
+  P: { ah: 5.0, gamme: 'XR' },
+  R: { ah: 6.0, gamme: 'XR' },
+  T: { ah: 6.0, gamme: 'FLEXVOLT' },
+  W: { ah: 8.0, gamme: 'XR' },
+  X: { ah: 9.0, gamme: 'FLEXVOLT' },
+  U: { ah: 10.0, gamme: 'XR' },
+  Y: { ah: 12.0, gamme: 'FLEXVOLT' },
+  Z: { ah: 15.0, gamme: 'FLEXVOLT' }
+};
+
+/* Lettres SANS chiffre : elles ne comptent aucune batterie. */
+var MARQUEURS_DEWALT = {
+  N: { nu: true,  note: 'machine nue, sans batterie ni chargeur' },
+  T: { coffret: 'TSTAK', note: 'livré en coffret TSTAK (T FINAL, sans chiffre)' },
+  M: { editionLimitee: true, note: 'édition limitée McLaren — vu sur DCK2223MP2T et DCK200MP2T' },
+  G: { note: 'faisceau VERT sur un laser (DCE079D1G) — ailleurs, sens non établi' }
+};
+
+/* ⛔⛔ UN LECTEUR, PAS UNE LISTE. Les références combinent les codes :
+   `P1D1` = une 5,0 Ah ET une 2,0 Ah, `MP2T` = McLaren + 2×5,0 Ah + TSTAK,
+   `E2T` = 2×1,7 Ah POWERSTACK + TSTAK. Une table figée n'aurait jamais
+   couvert ces assemblages ; on LIT la suite de codes.
+   ⚠️ Ce qui n'est pas reconnu est RENDU dans `inconnus` — jamais deviné, et
+   jamais avalé en silence : c'est ce qui permettra d'agrandir la table sur
+   des faits plutôt que sur des suppositions. */
+function lireSuffixeDewalt(sku) {
+  var s = String(sku || '').trim().toUpperCase();
+  var res = { nbBatteries: 0, batteries: [], ah: null, coffret: null,
+    nu: false, editionLimitee: false, inconnus: [], suffixe: '' };
+  if (!s) return res;
+  /* La région se retire d'abord — elle ne dit rien du contenu de la boîte. */
+  var sansRegion = s.replace(/-[A-Z0-9]{1,3}$/, '');
+  var m = sansRegion.match(/^[A-Z]+\d+(?:-\d+)*/);
+  if (!m) return res;
+  var reste = sansRegion.slice(m[0].length);
+  res.suffixe = reste;
+  var i = 0;
+  while (i < reste.length) {
+    var lettre = reste[i];
+    var chiffre = reste[i + 1];
+    if (chiffre >= '0' && chiffre <= '9' && BATTERIES_DEWALT[lettre]) {
+      var n = parseInt(chiffre, 10);
+      res.batteries.push({ nb: n, ah: BATTERIES_DEWALT[lettre].ah,
+        gamme: BATTERIES_DEWALT[lettre].gamme });
+      res.nbBatteries += n;
+      i += 2;
+      continue;
+    }
+    if (MARQUEURS_DEWALT[lettre]) {
+      var mk = MARQUEURS_DEWALT[lettre];
+      if (mk.nu) res.nu = true;
+      if (mk.coffret) res.coffret = mk.coffret;
+      if (mk.editionLimitee) res.editionLimitee = true;
+      i += 1;
+      continue;
+    }
+    res.inconnus.push(lettre);
+    i += 1;
+  }
+  /* Une seule capacité dans la boîte : on la remonte, c'est la plus utile. */
+  if (res.batteries.length === 1) res.ah = res.batteries[0].ah;
+  /* Aucune batterie ET aucun marqueur « nu » : le suffixe vide veut dire nu. */
+  if (!res.nbBatteries && !res.suffixe) res.nu = true;
+  return res;
+}
+
 var SUFFIXES_DEWALT = {
   N:  { nbBatteries: 0, note: 'machine NUE, sans batterie ni chargeur' },
   NT: { nbBatteries: 0, coffret: 'TSTAK', note: 'machine nue livrée en coffret TSTAK' },
@@ -980,6 +1077,8 @@ function mesureAutorisee(rayon, cle) {
 module.exports = {
   FAMILLES: FAMILLES, RAYONS: RAYONS, TYPES: TYPES, MESURES: MESURES, INDEX: INDEX,
   SUFFIXES_DEWALT: SUFFIXES_DEWALT, SUFFIXE_COFFRET: SUFFIXE_COFFRET,
+  BATTERIES_DEWALT: BATTERIES_DEWALT, MARQUEURS_DEWALT: MARQUEURS_DEWALT,
+  lireSuffixeDewalt: lireSuffixeDewalt,
   PREFIXES_DEWALT: PREFIXES_DEWALT, PREFIXES_DEWALT_ORDRE: PREFIXES_DEWALT_ORDRE,
   prefixeDeReference: prefixeDeReference,
   EXTENSIONS_REGION: EXTENSIONS_REGION, GAMMES: GAMMES,

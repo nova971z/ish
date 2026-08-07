@@ -1172,6 +1172,25 @@ function nieApres(t, motif) {
    s'intercale (« 2x **batterie** 2,0 Ah », « 2x **Batterie Powerstack** 1,7 Ah »)
    elle retombait sur la branche « une seule batterie » et écrivait 1X2.0 pour
    un pack de deux. Deux batteries de 5 Ah, ce n'est pas le même prix qu'une. */
+/* ⛔⛔ LA RÉFÉRENCE COMPLÈTE LE TITRE QUAND LE TITRE SE TAIT. Demande de
+   l'user, 04/08/2026 : « il faut absolument connaître TOUTES les références de
+   pack avec batterie qui existent. » Mesuré sur son balayage : 725 titres sur
+   1254 ne sont QUE la référence — sans ce lecteur, ces packs passaient pour
+   des machines nues, et le prix d'un kit à deux batteries 5 Ah serait tombé
+   sur une machine seule.
+   ⚠️ Le TITRE reste prioritaire : c'est lui que l'user a désigné comme faisant
+   foi. La référence ne parle que s'il n'a rien dit. */
+function signatureDepuisReference(sku) {
+  var r = nomen.lireSuffixeDewalt(sku);
+  if (!r || !r.nbBatteries) return '';
+  /* Une seule capacité : « 2X5 ». Plusieurs : on les écrit toutes, triées,
+     pour que deux écritures du même contenu donnent la MÊME signature. */
+  return r.batteries
+    .map(function (b) { return b.nb + 'X' + b.ah; })
+    .sort()
+    .join('_');
+}
+
 function signatureBatteries(t) {
   if (nieApres(t, /batter/)) return 'SANSBAT';
   const m = t.match(/(\d)\s*[x×]\s*(?:[a-zà-ÿ\s]{0,24}?)?(\d+(?:[.,]\d)?)\s*ah\b/);
@@ -1213,7 +1232,19 @@ function varianteProduit(titre, car, ref) {
     const avant = t.slice(Math.max(0, m.index - 8), m.index);
     if (!/(avec|with|mit|inkl\.?|\+)\s*$/.test(avant)) return 'ACCESSOIRE';
   }
-  const bat = signatureBatteries(t);
+  let bat = signatureBatteries(t);
+  /* ⛔⛔ LE TITRE PRIME, ET SON SILENCE N'EST PAS UN REFUS. Règle de l'user :
+     « ce qui prime c'est le TITRE de l'annonce plus le début de la référence ».
+     Donc la référence ne parle QUE si le titre s'est tu (`bat` vide). Un titre
+     qui dit « sans batterie ni chargeur » rend `SANSBAT` : c'est une réponse,
+     et elle GAGNE contre le suffixe de la référence.
+     ⚠️ Premier jet : je repliais aussi sur `SANSBAT`, et « DCD800D2 — sans
+     batterie ni chargeur » ressortait avec deux batteries de 2 Ah. Le prix
+     d'un kit serait tombé sur une machine nue. */
+  if (!bat) {
+    const parRef = signatureDepuisReference(ref);
+    if (parRef) bat = parRef;
+  }
   const chargeur = /\bchargeurs?\b|\bcharger\b|\blader\b/.test(t) && !nieApres(t, /chargeur|charger|lader/);
   const parts = [];
   /* Ni batterie ni chargeur ⇒ machine seule, quelle que soit la lettre finale
