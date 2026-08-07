@@ -1078,6 +1078,161 @@ function racineModele(sku) {
   return racine.length >= 4 ? racine : s;
 }
 
+
+/* ══ LIRE LE TITRE D'UNE ANNONCE — L'IDENTITÉ RÉELLE D'UN PRODUIT ═══════════
+   ⛔⛔⛔ RÈGLE DE L'USER, 04/08/2026, MOT POUR MOT : « le parseur et le
+   traqueur doivent LIRE LE TITRE de l'annonce. Si la référence c'est DCD800,
+   le même produit peut avoir N / NT / T / NT-XJ mais c'est le MÊME PRODUIT.
+   Notre switch à l'intérieur des cartes produit est là pour les fusionner —
+   chaque site nomme comme il veut, il ne respecte pas forcément la nomenclature
+   du fournisseur. Et le XJ peut changer, c'est la région ; sur certains outils
+   on trouve QW ou QS. On ne les regarde JAMAIS. »
+
+   ⛔ CE CODE VIVAIT DANS `scripts/classer-idealo.js`, HORS LIGNE. Le traqueur
+   ne pouvait donc pas s'en servir : il appariait sur `racineRef`, qui rend
+   QUATRE clés différentes pour un seul produit (DCD800N, DCD800NT, DCD800T,
+   DCD800). Conséquence mesurée : chaque écriture nu/coffret partait sur une
+   fiche distincte, et les prix ne pouvaient pas s'aligner en mode réel.
+   Il vit désormais ici, à côté de `racineModele`, et les deux mondes lisent la
+   MÊME vérité — une seconde copie divergerait au premier correctif (O6).
+
+   ⚠️ PORTE J4 LUE : rien ici ne touche un prix. Mais élargir un rapprochement,
+   c'est risquer d'écrire le coût d'un article sur la fiche d'un autre — c'est
+   pourquoi la VARIANTE (contenu de la boîte, lu dans le titre) continue de
+   trancher après la racine, et pourquoi un article vendu POUR une machine est
+   écarté au lieu d'en prendre l'identité.
+   ⚠️ J3 — des annonces publiques, aucune donnée personnelle. J5 — aucune TVA. */
+function sansAccentsTitre(t) {
+  return String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+}
+
+/* Les mots d'accessoire, tirés des annonces réellement vues dans le balayage
+   (raccords DCE5801, supports DCE5601, kit de conversion DCE560, dust box
+   DWH302DH, piètements DE7033…). Un accessoire cite la référence de SA
+   machine : sans cette variante, il écraserait le prix de la machine. */
+const ACCESSOIRE = /(kit de conversion|raccord|couplage|support|pi[eè]tement|adaptateur|rechange|remplacement|replacement|dust box|sac d.aspirat|filtre|batterie de remplacement|moulage|insert|tube d.extrusion|ensemble de supports|legstand|coiffe|embase|semelle|carter|charbons?|courroie|mandrin de rechange|ersatz|zubeh[öo]r)/i;
+
+/* ⛔ Faisceau de laser : le vert vaut plusieurs centaines d'euros de plus. */
+const DISCRIMINANTS = [
+  ['VERT', /\b(vert|verte|green)\b/],
+  ['ROUGE', /\b(rouge|red)\b/]
+];
+
+/* ⛔⛔⛔ LE COFFRET N'EST PAS UNE IDENTITÉ, C'EST UN INTERRUPTEUR.
+   RÈGLE DE L'USER, 04/08/2026, mot pour mot : « quand il y a N ou un T à la
+   fin, le N correspond à nu et le T correspond à la MÊME machine avec le
+   coffret ; si le début de la référence est pareil, et s'il n'y a rien de plus
+   dans le titre à part ce putain de coffret, on est censé avoir ce même
+   produit avec coffret et sans coffret sur la MÊME CARTE PRODUIT. »
+   Mesuré : DCD800N-XJ et DCD800NT-XJ font deux cartes séparées, DCF850N /
+   DCF850NT-XJ aussi — l'interrupteur de variante du site (`variantGroup`,
+   `variantRole`, `coffretSku`, déjà utilisé par 38 fiches) ne servait à rien.
+   ⛔ Le coffret sort donc de la clé d'identité et devient un RÔLE. */
+const COFFRET = /\b(coffret|tstak|t-?stak|toughsystem|mallette|kitbox|case|koffer)\b/;
+
+/* ⛔⛔⛔ LE COFFRET SE LIT D'ABORD DANS LA RÉFÉRENCE — RÈGLE DE L'USER :
+   « N correspond à nu et T correspond à la MÊME machine avec le coffret ».
+   Défaut mesuré le 04/08 : je ne cherchais le coffret que dans le TITRE, or
+   les titres du catalogue sont du genre « DeWALT DCD800NT-XJ — Perceuse-
+   visseuse 18V DCD800NT-XJ » : pas un mot sur le coffret. Résultat, 1 seul
+   groupe fusionnable détecté sur 29. La lettre finale de la référence, elle,
+   le dit toujours.
+   ⚠️ On retire d'abord le marquage géographique (`-XJ`, `-QW`…) : c'est la
+   région, jamais le produit. Ce qui reste après la racine est le suffixe
+   commercial ; s'il finit par T, c'est la version coffret.
+   ⚠️ Le titre reste consulté en RENFORT — une annonce marchande qui écrit
+   « coffret TSTAK » sans le T dans la référence est bien un coffret. */
+function roleCoffret(titre, sku) {
+  const s = String(sku || '').toUpperCase().replace(/-[A-Z]{2,3}$/, '');
+  const racine = racineModele(s);
+  const suffixe = s.indexOf(racine) === 0 ? s.slice(racine.length) : '';
+  if (/T$/.test(suffixe)) return 'coffret';
+  return COFFRET.test(sansAccentsTitre(titre)) ? 'coffret' : 'solo';
+}
+
+/* ⛔⛔ « SANS BATTERIE NI CHARGEUR » N'EST PAS « AVEC CHARGEUR ».
+   Défaut mesuré le 04/08 : `DCD800N-XJ — sans batterie ni chargeur` sortait en
+   `PACK+CHARGEUR`, parce que je cherchais le MOT « chargeur » sans regarder ce
+   qui le nie. Lire un mot n'est pas comprendre une phrase — c'est exactement
+   ce que l'user reprochait : « réfléchir à ce que ça veut dire, pas juste le
+   lire, sinon ça ne sert à rien ». */
+const NEGATION = /\b(sans|ni|ohne|without|excl\.?|non fourni|non inclus|nu|nue|solo|body only|bare tool|machine seule|outil seul|appareil seul)\b/;
+
+function nieApres(t, motif) {
+  const m = t.match(motif);
+  if (!m) return false;
+  /* La négation porte sur ce qui SUIT : on regarde les 34 signes qui précèdent
+     le mot, bornés à la ponctuation forte qui fermerait la proposition. */
+  const avant = t.slice(Math.max(0, m.index - 34), m.index).split(/[.;(]/).pop();
+  return NEGATION.test(avant);
+}
+
+/* ⛔⛔ « 2x batterie 2,0 Ah » VAUT DEUX BATTERIES, PAS UNE.
+   Défaut mesuré : ma signature exigeait « 2x2,0Ah » collés ; dès qu'un mot
+   s'intercale (« 2x **batterie** 2,0 Ah », « 2x **Batterie Powerstack** 1,7 Ah »)
+   elle retombait sur la branche « une seule batterie » et écrivait 1X2.0 pour
+   un pack de deux. Deux batteries de 5 Ah, ce n'est pas le même prix qu'une. */
+function signatureBatteries(t) {
+  if (nieApres(t, /batter/)) return 'SANSBAT';
+  const m = t.match(/(\d)\s*[x×]\s*(?:[a-zà-ÿ\s]{0,24}?)?(\d+(?:[.,]\d)?)\s*ah\b/);
+  if (m) return m[1] + 'X' + m[2].replace(',', '.');
+  const seul = t.match(/(\d+(?:[.,]\d)?)\s*ah\b/);
+  return seul ? '1X' + seul[1].replace(',', '.') : '';
+}
+
+/* ⛔ L'IDENTITÉ DU PRODUIT : la racine de modèle + CE QUE CONTIENT LA BOÎTE,
+   lu dans le titre. Le coffret en est EXCLU (c'est un rôle, pas un produit). */
+/* ⛔⛔⛔ « POUR <RÉFÉRENCE> » — L'ANNONCE PORTE LA RÉFÉRENCE D'UNE AUTRE
+   MACHINE. L'user me l'avait corrigé le 04/08 : « bien sûr que c'est une
+   référence produit, mais il faut LIRE LA DESCRIPTION avant ». La référence se
+   GARDE — elle dit pour quelle machine l'article est fait — mais l'article
+   n'est PAS cette machine.
+   ⛔ ARGENT, attrapé à l'essai avant toute écriture : « 34° Clous en bande
+   2,8x70mm POUR cloueur sans fil DeWalt DCN692 » à 95,50 € allait devenir le
+   coût du cloueur DCN692N, vendu 1 076,33 € — le prix de vente serait tombé à
+   163,12 €, un cinquième du coût réel de la machine. Idem « Rail de guidage
+   1,5 m POUR DWS520KR » à 115,59 € pour une scie plongeante à 819,59 €.
+   ⚠️ La garde ne mord QUE si la référence trouvée derrière « pour » est celle
+   de l'article lui-même : sans ça, « batterie compatible avec tous les XR »
+   ferait sortir des machines légitimes. */
+function estPourAutreMachine(t, ref) {
+  const r = String(ref || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (r.length < 5) return false;
+  const nu = t.toUpperCase().replace(/[^A-Z0-9\s]/g, ' ');
+  const re = new RegExp('\\b(POUR|FUR|FOR|COMPATIBLE(?:\\s+AVEC)?|PASSEND)\\s+(?:[A-Z\\s]{0,34}?)?'
+    + r.slice(0, 6), 'i');
+  return re.test(nu.replace(/\s+/g, ' '));
+}
+
+function varianteProduit(titre, car, ref) {
+  const c = car || {};
+  const t = sansAccentsTitre(titre);
+  if (ref && estPourAutreMachine(titre, ref)) return 'ACCESSOIRE';
+  const m = t.match(ACCESSOIRE);
+  if (m) {
+    const avant = t.slice(Math.max(0, m.index - 8), m.index);
+    if (!/(avec|with|mit|inkl\.?|\+)\s*$/.test(avant)) return 'ACCESSOIRE';
+  }
+  const bat = signatureBatteries(t);
+  const chargeur = /\bchargeurs?\b|\bcharger\b|\blader\b/.test(t) && !nieApres(t, /chargeur|charger|lader/);
+  const parts = [];
+  /* Ni batterie ni chargeur ⇒ machine seule, quelle que soit la lettre finale
+     de la référence. C'est le titre qui fait foi, comme l'a demandé l'user. */
+  if ((!bat || bat === 'SANSBAT') && !chargeur) parts.push('NU');
+  else {
+    if (bat && bat !== 'SANSBAT') parts.push(bat);
+    if (chargeur) parts.push('CHARGEUR');
+  }
+  /* ⛔⛔ LES DISCRIMINANTS S'APPLIQUENT AUSSI À UNE MACHINE NUE. Régression
+     attrapée par la porte le 04/08 : un `return 'NU'` anticipé les sautait, et
+     les deux lasers — rouge et vert, 430 € d'écart — redevenaient identiques.
+     Ce qui distingue deux produits ne dépend pas de ce qu'il y a dans la
+     boîte. */
+  DISCRIMINANTS.forEach(function (d) { if (d[1].test(t)) parts.push(d[0]); });
+  return parts.length ? parts.join('+') : 'NU';
+}
+
+
 /* ⛔⛔ L'IDENTITÉ D'UNE PAGE, TIRÉE DE SON CONTENU — parce que le raccourci ne
    dit JAMAIS quelle page il envoie. Sans ça, le serveur ne peut ni reconnaître
    une page envoyée deux fois, ni dire LAQUELLE des 67 manque : il ne sait que
@@ -2216,4 +2371,7 @@ function comparerCaracteristiques(a, b) {
   return { compatible: conflits.length === 0, conflits: conflits, concordances: concordances };
 }
 
-module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickoutil, parseIdealo: parseIdealo, parseAuto: parseAuto, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, raisonAucuneSource: raisonAucuneSource, enMillis: enMillis, SOURCE_FRESH_MS: SOURCE_FRESH_MS, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage, estMaPropreReponse: estMaPropreReponse, titresAttendus: titresAttendus, compterTuiles: compterTuiles, empreintePage: empreintePage, racineRef: racineRef, racineModele: racineModele, apparierParNomSouple: apparierParNomSouple, CONCORDANCES_MIN: CONCORDANCES_MIN, annoncesManquantes: annoncesManquantes, extraireCaracteristiques: extraireCaracteristiques, comparerCaracteristiques: comparerCaracteristiques, planBalayage: planBalayage, rangDansPlan: rangDansPlan, OUTILS: OUTILS, SERIES: SERIES, nomenclature: nomen };
+module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickoutil, parseIdealo: parseIdealo, parseAuto: parseAuto, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, raisonAucuneSource: raisonAucuneSource, enMillis: enMillis, SOURCE_FRESH_MS: SOURCE_FRESH_MS, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage, estMaPropreReponse: estMaPropreReponse, titresAttendus: titresAttendus, compterTuiles: compterTuiles, empreintePage: empreintePage, racineRef: racineRef, racineModele: racineModele,
+  varianteProduit: varianteProduit, roleCoffret: roleCoffret,
+  signatureBatteries: signatureBatteries, estPourAutreMachine: estPourAutreMachine,
+  sansAccentsTitre: sansAccentsTitre, apparierParNomSouple: apparierParNomSouple, CONCORDANCES_MIN: CONCORDANCES_MIN, annoncesManquantes: annoncesManquantes, extraireCaracteristiques: extraireCaracteristiques, comparerCaracteristiques: comparerCaracteristiques, planBalayage: planBalayage, rangDansPlan: rangDansPlan, OUTILS: OUTILS, SERIES: SERIES, nomenclature: nomen };

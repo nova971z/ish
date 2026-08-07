@@ -3812,6 +3812,51 @@ module.exports = async function () {
       + 'en portent (obtenu ' + bb.objetsJson(avecGuillemet).length + ' objet(s))');
   }
 
+
+  /* ══ N / NT / T / -XJ / -QS : UN SEUL PRODUIT ═════════════════════════════
+     ⛔⛔ RÈGLE DE L'USER, 04/08/2026 : « si la référence c'est DCD800, le même
+     produit peut avoir N / NT / T / NT-XJ mais c'est le MÊME PRODUIT — chaque
+     site nomme comme il veut. Le XJ peut changer, c'est la région ; sur
+     certains outils on trouve QW ou QS. On ne les regarde JAMAIS. »
+     MESURÉ avant correctif : `racineRef` rendait QUATRE clés pour un seul
+     produit, le traqueur n'appariait pas, et les prix ne pouvaient pas
+     s'aligner en mode réel. */
+  {
+    var fichesM = [{ sku: 'ZZD800N-XJ', title: 'ZZ perceuse-visseuse 18V sans batterie ni chargeur' }];
+    var idxM = {}; fichesM.forEach(function (f) { idxM[f.sku] = f; });
+    var poseM = adm._internals.pwIndexerModeles(fichesM, idxM);
+    ok(poseM && poseM.poses === 1,
+      '⛔ PRÉALABLE : l\'index de modèle pose bien la fiche nue ('
+      + JSON.stringify(poseM) + ')');
+
+    ['ZZD800NT-QS', 'ZZD800T', 'ZZD800', 'ZZD800N-QW'].forEach(function (ecriture) {
+      var cle = adm._internals.pwCleModele({ sku: ecriture,
+        name: 'ZZ perceuse-visseuse 18V sans batterie ni chargeur' });
+      ok(idxM[cle] === fichesM[0],
+        '⛔⛔ ARGENT : « ' + ecriture +' » doit retrouver la fiche nue du catalogue — '
+        + 'N / NT / T et le marquage de région désignent le MÊME produit (clé '
+        + cle + ')');
+    });
+
+    /* ⛔ …mais un KIT n'est pas la machine nue : sa boîte contient autre chose,
+       et lui coller le coût du nu écrirait un prix faux sur une vraie vente. */
+    var cleKit = adm._internals.pwCleModele({ sku: 'ZZD800D2',
+      name: 'ZZ perceuse-visseuse 18V + 2x batterie 2,0 Ah + chargeur' });
+    ok(idxM[cleKit] === undefined,
+      '⛔⛔ ARGENT : un KIT (2 batteries + chargeur) ne tombe PAS sur la fiche '
+      + 'nue — la variante lue dans le titre les sépare (clé ' + cleKit + ')');
+
+    /* Une racine que plusieurs fiches se disputent n'est jamais arbitrée. */
+    var ambigu = [{ sku: 'ZZD900N-XJ', title: 'ZZ scie nue' },
+      { sku: 'ZZD900T-QW', title: 'ZZ scie nue' }];
+    var idxA = {}; ambigu.forEach(function (f) { idxA[f.sku] = f; });
+    var poseA = adm._internals.pwIndexerModeles(ambigu, idxA);
+    ok(poseA.poses === 0 && poseA.ecartes === 1,
+      '⛔ deux fiches pour la même clé de modèle : on n\'ARBITRE PAS, on écarte — '
+      + 'écrire un coût sur l\'une des deux au hasard serait pire que ne rien '
+      + 'écrire (' + JSON.stringify(poseA) + ')');
+  }
+
   return errors;
 };
 

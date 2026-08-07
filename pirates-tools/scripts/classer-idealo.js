@@ -76,18 +76,6 @@ const LIBELLE = {
    pour outils » est un portage, pas une perceuse), la quincaillerie ensuite,
    l'électro en dernier — parce que « kit » et « batterie » apparaissent dans
    des titres de consommables et emporteraient tout s'ils passaient devant. */
-/* ⛔⛔ LES ACCENTS SE RETIRENT AVANT DE CHERCHER, ET C'EST UN DÉFAUT PAYÉ.
-   Premier jet : `/\b[ée]couteurs?/i` sur « Écouteurs True Wireless » — jamais
-   trouvé. `\b` est une frontière ASCII : entre le début de chaîne et `É`, qui
-   n'est pas un caractère de mot ASCII, il n'y a AUCUNE frontière. Le motif
-   avait l'air juste, il ne mordait rien, et les écouteurs partaient en
-   « à trancher » sans que rien ne le dise.
-   ⚠️ Même piège pour l'allemand : `\bnagel` ne trouve pas « StreifenNAGEL »,
-   parce qu'un composé n'a pas de frontière au milieu. D'où deux jeux de
-   motifs — MOT (frontière exigée) et FRAGMENT (n'importe où). */
-function sansAccents(t) {
-  return String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-}
 
 /* MOT — la frontière est exigée : « vis » ne doit pas attraper « visseuse ». */
 const MOTS = [
@@ -169,150 +157,16 @@ function normaliserTitre(t) {
    La clé est donc racine + variante lue dans la description. À l'intérieur
    d'une même clé : doublons virés, LE MOINS CHER gagne. */
 
-/* Les mots d'accessoire, tirés des annonces réellement vues dans le balayage
-   (raccords DCE5801, supports DCE5601, kit de conversion DCE560, dust box
-   DWH302DH, piètements DE7033…). Un accessoire cite la référence de SA
-   machine : sans cette variante, il écraserait le prix de la machine. */
-const ACCESSOIRE = /(kit de conversion|raccord|couplage|support|pi[eè]tement|adaptateur|rechange|remplacement|replacement|dust box|sac d.aspirat|filtre|batterie de remplacement|moulage|insert|tube d.extrusion|ensemble de supports|legstand|coiffe|embase|semelle|carter|charbons?|courroie|mandrin de rechange|ersatz|zubeh[öo]r)/i;
-
-/* ⛔⛔⛔ CE QUI CHANGE LE PRIX SÉPARE LES PRODUITS — LU DANS LA DESCRIPTION.
-   Défaut trouvé par l'user le 04/08/2026, sur son propre catalogue :
-   « le laser rotatif DCE079D1G est à 1312,09 € et nous on le vend plus de
-   2100 € … il n'est pas dans le tableau ». Il n'y était pas parce que ma clé
-   l'avait FUSIONNÉ avec le DCE079D1R : même racine `DCE079`, même variante
-   PACK, et le moins cher gagne — le laser à faisceau ROUGE (1098,88 €) a
-   effacé le VERT (1312,09 €). Deux produits, deux prix, une seule ligne.
-   MESURÉ : 299 groupes fusionnaient ainsi des annonces aux titres réellement
-   différents avec plus de 25 % d'écart de prix.
-
-   ⛔ Le parseur ne pouvait pas trancher : sur ces deux lasers il rend des
-   caractéristiques IDENTIQUES (pack, batteries, Ah, coffret, type). Seule la
-   DESCRIPTION les distingue — c'est exactement ce que l'user demandait :
-   « tu te bases sur la description du produit ».
-
-   ⚠️ ARBITRAGE ASSUMÉ : un discriminant de trop SÉPARE deux annonces du même
-   produit (deux lignes à l'œil, gênant) ; un discriminant de moins CONFOND
-   deux produits et écrit un prix pour un autre (de l'argent perdu). On penche
-   du côté qui ne coûte pas d'argent. */
-/* ⛔ Faisceau de laser : le vert vaut plusieurs centaines d'euros de plus. */
-const DISCRIMINANTS = [
-  ['VERT', /\b(vert|verte|green)\b/],
-  ['ROUGE', /\b(rouge|red)\b/]
-];
-
-/* ⛔⛔⛔ LE COFFRET N'EST PAS UNE IDENTITÉ, C'EST UN INTERRUPTEUR.
-   RÈGLE DE L'USER, 04/08/2026, mot pour mot : « quand il y a N ou un T à la
-   fin, le N correspond à nu et le T correspond à la MÊME machine avec le
-   coffret ; si le début de la référence est pareil, et s'il n'y a rien de plus
-   dans le titre à part ce putain de coffret, on est censé avoir ce même
-   produit avec coffret et sans coffret sur la MÊME CARTE PRODUIT. »
-   Mesuré : DCD800N-XJ et DCD800NT-XJ font deux cartes séparées, DCF850N /
-   DCF850NT-XJ aussi — l'interrupteur de variante du site (`variantGroup`,
-   `variantRole`, `coffretSku`, déjà utilisé par 38 fiches) ne servait à rien.
-   ⛔ Le coffret sort donc de la clé d'identité et devient un RÔLE. */
-const COFFRET = /\b(coffret|tstak|t-?stak|toughsystem|mallette|kitbox|case|koffer)\b/;
-
-/* ⛔⛔⛔ LE COFFRET SE LIT D'ABORD DANS LA RÉFÉRENCE — RÈGLE DE L'USER :
-   « N correspond à nu et T correspond à la MÊME machine avec le coffret ».
-   Défaut mesuré le 04/08 : je ne cherchais le coffret que dans le TITRE, or
-   les titres du catalogue sont du genre « DeWALT DCD800NT-XJ — Perceuse-
-   visseuse 18V DCD800NT-XJ » : pas un mot sur le coffret. Résultat, 1 seul
-   groupe fusionnable détecté sur 29. La lettre finale de la référence, elle,
-   le dit toujours.
-   ⚠️ On retire d'abord le marquage géographique (`-XJ`, `-QW`…) : c'est la
-   région, jamais le produit. Ce qui reste après la racine est le suffixe
-   commercial ; s'il finit par T, c'est la version coffret.
-   ⚠️ Le titre reste consulté en RENFORT — une annonce marchande qui écrit
-   « coffret TSTAK » sans le T dans la référence est bien un coffret. */
-function roleCoffret(titre, sku) {
-  const s = String(sku || '').toUpperCase().replace(/-[A-Z]{2,3}$/, '');
-  const racine = priceParse.racineModele(s);
-  const suffixe = s.indexOf(racine) === 0 ? s.slice(racine.length) : '';
-  if (/T$/.test(suffixe)) return 'coffret';
-  return COFFRET.test(sansAccents(titre)) ? 'coffret' : 'solo';
-}
-
-/* ⛔⛔ « SANS BATTERIE NI CHARGEUR » N'EST PAS « AVEC CHARGEUR ».
-   Défaut mesuré le 04/08 : `DCD800N-XJ — sans batterie ni chargeur` sortait en
-   `PACK+CHARGEUR`, parce que je cherchais le MOT « chargeur » sans regarder ce
-   qui le nie. Lire un mot n'est pas comprendre une phrase — c'est exactement
-   ce que l'user reprochait : « réfléchir à ce que ça veut dire, pas juste le
-   lire, sinon ça ne sert à rien ». */
-const NEGATION = /\b(sans|ni|ohne|without|excl\.?|non fourni|non inclus|nu|nue|solo|body only|bare tool|machine seule|outil seul|appareil seul)\b/;
-
-function nieApres(t, motif) {
-  const m = t.match(motif);
-  if (!m) return false;
-  /* La négation porte sur ce qui SUIT : on regarde les 34 signes qui précèdent
-     le mot, bornés à la ponctuation forte qui fermerait la proposition. */
-  const avant = t.slice(Math.max(0, m.index - 34), m.index).split(/[.;(]/).pop();
-  return NEGATION.test(avant);
-}
-
-/* ⛔⛔ « 2x batterie 2,0 Ah » VAUT DEUX BATTERIES, PAS UNE.
-   Défaut mesuré : ma signature exigeait « 2x2,0Ah » collés ; dès qu'un mot
-   s'intercale (« 2x **batterie** 2,0 Ah », « 2x **Batterie Powerstack** 1,7 Ah »)
-   elle retombait sur la branche « une seule batterie » et écrivait 1X2.0 pour
-   un pack de deux. Deux batteries de 5 Ah, ce n'est pas le même prix qu'une. */
-function signatureBatteries(t) {
-  if (nieApres(t, /batter/)) return 'SANSBAT';
-  const m = t.match(/(\d)\s*[x×]\s*(?:[a-zà-ÿ\s]{0,24}?)?(\d+(?:[.,]\d)?)\s*ah\b/);
-  if (m) return m[1] + 'X' + m[2].replace(',', '.');
-  const seul = t.match(/(\d+(?:[.,]\d)?)\s*ah\b/);
-  return seul ? '1X' + seul[1].replace(',', '.') : '';
-}
-
-/* ⛔ L'IDENTITÉ DU PRODUIT : la racine de modèle + CE QUE CONTIENT LA BOÎTE,
-   lu dans le titre. Le coffret en est EXCLU (c'est un rôle, pas un produit). */
-/* ⛔⛔⛔ « POUR <RÉFÉRENCE> » — L'ANNONCE PORTE LA RÉFÉRENCE D'UNE AUTRE
-   MACHINE. L'user me l'avait corrigé le 04/08 : « bien sûr que c'est une
-   référence produit, mais il faut LIRE LA DESCRIPTION avant ». La référence se
-   GARDE — elle dit pour quelle machine l'article est fait — mais l'article
-   n'est PAS cette machine.
-   ⛔ ARGENT, attrapé à l'essai avant toute écriture : « 34° Clous en bande
-   2,8x70mm POUR cloueur sans fil DeWalt DCN692 » à 95,50 € allait devenir le
-   coût du cloueur DCN692N, vendu 1 076,33 € — le prix de vente serait tombé à
-   163,12 €, un cinquième du coût réel de la machine. Idem « Rail de guidage
-   1,5 m POUR DWS520KR » à 115,59 € pour une scie plongeante à 819,59 €.
-   ⚠️ La garde ne mord QUE si la référence trouvée derrière « pour » est celle
-   de l'article lui-même : sans ça, « batterie compatible avec tous les XR »
-   ferait sortir des machines légitimes. */
-function estPourAutreMachine(t, ref) {
-  const r = String(ref || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
-  if (r.length < 5) return false;
-  const nu = t.toUpperCase().replace(/[^A-Z0-9\s]/g, ' ');
-  const re = new RegExp('\\b(POUR|FUR|FOR|COMPATIBLE(?:\\s+AVEC)?|PASSEND)\\s+(?:[A-Z\\s]{0,34}?)?'
-    + r.slice(0, 6), 'i');
-  return re.test(nu.replace(/\s+/g, ' '));
-}
-
-function varianteProduit(titre, car, ref) {
-  const c = car || {};
-  const t = sansAccents(titre);
-  if (ref && estPourAutreMachine(titre, ref)) return 'ACCESSOIRE';
-  const m = t.match(ACCESSOIRE);
-  if (m) {
-    const avant = t.slice(Math.max(0, m.index - 8), m.index);
-    if (!/(avec|with|mit|inkl\.?|\+)\s*$/.test(avant)) return 'ACCESSOIRE';
-  }
-  const bat = signatureBatteries(t);
-  const chargeur = /\bchargeurs?\b|\bcharger\b|\blader\b/.test(t) && !nieApres(t, /chargeur|charger|lader/);
-  const parts = [];
-  /* Ni batterie ni chargeur ⇒ machine seule, quelle que soit la lettre finale
-     de la référence. C'est le titre qui fait foi, comme l'a demandé l'user. */
-  if ((!bat || bat === 'SANSBAT') && !chargeur) parts.push('NU');
-  else {
-    if (bat && bat !== 'SANSBAT') parts.push(bat);
-    if (chargeur) parts.push('CHARGEUR');
-  }
-  /* ⛔⛔ LES DISCRIMINANTS S'APPLIQUENT AUSSI À UNE MACHINE NUE. Régression
-     attrapée par la porte le 04/08 : un `return 'NU'` anticipé les sautait, et
-     les deux lasers — rouge et vert, 430 € d'écart — redevenaient identiques.
-     Ce qui distingue deux produits ne dépend pas de ce qu'il y a dans la
-     boîte. */
-  DISCRIMINANTS.forEach(function (d) { if (d[1].test(t)) parts.push(d[0]); });
-  return parts.length ? parts.join('+') : 'NU';
-}
+/* ⛔⛔ CES FONCTIONS VIVENT DÉSORMAIS DANS `api/_lib/price-parse.js`, à côté
+   de `racineModele` — parce que le TRAQUEUR doit les utiliser lui aussi, et
+   qu'il ne peut pas charger un script hors ligne. Les garder en double ici
+   ferait deux vérités qui divergeraient au premier correctif (O6, la copie
+   périmée). On les ré-expose telles quelles pour les appelants existants. */
+const sansAccents = priceParse.sansAccentsTitre;
+const varianteProduit = priceParse.varianteProduit;
+const roleCoffret = priceParse.roleCoffret;
+const signatureBatteries = priceParse.signatureBatteries;
+const estPourAutreMachine = priceParse.estPourAutreMachine;
 
 function cleDoublon(e) {
   const c = e.car || {};

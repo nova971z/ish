@@ -1825,6 +1825,57 @@ function pwIndexerRacines(produits, index) {
   return { poses: poses, ecartes: ecartes };
 }
 
+
+/* ⛔⛔⛔ TROISIÈME NIVEAU D'APPARIEMENT : LA RACINE DE MODÈLE + LA VARIANTE.
+   RÈGLE DE L'USER, 04/08/2026 : « si la référence c'est DCD800, le même
+   produit peut avoir N / NT / T / NT-XJ mais c'est le MÊME PRODUIT — chaque
+   site nomme comme il veut, il ne respecte pas forcément la nomenclature du
+   fournisseur. Et le XJ peut changer, c'est la région ; on ne le regarde
+   jamais. »
+
+   ⛔ CE QUI MANQUAIT, MESURÉ : `racineRef` ne retire que le marquage de
+   marché, et rend donc QUATRE clés pour un seul produit — `DCD800N`,
+   `DCD800NT`, `DCD800T`, `DCD800`. Le traqueur ne pouvait pas reconnaître
+   qu'une annonce « DCD800NT-QS » désigne la fiche « DCD800N-XJ » du
+   catalogue : en mode réel, les coûts partaient sur des fiches distinctes et
+   les prix ne pouvaient pas s'aligner.
+
+   ⛔ ARGENT — CE QUI EMPÊCHE CE NIVEAU D'ÊTRE TROP LARGE. La racine seule
+   réunirait aussi les kits (`DCD800D2` = 2 batteries) et les accessoires
+   vendus POUR la machine. La VARIANTE, lue dans le titre, les sépare : elle
+   dit ce que contient la boîte. Et une racine que PLUSIEURS fiches se
+   disputent n'est pas arbitrée — même règle que `pwIndexerRacines`.
+   ⚠️ La fiche visée est toujours celle qui porte le prix servi : sur une paire
+   de variantes, c'est la face `solo` (la face `coffret` suit par le switch). */
+function pwIndexerModeles(produits, index) {
+  const parCle = Object.create(null);
+  (produits || []).forEach((p) => {
+    if (!p || !p.sku) return;
+    /* La face coffret ne reçoit pas de coût : elle suit sa version nue. */
+    if (p.variantRole === 'coffret') return;
+    const cle = priceParse.racineModele(String(p.sku).toUpperCase())
+      + '|' + priceParse.varianteProduit(p.title || p.name || '', null, p.sku);
+    (parCle[cle] = parCle[cle] || []).push(p);
+  });
+  let poses = 0, ecartes = 0;
+  Object.keys(parCle).forEach((cle) => {
+    const fiches = parCle[cle];
+    if (fiches.length > 1) { ecartes++; return; }   // ambiguë : on n'arbitre pas
+    if (index[cle]) return;
+    index[cle] = fiches[0];
+    poses++;
+  });
+  return { poses: poses, ecartes: ecartes };
+}
+
+/* La clé de modèle d'une ANNONCE, dans le même vocabulaire que l'index. */
+function pwCleModele(item) {
+  const ref = String((item && item.sku) || '').toUpperCase();
+  if (!ref) return '';
+  return priceParse.racineModele(ref) + '|'
+    + priceParse.varianteProduit((item && item.name) || '', (item && item.car) || null, ref);
+}
+
 function pwAliasNomenclature(products, brand, bySku) {
   if (String(brand || '').toUpperCase() !== 'DEWALT') return;
   const claims = {};
@@ -2750,6 +2801,7 @@ async function handlePriceWatch(req, res, admin, db) {
       });
       pwAliasNomenclature(produitsSec, brand, bySkuSec);
       pwIndexerRacines(produitsSec, bySkuSec);
+      pwIndexerModeles(produitsSec, bySkuSec);
       const reconnusSec = [], inconnusSec = [];
       parsed.forEach((it) => {
         /* ⛔ RECHERCHE EN DEUX TEMPS : l'écriture EXACTE d'abord, la RACINE
@@ -2757,7 +2809,10 @@ async function handlePriceWatch(req, res, admin, db) {
            suffixe commercial ; les deux sens doivent aboutir. L'exact garde la
            priorité — une fiche écrite en toutes lettres l'emporte toujours. */
         const p = bySkuSec[String(it.sku).toUpperCase()]
-          || bySkuSec[priceParse.racineRef(it.sku)];
+          || bySkuSec[priceParse.racineRef(it.sku)]
+          /* ⛔ Dernier recours : la racine de MODÈLE + la variante — N / NT /
+             T / -XJ / -QW désignent le même produit (règle user 04/08). */
+          || bySkuSec[pwCleModele(it)];
         /* ⛔ `car` EST RENDU EN MODE À SEC, et c'est le seul moyen de VOIR ce
            que le parseur a compris de chaque annonce. Sans ça, un extracteur
            qui typerait tout « kit » resterait invisible : le relevé aurait
@@ -3214,7 +3269,8 @@ async function handlePriceWatch(req, res, admin, db) {
       /* ⛔ Même règle que sur le chemin à sec : l'écriture exacte d'abord, la
          racine ensuite. Une règle vraie appliquée à un seul endroit ne protège
          que cet endroit — et ici l'autre endroit est celui qui ÉCRIT les prix. */
-      const p = bySku[item.sku] || bySku[priceParse.racineRef(item.sku)];
+      const p = bySku[item.sku] || bySku[priceParse.racineRef(item.sku)]
+        || bySku[pwCleModele(item)];
       if (!p) { unknown.push({ sku: item.sku, srcTTC: item.price, name: item.name }); continue; }
       if (fichesVues.has(p.id)) continue;
       fichesVues.add(p.id);
@@ -3569,6 +3625,7 @@ module.exports._internals = {
   pwSourceCost: pwSourceCost, pwSourcesConnues: pwSourcesConnues, pwEstGel: pwEstGel,
   pwApparierParNom: pwApparierParNom, pwAliasNomenclature: pwAliasNomenclature,
   pwIndexerRacines: pwIndexerRacines, pwBornerLues: pwBornerLues,
+  pwIndexerModeles: pwIndexerModeles, pwCleModele: pwCleModele,
   // Exposés pour check-price-watch : le mode balayage se prouve en APPELANT
   // le handler avec une base factice qui compte lectures et écritures.
   handlePriceWatch: handlePriceWatch, pwMajLocale: pwMajLocale, pwScanReset: pwScanReset
