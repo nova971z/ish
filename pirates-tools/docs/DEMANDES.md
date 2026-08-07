@@ -104,6 +104,21 @@ réflexe à garder : **une demande entendue s'écrit ici AVANT d'être traitée.
 | D-54 | Le traqueur doit couvrir tout seul — rien à coller à la main | 01/08 | `FAIT` | ⚠️ **Mon diagnostic « Festool en simulation » était FAUX** — ses captures montrent `dryRun=0` sur les trois raccourcis. C'est le DOCUMENT du dépôt qui était périmé, pas son installation (E-603). Ce qui est réellement livré : le traqueur rend désormais `absents` et `absentsJamaisReleves` à chaque passage · `TRAQUEUR-URLS.md` aligné sur ses captures et marqué « copie, ne prouve rien » · porte `check-traqueur`, 2 sabotages, 2 rouges |
 | D-53 | Recalculer le catalogue au taux 1 % | 01/08 | `RENDU` | Taux passé à 1 % (`pricing-model.js`), champ ajouté à l'écran admin. Le recalcul lui-même est un geste admin (deux boutons). |
 
+
+## Ouvertes — reprises du 08/08/2026
+
+*L'user : « note tout ça et enregistre-le, on le fera sûrement demain et je
+veux que tu me le rappelles ». C'est ce tableau qui le rappelle :
+`check-demandes` fait **échouer la CI** tant qu'une ligne est `OUVERT`.*
+
+| # | Demande | Date | État | Où ça en est |
+|---|---|---|---|---|
+| D-54 | Descriptif + caractéristiques des fiches muettes, cherchés sur le Web, **recoupés trois fois** avant validation | 08/08 | `OUVERT` | **519 fiches** restent muettes sur 1047. Faisabilité PROUVÉE sur `DWE397-QS` : une recherche donne 1700 W, lame 430 mm, 3000 cps/min, 5,5 kg, sur trois sources concordantes. Ce n'est pas la méthode qui bloque, c'est le volume — **à mener par lots** (30 références par passe). Liste : toute fiche que `completer-titres.decrit()` refuse. |
+| D-55 | Importer les dossiers de l'user — un dossier par produit, contenant le PNG, la fiche technique et la description | 08/08 | `RENDU` | `outils/importer-dossiers.mjs` écrit et éprouvé sur une arborescence témoin : référence lue dans le nom du dossier par le lecteur du traqueur, image la plus lourde retenue **sans recompression**, lignes « clé : valeur » rangées en caractéristiques, le reste en description. Refus mesurés : référence absente du catalogue, hors marque, image de 900 Ko (au-delà des 525 Ko). **Il attend l'archive ZIP de l'user.** |
+| D-56 | Audit complet de la page d'administration : code mal fait, erreurs, niveau institutionnel | 08/08 | `OUVERT` | Pas commencé. Périmètre : `renderAdmin()` et ses quatorze onglets, `api/admin.js`, la nouvelle page `#/ajout-produit`. |
+| D-57 | Arbitrer les **203 hausses de prix** en attente | 07/08 | `OUVERT` | `archives/idealo/mouvement-des-prix.csv`, colonne `Sens=HAUSSE`. Bloqué tant que le balayage s'arrête à l'offset 990 : un échantillon partiel ne peut que SURESTIMER un coût. |
+| D-58 | Trancher la source de coût : **clickoutil ou idealo** | 07/08 | `OUVERT` | Les deux donnent des coûts différents pour le même produit (119,32 € contre 44,00 € sur un sac à outils). Tant que ce n'est pas gravé dans `DECISIONS.md`, ces fiches garderont un prix que l'user juge faux. |
+
 ---
 
 ## Soldées
