@@ -54,6 +54,8 @@ const priceParse = require(join(RACINE, 'api/_lib/price-parse.js'));
 const nomen = require(join(RACINE, 'api/_lib/nomenclature.js'));
 const admin = require(join(RACINE, 'api/admin.js'))._internals;
 
+const { decrit } = require(join(RACINE, 'scripts/completer-titres.js'));
+
 const args = process.argv.slice(2);
 const essai = args.includes('--essai');
 const iM = args.indexOf('--marque');
@@ -168,7 +170,25 @@ const exemples = [];
 muettes.forEach((p) => {
   const sku = String(p.sku).toUpperCase();
   const annonce = titres.get(p.sku);
-  if (annonce) {
+  /* ⛔⛔ UN TITRE QUI NE DÉCRIT RIEN NE REMPLACE PAS UN TITRE QUI NE DÉCRIT
+     RIEN. Défaut mesuré le 08/08/2026, sur la sortie d'essai de cet outil
+     même : il reprenait « DEWALT DT1473-QZ » pour remplacer « DeWALT
+     DT1473-QZ — DT1473-QZ ». Le compteur montait de 210, la carte n'apprenait
+     toujours rien au client. On exige donc que le titre repris porte de la
+     LANGUE — la même mesure que `completer-titres.js`, une seule définition
+     pour les deux outils. */
+  /* ⛔⛔ ET LE TITRE NE DOIT PAS NOMMER UNE AUTRE RÉFÉRENCE. Attrapé sur la
+     sortie d'essai : « DWE492-QS » allait recevoir « Duo de meuleuses 125/230
+     mm DEWALT DWE492TWIN2-QS » — un LOT DE DEUX machines, pas la meuleuse
+     seule. Écrire ça sur la carte, c'est promettre au client deux outils pour
+     le prix d'un. Même garde que `completer-titres.js` : on relit la référence
+     ÉCRITE dans le titre candidat, et on refuse dès qu'elle diffère. */
+  const luDansAnnonce = annonce
+    ? priceParse.lireReferenceDuTitre(annonce, marque).ref : null;
+  const memeProduit = !luDansAnnonce
+    || priceParse.racineRef(String(luDansAnnonce).toUpperCase())
+       === priceParse.racineRef(sku);
+  if (annonce && decrit(annonce, p.sku, marque) && memeProduit) {
     /* ⛔ ON NE RÉÉCRIT PAS LE TITRE DU MARCHAND. On le reprend tel quel : le
        reformuler, c'est commencer à inventer. */
     p.title = marque + ' ' + p.sku + ' — ' + annonce;

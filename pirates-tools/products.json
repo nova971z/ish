@@ -29927,9 +29927,9 @@
     "name": "DNW2890E",
     "brand": "DeWALT",
     "category": "Quincaillerie",
-    "title": "DeWALT DNW2890E — DNW2890E",
+    "title": "DeWALT DNW2890E — DeWALT Clous 34º, lisse, 90 mm, 2200 pièces - DNW2890E",
     "tag": "Nouveau",
-    "desc": "DNW2890E. Envoi en lettre suivie — livraison 7 à 14 jours.",
+    "desc": "DeWALT Clous 34º, lisse, 90 mm, 2200 pièces - DNW2890E (descriptif repris de l'annonce fournisseur).",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -29948,9 +29948,10 @@
     },
     "weight_kg": 0.4,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 105.37,
-    "price": 126.44
+    "price": 126.44,
+    "sourceDescriptif": "annonce"
   },
   {
     "id": "dewalt-dwmt86090-0",
@@ -32423,9 +32424,9 @@
     "name": "DT20500-QZ",
     "brand": "DeWALT",
     "category": "Quincaillerie",
-    "title": "DeWALT DT20500-QZ — Référence DT20500-QZ — descriptif à compléter",
+    "title": "DeWALT DT20500-QZ — DEWALT - Renvoi d’angle droit compact, DT20500-QZ",
     "tag": "Nouveau",
-    "desc": "Référence DT20500-QZ — descriptif à compléter. Envoi en lettre suivie — livraison 7 à 14 jours.",
+    "desc": "DEWALT - Renvoi d’angle droit compact, DT20500-QZ (descriptif repris de l'annonce fournisseur).",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -32446,7 +32447,8 @@
     "poidsSuppose": true,
     "ficheAcompleter": true,
     "price_ht": 124.15,
-    "price": 148.98
+    "price": 148.98,
+    "sourceDescriptif": "annonce"
   },
   {
     "id": "dewalt-dwa427set",
@@ -37832,9 +37834,9 @@
     "name": "DCB090-XJ",
     "brand": "DeWALT",
     "category": "Batteries et chargeurs",
-    "title": "DeWALT DCB090-XJ — DCB090-XJ",
+    "title": "DeWALT DCB090-XJ — DeWALT DCB090 Câble Noir, Jaune",
     "tag": "Nouveau",
-    "desc": "DCB090-XJ.",
+    "desc": "DeWALT DCB090 Câble Noir, Jaune (descriptif repris de l'annonce fournisseur).",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -37853,9 +37855,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 123.41,
-    "price": 148.09
+    "price": 148.09,
+    "sourceDescriptif": "annonce"
   },
   {
     "id": "dewalt-dcb124g",
@@ -39312,9 +39315,9 @@
     "name": "DWE4233",
     "brand": "DeWALT",
     "category": "Meulage, découpe et polissage",
-    "title": "DeWALT DWE4233 — DWE4233",
+    "title": "DeWALT DWE4233 — DEWALT - Meuleuse compacte 125 mm avec interrupteur à palette - 1400 watts - DWE4233-QS",
     "tag": "Nouveau",
-    "desc": "DWE4233.",
+    "desc": "DEWALT - Meuleuse compacte 125 mm avec interrupteur à palette - 1400 watts - DWE4233-QS (descriptif repris de l'annonce fournisseur).",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -39333,9 +39336,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 145.24,
-    "price": 174.29
+    "price": 174.29,
+    "sourceDescriptif": "annonce"
   },
   {
     "id": "dewalt-dwe4206-qs",
@@ -43568,9 +43572,9 @@
     "name": "D25144K-QS",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT D25144K-QS — Référence D25144K-QS — descriptif à compléter",
+    "title": "DeWALT D25144K-QS — Marteau Perforateur SDS-Plus 28mm - 3 modes D25144K",
     "tag": "Nouveau",
-    "desc": "Référence D25144K-QS — descriptif à compléter.",
+    "desc": "Marteau Perforateur SDS-Plus 28mm - 3 modes D25144K (descriptif repris de l'annonce fournisseur).",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -43591,7 +43595,8 @@
     "poidsSuppose": true,
     "ficheAcompleter": true,
     "price_ht": 226.01,
-    "price": 271.21
+    "price": 271.21,
+    "sourceDescriptif": "annonce"
   },
   {
     "id": "dewalt-dpc6mrc-qs",
@@ -44183,9 +44188,9 @@
     "name": "DWD241-QS",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DWD241-QS — DWD241-QS",
+    "title": "DeWALT DWD241-QS — DEWALT DWD241 Mélangeur à palettes double poignée 1800 W 240 V",
     "tag": "Nouveau",
-    "desc": "DWD241-QS.",
+    "desc": "DEWALT DWD241 Mélangeur à palettes double poignée 1800 W 240 V (descriptif repris de l'annonce fournisseur).",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -44204,9 +44209,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 259.44,
-    "price": 311.33
+    "price": 311.33,
+    "sourceDescriptif": "annonce"
   },
   {
     "id": "dewalt-dw680k",
@@ -44537,9 +44543,9 @@
     "name": "DW331K",
     "brand": "DeWALT",
     "category": "Scies",
-    "title": "DeWALT DW331K — DW331K",
+    "title": "DeWALT DW331K — DEWALT DW331K-QS Scie sauteuse à poignée supérieure filaire - Moteur 701W - Changement rapide de la lame",
     "tag": "Nouveau",
-    "desc": "DW331K.",
+    "desc": "DEWALT DW331K-QS Scie sauteuse à poignée supérieure filaire - Moteur 701W - Changement rapide de la lame (descriptif repris de l'annonce fournisseur).",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -44558,9 +44564,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 267.65,
-    "price": 321.18
+    "price": 321.18,
+    "sourceDescriptif": "annonce"
   },
   {
     "id": "dewalt-dmf1550-xj",
@@ -44893,9 +44900,9 @@
     "name": "DCR027",
     "brand": "DeWALT",
     "category": "Accessoires",
-    "title": "DeWALT DCR027 — DCR027",
+    "title": "DeWALT DCR027 — DEWALT Radio premium 12V/14.4V/18V/54V XR Solo - DCR027",
     "tag": "Nouveau",
-    "desc": "DCR027.",
+    "desc": "DEWALT Radio premium 12V/14.4V/18V/54V XR Solo - DCR027 (descriptif repris de l'annonce fournisseur).",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -44914,9 +44921,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 279.51,
-    "price": 335.41
+    "price": 335.41,
+    "sourceDescriptif": "annonce"
   },
   {
     "id": "dewalt-dce088ng18-xj",
@@ -51608,9 +51616,9 @@
     "name": "DXCMB2M50HE",
     "brand": "DeWALT",
     "category": "Accessoires",
-    "title": "DeWALT DXCMB2M50HE — DXCMB2M50HE",
+    "title": "DeWALT DXCMB2M50HE — DeWalt DXCMB2M50HE - Compresseur d'air électrique monophasé à courroie - Moteur 2 CV 50 L",
     "tag": "Nouveau",
-    "desc": "DXCMB2M50HE.",
+    "desc": "DeWalt DXCMB2M50HE - Compresseur d'air électrique monophasé à courroie - Moteur 2 CV 50 L (descriptif repris de l'annonce fournisseur).",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -51629,9 +51637,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 581.65,
-    "price": 697.98
+    "price": 697.98,
+    "sourceDescriptif": "annonce"
   },
   {
     "id": "dewalt-dwk214",
@@ -55170,9 +55179,9 @@
     "name": "D24000",
     "brand": "DeWALT",
     "category": "Accessoires",
-    "title": "DeWALT D24000 — D24000",
+    "title": "DeWALT D24000 — DeWALT D24000-gb Wet Tile Saw avec support de roue, 250 mm Diamètre, 240 V",
     "tag": "Nouveau",
-    "desc": "D24000.",
+    "desc": "DeWALT D24000-gb Wet Tile Saw avec support de roue, 250 mm Diamètre, 240 V (descriptif repris de l'annonce fournisseur).",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -55191,9 +55200,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1079.7,
-    "price": 1295.64
+    "price": 1295.64,
+    "sourceDescriptif": "annonce"
   },
   {
     "id": "dewalt-dck502p3",
