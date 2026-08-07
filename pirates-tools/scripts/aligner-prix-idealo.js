@@ -93,6 +93,26 @@ function principal(argv) {
   const iM = argv.indexOf('--marque');
   const marque = iM !== -1 ? argv[iM + 1] : 'DeWALT';
   const confirmer = argv.indexOf('--confirmer') !== -1;
+  /* ⛔⛔ LE RELEVÉ NE VOIT QU'UNE PARTIE DU MARCHÉ, ET ÇA REND LES DEUX SENS
+     ASYMÉTRIQUES. Mesuré le 07/08/2026 sur une capture de l'user : idealo
+     annonce « 11 offres à partir de 44,00 € » pour un sac à outils dont AUCUNE
+     annonce n'apparaît dans les 67 pages du balayage. Le coût retenu ici n'est
+     donc pas « le moins cher d'idealo » — c'est « le moins cher de ce qu'on a
+     capté ». Un échantillon partiel ne peut que SURESTIMER un coût, jamais le
+     sous-estimer.
+     Conséquence, dans l'ordre de priorité du projet (argent d'abord) :
+       · une BAISSE ramène le prix vers un coût CONSTATÉ — au pire elle rogne
+         une marge, et elle corrige un prix qu'on sait faux ;
+       · une HAUSSE fait payer plus cher au client sur la foi d'un relevé
+         incomplet — au pire elle ment sur le prix.
+     `--sens baisses` n'applique donc que ce que la mesure soutient vraiment.
+     `--sens tout` reste possible quand le balayage sera complet. */
+  const iSens = argv.indexOf('--sens');
+  const sens = iSens !== -1 ? String(argv[iSens + 1] || '') : 'tout';
+  if (['tout', 'baisses', 'hausses'].indexOf(sens) === -1) {
+    console.error('⛔ --sens attend « tout », « baisses » ou « hausses ».');
+    return 2;
+  }
 
   const fClasse = path.join(RACINE, 'archives', 'idealo', 'idealo-classe.json');
   if (!fs.existsSync(fClasse)) {
@@ -136,12 +156,52 @@ function principal(argv) {
   const baisses = changes.filter((c) => c.apres < c.avant);
   const hausses = changes.filter((c) => c.apres > c.avant);
   l('  BAISSES : ' + baisses.length + '   HAUSSES : ' + hausses.length);
+  const aAppliquer = sens === 'tout' ? changes
+    : (sens === 'baisses' ? baisses : hausses);
+  if (sens !== 'tout') {
+    l('  ⛔ --sens ' + sens + ' : ' + aAppliquer.length + ' fiche(s) seront écrites, '
+      + (changes.length - aAppliquer.length) + ' laissées telles quelles.');
+  }
   l('');
-  l('  Les 10 plus fortes baisses :');
-  baisses.slice().sort((a, b) => (a.apres - a.avant) - (b.apres - b.avant)).slice(0, 10)
-    .forEach((c) => l('     ' + String(c.p.sku).padEnd(15)
-      + String(c.avant).padEnd(10) + '→ ' + String(c.apres).padEnd(10)
-      + '(coût idealo ' + c.cout + ' €)'));
+  /* ⛔⛔ LES HAUSSES SE MONTRENT AUSSI, ET C'EST UNE CORRECTION DE L'OUTIL.
+     Il comptait les hausses depuis toujours et n'en affichait AUCUNE : seules
+     les baisses passaient à l'écran. Or une baisse coûte de la marge, tandis
+     qu'une HAUSSE fait payer trop cher au client — c'est le sens dans lequel
+     une erreur se voit le moins et abîme le plus. Un rapport qui ne montre
+     qu'un côté du mouvement n'est pas un rapport, c'est une vitrine. */
+  const montrer = (titre, liste, tri) => {
+    l('  ' + titre + ' :');
+    liste.slice().sort(tri).slice(0, 10).forEach((c) => l('     '
+      + String(c.p.sku).padEnd(15) + String(c.avant).padEnd(10) + '→ '
+      + String(c.apres).padEnd(10) + '(coût idealo ' + c.cout + ' €)'));
+    l('');
+  };
+  montrer('Les 10 plus fortes BAISSES', baisses,
+    (a, b) => (a.apres - a.avant) - (b.apres - b.avant));
+  montrer('Les 10 plus fortes HAUSSES', hausses,
+    (a, b) => (b.apres - b.avant) - (a.apres - a.avant));
+
+  /* Et le mouvement COMPLET part dans un CSV : l'user relit sur son iPad, il
+     lui faut un canevas qu'il peut sélectionner et copier, pas trente lignes
+     d'écran qui défilent. */
+  const fRap = path.join(RACINE, 'archives', 'idealo', 'mouvement-des-prix.csv');
+  const champ = (v) => {
+    const s = (v == null) ? '' : String(v);
+    return /[";\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  };
+  const eur = (v) => (typeof v === 'number' && isFinite(v)) ? v.toFixed(2).replace('.', ',') : '';
+  const lignesRap = changes.slice()
+    .sort((a, b) => Math.abs(b.apres - b.avant) - Math.abs(a.apres - a.avant))
+    .map((c) => [c.p.sku, c.p.title || c.p.name || '', c.p.category || '',
+      eur(c.avant), eur(c.apres), eur(c.apres - c.avant),
+      (c.apres < c.avant ? 'BAISSE' : 'HAUSSE'), eur(c.cout)]);
+  fs.mkdirSync(path.dirname(fRap), { recursive: true });
+  fs.writeFileSync(fRap, '﻿' + [[
+    'Référence', 'Titre sur mon site', 'Ma famille', 'Ancien prix (€)',
+    'Nouveau prix (€)', 'Écart (€)', 'Sens', 'Coût idealo relevé (€)'
+  ].join(';')].concat(lignesRap.map((x) => x.map(champ).join(';'))).join('\r\n') + '\r\n', 'utf8');
+  l('  écrit : ' + path.relative(RACINE, fRap) + '   (' + lignesRap.length + ' lignes)');
+  l('');
 
   if (!confirmer) {
     l('');
@@ -154,7 +214,7 @@ function principal(argv) {
   fs.mkdirSync(path.dirname(sauve), { recursive: true });
   fs.writeFileSync(sauve, JSON.stringify(brut, null, 1));
 
-  changes.forEach((c) => { c.p.price = c.apres; c.p.price_ht = c.ht; });
+  aAppliquer.forEach((c) => { c.p.price = c.apres; c.p.price_ht = c.ht; });
 
   /* ⛔ LA CARTE COFFRET SUIT SA VERSION NUE : prix du solo + supplément du
      switch, arrondi au centime. Le supplément vient de `pricing`, jamais d'un
@@ -190,7 +250,7 @@ function principal(argv) {
   const sortie = Array.isArray(brut) ? tous : Object.assign({}, brut, { products: tous });
   fs.writeFileSync(fCat, JSON.stringify(sortie, null, 1));
   l('');
-  l('  ✅ ' + changes.length + ' prix alignés par le calculateur');
+  l('  ✅ ' + aAppliquer.length + ' prix alignés par le calculateur');
   l('  ✅ ' + cofMaj + ' carte(s) coffret recalées sur « nu + supplément »');
   l('  sauvegarde : ' + path.relative(RACINE, sauve));
   l('');
