@@ -56,11 +56,19 @@ function lireBalayage(dossier, marque) {
         if (!parRef.has(sku)) {
           parRef.set(sku, { titre: it.titre || it.name || '', car: it.car });
         }
+        /* ⛔⛔ LE TITRE D'UNE TUILE RECONNUE COMPTE AUSSI DANS LA FOUILLE.
+           Défaut de CET OUTIL, mesuré le 08/08/2026 : il ne cherchait la
+           référence que dans les OFFRES sans référence, jamais dans les titres
+           des tuiles reconnues. Il annonçait donc « aucune annonce ne nomme
+           cette référence » pour des produits que le balayage citait en toutes
+           lettres — un instrument qui se trompe est pire qu'une absence
+           d'instrument, il ferme la piste. */
+        if (it.name) offres.push({ titre: it.name, car: it.car, ou: cle });
       });
     });
     (j.sansRefDetail || []).forEach((it) => {
       if (!it.titre) return;
-      offres.push({ titre: it.titre, car: it.car });
+      offres.push({ titre: it.titre, car: it.car, ou: 'offre' });
       const lu = priceParse.lireReferenceDuTitre(it.titre, marque);
       if (lu.ref && !parRef.has(lu.ref)) parRef.set(lu.ref, { titre: it.titre, car: it.car });
     });
