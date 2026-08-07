@@ -330,6 +330,34 @@ function corps(ok) {
     '⛔⛔ ARGENT : une batterie « pour » trois machines n\'a PAS de référence '
     + 'propre — lui en attribuer une écrirait son prix sur un outil');
 
+
+  /* ── TROIS AUTRES FAÇONS D'ÉCRIRE UNE RÉFÉRENCE, MESURÉES LE 04/08/2026 ── */
+  /* ⑥ Une COTE n'est pas une seconde référence. « SDS-max 38x570x450 mm
+     ZZ9442-QZ » comptait deux candidats, donc refus — le foret était perdu
+     alors que sa référence est écrite en toutes lettres. */
+  ok(priceParse.lireReferenceDuTitre('ZZBRAND SDS-max 38x570x450 mm ZZ9442-QZ', 'ZZBRAND').ref === 'ZZ9442-QZ',
+    '⛔⛔ une DIMENSION (38x570x450) n\'est pas une référence : sans le « x » '
+    + 'dans les séparateurs d\'unité, tous les forets et disques étaient perdus ('
+    + priceParse.lireReferenceDuTitre('ZZBRAND SDS-max 38x570x450 mm ZZ9442-QZ', 'ZZBRAND').ref + ')');
+
+  /* ⑦ Une référence coupée par une espace se recolle… */
+  ok(priceParse.lireReferenceDuTitre('ZZBRAND-fraise à carotter ZZS 40 mm', 'ZZBRAND').ref === 'ZZS40',
+    '⛔ une référence écrite avec une espace (« ZZS 40 ») se recolle — le '
+    + 'marchand ne respecte pas toujours l\'écriture du fabricant');
+  ok(priceParse.lireReferenceDuTitre('ZZBRAND ZZS 355 D2 Oscillateur sans fil', 'ZZBRAND').ref === 'ZZS355D2',
+    '⛔ …suffixe compris (« ZZS 355 D2 »), sinon on perdrait la configuration '
+    + 'de batteries et le prix d\'un kit tomberait sur une machine nue');
+
+  /* ⑧ …mais JAMAIS un nom de gamme ni une unité. */
+  ok(priceParse.lireReferenceDuTitre('ZZBRAND Souffleur Brushless XR 18V 5Ah Li-ION', 'ZZBRAND').ref === null,
+    '⛔⛔ ARGENT : « XR 18V » est une GAMME suivie d\'un voltage, pas une '
+    + 'référence. En faire une rattacherait tous les outils XR au même article');
+  ok(priceParse.lireReferenceDuTitre('ZZBRAND-fraise à carotter ZZS 40 mm', 'ZZBRAND').ref !== 'ZZS40MM',
+    '⛔ …et « 40 mm » ne colle pas « MM » à la référence : une unité n\'est '
+    + 'jamais un suffixe de modèle');
+  ok(priceParse.lireReferenceDuTitre('ZZBRAND gants taille EN 388', 'ZZBRAND').ref === null,
+    '⛔ une NORME (EN 388) n\'est pas une référence produit');
+
   /* ── LES AUTRES GARDES TIENNENT TOUJOURS ─────────────────────────────────── */
   ok(priceParse.refUniqueDuTitre('ZZBRAND Foret métal HSS-G Coffret 29 pièces - ZZ7926-XJ', 'ZZBRAND') === 'ZZ7926-XJ',
     '⛔ une offre dont le titre NOMME une seule référence la donne');

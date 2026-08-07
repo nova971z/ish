@@ -370,11 +370,15 @@ function parseClickoutil(rawText, brand) {
    tout jeter. */
 var OFFRE_LOT = /(\s[+&]\s|\bsets?\b|\bkits?\b|\blots?\b|\bpower ?set\b|\bcombo\b)/i;
 var OFFRE_OCCASION = /\b(occasion|reconditionn|refurb|gebraucht|d.?occasion|\bused\b|seconde main)\b/i;
-/* ⛔ LES UNITÉS NE SONT JAMAIS DES RÉFÉRENCES. Table élargie le 04/08/2026
+/* ⛔ LES UNITÉS NE SONT JAMAIS DES RÉFÉRENCES. Table élargie le 04/08/2026,
+   puis le « x » des DIMENSIONS ajouté aux séparateurs : « SDS-max 38x570x450
+   mm DT9442-QZ » comptait « 38x570x450 » comme une SECONDE référence, donc
+   deux candidats, donc refus — et le foret était perdu alors que sa référence
+   est écrite en toutes lettres. Une cote n'est pas un code produit.
    après avoir accepté « N233859 » (une lettre, six chiffres) : ce même
    assouplissement laissait passer « 600ML », « 250PCS », « 18GA ». Une unité
    reconnue est écartée quelle que soit la forme de la référence. */
-var OFFRE_UNITE = /^\d+(\.\d+)?(V|AH|MM|CM|M|W|KW|NM|KG|G|ML|L|MAX|PCS|PC|GA|MIN|H|BAR|PSI|RPM|TR|DB|IN|FT|°)?([-\/]\d+(\.\d+)?(V|AH|MM|CM|M|W|KW|NM|KG|G|ML|L|MAX|PCS|PC|GA|MIN|H|BAR|PSI|RPM|TR|DB|IN|FT|°)?)*$/i;
+var OFFRE_UNITE = /^\d+(\.\d+)?(V|AH|MM|CM|M|W|KW|NM|KG|G|ML|L|MAX|PCS|PC|GA|MIN|H|BAR|PSI|RPM|TR|DB|IN|FT|°)?([-\/x×]\d+(\.\d+)?(V|AH|MM|CM|M|W|KW|NM|KG|G|ML|L|MAX|PCS|PC|GA|MIN|H|BAR|PSI|RPM|TR|DB|IN|FT|°)?)*$/i;
 /* Les mots qui introduisent une COMPATIBILITÉ, et rien d'autre. */
 var MOT_COMPAT = /\b(pour|f[üu]r|for|compatible\s+avec|compatible|adapt[ée]e?s?\s+(?:[àa]|pour)|passend\s+f[üu]r|convient\s+(?:[àa]|pour)|fits)\s*$/i;
 
@@ -413,6 +417,36 @@ function lireReferenceDuTitre(titre, brand) {
   if (!t) return vide;
   if (OFFRE_LOT.test(t) || OFFRE_OCCASION.test(t)) return vide;
   var cands = candidatsAvecPosition(t, brand);
+  /* ⛔ SECONDE LECTURE : LA RÉFÉRENCE ÉCRITE AVEC UNE ESPACE. Mesuré le
+     04/08/2026 : « DEWALT-fraise à carotter HSS 40 mm » porte la référence
+     HSS40, coupée en deux par le marchand. Aucune passe stricte ne peut la
+     voir. On la recolle — mais SEULEMENT si rien n'a été trouvé autrement,
+     pour ne pas fabriquer un second candidat là où il y en avait déjà un.
+     ⛔⛔ ET JAMAIS UN NOM DE GAMME. « Souffleur Brushless XR 18V 5Ah »
+     donnerait « XR18V », qui n'est pas une référence mais la gamme suivie du
+     voltage. Écrire un prix dessus rattacherait n'importe quel outil XR au
+     même article. Les gammes connues sont refusées d'office. */
+  if (!cands.length) {
+    /* Le suffixe peut être séparé lui aussi : « DCS 355 D2 ». On l'accepte,
+       mais jamais si c'est une UNITÉ — « HSS 40 MM » ne donne pas HSS40MM. */
+    /* ⛔⛔ LE PRÉFIXE DOIT ÊTRE EN MAJUSCULES DANS LE TITRE D'ORIGINE.
+       Défaut attrapé par la porte : en cherchant sur le titre mis en
+       majuscules, « bidon 600ML de graisse » donnait « BIDON600 ». N'importe
+       quel mot suivi d'un nombre devenait une référence. Une vraie référence
+       est ÉCRITE en capitales par le marchand — c'est ce qui la distingue
+       d'un mot ordinaire. On cherche donc sur le texte TEL QUEL. */
+    var re2 = /\b([A-Z]{2,5})\s+(\d{2,5})\s*([A-Z][A-Z0-9-]{0,5})?\b/g, m2;
+    while ((m2 = re2.exec(t)) !== null) {
+      var tete = m2[1];
+      if (SERIES.indexOf(tete.toLowerCase()) !== -1) continue;   // XR, FLEXVOLT…
+      if (tete === String(brand || '').toUpperCase()) continue;
+      if (/^(EN|ISO|NF|CE|FFP|DIN|ANSI|SDS|IP)$/.test(tete)) continue;
+      var queue = m2[3] || '';
+      if (queue && /^(MM|CM|M|V|W|KW|AH|NM|KG|G|ML|L|PCS|PC|GA|MIN|H|BAR|PSI|RPM|TR|DB|IN|FT|MAX|SET|KIT|LOT)$/.test(queue)) queue = '';
+      cands.push({ ref: tete + m2[2] + queue, index: m2.index, recolle: true });
+      break;                                                     // une seule tentative
+    }
+  }
   if (!cands.length) return vide;
   var propres = [], compat = [];
   cands.forEach(function (c) {
