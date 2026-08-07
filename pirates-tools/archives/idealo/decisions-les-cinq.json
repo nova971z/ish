@@ -1,0 +1,13 @@
+{
+  "marque": "DeWALT",
+  "_pourquoi": "Demande de l'user, 08/08/2026 : « Tu effaces tout ce qu'il faut, afin qu'on arrive à 100 %, si j'ai besoin je les rajouterai à la main, je t'ai dit ». Ces cinq fiches sont NOMMÉES dans le balayage, mais aucune annonce ne vend le produit SEUL : le traqueur refuse donc de leur prendre un prix, et ce refus est juste. Elles resteraient éternellement à leur prix d'import.",
+  "_ce_que_le_refus_protegeait": "DCB118-QW : 13 annonces, toutes des packs — « Perceuse DCD999NT-XJ + 1 batterie + DCB118 » à 393,90 € pour un chargeur à 125,45 €. DCB205 : 62 annonces génériques « Batterie 100% originale 20V 6000mAh » à ~76 €, listant huit références d'un coup. Prendre ces prix aurait été pire que ne rien prendre.",
+  "renommer": [],
+  "retirer": [
+    { "sku": "DCB118-QW", "motif": "nommée dans 13 annonces, TOUJOURS comme composant d'un pack — jamais vendue seule sur les 67 pages" },
+    { "sku": "DCB205", "motif": "nommée dans 62 annonces, toutes du même moule générique listant huit références à la fois ; aucune ne l'identifie. ⚠️ Sa fiche portait aussi un prix hors marché — 344,24 € pour « DCB205 Non-Batterie Rechargeable-Piles », titre incompréhensible hérité d'un import" },
+    { "sku": "DCB1102-QW", "motif": "chargeur seul ; les annonces du balayage vendent des packs batteries + chargeur" },
+    { "sku": "D215852-XJ", "motif": "une seule annonce, au titre cassé par le marchand : « D215852-XJ-ramasseur D215851 eau pour » — deux références dedans, aucune ne peut être tranchée" },
+    { "sku": "DSET1", "motif": "kit de six machines joint par des « + » ; le prix affiché est celui de l'ensemble, pas d'un article" }
+  ]
+}

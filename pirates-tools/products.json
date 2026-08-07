@@ -28961,38 +28961,6 @@
     "price": 150.11
   },
   {
-    "id": "dewalt-dcb118-qw",
-    "slug": "dewalt-dcb118-qw-chargeur-rapide-18-a-54v-dcb118-qw",
-    "sku": "DCB118-QW",
-    "name": "DCB118-QW",
-    "brand": "DeWALT",
-    "category": "Batteries et chargeurs",
-    "title": "DeWALT DCB118-QW — Chargeur rapide 18 à 54V DCB118-QW",
-    "tag": "Nouveau",
-    "desc": "Chargeur rapide 18 à 54V DCB118-QW.",
-    "img": "images/placeholder.svg",
-    "currency": "EUR",
-    "vat": 0.2,
-    "stock_status": "in_stock",
-    "stock_label": "En stock",
-    "model": "",
-    "ncCategory": "power_tool",
-    "productType": "pro",
-    "tags": [
-      "cordless"
-    ],
-    "features": [],
-    "specs": {
-      "Marque": "DeWALT",
-      "Référence": "DCB118-QW"
-    },
-    "weight_kg": 2,
-    "poidsSuppose": true,
-    "ficheAcompleter": false,
-    "price_ht": 104.54,
-    "price": 125.45
-  },
-  {
     "id": "dewalt-dcb116-qw",
     "slug": "dewalt-dcb116-qw-chargeur-12-54v-dcb116-qw",
     "sku": "DCB116-QW",
@@ -29055,38 +29023,6 @@
     "ficheAcompleter": false,
     "price_ht": 198.78,
     "price": 238.54
-  },
-  {
-    "id": "dewalt-dcb1102-qw",
-    "slug": "dewalt-dcb1102-qw-chargeur-10-8v-a-18v-dcb1102-qw",
-    "sku": "DCB1102-QW",
-    "name": "DCB1102-QW",
-    "brand": "DeWALT",
-    "category": "Batteries et chargeurs",
-    "title": "DeWALT DCB1102-QW — Chargeur 10.8V à 18V DCB1102-QW",
-    "tag": "Nouveau",
-    "desc": "Chargeur 10.8V à 18V DCB1102-QW.",
-    "img": "images/placeholder.svg",
-    "currency": "EUR",
-    "vat": 0.2,
-    "stock_status": "in_stock",
-    "stock_label": "En stock",
-    "model": "",
-    "ncCategory": "power_tool",
-    "productType": "pro",
-    "tags": [
-      "cordless"
-    ],
-    "features": [],
-    "specs": {
-      "Marque": "DeWALT",
-      "Référence": "DCB1102-QW"
-    },
-    "weight_kg": 2,
-    "poidsSuppose": true,
-    "ficheAcompleter": false,
-    "price_ht": 56.33,
-    "price": 67.6
   },
   {
     "id": "dewalt-dce089ng18-xj",
@@ -42720,38 +42656,6 @@
     "sourceDescriptif": "nomenclature"
   },
   {
-    "id": "dewalt-d215852-xj",
-    "slug": "dewalt-d215852-xj-d215852-xj-ramasseur-d215851-eau-pour",
-    "sku": "D215852-XJ",
-    "name": "D215852-XJ",
-    "brand": "DeWALT",
-    "category": "Combos",
-    "title": "DeWALT D215852-XJ — D215852-XJ-ramasseur D215851 eau pour",
-    "tag": "Nouveau",
-    "desc": "D215852-XJ-ramasseur D215851 eau pour.",
-    "img": "images/placeholder.svg",
-    "currency": "EUR",
-    "vat": 0.2,
-    "stock_status": "in_stock",
-    "stock_label": "En stock",
-    "model": "",
-    "ncCategory": "power_tool",
-    "productType": "pro",
-    "tags": [
-      "cordless"
-    ],
-    "features": [],
-    "specs": {
-      "Marque": "DeWALT",
-      "Référence": "D215852-XJ"
-    },
-    "weight_kg": 2,
-    "poidsSuppose": true,
-    "ficheAcompleter": false,
-    "price_ht": 213.47,
-    "price": 256.16
-  },
-  {
     "id": "dewalt-dch033n-xj",
     "slug": "dewalt-dch033n-xj-dch033n-xj",
     "sku": "DCH033N-XJ",
@@ -45855,38 +45759,6 @@
     "price_ht": 299.81,
     "price": 359.77,
     "sourceDescriptif": "nomenclature"
-  },
-  {
-    "id": "dewalt-dcb205",
-    "slug": "dewalt-dcb205-dcb205-non-batterie-rechargeable-piles",
-    "sku": "DCB205",
-    "name": "DCB205",
-    "brand": "DeWALT",
-    "category": "Batteries et chargeurs",
-    "title": "DeWALT DCB205 — DCB205 Non-Batterie Rechargeable-Piles",
-    "tag": "Nouveau",
-    "desc": "DCB205 Non-Batterie Rechargeable-Piles.",
-    "img": "images/placeholder.svg",
-    "currency": "EUR",
-    "vat": 0.2,
-    "stock_status": "in_stock",
-    "stock_label": "En stock",
-    "model": "",
-    "ncCategory": "power_tool",
-    "productType": "pro",
-    "tags": [
-      "cordless"
-    ],
-    "features": [],
-    "specs": {
-      "Marque": "DeWALT",
-      "Référence": "DCB205"
-    },
-    "weight_kg": 2,
-    "poidsSuppose": true,
-    "ficheAcompleter": false,
-    "price_ht": 286.87,
-    "price": 344.24
   },
   {
     "id": "dewalt-d25333k",
@@ -55548,38 +55420,6 @@
     "ficheAcompleter": false,
     "price_ht": 1147.92,
     "price": 1377.5
-  },
-  {
-    "id": "dewalt-dset1",
-    "slug": "dewalt-dset1-dset1-dcs391n-dcs331n-dcg405n-dcd796n-dcf887n-dch273n-6-ensemble-doutils-elec",
-    "sku": "DSET1",
-    "name": "DSET1",
-    "brand": "DeWALT",
-    "category": "Batteries et chargeurs",
-    "title": "DeWALT DSET1 — DSET1 DCS391N + DCS331N + DCG405N + DCD796N + DCF887N + DCH273N - 6 ENSEMBLE DOUTILS ÉLECTRIQUES 18V XR - fournit",
-    "tag": "Nouveau",
-    "desc": "DSET1 DCS391N + DCS331N + DCG405N + DCD796N + DCF887N + DCH273N - 6 ENSEMBLE DOUTILS ÉLECTRIQUES 18V XR - fournit.",
-    "img": "images/placeholder.svg",
-    "currency": "EUR",
-    "vat": 0.2,
-    "stock_status": "in_stock",
-    "stock_label": "En stock",
-    "model": "",
-    "ncCategory": "power_tool",
-    "productType": "pro",
-    "tags": [
-      "cordless"
-    ],
-    "features": [],
-    "specs": {
-      "Marque": "DeWALT",
-      "Référence": "DSET1"
-    },
-    "weight_kg": 2,
-    "poidsSuppose": true,
-    "ficheAcompleter": false,
-    "price_ht": 1163.73,
-    "price": 1396.48
   },
   {
     "id": "dewalt-dck699m3t",
