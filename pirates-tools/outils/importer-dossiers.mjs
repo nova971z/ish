@@ -89,6 +89,30 @@ function estCaracteristique(ligne) {
   return { cle, val };
 }
 
+/* ⛔⛔ CE QUI SÉPARE LA PHOTO DE LA CAPTURE : LE FOND TRANSPARENT.
+   Trouvé par l'user le 08/08/2026, après que je lui aie proposé de renommer
+   ses images une par une — « tu t'imagines même pas le temps que ça me
+   prendrait, c'est inacceptable ». Il avait raison, et sa solution est
+   meilleure que les deux miennes : « le PNG n'a pas de fond, alors que les
+   descriptions ou les fiches techniques ont des formes rectangulaires ».
+   Un visuel produit détouré porte un canal ALPHA ; une capture d'écran est
+   opaque, et un JPEG ne peut pas être transparent du tout.
+   ⚠️ ET ÇA SE LIT DANS L'EN-TÊTE, sans décoder un pixel. Le 25e octet d'un
+   PNG est le `colorType` de son IHDR : 4 et 6 portent un canal alpha, 3 peut
+   en avoir par un chunk `tRNS`. Mesuré sur deux témoins encodés exprès —
+   type 6 → true, type 2 → false.
+   ⚠️ MES DEUX PISTES PRÉCÉDENTES SONT MORTES, et il faut le dire : « la plus
+   lourde gagne » retenait la capture de fiche technique ; « les captures ont
+   toutes la taille de l'écran » a été démentie par l'user — ses captures
+   n'ont pas toutes la même taille. */
+function aDeLaTransparence(buf) {
+  if (buf.length < 26 || buf.toString('hex', 0, 8) !== '89504e470d0a1a0a') return false;
+  const type = buf[25];
+  if (type === 4 || type === 6) return true;
+  if (type === 3) return buf.includes(Buffer.from('tRNS'));
+  return false;
+}
+
 async function lireDossier(chemin) {
   const noms = await readdir(chemin);
   const res = { image: null, imageOctets: 0, images: [], lignes: [], fichiersTexte: [] };
@@ -105,7 +129,9 @@ async function lireDossier(chemin) {
          l'aurait posée comme photo du produit sur la carte de vente.
          Une image ne dit pas ce qu'elle montre. Quand plusieurs se
          présentent, on ne devine pas : on les relève toutes et on le dit. */
-      res.images.push({ nom: n, octets: st.size, ext: ext, chemin: complet });
+      const buf = await readFile(complet);
+      res.images.push({ nom: n, octets: st.size, ext: ext, chemin: complet,
+        buf: buf, detoure: aDeLaTransparence(buf) });
     } else if (TEXTES.includes(ext)) {
       const txt = await readFile(complet, 'utf8');
       res.fichiersTexte.push(n);
@@ -139,23 +165,30 @@ for (const nom of dossiers) {
      doit trancher, sinon on refuse et on liste ce qu'on a vu. */
   if (d.images.length === 1) d.retenue = d.images[0];
   else if (d.images.length > 1) {
-    const claires = d.images.filter((i) => /produit|photo|visuel|packshot/i.test(i.nom));
-    const captures = d.images.filter((i) => /techni|caract|spec|descri|fiche/i.test(i.nom));
-    if (claires.length === 1) d.retenue = claires[0];
-    else if (captures.length === d.images.length - 1) {
-      d.retenue = d.images.find((i) => captures.indexOf(i) === -1);
+    /* ① Le fond transparent tranche seul, et c'est le critère de l'user. */
+    const detourees = d.images.filter((i) => i.detoure);
+    if (detourees.length === 1) d.retenue = detourees[0];
+    else if (detourees.length > 1) {
+      /* Plusieurs visuels détourés : ce sont tous des photos produit. On prend
+         la plus grande — entre deux VRAIES photos, le poids est un critère
+         acceptable ; entre une photo et une capture, il ne l'était pas. */
+      d.retenue = detourees.slice().sort((a, b) => b.octets - a.octets)[0];
+      d.autresVisuels = detourees.length - 1;
+    } else {
+      /* ② Aucun détourage : le nom peut encore trancher, sinon on renonce. */
+      const claires = d.images.filter((i) => /produit|photo|visuel|packshot/i.test(i.nom));
+      if (claires.length === 1) d.retenue = claires[0];
     }
   }
   if (d.images.length > 1 && !d.retenue) {
-    refus.push([nom, d.images.length + ' images et aucun nom qui dise laquelle est le '
-      + 'PRODUIT : ' + d.images.map((i) => i.nom).join(', ')
-      + '. Nomme-la « produit » ou « photo », ou laisse-la seule dans le dossier']);
+    refus.push([nom, d.images.length + ' images, AUCUNE avec un fond transparent : '
+      + d.images.map((i) => i.nom).join(', ')
+      + '. Impossible de dire laquelle est le produit — je les regarderai']);
     continue;
   }
   if (d.retenue) {
-    const buf = await readFile(d.retenue.chemin);
-    d.image = 'data:' + MIME[d.retenue.ext] + ';base64,' + buf.toString('base64');
-    d.imageNom = d.retenue.nom;
+    d.image = 'data:' + MIME[d.retenue.ext] + ';base64,' + d.retenue.buf.toString('base64');
+    d.imageNom = d.retenue.nom + (d.retenue.detoure ? ', fond transparent' : '');
   }
   /* Les captures de fiche technique sont RELEVÉES, pas lues : un outil ne
      sait pas lire une image. Elles sont listées pour être ouvertes à la main. */
