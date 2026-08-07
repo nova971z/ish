@@ -37159,9 +37159,9 @@
     "name": "DT2400-QZ",
     "brand": "DeWALT",
     "category": "Quincaillerie",
-    "title": "DeWALT DT2400-QZ — Référence DT2400-QZ — descriptif à compléter",
+    "title": "DeWALT DT2400-QZ — DeWalt 228 mm 100 pièces (DT2400-QZ)",
     "tag": "Nouveau",
-    "desc": "Référence DT2400-QZ — descriptif à compléter. Envoi en lettre suivie — livraison 7 à 14 jours.",
+    "desc": "DeWalt 228 mm 100 pièces (DT2400-QZ) (descriptif repris de l'annonce fournisseur).",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -37182,7 +37182,8 @@
     "poidsSuppose": true,
     "ficheAcompleter": true,
     "price_ht": 246.89,
-    "price": 296.27
+    "price": 296.27,
+    "sourceDescriptif": "annonce"
   },
   {
     "id": "dewalt-dt9774-qz",
@@ -38727,9 +38728,9 @@
     "name": "DCMASBC1N-XJ",
     "brand": "DeWALT",
     "category": "Tronçonnage et élagage",
-    "title": "DeWALT DCMASBC1N-XJ — DCMASBC1N-XJ",
+    "title": "DeWALT DCMASBC1N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCMASBC1N-XJ.",
+    "desc": "Référence constructeur DCMASBC1N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -38748,9 +38749,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 127.79,
-    "price": 153.35
+    "price": 153.35,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcbp034",
@@ -39175,9 +39177,9 @@
     "name": "DCF809NT",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCF809NT — DCF809NT",
+    "title": "DeWALT DCF809NT — Machine nue, sans batterie ni chargeur, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCF809NT.",
+    "desc": "Référence constructeur DCF809NT. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -39196,9 +39198,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 134.71,
-    "price": 161.65
+    "price": 161.65,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-d28011",
@@ -39239,9 +39242,9 @@
     "name": "DCD708NT",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCD708NT — DCD708NT",
+    "title": "DeWALT DCD708NT — Machine nue, sans batterie ni chargeur, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCD708NT.",
+    "desc": "Référence constructeur DCD708NT. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -39260,9 +39263,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 135.81,
-    "price": 162.97
+    "price": 162.97,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcs3501",
@@ -39303,9 +39307,9 @@
     "name": "DCF801N-XJ",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCF801N-XJ — DCF801N-XJ",
+    "title": "DeWALT DCF801N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCF801N-XJ.",
+    "desc": "Référence constructeur DCF801N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -39324,9 +39328,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 136.75,
-    "price": 164.1
+    "price": 164.1,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dt99593-qz",
@@ -39495,9 +39500,9 @@
     "name": "DWD024KS",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DWD024KS — DWD024KS",
+    "title": "DeWALT DWD024KS — Perceuse à percussion DEWALT dwd024Puissance 650W Professionnelle de travail",
     "tag": "Nouveau",
-    "desc": "DWD024KS.",
+    "desc": "Perceuse à percussion DEWALT dwd024Puissance 650W Professionnelle de travail (descriptif repris de l'annonce fournisseur).",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -39516,9 +39521,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 139.42,
-    "price": 167.3
+    "price": 167.3,
+    "sourceDescriptif": "annonce"
   },
   {
     "id": "dewalt-dcf601n",
@@ -39527,9 +39533,9 @@
     "name": "DCF601N",
     "brand": "DeWALT",
     "category": "Accessoires",
-    "title": "DeWALT DCF601N — DCF601N",
+    "title": "DeWALT DCF601N — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCF601N.",
+    "desc": "Référence constructeur DCF601N. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -39548,9 +39554,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 146.06,
-    "price": 175.27
+    "price": 175.27,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcb115e2-qw",
@@ -39783,9 +39790,9 @@
     "name": "DCV517N-XJ",
     "brand": "DeWALT",
     "category": "Aspirateurs",
-    "title": "DeWALT DCV517N-XJ — DCV517N-XJ",
+    "title": "DeWALT DCV517N-XJ — DEWALT DCV517B Baretool 20V MAX Cordless 1/2 gallon Wet/Dry Portable Vac Kit (Tool Only)",
     "tag": "Nouveau",
-    "desc": "DCV517N-XJ.",
+    "desc": "DEWALT DCV517B Baretool 20V MAX Cordless 1/2 gallon Wet/Dry Portable Vac Kit (Tool Only) (descriptif repris de l'annonce fournisseur).",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -39804,9 +39811,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 142.49,
-    "price": 170.99
+    "price": 170.99,
+    "sourceDescriptif": "annonce"
   },
   {
     "id": "dewalt-dcf85m",
@@ -39879,9 +39887,9 @@
     "name": "DCBP518",
     "brand": "DeWALT",
     "category": "Batteries et chargeurs",
-    "title": "DeWALT DCBP518 — DCBP518",
+    "title": "DeWALT DCBP518 — DeWalt DCBP 518",
     "tag": "Nouveau",
-    "desc": "DCBP518.",
+    "desc": "DeWalt DCBP 518 (descriptif repris de l'annonce fournisseur).",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -39900,9 +39908,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 143.79,
-    "price": 172.55
+    "price": 172.55,
+    "sourceDescriptif": "annonce"
   },
   {
     "id": "dewalt-dwe4016d2",
@@ -40039,9 +40048,9 @@
     "name": "DCMHT520N-XJ",
     "brand": "DeWALT",
     "category": "Tronçonnage et élagage",
-    "title": "DeWALT DCMHT520N-XJ — DCMHT520N-XJ",
+    "title": "DeWALT DCMHT520N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCMHT520N-XJ.",
+    "desc": "Référence constructeur DCMHT520N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -40060,9 +40069,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 145.55,
-    "price": 174.66
+    "price": 174.66,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dxma1902092",
@@ -40199,9 +40209,9 @@
     "name": "DCMASPS5N-XJ",
     "brand": "DeWALT",
     "category": "Tronçonnage et élagage",
-    "title": "DeWALT DCMASPS5N-XJ — DCMASPS5N-XJ",
+    "title": "DeWALT DCMASPS5N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCMASPS5N-XJ.",
+    "desc": "Référence constructeur DCMASPS5N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -40220,9 +40230,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 147.8,
-    "price": 177.36
+    "price": 177.36,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dce5801",
@@ -40647,9 +40658,9 @@
     "name": "DCF880N",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCF880N — DCF880N",
+    "title": "DeWALT DCF880N — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCF880N.",
+    "desc": "Référence constructeur DCF880N. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -40668,9 +40679,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 155.89,
-    "price": 187.07
+    "price": 187.07,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dw274",
@@ -41191,9 +41203,9 @@
     "name": "DCC018N",
     "brand": "DeWALT",
     "category": "Accessoires",
-    "title": "DeWALT DCC018N — DCC018N",
+    "title": "DeWALT DCC018N — DeWalt DCC 018 N Gonfleur Sans Fil 18V 11bar, Batterie 4,0Ah (DCC018N)",
     "tag": "Nouveau",
-    "desc": "DCC018N.",
+    "desc": "DeWalt DCC 018 N Gonfleur Sans Fil 18V 11bar, Batterie 4,0Ah (DCC018N) (descriptif repris de l'annonce fournisseur).",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -41212,9 +41224,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 169.15,
-    "price": 202.98
+    "price": 202.98,
+    "sourceDescriptif": "annonce"
   },
   {
     "id": "dewalt-dwe550",
@@ -41255,9 +41268,9 @@
     "name": "DCS312N-XJ",
     "brand": "DeWALT",
     "category": "Scies",
-    "title": "DeWALT DCS312N-XJ — DCS312N-XJ",
+    "title": "DeWALT DCS312N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCS312N-XJ.",
+    "desc": "Référence constructeur DCS312N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -41276,9 +41289,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 169.48,
-    "price": 203.38
+    "price": 203.38,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcb1106",
@@ -41415,9 +41429,9 @@
     "name": "DCF921N-XJ",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCF921N-XJ — DCF921N-XJ",
+    "title": "DeWALT DCF921N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCF921N-XJ.",
+    "desc": "Référence constructeur DCF921N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -41436,9 +41450,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 172.46,
-    "price": 206.95
+    "price": 206.95,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcn9301",
@@ -41511,9 +41526,9 @@
     "name": "DCG412N-XJ",
     "brand": "DeWALT",
     "category": "Meulage, découpe et polissage",
-    "title": "DeWALT DCG412N-XJ — DCG412N-XJ",
+    "title": "DeWALT DCG412N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCG412N-XJ.",
+    "desc": "Référence constructeur DCG412N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -41532,9 +41547,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 173.13,
-    "price": 207.76
+    "price": 207.76,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcs512n",
@@ -41543,9 +41559,9 @@
     "name": "DCS512N",
     "brand": "DeWALT",
     "category": "Scies",
-    "title": "DeWALT DCS512N — DCS512N",
+    "title": "DeWALT DCS512N — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCS512N.",
+    "desc": "Référence constructeur DCS512N. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -41564,9 +41580,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 175.76,
-    "price": 210.91
+    "price": 210.91,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcb1880-xj",
@@ -41895,9 +41912,9 @@
     "name": "DCD771D2-QW",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCD771D2-QW — DCD771D2-QW",
+    "title": "DeWALT DCD771D2-QW — 2 batteries de 2 Ah XR",
     "tag": "Nouveau",
-    "desc": "DCD771D2-QW.",
+    "desc": "Référence constructeur DCD771D2-QW. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 2 Ah XR. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -41916,9 +41933,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 181.33,
-    "price": 217.6
+    "price": 217.6,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-d215804-xj",
@@ -42023,9 +42041,9 @@
     "name": "DCD716D2",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCD716D2 — DCD716D2",
+    "title": "DeWALT DCD716D2 — 2 batteries de 2 Ah XR",
     "tag": "Nouveau",
-    "desc": "DCD716D2.",
+    "desc": "Référence constructeur DCD716D2. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 2 Ah XR. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -42044,9 +42062,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 182.91,
-    "price": 219.49
+    "price": 219.49,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwh205dh-xj",
@@ -42151,9 +42170,9 @@
     "name": "DCH133N",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT DCH133N — DCH133N",
+    "title": "DeWALT DCH133N — DEWALT - Perforateur-Burineur SDS-PLUS Brushless 2.6J 18V - DCH133NT-XJ - Sans Fil avec Coffret TSTAK et Débrayage de Sé",
     "tag": "Nouveau",
-    "desc": "DCH133N.",
+    "desc": "DEWALT - Perforateur-Burineur SDS-PLUS Brushless 2.6J 18V - DCH133NT-XJ - Sans Fil avec Coffret TSTAK et Débrayage de Sé (descriptif repris de l'annonce fournisseur).",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -42172,9 +42191,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 186.56,
-    "price": 223.87
+    "price": 223.87,
+    "sourceDescriptif": "annonce"
   },
   {
     "id": "dewalt-dcd703nt",
@@ -42183,9 +42203,9 @@
     "name": "DCD703NT",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCD703NT — DCD703NT",
+    "title": "DeWALT DCD703NT — Machine nue, sans batterie ni chargeur, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCD703NT.",
+    "desc": "Référence constructeur DCD703NT. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -42204,9 +42224,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 188.5,
-    "price": 226.2
+    "price": 226.2,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcmst561n-xj",
@@ -42215,9 +42236,9 @@
     "name": "DCMST561N-XJ",
     "brand": "DeWALT",
     "category": "Tronçonnage et élagage",
-    "title": "DeWALT DCMST561N-XJ — DCMST561N-XJ",
+    "title": "DeWALT DCMST561N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCMST561N-XJ.",
+    "desc": "Référence constructeur DCMST561N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -42236,9 +42257,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 188.57,
-    "price": 226.28
+    "price": 226.28,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dw0822-xj",
@@ -42343,9 +42365,9 @@
     "name": "DCD701D2",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCD701D2 — DCD701D2",
+    "title": "DeWALT DCD701D2 — 2 batteries de 2 Ah XR",
     "tag": "Nouveau",
-    "desc": "DCD701D2.",
+    "desc": "Référence constructeur DCD701D2. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 2 Ah XR. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -42364,9 +42386,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 192.93,
-    "price": 231.52
+    "price": 231.52,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcl045-xj",
@@ -42407,9 +42430,9 @@
     "name": "DCH072N",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT DCH072N — DCH072N",
+    "title": "DeWALT DCH072N — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCH072N.",
+    "desc": "Référence constructeur DCH072N. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -42428,9 +42451,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 193.8,
-    "price": 232.56
+    "price": 232.56,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dchj067b-l",
@@ -42535,9 +42559,9 @@
     "name": "DCF923N",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCF923N — DCF923N",
+    "title": "DeWALT DCF923N — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCF923N.",
+    "desc": "Référence constructeur DCF923N. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -42556,9 +42580,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 197.11,
-    "price": 236.53
+    "price": 236.53,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dxv30sapta",
@@ -42663,9 +42688,9 @@
     "name": "DCD706D2",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCD706D2 — DCD706D2",
+    "title": "DeWALT DCD706D2 — 2 batteries de 2 Ah XR",
     "tag": "Nouveau",
-    "desc": "DCD706D2.",
+    "desc": "Référence constructeur DCD706D2. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 2 Ah XR. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -42684,9 +42709,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 200.04,
-    "price": 240.05
+    "price": 240.05,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-eudxv34p",
@@ -42727,9 +42753,9 @@
     "name": "DCS571N",
     "brand": "DeWALT",
     "category": "Scies",
-    "title": "DeWALT DCS571N — DCS571N",
+    "title": "DeWALT DCS571N — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCS571N.",
+    "desc": "Référence constructeur DCS571N. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -42748,9 +42774,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 201.14,
-    "price": 241.37
+    "price": 241.37,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcf903b",
@@ -42919,9 +42946,9 @@
     "name": "DCG407NT-XJ",
     "brand": "DeWALT",
     "category": "Meulage, découpe et polissage",
-    "title": "DeWALT DCG407NT-XJ — DCG407NT-XJ",
+    "title": "DeWALT DCG407NT-XJ — Machine nue, sans batterie ni chargeur, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCG407NT-XJ.",
+    "desc": "Référence constructeur DCG407NT-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -42940,9 +42967,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 205.28,
-    "price": 246.34
+    "price": 246.34,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-d25303dh-xj",
@@ -43207,9 +43235,9 @@
     "name": "DCF503N-XJ",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCF503N-XJ — DCF503N-XJ",
+    "title": "DeWALT DCF503N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCF503N-XJ.",
+    "desc": "Référence constructeur DCF503N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -43228,9 +43256,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 212.46,
-    "price": 254.95
+    "price": 254.95,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcf500n-xj",
@@ -43239,9 +43268,9 @@
     "name": "DCF500N-XJ",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCF500N-XJ — DCF500N-XJ",
+    "title": "DeWALT DCF500N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCF500N-XJ.",
+    "desc": "Référence constructeur DCF500N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -43260,9 +43289,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 213.09,
-    "price": 255.71
+    "price": 255.71,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcf815n",
@@ -43271,9 +43301,9 @@
     "name": "DCF815N",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCF815N — DCF815N",
+    "title": "DeWALT DCF815N — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCF815N.",
+    "desc": "Référence constructeur DCF815N. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -43292,9 +43322,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 213.4,
-    "price": 256.08
+    "price": 256.08,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-d215852-xj",
@@ -43335,9 +43366,9 @@
     "name": "DCH033N-XJ",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT DCH033N-XJ — DCH033N-XJ",
+    "title": "DeWALT DCH033N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCH033N-XJ.",
+    "desc": "Référence constructeur DCH033N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -43356,9 +43387,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 215.28,
-    "price": 258.34
+    "price": 258.34,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-td.powerset5007",
@@ -43431,9 +43463,9 @@
     "name": "DCF513N-XJ",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCF513N-XJ — DCF513N-XJ",
+    "title": "DeWALT DCF513N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCF513N-XJ.",
+    "desc": "Référence constructeur DCF513N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -43452,9 +43484,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 217.15,
-    "price": 260.58
+    "price": 260.58,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcm561",
@@ -43527,9 +43560,9 @@
     "name": "DCS382N",
     "brand": "DeWALT",
     "category": "Scies",
-    "title": "DeWALT DCS382N — DCS382N",
+    "title": "DeWALT DCS382N — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCS382N.",
+    "desc": "Référence constructeur DCS382N. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -43548,9 +43581,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 219.53,
-    "price": 263.44
+    "price": 263.44,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dxcmd155pe",
@@ -43623,9 +43657,9 @@
     "name": "DCMBA572N",
     "brand": "DeWALT",
     "category": "Tronçonnage et élagage",
-    "title": "DeWALT DCMBA572N — DCMBA572N",
+    "title": "DeWALT DCMBA572N — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCMBA572N.",
+    "desc": "Référence constructeur DCMBA572N. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -43644,9 +43678,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 221.64,
-    "price": 265.97
+    "price": 265.97,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcg413n",
@@ -43719,9 +43754,9 @@
     "name": "DCK211D2T-QW",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK211D2T-QW — DCK211D2T-QW",
+    "title": "DeWALT DCK211D2T-QW — 2 batteries de 2 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK211D2T-QW.",
+    "desc": "Référence constructeur DCK211D2T-QW. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 2 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -43740,9 +43775,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 223.84,
-    "price": 268.61
+    "price": 268.61,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwd524ks",
@@ -43847,9 +43883,9 @@
     "name": "DCH263N",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT DCH263N — DCH263N",
+    "title": "DeWALT DCH263N — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCH263N.",
+    "desc": "Référence constructeur DCH263N. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -43868,9 +43904,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 194.57,
-    "price": 233.48
+    "price": 233.48,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dch253n",
@@ -43879,9 +43916,9 @@
     "name": "DCH253N",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT DCH253N — DCH253N",
+    "title": "DeWALT DCH253N — DEWALT DCH253N-XJ Marteau électro-eumatique XR 18 V SDS-Plus 2,1 J 3 Modes sans Chargeur/Batterie, Jaune/Noir, Bare Unit",
     "tag": "Nouveau",
-    "desc": "DCH253N.",
+    "desc": "DEWALT DCH253N-XJ Marteau électro-eumatique XR 18 V SDS-Plus 2,1 J 3 Modes sans Chargeur/Batterie, Jaune/Noir, Bare Unit (descriptif repris de l'annonce fournisseur).",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -43900,9 +43937,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 228.05,
-    "price": 273.66
+    "price": 273.66,
+    "sourceDescriptif": "annonce"
   },
   {
     "id": "dewalt-dwe575k",
@@ -44007,9 +44045,9 @@
     "name": "DCM562P1",
     "brand": "DeWALT",
     "category": "Tronçonnage et élagage",
-    "title": "DeWALT DCM562P1 — DCM562P1",
+    "title": "DeWALT DCM562P1 — 1 batterie de 5 Ah XR",
     "tag": "Nouveau",
-    "desc": "DCM562P1.",
+    "desc": "Référence constructeur DCM562P1. Configuration livrée d'après la nomenclature DeWALT : 1 batterie de 5 Ah XR. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -44028,9 +44066,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 231.24,
-    "price": 277.49
+    "price": 277.49,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcf901nt",
@@ -44039,9 +44078,9 @@
     "name": "DCF901NT",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCF901NT — DCF901NT",
+    "title": "DeWALT DCF901NT — Machine nue, sans batterie ni chargeur, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCF901NT.",
+    "desc": "Référence constructeur DCF901NT. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -44060,9 +44099,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 232.91,
-    "price": 279.49
+    "price": 279.49,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck266nt",
@@ -44103,9 +44143,9 @@
     "name": "DCMAS5713N",
     "brand": "DeWALT",
     "category": "Tronçonnage et élagage",
-    "title": "DeWALT DCMAS5713N — DCMAS5713N",
+    "title": "DeWALT DCMAS5713N — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCMAS5713N.",
+    "desc": "Référence constructeur DCMAS5713N. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -44124,9 +44164,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 234.76,
-    "price": 281.71
+    "price": 281.71,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcdw107",
@@ -44295,9 +44336,9 @@
     "name": "DCS373N",
     "brand": "DeWALT",
     "category": "Scies",
-    "title": "DeWALT DCS373N — DCS373N",
+    "title": "DeWALT DCS373N — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCS373N.",
+    "desc": "Référence constructeur DCS373N. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -44316,9 +44357,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 237.33,
-    "price": 284.8
+    "price": 284.8,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcf860n-xj",
@@ -44327,9 +44369,9 @@
     "name": "DCF860N-XJ",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCF860N-XJ — DCF860N-XJ",
+    "title": "DeWALT DCF860N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCF860N-XJ.",
+    "desc": "Référence constructeur DCF860N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -44348,9 +44390,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 239.02,
-    "price": 286.82
+    "price": 286.82,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-d21441",
@@ -44391,9 +44434,9 @@
     "name": "DCMHT573N-XJ",
     "brand": "DeWALT",
     "category": "Tronçonnage et élagage",
-    "title": "DeWALT DCMHT573N-XJ — DCMHT573N-XJ",
+    "title": "DeWALT DCMHT573N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCMHT573N-XJ.",
+    "desc": "Référence constructeur DCMHT573N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -44412,9 +44455,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 239.27,
-    "price": 287.12
+    "price": 287.12,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwe4357-qs",
@@ -44487,9 +44531,9 @@
     "name": "DCD790D2",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCD790D2 — DCD790D2",
+    "title": "DeWALT DCD790D2 — 2 batteries de 2 Ah XR",
     "tag": "Nouveau",
-    "desc": "DCD790D2.",
+    "desc": "Référence constructeur DCD790D2. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 2 Ah XR. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -44508,9 +44552,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 243.05,
-    "price": 291.66
+    "price": 291.66,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwd522ks",
@@ -44583,9 +44628,9 @@
     "name": "DCMHT567N-XJ",
     "brand": "DeWALT",
     "category": "Tronçonnage et élagage",
-    "title": "DeWALT DCMHT567N-XJ — DCMHT567N-XJ",
+    "title": "DeWALT DCMHT567N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCMHT567N-XJ.",
+    "desc": "Référence constructeur DCMHT567N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -44604,9 +44649,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 253.28,
-    "price": 303.94
+    "price": 303.94,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dce154n",
@@ -44615,9 +44661,9 @@
     "name": "DCE154N",
     "brand": "DeWALT",
     "category": "Accessoires",
-    "title": "DeWALT DCE154N — DCE154N",
+    "title": "DeWALT DCE154N — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCE154N.",
+    "desc": "Référence constructeur DCE154N. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -44636,9 +44682,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 247.13,
-    "price": 296.56
+    "price": 296.56,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dxcms2524he",
@@ -44679,9 +44726,9 @@
     "name": "DCD100M2T",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCD100M2T — DCD100M2T",
+    "title": "DeWALT DCD100M2T — 2 batteries de 4 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCD100M2T.",
+    "desc": "Référence constructeur DCD100M2T. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 4 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -44700,9 +44747,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 247.17,
-    "price": 296.6
+    "price": 296.6,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwe4579",
@@ -44839,9 +44887,9 @@
     "name": "DCG430N",
     "brand": "DeWALT",
     "category": "Meulage, découpe et polissage",
-    "title": "DeWALT DCG430N — DCG430N",
+    "title": "DeWALT DCG430N — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCG430N.",
+    "desc": "Référence constructeur DCG430N. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -44860,9 +44908,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 258.42,
-    "price": 310.1
+    "price": 310.1,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwd241-qs",
@@ -45095,9 +45144,9 @@
     "name": "DCS565NT-XJ",
     "brand": "DeWALT",
     "category": "Scies",
-    "title": "DeWALT DCS565NT-XJ — DCS565NT-XJ",
+    "title": "DeWALT DCS565NT-XJ — Machine nue, sans batterie ni chargeur, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCS565NT-XJ.",
+    "desc": "Référence constructeur DCS565NT-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -45116,9 +45165,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 263.61,
-    "price": 316.33
+    "price": 316.33,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwp849x",
@@ -45191,9 +45241,9 @@
     "name": "DCF514N",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCF514N — DCF514N",
+    "title": "DeWALT DCF514N — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCF514N.",
+    "desc": "Référence constructeur DCF514N. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -45212,9 +45262,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 268.69,
-    "price": 322.43
+    "price": 322.43,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dw331k",
@@ -45383,9 +45434,9 @@
     "name": "DCF897N-XJ",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCF897N-XJ — DCF897N-XJ",
+    "title": "DeWALT DCF897N-XJ — DeWalt DCF 897 NT",
     "tag": "Nouveau",
-    "desc": "DCF897N-XJ.",
+    "desc": "DeWalt DCF 897 NT (descriptif repris de l'annonce fournisseur).",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -45404,9 +45455,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 285.16,
-    "price": 342.19
+    "price": 342.19,
+    "sourceDescriptif": "annonce"
   },
   {
     "id": "dewalt-dcgg571nk-xj",
@@ -45415,9 +45467,9 @@
     "name": "DCGG571NK-XJ",
     "brand": "DeWALT",
     "category": "Meulage, découpe et polissage",
-    "title": "DeWALT DCGG571NK-XJ — DCGG571NK-XJ",
+    "title": "DeWALT DCGG571NK-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCGG571NK-XJ.",
+    "desc": "Référence constructeur DCGG571NK-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -45436,9 +45488,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 275.31,
-    "price": 330.37
+    "price": 330.37,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwmt19231",
@@ -45479,9 +45532,9 @@
     "name": "DCM849",
     "brand": "DeWALT",
     "category": "Meulage, découpe et polissage",
-    "title": "DeWALT DCM849 — DCM849",
+    "title": "DeWALT DCM849 — DeWalt DCM 849 N Polisseuse Excentrique 18V 180mm Brushless (DCM849N)",
     "tag": "Nouveau",
-    "desc": "DCM849.",
+    "desc": "DeWalt DCM 849 N Polisseuse Excentrique 18V 180mm Brushless (DCM849N) (descriptif repris de l'annonce fournisseur).",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -45500,9 +45553,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 278.12,
-    "price": 333.74
+    "price": 333.74,
+    "sourceDescriptif": "annonce"
   },
   {
     "id": "dewalt-dck2060d2t",
@@ -45511,9 +45565,9 @@
     "name": "DCK2060D2T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK2060D2T — DCK2060D2T",
+    "title": "DeWALT DCK2060D2T — 2 batteries de 2 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK2060D2T.",
+    "desc": "Référence constructeur DCK2060D2T. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 2 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -45532,9 +45586,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 278.54,
-    "price": 334.25
+    "price": 334.25,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dw304pk",
@@ -45607,9 +45662,9 @@
     "name": "DCE088NG18-XJ",
     "brand": "DeWALT",
     "category": "Accessoires",
-    "title": "DeWALT DCE088NG18-XJ — DCE088NG18-XJ",
+    "title": "DeWALT DCE088NG18-XJ — 1 batterie de 3 Ah XR",
     "tag": "Nouveau",
-    "desc": "DCE088NG18-XJ.",
+    "desc": "Référence constructeur DCE088NG18-XJ. Configuration livrée d'après la nomenclature DeWALT : 1 batterie de 3 Ah XR. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -45628,9 +45683,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 282.15,
-    "price": 338.58
+    "price": 338.58,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcn701n",
@@ -45639,9 +45695,9 @@
     "name": "DCN701N",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCN701N — DCN701N",
+    "title": "DeWALT DCN701N — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCN701N.",
+    "desc": "Référence constructeur DCN701N. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -45660,9 +45716,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 283.2,
-    "price": 339.84
+    "price": 339.84,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcf894n-xj",
@@ -45703,9 +45760,9 @@
     "name": "DCG421N-XJ",
     "brand": "DeWALT",
     "category": "Meulage, découpe et polissage",
-    "title": "DeWALT DCG421N-XJ — DCG421N-XJ",
+    "title": "DeWALT DCG421N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCG421N-XJ.",
+    "desc": "Référence constructeur DCG421N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -45724,9 +45781,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 283.22,
-    "price": 339.86
+    "price": 339.86,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcf892nt-xj",
@@ -45735,9 +45793,9 @@
     "name": "DCF892NT-XJ",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCF892NT-XJ — DCF892NT-XJ",
+    "title": "DeWALT DCF892NT-XJ — Dewalt DCF 892 N",
     "tag": "Nouveau",
-    "desc": "DCF892NT-XJ.",
+    "desc": "Dewalt DCF 892 N (descriptif repris de l'annonce fournisseur).",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -45756,9 +45814,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 283.33,
-    "price": 340
+    "price": 340,
+    "sourceDescriptif": "annonce"
   },
   {
     "id": "dewalt-dcg404",
@@ -45767,9 +45826,9 @@
     "name": "DCG404",
     "brand": "DeWALT",
     "category": "Meulage, découpe et polissage",
-    "title": "DeWALT DCG404 — DCG404",
+    "title": "DeWALT DCG404 — Meuleuse compacte 125 mm XR 18V Brushless - DEVALT - Sans batterie, ni charger coffret TSTAK - DCG404NT-XJ",
     "tag": "Nouveau",
-    "desc": "DCG404.",
+    "desc": "Meuleuse compacte 125 mm XR 18V Brushless - DEVALT - Sans batterie, ni charger coffret TSTAK - DCG404NT-XJ (descriptif repris de l'annonce fournisseur).",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -45788,9 +45847,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 284.19,
-    "price": 341.03
+    "price": 341.03,
+    "sourceDescriptif": "annonce"
   },
   {
     "id": "dewalt-dxcms15re",
@@ -45895,9 +45955,9 @@
     "name": "DCM571N",
     "brand": "DeWALT",
     "category": "Tronçonnage et élagage",
-    "title": "DeWALT DCM571N — DCM571N",
+    "title": "DeWALT DCM571N — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCM571N.",
+    "desc": "Référence constructeur DCM571N. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -45916,9 +45976,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 290.27,
-    "price": 348.32
+    "price": 348.32,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcm572n-xj",
@@ -45927,9 +45988,9 @@
     "name": "DCM572N-XJ",
     "brand": "DeWALT",
     "category": "Tronçonnage et élagage",
-    "title": "DeWALT DCM572N-XJ — DCM572N-XJ",
+    "title": "DeWALT DCM572N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCM572N-XJ.",
+    "desc": "Référence constructeur DCM572N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -45948,9 +46009,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 290.4,
-    "price": 348.48
+    "price": 348.48,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcdw102-xj",
@@ -46023,9 +46085,9 @@
     "name": "DCK795S2T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK795S2T — DCK795S2T",
+    "title": "DeWALT DCK795S2T — Coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK795S2T.",
+    "desc": "Référence constructeur DCK795S2T. Configuration livrée d'après la nomenclature DeWALT : coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -46044,9 +46106,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 292.41,
-    "price": 350.89
+    "price": 350.89,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dt70523tm-qz",
@@ -46279,9 +46342,9 @@
     "name": "DCK2067D2T-QW",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK2067D2T-QW — Référence DCK2067D2T-QW — descriptif à compléter",
+    "title": "DeWALT DCK2067D2T-QW — 2 batteries de 2 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "Référence DCK2067D2T-QW — descriptif à compléter.",
+    "desc": "Référence constructeur DCK2067D2T-QW. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 2 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -46302,7 +46365,8 @@
     "poidsSuppose": true,
     "ficheAcompleter": true,
     "price_ht": 295.87,
-    "price": 355.04
+    "price": 355.04,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dw0811",
@@ -46375,9 +46439,9 @@
     "name": "DCK2110L2T-QW",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK2110L2T-QW — DCK2110L2T-QW",
+    "title": "DeWALT DCK2110L2T-QW — 2 batteries de 3 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK2110L2T-QW.",
+    "desc": "Référence constructeur DCK2110L2T-QW. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 3 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -46396,9 +46460,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 298.3,
-    "price": 357.96
+    "price": 357.96,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcb283bc",
@@ -46439,9 +46504,9 @@
     "name": "DCF902D2-QW",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCF902D2-QW — DCF902D2-QW",
+    "title": "DeWALT DCF902D2-QW — 2 batteries de 2 Ah XR",
     "tag": "Nouveau",
-    "desc": "DCF902D2-QW.",
+    "desc": "Référence constructeur DCF902D2-QW. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 2 Ah XR. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -46460,9 +46525,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 299.81,
-    "price": 359.77
+    "price": 359.77,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcb205",
@@ -46535,9 +46601,9 @@
     "name": "DCK2062D2T-QW",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK2062D2T-QW — DCK2062D2T-QW",
+    "title": "DeWALT DCK2062D2T-QW — 2 batteries de 2 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK2062D2T-QW.",
+    "desc": "Référence constructeur DCK2062D2T-QW. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 2 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -46556,9 +46622,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 301.24,
-    "price": 361.49
+    "price": 361.49,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dce050n-xj",
@@ -46567,9 +46634,9 @@
     "name": "DCE050N-XJ",
     "brand": "DeWALT",
     "category": "Accessoires",
-    "title": "DeWALT DCE050N-XJ — DCE050N-XJ",
+    "title": "DeWALT DCE050N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCE050N-XJ.",
+    "desc": "Référence constructeur DCE050N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -46588,9 +46655,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 303.3,
-    "price": 363.96
+    "price": 363.96,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcs578nt-xj",
@@ -46599,9 +46667,9 @@
     "name": "DCS578NT-XJ",
     "brand": "DeWALT",
     "category": "Scies",
-    "title": "DeWALT DCS578NT-XJ — DCS578NT-XJ",
+    "title": "DeWALT DCS578NT-XJ — Machine nue, sans batterie ni chargeur, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCS578NT-XJ.",
+    "desc": "Référence constructeur DCS578NT-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -46620,9 +46688,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 303.89,
-    "price": 364.67
+    "price": 364.67,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcd85mm2t",
@@ -46823,9 +46892,9 @@
     "name": "DCS389NT-XJ",
     "brand": "DeWALT",
     "category": "Scies",
-    "title": "DeWALT DCS389NT-XJ — DCS389NT-XJ",
+    "title": "DeWALT DCS389NT-XJ — Machine nue, sans batterie ni chargeur, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCS389NT-XJ.",
+    "desc": "Référence constructeur DCS389NT-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -46844,9 +46913,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 312.05,
-    "price": 374.46
+    "price": 374.46,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcm651pb-s",
@@ -46887,9 +46957,9 @@
     "name": "DCW682NT-XJ",
     "brand": "DeWALT",
     "category": "Meulage, découpe et polissage",
-    "title": "DeWALT DCW682NT-XJ — DCW682NT-XJ",
+    "title": "DeWALT DCW682NT-XJ — Machine nue, sans batterie ni chargeur, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCW682NT-XJ.",
+    "desc": "Référence constructeur DCW682NT-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -46908,9 +46978,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 313.83,
-    "price": 376.6
+    "price": 376.6,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcgg581n-xj",
@@ -47047,9 +47118,9 @@
     "name": "DCE0822D1R",
     "brand": "DeWALT",
     "category": "Accessoires",
-    "title": "DeWALT DCE0822D1R — DCE0822D1R",
+    "title": "DeWALT DCE0822D1R — 1 batterie de 2 Ah XR",
     "tag": "Nouveau",
-    "desc": "DCE0822D1R.",
+    "desc": "Référence constructeur DCE0822D1R. Configuration livrée d'après la nomenclature DeWALT : 1 batterie de 2 Ah XR. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -47068,9 +47139,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 320.13,
-    "price": 384.16
+    "price": 384.16,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dw294",
@@ -47111,9 +47183,9 @@
     "name": "DCS377NT-XJ",
     "brand": "DeWALT",
     "category": "Scies",
-    "title": "DeWALT DCS377NT-XJ — DCS377NT-XJ",
+    "title": "DeWALT DCS377NT-XJ — Machine nue, sans batterie ni chargeur, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCS377NT-XJ.",
+    "desc": "Référence constructeur DCS377NT-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -47132,9 +47204,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 320.59,
-    "price": 384.71
+    "price": 384.71,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dce580n-xj",
@@ -47143,9 +47216,9 @@
     "name": "DCE580N-XJ",
     "brand": "DeWALT",
     "category": "Accessoires",
-    "title": "DeWALT DCE580N-XJ — DCE580N-XJ",
+    "title": "DeWALT DCE580N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCE580N-XJ.",
+    "desc": "Référence constructeur DCE580N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -47164,9 +47237,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 322.13,
-    "price": 386.56
+    "price": 386.56,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwe6005",
@@ -47239,9 +47313,9 @@
     "name": "DCMCS574N-XJ",
     "brand": "DeWALT",
     "category": "Tronçonnage et élagage",
-    "title": "DeWALT DCMCS574N-XJ — DCMCS574N-XJ",
+    "title": "DeWALT DCMCS574N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCMCS574N-XJ.",
+    "desc": "Référence constructeur DCMCS574N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -47260,9 +47334,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 327.6,
-    "price": 393.12
+    "price": 393.12,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-d28885",
@@ -47399,9 +47474,9 @@
     "name": "DXPW002U-QS",
     "brand": "DeWALT",
     "category": "Accessoires",
-    "title": "DeWALT DXPW002U-QS — DXPW002U-QS",
+    "title": "DeWALT DXPW002U-QS — DEWALT DXPW002I - Nettoyeur haute pression semi-professionnel à eau froide - 160 bars - 450l/h",
     "tag": "Nouveau",
-    "desc": "DXPW002U-QS.",
+    "desc": "DEWALT DXPW002I - Nettoyeur haute pression semi-professionnel à eau froide - 160 bars - 450l/h (descriptif repris de l'annonce fournisseur).",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -47420,9 +47495,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 335.43,
-    "price": 402.52
+    "price": 402.52,
+    "sourceDescriptif": "annonce"
   },
   {
     "id": "dewalt-dck791",
@@ -47463,9 +47539,9 @@
     "name": "DCK796D2T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK796D2T — DCK796D2T",
+    "title": "DeWALT DCK796D2T — 2 batteries de 2 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK796D2T.",
+    "desc": "Référence constructeur DCK796D2T. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 2 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -47484,9 +47560,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 342.63,
-    "price": 411.16
+    "price": 411.16,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dxrh012e",
@@ -47527,9 +47604,9 @@
     "name": "DWS774",
     "brand": "DeWALT",
     "category": "Scies",
-    "title": "DeWALT DWS774 — DWS774",
+    "title": "DeWALT DWS774 — DEWALT - Scie à Onglet Radiale 230V - DWS774-QS - Scie Haute Performance avec Système XPS - Inclinaison de la Lame 48° -",
     "tag": "Nouveau",
-    "desc": "DWS774.",
+    "desc": "DEWALT - Scie à Onglet Radiale 230V - DWS774-QS - Scie Haute Performance avec Système XPS - Inclinaison de la Lame 48° - (descriptif repris de l'annonce fournisseur).",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -47548,9 +47625,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 344.47,
-    "price": 413.36
+    "price": 413.36,
+    "sourceDescriptif": "annonce"
   },
   {
     "id": "dewalt-dws5023",
@@ -47591,9 +47669,9 @@
     "name": "DCE0825D1R",
     "brand": "DeWALT",
     "category": "Accessoires",
-    "title": "DeWALT DCE0825D1R — DCE0825D1R",
+    "title": "DeWALT DCE0825D1R — 1 batterie de 2 Ah XR",
     "tag": "Nouveau",
-    "desc": "DCE0825D1R.",
+    "desc": "Référence constructeur DCE0825D1R. Configuration livrée d'après la nomenclature DeWALT : 1 batterie de 2 Ah XR. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -47612,9 +47690,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 373.42,
-    "price": 448.1
+    "price": 448.1,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dce571n-xj",
@@ -47687,9 +47766,9 @@
     "name": "DCE581NK",
     "brand": "DeWALT",
     "category": "Accessoires",
-    "title": "DeWALT DCE581NK — DCE581NK",
+    "title": "DeWALT DCE581NK — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCE581NK.",
+    "desc": "Référence constructeur DCE581NK. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -47708,9 +47787,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 348.13,
-    "price": 417.76
+    "price": 417.76,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-d28715",
@@ -47783,9 +47863,9 @@
     "name": "DCM5713N-XJ",
     "brand": "DeWALT",
     "category": "Tronçonnage et élagage",
-    "title": "DeWALT DCM5713N-XJ — DCM5713N-XJ",
+    "title": "DeWALT DCM5713N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCM5713N-XJ.",
+    "desc": "Référence constructeur DCM5713N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -47804,9 +47884,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 355.34,
-    "price": 426.41
+    "price": 426.41,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck2020p2t-qw",
@@ -47815,9 +47896,9 @@
     "name": "DCK2020P2T-QW",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK2020P2T-QW — DCK2020P2T-QW",
+    "title": "DeWALT DCK2020P2T-QW — 2 batteries de 5 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK2020P2T-QW.",
+    "desc": "Référence constructeur DCK2020P2T-QW. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 5 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -47836,9 +47917,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 355.87,
-    "price": 427.04
+    "price": 427.04,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcd732m2",
@@ -47847,9 +47929,9 @@
     "name": "DCD732M2",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCD732M2 — DCD732M2",
+    "title": "DeWALT DCD732M2 — 2 batteries de 4 Ah XR",
     "tag": "Nouveau",
-    "desc": "DCD732M2.",
+    "desc": "Référence constructeur DCD732M2. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 4 Ah XR. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -47868,9 +47950,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 356.49,
-    "price": 427.79
+    "price": 427.79,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcz100p2kt-qw",
@@ -47879,9 +47962,9 @@
     "name": "DCZ100P2KT-QW",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCZ100P2KT-QW — DCZ100P2KT-QW",
+    "title": "DeWALT DCZ100P2KT-QW — 2 batteries de 5 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCZ100P2KT-QW.",
+    "desc": "Référence constructeur DCZ100P2KT-QW. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 5 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -47900,9 +47983,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 357.81,
-    "price": 429.37
+    "price": 429.37,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcpr320b",
@@ -47975,9 +48059,9 @@
     "name": "DCE825NG18-XJ",
     "brand": "DeWALT",
     "category": "Accessoires",
-    "title": "DeWALT DCE825NG18-XJ — DCE825NG18-XJ",
+    "title": "DeWALT DCE825NG18-XJ — 1 batterie de 3 Ah XR",
     "tag": "Nouveau",
-    "desc": "DCE825NG18-XJ.",
+    "desc": "Référence constructeur DCE825NG18-XJ. Configuration livrée d'après la nomenclature DeWALT : 1 batterie de 3 Ah XR. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -47996,9 +48080,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 360.05,
-    "price": 432.06
+    "price": 432.06,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dxf1853",
@@ -48039,9 +48124,9 @@
     "name": "DCH274N",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT DCH274N — DCH274N",
+    "title": "DeWALT DCH274N — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCH274N.",
+    "desc": "Référence constructeur DCH274N. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -48060,9 +48145,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 361.2,
-    "price": 433.44
+    "price": 433.44,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcf92mp2t",
@@ -48135,9 +48221,9 @@
     "name": "DCS350NT-XJ",
     "brand": "DeWALT",
     "category": "Scies",
-    "title": "DeWALT DCS350NT-XJ — DCS350NT-XJ",
+    "title": "DeWALT DCS350NT-XJ — DeWalt 18V XR Threaded Rod Cutter - Bare Unit DCS350N-XJ",
     "tag": "Nouveau",
-    "desc": "DCS350NT-XJ.",
+    "desc": "DeWalt 18V XR Threaded Rod Cutter - Bare Unit DCS350N-XJ (descriptif repris de l'annonce fournisseur).",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -48156,9 +48242,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 365.07,
-    "price": 438.08
+    "price": 438.08,
+    "sourceDescriptif": "annonce"
   },
   {
     "id": "dewalt-dce0811",
@@ -48199,9 +48286,9 @@
     "name": "DCD240N-XJ",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCD240N-XJ — DCD240N-XJ",
+    "title": "DeWALT DCD240N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCD240N-XJ.",
+    "desc": "Référence constructeur DCD240N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -48220,9 +48307,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 366.09,
-    "price": 439.31
+    "price": 439.31,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcs577n-xj",
@@ -48231,9 +48319,9 @@
     "name": "DCS577N-XJ",
     "brand": "DeWALT",
     "category": "Scies",
-    "title": "DeWALT DCS577N-XJ — DCS577N-XJ",
+    "title": "DeWALT DCS577N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCS577N-XJ.",
+    "desc": "Référence constructeur DCS577N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -48252,9 +48340,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 370.54,
-    "price": 444.65
+    "price": 444.65,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwp611",
@@ -48295,9 +48384,9 @@
     "name": "DCS496N-XJ",
     "brand": "DeWALT",
     "category": "Meulage, découpe et polissage",
-    "title": "DeWALT DCS496N-XJ — DCS496N-XJ",
+    "title": "DeWALT DCS496N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCS496N-XJ.",
+    "desc": "Référence constructeur DCS496N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -48316,9 +48405,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 371.82,
-    "price": 446.18
+    "price": 446.18,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck268p2t",
@@ -48327,9 +48417,9 @@
     "name": "DCK268P2T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK268P2T — DCK268P2T",
+    "title": "DeWALT DCK268P2T — 2 batteries de 5 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK268P2T.",
+    "desc": "Référence constructeur DCK268P2T. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 5 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -48348,9 +48438,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 377.34,
-    "price": 452.81
+    "price": 452.81,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcd792nt",
@@ -48359,9 +48450,9 @@
     "name": "DCD792NT",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCD792NT — DCD792NT",
+    "title": "DeWALT DCD792NT — Machine nue, sans batterie ni chargeur, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCD792NT.",
+    "desc": "Référence constructeur DCD792NT. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -48380,9 +48471,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 380.29,
-    "price": 456.35
+    "price": 456.35,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcmcs575n-xj",
@@ -48391,9 +48483,9 @@
     "name": "DCMCS575N-XJ",
     "brand": "DeWALT",
     "category": "Tronçonnage et élagage",
-    "title": "DeWALT DCMCS575N-XJ — DCMCS575N-XJ",
+    "title": "DeWALT DCMCS575N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCMCS575N-XJ.",
+    "desc": "Référence constructeur DCMCS575N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -48412,9 +48504,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 380.48,
-    "price": 456.58
+    "price": 456.58,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcb1104-12",
@@ -48615,9 +48708,9 @@
     "name": "DCK2061D2T-QW",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK2061D2T-QW — DCK2061D2T-QW",
+    "title": "DeWALT DCK2061D2T-QW — 2 batteries de 2 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK2061D2T-QW.",
+    "desc": "Référence constructeur DCK2061D2T-QW. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 2 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -48636,9 +48729,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 388.06,
-    "price": 465.67
+    "price": 465.67,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcn681n",
@@ -48647,9 +48741,9 @@
     "name": "DCN681N",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCN681N — DCN681N",
+    "title": "DeWALT DCN681N — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCN681N.",
+    "desc": "Référence constructeur DCN681N. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -48668,9 +48762,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 390.19,
-    "price": 468.23
+    "price": 468.23,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwv901l",
@@ -48839,9 +48934,9 @@
     "name": "DCV586MN",
     "brand": "DeWALT",
     "category": "Aspirateurs",
-    "title": "DeWALT DCV586MN — DCV586MN",
+    "title": "DeWALT DCV586MN — Machine nue, sans batterie ni chargeur, édition limitée",
     "tag": "Nouveau",
-    "desc": "DCV586MN.",
+    "desc": "Référence constructeur DCV586MN. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur, édition limitée. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -48860,9 +48955,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 393.31,
-    "price": 471.97
+    "price": 471.97,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcg460nk-xj",
@@ -48871,9 +48967,9 @@
     "name": "DCG460NK-XJ",
     "brand": "DeWALT",
     "category": "Meulage, découpe et polissage",
-    "title": "DeWALT DCG460NK-XJ — DCG460NK-XJ",
+    "title": "DeWALT DCG460NK-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCG460NK-XJ.",
+    "desc": "Référence constructeur DCG460NK-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -48892,9 +48988,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 395.3,
-    "price": 474.36
+    "price": 474.36,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwe396",
@@ -48935,9 +49032,9 @@
     "name": "DCF964N-XJ",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCF964N-XJ — DCF964N-XJ",
+    "title": "DeWALT DCF964N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCF964N-XJ.",
+    "desc": "Référence constructeur DCF964N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -48956,9 +49053,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 397.37,
-    "price": 476.84
+    "price": 476.84,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-d21570k",
@@ -48999,9 +49097,9 @@
     "name": "DCK2050E2T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK2050E2T — DCK2050E2T",
+    "title": "DeWALT DCK2050E2T — 2 batteries de 1,7 Ah POWERSTACK, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK2050E2T.",
+    "desc": "Référence constructeur DCK2050E2T. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 1,7 Ah POWERSTACK, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -49020,9 +49118,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 401.49,
-    "price": 481.79
+    "price": 481.79,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcm586n",
@@ -49031,9 +49130,9 @@
     "name": "DCM586N",
     "brand": "DeWALT",
     "category": "Tronçonnage et élagage",
-    "title": "DeWALT DCM586N — DCM586N",
+    "title": "DeWALT DCM586N — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCM586N.",
+    "desc": "Référence constructeur DCM586N. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -49052,9 +49151,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 401.56,
-    "price": 481.87
+    "price": 481.87,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck2080p2t",
@@ -49063,9 +49163,9 @@
     "name": "DCK2080P2T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK2080P2T — DCK2080P2T",
+    "title": "DeWALT DCK2080P2T — 2 batteries de 5 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK2080P2T.",
+    "desc": "Référence constructeur DCK2080P2T. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 5 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -49084,9 +49184,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 403.68,
-    "price": 484.42
+    "price": 484.42,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcn650n-xj",
@@ -49095,9 +49196,9 @@
     "name": "DCN650N-XJ",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCN650N-XJ — DCN650N-XJ",
+    "title": "DeWALT DCN650N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCN650N-XJ.",
+    "desc": "Référence constructeur DCN650N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -49116,9 +49217,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 404.56,
-    "price": 485.47
+    "price": 485.47,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcs378",
@@ -49191,9 +49293,9 @@
     "name": "DCG200NT",
     "brand": "DeWALT",
     "category": "Meulage, découpe et polissage",
-    "title": "DeWALT DCG200NT — DCG200NT",
+    "title": "DeWALT DCG200NT — Machine nue, sans batterie ni chargeur, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCG200NT.",
+    "desc": "Référence constructeur DCG200NT. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -49212,9 +49314,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 412.65,
-    "price": 495.18
+    "price": 495.18,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dpn90c-xj",
@@ -49255,9 +49358,9 @@
     "name": "DCLE34031N-XJ",
     "brand": "DeWALT",
     "category": "Accessoires",
-    "title": "DeWALT DCLE34031N-XJ — DCLE34031N-XJ",
+    "title": "DeWALT DCLE34031N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCLE34031N-XJ.",
+    "desc": "Référence constructeur DCLE34031N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -49276,9 +49379,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 415.12,
-    "price": 498.14
+    "price": 498.14,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcg45mp2t",
@@ -49287,9 +49391,9 @@
     "name": "DCG45MP2T",
     "brand": "DeWALT",
     "category": "Meulage, découpe et polissage",
-    "title": "DeWALT DCG45MP2T — DCG45MP2T",
+    "title": "DeWALT DCG45MP2T — 2 batteries de 5 Ah XR, coffret TSTAK, édition limitée",
     "tag": "Nouveau",
-    "desc": "DCG45MP2T.",
+    "desc": "Référence constructeur DCG45MP2T. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 5 Ah XR, coffret TSTAK, édition limitée. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -49308,9 +49412,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 417.47,
-    "price": 500.96
+    "price": 500.96,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dce822ng18-xj",
@@ -49319,9 +49424,9 @@
     "name": "DCE822NG18-XJ",
     "brand": "DeWALT",
     "category": "Accessoires",
-    "title": "DeWALT DCE822NG18-XJ — DCE822NG18-XJ",
+    "title": "DeWALT DCE822NG18-XJ — 1 batterie de 3 Ah XR",
     "tag": "Nouveau",
-    "desc": "DCE822NG18-XJ.",
+    "desc": "Référence constructeur DCE822NG18-XJ. Configuration livrée d'après la nomenclature DeWALT : 1 batterie de 3 Ah XR. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -49340,9 +49445,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 421.69,
-    "price": 506.03
+    "price": 506.03,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcmst911n-xj",
@@ -49351,9 +49457,9 @@
     "name": "DCMST911N-XJ",
     "brand": "DeWALT",
     "category": "Tronçonnage et élagage",
-    "title": "DeWALT DCMST911N-XJ — DCMST911N-XJ",
+    "title": "DeWALT DCMST911N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCMST911N-XJ.",
+    "desc": "Référence constructeur DCMST911N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -49372,9 +49478,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 421.69,
-    "price": 506.03
+    "price": 506.03,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcf6201",
@@ -49415,9 +49522,9 @@
     "name": "DCMWP134N-XJ",
     "brand": "DeWALT",
     "category": "Tronçonnage et élagage",
-    "title": "DeWALT DCMWP134N-XJ — DCMWP134N-XJ",
+    "title": "DeWALT DCMWP134N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCMWP134N-XJ.",
+    "desc": "Référence constructeur DCMWP134N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -49436,9 +49543,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 422.74,
-    "price": 507.29
+    "price": 507.29,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcle14251gb-xj",
@@ -49479,9 +49587,9 @@
     "name": "DCK2051P2T-QW",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK2051P2T-QW — Référence DCK2051P2T-QW — descriptif à compléter",
+    "title": "DeWALT DCK2051P2T-QW — DeWalt 18V XR Battery Combo Pack (DCK2051P2T-QW)",
     "tag": "Nouveau",
-    "desc": "Référence DCK2051P2T-QW — descriptif à compléter.",
+    "desc": "DeWalt 18V XR Battery Combo Pack (DCK2051P2T-QW) (descriptif repris de l'annonce fournisseur).",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -49502,7 +49610,8 @@
     "poidsSuppose": true,
     "ficheAcompleter": true,
     "price_ht": 422.49,
-    "price": 506.99
+    "price": 506.99,
+    "sourceDescriptif": "annonce"
   },
   {
     "id": "dewalt-dch333n",
@@ -49511,9 +49620,9 @@
     "name": "DCH333N",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT DCH333N — DCH333N",
+    "title": "DeWALT DCH333N — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCH333N.",
+    "desc": "Référence constructeur DCH333N. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -49532,9 +49641,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 422.5,
-    "price": 507
+    "price": 507,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk206",
@@ -49639,9 +49749,9 @@
     "name": "DCF403NT-XJ",
     "brand": "DeWALT",
     "category": "Accessoires",
-    "title": "DeWALT DCF403NT-XJ — DCF403NT-XJ",
+    "title": "DeWALT DCF403NT-XJ — Machine nue, sans batterie ni chargeur, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCF403NT-XJ.",
+    "desc": "Référence constructeur DCF403NT-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -49660,9 +49770,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 430.34,
-    "price": 516.41
+    "price": 516.41,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-ppack0001",
@@ -49767,9 +49878,9 @@
     "name": "DCN662NT-XJ",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCN662NT-XJ — DCN662NT-XJ",
+    "title": "DeWALT DCN662NT-XJ — Machine nue, sans batterie ni chargeur, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCN662NT-XJ.",
+    "desc": "Référence constructeur DCN662NT-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -49788,9 +49899,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 433.62,
-    "price": 520.34
+    "price": 520.34,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk208",
@@ -49831,9 +49943,9 @@
     "name": "DCCS1100N",
     "brand": "DeWALT",
     "category": "Tronçonnage et élagage",
-    "title": "DeWALT DCCS1100N — DCCS1100N",
+    "title": "DeWALT DCCS1100N — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCCS1100N.",
+    "desc": "Référence constructeur DCCS1100N. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -49852,9 +49964,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 437.91,
-    "price": 525.49
+    "price": 525.49,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk201",
@@ -49895,9 +50008,9 @@
     "name": "DCE085D1G",
     "brand": "DeWALT",
     "category": "Accessoires",
-    "title": "DeWALT DCE085D1G — DCE085D1G",
+    "title": "DeWALT DCE085D1G — 1 batterie de 2 Ah XR",
     "tag": "Nouveau",
-    "desc": "DCE085D1G.",
+    "desc": "Référence constructeur DCE085D1G. Configuration livrée d'après la nomenclature DeWALT : 1 batterie de 2 Ah XR. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -49916,9 +50029,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 441.4,
-    "price": 529.68
+    "price": 529.68,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck2026p2t-qw",
@@ -49927,9 +50041,9 @@
     "name": "DCK2026P2T-QW",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK2026P2T-QW — Référence DCK2026P2T-QW — descriptif à compléter",
+    "title": "DeWALT DCK2026P2T-QW — 2 batteries de 5 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "Référence DCK2026P2T-QW — descriptif à compléter.",
+    "desc": "Référence constructeur DCK2026P2T-QW. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 5 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -49950,7 +50064,8 @@
     "poidsSuppose": true,
     "ficheAcompleter": true,
     "price_ht": 442.92,
-    "price": 531.5
+    "price": 531.5,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck2222mp2t-qw",
@@ -50183,9 +50298,9 @@
     "name": "DCE800N-XJ",
     "brand": "DeWALT",
     "category": "Scies",
-    "title": "DeWALT DCE800N-XJ — DCE800N-XJ",
+    "title": "DeWALT DCE800N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCE800N-XJ.",
+    "desc": "Référence constructeur DCE800N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -50204,9 +50319,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 461.21,
-    "price": 553.45
+    "price": 553.45,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk204",
@@ -50279,9 +50395,9 @@
     "name": "DCMPS635N-XJ",
     "brand": "DeWALT",
     "category": "Tronçonnage et élagage",
-    "title": "DeWALT DCMPS635N-XJ — DCMPS635N-XJ",
+    "title": "DeWALT DCMPS635N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCMPS635N-XJ.",
+    "desc": "Référence constructeur DCMPS635N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -50300,9 +50416,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 462.65,
-    "price": 555.18
+    "price": 555.18,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcs397n",
@@ -50311,9 +50428,9 @@
     "name": "DCS397N",
     "brand": "DeWALT",
     "category": "Scies",
-    "title": "DeWALT DCS397N — DCS397N",
+    "title": "DeWALT DCS397N — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCS397N.",
+    "desc": "Référence constructeur DCS397N. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -50332,9 +50449,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 464.63,
-    "price": 557.56
+    "price": 557.56,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwe399-qs",
@@ -50407,9 +50525,9 @@
     "name": "DCK2102L2T-QW",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK2102L2T-QW — DCK2102L2T-QW",
+    "title": "DeWALT DCK2102L2T-QW — 2 batteries de 3 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK2102L2T-QW.",
+    "desc": "Référence constructeur DCK2102L2T-QW. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 3 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -50428,9 +50546,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 470.87,
-    "price": 565.04
+    "price": 565.04,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-wdck796d2kx-qw",
@@ -50471,9 +50590,9 @@
     "name": "DCN682N",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCN682N — DCN682N",
+    "title": "DeWALT DCN682N — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCN682N.",
+    "desc": "Référence constructeur DCN682N. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -50492,9 +50611,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 472.76,
-    "price": 567.31
+    "price": 567.31,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcmbc812n-xj",
@@ -50503,9 +50623,9 @@
     "name": "DCMBC812N-XJ",
     "brand": "DeWALT",
     "category": "Tronçonnage et élagage",
-    "title": "DeWALT DCMBC812N-XJ — DCMBC812N-XJ",
+    "title": "DeWALT DCMBC812N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCMBC812N-XJ.",
+    "desc": "Référence constructeur DCMBC812N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -50524,9 +50644,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 472.76,
-    "price": 567.31
+    "price": 567.31,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk207",
@@ -50631,9 +50752,9 @@
     "name": "DCS777N",
     "brand": "DeWALT",
     "category": "Scies",
-    "title": "DeWALT DCS777N — DCS777N",
+    "title": "DeWALT DCS777N — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCS777N.",
+    "desc": "Référence constructeur DCS777N. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -50652,9 +50773,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 481.32,
-    "price": 577.58
+    "price": 577.58,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcf99mp2t",
@@ -50695,9 +50817,9 @@
     "name": "DCK200MP2T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK200MP2T — DCK200MP2T",
+    "title": "DeWALT DCK200MP2T — 2 batteries de 5 Ah XR, coffret TSTAK, édition limitée",
     "tag": "Nouveau",
-    "desc": "DCK200MP2T.",
+    "desc": "Référence constructeur DCK200MP2T. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 5 Ah XR, coffret TSTAK, édition limitée. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -50716,9 +50838,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 487.16,
-    "price": 584.59
+    "price": 584.59,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcn950n-xj",
@@ -50727,9 +50850,9 @@
     "name": "DCN950N-XJ",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCN950N-XJ — DCN950N-XJ",
+    "title": "DeWALT DCN950N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCN950N-XJ.",
+    "desc": "Référence constructeur DCN950N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -50748,9 +50871,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 487.63,
-    "price": 585.16
+    "price": 585.16,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dch416nt-xj",
@@ -50759,9 +50883,9 @@
     "name": "DCH416NT-XJ",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT DCH416NT-XJ — DCH416NT-XJ",
+    "title": "DeWALT DCH416NT-XJ — Machine nue, sans batterie ni chargeur, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCH416NT-XJ.",
+    "desc": "Référence constructeur DCH416NT-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -50780,9 +50904,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 488,
-    "price": 585.6
+    "price": 585.6,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dpc17ps",
@@ -51015,9 +51140,9 @@
     "name": "DCS365N",
     "brand": "DeWALT",
     "category": "Scies",
-    "title": "DeWALT DCS365N — DCS365N",
+    "title": "DeWALT DCS365N — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCS365N.",
+    "desc": "Référence constructeur DCS365N. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -51036,9 +51161,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 501.45,
-    "price": 601.74
+    "price": 601.74,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dch832xn-xj",
@@ -51047,9 +51173,9 @@
     "name": "DCH832XN-XJ",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT DCH832XN-XJ — DCH832XN-XJ",
+    "title": "DeWALT DCH832XN-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCH832XN-XJ.",
+    "desc": "Référence constructeur DCH832XN-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -51068,9 +51194,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 504.66,
-    "price": 605.59
+    "price": 605.59,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck2101l2t",
@@ -51079,9 +51206,9 @@
     "name": "DCK2101L2T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK2101L2T — DCK2101L2T",
+    "title": "DeWALT DCK2101L2T — 2 batteries de 3 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK2101L2T.",
+    "desc": "Référence constructeur DCK2101L2T. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 3 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -51100,9 +51227,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 504.87,
-    "price": 605.84
+    "price": 605.84,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dch254m2",
@@ -51111,9 +51239,9 @@
     "name": "DCH254M2",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT DCH254M2 — DCH254M2",
+    "title": "DeWALT DCH254M2 — 2 batteries de 4 Ah XR",
     "tag": "Nouveau",
-    "desc": "DCH254M2.",
+    "desc": "Référence constructeur DCH254M2. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 4 Ah XR. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -51132,9 +51260,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 508.3,
-    "price": 609.96
+    "price": 609.96,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwe7485-qs",
@@ -51175,9 +51304,9 @@
     "name": "DCMW564N-XJ",
     "brand": "DeWALT",
     "category": "Tronçonnage et élagage",
-    "title": "DeWALT DCMW564N-XJ — DCMW564N-XJ",
+    "title": "DeWALT DCMW564N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCMW564N-XJ.",
+    "desc": "Référence constructeur DCMW564N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -51196,9 +51325,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 511.26,
-    "price": 613.51
+    "price": 613.51,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcs388n",
@@ -51207,9 +51337,9 @@
     "name": "DCS388N",
     "brand": "DeWALT",
     "category": "Scies",
-    "title": "DeWALT DCS388N — DCS388N",
+    "title": "DeWALT DCS388N — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCS388N.",
+    "desc": "Référence constructeur DCS388N. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -51228,9 +51358,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 517.58,
-    "price": 621.1
+    "price": 621.1,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcbpsc0550-qw",
@@ -51271,9 +51402,9 @@
     "name": "DCK2052H2T-QW",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK2052H2T-QW — DCK2052H2T-QW",
+    "title": "DeWALT DCK2052H2T-QW — 2 batteries de 5 Ah POWERSTACK, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK2052H2T-QW.",
+    "desc": "Référence constructeur DCK2052H2T-QW. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 5 Ah POWERSTACK, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -51292,9 +51423,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 520.23,
-    "price": 624.28
+    "price": 624.28,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck384p2t-qw",
@@ -51303,9 +51435,9 @@
     "name": "DCK384P2T-QW",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK384P2T-QW — DCK384P2T-QW",
+    "title": "DeWALT DCK384P2T-QW — 2 batteries de 5 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK384P2T-QW.",
+    "desc": "Référence constructeur DCK384P2T-QW. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 5 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -51324,9 +51456,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 522.4,
-    "price": 626.88
+    "price": 626.88,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-d25832k-qs",
@@ -51399,9 +51532,9 @@
     "name": "DCS374N",
     "brand": "DeWALT",
     "category": "Scies",
-    "title": "DeWALT DCS374N — DCS374N",
+    "title": "DeWALT DCS374N — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCS374N.",
+    "desc": "Référence constructeur DCS374N. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -51420,9 +51553,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 530.4,
-    "price": 636.48
+    "price": 636.48,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwv010",
@@ -51495,9 +51629,9 @@
     "name": "DCMASED57X1",
     "brand": "DeWALT",
     "category": "Scies",
-    "title": "DeWALT DCMASED57X1 — DCMASED57X1",
+    "title": "DeWALT DCMASED57X1 — 1 batterie de 9 Ah FLEXVOLT",
     "tag": "Nouveau",
-    "desc": "DCMASED57X1.",
+    "desc": "Référence constructeur DCMASED57X1. Configuration livrée d'après la nomenclature DeWALT : 1 batterie de 9 Ah FLEXVOLT. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -51516,9 +51650,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 533.27,
-    "price": 639.92
+    "price": 639.92,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck2023m2t",
@@ -51527,9 +51662,9 @@
     "name": "DCK2023M2T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK2023M2T — DCK2023M2T",
+    "title": "DeWALT DCK2023M2T — 2 batteries de 4 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK2023M2T.",
+    "desc": "Référence constructeur DCK2023M2T. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 4 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -51548,9 +51683,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 534.42,
-    "price": 641.3
+    "price": 641.3,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwe7800-qs",
@@ -51591,9 +51727,9 @@
     "name": "DCK207P2T-QW",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK207P2T-QW — DCK207P2T-QW",
+    "title": "DeWALT DCK207P2T-QW — 2 batteries de 5 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK207P2T-QW.",
+    "desc": "Référence constructeur DCK207P2T-QW. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 5 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -51612,9 +51748,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 540.63,
-    "price": 648.76
+    "price": 648.76,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck308dm",
@@ -51623,9 +51760,9 @@
     "name": "DCK308DM",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK308DM — DCK308DM",
+    "title": "DeWALT DCK308DM — Édition limitée",
     "tag": "Nouveau",
-    "desc": "DCK308DM.",
+    "desc": "Référence constructeur DCK308DM. Configuration livrée d'après la nomenclature DeWALT : édition limitée. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -51644,9 +51781,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 541.17,
-    "price": 649.4
+    "price": 649.4,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck276p2",
@@ -51655,9 +51793,9 @@
     "name": "DCK276P2",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK276P2 — DCK276P2",
+    "title": "DeWALT DCK276P2 — 2 batteries de 5 Ah XR",
     "tag": "Nouveau",
-    "desc": "DCK276P2.",
+    "desc": "Référence constructeur DCK276P2. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 5 Ah XR. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -51676,9 +51814,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 541.25,
-    "price": 649.5
+    "price": 649.5,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk219",
@@ -51815,9 +51954,9 @@
     "name": "DCK2016T2T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK2016T2T — DCK2016T2T",
+    "title": "DeWALT DCK2016T2T — 2 batteries de 6 Ah FLEXVOLT, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK2016T2T.",
+    "desc": "Référence constructeur DCK2016T2T. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 6 Ah FLEXVOLT, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -51836,9 +51975,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 550.72,
-    "price": 660.86
+    "price": 660.86,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcs387m2",
@@ -51847,9 +51987,9 @@
     "name": "DCS387M2",
     "brand": "DeWALT",
     "category": "Scies",
-    "title": "DeWALT DCS387M2 — DCS387M2",
+    "title": "DeWALT DCS387M2 — 2 batteries de 4 Ah XR",
     "tag": "Nouveau",
-    "desc": "DCS387M2.",
+    "desc": "Référence constructeur DCS387M2. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 4 Ah XR. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -51868,9 +52008,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 555.15,
-    "price": 666.18
+    "price": 666.18,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-d25413k",
@@ -51975,9 +52116,9 @@
     "name": "DCK355P2T-QW",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK355P2T-QW — DCK355P2T-QW",
+    "title": "DeWALT DCK355P2T-QW — 2 batteries de 5 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK355P2T-QW.",
+    "desc": "Référence constructeur DCK355P2T-QW. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 5 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -51996,9 +52137,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 565.31,
-    "price": 678.37
+    "price": 678.37,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcmbc823n-xj",
@@ -52007,9 +52149,9 @@
     "name": "DCMBC823N-XJ",
     "brand": "DeWALT",
     "category": "Tronçonnage et élagage",
-    "title": "DeWALT DCMBC823N-XJ — DCMBC823N-XJ",
+    "title": "DeWALT DCMBC823N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCMBC823N-XJ.",
+    "desc": "Référence constructeur DCMBC823N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -52028,9 +52170,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 565.4,
-    "price": 678.48
+    "price": 678.48,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck2068p2t",
@@ -52039,9 +52182,9 @@
     "name": "DCK2068P2T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK2068P2T — DCK2068P2T",
+    "title": "DeWALT DCK2068P2T — 2 batteries de 5 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK2068P2T.",
+    "desc": "Référence constructeur DCK2068P2T. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 5 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -52060,9 +52203,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 572.27,
-    "price": 686.72
+    "price": 686.72,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk221",
@@ -52103,9 +52247,9 @@
     "name": "DCMWP500N-XJ",
     "brand": "DeWALT",
     "category": "Tronçonnage et élagage",
-    "title": "DeWALT DCMWP500N-XJ — DCMWP500N-XJ",
+    "title": "DeWALT DCMWP500N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCMWP500N-XJ.",
+    "desc": "Référence constructeur DCMWP500N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -52124,9 +52268,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 573.33,
-    "price": 688
+    "price": 688,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck440p2t",
@@ -52263,9 +52408,9 @@
     "name": "DCMST901N-XJ",
     "brand": "DeWALT",
     "category": "Tronçonnage et élagage",
-    "title": "DeWALT DCMST901N-XJ — DCMST901N-XJ",
+    "title": "DeWALT DCMST901N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCMST901N-XJ.",
+    "desc": "Référence constructeur DCMST901N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -52284,9 +52429,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 577.39,
-    "price": 692.87
+    "price": 692.87,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck2223mp2t",
@@ -52295,9 +52441,9 @@
     "name": "DCK2223MP2T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK2223MP2T — Référence DCK2223MP2T — descriptif à compléter",
+    "title": "DeWALT DCK2223MP2T — DeWalt 18V Combopack DCK2223MP2T 2x5Ah battery (DCD86M+DCG45M) in TSTAK",
     "tag": "Nouveau",
-    "desc": "Référence DCK2223MP2T — descriptif à compléter.",
+    "desc": "DeWalt 18V Combopack DCK2223MP2T 2x5Ah battery (DCD86M+DCG45M) in TSTAK (descriptif repris de l'annonce fournisseur).",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -52318,7 +52464,8 @@
     "poidsSuppose": true,
     "ficheAcompleter": true,
     "price_ht": 581.57,
-    "price": 697.88
+    "price": 697.88,
+    "sourceDescriptif": "annonce"
   },
   {
     "id": "dewalt-dxcmb2m50he",
@@ -52455,9 +52602,9 @@
     "name": "DCK327P2T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK327P2T — DCK327P2T",
+    "title": "DeWALT DCK327P2T — 2 batteries de 5 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK327P2T.",
+    "desc": "Référence constructeur DCK327P2T. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 5 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -52476,9 +52623,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 590.41,
-    "price": 708.49
+    "price": 708.49,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk216",
@@ -52679,9 +52827,9 @@
     "name": "DCK304P2-QW",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK304P2-QW — DCK304P2-QW",
+    "title": "DeWALT DCK304P2-QW — 2 batteries de 5 Ah XR",
     "tag": "Nouveau",
-    "desc": "DCK304P2-QW.",
+    "desc": "Référence constructeur DCK304P2-QW. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 5 Ah XR. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -52700,9 +52848,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 602.14,
-    "price": 722.57
+    "price": 722.57,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk218",
@@ -52871,9 +53020,9 @@
     "name": "DCK383P2T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK383P2T — DCK383P2T",
+    "title": "DeWALT DCK383P2T — 2 batteries de 5 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK383P2T.",
+    "desc": "Référence constructeur DCK383P2T. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 5 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -52892,9 +53041,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 621.63,
-    "price": 745.96
+    "price": 745.96,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck2012p2t-qw",
@@ -52903,9 +53053,9 @@
     "name": "DCK2012P2T-QW",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK2012P2T-QW — DCK2012P2T-QW",
+    "title": "DeWALT DCK2012P2T-QW — 2 batteries de 5 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK2012P2T-QW.",
+    "desc": "Référence constructeur DCK2012P2T-QW. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 5 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -52924,9 +53074,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 621.83,
-    "price": 746.2
+    "price": 746.2,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwv905m-qs",
@@ -52967,9 +53118,9 @@
     "name": "DCD990M2",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCD990M2 — DCD990M2",
+    "title": "DeWALT DCD990M2 — 2 batteries de 4 Ah XR",
     "tag": "Nouveau",
-    "desc": "DCD990M2.",
+    "desc": "Référence constructeur DCD990M2. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 4 Ah XR. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -52988,9 +53139,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 626.78,
-    "price": 752.14
+    "price": 752.14,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-d25881k-qs",
@@ -53063,9 +53215,9 @@
     "name": "DCMWSP550N-XJ",
     "brand": "DeWALT",
     "category": "Tronçonnage et élagage",
-    "title": "DeWALT DCMWSP550N-XJ — DCMWSP550N-XJ",
+    "title": "DeWALT DCMWSP550N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCMWSP550N-XJ.",
+    "desc": "Référence constructeur DCMWSP550N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -53084,9 +53236,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 645.28,
-    "price": 774.34
+    "price": 774.34,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dch614n",
@@ -53095,9 +53248,9 @@
     "name": "DCH614N",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT DCH614N — DCH614N",
+    "title": "DeWALT DCH614N — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCH614N.",
+    "desc": "Référence constructeur DCH614N. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -53116,9 +53269,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 646.8,
-    "price": 776.16
+    "price": 776.16,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcg4610t2-qw",
@@ -53127,9 +53281,9 @@
     "name": "DCG4610T2-QW",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCG4610T2-QW — DCG4610T2-QW",
+    "title": "DeWALT DCG4610T2-QW — 2 batteries de 6 Ah FLEXVOLT",
     "tag": "Nouveau",
-    "desc": "DCG4610T2-QW.",
+    "desc": "Référence constructeur DCG4610T2-QW. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 6 Ah FLEXVOLT. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -53148,9 +53302,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 646.95,
-    "price": 776.34
+    "price": 776.34,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcmbbl800n",
@@ -53159,9 +53314,9 @@
     "name": "DCMBBL800N",
     "brand": "DeWALT",
     "category": "Aspirateurs",
-    "title": "DeWALT DCMBBL800N — DCMBBL800N",
+    "title": "DeWALT DCMBBL800N — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCMBBL800N.",
+    "desc": "Référence constructeur DCMBBL800N. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -53180,9 +53335,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 651.32,
-    "price": 781.58
+    "price": 781.58,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-d27113",
@@ -53351,9 +53507,9 @@
     "name": "DCK2095D2T-QW",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK2095D2T-QW — DCK2095D2T-QW",
+    "title": "DeWALT DCK2095D2T-QW — 2 batteries de 2 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK2095D2T-QW.",
+    "desc": "Référence constructeur DCK2095D2T-QW. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 2 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -53372,9 +53528,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 664.23,
-    "price": 797.08
+    "price": 797.08,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck2200h2t-qw",
@@ -53383,9 +53540,9 @@
     "name": "DCK2200H2T-QW",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK2200H2T-QW — DCK2200H2T-QW",
+    "title": "DeWALT DCK2200H2T-QW — 2 batteries de 5 Ah POWERSTACK, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK2200H2T-QW.",
+    "desc": "Référence constructeur DCK2200H2T-QW. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 5 Ah POWERSTACK, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -53404,9 +53561,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 665.23,
-    "price": 798.28
+    "price": 798.28,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcc2520b",
@@ -53447,9 +53605,9 @@
     "name": "DCK2077P2T-QW",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK2077P2T-QW — DCK2077P2T-QW",
+    "title": "DeWALT DCK2077P2T-QW — 2 batteries de 5 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK2077P2T-QW.",
+    "desc": "Référence constructeur DCK2077P2T-QW. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 5 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -53468,9 +53626,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 671.17,
-    "price": 805.4
+    "price": 805.4,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck330p2t-qw",
@@ -53479,9 +53638,9 @@
     "name": "DCK330P2T-QW",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK330P2T-QW — Référence DCK330P2T-QW — descriptif à compléter",
+    "title": "DeWALT DCK330P2T-QW — DeWalt 18V battery combo pack 3 pcs. (DCK330P2T-QW)",
     "tag": "Nouveau",
-    "desc": "Référence DCK330P2T-QW — descriptif à compléter.",
+    "desc": "DeWalt 18V battery combo pack 3 pcs. (DCK330P2T-QW) (descriptif repris de l'annonce fournisseur).",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -53502,7 +53661,8 @@
     "poidsSuppose": true,
     "ficheAcompleter": true,
     "price_ht": 674.82,
-    "price": 809.78
+    "price": 809.78,
+    "sourceDescriptif": "annonce"
   },
   {
     "id": "dewalt-dck3222mp2t-qw",
@@ -53511,9 +53671,9 @@
     "name": "DCK3222MP2T-QW",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK3222MP2T-QW — DCK3222MP2T-QW",
+    "title": "DeWALT DCK3222MP2T-QW — 2 batteries de 5 Ah XR, coffret TSTAK, édition limitée",
     "tag": "Nouveau",
-    "desc": "DCK3222MP2T-QW.",
+    "desc": "Référence constructeur DCK3222MP2T-QW. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 5 Ah XR, coffret TSTAK, édition limitée. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -53532,9 +53692,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 675.22,
-    "price": 810.26
+    "price": 810.26,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck2225mp2t",
@@ -53639,9 +53800,9 @@
     "name": "DCK305P3T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK305P3T — DCK305P3T",
+    "title": "DeWALT DCK305P3T — 3 batteries de 5 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK305P3T.",
+    "desc": "Référence constructeur DCK305P3T. Configuration livrée d'après la nomenclature DeWALT : 3 batteries de 5 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -53660,9 +53821,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 689.49,
-    "price": 827.39
+    "price": 827.39,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck229p2t",
@@ -53671,9 +53833,9 @@
     "name": "DCK229P2T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK229P2T — Référence DCK229P2T — descriptif à compléter",
+    "title": "DeWALT DCK229P2T — DeWalt - Kit 2 Outils Perceuse Visseuse et Perforateur SDS-Plus 18V 5AH - DCK229P2T G",
     "tag": "Nouveau",
-    "desc": "Référence DCK229P2T — descriptif à compléter.",
+    "desc": "DeWalt - Kit 2 Outils Perceuse Visseuse et Perforateur SDS-Plus 18V 5AH - DCK229P2T G (descriptif repris de l'annonce fournisseur).",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -53694,7 +53856,8 @@
     "poidsSuppose": true,
     "ficheAcompleter": true,
     "price_ht": 695.05,
-    "price": 834.06
+    "price": 834.06,
+    "sourceDescriptif": "annonce"
   },
   {
     "id": "dewalt-dck368p3t",
@@ -53799,9 +53962,9 @@
     "name": "DCK329P2T-QW",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK329P2T-QW — DCK329P2T-QW",
+    "title": "DeWALT DCK329P2T-QW — 2 batteries de 5 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK329P2T-QW.",
+    "desc": "Référence constructeur DCK329P2T-QW. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 5 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -53820,9 +53983,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 703,
-    "price": 843.6
+    "price": 843.6,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dch275p2",
@@ -53831,9 +53995,9 @@
     "name": "DCH275P2",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT DCH275P2 — DCH275P2",
+    "title": "DeWALT DCH275P2 — 2 batteries de 5 Ah XR",
     "tag": "Nouveau",
-    "desc": "DCH275P2.",
+    "desc": "Référence constructeur DCH275P2. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 5 Ah XR. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -53852,9 +54016,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 706.19,
-    "price": 847.43
+    "price": 847.43,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dxgni20e",
@@ -53895,9 +54060,9 @@
     "name": "DCN910N",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCN910N — DCN910N",
+    "title": "DeWALT DCN910N — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCN910N.",
+    "desc": "Référence constructeur DCN910N. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -53916,9 +54081,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 719.33,
-    "price": 863.2
+    "price": 863.2,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck422p3t",
@@ -53927,9 +54093,9 @@
     "name": "DCK422P3T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK422P3T — DCK422P3T",
+    "title": "DeWALT DCK422P3T — 3 batteries de 5 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK422P3T.",
+    "desc": "Référence constructeur DCK422P3T. Configuration livrée d'après la nomenclature DeWALT : 3 batteries de 5 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -53948,9 +54114,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 730.57,
-    "price": 876.68
+    "price": 876.68,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk301",
@@ -53991,9 +54158,9 @@
     "name": "DCH892N",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT DCH892N — DCH892N",
+    "title": "DeWALT DCH892N — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCH892N.",
+    "desc": "Référence constructeur DCH892N. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -54012,9 +54179,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 753.35,
-    "price": 904.02
+    "price": 904.02,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck424m3-qw",
@@ -54055,9 +54223,9 @@
     "name": "DCFS950N-XJ",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCFS950N-XJ — DCFS950N-XJ",
+    "title": "DeWALT DCFS950N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCFS950N-XJ.",
+    "desc": "Référence constructeur DCFS950N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -54076,9 +54244,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 755.99,
-    "price": 907.19
+    "price": 907.19,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcs371nt",
@@ -54087,9 +54256,9 @@
     "name": "DCS371NT",
     "brand": "DeWALT",
     "category": "Scies",
-    "title": "DeWALT DCS371NT — DCS371NT",
+    "title": "DeWALT DCS371NT — Machine nue, sans batterie ni chargeur, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCS371NT.",
+    "desc": "Référence constructeur DCS371NT. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -54108,9 +54277,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 762.63,
-    "price": 915.16
+    "price": 915.16,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcmwsp660n-xj",
@@ -54119,9 +54289,9 @@
     "name": "DCMWSP660N-XJ",
     "brand": "DeWALT",
     "category": "Tronçonnage et élagage",
-    "title": "DeWALT DCMWSP660N-XJ — DCMWSP660N-XJ",
+    "title": "DeWALT DCMWSP660N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCMWSP660N-XJ.",
+    "desc": "Référence constructeur DCMWSP660N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -54140,9 +54310,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 765.13,
-    "price": 918.16
+    "price": 918.16,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck611p1d2",
@@ -54151,9 +54322,9 @@
     "name": "DCK611P1D2",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK611P1D2 — DCK611P1D2",
+    "title": "DeWALT DCK611P1D2 — 1 batterie de 5 Ah XR, 2 batteries de 2 Ah XR",
     "tag": "Nouveau",
-    "desc": "DCK611P1D2.",
+    "desc": "Référence constructeur DCK611P1D2. Configuration livrée d'après la nomenclature DeWALT : 1 batterie de 5 Ah XR, 2 batteries de 2 Ah XR. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -54172,9 +54343,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 770.69,
-    "price": 924.83
+    "price": 924.83,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dws727",
@@ -54311,9 +54483,9 @@
     "name": "DCK377P3T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK377P3T — DCK377P3T",
+    "title": "DeWALT DCK377P3T — 3 batteries de 5 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK377P3T.",
+    "desc": "Référence constructeur DCK377P3T. Configuration livrée d'après la nomenclature DeWALT : 3 batteries de 5 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -54332,9 +54504,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 775.32,
-    "price": 930.38
+    "price": 930.38,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck551p3t",
@@ -54343,9 +54516,9 @@
     "name": "DCK551P3T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK551P3T — DCK551P3T",
+    "title": "DeWALT DCK551P3T — 3 batteries de 5 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK551P3T.",
+    "desc": "Référence constructeur DCK551P3T. Configuration livrée d'après la nomenclature DeWALT : 3 batteries de 5 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -54364,9 +54537,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 780.62,
-    "price": 936.74
+    "price": 936.74,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck212d2t-qw",
@@ -54375,9 +54549,9 @@
     "name": "DCK212D2T-QW",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK212D2T-QW — DCK212D2T-QW",
+    "title": "DeWALT DCK212D2T-QW — 2 batteries de 2 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK212D2T-QW.",
+    "desc": "Référence constructeur DCK212D2T-QW. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 2 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -54396,9 +54570,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 801.56,
-    "price": 961.87
+    "price": 961.87,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck209p2",
@@ -54407,9 +54582,9 @@
     "name": "DCK209P2",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK209P2 — DCK209P2",
+    "title": "DeWALT DCK209P2 — 2 batteries de 5 Ah XR",
     "tag": "Nouveau",
-    "desc": "DCK209P2.",
+    "desc": "Référence constructeur DCK209P2. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 5 Ah XR. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -54428,9 +54603,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 803.97,
-    "price": 964.76
+    "price": 964.76,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dgn9033-xj",
@@ -54471,9 +54647,9 @@
     "name": "DCH775N-XJ",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT DCH775N-XJ — DCH775N-XJ",
+    "title": "DeWALT DCH775N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCH775N-XJ.",
+    "desc": "Référence constructeur DCH775N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -54492,9 +54668,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 812.35,
-    "price": 974.82
+    "price": 974.82,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcs398t2",
@@ -54663,9 +54840,9 @@
     "name": "DCS727N",
     "brand": "DeWALT",
     "category": "Scies",
-    "title": "DeWALT DCS727N — DCS727N",
+    "title": "DeWALT DCS727N — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCS727N.",
+    "desc": "Référence constructeur DCS727N. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -54684,9 +54861,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 823,
-    "price": 987.6
+    "price": 987.6,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcle05211r",
@@ -54695,9 +54873,9 @@
     "name": "DCLE05211R",
     "brand": "DeWALT",
     "category": "Accessoires",
-    "title": "DeWALT DCLE05211R — DCLE05211R",
+    "title": "DeWALT DCLE05211R — Pack pro niveau laser rotatif horizontal faisceaux rouges alcalines 600m IP66 DCLE05211RL-XJ",
     "tag": "Nouveau",
-    "desc": "DCLE05211R.",
+    "desc": "Pack pro niveau laser rotatif horizontal faisceaux rouges alcalines 600m IP66 DCLE05211RL-XJ (descriptif repris de l'annonce fournisseur).",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -54716,9 +54894,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 992,
-    "price": 1190.4
+    "price": 1190.4,
+    "sourceDescriptif": "annonce"
   },
   {
     "id": "dewalt-dcle34035d1-qw",
@@ -54727,9 +54906,9 @@
     "name": "DCLE34035D1-QW",
     "brand": "DeWALT",
     "category": "Accessoires",
-    "title": "DeWALT DCLE34035D1-QW — DCLE34035D1-QW",
+    "title": "DeWALT DCLE34035D1-QW — 1 batterie de 2 Ah XR",
     "tag": "Nouveau",
-    "desc": "DCLE34035D1-QW.",
+    "desc": "Référence constructeur DCLE34035D1-QW. Configuration livrée d'après la nomenclature DeWALT : 1 batterie de 2 Ah XR. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -54748,9 +54927,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 864.04,
-    "price": 1036.85
+    "price": 1036.85,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk305ps",
@@ -54855,9 +55035,9 @@
     "name": "DCK607M2-QW",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK607M2-QW — DCK607M2-QW",
+    "title": "DeWALT DCK607M2-QW — 2 batteries de 4 Ah XR",
     "tag": "Nouveau",
-    "desc": "DCK607M2-QW.",
+    "desc": "Référence constructeur DCK607M2-QW. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 4 Ah XR. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -54876,9 +55056,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 894.83,
-    "price": 1073.8
+    "price": 1073.8,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcn692n",
@@ -54887,9 +55068,9 @@
     "name": "DCN692N",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCN692N — DCN692N",
+    "title": "DeWALT DCN692N — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCN692N.",
+    "desc": "Référence constructeur DCN692N. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -54908,9 +55089,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 896.94,
-    "price": 1076.33
+    "price": 1076.33,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcm575x1",
@@ -54951,9 +55133,9 @@
     "name": "DCK246P2-QW",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK246P2-QW — DCK246P2-QW",
+    "title": "DeWALT DCK246P2-QW — 2 batteries de 5 Ah XR",
     "tag": "Nouveau",
-    "desc": "DCK246P2-QW.",
+    "desc": "Référence constructeur DCK246P2-QW. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 5 Ah XR. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -54972,9 +55154,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 906.87,
-    "price": 1088.24
+    "price": 1088.24,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk306ps",
@@ -55143,9 +55326,9 @@
     "name": "DCS690N-XJ",
     "brand": "DeWALT",
     "category": "Meulage, découpe et polissage",
-    "title": "DeWALT DCS690N-XJ — DCS690N-XJ",
+    "title": "DeWALT DCS690N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCS690N-XJ.",
+    "desc": "Référence constructeur DCS690N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -55164,9 +55347,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 944.92,
-    "price": 1133.9
+    "price": 1133.9,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-d25902k",
@@ -55271,9 +55455,9 @@
     "name": "DCK428P3T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK428P3T — DCK428P3T",
+    "title": "DeWALT DCK428P3T — 3 batteries de 5 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK428P3T.",
+    "desc": "Référence constructeur DCK428P3T. Configuration livrée d'après la nomenclature DeWALT : 3 batteries de 5 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -55292,9 +55476,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 961.49,
-    "price": 1153.79
+    "price": 1153.79,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk307ps",
@@ -55399,9 +55584,9 @@
     "name": "DCK623P3",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK623P3 — DCK623P3",
+    "title": "DeWALT DCK623P3 — 3 batteries de 5 Ah XR",
     "tag": "Nouveau",
-    "desc": "DCK623P3.",
+    "desc": "Référence constructeur DCK623P3. Configuration livrée d'après la nomenclature DeWALT : 3 batteries de 5 Ah XR. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -55420,9 +55605,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 975.27,
-    "price": 1170.32
+    "price": 1170.32,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcs782n",
@@ -55431,9 +55617,9 @@
     "name": "DCS782N",
     "brand": "DeWALT",
     "category": "Scies",
-    "title": "DeWALT DCS782N — DCS782N",
+    "title": "DeWALT DCS782N — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCS782N.",
+    "desc": "Référence constructeur DCS782N. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -55452,9 +55638,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 980.23,
-    "price": 1176.28
+    "price": 1176.28,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcd460t2",
@@ -55463,9 +55650,9 @@
     "name": "DCD460T2",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCD460T2 — DCD460T2",
+    "title": "DeWALT DCD460T2 — 2 batteries de 6 Ah FLEXVOLT",
     "tag": "Nouveau",
-    "desc": "DCD460T2.",
+    "desc": "Référence constructeur DCD460T2. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 6 Ah FLEXVOLT. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -55484,9 +55671,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 986.61,
-    "price": 1183.93
+    "price": 1183.93,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck500p3t-qw",
@@ -55495,9 +55683,9 @@
     "name": "DCK500P3T-QW",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK500P3T-QW — DCK500P3T-QW",
+    "title": "DeWALT DCK500P3T-QW — 3 batteries de 5 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK500P3T-QW.",
+    "desc": "Référence constructeur DCK500P3T-QW. Configuration livrée d'après la nomenclature DeWALT : 3 batteries de 5 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -55516,9 +55704,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 986.63,
-    "price": 1183.96
+    "price": 1183.96,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk401",
@@ -55719,9 +55908,9 @@
     "name": "DCH911NK-XJ",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT DCH911NK-XJ — DCH911NK-XJ",
+    "title": "DeWALT DCH911NK-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCH911NK-XJ.",
+    "desc": "Référence constructeur DCH911NK-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -55740,9 +55929,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1042.53,
-    "price": 1251.04
+    "price": 1251.04,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dxcmb4t200he",
@@ -55943,9 +56133,9 @@
     "name": "DCK421P3T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK421P3T — DCK421P3T",
+    "title": "DeWALT DCK421P3T — 3 batteries de 5 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK421P3T.",
+    "desc": "Référence constructeur DCK421P3T. Configuration livrée d'après la nomenclature DeWALT : 3 batteries de 5 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -55964,9 +56154,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1094.38,
-    "price": 1313.26
+    "price": 1313.26,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dw739",
@@ -56007,9 +56198,9 @@
     "name": "DCK685P3T-QW",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK685P3T-QW — DCK685P3T-QW",
+    "title": "DeWALT DCK685P3T-QW — 3 batteries de 5 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK685P3T-QW.",
+    "desc": "Référence constructeur DCK685P3T-QW. Configuration livrée d'après la nomenclature DeWALT : 3 batteries de 5 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -56028,9 +56219,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1129.9,
-    "price": 1355.88
+    "price": 1355.88,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-d271055",
@@ -56263,9 +56455,9 @@
     "name": "DCE074D1R",
     "brand": "DeWALT",
     "category": "Accessoires",
-    "title": "DeWALT DCE074D1R — DCE074D1R",
+    "title": "DeWALT DCE074D1R — 1 batterie de 2 Ah XR",
     "tag": "Nouveau",
-    "desc": "DCE074D1R.",
+    "desc": "Référence constructeur DCE074D1R. Configuration livrée d'après la nomenclature DeWALT : 1 batterie de 2 Ah XR. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -56284,9 +56476,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1204.47,
-    "price": 1445.36
+    "price": 1445.36,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck663p3",
@@ -56327,9 +56520,9 @@
     "name": "DCK690P3T-QW",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK690P3T-QW — DCK690P3T-QW",
+    "title": "DeWALT DCK690P3T-QW — 3 batteries de 5 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK690P3T-QW.",
+    "desc": "Référence constructeur DCK690P3T-QW. Configuration livrée d'après la nomenclature DeWALT : 3 batteries de 5 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -56348,9 +56541,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1221.32,
-    "price": 1465.58
+    "price": 1465.58,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck285m2",
@@ -56359,9 +56553,9 @@
     "name": "DCK285M2",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK285M2 — DCK285M2",
+    "title": "DeWALT DCK285M2 — 2 batteries de 4 Ah XR",
     "tag": "Nouveau",
-    "desc": "DCK285M2.",
+    "desc": "Référence constructeur DCK285M2. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 4 Ah XR. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -56380,9 +56574,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1224.15,
-    "price": 1468.98
+    "price": 1468.98,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwe1622k",
@@ -56455,9 +56650,9 @@
     "name": "DCD150NK-XJ",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCD150NK-XJ — DCD150NK-XJ",
+    "title": "DeWALT DCD150NK-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCD150NK-XJ.",
+    "desc": "Référence constructeur DCD150NK-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -56476,9 +56671,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1257.79,
-    "price": 1509.35
+    "price": 1509.35,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dch334",
@@ -56519,9 +56715,9 @@
     "name": "DCK665P3T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK665P3T — DCK665P3T",
+    "title": "DeWALT DCK665P3T — 3 batteries de 5 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK665P3T.",
+    "desc": "Référence constructeur DCK665P3T. Configuration livrée d'après la nomenclature DeWALT : 3 batteries de 5 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -56540,9 +56736,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1267.68,
-    "price": 1521.22
+    "price": 1521.22,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-d25966-qs",
@@ -56583,9 +56780,9 @@
     "name": "DCK706P3T-QW",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK706P3T-QW — DCK706P3T-QW",
+    "title": "DeWALT DCK706P3T-QW — 3 batteries de 5 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK706P3T-QW.",
+    "desc": "Référence constructeur DCK706P3T-QW. Configuration livrée d'après la nomenclature DeWALT : 3 batteries de 5 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -56604,9 +56801,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1272.49,
-    "price": 1526.99
+    "price": 1526.99,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck755p3t",
@@ -56615,9 +56813,9 @@
     "name": "DCK755P3T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK755P3T — DCK755P3T",
+    "title": "DeWALT DCK755P3T — 3 batteries de 5 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK755P3T.",
+    "desc": "Référence constructeur DCK755P3T. Configuration livrée d'après la nomenclature DeWALT : 3 batteries de 5 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -56636,9 +56834,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1280.62,
-    "price": 1536.74
+    "price": 1536.74,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck654p3t-qw",
@@ -56647,9 +56846,9 @@
     "name": "DCK654P3T-QW",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK654P3T-QW — DCK654P3T-QW",
+    "title": "DeWALT DCK654P3T-QW — 3 batteries de 5 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK654P3T-QW.",
+    "desc": "Référence constructeur DCK654P3T-QW. Configuration livrée d'après la nomenclature DeWALT : 3 batteries de 5 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -56668,9 +56867,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1355.99,
-    "price": 1627.19
+    "price": 1627.19,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-ar-dxpw008e",
@@ -56711,9 +56911,9 @@
     "name": "DCE080D1RS",
     "brand": "DeWALT",
     "category": "Accessoires",
-    "title": "DeWALT DCE080D1RS — DCE080D1RS",
+    "title": "DeWALT DCE080D1RS — 1 batterie de 2 Ah XR",
     "tag": "Nouveau",
-    "desc": "DCE080D1RS.",
+    "desc": "Référence constructeur DCE080D1RS. Configuration livrée d'après la nomenclature DeWALT : 1 batterie de 2 Ah XR. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -56732,9 +56932,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1315.54,
-    "price": 1578.65
+    "price": 1578.65,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck509p3-qw",
@@ -56743,9 +56944,9 @@
     "name": "DCK509P3-QW",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK509P3-QW — DCK509P3-QW",
+    "title": "DeWALT DCK509P3-QW — 3 batteries de 5 Ah XR",
     "tag": "Nouveau",
-    "desc": "DCK509P3-QW.",
+    "desc": "Référence constructeur DCK509P3-QW. Configuration livrée d'après la nomenclature DeWALT : 3 batteries de 5 Ah XR. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -56764,9 +56965,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1331.97,
-    "price": 1598.36
+    "price": 1598.36,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-d27107xps",
@@ -56839,9 +57041,9 @@
     "name": "DCD1623N-XJ",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCD1623N-XJ — DCD1623N-XJ",
+    "title": "DeWALT DCD1623N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCD1623N-XJ.",
+    "desc": "Référence constructeur DCD1623N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -56860,9 +57062,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1358.11,
-    "price": 1629.73
+    "price": 1629.73,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-d25960k",
@@ -56935,9 +57138,9 @@
     "name": "DCH323T2-QW",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT DCH323T2-QW — DCH323T2-QW",
+    "title": "DeWALT DCH323T2-QW — 2 batteries de 6 Ah FLEXVOLT",
     "tag": "Nouveau",
-    "desc": "DCH323T2-QW.",
+    "desc": "Référence constructeur DCH323T2-QW. Configuration livrée d'après la nomenclature DeWALT : 2 batteries de 6 Ah FLEXVOLT. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -56956,9 +57159,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1510.96,
-    "price": 1813.15
+    "price": 1813.15,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck624p3t",
@@ -56967,9 +57171,9 @@
     "name": "DCK624P3T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK624P3T — Référence DCK624P3T — descriptif à compléter",
+    "title": "DeWALT DCK624P3T — DeWALT - Set 12 outils sans fil, batteries et chargeur DCK624P3T",
     "tag": "Nouveau",
-    "desc": "Référence DCK624P3T — descriptif à compléter.",
+    "desc": "DeWALT - Set 12 outils sans fil, batteries et chargeur DCK624P3T (descriptif repris de l'annonce fournisseur).",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -56990,7 +57194,8 @@
     "poidsSuppose": true,
     "ficheAcompleter": true,
     "price_ht": 1522.23,
-    "price": 1826.68
+    "price": 1826.68,
+    "sourceDescriptif": "annonce"
   },
   {
     "id": "dewalt-d27300",
@@ -57031,9 +57236,9 @@
     "name": "DCK853P4",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK853P4 — DCK853P4",
+    "title": "DeWALT DCK853P4 — 4 batteries de 5 Ah XR",
     "tag": "Nouveau",
-    "desc": "DCK853P4.",
+    "desc": "Référence constructeur DCK853P4. Configuration livrée d'après la nomenclature DeWALT : 4 batteries de 5 Ah XR. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -57052,9 +57257,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1580.11,
-    "price": 1896.13
+    "price": 1896.13,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk601t",
@@ -57511,9 +57717,9 @@
     "name": "DCK1012P4T-QW",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK1012P4T-QW — DCK1012P4T-QW",
+    "title": "DeWALT DCK1012P4T-QW — 4 batteries de 5 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK1012P4T-QW.",
+    "desc": "Référence constructeur DCK1012P4T-QW. Configuration livrée d'après la nomenclature DeWALT : 4 batteries de 5 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -57532,9 +57738,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1862.8,
-    "price": 2235.36
+    "price": 2235.36,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk803t",
@@ -57607,9 +57814,9 @@
     "name": "DCK856P4",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK856P4 — DCK856P4",
+    "title": "DeWALT DCK856P4 — 4 batteries de 5 Ah XR",
     "tag": "Nouveau",
-    "desc": "DCK856P4.",
+    "desc": "Référence constructeur DCK856P4. Configuration livrée d'après la nomenclature DeWALT : 4 batteries de 5 Ah XR. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -57628,9 +57835,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1816.43,
-    "price": 2179.72
+    "price": 2179.72,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk703",
@@ -57703,9 +57911,9 @@
     "name": "DCK865P4T-QW",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK865P4T-QW — DCK865P4T-QW",
+    "title": "DeWALT DCK865P4T-QW — 4 batteries de 5 Ah XR, coffret TSTAK",
     "tag": "Nouveau",
-    "desc": "DCK865P4T-QW.",
+    "desc": "Référence constructeur DCK865P4T-QW. Configuration livrée d'après la nomenclature DeWALT : 4 batteries de 5 Ah XR, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -57724,9 +57932,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1886.45,
-    "price": 2263.74
+    "price": 2263.74,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck897p4-qw",
@@ -57927,9 +58136,9 @@
     "name": "DCH733N-XJ",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT DCH733N-XJ — DCH733N-XJ",
+    "title": "DeWALT DCH733N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCH733N-XJ.",
+    "desc": "Référence constructeur DCH733N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -57948,9 +58157,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 2169.44,
-    "price": 2603.33
+    "price": 2603.33,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk1102t",
@@ -58311,9 +58521,9 @@
     "name": "DCPS7154N-XJ",
     "brand": "DeWALT",
     "category": "Batteries et chargeurs",
-    "title": "DeWALT DCPS7154N-XJ — DCPS7154N-XJ",
+    "title": "DeWALT DCPS7154N-XJ — Machine nue, sans batterie ni chargeur",
     "tag": "Nouveau",
-    "desc": "DCPS7154N-XJ.",
+    "desc": "Référence constructeur DCPS7154N-XJ. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -58332,9 +58542,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 3150.07,
-    "price": 3780.08
+    "price": 3780.08,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dw721kn",

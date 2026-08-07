@@ -653,8 +653,21 @@ function lireSuffixeDewalt(sku) {
   }
   /* Une seule capacité dans la boîte : on la remonte, c'est la plus utile. */
   if (res.batteries.length === 1) res.ah = res.batteries[0].ah;
-  /* Aucune batterie ET aucun marqueur « nu » : le suffixe vide veut dire nu. */
-  if (!res.nbBatteries && !res.suffixe) res.nu = true;
+  /* ⛔ UN SUFFIXE VIDE NE DIT RIEN — ET SURTOUT PAS « NUE ».
+     Défaut mesuré le 07/08/2026 : `lireSuffixeDewalt('DT1473-QZ')` rendait
+     `nu: true` avec un suffixe VIDE, à cause d'une ligne qui disait « aucune
+     batterie et aucun suffixe ⇒ c'est une machine nue ». Or DT1473-QZ est un
+     FORET : « machine nue, sans batterie ni chargeur » n'a aucun sens pour un
+     consommable. Et sur une machine dont la référence n'encode pas sa
+     configuration, c'est une affirmation sans source.
+     ⚠️ Ça compte parce que ce drapeau part sur les FICHES PRODUITS : l'écrire
+     sur un foret est une bêtise visible par le client, et sur une machine
+     livrée en coffret, une promesse fausse. C'était une DÉDUCTION déguisée en
+     lecture. `nu` ne vaut désormais true que si le marqueur N est ÉCRIT ;
+     sinon il reste false, et l'absence se lit « la référence n'en dit rien ».
+     ⚠️ Le chemin du PRIX n'est pas concerné : `signatureDepuisReference` ne
+     lit que `nbBatteries`, jamais ce drapeau (vérifié par grep avant de
+     toucher). */
   return res;
 }
 

@@ -262,6 +262,22 @@ function corps(ok) {
     + 'est le coffret TSTAK. Les confondre ferait payer un coffret pour deux '
     + 'batteries 6 Ah, ou l\'inverse');
 
+  /* ⛔⛔ « JE NE SAIS PAS » NE S'ÉCRIT PAS « MACHINE NUE ».
+     Défaut mesuré le 07/08/2026 : une référence d'ACCESSOIRE, dont le suffixe
+     est vide, ressortait avec `nu: true` — parce qu'une ligne déduisait
+     « aucune batterie et aucun suffixe ⇒ machine nue ». Le drapeau part sur
+     les fiches produits : « machine nue, sans batterie ni chargeur » écrit sur
+     un foret est une bêtise que le client voit, et sur une machine livrée en
+     coffret, une promesse fausse. Une déduction n'est pas une lecture. */
+  const muet = nomen.lireSuffixeDewalt('ZZ1473-QZ');
+  ok(muet.suffixe === '' && muet.nu === false,
+    '⛔⛔ un suffixe VIDE ne dit rien du contenu : il ne doit pas affirmer '
+    + '« machine nue ». Seul le marqueur N l\'affirme ('
+    + JSON.stringify({ suffixe: muet.suffixe, nu: muet.nu }) + ')');
+  ok(nomen.lireSuffixeDewalt('ZZD800N').nu === true,
+    '⛔ …et quand le marqueur N EST écrit, « nue » se dit ('
+    + nomen.lireSuffixeDewalt('ZZD800N').nu + ')');
+
   /* Deux capacités dans la même boîte : les deux se lisent. */
   const mixte = nomen.lireSuffixeDewalt('ZZK317P1D1-QW');
   ok(mixte.nbBatteries === 2 && mixte.batteries.length === 2,
@@ -551,11 +567,11 @@ function corps(ok) {
     '⛔ …et les guillemets internes sont DOUBLÉS, sinon Numbers coupe la cellule');
 }
 
-/* ⛔ Mesuré, pas estimé : `assertions rendues : 88` (corps instrumenté le
+/* ⛔ Mesuré, pas estimé : `assertions rendues : 90` (corps instrumenté le
    05/08/2026, après les seize cas de lecture de titre). Un seuil écrit de tête
    laisse une marge où une amputation passe inaperçue — il se remesure à chaque
    assertion neuve, avec la commande, jamais de mémoire. */
-const ASSERTIONS_ATTENDUES = 88;
+const ASSERTIONS_ATTENDUES = 90;
 
 module.exports = function () {
   const errors = [];
