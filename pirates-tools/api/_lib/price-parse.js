@@ -368,7 +368,27 @@ function parseClickoutil(rawText, brand) {
    d'une tête de cuivre à 80,84 € sur la machine DCE4500. Elle ne s'assouplit
    pas, elle devient JUSTE — on distingue enfin les deux références au lieu de
    tout jeter. */
-var OFFRE_LOT = /(\s[+&]\s|\bsets?\b|\bkits?\b|\blots?\b|\bpower ?set\b|\bcombo\b)/i;
+/* ⛔⛔ « SET DE 2200 PIÈCES » N'EST PAS UN ASSEMBLAGE — C'EST UNE QUANTITÉ.
+   Défaut mesuré le 04/08/2026 : 65 des 104 références restantes tombaient ici.
+   Ma garde rejetait sur les MOTS « set », « kit », « lot », alors que
+   « Clou, Taille 34/63 mm, Set de 2200 Pièces » ou « Lot de 3 forets étagés »
+   désigne UN produit vendu en quantité, avec sa propre référence.
+   ⛔ CE QUI EST VRAIMENT DANGEREUX, ET QUI RESTE INTERDIT : un assemblage de
+   produits DISTINCTS, chacun avec sa référence — « Power Set 1×18V 5,0 Ah
+   **+** DCB107 ». Là, la référence lue n'est qu'un COMPOSANT, et son prix est
+   celui de l'ensemble. Deux gardes suffisent et sont plus justes qu'une liste
+   de mots : le JOINTEUR (« + », « & ») et la règle « plusieurs références
+   nommées ⇒ on refuse », qui existait déjà.
+   ⚠️ PORTE J4 LUE : on n'élargit pas au hasard, on remplace un critère
+   lexical par un critère STRUCTUREL — c'est la même leçon qu'en E-406, où
+   blacklister des formulations avait laissé passer les frais de port.
+   ⛔⛔ SECOND TOUR, 05/08/2026 : le JOINTEUR SEUL ne suffisait pas non plus.
+   « Pack de batteries DCB112D2 … 2 batteries + Chargeur DCB112 » énumère le
+   CONTENU d'un article qui a sa référence ; le refuser était aussi faux que
+   d'accepter « … DT2296-QZ + DEWALT Scie Sauteuse … ». Le jointeur est donc
+   jugé par `assemblageDeProduits()` — une référence COLLÉE à lui — et il ne
+   reste ici que la seule formule que le fabricant réserve aux assemblages. */
+var OFFRE_LOT = /\bpower ?set\b/i;
 var OFFRE_OCCASION = /\b(occasion|reconditionn|refurb|gebraucht|d.?occasion|\bused\b|seconde main)\b/i;
 /* ⛔ LES UNITÉS NE SONT JAMAIS DES RÉFÉRENCES. Table élargie le 04/08/2026,
    puis le « x » des DIMENSIONS ajouté aux séparateurs : « SDS-max 38x570x450
@@ -378,9 +398,48 @@ var OFFRE_OCCASION = /\b(occasion|reconditionn|refurb|gebraucht|d.?occasion|\bus
    après avoir accepté « N233859 » (une lettre, six chiffres) : ce même
    assouplissement laissait passer « 600ML », « 250PCS », « 18GA ». Une unité
    reconnue est écartée quelle que soit la forme de la référence. */
-var OFFRE_UNITE = /^\d+(\.\d+)?(V|AH|MM|CM|M|W|KW|NM|KG|G|ML|L|MAX|PCS|PC|GA|MIN|H|BAR|PSI|RPM|TR|DB|IN|FT|°)?([-\/x×]\d+(\.\d+)?(V|AH|MM|CM|M|W|KW|NM|KG|G|ML|L|MAX|PCS|PC|GA|MIN|H|BAR|PSI|RPM|TR|DB|IN|FT|°)?)*$/i;
-/* Les mots qui introduisent une COMPATIBILITÉ, et rien d'autre. */
-var MOT_COMPAT = /\b(pour|f[üu]r|for|compatible\s+avec|compatible|adapt[ée]e?s?\s+(?:[àa]|pour)|passend\s+f[üu]r|convient\s+(?:[àa]|pour)|fits)\s*$/i;
+var UNITES = 'GALLON|INCH|MAH|PCS|BAR|PSI|RPM|MIN|MAX|KWH|KW|KG|NM|ML|AH|MM|CM|VBL|WWZ|TFZ|WZ|HZ|GA|PC|DB|TR|IN|FT|V|W|M|L|G|H|°';
+/* ⚠️ Le trait d'union entre le nombre et l'unité — « 8-GALLON » — fait
+   partie de l'écriture courante ; sans lui, la cote n'était pas reconnue. */
+var OFFRE_UNITE = new RegExp('^\\d+(\\.\\d+)?-?(' + UNITES + ')?([-\\/x×]\\d+(\\.\\d+)?-?(' + UNITES + ')?)*$', 'i');
+/* ⛔ UNE NORME N'EST PAS UNE RÉFÉRENCE. « IP56 » dans « Écouteurs Bluetooth
+   37h IP56 Jaune (DXMA1902092) » comptait pour une seconde référence, donc
+   deux candidats, donc refus — et l'article était perdu alors que sa référence
+   est écrite entre parenthèses. Un indice de protection, une norme EN/ISO, une
+   classe FFP : ce sont des CARACTÉRISTIQUES, jamais des codes produit. */
+var NOTATION_NORME = /^(IP|EN|ISO|NF|DIN|ANSI|FFP|CE|SDS)\d+[A-Z]{0,2}$/;
+/* ⛔ « DW616/618 » DÉSIGNE DEUX MACHINES, PAS UNE. Aucune référence DeWALT ne
+   porte de barre oblique entre deux nombres — mesuré sur les 1105 fiches du
+   catalogue : les seuls `/` présents séparent des COTES (350/30, D125/8), où
+   le membre de droite tient sur un seul chiffre. Deux chiffres ou plus à
+   droite, c'est une énumération de modèles. */
+var LISTE_MODELES = /^[A-Z]*\d+(\/\d{2,})+$/;
+/* Les mots qui introduisent une COMPATIBILITÉ, et rien d'autre.
+   ⛔ ET ILS NE TOUCHENT PAS TOUJOURS LA RÉFÉRENCE. Mesuré le 05/08/2026 :
+   « Poulie de rechange pour tondeuse à gazon DeWalt DCMW220X2 » — quatre mots
+   séparent le « pour » de la machine visée, et l'ancienne borne collée à la
+   fin ne voyait rien. La poulie devenait alors une seconde référence propre,
+   donc deux candidats, donc refus. On accepte jusqu'à quatre mots ORDINAIRES
+   entre les deux — sans chiffre, donc jamais une autre référence. */
+var MOT_COMPAT = new RegExp('\\b(pour|f[üu]r|for|compatible\\s+avec|compatible'
+  + '|adapt[ée]e?s?\\s+(?:[àa]|pour)|passend\\s+f[üu]r|convient\\s+(?:[àa]|pour)'
+  + '|fits|de\\s+rechange\\s+pour|ersatz\\s+f[üu]r)\\s+'
+  + '(?:[A-Za-zÀ-ÖØ-öø-ÿ\'’-]+\\s+){0,4}$', 'i');
+/* Ce qui SÉPARE deux références de la même énumération de compatibilité :
+   rien d'autre que de la ponctuation faible et un « et ». Sert à propager la
+   marque de compatibilité à toute la liste — « pour DCD785, DCD985, DCF885 »
+   ne cite qu'UNE fois le mot « pour ». */
+var SEPARATEUR_FORT = /[.;)(]|\s[\u002D\u2013\u2014:]\s/;
+var SUITE_ENUMERATION = /^[\s,;\/]*(et|and|und|y|o|ou|of)?[\s,;\/]*$/i;
+/* ⛔ LES PRÉFIXES QUI DISENT « CET ARTICLE EST UN ENSEMBLE ». Vérifié le
+   05/08/2026 sur les nomenclatures publiques : DCK = *DeWalt Combo Kit* — le
+   premier chiffre donne même le nombre d'outils (toolguyd.com, housedigest.com) ;
+   FVK = kit FLEXVOLT, dont l'annonce constructeur énumère le contenu
+   (« FVK271T2-QW … DCH333 + DCG414 + 2 batteries + DCB118 », amazon.nl).
+   ⚠️ CE N'EST PAS UNE LISTE DE MOTS-CLÉS : c'est la nomenclature du fabricant.
+   Un titre de kit NOMME les machines qu'il contient ; sans cette règle, chaque
+   machine citée comptait pour une annonce concurrente et le kit était perdu. */
+var PREFIXES_KIT = /^(DCK|FVK)[0-9-]/;
 
 function candidatsAvecPosition(titre, brand) {
   var t = String(titre || '');
@@ -388,7 +447,30 @@ function candidatsAvecPosition(titre, brand) {
   var re = /[A-Z0-9][A-Z0-9.\/-]{3,}/gi;
   var out = [], m;
   while ((m = re.exec(t)) !== null) {
-    var c = m[0].toUpperCase();
+    /* ⛔ LA RÉFÉRENCE COLLÉE À UN MOT PAR UN TIRET. Mesuré :
+       « DT3889-QZ DT3889-QZ-Coronas de Diamante en Seco » donnait DEUX
+       candidats — la référence, et la même suivie de « -CORONAS ». Deux
+       candidats ⇒ refus, et le disque était perdu alors que sa référence est
+       écrite deux fois. On retire le dernier segment quand il ne porte AUCUN
+       chiffre : un segment sans chiffre est un mot, jamais un code.
+       ⚠️ ET ÇA SE FAIT AVANT TOUT LE RESTE, sur le texte TEL QU'ÉCRIT. Défaut
+       mesuré le 05/08/2026 : « D215852-XJ-ramasseur D215851 eau » — le mot
+       collé était en minuscules, la garde de capitales jetait donc la
+       référence ENTIÈRE, et l'annonce se rattachait à la mauvaise. */
+    var brut = m[0].replace(/-[A-Za-z]{3,}$/, function (seg) {
+      return /\d/.test(seg) ? seg : '';
+    });
+    /* Et le mot peut être collé SANS TIRET, la capitale servant de soudure :
+       « dwd024Puissance 650W » — mesuré le 05/08/2026. On ne retire que ce qui
+       ressemble à un mot, et jamais si le reste perd ses chiffres.
+       ⛔ CINQ SIGNES AU MINIMUM, ET C'EST UNE BORNE PAYÉE. À trois, la garde
+       mangeait le « Lrt » de « Dcg406P2Lrt » — or DCG406P2LRT-QW est une
+       référence CONSTRUCTEUR (meuleuse XR 125 mm LANYARD READY, publiée sur
+       cee.dewalt.global). Un suffixe DeWALT tient en quatre signes ; un mot de
+       la langue, non. */
+    brut = brut.replace(/(?!^)[A-Z][a-z]{4,}$/, '');
+    if (brut.length < 4 || !/\d/.test(brut)) brut = m[0];
+    var c = brut.toUpperCase();
     if (c === marqueUp) continue;
     /* ⛔ DEUX FORMES DE RÉFÉRENCE, ET LA SECONDE MANQUAIT. « DCB117-QW » a
        deux lettres ; « N233859 » — une pièce détachée montrée par l'user —
@@ -402,10 +484,86 @@ function candidatsAvecPosition(titre, brand) {
     if (!nbChiffres) continue;
     if (nbLettres < 2 && !(nbLettres === 1 && nbChiffres >= 4)) continue;
     if (OFFRE_UNITE.test(c)) continue;                        // « 18V-54V » n'est pas une réf
+    if (NOTATION_NORME.test(c)) continue;                     // « IP56 », « EN388 »
+    if (LISTE_MODELES.test(c)) continue;                      // « DW616/618 » = deux machines
+    /* ⛔⛔ UNE RÉFÉRENCE DeWALT COMMENCE PAR DES LETTRES. Ce qui commence par
+       un CHIFFRE et porte des minuscules est une quantité ou une cote, jamais
+       un code : « 11-piece », « 3-en-1 », « 80-Piece », « 8-Gallon »,
+       « 341-tlg. », « 9.9kSt. », « 9000tr/min », « 3200cps/min », « 59mm- »,
+       « 12xDT71516M ». Chacun comptait pour une SECONDE référence — donc deux
+       candidats, donc refus — alors que la vraie était écrite dans le même
+       titre. Mesuré sur les 1105 fiches DeWALT du catalogue : aucune référence
+       ne commence par un chiffre.
+       ⚠️ ET LA RÈGLE NE VA PAS PLUS LOIN QUE ÇA. Première version essayée le
+       05/08/2026 : « tout candidat portant une minuscule est écarté ». Elle a
+       coûté 53 lectures justes en une passe — « Dcs16150 », « Dw0521 »,
+       « dnf25r50e », « dt20736b/qz », « Dcg418Shdx2 » sont de VRAIES
+       références, simplement mises en casse de titre par le marchand. */
+    if (/^\d/.test(brut) && /[a-z]/.test(brut)) continue;
     if (out.some(function (x) { return x.ref === c; })) continue;
-    out.push({ ref: c, index: m.index });
+    out.push({ ref: c, ecrit: brut, index: m.index, fin: m.index + brut.length });
   }
-  return out;
+  /* ⛔ QUAND LES DEUX COEXISTENT, LES CAPITALES L'EMPORTENT. « DEWALT
+     DNBT1850SZ - Puntas Brad 1,25mm x 50mm 18GA Acero inox316 » : la référence
+     est écrite en capitales, « inox316 » ne l'est pas. C'est une règle
+     RELATIVE, et elle doit le rester — un marchand qui met TOUT en casse de
+     titre écrit quand même sa référence, et « DeWALT Dcs16150 … » n'a alors
+     aucun candidat en capitales à lui opposer. */
+  var enCapitales = out.filter(function (a) { return !/[a-z]/.test(a.ecrit); });
+  return enCapitales.length ? enCapitales : out;
+}
+
+/* Les tranches de texte où le marchand ÉNUMÈRE LE CONTENU d'un ensemble, et
+   non des produits vendus côte à côte. Deux formes, toutes deux structurelles :
+     · une parenthèse qui contient un « + » — « DCK2223MP2T (DCD86M+DCG45M) » ;
+     · tout ce qui suit un « = » — « CPROF367 - KIT = D21583K + DT9762 ».
+   ⛔ CE QUE ÇA CHANGE, ET POURQUOI C'EST JUSTE : un kit porte SA PROPRE
+   référence et se vend à SON prix. Le « + » de son contenu n'en fait pas un
+   assemblage de deux annonces. Le « + » resté À L'AIR LIBRE, lui, continue de
+   valoir refus — c'est lui qui signalait « Power Set 1×18V 5,0 Ah + DCB107 ».
+   Rend une liste d'intervalles [début, fin[ dans le titre d'origine. */
+function tranchesDeContenu(titre) {
+  var t = String(titre || ''), zones = [], m;
+  var re = /\([^()]*\)/g;
+  while ((m = re.exec(t)) !== null) {
+    if (/[+]/.test(m[0])) zones.push([m.index, m.index + m[0].length]);
+  }
+  var eg = t.search(/(?:^|\s)=\s/);
+  if (eg !== -1) zones.push([eg, t.length]);
+  return zones;
+}
+function dansUneTranche(zones, i) {
+  return zones.some(function (z) { return i >= z[0] && i < z[1]; });
+}
+
+/* ⛔⛔ LE « + » NE DIT PAS LA MÊME CHOSE SELON CE QU'IL Y A CONTRE LUI.
+   Défaut mesuré le 05/08/2026 : cinq articles étaient refusés à tort —
+   « DCB112D2 Pack de batteries … 2 batteries + Chargeur DCB112 »,
+   « Kit 2 outils … Perceuse + Gonfleur - DCK2067D2T-QW »,
+   « Pack 2 batteries bluetooth 18V 2Ah + Adapt USB - DCB283BC »,
+   « Combo Kit + 2 x 5.0Ah (DCK2026P2T-QW) », « … 2x 5,0 Ah + Ladegerät ».
+   Dans tous, le « + » énumère CE QUE CONTIENT l'article, qui a sa référence.
+   ⛔ CE QUI RESTE INTERDIT, et que cette règle continue d'attraper : deux
+   produits DISTINCTS accolés, chacun avec sa référence — « … DT2296-QZ +
+   DEWALT Scie Sauteuse … », « Power Set 1×18V 5,0 Ah + DCB107 ». Le signe
+   distinctif est STRUCTUREL et mesurable : dans un assemblage, une référence
+   TOUCHE le jointeur ; dans un contenu, il n'y a que de la prose contre lui.
+   Rend vrai quand une référence est collée à un « + » ou « & » de premier
+   niveau — seuls des espaces, tirets ou deux-points peuvent s'intercaler. */
+var COLLE_AU_JOINTEUR = /^[\s\-–—:]*$/;
+function assemblageDeProduits(titre, cands, zones) {
+  var t = String(titre || ''), re = /\s[+&]\s/g, m;
+  while ((m = re.exec(t)) !== null) {
+    var g = m.index, d = m.index + m[0].length;
+    if (dansUneTranche(zones, g)) continue;
+    var colle = cands.some(function (c) {
+      if (c.fin <= g) return COLLE_AU_JOINTEUR.test(t.slice(c.fin, g));
+      if (c.index >= d) return COLLE_AU_JOINTEUR.test(t.slice(d, c.index));
+      return false;
+    });
+    if (colle) return true;
+  }
+  return false;
 }
 
 /* Rend { ref, pourMachines } — `ref` est la référence PROPRE de l'article,
@@ -413,10 +571,15 @@ function candidatsAvecPosition(titre, brand) {
    rien ne peut être tranché sans deviner. */
 function lireReferenceDuTitre(titre, brand) {
   var t = String(titre || '');
-  var vide = { ref: null, pourMachines: [] };
+  var vide = { ref: null, pourMachines: [], contient: [] };
   if (!t) return vide;
-  if (OFFRE_LOT.test(t) || OFFRE_OCCASION.test(t)) return vide;
+  if (OFFRE_OCCASION.test(t)) return vide;
+  /* Le jointeur se juge HORS des tranches de contenu : « (DCH333 + DCG418) »
+     décrit ce qu'il y a dans le coffret, pas deux annonces accolées. */
+  var zones = tranchesDeContenu(t);
+  if (OFFRE_LOT.test(t)) return vide;                     // « Power Set … »
   var cands = candidatsAvecPosition(t, brand);
+  if (assemblageDeProduits(t, cands, zones)) return vide;
   /* ⛔ SECONDE LECTURE : LA RÉFÉRENCE ÉCRITE AVEC UNE ESPACE. Mesuré le
      04/08/2026 : « DEWALT-fraise à carotter HSS 40 mm » porte la référence
      HSS40, coupée en deux par le marchand. Aucune passe stricte ne peut la
@@ -448,16 +611,65 @@ function lireReferenceDuTitre(titre, brand) {
     }
   }
   if (!cands.length) return vide;
-  var propres = [], compat = [];
+  cands.sort(function (a, b) { return a.index - b.index; });
+  var propres = [], compat = [], contenu = [], precedent = null;
   cands.forEach(function (c) {
-    /* Les 24 signes qui précèdent, bornés à la ponctuation forte : un
-       « pour » d'une autre proposition ne doit pas mordre ici. */
-    var avant = t.slice(Math.max(0, c.index - 24), c.index);
-    avant = avant.split(/[.;,)(]/).pop();
-    if (MOT_COMPAT.test(avant)) compat.push(c.ref); else propres.push(c.ref);
+    /* Les 60 signes qui précèdent, bornés à la ponctuation forte : un
+       « pour » d'une autre proposition ne doit pas mordre ici. La virgule
+       n'est PAS une borne — elle sépare les membres d'une même énumération. */
+    var avant = t.slice(Math.max(0, c.index - 60), c.index);
+    /* ⛔ ET LE TIRET DE SÉPARATION BORNE AUSSI. « Support powershift pour
+       carotteuse - DEWALT - DCPS151-XJ » : après le tiret, le marchand écrit
+       SA référence, pas la machine visée. Sans cette borne, le « pour » du
+       début mordait jusqu'au bout du titre et l'article était perdu. */
+    avant = avant.split(SEPARATEUR_FORT).pop();
+    var estCompat = MOT_COMPAT.test(avant);
+    /* ⛔ « pour DCD785, DCD985, DCF885 » NE DIT « pour » QU'UNE FOIS. Sans
+       propagation, les deux suivantes passaient pour des références propres —
+       trois candidats, refus, et la batterie DCB183 était perdue. Une liste ne
+       se rompt que sur autre chose qu'une ponctuation faible ou un « et ». */
+    if (!estCompat && precedent && precedent.compat
+      && SUITE_ENUMERATION.test(t.slice(precedent.fin, c.index))) estCompat = true;
+    var estContenu = dansUneTranche(zones, c.index);
+    precedent = { fin: c.fin, compat: estCompat };
+    if (estCompat) compat.push(c.ref);
+    else if (estContenu) contenu.push(c.ref);
+    else propres.push(c.ref);
   });
-  if (propres.length !== 1) return { ref: null, pourMachines: compat };
-  return { ref: propres[0], pourMachines: compat };
+  /* ⛔ LA MÊME RÉFÉRENCE ÉCRITE DEUX FOIS, EN COURT ET EN LONG. Mesuré :
+     « Pack de 6 chargeurs DeWALT DCB1104-6 (DCB1104 - 12V 18V) »,
+     « DCB112D2 … + Chargeur DCB112 », « DCHJ080B-XL DCHJ080B Sweat … »,
+     « DT70523TM-QZ-Expositor Merchandiser DT70523T x 12 ». Le marchand cite
+     le modèle PUIS sa déclinaison ; ce n'est pas deux produits, c'en est un.
+     C'est la règle de l'user, mot pour mot : « si la référence est la même au
+     début, on a qu'une seule carte produit ». On garde la PLUS PRÉCISE.
+     ⛔⛔ ET SEULEMENT ENTRE RÉFÉRENCES PROPRES. Défaut attrapé par la porte le
+     05/08/2026 : appliqué à TOUS les candidats, le repli avalait la machine
+     visée — « Tête d'outil … pour ZZE4500 (ZZE450078) » perdait ZZE4500, et
+     l'accessoire ne disait donc plus à quoi il sert. Une machine compatible
+     n'est pas l'écriture abrégée de l'article : les deux listes vivent à part. */
+  propres = propres.filter(function (a) {
+    return !propres.some(function (b) {
+      return b !== a && b.length > a.length && b.indexOf(a) === 0;
+    });
+  });
+  /* ⛔ « DCK » VEUT DIRE KIT — *DeWalt Cordless Kit*. Un titre de kit nomme
+     les machines qu'il contient : « DCK266NT Perceuse (DCD796) Visseuse
+     (DCF887) ». Les machines citées ne sont pas des annonces concurrentes,
+     elles sont le CONTENU, et le prix affiché est celui du kit. Quand une
+     seule référence porte un préfixe de kit et que les autres n'en portent
+     pas, c'est elle l'article — les autres deviennent son contenu.
+     ⚠️ La compatibilité passe AVANT : un accessoire « pour DCK266 » n'est
+     jamais un kit, il a déjà été écarté ci-dessus. */
+  if (propres.length > 1) {
+    var kits = propres.filter(function (r) { return PREFIXES_KIT.test(r); });
+    if (kits.length === 1) {
+      contenu = contenu.concat(propres.filter(function (r) { return r !== kits[0]; }));
+      propres = kits;
+    }
+  }
+  if (propres.length !== 1) return { ref: null, pourMachines: compat, contient: contenu };
+  return { ref: propres[0], pourMachines: compat, contient: contenu };
 }
 
 /* Compatibilité d'appel : l'ancienne forme ne rendait que la référence. */

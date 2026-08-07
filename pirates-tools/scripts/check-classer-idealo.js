@@ -313,10 +313,38 @@ function corps(ok) {
     '⛔ …et la machine visée est RELEVÉE, pas jetée : c\'est elle qui dit que '
     + 'l\'article est un accessoire (' + JSON.stringify(tete.pourMachines) + ')');
 
-  /* ③ Une référence de pièce détachée n'a qu'UNE lettre. */
-  ok(priceParse.lireReferenceDuTitre('Barre pour scie Stationnaire ZZBRAND N233859', 'ZZBRAND').ref === 'N233859',
+  /* ③ Une référence de pièce détachée n'a qu'UNE lettre.
+     ⚠️ LE CAS A ÉTÉ SÉPARÉ EN DEUX LE 05/08/2026, ET C'EST UNE CORRECTION DE
+     LA PORTE, PAS UN ASSOUPLISSEMENT. L'énoncé d'origine — « Barre POUR scie
+     Stationnaire ZZBRAND N233859 » — éprouvait DEUX règles à la fois : le
+     compte de lettres, et le traitement du mot « pour ». Il ne pouvait donc
+     plus dire laquelle des deux cassait. Chacune a maintenant son cas, et
+     l'énoncé « pour » est éprouvé DANS LES DEUX SENS juste en dessous (③bis). */
+  ok(priceParse.lireReferenceDuTitre('Barre de scie stationnaire ZZBRAND N233859', 'ZZBRAND').ref === 'N233859',
     '⛔ une référence à UNE seule lettre suivie d\'un long numéro est valide — '
     + 'exiger deux lettres jetait toutes les pièces détachées');
+
+  /* ③bis ⛔⛔ ARGENT — « POUR » NE TOUCHE PAS TOUJOURS LA RÉFÉRENCE.
+     Mesuré le 05/08/2026 sur le balayage : « 34° Clous en bande 2,8x70mm …
+     POUR cloueur sans fil DeWalt DCN692 695 930 950 ». Quatre mots ordinaires
+     séparent le « pour » de la machine. Avec une borne collée à la référence,
+     l'annonce de CLOUS devenait l'annonce du CLOUEUR — et son prix serait allé
+     s'écrire sur la machine. C'est exactement le défaut « tête de cuivre sur
+     DCE4500 » que l'user a signalé, une seconde fois et sous une autre forme.
+     ⚠️ Et la borne ne mord pas au-delà d'un TIRET de séparation : « Support
+     powershift pour carotteuse - ZZBRAND - ZZPS151-XJ » nomme bien SON
+     article après le tiret. */
+  var clous = priceParse.lireReferenceDuTitre(
+    'Clous en bande 2,8x70mm lisse pour cloueur sans fil ZZBRAND ZZN692', 'ZZBRAND');
+  ok(clous.ref === null && clous.pourMachines.indexOf('ZZN692') !== -1,
+    '⛔⛔ ARGENT : « pour cloueur sans fil ZZBRAND ZZN692 » désigne la MACHINE '
+    + 'VISÉE, pas l\'article. La lire comme référence propre écrirait le prix '
+    + 'd\'une boîte de clous sur un cloueur (' + JSON.stringify(clous) + ')');
+  ok(priceParse.lireReferenceDuTitre(
+    'Support powershift pour carotteuse - ZZBRAND - ZZPS151-XJ', 'ZZBRAND').ref === 'ZZPS151-XJ',
+    '⛔ …et elle s\'arrête au TIRET de séparation : au-delà, le marchand écrit '
+    + 'SA référence, pas la machine visée ('
+    + priceParse.lireReferenceDuTitre('Support powershift pour carotteuse - ZZBRAND - ZZPS151-XJ', 'ZZBRAND').ref + ')');
 
   /* ④ …mais une UNITÉ ne devient jamais une référence pour autant. */
   ok(priceParse.lireReferenceDuTitre('ZZBRAND bidon 600ML de graisse', 'ZZBRAND').ref === null
@@ -358,6 +386,137 @@ function corps(ok) {
   ok(priceParse.lireReferenceDuTitre('ZZBRAND gants taille EN 388', 'ZZBRAND').ref === null,
     '⛔ une NORME (EN 388) n\'est pas une référence produit');
 
+  /* ── LIRE COMME UN HUMAIN, SUITE — 05/08/2026 ────────────────────────────
+     ⛔⛔ L'USER : « à chaque fois que je tape une de tes références de ta
+     liste, je les trouve sur idealo et elles ont TOUT UN TITRE … absolument
+     tout est reconnaissable, il suffit de lire ». Il avait raison : sur 104
+     références déclarées intraitables, 78 l'étaient à cause d'un FAUX second
+     candidat, pas d'un titre muet. Chaque cas ci-dessous est un de ces faux
+     candidats, et chacun coûtait un article entier. */
+
+  /* ⑨ Une QUANTITÉ ou une COTE en tête de mot n'est pas une référence. */
+  ok(priceParse.lireReferenceDuTitre('ZZBRAND Bim Hole Saw 11-piece Set ZZ90354', 'ZZBRAND').ref === 'ZZ90354',
+    '⛔ « 11-piece » commence par un chiffre et porte des minuscules : c\'est '
+    + 'une quantité. Elle comptait pour une SECONDE référence, donc refus ('
+    + priceParse.lireReferenceDuTitre('ZZBRAND Bim Hole Saw 11-piece Set ZZ90354', 'ZZBRAND').ref + ')');
+  ok(priceParse.lireReferenceDuTitre('Servante de chantier 3-en-1 ZZBRAND ZZST83448-1', 'ZZBRAND').ref === 'ZZST83448-1',
+    '⛔ …« 3-en-1 » non plus, et une vraie référence peut finir par « -1 »');
+  ok(priceParse.lireReferenceDuTitre('ZZBRAND Meuleuse XR 18V - Vitesse à Vide 9000tr/min - ZZG405', 'ZZBRAND').ref === 'ZZG405',
+    '⛔ …ni une VITESSE (« 9000tr/min »)');
+  /* ⚠️ ET C'EST CE CAS-CI QUI ÉPROUVE VRAIMENT LA GARDE. Les deux au-dessus
+     sont rattrapés par la préférence pour les capitales (⑯) : il y a une vraie
+     référence en face. Sabordée, la règle restait donc VERTE — elle ne
+     prouvait rien. Quand la quantité est le SEUL candidat du titre, plus
+     personne ne la couvre. */
+  ok(priceParse.lireReferenceDuTitre('ZZBRAND Lochsaegen-Set BIM Universal, 12-tlg.', 'ZZBRAND').ref === null,
+    '⛔⛔ ARGENT : « 12-tlg. » (12 pièces) est le SEUL candidat de ce titre. '
+    + 'Sans la garde il devient une référence, et le prix de la scie-cloche '
+    + 'part s\'écrire sur une fiche fantôme ('
+    + priceParse.lireReferenceDuTitre('ZZBRAND Lochsaegen-Set BIM Universal, 12-tlg.', 'ZZBRAND').ref + ')');
+
+  /* ⑨bis LES UNITÉS QUI MANQUAIENT À LA TABLE, chacune relevée sur une annonce
+     réelle du balayage : « 10000mAh », « 1/2inch », « 72WZ » (denture, sigle
+     allemand). Chacune comptait pour une SECONDE référence, donc refus, et
+     l'article partait à la poubelle avec sa référence écrite en clair. */
+  /* ⚠️ LES DEUX PREMIERS SONT ÉCRITS EN CAPITALES, ET C'EST VOULU. En casse
+     ordinaire (« 10000mAh », « 1/2inch ») la garde des chiffres en tête suffit
+     déjà : sabordée, la table d'unités restait VERTE et ne prouvait rien. Des
+     marchands titrent en majuscules — là, seule la table peut trancher. */
+  [['ZZBRAND POWERBANK 2 PORTS 10000MAH (ZZT2151643)', 'ZZT2151643'],
+    ['ZZBRAND ZZ215804-XJ EXTRACTEUR DE POUSSIERE, NOIR, 1/2INCH', 'ZZ215804-XJ'],
+    ['ZZBRAND Extreme 315 x 30 x 3,0 72WZ (ZZ4358QZ)', 'ZZ4358QZ'],
+    ['ZZBRAND ZZV010 HEPA DUST EXTRACTOR 8-GALLON', 'ZZV010']
+  ].forEach(function (p) {
+    ok(priceParse.lireReferenceDuTitre(p[0], 'ZZBRAND').ref === p[1],
+      '⛔ une UNITÉ non reconnue dans « ' + p[0] + ' » passe pour une seconde '
+      + 'référence, et l\'article est perdu ('
+      + priceParse.lireReferenceDuTitre(p[0], 'ZZBRAND').ref + ')');
+  });
+
+  /* ⑩ Une NORME ou un indice de protection reste une caractéristique. */
+  ok(priceParse.lireReferenceDuTitre('ZZBRAND Écouteurs Bluetooth 37h IP56 Jaune (ZZMA1902092)', 'ZZBRAND').ref === 'ZZMA1902092',
+    '⛔ « IP56 » est un indice de protection. Le compter pour une référence '
+    + 'faisait deux candidats, donc refus, et l\'article était perdu ('
+    + priceParse.lireReferenceDuTitre('ZZBRAND Écouteurs Bluetooth 37h IP56 Jaune (ZZMA1902092)', 'ZZBRAND').ref + ')');
+
+  /* ⑪ Une BARRE OBLIQUE entre deux nombres énumère des machines. */
+  var base = priceParse.lireReferenceDuTitre('ZZBRAND ZZ6184 Base fixe (pour routeur ZZ616/618)', 'ZZBRAND');
+  ok(base.ref === 'ZZ6184',
+    '⛔ « ZZ616/618 » désigne DEUX machines, pas une référence : mesuré sur les '
+    + 'fiches du catalogue, aucune référence ne porte deux chiffres après un '
+    + '« / » (' + base.ref + ')');
+  /* ⚠️ Même leçon : au-dessus, le « pour routeur » suffisait déjà à écarter la
+     liste. Ici il n'y a pas de « pour », et rien d'autre ne peut la refuser. */
+  ok(priceParse.lireReferenceDuTitre('ZZBRAND Support Plat De Pce ZZ777/71/11/07/01/00', 'ZZBRAND').ref === null,
+    '⛔⛔ ARGENT : « ZZ777/71/11/07/01/00 » énumère SIX machines qu\'un même '
+    + 'support équipe. En faire une référence créait une fiche fantôme qui '
+    + 'portait le prix du support ('
+    + priceParse.lireReferenceDuTitre('ZZBRAND Support Plat De Pce ZZ777/71/11/07/01/00', 'ZZBRAND').ref + ')');
+
+  /* ⑫ La même référence écrite en court PUIS en long ne fait qu'un produit. */
+  ok(priceParse.lireReferenceDuTitre('Pack de 6 chargeurs ZZBRAND ZZB1104-6 (ZZB1104 - 12V 18V)', 'ZZBRAND').ref === 'ZZB1104-6',
+    '⛔ « ZZB1104-6 » puis « ZZB1104 » : le marchand cite le modèle PUIS sa '
+    + 'déclinaison. C\'est UN produit, et c\'est la plus précise qui vaut — '
+    + 'c\'est la règle de l\'user sur N / NT / NT-XJ, appliquée au titre');
+
+  /* ⑬ ⛔⛔ ARGENT — LE « + » DIT DEUX CHOSES SELON CE QU'IL Y A CONTRE LUI. */
+  ok(priceParse.lireReferenceDuTitre('ZZBRAND ZZB112D2 Pack de batteries 18V - 2 batteries + Chargeur ZZB112', 'ZZBRAND').ref === 'ZZB112D2',
+    '⛔ le « + » qui n\'a que de la PROSE contre lui énumère le CONTENU d\'un '
+    + 'article qui a sa référence — le refuser perdait cinq packs entiers');
+  ok(priceParse.refUniqueDuTitre('ZZBRAND Coffret 10 lames Bois ZZ2296-QZ + ZZBRAND Scie Sauteuse', 'ZZBRAND') === null,
+    '⛔⛔ ARGENT : …mais quand une RÉFÉRENCE touche le « + », ce sont deux '
+    + 'produits vendus ensemble. La lire écrirait le prix des DEUX sur un seul');
+  ok(priceParse.refUniqueDuTitre('ZZBRAND Rail de Guidage 1.5m ZZS5022-XJ & Serre-joints pour Rails ZZS5021', 'ZZBRAND') === null,
+    '⛔⛔ ARGENT : …et le « & » vaut le « + »');
+
+  /* ⑭ Un KIT nomme les machines qu'il contient : ce n'est pas la concurrence.
+     ⚠️ ICI, ET SEULEMENT ICI, LE PRÉFIXE RÉEL EST ÉCRIT. « DCK » et « FVK »
+     ne sont pas des données du catalogue de l'user : ce sont des constantes de
+     NOMENCLATURE du fabricant, au même titre que « EN » pour une norme ou
+     « XR » pour une gamme, déjà écrits plus haut. Les NUMÉROS, eux, sont
+     inventés — aucune fiche ne les porte, la porte n'ancre donc rien. */
+  var ensemble = priceParse.lireReferenceDuTitre(
+    'ZZBRAND DCK9902NT Perceuse à percussion (ZZD796) Visseuse à chocs (ZZF887) en TSTAK', 'ZZBRAND');
+  ok(ensemble.ref === 'DCK9902NT',
+    '⛔ un kit porte SA référence ; les machines citées sont son CONTENU, pas '
+    + 'des annonces concurrentes (' + ensemble.ref + ')');
+  ok(ensemble.contient.indexOf('ZZD796') !== -1 && ensemble.contient.indexOf('ZZF887') !== -1,
+    '⛔ …et ce contenu est RELEVÉ, pas jeté ('
+    + JSON.stringify(ensemble.contient) + ')');
+  var ensembleP = priceParse.lireReferenceDuTitre(
+    'ZZBRAND Kit FVK9901T2-QW 54V/18V (ZZH333 + ZZG418 + 2 x 6.0 Ah + ZZB118)', 'ZZBRAND');
+  ok(ensembleP.ref === 'FVK9901T2-QW',
+    '⛔ …y compris quand le contenu est énuméré avec des « + » DANS une '
+    + 'parenthèse : là, le « + » ne joint pas deux annonces (' + ensembleP.ref + ')');
+
+  /* ⑮ Le mot collé à la référence sans tiret. */
+  ok(priceParse.lireReferenceDuTitre('Perceuse à percussion ZZBRAND zzd024Puissance 650W', 'ZZBRAND').ref === 'ZZD024',
+    '⛔ « zzd024Puissance » est une référence soudée à un MOT ('
+    + priceParse.lireReferenceDuTitre('Perceuse à percussion ZZBRAND zzd024Puissance 650W', 'ZZBRAND').ref + ')');
+  ok(priceParse.lireReferenceDuTitre('ZZBRAND Meuleuse d\'Angle 18V Zzg406P2Lrt Lame 125Mm', 'ZZBRAND').ref === 'ZZG406P2LRT',
+    '⛔⛔ …mais un SUFFIXE de modèle n\'est pas un mot. « Lrt » vaut LANYARD '
+    + 'READY + TSTAK et fait partie de la référence constructeur ; la borne à '
+    + 'cinq signes est ce qui les sépare ('
+    + priceParse.lireReferenceDuTitre('ZZBRAND Meuleuse d\'Angle 18V Zzg406P2Lrt Lame 125Mm', 'ZZBRAND').ref + ')');
+
+  /* ⑯ Les capitales l'emportent — mais seulement quand il y a le choix. */
+  ok(priceParse.lireReferenceDuTitre('ZZBRAND ZZBT1850SZ - Puntas Brad 1,25mm x 50mm Acero inox316', 'ZZBRAND').ref === 'ZZBT1850SZ',
+    '⛔ face à une référence en CAPITALES, « inox316 » ne pèse rien ('
+    + priceParse.lireReferenceDuTitre('ZZBRAND ZZBT1850SZ - Puntas Brad 1,25mm x 50mm Acero inox316', 'ZZBRAND').ref + ')');
+  ok(priceParse.lireReferenceDuTitre('ZZBRAND Zzs16150 Lot de 2 finitions', 'ZZBRAND').ref === 'ZZS16150',
+    '⛔⛔ …et la règle reste RELATIVE. Une première version écartait TOUT '
+    + 'candidat portant une minuscule : 53 lectures justes perdues en une '
+    + 'passe, parce qu\'un marchand qui met son titre en casse de titre y met '
+    + 'aussi sa référence');
+
+  /* ⑰ Une énumération de compatibilité ne dit « pour » qu'UNE fois. */
+  var bat = priceParse.lireReferenceDuTitre(
+    'ZZBRAND ZZB183 Lot de 2 batteries XR 18V 2,0 Ah pour ZZD785, ZZD985, ZZF885', 'ZZBRAND');
+  ok(bat.ref === 'ZZB183' && bat.pourMachines.length === 3,
+    '⛔⛔ ARGENT : « pour A, B, C » ne répète pas le mot. Sans propagation, B '
+    + 'et C passaient pour des références PROPRES — trois candidats, refus, et '
+    + 'la batterie était perdue (' + JSON.stringify(bat) + ')');
+
   /* ── LES AUTRES GARDES TIENNENT TOUJOURS ─────────────────────────────────── */
   ok(priceParse.refUniqueDuTitre('ZZBRAND Foret métal HSS-G Coffret 29 pièces - ZZ7926-XJ', 'ZZBRAND') === 'ZZ7926-XJ',
     '⛔ une offre dont le titre NOMME une seule référence la donne');
@@ -386,10 +545,11 @@ function corps(ok) {
     '⛔ …et les guillemets internes sont DOUBLÉS, sinon Numbers coupe la cellule');
 }
 
-/* ⛔ Mesuré, pas estimé : `assertions rendues : 25` (corps instrumenté après
-   l'ajout de la fusion par titre). Un seuil écrit de tête laisse une marge où
-   une amputation passe inaperçue — il se remesure à chaque assertion neuve. */
-const ASSERTIONS_ATTENDUES = 36;
+/* ⛔ Mesuré, pas estimé : `assertions rendues : 89` (corps instrumenté le
+   05/08/2026, après les seize cas de lecture de titre). Un seuil écrit de tête
+   laisse une marge où une amputation passe inaperçue — il se remesure à chaque
+   assertion neuve, avec la commande, jamais de mémoire. */
+const ASSERTIONS_ATTENDUES = 89;
 
 module.exports = function () {
   const errors = [];
