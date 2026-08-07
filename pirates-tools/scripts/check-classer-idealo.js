@@ -287,6 +287,39 @@ function corps(ok) {
     + 'qui permettra d\'agrandir la table sur des faits, jamais sur une '
     + 'supposition (' + JSON.stringify(inconnu.inconnus) + ')');
 
+
+  /* ── L'OFFRE MARCHANDE DONNE SA RÉFÉRENCE QUAND LE TITRE LA NOMME ───────── */
+  /* ⛔ Demande de l'user, 04/08/2026 : « dans le titre tu n'es pas capable de
+     comprendre ce que c'est ? Moi en un coup d'œil j'y arrive. » Mesuré : sur
+     2 162 offres du balayage, 999 portent une référence unique et lisible, et
+     332 fiches importées ne pouvaient pas être suivies faute de les lire. */
+  ok(priceParse.refUniqueDuTitre('ZZBRAND Foret métal HSS-G Coffret 29 pièces - ZZ7926-XJ', 'ZZBRAND') === 'ZZ7926-XJ',
+    '⛔ une offre dont le titre NOMME une seule référence la donne — c\'est ce '
+    + 'qu\'un humain lit d\'un coup d\'œil');
+  ok(priceParse.refUniqueDuTitre('ZZBRAND ceinture porte-outils (ZZST50113-1)', 'ZZBRAND') === 'ZZST50113-1',
+    '⛔ …y compris entre parenthèses en fin de titre');
+
+  /* ⛔⛔ ARGENT — LES QUATRE GARDES. Chacune vient d'un piège mesuré. */
+  ok(priceParse.refUniqueDuTitre('ZZBRAND Power Set 1 x 18V 5,0 Ah + ZZB107', 'ZZBRAND') === null,
+    '⛔⛔ un LOT (« + ») ne donne PAS sa référence : elle n\'y est qu\'un '
+    + 'COMPOSANT, et le prix de l\'ensemble se poserait sur le chargeur seul');
+  ok(priceParse.refUniqueDuTitre('Kit de conversion du tube pour ZZE 560', 'ZZBRAND') === null,
+    '⛔⛔ un article vendu POUR une machine est un ACCESSOIRE : son prix ne doit '
+    + 'jamais devenir le coût de la machine (le piège du pistolet à mastic)');
+  ok(priceParse.refUniqueDuTitre('ZZBRAND ZZD796 reconditionné', 'ZZBRAND') === null,
+    '⛔ une offre d\'OCCASION ou reconditionnée n\'est pas notre produit neuf');
+  ok(priceParse.refUniqueDuTitre('Batterie 20V 6.0Ah ZZB184 ZZB181 ZZB182', 'ZZBRAND') === null,
+    '⛔ PLUSIEURS références dans un titre : on n\'arbitre pas, on refuse');
+  /* ⚠️ CE TITRE PORTE UNE UNITÉ **ET** UNE VRAIE RÉFÉRENCE. Premier jet : il
+     n'avait que deux unités — désarmer le filtre laissait donc DEUX candidats,
+     donc un refus pour ambiguïté, et l'assertion passait sans rien vérifier.
+     Ici, filtre actif ⇒ un seul candidat (la réf) ; filtre désarmé ⇒ deux
+     candidats ⇒ null. Le sabotage mord. */
+  ok(priceParse.refUniqueDuTitre('ZZBRAND Batterie XR 18V-54V ZZB548-XJ', 'ZZBRAND') === 'ZZB548-XJ',
+    '⛔ « 18V-54V » est une UNITÉ, jamais une référence : sans ce filtre elle '
+    + 'ferait un second candidat et la vraie référence serait perdue ('
+    + priceParse.refUniqueDuTitre('ZZBRAND Batterie XR 18V-54V ZZB548-XJ', 'ZZBRAND') + ')');
+
   /* ── LE COMPTE OUTILS SEULS / PACKS ─────────────────────────────────────── */
   const c = cl.compter([{ pack: true }, { pack: false }, { pack: false }]);
   ok(c.total === 3 && c.packs === 1 && c.seuls === 2 && c.seuls + c.packs === c.total,

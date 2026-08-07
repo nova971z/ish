@@ -316,6 +316,55 @@ function parseClickoutil(rawText, brand) {
 
    Le d\u00e9coupage se fait donc sur ces deux ancres, pas sur une fen\u00eatre de
    lignes : une fen\u00eatre devine, une ancre constate. */
+
+/* ══ PROMOUVOIR LA RÉFÉRENCE D'UNE OFFRE MARCHANDE ══════════════════════════
+   ⛔⛔ DEMANDE DE L'USER, 04/08/2026 : « dans le titre tu n'es pas capable de
+   comprendre ce que c'est ? Moi en un coup d'œil rapide j'arrive très bien à
+   déterminer ce que c'est exactement. » Il a raison : « DEWALT Foret métal
+   HSS-G Coffret 29 pièces - DT7926-XJ » se lit sans effort.
+
+   CE QUI SE PASSAIT. Les offres marchandes (les vendeurs listés sous chaque
+   produit) partaient TOUTES au registre des écartées, référence comprise.
+   Mesuré sur son balayage : 2 162 offres, dont 999 portent UNE SEULE référence
+   propre — et 332 fiches importées ne pouvaient donc pas être suivies.
+
+   ⛔⛔ ARGENT — LES QUATRE GARDES, ET POURQUOI CHACUNE EXISTE. Le prix d'une
+   offre devient un COÛT D'ACHAT : s'il se pose sur la mauvaise fiche, on vend
+   à perte. Mesuré sur les mêmes 2 162 offres :
+     · 364 portent PLUSIEURS références → on n'arbitre pas ;
+     · 268 sont des LOTS (« + », « & », « set », « kit ») → la référence n'y
+       est qu'un COMPOSANT. « Power Set 1×18V 5,0 Ah + DCB107 » à 90 € aurait
+       posé le prix d'un ensemble sur un simple chargeur ;
+     ·  53 sont vendues POUR une machine → c'est un accessoire, pas la machine
+       (le piège du DCE560 : un kit de conversion à 123,99 € pour un pistolet
+       qui en vaut 244,86) ;
+     ·  38 sont d'occasion ou reconditionnées → ce n'est pas notre produit.
+   Ce qui reste est sûr : une référence unique, un produit entier, neuf.
+   ⚠️ PORTE J4 LUE : rien ici ne fixe un prix. On rattache un montant déjà
+   affiché à la référence que le titre NOMME — et on refuse dès qu'un doute
+   subsiste, parce qu'un coût faux se propage à toute la chaîne. */
+var OFFRE_LOT = /(\s[+&]\s|\bsets?\b|\bkits?\b|\blots?\b|\bpower ?set\b|\bcombo\b)/i;
+var OFFRE_POUR = /\b(pour|f[üu]r|compatible|adapt[ée]|passend|convient|fits)\b/i;
+var OFFRE_OCCASION = /\b(occasion|reconditionn|refurb|gebraucht|d.?occasion|used|seconde main)\b/i;
+var OFFRE_UNITE = /^\d+(\.\d+)?(V|AH|MM|CM|W|NM|KG|MAX)?([-\/]\d+(\.\d+)?(V|AH|MM|CM|W|NM|KG|MAX)?)*$/i;
+
+function refUniqueDuTitre(titre, brand) {
+  var t = String(titre || '');
+  if (!t) return null;
+  if (OFFRE_LOT.test(t) || OFFRE_POUR.test(t) || OFFRE_OCCASION.test(t)) return null;
+  var marqueUp = String(brand || '').toUpperCase();
+  var re = /[A-Z0-9][A-Z0-9.\/-]{3,}/gi;
+  var vus = [], m;
+  while ((m = re.exec(t)) !== null) {
+    var c = m[0].toUpperCase();
+    if (c === marqueUp) continue;
+    if (!/\d/.test(c) || !/[A-Z].*[A-Z]/.test(c)) continue;   // ≥1 chiffre, ≥2 lettres
+    if (OFFRE_UNITE.test(c)) continue;                        // « 18V-54V » n'est pas une réf
+    if (vus.indexOf(c) === -1) vus.push(c);
+  }
+  return vus.length === 1 ? vus[0] : null;
+}
+
 function parseIdealo(rawText, brand) {
   var out = [];
   var ecartes = [];
@@ -607,8 +656,24 @@ function parseIdealo(rawText, brand) {
            peut pas honorer une commande déjà encaissée. */
         var delai = null;
         for (var d = 0; d < b.length && delai == null; d++) delai = barriere.delaiEnJours(b[d]);
-        ecartes.push({ titre: titre, prix: px, delaiJours: delai,
-          car: extraireCaracteristiques(titre, brand) });
+        /* ⛔⛔ LA PROMOTION PASSE PAR LA MÊME BARRIÈRE QUE TOUT LE RESTE.
+           Défaut attrapé par `check-price-watch` le 04/08/2026 : en promouvant
+           l'offre directement, je court-circuitais la barrière d'achat — une
+           offre à 9 jours de délai, écartée exprès parce que l'user ne fait
+           que de l'envoi, serait redevenue un coût d'achat. Douze assertions
+           sont passées au rouge d'un coup, et elles avaient raison.
+           ⛔ Une porte qu'on contourne n'est plus une porte : le jugement se
+           fait AVANT la promotion, jamais après. */
+        var refOffre = refUniqueDuTitre(titre, brand);
+        var verdict = barriere.juger({ prix: px, delaiJours: delai });
+        if (refOffre && verdict.retenu) {
+          out.push({ sku: refOffre, price: px, name: titre, promo: false,
+            enStock: null, car: extraireCaracteristiques(titre, brand),
+            venuDOffre: true });
+        } else {
+          ecartes.push({ titre: titre, prix: px, delaiJours: delai,
+            car: extraireCaracteristiques(titre, brand) });
+        }
         titreOffre = null;
       } else {
         noter(b, !titre ? 'offre sans titre utilisable'
@@ -2405,4 +2470,4 @@ function comparerCaracteristiques(a, b) {
 module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickoutil, parseIdealo: parseIdealo, parseAuto: parseAuto, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, raisonAucuneSource: raisonAucuneSource, enMillis: enMillis, SOURCE_FRESH_MS: SOURCE_FRESH_MS, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage, estMaPropreReponse: estMaPropreReponse, titresAttendus: titresAttendus, compterTuiles: compterTuiles, empreintePage: empreintePage, racineRef: racineRef, racineModele: racineModele,
   varianteProduit: varianteProduit, roleCoffret: roleCoffret,
   signatureBatteries: signatureBatteries, estPourAutreMachine: estPourAutreMachine,
-  sansAccentsTitre: sansAccentsTitre, apparierParNomSouple: apparierParNomSouple, CONCORDANCES_MIN: CONCORDANCES_MIN, annoncesManquantes: annoncesManquantes, extraireCaracteristiques: extraireCaracteristiques, comparerCaracteristiques: comparerCaracteristiques, planBalayage: planBalayage, rangDansPlan: rangDansPlan, OUTILS: OUTILS, SERIES: SERIES, nomenclature: nomen };
+  sansAccentsTitre: sansAccentsTitre, refUniqueDuTitre: refUniqueDuTitre, apparierParNomSouple: apparierParNomSouple, CONCORDANCES_MIN: CONCORDANCES_MIN, annoncesManquantes: annoncesManquantes, extraireCaracteristiques: extraireCaracteristiques, comparerCaracteristiques: comparerCaracteristiques, planBalayage: planBalayage, rangDansPlan: rangDansPlan, OUTILS: OUTILS, SERIES: SERIES, nomenclature: nomen };

@@ -9,6 +9,26 @@ var fs = require('fs');
 var path = require('path');
 var pp = require('../api/_lib/price-parse');
 
+/* ⛔⛔ UNE OFFRE SE CHERCHE DANS LES DEUX SEAUX, DEPUIS LE 04/08/2026.
+   Le parseur PROMEUT désormais une offre marchande dont le titre nomme une
+   seule référence sûre : elle part alors dans `items` au lieu de `sansRef`.
+   L'INVARIANT DÉFENDU N'A PAS CHANGÉ — chaque prix reste attaché à SON propre
+   titre, et aucune annonce ne disparaît. Ce qui change, c'est le seau
+   d'arrivée. Chercher dans un seul revenait à tester l'ancien aiguillage
+   plutôt que la propriété : douze assertions ont rougi pour cette seule
+   raison, et elles avaient raison de rougir.
+   ⚠️ On ne relâche RIEN : les deux listes sont réunies sous une forme commune
+   {titre, prix}, donc une annonce réellement perdue reste introuvable. */
+function toutesOffres(r) {
+  var a = (r && r.sansRef ? r.sansRef : []).map(function (x) {
+    return { titre: x.titre, prix: x.prix, ou: 'sansRef' };
+  });
+  var b = (r && r.items ? r.items : []).map(function (x) {
+    return { titre: x.name, prix: x.price, ou: 'items' };
+  });
+  return a.concat(b);
+}
+
 module.exports = async function () {
   var errors = [];
   function ok(c, m) { if (!c) errors.push('[check-price-watch] ' + m); }
@@ -516,10 +536,10 @@ module.exports = async function () {
       '⛔⛔ ARGENT : une OFFRE MARCHANDE (« Vendu par : ») est un LOT — batterie '
       + 'et chargeur inclus. Son prix ne devient JAMAIS un produit, sinon un coût '
       + 'de pack s\'écrirait sur la réf d\'un composant');
-    ok(rid.sansRef.some(function (x) { return x.prix === 694.90 && /Débroussailleuse/.test(x.titre); }),
+    ok(toutesOffres(rid).some(function (x) { return x.prix === 694.90 && /Débroussailleuse/.test(x.titre); }),
       'l\'offre marchande est ÉCARTÉE mais LISTÉE avec son vrai titre et son prix — '
       + 'rien n\'est silencieux, et l\'user peut en faire une fiche s\'il le veut');
-    ok(!rid.sansRef.some(function (x) { return /^(24\/48|Livraison)/.test(x.titre); }),
+    ok(!toutesOffres(rid).some(function (x) { return /^(24\/48|Livraison)/.test(x.titre); }),
       '⛔ jamais un titre FAUX : une ligne de délai ou de livraison n\'est pas un '
       + 'nom de produit (un titre faux est pire qu\'une absence)');
 
@@ -536,7 +556,7 @@ module.exports = async function () {
     }
     var fauxTitres = ['3 à 6 jours ouvrés', 'Frais de port : 9,95 €', 'En stock', '1-2 jours ouvrables'];
     var passes = fauxTitres.filter(function (t) {
-      return offreAvec(t).sansRef.some(function (x) { return x.titre === t; });
+      return toutesOffres(offreAvec(t)).some(function (x) { return x.titre === t; });
     });
     ok(passes.length === 0,
       '⛔⛔ ARGENT : aucun délai, frais de port ou état de stock ne devient une '
@@ -547,7 +567,7 @@ module.exports = async function () {
       'Borne de recharge murale véhicule électrique 7,4 kW',
       'Kit MAKITA ZZS570 + ZZS334 (2 x 5.0 Ah)'];
     var gardes = vraisTitres.filter(function (t) {
-      return offreAvec(t).sansRef.some(function (x) { return x.titre === t; });
+      return toutesOffres(offreAvec(t)).some(function (x) { return x.titre === t; });
     });
     ok(gardes.length === vraisTitres.length,
       '⛔ PRÉALABLE : les VRAIES annonces passent toujours — y compris celle qui '
@@ -569,12 +589,12 @@ module.exports = async function () {
       'Ponceuse à plâtre 18V sans fil - MAKITA - ZZE800H1-SK',
       'Détails du produit'
     ].join('\n'), 'MAKITA');
-    ok(!queueCarte.sansRef.some(function (x) { return /jours\s+ouvr/i.test(x.titre); }),
+    ok(!toutesOffres(queueCarte).some(function (x) { return /jours\s+ouvr/i.test(x.titre); }),
       '⛔⛔ ARGENT : un délai de livraison ne devient pas une annonce à 674 € par '
       + 'la branche CARTE non plus — c\'est le trou resté ouvert après la garde '
       + 'de la branche ANNONCE (' + JSON.stringify(queueCarte.sansRef.map(function (x) {
         return x.titre; })) + ')');
-    ok(!queueCarte.sansRef.some(function (x) { return x.prix === 674; }),
+    ok(!toutesOffres(queueCarte).some(function (x) { return x.prix === 674; }),
       '⛔⛔ ARGENT : et ce prix ne se recolle PAS sur la ponceuse d\'en dessous — '
       + 'il appartient à l\'offre précédente. Le prix d\'une carte se lit APRÈS son '
       + 'titre, jamais avant. Un prix décalé a l\'air juste, c\'est pire qu\'absent');
@@ -595,7 +615,7 @@ module.exports = async function () {
       'Détails du produit'
     ].join('\n'), 'MAKITA');
     var eBadge = badgeAvant.sansRef[0] || {};
-    ok(badgeAvant.sansRef.length === 1 && /Ponceuse/.test(eBadge.titre || '')
+    ok(toutesOffres(badgeAvant).length === 1 && /Ponceuse/.test(eBadge.titre || '')
       && eBadge.prix === 674,
       '⛔ PRÉALABLE : une VRAIE carte précédée d\'un bandeau reste lue, avec son '
       + 'titre produit et son prix — pas « Meilleure vente » à 674 € ('
@@ -634,12 +654,12 @@ module.exports = async function () {
     /* ⛔ La carte à réf ÉCLATÉE doit être listée AVEC SON PRIX, ancres ou pas.
        Sans la règle qui la fait ouvrir un bloc, elle est avalée par sa
        voisine — et l'user perd une ligne sans jamais le savoir. */
-    ok(rid.sansRef.some(function (x) { return x.prix === 628.37; }),
+    ok(toutesOffres(rid).some(function (x) { return x.prix === 628.37; }),
       'une réf éclatée par des espaces est ÉCARTÉE mais LISTÉE avec son prix');
     ok(!ri.some(function (x) { return /^ZZI$/.test(x.sku) || x.price === 628.37; }),
       '⛔ ARGENT : et elle ne devient JAMAIS un produit — « ZZI 579 T2T » ne se '
       + 'recolle pas, on ne sait pas si le vrai code s\'arrête au 579 ou au T2T');
-    ok(sansP.sansRef.some(function (x) { return x.prix === 628.37; }),
+    ok(toutesOffres(sansP).some(function (x) { return x.prix === 628.37; }),
       '⛔ …y compris SANS la ligne « Détails du produit » : c\'est le titre qui '
       + 'ouvre la carte, pas l\'étiquette');
 
@@ -659,16 +679,16 @@ module.exports = async function () {
       'Vendu par : AutreMarchand.fr', 'Détails de l’offre',
       '1-2 jours ouvrables', 'Livraison gratuite', '693,49 € TVA incluse'
     ].join('\n'), 'MAKITA');
-    ok(deuxOffres.sansRef.length === 2,
+    ok(toutesOffres(deuxOffres).length === 2,
       '⛔⛔ DEUX offres qui se suivent sans ancre de fin sont lues TOUTES LES DEUX '
-      + '(' + deuxOffres.sansRef.length + '/2) — c\'est la perte mesurée sur SA page');
+      + '(' + toutesOffres(deuxOffres).length + '/2) — c\'est la perte mesurée sur SA page');
     /* ⛔⛔ LE PRIX DOIT ÊTRE SUR LE BON TITRE, pas seulement présent. Un
        premier jet vérifiait que les deux prix EXISTENT : un sabotage qui
        rendait la queue au MAUVAIS titre laissait donc tout vert, alors qu'il
        écrivait 695 € sur l'annonce d'à côté. Un prix présent mais décalé est
        pire qu'un prix absent : il a l'air juste. */
     function prixDe(motTitre) {
-      var e = deuxOffres.sansRef.filter(function (x) { return x.titre.indexOf(motTitre) !== -1; })[0];
+      var e = toutesOffres(deuxOffres).filter(function (x) { return x.titre && x.titre.indexOf(motTitre) !== -1; })[0];
       return e ? e.prix : null;
     }
     ok(prixDe('Nettoyeur') === 695.00 && prixDe('Meuleuse') === 693.49,
@@ -786,7 +806,11 @@ module.exports = async function () {
        exige que l'écart soit visible. Sans ce cas, il resterait vert en
        comptant exactement ce que le parseur a déjà su lire, et il ne
        servirait à rien. */
-    var lues = pi(pageAncres, 'MAKITA').sansRef.map(function (x) { return x.titre; });
+    /* ⚠️ « Lues » = TOUT ce que le parseur a rendu, les deux seaux confondus.
+       Depuis la promotion des offres à référence unique, une annonce lue peut
+       arriver dans `items` ; ne compter que `sansRef` ferait croire à une
+       perte qui n'existe pas. */
+    var lues = toutesOffres(pi(pageAncres, 'MAKITA')).map(function (x) { return x.titre; });
     var clef = function (s) { return String(s || '').replace(/\s+/g, ' ').trim().slice(0, 60).toUpperCase(); };
     var vus = {}; lues.forEach(function (t) { vus[clef(t)] = 1; });
     ok(att.filter(function (t) { return !vus[clef(t)]; }).length === 0,
@@ -963,7 +987,7 @@ module.exports = async function () {
       '⛔⛔ TROIS tuiles sur la page, TROIS lignes lues — celle dont le titre ne '
       + 'commence pas par la marque comprise (' + rTuiles.items.length + ' + '
       + rTuiles.sansRef.length + ')');
-    ok(rTuiles.sansRef.some(function (x) { return x.prix === 693.49; }),
+    ok(toutesOffres(rTuiles).some(function (x) { return x.prix === 693.49; }),
       '⛔⛔ ARGENT : et elle sort AVEC SON PRIX. Avant, la tuile entière était '
       + 'avalée par sa voisine et 693,49 € disparaissaient sans une trace ('
       + JSON.stringify(rTuiles.sansRef.map(function (x) { return x.prix; })) + ')');
@@ -1021,10 +1045,10 @@ module.exports = async function () {
       '', '168', 'Note ∅ 18/20', 'à partir de', '784,99 €'
     ].join('\n');
     var rDer = pi(derniereAnnonce, 'MAKITA');
-    ok(rDer.sansRef.length === 1 && rDer.sansRef[0].prix === 695.00,
+    ok(toutesOffres(rDer).length === 1 && toutesOffres(rDer)[0].prix === 695.00,
       '⛔⛔ ARGENT : la DERNIÈRE annonce garde son prix (695,00 €) et n\'attrape '
       + 'pas celui du bandeau qui la suit — un prix d\'iPhone sur un nettoyeur ('
-      + JSON.stringify(rDer.sansRef.map(function (x) { return x.prix; })) + ')');
+      + JSON.stringify(toutesOffres(rDer).map(function (x) { return x.prix; })) + ')');
     ok(!rDer.items.some(function (x) { return x.price === 784.99; })
       && !rDer.sansRef.some(function (x) { return x.prix === 784.99; }),
       '⛔⛔ ARGENT : et 784,99 € n\'apparaît NULLE PART — un prix qui n\'est celui '
@@ -1052,7 +1076,7 @@ module.exports = async function () {
       '24/48 heures', 'Frais de port : 9,95 €', '677,57 € TVA incluse'
     ].join('\n');
     var rPort = pi(avecPort, 'MAKITA');
-    var prixPort = rPort.sansRef.map(function (x) { return x.prix; });
+    var prixPort = toutesOffres(rPort).map(function (x) { return x.prix; });
     ok(prixPort.length === 2 && prixPort.indexOf(691.53) !== -1 && prixPort.indexOf(677.57) !== -1,
       '⛔⛔ ARGENT : le prix retenu est celui de L\'ARTICLE, jamais les frais de '
       + 'port écrits juste au-dessus (' + JSON.stringify(prixPort) + ')');
@@ -1070,9 +1094,9 @@ module.exports = async function () {
       'Vendu par : UnMarchand.fr', 'Détails de l’offre',
       '24/48 heures', 'Livraison gratuite', '694,80 € TVA incluse'
     ].join('\n'), 'MAKITA');
-    ok(sansPort.sansRef.length === 1 && sansPort.sansRef[0].prix === 694.80,
+    ok(toutesOffres(sansPort).length === 1 && toutesOffres(sansPort)[0].prix === 694.80,
       '⛔ PRÉALABLE : une annonce à livraison gratuite garde son prix ('
-      + JSON.stringify(sansPort.sansRef.map(function (x) { return x.prix; })) + ')');
+      + JSON.stringify(toutesOffres(sansPort).map(function (x) { return x.prix; })) + ')');
     /* ⛔⛔ ET QUAND IL N'Y A QUE DES FRAIS, IL N'Y A PAS DE PRIX. Cas
        discriminant : une annonce en rupture affiche son port et jamais son
        total. Un premier sabotage est resté VERT sans lui — la tuile étant
@@ -3379,17 +3403,24 @@ module.exports = async function () {
         /* ⛔⛔ ÉCARTER N'EST PAS EFFACER. Le jour où il lève la barrière, il doit
            retrouver EXACTEMENT ce qu'elle retenait — donc la ligne reste dans
            le relevé, avec son prix. */
-        ok((rBar.out.sansRefDetail || []).length === 2,
+        /* ⚠️ L'offre RETENUE part désormais dans les lues (`inconnus`), la
+           REFUSÉE reste dans `sansRefDetail`. L'invariant tient toujours :
+           AUCUNE des deux ne disparaît. On compte donc les deux seaux — ne
+           compter que `sansRefDetail` testerait l'aiguillage, pas la
+           conservation. */
+        var luesBar = (rBar.out.sansRefDetail || []).length
+          + (rBar.out.inconnus || []).length + (rBar.out.reconnus || []).length;
+        ok(luesBar === 2 && (rBar.out.sansRefDetail || []).length >= 1,
           '⛔⛔ la ligne écartée RESTE listée avec son prix : une barrière écarte, '
           + 'elle n\'efface pas — sinon on ne peut plus la lever ('
-          + (rBar.out.sansRefDetail || []).length + '/2)');
+          + luesBar + '/2, dont ' + (rBar.out.sansRefDetail || []).length + ' écartée(s))');
         ok(bar.seuils && bar.seuils.delaiMaxJours === seuilJ,
           '⛔ les seuils EN VIGUEUR sont rendus avec le verdict : lire un refus sans '
           + 'connaître la règle qui l\'a produit ne sert à rien');
         /* PRÉALABLE — sans lui, une barrière qui refuserait TOUT resterait verte. */
-        ok(ecar.length < (rBar.out.sansRefDetail || []).length,
+        ok(ecar.length < luesBar,
           '⛔ PRÉALABLE : la barrière ne refuse pas tout — sinon elle serait verte en '
-          + 'écartant le catalogue entier');
+          + 'écartant le catalogue entier (' + ecar.length + ' refusée(s) sur ' + luesBar + ')');
 
         /* ⛔⛔ UNE FOURCHETTE SE LIT PAR SON PIRE BOUT. « 3 à 9 jours ouvrés »,
            c'est neuf jours pour qui attend le colis. Lire « 3 » laisserait
