@@ -37546,9 +37546,9 @@
     "name": "DCB117-QW",
     "brand": "DeWALT",
     "category": "Batteries et chargeurs",
-    "title": "DeWALT DCB117-QW — DCB117-QW",
+    "title": "DeWALT DCB117-QW — Batterie ou chargeur",
     "tag": "Nouveau",
-    "desc": "DCB117-QW.",
+    "desc": "Référence constructeur DCB117-QW. Configuration livrée d'après la nomenclature DeWALT : Batterie ou chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -37567,9 +37567,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 120.17,
-    "price": 144.2
+    "price": 144.2,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dce4500",
@@ -37738,9 +37739,9 @@
     "name": "DXVCS002",
     "brand": "DeWALT",
     "category": "Aspirateurs",
-    "title": "DeWALT DXVCS002 — DXVCS002",
+    "title": "DeWALT DXVCS002 — Aspirateur de chantier",
     "tag": "Nouveau",
-    "desc": "DXVCS002.",
+    "desc": "Référence constructeur DXVCS002. Configuration livrée d'après la nomenclature DeWALT : Aspirateur de chantier. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -37759,9 +37760,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 122.75,
-    "price": 147.3
+    "price": 147.3,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwamf1280",
@@ -37867,9 +37869,9 @@
     "name": "DCB124G",
     "brand": "DeWALT",
     "category": "Batteries et chargeurs",
-    "title": "DeWALT DCB124G — DCB124G",
+    "title": "DeWALT DCB124G — Batterie ou chargeur",
     "tag": "Nouveau",
-    "desc": "DCB124G.",
+    "desc": "Référence constructeur DCB124G. Configuration livrée d'après la nomenclature DeWALT : Batterie ou chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -37888,9 +37890,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 123.76,
-    "price": 148.51
+    "price": 148.51,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dxv15a",
@@ -37899,9 +37902,9 @@
     "name": "DXV15A",
     "brand": "DeWALT",
     "category": "Aspirateurs",
-    "title": "DeWALT DXV15A — DXV15A",
+    "title": "DeWALT DXV15A — Aspirateur de chantier",
     "tag": "Nouveau",
-    "desc": "DXV15A.",
+    "desc": "Référence constructeur DXV15A. Configuration livrée d'après la nomenclature DeWALT : Aspirateur de chantier. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -37920,9 +37923,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 125.24,
-    "price": 150.29
+    "price": 150.29,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dxbc9002",
@@ -38156,9 +38160,9 @@
     "name": "DCBP034",
     "brand": "DeWALT",
     "category": "Batteries et chargeurs",
-    "title": "DeWALT DCBP034 — DCBP034",
+    "title": "DeWALT DCBP034 — Batterie ou chargeur",
     "tag": "Nouveau",
-    "desc": "DCBP034.",
+    "desc": "Référence constructeur DCBP034. Configuration livrée d'après la nomenclature DeWALT : Batterie ou chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -38177,9 +38181,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 128.68,
-    "price": 154.42
+    "price": 154.42,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-at-dxv20p",
@@ -38252,9 +38257,9 @@
     "name": "DCB094K-QW",
     "brand": "DeWALT",
     "category": "Batteries et chargeurs",
-    "title": "DeWALT DCB094K-QW — DCB094K-QW",
+    "title": "DeWALT DCB094K-QW — Batterie ou chargeur",
     "tag": "Nouveau",
-    "desc": "DCB094K-QW.",
+    "desc": "Référence constructeur DCB094K-QW. Configuration livrée d'après la nomenclature DeWALT : Batterie ou chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -38273,9 +38278,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 131.2,
-    "price": 157.44
+    "price": 157.44,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwht0-43172",
@@ -39025,9 +39031,9 @@
     "name": "DCBP318-XJ",
     "brand": "DeWALT",
     "category": "Batteries et chargeurs",
-    "title": "DeWALT DCBP318-XJ — DCBP318-XJ",
+    "title": "DeWALT DCBP318-XJ — Batterie ou chargeur",
     "tag": "Nouveau",
-    "desc": "DCBP318-XJ.",
+    "desc": "Référence constructeur DCBP318-XJ. Configuration livrée d'après la nomenclature DeWALT : Batterie ou chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -39046,9 +39052,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 141.51,
-    "price": 169.81
+    "price": 169.81,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dw6184",
@@ -39089,9 +39096,9 @@
     "name": "DCDW101",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCDW101 — DCDW101",
+    "title": "DeWALT DCDW101 — Outil de perçage et de vissage",
     "tag": "Nouveau",
-    "desc": "DCDW101.",
+    "desc": "Référence constructeur DCDW101. Configuration livrée d'après la nomenclature DeWALT : Outil de perçage et de vissage. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -39110,9 +39117,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 142.38,
-    "price": 170.86
+    "price": 170.86,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcv517n-xj",
@@ -39894,9 +39902,9 @@
     "name": "DCD710",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCD710 — DCD710",
+    "title": "DeWALT DCD710 — Outil de perçage et de vissage",
     "tag": "Nouveau",
-    "desc": "DCD710.",
+    "desc": "Référence constructeur DCD710. Configuration livrée d'après la nomenclature DeWALT : Outil de perçage et de vissage. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -39915,9 +39923,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 153.61,
-    "price": 184.33
+    "price": 184.33,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dt90353",
@@ -40087,9 +40096,9 @@
     "name": "DXV20P",
     "brand": "DeWALT",
     "category": "Aspirateurs",
-    "title": "DeWALT DXV20P — DXV20P",
+    "title": "DeWALT DXV20P — Aspirateur de chantier",
     "tag": "Nouveau",
-    "desc": "DXV20P.",
+    "desc": "Référence constructeur DXV20P. Configuration livrée d'après la nomenclature DeWALT : Aspirateur de chantier. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -40108,9 +40117,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 156.18,
-    "price": 187.42
+    "price": 187.42,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-at-dxv15t",
@@ -40215,9 +40225,9 @@
     "name": "D25133K",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT D25133K — D25133K",
+    "title": "DeWALT D25133K — Perforateur ou burineur",
     "tag": "Nouveau",
-    "desc": "D25133K.",
+    "desc": "Référence constructeur D25133K. Configuration livrée d'après la nomenclature DeWALT : Perforateur ou burineur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -40236,9 +40246,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 162.06,
-    "price": 194.47
+    "price": 194.47,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dps8016",
@@ -40729,9 +40740,9 @@
     "name": "D25304DH",
     "brand": "DeWALT",
     "category": "Aspirateurs",
-    "title": "DeWALT D25304DH — D25304DH",
+    "title": "DeWALT D25304DH — Perforateur ou burineur",
     "tag": "Nouveau",
-    "desc": "D25304DH.",
+    "desc": "Référence constructeur D25304DH. Configuration livrée d'après la nomenclature DeWALT : Perforateur ou burineur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -40750,9 +40761,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 172.03,
-    "price": 206.44
+    "price": 206.44,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcf921n-xj",
@@ -40794,9 +40806,9 @@
     "name": "DCN9301",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCN9301 — DCN9301",
+    "title": "DeWALT DCN9301 — Outil de fixation",
     "tag": "Nouveau",
-    "desc": "DCN9301.",
+    "desc": "Référence constructeur DCN9301. Configuration livrée d'après la nomenclature DeWALT : Outil de fixation. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -40815,9 +40827,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 172.69,
-    "price": 207.23
+    "price": 207.23,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dxvcs003",
@@ -40826,9 +40839,9 @@
     "name": "DXVCS003",
     "brand": "DeWALT",
     "category": "Aspirateurs",
-    "title": "DeWALT DXVCS003 — DXVCS003",
+    "title": "DeWALT DXVCS003 — Aspirateur de chantier",
     "tag": "Nouveau",
-    "desc": "DXVCS003.",
+    "desc": "Référence constructeur DXVCS003. Configuration livrée d'après la nomenclature DeWALT : Aspirateur de chantier. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -40847,9 +40860,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 133.36,
-    "price": 160.03
+    "price": 160.03,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcg412n-xj",
@@ -40924,9 +40938,9 @@
     "name": "DCB1880-XJ",
     "brand": "DeWALT",
     "category": "Batteries et chargeurs",
-    "title": "DeWALT DCB1880-XJ — DCB1880-XJ",
+    "title": "DeWALT DCB1880-XJ — Batterie ou chargeur",
     "tag": "Nouveau",
-    "desc": "DCB1880-XJ.",
+    "desc": "Référence constructeur DCB1880-XJ. Configuration livrée d'après la nomenclature DeWALT : Batterie ou chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -40945,9 +40959,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 184.12,
-    "price": 220.94
+    "price": 220.94,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcw200",
@@ -40956,9 +40971,9 @@
     "name": "DCW200",
     "brand": "DeWALT",
     "category": "Scies",
-    "title": "DeWALT DCW200 — DCW200",
+    "title": "DeWALT DCW200 — Outil de travail du bois",
     "tag": "Nouveau",
-    "desc": "DCW200.",
+    "desc": "Référence constructeur DCW200. Configuration livrée d'après la nomenclature DeWALT : Outil de travail du bois. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -40977,9 +40992,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 178.3,
-    "price": 213.96
+    "price": 213.96,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcd776d1-qw",
@@ -41438,9 +41454,9 @@
     "name": "DCD740",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCD740 — DCD740",
+    "title": "DeWALT DCD740 — Outil de perçage et de vissage",
     "tag": "Nouveau",
-    "desc": "DCD740.",
+    "desc": "Référence constructeur DCD740. Configuration livrée d'après la nomenclature DeWALT : Outil de perçage et de vissage. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -41459,9 +41475,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 185.37,
-    "price": 222.44
+    "price": 222.44,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-at-dxv23p-qt",
@@ -41730,9 +41747,9 @@
     "name": "DCL045-XJ",
     "brand": "DeWALT",
     "category": "Accessoires",
-    "title": "DeWALT DCL045-XJ — DCL045-XJ",
+    "title": "DeWALT DCL045-XJ — Instrument de mesure",
     "tag": "Nouveau",
-    "desc": "DCL045-XJ.",
+    "desc": "Référence constructeur DCL045-XJ. Configuration livrée d'après la nomenclature DeWALT : Instrument de mesure. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -41751,9 +41768,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 193.52,
-    "price": 232.22
+    "price": 232.22,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dch072n",
@@ -41924,9 +41942,9 @@
     "name": "DXV30SAPTA",
     "brand": "DeWALT",
     "category": "Aspirateurs",
-    "title": "DeWALT DXV30SAPTA — DXV30SAPTA",
+    "title": "DeWALT DXV30SAPTA — Aspirateur de chantier",
     "tag": "Nouveau",
-    "desc": "DXV30SAPTA.",
+    "desc": "Référence constructeur DXV30SAPTA. Configuration livrée d'après la nomenclature DeWALT : Aspirateur de chantier. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -41945,9 +41963,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 198.21,
-    "price": 237.85
+    "price": 237.85,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dw275kn",
@@ -42150,9 +42169,9 @@
     "name": "DCB104-QW",
     "brand": "DeWALT",
     "category": "Batteries et chargeurs",
-    "title": "DeWALT DCB104-QW — DCB104-QW",
+    "title": "DeWALT DCB104-QW — Batterie ou chargeur",
     "tag": "Nouveau",
-    "desc": "DCB104-QW.",
+    "desc": "Référence constructeur DCB104-QW. Configuration livrée d'après la nomenclature DeWALT : Batterie ou chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -42171,9 +42190,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 202.82,
-    "price": 243.38
+    "price": 243.38,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcf622",
@@ -42214,9 +42234,9 @@
     "name": "DXV234P",
     "brand": "DeWALT",
     "category": "Aspirateurs",
-    "title": "DeWALT DXV234P — DXV234P",
+    "title": "DeWALT DXV234P — Aspirateur de chantier",
     "tag": "Nouveau",
-    "desc": "DXV234P.",
+    "desc": "Référence constructeur DXV234P. Configuration livrée d'après la nomenclature DeWALT : Aspirateur de chantier. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -42235,9 +42255,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 204.11,
-    "price": 244.93
+    "price": 244.93,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwe496",
@@ -42311,9 +42332,9 @@
     "name": "D25303DH-XJ",
     "brand": "DeWALT",
     "category": "Aspirateurs",
-    "title": "DeWALT D25303DH-XJ — D25303DH-XJ",
+    "title": "DeWALT D25303DH-XJ — Perforateur ou burineur",
     "tag": "Nouveau",
-    "desc": "D25303DH-XJ.",
+    "desc": "Référence constructeur D25303DH-XJ. Configuration livrée d'après la nomenclature DeWALT : Perforateur ou burineur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -42332,9 +42353,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 196.97,
-    "price": 236.36
+    "price": 236.36,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dpn1664pp-xj",
@@ -42375,9 +42397,9 @@
     "name": "DCDW104",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCDW104 — DCDW104",
+    "title": "DeWALT DCDW104 — Outil de perçage et de vissage",
     "tag": "Nouveau",
-    "desc": "DCDW104.",
+    "desc": "Référence constructeur DCDW104. Configuration livrée d'après la nomenclature DeWALT : Outil de perçage et de vissage. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -42396,9 +42418,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 208.74,
-    "price": 250.49
+    "price": 250.49,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcs380",
@@ -42407,9 +42430,9 @@
     "name": "DCS380",
     "brand": "DeWALT",
     "category": "Scies",
-    "title": "DeWALT DCS380 — DCS380",
+    "title": "DeWALT DCS380 — Outil de sciage",
     "tag": "Nouveau",
-    "desc": "DCS380.",
+    "desc": "Référence constructeur DCS380. Configuration livrée d'après la nomenclature DeWALT : Outil de sciage. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -42428,9 +42451,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 209.31,
-    "price": 251.17
+    "price": 251.17,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcb1404-qw",
@@ -42471,9 +42495,9 @@
     "name": "DCD991",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCD991 — DCD991",
+    "title": "DeWALT DCD991 — Outil de perçage et de vissage",
     "tag": "Nouveau",
-    "desc": "DCD991.",
+    "desc": "Référence constructeur DCD991. Configuration livrée d'après la nomenclature DeWALT : Outil de perçage et de vissage. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -42492,9 +42516,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 202.18,
-    "price": 242.62
+    "price": 242.62,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dw341k",
@@ -42796,9 +42821,9 @@
     "name": "DCM561",
     "brand": "DeWALT",
     "category": "Tronçonnage et élagage",
-    "title": "DeWALT DCM561 — DCM561",
+    "title": "DeWALT DCM561 — Outil de jardin",
     "tag": "Nouveau",
-    "desc": "DCM561.",
+    "desc": "Référence constructeur DCM561. Configuration livrée d'après la nomenclature DeWALT : Outil de jardin. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -42817,9 +42842,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 219.01,
-    "price": 262.81
+    "price": 262.81,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwmt19230",
@@ -43281,9 +43307,9 @@
     "name": "DCDW105",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCDW105 — DCDW105",
+    "title": "DeWALT DCDW105 — Outil de perçage et de vissage",
     "tag": "Nouveau",
-    "desc": "DCDW105.",
+    "desc": "Référence constructeur DCDW105. Configuration livrée d'après la nomenclature DeWALT : Outil de perçage et de vissage. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -43302,9 +43328,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 229.04,
-    "price": 274.85
+    "price": 274.85,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-d28492s",
@@ -43313,9 +43340,9 @@
     "name": "D28492S",
     "brand": "DeWALT",
     "category": "Meulage, découpe et polissage",
-    "title": "DeWALT D28492S — D28492S",
+    "title": "DeWALT D28492S — Outil de meulage, découpe ou polissage",
     "tag": "Nouveau",
-    "desc": "D28492S.",
+    "desc": "Référence constructeur D28492S. Configuration livrée d'après la nomenclature DeWALT : Outil de meulage, découpe ou polissage. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -43334,9 +43361,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 229.81,
-    "price": 275.77
+    "price": 275.77,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcm562p1",
@@ -43476,9 +43504,9 @@
     "name": "DCDW107",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCDW107 — DCDW107",
+    "title": "DeWALT DCDW107 — Outil de perçage et de vissage",
     "tag": "Nouveau",
-    "desc": "DCDW107.",
+    "desc": "Référence constructeur DCDW107. Configuration livrée d'après la nomenclature DeWALT : Outil de perçage et de vissage. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -43497,9 +43525,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 234.9,
-    "price": 281.88
+    "price": 281.88,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcdw106-xj",
@@ -44059,9 +44088,9 @@
     "name": "DXV34P-QT",
     "brand": "DeWALT",
     "category": "Aspirateurs",
-    "title": "DeWALT DXV34P-QT — DXV34P-QT",
+    "title": "DeWALT DXV34P-QT — Aspirateur de chantier",
     "tag": "Nouveau",
-    "desc": "DXV34P-QT.",
+    "desc": "Référence constructeur DXV34P-QT. Configuration livrée d'après la nomenclature DeWALT : Aspirateur de chantier. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -44080,9 +44109,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 253.39,
-    "price": 304.07
+    "price": 304.07,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dxpw001u",
@@ -44317,9 +44347,9 @@
     "name": "D28730",
     "brand": "DeWALT",
     "category": "Tronçonnage et élagage",
-    "title": "DeWALT D28730 — D28730",
+    "title": "DeWALT D28730 — Outil de meulage, découpe ou polissage",
     "tag": "Nouveau",
-    "desc": "D28730.",
+    "desc": "Référence constructeur D28730. Configuration livrée d'après la nomenclature DeWALT : Outil de meulage, découpe ou polissage. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -44338,9 +44368,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 254.89,
-    "price": 305.87
+    "price": 305.87,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwe4347-qs",
@@ -44381,9 +44412,9 @@
     "name": "DWS773",
     "brand": "DeWALT",
     "category": "Scies",
-    "title": "DeWALT DWS773 — DWS773",
+    "title": "DeWALT DWS773 — Outil de sciage",
     "tag": "Nouveau",
-    "desc": "DWS773.",
+    "desc": "Référence constructeur DWS773. Configuration livrée d'après la nomenclature DeWALT : Outil de sciage. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -44402,9 +44433,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 263.57,
-    "price": 316.28
+    "price": 316.28,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcs565nt-xj",
@@ -44640,9 +44672,9 @@
     "name": "DCMBL777",
     "brand": "DeWALT",
     "category": "Tronçonnage et élagage",
-    "title": "DeWALT DCMBL777 — DCMBL777",
+    "title": "DeWALT DCMBL777 — Outil de jardin",
     "tag": "Nouveau",
-    "desc": "DCMBL777.",
+    "desc": "Référence constructeur DCMBL777. Configuration livrée d'après la nomenclature DeWALT : Outil de jardin. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -44661,9 +44693,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 271.13,
-    "price": 325.36
+    "price": 325.36,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-qt960w",
@@ -45162,9 +45195,9 @@
     "name": "DCS491",
     "brand": "DeWALT",
     "category": "Meulage, découpe et polissage",
-    "title": "DeWALT DCS491 — DCS491",
+    "title": "DeWALT DCS491 — Outil de sciage",
     "tag": "Nouveau",
-    "desc": "DCS491.",
+    "desc": "Référence constructeur DCS491. Configuration livrée d'après la nomenclature DeWALT : Outil de sciage. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -45183,9 +45216,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 288.51,
-    "price": 346.21
+    "price": 346.21,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcm571n",
@@ -45292,9 +45326,9 @@
     "name": "DCDW108",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCDW108 — DCDW108",
+    "title": "DeWALT DCDW108 — Outil de perçage et de vissage",
     "tag": "Nouveau",
-    "desc": "DCDW108.",
+    "desc": "Référence constructeur DCDW108. Configuration livrée d'après la nomenclature DeWALT : Outil de perçage et de vissage. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -45313,9 +45347,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 291.84,
-    "price": 350.21
+    "price": 350.21,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck795s2t",
@@ -45549,9 +45584,9 @@
     "name": "DCL079-XJ",
     "brand": "DeWALT",
     "category": "Accessoires",
-    "title": "DeWALT DCL079-XJ — DCL079-XJ",
+    "title": "DeWALT DCL079-XJ — Instrument de mesure",
     "tag": "Nouveau",
-    "desc": "DCL079-XJ.",
+    "desc": "Référence constructeur DCL079-XJ. Configuration livrée d'après la nomenclature DeWALT : Instrument de mesure. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -45570,9 +45605,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 295.45,
-    "price": 354.54
+    "price": 354.54,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck2067d2t-qw",
@@ -45775,9 +45811,9 @@
     "name": "D25333K",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT D25333K — D25333K",
+    "title": "DeWALT D25333K — Perforateur ou burineur",
     "tag": "Nouveau",
-    "desc": "D25333K.",
+    "desc": "Référence constructeur D25333K. Configuration livrée d'après la nomenclature DeWALT : Perforateur ou burineur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -45796,9 +45832,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 296.52,
-    "price": 355.82
+    "price": 355.82,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck2062d2t-qw",
@@ -45970,9 +46007,9 @@
     "name": "DCB549-XJ",
     "brand": "DeWALT",
     "category": "Batteries et chargeurs",
-    "title": "DeWALT DCB549-XJ — DCB549-XJ",
+    "title": "DeWALT DCB549-XJ — Batterie ou chargeur",
     "tag": "Nouveau",
-    "desc": "DCB549-XJ.",
+    "desc": "Référence constructeur DCB549-XJ. Configuration livrée d'après la nomenclature DeWALT : Batterie ou chargeur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -45991,9 +46028,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 301.3,
-    "price": 361.56
+    "price": 361.56,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcdw103-xj",
@@ -46131,9 +46169,9 @@
     "name": "DCM651PB-S",
     "brand": "DeWALT",
     "category": "Tronçonnage et élagage",
-    "title": "DeWALT DCM651PB-S — DCM651PB-S",
+    "title": "DeWALT DCM651PB-S — Outil de jardin",
     "tag": "Nouveau",
-    "desc": "DCM651PB-S.",
+    "desc": "Référence constructeur DCM651PB-S. Configuration livrée d'après la nomenclature DeWALT : Outil de jardin. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -46152,9 +46190,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 313.6,
-    "price": 376.32
+    "price": 376.32,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcw682nt-xj",
@@ -46487,9 +46526,9 @@
     "name": "DCG414",
     "brand": "DeWALT",
     "category": "Meulage, découpe et polissage",
-    "title": "DeWALT DCG414 — DCG414",
+    "title": "DeWALT DCG414 — Outil de meulage, découpe ou polissage",
     "tag": "Nouveau",
-    "desc": "DCG414.",
+    "desc": "Référence constructeur DCG414. Configuration livrée d'après la nomenclature DeWALT : Outil de meulage, découpe ou polissage. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -46508,9 +46547,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 327.06,
-    "price": 392.47
+    "price": 392.47,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcmcs574n-xj",
@@ -46552,9 +46592,9 @@
     "name": "D28885",
     "brand": "DeWALT",
     "category": "Meulage, découpe et polissage",
-    "title": "DeWALT D28885 — D28885",
+    "title": "DeWALT D28885 — Outil de meulage, découpe ou polissage",
     "tag": "Nouveau",
-    "desc": "D28885.",
+    "desc": "Référence constructeur D28885. Configuration livrée d'après la nomenclature DeWALT : Outil de meulage, découpe ou polissage. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -46573,9 +46613,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 331.28,
-    "price": 397.54
+    "price": 397.54,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-d26203",
@@ -46681,9 +46722,9 @@
     "name": "DCK791",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DCK791 — DCK791",
+    "title": "DeWALT DCK791 — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DCK791.",
+    "desc": "Référence constructeur DCK791. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -46702,9 +46743,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 336.82,
-    "price": 404.18
+    "price": 404.18,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck796d2t",
@@ -46811,9 +46853,9 @@
     "name": "DWS5023",
     "brand": "DeWALT",
     "category": "Scies",
-    "title": "DeWALT DWS5023 — DWS5023",
+    "title": "DeWALT DWS5023 — Outil de sciage",
     "tag": "Nouveau",
-    "desc": "DWS5023.",
+    "desc": "Référence constructeur DWS5023. Configuration livrée d'après la nomenclature DeWALT : Outil de sciage. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -46832,9 +46874,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 344.59,
-    "price": 413.51
+    "price": 413.51,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dce0825d1r",
@@ -46973,9 +47016,9 @@
     "name": "D28715",
     "brand": "DeWALT",
     "category": "Meulage, découpe et polissage",
-    "title": "DeWALT D28715 — D28715",
+    "title": "DeWALT D28715 — Outil de meulage, découpe ou polissage",
     "tag": "Nouveau",
-    "desc": "D28715.",
+    "desc": "Référence constructeur D28715. Configuration livrée d'après la nomenclature DeWALT : Outil de meulage, découpe ou polissage. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -46994,9 +47037,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 348.7,
-    "price": 418.44
+    "price": 418.44,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-d28710",
@@ -47005,9 +47049,9 @@
     "name": "D28710",
     "brand": "DeWALT",
     "category": "Meulage, découpe et polissage",
-    "title": "DeWALT D28710 — D28710",
+    "title": "DeWALT D28710 — Outil de meulage, découpe ou polissage",
     "tag": "Nouveau",
-    "desc": "D28710.",
+    "desc": "Référence constructeur D28710. Configuration livrée d'après la nomenclature DeWALT : Outil de meulage, découpe ou polissage. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -47026,9 +47070,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 349.62,
-    "price": 419.54
+    "price": 419.54,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcm5713n-xj",
@@ -47754,9 +47799,9 @@
     "name": "DWK211",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK211 — DWK211",
+    "title": "DeWALT DWK211 — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK211.",
+    "desc": "Référence constructeur DWK211. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -47775,9 +47820,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 383.62,
-    "price": 460.34
+    "price": 460.34,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcs575n-xj",
@@ -47850,9 +47896,9 @@
     "name": "DCLE14301GB-XJ",
     "brand": "DeWALT",
     "category": "Accessoires",
-    "title": "DeWALT DCLE14301GB-XJ — DCLE14301GB-XJ",
+    "title": "DeWALT DCLE14301GB-XJ — Instrument de mesure",
     "tag": "Nouveau",
-    "desc": "DCLE14301GB-XJ.",
+    "desc": "Référence constructeur DCLE14301GB-XJ. Configuration livrée d'après la nomenclature DeWALT : Instrument de mesure. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -47871,9 +47917,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 386.78,
-    "price": 464.14
+    "price": 464.14,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck2061d2t-qw",
@@ -47948,9 +47995,9 @@
     "name": "DWV901L",
     "brand": "DeWALT",
     "category": "Aspirateurs",
-    "title": "DeWALT DWV901L — DWV901L",
+    "title": "DeWALT DWV901L — Aspirateur de chantier",
     "tag": "Nouveau",
-    "desc": "DWV901L.",
+    "desc": "Référence constructeur DWV901L. Configuration livrée d'après la nomenclature DeWALT : Aspirateur de chantier. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -47969,9 +48016,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 390.73,
-    "price": 468.88
+    "price": 468.88,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dxf2067",
@@ -48012,9 +48060,9 @@
     "name": "D25810K",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT D25810K — D25810K",
+    "title": "DeWALT D25810K — Perforateur ou burineur",
     "tag": "Nouveau",
-    "desc": "D25810K.",
+    "desc": "Référence constructeur D25810K. Configuration livrée d'après la nomenclature DeWALT : Perforateur ou burineur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -48033,9 +48081,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 391.79,
-    "price": 470.15
+    "price": 470.15,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dpn9033",
@@ -48403,9 +48452,9 @@
     "name": "DCS378",
     "brand": "DeWALT",
     "category": "Scies",
-    "title": "DeWALT DCS378 — DCS378",
+    "title": "DeWALT DCS378 — Outil de sciage",
     "tag": "Nouveau",
-    "desc": "DCS378.",
+    "desc": "Référence constructeur DCS378. Configuration livrée d'après la nomenclature DeWALT : Outil de sciage. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -48424,9 +48473,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 405.48,
-    "price": 486.58
+    "price": 486.58,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-p2lrt",
@@ -48729,9 +48779,9 @@
     "name": "DCLE14251GB-XJ",
     "brand": "DeWALT",
     "category": "Accessoires",
-    "title": "DeWALT DCLE14251GB-XJ — DCLE14251GB-XJ",
+    "title": "DeWALT DCLE14251GB-XJ — Instrument de mesure",
     "tag": "Nouveau",
-    "desc": "DCLE14251GB-XJ.",
+    "desc": "Référence constructeur DCLE14251GB-XJ. Configuration livrée d'après la nomenclature DeWALT : Instrument de mesure. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -48750,9 +48800,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 422.38,
-    "price": 506.86
+    "price": 506.86,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck2051p2t-qw",
@@ -48827,9 +48878,9 @@
     "name": "DWK206",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK206 — DWK206",
+    "title": "DeWALT DWK206 — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK206.",
+    "desc": "Référence constructeur DWK206. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -48848,9 +48899,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 424.75,
-    "price": 509.7
+    "price": 509.7,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcr017",
@@ -48988,9 +49040,9 @@
     "name": "D25430K",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT D25430K — D25430K",
+    "title": "DeWALT D25430K — Perforateur ou burineur",
     "tag": "Nouveau",
-    "desc": "D25430K.",
+    "desc": "Référence constructeur D25430K. Configuration livrée d'après la nomenclature DeWALT : Perforateur ou burineur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -49009,9 +49061,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 432.79,
-    "price": 519.35
+    "price": 519.35,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dxwdmma200e",
@@ -49085,9 +49138,9 @@
     "name": "DWK208",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK208 — DWK208",
+    "title": "DeWALT DWK208 — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK208.",
+    "desc": "Référence constructeur DWK208. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -49106,9 +49159,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 435.85,
-    "price": 523.02
+    "price": 523.02,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dccs1100n",
@@ -49150,9 +49204,9 @@
     "name": "DWK201",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK201 — DWK201",
+    "title": "DeWALT DWK201 — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK201.",
+    "desc": "Référence constructeur DWK201. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -49171,9 +49225,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 440.02,
-    "price": 528.02
+    "price": 528.02,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dce085d1g",
@@ -49344,9 +49399,9 @@
     "name": "DWK212",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK212 — DWK212",
+    "title": "DeWALT DWK212 — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK212.",
+    "desc": "Référence constructeur DWK212. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -49365,9 +49420,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 451.36,
-    "price": 541.63
+    "price": 541.63,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-d25481k-qs",
@@ -49376,9 +49432,9 @@
     "name": "D25481K-QS",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT D25481K-QS — D25481K-QS",
+    "title": "DeWALT D25481K-QS — Perforateur ou burineur",
     "tag": "Nouveau",
-    "desc": "D25481K-QS.",
+    "desc": "Référence constructeur D25481K-QS. Configuration livrée d'après la nomenclature DeWALT : Perforateur ou burineur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -49397,9 +49453,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 457.5,
-    "price": 549
+    "price": 549,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcmcst632n-xj",
@@ -49440,9 +49497,9 @@
     "name": "DWK200",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK200 — DWK200",
+    "title": "DeWALT DWK200 — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK200.",
+    "desc": "Référence constructeur DWK200. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -49461,9 +49518,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 458.52,
-    "price": 550.22
+    "price": 550.22,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dce800n-xj",
@@ -49505,9 +49563,9 @@
     "name": "DWK204",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK204 — DWK204",
+    "title": "DeWALT DWK204 — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK204.",
+    "desc": "Référence constructeur DWK204. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -49526,9 +49584,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 462.65,
-    "price": 555.18
+    "price": 555.18,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk209",
@@ -49537,9 +49596,9 @@
     "name": "DWK209",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK209 — DWK209",
+    "title": "DeWALT DWK209 — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK209.",
+    "desc": "Référence constructeur DWK209. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -49558,9 +49617,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 462.65,
-    "price": 555.18
+    "price": 555.18,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcmps635n-xj",
@@ -49830,9 +49890,9 @@
     "name": "DWK207",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK207 — DWK207",
+    "title": "DeWALT DWK207 — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK207.",
+    "desc": "Référence constructeur DWK207. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -49851,9 +49911,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 473.88,
-    "price": 568.66
+    "price": 568.66,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwe398",
@@ -49894,9 +49955,9 @@
     "name": "DWK205",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK205 — DWK205",
+    "title": "DeWALT DWK205 — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK205.",
+    "desc": "Référence constructeur DWK205. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -49915,9 +49976,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 480.96,
-    "price": 577.15
+    "price": 577.15,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcs777n",
@@ -50154,9 +50216,9 @@
     "name": "DWK202",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK202 — DWK202",
+    "title": "DeWALT DWK202 — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK202.",
+    "desc": "Référence constructeur DWK202. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -50175,9 +50237,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 492.47,
-    "price": 590.96
+    "price": 590.96,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk203",
@@ -50186,9 +50249,9 @@
     "name": "DWK203",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK203 — DWK203",
+    "title": "DeWALT DWK203 — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK203.",
+    "desc": "Référence constructeur DWK203. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -50207,9 +50270,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 492.47,
-    "price": 590.96
+    "price": 590.96,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-d25334k-qs",
@@ -50218,9 +50282,9 @@
     "name": "D25334K-QS",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT D25334K-QS — D25334K-QS",
+    "title": "DeWALT D25334K-QS — Perforateur ou burineur",
     "tag": "Nouveau",
-    "desc": "D25334K-QS.",
+    "desc": "Référence constructeur D25334K-QS. Configuration livrée d'après la nomenclature DeWALT : Perforateur ou burineur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -50239,9 +50303,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 494.27,
-    "price": 593.12
+    "price": 593.12,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwe627kt-qs",
@@ -50642,9 +50707,9 @@
     "name": "D25832K-QS",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT D25832K-QS — D25832K-QS",
+    "title": "DeWALT D25832K-QS — Perforateur ou burineur",
     "tag": "Nouveau",
-    "desc": "D25832K-QS.",
+    "desc": "Référence constructeur D25832K-QS. Configuration livrée d'après la nomenclature DeWALT : Perforateur ou burineur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -50663,9 +50728,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 524.74,
-    "price": 629.69
+    "price": 629.69,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk210",
@@ -50674,9 +50740,9 @@
     "name": "DWK210",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK210 — DWK210",
+    "title": "DeWALT DWK210 — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK210.",
+    "desc": "Référence constructeur DWK210. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -50695,9 +50761,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 530.4,
-    "price": 636.48
+    "price": 636.48,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcs374n",
@@ -51000,9 +51067,9 @@
     "name": "DWK219",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK219 — DWK219",
+    "title": "DeWALT DWK219 — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK219.",
+    "desc": "Référence constructeur DWK219. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -51021,9 +51088,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 542.84,
-    "price": 651.41
+    "price": 651.41,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dw872",
@@ -51096,9 +51164,9 @@
     "name": "DWK224",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK224 — DWK224",
+    "title": "DeWALT DWK224 — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK224.",
+    "desc": "Référence constructeur DWK224. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -51117,9 +51185,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 547.94,
-    "price": 657.53
+    "price": 657.53,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck2016t2t",
@@ -51194,9 +51263,9 @@
     "name": "D25413K",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT D25413K — D25413K",
+    "title": "DeWALT D25413K — Perforateur ou burineur",
     "tag": "Nouveau",
-    "desc": "D25413K.",
+    "desc": "Référence constructeur D25413K. Configuration livrée d'après la nomenclature DeWALT : Perforateur ou burineur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -51215,9 +51284,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 556.06,
-    "price": 667.27
+    "price": 667.27,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dws778",
@@ -51226,9 +51296,9 @@
     "name": "DWS778",
     "brand": "DeWALT",
     "category": "Scies",
-    "title": "DeWALT DWS778 — DWS778",
+    "title": "DeWALT DWS778 — Outil de sciage",
     "tag": "Nouveau",
-    "desc": "DWS778.",
+    "desc": "Référence constructeur DWS778. Configuration livrée d'après la nomenclature DeWALT : Outil de sciage. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -51247,9 +51317,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 564.59,
-    "price": 677.51
+    "price": 677.51,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck355p2t-qw",
@@ -51357,9 +51428,9 @@
     "name": "DWK221",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK221 — DWK221",
+    "title": "DeWALT DWK221 — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK221.",
+    "desc": "Référence constructeur DWK221. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -51378,9 +51449,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 573.33,
-    "price": 688
+    "price": 688,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcmwp500n-xj",
@@ -51454,9 +51526,9 @@
     "name": "D25614K",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT D25614K — D25614K",
+    "title": "DeWALT D25614K — Perforateur ou burineur",
     "tag": "Nouveau",
-    "desc": "D25614K.",
+    "desc": "Référence constructeur D25614K. Configuration livrée d'après la nomenclature DeWALT : Perforateur ou burineur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -51475,9 +51547,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 576.63,
-    "price": 691.96
+    "price": 691.96,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk225",
@@ -51486,9 +51559,9 @@
     "name": "DWK225",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK225 — DWK225",
+    "title": "DeWALT DWK225 — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK225.",
+    "desc": "Référence constructeur DWK225. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -51507,9 +51580,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 575.53,
-    "price": 690.64
+    "price": 690.64,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-ppack0002",
@@ -51649,9 +51723,9 @@
     "name": "DWK214",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK214 — DWK214",
+    "title": "DeWALT DWK214 — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK214.",
+    "desc": "Référence constructeur DWK214. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -51670,9 +51744,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 582.77,
-    "price": 699.32
+    "price": 699.32,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk213",
@@ -51681,9 +51756,9 @@
     "name": "DWK213",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK213 — DWK213",
+    "title": "DeWALT DWK213 — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK213.",
+    "desc": "Référence constructeur DWK213. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -51702,9 +51777,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 582.77,
-    "price": 699.32
+    "price": 699.32,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk217",
@@ -51713,9 +51789,9 @@
     "name": "DWK217",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK217 — DWK217",
+    "title": "DeWALT DWK217 — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK217.",
+    "desc": "Référence constructeur DWK217. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -51734,9 +51810,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 582.77,
-    "price": 699.32
+    "price": 699.32,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck327p2t",
@@ -51778,9 +51855,9 @@
     "name": "DWK216",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK216 — DWK216",
+    "title": "DeWALT DWK216 — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK216.",
+    "desc": "Référence constructeur DWK216. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -51799,9 +51876,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 595.04,
-    "price": 714.05
+    "price": 714.05,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcf414",
@@ -51842,9 +51920,9 @@
     "name": "DWK220",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK220 — DWK220",
+    "title": "DeWALT DWK220 — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK220.",
+    "desc": "Référence constructeur DWK220. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -51863,9 +51941,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 597.87,
-    "price": 717.44
+    "price": 717.44,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk222",
@@ -51874,9 +51953,9 @@
     "name": "DWK222",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK222 — DWK222",
+    "title": "DeWALT DWK222 — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK222.",
+    "desc": "Référence constructeur DWK222. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -51895,9 +51974,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 597.87,
-    "price": 717.44
+    "price": 717.44,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk215",
@@ -51906,9 +51986,9 @@
     "name": "DWK215",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK215 — DWK215",
+    "title": "DeWALT DWK215 — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK215.",
+    "desc": "Référence constructeur DWK215. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -51927,9 +52007,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 597.87,
-    "price": 717.44
+    "price": 717.44,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dw622kt-qs",
@@ -52003,9 +52084,9 @@
     "name": "DWK218",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK218 — DWK218",
+    "title": "DeWALT DWK218 — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK218.",
+    "desc": "Référence constructeur DWK218. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -52024,9 +52105,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 609.45,
-    "price": 731.34
+    "price": 731.34,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcn45",
@@ -52035,9 +52117,9 @@
     "name": "DCN45",
     "brand": "DeWALT",
     "category": "Perçage, vissage et boulonnage",
-    "title": "DeWALT DCN45 — DCN45",
+    "title": "DeWALT DCN45 — Outil de fixation",
     "tag": "Nouveau",
-    "desc": "DCN45.",
+    "desc": "Référence constructeur DCN45. Configuration livrée d'après la nomenclature DeWALT : Outil de fixation. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -52056,9 +52138,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 611.28,
-    "price": 733.54
+    "price": 733.54,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dxpw003ce",
@@ -52099,9 +52182,9 @@
     "name": "D25330K",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT D25330K — D25330K",
+    "title": "DeWALT D25330K — Perforateur ou burineur",
     "tag": "Nouveau",
-    "desc": "D25330K.",
+    "desc": "Référence constructeur D25330K. Configuration livrée d'après la nomenclature DeWALT : Perforateur ou burineur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -52120,9 +52203,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 618.28,
-    "price": 741.94
+    "price": 741.94,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcs7485",
@@ -52131,9 +52215,9 @@
     "name": "DCS7485",
     "brand": "DeWALT",
     "category": "Scies",
-    "title": "DeWALT DCS7485 — DCS7485",
+    "title": "DeWALT DCS7485 — Outil de sciage",
     "tag": "Nouveau",
-    "desc": "DCS7485.",
+    "desc": "Référence constructeur DCS7485. Configuration livrée d'après la nomenclature DeWALT : Outil de sciage. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -52152,9 +52236,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 620.56,
-    "price": 744.67
+    "price": 744.67,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck383p2t",
@@ -52229,9 +52314,9 @@
     "name": "DWV905M-QS",
     "brand": "DeWALT",
     "category": "Aspirateurs",
-    "title": "DeWALT DWV905M-QS — DWV905M-QS",
+    "title": "DeWALT DWV905M-QS — Aspirateur de chantier",
     "tag": "Nouveau",
-    "desc": "DWV905M-QS.",
+    "desc": "Référence constructeur DWV905M-QS. Configuration livrée d'après la nomenclature DeWALT : Aspirateur de chantier. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -52250,9 +52335,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 622.73,
-    "price": 747.28
+    "price": 747.28,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcd990m2",
@@ -52294,9 +52380,9 @@
     "name": "D25881K-QS",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT D25881K-QS — D25881K-QS",
+    "title": "DeWALT D25881K-QS — Perforateur ou burineur",
     "tag": "Nouveau",
-    "desc": "D25881K-QS.",
+    "desc": "Référence constructeur D25881K-QS. Configuration livrée d'après la nomenclature DeWALT : Perforateur ou burineur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -52315,9 +52401,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 630.5,
-    "price": 756.6
+    "price": 756.6,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-d25335k-qs",
@@ -52326,9 +52413,9 @@
     "name": "D25335K-QS",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT D25335K-QS — D25335K-QS",
+    "title": "DeWALT D25335K-QS — Perforateur ou burineur",
     "tag": "Nouveau",
-    "desc": "D25335K-QS.",
+    "desc": "Référence constructeur D25335K-QS. Configuration livrée d'après la nomenclature DeWALT : Perforateur ou burineur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -52347,9 +52434,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 631.78,
-    "price": 758.14
+    "price": 758.14,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcmwsp550n-xj",
@@ -52879,9 +52967,9 @@
     "name": "D25899K",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT D25899K — D25899K",
+    "title": "DeWALT D25899K — Perforateur ou burineur",
     "tag": "Nouveau",
-    "desc": "D25899K.",
+    "desc": "Référence constructeur D25899K. Configuration livrée d'après la nomenclature DeWALT : Perforateur ou burineur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -52900,9 +52988,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 687.97,
-    "price": 825.56
+    "price": 825.56,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk223",
@@ -52911,9 +53000,9 @@
     "name": "DWK223",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK223 — DWK223",
+    "title": "DeWALT DWK223 — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK223.",
+    "desc": "Référence constructeur DWK223. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -52932,9 +53021,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 688.42,
-    "price": 826.1
+    "price": 826.1,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck305p3t",
@@ -53041,9 +53131,9 @@
     "name": "DWK300",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK300 — DWK300",
+    "title": "DeWALT DWK300 — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK300.",
+    "desc": "Référence constructeur DWK300. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -53062,9 +53152,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 699.83,
-    "price": 839.8
+    "price": 839.8,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dch735",
@@ -53073,9 +53164,9 @@
     "name": "DCH735",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT DCH735 — DCH735",
+    "title": "DeWALT DCH735 — Perforateur ou burineur",
     "tag": "Nouveau",
-    "desc": "DCH735.",
+    "desc": "Référence constructeur DCH735. Configuration livrée d'après la nomenclature DeWALT : Perforateur ou burineur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -53094,9 +53185,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 700.1,
-    "price": 840.12
+    "price": 840.12,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck329p2t-qw",
@@ -53171,9 +53263,9 @@
     "name": "DXGNI20E",
     "brand": "DeWALT",
     "category": "Accessoires",
-    "title": "DeWALT DXGNI20E — DXGNI20E",
+    "title": "DeWALT DXGNI20E — Équipement de chantier",
     "tag": "Nouveau",
-    "desc": "DXGNI20E.",
+    "desc": "Référence constructeur DXGNI20E. Configuration livrée d'après la nomenclature DeWALT : Équipement de chantier. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -53192,9 +53284,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 713.56,
-    "price": 856.27
+    "price": 856.27,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcn910n",
@@ -53269,9 +53362,9 @@
     "name": "DWK301",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK301 — DWK301",
+    "title": "DeWALT DWK301 — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK301.",
+    "desc": "Référence constructeur DWK301. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -53290,9 +53383,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 744.69,
-    "price": 893.63
+    "price": 893.63,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dch892n",
@@ -53465,9 +53559,9 @@
     "name": "DWS727",
     "brand": "DeWALT",
     "category": "Scies",
-    "title": "DeWALT DWS727 — DWS727",
+    "title": "DeWALT DWS727 — Outil de sciage",
     "tag": "Nouveau",
-    "desc": "DWS727.",
+    "desc": "Référence constructeur DWS727. Configuration livrée d'après la nomenclature DeWALT : Outil de sciage. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -53486,9 +53580,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 771.06,
-    "price": 925.27
+    "price": 925.27,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dxcmb3m100he",
@@ -53529,9 +53624,9 @@
     "name": "D25733K-QS",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT D25733K-QS — D25733K-QS",
+    "title": "DeWALT D25733K-QS — Perforateur ou burineur",
     "tag": "Nouveau",
-    "desc": "D25733K-QS.",
+    "desc": "Référence constructeur D25733K-QS. Configuration livrée d'après la nomenclature DeWALT : Perforateur ou burineur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -53550,9 +53645,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 771.59,
-    "price": 925.91
+    "price": 925.91,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-d27112",
@@ -53822,9 +53918,9 @@
     "name": "D25773K",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT D25773K — D25773K",
+    "title": "DeWALT D25773K — Perforateur ou burineur",
     "tag": "Nouveau",
-    "desc": "D25773K.",
+    "desc": "Référence constructeur D25773K. Configuration livrée d'après la nomenclature DeWALT : Perforateur ou burineur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -53843,9 +53939,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 828.71,
-    "price": 994.45
+    "price": 994.45,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dw712n",
@@ -53886,9 +53983,9 @@
     "name": "DWK402",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK402 — DWK402",
+    "title": "DeWALT DWK402 — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK402.",
+    "desc": "Référence constructeur DWK402. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -53907,9 +54004,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 835.28,
-    "price": 1002.34
+    "price": 1002.34,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dxgnp35e",
@@ -53918,9 +54016,9 @@
     "name": "DXGNP35E",
     "brand": "DeWALT",
     "category": "Accessoires",
-    "title": "DeWALT DXGNP35E — DXGNP35E",
+    "title": "DeWALT DXGNP35E — Équipement de chantier",
     "tag": "Nouveau",
-    "desc": "DXGNP35E.",
+    "desc": "Référence constructeur DXGNP35E. Configuration livrée d'après la nomenclature DeWALT : Équipement de chantier. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -53939,9 +54037,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 836.78,
-    "price": 1004.14
+    "price": 1004.14,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcs727n",
@@ -54049,9 +54148,9 @@
     "name": "DWK305PS",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK305PS — DWK305PS",
+    "title": "DeWALT DWK305PS — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK305PS.",
+    "desc": "Référence constructeur DWK305PS. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -54070,9 +54169,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 865.11,
-    "price": 1038.13
+    "price": 1038.13,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-d25911k-qs",
@@ -54081,9 +54181,9 @@
     "name": "D25911K-QS",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT D25911K-QS — D25911K-QS",
+    "title": "DeWALT D25911K-QS — Perforateur ou burineur",
     "tag": "Nouveau",
-    "desc": "D25911K-QS.",
+    "desc": "Référence constructeur D25911K-QS. Configuration livrée d'après la nomenclature DeWALT : Perforateur ou burineur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -54102,9 +54202,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 886.26,
-    "price": 1063.51
+    "price": 1063.51,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk303ps",
@@ -54113,9 +54214,9 @@
     "name": "DWK303PS",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK303PS — DWK303PS",
+    "title": "DeWALT DWK303PS — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK303PS.",
+    "desc": "Référence constructeur DWK303PS. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -54134,9 +54235,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 887.34,
-    "price": 1064.81
+    "price": 1064.81,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck607m2-qw",
@@ -54276,9 +54378,9 @@
     "name": "DWK306PS",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK306PS — DWK306PS",
+    "title": "DeWALT DWK306PS — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK306PS.",
+    "desc": "Référence constructeur DWK306PS. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -54297,9 +54399,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 913.78,
-    "price": 1096.54
+    "price": 1096.54,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-d27111",
@@ -54340,9 +54443,9 @@
     "name": "DWK403",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK403 — DWK403",
+    "title": "DeWALT DWK403 — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK403.",
+    "desc": "Référence constructeur DWK403. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -54361,9 +54464,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 921.27,
-    "price": 1105.52
+    "price": 1105.52,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dgn845d1",
@@ -54404,9 +54508,9 @@
     "name": "DWK304PS",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK304PS — DWK304PS",
+    "title": "DeWALT DWK304PS — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK304PS.",
+    "desc": "Référence constructeur DWK304PS. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -54425,9 +54529,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 936.59,
-    "price": 1123.91
+    "price": 1123.91,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcs690n-xj",
@@ -54501,9 +54606,9 @@
     "name": "DWK400",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK400 — DWK400",
+    "title": "DeWALT DWK400 — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK400.",
+    "desc": "Référence constructeur DWK400. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -54522,9 +54627,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 959.36,
-    "price": 1151.23
+    "price": 1151.23,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dch335",
@@ -54533,9 +54639,9 @@
     "name": "DCH335",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT DCH335 — DCH335",
+    "title": "DeWALT DCH335 — Perforateur ou burineur",
     "tag": "Nouveau",
-    "desc": "DCH335.",
+    "desc": "Référence constructeur DCH335. Configuration livrée d'après la nomenclature DeWALT : Perforateur ou burineur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -54554,9 +54660,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 963.55,
-    "price": 1156.26
+    "price": 1156.26,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck428p3t",
@@ -54598,9 +54705,9 @@
     "name": "DWK307PS",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK307PS — DWK307PS",
+    "title": "DeWALT DWK307PS — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK307PS.",
+    "desc": "Référence constructeur DWK307PS. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -54619,9 +54726,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 970.36,
-    "price": 1164.43
+    "price": 1164.43,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcbps0554-xj",
@@ -54826,9 +54934,9 @@
     "name": "DWK401",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK401 — DWK401",
+    "title": "DeWALT DWK401 — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK401.",
+    "desc": "Référence constructeur DWK401. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -54847,9 +54955,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 993.07,
-    "price": 1191.68
+    "price": 1191.68,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dw876",
@@ -54890,9 +54999,9 @@
     "name": "D25961K",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT D25961K — D25961K",
+    "title": "DeWALT D25961K — Perforateur ou burineur",
     "tag": "Nouveau",
-    "desc": "D25961K.",
+    "desc": "Référence constructeur D25961K. Configuration livrée d'après la nomenclature DeWALT : Perforateur ou burineur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -54911,9 +55020,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1015.27,
-    "price": 1218.32
+    "price": 1218.32,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk308ps",
@@ -54922,9 +55032,9 @@
     "name": "DWK308PS",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK308PS — DWK308PS",
+    "title": "DeWALT DWK308PS — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK308PS.",
+    "desc": "Référence constructeur DWK308PS. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -54943,9 +55053,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1015.74,
-    "price": 1218.89
+    "price": 1218.89,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-d25871k",
@@ -54954,9 +55065,9 @@
     "name": "D25871K",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT D25871K — D25871K",
+    "title": "DeWALT D25871K — Perforateur ou burineur",
     "tag": "Nouveau",
-    "desc": "D25871K.",
+    "desc": "Référence constructeur D25871K. Configuration livrée d'après la nomenclature DeWALT : Perforateur ou burineur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -54975,9 +55086,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1021.86,
-    "price": 1226.23
+    "price": 1226.23,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk404ps",
@@ -54986,9 +55098,9 @@
     "name": "DWK404PS",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK404PS — DWK404PS",
+    "title": "DeWALT DWK404PS — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK404PS.",
+    "desc": "Référence constructeur DWK404PS. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -55007,9 +55119,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1038.38,
-    "price": 1246.06
+    "price": 1246.06,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dch911nk-xj",
@@ -55115,9 +55228,9 @@
     "name": "DWK405PS",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK405PS — DWK405PS",
+    "title": "DeWALT DWK405PS — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK405PS.",
+    "desc": "Référence constructeur DWK405PS. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -55136,9 +55249,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1071.84,
-    "price": 1286.21
+    "price": 1286.21,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dw711",
@@ -55374,9 +55488,9 @@
     "name": "DXPW004E",
     "brand": "DeWALT",
     "category": "Accessoires",
-    "title": "DeWALT DXPW004E — DXPW004E",
+    "title": "DeWALT DXPW004E — Équipement de chantier",
     "tag": "Nouveau",
-    "desc": "DXPW004E.",
+    "desc": "Référence constructeur DXPW004E. Configuration livrée d'après la nomenclature DeWALT : Équipement de chantier. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -55395,9 +55509,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1147.6,
-    "price": 1377.12
+    "price": 1377.12,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-d25872k-qs",
@@ -55406,9 +55521,9 @@
     "name": "D25872K-QS",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT D25872K-QS — D25872K-QS",
+    "title": "DeWALT D25872K-QS — Perforateur ou burineur",
     "tag": "Nouveau",
-    "desc": "D25872K-QS.",
+    "desc": "Référence constructeur D25872K-QS. Configuration livrée d'après la nomenclature DeWALT : Perforateur ou burineur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -55427,9 +55542,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1147.92,
-    "price": 1377.5
+    "price": 1377.5,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck699m3t",
@@ -55762,9 +55878,9 @@
     "name": "D25966-QS",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT D25966-QS — D25966-QS",
+    "title": "DeWALT D25966-QS — Perforateur ou burineur",
     "tag": "Nouveau",
-    "desc": "D25966-QS.",
+    "desc": "Référence constructeur D25966-QS. Configuration livrée d'après la nomenclature DeWALT : Perforateur ou burineur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -55783,9 +55899,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1267.94,
-    "price": 1521.53
+    "price": 1521.53,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck706p3t-qw",
@@ -56088,9 +56205,9 @@
     "name": "D25960K",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT D25960K — D25960K",
+    "title": "DeWALT D25960K — Perforateur ou burineur",
     "tag": "Nouveau",
-    "desc": "D25960K.",
+    "desc": "Référence constructeur D25960K. Configuration livrée d'après la nomenclature DeWALT : Perforateur ou burineur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -56109,9 +56226,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1375.39,
-    "price": 1650.47
+    "price": 1650.47,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk600t",
@@ -56120,9 +56238,9 @@
     "name": "DWK600T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK600T — DWK600T",
+    "title": "DeWALT DWK600T — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK600T.",
+    "desc": "Référence constructeur DWK600T. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -56141,9 +56259,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1388.38,
-    "price": 1666.06
+    "price": 1666.06,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dch323t2-qw",
@@ -56283,9 +56402,9 @@
     "name": "DWK601T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK601T — DWK601T",
+    "title": "DeWALT DWK601T — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK601T.",
+    "desc": "Référence constructeur DWK601T. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -56304,9 +56423,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1586.76,
-    "price": 1904.11
+    "price": 1904.11,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk700t",
@@ -56315,9 +56435,9 @@
     "name": "DWK700T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK700T — DWK700T",
+    "title": "DeWALT DWK700T — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK700T.",
+    "desc": "Référence constructeur DWK700T. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -56336,9 +56456,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1586.76,
-    "price": 1904.11
+    "price": 1904.11,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk702t",
@@ -56347,9 +56468,9 @@
     "name": "DWK702T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK702T — DWK702T",
+    "title": "DeWALT DWK702T — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK702T.",
+    "desc": "Référence constructeur DWK702T. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -56368,9 +56489,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1614.08,
-    "price": 1936.9
+    "price": 1936.9,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcps151-xj",
@@ -56411,9 +56533,9 @@
     "name": "DWK802T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK802T — DWK802T",
+    "title": "DeWALT DWK802T — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK802T.",
+    "desc": "Référence constructeur DWK802T. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -56432,9 +56554,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1659,
-    "price": 1990.8
+    "price": 1990.8,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk800t",
@@ -56443,9 +56566,9 @@
     "name": "DWK800T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK800T — DWK800T",
+    "title": "DeWALT DWK800T — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK800T.",
+    "desc": "Référence constructeur DWK800T. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -56464,9 +56587,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1665.3,
-    "price": 1998.36
+    "price": 1998.36,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dxcmb55t271hce",
@@ -56507,9 +56631,9 @@
     "name": "D25981",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT D25981 — D25981",
+    "title": "DeWALT D25981 — Perforateur ou burineur",
     "tag": "Nouveau",
-    "desc": "D25981.",
+    "desc": "Référence constructeur D25981. Configuration livrée d'après la nomenclature DeWALT : Perforateur ou burineur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -56528,9 +56652,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1677.62,
-    "price": 2013.14
+    "price": 2013.14,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcle15221g-qw",
@@ -56603,9 +56728,9 @@
     "name": "DWK701T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK701T — DWK701T",
+    "title": "DeWALT DWK701T — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK701T.",
+    "desc": "Référence constructeur DWK701T. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -56624,9 +56749,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1744.43,
-    "price": 2093.32
+    "price": 2093.32,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dxcmb75t270hce",
@@ -56667,9 +56793,9 @@
     "name": "DWK801T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK801T — DWK801T",
+    "title": "DeWALT DWK801T — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK801T.",
+    "desc": "Référence constructeur DWK801T. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -56688,9 +56814,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1755.96,
-    "price": 2107.15
+    "price": 2107.15,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk804t",
@@ -56699,9 +56826,9 @@
     "name": "DWK804T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK804T — DWK804T",
+    "title": "DeWALT DWK804T — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK804T.",
+    "desc": "Référence constructeur DWK804T. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -56720,9 +56847,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1760.15,
-    "price": 2112.18
+    "price": 2112.18,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck1012p4t-qw",
@@ -56764,9 +56892,9 @@
     "name": "DWK803T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK803T — DWK803T",
+    "title": "DeWALT DWK803T — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK803T.",
+    "desc": "Référence constructeur DWK803T. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -56785,9 +56913,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1781.12,
-    "price": 2137.34
+    "price": 2137.34,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk900t",
@@ -56796,9 +56925,9 @@
     "name": "DWK900T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK900T — DWK900T",
+    "title": "DeWALT DWK900T — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK900T.",
+    "desc": "Référence constructeur DWK900T. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -56817,9 +56946,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1810.08,
-    "price": 2172.1
+    "price": 2172.1,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck856p4",
@@ -56861,9 +56991,9 @@
     "name": "DWK703",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK703 — DWK703",
+    "title": "DeWALT DWK703 — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK703.",
+    "desc": "Référence constructeur DWK703. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -56882,9 +57012,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1859.31,
-    "price": 2231.17
+    "price": 2231.17,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk805t",
@@ -56893,9 +57024,9 @@
     "name": "DWK805T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK805T — DWK805T",
+    "title": "DeWALT DWK805T — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK805T.",
+    "desc": "Référence constructeur DWK805T. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -56914,9 +57045,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1869.79,
-    "price": 2243.75
+    "price": 2243.75,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck865p4t-qw",
@@ -57022,9 +57154,9 @@
     "name": "DXPW009E",
     "brand": "DeWALT",
     "category": "Accessoires",
-    "title": "DeWALT DXPW009E — DXPW009E",
+    "title": "DeWALT DXPW009E — Équipement de chantier",
     "tag": "Nouveau",
-    "desc": "DXPW009E.",
+    "desc": "Référence constructeur DXPW009E. Configuration livrée d'après la nomenclature DeWALT : Équipement de chantier. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -57043,9 +57175,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1933.61,
-    "price": 2320.33
+    "price": 2320.33,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk901t",
@@ -57054,9 +57187,9 @@
     "name": "DWK901T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK901T — DWK901T",
+    "title": "DeWALT DWK901T — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK901T.",
+    "desc": "Référence constructeur DWK901T. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -57075,9 +57208,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1954.66,
-    "price": 2345.59
+    "price": 2345.59,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dxgnp853e",
@@ -57086,9 +57220,9 @@
     "name": "DXGNP853E",
     "brand": "DeWALT",
     "category": "Accessoires",
-    "title": "DeWALT DXGNP853E — DXGNP853E",
+    "title": "DeWALT DXGNP853E — Équipement de chantier",
     "tag": "Nouveau",
-    "desc": "DXGNP853E.",
+    "desc": "Référence constructeur DXGNP853E. Configuration livrée d'après la nomenclature DeWALT : Équipement de chantier. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -57107,9 +57241,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1958.79,
-    "price": 2350.55
+    "price": 2350.55,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dch966",
@@ -57118,9 +57253,9 @@
     "name": "DCH966",
     "brand": "DeWALT",
     "category": "Perforateurs",
-    "title": "DeWALT DCH966 — DCH966",
+    "title": "DeWALT DCH966 — Perforateur ou burineur",
     "tag": "Nouveau",
-    "desc": "DCH966.",
+    "desc": "Référence constructeur DCH966. Configuration livrée d'après la nomenclature DeWALT : Perforateur ou burineur. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -57139,9 +57274,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 1995.25,
-    "price": 2394.3
+    "price": 2394.3,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dch733n-xj",
@@ -57183,9 +57319,9 @@
     "name": "DWK1102T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK1102T — DWK1102T",
+    "title": "DeWALT DWK1102T — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK1102T.",
+    "desc": "Référence constructeur DWK1102T. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -57204,9 +57340,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 2201.1,
-    "price": 2641.32
+    "price": 2641.32,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dxpw011e",
@@ -57215,9 +57352,9 @@
     "name": "DXPW011E",
     "brand": "DeWALT",
     "category": "Accessoires",
-    "title": "DeWALT DXPW011E — DXPW011E",
+    "title": "DeWALT DXPW011E — Équipement de chantier",
     "tag": "Nouveau",
-    "desc": "DXPW011E.",
+    "desc": "Référence constructeur DXPW011E. Configuration livrée d'après la nomenclature DeWALT : Équipement de chantier. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -57236,9 +57373,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 2273.58,
-    "price": 2728.3
+    "price": 2728.3,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk1100t",
@@ -57247,9 +57385,9 @@
     "name": "DWK1100T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK1100T — DWK1100T",
+    "title": "DeWALT DWK1100T — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK1100T.",
+    "desc": "Référence constructeur DWK1100T. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -57268,9 +57406,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 2291.16,
-    "price": 2749.39
+    "price": 2749.39,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk1101t",
@@ -57279,9 +57418,9 @@
     "name": "DWK1101T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK1101T — DWK1101T",
+    "title": "DeWALT DWK1101T — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK1101T.",
+    "desc": "Référence constructeur DWK1101T. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -57300,9 +57439,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 2353.97,
-    "price": 2824.76
+    "price": 2824.76,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk1103t",
@@ -57311,9 +57451,9 @@
     "name": "DWK1103T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK1103T — DWK1103T",
+    "title": "DeWALT DWK1103T — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK1103T.",
+    "desc": "Référence constructeur DWK1103T. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -57332,9 +57472,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 2392.54,
-    "price": 2871.05
+    "price": 2871.05,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk1200t",
@@ -57343,9 +57484,9 @@
     "name": "DWK1200T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK1200T — DWK1200T",
+    "title": "DeWALT DWK1200T — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK1200T.",
+    "desc": "Référence constructeur DWK1200T. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -57364,9 +57505,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 2404.01,
-    "price": 2884.81
+    "price": 2884.81,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk1202t",
@@ -57375,9 +57517,9 @@
     "name": "DWK1202T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK1202T — DWK1202T",
+    "title": "DeWALT DWK1202T — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK1202T.",
+    "desc": "Référence constructeur DWK1202T. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -57396,9 +57538,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 2404.01,
-    "price": 2884.81
+    "price": 2884.81,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dxpw010e",
@@ -57407,9 +57550,9 @@
     "name": "DXPW010E",
     "brand": "DeWALT",
     "category": "Accessoires",
-    "title": "DeWALT DXPW010E — DXPW010E",
+    "title": "DeWALT DXPW010E — Équipement de chantier",
     "tag": "Nouveau",
-    "desc": "DXPW010E.",
+    "desc": "Référence constructeur DXPW010E. Configuration livrée d'après la nomenclature DeWALT : Équipement de chantier. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -57428,9 +57571,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 2445.06,
-    "price": 2934.07
+    "price": 2934.07,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dck-fr834mp4",
@@ -57471,9 +57615,9 @@
     "name": "DWK1201T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK1201T — DWK1201T",
+    "title": "DeWALT DWK1201T — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK1201T.",
+    "desc": "Référence constructeur DWK1201T. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -57492,9 +57636,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 2571.9,
-    "price": 3086.28
+    "price": 3086.28,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dwk1203t",
@@ -57503,9 +57648,9 @@
     "name": "DWK1203T",
     "brand": "DeWALT",
     "category": "Combos",
-    "title": "DeWALT DWK1203T — DWK1203T",
+    "title": "DeWALT DWK1203T — Ensemble de plusieurs outils",
     "tag": "Nouveau",
-    "desc": "DWK1203T.",
+    "desc": "Référence constructeur DWK1203T. Configuration livrée d'après la nomenclature DeWALT : Ensemble de plusieurs outils. Le descriptif détaillé de l'outil reste à compléter.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -57524,9 +57669,10 @@
     },
     "weight_kg": 2,
     "poidsSuppose": true,
-    "ficheAcompleter": false,
+    "ficheAcompleter": true,
     "price_ht": 2682.23,
-    "price": 3218.68
+    "price": 3218.68,
+    "sourceDescriptif": "nomenclature"
   },
   {
     "id": "dewalt-dcps7154n-xj",

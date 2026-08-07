@@ -133,6 +133,35 @@ async function titresDuBalayage(fiches) {
    client. La garde est étroite EXPRÈS : mieux vaut une fiche muette qu'une
    fiche qui raconte. */
 var REFERENCE_SANS_FIL = /^(DC|FVK)/;
+/* ⛔ LE RAYON S'ÉCRIT EN FRANÇAIS, ET SANS EN DIRE PLUS QU'IL N'EN SAIT.
+   Première version : `r.replace('-', ' ')`, qui donnait « Outil de aspiration »
+   et « Outil de batterie » — ni français, ni informatif. Chaque libellé
+   ci-dessous reste au NIVEAU DU RAYON : « batterie » couvre la batterie ET le
+   chargeur, on écrit donc les deux plutôt que de choisir. Nommer le modèle
+   exact serait une invention. */
+const LIBELLES_RAYON = {
+  percage: 'Outil de perçage et de vissage', 'vissage-choc': 'Visseuse ou boulonneuse à chocs',
+  perforation: 'Perforateur ou burineur', meulage: 'Outil de meulage, découpe ou polissage',
+  sciage: 'Outil de sciage', bois: 'Outil de travail du bois',
+  fixation: 'Outil de fixation', aspiration: 'Aspirateur de chantier',
+  jardin: 'Outil de jardin', chantier: 'Équipement de chantier',
+  mesure: 'Instrument de mesure', confort: 'Équipement de confort',
+  combo: 'Ensemble de plusieurs outils',
+  'lame-circulaire': 'Lame de scie circulaire', 'lame-alternative': 'Lame de scie alternative',
+  'lame-oscillante': 'Lame pour outil oscillant', foret: 'Foret', fraise: 'Fraise',
+  disque: 'Disque', abrasif: 'Abrasif', 'vissage-embout': 'Embout de vissage',
+  burin: 'Burin', visserie: 'Visserie', chaine: 'Chaîne',
+  filtration: 'Élément de filtration', accessoire: 'Accessoire',
+  batterie: 'Batterie ou chargeur', chargeur: 'Chargeur',
+  coffret: 'Coffret ou rangement', mobilier: 'Mobilier d\'atelier',
+  portage: 'Sac ou solution de portage', chaussure: 'Chaussure de sécurité',
+  vetement: 'Vêtement de travail', main: 'Protection des mains',
+  tete: 'Protection de la tête', auditif: 'Protection auditive',
+  respiratoire: 'Protection respiratoire', hauteur: 'Équipement antichute',
+  genou: 'Protection des genoux'
+};
+const LIBELLE_RAYON = (r) => LIBELLES_RAYON[r] || null;
+
 function depuisNomenclature(sku) {
   const dits = [];
   const suf = REFERENCE_SANS_FIL.test(sku) ? nomen.lireSuffixeDewalt(sku) : null;
@@ -200,6 +229,18 @@ muettes.forEach((p) => {
     return;
   }
   const n = depuisNomenclature(sku);
+  /* ⛔⛔ LE RAYON ÉTAIT CALCULÉ, RENVOYÉ, PUIS JETÉ. Défaut mesuré le
+     08/08/2026 : `depuisNomenclature` rend `{ dits, rayon, prefixe }`, et la
+     condition d'écriture ne regardait que `dits` — la CONFIGURATION livrée
+     (batteries, coffret). Une fiche dont le préfixe dit « meulage » mais dont
+     le suffixe se tait ne recevait donc rien. Sur 597 fiches muettes, 285 ont
+     un rayon tranché par la nomenclature du fabricant : 285 descriptifs
+     sourcés perdus parce qu'une variable n'était pas lue.
+     ⚠️ Le rayon dit CE QUE FAIT l'outil, pas son modèle : « outil de
+     meulage » est vrai et vérifiable, « meuleuse d'angle 125 mm » serait une
+     invention. On écrit le premier, et `ficheAcompleter` reste posé. */
+  const libelle = n.rayon ? LIBELLE_RAYON(n.rayon) : null;
+  if (libelle) n.dits.unshift(libelle);
   if (n.dits.length) {
     const phrase = n.dits.join(', ');
     p.title = marque + ' ' + p.sku + ' — ' + phrase.charAt(0).toUpperCase() + phrase.slice(1);
