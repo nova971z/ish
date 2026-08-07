@@ -746,6 +746,7 @@ function refUniqueDuTitre(titre, brand) {
 }
 
 function parseIdealo(rawText, brand) {
+
   var out = [];
   var ecartes = [];
   var perdus = [];
@@ -1056,9 +1057,19 @@ function parseIdealo(rawText, brand) {
         }
         titreOffre = null;
       } else {
+        /* ⛔⛔ UN PRIX NE DISPARAÎT PLUS EN SILENCE — MAIS IL NE DEVIENT PAS
+           UNE OFFRE POUR AUTANT. Mesuré le 08/08/2026 : 35 blocs par balayage
+           portaient un PRIX et tombaient dans `perdus` sans qu'on puisse les
+           relire. J'ai d'abord voulu les verser dans les offres écartées —
+           `check-price-watch` l'a REFUSÉ, et il avait raison : « 3 à 6 jours
+           ouvrés » y serait entré comme une annonce à 674 €. Un délai de
+           livraison n'est pas un produit, même écarté.
+           Le prix est donc simplement ÉCRIT dans le motif : on peut le relire
+           dans le diagnostic, il n'entre nulle part ailleurs. */
         noter(b, !titre ? 'offre sans titre utilisable'
           : (px == null || !(px > 0)) ? 'offre sans prix lisible'
-          : 'titre jugé non plausible : ' + String(titre).slice(0, 60));
+          : 'titre jugé non plausible (prix perdu : ' + px + ' €) : '
+            + String(titre).slice(0, 60));
       }
       return;
     }
