@@ -8474,3 +8474,30 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
   display: flex; align-items: center; gap: .8rem; flex-wrap: wrap;
 }
 .compta-actions--danger .admin-hint { margin: 0; flex: 1 1 16rem; }
+
+/* ══ AJOUT DE PRODUITS — page d'administration ═══════════════════════════════
+   ⛔ Aucune valeur en dur : tout passe par les jetons de la charte, sinon cet
+   écran resterait en arrière le jour où elle bouge (règle front.md). */
+.ap-form { display: flex; flex-direction: column; gap: 1.25rem; }
+.ap-grille {
+  display: grid; gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+}
+.ap-form label, .ap-large { display: flex; flex-direction: column; gap: .35rem; font-weight: 600; }
+.ap-form label em { font-weight: 400; color: var(--muted); }
+.ap-form textarea { resize: vertical; font: inherit; }
+.ap-bloc {
+  border: 1px solid var(--border, rgba(255, 255, 255, .14));
+  border-radius: .6rem; padding: 1rem; display: flex;
+  flex-direction: column; gap: .75rem;
+}
+.ap-bloc legend { font-weight: 700; padding: 0 .4rem; }
+/* La ligne caractéristique reste lisible en 390 px : elle passe en colonne. */
+.ap-spec { display: grid; grid-template-columns: 1fr 1fr auto; gap: .5rem; align-items: center; }
+@media (max-width: 30rem) { .ap-spec { grid-template-columns: 1fr; } }
+.ap-apercu { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; color: var(--muted); }
+.ap-apercu img { max-width: 8rem; max-height: 8rem; border-radius: .4rem; }
+.ap-apercu--refus { color: var(--danger, #ff6b6b); }
+.ap-prix { font-size: 1.15rem; font-weight: 700; margin: 0; }
+.ap-msg--ok { color: var(--success, #4ade80); font-weight: 600; }
+.ap-msg--refus { color: var(--danger, #ff6b6b); font-weight: 600; }

@@ -1291,6 +1291,148 @@ module.exports = async function handler(req, res) {
     }
   }
 
+  // ── POST ?type=product-price-preview : CE QUE DONNERAIT LE CALCULATEUR ──
+  // L'user saisit un coût fournisseur et doit VOIR le prix de vente avant de
+  // créer la fiche. Il n'existe aucun calculateur côté navigateur, et il ne
+  // doit pas en exister : deux implémentations divergeraient au premier
+  // correctif, et c'est le prix affiché qui mentirait. La simulation passe
+  // donc par le MÊME `recommend()` que la création — elle n'écrit rien.
+  if (req.method === 'POST' && ((req.query && req.query.type) === 'product-price-preview')) {
+    try {
+      const b = req.body || {};
+      const coutTTC = Number(b.srcTTC);
+      if (!(coutTTC > 0)) return res.status(400).json({ ok: false, error: 'prix fournisseur requis' });
+      const poids = Number(b.weight_kg);
+      const reco = priceModel.recommend(
+        { category: String(b.category || ''), weight_kg: poids > 0 ? poids : 2, vat: 0.2 },
+        { costTTC: coutTTC, mode: 'colissimo' });
+      if (!reco || !(reco.priceHtFor && reco.priceHtFor.price > 0)) {
+        return res.status(422).json({ ok: false, error: 'le calculateur n\'a pas pu établir de prix' });
+      }
+      return res.status(200).json({ ok: true, price: reco.priceHtFor.price,
+        price_ht: reco.priceHt, poidsSuppose: !(poids > 0) });
+    } catch (err) {
+      console.error('[api/admin] product-price-preview failed:', err.message);
+      return res.status(500).json({ ok: false, error: 'calcul impossible' });
+    }
+  }
+
+  // ── POST ?type=product-create : AJOUTER UN PRODUIT À LA MAIN ────────────
+  // Demande de l'user, 07/08/2026 : « je vais pouvoir ajouter des produits
+  // moi-même un par un … je rentrerai UNIQUEMENT le prix du fournisseur et le
+  // calcul du véritable prix se fera automatiquement ».
+  //
+  // ⛔⛔ ARGENT — LE PRIX N'EST JAMAIS CELUI QU'ON REÇOIT. Le client n'envoie
+  // qu'un COÛT D'ACHAT ; le prix de vente est calculé ICI, sur le serveur, par
+  // `pricing-model.recommend()` — le même calculateur que l'importeur et que
+  // le traqueur. Un `price` venu du formulaire est ignoré, purement et
+  // simplement : c'est la règle « le serveur est autoritaire sur le montant ».
+  //
+  // ⛔ PORTE J4 LUE (`node scripts/juridique.js J4`) : « le prix annoncé doit
+  // être exact et complet ». Si le calculateur ne peut pas établir de prix, on
+  // REFUSE la création au lieu de publier une fiche sans prix.
+  //
+  // ⛔ PORTE J5 LUE : aucun taux n'est écrit ici. `recommend()` reçoit la
+  // fiche et applique les taux du modèle ; la TVA et l'octroi de mer d'une
+  // COMMANDE restent dérivés du code postal de livraison, jamais d'ici.
+  //
+  // ⛔ PORTE J3 LUE : ce point d'entrée ne touche à aucune donnée personnelle.
+  // Rien de ce qui est écrit ici ne concerne une personne — que des produits.
+  //
+  // ⛔ LE COÛT D'ACHAT NE RESSORT JAMAIS. Il est écrit sous `srcTTC` dans le
+  // document Firestore — jamais dans `products.json` (CDN + historique git,
+  // fuite irréversible, gardée par `check-prix-fuite`) — et `toPublic()` le
+  // retire de tout ce qui part vers un navigateur.
+  //
+  // ⚠️ L'IMAGE EST STOCKÉE TELLE QUELLE, SANS RECOMPRESSION : l'user a demandé
+  // « télécharger le PNG sans perdre sa qualité ». C'est l'inverse du chemin
+  // des photos d'artisans, qui réencode en WebP/JPEG dégressif. Le seul
+  // plafond est donc PHYSIQUE : un document Firestore tient 1 Mio, et une
+  // dataURL pèse ~4/3 de l'octet. 700 000 signes (~512 Ko de PNG) laissent la
+  // marge nécessaire au reste de la fiche, et restent sous le plafond D-002
+  // de 871 Ko par image servie.
+  if (req.method === 'POST' && ((req.query && req.query.type) === 'product-create')) {
+    try {
+      const b = req.body || {};
+      const IMG_MAX = 700000;
+      const sku = String(b.sku || '').trim().toUpperCase().replace(/[^A-Z0-9./-]/g, '').slice(0, 40);
+      const title = String(b.title || '').trim().slice(0, 160);
+      const brand = String(b.brand || '').trim().slice(0, 40);
+      const category = String(b.category || '').trim().slice(0, 60);
+      const coutTTC = Number(b.srcTTC);
+      if (!sku) return res.status(400).json({ ok: false, error: 'référence requise' });
+      if (!title) return res.status(400).json({ ok: false, error: 'titre requis' });
+      if (!brand) return res.status(400).json({ ok: false, error: 'marque requise' });
+      if (!category) return res.status(400).json({ ok: false, error: 'famille requise' });
+      if (!(coutTTC > 0)) return res.status(400).json({ ok: false, error: 'prix fournisseur requis, TTC et strictement positif' });
+
+      /* ⛔ JAMAIS DEUX FOIS LA MÊME RÉFÉRENCE. Le catalogue complet est relu —
+         fichier ET fiches déjà créées à la main — parce qu'un doublon de SKU
+         casse l'appariement du traqueur et fabrique deux prix pour un produit. */
+      const dejaLa = (await catalog.loadCatalog())
+        .some((p) => String(p.sku || '').toUpperCase() === sku);
+      if (dejaLa) return res.status(409).json({ ok: false, error: 'la référence ' + sku + ' est déjà au catalogue' });
+
+      const poids = Number(b.weight_kg);
+      const poidsConnu = poids > 0;
+      const specs = {};
+      if (b.specs && typeof b.specs === 'object' && !Array.isArray(b.specs)) {
+        Object.keys(b.specs).slice(0, 30).forEach((k) => {
+          const cle = String(k).trim().slice(0, 40);
+          const val = String(b.specs[k] == null ? '' : b.specs[k]).trim().slice(0, 120);
+          if (cle && val) specs[cle] = val;
+        });
+      }
+      const img = String(b.img || '');
+      const imgOk = /^data:image\/(png|jpeg|webp);base64,/.test(img) && img.length <= IMG_MAX;
+      if (img && !imgOk) {
+        return res.status(400).json({ ok: false,
+          error: 'image refusée : PNG, JPEG ou WebP, et 700 000 signes maximum une fois encodée' });
+      }
+
+      const id = (brand + '-' + sku).toLowerCase().normalize('NFD')
+        .replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '').slice(0, 60);
+
+      /* La fiche telle que le calculateur doit la voir : le port dépend du
+         POIDS, et le poids fait le prix. Absent, `shipFor` retombe sur 2 kg —
+         on le marque, exactement comme l'importeur, pour savoir quelles fiches
+         auront un prix à revoir quand le poids réel sera connu. */
+      const fiche = {
+        id, sku, title, name: title, brand, category,
+        slug: id,
+        desc: String(b.desc || '').trim().slice(0, 2000),
+        specs,
+        img: imgOk ? img : 'images/placeholder.svg',
+        currency: 'EUR',
+        vat: 0.2,
+        stock_status: 'in_stock',
+        stock_label: 'En stock',
+        weight_kg: poidsConnu ? poids : 2,
+        poidsSuppose: !poidsConnu,
+        creeALaMain: true
+      };
+      const reco = priceModel.recommend(fiche, { costTTC: coutTTC, mode: 'colissimo' });
+      if (!reco || !(reco.priceHtFor && reco.priceHtFor.price > 0)) {
+        return res.status(422).json({ ok: false,
+          error: 'le calculateur n\'a pas pu établir de prix pour ce coût — fiche NON créée' });
+      }
+      fiche.price = reco.priceHtFor.price;
+      fiche.price_ht = reco.priceHt;
+      fiche.srcTTC = coutTTC;                 // ⛔ reste dans Firestore, jamais servi
+      fiche.createdAt = admin.firestore.FieldValue.serverTimestamp();
+      fiche.updatedAt = admin.firestore.FieldValue.serverTimestamp();
+
+      await db.collection('product_overrides').doc(id).set(fiche, { merge: false });
+      catalog.invalidateOverrides();
+      return res.status(200).json({ ok: true, id, sku,
+        price: fiche.price, price_ht: fiche.price_ht, poidsSuppose: fiche.poidsSuppose });
+    } catch (err) {
+      console.error('[api/admin] product-create failed:', err.message);
+      return res.status(500).json({ ok: false, error: 'création du produit échouée' });
+    }
+  }
+
   // ── POST ?type=invite-code-save : créer un code d'invitation ──
   // Code fourni (normalisé A-Z 0-9 tiret, 4-24) ou GÉNÉRÉ (PT-XXXXXX).
   // create() échoue si le code existe déjà → pas d'écrasement silencieux.

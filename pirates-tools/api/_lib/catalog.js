@@ -113,9 +113,39 @@ async function loadOverrides() {
   return (await loadOverridesEtat()).overrides;
 }
 
+/* ⛔⛔ LES FICHES CRÉÉES À LA MAIN VIVENT DANS LES OVERRIDES, PAS DANS LE
+   FICHIER. Demande de l'user, 07/08/2026 : une page d'administration pour
+   ajouter un produit à la fois. Or `products.json` est SERVI par le CDN et le
+   disque est en lecture seule en production : on ne peut pas y écrire. La
+   seule voie est Firestore — donc l'override.
+   ⚠️ Mais `applyOverrides` ne savait que faire un `.map()` : il pouvait
+   MODIFIER une fiche existante, jamais en créer une. Une fiche neuve écrite
+   dans `product_overrides` serait restée invisible pour toujours.
+   ⛔ CE QUI GARDE LA PORTE FERMÉE : seul un document portant `creeALaMain`
+   devient une fiche. Un override ordinaire sans produit correspondant reste ce
+   qu'il a toujours été — un patch orphelin, ignoré. Sans ce drapeau, n'importe
+   quel document égaré du traqueur apparaîtrait au catalogue.
+   ⛔ PORTE J4 LUE (`node scripts/juridique.js J4`) : « le prix annoncé doit
+   être exact et complet ». Une fiche sans prix strictement positif n'est donc
+   pas publiée du tout — mieux vaut ne rien montrer qu'une carte portant un
+   prix inconnu. Et ce prix n'est jamais saisi à la main : il est calculé par
+   `api/_lib/pricing-model.js` depuis le coût d'achat, côté SERVEUR. */
+function fichesCreees(products, overrides) {
+  var connus = Object.create(null);
+  products.forEach(function (p) { connus[p.id] = 1; if (p.slug) connus[p.slug] = 1; });
+  var neuves = [];
+  Object.keys(overrides).forEach(function (cle) {
+    var o = overrides[cle];
+    if (!o || !o.creeALaMain || connus[cle]) return;
+    if (!o.sku || !o.title || !(Number(o.price) > 0)) return;
+    neuves.push(Object.assign({ id: cle, slug: o.slug || cle }, o));
+  });
+  return neuves;
+}
+
 function applyOverrides(products, overrides) {
   if (!overrides || Object.keys(overrides).length === 0) return products;
-  return products
+  return products.concat(fichesCreees(products, overrides))
     .map(function (p) {
       var patch = overrides[p.id] || overrides[p.slug] || null;
       if (!patch) return p;

@@ -8195,7 +8195,7 @@
   // ── Router (hash-based SPA) ────────────────────────────────
 
   var ROUTES = ['/', '/catalogue', '/produit', '/devis', '/compte', '/auth', '/abonnement',
-                '/admin', '/merci', '/contact', '/favoris', '/artisans', '/rejoindre', '/livreur', '/livraison', '/mode-livraison', '/mes-livraisons', '/livreur-profil', '/discussion',
+                '/admin', '/ajout-produit', '/merci', '/contact', '/favoris', '/artisans', '/rejoindre', '/livreur', '/livraison', '/mode-livraison', '/mes-livraisons', '/livreur-profil', '/discussion',
                 '/mentions-legales', '/confidentialite', '/cgv'];
 
   // Territory landing slugs (keys) → territory codes (values).
@@ -8389,6 +8389,9 @@
         break;
       case '/admin':
         renderAdmin();
+        break;
+      case '/ajout-produit':
+        renderAjoutProduit();
         break;
       case '/contact':
         setupContactForm();
@@ -14411,6 +14414,197 @@
     return true;
   }
 
+  /* ══ AJOUT DE PRODUITS — SA PROPRE PAGE ═══════════════════════════════════
+     Demande de l'user, 07/08/2026 : « une section qui a sa propre page, et on
+     va la nommer Ajout de produits … je vais pouvoir ajouter des produits
+     moi-même un par un ».
+
+     ⛔⛔ ARGENT — IL NE SAISIT QUE LE PRIX FOURNISSEUR. « le calcul du
+     véritable prix se fera automatiquement à l'aide des outils qui sont déjà
+     intégrés dans le site ». Il n'y a donc AUCUN champ de prix de vente sur
+     cet écran, et il ne faut jamais en ajouter un : le prix est calculé par le
+     serveur (`pricing-model.recommend`), le même calculateur que l'importeur
+     et que le traqueur. L'aperçu affiché ici vient lui aussi du serveur — un
+     second calculateur écrit en JavaScript de navigateur divergerait au
+     premier correctif, et c'est le prix montré au client qui mentirait.
+
+     ⚠️ L'IMAGE N'EST PAS RECOMPRESSÉE. « je veux pouvoir télécharger le PNG
+     sans perdre sa qualité » : le fichier part tel quel, en base64. C'est
+     l'inverse du chemin des photos d'artisans, qui réencode en WebP dégressif.
+     Le plafond est physique (document Firestore : 1 Mio) et il est dit à
+     l'écran, en clair, plutôt que de dégrader l'image en silence. */
+  var _ajoutImage = '';
+  var _ajoutImageNom = '';
+
+  function ajoutProduitMsg(texte, type) {
+    var z = document.getElementById('apMsg');
+    if (!z) return;
+    z.textContent = texte || '';
+    z.className = 'admin-hint' + (type ? ' ap-msg--' + type : '');
+  }
+
+  function ajoutProduitSpecs() {
+    var specs = {};
+    var lignes = document.querySelectorAll('#apSpecs .ap-spec');
+    Array.prototype.forEach.call(lignes, function (l) {
+      var c = l.querySelector('.ap-spec-cle');
+      var v = l.querySelector('.ap-spec-val');
+      if (c && v && c.value.trim() && v.value.trim()) specs[c.value.trim()] = v.value.trim();
+    });
+    return specs;
+  }
+
+  function ajoutProduitLigneSpec() {
+    var d = document.createElement('div');
+    d.className = 'ap-spec';
+    d.innerHTML = '<input type="text" class="ap-spec-cle search" aria-label="Nom de la caractéristique" placeholder="Puissance">'
+      + '<input type="text" class="ap-spec-val search" aria-label="Valeur de la caractéristique" placeholder="18 V">'
+      + '<button type="button" class="btn btn--ghost ap-spec-rm" aria-label="Retirer cette caractéristique">✕</button>';
+    d.querySelector('.ap-spec-rm').onclick = function () { d.remove(); };
+    return d;
+  }
+
+  function ajoutProduitCorps() {
+    return {
+      sku: (document.getElementById('apSku') || {}).value || '',
+      title: (document.getElementById('apTitre') || {}).value || '',
+      brand: (document.getElementById('apMarque') || {}).value || '',
+      category: (document.getElementById('apFamille') || {}).value || '',
+      desc: (document.getElementById('apDesc') || {}).value || '',
+      srcTTC: Number((document.getElementById('apCout') || {}).value || 0),
+      weight_kg: Number((document.getElementById('apPoids') || {}).value || 0),
+      specs: ajoutProduitSpecs(),
+      img: _ajoutImage
+    };
+  }
+
+  function renderAjoutProduit() {
+    var view = document.getElementById('ajoutProduitView');
+    if (!view) return;
+    /* ⛔ MÊME PORTE QUE L'ADMINISTRATION. Une page à part ne veut pas dire une
+       page ouverte : `porteAdmin` rend la main dès qu'elle a affiché son écran
+       de refus, et rien de ce qui suit ne s'exécute. */
+    if (porteAdmin(view)) return;
+
+    var familles = (typeof ORDRE_CATEGORIES !== 'undefined' && ORDRE_CATEGORIES.length)
+      ? ORDRE_CATEGORIES : [];
+    view.innerHTML = '<div class="admin-wrap">'
+      + '<header class="admin-header">'
+      + '<h1>Ajout de produits</h1>'
+      + '<a class="btn btn--ghost" href="#/admin">Retour à l\'administration</a>'
+      + '</header>'
+      + '<p class="admin-hint">Tu ne saisis que le <strong>prix fournisseur TTC</strong>. '
+      + 'Le prix de vente est calculé par le calculateur du site — celui qui sert déjà '
+      + 'à l\'import et au traqueur — jamais à la main.</p>'
+      + '<form id="apForm" class="ap-form" novalidate>'
+      + '<div class="ap-grille">'
+      + '<label>Référence<input type="text" id="apSku" class="search" required autocomplete="off" placeholder="DCD800NT"></label>'
+      + '<label>Marque<input type="text" id="apMarque" class="search" required autocomplete="off" placeholder="DeWALT"></label>'
+      + '<label>Famille<select id="apFamille" class="search" required>'
+      + '<option value="">— choisir —</option>'
+      + familles.map(function (c) {
+        return '<option value="' + escapeHTML(c) + '">' + escapeHTML(c) + '</option>';
+      }).join('')
+      + '</select></label>'
+      + '<label>Poids en kg <em>(facultatif)</em><input type="number" id="apPoids" class="search" min="0" step="0.01" placeholder="2"></label>'
+      + '</div>'
+      + '<label class="ap-large">Titre du produit<input type="text" id="apTitre" class="search" required autocomplete="off" placeholder="Perceuse visseuse à percussion XR 18V"></label>'
+      + '<label class="ap-large">Description<textarea id="apDesc" class="search" rows="5" placeholder="Ce que fait la machine, ce qui est livré avec."></textarea></label>'
+
+      + '<fieldset class="ap-bloc"><legend>Caractéristiques techniques</legend>'
+      + '<div id="apSpecs"></div>'
+      + '<button type="button" class="btn btn--ghost" id="apSpecAdd">+ Ajouter une caractéristique</button>'
+      + '</fieldset>'
+
+      + '<fieldset class="ap-bloc"><legend>Photo du produit</legend>'
+      + '<p class="admin-hint">Le fichier est envoyé <strong>tel quel</strong>, sans recompression : '
+      + 'un PNG garde sa qualité. Plafond technique : 512 Ko environ — au-delà, la fiche ne tiendrait '
+      + 'pas dans un document de la base.</p>'
+      + '<input type="file" id="apImage" accept="image/png,image/jpeg,image/webp" aria-label="Photo du produit">'
+      + '<div id="apImageApercu" class="ap-apercu"></div>'
+      + '</fieldset>'
+
+      + '<fieldset class="ap-bloc"><legend>Prix</legend>'
+      + '<label>Prix fournisseur TTC, en euros<input type="number" id="apCout" class="search" min="0" step="0.01" required placeholder="112.40"></label>'
+      + '<button type="button" class="btn" id="apCalc">Calculer le prix de vente</button>'
+      + '<p id="apPrix" class="ap-prix" aria-live="polite"></p>'
+      + '</fieldset>'
+
+      + '<p id="apMsg" class="admin-hint" role="status" aria-live="polite"></p>'
+      + '<button type="submit" class="btn" id="apEnvoyer">Créer la fiche produit</button>'
+      + '</form></div>';
+
+    document.getElementById('apSpecs').appendChild(ajoutProduitLigneSpec());
+    document.getElementById('apSpecAdd').onclick = function () {
+      document.getElementById('apSpecs').appendChild(ajoutProduitLigneSpec());
+    };
+
+    _ajoutImage = ''; _ajoutImageNom = '';
+    document.getElementById('apImage').onchange = function (e) {
+      var f = e.target.files && e.target.files[0];
+      var box = document.getElementById('apImageApercu');
+      if (!f) { _ajoutImage = ''; box.textContent = ''; return; }
+      var fr = new FileReader();
+      fr.onload = function () {
+        var d = String(fr.result || '');
+        /* Le plafond est vérifié ICI aussi, pour ne pas laisser l'user remplir
+           tout le formulaire et se faire refuser à l'envoi. Le serveur le
+           revérifie : c'est lui qui décide, celui-ci ne fait qu'épargner. */
+        if (d.length > 700000) {
+          _ajoutImage = '';
+          box.textContent = 'Image trop lourde (' + Math.round(d.length / 1400) + ' Ko environ). '
+            + 'Réduis sa taille avant de la déposer — elle ne sera pas dégradée automatiquement.';
+          box.className = 'ap-apercu ap-apercu--refus';
+          return;
+        }
+        _ajoutImage = d; _ajoutImageNom = f.name;
+        box.className = 'ap-apercu';
+        box.innerHTML = '<img src="' + safeImgSrc(d) + '" alt="Aperçu de la photo du produit">'
+          + '<span>' + escapeHTML(f.name) + ' — ' + Math.round(d.length / 1400) + ' Ko</span>';
+      };
+      fr.onerror = function () { _ajoutImage = ''; box.textContent = 'Fichier illisible.'; };
+      fr.readAsDataURL(f);
+    };
+
+    document.getElementById('apCalc').onclick = function () {
+      var c = ajoutProduitCorps();
+      var z = document.getElementById('apPrix');
+      if (!(c.srcTTC > 0)) { z.textContent = 'Saisis d\'abord le prix fournisseur.'; return; }
+      z.textContent = 'Calcul…';
+      adminPostType('product-price-preview', { srcTTC: c.srcTTC, weight_kg: c.weight_kg, category: c.category })
+        .then(function (r) {
+          z.textContent = 'Prix de vente calculé : ' + r.price.toFixed(2).replace('.', ',') + ' € TTC'
+            + (r.poidsSuppose ? '  (poids supposé à 2 kg — le port, donc le prix, changera si tu le renseignes)' : '');
+        })
+        .catch(function (e) { z.textContent = 'Calcul impossible : ' + ((e && e.message) || 'erreur'); });
+    };
+
+    document.getElementById('apForm').onsubmit = function (ev) {
+      ev.preventDefault();
+      var btn = document.getElementById('apEnvoyer');
+      var c = ajoutProduitCorps();
+      if (!c.sku.trim() || !c.title.trim() || !c.brand.trim() || !c.category || !(c.srcTTC > 0)) {
+        ajoutProduitMsg('Référence, marque, famille, titre et prix fournisseur sont obligatoires.', 'refus');
+        return;
+      }
+      btn.disabled = true;
+      ajoutProduitMsg('Création…');
+      adminPostType('product-create', c)
+        .then(function (r) {
+          ajoutProduitMsg('✅ Fiche ' + r.sku + ' créée — prix de vente '
+            + Number(r.price).toFixed(2).replace('.', ',') + ' € TTC.'
+            + (r.poidsSuppose ? ' Poids supposé à 2 kg : renseigne-le pour un prix juste.' : ''), 'ok');
+          document.getElementById('apForm').reset();
+          document.getElementById('apImageApercu').textContent = '';
+          _ajoutImage = '';
+        })
+        .catch(function (e) {
+          ajoutProduitMsg('⛔ ' + ((e && e.message) || 'création impossible'), 'refus');
+        })
+        .then(function () { btn.disabled = false; });
+    };
+  }
+
   function renderAdmin() {
     var view = document.getElementById('adminView');
     if (!view) return;
@@ -14426,6 +14620,7 @@
     view.innerHTML = '<div class="admin-wrap">'
       + '<header class="admin-header">'
       + '<h1>Administration — Pirates Tools</h1>'
+      + '<a class="btn" href="#/ajout-produit">+ Ajout de produits</a>'
       + '<button type="button" class="btn btn--ghost" id="adminLogoutBtn">Déconnexion</button>'
       + '</header>'
 
@@ -16104,6 +16299,10 @@
         break;
       case '/admin':
         setDocMeta('Administration — ' + BASE_TITLE, '');
+        removeJsonLd('product');
+        break;
+      case '/ajout-produit':
+        setDocMeta('Ajout de produits — ' + BASE_TITLE, '');
         removeJsonLd('product');
         break;
       case '/mentions-legales':

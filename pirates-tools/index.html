@@ -1514,6 +1514,19 @@
       <div id="adminView"></div>
     </section>
 
+    <!-- ⛔ SA PROPRE PAGE, ET C'EST LA DEMANDE : « une section qui a sa propre
+         page, et on va la nommer Ajout de produits ». Ce n'est donc pas un
+         onglet de plus dans l'administration : c'est une route à part entière,
+         gardée par la MÊME porte admin.
+         ⚠️ Porte J1 lue (`node scripts/juridique.js J1`) : elle vise
+         l'information légale due aux VISITEURS — identité de l'éditeur, CGV,
+         médiateur. Cet écran n'est pas destiné au public et n'affiche aucune
+         mention légale ; il n'en retire ni n'en déplace aucune. -->
+    <section id="view-ajout-produit" class="view hidden" data-route="/ajout-produit" role="region" aria-labelledby="ajout-produit-h1">
+      <h1 id="ajout-produit-h1" class="sr-only">Ajout de produits</h1>
+      <div id="ajoutProduitView"></div>
+    </section>
+
     <!-- TERRITOIRE DOM-TOM (Guadeloupe, Martinique, Guyane, Réunion, Mayotte) -->
     <section id="view-territoire" class="view hidden" data-route="/territoire" role="region" aria-labelledby="terrView-h1">
       <div class="container terr-view">
