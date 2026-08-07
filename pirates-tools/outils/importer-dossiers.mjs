@@ -91,20 +91,21 @@ function estCaracteristique(ligne) {
 
 async function lireDossier(chemin) {
   const noms = await readdir(chemin);
-  const res = { image: null, imageOctets: 0, lignes: [], fichiersTexte: [] };
+  const res = { image: null, imageOctets: 0, images: [], lignes: [], fichiersTexte: [] };
   for (const n of noms) {
     const ext = extname(n).toLowerCase();
     const complet = join(chemin, n);
     const st = await stat(complet);
     if (!st.isFile()) continue;
     if (IMAGES.includes(ext)) {
-      /* La plus grosse image du dossier gagne : c'est la photo produit, les
-         autres sont des vignettes ou des logos. */
-      if (st.size > res.imageOctets) {
-        const buf = await readFile(complet);
-        const url = 'data:' + MIME[ext] + ';base64,' + buf.toString('base64');
-        res.image = url; res.imageOctets = st.size; res.imageNom = n;
-      }
+      /* ⛔⛔ ON NE CHOISIT PLUS LA PHOTO AU POIDS. Défaut mesuré le
+         08/08/2026, sur un dossier ne contenant QUE des images — le cas de
+         l'user : « il n'y a que des images ». La règle « la plus lourde
+         gagne » a retenu `fiche-technique.png`, une CAPTURE DE TEXTE, et
+         l'aurait posée comme photo du produit sur la carte de vente.
+         Une image ne dit pas ce qu'elle montre. Quand plusieurs se
+         présentent, on ne devine pas : on les relève toutes et on le dit. */
+      res.images.push({ nom: n, octets: st.size, ext: ext, chemin: complet });
     } else if (TEXTES.includes(ext)) {
       const txt = await readFile(complet, 'utf8');
       res.fichiersTexte.push(n);
@@ -124,7 +125,7 @@ const dossiers = (await readdir(racine, { withFileTypes: true }))
   .filter((d) => d.isDirectory() && d.name !== '__MACOSX')
   .map((d) => d.name);
 
-const faits = [], refus = [];
+const faits = [], refus = [], aRelire = [];
 for (const nom of dossiers) {
   const sku = referenceDuNom(nom);
   if (!sku) { refus.push([nom, 'aucune référence lisible dans le nom du dossier']); continue; }
@@ -134,6 +135,34 @@ for (const nom of dossiers) {
     refus.push([nom, 'fiche ' + fiche.brand + ' — hors marque déclarée']); continue;
   }
   const d = await lireDossier(join(racine, nom));
+  /* Une seule image : aucune ambiguïté, c'est la photo. Plusieurs : le nom
+     doit trancher, sinon on refuse et on liste ce qu'on a vu. */
+  if (d.images.length === 1) d.retenue = d.images[0];
+  else if (d.images.length > 1) {
+    const claires = d.images.filter((i) => /produit|photo|visuel|packshot/i.test(i.nom));
+    const captures = d.images.filter((i) => /techni|caract|spec|descri|fiche/i.test(i.nom));
+    if (claires.length === 1) d.retenue = claires[0];
+    else if (captures.length === d.images.length - 1) {
+      d.retenue = d.images.find((i) => captures.indexOf(i) === -1);
+    }
+  }
+  if (d.images.length > 1 && !d.retenue) {
+    refus.push([nom, d.images.length + ' images et aucun nom qui dise laquelle est le '
+      + 'PRODUIT : ' + d.images.map((i) => i.nom).join(', ')
+      + '. Nomme-la « produit » ou « photo », ou laisse-la seule dans le dossier']);
+    continue;
+  }
+  if (d.retenue) {
+    const buf = await readFile(d.retenue.chemin);
+    d.image = 'data:' + MIME[d.retenue.ext] + ';base64,' + buf.toString('base64');
+    d.imageNom = d.retenue.nom;
+  }
+  /* Les captures de fiche technique sont RELEVÉES, pas lues : un outil ne
+     sait pas lire une image. Elles sont listées pour être ouvertes à la main. */
+  const aLire = d.images.filter((i) => i !== d.retenue).map((i) => i.nom);
+  if (aLire.length && !d.lignes.length) {
+    aRelire.push([sku, nom, aLire.join(', ')]);
+  }
   if (d.image && d.image.length > IMG_MAX) {
     refus.push([nom, 'image de ' + Math.round(d.image.length * 0.75 / 1000)
       + ' Ko : au-delà des 525 Ko qu\'un document peut porter. Réduis-la, '
@@ -178,6 +207,11 @@ l('  fiches enrichies ............ ' + faits.length);
 l('  dossiers REFUSÉS ............ ' + refus.length);
 l('');
 faits.slice(0, 15).forEach((f) => l('   · ' + String(f[0]).padEnd(16) + f[1]));
+if (aRelire.length) {
+  l('');
+  l('  📷 CAPTURES À LIRE À LA MAIN — un outil ne lit pas une image :');
+  aRelire.slice(0, 20).forEach((r) => l('     ' + String(r[0]).padEnd(16) + r[2]));
+}
 if (refus.length) {
   l('');
   l('  ⛔ REFUSÉS — rien n\'a été écrit pour ceux-là :');
