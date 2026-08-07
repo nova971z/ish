@@ -171,3 +171,46 @@ Chacune de ces lignes figurait encore comme « à faire » dans `CLAUDE.md`.
 | Purge des `!important` (71) | chaque retrait change la cascade → test visuel requis, gain nul |
 | Découpe des fonctions XXL | 17 fonctions, dette **gelée** et surveillée par `p7-architecture` |
 | Dédoublonnage CSS après la fusion des blocs inline | sans urgence, aucun effet visible |
+
+## Feuille de route « traqueur ↔ parseur ↔ catalogue » — ouverte le 07/08/2026
+
+*Demande de l'user : « tu continues méthodiquement et tu te crées une feuille
+de route et tu mets à jour absolument tout ce qu'il faut mettre à jour pour ne
+pas te perdre ».*
+
+⛔ **POURQUOI DES ANNONCES DISPARAISSENT ALORS QU'ON LES TROUVE À LA MAIN.**
+Question de l'user, et la mesure la tranche. Le balayage n'est pas thématique :
+c'est **toute la marque DeWALT triée par prix**, paginée par pas de 15
+(`100I16-<offset>oM122663`). Il s'arrête à l'**offset 990**, et la dernière
+page rend **60 tuiles sur 60** — il reste donc des résultats après. Le plan
+est TRONQUÉ, pas cassé.
+
+Conséquence mesurée entre deux balayages du même plan :
+
+```
+node scratchpad/comparer-balayages.js arch3 arch4
+  arch3 : 1590 réfs · arch4 : 1929 réfs
+  présentes avant, ABSENTES après : 61      nouvelles : 400
+```
+
+`DCH334` est de celles-là : relevée à 1 192,75 € dans arch2 **et** arch3,
+absente d'arch4. Rien n'a bogué — elle est sortie des 990 premiers résultats.
+
+⚠️ **ET DEUX FICHES CITÉES PAR L'USER NE VIENNENT PAS DU TRAQUEUR DU TOUT.**
+`git log -S` le dit : `DWST60103-1` et `DCF6202-XJ` sont nées au commit
+`47ff5b6` — « catalogue : 129 fiches **clickoutil** ». Leur prix est calculé
+depuis un coût CLICKOUTIL (revendeur pro) pendant que l'user compare au prix
+IDEALO (grand public) : 119,32 € contre 44,00 €. Ce n'est pas un défaut
+d'appariement, c'est **deux sources qui ne mesurent pas le même marché**.
+
+| # | Chantier | État |
+|---|---|---|
+| R1 | Prolonger le plan de balayage au-delà de l'offset 990 | ✅ `archives/idealo/urls-idealo-suite.txt` — 100 URL, offsets 1005 → 2490 |
+| R2 | Page admin « Ajout de produits » | en cours |
+| R3 | 613 fiches sans descriptif | bloqué par R1 |
+| R4 | Arbitrer clickoutil ↔ idealo comme source de coût | à trancher |
+| R5 | 203 hausses de prix en attente | bloqué par R1 |
+
+⛔ **R1 est en tête parce que R3 et R5 en dépendent** : tant que le balayage ne
+descend pas au fond de la marque, un coût relevé ne peut que SURESTIMER (on ne
+voit que le haut du tri), et un titre manquant le reste faute de source.
