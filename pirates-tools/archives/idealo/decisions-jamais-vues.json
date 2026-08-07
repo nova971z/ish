@@ -1,0 +1,104 @@
+{
+  "marque": "DeWALT",
+  "_pourquoi": "Demande de l user, 08/08/2026 : « OK, supprime-les du site alors ». Ces 24 fiches ne sont nommees par AUCUNE annonce des 67 pages du balayage — le traqueur lui-meme les range dans couverture.fichesJamaisVuesDetail. Leur prix ne sera donc jamais realigne : il restera celui de leur import, indefiniment.",
+  "_ce_qu_on_garde": "Les 7 refus VOLONTAIRES restent au catalogue (DCB140, DCH334, D215852-XJ, DCB1102-QW, DCB118-QW, DCB205, DSET1) : l annonce existe, on refuse de lui prendre son prix parce qu elle vend autre chose (un pack au lieu d une machine nue, un chargeur au lieu d une batterie). Ce sont des produits vendables dont le refus protege l argent.",
+  "renommer": [],
+  "retirer": [
+    {
+      "sku": "D25323K",
+      "motif": "jamais vue par le traqueur idealo (import 7c84f2c) — prix 671,95 € fige a l import, jamais realignable"
+    },
+    {
+      "sku": "D26411-QS",
+      "motif": "jamais vue par le traqueur idealo — ATTENTION : fiche venue de CLICKOUTIL (commit 47ff5b6), son prix de 129,14 € vient d un cout clickoutil valide, pas d une absence de source"
+    },
+    {
+      "sku": "D28011",
+      "motif": "jamais vue par le traqueur idealo (import 7c84f2c) — prix 162,82 € fige a l import, jamais realignable"
+    },
+    {
+      "sku": "DCB107-QW",
+      "motif": "jamais vue par le traqueur idealo — ATTENTION : fiche venue de CLICKOUTIL (commit 47ff5b6), son prix de 82,38 € vient d un cout clickoutil valide, pas d une absence de source"
+    },
+    {
+      "sku": "DCD100M2T",
+      "motif": "jamais vue par le traqueur idealo (import 7c84f2c) — prix 296,60 € fige a l import, jamais realignable"
+    },
+    {
+      "sku": "DCD8052",
+      "motif": "jamais vue par le traqueur idealo (import 7c84f2c) — prix 397,60 € fige a l import, jamais realignable"
+    },
+    {
+      "sku": "DCE074D1R",
+      "motif": "jamais vue par le traqueur idealo (import 7c84f2c) — prix 1445,36 € fige a l import, jamais realignable"
+    },
+    {
+      "sku": "DCF6202-XJ",
+      "motif": "jamais vue par le traqueur idealo — ATTENTION : fiche venue de CLICKOUTIL (commit 47ff5b6), son prix de 192,07 € vient d un cout clickoutil valide, pas d une absence de source"
+    },
+    {
+      "sku": "DCLE14361GB-XJ",
+      "motif": "jamais vue par le traqueur idealo — ATTENTION : fiche venue de CLICKOUTIL (commit 47ff5b6), son prix de 660,86 € vient d un cout clickoutil valide, pas d une absence de source"
+    },
+    {
+      "sku": "DCMH3285",
+      "motif": "jamais vue par le traqueur idealo (import 7c84f2c) — prix 151,64 € fige a l import, jamais realignable"
+    },
+    {
+      "sku": "DCS371NT",
+      "motif": "jamais vue par le traqueur idealo (import 7c84f2c) — prix 915,16 € fige a l import, jamais realignable"
+    },
+    {
+      "sku": "DE0737",
+      "motif": "jamais vue par le traqueur idealo (import 7c84f2c) — prix 156,02 € fige a l import, jamais realignable"
+    },
+    {
+      "sku": "DT3796-QZ",
+      "motif": "jamais vue par le traqueur idealo — ATTENTION : fiche venue de CLICKOUTIL (commit 47ff5b6), son prix de 106,98 € vient d un cout clickoutil valide, pas d une absence de source"
+    },
+    {
+      "sku": "DT6837-QZ",
+      "motif": "jamais vue par le traqueur idealo (import 7c84f2c) — prix 133,64 € fige a l import, jamais realignable"
+    },
+    {
+      "sku": "DT70585T",
+      "motif": "jamais vue par le traqueur idealo (import 7c84f2c) — prix 293,34 € fige a l import, jamais realignable"
+    },
+    {
+      "sku": "DT71517T",
+      "motif": "jamais vue par le traqueur idealo (import 7c84f2c) — prix 127,66 € fige a l import, jamais realignable"
+    },
+    {
+      "sku": "DT9572-QZ",
+      "motif": "jamais vue par le traqueur idealo (import 7c84f2c) — prix 127,84 € fige a l import, jamais realignable"
+    },
+    {
+      "sku": "DT9607-QZ",
+      "motif": "jamais vue par le traqueur idealo (import 7c84f2c) — prix 230,09 € fige a l import, jamais realignable"
+    },
+    {
+      "sku": "DT99576",
+      "motif": "jamais vue par le traqueur idealo (import 7c84f2c) — prix 124,33 € fige a l import, jamais realignable"
+    },
+    {
+      "sku": "DW055PL-XJ",
+      "motif": "jamais vue par le traqueur idealo — ATTENTION : fiche venue de CLICKOUTIL (commit 47ff5b6), son prix de 106,98 € vient d un cout clickoutil valide, pas d une absence de source"
+    },
+    {
+      "sku": "DWHT71843",
+      "motif": "jamais vue par le traqueur idealo (import 7c84f2c) — prix 236,33 € fige a l import, jamais realignable"
+    },
+    {
+      "sku": "DWST60103-1",
+      "motif": "jamais vue par le traqueur idealo — ATTENTION : fiche venue de CLICKOUTIL (commit 47ff5b6), son prix de 119,32 € vient d un cout clickoutil valide, pas d une absence de source"
+    },
+    {
+      "sku": "DXCMS15RE",
+      "motif": "jamais vue par le traqueur idealo (import 7c84f2c) — prix 341,15 € fige a l import, jamais realignable"
+    },
+    {
+      "sku": "DXMH3288",
+      "motif": "jamais vue par le traqueur idealo (import 7c84f2c) — prix 155,74 € fige a l import, jamais realignable"
+    }
+  ]
+}
