@@ -78,6 +78,9 @@ var reqCatPub   = safeRequire('./check-catalog-public','check-catalog-public');
 var reqAssetVer = safeRequire('./check-asset-versions','check-asset-versions');
 var reqWhClaim  = safeRequire('./check-webhook-claim','check-webhook-claim');
 var reqPwMin    = safeRequire('./check-price-watch','check-price-watch');
+// Le depart entre la PHOTO du produit et la CAPTURE de fiche technique. Se
+// tromper pose une capture de texte comme visuel de vente sur la carte.
+var reqImpDos   = safeRequire('./check-importer-dossiers','check-importer-dossiers');
 var reqCsp      = safeRequire('./check-csp',         'check-csp');
 var reqAnalytics= safeRequire('./check-analytics',   'check-analytics');
 var reqFns      = safeRequire('./check-functions',   'check-functions');
@@ -215,6 +218,7 @@ var reqReconc   = safeRequire('./check-reconciliation', 'check-reconciliation');
   await runOne(reqAssetVer, 'check-asset-versions');
   await runOne(reqWhClaim,  'check-webhook-claim');
   await runOne(reqPwMin,    'check-price-watch');
+  await runOne(reqImpDos,   'check-importer-dossiers');
   await runOne(reqCsp,      'check-csp');
   await runOne(reqAnalytics,'check-analytics');
   await runOne(reqFns,      'check-functions');
