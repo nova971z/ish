@@ -455,6 +455,25 @@ function corps(ok) {
     '⛔ « bars/500L/H » est une COTE, morceau par morceau ('
     + priceParse.lireReferenceDuTitre('Nettoyeur ZZBRAND ZZPW 001CE KART de 160 bars/500L/H max', 'ZZBRAND').ref + ')');
 
+  /* ⑨quater ⛔ UNE RÉFÉRENCE PEUT N'AVOIR AUCUN CHIFFRE. Cas apporté par
+     l'user en capture le 08/08/2026 : « Aspirateur Eau & Poussières Dxvp-qt »
+     — la référence constructeur ne porte pas un seul chiffre, et la garde
+     « il faut des chiffres » la jetait. La nomenclature tranche : la tête doit
+     être un préfixe connu du fabricant, et il faut un TIRET. */
+  ok(priceParse.lireReferenceDuTitre('Aspirateur Eau & Poussières Dxpw-qt - 960w, 34l, Silencieux', 'ZZBRAND').ref === 'DXPW-QT',
+    '⛔ « Dxpw-qt » n\'a aucun chiffre et reste une référence constructeur ('
+    + priceParse.lireReferenceDuTitre('Aspirateur Eau & Poussières Dxpw-qt - 960w, 34l, Silencieux', 'ZZBRAND').ref + ')');
+  ok(priceParse.lireReferenceDuTitre('ZZBRAND Disque SDS-MAX pour beton', 'ZZBRAND').ref === null,
+    '⛔⛔ …mais « SDS-MAX » a un tiret et AUCUN chiffre : sa tête n\'est pas un '
+    + 'préfixe du fabricant, elle ne devient donc pas une référence ('
+    + priceParse.lireReferenceDuTitre('ZZBRAND Disque SDS-MAX pour beton', 'ZZBRAND').ref + ')');
+  /* ⚠️ ET LE PRÉFIXE SEUL N'EN EST JAMAIS UNE. Sans cette borne, 37 références
+     du balayage se sont retrouvées tronquées à leur famille — mesuré. */
+  ok(priceParse.lireReferenceDuTitre('DeWalt DXPW 002CE Nettoyeur Haute Pression', 'ZZBRAND').ref === 'DXPW002CE',
+    '⛔⛔ « DXPW » seul ne doit pas devenir un candidat : il empêcherait le '
+    + 'recollage et la référence serait perdue au profit de la famille ('
+    + priceParse.lireReferenceDuTitre('DeWalt DXPW 002CE Nettoyeur Haute Pression', 'ZZBRAND').ref + ')');
+
   /* ⑩ Une NORME ou un indice de protection reste une caractéristique. */
   ok(priceParse.lireReferenceDuTitre('ZZBRAND Écouteurs Bluetooth 37h IP56 Jaune (ZZMA1902092)', 'ZZBRAND').ref === 'ZZMA1902092',
     '⛔ « IP56 » est un indice de protection. Le compter pour une référence '
@@ -567,11 +586,11 @@ function corps(ok) {
     '⛔ …et les guillemets internes sont DOUBLÉS, sinon Numbers coupe la cellule');
 }
 
-/* ⛔ Mesuré, pas estimé : `assertions rendues : 90` (corps instrumenté le
+/* ⛔ Mesuré, pas estimé : `assertions rendues : 93` (corps instrumenté le
    05/08/2026, après les seize cas de lecture de titre). Un seuil écrit de tête
    laisse une marge où une amputation passe inaperçue — il se remesure à chaque
    assertion neuve, avec la commande, jamais de mémoire. */
-const ASSERTIONS_ATTENDUES = 90;
+const ASSERTIONS_ATTENDUES = 93;
 
 module.exports = function () {
   const errors = [];

@@ -748,6 +748,16 @@ var PREFIXES_DEWALT = {
   // ── Extérieur thermique
   DXPW: { famille: 'machine', rayon: 'chantier',     note: 'nettoyeur haute pression' },
   DXGN: { famille: 'machine', rayon: 'chantier',     note: 'groupe électrogène' },
+  /* ⛔ DXV / DXVP — ASPIRATEURS EAU ET POUSSIÈRES. Ils manquaient à cette
+     table alors que le catalogue en porte sept (DXV15T, DXV20P, DXV20PC,
+     DXV23P-QT, DXV30SAPTA, DXV34PTA, DXVP-QT). Et DXVP-QT est la SEULE
+     référence DeWALT du catalogue qui ne porte AUCUN chiffre — mesuré : 1 sur
+     1078. C'est elle qui a rendu ce trou visible, et c'est elle qui autorise
+     le parseur à lire une référence sans chiffre : uniquement quand sa tête
+     est un préfixe constructeur connu, sinon « EAU » ou « SDS-MAX » en
+     deviendraient une. */
+  DXVP: { famille: 'machine', rayon: 'aspiration',   note: 'aspirateur eau et poussières' },
+  DXV: { famille: 'machine', rayon: 'aspiration',    note: 'aspirateur eau et poussières' },
   // ── Rangement, main, accessoires
   /* ⚠️ CES QUATRE-LÀ N'ARBITRENT PAS. Mesuré : DeWALT range sa RADIO de
      chantier sous DWST (rangement) et son TÉLÉMÈTRE LASER sous DWHT (outil à

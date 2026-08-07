@@ -462,6 +462,17 @@ var SUITE_ENUMERATION = /^[\s,;\/]*(et|and|und|y|o|ou|of)?[\s,;\/]*$/i;
    machine citée comptait pour une annonce concurrente et le kit était perdu. */
 var PREFIXES_KIT = /^(DCK|FVK)[0-9-]/;
 
+/* La tête d'un candidat : ses lettres initiales. Rend vrai quand elles
+   forment un préfixe que le fabricant emploie réellement — on essaie du plus
+   long au plus court, sinon « DCB » masquerait « DCBP ». */
+function teteConnue(c) {
+  var lettres = (String(c).match(/^[A-Z]+/) || [''])[0];
+  for (var n = lettres.length; n >= 2; n--) {
+    if (Object.prototype.hasOwnProperty.call(nomen.PREFIXES_DEWALT, lettres.slice(0, n))) return true;
+  }
+  return false;
+}
+
 function candidatsAvecPosition(titre, brand) {
   var t = String(titre || '');
   var marqueUp = String(brand || '').toUpperCase();
@@ -502,7 +513,24 @@ function candidatsAvecPosition(titre, brand) {
        suivie d'un numéro long. */
     var nbLettres = (c.match(/[A-Z]/g) || []).length;
     var nbChiffres = (c.match(/\d/g) || []).length;
-    if (!nbChiffres) continue;
+    /* ⛔⛔ UNE RÉFÉRENCE PEUT N'AVOIR AUCUN CHIFFRE. Mesuré le 08/08/2026 sur
+       une capture de l'user : « Aspirateur Eau & Poussières Dxvp-qt - 960w,
+       34l, Silencieux » — DXVP-QT est la référence constructeur, et le
+       catalogue la porte. Elle est la SEULE des 1078 fiches DeWALT à ne pas
+       contenir de chiffre, et cette garde la jetait : aucun candidat, aucune
+       lecture, l'aspirateur restait hors du traqueur.
+       ⚠️ ET ON NE LÈVE PAS LA GARDE, ON LA CONDITIONNE. Sans chiffre, « EAU »,
+       « SILENCIEUX » ou « SDS-MAX » deviendraient des références. Un candidat
+       sans chiffre n'est donc accepté que si sa TÊTE est un préfixe
+       CONSTRUCTEUR connu — la nomenclature tranche, pas la forme.
+       ⛔⛔ ET IL LUI FAUT UN TIRET. Première version, sans cette condition :
+       37 références se sont retrouvées TRONQUÉES à leur seul préfixe, mesuré
+       sur le balayage — « DeWalt DCBP 034 E3 » donnait « DCBP », « DXPW 002CE »
+       donnait « DXPW ». Le préfixe nu devenait un candidat, le recollage ne
+       partait donc plus, et la référence était perdue au profit d'une famille
+       entière. Un préfixe SEUL n'est jamais une référence ; « DXVP-QT » en est
+       une, et son tiret est ce qui les sépare. */
+    if (!nbChiffres && !(teteConnue(c) && c.indexOf('-') !== -1)) continue;
     if (nbLettres < 2 && !(nbLettres === 1 && nbChiffres >= 4)) continue;
     if (estExpressionUnite(c)) continue;                      // « 18V-54V » n'est pas une réf
     if (NOTATION_NORME.test(c)) continue;                     // « IP56 », « EN388 »
