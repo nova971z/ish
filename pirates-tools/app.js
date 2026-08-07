@@ -14518,7 +14518,7 @@
 
       + '<fieldset class="ap-bloc"><legend>Photo du produit</legend>'
       + '<p class="admin-hint">Le fichier est envoyé <strong>tel quel</strong>, sans recompression : '
-      + 'un PNG garde sa qualité. Plafond technique : 512 Ko environ — au-delà, la fiche ne tiendrait '
+      + 'un PNG garde sa qualité. Plafond technique mesuré : 525 Ko — au-delà, la fiche ne tiendrait '
       + 'pas dans un document de la base.</p>'
       + '<input type="file" id="apImage" accept="image/png,image/jpeg,image/webp" aria-label="Photo du produit">'
       + '<div id="apImageApercu" class="ap-apercu"></div>'
@@ -14552,7 +14552,7 @@
            revérifie : c'est lui qui décide, celui-ci ne fait qu'épargner. */
         if (d.length > 700000) {
           _ajoutImage = '';
-          box.textContent = 'Image trop lourde (' + Math.round(d.length / 1400) + ' Ko environ). '
+          box.textContent = 'Image trop lourde (' + Math.round(d.length * 0.75 / 1000) + ' Ko environ). '
             + 'Réduis sa taille avant de la déposer — elle ne sera pas dégradée automatiquement.';
           box.className = 'ap-apercu ap-apercu--refus';
           return;
@@ -14560,7 +14560,7 @@
         _ajoutImage = d; _ajoutImageNom = f.name;
         box.className = 'ap-apercu';
         box.innerHTML = '<img src="' + safeImgSrc(d) + '" alt="Aperçu de la photo du produit">'
-          + '<span>' + escapeHTML(f.name) + ' — ' + Math.round(d.length / 1400) + ' Ko</span>';
+          + '<span>' + escapeHTML(f.name) + ' — ' + Math.round(d.length * 0.75 / 1000) + ' Ko</span>';
       };
       fr.onerror = function () { _ajoutImage = ''; box.textContent = 'Fichier illisible.'; };
       fr.readAsDataURL(f);

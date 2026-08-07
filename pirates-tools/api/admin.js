@@ -1348,9 +1348,11 @@ module.exports = async function handler(req, res) {
   // « télécharger le PNG sans perdre sa qualité ». C'est l'inverse du chemin
   // des photos d'artisans, qui réencode en WebP/JPEG dégressif. Le seul
   // plafond est donc PHYSIQUE : un document Firestore tient 1 Mio, et une
-  // dataURL pèse ~4/3 de l'octet. 700 000 signes (~512 Ko de PNG) laissent la
-  // marge nécessaire au reste de la fiche, et restent sous le plafond D-002
-  // de 871 Ko par image servie.
+  // dataURL pèse ~4/3 de l'octet. Le plafond retenu est 700 000 signes, et ce
+  // qu'il laisse passer a été MESURÉ, pas déduit : en encodant réellement,
+  // 524 982 octets donnent 699 998 signes — trois octets de plus, et c'est
+  // refusé. Soit 525 Ko (513 Kio) de fichier, ce qui laisse la marge du reste
+  // de la fiche et reste sous le plafond D-002 de 871 Ko par image servie.
   if (req.method === 'POST' && ((req.query && req.query.type) === 'product-create')) {
     try {
       const b = req.body || {};
