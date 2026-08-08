@@ -828,3 +828,37 @@ D-64), anterieures et voulues, restent bloquantes ; etat identique mesure sur
 HEAD d'avant les correctifs (rejeu worktree).
 
 ➡️ P0 SOLDES. Prochaine etape : plan_action_seo.csv, ordre 0.
+
+---
+
+## EXECUTION — plan_action_seo.csv (08/08/2026)
+
+### Ordre 0 — decisions d'architecture (S) — FAIT (commits dac8d62 / 6f7a8e3)
+D-019 (SSR leger + indexation progressive + OnlineStore sans NAP) et D-020
+(jalon pre-lancement) ecrites dans docs/DECISIONS.md ; check-memoire vert.
+Les ordres 1+ s'y conforment (verifie a l'ordre 1 : noindex progressif et
+cloaking rejete implementes tels que decides).
+
+### Ordre 1 — chemins reels + rendu serveur + vrai 404 (L) — FAIT, commit b2e29fa
+Criteres du plan, executes en local (la production n'est pas encore deployee ;
+les memes verifications par curl seront rejouees sur pirates-tools.com au
+deploiement) :
+- fiche remplie → 200 avec HTML produit sans JavaScript : porte check-render,
+  `✅ check-render OK` (200, h1 + titre produit dans le HTML brut, canonical
+  exact sans #, s-maxage=300) ;
+- slug inconnu → HTTP 404 + meta robots noindex : porte check-render (404,
+  noindex, page lisible avec sortie) ;
+- ancien lien a diese → chemin reel : harnais tests/chemins-reels.mjs 7/7
+  (#/catalogue → /catalogue, #/produit/<slug> → /produit/<slug>, fiche rendue,
+  vue 404 dediee, routes privees au diese).
+Sabotages : 4/4 rouges (404→200 · sans-noindex · canonical a diese ·
+redirection debranchee), outil sabotage.mjs, fichiers restaures.
+Chaine complete apres modification d'app.js : noyau 145/145 (8/8), plan9
+71/71, plan11 27/27, couriers 82/82. Ecran 404 regarde (vue--route-inconnue.png).
+Decouverte payee en chemin : toutes les URL du site sont RELATIVES — servies
+depuis /produit/<slug>, elles mouraient en /produit/styles.css. Reponse :
+<base href="/"> (posee par le serveur ET par app.js) + delegation des clics
+href="#/…" vers location.hash (sans elle, chaque clic rechargerait la page).
+
+➡️ Prochaine etape : ordre 2 (rendu complet — metas par page, JSON-LD Product
+toutes images + priceValidUntil reel, ItemList coherent, h1 unique).
