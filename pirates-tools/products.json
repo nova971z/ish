@@ -27503,15 +27503,15 @@
   },
   {
     "id": "dewalt-dw088k-xj",
-    "slug": "dewalt-dw088k-xj-niveau-laser-croix-dw088k-xj",
+    "slug": "dewalt-dw088k-xj-niveau-laser-croix-2-lignes-rouge-15m-mallette",
     "sku": "DW088K-XJ",
     "name": "DW088K-XJ",
     "brand": "DeWALT",
     "category": "Accessoires",
-    "title": "DeWALT DW088K-XJ — Niveau laser croix DW088K-XJ",
+    "title": "DeWALT DW088K-XJ — Niveau laser croix 2 lignes rouge, autonivelant, portée 15 m (avec mallette)",
     "tag": "Nouveau",
-    "desc": "Niveau laser croix DW088K-XJ.",
-    "img": "images/placeholder.svg",
+    "desc": "Laser croix 2 lignes rouge, autonivelant à ±4°, précision ±0,3 mm/m, portée 15 m. Livré en mallette.",
+    "img": "images/posters/dw088k-xj.webp",
     "currency": "EUR",
     "vat": 0.2,
     "stock_status": "in_stock",
@@ -27522,16 +27522,42 @@
     "tags": [
       "cordless"
     ],
-    "features": [],
+    "features": [
+      "Deux lignes croisées, faisceau rouge, portée 15 m",
+      "Autonivelant jusqu'à ±4°, avec alerte de hors-niveau",
+      "Précision ±0,3 mm/m",
+      "Support pivotant magnétique intégré et pas de vis 1/4\" pour trépied",
+      "Blindage caoutchouc, verre épais, IP54",
+      "Portée étendue à 50 m avec la cellule de réception DE0892",
+      "Livré avec 3 piles AA, support mural magnétique et mallette de transport"
+    ],
     "specs": {
       "Marque": "DeWALT",
+      "Type": "Niveau laser croix autonivelant",
+      "Projection": "2 lignes",
+      "Couleur du faisceau": "Rouge",
+      "Classe laser": "2",
+      "Plage de travail": "15 m",
+      "Portée avec détecteur DE0892": "50 m",
+      "Précision de mesure": "± 0,3 mm/m",
+      "Plage de nivellement automatique": "± 4°",
+      "Source d'alimentation": "3 × 1,5 V LR6 (AA), fournies",
+      "Autonomie": "40 h supplémentaires avec les 3 piles AA",
+      "Filetage du trépied": "1/4\"",
+      "Indice de protection": "IP54",
+      "Poids de l'outil": "0,46 kg",
+      "Livré avec": "3 piles alcalines AA, 1 support mural magnétique, 1 mallette de transport",
       "Référence": "DW088K-XJ"
     },
     "weight_kg": 2,
     "poidsSuppose": true,
     "ficheAcompleter": false,
     "price_ht": 148.77,
-    "price": 178.52
+    "price": 178.52,
+    "images": [
+      "images/posters/dw088k-xj.webp"
+    ],
+    "description_long": "Niveau laser à deux lignes croisées, faisceau rouge, précis à ±0,3 mm/m en nivellement. Il se met à niveau tout seul jusqu'à 4° d'inclinaison et trace sa ligne en quelques secondes ; au-delà de cette plage, un indicateur signale qu'il est hors niveau — on ne trace donc jamais une ligne fausse sans le savoir. Deux boutons, un témoin de batterie faible, rien d'autre à régler. Le support pivotant magnétique intégré permet de le poser directement sur une surface métallique, et le pas de vis 1/4\" accepte un trépied. Le blindage caoutchouc et le verre épais protègent le calibrage sur un chantier ; indice de protection IP54. Il fonctionne sur 3 piles AA (fournies) et se couple à la cellule de réception DE0892 pour travailler jusqu'à 50 m. Livré avec sa mallette de transport, qui protège le calibrage dans la caisse à outils, et un support mural magnétique."
   },
   {
     "id": "dewalt-dcs356nt-xj",
