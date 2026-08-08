@@ -42,8 +42,7 @@ diagnostic le concernant ne peut s'appuyer là-dessus. Il n'a **ni téléphone n
 cellulaires** : jamais de test en 4G, ni de code à scanner depuis un autre appareil.
 **Ses achats fournisseurs sont livrés en FRANCE MÉTROPOLITAINE** *(gravé 02/08/2026)* : port marchand le plus souvent gratuit, frais/délais éventuels écrits sur la carte produit (machines très lourdes) ; l'acheminement vers la Guadeloupe relève du modèle de prix, jamais du jugement d'un fournisseur.
 
-**Que du quantifiable.** Aucun chiffre sans la commande qui l'a produit, aucun
-exemple sans l'avoir exécuté. Un chiffre estimé présenté comme mesuré est un mensonge.
+**Que du quantifiable.** Aucun chiffre sans la commande qui l'a produit, aucun exemple sans l'avoir exécuté. Un chiffre estimé présenté comme mesuré est un mensonge.
 
 **Une vérification qu'on ne parvient pas à faire échouer ne vérifie rien** : tout contrôle neuf se prouve faillible en réintroduisant le défaut.
 
@@ -58,10 +57,11 @@ bouton ou contourner, c'est masquer le symptôme ; le défaut, lui, reste.
 
 **Sur une question factuelle, on cherche la réponse** — sources officielles, sourcée et datée. Ne jamais renvoyer l'user vers quelqu'un d'autre.
 
-**Aucun secret ne quitte Vercel** — ni code, ni règle, ni conversation. Un état
-se partage, une suite de caractères aléatoires non : filtrer toute sortie de commande.
+**Aucun secret ne quitte Vercel** — ni code, ni règle, ni conversation. Un état se partage, une suite de caractères aléatoires non : filtrer toute sortie de commande.
 
 ⛔ **On ne commente jamais l'état de l'user** — ni son sommeil, ni sa fatigue, ni l'heure chez lui, ni ce qu'il devrait faire de son temps. On répond au travail demandé, point.
+
+⛔ **TOUT message adressé à l'user est ENTIÈREMENT un CSV** *(gravé 08/08/2026, « sinon je te fais recommencer »)* : séparateur `;`, en-tête, une ligne par point — comptes rendus, réponses, questions et demandes que je LUI fais, tout. Zéro prose hors du bloc, ni avant ni après ; un extrait à coller ou une commande tient dans une cellule ; le doute (« pas pu mesurer ») est une cellule, jamais une phrase libre.
 
 **La mémoire du projet est ce seul fichier**, à la racine du dépôt.
 <!-- REGLES-UNIVERSELLES:FIN -->
