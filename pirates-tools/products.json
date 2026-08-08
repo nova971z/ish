@@ -26405,15 +26405,15 @@
   },
   {
     "id": "dewalt-dcm565n-xj",
-    "slug": "dewalt-dcm565n-xj-tronconneuse-18v-30-cm-dcm565n-xj",
+    "slug": "dewalt-dcm565n-xj-tronconneuse-18v-xr-guide-30cm-nue",
     "sku": "DCM565N-XJ",
     "name": "DCM565N-XJ",
     "brand": "DeWALT",
     "category": "Tronçonnage et élagage",
-    "title": "DeWALT DCM565N-XJ — Tronçonneuse 18V 30 cm DCM565N-XJ",
+    "title": "DeWALT DCM565N-XJ — Tronçonneuse 18V XR brushless, guide 30 cm (machine nue)",
     "tag": "Nouveau",
-    "desc": "Tronçonneuse 18V 30 cm DCM565N-XJ.",
-    "img": "images/placeholder.svg",
+    "desc": "Tronçonneuse XR guide 30 cm, moteur brushless à vitesse variable, chaîne à 7,3 m/s. Machine nue.",
+    "img": "images/posters/dcm565n-xj.webp",
     "currency": "EUR",
     "vat": 0.2,
     "stock_status": "in_stock",
@@ -26424,16 +26424,43 @@
     "tags": [
       "cordless"
     ],
-    "features": [],
+    "features": [
+      "Guide de 30 cm, chaîne à 7,3 m/s",
+      "Moteur brushless (sans charbon) à vitesse variable",
+      "Accepte les batteries XR 18 V ET les FlexVolt 18/54 V, sans adaptateur",
+      "Réservoir d'huile de graissage de 0,115 L",
+      "Poids net EPTA 3,5 kg (hors batterie)",
+      "Machine nue : aucune batterie ni chargeur fourni"
+    ],
     "specs": {
       "Marque": "DeWALT",
+      "Type": "Tronçonneuse sans fil XR (machine nue)",
+      "Type d'alimentation": "Batterie",
+      "Tension de batterie": "18/54 V",
+      "Batteries compatibles": "Gamme XR 18 V, type FlexVolt DeWALT 18/54 V",
+      "Composition chimique batterie": "Li-Ion",
+      "Nombre de batteries fournies": "Aucune",
+      "Longueur du guide": "30 cm",
+      "Vitesse de chaîne maxi": "7,3 m/s",
+      "Capacité du réservoir d'huile": "0,115 L",
+      "Type de moteur": "Brushless (sans charbon)",
+      "Technologie moteur": "Vitesse variable",
+      "Pression sonore (Lpa)": "89,5 dB(A)",
+      "Puissance sonore (Lwa)": "99 dB(A)",
+      "Marge d'incertitude bruit (K)": "3,0 dB(A)",
+      "Taux de vibration maximal": "3,7 m/s²",
+      "Poids net EPTA": "3,5 kg",
+      "Batterie / chargeur": "NON inclus",
       "Référence": "DCM565N-XJ"
     },
-    "weight_kg": 2,
-    "poidsSuppose": true,
+    "weight_kg": 3.5,
     "ficheAcompleter": false,
     "price_ht": 220.2,
-    "price": 264.24
+    "price": 264.24,
+    "images": [
+      "images/posters/dcm565n-xj.webp"
+    ],
+    "description_long": "Tronçonneuse compacte de la gamme XR, à guide de 30 cm et moteur brushless. La chaîne file à 7,3 m/s et la vitesse est variable : on module la coupe selon le bois au lieu de subir un régime unique. Le graissage de chaîne est alimenté par un réservoir d'huile de 0,115 L. Elle accepte indifféremment les batteries XR 18 V et les FlexVolt 18/54 V : la même machine tourne donc sur les deux gammes, sans adaptateur. Poids net EPTA 3,5 kg, batterie non comprise. Niveaux mesurés par le fabricant : 89,5 dB(A) de pression sonore, 99 dB(A) de puissance sonore (incertitude 3 dB) et 3,7 m/s² de vibration maximale — trois chiffres qui servent à calculer les temps d'exposition sur un chantier. ⚠️ MACHINE NUE : aucune batterie ni chargeur n'est fourni."
   },
   {
     "id": "dewalt-dcw220nt-xj",
