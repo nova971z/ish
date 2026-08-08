@@ -102,6 +102,32 @@ module.exports = async function () {
     var nbEligibles = produits.filter(eligible).length;
     ok(r6.code === 200 && nbLiens === nbEligibles,
       'le catalogue lie exactement les fiches éligibles — ' + nbLiens + ' lien(s) pour ' + nbEligibles + ' éligible(s)');
+
+    /* ── ⑥ D-65 : des mentions légales EN CHANTIER ne s'indexent pas ───────── */
+    var interne = rendre._internals || {};
+    ok(typeof interne.vueEnChantier === 'function', 'PRÉALABLE : vueEnChantier est exposée à la porte');
+    if (typeof interne.vueEnChantier === 'function') {
+      // Les deux branches de la règle, prouvées sur des vues synthétiques :
+      // la détection mord quand le marqueur est là…
+      ok(interne.vueEnChantier('<section data-route="/cgv">SIRET : [À COMPLÉTER]</section>', 'cgv') === true,
+        'une vue avec [À COMPLÉTER] est déclarée en chantier');
+      // …et la LEVÉE est automatique quand il n'y est plus (D-020, aucun geste).
+      ok(interne.vueEnChantier('<section data-route="/cgv">SIRET : 123 456 789</section>', 'cgv') === false,
+        'une vue complétée sort du chantier TOUTE SEULE (levée automatique)');
+      // Et sur le VRAI gabarit : le rendu de chaque page légale reflète
+      // exactement son état — noindex si chantier, rien sinon.
+      var gabaritReel = fs.readFileSync(path.join(RACINE, 'index.html'), 'utf8');
+      var legales = ['cgv', 'mentions-legales', 'confidentialite'];
+      for (var i = 0; i < legales.length; i++) {
+        var nom = legales[i];
+        var chantier = interne.vueEnChantier(gabaritReel, nom);
+        var rl = await appel({ page: nom });
+        var porteNoindex = /name="robots" content="noindex,follow"/.test(rl.corps);
+        ok(rl.code === 200 && porteNoindex === chantier,
+          '/' + nom + ' : noindex=' + porteNoindex + ' pour chantier=' + chantier
+          + ' — on n\'indexe pas des mentions légales en chantier (D-65)');
+      }
+    }
   } finally {
     if (saAvant === undefined) delete process.env.FIREBASE_SERVICE_ACCOUNT;
     else process.env.FIREBASE_SERVICE_ACCOUNT = saAvant;

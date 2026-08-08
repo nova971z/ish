@@ -80,6 +80,22 @@ function gabarit() {
   return _gabarit;
 }
 
+/* ── D-65 : des mentions légales EN CHANTIER ne s'indexent pas ──────────────
+   Les pages /cgv, /mentions-legales et /confidentialite portent des champs
+   « [À COMPLÉTER] » (raison sociale, SIRET, médiateur…) en attente de la
+   création d'entreprise (D-020). Tant qu'un seul subsiste dans la vue, son
+   HTML rendu porte noindex,follow. La détection relit le GABARIT à chaque
+   rendu : le jour où les champs seront remplis, le noindex tombe TOUT SEUL —
+   aucune levée manuelle, aucun geste à se rappeler. */
+const PAGES_LEGALES = { cgv: 1, 'mentions-legales': 1, confidentialite: 1 };
+function vueEnChantier(html, route) {
+  var debut = String(html).indexOf('data-route="/' + route + '"');
+  if (debut === -1) return false;
+  var fin = String(html).indexOf('data-route="', debut + 13 + route.length);
+  var vue = fin === -1 ? String(html).slice(debut) : String(html).slice(debut, fin);
+  return vue.indexOf('À COMPLÉTER') !== -1;
+}
+
 function escapeHTML(s) {
   return String(s == null ? '' : s)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -215,7 +231,8 @@ function pageFixe(nom) {
       titre: meta.titre,
       desc: meta.desc,
       canonical: BASE_URL + '/' + nom,
-      noindex: false
+      // D-65 : une page légale avec des [À COMPLÉTER] reste hors index.
+      noindex: !!(PAGES_LEGALES[nom] && vueEnChantier(gabarit(), nom))
     },
     /* Le contenu réel de ces pages vit dans le gabarit (sections .view) ; le
        bloc serveur ne porte que le titre — l'en-tête corrigé fait le travail. */
@@ -283,3 +300,7 @@ module.exports = async function handler(req, res) {
     : 'public, s-maxage=60');
   return res.status(rendu.statut).send(html);
 };
+
+// Exposées pour la porte CI (fonctions pures) — Vercel n'appelle que le
+// module lui-même, ces propriétés ne changent rien au point d'entrée.
+module.exports._internals = { vueEnChantier: vueEnChantier, estIndexable: estIndexable };
