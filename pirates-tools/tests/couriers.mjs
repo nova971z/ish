@@ -37,12 +37,28 @@ const COURIERS = [
 let profile = { uid:'me', displayName:'Kevin L.', commune:'Sainte-Anne', vehicle:'scooter',
   bio:'', photo:'', tarifs:{1:30,2:60,3:90,4:120}, available:false, published:true,
   coursesDone:12, ratingCount:4, ratingSum:19 };
+/* ⛔ LA FICHE SE CHOISIT À L'EXÉCUTION — CORRIGÉ le 08/08/2026. Le harnais
+   écrivait `quincaillerie-0001` en dur (lignes de la course ET navigation de
+   la section H) alors que cette fiche a été RETIRÉE du catalogue :
+   `lvPayLignes` ne résolvait plus rien, `#acPay` renvoyait au catalogue au
+   lieu d'ouvrir la modale carte, et la section H tournait sur une page
+   introuvable — rouge permanent qu'on finit par ignorer. Règle du dossier :
+   un harnais ne nomme jamais une donnée du catalogue. */
+const catalogueBrut = JSON.parse(await readFile(join(ROOT, 'products.json'), 'utf8'));
+const catalogueListe = Array.isArray(catalogueBrut) ? catalogueBrut : (catalogueBrut.products || []);
+const ficheQuinc = catalogueListe.find(p => String(p.category || '') === 'Quincaillerie' && (p.slug || p.id));
+if (!ficheQuinc) {
+  // Préalable des sections F (règlement marchandise) et H (fiche produit) :
+  // sans fiche Quincaillerie, le harnais ne vérifierait qu'à vide.
+  console.log('⏭ IGNORÉ — aucune fiche Quincaillerie au catalogue : rien à vérifier ici.');
+  process.exit(2);
+}
 // DEMANDE de livraison : acceptée par un livreur, AUCUN paiement.
 const COURSE = { id:'c1', status:'acceptee', productTitle:'Vis inox', qty:2, address:'12 Rue des Alizés, Sainte-Anne',
   km:1.2, zone:1, lat:16.23, lng:-61.38, date:'2026-07-28', when:'matin', hour:'',
   mine:true, acceptedByMe:false, courierUid:'u1', courierName:'Kevin L.', chatOpen:true, round:1,
   paid:false, escrow:null, feeCents:0, amountCents:0, code:'123456', hasScene:false, hasProof:false,
-  accord:null, goodsPaid:false, goodsAmountCents:0, lines:[{key:'quincaillerie-0001', qty:2}],
+  accord:null, goodsPaid:false, goodsAmountCents:0, lines:[{key:(ficheQuinc.id || ficheQuinc.slug), qty:2}],
   rating:0, ratingComment:'', videosCount:0, litige:null, createdAt:Date.now() };
 const API = [];   // journal des appels /api/contact (type + corps)
 
@@ -517,7 +533,9 @@ T('2e clic → appel course-cancel', API.some(b=>b.type==='course-cancel' && b.i
   JSON.stringify(API.map(b=>b.type)));
 
 // ── H. LA DEMANDE N'OUVRE PLUS AUCUN PANNEAU DE PAIEMENT ───────────────────
-await boot('#/produit/quincaillerie-0001');
+// La fiche est choisie à l'exécution, en tête de harnais (même règle que les
+// lignes de la course : jamais de donnée du catalogue écrite en dur).
+await boot('#/produit/' + (ficheQuinc.slug || ficheQuinc.id));
 API.length = 0;
 r = await page.evaluate(()=>{
   // Simule une adresse géocodée (l'API adresse est coupée dans le harnais).
