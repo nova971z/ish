@@ -61,7 +61,9 @@ LOG('━'.repeat(74));
    bruts, 12,9 % du fichier) dans un module chargé à la demande, comme mfa.js.
    Seul le propriétaire s'en sert ; tous les autres les téléchargent pour rien. */
 const BUDGET = {
-  'app.js':        400,   // relevé (D-014) — mesuré 205
+  // SEO ordre 9 (D-120) : le VISITEUR télécharge app.visitor.js (admin sorti),
+  // pas app.js (source DEV complète, jamais servie).
+  'app.visitor.js': 400,   // relevé (D-014) — bundle allégé après extraction admin
   /* ⚠️ RELEVÉ de 60 à 64 le 01/08/2026, et la contrepartie est ACTÉE — sinon
      c'est juste un plafond qu'on déplace quand il gêne.
 
@@ -80,7 +82,9 @@ const BUDGET = {
      ⛔ Ce plafond ne se relèvera plus tant que ce chantier n'est pas fait : le
      prochain dépassement devra retirer du poids, pas déplacer la limite. */
   'styles.css':     64,   // mesuré  60,26 (dont 18,59 de commentaires)
-  'products.json':  65,   // mesuré  54
+  // SEO ordre 9 (D-119) : la grille charge products-light.json (fiche allégée) ;
+  // products.json ne sert plus qu'au serveur (endpoint ?id + générateur léger).
+  'products-light.json': 65,   // catalogue allégé servi à froid
   'index.html':     46    // mesuré  39
 };
 let totalGz = 0;
@@ -185,8 +189,12 @@ LOG('  P8.4 — TOTAL SERVI À FROID (le chiffre que voit le visiteur)');
 LOG('━'.repeat(74));
 
 const PLAFOND_TOTAL_KO = 400;                       // décision user 28/07/2026
-const SERVIS_A_FROID = ['index.html', 'styles.css', 'app.js',
-  'firebase-init.js', 'products.json', 'sw.js'];
+// SEO ordre 9 (D-120/D-119) : le visiteur télécharge le bundle allégé
+// (app.visitor.js) et le catalogue allégé (products-light.json) ; ni app.js ni
+// products.json ne partent au client. admin.bundle.js n'est PAS ici : il n'est
+// chargé que sur #/admin (voir CONTRÔLE ZÉRO-ADMIN plus bas).
+const SERVIS_A_FROID = ['index.html', 'styles.css', 'app.visitor.js',
+  'firebase-init.js', 'products-light.json', 'sw.js'];
 let totalFroid = 0;
 SERVIS_A_FROID.forEach((f) => {
   try { totalFroid += zlib.gzipSync(read(f), { level: 9 }).length / 1024; } catch (e) {}

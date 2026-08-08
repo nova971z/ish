@@ -51,6 +51,11 @@ try { JUR = require('./juridique.js'); } catch (e) { JUR = null; }
    modification ici exige d'avoir consulté l'entonnoir. */
 var PROTEGES = [
   /(^|\/)pirates-tools\/app\.js$/,
+  // SEO ordre 9 (D-120) : bundles GÉNÉRÉS depuis app.js et SERVIS. app.visitor.js
+  // est chargé par chaque visiteur, admin.bundle.js à la demande sur #/admin —
+  // les deux doivent rappeler de bumper sw.js quand ils changent.
+  /(^|\/)pirates-tools\/app\.visitor\.js$/,
+  /(^|\/)pirates-tools\/admin\.bundle\.js$/,
   /(^|\/)pirates-tools\/sw\.js$/,
   /(^|\/)pirates-tools\/index\.html$/,
   /(^|\/)pirates-tools\/styles\.css$/,

@@ -37,6 +37,8 @@ const pw = await playwright();
 const nav = await pw.chromium.launch(optionsNavigateur());
 
 try {
+  // SEO ordre 9 : les fabriques de balisage admin vivent dans la SOURCE DEV
+  // COMPLÈTE (app.js), pas dans le bundle visiteur généré (app.visitor.js).
   const src = await readFile(join(RACINE, 'app.js'), 'utf8');
   const grab = (n) => {
     const i = src.indexOf('function ' + n + '(');

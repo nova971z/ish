@@ -82,8 +82,10 @@ module.exports = async function(){
   if (!/<link\b[^>]*href=["']\.?\/?styles\.css([?#][^"']*)?\s*["'][^>]*>/i.test(html)) {
     errs.push('index.html: <link href="styles.css"> manquant (rel="stylesheet").');
   }
-  if (!/<script\b[^>]*src=["']\.?\/?app\.js([?#][^"']*)?\s*["'][^>]*>/i.test(html)) {
-    errs.push('index.html: <script src="app.js"> manquant.');
+  // Le bundle servi est app.visitor.js (SEO ordre 9 / D-120 : admin sorti du
+  // bundle visiteur). app.js reste la source DEV, jamais référencée par le HTML.
+  if (!/<script\b[^>]*src=["']\.?\/?app\.visitor\.js([?#][^"']*)?\s*["'][^>]*>/i.test(html)) {
+    errs.push('index.html: <script src="app.visitor.js"> manquant.');
   }
 
   // Affiche les avertissements sans faire échouer la CI

@@ -114,6 +114,20 @@ function reqCatLegerPorte(){
     return ['[generer-catalogue-leger] ' + m.split('\n').filter(Boolean).join(' · ')];
   }
 }
+// SEO ordre 9 / D-120 : le bundle visiteur (app.js) ne contient AUCUNE fonction
+// admin, et il est à jour vs app.src.js. Fichier present mais casse -> porte morte.
+var reqExtraire = safeRequire('./extraire-admin','extraire-admin');
+function reqExtraireAdmin(){
+  if (!reqExtraire) return [];
+  try {
+    cp.execFileSync(process.execPath, [path.join(__dirname,'extraire-admin.js'),'--verifie'],
+      { stdio:['ignore','ignore','pipe'] });
+    return [];
+  } catch(e){
+    var m = (e.stderr ? e.stderr.toString() : '') || (e.message||'');
+    return ['[extraire-admin] ' + m.split('\n').filter(Boolean).join(' · ')];
+  }
+}
 var reqCatPub   = safeRequire('./check-catalog-public','check-catalog-public');
 var reqAssetVer = safeRequire('./check-asset-versions','check-asset-versions');
 var reqWhClaim  = safeRequire('./check-webhook-claim','check-webhook-claim');
@@ -260,6 +274,7 @@ var reqReconc   = safeRequire('./check-reconciliation', 'check-reconciliation');
   await runOne(reqRender,   'check-render');
   await runOne(reqSitemapPorte, 'generer-sitemap');
   await runOne(reqCatLegerPorte, 'generer-catalogue-leger');
+  await runOne(reqExtraireAdmin, 'extraire-admin');
   await runOne(reqCatPub,   'check-catalog-public');
   await runOne(reqAssetVer, 'check-asset-versions');
   await runOne(reqWhClaim,  'check-webhook-claim');
