@@ -35,7 +35,16 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(p ? 200 : 404, { 'Content-Type': 'application/json' });
       return res.end(JSON.stringify(p ? { ok: true, product: p } : { ok: false }));
     }
-    if (u.pathname === '/api/products') { res.writeHead(200, { 'Content-Type': 'application/json' }); return res.end(JSON.stringify({ ok: true, products: [] })); }
+    if (u.pathname === '/api/products') {
+      // ⛔ Comme la PROD : la liste /api/products est ALLÉGÉE et porte _light.
+      // Un faux vide masquerait le bug où l'upgrade API écrase les fiches
+      // légères SANS _light → renderPDP ne chercherait plus le détail.
+      var legers = liste.map(function (p) {
+        var c = Object.assign({}, p); delete c.specs; delete c.description_long; delete c.features; c._light = 1; return c;
+      });
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ ok: true, products: legers }));
+    }
     let p = decodeURIComponent(u.pathname); if (p === '/') p = '/index.html';
     if (!extname(p)) p = '/index.html';
     const fp = normalize(join(ROOT, p)); if (!fp.startsWith(ROOT)) { res.writeHead(403); return res.end(); }
