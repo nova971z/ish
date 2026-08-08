@@ -80,7 +80,7 @@ function gabarit() {
   return _gabarit;
 }
 
-/* ── D-65 : des mentions légales EN CHANTIER ne s'indexent pas ──────────────
+/* ── D-114 : des mentions légales EN CHANTIER ne s'indexent pas ──────────────
    Les pages /cgv, /mentions-legales et /confidentialite portent des champs
    « [À COMPLÉTER] » (raison sociale, SIRET, médiateur…) en attente de la
    création d'entreprise (D-020). Tant qu'un seul subsiste dans la vue, son
@@ -231,7 +231,7 @@ function pageFixe(nom) {
       titre: meta.titre,
       desc: meta.desc,
       canonical: BASE_URL + '/' + nom,
-      // D-65 : une page légale avec des [À COMPLÉTER] reste hors index.
+      // D-114 : une page légale avec des [À COMPLÉTER] reste hors index.
       noindex: !!(PAGES_LEGALES[nom] && vueEnChantier(gabarit(), nom))
     },
     /* Le contenu réel de ces pages vit dans le gabarit (sections .view) ; le

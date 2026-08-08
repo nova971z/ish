@@ -103,7 +103,7 @@ module.exports = async function () {
     ok(r6.code === 200 && nbLiens === nbEligibles,
       'le catalogue lie exactement les fiches éligibles — ' + nbLiens + ' lien(s) pour ' + nbEligibles + ' éligible(s)');
 
-    /* ── ⑥ D-65 : des mentions légales EN CHANTIER ne s'indexent pas ───────── */
+    /* ── ⑥ D-114 : des mentions légales EN CHANTIER ne s'indexent pas ───────── */
     var interne = rendre._internals || {};
     ok(typeof interne.vueEnChantier === 'function', 'PRÉALABLE : vueEnChantier est exposée à la porte');
     if (typeof interne.vueEnChantier === 'function') {
@@ -125,8 +125,25 @@ module.exports = async function () {
         var porteNoindex = /name="robots" content="noindex,follow"/.test(rl.corps);
         ok(rl.code === 200 && porteNoindex === chantier,
           '/' + nom + ' : noindex=' + porteNoindex + ' pour chantier=' + chantier
-          + ' — on n\'indexe pas des mentions légales en chantier (D-65)');
+          + ' — on n\'indexe pas des mentions légales en chantier (D-114)');
       }
+    }
+
+    /* ── ⑦ D-116 / SEO-025 : le domaine vercel.app REDIRIGE, chemin conservé ──
+       Un domaine technique qui répond 200 fabrique du contenu dupliqué. La
+       preuve finale est externe (curl -I → 308, mesure de l'user) ; ici on
+       verrouille la CONFIGURATION qui la produit — elle ne peut plus
+       disparaître sans rougir. */
+    var vercelCfg = JSON.parse(fs.readFileSync(path.join(RACINE, 'vercel.json'), 'utf8'));
+    var redir = (vercelCfg.redirects || []).filter(function (r) {
+      return (r.has || []).some(function (h) { return h.type === 'host' && /\.vercel\.app$/.test(h.value || ''); });
+    })[0];
+    ok(!!redir, 'PRÉALABLE : une redirection host *.vercel.app existe dans vercel.json (SEO-025)');
+    if (redir) {
+      ok(redir.permanent === true, 'la redirection vercel.app est PERMANENTE (308) — vu : ' + JSON.stringify(redir.permanent));
+      ok(/^https:\/\/pirates-tools\.com\//.test(redir.destination || '') && /:path\*/.test(redir.destination || ''),
+        'elle vise pirates-tools.com en CONSERVANT le chemin — vu : ' + redir.destination);
+      ok(/:path\*/.test(redir.source || ''), 'sa source couvre TOUS les chemins — vu : ' + redir.source);
     }
   } finally {
     if (saAvant === undefined) delete process.env.FIREBASE_SERVICE_ACCOUNT;

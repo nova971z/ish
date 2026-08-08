@@ -3,6 +3,14 @@
   "crons": [
     { "path": "/api/cron-report", "schedule": "0 6 1 * *" }
   ],
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "ish-ebon.vercel.app" }],
+      "destination": "https://pirates-tools.com/:path*",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     { "source": "/produit/:slug", "destination": "/api/render?page=produit&slug=:slug" },
     { "source": "/territoire/:slug", "destination": "/api/render?page=territoire&slug=:slug" },
