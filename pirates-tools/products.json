@@ -26449,15 +26449,15 @@
   },
   {
     "id": "dewalt-dcmpw1000n-xj",
-    "slug": "dewalt-dcmpw1000n-xj-nettoyeur-a-pression-54v-dcmpw1000n-xj",
+    "slug": "dewalt-dcmpw1000n-xj-nettoyeur-haute-pression-sans-fil-54v-69-bar",
     "sku": "DCMPW1000N-XJ",
     "name": "DeWalt Nettoyeur haute pression sans fil portable DCMPW1000N sans batterie et chargeur",
     "brand": "DeWALT",
     "category": "Accessoires",
-    "title": "DeWalt Nettoyeur haute pression sans fil portable DCMPW1000N sans batterie et chargeur",
+    "title": "DeWALT DCMPW1000N-XJ — Nettoyeur haute pression sans fil XR FLEXVOLT 54V, 69 bar (machine nue)",
     "tag": "Nouveau",
-    "desc": "Nettoyeur à pression 54V DCMPW1000N-XJ.",
-    "img": "images/placeholder.svg",
+    "desc": "Nettoyeur haute pression sans fil 54V, 69 bar, aspire l'eau depuis un bidon. Machine nue.",
+    "img": "images/posters/dcmpw1000n-xj.webp",
     "currency": "EUR",
     "vat": 0.2,
     "stock_status": "in_stock",
@@ -26468,16 +26468,42 @@
     "tags": [
       "cordless"
     ],
-    "features": [],
+    "features": [
+      "Aucune arrivée d'eau nécessaire : aspire depuis un bidon ou un réservoir (tuyau de siphon 6 m)",
+      "Pression maximale 69 bar, débit 3,8 à 5,1 L/min",
+      "Contrôle de puissance variable : moduler la pression et l'autonomie",
+      "Jusqu'à 60 minutes d'autonomie à vide avec une batterie DCB547",
+      "Moteur brushless (sans charbon)",
+      "Bandoulière rembourrée et sac de rangement en maille inclus",
+      "Livré avec buse réglable, buse turbo et bouteille à mousse 0,5 L",
+      "Machine nue : batteries XR FLEXVOLT 54 V, 6 à 12 Ah recommandées"
+    ],
     "specs": {
       "Marque": "DeWALT",
+      "Type": "Nettoyeur haute pression sans fil (machine nue)",
+      "Type de batterie": "XR Li-Ion / FLEXVOLT",
+      "Tension": "54 V",
+      "Capacité de batterie recommandée": "6,0 – 12,0 Ah",
+      "Nombre de batteries fournies": "Aucune",
+      "Pression maximale": "69 bar",
+      "Débit nominal": "3,8 L/min",
+      "Débit d'eau maximal": "5,1 L/min",
+      "Autonomie": "jusqu'à 60 min à vide (batterie DCB547)",
+      "Alimentation en eau": "Aspiration depuis un bidon ou un réservoir (siphon 6 m)",
+      "Indice de protection": "IPX5",
+      "Poids sans batterie": "6,5 kg",
+      "Contenu": "Tuyau de siphon 6 m, buse réglable, buse turbo, bouteille à mousse 0,5 L, bandoulière, adaptateur de tuyau, sac en maille",
+      "Batterie / chargeur": "NON inclus",
       "Référence": "DCMPW1000N-XJ"
     },
-    "weight_kg": 2,
-    "poidsSuppose": true,
+    "weight_kg": 6.5,
     "ficheAcompleter": false,
     "price_ht": 278.21,
-    "price": 333.85
+    "price": 333.85,
+    "images": [
+      "images/posters/dcmpw1000n-xj.webp"
+    ],
+    "description_long": "Nettoyeur haute pression sans fil, à moteur brushless, qui fonctionne sans prise de courant ET sans robinet : il aspire l'eau par un tuyau de siphon de 6 m depuis un réservoir, un bidon ou n'importe quelle source d'eau douce. C'est ce qui le rend utilisable là où un nettoyeur classique ne va pas — un chantier sans arrivée d'eau, un bord de route, un jardin. La pression monte à 69 bar, avec un débit nominal de 3,8 L/min et un maximum de 5,1 L/min ; le contrôle de puissance variable permet de baisser la pression pour économiser la batterie ou pour ne pas abîmer une surface fragile. Comptez jusqu'à 60 minutes d'autonomie à vide avec une batterie DCB547. La bandoulière rembourrée le fait porter à l'épaule, et le sac en maille tient les accessoires ensemble. Indice IPX5. ⚠️ MACHINE NUE : ni batterie ni chargeur — batteries XR FLEXVOLT 54 V, 6 à 12 Ah recommandées."
   },
   {
     "id": "dewalt-dcm565n-xj",
