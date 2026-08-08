@@ -109,6 +109,14 @@ module.exports = async function () {
     /* ── ④ Territoires : les 5 répondent, un faux répond 404 ───────────────── */
     var r4 = await appel({ page: 'territoire', slug: 'guadeloupe' });
     ok(r4.code === 200 && /Guadeloupe/.test(r4.corps), 'territoire guadeloupe → 200 avec son nom');
+    /* Ordre 4 (SEO-008/009) : chaque territoire porte un CONTENU UNIQUE —
+       fiscalité réelle propre à l'île + produits phares. Deux territoires ne
+       rendent pas le même corps (fini les pages jumelles). */
+    var rMayotte = await appel({ page: 'territoire', slug: 'mayotte' });
+    ok(r4.corps !== rMayotte.corps, 'ordre 4 : Guadeloupe et Mayotte ne rendent PAS le même contenu');
+    ok(/TVA 8,5 %/.test(r4.corps), 'Guadeloupe : la TVA réelle (8,5 %) est affichée');
+    ok(/aucun octroi de mer/.test(rMayotte.corps), 'Mayotte : « aucun octroi de mer » (fiscalité réelle)');
+    ok((r4.corps.match(/href="\/produit\//g) || []).length > 0, 'la page territoire lie des produits (maillage)');
     var r5 = await appel({ page: 'territoire', slug: 'atlantide' });
     ok(r5.code === 404, 'territoire inconnu → 404 — vu ' + r5.code);
 
@@ -199,9 +207,26 @@ module.exports = async function () {
       var aReleve = !!(pleine.priceCheckedAt || pleine.priceRecomputedAt);
       ok(aReleve ? !!ld.offers.priceValidUntil : ld.offers.priceValidUntil === undefined,
         'SEO-036 : priceValidUntil dérivé d\'un relevé réel, jamais inventé — relevé=' + aReleve + ', déclaré=' + (ld.offers && ld.offers.priceValidUntil));
+      // validFrom : même règle (dérivé du relevé, jamais inventé) — comble le
+      // champ facultatif signalé par Rich Results, honnêtement.
+      ok(aReleve ? !!ld.offers.validFrom : ld.offers.validFrom === undefined,
+        'validFrom dérivé du relevé réel, jamais inventé — déclaré=' + (ld.offers && ld.offers.validFrom));
       // Prix NON confirmés → AUCUNE offre (on n'annonce pas ce qu'on ne peut pas tenir).
       var sansPrix = JSON.parse(interne.jsonldProduit(pleine, false));
       ok(sansPrix.offers === undefined, '⛔ J4 : prix non confirmés → aucune offre rendue');
+      /* La branche « AVEC relevé » (validFrom/priceValidUntil dérivés) n'est pas
+         exerçable sans Firestore. On la teste au niveau unité : une fiche
+         SYNTHÉTIQUE portant un relevé connu → validFrom = jour du relevé,
+         priceValidUntil = relevé + 14 j. Un « validFrom inventé » se voit ici. */
+      var releveTest = 1735689600000;   // 2025-01-01, valeur fixe (jamais Date.now)
+      var jourReleve = new Date(releveTest).toISOString().slice(0, 10);
+      var avecReleve = JSON.parse(interne.jsonldProduit(
+        Object.assign({}, pleine, { priceCheckedAt: releveTest }), true));
+      ok(avecReleve.offers && avecReleve.offers.validFrom === jourReleve,
+        'validFrom = le JOUR du relevé (' + jourReleve + ') — vu ' + (avecReleve.offers && avecReleve.offers.validFrom));
+      var attenduValid = new Date(releveTest + 14 * 86400000).toISOString().slice(0, 10);
+      ok(avecReleve.offers && avecReleve.offers.priceValidUntil === attenduValid,
+        'priceValidUntil = relevé + 14 j (' + attenduValid + ') — vu ' + (avecReleve.offers && avecReleve.offers.priceValidUntil));
     }
     var ldCat = (r6.corps.match(/<script type="application\/ld\+json">(.*?)<\/script>/s) || [])[1];
     ok(!!ldCat, 'PRÉALABLE : un JSON-LD ItemList est rendu sur le catalogue');

@@ -49,6 +49,15 @@ let r = await page.evaluate(() => ({ chemin: location.pathname, hash: location.h
   vue: (document.querySelector('.view--active') || {}).id }));
 T('L\'ancien lien #/catalogue devient le chemin réel /catalogue', r.chemin === '/catalogue', JSON.stringify(r));
 T('La vue catalogue est rendue', r.vue === 'view-catalogue', r.vue);
+// Ordre 5 : le JSON-LD d'identité est un OnlineStore (signal marchand), sans
+// adresse postale (D-019, areaServed sans NAP).
+const org = await page.evaluate(() => {
+  try { return JSON.parse(document.querySelector('script[data-jsonld="org"]').textContent); } catch (_) { return {}; }
+});
+T('Identité = OnlineStore (SEO-007), jamais Organization nue', org['@type'] === 'OnlineStore', org['@type']);
+T('OnlineStore garde areaServed, SANS adresse postale (D-019)',
+  Array.isArray(org.areaServed) && org.areaServed.length >= 5 && org.address === undefined,
+  JSON.stringify({ n: (org.areaServed || []).length, adr: org.address }));
 
 // ── B. #/produit/<slug> → /produit/<slug>, fiche rendue ─────────────────────
 await boot('#/produit/' + SLUG);

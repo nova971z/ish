@@ -289,7 +289,13 @@ function jsonldProduit(p, prixConfirmes) {
        relevé du traqueur + 14 jours (la fenêtre de fraîcheur gravée D-112).
        Aucun relevé → pas de priceValidUntil : on n'invente pas une date. */
     var releve = priceParse.enMillis(p.priceCheckedAt || p.priceRecomputedAt);
-    if (releve > 0) offre.priceValidUntil = new Date(releve + 14 * 86400000).toISOString().slice(0, 10);
+    if (releve > 0) {
+      // validFrom = le jour du relevé (l'offre vaut à partir de là) ; priceValidUntil
+      // = +14 j (fenêtre de fraîcheur D-112). Les deux dérivent de la MÊME donnée
+      // réelle — jamais inventées (Rich Results : deux champs facultatifs comblés).
+      offre.validFrom = new Date(releve).toISOString().slice(0, 10);
+      offre.priceValidUntil = new Date(releve + 14 * 86400000).toISOString().slice(0, 10);
+    }
     data.offers = offre;
   }
   return JSON.stringify(data);
@@ -346,21 +352,52 @@ function pageProduit(p, prixConfirmes, produits) {
   };
 }
 
-function pageTerritoire(slug) {
+/* Code territoire ↔ slug, pour lire la fiscalité RÉELLE dans pricing.js
+   (J5 : les taux ne sont jamais recopiés, ils viennent de la table autoritaire). */
+var SLUG_CODE = { guadeloupe: '971', martinique: '972', guyane: '973', reunion: '974', mayotte: '976' };
+
+// Une phrase fiscale VRAIE par territoire, dérivée de pricing.TERRITORIES —
+// contenu UNIQUE par île (SEO-008/009 : plus de pages territoire jumelles).
+function phraseFiscale(code) {
+  var t = pricing.getTerritory(code);
+  if (!t) return '';
+  var tva = (t.tvaRate * 100).toString().replace('.', ',');
+  var octroi = t.octroiExterne > 0 || t.octroiRegional > 0;
+  var p = 'TVA ' + (t.tvaRate > 0 ? tva + ' %' : 'à 0 % (spécificité du territoire)');
+  if (octroi) p += ', octroi de mer et octroi de mer régional inclus dans chaque prix affiché';
+  else p += ', et aucun octroi de mer sur ce territoire';
+  return p + '.';
+}
+
+function pageTerritoire(slug, produits) {
   var nom = TERRITOIRES[slug];
+  var code = SLUG_CODE[slug];
+  var fiscal = phraseFiscale(code);
+  // Quelques fiches ÉLIGIBLES en « produits phares » : du contenu réel et des
+  // liens internes propres à la page (chaque territoire montre le catalogue).
+  var phares = (produits || []).filter(estIndexable).slice(0, 8);
   return {
     statut: 200,
     meta: {
-      titre: 'Outillage professionnel ' + nom + ' — Pirates Tools',
-      desc: 'Outillage professionnel livré en ' + nom + ' : octroi de mer et TVA du territoire inclus dans chaque prix affiché.',
+      titre: 'Outillage professionnel ' + nom + ' — livraison, TVA & octroi de mer — Pirates Tools',
+      desc: 'Outillage professionnel livré en ' + nom + ' : ' + fiscal.replace(/\.$/, '')
+        + '. DeWALT, Makita, Festool, Flex, Facom.',
       canonical: BASE_URL + '/territoire/' + slug,
       noindex: false
     },
     contenu: '<article>'
-      + '<h1>Outillage professionnel ' + escapeHTML(nom) + '</h1>'
-      + '<p>Pirates Tools livre l\'outillage professionnel en ' + escapeHTML(nom)
-      + ' — chaque prix affiché inclut la TVA et l\'octroi de mer du territoire.</p>'
-      + '<p><a href="/catalogue">Voir le catalogue</a></p>'
+      + '<h1>Outillage professionnel en ' + escapeHTML(nom) + '</h1>'
+      + '<p>Pirates Tools livre l\'outillage professionnel des grandes marques '
+      + '(DeWALT, Makita, Festool, Flex, Facom, Stanley, Wera) en ' + escapeHTML(nom) + '. '
+      + escapeHTML(fiscal) + ' Le territoire fiscal est dérivé du code postal à la commande, '
+      + 'jamais d\'un champ déclaré — le prix affiché est le prix débité.</p>'
+      + (phares.length
+        ? '<h2>Quelques produits livrés en ' + escapeHTML(nom) + '</h2><ul>'
+          + phares.map(function (p) {
+              return '<li><a href="/produit/' + encodeURIComponent(p.slug || p.id) + '">' + escapeHTML(p.title) + '</a></li>';
+            }).join('') + '</ul>'
+        : '')
+      + '<p><a href="/catalogue">Voir tout le catalogue</a></p>'
       + '</article>'
   };
 }
@@ -464,7 +501,7 @@ module.exports = async function handler(req, res) {
       rendu = p ? pageProduit(p, etat.prixConfirmes, etat.produits) : page404('/produit/' + slug);
       vue = p ? '/produit' : '/404';
     } else if (page === 'territoire') {
-      rendu = TERRITOIRES[slug] ? pageTerritoire(slug) : page404('/territoire/' + slug);
+      rendu = TERRITOIRES[slug] ? pageTerritoire(slug, await catalog.loadPublicCatalog()) : page404('/territoire/' + slug);
       vue = TERRITOIRES[slug] ? '/territoire' : '/404';
     } else if (page === 'catalogue') {
       rendu = pageCatalogue(await catalog.loadPublicCatalog());

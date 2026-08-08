@@ -16405,8 +16405,12 @@
         'priceCurrency': 'EUR',
         'price': price.ttc.toFixed(2),
         'availability': ldAvailability(product.stock_status),
-        'url': location.href,
-        'priceValidUntil': new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
+        'url': location.origin + '/produit/' + (product.slug || product.id),
+        /* ⛔ PAS de priceValidUntil ici (SEO-036) : le client n'a pas la date
+           de relevé (champ privé retiré du catalogue public) — un « aujourd'hui
+           + 30 jours » serait une date INVENTÉE. Le rendu serveur, lui, la
+           dérive du vrai relevé. Un champ facultatif omis vaut mieux qu'un
+           champ faux. */
         'shippingDetails': {
           '@type': 'OfferShippingDetails',
           'shippingDestination': {
@@ -16519,7 +16523,10 @@
     if (document.head.querySelector('script[data-jsonld="org"]')) return;
     var data = {
       '@context': 'https://schema.org',
-      '@type': 'Organization',
+      // OnlineStore (sous-type de Store adapté au e-commerce, SEO-007/040) :
+      // le signal marchand honnête. ⛔ AUCUNE adresse postale (D-019) tant que
+      // l'entreprise n'est pas créée — areaServed sans NAP, jamais inventée.
+      '@type': 'OnlineStore',
       'name': 'Pirates Tools',
       'url': location.origin,
       'logo': location.origin + '/icons/icon-512.png',
@@ -16531,7 +16538,7 @@
         { '@type': 'AdministrativeArea', 'name': 'La Réunion' },
         { '@type': 'AdministrativeArea', 'name': 'Mayotte' }
       ],
-      'description': 'Outillage professionnel DeWALT, Makita, Festool, Flex, Facom, Stanley, Wera — livraison DOM-TOM (Guadeloupe, Martinique, Guyane, Réunion, Mayotte). Octroi de mer inclus.',
+      'description': BASE_DESC,   // SEO-040 : une seule source de description
       'contactPoint': {
         '@type': 'ContactPoint',
         'contactType': 'customer service',

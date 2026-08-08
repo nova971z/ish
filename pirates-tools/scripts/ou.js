@@ -94,6 +94,22 @@ var INDEX = [
     fini: 'pdp-specs vert, et P8.5 sous le plafond de 871 Ko par image.'
   },
   {
+    intention: 'Référencement, rendu serveur, sitemap, données structurées, territoires',
+    mots: ['seo', 'referencement', 'référencement', 'rendu serveur', 'ssr', 'render',
+           'sitemap', 'json-ld', 'jsonld', 'canonical', 'meta', 'og', 'territoire',
+           'onlinestore', 'areaserved', 'noindex', 'rich results', 'maillage'],
+    fichiers: ['api/render.js', 'app.js', 'scripts/generer-sitemap.js', 'sitemap.xml', 'vercel.json'],
+    fonctions: ['pageProduit', 'jsonldProduit', 'garderVueSeule', 'injectProductJsonLd', 'updateRouteMeta'],
+    protege: ['scripts/check-render.js', 'scripts/generer-sitemap.js --verifie', 'tests/chemins-reels.mjs'],
+    regles: ['.claude/rules/front.md'],
+    pieges: ['MÊME HTML pour tous : aucun aiguillage robot/humain (cloaking rejeté, D-019).',
+             'Canonical et URLs JAMAIS avec un fragment # — le client résout contre l\'ORIGINE, pas location.href (sinon /produit/images/… sur chemin réel).',
+             'Fiche sans description_long ou visuel placeholder ⇒ noindex,follow ; le sitemap suit la MÊME règle (estIndexable).',
+             'Aucun prix rendu qui ne vienne pas du MÊME loadCatalog que le paiement (J4).'],
+    decisions: ['D-019', 'D-020'],
+    fini: 'check-render vert + sabotages rouges, generer-sitemap --verifie vert, chemins-reels vert, et Rich Results valide en prod.'
+  },
+  {
     intention: 'Service Worker, cache, mise en cache, version',
     mots: ['sw', 'service worker', 'cache', 'version', 'hors ligne', 'offline'],
     fichiers: ['sw.js', 'index.html'],
