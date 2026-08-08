@@ -26045,15 +26045,15 @@
   },
   {
     "id": "dewalt-dpc10qtc-qs",
-    "slug": "dewalt-dpc10qtc-qs-compresseur-10l-dpc10qtc-qs",
+    "slug": "dewalt-dpc10qtc-qs-compresseur-silencieux-10l-13-8-bar-sans-huile",
     "sku": "DPC10QTC-QS",
     "name": "DEWALT DEWALT Compresseur de montage DPC10QTC-QS Quantité:1",
     "brand": "DeWALT",
     "category": "Accessoires",
-    "title": "DEWALT DEWALT Compresseur de montage DPC10QTC-QS Quantité:1",
+    "title": "DeWALT DPC10QTC-QS — Compresseur silencieux 10 L, 13,8 bar, 69 dB(A), sans huile",
     "tag": "Nouveau",
-    "desc": "Compresseur 10L DPC10QTC-QS.",
-    "img": "images/placeholder.svg",
+    "desc": "Compresseur silencieux 69 dB(A), 13,8 bar, 82 L/min, moteur 1,5 CV sans huile, cuve 10 L.",
+    "img": "images/posters/dpc10qtc-qs.webp",
     "currency": "EUR",
     "vat": 0.2,
     "stock_status": "in_stock",
@@ -26064,16 +26064,40 @@
     "tags": [
       "cordless"
     ],
-    "features": [],
+    "features": [
+      "69 dB(A) : un niveau de conversation, pas un bruit de chantier",
+      "Moteur 1,5 CV (1,1 kW) SANS HUILE — aucun entretien de lubrification",
+      "Pression maximale 13,8 bar, débit restitué 82 L/min",
+      "Cuve de 10 L, volume engendré 7 m³/h",
+      "Cylindre mono-étagé à 2250 tr/min : rotation lente, durée de vie allongée",
+      "Deux sorties rapides pour brancher deux outils",
+      "18 kg, châssis tubulaire et roulettes de calage",
+      "Adapté aux cloueurs pneumatiques, menuisiers et travaux de finition"
+    ],
     "specs": {
       "Marque": "DeWALT",
+      "Type": "Compresseur à piston silencieux, sans huile",
+      "Pression maximale": "13,8 bar",
+      "Débit restitué": "82 L/min",
+      "Volume engendré": "7 m³/h",
+      "Volume du réservoir": "10 L",
+      "Puissance": "1,5 CV (1,1 kW)",
+      "Lubrification": "Sans huile",
+      "Type de cylindre": "Mono-étagé",
+      "Vitesse de rotation": "2250 tr/min",
+      "Niveau sonore": "69 dB(A)",
+      "Poids": "18 kg",
+      "Alimentation": "Secteur",
       "Référence": "DPC10QTC-QS"
     },
-    "weight_kg": 2,
-    "poidsSuppose": true,
+    "weight_kg": 18,
     "ficheAcompleter": false,
     "price_ht": 320.13,
-    "price": 384.16
+    "price": 384.16,
+    "images": [
+      "images/posters/dpc10qtc-qs.webp"
+    ],
+    "description_long": "Compresseur à piston conçu pour travailler à côté de quelqu'un : 69 dB(A), c'est-à-dire un niveau de conversation, là où un compresseur de chantier classique oblige à crier. Le moteur de 1,5 CV (1,1 kW) est SANS HUILE — pas de vidange, pas de niveau à surveiller — et monte à 13,8 bar pour un débit restitué de 82 L/min, de quoi alimenter des cloueurs pneumatiques en continu. La cuve de 10 L donne l'autonomie nécessaire aux travaux d'intensité moyenne. Le cylindre est mono-étagé et tourne lentement, à 2250 tr/min : moins de vitesse, moins d'usure, moins d'entretien. 18 kg, deux poignées et un châssis tubulaire : il se porte et se cale sur un chantier. Deux sorties rapides permettent de brancher deux outils. Pensé pour les cloueurs, les menuisiers et les travaux de finition."
   },
   {
     "id": "dewalt-dpc10rc-qs",
@@ -26117,7 +26141,7 @@
     "title": "DeWALT DCE590N-XJ — Palonnier à vide GRABO 18V, levage jusqu'à 120 kg (machine nue)",
     "tag": "Nouveau",
     "desc": "Palonnier à vide sans fil : soulève, transporte et installe jusqu'à 120 kg. Machine nue.",
-    "img": "images/placeholder.svg",
+    "img": "images/posters/dce590n-xj.webp",
     "currency": "EUR",
     "vat": 0.2,
     "stock_status": "in_stock",
@@ -26155,7 +26179,10 @@
     "ficheAcompleter": false,
     "price_ht": 317.11,
     "price": 380.53,
-    "description_long": "Palonnier à vide sans fil : une ventouse motorisée qui prend une charge par aspiration et permet de la soulever, la transporter et la poser à deux mains — jusqu'à 120 kg. La ventouse tient sur les matériaux semi-poreux et structurés : plaques de plâtre, contreplaqué, béton, et bien d'autres. Le déverrouillage demande un bouton à DOUBLE ACTION, à deux positions : on ne lâche pas la pression par accident avec une charge en l'air. L'électronique refuse de lancer la pompe si la batterie est trop faible, et si la charge descend sous le seuil en cours d'utilisation, l'écran clignote et un bip prévient avant la panne — pas de coupure silencieuse. La poignée est antidérapante, ce qui compte surtout sur les matériaux lourds. Compatible avec la puce Tool Connect. ⚠️ MACHINE NUE : ni batterie ni chargeur ne sont fournis."
+    "description_long": "Palonnier à vide sans fil : une ventouse motorisée qui prend une charge par aspiration et permet de la soulever, la transporter et la poser à deux mains — jusqu'à 120 kg. La ventouse tient sur les matériaux semi-poreux et structurés : plaques de plâtre, contreplaqué, béton, et bien d'autres. Le déverrouillage demande un bouton à DOUBLE ACTION, à deux positions : on ne lâche pas la pression par accident avec une charge en l'air. L'électronique refuse de lancer la pompe si la batterie est trop faible, et si la charge descend sous le seuil en cours d'utilisation, l'écran clignote et un bip prévient avant la panne — pas de coupure silencieuse. La poignée est antidérapante, ce qui compte surtout sur les matériaux lourds. Compatible avec la puce Tool Connect. ⚠️ MACHINE NUE : ni batterie ni chargeur ne sont fournis.",
+    "images": [
+      "images/posters/dce590n-xj.webp"
+    ]
   },
   {
     "id": "dewalt-dw088cg-xj",
