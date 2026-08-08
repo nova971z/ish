@@ -1,0 +1,93 @@
+Cas;Entrees;Attendu_calcule_main;Obtenu_code;Verdict
+calc-1 TTC 971 power_tool HT=100;price_ht=100 nc=power_tool terr=971;118.8075;118.80749999999999;OK
+calc-2 Mayotte 976 octroi 0 tva 0 HT=100;price_ht=100 nc=power_tool terr=976;100;100;OK
+calc-3 prix 0;price_ht=0 terr=971;0;0;OK
+calc-4 HT deduit de price/vat;price=120 vat=0.2 terr=971;118.8075;118.80749999999999;OK
+calc-5 hand_tool 971 HT=200;price_ht=200 nc=hand_tool terr=971;233.275;233.275;OK
+calc-6 Guyane 973 tva 0 HT=100;price_ht=100 nc=power_tool terr=973;110;109.99999999999999;OK
+calc-7 accessory 974 HT=50;price_ht=50 nc=accessory terr=974;56.9625;56.9625;OK
+calc-8 octroi 971 HT=100;price_ht=100 nc=power_tool terr=971 champ=octroi;9.5;9.5;OK
+calc-9 tva 971 HT=100;price_ht=100 nc=power_tool terr=971 champ=tva;9.3075;9.30749999999999;OK
+uc-1 unitCents 971 HT=100;price_ht=100 terr=971;11881;11881;OK
+uc-2 arrondi centimes entier 974 HT=50;ttc=56.9625 ×100=5696.25 round;5696;5696;OK
+uc-3 unitCents Mayotte HT=100;price_ht=100 terr=976;10000;10000;OK
+uc-4 unitCents prix 0;price_ht=0 terr=971;0;0;OK
+uc-5 unitCents hand_tool 971 HT=200;ttc=233.275 ×100=23327.5 round;23328;23328;OK
+tr-1 taux octE power_tool 971;nc=power_tool terr=971;0.07;0.07;OK
+tr-2 taux octE Mayotte;nc=power_tool terr=976;0;0;OK
+tr-3 taux octE hand_tool 974;nc=hand_tool terr=974;0.035;0.035;OK
+tr-4 taux octR consumable 971;nc=consumable terr=971;0.015;0.015;OK
+tr-5 territoire inconnu repli 971;nc=power_tool terr=999;0.085;0.085;OK
+tr-6 nc inconnue repli defaut terr;nc=inconnue terr=971;0.07;0.07;OK
+cf-1 coffret petit;nc=power_tool title=Perceuse cat=Perceuses;1500;1500;OK
+cf-2 coffret gros circulaire;nc=power_tool title=Scie circulaire;2500;2500;OK
+cf-3 coffret gros 3 machines;nc=power_tool title=Kit 3 outils;2500;2500;OK
+cf-4 coffret non eligible accessory;nc=accessory;0;0;OK
+cf-5 coffret non eligible category coffret;nc=power_tool category=Coffrets;0;0;OK
+cf-6 coffret deja inclus;nc=power_tool coffretIncluded=true;0;0;OK
+pe-1 poids outil+petit coffret;weight=2.7 avecCoffret=true petit;3.2;3.2;OK
+pe-2 poids sans coffret;weight=2.7 avecCoffret=false;2.7;2.7;OK
+pe-3 poids outil+gros coffret;weight=4 avecCoffret=true gros;5.3;5.3;OK
+pe-4 poids non eligible;weight=1 nc=accessory avecCoffret=true;1;1;OK
+pe-5 poids 0;weight absent avecCoffret=false;0;0;OK
+co-1 colissimo 0.4kg;w=0.4;14;14;OK
+co-2 colissimo 2.7kg;w=2.7 -> palier 3kg;33;33;OK
+co-3 colissimo 5kg;w=5;38.9;38.9;OK
+co-4 colissimo 10kg;w=10;64;64;OK
+co-5 colissimo hors grille 40kg;w=40 -> dernier;143.02;143.02;OK
+fpo-1 fixedPerOrder defaut (via evaluate);(1000+12×10)/400 = 2.80;2.8;2.8;OK
+ev-A commission panier 8e = 1% + 0.20;costHT=8 markup=0 ttc=8;0.28;0.28;OK
+ev-B commission ttc=100 = 1.00 + 0.20 (fix par transaction);costHT=100 markup=0 ttc=100;1.2;1.2;OK
+ev-C ttc 971 markup 100%;costHT=100 markup=1 oct .095 tva .085 ship 33 douane 5.10;237.615;237.61;OK
+ev-C commission round2;commission=2.57615 -> round2;2.58;2.58;OK
+ev-C octroiPaid;octroi .095 ×(100+33)=12.635;12.64;12.64;OK
+ev-C netOp round2;revenueHT 219 − costs 156.61115;62.39;62.39;OK
+ev-C netAfterIS round2;netOp 62.38885 ×0.85;53.03;53.03;OK
+ev-C marginAfterIS (net apres IS / revenueHT);netAfterIS 53.0305225 / revenueHT 219;0.2421485;0.24214850456621;OK
+ev-D marginAfterIS a prix 0;costHT=0 -> revenueHT=0;0;0;OK
+ev-D commission a prix 0 = fix 0.20;ttc=0 -> 0×0.01+0.20;0.2;0.2;OK
+sm-1 solveMarkup target 0.15 (attendu 0.273);costHT=100 oct0 tva0 ship0 target0.15;0.273;0.273;OK
+sm-2 solveMarkup target 0 (attendu 0.046);costHT=100 target0;0.046;0.046;OK
+sm-3 solveMarkup target 0.99 -> plafond 3;target0.99 inatteignable;3;3;OK
+rec-1 recommend priceHt (attendu 173.4);costHT=100 weight=2.7 mode=colissimo terr=971;173.4;173.4;OK
+rec-1 recommend price TTC-FR (attendu 208.08);priceHt 173.4 ×1.20;208.08;208.08;OK
+rec-1 recommend shipKind;colissimo 2.7kg;colissimo;colissimo;OK
+rec-1 recommend marginAfterIS >= target (0/1);marginAfterIS >= 0.15 ?;1;1;OK
+rec-2 recommend depuis costTTC=120 -> costHT 100;costTTC=120 /1.20=100;173.4;173.4;OK
+rec-3 recommend costHT<=0 -> null;costHT=0;null;null;OK
+mat-1 marginAt netOp;costHT=100 priceHt=173.4;33.58;33.58;OK
+mat-1 marginAt netAfterIS;netOp 33.577878 ×0.85;28.54;28.54;OK
+mat-1 marginAt marginAfterIS;28.5411963 / 189.873;0.150317;0.15031729765422144;OK
+mat-2 marginAt depuis costTTC;costTTC=120 priceHt=173.4;28.54;28.54;OK
+mat-3 marginAt priceHt<=0 -> null;priceHt=0;null;null;OK
+ti-1 tier 0e;spend=0;bronze;bronze;OK
+ti-2 tier 499.99e;spend=499.99;bronze;bronze;OK
+ti-3 tier 500e (borne);spend=500;argent;argent;OK
+ti-4 tier 2000e (borne);spend=2000;or;or;OK
+ti-5 tier 5000e (borne);spend=5000;platine;platine;OK
+ti-6 tier 100000e;spend=100000;platine;platine;OK
+ly-1 remise bronze 0%;spend=0 total=10000;0;0;OK
+ly-2 remise argent 2%;spend=60000c total=10000;200;200;OK
+ly-3 remise or 5%;spend=200000c total=10000;500;500;OK
+ly-4 remise platine 8%;spend=500000c total=10000;800;800;OK
+ly-5 remise arrondi centime;spend platine total=10101 -> round(808.08);808;808;OK
+ly-100 remise fidelite 100% -> tout le panier;palier 100% total=8000;8000;8000;OK
+ly-100 amountCents apres remise 100% = 0;total 8000 − remise 8000;0;0;OK
+ly-100 TIERS restaure (platine 8%);apres restauration;8;8;OK
+r2-1 round2 1.234;n=1.234;1.23;1.23;OK
+r2-2 round2 1.236;n=1.236;1.24;1.24;OK
+r2-3 round2 118.8075;n=118.8075 -> 11880.75 round;118.81;118.81;OK
+r2-4 round2 -3.58;n=-3.58;-3.58;-3.58;OK
+r2-5 round2 0;n=0;0;0;OK
+is-1 IS benefice 0;benefice=0;0;0;OK
+is-2 IS benefice negatif;benefice=-100;0;0;OK
+is-3 IS 10000 (taux reduit 15%);benefice=10000 ->1500;1500;1500;OK
+is-4 IS 42500 (seuil, 15%);benefice=42500 ->6375;6375;6375;OK
+is-5 IS 50000 (mixte);benefice=50000 ->8250;8250;8250;OK
+is-6 IS 100000 (mixte);benefice=100000 ->20750;20750;20750;OK
+fu-1 stripePct enregistre ecrase commissionPct defaut;enBase={stripePct:0.015};0.015;0.015;OK
+fu-2 commissionPct direct;enBase={commissionPct:0.028};0.028;0.028;OK
+fu-3 commissionPct l emporte sur stripePct si les deux;enBase={stripePct:0.015,commissionPct:0.02};0.02;0.02;OK
+fu-4 stripeFix enregistre ecrase commissionFix;enBase={stripeFix:0.25};0.25;0.25;OK
+fu-5 rien enregistre -> defaut 1% (0.010);enBase={};0.01;0.01;OK
+QUESTION KILLIAN: définition de la marge;candidats: (a) pricing-model.js:174 marginAfterIS = netAfterIS/revenueHT [net apres IS / (priceHt×(1+octroi))] (b) accounting.js:248 marge_nette_pct = resultatNet/caHt×100 [net apres IS / CA HT] (c) accounting.js:200 marge_brute = caHt − cogs [brute, en euros] (d) admin.bundle.js:1148/1164 r.marginPct [affichage de marginAt, = (a)];chaque formule est calculable (oracles OK ci-dessus);terme « marge » ambigu : dénominateur revenueHT (a) vs CA HT (b), et brute (c) ≠ nette (a/b);À TRANCHER
