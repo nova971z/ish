@@ -8390,8 +8390,47 @@
   }
 
 
+  /* CHEMINS RÉELS (D-019, SEO ordre 1) : les pages publiques vivent désormais
+     à des adresses sans dièse (/produit/<slug>, /territoire/<slug>,
+     /catalogue…), servies par api/render.js. Le routeur lit donc le CHEMIN
+     quand aucun dièse n'est présent — et le dièse garde la priorité, pour que
+     la navigation interne (location.hash) continue de fonctionner telle
+     quelle sur une page à chemin réel. */
+  function parseChemin(chemin) {
+    chemin = String(chemin || '/');
+    if (chemin === '/' || chemin === '/index.html') return { route: '/', slug: null };
+    if (chemin.indexOf('/produit/') === 0) {
+      return { route: '/produit', slug: chemin.slice('/produit/'.length) };
+    }
+    if (chemin.indexOf('/territoire/') === 0) {
+      var t = chemin.slice('/territoire/'.length);
+      if (territoryCodeFromSlug(t)) return { route: '/territoire', slug: t };
+      return { route: '/404', slug: null };
+    }
+    var terr = chemin.replace(/^\//, '');
+    if (territoryCodeFromSlug(terr)) return { route: '/territoire', slug: terr };
+    if (ROUTES.indexOf(chemin) !== -1) return { route: chemin, slug: null };
+    return { route: '/404', slug: null };
+  }
+
+  /* Le chemin réel d'une route PUBLIQUE — null pour les routes privées ou
+     techniques (compte, admin, merci…), qui restent au dièse. Sert à la
+     redirection des anciens liens à dièse, une fois, au démarrage. */
+  var CHEMINS_REELS = ['/catalogue', '/contact', '/cgv', '/mentions-legales',
+    '/confidentialite', '/livraison', '/artisans'];
+  function cheminReel(parsed) {
+    if (parsed.route === '/produit' && parsed.slug) {
+      return '/produit/' + encodeURIComponent(decodeURIComponent(parsed.slug));
+    }
+    if (parsed.route === '/territoire' && parsed.slug) return '/territoire/' + parsed.slug;
+    if (CHEMINS_REELS.indexOf(parsed.route) !== -1) return parsed.route;
+    return null;
+  }
+
   function parseHash() {
-    var hash = location.hash.replace(/^#/, '') || '/';
+    var hash = location.hash.replace(/^#/, '');
+    // Aucun dièse : la route vit dans le chemin réel (rendu serveur).
+    if (!hash) return parseChemin(location.pathname);
     // Retire la chaîne de requête portée par le hash (retour de paiement)
     // to #/merci?session_id=…) so it doesn't break the exact ROUTES match.
     var qIndex = hash.indexOf('?');
@@ -8419,7 +8458,9 @@
     if (territoryCodeFromSlug(terrSlug)) {
       return { route: '/territoire', slug: terrSlug };
     }
-    if (ROUTES.indexOf(hash) === -1) return { route: '/', slug: null };
+    /* Route inconnue → vue 404 dédiée (défaut SEO-027). Renvoyer l'accueil
+       faisait passer une adresse fausse pour une page qui existe. */
+    if (ROUTES.indexOf(hash) === -1) return { route: '/404', slug: null };
     return { route: hash, slug: null };
   }
 
@@ -8542,6 +8583,9 @@
         break;
       case '/produit':
         if (parsed.slug) renderPDP(decodeURIComponent(parsed.slug));
+        break;
+      case '/404':
+        // Vue statique (index.html) : rien à rendre, tout est déjà écrit.
         break;
       case '/devis':
         renderDevis();
@@ -16883,6 +16927,30 @@
   }
 
   function init() {
+    /* ── CHEMINS RÉELS : la base documentaire reste LA RACINE ─────────────
+       Toutes les URL du site sont relatives (styles.css, images/…, fetch
+       products.json). Sur une page à chemin réel (/produit/<slug>), elles
+       partiraient vers /produit/images/… — 404. La balise <base href="/">
+       ramène tout à la racine ; api/render.js la pose dans le HTML rendu,
+       et on la pose AUSSI ici — EN PREMIER, avant le moindre fetch — pour le
+       cas du lien à dièse réécrit en chemin réel plus bas (replaceState
+       change document.baseURI sans elle).
+       Contrepartie assumée : avec une <base>, un clic sur href="#/…"
+       naviguerait vers /#/… en RECHARGEANT tout — la délégation ci-dessous
+       reprend ces clics et pilote location.hash, sans rechargement. */
+    if (!document.querySelector('base')) {
+      var basePage = document.createElement('base');
+      basePage.setAttribute('href', '/');
+      document.head.insertBefore(basePage, document.head.firstChild);
+    }
+    document.addEventListener('click', function (e) {
+      var a = e.target && e.target.closest ? e.target.closest('a[href^="#"]') : null;
+      if (!a) return;
+      e.preventDefault();
+      var h = a.getAttribute('href');
+      if (h && h.indexOf('#/') === 0) location.hash = h;
+      // href="#" ou "#app" : ancres de confort, jamais une navigation.
+    });
     cacheDom();
     // Skip-link : focus programmatique du <main> (preventDefault — un vrai
     // saut #app passerait par le routeur hash et re-rendrait l'accueil).
@@ -16912,6 +16980,23 @@
     updateWishlistUI();
     injectOrganizationJsonLd();
     aInit(); // mesure d'audience maison (clics data-track, cycle de vie, session)
+    /* Le bloc rendu par api/render.js a fait son travail (robots + premier
+       paint) : l'application reprend la main, il disparaît. */
+    /* Ciblé par ATTRIBUT : cet élément n'existe que dans le HTML rendu
+       serveur, jamais dans index.html — un id le ferait accuser à tort par
+       p1-static (« lu mais inexistant »). */
+    var ssr = document.querySelector('[data-rendu-serveur]');
+    if (ssr && ssr.parentNode) ssr.parentNode.removeChild(ssr);
+    /* Ancien lien à dièse → chemin réel (SEO ordre 1) : même page, adresse
+       propre et partageable. replaceState ne déclenche ni navigation ni
+       hashchange — le routage part ensuite du chemin, comme à l'arrivée
+       directe sur une page rendue serveur. Routes privées : dièse conservé. */
+    if (location.hash) {
+      var reel = cheminReel(parseHash());
+      if (reel && location.pathname !== reel) {
+        try { history.replaceState(null, '', reel + location.search); } catch (_) {}
+      }
+    }
     onRouteChange();
     // Signal pour le watchdog de boot (index.html) : l'app a démarré et le
     // routeur a affiché une vue — pas d'écran « chargement incomplet ».

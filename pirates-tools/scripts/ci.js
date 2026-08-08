@@ -81,6 +81,9 @@ var reqCofPoids = safeRequire('./check-coffret-poids','check-coffret-poids');
 var reqCoursesAl= safeRequire('./check-courses-alertes','check-courses-alertes');
 // Chacun voit SES courses (filtre dans la requete) + raz-compta vivante (POST).
 var reqCoursesP1= safeRequire('./check-courses-p1','check-courses-p1');
+// Le rendu serveur des pages publiques (SEO ordre 1) : 200 produit, vrai 404,
+// canonical sans #, noindex progressif (D-019).
+var reqRender   = safeRequire('./check-render','check-render');
 var reqCatPub   = safeRequire('./check-catalog-public','check-catalog-public');
 var reqAssetVer = safeRequire('./check-asset-versions','check-asset-versions');
 var reqWhClaim  = safeRequire('./check-webhook-claim','check-webhook-claim');
@@ -224,6 +227,7 @@ var reqReconc   = safeRequire('./check-reconciliation', 'check-reconciliation');
   await runOne(reqCofPoids, 'check-coffret-poids');
   await runOne(reqCoursesAl,'check-courses-alertes');
   await runOne(reqCoursesP1,'check-courses-p1');
+  await runOne(reqRender,   'check-render');
   await runOne(reqCatPub,   'check-catalog-public');
   await runOne(reqAssetVer, 'check-asset-versions');
   await runOne(reqWhClaim,  'check-webhook-claim');

@@ -137,6 +137,16 @@ var LISTES = [
       'Les prix viennent TOUJOURS du catalogue serveur.',
       'Preuve exigée : plan9, plan10, plan11, couriers verts.'
     ] },
+  { nom: 'RENDU SERVEUR (SEO)',
+    quand: /pirates-tools\/(api\/render\.js|sitemap\.xml)$/,
+    points: [
+      'MÊME HTML pour tous : aucun aiguillage robot/humain (cloaking rejeté, D-019).',
+      'Canonical JAMAIS avec un fragment # — une URL par page, exactement.',
+      'Fiche sans description_long ou au visuel placeholder ⇒ noindex,follow.',
+      'Un slug inconnu répond HTTP 404 + noindex — jamais 200, jamais une redirection.',
+      'Aucun prix rendu qui ne vienne pas du MÊME loadCatalog que le paiement (J4).',
+      'Preuve exigée : scripts/check-render.js vert + sabotages rouges.'
+    ] },
   { nom: 'CATALOGUE ET VISUELS',
     quand: /pirates-tools\/(products\.json|images\/|models\/|api\/products\.js$|api\/_lib\/catalog\.js$)/,
     points: [

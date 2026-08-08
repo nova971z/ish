@@ -13,9 +13,18 @@ const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css
 const server = http.createServer(async (req, res) => {
   try {
     let p = decodeURIComponent(req.url.split('?')[0]); if (p === '/') p = '/index.html';
+    /* Miroir de la production (rewrites Vercel, SEO ordre 1) : un chemin réel
+       sans extension (/livraison, /produit/<slug>) sert le gabarit AVEC la
+       <base href="/"> que api/render.js pose — sans elle, styles.css et
+       app.js relatifs partiraient vers /produit/… et la page serait morte.
+       Depuis les chemins réels, un reload en plein harnais tombait sur 404. */
+    const spa = !extname(p);
+    if (spa) p = '/index.html';
     const fp = normalize(join(ROOT, p)); if (!fp.startsWith(ROOT)) { res.writeHead(403); return res.end(); }
     const st = await stat(fp).catch(() => null); if (!st || !st.isFile()) { res.writeHead(404); return res.end('nf'); }
-    res.writeHead(200, { 'Content-Type': MIME[extname(fp)] || 'application/octet-stream' }); res.end(await readFile(fp));
+    let corps = await readFile(fp);
+    if (spa) corps = String(corps).replace('<head>', '<head>\n  <base href="/">');
+    res.writeHead(200, { 'Content-Type': MIME[extname(fp)] || 'application/octet-stream' }); res.end(corps);
   } catch (e) { res.writeHead(500); res.end(String(e)); }
 });
 await new Promise(r => server.listen(0, r));

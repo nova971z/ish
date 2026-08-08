@@ -40,7 +40,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=592">
+  <link rel="stylesheet" href="styles.css?v=593">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -400,6 +400,20 @@
         </div>
       </section>
 
+    </section>
+
+    <!-- 404 — route inconnue : une vraie page, jamais un renvoi muet à
+         l'accueil (défaut SEO-027). Elle dit ce qui s'est passé et offre
+         une sortie. -->
+    <section id="view-404" class="view hidden" data-route="/404" role="region" aria-labelledby="notfound-h1">
+      <div class="container">
+        <h1 id="notfound-h1" tabindex="-1">Page introuvable</h1>
+        <p>Cette adresse ne correspond à aucune page du site — le lien est peut-être ancien, ou l'article n'existe plus.</p>
+        <p class="lv-cta">
+          <a class="btn primary" href="#/catalogue">Voir le catalogue</a>
+          <a class="btn" href="#/">Retour à l'accueil</a>
+        </p>
+      </div>
     </section>
 
     <!-- CATALOGUE -->
@@ -2354,7 +2368,7 @@
   </noscript>
 
   <!-- =================== JS =================== -->
-  <script defer src="app.js?v=592"></script>
+  <script defer src="app.js?v=593"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->

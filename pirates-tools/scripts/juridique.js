@@ -41,7 +41,13 @@ var DOMAINES = {
                  /pirates-tools\/api\/_lib\/paiement\/.+\.js$/] },
   J4: { titre: 'Prix et promotions',
         motifs: [/pirates-tools\/products\.json$/,
-                 /pirates-tools\/api\/(contact|checkout|create-payment-intent|webhook|admin)\.js$/,
+                 /* ⛔ `render` rattaché le 08/08/2026 : le rendu serveur écrit
+                    les pages produit que Google LIT — dès que l'ordre 2 y
+                    posera un prix (JSON-LD Offers), ce prix devient une
+                    annonce publique opposable. Un prix rendu faux ou périmé
+                    dans le HTML est une pratique commerciale trompeuse, même
+                    si la page de paiement, elle, calcule juste. */
+                 /pirates-tools\/api\/(contact|checkout|create-payment-intent|webhook|admin|render)\.js$/,
                  /* pricing-config rattaché le 02/08/2026 : il porte le drapeau
                     _sourceIllisible qui INTERDIT toute écriture de prix quand la
                     config n'est pas lisible — c'est une décision de prix. */
@@ -62,7 +68,9 @@ var DOMAINES = {
                  // réellement débité — le prix opposable au client.
                  /pirates-tools\/api\/_lib\/paiement\/.+\.js$/] },
   J5: { titre: 'Fiscalité DOM — TVA et octroi de mer',
-        motifs: [/pirates-tools\/api\/(checkout|create-payment-intent|webhook|admin|cron-report)\.js$/,
+        // `render` : les pages territoire affirment « TVA et octroi de mer
+        // inclus » — une affirmation fiscale publiée, donc couverte.
+        motifs: [/pirates-tools\/api\/(checkout|create-payment-intent|webhook|admin|cron-report|render)\.js$/,
                  /pirates-tools\/api\/_lib\/(pricing|pricing-model|accounting|invoice)\.js$/] }
 };
 

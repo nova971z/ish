@@ -3,6 +3,17 @@
   "crons": [
     { "path": "/api/cron-report", "schedule": "0 6 1 * *" }
   ],
+  "rewrites": [
+    { "source": "/produit/:slug", "destination": "/api/render?page=produit&slug=:slug" },
+    { "source": "/territoire/:slug", "destination": "/api/render?page=territoire&slug=:slug" },
+    { "source": "/catalogue", "destination": "/api/render?page=catalogue" },
+    { "source": "/contact", "destination": "/api/render?page=contact" },
+    { "source": "/cgv", "destination": "/api/render?page=cgv" },
+    { "source": "/mentions-legales", "destination": "/api/render?page=mentions-legales" },
+    { "source": "/confidentialite", "destination": "/api/render?page=confidentialite" },
+    { "source": "/livraison", "destination": "/api/render?page=livraison" },
+    { "source": "/artisans", "destination": "/api/render?page=artisans" }
+  ],
   "headers": [
     {
       "source": "/(.*)",
