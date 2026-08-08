@@ -28,7 +28,12 @@ const T = (n, ok, x = '') => { ok ? pass++ : fail++; console.log((ok ? '✅' : '
 
 const cat = JSON.parse(await readFile(join(ROOT, 'products.json'), 'utf8'));
 const prods = Array.isArray(cat) ? cat : (cat.products || []);
-const quinc = prods.filter(p => p.brand === 'Quincaillerie').slice(0, 2);
+/* ⛔ La quincaillerie se reconnaît à sa CATÉGORIE (app.js, estQuincaillerie),
+   plus à une marque : depuis le regroupement du catalogue, « Quincaillerie »
+   n'est plus une marque — le filtre par marque rendait 0 fiche et le harnais
+   mourait avant sa première assertion (corrigé le 08/08/2026). */
+const quinc = prods.filter(p => String(p.category || '') === 'Quincaillerie').slice(0, 2);
+if (quinc.length < 2) { console.log('⏭ IGNORÉ — moins de 2 fiches Quincaillerie au catalogue : rien à vérifier ici.'); process.exit(2); }
 const K1 = quinc[0].id || quinc[0].sku, K2 = quinc[1].id || quinc[1].sku;
 
 const PROFIL = {
