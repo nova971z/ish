@@ -81,7 +81,7 @@ const BUDGET = {
 
      ⛔ Ce plafond ne se relèvera plus tant que ce chantier n'est pas fait : le
      prochain dépassement devra retirer du poids, pas déplacer la limite. */
-  'styles.css':     64,   // mesuré  60,26 (dont 18,59 de commentaires)
+  'styles.min.css': 64,   // servi (généré depuis styles.css, sans commentaires)
   // SEO ordre 9 (D-119) : la grille charge products-light.json (fiche allégée) ;
   // products.json ne sert plus qu'au serveur (endpoint ?id + générateur léger).
   'products-light.json': 65,   // catalogue allégé servi à froid
@@ -189,22 +189,29 @@ LOG('  P8.4 — TOTAL SERVI À FROID (le chiffre que voit le visiteur)');
 LOG('━'.repeat(74));
 
 const PLAFOND_TOTAL_KO = 400;                       // décision user 28/07/2026
-// SEO ordre 9 (D-120/D-119) : le visiteur télécharge le bundle allégé
-// (app.visitor.js) et le catalogue allégé (products-light.json) ; ni app.js ni
-// products.json ne partent au client. admin.bundle.js n'est PAS ici : il n'est
-// chargé que sur #/admin (voir CONTRÔLE ZÉRO-ADMIN plus bas).
-const SERVIS_A_FROID = ['index.html', 'styles.css', 'app.visitor.js',
+// ⛔ PORTE RÉARMÉE BLOQUANTE le 08/08/2026 (décision Killian, lot poids). Le
+// repère de 400 Ko était devenu INFORMATIF le 01/08 (« vire-moi les plafonds »).
+// Une fois le total ramené SOUS 400 par les 3 leviers (strip commentaires CSS +
+// HTML, whitelist products-light), il redevient une RÈGLE : « un repère informatif
+// finit toujours dépassé ; maintenant qu'il est tenable, il redevient bloquant. »
+// Dépasser 400 Ko à froid FAIT ROUGIR la CI (P8.4 pousse dans `problems`).
+// SEO ordre 9 : le visiteur télécharge le bundle allégé (app.visitor.js), le CSS
+// sans commentaires (styles.min.css), le HTML sans commentaires (index.html
+// généré) et le catalogue allégé (products-light.json). admin.bundle.js n'est
+// PAS ici : chargé seulement sur #/admin.
+const SERVIS_A_FROID = ['index.html', 'styles.min.css', 'app.visitor.js',
   'firebase-init.js', 'products-light.json', 'sw.js'];
 let totalFroid = 0;
 SERVIS_A_FROID.forEach((f) => {
   try { totalFroid += zlib.gzipSync(read(f), { level: 9 }).length / 1024; } catch (e) {}
 });
-LOG('  ' + (totalFroid <= PLAFOND_TOTAL_KO ? '✅' : '❌')
+const froidOk = totalFroid <= PLAFOND_TOTAL_KO;
+LOG('  ' + (froidOk ? '✅' : '❌')
   + ' total ' + totalFroid.toFixed(1) + ' Ko compressés   (plafond '
   + PLAFOND_TOTAL_KO + ', marge ' + (PLAFOND_TOTAL_KO - totalFroid).toFixed(1) + ')');
-if (totalFroid > PLAFOND_TOTAL_KO) {
-  /* Même décision : on informe, on ne refuse plus. */
-  LOG('     ↑ au-dessus du repère de ' + PLAFOND_TOTAL_KO + ' Ko — information, pas un refus.');
+if (!froidOk) {
+  problems.push('TOTAL SERVI À FROID ' + totalFroid.toFixed(1) + ' Ko > '
+    + PLAFOND_TOTAL_KO + ' Ko compressés (porte réarmée bloquante, lot poids) — retirer du poids, ne pas relever le plafond');
 }
 
 // ═══ CONTRÔLE 5 — POIDS DES IMAGES SERVIES ════════════════════════════════

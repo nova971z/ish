@@ -78,9 +78,10 @@ module.exports = async function(){
     if (!hasId(oid)) warns.push('index.html: id="#' + oid + '" manquant (optionnel tant que PDP non branchée).');
   }
 
-  // Vérif assets principaux (<link>/<script>) — accepte ./, / ou sans préfixe
-  if (!/<link\b[^>]*href=["']\.?\/?styles\.css([?#][^"']*)?\s*["'][^>]*>/i.test(html)) {
-    errs.push('index.html: <link href="styles.css"> manquant (rel="stylesheet").');
+  // Vérif assets principaux (<link>/<script>) — accepte ./, / ou sans préfixe.
+  // Le CSS servi est styles.min.css (lot poids : styles.css source sans commentaires).
+  if (!/<link\b[^>]*href=["']\.?\/?styles\.min\.css([?#][^"']*)?\s*["'][^>]*>/i.test(html)) {
+    errs.push('index.html: <link href="styles.min.css"> manquant (rel="stylesheet").');
   }
   // Le bundle servi est app.visitor.js (SEO ordre 9 / D-120 : admin sorti du
   // bundle visiteur). app.js reste la source DEV, jamais référencée par le HTML.

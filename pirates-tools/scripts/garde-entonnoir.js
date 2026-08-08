@@ -58,7 +58,11 @@ var PROTEGES = [
   /(^|\/)pirates-tools\/admin\.bundle\.js$/,
   /(^|\/)pirates-tools\/sw\.js$/,
   /(^|\/)pirates-tools\/index\.html$/,
+  // Lot poids : source (index.src.html, styles.css) ET servi généré
+  // (styles.min.css). Changer l'une doit rappeler de régénérer + bumper sw.js.
+  /(^|\/)pirates-tools\/index\.src\.html$/,
   /(^|\/)pirates-tools\/styles\.css$/,
+  /(^|\/)pirates-tools\/styles\.min\.css$/,
   /(^|\/)pirates-tools\/mfa\.js$/,
   /(^|\/)pirates-tools\/firebase-init\.js$/,
   /(^|\/)pirates-tools\/manifest\.webmanifest$/,

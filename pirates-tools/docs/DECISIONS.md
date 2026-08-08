@@ -673,3 +673,35 @@ Search Console + vérification des redirections de domaine — indépendants de
 la création d'entreprise.
 
 **État : EN VIGUEUR** *(08/08/2026)*
+
+---
+
+## D-021 — Le total servi à froid redevient une porte BLOQUANTE (P8.4 ≤ 400 Ko)
+
+| | |
+|---|---|
+| **Statut** | ✅ **ACTIVE** — réarme et précise D-001 |
+| **Qui** | Killian (08/08/2026, lot « poids ») |
+| **Où c'est vérifiable** | `scripts/audit/p8-perf.js` (P8.4, `problems.push`) · sabotage prouvé |
+
+**Le fait tranché.** Le 01/08 (voir `.claude/rules/front.md`), tous les plafonds
+de poids étaient passés **informatifs** (« vire-moi les plafonds »). Motif d'alors :
+ils gênaient sans servir. Conséquence observée : le total à froid a dérivé à
+**417,7 Ko**, au-dessus du repère de 400 (D-001).
+
+**Ce qui change.** Une fois le total ramené **sous 400** par trois leviers sans
+perte de contenu — commentaires retirés du CSS servi (`styles.min.css`) et du
+HTML servi (`index.html` généré depuis `index.src.html`), et `products-light.json`
+réduit aux seuls champs que le visiteur lit — le repère de **400 Ko redevient une
+RÈGLE** : P8.4 fait **rougir la CI** au-dessus. Motif : « un repère informatif finit
+toujours dépassé ; maintenant qu'il est tenable, il redevient bloquant ».
+
+**Mesure de livraison (gzip-9, rejouée) :** 417,7 Ko → **397,7 Ko** (marge 2,3).
+Par fichier : index.html 36,8 · styles.min.css 39,4 · app.visitor.js 206,1 ·
+firebase-init.js 2,2 · products-light.json 106,7 · sw.js 6,4.
+
+**Les autres plafonds PAR FICHIER restent informatifs** (décision du 01/08
+inchangée pour eux) : seul le TOTAL à froid (P8.4), le seul chiffre que le
+visiteur paie réellement, redevient opposable.
+
+**État : EN VIGUEUR** *(08/08/2026)*

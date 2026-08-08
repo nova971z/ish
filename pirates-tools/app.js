@@ -2235,9 +2235,19 @@
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
         if (d && d.ok && d.product) {
-          // Fusion EN PLACE : les champs de détail arrivent, le marqueur tombe.
-          Object.assign(product, d.product);
-          delete product._light;
+          // Fusion EN PLACE dans TOUTES les instances vivantes de cette fiche.
+          // ⚠️ Le tableau `products` peut avoir été REMPLACÉ pendant le fetch :
+          // la liste live /api/products (rang « api ») écrase le statique par des
+          // objets NEUFS marqués `_light`. Fusionner seulement l'objet capturé
+          // laissait alors la fiche affichée vide (détail perdu au profit d'une
+          // instance orpheline) — course exposée par pdp/catalogue-leger. On
+          // fusionne donc dans chaque objet courant du même identifiant, plus
+          // l'objet d'origine, pour survivre à ce remplacement.
+          var cibles = products.filter(function (x) {
+            return x && (x.slug === cle || x.id === cle || x.sku === cle);
+          });
+          if (cibles.indexOf(product) === -1) cibles.push(product);
+          cibles.forEach(function (x) { Object.assign(x, d.product); delete x._light; });
         }
         return product;
       })

@@ -33,9 +33,9 @@ module.exports = function () {
   // 2) styles.css / app.visitor.js dans le HTML
   // Le bundle SERVI est app.visitor.js (SEO ordre 9 / D-120 : admin sorti du
   // bundle visiteur). app.js reste la source DEV complète, jamais servie.
-  var mCss = html.match(/styles\.css\?v=(\d+)/);
+  var mCss = html.match(/styles\.min\.css\?v=(\d+)/);
   var mJs = html.match(/app\.visitor\.js\?v=(\d+)/);
-  ok(mCss && mCss[1] === ASSET, 'index.html styles.css?v=' + (mCss && mCss[1]) + ' == ASSET_VER ' + ASSET);
+  ok(mCss && mCss[1] === ASSET, 'index.html styles.min.css?v=' + (mCss && mCss[1]) + ' == ASSET_VER ' + ASSET);
   ok(mJs && mJs[1] === ASSET, 'index.html app.visitor.js?v=' + (mJs && mJs[1]) + ' == ASSET_VER ' + ASSET);
 
   // 3) Icônes + manifest dans le HTML → ICON_VER, sans exception
@@ -53,7 +53,7 @@ module.exports = function () {
   ok(!!shell, 'APP_SHELL trouvé dans sw.js');
   if (shell) {
     var body = shell[1];
-    ok(/styles\.css\?v=\$\{ASSET_VER\}/.test(body), 'APP_SHELL styles.css sur ASSET_VER');
+    ok(/styles\.min\.css\?v=\$\{ASSET_VER\}/.test(body), 'APP_SHELL styles.min.css sur ASSET_VER');
     ok(/app\.visitor\.js\?v=\$\{ASSET_VER\}/.test(body), 'APP_SHELL app.visitor.js sur ASSET_VER');
     ok(/manifest\.webmanifest\?v=\$\{ICON_VER\}/.test(body), 'APP_SHELL manifest sur ICON_VER');
     ok(!/icon-\d+\.png\?v=\$\{ASSET_VER\}/.test(body), 'APP_SHELL : aucune icône sur ASSET_VER');

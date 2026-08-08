@@ -38,3 +38,10 @@ outils/
 # Presentes dans git pour etre recuperables, JAMAIS deployees — meme mecanisme
 # que images/_originals/. Elles ne doivent ni alourdir le site ni y reapparaitre.
 archives/
+
+# Lot poids : SOURCES de développement des fichiers servis générés. JAMAIS
+# déployées — Vercel sert les versions générées (index.html, styles.min.css),
+# et les générateurs (generer-index/styles) tournent en CI, pas sur Vercel.
+# index.src.html : source commentée + gabarit lu par api/render.js EN LOCAL/CI.
+index.src.html
+styles.css

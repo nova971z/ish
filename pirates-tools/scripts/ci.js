@@ -114,8 +114,8 @@ function reqCatLegerPorte(){
     return ['[generer-catalogue-leger] ' + m.split('\n').filter(Boolean).join(' · ')];
   }
 }
-// SEO ordre 9 / D-120 : le bundle visiteur (app.js) ne contient AUCUNE fonction
-// admin, et il est à jour vs app.src.js. Fichier present mais casse -> porte morte.
+// SEO ordre 9 / D-120 : le bundle visiteur (app.visitor.js) ne contient AUCUNE
+// fonction admin, et il est à jour vs app.js. Fichier present mais casse -> porte morte.
 var reqExtraire = safeRequire('./extraire-admin','extraire-admin');
 function reqExtraireAdmin(){
   if (!reqExtraire) return [];
@@ -126,6 +126,33 @@ function reqExtraireAdmin(){
   } catch(e){
     var m = (e.stderr ? e.stderr.toString() : '') || (e.message||'');
     return ['[extraire-admin] ' + m.split('\n').filter(Boolean).join(' · ')];
+  }
+}
+// Lot poids (levier 1) : styles.min.css servi = styles.css sans commentaires,
+// mêmes règles. (levier 3) : index.html servi = index.src.html sans commentaires
+// HTML, scripts inline (empreintes CSP) intacts. Present mais casse -> porte morte.
+var reqStyles = safeRequire('./generer-styles','generer-styles');
+function reqGenererStyles(){
+  if (!reqStyles) return [];
+  try {
+    cp.execFileSync(process.execPath, [path.join(__dirname,'generer-styles.js'),'--verifie'],
+      { stdio:['ignore','ignore','pipe'] });
+    return [];
+  } catch(e){
+    var m = (e.stderr ? e.stderr.toString() : '') || (e.message||'');
+    return ['[generer-styles] ' + m.split('\n').filter(Boolean).join(' · ')];
+  }
+}
+var reqIndex = safeRequire('./generer-index','generer-index');
+function reqGenererIndex(){
+  if (!reqIndex) return [];
+  try {
+    cp.execFileSync(process.execPath, [path.join(__dirname,'generer-index.js'),'--verifie'],
+      { stdio:['ignore','ignore','pipe'] });
+    return [];
+  } catch(e){
+    var m = (e.stderr ? e.stderr.toString() : '') || (e.message||'');
+    return ['[generer-index] ' + m.split('\n').filter(Boolean).join(' · ')];
   }
 }
 var reqCatPub   = safeRequire('./check-catalog-public','check-catalog-public');
@@ -275,6 +302,8 @@ var reqReconc   = safeRequire('./check-reconciliation', 'check-reconciliation');
   await runOne(reqSitemapPorte, 'generer-sitemap');
   await runOne(reqCatLegerPorte, 'generer-catalogue-leger');
   await runOne(reqExtraireAdmin, 'extraire-admin');
+  await runOne(reqGenererStyles, 'generer-styles');
+  await runOne(reqGenererIndex, 'generer-index');
   await runOne(reqCatPub,   'check-catalog-public');
   await runOne(reqAssetVer, 'check-asset-versions');
   await runOne(reqWhClaim,  'check-webhook-claim');

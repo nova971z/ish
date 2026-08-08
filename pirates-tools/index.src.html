@@ -7,6 +7,7 @@
   <title>Pirates Tools — Outillage professionnel DOM-TOM</title>
   <meta name="description" content="Outillage pro DeWALT, Makita, Festool, Flex, Facom, Stanley, Wera livré en Guadeloupe, Martinique, Guyane, Réunion et Mayotte. Octroi de mer et TVA inclus." />
 
+  <!-- Open Graph / Social -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Pirates Tools">
   <meta property="og:locale" content="fr_FR">
@@ -23,16 +24,38 @@
 
   <link rel="canonical" href="https://pirates-tools.com/">
 
+  <!-- Preconnect critical third-party origins -->
+  <!-- ajax.googleapis : origine du <model-viewer> chargé À LA DEMANDE (voir
+       app.js › ensureModelViewer). Le preconnect réchauffe la connexion sans
+       télécharger le script au boot. wa.me retiré : jamais sollicité au 1er
+       paint (WhatsApp n'est ouvert que sur clic utilisateur). -->
   <link rel="preconnect" href="https://ajax.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://ajax.googleapis.com">
-  
+  <!-- www.gstatic.com : Firebase (app+auth+firestore, ~500 Ko) est importé en
+       ES module par firebase-init.js — l'origine n'était découverte qu'APRÈS
+       le téléchargement de firebase-init.js → DNS+TLS+RTT sériels sur le chemin
+       critique, à CHAQUE visite en navigation privée. Modules = CORS →
+       crossorigin obligatoire pour préchauffer le bon pool de connexions. -->
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
+  <!-- CSS -->
   <link rel="stylesheet" href="styles.min.css?v=600">
 
+  <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
+       (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
+       donc hors du chemin critique du 1er paint. Le chargement paresseux évite
+       aussi la course "Multiple instances of Three.js" qui cassait le rendu GLB
+       sur Safari iPad. -->
+
+  <!-- Firebase (auth + firestore) -->
   <script type="module" src="firebase-init.js"></script>
 
+  <!-- WATCHDOG DE BOOT : si app.js ne s'est pas execute en 7s (reseau qui
+       hoquette pendant que le SW n'a pas encore la nouvelle version en cache,
+       erreur JS fatale...), les vues restent .hidden → page noire muette avec
+       seulement topbar/dock. Ce garde-fou inline (aucune dependance) affiche
+       alors un message + bouton Recharger au lieu d'un ecran mort. -->
   <script>
   (function () {
     setTimeout(function () {
@@ -54,10 +77,18 @@
   })();
   </script>
 
+  <!-- Serverless API base. Empty string = same origin.
+       Production is Vercel (pirates-tools.com): the site and its /api/*
+       serverless functions are served from the same origin, so '' is correct.
+       Card checkout REQUIRES this same-origin API — do not host on a static-only
+       origin (e.g. GitHub Pages) where /api/* does not exist. -->
   <script>
   window.PT_API_BASE = '';
   </script>
 
+  <!-- Crypto payment config — CE BLOC INLINE EST LA SOURCE UNIQUE.
+       (crypto-config.js est un vestige non chargé, exclu du déploiement via
+       .vercelignore — ne PAS y maintenir de copie, elle divergerait.) -->
   <script>
   window.PT_CRYPTO_CONFIG = {
     networks: [
@@ -92,6 +123,7 @@
   };
   </script>
 
+  <!-- PWA -->
   <meta name="theme-color" content="#0a0f14" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -101,12 +133,16 @@
   <link rel="icon" href="icons/icon-192.png?v=421" sizes="192x192" />
   <link rel="apple-touch-icon" href="icons/icon-180.png?v=421" sizes="180x180" />
 
+
+
 </head>
 
 <body>
-  
+  <!-- Lien d'evitement (WCAG 2.4.1) : premier element focusable, revele au
+       focus clavier (.skip-link:focus). Gere en JS (preventDefault + focus)
+       pour ne pas polluer le hash du routeur SPA. -->
   <a class="skip-link" href="#app" id="skipLink">Aller au contenu</a>
-  
+  <!-- =================== TOPBAR =================== -->
   <header class="topbar" role="banner">
     <div class="topbar-left">
       <button id="menu-toggle" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="side-menu">
@@ -144,9 +180,13 @@
     </div>
   </header>
 
+  <!-- =================== HERO =================== -->
   <section id="hero" class="hero-full" aria-hidden="true">
     <div class="hero-logo-container" id="heroLogoContainer">
-      
+      <!-- LCP : WebP (−51 % vs PNG, visuellement identique — vérifié pixel à
+           pixel q0.68) via <picture>, repli PNG pour les très vieux moteurs.
+           sizes = l'affichage RÉEL (clamp CSS 180px→420px), plus le 90vw/60vw
+           surévalué qui faisait télécharger le 512w sur mobile DPR2. -->
       <picture>
         <source type="image/webp"
           srcset="images/hero-logo-256.webp 256w, images/hero-logo-384.webp 384w, images/hero-logo-512.webp 512w"
@@ -159,15 +199,19 @@
     </div>
   </section>
 
+  <!-- Top loading bar (boot + retours accueil) -->
   <div id="pt-loadbar" class="pt-loadbar" aria-hidden="true"><span></span></div>
 
+  <!-- =================== VUES (SPA) =================== -->
   <main id="app" role="main" tabindex="-1">
 
+    <!-- HOME -->
     <section id="view-home" class="view" data-route="/" role="region" aria-labelledby="home-h1">
       <div class="container">
 
         <h1 id="home-h1" class="sr-only">Pirates Tools — outillage professionnel livré en Guadeloupe, Martinique, Guyane, Réunion et Mayotte (octroi de mer et TVA inclus)</h1>
 
+        <!-- Section Marques -->
         <div class="brands-section" data-reveal="fade-up">
           <div class="brands-section__header">
             <h2 class="brands-section__title">Nos Marques</h2>
@@ -176,6 +220,7 @@
           <div id="brandGrid" class="brands-showcase" role="list" data-bind="brands" data-reveal-stagger></div>
         </div>
 
+        <!-- Banniere outils 3D -->
         <section id="tools-banner" class="tools-banner">
           <h2>Découvrez nos Outils en 3D</h2>
           <div class="tools-3d-viewer">
@@ -202,6 +247,7 @@
         </section>
       </div>
 
+      <!-- Bandeau scroll produits — pleine largeur -->
       <section class="home-products-strip">
         <h2 class="home-products-strip__title">Nos produits</h2>
         <div class="home-products-strip__track" id="homeProductsTrack">
@@ -209,21 +255,30 @@
         </div>
       </section>
 
+      <!-- Recently viewed — caché si aucun produit vu -->
       <section class="home-products-strip home-products-strip--recent" id="recentlyViewedSection" hidden>
         <h2 class="home-products-strip__title">Récemment consultés</h2>
         <div class="home-products-strip__track" id="recentlyViewedTrack"></div>
       </section>
 
+      <!-- =================== NOS ARTISANS PARTENAIRES (Black) ===================
+           Vitrine des partenaires Black sur l'accueil : même mécanique que le
+           bandeau produits (scroll horizontal). Masquée tant qu'aucun partenaire
+           Black actif n'existe (renderPartnersStrip, app.js). -->
       <section class="home-products-strip home-products-strip--partners" id="partnersStripSection" hidden>
         <h2 class="home-products-strip__title">Nos artisans partenaires</h2>
         <div class="home-products-strip__track" id="partnersStripTrack"></div>
       </section>
 
+      <!-- LIVREURS : bandeau des fiches livreurs (même mécanique que ci-dessus).
+           Le liseré vert « Disponible » ne s'allume que si le livreur a lui-même
+           cliqué son interrupteur dans son espace (renderCouriersStrip, app.js). -->
       <section class="home-products-strip home-products-strip--couriers" id="couriersStripSection" hidden>
         <h2 class="home-products-strip__title">Nos livreurs</h2>
         <div class="home-products-strip__track" id="couriersStripTrack"></div>
       </section>
 
+      <!-- =================== ABONNEMENTS & SERVICES =================== -->
       <section class="plans-section" data-reveal="fade-up">
         <div class="container">
 
@@ -233,6 +288,7 @@
             <p class="plans-header__sub">Touchez un service pour voir vos economies &mdash; estimation pour un artisan qui achete ~4 000 &euro;/an d'outillage</p>
           </div>
 
+          <!-- Round service orbs -->
           <div class="plan-orbs" id="planOrbs">
 
             <button class="plan-orb plan-orb--basique" data-plan="basique" data-price="4,90" data-saving="25" aria-label="Plan Basique a 4,90 euros par mois">
@@ -276,6 +332,7 @@
 
           </div>
 
+          <!-- Compact chart -->
           <div class="plans-chart" id="plansChartWrap">
             <div class="plans-chart__header">
               <div class="plans-chart__header-left">
@@ -292,11 +349,13 @@
             </div>
           </div>
 
+          <!-- Expandable detail -->
           <div class="plan-detail" id="planDetail"></div>
 
         </div>
       </section>
 
+      <!-- Avis clients — page accueil -->
       <section class="home-reviews" data-reveal="fade-up">
         <div class="container">
           <h2 class="home-reviews__title">Ce que disent nos clients</h2>
@@ -323,6 +382,7 @@
         </div>
       </section>
 
+      <!-- Newsletter signup -->
       <section class="home-newsletter" data-reveal="fade-up">
         <div class="container">
           <div class="home-newsletter__card">
@@ -342,6 +402,9 @@
 
     </section>
 
+    <!-- 404 — route inconnue : une vraie page, jamais un renvoi muet à
+         l'accueil (défaut SEO-027). Elle dit ce qui s'est passé et offre
+         une sortie. -->
     <section id="view-404" class="view hidden" data-route="/404" role="region" aria-labelledby="notfound-h1">
       <div class="container">
         <h1 id="notfound-h1" tabindex="-1">Page introuvable</h1>
@@ -353,6 +416,7 @@
       </div>
     </section>
 
+    <!-- CATALOGUE -->
     <section id="view-catalogue" class="view hidden" data-route="/catalogue" role="region" aria-labelledby="catalogue-h1">
       <div class="container">
         <div class="catalogue-header">
@@ -373,15 +437,39 @@
       </div>
     </section>
 
+    <!-- PRODUIT (PDP) — Landing interactive Apple-style -->
     <section id="view-produit" class="view hidden" data-route="/produit" role="region" aria-labelledby="pdpTitle">
       <span id="pdp" aria-hidden="true"></span>
 
+      <!-- Navigation retour -->
       <div class="pdp-nav">
         <a class="pdp-back" href="#/catalogue" data-nav="/catalogue">&#8592; Retour</a>
       </div>
 
+      <!-- HERO : model-viewer plein ecran, titre en bas -->
       <div class="pdp-hero" id="pdpHero">
-
+        <!-- Héros = POSTER produit (jamais de 3D ici ; la 3D est dans le carré
+             « vue détail » plus bas). Vraie <img> → cadrage contrôlé au pixel
+             (produit remonté, bas vide rogné) et plus léger (pas de model-viewer).
+             Conteneur #pdp3d = cible de la parallaxe au scroll ; l'<img> porte le
+             décalage de remontée → les deux transforms ne se marchent pas dessus. -->
+        <!-- GALERIE : une piste qui défile à l'horizontale, une vignette par
+             visuel. QUATRE COUCHES, et chacune n'a qu'UN SEUL propriétaire de
+             `transform` — sinon la dernière écrite efface les autres :
+               .pdp-gallery__slide  → la cellule, qui DÉCOUPE (aucun transform)
+               .pdp-gallery__depth  → la parallaxe de balayage (JS)
+               .pdp-gallery__float  → le flottement (animation CSS)
+               .pdp-hero__img       → le cadrage au pixel de fitHeroPoster()
+             ⛔ La cellule de découpe n'est pas décorative : la parallaxe tire
+             la vignette suivante vers la gauche (c'est ce qui fait qu'elle
+             glisse moins vite que le doigt), et sans découpe elle DÉBORDE dans
+             le visuel courant — mesuré en 390 px, l'outil suivant apparaissait
+             sur le bord droit.
+             ⚠️ La piste vit DANS #pdp3d, elle ne le remplace pas : #pdp3d porte
+             déjà la parallaxe verticale, et un conteneur de défilement qu'on
+             transforme en même temps saccade.
+             ⚠️ Un seul visuel : la piste et son code existent quand même, il
+             n'y a simplement rien à faire défiler et les pastilles se taisent. -->
         <div class="pdp-hero__img-wrap" id="pdp3d">
           <div class="pdp-gallery" id="pdpGallery" tabindex="0" role="group" aria-label="Photos du produit">
             <div class="pdp-gallery__slide">
@@ -394,14 +482,21 @@
           </div>
         </div>
         <div class="pdp-hero__gradient"></div>
-        
+        <!-- Badges en haut à droite (comme les cartes) : stock puis tag -->
         <div class="pdp-hero__badges" id="pdpHeroBadges"></div>
         <div class="pdp-hero__info" id="pdpHeroInfo">
-          
+          <!-- ⛔ LES PASTILLES VIVENT DANS LE FLUX, AU-DESSUS DU TITRE. Posées
+               en absolu à 3,4 rem du bas, elles tombaient MESURÉES à y=786 —
+               sous le titre (452-516) et recouvertes par le bandeau cookies :
+               invisibles. Dans le flux, elles restent collées au titre quelle
+               que soit la hauteur du bloc, et elles suivent le même fondu que
+               lui au défilement. -->
           <div class="pdp-gallery__dots" id="pdpGalleryDots" hidden></div>
           <h1 id="pdpTitle" class="pdp-hero__title" tabindex="-1">Produit</h1>
           <div id="pdpPrice" class="pdp-hero__price"></div>
-          
+          <!-- Variante Solo/Coffret : switch conditionnement (masqué si le produit
+               n'a pas de variante). Chaque segment porte son prix (« sans coffret »
+               / « avec coffret ») → sert à la fois de bouton et d'écriteau. -->
           <div id="pdpVariant" class="pdp-variant" hidden></div>
           <div id="pdpBattNote" class="pdp-batt-note" hidden></div>
         </div>
@@ -411,6 +506,7 @@
         </div>
       </div>
 
+      <!-- SECTION : Découvrir — description immersive -->
       <div class="pdp-section pdp-section--discover" data-animate="scale-up">
         <div class="pdp-section__inner pdp-section__inner--wide">
           <h2 class="pdp-discover__heading" id="pdpDiscoverHeading">Conçu pour performer.</h2>
@@ -420,11 +516,15 @@
             <summary>En savoir plus</summary>
             <p id="pdpDescLong"></p>
           </details>
-          
+          <!-- GARANTIE (D-118, décision Q-03 du 08/08) : formulation FIXE,
+               identique pour toutes les marques — une garantie affichée engage
+               (J1). Le rendu serveur (api/render.js) porte la MÊME phrase. -->
           <p class="pdp-garantie">Garantie légale de conformité 2 ans + garantie constructeur selon enregistrement.</p>
         </div>
       </div>
 
+      <!-- SECTION : Livraison chantier (produits QUINCAILLERIE uniquement —
+           remplace le split 3D/specs ; rempli par initPdpDelivery()). -->
       <div class="pdp-section" data-animate="fade-up" id="pdpDelivery" hidden>
         <div class="pdp-section__inner">
           <h2 class="pdp-section__heading">🛵 Livraison sur ton chantier</h2>
@@ -459,6 +559,7 @@
         </div>
       </div>
 
+      <!-- SECTION : Split 3D + Specs -->
       <div class="pdp-section pdp-section--split" data-animate="fade-up">
         <div class="pdp-split">
           <div class="pdp-split__viewer">
@@ -489,6 +590,7 @@
         </div>
       </div>
 
+      <!-- SECTION : Photo produit -->
       <div class="pdp-section pdp-section--media" data-animate="parallax">
         <div class="pdp-section__inner">
           <div class="pdp-landing__media">
@@ -497,6 +599,7 @@
         </div>
       </div>
 
+      <!-- SECTION : Points forts -->
       <div class="pdp-section pdp-section--features" data-animate="stagger">
         <div class="pdp-section__inner pdp-section__inner--wide">
           <h2 class="pdp-section__heading pdp-section__heading--big">Points forts</h2>
@@ -504,6 +607,7 @@
         </div>
       </div>
 
+      <!-- SECTION : Kit -->
       <div class="pdp-section pdp-section--kit" id="pdpKitSection" data-animate="stagger" style="display:none">
         <div class="pdp-section__inner">
           <h2 class="pdp-section__heading">Contenu du kit</h2>
@@ -511,6 +615,7 @@
         </div>
       </div>
 
+      <!-- SECTION : CTA -->
       <div class="pdp-section pdp-section--cta" data-animate="scale-up">
         <div class="pdp-section__inner">
           <h2 class="pdp-cta__heading">Prêt à passer à l'action ?</h2>
@@ -531,11 +636,12 @@
         </div>
       </div>
 
+      <!-- SECTION : Avis clients -->
       <div class="pdp-section" data-animate="fade-up">
         <div class="pdp-section__inner">
           <h2 class="pdp-section__heading">Avis clients</h2>
           <div class="pdp-reviews">
-            
+            <!-- Résumé note moyenne -->
             <div class="pdp-reviews__summary" id="pdpReviewsSummary">
               <div class="pdp-reviews__avg">
                 <span class="pdp-reviews__avg-num" id="pdpAvgRating">—</span>
@@ -544,8 +650,10 @@
               </div>
             </div>
 
+            <!-- Liste des avis -->
             <div class="pdp-reviews__list" id="pdpReviewsList"></div>
 
+            <!-- Formulaire de dépôt -->
             <div class="pdp-reviews__form-wrapper">
               <h3 class="pdp-reviews__form-title">Donner votre avis</h3>
               <form id="pdpReviewForm" class="pdp-reviews__form" autocomplete="off">
@@ -568,6 +676,7 @@
         </div>
       </div>
 
+      <!-- SECTION : Produits similaires -->
       <div class="pdp-section" data-animate="fade-up">
         <div class="pdp-section__inner pdp-section__inner--wide">
           <div id="pdpRelated" data-bind="related"></div>
@@ -576,10 +685,12 @@
 
     </section>
 
+    <!-- DEVIS (panier) -->
     <section id="view-devis" class="view hidden" data-route="/devis" role="region" aria-labelledby="devis-h1">
       <div class="container">
         <h1 id="devis-h1" tabindex="-1" class="devis-page-title">Mon Devis</h1>
 
+        <!-- Stats banner -->
         <div class="devis-stats">
           <div class="devis-stat">
             <span class="devis-stat__value" id="devisStatItems">0</span>
@@ -595,12 +706,16 @@
           </div>
         </div>
 
+        <!-- Cart items -->
         <div id="devisList" class="devis-list"></div>
 
+        <!-- Shipping estimate (territory-aware) -->
         <div id="devisShipping" class="devis-shipping" hidden></div>
 
+        <!-- Loyalty banner (Phase 4) -->
         <div id="devisLoyalty" class="devis-loyalty" hidden></div>
 
+        <!-- Sticky total + actions -->
         <div class="devis-footer" id="devisFooter">
           <div class="devis-footer__total">
             <span>Total TTC</span>
@@ -625,10 +740,12 @@
       </div>
     </section>
 
+    <!-- COMPTE -->
     <section id="view-compte" class="view hidden" data-route="/compte" role="region" aria-labelledby="compte-h1">
       <div class="container">
         <h1 id="compte-h1" tabindex="-1">Mon compte</h1>
 
+        <!-- Email verification banner -->
         <div id="accVerifyBanner" class="acc-verify-banner" hidden>
           <div class="acc-verify-banner__icon">&#9888;</div>
           <div class="acc-verify-banner__text">
@@ -638,6 +755,7 @@
           <button id="accResendVerify" type="button" class="acc-verify-banner__btn">Renvoyer le lien</button>
         </div>
 
+        <!-- Header utilisateur (avatar + identite) -->
         <div class="acc-hero card">
           <div class="acc-hero__avatar-wrap">
             <img id="accAvatarImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" alt="Avatar" class="acc-hero__avatar"/>
@@ -658,13 +776,16 @@
               <div class="meter__scale"><span>0</span><span>1000 pts</span></div>
             </div>
           </div>
-          
+          <!-- Actions livraison, TOUT À DROITE : Mode livraison (livreurs
+               acceptés/testeur seulement, masqué sinon) + Mes livraisons
+               (tous les clients), empilés. -->
           <div class="acc-hero__actions">
             <a class="btn primary" id="accLivBtn" href="#/mode-livraison" hidden>🛵 Mode livraison</a>
             <a class="btn" id="accMyDelivBtn" href="#/mes-livraisons">📦 Mes livraisons</a>
           </div>
         </div>
 
+        <!-- Navigation par onglets -->
         <div class="acc-tabs" role="tablist" aria-label="Sections du compte">
           <button class="acc-tab active" role="tab" data-acc-tab="profile" aria-selected="true" aria-label="Profil">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -680,14 +801,22 @@
           </button>
         </div>
 
+        <!-- Onglet Profil -->
         <div class="acc-pane active" data-acc-pane="profile">
-          
+          <!-- Informations personnelles — LECTURE SEULE.
+               Les champs de saisie vivent dans l'onglet Paramètres, et nulle
+               part ailleurs : deux formulaires portant les mêmes identifiants
+               sur une même page, c'est le second qui gagne silencieusement. -->
           <div class="card">
             <div class="head"><h3 class="title">Informations personnelles</h3><span class="badge">Profil</span></div>
             <div class="specs">
               <dl class="acc-id" id="accIdGrid"></dl>
             </div>
-            
+            <!-- ⚠️ `.actions` est un FRÈRE de `.specs`, jamais un enfant : son
+                 retrait (`padding: 0 1.1rem 1.1rem`) est calculé pour la carte,
+                 et imbriqué dans le `display:flex` de `.specs` il devient une
+                 colonne étirée sur toute la hauteur — le bouton se change en
+                 pavé. Constaté en bac à sable le 01/08/2026. -->
             <div class="actions">
               <button class="btn" type="button" data-acc-goto="settings">&#9998; Modifier mes informations</button>
             </div>
@@ -701,6 +830,11 @@
             <div class="actions"><a class="btn" href="#/devis" data-nav="/devis">Voir le panier</a></div>
           </div>
 
+          <!-- Aperçu des dernières commandes. La liste COMPLÈTE reste dans
+               l'onglet Commandes : ici on n'en montre que les trois plus
+               récentes, et le bouton « Voir tout » n'apparaît que s'il y a
+               réellement plus à voir. Une seule lecture Firestore alimente
+               les deux affichages. -->
           <div class="card acc-card-next">
             <div class="head"><h3 class="title">Mes derni&egrave;res commandes</h3><span class="badge">Historique</span></div>
             <div class="specs">
@@ -711,11 +845,14 @@
             </div>
           </div>
 
+          <!-- Ma carte artisan (self-service partenaires) : visible UNIQUEMENT
+               si la carte annuaire de l'utilisateur est liée à son compte. -->
           <div class="card acc-card-next" id="accPartnerCard" hidden>
             <div class="head"><h3 class="title">Ma carte artisan</h3><span class="badge">Partenaire</span></div>
             <div class="specs" id="accPartnerBody"></div>
           </div>
 
+          <!-- Devenir Livreur (service coursier — en préparation). Placé EN BAS. -->
           <div class="card lv-cta-card acc-card-next">
             <div class="head"><h3 class="title">🛵 Devenir Livreur</h3><span class="badge">Nouveau</span></div>
             <div class="specs">
@@ -725,6 +862,7 @@
           </div>
         </div>
 
+        <!-- Onglet Commandes -->
         <div class="acc-pane" data-acc-pane="orders" hidden>
           <div class="card">
             <div class="head"><h3 class="title">Historique des devis</h3><span class="badge">Commandes</span></div>
@@ -733,15 +871,19 @@
                 <p class="acc-order__msg">Aucune commande pour le moment.</p>
               </div>
             </div>
-            
+            <!-- ⚠️ .actions est un FRÈRE de .specs, jamais un enfant (règle E2).
+                 Le bouton VIDE L'AFFICHAGE du client : les factures et les
+                 livres de la boutique ne bougent pas. Deux confirmations. -->
             <div class="actions acc-actions--danger">
               <button type="button" id="accRazHisto" class="btn acc-logout-btn">🗑️ Vider mon historique</button>
             </div>
           </div>
         </div>
 
+        <!-- Onglet Parametres -->
         <div class="acc-pane" data-acc-pane="settings" hidden>
-          
+          <!-- SEUL endroit du site où les informations personnelles se
+               modifient. L'onglet Profil ne fait que les afficher. -->
           <div class="card">
             <div class="head"><h3 class="title">Informations personnelles</h3><span class="badge">Modifier</span></div>
             <div class="specs">
@@ -808,6 +950,9 @@
             </div>
           </div>
 
+          <!-- DOUBLE AUTHENTIFICATION (TOTP). Tout le contenu est injecté par
+               app.js APRÈS chargement à la demande de mfa.js : la page ne
+               télécharge rien tant qu'on n'ouvre pas ce bloc. -->
           <div class="card acc-card-next" id="mfaCard">
             <div class="head"><h3 class="title">🔐 Double authentification</h3>
               <span class="badge" id="mfaBadge">…</span></div>
@@ -816,11 +961,16 @@
                 Ajoute un code à 6 chiffres, changeant toutes les 30 secondes, en plus de ton
                 mot de passe. Même si quelqu'un te vole ton mot de passe, il ne peut pas entrer.
               </p>
-              
+              <!-- `.lv-cta` et non `.actions` : ce bouton DOIT rester dans
+                   `#mfaBody`, dont `mfa.js` remplace tout le contenu quand le
+                   panneau s'ouvre — le sortir le laisserait affiché à côté du
+                   panneau. Or `.actions` enfant de `.specs` s'étire. C'est
+                   d'ailleurs la classe que `mfa.js` injecte lui-même. -->
               <div class="lv-cta"><button id="mfaOpen" class="btn primary" type="button">Gérer la double authentification</button></div>
             </div>
           </div>
 
+          <!-- Droit à l'oubli (RGPD) : suppression définitive du compte. -->
           <div class="card acc-danger" style="margin-top:1.2rem;border-color:rgba(239,68,68,.35)">
             <div class="head"><h3 class="title">Supprimer mon compte</h3><span class="badge" style="background:rgba(239,68,68,.15);color:#f87171">Irréversible</span></div>
             <div class="specs">
@@ -840,12 +990,13 @@
       </div>
     </section>
 
+    <!-- AUTH -->
     <section id="view-auth" class="view hidden" data-route="/auth" role="region" aria-labelledby="auth-h1">
       <div class="container">
         <h1 id="auth-h1" tabindex="-1">Mon Espace</h1>
 
         <div class="auth-card">
-          
+          <!-- Decorative glow orb -->
           <div class="auth-card__glow"></div>
 
           <div class="auth-card__header">
@@ -877,7 +1028,9 @@
                 <div class="auth-forgot-row">
                   <button id="authForgotBtn" type="button" class="auth-forgot-link">Mot de passe oublie ?</button>
                 </div>
-                
+                <!-- DÉFI TOTP : révélé UNIQUEMENT si Firebase interrompt la
+                     connexion pour réclamer le second facteur. Il remplace
+                     alors le bouton de connexion habituel. -->
                 <div class="auth-field mfa-challenge" id="loginMfa" hidden>
                   <label for="loginMfaCode">Code de ton application d'authentification</label>
                   <input id="loginMfaCode" type="text" inputmode="numeric" autocomplete="one-time-code"
@@ -894,6 +1047,7 @@
                 </button>
               </form>
 
+              <!-- Forgot password panel -->
               <div id="authForgotPanel" class="auth-forgot-panel" hidden>
                 <div class="auth-forgot-panel__head">
                   <h3>Reinitialiser le mot de passe</h3>
@@ -928,7 +1082,9 @@
                   <label for="regPwd">Mot de passe</label>
                   <input id="regPwd" type="password" placeholder="Min. 6 caracteres" minlength="6" autocomplete="new-password" required />
                 </div>
-                
+                <!-- Choix du département par la CARTE de son île (contours dorés
+                     lumineux, plus ludique qu'une liste). Sélection = territoire
+                     du site (octroi/TVA), via setTerritory(). -->
                 <div class="auth-field">
                   <label id="regIslandsLabel">Ton île</label>
                   <div class="isl-grid" id="regIslands" role="radiogroup" aria-labelledby="regIslandsLabel">
@@ -966,10 +1122,12 @@
       </div>
     </section>
 
+    <!-- ABONNEMENT -->
     <section id="view-abonnement" class="view hidden" data-route="/abonnement" role="region" aria-labelledby="abo-h1">
       <div id="aboContent"></div>
     </section>
 
+    <!-- PRÉ-INSCRIPTION PARTENAIRE (Phase 3a — sans paiement) -->
     <section id="view-rejoindre" class="view hidden" data-route="/rejoindre" role="region" aria-labelledby="rejoindre-h1">
       <div class="container">
         <button type="button" class="pj-back" id="pjBack">← Retour</button>
@@ -979,7 +1137,7 @@
         </header>
 
         <form id="partnerJoinForm" class="pj-form" novalidate>
-          
+          <!-- Honeypot anti-bot (masqué) -->
           <div class="pj-hp" aria-hidden="true"><label>Ne pas remplir<input type="text" id="pjHoneypot" tabindex="-1" autocomplete="off"></label></div>
 
           <fieldset class="pj-fieldset">
@@ -999,6 +1157,8 @@
             </label>
           </fieldset>
 
+          <!-- ÉPI : Gold (t-shirt + pantalon) et Black (pack complet) uniquement.
+               Masqué pour Basique/Pro (pas d'équipement dans ces formules). -->
           <fieldset class="pj-fieldset" id="pjFsEpi">
             <legend>Tailles (pour ton équipement floqué)</legend>
             <p class="pj-hint" id="pjEpiHint">Utile pour préparer ton équipement personnalisé. Tu pourras ajuster plus tard.</p>
@@ -1017,6 +1177,8 @@
             <div id="pjLogoPreview" class="pj-logo-preview"></div>
           </fieldset>
 
+          <!-- Visibilité : Gold (réseaux pour le partage croisé du club) et
+               Black (réseaux + pub gérée + site). Masqué pour Basique/Pro. -->
           <fieldset class="pj-fieldset" id="pjFsVisibilite">
             <legend>Visibilité & publicité</legend>
             <p class="pj-hint" id="pjVisHint" hidden>Club Gold : tes réalisations sont partagées 2 fois par mois par des membres d'autres métiers — tes réseaux nous servent à organiser ces partages.</p>
@@ -1065,6 +1227,8 @@
       </div>
     </section>
 
+    <!-- LIVRAISON QUINCAILLERIE (page vitrine du service coursier — ouverture
+         1er janvier ; barème rendu par renderLivraison() depuis LV_BAREME). -->
     <section id="view-livraison" class="view hidden" data-route="/livraison" role="region" aria-labelledby="livraison-h1">
       <div class="container">
         <header class="lv-header">
@@ -1085,15 +1249,20 @@
         <div class="lv-card">
           <h2 class="lv-h2">Repère de tarifs (Guadeloupe)</h2>
           <p class="lv-hint" style="margin:0 0 .6rem"><strong>Ces montants ne sont qu'un repère.</strong> Chaque livreur est indépendant et fixe <strong>lui-même</strong> ses tarifs&nbsp;: touche sa carte ci-dessous pour voir ses vrais prix. Pirates Tools ne fixe aucun prix, ne prend rien sur la course et n'encaisse rien&nbsp;: le service existe pour aider les artisans et donner du travail aux jeunes de l'île.</p>
-          <div id="livraisonBareme" class="lv-bareme"></div>
+          <div id="livraisonBareme" class="lv-bareme"><!-- rendu par renderLivraison() --></div>
         </div>
 
+        <!-- ANNUAIRE DES LIVREURS : une carte par livreur inscrit, cliquable
+             vers sa fiche publique (#/livreur-profil/{uid} : ses tarifs sur la
+             carte des zones, son compteur de courses, ses notes et avis).
+             Bandeau vert « Disponible » = interrupteur cliqué par le livreur. -->
         <div class="lv-card">
           <h2 class="lv-h2">🛵 Nos livreurs</h2>
           <p class="lv-hint" style="margin:0 0 .8rem">Chaque livreur est indépendant et <strong>fixe lui-même ses tarifs</strong>. Touche une carte pour voir sa fiche : ses prix par zone, ses courses déjà livrées et les avis de ses clients.</p>
           <div id="couriersGrid" class="couriers-grid" aria-live="polite"><p class="lv-hint">Chargement…</p></div>
         </div>
 
+        <!-- Commander une livraison depuis le PANIER (si quincaillerie dedans) -->
         <div class="lv-card" id="livraisonNoCart">
           <h2 class="lv-h2">📨 Demander une livraison</h2>
           <p class="lv-hint" style="margin:0 0 .8rem">Ajoute d'abord de la <strong>quincaillerie à ton panier</strong> — tu pourras ensuite commander ta livraison directement ici, sur la grande carte.</p>
@@ -1139,6 +1308,8 @@
       </div>
     </section>
 
+    <!-- MES LIVRAISONS (environnement CLIENT : carte de SES livraisons, détail
+         avec montant payé/dates/statut + NOTATION du livreur. renderClientDeliveries). -->
     <section id="view-mes-livraisons" class="view hidden" data-route="/mes-livraisons" role="region" aria-labelledby="meslivs-h1">
       <div class="container courier-space">
         <button type="button" class="pj-back" id="clientDelivBack">← Retour</button>
@@ -1153,16 +1324,24 @@
             <span class="lv-gear__t">Rafraîchir</span>
           </button>
         </header>
-
+        <!-- ORDRE VOULU (refonte 27/07/2026, modèle Uber) : ce qui demande une
+             ACTION en premier, la liste ensuite, la carte en dernier — elle
+             situe, elle ne fait pas agir. Avant, la carte occupait le haut de
+             l'écran et repoussait l'essentiel sous la ligne de flottaison. -->
+        <!-- ORDRE VOULU (user 28/07/2026) : la CARTE tout en haut, le reste
+             bien rangé dessous. Elle donne le contexte d'un coup d'œil ; les
+             actions et les listes viennent ensuite. -->
         <div class="lv-card">
           <h2 class="lv-h2">🗺️ Mes livraisons sur la carte</h2>
           <div id="clientDelivMap" class="pdp-deliv-map courier-map" aria-label="Carte de mes livraisons"></div>
         </div>
         <div id="clientDelivTodo"></div>
-        
+        <!-- Signet « en cours » : hors de l'historique replié, toujours
+             atteignable. Un clic ouvre la fiche détaillée ci-dessous. -->
         <div id="clientDelivEnCours" class="lv-card" hidden></div>
         <div id="clientDelivDetail" class="lv-card" hidden></div>
-        
+        <!-- HISTORIQUE : tout en bas et REPLIÉ (demande user 28/07/2026). On
+             arrive pour agir sur la course en cours, pas pour relire le passé. -->
         <details class="lv-card lv-histo">
           <summary class="lv-histo__sum"><span class="lv-h2">🧾 Historique de commande</span></summary>
           <div id="clientDelivList"><p class="lv-hint">Chargement…</p></div>
@@ -1170,10 +1349,15 @@
       </div>
     </section>
 
+    <!-- MODE LIVRAISON (espace livreur : carte des courses + détails + historique.
+         MÊME environnement pour tous les clients ; les actions réelles sont
+         limitées au mode test jusqu'au lancement. Rendu par renderCourierSpace(). -->
     <section id="view-mode-livraison" class="view hidden" data-route="/mode-livraison" role="region" aria-labelledby="modeliv-h1">
       <div class="container courier-space">
         <button type="button" class="pj-back" id="courierBack">← Retour</button>
-        
+        <!-- ⚙️ PARAMÈTRES : une fois la fiche remplie, elle n'est modifiable
+             QUE derrière ce bouton (décision user 27/07/2026). L'espace de
+             travail reste dédié aux COURSES. -->
         <header class="lv-header lv-header--tools">
           <div>
             <h1 id="modeliv-h1" tabindex="-1">🛵 Mode livraison</h1>
@@ -1187,25 +1371,35 @@
         </header>
         <div id="courierBanner"></div>
 
+        <!-- ÉCRAN PARAMÈTRES (masqué par défaut) : identité, photo, horaires,
+             tarifs. C'est le SEUL endroit où ces informations se modifient. -->
         <div id="courierParams" hidden>
           <div id="courierTarifs"></div>
         </div>
 
+        <!-- ÉCRAN DE TRAVAIL : sa carte, puis les courses, DISSOCIÉES. -->
         <div id="courierWork">
-          
+          <!-- ORDRE VOULU (user 28/07/2026) : la CARTE tout en haut, puis ma
+               fiche, les courses, les gains. -->
           <div class="lv-card">
             <h2 class="lv-h2">🗺️ Les courses sur la carte</h2>
             <div id="courierMap" class="pdp-deliv-map courier-map" aria-label="Carte des courses"></div>
           </div>
           <div id="courierMyCard"></div>
-          
+          <!-- Sélecteur affiché UNIQUEMENT s'il y a plusieurs courses en cours
+               (sinon la grosse fiche ci-dessous est déjà la course). -->
           <div id="courierEnCours" class="lv-card" hidden></div>
           <div id="courierDetail" class="lv-card" hidden></div>
-          
+          <!-- « Courses en attente » a été REMPLACÉE par le bandeau vert sous
+               la barre du haut (#courseAlert). Le conteneur reste, vide et
+               masqué : le rendu continue d'y écrire et l'alerte s'en nourrit,
+               sans dupliquer la logique. -->
           <div id="courierDispo" hidden></div>
           <div id="courierEarnings"></div>
           <button type="button" class="btn" id="courierRefresh">🔄 Rafraîchir</button>
-          
+          <!-- HISTORIQUE DE COURSE : tout en bas et REPLIÉ (demande user
+               28/07/2026). N'y figurent QUE les courses terminées — celle en
+               cours reste en haut, dans la grosse fiche, là où on agit. -->
           <details class="lv-card lv-histo">
             <summary class="lv-histo__sum"><span class="lv-h2">🧾 Historique de course</span></summary>
             <div id="courierMine"><p class="lv-hint">Chargement…</p></div>
@@ -1214,6 +1408,10 @@
       </div>
     </section>
 
+    <!-- FICHE PUBLIQUE D'UN LIVREUR (vue CLIENT) — #/livreur-profil/{uid}.
+         Rendu intégral par renderCourierProfile() : en-tête (photo, commune,
+         véhicule, pastille de disponibilité), compteurs (courses livrées, note,
+         prix mini), grande carte des zones avec SES tarifs, puis les avis. -->
     <section id="view-livreur-profil" class="view hidden" data-route="/livreur-profil" role="region" aria-labelledby="courierprof-h1">
       <div class="container courier-prof">
         <button type="button" class="pj-back" id="courierProfileBack">← Retour</button>
@@ -1221,6 +1419,9 @@
       </div>
     </section>
 
+    <!-- DISCUSSION DIRECTE client ↔ livreur (#/discussion/{id}) — ouverte
+         depuis la carte d'un livreur EN SERVICE. Aucun engagement : c'est une
+         mise en relation, le prix et les modalités restent entre eux. -->
     <section id="view-discussion" class="view hidden" data-route="/discussion" role="region" aria-labelledby="discussion-h1">
       <div class="container">
         <button type="button" class="pj-back" id="discussionBack">← Retour</button>
@@ -1231,6 +1432,8 @@
       </div>
     </section>
 
+    <!-- DEVENIR LIVREUR (service coursier — formulaire adaptatif par véhicule,
+         contenu légal rendu par app.js renderLivreur(). Inactif : COURIER_ENABLED. -->
     <section id="view-livreur" class="view hidden" data-route="/livreur" role="region" aria-labelledby="livreur-h1">
       <div class="container">
         <button type="button" class="pj-back" id="lvBack">← Retour</button>
@@ -1238,10 +1441,11 @@
           <h1 id="livreur-h1" tabindex="-1">Devenir Livreur Pirates Tools</h1>
           <p class="lv-sub">Livre de la quincaillerie aux artisans, gagne bien ta vie, et roule <strong>en toute légalité</strong>. On t'explique tout et on te mâche le travail. Choisis ton véhicule, le cahier des charges s'affiche.</p>
         </header>
-        <div id="lvForm" aria-live="polite"></div>
+        <div id="lvForm" aria-live="polite"><!-- rendu par renderLivreur() --></div>
       </div>
     </section>
 
+    <!-- ANNUAIRE ARTISANS (vitrine partenaires, Phase 2 abonnements) -->
     <section id="view-artisans" class="view hidden" data-route="/artisans" role="region" aria-labelledby="artisans-h1">
       <div class="container">
         <button type="button" class="pj-back" id="artisansBack">← Retour</button>
@@ -1260,6 +1464,7 @@
       </div>
     </section>
 
+    <!-- CONTACT -->
     <section id="view-contact" class="view hidden" data-route="/contact" role="region" aria-labelledby="contact-h1">
       <div class="container">
         <div class="contact-wrap">
@@ -1330,7 +1535,7 @@
                 <span>Message <em aria-hidden="true">*</em></span>
                 <textarea id="contactMessage" name="message" required minlength="10" maxlength="5000" rows="6"></textarea>
               </label>
-              
+              <!-- Honeypot (hidden from users, bots fill it) -->
               <input type="text" name="website" id="contactHoneypot" class="contact-form__honeypot" tabindex="-1" aria-hidden="true" autocomplete="off">
               <div class="contact-form__actions">
                 <button type="submit" class="btn primary" id="contactSubmit">Envoyer le message</button>
@@ -1342,6 +1547,7 @@
       </div>
     </section>
 
+    <!-- WISHLIST (favoris) -->
     <section id="view-wishlist" class="view hidden" data-route="/favoris" role="region" aria-labelledby="wishlist-h1">
       <div class="container">
         <header class="wishlist-header">
@@ -1352,16 +1558,26 @@
       </div>
     </section>
 
+    <!-- ADMIN (Stock + prix, derrière ADMIN_SECRET) -->
     <section id="view-admin" class="view hidden" data-route="/admin" role="region" aria-labelledby="admin-h1">
       <h1 id="admin-h1" class="sr-only">Administration</h1>
       <div id="adminView"></div>
     </section>
 
+    <!-- ⛔ SA PROPRE PAGE, ET C'EST LA DEMANDE : « une section qui a sa propre
+         page, et on va la nommer Ajout de produits ». Ce n'est donc pas un
+         onglet de plus dans l'administration : c'est une route à part entière,
+         gardée par la MÊME porte admin.
+         ⚠️ Porte J1 lue (`node scripts/juridique.js J1`) : elle vise
+         l'information légale due aux VISITEURS — identité de l'éditeur, CGV,
+         médiateur. Cet écran n'est pas destiné au public et n'affiche aucune
+         mention légale ; il n'en retire ni n'en déplace aucune. -->
     <section id="view-ajout-produit" class="view hidden" data-route="/ajout-produit" role="region" aria-labelledby="ajout-produit-h1">
       <h1 id="ajout-produit-h1" class="sr-only">Ajout de produits</h1>
       <div id="ajoutProduitView"></div>
     </section>
 
+    <!-- TERRITOIRE DOM-TOM (Guadeloupe, Martinique, Guyane, Réunion, Mayotte) -->
     <section id="view-territoire" class="view hidden" data-route="/territoire" role="region" aria-labelledby="terrView-h1">
       <div class="container terr-view">
         <header class="terr-view__hero">
@@ -1392,6 +1608,7 @@
       </div>
     </section>
 
+    <!-- MERCI / Confirmation paiement -->
     <section id="view-merci" class="view hidden" data-route="/merci" role="region" aria-labelledby="merci-h1">
       <div class="container" style="text-align:center;padding:3rem 1rem">
         <div class="merci-card">
@@ -1409,6 +1626,7 @@
       </div>
     </section>
 
+    <!-- MENTIONS LÉGALES -->
     <section id="view-mentions" class="view legal-page hidden" data-route="/mentions-legales" role="region" aria-labelledby="ml-h1">
       <div class="container legal-container">
         <h1 id="ml-h1" tabindex="-1">Mentions légales</h1>
@@ -1463,6 +1681,7 @@
       </div>
     </section>
 
+    <!-- POLITIQUE DE CONFIDENTIALITÉ -->
     <section id="view-confidentialite" class="view legal-page hidden" data-route="/confidentialite" role="region" aria-labelledby="pc-h1">
       <div class="container legal-container">
         <h1 id="pc-h1" tabindex="-1">Politique de confidentialité</h1>
@@ -1557,6 +1776,7 @@
       </div>
     </section>
 
+    <!-- CONDITIONS GÉNÉRALES DE VENTE -->
     <section id="view-cgv" class="view legal-page hidden" data-route="/cgv" role="region" aria-labelledby="cgv-h1">
       <div class="container legal-container">
         <h1 id="cgv-h1" tabindex="-1">Conditions Générales de Vente</h1>
@@ -1645,6 +1865,7 @@
 
   </main>
 
+  <!-- =================== MODALE DE PAIEMENT =================== -->
   <div id="payModal" class="pay-modal" hidden aria-hidden="true" role="dialog" aria-labelledby="payModalTitle" aria-modal="true">
     <div class="pay-modal__backdrop" data-pay-close></div>
     <div class="pay-modal__dialog" role="document">
@@ -1655,6 +1876,7 @@
         <p class="pay-modal__sub">Choisis ton mode de paiement</p>
       </div>
 
+      <!-- Onglets : Carte / Crypto -->
       <div class="pay-tabs" role="tablist" aria-label="Modes de paiement">
         <button class="pay-tab is-active" type="button" role="tab"
                 data-pay-tab="card" aria-selected="true" aria-label="Paiement par carte bancaire">
@@ -1673,8 +1895,11 @@
           <strong id="payModalTotal">0,00 €</strong>
         </div>
 
+        <!-- ── Panneau CARTE ── -->
         <div class="pay-pane is-active" data-pay-pane="card">
-          
+          <!-- Adresse de livraison AVANT paiement : le code postal fixe le
+               territoire fiscal cote serveur (971xx-976xx). Le formulaire
+               carte n'apparait qu'apres adresse valide. -->
           <form id="payAddress" class="pay-address" autocomplete="on" novalidate>
             <h4 class="pay-address__title">Adresse de livraison</h4>
             <div class="pay-address__grid">
@@ -1705,9 +1930,13 @@
             </div>
             <p id="payAddrHint" class="pay-address__hint" role="status">Nous livrons en Guadeloupe, Martinique, Guyane, La R&eacute;union et Mayotte (code postal 971xx&ndash;976xx).</p>
           </form>
-          
+          <!-- Point de montage du formulaire de carte (Revolut, selon
+               le fournisseur actif — c'est le serveur qui l'annonce). -->
           <div id="carteWrap" class="carte-wrap">
-            
+            <!-- ⛔ Le champ carte n'avait AUCUN intitule, alors que « Nom
+                 complet », « Telephone » et « Adresse » en ont un. Il donnait
+                 l'impression d'un bloc etranger colle au milieu du formulaire —
+                 juste avant l'ecran ou le client donne son numero de carte. -->
             <label class="pay-card-same">
               <input type="checkbox" id="payCardSame" checked>
               <span>La carte est &agrave; mon nom &mdash; celui saisi ci-dessus</span>
@@ -1719,7 +1948,7 @@
             </div>
             <span class="pay-card-label" id="payCardLabel">Num&eacute;ro de carte</span>
             <div id="carteMontage" class="carte-montage">
-              
+              <!-- Le widget du fournisseur se monte ici -->
             </div>
             <div id="carteErreur" class="carte-erreur" role="alert" hidden></div>
           </div>
@@ -1739,9 +1968,11 @@
           </div>
         </div>
 
+        <!-- ── Panneau CRYPTO ── -->
         <div class="pay-pane" data-pay-pane="crypto" hidden>
           <div class="cryptopay">
 
+            <!-- ÉTAPE 1 — Choisir le réseau -->
             <section class="cryptostep">
               <header class="cryptostep__head">
                 <span class="cryptostep__num">1</span>
@@ -1751,7 +1982,7 @@
                 </div>
               </header>
               <div class="cryptopay__nets" id="cryptopayNets" role="radiogroup" aria-label="Réseau blockchain">
-                
+                <!-- rendu dynamiquement par app.js -->
                 <div class="cryptopay__empty">Chargement des réseaux…</div>
               </div>
               <div class="cryptopay__tokens-wrap" id="cryptopayTokensWrap" hidden>
@@ -1760,6 +1991,7 @@
               </div>
             </section>
 
+            <!-- ÉTAPE 2 — Envoyer le paiement -->
             <section class="cryptostep" id="cryptostep2">
               <header class="cryptostep__head">
                 <span class="cryptostep__num">2</span>
@@ -1813,6 +2045,7 @@
               </p>
             </section>
 
+            <!-- ÉTAPE 3 — Confirmer -->
             <section class="cryptostep">
               <header class="cryptostep__head">
                 <span class="cryptostep__num">3</span>
@@ -1827,6 +2060,7 @@
               </p>
             </section>
 
+            <!-- Alternative carte -->
             <section class="cryptostep cryptostep--alt">
               <header class="cryptostep__head">
                 <span class="cryptostep__num cryptostep__num--alt">★</span>
@@ -1846,12 +2080,20 @@
       </div>
 
       <div class="pay-modal__footer">
-        
+        <!-- Art. L221-14 al. 2 du Code de la consommation : le bouton de
+             validation DOIT porter la mention « commande avec obligation de
+             paiement » (ou une formule analogue non ambiguë), à peine de
+             NULLITÉ du contrat + amende administrative (15 000 € pour une
+             société). « Payer en toute sécurité » ne satisfaisait pas ce texte.
+             + acceptation explicite des CGV et du droit de rétractation. -->
         <label class="pay-modal__cgv"><input type="checkbox" id="payCgvOk">
           <span>J'ai lu et j'accepte les <a href="#/cgv" target="_blank" rel="noopener">conditions générales de vente</a>
           et la <a href="#/confidentialite" target="_blank" rel="noopener">politique de confidentialité</a>.</span></label>
         <p class="pay-modal__cgv-note" id="payCgvNote" role="alert" hidden>Coche cette case pour valider ta commande.</p>
-        
+        <!-- ⚠️ La mention « commande avec obligation de paiement » est une
+             OBLIGATION LEGALE en vente a distance : elle doit figurer SUR le
+             bouton. On la garde donc, mais hierarchisee — « Payer » en gros,
+             la formule en dessous, lisible. Voir docs/JURIDIQUE.md (J1). -->
         <button id="payModalConfirm" class="btn primary btn--lg pay-modal__pay" type="button" aria-label="Payer — commande avec obligation de paiement">
           <span class="pay-modal__pay-main"><span class="pay-modal__btn-icon">&#128179;</span> Payer <span id="payModalAmount"></span></span>
           <span class="pay-modal__pay-legal">Commander avec obligation de paiement</span>
@@ -1860,12 +2102,17 @@
           <span class="pay-modal__btn-icon">✅</span>
           J'ai effectué le paiement
         </button>
-        
+        <!-- Contenu remplacé par `mentionFournisseur()` dès que le serveur a
+             annoncé QUI encaisse. Le texte statique ne doit donc nommer
+             PERSONNE : nommer un fournisseur ici, c'est afficher une marque
+             fausse pendant la fraction de seconde qui précède la réponse —
+             et c'en était une : un nom de fournisseur qui n'encaisse plus. -->
         <p class="pay-modal__powered" id="payModalPowered"><span>Paiement sécurisé — vos données de carte ne transitent jamais par nos serveurs</span></p>
       </div>
     </div>
   </div>
 
+  <!-- =================== FOOTER =================== -->
   <footer class="site-footer">
     <div class="container">
       <div class="footer-grid">
@@ -1930,6 +2177,16 @@
     </div>
   </footer>
 
+  <!-- =================== FLOATING WHATSAPP =================== -->
+  <!-- ══ BANDEAU « NOUVELLE COURSE » (livreurs) ═════════════════════════════
+       Sous la barre du haut, vert, cliquable pour accepter, avec une croix
+       pour le refuser (demande user 28/07/2026). Il remplace la fiche
+       « Courses en attente » : un livreur ne doit pas avoir à aller chercher
+       les courses, elles viennent à lui. -->
+  <!-- BANDEAU « nouvelle course » (livreur). Il CLIGNOTE tant qu'une course
+       attend, et le clic n'accepte plus à l'aveugle : il DÉPLIE les détails du
+       client (demande user 28/07/2026). L'acceptation ne se fait qu'ensuite,
+       en connaissance de cause — ou on écarte d'une croix. -->
   <div id="courseAlert" class="course-alert" hidden role="status">
     <div class="course-alert__row">
       <button type="button" class="course-alert__go" id="courseAlertGo"
@@ -1950,6 +2207,11 @@
     </div>
   </div>
 
+  <!-- ══ BULLE DE DISCUSSION (façon Messenger) ══════════════════════════════
+       En bas à GAUCHE, toujours accessible : le fil ne doit plus être enterré
+       dans un panneau qu'il faut penser à ouvrir (défaut signalé le 27/07/2026 :
+       « côté client on ne voit pas les messages »).
+       Le contenu ne se charge qu'au PREMIER clic — zéro octet au démarrage. -->
   <button type="button" id="chatBubble" class="chat-bubble" hidden
           aria-expanded="false" aria-controls="chatWin" aria-label="Mes discussions">
     <span class="chat-bubble__i" aria-hidden="true">💬</span>
@@ -1974,9 +2236,12 @@
     <span class="wa-float__label">WhatsApp</span>
   </a>
 
+  <!-- =================== CONSENT BAR =================== -->
   <div id="consentBar" class="consent-bar" role="dialog" aria-label="Consentement analytics" hidden>
     <div class="consent-bar__inner">
-      
+      <!-- Texte court : l'ancienne version (~260 car.) empilait ~8 lignes sur
+           mobile et le bandeau recouvrait les filtres du catalogue (taps
+           avalés). L'information complète vit dans la politique, liée ici. -->
       <p class="consent-bar__text">
         <strong>Cookies</strong> — Mesure d'audience (GA4, Meta Pixel), uniquement si vous acceptez. Modifiable à tout moment. <a href="#/confidentialite" class="consent-bar__link">En savoir plus</a>
       </p>
@@ -1987,6 +2252,7 @@
     </div>
   </div>
 
+  <!-- =================== DOCK =================== -->
   <nav id="dock" class="dock" aria-label="Barre d'action">
     <div class="dock__shell">
       <button id="dockHomeBtn" class="dock__btn dock__btn--home" type="button" aria-label="Accueil" data-nav="/" data-track="dock:accueil">🏠</button>
@@ -2000,6 +2266,7 @@
     </div>
   </nav>
 
+  <!-- =================== OVERLAY + MENU LATERAL =================== -->
   <div id="menuBackdrop" class="backdrop hidden" aria-hidden="true" hidden></div>
 
   <aside id="side-menu" class="drawer" role="dialog" aria-modal="true"
@@ -2091,9 +2358,11 @@
     </nav>
   </aside>
 
+  <!-- =================== TOASTS + A11y =================== -->
   <div id="toasts" aria-live="polite"></div>
   <div id="sr-live" class="sr-only" aria-live="polite" role="status"></div>
 
+  <!-- Bouton d'installation PWA -->
   <button id="installBtn" class="chip hidden" hidden data-action="install">Installer l'app</button>
 
   <noscript>
@@ -2102,7 +2371,8 @@
     </div>
   </noscript>
 
+  <!-- =================== JS =================== -->
   <script defer src="app.visitor.js?v=600"></script>
 </body>
 </html>
-
+<!-- deployed 20260406013000 -->

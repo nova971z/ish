@@ -17,9 +17,15 @@ var catalog = require('./_lib/catalog');
    servent. Le plafond de 12 fonctions Vercel interdit un endpoint dédié :
    le détail par fiche passe donc par CE point d'entrée, paramètre `id`. */
 var CHAMPS_DETAIL = ['specs', 'description_long', 'features'];
+// Lot poids (levier 2) : champs que le visiteur ne lit jamais (mesuré absents
+// de app.visitor.js) — retirés de la LISTE, conservés sur la fiche ?id (admin).
+// Aligné avec scripts/generer-catalogue-leger.js (porte : whitelist visiteur).
+var CHAMPS_MORTS_VISITEUR = ['ficheAcompleter', 'productType', 'poidsSuppose',
+  'sourceDescriptif', 'srcAltSkus', 'priceLocked'];
+var TOUS_RETIRES = CHAMPS_DETAIL.concat(CHAMPS_MORTS_VISITEUR);
 function alleger(p) {
   var clean = Object.assign({}, p);
-  for (var i = 0; i < CHAMPS_DETAIL.length; i++) delete clean[CHAMPS_DETAIL[i]];
+  for (var i = 0; i < TOUS_RETIRES.length; i++) delete clean[TOUS_RETIRES[i]];
   clean._light = 1;   // marqueur : le client sait qu'il doit chercher le détail
   return clean;
 }
