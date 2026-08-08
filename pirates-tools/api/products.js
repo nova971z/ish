@@ -7,6 +7,22 @@
 
 var catalog = require('./_lib/catalog');
 
+/* ── SEO ordre 9 : catalogue ALLÉGÉ pour la grille (CODE-003) ──────────────
+   Les 3 champs de DÉTAIL (mesurés : specs 129 Ko + description_long 89 Ko +
+   features 60 Ko = 278 Ko sur 1708 fiches) ne servent QUE la fiche produit
+   (renderPDP) et l'édition admin. La grille, la recherche, le panier et le
+   prix ne les lisent jamais. On les retire de la LISTE : le boot télécharge
+   moins ; la fiche récupère son détail à la demande via `?id=<slug>`.
+   ⚠️ `desc` (phrase courte) RESTE : la recherche serveur et les cartes s'en
+   servent. Le plafond de 12 fonctions Vercel interdit un endpoint dédié :
+   le détail par fiche passe donc par CE point d'entrée, paramètre `id`. */
+var CHAMPS_DETAIL = ['specs', 'description_long', 'features'];
+function alleger(p) {
+  var clean = Object.assign({}, p);
+  for (var i = 0; i < CHAMPS_DETAIL.length; i++) delete clean[CHAMPS_DETAIL[i]];
+  return clean;
+}
+
 module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(204).end();
 
@@ -26,6 +42,17 @@ module.exports = async function handler(req, res) {
       // que la première valeur au lieu de planter sur .toLowerCase().
       var query = req.query || {};
       var one = function (v) { return Array.isArray(v) ? String(v[0] || '') : (v ? String(v) : ''); };
+      var id = one(query.id);
+
+      /* ── FICHE À LA DEMANDE : ?id=<slug|id|sku> → UNE fiche COMPLÈTE ────────
+         (avec les champs de détail). Sert renderPDP et l'édition admin, qui
+         récupèrent le détail que la liste allégée ne porte plus. */
+      if (id) {
+        var fiche = catalog.findByKey(merged, id);
+        if (!fiche) return res.status(404).json({ ok: false, error: 'Produit introuvable' });
+        return res.status(200).json({ ok: true, prixConfirmes: etatCat.prixConfirmes, product: fiche });
+      }
+
       var brand = one(query.brand);
       var category = one(query.category);
       var q = one(query.q);
@@ -57,7 +84,8 @@ module.exports = async function handler(req, res) {
            overrides. Le client ne doit ni les mettre en cache à la place des
            bons, ni laisser croire qu'ils sont à jour. */
         prixConfirmes: etatCat.prixConfirmes,
-        products: filtered
+        // Liste ALLÉGÉE (SEO ordre 9) : détail retiré, récupéré à la demande.
+        products: filtered.map(alleger)
       });
     } catch (err) {
       console.error('[api/products] Error:', err.message);

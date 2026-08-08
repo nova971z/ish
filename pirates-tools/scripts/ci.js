@@ -100,6 +100,20 @@ function reqSitemapPorte(){
     return ['[generer-sitemap] ' + m.split('\n').filter(Boolean).join(' · ')];
   }
 }
+// SEO ordre 9 : products-light.json (grille) doit rester a jour vs products.json
+// et ne porter AUCUN champ de detail. Fichier present mais casse -> porte morte.
+var reqCatLeger = safeRequire('./generer-catalogue-leger','generer-catalogue-leger');
+function reqCatLegerPorte(){
+  if (!reqCatLeger) return [];
+  try {
+    cp.execFileSync(process.execPath, [path.join(__dirname,'generer-catalogue-leger.js'),'--verifie'],
+      { stdio:['ignore','ignore','pipe'] });
+    return [];
+  } catch(e){
+    var m = (e.stderr ? e.stderr.toString() : '') || (e.message||'');
+    return ['[generer-catalogue-leger] ' + m.split('\n').filter(Boolean).join(' · ')];
+  }
+}
 var reqCatPub   = safeRequire('./check-catalog-public','check-catalog-public');
 var reqAssetVer = safeRequire('./check-asset-versions','check-asset-versions');
 var reqWhClaim  = safeRequire('./check-webhook-claim','check-webhook-claim');
@@ -245,6 +259,7 @@ var reqReconc   = safeRequire('./check-reconciliation', 'check-reconciliation');
   await runOne(reqCoursesP1,'check-courses-p1');
   await runOne(reqRender,   'check-render');
   await runOne(reqSitemapPorte, 'generer-sitemap');
+  await runOne(reqCatLegerPorte, 'generer-catalogue-leger');
   await runOne(reqCatPub,   'check-catalog-public');
   await runOne(reqAssetVer, 'check-asset-versions');
   await runOne(reqWhClaim,  'check-webhook-claim');
