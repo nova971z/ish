@@ -109,6 +109,8 @@ const NON_PERSONNEL = {
   _adminGlobe:       'contexte WebGL, libéré par destroyAdminGlobe au changement de route',
   _adminLogoBusy:    'drapeau d\'occupation, sans donnée',
   _adminPhotosBusy:  'drapeau d\'occupation, sans donnée',
+  _adminProdQ:       'le texte tapé dans la recherche de produits — un critère de filtrage '
+                     + 'du catalogue public, jamais une donnée de compte',
   _lvAdminFuel:      'paramètre public (prix du carburant), pas une identité',
   _lvChatUnsub:      'fonction de désabonnement — coupée dans le bloc de remise à zéro',
   _lvVueParams:      'quel écran de l\'espace livreur est affiché (travail ou paramètres) — '

@@ -5559,6 +5559,150 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .admin-row__status--ok { color: #4ade80; }
 .admin-row__status--err { color: #f87171; }
 
+/* ══ ADMINISTRATION — RECHERCHE ET FICHE COMPLÈTE ══════════════════════════
+   Demande de l'user, 08/08/2026 : une barre de recherche dans les produits, et
+   un bouton qui déroule la fiche ENTIÈRE (description, caractéristiques,
+   visuels) au lieu du seul couple libellé + prix. */
+.admin-prodbar {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  margin: 0 0 1rem;
+}
+.admin-prodbar__lab {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: rgba(230, 237, 245, 0.7);
+}
+.admin-prodbar #adminProdSearch {
+  flex: 1 1 18rem;
+  min-width: 12rem;
+}
+.admin-prodbar__count {
+  font-size: 0.8rem;
+  color: rgba(230, 237, 245, 0.55);
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-row__more { white-space: nowrap; }
+.admin-row__chev {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+.admin-row--ouverte .admin-row__chev { transform: rotate(180deg); }
+
+.admin-fiche {
+  margin-top: 0.9rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+}
+.admin-fiche[hidden] { display: none; }
+.admin-fiche__grille {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 0.9rem;
+}
+.admin-field--large { grid-column: 1 / -1; }
+.admin-fiche__note {
+  font-size: 0.76rem;
+  color: rgba(230, 237, 245, 0.5);
+  margin: 0.3rem 0 0;
+  font-style: normal;
+}
+.admin-fiche__add { margin-top: 0.5rem; }
+.admin-fiche__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+.admin-fiche__status {
+  font-size: 0.82rem;
+  color: rgba(230, 237, 245, 0.55);
+}
+.admin-fiche__status--ok { color: #4ade80; }
+.admin-fiche__status--err { color: #f87171; }
+
+/* Une caractéristique = un couple. La colonne de gauche est plus étroite : un
+   nom de caractéristique est court, sa valeur ne l'est pas toujours. */
+.admin-spec,
+.admin-feat {
+  display: grid;
+  gap: 0.4rem;
+  margin-bottom: 0.4rem;
+  align-items: center;
+}
+.admin-spec { grid-template-columns: minmax(6rem, 1fr) minmax(8rem, 2fr) auto; }
+.admin-feat { grid-template-columns: 1fr auto; }
+/* Les deux conteneurs et les deux champs d'un couple : sans règle, `p1-static`
+   les signale comme des classes fantômes — et il a raison, une classe posée
+   dans le HTML sans style est du bruit qui finit par masquer un vrai oubli. */
+.admin-specs,
+.admin-feats { margin-top: 0.35rem; }
+.admin-spec__k,
+.admin-spec__v { min-width: 0; }
+.admin-spec__del {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(230, 237, 245, 0.75);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.admin-spec__del:hover {
+  border-color: #f87171;
+  color: #f87171;
+}
+
+.admin-vis-liste {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 0.5rem;
+}
+.admin-vis {
+  position: relative;
+  width: 5.5rem;
+  height: 5.5rem;
+  border-radius: 0.6rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  /* Fond sombre : les visuels produits sont DÉTOURÉS. Sur du blanc, un outil
+     noir devient une silhouette illisible. */
+  background: #0d1117;
+  overflow: hidden;
+}
+.admin-vis img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+.admin-vis__del {
+  position: absolute;
+  top: 0.2rem;
+  right: 0.2rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(10, 15, 20, 0.8);
+  color: #f87171;
+  font-size: 0.9rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.admin-fiche__ajout-img {
+  display: block;
+  font-size: 0.82rem;
+  color: rgba(230, 237, 245, 0.7);
+}
+.admin-fiche__ajout-img input { margin-top: 0.35rem; }
+
 .admin-login {
   min-height: 60vh;
   display: flex;

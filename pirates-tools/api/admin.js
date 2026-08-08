@@ -1435,6 +1435,146 @@ module.exports = async function handler(req, res) {
     }
   }
 
+  /* ── POST ?type=product-edit : LA FICHE ENTIÈRE, PAS SEULEMENT LE PRIX ────
+     Demande de l'user, 08/08/2026 : « je dois pouvoir modifier la fiche produit
+     complète […] là ça affiche que le libellé et le prix, je veux pouvoir tout
+     modifier, description / fiche technique / png ».
+
+     ⛔ POURQUOI UN POINT D'ENTRÉE À PART, ET PAS LA LISTE `allowed` DU POST
+     GÉNÉRIQUE. Ces champs-là ne sont pas des chaînes : `specs` est un objet,
+     `features` et `images` sont des tableaux, et `images` peut porter des
+     images ENTIÈRES encodées. Les jeter dans la liste générique reviendrait à
+     écrire dans Firestore ce que le navigateur envoie, sans forme ni borne —
+     un document de plusieurs mégaoctets, ou un `specs` qui n'est pas un objet
+     et casse le rendu de toutes les fiches.
+
+     ⛔ CHAQUE CHAMP EST BORNÉ ET LE REFUS EST EXPLICITE. Tronquer en silence
+     ferait disparaître du texte que l'user croit avoir enregistré.
+
+     ⚠️ LE PRIX N'EST PAS ICI, ET C'EST VOULU. Il passe par le POST générique et
+     par le calculateur ; un prix saisi à la main au milieu d'un formulaire de
+     description contournerait la règle « plus aucun prix n'est saisi à la
+     main » et la porte J4. */
+  if (req.method === 'POST' && ((req.query && req.query.type) === 'product-edit')) {
+    try {
+      const b = req.body || {};
+      const IMG_MAX = 700000;
+      const id = String(b.id || '').trim();
+      if (!id) return res.status(400).json({ ok: false, error: 'identifiant du produit requis' });
+
+      const patch = {};
+      const refus = [];
+
+      /* `title` sert AUSSI de `name` : les deux vivent dans le catalogue et la
+         fiche lit l'un ou l'autre selon l'endroit — les laisser diverger
+         afficherait deux noms pour un même produit. */
+      if (b.title !== undefined) {
+        const t = String(b.title).trim();
+        if (!t) refus.push('le titre ne peut pas être vide');
+        else if (t.length > 200) refus.push('titre : 200 signes maximum (' + t.length + ' reçus)');
+        else { patch.title = t; patch.name = t; }
+      }
+      [['desc', 400], ['description_long', 6000], ['tag', 40], ['stock_label', 60]].forEach(function (p) {
+        const k = p[0], max = p[1];
+        if (b[k] === undefined) return;
+        const v = String(b[k]).trim();
+        if (v.length > max) refus.push(k + ' : ' + max + ' signes maximum (' + v.length + ' reçus)');
+        else patch[k] = v;
+      });
+      if (b.stock_status !== undefined) {
+        const s = String(b.stock_status);
+        if (['in_stock', 'low_stock', 'out_of_stock', 'preorder'].indexOf(s) === -1) {
+          refus.push('statut de stock inconnu : ' + s);
+        } else patch.stock_status = s;
+      }
+
+      /* ⛔ LE POIDS EST DE L'ARGENT : il entre dans le calcul du port, donc du
+         prix de vente. Un poids nul ferait un port nul. */
+      if (b.weight_kg !== undefined) {
+        const w = Number(b.weight_kg);
+        if (!(w > 0) || w > 500) refus.push('poids : un nombre strictement positif en kg (reçu : ' + b.weight_kg + ')');
+        else { patch.weight_kg = w; patch.poidsSuppose = false; }
+      }
+
+      /* Caractéristiques : un objet « clé → valeur ». Une ligne laissée vide
+         est écartée, pas refusée — c'est une hésitation, pas une erreur. */
+      if (b.specs !== undefined) {
+        if (!b.specs || typeof b.specs !== 'object' || Array.isArray(b.specs)) {
+          refus.push('caractéristiques : format attendu « clé : valeur »');
+        } else {
+          const cles = Object.keys(b.specs);
+          if (cles.length > 40) refus.push('caractéristiques : 40 lignes maximum (' + cles.length + ' reçues)');
+          else {
+            const specs = {};
+            cles.forEach(function (k) {
+              const cle = String(k).trim().slice(0, 60);
+              const val = String(b.specs[k] == null ? '' : b.specs[k]).trim().slice(0, 200);
+              if (cle && val) specs[cle] = val;
+            });
+            patch.specs = specs;
+          }
+        }
+      }
+
+      if (b.features !== undefined) {
+        if (!Array.isArray(b.features)) refus.push('points forts : une liste attendue');
+        else if (b.features.length > 20) refus.push('points forts : 20 maximum (' + b.features.length + ' reçus)');
+        else patch.features = b.features.map(function (f) {
+          return String(f == null ? '' : f).trim().slice(0, 300);
+        }).filter(Boolean);
+      }
+
+      /* ⛔ LES VISUELS : soit un chemin DU SITE, soit une image entière encodée.
+         Rien d'autre — une URL externe ferait charger la fiche depuis un
+         serveur tiers, que la CSP bloque et sur lequel on n'a aucune prise. */
+      if (b.images !== undefined) {
+        if (!Array.isArray(b.images)) refus.push('visuels : une liste attendue');
+        else if (b.images.length > 6) refus.push('visuels : 6 maximum (' + b.images.length + ' reçus)');
+        else {
+          const images = [];
+          b.images.forEach(function (v, i) {
+            const s = String(v == null ? '' : v).trim();
+            if (!s) return;
+            const estChemin = /^images\/[A-Za-z0-9._/-]+\.(webp|png|jpe?g|svg)$/.test(s);
+            const estEncodee = /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(s);
+            if (!estChemin && !estEncodee) {
+              refus.push('visuel ' + (i + 1) + ' : ni un fichier du site, ni une image encodée');
+              return;
+            }
+            if (estEncodee && s.length > IMG_MAX) {
+              refus.push('visuel ' + (i + 1) + ' : trop lourd — ' + IMG_MAX
+                + ' signes maximum une fois encodé (' + s.length + ' reçus)');
+              return;
+            }
+            images.push(s);
+          });
+          if (!refus.length) {
+            patch.images = images;
+            /* La carte du catalogue montre TOUJOURS le premier visuel : les
+               laisser diverger afficherait un produit dans la grille et un
+               autre sur sa fiche. */
+            if (images.length) patch.img = images[0];
+          }
+        }
+      }
+
+      if (refus.length) return res.status(400).json({ ok: false, error: refus.join(' · ') });
+      if (Object.keys(patch).length === 0) {
+        return res.status(400).json({ ok: false, error: 'aucun champ à enregistrer' });
+      }
+
+      patch.updatedAt = admin.firestore.FieldValue.serverTimestamp();
+      await db.collection('product_overrides').doc(id).set(patch, { merge: true });
+      catalog.invalidateOverrides();
+      console.log('[api/admin] product-edit', id, Object.keys(patch).join(','));
+      return res.status(200).json({ ok: true, id: id,
+        champs: Object.keys(patch).filter(function (k) { return k !== 'updatedAt'; }) });
+    } catch (err) {
+      console.error('[api/admin] product-edit failed:', err.message);
+      return res.status(500).json({ ok: false, error: 'enregistrement de la fiche échoué' });
+    }
+  }
+
   // ── POST ?type=invite-code-save : créer un code d'invitation ──
   // Code fourni (normalisé A-Z 0-9 tiret, 4-24) ou GÉNÉRÉ (PT-XXXXXX).
   // create() échoue si le code existe déjà → pas d'écrasement silencieux.

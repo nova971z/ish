@@ -14815,7 +14815,16 @@
       + '</nav>'
 
       + '<div class="admin-pane is-active" data-admin-pane="products">'
-      + '<p class="admin-hint">Édite le stock et le prix de chaque produit. Les modifications sont enregistrées dans Firestore et visibles en production après rafraîchissement du cache (≤30 s).</p>'
+      + '<p class="admin-hint">Édite le stock, le prix, et la fiche complète de chaque produit (bouton ⌄). Les modifications sont enregistrées dans Firestore et visibles en production après rafraîchissement du cache (≤30 s).</p>'
+      // ⛔ LA RECHERCHE N'EST PAS UN CONFORT : le catalogue dépasse le millier
+      // de fiches. Les peindre toutes fait une page que l'iPad met des
+      // secondes à afficher, et dans laquelle on ne retrouve rien.
+      + '<div class="admin-prodbar">'
+      + '<label class="admin-prodbar__lab" for="adminProdSearch">Chercher un produit</label>'
+      + '<input type="search" id="adminProdSearch" class="search" autocomplete="off"'
+      + ' placeholder="référence, titre, marque ou famille">'
+      + '<span class="admin-prodbar__count" id="adminProdCount" aria-live="polite"></span>'
+      + '</div>'
       + '<div id="adminProductList" class="admin-list"><p class="admin-loading">Chargement…</p></div>'
       + '</div>'
 
@@ -15146,6 +15155,18 @@
     var refreshBtn = document.getElementById('adminOrdersRefresh');
     if (refreshBtn) refreshBtn.addEventListener('click', loadAdminOrders);
 
+    /* Recherche produits. ⚠️ On repeint sur `input`, pas sur `change` : sur
+       iPad, `change` n'arrive qu'à la perte du focus — la liste ne bougerait
+       pas pendant la frappe et on croirait la recherche cassée. */
+    var champRech = document.getElementById('adminProdSearch');
+    if (champRech) {
+      champRech.value = _adminProdQ;
+      champRech.addEventListener('input', function () {
+        _adminProdQ = champRech.value || '';
+        renderAdminList();
+      });
+    }
+
     renderAdminList();
   }
 
@@ -15199,6 +15220,25 @@
     });
   }
 
+  /* ⛔ COMBIEN DE FICHES ON PEINT D'UN COUP. Le catalogue en compte plus de
+     mille : toutes les rendre fabrique un DOM que l'iPad met des secondes à
+     poser, et dans lequel on ne retrouve rien. On en montre un paquet, et la
+     recherche fait le reste. Le nombre TOTAL trouvé reste affiché — sinon on
+     croit que le catalogue s'arrête là. */
+  var ADMIN_PROD_MAX = 60;
+  var _adminProdQ = '';
+
+  function adminProdFiltres() {
+    var q = _adminProdQ.trim().toLowerCase();
+    if (!q) return (products || []).slice();
+    var mots = q.split(/\s+/);
+    return (products || []).filter(function (p) {
+      var foin = [p.sku, p.title, p.name, p.brand, p.category, p.id]
+        .join(' ').toLowerCase();
+      return mots.every(function (m) { return foin.indexOf(m) !== -1; });
+    });
+  }
+
   function renderAdminList() {
     var listEl = document.getElementById('adminProductList');
     if (!listEl) return;
@@ -15208,7 +15248,22 @@
       return;
     }
 
-    listEl.innerHTML = products.map(function (p) {
+    var trouves = adminProdFiltres();
+    var montres = trouves.slice(0, ADMIN_PROD_MAX);
+    var compteur = document.getElementById('adminProdCount');
+    if (compteur) {
+      compteur.textContent = trouves.length === 0
+        ? 'aucun produit ne correspond'
+        : (trouves.length + ' produit' + (trouves.length > 1 ? 's' : '')
+          + (trouves.length > montres.length
+            ? ' — les ' + montres.length + ' premiers sont affichés, affine la recherche' : ''));
+    }
+    if (trouves.length === 0) {
+      listEl.innerHTML = '<p class="admin-loading">Aucun produit ne correspond à cette recherche.</p>';
+      return;
+    }
+
+    listEl.innerHTML = montres.map(function (p) {
       var id = escapeHTML(p.id);
       var status = (p.stock_status || 'in_stock');
       var label = (p.stock_label || '');
@@ -15244,8 +15299,14 @@
         + '<div class="admin-row__actions">'
         + '<button type="button" class="btn primary" data-admin-action="save">Enregistrer</button>'
         + '<button type="button" class="btn btn--ghost" data-admin-action="reset">Annuler</button>'
+        + '<button type="button" class="btn btn--ghost admin-row__more" data-admin-action="deplier"'
+        + ' aria-expanded="false" aria-label="Ouvrir la fiche complète de ' + escapeHTML(p.title || id) + '">'
+        + '<span class="admin-row__chev" aria-hidden="true">⌄</span> Fiche complète</button>'
         + '<span class="admin-row__status" aria-live="polite"></span>'
         + '</div>'
+        // ⚠️ Le panneau est VIDE tant qu'on ne l'ouvre pas : peindre mille
+        // formulaires complets d'avance coûterait la page entière.
+        + '<div class="admin-fiche" data-admin-fiche hidden></div>'
         + '</div>';
     }).join('');
 
@@ -15258,6 +15319,14 @@
       var action = btn.getAttribute('data-admin-action');
       var id = row.getAttribute('data-product-id');
       var statusEl = row.querySelector('.admin-row__status');
+
+      if (action === 'deplier') { adminBasculerFiche(row, btn); return; }
+      if (action === 'fiche-save') { adminEnregistrerFiche(row, btn); return; }
+      if (action === 'spec-add') { adminAjouterLigneSpec(row); return; }
+      if (action === 'spec-del') { var l = btn.closest('.admin-spec'); if (l) l.remove(); return; }
+      if (action === 'feat-add') { adminAjouterLigneFeat(row); return; }
+      if (action === 'feat-del') { var f = btn.closest('.admin-feat'); if (f) f.remove(); return; }
+      if (action === 'img-del') { var v = btn.closest('.admin-vis'); if (v) v.remove(); return; }
 
       if (action === 'save') {
         var patch = {};
@@ -15293,6 +15362,238 @@
         renderAdminList();
       }
     };
+  }
+
+  /* ══ FICHE COMPLÈTE DANS L'ADMINISTRATION ══════════════════════════════════
+     Demande de l'user, 08/08/2026 : « je dois pouvoir modifier la fiche produit
+     complète […] là ça affiche que le libellé et le prix, je veux pouvoir tout
+     modifier, description / fiche technique / png — je veux même pouvoir
+     rajouter des PNG pour qu'il y ait plusieurs visuels ».
+
+     ⚠️ LE PRIX N'EST PAS DANS CE PANNEAU, et ce n'est pas un oubli : il reste
+     dans la ligne du dessus, avec le calculateur. « Plus aucun prix n'est saisi
+     à la main » est une règle produit ; un champ prix noyé au milieu d'un
+     formulaire de description la contournerait sans qu'on s'en aperçoive. */
+  function adminProduitPar(id) {
+    for (var i = 0; i < (products || []).length; i++) {
+      if (products[i].id === id) return products[i];
+    }
+    return null;
+  }
+
+  function adminBasculerFiche(row, btn) {
+    var boite = row.querySelector('[data-admin-fiche]');
+    if (!boite) return;
+    var ouvert = !boite.hidden;
+    if (ouvert) {
+      boite.hidden = true;
+      boite.innerHTML = '';                       // on ne garde pas mille formulaires en mémoire
+      btn.setAttribute('aria-expanded', 'false');
+      row.classList.remove('admin-row--ouverte');
+      return;
+    }
+    var p = adminProduitPar(row.getAttribute('data-product-id'));
+    if (!p) return;
+    boite.innerHTML = adminFicheHtml(p);
+    boite.hidden = false;
+    btn.setAttribute('aria-expanded', 'true');
+    row.classList.add('admin-row--ouverte');
+    adminBrancherAjoutImage(row);
+  }
+
+  function adminFicheHtml(p) {
+    var specs = (p.specs && typeof p.specs === 'object' && !Array.isArray(p.specs)) ? p.specs : {};
+    var feats = Array.isArray(p.features) ? p.features : [];
+    var imgs = Array.isArray(p.images) && p.images.length ? p.images
+      : (p.img && !/placeholder/.test(p.img) ? [p.img] : []);
+    var h = '<div class="admin-fiche__grille">';
+
+    h += '<label class="admin-field admin-field--large"><span>Titre affiché</span>'
+      + '<input type="text" data-fiche="title" value="' + escapeHTML(p.title || '') + '"></label>';
+    h += '<label class="admin-field admin-field--large"><span>Phrase courte (sous le titre, cartes du catalogue)</span>'
+      + '<textarea rows="2" data-fiche="desc">' + escapeHTML(p.desc || '') + '</textarea></label>';
+    h += '<label class="admin-field admin-field--large"><span>Description longue (fiche produit)</span>'
+      + '<textarea rows="8" data-fiche="description_long">' + escapeHTML(p.description_long || '') + '</textarea></label>';
+    h += '<label class="admin-field"><span>Poids réel, en kg (sert au calcul du port)</span>'
+      + '<input type="number" step="0.01" min="0.01" data-fiche="weight_kg" value="'
+      + escapeHTML(String(p.weight_kg == null ? '' : p.weight_kg)) + '">'
+      + (p.poidsSuppose ? '<em class="admin-fiche__note">poids SUPPOSÉ — à remplacer par le poids réel</em>' : '')
+      + '</label>';
+    h += '<label class="admin-field"><span>Étiquette (Nouveau, Pro…)</span>'
+      + '<input type="text" data-fiche="tag" value="' + escapeHTML(p.tag || '') + '"></label>';
+
+    /* ── Caractéristiques : le tableau de la fiche produit ─────────────── */
+    h += '<div class="admin-field admin-field--large"><span>Caractéristiques techniques</span>'
+      + '<div class="admin-specs" data-specs>';
+    Object.keys(specs).forEach(function (k) { h += adminLigneSpecHtml(k, specs[k]); });
+    if (!Object.keys(specs).length) h += adminLigneSpecHtml('', '');
+    h += '</div>'
+      + '<button type="button" class="btn btn--ghost admin-fiche__add" data-admin-action="spec-add">+ Ajouter une caractéristique</button>'
+      + '</div>';
+
+    /* ── Points forts ──────────────────────────────────────────────────── */
+    h += '<div class="admin-field admin-field--large"><span>Points forts (puces de la fiche)</span>'
+      + '<div class="admin-feats" data-feats>';
+    feats.forEach(function (f) { h += adminLigneFeatHtml(f); });
+    if (!feats.length) h += adminLigneFeatHtml('');
+    h += '</div>'
+      + '<button type="button" class="btn btn--ghost admin-fiche__add" data-admin-action="feat-add">+ Ajouter un point fort</button>'
+      + '</div>';
+
+    /* ── Visuels ───────────────────────────────────────────────────────────
+       ⚠️ L'ORDRE COMPTE : le premier visuel est celui de la carte du catalogue,
+       et c'est aussi la première vignette de la galerie. On le dit, sinon
+       personne ne peut deviner pourquoi la grille change en réordonnant. */
+    h += '<div class="admin-field admin-field--large"><span>Visuels — le premier est celui de la carte du catalogue</span>'
+      + '<div class="admin-vis-liste" data-images>';
+    imgs.forEach(function (src) { h += adminVisuelHtml(src); });
+    h += '</div>'
+      + '<label class="admin-fiche__ajout-img">'
+      + '<span>Ajouter un ou plusieurs visuels (PNG, JPEG ou WebP)</span>'
+      + '<input type="file" accept="image/png,image/jpeg,image/webp" multiple data-ajout-img>'
+      + '</label>'
+      + '<p class="admin-fiche__note">Chaque visuel est réduit à 2000 px et réencodé en WebP dans le navigateur : '
+      + 'la transparence est conservée, et le fichier reste sous la limite d\'envoi.</p>'
+      + '</div>';
+
+    h += '</div>'
+      + '<div class="admin-fiche__actions">'
+      + '<button type="button" class="btn primary" data-admin-action="fiche-save">Enregistrer la fiche</button>'
+      + '<span class="admin-fiche__status" aria-live="polite"></span>'
+      + '</div>';
+    return h;
+  }
+
+  function adminLigneSpecHtml(cle, val) {
+    return '<div class="admin-spec">'
+      + '<input type="text" class="admin-spec__k" data-spec-k value="' + escapeHTML(String(cle || '')) + '" aria-label="Nom de la caractéristique" placeholder="Tension">'
+      + '<input type="text" class="admin-spec__v" data-spec-v value="' + escapeHTML(String(val == null ? '' : val)) + '" aria-label="Valeur de la caractéristique" placeholder="18 V XR">'
+      + '<button type="button" class="admin-spec__del" data-admin-action="spec-del" aria-label="Retirer cette caractéristique">×</button>'
+      + '</div>';
+  }
+  function adminLigneFeatHtml(txt) {
+    return '<div class="admin-feat">'
+      + '<input type="text" data-feat value="' + escapeHTML(String(txt || '')) + '" aria-label="Point fort" placeholder="Moteur brushless sans charbon">'
+      + '<button type="button" class="admin-spec__del" data-admin-action="feat-del" aria-label="Retirer ce point fort">×</button>'
+      + '</div>';
+  }
+  function adminVisuelHtml(src) {
+    return '<div class="admin-vis" data-src="' + escapeHTML(src) + '">'
+      + '<img src="' + escapeHTML(src) + '" alt="" loading="lazy" decoding="async">'
+      + '<button type="button" class="admin-vis__del" data-admin-action="img-del" aria-label="Retirer ce visuel">×</button>'
+      + '</div>';
+  }
+  function adminAjouterLigneSpec(row) {
+    var z = row.querySelector('[data-specs]');
+    if (z) z.insertAdjacentHTML('beforeend', adminLigneSpecHtml('', ''));
+  }
+  function adminAjouterLigneFeat(row) {
+    var z = row.querySelector('[data-feats]');
+    if (z) z.insertAdjacentHTML('beforeend', adminLigneFeatHtml(''));
+  }
+
+  /* ⛔ L'IMAGE EST RÉDUITE ET RÉENCODÉE DANS LE NAVIGATEUR, PAS ENVOYÉE BRUTE.
+     Mesuré le 08/08/2026 : un PNG sorti de Photoroom pèse 10,6 Mo en 4001 px.
+     L'envoyer tel quel dépasserait de très loin la limite du serveur, et le
+     stocker tel quel ferait payer ces octets à chaque visiteur. 2000 px est la
+     taille MESURÉE comme nécessaire : la fiche produit dessine l'image sur
+     1674 pixels d'écran sur l'iPad de l'user — en dessous, elle est agrandie
+     et floue. `image/webp` conserve la transparence des visuels détourés. */
+  function adminReduireImage(fichier) {
+    return new Promise(function (resoudre, rejeter) {
+      var lect = new FileReader();
+      lect.onerror = function () { rejeter(new Error('lecture impossible : ' + fichier.name)); };
+      lect.onload = function () {
+        var img = new Image();
+        img.onerror = function () { rejeter(new Error('image illisible : ' + fichier.name)); };
+        img.onload = function () {
+          var COTE = 2000;
+          var k = Math.min(1, COTE / Math.max(img.width, img.height));  // jamais d'agrandissement
+          var c = document.createElement('canvas');
+          c.width = Math.max(1, Math.round(img.width * k));
+          c.height = Math.max(1, Math.round(img.height * k));
+          var x = c.getContext('2d');
+          x.imageSmoothingEnabled = true;
+          x.imageSmoothingQuality = 'high';
+          x.drawImage(img, 0, 0, c.width, c.height);
+          resoudre(c.toDataURL('image/webp', 0.92));
+        };
+        img.src = String(lect.result);
+      };
+      lect.readAsDataURL(fichier);
+    });
+  }
+
+  function adminBrancherAjoutImage(row) {
+    var champ = row.querySelector('[data-ajout-img]');
+    var liste = row.querySelector('[data-images]');
+    var etat = row.querySelector('.admin-fiche__status');
+    if (!champ || !liste) return;
+    champ.onchange = function () {
+      var fichiers = Array.prototype.slice.call(champ.files || []);
+      if (!fichiers.length) return;
+      if (etat) { etat.textContent = 'Préparation des visuels…'; etat.className = 'admin-fiche__status'; }
+      Promise.all(fichiers.map(adminReduireImage)).then(function (uris) {
+        uris.forEach(function (u) { liste.insertAdjacentHTML('beforeend', adminVisuelHtml(u)); });
+        champ.value = '';
+        if (etat) {
+          etat.textContent = uris.length + ' visuel(s) ajouté(s) — pense à enregistrer la fiche';
+          etat.className = 'admin-fiche__status admin-fiche__status--ok';
+        }
+      }).catch(function (e) {
+        if (etat) { etat.textContent = 'Erreur : ' + e.message; etat.className = 'admin-fiche__status admin-fiche__status--err'; }
+      });
+    };
+  }
+
+  function adminEnregistrerFiche(row, btn) {
+    var id = row.getAttribute('data-product-id');
+    var etat = row.querySelector('.admin-fiche__status');
+    var corps = { id: id };
+    row.querySelectorAll('[data-fiche]').forEach(function (el) {
+      var k = el.getAttribute('data-fiche');
+      corps[k] = (k === 'weight_kg') ? Number(el.value) : el.value;
+    });
+    /* Un poids laissé vide n'est PAS zéro : on ne l'envoie pas, plutôt que de
+       faire refuser toute la fiche pour un champ qu'on n'a pas voulu toucher. */
+    if (!(corps.weight_kg > 0)) delete corps.weight_kg;
+
+    var specs = {};
+    row.querySelectorAll('.admin-spec').forEach(function (l) {
+      var k = (l.querySelector('[data-spec-k]') || {}).value || '';
+      var v = (l.querySelector('[data-spec-v]') || {}).value || '';
+      if (k.trim() && v.trim()) specs[k.trim()] = v.trim();
+    });
+    corps.specs = specs;
+    corps.features = Array.prototype.map.call(row.querySelectorAll('[data-feat]'), function (el) {
+      return el.value;
+    }).filter(function (v) { return String(v).trim(); });
+    corps.images = Array.prototype.map.call(row.querySelectorAll('.admin-vis'), function (el) {
+      return el.getAttribute('data-src');
+    }).filter(Boolean);
+
+    btn.disabled = true;
+    if (etat) { etat.textContent = 'Envoi…'; etat.className = 'admin-fiche__status'; }
+    adminPostType('product-edit', corps).then(function (rep) {
+      if (etat) {
+        etat.textContent = 'Enregistré — ' + (rep.champs || []).length + ' champ(s)';
+        etat.className = 'admin-fiche__status admin-fiche__status--ok';
+      }
+      /* On met à jour la fiche EN MÉMOIRE : sans ça, rouvrir le panneau
+         réafficherait les anciennes valeurs et on croirait l'écriture perdue. */
+      var p = adminProduitPar(id);
+      if (p) {
+        Object.assign(p, corps);
+        if (corps.images && corps.images.length) p.img = corps.images[0];
+        var t = row.querySelector('.admin-row__title');
+        if (t && corps.title) t.textContent = corps.title;
+        var vign = row.querySelector('.admin-row__img');
+        if (vign && p.img) vign.src = p.img;
+      }
+      toast('Fiche produit mise à jour', 'success');
+    }).catch(function (err) {
+      if (etat) { etat.textContent = 'Refusé : ' + err.message; etat.className = 'admin-fiche__status admin-fiche__status--err'; }
+    }).then(function () { btn.disabled = false; });
   }
 
   function adminOption(current, value, label) {

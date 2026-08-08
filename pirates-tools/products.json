@@ -26237,15 +26237,15 @@
   },
   {
     "id": "dewalt-dcs573nt-xj",
-    "slug": "dewalt-dcs573nt-xj-scie-circulaire-18v-190-mm-dcs573nt-xj",
+    "slug": "dewalt-dcs573nt-xj-scie-circulaire-190mm-flexvolt-advantage-tstak",
     "sku": "DCS573NT-XJ",
     "name": "DCS573NT-XJ",
     "brand": "DeWALT",
     "category": "Scies",
-    "title": "DeWALT DCS573NT-XJ — Scie circulaire 18V Ø190 mm DCS573NT-XJ",
+    "title": "DeWALT DCS573NT-XJ — Scie circulaire 18/54V XR FlexVolt ADVANTAGE Ø190 mm, coffret TSTAK (machine nue)",
     "tag": "Nouveau",
-    "desc": "Scie circulaire 18V Ø190 mm DCS573NT-XJ.",
-    "img": "images/placeholder.svg",
+    "desc": "Scie circulaire Ø190 mm brushless, coupe 67 mm à 90°, 5500 tr/min. Machine nue en coffret TSTAK.",
+    "img": "images/posters/dcs573nt-xj.webp",
     "currency": "EUR",
     "vat": 0.2,
     "stock_status": "in_stock",
@@ -26256,16 +26256,47 @@
     "tags": [
       "cordless"
     ],
-    "features": [],
+    "features": [
+      "Lame Ø190 mm, alésage 30 mm, 5500 tr/min à vide",
+      "Coupe 67 mm à 90° et 51 mm à 45°, inclinaison jusqu'à 57°",
+      "Butées de réglage à 22,5° et 45° pour retrouver l'angle d'un geste",
+      "ADVANTAGE : la scie reconnaît une batterie XR FLEXVOLT et libère plus de puissance",
+      "Moteur brushless, frein de sécurité électronique, réglage de profondeur sans outil",
+      "Lampe LED et soufflerie pour dégager le trait de coupe",
+      "Buse compatible AirLock pour raccorder un aspirateur",
+      "Machine nue en coffret TSTAK : ni batterie ni chargeur"
+    ],
     "specs": {
       "Marque": "DeWALT",
+      "Type": "Scie circulaire sans fil XR FlexVolt ADVANTAGE (machine nue)",
+      "Type d'alimentation": "Batterie",
+      "Tension de batterie": "18/54 V",
+      "Batteries compatibles": "Type FlexVolt DeWALT 18/54 V, gamme XR 18 V",
+      "Composition chimique batterie": "Li-Ion",
+      "Nombre de batteries fournies": "Aucune",
+      "Vitesse à vide maxi": "5500 tr/min",
+      "Diamètre de la lame": "190 mm",
+      "Diamètre de l'alésage": "30 mm",
+      "Capacité de coupe à 90°": "67 mm",
+      "Capacité de coupe à 45°": "51 mm",
+      "Inclinaison de la lame": "57°",
+      "Butées d'inclinaison": "22,5° et 45°",
+      "Type de moteur": "Brushless (sans charbon)",
+      "Frein de sécurité": "Électronique",
+      "Extraction des poussières": "Compatible DEWALT AirLock",
+      "Livré avec": "Coffret TSTAK",
+      "Batterie / chargeur": "NON inclus",
       "Référence": "DCS573NT-XJ"
     },
     "weight_kg": 2,
     "poidsSuppose": true,
     "ficheAcompleter": false,
     "price_ht": 294,
-    "price": 352.8
+    "price": 352.8,
+    "images": [
+      "images/posters/dcs573nt-xj.webp"
+    ],
+    "description_long": "Scie circulaire professionnelle à moteur brushless et technologie ADVANTAGE : un module électronique identifie le pack de batterie et libère davantage de puissance quand une XR FLEXVOLT est montée — le fabricant annonce jusqu'à 77 % de puissance en plus avec une DCB546 6 Ah FLEXVOLT qu'avec une DCB184 18 V 5 Ah. Lame de 190 mm, alésage 30 mm, 5500 tr/min à vide. Elle coupe 67 mm à 90° et 51 mm à 45°, avec un levier d'inclinaison jusqu'à 57° et des butées à 22,5° et 45° pour retrouver un angle courant d'un geste. Réglage de profondeur sans outil, frein de sécurité électronique, lampe LED et soufflerie qui dégagent le trait de coupe, poignée additionnelle pour la prise à deux mains. La buse d'extraction est directement compatible AirLock pour brancher un aspirateur. ⚠️ MACHINE NUE : ni batterie ni chargeur ne sont fournis — elle accepte les XR 18 V comme les FlexVolt 18/54 V. Livrée dans son coffret TSTAK."
   },
   {
     "id": "dewalt-dcd800nt-xj",
@@ -27549,8 +27580,7 @@
       "Livré avec": "3 piles alcalines AA, 1 support mural magnétique, 1 mallette de transport",
       "Référence": "DW088K-XJ"
     },
-    "weight_kg": 2,
-    "poidsSuppose": true,
+    "weight_kg": 0.46,
     "ficheAcompleter": false,
     "price_ht": 148.77,
     "price": 178.52,
