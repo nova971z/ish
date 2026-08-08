@@ -889,3 +889,45 @@ plan11 27/27, couriers 82/82, chemins-reels 7/7. ci.js : 6 erreurs =
 les 6 demandes ouvertes du registre, rien d'autre. sw pt-v594.
 EXTERNE restant : test Rich Results de Google sur une fiche remplie
 (a coller par Killian apres deploiement).
+
+### Ordres 4-5-8-11 + correctif Rich Results — 08/08/2026 (commits 250c82c 77b410e 6fabaf7)
+
+- Correctif Rich Results (250c82c) : le JSON-LD CLIENT resolvait les URLs
+  relatives contre location.href → /produit/images/... sur chemin reel.
+  Corrige (origine), + canonical/og territoire sans #, + ItemList/fil d'Ariane
+  reels. chemins-reels 12/12, sabotage rouge. VALIDE EN PROD (capture Killian
+  17:45 : image = /images/poster... sans /produit/, 4 elements valides).
+- Ordre 4 (77b410e) — pages territoire a CONTENU UNIQUE : fiscalite reelle
+  par ile (pricing.TERRITORIES, jamais recopiee, J5) + 8 produits phares.
+  Guadeloupe TVA 8,5 % / Mayotte aucun octroi. Guadeloupe != Mayotte (corps).
+  check-render : sabotage phraseFiscale constante → rouge.
+- Ordre 5 (77b410e) — OnlineStore (au lieu d'Organization), areaServed SANS
+  adresse (D-019), description=BASE_DESC, stock deja unifie (stock_status).
+  validFrom + priceValidUntil derives du MEME releve reel (teste au niveau
+  unite avec releve synthetique) ; le client OMET priceValidUntil (pas la
+  date de releve) au lieu d'inventer +30j. chemins-reels : OnlineStore +
+  areaServed sans adresse, sabotage retour Organization → rouge.
+- Ordre 8 (6fabaf7) — /images|models|icons immuables 1 an
+  (max-age=31536000, immutable). check-render §11 + sabotage rouge.
+- Ordre 11 — CRAWLABILITE DEJA ATTEINTE cote serveur : mesure
+  « 122 liens fiches uniques = 122 fiches eligibles → 100% atteintes » par un
+  crawl sans JS du /catalogue rendu (+ liens meme-famille sur chaque fiche +
+  produits phares sur chaque territoire). Le critere de l'ordre 11 est rempli.
+  La conversion COSMETIQUE de la pagination client en <a> reste un raffinement
+  (differe, blast-radius sur la grille app.js).
+
+### Ce qui reste, et POURQUOI (aucune invention)
+- Ordre 6 PRE-LANCEMENT : GBP, LocalBusiness, backlinks 971, avis = jalon
+  D-020, bloque sur la creation d'entreprise. Search Console + redirections
+  MAINTENANT = faits (Killian).
+- Ordre 7 : contenu des 1531 fiches vides = en continu, depend des envois de
+  photos/fiches de Killian et du traqueur.
+- Ordre 9 (poids du boot : scinder products.json, sortir l'admin) : blast-radius
+  ELEVE sur le chemin de l'ARGENT (chargement du catalogue = source des prix).
+  Merite son propre lot prudent, pas un ecrasement dans un push SEO.
+- Ordre 10 : posters 2000px = D-61, bloque sur images de Killian ou re-rendu 3D
+  (299 posters, arbitrage poids en prive) ; reencodage des heroes = performance
+  pure (plafonds de poids RENVERSES par decision user le 01/08), ~15 heroes >
+  400 Ko, non bloquant SEO. width/height CLS : les img produit sont
+  dimensionnees par leur CONTENEUR en CSS (width/height:100%), l'attribut
+  intrinseque n'y change pas le CLS.
