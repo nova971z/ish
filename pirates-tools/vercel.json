@@ -24,6 +24,13 @@
   ],
   "headers": [
     {
+      "comment": "SEO-011 : assets fingerprintés (posters WebP, modèles 3D, icônes) — immuables 1 an. Ils ne changent jamais sous la même URL ; un poster remplacé prend un nouveau nom.",
+      "source": "/(images|models|icons)/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
       "source": "/(.*)",
       "headers": [
         { "key": "X-Frame-Options", "value": "DENY" },

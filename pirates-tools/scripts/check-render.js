@@ -252,6 +252,13 @@ module.exports = async function () {
         'elle vise pirates-tools.com en CONSERVANT le chemin — vu : ' + redir.destination);
       ok(/:path\*/.test(redir.source || ''), 'sa source couvre TOUS les chemins — vu : ' + redir.source);
     }
+
+    /* ── ⑪ SEO-011 : les assets fingerprintés sont immuables 1 an ──────────── */
+    var immut = (vercelCfg.headers || []).filter(function (h) {
+      return /images|models|icons/.test(h.source || '')
+        && (h.headers || []).some(function (e) { return e.key === 'Cache-Control' && /immutable/.test(e.value || '') && /max-age=31536000/.test(e.value || ''); });
+    })[0];
+    ok(!!immut, 'SEO-011 : /images|models|icons servis immuables 1 an (max-age=31536000, immutable)');
   } finally {
     if (saAvant === undefined) delete process.env.FIREBASE_SERVICE_ACCOUNT;
     else process.env.FIREBASE_SERVICE_ACCOUNT = saAvant;
