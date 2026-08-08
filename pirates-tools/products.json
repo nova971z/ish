@@ -26109,14 +26109,14 @@
   },
   {
     "id": "dewalt-dce590n-xj",
-    "slug": "dewalt-dce590n-xj-ventouse-a-vide-d-air-18v-dce590n-xj",
+    "slug": "dewalt-dce590n-xj-palonnier-a-vide-grabo-18v-120kg-nue",
     "sku": "DCE590N-XJ",
     "name": "DCE590N-XJ",
     "brand": "DeWALT",
     "category": "Accessoires",
-    "title": "DeWALT DCE590N-XJ — Ventouse à vide d'air 18V DCE590N-XJ",
+    "title": "DeWALT DCE590N-XJ — Palonnier à vide GRABO 18V, levage jusqu'à 120 kg (machine nue)",
     "tag": "Nouveau",
-    "desc": "Ventouse à vide d'air 18V DCE590N-XJ.",
+    "desc": "Palonnier à vide sans fil : soulève, transporte et installe jusqu'à 120 kg. Machine nue.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -26128,16 +26128,34 @@
     "tags": [
       "cordless"
     ],
-    "features": [],
+    "features": [
+      "Soulève, transporte et installe jusqu'à 120 kg",
+      "Tient sur les matériaux semi-poreux et structurés : plâtre, contreplaqué, béton",
+      "Déverrouillage à double action, deux positions — pas de relâchement accidentel",
+      "La pompe ne démarre pas si la batterie est trop faible",
+      "Alerte écran + bip si la charge descend sous le seuil en cours d'usage",
+      "Poignée antidérapante pour les matériaux lourds",
+      "Compatible puce Tool Connect",
+      "Machine nue : ni batterie ni chargeur"
+    ],
     "specs": {
       "Marque": "DeWALT",
+      "Type": "Palonnier à vide sans fil GRABO (machine nue)",
+      "Charge maximale": "120 kg",
+      "Tension": "18 V",
+      "Déverrouillage": "Bouton à double action, 2 positions",
+      "Sécurité batterie": "Pompe bloquée sous un seuil de charge ; alerte écran et sonore en cours d'usage",
+      "Matériaux": "Semi-poreux et structurés (plâtre, contreplaqué, béton…)",
+      "Connectivité": "Compatible puce Tool Connect",
+      "Batterie / chargeur": "NON inclus",
       "Référence": "DCE590N-XJ"
     },
     "weight_kg": 2,
     "poidsSuppose": true,
     "ficheAcompleter": false,
     "price_ht": 317.11,
-    "price": 380.53
+    "price": 380.53,
+    "description_long": "Palonnier à vide sans fil : une ventouse motorisée qui prend une charge par aspiration et permet de la soulever, la transporter et la poser à deux mains — jusqu'à 120 kg. La ventouse tient sur les matériaux semi-poreux et structurés : plaques de plâtre, contreplaqué, béton, et bien d'autres. Le déverrouillage demande un bouton à DOUBLE ACTION, à deux positions : on ne lâche pas la pression par accident avec une charge en l'air. L'électronique refuse de lancer la pompe si la batterie est trop faible, et si la charge descend sous le seuil en cours d'utilisation, l'écran clignote et un bip prévient avant la panne — pas de coupure silencieuse. La poignée est antidérapante, ce qui compte surtout sur les matériaux lourds. Compatible avec la puce Tool Connect. ⚠️ MACHINE NUE : ni batterie ni chargeur ne sont fournis."
   },
   {
     "id": "dewalt-dw088cg-xj",

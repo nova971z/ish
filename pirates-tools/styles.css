@@ -2549,6 +2549,17 @@ padding: 0;
     font-size: 1rem;
     font-weight: 800;
 }
+/* Le poids expédié, sous le montant. Discret : c'est une information de
+   contrôle, pas un argument de vente — mais elle doit être LISIBLE, sinon
+   personne ne peut vérifier que le coffret pèse bien ce qu'il pèse. */
+.pdp-variant__btn .pdp-variant__kg {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    opacity: 0.6;
+    font-variant-numeric: tabular-nums;
+}
 .pdp-variant__btn:hover {
     color: #fff;
     background: rgba(var(--accent-rgb), 0.10);

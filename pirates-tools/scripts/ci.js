@@ -74,6 +74,9 @@ var reqInvoice = safeRequire('./check-invoice','check-invoice');
 var reqLoyalty  = safeRequire('./check-loyalty',     'check-loyalty');
 var reqHoraires = safeRequire('./check-horaires',    'check-horaires');
 var reqCoffret  = safeRequire('./check-coffret',     'check-coffret');
+// La regle coffret de l'user (poids + format) et son MIROIR client/serveur :
+// une divergence d'un centime entre prix affiche et prix debite est J4.
+var reqCofPoids = safeRequire('./check-coffret-poids','check-coffret-poids');
 var reqCatPub   = safeRequire('./check-catalog-public','check-catalog-public');
 var reqAssetVer = safeRequire('./check-asset-versions','check-asset-versions');
 var reqWhClaim  = safeRequire('./check-webhook-claim','check-webhook-claim');
@@ -214,6 +217,7 @@ var reqReconc   = safeRequire('./check-reconciliation', 'check-reconciliation');
   await runOne(reqLoyalty,  'check-loyalty');
   await runOne(reqHoraires, 'check-horaires');
   await runOne(reqCoffret,  'check-coffret');
+  await runOne(reqCofPoids, 'check-coffret-poids');
   await runOne(reqCatPub,   'check-catalog-public');
   await runOne(reqAssetVer, 'check-asset-versions');
   await runOne(reqWhClaim,  'check-webhook-claim');

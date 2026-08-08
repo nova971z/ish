@@ -14,8 +14,18 @@ module.exports = function () {
   ok(S && S.petit === 15 && S.gros === 25 && S.heavyKg === 3, 'paliers serveur (15/25/3)');
 
   // Surcharge par palier + éligibilité.
-  ok(pricing.coffretSurchargeCents({ ncCategory: 'power_tool', category: 'Meuleuses', weight_kg: 1.6 }) === 1500, 'petit outil = 15 €');
-  ok(pricing.coffretSurchargeCents({ ncCategory: 'power_tool', category: 'Scies', weight_kg: 4 }) === 2500, 'gros outil = 25 €');
+  /* ⛔ LE PALIER SE LIT SUR LE TYPE D'OUTIL DEPUIS LE 08/08/2026, plus sur son
+     poids. Ces deux assertions testaient l'ancien proxy (`weight_kg >= 3`) :
+     laissées telles quelles, elles défendaient une règle que l'user a
+     remplacée — une porte qui protège l'ancienne règle empêche la nouvelle.
+     Le détail de la nouvelle règle vit dans `check-coffret-poids`. */
+  ok(pricing.coffretSurchargeCents({ ncCategory: 'power_tool', category: 'Meuleuses',
+    title: 'Meuleuse 125 mm', weight_kg: 1.6 }) === 1500, 'outil courant = 15 € (petit coffret)');
+  ok(pricing.coffretSurchargeCents({ ncCategory: 'power_tool', category: 'Scies',
+    title: 'Scie circulaire 190 mm', weight_kg: 4 }) === 2500, 'scie circulaire = 25 € (gros coffret)');
+  ok(pricing.coffretSurchargeCents({ ncCategory: 'power_tool', category: 'Perforateurs',
+    title: 'Perforateur SDS-Plus', weight_kg: 12 }) === 1500,
+  '⛔ un outil LOURD mais sans gros coffret reste à 15 € — le poids ne décide plus');
   ok(pricing.coffretSurchargeCents({ ncCategory: 'power_tool', category: 'Batteries et chargeurs', weight_kg: 0.7 }) === 0, 'batterie exclue');
   ok(pricing.coffretSurchargeCents({ ncCategory: 'accessory', category: 'Accessoires', weight_kg: 1 }) === 0, 'accessoire exclu');
   ok(pricing.coffretEligible({ ncCategory: 'power_tool', category: 'Perforateurs' }) === true, 'perforateur éligible');

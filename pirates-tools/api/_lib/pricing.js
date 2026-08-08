@@ -94,6 +94,65 @@ function unitCents(product, territoryCode) {
 // identique. Modifiable ici (tarif La Poste OM à confirmer par l'user).
 // Éligible : machines (ncCategory 'power_tool') uniquement.
 var COFFRET = { petit: 15, gros: 25, heavyKg: 3 };
+
+/* ══ LE COFFRET A UN POIDS, ET DEUX FORMATS — RÈGLE DE L'USER, 08/08/2026 ═══
+   Mot pour mot : « il y a deux formats de coffret, un gros et un petit ; le
+   petit pèse environ 0,5 kg et le gros environ 1,3 kg ; dans les gros coffrets
+   il n'y a que des circulaires ou des défonceuses avec accessoires (kit), ou
+   alors s'il y a trois machines c'est un gros coffret […] toujours un maximum
+   de deux machines par coffret ».
+
+   ⛔ CE QUI TOURNAIT AVANT N'ÉTAIT PAS CETTE RÈGLE, et il la croyait appliquée.
+   Mesuré le 08/08 : le palier se choisissait sur le POIDS DE L'OUTIL (≥ 3 kg),
+   pas sur son TYPE — 62 fiches sur 1321 éligibles tombaient en « gros ». Et le
+   poids du coffret n'était ajouté nulle part : `weight_kg` restait le poids de
+   l'outil même quand le client cochait « avec coffret ».
+
+   ⚠️ `weight_kg` EST LE POIDS DE L'OUTIL SEUL. C'est la deuxième moitié de sa
+   consigne — « sans la mallette il pèse bien ce poids-là, le poids doit
+   augmenter si on utilise le switch avec coffret ». Le poids expédié se
+   CALCULE donc, il ne se stocke pas : une fiche ne peut pas porter deux poids.
+
+   ⛔ TOUT CE BLOC EST MIROIR DE `app.js` — le prix AFFICHÉ doit rester
+   exactement celui DÉBITÉ (porte J4). Une divergence ici n'est pas un écart
+   d'arrondi, c'est une pratique commerciale trompeuse. */
+var COFFRET_KG = { petit: 0.5, gros: 1.3 };
+
+/* Le gros coffret se lit sur le TYPE d'outil, pas sur son poids. Trois cas, et
+   ce sont EXACTEMENT les trois que l'user a nommés.
+
+   ⚠️ ① « CIRCULAIRES » — pas la famille « Scies » entière : une sauteuse ou une
+      sabre n'en sont pas, il a dit « circulaires ».
+   ⚠️ ② « DÉFONCEUSES AVEC ACCESSOIRES (KIT) » — pas toute défonceuse. Première
+      version mesurée : viser la famille « Défonceuses » faisait basculer 73
+      fiches, dont des AFFLEUREUSES nues, qui tiennent dans un petit coffret.
+      C'est le mot « kit » de sa phrase qui fait la différence, pas la famille.
+   ⚠️ ③ « OU ALORS S'IL Y A TROIS MACHINES » — le nombre d'outils est annoncé
+      dans le titre des packs (« Kit 5 outils »). */
+var COFFRET_CIRCULAIRE = /\bscies?\s+circulaires?\b/i;
+var COFFRET_DEFONCEUSE = /\bd[ée]fonceuses?\b|\baffleureuses?\b/i;
+var COFFRET_KIT = /\bkits?\b|\bsets?\b|\bavec\s+accessoires?\b|\bcoffret\s+d[eu]\s+\d/i;
+var COFFRET_NB_OUTILS = /(\d+)\s*(?:outils?|machines?)\b/i;
+function coffretNbOutils(product) {
+  var m = String((product && product.title) || '').match(COFFRET_NB_OUTILS);
+  return m ? Number(m[1]) : 0;
+}
+function coffretGros(product) {
+  if (!coffretEligible(product)) return false;
+  var titre = String((product && product.title) || '');
+  var texte = titre + ' ' + String((product && product.category) || '');
+  if (COFFRET_CIRCULAIRE.test(texte)) return true;                       // ①
+  if (COFFRET_DEFONCEUSE.test(texte) && COFFRET_KIT.test(titre)) return true;  // ②
+  return coffretNbOutils(product) >= 3;                                  // ③
+}
+/* Poids réellement expédié : l'outil, plus le coffret quand le client le prend.
+   ⛔ Sert au PORT, donc au prix : un poids sous-estimé fait un port sous-estimé,
+   et la marge part avec. */
+function poidsExpedieKg(product, avecCoffret) {
+  var w = Number(product && product.weight_kg) || 0;
+  if (!avecCoffret || !coffretEligible(product)) return w;
+  return Math.round((w + (coffretGros(product) ? COFFRET_KG.gros : COFFRET_KG.petit)) * 1000) / 1000;
+}
 // Exclut ce qui n'est pas une machine (batterie/chargeur/accessoire/rangement/
 // consommable). Décision user 25/07 : les PACKS/COMBOS ont AUSSI l'option
 // (prix affiché = sans coffret, +15/25 € = surcoût d'envoi si coffret voulu)
@@ -109,8 +168,10 @@ function coffretEligible(product) {
 }
 function coffretSurchargeCents(product) {
   if (!coffretEligible(product)) return 0;
-  var w = Number(product && product.weight_kg) || 0;
-  var eur = (w >= COFFRET.heavyKg) ? COFFRET.gros : COFFRET.petit;
+  /* ⛔ LE PALIER SUIT LE TYPE D'OUTIL DEPUIS LE 08/08/2026, plus son poids.
+     Avant : `weight_kg >= 3`. Cette ligne-là ne venait d'aucune décision de
+     l'user — c'était un proxy, et il ne recouvrait pas sa règle. */
+  var eur = coffretGros(product) ? COFFRET.gros : COFFRET.petit;
   return Math.round(eur * 100);
 }
 
@@ -125,5 +186,9 @@ module.exports = {
   unitCents: unitCents,
   coffretEligible: coffretEligible,
   coffretSurchargeCents: coffretSurchargeCents,
-  COFFRET_DENY: COFFRET_DENY
+  COFFRET_DENY: COFFRET_DENY,
+  COFFRET_KG: COFFRET_KG,
+  coffretGros: coffretGros,
+  coffretNbOutils: coffretNbOutils,
+  poidsExpedieKg: poidsExpedieKg
 };

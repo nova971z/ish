@@ -2438,10 +2438,15 @@
           '<div class="pdp-variant__switch" role="group" aria-label="Choix du conditionnement">'
           + '<button type="button" class="pdp-variant__btn active" data-coffret="0" aria-pressed="true">'
           + '<span class="pdp-variant__label">Sans coffret</span>'
-          + '<span class="pdp-variant__amt">' + formatPrice(pB.ttc) + '</span></button>'
+          + '<span class="pdp-variant__amt">' + formatPrice(pB.ttc) + '</span>'
+          + '<span class="pdp-variant__kg">' + formatKg(poidsExpedieKg(product, false)) + '</span></button>'
           + '<button type="button" class="pdp-variant__btn" data-coffret="1" aria-pressed="false">'
           + '<span class="pdp-variant__label">Avec coffret</span>'
-          + '<span class="pdp-variant__amt">' + formatPrice(pB.ttc + surE) + '</span></button>'
+          + '<span class="pdp-variant__amt">' + formatPrice(pB.ttc + surE) + '</span>'
+          // ⛔ LE POIDS EXPÉDIÉ EST ÉCRIT, pas seulement calculé. Demande de
+          // l'user : « le poids doit augmenter si on utilise le switch avec
+          // coffret ». Un calcul qu'on ne voit nulle part ne se vérifie pas.
+          + '<span class="pdp-variant__kg">' + formatKg(poidsExpedieKg(product, true)) + '</span></button>'
           + '</div>';
         var cBtns = pdpVariantEl.querySelectorAll('[data-coffret]');
         for (var cb = 0; cb < cBtns.length; cb++) {
@@ -10402,11 +10407,47 @@
   // server will charge. Falls back to the stored metropolitan price only for
   // legacy cart entries whose product is no longer in the live catalogue.
   // Supplément coffret TSTAK — MIROIR de api/_lib/pricing.js (garder IDENTIQUE).
-  // Éligible = machine (ncCategory 'power_tool'). 2 paliers selon le poids.
+  // Éligible = machine (ncCategory 'power_tool'). 2 paliers selon le TYPE.
   var COFFRET_SURCH = { petit: 15, gros: 25, heavyKg: 3 };
   // Packs/combos INCLUS (décision user 25/07) ; \b anti « lame »→« Lamelleuses ».
   var COFFRET_DENY = /\b(batteries?|chargeurs?|accessoires?|rangements?|lames?|forets?|consommables?|coffrets?|mallettes?)\b/i;
   function coffretEligible(p) { return !!(p && p.ncCategory === 'power_tool' && !p.coffretIncluded && !COFFRET_DENY.test(p.category || '')); }
+
+  /* ⛔ MIROIR EXACT de `api/_lib/pricing.js` — règle de l'user du 08/08/2026 :
+     deux formats de coffret (petit ≈ 0,5 kg, gros ≈ 1,3 kg), et le GROS se
+     reconnaît au TYPE d'outil — scie circulaire, défonceuse, ou un pack de
+     trois machines et plus — jamais au poids de l'outil.
+     ⚠️ Toute divergence avec le serveur ferait diverger le prix AFFICHÉ du prix
+     DÉBITÉ : c'est la porte J4, pas un détail d'affichage. */
+  var COFFRET_KG = { petit: 0.5, gros: 1.3 };
+  var COFFRET_CIRCULAIRE = /\bscies?\s+circulaires?\b/i;
+  var COFFRET_DEFONCEUSE = /\bd[ée]fonceuses?\b|\baffleureuses?\b/i;
+  var COFFRET_KIT = /\bkits?\b|\bsets?\b|\bavec\s+accessoires?\b|\bcoffret\s+d[eu]\s+\d/i;
+  var COFFRET_NB_OUTILS = /(\d+)\s*(?:outils?|machines?)\b/i;
+  function coffretNbOutils(p) {
+    var m = String((p && p.title) || '').match(COFFRET_NB_OUTILS);
+    return m ? Number(m[1]) : 0;
+  }
+  function coffretGros(p) {
+    if (!coffretEligible(p)) return false;
+    var titre = String((p && p.title) || '');
+    var texte = titre + ' ' + String((p && p.category) || '');
+    if (COFFRET_CIRCULAIRE.test(texte)) return true;
+    if (COFFRET_DEFONCEUSE.test(texte) && COFFRET_KIT.test(titre)) return true;
+    return coffretNbOutils(p) >= 3;
+  }
+  function poidsExpedieKg(p, avecCoffret) {
+    var w = Number(p && p.weight_kg) || 0;
+    if (!avecCoffret || !coffretEligible(p)) return w;
+    return Math.round((w + (coffretGros(p) ? COFFRET_KG.gros : COFFRET_KG.petit)) * 1000) / 1000;
+  }
+  /* Poids affiché sous le switch. Virgule décimale : on est en français, et un
+     point ferait lire « 3 kg 3 » au lieu de « 3,3 kg ». */
+  function formatKg(kg) {
+    var n = Number(kg) || 0;
+    if (!n) return '';
+    return (Math.round(n * 100) / 100).toFixed(2).replace(/[.,]?0+$/, '').replace('.', ',') + ' kg';
+  }
 
   // Outil vendu SANS batterie ni chargeur (machine seule / solo / produit seul)
   // → note d'avertissement sur la fiche (demande user : « ajoute sans batterie »).
@@ -10421,8 +10462,8 @@
   }
   function coffretSurchargeCents(p) {
     if (!coffretEligible(p)) return 0;
-    var w = Number(p && p.weight_kg) || 0;
-    return Math.round((w >= COFFRET_SURCH.heavyKg ? COFFRET_SURCH.gros : COFFRET_SURCH.petit) * 100);
+    // ⛔ Palier par le TYPE d'outil depuis le 08/08/2026, plus par son poids.
+    return Math.round((coffretGros(p) ? COFFRET_SURCH.gros : COFFRET_SURCH.petit) * 100);
   }
 
   // Choix « coffret » courant sur la fiche (réinitialisé à chaque ouverture).
