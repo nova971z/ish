@@ -1401,10 +1401,25 @@ async function handleCourses(req, body, cfg, res) {
   }
 
   if (body.type === 'course-list') {
-    const snap = await db.collection('courses').orderBy('createdAt', 'desc').limit(50).get()
-      .catch(() => db.collection('courses').limit(50).get());
+    /* ⛔ CORRIGÉ le 08/08/2026 (CODE-096) : on lisait les 50 DERNIÈRES courses
+       TOUTES CONFONDUES puis on filtrait en mémoire — dès que 50 courses
+       existaient au global, un utilisateur dont les courses étaient plus
+       anciennes ne voyait PLUS RIEN de ce qui lui appartenait. Le filtre est
+       désormais DANS la requête Firestore : trois lectures à filtre SIMPLE
+       (un seul champ, aucun orderBy accolé — donc aucun index composite,
+       même décision que Pré-C 1), tri chronologique en mémoire. */
+    const lire = (champ, val) => db.collection('courses').where(champ, '==', val).limit(50).get()
+      .then((s) => { const a = []; s.forEach((d) => a.push(d)); return a; })
+      .catch(() => []);
+    const [commeClient, commeLivreur, enAttente] = await Promise.all([
+      lire('artisanUid', uid),
+      lire('courierUid', uid),
+      isCourier ? lire('status', 'en_attente') : Promise.resolve([])
+    ]);
+    const parId = new Map();
+    commeClient.concat(commeLivreur, enAttente).forEach((d) => parId.set(d.id, d));
     const mine = [], dispo = [];
-    snap.forEach((d) => {
+    parId.forEach((d) => {
       const c = Object.assign({ id: d.id }, d.data());
       const out = {
         id: c.id, status: c.status, productTitle: c.productTitle, qty: c.qty,
@@ -1433,6 +1448,9 @@ async function handleCourses(req, body, cfg, res) {
       if (c.artisanUid === uid || c.courierUid === uid) mine.push(out);
       if (isCourier && c.status === 'en_attente') dispo.push(out); // (test : même compte des 2 côtés accepté)
     });
+    // Le tri que l'orderBy global faisait avant : plus récent d'abord.
+    const parDate = (a, b) => (b.createdAt || 0) - (a.createdAt || 0);
+    mine.sort(parDate); dispo.sort(parDate);
     return res.status(200).json({ ok: true, courier: isCourier, dispo, mine });
   }
 
