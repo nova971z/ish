@@ -26819,15 +26819,15 @@
   },
   {
     "id": "dewalt-dcmpp569n-xj",
-    "slug": "dewalt-dcmpp569n-xj-secateur-sur-perche-xr-18v-dcmpp569n-xj",
+    "slug": "dewalt-dcmpp569n-xj-secateur-sur-perche-18v-coupe-38mm-nue",
     "sku": "DCMPP569N-XJ",
     "name": "DCMPP569N-XJ",
     "brand": "DeWALT",
     "category": "Tronçonnage et élagage",
-    "title": "DeWALT DCMPP569N-XJ — Sécateur sur perche XR 18V DCMPP569N-XJ",
+    "title": "DeWALT DCMPP569N-XJ — Sécateur sur perche XR 18V, coupe 38 mm, portée 3 m (machine nue)",
     "tag": "Nouveau",
-    "desc": "Sécateur sur perche XR 18V DCMPP569N-XJ.",
-    "img": "images/placeholder.svg",
+    "desc": "Sécateur sur perche 18V XR, coupe jusqu'à 38 mm, portée 3 m, tête articulée 5 positions. Machine nue.",
+    "img": "images/posters/dcmpp569n-xj.webp",
     "currency": "EUR",
     "vat": 0.2,
     "stock_status": "in_stock",
@@ -26838,16 +26838,40 @@
     "tags": [
       "cordless"
     ],
-    "features": [],
+    "features": [
+      "Coupe les branches jusqu'à 38 mm d'épaisseur",
+      "Portée jusqu'à 3 m, perche divisible en 3 tronçons pour le transport",
+      "Tête articulée 5 positions pour les accès difficiles",
+      "Lames à revêtement antiadhésif : la sève et les débris ne collent pas",
+      "Lame remplaçable par une simple vis hexagonale (affûtage ou échange)",
+      "Crochet en métal pour dégager une branche coincée sans forcer",
+      "Poignée ergonomique, prise sûre et moins de fatigue",
+      "Machine nue : batterie et chargeur NON inclus (gamme 18 V XR)"
+    ],
     "specs": {
       "Marque": "DeWALT",
+      "Type": "Sécateur sur perche XR (machine nue)",
+      "Tension": "18 V XR",
+      "Diamètre maxi de coupe": "38 mm",
+      "Portée": "jusqu'à 3 m",
+      "Perche": "divisible en 3 tronçons",
+      "Tête articulée": "5 positions",
+      "Lame": "revêtement antiadhésif, remplaçable (vis hexagonale)",
+      "Crochet": "métal, pour libérer les branches coincées",
+      "Type d'alimentation": "Sans fil",
+      "Batterie / chargeur": "NON inclus",
       "Référence": "DCMPP569N-XJ"
     },
     "weight_kg": 2,
     "poidsSuppose": true,
     "ficheAcompleter": false,
     "price_ht": 245.26,
-    "price": 294.31
+    "price": 294.31,
+    "images": [
+      "images/posters/dcmpp569n-xj.webp",
+      "images/posters/dcmpp569n-xj-2.webp"
+    ],
+    "description_long": "Sécateur sur perche de la gamme XR 18V, conçu pour couper les branches en hauteur sans échelle. Il coupe jusqu'à 38 mm d'épaisseur et s'étend jusqu'à 3 mètres de portée ; la perche se divise en trois tronçons distincts pour le transport et le rangement. La tête articulée à 5 positions permet d'attaquer une branche sous le bon angle, y compris dans les zones d'accès difficile. Les lames reçoivent un revêtement antiadhésif qui empêche la sève et les débris de coller — moins de temps passé à nettoyer. La lame de coupe est remplaçable par une simple vis hexagonale, pour l'affûter ou la changer sans démonter l'outil. Un crochet en métal libère les branches coincées sans forcer sur la machine, et la poignée ergonomique limite la fatigue sur les séances longues. ⚠️ MACHINE NUE : ni batterie ni chargeur ne sont inclus. Les photos montrent l'outil équipé d'une batterie XR pour donner l'échelle ; elle n'est pas fournie avec cette référence."
   },
   {
     "id": "dewalt-dcm848n-xj",

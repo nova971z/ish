@@ -2593,6 +2593,115 @@ padding: 0;
     white-space: nowrap;
 }
 
+/* ══ GALERIE DU HÉROS — plusieurs visuels, un balayage horizontal ═══════════
+   Demandée par l'user le 08/08/2026 : « il y a deux PNG à ajouter […] je veux
+   voir l'outil flotter lorsqu'on scrolle ».
+
+   ⛔ TROIS COUCHES, UN SEUL PROPRIÉTAIRE DE `transform` PAR COUCHE. `transform`
+   n'est pas cumulatif : deux règles sur le même élément, la dernière écrite
+   gagne et l'autre disparaît sans erreur. Or trois effets se superposent ici —
+   le cadrage au pixel calculé par `fitHeroPoster()` (en ligne, sur l'<img>), le
+   flottement (animation CSS), et la parallaxe de balayage (JS). D'où la
+   séparation stricte : slide → parallaxe, float → flottement, img → cadrage.
+
+   ⚠️ `overflow-y: hidden` avec `overflow-x: auto` laisse le geste VERTICAL
+   remonter à la page : sur son iPad, le doigt doit continuer à faire défiler
+   la fiche quand il part du visuel. */
+.pdp-gallery {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    outline: none;
+}
+.pdp-gallery::-webkit-scrollbar { display: none; }
+.pdp-gallery:focus-visible {
+    outline: 2px solid rgba(var(--accent-rgb), 0.9);
+    outline-offset: -4px;
+}
+/* La cellule DÉCOUPE, elle ne bouge pas. Le découpage doit être au-dessus de
+   la parallaxe dans l'arbre : une boîte qu'on translate emporte son propre
+   `overflow: hidden` avec elle et ne découpe donc plus rien. */
+.pdp-gallery__slide {
+    position: relative;
+    flex: 0 0 100%;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+}
+.pdp-gallery__depth {
+    width: 100%;
+    height: 100%;
+    will-change: transform;
+}
+.pdp-gallery__float {
+    width: 100%;
+    height: 100%;
+    animation: pdpFloat 6s ease-in-out infinite;
+    will-change: transform;
+}
+/* Le flottement : une respiration, pas un rebond. 10 px sur 6 s, décalé d'un
+   visuel à l'autre pour que deux vignettes côte à côte ne battent pas ensemble. */
+@keyframes pdpFloat {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(-0.35deg); }
+}
+.pdp-gallery__slide:nth-child(even) .pdp-gallery__float { animation-delay: -3s; }
+
+/* Pastilles : DANS LE FLUX, juste au-dessus du titre. Hors de #pdp3d, donc
+   jamais floutées ni mises à l'échelle par la parallaxe verticale.
+   ⛔ En absolu à 3,4 rem du bas, elles tombaient — mesuré — à y=786 alors que
+   le titre occupe 452-516 : sous le titre, et recouvertes par le bandeau
+   cookies. Une pastille qu'on ne voit pas n'indique rien. */
+.pdp-gallery__dots {
+    display: flex;
+    justify-content: center;
+    width: -moz-fit-content;
+    width: fit-content;
+    margin: 0 auto 0.7rem;
+    gap: 0.45rem;
+    padding: 0.35rem 0.6rem;
+    border-radius: 999px;
+    background: rgba(10, 15, 20, 0.45);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+.pdp-gallery__dots[hidden] { display: none; }
+.pdp-gallery__dot {
+    width: 8px;
+    height: 8px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.32);
+    cursor: pointer;
+    transition: background 0.25s ease, width 0.25s ease;
+}
+.pdp-gallery__dot:hover { background: rgba(255, 255, 255, 0.55); }
+.pdp-gallery__dot--on {
+    width: 20px;
+    border-radius: 999px;
+    background: rgb(var(--accent-rgb));
+}
+.pdp-gallery__dot:focus-visible {
+    outline: 2px solid rgba(var(--accent-rgb), 0.9);
+    outline-offset: 3px;
+}
+
+/* ⛔ Un mouvement qu'on n'a pas demandé peut rendre malade. `prefers-reduced-motion`
+   n'est pas une option de confort : on coupe le flottement, on garde le
+   défilement — la fonction reste entière, seule l'animation s'arrête. */
+@media (prefers-reduced-motion: reduce) {
+    .pdp-gallery__float { animation: none; }
+    .pdp-gallery { scroll-behavior: auto; }
+}
+
 .pdp-hero__scroll-hint {
     position: absolute;
     bottom: 1.2rem;

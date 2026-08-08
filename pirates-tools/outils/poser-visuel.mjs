@@ -183,14 +183,31 @@ if (sortie.coin[3] !== 0) {
   process.exit(1);
 }
 
-/* ── ④ NE JAMAIS ÉCRASER UN VISUEL DÉJÀ POSÉ ─────────────────────────────── */
-const nom = sku.toLowerCase().replace(/[^a-z0-9-]/g, '-') + '.webp';
+/* ── ④ RANG DANS LA GALERIE, ET JAMAIS D'ÉCRASEMENT SILENCIEUX ────────────
+   Un produit peut porter PLUSIEURS visuels depuis le 08/08/2026 (demande de
+   l'user : « il y a deux PNG à ajouter »). `--rang 1` est la photo principale —
+   celle de la carte du catalogue, donc `img` ; les rangs suivants ne vivent que
+   dans `images`. Le rang 1 est le défaut : le cas le plus courant reste un seul
+   visuel, et il ne doit demander aucune option. */
+const base = sku.toLowerCase().replace(/[^a-z0-9-]/g, '-');
+const rang = Math.max(1, parseInt(opt('--rang') || '1', 10) || 1);
+const nom = base + (rang > 1 ? '-' + rang : '') + '.webp';
 const cible = join(RACINE, 'images', 'posters', nom);
-const ancien = String(fiche.img || '');
+const galerieAvant = Array.isArray(fiche.images) ? fiche.images.slice() : [];
+const ancien = rang === 1 ? String(fiche.img || '') : (galerieAvant[rang - 1] || '');
 const dejaPose = ancien && !/placeholder/.test(ancien);
 if (dejaPose && !remplacer) {
-  console.error('⛔ ' + sku + ' porte déjà un visuel : ' + ancien);
+  console.error('⛔ ' + sku + ' porte déjà un visuel au rang ' + rang + ' : ' + ancien);
   console.error('   Les visuels sont le travail de l\'user. `--remplacer` pour passer outre.');
+  process.exit(1);
+}
+/* ⛔ PAS DE TROU DANS LA GALERIE. Poser le rang 3 quand le 2 n'existe pas
+   fabriquerait un `images` à trous, que la piste rendrait en vignettes vides. */
+const rangsExistants = galerieAvant.length || (String(fiche.img || '') && !/placeholder/.test(String(fiche.img || '')) ? 1 : 0);
+if (rang > rangsExistants + 1) {
+  console.error('⛔ rang ' + rang + ' demandé alors que ' + sku + ' n\'a que '
+    + rangsExistants + ' visuel(s) : il manquerait le rang ' + (rangsExistants + 1)
+    + ', et la galerie afficherait une vignette vide.');
   process.exit(1);
 }
 
@@ -205,14 +222,21 @@ l('  sortie ................. ' + nom + '  ' + sortie.sortie.join('×')
   + '  ' + ko.toFixed(0) + ' Ko   (plafond ' + PLAFOND_KO + ')');
 l('  transparence conservée . oui (coin alpha 0)');
 l('  fiche .................. ' + (fiche.title || fiche.name));
-l('  img : ' + (ancien || '(aucun)') + '  →  images/posters/' + nom);
+l('  rang dans la galerie ... ' + rang + (rang === 1 ? '  (photo principale, celle de la carte)' : ''));
+l('  ' + (rang === 1 ? 'img' : 'images[' + (rang - 1) + ']') + ' : '
+  + (ancien || '(aucun)') + '  →  images/posters/' + nom);
 l('');
 
 if (!confirmer) { l('  ⚠️ ESSAI — --confirmer pour écrire.'); l(''); process.exit(0); }
 
 await mkdir(join(RACINE, 'images', 'posters'), { recursive: true });
 await writeFile(cible, webp);
-fiche.img = 'images/posters/' + nom;
+const chemin = 'images/posters/' + nom;
+const galerie = galerieAvant.length ? galerieAvant
+  : (String(fiche.img || '') && !/placeholder/.test(String(fiche.img || '')) ? [String(fiche.img)] : []);
+galerie[rang - 1] = chemin;
+fiche.images = galerie;
+fiche.img = galerie[0];              // la carte du catalogue montre TOUJOURS le rang 1
 await writeFile(cheminCat, JSON.stringify(brut, null, INDENT) + FIN_LIGNE, 'utf8');
 
 /* ⛔ ON NE SE FIE JAMAIS AU RETOUR D'UNE ÉCRITURE : ON RELIT. */
@@ -220,9 +244,10 @@ const relu = JSON.parse(await readFile(cheminCat, 'utf8'));
 const relus = Array.isArray(relu) ? relu : relu.products;
 const verif = relus.find((p) => String(p.sku || '').toUpperCase() === sku);
 const surDisque = existsSync(cible) ? statSync(cible).size : 0;
-if (!verif || verif.img !== 'images/posters/' + nom || surDisque !== webp.length) {
+if (!verif || !verif.images || verif.images[rang - 1] !== chemin
+  || verif.img !== galerie[0] || surDisque !== webp.length) {
   console.error('⛔ RELECTURE EN DÉSACCORD avec ce qui vient d\'être écrit — '
-    + 'img=' + (verif && verif.img) + ', fichier=' + surDisque + ' octets');
+    + 'images=' + JSON.stringify(verif && verif.images) + ', fichier=' + surDisque + ' octets');
   process.exit(1);
 }
 l('  ✅ écrit et RELU : ' + surDisque + ' octets sur le disque, `img` en place.');

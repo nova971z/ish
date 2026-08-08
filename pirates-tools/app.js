@@ -1966,11 +1966,27 @@
   // mini-canvas, puis applique translate+scale : le produit est calé juste sous
   // la topbar (petite marge) et réduit UNIQUEMENT si sa hauteur dépasse la place
   // au-dessus du titre. Marche pour les posters actuels comme pour les futurs PNG.
-  function fitHeroPoster() {
-    var img = dom.pdpHeroImg;
+  // ⚠️ GÉNÉRALISÉE À LA GALERIE (08/08/2026). Elle ne cadrait que `dom.pdpHeroImg` ;
+  // depuis que le héros peut porter PLUSIEURS visuels, chaque vignette doit être
+  // cadrée — sinon les visuels ajoutés gardent le cadrage CSS par défaut et
+  // changent de taille d'un balayage à l'autre. Sans argument : toute la piste.
+  function fitHeroPoster(cible) {
+    var imgs = cible ? [cible]
+      : Array.prototype.slice.call(document.querySelectorAll('#pdpGallery .pdp-hero__img'));
+    if (!imgs.length && dom.pdpHeroImg) imgs = [dom.pdpHeroImg];
+    var faits = [];
+    imgs.forEach(function (im) { var f = fitUneImage(im); if (f) faits.push(f); });
+    if (!cible) {
+      _heroFitFn = faits.length
+        ? function () { faits.forEach(function (f) { try { f(); } catch (_) {} }); }
+        : null;
+    }
+  }
+
+  function fitUneImage(img) {
     var hero = document.getElementById('pdpHero');
     var title = dom.pdpTitle;
-    if (!img || !hero || !title) return;
+    if (!img || !hero || !title) return null;
     function run() {
       try {
         var W = img.clientWidth, H = img.clientHeight;
@@ -2029,7 +2045,7 @@
     }
     if (img.complete && img.naturalWidth) run();
     else img.onload = run;
-    _heroFitFn = run;   // rappel au resize / changement d'orientation
+    return run;         // rappelé au resize / changement d'orientation
   }
   var _heroFitFn = null;
   var _heroFitRAF = 0;
@@ -2038,6 +2054,163 @@
     if (_heroFitRAF) cancelAnimationFrame(_heroFitRAF);
     _heroFitRAF = requestAnimationFrame(function () { try { _heroFitFn(); } catch (_) {} });
   });
+
+  /* ══ GALERIE DU HÉROS ══════════════════════════════════════════════════════
+     Demande de l'user, 08/08/2026 : plusieurs photos par produit, qu'on fait
+     défiler du doigt, avec « l'outil qui flotte » — et : « s'il n'y a qu'un
+     seul PNG on ne peut pas se scroller, mais la fonction y est quand même ».
+     C'est exactement ce que fait ce code : la piste est TOUJOURS construite,
+     seul le nombre de vignettes change. Rien à activer par produit.
+
+     ⛔ LES VISUELS D'UN PRODUIT SE LISENT DANS `images`, PAS AILLEURS. Un
+     produit sans `images` retombe sur son visuel unique — aucune fiche
+     existante ne change de comportement. */
+  function visuelsDe(p) {
+    var vus = {}, liste = [];
+    function ajouter(src) {
+      var s = String(src || '').trim();
+      if (!s || vus[s]) return;
+      vus[s] = 1; liste.push(s);
+    }
+    if (p && Array.isArray(p.images)) p.images.forEach(ajouter);
+    if (!liste.length) { ajouter(p && (p.heroImg || p.img)); }
+    if (!liste.length) liste.push('images/placeholder.svg');
+    return liste;
+  }
+
+  var _galerieNettoyage = null;
+
+  function construireGalerie(p) {
+    var piste = document.getElementById('pdpGallery');
+    var pastilles = document.getElementById('pdpGalleryDots');
+    var img0 = dom.pdpHeroImg;
+    if (!piste || !img0) return;
+    if (_galerieNettoyage) { _galerieNettoyage(); _galerieNettoyage = null; }
+
+    var srcs = visuelsDe(p);
+    var titre = (p && p.title) || '';
+
+    /* ⛔ LA PREMIÈRE VIGNETTE GARDE L'<img> D'ORIGINE, JAMAIS UNE COPIE.
+       `#pdpHeroImg` est référencé par `applyVariant`, par le cadrage et par le
+       balisage SEO : la remplacer casserait trois choses à la fois, en
+       silence. On ne recrée donc QUE les vignettes suivantes. */
+    var premiere = piste.firstElementChild;
+    while (piste.children.length > 1) piste.removeChild(piste.lastElementChild);
+    img0.src = srcs[0];
+    img0.alt = titre;
+    for (var i = 1; i < srcs.length; i++) {
+      var slide = document.createElement('div');
+      slide.className = 'pdp-gallery__slide';
+      var prof = document.createElement('div');
+      prof.className = 'pdp-gallery__depth';
+      var flot = document.createElement('div');
+      flot.className = 'pdp-gallery__float';
+      var im = document.createElement('img');
+      im.className = 'pdp-hero__img';
+      im.decoding = 'async';
+      im.loading = 'lazy';
+      im.src = srcs[i];
+      im.alt = titre + ' — visuel ' + (i + 1);
+      flot.appendChild(im);
+      prof.appendChild(flot);
+      slide.appendChild(prof);
+      piste.appendChild(slide);
+    }
+    if (premiere) premiere.className = 'pdp-gallery__slide';
+    piste.scrollLeft = 0;
+    fitHeroPoster();
+
+    /* Une seule photo : rien à faire défiler, donc rien à annoncer. La piste,
+       elle, reste en place — c'est la demande. */
+    var multiple = srcs.length > 1;
+    piste.setAttribute('aria-label', multiple
+      ? 'Photos du produit — ' + srcs.length + ' visuels, balayer pour changer'
+      : 'Photo du produit');
+    if (pastilles) {
+      pastilles.innerHTML = '';
+      pastilles.hidden = !multiple;
+      if (multiple) {
+        for (var d = 0; d < srcs.length; d++) {
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'pdp-gallery__dot' + (d === 0 ? ' pdp-gallery__dot--on' : '');
+          b.setAttribute('aria-label', 'Voir la photo ' + (d + 1) + ' sur ' + srcs.length);
+          b.dataset.index = String(d);
+          pastilles.appendChild(b);
+        }
+      }
+    }
+    _galerieNettoyage = brancherGalerie(piste, pastilles, multiple);
+  }
+
+  /* Le balayage : parallaxe de profondeur + suivi des pastilles.
+     ⚠️ On lit `scrollLeft` DANS un requestAnimationFrame, jamais dans le
+     gestionnaire d'évènement : un `scroll` tactile en émet des dizaines par
+     seconde, et écrire un style à chaque appel force autant de recalculs. */
+  function brancherGalerie(piste, pastilles, multiple) {
+    var raf = 0, actif = 0;
+    var doux = !window.matchMedia || !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function peindre() {
+      raf = 0;
+      var w = piste.clientWidth || 1;
+      var x = piste.scrollLeft / w;
+      var slides = piste.children;
+      for (var i = 0; i < slides.length; i++) {
+        var prof = slides[i].firstElementChild;
+        if (!prof) continue;
+        /* Décalage de profondeur : la vignette glisse à 18 % de la vitesse du
+           doigt, donc les visuels ne défilent pas d'un bloc — c'est ce qui
+           donne le relief. Bornée à ±1 : au-delà, la vignette est hors champ. */
+        var dx = Math.max(-1, Math.min(1, i - x));
+        prof.style.transform = doux
+          ? 'translateX(' + (dx * -18).toFixed(2) + '%) scale(' + (1 - Math.abs(dx) * 0.06).toFixed(4) + ')'
+          : '';
+        prof.style.opacity = String(1 - Math.abs(dx) * 0.35);
+      }
+      var n = Math.round(x);
+      if (n !== actif && pastilles && !pastilles.hidden) {
+        actif = n;
+        for (var d = 0; d < pastilles.children.length; d++) {
+          pastilles.children[d].classList.toggle('pdp-gallery__dot--on', d === n);
+        }
+      }
+    }
+    function auDefilement() { if (!raf) raf = requestAnimationFrame(peindre); }
+
+    function versVignette(n) {
+      var w = piste.clientWidth || 1;
+      piste.scrollTo({ left: n * w, behavior: doux ? 'smooth' : 'auto' });
+    }
+    function auClicPastille(e) {
+      var b = e.target.closest ? e.target.closest('.pdp-gallery__dot') : null;
+      if (b) versVignette(Number(b.dataset.index) || 0);
+    }
+    /* Clavier : une galerie qu'on ne peut atteindre qu'au doigt exclut qui ne
+       peut pas balayer. Les flèches suffisent, et elles ne volent la page que
+       lorsque la piste a le focus. */
+    function auClavier(e) {
+      if (!multiple) return;
+      var n = null;
+      if (e.key === 'ArrowRight') n = Math.min(piste.children.length - 1, Math.round(piste.scrollLeft / (piste.clientWidth || 1)) + 1);
+      else if (e.key === 'ArrowLeft') n = Math.max(0, Math.round(piste.scrollLeft / (piste.clientWidth || 1)) - 1);
+      if (n === null) return;
+      e.preventDefault();
+      versVignette(n);
+    }
+
+    piste.addEventListener('scroll', auDefilement, { passive: true });
+    piste.addEventListener('keydown', auClavier);
+    if (pastilles) pastilles.addEventListener('click', auClicPastille);
+    peindre();
+
+    return function () {
+      if (raf) cancelAnimationFrame(raf);
+      piste.removeEventListener('scroll', auDefilement);
+      piste.removeEventListener('keydown', auClavier);
+      if (pastilles) pastilles.removeEventListener('click', auClicPastille);
+    };
+  }
 
   function renderPDP(slug) {
     var product = null;
@@ -2124,13 +2297,11 @@
     // La 3D est UNIQUEMENT dans le carré « vue détail » (pdp3dSecondary), chargée
     // au scroll (loading=lazy). Si le produit n'a pas de GLB, le carré reste sur
     // son poster (jamais de modèle « fantôme »).
-    if (dom.pdpHeroImg) {
-      // Héros = version « fiche » (heroImg : lumière cuite + outils horizontaux
-      // réduits) ; carte de catalogue = product.img (taille pleine). Repli img.
-      dom.pdpHeroImg.src = product.heroImg || product.img || 'images/placeholder.svg';
-      dom.pdpHeroImg.alt = product.title;
-      fitHeroPoster();
-    }
+    // Héros = version « fiche » (heroImg : lumière cuite + outils horizontaux
+    // réduits) ; carte de catalogue = product.img (taille pleine). Repli img.
+    // Depuis le 08/08/2026 c'est `construireGalerie` qui pose la première
+    // vignette : elle applique la même règle et sait en poser d'autres.
+    construireGalerie(product);
     function setPdpViewer(v, alt, load3D) {
       if (!v) return;
       v.setAttribute('alt', alt);
@@ -2188,11 +2359,10 @@
     function applyVariant(v) {
       activeProduct = v;
       var isCof = (v.variantRole === 'coffret');
-      if (dom.pdpHeroImg) {
-        dom.pdpHeroImg.src = v.heroImg || v.img || 'images/placeholder.svg';
-        dom.pdpHeroImg.alt = v.title;
-        fitHeroPoster();
-      }
+      // ⚠️ La galerie se REFAIT à chaque variante : solo et coffret n'ont pas
+      // les mêmes visuels, et garder les vignettes de l'un sous le prix de
+      // l'autre montrerait un contenu de boîte qui n'est pas celui vendu.
+      construireGalerie(v);
       if (dom.pdpImg) { dom.pdpImg.src = v.img || 'images/placeholder.svg'; dom.pdpImg.alt = v.title; }
       if (dom.pdpTitle) dom.pdpTitle.textContent = v.title;
       if (dom.pdpPrice) {
@@ -8289,6 +8459,9 @@
       // Reset hero transforms
       var pdpViewer = document.getElementById('pdp3d');
       if (pdpViewer) { pdpViewer.style.transform = ''; pdpViewer.style.opacity = ''; pdpViewer.style.filter = ''; }
+      // La galerie survit à la fiche (mêmes éléments réutilisés par la SPA) :
+      // sans ce débranchement, chaque ouverture ajouterait un écouteur de plus.
+      if (_galerieNettoyage) { _galerieNettoyage(); _galerieNettoyage = null; }
       var pdpInfo = document.getElementById('pdpHeroInfo');
       if (pdpInfo) { pdpInfo.style.transform = ''; pdpInfo.style.opacity = ''; }
     }

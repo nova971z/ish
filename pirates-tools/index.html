@@ -40,7 +40,7 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="styles.css?v=589">
+  <link rel="stylesheet" href="styles.css?v=590">
 
   <!-- 3D : model-viewer ET Three.js sont chargés À LA DEMANDE par app.js
        (ensureModelViewer / ensureThree) — plus aucun script 3D dans le <head>,
@@ -439,13 +439,45 @@
              (produit remonté, bas vide rogné) et plus léger (pas de model-viewer).
              Conteneur #pdp3d = cible de la parallaxe au scroll ; l'<img> porte le
              décalage de remontée → les deux transforms ne se marchent pas dessus. -->
+        <!-- GALERIE : une piste qui défile à l'horizontale, une vignette par
+             visuel. QUATRE COUCHES, et chacune n'a qu'UN SEUL propriétaire de
+             `transform` — sinon la dernière écrite efface les autres :
+               .pdp-gallery__slide  → la cellule, qui DÉCOUPE (aucun transform)
+               .pdp-gallery__depth  → la parallaxe de balayage (JS)
+               .pdp-gallery__float  → le flottement (animation CSS)
+               .pdp-hero__img       → le cadrage au pixel de fitHeroPoster()
+             ⛔ La cellule de découpe n'est pas décorative : la parallaxe tire
+             la vignette suivante vers la gauche (c'est ce qui fait qu'elle
+             glisse moins vite que le doigt), et sans découpe elle DÉBORDE dans
+             le visuel courant — mesuré en 390 px, l'outil suivant apparaissait
+             sur le bord droit.
+             ⚠️ La piste vit DANS #pdp3d, elle ne le remplace pas : #pdp3d porte
+             déjà la parallaxe verticale, et un conteneur de défilement qu'on
+             transforme en même temps saccade.
+             ⚠️ Un seul visuel : la piste et son code existent quand même, il
+             n'y a simplement rien à faire défiler et les pastilles se taisent. -->
         <div class="pdp-hero__img-wrap" id="pdp3d">
-          <img id="pdpHeroImg" class="pdp-hero__img" alt="" decoding="async" fetchpriority="high">
+          <div class="pdp-gallery" id="pdpGallery" tabindex="0" role="group" aria-label="Photos du produit">
+            <div class="pdp-gallery__slide">
+              <div class="pdp-gallery__depth">
+                <div class="pdp-gallery__float">
+                  <img id="pdpHeroImg" class="pdp-hero__img" alt="" decoding="async" fetchpriority="high">
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="pdp-hero__gradient"></div>
         <!-- Badges en haut à droite (comme les cartes) : stock puis tag -->
         <div class="pdp-hero__badges" id="pdpHeroBadges"></div>
         <div class="pdp-hero__info" id="pdpHeroInfo">
+          <!-- ⛔ LES PASTILLES VIVENT DANS LE FLUX, AU-DESSUS DU TITRE. Posées
+               en absolu à 3,4 rem du bas, elles tombaient MESURÉES à y=786 —
+               sous le titre (452-516) et recouvertes par le bandeau cookies :
+               invisibles. Dans le flux, elles restent collées au titre quelle
+               que soit la hauteur du bloc, et elles suivent le même fondu que
+               lui au défilement. -->
+          <div class="pdp-gallery__dots" id="pdpGalleryDots" hidden></div>
           <h1 id="pdpTitle" class="pdp-hero__title" tabindex="-1">Produit</h1>
           <div id="pdpPrice" class="pdp-hero__price"></div>
           <!-- Variante Solo/Coffret : switch conditionnement (masqué si le produit
@@ -2322,7 +2354,7 @@
   </noscript>
 
   <!-- =================== JS =================== -->
-  <script defer src="app.js?v=589"></script>
+  <script defer src="app.js?v=590"></script>
 </body>
 </html>
 <!-- deployed 20260406013000 -->
