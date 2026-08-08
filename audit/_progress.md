@@ -762,3 +762,69 @@
 - [x] pirates-tools/vendor/leaflet/leaflet.js  (bibliotheque vendored Leaflet, intacte)
 - [x] pirates-tools/vercel.json  (lu/mesure — session 08/08)
 - [x] pirates-tools/world-coastline.json  (donnee geographique du globe admin, servie mais chargee a la demande)
+
+---
+
+## EXECUTION — plan_correctifs_p0.csv (08/08/2026)
+
+### Ordre 0 — constat de mise en service (S) — FAIT
+Commande : `grep -oE "case '/[a-z-]+'" app.js | sort -u | grep -E "livr|mode-livraison"`
+Sortie : `case '/livraison'` · `case '/livreur'` · `case '/livreur-profil'` ·
+`case '/mes-livraisons'` · `case '/mode-livraison'` — 5 routes du module
+courses servies aux visiteurs. Les P0 cassent des parcours REELS.
+
+### Ordre 1 — trois ReferenceError des alertes (M) — FAIT, commit 6137b48
+- `alertCourseAgain(course, id, db)` et `alertCourierApplication(compte, uid, db)`
+  recoivent `db` ; le bloc SMS copie-colle (variable `course` inexistante) est
+  SUPPRIME ; le dossier candidat ne part qu'a l'administration, jamais aux
+  autres livreurs ; `contact.js` passe `db` (il passait `cfg`) et JOURNALISE
+  l'echec au lieu de l'avaler.
+- Preuve : `node scripts/check-courses-alertes.js` → `✅ check-courses-alertes OK`.
+
+### Ordre 2 — goods-paid ecrit paye.id (S) — FAIT, commit 9e1f9a2
+- `goodsPaymentIntentId: paye.id`, `goodsAmountCents: paye.montantCents || 0`
+  (avant : `pi.id`/`pi.amount`, const d'un autre bloc — 500 systematique).
+- Preuve : porte ordre 3, controle a la source + sabotage `pi.id` → rouge.
+
+### Ordre 3 — porte check-courses-alertes (M) — FAIT, commit 2881403
+- Branchee dans `scripts/ci.js`. Sabotages via `outils/sabotage.mjs` : 3/3
+  « LA PORTE MORD » (retrait de db d'une signature, catch vide, pi.id).
+
+### Ordre 4 — P1 course-list + raz-compta (M) — FAIT, commit 8558efc
+- `course-list` : filtre uid DANS la requete (3 lectures a filtre simple,
+  aucun index composite, tri en memoire). `raz-compta` : gestionnaire deplace
+  en POST (l'ecran l'appelle en POST ; le GET lisait `body` inexistant),
+  GET → 400 fail-loud.
+- Preuves : `node scripts/check-courses-p1.js` → `✅ check-courses-p1 OK` ;
+  60 courses en fausse base dont 2 (les plus anciennes) au compte teste →
+  les 2 rendues ; GET raz-compta → 400 sans suppression ; POST sans
+  confirmer → essai 200 sans suppression ; POST confirmer OUI → 4 ecritures
+  effacees + compteur factures a 0. Sabotages : 3/3 rouges.
+
+### Ordre 5 — garde-fou de perimetre (S) — VERIFIE
+Commande : `git diff 6f7a8e3..HEAD -- api | grep -E "^[+-]" | grep -vE "^[+-]{3}" |
+grep -iE "prix|tarif|bareme|price|montant|cents|encaiss|escrow|fee"`
+Sortie : 4 lignes — un commentaire deplace (raz-compta), un commentaire
+(`paye`), et `goodsAmountCents: pi.amount` → `paye.montantCents` (identifiant
+de variable). AUCUN changement de bareme, de prix ou d'encaissement ;
+`pricing-model.js` et `pricing.js` intacts (diff --stat : 10 fichiers, aucun
+des deux).
+
+### Reparations de harnais decouvertes en chemin (regle : la fiche se choisit a l'execution)
+- `tests/couriers.mjs` (commit 9f467c2) : cle `quincaillerie-0001` en dur,
+  RETIREE du catalogue → 82/82 (avant : mort a l'assertion 56). Rouge
+  anterieur prouve par rejeu worktree sur HEAD.
+- `tests/plan8/9/11.mjs` (commit 61b54e4) : filtre `brand === 'Quincaillerie'`
+  → 0 fiche (mesure : 0 par marque, 261 par categorie) ; critere aligne sur
+  `estQuincaillerie` (categorie). 70/70, 71/71, 27/27. Rouge anterieur prouve
+  par rejeu worktree.
+
+### Chaine de livraison — preuve complete (08/08/2026)
+plan8 70/70 · plan9 71/71 · plan9-serveur 31/31 · plan10 32/32 · plan11 27/27 ·
+plan11-serveur 17/17 · plan12-serveur 20/20 · course-pay 14/14 ·
+raz-deux-clics 7/7 · couriers 82/82. `ci.js` : aucune erreur nouvelle —
+seules les 6 demandes ouvertes du registre (D-54, D-56, D-57, D-58, D-61,
+D-64), anterieures et voulues, restent bloquantes ; etat identique mesure sur
+HEAD d'avant les correctifs (rejeu worktree).
+
+➡️ P0 SOLDES. Prochaine etape : plan_action_seo.csv, ordre 0.
