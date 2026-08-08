@@ -77,6 +77,8 @@ var reqCoffret  = safeRequire('./check-coffret',     'check-coffret');
 // La regle coffret de l'user (poids + format) et son MIROIR client/serveur :
 // une divergence d'un centime entre prix affiche et prix debite est J4.
 var reqCofPoids = safeRequire('./check-coffret-poids','check-coffret-poids');
+// Les alertes du module courses S'EXECUTENT (trois ReferenceError morts le 08/08).
+var reqCoursesAl= safeRequire('./check-courses-alertes','check-courses-alertes');
 var reqCatPub   = safeRequire('./check-catalog-public','check-catalog-public');
 var reqAssetVer = safeRequire('./check-asset-versions','check-asset-versions');
 var reqWhClaim  = safeRequire('./check-webhook-claim','check-webhook-claim');
@@ -218,6 +220,7 @@ var reqReconc   = safeRequire('./check-reconciliation', 'check-reconciliation');
   await runOne(reqHoraires, 'check-horaires');
   await runOne(reqCoffret,  'check-coffret');
   await runOne(reqCofPoids, 'check-coffret-poids');
+  await runOne(reqCoursesAl,'check-courses-alertes');
   await runOne(reqCatPub,   'check-catalog-public');
   await runOne(reqAssetVer, 'check-asset-versions');
   await runOne(reqWhClaim,  'check-webhook-claim');
