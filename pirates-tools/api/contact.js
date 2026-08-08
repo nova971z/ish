@@ -734,7 +734,14 @@ async function handleCourses(req, body, cfg, res) {
     if (!dejaValide) compte.kycStatus = 'en_attente';
     await db.collection('couriers').doc(uid).set(compte, { merge: true });
 
-    try { await coursesLib.alertCourierApplication(compte, uid, cfg); } catch (_) {}
+    /* ⛔ CORRIGÉ le 08/08/2026 : on passait `cfg` là où la fonction attend
+       `db`, et le catch VIDE avalait le ReferenceError qui en résultait —
+       AUCUNE alerte de dossier n'est jamais partie, en silence (CODE-095).
+       L'échec est désormais JOURNALISÉ : une alerte qui ne part pas est une
+       information, pas un détail. Il reste non bloquant — le dossier, lui,
+       est bien enregistré. */
+    try { await coursesLib.alertCourierApplication(compte, uid, db); }
+    catch (e) { console.error('[contact] alerte dossier livreur NON envoyée:', e.message); }
     return res.status(200).json({ ok: true, status: dejaValide ? 'valide' : 'en_attente' });
   }
 
@@ -1245,7 +1252,13 @@ async function handleCourses(req, body, cfg, res) {
       return res.status(500).json({ ok: false, error: 'Remise en ligne échouée.' });
     }
     // L'alerte repart vers tous les livreurs + on prévient l'autre partie.
-    await coursesLib.alertCourseAgain(out.course, id);
+    /* ⛔ CORRIGÉ le 08/08/2026 : `db` manquait (ReferenceError APRÈS le commit
+       de la remise en ligne — l'opération réussissait, l'utilisateur recevait
+       500, CODE-094/128). Et l'alerte est désormais NON BLOQUANTE : une
+       notification qui échoue ne doit pas faire passer pour ratée une remise
+       en ligne déjà committée. L'échec est journalisé, jamais avalé. */
+    try { await coursesLib.alertCourseAgain(out.course, id, db); }
+    catch (e) { console.error('[contact] alerte remise en ligne NON envoyée:', e.message); }
     const autre = out.par === 'client' ? out.course.courierEmail : out.course.artisanEmail;
     if (autre) {
       await coursesLib.sendMail(autre,

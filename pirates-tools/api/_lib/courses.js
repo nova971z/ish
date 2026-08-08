@@ -205,7 +205,12 @@ function buildRequest(input, who) {
 }
 
 // Alerte « demande remise en ligne » (après une annulation de mise en relation).
-async function alertCourseAgain(course, id) {
+/* ⛔ `db` EST UN PARAMÈTRE, comme dans alertNewCourse — CORRIGÉ le 08/08/2026.
+   Avant : la fonction lisait un `db` qui n'existait dans AUCUNE portée.
+   ReferenceError à chaque appel, APRÈS le commit de la transaction de remise
+   en ligne : la course repartait bien, mais l'appelant recevait 500 et
+   l'utilisateur croyait l'opération échouée (CODE-128 de l'audit). */
+async function alertCourseAgain(course, id, db) {
   const subject = '🔁 Course de nouveau disponible — zone ' + course.zone + ' — ' + String(course.address || '').slice(0, 60);
   const html = '<p><strong>Une demande de livraison est de nouveau ouverte.</strong> '
     + 'Le client et le livreur précédent ne se sont pas mis d\'accord.</p>'
@@ -235,7 +240,16 @@ async function alertCourseAgain(course, id) {
 // Ne contient AUCUNE pièce justificative : uniquement de quoi savoir qu'un
 // dossier attend, et de qui.
 const VEH_LABEL = { vae: 'Vélo à assistance électrique', trottinette: 'Trottinette électrique', scooter: 'Scooter / Moto' };
-async function alertCourierApplication(compte, uid) {
+/* ⛔ CORRIGÉ le 08/08/2026 — cette fonction n'avait JAMAIS fonctionné :
+   ① elle lisait un `db` inexistant (ReferenceError à chaque dépôt de dossier,
+     avalé par le catch vide de l'appelant : AUCUNE alerte n'est jamais partie) ;
+   ② son bloc destinataires + SMS était copié-collé d'alertCourseAgain et
+     référençait une variable `course` inexistante — deuxième ReferenceError ;
+   ③ surtout, ce copier-coller aurait envoyé le NOM, l'EMAIL et le TÉLÉPHONE
+     du candidat à TOUS les livreurs validés. Un dossier de candidature est
+     une donnée personnelle (J3) : il ne va qu'à celui qui VALIDE — l'owner
+     (plus les comptes de test) — comme l'annonce l'en-tête de la fonction. */
+async function alertCourierApplication(compte, uid, db) {
   const veh = VEH_LABEL[compte.vehicle] || compte.vehicle || '—';
   const subject = '🛵 Nouveau dossier livreur — ' + String(compte.displayName || '').slice(0, 60);
   const html = '<p><strong>Un dossier livreur vient d\'être déposé.</strong></p>'
@@ -244,22 +258,17 @@ async function alertCourierApplication(compte, uid) {
     + '🛵 ' + escapeHtml(veh) + (compte.cylindree ? ' — ' + escapeHtml(compte.cylindree) + ' cm³' : '') + '</p>'
     + '<p>À valider dans l\'administration, onglet <strong>Candidatures</strong>. '
     + 'Tant qu\'il n\'est pas validé, ce compte n\'a AUCUN accès livreur.</p>';
-  // DESTINATAIRES : les livreurs VALIDÉS (leur email de dossier), plus les
-  // comptes de test et l'owner. Avant, seuls ces deux derniers recevaient
-  // l'alerte : un vrai livreur n'était prévenu de RIEN (user 28/07/2026).
+  /* DESTINATAIRES : l'owner et les comptes de test, PERSONNE d'autre. Un
+     dossier de candidature contient l'identité complète du candidat — le
+     diffuser aux autres livreurs serait une fuite de donnée personnelle, et
+     eux n'ont rien à valider. (Le bloc « tous les livreurs + SMS » qui vivait
+     ici était un copier-coller d'alertCourseAgain, cassé de surcroît.) */
   const owner = process.env.OWNER_EMAIL;
-  const livreurs = await destinatairesLivreurs(db, 50);
-  const dests = Array.from(new Set(
-    TEST_EMAILS
-      .concat(owner ? [owner] : [])
-      .concat(livreurs.map((l) => l.email).filter(Boolean))
-  ));
+  const dests = Array.from(new Set(TEST_EMAILS.concat(owner ? [owner] : [])));
   for (const to of dests) await sendMail(to, subject, html);
-  // SMS : court, sans donnée sensible, et seulement si le canal est configuré.
-  const sms = '🛵 Pirates Tools — nouvelle course zone ' + course.zone + ' · '
-    + String(course.address || '').slice(0, 40) + ' (' + course.km + ' km). '
-    + 'Ouvre ton espace livreur pour l\'accepter.';
-  for (const l of livreurs) { if (l.phone) await sendSms(l.phone, sms); }
+  /* `db` reste dans la signature pour l'uniformité des trois alertes et les
+     évolutions futures ; on le marque consommé sans lecture. */
+  void db;
 }
 
 // Crée la course depuis un PaymentIntent PAYÉ (metadata course* posée par
