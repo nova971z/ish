@@ -862,3 +862,30 @@ href="#/…" vers location.hash (sans elle, chaque clic rechargerait la page).
 
 ➡️ Prochaine etape : ordre 2 (rendu complet — metas par page, JSON-LD Product
 toutes images + priceValidUntil reel, ItemList coherent, h1 unique).
+
+### Ordre 2 — rendu serveur complet (L) — FAIT (+ constats externes du 08/08)
+Criteres executes (porte scripts/check-render.js, mode fichier deliberre) :
+- title/meta/canonical/og:* par page (deja mesures en prod par Killian, ordre 1) ;
+- SEULE LA VUE DEMANDEE EST SERVIE (SEO-010/039 + constat externe 1) :
+  1 seule vue data-route="/..." dans le HTML d'une fiche ET du catalogue,
+  zero texte CGV/mentions dans les fiches — sabotage (vues non retirees) rouge.
+  app.js recharge le gabarit complet si une vue manque a la navigation.
+- twitter:title/description ALIGNEES sur og:* (constat 2) — sabotage rouge ;
+- og:type=product sur les fiches (constat 3) — sabotage rouge ;
+- og:image:width/height = dimensions LUES dans le fichier WebP (constat 4,
+  lecteur d'en-tete identique a p8-perf) ; illisible → aucune declaration ;
+- JSON-LD Product : toutes les images de la galerie (SEO-035), prix du MEME
+  pricing.calcPrice que le paiement (J4, sabotage prix-hors-modele rouge),
+  priceValidUntil derive du dernier releve reel du traqueur +14 j (SEO-036,
+  sabotage date-inventee rouge), AUCUNE offre si prix non confirmes (J4) ;
+- ItemList : numberOfItems = items listes = fiches eligibles (SEO-034,
+  sabotage rouge) ;
+- D-115 (FOUC) : CSS critique #rendu-serveur dans le <head> avant le contenu
+  (assertion + sabotage rouge) ; le bloc serveur n'est retire qu'apres la
+  premiere peinture de la vue avec donnees (app.js) — verification
+  perceptuelle sur iPad apres deploiement.
+Sabotages ordre 2 : 7/7 rouges. Harnais : noyau 145/145 (8/8), plan9 71/71,
+plan11 27/27, couriers 82/82, chemins-reels 7/7. ci.js : 6 erreurs =
+les 6 demandes ouvertes du registre, rien d'autre. sw pt-v594.
+EXTERNE restant : test Rich Results de Google sur une fiche remplie
+(a coller par Killian apres deploiement).

@@ -29,6 +29,11 @@
 const fs = require('fs');
 const path = require('path');
 const catalog = require('./_lib/catalog');
+// J4 : le prix rendu vient du MÊME modèle que le paiement — jamais recalculé
+// ailleurs. enMillis : le SEUL convertisseur de dates du traqueur (Timestamp
+// Firestore, ms, ISO), on ne réécrit pas un parseur.
+const pricing = require('./_lib/pricing');
+const priceParse = require('./_lib/price-parse');
 
 const BASE_URL = 'https://pirates-tools.com';
 
@@ -108,6 +113,65 @@ function absolue(chemin) {
   return BASE_URL + '/' + String(chemin).replace(/^\//, '');
 }
 
+/* Dimensions réelles d'un WebP servi — même lecture d'en-tête que la mesure
+   P8.6 (scripts/audit/p8-perf.js, coteWebp) : VP8X, VP8L, VP8. On DÉCLARE ce
+   qu'on a lu, jamais un 1200×630 recopié (constat externe du 08/08). */
+function dimsWebp(rel) {
+  try {
+    var b = fs.readFileSync(path.join(__dirname, '..', rel));
+    if (b.toString('latin1', 8, 12) !== 'WEBP') return null;
+    var s = b.toString('latin1', 12, 16);
+    if (s === 'VP8X') return { w: (b.readUIntLE(24, 3) & 0xffffff) + 1, h: (b.readUIntLE(27, 3) & 0xffffff) + 1 };
+    if (s === 'VP8L') { var v = b.readUInt32LE(21); return { w: (v & 0x3fff) + 1, h: ((v >> 14) & 0x3fff) + 1 }; }
+    return { w: b.readUInt16LE(26) & 0x3fff, h: b.readUInt16LE(28) & 0x3fff };
+  } catch (e) { return null; }
+}
+
+/* ── SEO-010/039 : SEULE LA VUE DEMANDÉE EST SERVIE ─────────────────────────
+   Mesure externe du 08/08 : chaque fiche embarquait l'accueil, les 22 vues et
+   le texte INTÉGRAL des CGV + mentions + confidentialité — duplication
+   massive inter-fiches, dilution du contenu, h1 multiples. On retire donc
+   toutes les sections-vues SAUF celle de la route servie, en équilibrant les
+   <section> imbriquées (l'accueil en contient). Côté app : une vue absente du
+   document déclenche un rechargement du gabarit complet (app.js). */
+function garderVueSeule(html, route) {
+  var out = '';
+  var i = 0;
+  for (;;) {
+    var deb = html.indexOf('<section', i);
+    if (deb === -1) { out += html.slice(i); break; }
+    var finTag = html.indexOf('>', deb);
+    var tag = html.slice(deb, finTag);
+    if (tag.indexOf('data-route="') === -1) { out += html.slice(i, finTag + 1); i = finTag + 1; continue; }
+    var garder = tag.indexOf('data-route="' + route + '"') !== -1;
+    var prof = 1, j = finTag + 1;
+    while (prof > 0) {
+      var o = html.indexOf('<section', j);
+      var c = html.indexOf('</section>', j);
+      if (c === -1) { j = html.length; break; }
+      if (o !== -1 && o < c) { prof++; j = o + 8; }
+      else { prof--; j = c + 10; }
+    }
+    out += html.slice(i, deb);
+    if (garder) out += html.slice(deb, j);
+    i = j;
+  }
+  return out;
+}
+
+/* Toutes les images de la galerie (SEO-035) : `images[]` + le visuel
+   principal, dédoublonnées, placeholder exclu. */
+function toutesImages(p) {
+  var liste = [];
+  if (p.img) liste.push(p.img);
+  (Array.isArray(p.images) ? p.images : []).forEach(function (x) { if (x) liste.push(x); });
+  var vues = {};
+  return liste.filter(function (x) {
+    if (vues[x] || String(x).indexOf('placeholder') !== -1) return false;
+    vues[x] = true; return true;
+  }).map(absolue);
+}
+
 /* La règle d'indexation progressive (D-019) : description réelle ET visuel
    réel, sinon noindex,follow. La MÊME règle décidera du sitemap (ordre 3). */
 function estIndexable(p) {
@@ -127,18 +191,49 @@ function poserEnTete(html, meta) {
      y compris les URL que app.js fabrique ensuite. Les liens à dièse restent
      sains : app.js les prend en charge au clic (délégation). */
   html = html.replace('<head>', '<head>\n  <base href="/">');
+  /* D-115 (FOUC) : CSS critique du bloc serveur, dans le <head>, AVANT tout
+     contenu — le bloc est lisible dès le premier octet peint, même avant
+     styles.css. Il ne peut pas vivre dans styles.css : l'élément n'existe
+     que dans le HTML rendu serveur. */
+  html = html.replace('<base href="/">', '<base href="/">\n  <style>'
+    + '#rendu-serveur{max-width:720px;margin:0 auto;padding:24px 16px;'
+    + 'font-family:system-ui,-apple-system,sans-serif;line-height:1.6;color:#e8e8f0}'
+    + '#rendu-serveur img{max-width:min(420px,100%);height:auto;display:block;margin:12px 0}'
+    + '#rendu-serveur a{color:#8f7bff}'
+    + '</style>');
   html = html.replace(/<title>[^<]*<\/title>/, '<title>' + escapeHTML(meta.titre) + '</title>');
   html = html.replace(/(<meta name="description" content=")[^"]*(")/, '$1' + escapeHTML(meta.desc) + '$2');
   html = html.replace(/(<link rel="canonical" href=")[^"]*(")/, '$1' + escapeHTML(meta.canonical) + '$2');
   html = html.replace(/(<meta property="og:url" content=")[^"]*(")/, '$1' + escapeHTML(meta.canonical) + '$2');
   html = html.replace(/(<meta property="og:title" content=")[^"]*(")/, '$1' + escapeHTML(meta.titre) + '$2');
   html = html.replace(/(<meta property="og:description" content=")[^"]*(")/, '$1' + escapeHTML(meta.desc) + '$2');
+  /* Twitter Cards alignées sur les OG (constat externe du 08/08 : og:* au
+     produit mais twitter:* restés au site). */
+  html = html.replace(/(<meta name="twitter:title" content=")[^"]*(")/, '$1' + escapeHTML(meta.titre) + '$2');
+  html = html.replace(/(<meta name="twitter:description" content=")[^"]*(")/, '$1' + escapeHTML(meta.desc) + '$2');
+  // og:type=website sur une fiche produit induit les partages en erreur.
+  if (meta.type) {
+    html = html.replace(/(<meta property="og:type" content=")[^"]*(")/, '$1' + escapeHTML(meta.type) + '$2');
+  }
   if (meta.image) {
     html = html.replace(/(<meta property="og:image" content=")[^"]*(")/, '$1' + escapeHTML(meta.image) + '$2');
     html = html.replace(/(<meta name="twitter:image" content=")[^"]*(")/, '$1' + escapeHTML(meta.image) + '$2');
+    /* Les dimensions déclarées sont celles LUES dans le fichier ; si on ne
+       sait pas les lire, on ne déclare RIEN — un 1200×630 recopié sur un
+       poster carré est un mensonge de plus (constat externe du 08/08). */
+    if (meta.imageDims) {
+      html = html.replace(/(<meta property="og:image:width" content=")[^"]*(")/, '$1' + meta.imageDims.w + '$2');
+      html = html.replace(/(<meta property="og:image:height" content=")[^"]*(")/, '$1' + meta.imageDims.h + '$2');
+    } else {
+      html = html.replace(/\s*<meta property="og:image:width" content="[^"]*">/, '');
+      html = html.replace(/\s*<meta property="og:image:height" content="[^"]*">/, '');
+    }
   }
   if (meta.noindex) {
     html = html.replace('<link rel="canonical"', '<meta name="robots" content="noindex,follow">\n  <link rel="canonical"');
+  }
+  if (meta.jsonld) {
+    html = html.replace('</head>', '  <script type="application/ld+json">' + meta.jsonld + '</script>\n</head>');
   }
   return html;
 }
@@ -152,28 +247,87 @@ function poserContenu(html, contenu) {
   return html.replace('<body>', '<body>\n<div id="rendu-serveur" data-rendu-serveur>\n' + contenu + '\n</div>');
 }
 
-function pageProduit(p) {
+/* JSON-LD Product (ordre 2). Champs SORTIS UN PAR UN — jamais l'objet entier :
+   `p` vient du catalogue COMPLET (loadCatalogEtat) qui porte les champs
+   internes (coût d'achat, marge) ; les recopier serait la fuite irréversible
+   que check-catalog-public interdit. */
+var STOCK_LD = {
+  out_of_stock: 'https://schema.org/OutOfStock',
+  preorder: 'https://schema.org/PreOrder',
+  low_stock: 'https://schema.org/LimitedAvailability'
+};
+function jsonldProduit(p, prixConfirmes) {
+  var data = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    'name': p.title,
+    'description': String(p.description_long || p.desc || '').trim(),
+    'brand': { '@type': 'Brand', 'name': p.brand || '' },
+    'sku': p.sku || p.id,
+    'image': toutesImages(p)   // SEO-035 : TOUTES les images de la galerie
+  };
+  if (p.weight_kg) data.weight = { '@type': 'QuantitativeValue', 'value': p.weight_kg, 'unitCode': 'KGM' };
+  /* J4 : le prix vient du MÊME loadCatalog que le paiement, calculé par le
+     MÊME pricing.calcPrice (territoire par défaut, 971). Prix NON confirmés
+     (Firestore injoignable) → AUCUNE offre : ne rien annoncer vaut toujours
+     mieux qu'annoncer faux. */
+  if (prixConfirmes) {
+    var offre = {
+      '@type': 'Offer',
+      'priceCurrency': 'EUR',
+      'price': pricing.calcPrice(p, pricing.DEFAULT_TERRITORY).ttc.toFixed(2),
+      'availability': STOCK_LD[String(p.stock_status || '').toLowerCase()] || 'https://schema.org/InStock',
+      'url': BASE_URL + '/produit/' + encodeURIComponent(p.slug || p.id)
+    };
+    /* SEO-036 : priceValidUntil DÉRIVÉ D'UNE DONNÉE RÉELLE — le dernier
+       relevé du traqueur + 14 jours (la fenêtre de fraîcheur gravée D-112).
+       Aucun relevé → pas de priceValidUntil : on n'invente pas une date. */
+    var releve = priceParse.enMillis(p.priceCheckedAt || p.priceRecomputedAt);
+    if (releve > 0) offre.priceValidUntil = new Date(releve + 14 * 86400000).toISOString().slice(0, 10);
+    data.offers = offre;
+  }
+  return JSON.stringify(data);
+}
+
+function pageProduit(p, prixConfirmes, produits) {
   var indexable = estIndexable(p);
   var desc = String(p.desc || p.description_long || '').trim()
     || ('Fiche ' + p.title + ' — outillage professionnel livré dans les DOM-TOM.');
+  var imgs = toutesImages(p);
+  /* Liens internes : jusqu'à 6 fiches ÉLIGIBLES de la même famille — le
+     maillage qui donne aux voisines leur lien entrant (ordre 2). */
+  var voisines = (produits || []).filter(function (v) {
+    return v !== p && v.category === p.category && estIndexable(v);
+  }).slice(0, 6);
   var corps = '<article>'
     + '<h1>' + escapeHTML(p.title) + '</h1>'
-    + (p.img && p.img.indexOf('placeholder') === -1
-      ? '<img src="' + escapeHTML(absolue(p.img)) + '" alt="' + escapeHTML(p.title) + '" width="600" height="600">'
-      : '')
+    + imgs.map(function (u, i) {
+      var d = dimsWebp(u.replace(BASE_URL + '/', ''));
+      return '<img src="' + escapeHTML(u) + '" alt="' + escapeHTML(p.title) + (i ? ' — vue ' + (i + 1) : '') + '"'
+        + (d ? ' width="' + d.w + '" height="' + d.h + '"' : '') + '>';
+    }).join('')
     + (p.brand ? '<p>Marque : ' + escapeHTML(p.brand) + '</p>' : '')
     + (p.category ? '<p>Famille : ' + escapeHTML(p.category) + '</p>' : '')
     + '<p>' + escapeHTML(String(p.description_long || p.desc || '').trim() || desc) + '</p>'
+    + (voisines.length
+      ? '<h2>Dans la même famille</h2><ul>' + voisines.map(function (v) {
+          return '<li><a href="/produit/' + encodeURIComponent(v.slug || v.id) + '">' + escapeHTML(v.title) + '</a></li>';
+        }).join('') + '</ul>'
+      : '')
     + '<p><a href="/catalogue">← Tout le catalogue</a></p>'
     + '</article>';
+  var image = imgs[0] || '';
   return {
     statut: 200,
     meta: {
       titre: p.title + ' — Pirates Tools',
       desc: desc.slice(0, 300),
       canonical: BASE_URL + '/produit/' + encodeURIComponent(p.slug || p.id),
-      image: p.img && p.img.indexOf('placeholder') === -1 ? absolue(p.img) : '',
-      noindex: !indexable
+      image: image,
+      imageDims: image ? dimsWebp(image.replace(BASE_URL + '/', '')) : null,
+      type: 'product',   // og:type=website sur une fiche induisait les partages en erreur
+      noindex: !indexable,
+      jsonld: jsonldProduit(p, prixConfirmes)
     },
     contenu: corps
   };
@@ -206,13 +360,29 @@ function pageCatalogue(produits) {
   var terr = Object.keys(TERRITOIRES).map(function (s) {
     return '<li><a href="/territoire/' + s + '">Outillage ' + escapeHTML(TERRITOIRES[s]) + '</a></li>';
   }).join('');
+  /* ItemList COHÉRENT (SEO-034) : numberOfItems = exactement les items
+     listés — le même tableau produit les liens ET le JSON-LD. */
+  var itemList = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    'numberOfItems': eligibles.length,
+    'itemListElement': eligibles.map(function (p, i) {
+      return {
+        '@type': 'ListItem',
+        'position': i + 1,
+        'name': p.title,
+        'url': BASE_URL + '/produit/' + encodeURIComponent(p.slug || p.id)
+      };
+    })
+  });
   return {
     statut: 200,
     meta: {
       titre: PAGES_FIXES.catalogue.titre,
       desc: PAGES_FIXES.catalogue.desc,
       canonical: BASE_URL + '/catalogue',
-      noindex: false
+      noindex: false,
+      jsonld: itemList
     },
     contenu: '<nav>'
       + '<h1>Catalogue outillage professionnel</h1>'
@@ -269,20 +439,29 @@ module.exports = async function handler(req, res) {
   var page = String(q.page || '');
   var slug = String(q.slug || '').slice(0, 200);
 
-  var rendu;
+  var rendu, vue;
   try {
     if (page === 'produit') {
-      var produits = await catalog.loadPublicCatalog();
-      var p = catalog.findByKey(produits, slug);
-      rendu = p ? pageProduit(p) : page404('/produit/' + slug);
+      /* loadCatalogEtat : le catalogue COMPLET (mêmes prix que le paiement,
+         J4) + le drapeau prixConfirmes. Les champs internes qu'il porte ne
+         sortent JAMAIS entiers — jsonldProduit/pageProduit recopient champ
+         par champ. */
+      var etat = await catalog.loadCatalogEtat();
+      var p = catalog.findByKey(etat.produits, slug);
+      rendu = p ? pageProduit(p, etat.prixConfirmes, etat.produits) : page404('/produit/' + slug);
+      vue = p ? '/produit' : '/404';
     } else if (page === 'territoire') {
       rendu = TERRITOIRES[slug] ? pageTerritoire(slug) : page404('/territoire/' + slug);
+      vue = TERRITOIRES[slug] ? '/territoire' : '/404';
     } else if (page === 'catalogue') {
       rendu = pageCatalogue(await catalog.loadPublicCatalog());
+      vue = '/catalogue';
     } else if (PAGES_FIXES[page]) {
       rendu = pageFixe(page);
+      vue = '/' + page;
     } else {
       rendu = page404('/' + page);
+      vue = '/404';
     }
   } catch (e) {
     /* Panne de rendu ≠ page absente : on répond 500 SANS cache — un 404 mis
@@ -291,7 +470,7 @@ module.exports = async function handler(req, res) {
     return res.status(500).send('Erreur de rendu : ' + escapeHTML(e.message));
   }
 
-  var html = poserContenu(poserEnTete(gabarit(), rendu.meta), rendu.contenu);
+  var html = poserContenu(poserEnTete(garderVueSeule(gabarit(), vue), rendu.meta), rendu.contenu);
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   /* 200 : le CDN absorbe (5 min + revalidation en arrière-plan). 404 : cache
      court seulement — une fiche peut naître d'une minute à l'autre. */
@@ -303,4 +482,8 @@ module.exports = async function handler(req, res) {
 
 // Exposées pour la porte CI (fonctions pures) — Vercel n'appelle que le
 // module lui-même, ces propriétés ne changent rien au point d'entrée.
-module.exports._internals = { vueEnChantier: vueEnChantier, estIndexable: estIndexable };
+module.exports._internals = {
+  vueEnChantier: vueEnChantier, estIndexable: estIndexable,
+  dimsWebp: dimsWebp, jsonldProduit: jsonldProduit,
+  garderVueSeule: garderVueSeule, toutesImages: toutesImages
+};

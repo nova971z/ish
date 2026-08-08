@@ -129,6 +129,72 @@ module.exports = async function () {
       }
     }
 
+    /* ── ⑧ ORDRE 2 : seule la vue demandée est servie (SEO-010/039) ─────────
+       Mesure externe du 08/08 : chaque fiche embarquait l'accueil, 22 vues et
+       le texte INTÉGRAL des CGV. Critère ajouté par l'user : le HTML d'une
+       fiche ne contient NI le texte des CGV NI les autres vues. */
+    // Les vues portent data-route="/…" ; les LIENS du menu data-route="#/…" —
+    // seuls les premiers sont des sections à dédoublonner.
+    var vuesDansFiche = (r1.corps.match(/data-route="\//g) || []).length;
+    ok(vuesDansFiche === 1, '⛔ la fiche ne sert QUE sa vue — ' + vuesDansFiche + ' vue(s) trouvée(s) (attendu 1)');
+    ok(r1.corps.indexOf('data-route="/cgv"') === -1 && r1.corps.indexOf('À COMPLÉTER') === -1,
+      '⛔ le texte des CGV/mentions ne vit PLUS dans chaque fiche');
+    var vuesDansCatalogue = (r6.corps.match(/data-route="\//g) || []).length;
+    ok(vuesDansCatalogue === 1, 'le catalogue aussi ne sert que sa vue — vu ' + vuesDansCatalogue);
+    // D-115 (FOUC) : le CSS critique du bloc serveur vit dans le <head>,
+    // AVANT tout contenu — lisible des le premier octet peint.
+    var posStyle = r1.corps.indexOf('#rendu-serveur{');
+    var posBloc = r1.corps.indexOf('<div id="rendu-serveur"');
+    ok(posStyle !== -1 && posBloc !== -1 && posStyle < posBloc,
+      'D-115 : CSS critique du bloc serveur present dans le <head>, avant le contenu');
+
+    /* ── ⑨ ORDRE 2 : métas de partage exactes ──────────────────────────────── */
+    var ogTitre = (r1.corps.match(/<meta property="og:title" content="([^"]*)"/) || [])[1] || '';
+    var twTitre = (r1.corps.match(/<meta name="twitter:title" content="([^"]*)"/) || [])[1] || '';
+    ok(ogTitre && ogTitre === twTitre, 'twitter:title ALIGNÉ sur og:title — og=' + ogTitre.slice(0, 40) + ' tw=' + twTitre.slice(0, 40));
+    var ogDesc = (r1.corps.match(/<meta property="og:description" content="([^"]*)"/) || [])[1] || '';
+    var twDesc = (r1.corps.match(/<meta name="twitter:description" content="([^"]*)"/) || [])[1] || '';
+    ok(ogDesc && ogDesc === twDesc, 'twitter:description ALIGNÉE sur og:description');
+    ok(/<meta property="og:type" content="product">/.test(r1.corps),
+      'og:type=product sur une fiche (plus jamais website)');
+    var dimLue = interne.dimsWebp && interne.dimsWebp(String(pleine.img));
+    var wDeclare = (r1.corps.match(/<meta property="og:image:width" content="([^"]*)"/) || [])[1];
+    if (dimLue) {
+      ok(String(dimLue.w) === wDeclare,
+        'og:image:width = dimension LUE dans le fichier — fichier ' + dimLue.w + ', déclaré ' + wDeclare);
+    } else {
+      ok(wDeclare === undefined, 'dimensions illisibles → AUCUNE dimension déclarée (on ne recopie pas 1200×630)');
+    }
+
+    /* ── ⑩ ORDRE 2 : JSON-LD Product et ItemList ──────────────────────────── */
+    var ldBrut = (r1.corps.match(/<script type="application\/ld\+json">(.*?)<\/script>/s) || [])[1];
+    ok(!!ldBrut, 'PRÉALABLE : un JSON-LD est rendu sur la fiche');
+    if (ldBrut) {
+      var ld = JSON.parse(ldBrut);
+      ok(ld['@type'] === 'Product' && ld.name === pleine.title, 'JSON-LD Product au nom du produit');
+      var nbGalerie = interne.toutesImages(pleine).length;
+      ok(Array.isArray(ld.image) && ld.image.length === nbGalerie,
+        'SEO-035 : TOUTES les images de la galerie — ' + (ld.image || []).length + '/' + nbGalerie);
+      // J4 : le prix rendu est CELUI du même modèle que le paiement.
+      var pricingLib = require(path.join(RACINE, 'api', '_lib', 'pricing.js'));
+      ok(ld.offers && ld.offers.price === pricingLib.calcPrice(pleine, pricingLib.DEFAULT_TERRITORY).ttc.toFixed(2),
+        '⛔ J4 : prix du JSON-LD = pricing.calcPrice (même modèle que le paiement) — vu ' + (ld.offers && ld.offers.price));
+      // SEO-036 : priceValidUntil seulement s'il existe un relevé RÉEL.
+      var aReleve = !!(pleine.priceCheckedAt || pleine.priceRecomputedAt);
+      ok(aReleve ? !!ld.offers.priceValidUntil : ld.offers.priceValidUntil === undefined,
+        'SEO-036 : priceValidUntil dérivé d\'un relevé réel, jamais inventé — relevé=' + aReleve + ', déclaré=' + (ld.offers && ld.offers.priceValidUntil));
+      // Prix NON confirmés → AUCUNE offre (on n'annonce pas ce qu'on ne peut pas tenir).
+      var sansPrix = JSON.parse(interne.jsonldProduit(pleine, false));
+      ok(sansPrix.offers === undefined, '⛔ J4 : prix non confirmés → aucune offre rendue');
+    }
+    var ldCat = (r6.corps.match(/<script type="application\/ld\+json">(.*?)<\/script>/s) || [])[1];
+    ok(!!ldCat, 'PRÉALABLE : un JSON-LD ItemList est rendu sur le catalogue');
+    if (ldCat) {
+      var il = JSON.parse(ldCat);
+      ok(il['@type'] === 'ItemList' && il.numberOfItems === il.itemListElement.length && il.numberOfItems === nbEligibles,
+        'SEO-034 : numberOfItems = items listés = éligibles — ' + il.numberOfItems + '/' + il.itemListElement.length + '/' + nbEligibles);
+    }
+
     /* ── ⑦ D-116 / SEO-025 : le domaine vercel.app REDIRIGE, chemin conservé ──
        Un domaine technique qui répond 200 fabrique du contenu dupliqué. La
        preuve finale est externe (curl -I → 308, mesure de l'user) ; ici on

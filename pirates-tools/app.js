@@ -8512,6 +8512,14 @@
       if (pdpInfo) { pdpInfo.style.transform = ''; pdpInfo.style.opacity = ''; }
     }
 
+    /* Page rendue serveur ALLÉGÉE (SEO ordre 2) : seule la vue demandée est
+       servie. Si la navigation interne vise une vue ABSENTE du document, on
+       recharge le gabarit complet — une vraie navigation, une seule fois
+       (sur le gabarit complet, toutes les vues existent : pas de boucle). */
+    if (!document.querySelector('.view[data-route="' + route + '"]')) {
+      location.href = '/' + (location.hash || ('#' + route));
+      return;
+    }
     // Show matching view, hide all others
     $$('.view[data-route]').forEach(function (v) {
       var match = (v.dataset.route === route);
@@ -8646,6 +8654,16 @@
 
     // Update <title> + meta description for SEO
     updateRouteMeta(route, parsed);
+
+    /* D-115 (FOUC) : le bloc rendu serveur ne disparaît qu'ICI — quand la vue
+       vient d'être peinte ET que les produits sont chargés. Avant, il partait
+       au démarrage, avant tout rendu : écran vide entre le HTML serveur et la
+       première peinture de l'app. Ciblé par ATTRIBUT : cet élément n'existe
+       que dans le HTML rendu serveur, jamais dans index.html (p1-static). */
+    if (products && products.length) {
+      var blocServeur = document.querySelector('[data-rendu-serveur]');
+      if (blocServeur && blocServeur.parentNode) blocServeur.parentNode.removeChild(blocServeur);
+    }
 
     // A11y (WCAG 2.4.3) : focus sur le titre de la vue affichée. Sans lui, le
     // lecteur d'écran n'annonce jamais la « nouvelle page » d'une SPA et le
@@ -16980,13 +16998,11 @@
     updateWishlistUI();
     injectOrganizationJsonLd();
     aInit(); // mesure d'audience maison (clics data-track, cycle de vie, session)
-    /* Le bloc rendu par api/render.js a fait son travail (robots + premier
-       paint) : l'application reprend la main, il disparaît. */
-    /* Ciblé par ATTRIBUT : cet élément n'existe que dans le HTML rendu
-       serveur, jamais dans index.html — un id le ferait accuser à tort par
-       p1-static (« lu mais inexistant »). */
-    var ssr = document.querySelector('[data-rendu-serveur]');
-    if (ssr && ssr.parentNode) ssr.parentNode.removeChild(ssr);
+    /* D-115 (FOUC) : le bloc rendu serveur n'est PLUS retiré ici, avant que
+       l'app ait peint quoi que ce soit — il le sera à la fin du premier
+       onRouteChange qui dispose des données (voir la fin de onRouteChange).
+       Le retirer trop tôt laissait un écran vide entre le HTML serveur et le
+       premier rendu de la vue. */
     /* Ancien lien à dièse → chemin réel (SEO ordre 1) : même page, adresse
        propre et partageable. replaceState ne déclenche ni navigation ni
        hashchange — le routage part ensuite du chemin, comme à l'arrivée
