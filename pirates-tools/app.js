@@ -1183,7 +1183,11 @@
     // (produits ET carrousel vides) plusieurs dizaines de secondes.
     var apiConfigured = typeof window.PT_API_BASE === 'string';
     var apiBase = apiBaseUrl();
-    var staticUrl = 'products.json';
+    // SEO ordre 9 : la GRILLE charge le catalogue ALLÉGÉ (sans specs/
+    // description_long/features, -663 Ko mesurés). La fiche récupère son
+    // détail à la demande (ensureDetail → /api/products?id=…). /api/products
+    // renvoie déjà une liste allégée côté serveur.
+    var staticUrl = 'products-light.json';
     var overridesUrl = apiConfigured ? (apiBase + '/api/products') : null;
 
     function extractProducts(data) {
@@ -2212,6 +2216,83 @@
     };
   }
 
+  /* ── SEO ordre 9 : le DÉTAIL de la fiche, à la demande ─────────────────────
+     La grille charge le catalogue allégé (marqueur `_light`). Quand une fiche
+     s'ouvre, on récupère UNE fois son détail (specs/description_long/features)
+     via /api/products?id=… et on le fusionne dans l'objet EN PLACE — les
+     ouvertures suivantes sont instantanées. Si le réseau échoue, la fiche
+     reste affichable avec ce que porte l'allégé (titre, prix, image) : jamais
+     de fiche cassée, juste un détail absent. Le serveur (paiement) n'est pas
+     concerné : il lit toujours le catalogue complet. */
+  var _detailEnCours = {};
+  function ensureDetail(product) {
+    if (!product || !product._light) return Promise.resolve(product);
+    var cle = product.slug || product.id || product.sku;
+    if (_detailEnCours[cle]) return _detailEnCours[cle];
+    if (!apiBaseUrl && !window.PT_API_BASE) return Promise.resolve(product);
+    var url = apiBaseUrl() + '/api/products?id=' + encodeURIComponent(cle);
+    _detailEnCours[cle] = fetch(url, { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (d && d.ok && d.product) {
+          // Fusion EN PLACE : les champs de détail arrivent, le marqueur tombe.
+          Object.assign(product, d.product);
+          delete product._light;
+        }
+        return product;
+      })
+      .catch(function () { return product; })
+      .then(function (p) { delete _detailEnCours[cle]; return p; });
+    return _detailEnCours[cle];
+  }
+
+  /* Met à jour UNIQUEMENT les parties de la fiche qui dépendent du détail
+     (description longue, points forts, caractéristiques, note « sans batterie »,
+     JSON-LD). ⛔ On ne re-rend PAS toute la fiche : le héros, la galerie et les
+     animations de défilement resteraient intacts (un re-render complet
+     réinitialisait la galerie en plein balayage — cassé par pdp-galerie). */
+  function majFicheDetail(product) {
+    var pdpMore = document.getElementById('pdpMore');
+    var pdpDescLong = document.getElementById('pdpDescLong');
+    if (pdpMore && pdpDescLong) {
+      if (product.description_long) { pdpDescLong.textContent = product.description_long; pdpMore.hidden = false; }
+      else { pdpMore.hidden = true; pdpDescLong.textContent = ''; }
+    }
+    var battNote = document.getElementById('pdpBattNote');
+    if (battNote) {
+      if (batteryNotIncluded(product)) {
+        battNote.innerHTML = '<span class="pdp-batt-note__tri" aria-hidden="true">⚠️</span> Vendu sans batterie ni chargeur';
+        battNote.hidden = false;
+      } else { battNote.hidden = true; battNote.innerHTML = ''; }
+    }
+    var featuresEl = document.getElementById('pdpFeatures');
+    if (featuresEl && product.features && product.features.length > 0) {
+      featuresEl.innerHTML = product.features.map(function (f) {
+        return '<div class="pdp-feature"><div class="pdp-feature__icon">✓</div><span>' + escapeHTML(f) + '</span></div>';
+      }).join('');
+    } else if (featuresEl) { featuresEl.innerHTML = ''; }
+    if (dom.pdpSpecs) {
+      var specKeys = product.specs ? Object.keys(product.specs) : [];
+      var specsBlock = dom.pdpSpecs.closest('.pdp-split__specs');
+      var splitGrid = dom.pdpSpecs.closest('.pdp-split');
+      if (specKeys.length > 0) {
+        var h = '<table>';
+        specKeys.forEach(function (k) { h += '<tr><td>' + escapeHTML(k) + '</td><td>' + escapeHTML(product.specs[k]) + '</td></tr>'; });
+        dom.pdpSpecs.innerHTML = h + '</table>';
+        if (specsBlock) specsBlock.hidden = false;
+        if (splitGrid) splitGrid.classList.remove('pdp-split--solo');
+      } else {
+        dom.pdpSpecs.innerHTML = '';
+        if (specsBlock) specsBlock.hidden = true;
+        if (splitGrid) splitGrid.classList.add('pdp-split--solo');
+      }
+    }
+    try { injectProductJsonLd(product); } catch (_) {}
+    // Les nouvelles lignes de specs/points forts entrent à opacity:0 (animées) :
+    // on les révèle comme le fait renderPDP après injection.
+    try { initPdpScrollAnimations(); } catch (_) {}
+  }
+
   function renderPDP(slug) {
     var product = null;
     for (var i = 0; i < products.length; i++) {
@@ -2221,6 +2302,17 @@
     if (!product) {
       if (dom.pdpTitle) dom.pdpTitle.textContent = 'Produit introuvable';
       return;
+    }
+    /* Fiche allégée : on récupère le détail PUIS on remplit SEULEMENT les
+       parties de détail (pas de re-render complet — le héros/galerie restent).
+       Le rendu continue ci-dessous avec titre/prix/image : pas d'écran figé. */
+    if (product._light) {
+      ensureDetail(product).then(function () {
+        if (parseHash().route === '/produit' && parseHash().slug
+            && decodeURIComponent(parseHash().slug) === slug) {
+          majFicheDetail(product);
+        }
+      });
     }
 
     // ── Variante Solo / Coffret ───────────────────────────────────────────────
@@ -15497,11 +15589,24 @@
     }
     var p = adminProduitPar(row.getAttribute('data-product-id'));
     if (!p) return;
-    boite.innerHTML = adminFicheHtml(p);
-    boite.hidden = false;
-    btn.setAttribute('aria-expanded', 'true');
-    row.classList.add('admin-row--ouverte');
-    adminBrancherAjoutImage(row);
+    /* SEO ordre 9 : le catalogue admin est allégé comme le reste — l'éditeur
+       a besoin du DÉTAIL (specs, description longue, points forts). On le
+       récupère à la demande AVANT de peindre le formulaire, sinon ces champs
+       s'ouvriraient vides et un enregistrement les effacerait. */
+    var peindre = function () {
+      boite.innerHTML = adminFicheHtml(p);
+      boite.hidden = false;
+      btn.setAttribute('aria-expanded', 'true');
+      row.classList.add('admin-row--ouverte');
+      adminBrancherAjoutImage(row);
+    };
+    if (p._light) {
+      boite.hidden = false;
+      boite.innerHTML = '<p class="lv-hint">Chargement de la fiche…</p>';
+      ensureDetail(p).then(peindre);
+    } else {
+      peindre();
+    }
   }
 
   function adminFicheHtml(p) {

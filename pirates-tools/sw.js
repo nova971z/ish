@@ -1,5 +1,5 @@
 /* sw.js — Pirates Tools (PWA) */
-const VERSION        = 'pt-v597';                    // version du SW (logique SW)
+const VERSION        = 'pt-v598';                    // version du SW (logique SW)
 const STATIC_CACHE   = `pt-static-${VERSION}`;
 const RUNTIME_CACHE  = `pt-runtime-${VERSION}`;
 const IMG_CACHE      = `pt-img-${VERSION}`;
@@ -8,7 +8,7 @@ const ORIGIN         = self.location.origin;
 
 // Aligner avec le HTML (cache-busting des assets) — garde-fou CI :
 // scripts/check-asset-versions.js casse la CI si sw.js et index.html divergent.
-const ASSET_VER = '597';
+const ASSET_VER = '598';
 
 // Icônes + manifest : fingerprint STABLE, séparé d'ASSET_VER. Ces fichiers ne
 // changent pas à chaque déploiement — les re-cache-buster à chaque bump forçait
@@ -317,8 +317,11 @@ self.addEventListener('fetch', (event) => {
   const pathname = url.pathname;
   const e = ext(pathname);
 
-  // 2) Produits JSON (data/products.json ou products.json)
-  if (pathname.endsWith('/data/products.json') || pathname.endsWith('/products.json')) {
+  // 2) Produits JSON (data/products.json, products.json, ou products-light.json
+  //    — le catalogue allégé de la grille, SEO ordre 9 : même stratégie
+  //    network-first + repli cache que le catalogue complet)
+  if (pathname.endsWith('/data/products.json') || pathname.endsWith('/products.json')
+      || pathname.endsWith('/products-light.json')) {
     event.respondWith(handleProducts(req));
     return;
   }
