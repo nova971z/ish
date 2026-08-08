@@ -594,3 +594,51 @@ Tant que la ligne dit `EN VIGUEUR`, aucune URL sans `sec=1` ne doit être
 proposée — et la porte le vérifie.
 
 **État : EN VIGUEUR** *(04/08/2026)*
+
+---
+
+## D-019 — Architecture du référencement : SSR léger sur Vercel, indexation progressive, OnlineStore sans NAP
+
+| | |
+|---|---|
+| **Statut** | ✅ **ACTIVE** |
+| **Qui** | Killian (revue V1 de l'audit SEO, 08/08/2026) sur proposition argumentée |
+| **Où c'est vérifiable** | `audit/plan_action_seo.csv` (ordre 0) · `audit/audit_seo.csv` |
+
+**Le problème tranché.** Pour un moteur de recherche, le site est UNE page :
+toutes les routes vivent derrière un `#`, le sitemap ne déclare qu'une URL
+pour 1708 produits, et le canonical renvoie tout vers l'accueil (mesures du
+08/08 dans `audit/audit_seo.csv`, SEO-001 à SEO-005).
+
+**Trois choix, gravés ensemble :**
+
+1. **RENDU : SSR léger sur Vercel.** Une fonction serverless (`api/render.js`,
+   à créer) rend le HTML complet de `/produit/<slug>`, `/territoire/<slug>` et
+   `/catalogue` en lisant `api/_lib/catalog.js` (overrides Firestore compris),
+   cache CDN court (`s-maxage=300, stale-while-revalidate`).
+   · **SSG rejeté** : aucun pipeline de build n'existe, et les prix bougent
+     2×/jour via le traqueur — des prix figés dans du HTML statique seraient
+     périmés en quelques heures (pratique commerciale trompeuse, porte J4).
+   · **Rendu réservé aux robots rejeté** : deux chemins de code, assimilable
+     à du cloaking.
+
+2. **INDEXATION PROGRESSIVE — jamais de thin content.** Une fiche n'entre au
+   sitemap et n'est indexable QUE si `description_long` est non vide ET que
+   `img` n'est pas le placeholder. Sinon : rendue avec `noindex,follow`.
+   Mesure au 08/08 : 1531 fiches vides sur 1708 — les indexer d'un coup
+   ferait classer le domaine entier comme contenu pauvre. La levée du
+   `noindex` est PILOTÉE par le compteur CI de D-54 : chaque lot rempli rend
+   ses fiches éligibles automatiquement.
+
+3. **DONNÉES STRUCTURÉES LOCALES : OnlineStore + areaServed, RIEN de plus.**
+   Mot de Killian : « on n'invente jamais une fausse adresse NAP, c'est le
+   meilleur moyen de se faire suspendre du Google Business Profile. » Aucune
+   adresse postale dans le JSON-LD tant qu'une adresse réelle vérifiable
+   n'existe pas. Le signal local vient des pages territoire, du contenu, et
+   des actions externes réelles (Search Console, backlinks locaux).
+
+**Préalable d'exécution** : les cinq P0 fonctionnels du module courses
+(`audit/plan_correctifs_p0.csv`) se corrigent AVANT d'ouvrir ce chantier —
+le module est en service, ses routes répondent 500.
+
+**État : EN VIGUEUR** *(08/08/2026)*
