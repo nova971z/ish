@@ -1170,9 +1170,14 @@ async function handleCourses(req, body, cfg, res) {
         // jamais le faire depuis n'importe quel état. Sans elle, `confirmee`
         // pouvait être écrit par-dessus un état plus avancé.
         if (c.status !== 'acceptee') throw new Error('pas-en-negociation');
+        /* ⛔ CORRIGÉ le 08/08/2026 : ce bloc lisait `pi`, une const d'un AUTRE
+           bloc (course-create) — ReferenceError garanti, donc course-goods-paid
+           répondait TOUJOURS 500 et AUCUNE course ne pouvait passer à l'état
+           `confirmee` (CODE-093). Le paiement vérifié de CE bloc s'appelle
+           `paye` : c'est lui qui porte l'identifiant et le montant. */
         tx.update(ref, {
-          goodsPaid: true, goodsPaymentIntentId: pi.id,
-          goodsAmountCents: pi.amount || 0,
+          goodsPaid: true, goodsPaymentIntentId: paye.id,
+          goodsAmountCents: paye.montantCents || 0,
           status: 'confirmee', confirmedOrderAt: new Date()
         });
         return c;
