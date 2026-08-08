@@ -931,3 +931,25 @@ EXTERNE restant : test Rich Results de Google sur une fiche remplie
   400 Ko, non bloquant SEO. width/height CLS : les img produit sont
   dimensionnees par leur CONTENEUR en CSS (width/height:100%), l'attribut
   intrinseque n'y change pas le CLS.
+
+### Lot 9 (ordre 9) — split du catalogue LIVRÉ (commits a8208a2 + aeda3be)
+- products-light.json (grille sans specs/description_long/features) : mesuré
+  1733 Ko → 1088 Ko. Généré par scripts/generer-catalogue-leger.js, porte CI
+  --verifie (à jour + aucun détail), sabotage rouge.
+- api/products.js : liste allégée (map alleger, marqueur _light) + ?id=<slug>
+  → fiche complète. Plafond 12 fonctions respecté (pas de nouvel endpoint).
+- Client : ensureDetail fusionne le détail à la demande ; majFicheDetail
+  remplit description/points forts/specs/note batterie/JSON-LD SANS re-render
+  (héros + galerie intacts — un re-render complet cassait pdp-galerie).
+  Admin : détail récupéré avant l'éditeur (sinon champs vides = effacement).
+- sw.js : products-light.json en network-first (comme le catalogue). pt-v598.
+- Preuves : harnais catalogue-leger 4/4 (grille sur l'allégé + détail à la
+  demande via ?id + re-ouverture sans 2e appel), 3 sabotages rouges ;
+  pdp-galerie 21/21, admin-fiche 13/13, plan10 32/32, noyau 145/145 (8/8),
+  chemins-reels 12/12, plan9/11/couriers verts.
+- ⛔ Chemin de l'ARGENT : le serveur (create-payment-intent, SSR) lit
+  products.json COMPLET — non touché.
+- RESTE de l'ordre 9 : D-120 (sortir l'admin d'app.js en module) — bloc admin
+  mesuré 277 Ko dans une IIFE de 868 Ko ; extraction ATOMIQUE (exposer un
+  namespace partagé), à faire en une passe avec les harnais admin. Non entamée
+  pour ne jamais laisser app.js à moitié extrait.
