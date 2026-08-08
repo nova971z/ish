@@ -33,6 +33,7 @@ function alleger(liste) {
   return liste.map(function (p) {
     var clean = Object.assign({}, p);
     CHAMPS_DETAIL.forEach(function (c) { delete clean[c]; });
+    clean._light = 1;   // marqueur : le client récupère le détail à la demande
     return clean;
   });
 }

@@ -20,6 +20,7 @@ var CHAMPS_DETAIL = ['specs', 'description_long', 'features'];
 function alleger(p) {
   var clean = Object.assign({}, p);
   for (var i = 0; i < CHAMPS_DETAIL.length; i++) delete clean[CHAMPS_DETAIL[i]];
+  clean._light = 1;   // marqueur : le client sait qu'il doit chercher le détail
   return clean;
 }
 
