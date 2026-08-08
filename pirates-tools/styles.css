@@ -2882,6 +2882,16 @@ padding: 0;
     will-change: transform, opacity, filter;
 }
 
+/* Garantie (D-118) : discrète, sous la description — un engagement lisible,
+   jamais un argument tapageur. */
+.pdp-garantie {
+    margin: 1.4rem auto 0;
+    max-width: 680px;
+    text-align: center;
+    font-size: 0.95rem;
+    color: var(--muted);
+}
+
 .pdp-section--split {
     padding: 4rem 0;
     background: linear-gradient(180deg, #0a0f14 0%, rgba(var(--accent-rgb), 0.03) 50%, #0a0f14 100%);

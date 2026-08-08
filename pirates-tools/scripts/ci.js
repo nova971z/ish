@@ -84,6 +84,22 @@ var reqCoursesP1= safeRequire('./check-courses-p1','check-courses-p1');
 // Le rendu serveur des pages publiques (SEO ordre 1) : 200 produit, vrai 404,
 // canonical sans #, noindex progressif (D-019).
 var reqRender   = safeRequire('./check-render','check-render');
+// Le sitemap ne declare que des URLs indexables (SEO ordre 3). La porte
+// rejoue le generateur en mode --verifie : le sitemap sur le disque doit
+// declarer EXACTEMENT les URLs indexables mesurees (ni fiche noindex de trop,
+// ni eligible oubliee). Fichier present mais casse -> porte morte (safeRequire).
+var reqSitemap  = safeRequire('./generer-sitemap','generer-sitemap');
+function reqSitemapPorte(){
+  if (!reqSitemap) return [];   // absent : optionnel (meme regle que safeRequire)
+  try {
+    cp.execFileSync(process.execPath, [path.join(__dirname,'generer-sitemap.js'),'--verifie'],
+      { stdio:['ignore','ignore','pipe'] });
+    return [];
+  } catch(e){
+    var m = (e.stderr ? e.stderr.toString() : '') || (e.message||'');
+    return ['[generer-sitemap] ' + m.split('\n').filter(Boolean).join(' · ')];
+  }
+}
 var reqCatPub   = safeRequire('./check-catalog-public','check-catalog-public');
 var reqAssetVer = safeRequire('./check-asset-versions','check-asset-versions');
 var reqWhClaim  = safeRequire('./check-webhook-claim','check-webhook-claim');
@@ -228,6 +244,7 @@ var reqReconc   = safeRequire('./check-reconciliation', 'check-reconciliation');
   await runOne(reqCoursesAl,'check-courses-alertes');
   await runOne(reqCoursesP1,'check-courses-p1');
   await runOne(reqRender,   'check-render');
+  await runOne(reqSitemapPorte, 'generer-sitemap');
   await runOne(reqCatPub,   'check-catalog-public');
   await runOne(reqAssetVer, 'check-asset-versions');
   await runOne(reqWhClaim,  'check-webhook-claim');

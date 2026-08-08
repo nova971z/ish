@@ -58,13 +58,29 @@ module.exports = async function () {
       await rendre({ method: 'GET', query: query }, res);
       return res;
     };
+    var interne0 = rendre._internals || {};
+    var gabaritSrc = fs.readFileSync(path.join(RACINE, 'index.html'), 'utf8');
+    var titrePropreEsc = function (t) {
+      return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+        .replace(/[.*+?^${}()|[\]\\]/g, '\\$&');   // échappe aussi pour la regex
+    };
 
     /* ── ① Fiche REMPLIE : 200, contenu produit, canonical propre, indexable ── */
     var slugPlein = pleine.slug || pleine.id;
     var r1 = await appel({ page: 'produit', slug: slugPlein });
     ok(r1.code === 200, 'fiche remplie → 200 — vu ' + r1.code);
-    ok(r1.corps.indexOf('<h1>') !== -1 && r1.corps.indexOf('rendu-serveur') !== -1,
-      'le HTML brut porte le bloc rendu serveur avec un h1');
+    ok(r1.corps.indexOf('rendu-serveur') !== -1, 'le HTML brut porte le bloc rendu serveur');
+    /* h1 UNIQUE (SEO-010/039) : exactement UN h1 dans la fiche, et il porte le
+       nom du produit (pdpTitle pré-rempli, hydratation non destructive). */
+    var nbH1 = (r1.corps.match(/<h1[ >]/g) || []).length;
+    ok(nbH1 === 1, '⛔ h1 UNIQUE — ' + nbH1 + ' balise(s) h1 dans la fiche (attendu 1)');
+    ok(new RegExp('id="pdpTitle"[^>]*>' + titrePropreEsc(pleine.title)).test(r1.corps),
+      'le h1 unique (pdpTitle) porte le nom du produit');
+    /* GARANTIE (D-118) : la MÊME phrase dans le rendu serveur ET dans le
+       gabarit index.html — une garantie affichée engage, elle ne diverge pas. */
+    ok(r1.corps.indexOf(interne0.GARANTIE) !== -1, 'la garantie D-118 est dans la fiche rendue');
+    ok(gabaritSrc.indexOf(interne0.GARANTIE) !== -1, 'la garantie D-118 est dans le gabarit (index.html)');
     var canon1 = (r1.corps.match(/<link rel="canonical" href="([^"]*)"/) || [])[1] || '';
     ok(canon1 === 'https://pirates-tools.com/produit/' + encodeURIComponent(slugPlein),
       'canonical exact de la fiche — vu : ' + canon1);

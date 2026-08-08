@@ -37,6 +37,12 @@ const priceParse = require('./_lib/price-parse');
 
 const BASE_URL = 'https://pirates-tools.com';
 
+/* Garantie (D-118, décision Q-03 du 08/08) : formulation FIXE, identique pour
+   toutes les marques — une garantie affichée engage (J1). La MÊME phrase vit
+   en dur dans le gabarit fiche (index.html, .pdp-garantie) : la porte
+   check-render vérifie que les deux ne divergent pas. */
+const GARANTIE = 'Garantie légale de conformité 2 ans + garantie constructeur selon enregistrement.';
+
 // Miroir de TERRITORY_SLUGS (app.js) — les 5 territoires servis.
 const TERRITOIRES = {
   guadeloupe: 'Guadeloupe',
@@ -299,8 +305,13 @@ function pageProduit(p, prixConfirmes, produits) {
   var voisines = (produits || []).filter(function (v) {
     return v !== p && v.category === p.category && estIndexable(v);
   }).slice(0, 6);
+  /* h1 UNIQUE (SEO-010/039) : le SEUL h1 du document est celui de la vue
+     produit (pdpTitle), pré-rempli plus bas avec le nom réel du produit
+     (hydratation non destructive — app.js écrit le même titre). Le bloc
+     serveur porte donc un h2, pas un h1 : deux h1 dans une page, c'est le
+     défaut qu'on corrige. */
   var corps = '<article>'
-    + '<h1>' + escapeHTML(p.title) + '</h1>'
+    + '<h2>' + escapeHTML(p.title) + '</h2>'
     + imgs.map(function (u, i) {
       var d = dimsWebp(u.replace(BASE_URL + '/', ''));
       return '<img src="' + escapeHTML(u) + '" alt="' + escapeHTML(p.title) + (i ? ' — vue ' + (i + 1) : '') + '"'
@@ -309,6 +320,7 @@ function pageProduit(p, prixConfirmes, produits) {
     + (p.brand ? '<p>Marque : ' + escapeHTML(p.brand) + '</p>' : '')
     + (p.category ? '<p>Famille : ' + escapeHTML(p.category) + '</p>' : '')
     + '<p>' + escapeHTML(String(p.description_long || p.desc || '').trim() || desc) + '</p>'
+    + '<p>' + escapeHTML(GARANTIE) + '</p>'   // D-118 : même phrase que le gabarit
     + (voisines.length
       ? '<h2>Dans la même famille</h2><ul>' + voisines.map(function (v) {
           return '<li><a href="/produit/' + encodeURIComponent(v.slug || v.id) + '">' + escapeHTML(v.title) + '</a></li>';
@@ -323,6 +335,7 @@ function pageProduit(p, prixConfirmes, produits) {
       titre: p.title + ' — Pirates Tools',
       desc: desc.slice(0, 300),
       canonical: BASE_URL + '/produit/' + encodeURIComponent(p.slug || p.id),
+      h1: p.title,   // pré-remplit le h1 unique du gabarit (pdpTitle)
       image: image,
       imageDims: image ? dimsWebp(image.replace(BASE_URL + '/', '')) : null,
       type: 'product',   // og:type=website sur une fiche induisait les partages en erreur
@@ -470,7 +483,15 @@ module.exports = async function handler(req, res) {
     return res.status(500).send('Erreur de rendu : ' + escapeHTML(e.message));
   }
 
-  var html = poserContenu(poserEnTete(garderVueSeule(gabarit(), vue), rendu.meta), rendu.contenu);
+  var gab = garderVueSeule(gabarit(), vue);
+  /* h1 UNIQUE : le gabarit pose `<h1 id="pdpTitle" …>Produit</h1>` (placeholder).
+     On le pré-remplit avec le nom du produit — hydratation non destructive :
+     app.js écrit ensuite le même titre, aucun flash. C'est LE seul h1 de la
+     page (le bloc serveur porte un h2). */
+  if (rendu.meta.h1) {
+    gab = gab.replace(/(<h1 id="pdpTitle"[^>]*>)Produit(<\/h1>)/, '$1' + escapeHTML(rendu.meta.h1) + '$2');
+  }
+  var html = poserContenu(poserEnTete(gab, rendu.meta), rendu.contenu);
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   /* 200 : le CDN absorbe (5 min + revalidation en arrière-plan). 404 : cache
      court seulement — une fiche peut naître d'une minute à l'autre. */
@@ -485,5 +506,7 @@ module.exports = async function handler(req, res) {
 module.exports._internals = {
   vueEnChantier: vueEnChantier, estIndexable: estIndexable,
   dimsWebp: dimsWebp, jsonldProduit: jsonldProduit,
-  garderVueSeule: garderVueSeule, toutesImages: toutesImages
+  garderVueSeule: garderVueSeule, toutesImages: toutesImages,
+  GARANTIE: GARANTIE, TERRITOIRES: TERRITOIRES, PAGES_LEGALES: PAGES_LEGALES,
+  gabarit: gabarit
 };
