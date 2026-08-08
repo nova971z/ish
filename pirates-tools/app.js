@@ -737,7 +737,7 @@
     if (!product) return '';
     var t = getTerritory(territoryCode) || getTerritory(DEFAULT_TERRITORY);
     var price = calcPrice(product, t.code);
-    var url = location.origin + location.pathname + '#/produit/' + (product.slug || product.id);
+    var url = location.origin + '/produit/' + (product.slug || product.id);   // chemin réel partageable
     return 'Bonjour Pirates Tools, je suis intéressé(e) par : '
       + product.title + ' (' + (product.brand || '') + ')\n'
       + 'Prix TTC : ' + formatPrice(price.ttc) + '\n'
@@ -16394,7 +16394,11 @@
       'description': product.description_long || product.description || product.desc || '',
       'brand': { '@type': 'Brand', 'name': product.brand || '' },
       'sku': product.sku || product.id,
-      'image': product.img ? [new URL(product.img, location.href).href] : [],
+      /* ⛔ base = l'ORIGINE, jamais location.href : sur un chemin réel
+         (/produit/<slug>, SEO ordre 1) résoudre « images/… » contre location.href
+         donnait « /produit/images/… » — une URL d'image morte dans le JSON-LD
+         (vu au test Rich Results, 08/08). L'image vit à la racine. */
+      'image': product.img ? [new URL(product.img, location.origin + '/').href] : [],
       'weight': product.weight_kg ? { '@type': 'QuantitativeValue', 'value': product.weight_kg, 'unitCode': 'KGM' } : undefined,
       'offers': {
         '@type': 'Offer',
@@ -16445,13 +16449,15 @@
   function injectBreadcrumbLd(crumbs) {
     removeJsonLd('breadcrumb');
     if (!crumbs || !crumbs.length) return;
-    var base = location.origin + location.pathname;
+    /* CHEMINS RÉELS (SEO ordre 1) : les crumbs portent déjà le chemin réel
+       (« /produit/<slug> », « /catalogue », « / »). On les résout contre
+       l'ORIGINE — plus jamais « pathname#/… », qui doublait le chemin. */
     var items = crumbs.map(function (c, i) {
       return {
         '@type': 'ListItem',
         'position': i + 1,
         'name': c.name,
-        'item': c.hash ? (base + '#' + c.hash) : (base)
+        'item': location.origin + (c.hash || '/')
       };
     });
     var data = {
@@ -16484,8 +16490,8 @@
         'item': {
           '@type': 'Product',
           'name': p.title,
-          'url': base + '#/produit/' + (p.slug || p.id),
-          'image': p.img ? new URL(p.img, location.href).href : '',
+          'url': location.origin + '/produit/' + (p.slug || p.id),   // chemin réel, plus de #/
+          'image': p.img ? new URL(p.img, location.origin + '/').href : '',
           'offers': {
             '@type': 'Offer',
             'priceCurrency': 'EUR',
@@ -16801,10 +16807,15 @@
     setDocMeta(title, desc);
     setHeadMeta('og:title', title, 'property');
     setHeadMeta('og:description', desc, 'property');
-    setHeadMeta('og:url', location.href, 'property');
+    /* CHEMIN RÉEL : la page territoire vit à /territoire/<slug> (rewrite
+       Vercel). Le canonical et l'og:url doivent MATCHER le rendu serveur —
+       plus jamais « pathname#/slug » (fragment + chemin doublé, défaut
+       SEO-026/028 que le serveur avait déjà corrigé). */
+    var urlTerr = location.origin + '/territoire/' + slug;
+    setHeadMeta('og:url', urlTerr, 'property');
     setHeadMeta('twitter:title', title);
     setHeadMeta('twitter:description', desc);
-    setCanonical(location.origin + location.pathname + '#/' + slug);
+    setCanonical(urlTerr);
   }
 
   function resetSeoExtras() {

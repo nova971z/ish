@@ -58,6 +58,24 @@ r = await page.evaluate(() => ({ chemin: location.pathname,
 T('L\'ancien lien fiche devient /produit/<slug>', r.chemin === '/produit/' + encodeURIComponent(SLUG), r.chemin);
 T('La fiche se rend sur le chemin réel', r.vue === 'view-produit' && r.titre.trim().length > 0, JSON.stringify(r).slice(0, 90));
 
+// ── B2. Le JSON-LD CLIENT (injecté après hydratation) reste propre sur le
+//        chemin réel : image sans « /produit/ » parasite, aucun canonical à #.
+//        C'est le défaut vu au test Rich Results du 08/08 (image
+//        /produit/images/…) : le client résolvait contre location.href.
+const seo = await page.evaluate(() => {
+  const ld = document.querySelector('script[data-jsonld="product"]');
+  let img = '', bcHasHash = false;
+  try { img = (JSON.parse(ld.textContent).image || [])[0] || ''; } catch (_) {}
+  const bc = document.querySelector('script[data-jsonld="breadcrumb"]');
+  try { bcHasHash = JSON.parse(bc.textContent).itemListElement.some(x => /#/.test(x.item)); } catch (_) {}
+  const canon = (document.querySelector('link[rel="canonical"]') || {}).href || '';
+  return { img, bcHasHash, canon };
+});
+T('JSON-LD image = URL racine, jamais /produit/images/ (Rich Results)',
+  /^https?:\/\/[^/]+\/images\//.test(seo.img) && seo.img.indexOf('/produit/images/') === -1, seo.img);
+T('Fil d\'Ariane : aucun item à fragment #', seo.bcHasHash === false, JSON.stringify(seo).slice(0, 80));
+T('Canonical de la fiche sans fragment #', seo.canon.indexOf('#') === -1, seo.canon);
+
 // ── C. Route inconnue → vue 404 dédiée, jamais l'accueil ────────────────────
 await boot('#/cette-route-n-existe-pas');
 r = await page.evaluate(() => ({ vue: (document.querySelector('.view--active') || {}).id,
