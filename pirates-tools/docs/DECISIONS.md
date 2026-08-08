@@ -642,3 +642,34 @@ pour 1708 produits, et le canonical renvoie tout vers l'accueil (mesures du
 le module est en service, ses routes répondent 500.
 
 **État : EN VIGUEUR** *(08/08/2026)*
+
+---
+
+## D-020 — La création d'entreprise arrive 1 à 2 mois avant le lancement : le SEO local « établissement » est un jalon PRÉ-LANCEMENT
+
+| | |
+|---|---|
+| **Statut** | ✅ **ACTIVE** |
+| **Qui** | Killian, relecture V2 de l'audit SEO (08/08/2026) |
+| **Où c'est vérifiable** | `audit/questions_ouvertes.csv` (Q-05) · `audit/plan_action_seo.csv` (ordre 6) |
+
+**Le fait tranché.** L'adresse postale et la structure juridique n'existeront
+que 1 à 2 mois avant le lancement commercial. En conséquence, tout ce qui
+exige un établissement réel est **différé au jalon PRÉ-LANCEMENT** et sort
+des questions ouvertes comme des bloqueurs :
+
+- Google Business Profile ;
+- JSON-LD LocalBusiness (adresse, geo, horaires) ;
+- backlinks locaux / annuaires 971 ;
+- avis clients.
+
+**Ce qui ne bouge PAS d'ici là** : D-019 reste en vigueur — OnlineStore +
+areaServed, aucune adresse inventée. Le chantier SEO actuel (URL réelles,
+rendu serveur, sitemap, contenu) avance **sans attendre** : aucun de ses
+ordres ne dépend d'un établissement.
+
+**Ce qui reste actionnable tout de suite** (ordre 6, partie vivante) :
+Search Console + vérification des redirections de domaine — indépendants de
+la création d'entreprise.
+
+**État : EN VIGUEUR** *(08/08/2026)*
