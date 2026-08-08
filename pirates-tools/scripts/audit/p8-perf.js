@@ -254,6 +254,46 @@ tropLourdes.forEach((i) => {
   LOG('     ↑ image au-dessus du repère : ' + i.rel + ' (' + i.ko.toFixed(0) + ' Ko)');
 });
 
+/* ── P8.6 — UN POSTER TROP PETIT EST AGRANDI, DONC FLOU ────────────────────
+   ⛔ L'user, 08/08/2026 : « pourquoi la photo de la tronçonneuse est floue ? »
+   Mesuré ce jour-là sur trois écrans : le héros de la fiche produit dessine
+   l'image sur 1674 pixels d'écran sur son iPad (834 CSS × 2), 1553 sur un
+   ordinateur, 1178 sur un téléphone. Les posters du dépôt font 1000 px : le
+   navigateur les agrandit de ×1,67 et invente les pixels manquants.
+
+   ⚠️ TROP PETIT NE SE VOIT PAS DANS LE POIDS — c'est même l'inverse : un
+   poster trop petit est LÉGER, donc il passe tous les contrôles de poids en
+   souriant. Sans cette mesure-ci, le défaut est invisible pour la CI.
+
+   ⚠️ INFORMATION, PAS REFUS — même décision que pour les poids (01/08/2026).
+   Les posters historiques n'ont pas de source plus grande sur le disque :
+   les refaire demande de repasser par les visuels de l'user ou par un rendu
+   3D. C'est un chantier tracé, pas un blocage de livraison. */
+const COTE_ECRAN_MAX = 1674;   // mesuré, pas supposé : iPad portrait 834 CSS × 2
+function coteWebp(chemin) {
+  try {
+    const b = fs.readFileSync(path.join(ROOT, chemin));
+    if (b.toString('latin1', 8, 12) !== 'WEBP') return null;
+    const s = b.toString('latin1', 12, 16);
+    if (s === 'VP8X') return Math.max((b.readUIntLE(24, 3) & 0xffffff) + 1,
+      (b.readUIntLE(27, 3) & 0xffffff) + 1);
+    if (s === 'VP8L') { const v = b.readUInt32LE(21); return Math.max((v & 0x3fff) + 1, ((v >> 14) & 0x3fff) + 1); }
+    return Math.max(b.readUInt16LE(26) & 0x3fff, b.readUInt16LE(28) & 0x3fff);
+  } catch (e) { return null; }
+}
+const posters = imagesServies.filter((i) => /^images\/posters\/.+\.webp$/.test(i.rel));
+const petits = posters.map((i) => ({ rel: i.rel, cote: coteWebp(i.rel) }))
+  .filter((i) => i.cote && i.cote < COTE_ECRAN_MAX);
+LOG('  ' + (petits.length === 0 ? '✅' : 'ℹ️ ') + ' définition des posters : '
+  + (posters.length - petits.length) + '/' + posters.length
+  + ' assez définis pour le plus grand écran mesuré (' + COTE_ECRAN_MAX + ' px)');
+if (petits.length) {
+  LOG('     ↑ ' + petits.length + ' poster(s) sous ' + COTE_ECRAN_MAX + ' px : ils sont AGRANDIS '
+    + 'à l\'affichage, donc flous. Le plus petit : '
+    + petits.slice().sort((a, b) => a.cote - b.cote)[0].cote + ' px.');
+  LOG('     Un poster trop petit est LÉGER : aucun contrôle de poids ne le voit.');
+}
+
 LOG('\n' + '═'.repeat(74));
 LOG(problems.length === 0 ? '  ✅ P8 : performance et PWA conformes.' : '  ❌ P8 : ' + problems.length + ' défaut(s).');
 LOG('═'.repeat(74) + '\n');

@@ -35,7 +35,26 @@ import { existsSync, statSync } from 'node:fs';
 import { join, extname, basename } from 'node:path';
 import { inflateSync } from 'node:zlib';
 
-const COTE = 1000;                    // mesuré sur les posters en ligne
+/* ⛔⛔ 2000, ET PAS 1000. L'user, 08/08/2026 : « pourquoi la photo de la
+   tronçonneuse est floue ? »
+   ─────────────────────────────────────────────────────────────────────────
+   MA PREMIÈRE VALEUR ÉTAIT 1000, mesurée sur les posters déjà en ligne. La
+   mesure était juste, le raisonnement faux : ces posters-là ont été faits
+   pour les PETITES CARTES du catalogue. Je les ai recopiés pour une image
+   qui occupe TOUT l'écran de la fiche produit. Deux usages, deux tailles.
+
+   Ce que le navigateur dessine réellement, mesuré sur trois écrans :
+       iPad portrait (834 CSS, ×2)  → 1674 px d'écran pour 1000 px de fichier
+       ordinateur   (1194 CSS, ×2)  → 1553 px
+       iPhone        (390 CSS, ×3)  → 1178 px
+   Sur l'iPad de l'user — le seul écran qui compte pour lui — c'est un
+   agrandissement de ×1,67. Il n'y a rien à agrandir : le navigateur invente
+   les pixels manquants. C'est exactement ce qu'il voit.
+
+   2000 couvre le plus grand des trois cas avec de la marge. ⚠️ On n'agrandit
+   toujours JAMAIS au-delà de la source (`Math.min(1, …)`) : une source de
+   800 px reste à 800 px, gonfler ne rajouterait que du poids et du flou. */
+const COTE = 2000;
 const PLAFOND_KO = 871;               // audit/p8-perf, décision user 28/07/2026
 const MIME = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp' };
 
