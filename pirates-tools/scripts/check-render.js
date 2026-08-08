@@ -259,6 +259,12 @@ module.exports = async function () {
         && (h.headers || []).some(function (e) { return e.key === 'Cache-Control' && /immutable/.test(e.value || '') && /max-age=31536000/.test(e.value || ''); });
     })[0];
     ok(!!immut, 'SEO-011 : /images|models|icons servis immuables 1 an (max-age=31536000, immutable)');
+    /* ── ⑫ SEO-012/CODE-003 : le catalogue statique est caché au bord 5 min ─── */
+    var catCache = (vercelCfg.headers || []).filter(function (h) {
+      return /products\.json/.test(h.source || '')
+        && (h.headers || []).some(function (e) { return e.key === 'Cache-Control' && /s-maxage=300/.test(e.value || '') && /stale-while-revalidate/.test(e.value || ''); });
+    })[0];
+    ok(!!catCache, 'SEO-012 : products.json caché au bord (s-maxage=300, SWR) — CDN offload sans perte de fraîcheur prix');
   } finally {
     if (saAvant === undefined) delete process.env.FIREBASE_SERVICE_ACCOUNT;
     else process.env.FIREBASE_SERVICE_ACCOUNT = saAvant;
