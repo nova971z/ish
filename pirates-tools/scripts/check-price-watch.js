@@ -578,6 +578,48 @@ module.exports = async function () {
       '⛔ jamais un titre FAUX : une ligne de délai ou de livraison n\'est pas un '
       + 'nom de produit (un titre faux est pire qu\'une absence)');
 
+    /* ⛔⛔ LA RÉFÉRENCE N'EST PAS TOUJOURS LE PREMIER MOT APRÈS LA MARQUE
+       (09/08/2026). Mesuré sur le balayage réel de l'user, 67 pages : les 45
+       tuiles LUES avaient toutes leur référence au mot 1, mais sur les 1 094
+       ÉCARTÉES, 517 en portaient une AILLEURS dans le titre — le site écrit les
+       machines « <marque> <réf> <description> » et les accessoires
+       « <marque> <description> <réf> ». Tout le rayon accessoires tombait donc
+       en `sansRef`, PRIX COMPRIS : 124 fiches du catalogue restaient sur un coût
+       SUPPOSÉ alors que leur coût réel était dans la page.
+       ⚠️ Réfs synthétiques (un harnais ne nomme jamais une donnée du catalogue) ;
+       le gabarit, lui, est celui qui a été mesuré. */
+    var pageRefFin = [
+      'MAKITA ZZQ700P2', 'Machine test, 2 batteries', '3 offres', 'à partir de 450,00 €',
+      'Détails du produit',
+      'MAKITA emmanchement 25x920x790 mm ZZQ611-QZ', 'Accessoire test', '2 offres',
+      'à partir de 79,99 €', 'Détails du produit',
+      'MAKITA Batterie de rechange pour machine ZZQ700P2', 'Accessoire test', '1 offre',
+      '77,00 €', 'Détails du produit'
+    ].join('\n');
+    var rFin = pi(pageRefFin, 'MAKITA');
+    var fSku = {}; rFin.items.forEach(function (x) { fSku[x.sku] = x; });
+    ok(fSku['ZZQ611-QZ'] && fSku['ZZQ611-QZ'].price === 79.99,
+      '⛔ une carte dont la référence est écrite À LA FIN du titre est LUE — sinon '
+      + 'tout un rayon reste sur un coût supposé alors que son prix est dans la page '
+      + '(obtenu : ' + JSON.stringify(Object.keys(fSku)) + ')');
+    /* ⚠️ PRÉALABLE 1 — la réf en TÊTE continue de se lire : le repli ne remplace
+       rien, il complète. Sans ce cas, une régression du chemin principal
+       resterait invisible. */
+    ok(fSku.ZZQ700P2 && fSku.ZZQ700P2.price === 450,
+      '⚠️ PRÉALABLE : la référence en TÊTE de titre se lit toujours — le repli '
+      + 'complète le chemin principal, il ne le remplace pas');
+    /* ⛔⛔ ARGENT, LE GARDE-FOU QUI COMPTE — la seule référence d'un titre peut
+       être la MACHINE DE DESTINATION. « Batterie de rechange POUR machine
+       <réf> » ne doit JAMAIS écrire le prix de la batterie sur la fiche de la
+       machine : le coût serait divisé et la vente se ferait à perte. */
+    ok(!fSku.ZZQ700P2 || fSku.ZZQ700P2.price !== 77,
+      '⛔⛔ ARGENT : le prix d\'un accessoire « pour <machine> » ne s\'écrit JAMAIS '
+      + 'sur la fiche de cette machine (obtenu ' + JSON.stringify(fSku.ZZQ700P2 && fSku.ZZQ700P2.price) + ')');
+    ok(toutesOffres(rFin).some(function (x) { return x.prix === 77; })
+       || (rFin.sansRef || []).some(function (x) { return x.prix === 77; }),
+      '⛔ et l\'accessoire écarté reste LISTÉ avec son prix — une barrière écarte, '
+      + 'elle n\'efface pas');
+
     /* ⛔⛔ ARGENT — TITRE FAUX AVEC PRIX DESSUS (03/08/2026, SON RELEVÉ).
        L'annonce « 3 à 6 jours ouvrés » est sortie avec un prix de 674 €. La
        garde d'alors listait des FORMULATIONS (« 24/48 », « Livraison ») — un
@@ -649,15 +691,24 @@ module.exports = async function () {
       'Livraison gratuite', '674,00 €',
       'Détails du produit'
     ].join('\n'), 'MAKITA');
-    var eBadge = badgeAvant.sansRef[0] || {};
-    ok(toutesOffres(badgeAvant).length === 1 && /Ponceuse/.test(eBadge.titre || '')
-      && eBadge.prix === 674,
-      '⛔ PRÉALABLE : une VRAIE carte précédée d\'un bandeau reste lue, avec son '
-      + 'titre produit et son prix — pas « Meilleure vente » à 674 € ('
-      + JSON.stringify(eBadge.titre) + ' / ' + eBadge.prix + ')');
-    ok((eBadge.car || {}).sku === 'ZZE800H1-SK' && (eBadge.car || {}).type === 'ponceuse',
-      '⛔ …et la qualification part de CE titre-là : réf et type lus sur la ligne '
-      + 'produit, pas sur le bandeau');
+    /* ⚠️ ASSERTION REFORMULÉE LE 09/08/2026, ET ELLE SE DURCIT. Elle exigeait
+       que ce bloc sorte en `sansRef` — c'était décrire le manque : la référence
+       étant écrite à la FIN du titre, le parseur ne savait pas la lire. Depuis
+       le repli de lecture, la carte est LUE. Ce qu'elle protège n'a pas changé
+       d'un pouce : le titre retenu est la ligne PRODUIT, jamais le bandeau
+       « Meilleure vente », et le prix est celui de la carte. On l'exprime donc
+       en INVARIANT, valable que la carte soit lue ou écartée. */
+    var vuBadge = toutesOffres(badgeAvant);
+    ok(vuBadge.length === 1 && vuBadge[0].prix === 674
+      && !/Meilleure vente/i.test(vuBadge[0].titre || ''),
+      '⛔ PRÉALABLE : une VRAIE carte précédée d\'un bandeau est retenue avec SON '
+      + 'prix, et jamais sous le nom du bandeau ('
+      + JSON.stringify(vuBadge) + ')');
+    var refBadge = (badgeAvant.items[0] || {}).sku
+      || ((badgeAvant.sansRef[0] || {}).car || {}).sku;
+    ok(refBadge === 'ZZE800H1-SK',
+      '⛔ …et la référence vient de CETTE ligne-là — celle du produit, pas du '
+      + 'bandeau (' + JSON.stringify(refBadge) + ')');
 
     ok(ri.every(function (x) { return x.promo === false && x.enStock === null; }),
       'comparateur : jamais de promo ni de stock inventés');
@@ -1077,11 +1128,24 @@ module.exports = async function () {
       '⛔⛔ ARGENT : et elle sort AVEC SON PRIX. Avant, la tuile entière était '
       + 'avalée par sa voisine et 693,49 € disparaissaient sans une trace ('
       + JSON.stringify(rTuiles.sansRef.map(function (x) { return x.prix; })) + ')');
-    ok(rTuiles.items.length === 2 && rTuiles.items[0].price === 649.68
-      && rTuiles.items[1].price === 299.00,
-      '⛔⛔ ARGENT : et les voisines gardent LEUR prix — une tuile qu\'on ouvre ne '
-      + 'doit pas décaler celles d\'à côté ('
-      + JSON.stringify(rTuiles.items.map(function (x) { return x.price; })) + ')');
+    /* ⚠️ ASSERTION REFORMULÉE LE 09/08/2026 — en INVARIANT, et elle se durcit.
+       Elle figeait la RÉPARTITION du moment (2 lues + 1 écartée) parce que la
+       tuile du milieu, référence en fin de titre, n'était pas lisible. Elle est
+       lue maintenant. Ce qui compte n'a pas bougé et se dit mieux : CHAQUE
+       référence porte le prix de SA tuile, aucun prix ne migre chez la voisine.
+       ⛔ Un seuil recopié se périme (règle des harnais) : on n'écrit plus « 2 »,
+       on vérifie l'appariement réf ↔ prix. */
+    var parRefTuile = {};
+    rTuiles.items.forEach(function (x) { parRefTuile[x.sku] = x.price; });
+    ok(parRefTuile.ZZK368P3T === 649.68 && parRefTuile.ZZS572P2 === 299.00,
+      '⛔⛔ ARGENT : chaque voisine garde LE SIEN — une tuile qu\'on ouvre ne '
+      + 'décale pas les prix d\'à côté (' + JSON.stringify(parRefTuile) + ')');
+    /* ⛔ Et le prix du milieu ne se retrouve JAMAIS sur une voisine — c'est la
+       forme exacte du défaut qu'on redoute : un prix qui migre d'une réf à
+       l'autre. */
+    ok(parRefTuile.ZZK368P3T !== 693.49 && parRefTuile.ZZS572P2 !== 693.49,
+      '⛔⛔ ARGENT : le prix de la tuile du milieu ne migre sur AUCUNE voisine ('
+      + JSON.stringify(parRefTuile) + ')');
 
     /* ⛔ LE COMPTE BRUT DES TUILES — c'est LUI qui répond à « la page en a-t-elle
        60 ? ». Il ne dépend d'aucun titre, d'aucun repli, d'aucun vocabulaire :
@@ -1110,14 +1174,28 @@ module.exports = async function () {
       && attTuiles.indexOf('MAKITA ZZS572P2') !== -1,
       '⛔ le titre attendu d\'une fiche est SON TITRE, pas le sous-titre qui le '
       + 'suit (' + JSON.stringify(attTuiles) + ')');
-    ok(pp.annoncesManquantes(troisTuiles,
-      rTuiles.items.map(function (x) { return x.name; })
-        .concat(rTuiles.sansRef.map(function (x) { return x.titre; }))).length === 0,
+    /* ⚠️ LE HARNAIS APPELAIT LE RAPPROCHEMENT AUTREMENT QUE LA PRODUCTION —
+       corrigé le 09/08/2026. `api/admin.js` lui passe TROIS arguments : le
+       texte, les titres rendus, ET LES RÉFÉRENCES LUES. Ici on n'en passait que
+       deux. Tant que toute tuile s'appelait « MARQUE RÉF », les deux chemins se
+       confondaient ; depuis qu'une carte peut porter un titre libre (référence
+       en fin de ligne), ils divergent — et c'est le harnais qui était infidèle,
+       pas le code. On appelle désormais comme la production appelle.
+       ⛔ Un harnais qui n'exerce pas le vrai chemin ne garantit rien. */
+    var titresRendus = rTuiles.items.map(function (x) { return x.name; })
+      .concat(rTuiles.sansRef.map(function (x) { return x.titre; }));
+    var refsRendues = rTuiles.items.map(function (x) { return x.sku; })
+      .concat(rTuiles.sansRef.map(function (x) { return (x.car || {}).sku; }))
+      .filter(Boolean);
+    ok(pp.annoncesManquantes(troisTuiles, titresRendus, refsRendues).length === 0,
       '⛔ …et le rapprochement retombe donc à ZÉRO manquante sur une page dont '
       + 'tout est lu — un compteur qui crie au loup finit ignoré ('
-      + JSON.stringify(pp.annoncesManquantes(troisTuiles,
-        rTuiles.items.map(function (x) { return x.name; })
-          .concat(rTuiles.sansRef.map(function (x) { return x.titre; })))) + ')');
+      + JSON.stringify(pp.annoncesManquantes(troisTuiles, titresRendus, refsRendues)) + ')');
+    /* ⚠️ PRÉALABLE — le rapprochement doit encore SAVOIR CRIER. Sans ce cas, un
+       rapprochement qui rendrait toujours zéro passerait pour parfait. */
+    ok(pp.annoncesManquantes(troisTuiles, [], []).length > 0,
+      '⚠️ PRÉALABLE : le rapprochement signale bien les tuiles quand RIEN n\'a été '
+      + 'lu — sinon « zéro manquante » ne veut rien dire');
     /* ⛔⛔ ARGENT — ET SON PRIX NE DOIT PAS ATTERRIR SUR LA DERNIÈRE ANNONCE.
        Trouvé en éprouvant une page mixte : la dernière annonce, que rien ne
        fermait, avalait ce bandeau et ressortait à 784,99 € — LE PRIX DE

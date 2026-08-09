@@ -11,6 +11,8 @@
 | `FIREBASE_SERVICE_ACCOUNT` | présent (Production + Preview) | 08/08/2026 soir | capture Environment Variables |
 | Build Production `f651fc0` (fix vercel.json) | **READY 1m22s** — la prod sert enfin tous les lots depuis 6fabaf7 | 09/08/2026 09:04 | capture Deployments |
 | `VERCEL_TOKEN` | **PAS ENCORE posé** — nécessaire pour que ma session lise l'état des builds | — | voir procédure ci-dessous |
+| Notifications e-mail « Deployment Failed » | **PAS ACTIVÉES — et ce n'est PAS bloquant** | 09/08/2026 | Killian, mot pour mot : « OK pour vercel […] je le ferai plus tard, ce n'est pas très important ça j'ai tout le temps la page vercel ouverte ». Il SURVEILLE À VUE, la page reste ouverte devant lui. ⛔ On ne le relance donc plus là-dessus, et on ne lui demande plus de vérifier un build : s'il voit un échec, il le dira. |
+| Commit `fc33dfe` (rejets `sansRef` visibles en balayage) | **SERVI EN PRODUCTION** — prouvé par le COMPORTEMENT | 09/08/2026 | Son balayage du jour rend 1 094 rejets `sansRef` détaillés (titre + prix) : cette sortie N'EXISTE PAS avant `fc33dfe`. Une preuve de build par ce que le serveur FAIT, quand on ne peut pas l'interroger. |
 
 Conséquences en vigueur :
 - l'audit SE-002/SE-003 (« vérifier qu'ADMIN_SECRET est supprimé ») est **CLOS** ;

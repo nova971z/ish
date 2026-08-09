@@ -1103,6 +1103,45 @@ function parseIdealo(rawText, brand) {
       if (!/\d/.test(cand) || cand.length < 4 || UNITE_RE.test(cand)) continue;
       sku = cand; iTitre = t; break;
     }
+    /* ⛔⛔ LA RÉFÉRENCE N'EST PAS TOUJOURS LE PREMIER MOT APRÈS LA MARQUE.
+       Mesuré le 09/08/2026 sur le balayage réel de l'user (67 pages) : les 45
+       tuiles LUES ont toutes leur référence au mot 1 — mais sur les 1 094
+       écartées, **517 portent une référence lisible AILLEURS dans le titre**.
+       idealo écrit les machines « DeWalt DCD796P2 Perceuse… » (réf en tête) et
+       les accessoires « DeWalt SDS-max 25x920x790 mm DT60826-QZ » (réf à la
+       FIN). La boucle ci-dessus ne regarde que la tête : tout le rayon
+       accessoires tombait donc en `sansRef`, prix compris — et 124 fiches du
+       catalogue restaient sur un coût SUPPOSÉ alors que leur prix réel était
+       dans la page, sous les yeux du parseur.
+       ⛔ ARGENT, DONC ON NE DEVINE PAS : on n'élargit pas la regex de tête (elle
+       prendrait « SDS-MAX » ou « 25X920X790 » pour des références). On appelle
+       `lireReferenceDuTitre`, l'extracteur MÛR déjà utilisé par le chemin des
+       annonces marchandes — celui qui sait écarter la machine de destination
+       (« pour DCD785 »), les lots, les assemblages de produits et les noms de
+       gamme. Il rend `null` dès qu'il faudrait deviner, et le bloc repart alors
+       dans les écartés, listé, comme avant.
+       ⚠️ Ce repli ne s'applique QUE si la tête n'a rien donné : là où le
+       parseur lisait déjà une référence, rien ne change. */
+    if (!sku) {
+      for (var t2 = 0; t2 < b.length; t2++) {
+        if (!titrePlausible(b[t2])) continue;
+        if (!new RegExp(escapeRe(brand), 'i').test(b[t2])) continue;
+        var lu = lireReferenceDuTitre(b[t2], brand);
+        if (!lu || !lu.ref) continue;
+        var refLue = String(lu.ref).toUpperCase();
+        if (!/\d/.test(refLue) || refLue.length < 4 || UNITE_RE.test(refLue)) continue;
+        /* ⛔⛔ ET ON N'ÉCRIT JAMAIS UN PRIX SUR UNE RÉFÉRENCE RECOLLÉE. Le
+           lecteur d'annonces sait recoller « <marque> DCS 579 T2T » en
+           DCS579T2T — c'est bon pour RAPPROCHER deux annonces, jamais pour
+           poser un coût : on ne sait pas si le vrai code s'arrête au 579 ou au
+           T2T, et se tromper écrit le prix d'une machine sur une autre. Ici on
+           exige donc la référence écrite D'UN SEUL TENANT dans le titre.
+           (Défaut attrapé PAR LA PORTE au premier jet : sans cette condition,
+           trois assertions déjà existantes sont passées au rouge.) */
+        if (b[t2].toUpperCase().replace(/[^A-Z0-9./-]/g, ' ').split(/\s+/).indexOf(refLue) === -1) continue;
+        sku = refLue; iTitre = t2; break;
+      }
+    }
     if (!sku) {
       /* \u26d4\u26d4 ARGENT \u2014 LE PRIX SE LIT EN DESCENDANT DEPUIS LE TITRE, JAMAIS EN
          REMONTANT DEPUIS LA FIN DU BLOC. Trouv\u00e9 PAR LA PORTE le 03/08 : sans
