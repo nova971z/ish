@@ -11,6 +11,9 @@ const catalog = require('./_lib/catalog');
 const priceParse = require('./_lib/price-parse');
 // Les pages à balayer, déclarées une fois — jamais dans une URL tapée à la main.
 const plans = require('./_lib/traqueur-plans');
+// Snapshot des derniers prix vivants (4 docs agrégés) : CHAQUE écriture
+// d'override doit s'y répercuter, sinon le rendu servirait des prix d'avant.
+const snapshotLib = require('./_lib/snapshot');
 // Ce qu'on refuse d'acheter, et pourquoi. Un seul fichier, fait pour changer.
 const barriere = require('./_lib/barriere-achat');
 /* Pourquoi une rafale rend moins de pages qu'elle n'en a envoyé. Fonction pure.
@@ -1477,6 +1480,7 @@ module.exports = async function handler(req, res) {
       fiche.updatedAt = admin.firestore.FieldValue.serverTimestamp();
 
       await db.collection('product_overrides').doc(id).set(fiche, { merge: false });
+      await snapshotLib.majSnapshot(db, admin, id, fiche);
       catalog.invalidateOverrides();
       return res.status(200).json({ ok: true, id, sku,
         price: fiche.price, price_ht: fiche.price_ht, poidsSuppose: fiche.poidsSuppose });
@@ -1616,6 +1620,7 @@ module.exports = async function handler(req, res) {
 
       patch.updatedAt = admin.firestore.FieldValue.serverTimestamp();
       await db.collection('product_overrides').doc(id).set(patch, { merge: true });
+      await snapshotLib.majSnapshot(db, admin, id, patch);
       catalog.invalidateOverrides();
       console.log('[api/admin] product-edit', id, Object.keys(patch).join(','));
       return res.status(200).json({ ok: true, id: id,
@@ -1948,6 +1953,7 @@ module.exports = async function handler(req, res) {
       patch.updatedAt = admin.firestore.FieldValue.serverTimestamp();
 
       await db.collection('product_overrides').doc(productId).set(patch, { merge: true });
+      await snapshotLib.majSnapshot(db, admin, productId, patch);
 
       console.log('[api/admin] Updated override for', productId, Object.keys(patch).join(','));
       return res.status(200).json({ ok: true, id: productId, patch: patch });
@@ -1963,6 +1969,7 @@ module.exports = async function handler(req, res) {
       const id = (req.query && req.query.id) || (req.body && req.body.id) || '';
       if (!id) return res.status(400).json({ ok: false, error: 'Missing id' });
       await db.collection('product_overrides').doc(String(id)).delete();
+      await snapshotLib.majSnapshot(db, admin, String(id), null);
       return res.status(200).json({ ok: true, id: String(id) });
     } catch (err) {
       console.error('[api/admin] DELETE failed:', err.message);
@@ -2435,11 +2442,13 @@ async function handleRepriceAll(req, res, admin, db) {
         // définitivement et empêchait toute correction ultérieure (garde-fou
         // coffret, nouveau relevé). Le coût est désormais re-résolu à chaque
         // passage ; on ne mémorise que son ORIGINE, pour la transparence.
-        await db.collection('product_overrides').doc(p.id).set({
+        const patchReprice = {
           price: priced.newPrice, price_ht: priced.newHt,
           priceMarkup: priced.markup, priceMode: priced.mode,
           priceCostOrigin: srcInfo.origin, priceRecomputedAt: now
-        }, { merge: true });
+        };
+        await db.collection('product_overrides').doc(p.id).set(patchReprice, { merge: true });
+        await snapshotLib.majSnapshot(db, admin, p.id, patchReprice);
       }
       changed.push(rec);
     }
@@ -3733,6 +3742,7 @@ async function handlePriceWatch(req, res, admin, db) {
           };
           await db.collection('product_overrides').doc(p.id).set(
             Object.assign({}, patchR, { priceCheckedAt: now }), { merge: true });
+          await snapshotLib.majSnapshot(db, admin, p.id, Object.assign({}, patchR, { priceCheckedAt: now }));
           if (scanMode) pwMajLocale(ovW, p.id, patchR, nowMs);
         }
         continue;
@@ -3808,6 +3818,7 @@ async function handlePriceWatch(req, res, admin, db) {
           };
           await db.collection('product_overrides').doc(p.id).set(
             Object.assign({}, patchU, { priceCheckedAt: now }), { merge: true });
+          await snapshotLib.majSnapshot(db, admin, p.id, Object.assign({}, patchU, { priceCheckedAt: now }));
           if (scanMode) pwMajLocale(ovW, p.id, patchU, nowMs);
         }
         continue;
@@ -3894,6 +3905,7 @@ async function handlePriceWatch(req, res, admin, db) {
         }, promo);
         await db.collection('product_overrides').doc(p.id).set(
           Object.assign({}, patchA, { priceCheckedAt: now }), { merge: true });
+        await snapshotLib.majSnapshot(db, admin, p.id, Object.assign({}, patchA, { priceCheckedAt: now }));
         if (scanMode) pwMajLocale(ovW, p.id, patchA, nowMs);
         await db.collection('price_watch_log').add({
           sku: item.sku, id: p.id, oldPrice: cur, newPrice, srcTTC: effSrc, source: sourceSlug, brand,

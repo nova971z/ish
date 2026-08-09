@@ -3609,6 +3609,23 @@ module.exports = async function () {
         var rP = fauxRes();
         await admFn(reqPage(cible.sku, {}), rP, fauxAdmin, dbP);
         ok(rP.out && rP.out.ok === true && rP.out.counts.applied === 1, 'préalable promo : baisse appliquée');
+        /* ⛔ SNAPSHOT DES DERNIERS PRIX (09/08/2026, exigé par l'user) : CHAQUE
+           prix appliqué doit se replier dans son shard config/prix_snapshot_N —
+           c'est LUI que le rendu lit (4 lectures au lieu de ~1 700). Un prix
+           écrit dans la collection mais pas dans le snapshot = un site qui
+           continue d'afficher l'ANCIEN prix. */
+        var snapLib = require('../api/_lib/snapshot.js');
+        var shardAttendu = 'prix_snapshot_' + snapLib.shardDe(cible.id);
+        var shardDoc = dbP._compte.configDocs[shardAttendu];
+        var entreeSnap = shardDoc && shardDoc[cible.id];
+        ok(!!(entreeSnap && typeof entreeSnap.price === 'number'
+          && dbP._compte.patchsParId[cible.id]
+          && entreeSnap.price === dbP._compte.patchsParId[cible.id].price),
+          '⛔ le prix APPLIQUÉ est replié dans son shard snapshot (' + shardAttendu
+          + ') avec LE MÊME prix — obtenu : ' + JSON.stringify(entreeSnap && entreeSnap.price)
+          + ' vs collection ' + JSON.stringify(dbP._compte.patchsParId[cible.id]
+            && dbP._compte.patchsParId[cible.id].price));
+
         var patchP = dbP._compte.patchsParId[cible.id];
         ok(!!(patchP && patchP.promoAncienPrix != null
           && Math.abs(patchP.promoAncienPrix - minJournal) < 0.01),

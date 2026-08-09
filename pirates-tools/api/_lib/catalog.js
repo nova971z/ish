@@ -36,7 +36,12 @@ function loadProducts() {
    mieux que le fichier : ce sont les VRAIS prix, seulement un peu vieux. Mais
    un « un peu vieux » sans borne devient un mensonge. Quinze minutes : plus
    long que toute panne passagère, plus court que la vie d'une instance chaude. */
-var CACHE_PANNE_MAX = 15 * 60 * 1000;
+/* ⚠️ PORTÉ de 15 à 60 min le 09/08/2026 (exigence user : « le serveur ressert
+   les derniers prix si Firebase plante »). Avec le snapshot (4 lectures/rendu)
+   l'épuisement de quota devient improbable ; si une vraie panne survient quand
+   même, une instance chaude ressert les derniers prix VIVANTS une heure —
+   au-delà, mieux vaut avouer (bandeau + paiement suspendu) que mentir. */
+var CACHE_PANNE_MAX = 60 * 60 * 1000;
 
 /* ⛔⛔⛔ LA PANNE ET LE VIDE NE DONNENT PLUS LA MÊME RÉPONSE. C'EST DE L'ARGENT.
    Jusqu'au 04/08/2026 cette fonction rendait `{}` dans les DEUX cas : « il n'y
@@ -86,18 +91,39 @@ async function loadOverridesEtat() {
   }
 
   try {
-    var db = require('./firebase').getFirebase().db;
+    var fb = require('./firebase').getFirebase();
+    var db = fb.db;
     if (!db) return repli('firebase-indisponible');
-    var snap = await db.collection('product_overrides').get();
-    var map = {};
-    snap.forEach(function (doc) {
-      var data = doc.data();
-      delete data.updatedAt; // strip Firestore internals
-      map[doc.id] = data;
-    });
+    /* ── SNAPSHOT D'ABORD (09/08/2026, exigé par l'user) ────────────────────
+       Les derniers prix vivants tiennent dans 4 documents agrégés, maintenus à
+       chaque écriture d'override. Un rendu à froid coûte 4 lectures au lieu de
+       ~1 700 : c'est CETTE dépense qui épuisait le quota et faisait retomber le
+       site sur les prix du fichier. Snapshot absent (première vie) → on lit la
+       collection UNE fois et on le reconstruit.
+       J4 : le snapshot porte les MÊMES prix que les overrides — rien d'inventé. */
+    var map = null, raisonLecture = 'snapshot';
+    try {
+      map = await require('./snapshot').lireSnapshot(db);
+    } catch (eSnap) {
+      console.error('[catalog] snapshot illisible, repli collection:', eSnap.message);
+    }
+    if (map === null) {
+      raisonLecture = 'collection';
+      var snap = await db.collection('product_overrides').get();
+      map = {};
+      snap.forEach(function (doc) {
+        var data = doc.data();
+        delete data.updatedAt; // strip Firestore internals
+        map[doc.id] = data;
+      });
+      /* Auto-réparation : le prochain rendu ne repaiera pas N lectures.
+         Best-effort — un échec ici n'empêche pas de servir. */
+      require('./snapshot').reconstruire(db, fb.admin)
+        .catch(function (eR) { console.error('[catalog] reconstruction snapshot:', eR.message); });
+    }
     _overridesCache = map;
     _overridesCacheTime = Date.now();
-    return { overrides: map, disponible: true, raison: 'lu', ageMs: 0 };
+    return { overrides: map, disponible: true, raison: 'lu-' + raisonLecture, ageMs: 0 };
   } catch (err) {
     /* ⚠️ Le message part dans les journaux Vercel, jamais dans une réponse :
        il peut porter un identifiant de projet. */

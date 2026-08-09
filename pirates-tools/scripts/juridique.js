@@ -64,6 +64,10 @@ var DOMAINES = {
                  // expire. C'est donc lui qui rend une annonce de réduction
                  // conforme — ou trompeuse. La porte l'a réclamé d'elle-même.
                  /pirates-tools\/api\/_lib\/catalog\.js$/,
+                 // ⛔ AJOUTÉ le 09/08/2026 : `snapshot.js` est le REPLI des prix
+                 // vivants (4 docs agrégés que lit le rendu). Un snapshot faux =
+                 // un prix affiché faux — même exigence J4 que catalog.js.
+                 /pirates-tools\/api\/_lib\/snapshot\.js$/,
                  // Couture paiement : c'est par là que passe le montant
                  // réellement débité — le prix opposable au client.
                  /pirates-tools\/api\/_lib\/paiement\/.+\.js$/] },
