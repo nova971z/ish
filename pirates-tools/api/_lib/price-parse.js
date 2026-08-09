@@ -1444,6 +1444,87 @@ function compterTuiles(rawText) {
    désormais `appariementNom` dans la réponse (`ambigus` contre `sansCandidat`).
    ⚠️ Tant que ce compte n'est pas revenu d'un vrai balayage, toucher au seuil
    serait régler un cadran au hasard. */
+/* ══ RÉFÉRENCE ÉCRITE AVEC DES ESPACES — LE CATALOGUE TRANCHE ══════════════
+   ⛔⛔ DÉFAUT D'ARGENT MESURÉ LE 09/08/2026, SUR SA CAPTURE ET SON BALAYAGE.
+   Le comparateur écrit certaines cartes « DeWalt DCG 405 N » — référence
+   ÉCLATÉE PAR DES ESPACES. Le parseur refuse de recoller (et il a raison :
+   on ne sait pas si le vrai code s'arrête au 405 ou au N, et écrire un prix
+   sur une devinette est interdit). Conséquence : cette carte partait aux
+   rejets… ALORS QU'ELLE PORTAIT LE PRIX LE PLUS BAS. Le traqueur retenait
+   donc une tuile PLUS CHÈRE et le prix de vente montait à tort.
+   Mesuré sur son relevé : la meuleuse était à 116,90 € sur la carte rejetée
+   et le traqueur voulait la vendre 225,42 € au lieu de 204,23 € ; sur le
+   souffleur, 244,13 € au lieu de 145,48 € — 98,65 € de trop.
+
+   ⛔ CE QUI CHANGE, ET POURQUOI CE N'EST PLUS UNE DEVINETTE : on ne recolle
+   que si le résultat est ÉGAL à la référence d'une fiche du CATALOGUE. Ce
+   n'est plus la forme qui tranche, c'est la liste des produits réels — le
+   même principe que la table des préfixes constructeur. Aucune fiche
+   correspondante ⇒ on ne rapproche rien, comme avant.
+
+   ⛔⛔ ET LA GARDE D'ARGENT INVERSE, ELLE, EST OBLIGATOIRE. Sur la même page :
+   « DeWalt DCG 405 N + 1x 4,0Ah » (216,96 €) et « DeWalt DCG 405 N (1x 5,0 Ah) »
+   (224,59 €) recollent eux aussi vers DCG405N — mais ce sont des LOTS. Écrire
+   leur prix sur l'outil nu, c'est le défaut que le projet interdit depuis le
+   premier jour. Tout titre qui annonce un contenu (batterie, chargeur, « + »,
+   coffret, décompte de pièces) est donc REFUSÉ ici, quoi qu'il recolle.
+
+   ⚠️ Rend { items, restants } — même forme que les autres appariements, et
+   ce qui n'est pas apparié RESTE listé : on écarte, on n'efface pas. */
+function apparierParRefRecollee(annonces, fiches, marque) {
+  var res = { items: [], restants: [] };
+  var liste = annonces || [];
+  if (!liste.length) return res;
+  /* Index des références RÉELLES, forme normalisée → la fiche. La normalisation
+     retire tirets et points : « DCV 100 XJ » doit pouvoir retrouver
+     « DCV100-XJ », qui est la référence telle que le constructeur l'écrit. */
+  var parRef = Object.create(null), collisions = Object.create(null);
+  (fiches || []).forEach(function (p) {
+    if (!p || !p.sku) return;
+    var k = String(p.sku).toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (!k) return;
+    if (parRef[k] && parRef[k].sku !== p.sku) { collisions[k] = 1; return; }
+    parRef[k] = p;
+  });
+  /* Le titre annonce-t-il un CONTENU ? Alors son prix est celui d'un lot. */
+  function annonceUnLot(titre) {
+    var t = String(titre || '');
+    if (/\s\+\s|\s\+\d|\+\s*\d/.test(t)) return true;              // « … + 1x 4,0Ah »
+    if (/\d\s*[x×]\s*\d+[.,]?\d*\s*ah\b/i.test(t)) return true;    // « 1x 5,0 Ah »
+    if (/\bah\b/i.test(t) && /\d/.test(t)) return true;            // toute capacité annoncée
+    if (/\b(chargeur|charger|ladeger|batterie|akku|coffret|tstak|toughsystem|makpac|set|kit|pack|lot)\b/i.test(t)) return true;
+    return false;
+  }
+  var reEclatee = /\b([A-Z]{2,5})\s+(\d{2,5})\s*([A-Z][A-Z0-9-]{0,6})?\b/;
+  liste.forEach(function (e) {
+    var titre = String((e && e.titre) || '');
+    var prix = e && (typeof e.prix === 'number' ? e.prix : e.price);
+    if (!titre || !(prix > 0)) { res.restants.push(e); return; }
+    if (annonceUnLot(titre)) { res.restants.push(e); return; }
+    /* ⛔ La référence doit être écrite EN CAPITALES par le marchand — c'est ce
+       qui la distingue d'un mot ordinaire suivi d'un nombre (défaut déjà payé :
+       « bidon 600ML » donnait « BIDON600 »). On cherche donc sur le titre TEL
+       QUEL, jamais sur sa version en majuscules. */
+    var m = titre.match(reEclatee);
+    if (!m) { res.restants.push(e); return; }
+    var tete = m[1];
+    if (SERIES.indexOf(tete.toLowerCase()) !== -1) { res.restants.push(e); return; }
+    if (tete === String(marque || '').toUpperCase()) { res.restants.push(e); return; }
+    if (/^(EN|ISO|NF|CE|FFP|DIN|ANSI|SDS|IP)$/.test(tete)) { res.restants.push(e); return; }
+    var recolle = (tete + m[2] + (m[3] || '')).toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (collisions[recolle]) { res.restants.push(e); return; }   // deux fiches : on ne tranche pas
+    var fiche = parRef[recolle];
+    if (!fiche) { res.restants.push(e); return; }                // aucune fiche : on ne devine pas
+    res.items.push({
+      sku: fiche.sku,                       // ⛔ la référence du CATALOGUE, jamais notre recollage
+      price: prix, name: titre, promo: false, enStock: null,
+      car: extraireCaracteristiques(titre, marque),
+      refRecollee: true                     // traçable : d'où vient ce rapprochement
+    });
+  });
+  return res;
+}
+
 var CONCORDANCES_MIN = 2;
 function apparierParNomSouple(annonces, fiches, marque) {
   var res = { items: [], restants: [], ambigus: [] };
@@ -3006,4 +3087,4 @@ module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickou
   varianteProduit: varianteProduit, roleCoffret: roleCoffret,
   signatureBatteries: signatureBatteries, estPourAutreMachine: estPourAutreMachine,
   sansAccentsTitre: sansAccentsTitre, refUniqueDuTitre: refUniqueDuTitre,
-  lireReferenceDuTitre: lireReferenceDuTitre, candidatsAvecPosition: candidatsAvecPosition, apparierParNomSouple: apparierParNomSouple, CONCORDANCES_MIN: CONCORDANCES_MIN, annoncesManquantes: annoncesManquantes, extraireCaracteristiques: extraireCaracteristiques, comparerCaracteristiques: comparerCaracteristiques, planBalayage: planBalayage, rangDansPlan: rangDansPlan, OUTILS: OUTILS, SERIES: SERIES, nomenclature: nomen };
+  lireReferenceDuTitre: lireReferenceDuTitre, candidatsAvecPosition: candidatsAvecPosition, apparierParNomSouple: apparierParNomSouple, apparierParRefRecollee: apparierParRefRecollee, CONCORDANCES_MIN: CONCORDANCES_MIN, annoncesManquantes: annoncesManquantes, extraireCaracteristiques: extraireCaracteristiques, comparerCaracteristiques: comparerCaracteristiques, planBalayage: planBalayage, rangDansPlan: rangDansPlan, OUTILS: OUTILS, SERIES: SERIES, nomenclature: nomen };

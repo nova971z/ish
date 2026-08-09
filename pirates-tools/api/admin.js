@@ -3660,8 +3660,25 @@ async function handlePriceWatch(req, res, admin, db) {
        partir de ses 379 `srcNom` reformulés : 163 appariés, 163 justes,
        ZÉRO faux. Un corpus fabriqué mesure la souplesse, pas le monde réel :
        c'est le prochain relevé qui dira le vrai rendement. */
-    const souple = priceParse.apparierParNomSouple(
+    /* ⛔⛔ RÉFÉRENCE ÉCRITE AVEC DES ESPACES — AVANT LE SOUPLE, ET C'EST VOULU.
+       Défaut d'argent mesuré le 09/08/2026 sur SA capture et SON balayage : le
+       comparateur écrit certaines cartes « <marque> DCG 405 N », référence
+       éclatée. Le parseur refuse de recoller (à raison), la carte partait aux
+       rejets — ET C'ÉTAIT ELLE QUI PORTAIT LE PRIX LE PLUS BAS. Le traqueur
+       retenait donc une tuile plus chère : 225,42 € au lieu de 204,23 € sur la
+       meuleuse, 244,13 € au lieu de 145,48 € sur le souffleur.
+       ⛔ Ce rapprochement-ci exige l'ÉGALITÉ avec une référence du catalogue :
+       c'est une correspondance, pas une devinette. Il passe donc AVANT le
+       souple (qui, lui, compare des caractéristiques) — l'exact d'abord, le
+       plus sûr ensuite, le plus tolérant en dernier.
+       ⚠️ Portes lues — J4 : le prix vient de la tuile, aucun taux ici, et tout
+       titre annonçant un LOT est refusé (le prix d'un pack ne s'écrit jamais
+       sur un composant). J3 : des titres publics. J5 : ni TVA ni octroi. */
+    const recolle = priceParse.apparierParRefRecollee(
       (apparie.restants || []).concat(appariePacks.restants || []), products, brand);
+    recolle.items.forEach((it) => parsed.push(it));
+    const souple = priceParse.apparierParNomSouple(
+      recolle.restants || [], products, brand);
     souple.items.forEach((it) => parsed.push(it));
     /* ⛔⛔ POURQUOI SI PEU ? SANS CE COMPTE, LA QUESTION N'A PAS DE RÉPONSE.
        Mesuré le 04/08 : l'appariement souple ne ramène que 10 des 379 fiches
@@ -4044,7 +4061,11 @@ async function handlePriceWatch(req, res, admin, db) {
         absents: absents.length, absentsJamaisReleves: jamaisReleves.length,
         rupture: enRupture.length,
         packsIgnores: appariePacks.restants.length, packsSuivis: appariePacks.items.length,
-        sansRef: apparie.restants.length, sansRefSuivis: apparie.items.length
+        sansRef: apparie.restants.length, sansRefSuivis: apparie.items.length,
+        /* ⛔ CE QUE LE RECOLLAGE VALIDÉ PAR LE CATALOGUE A RAMENÉ. Sans ce
+           compte, on ne saurait pas si l'étape sert — et une étape dont on ne
+           mesure pas le rendement finit par vivre sans qu'on sache pourquoi. */
+        refsRecollees: recolle.items.length
       },
       source: sourceSlug, format: auto.format,
       /* ── BALAYAGE : LES COMPTEURS, PAS LES LISTES (02/08/2026) ────────────

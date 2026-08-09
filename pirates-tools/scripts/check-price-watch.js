@@ -1674,6 +1674,61 @@ module.exports = async function () {
        qui ne doit JAMAIS s'apparier.
        ⚠️ Références et libellés synthétiques — un harnais ne nomme jamais une
        donnée du catalogue. */
+    /* ⛔⛔ RÉFÉRENCE ÉCRITE AVEC DES ESPACES — DÉFAUT D'ARGENT DU 09/08/2026.
+       Sa capture et son balayage, mesurés : le comparateur écrit certaines
+       cartes « <marque> DCG 405 N » (référence éclatée). Le parseur refuse de
+       recoller — à raison —, la carte partait donc aux rejets ALORS QU'ELLE
+       PORTAIT LE PRIX LE PLUS BAS, et le traqueur retenait une tuile plus
+       chère : 225,42 € au lieu de 204,23 € sur la meuleuse, 244,13 € au lieu
+       de 145,48 € sur le souffleur (98,65 € de trop, à chaque vente).
+       ⛔ Le remède n'est PAS de recoller : c'est d'exiger que le recollage
+       tombe EXACTEMENT sur une référence du catalogue. Le catalogue tranche,
+       la forme ne tranche jamais.
+       ⚠️ Références et libellés synthétiques (un harnais ne nomme jamais une
+       donnée du catalogue) ; c'est le GABARIT qui vient de sa page. */
+    var arr = pp.apparierParRefRecollee;
+    ok(typeof arr === 'function', 'apparierParRefRecollee exportée');
+    if (arr) {
+      var fichesR = [{ sku: 'ZZQ405N', price: 200 }, { sku: 'ZZV100-XJ', price: 150 }];
+      var lot = [
+        { titre: 'MarqueZZ ZZQ 405 N', prix: 116.90 },              // ← la moins chère
+        { titre: 'MarqueZZ ZZQ 405 N + 1x 4,0Ah', prix: 216.96 },   // ← un LOT
+        { titre: 'MarqueZZ ZZQ 405 N (1x 5,0 Ah)', prix: 224.59 },  // ← un LOT
+        { titre: 'MarqueZZ ZZV 100 XJ', prix: 81.18 },              // ← réf à tirets
+        { titre: 'MarqueZZ ZZZ 999 X', prix: 50 },                  // ← aucune fiche
+        { titre: 'bidon 600ML de graisse', prix: 12 }                // ← un mot, pas une réf
+      ];
+      var rr = arr(lot, fichesR, 'MARQUEZZ');
+      var parSkuR = {}; rr.items.forEach(function (x) { parSkuR[x.sku] = x.price; });
+      ok(parSkuR.ZZQ405N === 116.90,
+        '⛔⛔ ARGENT : une carte dont la référence est écrite AVEC DES ESPACES est '
+        + 'rapprochée quand le recollage tombe sur une fiche — sinon la tuile la MOINS '
+        + 'CHÈRE est ignorée et le prix de vente monte à tort ('
+        + JSON.stringify(parSkuR) + ')');
+      ok(parSkuR['ZZV100-XJ'] === 81.18,
+        '⛔ et la référence rendue est celle du CATALOGUE (avec ses tirets), jamais '
+        + 'notre recollage (' + JSON.stringify(rr.items.map(function (x) { return x.sku; })) + ')');
+      /* ⛔⛔ LA GARDE INVERSE, ET C'EST ELLE QUI COÛTERAIT LE PLUS CHER. Sur la
+         MÊME page, deux lots recollent vers la même racine. Écrire leur prix
+         sur l'outil nu, c'est le défaut que le projet interdit depuis le
+         premier jour — un coût de pack sur la réf d'un composant. */
+      ok(parSkuR.ZZQ405N !== 216.96 && parSkuR.ZZQ405N !== 224.59,
+        '⛔⛔ ARGENT : un titre qui annonce un CONTENU (batterie, « + », capacité) est '
+        + 'un LOT — son prix ne s\'écrit JAMAIS sur la référence nue');
+      /* ⚠️ PRÉALABLE 1 — sans fiche correspondante, on ne devine pas. Sans ce
+         cas, une règle qui recollerait TOUT resterait verte. */
+      ok(!rr.items.some(function (x) { return /ZZZ999/.test(x.sku); }),
+        '⚠️ PRÉALABLE : un recollage qui ne tombe sur AUCUNE fiche n\'est pas rapproché');
+      /* ⚠️ PRÉALABLE 2 — un mot ordinaire suivi d'un nombre n'est pas une
+         référence (défaut déjà payé : « bidon 600ML » donnait « BIDON600 »). */
+      ok(rr.restants.some(function (x) { return /bidon/i.test(x.titre); }),
+        '⚠️ PRÉALABLE : un mot en minuscules suivi d\'un nombre n\'est jamais une '
+        + 'référence — et il reste LISTÉ, jamais effacé');
+      ok(rr.items.length + rr.restants.length === lot.length,
+        '⛔ rien ne disparaît : chaque entrée est soit rapprochée, soit rendue ('
+        + rr.items.length + ' + ' + rr.restants.length + ' / ' + lot.length + ')');
+    }
+
     var apn = pp.apparierParNomSouple;
     ok(typeof apn === 'function', 'apparierParNomSouple exportée');
     if (apn) {
