@@ -2490,6 +2490,48 @@ module.exports = async function () {
         await admFn({ method: 'POST', query: { type: 'price-watch', brand: 'DEWALT',
           source: 'idealo', scan: '1' }, body: { text: pageAvecRejet } },
           rRej0, fauxAdmin, fauxDb({}, []));
+        /* ⛔⛔ UNE FICHE QUI PLANTE NE DOIT JAMAIS EMPORTER LA PAGE (09/08/2026).
+           Mesuré sur SON balayage : la page 494 sur 67 est revenue en erreur
+           entière — « documentPath must point to a document » — parce qu'UN
+           produit porte une barre oblique dans son identifiant (la référence
+           constructeur en contient une). La base lit la barre comme un
+           séparateur de chemin, l'exception est remontée jusqu'au point
+           d'entrée, et les ~60 relevés de la page sont partis avec, sans trace.
+           UN produit en a fait perdre SOIXANTE.
+           ⛔ Deux garanties à tenir, et les DEUX sont éprouvées ici : la page
+           répond quand même (200), et ce qui n'a pas pu s'écrire est LISTÉ.
+           ⚠️ La base factice n'a pas le comportement de la vraie : c'est la
+           GARDE (identifiant refusé avant écriture) qu'on éprouve, pas le
+           message d'erreur du fournisseur — on ne recopie pas ce qu'on ne
+           contrôle pas. */
+        var cibleBarre = null;
+        for (var cb = 0; cb < prods.length; cb++) {
+          if (String(prods[cb].id || '').indexOf('/') !== -1) { cibleBarre = prods[cb]; break; }
+        }
+        ok(!!cibleBarre,
+          '⚠️ PRÉALABLE : le catalogue porte au moins une fiche dont l\'identifiant '
+          + 'contient une barre oblique — sans elle, ce cas ne serait pas éprouvé '
+          + 'et la garde pourrait mourir sans qu\'on le voie');
+        if (cibleBarre) {
+          scanReset();
+          var rBarre = fauxRes();
+          await admFn({ method: 'POST', query: { type: 'price-watch', brand: 'DEWALT',
+            source: 'idealo' }, body: { text: pageIdealo(cibleBarre.sku, '450,00') } },
+            rBarre, fauxAdmin, fauxDb({}, []));
+          ok(rBarre.code === 200 && rBarre.out && rBarre.out.ok === true,
+            '⛔⛔ ARGENT : une fiche dont l\'identifiant est inécrivable ne fait PAS '
+            + 'tomber la page — les autres relevés doivent survivre (code '
+            + rBarre.code + ')');
+          var refuses = (rBarre.out && rBarre.out.idsRefuses) || [];
+          ok(refuses.length >= 1 && /\//.test(String(refuses[0].id || ''))
+            && String(refuses[0].motif || '').length > 10,
+            '⛔ …et elle est LISTÉE avec son motif : écarté n\'est pas effacé ('
+            + JSON.stringify(refuses.slice(0, 1)) + ')');
+          ok((rBarre.out.counts || {}).idsRefuses >= 1,
+            '⛔ …et COMPTÉE dans le rapport — un incident lisible vaut mieux qu\'un '
+            + 'incident silencieux (' + JSON.stringify((rBarre.out.counts || {}).idsRefuses) + ')');
+        }
+
         ok(rRej0.out && Array.isArray(rRej0.out.sansRef) && rRej0.out.sansRef.length === 0
           && rRej0.out.counts && rRej0.out.counts.sansRef >= 1,
           '⚠️ PRÉALABLE : sans &inconnus=1, `sansRef` sort VIDE mais son COMPTEUR reste '

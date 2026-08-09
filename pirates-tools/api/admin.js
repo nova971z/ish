@@ -3761,213 +3761,258 @@ async function handlePriceWatch(req, res, admin, db) {
        après la boucle. La collection product_overrides, elle, reste écrite au
        fil de la boucle (documents distincts, aucune contention). */
     const snapPage = [];
+    /* Fiches dont l'identifiant interdit l'écriture — listées, jamais tues. */
+    const idsRefuses = [];
+    /* ⛔⛔ LE FILET, ET IL MANQUAIT : UNE FICHE QUI PLANTE NE DOIT JAMAIS EMPORTER
+       LA PAGE. Mesuré le 09/08/2026 — page 494 sur 67, une exception d'écriture
+       sur UN produit a remonté jusqu'au point d'entrée et fait disparaître les
+       ~60 relevés de la page, sans une trace. La cause du jour est réparée juste
+       au-dessus (identifiant à barre oblique), mais la LEÇON est plus large :
+       tant qu'une seule fiche peut tuer un lot entier, la prochaine cause fera
+       exactement la même chose.
+       ⚠️ On n'avale pas l'erreur : elle est comptée, nommée, et rendue dans la
+       réponse. Un incident silencieux vaut moins qu'un incident lisible. */
+    const echecsFiche = [];
     for (const item of parsed) {
-      /* ⛔ Même règle que sur le chemin à sec : l'écriture exacte d'abord, la
-         racine ensuite. Une règle vraie appliquée à un seul endroit ne protège
-         que cet endroit — et ici l'autre endroit est celui qui ÉCRIT les prix. */
-      const p = bySku[item.sku] || bySku[priceParse.racineRef(item.sku)]
-        || bySku[pwCleModele(item)];
-      if (!p) { unknown.push({ sku: item.sku, srcTTC: item.price, name: item.name }); continue; }
-      if (fichesVues.has(p.id)) continue;
-      fichesVues.add(p.id);
-      if (item.enStock === false) {
-        enRupture.push({ sku: item.sku, id: p.id, name: p.title || p.name, srcTTC: item.price });
+      try {
+        /* ⛔ Même règle que sur le chemin à sec : l'écriture exacte d'abord, la
+           racine ensuite. Une règle vraie appliquée à un seul endroit ne protège
+           que cet endroit — et ici l'autre endroit est celui qui ÉCRIT les prix. */
+        const p = bySku[item.sku] || bySku[priceParse.racineRef(item.sku)]
+          || bySku[pwCleModele(item)];
+        if (!p) { unknown.push({ sku: item.sku, srcTTC: item.price, name: item.name }); continue; }
+        if (fichesVues.has(p.id)) continue;
+        fichesVues.add(p.id);
+        /* ⛔⛔ UN IDENTIFIANT DE PRODUIT QUI CONTIENT UNE BARRE OBLIQUE TUE TOUTE
+           LA PAGE (mesuré le 09/08/2026 sur SON balayage, page 494 sur 67) :
+           « dewalt-d125/8 » — la référence constructeur D125/8 porte une barre.
+           La base de données lit cette barre comme un séparateur de chemin, refuse
+           l'écriture, et l'exception remontait jusqu'au point d'entrée : les ~60
+           relevés de la page partaient avec, sans une trace. UN produit en a fait
+           perdre soixante.
+           ⛔ ON ÉCARTE, ON N'INVENTE PAS DE CLÉ. Ré-encoder la barre créerait une
+           SECONDE clé pour le même produit — les relevés déjà écrits vivraient
+           sous l'ancienne, ceux d'après sous la nouvelle, et les prix divergeraient
+           en silence. On refuse donc d'écrire, ET ON LE DIT : la fiche est listée
+           avec son motif, comme toute chose écartée dans ce projet.
+           ⚠️ Le vrai remède est de renommer l'identifiant de cette fiche — geste
+           qui change son adresse publique, donc une décision de l'user, pas la
+           mienne. Tant qu'elle n'est pas prise, ce produit reste sans coût relevé,
+           et ça se voit au lieu de casser la page.
+           ⚠️ Portes lues — J4 : aucun prix écrit ici, le produit reste à son prix ;
+           J3 : une référence produit publique ; J5 : ni TVA ni octroi. */
+        if (String(p.id).indexOf('/') !== -1) {
+          idsRefuses.push({ id: p.id, sku: p.sku, srcTTC: item.price,
+            motif: 'identifiant contenant « / » : la base le lit comme un chemin — '
+              + 'écriture refusée, fiche à renommer' });
+          continue;
+        }
+        if (item.enStock === false) {
+          enRupture.push({ sku: item.sku, id: p.id, name: p.title || p.name, srcTTC: item.price });
+          if (!dryRun) {
+            const srcsR = pwSourcesConnues(ovW[p.id] || {});   // carte + héritage
+            srcsR[sourceSlug] = { ttc: item.price, at: nowMs, enStock: false };
+            const choixR = priceParse.choisirCoutSource(srcsR, nowMs);
+            const patchR = {
+              priceSources: { [sourceSlug]: { ttc: item.price, at: nowMs, enStock: false } },
+              // Le coût effectif se recalcule SANS cette source. S'il ne reste
+              // rien d'achetable, le produit passe en GEL (origin 'rupture').
+              priceSrcTTC: choixR ? choixR.ttc : null,
+              priceSource: choixR ? choixR.source : 'rupture'
+            };
+            await db.collection('product_overrides').doc(p.id).set(
+              Object.assign({}, patchR, { priceCheckedAt: now }), { merge: true });
+            snapPage.push({ id: p.id, patch: Object.assign({}, patchR, { priceCheckedAt: now }) });
+            if (scanMode) pwMajLocale(ovW, p.id, patchR, nowMs);
+          }
+          continue;
+        }
+        // Règle 25/07 : si le produit référence des déclinaisons fournisseur
+        // (srcAltSkus, ex. DBS180Z ← DBS180ZJ), on achète TOUJOURS la moins
+        // chère → source effective = min des prix présents sur la page.
+        // 🔒 Prix verrouillé : le traqueur relève, mais n'écrit JAMAIS.
+        if (p.priceLocked === true) { lockedW.push({ sku: item.sku, id: p.id, name: p.title || p.name }); continue; }
+        const oW = ovW[p.id] || {};
+        /* Le PROPRE sku de la fiche entre dans la liste des candidats : quand la
+           fiche est atteinte par un ALIAS (clickoutil n'affiche que DCN930N-XJ),
+           `item` est l'alias — sans cet ajout, un prix du sku principal présent
+           ailleurs sur la page échapperait au min. */
+        const src = priceParse.pickCheapestSource(item.price,
+          [p.sku].concat(Array.isArray(p.srcAltSkus) ? p.srcAltSkus : []), parsedBySku);
+        /* ── COÛT EFFECTIF = LE MOINS CHER DE TOUTES LES SOURCES VALIDES ──────
+           (01/08/2026) Cette source-ci, fraîchement relevée, rejoint la carte
+           `priceSources` ; le prix du site se calcule sur le minimum des
+           sources fraîches ET en stock — quel que soit le traqueur qui parle. */
+        const srcsMaj = pwSourcesConnues(oW);   // carte + héritage cotébrico
+        /* ⛔⛔ DANS UNE MÊME RAFALE, ON GARDE LE MOINS CHER — JAMAIS LE DERNIER VU.
+           Décision de l'user, 03/08, mot pour mot : « c'est totalement normal
+           qu'il y ait le même produit plusieurs fois, on peut même le retrouver
+           jusqu'à 10 fois car ils comparent plus de 15 sites différents […] on
+           récupère TOUJOURS le moins cher ».
+           ⛔ Mesuré sur son balayage du 03/08 (67 pages, dryRun) : CINQ fiches
+           atteintes deux fois avec des coûts très écartés — `dewalt-dch273nt-xj`
+           à 226,04 € puis 341,22 €, `dewalt-dcn660n-xj` à 311,83 € puis
+           349,38 €. Cette ligne ÉCRASAIT la carte à chaque page : le prix final
+           dépendait de QUELLE PAGE ÉTAIT PASSÉE EN DERNIER. Sur DCH273NT, c'était
+           323,92 € ou 465,77 € au tirage au sort de la pagination.
+           ⚠️ Le minimum ne vaut QUE DANS LA RAFALE EN COURS. Hors rafale, une
+           hausse réelle du fournisseur doit pouvoir remonter le coût — sinon le
+           prix descendrait pour toujours sans jamais remonter, et ce serait
+           contraire à D-015 : « le traqueur lit ce que la page AFFICHE, c'est
+           exactement ce que l'user paiera ». La borne vient du début de la
+           rafale, pas d'une horloge arbitraire.
+           ⚠️ PORTES LUES. J4 : le prix annoncé doit être exact et complet, et une
+           réduction se réfère au prix le plus bas des 30 jours précédents. Ici on
+           ne fixe pas un prix de référence — on retient le COÛT D'ACHAT réel le
+           plus bas parmi ceux que le comparateur affiche pour le même article,
+           c'est-à-dire celui que l'user paierait. Le minimum 30 jours reste
+           calculé ailleurs, sur le journal réel. J3 : aucune donnée personnelle.
+           J5 : aucune TVA ni octroi de mer, le territoire vient du code postal. */
+        const srcRetenu = pwRafaleCoutMin(brand, p.id, src);
+        srcsMaj[sourceSlug] = { ttc: srcRetenu, at: nowMs, enStock: true };
+        const choix = priceParse.choisirCoutSource(srcsMaj, nowMs);
+        const effSrc = choix ? choix.ttc : src;
+        const effFrom = choix ? choix.source : sourceSlug;
+        const priced = pwComputePrice(p, effSrc, cfg);
+        const newPrice = priced.newPrice, newHt = priced.newHt;
+        const cur = (typeof oW.price === 'number') ? oW.price
+          : (typeof p.price === 'number' ? p.price : null);
+        const rec = { sku: item.sku, id: p.id, name: p.title || p.name, srcTTC: effSrc, source: effFrom, newPrice, newHt, markup: priced.markup, oldPrice: cur };
+
+        // Cette source a-t-elle DÉJÀ ce relevé, et le coût effectif est-il déjà bon ?
+        const entreeSrc = (oW.priceSources || {})[sourceSlug];
+        const dejaAJour = !!entreeSrc && Math.abs((entreeSrc.ttc || 0) - srcRetenu) < 0.01
+          && Math.abs((oW.priceSrcTTC || 0) - effSrc) < 0.01 && entreeSrc.enStock !== false;
+
+        if (cur != null && Math.abs(newPrice - cur) < 0.02) {
+          unchanged.push(rec);
+          // Le prix est déjà bon — mais le COÛT RELEVÉ doit quand même être
+          // enregistré. Sans ça, un produit parfaitement suivi n'a JAMAIS de coût
+          // réel en base : il compte comme « estimé », le garde-fou coffret ne
+          // peut pas s'appuyer dessus, et la marge affichée repose sur une
+          // supposition alors que le vrai prix fournisseur est connu.
+          if (!dryRun && !dejaAJour) {
+            const patchU = {
+              priceSources: { [sourceSlug]: { ttc: srcRetenu, at: nowMs, enStock: true } },
+              priceSource: effFrom, priceSrcTTC: effSrc
+            };
+            await db.collection('product_overrides').doc(p.id).set(
+              Object.assign({}, patchU, { priceCheckedAt: now }), { merge: true });
+            snapPage.push({ id: p.id, patch: Object.assign({}, patchU, { priceCheckedAt: now }) });
+            if (scanMode) pwMajLocale(ovW, p.id, patchU, nowMs);
+          }
+          continue;
+        }
+
+        let reason = null;
+        if (src < PW.MIN_TTC || src > PW.MAX_TTC) reason = 'prix source hors fourchette (' + src + ' €)';
+        // ⛔ PLAFOND DE VARIATION RETIRÉ — décision D-015 de l'user, 31/07/2026.
+        //
+        // Il refusait tout prix bougeant de plus de 25 % par rapport au dernier
+        // relevé. Motif d'origine : se protéger d'une page mal lue. Motif du
+        // retrait, et il est plus fort : **le traqueur lit ce que la page du
+        // fournisseur AFFICHE — c'est exactement ce que l'user paiera.** Une
+        // hausse de 29 % n'est pas une anomalie à filtrer, c'est le tarif réel.
+        //
+        // Ce que ce verrou a réellement coûté : DVC560Z est resté à un prix qui
+        // faisait perdre 8,31 € par vente, parce que la correction nécessaire
+        // dépassait le seuil. Un garde-fou qui bloque la réparation d'une perte
+        // ne protège pas, il ampute.
+        //
+        // ⚠️ Les bornes ABSOLUES (MIN_TTC / MAX_TTC) restent en place : elles ne
+        // jugent pas une variation mais une valeur impossible, et c'est le seul
+        // filet qui attrape un parseur qui déraille. Le verrou `priceLocked`
+        // reste actif lui aussi.
+        // Une variation, même énorme, reste visible dans la réponse (`applied`)
+        // et dans `price_watch_log` : on ne perd pas la trace, on cesse de bloquer.
+        if (reason) { rec.reason = reason; flagged.push(rec); continue; }
+
         if (!dryRun) {
-          const srcsR = pwSourcesConnues(ovW[p.id] || {});   // carte + héritage
-          srcsR[sourceSlug] = { ttc: item.price, at: nowMs, enStock: false };
-          const choixR = priceParse.choisirCoutSource(srcsR, nowMs);
-          const patchR = {
-            priceSources: { [sourceSlug]: { ttc: item.price, at: nowMs, enStock: false } },
-            // Le coût effectif se recalcule SANS cette source. S'il ne reste
-            // rien d'achetable, le produit passe en GEL (origin 'rupture').
-            priceSrcTTC: choixR ? choixR.ttc : null,
-            priceSource: choixR ? choixR.source : 'rupture'
-          };
-          await db.collection('product_overrides').doc(p.id).set(
-            Object.assign({}, patchR, { priceCheckedAt: now }), { merge: true });
-          snapPage.push({ id: p.id, patch: Object.assign({}, patchR, { priceCheckedAt: now }) });
-          if (scanMode) pwMajLocale(ovW, p.id, patchR, nowMs);
-        }
-        continue;
-      }
-      // Règle 25/07 : si le produit référence des déclinaisons fournisseur
-      // (srcAltSkus, ex. DBS180Z ← DBS180ZJ), on achète TOUJOURS la moins
-      // chère → source effective = min des prix présents sur la page.
-      // 🔒 Prix verrouillé : le traqueur relève, mais n'écrit JAMAIS.
-      if (p.priceLocked === true) { lockedW.push({ sku: item.sku, id: p.id, name: p.title || p.name }); continue; }
-      const oW = ovW[p.id] || {};
-      /* Le PROPRE sku de la fiche entre dans la liste des candidats : quand la
-         fiche est atteinte par un ALIAS (clickoutil n'affiche que DCN930N-XJ),
-         `item` est l'alias — sans cet ajout, un prix du sku principal présent
-         ailleurs sur la page échapperait au min. */
-      const src = priceParse.pickCheapestSource(item.price,
-        [p.sku].concat(Array.isArray(p.srcAltSkus) ? p.srcAltSkus : []), parsedBySku);
-      /* ── COÛT EFFECTIF = LE MOINS CHER DE TOUTES LES SOURCES VALIDES ──────
-         (01/08/2026) Cette source-ci, fraîchement relevée, rejoint la carte
-         `priceSources` ; le prix du site se calcule sur le minimum des
-         sources fraîches ET en stock — quel que soit le traqueur qui parle. */
-      const srcsMaj = pwSourcesConnues(oW);   // carte + héritage cotébrico
-      /* ⛔⛔ DANS UNE MÊME RAFALE, ON GARDE LE MOINS CHER — JAMAIS LE DERNIER VU.
-         Décision de l'user, 03/08, mot pour mot : « c'est totalement normal
-         qu'il y ait le même produit plusieurs fois, on peut même le retrouver
-         jusqu'à 10 fois car ils comparent plus de 15 sites différents […] on
-         récupère TOUJOURS le moins cher ».
-         ⛔ Mesuré sur son balayage du 03/08 (67 pages, dryRun) : CINQ fiches
-         atteintes deux fois avec des coûts très écartés — `dewalt-dch273nt-xj`
-         à 226,04 € puis 341,22 €, `dewalt-dcn660n-xj` à 311,83 € puis
-         349,38 €. Cette ligne ÉCRASAIT la carte à chaque page : le prix final
-         dépendait de QUELLE PAGE ÉTAIT PASSÉE EN DERNIER. Sur DCH273NT, c'était
-         323,92 € ou 465,77 € au tirage au sort de la pagination.
-         ⚠️ Le minimum ne vaut QUE DANS LA RAFALE EN COURS. Hors rafale, une
-         hausse réelle du fournisseur doit pouvoir remonter le coût — sinon le
-         prix descendrait pour toujours sans jamais remonter, et ce serait
-         contraire à D-015 : « le traqueur lit ce que la page AFFICHE, c'est
-         exactement ce que l'user paiera ». La borne vient du début de la
-         rafale, pas d'une horloge arbitraire.
-         ⚠️ PORTES LUES. J4 : le prix annoncé doit être exact et complet, et une
-         réduction se réfère au prix le plus bas des 30 jours précédents. Ici on
-         ne fixe pas un prix de référence — on retient le COÛT D'ACHAT réel le
-         plus bas parmi ceux que le comparateur affiche pour le même article,
-         c'est-à-dire celui que l'user paierait. Le minimum 30 jours reste
-         calculé ailleurs, sur le journal réel. J3 : aucune donnée personnelle.
-         J5 : aucune TVA ni octroi de mer, le territoire vient du code postal. */
-      const srcRetenu = pwRafaleCoutMin(brand, p.id, src);
-      srcsMaj[sourceSlug] = { ttc: srcRetenu, at: nowMs, enStock: true };
-      const choix = priceParse.choisirCoutSource(srcsMaj, nowMs);
-      const effSrc = choix ? choix.ttc : src;
-      const effFrom = choix ? choix.source : sourceSlug;
-      const priced = pwComputePrice(p, effSrc, cfg);
-      const newPrice = priced.newPrice, newHt = priced.newHt;
-      const cur = (typeof oW.price === 'number') ? oW.price
-        : (typeof p.price === 'number' ? p.price : null);
-      const rec = { sku: item.sku, id: p.id, name: p.title || p.name, srcTTC: effSrc, source: effFrom, newPrice, newHt, markup: priced.markup, oldPrice: cur };
+          /* ── ÉTIQUETTE « EN PROMO » ─────────────────────────────────────
+             Demandée par l'user le 01/08/2026 : « lorsque le prix baisse, il
+             faut le notifier en promo ; si le prix remonte on enlève ; et si le
+             prix reste à ce prix-là plus de deux mois, ça devient son nouveau
+             prix, on enlève la notification ».
 
-      // Cette source a-t-elle DÉJÀ ce relevé, et le coût effectif est-il déjà bon ?
-      const entreeSrc = (oW.priceSources || {})[sourceSlug];
-      const dejaAJour = !!entreeSrc && Math.abs((entreeSrc.ttc || 0) - srcRetenu) < 0.01
-        && Math.abs((oW.priceSrcTTC || 0) - effSrc) < 0.01 && entreeSrc.enStock !== false;
+             ⛔⛔ LE PRIX DE RÉFÉRENCE N'EST PAS « CELUI D'AVANT ». La porte J4 le
+             dit : « une réduction annoncée se réfère au PRIX LE PLUS BAS
+             PRATIQUÉ SUR LES 30 JOURS PRÉCÉDENTS ». Barrer le prix de la veille
+             alors qu'on a vendu moins cher il y a trois semaines, c'est une
+             annonce de réduction trompeuse — une infraction, pas une
+             approximation. On relit donc le journal des mouvements et on prend
+             le MINIMUM réellement pratiqué.
 
-      if (cur != null && Math.abs(newPrice - cur) < 0.02) {
-        unchanged.push(rec);
-        // Le prix est déjà bon — mais le COÛT RELEVÉ doit quand même être
-        // enregistré. Sans ça, un produit parfaitement suivi n'a JAMAIS de coût
-        // réel en base : il compte comme « estimé », le garde-fou coffret ne
-        // peut pas s'appuyer dessus, et la marge affichée repose sur une
-        // supposition alors que le vrai prix fournisseur est connu.
-        if (!dryRun && !dejaAJour) {
-          const patchU = {
-            priceSources: { [sourceSlug]: { ttc: srcRetenu, at: nowMs, enStock: true } },
-            priceSource: effFrom, priceSrcTTC: effSrc
-          };
-          await db.collection('product_overrides').doc(p.id).set(
-            Object.assign({}, patchU, { priceCheckedAt: now }), { merge: true });
-          snapPage.push({ id: p.id, patch: Object.assign({}, patchU, { priceCheckedAt: now }) });
-          if (scanMode) pwMajLocale(ovW, p.id, patchU, nowMs);
-        }
-        continue;
-      }
+             Et s'il n'y a aucune réduction face à ce minimum, il n'y a PAS de
+             promo, même si le prix vient de baisser : c'est le cas d'un prix
+             remonté puis rebaissé — rien de nouveau n'est offert au client.
 
-      let reason = null;
-      if (src < PW.MIN_TTC || src > PW.MAX_TTC) reason = 'prix source hors fourchette (' + src + ' €)';
-      // ⛔ PLAFOND DE VARIATION RETIRÉ — décision D-015 de l'user, 31/07/2026.
-      //
-      // Il refusait tout prix bougeant de plus de 25 % par rapport au dernier
-      // relevé. Motif d'origine : se protéger d'une page mal lue. Motif du
-      // retrait, et il est plus fort : **le traqueur lit ce que la page du
-      // fournisseur AFFICHE — c'est exactement ce que l'user paiera.** Une
-      // hausse de 29 % n'est pas une anomalie à filtrer, c'est le tarif réel.
-      //
-      // Ce que ce verrou a réellement coûté : DVC560Z est resté à un prix qui
-      // faisait perdre 8,31 € par vente, parce que la correction nécessaire
-      // dépassait le seuil. Un garde-fou qui bloque la réparation d'une perte
-      // ne protège pas, il ampute.
-      //
-      // ⚠️ Les bornes ABSOLUES (MIN_TTC / MAX_TTC) restent en place : elles ne
-      // jugent pas une variation mais une valeur impossible, et c'est le seul
-      // filet qui attrape un parseur qui déraille. Le verrou `priceLocked`
-      // reste actif lui aussi.
-      // Une variation, même énorme, reste visible dans la réponse (`applied`)
-      // et dans `price_watch_log` : on ne perd pas la trace, on cesse de bloquer.
-      if (reason) { rec.reason = reason; flagged.push(rec); continue; }
-
-      if (!dryRun) {
-        /* ── ÉTIQUETTE « EN PROMO » ─────────────────────────────────────
-           Demandée par l'user le 01/08/2026 : « lorsque le prix baisse, il
-           faut le notifier en promo ; si le prix remonte on enlève ; et si le
-           prix reste à ce prix-là plus de deux mois, ça devient son nouveau
-           prix, on enlève la notification ».
-
-           ⛔⛔ LE PRIX DE RÉFÉRENCE N'EST PAS « CELUI D'AVANT ». La porte J4 le
-           dit : « une réduction annoncée se réfère au PRIX LE PLUS BAS
-           PRATIQUÉ SUR LES 30 JOURS PRÉCÉDENTS ». Barrer le prix de la veille
-           alors qu'on a vendu moins cher il y a trois semaines, c'est une
-           annonce de réduction trompeuse — une infraction, pas une
-           approximation. On relit donc le journal des mouvements et on prend
-           le MINIMUM réellement pratiqué.
-
-           Et s'il n'y a aucune réduction face à ce minimum, il n'y a PAS de
-           promo, même si le prix vient de baisser : c'est le cas d'un prix
-           remonté puis rebaissé — rien de nouveau n'est offert au client.
-
-           L'expiration à deux mois se calcule à l'AFFICHAGE (`promoActive`) :
-           une promo qui dépendrait d'une tâche planifiée resterait affichée le
-           jour où la tâche ne tourne pas, et une réduction périmée affichée
-           est le même délit. */
-        var promo = { promoDepuis: null, promoAncienPrix: null };
-        if (newPrice < cur) {
-          /* ⛔ CORRIGÉ le 02/08/2026 — la fenêtre était calculée avec le
-             SENTINEL : `now - 30 j` = NaN (E-228, même mécanisme), et la
-             requête `where('at' >= NaN)` ne rendait JAMAIS rien — le catch
-             avalait tout et `refMin` retombait sur le prix courant. Résultat :
-             un prix remonté puis rebaissé s'affichait « promo » face au prix
-             de la veille — précisément l'annonce trompeuse que J4 interdit.
-             Fenêtre désormais en NOMBRES (nowMs), et filtrée EN MÉMOIRE sur
-             un seul `where` : `id ==` + `at >=` exigerait un index composite
-             que l'émulateur ne signalerait jamais (règle E). Le journal d'un
-             seul produit tient en quelques documents. */
-          var depuis30 = nowMs - 30 * 24 * 3600 * 1000;
-          var refMin = cur;
-          try {
-            var hist = await db.collection('price_watch_log')
-              .where('id', '==', p.id).get();
-            hist.forEach(function (d) {
-              var v = d.data();
-              if (priceParse.enMillis(v.at) < depuis30) return; // hors fenêtre 30 j
-              [Number(v.oldPrice), Number(v.newPrice)].forEach(function (x) {
-                if (x > 0 && x < refMin) refMin = x;
+             L'expiration à deux mois se calcule à l'AFFICHAGE (`promoActive`) :
+             une promo qui dépendrait d'une tâche planifiée resterait affichée le
+             jour où la tâche ne tourne pas, et une réduction périmée affichée
+             est le même délit. */
+          var promo = { promoDepuis: null, promoAncienPrix: null };
+          if (newPrice < cur) {
+            /* ⛔ CORRIGÉ le 02/08/2026 — la fenêtre était calculée avec le
+               SENTINEL : `now - 30 j` = NaN (E-228, même mécanisme), et la
+               requête `where('at' >= NaN)` ne rendait JAMAIS rien — le catch
+               avalait tout et `refMin` retombait sur le prix courant. Résultat :
+               un prix remonté puis rebaissé s'affichait « promo » face au prix
+               de la veille — précisément l'annonce trompeuse que J4 interdit.
+               Fenêtre désormais en NOMBRES (nowMs), et filtrée EN MÉMOIRE sur
+               un seul `where` : `id ==` + `at >=` exigerait un index composite
+               que l'émulateur ne signalerait jamais (règle E). Le journal d'un
+               seul produit tient en quelques documents. */
+            var depuis30 = nowMs - 30 * 24 * 3600 * 1000;
+            var refMin = cur;
+            try {
+              var hist = await db.collection('price_watch_log')
+                .where('id', '==', p.id).get();
+              hist.forEach(function (d) {
+                var v = d.data();
+                if (priceParse.enMillis(v.at) < depuis30) return; // hors fenêtre 30 j
+                [Number(v.oldPrice), Number(v.newPrice)].forEach(function (x) {
+                  if (x > 0 && x < refMin) refMin = x;
+                });
               });
-            });
-          } catch (e) { /* journal illisible → on reste sur le prix courant */ }
-          if (newPrice < refMin) promo = { promoDepuis: now, promoAncienPrix: refMin };
+            } catch (e) { /* journal illisible → on reste sur le prix courant */ }
+            if (newPrice < refMin) promo = { promoDepuis: now, promoAncienPrix: refMin };
+          }
+          const patchA = Object.assign({
+            price: newPrice, price_ht: newHt,
+            priceSources: { [sourceSlug]: { ttc: srcRetenu, at: nowMs, enStock: true } },
+            priceSource: effFrom, priceSrcTTC: effSrc,
+            priceMarkup: priced.markup, priceMode: priced.mode
+          }, promo);
+          await db.collection('product_overrides').doc(p.id).set(
+            Object.assign({}, patchA, { priceCheckedAt: now }), { merge: true });
+          snapPage.push({ id: p.id, patch: Object.assign({}, patchA, { priceCheckedAt: now }) });
+          if (scanMode) pwMajLocale(ovW, p.id, patchA, nowMs);
+          await db.collection('price_watch_log').add({
+            sku: item.sku, id: p.id, oldPrice: cur, newPrice, srcTTC: effSrc, source: sourceSlug, brand,
+            /* ⛔⛔ `at` EN MILLISECONDES, PAS EN serverTimestamp. La page
+               « Mouvement des prix » filtre `where('at','>=', <nombre>)` et
+               affiche `Number(v.at)`. Un sentinel serverTimestamp devient un
+               OBJET Timestamp à la relecture : `Number()` rend NaN, la date
+               s'affiche vide, et le filtre « sur combien de jours » ne filtre
+               plus rien — dans l'ordre des types Firestore, TOUT timestamp est
+               supérieur à N'IMPORTE QUEL nombre. La page paraissait marcher et
+               mentait sur les deux colonnes qui font son intérêt.
+               ⛔ C'est E-228 pour la troisième fois — après `priceCheckedAt` et
+               `promoDepuis`. Le remède est le même partout : ce qui sera LU EN
+               ARITHMÉTIQUE s'écrit en nombre. `priceSources.at` l'est déjà. */
+            at: nowMs,
+            markup: priced.markup, mode: priced.mode
+          });
         }
-        const patchA = Object.assign({
-          price: newPrice, price_ht: newHt,
-          priceSources: { [sourceSlug]: { ttc: srcRetenu, at: nowMs, enStock: true } },
-          priceSource: effFrom, priceSrcTTC: effSrc,
-          priceMarkup: priced.markup, priceMode: priced.mode
-        }, promo);
-        await db.collection('product_overrides').doc(p.id).set(
-          Object.assign({}, patchA, { priceCheckedAt: now }), { merge: true });
-        snapPage.push({ id: p.id, patch: Object.assign({}, patchA, { priceCheckedAt: now }) });
-        if (scanMode) pwMajLocale(ovW, p.id, patchA, nowMs);
-        await db.collection('price_watch_log').add({
-          sku: item.sku, id: p.id, oldPrice: cur, newPrice, srcTTC: effSrc, source: sourceSlug, brand,
-          /* ⛔⛔ `at` EN MILLISECONDES, PAS EN serverTimestamp. La page
-             « Mouvement des prix » filtre `where('at','>=', <nombre>)` et
-             affiche `Number(v.at)`. Un sentinel serverTimestamp devient un
-             OBJET Timestamp à la relecture : `Number()` rend NaN, la date
-             s'affiche vide, et le filtre « sur combien de jours » ne filtre
-             plus rien — dans l'ordre des types Firestore, TOUT timestamp est
-             supérieur à N'IMPORTE QUEL nombre. La page paraissait marcher et
-             mentait sur les deux colonnes qui font son intérêt.
-             ⛔ C'est E-228 pour la troisième fois — après `priceCheckedAt` et
-             `promoDepuis`. Le remède est le même partout : ce qui sera LU EN
-             ARITHMÉTIQUE s'écrit en nombre. `priceSources.at` l'est déjà. */
-          at: nowMs,
-          markup: priced.markup, mode: priced.mode
-        });
+        applied.push(rec);
+      } catch (errFiche) {
+        /* ⛔ Une fiche qui plante est COMPTÉE et NOMMÉE, jamais tue — et la
+           page continue. Le message reste court : il sert au diagnostic, il
+           ne recopie ni le relevé ni un secret. */
+        echecsFiche.push({ sku: item && item.sku,
+          erreur: String((errFiche && errFiche.message) || errFiche).slice(0, 140) });
+        continue;
       }
-      applied.push(rec);
     }
 
     /* Snapshot regroupé : UNE écriture par shard pour toute la page (au plus 4),
@@ -4065,7 +4110,11 @@ async function handlePriceWatch(req, res, admin, db) {
         /* ⛔ CE QUE LE RECOLLAGE VALIDÉ PAR LE CATALOGUE A RAMENÉ. Sans ce
            compte, on ne saurait pas si l'étape sert — et une étape dont on ne
            mesure pas le rendement finit par vivre sans qu'on sache pourquoi. */
-        refsRecollees: recolle.items.length
+        refsRecollees: recolle.items.length,
+        /* ⛔ Ce qui n'a PAS pu s'écrire, et pourquoi. Une page qui tombe en
+           silence coûte ~60 relevés ; une page qui dit ce qu'elle a raté coûte
+           une ligne de rapport. */
+        idsRefuses: idsRefuses.length, echecsFiche: echecsFiche.length
       },
       source: sourceSlug, format: auto.format,
       /* ── BALAYAGE : LES COMPTEURS, PAS LES LISTES (02/08/2026) ────────────
@@ -4100,6 +4149,11 @@ async function handlePriceWatch(req, res, admin, db) {
          c'est cette liste, AVEC les prix, qui sert à créer les fiches des
          packs — plafonnée à 100, l'import aurait été borgne (275 packs sur la
          page, mesurés le 02/08). */
+      /* Écarté n'est pas effacé : ces deux listes sortent TOUJOURS, même en
+         balayage — elles sont courtes par nature, et leur silence a coûté une
+         page entière le 09/08/2026. */
+      idsRefuses: idsRefuses.slice(0, 40),
+      echecsFiche: echecsFiche.slice(0, 40),
       packsIgnores: scanMode ? [] : appariePacks.restants.slice(0, 400),
       /* ⛔ EN BALAYAGE, LES REJETS DOIVENT POUVOIR SE LIRE (09/08/2026). Le
          balayage réel du jour comptait 1 093 `sansRef` sur 67 pages — comptés,
