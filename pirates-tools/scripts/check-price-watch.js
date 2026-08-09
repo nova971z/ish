@@ -315,6 +315,14 @@ module.exports = async function () {
   var pw = adm._internals && adm._internals.pwSourceCost;
   ok(typeof pw === 'function', 'pwSourceCost exposée aux portes via _internals');
   if (pw) {
+    /* ⛔ TR-007 (mise en réel idealo, 08/08/2026) : un coût relevé sur idealo —
+       la source LIVE — doit être reconnu comme RÉEL, exactement comme cotebrico.
+       Sans ça, `estSourceRelevee` le requalifierait en estimation : le coût idealo
+       ne sèmerait pas la variante jumelle et le prix affiché dériverait. Format
+       hérité (priceSource/priceSrcTTC/priceCheckedAt sans carte priceSources). */
+    var idealoReel = pw({}, { priceSource: 'idealo', priceSrcTTC: 150, priceCheckedAt: Date.now() }, {}, null);
+    ok(idealoReel && idealoReel.origin === 'traqueur' && idealoReel.srcTTC === 150,
+      '⛔ un coût relevé sur idealo est un coût RÉEL (origin traqueur), pas une estimation (' + JSON.stringify(idealoReel) + ')');
     var gel = pw({}, { priceSources: { cotebrico: { ttc: 200, at: Date.now(), enStock: false } } }, {}, null);
     ok(gel && gel.origin === 'rupture' && gel.srcTTC === null,
       '⛔ relevés présents mais AUCUN achetable → origin \'rupture\', prix GELÉ (' + JSON.stringify(gel) + ')');
@@ -3592,6 +3600,21 @@ module.exports = async function () {
           + '), pas le prix courant (' + courantHaut + '), et JAMAIS une entrée hors fenêtre '
           + 'ou d\'une autre fiche — obtenu : ' + (patchP && patchP.promoAncienPrix)
           + '. L\'ancien calcul (sentinel - 30 j = NaN) ne trouvait jamais le journal.');
+
+        /* ⛔ TR-001 KILL-SWITCH (mise en réel 08/08/2026) : TRAQUEUR_ECRIRE='0'
+           gèle TOUTE écriture sans redéploiement — l'arrêt d'urgence de
+           l'automatisation iPad. Même page reconnue, même base : ZÉRO écriture. */
+        scanReset();
+        var seedOvK = {}; seedOvK[cible.id] = { price: courantHaut };
+        var dbK = fauxDb(seedOvK, []);
+        var rK = fauxRes();
+        process.env.TRAQUEUR_ECRIRE = '0';
+        await admFn(reqPage(cible.sku, {}), rK, fauxAdmin, dbK);
+        delete process.env.TRAQUEUR_ECRIRE;
+        ok(rK.out && rK.out.gelEcriture === true
+          && Object.keys(dbK._compte.ecrituresParId).length === 0,
+          '⛔ TRAQUEUR_ECRIRE=0 gèle l\'écriture : 0 override écrit ('
+          + JSON.stringify({ gel: rK.out && rK.out.gelEcriture, ecritures: dbK._compte.ecrituresParId }) + ')');
 
         // ── J4 : prix remonté puis rebaissé — rien de nouveau → PAS de promo ──
         var seedOvE = {}; seedOvE[cible.id] = { price: courantHaut };

@@ -1974,6 +1974,22 @@ function pwRound2(n) { return Math.round(n * 100) / 100; }
 // 240,79 € alors que la version nue coûte 149,90 € → coût réel ~169,90 €).
 var COFFRET_COST_DELTA = 20;
 
+/* ── SOURCES RÉELLEMENT RELEVÉES (TR-006/TR-007) ────────────────────────────
+   Un coût ne sert de base à la dérivation ± 20 € ou à l'héritage que s'il porte
+   la marque d'UN traqueur — jamais une estimation (qui ne pose aucun
+   priceSource de traqueur). Historiquement le seul slug reconnu était
+   'cotebrico' ; la mise en réel bascule sur 'idealo', et le comparateur
+   couvrira toutes les marques. On reconnaît donc TOUS les slugs de traqueur.
+   ⛔ 'cotebrico'/'clickoutil' restent reconnus tant que des overrides Firestore
+   les portent encore (données héritées) : les retirer ICI REQUALIFIERAIT ces
+   coûts réels en estimations et changerait des prix. Leur retrait propre est un
+   lot dédié (audit E), côté DONNÉES, pas ici.
+   ⛔ J4 (porte lue) : ceci ne touche PAS le prix de référence des promotions
+   (promoAncienPrix = plus bas sur 30 j, calculé ailleurs). Un relevé idealo est
+   un vrai prix fournisseur — exactement ce qui doit nourrir le calcul serveur. */
+var SOURCES_RELEVEES = { cotebrico: 1, clickoutil: 1, idealo: 1 };
+function estSourceRelevee(s) { return !!(s && SOURCES_RELEVEES[s]); }
+
 // Index des coûts RÉELS connus (traqueur ou fiche), par groupe de variante.
 // { [variantGroup]: { solo: srcTTC, coffret: srcTTC } }
 function pwBuildVariantCosts(products, ov) {
@@ -1985,7 +2001,7 @@ function pwBuildVariantCosts(products, ov) {
     // Même exigence que pwSourceCost : seul un coût RELEVÉ (traqueur) ou saisi
     // en fiche sert de base à la dérivation ± 20 € — jamais une estimation.
     var ovHasCost = (typeof o.priceSrcTTC === 'number' && o.priceSrcTTC > 0);
-    var real = (o.priceSource === 'cotebrico' && ovHasCost)
+    var real = (estSourceRelevee(o.priceSource) && ovHasCost)
       ? o.priceSrcTTC
       : ((!ovHasCost && typeof p.priceSrcTTC === 'number' && p.priceSrcTTC > 0) ? p.priceSrcTTC : null);
     if (!(real > 0)) continue;
@@ -2022,10 +2038,10 @@ function pwSourcesConnues(o) {
      secondes d'une autre ère — 63 889 596 800 — et l'héritage paraissait
      toujours périmé face à Date.now()). */
   var atHeritage = priceParse.enMillis(o && o.priceCheckedAt);
-  if (o && o.priceSource === 'cotebrico' && !srcs.cotebrico
+  if (o && estSourceRelevee(o.priceSource) && !srcs[o.priceSource]
       && typeof o.priceSrcTTC === 'number' && o.priceSrcTTC > 0
       && atHeritage > 0) {
-    srcs.cotebrico = { ttc: o.priceSrcTTC, at: atHeritage };
+    srcs[o.priceSource] = { ttc: o.priceSrcTTC, at: atHeritage };
   }
   return srcs;
 }
@@ -2246,7 +2262,7 @@ function pwSourceCost(p, o, cfg, byGroup) {
   // marque du traqueur. Sans ce contrôle, un coût ESTIMÉ écrit par un ancien
   // « Appliquer » se faisait passer pour un relevé réel : la supposition
   // devenait définitive et neutralisait le garde-fou coffret.
-  if (o && o.priceSource === 'cotebrico' && typeof o.priceSrcTTC === 'number' && o.priceSrcTTC > 0) {
+  if (o && estSourceRelevee(o.priceSource) && typeof o.priceSrcTTC === 'number' && o.priceSrcTTC > 0) {
     return { srcTTC: o.priceSrcTTC, origin: 'traqueur' };
   }
   // ⚠️ `p` est le produit FUSIONNÉ : si l'override porte un priceSrcTTC, alors
@@ -2948,14 +2964,15 @@ async function handlePriceWatch(req, res, admin, db) {
       || (req.query && (req.query.inconnus === '1' || req.query.inconnus === 'true'));
     /* ── IDENTITÉ DE LA SOURCE (01/08/2026) ─────────────────────────────────
        Un deuxième site va être traqué, puis d'autres : chaque raccourci passe
-       `&source=<slug>`. Sans le paramètre : 'cotebrico' — aucun raccourci
-       existant ne change. ⛔ Le slug devient une CLÉ Firestore : alphabet
+       `&source=<slug>`. Sans le paramètre : 'idealo' (mise en réel 08/08/2026 —
+       cotebrico/clickoutil retirés) ; le Raccourci iPad envoie &source=idealo
+       explicitement. ⛔ Le slug devient une CLÉ Firestore : alphabet
        fermé, longueur bornée — rien d'arbitraire n'entre en base.
        ⚠️ Calculé AVANT TOUT RETOUR, erreurs comprises : le premier essai
        clickoutil a rendu un JSON muet sur la source qui tournait —
        indiagnosticable. */
-    const sourceSlug = (String((req.query && req.query.source) || 'cotebrico')
-      .toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 24)) || 'cotebrico';
+    const sourceSlug = (String((req.query && req.query.source) || 'idealo')
+      .toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 24)) || 'idealo';
 
     /* ⛔ UN REFUS MUET EST UN MUR (02/08/2026) ──────────────────────────────
        « text manquant ou trop court » n'a longtemps rien dit d'autre. Sur le
@@ -3590,6 +3607,21 @@ async function handlePriceWatch(req, res, admin, db) {
        balayage — l'ouvrir à la fin (avec le cumul de couverture) laisserait la
        page 1 écrire sans mémoire, et une fiche vue page 1 puis page 40 se
        ferait écraser par la plus chère des deux. */
+    /* ⛔ GARDE D'ÉCRITURE — FILET SECONDAIRE (TR-001, mise en réel 08/08/2026).
+       Le mode à sec rend BIEN AVANT ce point (return anticipé du bloc `if
+       (secMode)`). Cette assertion est le second filet : si ce return venait à
+       sauter, AUCUNE écriture d'override ne doit partir quand même. Un run à sec
+       ne peut PHYSIQUEMENT jamais toucher un prix ni coûter d'argent.
+       ⛔ Et un KILL-SWITCH sans redéploiement : TRAQUEUR_ECRIRE='0' gèle toute
+       écriture (opt-OUT — non posé = écriture normale, on ne casse pas la prod). */
+    if (secMode) {
+      return res.status(500).json({ ok: false, sec: true, brand, source: sourceSlug,
+        error: 'garde: un run a sec a atteint le chemin d\'ecriture — ecriture refusee' });
+    }
+    if (process.env.TRAQUEUR_ECRIRE === '0') {
+      return res.status(200).json({ ok: true, gelEcriture: true, brand, source: sourceSlug,
+        note: 'ecriture gelee par TRAQUEUR_ECRIRE=0 — releve non applique' });
+    }
     pwRafaleOuvrir(brand, (plans.plan(brand, sourceSlug) || {}).pages, nowMs);
     for (const item of parsed) {
       /* ⛔ Même règle que sur le chemin à sec : l'écriture exacte d'abord, la
