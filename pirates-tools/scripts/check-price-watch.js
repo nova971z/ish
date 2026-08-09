@@ -2320,6 +2320,25 @@ module.exports = async function () {
         configDocs: Object.assign({}, seedConfig || {}) };
       return {
         _compte: compte,
+        /* ⛔ LE LOT D'ÉCRITURES, ET IL SE MESURE (09/08/2026). Sans lui, la base
+           factice ne saurait pas exécuter le chemin réel — et « non exécuté
+           n'est pas vert ». `commits` est ce qui prouve le groupage : une page
+           qui applique N prix doit rendre 1 lot, pas 2N écritures isolées. */
+        batch: function () {
+          var ops = [];
+          return {
+            set: function (ref, donnees) { ops.push({ ref: ref, donnees: donnees }); return this; },
+            commit: function () {
+              compte.commits = (compte.commits || 0) + 1;
+              compte.opsParCommit = (compte.opsParCommit || []).concat([ops.length]);
+              ops.forEach(function (o) {
+                if (o.ref && o.ref.set) o.ref.set(o.donnees);
+              });
+              ops = [];
+              return Promise.resolve();
+            }
+          };
+        },
         collection: function (nom) {
           if (nom === 'product_overrides') {
             return {
@@ -2332,11 +2351,15 @@ module.exports = async function () {
                 } });
               },
               doc: function (id) {
-                return { set: function (patch) {
-                  compte.ecrituresParId[id] = (compte.ecrituresParId[id] || 0) + 1;
-                  compte.patchsParId[id] = patch;
-                  return Promise.resolve();
-                } };
+                /* ⚠️ La référence porte son identifiant : un LOT reçoit des
+                   références, pas des chemins — sans ça il ne saurait pas quoi
+                   compter, et l'assertion du groupage ne prouverait rien. */
+                return { _coll: 'product_overrides', _id: id,
+                  set: function (patch) {
+                    compte.ecrituresParId[id] = (compte.ecrituresParId[id] || 0) + 1;
+                    compte.patchsParId[id] = patch;
+                    return Promise.resolve();
+                  } };
               }
             };
           }
@@ -2355,7 +2378,13 @@ module.exports = async function () {
                   where: function () { throw new Error('index composite requis (id + at) — règle E'); }
                 };
               },
-              add: function () { return Promise.resolve(); }
+              add: function () { compte.journal = (compte.journal || 0) + 1; return Promise.resolve(); },
+              /* Un lot ne peut pas appeler `add()` (il n'attend pas de réponse) :
+                 il demande une référence neuve par `doc()` sans argument. */
+              doc: function () {
+                return { _coll: 'price_watch_log', _id: '(auto)',
+                  set: function () { compte.journal = (compte.journal || 0) + 1; return Promise.resolve(); } };
+              }
             };
           }
           if (nom === 'config') {
@@ -2518,6 +2547,45 @@ module.exports = async function () {
         await admFn({ method: 'POST', query: { type: 'price-watch', brand: 'DEWALT',
           source: 'idealo', scan: '1' }, body: { text: pageAvecRejet } },
           rRej0, fauxAdmin, fauxDb({}, []));
+        /* ⛔⛔ LES ÉCRITURES PARTENT EN UN SEUL LOT (09/08/2026, demande de
+           l'user : « est-ce que les traqueurs peuvent être beaucoup plus
+           rapides ? »). MESURÉ sur SES deux balayages du soir : chaque produit
+           dont le prix bouge déclenchait DEUX écritures qui attendaient chacune
+           leur réponse — 216 allers-retours sur DeWALT (67 pages), 650 sur
+           Makita (112 pages). Le lot les envoie en une fois.
+           ⛔ Ce qui se vérifie ici est un INVARIANT, pas un chiffre : quel que
+           soit le nombre de prix appliqués, la page ne doit produire QU'UN lot
+           tant qu'elle reste sous la borne de Firestore. */
+        scanReset();
+        var seedLot = {}; seedLot[cible.id] = { price: courantHaut };
+        var dbLot = fauxDb(seedLot, []);
+        var rLot = fauxRes();
+        await admFn(reqPage(cible.sku, {}), rLot, fauxAdmin, dbLot);
+        ok((dbLot._compte.commits || 0) === 1,
+          '⛔⛔ VITESSE : une page d\'écriture ne produit QU\'UN lot, quel que soit le '
+          + 'nombre de prix appliqués — sinon chaque produit rouvre une connexion et '
+          + 'attend sa réponse (obtenu : ' + (dbLot._compte.commits || 0) + ' lot(s), '
+          + JSON.stringify(dbLot._compte.opsParCommit) + ' opérations)');
+        /* ⚠️ PRÉALABLE 1 — le lot doit contenir QUELQUE CHOSE. Un lot vide
+           commité une fois passerait l'assertion ci-dessus sans rien écrire :
+           c'est exactement la forme « vert sans avoir rien franchi ». */
+        ok((dbLot._compte.opsParCommit || [])[0] >= 2,
+          '⚠️ PRÉALABLE : le lot porte au moins l\'override ET le journal — un lot vide '
+          + 'commité une fois passerait pour un groupage réussi ('
+          + JSON.stringify(dbLot._compte.opsParCommit) + ')');
+        /* ⚠️ PRÉALABLE 2 — et les écritures ARRIVENT vraiment. Grouper ne doit
+           pas faire disparaître ce qu'on écrit : le prix doit avoir bougé. */
+        ok((dbLot._compte.ecrituresParId[cible.id] || 0) >= 1
+          && rLot.out && rLot.out.counts && rLot.out.counts.applied === 1,
+          '⛔⛔ ARGENT : grouper ne fait RIEN disparaître — l\'override est bien écrit et '
+          + 'le prix appliqué (écritures ' + (dbLot._compte.ecrituresParId[cible.id] || 0)
+          + ', appliqués ' + JSON.stringify(rLot.out && rLot.out.counts && rLot.out.counts.applied) + ')');
+        /* ⛔ Et le compte de lots est RENDU : une optimisation qu'on ne mesure
+           pas depuis le raccourci finit par se faire défaire sans qu'on le voie. */
+        ok((rLot.out.counts || {}).lotsEcriture === 1,
+          '⛔ le nombre de lots est rendu dans la réponse ('
+          + JSON.stringify((rLot.out.counts || {}).lotsEcriture) + ')');
+
         /* ⛔⛔ CE QUI DÉCIDE DU PRIX NE DOIT PAS ÊTRE JETÉ (09/08/2026).
            Mesuré sur son balayage : 2 254 annonces portent une référence SANS
            suffixe de conditionnement — impossible de dire si c'est la machine
@@ -4174,7 +4242,16 @@ module.exports = async function () {
      ⚠️ Le contrôle porte sur l'invariant, pas sur une écriture exacte : ce qui
      sera lu en arithmétique doit être un NOMBRE au moment de l'écriture. */
   var srcMoves = fs.readFileSync(path.join(__dirname, '..', 'api', 'admin.js'), 'utf8');
-  var iLog = srcMoves.indexOf("collection('price_watch_log').add({");
+  /* ⚠️ L'ANCRE NE DÉPEND PLUS DE LA FAÇON D'ÉCRIRE (09/08/2026). Elle visait
+     `collection('price_watch_log').add({` — le passage des écritures en LOT a
+     remplacé `add()` par `doc()`, et cette porte est tombée pour une raison qui
+     n'était pas la sienne. Ce qu'elle garde, c'est le FORMAT DE LA DATE : elle
+     s'ancre donc sur le nom de la collection, quelle que soit la mécanique
+     d'écriture. */
+  /* ⛔ On vise l'ÉCRITURE, pas une lecture : le fichier contient aussi des
+     requêtes sur cette collection, et s'ancrer sur la première occurrence
+     ferait juger le format de date sur un bloc de lecture. */
+  var iLog = srcMoves.search(/collection\('price_watch_log'\)\s*\.doc\(\)|collection\('price_watch_log'\)\.add\(/);
   var blocLog = iLog === -1 ? null : [srcMoves.slice(iLog, iLog + 1400)];
   ok(!!blocLog, '⛔ PRÉALABLE : le bloc d\'écriture du journal des prix est lisible');
   if (blocLog) {

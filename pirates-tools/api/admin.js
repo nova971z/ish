@@ -3761,6 +3761,30 @@ async function handlePriceWatch(req, res, admin, db) {
        après la boucle. La collection product_overrides, elle, reste écrite au
        fil de la boucle (documents distincts, aucune contention). */
     const snapPage = [];
+    /* ⛔⛔ LES ÉCRITURES PARTENT EN UN SEUL LOT (09/08/2026, demande de l'user :
+       « est-ce que les traqueurs peuvent être beaucoup plus rapides ? »).
+       MESURÉ sur SES deux balayages du soir : chaque produit dont le prix bouge
+       déclenchait DEUX écritures qui attendaient chacune leur réponse — 216
+       allers-retours sur DeWALT (67 pages), **650 sur Makita** (112 pages).
+       Un lot Firestore les envoie EN UNE FOIS : une page de 60 produits passe
+       de 120 attentes à UNE.
+       ⛔ ET ÇA SOULAGE LE QUOTA autant que le temps — c'est lui qui a sauté ce
+       soir. Le nombre d'écritures ne change pas, mais leur coût en connexions
+       et en temps d'exécution serverless, si.
+       ⚠️ Le lot est plafonné à 500 opérations par Firestore : on le referme et
+       on en rouvre un avant d'atteindre la borne. Une page en compte ~120, mais
+       la borne se respecte par CONSTRUCTION, pas par pari sur la taille d'une
+       page. */
+    const LOT_MAX = 450;                 // marge sous la borne de 500
+    let lotEcr = db.batch(), lotN = 0, lotsCommits = 0;
+    async function lotAjouter(ref, donnees, options) {
+      if (options) lotEcr.set(ref, donnees, options); else lotEcr.set(ref, donnees);
+      lotN += 1;
+      if (lotN >= LOT_MAX) { await lotEcr.commit(); lotsCommits += 1; lotEcr = db.batch(); lotN = 0; }
+    }
+    async function lotFermer() {
+      if (lotN > 0) { await lotEcr.commit(); lotsCommits += 1; lotEcr = db.batch(); lotN = 0; }
+    }
     /* Fiches dont l'identifiant interdit l'écriture — listées, jamais tues. */
     const idsRefuses = [];
     /* ⛔⛔ LE FILET, ET IL MANQUAIT : UNE FICHE QUI PLANTE NE DOIT JAMAIS EMPORTER
@@ -3840,7 +3864,7 @@ async function handlePriceWatch(req, res, admin, db) {
               priceSrcTTC: choixR ? choixR.ttc : null,
               priceSource: choixR ? choixR.source : 'rupture'
             };
-            await db.collection('product_overrides').doc(p.id).set(
+            await lotAjouter(db.collection('product_overrides').doc(p.id),
               Object.assign({}, patchR, { priceCheckedAt: now }), { merge: true });
             snapPage.push({ id: p.id, patch: Object.assign({}, patchR, { priceCheckedAt: now }) });
             if (scanMode) pwMajLocale(ovW, p.id, patchR, nowMs);
@@ -3916,7 +3940,7 @@ async function handlePriceWatch(req, res, admin, db) {
               priceSources: { [sourceSlug]: { ttc: srcRetenu, at: nowMs, enStock: true } },
               priceSource: effFrom, priceSrcTTC: effSrc
             };
-            await db.collection('product_overrides').doc(p.id).set(
+            await lotAjouter(db.collection('product_overrides').doc(p.id),
               Object.assign({}, patchU, { priceCheckedAt: now }), { merge: true });
             snapPage.push({ id: p.id, patch: Object.assign({}, patchU, { priceCheckedAt: now }) });
             if (scanMode) pwMajLocale(ovW, p.id, patchU, nowMs);
@@ -4003,11 +4027,11 @@ async function handlePriceWatch(req, res, admin, db) {
             priceSource: effFrom, priceSrcTTC: effSrc,
             priceMarkup: priced.markup, priceMode: priced.mode
           }, promo);
-          await db.collection('product_overrides').doc(p.id).set(
+          await lotAjouter(db.collection('product_overrides').doc(p.id),
             Object.assign({}, patchA, { priceCheckedAt: now }), { merge: true });
           snapPage.push({ id: p.id, patch: Object.assign({}, patchA, { priceCheckedAt: now }) });
           if (scanMode) pwMajLocale(ovW, p.id, patchA, nowMs);
-          await db.collection('price_watch_log').add({
+          await lotAjouter(db.collection('price_watch_log').doc(), {
             sku: item.sku, id: p.id, oldPrice: cur, newPrice, srcTTC: effSrc, source: sourceSlug, brand,
             /* ⛔⛔ `at` EN MILLISECONDES, PAS EN serverTimestamp. La page
                « Mouvement des prix » filtre `where('at','>=', <nombre>)` et
@@ -4037,6 +4061,11 @@ async function handlePriceWatch(req, res, admin, db) {
 
     /* Snapshot regroupé : UNE écriture par shard pour toute la page (au plus 4),
        au lieu d'une par produit. En dryRun on n'a rien poussé (aucune écriture). */
+    /* ⛔⛔ ON FERME LE LOT AVANT TOUT LE RESTE. C'est LE point où une erreur
+       coûterait des prix : un lot jamais commité, ce sont toutes les écritures
+       de la page qui n'existent pas — silencieusement. Il se ferme donc ICI,
+       avant le snapshot (qui reflète ces mêmes écritures) et avant la réponse. */
+    await lotFermer();
     if (snapPage.length) await snapshotLib.majSnapshotBatch(db, admin, snapPage);
 
     if (!dryRun && applied.length) catalog.invalidateOverrides();
@@ -4134,7 +4163,11 @@ async function handlePriceWatch(req, res, admin, db) {
         /* ⛔ Ce qui n'a PAS pu s'écrire, et pourquoi. Une page qui tombe en
            silence coûte ~60 relevés ; une page qui dit ce qu'elle a raté coûte
            une ligne de rapport. */
-        idsRefuses: idsRefuses.length, echecsFiche: echecsFiche.length
+        idsRefuses: idsRefuses.length, echecsFiche: echecsFiche.length,
+        /* ⛔ Le nombre de LOTS d'écriture. C'est lui qui dit si le groupage
+           fonctionne : une page qui applique 60 prix doit rendre 1, pas 120.
+           Une optimisation qu'on ne mesure pas finit par se faire défaire. */
+        lotsEcriture: lotsCommits
       },
       source: sourceSlug, format: auto.format,
       /* ── BALAYAGE : LES COMPTEURS, PAS LES LISTES (02/08/2026) ────────────
