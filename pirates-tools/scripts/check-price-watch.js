@@ -2518,6 +2518,40 @@ module.exports = async function () {
         await admFn({ method: 'POST', query: { type: 'price-watch', brand: 'DEWALT',
           source: 'idealo', scan: '1' }, body: { text: pageAvecRejet } },
           rRej0, fauxAdmin, fauxDb({}, []));
+        /* ⛔⛔ CE QUI DÉCIDE DU PRIX NE DOIT PAS ÊTRE JETÉ (09/08/2026).
+           Mesuré sur son balayage : 2 254 annonces portent une référence SANS
+           suffixe de conditionnement — impossible de dire si c'est la machine
+           NUE ou un kit avec batteries, alors que l'écart de prix va du simple
+           au double. Le serveur LIT pourtant ce contenu dans le sous-titre de
+           la tuile, et `unknown` ne rendait que référence + prix : la donnée
+           qui tranche était produite puis perdue. Sans elle, apparier ces
+           annonces reviendrait à DEVINER sur un prix. */
+        scanReset();
+        var lignesContenu = ['DEWALT ZZW680', 'Scie circulaire sans fil, 2 batteries, 3,5 kg',
+          '5', '94 offres', 'à partir de 192,76 €', 'Détails du produit'];
+        /* Le serveur refuse un corps trop court (garde légitime) : on bourre
+           jusqu'au seuil, sans marque ni prix, comme le gabarit voisin. */
+        while (lignesContenu.join('\n').length < 260) {
+          lignesContenu.push('ligne de bourrage sans marque ni prix pour atteindre le seuil du corps');
+        }
+        var pageContenu = lignesContenu.join('\n');
+        var rCont = fauxRes();
+        await admFn({ method: 'POST', query: { type: 'price-watch', brand: 'DEWALT',
+          source: 'idealo', inconnus: '1' }, body: { text: pageContenu } },
+          rCont, fauxAdmin, fauxDb({}, []));
+        var inc = ((rCont.out || {}).unknown || []).filter(function (u) { return /ZZW680/.test(u.sku || ''); })[0];
+        ok(inc && inc.nBat === 2,
+          '⛔⛔ ARGENT : une annonce sans fiche rend le CONTENU lu (batteries), pas '
+          + 'seulement sa référence et son prix — sans lui, on ne peut pas distinguer '
+          + 'une machine nue d\'un kit, et apparier deviendrait deviner ('
+          + JSON.stringify(inc) + ')');
+        /* ⚠️ PRÉALABLE — la forme reste COMPACTE : 112 pages passent par le
+           presse-papier d'un raccourci, et une réponse illisible n'est pas
+           vérifiable. On rend trois champs, pas l'objet entier. */
+        ok(inc && !('car' in inc) && Object.keys(inc).length <= 6,
+          '⚠️ PRÉALABLE : la forme reste compacte — jamais l\'objet de qualification '
+          + 'entier (' + JSON.stringify(inc && Object.keys(inc)) + ')');
+
         /* ⛔⛔ UNE FICHE QUI PLANTE NE DOIT JAMAIS EMPORTER LA PAGE (09/08/2026).
            Mesuré sur SON balayage : la page 494 sur 67 est revenue en erreur
            entière — « documentPath must point to a document » — parce qu'UN

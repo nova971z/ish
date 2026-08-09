@@ -3780,7 +3780,27 @@ async function handlePriceWatch(req, res, admin, db) {
            que cet endroit — et ici l'autre endroit est celui qui ÉCRIT les prix. */
         const p = bySku[item.sku] || bySku[priceParse.racineRef(item.sku)]
           || bySku[pwCleModele(item)];
-        if (!p) { unknown.push({ sku: item.sku, srcTTC: item.price, name: item.name }); continue; }
+        if (!p) {
+          /* ⛔⛔ CE QUI DÉCIDE DU PRIX ÉTAIT LU, PUIS JETÉ (09/08/2026). Mesuré
+             sur son balayage : 2 254 annonces d'une marque portent une référence
+             SANS suffixe de conditionnement (« MAKITA DHS680 ») — impossible de
+             savoir si c'est la machine NUE ou un kit avec batteries, alors que
+             l'écart de prix est du simple au double. Or le serveur LIT ce
+             contenu dans le sous-titre de la tuile (`car.nbBatteries` valait 2
+             sur le cas mesuré) et ne rendait que référence + prix.
+             ⛔ Sans cette information, apparier ces annonces serait DEVINER sur
+             un prix — exactement ce que le projet interdit. Avec elle, le
+             rapprochement devient une lecture.
+             ⚠️ Forme COMPACTE et rien d'autre : trois champs qui tranchent, pas
+             l'objet entier — 112 pages passent par le presse-papier d'un
+             raccourci, et une réponse illisible n'est pas vérifiable. */
+          var carU = item.car || {};
+          unknown.push({ sku: item.sku, srcTTC: item.price, name: item.name,
+            nBat: (typeof carU.nbBatteries === 'number') ? carU.nbBatteries : null,
+            chg: carU.chargeur === true ? 1 : 0,
+            cof: carU.coffret || null });
+          continue;
+        }
         if (fichesVues.has(p.id)) continue;
         fichesVues.add(p.id);
         /* ⛔⛔ UN IDENTIFIANT DE PRODUIT QUI CONTIENT UNE BARRE OBLIQUE TUE TOUTE
