@@ -13823,7 +13823,7 @@
      Il lit les symboles partagés via window.__PT_ADMIN_CTX (accesseurs
      get/set → variables VIVES de cette fermeture). GÉNÉRÉ, ne pas éditer. */
   var __A = {};
-  Object.defineProperty(__A, '$', { get: function () { return $; }, set: function (v) { $ = v; }, configurable: true });
+  Object.defineProperty(__A, '$$', { get: function () { return $$; }, set: function (v) { $$ = v; }, configurable: true });
   Object.defineProperty(__A, 'ADMIN_PARTNER_PHOTOS_MAX', { get: function () { return ADMIN_PARTNER_PHOTOS_MAX; }, set: function (v) { ADMIN_PARTNER_PHOTOS_MAX = v; }, configurable: true });
   Object.defineProperty(__A, 'ADMIN_PROD_MAX', { get: function () { return ADMIN_PROD_MAX; }, set: function (v) { ADMIN_PROD_MAX = v; }, configurable: true });
   Object.defineProperty(__A, 'COMPTA_DEVIS', { get: function () { return COMPTA_DEVIS; }, set: function (v) { COMPTA_DEVIS = v; }, configurable: true });
@@ -13896,7 +13896,7 @@
     if (window.__PT_ADMIN) return Promise.resolve();
     if (__adminCharge) return __adminCharge;
     __adminCharge = new Promise(function (res, rej) {
-      var s = document.createElement('script'); s.src = 'admin.bundle.js?v=601';
+      var s = document.createElement('script'); s.src = 'admin.bundle.js?v=602';
       s.onload = res; s.onerror = function () { __adminCharge = null; rej(new Error('admin.bundle indisponible')); };
       document.head.appendChild(s);
     });

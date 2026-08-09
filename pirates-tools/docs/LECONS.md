@@ -164,6 +164,7 @@ consigne se vérifie donc contre CE contexte avant d'être donnée — pas aprè
 
 ---
 | 09/08/2026 | TOUS les builds Vercel en ERROR pendant ~9 h — Production figée sur l'ancien commit, 8 lots annoncés « déployés » alors que rien n'était en ligne | Des clés `"comment"` ajoutées dans `vercel.json` (schéma strict : propriété inconnue = build refusé) ; et la porte de fin de lot ne vérifiait que GIT, jamais le BUILD — poussé n'est pas construit, construit n'est pas servi | `outils/verifier-pousse.mjs` |
+| 09/08/2026 | L'onglet stats admin mort en PROD (« A.$$ is not a function ») alors que tous les harnais étaient verts | `$$` dans la chaîne de remplacement de String.replace est un MOTIF SPÉCIAL : le symbole partagé `$$` était exposé sous le nom `$` — et le fichier régénéré étant identique au corrompu, la comparaison « à jour » ne voyait rien | `scripts/extraire-admin.js` |
 
 ---
 

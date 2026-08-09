@@ -80,6 +80,21 @@ T('__PT_ADMIN_CTX.escapeHTML (accesseur) échappe correctement',
 T('__PT_ADMIN_CTX.products reflète le catalogue vivant (accesseur get)',
   acc.prodsEstTableau === true);
 
+/* ── D. CHAQUE A.<x> référencé par le bundle admin EXISTE dans le contexte ──
+   Motif (09/08/2026, vu en PROD seulement) : `$$` exposé sous le nom `$` par
+   un motif spécial de String.replace → « A.$$ is not a function » sur l'onglet
+   stats. Ce harnais restait vert parce que le chemin qui APPELLE A.$$ n'était
+   pas exercé. Cette assertion-ci ne dépend d'aucun chemin : elle confronte
+   TOUTES les références A.<x> du bundle servi aux clés réellement exposées. */
+const bundleTexte = await readFile(join(RACINE, 'admin.bundle.js'), 'utf8');
+const refsA = [...new Set([...bundleTexte.matchAll(/\bA\.([$A-Za-z_][$\w]*)/g)].map((m) => m[1]))];
+const manquants = await page.evaluate((refs) => {
+  const A = window.__PT_ADMIN_CTX || {};
+  return refs.filter((n) => !(n in A));
+}, refsA);
+T('chaque A.<x> du bundle admin est exposé dans __PT_ADMIN_CTX (' + refsA.length + ' réfs)',
+  manquants.length === 0, manquants.length ? 'MANQUANTS : ' + manquants.join(', ') : 'tous présents');
+
 await browser.close(); server.close();
 console.log(`\n${pass} OK / ${fail} KO`);
 process.exit(fail ? 1 : 0);

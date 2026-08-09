@@ -134,7 +134,11 @@ function generer() {
     + '      document.head.appendChild(s);\n'
     + '    });\n    return __adminCharge;\n  }\n'
     + amorces + '\n\n';
-  vis = vis.replace(ancre, inject + ancre);
+  /* ⛔ FORME FONCTION OBLIGATOIRE. En chaîne de remplacement, `$$`, `$&`, `$'`
+     sont des MOTIFS SPÉCIAUX de String.replace : le symbole partagé `$$` était
+     silencieusement exposé sous le nom `$` — et l'admin en prod mourait sur
+     « A.$$ is not a function » (09/08/2026). Une fonction rend le texte LITTÉRAL. */
+  vis = vis.replace(ancre, function () { return inject + ancre; });
   vis = '/* GÉNÉRÉ par scripts/extraire-admin.js depuis app.js — NE PAS ÉDITER. */\n' + vis;
 
   return { vis: vis, bundle: bundle, moveNames: Object.keys(c.moveNames), shared: c.shared };
@@ -154,6 +158,16 @@ if (require.main === module) {
     g.moveNames.forEach(function (nm) {
       if (ENTREES.indexOf(nm) !== -1) return;   // les amorces réutilisent le nom
       if (new RegExp('function\\s+' + nm + '\\s*\\(').test(vd)) errs.push('la fonction admin ' + nm + ' est ENCORE définie dans le bundle visiteur');
+    });
+    /* ⛔ CHAQUE symbole partagé est exposé SOUS SON NOM EXACT dans le contexte.
+       Motif (09/08/2026) : `$$` était devenu `$` via les motifs spéciaux de
+       String.replace — le fichier régénéré était identique au fichier corrompu,
+       donc la comparaison « à jour » ne voyait rien. Ce contrôle est SÉMANTIQUE :
+       il cherche la clé verbatim, indépendamment du générateur. */
+    g.shared.forEach(function (s) {
+      if (vd.indexOf("Object.defineProperty(__A, '" + s + "'") === -1) {
+        errs.push('symbole partagé « ' + s + ' » NON exposé sous son nom exact dans app.visitor.js — l\'admin mourra sur A.' + s);
+      }
     });
     if (errs.length) { errs.forEach(function (e) { console.error('  ❌ [extraire-admin] ' + e); }); process.exit(1); }
     console.log('✅ extraire-admin : ' + g.moveNames.length + ' fonctions admin hors du bundle visiteur, à jour');
