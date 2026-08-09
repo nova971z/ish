@@ -1496,6 +1496,16 @@ function apparierParRefRecollee(annonces, fiches, marque) {
     return false;
   }
   var reEclatee = /\b([A-Z]{2,5})\s+(\d{2,5})\s*([A-Z][A-Z0-9-]{0,6})?\b/;
+  /* ⛔⛔ CERTAINES RÉFÉRENCES COMMENCENT PAR UN CHIFFRE — mesuré le 09/08/2026 :
+     59 fiches sur 611 d'une des marques suivies (formes « 198458-6 », « 7104L »,
+     « 2012NB »). Le lecteur de référence exige une LETTRE en tête : il ne les
+     voyait donc PAS DU TOUT, et ces produits ne pouvaient jamais recevoir de
+     coût — quoi que le comparateur affiche.
+     ⛔ POURQUOI C'EST SÛR ICI ET NULLE PART AILLEURS : un nombre nu ressemble à
+     tout (un prix, une cote, une année). On ne l'accepte donc QUE s'il est
+     ÉGAL à la référence d'une fiche du catalogue — la même règle que le
+     recollage juste au-dessus. Le catalogue tranche ; la forme, jamais. */
+  var reNumerique = /\b(\d{4,7}(?:-\d)?[A-Z]{0,3}|\d{3}[A-Z]\d{2}-\d)\b/;
   liste.forEach(function (e) {
     var titre = String((e && e.titre) || '');
     var prix = e && (typeof e.prix === 'number' ? e.prix : e.price);
@@ -1506,7 +1516,21 @@ function apparierParRefRecollee(annonces, fiches, marque) {
        « bidon 600ML » donnait « BIDON600 »). On cherche donc sur le titre TEL
        QUEL, jamais sur sa version en majuscules. */
     var m = titre.match(reEclatee);
-    if (!m) { res.restants.push(e); return; }
+    if (!m) {
+      /* Second essai : une référence qui commence par un chiffre. Elle n'est
+         retenue que si le catalogue la reconnaît (contrôle plus bas). */
+      var mn = titre.match(reNumerique);
+      if (!mn) { res.restants.push(e); return; }
+      var recolleNum = mn[1].toUpperCase().replace(/[^A-Z0-9]/g, '');
+      if (collisions[recolleNum]) { res.restants.push(e); return; }
+      var ficheNum = parRef[recolleNum];
+      if (!ficheNum) { res.restants.push(e); return; }
+      res.items.push({
+        sku: ficheNum.sku, price: prix, name: titre, promo: false, enStock: null,
+        car: extraireCaracteristiques(titre, marque), refRecollee: true
+      });
+      return;
+    }
     var tete = m[1];
     if (SERIES.indexOf(tete.toLowerCase()) !== -1) { res.restants.push(e); return; }
     if (tete === String(marque || '').toUpperCase()) { res.restants.push(e); return; }

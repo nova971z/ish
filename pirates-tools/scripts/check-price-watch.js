@@ -1727,6 +1727,34 @@ module.exports = async function () {
       ok(rr.items.length + rr.restants.length === lot.length,
         '⛔ rien ne disparaît : chaque entrée est soit rapprochée, soit rendue ('
         + rr.items.length + ' + ' + rr.restants.length + ' / ' + lot.length + ')');
+
+      /* ⛔⛔ UNE RÉFÉRENCE PEUT COMMENCER PAR UN CHIFFRE — mesuré le 09/08/2026
+         sur le catalogue : 59 fiches d'une des marques suivies portent une
+         référence de cette forme (« 198458-6 », « 7104L », « 2012NB »). Le
+         lecteur exigeait une LETTRE en tête : ces produits ne pouvaient donc
+         JAMAIS recevoir de coût, quoi que le comparateur affiche.
+         ⛔ Et c'est sûr ICI et nulle part ailleurs : un nombre nu ressemble à
+         tout — un prix, une cote, une année. Il n'est retenu que s'il est ÉGAL
+         à une référence du catalogue. Le préalable ci-dessous le prouve. */
+      var fichesN = [{ sku: '997462-2', price: 30 }, { sku: '7994L', price: 1400 }];
+      var lotN = [
+        { titre: 'MarqueZZ Adaptateur de rail (997462-2)', prix: 25.23 },
+        { titre: 'MarqueZZ 7994L', prix: 1365.41 },
+        { titre: 'prix 2026 sur 1250 pieces', prix: 99 }        // ← aucun produit
+      ];
+      var rn = arr(lotN, fichesN, 'MARQUEZZ');
+      var parN = {}; rn.items.forEach(function (x) { parN[x.sku] = x.price; });
+      ok(parN['997462-2'] === 25.23 && parN['7994L'] === 1365.41,
+        '⛔⛔ ARGENT : une référence qui commence par un CHIFFRE est lue quand le '
+        + 'catalogue la reconnaît — sinon ces fiches ne reçoivent JAMAIS de coût ('
+        + JSON.stringify(parN) + ')');
+      /* ⚠️ PRÉALABLE — et un nombre qui n'est pas une référence n'en devient
+         jamais une. Sans ce cas, la règle pourrait avaler n'importe quel chiffre
+         de la page et rester verte. */
+      ok(rn.restants.some(function (x) { return /2026/.test(x.titre); })
+        && !rn.items.some(function (x) { return /2026|1250/.test(String(x.sku)); }),
+        '⚠️ PRÉALABLE : un nombre quelconque du titre (année, quantité) ne devient '
+        + 'JAMAIS une référence — seul le catalogue en décide');
     }
 
     var apn = pp.apparierParNomSouple;
