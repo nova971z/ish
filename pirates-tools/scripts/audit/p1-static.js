@@ -76,6 +76,17 @@ HTML.replace(/\sid="([^"]+)"/g, (_, id) => { htmlIds.push(id); return _; });
 const jsMadeIds = new Set();
 ALL_JS_TEXT.replace(/\sid="([A-Za-z0-9_:-]+)"/g, (_, id) => { jsMadeIds.add(id); return _; });
 ALL_JS_TEXT.replace(/\sid='([A-Za-z0-9_:-]+)'/g, (_, id) => { jsMadeIds.add(id); return _; });
+// …et par AFFECTATION (el.id = 'x') : le bandeau prix (09/08) est créé ainsi
+// (createElement + .id) et passait pour « lu mais inexistant ». ALL_JS_TEXT ne
+// contient que les LITTÉRAUX : l'affectation se voit dans l'AST, pas dedans.
+walk(AST, (n) => {
+  if (n.type === 'AssignmentExpression' && n.operator === '='
+    && n.left.type === 'MemberExpression' && !n.left.computed
+    && n.left.property.type === 'Identifier' && n.left.property.name === 'id'
+    && n.right.type === 'Literal' && typeof n.right.value === 'string') {
+    jsMadeIds.add(n.right.value);
+  }
+});
 
 // ids LUS par le JS : getElementById('x'), querySelector('#x'), $('#x')
 const readIds = new Map();   // id -> [lignes]

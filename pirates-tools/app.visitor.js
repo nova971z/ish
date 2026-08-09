@@ -1262,10 +1262,26 @@
       .catch(function (err) { console.warn('[products] statique KO:', err.message); });
 
     // 2) Enrichissement overrides — borné, non bloquant.
+    /* ⛔ ARGENT — LE CLIENT DOIT SAVOIR SI LES PRIX SONT VIVANTS (09/08/2026).
+       `prixConfirmes:false` (ou l'API injoignable — quota Firebase épuisé)
+       signifie : les prix à l'écran viennent du fichier de base, possiblement
+       PÉRIMÉS. On l'affiche (bandeau) et on bloque la saisie de carte — le
+       serveur refuse déjà le débit (503), ici on cesse de faire SEMBLANT. */
     if (overridesUrl) {
-      withTimeout(tryFetch(overridesUrl), 6000)
-        .then(function (arr) { apply(arr, 'api'); })
-        .catch(function (err) { console.warn('[products] overrides ignorés:', err.message); });
+      withTimeout(fetch(overridesUrl, { cache: 'no-store' })
+        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }), 6000)
+        .then(function (data) {
+          var arr = extractProducts(data);
+          if (!arr) throw new Error('Invalid response shape');
+          _prixConfirmes = data.prixConfirmes !== false;
+          majBandeauPrix();
+          apply(arr, 'api');
+        })
+        .catch(function (err) {
+          _prixConfirmes = false;
+          majBandeauPrix();
+          console.warn('[products] overrides ignorés:', err.message);
+        });
     }
 
     // 3) Filet : si rien n'a pu être rendu au bout de 8 s, prévenir l'utilisateur.
@@ -1391,6 +1407,26 @@
   var _gridItems = [];
   var _gridPage = 1;
   var _pagerWired = false;
+
+  /* ⛔ ARGENT — LES PRIX SONT-ILS VIVANTS ? Vrai quand /api/products a répondu
+     avec prixConfirmes:true (overrides Firebase fusionnés). Faux quand l'API
+     le dit (panne/quota) OU qu'elle est injoignable : les prix affichés sont
+     alors ceux du fichier de base, possiblement périmés — on l'ANNONCE
+     (bandeau) et la saisie de carte est bloquée (même message). Le débit est
+     déjà refusé côté serveur (create-payment-intent 503) : ici on cesse
+     seulement de faire semblant. */
+  var _prixConfirmes = true;
+  function majBandeauPrix() {
+    var b = document.getElementById('prixBandeau');
+    if (_prixConfirmes) { if (b) b.remove(); return; }
+    if (b) return;
+    b = document.createElement('div');
+    b.id = 'prixBandeau';
+    b.className = 'prix-bandeau';
+    b.setAttribute('role', 'status');
+    b.textContent = 'Prix en cours d’actualisation — les commandes reprennent dans quelques minutes.';
+    document.body.prepend(b);
+  }
 
   // SOURCE UNIQUE du balisage d'une carte produit (audit P7). Il était écrit
   // TROIS fois — catalogue, accueil, favoris — et la copie des favoris avait
@@ -11432,6 +11468,19 @@
     var container = document.getElementById('carteMontage');
     var errorEl = document.getElementById('carteErreur');
     if (errorEl) { errorEl.hidden = true; errorEl.textContent = ''; }
+    /* ⛔ ARGENT — PRIX NON CONFIRMÉS = PAS DE PAIEMENT (09/08/2026). Quand
+       Firebase est indisponible (quota…), les prix affichés retombent sur le
+       fichier de base, potentiellement PÉRIMÉS. Le serveur refuse déjà (503,
+       create-payment-intent) ; ici on le dit AVANT la saisie de carte au lieu
+       de laisser le client découvrir le refus après. Même message que le
+       bandeau — une seule vérité. */
+    if (!_prixConfirmes) {
+      if (errorEl) {
+        errorEl.hidden = false;
+        errorEl.textContent = 'Les prix sont en cours d’actualisation — les commandes reprennent dans quelques minutes. Merci de réessayer.';
+      }
+      return;
+    }
     _quoteTerritory = ship.territory;
 
     /* ⛔⛔ AUCUN TEST DU SDK L'ANCIEN FOURNISSEUR ICI (01/08/2026). Ce bloc commençait par
@@ -13904,7 +13953,7 @@
     if (window.__PT_ADMIN) return Promise.resolve();
     if (__adminCharge) return __adminCharge;
     __adminCharge = new Promise(function (res, rej) {
-      var s = document.createElement('script'); s.src = 'admin.bundle.js?v=603';
+      var s = document.createElement('script'); s.src = 'admin.bundle.js?v=604';
       s.onload = res; s.onerror = function () { __adminCharge = null; rej(new Error('admin.bundle indisponible')); };
       document.head.appendChild(s);
     });

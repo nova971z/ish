@@ -2800,8 +2800,11 @@ module.exports = async function () {
            ⚠️ Le harnais ne recopie AUCUN nombre de pages : il le relit dans le
            plan. Un seuil recopié se périme. */
         adm._internals.pwScanReset();
-        var planT = require('../api/_lib/traqueur-plans.js').plan('MAKITA', 'idealo')
-          || require('../api/_lib/traqueur-plans.js').plan('DEWALT', 'idealo');
+        /* ⛔ LE PLAN LU ET LA MARQUE REJOUÉE DOIVENT ÊTRE LES MÊMES. Quand le
+           plan MAKITA est arrivé (09/08), ce bloc lisait SES 112 pages tout en
+           rejouant des requêtes DEWALT (67 pages) — trois assertions rouges
+           pour un code juste. Le harnais rejoue DEWALT : il lit le plan DEWALT. */
+        var planT = require('../api/_lib/traqueur-plans.js').plan('DEWALT', 'idealo');
         var nbPages = planT && planT.pages;
         ok(nbPages > 1, '⛔ PRÉALABLE : un plan déclare bien un nombre de pages');
         if (nbPages > 1) {

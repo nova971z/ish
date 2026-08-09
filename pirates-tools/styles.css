@@ -5863,6 +5863,17 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 }
 .stat-mini__btn.active { color: var(--accent); border-color: var(--accent); }
 
+/* Bandeau « prix en cours d'actualisation » : visible quand les prix servis
+   viennent du fichier de base (Firebase indisponible). L'achat est suspendu —
+   le bandeau porte LE même message que le refus du tunnel de paiement. */
+.prix-bandeau {
+  position: sticky; top: 0; z-index: 240;
+  padding: .55rem .9rem; text-align: center;
+  font-size: .85rem; font-weight: 600;
+  background: #4a3200; color: #ffd67a;
+  border-bottom: 1px solid #7a5a10;
+}
+
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));

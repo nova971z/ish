@@ -51,6 +51,32 @@ var PLANS = {
       + 'tranche, sans rien avoir à supposer.',
     note: 'trié par prix DÉCROISSANT, donc le balayage part de la DERNIÈRE page — '
       + 'les articles les moins chers bougent le plus.'
+  },
+
+  /* ── MAKITA chez idealo (09/08/2026) ──────────────────────────────────────
+     URLs données par l'user, DEPUIS SON ÉCRAN (jamais déduites) :
+     · page 1   : /prechcat/100oE0oJ1oM124301.html?qr=false      (SANS I16)
+     · page 2   : /prechcat/100I16-15oE0oJ1oM124301.html?qr=false
+     · page 3   : /prechcat/100I16-30oE0oJ1oM124301.html?qr=false
+     · page 112 : /prechcat/100I16-1665oE0oJ1oM124301.html?qr=false
+     Le pas de 15 est PROUVÉ par trois points (15, 30, et 1665 = 111 × 15) —
+     pas deux comme DeWALT à l'époque. Catégorie idealo : M124301. */
+  'MAKITA@idealo': {
+    site: 'idealo',
+    pages: 112,
+    pas: 15,
+    parPage: 60,
+    ordre: 'desc',
+    patron: 'https://www.idealo.fr/prechcat/100I16-{offset}oE0oJ1oM124301.html?qr=false',
+    patronPage1: 'https://www.idealo.fr/prechcat/100oE0oJ1oM124301.html?qr=false',
+    aVerifier: 'parPage (60) est supposé IDENTIQUE à DeWALT (même site, même gabarit de '
+      + 'grille) — le premier balayage tranche : `tuilesDansLaPage` le mesure page par '
+      + 'page, et `couverture.refsDistinctes` doit croître d\'environ 60 par page. '
+      + 'Ses URLs ne portent pas de sortKey : l\'ordre réel se lira sur le relevé.',
+    note: 'ATTENTION lecture des références : la tête de référence « connue » du parseur '
+      + '(teteConnue) ne couvre que la nomenclature DeWALT — une réf Makita SANS chiffre '
+      + 'et à tiret peut être manquée. Les réfs Makita courantes (DTW700Z, DHP486…) '
+      + 'portent des chiffres et passent par le chemin normal.'
   }
 };
 
