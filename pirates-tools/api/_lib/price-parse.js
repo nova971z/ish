@@ -2279,8 +2279,24 @@ function extraireCaracteristiques(titre, brand) {
      ⚠️ SEUL LE TYPAGE utilise ce texte élagué. Les batteries, le chargeur,
      le coffret et les Ah continuent de se lire sur le titre ENTIER — sinon
      on perdrait précisément ce qui fait le prix d'un lot. */
-  var elague = aTyper.replace(/\([^)]*\)/g, ' ').replace(/\s\+.*$/, ' ').trim();
+  /* ⛔ LE « & » EST UN « + » ÉCRIT AUTREMENT. Mesuré le 09/08/2026 sur le
+     relevé idealo Quincaillerie de l'user : « Affleureuse Défonceuse Brushless
+     XR 18V - Plongée 55mm & Coffret 22 Fraises » sortait `consommable/fraise`
+     — la machine typée par les fraises de son lot — et « Souffleur … &
+     Recharge de Fil Coupe Bordure » sortait `fil de débroussailleuse`. Même
+     mécanisme que le « + » : ce qui suit l'esperluette est le lot, pas
+     l'article. ⚠️ Comme pour le « + », SEUL LE TYPAGE est élagué — batteries,
+     Ah et coffret continuent de se lire sur le titre ENTIER. */
+  var elague = aTyper.replace(/\([^)]*\)/g, ' ').replace(/\s[+&].*$/, ' ').trim();
   if (elague.length >= 8) aTyper = elague;
+  /* ⛔ « … ET/AVEC COFFRET DE TRANSPORT » DÉCRIT L'EMBALLAGE, PAS L'ARTICLE.
+     Mesuré le 09/08/2026, même relevé : « Scie Sabre Électrique avec Vitesse
+     Variable et Coffret de Transport » sortait `rangement/coffret` parce que
+     « coffret de transport » est une entrée du vocabulaire PLUS LONGUE que
+     « scie sabre » — et la plus longue gagne. Précédé de « et »/« avec », ce
+     segment ACCOMPAGNE l'article : il sort du typage. Un « Coffret de
+     transport » vendu SEUL (sans et/avec devant) reste typé coffret. */
+  aTyper = aTyper.replace(/\b(?:et|avec)\s+(?:son\s+)?coffret\s+de\s+transport\b/g, ' ');
   // ── Nom propre de l'article, par correspondance la plus longue (mot entier).
   var typ = typerTitre(aTyper) || typerTitre(sansCond) || typerTitre(bas);
   if (typ) { car.famille = typ.famille; car.rayon = typ.rayon; car.type = typ.type; }

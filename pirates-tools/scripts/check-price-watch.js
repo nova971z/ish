@@ -951,6 +951,57 @@ module.exports = async function () {
       '⛔ PRÉALABLE : DWST reste du RANGEMENT — sinon la règle ne distingue plus '
       + 'un lot de machines d\'une caisse vide (' + typeDewalt('DEWALT DWST83345-1 Coffret TOUGHSYSTEM') + ')');
 
+    /* ⛔⛔ FVK EST LE MÊME PIÈGE QUE DWK, EN GAMME FLEXVOLT. Mesuré le
+       09/08/2026 sur le relevé idealo Quincaillerie de l'user : deux kits
+       FVK…T2-QW dont le titre énumère le contenu (« DCH… + DCG… + 2 x 6.0 Ah
+       + … + TSTAK II + TSTAK VI ») sortaient `rangement / coffret modulaire` —
+       un lot de deux machines 54 V pris pour sa caisse. Réfs synthétiques ici
+       (règle d'ancrage) : c'est le PRÉFIXE qu'on éprouve. */
+    var kitsFvk = ['DeWALT Kit FVK999T2-QW 54V/18V (DCH999 + DCG999 + 2 x 6.0 Ah + TSTAK II + TSTAK VI)',
+      'DEWALT FVK998X3HD-QW'];
+    var kitsFvkOk = kitsFvk.filter(function (t) { return typeDewalt(t) === 'machine/combo/pack d\'outils'; });
+    ok(kitsFvkOk.length === kitsFvk.length,
+      '⛔⛔ un FVK est un LOT DE MACHINES FlexVolt, même quand son titre finit par '
+      + 'les TSTAK du lot, et même réduit à sa seule référence ('
+      + kitsFvkOk.length + '/' + kitsFvk.length + ' — obtenu '
+      + JSON.stringify(kitsFvk.map(typeDewalt)) + ')');
+
+    /* ⛔ LE « & » EST UN « + » ÉCRIT AUTREMENT. Mesuré le 09/08/2026 sur le même
+       relevé : « Affleureuse … & Coffret 22 Fraises » sortait
+       `consommable/fraise` (la machine typée par les fraises de son lot) et
+       « Souffleur … & Recharge de Fil Coupe Bordure » sortait
+       `fil de débroussailleuse`. Ce qui suit l'esperluette est le lot. */
+    ok(typeDewalt('DEWALT - Affleureuse Brushless XR 18V - Plongée 55mm & Coffret 22 Fraises de Défonceuse')
+        === 'machine/bois/affleureuse',
+      '⛔ ce qui suit un « & » est le LOT, pas l\'article : l\'affleureuse ne se '
+      + 'type plus par les fraises de son coffret ('
+      + typeDewalt('DEWALT - Affleureuse Brushless XR 18V - Plongée 55mm & Coffret 22 Fraises de Défonceuse') + ')');
+    /* ⚠️ PRÉALABLE 1 — l'élagage ne vaut que pour le TYPAGE : le coffret du lot
+       continue de se lire sur le titre ENTIER, c'est lui qui fait le prix. */
+    ok(pp.extraireCaracteristiques('DEWALT Perceuse Brushless 18V & Coffret TSTAK II', 'DEWALT').coffret === 'TSTAK',
+      '⚠️ PRÉALABLE : le coffret cité APRÈS le « & » se lit toujours — l\'élagage '
+      + 'ne vaut que pour le typage, jamais pour ce qui fait le prix');
+    /* ⚠️ PRÉALABLE 2 — un kit d'ACCESSOIRES à « & » reste un consommable : sans
+       ce cas, une règle qui typerait « machine » tout titre à « & » resterait
+       verte. */
+    ok(/^consommable\//.test(typeDewalt('DEWALT Jeu de douilles 13-24mm & cliquet, 9 pièces')),
+      '⚠️ PRÉALABLE : un jeu de douilles à « & » reste un CONSOMMABLE ('
+      + typeDewalt('DEWALT Jeu de douilles 13-24mm & cliquet, 9 pièces') + ')');
+
+    /* ⛔ « ET/AVEC COFFRET DE TRANSPORT » DÉCRIT L'EMBALLAGE, PAS L'ARTICLE.
+       Mesuré le 09/08/2026 : « Scie Sabre Électrique avec Vitesse Variable et
+       Coffret de Transport » sortait `rangement/coffret` — « coffret de
+       transport » est une entrée plus LONGUE que « scie sabre », et la plus
+       longue gagne. */
+    ok(typeDewalt('DEWALT Scie Sabre Électrique avec Vitesse Variable et Coffret de Transport + Lame, Set de 3')
+        === 'machine/sciage/scie sabre',
+      '⛔ « et Coffret de Transport » ne vole plus le type de la machine qu\'il '
+      + 'accompagne (' + typeDewalt('DEWALT Scie Sabre Électrique avec Vitesse Variable et Coffret de Transport + Lame, Set de 3') + ')');
+    /* ⚠️ PRÉALABLE — le coffret de transport vendu SEUL reste un coffret. */
+    ok(/^rangement\//.test(typeDewalt('DEWALT Coffret de transport TSTAK profond')),
+      '⚠️ PRÉALABLE : un coffret de transport vendu SEUL reste du RANGEMENT ('
+      + typeDewalt('DEWALT Coffret de transport TSTAK profond') + ')');
+
     /* ⛔⛔ UN TITRE DE MARCHAND PEUT ÊTRE FAUX ; UNE RÉFÉRENCE, NON. Trouvé le
        03/08 en faisant auditer ses 59 lignes contre la réalité DeWALT, source
        par source. DEUX lignes vendaient une « Dégauchisseuse sans fil DCW 620 »

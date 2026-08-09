@@ -781,6 +781,18 @@ var PREFIXES_DEWALT = {
      l'objet vendu, comme DCK. C'est lui qui doit renverser le mot du
      sous-titre, pas l'inverse. */
   DWK:  { famille: 'machine', rayon: 'combo', type: 'pack d\'outils', note: 'DeWALT Kit — lot de machines, jamais le coffret qui les porte' },
+  /* ⛔⛔ FVK EST LE MÊME PIÈGE QUE DWK, EN GAMME FLEXVOLT. Mesuré le 09/08/2026
+     sur le relevé idealo Quincaillerie de l'user : « FVK271T2-QW 54V/18V
+     (DCH333 + DCG418 + 2 x 6.0 Ah + DCB118 + TSTAK II + TSTAK VI) » et
+     « FVK381T2-QW … » sortaient tous deux « rangement / coffret modulaire » —
+     le TSTAK du lot volait la place des DEUX machines qu'il contient, et un
+     kit à ~700 € passait pour un coffret de rangement. Le titre énumère
+     lui-même son contenu ; `price-parse` traite d'ailleurs déjà FVK en kit
+     (PREFIXES_KIT, ligne « FVK = kit FLEXVOLT »).
+     ⚠️ J4 : c'est de l'argent — même mécanisme, mot pour mot, que DWK.
+     ⛔ Et il ARBITRE, comme DCK et DWK : le K de FlexVolt Kit désigne l'objet
+     vendu. */
+  FVK:  { famille: 'machine', rayon: 'combo', type: 'pack d\'outils', note: 'FlexVolt Kit — lot de machines 54V/18V, jamais le coffret qui les porte' },
   DWST: { famille: 'rangement', rayon: 'coffret', incertain: true, note: 'coffret et organiseur, mais AUSSI la radio de chantier' },
   DWHT: { famille: 'consommable', incertain: true, note: 'outillage à main, mais AUSSI le télémètre laser' },
   DWMT: { famille: 'consommable', incertain: true, note: 'outillage de mécanicien' },
