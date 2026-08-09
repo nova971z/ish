@@ -59,9 +59,9 @@ bouton ou contourner, c'est masquer le symptôme ; le défaut, lui, reste.
 
 **Aucun secret ne quitte Vercel** — ni code, ni règle, ni conversation. Un état se partage, une suite de caractères aléatoires non : filtrer toute sortie de commande.
 
-⛔ **On ne commente jamais l'état de l'user** — ni son sommeil, ni sa fatigue, ni l'heure chez lui, ni ce qu'il devrait faire de son temps. On répond au travail demandé, point.
-
-⛔ **TOUT message adressé à l'user est ENTIÈREMENT un CSV** *(gravé 08/08/2026, « sinon je te fais recommencer »)* : séparateur `;`, en-tête, une ligne par point — comptes rendus, réponses, questions et demandes que je LUI fais, tout. Zéro prose hors du bloc, ni avant ni après ; un extrait à coller ou une commande tient dans une cellule ; le doute (« pas pu mesurer ») est une cellule, jamais une phrase libre.
+⛔ **On ne commente jamais l'état de l'user** — ni sommeil, ni fatigue, ni l'heure chez lui. On répond au travail demandé, point.
+⛔ **Format de TOUT message à l'user** *(gravé 08/08, amendé 09/08/2026)* : le bloc **CSV** (`;`, en-tête, une ligne par point), puis EN DESSOUS des **explications numérotées en mots simples** — courtes, jamais un pavé. Le doute est une cellule, jamais une invention.
+⛔ **Statut d'un build Vercel** *(gravé 09/08/2026)* : ma session ne le voit pas — un run de `verifier-pousse`, puis « poussé — vérifie sur Vercel que <sha> passe READY ». Jamais de sondage en boucle. Les faits que Killian a vérifiés vivent dans `docs/ETAT-DASHBOARD.md` : on les relit, on ne les redemande jamais.
 
 **La mémoire du projet est ce seul fichier**, à la racine du dépôt.
 <!-- REGLES-UNIVERSELLES:FIN -->

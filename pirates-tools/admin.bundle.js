@@ -28,34 +28,55 @@ function loadAdminStats(force) {
     return;
   A._adminStatsLoaded = true;
   el.innerHTML = '<p class="admin-loading">Chargement\u2026</p>';
-  A.adminGet('stats').then(function (data) {
-    renderAdminStats(el, data.stats || {});
+  var params = A._adminStatsJours === 7 || A._adminStatsJours === 30 ? { jours: A._adminStatsJours } : null;
+  A.adminGet('stats', params).then(function (data) {
+    renderAdminStats(el, data.stats || {}, data.periode || null);
   }).catch(function (e) {
     el.innerHTML = '<p class="admin-error">Erreur : ' + A.escapeHTML(e.message) + '</p>';
   });
 }
 
-function renderAdminStats(el, s) {
+function renderAdminStats(el, s, periode) {
   var t = s.totals || {};
   var totalVisitors = (t.newVisitors || 0) + (t.returningVisitors || 0);
   var html = '';
-  html += '<div class="stat-grid">' + A.statCard('Visites', t.sessions || 0) + A.statCard('Pages vues', t.pageViews || 0) + A.statCard('Clics', t.clicks || 0) + A.statCard('Visiteurs identifiés', totalVisitors, 'consentis') + A.statCard('Nouveaux', t.newVisitors || 0) + A.statCard('Récurrents', t.returningVisitors || 0) + '</div>';
+  var pJours = periode && periode.jours;
+  var libPeriode = pJours === 7 ? '7 derniers jours' : pJours === 30 ? '30 derniers jours' : 'depuis le début';
+  var fenetre = periode && periode.du && periode.au ? ' \u2014 du ' + A.escapeHTML(periode.du) + ' au ' + A.escapeHTML(periode.au) : '';
+  html += '<div class="stat-periode" role="group" aria-label="Période des statistiques">' + [
+    [
+      7,
+      '7 jours'
+    ],
+    [
+      30,
+      '30 jours'
+    ],
+    [
+      'total',
+      'Depuis le début'
+    ]
+  ].map(function (o) {
+    var actif = pJours === o[0] || o[0] === 'total' && pJours === 'total';
+    return '<button type="button" class="cat-chip' + (actif ? ' active' : '') + '" data-stats-jours="' + o[0] + '">' + o[1] + '</button>';
+  }).join('') + '<span class="stat-periode__fenetre">' + A.escapeHTML(libPeriode) + fenetre + '</span>' + '</div>';
+  html += '<div class="stat-grid">' + A.statCard('Visites (sessions)', t.sessions || 0, libPeriode) + A.statCard('Pages vues', t.pageViews || 0, libPeriode) + A.statCard('Clics mesurés', t.clicks || 0, 'boutons suivis \xB7 ' + libPeriode) + A.statCard('Visiteurs uniques', totalVisitors, 'consentis \xB7 ' + libPeriode) + A.statCard('Nouveaux', t.newVisitors || 0, '1re visite \xB7 ' + libPeriode) + A.statCard('Récurrents', t.returningVisitors || 0, 'déjà venus \xB7 ' + libPeriode) + '</div>' + '<p class="stat-note">Mesure première partie : robots exclus, et seuls les visiteurs ayant accepté la mesure sont comptés \u2014 les vrais totaux sont donc supérieurs.</p>';
   html += '<div class="stat-cols">' + '<section class="stat-block"><h3 class="stat-block__title">Appareils</h3>' + A.barRows(s.devices) + '</section>' + '<section class="stat-block"><h3 class="stat-block__title">Sources de trafic</h3>' + A.barRows(s.sources) + '</section>' + '</div>';
-  html += '<section class="stat-block"><h3 class="stat-block__title">Produits les plus consultés</h3>';
+  html += '<section class="stat-block"><h3 class="stat-block__title">Produits les plus consultés</h3>' + '<p class="stat-note">Compteurs cumulés depuis le début \u2014 non filtrés par la période.</p>';
   var prods = (s.products || []).filter(function (p) {
     return p.views || p.selects || p.addToCart;
   }).slice(0, 15);
   if (!prods.length) {
     html += '<p class="admin-empty">Aucune consultation enregistrée pour le moment.</p>';
   } else {
-    html += '<table class="stat-table"><thead><tr><th>Produit</th><th>Vues</th><th>Clics</th><th>Panier</th><th>Achats</th><th>Temps moy.</th></tr></thead><tbody>';
+    html += '<table class="stat-table"><thead><tr><th>Produit</th><th>Vues fiche</th><th>Clics carte</th><th>Panier</th><th>Achats</th><th>Temps moy.</th></tr></thead><tbody>';
     prods.forEach(function (p) {
       html += '<tr>' + '<td>' + A.escapeHTML(A.productTitleByKey(p.productId)) + '</td>' + '<td>' + (p.views || 0) + '</td>' + '<td>' + (p.selects || 0) + '</td>' + '<td>' + (p.addToCart || 0) + '</td>' + '<td>' + (p.purchases || 0) + '</td>' + '<td>' + A.fmtDuration(p.avgTimeMs) + '</td>' + '</tr>';
     });
     html += '</tbody></table>';
   }
   html += '</section>';
-  html += '<section class="stat-block"><h3 class="stat-block__title">Clics \u2014 sur quoi et combien de fois</h3>';
+  html += '<section class="stat-block"><h3 class="stat-block__title">Clics \u2014 sur quoi et combien de fois</h3>' + '<p class="stat-note">Compteurs cumulés depuis le début \u2014 non filtrés par la période.</p>';
   var clicks = (s.clicks || []).slice(0, 20);
   if (!clicks.length) {
     html += '<p class="admin-empty">Aucun clic instrumenté pour le moment.</p>';
@@ -67,7 +88,7 @@ function renderAdminStats(el, s) {
     html += A.barRows(cmap, { limit: 20 });
   }
   html += '</section>';
-  html += '<section class="stat-block"><h3 class="stat-block__title">Provenance des visiteurs</h3>';
+  html += '<section class="stat-block"><h3 class="stat-block__title">Provenance des visiteurs</h3>' + '<p class="stat-note">Pays vu par le réseau (peut différer du domicile réel) \u2014 cumulé depuis le début.</p>';
   var geo = s.geo || [];
   if (!geo.length) {
     html += '<p class="admin-empty">Aucune donnée géographique pour le moment.</p>';
@@ -81,6 +102,13 @@ function renderAdminStats(el, s) {
   }
   html += '</section>';
   el.innerHTML = html;
+  A.$$('[data-stats-jours]', el).forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var v = btn.getAttribute('data-stats-jours');
+      A._adminStatsJours = v === 'total' ? 'total' : Number(v);
+      loadAdminStats(true);
+    });
+  });
   A.destroyAdminGlobe();
   if (geo.length) {
     var container = document.getElementById('adminGlobe');

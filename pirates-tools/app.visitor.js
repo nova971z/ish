@@ -12113,6 +12113,11 @@
 
   // ── Dashboard : Statistiques ───────────────────────────────
   var _adminStatsLoaded = false;
+  /* Période affichée par l'onglet stats. Demande user 09/08 : « on ne comprend
+     pas à quoi ça correspond ni sur quelle période ». Défaut 30 jours — le
+     total historique reste à un tap. La valeur vit ici (pas dans le DOM) pour
+     survivre au re-render. */
+  var _adminStatsJours = 30;
   
 
   function statCard(label, value, sub) {
@@ -13818,6 +13823,7 @@
      Il lit les symboles partagés via window.__PT_ADMIN_CTX (accesseurs
      get/set → variables VIVES de cette fermeture). GÉNÉRÉ, ne pas éditer. */
   var __A = {};
+  Object.defineProperty(__A, '$', { get: function () { return $; }, set: function (v) { $ = v; }, configurable: true });
   Object.defineProperty(__A, 'ADMIN_PARTNER_PHOTOS_MAX', { get: function () { return ADMIN_PARTNER_PHOTOS_MAX; }, set: function (v) { ADMIN_PARTNER_PHOTOS_MAX = v; }, configurable: true });
   Object.defineProperty(__A, 'ADMIN_PROD_MAX', { get: function () { return ADMIN_PROD_MAX; }, set: function (v) { ADMIN_PROD_MAX = v; }, configurable: true });
   Object.defineProperty(__A, 'COMPTA_DEVIS', { get: function () { return COMPTA_DEVIS; }, set: function (v) { COMPTA_DEVIS = v; }, configurable: true });
@@ -13842,6 +13848,7 @@
   Object.defineProperty(__A, '_adminPartnersList', { get: function () { return _adminPartnersList; }, set: function (v) { _adminPartnersList = v; }, configurable: true });
   Object.defineProperty(__A, '_adminPhotosBusy', { get: function () { return _adminPhotosBusy; }, set: function (v) { _adminPhotosBusy = v; }, configurable: true });
   Object.defineProperty(__A, '_adminProdQ', { get: function () { return _adminProdQ; }, set: function (v) { _adminProdQ = v; }, configurable: true });
+  Object.defineProperty(__A, '_adminStatsJours', { get: function () { return _adminStatsJours; }, set: function (v) { _adminStatsJours = v; }, configurable: true });
   Object.defineProperty(__A, '_adminStatsLoaded', { get: function () { return _adminStatsLoaded; }, set: function (v) { _adminStatsLoaded = v; }, configurable: true });
   Object.defineProperty(__A, '_ajoutImage', { get: function () { return _ajoutImage; }, set: function (v) { _ajoutImage = v; }, configurable: true });
   Object.defineProperty(__A, '_ajoutImageNom', { get: function () { return _ajoutImageNom; }, set: function (v) { _ajoutImageNom = v; }, configurable: true });
@@ -13889,7 +13896,7 @@
     if (window.__PT_ADMIN) return Promise.resolve();
     if (__adminCharge) return __adminCharge;
     __adminCharge = new Promise(function (res, rej) {
-      var s = document.createElement('script'); s.src = 'admin.bundle.js?v=600';
+      var s = document.createElement('script'); s.src = 'admin.bundle.js?v=601';
       s.onload = res; s.onerror = function () { __adminCharge = null; rej(new Error('admin.bundle indisponible')); };
       document.head.appendChild(s);
     });

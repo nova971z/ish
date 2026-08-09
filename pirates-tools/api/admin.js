@@ -689,11 +689,40 @@ module.exports = async function handler(req, res) {
           s.forEach((d) => out.push(Object.assign({ id: d.id }, d.data())));
           return out;
         };
-        const daily = await readAll('analytics_daily');
+        /* ── PÉRIODE (demande user 09/08) : &jours=7|30 borne les compteurs
+           journaliers (visites, pages vues, clics, visiteurs) à la fenêtre.
+           L'id des docs analytics_daily EST la date (YYYY-MM-DD) : la requête
+           par intervalle d'id ne LIT que les jours voulus — précision ET
+           économie de quota. Sans paramètre : tout l'historique (Total).
+           ⚠️ Produits/clics-libellés/pays n'ont PAS de dimension temporelle
+           (compteurs cumulés, un doc par produit/libellé/pays) : ils restent
+           « depuis le début » quel que soit le filtre — la réponse le DIT
+           (periode.cumulatif) pour que l'écran l'affiche honnêtement.
+           J3 : agrégats sans identifiant ni IP — rien de nouveau ne sort. */
+        const joursDemandes = Number(req.query && req.query.jours) || 0;
+        let daily;
+        if (joursDemandes === 7 || joursDemandes === 30) {
+          const depuis = analytics.dateKey(Date.now() - joursDemandes * 86400000);
+          const sd = await db.collection('analytics_daily')
+            .where(admin.firestore.FieldPath.documentId(), '>=', depuis).get();
+          daily = [];
+          sd.forEach((d) => daily.push(Object.assign({ id: d.id }, d.data())));
+        } else {
+          daily = await readAll('analytics_daily');
+        }
         const products = await readAll('analytics_products');
         const clicks = await readAll('analytics_clicks');
         const geo = await readAll('analytics_geo');
-        return res.status(200).json({ ok: true, stats: analytics.summarize(daily, products, clicks, geo) });
+        const dates = daily.map((d) => d.date || d.id).sort();
+        return res.status(200).json({
+          ok: true,
+          periode: {
+            jours: (joursDemandes === 7 || joursDemandes === 30) ? joursDemandes : 'total',
+            du: dates[0] || null, au: dates[dates.length - 1] || null,
+            cumulatif: 'produits, clics par libellé et pays sont comptés depuis le début (pas de date par événement)'
+          },
+          stats: analytics.summarize(daily, products, clicks, geo)
+        });
       }
 
       // ── Cartes client (comptes créés) ──────────────────────────

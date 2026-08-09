@@ -5844,6 +5844,17 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 .admin-empty, .admin-error, .admin-count { color: rgba(255,255,255,.6); font-size: .9rem; margin: .4rem 0; }
 .admin-error { color: #ff8a8a; }
 .admin-ok { color: #6ee7b7; }
+/* Sélecteur de période des statistiques (7 j / 30 j / total) + fenêtre réelle.
+   Réutilise .cat-chip (même langage visuel que les puces du catalogue). */
+.stat-periode {
+  display: flex; flex-wrap: wrap; align-items: center; gap: .5rem;
+  margin: 1rem 0 .2rem;
+}
+.stat-periode__fenetre { font-size: .8rem; color: var(--muted); }
+/* Note de lecture sous un bloc de chiffres : dit CE QUI est compté (période,
+   consentement, cumul) — un nombre sans définition est un piège. */
+.stat-note { font-size: .78rem; color: var(--muted); margin: .2rem 0 .8rem; }
+
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));

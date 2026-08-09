@@ -12124,14 +12124,20 @@
 
   // ── Dashboard : Statistiques ───────────────────────────────
   var _adminStatsLoaded = false;
+  /* Période affichée par l'onglet stats. Demande user 09/08 : « on ne comprend
+     pas à quoi ça correspond ni sur quelle période ». Défaut 30 jours — le
+     total historique reste à un tap. La valeur vit ici (pas dans le DOM) pour
+     survivre au re-render. */
+  var _adminStatsJours = 30;
   function loadAdminStats(force) {
     var el = document.getElementById('adminStats');
     if (!el) return;
     if (_adminStatsLoaded && !force) return;
     _adminStatsLoaded = true;
     el.innerHTML = '<p class="admin-loading">Chargement…</p>';
-    adminGet('stats').then(function (data) {
-      renderAdminStats(el, data.stats || {});
+    var params = (_adminStatsJours === 7 || _adminStatsJours === 30) ? { jours: _adminStatsJours } : null;
+    adminGet('stats', params).then(function (data) {
+      renderAdminStats(el, data.stats || {}, data.periode || null);
     }).catch(function (e) {
       el.innerHTML = '<p class="admin-error">Erreur : ' + escapeHTML(e.message) + '</p>';
     });
@@ -12174,20 +12180,39 @@
     return p ? (p.brand + ' — ' + p.title) : key;
   }
 
-  function renderAdminStats(el, s) {
+  function renderAdminStats(el, s, periode) {
     var t = s.totals || {};
     var totalVisitors = (t.newVisitors || 0) + (t.returningVisitors || 0);
     var html = '';
 
-    // Compteurs principaux.
-    html += '<div class="stat-grid">'
-      + statCard('Visites', t.sessions || 0)
-      + statCard('Pages vues', t.pageViews || 0)
-      + statCard('Clics', t.clicks || 0)
-      + statCard('Visiteurs identifiés', totalVisitors, 'consentis')
-      + statCard('Nouveaux', t.newVisitors || 0)
-      + statCard('Récurrents', t.returningVisitors || 0)
+    /* ── Période : sélecteur 7 j / 30 j / Total + fenêtre réelle affichée ──
+       Chaque chiffre du haut est SOMMÉ sur cette fenêtre — elle est écrite en
+       toutes lettres pour qu'aucun nombre ne flotte sans période. */
+    var pJours = periode && periode.jours;
+    var libPeriode = pJours === 7 ? '7 derniers jours'
+      : pJours === 30 ? '30 derniers jours' : 'depuis le début';
+    var fenetre = (periode && periode.du && periode.au)
+      ? ' — du ' + escapeHTML(periode.du) + ' au ' + escapeHTML(periode.au) : '';
+    html += '<div class="stat-periode" role="group" aria-label="Période des statistiques">'
+      + [[7, '7 jours'], [30, '30 jours'], ['total', 'Depuis le début']].map(function (o) {
+        var actif = (pJours === o[0]) || (o[0] === 'total' && pJours === 'total');
+        return '<button type="button" class="cat-chip' + (actif ? ' active' : '') + '" data-stats-jours="' + o[0] + '">' + o[1] + '</button>';
+      }).join('')
+      + '<span class="stat-periode__fenetre">' + escapeHTML(libPeriode) + fenetre + '</span>'
       + '</div>';
+
+    /* Compteurs principaux — libellés qui disent CE QUI est compté.
+       Rappel affiché : robots exclus, et seuls les visiteurs ayant ACCEPTÉ la
+       mesure sont comptés (les chiffres réels sont donc au-dessus). */
+    html += '<div class="stat-grid">'
+      + statCard('Visites (sessions)', t.sessions || 0, libPeriode)
+      + statCard('Pages vues', t.pageViews || 0, libPeriode)
+      + statCard('Clics mesurés', t.clicks || 0, 'boutons suivis · ' + libPeriode)
+      + statCard('Visiteurs uniques', totalVisitors, 'consentis · ' + libPeriode)
+      + statCard('Nouveaux', t.newVisitors || 0, '1re visite · ' + libPeriode)
+      + statCard('Récurrents', t.returningVisitors || 0, 'déjà venus · ' + libPeriode)
+      + '</div>'
+      + '<p class="stat-note">Mesure première partie : robots exclus, et seuls les visiteurs ayant accepté la mesure sont comptés — les vrais totaux sont donc supérieurs.</p>';
 
     // Appareils + sources.
     html += '<div class="stat-cols">'
@@ -12195,13 +12220,19 @@
       + '<section class="stat-block"><h3 class="stat-block__title">Sources de trafic</h3>' + barRows(s.sources) + '</section>'
       + '</div>';
 
-    // Produits les plus consultés (+ temps moyen).
-    html += '<section class="stat-block"><h3 class="stat-block__title">Produits les plus consultés</h3>';
+    /* Produits les plus consultés (+ temps moyen).
+       ⚠️ Ces compteurs sont CUMULÉS depuis le début (un compteur par produit,
+       sans date par événement) : le sélecteur de période ne les filtre pas —
+       on l'écrit sous le titre au lieu de le laisser deviner. « Clics carte »
+       = select_item (toucher la carte du produit dans la grille), pour ne plus
+       le confondre avec « Clics mesurés » (boutons suivis) du haut. */
+    html += '<section class="stat-block"><h3 class="stat-block__title">Produits les plus consultés</h3>'
+      + '<p class="stat-note">Compteurs cumulés depuis le début — non filtrés par la période.</p>';
     var prods = (s.products || []).filter(function (p) { return p.views || p.selects || p.addToCart; }).slice(0, 15);
     if (!prods.length) {
       html += '<p class="admin-empty">Aucune consultation enregistrée pour le moment.</p>';
     } else {
-      html += '<table class="stat-table"><thead><tr><th>Produit</th><th>Vues</th><th>Clics</th><th>Panier</th><th>Achats</th><th>Temps moy.</th></tr></thead><tbody>';
+      html += '<table class="stat-table"><thead><tr><th>Produit</th><th>Vues fiche</th><th>Clics carte</th><th>Panier</th><th>Achats</th><th>Temps moy.</th></tr></thead><tbody>';
       prods.forEach(function (p) {
         html += '<tr>'
           + '<td>' + escapeHTML(productTitleByKey(p.productId)) + '</td>'
@@ -12217,7 +12248,8 @@
     html += '</section>';
 
     // Clics ultra-précis.
-    html += '<section class="stat-block"><h3 class="stat-block__title">Clics — sur quoi et combien de fois</h3>';
+    html += '<section class="stat-block"><h3 class="stat-block__title">Clics — sur quoi et combien de fois</h3>'
+      + '<p class="stat-note">Compteurs cumulés depuis le début — non filtrés par la période.</p>';
     var clicks = (s.clicks || []).slice(0, 20);
     if (!clicks.length) {
       html += '<p class="admin-empty">Aucun clic instrumenté pour le moment.</p>';
@@ -12229,7 +12261,8 @@
     html += '</section>';
 
     // Provenance : globe 3D (si des coordonnées existent) + liste par pays.
-    html += '<section class="stat-block"><h3 class="stat-block__title">Provenance des visiteurs</h3>';
+    html += '<section class="stat-block"><h3 class="stat-block__title">Provenance des visiteurs</h3>'
+      + '<p class="stat-note">Pays vu par le réseau (peut différer du domicile réel) — cumulé depuis le début.</p>';
     var geo = (s.geo || []);
     if (!geo.length) {
       html += '<p class="admin-empty">Aucune donnée géographique pour le moment.</p>';
@@ -12242,6 +12275,16 @@
     html += '</section>';
 
     el.innerHTML = html;
+
+    /* Sélecteur de période : chaque puce recharge les stats sur sa fenêtre.
+       (Re-render complet — l'onglet est court, aucun état à préserver.) */
+    $$('[data-stats-jours]', el).forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var v = btn.getAttribute('data-stats-jours');
+        _adminStatsJours = (v === 'total') ? 'total' : Number(v);
+        loadAdminStats(true);
+      });
+    });
 
     // Globe 3D (lazy, three.js déjà utilisé pour les sphères de marque). En cas
     // d'échec (CDN/WebGL), la liste par pays ci-dessus reste la source fiable.

@@ -88,6 +88,7 @@ let resetBloc = APP.slice(APP.indexOf('if (changed) {'), APP.indexOf('if (user) 
 // personnelles — classées ici, avec leur raison, une par une.
 const NON_PERSONNEL = {
   _currentTerritory: 'préférence d\'affichage (territoire fiscal), pas une identité',
+  _adminStatsJours:  'période choisie de l\'onglet stats admin (7/30/total) — un réglage d\'écran, aucune donnée de compte',
   _partnersPromise:  'cache de l\'annuaire PUBLIC des artisans',
   _couriersPromise:  'cache de l\'annuaire PUBLIC des livreurs',
   // Filets « échec ≠ vide » : dernière liste RÉUSSIE des deux annuaires
