@@ -24,14 +24,12 @@
   ],
   "headers": [
     {
-      "comment": "SEO-011 : assets fingerprintés (posters WebP, modèles 3D, icônes) — immuables 1 an. Ils ne changent jamais sous la même URL ; un poster remplacé prend un nouveau nom.",
       "source": "/(images|models|icons)/(.*)",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
       ]
     },
     {
-      "comment": "SEO-012/CODE-003 : le catalogue statique (1,67 Mo) est mis en cache au BORD (CDN) 5 min, revalide en arriere-plan. Le CDN absorbe la charge et sert vite les visites repetees. La fraicheur des prix reste garantie par /api/products (overrides admin) et par le network-first du Service Worker.",
       "source": "/products.json",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=0, s-maxage=300, stale-while-revalidate=86400" }
