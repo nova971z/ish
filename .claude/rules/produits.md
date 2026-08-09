@@ -35,6 +35,52 @@ Son prix reposerait sur une supposition, et il n'est de toute façon pas
 approvisionnable. ⚠️ Retirer une fiche **ne supprime jamais ses visuels** :
 posters et modèles 3D sont conservés pour un éventuel retour.
 
+## Descriptifs et fiches techniques — comment on les récupère
+
+*Méthode gravée le 09/08/2026 à la demande de l'user : « il faudra que tu
+saches déjà comment le faire ». Elle vaut pour les 1 590 fiches sans descriptif
+mesurées ce jour (sur 1 708).*
+
+**⛔ ON RELÈVE DES FAITS, ON NE COPIE PAS UN TEXTE.** Ce qui se récupère, ce
+sont des **mesures** — puissance, vitesse, capacité de coupe, poids, cotes,
+emmanchement, nuance. Ce qui se rédige, c'est la phrase : elle est écrite ici,
+jamais reprise ailleurs. L'user, mot pour mot : « récupérer ne veut pas dire
+copier-coller, on récupère, on modifie proprement sans défaut et on colle au
+bon produit ».
+
+**Le geste, dans cet ordre :**
+1. **Une recherche par référence**, la référence exacte de la fiche accompagnée
+   du type d'outil et d'une caractéristique attendue (puissance, diamètre) —
+   sans quoi la recherche rend des produits voisins.
+2. **La documentation du constructeur fait foi.** Un distributeur sert à
+   recouper, jamais à trancher seul.
+3. **Recoupement sur au moins deux sources indépendantes** pour toute valeur
+   qui entre dans un calcul. ⛔ Le POIDS en fait partie : il commande le mode
+   d'envoi, donc le prix (voir plus bas).
+4. **Ce qui n'est pas trouvé reste VIDE**, et on le dit. Une caractéristique
+   inventée est pire qu'une caractéristique absente — c'est E-101.
+5. **Les sources sont citées** dans le compte-rendu, avec leur adresse.
+
+**⛔⛔ LE POIDS EST UNE DONNÉE D'ARGENT, PAS UNE FINITION.** Mesuré le
+09/08/2026 : **1 282 fiches sur 1 708 déclarent exactement 2 kg** — une valeur
+par défaut, jamais une pesée. Or `shipFor()` lit `weight_kg` et en tire le mode
+d'envoi. Sous 10 kg le tarif colis s'applique et grimpe avec le poids (23 € à
+2 kg, jusqu'à 64 € à 10 kg) ; au-delà, le modèle bascule sur le tarif bateau à
+29 €.
+⚠️ **Conséquence mesurée, et elle n'est pas celle qu'on croit** : les machines
+LOURDES ne sont pas sous-facturées (le bateau les rattrape). Le risque vit dans
+la tranche **3 à 10 kg déclarée 2 kg** — jusqu'à **41 € de transport non
+facturé par vente**. C'est cette tranche qu'on pèse en premier.
+*Porte* : aucune à ce jour — un poids par défaut ne se distingue pas d'un poids
+mesuré dans `products.json`. **Déclaratif, et dit.**
+
+**⛔ CE QUI N'EST PAS RÉCUPÉRABLE DEPUIS CETTE SESSION : LES IMAGES.** Mesuré
+le 09/08/2026, quatre fois : accès direct à un site constructeur, à un site
+marchand, à une banque d'images, et téléchargement d'un fichier — **tous
+refusés par le mandataire réseau**. Le moteur de recherche, lui, répond : il
+rend des **pages**, jamais des fichiers. Les visuels restent donc le travail de
+l'user (voir la règle des posters ci-dessous). On ne redemande plus.
+
 ## Posters
 
 **Fond sombre obligatoire, jamais blanc.** Si un visuel fourni est sur fond
