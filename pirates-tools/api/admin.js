@@ -2386,6 +2386,7 @@ async function handleRepriceAll(req, res, admin, db) {
        et on le DIT, au lieu de les fondre dans « coût inconnu ». */
     const gels = [];
     let lockedCount = 0;   // produits à prix verrouillé (jamais recalculés)
+    const snapReprice = []; // snapshot regroupé (flush ≤4 écritures après la boucle)
 
     for (const p of products) {
       // 🔒 PRIX VERROUILLÉ : décision commerciale de l'owner, le calculateur
@@ -2448,13 +2449,16 @@ async function handleRepriceAll(req, res, admin, db) {
           priceCostOrigin: srcInfo.origin, priceRecomputedAt: now
         };
         await db.collection('product_overrides').doc(p.id).set(patchReprice, { merge: true });
-        await snapshotLib.majSnapshot(db, admin, p.id, patchReprice);
+        // Snapshot regroupé (comme le balayage) : accumulé, écrit en ≤4 appels
+        // après la boucle — jamais un par produit (contention sur 4 documents).
+        snapReprice.push({ id: p.id, patch: patchReprice });
       }
       changed.push(rec);
     }
 
     // Écritures faites : purge le cache pour que le prochain contrôle (et le
     // site public) reparte des prix réels, sans attendre l'expiration.
+    if (snapReprice.length) await snapshotLib.majSnapshotBatch(db, admin, snapReprice);
     if (!dryRun && changed.length) catalog.invalidateOverrides();
 
     return res.status(200).json({
@@ -3718,6 +3722,12 @@ async function handlePriceWatch(req, res, admin, db) {
         note: 'ecriture gelee par TRAQUEUR_ECRIRE=0 — releve non applique' });
     }
     pwRafaleOuvrir(brand, (plans.plan(brand, sourceSlug) || {}).pages, nowMs);
+    /* ⛔ SNAPSHOT REGROUPÉ (09/08/2026) : on N'écrit PAS le snapshot produit par
+       produit dans la boucle — 60 écritures sur 4 documents contendaient et
+       ralentissaient le traqueur. On accumule ici et on écrit AU PLUS 4 fois,
+       après la boucle. La collection product_overrides, elle, reste écrite au
+       fil de la boucle (documents distincts, aucune contention). */
+    const snapPage = [];
     for (const item of parsed) {
       /* ⛔ Même règle que sur le chemin à sec : l'écriture exacte d'abord, la
          racine ensuite. Une règle vraie appliquée à un seul endroit ne protège
@@ -3742,7 +3752,7 @@ async function handlePriceWatch(req, res, admin, db) {
           };
           await db.collection('product_overrides').doc(p.id).set(
             Object.assign({}, patchR, { priceCheckedAt: now }), { merge: true });
-          await snapshotLib.majSnapshot(db, admin, p.id, Object.assign({}, patchR, { priceCheckedAt: now }));
+          snapPage.push({ id: p.id, patch: Object.assign({}, patchR, { priceCheckedAt: now }) });
           if (scanMode) pwMajLocale(ovW, p.id, patchR, nowMs);
         }
         continue;
@@ -3818,7 +3828,7 @@ async function handlePriceWatch(req, res, admin, db) {
           };
           await db.collection('product_overrides').doc(p.id).set(
             Object.assign({}, patchU, { priceCheckedAt: now }), { merge: true });
-          await snapshotLib.majSnapshot(db, admin, p.id, Object.assign({}, patchU, { priceCheckedAt: now }));
+          snapPage.push({ id: p.id, patch: Object.assign({}, patchU, { priceCheckedAt: now }) });
           if (scanMode) pwMajLocale(ovW, p.id, patchU, nowMs);
         }
         continue;
@@ -3905,7 +3915,7 @@ async function handlePriceWatch(req, res, admin, db) {
         }, promo);
         await db.collection('product_overrides').doc(p.id).set(
           Object.assign({}, patchA, { priceCheckedAt: now }), { merge: true });
-        await snapshotLib.majSnapshot(db, admin, p.id, Object.assign({}, patchA, { priceCheckedAt: now }));
+        snapPage.push({ id: p.id, patch: Object.assign({}, patchA, { priceCheckedAt: now }) });
         if (scanMode) pwMajLocale(ovW, p.id, patchA, nowMs);
         await db.collection('price_watch_log').add({
           sku: item.sku, id: p.id, oldPrice: cur, newPrice, srcTTC: effSrc, source: sourceSlug, brand,
@@ -3926,6 +3936,10 @@ async function handlePriceWatch(req, res, admin, db) {
       }
       applied.push(rec);
     }
+
+    /* Snapshot regroupé : UNE écriture par shard pour toute la page (au plus 4),
+       au lieu d'une par produit. En dryRun on n'a rien poussé (aucune écriture). */
+    if (snapPage.length) await snapshotLib.majSnapshotBatch(db, admin, snapPage);
 
     if (!dryRun && applied.length) catalog.invalidateOverrides();
 

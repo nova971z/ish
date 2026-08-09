@@ -317,6 +317,23 @@ module.exports = async function () {
      ses réfs à tiret sans chiffre sont perdues en silence. On vérifie une tête
      de chaque table (DCB = DeWALT batteries ; DTW = Makita boulonneuses,
      32 fiches mesurées au catalogue). */
+  /* ⛔ PERFORMANCE DU BALAYAGE (09/08/2026, remonté par l'user) : le snapshot
+     NE s'écrit PAS produit par produit dans la boucle — 60 écritures sur 4
+     documents contendaient et ralentissaient le traqueur. La boucle accumule
+     (snapPage.push) et une SEULE maj groupée (majSnapshotBatch) suit. On lit la
+     source d'admin.js : aucune ligne du corps de boucle ne doit contenir la
+     forme mono `snapshotLib.majSnapshot(` — seulement `majSnapshotBatch`. */
+  var admSrc = require('fs').readFileSync(require('path').join(__dirname, '..', 'api', 'admin.js'), 'utf8');
+  var boucle = admSrc.slice(admSrc.indexOf('for (const item of parsed) {'),
+    admSrc.indexOf('if (!dryRun && applied.length) catalog.invalidateOverrides();'));
+  ok(boucle && boucle.indexOf('for (const item of parsed) {') !== -1,
+    'préalable : la boucle de balayage est repérée dans admin.js');
+  ok(boucle.indexOf('snapshotLib.majSnapshot(') === -1 && /snapPage\.push\(/.test(boucle),
+    '⛔ le balayage n\'écrit PLUS le snapshot par produit (contention 4 docs) — il accumule (snapPage.push) '
+    + 'et une seule maj groupée suit la boucle');
+  ok(/snapshotLib\.majSnapshotBatch\(db, admin, snapPage\)/.test(admSrc),
+    '⛔ …et la maj groupée (≤4 écritures/page) est bien appelée après la boucle');
+
   var tetes = pp.nomenclature && pp.nomenclature.TETES_CONNUES;
   ok(!!(tetes && tetes.DCB && tetes.DTW),
     '⛔ TETES_CONNUES couvre DeWALT (DCB) ET Makita (DTW) — obtenu : '

@@ -61,6 +61,40 @@ async function majSnapshot(db, admin, id, patch) {
   }
 }
 
+/* Répercute PLUSIEURS écritures d'un COUP (un balayage applique jusqu'à ~60
+   prix par page). ⛔ PERFORMANCE (09/08/2026) : appeler majSnapshot par produit
+   faisait 60 écritures sérialisées sur seulement 4 documents — Firestore
+   sérialise les écritures d'UN même document, d'où une contention qui a
+   ralenti le traqueur. Ici on regroupe par shard : au plus 4 écritures pour
+   toute la page, chacune fusionnant tous ses produits en un seul appel.
+   `entries` = [{ id, patch }] ; patch null = suppression. Best-effort.
+   J4 : même contenu que produit-par-produit, mêmes prix, clés littérales. */
+async function majSnapshotBatch(db, admin, entries) {
+  if (!entries || !entries.length) return true;
+  try {
+    var parShard = {};
+    entries.forEach(function (e) {
+      var n = shardDe(e.id);
+      if (!parShard[n]) parShard[n] = { _maj: admin.firestore.FieldValue.serverTimestamp() };
+      if (e.patch === null) {
+        parShard[n][String(e.id)] = admin.firestore.FieldValue.delete();
+      } else {
+        var v = Object.assign({}, e.patch);
+        delete v.updatedAt; delete v.createdAt;
+        parShard[n][String(e.id)] = v;
+      }
+    });
+    var ecritures = Object.keys(parShard).map(function (n) {
+      return docShard(db, Number(n)).set(parShard[n], { merge: true });
+    });
+    await Promise.all(ecritures);
+    return true;
+  } catch (e) {
+    console.error('[snapshot] maj groupée échouée (non bloquant):', e.message);
+    return false;
+  }
+}
+
 /* Lit les 4 shards → carte {id: override} fusionnée, ou null si AUCUN shard
    n'existe encore (première vie : le lecteur retombe sur la collection et
    reconstruit). Les clés techniques (_maj) sont retirées. */
@@ -99,5 +133,6 @@ async function reconstruire(db, admin) {
   return snap.size;
 }
 
-module.exports = { majSnapshot: majSnapshot, lireSnapshot: lireSnapshot,
-  reconstruire: reconstruire, shardDe: shardDe, NB_SHARDS: NB_SHARDS, PREFIXE: PREFIXE };
+module.exports = { majSnapshot: majSnapshot, majSnapshotBatch: majSnapshotBatch,
+  lireSnapshot: lireSnapshot, reconstruire: reconstruire, shardDe: shardDe,
+  NB_SHARDS: NB_SHARDS, PREFIXE: PREFIXE };
