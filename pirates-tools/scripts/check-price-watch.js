@@ -2235,6 +2235,41 @@ module.exports = async function () {
           + appelsLoadCatalog + '/2) — le comportement historique ne change pas');
         catMod.loadCatalog = vraiLoadCatalog;
 
+        /* ⛔ EN BALAYAGE, LES REJETS DOIVENT POUVOIR SE LIRE (09/08/2026). Le
+           balayage réel du jour comptait 1 093 `sansRef` sur 67 pages — comptés
+           mais jamais montrés : impossible de dire si un produit « estimé » du
+           catalogue s'y cachait ou n'était simplement pas sur les pages. Même
+           drapeau que `unknown` (&inconnus=1, que le Raccourci envoie déjà), et
+           forme COMPACTE (titre tronqué + prix) pour ne pas faire déborder le
+           presse-papier du raccourci sur 67 pages. */
+        scanReset();
+        var pageAvecRejet = pageIdealo(cible.sku, '450,00')
+          + '\nDEWALT Soufflerie de chantier thermique grand format\n'
+          + 'Vendu par : UnMarchand.fr\nDétails de l’offre\n'
+          + '24/48 heures\n89,99 € TVA incluse\nDétails de l’offre';
+        var rRej = fauxRes();
+        await admFn({ method: 'POST', query: { type: 'price-watch', brand: 'DEWALT',
+          source: 'idealo', scan: '1', inconnus: '1' }, body: { text: pageAvecRejet } },
+          rRej, fauxAdmin, fauxDb({}, []));
+        var lRej = (rRej.out && rRej.out.sansRef) || [];
+        ok(rRej.out && rRej.out.scan === true && lRej.length >= 1
+          && typeof (lRej[0] && lRej[0].titre) === 'string' && lRej[0].titre.length <= 90
+          && !('car' in (lRej[0] || {})),
+          '⛔ balayage + &inconnus=1 : les rejets `sansRef` SORTENT, compacts (titre '
+          + 'tronqué + prix, jamais l\'objet entier) — obtenu ' + JSON.stringify(lRej.slice(0, 2)));
+        /* ⚠️ PRÉALABLE — sans le drapeau, le balayage reste léger et le compteur
+           reste exact : la donnée n'est pas perdue, elle est repliée. */
+        scanReset();
+        var rRej0 = fauxRes();
+        await admFn({ method: 'POST', query: { type: 'price-watch', brand: 'DEWALT',
+          source: 'idealo', scan: '1' }, body: { text: pageAvecRejet } },
+          rRej0, fauxAdmin, fauxDb({}, []));
+        ok(rRej0.out && Array.isArray(rRej0.out.sansRef) && rRej0.out.sansRef.length === 0
+          && rRej0.out.counts && rRej0.out.counts.sansRef >= 1,
+          '⚠️ PRÉALABLE : sans &inconnus=1, `sansRef` sort VIDE mais son COMPTEUR reste '
+          + 'exact (obtenu : ' + JSON.stringify(rRej0.out && rRej0.out.counts
+          && rRej0.out.counts.sansRef) + ')');
+
         /* ══ LA MOYENNE DE BAISSE, ET LES DIX À VÉRIFIER AVANT D'ÉCRIRE ═════
            ⛔⛔ Demande de l'user, 03/08 : « la moyenne de baisse qu'on a pu
            faire pour tous ces produits », et « dix produits qui auront une

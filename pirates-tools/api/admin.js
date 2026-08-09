@@ -1997,7 +1997,12 @@ module.exports = async function handler(req, res) {
 // Il ne reste donc que des bornes ABSOLUES : MIN_TTC / MAX_TTC. Elles ne jugent
 // pas une variation mais une valeur impossible — c'est le seul filet qui
 // attrape un parseur qui déraille, et il ne peut pas bloquer un prix réel.
-const PW = { MARGIN: 1.15, VAT: 1.20, MIN_TTC: 5, MAX_TTC: 8000 };
+/* ⛔ MIN_TTC ALIGNÉ SUR LA BARRIÈRE D'ACHAT (09/08/2026, ordre de l'user :
+   « baisser la marge minimale à un euro »). À 5 €, un article de quincaillerie
+   à 3 € aurait passé la barrière (plancher 1 €) puis été refusé ICI en
+   « hors fourchette » — deux planchers qui se contredisent, celui du bas doit
+   suivre celui que l'user règle (api/_lib/barriere-achat.js). */
+const PW = { MARGIN: 1.15, VAT: 1.20, MIN_TTC: 1, MAX_TTC: 8000 };
 function pwRound2(n) { return Math.round(n * 100) / 100; }
 
 // Prix à partir du coût source TTC (src) : MODÈLE de marge cible si cfg.autoPrice,
@@ -4064,7 +4069,19 @@ async function handlePriceWatch(req, res, admin, db) {
          packs — plafonnée à 100, l'import aurait été borgne (275 packs sur la
          page, mesurés le 02/08). */
       packsIgnores: scanMode ? [] : appariePacks.restants.slice(0, 400),
-      sansRef: scanMode ? [] : apparie.restants.slice(0, 200)
+      /* ⛔ EN BALAYAGE, LES REJETS DOIVENT POUVOIR SE LIRE (09/08/2026). Le
+         balayage réel du jour comptait 1 093 `sansRef` sur 67 pages — comptés,
+         jamais montrés : impossible de dire si un produit « estimé » du
+         catalogue se cachait dedans ou n'était simplement pas sur les pages.
+         Même drapeau que `unknown` (`&inconnus=1`, que le Raccourci envoie
+         déjà) et forme COMPACTE (titre tronqué + prix) : le diagnostic sans
+         faire déborder le presse-papier du raccourci. */
+      sansRef: scanMode
+        ? (inconnusVoulus
+          ? apparie.restants.slice(0, 200).map((e) => ({
+              titre: String(e.titre || '').slice(0, 90), prix: e.prix }))
+          : [])
+        : apparie.restants.slice(0, 200)
     });
   } catch (err) {
     /* ⛔ UN PLANTAGE MUET EST UN MUR (02/08/2026, troisième fois) ───────────

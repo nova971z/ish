@@ -37,8 +37,15 @@ var SEUILS = {
      50 000 € et 50 € » — volontairement LARGES, il l'a précisé. Ce sont des
      garde-fous, pas une estimation : les resserrer sans mesure écarterait de
      vrais articles.
+     ⛔⛔ PLANCHER ABAISSÉ 50 → 1 LE 09/08/2026, SUR ORDRE DE L'USER (« baisser
+     la marge minimale à un euro »). Motif : la quincaillerie entre dans le
+     traqueur, et un foret ou un jeu d'embouts coûte couramment moins de 50 € —
+     le plancher de 50 € aurait écarté tout ce rayon comme « frais de port ».
+     ⚠️ Contrepartie assumée : un frais de port lu comme prix (3-10 €) ne sera
+     plus arrêté ICI — il l'est en amont, au parsing (prix pris sur le champ
+     prix de la tuile, packs et réfs douteuses écartés et listés).
      ⛔ POUR LES LEVER : mettre `null`. */
-  prixMinEuros: 50,
+  prixMinEuros: 1,
   prixMaxEuros: 50000
 };
 
