@@ -175,6 +175,9 @@ var reqMemoire  = safeRequire('./check-memoire',     'check-memoire');
 var reqOu       = safeRequire('./check-ou',          'check-ou');
 // Une panne doit produire une PORTE, pas un souvenir (boucle d'apprentissage).
 var reqLecons   = safeRequire('./check-lecons',      'check-lecons');
+// La CI doit survivre à une installation fraîche : tout import au manifeste
+// (panne du 09/08/2026 : esprima absent de package.json, tué par npm install).
+var reqDeps     = safeRequire('./check-deps',        'check-deps');
 // Le registre des erreurs est injecté à CHAQUE message : s'il se déforme ou
 // s'il enfle, il finit ignoré — et un registre ignoré ne trace plus rien.
 var reqErreurs  = safeRequire('./erreurs',           'check-erreurs');
@@ -318,6 +321,7 @@ var reqReconc   = safeRequire('./check-reconciliation', 'check-reconciliation');
   await runOne(reqMemoire,  'check-memoire');
   await runOne(reqOu,       'check-ou');
   await runOne(reqLecons,   'check-lecons');
+  await runOne(reqDeps,     'check-deps');
   await runOne(reqErreurs,  'check-erreurs');
   await runOne(reqJur,      'check-juridique');
   await runOne(reqSortie,   'check-sortie');

@@ -61,7 +61,7 @@ bouton ou contourner, c'est masquer le symptôme ; le défaut, lui, reste.
 
 ⛔ **On ne commente jamais l'état de l'user** — ni sommeil, ni fatigue, ni l'heure chez lui. On répond au travail demandé, point.
 ⛔ **Format de TOUT message à l'user** *(gravé 08/08, amendé 09/08/2026)* : le bloc **CSV** (`;`, en-tête, une ligne par point), puis EN DESSOUS des **explications numérotées en mots simples** — courtes, jamais un pavé. Le doute est une cellule, jamais une invention.
-⛔ **Statut d'un build Vercel** *(gravé 09/08/2026)* : ma session ne le voit pas — un run de `verifier-pousse`, puis « poussé — vérifie sur Vercel que <sha> passe READY ». Jamais de sondage en boucle. Les faits que Killian a vérifiés vivent dans `docs/ETAT-DASHBOARD.md` : on les relit, on ne les redemande jamais.
+⛔ **Statut d'un build Vercel** *(gravé 09/08/2026, amendé le soir)* : `api.vercel.com` et le site sont injoignables de ma session (mesuré, DÉFINITIF : CONNECT 403) — fin de lot = `verifier-pousse` puis « **poussé, build non prouvé** », jamais « déployé ». Killian active UNE FOIS les notifications d'échec de déploiement par e-mail (2 gestes, `.claude/rules/build.md`) : le **silence vaut succès, un e-mail vaut échec** — plus aucune vérification active de sa part. Un SHA servi plus vieux qu'annoncé au-delà du délai normal de build est un **BUILD CASSÉ**, pas un retard. Ses faits vérifiés vivent dans `docs/ETAT-DASHBOARD.md` : on les relit, on ne les redemande jamais.
 
 **La mémoire du projet est ce seul fichier**, à la racine du dépôt.
 <!-- REGLES-UNIVERSELLES:FIN -->

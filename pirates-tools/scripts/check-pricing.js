@@ -172,5 +172,28 @@ module.exports = function checkPricing() {
     }
   });
 
+  /* ⛔ UNE FORMULE D'ARGENT N'A QU'UNE IMPLÉMENTATION (.claude/rules/argent.md,
+     09/08/2026). Panne payée : `calcPrice` côté client a existé en PLUSIEURS
+     copies — favoris et « récemment vus » affichaient un prix non taxé, dérive
+     de prix entre pages (docs/PLAN-REMEDIATION.md). Le calcul vit côté serveur
+     (pricing-model.js) ; le client AFFICHE, il ne calcule pas. Cette porte
+     refuse tout identifiant du modèle de prix dans un fichier servi au client
+     — le jour où une copie devient nécessaire, elle naîtra d'un GÉNÉRATEUR
+     avec sa porte de diff, jamais d'une recopie à la main. */
+  var IDENTIFIANTS_MODELE = ['solveMarkup', 'octroiRate', 'colissimoCost', 'fixedPerOrder'];
+  ['app.js', 'app.visitor.js', 'admin.bundle.js'].forEach(function (fc) {
+    var chemin = path.join(RACINE, fc);
+    if (!fs.existsSync(chemin)) return;           // généré absent = autre porte
+    var src = fs.readFileSync(chemin, 'utf8');
+    IDENTIFIANTS_MODELE.forEach(function (id) {
+      if (src.indexOf(id) !== -1) {
+        errors.push('[check-pricing] ⛔ `' + id + '` (formule du modèle de prix) trouvé '
+          + 'dans le fichier CLIENT ' + fc + ' : une formule d\'argent n\'a qu\'UNE '
+          + 'implémentation, côté serveur. Une copie client se GÉNÈRE, ne se recopie pas '
+          + '(.claude/rules/argent.md).');
+      }
+    });
+  });
+
   return errors;
 };

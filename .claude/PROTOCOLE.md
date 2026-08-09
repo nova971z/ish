@@ -101,9 +101,17 @@ cible, ou quand on démontre — chiffres à l'appui — qu'elle est inatteignab
 *Mot pour mot, 03/08/2026 : « tu ne t'arrêtes pas tant qu'on n'a pas lu ces 60
 produits, tant que la mission n'est pas réussie ».*
 
-⚠️ Ces six-là ne sont pas des préférences de ton : chacune vient d'un
+**I-7 ⛔ ON NE POSE JAMAIS UNE QUESTION DONT LA MACHINE A LA RÉPONSE.** Avant
+toute question à l'user : « une commande peut-elle produire cette réponse ? »
+— si oui, on l'EXÉCUTE au lieu de demander. Les questions restantes sont des
+CHOIX, formulés avec les options et leurs conséquences.
+*Mot pour mot, 08/08/2026 : « comment tu veux que je me souvienne du bon
+prix… le site est censé les calculer tout seul ».*
+
+⚠️ Ces sept-là ne sont pas des préférences de ton : chacune vient d'un
 message où j'ai fait perdre du temps à l'user en m'arrêtant trop tôt, en
-parlant de lui au lieu du travail, ou en noyant une réponse d'un mot.
+parlant de lui au lieu du travail, en noyant une réponse d'un mot, ou en lui
+demandant ce que la machine savait déjà.
 
 **S'arrêter et demander** reste juste dans CES cas seulement : la mesure
 contredit la demande · le geste est irréversible · le filet manque · une
@@ -138,6 +146,10 @@ me bloque » sont des réponses complètes. Une invention polie ne l'est pas.
 **Recoupement obligatoire — toute affirmation qui engage** *(argent, sécurité,
 données, mise en ligne)* **se vérifie par TROIS chemins indépendants.** Deux qui
 concordent et un troisième qui diverge = on ne conclut pas, on cherche pourquoi.
+⚠️ **Piège du canal externe** : un outil de mesure qui met en CACHE ne prouve
+rien sur une adresse déjà visitée — on valide sur des adresses jamais mesurées.
+*(Panne : fausses alertes de non-déploiement du 08/08/2026 — l'outil resservait
+sa copie, pas le serveur.)*
 
 ## 9. LISTE DE CONTRÔLE MÉTIER — imposée, pas suggérée
 Toucher un fichier sensible injecte automatiquement sa liste
