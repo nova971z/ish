@@ -12713,6 +12713,12 @@
 
   
 
+  /* Aperçu de la photo déposée — et il DIT ce qui a été fait au fichier.
+     ⛔ Motif : l'user retravaille ses visuels lui-même (règle des posters). Une
+     conversion silencieuse le priverait du seul moyen de vérifier qu'on n'a pas
+     abîmé son travail. */
+  
+
   
 
   
@@ -12766,6 +12772,29 @@
      taille MESURÉE comme nécessaire : la fiche produit dessine l'image sur
      1674 pixels d'écran sur l'iPad de l'user — en dessous, elle est agrandie
      et floue. `image/webp` conserve la transparence des visuels détourés. */
+  /* ══ PRÉPARATION D'UNE PHOTO PRODUIT — UNE SEULE IMPLÉMENTATION ═══════════
+     ⛔⛔ CORRIGÉE LE 09/08/2026. L'user : « lorsque je veux ajouter des PNG sur
+     un produit, ça ne marche pas ». Deux défauts, mesurés :
+       ① le formulaire de création REFUSAIT au-delà de 525 Ko (« réduis sa taille
+          avant de la déposer ») — il lui rendait le travail au lieu de le faire,
+          et un PNG de photo produit dépasse presque toujours ce plafond ;
+       ② cette fonction-ci, elle, réduisait bien… mais ne vérifiait AUCUN
+          plafond : une image de 2 000 px pouvait repasser au-dessus et se faire
+          refuser par le serveur ensuite. Deux chemins, deux comportements.
+     ⛔ On n'en écrit pas un troisième : les deux passent désormais ici.
+     ⚠️ Cible mesurée sur SES visuels : 780×780, quelques-uns à 1000 et 1024,
+     de 14 à 233 Ko en WebP. D'où 1000 px par défaut.
+     ⛔ TROIS PROMESSES TENUES ENVERS SON TRAVAIL :
+       · on n'AGRANDIT jamais (une petite image y perdrait sa netteté) ;
+       · on ne PEINT AUCUN FOND — la transparence d'un PNG détouré survit, sans
+         quoi le visuel serait inutilisable sur le fond sombre du site ;
+       · une image DÉJÀ conforme part INTACTE, octet pour octet, sans même être
+         ré-encodée. « Je ne veux pas perdre de qualité », ce sont ses mots.
+     Rend { dataUrl, w, h, ko, intact, qualite, wSource, hSource, koSource }. */
+  
+
+  /* Ancien nom, conservé pour le chemin des visuels multiples : il ne rendait
+     qu'une adresse de données. Il passe désormais par la fonction unique. */
   
 
   
@@ -13953,7 +13982,7 @@
     if (window.__PT_ADMIN) return Promise.resolve();
     if (__adminCharge) return __adminCharge;
     __adminCharge = new Promise(function (res, rej) {
-      var s = document.createElement('script'); s.src = 'admin.bundle.js?v=605';
+      var s = document.createElement('script'); s.src = 'admin.bundle.js?v=606';
       s.onload = res; s.onerror = function () { __adminCharge = null; rej(new Error('admin.bundle indisponible')); };
       document.head.appendChild(s);
     });

@@ -14983,6 +14983,22 @@
     z.className = 'admin-hint' + (type ? ' ap-msg--' + type : '');
   }
 
+  /* Aperçu de la photo déposée — et il DIT ce qui a été fait au fichier.
+     ⛔ Motif : l'user retravaille ses visuels lui-même (règle des posters). Une
+     conversion silencieuse le priverait du seul moyen de vérifier qu'on n'a pas
+     abîmé son travail. */
+  function adminApercuImage(box, dataUrl, nom, r) {
+    box.className = 'ap-apercu';
+    var note = r.intact
+      ? 'envoyée telle quelle, sans recompression — ' + r.w + '×' + r.h + ', ' + r.ko + ' Ko'
+      : 'redimensionnée ' + r.wSource + '×' + r.hSource + ' → ' + r.w + '×' + r.h
+        + ', ' + r.koSource + ' Ko → ' + r.ko + ' Ko ('
+        + (dataUrl.indexOf('data:image/webp') === 0 ? 'WebP' : 'JPEG')
+        + ', qualité ' + Math.round(r.qualite * 100) + ' %, transparence conservée)';
+    box.innerHTML = '<img src="' + safeImgSrc(dataUrl) + '" alt="Aperçu de la photo du produit">'
+      + '<span>' + escapeHTML(nom) + ' — ' + escapeHTML(note) + '</span>';
+  }
+
   function ajoutProduitSpecs() {
     var specs = {};
     var lignes = document.querySelectorAll('#apSpecs .ap-spec');
@@ -15057,9 +15073,13 @@
       + '</fieldset>'
 
       + '<fieldset class="ap-bloc"><legend>Photo du produit</legend>'
-      + '<p class="admin-hint">Le fichier est envoyé <strong>tel quel</strong>, sans recompression : '
-      + 'un PNG garde sa qualité. Plafond technique mesuré : 525 Ko — au-delà, la fiche ne tiendrait '
-      + 'pas dans un document de la base.</p>'
+      /* ⚠️ CE TEXTE DÉCRIT CE QUE LE CODE FAIT, ET RIEN D'AUTRE. Il promettait
+         « envoyé tel quel » alors que l'outil refusait au-delà du plafond : une
+         promesse qu'il ne tenait pas. Il dit désormais les deux cas. */
+      + '<p class="admin-hint">PNG, JPEG ou WebP. Une image <strong>déjà au format</strong> '
+      + '(1000 px maximum, sous 525 Ko) part <strong>telle quelle</strong>, sans recompression. '
+      + 'Au-delà, elle est redimensionnée et convertie en WebP haute qualité — '
+      + '<strong>la transparence est conservée</strong> et l\'aperçu te dit exactement ce qui a été fait.</p>'
       + '<input type="file" id="apImage" accept="image/png,image/jpeg,image/webp" aria-label="Photo du produit">'
       + '<div id="apImageApercu" class="ap-apercu"></div>'
       + '</fieldset>'
@@ -15084,26 +15104,27 @@
       var f = e.target.files && e.target.files[0];
       var box = document.getElementById('apImageApercu');
       if (!f) { _ajoutImage = ''; box.textContent = ''; return; }
-      var fr = new FileReader();
-      fr.onload = function () {
-        var d = String(fr.result || '');
-        /* Le plafond est vérifié ICI aussi, pour ne pas laisser l'user remplir
-           tout le formulaire et se faire refuser à l'envoi. Le serveur le
-           revérifie : c'est lui qui décide, celui-ci ne fait qu'épargner. */
-        if (d.length > 700000) {
-          _ajoutImage = '';
-          box.textContent = 'Image trop lourde (' + Math.round(d.length * 0.75 / 1000) + ' Ko environ). '
-            + 'Réduis sa taille avant de la déposer — elle ne sera pas dégradée automatiquement.';
-          box.className = 'ap-apercu ap-apercu--refus';
-          return;
-        }
-        _ajoutImage = d; _ajoutImageNom = f.name;
-        box.className = 'ap-apercu';
-        box.innerHTML = '<img src="' + safeImgSrc(d) + '" alt="Aperçu de la photo du produit">'
-          + '<span>' + escapeHTML(f.name) + ' — ' + Math.round(d.length * 0.75 / 1000) + ' Ko</span>';
-      };
-      fr.onerror = function () { _ajoutImage = ''; box.textContent = 'Fichier illisible.'; };
-      fr.readAsDataURL(f);
+      /* ⛔⛔ IL REFUSAIT AU LIEU DE TRAITER (corrigé le 09/08/2026). L'user, mot
+         pour mot : « lorsque je veux ajouter des PNG sur un produit, ça ne
+         marche pas ». Cause mesurée : un PNG de photo produit dépasse presque
+         toujours le plafond de 525 Ko, et l'outil se contentait de dire
+         « réduis sa taille avant de la déposer » — il lui rendait le travail.
+         ⛔ Une seule implémentation : `adminPreparerImage`, la même que les
+         visuels multiples. Elle n'agrandit jamais, garde la transparence, et
+         laisse INTACTE une image déjà conforme. */
+      box.className = 'ap-apercu';
+      box.textContent = 'Préparation de la photo…';
+      adminPreparerImage(f, { cote: 1000 }).then(function (r) {
+        _ajoutImage = r.dataUrl;
+        _ajoutImageNom = r.intact ? f.name
+          : String(f.name).replace(/\.[a-z0-9]+$/i, '')
+            + (r.dataUrl.indexOf('data:image/webp') === 0 ? '.webp' : '.jpg');
+        adminApercuImage(box, r.dataUrl, _ajoutImageNom, r);
+      }).catch(function (err) {
+        _ajoutImage = '';
+        box.className = 'ap-apercu ap-apercu--refus';
+        box.textContent = (err && err.message) || 'Fichier illisible.';
+      });
     };
 
     document.getElementById('apCalc').onclick = function () {
@@ -15879,29 +15900,84 @@
      taille MESURÉE comme nécessaire : la fiche produit dessine l'image sur
      1674 pixels d'écran sur l'iPad de l'user — en dessous, elle est agrandie
      et floue. `image/webp` conserve la transparence des visuels détourés. */
-  function adminReduireImage(fichier) {
+  /* ══ PRÉPARATION D'UNE PHOTO PRODUIT — UNE SEULE IMPLÉMENTATION ═══════════
+     ⛔⛔ CORRIGÉE LE 09/08/2026. L'user : « lorsque je veux ajouter des PNG sur
+     un produit, ça ne marche pas ». Deux défauts, mesurés :
+       ① le formulaire de création REFUSAIT au-delà de 525 Ko (« réduis sa taille
+          avant de la déposer ») — il lui rendait le travail au lieu de le faire,
+          et un PNG de photo produit dépasse presque toujours ce plafond ;
+       ② cette fonction-ci, elle, réduisait bien… mais ne vérifiait AUCUN
+          plafond : une image de 2 000 px pouvait repasser au-dessus et se faire
+          refuser par le serveur ensuite. Deux chemins, deux comportements.
+     ⛔ On n'en écrit pas un troisième : les deux passent désormais ici.
+     ⚠️ Cible mesurée sur SES visuels : 780×780, quelques-uns à 1000 et 1024,
+     de 14 à 233 Ko en WebP. D'où 1000 px par défaut.
+     ⛔ TROIS PROMESSES TENUES ENVERS SON TRAVAIL :
+       · on n'AGRANDIT jamais (une petite image y perdrait sa netteté) ;
+       · on ne PEINT AUCUN FOND — la transparence d'un PNG détouré survit, sans
+         quoi le visuel serait inutilisable sur le fond sombre du site ;
+       · une image DÉJÀ conforme part INTACTE, octet pour octet, sans même être
+         ré-encodée. « Je ne veux pas perdre de qualité », ce sont ses mots.
+     Rend { dataUrl, w, h, ko, intact, qualite, wSource, hSource, koSource }. */
+  function adminPreparerImage(fichier, opts) {
+    var o = opts || {};
+    var COTE = o.cote || 1000;
+    var PLAFOND = o.plafond || 700000;
     return new Promise(function (resoudre, rejeter) {
       var lect = new FileReader();
       lect.onerror = function () { rejeter(new Error('lecture impossible : ' + fichier.name)); };
       lect.onload = function () {
+        var source = String(lect.result || '');
+        var koSource = Math.round(source.length * 0.75 / 1000);
         var img = new Image();
         img.onerror = function () { rejeter(new Error('image illisible : ' + fichier.name)); };
         img.onload = function () {
-          var COTE = 2000;
-          var k = Math.min(1, COTE / Math.max(img.width, img.height));  // jamais d'agrandissement
+          var wI = img.naturalWidth || img.width, hI = img.naturalHeight || img.height;
+          var tropGrande = Math.max(wI, hI) > COTE;
+          if (source.length <= PLAFOND && !tropGrande) {
+            resoudre({ dataUrl: source, w: wI, h: hI, ko: koSource, intact: true,
+              qualite: 1, wSource: wI, hSource: hI, koSource: koSource });
+            return;
+          }
+          var k = Math.min(1, COTE / Math.max(wI, hI));   // jamais d'agrandissement
           var c = document.createElement('canvas');
-          c.width = Math.max(1, Math.round(img.width * k));
-          c.height = Math.max(1, Math.round(img.height * k));
+          c.width = Math.max(1, Math.round(wI * k));
+          c.height = Math.max(1, Math.round(hI * k));
           var x = c.getContext('2d');
           x.imageSmoothingEnabled = true;
           x.imageSmoothingQuality = 'high';
           x.drawImage(img, 0, 0, c.width, c.height);
-          resoudre(c.toDataURL('image/webp', 0.92));
+          /* La qualité descend par paliers SEULEMENT si le plafond l'exige, et
+             on rend celle qui a été retenue — l'appelant la montre. */
+          var paliers = [0.95, 0.92, 0.88, 0.84, 0.78, 0.72];
+          for (var i = 0; i < paliers.length; i++) {
+            var sortie = c.toDataURL('image/webp', paliers[i]);
+            /* ⚠️ Un navigateur qui ne sait pas encoder le WebP rend du PNG sans
+               le dire : on le voit au préfixe et on bascule sur du JPEG plutôt
+               que de croire à une conversion qui n'a pas eu lieu. */
+            if (sortie.indexOf('data:image/webp') !== 0) {
+              sortie = c.toDataURL('image/jpeg', paliers[i]);
+            }
+            if (sortie.length <= PLAFOND) {
+              resoudre({ dataUrl: sortie, w: c.width, h: c.height,
+                ko: Math.round(sortie.length * 0.75 / 1000), intact: false,
+                qualite: paliers[i], wSource: wI, hSource: hI, koSource: koSource });
+              return;
+            }
+          }
+          rejeter(new Error('image encore trop lourde une fois réduite à '
+            + c.width + '×' + c.height + ' — recadre-la sur le produit'));
         };
-        img.src = String(lect.result);
+        img.src = source;
       };
       lect.readAsDataURL(fichier);
     });
+  }
+
+  /* Ancien nom, conservé pour le chemin des visuels multiples : il ne rendait
+     qu'une adresse de données. Il passe désormais par la fonction unique. */
+  function adminReduireImage(fichier) {
+    return adminPreparerImage(fichier, { cote: 2000 }).then(function (r) { return r.dataUrl; });
   }
 
   function adminBrancherAjoutImage(row) {

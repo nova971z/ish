@@ -1953,6 +1953,12 @@ function ajoutProduitMsg(texte, type) {
   z.className = 'admin-hint' + (type ? ' ap-msg--' + type : '');
 }
 
+function adminApercuImage(box, dataUrl, nom, r) {
+  box.className = 'ap-apercu';
+  var note = r.intact ? 'envoyée telle quelle, sans recompression \u2014 ' + r.w + '\xD7' + r.h + ', ' + r.ko + ' Ko' : 'redimensionnée ' + r.wSource + '\xD7' + r.hSource + ' \u2192 ' + r.w + '\xD7' + r.h + ', ' + r.koSource + ' Ko \u2192 ' + r.ko + ' Ko (' + (dataUrl.indexOf('data:image/webp') === 0 ? 'WebP' : 'JPEG') + ', qualité ' + Math.round(r.qualite * 100) + ' %, transparence conservée)';
+  box.innerHTML = '<img src="' + A.safeImgSrc(dataUrl) + '" alt="Aperçu de la photo du produit">' + '<span>' + A.escapeHTML(nom) + ' \u2014 ' + A.escapeHTML(note) + '</span>';
+}
+
 function ajoutProduitSpecs() {
   var specs = {};
   var lignes = document.querySelectorAll('#apSpecs .ap-spec');
@@ -1998,7 +2004,7 @@ function renderAjoutProduit() {
   var familles = typeof ORDRE_CATEGORIES !== 'undefined' && ORDRE_CATEGORIES.length ? ORDRE_CATEGORIES : [];
   view.innerHTML = '<div class="admin-wrap">' + '<header class="admin-header">' + '<h1>Ajout de produits</h1>' + '<a class="btn btn--ghost" href="#/admin">Retour à l\'administration</a>' + '</header>' + '<p class="admin-hint">Tu ne saisis que le <strong>prix fournisseur TTC</strong>. ' + 'Le prix de vente est calculé par le calculateur du site \u2014 celui qui sert déjà ' + 'à l\'import et au traqueur \u2014 jamais à la main.</p>' + '<form id="apForm" class="ap-form" novalidate>' + '<div class="ap-grille">' + '<label>Référence<input type="text" id="apSku" class="search" required autocomplete="off" placeholder="DCD800NT"></label>' + '<label>Marque<input type="text" id="apMarque" class="search" required autocomplete="off" placeholder="DeWALT"></label>' + '<label>Famille<select id="apFamille" class="search" required>' + '<option value="">\u2014 choisir \u2014</option>' + familles.map(function (c) {
     return '<option value="' + A.escapeHTML(c) + '">' + A.escapeHTML(c) + '</option>';
-  }).join('') + '</select></label>' + '<label>Poids en kg <em>(facultatif)</em><input type="number" id="apPoids" class="search" min="0" step="0.01" placeholder="2"></label>' + '</div>' + '<label class="ap-large">Titre du produit<input type="text" id="apTitre" class="search" required autocomplete="off" placeholder="Perceuse visseuse à percussion XR 18V"></label>' + '<label class="ap-large">Description<textarea id="apDesc" class="search" rows="5" placeholder="Ce que fait la machine, ce qui est livré avec."></textarea></label>' + '<fieldset class="ap-bloc"><legend>Caractéristiques techniques</legend>' + '<div id="apSpecs"></div>' + '<button type="button" class="btn btn--ghost" id="apSpecAdd">+ Ajouter une caractéristique</button>' + '</fieldset>' + '<fieldset class="ap-bloc"><legend>Photo du produit</legend>' + '<p class="admin-hint">Le fichier est envoyé <strong>tel quel</strong>, sans recompression : ' + 'un PNG garde sa qualité. Plafond technique mesuré : 525 Ko \u2014 au-delà, la fiche ne tiendrait ' + 'pas dans un document de la base.</p>' + '<input type="file" id="apImage" accept="image/png,image/jpeg,image/webp" aria-label="Photo du produit">' + '<div id="apImageApercu" class="ap-apercu"></div>' + '</fieldset>' + '<fieldset class="ap-bloc"><legend>Prix</legend>' + '<label>Prix fournisseur TTC, en euros<input type="number" id="apCout" class="search" min="0" step="0.01" required placeholder="112.40"></label>' + '<button type="button" class="btn" id="apCalc">Calculer le prix de vente</button>' + '<p id="apPrix" class="ap-prix" aria-live="polite"></p>' + '</fieldset>' + '<p id="apMsg" class="admin-hint" role="status" aria-live="polite"></p>' + '<button type="submit" class="btn" id="apEnvoyer">Créer la fiche produit</button>' + '</form></div>';
+  }).join('') + '</select></label>' + '<label>Poids en kg <em>(facultatif)</em><input type="number" id="apPoids" class="search" min="0" step="0.01" placeholder="2"></label>' + '</div>' + '<label class="ap-large">Titre du produit<input type="text" id="apTitre" class="search" required autocomplete="off" placeholder="Perceuse visseuse à percussion XR 18V"></label>' + '<label class="ap-large">Description<textarea id="apDesc" class="search" rows="5" placeholder="Ce que fait la machine, ce qui est livré avec."></textarea></label>' + '<fieldset class="ap-bloc"><legend>Caractéristiques techniques</legend>' + '<div id="apSpecs"></div>' + '<button type="button" class="btn btn--ghost" id="apSpecAdd">+ Ajouter une caractéristique</button>' + '</fieldset>' + '<fieldset class="ap-bloc"><legend>Photo du produit</legend>' + '<p class="admin-hint">PNG, JPEG ou WebP. Une image <strong>déjà au format</strong> ' + '(1000 px maximum, sous 525 Ko) part <strong>telle quelle</strong>, sans recompression. ' + 'Au-delà, elle est redimensionnée et convertie en WebP haute qualité \u2014 ' + '<strong>la transparence est conservée</strong> et l\'aperçu te dit exactement ce qui a été fait.</p>' + '<input type="file" id="apImage" accept="image/png,image/jpeg,image/webp" aria-label="Photo du produit">' + '<div id="apImageApercu" class="ap-apercu"></div>' + '</fieldset>' + '<fieldset class="ap-bloc"><legend>Prix</legend>' + '<label>Prix fournisseur TTC, en euros<input type="number" id="apCout" class="search" min="0" step="0.01" required placeholder="112.40"></label>' + '<button type="button" class="btn" id="apCalc">Calculer le prix de vente</button>' + '<p id="apPrix" class="ap-prix" aria-live="polite"></p>' + '</fieldset>' + '<p id="apMsg" class="admin-hint" role="status" aria-live="polite"></p>' + '<button type="submit" class="btn" id="apEnvoyer">Créer la fiche produit</button>' + '</form></div>';
   document.getElementById('apSpecs').appendChild(ajoutProduitLigneSpec());
   document.getElementById('apSpecAdd').onclick = function () {
     document.getElementById('apSpecs').appendChild(ajoutProduitLigneSpec());
@@ -2013,25 +2019,17 @@ function renderAjoutProduit() {
       box.textContent = '';
       return;
     }
-    var fr = new FileReader();
-    fr.onload = function () {
-      var d = String(fr.result || '');
-      if (d.length > 700000) {
-        A._ajoutImage = '';
-        box.textContent = 'Image trop lourde (' + Math.round(d.length * 0.75 / 1000) + ' Ko environ). ' + 'Réduis sa taille avant de la déposer \u2014 elle ne sera pas dégradée automatiquement.';
-        box.className = 'ap-apercu ap-apercu--refus';
-        return;
-      }
-      A._ajoutImage = d;
-      A._ajoutImageNom = f.name;
-      box.className = 'ap-apercu';
-      box.innerHTML = '<img src="' + A.safeImgSrc(d) + '" alt="Aperçu de la photo du produit">' + '<span>' + A.escapeHTML(f.name) + ' \u2014 ' + Math.round(d.length * 0.75 / 1000) + ' Ko</span>';
-    };
-    fr.onerror = function () {
+    box.className = 'ap-apercu';
+    box.textContent = 'Préparation de la photo\u2026';
+    adminPreparerImage(f, { cote: 1000 }).then(function (r) {
+      A._ajoutImage = r.dataUrl;
+      A._ajoutImageNom = r.intact ? f.name : String(f.name).replace(/\.[a-z0-9]+$/i, '') + (r.dataUrl.indexOf('data:image/webp') === 0 ? '.webp' : '.jpg');
+      adminApercuImage(box, r.dataUrl, A._ajoutImageNom, r);
+    }).catch(function (err) {
       A._ajoutImage = '';
-      box.textContent = 'Fichier illisible.';
-    };
-    fr.readAsDataURL(f);
+      box.className = 'ap-apercu ap-apercu--refus';
+      box.textContent = err && err.message || 'Fichier illisible.';
+    });
   };
   document.getElementById('apCalc').onclick = function () {
     var c = ajoutProduitCorps();
@@ -2530,32 +2528,86 @@ function adminAjouterLigneFeat(row) {
     z.insertAdjacentHTML('beforeend', adminLigneFeatHtml(''));
 }
 
-function adminReduireImage(fichier) {
+function adminPreparerImage(fichier, opts) {
+  var o = opts || {};
+  var COTE = o.cote || 1000;
+  var PLAFOND = o.plafond || 700000;
   return new Promise(function (resoudre, rejeter) {
     var lect = new FileReader();
     lect.onerror = function () {
       rejeter(new Error('lecture impossible : ' + fichier.name));
     };
     lect.onload = function () {
+      var source = String(lect.result || '');
+      var koSource = Math.round(source.length * 0.75 / 1000);
       var img = new Image();
       img.onerror = function () {
         rejeter(new Error('image illisible : ' + fichier.name));
       };
       img.onload = function () {
-        var COTE = 2000;
-        var k = Math.min(1, COTE / Math.max(img.width, img.height));
+        var wI = img.naturalWidth || img.width, hI = img.naturalHeight || img.height;
+        var tropGrande = Math.max(wI, hI) > COTE;
+        if (source.length <= PLAFOND && !tropGrande) {
+          resoudre({
+            dataUrl: source,
+            w: wI,
+            h: hI,
+            ko: koSource,
+            intact: true,
+            qualite: 1,
+            wSource: wI,
+            hSource: hI,
+            koSource: koSource
+          });
+          return;
+        }
+        var k = Math.min(1, COTE / Math.max(wI, hI));
         var c = document.createElement('canvas');
-        c.width = Math.max(1, Math.round(img.width * k));
-        c.height = Math.max(1, Math.round(img.height * k));
+        c.width = Math.max(1, Math.round(wI * k));
+        c.height = Math.max(1, Math.round(hI * k));
         var x = c.getContext('2d');
         x.imageSmoothingEnabled = true;
         x.imageSmoothingQuality = 'high';
         x.drawImage(img, 0, 0, c.width, c.height);
-        resoudre(c.toDataURL('image/webp', 0.92));
+        var paliers = [
+          0.95,
+          0.92,
+          0.88,
+          0.84,
+          0.78,
+          0.72
+        ];
+        for (var i = 0; i < paliers.length; i++) {
+          var sortie = c.toDataURL('image/webp', paliers[i]);
+          if (sortie.indexOf('data:image/webp') !== 0) {
+            sortie = c.toDataURL('image/jpeg', paliers[i]);
+          }
+          if (sortie.length <= PLAFOND) {
+            resoudre({
+              dataUrl: sortie,
+              w: c.width,
+              h: c.height,
+              ko: Math.round(sortie.length * 0.75 / 1000),
+              intact: false,
+              qualite: paliers[i],
+              wSource: wI,
+              hSource: hI,
+              koSource: koSource
+            });
+            return;
+          }
+        }
+        rejeter(new Error('image encore trop lourde une fois réduite à ' + c.width + '\xD7' + c.height + ' \u2014 recadre-la sur le produit'));
       };
-      img.src = String(lect.result);
+      img.src = source;
     };
     lect.readAsDataURL(fichier);
+  });
+}
+
+function adminReduireImage(fichier) {
+  return adminPreparerImage(fichier, { cote: 2000 }).then(function (r) {
+    return r.dataUrl;
   });
 }
 
@@ -2907,5 +2959,5 @@ function initAdminInstagram() {
   }
 }
 
-window.__PT_ADMIN = { adminFetch: adminFetch, loadAdminStats: loadAdminStats, renderAdminStats: renderAdminStats, buildAdminGlobe: buildAdminGlobe, sendAdminReport: sendAdminReport, loadAdminClients: loadAdminClients, renderAdminClients: renderAdminClients, comptaState: comptaState, comptaSetChecked: comptaSetChecked, comptaCopy: comptaCopy, comptaFallbackCopy: comptaFallbackCopy, renderAdminCompta: renderAdminCompta, comptaBrancherReconciliation: comptaBrancherReconciliation, comptaBrancherOrdreTest: comptaBrancherOrdreTest, comptaBrancherWebhook: comptaBrancherWebhook, comptaBrancherRelire: comptaBrancherRelire, comptaBrancherSante: comptaBrancherSante, comptaBrancherPing: comptaBrancherPing, comptaLoadAccounting: comptaLoadAccounting, comptaChargesHtml: comptaChargesHtml, comptaBrancherCharges: comptaBrancherCharges, comptaRemboursementsHtml: comptaRemboursementsHtml, comptaBrancherRemboursements: comptaBrancherRemboursements, comptaRenderAccounting: comptaRenderAccounting, comptaLoadCalc: comptaLoadCalc, comptaRenderCalc: comptaRenderCalc, ligneMouvementPrix: ligneMouvementPrix, loadAdminPriceMoves: loadAdminPriceMoves, loadAdminMargins: loadAdminMargins, renderAdminMargins: renderAdminMargins, renderAdminFisc: renderAdminFisc, renderAdminInvoices: renderAdminInvoices, comptaBuildInvoices: comptaBuildInvoices, loadAdminPartners: loadAdminPartners, adminPartnerFormHTML: adminPartnerFormHTML, renderAdminPartnerPhotos: renderAdminPartnerPhotos, bindAdminPartnerForm: bindAdminPartnerForm, renderAdminPartners: renderAdminPartners, loadAdminInviteCodes: loadAdminInviteCodes, bindAdminInviteCodeCreate: bindAdminInviteCodeCreate, loadAdminApplications: loadAdminApplications, renderAdminCourierBareme: renderAdminCourierBareme, loadAdminCouriers: loadAdminCouriers, adminCourierSection: adminCourierSection, adminCourierDossierHTML: adminCourierDossierHTML, adminCourierFicheHTML: adminCourierFicheHTML, reviewCourier: reviewCourier, ajoutProduitMsg: ajoutProduitMsg, ajoutProduitSpecs: ajoutProduitSpecs, ajoutProduitLigneSpec: ajoutProduitLigneSpec, ajoutProduitCorps: ajoutProduitCorps, renderAjoutProduit: renderAjoutProduit, renderAdmin: renderAdmin, loadAdminOrders: loadAdminOrders, adminProdFiltres: adminProdFiltres, renderAdminList: renderAdminList, adminProduitPar: adminProduitPar, adminBasculerFiche: adminBasculerFiche, adminFicheHtml: adminFicheHtml, adminLigneSpecHtml: adminLigneSpecHtml, adminLigneFeatHtml: adminLigneFeatHtml, adminVisuelHtml: adminVisuelHtml, adminAjouterLigneSpec: adminAjouterLigneSpec, adminAjouterLigneFeat: adminAjouterLigneFeat, adminReduireImage: adminReduireImage, adminBrancherAjoutImage: adminBrancherAjoutImage, adminEnregistrerFiche: adminEnregistrerFiche, adminOption: adminOption, initAdminInstagram: initAdminInstagram };
+window.__PT_ADMIN = { adminFetch: adminFetch, loadAdminStats: loadAdminStats, renderAdminStats: renderAdminStats, buildAdminGlobe: buildAdminGlobe, sendAdminReport: sendAdminReport, loadAdminClients: loadAdminClients, renderAdminClients: renderAdminClients, comptaState: comptaState, comptaSetChecked: comptaSetChecked, comptaCopy: comptaCopy, comptaFallbackCopy: comptaFallbackCopy, renderAdminCompta: renderAdminCompta, comptaBrancherReconciliation: comptaBrancherReconciliation, comptaBrancherOrdreTest: comptaBrancherOrdreTest, comptaBrancherWebhook: comptaBrancherWebhook, comptaBrancherRelire: comptaBrancherRelire, comptaBrancherSante: comptaBrancherSante, comptaBrancherPing: comptaBrancherPing, comptaLoadAccounting: comptaLoadAccounting, comptaChargesHtml: comptaChargesHtml, comptaBrancherCharges: comptaBrancherCharges, comptaRemboursementsHtml: comptaRemboursementsHtml, comptaBrancherRemboursements: comptaBrancherRemboursements, comptaRenderAccounting: comptaRenderAccounting, comptaLoadCalc: comptaLoadCalc, comptaRenderCalc: comptaRenderCalc, ligneMouvementPrix: ligneMouvementPrix, loadAdminPriceMoves: loadAdminPriceMoves, loadAdminMargins: loadAdminMargins, renderAdminMargins: renderAdminMargins, renderAdminFisc: renderAdminFisc, renderAdminInvoices: renderAdminInvoices, comptaBuildInvoices: comptaBuildInvoices, loadAdminPartners: loadAdminPartners, adminPartnerFormHTML: adminPartnerFormHTML, renderAdminPartnerPhotos: renderAdminPartnerPhotos, bindAdminPartnerForm: bindAdminPartnerForm, renderAdminPartners: renderAdminPartners, loadAdminInviteCodes: loadAdminInviteCodes, bindAdminInviteCodeCreate: bindAdminInviteCodeCreate, loadAdminApplications: loadAdminApplications, renderAdminCourierBareme: renderAdminCourierBareme, loadAdminCouriers: loadAdminCouriers, adminCourierSection: adminCourierSection, adminCourierDossierHTML: adminCourierDossierHTML, adminCourierFicheHTML: adminCourierFicheHTML, reviewCourier: reviewCourier, ajoutProduitMsg: ajoutProduitMsg, adminApercuImage: adminApercuImage, ajoutProduitSpecs: ajoutProduitSpecs, ajoutProduitLigneSpec: ajoutProduitLigneSpec, ajoutProduitCorps: ajoutProduitCorps, renderAjoutProduit: renderAjoutProduit, renderAdmin: renderAdmin, loadAdminOrders: loadAdminOrders, adminProdFiltres: adminProdFiltres, renderAdminList: renderAdminList, adminProduitPar: adminProduitPar, adminBasculerFiche: adminBasculerFiche, adminFicheHtml: adminFicheHtml, adminLigneSpecHtml: adminLigneSpecHtml, adminLigneFeatHtml: adminLigneFeatHtml, adminVisuelHtml: adminVisuelHtml, adminAjouterLigneSpec: adminAjouterLigneSpec, adminAjouterLigneFeat: adminAjouterLigneFeat, adminPreparerImage: adminPreparerImage, adminReduireImage: adminReduireImage, adminBrancherAjoutImage: adminBrancherAjoutImage, adminEnregistrerFiche: adminEnregistrerFiche, adminOption: adminOption, initAdminInstagram: initAdminInstagram };
 })(window.__PT_ADMIN_CTX);
