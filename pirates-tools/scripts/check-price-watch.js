@@ -1983,8 +1983,9 @@ module.exports = async function () {
        cache : (1) chaque get() sur la collection se COMPTE ; (2) chaîner un
        second where (id == + at >=) exigerait un index composite (règle E) —
        ici il JETTE, comme la production jette FAILED_PRECONDITION. */
-    function fauxDb(seedOv, seedLog) {
-      var compte = { lecturesOv: 0, ecrituresParId: {}, patchsParId: {} };
+    function fauxDb(seedOv, seedLog, seedConfig) {
+      var compte = { lecturesOv: 0, ecrituresParId: {}, patchsParId: {},
+        configDocs: Object.assign({}, seedConfig || {}) };
       return {
         _compte: compte,
         collection: function (nom) {
@@ -2024,6 +2025,18 @@ module.exports = async function () {
               },
               add: function () { return Promise.resolve(); }
             };
+          }
+          if (nom === 'config') {
+            return { doc: function (id) { return {
+              get: function () {
+                return Promise.resolve({ exists: compte.configDocs[id] !== undefined,
+                  data: function () { return compte.configDocs[id] || {}; } });
+              },
+              set: function (patch) {
+                compte.configDocs[id] = Object.assign({}, compte.configDocs[id] || {}, patch);
+                return Promise.resolve();
+              }
+            }; } };
           }
           throw new Error('collection inattendue : ' + nom);
         }
@@ -3615,6 +3628,38 @@ module.exports = async function () {
           && Object.keys(dbK._compte.ecrituresParId).length === 0,
           '⛔ TRAQUEUR_ECRIRE=0 gèle l\'écriture : 0 override écrit ('
           + JSON.stringify({ gel: rK.out && rK.out.gelEcriture, ecritures: dbK._compte.ecrituresParId }) + ')');
+
+        /* ── ANTI RATE-LIMIT : BLOCAGE DU COMPARATEUR (08/08/2026) ────────────
+           Cloudflare a rate-limité en essai. detecterBlocage est PURE : on la
+           teste seule (challenge vs vraie page), puis de bout en bout — une page
+           bloquée n'écrit RIEN + pose l'alerte + arme le backoff. */
+        var detB = pp.detecterBlocage;
+        ok(typeof detB === 'function', 'detecterBlocage exportée');
+        var pageChallenge = 'Just a moment...\ncf-browser-verification\nChecking your browser before accessing idealo.\n'
+          + 'DDoS protection by Cloudflare\nRay ID: abc123\n' + 'x'.repeat(300);
+        ok(!!detB(pageChallenge, 0), 'une page de challenge Cloudflare est détectée (' + detB(pageChallenge, 0) + ')');
+        ok(detB('', 403) === 'statut-http-403' && detB('', 429) === 'statut-http-429' && detB('', 1015) === 'statut-http-1015',
+          'un statut HTTP de blocage (403/429/1015) fait autorité, sans regarder le contenu');
+        ok(detB(pageIdealo(cible.sku, '450,00'), 200) === null,
+          '⛔ FAUX POSITIF INTERDIT : une vraie page produit idealo n\'est JAMAIS prise pour un blocage — sinon le traqueur se gèle seul');
+        scanReset();
+        var dbBlo = fauxDb({}, [], {});
+        var rBlo = fauxRes();
+        await admFn({ method: 'POST', query: { type: 'price-watch', brand: 'DEWALT', source: 'idealo' },
+          body: { text: pageChallenge } }, rBlo, fauxAdmin, dbBlo);
+        ok(rBlo.out && rBlo.out.bloque === true
+          && Object.keys(dbBlo._compte.ecrituresParId).length === 0
+          && dbBlo._compte.configDocs.traqueur_etat && Number(dbBlo._compte.configDocs.traqueur_etat.bloqueDepuis) > 0,
+          '⛔ page bloquée → ZÉRO override écrit + alerte traqueur_etat posée ('
+          + JSON.stringify({ bloque: rBlo.out && rBlo.out.bloque, ecr: Object.keys(dbBlo._compte.ecrituresParId).length,
+            alerte: !!(dbBlo._compte.configDocs.traqueur_etat) }) + ')');
+        scanReset();
+        var dbBackoff = fauxDb({}, [], { traqueur_etat: { backoffJusqu: Date.now() + 3600000, raisonBlocage: 'cloudflare-just-a-moment' } });
+        var rBk = fauxRes();
+        await admFn(reqPage(cible.sku, {}), rBk, fauxAdmin, dbBackoff);
+        ok(rBk.out && rBk.out.backoff === true && Object.keys(dbBackoff._compte.ecrituresParId).length === 0,
+          '⛔ en backoff après un blocage : la page suivante n\'écrit RIEN, même reconnue ('
+          + JSON.stringify({ backoff: rBk.out && rBk.out.backoff, ecr: Object.keys(dbBackoff._compte.ecrituresParId).length }) + ')');
 
         // ── J4 : prix remonté puis rebaissé — rien de nouveau → PAS de promo ──
         var seedOvE = {}; seedOvE[cible.id] = { price: courantHaut };

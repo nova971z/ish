@@ -1990,6 +1990,13 @@ var COFFRET_COST_DELTA = 20;
 var SOURCES_RELEVEES = { cotebrico: 1, clickoutil: 1, idealo: 1 };
 function estSourceRelevee(s) { return !!(s && SOURCES_RELEVEES[s]); }
 
+/* Anti rate-limit : après un blocage détecté du comparateur (Cloudflare), la
+   session s'arrête et AUCUN nouveau relevé n'est appliqué pendant plusieurs
+   heures — jamais de retry immédiat qui aggraverait le blocage. Deux sessions/
+   jour espacées de ~12 h : 3 h saute les retries d'une session bloquée sans
+   pénaliser la session planifiée suivante. */
+var TRAQUEUR_BACKOFF_MS = 3 * 3600 * 1000;
+
 // Index des coûts RÉELS connus (traqueur ou fiche), par groupe de variante.
 // { [variantGroup]: { solo: srcTTC, coffret: srcTTC } }
 function pwBuildVariantCosts(products, ov) {
@@ -2974,6 +2981,11 @@ async function handlePriceWatch(req, res, admin, db) {
     const sourceSlug = (String((req.query && req.query.source) || 'idealo')
       .toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 24)) || 'idealo';
 
+    /* Statut HTTP que le Raccourci a reçu du comparateur (facultatif) : s'il est
+       envoyé (&status=403|429|1015…), il fait AUTORITÉ pour détecter un blocage,
+       avant même de regarder le contenu. */
+    const httpStatus = Number((req.query && req.query.status) || body.status) || 0;
+
     /* ⛔ UN REFUS MUET EST UN MUR (02/08/2026) ──────────────────────────────
        « text manquant ou trop court » n'a longtemps rien dit d'autre. Sur le
        raccourci de balayage 67 pages, ce mur s'est levé à chaque tour sans une
@@ -3034,6 +3046,33 @@ async function handlePriceWatch(req, res, admin, db) {
        composant corromprait un coût d'achat. */
     const auto = priceParse.parseAuto(text, brand);
     const parsed = auto.items;
+
+    /* ── BLOCAGE DU COMPARATEUR (anti rate-limit, 08/08/2026) ─────────────────
+       Cloudflare a rate-limité pendant les essais : au lieu d'une page produit
+       on reçoit un challenge / 403 / 429 / 1015. Ce n'est PAS un catalogue vide
+       — c'est un mur. On l'ARRÊTE : aucune écriture, on pose le backoff, on lève
+       une alerte admin (doc agrégé `config/traqueur_etat`, 1 écriture).
+       ⛔ Faux positif = poison : on ne bloque sur le CONTENU que si la page n'a
+       rien donné (parsed 0) ; un statut HTTP de blocage, lui, fait autorité même
+       si par malheur des tuiles étaient lisibles. Un run à sec / dryRun ne
+       touche JAMAIS Firestore : il renvoie le blocage sans écrire. */
+    const raisonBlocage = priceParse.detecterBlocage(text, httpStatus);
+    if (raisonBlocage && (httpStatus >= 400 || !parsed.length)) {
+      const maintenantBlocage = Date.now();
+      const backoffJusqu = maintenantBlocage + TRAQUEUR_BACKOFF_MS;
+      if (!secMode && !dryRun) {
+        try {
+          await db.collection('config').doc('traqueur_etat').set(
+            { bloqueDepuis: maintenantBlocage, raisonBlocage: raisonBlocage, backoffJusqu: backoffJusqu,
+              source: sourceSlug, brand: brand }, { merge: true });
+        } catch (e) { /* l'alerte ne doit pas masquer le blocage lui-même */ }
+      }
+      return res.status(200).json({
+        ok: false, bloque: true, raison: raisonBlocage, brand: brand, source: sourceSlug,
+        backoffJusqu: backoffJusqu, sec: secMode || undefined,
+        note: 'comparateur bloque (' + raisonBlocage + ') — aucune ecriture, backoff pose'
+      });
+    }
     /* ⛔⛔ ARGENT — « AUCUNE FICHE » N'EST PAS « RIEN RECONNU ». Ce test ne
        regardait que `items` : une page faite UNIQUEMENT d'annonces marchandes
        repartait en « aucun produit reconnu », et ses annonces — leurs prix
@@ -3452,6 +3491,24 @@ async function handlePriceWatch(req, res, admin, db) {
         sansRefDetail: (bref && !inconnusVoulus) ? undefined : sansRefSec
       });
     }
+
+    /* ── BACKOFF ACTIF ? (anti rate-limit) ───────────────────────────────────
+       Après un blocage, on n'applique RIEN pendant TRAQUEUR_BACKOFF_MS — même si
+       le Raccourci continue d'envoyer ses pages. On lit l'état (1 lecture) AVANT
+       de relire tout le catalogue : une page en backoff ne dépense donc ni
+       quota d'override ni écriture. dryRun n'écrit pas mais respecte le backoff
+       aussi (inutile de calculer des hausses qu'on n'appliquera pas). */
+    try {
+      const etatDoc = await db.collection('config').doc('traqueur_etat').get();
+      const etat = etatDoc && etatDoc.exists ? (etatDoc.data() || {}) : {};
+      if (Number(etat.backoffJusqu) > Date.now()) {
+        return res.status(200).json({
+          ok: false, backoff: true, raison: etat.raisonBlocage || 'blocage', brand: brand,
+          source: sourceSlug, backoffJusqu: etat.backoffJusqu,
+          note: 'en backoff apres blocage — releve non applique jusqu\'a ' + new Date(Number(etat.backoffJusqu)).toISOString()
+        });
+      }
+    } catch (e) { /* état illisible : on ne bloque pas le traqueur pour ça */ }
 
     /* Overrides relus À LA SOURCE : le catalogue fusionné peut avoir jusqu'à
        30 s de retard. En mode balayage (&scan=1), le relevé vient du cache de

@@ -2872,7 +2872,43 @@ function comparerCaracteristiques(a, b) {
   return { compatible: conflits.length === 0, conflits: conflits, concordances: concordances };
 }
 
-module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickoutil, parseIdealo: parseIdealo, parseAuto: parseAuto, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, raisonAucuneSource: raisonAucuneSource, enMillis: enMillis, SOURCE_FRESH_MS: SOURCE_FRESH_MS, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage, estMaPropreReponse: estMaPropreReponse, titresAttendus: titresAttendus, compterTuiles: compterTuiles, empreintePage: empreintePage, racineRef: racineRef, racineModele: racineModele,
+/* ── DÉTECTION DE BLOCAGE DU COMPARATEUR (anti rate-limit, 08/08/2026) ───────
+   Le comparateur (idealo) est derrière Cloudflare : à cadence trop haute il
+   sert une page de challenge (« Just a moment… »), un 403/429, ou l'erreur
+   1015. Ce n'est PAS une page produit — la parser donnerait 0 article. On la
+   NOMME pour que la session s'arrête, n'écrive rien, et déclenche le backoff.
+
+   ⛔ FONCTION PURE, faux positif = poison. Un vrai listing idealo (long, plein
+   de tuiles produit) ne doit JAMAIS être pris pour un blocage — sinon le
+   traqueur se gèle tout seul. Deux garde-fous :
+     · le STATUT HTTP (si le Raccourci l'envoie) fait AUTORITÉ : 403/429/503 et
+       les codes Cloudflare 1xxx = bloqué, sans regarder le contenu ;
+     · côté CONTENU, on n'accepte QUE des marqueurs distinctifs d'interstitiel
+       Cloudflare — jamais un mot générique (« cookies », « forbidden ») qui
+       vivrait dans un bandeau de consentement ou un nom d'outil.
+   Retourne une raison (string) si bloqué, sinon null. */
+function detecterBlocage(rawText, httpStatus) {
+  var st = Number(httpStatus);
+  if (st === 403 || st === 429 || st === 503 || (st >= 1000 && st < 1100)) {
+    return 'statut-http-' + st;
+  }
+  var t = String(rawText || '').slice(0, 8000); // les marqueurs sont en tête de page
+  var MARQUEURS = [
+    [/just a moment/i, 'cloudflare-just-a-moment'],
+    [/cf-browser-verification|__cf_chl|cf_chl_opt|\/cdn-cgi\/challenge/i, 'cloudflare-challenge'],
+    [/checking your browser before accessing/i, 'cloudflare-checking-browser'],
+    [/ddos protection by cloudflare/i, 'cloudflare-ddos'],
+    [/attention required[\s\S]{0,60}cloudflare/i, 'cloudflare-attention'],
+    [/error code:\s*1\d{3}/i, 'cloudflare-error-1xxx'],
+    [/\b(hcaptcha|recaptcha)\b/i, 'captcha']
+  ];
+  for (var i = 0; i < MARQUEURS.length; i++) {
+    if (MARQUEURS[i][0].test(t)) return MARQUEURS[i][1];
+  }
+  return null;
+}
+
+module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickoutil, parseIdealo: parseIdealo, parseAuto: parseAuto, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, raisonAucuneSource: raisonAucuneSource, enMillis: enMillis, SOURCE_FRESH_MS: SOURCE_FRESH_MS, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage, estMaPropreReponse: estMaPropreReponse, detecterBlocage: detecterBlocage, titresAttendus: titresAttendus, compterTuiles: compterTuiles, empreintePage: empreintePage, racineRef: racineRef, racineModele: racineModele,
   varianteProduit: varianteProduit, roleCoffret: roleCoffret,
   signatureBatteries: signatureBatteries, estPourAutreMachine: estPourAutreMachine,
   sansAccentsTitre: sansAccentsTitre, refUniqueDuTitre: refUniqueDuTitre,
