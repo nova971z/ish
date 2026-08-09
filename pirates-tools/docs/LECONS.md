@@ -163,6 +163,9 @@ noir sur blanc que l'user travaille **sur iPad, en navigation privée**. Une
 consigne se vérifie donc contre CE contexte avant d'être donnée — pas après.
 
 ---
+| 09/08/2026 | TOUS les builds Vercel en ERROR pendant ~9 h — Production figée sur l'ancien commit, 8 lots annoncés « déployés » alors que rien n'était en ligne | Des clés `"comment"` ajoutées dans `vercel.json` (schéma strict : propriété inconnue = build refusé) ; et la porte de fin de lot ne vérifiait que GIT, jamais le BUILD — poussé n'est pas construit, construit n'est pas servi | `outils/verifier-pousse.mjs` |
+
+---
 
 ## Comment on s'en sert
 

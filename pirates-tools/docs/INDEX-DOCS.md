@@ -74,3 +74,5 @@ il occupe de la place et donne l'illusion que le sujet est traité.
 
 La porte M4 rend l'oubli **mécaniquement impossible** : créer un document sans
 le désigner fait rougir la CI.
+
+| `docs/ETAT-DASHBOARD.md` | Faits vérifiés par capture sur le dashboard Vercel — ne jamais redemander |
