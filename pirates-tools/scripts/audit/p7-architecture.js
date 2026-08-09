@@ -89,6 +89,8 @@ let resetBloc = APP.slice(APP.indexOf('if (changed) {'), APP.indexOf('if (user) 
 const NON_PERSONNEL = {
   _currentTerritory: 'préférence d\'affichage (territoire fiscal), pas une identité',
   _adminStatsJours:  'période choisie de l\'onglet stats admin (7/30/total) — un réglage d\'écran, aucune donnée de compte',
+  _adminStatsNvFenetre: 'fenêtre du widget Nouveaux visiteurs (hier/auj/7j) — un réglage d\'écran, aucune donnée de compte',
+  _adminStatsDerniere: 'dernière réponse stats (agrégats ANONYMES : compteurs journaliers, aucun identifiant) — évite une relecture Firestore au changement de fenêtre',
   _partnersPromise:  'cache de l\'annuaire PUBLIC des artisans',
   _couriersPromise:  'cache de l\'annuaire PUBLIC des livreurs',
   // Filets « échec ≠ vide » : dernière liste RÉUSSIE des deux annuaires

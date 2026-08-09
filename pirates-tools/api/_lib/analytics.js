@@ -270,7 +270,10 @@ function summarize(daily, products, clicks, geo) {
     totals.returningVisitors += num(d.returningVisitors);
     mergeCounts(devices, d.device);
     mergeCounts(sources, d.source);
-    series.push({ date: d.date || d.id, sessions: num(d.sessions), pageViews: num(d.pageViews), clicks: num(d.clicks) });
+    // newVisitors PAR JOUR : nourrit le widget « Nouveaux visiteurs » de
+    // l'admin (fenêtre hier / aujourd'hui / 7 jours) — agrégat anonyme (J3),
+    // additif, rien ne change pour les lecteurs existants de la série.
+    series.push({ date: d.date || d.id, sessions: num(d.sessions), pageViews: num(d.pageViews), clicks: num(d.clicks), newVisitors: num(d.newVisitors) });
   });
   series.sort(function (a, b) { return a.date < b.date ? -1 : (a.date > b.date ? 1 : 0); });
 

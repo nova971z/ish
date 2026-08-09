@@ -5854,6 +5854,14 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 /* Note de lecture sous un bloc de chiffres : dit CE QUI est compté (période,
    consentement, cumul) — un nombre sans définition est un piège. */
 .stat-note { font-size: .78rem; color: var(--muted); margin: .2rem 0 .8rem; }
+/* Mini-sélecteur DANS une carte de stat (fenêtre du widget Nouveaux visiteurs). */
+.stat-mini { display: flex; gap: .3rem; margin-top: .45rem; }
+.stat-mini__btn {
+  font-size: .68rem; padding: .18rem .5rem; border-radius: 999px;
+  background: transparent; color: var(--muted);
+  border: 1px solid var(--border, rgba(255,255,255,.18)); cursor: pointer;
+}
+.stat-mini__btn.active { color: var(--accent); border-color: var(--accent); }
 
 .stat-grid {
   display: grid;

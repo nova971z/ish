@@ -12118,6 +12118,12 @@
      total historique reste à un tap. La valeur vit ici (pas dans le DOM) pour
      survivre au re-render. */
   var _adminStatsJours = 30;
+  /* Fenêtre du widget « Nouveaux visiteurs » : 'hier' (la veille, 24 h) par
+     défaut — indépendante du sélecteur global, changeable sur la carte. */
+  var _adminStatsNvFenetre = 'hier';
+  /* Dernière réponse stats reçue : re-rendre (changement de fenêtre du widget)
+     sans refaire d'appel réseau ni dépenser de lecture Firestore. */
+  var _adminStatsDerniere = null;
   
 
   function statCard(label, value, sub) {
@@ -13848,8 +13854,10 @@
   Object.defineProperty(__A, '_adminPartnersList', { get: function () { return _adminPartnersList; }, set: function (v) { _adminPartnersList = v; }, configurable: true });
   Object.defineProperty(__A, '_adminPhotosBusy', { get: function () { return _adminPhotosBusy; }, set: function (v) { _adminPhotosBusy = v; }, configurable: true });
   Object.defineProperty(__A, '_adminProdQ', { get: function () { return _adminProdQ; }, set: function (v) { _adminProdQ = v; }, configurable: true });
+  Object.defineProperty(__A, '_adminStatsDerniere', { get: function () { return _adminStatsDerniere; }, set: function (v) { _adminStatsDerniere = v; }, configurable: true });
   Object.defineProperty(__A, '_adminStatsJours', { get: function () { return _adminStatsJours; }, set: function (v) { _adminStatsJours = v; }, configurable: true });
   Object.defineProperty(__A, '_adminStatsLoaded', { get: function () { return _adminStatsLoaded; }, set: function (v) { _adminStatsLoaded = v; }, configurable: true });
+  Object.defineProperty(__A, '_adminStatsNvFenetre', { get: function () { return _adminStatsNvFenetre; }, set: function (v) { _adminStatsNvFenetre = v; }, configurable: true });
   Object.defineProperty(__A, '_ajoutImage', { get: function () { return _ajoutImage; }, set: function (v) { _ajoutImage = v; }, configurable: true });
   Object.defineProperty(__A, '_ajoutImageNom', { get: function () { return _ajoutImageNom; }, set: function (v) { _ajoutImageNom = v; }, configurable: true });
   Object.defineProperty(__A, '_currentUser', { get: function () { return _currentUser; }, set: function (v) { _currentUser = v; }, configurable: true });
@@ -13896,7 +13904,7 @@
     if (window.__PT_ADMIN) return Promise.resolve();
     if (__adminCharge) return __adminCharge;
     __adminCharge = new Promise(function (res, rej) {
-      var s = document.createElement('script'); s.src = 'admin.bundle.js?v=602';
+      var s = document.createElement('script'); s.src = 'admin.bundle.js?v=603';
       s.onload = res; s.onerror = function () { __adminCharge = null; rej(new Error('admin.bundle indisponible')); };
       document.head.appendChild(s);
     });

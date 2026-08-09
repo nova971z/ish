@@ -12129,6 +12129,12 @@
      total historique reste à un tap. La valeur vit ici (pas dans le DOM) pour
      survivre au re-render. */
   var _adminStatsJours = 30;
+  /* Fenêtre du widget « Nouveaux visiteurs » : 'hier' (la veille, 24 h) par
+     défaut — indépendante du sélecteur global, changeable sur la carte. */
+  var _adminStatsNvFenetre = 'hier';
+  /* Dernière réponse stats reçue : re-rendre (changement de fenêtre du widget)
+     sans refaire d'appel réseau ni dépenser de lecture Firestore. */
+  var _adminStatsDerniere = null;
   function loadAdminStats(force) {
     var el = document.getElementById('adminStats');
     if (!el) return;
@@ -12137,6 +12143,7 @@
     el.innerHTML = '<p class="admin-loading">Chargement…</p>';
     var params = (_adminStatsJours === 7 || _adminStatsJours === 30) ? { jours: _adminStatsJours } : null;
     adminGet('stats', params).then(function (data) {
+      _adminStatsDerniere = data;
       renderAdminStats(el, data.stats || {}, data.periode || null);
     }).catch(function (e) {
       el.innerHTML = '<p class="admin-error">Erreur : ' + escapeHTML(e.message) + '</p>';
@@ -12204,12 +12211,49 @@
     /* Compteurs principaux — libellés qui disent CE QUI est compté.
        Rappel affiché : robots exclus, et seuls les visiteurs ayant ACCEPTÉ la
        mesure sont comptés (les chiffres réels sont donc au-dessus). */
+    /* ── Widget « Nouveaux visiteurs » à fenêtre PROPRE (demande user 09/08) ──
+       « Nouveaux depuis le début » ne bouge presque jamais : ce qu'on veut
+       piloter, c'est la veille. Fenêtre par défaut : HIER (24 h pleines), et
+       changeable SUR la carte (Hier / Aujourd'hui / 7 j) sans toucher au
+       sélecteur global. Calculé depuis la série JOURNALIÈRE déjà reçue —
+       zéro appel réseau, zéro lecture Firestore au changement de fenêtre.
+       Dates en UTC, comme les clés du serveur (dateKey). */
+    var serieJours = s.daily || [];
+    function cleJourUTC(ms) { return new Date(ms).toISOString().slice(0, 10); }
+    function nvSurFenetre(fen) {
+      var aujourdhui = cleJourUTC(Date.now());
+      if (fen === 'auj') {
+        var dA = serieJours.find(function (d) { return d.date === aujourdhui; });
+        return dA ? (dA.newVisitors || 0) : 0;
+      }
+      if (fen === '7j') {
+        var borne = cleJourUTC(Date.now() - 6 * 86400000);
+        return serieJours.reduce(function (somme, d) {
+          return somme + ((d.date >= borne && d.date <= aujourdhui) ? (d.newVisitors || 0) : 0);
+        }, 0);
+      }
+      var hier = cleJourUTC(Date.now() - 86400000);   // 'hier' — la veille
+      var dH = serieJours.find(function (d) { return d.date === hier; });
+      return dH ? (dH.newVisitors || 0) : 0;
+    }
+    var nvFen = _adminStatsNvFenetre;
+    var nvLib = nvFen === 'auj' ? 'aujourd’hui' : nvFen === '7j' ? '7 derniers jours' : 'hier (la veille)';
+    var carteNouveaux = '<div class="stat-card">'
+      + '<span class="stat-card__value">' + nvSurFenetre(nvFen) + '</span>'
+      + '<span class="stat-card__label">Nouveaux visiteurs</span>'
+      + '<span class="stat-card__sub">1re visite · ' + escapeHTML(nvLib) + '</span>'
+      + '<span class="stat-mini" role="group" aria-label="Fenêtre des nouveaux visiteurs">'
+      + [['hier', 'Hier'], ['auj', 'Auj.'], ['7j', '7 j']].map(function (o) {
+        return '<button type="button" class="stat-mini__btn' + (nvFen === o[0] ? ' active' : '') + '" data-stats-nv="' + o[0] + '">' + o[1] + '</button>';
+      }).join('') + '</span>'
+      + '</div>';
+
     html += '<div class="stat-grid">'
       + statCard('Visites (sessions)', t.sessions || 0, libPeriode)
       + statCard('Pages vues', t.pageViews || 0, libPeriode)
       + statCard('Clics mesurés', t.clicks || 0, 'boutons suivis · ' + libPeriode)
       + statCard('Visiteurs uniques', totalVisitors, 'consentis · ' + libPeriode)
-      + statCard('Nouveaux', t.newVisitors || 0, '1re visite · ' + libPeriode)
+      + carteNouveaux
       + statCard('Récurrents', t.returningVisitors || 0, 'déjà venus · ' + libPeriode)
       + '</div>'
       + '<p class="stat-note">Mesure première partie : robots exclus, et seuls les visiteurs ayant accepté la mesure sont comptés — les vrais totaux sont donc supérieurs.</p>';
@@ -12283,6 +12327,18 @@
         var v = btn.getAttribute('data-stats-jours');
         _adminStatsJours = (v === 'total') ? 'total' : Number(v);
         loadAdminStats(true);
+      });
+    });
+    /* Fenêtre du widget « Nouveaux visiteurs » : re-render depuis la réponse
+       déjà reçue — aucun appel réseau, aucune lecture Firestore. */
+    $$('[data-stats-nv]', el).forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        _adminStatsNvFenetre = btn.getAttribute('data-stats-nv');
+        if (_adminStatsDerniere) {
+          renderAdminStats(el, _adminStatsDerniere.stats || {}, _adminStatsDerniere.periode || null);
+        } else {
+          loadAdminStats(true);
+        }
       });
     });
 

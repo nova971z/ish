@@ -30,6 +30,7 @@ function loadAdminStats(force) {
   el.innerHTML = '<p class="admin-loading">Chargement\u2026</p>';
   var params = A._adminStatsJours === 7 || A._adminStatsJours === 30 ? { jours: A._adminStatsJours } : null;
   A.adminGet('stats', params).then(function (data) {
+    A._adminStatsDerniere = data;
     renderAdminStats(el, data.stats || {}, data.periode || null);
   }).catch(function (e) {
     el.innerHTML = '<p class="admin-error">Erreur : ' + A.escapeHTML(e.message) + '</p>';
@@ -60,7 +61,49 @@ function renderAdminStats(el, s, periode) {
     var actif = pJours === o[0] || o[0] === 'total' && pJours === 'total';
     return '<button type="button" class="cat-chip' + (actif ? ' active' : '') + '" data-stats-jours="' + o[0] + '">' + o[1] + '</button>';
   }).join('') + '<span class="stat-periode__fenetre">' + A.escapeHTML(libPeriode) + fenetre + '</span>' + '</div>';
-  html += '<div class="stat-grid">' + A.statCard('Visites (sessions)', t.sessions || 0, libPeriode) + A.statCard('Pages vues', t.pageViews || 0, libPeriode) + A.statCard('Clics mesurés', t.clicks || 0, 'boutons suivis \xB7 ' + libPeriode) + A.statCard('Visiteurs uniques', totalVisitors, 'consentis \xB7 ' + libPeriode) + A.statCard('Nouveaux', t.newVisitors || 0, '1re visite \xB7 ' + libPeriode) + A.statCard('Récurrents', t.returningVisitors || 0, 'déjà venus \xB7 ' + libPeriode) + '</div>' + '<p class="stat-note">Mesure première partie : robots exclus, et seuls les visiteurs ayant accepté la mesure sont comptés \u2014 les vrais totaux sont donc supérieurs.</p>';
+  var serieJours = s.daily || [];
+  function cleJourUTC(ms) {
+    return new Date(ms).toISOString().slice(0, 10);
+  }
+  function nvSurFenetre(fen) {
+    var aujourdhui = cleJourUTC(Date.now());
+    if (fen === 'auj') {
+      var dA = serieJours.find(function (d) {
+        return d.date === aujourdhui;
+      });
+      return dA ? dA.newVisitors || 0 : 0;
+    }
+    if (fen === '7j') {
+      var borne = cleJourUTC(Date.now() - 6 * 86400000);
+      return serieJours.reduce(function (somme, d) {
+        return somme + (d.date >= borne && d.date <= aujourdhui ? d.newVisitors || 0 : 0);
+      }, 0);
+    }
+    var hier = cleJourUTC(Date.now() - 86400000);
+    var dH = serieJours.find(function (d) {
+      return d.date === hier;
+    });
+    return dH ? dH.newVisitors || 0 : 0;
+  }
+  var nvFen = A._adminStatsNvFenetre;
+  var nvLib = nvFen === 'auj' ? 'aujourd\u2019hui' : nvFen === '7j' ? '7 derniers jours' : 'hier (la veille)';
+  var carteNouveaux = '<div class="stat-card">' + '<span class="stat-card__value">' + nvSurFenetre(nvFen) + '</span>' + '<span class="stat-card__label">Nouveaux visiteurs</span>' + '<span class="stat-card__sub">1re visite \xB7 ' + A.escapeHTML(nvLib) + '</span>' + '<span class="stat-mini" role="group" aria-label="Fenêtre des nouveaux visiteurs">' + [
+    [
+      'hier',
+      'Hier'
+    ],
+    [
+      'auj',
+      'Auj.'
+    ],
+    [
+      '7j',
+      '7 j'
+    ]
+  ].map(function (o) {
+    return '<button type="button" class="stat-mini__btn' + (nvFen === o[0] ? ' active' : '') + '" data-stats-nv="' + o[0] + '">' + o[1] + '</button>';
+  }).join('') + '</span>' + '</div>';
+  html += '<div class="stat-grid">' + A.statCard('Visites (sessions)', t.sessions || 0, libPeriode) + A.statCard('Pages vues', t.pageViews || 0, libPeriode) + A.statCard('Clics mesurés', t.clicks || 0, 'boutons suivis \xB7 ' + libPeriode) + A.statCard('Visiteurs uniques', totalVisitors, 'consentis \xB7 ' + libPeriode) + carteNouveaux + A.statCard('Récurrents', t.returningVisitors || 0, 'déjà venus \xB7 ' + libPeriode) + '</div>' + '<p class="stat-note">Mesure première partie : robots exclus, et seuls les visiteurs ayant accepté la mesure sont comptés \u2014 les vrais totaux sont donc supérieurs.</p>';
   html += '<div class="stat-cols">' + '<section class="stat-block"><h3 class="stat-block__title">Appareils</h3>' + A.barRows(s.devices) + '</section>' + '<section class="stat-block"><h3 class="stat-block__title">Sources de trafic</h3>' + A.barRows(s.sources) + '</section>' + '</div>';
   html += '<section class="stat-block"><h3 class="stat-block__title">Produits les plus consultés</h3>' + '<p class="stat-note">Compteurs cumulés depuis le début \u2014 non filtrés par la période.</p>';
   var prods = (s.products || []).filter(function (p) {
@@ -107,6 +150,16 @@ function renderAdminStats(el, s, periode) {
       var v = btn.getAttribute('data-stats-jours');
       A._adminStatsJours = v === 'total' ? 'total' : Number(v);
       loadAdminStats(true);
+    });
+  });
+  A.$$('[data-stats-nv]', el).forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      A._adminStatsNvFenetre = btn.getAttribute('data-stats-nv');
+      if (A._adminStatsDerniere) {
+        renderAdminStats(el, A._adminStatsDerniere.stats || {}, A._adminStatsDerniere.periode || null);
+      } else {
+        loadAdminStats(true);
+      }
     });
   });
   A.destroyAdminGlobe();
