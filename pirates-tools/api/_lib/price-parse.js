@@ -471,7 +471,10 @@ var PIECE_DETACHEE = /^N\d{5,}$/;
 function teteConnue(c) {
   var lettres = (String(c).match(/^[A-Z]+/) || [''])[0];
   for (var n = lettres.length; n >= 2; n--) {
-    if (Object.prototype.hasOwnProperty.call(nomen.PREFIXES_DEWALT, lettres.slice(0, n))) return true;
+    /* TETES_CONNUES = union des tables de préfixes de TOUTES les marques
+       traquées (DeWALT + Makita, MESURÉES depuis le catalogue). Une nouvelle
+       marque s'ajoute par sa TABLE dans nomenclature.js — jamais ici (TR-009). */
+    if (Object.prototype.hasOwnProperty.call(nomen.TETES_CONNUES, lettres.slice(0, n))) return true;
   }
   return false;
 }

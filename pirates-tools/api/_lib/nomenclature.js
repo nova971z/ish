@@ -825,6 +825,106 @@ var PREFIXES_DEWALT = {
 /* Les clés triées du plus LONG au plus court — l'ordre de lecture. */
 var PREFIXES_DEWALT_ORDRE = Object.keys(PREFIXES_DEWALT).sort(function (a, b) { return b.length - a.length; });
 
+/* ── PRÉFIXES MAKITA (09/08/2026) ─────────────────────────────────────────────
+   ⛔ TABLE MESURÉE, PAS INVENTÉE : générée depuis products.json (611 fiches
+   Makita du catalogue) — préfixe = tête alphabétique du SKU, retenu s'il porte
+   AU MOINS 2 fiches ; la note dit la catégorie DOMINANTE observée et sur
+   combien de fiches. Même rôle que PREFIXES_DEWALT : reconnaître qu'une tête
+   de candidat est une vraie famille de références (teteConnue du parseur), et
+   dire ce que le préfixe annonce. 73 préfixes retenus. */
+var PREFIXES_MAKITA = {
+  AF:     { famille: 'machine', note: 'Cloueurs (3/3 fiches)' },
+  BL:     { famille: 'machine', note: 'Accessoires (5/7 fiches)' },
+  BN:     { famille: 'machine', note: 'Rangements (2/2 fiches)' },
+  BO:     { famille: 'machine', note: 'Meulage, découpe et polissage (4/5 fiches)' },
+  CC:     { famille: 'machine', note: 'Scies (2/2 fiches)' },
+  CE:     { famille: 'machine', note: 'Meulage, découpe et polissage (2/2 fiches)' },
+  CL:     { famille: 'machine', note: 'Aspirateurs (1/2 fiches)' },
+  CW:     { famille: 'machine', note: 'Accessoires (3/3 fiches)' },
+  DBN:    { famille: 'machine', note: 'Accessoires (4/5 fiches)' },
+  DBO:    { famille: 'machine', note: 'Meulage, découpe et polissage (9/11 fiches)' },
+  DBS:    { famille: 'machine', note: 'Meulage, découpe et polissage (3/3 fiches)' },
+  DC:     { famille: 'energie', note: 'Batteries et chargeurs (4/4 fiches)' },
+  DCC:    { famille: 'machine', note: 'Scies (3/3 fiches)' },
+  DCE:    { famille: 'machine', note: 'Meulage, découpe et polissage (2/2 fiches)' },
+  DCL:    { famille: 'machine', note: 'Aspirateurs (1/2 fiches)' },
+  DCO:    { famille: 'machine', note: 'Défonceuses (3/3 fiches)' },
+  DCS:    { famille: 'machine', note: 'Accessoires (3/4 fiches)' },
+  DDA:    { famille: 'machine', note: 'Perçage, vissage et boulonnage (5/5 fiches)' },
+  DDF:    { famille: 'machine', note: 'Perçage, vissage et boulonnage (19/23 fiches)' },
+  DEADML: { famille: 'machine', note: 'Accessoires (3/3 fiches)' },
+  DF:     { famille: 'machine', note: 'Perçage, vissage et boulonnage (1/2 fiches)' },
+  DFR:    { famille: 'machine', note: 'Perçage, vissage et boulonnage (4/4 fiches)' },
+  DFS:    { famille: 'machine', note: 'Accessoires (2/4 fiches)' },
+  DGA:    { famille: 'machine', note: 'Meulage, découpe et polissage (28/29 fiches)' },
+  DGD:    { famille: 'machine', note: 'Accessoires (2/4 fiches)' },
+  DGP:    { famille: 'machine', note: 'Accessoires (2/2 fiches)' },
+  DHG:    { famille: 'machine', note: 'Accessoires (2/2 fiches)' },
+  DHP:    { famille: 'machine', note: 'Perçage, vissage et boulonnage (17/31 fiches)' },
+  DHR:    { famille: 'machine', note: 'Perforateurs (21/25 fiches)' },
+  DHS:    { famille: 'machine', note: 'Scies (24/24 fiches)' },
+  DJN:    { famille: 'machine', note: 'Accessoires (3/4 fiches)' },
+  DJR:    { famille: 'machine', note: 'Scies (23/23 fiches)' },
+  DJV:    { famille: 'machine', note: 'Scies (7/8 fiches)' },
+  DKP:    { famille: 'machine', note: 'Rabots (2/2 fiches)' },
+  DLM:    { famille: 'machine', note: 'Tronçonnage et élagage (8/13 fiches)' },
+  DLX:    { famille: 'machine', note: 'Accessoires (16/20 fiches)' },
+  DMP:    { famille: 'machine', note: 'Accessoires (3/5 fiches)' },
+  DMR:    { famille: 'machine', note: 'Accessoires (3/3 fiches)' },
+  DPT:    { famille: 'machine', note: 'Rangements (3/4 fiches)' },
+  DPV:    { famille: 'machine', note: 'Meulage, découpe et polissage (3/3 fiches)' },
+  DRT:    { famille: 'machine', note: 'Défonceuses (5/6 fiches)' },
+  DRV:    { famille: 'machine', note: 'Accessoires (2/3 fiches)' },
+  DSP:    { famille: 'machine', note: 'Scies (1/2 fiches)' },
+  DSS:    { famille: 'machine', note: 'Scies (3/3 fiches)' },
+  DST:    { famille: 'machine', note: 'Rangements (3/4 fiches)' },
+  DTD:    { famille: 'machine', note: 'Perçage, vissage et boulonnage (15/20 fiches)' },
+  DTL:    { famille: 'machine', note: 'Perçage, vissage et boulonnage (4/4 fiches)' },
+  DTM:    { famille: 'machine', note: 'Outils multifonctions (4/6 fiches)' },
+  DTW:    { famille: 'machine', note: 'Perçage, vissage et boulonnage (26/32 fiches)' },
+  DUC:    { famille: 'machine', note: 'Tronçonnage et élagage (4/8 fiches)' },
+  DUS:    { famille: 'machine', note: 'Accessoires (2/2 fiches)' },
+  DUT:    { famille: 'machine', note: 'Malaxeurs (2/2 fiches)' },
+  DVC:    { famille: 'machine', note: 'Aspirateurs (1/2 fiches)' },
+  DWR:    { famille: 'machine', note: 'Perçage, vissage et boulonnage (4/5 fiches)' },
+  GA:     { famille: 'machine', note: 'Meulage, découpe et polissage (6/6 fiches)' },
+  GD:     { famille: 'machine', note: 'Meulage, découpe et polissage (2/2 fiches)' },
+  HB:     { famille: 'machine', note: 'Perçage, vissage et boulonnage (2/2 fiches)' },
+  HM:     { famille: 'machine', note: 'Perforateurs (5/6 fiches)' },
+  HR:     { famille: 'machine', note: 'Perforateurs (10/12 fiches)' },
+  HS:     { famille: 'machine', note: 'Scies (2/2 fiches)' },
+  JR:     { famille: 'machine', note: 'Scies (4/5 fiches)' },
+  KP:     { famille: 'machine', note: 'Rabots (3/3 fiches)' },
+  LM:     { famille: 'machine', note: 'Tronçonnage et élagage (3/3 fiches)' },
+  LS:     { famille: 'machine', note: 'Scies (5/5 fiches)' },
+  LW:     { famille: 'machine', note: 'Tronçonnage et élagage (2/2 fiches)' },
+  MR:     { famille: 'machine', note: 'Accessoires (2/2 fiches)' },
+  RP:     { famille: 'machine', note: 'Défonceuses (6/6 fiches)' },
+  RT:     { famille: 'machine', note: 'Défonceuses (2/2 fiches)' },
+  SG:     { famille: 'machine', note: 'Accessoires (2/3 fiches)' },
+  SK:     { famille: 'machine', note: 'Accessoires (2/2 fiches)' },
+  TW:     { famille: 'machine', note: 'Perçage, vissage et boulonnage (5/6 fiches)' },
+  UB:     { famille: 'machine', note: 'Souffleurs (3/3 fiches)' },
+  VC:     { famille: 'machine', note: 'Aspirateurs (3/3 fiches)' },
+};
+var PREFIXES_MAKITA_ORDRE = Object.keys(PREFIXES_MAKITA).sort(function (a, b) { return b.length - a.length; });
+
+/* ── TÊTES CONNUES, TOUTES MARQUES ────────────────────────────────────────────
+   L'union des tables de préfixes : le parseur (teteConnue) demande seulement
+   « cette tête est-elle une famille de références connue ? » — la réponse doit
+   couvrir CHAQUE marque traquée, sinon une réf à tiret sans chiffre de la
+   nouvelle marque est perdue (TR-009 : la marque s'ajoute par une TABLE,
+   jamais en dupliquant le parseur). */
+var TETES_CONNUES = {};
+/* ⛔ TÊTES DE 3 LETTRES AU MOINS. Mesuré (porte check-classer-idealo) : les
+   têtes de DEUX lettres de Makita (HS, HP, HM…) faisaient passer « HSS-G »
+   — une nuance d'acier, pas une référence — pour un candidat, et une offre à
+   référence unique en montrait deux. Le secours teteConnue ne sert qu'aux
+   réfs À TIRET SANS CHIFFRE : dans le catalogue mesuré, aucune n'a une tête
+   de deux lettres — on ne perd rien, on ferme le faux positif. */
+Object.keys(PREFIXES_DEWALT).forEach(function (k) { if (k.length >= 3) TETES_CONNUES[k] = 1; });
+Object.keys(PREFIXES_MAKITA).forEach(function (k) { if (k.length >= 3) TETES_CONNUES[k] = 1; });
+
 /* Un T ajouté APRÈS le code batterie signale le coffret TSTAK :
    « DCK368P3T » = 3 batteries 5,0 Ah + TSTAK. */
 var SUFFIXE_COFFRET = 'T';
@@ -1103,6 +1203,8 @@ module.exports = {
   BATTERIES_DEWALT: BATTERIES_DEWALT, MARQUEURS_DEWALT: MARQUEURS_DEWALT,
   lireSuffixeDewalt: lireSuffixeDewalt,
   PREFIXES_DEWALT: PREFIXES_DEWALT, PREFIXES_DEWALT_ORDRE: PREFIXES_DEWALT_ORDRE,
+  PREFIXES_MAKITA: PREFIXES_MAKITA, PREFIXES_MAKITA_ORDRE: PREFIXES_MAKITA_ORDRE,
+  TETES_CONNUES: TETES_CONNUES,
   prefixeDeReference: prefixeDeReference,
   EXTENSIONS_REGION: EXTENSIONS_REGION, GAMMES: GAMMES,
   EMMANCHEMENTS: EMMANCHEMENTS, NUANCES: NUANCES, MATIERES: MATIERES,

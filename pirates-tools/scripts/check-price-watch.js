@@ -312,6 +312,16 @@ module.exports = async function () {
   /* Le chemin de LECTURE réel (celui du recalcul), via les internes d'admin —
      jamais une copie de la logique (leçon O6). */
   var adm = require('../api/admin.js');
+  /* ⛔ TÊTES DE RÉFÉRENCES MULTI-MARQUES (09/08/2026, plan Makita) : l'union
+     TETES_CONNUES doit couvrir CHAQUE marque traquée — une marque absente, et
+     ses réfs à tiret sans chiffre sont perdues en silence. On vérifie une tête
+     de chaque table (DCB = DeWALT batteries ; DTW = Makita boulonneuses,
+     32 fiches mesurées au catalogue). */
+  var tetes = pp.nomenclature && pp.nomenclature.TETES_CONNUES;
+  ok(!!(tetes && tetes.DCB && tetes.DTW),
+    '⛔ TETES_CONNUES couvre DeWALT (DCB) ET Makita (DTW) — obtenu : '
+    + JSON.stringify(tetes ? { DCB: !!tetes.DCB, DTW: !!tetes.DTW } : null));
+
   var pw = adm._internals && adm._internals.pwSourceCost;
   ok(typeof pw === 'function', 'pwSourceCost exposée aux portes via _internals');
   if (pw) {
