@@ -229,23 +229,74 @@ module.exports = async function () {
          sources fraîches ET en stock ;
        · s'il ne reste AUCUNE source achetable, le prix est GELÉ — pas
          recalculé, pas estimé en douce. */
+  /* ⛔ LE SLUG DE LA SOURCE EN SERVICE SE LIT À L'EXÉCUTION, JAMAIS RECOPIÉ
+     (règle des harnais : un seuil recopié se périme). Il vit dans
+     `SOURCES_ACTIVES` (D-022) : le jour où l'user change de traqueur, tout ce
+     fichier suit au lieu de rougir pour une raison qui n'est pas la sienne. */
+  var SRC_ACT = Object.keys(pp.SOURCES_ACTIVES || {})[0];
+  var SRC_RETIRE = 'zz-traqueur-retire';     // synthétique : jamais un slug réel
   var choisir = pp.choisirCoutSource;
   ok(typeof choisir === 'function', 'choisirCoutSource exportée');
   var NOW = 1700000000000, J = 24 * 3600 * 1000;
   if (choisir) {
-    var deux = { cotebrico: { ttc: 200, at: NOW - J }, nouveau: { ttc: 180, at: NOW - J } };
-    var c1 = choisir(deux, NOW);
-    ok(c1 && c1.ttc === 180 && c1.source === 'nouveau',
+    /* ⚠️ LOGIQUE PURE DU MINIMUM — CONFIG INJECTÉE (D-022, 09/08/2026).
+       Ces assertions éprouvent le CHOIX (moins cher · rupture · péremption),
+       pas la liste des traqueurs en service. Elles nommaient deux sources
+       aujourd'hui retirées : elles seraient devenues rouges pour une raison
+       qui n'est pas la leur. On leur injecte donc leurs propres sources —
+       exactement comme le modèle de prix reçoit sa config. La règle de
+       production, elle, est éprouvée juste en dessous, SANS injection. */
+    var ACTIFS = Object.keys(pp.SOURCES_ACTIVES || {});
+    ok(ACTIFS.length >= 1,
+      '⛔ PRÉALABLE : au moins une source de coût est ACTIVE — sinon aucun prix ne '
+      + 'pourrait se calculer, et rien de ce qui suit ne prouverait quoi que ce soit');
+    var ACT = SRC_ACT;
+    var DEUX = { unSite: 1, autreSite: 1 };     // synthétiques, jamais des slugs réels
+    var deux = { unSite: { ttc: 200, at: NOW - J }, autreSite: { ttc: 180, at: NOW - J } };
+    var c1 = choisir(deux, NOW, null, DEUX);
+    ok(c1 && c1.ttc === 180 && c1.source === 'autreSite',
       'deux traqueurs → le MOINS CHER gagne, quel que soit son nom (' + JSON.stringify(c1) + ')');
-    var c2 = choisir({ cotebrico: { ttc: 150, at: NOW - J, enStock: false }, nouveau: { ttc: 180, at: NOW - J } }, NOW);
+    var c2 = choisir({ unSite: { ttc: 150, at: NOW - J, enStock: false }, autreSite: { ttc: 180, at: NOW - J } }, NOW, null, DEUX);
     ok(c2 && c2.ttc === 180,
       '⛔ une source EN RUPTURE ne compte pas, même moins chère : on ne peut pas y acheter (' + JSON.stringify(c2) + ')');
-    var c3 = choisir({ cotebrico: { ttc: 150, at: NOW - 20 * J }, nouveau: { ttc: 180, at: NOW - J } }, NOW);
+    var c3 = choisir({ unSite: { ttc: 150, at: NOW - 20 * J }, autreSite: { ttc: 180, at: NOW - J } }, NOW, null, DEUX);
     ok(c3 && c3.ttc === 180,
       'une source PÉRIMÉE (> 14 j) ne compte pas : le produit a quitté sa page (' + JSON.stringify(c3) + ')');
-    ok(choisir({ cotebrico: { ttc: 150, at: NOW - J, enStock: false } }, NOW) === null,
+    ok(choisir({ unSite: { ttc: 150, at: NOW - J, enStock: false } }, NOW, null, DEUX) === null,
       'AUCUNE source achetable → null : le produit doit être GELÉ, jamais recalculé');
     ok(choisir(null, NOW) === null && choisir({}, NOW) === null, 'carte absente ou vide → null, sans planter');
+
+    /* ⛔⛔ ARGENT — UNE SOURCE RETIRÉE NE FIXE PLUS AUCUN PRIX (D-022,
+       09/08/2026). Décision de l'user, ses mots du 03/08 : « au final on ne
+       gardera qu'un seul traqueur, celui d'idealo, et ça pour toutes les
+       marques ». Elle n'était appliquée NULLE PART dans le calcul du coût : le
+       coût étant le MINIMUM des sources fraîches, le relevé d'un traqueur
+       abandonné restait GAGNANT jusqu'à sa péremption — c'est le défaut exact
+       signalé en D-58 (44,00 € contre 119,32 € sur le même article). */
+    var RETIRE = SRC_RETIRE;
+    var dMixte = {}; dMixte[RETIRE] = { ttc: 44, at: NOW - J }; dMixte[ACT] = { ttc: 119.32, at: NOW - J };
+    var cRet = choisir(dMixte, NOW);
+    ok(cRet && cRet.source === ACT && cRet.ttc === 119.32,
+      '⛔⛔ ARGENT : le relevé d\'un traqueur RETIRÉ ne devient jamais le coût, même '
+      + 'moins cher — un coût faux fabrique un prix faux (' + JSON.stringify(cRet) + ')');
+    var dSeul = {}; dSeul[RETIRE] = { ttc: 44, at: NOW - J };
+    ok(choisir(dSeul, NOW) === null,
+      '⛔ et quand la source retirée est la SEULE, il n\'y a pas de coût : le produit '
+      + 'est GELÉ, jamais tarifé sur une source hors service');
+    /* ⛔ …ET LA RAISON DU GEL DOIT ÊTRE VRAIE. « rupture » enverrait chercher
+       chez le fournisseur un problème qui n'existe pas (défaut déjà payé une
+       fois, sur « rupture » vs « perime »). */
+    ok(pp.raisonAucuneSource(dSeul, NOW) === 'source-retiree',
+      '⛔ la raison du gel nomme le VRAI motif — ni rupture, ni péremption ('
+      + JSON.stringify(pp.raisonAucuneSource(dSeul, NOW)) + ')');
+    /* ⚠️ PRÉALABLE — les deux autres raisons continuent de se dire, sinon la
+       nouvelle aurait pu toutes les avaler sans qu'on le voie. */
+    var dRup2 = {}; dRup2[ACT] = { ttc: 150, at: NOW - J, enStock: false };
+    var dPer2 = {}; dPer2[ACT] = { ttc: 150, at: NOW - 20 * J };
+    ok(pp.raisonAucuneSource(dRup2, NOW) === 'rupture'
+      && pp.raisonAucuneSource(dPer2, NOW) === 'perime',
+      '⚠️ PRÉALABLE : « rupture » et « perime » restent distinctes ('
+      + pp.raisonAucuneSource(dRup2, NOW) + ' / ' + pp.raisonAucuneSource(dPer2, NOW) + ')');
 
     /* ═══ HORODATAGES EN MILLISECONDES (E-228, 01/08/2026 au soir) ══════════
        En production, les `at` partaient en SENTINEL serverTimestamp
@@ -262,20 +313,26 @@ module.exports = async function () {
       ok(em({}) === 0 && em(undefined) === 0 && em(NaN) === 0,
         'un sentinel ou n\'importe quoi d\'autre vaut 0 : écarté, jamais deviné');
     }
-    var d25 = choisir({ cotebrico: { ttc: 126.72, at: NOW - J },
-      clickoutil: { ttc: 119.90, at: NOW - J } }, NOW);
-    ok(d25 && d25.ttc === 119.90 && d25.source === 'clickoutil',
-      '⛔ RÉGRESSION D25033K : les deux sources datées en ms → le MOINS CHER gagne '
-      + 'vraiment (' + JSON.stringify(d25) + ')');
-    var d25b = choisir({ cotebrico: { ttc: 126.72, at: NOW - J },
-      clickoutil: { ttc: 119.90, at: {} } }, NOW);
-    ok(d25b && d25b.ttc === 126.72,
+    /* ⚠️ CES QUATRE-LÀ NOMMAIENT DEUX TRAQUEURS AUJOURD'HUI RETIRÉS (D-022) :
+       elles seraient devenues rouges pour une raison qui n'est pas la leur.
+       Elles gardent leur sujet — la FRAÎCHEUR et le format d'horodatage — sur
+       la source en service, lue à l'exécution. */
+    var ACT2 = ACT, SEC = ACTIFS[1] || (ACT + '-bis');
+    var d25 = {}; d25[ACT2] = { ttc: 126.72, at: NOW - J }; d25[SEC] = { ttc: 119.90, at: NOW - J };
+    var r25 = choisir(d25, NOW);
+    ok(r25 && r25.ttc === (ACTIFS.length > 1 ? 119.90 : 126.72),
+      '⛔ RÉGRESSION D25033K : des sources datées en ms → le MOINS CHER des sources '
+      + 'EN SERVICE gagne vraiment (' + JSON.stringify(r25) + ')');
+    var d25b = {}; d25b[ACT2] = { ttc: 126.72, at: NOW - J }; d25b[SEC] = { ttc: 119.90, at: {} };
+    var r25b = choisir(d25b, NOW);
+    ok(r25b && r25b.ttc === 126.72,
       'une entrée dont le `at` n\'est pas datable est ÉCARTÉE — c\'est le bogue sentinel rendu visible');
-    ok(choisir({ cotebrico: { ttc: 126.72, at: NOW - J } }, {}) === null,
+    var d25n = {}; d25n[ACT2] = { ttc: 126.72, at: NOW - J };
+    ok(choisir(d25n, {}) === null,
       'un « maintenant » non numérique ne date rien → null, jamais un choix au hasard');
-    var d25c = choisir({ cotebrico: { ttc: 126.72,
-      at: { toMillis: function () { return NOW - J; } } } }, NOW);
-    ok(d25c && d25c.ttc === 126.72,
+    var d25c = {}; d25c[ACT2] = { ttc: 126.72, at: { toMillis: function () { return NOW - J; } } };
+    var r25c = choisir(d25c, NOW);
+    ok(r25c && r25c.ttc === 126.72,
       'une carte RELUE de Firestore (at = Timestamp) reste fraîche — fin du gel fantôme au recalcul');
   }
   // Branchement réel : l'arithmétique de fraîcheur reçoit des NOMBRES.
@@ -350,7 +407,8 @@ module.exports = async function () {
     var idealoReel = pw({}, { priceSource: 'idealo', priceSrcTTC: 150, priceCheckedAt: Date.now() }, {}, null);
     ok(idealoReel && idealoReel.origin === 'traqueur' && idealoReel.srcTTC === 150,
       '⛔ un coût relevé sur idealo est un coût RÉEL (origin traqueur), pas une estimation (' + JSON.stringify(idealoReel) + ')');
-    var gel = pw({}, { priceSources: { cotebrico: { ttc: 200, at: Date.now(), enStock: false } } }, {}, null);
+    var gelSrc = {}; gelSrc[SRC_ACT] = { ttc: 200, at: Date.now(), enStock: false };
+    var gel = pw({}, { priceSources: gelSrc }, {}, null);
     ok(gel && gel.origin === 'rupture' && gel.srcTTC === null,
       '⛔ relevés présents mais AUCUN achetable → origin \'rupture\', prix GELÉ (' + JSON.stringify(gel) + ')');
     /* ═══ RUPTURE ≠ PÉRIMÉ (03/08/2026) ═══════════════════════════════════
@@ -362,7 +420,8 @@ module.exports = async function () {
        l'appelait « rupture », ce qui envoie chercher un problème de stock
        là où il n'y en a pas. Le gel ne change PAS ; la raison devient vraie. */
     var vieux = Date.now() - (pp.SOURCE_FRESH_MS + 24 * 3600 * 1000);
-    var per = pw({}, { priceSources: { unSite: { ttc: 200, at: vieux, enStock: true } } }, {}, null);
+    var perSrc = {}; perSrc[SRC_ACT] = { ttc: 200, at: vieux, enStock: true };
+    var per = pw({}, { priceSources: perSrc }, {}, null);
     ok(per && per.srcTTC === null,
       '⛔ ARGENT INCHANGÉ : un relevé plus vieux que la fenêtre de fraîcheur ne '
       + 'sert plus de coût — le produit reste GELÉ (' + JSON.stringify(per) + ')');
@@ -386,16 +445,22 @@ module.exports = async function () {
         'préalable : un coût normal n\'est PAS gelé — sinon plus rien ne serait recalculé');
     }
 
-    var mixte = pw({}, { priceSources: {
-      a: { ttc: 200, at: Date.now(), enStock: false },
-      b: { ttc: 180, at: vieux, enStock: true } } }, {}, null);
+    /* ⚠️ « mixte » exige DEUX entrées en service : avec une seule source
+       active, les deux causes se portent sur la même carte à des dates
+       différentes — impossible. On éprouve donc la fonction PURE, qui est
+       l'endroit où la règle vit (l'admin ne fait que la relayer). */
+    var mixteCarte = { unSite: { ttc: 200, at: Date.now(), enStock: false },
+      autreSite: { ttc: 180, at: vieux, enStock: true } };
+    var mixte = { raisonGel: pp.raisonAucuneSource(mixteCarte, Date.now(), null, { unSite: 1, autreSite: 1 }),
+      srcTTC: pp.choisirCoutSource(mixteCarte, Date.now(), null, { unSite: 1, autreSite: 1 }) };
     ok(mixte && mixte.srcTTC === null && mixte.raisonGel === 'mixte',
       'les deux causes à la fois se disent « mixte », jamais l\'une des deux au hasard');
 
-    var deux2 = pw({}, { priceSources: { cotebrico: { ttc: 200, at: Date.now() }, nouveau: { ttc: 180, at: Date.now() } } }, {}, null);
+    var d2Src = {}; d2Src[SRC_ACT] = { ttc: 180, at: Date.now() }; d2Src[SRC_RETIRE] = { ttc: 200, at: Date.now() };
+    var deux2 = pw({}, { priceSources: d2Src }, {}, null);
     ok(deux2 && deux2.srcTTC === 180 && deux2.origin === 'traqueur',
       'le recalcul lit le MIN multi-sources (' + JSON.stringify(deux2) + ')');
-    var her = pw({}, { priceSource: 'cotebrico', priceSrcTTC: 150 }, {}, null);
+    var her = pw({}, { priceSource: SRC_ACT, priceSrcTTC: 150 }, {}, null);
     ok(her && her.srcTTC === 150 && her.origin === 'traqueur',
       'ancien format (sans carte) toujours lu — aucun override existant ne casse');
 
@@ -407,27 +472,55 @@ module.exports = async function () {
     ok(typeof fus === 'function', 'pwSourcesConnues exposée aux portes');
     if (fus) {
       var T = Date.now();
-      var f1 = fus({ priceSource: 'cotebrico', priceSrcTTC: 200, priceCheckedAt: T });
-      ok(f1.cotebrico && f1.cotebrico.ttc === 200 && f1.cotebrico.at === T,
-        'l\'héritage cotébrico (marqué) entre dans la carte fusionnée');
-      ok(!fus({ priceSrcTTC: 200, priceCheckedAt: T }).cotebrico,
-        '⛔ un coût SANS la marque `cotebrico` (ex. estimé) ne se ressème JAMAIS');
-      ok(fus({ priceSource: 'cotebrico', priceSrcTTC: 200, priceCheckedAt: T,
-        priceSources: { cotebrico: { ttc: 180, at: T } } }).cotebrico.ttc === 180,
+      var f1 = fus({ priceSource: SRC_ACT, priceSrcTTC: 200, priceCheckedAt: T });
+      ok(f1[SRC_ACT] && f1[SRC_ACT].ttc === 200 && f1[SRC_ACT].at === T,
+        'l\'héritage MARQUÉ d\'une source entre dans la carte fusionnée');
+      ok(!fus({ priceSrcTTC: 200, priceCheckedAt: T })[SRC_ACT],
+        '⛔ un coût SANS marque de source (ex. estimé) ne se ressème JAMAIS');
+      var carteExistante = {}; carteExistante[SRC_ACT] = { ttc: 180, at: T };
+      ok(fus({ priceSource: SRC_ACT, priceSrcTTC: 200, priceCheckedAt: T,
+        priceSources: carteExistante })[SRC_ACT].ttc === 180,
         'une entrée de carte existante n\'est jamais écrasée par l\'héritage');
-      var minHer = pw({}, {
-        priceSources: { clickoutil: { ttc: 389, at: T } },
-        priceSource: 'cotebrico', priceSrcTTC: 200, priceCheckedAt: T
-      }, {}, null);
-      ok(minHer && minHer.srcTTC === 200 && minHer.source === 'cotebrico',
-        '⛔ LA HAUSSE FANTÔME : carte {clickoutil: 389} + héritage cotébrico 200 frais '
-        + '→ le min est 200, jamais 389 (' + JSON.stringify(minHer) + ')');
-      var minVieux = pw({}, {
-        priceSources: { clickoutil: { ttc: 389, at: T } },
-        priceSource: 'cotebrico', priceSrcTTC: 200, priceCheckedAt: T - 20 * 24 * 3600 * 1000
-      }, {}, null);
-      ok(minVieux && minVieux.srcTTC === 389,
-        'un héritage PÉRIMÉ (> 14 j) ne pèse rien : le produit a quitté la page cotébrico');
+      /* ⚠️ REBASÉ SUR LA SOURCE EN SERVICE (D-022) : l'ancienne version opposait
+         deux traqueurs aujourd'hui retirés, dont plus AUCUN ne peut fixer un
+         coût — elle serait rouge pour une raison qui n'est pas la sienne. Le
+         défaut qu'elle garde est intact : une carte fraîche PLUS CHÈRE ne doit
+         pas effacer un héritage MOINS CHER de la même source, sinon on
+         fabrique une hausse qui n'a jamais eu lieu (E-227). */
+      /* ⚠️ REBASÉ (D-022) — et le scénario a CHANGÉ DE SENS, il faut le dire.
+         E-227 opposait la carte d'un traqueur à l'héritage d'un AUTRE : le min
+         des deux évitait une hausse fantôme. Aujourd'hui l'autre est RETIRÉ,
+         donc son relevé ne compte plus — la « hausse » n'en est plus une, c'est
+         l'abandon d'un coût auquel on ne peut plus s'approvisionner.
+         ⛔ Ce qui reste à garder, et qui est éprouvé ici : (1) le RESSEMAGE de
+         l'héritage marche toujours, (2) le min se prend bien sur les sources
+         EN SERVICE. On l'éprouve sur les fonctions pures, avec deux sources
+         injectées — l'admin ne fait que les relayer. */
+      /* ⚠️ E-227 A CHANGÉ DE FORME, ET ON LE DIT PLUTÔT QUE DE LE MIMER.
+         Le défaut opposait la carte d'un traqueur à l'héritage d'un AUTRE : le
+         min des deux évitait une hausse fantôme (+136 % mesurés le 01/08). Le
+         ressemage exige une source RECONNUE (`estSourceRelevee`), et depuis
+         D-022 une seule est EN SERVICE : le scénario à deux traqueurs ne peut
+         plus se produire en production. Ce qui doit rester vrai se teste donc
+         en trois invariants séparés — le ressemage (ci-dessus), le minimum
+         (fonction pure, config injectée, plus haut), et la règle d'argent
+         ci-dessous. Fabriquer un faux scénario à deux traqueurs pour garder
+         l'assertion « telle quelle » aurait été un harnais qui se rassure. */
+      var carteAct2 = {}; carteAct2[SRC_ACT] = { ttc: 389, at: T };
+      var herFrais = pw({}, { priceSources: carteAct2,
+        priceSource: SRC_ACT, priceSrcTTC: 200, priceCheckedAt: T }, {}, null);
+      ok(herFrais && herFrais.srcTTC === 389,
+        '⛔ carte et héritage de la MÊME source : la carte (relevé le plus récent) '
+        + 'fait foi, l\'héritage ne l\'écrase pas (' + JSON.stringify(herFrais) + ')');
+      /* ⛔⛔ ET LA RÈGLE DE PRODUCTION, SANS INJECTION : un héritage venu d'une
+         source RETIRÉE ne tire plus le prix vers le bas, même moins cher. */
+      var carteAct = {}; carteAct[SRC_ACT] = { ttc: 389, at: T };
+      var herRetire = pw({}, { priceSources: carteAct,
+        priceSource: SRC_RETIRE, priceSrcTTC: 200, priceCheckedAt: T }, {}, null);
+      ok(herRetire && herRetire.srcTTC === 389,
+        '⛔⛔ ARGENT : l\'héritage d\'un traqueur RETIRÉ ne fixe plus le coût, même '
+        + 'moins cher — on ne peut plus s\'y approvisionner ('
+        + JSON.stringify(herRetire) + ')');
     }
     // Branchement réel : le relevé fusionne l'héritage avant de choisir.
     var adminSrc2 = fs.readFileSync(path.join(__dirname, '..', 'api', 'admin.js'), 'utf8');

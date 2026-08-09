@@ -13744,13 +13744,27 @@
            achetable — rupture chez toutes les sources, ou relevés périmés.
            Leur prix n'est PAS recalculé : demandé par l'user après que dix
            produits en rupture allaient faire MONTER les prix du site. */
+        /* ⚠️ LIBELLÉ CORRIGÉ LE 09/08/2026 (D-022). Il affirmait « en rupture
+           chez toutes les sources » pour TOUS les gelés. Depuis qu'un traqueur
+           peut être retiré, un produit gèle aussi parce que son seul relevé
+           vient d'une source hors service — ni rupture, ni péremption. Un
+           libellé qui ment fait chercher au mauvais endroit : l'en-tête annonce
+           le gel, et CHAQUE LIGNE dit sa raison. */
         + ((o.rupture || 0) ? ' · <span class="admin-error">⛔ ' + o.rupture
-          + ' gelés — en rupture chez toutes les sources, prix intouchés</span>' : '')
+          + ' gelés — prix intouchés</span>' : '')
         + '</div>';
       if ((o.rupture || 0) && d.gels && d.gels.length) {
-        h += '<p class="admin-hint">Produits gelés (aucune source achetable) :</p>'
+        var RAISON_GEL = {
+          rupture: 'en rupture chez toutes les sources',
+          perime: 'plus vu depuis plus de 14 jours',
+          mixte: 'relevés tous en rupture ou périmés',
+          'source-retiree': 'seul relevé venu d’un traqueur retiré — attend le traqueur en service'
+        };
+        h += '<p class="admin-hint">Produits gelés (aucun coût exploitable) :</p>'
           + '<ul class="compta-sample">' + d.gels.map(function (x) {
-            return '<li>' + escapeHTML(x.sku || '') + ' — ' + escapeHTML((x.name || '').slice(0, 70)) + '</li>';
+            var r = RAISON_GEL[x.raison] || x.raison || '';
+            return '<li>' + escapeHTML(x.sku || '') + ' — ' + escapeHTML((x.name || '').slice(0, 70))
+              + (r ? ' <em>(' + escapeHTML(r) + ')</em>' : '') + '</li>';
           }).join('') + '</ul>';
       }
       if (est && d.estimes && d.estimes.length) {

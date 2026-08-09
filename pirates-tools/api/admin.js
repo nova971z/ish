@@ -2270,7 +2270,11 @@ function pwAliasNomenclature(products, brand, bySku) {
    on ne touche pas au prix. ⚠️ Écrit en fonction pour être testable : tant que
    la condition vivait en ligne dans le recalcul, un oubli d'un des deux cas
    faisait DISPARAÎTRE le produit du rapport sans qu'aucun sabotage ne morde. */
-function pwEstGel(origin) { return origin === 'rupture' || origin === 'perime'; }
+/* ⛔ TROIS RAISONS DE GELER, UN SEUL COMPORTEMENT — on n'y touche pas, on le
+   DIT (« source-retiree » ajoutée le 09/08/2026, D-022). */
+function pwEstGel(origin) {
+  return origin === 'rupture' || origin === 'perime' || origin === 'source-retiree';
+}
 
 function pwSourceCost(p, o, cfg, byGroup) {
   /* ── PLUSIEURS TRAQUEURS (01/08/2026) : la carte `priceSources` fait foi ──
@@ -2303,8 +2307,15 @@ function pwSourceCost(p, o, cfg, byGroup) {
        ⚠️ Portes lues — J3 : aucune donnée personnelle, on qualifie un état de
        stock. J4 : AUCUN prix ne bouge, un produit gelé reste gelé, et rien
        ici ne sert de prix de référence. J5 : ni TVA ni octroi de mer. */
+    /* ⛔ TROISIÈME RAISON DE GELER, ET ELLE A SON NOM (09/08/2026, D-022) : le
+       seul relevé vient d'un traqueur RETIRÉ. Ce n'est ni une rupture ni une
+       péremption — le produit attend d'être vu par le traqueur en service.
+       Même correction que « rupture » → « perime » plus haut : le gel ne
+       change pas, la RAISON devient vraie. */
     var pourquoi = priceParse.raisonAucuneSource(pwSourcesConnues(o), Date.now());
-    return { srcTTC: null, origin: pourquoi === 'perime' ? 'perime' : 'rupture', raisonGel: pourquoi };
+    var originGel = pourquoi === 'perime' ? 'perime'
+      : (pourquoi === 'source-retiree' ? 'source-retiree' : 'rupture');
+    return { srcTTC: null, origin: originGel, raisonGel: pourquoi };
   }
   // ⚠️ Un coût n'est « relevé » que s'il porte priceSource='cotebrico', la
   // marque du traqueur. Sans ce contrôle, un coût ESTIMÉ écrit par un ancien

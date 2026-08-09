@@ -1066,10 +1066,17 @@ function comptaRenderCalc(box, cfg) {
     var solide = (o.traqueur || 0) + (o.fiche || 0) + (o.variante || 0);
     var est = o['estimé'] || 0;
     var locked = d.counts && d.counts.locked || 0;
-    var h = '<div class="reprice-health"><strong>Sur quoi reposent tes prix :</strong><br>' + '\uD83D\uDCE1 ' + (o.traqueur || 0) + ' relevés par le traqueur \xB7 ' + '\uD83D\uDCC4 ' + (o.fiche || 0) + ' prix fournisseur saisis \xB7 ' + '\uD83D\uDD17 ' + (o.variante || 0) + ' déduits de la variante (\xB1 20 \u20AC) \xB7 ' + (est ? '<span class="admin-error">\u26A0️ ' + est + ' estimés</span>' : '\u2705 0 estimé') + (locked ? ' \xB7 \uD83D\uDD12 ' + locked + ' à prix verrouillé (jamais recalculé)' : '') + (o.rupture || 0 ? ' \xB7 <span class="admin-error">\u26D4 ' + o.rupture + ' gelés \u2014 en rupture chez toutes les sources, prix intouchés</span>' : '') + '</div>';
+    var h = '<div class="reprice-health"><strong>Sur quoi reposent tes prix :</strong><br>' + '\uD83D\uDCE1 ' + (o.traqueur || 0) + ' relevés par le traqueur \xB7 ' + '\uD83D\uDCC4 ' + (o.fiche || 0) + ' prix fournisseur saisis \xB7 ' + '\uD83D\uDD17 ' + (o.variante || 0) + ' déduits de la variante (\xB1 20 \u20AC) \xB7 ' + (est ? '<span class="admin-error">\u26A0️ ' + est + ' estimés</span>' : '\u2705 0 estimé') + (locked ? ' \xB7 \uD83D\uDD12 ' + locked + ' à prix verrouillé (jamais recalculé)' : '') + (o.rupture || 0 ? ' \xB7 <span class="admin-error">\u26D4 ' + o.rupture + ' gelés \u2014 prix intouchés</span>' : '') + '</div>';
     if ((o.rupture || 0) && d.gels && d.gels.length) {
-      h += '<p class="admin-hint">Produits gelés (aucune source achetable) :</p>' + '<ul class="compta-sample">' + d.gels.map(function (x) {
-        return '<li>' + A.escapeHTML(x.sku || '') + ' \u2014 ' + A.escapeHTML((x.name || '').slice(0, 70)) + '</li>';
+      var RAISON_GEL = {
+        rupture: 'en rupture chez toutes les sources',
+        perime: 'plus vu depuis plus de 14 jours',
+        mixte: 'relevés tous en rupture ou périmés',
+        'source-retiree': 'seul relevé venu d\u2019un traqueur retiré \u2014 attend le traqueur en service'
+      };
+      h += '<p class="admin-hint">Produits gelés (aucun coût exploitable) :</p>' + '<ul class="compta-sample">' + d.gels.map(function (x) {
+        var r = RAISON_GEL[x.raison] || x.raison || '';
+        return '<li>' + A.escapeHTML(x.sku || '') + ' \u2014 ' + A.escapeHTML((x.name || '').slice(0, 70)) + (r ? ' <em>(' + A.escapeHTML(r) + ')</em>' : '') + '</li>';
       }).join('') + '</ul>';
     }
     if (est && d.estimes && d.estimes.length) {

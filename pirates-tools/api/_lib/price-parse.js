@@ -2024,6 +2024,26 @@ function diagnostiquerPage(rawText, brand) {
    PURE — testée par check-price-watch, sabotage compris. */
 var SOURCE_FRESH_MS = 14 * 24 * 3600 * 1000;   // 14 jours ≈ 28 passages manqués
 
+/* ⛔⛔ LES SOURCES QUI COMPTENT ENCORE — UN SEUL ENDROIT, FAIT POUR CHANGER.
+   Décision de l'user, ses mots (03/08/2026, registre D-112) : « au final on ne
+   gardera qu'un seul traqueur, celui d'idealo, et ça pour toutes les marques ».
+   Gravée en DÉCISION le 09/08/2026 (D-022) parce qu'elle n'était appliquée
+   NULLE PART dans le calcul du coût.
+   ⛔ POURQUOI ÇA NE POUVAIT PAS ATTENDRE LA PÉREMPTION : le coût retenu est le
+   MINIMUM des sources fraîches. Le relevé d'un traqueur abandonné restait donc
+   GAGNANT tant qu'il n'avait pas 14 jours — c'est exactement le défaut signalé
+   par l'user (D-58 : 44,00 € d'un côté contre 119,32 € de l'autre, même
+   article). Un coût faux fabrique un prix faux, à la baisse comme à la hausse.
+   ⚠️ ON ÉCARTE, ON N'EFFACE PAS (règle du projet) : les relevés des sources
+   retirées RESTENT dans `priceSources`, ils sortent seulement du calcul. Le
+   jour où une source revient, on la remet dans cette liste et ses relevés
+   reprennent leur rôle sans que rien n'ait été perdu.
+   ⛔ POUR EN RÉACTIVER UNE : ajouter son slug ici. Rien d'autre, nulle part. */
+var SOURCES_ACTIVES = { idealo: 1 };
+function sourceActive(slug) {
+  return Object.prototype.hasOwnProperty.call(SOURCES_ACTIVES, String(slug));
+}
+
 /* ⚠️ HORODATAGES : MILLISECONDES, ET RIEN D'AUTRE — appris en production le
    01/08/2026 au soir. Les `at` écrits via `serverTimestamp()` partaient en
    SENTINEL (Number → NaN : l'entrée du passage EN COURS était invisible au
@@ -2039,15 +2059,24 @@ function enMillis(v) {
   return (isFinite(n) && n > 0) ? n : 0;
 }
 
-function choisirCoutSource(sources, nowMs, maxAgeMs) {
+function choisirCoutSource(sources, nowMs, maxAgeMs, actives) {
   if (!sources || typeof sources !== 'object') return null;
   if (!(Number(nowMs) > 0)) return null;   // un « maintenant » non numérique ne date rien
   var age = (typeof maxAgeMs === 'number' && maxAgeMs > 0) ? maxAgeMs : SOURCE_FRESH_MS;
+  /* ⚠️ CONFIG INJECTABLE, DÉFAUT = LA CONFIG RÉELLE (même patron que le modèle
+     de prix). La production n'injecte RIEN : elle prend `SOURCES_ACTIVES`. Le
+     paramètre n'existe que pour que la logique PURE du minimum reste éprouvable
+     avec des noms synthétiques — sans lui, le jour où il ne reste qu'une seule
+     source en service, plus aucun harnais ne pourrait tester « le moins cher
+     gagne ». ⛔ Il ne sert JAMAIS à desserrer la règle en production. */
+  var act = (actives && typeof actives === 'object') ? actives : SOURCES_ACTIVES;
   var best = null;
   Object.keys(sources).forEach(function (slug) {
     var e = sources[slug] || {};
     var ttc = Number(e.ttc);
     if (!(ttc > 0)) return;
+    /* ⛔ SOURCE RETIRÉE : son relevé reste écrit, il ne pèse plus (D-022). */
+    if (!Object.prototype.hasOwnProperty.call(act, slug)) return;
     if (e.enStock === false) return;                    // en rupture : inachetable
     var at = enMillis(e.at);
     if (!(at > 0) || (nowMs - at) > age) return;        // périmée ou indatable
@@ -2075,14 +2104,20 @@ function choisirCoutSource(sources, nowMs, maxAgeMs) {
    'perime' (des relevés existent, tous plus vieux que la fenêtre) ·
    'mixte' (les deux causes présentes) · null (rien d'exploitable, ou il
    restait une source valable — dans les deux cas il n'y a rien à expliquer). */
-function raisonAucuneSource(sources, nowMs, maxAgeMs) {
+function raisonAucuneSource(sources, nowMs, maxAgeMs, actives) {
   if (!sources || typeof sources !== 'object') return null;
   var age = (typeof maxAgeMs === 'number' && maxAgeMs > 0) ? maxAgeMs : SOURCE_FRESH_MS;
-  var horsStock = 0, perimes = 0, exploitables = 0;
+  var act = (actives && typeof actives === 'object') ? actives : SOURCES_ACTIVES;
+  var horsStock = 0, perimes = 0, exploitables = 0, retirees = 0;
   Object.keys(sources).forEach(function (slug) {
     var e = sources[slug] || {};
     if (!(Number(e.ttc) > 0)) return;
     exploitables += 1;
+    /* ⛔ UN DIAGNOSTIC FAUX FAIT CHERCHER AU MAUVAIS ENDROIT (règle déjà payée
+       une fois sur « rupture » vs « perime »). Un produit dont le seul relevé
+       vient d'un traqueur RETIRÉ n'est ni en rupture ni périmé : il attend
+       simplement d'être vu par le traqueur en service. On le dit. */
+    if (!Object.prototype.hasOwnProperty.call(act, slug)) { retirees += 1; return; }
     if (e.enStock === false) { horsStock += 1; return; }
     var at = enMillis(e.at);
     if (!(at > 0) || (Number(nowMs) - at) > age) perimes += 1;
@@ -2091,6 +2126,7 @@ function raisonAucuneSource(sources, nowMs, maxAgeMs) {
   if (horsStock && perimes) return 'mixte';
   if (horsStock) return 'rupture';
   if (perimes) return 'perime';
+  if (retirees) return 'source-retiree';
   return null;
 }
 
@@ -2966,7 +3002,7 @@ function detecterBlocage(rawText, httpStatus) {
   return null;
 }
 
-module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickoutil, parseIdealo: parseIdealo, parseAuto: parseAuto, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, raisonAucuneSource: raisonAucuneSource, enMillis: enMillis, SOURCE_FRESH_MS: SOURCE_FRESH_MS, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage, estMaPropreReponse: estMaPropreReponse, detecterBlocage: detecterBlocage, titresAttendus: titresAttendus, compterTuiles: compterTuiles, empreintePage: empreintePage, racineRef: racineRef, racineModele: racineModele,
+module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickoutil, parseIdealo: parseIdealo, parseAuto: parseAuto, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, raisonAucuneSource: raisonAucuneSource, enMillis: enMillis, SOURCE_FRESH_MS: SOURCE_FRESH_MS, SOURCES_ACTIVES: SOURCES_ACTIVES, sourceActive: sourceActive, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage, estMaPropreReponse: estMaPropreReponse, detecterBlocage: detecterBlocage, titresAttendus: titresAttendus, compterTuiles: compterTuiles, empreintePage: empreintePage, racineRef: racineRef, racineModele: racineModele,
   varianteProduit: varianteProduit, roleCoffret: roleCoffret,
   signatureBatteries: signatureBatteries, estPourAutreMachine: estPourAutreMachine,
   sansAccentsTitre: sansAccentsTitre, refUniqueDuTitre: refUniqueDuTitre,

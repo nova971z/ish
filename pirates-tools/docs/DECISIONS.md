@@ -676,6 +676,39 @@ la création d'entreprise.
 
 ---
 
+## D-022 — Une seule source de coût en service : les traqueurs retirés ne fixent plus aucun prix
+
+| | |
+|---|---|
+| **Statut** | ✅ **ACTIVE** — applique enfin D-112, ferme D-58 |
+| **Qui** | Killian (03/08/2026, ses mots) — gravée le 09/08/2026 |
+| **Où c'est vérifiable** | `api/_lib/price-parse.js` (`SOURCES_ACTIVES`) · `scripts/check-price-watch.js` · 2 sabotages rouges |
+
+**Le fait tranché.** Ses mots du 03/08 : « au final on ne gardera qu'un seul
+traqueur, celui d'idealo, et ça pour toutes les marques ». Cette décision
+n'était appliquée **nulle part dans le calcul du coût**.
+
+**Pourquoi ça ne pouvait pas attendre.** Le coût retenu est le **minimum des
+sources fraîches**. Le relevé d'un traqueur abandonné restait donc **gagnant**
+jusqu'à sa péremption (14 jours) — c'est exactement le défaut signalé en D-58 :
+44,00 € d'un côté contre 119,32 € de l'autre sur le même article, et une fiche
+qui gardait un prix que l'user jugeait faux. Un coût faux fabrique un prix faux.
+
+**Ce qui change.** `SOURCES_ACTIVES` (un seul endroit, fait pour être modifié)
+liste les traqueurs en service ; `choisirCoutSource` ignore les autres.
+⚠️ **On écarte, on n'efface pas** : les relevés des sources retirées restent
+écrits dans `priceSources`. Réactiver une source = rajouter son slug, et ses
+relevés reprennent leur rôle sans que rien n'ait été perdu.
+
+**Ce qui devient visible.** Un produit dont le seul relevé vient d'une source
+retirée est **gelé** avec sa vraie raison — `source-retiree`, ni « rupture »
+ni « périmé ». L'écran d'administration affiche la raison **par ligne** ; son
+en-tête n'affirme plus « en rupture chez toutes les sources » pour tout le monde.
+
+⚠️ **Ce que je n'ai pas pu mesurer** : combien de fiches sont concernées en
+base. Ma session ne lit pas Firestore — le compte apparaîtra sur l'écran
+« Appliquer à tout le catalogue » au prochain passage.
+
 ## D-021 — Le total servi à froid redevient une porte BLOQUANTE (P8.4 ≤ 400 Ko)
 
 | | |
