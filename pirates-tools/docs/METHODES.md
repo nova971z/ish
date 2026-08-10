@@ -311,6 +311,32 @@ tirées d'une version périmée de la doc — gabarit d'URL, « Répéter 66 foi
 *Porte* : `docs/TRAQUEUR-URLS.md`, section « L'anatomie du raccourci — les 9
 blocs », avec le bloc 9 marqué **NON LU** parce qu'il est coupé sur sa capture.
 
+### M-27 — L'ancre est la FORME, jamais la POSITION
+
+Quand on va chercher une donnée dans un texte libre, on s'ancre sur ce qui est
+**stable dans la donnée elle-même** — sa forme — et jamais sur l'endroit où on
+l'a vue les premières fois.
+
+*Panne évitée de justesse (10/08/2026)* : j'avais décrit les références d'une
+marque comme étant « entre parenthèses » dans les titres. **L'user m'a repris :
+« elles ne sont pas toujours dans des parenthèses ».** Mesuré sur ses 793
+occurrences :
+
+| Où le numéro se trouve | Combien | Part |
+|---|---|---|
+| entre parenthèses `(…)` | 393 | 49,6 % |
+| après un tiret `- …` | 280 | 35,3 % |
+| nu, en fin de titre | 74 | 9,3 % |
+| ailleurs, parfois **avant** le nom du produit | 46 | 5,8 % |
+
+S'ancrer sur les parenthèses aurait perdu **400 références sur 793 — la
+moitié**. Ce qui est stable, c'est la forme : les **791** nombres à dix
+chiffres du relevé commencent **tous** par `49`, sans une exception.
+
+⚠️ Corollaire : une forme s'établit en comptant **toutes** les occurrences,
+pas en regardant les trois premières. Trois exemples qui se ressemblent sont
+une coïncidence — c'est M-01 appliqué à l'extraction.
+
 ---
 
 ## Où ces méthodes sont déjà branchées
@@ -325,4 +351,4 @@ blocs », avec le bloc 9 marqué **NON LU** parce qu'il est coupé sur sa captur
 | M-18 | `api/_lib/traqueur-plans.js`, `docs/TRAQUEUR-URLS.md` |
 | M-19, M-20, M-24, M-25 | `outils/sabotage.mjs`, `scripts/check-pricing-model.js` |
 | M-23 | `data/transport-outre-mer.json`, `api/_lib/pricing-model.js` |
-| M-26 | `docs/TRAQUEUR-URLS.md`, `api/_lib/traqueur-plans.js` |
+| M-26, M-27 | `docs/TRAQUEUR-URLS.md`, `api/_lib/traqueur-plans.js` |
