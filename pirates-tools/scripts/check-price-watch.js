@@ -2753,6 +2753,65 @@ module.exports = async function () {
           scanReset();
         }
 
+        /* ══ CE QUE LE SERVEUR CLASSE DOIT SORTIR CLASSÉ ═══════════════════════
+           ⛔⛔ QUESTION DE L'USER, 10/08/2026 : « est-ce que sur les 112 pages tu
+           arrives à classer correctement les produits ? ». MESURÉ sur son
+           balayage du jour : `name` vaut « MARQUE RÉF » pour **3 168 annonces
+           sur 3 168** — donc, depuis la réponse, RIEN à classer. Or le serveur
+           TYPE chaque tuile à partir de la ligne de description qui suit le
+           titre : la famille était calculée à l'intérieur, puis jetée. Même
+           défaut que le contenu (batteries / chargeur / coffret) la veille.
+           ⛔ Le type est choisi À L'EXÉCUTION dans la nomenclature — un harnais
+           ne nomme jamais une donnée du catalogue. */
+        var idxT = (pp.nomenclature && pp.nomenclature.INDEX) || [];
+        var libT = null;
+        for (var li = 0; li < idxT.length; li++) {
+          if (idxT[li].famille === 'machine' && /^[a-zà-ÿ -]{6,}$/.test(idxT[li].libelle)) {
+            libT = idxT[li]; break;
+          }
+        }
+        ok(!!libT, '⚠️ PRÉALABLE : la nomenclature déclare au moins un type de machine '
+          + 'utilisable pour ce cas');
+        if (libT) {
+          var pageClassee = function (descr) {
+            var l = ['DEWALT ZZKLASSE1', descr, '7', '31 offres', 'à partir de 250,00 €'];
+            while (l.join('\n').length < 260) {
+              l.push('ligne de bourrage sans marque ni prix pour le seuil du corps');
+            }
+            return l.join('\n');
+          };
+          var reqClasse = function (txt) {
+            return { method: 'POST',
+              query: { type: 'price-watch', brand: 'DEWALT', source: 'idealo',
+                dryRun: '1', inconnus: '1' },
+              body: { text: txt } };
+          };
+          scanReset();
+          var rCl = fauxRes();
+          await admFn(reqClasse(pageClassee(libT.libelle + ' sans fil 18 V')),
+            rCl, fauxAdmin, fauxDb({}, []));
+          var incCl = ((rCl.out || {}).unknown || [])[0] || {};
+          ok(incCl.typ === libT.libelle && incCl.fam === libT.famille,
+            '⛔⛔ CLASSEMENT : une annonce que le catalogue ne connaît pas doit sortir avec '
+            + 'sa FAMILLE et son TYPE — c\'est cette information qui permet de créer la '
+            + 'fiche, et le serveur la calculait déjà sans la rendre (attendu '
+            + JSON.stringify([libT.famille, libT.libelle]) + ', obtenu '
+            + JSON.stringify([incCl.fam, incCl.typ]) + ')');
+          /* ⚠️ PRÉALABLE INVERSE — on ne fabrique JAMAIS un classement. Une tuile
+             qui ne dit rien de ce qu'elle est sort sans famille : un type inventé
+             enverrait une fiche dans le mauvais rayon, et c'est l'user qui le
+             découvrirait sur son site. */
+          scanReset();
+          var rCl0 = fauxRes();
+          await admFn(reqClasse(pageClassee('article divers')), rCl0, fauxAdmin, fauxDb({}, []));
+          var incCl0 = ((rCl0.out || {}).unknown || [])[0] || {};
+          ok(incCl0.sku && incCl0.fam === null && incCl0.typ === null,
+            '⛔ …et une annonce qui ne dit RIEN de ce qu\'elle est sort SANS famille : '
+            + 'un classement inventé est pire que pas de classement (obtenu '
+            + JSON.stringify([incCl0.sku, incCl0.fam, incCl0.typ]) + ')');
+          scanReset();
+        }
+
         /* ⛔ EN BALAYAGE, LES REJETS DOIVENT POUVOIR SE LIRE (09/08/2026). Le
            balayage réel du jour comptait 1 093 `sansRef` sur 67 pages — comptés
            mais jamais montrés : impossible de dire si un produit « estimé » du
@@ -2937,10 +2996,23 @@ module.exports = async function () {
           + JSON.stringify(inc) + ')');
         /* ⚠️ PRÉALABLE — la forme reste COMPACTE : 112 pages passent par le
            presse-papier d'un raccourci, et une réponse illisible n'est pas
-           vérifiable. On rend trois champs, pas l'objet entier. */
-        ok(inc && !('car' in inc) && Object.keys(inc).length <= 6,
-          '⚠️ PRÉALABLE : la forme reste compacte — jamais l\'objet de qualification '
-          + 'entier (' + JSON.stringify(inc && Object.keys(inc)) + ')');
+           vérifiable.
+           ⛔ L'INVARIANT, PAS UN COMPTE RECOPIÉ (recentré le 10/08/2026). La
+           borne « au plus 6 clés » a rougi le jour où le CLASSEMENT est venu
+           s'ajouter au contenu — pour une raison qui n'est pas la sienne : elle
+           défendait un chiffre, pas une propriété. Ce qu'on veut vraiment :
+           aucune valeur imbriquée, et une empreinte franchement plus petite que
+           l'objet de qualification complet, relu À L'EXÉCUTION. */
+        var carPlein = pp.extraireCaracteristiques(lignesContenu[1], 'DEWALT') || {};
+        ok(inc && !('car' in inc)
+          && Object.keys(inc).every(function (k) {
+            return inc[k] === null || typeof inc[k] !== 'object';
+          })
+          && JSON.stringify(inc).length * 2 < JSON.stringify(carPlein).length,
+          '⚠️ PRÉALABLE : la forme reste compacte — que des valeurs simples, et une '
+          + 'empreinte deux fois moindre que l\'objet de qualification entier (obtenu '
+          + JSON.stringify(inc && Object.keys(inc)) + ' = ' + JSON.stringify(inc).length
+          + ' signes contre ' + JSON.stringify(carPlein).length + ')');
 
         /* ⛔⛔ UNE FICHE QUI PLANTE NE DOIT JAMAIS EMPORTER LA PAGE (09/08/2026).
            Mesuré sur SON balayage : la page 494 sur 67 est revenue en erreur

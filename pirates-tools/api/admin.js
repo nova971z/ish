@@ -3953,10 +3953,32 @@ async function handlePriceWatch(req, res, admin, db) {
              l'objet entier — 112 pages passent par le presse-papier d'un
              raccourci, et une réponse illisible n'est pas vérifiable. */
           var carU = item.car || {};
+          /* ⛔⛔ ET LE CLASSEMENT AUSSI ÉTAIT LU PUIS JETÉ (10/08/2026). Question
+             de l'user, mot pour mot : « est-ce que sur les 112 pages tu arrives
+             à classer correctement les produits comme tu as pu faire avec
+             <l'autre marque> ? ». Le serveur TYPE déjà chaque tuile à partir de
+             la ligne de description qui suit le titre (`typerTitre`, le même
+             moteur qui a classé l'autre marque) — mais la réponse ne rendait que
+             référence + prix + contenu. Mesuré sur son balayage du jour : `name`
+             vaut « MARQUE RÉF » pour 3 168 annonces sur 3 168, donc RIEN à
+             classer depuis la réponse, alors que la famille était calculée à
+             l'intérieur. Même défaut que le contenu (nBat/chg/cof) la veille :
+             ce qui est lu se rend.
+             ⚠️ Trois champs courts, pas l'objet entier : 112 pages passent par
+             le presse-papier d'un raccourci. `rej` dit ce que la nomenclature a
+             REFUSÉ (un moulage de coffret n'est jamais un produit — règle de
+             l'user du 02/08) : sans lui, un refus se lit comme une absence.
+             ⚠️ Portes lues — J4 : aucun prix n'est calculé ni annoncé ici, on
+             ajoute un LIBELLÉ de famille à un diagnostic ; rien n'y produit de
+             prix de référence ni de réduction (D-004). J3 : des libellés
+             d'outils, aucune donnée personnelle. J5 : ni TVA ni octroi de mer,
+             le territoire fiscal continue de venir du code postal. */
           unknown.push({ sku: item.sku, srcTTC: item.price, name: item.name,
             nBat: (typeof carU.nbBatteries === 'number') ? carU.nbBatteries : null,
             chg: carU.chargeur === true ? 1 : 0,
-            cof: carU.coffret || null });
+            cof: carU.coffret || null,
+            fam: carU.famille || null, typ: carU.type || null,
+            rej: carU.typeRejete || null });
           continue;
         }
         if (fichesVues.has(p.id)) continue;
@@ -4356,8 +4378,16 @@ async function handlePriceWatch(req, res, admin, db) {
          faire déborder le presse-papier du raccourci. */
       sansRef: scanMode
         ? (inconnusVoulus
-          ? apparie.restants.slice(0, 200).map((e) => ({
-              titre: String(e.titre || '').slice(0, 90), prix: e.prix }))
+          /* ⛔ LA FAMILLE VOYAGE AVEC LE TITRE (10/08/2026). Ces rejets sont la
+             matière première des fiches à créer : sans leur classement, il faut
+             re-typer 245 libellés à la main hors du serveur, alors que le
+             serveur sait le faire — mesuré sur son balayage du jour : 105 des
+             245 titres distincts reçoivent une famille et un type. */
+          ? apparie.restants.slice(0, 200).map((e) => {
+            const cS = priceParse.extraireCaracteristiques(e.titre, brand) || {};
+            return { titre: String(e.titre || '').slice(0, 90), prix: e.prix,
+              fam: cS.famille || null, typ: cS.type || null, rej: cS.typeRejete || null };
+          })
           : [])
         : apparie.restants.slice(0, 200)
     });
