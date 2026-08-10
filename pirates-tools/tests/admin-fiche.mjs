@@ -166,6 +166,76 @@ try {
   c.T('aucune erreur JavaScript pendant le rendu',
     erreurs.length === 0, erreurs.length ? erreurs.join(' | ') : 'aucune');
 
+  /* ══ LA PRÉPARATION D'UNE VRAIE PHOTO — DEUX FOIS QUE ÇA LUI COÛTE UN TOUR ══
+     ⛔⛔ L'user, 10/08/2026 : « j'ai ajouté les deux PNG […] ça ne marche
+     toujours pas […] ça fait deux fois qu'on le refait ». REPRODUIT ici, dans
+     un vrai navigateur : la fonction FIXAIT le côté et ne faisait descendre que
+     la QUALITÉ. Sur une image dense de 2000 px, même à 0,72, le résultat
+     dépassait le plafond → elle JETAIT, le visuel n'était jamais ajouté, et le
+     message renvoyait le travail à l'user (« recadre-la sur le produit »).
+     ⛔ Le harnais précédent ne pouvait pas le voir : il n'utilisait qu'un PNG
+     de 1×1 pixel. Un cas d'essai plus léger que le pire cas réel ne teste rien.
+     ⚠️ Images de SYNTHÈSE, denses à dessein — aucun visuel du catalogue n'est
+     nommé, et le bruit est le pire cas de compression. */
+  const CODE_IMG = [grab('adminPreparerImage'), grab('adminReduireImage')].join('\n');
+  const PLAFOND = Number((src.match(/var PLAFOND = o\.plafond \|\| (\d+);/) || [])[1]);
+  c.T('préalable : le plafond de poids se lit dans le produit, il n\'est pas recopié ici',
+    PLAFOND > 0, String(PLAFOND));
+
+  const prep = await page.evaluate(async ({ CODE_IMG, cas }) => {
+    eval(CODE_IMG);
+    const out = [];
+    for (const k of cas) {
+      const cv = document.createElement('canvas');
+      cv.width = k.w; cv.height = k.h;
+      const cx = cv.getContext('2d');
+      const im = cx.createImageData(k.w, k.h);
+      for (let i = 0; i < im.data.length; i += 4) {
+        const v = Math.floor(Math.sin(i * 0.001) * 90) + 128 + ((i * 7) % 61);
+        im.data[i] = v % 256; im.data[i + 1] = (v * 3) % 256; im.data[i + 2] = (v * 7) % 256;
+        im.data[i + 3] = k.alpha ? ((((i / 4) % k.w) < k.w * 0.1) ? 0 : 255) : 255;
+      }
+      cx.putImageData(im, 0, 0);
+      const blob = await new Promise((r) => cv.toBlob(r, 'image/png'));
+      const f = new File([blob], 'essai.png', { type: 'image/png' });
+      try {
+        const r = await adminPreparerImage(f, { cote: 2000 });
+        out.push({ ok: true, nom: k.nom, longueur: r.dataUrl.length, w: r.w, h: r.h,
+          alpha: k.alpha, type: r.dataUrl.slice(5, r.dataUrl.indexOf(';')),
+          koSource: Math.round(f.size / 1000) });
+      } catch (e) {
+        out.push({ ok: false, nom: k.nom, erreur: e.message, koSource: Math.round(f.size / 1000) });
+      }
+    }
+    return out;
+  }, { CODE_IMG, cas: [
+    { nom: 'photo dense 2000', w: 2000, h: 2000, alpha: false },
+    { nom: 'PNG détouré 2000', w: 2000, h: 2000, alpha: true },
+    { nom: 'PNG détouré 3000', w: 3000, h: 3000, alpha: true }
+  ] });
+
+  const refuses = prep.filter((r) => !r.ok);
+  c.T('⛔⛔ UNE VRAIE PHOTO PRODUIT est ACCEPTÉE — l\'outil la redimensionne, il ne '
+    + 'renvoie pas le travail à l\'user',
+    refuses.length === 0,
+    refuses.length ? refuses.map((r) => r.nom + ' : ' + r.erreur).join(' | ')
+      : prep.map((r) => r.nom + ' → ' + r.w + '×' + r.h + ' ' + Math.round(r.longueur * 0.75 / 1000) + ' Ko').join(' · '));
+  c.T('…et elle tient SOUS le plafond que le serveur impose — sinon elle serait '
+    + 'refusée à l\'envoi, une fois le travail fait',
+    prep.every((r) => r.ok && r.longueur <= PLAFOND),
+    prep.map((r) => r.ok ? r.longueur : 'refusée').join(' / ') + ' ≤ ' + PLAFOND);
+  /* ⚠️ PRÉALABLE — la transparence SURVIT. Un PNG détouré aplati sur un fond
+     blanc serait inutilisable sur le fond sombre du site : le visuel partirait
+     avec un rectangle blanc autour, et l'user le découvrirait sur sa fiche. */
+  c.T('la transparence d\'un PNG détouré survit à la préparation (WebP, jamais JPEG)',
+    prep.filter((r) => r.alpha).every((r) => r.ok && r.type === 'image/webp'),
+    prep.filter((r) => r.alpha).map((r) => r.type || 'refusée').join(' / '));
+  /* ⚠️ PRÉALABLE — le pire cas est bien PIRE que le plafond au départ, sinon
+     l'assertion ci-dessus serait verte sans que rien n'ait été redimensionné. */
+  c.T('préalable : les images d\'essai pèsent bien plus que le plafond avant préparation',
+    prep.every((r) => r.koSource * 1000 > PLAFOND),
+    prep.map((r) => r.koSource + ' Ko').join(' / '));
+
   await page.locator('#__admFiche').screenshot({ path: join(RACINE, 'tests', '_sortie', 'admin-fiche.png') });
   await ctx.close();
 } finally {

@@ -13982,7 +13982,7 @@
     if (window.__PT_ADMIN) return Promise.resolve();
     if (__adminCharge) return __adminCharge;
     __adminCharge = new Promise(function (res, rej) {
-      var s = document.createElement('script'); s.src = 'admin.bundle.js?v=606';
+      var s = document.createElement('script'); s.src = 'admin.bundle.js?v=607';
       s.onload = res; s.onerror = function () { __adminCharge = null; rej(new Error('admin.bundle indisponible')); };
       document.head.appendChild(s);
     });

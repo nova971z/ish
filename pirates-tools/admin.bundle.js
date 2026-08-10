@@ -2561,14 +2561,13 @@ function adminPreparerImage(fichier, opts) {
           });
           return;
         }
-        var k = Math.min(1, COTE / Math.max(wI, hI));
-        var c = document.createElement('canvas');
-        c.width = Math.max(1, Math.round(wI * k));
-        c.height = Math.max(1, Math.round(hI * k));
-        var x = c.getContext('2d');
-        x.imageSmoothingEnabled = true;
-        x.imageSmoothingQuality = 'high';
-        x.drawImage(img, 0, 0, c.width, c.height);
+        var facteurs = [
+          1,
+          0.8,
+          0.64,
+          0.5,
+          0.4
+        ];
         var paliers = [
           0.95,
           0.92,
@@ -2577,27 +2576,48 @@ function adminPreparerImage(fichier, opts) {
           0.78,
           0.72
         ];
-        for (var i = 0; i < paliers.length; i++) {
-          var sortie = c.toDataURL('image/webp', paliers[i]);
-          if (sortie.indexOf('data:image/webp') !== 0) {
-            sortie = c.toDataURL('image/jpeg', paliers[i]);
-          }
-          if (sortie.length <= PLAFOND) {
-            resoudre({
-              dataUrl: sortie,
+        var c = document.createElement('canvas');
+        var dernier = null, largeurVue = 0;
+        for (var f = 0; f < facteurs.length; f++) {
+          var cible = Math.max(320, Math.round(COTE * facteurs[f]));
+          var k = Math.min(1, cible / Math.max(wI, hI));
+          var lg = Math.max(1, Math.round(wI * k));
+          if (lg === largeurVue)
+            continue;
+          largeurVue = lg;
+          c.width = lg;
+          c.height = Math.max(1, Math.round(hI * k));
+          var x = c.getContext('2d');
+          x.imageSmoothingEnabled = true;
+          x.imageSmoothingQuality = 'high';
+          x.drawImage(img, 0, 0, c.width, c.height);
+          for (var i = 0; i < paliers.length; i++) {
+            var sortie = c.toDataURL('image/webp', paliers[i]);
+            if (sortie.indexOf('data:image/webp') !== 0) {
+              sortie = c.toDataURL('image/jpeg', paliers[i]);
+            }
+            dernier = {
+              l: sortie.length,
               w: c.width,
-              h: c.height,
-              ko: Math.round(sortie.length * 0.75 / 1000),
-              intact: false,
-              qualite: paliers[i],
-              wSource: wI,
-              hSource: hI,
-              koSource: koSource
-            });
-            return;
+              h: c.height
+            };
+            if (sortie.length <= PLAFOND) {
+              resoudre({
+                dataUrl: sortie,
+                w: c.width,
+                h: c.height,
+                ko: Math.round(sortie.length * 0.75 / 1000),
+                intact: false,
+                qualite: paliers[i],
+                wSource: wI,
+                hSource: hI,
+                koSource: koSource
+              });
+              return;
+            }
           }
         }
-        rejeter(new Error('image encore trop lourde une fois réduite à ' + c.width + '\xD7' + c.height + ' \u2014 recadre-la sur le produit'));
+        rejeter(new Error('image impossible à faire tenir sous ' + Math.round(PLAFOND * 0.75 / 1000) + ' Ko : essayé jusqu\'à ' + (dernier ? dernier.w + '\xD7' + dernier.h + ' en qualité 0,72 (' + Math.round(dernier.l * 0.75 / 1000) + ' Ko)' : 'aucun encodage') + ' \u2014 source ' + wI + '\xD7' + hI + ', ' + koSource + ' Ko'));
       };
       img.src = source;
     };
@@ -2639,6 +2659,7 @@ function adminBrancherAjoutImage(row) {
         etat.textContent = 'Erreur : ' + e.message;
         etat.className = 'admin-fiche__status admin-fiche__status--err';
       }
+      A.toast('Visuel refusé : ' + e.message, 'error');
     });
   };
 }
@@ -2697,6 +2718,7 @@ function adminEnregistrerFiche(row, btn) {
       etat.textContent = 'Refusé : ' + err.message;
       etat.className = 'admin-fiche__status admin-fiche__status--err';
     }
+    A.toast('Fiche NON enregistrée : ' + err.message, 'error');
   }).then(function () {
     btn.disabled = false;
   });

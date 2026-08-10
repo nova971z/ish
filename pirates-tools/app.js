@@ -15939,34 +15939,64 @@
               qualite: 1, wSource: wI, hSource: hI, koSource: koSource });
             return;
           }
-          var k = Math.min(1, COTE / Math.max(wI, hI));   // jamais d'agrandissement
-          var c = document.createElement('canvas');
-          c.width = Math.max(1, Math.round(wI * k));
-          c.height = Math.max(1, Math.round(hI * k));
-          var x = c.getContext('2d');
-          x.imageSmoothingEnabled = true;
-          x.imageSmoothingQuality = 'high';
-          x.drawImage(img, 0, 0, c.width, c.height);
-          /* La qualité descend par paliers SEULEMENT si le plafond l'exige, et
-             on rend celle qui a été retenue — l'appelant la montre. */
+          /* ⛔⛔ DÉFAUT MESURÉ LE 10/08/2026, ET C'EST LE MIEN. L'user, deuxième
+             fois : « j'ai ajouté les deux PNG […] ça ne marche toujours pas ».
+             Rejoué dans un vrai navigateur sur des images de synthèse denses :
+             2000×2000 → REFUS, 3000×3000 → REFUS. La cause : le côté était
+             FIXÉ à `COTE` et seule la QUALITÉ descendait. Sur une photo riche,
+             même à 0,72 de qualité, 2000 px dépassent le plafond — la fonction
+             jetait, le visuel n'était jamais ajouté, et la faute retombait sur
+             l'user (« recadre-la sur le produit »).
+             ⛔ « L'outil doit redimensionner correctement la photo que je lui
+             envoie », ce sont ses mots. Alors il la redimensionne : le côté
+             descend LUI AUSSI, par paliers, et la RÉSOLUTION est défendue
+             d'abord — on épuise les qualités à 2000 px avant de passer à 1600.
+             Un visuel plus grand légèrement plus compressé vaut mieux qu'un
+             visuel net et trop petit : la fiche le dessine sur 1674 px. */
+          var facteurs = [1, 0.8, 0.64, 0.5, 0.4];
           var paliers = [0.95, 0.92, 0.88, 0.84, 0.78, 0.72];
-          for (var i = 0; i < paliers.length; i++) {
-            var sortie = c.toDataURL('image/webp', paliers[i]);
-            /* ⚠️ Un navigateur qui ne sait pas encoder le WebP rend du PNG sans
-               le dire : on le voit au préfixe et on bascule sur du JPEG plutôt
-               que de croire à une conversion qui n'a pas eu lieu. */
-            if (sortie.indexOf('data:image/webp') !== 0) {
-              sortie = c.toDataURL('image/jpeg', paliers[i]);
-            }
-            if (sortie.length <= PLAFOND) {
-              resoudre({ dataUrl: sortie, w: c.width, h: c.height,
-                ko: Math.round(sortie.length * 0.75 / 1000), intact: false,
-                qualite: paliers[i], wSource: wI, hSource: hI, koSource: koSource });
-              return;
+          var c = document.createElement('canvas');
+          var dernier = null, largeurVue = 0;
+          for (var f = 0; f < facteurs.length; f++) {
+            var cible = Math.max(320, Math.round(COTE * facteurs[f]));
+            var k = Math.min(1, cible / Math.max(wI, hI));   // jamais d'agrandissement
+            var lg = Math.max(1, Math.round(wI * k));
+            /* ⚠️ Deux paliers peuvent rendre la MÊME taille (source déjà petite) :
+               réencoder à l'identique ne ferait que perdre du temps. */
+            if (lg === largeurVue) continue;
+            largeurVue = lg;
+            c.width = lg;
+            c.height = Math.max(1, Math.round(hI * k));
+            var x = c.getContext('2d');
+            x.imageSmoothingEnabled = true;
+            x.imageSmoothingQuality = 'high';
+            x.drawImage(img, 0, 0, c.width, c.height);
+            /* La qualité descend par paliers SEULEMENT si le plafond l'exige, et
+               on rend celle qui a été retenue — l'appelant la montre. */
+            for (var i = 0; i < paliers.length; i++) {
+              var sortie = c.toDataURL('image/webp', paliers[i]);
+              /* ⚠️ Un navigateur qui ne sait pas encoder le WebP rend du PNG sans
+                 le dire : on le voit au préfixe et on bascule sur du JPEG plutôt
+                 que de croire à une conversion qui n'a pas eu lieu. */
+              if (sortie.indexOf('data:image/webp') !== 0) {
+                sortie = c.toDataURL('image/jpeg', paliers[i]);
+              }
+              dernier = { l: sortie.length, w: c.width, h: c.height };
+              if (sortie.length <= PLAFOND) {
+                resoudre({ dataUrl: sortie, w: c.width, h: c.height,
+                  ko: Math.round(sortie.length * 0.75 / 1000), intact: false,
+                  qualite: paliers[i], wSource: wI, hSource: hI, koSource: koSource });
+                return;
+              }
             }
           }
-          rejeter(new Error('image encore trop lourde une fois réduite à '
-            + c.width + '×' + c.height + ' — recadre-la sur le produit'));
+          /* ⛔ UN REFUS DIT CE QU'IL A ESSAYÉ. Sans ces chiffres, « trop lourde »
+             est un mur : on ne sait ni de combien, ni jusqu'où on est descendu. */
+          rejeter(new Error('image impossible à faire tenir sous '
+            + Math.round(PLAFOND * 0.75 / 1000) + ' Ko : essayé jusqu\'à '
+            + (dernier ? dernier.w + '×' + dernier.h + ' en qualité 0,72 ('
+              + Math.round(dernier.l * 0.75 / 1000) + ' Ko)' : 'aucun encodage')
+            + ' — source ' + wI + '×' + hI + ', ' + koSource + ' Ko'));
         };
         img.src = source;
       };
@@ -15998,6 +16028,11 @@
         }
       }).catch(function (e) {
         if (etat) { etat.textContent = 'Erreur : ' + e.message; etat.className = 'admin-fiche__status admin-fiche__status--err'; }
+        /* ⛔ UN ÉCHEC MUET EST UN MUR (10/08/2026). La ligne d'état vit DANS le
+           panneau, souvent hors écran sur un iPad : l'user a cru deux fois que
+           « ça ne marche pas » sans jamais voir pourquoi. Le bandeau, lui, se
+           voit toujours. */
+        toast('Visuel refusé : ' + e.message, 'error');
       });
     };
   }
@@ -16049,6 +16084,9 @@
       toast('Fiche produit mise à jour', 'success');
     }).catch(function (err) {
       if (etat) { etat.textContent = 'Refusé : ' + err.message; etat.className = 'admin-fiche__status admin-fiche__status--err'; }
+      /* Même motif que l'ajout de visuel : le succès crie déjà (bandeau vert),
+         l'échec restait chuchoté au fond du panneau. Les deux se voient. */
+      toast('Fiche NON enregistrée : ' + err.message, 'error');
     }).then(function () { btn.disabled = false; });
   }
 
