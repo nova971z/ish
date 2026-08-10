@@ -49,6 +49,14 @@ var PLANS = {
       + 'DISTINCTES cumulées croît d\'environ 60 par page ; s\'il est trop petit, les '
       + 'pages se recouvrent et il stagne. C\'est `couverture.refsDistinctes` qui '
       + 'tranche, sans rien avoir à supposer.',
+    /* ⛔ RECHERCHE PAR RÉFÉRENCE — le seul chemin PROUVÉ vers une couverture
+       complète. Le paramètre `q=` de cette adresse vient de SON écran : il est
+       déjà dans le patron ci-dessus, avec le nom de la marque comme valeur. On
+       ne fait qu'y mettre une RÉFÉRENCE à la place, sur la même catégorie.
+       ⚠️ Ce qui reste SUPPOSÉ, et qui se prouve tout seul au premier essai : que
+       `q=<référence>` ramène la fiche de cette référence. Si c'est faux, le
+       relevé rend `parsed: 0` avec son diagnostic — pas un silence. */
+    patronRecherche: 'https://www.idealo.fr/prechcat/100oM122663.html?q={ref}',
     note: 'trié par prix DÉCROISSANT, donc le balayage part de la DERNIÈRE page — '
       + 'les articles les moins chers bougent le plus.'
   },
@@ -69,6 +77,20 @@ var PLANS = {
     ordre: 'desc',
     patron: 'https://www.idealo.fr/prechcat/100I16-{offset}oE0oJ1oM124301.html?qr=false',
     patronPage1: 'https://www.idealo.fr/prechcat/100oE0oJ1oM124301.html?qr=false',
+    /* ⛔ RECHERCHE PAR RÉFÉRENCE. Mesuré sur son balayage du 10/08/2026, et
+       c'est ce qui rend ce chemin NÉCESSAIRE : la grille de catégorie ne peut
+       pas donner 100 %. Sur les 145 racines nues que la grille montre et que le
+       catalogue décline, **134 sont MUETTES** sur leur contenu (ni batteries,
+       ni chargeur, ni coffret) et les 11 qui parlent ne désignent aucune fiche
+       unique — donc ZÉRO rapprochement possible, quel que soit le code. Une
+       recherche par référence, elle, ramène la référence EXACTE : plus
+       d'ambiguïté à arbitrer, donc plus de risque d'écrire un coût d'outil nu
+       sur un kit.
+       ⚠️ SUPPOSÉ, et écrit comme tel : le paramètre `q=` est PROUVÉ sur ce site
+       (il vit dans le patron de l'autre marque, venu de son écran) mais ses URL
+       Makita ne le portent pas. Si `q=` ne s'applique pas à cette catégorie, le
+       relevé rendra `parsed: 0` AVEC son diagnostic — jamais un silence. */
+    patronRecherche: 'https://www.idealo.fr/prechcat/100oE0oJ1oM124301.html?qr=false&q={ref}',
     aVerifier: 'parPage (60) est supposé IDENTIQUE à DeWALT (même site, même gabarit de '
       + 'grille) — le premier balayage tranche : `tuilesDansLaPage` le mesure page par '
       + 'page, et `couverture.refsDistinctes` doit croître d\'environ 60 par page. '

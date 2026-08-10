@@ -46,6 +46,33 @@ async function lireOverrides(db, admin) {
     .catch((e) => console.error('[admin] semis snapshot:', e.message));
   return map;
 }
+
+/* ⛔⛔ LES RÉFÉRENCES QUI N'ONT TOUJOURS PAS DE COÛT RELEVÉ, ET LEUR ADRESSE DE
+   RECHERCHE. Fonction PURE — c'est elle qui décide ce que « il en reste » veut
+   dire, donc elle se teste seule, sans base.
+   ⛔ « MANQUANTE » = AUCUN RELEVÉ EXPLOITABLE DE CETTE SOURCE, et surtout PAS
+   « absente du dernier balayage » : le cumul d'un balayage vit dans la mémoire
+   d'UNE instance sans serveur (mesuré le 10/08 : 110 pages + 2 sur deux
+   instances), la fraîcheur d'un relevé vit en base. Un critère qui survit au
+   redémarrage est le seul qui vaille.
+   ⚠️ Trois motifs, et chacun a sa raison : jamais relevé · relevé en RUPTURE
+   (une offre qu'on ne peut pas honorer n'est pas un coût, D-015) · relevé
+   PÉRIMÉ au-delà de `SOURCE_FRESH_MS`. Les trois se re-cherchent. */
+function pwRattrapageEtapes(plan, fiches, overrides, source, nowMs) {
+  if (!plan || !plan.patronRecherche) return [];
+  const now = (typeof nowMs === 'number' && nowMs > 0) ? nowMs : Date.now();
+  return (fiches || []).filter((pr) => {
+    const o = (overrides || {})[pr && pr.id] || {};
+    const src = (o.priceSources || {})[source];
+    if (!src || !(src.ttc > 0)) return true;
+    if (src.enStock === false) return true;
+    const at = priceParse.enMillis(src.at);
+    return !(at > 0 && (now - at) < priceParse.SOURCE_FRESH_MS);
+  }).map((pr) => ({
+    sku: pr.sku,
+    url: plan.patronRecherche.replace('{ref}', encodeURIComponent(String((pr && pr.sku) || '')))
+  })).filter((e) => e.sku);
+}
 /* Pourquoi une rafale rend moins de pages qu'elle n'en a envoyé. Fonction pure.
    ⚠️ Portes lues : J3 — n'y entrent que des horodatages techniques et des
    compteurs, aucune donnée personnelle, rien de persisté ni de journalisé ;
@@ -129,6 +156,65 @@ module.exports = async function handler(req, res) {
        balayage — sans lui, 67 pages coûteraient ~160 000 lectures Firestore. */
     const postUrl = '/api/admin?type=price-watch&brand=' + encodeURIComponent(brand)
       + '&source=' + encodeURIComponent(source) + '&scan=1&dryRun=0';
+
+    /* ── ?rattrapage=1 : UNE RECHERCHE PAR RÉFÉRENCE MANQUANTE ────────────────
+       ⛔⛔ POURQUOI CE MODE EXISTE, ET C'EST MESURÉ (10/08/2026, sur SON
+       balayage de 112 pages). La grille de catégorie ne peut PAS atteindre
+       100 %, et ce n'est pas une limite de code :
+         · 611 fiches de la marque, 423 rapprochées (69,2 %) ;
+         · sur les 145 racines nues que la grille montre et que le catalogue
+           décline en plusieurs conditionnements, **134 sont MUETTES** — la
+           tuile ne dit ni batteries, ni chargeur, ni coffret ;
+         · les 11 qui parlent ne désignent AUCUNE fiche unique.
+       Donc zéro rapprochement possible sur cette voie, quoi qu'on écrive. Et
+       forcer le rapprochement, c'est écrire le coût d'un outil nu sur un kit :
+       cas mesuré, une fiche vendue 754,13 € contre une annonce à 352,18 €.
+       ⛔ LA RECHERCHE PAR RÉFÉRENCE SUPPRIME L'AMBIGUÏTÉ AU LIEU DE L'ARBITRER :
+       une page par référence exacte, donc plus rien à deviner.
+       ⚠️ Ce mode LIT (4 documents agrégés) — le plan normal, lui, ne lit
+       toujours rien : le laisser tomber sur une panne Firestore le rendrait
+       indisponible pour une raison qui ne le concerne pas.
+       ⚠️ Portes lues — J4 : aucune adresse ne porte de prix, rien ici n'écrit,
+       n'annonce ni ne barre un prix (D-004) ; ce mode ne fait que dire OÙ aller
+       chercher un coût. J3 : des références d'outils, aucune donnée
+       personnelle, rien de conservé. J5 : aucune TVA, aucun octroi de mer — le
+       territoire fiscal continue de se dériver du code postal. */
+    if (String((req.query && req.query.rattrapage) || '') === '1') {
+      if (!p.patronRecherche) {
+        return res.status(404).json({ ok: false,
+          error: 'Aucune adresse de recherche par référence déclarée pour ' + brand + '@'
+            + source + '. Elle se déclare dans api/_lib/traqueur-plans.js, jamais dans une URL.' });
+      }
+      const fb2 = firebase.getFirebase();
+      if (!fb2.db) {
+        return res.status(503).json({ ok: false,
+          error: 'Le rattrapage a besoin des relevés déjà connus (Firestore indisponible) — '
+            + 'le plan normal, lui, reste disponible sans &rattrapage=1.' });
+      }
+      const ovR = await lireOverrides(fb2.db, fb2.admin);
+      const fichesR = catalog.loadCatalogAvec(ovR)
+        .filter((pr) => String(pr.brand || '').toUpperCase() === brand);
+      const etapesR = pwRattrapageEtapes(p, fichesR, ovR, source, Date.now());
+      return res.status(200).json({
+        ok: true, brand: brand, source: source, rattrapage: true,
+        fichesDeLaMarque: fichesR.length,
+        /* Le compte de CE QUI RESTE à couvrir. C'est lui qui doit tomber à zéro
+           balayage après balayage : « 100 % » n'est pas une impression, c'est ce
+           nombre-là. */
+        sansReleveExploitable: etapesR.length,
+        aVerifier: 'l\'adresse de recherche par référence est SUPPOSÉE (le paramètre q= est '
+          + 'prouvé sur ce site, pas sur cette catégorie). Le premier essai tranche seul : '
+          + 'une réponse `parsed: 0` avec son diagnostic veut dire que la recherche ne '
+          + 'ramène pas la fiche — on ne l\'apprend pas en devinant.',
+        note: 'une page par référence : la recherche SUPPRIME l\'ambiguïté de '
+          + 'conditionnement au lieu de l\'arbitrer. À lancer une fois, puis seulement '
+          + 'sur ce qui reste.',
+        postUrl: postUrl,
+        urls: etapesR.map((e) => e.url),
+        etapes: etapesR
+      });
+    }
+
     return res.status(200).json({
       ok: true,
       brand: brand, source: source,
@@ -4423,5 +4509,7 @@ module.exports._internals = {
   pwIndexerModeles: pwIndexerModeles, pwCleModele: pwCleModele,
   // Exposés pour check-price-watch : le mode balayage se prouve en APPELANT
   // le handler avec une base factice qui compte lectures et écritures.
-  handlePriceWatch: handlePriceWatch, pwMajLocale: pwMajLocale, pwScanReset: pwScanReset
+  handlePriceWatch: handlePriceWatch, pwMajLocale: pwMajLocale, pwScanReset: pwScanReset,
+  // Ce que « il en reste » veut dire — fonction pure, testée et sabotée.
+  pwRattrapageEtapes: pwRattrapageEtapes
 };

@@ -1805,6 +1805,76 @@ module.exports = async function () {
         '⛔ rien ne disparaît : chaque annonce est soit rapprochée, soit rendue');
     }
 
+    /* ══ LE RATTRAPAGE — UNE RECHERCHE PAR RÉFÉRENCE MANQUANTE ════════════════
+       ⛔⛔ POURQUOI IL EXISTE, ET C'EST MESURÉ (10/08/2026, sur son balayage de
+       112 pages) : la grille de catégorie NE PEUT PAS atteindre 100 %. Sur les
+       145 racines nues qu'elle montre et que le catalogue décline, **134 sont
+       MUETTES** sur leur contenu, et les 11 qui parlent ne désignent aucune
+       fiche unique — zéro rapprochement possible, quel que soit le code.
+       ⛔ Ce que la porte défend : le compte de « ce qui reste » doit être JUSTE.
+       Trop large, l'user rebalaie des références déjà couvertes ; trop étroit,
+       il croit avoir fini alors qu'il manque des coûts — et un coût manquant
+       laisse un prix ESTIMÉ, c'est-à-dire deviné à l'envers depuis le prix de
+       vente. C'est de l'argent.
+       ⚠️ Fiches et relevés SYNTHÉTIQUES, seuil de fraîcheur RELU dans le module
+       (un seuil recopié se périme). */
+    var rat = adm._internals && adm._internals.pwRattrapageEtapes;
+    ok(typeof rat === 'function', 'pwRattrapageEtapes exposée aux portes');
+    if (rat) {
+      var planR = { patronRecherche: 'https://exemple.test/rech?q={ref}' };
+      var maintenantR = 1700000000000;
+      var fraisR = maintenantR - Math.floor(pp.SOURCE_FRESH_MS / 2);
+      var perimeR = maintenantR - pp.SOURCE_FRESH_MS - 60000;
+      var fichesR = [
+        { id: 'f-couvert', sku: 'ZZR-COUVERT' },
+        { id: 'f-jamais', sku: 'ZZR-JAMAIS' },
+        { id: 'f-perime', sku: 'ZZR-PERIME' },
+        { id: 'f-rupture', sku: 'ZZR-RUPTURE' },
+        { id: 'f-autresource', sku: 'ZZR-AUTRESOURCE' }
+      ];
+      var ovR = {
+        'f-couvert': { priceSources: { zzsrc: { ttc: 100, at: fraisR, enStock: true } } },
+        'f-perime': { priceSources: { zzsrc: { ttc: 100, at: perimeR, enStock: true } } },
+        'f-rupture': { priceSources: { zzsrc: { ttc: 100, at: fraisR, enStock: false } } },
+        'f-autresource': { priceSources: { zzautre: { ttc: 100, at: fraisR, enStock: true } } }
+      };
+      var etR = rat(planR, fichesR, ovR, 'zzsrc', maintenantR);
+      var skusR = etR.map(function (e) { return e.sku; }).sort();
+      ok(JSON.stringify(skusR) === JSON.stringify(
+        ['ZZR-AUTRESOURCE', 'ZZR-JAMAIS', 'ZZR-PERIME', 'ZZR-RUPTURE']),
+        '⛔⛔ ARGENT : « il en reste » = jamais relevé · relevé PÉRIMÉ · relevé en RUPTURE · '
+        + 'relevé d\'une AUTRE source. Une fiche déjà couverte par un relevé frais et '
+        + 'achetable n\'y est PAS — sinon on rebalaie pour rien (obtenu '
+        + JSON.stringify(skusR) + ')');
+      /* ⚠️ PRÉALABLE — la fiche couverte est bien dans le lot de départ : sans ce
+         cas, une fonction qui rend TOUT passerait l'assertion ci-dessus si elle
+         était mal écrite. */
+      ok(fichesR.length === etR.length + 1,
+        '⚠️ PRÉALABLE : exactement une fiche sur cinq est couverte, les quatre autres '
+        + 'restent à chercher (' + etR.length + '/' + fichesR.length + ')');
+      ok(etR.every(function (e) { return e.url.indexOf('{ref}') === -1
+        && e.url.indexOf(encodeURIComponent(e.sku)) !== -1; }),
+        '⛔ chaque adresse porte SA référence, et le gabarit est bien remplacé — une '
+        + 'adresse qui garderait `{ref}` enverrait 188 fois sur la même page ('
+        + JSON.stringify(etR[0] && etR[0].url) + ')');
+      /* ⚠️ PRÉALABLE — sans adresse de recherche déclarée, on ne fabrique RIEN.
+         Une URL fournisseur inventée est la faute que la mémoire du projet
+         interdit explicitement : elle se lit sur son écran, jamais d'imagination. */
+      ok(rat({}, fichesR, {}, 'zzsrc', maintenantR).length === 0,
+        '⛔ pas d\'adresse de recherche déclarée ⇒ aucune adresse fabriquée');
+      /* La déclaration elle-même : chaque plan qui balaie une grille doit
+         porter son adresse de recherche, sinon le rattrapage n'existe que pour
+         une marque et l'autre reste plafonnée sans que rien ne le dise. */
+      var plansMod = require('../api/_lib/traqueur-plans.js');
+      var sansRech = plansMod.plansConnus().filter(function (c) {
+        return !plansMod.PLANS[c].patronRecherche;
+      });
+      ok(sansRech.length === 0,
+        '⛔ chaque plan de balayage déclare son adresse de recherche par référence — '
+        + 'sans elle, sa marque est plafonnée par la grille et rien ne le dit ('
+        + JSON.stringify(sansRech) + ')');
+    }
+
     var apn = pp.apparierParNomSouple;
     ok(typeof apn === 'function', 'apparierParNomSouple exportée');
     if (apn) {
