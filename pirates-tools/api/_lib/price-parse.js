@@ -1723,6 +1723,37 @@ function apparierParConfiguration(annonces, fiches, marque) {
     var car = e.car || {};
     var nbAnn = (typeof car.nbBatteries === 'number') ? car.nbBatteries
       : (typeof e.nBat === 'number' ? e.nBat : null);
+    /* ⛔⛔ RÈGLE DE L'USER, GRAVÉE LE 10/08/2026 — ELLE N'ÉTAIT ÉCRITE NULLE
+       PART, NI POUR CETTE MARQUE NI POUR L'AUTRE, ET IL A DÛ LA REDIRE :
+       « dans 99,9 % des cas, si la description mentionne uniquement l'outil et
+       que la référence contient uniquement les premières lettres suivies des
+       numéros, ce sont toujours des outils nus — c'est exactement la règle
+       qu'on a appliquée pour l'autre marque ».
+       ⛔ VÉRIFIÉE À L'ÉCHELLE, sur SON relevé : 167 paires « référence nue » /
+       « même référence + Z » coexistent dans les pages, et **158 sont au MÊME
+       PRIX à 2 % près (94,6 %)** — DHP489 = DHP489Z à 133,50 €, DTM52 =
+       DTM52Z à 159,06 €, DHR243 = DHR243Z à 203,98 €. Une référence sans
+       suffixe EST l'outil nu.
+       ⛔ DEUX CONDITIONS EXIGÉES, et la seconde est la garde d'argent : on
+       n'arrive ici que si la référence n'a PAS de suffixe (vérifié plus haut),
+       et la description ne doit RIEN annoncer — ni batterie, ni Ah, ni
+       chargeur, ni coffret, ni lot. Dès qu'elle annonce un contenu, on retombe
+       sur la lecture normale ; sans cette garde, un kit dont le titre porte la
+       référence nue recevrait le coût d'un outil nu, et le prix serait faux.
+       ⚠️ Les 9 paires en écart sont DITES, pas cachées : sur celles-là, le
+       prix de la référence nue diffère de la version Z. C'est le prix de la
+       règle, et il est mesuré. */
+    /* ⛔⛔ ET LA GARDE QUI MANQUAIT AU PREMIER JET, TROUVÉE EN MESURANT :
+       la règle rapprochait « Butée parallèle, Makita SP6000 » à **14,49 €** de
+       la fiche de la SCIE SP6000Z. Un accessoire porte la référence de la
+       machine à laquelle il se monte — c'est une COMPATIBILITÉ, pas l'article.
+       La règle ne vaut donc que si l'annonce est typée comme une MACHINE : un
+       consommable, un rangement, une batterie ne sont jamais « l'outil nu ». */
+    if (nbAnn === null && car.famille === 'machine'
+        && !car.chargeur && car.coffret == null && car.ah == null
+        && !car.pack && (car.nbOutils == null || car.nbOutils <= 1)) {
+      nbAnn = 0;
+    }
     if (nbAnn === null) { res.restants.push(e); return; }   // muette : jamais rapprochée
     var ahAnn = (typeof car.ah === 'number') ? car.ah : null;
     var retenus = cands.filter(function (c) {

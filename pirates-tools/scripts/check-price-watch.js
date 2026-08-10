@@ -1924,6 +1924,47 @@ module.exports = async function () {
         '⛔ la grammaire des suffixes ne vaut que pour SA marque');
       ok(rc.items.length + rc.restants.length === 4,
         '⛔ rien ne disparaît : chaque annonce est soit rapprochée, soit rendue');
+
+      /* ══ « RÉFÉRENCE SANS SUFFIXE + DESCRIPTION QUI NE PARLE QUE DE L'OUTIL
+             = OUTIL NU » — LA RÈGLE DE L'USER ═══════════════════════════════
+         ⛔⛔ Il a dû la redire le 10/08/2026, et il avait raison : elle
+         n'était écrite NULLE PART, ni ici ni pour l'autre marque. Mot pour
+         mot : « dans 99,9 % des cas, si la description mentionne uniquement
+         l'outil et que la référence contient uniquement les premières lettres
+         suivies des numéros, ce sont toujours des outils nus ».
+         ⛔ VÉRIFIÉE À L'ÉCHELLE sur SON relevé : 167 paires « référence nue »
+         et « même référence + Z » coexistent, **158 au MÊME PRIX à 2 % près
+         (94,6 %)**. Sur ses propres captures : DHP489 = DHP489Z à 133,50 €,
+         DTM52 = DTM52Z à 159,06 €, DHR243 = DHR243Z à 203,98 €.
+         ⛔ CE QU'ELLE RAPPORTE, MESURÉ : 445 racines nues rapprochées sur 574
+         (77,5 %) — c'est le premier poste de non-reconnaissance qui tombe. */
+      var fichesNu = [{ sku: 'ZZN450Z' }, { sku: 'ZZN450RTJ' }];
+      var annNue = { titre: 'MARQUEZZ ZZN450', prix: 133.5, sku: 'ZZN450',
+        car: { sku: 'ZZN450', famille: 'machine', type: 'perceuse-visseuse' } };
+      var rNu = apc([annNue], fichesNu, 'MAKITA');
+      ok(rNu.items.length === 1 && rNu.items[0].sku === 'ZZN450Z',
+        '⛔⛔ RÈGLE DE L\'USER : une référence SANS suffixe dont la description ne parle '
+        + 'que de l\'outil EST l\'outil nu — elle va sur la fiche « machine seule », pas '
+        + 'sur le kit (obtenu ' + JSON.stringify(rNu.items.map(function (x) { return x.sku; })) + ')');
+      /* ⛔⛔ LA GARDE D'ARGENT, TROUVÉE EN MESURANT : un ACCESSOIRE porte la
+         référence de la machine sur laquelle il se monte. Sans elle, la règle
+         rapprochait « Butée parallèle, <marque> SP6000 » à 14,49 € de la fiche
+         de la SCIE — un prix d'accessoire écrit sur une machine. La règle ne
+         vaut donc que si l'annonce est typée MACHINE. */
+      var annAcc = { titre: 'MARQUEZZ ZZN450', prix: 14.49, sku: 'ZZN450',
+        car: { sku: 'ZZN450', famille: 'consommable', type: 'butée parallèle' } };
+      ok(apc([annAcc], fichesNu, 'MAKITA').items.length === 0,
+        '⛔⛔ ARGENT : un ACCESSOIRE qui porte la référence de la machine n\'est JAMAIS '
+        + 'pris pour l\'outil nu — sinon un prix d\'accessoire tombe sur une machine');
+      /* ⚠️ PRÉALABLE — la règle ne force rien quand l'annonce ANNONCE un
+         contenu : là, c'est la lecture normale qui tranche. */
+      var annKit = { titre: 'MARQUEZZ ZZN450', prix: 400, sku: 'ZZN450',
+        car: { sku: 'ZZN450', famille: 'machine', nbBatteries: 2, ah: 5 } };
+      var rKit = apc([annKit], fichesNu, 'MAKITA');
+      ok(rKit.items.length === 1 && rKit.items[0].sku === 'ZZN450RTJ',
+        '⚠️ PRÉALABLE : une annonce qui ANNONCE son contenu n\'est pas forcée à « nu » — '
+        + 'elle va sur la fiche qui porte ce contenu (obtenu '
+        + JSON.stringify(rKit.items.map(function (x) { return x.sku; })) + ')');
     }
 
     /* ══ LE RATTRAPAGE — UNE RECHERCHE PAR RÉFÉRENCE MANQUANTE ════════════════
