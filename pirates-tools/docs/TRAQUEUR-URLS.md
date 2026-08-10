@@ -142,6 +142,48 @@ Le raccourci a **quatre** actions au lieu de trois :
 
 ---
 
+---
+
+## 🔴 MILWAUKEE — idealo, 67 PAGES EN BOUCLE (10/08/2026)
+
+> ⛔ **URL VENUES DE SON ÉCRAN, JAMAIS DÉDUITES.** Il a envoyé quatre adresses :
+> page 1, page 2, page 3 et page 67. Le pas de 15 est donc **PROUVÉ** par
+> quatre points (0, 15, 30, et 990 = 66 × 15) — c'est le premier des trois
+> plans où la loi de pagination n'est pas une supposition. Catégorie : `M140603`.
+>
+> ⛔ **AUCUNE FICHE DE CETTE MARQUE AU CATALOGUE** (mesuré le 10/08/2026 :
+> Makita 611, DeWALT 1047, Festool 50, Milwaukee 0). Le premier balayage ne
+> mettra **aucun prix à jour** : il sert à DÉCOUVRIR. Tout ce qu'il lit sortira
+> dans `unknown` avec titre, prix et contenu. Ce n'est pas une panne.
+
+**Le raccourci se duplique depuis celui de DeWALT. QUATRE lignes changent, et
+elles seules :**
+
+| Action du raccourci | Ce qu'on remplace par |
+|---|---|
+| **2** — page 1 (GET) | `https://www.idealo.fr/prechcat/100oM140603.html?qr=false&sortKey=maxPrice` |
+| **3** — le POST | `https://pirates-tools.com/api/admin?type=price-watch&brand=MILWAUKEE&source=idealo&scan=1&dryRun=1&sec=1` |
+| **7** — le Texte de la boucle | `https://www.idealo.fr/prechcat/100I16-[Nombre formaté]oM140603.html?qr=false&sortKey=maxPrice` |
+| **9** — le POST de la boucle | la MÊME adresse que l'action 3 |
+
+**Ce qui NE change PAS** : l'action 1 (`/api/health`), le « Répéter **66** fois »
+de l'action 4, le « × **15** » de l'action 5, le « **0 décimale** » de l'action 6,
+l'en-tête `x-watch-secret` sur les deux POST, et le champ `text` du corps JSON.
+
+> ⛔ **PREMIER PASSAGE EN `dryRun=1`** — c'est écrit dans le tableau ci-dessus.
+> On vérifie `format: "idealo"` et `tuilesDansLaPage` page à page, PUIS on passe
+> les actions 3 et 9 en `dryRun=0`. Un raccourci ne reste JAMAIS en `dryRun=1`.
+>
+> ⛔ **`&scan=1` n'est pas facultatif** : sans le cache de balayage, 67 pages
+> relisent la collection entière et le quota Firestore saute (déjà payé le 01/08).
+>
+> ⚠️ **Ce qui reste à vérifier, et qui se vérifie tout seul** : `parPage = 60`
+> est supposé identique aux deux autres marques (même site, même gabarit).
+> `tuilesDansLaPage` le mesure page par page, et `couverture.refsDistinctes`
+> doit croître d'environ 60 par page. Si le compteur stagne, les pages se
+> recouvrent — mais le pas, lui, est prouvé.
+
+
 ## ➕ AJOUTER UN TRAQUEUR (autre site) — depuis le 01/08/2026
 
 Même raccourci en 3 actions, avec **deux différences** :

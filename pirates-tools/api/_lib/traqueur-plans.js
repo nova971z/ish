@@ -99,6 +99,46 @@ var PLANS = {
       + '(teteConnue) ne couvre que la nomenclature DeWALT — une réf Makita SANS chiffre '
       + 'et à tiret peut être manquée. Les réfs Makita courantes (DTW700Z, DHP486…) '
       + 'portent des chiffres et passent par le chemin normal.'
+  },
+
+  /* ── MILWAUKEE chez idealo (10/08/2026) ───────────────────────────────────
+     URLs données par l'user, DEPUIS SON ÉCRAN (jamais déduites) :
+     · page 1  : /prechcat/100oM140603.html?qr=false&sortKey=maxPrice   (SANS I16)
+     · page 2  : /prechcat/100I16-15oM140603.html?qr=false&sortKey=maxPrice
+     · page 3  : /prechcat/100I16-30oM140603.html?qr=false&sortKey=maxPrice
+     · page 67 : /prechcat/100I16-990oM140603.html?qr=false&sortKey=maxPrice
+     ⚠️ QUATRE POINTS, DONC LE PAS N'EST PLUS UNE SUPPOSITION : 0, 15, 30, et
+     990 = 66 × 15. C'est le premier plan des trois où la loi de pagination est
+     PROUVÉE au lieu d'être déduite de deux points (E-112, déjà payée).
+     Catégorie idealo : M140603. Le chemin ne porte ni `oE0` ni `oJ1`.
+     `sortKey=maxPrice` est écrit dans SES adresses : tri par prix DÉCROISSANT,
+     comme l'autre marque — le balayage part donc de la dernière page. */
+  'MILWAUKEE@idealo': {
+    site: 'idealo',
+    pages: 67,
+    pas: 15,
+    parPage: 60,
+    ordre: 'desc',
+    patron: 'https://www.idealo.fr/prechcat/100I16-{offset}oM140603.html?qr=false&sortKey=maxPrice',
+    patronPage1: 'https://www.idealo.fr/prechcat/100oM140603.html?qr=false&sortKey=maxPrice',
+    /* ⛔ RECHERCHE PAR RÉFÉRENCE — obligatoire, une porte le vérifie : sans
+       elle la marque reste plafonnée par la grille sans que rien ne le dise.
+       ⚠️ SUPPOSÉ, et écrit comme tel : `q=` est PROUVÉ sur ce site (il vient
+       de son écran, dans le patron de l'autre marque) mais ses adresses
+       Milwaukee ne le portent pas. Si le paramètre ne s'applique pas à cette
+       catégorie, le relevé rend `parsed: 0` AVEC son diagnostic, jamais un
+       silence. */
+    patronRecherche: 'https://www.idealo.fr/prechcat/100oM140603.html?qr=false&q={ref}',
+    aVerifier: 'parPage (60) est supposé IDENTIQUE aux deux autres marques — même site, '
+      + 'même gabarit de grille. Le premier balayage tranche seul : `tuilesDansLaPage` '
+      + 'le mesure page par page, et `couverture.refsDistinctes` doit croître d\'environ '
+      + '60 par page. Le PAS, lui, n\'est pas à vérifier : quatre de ses adresses le '
+      + 'prouvent.',
+    note: '⛔ AUCUNE FICHE DE CETTE MARQUE AU CATALOGUE au jour de la déclaration '
+      + '(mesuré : Makita 611, DeWALT 1047, Festool 50, Milwaukee 0). Le premier '
+      + 'balayage ne mettra donc AUCUN prix à jour : il sert à DÉCOUVRIR — tout ce '
+      + 'qu\'il lit sortira dans `unknown`, avec titre, prix et contenu. C\'est normal, '
+      + 'ce n\'est pas une panne, et il ne faut pas le lire comme un échec.'
   }
 };
 

@@ -116,7 +116,19 @@ var HORS_PORTEE = {
      le 03/08/2026, dès que le contrôle l'a signalé : le rattacher à J4 ferait
      sonner un rappel de conformité tarifaire à chaque ajout de vocabulaire,
      et un rappel qui sonne à tort finit ignoré — emportant les vrais avec. */
-  'pirates-tools/api/_lib/nomenclature.js': 'dictionnaire de vocabulaire — aucun prix lu, calculé ni écrit'
+  'pirates-tools/api/_lib/nomenclature.js': 'dictionnaire de vocabulaire — aucun prix lu, calculé ni écrit',
+  /* traqueur-plans.js est un CARNET D'ADRESSES : des URL de pages publiques,
+     un nombre de pages, un pas de pagination. Aucun prix n'y est lu, calculé
+     ni écrit — ses occurrences de « prix » sont les commentaires qui
+     expliquent POURQUOI on balaie dans cet ordre (tri décroissant : les
+     articles les moins chers bougent le plus). Le franchissement du seuil
+     date du 10/08/2026, à l'ajout du troisième plan : c'est le VOLUME de
+     commentaire qui a bougé, pas la nature du fichier. Écarté NOMMÉMENT
+     plutôt que rattaché à J4 — un rappel de conformité tarifaire qui sonne à
+     chaque ajout d'URL finirait ignoré, et emporterait les vrais avec lui.
+     ⚠️ Ce qui reste vrai et vérifié : c'est `price-parse.js` qui lit les prix
+     de la page, et il est déjà écarté ci-dessus avec son propre motif. */
+  'pirates-tools/api/_lib/traqueur-plans.js': 'carnet d\'adresses de pages publiques — aucun prix lu, calculé ni écrit'
 };
 
 /** Les domaines qu'un fichier engage. Vide = aucune obligation juridique. */
