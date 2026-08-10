@@ -15213,6 +15213,20 @@
       + ' placeholder="référence, titre, marque ou famille">'
       + '<span class="admin-prodbar__count" id="adminProdCount" aria-live="polite"></span>'
       + '</div>'
+      /* ⛔⛔ LE TABLEAU DES RÉFÉRENCES SANS COÛT RELEVÉ (10/08/2026). L'user :
+         « donne-moi une liste dans un tableau que je peux télécharger sur mon
+         iPad […] absolument TOUTES celles qui n'ont pas été trouvées ». Le
+         serveur SAIT la répondre, mais son point d'entrée n'est joignable qu'avec
+         un en-tête d'authentification : impossible à ouvrir depuis Safari en
+         tapant l'adresse. Ce bouton fait l'appel authentifié et rend le fichier.
+         ⚠️ La liste vient des relevés PERSISTÉS, pas du dernier balayage : elle
+         est donc juste même si le balayage s'est réparti sur plusieurs machines. */
+      + '<div class="admin-prodbar">'
+      + '<label class="admin-prodbar__lab" for="adminSansReleveMarque">Références sans coût relevé</label>'
+      + '<select id="adminSansReleveMarque" class="search"></select>'
+      + '<button type="button" id="adminSansReleveBtn" class="btn">Télécharger le tableau (CSV)</button>'
+      + '<span class="admin-prodbar__count" id="adminSansReleveEtat" aria-live="polite"></span>'
+      + '</div>'
       + '<div id="adminProductList" class="admin-list"><p class="admin-loading">Chargement…</p></div>'
       + '</div>'
 
@@ -15554,8 +15568,67 @@
         renderAdminList();
       });
     }
+    adminBrancherSansReleve();
 
     renderAdminList();
+  }
+
+  function adminBrancherSansReleve() {
+    /* ⛔⛔ « TOUTES CELLES QUI N'ONT PAS ÉTÉ TROUVÉES », EN UN TAP (10/08/2026).
+       Les marques proposées sont celles RÉELLEMENT présentes au catalogue, lues
+       à l'exécution : une liste écrite en dur se périmerait au premier import.
+       ⚠️ Le serveur répond en CSV ; on le rend par un objet local plutôt qu'en
+       ouvrant l'adresse, parce que l'appel exige un en-tête d'authentification
+       qu'une navigation ne porte pas.
+       ⚠️ CE COMMENTAIRE VIT DANS LE CORPS, PAS AU-DESSUS : l'extracteur déplace
+       la FONCTION vers le paquet d'administration, mais laisse derrière lui le
+       commentaire qui la précède — huit lignes suffisent à faire passer le
+       total servi à froid au-dessus de son plafond (mesuré ce jour : 399,8 →
+       400,0 Ko). Un octet payé par chaque visiteur pour une note qui ne
+       concerne que l'administration. */
+    var sel = document.getElementById('adminSansReleveMarque');
+    var btn = document.getElementById('adminSansReleveBtn');
+    var etat = document.getElementById('adminSansReleveEtat');
+    if (!sel || !btn) return;
+    var marques = {};
+    (products || []).forEach(function (p) {
+      var m = String((p && p.brand) || '').trim();
+      if (m) marques[m] = (marques[m] || 0) + 1;
+    });
+    var noms = Object.keys(marques).sort();
+    sel.innerHTML = noms.map(function (m) {
+      return '<option value="' + escapeHTML(m) + '">' + escapeHTML(m)
+        + ' (' + marques[m] + ')</option>';
+    }).join('');
+    btn.addEventListener('click', function () {
+      var marque = sel.value || '';
+      if (!marque) return;
+      btn.disabled = true;
+      if (etat) { etat.textContent = 'Calcul en cours…'; }
+      var url = apiBaseUrl() + '/api/admin?type=price-watch-plan&brand='
+        + encodeURIComponent(marque) + '&source=idealo&rattrapage=1&format=csv';
+      adminAuthHeaders({}).then(function (headers) {
+        return fetch(url, { headers: headers });
+      }).then(function (r) {
+        if (!r.ok) return r.text().then(function (t) { throw new Error(t.slice(0, 180)); });
+        return r.text();
+      }).then(function (txt) {
+        var lignes = txt.split('\n').filter(function (l) { return l.trim(); }).length - 1;
+        var blob = new Blob([txt], { type: 'text/csv;charset=utf-8' });
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = marque.toLowerCase().replace(/[^a-z0-9]/g, '') + '-sans-releve.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+        if (etat) { etat.textContent = lignes + ' référence(s) sans coût relevé'; }
+        toast(lignes + ' référence(s) dans le tableau', 'success');
+      }).catch(function (e) {
+        if (etat) { etat.textContent = 'Échec : ' + e.message; }
+        toast('Tableau non produit : ' + e.message, 'error');
+      }).then(function () { btn.disabled = false; });
+    });
   }
 
   function loadAdminOrders() {

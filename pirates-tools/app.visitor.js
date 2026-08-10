@@ -12731,6 +12731,8 @@
 
   
 
+  
+
   /* ⛔ COMBIEN DE FICHES ON PEINT D'UN COUP. Le catalogue en compte plus de
      mille : toutes les rendre fabrique un DOM que l'iPad met des secondes à
      poser, et dans lequel on ne retrouve rien. On en montre un paquet, et la
@@ -13982,7 +13984,7 @@
     if (window.__PT_ADMIN) return Promise.resolve();
     if (__adminCharge) return __adminCharge;
     __adminCharge = new Promise(function (res, rej) {
-      var s = document.createElement('script'); s.src = 'admin.bundle.js?v=607';
+      var s = document.createElement('script'); s.src = 'admin.bundle.js?v=608';
       s.onload = res; s.onerror = function () { __adminCharge = null; rej(new Error('admin.bundle indisponible')); };
       document.head.appendChild(s);
     });

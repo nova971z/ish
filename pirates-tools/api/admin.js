@@ -55,23 +55,75 @@ async function lireOverrides(db, admin) {
    d'UNE instance sans serveur (mesuré le 10/08 : 110 pages + 2 sur deux
    instances), la fraîcheur d'un relevé vit en base. Un critère qui survit au
    redémarrage est le seul qui vaille.
-   ⚠️ Trois motifs, et chacun a sa raison : jamais relevé · relevé en RUPTURE
+   ⚠️ Quatre motifs, et chacun a sa raison : jamais relevé · relevé en RUPTURE
    (une offre qu'on ne peut pas honorer n'est pas un coût, D-015) · relevé
-   PÉRIMÉ au-delà de `SOURCE_FRESH_MS`. Les trois se re-cherchent. */
+   PÉRIMÉ au-delà de `SOURCE_FRESH_MS` · relevé d'une AUTRE source seulement.
+   Les quatre se re-cherchent, et le motif SORT — « il en manque 178 » sans
+   dire pourquoi ne se vérifie pas.
+   ⛔ LES OVERRIDES D'AVANT LE FORMAT CARTE PASSENT PAR `pwSourcesConnues`
+   (E-227) : leur relevé vit dans `priceSrcTTC`/`priceSource`, pas dans
+   `priceSources`. Les ignorer déclarerait « jamais relevées » des fiches qui
+   ont un coût — et l'user irait rechercher ce qu'il possède déjà.
+   ⚠️ Portes lues — J4 : aucun prix n'est calculé ni annoncé ici ; le prix rendu
+   est CELUI DU SITE, recopié tel quel pour que l'écart avec l'offre saute aux
+   yeux, et rien n'en fait un prix de référence ni une réduction (D-004).
+   J3 : des références et des libellés d'outils, aucune donnée personnelle.
+   J5 : aucune TVA, aucun octroi de mer — le territoire vient du code postal. */
 function pwRattrapageEtapes(plan, fiches, overrides, source, nowMs) {
   if (!plan || !plan.patronRecherche) return [];
   const now = (typeof nowMs === 'number' && nowMs > 0) ? nowMs : Date.now();
-  return (fiches || []).filter((pr) => {
-    const o = (overrides || {})[pr && pr.id] || {};
-    const src = (o.priceSources || {})[source];
-    if (!src || !(src.ttc > 0)) return true;
-    if (src.enStock === false) return true;
-    const at = priceParse.enMillis(src.at);
-    return !(at > 0 && (now - at) < priceParse.SOURCE_FRESH_MS);
-  }).map((pr) => ({
-    sku: pr.sku,
-    url: plan.patronRecherche.replace('{ref}', encodeURIComponent(String((pr && pr.sku) || '')))
-  })).filter((e) => e.sku);
+  const sortie = [];
+  (fiches || []).forEach((pr) => {
+    if (!pr || !pr.sku) return;
+    const o = (overrides || {})[pr.id] || {};
+    const srcs = pwSourcesConnues(o);
+    const src = srcs[source];
+    let motif = null;
+    if (!src || !(src.ttc > 0)) {
+      motif = Object.keys(srcs).length ? 'releve d une autre source seulement' : 'jamais releve';
+    } else if (src.enStock === false) {
+      motif = 'releve en rupture';
+    } else {
+      const at = priceParse.enMillis(src.at);
+      if (!(at > 0 && (now - at) < priceParse.SOURCE_FRESH_MS)) {
+        motif = at > 0
+          ? ('releve perime — ' + Math.floor((now - at) / 86400000) + ' jours')
+          : 'releve sans date';
+      }
+    }
+    if (!motif) return;
+    sortie.push({
+      sku: pr.sku, motif: motif,
+      titre: pr.title || pr.name || '',
+      prix: (typeof pr.price === 'number') ? pr.price : null,
+      url: plan.patronRecherche.replace('{ref}', encodeURIComponent(String(pr.sku)))
+    });
+  });
+  return sortie;
+}
+
+/* ⛔⛔ LA MÊME LISTE, EN TABLEAU TÉLÉCHARGEABLE. Demande de l'user, 10/08/2026 :
+   « donne-moi une liste dans un tableau que je peux télécharger sur mon iPad
+   […] absolument TOUTES celles qui n'ont pas été trouvées ». Une réponse JSON
+   ne s'ouvre pas dans un tableur, et un extrait de 60 lignes ne sert à rien.
+   ⚠️ Point-virgule (le séparateur des tableurs en français), BOM (sans lui les
+   accents sortent en charabia), fins de ligne CRLF. Les nombres portent la
+   VIRGULE décimale, sinon le tableur les lit comme du texte.
+   ⛔ Chaque cellule est échappée : un titre contenant un point-virgule ou un
+   guillemet décalerait toutes les colonnes de sa ligne — et une ligne décalée
+   fait lire un prix dans la colonne du motif. */
+function pwRattrapageCsv(etapes) {
+  const cel = (v) => {
+    const s = String(v == null ? '' : v);
+    return /[;"\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  };
+  const lignes = ['reference;titre;prix_du_site_eur;motif;adresse_de_recherche'];
+  (etapes || []).forEach((e) => {
+    lignes.push([cel(e.sku), cel(e.titre),
+      cel(e.prix == null ? '' : String(e.prix).replace('.', ',')),
+      cel(e.motif), cel(e.url)].join(';'));
+  });
+  return '﻿' + lignes.join('\r\n') + '\r\n';
 }
 /* Pourquoi une rafale rend moins de pages qu'elle n'en a envoyé. Fonction pure.
    ⚠️ Portes lues : J3 — n'y entrent que des horodatages techniques et des
@@ -195,6 +247,19 @@ module.exports = async function handler(req, res) {
       const fichesR = catalog.loadCatalogAvec(ovR)
         .filter((pr) => String(pr.brand || '').toUpperCase() === brand);
       const etapesR = pwRattrapageEtapes(p, fichesR, ovR, source, Date.now());
+      /* ⛔ `&format=csv` : LE TABLEAU, PAS DU JSON. L'user travaille sur iPad —
+         une réponse JSON ne s'ouvre pas dans un tableur. Le nom de fichier part
+         dans l'en-tête pour que le téléchargement arrive nommé, pas en
+         « document sans titre ».
+         ⚠️ AUCUN plafond de lignes ici, et c'est délibéré : un extrait ne sert à
+         rien quand la question est « lesquelles exactement ». */
+      if (String((req.query && req.query.format) || '').toLowerCase() === 'csv') {
+        res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+        res.setHeader('Content-Disposition', 'attachment; filename="'
+          + brand.toLowerCase().replace(/[^a-z0-9]/g, '') + '-sans-releve.csv"');
+        res.setHeader('Cache-Control', 'no-store');
+        return res.status(200).send(pwRattrapageCsv(etapesR));
+      }
       return res.status(200).json({
         ok: true, brand: brand, source: source, rattrapage: true,
         fichesDeLaMarque: fichesR.length,
@@ -4527,5 +4592,5 @@ module.exports._internals = {
   // le handler avec une base factice qui compte lectures et écritures.
   handlePriceWatch: handlePriceWatch, pwMajLocale: pwMajLocale, pwScanReset: pwScanReset,
   // Ce que « il en reste » veut dire — fonction pure, testée et sabotée.
-  pwRattrapageEtapes: pwRattrapageEtapes
+  pwRattrapageEtapes: pwRattrapageEtapes, pwRattrapageCsv: pwRattrapageCsv
 };

@@ -1840,6 +1840,34 @@ module.exports = async function () {
       };
       var etR = rat(planR, fichesR, ovR, 'zzsrc', maintenantR);
       var skusR = etR.map(function (e) { return e.sku; }).sort();
+      /* ⛔⛔ CHAQUE LIGNE DIT POURQUOI. « Il en manque 178 » sans motif ne se
+         vérifie pas : l'user ne peut ni corriger, ni décider de supprimer. */
+      var motifs = {}; etR.forEach(function (e) { motifs[e.sku] = e.motif; });
+      ok(/jamais/.test(motifs['ZZR-JAMAIS'] || '')
+        && /perime/.test(motifs['ZZR-PERIME'] || '')
+        && /rupture/.test(motifs['ZZR-RUPTURE'] || '')
+        && /autre source/.test(motifs['ZZR-AUTRESOURCE'] || ''),
+        '⛔ chaque référence sort avec SON motif — jamais relevé, périmé, en rupture, '
+        + 'autre source : quatre causes, quatre remèdes différents (obtenu '
+        + JSON.stringify(motifs) + ')');
+      /* ⛔⛔ E-227 : les overrides d'AVANT le format carte portent leur relevé
+         dans `priceSrcTTC`/`priceSource`. Les ignorer déclarerait « jamais
+         relevée » une fiche qui a un coût — et l'user irait rechercher ce qu'il
+         possède déjà, sur une liste qu'il croit exacte. */
+      /* ⚠️ Le slug se LIT à l'exécution : l'héritage n'est ressemé que pour une
+         source DÉCLARÉE, et un slug inventé ferait passer ce cas à côté du
+         chemin réel — vert sans avoir rien franchi. */
+      var slugR = Object.keys(pp.SOURCES_ACTIVES || {})[0];
+      ok(!!slugR, '⚠️ PRÉALABLE : au moins une source de relevé est déclarée active');
+      var ovHeritage = { 'f-heritage': {} };
+      ovHeritage['f-heritage'].priceSource = slugR;
+      ovHeritage['f-heritage'].priceSrcTTC = 100;
+      ovHeritage['f-heritage'].priceCheckedAt = fraisR;
+      var etH = rat(planR, [{ id: 'f-heritage', sku: 'ZZR-HERITAGE' }],
+        ovHeritage, slugR, maintenantR);
+      ok(etH.length === 0,
+        '⛔⛔ un relevé au FORMAT ANCIEN compte comme un relevé : sans ça la liste '
+        + 'réclamerait des fiches déjà couvertes (obtenu ' + etH.length + ' à rechercher)');
       ok(JSON.stringify(skusR) === JSON.stringify(
         ['ZZR-AUTRESOURCE', 'ZZR-JAMAIS', 'ZZR-PERIME', 'ZZR-RUPTURE']),
         '⛔⛔ ARGENT : « il en reste » = jamais relevé · relevé PÉRIMÉ · relevé en RUPTURE · '
@@ -1873,6 +1901,65 @@ module.exports = async function () {
         '⛔ chaque plan de balayage déclare son adresse de recherche par référence — '
         + 'sans elle, sa marque est plafonnée par la grille et rien ne le dit ('
         + JSON.stringify(sansRech) + ')');
+
+      /* ══ LE TABLEAU TÉLÉCHARGEABLE ════════════════════════════════════════
+         ⛔⛔ DEMANDE DE L'USER, 10/08/2026 : « donne-moi une liste dans un
+         tableau que je peux télécharger sur mon iPad […] absolument TOUTES
+         celles qui n'ont pas été trouvées ». Je lui avais rendu un extrait de
+         60 lignes : inutilisable, et il l'a dit. Ce qui se défend ici : la
+         liste est ENTIÈRE, et chaque ligne reste lisible par un tableur. */
+      var csv = adm._internals && adm._internals.pwRattrapageCsv;
+      ok(typeof csv === 'function', 'pwRattrapageCsv exposée aux portes');
+      if (csv) {
+        /* Un titre qui contient le séparateur ET un guillemet : c'est le seul
+           cas qui décale les colonnes, donc le seul qui vaille d'être testé. */
+        var etCsv = etR.concat([{ sku: 'ZZR-PIEGE', motif: 'jamais releve',
+          titre: 'Outil 3/4" ; modele "long"', prix: 1234.5,
+          url: 'https://exemple.test/rech?q=ZZR-PIEGE' }]);
+        var txt = csv(etCsv);
+        var lg = txt.replace(/^﻿/, '').split('\r\n').filter(Boolean);
+        ok(lg.length === etCsv.length + 1,
+          '⛔⛔ TOUTES les lignes sortent, jamais un extrait — un tableau tronqué ne '
+          + 'répond pas à « lesquelles exactement » (obtenu ' + (lg.length - 1)
+          + ' pour ' + etCsv.length + ' références)');
+        ok(txt.charCodeAt(0) === 0xFEFF && /\r\n/.test(txt),
+          '⛔ marque d\'encodage en tête et fins de ligne CRLF — sans elles, un tableur '
+          + 'rend les accents en charabia ou colle tout sur une ligne');
+        /* ⛔ On RELIT la ligne comme un tableur le ferait — guillemets compris.
+           Un `split(';')` naïf couperait à l'intérieur du champ cité : il
+           accuserait un fichier correct, ou laisserait passer un fichier
+           cassé. Le seul juge valable est un lecteur de CSV. */
+        var lireCsv = function (ligne) {
+          var champs = [], cur = '', dansCite = false;
+          for (var i = 0; i < ligne.length; i++) {
+            var ch = ligne[i];
+            if (dansCite) {
+              if (ch === '"') {
+                if (ligne[i + 1] === '"') { cur += '"'; i++; } else dansCite = false;
+              } else cur += ch;
+            } else if (ch === '"') dansCite = true;
+            else if (ch === ';') { champs.push(cur); cur = ''; }
+            else cur += ch;
+          }
+          champs.push(cur);
+          return champs;
+        };
+        var enTete = lireCsv(lg[0]);
+        var piege = lireCsv(lg[lg.length - 1]);
+        ok(piege.length === enTete.length
+          && piege[1] === 'Outil 3/4" ; modele "long"',
+          '⛔⛔ un titre qui contient le SÉPARATEUR et un guillemet se relit À '
+          + 'L\'IDENTIQUE : une ligne décalée ferait lire un prix dans la colonne du '
+          + 'motif (obtenu ' + piege.length + ' champs pour ' + enTete.length
+          + ', titre ' + JSON.stringify(piege[1]) + ')');
+        ok(piege[2] === '1234,5',
+          '⛔ le prix porte la VIRGULE décimale — avec un point, le tableur français le '
+          + 'lit comme du texte et aucun tri par prix ne marche (obtenu '
+          + JSON.stringify(piege[2]) + ')');
+        ok(csv([]).replace(/^﻿/, '').split('\r\n').filter(Boolean).length === 1,
+          '⚠️ PRÉALABLE : plus rien à chercher ⇒ le tableau garde son en-tête et reste '
+          + 'un fichier valide, il ne se vide pas');
+      }
     }
 
     var apn = pp.apparierParNomSouple;
