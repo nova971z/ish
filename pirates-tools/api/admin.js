@@ -4145,7 +4145,21 @@ async function handlePriceWatch(req, res, admin, db) {
             chg: carU.chargeur === true ? 1 : 0,
             cof: carU.coffret || null,
             fam: carU.famille || null, typ: carU.type || null,
-            rej: carU.typeRejete || null });
+            rej: carU.typeRejete || null,
+            /* ⛔⛔ LE TITRE ET LA DESCRIPTION DE LA CARTE, MOT POUR MOT
+               (10/08/2026). L'user, après trois tours : « chaque produit sur
+               chaque carte a une description, et s'il n'y en a pas, tout est
+               écrit dans le titre ». Il a raison, et le parseur le lisait déjà
+               — c'est de là que sortait le type. Ce qu'il ne rendait pas,
+               c'était le TEXTE : `name` valait « MARQUE RÉF » pour 3 156
+               références sur 3 156. Sans ces deux lignes, sa règle « on lit le
+               titre et la description, puis on tranche » n'a rien à lire.
+               ⚠️ Portes lues — J3 : des libellés d'outils publics, aucune
+               donnée personnelle, rien de persisté ici ; J5 : aucune TVA,
+               aucun octroi de mer ; J4 : aucun prix n'est calculé ni annoncé,
+               ce sont des libellés. */
+            titre: item.titre || null,
+            descr: item.descr || null });
           continue;
         }
         if (fichesVues.has(p.id)) continue;

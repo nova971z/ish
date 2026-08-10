@@ -1218,8 +1218,37 @@ function parseIdealo(rawText, brand) {
        premi\u00e8re ligne, c'est jeter la moiti\u00e9 de ce que la page dit. On donne
        donc \u00e0 l'extracteur tout ce qui va du titre au prix. */
     var desc = b.slice(iTitre, iPrix < 0 ? b.length : iPrix).join(' ');
+    /* ⛔⛔ LE NOM RENDU ÉTAIT FABRIQUÉ — DÉFAUT MESURÉ LE 10/08/2026, ET IL A
+       COÛTÉ TROIS TOURS À L'USER. Cette ligne écrivait `brand + ' ' + sku` :
+       le VRAI titre de la carte et sa description partaient à la poubelle
+       juste après avoir servi à qualifier l'article. Mesuré sur son balayage :
+       `name` valait « MARQUE RÉF » pour **3 156 références sur 3 156**, alors
+       qu'un type d'outil avait été lu pour **2 991** d'entre elles — donc lu
+       dans un texte que la réponse ne rendait pas. Impossible pour lui de
+       trancher « outil nu ou pack » sur des lignes amputées.
+       ⛔ Or c'est écrit sur la carte, en toutes lettres : « … DTD152Z (machine
+       seule) », « … Sans batterie, Sans chargeur ». Le titre porte le
+       conditionnement quand la description ne le porte pas, et inversement.
+       ⛔ ON REND DONC LES DEUX, séparément. `name` ne bouge pas — des
+       appelants l'affichent déjà — et le titre réel arrive à côté.
+       ⚠️ Portes lues — J4 : rien ici ne touche un prix, ce sont des libellés ;
+       J3 : des noms d'outils publics ; J5 : aucune fiscalité. */
+    var lignesDesc = b.slice(iTitre + 1, iPrix < 0 ? b.length : iPrix)
+      .filter(function (x) {
+        var s = String(x || '').trim();
+        if (!s) return false;
+        if (/^\d+$/.test(s)) return false;                 // le compte d'avis
+        if (NB_OFFRES.test(s)) return false;               // « 17 offres »
+        if (/\d,\d{2}\s*€/.test(s)) return false;          // un prix
+        return true;
+      });
     out.push({
       sku: sku, price: prix, name: brand + ' ' + sku, promo: false, enStock: null,
+      /* Le titre de la carte, mot pour mot — c'est lui qui porte « (machine
+         seule) », « Solo », « avec coffret + rail de guidage ». */
+      titre: String(b[iTitre] || '').slice(0, 200),
+      /* La description, celle qui dit « Sans batterie, Sans chargeur ». */
+      descr: lignesDesc.join(' ').slice(0, 300),
       car: extraireCaracteristiques(desc, brand)
     });
   }

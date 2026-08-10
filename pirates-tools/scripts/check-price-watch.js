@@ -3285,7 +3285,8 @@ module.exports = async function () {
            qui tranche était produite puis perdue. Sans elle, apparier ces
            annonces reviendrait à DEVINER sur un prix. */
         scanReset();
-        var lignesContenu = ['DEWALT ZZW680', 'Scie circulaire sans fil, 2 batteries, 3,5 kg',
+        var lignesContenu = ['DEWALT ZZW680 avec coffret et rail de guidage',
+          'Scie circulaire sans fil, 2 batteries, 3,5 kg',
           '5', '94 offres', 'à partir de 192,76 €', 'Détails du produit'];
         /* Le serveur refuse un corps trop court (garde légitime) : on bourre
            jusqu'au seuil, sans marque ni prix, comme le gabarit voisin. */
@@ -3303,6 +3304,41 @@ module.exports = async function () {
           + 'seulement sa référence et son prix — sans lui, on ne peut pas distinguer '
           + 'une machine nue d\'un kit, et apparier deviendrait deviner ('
           + JSON.stringify(inc) + ')');
+
+        /* ══ LE TITRE ET LA DESCRIPTION DE LA CARTE, MOT POUR MOT ═════════════
+           ⛔⛔ DÉFAUT MESURÉ LE 10/08/2026, ET IL A COÛTÉ TROIS TOURS À L'USER.
+           Le parseur FABRIQUAIT le nom rendu (`marque + réf`) juste après avoir
+           lu le vrai titre et la description pour qualifier l'article. Mesuré
+           sur son balayage : le nom rendu valait « MARQUE RÉF » pour **3 156
+           références sur 3 156**, alors qu'un type d'outil avait été lu pour
+           **2 991** d'entre elles — donc lu dans un texte que la réponse ne
+           rendait pas. Sa règle « on lit le titre et la description, puis on
+           tranche » n'avait rien à lire.
+           ⛔ Ce qui se perdait n'est pas décoratif : le conditionnement est
+           écrit tantôt dans le TITRE (« (machine seule) »), tantôt dans la
+           DESCRIPTION (« Sans batterie, Sans chargeur »). Les deux se rendent,
+           séparément. */
+        ok(inc && inc.titre === lignesContenu[0],
+          '⛔⛔ le TITRE de la carte sort MOT POUR MOT — c\'est lui qui porte le '
+          + 'conditionnement quand la description ne le porte pas (attendu '
+          + JSON.stringify(lignesContenu[0]) + ', obtenu '
+          + JSON.stringify(inc && inc.titre) + ')');
+        ok(inc && inc.descr === lignesContenu[1],
+          '⛔⛔ la DESCRIPTION de la carte sort MOT POUR MOT — sans elle, « outil nu '
+          + 'ou pack » ne se tranche pas (attendu ' + JSON.stringify(lignesContenu[1])
+          + ', obtenu ' + JSON.stringify(inc && inc.descr) + ')');
+        /* ⚠️ PRÉALABLE — le titre rendu n'est PAS le nom fabriqué. Sans ce cas,
+           un `titre` recopié depuis `name` passerait pour une réparation. */
+        ok(inc && inc.titre !== inc.name && /rail de guidage/.test(String(inc.titre)),
+          '⚠️ PRÉALABLE : le titre rendu est celui de la PAGE, pas « marque + réf » '
+          + 'refabriqué (name=' + JSON.stringify(inc && inc.name) + ')');
+        /* ⚠️ PRÉALABLE — la description ne ramasse ni le compte d\'avis, ni le
+           nombre d\'offres, ni le prix : trois lignes qui suivent la carte et
+           qui rendraient le champ illisible. */
+        ok(inc && !/\d,\d{2}\s*€/.test(String(inc.descr))
+          && !/offres?/i.test(String(inc.descr)),
+          '⚠️ PRÉALABLE : la description s\'arrête au produit — ni prix, ni compte '
+          + 'd\'offres, ni note (obtenu ' + JSON.stringify(inc && inc.descr) + ')');
         /* ⚠️ PRÉALABLE — la forme reste COMPACTE : 112 pages passent par le
            presse-papier d'un raccourci, et une réponse illisible n'est pas
            vérifiable.
