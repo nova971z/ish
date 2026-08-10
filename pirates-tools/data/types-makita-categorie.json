@@ -1,0 +1,70 @@
+{
+ "_lisezmoi": "Type d outil lu par le parseur -> famille du site. Chaque entree est un VOTE de ses propres fiches : la categorie qu il a lui-meme donnee aux produits de ce type. Retenu seulement a partir de 3 fiches ET 80 % d accord — en dessous, ce n est pas une preuve, c est une coincidence. Aucune categorie inventee.",
+ "_mesure_le": "2026-08-10",
+ "types": {
+  "affleureuse": {
+   "categorie": "Défonceuses",
+   "accord": "5/5"
+  },
+  "ponceuse": {
+   "categorie": "Meulage, découpe et polissage",
+   "accord": "18/20"
+  },
+  "scie sabre": {
+   "categorie": "Scies",
+   "accord": "19/20"
+  },
+  "visseuse à chocs": {
+   "categorie": "Perçage, vissage et boulonnage",
+   "accord": "35/42"
+  },
+  "scie circulaire": {
+   "categorie": "Scies",
+   "accord": "26/26"
+  },
+  "meuleuse d'angle": {
+   "categorie": "Meulage, découpe et polissage",
+   "accord": "25/25"
+  },
+  "perforateur": {
+   "categorie": "Perforateurs",
+   "accord": "11/12"
+  },
+  "scie sauteuse": {
+   "categorie": "Scies",
+   "accord": "7/8"
+  },
+  "marteau perforateur": {
+   "categorie": "Perforateurs",
+   "accord": "13/16"
+  },
+  "visseuse": {
+   "categorie": "Perçage, vissage et boulonnage",
+   "accord": "3/3"
+  },
+  "chargeur": {
+   "categorie": "Batteries et chargeurs",
+   "accord": "3/3"
+  },
+  "polisseuse": {
+   "categorie": "Meulage, découpe et polissage",
+   "accord": "5/5"
+  },
+  "marteau de démolition": {
+   "categorie": "Perforateurs",
+   "accord": "4/5"
+  },
+  "défonceuse": {
+   "categorie": "Défonceuses",
+   "accord": "7/8"
+  },
+  "raboteuse": {
+   "categorie": "Rabots",
+   "accord": "3/3"
+  },
+  "scie à onglet": {
+   "categorie": "Scies",
+   "accord": "5/5"
+  }
+ }
+}

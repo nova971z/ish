@@ -1,0 +1,1046 @@
+{
+ "_lisezmoi": "Poids NU (machine seule, sans batterie ni coffret) par RACINE de référence Makita. Chaque entrée porte SA source. Aucune valeur sans source : une racine absente de cette table est une racine dont on ne connaît pas le poids, et le générateur de fiches REFUSE de lui inventer un prix.",
+ "_unite": "kg",
+ "poids": {
+  "DTW700": {
+   "kg": 2.7,
+   "source": "fiche du catalogue DTW700Z",
+   "date": "2026-08-10"
+  },
+  "DTW300": {
+   "kg": 2.4,
+   "source": "fiche du catalogue DTW300Z",
+   "date": "2026-08-10"
+  },
+  "DHS680": {
+   "kg": 3.5,
+   "source": "fiche du catalogue DHS680Z",
+   "date": "2026-08-10"
+  },
+  "DHR202": {
+   "kg": 3.5,
+   "source": "fiche du catalogue DHR202ZJ",
+   "date": "2026-08-10"
+  },
+  "DGA452": {
+   "kg": 1.6,
+   "source": "fiche du catalogue DGA452Z",
+   "date": "2026-08-10"
+  },
+  "DBO382": {
+   "kg": 1.6,
+   "source": "fiche du catalogue DBO382Z",
+   "date": "2026-08-10"
+  },
+  "DBO480": {
+   "kg": 1.6,
+   "source": "fiche du catalogue DBO480Z",
+   "date": "2026-08-10"
+  },
+  "DBS180": {
+   "kg": 1.6,
+   "source": "fiche du catalogue DBS180Z",
+   "date": "2026-08-10"
+  },
+  "DCC500": {
+   "kg": 3.5,
+   "source": "fiche du catalogue DCC500Z",
+   "date": "2026-08-10"
+  },
+  "DCO181": {
+   "kg": 1.8,
+   "source": "fiche du catalogue DCO181Z",
+   "date": "2026-08-10"
+  },
+  "DDF083": {
+   "kg": 1.6,
+   "source": "fiche du catalogue DDF083Z",
+   "date": "2026-08-10"
+  },
+  "DDF485": {
+   "kg": 1.6,
+   "source": "fiche du catalogue DDF485ZJ",
+   "date": "2026-08-10"
+  },
+  "DDF490": {
+   "kg": 1.6,
+   "source": "fiche du catalogue DDF490Z",
+   "date": "2026-08-10"
+  },
+  "DDG461": {
+   "kg": 6.2,
+   "source": "fiche du catalogue DDG461Z",
+   "date": "2026-08-10"
+  },
+  "DGA506": {
+   "kg": 2.4,
+   "source": "fiche du catalogue DGA506Z",
+   "date": "2026-08-10"
+  },
+  "DGA508": {
+   "kg": 2.4,
+   "source": "fiche du catalogue DGA508Z",
+   "date": "2026-08-10"
+  },
+  "DGA513": {
+   "kg": 2,
+   "source": "fiche du catalogue DGA513ZJ",
+   "date": "2026-08-10"
+  },
+  "DGA517": {
+   "kg": 2.4,
+   "source": "fiche du catalogue DGA517Z",
+   "date": "2026-08-10"
+  },
+  "DGA519": {
+   "kg": 2,
+   "source": "fiche du catalogue DGA519Z",
+   "date": "2026-08-10"
+  },
+  "DHP489": {
+   "kg": 1.6,
+   "source": "fiche du catalogue DHP489Z",
+   "date": "2026-08-10"
+  },
+  "DHR171": {
+   "kg": 2.8,
+   "source": "fiche du catalogue DHR171Z",
+   "date": "2026-08-10"
+  },
+  "DHR183": {
+   "kg": 2.9,
+   "source": "fiche du catalogue DHR183Z",
+   "date": "2026-08-10"
+  },
+  "DHR242": {
+   "kg": 3.4,
+   "source": "fiche du catalogue DHR242Z",
+   "date": "2026-08-10"
+  },
+  "DHR243": {
+   "kg": 3.4,
+   "source": "fiche du catalogue DHR243Z",
+   "date": "2026-08-10"
+  },
+  "DHR283": {
+   "kg": 4.1,
+   "source": "fiche du catalogue DHR283Z",
+   "date": "2026-08-10"
+  },
+  "DHS900": {
+   "kg": 5.3,
+   "source": "fiche du catalogue DHS900Z",
+   "date": "2026-08-10"
+  },
+  "DJR187": {
+   "kg": 3.4,
+   "source": "fiche du catalogue DJR187Z",
+   "date": "2026-08-10"
+  },
+  "DJR188": {
+   "kg": 2.9,
+   "source": "fiche du catalogue DJR188Z",
+   "date": "2026-08-10"
+  },
+  "DJR189": {
+   "kg": 3.5,
+   "source": "fiche du catalogue DJR189Z",
+   "date": "2026-08-10"
+  },
+  "DJR360": {
+   "kg": 4,
+   "source": "fiche du catalogue DJR360ZK",
+   "date": "2026-08-10"
+  },
+  "DJV181": {
+   "kg": 2.6,
+   "source": "fiche du catalogue DJV181Z",
+   "date": "2026-08-10"
+  },
+  "DJV184": {
+   "kg": 2.4,
+   "source": "fiche du catalogue DJV184Z",
+   "date": "2026-08-10"
+  },
+  "DJV185": {
+   "kg": 3.5,
+   "source": "fiche du catalogue DJV185Z",
+   "date": "2026-08-10"
+  },
+  "DLS600": {
+   "kg": 3.5,
+   "source": "fiche du catalogue DLS600Z",
+   "date": "2026-08-10"
+  },
+  "DMC300": {
+   "kg": 2,
+   "source": "fiche du catalogue DMC300Z",
+   "date": "2026-08-10"
+  },
+  "DPV300": {
+   "kg": 1.6,
+   "source": "fiche du catalogue DPV300Z",
+   "date": "2026-08-10"
+  },
+  "DRT50": {
+   "kg": 1.8,
+   "source": "fiche du catalogue DRT50Z",
+   "date": "2026-08-10"
+  },
+  "DRV250": {
+   "kg": 2,
+   "source": "fiche du catalogue DRV250ZJ",
+   "date": "2026-08-10"
+  },
+  "DSP601": {
+   "kg": 3.5,
+   "source": "fiche du catalogue DSP601ZJU",
+   "date": "2026-08-10"
+  },
+  "DTD153": {
+   "kg": 1.5,
+   "source": "fiche du catalogue DTD153Z",
+   "date": "2026-08-10"
+  },
+  "DTD154": {
+   "kg": 1.5,
+   "source": "fiche du catalogue DTD154Z",
+   "date": "2026-08-10"
+  },
+  "DTD155": {
+   "kg": 1.5,
+   "source": "fiche du catalogue DTD155ZJ",
+   "date": "2026-08-10"
+  },
+  "DTD158": {
+   "kg": 1.5,
+   "source": "fiche du catalogue DTD158Z",
+   "date": "2026-08-10"
+  },
+  "DTM52": {
+   "kg": 1.5,
+   "source": "fiche du catalogue DTM52Z",
+   "date": "2026-08-10"
+  },
+  "DTP141": {
+   "kg": 1.6,
+   "source": "fiche du catalogue DTP141Z",
+   "date": "2026-08-10"
+  },
+  "DTW1001": {
+   "kg": 3.7,
+   "source": "fiche du catalogue DTW1001Z",
+   "date": "2026-08-10"
+  },
+  "DTW1002": {
+   "kg": 1.7,
+   "source": "fiche du catalogue DTW1002Z",
+   "date": "2026-08-10"
+  },
+  "DTW181": {
+   "kg": 1.5,
+   "source": "fiche du catalogue DTW181Z",
+   "date": "2026-08-10"
+  },
+  "DTW301": {
+   "kg": 1.2,
+   "source": "fiche du catalogue DTW301ZJ",
+   "date": "2026-08-10"
+  },
+  "DUA301": {
+   "kg": 4,
+   "source": "fiche du catalogue DUA301Z",
+   "date": "2026-08-10"
+  },
+  "DUC101": {
+   "kg": 4,
+   "source": "fiche du catalogue DUC101Z",
+   "date": "2026-08-10"
+  },
+  "DUC254": {
+   "kg": 4,
+   "source": "fiche du catalogue DUC254Z",
+   "date": "2026-08-10"
+  },
+  "DUT130": {
+   "kg": 3.2,
+   "source": "fiche du catalogue DUT130Z",
+   "date": "2026-08-10"
+  },
+  "DVC560": {
+   "kg": 2.5,
+   "source": "fiche du catalogue DVC560Z",
+   "date": "2026-08-10"
+  },
+  "HM004": {
+   "kg": 2,
+   "source": "fiche du catalogue HM004GZ01",
+   "date": "2026-08-10"
+  },
+  "HB500": {
+   "kg": 2,
+   "source": "fiche du catalogue HB500",
+   "date": "2026-08-10"
+  },
+  "HR5000": {
+   "kg": 2,
+   "source": "fiche du catalogue HR5000",
+   "date": "2026-08-10"
+  },
+  "SG181": {
+   "kg": 2,
+   "source": "fiche du catalogue SG181",
+   "date": "2026-08-10"
+  },
+  "CW002": {
+   "kg": 2,
+   "source": "fiche du catalogue CW002GZ",
+   "date": "2026-08-10"
+  },
+  "LS003": {
+   "kg": 2,
+   "source": "fiche du catalogue LS003GZ01",
+   "date": "2026-08-10"
+  },
+  "SG150": {
+   "kg": 2,
+   "source": "fiche du catalogue SG150",
+   "date": "2026-08-10"
+  },
+  "LS004": {
+   "kg": 2,
+   "source": "fiche du catalogue LS004GZ01",
+   "date": "2026-08-10"
+  },
+  "LS002": {
+   "kg": 2,
+   "source": "fiche du catalogue LS002GZ01",
+   "date": "2026-08-10"
+  },
+  "DBM131": {
+   "kg": 2,
+   "source": "fiche du catalogue DBM131",
+   "date": "2026-08-10"
+  },
+  "CE003": {
+   "kg": 2,
+   "source": "fiche du catalogue CE003GZ02",
+   "date": "2026-08-10"
+  },
+  "LM002": {
+   "kg": 2,
+   "source": "fiche du catalogue LM002GZ",
+   "date": "2026-08-10"
+  },
+  "HS013": {
+   "kg": 2,
+   "source": "fiche du catalogue HS013GZ",
+   "date": "2026-08-10"
+  },
+  "HB350": {
+   "kg": 2,
+   "source": "fiche du catalogue HB350",
+   "date": "2026-08-10"
+  },
+  "LM001": {
+   "kg": 2,
+   "source": "fiche du catalogue LM001GZ",
+   "date": "2026-08-10"
+  },
+  "MW001": {
+   "kg": 2,
+   "source": "fiche du catalogue MW001GZ",
+   "date": "2026-08-10"
+  },
+  "HM002": {
+   "kg": 2,
+   "source": "fiche du catalogue HM002GZ03",
+   "date": "2026-08-10"
+  },
+  "CE002": {
+   "kg": 2,
+   "source": "fiche du catalogue CE002GZ01",
+   "date": "2026-08-10"
+  },
+  "CW004": {
+   "kg": 2,
+   "source": "fiche du catalogue CW004GZ",
+   "date": "2026-08-10"
+  },
+  "BN001": {
+   "kg": 2,
+   "source": "fiche du catalogue BN001GZ",
+   "date": "2026-08-10"
+  },
+  "BN002": {
+   "kg": 2,
+   "source": "fiche du catalogue BN002GZ",
+   "date": "2026-08-10"
+  },
+  "DBN900": {
+   "kg": 2,
+   "source": "fiche du catalogue DBN900ZK",
+   "date": "2026-08-10"
+  },
+  "DLM539": {
+   "kg": 2,
+   "source": "fiche du catalogue DLM539Z",
+   "date": "2026-08-10"
+  },
+  "DG002": {
+   "kg": 2,
+   "source": "fiche du catalogue DG002GZ",
+   "date": "2026-08-10"
+  },
+  "BAC01": {
+   "kg": 2,
+   "source": "fiche du catalogue BAC01",
+   "date": "2026-08-10"
+  },
+  "TW1000": {
+   "kg": 2,
+   "source": "fiche du catalogue TW1000",
+   "date": "2026-08-10"
+  },
+  "SP001": {
+   "kg": 2,
+   "source": "fiche du catalogue SP001GZ03",
+   "date": "2026-08-10"
+  },
+  "DCE090": {
+   "kg": 2,
+   "source": "fiche du catalogue DCE090ZX1",
+   "date": "2026-08-10"
+  },
+  "DLX2025": {
+   "kg": 2,
+   "source": "fiche du catalogue DLX2025",
+   "date": "2026-08-10"
+  },
+  "DLM460": {
+   "kg": 2,
+   "source": "fiche du catalogue DLM460Z",
+   "date": "2026-08-10"
+  },
+  "CW003": {
+   "kg": 2,
+   "source": "fiche du catalogue CW003GZ01",
+   "date": "2026-08-10"
+  },
+  "DBN600": {
+   "kg": 2,
+   "source": "fiche du catalogue DBN600ZJ",
+   "date": "2026-08-10"
+  },
+  "DLM480": {
+   "kg": 2,
+   "source": "fiche du catalogue DLM480Z",
+   "date": "2026-08-10"
+  },
+  "FN001": {
+   "kg": 2,
+   "source": "fiche du catalogue FN001GZ",
+   "date": "2026-08-10"
+  },
+  "LM004": {
+   "kg": 2,
+   "source": "fiche du catalogue LM004GZ",
+   "date": "2026-08-10"
+  },
+  "DGA900": {
+   "kg": 2,
+   "source": "fiche du catalogue DGA900ZKX2",
+   "date": "2026-08-10"
+  },
+  "DFR552": {
+   "kg": 2,
+   "source": "fiche du catalogue DFR552Z",
+   "date": "2026-08-10"
+  },
+  "DLM538": {
+   "kg": 2,
+   "source": "fiche du catalogue DLM538Z",
+   "date": "2026-08-10"
+  },
+  "DTW1005": {
+   "kg": 2,
+   "source": "fiche du catalogue DTW1005Z",
+   "date": "2026-08-10"
+  },
+  "DGA901": {
+   "kg": 2,
+   "source": "fiche du catalogue DGA901ZKU1",
+   "date": "2026-08-10"
+  },
+  "DFR453": {
+   "kg": 2,
+   "source": "fiche du catalogue DFR453Z",
+   "date": "2026-08-10"
+  },
+  "LW1400": {
+   "kg": 2,
+   "source": "fiche du catalogue LW1400",
+   "date": "2026-08-10"
+  },
+  "DJN161": {
+   "kg": 2,
+   "source": "fiche du catalogue DJN161ZJ",
+   "date": "2026-08-10"
+  },
+  "DHS782": {
+   "kg": 2,
+   "source": "fiche du catalogue DHS782Z",
+   "date": "2026-08-10"
+  },
+  "DPO600": {
+   "kg": 2,
+   "source": "fiche du catalogue DPO600Z",
+   "date": "2026-08-10"
+  },
+  "DHR264": {
+   "kg": 2,
+   "source": "fiche du catalogue DHR264ZJ",
+   "date": "2026-08-10"
+  },
+  "DKP181": {
+   "kg": 2,
+   "source": "fiche du catalogue DKP181ZU",
+   "date": "2026-08-10"
+  },
+  "DFN350": {
+   "kg": 2,
+   "source": "fiche du catalogue DFN350Z",
+   "date": "2026-08-10"
+  },
+  "SK105": {
+   "kg": 2,
+   "source": "fiche du catalogue SK105GDZ",
+   "date": "2026-08-10"
+  },
+  "DJS161": {
+   "kg": 2,
+   "source": "fiche du catalogue DJS161Z",
+   "date": "2026-08-10"
+  },
+  "DTS141": {
+   "kg": 2,
+   "source": "fiche du catalogue DTS141Z",
+   "date": "2026-08-10"
+  },
+  "DGP180": {
+   "kg": 2,
+   "source": "fiche du catalogue DGP180Z",
+   "date": "2026-08-10"
+  },
+  "UB001": {
+   "kg": 2,
+   "source": "fiche du catalogue UB001GZ",
+   "date": "2026-08-10"
+  },
+  "DHS630": {
+   "kg": 2,
+   "source": "fiche du catalogue DHS630Z",
+   "date": "2026-08-10"
+  },
+  "UD2500": {
+   "kg": 2,
+   "source": "fiche du catalogue UD2500",
+   "date": "2026-08-10"
+  },
+  "DUH754": {
+   "kg": 2,
+   "source": "fiche du catalogue DUH754SZ",
+   "date": "2026-08-10"
+  },
+  "DUC307": {
+   "kg": 2,
+   "source": "fiche du catalogue DUC307ZX2",
+   "date": "2026-08-10"
+  },
+  "DPT353": {
+   "kg": 2,
+   "source": "fiche du catalogue DPT353ZJ",
+   "date": "2026-08-10"
+  },
+  "DHS710": {
+   "kg": 2,
+   "source": "fiche du catalogue DHS710ZJ",
+   "date": "2026-08-10"
+  },
+  "DTW701": {
+   "kg": 2,
+   "source": "fiche du catalogue DTW701ZJ",
+   "date": "2026-08-10"
+  },
+  "DHS660": {
+   "kg": 2,
+   "source": "fiche du catalogue DHS660ZJ",
+   "date": "2026-08-10"
+  },
+  "DFR750": {
+   "kg": 2,
+   "source": "fiche du catalogue DFR750Z",
+   "date": "2026-08-10"
+  },
+  "DCS553": {
+   "kg": 2,
+   "source": "fiche du catalogue DCS553ZJ",
+   "date": "2026-08-10"
+  },
+  "DTM51": {
+   "kg": 2,
+   "source": "fiche du catalogue DTM51ZJX2",
+   "date": "2026-08-10"
+  },
+  "DST112": {
+   "kg": 2,
+   "source": "fiche du catalogue DST112Z",
+   "date": "2026-08-10"
+  },
+  "DTL061": {
+   "kg": 2,
+   "source": "fiche du catalogue DTL061ZJ",
+   "date": "2026-08-10"
+  },
+  "DST221": {
+   "kg": 2,
+   "source": "fiche du catalogue DST221ZJ",
+   "date": "2026-08-10"
+  },
+  "DLM382": {
+   "kg": 2,
+   "source": "fiche du catalogue DLM382Z",
+   "date": "2026-08-10"
+  },
+  "DHP492": {
+   "kg": 2,
+   "source": "fiche du catalogue DHP492ZJ",
+   "date": "2026-08-10"
+  },
+  "DPB182": {
+   "kg": 2,
+   "source": "fiche du catalogue DPB182Z",
+   "date": "2026-08-10"
+  },
+  "DLX2145": {
+   "kg": 2,
+   "source": "fiche du catalogue DLX2145ZJ",
+   "date": "2026-08-10"
+  },
+  "DFS452": {
+   "kg": 2,
+   "source": "fiche du catalogue DFS452ZJ",
+   "date": "2026-08-10"
+  },
+  "GA023": {
+   "kg": 2,
+   "source": "fiche du catalogue GA023GZ",
+   "date": "2026-08-10"
+  },
+  "DHR263": {
+   "kg": 2,
+   "source": "fiche du catalogue DHR263Z",
+   "date": "2026-08-10"
+  },
+  "DTW302": {
+   "kg": 2,
+   "source": "fiche du catalogue DTW302Z",
+   "date": "2026-08-10"
+  },
+  "DMR115": {
+   "kg": 2,
+   "source": "fiche du catalogue DMR115",
+   "date": "2026-08-10"
+  },
+  "DDF492": {
+   "kg": 2,
+   "source": "fiche du catalogue DDF492Z",
+   "date": "2026-08-10"
+  },
+  "DCC501": {
+   "kg": 2,
+   "source": "fiche du catalogue DCC501ZJ",
+   "date": "2026-08-10"
+  },
+  "DUC122": {
+   "kg": 2,
+   "source": "fiche du catalogue DUC122ZK",
+   "date": "2026-08-10"
+  },
+  "DJV182": {
+   "kg": 2,
+   "source": "fiche du catalogue DJV182Z",
+   "date": "2026-08-10"
+  },
+  "DF332": {
+   "kg": 2,
+   "source": "fiche du catalogue DF332DZJ",
+   "date": "2026-08-10"
+  },
+  "DCS552": {
+   "kg": 2,
+   "source": "fiche du catalogue DCS552ZJ",
+   "date": "2026-08-10"
+  },
+  "DPJ180": {
+   "kg": 2,
+   "source": "fiche du catalogue DPJ180Z",
+   "date": "2026-08-10"
+  },
+  "BKP180": {
+   "kg": 2,
+   "source": "fiche du catalogue BKP180Z",
+   "date": "2026-08-10"
+  },
+  "GA008": {
+   "kg": 2,
+   "source": "fiche du catalogue GA008GZ",
+   "date": "2026-08-10"
+  },
+  "DVC750": {
+   "kg": 2,
+   "source": "fiche du catalogue DVC750LZ",
+   "date": "2026-08-10"
+  },
+  "CL003": {
+   "kg": 2,
+   "source": "fiche du catalogue CL003GZ",
+   "date": "2026-08-10"
+  },
+  "DRT52": {
+   "kg": 2,
+   "source": "fiche du catalogue DRT52ZJ",
+   "date": "2026-08-10"
+  },
+  "DGD800": {
+   "kg": 2,
+   "source": "fiche du catalogue DGD800ZJ",
+   "date": "2026-08-10"
+  },
+  "DUS054": {
+   "kg": 2,
+   "source": "fiche du catalogue DUS054Z",
+   "date": "2026-08-10"
+  },
+  "DCG180": {
+   "kg": 2,
+   "source": "fiche du catalogue DCG180Z",
+   "date": "2026-08-10"
+  },
+  "AF601": {
+   "kg": 2,
+   "source": "fiche du catalogue AF601",
+   "date": "2026-08-10"
+  },
+  "DTD173": {
+   "kg": 2,
+   "source": "fiche du catalogue DTD173ZJ",
+   "date": "2026-08-10"
+  },
+  "DDA351": {
+   "kg": 2,
+   "source": "fiche du catalogue DDA351Z",
+   "date": "2026-08-10"
+  },
+  "DKP180": {
+   "kg": 2,
+   "source": "fiche du catalogue DKP180Z",
+   "date": "2026-08-10"
+  },
+  "BL1890": {
+   "kg": 2,
+   "source": "fiche du catalogue BL1890",
+   "date": "2026-08-10"
+  },
+  "DWR180": {
+   "kg": 2,
+   "source": "fiche du catalogue DWR180ZJ",
+   "date": "2026-08-10"
+  },
+  "ELM3320": {
+   "kg": 2,
+   "source": "fiche du catalogue ELM3320",
+   "date": "2026-08-10"
+  },
+  "DLM330": {
+   "kg": 2,
+   "source": "fiche du catalogue DLM330Z",
+   "date": "2026-08-10"
+  },
+  "DSS501": {
+   "kg": 2,
+   "source": "fiche du catalogue DSS501Z",
+   "date": "2026-08-10"
+  },
+  "KP0800": {
+   "kg": 2,
+   "source": "fiche du catalogue KP0800",
+   "date": "2026-08-10"
+  },
+  "DHG181": {
+   "kg": 2,
+   "source": "fiche du catalogue DHG181ZK",
+   "date": "2026-08-10"
+  },
+  "HR2230": {
+   "kg": 2,
+   "source": "fiche du catalogue HR2230",
+   "date": "2026-08-10"
+  },
+  "DCO180": {
+   "kg": 2,
+   "source": "fiche du catalogue DCO180ZJ",
+   "date": "2026-08-10"
+  },
+  "HR2670": {
+   "kg": 2,
+   "source": "fiche du catalogue HR2670",
+   "date": "2026-08-10"
+  },
+  "DTW251": {
+   "kg": 2,
+   "source": "fiche du catalogue DTW251ZJ",
+   "date": "2026-08-10"
+  },
+  "DHR241": {
+   "kg": 2,
+   "source": "fiche du catalogue DHR241Z",
+   "date": "2026-08-10"
+  },
+  "RP0900": {
+   "kg": 2,
+   "source": "fiche du catalogue RP0900",
+   "date": "2026-08-10"
+  },
+  "DSS611": {
+   "kg": 2,
+   "source": "fiche du catalogue DSS611Z",
+   "date": "2026-08-10"
+  },
+  "HR2470": {
+   "kg": 2,
+   "source": "fiche du catalogue HR2470",
+   "date": "2026-08-10"
+  },
+  "HS7611": {
+   "kg": 2,
+   "source": "fiche du catalogue HS7611",
+   "date": "2026-08-10"
+  },
+  "DJR186": {
+   "kg": 2,
+   "source": "fiche du catalogue DJR186ZK",
+   "date": "2026-08-10"
+  },
+  "DBO180": {
+   "kg": 2,
+   "source": "fiche du catalogue DBO180ZJ",
+   "date": "2026-08-10"
+  },
+  "DHP484": {
+   "kg": 2,
+   "source": "fiche du catalogue DHP484ZJ",
+   "date": "2026-08-10"
+  },
+  "UC100": {
+   "kg": 2,
+   "source": "fiche du catalogue UC100DZ",
+   "date": "2026-08-10"
+  },
+  "DAS180": {
+   "kg": 2,
+   "source": "fiche du catalogue DAS180Z",
+   "date": "2026-08-10"
+  },
+  "DTW180": {
+   "kg": 2,
+   "source": "fiche du catalogue DTW180ZJ",
+   "date": "2026-08-10"
+  },
+  "DSS610": {
+   "kg": 2,
+   "source": "fiche du catalogue DSS610Z",
+   "date": "2026-08-10"
+  },
+  "CC301": {
+   "kg": 2,
+   "source": "fiche du catalogue CC301DZJ",
+   "date": "2026-08-10"
+  },
+  "DHP458": {
+   "kg": 2,
+   "source": "fiche du catalogue DHP458ZJ",
+   "date": "2026-08-10"
+  },
+  "DDA350": {
+   "kg": 2,
+   "source": "fiche du catalogue DDA350Z",
+   "date": "2026-08-10"
+  },
+  "DHW180": {
+   "kg": 2,
+   "source": "fiche du catalogue DHW180Z",
+   "date": "2026-08-10"
+  },
+  "DMR116": {
+   "kg": 2,
+   "source": "fiche du catalogue DMR116",
+   "date": "2026-08-10"
+  },
+  "AF353": {
+   "kg": 2,
+   "source": "fiche du catalogue AF353",
+   "date": "2026-08-10"
+  },
+  "DHP490": {
+   "kg": 2,
+   "source": "fiche du catalogue DHP490ZJ",
+   "date": "2026-08-10"
+  },
+  "DTM50": {
+   "kg": 2,
+   "source": "fiche du catalogue DTM50Z",
+   "date": "2026-08-10"
+  },
+  "DJR183": {
+   "kg": 2,
+   "source": "fiche du catalogue DJR183ZJ",
+   "date": "2026-08-10"
+  },
+  "BO5030": {
+   "kg": 2,
+   "source": "fiche du catalogue BO5030",
+   "date": "2026-08-10"
+  },
+  "DMR056": {
+   "kg": 2,
+   "source": "fiche du catalogue DMR056",
+   "date": "2026-08-10"
+  },
+  "DMP181": {
+   "kg": 2,
+   "source": "fiche du catalogue DMP181Z",
+   "date": "2026-08-10"
+  },
+  "FS4200": {
+   "kg": 2,
+   "source": "fiche du catalogue FS4200",
+   "date": "2026-08-10"
+  },
+  "DTW190": {
+   "kg": 2,
+   "source": "fiche du catalogue DTW190ZJ",
+   "date": "2026-08-10"
+  },
+  "DDF453": {
+   "kg": 2,
+   "source": "fiche du catalogue DDF453ZJ",
+   "date": "2026-08-10"
+  },
+  "DKT360": {
+   "kg": 2,
+   "source": "fiche du catalogue DKT360Z",
+   "date": "2026-08-10"
+  },
+  "DTD156": {
+   "kg": 2,
+   "source": "fiche du catalogue DTD156ZJ",
+   "date": "2026-08-10"
+  },
+  "PF0410": {
+   "kg": 2,
+   "source": "fiche du catalogue PF0410",
+   "date": "2026-08-10"
+  },
+  "DCL184": {
+   "kg": 2,
+   "source": "fiche du catalogue DCL184Z",
+   "date": "2026-08-10"
+  },
+  "AF506": {
+   "kg": 2,
+   "source": "fiche du catalogue AF506",
+   "date": "2026-08-10"
+  },
+  "DBO482": {
+   "kg": 2,
+   "source": "fiche du catalogue DBO482Z",
+   "date": "2026-08-10"
+  },
+  "CL121": {
+   "kg": 2,
+   "source": "fiche du catalogue CL121DZ",
+   "date": "2026-08-10"
+  },
+  "JR103": {
+   "kg": 2,
+   "source": "fiche du catalogue JR103DZ",
+   "date": "2026-08-10"
+  },
+  "DHP453": {
+   "kg": 2,
+   "source": "fiche du catalogue DHP453ZJ",
+   "date": "2026-08-10"
+  },
+  "GD0603": {
+   "kg": 2,
+   "source": "fiche du catalogue GD0603",
+   "date": "2026-08-10"
+  },
+  "TW060": {
+   "kg": 2,
+   "source": "fiche du catalogue TW060DZJ",
+   "date": "2026-08-10"
+  },
+  "UB002": {
+   "kg": 2,
+   "source": "fiche du catalogue UB002GZ01",
+   "date": "2026-08-10"
+  },
+  "BO3711": {
+   "kg": 2,
+   "source": "fiche du catalogue BO3711",
+   "date": "2026-08-10"
+  },
+  "DMP180": {
+   "kg": 2,
+   "source": "fiche du catalogue DMP180Z",
+   "date": "2026-08-10"
+  },
+  "UB100": {
+   "kg": 2,
+   "source": "fiche du catalogue UB100DZ",
+   "date": "2026-08-10"
+  },
+  "TW140": {
+   "kg": 2,
+   "source": "fiche du catalogue TW140DZJ",
+   "date": "2026-08-10"
+  },
+  "MR052": {
+   "kg": 2,
+   "source": "fiche du catalogue MR052",
+   "date": "2026-08-10"
+  },
+  "DHR182": {
+   "kg": 2.4,
+   "source": "recherche ciblée : manuel Makita + cheefatt.com + hupshenghardware (2,4 kg nu)",
+   "date": "2026-08-10"
+  },
+  "DVC261": {
+   "kg": 3.2,
+   "source": "recherche ciblée : klium.com + dustarrest.com (3,2 kg corps seul)",
+   "date": "2026-08-10"
+  },
+  "DJV180": {
+   "kg": 3,
+   "source": "recherche ciblée : manuel Makita, fourchette 2,7-3,0 kg — valeur HAUTE retenue",
+   "date": "2026-08-10"
+  },
+  "DUC150": {
+   "kg": 2,
+   "source": "recherche ciblée : manuel Makita, fourchette 1,6-2,0 kg — valeur HAUTE retenue",
+   "date": "2026-08-10"
+  }
+ }
+}
