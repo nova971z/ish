@@ -842,14 +842,41 @@ function decomposerSuffixeMakita(suffixe, estSansFil) {
     if (ex.coffret) cfgEx.coffret = ex.coffret;
     return cfgEx;
   }
-  /* ⛔ L'EXCEPTION NE SE PROPAGE PAS AU-DELÀ DE SA FORME EXACTE — ET C'EST UN
-     ARBITRAGE D'ARGENT, PAS UN DÉTAIL. Ses fiches se contredisent : `RFX1`
-     (`DUB186RFX1`) annonce UNE batterie, `RFX9` (`DHP482RFX9`) en annonce
-     DEUX. Aucune règle ne peut satisfaire les deux. On garde donc la
-     grammaire (deux) dès qu'un lot d'accessoires est accroché, parce que le
-     SENS DE L'ERREUR n'est pas neutre : surestimer le contenu fait entrer un
-     coût trop HAUT — on vend trop cher, on ne vend pas à perte. Sous-estimer
-     ferait l'inverse. Entre deux inconnues, on prend celle qui ne ruine pas. */
+  /* ══ LA GAMME 40 V XGT EST UNE AUTRE GRAMMAIRE ═════════════════════════════
+     ⛔ Elle me manquait, et c'est elle qui bloquait `DK0124G201`. Là où la
+     gamme 18 V écrit [chargeur][batterie][coffret], la gamme 40 V écrit
+     `G` (la GAMME) puis la capacité puis un code de conditionnement à trois
+     chiffres. Recoupé sur la fiche officielle de la marque en Malaisie
+     (`GA013GM201 / GD201 / GZ`) et chez un revendeur de Singapour pour
+     `TW001G` : **`GM201` = 2 × 4,0 Ah + chargeur rapide · `GD201` = 2 × 2,5 Ah
+     + chargeur rapide · `GZ` = outil nu**. Le premier des trois chiffres est
+     le NOMBRE de batteries.
+     ⚠️ Vérifié sur sa fiche `DK0124G201` : huit revendeurs (klium.com,
+     jardiland.fr, cotebrico.fr, maxoutil.com, bati-avenue.com, toolnation.com,
+     comptoirdespros.com, magasin-ek.com) annoncent tous **2 batteries 4,0 Ah
+     + chargeur** — et le code dit bien « 2 ». La capacité, elle, n'est PAS
+     dans ce code-là : on ne l'invente pas. */
+  var mXGT = s.match(/^G([DM]?)([1-9])01$/);
+  if (mXGT) {
+    var cfgXGT = { nbBatteries: parseInt(mXGT[2], 10) };
+    if (mXGT[1] === 'D') cfgXGT.ah = 2.5;
+    else if (mXGT[1] === 'M') cfgXGT.ah = 4;
+    return cfgXGT;
+  }
+  /* ⛔ L'EXCEPTION NE SE PROPAGE PAS AU-DELÀ DE SA FORME EXACTE — ET LE
+     RECOUPEMENT A PROUVÉ QUE LE CODE LUI-MÊME EST AMBIGU, pas ma lecture :
+     `DUB186RFX1` = **1 batterie** de 3,0 Ah (idealo.fr, racetools.fr,
+     gammvert.fr, gpasplus.com) et `DHP482RFX9` = **2 batteries** de 3,0 Ah
+     (cotebrico.fr, castorama.fr, amazon.fr, manomano.fr, kamody.fr,
+     walmart.com). Même `RF`, deux contenus : la marque n'est pas cohérente
+     avec elle-même, et AUCUNE règle ne peut satisfaire les deux.
+     On garde donc la grammaire (deux) dès qu'un lot est accroché, parce que
+     le SENS DE L'ERREUR n'est pas neutre : surestimer le contenu fait entrer
+     un coût trop HAUT — on vend trop cher, on ne vend pas à perte.
+     Sous-estimer ferait l'inverse. Entre deux inconnues, on prend celle qui
+     ne ruine pas. Et le filet reste posé en aval : l'appariement compare ce
+     que l'ANNONCE énonce, donc un écart produit un REFUS de rapprochement,
+     jamais un prix faux. */
   var lot = false;
   var mxt = s.match(/X(\d{0,2})$/);
   if (mxt && s.length > mxt[0].length) { lot = true; s = s.slice(0, -mxt[0].length); }
@@ -1052,10 +1079,31 @@ function formeReferenceMakita(sku) {
      qu'une `6906`, et les compter « conditionnement inconnu » refait
      exactement l'erreur que cette fonction existe pour corriger. */
   var sansFil = (forme === 'modele') ? racineSansFilMakita(s) : false;
+  /* ⛔ UNE BATTERIE ET UN CHARGEUR N'ONT PAS DE CONDITIONNEMENT — ILS EN SONT
+     UN. `BL1850BX10`, `BL18120`, `DC18RD` restaient « inconnus » alors que
+     leurs titres disent « Batterie 18V 12Ah » et « Chargeur rapide ». La
+     famille du préfixe suffit à trancher, et elle est déjà dans la table. */
+  var tete = null;
+  for (var k = 0; k < PREFIXES_MAKITA_ORDRE.length; k++) {
+    if (s.indexOf(PREFIXES_MAKITA_ORDRE[k]) === 0) { tete = PREFIXES_MAKITA_ORDRE[k]; break; }
+  }
+  var energie = !!(tete && PREFIXES_MAKITA[tete].famille === 'energie');
+  /* ⛔ UN SUFFIXE QUI N'EST QU'UN LOT D'ACCESSOIRES NE DIT RIEN DU PACK — et
+     ce n'est pas une supposition. `DLX4057X1` : sept revendeurs (amazon.ca,
+     cotebrico.fr, lumen.ca, homedepot.ca, rona.ca, placide.com,
+     mississaugahardware.com) annoncent 4 machines + **2 batteries 3,0 Ah** +
+     chargeur DC18SD + sac — alors que `X1` ne porte AUCUNE lettre de
+     batterie. Le code est MUET ici : ce n'est pas une ignorance du parseur,
+     c'est une absence dans la référence. Le titre, lui, le dit. */
+  var m = s.match(/^[A-Z]{1,4}\d{2,4}([A-Z0-9]{0,8})$/);
+  var codeMuet = !!(m && /^X\d{0,2}$/.test(m[1]));
+  var porte = d.porteConditionnement && !energie && !codeMuet;
   return {
-    forme: forme, porteConditionnement: d.porteConditionnement,
-    sansFil: sansFil, batteriePossible: forme === 'modele' && sansFil,
-    coffret: coffret, note: d.note
+    forme: forme, porteConditionnement: porte,
+    energie: energie, codeMuet: codeMuet,
+    sansFil: sansFil, batteriePossible: porte && sansFil,
+    coffret: coffret, note: energie ? 'batterie ou chargeur : il EST le conditionnement'
+      : (codeMuet ? 'suffixe de lot seul : la référence ne dit rien du pack' : d.note)
   };
 }
 
@@ -1220,7 +1268,13 @@ var PREFIXES_DEWALT_ORDRE = Object.keys(PREFIXES_DEWALT).sort(function (a, b) { 
    dire ce que le préfixe annonce. 73 préfixes retenus. */
 var PREFIXES_MAKITA = {
   AF:     { famille: 'machine', note: 'Cloueurs (3/3 fiches)' },
-  BL:     { famille: 'machine', note: 'Accessoires (5/7 fiches)' },
+  /* ⛔ `BL` EST UNE BATTERIE, PAS UN ACCESSOIRE. La note « Accessoires (5/7
+     fiches) » venait du RAYON où l'user les avait rangées, pas de ce qu'elles
+     SONT : `BL1830B`, `BL1850B`, `BL1860B`, `BL1041B`, `BL18120` — cinq
+     batteries Li-Ion, et ses propres titres l'écrivent (« Batterie 18V LXT
+     Li-Ion 3,0 Ah »). Une batterie ne se demande pas si elle est « nue ou en
+     pack » : elle EST le pack. Même chose pour `DC`, déjà classé `energie`. */
+  BL:     { famille: 'energie', rayon: 'batterie', note: 'batterie Li-Ion — jamais une machine' },
   BN:     { famille: 'machine', note: 'Rangements (2/2 fiches)' },
   BO:     { famille: 'machine', note: 'Meulage, découpe et polissage (4/5 fiches)' },
   CC:     { famille: 'machine', note: 'Scies (2/2 fiches)' },

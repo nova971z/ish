@@ -1971,6 +1971,53 @@ module.exports = async function () {
           '⛔ une machine FILAIRE écrite en nomenclature actuelle n\'a pas plus de '
           + 'batterie qu\'une référence ancienne (obtenu '
           + JSON.stringify(forme('ZZR2811FT')) + ')');
+        /* Une batterie et un chargeur SONT le conditionnement — ils n'en ont
+           pas un à connaître. La famille du préfixe suffit à trancher. */
+        ok(forme('BL1850BX10').porteConditionnement === false
+          && forme('BL1850BX10').energie === true,
+          '⛔ une BATTERIE n\'a pas de conditionnement à connaître : elle en est un '
+          + '(obtenu ' + JSON.stringify(forme('BL1850BX10')) + ')');
+        ok(forme('DC18RD').energie === true,
+          '⛔ un CHARGEUR non plus (obtenu ' + JSON.stringify(forme('DC18RD')) + ')');
+        /* ⛔ CODE MUET ≠ CODE INCONNU. `DLX4057X1` contient 2 batteries de
+           3,0 Ah (sept revendeurs) alors que `X1` ne porte aucune lettre de
+           batterie : l'absence est DANS la référence, pas dans le parseur. */
+        ok(forme('DZX4057X1').codeMuet === true
+          && forme('DZX4057X1').porteConditionnement === false,
+          '⛔ un suffixe qui n\'est qu\'un lot ne dit RIEN du pack — c\'est une absence '
+          + 'dans la référence, pas une ignorance (obtenu '
+          + JSON.stringify(forme('DZX4057X1')) + ')');
+        ok(forme('DZX2145TJ').codeMuet === false
+          && forme('DZX2145TJ').porteConditionnement === true,
+          '⚠️ PRÉALABLE : un suffixe qui porte VRAIMENT un code d\'ensemble n\'est pas '
+          + 'muet — sans ça l\'assertion précédente absoudrait tout le monde '
+          + '(obtenu ' + JSON.stringify(forme('DZX2145TJ')) + ')');
+      }
+
+      /* ══ LA GAMME 40 V EST UNE AUTRE GRAMMAIRE ═════════════════════════════
+         `G` = la gamme, puis la capacité, puis un code à trois chiffres dont
+         le PREMIER est le nombre de batteries. Fiche officielle de la marque
+         (`GA013GM201 / GD201 / GZ`) : GM201 = 2×4,0 Ah, GD201 = 2×2,5 Ah. */
+      if (lireSuf) {
+        var cfgGM = (lireSuf('ZZA013GM201') || {}).config || {};
+        ok(cfgGM.nbBatteries === 2 && cfgGM.ah === 4,
+          '⛔ gamme 40 V : `GM201` vaut 2 batteries de 4,0 Ah '
+          + '(obtenu ' + JSON.stringify(cfgGM) + ')');
+        var cfgGD = (lireSuf('ZZA013GD201') || {}).config || {};
+        ok(cfgGD.nbBatteries === 2 && cfgGD.ah === 2.5,
+          '⛔ gamme 40 V : `GD201` vaut 2 batteries de 2,5 Ah '
+          + '(obtenu ' + JSON.stringify(cfgGD) + ')');
+        /* ⛔ SANS LETTRE DE CAPACITÉ, ON COMPTE SANS INVENTER LA CAPACITÉ.
+           Huit revendeurs sur `DK0124G201` : 2 batteries — le code dit « 2 »,
+           il ne dit pas « 4,0 Ah ». Inventer la capacité serait un prix faux. */
+        var cfgG2 = (lireSuf('DZ0124G201') || {}).config || {};
+        ok(cfgG2.nbBatteries === 2 && cfgG2.ah === undefined,
+          '⛔⛔ ARGENT : le code de gamme 40 V donne le NOMBRE sans donner la CAPACITÉ '
+          + '— on ne l\'invente pas (obtenu ' + JSON.stringify(cfgG2) + ')');
+        /* ⚠️ Et le `G` SEUL reste un marqueur de gamme, pas 2×6,0 Ah. */
+        ok(((lireSuf('ZZR005G') || {}).config) === null,
+          '⚠️ PRÉALABLE : un `G` seul reste la GAMME — la règle des trois chiffres ne '
+          + 'l\'ouvre pas (obtenu ' + JSON.stringify((lireSuf('ZZR005G') || {}).config) + ')');
       }
 
       var tblSuf = pp.nomenclature && pp.nomenclature.SUFFIXES_MAKITA;
