@@ -16,6 +16,36 @@ const plans = require('./_lib/traqueur-plans');
 const snapshotLib = require('./_lib/snapshot');
 // Ce qu'on refuse d'acheter, et pourquoi. Un seul fichier, fait pour changer.
 const barriere = require('./_lib/barriere-achat');
+
+/* ⛔ LIRE TOUS LES OVERRIDES COÛTE 4 LECTURES, PLUS ~1 708 (10/08/2026).
+   Mesuré sur la capture Firestore de l'user : 4 400 lectures pour 3 écritures
+   en deux minutes de balayage. `catalog.js` lisait déjà les 4 documents
+   agrégés depuis le 09/08 ; l'administration et le traqueur, eux, étaient
+   restés sur `collection('product_overrides').get()` — chaque écran de marges,
+   chaque recalcul, chaque instance froide du traqueur repayait la collection
+   entière. Tout passe désormais par ici.
+   ⚠️ Le repli n'est pas décoratif : snapshot absent (première vie) ou illisible
+   → on relit la collection UNE fois, sinon on travaillerait sur une carte vide
+   et on réécrirait des prix par-dessus les bons (J4). Et on SÈME les shards
+   depuis la carte qu'on vient de lire — pas via `reconstruire()`, qui relirait
+   la collection et DOUBLERAIT la facture de la seule requête qui paie déjà le
+   repli. */
+async function lireOverrides(db, admin) {
+  let map = null;
+  try {
+    map = await snapshotLib.lireSnapshot(db);
+  } catch (e) {
+    console.error('[admin] snapshot illisible, repli collection:', e.message);
+  }
+  if (map !== null) return map;
+  const snap = await db.collection('product_overrides').get();
+  map = {};
+  snap.forEach((d) => { map[d.id] = d.data() || {}; });
+  snapshotLib.majSnapshotBatch(db, admin,
+    Object.keys(map).map((id) => ({ id: id, patch: map[id] })))
+    .catch((e) => console.error('[admin] semis snapshot:', e.message));
+  return map;
+}
 /* Pourquoi une rafale rend moins de pages qu'elle n'en a envoyé. Fonction pure.
    ⚠️ Portes lues : J3 — n'y entrent que des horodatages techniques et des
    compteurs, aucune donnée personnelle, rien de persisté ni de journalisé ;
@@ -1088,9 +1118,7 @@ module.exports = async function handler(req, res) {
       if (type === 'margins') {
         const cfg = await priceConfig.load();
         const tvaFR = cfg.tvaFR || 0.20;
-        const ovSnap = await db.collection('product_overrides').get();
-        const ov = {};
-        ovSnap.forEach((doc) => { ov[doc.id] = doc.data() || {}; });
+        const ov = await lireOverrides(db, admin);
         const catProducts = await catalog.loadCatalog();
         const variantCostsM = pwBuildVariantCosts(catProducts, ov);
         const rows = [];
@@ -1137,9 +1165,7 @@ module.exports = async function handler(req, res) {
       }
 
       // Default: list all overrides
-      const snap = await db.collection('product_overrides').get();
-      const overrides = {};
-      snap.forEach((doc) => { overrides[doc.id] = doc.data(); });
+      const overrides = await lireOverrides(db, admin);
       return res.status(200).json({ ok: true, overrides: overrides });
     } catch (err) {
       console.error('[api/admin] GET failed:', err.message);
@@ -2382,9 +2408,7 @@ async function handleRepriceAll(req, res, admin, db) {
     }
 
     // Overrides existants (pour le coût source connu).
-    const ovSnap = await db.collection('product_overrides').get();
-    const ov = {};
-    ovSnap.forEach((d) => { ov[d.id] = d.data() || {}; });
+    const ov = await lireOverrides(db, admin);
 
     const products = await catalog.loadCatalog();
     // Garde-fou coffret : coûts RÉELS connus par groupe de variante, pour
@@ -3610,9 +3634,20 @@ async function handlePriceWatch(req, res, admin, db) {
       ovW = pwScanCache.map;
       cacheReutilise = true;
     } else {
-      const ovSnapW = await db.collection('product_overrides').get();
-      ovW = {};
-      ovSnapW.forEach((d) => { ovW[d.id] = d.data() || {}; });
+      /* ⛔ SNAPSHOT D'ABORD (10/08/2026, mesuré sur la capture Firestore de
+         l'user : 4 400 lectures pour 3 écritures en deux minutes de balayage).
+         Le cache de rafale ne vit que dans la mémoire d'UNE instance ; sur son
+         balayage Makita, 2 pages sur 112 ont rendu `scanCache:false` — deux
+         instances froides qui ont chacune relu la COLLECTION ENTIÈRE (~1 708
+         documents) = ~3 416 lectures, l'essentiel de la facture. `catalog.js`
+         lit les 4 documents agrégés depuis le 09/08 ; le traqueur, lui, était
+         resté sur la collection. Il lit désormais LA MÊME source : 4 lectures
+         par instance froide au lieu de ~1 708.
+         J4 (prix exact) : le snapshot porte les MÊMES overrides — il est
+         maintenu à chaque écriture, y compris par ce traqueur (majSnapshotBatch
+         en fin de page). Snapshot absent (première vie) → collection UNE fois,
+         puis reconstruction pour que la suivante ne la repaie pas. */
+      ovW = await lireOverrides(db, admin);
       if (scanMode) pwScanCache = { map: ovW, at: Date.now() };
     }
     const products = scanMode ? catalog.loadCatalogAvec(ovW) : await catalog.loadCatalog();

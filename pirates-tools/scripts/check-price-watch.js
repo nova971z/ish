@@ -2353,7 +2353,9 @@ module.exports = async function () {
     }
     ok(!!cible, 'préalable : une fiche DeWALT à réf sûre existe au catalogue');
 
-    var fauxAdmin = { firestore: { FieldValue: { serverTimestamp: function () { return { _sentinelle: true }; } } } };
+    var fauxAdmin = { firestore: { FieldValue: {
+      serverTimestamp: function () { return { _sentinelle: true }; },
+      delete: function () { return { _supprime: true }; } } } };
     function fauxRes() {
       return { code: 0, out: null,
         status: function (c) { this.code = c; return this; },
@@ -2363,11 +2365,41 @@ module.exports = async function () {
        cache : (1) chaque get() sur la collection se COMPTE ; (2) chaîner un
        second where (id == + at >=) exigerait un index composite (règle E) —
        ici il JETTE, comme la production jette FAILED_PRECONDITION. */
-    function fauxDb(seedOv, seedLog, seedConfig) {
-      var compte = { lecturesOv: 0, ecrituresParId: {}, patchsParId: {},
+    function fauxDb(seedOv, seedLog, seedConfig, options) {
+      var snapLib = require('../api/_lib/snapshot.js');
+      var compte = { lecturesOv: 0, lecturesSnapshot: 0, lecturesDocs: 0,
+        ecrituresParId: {}, patchsParId: {},
         configDocs: Object.assign({}, seedConfig || {}) };
+      /* ⛔ LE SNAPSHOT EXISTE, comme en production depuis le 09/08 : les 4
+         documents agrégés sont SEMÉS depuis `seedOv`. Sans eux, `lireSnapshot`
+         rendrait null, le traqueur retomberait TOUJOURS sur la collection, et
+         l'assertion « une instance froide coûte 4 lectures » serait verte pour
+         la mauvaise raison — le repli. `options.sansSnapshot` rejoue la
+         PREMIÈRE VIE (aucun shard) pour prouver ce repli-là séparément. */
+      if (!(options && options.sansSnapshot)) {
+        for (var ns = 0; ns < snapLib.NB_SHARDS; ns++) {
+          compte.configDocs[snapLib.PREFIXE + ns] = { _maj: { _sentinelle: true } };
+        }
+        Object.keys(seedOv || {}).forEach(function (id) {
+          compte.configDocs[snapLib.PREFIXE + snapLib.shardDe(id)][id] =
+            JSON.parse(JSON.stringify(seedOv[id]));
+        });
+      }
       return {
         _compte: compte,
+        /* `getAll` est CE QUE LIT le snapshot : 4 références, 4 lectures — le
+           compteur est l'instrument, pas une décoration. */
+        getAll: function () {
+          var refs = Array.prototype.slice.call(arguments);
+          compte.lecturesSnapshot++;
+          compte.lecturesDocs += refs.length;
+          return Promise.resolve(refs.map(function (r) {
+            var id = r && r._id;
+            var present = compte.configDocs[id] !== undefined;
+            return { id: id, exists: present,
+              data: function () { return compte.configDocs[id] || {}; } };
+          }));
+        },
         /* ⛔ LE LOT D'ÉCRITURES, ET IL SE MESURE (09/08/2026). Sans lui, la base
            factice ne saurait pas exécuter le chemin réel — et « non exécuté
            n'est pas vert ». `commits` est ce qui prouve le groupage : une page
@@ -2437,12 +2469,28 @@ module.exports = async function () {
           }
           if (nom === 'config') {
             return { doc: function (id) { return {
+              _coll: 'config', _id: id,
               get: function () {
                 return Promise.resolve({ exists: compte.configDocs[id] !== undefined,
                   data: function () { return compte.configDocs[id] || {}; } });
               },
-              set: function (patch) {
-                compte.configDocs[id] = Object.assign({}, compte.configDocs[id] || {}, patch);
+              /* ⛔ `merge:true` fusionne AUSSI les cartes imbriquées (un shard de
+                 snapshot est une carte {id: override}) : une fusion à plat
+                 écraserait tout l'override à chaque écriture partielle, et le
+                 harnais mentirait dans le sens rassurant. `merge:false` (la
+                 reconstruction) remplace, lui, le document entier. */
+              set: function (patch, opts) {
+                var cible = (opts && opts.merge === false)
+                  ? {} : Object.assign({}, compte.configDocs[id] || {});
+                Object.keys(patch || {}).forEach(function (k) {
+                  var v = patch[k];
+                  if (v && v._supprime) { delete cible[k]; return; }
+                  if (v && typeof v === 'object' && !Array.isArray(v) && !v._sentinelle
+                      && cible[k] && typeof cible[k] === 'object' && !Array.isArray(cible[k])) {
+                    cible[k] = Object.assign({}, cible[k], v);
+                  } else { cible[k] = v; }
+                });
+                compte.configDocs[id] = cible;
                 return Promise.resolve();
               }
             }; } };
@@ -2531,9 +2579,20 @@ module.exports = async function () {
         ok(ecritsPage1 >= 1, 'page 1 : le relevé s\'écrit');
         var rS2 = fauxRes();
         await admFn(reqPage(cible.sku, { scan: '1' }), rS2, fauxAdmin, dbS);
-        ok(dbS._compte.lecturesOv === 1,
-          '⛔ BALAYAGE : deux pages scan=1 = UNE lecture de product_overrides ('
-          + dbS._compte.lecturesOv + ') — sans cache, 67 pages ≈ 160 000 lectures et le quota meurt');
+        ok(dbS._compte.lecturesSnapshot === 1,
+          '⛔ BALAYAGE : deux pages scan=1 = UN chargement des overrides ('
+          + dbS._compte.lecturesSnapshot + ') — sans cache, 67 pages ≈ 160 000 lectures et le quota meurt');
+        /* ⛔ 4 LECTURES, PAS 1 708 (10/08/2026 — capture Firestore de l'user :
+           4 400 lectures pour 3 écritures en 2 minutes). Le cache de rafale ne
+           protège QUE l'instance qui l'a rempli : sur son balayage Makita, 2
+           pages sur 112 sont parties froides et ont chacune relu la collection
+           entière. La collection ne doit plus être touchée tant que le snapshot
+           existe — c'est la seule mesure qui rende ce coût BORNÉ. */
+        ok(dbS._compte.lecturesOv === 0 && dbS._compte.lecturesDocs === 4,
+          '⛔ BALAYAGE : une instance FROIDE lit les 4 documents du snapshot, JAMAIS la '
+          + 'collection product_overrides (~1 708 documents) — obtenu : '
+          + dbS._compte.lecturesOv + ' lecture(s) de collection, '
+          + dbS._compte.lecturesDocs + ' document(s) de snapshot');
         /* La réponse DIT si le relevé a été réutilisé. Sans ce champ, « le cache
            a servi » resterait une supposition : il vit dans la mémoire d'UNE
            instance serverless, et une instance froide relit tout sans que rien
@@ -2558,13 +2617,54 @@ module.exports = async function () {
         var dbN = fauxDb({}, []);
         await admFn(reqPage(cible.sku, {}), fauxRes(), fauxAdmin, dbN);
         await admFn(reqPage(cible.sku, {}), fauxRes(), fauxAdmin, dbN);
-        ok(dbN._compte.lecturesOv === 2,
-          'sans &scan=1, relecture pleine à CHAQUE appel (' + dbN._compte.lecturesOv
-          + ') — un relevé isolé garde la fraîcheur maximale');
+        ok(dbN._compte.lecturesSnapshot === 2 && dbN._compte.lecturesOv === 0,
+          'sans &scan=1, rechargement à CHAQUE appel (' + dbN._compte.lecturesSnapshot
+          + ') — un relevé isolé garde la fraîcheur maximale, et il coûte 4 documents, '
+          + 'pas la collection (' + dbN._compte.lecturesOv + ' lecture(s) de collection)');
         ok(appelsLoadCatalog === 2,
           'sans &scan=1, le catalogue fusionné passe toujours par loadCatalog ('
           + appelsLoadCatalog + '/2) — le comportement historique ne change pas');
         catMod.loadCatalog = vraiLoadCatalog;
+
+        /* ⛔ PREMIÈRE VIE : aucun shard n'existe → le traqueur DOIT retomber sur
+           la collection (sinon il travaillerait sur une carte vide et écraserait
+           des prix — J4), et RECONSTRUIRE le snapshot pour que l'appel suivant
+           ne repaie pas 1 708 lectures. Sans ce cas, le repli serait du code
+           jamais exécuté, donc jamais vert. */
+        scanReset();
+        var seedVierge = {}; seedVierge[cible.id] = { price: courantHaut };
+        var dbV = fauxDb(seedVierge, [], null, { sansSnapshot: true });
+        var rV1 = fauxRes();
+        await admFn(reqPage(cible.sku, { scan: '1' }), rV1, fauxAdmin, dbV);
+        ok(rV1.code === 200 && dbV._compte.lecturesOv === 1,
+          '⛔ SNAPSHOT ABSENT : le traqueur relit la collection UNE fois au lieu de '
+          + 'travailler à vide (obtenu : ' + dbV._compte.lecturesOv + ' lecture(s), code '
+          + rV1.code + ')');
+        ok(rV1.out && rV1.out.counts && rV1.out.counts.applied === 1,
+          '⛔ SNAPSHOT ABSENT : le prix vu par le repli est le MÊME (la baisse forcée de '
+          + '100 € s\'applique) — un repli qui perdrait les overrides referait des hausses '
+          + 'fantômes (obtenu : ' + JSON.stringify(rV1.out && rV1.out.counts) + ')');
+        /* Le semis est volontairement NON attendu (il ne doit pas retarder la
+           réponse) : on laisse la file des micro-tâches se vider avant de le
+           mesurer, sinon l'assertion testerait une course, pas un fait. */
+        await new Promise(function (r) { setTimeout(r, 0); });
+        /* ⛔ ET LA PREUVE QUE LE SEMIS SERT : une SECONDE instance froide (cache
+           vidé) ne doit plus toucher la collection. Compter les documents semés
+           ne prouverait rien — c'est la lecture suivante qui paie ou ne paie
+           pas. Sans ce tour, une page froide sur deux repaierait 1 708 lectures
+           et le quota mourrait exactement comme le 10/08. */
+        scanReset();                                   // instance froide suivante
+        var rV2 = fauxRes();
+        await admFn(reqPage(cible.sku, { scan: '1' }), rV2, fauxAdmin, dbV);
+        ok(rV2.code === 200 && dbV._compte.lecturesOv === 1 && dbV._compte.lecturesDocs >= 4,
+          '⛔ SNAPSHOT SEMÉ : la 2e instance FROIDE lit les documents agrégés, plus jamais '
+          + 'la collection (obtenu : ' + dbV._compte.lecturesOv + ' lecture(s) de collection '
+          + 'au total pour 2 instances froides, ' + dbV._compte.lecturesDocs
+          + ' document(s) de snapshot, code ' + rV2.code + ')');
+        ok(rV2.out && rV2.out.counts && rV2.out.counts.unchanged === 1,
+          '⛔ SNAPSHOT SEMÉ : et il porte le MÊME prix — la 2e instance ne réapplique rien '
+          + '(J4 : un semis qui perdrait les overrides referait des hausses fantômes ; '
+          + 'obtenu : ' + JSON.stringify(rV2.out && rV2.out.counts) + ')');
 
         /* ⛔ EN BALAYAGE, LES REJETS DOIVENT POUVOIR SE LIRE (09/08/2026). Le
            balayage réel du jour comptait 1 093 `sansRef` sur 67 pages — comptés
@@ -3197,12 +3297,25 @@ module.exports = async function () {
         var dbM2 = fauxDb({}, []);
         await pageAuPrix(cible.sku, MOINS, dbM2);
         var apresHausse = await pageAuPrix(cible.sku, CHER, dbM2);
-        var recHausse = (apresHausse.applied || []).concat(apresHausse.unchanged || [])[0];
-        ok(!!recHausse && Math.abs(recHausse.srcTTC - 300) < 0.01,
-          '⛔⛔ ARGENT — moins cher d\'abord, plus cher ensuite : le coût retenu reste le '
-          + 'MOINS CHER. Sans ça le prix final dépend de l\'ordre des pages, et l\'user '
-          + 'vend 465,77 € un outil qu\'il pouvait acheter pour 323,92 € (obtenu '
-          + JSON.stringify(recHausse && recHausse.srcTTC) + ', attendu 300)');
+        /* ⚠️ On mesure ici CE QUI EST ÉCRIT, pas ce qui est rapporté. Depuis que
+           la base factice porte le snapshot (10/08/2026), la page 2 relit
+           VRAIMENT l'override écrit par la page 1 — le prix est déjà bon, la
+           fiche tombe donc en `unchanged`, une liste que la réponse ne rend
+           pas. Le coût PERSISTÉ, lui, est la donnée d'argent : c'est lui qui
+           décide du prix de vente, et un écrasement par la page chère s'y
+           verrait immédiatement. */
+        var patchHausse = dbM2._compte.patchsParId[cible.id] || {};
+        var srcHausse = (patchHausse.priceSources || {}).idealo || {};
+        ok(Math.abs(patchHausse.priceSrcTTC - 300) < 0.01
+          && Math.abs(srcHausse.ttc - 300) < 0.01
+          && apresHausse.counts && apresHausse.counts.applied === 0,
+          '⛔⛔ ARGENT — moins cher d\'abord, plus cher ensuite : le coût ÉCRIT reste le '
+          + 'MOINS CHER et aucune hausse ne s\'applique. Sans ça le prix final dépend de '
+          + 'l\'ordre des pages, et l\'user vend 465,77 € un outil qu\'il pouvait acheter '
+          + 'pour 323,92 € (obtenu coût ' + JSON.stringify(patchHausse.priceSrcTTC)
+          + ', source ' + JSON.stringify(srcHausse.ttc) + ', appliqués '
+          + JSON.stringify(apresHausse.counts && apresHausse.counts.applied)
+          + ' — attendu 300 / 300 / 0)');
         scanReset();
 
         /* ⛔ ET LE MINIMUM NE VAUT QUE DANS LA RAFALE. Hors rafale, une hausse
