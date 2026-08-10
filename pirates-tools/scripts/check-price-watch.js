@@ -1757,6 +1757,54 @@ module.exports = async function () {
         + 'JAMAIS une référence — seul le catalogue en décide');
     }
 
+    /* ⛔⛔ RACINE NUE ↔ FICHE CONDITIONNÉE — LE PLUS GROS POSTE, ET LE PLUS
+       DANGEREUX (09/08/2026). Mesuré sur son balayage de 112 pages : 180 fiches
+       sur 611 ne sont pas reconnues parce que le comparateur écrit la référence
+       NUE là où la fiche porte son conditionnement.
+       ⛔ Et la racine ne suffit JAMAIS à trancher : chez lui, une même racine
+       désigne jusqu'à CINQ fiches (machine seule, en coffret, avec 2 batteries
+       3 / 5 / 6 Ah). Cas mesuré : une fiche vendue 754,13 € et une annonce à
+       352,18 € portant la même racine — les rapprocher ferait vendre à perte.
+       ⚠️ Références synthétiques ; c'est la GRAMMAIRE qui vient de son catalogue. */
+    var apc = pp.apparierParConfiguration;
+    ok(typeof apc === 'function', 'apparierParConfiguration exportée');
+    if (apc) {
+      var fichesC = [{ sku: 'ZZH680Z' }, { sku: 'ZZH680RTJ' }, { sku: 'ZZH680RFJ' }];
+      var nu   = { titre: 'MARQUEZZ ZZH680', prix: 192, sku: 'ZZH680',
+        car: { sku: 'ZZH680', nbBatteries: 0 } };
+      var kit5 = { titre: 'MARQUEZZ ZZH680', prix: 400, sku: 'ZZH680',
+        car: { sku: 'ZZH680', nbBatteries: 2, ah: 5 } };
+      var muet = { titre: 'MARQUEZZ ZZH680', prix: 350, sku: 'ZZH680',
+        car: { sku: 'ZZH680' } };
+      var flou = { titre: 'MARQUEZZ ZZH680', prix: 380, sku: 'ZZH680',
+        car: { sku: 'ZZH680', nbBatteries: 2 } };
+      var rc = apc([nu, kit5, muet, flou], fichesC, 'MAKITA');
+      var parC = {}; rc.items.forEach(function (x) { parC[x.sku] = x.price; });
+      ok(parC.ZZH680Z === 192 && parC.ZZH680RTJ === 400,
+        '⛔⛔ ARGENT : une annonce qui ANNONCE sa configuration va sur la fiche qui '
+        + 'porte la MÊME — l\'outil nu sur la fiche nue, le kit 2×5 Ah sur la fiche '
+        + 'correspondante (' + JSON.stringify(parC) + ')');
+      /* ⚠️ PRÉALABLE 1 — une annonce MUETTE n'est jamais rapprochée. C'est
+         l'essentiel : sur le balayage mesuré, 2 254 annonces sur 2 254 étaient
+         muettes. Sans ce refus, on écrirait un prix au hasard sur cinq fiches. */
+      ok(rc.restants.some(function (x) { return x.prix === 350; })
+        && !rc.items.some(function (x) { return x.price === 350; }),
+        '⛔⛔ ARGENT : une annonce MUETTE sur son contenu n\'est JAMAIS rapprochée — '
+        + 'rien ne permet de choisir entre l\'outil nu et le kit');
+      /* ⚠️ PRÉALABLE 2 — l'ambiguïté ne s'arbitre pas : « 2 batteries » sans
+         capacité laisse deux fiches candidates (5 Ah et 3 Ah). */
+      ok(rc.restants.some(function (x) { return x.prix === 380; }),
+        '⛔ deux fiches compatibles ⇒ on ne rapproche rien (l\'ambiguïté ne '
+        + 's\'arbitre jamais)');
+      /* ⚠️ PRÉALABLE 3 — la table est celle d'UNE marque. Appliquée à une
+         autre, elle ferait le défaut qui avait fait chuter le typage de 70
+         fiches quand la table des préfixes DeWALT a mordu du Makita. */
+      ok(apc([nu], fichesC, 'DEWALT').items.length === 0,
+        '⛔ la grammaire des suffixes ne vaut que pour SA marque');
+      ok(rc.items.length + rc.restants.length === 4,
+        '⛔ rien ne disparaît : chaque annonce est soit rapprochée, soit rendue');
+    }
+
     var apn = pp.apparierParNomSouple;
     ok(typeof apn === 'function', 'apparierParNomSouple exportée');
     if (apn) {

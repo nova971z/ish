@@ -685,6 +685,77 @@ var SUFFIXES_DEWALT = {
   X1: { nbBatteries: 1, ah: 9.0 }, X2: { nbBatteries: 2, ah: 9.0 },
   Y1: { nbBatteries: 1, ah: 12.0 }, Y2: { nbBatteries: 2, ah: 12.0 }
 };
+/* ── SUFFIXES DE RÉFÉRENCE MAKITA ───────────────────────────────────────
+   ⛔⛔ MESURÉE SUR SES 611 FICHES, JAMAIS DE MÉMOIRE (09/08/2026). Chaque
+   entrée vient d'un comptage sur le catalogue réel : le suffixe, le nombre de
+   fiches qui le portent, et ce que leurs titres annoncent. Une table de
+   suffixes citée de mémoire serait une invention — et celle-ci décide de
+   l'argent.
+
+   ⛔ POURQUOI ELLE VAUT DE L'ARGENT. Le comparateur écrit souvent la référence
+   NUE (« MAKITA DHS680 ») là où la fiche porte son conditionnement
+   (« DHS680Z » = machine seule, « DHS680RTJ » = 2 batteries 5 Ah + coffret).
+   Mesuré sur son balayage : la racine `DHS680` désigne **cinq** fiches
+   différentes du catalogue. Écrire le prix de la version nue sur celle du kit
+   — ou l'inverse — c'est un coût faux, donc un prix faux.
+   Cas mesuré : `DUC256PT2` est vendue 754,13 € et le comparateur montre
+   `DUC256` à 352,18 €. Rapprocher les deux ferait vendre à perte.
+
+   ⚠️ CE QUE CETTE TABLE PERMET, ET RIEN DE PLUS : vérifier qu'une annonce et
+   une fiche décrivent la MÊME configuration. Elle n'autorise jamais à deviner
+   un conditionnement que l'annonce n'énonce pas.
+
+   Relevé (suffixe · fiches · batteries dominantes · Ah · part avec coffret) :
+     Z 115·0  ZJ 60·0/95%  ZK 7·0/71%  GZ 15·0  GZ01 7·0  DZ 7·0  DZJ 4·0/100%
+     RTJ 59·2×5,0/61%  RFJ 43·2×3,0/74%  RGJ 7·2×6,0/86%  RT 7·1×5,0
+     PT2 6·2×5,0  TJ 6·2×5,0  RFE 5·2×3,0  RTE 4·2×5,0                       */
+var SUFFIXES_MAKITA = {
+  Z:    { nbBatteries: 0, note: 'machine seule' },
+  ZJ:   { nbBatteries: 0, coffret: 'MAKPAC', note: 'machine seule en coffret' },
+  ZK:   { nbBatteries: 0, coffret: 'MAKPAC', note: 'machine seule en coffret' },
+  DZ:   { nbBatteries: 0, note: 'machine seule (gamme 10,8/12 V)' },
+  DZJ:  { nbBatteries: 0, coffret: 'MAKPAC', note: 'machine seule en coffret (10,8/12 V)' },
+  GZ:   { nbBatteries: 0, note: 'machine seule (gamme 40 V)' },
+  GZ01: { nbBatteries: 0, note: 'machine seule (gamme 40 V)' },
+  RT:   { nbBatteries: 1, ah: 5.0 },
+  RTJ:  { nbBatteries: 2, ah: 5.0, coffret: 'MAKPAC' },
+  RTE:  { nbBatteries: 2, ah: 5.0 },
+  PT2:  { nbBatteries: 2, ah: 5.0 },
+  TJ:   { nbBatteries: 2, ah: 5.0, coffret: 'MAKPAC' },
+  RFJ:  { nbBatteries: 2, ah: 3.0, coffret: 'MAKPAC' },
+  RFE:  { nbBatteries: 2, ah: 3.0 },
+  RGJ:  { nbBatteries: 2, ah: 6.0, coffret: 'MAKPAC' },
+  /* ── Longue traîne : 1 à 2 fiches chacun, et TOUS mesurés sur le titre de
+     ces fiches-là (batteries et Ah lus, jamais supposés). Les suffixes dont
+     le titre ne dit RIEN de leur contenu ne figurent pas ici : les ajouter
+     « au jugé » ferait exactement le défaut que cette table empêche. */
+  PT2J:  { nbBatteries: 2, ah: 5.0, coffret: 'MAKPAC' },
+  RTJX2: { nbBatteries: 2, ah: 5.0, coffret: 'MAKPAC' },
+  T2X1:  { nbBatteries: 2, ah: 5.0 },
+  PG2J:  { nbBatteries: 2, ah: 6.0, coffret: 'MAKPAC' },
+  RF2:   { nbBatteries: 2, ah: 3.0 },
+  SFE:   { nbBatteries: 2, ah: 3.0, coffret: 'MAKPAC' },
+  RF3J:  { nbBatteries: 3, ah: 3.0, coffret: 'MAKPAC' },
+  RT1J:  { nbBatteries: 1, ah: 5.0, coffret: 'MAKPAC' },
+  SF:    { nbBatteries: 1, ah: 3.0 },
+  Y1J:   { nbBatteries: 1, ah: 1.5, coffret: 'MAKPAC' },
+  DSAW:  { nbBatteries: 1, ah: 2.0 },
+  ZJX2:  { nbBatteries: 0 },
+  ZKU1:  { nbBatteries: 0, coffret: 'MAKPAC' },
+  SZ:    { nbBatteries: 0 }
+};
+
+/* Rend { racine, suffixe, config } ou null. `config` est l'entrée de la table
+   ci-dessus — absente quand le suffixe n'y figure pas : on ne DEVINE pas un
+   conditionnement, on dit qu'on ne le connaît pas. */
+function lireSuffixeMakita(sku) {
+  var m = String(sku || '').toUpperCase().match(/^([A-Z]{2,4}\d{2,4})([A-Z0-9]{0,6})$/);
+  if (!m) return null;
+  var suf = m[2] || '';
+  return { racine: m[1], suffixe: suf,
+    config: Object.prototype.hasOwnProperty.call(SUFFIXES_MAKITA, suf) ? SUFFIXES_MAKITA[suf] : null };
+}
+
 /* ── PRÉFIXES DE RÉFÉRENCE DeWALT ────────────────────────────────────────
    ⛔ CE QUI MANQUAIT AU PREMIER JET, ET L'USER L'A VU : « dans ton document
    je n'ai absolument rien vu qui référence le DÉBUT des références ; en
@@ -1211,7 +1282,7 @@ function mesureAutorisee(rayon, cle) {
 
 module.exports = {
   FAMILLES: FAMILLES, RAYONS: RAYONS, TYPES: TYPES, MESURES: MESURES, INDEX: INDEX,
-  SUFFIXES_DEWALT: SUFFIXES_DEWALT, SUFFIXE_COFFRET: SUFFIXE_COFFRET,
+  SUFFIXES_DEWALT: SUFFIXES_DEWALT, SUFFIXES_MAKITA: SUFFIXES_MAKITA, lireSuffixeMakita: lireSuffixeMakita, SUFFIXE_COFFRET: SUFFIXE_COFFRET,
   BATTERIES_DEWALT: BATTERIES_DEWALT, MARQUEURS_DEWALT: MARQUEURS_DEWALT,
   lireSuffixeDewalt: lireSuffixeDewalt,
   PREFIXES_DEWALT: PREFIXES_DEWALT, PREFIXES_DEWALT_ORDRE: PREFIXES_DEWALT_ORDRE,

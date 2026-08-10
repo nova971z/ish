@@ -1549,6 +1549,82 @@ function apparierParRefRecollee(annonces, fiches, marque) {
   return res;
 }
 
+/* ══ RACINE NUE ↔ FICHE CONDITIONNÉE — LA CONFIGURATION DOIT CONCORDER ═════
+   ⛔⛔ MESURÉ LE 09/08/2026 SUR SON BALAYAGE DE 112 PAGES. Le comparateur écrit
+   souvent la référence NUE (« MAKITA DHS680 ») là où la fiche porte son
+   conditionnement. **180 fiches sur 611** sont dans ce cas — c'est le premier
+   poste de non-reconnaissance, loin devant tout le reste.
+
+   ⛔⛔ ET C'EST LE PLUS DANGEREUX À TRAITER. La racine `DHS680` désigne CINQ
+   fiches du catalogue (Z, ZJ, RGJ, RTJ, RFJ) : machine seule, en coffret, avec
+   deux batteries 3 / 5 / 6 Ah. Prendre la première venue, c'est écrire le prix
+   d'un kit sur un outil nu — ou l'inverse. Cas mesuré : `DUC256PT2` est vendue
+   754,13 € et le comparateur montre `DUC256` à 352,18 €. Les rapprocher ferait
+   **vendre à perte**.
+
+   ⛔ LA RÈGLE, DONC : on ne rapproche QUE si l'annonce ÉNONCE une configuration
+   et qu'elle concorde avec ce que le suffixe de la fiche décrit. Une annonce
+   MUETTE sur son contenu n'est jamais rapprochée — pas par prudence molle, par
+   arithmétique : rien ne permet de trancher, et un coût faux fabrique un prix
+   faux.
+   ⚠️ Mesuré au même moment : sur ce balayage-là, **2 254 annonces sur 2 254**
+   étaient muettes. La règle ne rendra donc rien tant que le relevé ne portera
+   pas le contenu lu (`nBat`, `chg`, `cof`) — c'est dit, pas caché.
+
+   `annonces` : [{ titre, prix, car }] — `car` vient de `extraireCaracteristiques`.
+   Rend { items, restants } comme les autres appariements. */
+function apparierParConfiguration(annonces, fiches, marque) {
+  var res = { items: [], restants: [] };
+  var liste = annonces || [];
+  if (!liste.length) return res;
+  if (!/^makita$/i.test(String(marque || '').replace(/[\s-]/g, ''))) {
+    /* ⛔ La table des suffixes est celle de MAKITA, et d'elle seule — même
+       leçon que les préfixes DeWALT, qui avaient fait chuter le typage de 70
+       fiches en s'appliquant à une autre marque. */
+    return { items: [], restants: liste };
+  }
+  /* Index des fiches par RACINE, avec la configuration que leur suffixe décrit. */
+  var parRacine = Object.create(null);
+  (fiches || []).forEach(function (p) {
+    if (!p || !p.sku) return;
+    var l = nomen.lireSuffixeMakita(p.sku);
+    if (!l || !l.config) return;              // suffixe inconnu : on ne devine pas
+    (parRacine[l.racine] = parRacine[l.racine] || []).push({ fiche: p, cfg: l.config });
+  });
+  liste.forEach(function (e) {
+    var titre = String((e && e.titre) || (e && e.name) || '');
+    var prix = e && (typeof e.prix === 'number' ? e.prix : e.price);
+    if (!titre || !(prix > 0)) { res.restants.push(e); return; }
+    var lu = nomen.lireSuffixeMakita((e.car && e.car.sku) || e.sku || '');
+    /* On ne traite QUE la racine nue : une annonce qui porte déjà son suffixe
+       est l'affaire de l'appariement exact, en amont. */
+    if (!lu || lu.suffixe !== '') { res.restants.push(e); return; }
+    var cands = parRacine[lu.racine];
+    if (!cands || !cands.length) { res.restants.push(e); return; }
+    /* ⛔ CE QUE L'ANNONCE ÉNONCE. Un champ absent est une IGNORANCE, et une
+       ignorance NE VOTE PAS (règle du rapprochement, déjà payée trois fois). */
+    var car = e.car || {};
+    var nbAnn = (typeof car.nbBatteries === 'number') ? car.nbBatteries
+      : (typeof e.nBat === 'number' ? e.nBat : null);
+    if (nbAnn === null) { res.restants.push(e); return; }   // muette : jamais rapprochée
+    var ahAnn = (typeof car.ah === 'number') ? car.ah : null;
+    var retenus = cands.filter(function (c) {
+      if (c.cfg.nbBatteries !== nbAnn) return false;
+      /* L'Ah ne tranche que s'il est ANNONCÉ des deux côtés. */
+      if (ahAnn !== null && c.cfg.ah && Math.abs(c.cfg.ah - ahAnn) > 0.05) return false;
+      return true;
+    });
+    /* ⛔ L'AMBIGUÏTÉ NE S'ARBITRE JAMAIS. Deux fiches compatibles ⇒ on ne
+       rapproche rien : la règle vaut depuis le premier jour du projet. */
+    if (retenus.length !== 1) { res.restants.push(e); return; }
+    res.items.push({
+      sku: retenus[0].fiche.sku, price: prix, name: titre,
+      promo: false, enStock: null, car: e.car || null, parConfiguration: true
+    });
+  });
+  return res;
+}
+
 var CONCORDANCES_MIN = 2;
 function apparierParNomSouple(annonces, fiches, marque) {
   var res = { items: [], restants: [], ambigus: [] };
@@ -3111,4 +3187,4 @@ module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickou
   varianteProduit: varianteProduit, roleCoffret: roleCoffret,
   signatureBatteries: signatureBatteries, estPourAutreMachine: estPourAutreMachine,
   sansAccentsTitre: sansAccentsTitre, refUniqueDuTitre: refUniqueDuTitre,
-  lireReferenceDuTitre: lireReferenceDuTitre, candidatsAvecPosition: candidatsAvecPosition, apparierParNomSouple: apparierParNomSouple, apparierParRefRecollee: apparierParRefRecollee, CONCORDANCES_MIN: CONCORDANCES_MIN, annoncesManquantes: annoncesManquantes, extraireCaracteristiques: extraireCaracteristiques, comparerCaracteristiques: comparerCaracteristiques, planBalayage: planBalayage, rangDansPlan: rangDansPlan, OUTILS: OUTILS, SERIES: SERIES, nomenclature: nomen };
+  lireReferenceDuTitre: lireReferenceDuTitre, candidatsAvecPosition: candidatsAvecPosition, apparierParNomSouple: apparierParNomSouple, apparierParRefRecollee: apparierParRefRecollee, apparierParConfiguration: apparierParConfiguration, CONCORDANCES_MIN: CONCORDANCES_MIN, annoncesManquantes: annoncesManquantes, extraireCaracteristiques: extraireCaracteristiques, comparerCaracteristiques: comparerCaracteristiques, planBalayage: planBalayage, rangDansPlan: rangDansPlan, OUTILS: OUTILS, SERIES: SERIES, nomenclature: nomen };

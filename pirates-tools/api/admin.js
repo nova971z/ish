@@ -3677,6 +3677,19 @@ async function handlePriceWatch(req, res, admin, db) {
     const recolle = priceParse.apparierParRefRecollee(
       (apparie.restants || []).concat(appariePacks.restants || []), products, brand);
     recolle.items.forEach((it) => parsed.push(it));
+    /* ⛔⛔ RACINE NUE ↔ FICHE CONDITIONNÉE (09/08/2026). Mesuré sur son balayage
+       de 112 pages : 180 fiches sur 611 ne sont pas reconnues parce que le
+       comparateur écrit la référence NUE là où la fiche porte son
+       conditionnement. C'est le premier poste, loin devant tout le reste.
+       ⛔ Le rapprochement n'a lieu QUE si l'annonce ÉNONCE sa configuration et
+       qu'elle concorde avec le suffixe de la fiche — une annonce muette n'est
+       jamais rapprochée. La racine `DHS680` désigne cinq fiches ; prendre la
+       première venue ferait écrire un prix de kit sur un outil nu.
+       ⚠️ Il vient APRÈS le recollage (qui, lui, exige l'égalité de référence) :
+       du plus sûr au moins sûr, comme toute la chaîne d'appariement. */
+    const parConfig = priceParse.apparierParConfiguration(
+      (recolle.restants || []).concat(unknown.filter((u) => u && u.sku)), products, brand);
+    parConfig.items.forEach((it) => parsed.push(it));
     const souple = priceParse.apparierParNomSouple(
       recolle.restants || [], products, brand);
     souple.items.forEach((it) => parsed.push(it));
@@ -4160,6 +4173,10 @@ async function handlePriceWatch(req, res, admin, db) {
            compte, on ne saurait pas si l'étape sert — et une étape dont on ne
            mesure pas le rendement finit par vivre sans qu'on sache pourquoi. */
         refsRecollees: recolle.items.length,
+        /* Ce que le rapprochement par CONFIGURATION a ramené. Sans ce compte,
+           on ne saurait pas si la règle sert — et une règle dont on ne mesure
+           pas le rendement finit par vivre sans qu'on sache pourquoi. */
+        parConfiguration: parConfig.items.length,
         /* ⛔ Ce qui n'a PAS pu s'écrire, et pourquoi. Une page qui tombe en
            silence coûte ~60 relevés ; une page qui dit ce qu'elle a raté coûte
            une ligne de rapport. */
