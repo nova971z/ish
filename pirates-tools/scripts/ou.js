@@ -326,6 +326,34 @@ var INDEX = [
     fini: 'check-price-watch vert (ruptures, min multi-sources, gel, héritage), chaque promesse sabotée et rouge.'
   },
   {
+    /* ⛔ INTENTION AJOUTÉE LE 10/08/2026, sur son ordre : « enregistre toutes
+       les techniques qu'on utilise […] tu dois aller graver quelque part afin
+       que tu puisses t'en servir à n'importe quel moment ». Un document que
+       l'aiguillage ne cite pas n'est jamais relu au bon moment. */
+    intention: 'Ajouter des produits au catalogue — depuis un relevé, en masse',
+    mots: ['ajouter des produits', 'ajout de produits', 'ajouter au catalogue', 'créer des fiches',
+           'creer des fiches', 'nouvelles fiches', 'verser au catalogue', 'importer des produits',
+           'peser', 'poids', 'table de poids', 'méthode', 'methode', 'technique'],
+    fichiers: ['scripts/generer-fiches-makita.js', 'data/poids-makita.json',
+               'data/types-makita-categorie.json', 'products.json', 'docs/METHODES.md'],
+    fonctions: ['poidsExpedie', 'categorieDe', 'phaseDe'],
+    protege: ['scripts/generer-catalogue-leger.js --verifie', 'scripts/generer-sitemap.js --verifie',
+              'scripts/audit/p8-perf.js', 'docs/METHODES.md (les 22 méthodes nommées)'],
+    regles: [],
+    pieges: ['⛔⛔ ARGENT — M-02 : le calculateur retombe sur 2 kg quand le poids manque. Mesuré, à coût identique de 500 € TTC : 661,00 € à 2 kg contre 721,50 € à 10 kg. Un poids supposé, c\'est 60,50 € de marge perdue PAR VENTE.',
+             '⛔ M-06 — le générateur REFUSE et NOMME ce qui manque (racine, type, coût) : jamais de repli silencieux sur une valeur par défaut.',
+             '⛔ M-07 — on ne saisit JAMAIS un prix de vente : on saisit le coût fournisseur, et `pricing-model.recommend` rend le prix. Une seconde formule diverge au premier correctif.',
+             '⛔ M-03 — une recherche Web PAR VALEUR. Mesuré le 10/08 : une requête groupant cinq modèles a rendu DHR182 à 0,9 kg ; la recherche ciblée donne 2,4 kg.',
+             '⛔ M-01 — une table de correspondance se DÉPOUILLE sur ses propres fiches, seuil ≥ 3 fiches ET ≥ 80 % d\'accord. Une fiche isolée mal rangée contaminerait toute une gamme.',
+             '⛔ M-09 — pour REMETTRE des données retirées : restaurer l\'état exact d\'avant et le prouver identique octet à octet. Refabriquer, c\'est s\'offrir une occasion de doublon.',
+             '⛔ M-10 — « vérifie-toi trois fois » veut dire TROIS ANGLES : le fichier, les portes, le client. Trois fois la même commande ne vaut rien.',
+             '⚠️ M-11 — entre deux lectures possibles, prendre celle qui ne peut pas faire vendre à perte : surestimer le poids ou le contenu, jamais l\'inverse.',
+             '⚠️ Le slug est une URL : il se dérive de la RÉFÉRENCE (unique), jamais du titre (qui se répète).'],
+    decisions: [],
+    fini: 'les fiches versées passent generer-catalogue-leger --verifie et generer-sitemap --verifie, '
+      + '0 doublon de sku/id/slug, 0 URL morte, P8 perf conforme, et AUCUNE fiche sans poids sourcé.'
+  },
+  {
     intention: 'Ce que l\'user a demandé — registre et solde',
     mots: ['demande', 'demandes', 'demandé', 'promis', 'reste a faire', 'reste à faire',
            'oublié', 'oubli', 'pas fait', 'solde', 'livrer', 'livraison'],

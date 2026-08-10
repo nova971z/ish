@@ -22,6 +22,7 @@
    | M7    | deux décisions ACTIVE qui se contredisent                       |
    | M8    | une même règle dupliquée entre deux fichiers de .claude/rules/  |
    | M9    | un secret dans un fichier de règles                             |
+   | M10   | une méthode citée qui n'existe pas, un fichier promis absent    |
 
    (M5 = l'index de l'entonnoir : voir `scripts/check-ou.js`.)
    ───────────────────────────────────────────────────────────────────────── */
@@ -134,6 +135,62 @@ module.exports = function checkMemoire() {
             + 'soit on le range dans docs/archives/. On ne le supprime pas.');
         }
       });
+  }
+
+  /* ── M10 : une méthode citée existe, un fichier promis existe ──────────
+     ⛔ POURQUOI CETTE PORTE. `docs/METHODES.md` a été gravé le 10/08/2026 sur
+     son ordre : « enregistre toutes les techniques qu'on utilise […] afin que
+     tu puisses t'en servir à n'importe quel moment, les nommer correctement ».
+     Un catalogue de méthodes se périme de deux façons, et TOUTES DEUX en
+     silence :
+       ① on cite `M-07` ailleurs (entonnoir, protocole, règles) alors que la
+          méthode a été renumérotée ou n'a jamais existé — la référence pointe
+          dans le vide, et personne ne s'en aperçoit ;
+       ② le tableau « où ces méthodes sont branchées » nomme un fichier qui a
+          été renommé ou supprimé — la méthode devient une intention.
+     C'est le même défaut que l'ancre périmée d'un harnais, appliqué à la
+     mémoire. On le refuse de la même manière : en relisant le réel. */
+  var fMeth = path.join(RACINE, 'docs', 'METHODES.md');
+  if (fs.existsSync(fMeth)) {
+    var meth = fs.readFileSync(fMeth, 'utf8');
+    var declarees = {};
+    (meth.match(/^### (M-\d{2})/gm) || []).forEach(function (m) {
+      declarees[m.replace('### ', '')] = 1;
+    });
+    if (!Object.keys(declarees).length) {
+      errors.push('M10 — docs/METHODES.md ne déclare aucune méthode `### M-xx`. '
+        + 'Un catalogue vide se lit comme un catalogue à jour.');
+    }
+    /* ① les citations, partout où elles peuvent vivre */
+    ['scripts/ou.js', '../.claude/PROTOCOLE.md', '../CLAUDE.md'].forEach(function (f) {
+      var p = path.join(RACINE, f);
+      if (!fs.existsSync(p)) return;
+      var txt = fs.readFileSync(p, 'utf8');
+      var vues = {};
+      (txt.match(/\bM-\d{2}\b/g) || []).forEach(function (c) { vues[c] = 1; });
+      Object.keys(vues).forEach(function (c) {
+        if (!declarees[c]) {
+          errors.push('M10 — ' + f + ' cite la méthode ' + c + ', que docs/METHODES.md '
+            + 'ne déclare pas. Une référence qui pointe dans le vide se lit comme '
+            + 'une méthode existante.');
+        }
+      });
+    });
+    /* ② les fichiers que le tableau final promet */
+    var promis = {};
+    (meth.match(/`([a-z0-9_./-]+\.(?:js|mjs|json|md))`/gi) || []).forEach(function (m) {
+      var f = m.replace(/`/g, '');
+      if (f.indexOf('/') === -1) return;                 // un nom seul n'est pas un chemin
+      promis[f] = 1;
+    });
+    Object.keys(promis).forEach(function (f) {
+      var p = path.join(RACINE, f);
+      var p2 = path.join(RACINE, '..', f);
+      if (!fs.existsSync(p) && !fs.existsSync(p2)) {
+        errors.push('M10 — docs/METHODES.md nomme ' + f + ', qui n\'existe pas. '
+          + 'Une méthode dont le code a disparu n\'est plus une méthode, c\'est un souvenir.');
+      }
+    });
   }
 
   /* ── M7 : pas deux décisions ACTIVE contradictoires ───────────────────── */

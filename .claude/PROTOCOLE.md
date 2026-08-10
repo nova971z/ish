@@ -39,6 +39,23 @@ Intention absente de l'index → **l'ajouter**, puis continuer.
 - Un écran, un formulaire, un message de succès **ne prouvent rien** : on relit.
 - **Session longue** : relire le fichier plutôt que se fier à son souvenir.
 
+## 3 bis. LES MÉTHODES SONT ÉCRITES — on ne les réinvente pas
+
+`pirates-tools/docs/METHODES.md` — 22 techniques NOMMÉES (`M-01` à `M-22`),
+chacune avec la panne qui l'a payée. À relire avant tout chantier du même
+genre : construire une table, ajouter des produits en masse, faire lire une
+nomenclature à un parseur, prouver qu'un contrôle sert.
+⛔ Les quatre qui coûtent de l'argent si on les oublie :
+- **M-02** — une valeur sans source n'entre pas. Un défaut silencieux du
+  calculateur (2 kg quand le poids manque) vaut 60,50 € de marge par vente.
+- **M-03** — une recherche Web PAR VALEUR : une requête groupée a rendu un
+  poids trois fois trop faible.
+- **M-07** — on saisit un COÛT, jamais un prix de vente : un seul calculateur.
+- **M-11** — entre deux lectures possibles, celle qui ne peut pas faire vendre
+  à perte.
+⚠️ Une technique qu'on emploie deux fois se GRAVE là — c'est la règle d'or
+qu'il a posée : s'améliorer en permanence, et laisser la trace.
+
 ## 4. VÉRIFIER quatre fois, sous quatre angles
 1. **Ça fait ce qu'on veut** — exécuté, pas supposé.
 2. **Ça ne casse rien** — `node scripts/ci.js` + `node tests/lancer.mjs --noyau`.
