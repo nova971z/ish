@@ -1837,9 +1837,140 @@ module.exports = async function () {
           + 'batterie — c\'est un marqueur de gamme (obtenu '
           + JSON.stringify((lireSuf('ZZX006G') || {}).config) + ')');
         /* ⚠️ PRÉALABLE — ce qui n'est pas compris reste INCONNU, jamais deviné. */
-        ok(((lireSuf('ZZX450WVE') || {}).config) === null,
+        ok(((lireSuf('ZZX450QQQ') || {}).config) === null,
           '⚠️ PRÉALABLE : un suffixe hors grammaire rend `null` — deviner un contenu '
           + 'serait pire que l\'ignorer');
+
+        /* ══ CE QUE LA RECHERCHE CROISÉE DU 10/08/2026 A AJOUTÉ ═══════════════
+           Chaque assertion ci-dessous défend un fait RECOUPÉ, et chacune
+           défend de l'argent. Références synthétiques : c'est la grammaire
+           qu'on teste, jamais un produit du catalogue. */
+
+        /* ① LA MACHINE FILAIRE N'A PAS DE BATTERIE — LA PLUS CHÈRE DES SEPT.
+           Mesuré : sept de ses fiches filaires (perforateurs, défonceuses,
+           aspirateur, scie sabre) sortaient « 2 batteries » parce qu'une
+           lettre de batterie suivie d'un coffret suffisait à conclure. Sur une
+           machine filaire, ce `F` et ce `T` appartiennent au NOM du modèle. */
+        ok(((lireSuf('ZZR2811FT') || {}).config) === null,
+          '⛔⛔ ARGENT : sur une référence FILAIRE, une lettre de batterie n\'en est pas '
+          + 'une — lire un kit là où il n\'y a qu\'une machine écrit un coût de kit '
+          + '(obtenu ' + JSON.stringify((lireSuf('ZZR2811FT') || {}).config) + ')');
+        /* ⚠️ CELLE-CI EST LE VRAI TÉMOIN DE LA GARDE « SANS FIL ». La
+           précédente tient aussi par la règle « suffixe non consommé » : elle
+           resterait verte si la garde disparaissait. `FJ`, lui, se consomme
+           ENTIÈREMENT (batterie + coffret) — seule la garde l'arrête. Sans
+           elle, un perforateur filaire en coffret devient un kit à 2×3,0 Ah. */
+        var cfgFil = (lireSuf('ZZR1841FJ') || {}).config || {};
+        ok(typeof cfgFil.nbBatteries !== 'number',
+          '⛔⛔ ARGENT : une machine FILAIRE livrée en coffret n\'invente aucune batterie '
+          + '— `F` y est une lettre de modèle (obtenu ' + JSON.stringify(cfgFil) + ')');
+        var cfgSf = (lireSuf('DZR2811FT') || {}).config || {};
+        ok(cfgSf.nbBatteries === 2,
+          '⚠️ PRÉALABLE : le MÊME suffixe sur une référence SANS FIL se lit, lui — sans '
+          + 'quoi l\'assertion précédente passerait pour la mauvaise raison '
+          + '(obtenu ' + JSON.stringify(cfgSf) + ')');
+
+        /* ② UN SUFFIXE À MOITIÉ LU N'EST PAS LU. */
+        ok(((lireSuf('DZR2302FC07') || {}).config) === null,
+          '⛔ ARGENT : ce qui reste non consommé tue la lecture — une grammaire qui ne '
+          + 'comprend qu\'un morceau du suffixe se tait '
+          + '(obtenu ' + JSON.stringify((lireSuf('DZR2302FC07') || {}).config) + ')');
+
+        /* ③ LA COUPE : le `D` final appartient au MODÈLE, pas au code d'ensemble.
+           Recoupé sur quatre revendeurs pour `ST113DSMJ` : 2×4,0 Ah, chargeur
+           DC10SA, coffret MAKPAC — donc `S`+`M`+`J`, que la grammaire savait
+           déjà lire mais qu'on ne lui donnait pas. */
+        var luD = lireSuf('ZZT113DSMJ') || {};
+        ok(luD.racine === 'ZZT113D' && luD.config && luD.config.nbBatteries === 2
+          && luD.config.ah === 4 && luD.config.coffret === 'MAKPAC',
+          '⛔ la coupe déplace la lettre de modèle quand le RESTE devient décodable '
+          + '(obtenu ' + JSON.stringify(luD) + ')');
+
+        /* ④ `E` FINAL = COFFRET, jamais une batterie de plus. Le premier
+           recoupement disait « E = Extra, deux batteries » ; la source croisée
+           l'a tué (`RFE` = 2×3,0 Ah, et le `F` les porte déjà). */
+        /* ⚠️ Suffixe absent de la table mesurée, EXPRÈS : c'est la GRAMMAIRE
+           qu'on teste ici. Sur un suffixe listé, la table répondrait à sa
+           place et l'assertion verdirait sans rien prouver. */
+        var cfgE = (lireSuf('DZR482RME') || {}).config || {};
+        ok(cfgE.nbBatteries === 2 && cfgE.ah === 4 && cfgE.coffret === 'MALLETTE',
+          '⛔ `E` final occupe la case du COFFRET, pas celle de la batterie '
+          + '(obtenu ' + JSON.stringify(cfgE) + ')');
+
+        /* ⑤ `X`+chiffre = LOT D'ACCESSOIRES, avant OU après le coffret. */
+        var cfgX = (lireSuf('DZT190ZJX3') || {}).config || {};
+        ok(cfgX.nbBatteries === 0 && cfgX.coffret === 'MAKPAC' && cfgX.accessoires === true,
+          '⛔ un lot d\'accessoires ne fabrique aucune batterie — machine nue, coffret, '
+          + 'accessoires (obtenu ' + JSON.stringify(cfgX) + ')');
+        /* Et il s'écrit AUSSI avant le coffret — `XJ`. Deux positions, deux
+           assertions : une seule laisserait la moitié du code sans témoin. */
+        var cfgXJ = (lireSuf('DZP0900XJ') || {}).config || {};
+        ok(cfgXJ.coffret === 'MAKPAC' && cfgXJ.accessoires === true
+          && typeof cfgXJ.nbBatteries !== 'number',
+          '⛔ un lot écrit AVANT le coffret se lit aussi, et n\'invente pas de batterie '
+          + '(obtenu ' + JSON.stringify(cfgXJ) + ')');
+
+        /* ⑤ bis — `U` FINAL = MODULE AWS, une option de la MACHINE. Ses fiches
+           l'écrivent : `DSP601ZJU` « AWS en MAKPAC (machine seule) »,
+           `DHS900ZU` « module AWS (machine seule) ». Sans cette lecture, une
+           machine nue en coffret redevient « contenu inconnu ». */
+        var cfgU = (lireSuf('DZP601ZJU') || {}).config || {};
+        ok(cfgU.nbBatteries === 0 && cfgU.coffret === 'MAKPAC',
+          '⛔ un `U` final (module de démarrage sans fil) ne cache pas le contenu : '
+          + 'machine nue en coffret (obtenu ' + JSON.stringify(cfgU) + ')');
+        /* ⑤ ter — un nombre à deux chiffres derrière un outil NU est un numéro
+           de variante : `CE003GZ02`, `HM002GZ03`, `SP001GZ03` — trois fiches,
+           trois fois « solo » dans le titre. */
+        var cfgV = (lireSuf('CZ003GZ02') || {}).config || {};
+        ok(cfgV.nbBatteries === 0,
+          '⛔ un numéro de variante derrière un outil NU ne le rend pas illisible '
+          + '(obtenu ' + JSON.stringify(cfgV) + ')');
+
+        /* ⑥ LE CHIFFRE DERRIÈRE LE COFFRET : `1` = taille du coffret (neuf
+           revendeurs sur `DLX2210TJ1` : deux batteries), `3` = nombre réel
+           (quatre revendeurs sur `DDF485RTJ3` : trois batteries). */
+        var cfgJ1 = (lireSuf('DZX2210TJ1') || {}).config || {};
+        ok(cfgJ1.nbBatteries === 2,
+          '⛔⛔ ARGENT : un `1` derrière le coffret est une TAILLE, pas un compte — le '
+          + 'lire comme un compte sous-évaluerait le contenu, donc le coût '
+          + '(obtenu ' + JSON.stringify(cfgJ1) + ')');
+        var cfgJ3 = (lireSuf('DZF485RTJ3') || {}).config || {};
+        ok(cfgJ3.nbBatteries === 3,
+          '⚠️ PRÉALABLE : un chiffre supérieur à 1 derrière le coffret reste un COMPTE — '
+          + 'sinon l\'assertion précédente ne prouve rien (obtenu ' + JSON.stringify(cfgJ3) + ')');
+      }
+
+      /* ══ LA FORME DE LA RÉFÉRENCE — CE QUI RÉPARE LE COMPTEUR ═══════════════
+         ⛔ Le défaut n'était pas dans le parseur, il était dans la MESURE :
+         accessoires, consommables et machines filaires étaient comptés
+         « conditionnement inconnu » alors qu'ils n'ont AUCUN conditionnement à
+         connaître. Le problème paraissait deux fois plus gros qu'il n'est. */
+      var forme = pp.nomenclature && pp.nomenclature.formeReferenceMakita;
+      ok(typeof forme === 'function', 'formeReferenceMakita exportée');
+      if (forme) {
+        ok(forme('B-33750').porteConditionnement === false
+          && forme('B-33750').forme === 'accessoire',
+          '⛔ une référence d\'accessoire (lettre-tiret-chiffres) n\'a RIEN à connaître '
+          + '(obtenu ' + JSON.stringify(forme('B-33750')) + ')');
+        ok(forme('194093-8').porteConditionnement === false
+          && forme('194093-8').forme === 'piece',
+          '⛔ une référence de pièce (six signes et une clé) n\'a RIEN à connaître '
+          + '(obtenu ' + JSON.stringify(forme('194093-8')) + ')');
+        ok(forme('6906').porteConditionnement === false && forme('6906').forme === 'filaire',
+          '⛔ une référence de machine filaire ancienne n\'a RIEN à connaître '
+          + '(obtenu ' + JSON.stringify(forme('6906')) + ')');
+        ok(forme('9403J').coffret === 'MAKPAC',
+          '⚠️ le coffret survit à l\'absence de batterie : un `J` final sur une '
+          + 'référence ancienne reste un coffret (obtenu ' + JSON.stringify(forme('9403J')) + ')');
+        ok(forme('DZP486RTJ').porteConditionnement === true
+          && forme('DZP486RTJ').batteriePossible === true,
+          '⚠️ PRÉALABLE : la forme actuelle SANS FIL, elle, porte bien un code d\'ensemble '
+          + '— sans ça les trois assertions ci-dessus verdiraient à vide '
+          + '(obtenu ' + JSON.stringify(forme('DZP486RTJ')) + ')');
+        ok(forme('ZZR2811FT').batteriePossible === false,
+          '⛔ une machine FILAIRE écrite en nomenclature actuelle n\'a pas plus de '
+          + 'batterie qu\'une référence ancienne (obtenu '
+          + JSON.stringify(forme('ZZR2811FT')) + ')');
       }
 
       var tblSuf = pp.nomenclature && pp.nomenclature.SUFFIXES_MAKITA;

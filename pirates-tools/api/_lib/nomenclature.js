@@ -719,11 +719,11 @@ var SUFFIXES_MAKITA = {
   GZ01: { nbBatteries: 0, note: 'machine seule (gamme 40 V)' },
   RT:   { nbBatteries: 1, ah: 5.0 },
   RTJ:  { nbBatteries: 2, ah: 5.0, coffret: 'MAKPAC' },
-  RTE:  { nbBatteries: 2, ah: 5.0 },
+  RTE:  { nbBatteries: 2, ah: 5.0, coffret: 'MALLETTE' },
   PT2:  { nbBatteries: 2, ah: 5.0 },
   TJ:   { nbBatteries: 2, ah: 5.0, coffret: 'MAKPAC' },
   RFJ:  { nbBatteries: 2, ah: 3.0, coffret: 'MAKPAC' },
-  RFE:  { nbBatteries: 2, ah: 3.0 },
+  RFE:  { nbBatteries: 2, ah: 3.0, coffret: 'MALLETTE' },
   RGJ:  { nbBatteries: 2, ah: 6.0, coffret: 'MAKPAC' },
   /* ── Longue traîne : 1 à 2 fiches chacun, et TOUS mesurés sur le titre de
      ces fiches-là (batteries et Ah lus, jamais supposés). Les suffixes dont
@@ -770,9 +770,39 @@ var SUFFIXES_MAKITA = {
        exception mesurée sur trois fiches, gardée telle quelle.
    ⛔ La table explicite reste PRIORITAIRE sur la grammaire : une valeur
    mesurée bat toujours une valeur déduite.
-   ⚠️ Ce qui reste INCONNU est rendu `null` — jamais deviné. Les lettres non
-   expliquées (C, E, X1…X5, B, U, L, WVE) restent dehors : les inventer, ce
-   serait écrire un coût de kit sur un outil nu, donc un prix de vente faux. */
+   ⚠️ Ce qui reste INCONNU est rendu `null` — jamais deviné : les inventer, ce
+   serait écrire un coût de kit sur un outil nu, donc un prix de vente faux.
+
+   ══ CE QUE LA RECHERCHE DU 10/08/2026 A AJOUTÉ (ordre de l'user : « tu dois
+   connaître le référencement Makita à 100 % ») ═══════════════════════════════
+   Quatre lettres qui restaient dehors sont rentrées, chacune avec DEUX
+   sources au moins, et une cinquième a été démontrée FAUSSE :
+
+   · `E` FINAL = LE COFFRET, pas une batterie. Une première source (recherche
+     « Makita E suffix ») annonçait « E = Extra, deux batteries ». Le
+     recoupement l'a TUÉE : toolbrothers.de écrit « RFE = 2x 3,0Ah Akku,
+     Ladegerät DC18RC, Systemkoffer » — or le `F` porte DÉJÀ les deux
+     batteries, donc le `E` ne peut pas les porter aussi ; et la fiche
+     marchande de `DHP490WVE` liste « 1 coffret plastique ». `E` occupe donc
+     la MÊME case que `J` : le contenant. C'est exactement l'erreur qu'un
+     recoupement doit attraper — une source seule l'aurait fait entrer.
+   · `X` + CHIFFRE = LOT D'ACCESSOIRES, jamais des batteries. Prouvé par SA
+     fiche `TM30DSMJX5` : « Outil multifonctions 10,8V (2x 4,0 Ah) +
+     accessoires en coffret » — le `SMJ` dit déjà tout le contenu énergétique,
+     le `X5` ne peut désigner que les accessoires.
+   · `W` = livré AVEC batterie et chargeur (ancienne écriture Makita : le
+     manuel officiel couvre « model 6221D » ET « model 6221DW »). On en tire
+     `avecEnergie`, JAMAIS un nombre : `DF001DW` est vendu avec UNE batterie,
+     `DHP490WVE` avec DEUX. Compter serait inventer.
+   · `WVE` en entier = 2×2,0 Ah + chargeur + coffret plastique — mesuré sur
+     les pages marchandes de `DHP490WVE` (idealo.fr, guedo-outillage.fr,
+     sanitino.fr, cotebrico.fr : « 2 batteries 2,0 Ah Li-Ion, chargeur »).
+     Entrée d'exception, parce que le `V` seul reste inexpliqué.
+   ⛔ CE QUI RESTE DEHORS, ET POURQUOI : `C` (contrôle électronique — une
+   CARACTÉRISTIQUE de la machine, jamais un conditionnement), `G` final
+   (gamme 40 V XGT), `L`, `S`, `N`, `B`, `F`, `R`, `P` seuls sur une machine
+   filaire (ce sont des variantes de MODÈLE, pas des codes d'ensemble). Ces
+   lettres-là ne doivent RIEN produire : c'est la garde d'argent ci-dessous. */
 var MAKITA_CHARGEUR = { R: 'DC18RC', P: 'DC18RD', S: 'DC10SA', N: 'DC18RE' };
 var MAKITA_BATTERIE = {
   H1: [1, 1.3], H: [2, 1.3], Y1: [1, 1.5], Y: [2, 1.5],
@@ -784,20 +814,58 @@ var MAKITA_BATTERIE = {
    donnerait deux — mesuré sur six de ses fiches (`DJR187RT`, `DLM330RT`,
    `DJR186RT`, `DUS054RF`, `DCL184RF`, `DUB186RFX1`). Leurs formes en coffret
    (`RTJ`, `RFJ`) valent bien DEUX : c'est le J qui marque l'ensemble complet. */
+/* ⚠️ `WVE` : le `V` seul n'est expliqué par aucune source. On n'invente pas de
+   règle pour lui — on inscrit le contenu MESURÉ du seul suffixe où il paraît. */
 var MAKITA_EXCEPTIONS = {
   RT: { nbBatteries: 1, ah: 5 },
-  RF: { nbBatteries: 1, ah: 3 }
+  RF: { nbBatteries: 1, ah: 3 },
+  WVE: { nbBatteries: 2, ah: 2, coffret: 'MALLETTE' }
 };
 
-function decomposerSuffixeMakita(suffixe) {
+/* ⛔⛔ `estSansFil` — LA GARDE QUI A ARRÊTÉ SEPT FAUX PRIX. Mesuré le
+   10/08/2026 sur ses 611 fiches : `HR2811FT` (perforateur FILAIRE 800 W),
+   `HR2670FT`, `HR1841FJ`, `JR3051TK`, `VC4210MX`, `RP2302FC07`, `RP2303FC07`
+   sortaient tous « 2 batteries » — parce qu'une lettre de batterie suivie
+   d'un coffret suffisait à conclure. Sur une machine filaire, ce `F` et ce
+   `T` appartiennent au NOM DU MODÈLE. Lire un kit là où il n'y a qu'une
+   machine, c'est écrire un coût de kit dans un prix de vente.
+   ⚠️ Toutes les lectures JUSTES de cette forme sans chargeur — `DLX2145TJ`,
+   `DCE090T2X1`, `DLM480CT2`, `DBO180Y1J`, `DFS452TJX2` — sont sur des
+   références SANS FIL, qui s'écrivent toutes `D` + lettre. La coupure est
+   nette dans SA donnée : 17 justes sans fil, 7 fausses filaires. */
+function decomposerSuffixeMakita(suffixe, estSansFil) {
   var s = String(suffixe || '').toUpperCase();
   if (!s) return null;
   if (Object.prototype.hasOwnProperty.call(MAKITA_EXCEPTIONS, s)) {
-    return { nbBatteries: MAKITA_EXCEPTIONS[s].nbBatteries, ah: MAKITA_EXCEPTIONS[s].ah };
+    var ex = MAKITA_EXCEPTIONS[s];
+    var cfgEx = { nbBatteries: ex.nbBatteries, ah: ex.ah };
+    if (ex.coffret) cfgEx.coffret = ex.coffret;
+    return cfgEx;
   }
-  var nb = null, ah = null, coffret = null;
-  if (/Z$/.test(s) && !/^[A-Z]?Z/.test(s)) { nb = 0; s = s.replace(/Z$/, ''); }
-  if (/^[DG]Z/.test(s)) { nb = 0; s = s.slice(2); }
+  /* ⛔ L'EXCEPTION NE SE PROPAGE PAS AU-DELÀ DE SA FORME EXACTE — ET C'EST UN
+     ARBITRAGE D'ARGENT, PAS UN DÉTAIL. Ses fiches se contredisent : `RFX1`
+     (`DUB186RFX1`) annonce UNE batterie, `RFX9` (`DHP482RFX9`) en annonce
+     DEUX. Aucune règle ne peut satisfaire les deux. On garde donc la
+     grammaire (deux) dès qu'un lot d'accessoires est accroché, parce que le
+     SENS DE L'ERREUR n'est pas neutre : surestimer le contenu fait entrer un
+     coût trop HAUT — on vend trop cher, on ne vend pas à perte. Sous-estimer
+     ferait l'inverse. Entre deux inconnues, on prend celle qui ne ruine pas. */
+  var lot = false;
+  var mxt = s.match(/X(\d{0,2})$/);
+  if (mxt && s.length > mxt[0].length) { lot = true; s = s.slice(0, -mxt[0].length); }
+  var nb = null, ah = null, coffret = null, accessoires = lot, avecEnergie = false;
+  /* `W` = « livré avec batterie et chargeur », écriture historique de la marque
+     (le manuel officiel couvre « model 6221D » ET « model 6221DW »). Il dit
+     QU'IL Y EN A ; il ne dit JAMAIS combien — `DF001DW` en a une, `DHP490WVE`
+     en a deux. On pose donc un drapeau, jamais un nombre. */
+  if (/^W/.test(s)) { avecEnergie = true; s = s.slice(1); }
+  /* `Z` VEUT DIRE « OUTIL NU », OÙ QU'IL SOIT — c'est la seule lettre du
+     système dont toutes les sources disent la même chose. L'ancienne écriture
+     refusait de lire le `Z` final dès que le suffixe faisait deux signes, et
+     `DVC750LZ` — dont SA fiche dit « (Produit seul) » — sortait « inconnu ».
+     Le `L` y nomme la classe de filtration, pas un conditionnement. */
+  if (/Z$/.test(s)) { nb = 0; s = ''; }
+  else if (/^[DG]Z/.test(s)) { nb = 0; s = s.slice(2); }
   else if (s.charAt(0) === 'Z') { nb = 0; s = s.slice(1); }
   /* ⛔⛔ UNE LETTRE SEULE N'EST PAS UNE BATTERIE — GARDE D'ARGENT MESURÉE.
      Sur ses fiches : `MR006G` est une radio de la gamme 40 V ; le `G` final
@@ -807,8 +875,14 @@ function decomposerSuffixeMakita(suffixe) {
      autrement dit seulement quand le suffixe décrit VRAIMENT un ensemble. */
   var avaitChargeur = false;
   if (nb === null && MAKITA_CHARGEUR[s.charAt(0)]) { avaitChargeur = true; s = s.slice(1); }
-  if (nb === null && !avaitChargeur && /^[A-Z]$/.test(s)) return null;
-  if (nb === null) {
+  /* ⚠️ `Z`, `J` et `K` échappent à la garde : ce ne sont pas des lettres de
+     BATTERIE, ce sont l'outil nu et le coffret. `RP0900J`, `PJ7000J`,
+     `SG1251J`, `TW0350J` — quatre machines FILAIRES dont sa fiche dit
+     « coffret Makpac » — tombaient dans la garde et sortaient « inconnu ».
+     Un coffret sans batterie existe ; c'est même le cas le plus banal. */
+  if (nb === null && !avaitChargeur && !estSansFil
+      && /^[A-Z]$/.test(s) && 'ZJK'.indexOf(s) === -1) return null;
+  if (nb === null && (avaitChargeur || estSansFil)) {
     var cles = Object.keys(MAKITA_BATTERIE).sort(function (a, b) { return b.length - a.length; });
     for (var i = 0; i < cles.length; i++) {
       if (s.indexOf(cles[i]) === 0) {
@@ -817,27 +891,172 @@ function decomposerSuffixeMakita(suffixe) {
       }
     }
   }
-  var m1 = s.match(/^(\d)/);
+  /* Un chiffre COLLÉ à la lettre de batterie donne le nombre réel — `PT4J` = 4.
+     Jamais un `0` : `DK0124G201` (ensemble XGT) y perdait ses batteries. */
+  var m1 = s.match(/^([1-9])/);
   if (m1 && nb) { nb = parseInt(m1[1], 10); s = s.slice(1); }
+  /* `X` + chiffre = LOT D'ACCESSOIRES. Il ne touche jamais au compte de
+     batteries : sur `TM30DSMJX5`, le `SMJ` porte déjà « 2x 4,0 Ah en
+     coffret », le `X5` ne peut désigner que les accessoires du lot. Il se lit
+     AVANT le coffret, parce que `RP0900XJ` les porte tous les deux et que sa
+     fiche dit « dans coffret Makpac ». */
+  var mx = s.match(/^X(\d{0,2})/);
+  if (mx) { accessoires = true; s = s.slice(mx[0].length); }
   if (s.charAt(0) === 'J' || s.charAt(0) === 'K') { coffret = 'MAKPAC'; s = s.slice(1); }
-  var m2 = s.match(/^(\d)/);
-  if (m2 && nb) { nb = parseInt(m2[1], 10); s = s.slice(1); }
-  if (nb === null && coffret === null) return null;    // rien de sûr : on ne devine pas
+  /* ⚠️ PAS DE SECONDE LECTURE DU LOT ICI. Le lot écrit APRÈS le coffret
+     (`ZJX3`, `JX3`, `TJX2`, `ZKX2`) est déjà détaché en tête de fonction —
+     j'en avais mis une seconde par symétrie, et le sabotage l'a démasquée :
+     on pouvait la supprimer sans qu'aucune assertion ne bouge. Du code
+     qu'aucun sabotage ne peut tuer est du code qui ment sur son utilité. */
+  /* `E` FINAL = LE COFFRET, à la place du `J`. Il n'entre QUE si une batterie
+     a déjà été lue : sans cela `GN900SE` (cloueur à gaz, aucune batterie)
+     s'inventerait un coffret sur la foi d'une lettre de nom de modèle. */
+  else if (s.charAt(0) === 'E' && nb !== null) { coffret = 'MALLETTE'; s = s.slice(1); }
+  /* ⚠️ APRÈS LE COFFRET, LE CHIFFRE EST AMBIGU — ET LE RECOUPEMENT L'A TRANCHÉ.
+     `DDF485RTJ3` : « 3 batteries 5,0 Ah » (amazon.fr, fixami.fr, manomano.fr,
+     idealo.fr) → le 3 est bien un NOMBRE.
+     `DLX2210TJ1` : « 2 batteries 5 Ah + 2 coffrets MAKPAC » (afdb.fr,
+     sobrico.com, kamody.fr, maxoutil.com, todotaladros.com, master-outillage,
+     bati-avenue, comptoirdespros, magasin-ek — neuf revendeurs) → le 1 est la
+     TAILLE du coffret, pas un compte. Une lecture naïve donnait « 1 batterie ».
+     Règle qui satisfait les deux, et elle seule : un `1` après le coffret est
+     une taille, jamais un compte — une seule batterie s'écrit `T1J`. */
+  var m2 = s.match(/^(\d)$/);
+  if (m2 && nb) { if (m2[1] !== '1') nb = parseInt(m2[1], 10); s = ''; }
+  /* `U` FINAL = MODULE AWS (démarrage sans fil de l'aspirateur), une option de
+     la MACHINE. Ses fiches l'écrivent : `DSP601ZJU` « AWS en MAKPAC (machine
+     seule) », `DHS900ZU` « module AWS (machine seule) ». Il ne change rien au
+     contenu de la boîte — on le consomme, il ne produit rien. */
+  if (s === 'U') s = '';
+  /* Un nombre à deux chiffres derrière un outil NU est un numéro de variante,
+     pas un contenu : `CE003GZ02` « (Solo) », `HM002GZ03` « (solo) en
+     coffret », `SP001GZ03` « (solo) en makpac » — trois fiches, trois fois
+     « solo ». Il ne peut rien gonfler puisque le compte est déjà zéro. */
+  if (nb === 0 && /^\d{2}$/.test(s)) s = '';
+  if (nb === null && coffret === null && !avecEnergie) return null;  // rien de sûr : on ne devine pas
+  /* ⛔ CE QUI RESTE NON CONSOMMÉ TUE LA LECTURE. `RP2302FC07` (défonceuse
+     FILAIRE 2300 W) donnait « 2 batteries 3 Ah » sur la foi de son `F`, en
+     abandonnant `C07` en route. Une grammaire qui ne lit qu'un MORCEAU du
+     suffixe n'a pas compris le suffixe : elle se tait. */
+  if (s !== '') return null;
   var cfg = { nbBatteries: nb };
   if (ah !== null) cfg.ah = ah;
   if (coffret) cfg.coffret = coffret;
+  if (accessoires) cfg.accessoires = true;
+  if (avecEnergie) cfg.avecEnergie = true;
   if (nb === 0) cfg.note = coffret ? 'machine seule en coffret' : 'machine seule';
   return cfg;
 }
 
+/* Sans fil = `D` suivi d'une lettre (DHP, DTD, DLX, DBO…), l'écriture de toute
+   la gamme à batterie de la marque. Les machines filaires n'y répondent pas —
+   HR, JR, RP, VC, KP, LS, LW, MLT, LB, GA, LD, PJ, SG, TW. */
+function racineSansFilMakita(racine) {
+  return /^D[A-Z]/.test(String(racine || '').toUpperCase());
+}
+
+function configDuSuffixeMakita(suf, estSansFil) {
+  return Object.prototype.hasOwnProperty.call(SUFFIXES_MAKITA, suf)
+    ? SUFFIXES_MAKITA[suf]                       // mesuré : prioritaire
+    : decomposerSuffixeMakita(suf, estSansFil);  // déduit de la grammaire
+}
+
+/* ⛔⛔ LA COUPE ÉTAIT FAUSSE, ET C'EST ELLE QUI COÛTAIT LE PLUS.
+   Trouvé le 10/08/2026 en cherchant ce que valait `ST113DSMJ` : la coupe
+   gloutonne rendait racine `ST113`, suffixe `DSMJ` — et `DSMJ` n'est décodable
+   par personne, donc « contenu inconnu ». Or les pages marchandes de ce
+   cloueur (darty.com, manomano.fr, maxi-brico.fr, racetools.fr) écrivent
+   toutes la même chose : **2 batteries 4,0 Ah, chargeur DC10SA, coffret
+   MAKPAC**. Autrement dit `S` + `M` + `J` — la grammaire savait déjà lire ce
+   suffixe, on ne le lui donnait pas.
+   La cause : le `D` FINAL APPARTIENT AU MODÈLE, pas au code d'ensemble. Toute
+   la gamme sans fil s'écrit ainsi — `TD110D`, `TD111D`, `HR140D`, `DF001D`,
+   `TM30D`, `ST113D` — et le manuel officiel de la marque titre « model 6221D /
+   model 6221DW », le `D` d'un côté, le code d'ensemble de l'autre.
+   ⚠️ On ne déplace la lettre QUE si le reste devient décodable : un essai qui
+   échoue rend la coupe d'origine. On ne gagne donc jamais un décodage faux —
+   au pire on reste sur ce qu'on avait. */
 function lireSuffixeMakita(sku) {
   var m = String(sku || '').toUpperCase().match(/^([A-Z]{1,4}\d{2,4})([A-Z0-9]{0,8})$/);
   if (!m) return null;
   var suf = m[2] || '';
-  var cfg = Object.prototype.hasOwnProperty.call(SUFFIXES_MAKITA, suf)
-    ? SUFFIXES_MAKITA[suf]                       // mesuré : prioritaire
-    : decomposerSuffixeMakita(suf);              // déduit de la grammaire
-  return { racine: m[1], suffixe: suf, config: cfg || null };
+  var sansFil = racineSansFilMakita(m[1]);
+  var cfg = configDuSuffixeMakita(suf, sansFil);
+  if (!cfg && /^[A-Z][A-Z0-9]/.test(suf)) {
+    var cfg2 = configDuSuffixeMakita(suf.slice(1), sansFil);
+    if (cfg2) return { racine: m[1] + suf.charAt(0), suffixe: suf.slice(1), config: cfg2, varianteModele: false };
+  }
+  /* ⛔ UNE LETTRE SEULE QUI N'EST NI `Z` NI `J`/`K` N'EST PAS UN CODE
+     D'ENSEMBLE — C'EST UNE VARIANTE DE MODÈLE, et il n'y a RIEN à décoder.
+     Recoupé le 10/08/2026 : `C` = paquet de contrôle électronique (vitesse
+     variable, démarrage progressif) sur `HR4510C`, `HR5212C`, `HM1213C` —
+     quatorze de ses fiches, toutes FILAIRES ; `G` final = gamme 40 V XGT
+     (`MR006G`, `HR005G`) ; `L` = classe de filtration ou laser (`VC2512L`,
+     `LS1219L`) ; `B` = variante d'une BATTERIE (`BL1850B`) ; `N`, `F`, `R`,
+     `P`, `S` = variantes de machines filaires (`MLT100N`, `LB1200F`,
+     `GA9020R`, `LD050P`, `KP312S`).
+     ⚠️ Le dire NE LES DÉCODE PAS : `varianteModele` veut dire « il n'y a pas
+     d'ensemble ici », pas « on connaît l'ensemble ». Mais ça les sort du
+     compte des inconnues, où elles n'ont jamais eu leur place. */
+  var variante = !cfg && /^[A-Z]$/.test(suf) && 'ZJK'.indexOf(suf) === -1;
+  return { racine: m[1], suffixe: suf, config: cfg || null, varianteModele: variante };
+}
+
+/* ══ LA FORME DE LA RÉFÉRENCE — CE QUI RÉPARE LE COMPTEUR ══════════════════
+   ⛔⛔ LE DÉFAUT ÉTAIT DANS MA MESURE, PAS DANS LE PARSEUR. Je comptais
+   « conditionnement inconnu » sur TOUTE référence dont le suffixe ne se
+   décodait pas — donc aussi sur une lame de scie, sur un fil de ligature et
+   sur une raboteuse filaire de 1988. Or ces objets-là n'ONT pas de
+   conditionnement : la question « nu ou en pack ? » n'a aucun sens pour eux.
+   Le problème paraissait ainsi deux fois plus gros qu'il n'est, et l'effort
+   partait au mauvais endroit.
+   ⚠️ `porteConditionnement:false` ne veut pas dire « on sait » : il veut dire
+   **IL N'Y A RIEN À SAVOIR**. Les deux ne se comptent plus ensemble.
+
+   Les quatre formes, mesurées sur ses 611 fiches Makita (archive du
+   10/08/2026) — 23 + 39 + 17 + 519, plus 13 hors forme :
+     · `B-33750`, `D-74778`, `E-16586`, `P-23721`, `Y-00197` … 23 fiches :
+       une LETTRE, un tiret, des chiffres. Consommables et accessoires.
+     · `194093-8`, `191J59-9`, `824697-9` … 39 fiches : six signes et une clé.
+       Numérotation de pièces et d'accessoires au catalogue.
+     · `6906`, `1806B`, `2012NB`, `9403J` … 17 fiches : la numérotation d'avant
+       la nomenclature actuelle. Machines FILAIRES — aucune batterie possible.
+       ⚠️ Un `J` final y marque quand même le coffret : sa fiche `5008MGJ` dit
+       « en coffret MakPac ». Le coffret existe sans batterie.
+     · `DHP486RTJ`, `ST113DSMJ` … 519 fiches : lettres, chiffres, code
+       d'ensemble. LA SEULE forme où l'inconnu coûte de l'argent.
+   ⛔ Aucune de ces formes n'est devinée : chacune est prouvée par le TITRE que
+   l'user a écrit sur ses propres fiches. */
+var FORMES_MAKITA = {
+  accessoire: { porteConditionnement: false, note: 'lettre-tiret-chiffres : accessoire ou consommable' },
+  piece: { porteConditionnement: false, note: 'six signes et une clé : pièce ou accessoire au catalogue' },
+  filaire: { porteConditionnement: false, note: 'numérotation ancienne : machine filaire, pas de batterie' },
+  modele: { porteConditionnement: true, note: 'nomenclature actuelle : peut porter un code d\'ensemble' },
+  inconnue: { porteConditionnement: false, note: 'aucune des formes connues' }
+};
+
+function formeReferenceMakita(sku) {
+  var s = String(sku || '').toUpperCase().trim();
+  if (!s) return { forme: 'inconnue', porteConditionnement: false, coffret: null };
+  var forme;
+  if (/^[A-Z]-\d{4,6}(-\d{1,4})?$/.test(s)) forme = 'accessoire';
+  else if (/^\d{3}[A-Z0-9]\d{2}-\d$/.test(s)) forme = 'piece';
+  else if (/^[A-Z]{1,4}\d{2,4}[A-Z0-9]{0,8}$/.test(s)) forme = 'modele';
+  else if (/^\d{3,4}[A-Z0-9]{0,6}$/.test(s)) forme = 'filaire';
+  else forme = 'inconnue';
+  var d = FORMES_MAKITA[forme];
+  /* Le coffret survit à l'absence de batterie : `5008MGJ`, `9403J`, `9404J`. */
+  var coffret = (forme === 'filaire' && /J$/.test(s)) ? 'MAKPAC' : null;
+  /* ⚠️ La forme actuelle abrite AUSSI des machines filaires — `HR2811FT`,
+     `RP2302FC07`, `VC4210MX`, `JR3070CT`. Elles n'ont pas plus de batterie
+     qu'une `6906`, et les compter « conditionnement inconnu » refait
+     exactement l'erreur que cette fonction existe pour corriger. */
+  var sansFil = (forme === 'modele') ? racineSansFilMakita(s) : false;
+  return {
+    forme: forme, porteConditionnement: d.porteConditionnement,
+    sansFil: sansFil, batteriePossible: forme === 'modele' && sansFil,
+    coffret: coffret, note: d.note
+  };
 }
 
 /* ── PRÉFIXES DE RÉFÉRENCE DeWALT ────────────────────────────────────────
@@ -1035,7 +1254,25 @@ var PREFIXES_MAKITA = {
   DJV:    { famille: 'machine', note: 'Scies (7/8 fiches)' },
   DKP:    { famille: 'machine', note: 'Rabots (2/2 fiches)' },
   DLM:    { famille: 'machine', note: 'Tronçonnage et élagage (8/13 fiches)' },
-  DLX:    { famille: 'machine', note: 'Accessoires (16/20 fiches)' },
+  /* ⛔⛔ DLX ET MEU SONT DES LOTS DE MACHINES — LE MÊME PIÈGE QUE `DWK` CHEZ
+     L'AUTRE MARQUE, ET IL ÉTAIT OUVERT ICI. La note « Accessoires (16/20
+     fiches) » venait du RAYON où l'user les a rangés, pas de ce qu'ils SONT :
+     `DLX` est le code maison des « combo kits », et il en portait la famille
+     d'un rayon de rangement. Recoupé le 10/08/2026 sur huit revendeurs pour
+     `DLX2145TJ` et `DLX2283TJ` (makitauk.com, screwfix.com, toolstation.com,
+     makita.com.au, makitatools.com rubrique « LXT COMBO KITS », amazon.co.uk,
+     rsdelivers.com, primetools.co.uk) : DEUX machines + 2 batteries 5,0 Ah +
+     chargeur DC18RC + coffret MAKPAC.
+     `MEU` de même, recoupé sur six revendeurs pour `MEU029J` (afdb.fr,
+     crespin.be, cotebrico.fr, racetools.fr, master-outillage.com,
+     cdiscount.com) : scie plongeante SP6000J + scie sauteuse 4351FCTJ, deux
+     MAKPAC. Sa propre fiche l'écrit d'ailleurs dans son titre.
+     ⚠️ J4 — C'EST DE L'ARGENT : le prix d'un lot de deux machines pris pour
+     celui d'un accessoire fausse tout ce qui en découle.
+     ⛔ Et ils ARBITRENT, comme `DCK`/`DWK` : « lot de machines » EST le sens du
+     préfixe, pas une déduction tirée d'un mot du sous-titre. */
+  DLX:    { famille: 'machine', rayon: 'combo', type: 'pack d\'outils', note: 'combo kit — plusieurs machines, jamais un accessoire' },
+  MEU:    { famille: 'machine', rayon: 'combo', type: 'pack d\'outils', note: 'ensemble de machines vendu en lot' },
   DMP:    { famille: 'machine', note: 'Accessoires (3/5 fiches)' },
   DMR:    { famille: 'machine', note: 'Accessoires (3/3 fiches)' },
   DPT:    { famille: 'machine', note: 'Rangements (3/4 fiches)' },
@@ -1371,6 +1608,7 @@ module.exports = {
   lireSuffixeDewalt: lireSuffixeDewalt,
   PREFIXES_DEWALT: PREFIXES_DEWALT, PREFIXES_DEWALT_ORDRE: PREFIXES_DEWALT_ORDRE,
   PREFIXES_MAKITA: PREFIXES_MAKITA, PREFIXES_MAKITA_ORDRE: PREFIXES_MAKITA_ORDRE,
+  FORMES_MAKITA: FORMES_MAKITA, formeReferenceMakita: formeReferenceMakita,
   TETES_CONNUES: TETES_CONNUES,
   prefixeDeReference: prefixeDeReference,
   EXTENSIONS_REGION: EXTENSIONS_REGION, GAMMES: GAMMES,
