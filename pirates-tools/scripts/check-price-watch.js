@@ -2938,10 +2938,31 @@ module.exports = async function () {
           casCfg = { racine: r, fiche: conc[0].p, variantes: v.length,
             marque: String(conc[0].p.brand || '') };
         });
-        ok(!!casCfg,
-          '⚠️ PRÉALABLE : le catalogue décline au moins une racine en plusieurs '
-          + 'conditionnements dont UN SEUL porte « 2 batteries 5 Ah » — sans ce cas, '
-          + 'le branchement du rapprochement par configuration n\'est pas exercé');
+        /* ⛔⛔ CE CAS DÉPEND DU CATALOGUE, ET LE CATALOGUE EST UNE DÉCISION DE
+           L'USER. Le 10/08/2026 il a fait retirer toutes les fiches de la marque
+           dont la grammaire de suffixes est déclarée : plus aucune racine n'est
+           déclinée, et ce cas de bout en bout ne peut plus s'exercer.
+           ⛔ UN PRÉALABLE QUI SAUTE NE SE TAIT PAS — mais il ne doit pas non
+           plus accuser d'un défaut ce qui est un choix. On assure donc l'un OU
+           l'autre, et jamais rien : soit le cas existe et il est joué, soit le
+           catalogue est VRAIMENT vide de cette marque, et on le PROUVE.
+           ⚠️ Le jour où des fiches de cette marque reviennent, `casCfg` redevient
+           non nul et le cas de bout en bout se rejoue tout seul. */
+        /* La STRUCTURE dont la règle a besoin : une racine déclinée en plusieurs
+           conditionnements. Sans elle, il n'y a aucune ambiguïté à trancher —
+           donc rien à exercer, et ce n'est pas un défaut. */
+        var racinesDeclinees = Object.keys(racinesT).filter(function (r) {
+          return racinesT[r].filter(function (x) {
+            return String(x.p.sku).toUpperCase() !== r;
+          }).length >= 2;
+        }).length;
+        ok(!!casCfg || racinesDeclinees === 0,
+          '⚠️ PRÉALABLE : ou bien le catalogue décline une racine en plusieurs '
+          + 'conditionnements dont UN SEUL porte « 2 batteries 5 Ah » (le cas de bout en '
+          + 'bout se joue), ou bien AUCUNE racine n\'est plus déclinée — et alors '
+          + 'l\'ambiguïté que cette règle tranche n\'existe plus au catalogue. Obtenu : '
+          + racinesDeclinees + ' racine(s) déclinée(s), cas trouvé : '
+          + (casCfg ? 'oui' : 'non'));
         if (casCfg) {
           function pageNue(suffixeTexte) {
             var l = [casCfg.marque.toUpperCase() + ' ' + casCfg.racine + suffixeTexte,
