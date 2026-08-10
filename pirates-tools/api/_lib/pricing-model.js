@@ -163,24 +163,43 @@ function evaluate(costHT, markup, ship, octroi, tvaDom, cfg, douane) {
   var octroiPaid = octroi * (costHT + ship);          // à l'import, non récupérable
   var costs = costHT + ship + octroiPaid + commission + cfg.packaging + fixedPerOrder(cfg) + douane;
   var netOp = revenueHT - costs;
-  var netAfterIS = netOp * (1 - cfg.is);
+  /* ⛔⛔ ON NE PAIE PAS D'IMPÔT SUR UNE PERTE — ET LE MODÈLE LE FAISAIT.
+     Mesuré le 10/08/2026 : une vente à 50 € HT pour un coût de 100 € TTC donne
+     un résultat d'exploitation de −62,53 €, et le modèle annonçait −53,15 €.
+     Il ADOUCISSAIT la perte de 9,38 € en appliquant 15 % d'IS à un déficit.
+     Sur un audit de prix, c'est exactement l'erreur qui laisse passer une vente
+     à perte : elle paraît 15 % moins grave qu'elle ne l'est. */
+  var netAfterIS = netOp > 0 ? netOp * (1 - cfg.is) : netOp;
   return {
     markup: markup, priceHt: round2(priceHt), ttc: round2(ttc),
     transport: round2(ship), octroiPaid: round2(octroiPaid), commission: round2(commission),
     douane: round2(douane),
     fixed: round2(cfg.packaging + fixedPerOrder(cfg)),
-    is: round2(netOp * cfg.is), netOp: round2(netOp),
+    is: round2(netOp > 0 ? netOp * cfg.is : 0), netOp: round2(netOp),
     netAfterIS: round2(netAfterIS),
     marginAfterIS: revenueHT > 0 ? netAfterIS / revenueHT : 0
   };
 }
 
-// Markup minimal (pas de 0,1 %) atteignant la marge cible après IS.
+/* Markup minimal (pas de 0,1 %) atteignant la marge cible après IS.
+   ⛔⛔ IL RENDAIT 3 EN SILENCE, ET C'ÉTAIT UN PRIX À PERTE. Mesuré le
+   10/08/2026 : sous **13,39 € TTC** de coût fournisseur (poids 1 kg), la marge
+   cible de 15 % est ARITHMÉTIQUEMENT inatteignable — les frais fixes par
+   commande, l'option douane à 5,10 € et la commission mangent tout. La boucle
+   sortait alors sur son plafond de 300 % et rendait un prix dont la marge
+   réelle atteint **−780 %** : un article à 0,76 € vendu 3,04 € quand les seuls
+   frais fixes valent ~8 €. Rien ne le disait.
+   ⚠️ Portée mesurée sur son relevé : **647 références sur 3 581 (18,1 %)** sont
+   sous ce seuil — aucune n'est encore au catalogue, mais elles font partie de
+   celles qu'il veut ajouter. La garde est donc posée AVANT, pas après.
+   ⇒ On rend désormais `{ markup, atteinte }`. L'appelant SAIT. */
 function solveMarkup(costHT, ship, octroi, tvaDom, cfg, douane) {
   for (var m = 0.02; m <= 3; m += 0.001) {
-    if (evaluate(costHT, m, ship, octroi, tvaDom, cfg, douane).marginAfterIS >= cfg.targetNet) return m;
+    if (evaluate(costHT, m, ship, octroi, tvaDom, cfg, douane).marginAfterIS >= cfg.targetNet) {
+      return { markup: m, atteinte: true };
+    }
   }
-  return 3;
+  return { markup: 3, atteinte: false };
 }
 
 // Sélection du transport pour un produit et un mode. Factorisé (utilisé par
@@ -267,8 +286,12 @@ function recommend(product, opts, config) {
   var octroi = octroiRate(product, cfg);
   var tvaDom = tvaDomRate(cfg);
   var douane = douaneFor(s.shipKind, cfg);
-  var m = solveMarkup(costHT, s.ship, octroi, tvaDom, cfg, douane);
-  var r = evaluate(costHT, m, s.ship, octroi, tvaDom, cfg, douane);
+  var sm = solveMarkup(costHT, s.ship, octroi, tvaDom, cfg, douane);
+  var r = evaluate(costHT, sm.markup, s.ship, octroi, tvaDom, cfg, douane);
+  /* ⛔ LE DRAPEAU QUI MANQUAIT. `false` veut dire : ce prix N'ATTEINT PAS la
+     marge cible, et il peut être à perte. Celui qui écrit une fiche doit le
+     lire et refuser — voir `scripts/generer-fiches-makita.js`. */
+  r.cibleAtteinte = sm.atteinte;
   r.costHT = round2(costHT);
   r.priceHtFor = { price_ht: r.priceHt, price: round2(r.priceHt * (1 + cfg.tvaFR)) };
   r.mode = mode;

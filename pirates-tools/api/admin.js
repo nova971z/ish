@@ -2526,19 +2526,51 @@ function pwSourceCost(p, o, cfg, byGroup) {
   return { srcTTC: null, origin: null };
 }
 
+/* ⛔⛔⛔ LE REPLI « ×1,15 » A ÉTÉ RETIRÉ LE 10/08/2026 — IL VENDAIT À PERTE.
+   ─────────────────────────────────────────────────────────────────────────
+   Ordre de l'user : « vérifie ligne par ligne toute la méthode de calcul ».
+   Voici ce que la relecture a trouvé, et c'est le défaut le plus cher du lot.
+
+   Cette fonction se repliait sur `srcTTC × 1,15` dès que le modèle ne rendait
+   pas de prix — et ANNONÇAIT `markup: 0.15`, c'est-à-dire « 15 % de marge ».
+   C'est faux : un prix à coût × 1,15 ne couvre NI le port, NI l'octroi de mer,
+   NI la commission d'encaissement, NI la quote-part de frais fixes. Sa marge
+   réelle est NÉGATIVE.
+
+   ⛔ MESURÉ SUR SON CATALOGUE, coût fournisseur relevé à l'appui :
+     · 414 fiches comparables ;
+     · **60 sont vendues à PERTE** ;
+     · leur rapport prix/coût médian est **×1,16**, et 25 d'entre elles sont
+       exactement à ×1,15 à 3 % près. La signature du repli est sans ambiguïté.
+     · trois se vendent même SOUS le prix d'achat : −8,32 €, −2,50 €, −2,23 €
+       à chaque vente.
+
+   ⚠️ ET MA PROPRE CORRECTION D'AUJOURD'HUI RENDAIT CE REPLI PLUS ATTEIGNABLE :
+   `recommend` rend désormais `null` au-delà de 30 kg (hors Colissimo Eco) —
+   ce `null` serait tombé droit dans le ×1,15. Un correctif qui alimente un
+   défaut voisin, c'est exactement pourquoi on relit la chaîne entière.
+
+   ⇒ DÉSORMAIS : pas de prix viable, PAS DE PRIX. La fonction rend `null` avec
+   son motif, l'appelant n'écrit rien et le dit. Un article sans prix est
+   visible et réparable ; un article vendu à perte ne se voit jamais. */
 function pwComputePrice(product, srcTTC, cfg) {
-  // Verrou de sécurité : le MODÈLE de marge cible (15 % net) s'applique par
-  // défaut. On ne retombe au ×1,15 QUE si autoPrice est EXPLICITEMENT désactivé
-  // (autoPrice === false). Ainsi un scan traqueur ne peut jamais casser les
-  // marges à cause d'une config partielle où autoPrice serait absent.
-  if (!cfg || cfg.autoPrice !== false) {
-    const r = priceModel.recommend(product, { costTTC: srcTTC, mode: (cfg && cfg.mode) || 'colissimo' }, cfg);
-    if (r && r.priceHt > 0) {
-      return { newHt: r.priceHt, newPrice: pwRound2(r.priceHt * (1 + (cfg.tvaFR || 0.20))), markup: r.markup, mode: r.mode };
-    }
+  const r = priceModel.recommend(product, { costTTC: srcTTC, mode: (cfg && cfg.mode) || 'colissimo' }, cfg);
+  if (!r || !(r.priceHt > 0)) {
+    return { refus: 'le calculateur ne rend aucun prix pour cet article (transport hors grille postale ?)' };
   }
-  const newPrice = pwRound2(srcTTC * PW.MARGIN);
-  return { newPrice, newHt: pwRound2(newPrice / PW.VAT), markup: 0.15, mode: 'legacy' };
+  /* ⛔ La marge cible peut être ARITHMÉTIQUEMENT inatteignable sous ~13,39 € de
+     coût : frais fixes, option douane et commission dépassent alors tout ce
+     qu'on peut facturer. Le modèle le DIT (`cibleAtteinte:false`) — on refuse
+     plutôt que d'écrire un prix dont la marge est négative. */
+  if (r.cibleAtteinte === false) {
+    return { refus: 'coût trop bas : la marge cible est inatteignable, le prix serait à perte' };
+  }
+  return {
+    newHt: r.priceHt,
+    newPrice: pwRound2(r.priceHt * (1 + ((cfg && cfg.tvaFR) || 0.20))),
+    markup: r.markup,
+    mode: r.mode
+  };
 }
 
 // Recalcule TOUS les prix depuis le modèle (bouton admin, recompute intentionnel).
@@ -2572,6 +2604,9 @@ async function handleRepriceAll(req, res, admin, db) {
     // les prix sont bâtis sur des estimations.
     const origins = { traqueur: 0, fiche: 0, variante: 0, 'estimé': 0, rupture: 0 };
     const estimes = [];
+    /* ⛔ Les articles pour lesquels AUCUN prix viable n'existe. Ils sortent
+       NOMMÉS dans la réponse : un refus muet se lit comme « rien à faire ». */
+    const refusesPrix = [];
     /* Produits GELÉS : des relevés existent mais aucun n'est achetable
        (rupture partout, ou relevés périmés). On ne recalcule PAS leur prix —
        et on le DIT, au lieu de les fondre dans « coût inconnu ». */
@@ -2617,6 +2652,9 @@ async function handleRepriceAll(req, res, admin, db) {
       }
 
       const priced = pwComputePrice(p, srcTTC, cfg);
+      /* ⛔ PAS DE PRIX VIABLE, PAS D'ÉCRITURE — et on NOMME le refus. Le repli
+         « ×1,15 » qui vivait ici vendait à perte (60 fiches mesurées). */
+      if (priced.refus) { refusesPrix.push({ sku: p.sku, motif: priced.refus, srcTTC: srcTTC }); continue; }
       // Prix ACTUEL : l'override fraîchement relu fait foi. `p` vient du
       // catalogue fusionné, dont le cache d'overrides peut avoir jusqu'à 30 s
       // de retard : juste après un « Appliquer », il renvoyait encore l'ancien
@@ -2656,6 +2694,9 @@ async function handleRepriceAll(req, res, admin, db) {
       ok: true, dryRun: !!dryRun, mode: cfg.mode, autoPrice: !!cfg.autoPrice,
       counts: { total: products.length, changed: changed.length, skipped: skipped.length, locked: lockedCount },
       origins: origins, estimes: estimes, gels: gels,
+      /* ⛔ Ce que le calculateur a REFUSÉ de chiffrer, avec le motif. Dit,
+         jamais avalé : c'est ce qui remplace l'ancien repli à perte. */
+      refusesPrix: refusesPrix, refusesPrixCount: refusesPrix.length,
       changed: changed.slice(0, 500), skipped: skipped.slice(0, 100)
     });
   } catch (err) {
@@ -3509,6 +3550,7 @@ async function handlePriceWatch(req, res, admin, db) {
           var priceSec = null;
           try {
             priceSec = pwComputePrice(p, it.price, priceConfig.defaults());
+            if (priceSec && priceSec.refus) priceSec = null;
           } catch (e) { priceSec = null; }
           /* ⛔⛔ LE TITRE DE L'ANNONCE SE GARDE, PAS SEULEMENT CELUI DE NOTRE
              FICHE. `fiche` dit ce que NOUS appelons ce produit ; `name` dit ce
@@ -4255,6 +4297,8 @@ async function handlePriceWatch(req, res, admin, db) {
         const effSrc = choix ? choix.ttc : src;
         const effFrom = choix ? choix.source : sourceSlug;
         const priced = pwComputePrice(p, effSrc, cfg);
+        /* ⛔ Même règle dans le balayage : un prix non viable ne s'écrit pas. */
+        if (priced.refus) { continue; }
         const newPrice = priced.newPrice, newHt = priced.newHt;
         const cur = (typeof oW.price === 'number') ? oW.price
           : (typeof p.price === 'number' ? p.price : null);

@@ -131,6 +131,52 @@ module.exports = function () {
     '⚠️ PRÉALABLE : en mode container, un article lourd reste en groupage — sinon '
     + 'la règle du bateau écraserait le cas où il affrète (obtenu ' + cont.shipKind + ')');
 
+  /* ══ DEUX DÉFAUTS DU CALCULATEUR, TROUVÉS EN LE RELISANT LIGNE PAR LIGNE ═══
+     Sur son ordre du 10/08/2026 : « vérifie ligne par ligne toute la méthode de
+     calcul et que rien n'est oublié ». */
+
+  /* ⛔⛔ ① LE REPLI SILENCIEUX. `solveMarkup` bouclait jusqu'à 300 % et rendait
+     ce plafond SANS RIEN DIRE quand la marge cible était inatteignable. Mesuré :
+     sous 13,39 € TTC de coût, un article à 0,76 € sortait à 3,04 € — marge
+     réelle −917 % — alors que les seuls frais fixes valent ~8 €. 647 des 3 581
+     références de son relevé (18,1 %) sont dans cette zone. */
+  var pauvre = model.recommend({ weight_kg: 1, ncCategory: 'accessory' },
+    { costTTC: 1 }, model.DEFAULT_CONFIG);
+  ok(pauvre && pauvre.cibleAtteinte === false,
+    '⛔⛔ ARGENT : quand la marge cible est INATTEIGNABLE, le calculateur le DIT '
+    + '(`cibleAtteinte:false`) au lieu de rendre son plafond en silence — sans ce '
+    + 'drapeau, un article se crée à perte sans que rien ne le signale (obtenu '
+    + JSON.stringify(pauvre && pauvre.cibleAtteinte) + ')');
+  var riche = model.recommend({ weight_kg: 1, ncCategory: 'accessory' },
+    { costTTC: 150 }, model.DEFAULT_CONFIG);
+  ok(riche && riche.cibleAtteinte === true,
+    '⚠️ PRÉALABLE : un coût normal atteint la cible et le dit — sinon l\'assertion '
+    + 'précédente serait vraie pour tout le monde (obtenu '
+    + JSON.stringify(riche && riche.cibleAtteinte) + ')');
+  ok(pauvre.marginAfterIS < 0,
+    '⚠️ et la marge annoncée pour ce cas est bien NÉGATIVE : le drapeau ne masque '
+    + 'pas le chiffre, il l\'accompagne (obtenu ' + pauvre.marginAfterIS + ')');
+
+  /* ⛔⛔ ② L'IMPÔT APPLIQUÉ À UNE PERTE. `netAfterIS = netOp × (1 − IS)`
+     adoucissait un déficit de 15 %. Mesuré : une perte réelle de −62,53 €
+     s'affichait −53,15 €. Sur un audit de prix, c'est ce qui laisse passer une
+     vente à perte : elle paraît moins grave qu'elle n'est. */
+  var perte = model.marginAt({ weight_kg: 1, ncCategory: 'accessory' },
+    { costTTC: 100, priceHt: 50 }, model.DEFAULT_CONFIG);
+  ok(perte && perte.netAfterIS === perte.netOp,
+    '⛔⛔ ARGENT : aucun impôt sur une PERTE — le résultat après IS d\'un déficit '
+    + 'est le déficit lui-même (obtenu netOp=' + (perte && perte.netOp)
+    + ', netAfterIS=' + (perte && perte.netAfterIS) + ')');
+  ok(perte && perte.is === 0,
+    '⛔ et l\'IS affiché sur une perte vaut ZÉRO (obtenu ' + (perte && perte.is) + ')');
+  var gain = model.marginAt({ weight_kg: 1, ncCategory: 'accessory' },
+    { costTTC: 100, priceHt: 400 }, model.DEFAULT_CONFIG);
+  ok(gain && gain.netAfterIS < gain.netOp && gain.is > 0,
+    '⚠️ PRÉALABLE : sur un BÉNÉFICE l\'impôt s\'applique toujours — sinon les deux '
+    + 'assertions ci-dessus passeraient sur un modèle qui aurait simplement '
+    + 'oublié l\'IS (obtenu netOp=' + (gain && gain.netOp) + ', netAfterIS='
+    + (gain && gain.netAfterIS) + ', is=' + (gain && gain.is) + ')');
+
   return errors;
 };
 

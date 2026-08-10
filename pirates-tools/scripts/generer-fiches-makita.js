@@ -202,6 +202,19 @@ candidats.forEach((x) => {
     refusees.push({ sku: x.sku, motif: 'le calculateur n\'a pas rendu de prix', typ: x.typ || '' });
     return;
   }
+  /* ⛔⛔ ARGENT — LA MARGE CIBLE N'EST PAS TOUJOURS ATTEIGNABLE, ET LE MODÈLE
+     LE DIT DÉSORMAIS. Mesuré le 10/08/2026 : sous 13,39 € TTC de coût, les
+     frais fixes par commande, l'option douane et la commission dépassent à eux
+     seuls tout ce qu'on peut facturer — le calculateur sortait alors sur son
+     plafond de 300 % et rendait un prix dont la marge réelle atteint −917 %.
+     647 des références de son relevé (18,1 %) sont dans cette zone. On refuse
+     de créer la fiche : un article vendu à perte est pire que pas d'article. */
+  if (reco.cibleAtteinte === false) {
+    refusees.push({ sku: x.sku, racine: racineDe(x.sku),
+      motif: 'coût trop bas : la marge cible est inatteignable, le prix serait à perte',
+      typ: x.typ || '', titre: x.titre || '', cout: cout });
+    return;
+  }
   const sku = String(x.sku).toUpperCase();
   const id = 'makita-' + slugifier(sku);
   const slug = id + '-' + slugifier(String(x.typ || x.titre || '').slice(0, 60));

@@ -1953,6 +1953,25 @@ module.exports = async function () {
               venait de repérer chez l'autre marque, un prix de pack écrit sur
               la machine seule.
          ⚠️ Références SYNTHÉTIQUES : c'est la règle qu'on teste, pas un produit. */
+      /* ══ LE REPLI « ×1,15 » NE DOIT PLUS EXISTER ══════════════════════════
+         ⛔⛔ LE DÉFAUT LE PLUS CHER DU LOT, trouvé le 10/08/2026 en relisant le
+         calcul ligne par ligne sur son ordre. `pwComputePrice` se repliait sur
+         `coût × 1,15` dès que le modèle ne rendait pas de prix, et annonçait
+         `markup: 0.15` — « 15 % de marge ». C'est faux : ×1,15 ne couvre ni le
+         port, ni l'octroi, ni la commission, ni les frais fixes.
+         Mesuré sur son catalogue : **60 fiches vendues à perte**, rapport
+         prix/coût médian **×1,16**, et trois vendues SOUS le prix d'achat.
+         ⚠️ Une chaîne de caractères suffit à le rattraper : si `PW.MARGIN`
+         revient multiplier un coût pour produire un prix, la porte rougit. */
+      var srcAdmin = fs.readFileSync(path.join(__dirname, '..', 'api', 'admin.js'), 'utf8');
+      ok(!/srcTTC\s*\*\s*PW\.MARGIN/.test(srcAdmin),
+        '⛔⛔⛔ ARGENT : le repli « coût × 1,15 » est REVENU dans le calcul de prix. '
+        + 'Il ne couvre ni le port, ni l\'octroi, ni la commission, ni les frais fixes : '
+        + 'il a déjà mis 60 fiches en vente à perte. Pas de prix viable ⇒ pas de prix.');
+      ok(/refus:/.test(srcAdmin) && /cibleAtteinte === false/.test(srcAdmin),
+        '⛔ et le refus est NOMMÉ : `pwComputePrice` rend un motif quand aucun prix '
+        + 'viable n\'existe, au lieu d\'écrire un prix à perte en silence');
+
       var lireMw = pp.nomenclature && pp.nomenclature.lireReferenceMilwaukee;
       ok(typeof lireMw === 'function', 'lireReferenceMilwaukee exportée');
       if (lireMw) {
