@@ -129,16 +129,34 @@ var PLANS = {
        catégorie, le relevé rend `parsed: 0` AVEC son diagnostic, jamais un
        silence. */
     patronRecherche: 'https://www.idealo.fr/prechcat/100oM140603.html?qr=false&q={ref}',
-    aVerifier: 'parPage (60) est supposé IDENTIQUE aux deux autres marques — même site, '
-      + 'même gabarit de grille. Le premier balayage tranche seul : `tuilesDansLaPage` '
-      + 'le mesure page par page, et `couverture.refsDistinctes` doit croître d\'environ '
-      + '60 par page. Le PAS, lui, n\'est pas à vérifier : quatre de ses adresses le '
-      + 'prouvent.',
-    note: '⛔ AUCUNE FICHE DE CETTE MARQUE AU CATALOGUE au jour de la déclaration '
-      + '(mesuré : Makita 611, DeWALT 1047, Festool 50, Milwaukee 0). Le premier '
-      + 'balayage ne mettra donc AUCUN prix à jour : il sert à DÉCOUVRIR — tout ce '
-      + 'qu\'il lit sortira dans `unknown`, avec titre, prix et contenu. C\'est normal, '
-      + 'ce n\'est pas une panne, et il ne faut pas le lire comme un échec.'
+    /* ⛔ PLUS RIEN À VÉRIFIER SUR LA PAGINATION — SON BALAYAGE L'A TRANCHÉE. */
+    pasConfirme: 'PAS de 15 : prouvé par QUATRE de ses adresses (0, 15, 30, et 990 = '
+      + '66 × 15) — jamais deux points, jamais une symétrie. parPage de 60 : prouvé '
+      + 'par son relevé du 10/08/2026, 67 pages en mode à sec, 4 019 tuiles lues, '
+      + '66 pages sur 67 à exactement 60 tuiles (la dernière à 59). Ce plan ne '
+      + 'suppose plus rien.',
+    note: '⛔⛔ CE QUE SON PREMIER BALAYAGE A MESURÉ, ET QUI CHANGE LE CHANTIER '
+      + '(10/08/2026, 67 pages, mode à sec) : sur 4 019 tuiles lues, le parseur n\'a '
+      + 'tiré une référence que de 1 764 d\'entre elles — 2 199 tuiles, soit 54,7 %, '
+      + 'sont sorties SANS référence. La cause n\'est pas la page : la nomenclature de '
+      + 'cette marque n\'est écrite NULLE PART dans le parseur. Mesuré sur les 2 151 '
+      + 'titres détaillés : 787 portent un numéro d\'article à DIX CHIFFRES (4932…, '
+      + '4933…) que rien ne reconnaît — 738 références distinctes récupérables à ce '
+      + 'seul motif ; 521 portent une référence de plateforme (M18…, M12…) ; 843 '
+      + 'n\'affichent vraiment rien. '
+      + '⛔ ET CE QU\'IL LIT, IL LE COUPE MAL : les références sorties ressemblent à '
+      + 'ONEF2VC34M, FPP2A2-402X, FSAG115X — ce sont des MOITIÉS. La vraie référence '
+      + 's\'écrit « M18 ONEFHIWF12-0X » : une PLATEFORME (M18/M12), une espace, puis '
+      + 'le modèle. Le parseur garde le second morceau et jette la plateforme. '
+      + 'Recoupé sur plusieurs revendeurs (rs-online, honeybros, ifd-outillage, '
+      + 'rubix) : le suffixe -0 marque l\'outil NU, et -502X un ensemble à deux '
+      + 'batteries de 5,0 Ah avec chargeur et coffret. '
+      + '⚠️ LA GRAMMAIRE COMPLÈTE DES SUFFIXES N\'EST PAS ENCORE ÉCRITE : deux '
+      + 'lectures de « 502X » restent possibles et une seule source ne suffit pas. '
+      + 'Tant qu\'elle n\'est pas recoupée, on ne l\'encode pas (M-03, M-04). '
+      + '⚠️ AUCUNE FICHE DE CETTE MARQUE AU CATALOGUE (mesuré : Makita 611, DeWALT '
+      + '1047, Festool 50, Milwaukee 0) : ce balayage DÉCOUVRE, il ne met aucun prix '
+      + 'à jour. Ce n\'est pas une panne.'
   }
 };
 
