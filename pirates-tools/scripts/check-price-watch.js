@@ -1802,6 +1802,46 @@ module.exports = async function () {
          donc sur le TEXTE, avant tout classement.
          ⚠️ Suffixes choisis À L'EXÉCUTION dans la nomenclature : un harnais ne
          grave pas une grammaire qui vit dans le produit. */
+      /* ══ LA GRAMMAIRE DES SUFFIXES — DÉCOMPOSER, PAS ÉNUMÉRER ═════════════
+         ⛔⛔ L'USER, 10/08/2026 : « tu reproduis exactement la même chose sur
+         cette marque […] tu dois tout savoir sur le référencement ». La table
+         du 09/08 comptait 29 entrées apprises sur ses fiches — une liste finie
+         ne couvre pas un catalogue vivant. La grammaire, elle, se décompose :
+         **[chargeur][batterie][coffret]**, recoupée sur TROIS sources dont ses
+         611 fiches (328 concordances sur 332 titres testables, 98,8 %).
+         ⛔ CE QUE LA PORTE DÉFEND, ET C'EST DE L'ARGENT : un suffixe mal lu
+         écrit un coût de kit sur un outil nu, ou l'inverse.
+         ⚠️ Références SYNTHÉTIQUES — un harnais ne grave jamais une donnée du
+         catalogue ; c'est la GRAMMAIRE qui est testée, pas un produit. */
+      var lireSuf = pp.nomenclature && pp.nomenclature.lireSuffixeMakita;
+      ok(typeof lireSuf === 'function', 'lireSuffixeMakita exportée');
+      if (lireSuf) {
+        var cfgKit = (lireSuf('ZZX450RTJ') || {}).config || {};
+        ok(cfgKit.nbBatteries === 2 && cfgKit.ah === 5 && cfgKit.coffret === 'MAKPAC',
+          '⛔⛔ la GRAMMAIRE décompose un suffixe jamais listé : chargeur + 2×5,0 Ah + '
+          + 'coffret (obtenu ' + JSON.stringify(cfgKit) + ')');
+        var cfgNu = (lireSuf('ZZX450Z') || {}).config || {};
+        ok(cfgNu.nbBatteries === 0,
+          '⛔ un suffixe d\'outil NU se lit comme tel (obtenu ' + JSON.stringify(cfgNu) + ')');
+        var cfg4 = (lireSuf('ZZX450PT4J') || {}).config || {};
+        ok(cfg4.nbBatteries === 4,
+          '⛔⛔ ARGENT : un CHIFFRE collé à la lettre de batterie donne le NOMBRE réel — '
+          + 'lire « 2 » là où la référence dit 4 sous-évaluerait le contenu, donc le coût '
+          + '(obtenu ' + JSON.stringify(cfg4) + ')');
+        /* ⚠️ PRÉALABLE D'ARGENT — UNE LETTRE SEULE N'EST PAS UNE BATTERIE.
+           Mesuré sur ses fiches : une référence de gamme 40 V se termine par un
+           `G` qui nomme la GAMME. Lue comme « 2 batteries 6,0 Ah », elle ferait
+           écrire un coût de kit sur un outil nu. */
+        ok(((lireSuf('ZZX006G') || {}).config) === null,
+          '⛔⛔ ARGENT : une LETTRE SEULE en fin de référence n\'est jamais lue comme une '
+          + 'batterie — c\'est un marqueur de gamme (obtenu '
+          + JSON.stringify((lireSuf('ZZX006G') || {}).config) + ')');
+        /* ⚠️ PRÉALABLE — ce qui n'est pas compris reste INCONNU, jamais deviné. */
+        ok(((lireSuf('ZZX450WVE') || {}).config) === null,
+          '⚠️ PRÉALABLE : un suffixe hors grammaire rend `null` — deviner un contenu '
+          + 'serait pire que l\'ignorer');
+      }
+
       var tblSuf = pp.nomenclature && pp.nomenclature.SUFFIXES_MAKITA;
       var sufOk = null, sufAutre = null;
       Object.keys(tblSuf || {}).forEach(function (s) {

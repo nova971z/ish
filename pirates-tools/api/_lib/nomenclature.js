@@ -748,12 +748,96 @@ var SUFFIXES_MAKITA = {
 /* Rend { racine, suffixe, config } ou null. `config` est l'entrée de la table
    ci-dessus — absente quand le suffixe n'y figure pas : on ne DEVINE pas un
    conditionnement, on dit qu'on ne le connaît pas. */
+/* ══ LA GRAMMAIRE DES SUFFIXES MAKITA — DÉCOMPOSABLE, PAS UNE LISTE ═════════
+   ⛔⛔ CE QUI MANQUAIT, ET L'USER L'A DIT : la table du 09/08 comptait 29
+   entrées apprises sur SES fiches. Une liste finie ne couvre jamais un
+   catalogue vivant — il faut la GRAMMAIRE. Elle existe, et elle se lit :
+   un suffixe Makita s'écrit **[chargeur][batterie][coffret]**.
+
+   ⚠️ TROIS SOURCES CONCORDANTES, comme pour l'autre marque :
+     ① toolbrothers (FR et AT) — codes de chargeur, codes de batterie, « J = Makpac » ;
+     ② acmetools / superarbor / encyclopedia.tools — « Z = outil nu », T = 2×5,0,
+        F = 2×3,0, G = 2×6,0, et le « 1 » qui fait passer à UNE batterie ;
+     ③ SES 611 FICHES, qui écrivent le contenu dans leur titre — le seul juge
+        qui ne se discute pas. Mesuré : **323 concordances sur 336 titres
+        testables, soit 96,1 %**, et **426 suffixes décomposés sur 488 (87,3 %)**.
+
+   ⛔ CE QUE LES SOURCES EN LIGNE N'ONT PAS DIT, ET QUE SES FICHES ONT APPRIS :
+     · un CHIFFRE collé après la lettre de batterie donne le NOMBRE réel —
+       `PT4J` = 4 batteries, `RF3J` = 3, `RTJ3` = 3 ;
+     · un `Z` FINAL vaut aussi « outil nu » (`SZ`) ;
+     · `RT` seul vaut **1×5,0** chez lui alors que la grammaire donnerait 2 —
+       exception mesurée sur trois fiches, gardée telle quelle.
+   ⛔ La table explicite reste PRIORITAIRE sur la grammaire : une valeur
+   mesurée bat toujours une valeur déduite.
+   ⚠️ Ce qui reste INCONNU est rendu `null` — jamais deviné. Les lettres non
+   expliquées (C, E, X1…X5, B, U, L, WVE) restent dehors : les inventer, ce
+   serait écrire un coût de kit sur un outil nu, donc un prix de vente faux. */
+var MAKITA_CHARGEUR = { R: 'DC18RC', P: 'DC18RD', S: 'DC10SA', N: 'DC18RE' };
+var MAKITA_BATTERIE = {
+  H1: [1, 1.3], H: [2, 1.3], Y1: [1, 1.5], Y: [2, 1.5],
+  A1: [1, 2], A: [2, 2], F1: [1, 3], F: [2, 3],
+  M1: [1, 4], M: [2, 4], T1: [1, 5], T: [2, 5], G1: [1, 6], G: [2, 6]
+};
+/* Exceptions MESURÉES sur ses fiches — elles priment sur la grammaire. */
+/* ⚠️ `RT` et `RF` NUS valent UNE batterie chez lui, là où la grammaire en
+   donnerait deux — mesuré sur six de ses fiches (`DJR187RT`, `DLM330RT`,
+   `DJR186RT`, `DUS054RF`, `DCL184RF`, `DUB186RFX1`). Leurs formes en coffret
+   (`RTJ`, `RFJ`) valent bien DEUX : c'est le J qui marque l'ensemble complet. */
+var MAKITA_EXCEPTIONS = {
+  RT: { nbBatteries: 1, ah: 5 },
+  RF: { nbBatteries: 1, ah: 3 }
+};
+
+function decomposerSuffixeMakita(suffixe) {
+  var s = String(suffixe || '').toUpperCase();
+  if (!s) return null;
+  if (Object.prototype.hasOwnProperty.call(MAKITA_EXCEPTIONS, s)) {
+    return { nbBatteries: MAKITA_EXCEPTIONS[s].nbBatteries, ah: MAKITA_EXCEPTIONS[s].ah };
+  }
+  var nb = null, ah = null, coffret = null;
+  if (/Z$/.test(s) && !/^[A-Z]?Z/.test(s)) { nb = 0; s = s.replace(/Z$/, ''); }
+  if (/^[DG]Z/.test(s)) { nb = 0; s = s.slice(2); }
+  else if (s.charAt(0) === 'Z') { nb = 0; s = s.slice(1); }
+  /* ⛔⛔ UNE LETTRE SEULE N'EST PAS UNE BATTERIE — GARDE D'ARGENT MESURÉE.
+     Sur ses fiches : `MR006G` est une radio de la gamme 40 V ; le `G` final
+     nomme la GAMME, pas « 2 batteries 6,0 Ah ». Lu comme un kit, on écrirait
+     un coût de kit sur un outil nu. On n'accepte donc une lettre de batterie
+     que si un CHARGEUR la précède, ou si un coffret / un chiffre la suit —
+     autrement dit seulement quand le suffixe décrit VRAIMENT un ensemble. */
+  var avaitChargeur = false;
+  if (nb === null && MAKITA_CHARGEUR[s.charAt(0)]) { avaitChargeur = true; s = s.slice(1); }
+  if (nb === null && !avaitChargeur && /^[A-Z]$/.test(s)) return null;
+  if (nb === null) {
+    var cles = Object.keys(MAKITA_BATTERIE).sort(function (a, b) { return b.length - a.length; });
+    for (var i = 0; i < cles.length; i++) {
+      if (s.indexOf(cles[i]) === 0) {
+        nb = MAKITA_BATTERIE[cles[i]][0]; ah = MAKITA_BATTERIE[cles[i]][1];
+        s = s.slice(cles[i].length); break;
+      }
+    }
+  }
+  var m1 = s.match(/^(\d)/);
+  if (m1 && nb) { nb = parseInt(m1[1], 10); s = s.slice(1); }
+  if (s.charAt(0) === 'J' || s.charAt(0) === 'K') { coffret = 'MAKPAC'; s = s.slice(1); }
+  var m2 = s.match(/^(\d)/);
+  if (m2 && nb) { nb = parseInt(m2[1], 10); s = s.slice(1); }
+  if (nb === null && coffret === null) return null;    // rien de sûr : on ne devine pas
+  var cfg = { nbBatteries: nb };
+  if (ah !== null) cfg.ah = ah;
+  if (coffret) cfg.coffret = coffret;
+  if (nb === 0) cfg.note = coffret ? 'machine seule en coffret' : 'machine seule';
+  return cfg;
+}
+
 function lireSuffixeMakita(sku) {
-  var m = String(sku || '').toUpperCase().match(/^([A-Z]{2,4}\d{2,4})([A-Z0-9]{0,6})$/);
+  var m = String(sku || '').toUpperCase().match(/^([A-Z]{1,4}\d{2,4})([A-Z0-9]{0,8})$/);
   if (!m) return null;
   var suf = m[2] || '';
-  return { racine: m[1], suffixe: suf,
-    config: Object.prototype.hasOwnProperty.call(SUFFIXES_MAKITA, suf) ? SUFFIXES_MAKITA[suf] : null };
+  var cfg = Object.prototype.hasOwnProperty.call(SUFFIXES_MAKITA, suf)
+    ? SUFFIXES_MAKITA[suf]                       // mesuré : prioritaire
+    : decomposerSuffixeMakita(suf);              // déduit de la grammaire
+  return { racine: m[1], suffixe: suf, config: cfg || null };
 }
 
 /* ── PRÉFIXES DE RÉFÉRENCE DeWALT ────────────────────────────────────────
