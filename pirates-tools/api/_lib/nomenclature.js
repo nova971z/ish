@@ -1367,6 +1367,40 @@ var PREFIXES_MAKITA = {
 };
 var PREFIXES_MAKITA_ORDRE = Object.keys(PREFIXES_MAKITA).sort(function (a, b) { return b.length - a.length; });
 
+/* ══ LES PRÉFIXES DE DISTRIBUTEUR — LA MÊME MACHINE SOUS DEUX CODES ════════
+   ⛔⛔ TROUVÉ SUR SA CAPTURE DU 10/08/2026 : il vendait un projecteur LED
+   **349,58 €** alors que le MÊME projecteur, sous son vrai code, s'achète
+   **192,36 €**. Cause : sa fiche porte `DEADML810`, et le traqueur a lu la
+   tuile `DEADML810` à **357,90 €** — sans jamais voir la tuile `DML810` à
+   192,36 € juste à côté, sur la même page.
+
+   `DEA`, `DEB`, `DEC` sont des préfixes de DISTRIBUTEUR posés devant la vraie
+   référence du fabricant. Recoupé sur six revendeurs français (distriartisan,
+   maxoutil, manomano, quincaillerie-angles, midifix, promax-outillage) : le
+   `DEADML810` vendu en France EST le `DML810` du catalogue mondial, même
+   projecteur, mêmes 5 500 lumens, même IP54.
+
+   ⛔ CE QUE ÇA COÛTAIT, MESURÉ SUR SON RELEVÉ : deux paires trouvées —
+   `DEADML810` 357,90 € contre `DML810` 192,36 € (écart **165,54 €**) et
+   `DEBML009G` 345 € contre `ML009G` 229,56 € (écart **115,44 €**).
+
+   ⚠️⚠️ LA GARDE EST OBLIGATOIRE, ET DANS LE SENS INVERSE DE D'HABITUDE.
+   Ici, rapprocher fait BAISSER le coût retenu — donc le prix de vente. Se
+   tromper de rapprochement ferait vendre à PERTE. On n'accepte donc la
+   normalisation que si le code dépouillé EXISTE VRAIMENT dans le relevé ET
+   que les deux tuiles décrivent le MÊME TYPE d'outil. Vérifié sur les deux
+   paires : « projecteur » des deux côtés, famille « machine » des deux côtés. */
+var PREFIXES_DISTRIBUTEUR_MAKITA = ['DEA', 'DEB', 'DEC', 'DED', 'DEE', 'NLA'];
+
+function refSansPrefixeDistributeur(sku) {
+  var s = String(sku || '').toUpperCase().trim();
+  for (var i = 0; i < PREFIXES_DISTRIBUTEUR_MAKITA.length; i++) {
+    var p = PREFIXES_DISTRIBUTEUR_MAKITA[i];
+    if (s.indexOf(p) === 0 && s.length > p.length + 2) return s.slice(p.length);
+  }
+  return null;
+}
+
 /* ══ MILWAUKEE — LIRE LA RÉFÉRENCE DANS LE TITRE ═══════════════════════════
    ⛔⛔ POURQUOI CE CODE EXISTE. Son premier balayage (10/08/2026, 67 pages,
    4 019 tuiles) a sorti 2 199 tuiles SANS RÉFÉRENCE, soit 54,7 % — non pas
@@ -1747,6 +1781,8 @@ module.exports = {
   PREFIXES_MAKITA: PREFIXES_MAKITA, PREFIXES_MAKITA_ORDRE: PREFIXES_MAKITA_ORDRE,
   FORMES_MAKITA: FORMES_MAKITA, formeReferenceMakita: formeReferenceMakita,
   lireReferenceMilwaukee: lireReferenceMilwaukee,
+  PREFIXES_DISTRIBUTEUR_MAKITA: PREFIXES_DISTRIBUTEUR_MAKITA,
+  refSansPrefixeDistributeur: refSansPrefixeDistributeur,
   TETES_CONNUES: TETES_CONNUES,
   prefixeDeReference: prefixeDeReference,
   EXTENSIONS_REGION: EXTENSIONS_REGION, GAMMES: GAMMES,

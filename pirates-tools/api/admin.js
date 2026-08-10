@@ -3905,6 +3905,23 @@ async function handlePriceWatch(req, res, admin, db) {
       });
     });
     pwAliasNomenclature(products, brand, bySku);
+    /* ⛔⛔ LE PRÉFIXE DE DISTRIBUTEUR — TROUVÉ SUR SA CAPTURE DU 10/08/2026,
+       ET IL LUI FAISAIT VENDRE UN PROJECTEUR 349,58 € AU LIEU DE ~279 €.
+       Sa fiche porte `DEADML810` ; sur la page, le comparateur montre la MÊME
+       lampe deux fois : `DEADML810` à 357,90 € et `DML810` à 192,36 €.
+       `DEA`/`DEB`/`DEC` sont des préfixes de DISTRIBUTEUR posés devant la vraie
+       référence du fabricant — recoupé sur six revendeurs français. Sans cet
+       index, la tuile la moins chère n'atteignait jamais la fiche, et le coût
+       retenu était le plus cher des deux : **165,54 € d'écart**.
+       ⚠️⚠️ LA GARDE EST DANS LE SENS INVERSE DE D'HABITUDE : ici, rapprocher
+       fait BAISSER le coût, donc le prix. Un mauvais rapprochement ferait
+       vendre à PERTE. On n'ajoute donc l'alias QUE si la place est libre —
+       jamais par-dessus un sku principal ou un `srcAltSkus` déclaré à la main,
+       qui priment tous les deux. Et le minimum de rafale fait le reste. */
+    products.forEach((p) => {
+      const nu = priceParse.nomenclature.refSansPrefixeDistributeur(p.sku);
+      if (nu && !bySku[nu]) bySku[nu] = p;
+    });
     pwIndexerRacines(products, bySku);
 
     // Config de tarification : si autoPrice, on applique le MODÈLE de marge cible

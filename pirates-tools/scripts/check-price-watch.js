@@ -1972,6 +1972,42 @@ module.exports = async function () {
         '⛔ et le refus est NOMMÉ : `pwComputePrice` rend un motif quand aucun prix '
         + 'viable n\'existe, au lieu d\'écrire un prix à perte en silence');
 
+      /* ══ LE PRÉFIXE DE DISTRIBUTEUR — LA MÊME MACHINE SOUS DEUX CODES ═════
+         ⛔⛔ TROUVÉ SUR SA CAPTURE DU 10/08/2026. Sa fiche porte une référence
+         à préfixe de distributeur ; sur la page, le comparateur montre la MÊME
+         machine deux fois — une fois sous ce code, une fois sous le code du
+         fabricant, à **165,54 € de moins**. Sans normalisation, la tuile la
+         moins chère n'atteint jamais la fiche et le coût retenu est le plus
+         cher des deux : le client paie la différence.
+         ⚠️ Références SYNTHÉTIQUES : c'est la règle qu'on teste. */
+      var sansPref = pp.nomenclature && pp.nomenclature.refSansPrefixeDistributeur;
+      ok(typeof sansPref === 'function', 'refSansPrefixeDistributeur exportée');
+      if (sansPref) {
+        ok(sansPref('DEAZZL810') === 'ZZL810',
+          '⛔⛔ ARGENT : un préfixe de distributeur se retire pour retrouver la vraie '
+          + 'référence du fabricant (obtenu ' + JSON.stringify(sansPref('DEAZZL810')) + ')');
+        ok(sansPref('DEBZZ009G') === 'ZZ009G',
+          '⛔ les trois préfixes connus sont traités, pas seulement le premier (obtenu '
+          + JSON.stringify(sansPref('DEBZZ009G')) + ')');
+        /* ⚠️ PRÉALABLE — la règle ne doit PAS mordre sur une référence normale,
+           sinon elle rapprocherait n'importe quoi et ferait vendre à perte. */
+        ok(sansPref('ZZW700Z') === null && sansPref('ZZP486RTJ') === null,
+          '⚠️ PRÉALABLE : une référence ordinaire n\'est PAS normalisée — sinon la '
+          + 'règle rapprocherait des produits différents, et rapprocher fait BAISSER '
+          + 'le coût retenu, donc vendre à perte (obtenu '
+          + JSON.stringify([sansPref('ZZW700Z'), sansPref('ZZP486RTJ')]) + ')');
+        ok(sansPref('DEA') === null,
+          '⚠️ et un préfixe SEUL ne devient pas une référence (obtenu '
+          + JSON.stringify(sansPref('DEA')) + ')');
+        /* ⛔ La règle est branchée là où l'argent se décide : l'index du
+           traqueur. Une fonction juste qui n'est appelée nulle part ne défend
+           rien — c'est le défaut qu'un sabotage ne verrait pas. */
+        var srcAdm = fs.readFileSync(path.join(__dirname, '..', 'api', 'admin.js'), 'utf8');
+        ok(/refSansPrefixeDistributeur\s*\(\s*p\.sku\s*\)/.test(srcAdm),
+          '⛔ et elle est BRANCHÉE dans l\'index du traqueur — sans appel, elle ne '
+          + 'défend rien');
+      }
+
       var lireMw = pp.nomenclature && pp.nomenclature.lireReferenceMilwaukee;
       ok(typeof lireMw === 'function', 'lireReferenceMilwaukee exportée');
       if (lireMw) {
