@@ -185,13 +185,48 @@ function solveMarkup(costHT, ship, octroi, tvaDom, cfg, douane) {
 
 // Sélection du transport pour un produit et un mode. Factorisé (utilisé par
 // recommend ET marginAt) → une seule source de vérité du choix d'envoi.
+/* ⛔⛔ LE BATEAU DE LA POSTE, ET CE QU'IL COÛTE VRAIMENT.
+   Règle de l'user, gravée le 10/08/2026 : « si un seul outil pèse plus de
+   10 kg, il passe par bateau ». Le seuil existait déjà (`heavyKg: 10`) — mais
+   le coût était un FORFAIT de 29 €, quel que soit le poids. Mesuré :
+       11 kg → 29 €   ·   20 kg → 29 €   ·   30 kg → 29 €
+   Or le bateau de La Poste s'appelle **Colissimo Eco Outre-mer**, et il coûte
+   **39,24 € dès 10 kg** (affiche officielle La Poste, janvier 2026) — donc le
+   forfait était déjà sous l'eau au premier kilo au-dessus du seuil, et très
+   loin en haut de grille. Un transport sous-provisionné se paie sur la marge,
+   vente après vente, sans que rien ne le dise.
+   ⚠️ 29 € reste juste pour le mode `container` : c'est une quote-part de
+   GROUPAGE, le cas où l'user affrète lui-même. Les deux ne se confondent plus.
+   ⛔ ON N'INTERPOLE PAS. Un poids qui ne tombe pas sur un point confirmé prend
+   le point confirmé JUSTE AU-DESSUS : interpoler, c'est inventer un prix de
+   transport, et l'inventer trop bas fait vendre à perte. */
+var GRILLES = require('../../data/transport-outre-mer.json');
+
+function tarifDeGrille(weightKg, points) {
+  for (var i = 0; i < points.length; i++) {
+    if (weightKg <= points[i].kgMax) return points[i];
+  }
+  return null;                       // au-delà du plafond : on ne chiffre pas
+}
+
 function shipFor(product, mode, cfg) {
   var weight = Number(product && product.weight_kg) || 2;
   var isCoffret = (product && (product.variantRole === 'coffret' || /coffret|makpac|tstak|valise/i.test(product.title || '')));
   var heavy = cfg.heavyKg && weight > cfg.heavyKg;
   var ship, shipKind;
   if (heavy && mode !== 'container') {
-    ship = cfg.containerPerUnit.coffret; shipKind = 'bateau-lourd';       // trop lourd → bateau
+    var pt = tarifDeGrille(weight, GRILLES.colissimoEco._points);
+    if (!pt) {
+      /* Au-delà de 30 kg, La Poste ne prend plus le colis : c'est du fret, et
+         le coût se lit sur un devis de transitaire. On REFUSE de chiffrer
+         plutôt que d'inventer — `recommend` rendra `null`, et l'appelant le
+         VERRA au lieu de vendre à un prix faux. */
+      return { ship: null, shipKind: 'fret-devis', weight: weight,
+        motif: 'plus de ' + GRILLES.colissimoEco._plafond_kg
+          + ' kg : hors Colissimo Eco Outre-mer, devis de transitaire' };
+    }
+    return { ship: pt.prix, shipKind: 'bateau-poste', weight: weight,
+      tarifConfirme: pt.confirme === true, tranche: pt.kgMax };
   } else if (mode === 'container') {
     ship = isCoffret ? cfg.containerPerUnit.coffret : cfg.containerPerUnit.nu; shipKind = 'container';
   } else if (cfg.lettre && weight <= cfg.lettre.maxKg) {
@@ -223,6 +258,12 @@ function recommend(product, opts, config) {
 
   var mode = opts.mode || 'colissimo';
   var s = shipFor(product, mode, cfg);
+  /* ⛔⛔ UN TRANSPORT INCONNU NE VAUT PAS ZÉRO. Attrapé par sa propre porte, à
+     la minute où la règle du bateau est entrée : `shipFor` rendait `null` pour
+     un article de plus de 30 kg, et le calcul continuait avec un port à 0 —
+     donc un prix de vente calculé comme si l'expédition était gratuite. Pire
+     que l'ancien forfait. Un refus doit REMONTER, pas se diluer. */
+  if (s.ship == null) return null;
   var octroi = octroiRate(product, cfg);
   var tvaDom = tvaDomRate(cfg);
   var douane = douaneFor(s.shipKind, cfg);
@@ -247,6 +288,12 @@ function marginAt(product, opts, config) {
   if (!(costHT > 0) || !(priceHt > 0)) return null;
   var mode = opts.mode || 'colissimo';
   var s = shipFor(product, mode, cfg);
+  /* ⛔⛔ UN TRANSPORT INCONNU NE VAUT PAS ZÉRO. Attrapé par sa propre porte, à
+     la minute où la règle du bateau est entrée : `shipFor` rendait `null` pour
+     un article de plus de 30 kg, et le calcul continuait avec un port à 0 —
+     donc un prix de vente calculé comme si l'expédition était gratuite. Pire
+     que l'ancien forfait. Un refus doit REMONTER, pas se diluer. */
+  if (s.ship == null) return null;
   var octroi = octroiRate(product, cfg);
   var tvaDom = tvaDomRate(cfg);
   var markup = priceHt / costHT - 1;

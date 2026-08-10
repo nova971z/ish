@@ -42,15 +42,21 @@ var RACINE = path.join(__dirname, '..');
 var INDEX = [
   {
     intention: 'Prix, TVA, octroi de mer, remise fidélité',
-    mots: ['prix', 'tva', 'octroi', 'marge', 'fidelite', 'fidélité', 'remise', 'tarif'],
-    fichiers: ['api/_lib/pricing.js', 'api/_lib/loyalty.js', 'app.js'],
+    mots: ['prix', 'tva', 'octroi', 'marge', 'fidelite', 'fidélité', 'remise', 'tarif',
+           'transport', 'port', 'colissimo', 'bateau', 'poids', 'expedition', 'expédition'],
+    fichiers: ['api/_lib/pricing.js', 'api/_lib/loyalty.js', 'api/_lib/pricing-model.js',
+               'data/transport-outre-mer.json', 'app.js'],
     fonctions: ['calcPrice'],
     protege: ['scripts/check-pricing.js (parité client ↔ serveur)', 'scripts/check-loyalty.js', 'scripts/audit/p5-money.js'],
     regles: ['.claude/rules/produits.md'],
     pieges: ['Le prix affiché et le prix débité doivent tomber au centime — le serveur est autoritaire, le prix client est ignoré.',
-             'Le territoire vient du CODE POSTAL, jamais d\'un champ déclaré.'],
+             'Le territoire vient du CODE POSTAL, jamais d\'un champ déclaré.',
+             '⛔⛔ RÈGLE DE L\'USER, 10/08/2026 — PLUS DE 10 kg = BATEAU. Le bateau de La Poste s\'appelle Colissimo Eco Outre-mer : 39,24 € dès 10 kg (affiche officielle janvier 2026). Le forfait de 29 € qui traînait sous-provisionnait 606,15 € au total sur ses 9 fiches lourdes, 67,35 € par vente.',
+             '⛔ M-23 — on n\'INTERPOLE jamais entre deux points d\'une grille de transport : on prend le point confirmé JUSTE AU-DESSUS. Interpoler, c\'est inventer un prix.',
+             '⛔ M-25 — au-delà de 30 kg La Poste ne prend plus le colis : `recommend` rend `null`. Un refus REMONTE, il ne se dilue pas en port à 0 € (défaut attrapé par sa propre porte le jour même).',
+             '⛔ M-24 — une assertion ne recopie pas la valeur observée : elle vise l\'INVARIANT. `ok(port < 40)` gravait le forfait fautif et rougissait quand on le corrigeait.'],
     decisions: ['D-004'],
-    fini: 'check-pricing et check-loyalty verts, et un paiement de bout en bout rejoué.'
+    fini: 'check-pricing, check-pricing-model et check-loyalty verts, sabotages rouges, et un paiement de bout en bout rejoué.'
   },
   {
     intention: 'Paiement par carte, Revolut, webhook',

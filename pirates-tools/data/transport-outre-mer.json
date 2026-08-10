@@ -1,0 +1,29 @@
+{
+  "_lisezmoi": "Les DEUX grilles de La Poste pour expédier de France métropolitaine vers la Guadeloupe (zone OM1). Chaque point porte SA source et SA date. Un poids qui ne tombe pas sur un point confirmé prend le point confirmé JUSTE AU-DESSUS — jamais une interpolation. Interpoler, c'est inventer un prix de transport, et un transport sous-évalué se paie sur la marge.",
+  "_regle_de_l_user": "Gravée le 10/08/2026 : « si un seul outil pèse plus de 10 kg, il passe par bateau ». Le bateau de La Poste s'appelle Colissimo Eco Outre-mer.",
+  "_zone": "OM1 — Guadeloupe, Martinique, Guyane, La Réunion, Mayotte, Saint-Pierre-et-Miquelon, Saint-Martin, Saint-Barthélemy",
+  "_seuil_bateau_kg": 10,
+
+  "colissimo": {
+    "_nom": "Colissimo Outre-mer (voie aérienne)",
+    "_delai": "5 à 11 jours hors traitement douanier",
+    "_points": [
+      { "kgMax": 5, "prix": 38.90, "confirme": true, "source": "laposte.fr/tarif-colissimo-outre-mer, recoupé tarif-lettre.com et info-postes.com", "date": "2026-08-10" },
+      { "kgMax": 30, "prix": 143.02, "confirme": true, "source": "affiche officielle La Poste « PRINCIPAUX TARIFS COLIS DÉPART DE FRANCE MÉTROPOLITAINE, 1er janvier 2026 » (LPS-14231), recoupée laposte.fr", "date": "2026-08-10" }
+    ],
+    "_points_non_confirmes": "Les tranches 0,5 · 1 · 2 · 3 · 10 · 15 kg vivaient dans le code depuis le 25/07/2026 avec la mention « intermédiaires estimés, à confirmer sur laposte.fr ». Elles n'ont PAS été confirmées : laposte.fr et tous les agrégateurs tarifaires sont injoignables de ma session (proxy 403), et les résumés de recherche ne rendent pas la grille complète. Elles sont donc SORTIES de la table et remplacées par la règle du point supérieur."
+  },
+
+  "colissimoEco": {
+    "_nom": "Colissimo Eco Outre-mer — LE BATEAU DE LA POSTE",
+    "_delai": "20 à 50 jours ouvrés (livraison par bateau, J+18 à J+48 selon la source)",
+    "_plafond_kg": 30,
+    "_points": [
+      { "kgMax": 5, "prix": 24.80, "confirme": true, "source": "laposte.fr/envoyer/colissimo-eco-outre-mer", "date": "2026-08-10" },
+      { "kgMax": 10, "prix": 39.24, "confirme": true, "source": "affiche officielle La Poste janvier 2026 (LPS-14231), tarif DOM", "date": "2026-08-10" },
+      { "kgMax": 30, "prix": 96.35, "confirme": false, "source": "tarif 2025 relevé sur tarif-lettre.com — la valeur 2026 n'a pas pu être lue, laposte.fr étant injoignable. Retenue faute de mieux ET marquée non confirmée : elle SURESTIME très probablement le coût réel 2025, jamais l'inverse", "date": "2026-08-10" }
+    ]
+  },
+
+  "_au_dela_de_30_kg": "Colissimo Eco Outre-mer s'arrête à 30 kg. Au-delà, aucun envoi postal n'est possible : c'est du fret, et le coût se lit sur un devis de transitaire — jamais dans cette table. Le modèle de prix REFUSE de chiffrer un tel article plutôt que d'inventer."
+}

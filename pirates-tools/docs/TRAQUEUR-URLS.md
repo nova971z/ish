@@ -144,45 +144,115 @@ Le raccourci a **quatre** actions au lieu de trois :
 
 ---
 
-## 🔴 MILWAUKEE — idealo, 67 PAGES EN BOUCLE (10/08/2026)
+## 🧩 L'ANATOMIE DU RACCOURCI — LES 9 BLOCS, UNE FOIS POUR TOUTES
 
-> ⛔ **URL VENUES DE SON ÉCRAN, JAMAIS DÉDUITES.** Il a envoyé quatre adresses :
-> page 1, page 2, page 3 et page 67. Le pas de 15 est donc **PROUVÉ** par
-> quatre points (0, 15, 30, et 990 = 66 × 15) — c'est le premier des trois
-> plans où la loi de pagination n'est pas une supposition. Catégorie : `M140603`.
+> ⛔⛔ **GRAVÉ LE 10/08/2026, SUR SA CAPTURE D'ÉCRAN.** Je lui avais donné une
+> recette à quatre lignes à remplacer (URL de page 1, gabarit `[Nombre
+> formaté]`, « Répéter 66 fois », « × 15 »). **Elle était fausse** : elle
+> décrivait une version du raccourci qu'il n'utilise plus. Son raccourci réel
+> **ne fabrique AUCUNE URL** — il demande le PLAN au serveur et boucle dessus.
+> C'est tout l'intérêt du point d'entrée `price-watch-plan` : le jour où la
+> pagination du site change, elle change dans `traqueur-plans.js`, et aucun
+> raccourci n'est à retoucher.
 >
-> ⛔ **AUCUNE FICHE DE CETTE MARQUE AU CATALOGUE** (mesuré le 10/08/2026 :
-> Makita 611, DeWALT 1047, Festool 50, Milwaukee 0). Le premier balayage ne
-> mettra **aucun prix à jour** : il sert à DÉCOUVRIR. Tout ce qu'il lit sortira
-> dans `unknown` avec titre, prix et contenu. Ce n'est pas une panne.
+> ⚠️ Ce que je lis sur SA capture, bloc par bloc — pas ce que j'imagine :
 
-**Le raccourci se duplique depuis celui de DeWALT. QUATRE lignes changent, et
-elles seules :**
+| # | Le bloc | Ce qu'il contient |
+|---|---|---|
+| **1** | Obtenir le contenu de | `https://pirates-tools.com/api/health` |
+| **2** | Obtenir le contenu de | `https://pirates-tools.com/api/admin?type=price-watch-plan&brand=`**`DEWALT`**`&source=idealo` |
+| **3** | Obtenir **Valeur** pour `urls` dans | Contenu de l'URL *(du bloc 2)* |
+| **4** | **Répéter avec chaque élément dans** | Valeur du dictionnaire *(du bloc 3)* |
+| **5** | ↳ Obtenir le contenu de | **Élément de répétition** *(l'adresse fournisseur)* |
+| **6** | ↳ Définir la variable | **Page** sur Contenu de l'URL *(du bloc 5)* |
+| **7** | ↳ Obtenir le contenu de | `type=price-watch&brand=`**`DEWALT`**`&source=idealo&scan=1&bref=1&manquants=1&inconnus=1` — ⛔ **sa capture ne montre PAS `sec=1`**, voir l'encadré ci-dessous |
+| **8** | **Fin de la récurrence** | — |
+| **9** | *(coupé en bas de sa capture)* | ⚠️ **NON LU** — je ne l'invente pas |
 
-| Action du raccourci | Ce qu'on remplace par |
-|---|---|
-| **2** — page 1 (GET) | `https://www.idealo.fr/prechcat/100oM140603.html?qr=false&sortKey=maxPrice` |
-| **3** — le POST | `https://pirates-tools.com/api/admin?type=price-watch&brand=MILWAUKEE&source=idealo&scan=1&dryRun=1&sec=1` |
-| **7** — le Texte de la boucle | `https://www.idealo.fr/prechcat/100I16-[Nombre formaté]oM140603.html?qr=false&sortKey=maxPrice` |
-| **9** — le POST de la boucle | la MÊME adresse que l'action 3 |
+### ⛔ POUR UNE NOUVELLE MARQUE : DEUX CHOSES CHANGENT, PAS QUATRE
 
-**Ce qui NE change PAS** : l'action 1 (`/api/health`), le « Répéter **66** fois »
-de l'action 4, le « × **15** » de l'action 5, le « **0 décimale** » de l'action 6,
-l'en-tête `x-watch-secret` sur les deux POST, et le champ `text` du corps JSON.
+**Bloc 2** et **bloc 7** — le `brand=`. **Rien d'autre.**
 
-> ⛔ **PREMIER PASSAGE EN `dryRun=1`** — c'est écrit dans le tableau ci-dessus.
-> On vérifie `format: "idealo"` et `tuilesDansLaPage` page à page, PUIS on passe
-> les actions 3 et 9 en `dryRun=0`. Un raccourci ne reste JAMAIS en `dryRun=1`.
+| Bloc | Avant | Après (exemple Milwaukee) |
+|---|---|---|
+| **2** | `…price-watch-plan&brand=DEWALT&source=idealo` | `…price-watch-plan&brand=`**`MILWAUKEE`**`&source=idealo` |
+| **7** | `…price-watch&brand=DEWALT&source=…&scan=1&sec=1&bref=1&manquants=1&inconnus=1` | `…price-watch&brand=`**`MILWAUKEE`**`&source=idealo&scan=1&sec=1&bref=1&manquants=1&inconnus=1` |
+
+> ### ⛔⛔ CE QUE SA CAPTURE RÉVÈLE, ET QUE JE NE CORRIGE PAS EN DOUCE
 >
-> ⛔ **`&scan=1` n'est pas facultatif** : sans le cache de balayage, 67 pages
-> relisent la collection entière et le quota Firestore saute (déjà payé le 01/08).
+> Le bloc 7 de son écran ne porte **pas** `&sec=1`. Or la décision **D-018**
+> (« on continue de tester à sec, je ne veux pas que ça utilise Firebase pour
+> l'instant ») est écrite **EN VIGUEUR** et n'a jamais été levée — et c'est une
+> porte de la CI qui l'a signalé, pas moi.
 >
-> ⚠️ **Ce qui reste à vérifier, et qui se vérifie tout seul** : `parPage = 60`
-> est supposé identique aux deux autres marques (même site, même gabarit).
-> `tuilesDansLaPage` le mesure page par page, et `couverture.refsDistinctes`
-> doit croître d'environ 60 par page. Si le compteur stagne, les pages se
-> recouvrent — mais le pas, lui, est prouvé.
+> Ce que ça change, mesuré : sans `sec=1`, un balayage lit la collection
+> entière — **~3 780 documents**, ce qui a fermé son administration le 04/08.
+> Avec `sec=1`, le serveur lit `products.json` **sur le disque**, ne touche pas
+> Firestore et ne peut RIEN écrire par construction.
+>
+> **Donc, dans cet ordre :**
+> 1. **premier passage AVEC `&sec=1`** — il prouve le câblage (format reconnu,
+>    nombre d'articles lus, lesquels correspondent à une fiche), sans quota :
+>    `…?type=price-watch&brand=MILWAUKEE&source=idealo&scan=1&sec=1&bref=1&manquants=1&inconnus=1`
+> 2. **ensuite seulement**, retirer `&sec=1` pour un vrai relevé — et c'est SA
+>    décision, parce que c'est SA décision D-018 qui l'interdit aujourd'hui.
 
+**Ce qui ne bouge JAMAIS** : le bloc 1 (`/api/health`), les blocs 3 à 6 et 8,
+l'en-tête `x-watch-secret` sur les blocs 2 et 7, la méthode **POST** et le
+champ **`text`** = variable **Page** sur le bloc 7.
+
+⚠️ **Aucune URL fournisseur n'apparaît dans le raccourci.** Elles vivent
+toutes dans `api/_lib/traqueur-plans.js`, côté serveur. C'est là — et là
+seulement — que les adresses d'une nouvelle marque s'écrivent.
+
+### Les quatre drapeaux du bloc 7, et pourquoi ils y sont
+
+- **`scan=1`** — le cache de balayage. ⛔ **Pas facultatif** : sans lui, chaque
+  page relit la collection entière et le quota a déjà sauté (01/08).
+- **`bref=1`** — la réponse allégée. Une réponse pleine fait 50 480 signes ;
+  sur 67 pages, son iPad ne peut ni l'écrire ni la recopier.
+- **`manquants=1`** — la liste NOMMÉE des fiches qu'aucune page n'a retrouvées.
+- **`inconnus=1`** — les références vues chez le fournisseur avec leur TITRE.
+  Sans elles, « pourquoi cette référence n'est pas reconnue ? » n'a pas de
+  réponse.
+
+### Ce que je dois faire quand il dit « on crée le traqueur pour telle marque »
+
+1. Il envoie les URL de **page 1, 2, 3 et dernière** *(quatre points : la loi
+   de pagination est PROUVÉE, pas déduite — E-112)*.
+2. J'ajoute le plan dans **`api/_lib/traqueur-plans.js`** : `pages`, `pas`,
+   `parPage`, `ordre`, `patron`, `patronPage1`, `patronRecherche`.
+   ⛔ `patronRecherche` est **obligatoire** — une porte le vérifie.
+3. Je vérifie : le bon nombre d'adresses, **0 doublon**, aucun gabarit
+   `{offset}` resté en place, page 1 sur son chemin propre.
+4. Je lui rends **les deux lignes** du tableau ci-dessus, avec sa marque.
+5. Je lui dis s'il a des fiches de cette marque au catalogue — sinon le premier
+   balayage **découvre** au lieu de mettre à jour, et il faut le savoir avant.
+
+---
+
+## 🔴 MILWAUKEE — idealo, 67 PAGES (plan déclaré le 10/08/2026)
+
+> **Le plan est en place** : `MILWAUKEE@idealo`, catégorie `M140603`, 67 pages.
+> Ses quatre adresses donnent le pas : 0, 15, 30 et 990 = 66 × 15. **Le pas est
+> PROUVÉ**, c'est le premier des trois plans dans ce cas.
+>
+> **Dans le raccourci dupliqué, deux blocs à modifier :**
+>
+> - **Bloc 2** → `https://pirates-tools.com/api/admin?type=price-watch-plan&brand=MILWAUKEE&source=idealo`
+> - **Bloc 7** → `https://pirates-tools.com/api/admin?type=price-watch&brand=MILWAUKEE&source=idealo&scan=1&sec=1&bref=1&manquants=1&inconnus=1`
+>   *(le `&sec=1` est le premier passage, celui qui prouve le câblage sans quota — voir l'encadré D-018 plus haut)*
+>
+> Rien d'autre. Pas d'URL idealo à taper : le bloc 2 les rapporte toutes.
+>
+> ⛔ **AUCUNE FICHE DE CETTE MARQUE AU CATALOGUE** (mesuré : Makita 611,
+> DeWALT 1047, Festool 50, Milwaukee 0). Le premier balayage ne mettra **aucun
+> prix à jour** — il DÉCOUVRE, et tout sort dans `inconnus`. Ce n'est pas une
+> panne.
+>
+> ⚠️ **Ce qui reste à vérifier, et se vérifie tout seul** : `parPage = 60` est
+> supposé identique aux deux autres marques. `tuilesDansLaPage` le mesure page
+> par page, et `couverture.refsDistinctes` doit croître d'environ 60 par page.
 
 ## ➕ AJOUTER UN TRAQUEUR (autre site) — depuis le 01/08/2026
 

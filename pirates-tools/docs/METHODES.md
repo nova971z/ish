@@ -263,6 +263,54 @@ d'arbitrer.
 *Appliqué* : « 536 racines à peser, une recherche chacune » — pas « je
 continue ».
 
+### M-23 — Le tarif d'un TRANSPORTEUR est une grille, pas un forfait
+
+Un coût d'expédition dépend du poids. Le figer en forfait « pour les objets
+lourds » sous-provisionne dès le premier kilo au-dessus du seuil.
+
+*Panne payée (10/08/2026)* : tout article de plus de 10 kg provisionnait
+**29 €** de port, quel que soit son poids — 11 kg comme 30 kg. Or le bateau de
+La Poste (Colissimo Eco Outre-mer) coûte **39,24 € dès 10 kg**. Mesuré sur ses
+9 fiches concernées : **606,15 € de provision manquante, 67,35 € par vente**.
+⛔ Et **on n'interpole pas** entre deux points de grille : un poids qui ne
+tombe pas sur un point confirmé prend le point confirmé **juste au-dessus**.
+*Porte* : `scripts/check-pricing-model.js` (3 sabotages, 3 rouges) ·
+`data/transport-outre-mer.json`.
+
+### M-24 — Une porte qui verrouille un DÉFAUT empêche de le réparer
+
+Une assertion qui recopie la valeur observée grave le comportement, bon ou
+mauvais. Le jour où on corrige, c'est elle qui rougit.
+
+*Panne payée le jour même* : `ok(lourd.transport < 40, 'port bateau < 40 €')`
+décrivait le forfait de 29 €. Corriger le tarif faisait échouer la porte.
+⇒ Une assertion vise un **INVARIANT** (« le port postal dépasse la quote-part
+de groupage »), jamais un chiffre recopié.
+
+### M-25 — Un refus doit REMONTER, jamais se diluer
+
+Quand une fonction rend « je ne sais pas », l'appelant doit s'arrêter. Sinon
+l'absence devient un zéro, et un zéro se calcule très bien.
+
+*Panne payée à la minute où la règle du bateau est entrée* : `shipFor` rendait
+`null` au-delà de 30 kg, `recommend` continuait — et sortait un prix calculé
+avec **un port à 0 €**. Pire que le forfait qu'on venait de corriger. C'est sa
+propre porte neuve qui l'a attrapé.
+
+### M-26 — Le raccourci ne fabrique rien : il demande son PLAN
+
+Un raccourci d'iPad ne doit contenir **aucune adresse fournisseur**. Il appelle
+le point d'entrée `price-watch-plan`, qui lui rend la liste des pages, et il
+boucle dessus. Changer de marque ne touche alors qu'**un seul mot, à deux
+endroits** — le `brand=` des blocs 2 et 7.
+
+*Panne payée (10/08/2026)* : je lui ai donné « quatre lignes à remplacer »
+tirées d'une version périmée de la doc — gabarit d'URL, « Répéter 66 fois »,
+« × 15 ». Sa capture d'écran a montré que son raccourci ne fait rien de tout
+ça. ⛔ **Une recette se lit sur SON écran, jamais dans mon souvenir.**
+*Porte* : `docs/TRAQUEUR-URLS.md`, section « L'anatomie du raccourci — les 9
+blocs », avec le bloc 9 marqué **NON LU** parce qu'il est coupé sur sa capture.
+
 ---
 
 ## Où ces méthodes sont déjà branchées
@@ -275,4 +323,6 @@ continue ».
 | M-14, M-15, M-16 | `api/_lib/nomenclature.js` (`lireSuffixeMakita`, `decomposerSuffixeMakita`) |
 | M-17 | `audit/nomenclature-makita.js` |
 | M-18 | `api/_lib/traqueur-plans.js`, `docs/TRAQUEUR-URLS.md` |
-| M-19, M-20 | `outils/sabotage.mjs`, `scripts/check-price-watch.js` |
+| M-19, M-20, M-24, M-25 | `outils/sabotage.mjs`, `scripts/check-pricing-model.js` |
+| M-23 | `data/transport-outre-mer.json`, `api/_lib/pricing-model.js` |
+| M-26 | `docs/TRAQUEUR-URLS.md`, `api/_lib/traqueur-plans.js` |
