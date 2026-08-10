@@ -2924,11 +2924,31 @@ function pwCouvAjouter(brand, skus, titres, nbTuiles, nbLues, pagesDuPlan, extra
        ⚠️ Portes lues : J3 — des références et des libellés d'outils, aucune
        donnée personnelle ; J4 — aucun prix n'y figure ; J5 — aucune TVA,
        aucun octroi de mer. */
-    fichesJamaisVuesDetail: (extra.manquants && Array.isArray(pwCouv.fichesDetail))
+    /* ⛔⛔ LA LISTE COMPLÈTE NE PART QU'À LA DERNIÈRE PAGE (09/08/2026).
+       L'user : « j'ai l'impression que c'est encore plus long ». MESURÉ sur son
+       balayage Makita : la réponse fait 63 Ko, dont **55 Ko pour cette seule
+       liste** (605 fiches, nom compris) — renvoyée à son iPad À CHAQUE PAGE.
+       Sur 112 pages : **5,7 Mo** de la même liste, transférés puis empilés dans
+       « Résultats de la répétition » du raccourci. Cadence mesurée : 11,24 s par
+       page sur Makita contre 3,51 s sur DeWALT (67 pages, 145 manquants).
+       ⛔ Ce n'est PAS le calcul qui coûte — mes passes d'appariement pèsent
+       2,38 ms par page, soit 0,27 s sur tout le balayage (mesuré). C'est le
+       TRANSFERT de cette liste.
+       ⛔ Elle n'a de sens qu'une fois le balayage FINI : à mi-parcours, elle
+       liste des fiches que les pages suivantes vont trouver. On la rend donc à
+       la DERNIÈRE page seulement — et hors balayage, où il n'y a qu'une page.
+       ⚠️ Le COMPTE (`fichesJamaisVues`), lui, part à chaque page : il est léger
+       et c'est lui qui dit où on en est. Rien n'est perdu, seul le détail
+       attend la fin. */
+    fichesJamaisVuesDetail: (extra.manquants && Array.isArray(pwCouv.fichesDetail)
+        && (!extra.scan || manquantes === 0 || manquantes === null))
       ? pwCouv.fichesDetail
         .filter(function (f) { return !pwCouv.fiches[String(f.sku).toUpperCase()]; })
         .slice(0, PW_MANQUANTS_MAX)
       : undefined,
+    /* Dit POURQUOI le détail est absent, au lieu de le laisser croire vide. */
+    fichesJamaisVuesDetailDiffere: (extra.manquants && extra.scan
+      && manquantes !== 0 && manquantes !== null) ? true : undefined,
     /* ⛔ UNE TRONCATURE SE DIT. Sans ce drapeau, une liste coupée se lit
        « voici tout ce qui manque » — et l'user cherche 600 produits en croyant
        les avoir tous. Le compte, lui, reste juste : c'est l'écart entre les
@@ -3343,6 +3363,10 @@ async function handlePriceWatch(req, res, admin, db) {
           fichesMarque: fichesMarqueSec,
           skusMarque: fichesDeLaMarqueSec.map((p) => p.sku).filter(Boolean),
           manquants: manquants,
+          /* ⛔ Le mode balayage remonte ICI : c'est lui qui décide si la liste
+             complète des fiches jamais vues part sur CETTE page ou attend la
+             dernière (5,7 Mo transférés en trop, mesurés le 09/08/2026). */
+          scan: scanMode,
           fichesDetail: fichesDeLaMarqueSec.map((p) => ({
             sku: p.sku, nom: String(p.title || p.name || '').slice(0, 90) })) });
 
@@ -4144,6 +4168,7 @@ async function handlePriceWatch(req, res, admin, db) {
           skusMarque: products.filter((p) => String(p.brand || '').toUpperCase()
             === String(brand).toUpperCase()).map((p) => p.sku).filter(Boolean),
           manquants: manquants,
+          scan: scanMode,          // même règle sur le chemin d'écriture
           fichesDetail: products.filter((p) => String(p.brand || '').toUpperCase()
             === String(brand).toUpperCase() && p.sku)
             .map((p) => ({ sku: p.sku, nom: String(p.title || p.name || '').slice(0, 90) })),

@@ -2595,6 +2595,45 @@ module.exports = async function () {
         await admFn({ method: 'POST', query: { type: 'price-watch', brand: 'DEWALT',
           source: 'idealo', scan: '1' }, body: { text: pageAvecRejet } },
           rRej0, fauxAdmin, fauxDb({}, []));
+        /* ⛔⛔ LA LISTE DES FICHES JAMAIS VUES NE PART QU'À LA DERNIÈRE PAGE
+           (09/08/2026). L'user : « j'ai l'impression que c'est encore plus
+           long ». MESURÉ sur son balayage : la réponse fait 63 Ko dont 55 Ko
+           pour cette seule liste (605 fiches), renvoyée à CHAQUE page — 5,7 Mo
+           sur 112 pages. Cadence : 11,24 s/page sur ce balayage contre 3,51 s
+           sur celui de 67 pages. Ce n'est pas le calcul (2,38 ms/page mesurés),
+           c'est le TRANSFERT.
+           ⚠️ Le mode balayage se reconnaît à `scan=1` ; le plan de la marque
+           dit combien de pages sont attendues. Tant qu'il en manque, seul le
+           COMPTE part — le détail attend. */
+        scanReset();
+        var rMi = fauxRes();
+        await admFn(reqPage(cible.sku, { scan: '1', manquants: '1' }),
+          rMi, fauxAdmin, fauxDb({}, []));
+        var couvMi = (rMi.out || {}).couverture || {};
+        ok(couvMi.fichesJamaisVuesDetail === undefined && couvMi.fichesJamaisVuesDetailDiffere === true,
+          '⛔⛔ VITESSE : en cours de balayage, la liste complète des fiches jamais vues '
+          + 'ne part PAS — et son absence est DITE, pas laissée croire vide ('
+          + JSON.stringify({ detail: couvMi.fichesJamaisVuesDetail !== undefined,
+            differe: couvMi.fichesJamaisVuesDetailDiffere }) + ')');
+        /* ⚠️ PRÉALABLE 1 — le COMPTE, lui, part à chaque page : c'est lui qui
+           dit où on en est. Sans ce cas, on aurait pu tout supprimer. */
+        ok(typeof couvMi.fichesJamaisVues === 'number',
+          '⚠️ PRÉALABLE : le COMPTE des fiches jamais vues part quand même — rien '
+          + 'n\'est perdu, seul le détail attend ('
+          + JSON.stringify(couvMi.fichesJamaisVues) + ')');
+        /* ⛔⛔ PRÉALABLE 2, LE PLUS IMPORTANT : la liste doit ARRIVER quand le
+           balayage est fini. Sans ce cas, « différer » serait indistinguable de
+           « perdre » — et l'user n'aurait plus jamais la liste. Hors balayage,
+           il n'y a qu'une page : c'est la dernière. */
+        scanReset();
+        var rFin = fauxRes();
+        await admFn(reqPage(cible.sku, { manquants: '1' }), rFin, fauxAdmin, fauxDb({}, []));
+        var couvFin = (rFin.out || {}).couverture || {};
+        ok(Array.isArray(couvFin.fichesJamaisVuesDetail),
+          '⛔⛔ PRÉALABLE : la liste ARRIVE bien quand le balayage est terminé — '
+          + 'différer n\'est pas perdre (' + (Array.isArray(couvFin.fichesJamaisVuesDetail)
+            ? couvFin.fichesJamaisVuesDetail.length + ' entrées' : 'ABSENTE') + ')');
+
         /* ⛔⛔ LES ÉCRITURES PARTENT EN UN SEUL LOT (09/08/2026, demande de
            l'user : « est-ce que les traqueurs peuvent être beaucoup plus
            rapides ? »). MESURÉ sur SES deux balayages du soir : chaque produit
@@ -3659,7 +3698,12 @@ module.exports = async function () {
             var rAl = fauxRes();
             await admFn({ method: 'POST',
               query: { type: 'price-watch', brand: marqueT, source: 'idealo', sec: '1',
-                scan: '1', manquants: '1' },
+                /* ⚠️ SANS `scan` : ces assertions jugent la QUALITÉ de la liste
+                   (compte == liste, troncature déclarée), pas le moment de son
+                   envoi. Depuis le 09/08/2026 le détail est différé à la dernière
+                   page du balayage — les garder en balayage les ferait juger une
+                   liste volontairement absente. */
+                manquants: '1' },
               // La page n'écrit QUE l'alias, jamais la référence de la fiche.
               body: { text: pageDeFiches([String(ficheAlias.srcAltSkus[0]).toUpperCase()], 800) } },
               rAl, fauxAdmin, dbInterdite);
@@ -3788,7 +3832,8 @@ module.exports = async function () {
         var rMq = fauxRes();
         await admFn({ method: 'POST',
           query: { type: 'price-watch', brand: marqueT, source: 'idealo', sec: '1',
-            scan: '1', manquants: '1' },
+            /* ⚠️ Idem : le sujet est le CONTENU de la liste (référence + libellé). */
+            manquants: '1' },
           body: { text: pageDeFiches(troisRefs.slice(0, 2), 700) } },
           rMq, fauxAdmin, dbInterdite);
         var cMq = rMq.out && rMq.out.couverture;
