@@ -1506,11 +1506,99 @@ function apparierParRefRecollee(annonces, fiches, marque) {
      ÉGAL à la référence d'une fiche du catalogue — la même règle que le
      recollage juste au-dessus. Le catalogue tranche ; la forme, jamais. */
   var reNumerique = /\b(\d{4,7}(?:-\d)?[A-Z]{0,3}|\d{3}[A-Z]\d{2}-\d)\b/;
+  /* ⛔⛔ LA RÉFÉRENCE ENTRE PARENTHÈSES EN FIN DE TITRE DÉSIGNE L'ARTICLE.
+     Mesuré le 10/08/2026, en vase clos, sur son balayage de 112 pages : NEUF
+     fiches « Power Source Kit … (198458-6) » plus un « Battery Combo Kit
+     DLM330Z + DHW180Z … (DLX2583T) » étaient écartées parce que le titre
+     annonce un contenu. Or ces fiches SONT le kit : la référence finale est
+     celle de l'article vendu, les autres ne sont que ses composants.
+     ⛔ ET LA RÈGLE RÉPARE UN FAUX POSITIF EN MÊME TEMPS QU'ELLE GAGNE : sur
+     « Patin graphite pour ponceuse à bande 9403/9403J (421648-9) », la
+     parenthèse porte 421648-9 — le patin — et 9403J n'est cité qu'en
+     COMPATIBILITÉ. En ne lisant QUE la parenthèse finale, on cesse d'écrire
+     9,10 € sur une ponceuse vendue 332,68 €.
+     ⛔ Trois gardes, et il faut les trois : la parenthèse est la DERNIÈRE chose
+     du titre ; elle ne contient QU'UNE référence (pas « (2x Battery 4 Ah) ») ;
+     et cette référence EST une fiche du catalogue — le catalogue tranche,
+     jamais la forme.
+     ⚠️ J4 : le prix retenu reste CELUI DE LA TUILE, jamais recalculé, jamais
+     annoncé barré. Ce qui change ici est la fiche à laquelle il s'applique —
+     et l'erreur qu'on répare est justement un prix posé sur le mauvais
+     article, donc un prix de vente faux. */
+  var reParenFinale = /\(([A-Z0-9][A-Z0-9 ./-]{2,24})\)\s*$/;
+  /* ⛔⛔ UN « + » NE DISQUALIFIE PAS QUAND LE SUFFIXE DIT LE MÊME CONTENU.
+     Mesuré au même endroit : « Makita DHR 202 RFJ 18 V + 2x 3,0 Ah + chargeur
+     et Makpac » à 278,04 € était écarté, alors que le suffixe RFJ de la fiche
+     décrit EXACTEMENT ça — 2 batteries 3 Ah en coffret MAKPAC. Le « + » y
+     énumère le contenu DE LA RÉFÉRENCE NOMMÉE, pas un lot de deux produits.
+     ⚠️ On n'accepte que si le suffixe est CONNU et que le titre concorde sur le
+     nombre de batteries ; une concordance partielle ne suffit pas. J4 : sans
+     cette garde, on écrirait un prix de kit sur un outil nu. */
+  /* ⛔⛔ ON LIT LE CONTENU SUR LE TITRE BRUT, PAS SUR LA QUALIFICATION.
+     Défaut mesuré en vase clos le 10/08/2026 sur « Makita DHR 202 RFJ 18 V +
+     2x 3,0 Ah + chargeur et Makpac » : `extraireCaracteristiques` lit bien
+     « 2 batteries / 3 Ah »… puis le VERROU DE L'ENTONNOIR les EFFACE, parce
+     que le titre — dominé par « chargeur » et « Ah » — a été typé dans le
+     rayon ÉNERGIE, où ces mesures n'ont pas leur place. Le verrou a raison sur
+     son terrain : une lame n'a pas d'ampères-heures. Mais ici on ne cherche
+     pas à qualifier l'article, on cherche à savoir si le titre ÉNONCE le
+     contenu que le suffixe décrit — et cette question-là se pose sur le texte,
+     avant tout classement.
+     ⚠️ Mêmes écritures que le lecteur principal, et rien de plus : « 2x 3,0 Ah »
+     et « 2 batteries ». Une lecture plus large ici rapprocherait sur du vide. */
+  function contenuAnnonce(titre) {
+    var s = String(titre || '');
+    var m = s.match(/\b(\d+)\s*[xX×]\s*(\d+(?:[.,]\d+)?)\s*Ah\b/i);
+    if (m) return { nb: parseInt(m[1], 10), ah: parseFloat(m[2].replace(',', '.')) };
+    var mb2 = s.toLowerCase().match(/(?:^|[^a-z0-9])(\d+)\s*batteries?\b/);
+    if (mb2) {
+      var ma2 = s.match(/(\d+(?:[.,]\d+)?)\s*Ah\b/i);
+      return { nb: parseInt(mb2[1], 10), ah: ma2 ? parseFloat(ma2[1].replace(',', '.')) : null };
+    }
+    return null;
+  }
+  function suffixeDitLeContenu(titre, sku) {
+    var l = nomen.lireSuffixeMakita(String(sku || '').toUpperCase());
+    if (!l || !l.config || typeof l.config.nbBatteries !== 'number') return false;
+    var dit = contenuAnnonce(titre);
+    if (!dit) return false;
+    if (dit.nb !== l.config.nbBatteries) return false;
+    if (dit.ah != null && l.config.ah && Math.abs(dit.ah - l.config.ah) > 0.05) return false;
+    return true;
+  }
   liste.forEach(function (e) {
     var titre = String((e && e.titre) || '');
     var prix = e && (typeof e.prix === 'number' ? e.prix : e.price);
     if (!titre || !(prix > 0)) { res.restants.push(e); return; }
-    if (annonceUnLot(titre)) { res.restants.push(e); return; }
+    var mp = titre.match(reParenFinale);
+    if (mp) {
+      var refParen = mp[1].toUpperCase().replace(/[^A-Z0-9]/g, '');
+      if (refParen && !collisions[refParen] && parRef[refParen]) {
+        res.items.push({
+          sku: parRef[refParen].sku, price: prix, name: titre, promo: false,
+          enStock: null, car: extraireCaracteristiques(titre, marque),
+          refRecollee: true, refParenthese: true
+        });
+        return;
+      }
+    }
+    if (annonceUnLot(titre)) {
+      /* Dernier recours avant le rejet : la référence nommée porte-t-elle un
+         suffixe qui DIT le contenu que le titre énumère ? */
+      var mLot = titre.match(reEclatee);
+      var recolleLot = mLot
+        ? (mLot[1] + mLot[2] + (mLot[3] || '')).toUpperCase().replace(/[^A-Z0-9]/g, '') : '';
+      if (recolleLot && !collisions[recolleLot] && parRef[recolleLot]
+          && suffixeDitLeContenu(titre, parRef[recolleLot].sku)) {
+        res.items.push({
+          sku: parRef[recolleLot].sku, price: prix, name: titre, promo: false,
+          enStock: null, car: extraireCaracteristiques(titre, marque),
+          refRecollee: true, contenuConcordant: true
+        });
+        return;
+      }
+      res.restants.push(e); return;
+    }
     /* ⛔ La référence doit être écrite EN CAPITALES par le marchand — c'est ce
        qui la distingue d'un mot ordinaire suivi d'un nombre (défaut déjà payé :
        « bidon 600ML » donnait « BIDON600 »). On cherche donc sur le titre TEL

@@ -1755,6 +1755,87 @@ module.exports = async function () {
         && !rn.items.some(function (x) { return /2026|1250/.test(String(x.sku)); }),
         '⚠️ PRÉALABLE : un nombre quelconque du titre (année, quantité) ne devient '
         + 'JAMAIS une référence — seul le catalogue en décide');
+
+      /* ══ LA RÉFÉRENCE ENTRE PARENTHÈSES EN FIN DE TITRE ═══════════════════
+         ⛔⛔ MESURÉ EN VASE CLOS LE 10/08/2026 sur son balayage de 112 pages :
+         DIX fiches — des kits « … (198458-6) » — étaient écartées parce que
+         leur titre annonce un contenu. Or ces fiches SONT le kit : la
+         référence finale nomme l'article vendu, les autres n'en sont que les
+         composants.
+         ⛔⛔ ET C'EST AUSSI UNE GARDE D'ARGENT : sur un titre du type
+         « Patin pour ponceuse REF-A/REF-B (REF-PATIN) », l'ancienne lecture
+         pouvait retenir la PONCEUSE citée en compatibilité — 9,10 € écrits sur
+         une machine vendue 332,68 €. En ne lisant QUE la parenthèse finale, le
+         composant cesse d'être confondu avec l'article. */
+      var fichesP = [{ sku: 'ZZK-198458-6' }, { sku: 'ZZB1830B' }, { sku: 'ZZP9403J' },
+        { sku: 'ZZPATIN-421648' }];
+      var lotP = [
+        { titre: 'MarqueZZ Power Source Kit 5,0Ah (ZZK-198458-6)', prix: 329.18 },
+        { titre: 'MarqueZZ Power Source Kit (2x ZZB1830B + ZZC18RC)', prix: 114.26 },
+        { titre: 'MarqueZZ Patin graphite pour ponceuse ZZP9403J (ZZPATIN-421648)', prix: 9.1 }
+      ];
+      var rp = arr(lotP, fichesP, 'MARQUEZZ');
+      var parP = {}; rp.items.forEach(function (x) { parP[x.sku] = x.price; });
+      ok(parP['ZZK-198458-6'] === 329.18,
+        '⛔⛔ la référence ENTRE PARENTHÈSES en fin de titre désigne L\'ARTICLE — sans '
+        + 'elle, dix kits du relevé mesuré restaient sans coût (obtenu '
+        + JSON.stringify(parP) + ')');
+      ok(parP['ZZPATIN-421648'] === 9.1 && parP['ZZP9403J'] === undefined,
+        '⛔⛔ ARGENT : la machine citée en COMPATIBILITÉ ne reçoit pas le prix de '
+        + 'l\'accessoire — c\'est la parenthèse finale qui nomme l\'article, jamais '
+        + 'une référence du corps du titre');
+      /* ⚠️ PRÉALABLE — un composant listé dans un lot reste écarté : la
+         parenthèse doit être la DERNIÈRE chose du titre, pas n'importe où. */
+      ok(parP['ZZB1830B'] === undefined,
+        '⚠️ PRÉALABLE : un composant énuméré dans un lot n\'est JAMAIS rapproché — '
+        + 'sinon un prix de pack tomberait sur une batterie seule');
+
+      /* ══ LE « + » QUI ÉNUMÈRE LE CONTENU DE LA RÉFÉRENCE NOMMÉE ═══════════
+         ⛔⛔ Mesuré au même endroit : un titre « <réf conditionnée> 18 V + 2x
+         3,0 Ah + chargeur et coffret » était écarté, alors que le suffixe de
+         CETTE référence décrit exactement ce contenu. Le « + » y détaille le
+         kit nommé, il n'annonce pas un lot de deux produits.
+         ⛔ ET LE DÉFAUT QUI L'EMPÊCHAIT ÉTAIT AILLEURS : le contenu se lisait
+         par la qualification complète, dont le VERROU DE L'ENTONNOIR efface
+         les ampères-heures dès que le titre est typé dans le rayon énergie —
+         ce que « chargeur » et « Ah » provoquent justement. Le contenu se lit
+         donc sur le TEXTE, avant tout classement.
+         ⚠️ Suffixes choisis À L'EXÉCUTION dans la nomenclature : un harnais ne
+         grave pas une grammaire qui vit dans le produit. */
+      var tblSuf = pp.nomenclature && pp.nomenclature.SUFFIXES_MAKITA;
+      var sufOk = null, sufAutre = null;
+      Object.keys(tblSuf || {}).forEach(function (s) {
+        var c = tblSuf[s];
+        if (!c || typeof c.nbBatteries !== 'number') return;
+        if (!sufOk && c.nbBatteries === 2 && c.ah) sufOk = { s: s, c: c };
+        if (!sufAutre && c.nbBatteries === 0) sufAutre = { s: s, c: c };
+      });
+      ok(!!sufOk && !!sufAutre,
+        '⚠️ PRÉALABLE : la nomenclature déclare un suffixe « 2 batteries + Ah » ET un '
+        + 'suffixe « machine seule » — sans les deux, le cas ne prouve rien');
+      if (sufOk && sufAutre) {
+        var ahTxt = String(sufOk.c.ah).replace('.', ',');
+        /* ⚠️ Référence ÉCLATÉE par des espaces — c'est la forme réelle du
+           relevé, et c'est justement celle que le recollage traite. */
+        var fichesC2 = [{ sku: 'ZZR450' + sufOk.s }, { sku: 'ZZR450' + sufAutre.s }];
+        var rc2 = arr([
+          { titre: 'MarqueZZ ZZR 450 ' + sufOk.s + ' 18 V + 2x ' + ahTxt + ' Ah + chargeur et coffret',
+            prix: 278.04 },
+          { titre: 'MarqueZZ ZZR 450 ' + sufAutre.s + ' 18 V + 2x ' + ahTxt + ' Ah + chargeur',
+            prix: 111.11 }
+        ], fichesC2, 'MARQUEZZ');
+        var parC2 = {}; rc2.items.forEach(function (x) { parC2[x.sku] = x.price; });
+        ok(parC2['ZZR450' + sufOk.s] === 278.04,
+          '⛔⛔ un « + » qui ÉNUMÈRE le contenu de la référence nommée ne la disqualifie '
+          + 'pas : le suffixe dit la même chose que le titre (obtenu '
+          + JSON.stringify(parC2) + ')');
+        /* ⛔⛔ ARGENT, LE PRÉALABLE QUI COMPTE : si le suffixe dit « machine
+           seule » et que le titre annonce deux batteries, ils se CONTREDISENT.
+           Rapprocher là écrirait un prix de kit sur un outil nu. */
+        ok(parC2['ZZR450' + sufAutre.s] === undefined,
+          '⛔⛔ ARGENT : un suffixe qui CONTREDIT le contenu annoncé fait refuser le '
+          + 'rapprochement — sinon un prix de kit tomberait sur une machine seule');
+      }
     }
 
     /* ⛔⛔ RACINE NUE ↔ FICHE CONDITIONNÉE — LE PLUS GROS POSTE, ET LE PLUS
