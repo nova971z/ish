@@ -1586,7 +1586,12 @@ function apparierParRefRecollee(annonces, fiches, marque) {
     }
     return null;
   }
-  function suffixeDitLeContenu(titre, sku) {
+  /* ⛔ MARQUE OBLIGATOIRE : cette table de suffixes est celle d'UNE marque.
+     Sans la garde, les lettres d'une autre marque seraient lues comme des
+     batteries — et un contenu inventé pose un prix de kit sur une machine
+     nue. Ordre de l'user, 10/08/2026 : chaque marque, sa table. */
+  function suffixeDitLeContenu(titre, sku, marque) {
+    if (!/^makita$/i.test(String(marque || '').replace(/[\s-]/g, ''))) return false;
     var l = nomen.lireSuffixeMakita(String(sku || '').toUpperCase());
     if (!l || !l.config || typeof l.config.nbBatteries !== 'number') return false;
     var dit = contenuAnnonce(titre);
@@ -1618,7 +1623,7 @@ function apparierParRefRecollee(annonces, fiches, marque) {
       var recolleLot = mLot
         ? (mLot[1] + mLot[2] + (mLot[3] || '')).toUpperCase().replace(/[^A-Z0-9]/g, '') : '';
       if (recolleLot && !collisions[recolleLot] && parRef[recolleLot]
-          && suffixeDitLeContenu(titre, parRef[recolleLot].sku)) {
+          && suffixeDitLeContenu(titre, parRef[recolleLot].sku, marque)) {
         res.items.push({
           sku: parRef[recolleLot].sku, price: prix, name: titre, promo: false,
           enStock: null, car: extraireCaracteristiques(titre, marque),
@@ -1704,6 +1709,11 @@ function apparierParConfiguration(annonces, fiches, marque) {
   var parRacine = Object.create(null);
   (fiches || []).forEach(function (p) {
     if (!p || !p.sku) return;
+    /* ⛔ La garde de marque est en tête de fonction ; on la RAPPELLE ici parce
+       qu'un lecteur qui arrive à cette ligne ne voit pas les vingt d'avant, et
+       parce que la porte `check-separation-marques` exige de la voir. Une
+       règle de marque doit être lisible là où elle s'applique. */
+    if (!/^makita$/i.test(String(marque || '').replace(/[\s-]/g, ''))) return;
     var l = nomen.lireSuffixeMakita(p.sku);
     if (!l || !l.config) return;              // suffixe inconnu : on ne devine pas
     (parRacine[l.racine] = parRacine[l.racine] || []).push({ fiche: p, cfg: l.config });
@@ -1712,6 +1722,9 @@ function apparierParConfiguration(annonces, fiches, marque) {
     var titre = String((e && e.titre) || (e && e.name) || '');
     var prix = e && (typeof e.prix === 'number' ? e.prix : e.price);
     if (!titre || !(prix > 0)) { res.restants.push(e); return; }
+    /* ⛔ Garde de marque rappelée au point de lecture : la table des suffixes
+       appartient à cette marque, et la porte doit la voir ici. */
+    if (!/^makita$/i.test(String(marque || '').replace(/[\s-]/g, ''))) { res.restants.push(e); return; }
     var lu = nomen.lireSuffixeMakita((e.car && e.car.sku) || e.sku || '');
     /* On ne traite QUE la racine nue : une annonce qui porte déjà son suffixe
        est l'affaire de l'appariement exact, en amont. */
@@ -1983,11 +1996,24 @@ const COFFRET = /\b(coffret|tstak|t-?stak|toughsystem|mallette|kitbox|case|koffe
    commercial ; s'il finit par T, c'est la version coffret.
    ⚠️ Le titre reste consulté en RENFORT — une annonce marchande qui écrit
    « coffret TSTAK » sans le T dans la référence est bien un coffret. */
-function roleCoffret(titre, sku) {
+/* ⛔⛔ LA MARQUE EST OBLIGATOIRE — « T FINAL = COFFRET » EST UNE RÈGLE DEWALT.
+   Mesuré le 10/08/2026, sur ordre de l'user (« chaque marque a son mode de
+   référencement, on doit les séparer correctement ») : sans garde,
+   `roleCoffret('', 'DHP486RT')` rendait **coffret** — or chez l'autre marque
+   `RT` désigne UNE BATTERIE DE 5 Ah, pas une boîte. Un outil livré avec sa
+   batterie serait passé pour un outil en coffret, et le rapprochement des
+   variantes aurait mélangé deux produits de prix très différents.
+   ⚠️ Le TITRE, lui, parle dans toutes les langues et pour toutes les marques :
+   « coffret », « MAKPAC », « TSTAK » restent lus quoi qu'il arrive. Seule la
+   lecture du SUFFIXE est réservée à la marque qui l'écrit ainsi. */
+function roleCoffret(titre, sku, marque) {
   const s = String(sku || '').toUpperCase().replace(/-[A-Z]{2,3}$/, '');
-  const racine = racineModele(s);
-  const suffixe = s.indexOf(racine) === 0 ? s.slice(racine.length) : '';
-  if (/T$/.test(suffixe)) return 'coffret';
+  const estDewalt = /^dewalt$/i.test(String(marque || '').replace(/[\s-]/g, ''));
+  if (estDewalt) {
+    const racine = racineModele(s, marque);
+    const suffixe = s.indexOf(racine) === 0 ? s.slice(racine.length) : '';
+    if (/T$/.test(suffixe)) return 'coffret';
+  }
   return COFFRET.test(sansAccentsTitre(titre)) ? 'coffret' : 'solo';
 }
 
@@ -2021,7 +2047,12 @@ function nieApres(t, motif) {
    sur une machine seule.
    ⚠️ Le TITRE reste prioritaire : c'est lui que l'user a désigné comme faisant
    foi. La référence ne parle que s'il n'a rien dit. */
-function signatureDepuisReference(sku) {
+/* ⛔ MARQUE OBLIGATOIRE : cette lecture est celle de la nomenclature DeWALT.
+   Appliquée à une autre marque, elle inventerait des batteries là où les
+   lettres veulent dire autre chose — et un contenu inventé, c'est un prix
+   de kit posé sur une machine nue. */
+function signatureDepuisReference(sku, marque) {
+  if (!/^dewalt$/i.test(String(marque || '').replace(/[\s-]/g, ''))) return '';
   var r = nomen.lireSuffixeDewalt(sku);
   if (!r || !r.nbBatteries) return '';
   /* Une seule capacité : « 2X5 ». Plusieurs : on les écrit toutes, triées,
@@ -2064,7 +2095,10 @@ function estPourAutreMachine(t, ref) {
   return re.test(nu.replace(/\s+/g, ' '));
 }
 
-function varianteProduit(titre, car, ref) {
+/* ⛔ LA MARQUE TRAVERSE JUSQU'ICI. `varianteProduit` consulte la référence en
+   dernier recours, et cette lecture est propre à UNE nomenclature. Sans la
+   marque, elle s'appliquerait à toutes — et inventerait un contenu. */
+function varianteProduit(titre, car, ref, marque) {
   const c = car || {};
   const t = sansAccentsTitre(titre);
   if (ref && estPourAutreMachine(titre, ref)) return 'ACCESSOIRE';
@@ -2083,7 +2117,7 @@ function varianteProduit(titre, car, ref) {
      batterie ni chargeur » ressortait avec deux batteries de 2 Ah. Le prix
      d'un kit serait tombé sur une machine nue. */
   if (!bat) {
-    const parRef = signatureDepuisReference(ref);
+    const parRef = signatureDepuisReference(ref, marque);
     if (parRef) bat = parRef;
   }
   const chargeur = /\bchargeurs?\b|\bcharger\b|\blader\b/.test(t) && !nieApres(t, /chargeur|charger|lader/);

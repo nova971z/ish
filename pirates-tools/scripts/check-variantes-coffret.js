@@ -35,14 +35,23 @@ function corps(ok) {
   const parSku = new Map(tous.map((p) => [String(p.sku).toUpperCase(), p]));
 
   /* ── ① LA LETTRE FINALE DE LA RÉFÉRENCE DIT LE COFFRET ─────────────────── */
-  ok(classer.roleCoffret('libellé sans le mot', 'ZZD800N-XJ') === 'solo'
-    && classer.roleCoffret('libellé sans le mot', 'ZZD800NT-XJ') === 'coffret',
+  /* ⛔⛔ LA MARQUE EST OBLIGATOIRE DEPUIS LE 10/08/2026 — ET CE CAS LE PROUVE.
+     « T final = coffret » est la règle d'UNE marque. Sans garde, elle rendait
+     « coffret » pour une référence d'une AUTRE marque dont le `T` veut dire
+     tout autre chose (mesuré : un suffixe qui désigne une batterie de 5 Ah).
+     Ce contrôle passait donc pour la mauvaise raison. */
+  ok(classer.roleCoffret('libellé sans le mot', 'ZZD800NT-XJ') === 'solo',
+    '⛔⛔ SÉPARATION DES MARQUES : sans marque, la LETTRE FINALE ne dit rien — la '
+    + 'règle d\'une marque ne se lit jamais sur une autre (obtenu '
+    + classer.roleCoffret('libellé sans le mot', 'ZZD800NT-XJ') + ')');
+  ok(classer.roleCoffret('libellé sans le mot', 'ZZD800N-XJ', 'DEWALT') === 'solo'
+    && classer.roleCoffret('libellé sans le mot', 'ZZD800NT-XJ', 'DEWALT') === 'coffret',
     '⛔⛔ RÈGLE USER : N = nu, T = coffret, LU DANS LA RÉFÉRENCE. Les titres du '
     + 'catalogue ne disent pas « coffret » — ne chercher que dans le titre n\'a '
     + 'trouvé qu\'1 groupe sur 20 ('
-    + classer.roleCoffret('x', 'ZZD800N-XJ') + ' / ' + classer.roleCoffret('x', 'ZZD800NT-XJ') + ')');
-  ok(classer.roleCoffret('x', 'ZZD800NT') === 'coffret'
-    && classer.roleCoffret('x', 'ZZD800NT-QW') === 'coffret',
+    + classer.roleCoffret('x', 'ZZD800N-XJ', 'DEWALT') + ' / ' + classer.roleCoffret('x', 'ZZD800NT-XJ', 'DEWALT') + ')');
+  ok(classer.roleCoffret('x', 'ZZD800NT', 'DEWALT') === 'coffret'
+    && classer.roleCoffret('x', 'ZZD800NT-QW', 'DEWALT') === 'coffret',
     '⛔ …et le marquage géographique ne change RIEN : -XJ, -QW, ou rien du tout, '
     + 'c\'est la même version coffret (l\'user : « XJ c\'est pour la région »)');
   ok(classer.roleCoffret('coffret TSTAK inclus', 'ZZD800N-XJ') === 'coffret',

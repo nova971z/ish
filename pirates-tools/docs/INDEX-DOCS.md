@@ -34,7 +34,7 @@ désigné ici, soit il est rangé.
 | `JURIDIQUE.md` | les 5 domaines qui engagent la responsabilité — porte à ouvrir avant d'éditer (`scripts/juridique.js`) |
 | `EPREUVES.md` | trois épreuves en environnement isolé : ce que le dispositif attrape et ce qu'il laisse passer |
 | `PRIX-SOURCE-UNIQUE.md` | pourquoi le site avait plusieurs prix, et la boucle qui referme l'écart |
-| `METHODES.md` | **les techniques de travail, NOMMÉES** — construire une table, ajouter des produits, comment le parseur doit se comporter, prouver qu'un contrôle sert. 27 méthodes, chacune avec la panne qui l'a payée et le code qui l'applique. C'est le document qu'on relit avant de recommencer un chantier du même genre pour une autre marque ou un autre fournisseur |
+| `METHODES.md` | **les techniques de travail, NOMMÉES** — construire une table, ajouter des produits, comment le parseur doit se comporter, prouver qu'un contrôle sert. 29 méthodes, chacune avec la panne qui l'a payée et le code qui l'applique. C'est le document qu'on relit avant de recommencer un chantier du même genre pour une autre marque ou un autre fournisseur |
 | `INDEX-DOCS.md` | ce fichier |
 
 ## 🟡 VIVANTS — travaux en cours, à reprendre

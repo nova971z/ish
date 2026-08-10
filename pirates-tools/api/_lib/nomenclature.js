@@ -1392,7 +1392,21 @@ var PREFIXES_MAKITA_ORDRE = Object.keys(PREFIXES_MAKITA).sort(function (a, b) { 
    paires : « projecteur » des deux côtés, famille « machine » des deux côtés. */
 var PREFIXES_DISTRIBUTEUR_MAKITA = ['DEA', 'DEB', 'DEC', 'DED', 'DEE', 'NLA'];
 
-function refSansPrefixeDistributeur(sku) {
+/* ⛔⛔ LA MARQUE EST OBLIGATOIRE — ORDRE DE L'USER, 10/08/2026 :
+   « le parseur doit parfaitement reconnaître sur quelle marque il travaille ;
+   une fois qu'il a détecté la marque, il utilise la BONNE table et les BONNES
+   consignes […] ce n'est pas parce qu'il y a des choses qui marchent pareil
+   que c'est pour la totalité ».
+   Ces préfixes sont ceux du DISTRIBUTEUR FRANÇAIS DE MAKITA, et d'eux seuls.
+   Le premier jet les appliquait à TOUTES les marques. Mesuré le jour même :
+   aucune fiche d'une autre marque n'était touchée — mais c'était la CHANCE, pas
+   une garantie. Le jour où une référence d'une autre marque commence par
+   « DEA », elle serait dépouillée à tort, et comme ce rapprochement fait
+   BAISSER le coût retenu, il ferait vendre à PERTE.
+   ⚠️ Même patron que l'alias de l'autre marque (`pwAliasNomenclature`) : la
+   marque est demandée ET revérifiée. Sans marque, on ne normalise RIEN. */
+function refSansPrefixeDistributeur(sku, marque) {
+  if (!/^makita$/i.test(String(marque || '').replace(/[\s-]/g, ''))) return null;
   var s = String(sku || '').toUpperCase().trim();
   for (var i = 0; i < PREFIXES_DISTRIBUTEUR_MAKITA.length; i++) {
     var p = PREFIXES_DISTRIBUTEUR_MAKITA[i];

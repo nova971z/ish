@@ -171,8 +171,11 @@ const estPourAutreMachine = priceParse.estPourAutreMachine;
 function cleDoublon(e) {
   const c = e.car || {};
   const ref = e.sku || c.sku || c.skuEclate || null;
-  const variante = varianteProduit(e.titre, c, e.sku || c.sku || c.skuEclate);
-  const role = roleCoffret(e.titre, ref);
+  /* ⛔ LA MARQUE TRAVERSE : `varianteProduit` consulte la nomenclature en
+     dernier recours, et une nomenclature appartient à SA marque. */
+  const variante = varianteProduit(e.titre, c, e.sku || c.sku || c.skuEclate, e.brand || e.marque);
+  /* ⛔ La marque traverse : « T final = coffret » appartient à UNE marque. */
+  const role = roleCoffret(e.titre, ref, e.brand || e.marque);
   if (ref) {
     const racine = priceParse.racineModele(String(ref).toUpperCase());
     return { cle: 'REF:' + racine + '|' + variante, niveau: 'référence',

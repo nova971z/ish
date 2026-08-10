@@ -28,6 +28,19 @@ const path = require('path');
 const RACINE = path.join(__dirname, '..');
 const nomen = require(path.join(RACINE, 'api/_lib/nomenclature.js'));
 
+/* ⛔⛔ CE SCRIPT NE TRAVAILLE QUE POUR UNE MARQUE, ET IL LE DIT.
+   Ordre de l'user, 10/08/2026 : « le parseur doit parfaitement reconnaître sur
+   quelle marque il travaille ; une fois qu'il a détecté la marque, il utilise
+   la BONNE table ». Un script qui lit une nomenclature sans nommer sa marque
+   est un script qu'on réutilisera un jour sur une autre — et la table de
+   l'une appliquée à l'autre fabrique des contenus faux, donc des prix faux.
+   La marque est donc DÉCLARÉE ici et REVÉRIFIÉE à chaque fiche. */
+const MARQUE_DU_SCRIPT = 'MAKITA';
+function estDeLaMarque(x) {
+  const b = String((x && (x.brand || x.marque)) || MARQUE_DU_SCRIPT).toUpperCase();
+  return b === MARQUE_DU_SCRIPT;
+}
+
 const args = process.argv.slice(2);
 const iCsv = args.indexOf('--csv');
 const SORTIE_CSV = iCsv !== -1 ? args[iCsv + 1] : null;
@@ -61,8 +74,22 @@ let testables = 0, concordances = 0;
 const desaccords = [];
 let sousEstimations = 0;
 
+/* ⛔ LA GARDE EST RÉELLE, PAS DÉCORATIVE : on ÉCARTE ce qui n'est pas de la
+   marque avant de lire quoi que ce soit. Une garde qu'on déclare sans s'en
+   servir est pire qu'aucune garde — elle rassure. */
+const horsMarque = fiches.filter((p) => !estDeLaMarque(p)).length;
+if (horsMarque) {
+  console.log('⚠️ ' + horsMarque + ' fiche(s) d\'une AUTRE marque écartée(s) : '
+    + 'cet audit ne lit que la nomenclature ' + MARQUE_DU_SCRIPT + '.');
+}
+fiches = fiches.filter(estDeLaMarque);
+
 fiches.forEach((p) => {
   const sku = String((p && p.sku) || '');
+  /* ⛔ Comparaison de marque VISIBLE au point de lecture : la porte
+     `check-separation-marques` n'accepte ni un commentaire, ni un nom de
+     paramètre — il lui faut un test réel, et elle a raison. */
+  if (String(p.brand || MARQUE_DU_SCRIPT).toUpperCase() !== MARQUE_DU_SCRIPT) return;
   const forme = nomen.formeReferenceMakita(sku);
   const lu = nomen.lireSuffixeMakita(sku);
   const cfg = lu && lu.config;

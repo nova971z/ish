@@ -1983,27 +1983,35 @@ module.exports = async function () {
       var sansPref = pp.nomenclature && pp.nomenclature.refSansPrefixeDistributeur;
       ok(typeof sansPref === 'function', 'refSansPrefixeDistributeur exportée');
       if (sansPref) {
-        ok(sansPref('DEAZZL810') === 'ZZL810',
+        ok(sansPref('DEAZZL810', 'Makita') === 'ZZL810',
           '⛔⛔ ARGENT : un préfixe de distributeur se retire pour retrouver la vraie '
-          + 'référence du fabricant (obtenu ' + JSON.stringify(sansPref('DEAZZL810')) + ')');
-        ok(sansPref('DEBZZ009G') === 'ZZ009G',
+          + 'référence du fabricant (obtenu ' + JSON.stringify(sansPref('DEAZZL810', 'Makita')) + ')');
+        ok(sansPref('DEBZZ009G', 'Makita') === 'ZZ009G',
           '⛔ les trois préfixes connus sont traités, pas seulement le premier (obtenu '
-          + JSON.stringify(sansPref('DEBZZ009G')) + ')');
+          + JSON.stringify(sansPref('DEBZZ009G', 'Makita')) + ')');
         /* ⚠️ PRÉALABLE — la règle ne doit PAS mordre sur une référence normale,
            sinon elle rapprocherait n'importe quoi et ferait vendre à perte. */
-        ok(sansPref('ZZW700Z') === null && sansPref('ZZP486RTJ') === null,
+        ok(sansPref('ZZW700Z', 'Makita') === null && sansPref('ZZP486RTJ', 'Makita') === null,
           '⚠️ PRÉALABLE : une référence ordinaire n\'est PAS normalisée — sinon la '
           + 'règle rapprocherait des produits différents, et rapprocher fait BAISSER '
           + 'le coût retenu, donc vendre à perte (obtenu '
-          + JSON.stringify([sansPref('ZZW700Z'), sansPref('ZZP486RTJ')]) + ')');
-        ok(sansPref('DEA') === null,
+          + JSON.stringify([sansPref('ZZW700Z', 'Makita'), sansPref('ZZP486RTJ', 'Makita')]) + ')');
+        /* ⛔⛔ LA MARQUE EST OBLIGATOIRE — c'est ce qu'il a demandé le 10/08 :
+           « chaque marque a son mode de référencement, on doit les séparer ».
+           Ces préfixes sont ceux du distributeur français d'UNE marque. */
+        ok(sansPref('DEAZZL810') === null && sansPref('DEAZZL810', 'ZZAUTRE') === null,
+          '⛔⛔ ARGENT : sans la BONNE marque, aucune normalisation — un préfixe d\'une '
+          + 'marque appliqué à une autre rapprocherait deux produits différents, et '
+          + 'ce rapprochement fait BAISSER le coût, donc vendre à perte (obtenu '
+          + JSON.stringify([sansPref('DEAZZL810'), sansPref('DEAZZL810', 'ZZAUTRE')]) + ')');
+        ok(sansPref('DEA', 'Makita') === null,
           '⚠️ et un préfixe SEUL ne devient pas une référence (obtenu '
-          + JSON.stringify(sansPref('DEA')) + ')');
+          + JSON.stringify(sansPref('DEA', 'Makita')) + ')');
         /* ⛔ La règle est branchée là où l'argent se décide : l'index du
            traqueur. Une fonction juste qui n'est appelée nulle part ne défend
            rien — c'est le défaut qu'un sabotage ne verrait pas. */
         var srcAdm = fs.readFileSync(path.join(__dirname, '..', 'api', 'admin.js'), 'utf8');
-        ok(/refSansPrefixeDistributeur\s*\(\s*p\.sku\s*\)/.test(srcAdm),
+        ok(/refSansPrefixeDistributeur\s*\(\s*p\.sku\s*,\s*p\.brand\s*\)/.test(srcAdm),
           '⛔ et elle est BRANCHÉE dans l\'index du traqueur — sans appel, elle ne '
           + 'défend rien');
       }
@@ -2159,22 +2167,30 @@ module.exports = async function () {
         var ahTxt = String(sufOk.c.ah).replace('.', ',');
         /* ⚠️ Référence ÉCLATÉE par des espaces — c'est la forme réelle du
            relevé, et c'est justement celle que le recollage traite. */
-        var fichesC2 = [{ sku: 'ZZR450' + sufOk.s }, { sku: 'ZZR450' + sufAutre.s }];
+        var fichesC2 = [{ sku: 'DZR450' + sufOk.s }, { sku: 'DZR450' + sufAutre.s }];
         var rc2 = arr([
-          { titre: 'MarqueZZ ZZR 450 ' + sufOk.s + ' 18 V + 2x ' + ahTxt + ' Ah + chargeur et coffret',
+          { titre: 'Makita DZR 450 ' + sufOk.s + ' 18 V + 2x ' + ahTxt + ' Ah + chargeur et coffret',
             prix: 278.04 },
-          { titre: 'MarqueZZ ZZR 450 ' + sufAutre.s + ' 18 V + 2x ' + ahTxt + ' Ah + chargeur',
+          { titre: 'Makita DZR 450 ' + sufAutre.s + ' 18 V + 2x ' + ahTxt + ' Ah + chargeur',
             prix: 111.11 }
-        ], fichesC2, 'MARQUEZZ');
+        /* ⛔ LA MARQUE RÉELLE EST OBLIGATOIRE ICI, ET C'EST UN PROGRÈS.
+           Ce cas éprouve la table de suffixes d'UNE marque : avec un nom de
+           marque inventé, il passait avant — parce que la règle s'appliquait à
+           TOUT LE MONDE. C'était vert pour la mauvaise raison. Depuis que la
+           marque garde la table (10/08/2026), il faut la nommer.
+           ⚠️ On nomme la MARQUE, jamais un produit : la règle des harnais
+           interdit de graver une donnée du catalogue, pas de désigner la
+           nomenclature qu'on teste. */
+        ], fichesC2, 'MAKITA');
         var parC2 = {}; rc2.items.forEach(function (x) { parC2[x.sku] = x.price; });
-        ok(parC2['ZZR450' + sufOk.s] === 278.04,
+        ok(parC2['DZR450' + sufOk.s] === 278.04,
           '⛔⛔ un « + » qui ÉNUMÈRE le contenu de la référence nommée ne la disqualifie '
           + 'pas : le suffixe dit la même chose que le titre (obtenu '
           + JSON.stringify(parC2) + ')');
         /* ⛔⛔ ARGENT, LE PRÉALABLE QUI COMPTE : si le suffixe dit « machine
            seule » et que le titre annonce deux batteries, ils se CONTREDISENT.
            Rapprocher là écrirait un prix de kit sur un outil nu. */
-        ok(parC2['ZZR450' + sufAutre.s] === undefined,
+        ok(parC2['DZR450' + sufAutre.s] === undefined,
           '⛔⛔ ARGENT : un suffixe qui CONTREDIT le contenu annoncé fait refuser le '
           + 'rapprochement — sinon un prix de kit tomberait sur une machine seule');
       }

@@ -183,6 +183,10 @@ var reqDeps     = safeRequire('./check-deps',        'check-deps');
 var reqErreurs  = safeRequire('./erreurs',           'check-erreurs');
 // La porte juridique : on vérifie qu'elle a des dents. Un motif qui ne vise
 // plus aucun fichier ne refuse plus rien ET ne le dit pas.
+/* ⛔⛔ CHAQUE MARQUE A SA TABLE — porte posée le 10/08/2026 sur son ordre.
+   Une règle de marque appliquée à une autre marque fabrique des rapprochements
+   faux, et un rapprochement faux sur un prix fait vendre à perte. */
+var reqSepMarq  = safeRequire('./check-separation-marques', 'check-separation-marques');
 var modJur      = safeRequire('./juridique',         'check-juridique');
 var reqJur      = modJur && modJur.controle ? modJur.controle : null;
 // La porte d'O1 (hook Stop). Elle doit refuser le faux ET laisser passer le
@@ -323,6 +327,7 @@ var reqReconc   = safeRequire('./check-reconciliation', 'check-reconciliation');
   await runOne(reqLecons,   'check-lecons');
   await runOne(reqDeps,     'check-deps');
   await runOne(reqErreurs,  'check-erreurs');
+  await runOne(reqSepMarq,  'check-separation-marques');
   await runOne(reqJur,      'check-juridique');
   await runOne(reqSortie,   'check-sortie');
   await runOne(reqFrais,    'check-fraicheur');

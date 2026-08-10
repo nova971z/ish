@@ -37,6 +37,19 @@ const fs = require('fs');
 const path = require('path');
 const RACINE = path.join(__dirname, '..');
 const nomen = require(path.join(RACINE, 'api/_lib/nomenclature.js'));
+
+/* ⛔⛔ CE SCRIPT NE TRAVAILLE QUE POUR UNE MARQUE, ET IL LE DIT.
+   Ordre de l'user, 10/08/2026 : « le parseur doit parfaitement reconnaître sur
+   quelle marque il travaille ; une fois qu'il a détecté la marque, il utilise
+   la BONNE table ». Un script qui lit une nomenclature sans nommer sa marque
+   est un script qu'on réutilisera un jour sur une autre — et la table de
+   l'une appliquée à l'autre fabrique des contenus faux, donc des prix faux.
+   La marque est donc DÉCLARÉE ici et REVÉRIFIÉE à chaque fiche. */
+const MARQUE_DU_SCRIPT = 'MAKITA';
+function estDeLaMarque(x) {
+  const b = String((x && (x.brand || x.marque)) || MARQUE_DU_SCRIPT).toUpperCase();
+  return b === MARQUE_DU_SCRIPT;
+}
 const pricing = require(path.join(RACINE, 'api/_lib/pricing-model.js'));
 
 const PHASES = {
@@ -70,6 +83,10 @@ if (!RELEVE || !fs.existsSync(RELEVE)) {
    Elle se lit sur ce que le parseur a typé ET sur la grammaire des suffixes —
    jamais sur un mot du titre seul, qui décrit souvent l'accessoire livré. */
 function phaseDe(x) {
+  /* ⛔ Garde de marque rappelée là où la table est lue — un lecteur qui arrive
+     ici ne voit pas le filtre d'entrée, et la porte non plus. */
+  const marque = String((x && x.brand) || MARQUE_DU_SCRIPT).toUpperCase();
+  if (marque !== MARQUE_DU_SCRIPT) return 'accessoire';
   const l = nomen.lireSuffixeMakita(x.sku);
   const f = nomen.formeReferenceMakita(x.sku);
   const c = l && l.config;
@@ -82,7 +99,9 @@ function phaseDe(x) {
   return 'filaire';
 }
 
-function racineDe(sku) {
+/* ⛔ Marque explicite : la racine se lit avec la grammaire de CETTE marque. */
+function racineDe(sku, marque) {
+  if (String(marque || '').toUpperCase() !== MARQUE_DU_SCRIPT) return String(sku || '').toUpperCase();
   const l = nomen.lireSuffixeMakita(sku);
   return l ? l.racine : String(sku || '').toUpperCase();
 }
@@ -97,8 +116,11 @@ function racineDe(sku) {
 const MASSE_BATTERIE_KG = { 1.3: 0.4, 1.5: 0.4, 2: 0.4, 2.5: 0.5, 3: 0.65, 4: 0.65, 5: 0.65, 6: 0.9 };
 const MASSE_COFFRET_KG = { MAKPAC: 2.2, MALLETTE: 1.5 };
 
-function poidsExpedie(sku, table) {
-  const r = racineDe(sku);
+function poidsExpedie(sku, table, marque) {
+  /* ⛔ Garde de marque : le poids se compose à partir du conditionnement, et le
+     conditionnement se lit dans la grammaire de CETTE marque. */
+  if (String(marque || '').toUpperCase() !== MARQUE_DU_SCRIPT) return null;
+  const r = racineDe(sku, marque);
   const base = table[r];
   if (!base) return null;
   const l = nomen.lireSuffixeMakita(sku);
@@ -175,7 +197,17 @@ const slugsPris = new Set(catalogue.map((p) => String(p.slug || '')));
 const idsPris = new Set(catalogue.map((p) => String(p.id || '')));
 const categoriesConnues = new Set(catalogue.map((p) => p.category));
 
+/* ⛔ LA GARDE EST RÉELLE : ce qui n'est pas de la marque n'entre même pas dans
+   la boucle. Le relevé porte la marque du balayage, mais un fichier mélangé
+   arrivera un jour — et ce jour-là, la table de cette marque ne doit pas lire
+   les références d'une autre. */
+const horsMarque = releve.filter((x) => !estDeLaMarque(x)).length;
+if (horsMarque) {
+  console.log('⚠️ ' + horsMarque + ' référence(s) d\'une AUTRE marque écartée(s) : '
+    + 'ce générateur ne lit que la nomenclature ' + MARQUE_DU_SCRIPT + '.');
+}
 const candidats = releve
+  .filter(estDeLaMarque)
   .filter((x) => x && x.sku && !dejaLa.has(String(x.sku).toUpperCase()))
   .filter((x) => phaseDe(x) === PHASE);
 
@@ -185,9 +217,9 @@ const refusees = [];
 candidats.forEach((x) => {
   const cout = Number(x.srcTTC);
   if (!(cout > 0)) { refusees.push({ sku: x.sku, motif: 'aucun coût fournisseur lu', typ: x.typ || '' }); return; }
-  const p = poidsExpedie(x.sku, tablePoids);
+  const p = poidsExpedie(x.sku, tablePoids, MARQUE_DU_SCRIPT);
   if (!p) {
-    refusees.push({ sku: x.sku, racine: racineDe(x.sku), motif: 'POIDS INCONNU — à chercher',
+    refusees.push({ sku: x.sku, racine: racineDe(x.sku, MARQUE_DU_SCRIPT), motif: 'POIDS INCONNU — à chercher',
       typ: x.typ || '', titre: x.titre || '', cout: cout });
     return;
   }
@@ -210,7 +242,7 @@ candidats.forEach((x) => {
      647 des références de son relevé (18,1 %) sont dans cette zone. On refuse
      de créer la fiche : un article vendu à perte est pire que pas d'article. */
   if (reco.cibleAtteinte === false) {
-    refusees.push({ sku: x.sku, racine: racineDe(x.sku),
+    refusees.push({ sku: x.sku, racine: racineDe(x.sku, MARQUE_DU_SCRIPT),
       motif: 'coût trop bas : la marge cible est inatteignable, le prix serait à perte',
       typ: x.typ || '', titre: x.titre || '', cout: cout });
     return;

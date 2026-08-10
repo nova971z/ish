@@ -2401,7 +2401,7 @@ function pwIndexerModeles(produits, index) {
     /* La face coffret ne reçoit pas de coût : elle suit sa version nue. */
     if (p.variantRole === 'coffret') return;
     const cle = priceParse.racineModele(String(p.sku).toUpperCase())
-      + '|' + priceParse.varianteProduit(p.title || p.name || '', null, p.sku);
+      + '|' + priceParse.varianteProduit(p.title || p.name || '', null, p.sku, p.brand);
     (parCle[cle] = parCle[cle] || []).push(p);
   });
   let poses = 0, ecartes = 0;
@@ -2415,12 +2415,16 @@ function pwIndexerModeles(produits, index) {
   return { poses: poses, ecartes: ecartes };
 }
 
-/* La clé de modèle d'une ANNONCE, dans le même vocabulaire que l'index. */
-function pwCleModele(item) {
+/* La clé de modèle d'une ANNONCE, dans le même vocabulaire que l'index.
+   ⛔ LA MARQUE EST OBLIGATOIRE : `varianteProduit` consulte la nomenclature en
+   dernier recours, et une nomenclature appartient à SA marque. Sans elle, la
+   règle d'une marque déborderait sur une autre — c'est ce que l'user a
+   demandé de séparer, le 10/08/2026. */
+function pwCleModele(item, marque) {
   const ref = String((item && item.sku) || '').toUpperCase();
   if (!ref) return '';
   return priceParse.racineModele(ref) + '|'
-    + priceParse.varianteProduit((item && item.name) || '', (item && item.car) || null, ref);
+    + priceParse.varianteProduit((item && item.name) || '', (item && item.car) || null, ref, marque);
 }
 
 function pwAliasNomenclature(products, brand, bySku) {
@@ -3510,7 +3514,7 @@ async function handlePriceWatch(req, res, admin, db) {
           || bySkuSec[priceParse.racineRef(it.sku)]
           /* ⛔ Dernier recours : la racine de MODÈLE + la variante — N / NT /
              T / -XJ / -QW désignent le même produit (règle user 04/08). */
-          || bySkuSec[pwCleModele(it)];
+          || bySkuSec[pwCleModele(it, brand)];
         /* ⛔ `car` EST RENDU EN MODE À SEC, et c'est le seul moyen de VOIR ce
            que le parseur a compris de chaque annonce. Sans ça, un extracteur
            qui typerait tout « kit » resterait invisible : le relevé aurait
@@ -3919,8 +3923,12 @@ async function handlePriceWatch(req, res, admin, db) {
        jamais par-dessus un sku principal ou un `srcAltSkus` déclaré à la main,
        qui priment tous les deux. Et le minimum de rafale fait le reste. */
     products.forEach((p) => {
-      const nu = priceParse.nomenclature.refSansPrefixeDistributeur(p.sku);
-      if (nu && !bySku[nu]) bySku[nu] = p;
+      /* ⛔ DEUX VÉRIFICATIONS DE MARQUE, comme pour l'alias de l'autre marque :
+         celle du BALAYAGE en cours, et celle de la FICHE. Un catalogue mixte
+         croise les deux, et une règle de marque ne doit jamais déborder. */
+      const nu = priceParse.nomenclature.refSansPrefixeDistributeur(p.sku, p.brand);
+      if (nu && String(p.brand || '').toUpperCase() === String(brand || '').toUpperCase()
+        && !bySku[nu]) bySku[nu] = p;
     });
     pwIndexerRacines(products, bySku);
 
@@ -4027,7 +4035,7 @@ async function handlePriceWatch(req, res, admin, db) {
        (D-004). J3 : des titres publics, aucune donnée personnelle. J5 : aucune
        TVA, aucun octroi de mer — le territoire vient du code postal. */
     const sansFiche = parsed.filter((it) => !(bySku[it.sku]
-      || bySku[priceParse.racineRef(it.sku)] || bySku[pwCleModele(it)]));
+      || bySku[priceParse.racineRef(it.sku)] || bySku[pwCleModele(it, brand)]));
     const parConfigNu = priceParse.apparierParConfiguration(sansFiche, products, brand);
     if (parConfigNu.items.length) {
       /* Ce qui a été rapproché DISPARAÎT de `parsed` sous sa forme d'origine :
@@ -4163,7 +4171,7 @@ async function handlePriceWatch(req, res, admin, db) {
            racine ensuite. Une règle vraie appliquée à un seul endroit ne protège
            que cet endroit — et ici l'autre endroit est celui qui ÉCRIT les prix. */
         const p = bySku[item.sku] || bySku[priceParse.racineRef(item.sku)]
-          || bySku[pwCleModele(item)];
+          || bySku[pwCleModele(item, brand)];
         if (!p) {
           /* ⛔⛔ CE QUI DÉCIDE DU PRIX ÉTAIT LU, PUIS JETÉ (09/08/2026). Mesuré
              sur son balayage : 2 254 annonces d'une marque portent une référence

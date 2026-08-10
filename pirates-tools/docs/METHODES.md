@@ -337,6 +337,52 @@ chiffres du relevé commencent **tous** par `49`, sans une exception.
 pas en regardant les trois premières. Trois exemples qui se ressemblent sont
 une coïncidence — c'est M-01 appliqué à l'extraction.
 
+### M-28 — Chaque MARQUE a sa table, et rien ne déborde
+
+Une nomenclature appartient à **sa** marque. Le parseur reconnaît d'abord la
+marque, **puis** ouvre la bonne table. Deux marques peuvent écrire pareil sans
+vouloir dire la même chose.
+
+*Pannes payées (10/08/2026)*, toutes le même jour :
+- `roleCoffret('', 'DHP486RT')` rendait **coffret** — or ce suffixe désigne
+  chez l'autre marque **une batterie de 5 Ah**, pas une boîte ;
+- un audit découpait toutes les références avec la grammaire d'une seule
+  marque : `DWMT73803` et `DWMT73801`, deux coffrets DIFFÉRENTS, tombaient sur
+  la même racine. **Neuf faux jumeaux d'un coup**, dont un à 148,41 € ;
+- la normalisation des préfixes de distributeur s'appliquait à toutes les
+  marques. Aucune fiche d'une autre marque n'était touchée ce jour-là — **par
+  chance, pas par construction**.
+
+⛔ **Le sens de l'erreur est ici INVERSÉ** : rapprocher deux références fait
+BAISSER le coût retenu, donc le prix. Un mauvais rapprochement fait vendre à
+**perte**, là où d'habitude l'erreur fait vendre trop cher.
+
+**Deux règles opposables :**
+1. **Le nom porte la marque.** Toute table ou fonction propre à une marque
+   s'appelle `…Makita`, `…Dewalt`, `…Milwaukee`. Un nom neutre sur une règle de
+   marque rend la porte aveugle.
+2. **La marque est un PARAMÈTRE, pas un contexte.** Elle est passée, et
+   revérifiée chez l'appelée — jamais supposée par l'endroit du code.
+
+*Porte* : `scripts/check-separation-marques.js`, dans `ci.js`.
+
+### M-29 — Un détecteur qui cherche un MOT détecte du vocabulaire
+
+Une porte doit chercher un **comportement**, pas un terme.
+
+*Panne payée deux fois de suite, le même jour, sur la porte ci-dessus* :
+① elle cherchait le mot « marque » dans les huit lignes précédentes — mais
+chaque garde est précédée d'un **commentaire** qui l'explique et contient le
+mot. J'ai retiré une vraie garde : **la porte est restée verte**, satisfaite
+par la prose décrivant la garde disparue.
+② commentaires retirés, le mot survivait dans la **signature**
+(`function f(titre, sku, marque)`). Un paramètre nommé `marque` ne prouve pas
+qu'on s'en sert. **Verte une seconde fois.**
+
+⇒ Elle exige désormais une vraie comparaison — `===`, `!==`, `.test(…)`,
+`indexOf` — ou que la marque soit passée à l'appel. Et c'est le **sabotage**
+qui a démasqué les deux, pas la relecture.
+
 ---
 
 ## Où ces méthodes sont déjà branchées
@@ -352,3 +398,4 @@ une coïncidence — c'est M-01 appliqué à l'extraction.
 | M-19, M-20, M-24, M-25 | `outils/sabotage.mjs`, `scripts/check-pricing-model.js` |
 | M-23 | `data/transport-outre-mer.json`, `api/_lib/pricing-model.js` |
 | M-26, M-27 | `docs/TRAQUEUR-URLS.md`, `api/_lib/traqueur-plans.js` |
+| M-28, M-29 | `scripts/check-separation-marques.js`, `api/_lib/price-parse.js` |

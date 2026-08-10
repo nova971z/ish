@@ -72,13 +72,13 @@ const catalogue = JSON.parse(fs.readFileSync(path.join(RACINE, 'products.json'),
    lui qui décide si les deux tuiles sont vraiment comparables. */
 function clefModele(sku) {
   const s = String(sku || '').toUpperCase().trim();
-  const nu = nomen.refSansPrefixeDistributeur(s) || s;
+  const nu = nomen.refSansPrefixeDistributeur(s, MARQUE) || s;
   const l = lireSuffixe(nu);
   return l ? l.racine : nu;
 }
 
 function contenu(sku) {
-  const nu = nomen.refSansPrefixeDistributeur(String(sku || '').toUpperCase()) || String(sku || '').toUpperCase();
+  const nu = nomen.refSansPrefixeDistributeur(String(sku || '').toUpperCase(), MARQUE) || String(sku || '').toUpperCase();
   const l = lireSuffixe(nu);
   const c = l && l.config;
   if (!c) return null;
@@ -129,8 +129,8 @@ groupes.forEach((liste, racine) => {
       const cy = contenu(y.sku);
       /* Degré de certitude — jamais un rapprochement muet. */
       let degre, motif;
-      const prefixe = nomen.refSansPrefixeDistributeur(String(x.sku).toUpperCase()) === String(y.sku).toUpperCase()
-        || nomen.refSansPrefixeDistributeur(String(y.sku).toUpperCase()) === String(x.sku).toUpperCase();
+      const prefixe = nomen.refSansPrefixeDistributeur(String(x.sku).toUpperCase(), MARQUE) === String(y.sku).toUpperCase()
+        || nomen.refSansPrefixeDistributeur(String(y.sku).toUpperCase(), MARQUE) === String(x.sku).toUpperCase();
       /* ⚠️ LE TYPE MANQUE D'UN CÔTÉ QUAND LA TUILE A DÉJÀ ÉTÉ APPLIQUÉE À UNE
          FICHE — la liste `applied` ne le porte pas. Sans cette nuance, TOUT
          tombait dans « à vérifier » et l'audit ne triait plus rien : un

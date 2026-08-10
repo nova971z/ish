@@ -285,14 +285,22 @@ function corps(ok) {
     + 'ces assemblages, il faut les LIRE (' + JSON.stringify(mixte.batteries) + ')');
 
   /* ⛔ LE TITRE PRIME SUR LA RÉFÉRENCE, DANS LES DEUX SENS. */
-  ok(priceParse.varianteProduit('ZZ machine', {}, 'ZZD800D2-QW') === '2X2',
+  /* ⛔ LA MARQUE EST DÉSORMAIS OBLIGATOIRE, ET C'EST UN PROGRÈS.
+     Ces trois cas éprouvent la lecture du SUFFIXE, qui appartient à UNE
+     nomenclature. Sans marque, ils passaient — parce que la règle s'appliquait
+     à toutes les marques. Vert pour la mauvaise raison, jusqu'au 10/08/2026. */
+  ok(priceParse.varianteProduit('ZZ machine', {}, 'ZZD800D2-QW') === 'NU',
+    '⛔⛔ SÉPARATION DES MARQUES : sans marque, la référence ne parle PAS — la table '
+    + 'd\'une marque ne se lit jamais sur une autre (obtenu '
+    + priceParse.varianteProduit('ZZ machine', {}, 'ZZD800D2-QW', 'DEWALT') + ')');
+  ok(priceParse.varianteProduit('ZZ machine', {}, 'ZZD800D2-QW', 'DEWALT') === '2X2',
     '⛔ titre MUET : la référence parle et annonce 2×2 Ah ('
     + priceParse.varianteProduit('ZZ machine', {}, 'ZZD800D2-QW') + ')');
-  ok(priceParse.varianteProduit('ZZ perceuse 18V sans batterie ni chargeur', {}, 'ZZD800D2-QW') === 'NU',
+  ok(priceParse.varianteProduit('ZZ perceuse 18V sans batterie ni chargeur', {}, 'ZZD800D2-QW', 'DEWALT') === 'NU',
     '⛔⛔ titre EXPLICITE « sans batterie ni chargeur » : il GAGNE contre le '
     + 'suffixe D2 de la référence — sinon le prix d\'un kit tomberait sur une '
-    + 'machine nue (' + priceParse.varianteProduit('ZZ perceuse 18V sans batterie ni chargeur', {}, 'ZZD800D2-QW') + ')');
-  ok(priceParse.varianteProduit('ZZ perceuse 18V + 2x5,0Ah + chargeur', {}, 'ZZD800N-XJ') !== 'NU',
+    + 'machine nue (' + priceParse.varianteProduit('ZZ perceuse 18V sans batterie ni chargeur', {}, 'ZZD800D2-QW', 'DEWALT') + ')');
+  ok(priceParse.varianteProduit('ZZ perceuse 18V + 2x5,0Ah + chargeur', {}, 'ZZD800N-XJ', 'DEWALT') !== 'NU',
     '⛔ …et dans l\'autre sens : un titre qui annonce deux batteries gagne contre '
     + 'le « N » de la référence');
 
