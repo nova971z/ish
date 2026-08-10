@@ -2666,6 +2666,93 @@ module.exports = async function () {
           + '(J4 : un semis qui perdrait les overrides referait des hausses fantômes ; '
           + 'obtenu : ' + JSON.stringify(rV2.out && rV2.out.counts) + ')');
 
+        /* ══ LE RAPPROCHEMENT PAR CONFIGURATION DOIT RECEVOIR QUELQUE CHOSE ═══
+           ⛔⛔ DÉFAUT MESURÉ SUR SON BALAYAGE DU 10/08/2026 : `parConfiguration`
+           valait **0 sur 112 pages** alors que le relevé portait 886 annonces
+           énonçant leur nombre de batteries. La règle était juste — ses
+           assertions unitaires passaient — mais le point d'entrée lui donnait
+           `unknown`, une liste ENCORE VIDE à cet endroit du fichier.
+           ⛔ Les assertions unitaires ne pouvaient PAS le voir : elles appellent
+           la fonction directement. Seul un passage par le point d'entrée le
+           démasque — c'est le branchement qui était mort, pas la règle.
+           ⛔ Fiche choisie À L'EXÉCUTION : on cherche une racine que le
+           catalogue décline en plusieurs conditionnements, dont UN SEUL porte
+           la configuration annoncée. Rien n'est nommé en dur. */
+        var nomenT = pp.nomenclature;
+        var racinesT = Object.create(null), skusT = Object.create(null);
+        prods.forEach(function (p) {
+          if (!p || !p.sku) return;
+          skusT[String(p.sku).toUpperCase()] = p;
+          var l = nomenT && nomenT.lireSuffixeMakita ? nomenT.lireSuffixeMakita(p.sku) : null;
+          if (!l || !l.config) return;
+          (racinesT[l.racine] = racinesT[l.racine] || []).push({ p: p, cfg: l.config });
+        });
+        var casCfg = null;
+        Object.keys(racinesT).forEach(function (r) {
+          if (casCfg || skusT[r]) return;              // la racine nue ne doit PAS être une fiche
+          var v = racinesT[r];
+          if (v.length < 2) return;                    // sans variantes, la règle ne tranche rien
+          var conc = v.filter(function (c) {
+            return c.cfg.nbBatteries === 2 && Number(c.cfg.ah) === 5;
+          });
+          if (conc.length !== 1) return;
+          if (!(Number(conc[0].p.price) > 0) || conc[0].p.priceLocked || conc[0].p.hidden) return;
+          casCfg = { racine: r, fiche: conc[0].p, variantes: v.length,
+            marque: String(conc[0].p.brand || '') };
+        });
+        ok(!!casCfg,
+          '⚠️ PRÉALABLE : le catalogue décline au moins une racine en plusieurs '
+          + 'conditionnements dont UN SEUL porte « 2 batteries 5 Ah » — sans ce cas, '
+          + 'le branchement du rapprochement par configuration n\'est pas exercé');
+        if (casCfg) {
+          function pageNue(suffixeTexte) {
+            var l = [casCfg.marque.toUpperCase() + ' ' + casCfg.racine + suffixeTexte,
+              'description outil', '5', '94 offres', 'à partir de 450,00 €'];
+            while (l.join('\n').length < 260) {
+              l.push('ligne de bourrage sans marque ni prix pour le seuil du corps');
+            }
+            return l.join('\n');
+          }
+          function reqNue(txt) {
+            return { method: 'POST',
+              query: { type: 'price-watch', brand: casCfg.marque.toUpperCase(),
+                source: 'idealo', dryRun: '1', inconnus: '1' },
+              body: { text: txt } };
+          }
+          scanReset();
+          var rCfg = fauxRes();
+          await admFn(reqNue(pageNue(', 2 batteries 5 Ah')), rCfg, fauxAdmin, fauxDb({}, []));
+          var recusCfg = ((rCfg.out && rCfg.out.applied) || [])
+            .concat((rCfg.out && rCfg.out.flagged) || []);
+          ok(rCfg.out && rCfg.out.counts && rCfg.out.counts.parConfiguration === 1
+            && recusCfg.length === 1
+            && String(recusCfg[0].sku).toUpperCase() === String(casCfg.fiche.sku).toUpperCase(),
+            '⛔⛔ ARGENT — une annonce à RACINE NUE qui énonce sa configuration doit '
+            + 'atteindre la fiche qui porte le MÊME conditionnement, en passant par le '
+            + 'point d\'entrée (racine déclinée en ' + casCfg.variantes + ' fiches ; '
+            + 'obtenu parConfiguration=' + JSON.stringify(rCfg.out && rCfg.out.counts
+              && rCfg.out.counts.parConfiguration) + ', reçus '
+            + JSON.stringify(recusCfg.map(function (x) { return x.sku; })) + ')');
+          ok(rCfg.out && rCfg.out.counts && rCfg.out.counts.unknown === 0,
+            '⛔ …et elle ne compte PLUS comme inconnue : une même annonce ne peut pas être '
+            + 'à la fois reconnue et rendue « jamais vue » (obtenu unknown='
+            + JSON.stringify(rCfg.out && rCfg.out.counts && rCfg.out.counts.unknown) + ')');
+          /* ⚠️ PRÉALABLE INVERSE — la même annonce MUETTE sur son contenu reste
+             écartée. Sans lui, l'assertion ci-dessus serait satisfaite par un
+             rapprochement au jugé, qui écrirait un coût d'outil nu sur un kit. */
+          scanReset();
+          var rMuet = fauxRes();
+          await admFn(reqNue(pageNue('')), rMuet, fauxAdmin, fauxDb({}, []));
+          ok(rMuet.out && rMuet.out.counts && rMuet.out.counts.parConfiguration === 0
+            && rMuet.out.counts.unknown === 1,
+            '⛔⛔ ARGENT — la MÊME annonce sans sa configuration n\'est JAMAIS rapprochée : '
+            + 'elle repart en inconnue (obtenu parConfiguration='
+            + JSON.stringify(rMuet.out && rMuet.out.counts && rMuet.out.counts.parConfiguration)
+            + ', unknown=' + JSON.stringify(rMuet.out && rMuet.out.counts
+              && rMuet.out.counts.unknown) + ')');
+          scanReset();
+        }
+
         /* ⛔ EN BALAYAGE, LES REJETS DOIVENT POUVOIR SE LIRE (09/08/2026). Le
            balayage réel du jour comptait 1 093 `sansRef` sur 67 pages — comptés
            mais jamais montrés : impossible de dire si un produit « estimé » du
@@ -2733,6 +2820,54 @@ module.exports = async function () {
           '⛔⛔ PRÉALABLE : la liste ARRIVE bien quand le balayage est terminé — '
           + 'différer n\'est pas perdre (' + (Array.isArray(couvFin.fichesJamaisVuesDetail)
             ? couvFin.fichesJamaisVuesDetail.length + ' entrées' : 'ABSENTE') + ')');
+
+        /* ⛔⛔ ET EN BALAYAGE RÉEL, ELLE N'ARRIVAIT JAMAIS (mesuré le 10/08/2026
+           sur SES DEUX zips). Le balayage se répartit sur PLUSIEURS instances
+           sans serveur — 110 pages + 2, puis 111 + 1 — et le cumul vit dans la
+           mémoire d'UNE instance. Aucune n'a donc jamais vu « toutes les
+           pages » : `pagesManquantes` valait 2 chez l'une, 110 chez l'autre, et
+           la condition « il n'en manque plus AUCUNE » n'a pu être vraie nulle
+           part. Résultat : 0 page sur 112 portait la liste.
+           ⛔ Le cas précédent ne pouvait pas le voir : il passe HORS balayage,
+           là où il n'y a qu'une page. Celui-ci rejoue une VRAIE rafale, page
+           après page, et regarde à quel moment la liste part.
+           ⚠️ Pages synthétiques toutes DIFFÉRENTES : c'est le nombre de pages
+           DISTINCTES qui fait avancer la rafale, deux pages identiques ne
+           comptent que pour une. */
+        scanReset();
+        var dbRaf = fauxDb({}, []);
+        var vuAvecReste = null, vuSansListe = null, dernierReste = null;
+        for (var pg = 0; pg < 66; pg++) {
+          var rPg = fauxRes();
+          await admFn({ method: 'POST',
+            query: { type: 'price-watch', brand: 'DEWALT', source: 'idealo',
+              scan: '1', manquants: '1', dryRun: '1' },
+            body: { text: pageIdealo(cible.sku, '450,00') + '\nrepere de page unique ' + pg } },
+            rPg, fauxAdmin, dbRaf);
+          var cPg = (rPg.out || {}).couverture || {};
+          dernierReste = cPg.pagesManquantes;
+          if (cPg.pagesManquantes > 2 && Array.isArray(cPg.fichesJamaisVuesDetail) === false) {
+            vuSansListe = cPg.pagesManquantes;
+          }
+          if (cPg.pagesManquantes > 0 && cPg.pagesManquantes <= 2
+              && Array.isArray(cPg.fichesJamaisVuesDetail)) {
+            vuAvecReste = cPg;
+          }
+        }
+        ok(vuSansListe !== null,
+          '⚠️ PRÉALABLE : en plein balayage, tant qu\'il manque plus que la tolérance, '
+          + 'la liste ne part PAS (reste observé : ' + JSON.stringify(vuSansListe) + ')');
+        ok(vuAvecReste !== null,
+          '⛔⛔ LA LISTE PART MÊME S\'IL RESTE QUELQUES PAGES — sans cette tolérance, un '
+          + 'balayage réparti sur plusieurs instances ne la rend JAMAIS : mesuré 0 page sur '
+          + '112 le 10/08 (dernier reste observé : ' + JSON.stringify(dernierReste) + ')');
+        ok(vuAvecReste && vuAvecReste.fichesJamaisVuesPagesVues > 0
+          && vuAvecReste.fichesJamaisVuesPagesVues < vuAvecReste.fichesJamaisVuesPagesAttendues,
+          '⛔ …et elle DIT sur combien de pages elle est calculée : une liste établie sur '
+          + 'moins que le plan entier peut porter un faux absent, et l\'écart doit se LIRE '
+          + '(obtenu ' + JSON.stringify(vuAvecReste && [vuAvecReste.fichesJamaisVuesPagesVues,
+            vuAvecReste.fichesJamaisVuesPagesAttendues]) + ')');
+        scanReset();
 
         /* ⛔⛔ LES ÉCRITURES PARTENT EN UN SEUL LOT (09/08/2026, demande de
            l'user : « est-ce que les traqueurs peuvent être beaucoup plus

@@ -2964,15 +2964,41 @@ function pwCouvAjouter(brand, skus, titres, nbTuiles, nbLues, pagesDuPlan, extra
        ⚠️ Le COMPTE (`fichesJamaisVues`), lui, part à chaque page : il est léger
        et c'est lui qui dit où on en est. Rien n'est perdu, seul le détail
        attend la fin. */
+    /* ⛔⛔ DÉFAUT DE MA PROPRE LIVRAISON, MESURÉ SUR SES DEUX BALAYAGES DU
+       10/08/2026 : la liste n'est JAMAIS PARTIE. Sur 112 pages, `manquantes`
+       n'est jamais retombé à 0 — parce que le balayage se répartit sur
+       PLUSIEURS instances sans serveur (mesuré : 110 pages + 2, puis 111 + 1)
+       et que ce cumul vit dans la mémoire d'UNE instance. Aucune n'a donc vu
+       « les 112 » : `manquantes` valait 2 chez l'une, 110 chez l'autre, et la
+       condition `=== 0` n'a pu être vraie nulle part.
+       ⛔ Une condition qui ne peut pas devenir vraie n'est pas une condition,
+       c'est une suppression — et elle avait l'air d'un différé.
+       ⛔ On tolère donc un RESTE : l'instance qui a vu la quasi-totalité des
+       pages rend la liste. Le seuil vaut 2 % des pages du plan (au moins 2) —
+       sur 112 pages, la liste ne part que sur les 2 ou 3 dernières, soit
+       ~110 Ko au lieu des 5,7 Mo d'avant le différé.
+       ⚠️ CE QUE ÇA COÛTE, ÉCRIT PLUTÔT QUE TU : la liste est alors calculée
+       sur les pages VUES PAR CETTE INSTANCE. Les quelques pages traitées
+       ailleurs peuvent y laisser un faux absent. La réponse rend donc les deux
+       nombres (`fichesJamaisVuesPagesVues` / `...PagesAttendues`) : l'écart se
+       LIT, il ne se devine pas. */
     fichesJamaisVuesDetail: (extra.manquants && Array.isArray(pwCouv.fichesDetail)
-        && (!extra.scan || manquantes === 0 || manquantes === null))
+        && (!extra.scan || manquantes === null
+          || manquantes <= Math.max(2, Math.ceil((pagesPlan || 0) * 0.02))))
       ? pwCouv.fichesDetail
         .filter(function (f) { return !pwCouv.fiches[String(f.sku).toUpperCase()]; })
         .slice(0, PW_MANQUANTS_MAX)
       : undefined,
     /* Dit POURQUOI le détail est absent, au lieu de le laisser croire vide. */
     fichesJamaisVuesDetailDiffere: (extra.manquants && extra.scan
-      && manquantes !== 0 && manquantes !== null) ? true : undefined,
+      && manquantes !== null
+      && manquantes > Math.max(2, Math.ceil((pagesPlan || 0) * 0.02))) ? true : undefined,
+    /* ⛔ SUR COMBIEN DE PAGES CETTE LISTE EST-ELLE CALCULÉE. Sans ces deux
+       nombres, une liste établie sur 110 pages d'un plan de 112 se lit comme
+       une liste complète — et l'user irait chercher des produits qui étaient
+       en réalité sur les deux pages manquantes. */
+    fichesJamaisVuesPagesVues: extra.manquants ? base : undefined,
+    fichesJamaisVuesPagesAttendues: extra.manquants ? (pagesPlan || null) : undefined,
     /* ⛔ UNE TRONCATURE SE DIT. Sans ce drapeau, une liste coupée se lit
        « voici tout ce qui manque » — et l'user cherche 600 produits en croyant
        les avoir tous. Le compte, lui, reste juste : c'est l'écart entre les
@@ -3747,11 +3773,47 @@ async function handlePriceWatch(req, res, admin, db) {
        ⚠️ Il vient APRÈS le recollage (qui, lui, exige l'égalité de référence) :
        du plus sûr au moins sûr, comme toute la chaîne d'appariement. */
     const parConfig = priceParse.apparierParConfiguration(
-      (recolle.restants || []).concat(unknown.filter((u) => u && u.sku)), products, brand);
+      recolle.restants || [], products, brand);
     parConfig.items.forEach((it) => parsed.push(it));
     const souple = priceParse.apparierParNomSouple(
       recolle.restants || [], products, brand);
     souple.items.forEach((it) => parsed.push(it));
+    /* ⛔⛔ DÉFAUT DE MA PROPRE LIVRAISON, MESURÉ SUR SON BALAYAGE DU 10/08/2026.
+       L'appel ci-dessus recevait aussi `unknown` — une liste ENCORE VIDE à cet
+       endroit : elle ne se remplit qu'au fil de la boucle d'écriture, ~120
+       lignes plus bas. Le rapprochement par configuration ne voyait donc JAMAIS
+       les annonces à RACINE NUE — précisément celles pour lesquelles il a été
+       écrit. Résultat mesuré sur ses 112 pages : `parConfiguration: 0`, alors
+       que le relevé portait 886 annonces énonçant leur nombre de batteries.
+       ⛔ Une passe qui ne reçoit rien reste verte pour toujours : elle avait
+       l'air d'une couverture, elle n'en était pas une.
+       ⛔ ON LUI DONNE CE QU'ELLE ATTEND : les annonces déjà analysées dont
+       AUCUNE fiche ne porte la référence — la même recherche que la boucle
+       d'écriture juste en dessous, à l'identique (racine et clé de modèle
+       comprises), sinon on rapprocherait une annonce que le catalogue sait
+       déjà placer.
+       ⚠️ Portes lues — J4 : la RÈGLE ne bouge pas d'un iota. L'annonce doit
+       ÉNONCER sa configuration, elle doit CONCORDER avec le suffixe, et une
+       seule fiche doit rester compatible ; une annonce muette ou ambiguë reste
+       écartée. C'est la garde qui empêche d'écrire un coût d'outil nu sur un
+       kit — et ce coût décide d'un prix de vente, qui doit être exact.
+       ⛔ Rien ici ne fabrique un prix de référence ni une réduction annoncée
+       (D-004). J3 : des titres publics, aucune donnée personnelle. J5 : aucune
+       TVA, aucun octroi de mer — le territoire vient du code postal. */
+    const sansFiche = parsed.filter((it) => !(bySku[it.sku]
+      || bySku[priceParse.racineRef(it.sku)] || bySku[pwCleModele(it)]));
+    const parConfigNu = priceParse.apparierParConfiguration(sansFiche, products, brand);
+    if (parConfigNu.items.length) {
+      /* Ce qui a été rapproché DISPARAÎT de `parsed` sous sa forme d'origine :
+         laissé là, il repartirait dans `unknown` et la réponse dirait à la fois
+         « reconnu » et « inconnu » pour la même annonce. */
+      const remplacees = new Set(sansFiche);
+      (parConfigNu.restants || []).forEach((e) => remplacees.delete(e));
+      for (let i = parsed.length - 1; i >= 0; i--) {
+        if (remplacees.has(parsed[i])) parsed.splice(i, 1);
+      }
+      parConfigNu.items.forEach((it) => parsed.push(it));
+    }
     /* ⛔⛔ POURQUOI SI PEU ? SANS CE COMPTE, LA QUESTION N'A PAS DE RÉPONSE.
        Mesuré le 04/08 : l'appariement souple ne ramène que 10 des 379 fiches
        sans référence, alors que le corpus fabriqué en rendait 163. L'écart
@@ -4236,7 +4298,7 @@ async function handlePriceWatch(req, res, admin, db) {
         /* Ce que le rapprochement par CONFIGURATION a ramené. Sans ce compte,
            on ne saurait pas si la règle sert — et une règle dont on ne mesure
            pas le rendement finit par vivre sans qu'on sache pourquoi. */
-        parConfiguration: parConfig.items.length,
+        parConfiguration: parConfig.items.length + parConfigNu.items.length,
         /* ⛔ Ce qui n'a PAS pu s'écrire, et pourquoi. Une page qui tombe en
            silence coûte ~60 relevés ; une page qui dit ce qu'elle a raté coûte
            une ligne de rapport. */
