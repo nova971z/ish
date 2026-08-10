@@ -1367,6 +1367,89 @@ var PREFIXES_MAKITA = {
 };
 var PREFIXES_MAKITA_ORDRE = Object.keys(PREFIXES_MAKITA).sort(function (a, b) { return b.length - a.length; });
 
+/* ══ MILWAUKEE — LIRE LA RÉFÉRENCE DANS LE TITRE ═══════════════════════════
+   ⛔⛔ POURQUOI CE CODE EXISTE. Son premier balayage (10/08/2026, 67 pages,
+   4 019 tuiles) a sorti 2 199 tuiles SANS RÉFÉRENCE, soit 54,7 % — non pas
+   parce que la page était illisible, mais parce que la nomenclature de cette
+   marque n'était écrite NULLE PART.
+
+   ⛔ L'ANCRE EST LA FORME, JAMAIS LA POSITION (M-27) — et c'est LUI qui m'a
+   repris : « elles ne sont pas toujours dans des parenthèses ». Mesuré sur ses
+   793 occurrences : 393 entre parenthèses, 280 après un tiret, 74 nues en fin
+   de titre, 46 ailleurs — parfois AVANT le nom du produit. S'ancrer sur les
+   parenthèses aurait perdu la moitié des références.
+   Ce qui est STABLE : les 791 nombres à dix chiffres du relevé commencent
+   TOUS par « 49 », sans une exception ; une seconde famille vit à huit
+   chiffres (128 en « 48 », 105 en « 49 »).
+
+   ⛔⛔ L'ORDRE DES RÈGLES EST UNE RÈGLE D'ARGENT, PAS UNE COMMODITÉ.
+   Le numéro d'article se lit AVANT la plateforme, et la plateforme ne se lit
+   JAMAIS derrière « pour », « compatible », « adapté ». Motif mesuré sur ses
+   titres : « Plateau de ponçage 125 mm POUR M18 FROS125 — 4932500123 » est un
+   ACCESSOIRE dont la vraie référence est le nombre ; la plateforme y dit
+   seulement sur quelle machine il se monte. C'est le piège déjà payé chez
+   l'autre marque (« Butée parallèle, Makita SP6000 » à 14,49 € rapprochée de
+   la SCIE) : une compatibilité prise pour une identité écrit le prix d'un
+   accessoire sur une machine. */
+var MILWAUKEE_ARTICLE_10 = /\b(49\d{8})\b/;
+var MILWAUKEE_ARTICLE_8 = /\b(4[89]\d{6})\b/;
+/* ⛔⛔ LE SUFFIXE SE DÉTACHE — ET LE PERDRE, C'EST LE BUG À 493,48 €.
+   Mesuré sur ses titres : le code d'ensemble s'écrit avec des espaces autour
+   du tiret, ou sans tiret du tout — « M18 BHG -502C », « M12 GG- 401B »,
+   « M18 BPD 402 C ». Une expression qui exige le tiret COLLÉ perd le suffixe,
+   et alors « M18 BSX » (l'outil nu) et « M18 BSX (2 x 4 Ah + charger) »
+   (le pack) s'écrasent sur la MÊME référence.
+   C'est exactement la panne qu'il vient de repérer chez l'autre marque : le
+   prix d'un pack (351,98 €) écrit sur la machine seule, un prix de vente
+   gonflé à 493,48 € au lieu de 323,15 €. On ne la refait pas ici. */
+var MILWAUKEE_PLATEFORME = /\b(M(?:12|14|18|28)\s?([A-Z][A-Z0-9]{1,12})(?:\s*-\s*|\s+)?([A-Z]?[0-9][A-Z0-9]{0,5}\s?[A-Z]?)?)\b/;
+/* ⛔⛔ UN NOM DE GAMME N'EST PAS UN MODÈLE — MESURÉ, ET C'EST LE PIRE DOUBLON.
+   « M18 FUEL » a été extrait de DIX titres de produits DIFFÉRENTS : une clé à
+   chocs, une scie sabre, un pack de huit machines. FUEL est la gamme haut de
+   game de la marque, pas une référence. Le laisser passer aurait fait porter
+   un seul « produit » à dix prix incompatibles — donc un prix faux garanti.
+   ⚠️ Liste tenue COURTE et mesurée : sur les 18 têtes les plus fréquentes de
+   son relevé, FUEL est la seule qui ne soit pas un code modèle. On n'exclut
+   pas « au cas où » : chaque mot ici a été vu jouer ce rôle. */
+var MILWAUKEE_GAMMES = { FUEL: 1, ONEKEY: 1, REDLITHIUM: 1, REDLINK: 1, PACKOUT: 1, POWERPACK: 1 };
+/* ⛔⛔ UN MOT FRANÇAIS N'EST PAS UNE RÉFÉRENCE — et celui-là m'avait échappé.
+   Mesuré : « PACK 2 MACHINES MILWAUKEE M18 AVEC BATTERIES ET SAC » et « PACK
+   MILWAUKEE GARAGISTE 3 MACHINES M18 AVEC BATTERIES » produisaient tous deux
+   la référence « M18AVEC » — deux packs DIFFÉRENTS écrasés sur un mot de
+   liaison. C'est le doublon dans sa forme la plus bête, et le plus dangereux :
+   deux prix incompatibles sur un produit qui n'existe pas. */
+var MILWAUKEE_MOTS_FR = {
+  AVEC: 1, SANS: 1, POUR: 1, ET: 1, OU: 1, PLUS: 1, LOT: 1, PACK: 1, KIT: 1,
+  SET: 1, BATTERIE: 1, BATTERIES: 1, CHARGEUR: 1, COFFRET: 1, MACHINES: 1, VOLTS: 1
+};
+var MILWAUKEE_COMPATIBILITE = /\b(pour|compatible|adapt[ée]|convient|s'adapte)\b/i;
+
+function lireReferenceMilwaukee(titre) {
+  var t = String(titre || '');
+  if (!t) return null;
+  var m = MILWAUKEE_ARTICLE_10.exec(t);
+  if (m) return { ref: m[1], forme: 'article10', porteConditionnement: false };
+  m = MILWAUKEE_ARTICLE_8.exec(t);
+  if (m) return { ref: m[1], forme: 'article8', porteConditionnement: false };
+  /* ⛔ La plateforme ne vaut identité que si le titre ne la désigne pas comme
+     une compatibilité. Sans cette garde, tout accessoire volerait la
+     référence de la machine sur laquelle il se monte. */
+  if (MILWAUKEE_COMPATIBILITE.test(t)) return null;
+  m = MILWAUKEE_PLATEFORME.exec(t);
+  if (m && !MILWAUKEE_GAMMES[m[2]] && !MILWAUKEE_MOTS_FR[m[2]]) {
+    /* On normalise en retirant espaces et tirets : « M18 BHG -502C » et
+       « M18BHG502C » désignent le même article, et deux écritures d'une même
+       référence ne doivent jamais compter pour deux produits. */
+    return {
+      ref: m[1].replace(/[\s-]+/g, ''),
+      forme: 'plateforme',
+      porteConditionnement: true,
+      suffixe: (m[3] || '').replace(/\s+/g, '') || null
+    };
+  }
+  return null;
+}
+
 /* ── TÊTES CONNUES, TOUTES MARQUES ────────────────────────────────────────────
    L'union des tables de préfixes : le parseur (teteConnue) demande seulement
    « cette tête est-elle une famille de références connue ? » — la réponse doit
@@ -1663,6 +1746,7 @@ module.exports = {
   PREFIXES_DEWALT: PREFIXES_DEWALT, PREFIXES_DEWALT_ORDRE: PREFIXES_DEWALT_ORDRE,
   PREFIXES_MAKITA: PREFIXES_MAKITA, PREFIXES_MAKITA_ORDRE: PREFIXES_MAKITA_ORDRE,
   FORMES_MAKITA: FORMES_MAKITA, formeReferenceMakita: formeReferenceMakita,
+  lireReferenceMilwaukee: lireReferenceMilwaukee,
   TETES_CONNUES: TETES_CONNUES,
   prefixeDeReference: prefixeDeReference,
   EXTENSIONS_REGION: EXTENSIONS_REGION, GAMMES: GAMMES,

@@ -1940,6 +1940,75 @@ module.exports = async function () {
           + 'sinon l\'assertion précédente ne prouve rien (obtenu ' + JSON.stringify(cfgJ3) + ')');
       }
 
+      /* ══ MILWAUKEE — LIRE LA RÉFÉRENCE DANS LE TITRE ══════════════════════
+         ⛔⛔ CE QUE CES ASSERTIONS DÉFENDENT, ET C'EST DE L'ARGENT. Son premier
+         balayage a sorti 2 199 tuiles sur 4 019 SANS référence : la
+         nomenclature de cette marque n'était écrite nulle part. En l'écrivant,
+         trois pièges se sont présentés — chacun aurait produit un prix faux :
+           ① un nom de GAMME pris pour un modèle (« M18 FUEL » lu sur DIX
+              produits différents : clé à chocs, scie sabre, pack de huit) ;
+           ② un mot FRANÇAIS pris pour un modèle (« M18 AVEC batteries ») ;
+           ③ le SUFFIXE perdu quand il se détache (« M18 BSX » et « M18 BSX
+              (2 x 4 Ah + charger) » écrasés) — c'est EXACTEMENT la panne qu'il
+              venait de repérer chez l'autre marque, un prix de pack écrit sur
+              la machine seule.
+         ⚠️ Références SYNTHÉTIQUES : c'est la règle qu'on teste, pas un produit. */
+      var lireMw = pp.nomenclature && pp.nomenclature.lireReferenceMilwaukee;
+      ok(typeof lireMw === 'function', 'lireReferenceMilwaukee exportée');
+      if (lireMw) {
+        /* ⛔ L'ANCRE EST LA FORME, JAMAIS LA POSITION (M-27) — et c'est LUI qui
+           l'a dit. Mesuré : à peine la moitié des numéros sont entre
+           parenthèses. Les quatre positions doivent rendre la MÊME référence. */
+        ['Zztruc quelconque 40x9mm (4932000001)',
+          'Zztruc quelconque 40x9mm - 4932000001',
+          'Zztruc quelconque 40x9mm 4932000001',
+          '4932000001 Zztruc quelconque 40x9mm'].forEach(function (titre, i) {
+          var r = lireMw(titre) || {};
+          ok(r.ref === '4932000001',
+            '⛔ position ' + (i + 1) + ' : le numéro d\'article se lit où qu\'il soit dans le '
+            + 'titre — s\'ancrer sur les parenthèses perdrait la moitié des références '
+            + '(obtenu ' + JSON.stringify(r.ref) + ')');
+        });
+        /* ⛔⛔ ARGENT ① — un nom de gamme n'est pas un modèle. */
+        var gamme = lireMw('Zzclé à chocs Zzmarque M18 FUEL Brushless 650 Nm') || {};
+        ok(gamme.ref !== 'M18FUEL',
+          '⛔⛔ ARGENT : un nom de GAMME ne devient jamais une référence — il en '
+          + 'porterait dix produits incompatibles, donc dix prix (obtenu '
+          + JSON.stringify(gamme.ref) + ')');
+        /* ⛔⛔ ARGENT ② — un mot français n'est pas un modèle. */
+        var motFr = lireMw('ZZPACK 2 MACHINES ZZMARQUE M18 AVEC BATTERIES ET SAC') || {};
+        ok(motFr.ref !== 'M18AVEC',
+          '⛔⛔ ARGENT : un mot de liaison ne devient jamais une référence (obtenu '
+          + JSON.stringify(motFr.ref) + ')');
+        /* ⛔⛔ ARGENT ③ — le suffixe détaché se rattrape, sinon le pack écrase
+           l\'outil nu. Les trois écritures observées doivent se distinguer. */
+        var nu = lireMw('Zzmarque M18 ZQR') || {};
+        var av502 = lireMw('Zzmarque M18 ZQR -502C') || {};
+        var av402 = lireMw('Zzmarque M18 ZQR 402 C') || {};
+        ok(nu.ref === 'M18ZQR' && av502.ref === 'M18ZQR502C' && av402.ref === 'M18ZQR402C',
+          '⛔⛔ ARGENT : un suffixe séparé par une espace ou un tiret espacé reste LU — '
+          + 'le perdre écrase le pack et l\'outil nu sur la même référence, et c\'est '
+          + 'ainsi qu\'un prix de pack finit sur une machine seule (obtenu '
+          + JSON.stringify([nu.ref, av502.ref, av402.ref]) + ')');
+        /* ⛔ LA COMPATIBILITÉ N'EST PAS UNE IDENTITÉ — piège déjà payé chez
+           l\'autre marque : un accessoire porte la référence de la machine sur
+           laquelle il se monte. Le numéro d\'article prime, et sans lui on ne
+           prend RIEN. */
+        var acc = lireMw('Plateau de ponçage 125 mm pour M18 ZFR125 - ZZMARQUE - 4932000002') || {};
+        ok(acc.ref === '4932000002',
+          '⛔ le NUMÉRO D\'ARTICLE prime sur la plateforme citée en compatibilité '
+          + '(obtenu ' + JSON.stringify(acc.ref) + ')');
+        ok(lireMw('Bac latéral pour coffret Zzrangement M18 ZFR125') === null,
+          '⛔⛔ ARGENT : sans numéro d\'article, une plateforme citée derrière « pour » '
+          + 'ne vaut PAS identité — sinon le prix d\'un accessoire s\'écrit sur la '
+          + 'machine (obtenu ' + JSON.stringify(lireMw('Bac latéral pour coffret Zzrangement M18 ZFR125')) + ')');
+        /* ⚠️ PRÉALABLE : un titre qui ne porte aucune référence rend `null` —
+           sans quoi tout ce qui précède verdirait sur une fonction qui accepte
+           n\'importe quoi. */
+        ok(lireMw('Zzbac latéral grand format pour coffret Zzrangement') === null,
+          '⚠️ PRÉALABLE : un titre sans référence rend `null`, il n\'en invente pas');
+      }
+
       /* ══ LA FORME DE LA RÉFÉRENCE — CE QUI RÉPARE LE COMPTEUR ═══════════════
          ⛔ Le défaut n'était pas dans le parseur, il était dans la MESURE :
          accessoires, consommables et machines filaires étaient comptés
