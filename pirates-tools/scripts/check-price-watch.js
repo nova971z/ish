@@ -2998,6 +2998,56 @@ module.exports = async function () {
             vuAvecReste.fichesJamaisVuesPagesAttendues]) + ')');
         scanReset();
 
+        /* ⛔⛔ ET LE FOURNISSEUR RESSERT LA MÊME PAGE (mesuré le 10/08/2026 sur
+           SON relevé) : une instance a traité **110 pages dont 43 EN DOUBLE** —
+           67 contenus distincts seulement. Au-delà d'un certain rang, la
+           pagination du site rend toujours la même page.
+           ⛔ Conséquence, et c'est le défaut : « il manque 45 pages » restait
+           vrai alors que le raccourci avait FINI sa boucle. La liste des fiches
+           jamais vues n'attend pas la couverture, elle attend la FIN — les deux
+           comptes ne mesurent pas la même chose, et les confondre l'a supprimée
+           une seconde fois.
+           ⚠️ Ici, TOUTES les pages portent le même contenu : les distinctes
+           restent à 1 pendant que les traitées montent jusqu'au plan. */
+        scanReset();
+        var dbDbl = fauxDb({}, []);
+        /* ⚠️ L'empreinte d'une page se calcule sur ses MONTANTS et exige d'en
+           trouver au moins quatre : une page à un seul prix n'a pas d'identité,
+           et le compte des distinctes retomberait sur celui des requêtes — le
+           cas ne prouverait alors plus rien. On fabrique donc une vraie grille. */
+        var lignesDbl = [];
+        [cible.sku, 'ZZDBL1', 'ZZDBL2', 'ZZDBL3', 'ZZDBL4'].forEach(function (s, n) {
+          lignesDbl.push('DEWALT ' + s, 'description outil', '5', '94 offres',
+            'à partir de ' + (410 + n * 10) + ',00 €');
+        });
+        while (lignesDbl.join('\n').length < 260) {
+          lignesDbl.push('ligne de bourrage sans marque ni prix pour le seuil du corps');
+        }
+        var pageIdentique = lignesDbl.join('\n');
+        var rDbl = null, resteDbl = null;
+        for (var pd = 0; pd < 67; pd++) {
+          var rD = fauxRes();
+          await admFn({ method: 'POST',
+            query: { type: 'price-watch', brand: 'DEWALT', source: 'idealo',
+              scan: '1', manquants: '1', dryRun: '1' },
+            body: { text: pageIdentique } }, rD, fauxAdmin, dbDbl);
+          rDbl = (rD.out || {}).couverture || {};
+          resteDbl = rDbl.pagesManquantes;
+        }
+        ok(rDbl && rDbl.pagesEnDouble > 0 && resteDbl > 3,
+          '⚠️ PRÉALABLE : des pages resservies à l\'identique laissent la COUVERTURE '
+          + 'incomplète (' + JSON.stringify([rDbl && rDbl.pagesEnDouble, resteDbl])
+          + ') — sans ce cas, les deux comptes seraient indistinguables');
+        ok(rDbl && rDbl.fichesJamaisVuesPagesTraitees >= 67
+          && Array.isArray(rDbl.fichesJamaisVuesDetail),
+          '⛔⛔ LA LISTE PART QUAND LA BOUCLE EST FINIE, pas quand la couverture est '
+          + 'complète : un fournisseur qui ressert la même page ne doit pas supprimer '
+          + 'la seule liste qui dise QUOI aller chercher (traitées : '
+          + JSON.stringify(rDbl && rDbl.fichesJamaisVuesPagesTraitees) + ', distinctes : '
+          + JSON.stringify(rDbl && rDbl.fichesJamaisVuesPagesVues) + ', liste : '
+          + (Array.isArray(rDbl && rDbl.fichesJamaisVuesDetail) ? 'présente' : 'ABSENTE') + ')');
+        scanReset();
+
         /* ⛔⛔ LES ÉCRITURES PARTENT EN UN SEUL LOT (09/08/2026, demande de
            l'user : « est-ce que les traqueurs peuvent être beaucoup plus
            rapides ? »). MESURÉ sur SES deux balayages du soir : chaque produit

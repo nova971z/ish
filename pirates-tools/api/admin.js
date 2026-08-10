@@ -2946,6 +2946,17 @@ function pwCouvAjouter(brand, skus, titres, nbTuiles, nbLues, pagesDuPlan, extra
   const nbDistinctes = Object.keys(pwCouv.empreintes).length;
   const base = nbDistinctes || pwCouv.pages;
   const manquantes = pagesPlan ? Math.max(0, pagesPlan - base) : null;
+  /* ⛔⛔ DEUX CHOSES DIFFÉRENTES, ET LES CONFONDRE A COÛTÉ LA LISTE (10/08/2026).
+     `manquantes` compte les pages dont le CONTENU est distinct — c'est la bonne
+     mesure de COUVERTURE. Mais elle ne dit PAS si le balayage est fini : mesuré
+     sur son relevé du jour, une instance a traité **110 pages** dont **43 en
+     DOUBLE** (le fournisseur ressert la même page au-delà d'un certain rang),
+     donc 67 contenus distincts et « 45 manquantes » — alors que le raccourci
+     avait bel et bien fini sa boucle. La liste des fiches jamais vues, elle,
+     n'attend qu'une chose : que la boucle soit TERMINÉE.
+     ⚠️ Portes lues : J3 — un compteur de pages, aucune donnée personnelle ;
+     J4 — aucun prix, aucune annonce de réduction ; J5 — aucune fiscalité. */
+  const restantesTraitees = pagesPlan ? Math.max(0, pagesPlan - (pwCouv.pages || 0)) : null;
   /* ⛔ LA CAUSE, PAS SEULEMENT LE CHIFFRE. Un « il manque 14 pages » sans cause
      se termine toujours en supposition — et j'en ai déjà écrit une fausse. */
   const explication = diagRafale.expliquerRafale({
@@ -3069,16 +3080,21 @@ function pwCouvAjouter(brand, skus, titres, nbTuiles, nbLues, pagesDuPlan, extra
        nombres (`fichesJamaisVuesPagesVues` / `...PagesAttendues`) : l'écart se
        LIT, il ne se devine pas. */
     fichesJamaisVuesDetail: (extra.manquants && Array.isArray(pwCouv.fichesDetail)
-        && (!extra.scan || manquantes === null
-          || manquantes <= Math.max(2, Math.ceil((pagesPlan || 0) * 0.02))))
+        && (!extra.scan || restantesTraitees === null
+          || restantesTraitees <= Math.max(2, Math.ceil((pagesPlan || 0) * 0.02))))
       ? pwCouv.fichesDetail
         .filter(function (f) { return !pwCouv.fiches[String(f.sku).toUpperCase()]; })
         .slice(0, PW_MANQUANTS_MAX)
       : undefined,
     /* Dit POURQUOI le détail est absent, au lieu de le laisser croire vide. */
     fichesJamaisVuesDetailDiffere: (extra.manquants && extra.scan
-      && manquantes !== null
-      && manquantes > Math.max(2, Math.ceil((pagesPlan || 0) * 0.02))) ? true : undefined,
+      && restantesTraitees !== null
+      && restantesTraitees > Math.max(2, Math.ceil((pagesPlan || 0) * 0.02))) ? true : undefined,
+    /* ⛔ COMBIEN DE PAGES ONT ÉTÉ TRAITÉES — à distinguer des pages au contenu
+       DISTINCT. L'écart entre les deux est exactement le nombre de pages que le
+       fournisseur a resservies à l'identique : c'est lui qui dit si le plan
+       demande plus de pages que le site n'en sert vraiment. */
+    fichesJamaisVuesPagesTraitees: extra.manquants ? (pwCouv.pages || 0) : undefined,
     /* ⛔ SUR COMBIEN DE PAGES CETTE LISTE EST-ELLE CALCULÉE. Sans ces deux
        nombres, une liste établie sur 110 pages d'un plan de 112 se lit comme
        une liste complète — et l'user irait chercher des produits qui étaient

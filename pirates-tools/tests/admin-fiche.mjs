@@ -211,7 +211,12 @@ try {
   }, { CODE_IMG, cas: [
     { nom: 'photo dense 2000', w: 2000, h: 2000, alpha: false },
     { nom: 'PNG détouré 2000', w: 2000, h: 2000, alpha: true },
-    { nom: 'PNG détouré 3000', w: 3000, h: 3000, alpha: true }
+    { nom: 'PNG détouré 3000', w: 3000, h: 3000, alpha: true },
+    /* ⛔⛔ SA DEMANDE, MOT POUR MOT (10/08/2026) : « même si j'en envoie des
+       4000 par 4000, ça doit marcher […] n'importe quel format, c'est
+       n'importe quel format ». Le cas est donc DANS le harnais : une promesse
+       qu'aucune assertion ne tient se reperd au correctif suivant. */
+    { nom: 'PNG détouré 4000', w: 4000, h: 4000, alpha: true }
   ] });
 
   const refuses = prep.filter((r) => !r.ok);
