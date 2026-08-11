@@ -1441,6 +1441,21 @@ function refSansPrefixeDistributeur(sku, marque) {
    accessoire sur une machine. */
 var MILWAUKEE_ARTICLE_10 = /\b(49\d{8})\b/;
 var MILWAUKEE_ARTICLE_8 = /\b(4[89]\d{6})\b/;
+/* ⛔⛔ LE MÊME NUMÉRO, ÉCRIT AVEC DES TIRETS — troisième écriture, mesurée le
+   11/08/2026 sur son relevé à sec : « 48-32-4537 », « 49-56-0511 ». C'est le
+   numéro à HUIT chiffres de la famille ci-dessus, groupé 2-2-4 par le
+   marchand. Une expression qui exige les huit chiffres COLLÉS ne le voit pas :
+   45 tuiles, 32 références distinctes, restaient « sans référence » alors que
+   leur numéro est écrit en toutes lettres dans le titre.
+   ⛔ ET C'EST UN RISQUE DE DOUBLON À DEUX PRIX. Sur CE relevé, aucune des 32
+   n'apparaît aussi sans tirets (mesuré : 0 croisement) — donc aucun écart de
+   prix aujourd'hui. Mais deux écritures d'un même article qui ne se
+   reconnaissent pas, c'est exactement le mécanisme qui a fait vendre une lampe
+   165,54 € trop cher. On normalise avant que ça arrive, pas après.
+   ⚠️ LA FORME EST TENUE SERRÉE : deux chiffres de tête (48 ou 49), puis 2,
+   puis 4 — trois groupes obligatoires. Une plage de cotes (« 32-48 mm ») n'a
+   pas cette forme, et une tête autre que 48/49 est refusée. */
+var MILWAUKEE_ARTICLE_TIRETS = /\b(4[89])-(\d{2})-(\d{4})\b/;
 /* ⛔⛔ LE SUFFIXE SE DÉTACHE — ET LE PERDRE, C'EST LE BUG À 493,48 €.
    Mesuré sur ses titres : le code d'ensemble s'écrit avec des espaces autour
    du tiret, ou sans tiret du tout — « M18 BHG -502C », « M12 GG- 401B »,
@@ -1479,6 +1494,10 @@ function lireReferenceMilwaukee(titre) {
   if (m) return { ref: m[1], forme: 'article10', porteConditionnement: false };
   m = MILWAUKEE_ARTICLE_8.exec(t);
   if (m) return { ref: m[1], forme: 'article8', porteConditionnement: false };
+  /* ⛔ Le même numéro à huit chiffres, groupé par tirets — NORMALISÉ vers la
+     même identité, sinon le même article compterait pour deux produits. */
+  m = MILWAUKEE_ARTICLE_TIRETS.exec(t);
+  if (m) return { ref: m[1] + m[2] + m[3], forme: 'article8', porteConditionnement: false };
   /* ⛔ La plateforme ne vaut identité que si le titre ne la désigne pas comme
      une compatibilité. Sans cette garde, tout accessoire volerait la
      référence de la machine sur laquelle il se monte. */

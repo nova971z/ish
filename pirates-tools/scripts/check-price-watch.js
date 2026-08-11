@@ -2032,6 +2032,22 @@ module.exports = async function () {
             + 'titre — s\'ancrer sur les parenthèses perdrait la moitié des références '
             + '(obtenu ' + JSON.stringify(r.ref) + ')');
         });
+        /* ⛔⛔ LA TROISIÈME ÉCRITURE DU MÊME NUMÉRO — groupée par tirets, mesurée
+           le 11/08/2026 sur son relevé (45 tuiles, 32 références perdues). Elle
+           doit rendre EXACTEMENT la même identité que la forme collée : deux
+           écritures d'un même article qui ne se reconnaissent pas, c'est le
+           mécanisme du doublon à deux prix. */
+        var colle = lireMw('Zzarticle quelconque 48324537 en boite') || {};
+        var tirete = lireMw('Zzarticle quelconque 48-32-4537 en boite') || {};
+        ok(colle.ref === '48324537' && tirete.ref === colle.ref,
+          '⛔⛔ ARGENT : le numéro groupé par tirets rend la MÊME identité que le même '
+          + 'numéro collé — sinon le même article compte pour deux produits, à deux prix '
+          + '(obtenu ' + JSON.stringify([colle.ref, tirete.ref]) + ')');
+        /* ⛔ ET LA FORME RESTE SERRÉE : une plage de cotes n'est pas un numéro. */
+        ok(!(lireMw('Zzoutil quelconque 32-48 mm de plage') || {}).ref
+          && !(lireMw('Zzoutil quelconque 12-34-5678 en boite') || {}).ref,
+          '⛔ une plage de cotes ou un nombre à tête étrangère ne devient PAS un numéro '
+          + 'd\'article : la forme exige 48 ou 49 en tête et trois groupes 2-2-4');
         /* ⛔⛔ ARGENT ① — un nom de gamme n'est pas un modèle. */
         var gamme = lireMw('Zzclé à chocs Zzmarque M18 FUEL Brushless 650 Nm') || {};
         ok(gamme.ref !== 'M18FUEL',
