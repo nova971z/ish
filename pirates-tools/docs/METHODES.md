@@ -847,6 +847,41 @@ répondre : c'est de le rendre mesurable (M-38, appliqué et vérifié).
 
 ---
 
+### M-48 — Le titre dit la vérité : on le CONVERTIT, on ne le jette pas
+
+Une annonce marchande **engage le vendeur**. Si elle dit « lot de 5 batteries »,
+il y a cinq batteries — sinon l'acheteur a un recours. Le titre n'est donc pas
+une donnée douteuse à filtrer : c'est une **source de droit** dont on peut se
+servir.
+
+*Reprise de l'user, 13/08/2026, et il avait raison* : « s'il y a écrit lot de
+cinq batteries, c'est qu'il y en a cinq […] le titre dit toujours la vérité.
+S'il ne dit pas la vérité, j'aurais droit à un dédommagement auprès du
+revendeur. » Sa capture du marchand le confirmait — « Nombre de batteries : 5
+incluse(s) », « Unité de comptage : 5 unité ».
+
+⛔ **Ma première correction jetait la carte.** Elle évitait bien l'erreur — le
+prix de cinq batteries écrit comme coût d'une seule — mais elle jetait avec
+elle une information juste et **avantageuse** : vérifié sur ses captures, les
+quatre cartes de lot donnent **68,92 · 69,14 · 70,00 · 74,46 €** l'unité, alors
+que la carte unitaire de son propre relevé est à **79,90 €**. Acheter par lot
+lui revient moins cher — refuser le lot lui coûtait de l'argent.
+
+⇒ N unités à P euros font **P/N** l'unité. Le pack porte désormais `quantite` et
+`prixUnitaire`.
+
+⚠️ **ET LA PREUVE EXIGÉE AVANT DE DIVISER.** Le prix unitaire n'entre dans le
+calcul que si la référence a été vue **seule** dans la même rafale : c'est ce
+qui établit qu'elle désigne une unité, pas un ensemble. Sans cette condition,
+« Lot de 3 forets étagés » — dont la référence désigne le **jeu** de trois —
+tomberait à 29,32 € au lieu de 87,97 € : une vente à perte. **Les deux titres
+ont exactement la même forme** ; seule cette preuve les sépare.
+
+*Porte* : quatre assertions dans `check-price-watch`, deux sabotages rouges
+(prix unitaire non calculé ; preuve « vue seule » supprimée).
+
+---
+
 ## Où ces méthodes sont déjà branchées
 
 | Méthode | Le code qui l'applique |
@@ -879,3 +914,4 @@ répondre : c'est de le rendre mesurable (M-38, appliqué et vérifié).
 | M-45 | `api/_lib/price-parse.js` (`titreAjouteDuContenu`), `scripts/check-price-watch.js` |
 | M-46 | `api/_lib/price-parse.js` (`titreAnnonceUneQuantiteMultiple`), `scripts/banc-tuiles.js` |
 | M-47 | `api/_lib/price-parse.js` (`EMPREINTE_PARSEUR`), `scripts/check-version-parseur.js` |
+| M-48 | `api/_lib/price-parse.js` (`quantite`, `prixUnitaire`), `api/admin.js` (`packsUnitaires`) |

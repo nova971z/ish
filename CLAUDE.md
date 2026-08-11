@@ -22,7 +22,7 @@ décisions en vigueur · « fini » ici. Intention inconnue : elle le dit et dem
 | Les règles opposables, par domaine | `.claude/rules/` *(chargées toutes seules)* |
 | Comment le site est fait | `pirates-tools/docs/CARTOGRAPHIE.md` |
 | Fiscalité, statut, TVA | `pirates-tools/docs/METHODE-ENTREPRISE-FISCALITE.md` |
-| **Comment on s'y prend** — les techniques, nommées | `pirates-tools/docs/METHODES.md` *(47 méthodes, `M-01` à `M-47`)* |
+| **Comment on s'y prend** — les techniques, nommées | `pirates-tools/docs/METHODES.md` *(48 méthodes, `M-01` à `M-48`)* |
 | L'histoire du projet · où en est le chantier | `pirates-tools/docs/JOURNAL.md` · `AVANCEMENT-FONDATIONS.md` |
 | Une panne, sa cause, la porte posée | `pirates-tools/docs/LECONS.md` |
 | **Ce que l'user a demandé, et où ça en est** | `pirates-tools/docs/DEMANDES.md` *(porte : `check-demandes`)* |

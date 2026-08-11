@@ -4011,6 +4011,50 @@ async function handlePriceWatch(req, res, admin, db) {
        catalogue) : identité = le titre exact (`srcNom`), jamais la réf d'un
        composant. Le verrou d'argent reste entier : un pack non apparié
        reste listé, son prix ne s'écrit sur AUCUNE fiche. */
+    /* ⛔⛔⛔ UN LOT DE N DONNE LE PRIX UNITAIRE — MAIS SEULEMENT SI LA
+       RÉFÉRENCE DÉSIGNE BIEN L'UNITÉ.
+       ORDRE DE L'USER, 13/08/2026, mot pour mot : « s'il y a écrit lot de cinq
+       batteries, c'est qu'il y en a cinq […] le titre dit toujours la vérité.
+       S'il ne dit pas la vérité, j'aurais droit à un dédommagement auprès du
+       revendeur. » C'est un argument de DROIT : une annonce engage le vendeur.
+       Sa capture du marchand le confirme — « Nombre de batteries : 5
+       incluse(s) », « Unité de comptage : 5 unité ».
+       ⇒ On ne jette plus l'information, on la CONVERTIT : N unités à P euros
+       font P/N l'unité. Vérifié sur ses captures : les quatre cartes de lot de
+       cette référence donnent 68,92 · 69,14 · 70,00 · 74,46 € l'unité — toutes
+       cohérentes, et MOINS chères que la carte unitaire de son propre relevé
+       (79,90 €). Le lot lui fait donc gagner de l'argent, et le refuser en
+       bloc le lui faisait perdre.
+
+       ⛔⛔ LA PREUVE EXIGÉE AVANT DE DIVISER, ET ELLE EST NÉCESSAIRE : la
+       référence doit avoir été vue SEULE dans la même rafale. C'est ce qui
+       établit qu'elle désigne UNE unité et non un ensemble. Sans cette preuve,
+       « Lot de 3 forets étagés » — dont la référence désigne le JEU de trois —
+       serait divisé par trois, le coût tomberait à 29,32 € au lieu de 87,97 €,
+       et on vendrait À PERTE. Les deux titres ont EXACTEMENT la même forme :
+       seule la présence d'une carte unitaire ailleurs les sépare.
+       ⚠️ Le minimum de rafale fait le reste : le prix unitaire déduit entre
+       comme un candidat parmi les autres, jamais comme une valeur imposée.
+       ⚠️ Portes lues — J4 : le prix retenu reste celui que l'user paierait
+       réellement, rapporté à l'unité ; rien ici ne fabrique un prix de
+       référence ni une réduction. J3 : des titres publics. J5 : aucune
+       fiscalité. */
+    const packsUnitaires = [];
+    (auto.packs || []).forEach((pk) => {
+      if (!pk || !(pk.quantite > 1) || !(pk.prixUnitaire > 0) || !pk.skuRefuse) return;
+      const cle = String(pk.skuRefuse).toUpperCase();
+      /* Vue SEULE dans cette rafale ? `pwCouv.refs` porte les références lues
+         par les pages précédentes, `parsed` celles de la page courante. */
+      const vueSeule = !!(pwCouv && pwCouv.brand === brand && pwCouv.refs
+        && pwCouv.refs[cle])
+        || parsed.some((it) => String(it.sku || '').toUpperCase() === cle);
+      if (!vueSeule) return;
+      packsUnitaires.push({ sku: pk.skuRefuse, price: pk.prixUnitaire,
+        name: brand + ' ' + pk.skuRefuse, titre: pk.titre,
+        quantiteDuLot: pk.quantite, prixDuLot: pk.prix, car: pk.car || null });
+    });
+    packsUnitaires.forEach((it) => parsed.push(it));
+
     const appariePacks = pwApparierParNom(auto.packs, products);
     appariePacks.items.forEach((it) => parsed.push(it));
 

@@ -773,15 +773,16 @@ function candidatsAvecPosition(titre, brand) {
    annoncé PLUS exact ; J3 : des titres publics ; J5 : aucune fiscalité. */
 function titreAnnonceUneQuantiteMultiple(texte) {
   var s = String(texte || '');
-  if (!s) return false;
-  /* « Lot de 5 », « Pack de 2 », « Set de 10 », « Jeu de 3 » — le nombre est
-     ce qui compte, et il doit être au moins DEUX. */
-  if (/\b(lots?|packs?|sets?|ensembles?|jeux?|jeu)\s+de\s+([2-9]|[1-9]\d)\b/i.test(s)) return true;
-  /* « x5 », « x 5 », « 5x » accolés à un objet ou entre parenthèses. */
-  if (/\(\s*[xX]\s*([2-9]|[1-9]\d)\s*\)/.test(s)) return true;
-  if (/\b([2-9]|[1-9]\d)\s*[xX]\s+[A-Za-zÀ-ÖØ-öø-ÿ]{3,}/.test(s)) return true;
-  return false;
+  if (!s) return 0;
+  var m = s.match(/\b(?:lots?|packs?|sets?|ensembles?|jeux?|jeu)\s+de\s+([2-9]|[1-9]\d)\b/i);
+  if (m) return parseInt(m[1], 10);
+  m = s.match(/\(\s*[xX]\s*([2-9]|[1-9]\d)\s*\)/);
+  if (m) return parseInt(m[1], 10);
+  m = s.match(/\b([2-9]|[1-9]\d)\s*[xX]\s+[A-Za-zÀ-ÖØ-öø-ÿ]{3,}/);
+  if (m) return parseInt(m[1], 10);
+  return 0;
 }
+
 
 function titreAjouteDuContenu(texte, portee) {
   var s = String(texte || '');
@@ -1555,6 +1556,28 @@ function parseIdealo(rawText, brand) {
     if (quantiteMultiple || (ajoutAnnonce && referenceEstNue(sku, brand))) {
       packs.push({ titre: String(b[iTitre] || '').slice(0, 200), prix: prix,
         skuRefuse: sku,
+        /* ⛔⛔ LE TITRE DIT LA VÉRITÉ — ORDRE DE L'USER, 13/08/2026, mot pour
+           mot : « s'il y a écrit lot de cinq batteries, c'est qu'il y en a
+           cinq […] le titre dit toujours la vérité. S'il ne dit pas la vérité,
+           j'aurais droit à un dédommagement auprès du revendeur. »
+           Il a raison, et c'est un argument de DROIT, pas d'opinion : une
+           annonce est opposable au vendeur. Sa capture du marchand le confirme
+           d'ailleurs — « Nombre de batteries : 5 incluse(s) », « Unité de
+           comptage : 5 unité ».
+           ⇒ On ne JETTE donc plus l'information, on la CONVERTIT : N unités à
+           P euros font P/N l'unité. Vérifié sur ses propres captures — les
+           quatre cartes de lot de cette référence donnent 68,92 · 69,14 ·
+           70,00 · 74,46 € l'unité, toutes cohérentes entre elles ET avec le
+           marché (59,90 à 79,90 €). Mieux : le lot revient MOINS cher à
+           l'unité que la carte unitaire de son propre relevé (79,90 €).
+           ⚠️ Le prix unitaire est RENDU, pas appliqué d'office : c'est
+           `api/admin.js` qui décide de s'en servir, et seulement quand la
+           référence a déjà été vue SEULE dans la même rafale — preuve qu'elle
+           désigne bien l'unité et non l'ensemble. Sans cette preuve, un
+           « Lot de 3 forets étagés » dont la référence désigne le JEU serait
+           divisé par trois, et on vendrait à perte. */
+        quantite: quantiteMultiple || null,
+        prixUnitaire: quantiteMultiple ? Math.round((prix / quantiteMultiple) * 100) / 100 : null,
         raison: quantiteMultiple
           ? 'titre annoncant une QUANTITE MULTIPLE : le prix de N unites n est '
             + 'jamais le prix d une unite (mesure : un lot de 5 batteries a 372,29 EUR '

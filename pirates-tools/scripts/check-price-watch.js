@@ -5914,6 +5914,40 @@ module.exports = async function () {
       + ((qteLot.items || []).length) + ')');
     ok(/QUANTITE MULTIPLE/i.test(String(((qteLot.packs || [])[0] || {}).raison || '')),
       '⛔ …et le motif NOMME la quantité multiple : un refus muet ne s\'apprend pas');
+    /* ⛔⛔⛔ LE TITRE DIT LA VÉRITÉ — ON CONVERTIT, ON NE JETTE PAS.
+       Ordre de l'user, 13/08/2026 : « s'il y a écrit lot de cinq batteries,
+       c'est qu'il y en a cinq […] le titre dit toujours la vérité. S'il ne dit
+       pas la vérité, j'aurais droit à un dédommagement auprès du revendeur. »
+       C'est un argument de DROIT : l'annonce engage le vendeur. Sa capture du
+       marchand le confirme (« Nombre de batteries : 5 incluse(s) »).
+       ⇒ N unités à P euros font P/N l'unité, et le pack PORTE cette valeur.
+       Vérifié sur ses captures : les quatre cartes de lot donnent 68,92 ·
+       69,14 · 70,00 · 74,46 € l'unité — toutes cohérentes, et MOINS chères que
+       la carte unitaire de son relevé (79,90 €). Jeter le lot lui coûtait de
+       l'argent. */
+    var lotN = pp.parseIdealo(page('Makita ' + nue + ' Lot de 5 pieces', '372,29'), 'MAKITA');
+    var pk = (lotN.packs || [])[0] || {};
+    ok(pk.quantite === 5 && Math.abs(pk.prixUnitaire - 74.46) < 0.01,
+      '⛔⛔ ARGENT : le pack porte la QUANTITÉ lue et le PRIX UNITAIRE déduit — le titre '
+      + 'dit la vérité, on le convertit au lieu de le jeter (obtenu quantite='
+      + JSON.stringify(pk.quantite) + ' unitaire=' + JSON.stringify(pk.prixUnitaire) + ')');
+    ok(pp.titreAnnonceUneQuantiteMultiple('Lot de 5 batteries') === 5
+      && pp.titreAnnonceUneQuantiteMultiple('Batterie 18V 5 Ah') === 0,
+      '⛔ …et la fonction rend le NOMBRE, pas un oui/non : sans le nombre, aucune '
+      + 'division n\'est possible');
+    /* ⛔⛔ ET LA PREUVE EXIGÉE AVANT DE DIVISER. Le prix unitaire n'entre dans le
+       calcul QUE si la référence a été vue SEULE dans la même rafale — c'est ce
+       qui établit qu'elle désigne une unité et non un ensemble. Sans cette
+       condition, « Lot de 3 forets étagés », dont la référence désigne le JEU,
+       tomberait à 29,32 € au lieu de 87,97 € : une vente à perte. Les deux
+       titres ont la MÊME forme ; seule cette preuve les sépare. */
+    var srcAdmQte = fs.readFileSync(path.join(__dirname, '..', 'api', 'admin.js'), 'utf8');
+    var blocQte = srcAdmQte.slice(srcAdmQte.indexOf('const packsUnitaires = []'));
+    blocQte = blocQte.slice(0, blocQte.indexOf('packsUnitaires.forEach'));
+    ok(/vueSeule/.test(blocQte) && /if \(!vueSeule\) return;/.test(blocQte),
+      '⛔⛔ ARGENT : le prix unitaire d\'un lot n\'entre dans le calcul QUE si la '
+      + 'référence a été vue SEULE dans la rafale — sinon un « lot de 3 » dont la '
+      + 'référence désigne le jeu ferait tomber le coût des deux tiers');
     var qteUnite = pp.parseIdealo(page('Makita ' + nue, '79,90'), 'MAKITA');
     ok((qteUnite.items || []).length === 1,
       '⛔ …et l\'unité, elle, passe : sans ce témoin, « tout refuser » serait vert');
