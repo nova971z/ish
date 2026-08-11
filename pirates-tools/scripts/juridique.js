@@ -51,7 +51,14 @@ var DOMAINES = {
                  /* pricing-config rattaché le 02/08/2026 : il porte le drapeau
                     _sourceIllisible qui INTERDIT toute écriture de prix quand la
                     config n'est pas lisible — c'est une décision de prix. */
-                 /pirates-tools\/api\/_lib\/(pricing|pricing-model|pricing-config|price-parse|courses)\.js$/,
+                 /* ⛔ `reconstitution` rattaché le 13/08/2026 : il calcule le
+                    COÛT D'ACHAT retenu pour un pack — en le divisant par sa
+                    quantité ou en lui soustrayant ses accessoires. Ce coût
+                    décide du prix de vente : c'est du J4, pas de l'arithmétique
+                    neutre. Sa première version a d'ailleurs sorti un coût de
+                    machine divisé par deux, faute de distinguer un lot d'une
+                    machine livrée avec ses batteries. */
+                 /pirates-tools\/api\/_lib\/(pricing|pricing-model|pricing-config|price-parse|reconstitution|courses)\.js$/,
                  /* ⛔ `barriere-achat` rattaché le 03/08/2026, et la porte l'a
                     réclamé d'elle-même : il décide QUELLES sources entrent dans
                     le coût d'achat. Le coût retenu étant le MINIMUM des sources

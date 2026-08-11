@@ -200,6 +200,10 @@ var reqAuditMulti = safeRequire('./check-audit-multi-ecritures', 'check-audit-mu
    TOURS passés à débattre d'un déploiement au lieu de le mesurer : ma session
    ne voit ni le site ni l'API de l'hébergeur, la question était indécidable. */
 var reqVersionP = safeRequire('./check-version-parseur', 'check-version-parseur');
+/* ⛔⛔ LE CALCULATEUR DE PACK NE DIVISE QUE CE QUI SE DIVISE. Posée le
+   13/08/2026, après qu'une première version a fait ressortir une clé à chocs
+   à la moitié de son prix « parce qu'elle contient deux batteries ». */
+var reqRecons = safeRequire('./check-reconstitution', 'check-reconstitution');
 var modJur      = safeRequire('./juridique',         'check-juridique');
 var reqJur      = modJur && modJur.controle ? modJur.controle : null;
 // La porte d'O1 (hook Stop). Elle doit refuser le faux ET laisser passer le
@@ -344,6 +348,7 @@ var reqReconc   = safeRequire('./check-reconciliation', 'check-reconciliation');
   await runOne(reqAliasNom, 'check-alias-nomenclature');
   await runOne(reqAuditMulti, 'check-audit-multi-ecritures');
   await runOne(reqVersionP, 'check-version-parseur');
+  await runOne(reqRecons, 'check-reconstitution');
   await runOne(reqJur,      'check-juridique');
   await runOne(reqSortie,   'check-sortie');
   await runOne(reqFrais,    'check-fraicheur');

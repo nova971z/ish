@@ -882,6 +882,56 @@ ont exactement la même forme** ; seule cette preuve les sépare.
 
 ---
 
+### M-49 — Diviser n'a de sens que si le produit EST l'article qu'on compte
+
+Un prix se divise par une quantité **seulement** quand les N exemplaires sont
+le produit lui-même. Sinon, ce n'est pas une division qu'il faut : c'est une
+**soustraction**.
+
+*Panne payée le 13/08/2026, et j'ai annoncé le chiffre faux avant de le
+retirer* : j'ai divisé le prix par le nombre de batteries annoncées, pour tout
+produit. Sur son relevé, une clé à chocs vendue **235 €** « (2 × 2,0 Ah +
+chargeur + coffret) » ressortait à **117,50 €** — comme s'il y avait deux clés
+à chocs. Il n'y en a qu'**une** : les deux batteries sont son contenu, pas des
+exemplaires. J'avais annoncé « 51 références gagnantes, 9 078 € d'économie ».
+**Entièrement faux.**
+
+⇒ Trois rôles, et chacun sa formule :
+· **lot de N articles** (le produit EST l'article) → prix ÷ N ;
+· **lot de N + un accessoire** (chargeur inclus) → ni l'un ni l'autre : on
+  reconstitue, sinon le chargeur se répartit sur chaque unité ;
+· **machine livrée avec des batteries** → prix − N×batterie − chargeur, ce qui
+  donne le coût de la machine nue.
+
+⚠️ Le rôle se lit sur le **type du produit** (`car.type`), jamais sur la forme
+de la référence.
+
+⚠️ **Et un reste invraisemblable est un refus, pas un résultat** : si les
+accessoires « valent » plus que le pack entier, soit un prix est faux, soit le
+pack est en promotion. Dans les deux cas on ne sait pas — et un coût de machine
+à trois euros ferait vendre à perte.
+
+*Porte* : `scripts/check-reconstitution.js` (dans `ci.js`), quatre invariants
+d'argent, trois sabotages rouges.
+
+---
+
+### M-50 — Un chiffre d'argent s'annonce APRÈS avoir vérifié ce qu'on a divisé
+
+J'ai publié « 9 078 € d'économie » cinq minutes après avoir écrit le calcul, et
+je l'ai retiré dix minutes plus tard. Le protocole demande la commande qui a
+produit le chiffre — je l'avais. Il manquait l'autre moitié : **vérifier que
+l'opération elle-même a un sens sur les cas qu'elle traite.**
+
+⇒ Avant d'annoncer un gain, on regarde **trois lignes du détail à la main**. Ici,
+lire « clé à chocs → 117,50 € » aurait suffi à tuer le chiffre avant qu'il ne
+sorte.
+
+⚠️ Un chiffre faux annoncé coûte plus qu'un chiffre absent : il oriente une
+décision d'achat, et il faut ensuite le désavouer.
+
+---
+
 ## Où ces méthodes sont déjà branchées
 
 | Méthode | Le code qui l'applique |
@@ -915,3 +965,5 @@ ont exactement la même forme** ; seule cette preuve les sépare.
 | M-46 | `api/_lib/price-parse.js` (`titreAnnonceUneQuantiteMultiple`), `scripts/banc-tuiles.js` |
 | M-47 | `api/_lib/price-parse.js` (`EMPREINTE_PARSEUR`), `scripts/check-version-parseur.js` |
 | M-48 | `api/_lib/price-parse.js` (`quantite`, `prixUnitaire`), `api/admin.js` (`packsUnitaires`) |
+| M-49 | `api/_lib/reconstitution.js`, `scripts/check-reconstitution.js` |
+| M-50 | — règle de conduite, pas de code |
