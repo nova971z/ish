@@ -5637,6 +5637,54 @@ module.exports = async function () {
           + 'Sans ce rejeu elle est PERDUE, la même hausse serait jetée à chaque balayage, '
           + 'une vraie hausse fournisseur ne passerait jamais (D-015), et on finirait par '
           + 'vendre sous le coût (obtenu ' + ecritesFin + ')');
+
+        /* ⛔⛔⛔ ET UNE RAFALE QUI N'ABOUTIT PAS NE DOIT PAS PERDRE LA FILE.
+           Mesuré le 12/08/2026 sur ses relevés : une des trois marques n'a
+           envoyé que 66 pages là où son plan en compte 67. Sa rafale ne se
+           déclare donc JAMAIS finie. Et comme il enchaîne ses trois traqueurs à
+           la suite, le balayage de la marque suivante effaçait la file — les
+           20 hausses retenues disparaissaient, étaient redétectées, redisparues.
+           Indéfiniment.
+           ⛔ Le coût de cette boucle est mesuré le même jour : NEUF fiches
+           vendues À PERTE, −435,45 € par tour de vente, parce que leur prix
+           était resté au plus bas d'un balayage précédent pendant que le coût
+           fournisseur remontait.
+
+           ⛔⛔ MON PREMIER TÉMOIN NE TRAVERSAIT PAS CE CHEMIN — sabotage passé,
+           harnais vert. Il envoyait 66 pages puis repartait à 1 SANS changer de
+           marque : la rafale n'était jamais réinitialisée, elle continuait, et
+           la file était rejouée par le chemin ordinaire. Il ne prouvait donc
+           rien du report. Le témoin juste reproduit SA séquence : rafale
+           avortée → UNE AUTRE MARQUE → retour, rafale complète. */
+        scanReset();
+        var dbI = fauxDb(seedH, []);
+        for (var pa = 1; pa < pagesPlanH; pa++) {          // rafale AVORTÉE
+          var ri = fauxRes();
+          await admFn({ method: 'POST',
+            query: { type: 'price-watch', brand: 'DEWALT', source: 'idealo', scan: '1', dryRun: '1' },
+            body: { text: pageIdealo(pa === 1 ? cibleH.sku : cibleH2.sku, '450,00') } },
+          ri, fauxAdmin, dbI);
+        }
+        /* ⛔ LE BALAYAGE D'UNE AUTRE MARQUE PASSE ENTRE LES DEUX — c'est ce
+           qu'il fait réellement, et c'est ce qui effaçait la file. */
+        var rAutre = fauxRes();
+        await admFn({ method: 'POST',
+          query: { type: 'price-watch', brand: 'MAKITA', source: 'idealo', scan: '1', dryRun: '1' },
+          body: { text: pageIdealo('ZZINCONNU1', '450,00') } }, rAutre, fauxAdmin, dbI);
+        var ecritApresReport = 0;
+        for (var pb = 1; pb <= pagesPlanH; pb++) {          // rafale COMPLÈTE
+          var rj = fauxRes();
+          await admFn({ method: 'POST',
+            query: { type: 'price-watch', brand: 'DEWALT', source: 'idealo', scan: '1', dryRun: '1' },
+            body: { text: pageIdealo(cibleH2.sku, '450,00') } }, rj, fauxAdmin, dbI);
+          ecritApresReport += ((rj.out && rj.out.applied) || [])
+            .filter(function (x) { return x.id === cibleH.id && x.newPrice > x.oldPrice; }).length;
+        }
+        ok(ecritApresReport >= 1,
+          '⛔⛔ ARGENT : une hausse retenue par une rafale AVORTÉE survit au balayage '
+          + 'd\'une AUTRE marque et s\'écrit à la rafale suivante qui aboutit. Sans ce '
+          + 'report elle est retenue puis jetée à chaque balayage, indéfiniment, et le '
+          + 'prix reste sous le coût (obtenu ' + ecritApresReport + ')');
       }
       scanReset();
     }

@@ -2763,6 +2763,31 @@ const PW_SCAN_TTL = 20 * 60 * 1000;
    · J5 — aucune TVA, aucun octroi de mer : le territoire fiscal continue de
      se dériver du code postal, ce compteur n'y touche pas. */
 let pwCouv = null;
+/* ⛔⛔⛔ LA FILE DES HAUSSES RETENUES VIT HORS DE LA RAFALE, ET PAR MARQUE.
+   Premier jet du 12/08/2026 : je la rangeais DANS `pwCouv`. Elle ne survivait
+   donc ni à une rafale avortée, ni — surtout — à un changement de marque. Or
+   il enchaîne ses trois traqueurs à la suite : la file d'une marque était
+   effacée par le balayage de la suivante, à tous les coups.
+   ⛔ Mesuré ce jour-là sur ses relevés : une marque n'a envoyé que 66 pages
+   là où son plan en compte 67. Sa rafale ne se déclare jamais finie, ses
+   20 hausses retenues n'étaient donc jamais rejouées — et elles disparaissaient
+   au balayage suivant. Le prix restait au plus bas d'un balayage précédent
+   pendant que le coût fournisseur remontait : NEUF fiches vendues à perte,
+   **−435,45 € par tour de vente**, mesurées le même jour.
+   ⚠️ INDEXÉE PAR MARQUE, ET C'EST LA GARDE : une file d'une marque appliquée à
+   une autre écrirait des prix croisés. La séparation des marques vaut aussi
+   pour une file d'attente — ce n'est pas une commodité de rangement.
+   ⚠️ Elle vit en mémoire d'instance, comme le cumul : une instance neuve repart
+   à vide, la hausse sera simplement redétectée au balayage suivant. Sens sûr.
+   ⚠️ Portes lues — J4 : rien n'est fabriqué, on conserve des annonces déjà lues
+   sur la page du fournisseur ; J3 : aucune donnée personnelle ; J5 : aucune
+   fiscalité. */
+let pwHaussesEnAttente = Object.create(null);
+function pwFileHausses(brand) {
+  const k = String(brand || '').toUpperCase();
+  if (!pwHaussesEnAttente[k]) pwHaussesEnAttente[k] = Object.create(null);
+  return pwHaussesEnAttente[k];
+}
 /* ⛔⛔ QUI COMPTE ? L'INSTANCE ELLE-MÊME, ET ELLE NE LE DISAIT PAS. J'ai lu
    « pagesRefusees: 0 avec 14 manquantes » et j'en ai conclu « les POST ne nous
    atteignent jamais ». Cette conclusion suppose que les 67 requêtes tombent
@@ -2872,9 +2897,6 @@ function pwRafaleOuvrir(brand, pagesDuPlan, nowMs) {
   if (!pwCouv || (nowMs - pwCouv.at) > PW_SCAN_TTL || pwCouv.brand !== brand) {
     pwCouv = { brand: brand, refs: Object.create(null), noms: Object.create(null),
       empreintes: Object.create(null), fiches: Object.create(null),
-      /* Les ANNONCES dont la hausse attend la fin de la rafale — voir le bloc
-         « LES HAUSSES RETENUES REVIENNENT SUR LA DERNIÈRE PAGE ». */
-      haussesEnAttente: Object.create(null),
       baisses: Object.create(null), coutMin: Object.create(null),
       pages: 0, tuiles: 0, lues: 0, debut: nowMs, at: nowMs };
   }
@@ -3261,9 +3283,6 @@ function pwCouvRefus(brand) {
   if (!pwCouv || (nowMs - pwCouv.at) > PW_SCAN_TTL || pwCouv.brand !== brand) {
     pwCouv = { brand: brand, refs: Object.create(null), noms: Object.create(null),
       empreintes: Object.create(null), fiches: Object.create(null),
-      /* Les ANNONCES dont la hausse attend la fin de la rafale — voir le bloc
-         « LES HAUSSES RETENUES REVIENNENT SUR LA DERNIÈRE PAGE ». */
-      haussesEnAttente: Object.create(null),
       baisses: Object.create(null),
       pages: 0, tuiles: 0, lues: 0, refus: 0, debut: nowMs, at: nowMs };
   }
@@ -4222,8 +4241,7 @@ async function handlePriceWatch(req, res, admin, db) {
        fiscalité. */
     var rafaleFinieCettePage = !scanMode || !(pagesDuPlanCourant > 0)
       || ((pwCouv && pwCouv.brand === brand ? pwCouv.pages : 0) + 1) >= pagesDuPlanCourant;
-    var fileRetenue = (pwCouv && pwCouv.brand === brand && pwCouv.haussesEnAttente)
-      ? pwCouv.haussesEnAttente : null;
+    var fileRetenue = pwFileHausses(brand);
     var aTraiter = parsed;
     if (rafaleFinieCettePage && fileRetenue) {
       var repris = Object.keys(fileRetenue).map(function (k) { return fileRetenue[k]; })
@@ -4233,7 +4251,7 @@ async function handlePriceWatch(req, res, admin, db) {
           return it && !parsed.some(function (x) { return x && x.sku === it.sku; });
         });
       if (repris.length) aTraiter = parsed.concat(repris);
-      pwCouv.haussesEnAttente = Object.create(null);
+      pwHaussesEnAttente[String(brand || '').toUpperCase()] = Object.create(null);
     }
     for (const item of aTraiter) {
       try {
@@ -4494,10 +4512,7 @@ async function handlePriceWatch(req, res, admin, db) {
              lendemain sur ses relevés : 33 retenues, zéro écrite. C'est
              l'ANNONCE qu'il faut conserver, puisque c'est elle qui repasse par
              le chemin d'écriture sur la dernière page. */
-          if (pwCouv && pwCouv.brand === brand) {
-            if (!pwCouv.haussesEnAttente) pwCouv.haussesEnAttente = Object.create(null);
-            pwCouv.haussesEnAttente[p.id] = item;
-          }
+          pwFileHausses(brand)[p.id] = item;
           continue;
         }
 

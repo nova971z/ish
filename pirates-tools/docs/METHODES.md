@@ -642,6 +642,38 @@ commentaire absent : on le croit sans le vérifier.
 
 ---
 
+### M-40 — Une file d'attente se range hors de ce qui la remet à zéro
+
+Quand on retarde une décision, l'endroit où l'on range ce qui attend décide de
+tout. Rangé dans un objet qui se réinitialise, ce qui attend disparaît — et le
+retard devient une perte silencieuse.
+
+*Panne payée le 12/08/2026, en deux temps, sur ma propre correction* :
+① la file des hausses retenues vivait **dans la rafale**. Une rafale qui
+n'aboutit pas — mesuré : 66 pages envoyées là où le plan en compte 67 — ne la
+rejoue jamais ;
+② et comme il enchaîne ses trois traqueurs à la suite, le balayage de la marque
+**suivante** effaçait la file de la précédente, à tous les coups.
+Les hausses étaient donc retenues, effacées, redétectées, réeffacées.
+**Indéfiniment.** Coût mesuré le même jour, sur ses données : **neuf fiches
+vendues à perte, −435,45 € par tour de vente**, parce que leur prix restait au
+plus bas d'un balayage précédent pendant que le coût fournisseur remontait.
+
+⇒ La file vit **hors** de la rafale, **indexée par marque** — et l'indexation
+par marque n'est pas un rangement, c'est la garde : une file d'une marque
+appliquée à une autre écrirait des prix croisés.
+
+⚠️ **Et mon premier témoin ne traversait pas le chemin qu'il prétendait
+tester** : il renvoyait 66 pages puis repartait à 1 **sans changer de marque**,
+donc la rafale continuait et la file était rejouée par le chemin ordinaire. Le
+sabotage passait, le harnais restait vert. Le témoin juste reproduit **sa
+séquence réelle** : rafale avortée → autre marque → retour.
+
+*Porte* : `scripts/check-price-watch.js`, deux sabotages rouges (file remise
+dans la rafale ; file non indexée par marque).
+
+---
+
 ## Où ces méthodes sont déjà branchées
 
 | Méthode | Le code qui l'applique |
@@ -665,4 +697,5 @@ commentaire absent : on le croit sans le vérifier.
 | M-36 | `api/admin.js` (`haussesDifferees`), `scripts/check-price-watch.js` |
 | M-37 | `scripts/check-price-watch.js` (bilan des baisses) |
 | M-38 | `api/_lib/price-parse.js` (`EMPREINTE_PARSEUR`), `scripts/check-version-parseur.js` |
-| M-39 | `api/admin.js` (`haussesEnAttente`), `scripts/check-price-watch.js` |
+| M-39 | `api/admin.js` (report des hausses), `scripts/check-price-watch.js` |
+| M-40 | `api/admin.js` (`pwFileHausses`), `scripts/check-price-watch.js` |
