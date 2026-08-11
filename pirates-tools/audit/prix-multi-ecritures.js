@@ -53,7 +53,72 @@ if (!RELEVE || !fs.existsSync(RELEVE) || !MARQUE) {
    à une autre, c'est inventer des rapprochements — exactement ce que cet
    audit sert à empêcher.
    ⇒ La marque est OBLIGATOIRE, et sans grammaire connue on ne regroupe RIEN. */
-var GRAMMAIRES = { MAKITA: nomen.lireSuffixeMakita };
+/* ⛔⛔⛔ UNE GRAMMAIRE ÉCRITE N'EST PAS UNE GRAMMAIRE BRANCHÉE (M-32).
+   Mesuré le 11/08/2026 : cet audit annonçait « aucune grammaire déclarée pour
+   DeWALT » et sortait sans rien regarder — sur **1 047 fiches**, 61 % du
+   catalogue. Or `lireSuffixeDewalt` existait depuis longtemps, elle était
+   exportée, et le parseur s'en servait déjà. Elle n'était simplement pas
+   INSCRITE ici. L'audit que l'user a demandé pour trouver « le même produit à
+   plusieurs prix » était donc aveugle sur sa plus grosse marque, et il le
+   disait d'une phrase qu'on pouvait lire comme « il n'y a rien à voir ».
+   C'est la même panne que la nomenclature de la troisième marque, écrite,
+   exportée, testée — et appelée par personne.
+
+   ⚠️ LES DEUX GRAMMAIRES NE RENDENT PAS LA MÊME FORME, et les confondre
+   fabriquerait exactement les faux jumeaux que cet audit traque. On les
+   ADAPTE explicitement, chacune chez elle, vers la forme canonique
+   `{ racine, config: { nbBatteries, ah, coffret, accessoires } }`.
+
+   ⛔ VÉRIFIÉ AVANT D'INSCRIRE, parce que c'est cette marque-là qui avait déjà
+   payé : `DWMT73803` et `DWMT73801` — deux coffrets d'outils DIFFÉRENTS —
+   rendent des racines DIFFÉRENTES avec SA grammaire (la tête consomme tous
+   les chiffres, il ne reste aucun suffixe). Les neuf faux jumeaux du 10/08
+   venaient d'avoir appliqué la grammaire d'une AUTRE marque, pas d'un manque
+   de grammaire ici. */
+function adapterDewalt(sku, marque) {
+  /* ⛔⛔ LA GARDE EST DANS LA FONCTION, PAS DANS L'INTENTION — et c'est
+     `check-separation-marques` qui me l'a imposée en devenant ROUGE sur ce
+     fichier même, quelques minutes après que je l'ai écrit. Elle avait raison :
+     rien n'empêchait cet adaptateur d'être appelé un jour sur une autre marque,
+     et la grammaire d'une marque appliquée à une autre est exactement ce que
+     cet audit existe pour empêcher. On vérifie donc CHEZ SOI, comme
+     `refSansPrefixeDistributeur` — jamais « en amont, normalement ». */
+  if (String(marque || '').toUpperCase().replace(/[\s-]/g, '') !== 'DEWALT') return null;
+  var s = String(sku || '').trim().toUpperCase();
+  var l = nomen.lireSuffixeDewalt(s);
+  if (!l) return null;
+  /* La racine est ce qui reste une fois le marquage régional et le code
+     d'ensemble retirés — reconstruite depuis le suffixe que la grammaire a lu,
+     jamais recoupée à la main. */
+  var sansRegion = s.replace(/-[A-Z0-9]{1,3}$/, '');
+  var suf = String(l.suffixe || '');
+  var racine = suf && sansRegion.slice(-suf.length) === suf
+    ? sansRegion.slice(0, sansRegion.length - suf.length) : sansRegion;
+  /* ⚠️ Un suffixe VIDE veut dire « cette écriture ne dit rien de sa boîte » —
+     pas « boîte vide ». On rend `config: null`, et l'audit la classera
+     « contenu non lu » au lieu de la comparer à tort. */
+  if (!suf) return { racine: racine, suffixe: '', config: null };
+  return {
+    racine: racine,
+    suffixe: suf,
+    config: {
+      nbBatteries: l.nbBatteries,
+      ah: l.ah,
+      coffret: l.coffret || null,
+      accessoires: false,
+      /* ⛔ CE QUE LA GRAMMAIRE N'A PAS SU LIRE VOYAGE AVEC — voir `contenu()`.
+         Cette grammaire-ci lit code par code et RECONNAÎT son ignorance : on
+         ne la jette pas, on la transporte jusqu'au classement. */
+      inconnus: Array.isArray(l.inconnus) ? l.inconnus : []
+    }
+  };
+}
+/* ⛔ LA MARQUE DU BALAYAGE EST PASSÉE À L'ADAPTATEUR, qui la revérifie. Deux
+   contrôles, comme partout ailleurs : celui de l'appel et celui de la fonction. */
+var GRAMMAIRES = {
+  MAKITA: nomen.lireSuffixeMakita,
+  DEWALT: function (sku) { return adapterDewalt(sku, MARQUE); }
+};
 if (!GRAMMAIRES[MARQUE]) {
   console.log('⚠️ aucune grammaire de référence déclarée pour ' + MARQUE + ' : '
     + 'aucun regroupement ne sera proposé. Écrire sa nomenclature d\'abord — '
@@ -93,7 +158,24 @@ function contenu(sku) {
   return {
     nb: (typeof c.nbBatteries === 'number') ? c.nbBatteries : null,
     ah: (typeof c.ah === 'number') ? c.ah : null,
-    coffret: c.coffret || null
+    coffret: c.coffret || null,
+    /* ⛔⛔ CE QUE LA GRAMMAIRE N'A PAS SU LIRE VOYAGE AVEC LE CONTENU — ET SANS
+       ÇA L'AUDIT A REFAIT SON PROPRE DÉFAUT, UNE TROISIÈME FOIS.
+       Mesuré le 11/08/2026, dès le premier passage sur la marque qu'on venait
+       d'inscrire : « DCF887N » (outil nu, 126 €) et « DCF887NDS » (appareil
+       seul **+ DS150**, 117 €) sortaient « même conditionnement ». La grammaire
+       de cette marque rend pourtant `inconnus: ["D","S"]` sur la seconde — elle
+       DIT qu'elle n'a pas tout lu. Je comparais des batteries et un coffret en
+       ignorant le reste du code.
+       ⛔ Et le sens est le mauvais : le paquet le PLUS complet était le MOINS
+       cher. Retenir son coût sur la fiche de l'outil nu fait baisser le prix
+       de vente — c'est-à-dire vendre à perte. Exactement le danger écrit en
+       tête de ce fichier, produit par ce fichier.
+       ⚠️ Une grammaire qui lit PARTIELLEMENT est plus dangereuse qu'une
+       grammaire qui échoue : l'échec rend `null` et le classement le voit ;
+       la lecture partielle rend un objet d'apparence complète. */
+    inconnus: Array.isArray(l.config && l.config.inconnus) ? l.config.inconnus
+      : (Array.isArray(l.inconnus) ? l.inconnus : [])
   };
 }
 
@@ -141,7 +223,15 @@ groupes.forEach((liste, racine) => {
       const memeType = typeConnu ? (x.typ === y.typ) : null;
       const famConnue = !!(x.fam && y.fam);
       const memeFam = famConnue ? (x.fam === y.fam) : null;
-      const memeContenu = (cx && cy) ? (cx.nb === cy.nb && cx.ah === cy.ah && cx.coffret === cy.coffret) : (!cx && !cy);
+      /* ⛔⛔ UN CODE NON LU INTERDIT DE CONCLURE « MÊME CONTENU ». Défaut mesuré
+         le 11/08/2026 : « + DS150 » se lit `inconnus: ["D","S"]`, et sans cette
+         condition les deux écritures sortaient « même conditionnement » alors
+         que l'une porte un accessoire de plus — 9 € moins cher, dans le sens
+         qui fait vendre à perte. Ce n'est pas « prudent », c'est la seule
+         lecture honnête : on ne sait pas ce que ce code ajoute à la boîte. */
+      const codeNonLu = (cx && cx.inconnus.length > 0) || (cy && cy.inconnus.length > 0);
+      const memeContenu = codeNonLu ? false
+        : ((cx && cy) ? (cx.nb === cy.nb && cx.ah === cy.ah && cx.coffret === cy.coffret) : (!cx && !cy));
       if (prefixe && memeType !== false && memeFam !== false) {
         degre = '1 CERTAIN'; motif = 'préfixe de distributeur, rien ne contredit';
       } else if (memeContenu && memeType !== false && memeFam !== false) {
@@ -154,8 +244,13 @@ groupes.forEach((liste, racine) => {
            kit au prix du nu — donc à perte. On les SÉPARE, on ne les corrige
            pas : c'est une information, pas une anomalie. */
         degre = '4 CONDITIONNEMENTS DIFFERENTS';
-        motif = 'même machine mais pas le même contenu : '
-          + decrire(cx) + '  contre  ' + decrire(cy);
+        motif = codeNonLu
+          ? 'même machine, mais un code d\'ensemble N\'A PAS ÉTÉ LU ('
+            + [].concat(cx ? cx.inconnus : [], cy ? cy.inconnus : []).join('') + ') : '
+            + 'on ignore ce que ce code ajoute à la boîte, donc on ne rapproche PAS. '
+            + decrire(cx) + '  contre  ' + decrire(cy)
+          : 'même machine mais pas le même contenu : '
+            + decrire(cx) + '  contre  ' + decrire(cy);
       } else {
         degre = '3 A VERIFIER';
         motif = 'même racine mais ' + (memeType === false ? 'type différent (' + x.typ + ' / ' + y.typ + ')' : 'famille différente');

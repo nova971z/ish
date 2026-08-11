@@ -496,6 +496,48 @@ sabotage qui le dit — pas la relecture.
 
 ---
 
+### M-34 — Une grammaire qui lit PARTIELLEMENT est plus dangereuse qu'une qui échoue
+
+Un décodeur qui échoue rend `null`, et l'appelant le voit. Un décodeur qui lit
+la moitié rend un objet **d'apparence complète** — et l'appelant conclut sur ce
+qu'il n'a pas lu.
+
+⇒ **Ce qu'une grammaire n'a pas su lire voyage AVEC son résultat**, jusqu'au
+point de décision. Et un code non lu **interdit** de conclure « même contenu ».
+
+*Panne payée le 11/08/2026, quelques minutes après avoir inscrit une nouvelle
+grammaire dans l'audit des faux jumeaux* : deux écritures de la même machine,
+l'une nue à 126 €, l'autre « appareil seul **+ DS150** » à 117 €, sortaient
+**« même conditionnement »**. La grammaire disait pourtant `inconnus: ["D","S"]`
+— je comparais les batteries et le coffret en jetant le reste du code.
+Et le sens était le mauvais : le paquet **le plus complet** était le **moins
+cher**. Retenir son coût sur la fiche de l'outil nu fait baisser le prix de
+vente — c'est-à-dire **vendre à perte**. L'audit écrit pour trouver ce défaut
+venait de le produire, pour la **troisième** fois.
+
+*Porte* : `scripts/check-audit-multi-ecritures.js` (dans `ci.js`), sujet choisi
+à l'exécution sur une forme, trois sabotages rouges.
+
+---
+
+### M-35 — Une porte qui mord sur MON code neuf a raison, et on ne l'apaise pas
+
+Quand une porte existante devient rouge sur du code qu'on vient d'écrire, le
+réflexe est de la trouver trop stricte. C'est presque toujours l'inverse.
+
+*Cas du 11/08/2026* : `check-separation-marques` est devenue rouge sur
+l'adaptateur de grammaire que je venais d'ajouter — « appelle une fonction de
+marque sans que la marque soit vérifiée dans les parages ». J'aurais pu me dire
+que la marque est vérifiée *en amont*, par la table qui choisit la grammaire.
+Vrai aujourd'hui, faux dès que quelqu'un appelle l'adaptateur ailleurs.
+
+⇒ **La garde se pose DANS la fonction, jamais dans l'intention de l'appelant.**
+La marque est passée à l'appel **et** revérifiée chez soi — deux contrôles,
+comme `refSansPrefixeDistributeur`. Sabotage à l'appui : garde retirée, porte
+rouge.
+
+---
+
 ## Où ces méthodes sont déjà branchées
 
 | Méthode | Le code qui l'applique |
@@ -514,3 +556,5 @@ sabotage qui le dit — pas la relecture.
 | M-31 | `api/_lib/diag-rafale.js`, `scripts/check-price-watch.js`, `api/_lib/traqueur-plans.js` |
 | M-32 | `api/_lib/price-parse.js` (`candidatsAvecPosition`), `api/_lib/nomenclature.js` (`lireReferenceMilwaukee`) |
 | M-33 | `scripts/check-price-watch.js`, `outils/sabotage.mjs` |
+| M-34 | `audit/prix-multi-ecritures.js`, `scripts/check-audit-multi-ecritures.js` |
+| M-35 | `scripts/check-separation-marques.js`, `audit/prix-multi-ecritures.js` (`adapterDewalt`) |

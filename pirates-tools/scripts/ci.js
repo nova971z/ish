@@ -192,6 +192,10 @@ var reqSepMarq  = safeRequire('./check-separation-marques', 'check-separation-ma
    contenu différent (coffret, batteries), c'est un prix faux — et dans le sens
    du moins cher, une vente à PERTE. Mesuré ce jour-là sur son relevé réel. */
 var reqAliasNom = safeRequire('./check-alias-nomenclature', 'check-alias-nomenclature');
+/* ⛔⛔ L'AUDIT QUI CHERCHE LES FAUX JUMEAUX NE DOIT PAS EN FABRIQUER. Il s'est
+   trompé TROIS FOIS, et chaque fois dans le sens qui fait vendre à perte.
+   Posée le 11/08/2026, après la troisième. */
+var reqAuditMulti = safeRequire('./check-audit-multi-ecritures', 'check-audit-multi-ecritures');
 var modJur      = safeRequire('./juridique',         'check-juridique');
 var reqJur      = modJur && modJur.controle ? modJur.controle : null;
 // La porte d'O1 (hook Stop). Elle doit refuser le faux ET laisser passer le
@@ -334,6 +338,7 @@ var reqReconc   = safeRequire('./check-reconciliation', 'check-reconciliation');
   await runOne(reqErreurs,  'check-erreurs');
   await runOne(reqSepMarq,  'check-separation-marques');
   await runOne(reqAliasNom, 'check-alias-nomenclature');
+  await runOne(reqAuditMulti, 'check-audit-multi-ecritures');
   await runOne(reqJur,      'check-juridique');
   await runOne(reqSortie,   'check-sortie');
   await runOne(reqFrais,    'check-fraicheur');
