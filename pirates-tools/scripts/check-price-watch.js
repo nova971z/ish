@@ -5533,6 +5533,59 @@ module.exports = async function () {
     }).cause === 'indeterminable',
       '⛔ une seule page : aucune cadence, donc AUCUNE conclusion — on le dit au lieu '
       + 'de trancher au hasard');
+
+    /* ⛔⛔ LE CAS QUI A RENDU UNE CAUSE FAUSSE PENDANT UN BALAYAGE ENTIER.
+       Relevé du 10/08/2026 : 112 pages envoyées, `pagesDistinctes: 67`,
+       `pagesEnDouble: 45`, `pagesManquantes: 45`. Le diagnostic rendait
+       `jamais-arrivees` — « le remède est côté réseau ». Faux deux fois : les
+       45 pages sont ARRIVÉES (elles sont dans le compte des doublons), et le
+       remède est de raccourcir le plan, pas de réparer un réseau qui va bien.
+       ⛔ Les deux compteurs décrivaient LE MÊME incident sous deux étiquettes
+       opposées, et l'estimation de cadence tranchait entre deux hypothèses dont
+       AUCUNE n'était la bonne. Une déduction bien menée sur un cas absent du
+       catalogue des causes rend une réponse fausse AVEC ASSURANCE.
+       ⚠️ Les nombres rejouent ce relevé-là, pas des nombres ronds : un cas
+       reproduit à l'identique est la seule preuve qu'on a compris celui-ci. */
+    var trop = dr.expliquerRafale({
+      pagesDansLaRafale: 67, pagesManquantes: 45, pagesEnDouble: 45, pagesRefusees: 0,
+      debutRafale: T, finRafale: T + 111 * cad, demarrageInstance: T - 400000
+    });
+    ok(trop.cause === 'plan-trop-long',
+      '⛔ pages resservies à l\'identique en nombre suffisant ⇒ le plan demande plus de '
+      + 'pages que le site n\'en sert — JAMAIS « jamais arrivées » (obtenu : ' + trop.cause + ')');
+    ok(/plan/i.test(trop.lecture) && /traqueur-plans/.test(trop.lecture),
+      '⛔ la phrase envoie corriger le PLAN et nomme le fichier — elle n\'envoie pas '
+      + 'chercher une panne réseau qui n\'existe pas');
+    /* ⛔ LE DOUBLON EST MESURÉ : il prime sur l'estimation de cadence, comme la
+       page vide. Même rafale, mêmes dates — SEUL le doublon change. Sans ce
+       témoin, l'assertion au-dessus pourrait passer par un hasard d'horloge. */
+    ok(dr.expliquerRafale({
+      pagesDansLaRafale: 67, pagesManquantes: 45, pagesEnDouble: 0, pagesRefusees: 0,
+      debutRafale: T, finRafale: T + 111 * cad, demarrageInstance: T - 400000
+    }).cause === 'jamais-arrivees',
+      '⛔ SANS doublon, le MÊME cas retombe sur l\'estimation de cadence : c\'est bien le '
+      + 'doublon qui tranche, pas un hasard de dates');
+    /* Une explication PARTIELLE ne se maquille pas en explication complète. */
+    var partiel = dr.expliquerRafale({
+      pagesDansLaRafale: 60, pagesManquantes: 10, pagesEnDouble: 4, pagesRefusees: 0,
+      debutRafale: T, finRafale: T + 59 * cad, demarrageInstance: T - 1000
+    });
+    ok(partiel.cause === 'doublons-partiels' && /6 page/.test(partiel.lecture),
+      '⛔ 4 doublons pour 10 manquantes : le reste NON expliqué est nommé et compté, '
+      + 'jamais absorbé dans une cause qui aurait l\'air complète');
+    /* ⛔ ET LE CÂBLAGE. Les quatre assertions ci-dessus appellent la fonction
+       DIRECTEMENT : elles resteraient vertes si `api/admin.js` cessait de lui
+       passer le compteur — la nouvelle cause ne se déclencherait alors JAMAIS
+       en production, sans qu'aucun test ne bouge. C'est la panne des harnais
+       qui testent une pièce sans son branchement.
+       ⚠️ Assertion sur la SOURCE, et c'est dit : la seule preuve plus forte
+       serait un balayage complet rejoué avec des pages en double, ce que ce
+       harnais ne monte pas. Faible mais durable, plutôt que rien. */
+    var srcAdm = fs.readFileSync(path.join(__dirname, '..', 'api', 'admin.js'), 'utf8');
+    var appel = srcAdm.match(/expliquerRafale\(\{[\s\S]{0,1200}?\}\)/);
+    ok(!!appel && /pagesEnDouble\s*:/.test(appel[0]),
+      '⛔ api/admin.js passe `pagesEnDouble` à expliquerRafale — sans lui, la cause '
+      + '« plan-trop-long » ne peut jamais se déclencher en vrai');
   }
 
   var bb = require('./bilan-balayage.js');

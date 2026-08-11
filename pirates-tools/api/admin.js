@@ -3073,6 +3073,13 @@ function pwCouvAjouter(brand, skus, titres, nbTuiles, nbLues, pagesDuPlan, extra
     pagesDansLaRafale: base,
     pagesManquantes: manquantes,
     pagesRefusees: pwCouv.refus || 0,
+    /* ⛔ LE DOUBLON EST MESURÉ, DONC IL DOIT ENTRER DANS LE DIAGNOSTIC. Sans
+       lui, `expliquerRafale` n'avait pas le cas « le plan demande plus de pages
+       que le site n'en sert » à son catalogue, et rendait `jamais-arrivees`
+       sur des pages qui étaient bel et bien arrivées (mesuré le 10/08/2026).
+       ⚠️ Portes lues — J3 : un compteur de pages, aucune donnée personnelle ;
+       J4 : aucun prix ne transite ici ; J5 : ni TVA ni octroi de mer. */
+    pagesEnDouble: nbDistinctes ? Math.max(0, pwCouv.pages - nbDistinctes) : 0,
     debutRafale: pwCouv.debut,
     finRafale: pwCouv.at,
     demarrageInstance: PW_INSTANCE.demarrage

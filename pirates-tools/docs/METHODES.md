@@ -385,6 +385,65 @@ qui a démasqué les deux, pas la relecture.
 
 ---
 
+### M-30 — Un alias de référence est une affirmation d'ARGENT, pas de catalogue
+
+Déclarer qu'une écriture B désigne la même fiche que A, c'est déclarer que **le
+coût d'achat de B vaut pour A**. Un alias ne se pose donc jamais « parce que ça
+se ressemble » : la **grammaire de la marque** doit dire que les deux écritures
+énoncent **le même contenu de boîte** — mêmes batteries, même capacité, même
+coffret, mêmes accessoires.
+
+*Panne payée, mesurée le 10/08/2026 sur son relevé réel* : la fiche de la
+ponceuse à bande **nue** déclarait en alias la même machine **en coffret**. Le
+parseur, lui, lisait parfaitement les deux (`Z` = machine seule, `ZJ` = machine
+seule **en coffret MAKPAC**) — c'est la donnée du catalogue qui mentait. Le
+traqueur a écrit le coût du coffret sur la fiche nue : **361,49 € au lieu de
+288,40 €**, 73,09 € trop cher.
+
+⚠️ **Et le sens qui fait mal est l'autre.** Ce jour-là l'alias a rendu la fiche
+trop chère — ça ne coûte qu'une vente. Mais le minimum de rafale retient le coût
+**le plus bas** : le jour où c'est le coffret qui est en promo, la fiche du
+coffret hérite du prix de l'outil nu, et là on **vend à perte**.
+
+*Porte* : `scripts/check-alias-nomenclature.js` (dans `ci.js`), prouvée faillible
+sur **deux dimensions** — le coffret et la capacité des batteries. Angle mort
+dit : une marque sans grammaire déclarée n'est pas vérifiée.
+
+---
+
+### M-31 — Deux compteurs justes peuvent décrire le même incident sous deux étiquettes opposées
+
+Un diagnostic déduit une cause **parmi celles de son catalogue**. Si le cas réel
+n'y figure pas, il n'échoue pas : il rend la cause la plus proche, **avec
+assurance**. C'est le mode de panne le plus coûteux d'un instrument.
+
+*Panne payée, 10/08/2026* : le relevé rendait `pagesDistinctes: 67`,
+`pagesEnDouble: 45` **et** `pagesManquantes: 45`. Les deux derniers chiffres
+décrivaient les **mêmes 45 pages** — arrivées et identiques d'un côté, absentes
+de l'autre. Le diagnostic, qui ne connaissait pas ce cas, a estimé une cadence,
+comparé deux dates et conclu **`jamais-arrivees` : « le remède est côté
+réseau »**. Faux deux fois : les pages étaient arrivées, et le réseau allait
+bien. La vraie cause : *le plan demandait 45 pages de plus que le site n'en
+sert* — au-delà du dernier rang, le fournisseur ressert sa **page 1**, avec ses
+60 tuiles pleines, sans rien signaler.
+
+⇒ **Ce qui est MESURÉ passe avant ce qui est DÉDUIT.** Le doublon est un fait
+constaté : il tranche avant toute estimation, exactement comme la page vide.
+⇒ **Une explication partielle se dit partielle** : 4 doublons pour 10
+manquantes rend `doublons-partiels` et compte les 6 restantes, jamais une cause
+qui aurait l'air complète.
+⇒ **Un chiffre juste que personne ne sait lire ne sert à rien.** `pagesEnDouble:
+45` était déjà rendu depuis des jours — il fallait le lire comme « ton plan est
+trop long de 45 pages », et rien ne le disait. Un compteur porte donc sa
+**conduite à tenir**, pas seulement sa valeur.
+
+*Porte* : `api/_lib/diag-rafale.js` (causes `plan-trop-long` et
+`doublons-partiels`), quatre assertions dans `scripts/check-price-watch.js`
+dont une sur le **câblage** — les trois autres resteraient vertes si
+`api/admin.js` cessait de passer le compteur.
+
+---
+
 ## Où ces méthodes sont déjà branchées
 
 | Méthode | Le code qui l'applique |
@@ -399,3 +458,5 @@ qui a démasqué les deux, pas la relecture.
 | M-23 | `data/transport-outre-mer.json`, `api/_lib/pricing-model.js` |
 | M-26, M-27 | `docs/TRAQUEUR-URLS.md`, `api/_lib/traqueur-plans.js` |
 | M-28, M-29 | `scripts/check-separation-marques.js`, `api/_lib/price-parse.js` |
+| M-30 | `scripts/check-alias-nomenclature.js`, `products.json` (`srcAltSkus`) |
+| M-31 | `api/_lib/diag-rafale.js`, `scripts/check-price-watch.js`, `api/_lib/traqueur-plans.js` |

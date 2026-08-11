@@ -68,10 +68,31 @@ var PLANS = {
      · page 3   : /prechcat/100I16-30oE0oJ1oM124301.html?qr=false
      · page 112 : /prechcat/100I16-1665oE0oJ1oM124301.html?qr=false
      Le pas de 15 est PROUVÉ par trois points (15, 30, et 1665 = 111 × 15) —
-     pas deux comme DeWALT à l'époque. Catégorie idealo : M124301. */
+     pas deux comme DeWALT à l'époque. Catégorie idealo : M124301.
+
+     ⛔⛔ `pages` EST PASSÉ DE 112 À 67 — ET C'EST SON PROPRE BALAYAGE QUI L'A
+     TRANCHÉ, PAS UNE DÉDUCTION. Relevé du 10/08/2026, 112 pages envoyées, mode
+     réel : **67 empreintes de page distinctes seulement**. Les 46 doublons ne
+     sont pas dispersés au hasard, ils tombent exactement là où l'arithmétique
+     les attend — les 45 premières pages envoyées (offsets 1 665 à 1 005, soit
+     tous les offsets AU-DESSUS de 990) portent la MÊME empreinte `2362c05a`,
+     et cette empreinte est aussi celle de la page d'offset 0. Autrement dit :
+     **le site RETOURNE LA PAGE 1 pour tout offset au-delà de 990**, et il ne
+     le dit pas — la réponse a l'air d'une page normale, 60 tuiles pleines.
+     Vérification croisée : les deux autres catégories du même site s'arrêtent
+     elles aussi à l'offset 990 (67 pages), et leurs relevés du même jour n'ont
+     AUCUN doublon d'empreinte. La borne est celle du site, pas de la marque.
+     ⚠️ Ce que coûtait l'erreur : 45 requêtes par balayage qui relisaient la
+     page 1 et RÉÉCRIVAIENT ses prix — du quota dépensé pour zéro information,
+     et 45 occasions de faire osciller un prix déjà écrit.
+     ⛔ L'adresse « page 112 » qu'il m'a donnée depuis son écran reste VRAIE :
+     elle existe et elle répond. Ce qui était faux, c'est de croire qu'elle
+     rendait une page NEUVE. Une URL qui répond n'est pas une URL qui informe.
+     *Porte* : `couverture` compte les empreintes ; une page déjà vue dans la
+     rafale est signalée (`pagesEnDouble`). */
   'MAKITA@idealo': {
     site: 'idealo',
-    pages: 112,
+    pages: 67,
     pas: 15,
     parPage: 60,
     ordre: 'desc',

@@ -187,6 +187,11 @@ var reqErreurs  = safeRequire('./erreurs',           'check-erreurs');
    Une règle de marque appliquée à une autre marque fabrique des rapprochements
    faux, et un rapprochement faux sur un prix fait vendre à perte. */
 var reqSepMarq  = safeRequire('./check-separation-marques', 'check-separation-marques');
+/* ⛔⛔ UN ALIAS DÉSIGNE LE MÊME CONTENU DE BOÎTE — porte posée le 10/08/2026.
+   Un `srcAltSkus` fait hériter le COÛT D'ACHAT d'une autre écriture : sur un
+   contenu différent (coffret, batteries), c'est un prix faux — et dans le sens
+   du moins cher, une vente à PERTE. Mesuré ce jour-là sur son relevé réel. */
+var reqAliasNom = safeRequire('./check-alias-nomenclature', 'check-alias-nomenclature');
 var modJur      = safeRequire('./juridique',         'check-juridique');
 var reqJur      = modJur && modJur.controle ? modJur.controle : null;
 // La porte d'O1 (hook Stop). Elle doit refuser le faux ET laisser passer le
@@ -328,6 +333,7 @@ var reqReconc   = safeRequire('./check-reconciliation', 'check-reconciliation');
   await runOne(reqDeps,     'check-deps');
   await runOne(reqErreurs,  'check-erreurs');
   await runOne(reqSepMarq,  'check-separation-marques');
+  await runOne(reqAliasNom, 'check-alias-nomenclature');
   await runOne(reqJur,      'check-juridique');
   await runOne(reqSortie,   'check-sortie');
   await runOne(reqFrais,    'check-fraicheur');
