@@ -381,10 +381,23 @@ module.exports = async function () {
      source d'admin.js : aucune ligne du corps de boucle ne doit contenir la
      forme mono `snapshotLib.majSnapshot(` — seulement `majSnapshotBatch`. */
   var admSrc = require('fs').readFileSync(require('path').join(__dirname, '..', 'api', 'admin.js'), 'utf8');
-  var boucle = admSrc.slice(admSrc.indexOf('for (const item of parsed) {'),
-    admSrc.indexOf('if (!dryRun && applied.length) catalog.invalidateOverrides();'));
-  ok(boucle && boucle.indexOf('for (const item of parsed) {') !== -1,
-    'préalable : la boucle de balayage est repérée dans admin.js');
+  /* ⛔⛔ LE REPÈRE NE PINGLE PLUS UN NOM DE VARIABLE. Premier jet : il cherchait
+     littéralement `for (const item of parsed) {`. Le 12/08/2026, la file
+     d'écriture a dû accueillir les hausses retenues — la boucle itère désormais
+     `aTraiter` — et cette porte est passée au ROUGE alors que rien de ce
+     qu'elle protège n'avait bougé. Un repère qui dépend d'un nom d'identifiant
+     casse au premier renommage légitime, et le réflexe est alors de renommer
+     pour lui plaire : c'est la porte qui dicte le code au lieu de le vérifier.
+     ⇒ On borne la zone par deux repères STABLES qui décrivent ce qu'elle est —
+     le compteur d'échecs qui ouvre la boucle, l'invalidation du cache qui la
+     ferme — et on exige toujours qu'une boucle `for (… of …)` s'y trouve. */
+  var debutBoucle = admSrc.indexOf('const echecsFiche = [];');
+  var finBoucle = admSrc.indexOf('if (!dryRun && applied.length) catalog.invalidateOverrides();');
+  var boucle = (debutBoucle !== -1 && finBoucle > debutBoucle)
+    ? admSrc.slice(debutBoucle, finBoucle) : '';
+  ok(!!boucle && /for \(const \w+ of \w+\) \{/.test(boucle),
+    'préalable : la boucle de balayage est repérée dans admin.js (bornes stables, '
+    + 'pas un nom de variable)');
   ok(boucle.indexOf('snapshotLib.majSnapshot(') === -1 && /snapPage\.push\(/.test(boucle),
     '⛔ le balayage n\'écrit PLUS le snapshot par produit (contention 4 docs) — il accumule (snapPage.push) '
     + 'et une seule maj groupée suit la boucle');
@@ -4023,6 +4036,7 @@ module.exports = async function () {
                   diff.map(function (x) { return x.sku; })) + ')');
               ok((rBh.out && rBh.out.counts && rBh.out.counts.haussesDifferees) === 1,
                 '⛔ …et elle est COMPTÉE : muette, elle passerait pour un prix inchangé');
+
               /* ⛔ ET LA BAISSE, ELLE, PASSE TOUT DE SUITE — sinon la garde
                  gèlerait tout le balayage au lieu de retenir les seules hausses.
                  Le minimum de rafale ne peut que descendre : une baisse est déjà
@@ -5544,6 +5558,89 @@ module.exports = async function () {
         'pwMajLocale fusionne comme set(merge:true) : les AUTRES sources de la carte survivent '
         + '(sinon E-227 en local) et priceCheckedAt devient un NOMBRE');
     }
+
+    /* ══ UNE HAUSSE RETENUE FINIT PAR S'ÉCRIRE ══════════════════════════════
+       ⛔⛔⛔ LE DÉFAUT DE MA PROPRE CORRECTION, TROUVÉ SUR SES RELEVÉS DU
+       12/08/2026. Le commentaire annonçait « une hausse attend la FIN de la
+       rafale, PUIS s'écrit ». Le code se contentait de `continue` : il la
+       JETAIT. Mesuré sur ses trois relevés : **33 hausses retenues (20 + 13),
+       ZÉRO écrite** — et sur l'une des marques la rafale s'était pourtant
+       terminée (67 pages sur 67, `pagesManquantes: 0`).
+       ⛔ La perte n'est pas ponctuelle : la même hausse serait détectée et jetée
+       à CHAQUE balayage, indéfiniment. Une vraie hausse fournisseur ne
+       passerait donc JAMAIS — contraire à D-015 — et le jour où le fournisseur
+       augmente pour de bon, on vend en dessous du coût.
+
+       ⛔⛔ ET MON PREMIER TÉMOIN ÉTAIT UN FAUX VERT — les deux sabotages sont
+       passés sans le faire rougir. Il envoyait LA MÊME fiche sur toutes les
+       pages : sur la dernière, la rafale est finie, donc la hausse s'écrivait
+       par le chemin NORMAL, sans que la file de rejeu ait servi à quoi que ce
+       soit. Il prouvait « une hausse s'écrit sur la dernière page », pas « une
+       hausse RETENUE est rejouée » — et c'est exactement là que vit le défaut.
+       ⇒ La fiche visée n'apparaît QUE sur la première page. Les pages suivantes
+       portent une AUTRE fiche. Sur la dernière, seule la file de rejeu peut
+       encore écrire la hausse de la première : si elle est vide, rien ne
+       s'écrit et la porte rougit.
+       ⚠️ Placé en fin de bloc : il envoie autant de pages que le plan en
+       compte, donc il fait ROULER la rafale. Au milieu, il vidait le cumul que
+       les assertions suivantes relisent et le harnais mourait. */
+    var cibleH = null, cibleH2 = null;
+    for (var ih = 0; ih < prods.length && !(cibleH && cibleH2); ih++) {
+      var ph = prods[ih];
+      if (!ph || String(ph.brand || '').toUpperCase() !== 'DEWALT') continue;
+      if (!ph.sku || ph.priceLocked || ph.hidden || !(Number(ph.price) > 0)) continue;
+      if (!/^[A-Z][A-Z0-9.\/-]{2,}[A-Z0-9]$/.test(String(ph.sku)) || !/\d/.test(ph.sku)) continue;
+      if (!cibleH) cibleH = ph; else if (ph.sku !== cibleH.sku) cibleH2 = ph;
+    }
+    var pagesPlanH = Number((plansMod.plan('DEWALT', 'idealo') || {}).pages) || 0;
+    ok(!!cibleH && !!cibleH2 && pagesPlanH > 1,
+      '⛔ PRÉALABLE : DEUX fiches à référence sûre et un plan qui déclare ses pages — '
+      + 'sans la seconde, la fiche visée reviendrait sur la dernière page et la porte '
+      + 'serait verte sans que la file de rejeu ait servi');
+    if (cibleH && cibleH2 && pagesPlanH > 1) {
+      scanReset();
+      var rSonde = fauxRes();
+      await admFn({ method: 'POST',
+        query: { type: 'price-watch', brand: 'DEWALT', source: 'idealo', dryRun: '1' },
+        body: { text: pageIdealo(cibleH.sku, '450,00') } }, rSonde, fauxAdmin, fauxDb({}, []));
+      var recSonde = (rSonde.out && rSonde.out.applied && rSonde.out.applied[0])
+        || (rSonde.out && rSonde.out.unchanged && rSonde.out.unchanged[0]);
+      ok(!!(recSonde && recSonde.newPrice > 0),
+        '⛔ PRÉALABLE : le prix rendu par le modèle est appris à l\'exécution, jamais recopié');
+      if (recSonde && recSonde.newPrice > 0) {
+        /* Prix courant à la MOITIÉ de ce que le modèle rend : chaque passage
+           voit donc une HAUSSE franche. */
+        var seedH = {};
+        seedH[cibleH.id] = { price: Math.round(recSonde.newPrice * 0.5 * 100) / 100 };
+        var dbH = fauxDb(seedH, []);
+        scanReset();
+        var retenues = 0, ecritesFin = 0;
+        for (var pg = 1; pg <= pagesPlanH; pg++) {
+          var rp = fauxRes();
+          /* ⛔ LA FICHE VISÉE N'EST QUE SUR LA PREMIÈRE PAGE. */
+          var skuPage = (pg === 1) ? cibleH.sku : cibleH2.sku;
+          await admFn({ method: 'POST',
+            query: { type: 'price-watch', brand: 'DEWALT', source: 'idealo', scan: '1', dryRun: '1' },
+            body: { text: pageIdealo(skuPage, '450,00') } }, rp, fauxAdmin, dbH);
+          if (pg === 1) retenues += ((rp.out && rp.out.haussesDifferees) || [])
+            .filter(function (x) { return x.id === cibleH.id; }).length;
+          if (pg === pagesPlanH) ecritesFin += ((rp.out && rp.out.applied) || [])
+            .filter(function (x) { return x.id === cibleH.id && x.newPrice > x.oldPrice; }).length;
+        }
+        ok(retenues === 1,
+          '⛔ PRÉALABLE : la hausse de la fiche visée a bien été RETENUE à la page 1 — '
+          + 'sans retenue, l\'assertion suivante serait verte sans rien avoir traversé '
+          + '(obtenu ' + retenues + ')');
+        ok(ecritesFin === 1,
+          '⛔⛔ ARGENT : une hausse RETENUE à la page 1 est REJOUÉE et écrite quand la '
+          + 'rafale se termine, alors même que sa fiche n\'est plus sur la dernière page. '
+          + 'Sans ce rejeu elle est PERDUE, la même hausse serait jetée à chaque balayage, '
+          + 'une vraie hausse fournisseur ne passerait jamais (D-015), et on finirait par '
+          + 'vendre sous le coût (obtenu ' + ecritesFin + ')');
+      }
+      scanReset();
+    }
+
   }
 
   /* ═══ MOUVEMENT DES PRIX : LA DATE DOIT SURVIVRE À LA RELECTURE ══════════
@@ -5890,7 +5987,9 @@ module.exports = async function () {
     blocInc = blocInc.slice(0, blocInc.indexOf('});') + 3);
     ok(/\bname:\s*it\.name\b/.test(blocInc),
       '⛔ …et `inconnus` aussi, qui le gardait déjà');
+
   }
+
 
   return errors;
 };

@@ -196,6 +196,10 @@ var reqAliasNom = safeRequire('./check-alias-nomenclature', 'check-alias-nomencl
    trompé TROIS FOIS, et chaque fois dans le sens qui fait vendre à perte.
    Posée le 11/08/2026, après la troisième. */
 var reqAuditMulti = safeRequire('./check-audit-multi-ecritures', 'check-audit-multi-ecritures');
+/* ⛔⛔ LE RELEVÉ DIT QUELLE VERSION L'A PRODUIT. Posée le 12/08/2026 après DEUX
+   TOURS passés à débattre d'un déploiement au lieu de le mesurer : ma session
+   ne voit ni le site ni l'API de l'hébergeur, la question était indécidable. */
+var reqVersionP = safeRequire('./check-version-parseur', 'check-version-parseur');
 var modJur      = safeRequire('./juridique',         'check-juridique');
 var reqJur      = modJur && modJur.controle ? modJur.controle : null;
 // La porte d'O1 (hook Stop). Elle doit refuser le faux ET laisser passer le
@@ -339,6 +343,7 @@ var reqReconc   = safeRequire('./check-reconciliation', 'check-reconciliation');
   await runOne(reqSepMarq,  'check-separation-marques');
   await runOne(reqAliasNom, 'check-alias-nomenclature');
   await runOne(reqAuditMulti, 'check-audit-multi-ecritures');
+  await runOne(reqVersionP, 'check-version-parseur');
   await runOne(reqJur,      'check-juridique');
   await runOne(reqSortie,   'check-sortie');
   await runOne(reqFrais,    'check-fraicheur');

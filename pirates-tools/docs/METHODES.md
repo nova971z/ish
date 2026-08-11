@@ -585,6 +585,63 @@ honnête grâce à une assertion écrite avant le défaut qu'elle a attrapé.
 
 ---
 
+### M-38 — Un état qu'on ne peut pas mesurer est un état qu'on finit par inventer
+
+Quand une question sur le monde extérieur revient deux fois sans réponse, le
+travail n'est plus d'y répondre : c'est de la **rendre mesurable**.
+
+*Panne payée les 11 et 12/08/2026* : sur **quatre relevés successifs**, deux
+faits contradictoires — le plan servi portait ma correction du jour, le parseur
+servi ne la portait pas. Ma session ne voit ni le site ni l'API de l'hébergeur
+(CONNECT 403, mesuré, définitif). J'ai passé **deux tours entiers** à débattre
+d'un déploiement au lieu de le mesurer.
+
+⇒ La réponse était dans les données depuis le début, sans que personne l'y ait
+mise : le champ `haussesDifferees`, livré la veille, était **présent** dans deux
+relevés et **absent** du troisième. Les trois traqueurs n'avaient donc pas tapé
+la même version. Aucune contradiction — seulement un marqueur qu'on n'avait pas
+posé exprès.
+
+⇒ Depuis, chaque relevé porte `versionParseur`, une somme sur le **texte source**
+des fichiers qui décident d'une référence. Pas un numéro à incrémenter à la main
+(on l'oublie, et une version qui ment est pire que pas de version), pas la date
+du fichier (l'empaquetage la réécrit) : le texte source est exactement ce qui
+s'exécute.
+
+*Porte* : `scripts/check-version-parseur.js` — présente dans les DEUX modes,
+stable à code constant, et discriminante au caractère près. Trois sabotages
+rouges.
+
+---
+
+### M-39 — Une garde qui n'a que le côté « refuse » laisse passer « refuse pour toujours »
+
+Poser un refus, c'est écrire la moitié d'une règle. L'autre moitié — *et
+ensuite, ça se débloque quand ?* — se teste séparément, ou elle n'existe pas.
+
+*Panne payée le 12/08/2026, sur ma propre correction de la veille* : le commentaire
+annonçait « une hausse attend la FIN de la rafale, **puis s'écrit** ». Le code se
+contentait de `continue` : il la **jetait**. Mesuré sur ses trois relevés :
+**33 hausses retenues, zéro écrite** — et sur l'une des marques la rafale s'était
+pourtant terminée (67 pages sur 67). La même hausse aurait été détectée et jetée
+à chaque balayage, indéfiniment : une vraie hausse fournisseur n'aurait **jamais**
+pu passer.
+
+⛔ Les trois assertions écrites la veille étaient **toutes vertes** pendant ce
+défaut. Elles vérifiaient qu'on n'écrit pas ; aucune ne vérifiait qu'on finit par
+écrire.
+
+⛔⛔ **Et mon premier témoin de réparation était un faux vert** : il envoyait la
+même fiche sur toutes les pages, donc sur la dernière la hausse s'écrivait par le
+chemin normal — sans que la file de rejeu serve à rien. Les deux sabotages sont
+passés sans le faire rougir. Le témoin juste ne montre la fiche **que sur la
+première page** : seule la file peut encore l'écrire à la fin.
+
+⇒ Un commentaire qui décrit un comportement que le code n'a pas est pire qu'un
+commentaire absent : on le croit sans le vérifier.
+
+---
+
 ## Où ces méthodes sont déjà branchées
 
 | Méthode | Le code qui l'applique |
@@ -607,3 +664,5 @@ honnête grâce à une assertion écrite avant le défaut qu'elle a attrapé.
 | M-35 | `scripts/check-separation-marques.js`, `audit/prix-multi-ecritures.js` (`adapterDewalt`) |
 | M-36 | `api/admin.js` (`haussesDifferees`), `scripts/check-price-watch.js` |
 | M-37 | `scripts/check-price-watch.js` (bilan des baisses) |
+| M-38 | `api/_lib/price-parse.js` (`EMPREINTE_PARSEUR`), `scripts/check-version-parseur.js` |
+| M-39 | `api/admin.js` (`haussesEnAttente`), `scripts/check-price-watch.js` |

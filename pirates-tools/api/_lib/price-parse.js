@@ -5,6 +5,60 @@
    entièrement avant le premier appel — mais une dépendance qu'on ne voit pas
    en ouvrant le fichier est une dépendance qu'on casse sans le savoir. */
 var barriere = require('./barriere-achat.js');
+
+/* ⛔⛔⛔ L'EMPREINTE DU PARSEUR — POURQUOI CE CHIFFRE EXISTE.
+   Les 11 et 12/08/2026, sur QUATRE relevés successifs de l'user, j'ai mesuré
+   deux faits contradictoires sans pouvoir trancher :
+     · le plan servi portait bien ma correction du 11/08 (67 pages au lieu de
+       112) — donc du code de ce jour-là tournait ;
+     · le parseur servi ne lisait PAS un numéro d'article que mon code local lit
+       par le chemin de production complet — donc du code de ce jour-là ne
+       tournait pas. Et 160 titres, identiques d'un relevé à l'autre, l'ont
+       confirmé deux fois.
+   Ma session ne voit ni le site ni l'API de l'hébergeur (CONNECT 403, mesuré et
+   DÉFINITIF) : la question « quelle version a servi cette page ? » était donc
+   INDÉCIDABLE. J'ai passé deux tours à en débattre au lieu de la mesurer.
+
+   ⇒ On ne débat plus : le relevé PORTE désormais l'empreinte du code qui l'a
+   produit. Un coup d'œil, et on sait. C'est la règle mère appliquée à
+   l'outillage lui-même — un état qu'on ne peut pas mesurer est un état qu'on
+   finit par inventer.
+
+   ⚠️ COMMENT ELLE EST CALCULÉE, ET POURQUOI PAS AUTREMENT : une somme sur le
+   TEXTE SOURCE des deux fichiers qui décident d'une référence. Pas un numéro à
+   incrémenter à la main — on l'oublierait, et une version qui ment est pire que
+   pas de version. Pas la date du fichier — l'empaquetage la réécrit. Le texte
+   source, lui, est exactement ce qui s'exécute.
+   ⚠️ Elle ne sert QU'AU DIAGNOSTIC : aucune décision de prix ne la lit, elle
+   n'entre dans aucun calcul et ne peut donc pas altérer un prix annoncé.
+   ⚠️ Portes lues — J3 : une somme sur du code, aucune donnée personnelle ;
+   J4 : aucun prix n'entre ici, rien ne devient un prix de référence ni une
+   annonce de réduction ; J5 : aucune TVA, aucun octroi de mer. */
+function empreinteParseur() {
+  var textes = [];
+  try {
+    var fs = require('fs');
+    var path = require('path');
+    ['price-parse.js', 'nomenclature.js'].forEach(function (f) {
+      /* ⚠️ LECTURE DÉFENSIVE, ET C'EST LA RÈGLE DES PORTES : une lecture qui
+         jette au chargement rendrait TOUT le parseur inchargeable — donc le
+         traqueur mort — pour un simple chiffre de diagnostic. Un fichier
+         absent devient une information, jamais une panne. */
+      try { textes.push(fs.readFileSync(path.join(__dirname, f), 'utf8')); }
+      catch (eLect) { textes.push('ABSENT:' + f); }
+    });
+  } catch (eEnv) { return 'indisponible'; }
+  var s = textes.join('\n');
+  var h1 = 0x811c9dc5, h2 = 0x01000193;
+  for (var i = 0; i < s.length; i++) {
+    h1 = ((h1 ^ s.charCodeAt(i)) * 0x01000193) >>> 0;
+    h2 = ((h2 + s.charCodeAt(i) * (i % 31 + 1)) * 0x85ebca6b) >>> 0;
+  }
+  return ('00000000' + h1.toString(16)).slice(-8)
+    + ('00000000' + h2.toString(16)).slice(-8) + '-' + s.length;
+}
+var EMPREINTE_PARSEUR = empreinteParseur();
+
 // Parseur des pages « marque » de cotébrico → [{ sku, price, name, promo }].
 //
 // price = le prix TTC **RÉELLEMENT AFFICHÉ, PROMO COMPRISE**.
@@ -3433,4 +3487,9 @@ module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickou
   varianteProduit: varianteProduit, roleCoffret: roleCoffret,
   signatureBatteries: signatureBatteries, estPourAutreMachine: estPourAutreMachine,
   sansAccentsTitre: sansAccentsTitre, refUniqueDuTitre: refUniqueDuTitre,
-  lireReferenceDuTitre: lireReferenceDuTitre, candidatsAvecPosition: candidatsAvecPosition, apparierParNomSouple: apparierParNomSouple, apparierParRefRecollee: apparierParRefRecollee, apparierParConfiguration: apparierParConfiguration, CONCORDANCES_MIN: CONCORDANCES_MIN, annoncesManquantes: annoncesManquantes, extraireCaracteristiques: extraireCaracteristiques, comparerCaracteristiques: comparerCaracteristiques, planBalayage: planBalayage, rangDansPlan: rangDansPlan, OUTILS: OUTILS, SERIES: SERIES, nomenclature: nomen };
+  lireReferenceDuTitre: lireReferenceDuTitre, candidatsAvecPosition: candidatsAvecPosition, apparierParNomSouple: apparierParNomSouple, apparierParRefRecollee: apparierParRefRecollee, apparierParConfiguration: apparierParConfiguration, CONCORDANCES_MIN: CONCORDANCES_MIN, annoncesManquantes: annoncesManquantes, extraireCaracteristiques: extraireCaracteristiques, comparerCaracteristiques: comparerCaracteristiques, planBalayage: planBalayage, rangDansPlan: rangDansPlan, OUTILS: OUTILS, SERIES: SERIES,
+  /* ⛔ L'EMPREINTE DU CODE QUI A SERVI LA PAGE — voir le bloc en tête de
+     fichier. Sans elle, « quelle version tourne ? » est indécidable depuis ma
+     session, et je l'ai payé deux tours entiers. */
+  EMPREINTE_PARSEUR: EMPREINTE_PARSEUR, empreinteParseur: empreinteParseur,
+  nomenclature: nomen };

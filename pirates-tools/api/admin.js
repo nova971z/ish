@@ -2872,6 +2872,9 @@ function pwRafaleOuvrir(brand, pagesDuPlan, nowMs) {
   if (!pwCouv || (nowMs - pwCouv.at) > PW_SCAN_TTL || pwCouv.brand !== brand) {
     pwCouv = { brand: brand, refs: Object.create(null), noms: Object.create(null),
       empreintes: Object.create(null), fiches: Object.create(null),
+      /* Les ANNONCES dont la hausse attend la fin de la rafale — voir le bloc
+         « LES HAUSSES RETENUES REVIENNENT SUR LA DERNIÈRE PAGE ». */
+      haussesEnAttente: Object.create(null),
       baisses: Object.create(null), coutMin: Object.create(null),
       pages: 0, tuiles: 0, lues: 0, debut: nowMs, at: nowMs };
   }
@@ -3258,6 +3261,9 @@ function pwCouvRefus(brand) {
   if (!pwCouv || (nowMs - pwCouv.at) > PW_SCAN_TTL || pwCouv.brand !== brand) {
     pwCouv = { brand: brand, refs: Object.create(null), noms: Object.create(null),
       empreintes: Object.create(null), fiches: Object.create(null),
+      /* Les ANNONCES dont la hausse attend la fin de la rafale — voir le bloc
+         « LES HAUSSES RETENUES REVIENNENT SUR LA DERNIÈRE PAGE ». */
+      haussesEnAttente: Object.create(null),
       baisses: Object.create(null),
       pages: 0, tuiles: 0, lues: 0, refus: 0, debut: nowMs, at: nowMs };
   }
@@ -3749,6 +3755,15 @@ async function handlePriceWatch(req, res, admin, db) {
 
       return res.status(200).json({
         ok: true, sec: true, brand, source: sourceSlug, format: auto.format,
+        /* ⛔⛔ QUELLE VERSION DU PARSEUR A SERVI CETTE PAGE. Sans ce champ, la
+           question est INDÉCIDABLE depuis ma session (le site et l'API de
+           l'hébergeur répondent CONNECT 403, mesuré et définitif) — et je l'ai
+           payé deux tours entiers, à débattre d'un déploiement au lieu de le
+           mesurer. Voir le bloc en tête de `api/_lib/price-parse.js`.
+           ⚠️ Portes lues — J3 : une somme sur du code, aucune donnée
+           personnelle ; J4 : aucun prix, rien qui puisse servir de prix de
+           référence ; J5 : aucune TVA, aucun octroi de mer. */
+        versionParseur: priceParse.EMPREINTE_PARSEUR,
         counts: {
           parsed: parsed.length,
           reconnus: reconnusSec.length, inconnus: inconnusSec.length,
@@ -4178,7 +4193,49 @@ async function handlePriceWatch(req, res, admin, db) {
        ⚠️ On n'avale pas l'erreur : elle est comptée, nommée, et rendue dans la
        réponse. Un incident silencieux vaut moins qu'un incident lisible. */
     const echecsFiche = [];
-    for (const item of parsed) {
+    /* ⛔⛔⛔ LES HAUSSES RETENUES REVIENNENT SUR LA DERNIÈRE PAGE — ET SANS ÇA
+       MA PROPRE CORRECTION LES PERDAIT.
+       Défaut de MA livraison de la veille, mesuré le 12/08/2026 sur ses trois
+       relevés : le commentaire annonçait « une hausse attend la FIN de la
+       rafale, PUIS s'écrit ». Le code, lui, se contentait de `continue` — il
+       les JETAIT. Résultat sur ses relevés : **33 hausses retenues (20 + 13),
+       zéro écrite**, alors que le balayage s'était pourtant terminé sur l'une
+       des marques (67 pages sur 67, `pagesManquantes: 0`).
+       ⛔ Et la perte n'est pas ponctuelle : la même hausse serait détectée et
+       jetée à CHAQUE balayage, indéfiniment. Une vraie hausse fournisseur ne
+       passerait donc JAMAIS — contraire à D-015 — et le jour où le fournisseur
+       augmente pour de bon, on vend en dessous du coût.
+       ⛔ Un commentaire qui décrit un comportement que le code n'a pas est pire
+       qu'un commentaire absent : on le croit sans le vérifier.
+
+       ⚠️ COMMENT, ET POURQUOI PAS AUTREMENT : on ne duplique PAS le chemin
+       d'écriture — ce serait une seconde implémentation d'une décision
+       d'argent, exactement ce que la règle « une formule n'a qu'une
+       implémentation » interdit. On remet les ANNONCES retenues dans la file
+       de la dernière page : elles repassent par le MÊME code, et comme la
+       rafale est alors finie, elles s'écrivent.
+       ⚠️ La file vit dans la mémoire de la rafale : un balayage interrompu ne
+       les écrit pas, le prix reste le plus BAS connu, et la hausse repart au
+       balayage suivant. Sens sûr, et dit.
+       ⚠️ Portes lues — J4 : rien n'est fabriqué ici, on rejoue une annonce déjà
+       lue par le même code ; J3 : aucune donnée personnelle ; J5 : aucune
+       fiscalité. */
+    var rafaleFinieCettePage = !scanMode || !(pagesDuPlanCourant > 0)
+      || ((pwCouv && pwCouv.brand === brand ? pwCouv.pages : 0) + 1) >= pagesDuPlanCourant;
+    var fileRetenue = (pwCouv && pwCouv.brand === brand && pwCouv.haussesEnAttente)
+      ? pwCouv.haussesEnAttente : null;
+    var aTraiter = parsed;
+    if (rafaleFinieCettePage && fileRetenue) {
+      var repris = Object.keys(fileRetenue).map(function (k) { return fileRetenue[k]; })
+        /* Une annonce déjà présente sur CETTE page n'est pas remise en double :
+           elle y sera traitée avec son coût du moment. */
+        .filter(function (it) {
+          return it && !parsed.some(function (x) { return x && x.sku === it.sku; });
+        });
+      if (repris.length) aTraiter = parsed.concat(repris);
+      pwCouv.haussesEnAttente = Object.create(null);
+    }
+    for (const item of aTraiter) {
       try {
         /* ⛔ Même règle que sur le chemin à sec : l'écriture exacte d'abord, la
            racine ensuite. Une règle vraie appliquée à un seul endroit ne protège
@@ -4425,14 +4482,22 @@ async function handlePriceWatch(req, res, admin, db) {
            pas, et le prix servi reste exact et complet. J3 : des références
            d'outils, aucune donnée personnelle. J5 : ni TVA ni octroi de mer,
            le territoire vient du code postal. */
-        var rafaleFinie = !scanMode
-          || !(pagesDuPlanCourant > 0)
-          || ((pwCouv && pwCouv.brand === brand ? pwCouv.pages : 0) + 1) >= pagesDuPlanCourant;
-        if (scanMode && cur != null && newPrice > cur && !rafaleFinie) {
+        if (scanMode && cur != null && newPrice > cur && !rafaleFinieCettePage) {
           rec.reason = 'hausse differee : le balayage n est pas fini, une tuile moins '
             + 'chere du meme article peut encore arriver (mesure le 11/08/2026 : 11 fiches '
-            + 'sur 15 affichees trop cher pendant 13 a 44 pages, jusqu a +312,59 EUR)';
+            + 'sur 15 affichees trop cher pendant 13 a 44 pages, jusqu a +312,59 EUR). '
+            + 'Elle sera rejouee sur la derniere page de la rafale.';
           haussesDifferees.push(rec);
+          /* ⛔ ON GARDE L'ANNONCE, PAS SEULEMENT LE CONSTAT. Premier jet du
+             11/08 : je poussais `rec` dans une liste de rapport et je faisais
+             `continue` — la hausse était donc PERDUE, pas différée. Mesuré le
+             lendemain sur ses relevés : 33 retenues, zéro écrite. C'est
+             l'ANNONCE qu'il faut conserver, puisque c'est elle qui repasse par
+             le chemin d'écriture sur la dernière page. */
+          if (pwCouv && pwCouv.brand === brand) {
+            if (!pwCouv.haussesEnAttente) pwCouv.haussesEnAttente = Object.create(null);
+            pwCouv.haussesEnAttente[p.id] = item;
+          }
           continue;
         }
 
@@ -4576,6 +4641,16 @@ async function handlePriceWatch(req, res, admin, db) {
 
     return res.status(200).json({
       ok: true, brand, dryRun: !!dryRun, scan: !!scanMode,
+      /* ⛔⛔ QUELLE VERSION DU PARSEUR A SERVI CETTE PAGE. Même champ qu'à sec,
+         et pour la même raison : sans lui, « le correctif est-il en ligne ? »
+         est indécidable depuis ma session (CONNECT 403 sur le site ET sur l'API
+         de l'hébergeur, mesuré et définitif). Deux tours entiers y sont passés
+         avant que je pose ce chiffre. Voir le bloc en tête de
+         `api/_lib/price-parse.js`.
+         ⚠️ Portes lues — J3 : une somme sur du code, aucune donnée personnelle ;
+         J4 : aucun prix, rien qui puisse servir de prix de référence ; J5 :
+         aucune TVA, aucun octroi de mer. */
+      versionParseur: priceParse.EMPREINTE_PARSEUR,
       // Mesure, pas promesse : le relevé a-t-il été réutilisé sur CETTE page ?
       scanCache: scanMode ? cacheReutilise : undefined,
       /* Couverture cumulée de la rafale — la seule réponse à « ai-je balayé
