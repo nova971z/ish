@@ -930,6 +930,76 @@ sorte.
 ⚠️ Un chiffre faux annoncé coûte plus qu'un chiffre absent : il oriente une
 décision d'achat, et il faut ensuite le désavouer.
 
+### M-51 — Un champ calculé n'engage que son auteur ; le titre engage le vendeur
+
+Pour construire la table des pièces détachées, j'ai sélectionné les cartes par
+le champ de type du parseur : `typ === 'chargeur'`. Résultat mesuré sur les
+trois relevés du 13/08/2026 : **0 chargeur sur 5 300 tuiles**, alors que **970
+tuiles écrivent « chargeur » dans leur titre**. Le parseur range en effet la
+plupart des chargeurs en `typ:'batterie'` — sans conséquence pour lui, mais la
+table sortait sans aucun chargeur, donc tout pack en contenant restait
+non-reconstituable et l'économie se perdait en silence.
+
+⇒ **Quand la question est « qu'est-ce que j'achète ? », on lit le TITRE.** Il
+engage juridiquement le vendeur (M-48). Un champ calculé par un outil ne dit que
+ce que cet outil a compris, et il n'a jamais promis d'être exhaustif.
+
+⚠️ Corollaire : un champ calculé reste excellent en refus (« ceci est une
+machine, donc pas une pièce »), jamais en sélection.
+
+---
+
+### M-52 — Une garde écrite dans une seule langue est ouverte dans les autres
+
+Ma détection des négations ne parlait que français : « sans batterie ni
+chargeur ». Le comparateur agrège des vendeurs de toute l'Europe. Sont donc
+entrés dans la table des pièces, mesurés : un rabot « **without** Battery and
+Charger » à 175,04 € rangé comme prix d'un CHARGEUR, et des machines « **ohne**
+Akku » comme pièces vendues seules. Le titre parlait de la pièce **pour dire
+qu'elle est absente** ; je l'ai lu comme une pièce vendue.
+
+⇒ Toute garde qui lit du texte de marchand se pose dans **toutes les langues où
+la source publie**, et le contrôle en cite une par langue. Même famille de
+défaut : un multiplicateur qui n'attrape que « 3 x 1,7 Ah » et rate « 3x
+batterie » — le compte porte tantôt sur un chiffre, tantôt sur le mot.
+
+---
+
+### M-53 — Un résultat invraisemblable accuse une ENTRÉE, pas le calcul
+
+Le calculateur a déduit qu'une perceuse-visseuse sans charbon vendue 184,71 € en
+pack valait **23,13 € nue**. L'arithmétique était juste. Ce qui était faux, c'est
+une entrée : le seul chargeur d'outil vendu seul dans les trois relevés est un
+chargeur rapide 6 A à **97,73 €** — recoupé sur le Web (deux sources), le
+chargeur réellement livré dans ces packs vaut **29,90 à 37,58 €**. La
+soustraction retirait le chargeur le plus cher du catalogue à des packs qui
+embarquent le plus simple.
+
+⇒ Devant un résultat qui ne peut pas exister, on ne rafistole pas le seuil : on
+remonte à l'entrée la plus fragile. Ici, « une seule offre » n'est pas une
+mesure — c'est un échantillon de taille 1, et il faut le dire quand on s'en sert.
+
+⚠️ Et on va chercher un **oracle indépendant** : le même appareil vendu NU et
+vendu EN PACK donne la valeur du lot d'accessoires **sans aucune modélisation**,
+par simple soustraction entre deux prix relevés. Mesuré sur 24 paires : un pack
+« 1 batterie + 1 chargeur » coûte **101,29 € de plus** que la machine nue
+(médiane) — quand les mêmes pièces achetées séparément en coûteraient 161,58 €.
+
+---
+
+### M-54 — Zéro résultat n'est pas « il n'y a rien », c'est un préalable qui échoue
+
+Le banc d'appariement nue/pack a rendu **zéro paire** en se croyant complet — il
+appariait sur une racine qui rend « DCF787N » suffixe compris, si bien que la
+machine nue et son pack n'avaient jamais la même clef. Deux fois le même jour :
+la table de composants a d'abord rendu **0 marque**, donc 0 carte, en imprimant
+quand même un tableau.
+
+⇒ **Une condition sans laquelle le banc n'a rien mesuré est un PRÉALABLE, et un
+préalable non rempli fait ÉCHOUER le banc** (code 2), jamais verdir à vide. Un
+zéro imprimé au milieu d'un rapport se lit comme un fait ; un préalable rouge se
+lit comme ce qu'il est.
+
 ---
 
 ## Où ces méthodes sont déjà branchées
@@ -967,3 +1037,6 @@ décision d'achat, et il faut ensuite le désavouer.
 | M-48 | `api/_lib/price-parse.js` (`quantite`, `prixUnitaire`), `api/admin.js` (`packsUnitaires`) |
 | M-49 | `api/_lib/reconstitution.js`, `scripts/check-reconstitution.js` |
 | M-50 | — règle de conduite, pas de code |
+| M-51, M-52 | `scripts/banc-composants.js`, `scripts/check-composants.js` |
+| M-53 | `scripts/banc-valeur-bundle.js` (oracle indépendant), `scripts/banc-reconstitution.js` |
+| M-54 | préalables de `scripts/banc-composants.js` et `scripts/banc-valeur-bundle.js` |
