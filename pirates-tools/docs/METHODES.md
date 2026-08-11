@@ -674,6 +674,72 @@ dans la rafale ; file non indexée par marque).
 
 ---
 
+### M-41 — Une règle d'argent posée sur UN format ne garde pas l'autre
+
+Quand un même parseur sert plusieurs fournisseurs, une garde écrite pour l'un
+laisse l'autre entièrement découvert — et personne ne le voit, parce que la
+règle « existe ».
+
+*Panne payée le 12/08/2026, capture de l'user à l'appui* : sur la même page, le
+comparateur affichait « <réf> » à **213,44 €** et « <réf> (+ Jeu de clés
+14 pièces) » à **351,98 €**. Le parseur rendait la MÊME référence sur les deux,
+et le pack l'emportait quand il arrivait en premier : **138,54 € de coût
+inventé** sur la machine seule.
+La règle « un titre à “+” est un pack, il ne porte pas la référence d'un
+composant » existait depuis le 02/08/2026 — **sur l'autre format seulement**.
+Le parseur de celui-ci rendait `packs: []` **en dur**.
+
+⚠️ **Et la moitié du travail est de ne PAS trop refuser** : mesuré sur ses trois
+relevés, **548 tuiles sur 7 126** portent un « + », et la plupart sont
+légitimes — une référence dont le suffixe dit déjà « 1 batterie 5 Ah » a le
+droit d'être vendue avec son chargeur. On ne refuse donc que la combinaison
+dangereuse : **référence NUE + titre qui ajoute**. Et « sans batterie +
+chargeur » veut dire *ni l'un ni l'autre* : le refuser perdrait le prix le plus
+bas.
+
+*Porte* : `scripts/check-price-watch.js`, quatre assertions (pack refusé,
+machine nue acceptée, référence conditionnée acceptée, « sans … + … » accepté),
+trois sabotages rouges.
+
+---
+
+### M-42 — Un prix qu'on ne peut pas rattacher à son offre n'est pas vérifiable
+
+Écrire un prix sans garder le **titre de l'offre qui l'a fourni**, c'est rendre
+tout contrôle ultérieur impossible : on voit le montant, jamais d'où il vient.
+
+*Mesuré le 12/08/2026* : deux tuiles portaient la même référence, l'une à
+**77,46 €**, l'autre à **126 €**, sur deux pages différentes. Impossible de dire
+laquelle est la vraie machine — les deux enregistrements portaient
+`titre: undefined` et le nom de NOTRE fiche, jamais celui de la carte. Le défaut
+du pack n'a pu être prouvé que **grâce à la capture d'écran de l'user**.
+La règle existait déjà pour les listes du mode à sec ; elle manquait là où l'on
+**écrit** vraiment.
+
+⇒ Chaque prix écrit archive `titreCarte`. Sans ce champ, « pourquoi ce coût ? »
+n'a pas de réponse, et on redemande une capture pour chaque doute.
+
+---
+
+### M-43 — Avant d'accuser le parseur, vérifier que la page est TRIÉE
+
+Un écart de prix entre deux relevés ressemble toujours à un décalage
+titre ↔ prix. Le test qui tranche coûte trois lignes : sur une page triée par
+prix, la suite des prix rendus doit être **monotone**.
+
+*Mesuré le 12/08/2026, et l'hypothèse est morte tout de suite* : **0 saut** sur
+1 441 tuiles d'une marque et **0 saut** sur 2 334 d'une autre — leurs bandes
+sont d'une régularité parfaite (99,99 → 102,42 €). Aucun décalage, nulle part.
+La troisième marque montre 68,2 % de sauts **parce que sa grille n'est pas
+triée par prix** — mesuré séparément, ses adresses ne portent pas de clé de
+tri. Ce n'est donc pas un défaut, c'est un tri différent.
+
+⇒ Deux prix différents pour une même référence ne prouvent pas un décalage :
+le comparateur crée plusieurs CARTES pour un même outil. Sa propre capture le
+montre — trois cartes, 113,48 €, 157,12 € et 173,17 €, pour la même scie.
+
+---
+
 ## Où ces méthodes sont déjà branchées
 
 | Méthode | Le code qui l'applique |
@@ -699,3 +765,6 @@ dans la rafale ; file non indexée par marque).
 | M-38 | `api/_lib/price-parse.js` (`EMPREINTE_PARSEUR`), `scripts/check-version-parseur.js` |
 | M-39 | `api/admin.js` (report des hausses), `scripts/check-price-watch.js` |
 | M-40 | `api/admin.js` (`pwFileHausses`), `scripts/check-price-watch.js` |
+| M-41 | `api/_lib/price-parse.js` (`titreAjouteDuContenu`, `referenceEstNue`) |
+| M-42 | `api/admin.js` (`titreCarte`), `scripts/check-price-watch.js` |
+| M-43 | `scripts/tableau-produits.js` |

@@ -5803,6 +5803,75 @@ module.exports = async function () {
       + 'court toute la hauteur, il ne s\'arrête pas aux premiers montants)');
   }
 
+  /* ══ ARGENT — UN PACK NE PORTE PAS LE PRIX DE LA MACHINE NUE ══════════════
+     ⛔⛔⛔ SA CAPTURE idealo DU 12/08/2026, mot pour mot : « DTW700Z = 213,44 €
+     chez idealo […] tu as créé un problème qui n'existait pas […] je veux que
+     le parseur trouve le bon prix. On règle toujours le problème à la SOURCE. »
+     Sur la MÊME page le fournisseur affichait « <réf> » à 213,44 € et
+     « <réf> (+ Jeu de clés 14 pièces) » à 351,98 €. Le parseur rendait la même
+     référence sur les deux, et le PACK l'emportait quand il arrivait en
+     premier : **138,54 € de coût inventé** sur la machine seule.
+     ⛔ La règle existait depuis le 02/08/2026 — mais sur l'AUTRE format
+     seulement. Le parseur d'idealo rendait `packs: []` EN DUR. « Une garde
+     posée sur un seul chemin ne garde rien : le défaut prend l'autre », leçon
+     déjà écrite dans ce fichier, payée une seconde fois.
+     ⚠️ SUJETS CHOISIS À L'EXÉCUTION, sur une FORME : on prend au catalogue une
+     référence que la grammaire de sa marque déclare NUE, et une autre qui
+     porte déjà son conditionnement. Aucune donnée du catalogue n'est nommée. */
+  (function packNeVolePasLaMachineNue() {
+    var cat = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'products.json'), 'utf8'));
+    var liste = cat.products || cat;
+    var nue = null, conditionnee = null;
+    for (var i = 0; i < liste.length && !(nue && conditionnee); i++) {
+      var q = liste[i];
+      if (!q || !q.sku || String(q.brand || '').toUpperCase() !== 'MAKITA') continue;
+      var l = pp.nomenclature.lireSuffixeMakita(String(q.sku).toUpperCase());
+      var c = l && l.config;
+      if (!c) continue;
+      if (!nue && c.nbBatteries === 0 && !c.coffret && !c.accessoires) nue = q.sku;
+      else if (!conditionnee && c.nbBatteries > 0) conditionnee = q.sku;
+    }
+    ok(!!nue && !!conditionnee,
+      '⛔ PRÉALABLE : une référence NUE et une référence CONDITIONNÉE au catalogue — '
+      + 'sans les deux, on ne peut pas montrer que la garde vise la bonne');
+    if (!nue || !conditionnee) return;
+    function page(titre, prix) {
+      return [titre, 'En stock', '12 offres', 'à partir de ' + prix + ' €'].join('\n');
+    }
+    var rPack = pp.parseIdealo(page('Makita ' + nue + ' (+ Jeu de clés 14 pièces)', '351,98'), 'MAKITA');
+    ok((rPack.items || []).length === 0 && (rPack.packs || []).length === 1
+      && rPack.packs[0].skuRefuse === nue,
+      '⛔⛔ ARGENT : un titre qui AJOUTE du contenu sur une référence NUE ne devient '
+      + 'jamais un article — son prix irait sur la machine seule (obtenu items='
+      + ((rPack.items || []).length) + ' packs=' + ((rPack.packs || []).length) + ')');
+    var rNue = pp.parseIdealo(page('Makita ' + nue, '213,44'), 'MAKITA');
+    ok((rNue.items || []).length === 1 && rNue.items[0].sku === nue,
+      '⛔ …et la machine NUE, elle, passe : sans ce témoin, « tout refuser » serait vert '
+      + '(obtenu ' + JSON.stringify((rNue.items || []).map(function (x) { return x.sku; })) + ')');
+    var rCond = pp.parseIdealo(page('Makita ' + conditionnee + ' Pack batterie + chargeur', '101,72'), 'MAKITA');
+    ok((rCond.items || []).length === 1 && rCond.items[0].sku === conditionnee,
+      '⛔ …et une référence qui porte DÉJÀ son conditionnement passe malgré le « + » : '
+      + 'mesuré sur ses relevés, 548 tuiles sur 7 126 portent un « + » et les jeter '
+      + 'toutes coûterait plus cher que le défaut (obtenu '
+      + JSON.stringify((rCond.items || []).map(function (x) { return x.sku; })) + ')');
+    var rNi = pp.parseIdealo(page('Makita ' + nue + ' (sans batterie + chargeur)', '146,48'), 'MAKITA');
+    ok((rNi.items || []).length === 1,
+      '⛔ « sans batterie + chargeur » veut dire NI L\'UN NI L\'AUTRE, pas un ajout — '
+      + 'le refuser perdrait justement le prix le plus bas (obtenu items='
+      + ((rNi.items || []).length) + ')');
+  }());
+
+  /* ⛔⛔ ET LE PRIX ÉCRIT GARDE LE TITRE DE LA CARTE QUI L'A FOURNI.
+     Sans lui, impossible de dire APRÈS COUP quelle offre a donné le coût : le
+     défaut ci-dessus n'a pu être prouvé que grâce à SA capture d'écran. Un prix
+     qu'on ne peut pas rattacher à sa source n'est pas un prix vérifiable. */
+  var srcAdm2 = fs.readFileSync(path.join(__dirname, '..', 'api', 'admin.js'), 'utf8');
+  var blocRec2 = srcAdm2.slice(srcAdm2.indexOf('const rec = { sku: item.sku'));
+  blocRec2 = blocRec2.slice(0, blocRec2.indexOf('};') + 2);
+  ok(/titreCarte\s*:/.test(blocRec2),
+    '⛔⛔ chaque prix écrit archive `titreCarte` — le titre de l\'OFFRE retenue, pas '
+    + 'seulement le nom de notre fiche. Sans lui, aucun prix n\'est vérifiable après coup');
+
   var dr = require('../api/_lib/diag-rafale.js');
   ok(typeof dr.expliquerRafale === 'function', 'expliquerRafale exportée');
   if (dr.expliquerRafale) {

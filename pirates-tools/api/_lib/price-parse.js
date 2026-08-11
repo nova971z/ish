@@ -701,6 +701,80 @@ function candidatsAvecPosition(titre, brand) {
    assemblage de deux annonces. Le « + » resté À L'AIR LIBRE, lui, continue de
    valoir refus — c'est lui qui signalait « Power Set 1×18V 5,0 Ah + DCB107 ».
    Rend une liste d'intervalles [début, fin[ dans le titre d'origine. */
+/* ⛔⛔⛔ UN TITRE QUI AJOUTE DU CONTENU N'EST PAS LA MACHINE NUE.
+   ─────────────────────────────────────────────────────────────────────────
+   ORDRE DE L'USER, 12/08/2026, capture idealo à l'appui : « DTW700Z = 213,44 €
+   chez idealo […] tu as créé un problème qui n'existait pas […] je veux que le
+   parseur trouve le bon prix. […] On règle toujours le problème à la SOURCE. »
+
+   ⛔ CE QUE SA CAPTURE MONTRE, ET CE QUE LE PARSEUR EN FAISAIT. Sur la même
+   page, le fournisseur affiche DEUX cartes :
+     · « Makita DTW700Z »                            → à partir de 213,44 €
+     · « Makita DTW700Z (+ Jeu de clés 14 pièces) »  → à partir de 351,98 €
+   La seconde est un PACK. Le parseur en tirait `DTW700Z` — la référence de la
+   machine SEULE — et ce prix partait sur la fiche de la machine seule :
+   **351,98 € au lieu de 213,44 €**, 138,54 € de coût inventé, et une fiche
+   vendue bien trop cher. Vérifié : le parseur rend bien `DTW700Z` sur ce titre
+   exact.
+
+   ⛔⛔ ET LA RÈGLE EXISTAIT DÉJÀ — SUR L'AUTRE FORMAT SEULEMENT. Le parseur de
+   l'autre fournisseur écarte ces titres depuis le 02/08/2026 (`out.packs`).
+   Celui d'idealo rendait `packs: []` EN DUR : aucune détection, jamais. C'est
+   la leçon déjà écrite dans ce fichier, payée une seconde fois — « une garde
+   posée sur un seul chemin ne garde rien : le défaut prend l'autre ».
+
+   ⚠️ CE QU'ON NE JETTE PAS, ET C'EST LA MOITIÉ DU TRAVAIL. Beaucoup de titres
+   à « + » sont PARFAITEMENT légitimes : « DCB115P1 Pack batterie 5 Ah +
+   chargeur » porte une référence dont le suffixe DIT déjà « 1 batterie 5 Ah ».
+   Écrire ce coût sur cette fiche-là est juste. Mesuré sur ses trois relevés du
+   12/08 : **548 tuiles sur 7 126** portent un « + » — les jeter toutes coûterait
+   bien plus cher que le défaut. On ne refuse donc QUE la combinaison
+   dangereuse : **référence NUE + titre qui ajoute**.
+
+   ⚠️ ET « SANS BATTERIE + CHARGEUR » N'EST PAS UN AJOUT — c'est « ni l'un ni
+   l'autre ». Mesuré sur ses relevés (« DeWalt DCS391N (sans batterie +
+   chargeur) ») : sans cette exception, une machine nue correctement annoncée
+   serait refusée et on perdrait justement le prix le plus bas.
+   ⚠️ Portes lues — J4 : on refuse d'attribuer à une machine le prix d'un pack,
+   ce qui rend le prix annoncé PLUS exact, et rien ici ne fabrique un prix de
+   référence ni une réduction ; J3 : des titres publics, aucune donnée
+   personnelle ; J5 : aucune TVA, aucun octroi de mer. */
+function titreAjouteDuContenu(titre) {
+  var s = String(titre || '');
+  if (!s) return false;
+  if (/\bsans\b[^.,;]{0,40}\+/i.test(s)) return false;
+  if (/\(\s*\+\s*[A-Za-zÀ-ÖØ-öø-ÿ0-9]/.test(s)) return true;   // « (+ Jeu de clés 14 pièces) »
+  if (/\s\+\s+[A-Za-zÀ-ÖØ-öø-ÿ]{3,}/.test(s)) return true;     // « + saw blade »
+  if (/\bavec\s+(coffret|mallette|sac|jeu|set|kit|accessoires?|batteries?|chargeur)\b/i.test(s)) return true;
+  return false;
+}
+
+/* ⛔ LA RÉFÉRENCE DÉCRIT-ELLE UNE MACHINE NUE ? La grammaire DE SA MARQUE
+   tranche — jamais une autre, jamais la forme seule. Une marque sans grammaire
+   déclarée rend `false` : on ne refuse alors rien, faute de savoir, et c'est
+   dit plutôt que deviné. */
+function referenceEstNue(sku, marque) {
+  /* ⛔ LA GARDE PORTE LE MOT « marque », ET CE N'EST PAS COSMÉTIQUE.
+     Premier jet : la variable s'appelait `M`. `check-separation-marques` est
+     passée au ROUGE — et elle avait raison deux fois. D'abord parce qu'une
+     garde qu'un relecteur ne repère pas est une garde qu'on supprimera un
+     jour sans le voir ; ensuite parce que c'est exactement le motif qu'elle
+     cherche. On nomme donc ce qu'on garde. */
+  var marqueUp = String(marque || '').toUpperCase().replace(/[\s-]/g, '');
+  var s = String(sku || '').toUpperCase();
+  if (!s) return false;
+  if (marqueUp === 'MAKITA') {
+    var lm = nomen.lireSuffixeMakita(s), cm = lm && lm.config;
+    return !!(cm && cm.nbBatteries === 0 && !cm.coffret && !cm.accessoires);
+  }
+  if (marqueUp === 'DEWALT') {
+    var ld = nomen.lireSuffixeDewalt(s);
+    return !!(ld && ld.suffixe && ld.nbBatteries === 0 && !ld.coffret
+      && (!ld.inconnus || !ld.inconnus.length));
+  }
+  return false;
+}
+
 function tranchesDeContenu(titre) {
   var t = String(titre || ''), zones = [], m;
   var re = /\([^()]*\)/g;
@@ -885,7 +959,11 @@ function parseIdealo(rawText, brand) {
   var out = [];
   var ecartes = [];
   var perdus = [];
-  if (!rawText) return { items: out, sansRef: ecartes, perdus: perdus };
+  /* ⛔ LES PACKS ÉCARTÉS — même conteneur que sur l'autre format. Ils sortent
+     avec leur titre et leur prix : l'user les VEUT au catalogue, ce qui est
+     interdit c'est d'écrire leur prix sur la référence d'un composant. */
+  var packs = [];
+  if (!rawText) return { items: out, packs: packs, sansRef: ecartes, perdus: perdus };
   brand = (brand || 'DEWALT');
   var lignes = stripHtml(rawText).split(/\n+/).map(function (l) {
     return l.replace(/[ \t   ]+/g, ' ').trim();
@@ -1360,6 +1438,30 @@ function parseIdealo(rawText, brand) {
         if (/\d,\d{2}\s*€/.test(s)) return false;          // un prix
         return true;
       });
+    /* ⛔⛔⛔ ARGENT — LE PACK NE PORTE PAS LE PRIX DE LA MACHINE NUE.
+       Voir le bloc « UN TITRE QUI AJOUTE DU CONTENU N'EST PAS LA MACHINE NUE ».
+       Mesuré sur SA capture idealo du 12/08/2026 : « Makita DTW700Z (+ Jeu de
+       clés 14 pièces) » à 351,98 € contre « Makita DTW700Z » à 213,44 €. Le
+       parseur rendait `DTW700Z` sur les DEUX, et le pack l'emportait quand il
+       arrivait en premier : 138,54 € de coût inventé sur la machine seule.
+       ⛔ La carte n'est pas PERDUE — elle sort dans `packs`, avec son titre et
+       son prix, exactement comme sur l'autre format. L'user les VEUT au
+       catalogue (décision du 02/08/2026) ; ce qui est interdit, c'est
+       seulement d'écrire leur prix sur la référence d'un composant.
+       ⚠️ Refus limité au cas dangereux : la référence est NUE selon la
+       grammaire de SA marque, et le titre ajoute quelque chose. Une référence
+       qui porte déjà son conditionnement (`P1`, `D2`, `RTJ`…) passe. */
+    if (titreAjouteDuContenu(b[iTitre]) && referenceEstNue(sku, brand)) {
+      packs.push({ titre: String(b[iTitre] || '').slice(0, 200), prix: prix,
+        skuRefuse: sku,
+        raison: 'titre qui AJOUTE du contenu sur une reference NUE : le prix du '
+          + 'pack ne s ecrit jamais sur la machine seule',
+        car: extraireCaracteristiques(desc, brand) });
+      /* ⚠️ `return`, pas `continue` : ce corps est un callback de `forEach`,
+         pas une boucle. Attrapé par le chargement du module — un `continue`
+         illégal aurait tué TOUT le parseur, donc le traqueur entier. */
+      return;
+    }
     out.push({
       sku: sku, price: prix, name: brand + ' ' + sku, promo: false, enStock: null,
       /* Le titre de la carte, mot pour mot — c'est lui qui porte « (machine
@@ -1371,7 +1473,7 @@ function parseIdealo(rawText, brand) {
     });
   }
 
-  return { items: out, sansRef: ecartes, perdus: perdus };
+  return { items: out, packs: packs, sansRef: ecartes, perdus: perdus };
 }
 
 /* \u2500\u2500 AIGUILLAGE DE FORMAT \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
@@ -1398,7 +1500,7 @@ function parseAuto(rawText, brand) {
        ⛔ Une page reconnue, c'est une page dont on tire QUELQUE CHOSE : une
        fiche ou une annonce. Pas seulement une fiche. */
     if ((idea.sansRef || []).length) {
-      return { format: 'idealo', items: [], packs: [], sansRef: idea.sansRef, perdus: idea.perdus };
+      return { format: 'idealo', items: [], packs: idea.packs || [], sansRef: idea.sansRef, perdus: idea.perdus };
     }
     return { format: 'aucun', items: [], packs: clic.packs, sansRef: clic.sansRef, perdus: idea.perdus };
   }
@@ -1408,7 +1510,7 @@ function parseAuto(rawText, brand) {
     /* Les offres marchandes d'idealo (« Vendu par : ») sortent en `sansRef` :
        ce sont des LOTS, leur prix ne s'écrit sur aucune réf tant que l'user
        n'a pas créé la fiche et posé son `srcNom`. Listés, jamais devinés. */
-    return { format: 'idealo', items: idea.items, packs: [], sansRef: idea.sansRef, perdus: idea.perdus };
+    return { format: 'idealo', items: idea.items, packs: idea.packs || [], sansRef: idea.sansRef, perdus: idea.perdus };
   }
   if (clic.items.length > cote.length) {
     return { format: 'clickoutil', items: clic.items, packs: clic.packs, sansRef: clic.sansRef };

@@ -4415,7 +4415,23 @@ async function handlePriceWatch(req, res, admin, db) {
         const newPrice = priced.newPrice, newHt = priced.newHt;
         const cur = (typeof oW.price === 'number') ? oW.price
           : (typeof p.price === 'number' ? p.price : null);
-        const rec = { sku: item.sku, id: p.id, name: p.title || p.name, srcTTC: effSrc, source: effFrom, newPrice, newHt, markup: priced.markup, oldPrice: cur };
+        /* ⛔⛔⛔ LE TITRE DE LA CARTE QUI A FOURNI LE PRIX — SANS LUI, AUCUN
+           PRIX N'EST VÉRIFIABLE APRÈS COUP.
+           Mesuré le 12/08/2026 : l'user envoie une capture idealo montrant
+           « Makita DTW700Z » à 213,44 € et « Makita DTW700Z (+ Jeu de clés
+           14 pièces) » à 351,98 €. Mon relevé avait retenu 351,98 € — mais
+           `applied` ne portait que le nom de SA FICHE, jamais le titre de la
+           carte. Impossible de dire QUELLE carte avait fourni le coût, donc
+           impossible de prouver le défaut sans sa capture à lui.
+           ⛔ Un prix qu'on ne peut pas rattacher à sa source n'est pas un prix
+           vérifiable. La règle existait déjà pour `reconnus` et `inconnus` du
+           mode à sec — elle manquait là où l'on ÉCRIT vraiment.
+           ⚠️ Portes lues — J4 : c'est le libellé public de l'offre retenue,
+           conservé pour prouver l'exactitude du prix ; J3 : un titre d'outil,
+           aucune donnée personnelle ; J5 : aucune fiscalité. */
+        const rec = { sku: item.sku, id: p.id, name: p.title || p.name,
+          titreCarte: String((item && (item.titre || item.name)) || '').slice(0, 160),
+          srcTTC: effSrc, source: effFrom, newPrice, newHt, markup: priced.markup, oldPrice: cur };
 
         // Cette source a-t-elle DÉJÀ ce relevé, et le coût effectif est-il déjà bon ?
         const entreeSrc = (oW.priceSources || {})[sourceSlug];
