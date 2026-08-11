@@ -5854,6 +5854,37 @@ module.exports = async function () {
       + 'mesuré sur ses relevés, 548 tuiles sur 7 126 portent un « + » et les jeter '
       + 'toutes coûterait plus cher que le défaut (obtenu '
       + JSON.stringify((rCond.items || []).map(function (x) { return x.sku; })) + ')');
+    /* ⛔⛔⛔ UN « + » QUI ÉNUMÈRE UNE CARACTÉRISTIQUE N'EST PAS UN AJOUT — ET LE
+       BANC SUR SES 1 708 FICHES ME L'A IMPOSÉ.
+       Premier jet : tout « + » suivi d'un mot valait ajout. Passé sur le
+       catalogue entier, il a écarté TROIS machines explicitement nues, dont les
+       descriptifs disent « frein moteur + débrayage de sécurité »,
+       « brushless + ADT », « frein électronique + XPT ». Sur une vraie carte
+       fournisseur, leur prix aurait été JETÉ — une couverture perdue pour rien.
+       ⇒ Le « + » ne vaut ajout que devant un OBJET LIVRABLE, et ce que le
+       vendeur écrit noir sur blanc (« machine seule ») prime sur tout. */
+    ok(!pp.titreAjouteDuContenu('Meuleuse 180 mm, frein moteur + debrayage de securite', 'description'),
+      '⛔⛔ ARGENT : « + débrayage de sécurité » est une CARACTÉRISTIQUE, pas un contenu — '
+      + 'la prendre pour un pack jette le prix d\'une machine nue');
+    ok(!pp.titreAjouteDuContenu('Scie sans fil, moteur brushless + ADT, coupe 46x92 mm', 'description'),
+      '⛔ …idem pour une option technique énumérée après un « + »');
+    ok(pp.titreAjouteDuContenu('Boulonneuse livree + jeu de cles 14 pieces', 'description'),
+      '⛔ …mais un OBJET LIVRABLE derrière le « + » reste un ajout, titre ou description');
+    ok(!pp.titreAjouteDuContenu('Perforateur 18V - Sans Fil avec Coffret TSTAK', 'description'),
+      '⛔ « avec coffret » dans une DESCRIPTION est du bruit : mesuré sur ses 1 708 fiches, '
+      + 'un descriptif y était recopié d\'une autre déclinaison');
+    ok(pp.titreAjouteDuContenu('Perforateur 18V avec coffret TSTAK', 'titre'),
+      '⛔ …mais dans le TITRE c\'est une annonce de vente, et elle compte');
+    /* ⚠️ LE TÉMOIN PORTE UN OBJET LIVRABLE, ET C'EST TOUT LE POINT. Premier
+       jet : « (machine seule) + debrayage » — mais « débrayage » n'est pas un
+       objet livrable, donc la fonction rendait `false` par l'AUTRE règle. Le
+       sabotage « machine seule ne prime plus » laissait le harnais VERT : un
+       témoin qui peut réussir pour une autre raison ne témoigne de rien
+       (M-33). Ici le « + coffret » déclencherait à coup sûr — seule la
+       déclaration « machine seule » peut l'en empêcher. */
+    ok(!pp.titreAjouteDuContenu('Meuleuse 180 mm (machine seule) + coffret', 'titre'),
+      '⛔⛔ ce que le vendeur écrit NOIR SUR BLANC prime : « machine seule » ferme la '
+      + 'question, et même un « + coffret » plus loin ne peut pas la rouvrir');
     var rNi = pp.parseIdealo(page('Makita ' + nue + ' (sans batterie + chargeur)', '146,48'), 'MAKITA');
     ok((rNi.items || []).length === 1,
       '⛔ « sans batterie + chargeur » veut dire NI L\'UN NI L\'AUTRE, pas un ajout — '

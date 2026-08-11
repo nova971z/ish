@@ -739,13 +739,52 @@ function candidatsAvecPosition(titre, brand) {
    ce qui rend le prix annoncé PLUS exact, et rien ici ne fabrique un prix de
    référence ni une réduction ; J3 : des titres publics, aucune donnée
    personnelle ; J5 : aucune TVA, aucun octroi de mer. */
-function titreAjouteDuContenu(titre) {
-  var s = String(titre || '');
+function titreAjouteDuContenu(texte, portee) {
+  var s = String(texte || '');
   if (!s) return false;
+
+  /* ⛔⛔⛔ CE QUE LE VENDEUR ÉCRIT NOIR SUR BLANC PRIME SUR TOUT LE RESTE.
+     Ordre de l'user, 12/08/2026 : « le titre ET la description doivent être lus
+     et COMPRIS à 100 %. » Comprendre, c'est d'abord lire ce qui est dit.
+     Un texte qui annonce « machine seule », « outil nu », « sans batterie »,
+     « solo » DÉCLARE qu'il n'y a rien de plus dans la boîte. Aucun « + » plus
+     loin ne peut renverser ça : il énumère alors autre chose. */
+  if (/machine seule|outil nu|produit seul|\bsolo\b|sans batterie ni chargeur|sans accessoire/i.test(s)) {
+    return false;
+  }
+  /* « sans batterie + chargeur » = ni l'un ni l'autre. */
   if (/\bsans\b[^.,;]{0,40}\+/i.test(s)) return false;
-  if (/\(\s*\+\s*[A-Za-zÀ-ÖØ-öø-ÿ0-9]/.test(s)) return true;   // « (+ Jeu de clés 14 pièces) »
-  if (/\s\+\s+[A-Za-zÀ-ÖØ-öø-ÿ]{3,}/.test(s)) return true;     // « + saw blade »
-  if (/\bavec\s+(coffret|mallette|sac|jeu|set|kit|accessoires?|batteries?|chargeur)\b/i.test(s)) return true;
+
+  /* ⛔⛔ UN « + » N'EST PAS UN AJOUT S'IL ÉNUMÈRE UNE CARACTÉRISTIQUE — ET LE
+     BANC PRODUIT PAR PRODUIT ME L'A IMPOSÉ, SUR SES 1 708 FICHES.
+     Premier jet : tout « + » suivi d'un mot valait ajout. Passé sur le
+     catalogue entier, il a écarté TROIS machines explicitement nues, parce que
+     leur descriptif dit « frein moteur + débrayage de sécurité »,
+     « brushless + ADT », « frein électronique + XPT ». Ce sont des
+     CARACTÉRISTIQUES, pas un contenu de boîte. Sur une vraie carte
+     fournisseur, j'aurais jeté leur prix — une couverture perdue pour rien.
+     ⇒ Le « + » ne vaut ajout que s'il introduit un OBJET LIVRABLE. La liste est
+     COURTE et tenue sur ce qu'on a vraiment vu : coffret, mallette, sac,
+     batterie, chargeur, jeu, set, kit, lame, foret, embout, accessoire,
+     support, rail. Un mot hors liste ne fait pas d'un « + » un pack.
+     ⚠️ On ne devine pas : un ajout qu'on ne reconnaît pas laisse la carte
+     passer, et c'est le sens sûr — l'autre sens jette un prix juste. */
+  var OBJET = '(coffret|mallette|malette|sac|sacoche|batterie|batteries|chargeur|chargeurs'
+    + '|jeu|jeux|set|kit|lot|lame|lames|foret|forets|meche|meches|embout|embouts'
+    + '|disque|disques|accessoire|accessoires|support|rail|guide|cle|cles|douille|douilles)';
+  if (new RegExp('\\(\\s*\\+\\s*(?:\\d+\\s+)?' + OBJET + '\\b', 'i').test(s)) return true;
+  if (new RegExp('\\s\\+\\s+(?:\\d+\\s+)?' + OBJET + '\\b', 'i').test(s)) return true;
+
+  /* ⛔ « AVEC <OBJET> » NE VAUT QUE DANS LE TITRE. La description est un texte
+     technique, bavard, souvent recopié d'une autre déclinaison — mesuré sur ses
+     1 708 fiches, l'une décrit une machine NUE avec le descriptif de la version
+     coffret. Un « avec coffret » y est du bruit ; dans le titre, c'est une
+     annonce de vente.
+     ⚠️ Sans `portee`, on suppose un TITRE : l'usage le plus strict par défaut. */
+  if (portee !== 'description'
+      && new RegExp('\\bavec\\s+(?:\\d+\\s+)?' + OBJET + '\\b', 'i').test(s)) {
+    return true;
+  }
   return false;
 }
 
@@ -1451,7 +1490,21 @@ function parseIdealo(rawText, brand) {
        ⚠️ Refus limité au cas dangereux : la référence est NUE selon la
        grammaire de SA marque, et le titre ajoute quelque chose. Une référence
        qui porte déjà son conditionnement (`P1`, `D2`, `RTJ`…) passe. */
-    if (titreAjouteDuContenu(b[iTitre]) && referenceEstNue(sku, brand)) {
+    /* ⛔⛔ LE TITRE **ET** LA DESCRIPTION — ORDRE DE L'USER, 12/08/2026 :
+       « il est possible qu'il y ait la référence nue du style DTW700Z (+ jeu de
+       clés 14 pièces) ! C'est pour ça que le titre ET la description doivent
+       être lus et compris à 100 %. Ce n'est pas négociable. »
+       Il a raison : un fournisseur peut mettre la référence seule en titre et
+       l'ajout dans la description — la garde qui ne lit que le titre passe
+       alors à côté, et le prix du pack repart sur la machine nue.
+       ⚠️ MESURÉ AVANT D'ÉLARGIR, parce qu'une garde trop large coûte plus cher
+       que le défaut : sur ses relevés du 12/08, 432 tuiles portent une
+       référence NUE ; lire la description EN PLUS du titre en écarte
+       **zéro de plus**. Aucun faux positif, donc élargissement gratuit en
+       risque et couverture réelle en cas de titre avare. */
+    var ajoutAnnonce = titreAjouteDuContenu(b[iTitre], 'titre')
+      || titreAjouteDuContenu(desc, 'description');
+    if (ajoutAnnonce && referenceEstNue(sku, brand)) {
       packs.push({ titre: String(b[iTitre] || '').slice(0, 200), prix: prix,
         skuRefuse: sku,
         raison: 'titre qui AJOUTE du contenu sur une reference NUE : le prix du '
@@ -3594,4 +3647,8 @@ module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickou
      fichier. Sans elle, « quelle version tourne ? » est indécidable depuis ma
      session, et je l'ai payé deux tours entiers. */
   EMPREINTE_PARSEUR: EMPREINTE_PARSEUR, empreinteParseur: empreinteParseur,
+  /* ⛔ EXPOSÉES POUR ÊTRE TESTABLES. Une règle d'argent qu'on ne peut pas
+     appeler depuis une porte se vérifie « en la relisant » — c'est-à-dire pas
+     du tout. */
+  titreAjouteDuContenu: titreAjouteDuContenu, referenceEstNue: referenceEstNue,
   nomenclature: nomen };

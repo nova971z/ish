@@ -740,6 +740,64 @@ montre — trois cartes, 113,48 €, 157,12 € et 173,17 €, pour la même sci
 
 ---
 
+### M-44 — Le banc PRODUIT PAR PRODUIT, sur le catalogue entier, contre le chemin réel
+
+Passer chaque fiche du site au parseur — titre **et** description — comme si le
+fournisseur en faisait une carte, puis comparer ce qu'il en comprend à ce que la
+fiche dit. Pas un échantillon : **toutes**.
+
+*Ordre de l'user, 12/08/2026* : « s'il y a 5 000 produits, tu revérifies les
+5 000, c'est non négociable […] tu lis les descriptions, les titres, tu regardes
+le prix et tu vérifies comment le parseur réagit par rapport à ça. »
+
+**Ce que le premier passage a sorti, sur 1 708 fiches, en une exécution :**
+· 95,7 % de références retrouvées, **19 fiches dont le TITRE porte une autre
+  référence que le SKU** (leur prix partirait ailleurs), 53 sans référence
+  lisible, 24 désaccords référence ↔ texte ;
+· et surtout **trois faux positifs d'une règle que je venais d'écrire** — voir
+  M-45. Aucune relecture ne les aurait trouvés.
+
+⇒ Le banc passe par `parseIdealo`, le chemin qui **écrit les prix**, jamais par
+la grammaire seule : une règle vérifiée hors de son chemin d'exécution est une
+règle vérifiée nulle part (M-32, M-39, une troisième fois).
+
+*Porte* : `scripts/banc-produits.js`, lecture seule, rejouable, `--csv`.
+
+---
+
+### M-45 — Comprendre un texte, ce n'est pas y chercher un signe
+
+Une règle qui cherche un caractère attrape tout ce qui le contient. Comprendre,
+c'est distinguer **ce que le signe introduit**.
+
+*Panne payée le 12/08/2026, attrapée par le banc ci-dessus* : ma règle « un
+titre à “+” annonce un pack » a écarté **trois machines explicitement nues**,
+parce que leurs descriptifs disent « frein moteur **+ débrayage de sécurité** »,
+« brushless **+ ADT** », « frein électronique **+ XPT** ». Ce sont des
+**caractéristiques**, pas un contenu de boîte. Sur une vraie carte, leur prix
+aurait été jeté.
+
+⇒ Trois niveaux, dans cet ordre :
+1. **ce que le vendeur écrit noir sur blanc prime** — « machine seule »,
+   « outil nu », « sans batterie ni chargeur » ferment la question, et aucun
+   « + » plus loin ne la rouvre ;
+2. un « + » ne vaut ajout que devant un **objet livrable** (coffret, batterie,
+   chargeur, jeu, lame, embout…), liste courte et tenue sur du mesuré ;
+3. « avec &lt;objet&gt; » ne vaut que dans le **titre** — une description est un
+   texte technique, souvent recopié d'une autre déclinaison : mesuré, l'une
+   décrit une machine nue avec le descriptif de la version coffret.
+
+⚠️ **Et le témoin de la règle 1 était un faux vert** : « (machine seule) +
+débrayage » — mais « débrayage » n'étant pas un objet livrable, la fonction
+répondait `false` par la règle 2. Le sabotage passait. Le témoin juste porte un
+objet livrable (« + coffret ») : seule la déclaration peut alors l'empêcher.
+
+*Porte* : six assertions dans `check-price-watch`, trois sabotages rouges.
+Mesure de non-régression : sur ses 432 tuiles à référence nue, **une seule**
+est écartée — un vrai pack à 597,22 €.
+
+---
+
 ## Où ces méthodes sont déjà branchées
 
 | Méthode | Le code qui l'applique |
@@ -768,3 +826,5 @@ montre — trois cartes, 113,48 €, 157,12 € et 173,17 €, pour la même sci
 | M-41 | `api/_lib/price-parse.js` (`titreAjouteDuContenu`, `referenceEstNue`) |
 | M-42 | `api/admin.js` (`titreCarte`), `scripts/check-price-watch.js` |
 | M-43 | `scripts/tableau-produits.js` |
+| M-44 | `scripts/banc-produits.js` |
+| M-45 | `api/_lib/price-parse.js` (`titreAjouteDuContenu`), `scripts/check-price-watch.js` |
