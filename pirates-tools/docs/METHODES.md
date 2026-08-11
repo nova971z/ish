@@ -444,6 +444,58 @@ dont une sur le **câblage** — les trois autres resteraient vertes si
 
 ---
 
+### M-32 — Une table écrite, exportée et testée peut n'être BRANCHÉE nulle part
+
+Écrire la nomenclature d'une marque ne la met pas en service. Le contrôle qui
+vérifie qu'une fonction **existe** ne vérifie pas qu'on l'**appelle** : les deux
+choses n'ont rien à voir, et seule la seconde protège quoi que ce soit.
+
+*Panne payée, mesurée le 11/08/2026* : `lireReferenceMilwaukee` était écrite,
+exportée, et couverte par **dix assertions vertes** — position du numéro dans le
+titre, nom de gamme refusé, mot de liaison refusé, suffixe détaché rattrapé,
+compatibilité écartée. Aucune ligne de production ne l'appelait. La marque était
+**intégralement invisible** au traqueur, et rien ne le disait.
+Sur son relevé à sec (67 pages, 4 019 tuiles) : **1 442 tuiles dont le titre
+porte un numéro d'article parfaitement lisible** ressortaient « sans référence ».
+
+⛔ **La cause dans le code n'était pas une omission, c'était une règle d'une
+autre marque appliquée à tout le monde** : *« une référence commence par des
+lettres, sans exception »* — vraie, mesurée sur les 1 105 fiches d'une marque, et
+posée dans une fonction PARTAGÉE. Or les numéros d'article de cette marque-ci
+sont **entièrement numériques**. Une règle de marque qui déborde ne fabrique pas
+seulement de faux rapprochements : elle **efface une marque entière**.
+
+⚠️ Et `check-separation-marques` ne pouvait pas la voir : elle cherche les
+fonctions dont le NOM porte une marque, et cette règle-là vivait en ligne, sans
+nom, dans une fonction neutre. C'est l'angle mort que cette porte déclare.
+
+⇒ **Un contrôle de nomenclature teste le CHEMIN RÉEL du parseur**, pas la table
+isolée — et il vérifie aussi que la règle **ne déborde pas** sur une autre
+marque. Gain mesuré sur son relevé : **+1 080 tuiles lues, +993 références
+distinctes** (44,5 % → 71,8 % des tuiles lues).
+
+*Porte* : `scripts/check-price-watch.js` — quatre assertions sur le chemin réel
+(branchement, non-débordement, nombre quelconque refusé), prouvées faillibles.
+
+---
+
+### M-33 — Un témoin qui peut réussir pour une autre raison ne témoigne de rien
+
+Avant de conclure qu'une porte mord, vérifier que l'assertion échouerait
+**par la cause visée** et pas par une autre.
+
+*Panne payée le 11/08/2026, dans la même heure* : pour prouver qu'un nombre
+quelconque ne devient pas une référence, j'avais pris le titre
+« … 9000 tr/min 1200 W ». Il porte **deux** nombres — donc deux candidats, donc
+refus par **ambiguïté**. L'assertion était verte sans que la table ait rien
+tranché : le sabotage « accepte n'importe quel nombre » l'a laissée **verte**.
+Un seul nombre dans le titre, et le sabotage devient rouge.
+
+⇒ Un témoin s'écrit avec **une seule** cause possible de succès. Et c'est le
+sabotage qui le dit — pas la relecture.
+
+---
+
 ## Où ces méthodes sont déjà branchées
 
 | Méthode | Le code qui l'applique |
@@ -460,3 +512,5 @@ dont une sur le **câblage** — les trois autres resteraient vertes si
 | M-28, M-29 | `scripts/check-separation-marques.js`, `api/_lib/price-parse.js` |
 | M-30 | `scripts/check-alias-nomenclature.js`, `products.json` (`srcAltSkus`) |
 | M-31 | `api/_lib/diag-rafale.js`, `scripts/check-price-watch.js`, `api/_lib/traqueur-plans.js` |
+| M-32 | `api/_lib/price-parse.js` (`candidatsAvecPosition`), `api/_lib/nomenclature.js` (`lireReferenceMilwaukee`) |
+| M-33 | `scripts/check-price-watch.js`, `outils/sabotage.mjs` |

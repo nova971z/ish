@@ -441,11 +441,38 @@ var LISTE_MODELES = /^[A-Z]*\d+(\/\d{2,})+$/;
    séparent le « pour » de la machine visée, et l'ancienne borne collée à la
    fin ne voyait rien. La poulie devenait alors une seconde référence propre,
    donc deux candidats, donc refus. On accepte jusqu'à quatre mots ORDINAIRES
-   entre les deux — sans chiffre, donc jamais une autre référence. */
+   entre les deux — sans chiffre, donc jamais une autre référence.
+
+   ⛔⛔ ET UN JETON PORTANT UN CHIFFRE ROMPAIT LA CHAÎNE — DÉFAUT D'ARGENT
+   MESURÉ LE 11/08/2026, sur deux cas indépendants et sur DEUX marques :
+     · « Plateau de ponçage 125 mm pour M18 FROS125 » → le plateau ressortait
+       avec la référence de la MEULEUSE, et `pourMachines` VIDE ;
+     · « Chargeur pour 18V DCB115 » → le chargeur prenait la référence d'une
+       BATTERIE.
+   Entre le « pour » et la machine visée, le marchand écrit très souvent une
+   plateforme (`M18`) ou une tension (`18V`). Ces jetons portent un chiffre :
+   la chaîne de mots ordinaires s'arrêtait là, le `$` n'était jamais atteint,
+   et la compatibilité n'était pas vue. L'accessoire devenait alors une
+   référence PROPRE — c'est-à-dire que son prix, dix à vingt fois plus bas que
+   celui de la machine, allait s'écrire sur la fiche de la machine. C'est
+   exactement la panne déjà payée (« Butée parallèle, Makita SP6000 » à
+   14,49 € rapprochée de la scie), sous une autre forme.
+
+   ⚠️ ON N'OUVRE PAS À TOUT CE QUI PORTE UN CHIFFRE — l'intention d'origine
+   reste entière : le trou ne doit JAMAIS pouvoir avaler une autre référence.
+   On n'ajoute donc que deux formes dont on sait qu'elles n'en sont jamais
+   une : une quantité avec son unité (`18V`, `125`, `300mm`) et une
+   désignation de plateforme (`M12`/`M14`/`M18`/`M28`). Une vraie référence
+   mêle lettres ET chiffres dans un autre ordre, et continue d'arrêter la
+   chaîne — « pour DCD796 DCB184 » reste traité par la propagation
+   d'énumération, qui le rendait déjà juste.
+   ⚠️ Portes lues — J4 : on ne fabrique aucun prix ici, on refuse d'attribuer
+   à une machine le prix d'un accessoire ; J3 : des titres publics ; J5 :
+   aucune fiscalité. */
 var MOT_COMPAT = new RegExp('\\b(pour|f[üu]r|for|compatible\\s+avec|compatible'
   + '|adapt[ée]e?s?\\s+(?:[àa]|pour)|passend\\s+f[üu]r|convient\\s+(?:[àa]|pour)'
   + '|fits|de\\s+rechange\\s+pour|ersatz\\s+f[üu]r)\\s+'
-  + '(?:[A-Za-zÀ-ÖØ-öø-ÿ\'’-]+\\s+){0,4}$', 'i');
+  + '(?:(?:[A-Za-zÀ-ÖØ-öø-ÿ\'’-]+|\\d+[A-Za-z]{0,3}|M(?:12|14|18|28))\\s+){0,4}$', 'i');
 /* Ce qui SÉPARE deux références de la même énumération de compatibilité :
    rien d'autre que de la ponctuation faible et un « et ». Sert à propager la
    marque de compatibilité à toute la liste — « pour DCD785, DCD985, DCF885 »
@@ -519,6 +546,43 @@ function candidatsAvecPosition(titre, brand) {
        suivie d'un numéro long. */
     var nbLettres = (c.match(/[A-Z]/g) || []).length;
     var nbChiffres = (c.match(/\d/g) || []).length;
+    /* ⛔⛔⛔ CHAQUE MARQUE A SA TABLE — ET LA SIENNE NE SERVAIT À RIEN.
+       Ordre de l'user, 10/08/2026 : « une fois qu'il a détecté la marque, il
+       utilise la BONNE table et les BONNES consignes ». J'avais écrit la
+       nomenclature de cette marque, je l'avais exportée, un contrôle vérifiait
+       même qu'elle EXISTE — et **aucune ligne de production ne l'appelait**.
+       Elle ne pouvait donc rien lire. Un contrôle qui atteste l'existence d'une
+       fonction n'atteste pas son BRANCHEMENT : c'est la même panne que M-31,
+       en pire, parce qu'ici la pièce n'était reliée à rien du tout.
+
+       ⛔ CE QUE ÇA COÛTAIT, MESURÉ SUR SON RELEVÉ À SEC DU 10/08/2026 (67
+       pages, 4 019 tuiles) : **1 442 tuiles dont le titre porte pourtant un
+       numéro d'article parfaitement lisible** ressortaient « sans référence ».
+       La cause est trois lignes plus bas : « une référence commence par des
+       LETTRES, sans exception » — une règle vraie, mesurée sur les 1 105 fiches
+       d'une AUTRE marque, et appliquée à tout le monde. Or les numéros
+       d'article de celle-ci sont **entièrement numériques**. La règle d'une
+       marque appliquée à une autre ne fabrique pas seulement de faux
+       rapprochements : elle rend une marque entière INVISIBLE.
+
+       ⚠️ ET ON NE LÈVE PAS LA GARDE, ON LA CONDITIONNE — deux fois. La marque
+       du balayage doit être celle-ci, ET c'est SA table qui tranche : le
+       candidat n'est retenu que si elle le reconnaît EN ENTIER. « 9000 »
+       (tr/min), « 125 » (mm) ou « 18 » (V) ne sont reconnus par personne et
+       restent écartés. Sans cette double condition, tout nombre d'un titre
+       deviendrait une référence, et un prix s'écrirait sur une vitesse.
+       ⚠️ Portes lues — J4 : rien ici ne fabrique un prix ni une réduction, on
+       lit une identité d'article ; J3 : des titres publics ; J5 : aucune
+       fiscalité. */
+    if (marqueUp === 'MILWAUKEE' && !nbLettres) {
+      var luMw = nomen.lireReferenceMilwaukee(c);
+      if (luMw && luMw.ref === c) {
+        if (!out.some(function (x) { return x.ref === c; })) {
+          out.push({ ref: c, ecrit: brut, index: m.index, fin: m.index + brut.length });
+        }
+        continue;
+      }
+    }
     /* ⛔⛔ UNE RÉFÉRENCE PEUT N'AVOIR AUCUN CHIFFRE. Mesuré le 08/08/2026 sur
        une capture de l'user : « Aspirateur Eau & Poussières Dxvp-qt - 960w,
        34l, Silencieux » — DXVP-QT est la référence constructeur, et le

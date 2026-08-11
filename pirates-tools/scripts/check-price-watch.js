@@ -2070,7 +2070,82 @@ module.exports = async function () {
            n\'importe quoi. */
         ok(lireMw('Zzbac latéral grand format pour coffret Zzrangement') === null,
           '⚠️ PRÉALABLE : un titre sans référence rend `null`, il n\'en invente pas');
+
+        /* ⛔⛔⛔ ET LA GRAMMAIRE EST-ELLE SEULEMENT BRANCHÉE ? Tout ce qui
+           précède appelle la table DIRECTEMENT. Le 10/08/2026, elle passait ces
+           contrôles au complet alors qu'AUCUNE ligne de production ne l'appelait
+           — la marque était donc entièrement invisible au traqueur, et rien ne
+           le disait. Mesuré sur son relevé à sec du jour : 1 442 tuiles dont le
+           titre portait un numéro d'article parfaitement lisible ressortaient
+           « sans référence ».
+           ⛔ On teste donc le CHEMIN RÉEL du parseur, pas la table isolée.
+           C'est la leçon M-31 poussée d'un cran : un contrôle qui atteste
+           l'EXISTENCE d'une fonction n'atteste pas son BRANCHEMENT. */
+        var parChemin = pp.lireReferenceDuTitre('Zzembout quelconque 40x9mm (4932000003)', 'MILWAUKEE');
+        ok(parChemin && parChemin.ref === '4932000003',
+          '⛔⛔ la grammaire de cette marque est BRANCHÉE dans le chemin de lecture du '
+          + 'parseur : un numéro d\'article entièrement numérique est LU quand le '
+          + 'balayage porte cette marque (obtenu ' + JSON.stringify(parChemin && parChemin.ref) + ')');
+        /* ⛔ ET ELLE NE DÉBORDE PAS : sur une AUTRE marque, le même titre ne
+           donne rien. Une règle de marque qui s'applique partout est le défaut
+           que `check-separation-marques` existe pour empêcher — ici c'est le
+           comportement, pas le nom, qui le prouve. */
+        var horsMarque = pp.lireReferenceDuTitre('Zzembout quelconque 40x9mm (4932000003)', 'ZZMARQUEINCONNUE');
+        ok(!(horsMarque && horsMarque.ref === '4932000003'),
+          '⛔ la table de cette marque NE s\'applique PAS aux autres : un nombre nu ne '
+          + 'devient une référence que sous la marque dont c\'est la nomenclature '
+          + '(obtenu ' + JSON.stringify(horsMarque && horsMarque.ref) + ')');
+        /* ⛔ ET UN NOMBRE QUELCONQUE N'EST PAS UN NUMÉRO D'ARTICLE, même sous la
+           bonne marque : c'est SA table qui tranche, pas « ça commence par un
+           chiffre ». Sans cette borne, une vitesse ou une cote deviendrait une
+           référence, et un prix s'écrirait dessus. */
+        /* ⚠️ UN SEUL NOMBRE PAR TITRE, ET C'EST DÉLIBÉRÉ. Premier jet du
+           11/08/2026 : « 9000 tr/min 1200 W » — deux nombres, donc DEUX
+           candidats, donc refus par ambiguïté. L'assertion passait sans que la
+           table ait rien tranché : le sabotage « accepte tout nombre » l'a
+           laissée VERTE. Un témoin qui peut réussir pour une autre raison ne
+           témoigne de rien (règle mère des harnais). */
+        ['Zzperceuse quelconque 9000 tr par minute',
+          'Zzscie quelconque 1234567890 en boite',
+          'Zzoutil quelconque 12345678 en boite'].forEach(function (titre) {
+          var r = pp.lireReferenceDuTitre(titre, 'MILWAUKEE') || {};
+          ok(!/^\d+$/.test(String(r.ref || '')),
+            '⛔⛔ ARGENT : un nombre que la table de la marque NE reconnaît PAS reste '
+            + 'écarté — sans quoi une vitesse ou un nombre quelconque deviendrait une '
+            + 'référence, et un prix s\'écrirait dessus (titre « ' + titre + ' », obtenu '
+            + JSON.stringify(r.ref) + ')');
+        });
       }
+
+      /* ⛔⛔⛔ ARGENT — UN ACCESSOIRE NE VOLE JAMAIS LA RÉFÉRENCE DE LA MACHINE.
+         Défaut mesuré le 11/08/2026 sur deux cas indépendants : entre le mot de
+         compatibilité et la machine visée, le marchand écrit très souvent une
+         plateforme ou une tension. Ces jetons portent un chiffre, la chaîne de
+         mots ordinaires s'arrêtait là, et la compatibilité n'était pas vue :
+         l'accessoire ressortait avec la référence de la machine et une liste
+         `pourMachines` VIDE. Son prix — dix à vingt fois plus bas — serait allé
+         s'écrire sur la fiche de la machine.
+         ⚠️ Sujets choisis à l'exécution sur une FORME, jamais sur une donnée du
+         catalogue : les références ci-dessous sont fabriquées. */
+      [['Zzplateau de ponçage 125 mm pour M18 ZZFR125', 'MILWAUKEE', 'ZZFR125'],
+        ['Zzchargeur pour 18V ZZB115', 'DEWALT', 'ZZB115'],
+        ['Zzpoulie de rechange pour tondeuse Zzmarque ZZW220X2', 'DEWALT', 'ZZW220X2']
+      ].forEach(function (cas) {
+        var r = pp.lireReferenceDuTitre(cas[0], cas[1]) || {};
+        ok(r.ref !== cas[2] && (r.pourMachines || []).indexOf(cas[2]) !== -1,
+          '⛔⛔ ARGENT : la machine citée derrière un mot de compatibilité reste une '
+          + 'COMPATIBILITÉ, même séparée par une plateforme ou une tension — sinon le '
+          + 'prix de l\'accessoire s\'écrit sur la machine (obtenu ref='
+          + JSON.stringify(r.ref) + ' compat=' + JSON.stringify(r.pourMachines) + ')');
+      });
+      /* ⛔ ET LE TROU NE PEUT PAS AVALER UNE AUTRE RÉFÉRENCE — c'était
+         l'intention d'origine de cette borne, et elle doit tenir. Deux machines
+         citées derrière « pour » restent TOUTES DEUX des compatibilités. */
+      var deuxMachines = pp.lireReferenceDuTitre('Zzbatterie pour ZZD796 ZZB184', 'DEWALT') || {};
+      ok(!deuxMachines.ref && (deuxMachines.pourMachines || []).length === 2,
+        '⛔ deux machines derrière « pour » restent deux COMPATIBILITÉS : l\'ouverture '
+        + 'de la borne n\'avale pas une référence (obtenu ref=' + JSON.stringify(deuxMachines.ref)
+        + ' compat=' + JSON.stringify(deuxMachines.pourMachines) + ')');
 
       /* ══ LA FORME DE LA RÉFÉRENCE — CE QUI RÉPARE LE COMPTEUR ═══════════════
          ⛔ Le défaut n'était pas dans le parseur, il était dans la MESURE :
