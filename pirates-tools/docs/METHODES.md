@@ -538,6 +538,53 @@ rouge.
 
 ---
 
+### M-36 — Le prix JUSTE À LA FIN ne dit rien du prix SERVI PENDANT
+
+Un balayage n'est pas atomique : entre sa première et sa dernière page, le site
+sert des prix. Vérifier seulement l'état final, c'est ne rien vérifier de ce que
+le client a vu.
+
+*Panne payée, mesurée le 11/08/2026 sur son relevé réel* : sur une marque, en un
+seul balayage, **onze fiches sur quinze** ont été affichées plus cher qu'elles ne
+devaient pendant **13 à 44 pages** — jusqu'à **+312,59 €** sur l'une, **+203,64 €**
+sur la lampe qu'il avait lui-même repérée. Surcoût cumulé pendant le balayage :
+**1 465,85 €**. À la fin, chaque prix était juste.
+
+⛔ **La cause n'est pas un bogue, c'est un ordre d'arrivée.** Le minimum de rafale
+ne retient que ce qu'il a DÉJÀ vu : la première page qui touche une fiche écrit au
+coût de cette page. Sur une grille non triée par prix, la même référence
+réapparaît trente pages plus loin, deux fois moins chère.
+
+⚠️ **Et le défaut était invisible sur l'autre marque** (0 € mesuré) : sa grille
+est triée par prix, les tuiles d'un même article se suivent. **Une garde qui
+dépend du tri d'un fournisseur n'est pas une garde** — elle marche par chance.
+
+⇒ Pendant un balayage : une **baisse** s'écrit tout de suite (le minimum ne peut
+que descendre, elle est déjà définitive) ; une **hausse** attend la fin de la
+rafale. Elle n'est pas supprimée — D-015 exige qu'une vraie hausse fournisseur
+passe — elle est **retenue, comptée et rendue**.
+
+*Porte* : `scripts/check-price-watch.js`, cinq assertions dont **le témoin
+inverse** (hors balayage, une hausse s'écrit immédiatement) sans lequel « ne
+jamais écrire de hausse » resterait vert. Cinq sabotages rouges.
+
+---
+
+### M-37 — Une correction qui fait rougir une porte a révélé un défaut DE LA CORRECTION
+
+Quand une porte existante devient rouge sur un correctif, la question n'est pas
+« comment la calmer » mais « qu'a-t-elle vu que je n'ai pas vu ».
+
+*Cas du 11/08/2026, dans la minute* : en retenant les hausses pendant un
+balayage, j'ai fait tomber une assertion de 2026 — « une HAUSSE est comptée et
+rendue : ne montrer que les baisses ferait d'un rapport un argumentaire ».
+Elle avait raison : mon correctif venait de faire disparaître les hausses du
+bilan. La nuance manquante tient en un mot — `flagged` = **refusé** (n'entre pas
+au bilan), hausse différée = **en attente** (y entre). Le rapport est resté
+honnête grâce à une assertion écrite avant le défaut qu'elle a attrapé.
+
+---
+
 ## Où ces méthodes sont déjà branchées
 
 | Méthode | Le code qui l'applique |
@@ -558,3 +605,5 @@ rouge.
 | M-33 | `scripts/check-price-watch.js`, `outils/sabotage.mjs` |
 | M-34 | `audit/prix-multi-ecritures.js`, `scripts/check-audit-multi-ecritures.js` |
 | M-35 | `scripts/check-separation-marques.js`, `audit/prix-multi-ecritures.js` (`adapterDewalt`) |
+| M-36 | `api/admin.js` (`haussesDifferees`), `scripts/check-price-watch.js` |
+| M-37 | `scripts/check-price-watch.js` (bilan des baisses) |

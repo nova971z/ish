@@ -3990,6 +3990,78 @@ module.exports = async function () {
                   && bilH.produitsCompares) + ' comparés)');
               ok(bilH && (bilH.plusFortesBaisses || []).every(function (x) { return x.euros > 0; }),
                 '⛔ …et elle n\'entre PAS dans la liste des plus fortes BAISSES');
+
+              /* ⛔⛔⛔ ARGENT — UNE HAUSSE NE S'ÉCRIT PAS AU MILIEU D'UN BALAYAGE.
+                 MESURÉ SUR SON RELEVÉ RÉEL DU 11/08/2026 : sur une marque, en un
+                 seul balayage, ONZE fiches sur quinze ont été affichées PLUS
+                 CHER qu'elles ne devaient pendant 13 à 44 pages, avant de
+                 redescendre — jusqu'à +312,59 € sur l'une, +203,64 € sur une
+                 autre. Surcoût cumulé pendant le balayage : 1 465,85 €.
+                 La cause n'est pas un bogue mais un ORDRE D'ARRIVÉE : le minimum
+                 de rafale ne retient que ce qu'il a DÉJÀ vu, donc la première
+                 page qui touche une fiche écrit au coût de CETTE page. Sur une
+                 grille non triée par prix, la même référence réapparaît trente
+                 pages plus loin, deux fois moins chère.
+                 ⚠️ Le défaut était INVISIBLE sur l'autre marque (0 € mesuré) :
+                 sa grille est triée par prix. Une garde qui dépend du tri d'un
+                 fournisseur n'est pas une garde.
+                 ⇒ En balayage NON TERMINÉ, une hausse est RETENUE : absente
+                 d'`applied`, présente dans `haussesDifferees`, et TOUJOURS
+                 comptée au bilan (une hausse différée est observée, pas
+                 refusée — la taire ferait du rapport une plaidoirie). */
+              var recH = (rBh.out && rBh.out.applied || [])
+                .filter(function (x) { return x.newPrice > x.oldPrice; });
+              ok(recH.length === 0,
+                '⛔⛔ ARGENT : en balayage NON TERMINÉ, aucune HAUSSE n\'est écrite — '
+                + 'une tuile moins chère du même article peut encore arriver (obtenu '
+                + recH.length + ' hausse(s) écrite(s))');
+              var diff = (rBh.out && rBh.out.haussesDifferees) || [];
+              ok(diff.length === 1 && diff[0].newPrice > diff[0].oldPrice
+                && /differee/i.test(String(diff[0].reason || '')),
+                '⛔ …et elle est RENDUE, avec son motif : une écriture retardée qu\'on ne '
+                + 'verrait pas serait une écriture perdue (obtenu ' + JSON.stringify(
+                  diff.map(function (x) { return x.sku; })) + ')');
+              ok((rBh.out && rBh.out.counts && rBh.out.counts.haussesDifferees) === 1,
+                '⛔ …et elle est COMPTÉE : muette, elle passerait pour un prix inchangé');
+              /* ⛔ ET LA BAISSE, ELLE, PASSE TOUT DE SUITE — sinon la garde
+                 gèlerait tout le balayage au lieu de retenir les seules hausses.
+                 Le minimum de rafale ne peut que descendre : une baisse est déjà
+                 définitive. Sans ce témoin, « ne rien écrire du tout » passerait
+                 l\'assertion précédente. */
+              var recB = (rB1.out && rB1.out.applied || [])
+                .filter(function (x) { return x.newPrice < x.oldPrice; });
+              ok(recB.length >= 1,
+                '⛔ une BAISSE s\'écrit immédiatement pendant le balayage : le minimum de '
+                + 'rafale ne peut que descendre (obtenu ' + recB.length + ')');
+
+              /* ⛔⛔ ET LE TÉMOIN INVERSE, SANS LEQUEL LE GEL SERAIT PERMANENT.
+                 Les assertions ci-dessus sont toutes satisfaites par un code
+                 qui n'écrirait PLUS JAMAIS une hausse. Or D-015 est formel :
+                 le traqueur lit ce que la page AFFICHE, et une vraie hausse
+                 fournisseur doit passer. Hors balayage, une page isolée n'a pas
+                 de « suite » à attendre : la hausse s'écrit tout de suite.
+                 ⚠️ Sans ce témoin, le sabotage « ne jamais écrire de hausse »
+                 laisserait le harnais VERT — c'est M-33, un témoin qui peut
+                 réussir pour une autre raison ne témoigne de rien.
+                 ⚠️ PAS DE `scanReset()` ICI — premier jet du 11/08/2026 : il
+                 vidait le cumul de rafale que les assertions SUIVANTES
+                 relisent, et le harnais mourait sur « Cannot read properties of
+                 undefined ». Un témoin ne doit pas détruire l'état que le reste
+                 du harnais mesure. Cet appel-ci ne porte pas `scan`, il n'entre
+                 donc pas dans le cumul. */
+              var rHors = fauxRes();
+              await admFn({ method: 'POST',
+                query: { type: 'price-watch', brand: 'DEWALT', source: 'idealo', dryRun: '1' },
+                body: { text: pageIdealo(cible3.sku, '450,00') } }, rHors, fauxAdmin, dbB);
+              var hausseHors = (rHors.out && rHors.out.applied || [])
+                .filter(function (x) { return x.newPrice > x.oldPrice; });
+              ok(hausseHors.length === 1
+                && !((rHors.out && rHors.out.haussesDifferees) || []).length,
+                '⛔⛔ HORS balayage, une HAUSSE s\'écrit immédiatement : une page isolée '
+                + 'n\'a pas de suite à attendre, et une vraie hausse fournisseur doit '
+                + 'passer (D-015). Sans ce témoin, « ne jamais écrire de hausse » serait '
+                + 'vert (obtenu ' + hausseHors.length + ' écrite(s), '
+                + (((rHors.out && rHors.out.haussesDifferees) || []).length) + ' différée(s))');
             }
             /* ⛔⛔ UN PRIX ÉCARTÉ N'EST PAS UNE BAISSE. Une source hors des
                bornes absolues part en `flagged` : le traqueur REFUSE de

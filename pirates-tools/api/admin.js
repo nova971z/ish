@@ -3953,6 +3953,12 @@ async function handlePriceWatch(req, res, admin, db) {
     }
 
     const applied = [], flagged = [], unchanged = [], unknown = [], lockedW = [];
+    /* Les hausses retenues jusqu'à la fin de la rafale — voir le bloc « UNE
+       HAUSSE NE S'ÉCRIT PAS AU MILIEU D'UN BALAYAGE ». Elles sont RENDUES dans
+       la réponse : une écriture retardée qu'on ne verrait pas serait une
+       écriture perdue. */
+    const haussesDifferees = [];
+    const pagesDuPlanCourant = Number((plans.plan(brand, sourceSlug) || {}).pages) || 0;
     const now = admin.firestore.FieldValue.serverTimestamp();
     /* ⚠️ DEUX HORLOGES, DEUX USAGES — appris en production (E-228) :
        `now` est un SENTINEL serverTimestamp, bon pour les champs d'affichage
@@ -4384,6 +4390,52 @@ async function handlePriceWatch(req, res, admin, db) {
         // et dans `price_watch_log` : on ne perd pas la trace, on cesse de bloquer.
         if (reason) { rec.reason = reason; flagged.push(rec); continue; }
 
+        /* ⛔⛔⛔ ARGENT — UNE HAUSSE NE S'ÉCRIT PAS AU MILIEU D'UN BALAYAGE.
+           MESURÉ SUR SON RELEVÉ RÉEL DU 11/08/2026, une marque, un seul
+           balayage : **onze fiches sur quinze** ont été affichées PLUS CHER
+           qu'elles ne devaient, pendant 13 à 44 pages, avant de redescendre —
+           jusqu'à **+312,59 €** sur l'une, **+203,64 €** sur la lampe qu'il
+           avait lui-même repérée. Surcoût cumulé pendant le balayage :
+           1 465,85 €. À la fin le prix était juste ; entre-temps, non.
+
+           ⛔ LA CAUSE N'EST PAS UN BOGUE, C'EST UN ORDRE D'ARRIVÉE. Le minimum
+           de rafale (`pwRafaleCoutMin`) ne retient que ce qu'il a DÉJÀ vu : la
+           première page qui touche une fiche écrit au coût de CETTE page.
+           Quand la grille n'est pas triée par prix — c'est le cas d'une des
+           trois catégories — la même référence réapparaît trente pages plus
+           loin, deux fois moins chère.
+           ⚠️ L'autre marque n'a rien montré (0 €) : sa grille EST triée par
+           prix, les tuiles d'un même article se suivent. Le défaut était donc
+           invisible sur elle — une garde qui dépend du tri d'un fournisseur
+           n'est pas une garde.
+
+           ⛔ CE QU'ON FAIT, ET POURQUOI PAS AUTRE CHOSE :
+           · une BAISSE s'écrit tout de suite — le minimum de rafale ne peut que
+             descendre, une baisse est donc déjà définitive ;
+           · une HAUSSE attend la FIN de la rafale, puis s'écrit. On ne la
+             supprime pas : D-015 dit que le traqueur lit ce que la page
+             AFFICHE, et une vraie hausse fournisseur doit passer.
+           ⚠️ Si le balayage s'interrompt, les hausses différées ne s'écrivent
+           pas : le prix reste le plus BAS connu, et la hausse repart au
+           balayage suivant. C'est le sens sûr, et c'est dit — jamais l'inverse.
+           ⚠️ Hors balayage (`&scan=1` absent), rien ne change : une page isolée
+           n'a pas de « suite » à attendre.
+           ⚠️ Portes lues — J4 : aucun prix de référence n'est fabriqué et aucune
+           réduction n'est annoncée ici ; on retarde une hausse, on n'en invente
+           pas, et le prix servi reste exact et complet. J3 : des références
+           d'outils, aucune donnée personnelle. J5 : ni TVA ni octroi de mer,
+           le territoire vient du code postal. */
+        var rafaleFinie = !scanMode
+          || !(pagesDuPlanCourant > 0)
+          || ((pwCouv && pwCouv.brand === brand ? pwCouv.pages : 0) + 1) >= pagesDuPlanCourant;
+        if (scanMode && cur != null && newPrice > cur && !rafaleFinie) {
+          rec.reason = 'hausse differee : le balayage n est pas fini, une tuile moins '
+            + 'chere du meme article peut encore arriver (mesure le 11/08/2026 : 11 fiches '
+            + 'sur 15 affichees trop cher pendant 13 a 44 pages, jusqu a +312,59 EUR)';
+          haussesDifferees.push(rec);
+          continue;
+        }
+
         if (!dryRun) {
           /* ── ÉTIQUETTE « EN PROMO » ─────────────────────────────────────
              Demandée par l'user le 01/08/2026 : « lorsque le prix baisse, il
@@ -4548,10 +4600,19 @@ async function handlePriceWatch(req, res, admin, db) {
           fichesDetail: products.filter((p) => String(p.brand || '').toUpperCase()
             === String(brand).toUpperCase() && p.sku)
             .map((p) => ({ sku: p.sku, nom: String(p.title || p.name || '').slice(0, 90) })),
-          /* ⛔ SEULEMENT `applied` : ce que le traqueur a VALIDÉ. `unchanged`
-             ne bouge pas, `flagged` a été REFUSÉ — les faire entrer dans une
-             moyenne de baisse la ferait mentir dans le sens qui plaît. */
-          baisses: applied }),
+          /* ⛔ `applied` : ce que le traqueur a VALIDÉ. `unchanged` ne bouge
+             pas, `flagged` a été REFUSÉ — les faire entrer dans une moyenne de
+             baisse la ferait mentir dans le sens qui plaît.
+             ⛔⛔ ET LES HAUSSES DIFFÉRÉES ENTRENT, ELLES. Attrapé PAR LA PORTE
+             le 11/08/2026, dans la minute où j'ai posé le report des hausses :
+             `enHausse` est tombé à 0 et le bilan ne montrait plus QUE des
+             baisses — exactement ce que l'assertion existante interdit
+             (« ne montrer que les baisses ferait d'un rapport un
+             argumentaire »). Une hausse différée n'est pas refusée : elle est
+             OBSERVÉE et elle attend. La taire ferait du rapport une plaidoirie.
+             ⚠️ La nuance tient en un mot : `flagged` = REFUSÉ (n'entre pas),
+             `haussesDifferees` = EN ATTENTE (entre). */
+          baisses: applied.concat(haussesDifferees) }),
       /* La même ligne locale qu'à sec : trois valeurs, aucune mémoire. C'est
          elle qui se totalise sur le fichier des 67 réponses, quand le cumul
          d'instance, lui, peut avoir été tronqué par une instance neuve. */
@@ -4565,6 +4626,10 @@ async function handlePriceWatch(req, res, admin, db) {
       appariementNom: souplePourquoi,
       counts: {
         parsed: parsed.length, applied: applied.length, flagged: flagged.length,
+        /* ⛔ CE QUI N'A PAS ÉTÉ ÉCRIT SE COMPTE. Une hausse retenue jusqu'à la
+           fin de la rafale est une écriture QUI N'A PAS EU LIEU : muette, elle
+           passerait pour un prix inchangé. */
+        haussesDifferees: haussesDifferees.length,
         unchanged: unchanged.length, unknown: unknown.length, locked: lockedW.length,
         absents: absents.length, absentsJamaisReleves: jamaisReleves.length,
         rupture: enRupture.length,
@@ -4606,6 +4671,10 @@ async function handlePriceWatch(req, res, admin, db) {
           + 'refaire un passage SANS &scan=1 sur la page voulue.'
         : undefined,
       applied, flagged,
+      /* ⛔ LES HAUSSES RETENUES SORTENT EN ENTIER, comme `applied`. Une écriture
+         retardée qu'on ne verrait pas serait une écriture perdue : c'est la
+         seule façon de savoir, en fin de balayage, ce qui attendait encore. */
+      haussesDifferees: haussesDifferees,
       /* ⛔ En balayage, `unknown` sort VIDE — sauf si on l'a demandé. C'est la
          seule donnée qui dise POURQUOI une fiche n'est pas reconnue : ce que le
          fournisseur affichait, et que rien n'a réclamé. */
