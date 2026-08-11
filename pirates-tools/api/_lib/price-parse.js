@@ -739,6 +739,50 @@ function candidatsAvecPosition(titre, brand) {
    ce qui rend le prix annoncé PLUS exact, et rien ici ne fabrique un prix de
    référence ni une réduction ; J3 : des titres publics, aucune donnée
    personnelle ; J5 : aucune TVA, aucun octroi de mer. */
+/* ⛔⛔⛔ UNE QUANTITÉ MULTIPLE N'EST PAS LE PRIX D'UNE UNITÉ.
+   ─────────────────────────────────────────────────────────────────────────
+   TROUVÉ EN RELISANT SES TUILES UNE PAR UNE, LE 13/08/2026, SUR SON ORDRE :
+   « relis les trois relevés un par un […] là c'est une question d'argent ».
+   Une carte de son relevé s'intitule « Dewalt DCB184-XJ XR **Lot de 5
+   Batteries** Lithium-ION 5 Ah 18 V » et coûte **372,29 €**.
+
+   ⛔ RECOUPÉ SUR LE WEB, DEUX SOURCES INDÉPENDANTES : `DCB184-XJ` désigne UNE
+   batterie 18 V XR 5,0 Ah — 59,90 € chez le comparateur, 61,90 € chez un
+   revendeur, 63,39 € chez un autre ; et les conditionnements multiples se
+   vendent par 2 (~94 £) ou par 3 (~142,50 £). 372,29 € ÷ 5 = 74,46 € l'unité :
+   la carte est bien un LOT DE CINQ.
+   ⇒ Sans cette garde, le prix de cinq batteries part sur la fiche d'UNE —
+   soit une batterie affichée près de **cinq fois trop cher**.
+
+   ⛔⛔ ET C'EST MOI QUI AI OUVERT LA PORTE. Le relevé du 12/08 laissait cette
+   carte en « sans référence » : aucun dégât. Mes corrections du parseur la
+   rendent LISIBLE — donc dangereuse. Une amélioration de couverture qui n'est
+   pas accompagnée de sa garde est une régression d'argent déguisée en progrès.
+
+   ⚠️ CE QU'ON NE SAIT PAS TRANCHER, ON NE L'ÉCRIT PAS. « DWA1790IR — Lot de 3
+   forets étagés » a exactement la MÊME forme, mais là la référence désigne le
+   LOT lui-même : son prix est juste. Aucune règle de forme ne sépare les deux,
+   et deviner ici, c'est se tromper une fois sur deux sur de l'argent.
+   ⇒ On refuse d'ÉCRIRE, on ne refuse pas de VOIR : la carte sort dans `packs`,
+   avec son titre et son prix, comme les autres. Coût mesuré de ce choix sur
+   ses trois relevés : **une** tuile légitime perdue (87,97 €), contre **une**
+   tuile qui aurait multiplié un prix par 4,7.
+   ⚠️ C'est M-11 : entre deux lectures possibles, on prend celle qui ne peut pas
+   faire vendre de travers.
+   ⚠️ Portes lues — J4 : refuser un prix de lot sur une unité rend le prix
+   annoncé PLUS exact ; J3 : des titres publics ; J5 : aucune fiscalité. */
+function titreAnnonceUneQuantiteMultiple(texte) {
+  var s = String(texte || '');
+  if (!s) return false;
+  /* « Lot de 5 », « Pack de 2 », « Set de 10 », « Jeu de 3 » — le nombre est
+     ce qui compte, et il doit être au moins DEUX. */
+  if (/\b(lots?|packs?|sets?|ensembles?|jeux?|jeu)\s+de\s+([2-9]|[1-9]\d)\b/i.test(s)) return true;
+  /* « x5 », « x 5 », « 5x » accolés à un objet ou entre parenthèses. */
+  if (/\(\s*[xX]\s*([2-9]|[1-9]\d)\s*\)/.test(s)) return true;
+  if (/\b([2-9]|[1-9]\d)\s*[xX]\s+[A-Za-zÀ-ÖØ-öø-ÿ]{3,}/.test(s)) return true;
+  return false;
+}
+
 function titreAjouteDuContenu(texte, portee) {
   var s = String(texte || '');
   if (!s) return false;
@@ -1504,11 +1548,19 @@ function parseIdealo(rawText, brand) {
        risque et couverture réelle en cas de titre avare. */
     var ajoutAnnonce = titreAjouteDuContenu(b[iTitre], 'titre')
       || titreAjouteDuContenu(desc, 'description');
-    if (ajoutAnnonce && referenceEstNue(sku, brand)) {
+    /* ⛔ LA QUANTITÉ MULTIPLE VAUT POUR TOUTES LES FAMILLES, pas seulement les
+       machines nues : une batterie, un foret, un embout se vendent aussi par
+       lot, et le prix du lot n'est jamais celui de l'unité. */
+    var quantiteMultiple = titreAnnonceUneQuantiteMultiple(b[iTitre]);
+    if (quantiteMultiple || (ajoutAnnonce && referenceEstNue(sku, brand))) {
       packs.push({ titre: String(b[iTitre] || '').slice(0, 200), prix: prix,
         skuRefuse: sku,
-        raison: 'titre qui AJOUTE du contenu sur une reference NUE : le prix du '
-          + 'pack ne s ecrit jamais sur la machine seule',
+        raison: quantiteMultiple
+          ? 'titre annoncant une QUANTITE MULTIPLE : le prix de N unites n est '
+            + 'jamais le prix d une unite (mesure : un lot de 5 batteries a 372,29 EUR '
+            + 'contre 79,90 EUR l unite)'
+          : 'titre qui AJOUTE du contenu sur une reference NUE : le prix du '
+            + 'pack ne s ecrit jamais sur la machine seule',
         car: extraireCaracteristiques(desc, brand) });
       /* ⚠️ `return`, pas `continue` : ce corps est un callback de `forEach`,
          pas une boucle. Attrapé par le chargement du module — un `continue`
@@ -3651,4 +3703,5 @@ module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickou
      appeler depuis une porte se vérifie « en la relisant » — c'est-à-dire pas
      du tout. */
   titreAjouteDuContenu: titreAjouteDuContenu, referenceEstNue: referenceEstNue,
+  titreAnnonceUneQuantiteMultiple: titreAnnonceUneQuantiteMultiple,
   nomenclature: nomen };

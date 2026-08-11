@@ -798,6 +798,55 @@ est écartée — un vrai pack à 597,22 €.
 
 ---
 
+### M-46 — Une couverture gagnée sans sa garde est une régression d'argent
+
+Apprendre au parseur à lire davantage augmente aussi ce qu'il peut lire **de
+travers**. Chaque gain de lecture doit arriver avec la garde qui va avec, dans
+le même geste.
+
+*Panne payée le 13/08/2026, en relisant ses tuiles une par une* : une carte de
+son relevé s'intitule « <réf>-XJ XR **Lot de 5 Batteries** Lithium-ION 5 Ah
+18 V » et coûte **372,29 €**. Le serveur la laissait « sans référence » : aucun
+dégât. **Mes propres corrections de lecture la rendent lisible** — et son prix
+de lot partait alors sur la fiche d'**une** batterie.
+
+⛔ **Recoupé sur le Web, deux sources indépendantes** : cette référence désigne
+UNE batterie 18 V 5,0 Ah — 59,90 € au comparateur, 61,90 € et 63,39 € chez deux
+revendeurs ; les conditionnements multiples se vendent par 2 ou par 3.
+372,29 € ÷ 5 = 74,46 € l'unité. C'est bien un lot de cinq, et la fiche aurait
+été affichée près de **cinq fois trop cher**.
+
+⇒ Toute quantité multiple annoncée (« Lot de N », « Pack de N », « x N »)
+interdit d'écrire le prix.
+
+⚠️ **Et ce qu'on ne sait pas trancher, on ne l'écrit pas.** « Lot de 3 forets
+étagés » a exactement la même forme, mais là la référence désigne le lot
+lui-même : son prix est juste. Aucune règle de forme ne les sépare. Mesure du
+choix, faite avant de le poser : 83 tuiles écartées sur trois relevés, dont
+**deux seulement** atteignent une fiche — l'une évitée (×4,7), l'autre perdue
+(87,97 €). On refuse d'ÉCRIRE, jamais de VOIR : la carte sort dans `packs`
+avec son prix.
+
+*Porte* : cinq assertions dans `check-price-watch`, deux sabotages rouges — un
+par sens (garde absente, garde trop large).
+
+---
+
+### M-47 — Le relevé porte la version qui l'a produit : la question est close
+
+*Posé le 12/08, vérifié le 13/08/2026* : les trois relevés portent
+`versionParseur: d6325360418cfa00-339011`, **la même sur les trois**. En
+recalculant cette somme sur chaque commit, elle désigne exactement celui qui a
+servi les pages.
+
+⇒ Deux tours entiers avaient été perdus à débattre de « le correctif est-il en
+ligne ? » sans pouvoir trancher — la session ne voit ni le site ni l'API de
+l'hébergeur. Une seule ligne dans la réponse a supprimé la question **pour
+toujours**. Quand un doute revient deux fois, le travail n'est plus d'y
+répondre : c'est de le rendre mesurable (M-38, appliqué et vérifié).
+
+---
+
 ## Où ces méthodes sont déjà branchées
 
 | Méthode | Le code qui l'applique |
@@ -828,3 +877,5 @@ est écartée — un vrai pack à 597,22 €.
 | M-43 | `scripts/tableau-produits.js` |
 | M-44 | `scripts/banc-produits.js` |
 | M-45 | `api/_lib/price-parse.js` (`titreAjouteDuContenu`), `scripts/check-price-watch.js` |
+| M-46 | `api/_lib/price-parse.js` (`titreAnnonceUneQuantiteMultiple`), `scripts/banc-tuiles.js` |
+| M-47 | `api/_lib/price-parse.js` (`EMPREINTE_PARSEUR`), `scripts/check-version-parseur.js` |

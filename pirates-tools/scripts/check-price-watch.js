@@ -5885,6 +5885,43 @@ module.exports = async function () {
     ok(!pp.titreAjouteDuContenu('Meuleuse 180 mm (machine seule) + coffret', 'titre'),
       '⛔⛔ ce que le vendeur écrit NOIR SUR BLANC prime : « machine seule » ferme la '
       + 'question, et même un « + coffret » plus loin ne peut pas la rouvrir');
+    /* ⛔⛔⛔ UNE QUANTITÉ MULTIPLE N'EST PAS LE PRIX D'UNE UNITÉ.
+       TROUVÉ EN RELISANT SES TUILES UNE PAR UNE, LE 13/08/2026 : une carte de
+       son relevé s'intitule « <réf>-XJ XR Lot de 5 Batteries Lithium-ION 5 Ah
+       18 V » et coûte 372,29 €.
+       ⛔ RECOUPÉ SUR LE WEB, DEUX SOURCES INDÉPENDANTES : cette référence
+       désigne UNE batterie 18 V 5,0 Ah — 59,90 € chez le comparateur, 61,90 €
+       et 63,39 € chez deux revendeurs ; les conditionnements multiples se
+       vendent par 2 ou par 3. 372,29 € ÷ 5 = 74,46 € l'unité : c'est bien un
+       LOT DE CINQ. Sans garde, son prix part sur la fiche d'UNE batterie —
+       près de cinq fois trop cher.
+       ⛔ ET C'EST MA PROPRE CORRECTION QUI A OUVERT LA PORTE : le relevé
+       laissait cette carte « sans référence », donc inoffensive ; mes
+       améliorations de lecture la rendent LISIBLE, donc dangereuse. Une
+       couverture gagnée sans sa garde est une régression d'argent déguisée en
+       progrès.
+       ⚠️ MESURE DU COÛT DE CETTE RÈGLE, avant de la poser : sur ses trois
+       relevés, 83 tuiles sont écartées — dont **deux seulement** atteignent une
+       fiche. L'une est le lot de 5 (évité), l'autre un « lot de 3 forets »
+       dont la référence désigne le lot lui-même (perdu, 87,97 €). Aucune règle
+       de forme ne sépare les deux : deviner ici, c'est se tromper une fois sur
+       deux sur de l'argent. On refuse donc d'ÉCRIRE, jamais de VOIR — la carte
+       sort dans `packs` avec son prix (M-11). */
+    var qteLot = pp.parseIdealo(page('Makita ' + nue + ' Lot de 5 pieces', '372,29'), 'MAKITA');
+    ok((qteLot.items || []).length === 0 && (qteLot.packs || []).length === 1,
+      '⛔⛔ ARGENT : « Lot de 5 » ne porte JAMAIS le prix d\'une unité — mesuré, un lot '
+      + 'de 5 batteries à 372,29 € contre 79,90 € l\'unité (obtenu items='
+      + ((qteLot.items || []).length) + ')');
+    ok(/QUANTITE MULTIPLE/i.test(String(((qteLot.packs || [])[0] || {}).raison || '')),
+      '⛔ …et le motif NOMME la quantité multiple : un refus muet ne s\'apprend pas');
+    var qteUnite = pp.parseIdealo(page('Makita ' + nue, '79,90'), 'MAKITA');
+    ok((qteUnite.items || []).length === 1,
+      '⛔ …et l\'unité, elle, passe : sans ce témoin, « tout refuser » serait vert');
+    ok(!pp.titreAnnonceUneQuantiteMultiple('Ensemble d outils de mecanicien 108 pieces'),
+      '⛔ « 108 pièces » décrit la COMPOSITION d\'un coffret dont la référence est le '
+      + 'coffret — ce n\'est pas « lot de N produits », et le refuser perdrait un prix juste');
+    ok(!pp.titreAnnonceUneQuantiteMultiple('Set 9 cles Torx en L tete spherique'),
+      '⛔ …idem pour « Set 9 clés » sans « de » : la référence désigne le set');
     var rNi = pp.parseIdealo(page('Makita ' + nue + ' (sans batterie + chargeur)', '146,48'), 'MAKITA');
     ok((rNi.items || []).length === 1,
       '⛔ « sans batterie + chargeur » veut dire NI L\'UN NI L\'AUTRE, pas un ajout — '
