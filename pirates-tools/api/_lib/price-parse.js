@@ -1856,8 +1856,28 @@ function apparierParRefRecollee(annonces, fiches, marque) {
      retire tirets et points : « DCV 100 XJ » doit pouvoir retrouver
      « DCV100-XJ », qui est la référence telle que le constructeur l'écrit. */
   var parRef = Object.create(null), collisions = Object.create(null);
+  /* ⛔⛔ GARDE DE MARQUE — AJOUTÉE LE 13/08/2026, TROUVÉE PAR SABOTAGE.
+     Cette fonction indexait TOUTES les fiches reçues sans regarder leur
+     marque. Elle n'était donc sûre que par une CONVENTION D'APPELANT que rien
+     n'imposait — et l'appelant réel ne la respecte pas : `api/admin.js` lui
+     passe `catalog.loadCatalog()`, le catalogue ENTIER (mesuré : trois
+     marques, 1 708 fiches), avec la marque balayée à côté.
+     MESURE QUI LE DÉMONTRE : la même annonce rendait le MÊME rapprochement
+     qu'on lui annonce l'une ou l'autre des trois marques suivies. La marque
+     passée ne servait à rien ici.
+     ⚠️ EXPOSITION RÉELLE AU JOUR DE LA CORRECTION : **zéro** — aucune
+     référence du catalogue n'est portée par deux marques (mesuré), et zéro
+     rapprochement hors-marque sur les 1 117 cartes réelles du corpus. Le
+     défaut est donc LATENT, il n'est pas en train de coûter. Il est corrigé
+     quand même : c'est M-28, et son sens est celui qui fait BAISSER un coût —
+     donc vendre à perte — le jour où une référence se recoupe entre marques.
+     ⚠️ Marque absente ⇒ on n'indexe RIEN : sans marque on ne sait pas dans
+     quelle table chercher, et deviner est exactement l'erreur qu'on interdit. */
+  var marqueUp = String(marque || '').toUpperCase().replace(/[\s-]/g, '');
+  if (!marqueUp) return res;
   (fiches || []).forEach(function (p) {
     if (!p || !p.sku) return;
+    if (String(p.brand || '').toUpperCase().replace(/[\s-]/g, '') !== marqueUp) return;
     var k = String(p.sku).toUpperCase().replace(/[^A-Z0-9]/g, '');
     if (!k) return;
     if (parRef[k] && parRef[k].sku !== p.sku) { collisions[k] = 1; return; }
@@ -2137,7 +2157,21 @@ function apparierParConfiguration(annonces, fiches, marque) {
 var CONCORDANCES_MIN = 2;
 function apparierParNomSouple(annonces, fiches, marque) {
   var res = { items: [], restants: [], ambigus: [] };
-  var fichesUtiles = (fiches || []).filter(function (p) { return p && p.srcNom && p.sku; });
+  /* ⛔⛔ MÊME GARDE DE MARQUE QUE `apparierParRefRecollee`, ET POUR LA MÊME
+     RAISON (13/08/2026). Ce rapprochement-ci est le PLUS souple des trois : il
+     compare des NOMS, pas des références. Indexer les fiches de toutes les
+     marques y est donc encore plus dangereux — deux marques nomment leurs
+     outils avec les mêmes mots (« perceuse-visseuse 18V »), et c'est le nom
+     qui sert de clé. Un rapprochement entre marques ferait BAISSER un coût :
+     vendre à perte (M-28).
+     ⚠️ Marque absente ⇒ on ne rapproche RIEN, et les annonces ressortent
+     intactes dans `restants` : on ne les perd pas, on refuse de trancher. */
+  var marqueNS = String(marque || '').toUpperCase().replace(/[\s-]/g, '');
+  if (!marqueNS) { res.restants = (annonces || []).slice(); return res; }
+  var fichesUtiles = (fiches || []).filter(function (p) {
+    return p && p.srcNom && p.sku
+      && String(p.brand || '').toUpperCase().replace(/[\s-]/g, '') === marqueNS;
+  });
   if (!fichesUtiles.length) {
     res.restants = (annonces || []).slice();
     return res;

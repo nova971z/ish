@@ -1,0 +1,6722 @@
+{
+ "gele": "13/08/2026",
+ "origine": "relevés du traqueur fournis par l'user (3 balayages)",
+ "selection": "mécanique : toutes les cartes annonçant un ajout (échantillonnées si trop nombreuses), plus une carte ordinaire sur 7",
+ "lues": 868,
+ "uniques": 5671,
+ "avecAjout": 1611,
+ "ordinaires": 4060,
+ "cartes": [
+  {
+   "marque": "DEWALT",
+   "titre": "17500 clous en rouleaux galvanisés à tige annelée DeWalt 2,03x38mm",
+   "descr": "",
+   "prix": 112.49
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "34° Clous en bande 2,8x70mm lisse brillant pour cloueur sans fil DeWalt DCN692 695 930 950",
+   "descr": "",
+   "prix": 95.15
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Aspirateur DCV584L-QW + 2 batteries 18V/54V 6Ah-2Ah + 1 chargeur DCB118-QW DEWALT",
+   "descr": "",
+   "prix": 564.9
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Aspirateur sans fil DeWalt DCE 590 M2 18 V 120 kg + 2 batteries 4,0 Ah + chargeur",
+   "descr": "",
+   "prix": 512.55
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Aspirateur à main 18V DCV501LN-XJ + 1 batterie 18V 5 Ah + chargeur DCB1104-QW DEWALT",
+   "descr": "",
+   "prix": 250.9
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Borne de recharge murale véhicule électrique 7,4 kW - monophasée avec câble Type 2",
+   "descr": "",
+   "prix": 683.24
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Boulonneuse à chocs 3/4 pouces 18V - POWERSTACK - PACK GFN - DEWALT - DCF964H2G-QW",
+   "descr": "",
+   "prix": 1007
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Chargeur Véhicule Électrique Portable DEWALT, 3.7kW, Type 2 + Prise Schuko, 7m Câble, 16A,",
+   "descr": "",
+   "prix": 466.75
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Chargeur portable véhicule électrique Type 2 7 m - 3,7 kW avec prise 16 A",
+   "descr": "",
+   "prix": 253.08
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Cloueuse sans fil DeWalt DCN 660 M2 18 V 32 - 63 mm sans balais + 2 batteries 4,0 Ah + chargeur + coffret",
+   "descr": "",
+   "prix": 539.86
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Cloueuse sans fil DeWalt DCN 930 H2 18 V 50 - 90 mm sans balais + 2 batteries Powerstack 5,0 Ah + chargeur",
+   "descr": "",
+   "prix": 762.12
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Cloueuse sans fil DeWalt DCN 930 P1 18 V 50 - 90 mm sans balais + 1 batterie 5,0 Ah + chargeur",
+   "descr": "",
+   "prix": 572.56
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Clé à Chocs DeWALT DCF899P2T (2 x 5,0 Ah + DCB107 + TSTAK II)",
+   "descr": "",
+   "prix": 373
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Clé à chocs DeWALT DCF887D1T (1 x 2,0 Ah + DCB107 + TSTAK II) + kit de 32 embouts de vissage Impact Torsion",
+   "descr": "",
+   "prix": 201
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Clé à chocs DeWALT DCF887P1 (1 x 5,0 Ah + DCB115 + TSTAK II)",
+   "descr": "",
+   "prix": 210
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Clé à chocs DeWALT DCF899P1T (1 x 5,0 Ah + DCB115 + TSTAK II)",
+   "descr": "",
+   "prix": 308
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Clé à chocs DeWALT DCF922P2T (2 x 5,0 Ah + DCB115 + TSTAK II)",
+   "descr": "",
+   "prix": 387.73
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Coffret de 10 scies cloches Extreme BIM bois/métal/plastique DeWalt",
+   "descr": "",
+   "prix": 99.99
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT - Meuleuse Brushless XR 18V 5Ah Li-Ion - DCG406NT-XJ - Meuleuse sans Fil avec Interrupteur à Palette & Boîte de 10 Disques à Tronçonner Standards en Acier - Dimensions 125 x 1,2mm",
+   "descr": "",
+   "prix": 197.66
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT - Multi-Cutter Brushless - XR 18V - DCS355D2-QW - Multi-Cutter sans Fil en Coffret avec 2 Batteries, Chargeur et 32 Accessoires - 20000 orb/min & Ponceuse Excentrique XR 18V 125mm Brushless",
+   "descr": "",
+   "prix": 390.18
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT - Perforateur SDS-PLUS XR 18V 5 Ah - DCH273P2T-QW - Perforateur sans Fil avec Coffr",
+   "descr": "",
+   "prix": 538.1
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT - Perforateur-Burineur SDS-PLUS Brushless 2.6J 18V 4Ah Li-Ion - Sans Fil avec Coffr",
+   "descr": "",
+   "prix": 281.61
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT - Pompe A Graisse Electrique Sur Batterie XR 18V 4Ah Li-Ion - DCGG571M1-QW - Sans Fil & Batterie XR 18V 4 Ah Li-Ion - Compatible Avec Tous Les Outils XR 18V Bricolage et Jardin",
+   "descr": "",
+   "prix": 434.88
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT - Scie Sauteuse à Prise par le Corps Brushless XR 18V - Scie sans Fil avec Coffret",
+   "descr": "",
+   "prix": 238.41
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT - Tronçonneuse Élagueuse Brushless XR 18V - DCM565N-XJ & Batterie XR 18V 4 Ah Li-Io",
+   "descr": "",
+   "prix": 293.16
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT Carlisle Bottes de travail en cuir nubuck pour homme, avec embout en acier de sécur",
+   "descr": "",
+   "prix": 80.08
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT Chargeur Mural USB-C GaN 100W EU, Double Port Type-C PD/PPS, Charge Rapide Haute Pu",
+   "descr": "",
+   "prix": 84.99
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT Chargeur USB C 4 Ports 100W Haute Puissance, Station de Charge Multiport avec Répar",
+   "descr": "",
+   "prix": 116.99
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT Clou en bande DEWALT DNPT 2,8 x 75 mm 33 degrés tige annulaire Galvanisé G12 Quanti",
+   "descr": "",
+   "prix": 81.99
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT Clé à chocs sans fil 1/2'', 2 batteries 5,0 Ah Lanyard Ready, chargeur DCF921P2LRT",
+   "descr": "",
+   "prix": 387.48
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT Coupe-bordures sans fil 54V, modèle DCMBC723N, avec guidon",
+   "descr": "",
+   "prix": 744.84
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT DCF964H2G DCF964H2G-QW Clé à chocs sans fil 18 V Nombre d’accus fournis 2 5 Ah Li-Ion + 2 batteries, + chargeur",
+   "descr": "",
+   "prix": 985.05
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT DCV517B Baretool 20V MAX Cordless 1/2 gallon Wet/Dry Portable Vac Kit (Tool Only)",
+   "descr": "",
+   "prix": 172.98
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT DNW28R63G12E Clou, Argent, Taille 34/63 mm, Set de 2200 Pièces",
+   "descr": "",
+   "prix": 79.69
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT DT60809-QZ - Broca SDS-Max XLR 16x340mm 4 cortes G",
+   "descr": "",
+   "prix": 101.85
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT DWE305PK-QS Scie sabre filaire - 1100W - Spéciale applications difficiles & Coffret",
+   "descr": "",
+   "prix": 195.95
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT DXBC9002-2X Kit de 8 pièces avec Sangles à cliquet rétractables automatiques de 5,1 cm x 3 m (résistance à la Rupture de 1,5 kg) et Boucles Souples de qualité supérieure de 4,3 x 45,7 cm",
+   "descr": "",
+   "prix": 136.98
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT Diamant-Nassbohrkrone 61x400mm 1 1/4Z",
+   "descr": "",
+   "prix": 122.99
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT Foret métal HSS-G Coffret 29 pièces - DT7926-XJ & Coffret de 32 Embouts de Vissage",
+   "descr": "",
+   "prix": 107.19
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT Jeu de 15 forets et burins SDS-plus DT9679-QZ & Coffret de 100 Pièces de Perçage et",
+   "descr": "",
+   "prix": 88.22
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT Kit 4 Outils XR 18V Brushless + 3 Batteries 5Ah + 1 Chargeur + 2 Coffrets TSTAK DCK",
+   "descr": "",
+   "prix": 759.18
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT Kit de chargement USB",
+   "descr": "",
+   "prix": 177.53
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT Laser rotatif double pente USB-C Pack Pro - DCLE15211RL-QW",
+   "descr": "",
+   "prix": 1199
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT Marteau perforateur DEWALT SDS-max 35x670x540 mm DT60839-QZ Quantité:1",
+   "descr": "",
+   "prix": 93.99
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT Meuleuse d'angle électronique \"Le Béton 125 mm - 1500 W - 240 V & Coffret de 10 Dis",
+   "descr": "",
+   "prix": 251.9
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT Multi outil Lame de scie, 67 x 30 mm, 100 pièces, noir, dt20734b/qz",
+   "descr": "",
+   "prix": 801.77
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT Pack de 2 outils xr 18 V dcd791+dcf887 + 2 batteries 5Ah + chargeur + coffret T-sta",
+   "descr": "",
+   "prix": 485.79
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT Perceuse à aspiration DEWALT SDS-max 24x400x600mm Quantité:1",
+   "descr": "",
+   "prix": 147.98
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT Perforateur SDS-PLUS 3J - 3 Modes avec Coffret de Transport - 900W, D25144K-QS + DE",
+   "descr": "",
+   "prix": 197.44
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT Projecteur de Chantier Compact XR Sans Fil - Sans Batterie Ni Chargeur & Lampe Projecteur LED XR 18V, 1.000 lumens - DCL043-XJ - Sans Fil - Lampe Led Rechargeable",
+   "descr": "",
+   "prix": 180.93
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT Scie Sabre Électrique avec Vitesse Variable et Coffret de Transport + DEWALT Lame p",
+   "descr": "",
+   "prix": 181.2
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT Scie Sauteuse Sans Fil 18V - Sans Batterie ni Chargeur DCS335N-XJ & Outil Oscillant",
+   "descr": "",
+   "prix": 306.76
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT Scie a onglet D27113-QS + Lame de scie circulaire stationnaire Extreme Workshop 305",
+   "descr": "",
+   "prix": 754.66
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT ToughSystem 2.0 DXL Kit de rangement d'outils d'atelier portable avec roulettes (DW",
+   "descr": "",
+   "prix": 200.37
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT dnf28r80e PowerCoil ongles DNF 80 mm 6 KST. Anneau Tige, Lot de 6",
+   "descr": "",
+   "prix": 78.91
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT scie circulaire 1300W 165mm DWS520KTR + 1,5m TSTAK ROW",
+   "descr": "",
+   "prix": 569.99
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWALT - Meuleuse d'angle sans fil 54 V, 125 mm, avec accessoires, 3 batteries Li-Ion 9,0 Ah et chargeur. DCG418NTA",
+   "descr": "",
+   "prix": 742.91
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWALT - Scie circulaire sans fil 54 V, 190 mm, avec accessoires, 3 batteries Li-Ion 9,0 Ah et chargeur. DCS578NTA",
+   "descr": "",
+   "prix": 788.22
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWALT - Set de clés à chocs sans fil, batteries et chargeur, 6 pièces DCF850NA",
+   "descr": "",
+   "prix": 548.38
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWALT - Tronçonneuse 54V AKU 50 cm, 1x batterie 9,0 Ah FLEXVOLT, chargeur DCMCS575X1",
+   "descr": "",
+   "prix": 517.92
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWALT DCD800P2T Perceuse-visseuse XR 18V (90Nm, 2x5,0Ah) Tstak",
+   "descr": "",
+   "prix": 328.74
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWALT DCG404S2T-QW Kit Meuleuse D'angle Compacte Sans Fil 18 V XR (2 Batteries 3,5 Ah + Chargeur) - 125 Mm",
+   "descr": "",
+   "prix": 557.5
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWALT DCMPP568P1 18V XR Li-Ion Set De Sécateurs Sans Fil (1x Batterie 5.0Ah) - 38mm",
+   "descr": "",
+   "prix": 237.01
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWALT DNM40R50GZ Clous anneau GAL, Argent, 4x50mm Set de 2000 Pieces",
+   "descr": "",
+   "prix": 126.38
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWALT Dw1648 Self Feed Kit 5",
+   "descr": "",
+   "prix": 169.98
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWALT Kit FVK381TST2HD-QW 54V/18V (DCH333 + DCD996 + DCG418 + 2 x 6.0 Ah + DCB118 + DS450 DWST1-75668)",
+   "descr": "",
+   "prix": 1260
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt - Aspirateur de Chantier Classe L - DCV584L-QW & Batterie XR 18V 4 Ah Li-ION - DCB1",
+   "descr": "",
+   "prix": 264.18
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt - Kit perceuse DCD796 + visseuse à Impact DCF887 + 2 batteries 5Ah + chargeur DCB11",
+   "descr": "",
+   "prix": 475.96
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt - Niveau laser en croix - faisceau rouge - coffret - DW088K-XJ & Stanley FATMAX Cis",
+   "descr": "",
+   "prix": 206.17
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt 305x30 mm 3 pcs (DT1126-QZ)",
+   "descr": "Lame de scie circulaire, 3 pièce(s), Longueur de la lame 305 mm",
+   "prix": 83.55
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt 4250887742883",
+   "descr": "Ensemble de batteries outillage, 18 V, 6 Ah",
+   "prix": 424.2
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt Casque Tour de Cou Bluetooth 2-en-1 avec Haut-parleurs Intégrés, 60+h, IP56 (DXMA1902093)",
+   "descr": "Écouteurs True Wireless, Intra-auriculaire, Bluetooth 5.0",
+   "prix": 124.99
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt Cloueur de Finition XR 18V - DCN660NT-XJ - Cloueur sans Fil avec Coffret TSTAK - 16",
+   "descr": "",
+   "prix": 376.95
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt Combo Kit DCK266M2T (2 x 4,0 Ah + chargeur + T-stak box)",
+   "descr": "Pack outillage sans fil, 18 V, Li-Ion",
+   "prix": 328.42
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCB 118 Y1 Kit de démarrage sans fil 18 V / 54 V 1x XR FLEXVOLT batterie 12 Ah + chargeur",
+   "descr": "",
+   "prix": 278.57
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCB 184 / 18 V 5 Ah",
+   "descr": "",
+   "prix": 108.91
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCB1104D2-QW",
+   "descr": "Ensemble de batteries outillage, 18 V, 2 Ah",
+   "prix": 114
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCB1104P2-QW",
+   "descr": "Ensemble de batteries outillage, 18 V, 5 Ah",
+   "prix": 144.83
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCB118Y2T-QW (Charger + 2x Battery 12Ah)",
+   "descr": "Chargeur avec piles rechargeables",
+   "prix": 404
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCB184P2-XJ XR 5.0 Ah",
+   "descr": "Ensemble de batteries outillage, 18 V, 5 Ah",
+   "prix": 118.88
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCB547X2",
+   "descr": "Ensemble de batteries outillage, 18 V, 9 Ah",
+   "prix": 278.49
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCBP 518 H4 4 x 5,0 Ah",
+   "descr": "",
+   "prix": 547.05
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCBP518H2-XJ - 2 batteries Powerstack",
+   "descr": "Batterie outillage d'origine, 18 V, 5 Ah",
+   "prix": 201.73
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCD 708 H1 Perceuse-visseuse sans fil 18 V 65 Nm Brushless + 1x batterie Powerstack 5,0 Ah + chargeur",
+   "descr": "",
+   "prix": 244.27
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCD 708 M2 Perceuse-visseuse sans fil 18 V 65 Nm Brushless + 2x batterie 4,0 Ah + chargeur",
+   "descr": "",
+   "prix": 231.42
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCD 708 N Perceuse-visseuse sans fil 18 V 65 Nm Brushless + 1x batterie Powerstack 5,0 Ah - sans chargeur",
+   "descr": "",
+   "prix": 213.74
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCD 791 E1 Perceuse-visseuse sans fil 18 V 70 Nm Brushless + 1x batterie Powerstack 1,7 Ah + chargeur",
+   "descr": "",
+   "prix": 206.11
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCD 800 E2 Batterie 18 V 90 Nm Sans Balais + 2x Batterie Powerstack 1,7 Ah + Charge",
+   "descr": "",
+   "prix": 281.22
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCD 805 H2T Perceuse-visseuse à percussion sans fil 18 V 90 Nm Brushless + 2x batterie Powerstack 5,0 Ah + chargeur + TSTAK",
+   "descr": "",
+   "prix": 441.87
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCD 996 E2 Perceuse-visseuse à percussion sans fil 18 V 95 Nm Brushless + 2x Powerstack batterie 1,7 Ah + chargeur",
+   "descr": "",
+   "prix": 343.47
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCD 996 M2 Perceuse-visseuse sans fil 18V 95Nm Brushless + 2x batterie 4,0Ah + char",
+   "descr": "",
+   "prix": 348.69
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCD240X2-QW",
+   "descr": "Diamètre de l'hélice 160 mm, M14",
+   "prix": 694
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCD740NT (Solo+TSTAK II)",
+   "descr": "Perceuse-visseuse d'angle sans fil, Vitesse à vide max. 2 000 tr/min, Couple max. (vissage en force) 33 Nm",
+   "prix": 154.4
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCD777M2TA (2x 4,0 Ah)",
+   "descr": "Perceuse-visseuse sans fil, Vitesse à vide max. 1 750 tr/min, Couple max. (vissage en force) 65 Nm",
+   "prix": 250.81
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCD778L2T (2 x 3,0 Ah + Chargeur Rapide) dans Coffret T STAK",
+   "descr": "Perceuse-visseuse à percussion sans fil, Vitesse à vide max. 1 750 tr/min, Couple max. (vissage en force) 65 Nm",
+   "prix": 263.36
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCD791P2 (2 x 5,0 Ah)",
+   "descr": "Perceuse-visseuse sans fil, Vitesse à vide max. 2 000 tr/min, Couple max. (vissage en force) 70 Nm Note ∅ 18/20",
+   "prix": 224.2
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCD794D2T-QW 18V cordless Drill Driver ( Brushless) incl. 2 x rechargeable Batteries 5 Ah and System Quick Charger",
+   "descr": "Perceuse-visseuse sans fil, 18 V, 5 Ah",
+   "prix": 270
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCD796P1 (1 x 5,0 Ah + chargeur) avec coffret",
+   "descr": "Perceuse-visseuse à percussion sans fil, Vitesse à vide max. 2 000 tr/min, Couple max. (vissage en force) 70 Nm",
+   "prix": 192.38
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCD799D2T-QW 18V Cordless Impact Drill (brushless) incl. 2 x rechargeable batteries 2 Ah and System Quick Charger",
+   "descr": "Perceuse-visseuse à percussion sans fil, Couple max. (vissage en force) 74 Nm, 15 Positions de couple",
+   "prix": 239.62
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCD800H1 (1x Powerstack battery 5.0 Ah + charger)",
+   "descr": "Perceuse-visseuse sans fil, 18 V",
+   "prix": 292.46
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCD800P2LRT With 2x5.0Ah Batteries And Charger",
+   "descr": "Perceuse-visseuse sans fil, Vitesse à vide max. 2 000 tr/min, 18 V",
+   "prix": 342.67
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCD991P2 18V 2 x 5,0Ah (DEWDCD991P2)",
+   "descr": "Perceuse-visseuse sans fil, Vitesse à vide max. 2 000 tr/min, 18 V",
+   "prix": 479.89
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCD996M1 (1 x 4,0 Ah + Chargeur) dans boîte T-STAK",
+   "descr": "Perceuse-visseuse à percussion sans fil, Vitesse à vide max. 2 000 tr/min, Couple max. (vissage en force) 95 Nm",
+   "prix": 279.61
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCD996M2T (2x 4.0 Ah battery + charger + TSTAK)",
+   "descr": "Perceuse-visseuse à percussion sans fil, 18 V",
+   "prix": 324.59
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCD996P1T (1x 5.0 Ah battery + charger + TSTAK)",
+   "descr": "Perceuse-visseuse à percussion sans fil, 18 V",
+   "prix": 268.37
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCD996P2T (2x 5.0 Ah battery + charger + TSTAK)",
+   "descr": "Perceuse-visseuse à percussion sans fil, 18 V",
+   "prix": 334.23
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCD999X1-QW",
+   "descr": "Perceuse-visseuse à percussion sans fil, Vitesse à vide max. 2 000 tr/min, Couple max. (vissage en force) 127 Nm",
+   "prix": 335.5
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCE 581 P1K Pistolet à cartouche sans fil 18 V 310 ml + 1x batterie 5,0 Ah + chargeur + coffret",
+   "descr": "",
+   "prix": 415.21
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCE560D1-QW",
+   "descr": "18 V, 2 Ah",
+   "prix": 581.99
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF 620 E2T Visseuse pour cloisons sèches sans fil 18 V 30 Nm Brushless + 2x Powerstack batterie 1,7 Ah + chargeur + TSTAK",
+   "descr": "",
+   "prix": 290.86
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF 809 E2 Clé à choc sans fil 18 V 190 Nm 1/4'' Brushless + 2x Powerstack batterie 1,7 Ah + chargeur",
+   "descr": "",
+   "prix": 264.75
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF 887 E1 Clé à choc sans fil 18 V 205 Nm 1/4'' Brushless + 1x batterie Powerstack 1,7 Ah + chargeur",
+   "descr": "",
+   "prix": 176.39
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF 887 M2 Clé à choc sans fil 18 V 205 Nm 1/4'' Brushless + 2x batterie 4,0 Ah + chargeur",
+   "descr": "",
+   "prix": 247.48
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF 899 M1 18 V Boulonneuse à chocs sans fil Brushless 950 Nm 1/2\" avec boîtier TSTAK + 1 x DCB 182 4,0 Ah Batterie + DCB 115 Chargeur",
+   "descr": "",
+   "prix": 310.94
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF 922 E2 Clé à choc 18 V 406 Nm 1/2'' Brushless + 2x Powerstack batterie 1,7 Ah + chargeur",
+   "descr": "",
+   "prix": 303.71
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF 922 M2 Clé à choc 18 V 406 Nm 1/2'' Brushless + 2x batterie 4,0 Ah + chargeur",
+   "descr": "",
+   "prix": 308.53
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF 961 E1T Clé à choc 18 V 1632 Nm 1/2'' Brushless + 1x batterie Powerstack 1,7 Ah + chargeur + TSTAK",
+   "descr": "",
+   "prix": 434.4
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF 961 M1T Clé à choc 18 V 1632 Nm 1/2'' Brushless + 1x batterie 4,0 Ah + chargeur + TSTAK",
+   "descr": "",
+   "prix": 432.79
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF 961 P2T Clé à choc 18 V 1632 Nm 1/2'' Brushless + 2x batterie 5,0 Ah + chargeur + TSTAK",
+   "descr": "",
+   "prix": 503.48
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF620 P1 Visseuse à Plaques Sans Fil 18 V 30 Nm + Batterie 5 Ah + Chargeur + TSTAK",
+   "descr": "Visseuse automatique sans fil, Vitesse à vide max. 4 400 tr/min, Couple max. (vissage en force) 30 Nm",
+   "prix": 245.87
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF620E1T (1x Powerstack battery 1.7 Ah + charger + TSTAK)",
+   "descr": "Visseuse plaquiste sans fil, 18 V",
+   "prix": 223.38
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF801D2",
+   "descr": "Visseuse à choc sans fil, 2 Ah, Emmanchement carré 1/4 pouce",
+   "prix": 191.32
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF809L2T-QW",
+   "descr": "Visseuse à choc sans fil, 3 Ah, Emmanchement 6 pans 1/4 pouce",
+   "prix": 243.92
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF809P1T",
+   "descr": "Visseuse à choc sans fil, 5 Ah, Emmanchement 6 pans 1/4 pouce",
+   "prix": 186.75
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF840D2T",
+   "descr": "Visseuse à choc sans fil, 2 Ah, Emmanchement carré 1/4 pouce",
+   "prix": 200.4
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF850E1T",
+   "descr": "Visseuse à choc sans fil, 1,7 Ah, Couple de serrage max. 205 Nm",
+   "prix": 229.44
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF850M2 (2 x batterie 4,0 Ah + chargeur)",
+   "descr": "Visseuse à choc sans fil, 4 Ah, Couple de serrage max. 205 Nm",
+   "prix": 308.53
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF85ME2GT-QW McLaren Design",
+   "descr": "Visseuse à choc sans fil, 1,7 Ah, Emmanchement 6 pans 1/4 pouce",
+   "prix": 293
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF870E2T-QW",
+   "descr": "Visseuse à choc sans fil, 1,7 Ah, Emmanchement 6 pans 1/4 pouce",
+   "prix": 341.69
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF887H1",
+   "descr": "Visseuse à choc sans fil, 5 Ah, Emmanchement 6 pans 1/4 pouce",
+   "prix": 253.51
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF887P1",
+   "descr": "Visseuse à choc sans fil, 5 Ah, Emmanchement 6 pans 1/4 pouce",
+   "prix": 205
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF891H2T-QW",
+   "descr": "Visseuse à choc sans fil, 5 Ah, Couple de serrage max. 813 Nm",
+   "prix": 447.06
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF891P2G",
+   "descr": "Visseuse à choc sans fil, 5 Ah, Couple de serrage max. 813 Nm",
+   "prix": 399.99
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF894P2T-15 (2x 5,0 Ah + chargeur en coffret)",
+   "descr": "Visseuse à choc sans fil, 5 Ah, Emmanchement carré 1/2 pouce",
+   "prix": 424.5
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF899HP2-QW",
+   "descr": "Visseuse à choc sans fil, 5 Ah, Emmanchement carré",
+   "prix": 335.89
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF899P1",
+   "descr": "Visseuse à choc sans fil, 5 Ah, Emmanchement carré",
+   "prix": 319.79
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF900P2G",
+   "descr": "Visseuse à choc sans fil, 5 Ah, Emmanchement carré 1/2 pouce",
+   "prix": 431.77
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF901P1G",
+   "descr": "Visseuse à choc sans fil, 5 Ah, Emmanchement carré 1/2 pouce",
+   "prix": 244.31
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF903P1",
+   "descr": "Visseuse à choc sans fil, 5 Ah, Emmanchement carré",
+   "prix": 237.59
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF921D2T-QW",
+   "descr": "Visseuse à choc sans fil, 2 Ah, Couple de serrage max. 406 Nm",
+   "prix": 266.94
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF921NT",
+   "descr": "Visseuse à choc sans fil, 5 Ah, Couple de serrage max. 406 Nm",
+   "prix": 246.84
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF921P2T-QW",
+   "descr": "Visseuse à choc sans fil, 5 Ah, Couple de serrage max. 406 Nm",
+   "prix": 306.84
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF922P2T-QW",
+   "descr": "Visseuse à choc sans fil, 5 Ah, Emmanchement carré 1/2 pouce",
+   "prix": 285.37
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF961H2G",
+   "descr": "Visseuse à choc sans fil, 5 Ah, Emmanchement carré 1/2 pouce",
+   "prix": 579.99
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCG 405 M1 Meuleuse d'angle sans fil 18V 125mm Brushless + 1x batterie 4,0Ah + chargeur",
+   "descr": "",
+   "prix": 245.87
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCG 405 N + 1x 4,0Ah",
+   "descr": "",
+   "prix": 216.96
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCG 405 P2 (2x 5,0 Ah + charger)",
+   "descr": "",
+   "prix": 319.37
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCG 406 H2 Meuleuse d'angle sans fil 18 V 125 mm Brushless + 2x batterie Powerstack 5,0 Ah + chargeur",
+   "descr": "",
+   "prix": 470.78
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCG 406 M1 Meuleuse d'angle sans fil 18V 125mm Brushless + 1x batterie 4,0Ah + chargeur + TSTAK",
+   "descr": "",
+   "prix": 297.28
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCG 406 P1 Meuleuse d'angle sans fil 18 V 125 mm Brushless + 1x batterie 5,0 Ah + chargeur",
+   "descr": "",
+   "prix": 273.19
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCG 406 P2 Meuleuse d'angle sans fil 18 V 125 mm Brushless + 2x batterie 5,0 Ah + chargeur",
+   "descr": "",
+   "prix": 340.66
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCG407M2T Meuleuse d'angle sans fil 18V XR sans balais 125mm, 2x4Ah (DCG407M2T)",
+   "descr": "Meuleuse d'angle sans fil, 125 mm",
+   "prix": 324.85
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCG460X2 FlexVolt Meuleuse d'Angle 54V 2x3.0Ah Li-ion (DCG460X2-GB)",
+   "descr": "Meuleuse d'angle sans fil, 230 mm",
+   "prix": 1136.12
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCGG571M1",
+   "descr": "3,3 kg, Sans batterie ni chargeur, Volume 380 ml",
+   "prix": 340.74
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCH 133 NT Marteau combiné sans fil 18V 2,6J SDS plus Brushless + 1x batterie 4,0Ah + TSTAK - sans chargeur",
+   "descr": "",
+   "prix": 268.37
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCH 133 P2 Marteau combiné sans fil 18V 2,6J SDS plus Brushless + 2x batterie 5,0Ah + chargeur + TSTAK",
+   "descr": "",
+   "prix": 371.18
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCH 273 E2 Marteau combiné sans fil 18 V 2,1 J SDS Plus Brushless + 2x Powerstack batterie 1,7 Ah + chargeur",
+   "descr": "",
+   "prix": 423.79
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCH133NT (1x 4,0Ah + TSTAK)",
+   "descr": "Marteau perforateur combiné sans fil, Vitesse à vide max. 1 550 tr/min, Fréquence de frappe max. 5 680 coups/min",
+   "prix": 283.37
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCH253P2 XR 18V avec 2 batteries 5 Ah",
+   "descr": "Perforateur burineur, Batterie, Moteur EC sans balai",
+   "prix": 436
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCH273M1 (1x 4.0 Ah battery + charger)",
+   "descr": "Marteau perforateur combiné sans fil, Stop de frappe, SDS-Plus",
+   "prix": 345.48
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCH273P2 (2 x 5,0 Ah)",
+   "descr": "Marteau perforateur combiné sans fil, Vitesse à vide max. 1 100 tr/min, Fréquence de frappe max. 4 600 coups/min",
+   "prix": 387.26
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCH273P3 (3 x 5,0 Ah)",
+   "descr": "Marteau perforateur combiné sans fil, Vitesse à vide max. 1 100 tr/min, Fréquence de frappe max. 4 600 coups/min",
+   "prix": 488.46
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCH333X2-QW",
+   "descr": "Marteau perforateur combiné sans fil, Vitesse à vide max. 1 000 tr/min, Fréquence de frappe max. 4 480 coups/min",
+   "prix": 701.71
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCH481X2-QW",
+   "descr": "Perforateur sans fil, Vitesse à vide max. 540 tr/min, Fréquence de frappe max. 3 150 coups/min",
+   "prix": 882
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCH832X2-QW",
+   "descr": "Perforateur burineur, Fréquence de frappe max. 2 900 coups/min, Moteur EC sans balai",
+   "prix": 899.9
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCK XR2WP2T",
+   "descr": "Pack outillage sans fil, Li-Ion, Inclus dans le kit Scie sauteuse sans fil",
+   "prix": 559
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCK2051H2T-QW",
+   "descr": "Pack outillage sans fil, 18 V, Li-Ion",
+   "prix": 475.21
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCK2062L2T-QW",
+   "descr": "Pack outillage sans fil, 18 V, Li-Ion",
+   "prix": 302.59
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCK246P2T-QW",
+   "descr": "Pack outillage sans fil, 18 V, Li-Ion",
+   "prix": 922.88
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCK266P3-QW",
+   "descr": "Pack outillage sans fil, 18 V, Li-Ion",
+   "prix": 425
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCK278P2 Pack combo batterie 18 V",
+   "descr": "Pack outillage sans fil, 18 V, Li-Ion",
+   "prix": 540.63
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCL 040 E2 Lampe LED sans fil 18 V 110 lm + 2x Powerstack Batterie 1,7 Ah + chargeur",
+   "descr": "",
+   "prix": 190.82
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCM 561 PBS 18 V Brushless + 2x 4.0 Ah Batteries + Charger",
+   "descr": "",
+   "prix": 373.57
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCM 561 PBS 18V Brushless + 2x 5.0 Ah Batteries + Charger",
+   "descr": "",
+   "prix": 394.48
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCM 849 H1 Polisseuse excentrique sans fil 18 V 180 mm Brushless + 1x Powerstack batterie 5,0 Ah + chargeur",
+   "descr": "",
+   "prix": 418.33
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCM563P1-QW (avec 1 batterie 5,0Ah)",
+   "descr": "Taille-haie sans fil, Longueur de la lame 55 cm, Longueur de coupe 55 cm",
+   "prix": 227.6
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCM572X1-QW",
+   "descr": "Batterie, Souffler, 54 V",
+   "prix": 437.36
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCM849N",
+   "descr": "Polisseuse sans fil, 180 mm, 1,7 Ah",
+   "prix": 328.37
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCMBL777X1-QW",
+   "descr": "Batterie, Souffler, Avec chargeur",
+   "prix": 384.2
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCMCS575X1-QW",
+   "descr": "Tronçonneuse batterie, 54 V, 1 batterie",
+   "prix": 517.63
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCMHT562D2 Taille-haie 18V, 2x2,0Ah (DCMHT562D2)",
+   "descr": "Taille-haie sans fil, 18 V",
+   "prix": 271
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCMHT564P1-QW (1x Battery 5Ah + Charger)",
+   "descr": "Taille-haie sans fil, Longueur de la lame 55 cm, Longueur de coupe 55 cm",
+   "prix": 246.1
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCMHT573X XR FlexVolt Taille-Haies 54V 65cm sans balais (DCMHT573X1-GB)",
+   "descr": "Taille-haie sans fil, 54 V, Batterie Li-Ion",
+   "prix": 755.4
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCMPH 566 M2 Taille-haie télescopique sur batterie 18 V 55 cm + 2x batterie 4,0 Ah",
+   "descr": "",
+   "prix": 382.94
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCMPH 566 N Taille-haies sur batterie 18 V 55 cm + 1x batterie 5,0 Ah - sans chargeur",
+   "descr": "",
+   "prix": 300.25
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCMPH 566 P1 Taille-haies sans fil 18 V 55 cm + 1x batterie 5,0 Ah + chargeur",
+   "descr": "",
+   "prix": 329.17
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCMPH566P1-QW",
+   "descr": "Taille-haie sans fil, 5 Ah, Avec une batterie",
+   "prix": 212.9
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCMPS 520 H1 Scie à élaguer sans fil 18 V 20 cm Brushless + 1x Powerstack batterie 5,0 Ah + chargeur",
+   "descr": "",
+   "prix": 325.16
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCMPS567P2 (2 x 5.0 Ah + DCB1104)",
+   "descr": "Élagueuse sur perche batterie, 18 V, 1 batterie",
+   "prix": 404
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCN 660 M2 Cloueur sans fil 18V 32 - 63mm Brushless + 2x Batteries 4,0Ah + Chargeur + Coffret de transport",
+   "descr": "",
+   "prix": 554.86
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCN662 Cloueur, 18V, 1x5,0Ah + DCB1104 (DCN662P1-SK)",
+   "descr": "Cloueuse sans fil, 1,6 kg",
+   "prix": 539
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCP 580 P1 18 V Rabot sans fil 82 mm avec boîtier TSTAK VI + 1x Batterie DCB 184 5,0 Ah + 1x Chargeur DCB 115",
+   "descr": "",
+   "prix": 329.98
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS 334 E1 Scie Sauteuse Orbitale sur Batterie 18 V Sans Balais + 1x Batterie Power",
+   "descr": "",
+   "prix": 315.69
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS 334 E2 18 V Brushless + 2x Batterie Powerstack 1,7 Ah + Chargeur",
+   "descr": "",
+   "prix": 397.46
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS 334 M1 cordless pendulum jigsaw 18 V brushless + 1x battery 4.0 Ah + charger",
+   "descr": "",
+   "prix": 315.01
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS 334 P2 Scie sauteuse pendulaire sans fil Brushless 18V + 2x Batteries 5,0Ah + Chargeur",
+   "descr": "",
+   "prix": 368.53
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS 334N ( 1x 4,0 Ah)",
+   "descr": "",
+   "prix": 280.72
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS 335 H1 Scie sauteuse sans fil 18 V 135 mm Brushless + 1x batterie Powerstack 5,0 Ah + chargeur",
+   "descr": "",
+   "prix": 392.07
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS 335 N Scie Sauteuse sans Fil 18V 135mm Brushless + 1x Batterie 5,0Ah (DCS 335 N",
+   "descr": "",
+   "prix": 295.68
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS 335 P2 Scie sauteuse sans fil 18 V 135 mm Brushless + 2x batterie 5,0 Ah + chargeur",
+   "descr": "",
+   "prix": 422.38
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS 355 E2 Oscillateur sans fil Multitool 18 V Brushless + 2x Powerstack batterie 1,7 Ah + chargeur + accessoires",
+   "descr": "",
+   "prix": 280.82
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS 369 M2 Scie sabre sans fil Scie réversible 18 V Brushless + 2x batterie 4,0 Ah + chargeur",
+   "descr": "",
+   "prix": 317.1
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS 570 H1T Cordless circular saw 18 V 184 mm brushless + 1× 5.0 Ah Powerstack batt",
+   "descr": "",
+   "prix": 399.86
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS 570 M2T Cordless circular saw 18 V 184 mm brushless + 2× 4.0 Ah batteries + cha",
+   "descr": "",
+   "prix": 380.58
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS 570 NT Cordless circular saw 18 V 184 mm brushless + 1× 5.0 Ah battery + TSTAK",
+   "descr": "",
+   "prix": 309.38
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS 579 NT Cordless circular saw 54 V FlexVolt 190 mm brushless + 1× 12.0 Ah batter",
+   "descr": "",
+   "prix": 541.62
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS 579 T2T Cordless circular saw 54 V FlexVolt 190 mm brushless + 2× 6.0 Ah batter",
+   "descr": "",
+   "prix": 628.37
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS334M1 Scie sauteuse sans fil 18V Brushless + 1x Batterie 4,0Ah + Chargeur",
+   "descr": "",
+   "prix": 294.63
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS350",
+   "descr": "Batterie, 18 V, 5 Ah",
+   "prix": 333.84
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS355M2 + 2x Batterie 4,0 Ah + Chargeur + Accessoires + TSTAK",
+   "descr": "Découpeur ponceur sans fil, 18 V, Batterie",
+   "prix": 306.92
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS355P2T (2 x 5,0 Ah + chargeur + TSTAK II)",
+   "descr": "Découpeur ponceur sans fil, 18 V, Vitesse d'oscillation max. à vide 20 000 tr/min",
+   "prix": 337
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS389T2-QW with 2x6,0Ah battery and charger in TSTAK VI",
+   "descr": "Scie sabre sans fil, Profondeur max. de coupe à 90° 160 mm, 54 V",
+   "prix": 559.01
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS391N (sans batterie + chargeur)",
+   "descr": "Scie circulaire portative, 460 W, Sans batterie",
+   "prix": 146.48
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS391P2 (2x 5,0 Ah + charger + TSTAK VI)",
+   "descr": "Scie circulaire portative, 460 W, 2 batteries",
+   "prix": 347
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS565P2-QW (2 x 5,0 Ah + chargeur + coffret)",
+   "descr": "Scie circulaire portative, 2 batteries, 2,8 kg",
+   "prix": 377
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS570P2 (2 x Batterie 18 V 5,0 Ah + Chargeur dans la boîte TSTAK)",
+   "descr": "Scie circulaire portative, 2 batteries, 3,5 kg",
+   "prix": 351.04
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS572M2 (2x 4.0 Ah battery + charger + T-STAK)",
+   "descr": "1 batterie, Diamètre de la lame 184 mm",
+   "prix": 437.05
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS578X2-QW",
+   "descr": "Scie circulaire portative, 2 batteries, 3,7 kg",
+   "prix": 746.19
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS691X2",
+   "descr": "Meuleuse d'angle sans fil, 54 V, Vitesse à vide max. 6 600 tr/min",
+   "prix": 1037.56
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS782N 18 V Cordless Panel Saw without Battery and Charger",
+   "descr": "",
+   "prix": 868.16
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCV 100 E2 18 V + 2x batterie Powerstack 1,7 Ah + chargeur",
+   "descr": "",
+   "prix": 261.98
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCV 100 M2 2x4Ah batteries et chargeur",
+   "descr": "",
+   "prix": 251.92
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCV 100 P1 1 x 5Ah Battery with Charger",
+   "descr": "",
+   "prix": 199.54
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCV 501 LM1 Aspirateur sans fil 18 V 0,7 l e poussière L + 1x batterie 4,0 Ah + chargeur",
+   "descr": "",
+   "prix": 254.47
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCV 501 LP1 Aspirateur sans fil 18 V 0,7 l e poussière L + 1x batterie 5,0 Ah + chargeur",
+   "descr": "",
+   "prix": 257.68
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCV 501 LP2 aspirateur balai sans fil 18 V 0,7 l classe poussière L + 2x batterie 5",
+   "descr": "",
+   "prix": 344.06
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCV 517 P1 Aspirateur à main sans fil 18 V 1,9 L + 1x batterie 5,0 Ah + chargeur",
+   "descr": "",
+   "prix": 230.37
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCW 210 P1 ( 1 x 5,0 Ah in TSTAK)",
+   "descr": "",
+   "prix": 267.34
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCW 604 P2 Fraiseuse combinée sans fil 18V 55mm + 2x batteries 5,0 Ah + 1x chargeur rapide + set de fraises 12 pcs dans TSTAK",
+   "descr": "",
+   "prix": 604.83
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCW 620 P1T Défonceuse sans fil 18 V 12 mm Brushless + 1 batterie 5,0 Ah + chargeur + TSTAK",
+   "descr": "",
+   "prix": 572.56
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCW620 Défonceuse Plongeante XR 18V sans Balai 1/2\" 2x5Ah (DCW620H2-GB)",
+   "descr": "Défonceuse, 720 W",
+   "prix": 1093.85
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DWE494TWIN",
+   "descr": "Set de meuleuses d'angle, 2 000 W, Vitesse à vide max. 6 000 tr/min",
+   "prix": 229.99
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DWH161P2T Aspirateur 2x5,0Ah avec DCB115 et TSTAK II (DWH161P2T)",
+   "descr": "Filtre HEPA",
+   "prix": 376
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DWK1102 (3 x 5,0 Ah + caddy 3in1)",
+   "descr": "Pack outillage sans fil, 18 V, Li-Ion",
+   "prix": 2387
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DWK1201 (3 x 5,0 Ah + caddy 3in1)",
+   "descr": "Pack outillage sans fil, 18 V, Li-Ion",
+   "prix": 2618
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DWK600 (3 x 5,0 Ah + Chariot 3in1)",
+   "descr": "Pack outillage sans fil, 18 V, Li-Ion",
+   "prix": 1474
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DWK701 (3 x 5,0 Ah + Chariot 3in1)",
+   "descr": "Pack outillage sans fil, 18 V, Li-Ion",
+   "prix": 1780
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DWK800 (3 x 5,0 Ah + chariot 3en1)",
+   "descr": "Pack outillage sans fil, 18 V, Li-Ion",
+   "prix": 1714
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DWK803 (3 x 5,0 Ah + chariot 3in1)",
+   "descr": "Pack outillage sans fil, 18 V, Li-Ion",
+   "prix": 1843
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DWK900 (3 x 5,0 Ah + caddy 3in1)",
+   "descr": "Pack outillage sans fil, 18 V, Li-Ion",
+   "prix": 1903
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DXIR1FFMMA2P3 Masque Complet Léger Réutilisable Avec Filtres A2P3 - Taille M",
+   "descr": "",
+   "prix": 199.99
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt Drywall sander DCE800H1-SK (1 x 5.0 Ah Powerstack + DCB1104)",
+   "descr": "Ponceuse pour platre",
+   "prix": 689
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt Elite Series Meule Diamant Polyvalente 305x25,4mm (DT20460-QZ)",
+   "descr": "Disque à tronçonner diamanté, 300 mm",
+   "prix": 90.2
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt FlexVolt Groupe Électrogène 54V/18V 9,0Ah (DCB132X1)",
+   "descr": "Ensemble de batteries outillage, 18 V, Li-Ion",
+   "prix": 281
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt Kit FVK381T2HD-QW 54V/18V (3060)",
+   "descr": "Pack outillage sans fil, 54 V, Li-Ion",
+   "prix": 1195
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt Kit batterie DCBP 034 E3 3x batterie Powerstack 18 V 1,7 Ah / 1700 mAh XR Li-Ion - avec indicateur de charge",
+   "descr": "",
+   "prix": 210.53
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt Laser-Set DW088CG + DW099E (DW0887100-1)",
+   "descr": "",
+   "prix": 224.99
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt McLaren F1 Team DCF86MP 2x 5,0Ah Akkus + Ladegerät",
+   "descr": "Visseuse à choc sans fil, 5 Ah, Emmanchement carré 1/4 pouce",
+   "prix": 279
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt Mini-meuleuse DCG408P2T 2x5,0Ah + DCB1104 + TSTAK II (DCG408P2T)",
+   "descr": "",
+   "prix": 381
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt Perceuse visseuse percussion Premium XRP 18V - sans batterie ni chargeur - coffret",
+   "descr": "",
+   "prix": 203.68
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt Pistolet à riveter 18V 1x1,7Ah POWERSTACK avec chargeur et TSTAK (DCF403E1GT)",
+   "descr": "Pistolet à rivets sans fil, 1,7 Ah, 1,7 kg",
+   "prix": 539.62
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt Power Set FlexVolt (1 x 54V/18V 6,0 Ah + DCB132)",
+   "descr": "",
+   "prix": 251
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt Power Set McLaren 2x 18V 4,0Ah (DCB1104)",
+   "descr": "",
+   "prix": 173
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt SDS-max 40x570x450 mm DT9445-QZ",
+   "descr": "Foret, SDS-max, Diamètre du foret 40 mm",
+   "prix": 98.99
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt Set DCK266P2",
+   "descr": "Pack outillage sans fil, 18 V, Inclus dans le kit Perceuse-visseuse sans fil",
+   "prix": 295.96
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt Starter-Kit 2 x 2,0 Ah Batteries VDCB105D2",
+   "descr": "Ensemble de batteries outillage, 18 V, 2 Ah",
+   "prix": 105.48
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt Starter-Set DCB132X2-QW FlexVolt",
+   "descr": "Ensemble de batteries outillage",
+   "prix": 325
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt Taille-haie DCMHT562P2, 2x5,0Ah, avec DCB1104 (DCMHT562P2)",
+   "descr": "",
+   "prix": 337
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt XR FLEXVOLT 2x - 18/54V 12Ah ( DCB548Y2 )",
+   "descr": "Ensemble de batteries outillage, 18 V, 12 Ah",
+   "prix": 382.1
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt kit 18V XR DCD791 + DCG405 - 2x5Ah - Meuleuse 125 mm - Coffret TSTAK",
+   "descr": "",
+   "prix": 465.1
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt - Pack 2 batteries POWERSTACK XR 18V 1.7Ah Li-Ion + chargeur - DCB1102E2-QW",
+   "descr": "",
+   "prix": 232.99
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt 18V Impact Driver Dcd709M1 65Nm 1X4.0Ah",
+   "descr": "",
+   "prix": 217.68
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCB1102MDR-QW Pack 2 batteries 4.0Ah + 2.0Ah XR 18V Li-Ion + chargeur",
+   "descr": "",
+   "prix": 134.21
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCB115P1 Pack batterie XR 18V 5Ah Li-Ion + chargeur",
+   "descr": "",
+   "prix": 101.72
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCB184P10 Lot de batteries 10 x DCB184 18V Li-Ion XR - 10 X 5.0Ah",
+   "descr": "",
+   "prix": 638.45
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCD1007H1T-QW Perceuse-visseuse a percussion sans fil 18 V 169Nm XRP - 1X5.0Ah Batterie PowerStack + chargeur en T-STAK",
+   "descr": "",
+   "prix": 386.21
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCD708D1T-QW Perceuse visseuse sans fil Brushless XR 65Nm 18V 1x2Ah Batterie + Chargeur en Tstak",
+   "descr": "",
+   "prix": 142.38
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCD709D1T-QW Perceuse à percussion sans fil XR 18V 65Nm 2 vitesses - 1 X 2.0 Ah Batterie, chargeur en coffret",
+   "descr": "",
+   "prix": 153.91
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCD791D1-QW Set perceuse visseuse Li-Ion 18V (1x batterie 2.0Ah) dans TSTAK - moteur brushless - 70Nm",
+   "descr": "",
+   "prix": 163.75
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCD796M1 Perceuse à percussion 18V XR (1x 4,0Ah) + chargeur en TSTAK",
+   "descr": "",
+   "prix": 189.74
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCD800H1T-QW Perceuse visseuse 18V XR 90 Nm + 1 x 5,0Ah Batteries Powerstack + Chargeur + Coffret T-STAK",
+   "descr": "",
+   "prix": 269.23
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCD805P1T Perceuse à percussion XR Brushless 18V 90Nm - 1 X 5Ah Batteries, chargeur en coffret",
+   "descr": "",
+   "prix": 246.13
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCF403D1-QW Riveteuse sans fil 18 V 2.4-4.8mm - 1X2.0Ah Batterie + chargeur en T-STAK",
+   "descr": "",
+   "prix": 497.82
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCF414D2-QW Riveteuse sans fil 18 V 4.8-6.4mm - 2X2.0Ah Batteries + chargeur en T-STAK",
+   "descr": "",
+   "prix": 736.41
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCF620P1K-QW Set doutils à batteries 18V - Visseuse plaques de plâtre (1x batterie 5.0Ah) dans TSTAK - Moteur sans charbon",
+   "descr": "",
+   "prix": 279.8
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCF809D1T Clé à chocs sans fil 18V - 1/4 - Brushless (sans charbon) 1 X 2,0 Ah Batterie + chargeur en coffret",
+   "descr": "",
+   "prix": 155.49
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCF860D1T-QW Visseuse à chocs XR 282Nm 18V 1 x 2.0Ah batterie + chargeur en Coffret TSTAK",
+   "descr": "",
+   "prix": 276.88
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCF860P1T-QW Visseuse à chocs XR 282Nm 18V 1 x 5.0Ah batterie + chargeur en Coffret TSTAK",
+   "descr": "",
+   "prix": 318.42
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCF870D2T-QW Visseuse à chocs Hydraulique XR 18V 1/4″ Brushless 2 x 2,0Ah Batteries + chargeur en Coffret TSTAK",
+   "descr": "",
+   "prix": 289.21
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCF887M2 Visseuse à chocs 18V XR 205 Nm (2x4,0 Ah) dans TSTAK",
+   "descr": "",
+   "prix": 239.74
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCF899P1-QW Boulonneuse à chocs 18V 5Ah (1x5.0Ah) Li-Ion XR en coffret TSTAK",
+   "descr": "",
+   "prix": 296.75
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCF921D1T-QW Clé à Chocs 1/2 406Nm 18V XR + 1X2.0 Ah Batterie + chargeur en Coffret TSTAK",
+   "descr": "",
+   "prix": 244.28
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCF922D1T-QW Clé à choc sans fil sans charbon 18V Li-ion XR - 1 X 2.0Ah Batrerie + chargeur en Tstak",
+   "descr": "",
+   "prix": 240.2
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCF964H1T Clé à chocs sans fil 18V Brushless 3/4 - 1 X 5.0Ah batterie PowerStack + chargeur + coffret T-STAK",
+   "descr": "",
+   "prix": 547.85
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCF964P2T Clé à chocs sans fil 18V Brushless 3/4 - 2 batteries 5.0Ah + chargeur + coffret T-STAK",
+   "descr": "",
+   "prix": 569.24
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCG405M1 Meuleuse dangle sans fil 18V 125mm Brushless + 1x Batterie 4,0Ah + Chargeur + TStak",
+   "descr": "",
+   "prix": 249.61
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCG409VSX1-QW Meuleuse dangle Accu Flexvolt Advantage 125 mm vitesse variable 18V avec 1 X 9 Ah batterie + chargeur en TSTAK",
+   "descr": "",
+   "prix": 438.29
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCM 561 PBS Coupe-bordures sans fil 18V Brushless + 1x batterie 5,0Ah + chargeur",
+   "descr": "",
+   "prix": 307.18
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCMPS520P2-QW Tronçonneuse élagueuse - Lame de 20 cm - XR - 18V - 2 X 5.0Ah Batreries + chargeur",
+   "descr": "",
+   "prix": 305.68
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCN662D1-QW Finisseuse sans balais 16GA XR 18V 1 x 2.0Ah Batterie, Chargeur avec coffret",
+   "descr": "",
+   "prix": 488.91
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCS331 P1 Scie Sauteuse + 1 X 5 Ah Batterie DCB184 + chargeur et Coffret TSTAK",
+   "descr": "",
+   "prix": 284.12
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCS355P1-QW Multi-Cutter Sans Fil XR 18V 1 X 5.0Ah Li-Ion Sans Charbons + 32 Accessoires Coffret TSTAK",
+   "descr": "",
+   "prix": 239.75
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCS369P1T-QW Scie sabre XR 18V 1 X 5.0 Ah batteries + chargeur en coffret",
+   "descr": "",
+   "prix": 258.71
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCS520T1-QW Scie circulaire plongeante 54V XR FLEXVOLT - 1 batterie 54V 6.0Ah, chargeur, coffret",
+   "descr": "",
+   "prix": 692.84
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCS570P1-QW Scie circulaire XR Li-Ion 18V Brushless + 1 x 5.0Ah Batterie + Chargeur + Coffret TSTAK",
+   "descr": "",
+   "prix": 306.84
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCS572P1-QW Scie circulaire XR 18V 184 mm - 1 X 5.0 Ah batterie + chargeur en coffret",
+   "descr": "",
+   "prix": 384.61
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCV 586 MT2 Aspirateur eau et poussière sans fil 54V 11L sans balais + 2x Batteries FlexVolt 6.0Ah + Chargeur",
+   "descr": "",
+   "prix": 689.83
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCV517P1-QW XR aspirateur sans fil 18V + 1x5.0Ah Batterie + Chargeur",
+   "descr": "",
+   "prix": 219.74
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCW200M1 Ponceuse vibrante sans fil 18 V 108x115 mm + 1 x 4,0Ah Batteries + Chargeur + Coffret T-STAK",
+   "descr": "",
+   "prix": 244.25
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCW210D1 Ponceuse excentrique 125 mm 18V Brushless + en TSTAK + 1 X 2,0 Ah Batteries + Chargeur",
+   "descr": "",
+   "prix": 239.28
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DNPT28R75G12Z Pointes en bande papier 33° crantées éléctro-zinguées 2.8x75mm",
+   "descr": "",
+   "prix": 80.61
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt Meuleuse d'Angle 125Mm 18V Dcg418Shdx2 2X9.0Ah Fv Blade Switch Tstak",
+   "descr": "",
+   "prix": 805.99
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt Multicutter 18v dewalt - sans Batterie ni Chargeur - dcs356nt-xj & Ponceuse Excentr",
+   "descr": "",
+   "prix": 319.39
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt kit de batteries 18V 5,0Ah - lot de 2",
+   "descr": "",
+   "prix": 257.88
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt zszywacz 18v 2x2,0ah dcn701d2",
+   "descr": "",
+   "prix": 515.6
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Duo de meuleuse DEWALT 230mm 2200W (DWE492) + 125mm 900W (DWE4157) - DWE492TWIN2 G",
+   "descr": "",
+   "prix": 272.28
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Débroussailleuse à fil xr flexvolt 54V Brushless - sans batterie ni chargeur - DEWALT - DC",
+   "descr": "",
+   "prix": 569.45
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Défonceuse XR 18V DCW620NT-XJ + 2 batteries 18V 5 Ah + 1 Chargeur DCB1104-QW DEWALT",
+   "descr": "",
+   "prix": 609.9
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Ensemble combiné Dewalt DCD996 + DCF887, chargeur, TSTAK DCK276P3T",
+   "descr": "",
+   "prix": 514.02
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Gonfleur 18V XR DCC018N-XJ + 2 batteries 18V 5 Ah + 1 chargeur DCB1104-QW DEWALT",
+   "descr": "",
+   "prix": 303.9
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Kit DeWALT DCK266NDS (DCD796 + DCF887 + DS150)",
+   "descr": "",
+   "prix": 230
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Kit de démarrage DeWALT 18V 3 batteries 5Ah DCB184P3",
+   "descr": "",
+   "prix": 214.7
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Lame pour scie plongeante - 48 Dents - 165x20 mm DEWALT",
+   "descr": "",
+   "prix": 92.95
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Marteau combiné DeWALT DCH273P3T (3 x 5,0 Ah + DCB115 + TSTAK II)",
+   "descr": "",
+   "prix": 510
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Meuleuse compacte 125 mm XR 18V Brushless - DEVALT - Sans batterie, ni charger coffret TST",
+   "descr": "",
+   "prix": 305.71
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Meuleuse compacte 76mm XR 18V DCG430N-XJ + 2 batteries 18V 1,7 Ah PowerStack + 1 Chargeur",
+   "descr": "",
+   "prix": 449.9
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Meuleuse d'angle sans fil 125 mm 18 V - DCG405NT + Batterie lithium XR 18V 4Ah DCB182 DEWA",
+   "descr": "",
+   "prix": 339.9
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Meuleuse droite XR 18V DCG426N-XJ + 1 batterie 18V 5 Ah + 1 Chargeur DCB1104-QW DEWALT",
+   "descr": "",
+   "prix": 264.9
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Meuleuse droite sans fil DeWalt DCG 426 H1 18 V Brushless + 1 batterie Powerstack 5,0 Ah + chargeur",
+   "descr": "",
+   "prix": 343.87
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Meuleuse Ø125 mm 18V DCG404NT-XJ + 2 batteries 18V 5 Ah + chargeur DCB1104-QW DEWALT",
+   "descr": "",
+   "prix": 429.9
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Meuleuse Ø125 mm 18V DCG408NT-XJ + 1 batterie 18V 5 Ah + 1 Chargeur DCB1104-QW DEWALT",
+   "descr": "",
+   "prix": 294.9
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Nettoyeur haute pression XR 2 X 18V DCMPW1600N-XJ + 2 batteries 18/54V 9-3Ah + 1 chargeur",
+   "descr": "",
+   "prix": 779.9
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Nettoyeur à pression 54V DCMPW1000N-XJ + 2 batteries 18/54V 9-3Ah + 1 chargeur DCB118-QW D",
+   "descr": "",
+   "prix": 639.9
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "PACK 5 OUTILS DEWALT ,4 batteries 5Ah 18v,2 chargeurs + disque.DCD800/DCF887/DCH273/DCG405",
+   "descr": "",
+   "prix": 990
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Pack 2 outils 18V XR (DCD791/DCG405) + 25 disques à tronçonner (DT43906) + 2 batteries 5.0Ah + chargeur + TSTAK - DEWALT - DCK2020P2T/DT43906",
+   "descr": "",
+   "prix": 574.67
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Pack 6 outils 18V XR (3x5,0 Ah) avec 2 coffrets TSTAK - DEWALT DCK694P3",
+   "descr": "",
+   "prix": 810
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Pack de 2200 pointes crantées électro-zinguées 33° DEWALT DNPT28R",
+   "descr": "",
+   "prix": 83.19
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Pack laser rotatif DCLE15221GL-QW - Simple pente - Faisceaux verts - USB-C",
+   "descr": "",
+   "prix": 1932.55
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Pack pro niveau laser rotatif horizontal - faisceaux rouges - alcalines - DEWALT - DCLE05211RL-XJ",
+   "descr": "",
+   "prix": 1222.79
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Perceuse visseuse percussion compacte XR DEWALT DCD805P2LRT-QW 18V 2X5Ah Li-Ion Brushless - lanière de sécurité",
+   "descr": "",
+   "prix": 385.8
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Perceuse à percussion 18V XR (1x6.0 Ah) en TSTAK - DEWALT DCD796T1T",
+   "descr": "",
+   "prix": 278.89
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Perceuse-visseuse 18V DCD791NT-XJ + 1 batterie 18V 5 Ah + 1 chargeur DCB1104-QW DEWALT",
+   "descr": "",
+   "prix": 211.9
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Perceuse-visseuse sans fil DeWalt DCD 791 M2 18 V 70 Nm Brushless + 2 batteries 4,0 Ah + chargeur",
+   "descr": "",
+   "prix": 261.94
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Perceuse-visseuse à percussion 18V DCD999NT-XJ + 2 batteries 18/54 V 6/2 Ah + 1 Chargeur D",
+   "descr": "",
+   "prix": 523.9
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Perceuse-visseuse à percussion DeWALT DCD796D2T (2 x 2,0 Ah + DCB107 + TSTAK II) + kit de 40 embouts de vissage",
+   "descr": "",
+   "prix": 219
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Perceuse-visseuse à percussion DeWALT DCD796P1T (1 x 5,0 Ah + DCB115 + TSTAK II) + kit de 40 embouts de vissage",
+   "descr": "",
+   "prix": 233
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Pistolet à air chaud sans fil DeWalt DCE 530 M1 18 V 530 °C + 1 batterie 4,0 Ah + 1 chargeur + buse plate et buse à réflecteur",
+   "descr": "",
+   "prix": 204.75
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Pistolet à mastic XR 18V - Sans batterie, ni chargeur - tube long - DCE581N-XJ",
+   "descr": "",
+   "prix": 381.13
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Pointes crant?es inoxydables DEWALT 2,8 x 63 mm - Boite de 1200 - DNPT28R63SZ",
+   "descr": "",
+   "prix": 184.9
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Pointes crantées galvanisées à chaud DEWALT 3,1 x 90 mm - Boite de 1200 - DNPT31R90HDZ G",
+   "descr": "",
+   "prix": 117.59
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Pointes crantées inoxydables DEWALT 2,8 x 63 mm - Boite de 1200 - DNPT28R63SZ G",
+   "descr": "",
+   "prix": 123.38
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Pointes inox pour cloueur 15GA 34° - 1.4x38mm - par 4000 DEWALT",
+   "descr": "",
+   "prix": 125.52
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Pompe à graisse double vitesse XR 18V 5 Ah Li-Ion Brushless DCGG581P1G-QW flexible 1,2m compatible cartouches 400g",
+   "descr": "",
+   "prix": 519.65
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Ponceuse vibrante DCW200NT-XJ + 1 batterie 18V 5 Ah + 1 chargeur DCB1104-QW DEWALT",
+   "descr": "",
+   "prix": 263.9
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Scie Sabre compacte 18V XR (1x5,0 Ah) en TSTAK - DEWALT DCS369P1",
+   "descr": "",
+   "prix": 311.92
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Scie circulaire DeWalt 18v XR FlexVolt Advantage + Powerstack 2x5AH DCS386H2T",
+   "descr": "",
+   "prix": 527.2
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Scie sabre compact XR 18V 5 Ah Li-Ion brushless DCS367P2-QW- 2 batteries - coffret TSTAK DEWALT",
+   "descr": "",
+   "prix": 609.9
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Scie sauteuse pendulaire DeWALT DCS334P1T (1 x 5,0 Ah + DCB115 + TSTAK II)",
+   "descr": "",
+   "prix": 313
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Scie à onglet radiale Ø305 mm DCS781N-XJ + 1 batterie 54V 9 Ah + 1 chargeur DCB118-QW DEWA",
+   "descr": "",
+   "prix": 1149.9
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Starter-Kit 18V Powerstack (2x5,0 Ah) avec chargeur - DCB115H2-QW",
+   "descr": "",
+   "prix": 289.9
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Taille haie 18V 55cm DCMHT564N-XJ + 1 batterie 18V 5 Ah + chargeur DCB1104-QW DEWALT",
+   "descr": "",
+   "prix": 269.9
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Tondeuse 2 x 18V DCMWSP156N-XJ + 2 batteries 18V 5 Ah + 1 chargeur DCB1104-QW DEWALT",
+   "descr": "",
+   "prix": 569.9
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Tronçonneuse 54V 35 cm DCMCST635N-XJ + 1 batterie 54V 9 Ah + 1 chargeur DCB118-QW DEWALT",
+   "descr": "",
+   "prix": 587.9
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Tronçonneuse sans fil DeWALT 50 cm, XR FlexVolt 54 V (1x9,0 Ah) DCMCS575X1",
+   "descr": "",
+   "prix": 545.5
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Vibrateur à béton DCE531N-XJ + 2 batteries 18V 5 Ah + 1 Chargeur DCB1104-QW DEWALT",
+   "descr": "",
+   "prix": 649.9
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Visseuse à Chocs DeWALT DCF887D1T (1 x 2,0 Ah + DCB107 + TSTAK II) + Jeu de 32 embouts de vissage Impact Torsion",
+   "descr": "",
+   "prix": 213
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "XR FLEXVOLT Lot de 2 batteries DCB547 de 18/54 V et 9 Ah et chargeur rapide DCB118 de 18 V",
+   "descr": "",
+   "prix": 302.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 115 x 1,2 x 22,23 mm 10 St. (D-65953-12)",
+   "descr": "Disque à tronçonner pour métal, Métal, 10 pièce(s)",
+   "prix": 8.25
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 125 x 1,6 x 22,23 mm 1 St. (B-53796)",
+   "descr": "Disque à tronçonner diamanté, Marbre, 1 pièce(s)",
+   "prix": 23.47
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 165 x 20 x 40 Z (B-32954)",
+   "descr": "Lame de scie circulaire, 1 pièce(s), Diamètre de la lame 165 mm",
+   "prix": 20.59
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 180x30x60Z (B-33255)",
+   "descr": "Lame de scie circulaire, 1 pièce(s), Diamètre de la lame 180 mm",
+   "prix": 43.54
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 190 x 30 x 24Z (B-32926)",
+   "descr": "Lame de scie circulaire, 1 pièce(s), Diamètre de la lame 190 mm",
+   "prix": 21.32
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 1910C9-5 H-Filter Set",
+   "descr": "Filtre HEPA, Makita, Blanc",
+   "prix": 15.69
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 191X84-4",
+   "descr": "Boîte à outils avec compartiments, Vide, Portable",
+   "prix": 33.4
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 191X95-9",
+   "descr": "Profondeur 100 mm",
+   "prix": 1.92
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 197624-2",
+   "descr": "Chargeur rapide pour batterie d'outillage, Pour technologie de batterie Li-Ion, Nombre d'emplacements 1",
+   "prix": 222.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 199137-9 (50 x 100m)",
+   "descr": "Fil de ligature, Ronde, Roulettes",
+   "prix": 126
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 210x30x24Z (B-32253)",
+   "descr": "Lame de scie circulaire, 1 pièce(s), Diamètre de la lame 210 mm",
+   "prix": 30.18
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 216x30x60Z (B-32502)",
+   "descr": "Lame de scie circulaire, 1 pièce(s), Diamètre de la lame 216 mm",
+   "prix": 66.83
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 235 x 30 x 40 Z (B-32362)",
+   "descr": "Lame de scie circulaire, 1 pièce(s), Diamètre de la lame 235 mm",
+   "prix": 33.06
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 260 x 30 x 48Z (B-33495)",
+   "descr": "Lame de scie circulaire, 1 pièce(s), Diamètre de la lame 260 mm",
+   "prix": 66.16
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 300 x 30 x 80 Z (B-33392)",
+   "descr": "Lame de scie circulaire, 1 pièce(s), Diamètre de la lame 300 mm",
+   "prix": 82.22
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 305x30x100Z (B-32649)",
+   "descr": "Lame de scie circulaire, 1 pièce(s), Diamètre de la lame 305 mm",
+   "prix": 102.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 355x30x80Z (B-32574)",
+   "descr": "Lame de scie circulaire, 1 pièce(s), Diamètre de la lame 355 mm",
+   "prix": 141.74
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 5-piece set (P-83951)",
+   "descr": "Lame de scie sabre, Métal, 5 Pièces",
+   "prix": 18.49
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 821670-0",
+   "descr": "Coffret de transport outils électroportatifs, Vide, Résistant",
+   "prix": 35.23
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 821864-7",
+   "descr": "Coffret de transport outils électroportatifs, Vide, Vert",
+   "prix": 51.54
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 824985-4",
+   "descr": "Coffret de transport outils électroportatifs, Vide, Forme stabile",
+   "prix": 20.24
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Alu 125 x 1 x 22 mm 1 St. (B-45331)",
+   "descr": "Disque à tronçonner pour métal, Métal, 1 pièce(s)",
+   "prix": 1.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-63264 nemesis2 6 x 165 mm (10 pcs)",
+   "descr": "Jeu de forets, SDS-plus, Diamètre du foret 6 mm",
+   "prix": 40.54
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-63410 nemesis2 10 x 165 mm (10 pcs)",
+   "descr": "Jeu de forets, SDS-plus, Diamètre du foret 10 mm",
+   "prix": 63.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita BL0715 7,2V 1,5Ah (198000-3)",
+   "descr": "Batterie outillage d'origine, 7,2 V, 1,5 Ah",
+   "prix": 52.17
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita BL1021B 12V 2Ah (197396-9)",
+   "descr": "Batterie outillage d'origine, 12 V, 2 Ah",
+   "prix": 27.22
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita BL1415N 14,4V 1,5Ah (196875-4)",
+   "descr": "Batterie outillage d'origine, 14,4 V, 1,5 Ah",
+   "prix": 64.49
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita BL1815G 18V 1,5Ah (198186-3)",
+   "descr": "Batterie outillage d'origine, 18 V, 1,5 Ah",
+   "prix": 64.97
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita BL1830 18V 3Ah (194204-5)",
+   "descr": "Batterie outillage d'origine, 18 V, 3 Ah",
+   "prix": 45.91
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita BL1850 18V 5Ah (196672-8)",
+   "descr": "Batterie outillage d'origine, 18 V, 5 Ah",
+   "prix": 79.9
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita BL4025 XGT 40V 2,5Ah (191B36-3)",
+   "descr": "Batterie outillage d'origine, 40 V, 2,5 Ah",
+   "prix": 76.55
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita BL4050F XGT 40V 5Ah (191L47-8)",
+   "descr": "Batterie outillage d'origine, 40 V, 5 Ah",
+   "prix": 174.29
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita BS001GZ Solo",
+   "descr": "Ponceuse à bande, Avec Bluetooth, 40 V",
+   "prix": 306.1
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Bande abrasive 76 x 610 mm (P-373 56)",
+   "descr": "",
+   "prix": 6.47
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Batterie LXT Basic 18V 2,0Ah Li-Ion (BLB182)",
+   "descr": "Batterie outillage d'origine, 18 V, 2 Ah",
+   "prix": 36.19
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita CG100DZA",
+   "descr": "404 x 108 x 259 cm, 1,9 kg, Protection anti-gouttes",
+   "prix": 147.05
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita CLX224SMJ (DF333D + TD110D)",
+   "descr": "Pack outillage sans fil, 12 V, Li-Ion",
+   "prix": 236.22
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita CLX245SAX1 ( CL108FDZW+ UB100D)",
+   "descr": "Aspirateur à main, Blanc, Technique de nettoyage Sèche",
+   "prix": 112.9
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Coffret Burins SDS-Max, 6 pièces (D-42488)",
+   "descr": "Jeu de burins, SDS-max, Longueur totale 400 mm",
+   "prix": 59.84
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Coffret de forets et embouts, 75 pièces (E-15126)",
+   "descr": "Jeu d'embouts de vissage, ASR, Métal",
+   "prix": 25.2
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Coupe-herbe UR100DWAE avec 2 batteries 1 chargeur",
+   "descr": "Coupe-bordure, Batterie, Bords de pelouse",
+   "prix": 203.38
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DAS180RT",
+   "descr": "Mini compresseur, Pression max. 0,297 bars, Avec une batterie",
+   "prix": 281.68
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DC10WA",
+   "descr": "Chargeur pour batterie d'outillage, Nombre d'emplacements 1, Affichage LED",
+   "prix": 39.07
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DC18RA",
+   "descr": "Chargeur rapide pour batterie d'outillage, Pour technologie de batterie NiCd, Nombre d'emplacements 1",
+   "prix": 58.41
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DC18SD",
+   "descr": "Chargeur pour batterie d'outillage, Pour technologie de batterie Li-Ion, Nombre d'emplacements 1",
+   "prix": 17.04
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DC18WC (1910G0-1)",
+   "descr": "Chargeur pour batterie d'outillage, Pour technologie de batterie Li-Ion, Nombre d'emplacements 1",
+   "prix": 23.09
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DCG180",
+   "descr": "404 x 108 x 264 cm, 2,1 kg, 18 V",
+   "prix": 140.24
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DCG180ZX",
+   "descr": "538 x 108 x 219 cm, 2,1 kg, Sans batterie ni chargeur",
+   "prix": 207.9
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DCL284FZ cordless vacuum cleaner 18V (without battery, without charger)",
+   "descr": "Aspirateur balai, Noir, Technique de nettoyage Sèche",
+   "prix": 153.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DDF453RFE (2 x 3.0 Ah)",
+   "descr": "",
+   "prix": 216.73
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DDF458 (3 x 3,0Ah)",
+   "descr": "Perceuse-visseuse sans fil, Vitesse à vide max. 2 000 tr/min, Couple max. (vissage en force) 91 Nm",
+   "prix": 338.05
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DDF482RFEB Black Edition (2 x 3,0 Ah)",
+   "descr": "Perceuse-visseuse sans fil, Vitesse à vide max. 1 900 tr/min, Couple max. (vissage en force) 62 Nm",
+   "prix": 182.63
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DDG460ZX7 without Battery and Charger",
+   "descr": "Tarière mécanique, Batterie",
+   "prix": 466.39
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DF333DZJ (1 x 2,0 Ah + chargeur + Makpac)",
+   "descr": "Perceuse-visseuse sans fil, Vitesse à vide max. 1 700 tr/min, Couple max. (vissage en force) 30 Nm",
+   "prix": 228.44
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DGA517RTJ (2 x 5,0 Ah)",
+   "descr": "",
+   "prix": 394.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DHP486RTJ with 2x5,0Ah battery and charger in Makpac 2",
+   "descr": "Perceuse-visseuse à percussion sans fil, Couple max. (vissage en force) 130 Nm, Moteur Brushless",
+   "prix": 485.1
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DHR281ZWJ + DX09",
+   "descr": "Marteau perforateur combiné sans fil, Vitesse à vide max. 980 tr/min, Fréquence de frappe max. 5 000 coups/min",
+   "prix": 433.18
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DJV180RF1J (1 x 3,0 Ah, im Makpac)",
+   "descr": "Scie sauteuse sans fil, Profondeur de coupe max. (bois) 135 mm, 18 V",
+   "prix": 271.87
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DK0053G",
+   "descr": "Set de meuleuses d'angle, 2 200 W, Vitesse à vide max. 6 600 tr/min",
+   "prix": 189.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DK0097X1 (GA5030R + GA9020 )",
+   "descr": "Pack outillage électrique, Inclus dans le kit Meuleuse d'angle, Secteur",
+   "prix": 155.23
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DK18A35X1 (2 x 4 Ah)",
+   "descr": "Perceuse-visseuse à percussion sans fil, Variateur de vitesse, 18 V",
+   "prix": 279.17
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DLM382PM2 (2 batteries 4Ah + double chargeur)",
+   "descr": "Tondeuse batterie, Sans fil, Largeur de coupe 38 cm",
+   "prix": 407.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DLM460Z (without batterie and charger)",
+   "descr": "",
+   "prix": 588
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DLX1011PTJ",
+   "descr": "Pack outillage électrique, 18 V, Li-Ion",
+   "prix": 1839.9
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DLX2127TJ (DDF482 + DTD152 + 3x5,0 Ah 18V)",
+   "descr": "Pack outillage sans fil, 18 V, Li-Ion",
+   "prix": 334.9
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DLX2180TJ1",
+   "descr": "Pack outillage sans fil, 18 V, Li-Ion",
+   "prix": 451.91
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DLX2210TJ1 (DGA506 + DHP484)",
+   "descr": "",
+   "prix": 459.4
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DLX2527TJ",
+   "descr": "Pack outillage sans fil, 18 V, Li-Ion",
+   "prix": 466.79
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DLX4080TX1",
+   "descr": "Pack outillage électrique, 18 V, Li-Ion",
+   "prix": 894.82
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DLX7013PT1 (DDF482 + DTD152 + DGA504 + DSS610 + DHR202 + DJR186 + DJV180)",
+   "descr": "Pack outillage sans fil, 18 V, Li-Ion",
+   "prix": 1263.89
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DMR112 + 1x batterie 3Ah + chargeur DC18RC",
+   "descr": "Radio numérique, Stéréo, Bluetooth",
+   "prix": 270
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DSS 610 RMJ (2 x 5,0 Ah, avec Makpac)",
+   "descr": "",
+   "prix": 347.9
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DTD157RFJ",
+   "descr": "Visseuse à choc sans fil, 3 Ah, Éclairage LED",
+   "prix": 259
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DTM51RT1J3 (1 x 5,0 Ah Batterie, 41 pièces, Makpac)",
+   "descr": "Découpeur ponceur sans fil, 18 V, Vitesse d'oscillation max. à vide 6 000 tr/min",
+   "prix": 354.05
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DTW1002RTJ",
+   "descr": "Visseuse à choc sans fil, 5 Ah, Emmanchement carré 1/2 pouce",
+   "prix": 434.98
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DTW300RTJ",
+   "descr": "Visseuse à choc sans fil, 5 Ah, Emmanchement carré 1/2 pouce",
+   "prix": 373.48
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DUB 185 RT 1x5,0Ah + Charger",
+   "descr": "",
+   "prix": 194.87
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DUB184 RT avec 1x batterie 5,0 Ah + chargeur",
+   "descr": "Souffleur, Batterie, Souffler",
+   "prix": 219.2
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DUB363PT2V 2 x 18V + DoppleCharger",
+   "descr": "Batterie, Souffler, 18 V",
+   "prix": 480.94
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DUC 353 PF2 (2 x batteries 3 Ah + chargeur DC18RD )",
+   "descr": "",
+   "prix": 526.06
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DUC306 Z (sans batterie ni chargeur)",
+   "descr": "Tronçonneuse batterie, 2 x 18 V, Sans batterie",
+   "prix": 310.9
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DUC353 RF2 (2 batteries 3 Ah + chargeur DC18RC)",
+   "descr": "Tronçonneuse batterie, Système de batteries multi-appareil Makita 18 V Lithium-Ion, 2 x 18 V",
+   "prix": 402.04
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DUC356",
+   "descr": "Tronçonneuse batterie, 2 x 18 V, Frein de chaîne Avec frein automatique de chaîne",
+   "prix": 302.1
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DUC406Z Solo",
+   "descr": "Tronçonneuse batterie, 2 x 18 V, Sans batterie",
+   "prix": 393.24
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DUH502Z (sans batterie et chargeur)",
+   "descr": "Taille-haie sans fil, Longueur de la lame 50 cm, Longueur de coupe 50 cm Note ∅ 19/20",
+   "prix": 267.29
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DUH523 Z (no battery pack)",
+   "descr": "Taille-haie sans fil, Longueur de la lame 52 cm, Longueur de coupe 52 cm Note ∅ 12/20",
+   "prix": 126.62
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DUH601 Z (without Battery and Charger)",
+   "descr": "Taille-haie sans fil, Longueur de la lame 60 cm, Longueur de coupe 60 cm",
+   "prix": 296.09
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DUH602 SF (avec 1 batterie 3 Ah, sans chargeur)",
+   "descr": "Taille-haie sans fil, Longueur de coupe 60 cm, Capacité de coupe 18 mm",
+   "prix": 296.34
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DUH607Z (sans batterie ni chargeur)",
+   "descr": "Taille-haie sans fil, Longueur de la lame 60 cm, Longueur de coupe 60 cm",
+   "prix": 118.61
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DUM604RFX (1x Battery Pack 3 Ah + Charger)",
+   "descr": "Cisaille à gazon sans fil, Longueur de la lame 20 cm, Longueur de coupe 20 cm Note ∅ 16/20",
+   "prix": 179.74
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DUN500WZ (sans batterie et chargeur)",
+   "descr": "Taille-haie sans fil, Longueur de coupe 50 cm, Capacité de coupe 23 mm",
+   "prix": 311.53
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DUR 193 RM Tondeuse à batterie 18 V 260 mm + 2 x Batterie 4,0 Ah + Chargeur",
+   "descr": "",
+   "prix": 291.91
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DUR193RF (1 x batterie 3,0 Ah + chargeur)",
+   "descr": "Coupe-bordure, Batterie, Petites surfaces",
+   "prix": 180.8
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DVC261ZX14 sans batterie ni chargeur",
+   "descr": "Aspirateur eau et poussières, Bleu, Capacité du réservoir 2 L",
+   "prix": 300.58
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Disque de coupe diamant 230 x 22,23 mm (B-12778)",
+   "descr": "Disque à tronçonner diamanté, Marbre, 1 pièce(s)",
+   "prix": 36.22
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Disque de coupe diamant 400 x 25,4 mm (B-13568)",
+   "descr": "Disque à tronçonner diamanté, Marbre, 1 pièce(s)",
+   "prix": 182.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Drill set HSS-G 25 pieces (D-67555)",
+   "descr": "Jeu de forets, HSS-G, Métal",
+   "prix": 77.95
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita E-03084 set 31-tlg",
+   "descr": "Jeu d'embouts de vissage, Nombre d'embouts de vissage 30, Nombre de pièces 31",
+   "prix": 12.29
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita E-10883",
+   "descr": "Coffret à outils, Plastique, Avec outils",
+   "prix": 103.9
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita E-12120 2er Set",
+   "descr": "Lame de scie circulaire, Bois, 2 pièce(s)",
+   "prix": 23.81
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita EFFICUT 150x1,1x20mm B-69331",
+   "descr": "Lame de scie circulaire, 1 pièce(s), Diamètre de la lame 150 mm",
+   "prix": 35.92
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita EFFICUT 190 x 30 mm Z45 (B-68638)",
+   "descr": "Ensemble de lames pour scie, Longueur de la lame 190 mm, Largeur de coupe 30 mm",
+   "prix": 29.8
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita EFFICUT 305 x 30 mm Z100 (B-67321)",
+   "descr": "Ensemble de lames pour scie, Longueur de la lame 305 mm, Largeur de coupe 30 mm",
+   "prix": 65.28
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita EZYCHANGE-BIM-Set (B-12326)",
+   "descr": "Scie-cloche, HSS-G, Métal",
+   "prix": 91.01
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Energy Kit 197658-5",
+   "descr": "",
+   "prix": 130.87
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Ersatzmesser 203 x 25,4 mm (196745-7)",
+   "descr": "",
+   "prix": 13.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Foret Nemesis 12 x 340 mm (B-19897)",
+   "descr": "Foret à percussion, Métal dur, Béton",
+   "prix": 27.9
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Foret Nemesis 16 x 340 mm (B-20199)",
+   "descr": "Foret à percussion, Métal dur, Béton",
+   "prix": 75
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Foret Nemesis 18 x 540 mm (B-20002)",
+   "descr": "Foret à percussion, Métal dur, Béton",
+   "prix": 44.76
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Foret Nemesis 22 x 920 mm (B-20074)",
+   "descr": "Foret à percussion, Métal dur, Béton",
+   "prix": 69.97
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Foret SDS-VPLUS 10 x 260 mm (B-47575)",
+   "descr": "Foret à béton, Métal dur, Béton",
+   "prix": 3.91
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Foret SDS-VPLUS 16 x 160 mm (B-47905)",
+   "descr": "Foret à béton, Métal dur, Béton",
+   "prix": 5.89
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Forêt Nemesis 28 x 670 mm (B-20161)",
+   "descr": "Foret à percussion, Métal dur, Béton",
+   "prix": 87.44
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Fraise en Métal Dur Denture Croisée 10x20mm Ø6mm (B-52788)",
+   "descr": "6 mm, Diamètre 6 mm",
+   "prix": 13.93
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita GA5091X01",
+   "descr": "Meuleuse d'angle filaire, 1 900 W, Vitesse à vide max. 11 500 tr/min",
+   "prix": 198.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita GA5095X01",
+   "descr": "Meuleuse d'angle filaire, 1 900 W, Vitesse à vide max. 11 500 tr/min",
+   "prix": 162.77
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita HP001GM201 ( 2x 4.0Ah + charger + Makpac)",
+   "descr": "Perceuse-visseuse à percussion sans fil, Vitesse à vide max. 2 600 tr/min, Couple max. (vissage en force) 140 Nm",
+   "prix": 447.26
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita HR007GZ01 Perfo-burineur SDS-Plus 40V 3,0J (HR007GZ01)",
+   "descr": "Marteau perforateur combiné sans fil, Avec Bluetooth, Moteur EC sans balai",
+   "prix": 286
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita HR2630X7",
+   "descr": "Marteau perforateur combiné, Vitesse à vide max. 1 200 tr/min, Fréquence de frappe max. 4 600 coups/min",
+   "prix": 131.42
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita HS6601 (in Set + Rip fence)",
+   "descr": "Scie circulaire portative, 1 050 W, Diamètre de la lame 165 mm",
+   "prix": 133
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Housse pour portable et porte-stylo avec crochet à ressort (P-71847)",
+   "descr": "Sac à outils, Noir",
+   "prix": 11.49
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Impact Socket Set Impact Black (E-16564)",
+   "descr": "Jeu de douilles, Nombre de pièces 9, Emmanchement 1/2\"",
+   "prix": 32.9
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Jeu d'embouts avec porte-embout 80mm, 26 pcs (B-48773)",
+   "descr": "Jeu d'embouts de vissage",
+   "prix": 8.96
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Kit DLX2127",
+   "descr": "Pack outillage sans fil, 18 V, Li-Ion",
+   "prix": 332.29
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Kit de débouchage de canalisations 8 m (P-66503)",
+   "descr": "Tuyau de nettoyage de canalisation",
+   "prix": 44.37
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Lame de Scie Circulaire Carbure Bois 136x20mm 16T (B-09949)",
+   "descr": "Lame de scie circulaire, 20 pièce(s), Diamètre de la lame 136 mm",
+   "prix": 18
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Lame de scie plongeante MAM002 52x70mm Starlock Max, 5 pcs. (B-66416-5)",
+   "descr": "",
+   "prix": 59.49
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Lime chaîne ronde 1/4x5,2 mm (D-73776)",
+   "descr": "Lime pour tronçonneuse",
+   "prix": 10.95
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Lunchtasche (E-15584)",
+   "descr": "Vide, Revêtement isolant, 33 x 21 x 18 cm",
+   "prix": 24.86
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita MACCESS Coffret Embouts et Forets, 200 pièces (E-22610)",
+   "descr": "Jeu d'embouts de vissage, ASR, Métal",
+   "prix": 102.78
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita MAKSTOR Nr.3-12 (P-84327)",
+   "descr": "Boîte à outils avec compartiments, Panier à outils, Vide",
+   "prix": 114.46
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita ML001G (sans batterie ni chargeur)",
+   "descr": "Lampe projecteur, Autonomie max. 55 h, 160 lumens",
+   "prix": 34.9
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Mallette de Transport pour BO5021 (183782-0)",
+   "descr": "",
+   "prix": 21.64
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Nebula 400 x 25,4 mm 1 St. (B-54069)",
+   "descr": "Disque à tronçonner diamanté, Pierre, 1 pièce(s)",
+   "prix": 72.98
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Nemesis II Forets SDS-Plus, Coffret 5 pièces (B-59003)",
+   "descr": "Jeu de forets, Métal dur, Béton",
+   "prix": 18.77
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita P-33152 Abrasive Paper 114 x 102 mm 240g (10 pcs)",
+   "descr": "Papier abrasif, Grain 240, 10 pièce(s)",
+   "prix": 3.16
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita P-43315 Sanding Belt 9 x 533 mm 240g (5 pcs)",
+   "descr": "Bande abrasive, Grain 240, 5 pièce(s)",
+   "prix": 4.34
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita P-70502",
+   "descr": "Set de brosses, Foyer, Makita",
+   "prix": 35.04
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita PH Bit 2x25 2pièces (B-63616)",
+   "descr": "Embout de vissage, Nombre de pièces 2",
+   "prix": 1.51
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Perceuse-visseuse 18 V (1x 3,0 Ah)",
+   "descr": "",
+   "prix": 207.76
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Power Source Kit (198116-4)",
+   "descr": "",
+   "prix": 234.66
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Power Source Kit 18V 3Ah (197952-5)",
+   "descr": "",
+   "prix": 139
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Power Source Kit LXT 6,0A (199485-6)",
+   "descr": "",
+   "prix": 452.69
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Power Source-Kit (1914J6-4)",
+   "descr": "",
+   "prix": 193.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Power Source-Kit 40V (191L76-1)",
+   "descr": "",
+   "prix": 323.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Power Source-Kit LXT 3Ah + DC18RC (191A24-4)",
+   "descr": "",
+   "prix": 63.52
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Power Source-Kit LXT 5,0Ah (198458-6)",
+   "descr": "",
+   "prix": 329.18
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Quick-Assembly Screws TEKS F-31195 3.5 x 35mm 1000 pcs.",
+   "descr": "Vis autoforeuse, Quantité 1 000 Pièce(s), Anticorrosion",
+   "prix": 18.59
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita SACLXT600",
+   "descr": "Sac à outils, Avec outils, Makita LXT",
+   "prix": 42.79
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita SDS-Plus Nemesis 2 10x115 mm (B-58198)",
+   "descr": "Foret à percussion, Diamètre du foret 10 mm",
+   "prix": 5.52
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita SDS-Plus Nemesis 2 10x265 mm (B-58229)",
+   "descr": "Foret à percussion, Diamètre du foret 10 mm",
+   "prix": 6.94
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita SDS-Plus Nemesis 2 20x450 mm (B-58659)",
+   "descr": "Foret à percussion, Diamètre du foret 20 mm",
+   "prix": 37.4
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita SDS-Plus Nemesis 2 24x450 mm (B-58702)",
+   "descr": "Foret à percussion, Diamètre du foret 24 mm",
+   "prix": 40.91
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita SDS-Plus Nemesis 2 28x250 mm (B-58746)",
+   "descr": "Foret à percussion, Diamètre du foret 28 mm",
+   "prix": 49.74
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita SDS-Plus Nemesis 2 30x450 mm (B-58774)",
+   "descr": "Foret à percussion, Diamètre du foret 30 mm",
+   "prix": 59.14
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita SDS-Plus Nemesis 2 6,5x165 mm (B-58023)",
+   "descr": "Foret à percussion, Diamètre du foret 6,5 mm",
+   "prix": 5.6
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita SDS-Plus Nemesis 2 6x265 mm (B-57990)",
+   "descr": "Foret à percussion, Diamètre du foret 6 mm",
+   "prix": 5.06
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita SDS-Plus Nemesis 2 8x165 mm (B-58104)",
+   "descr": "Foret à percussion, Diamètre du foret 8 mm",
+   "prix": 4.18
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita SDS-Plus Nemesis 2 8x315 mm (B-58132)",
+   "descr": "Foret à percussion, Diamètre du foret 8 mm",
+   "prix": 7.32
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita SE00000679 for DMR114/DMR115/MR004G/MR007G",
+   "descr": "Chargeur de piles, Nombre d'emplacements 1",
+   "prix": 27.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita SP6000J1X2",
+   "descr": "Scie plongeante, 1 300 W, 4,4 kg",
+   "prix": 486.85
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Spade Chisel 125 x 400 mm (P-05555)",
+   "descr": "Burin bêche, Longueur totale 400 mm, Largeur de travail 125 mm",
+   "prix": 68.02
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Specialized 165 x 20 mm Z60 (B-56568)",
+   "descr": "Ensemble de lames pour scie, Longueur de la lame 165 mm, Largeur de coupe 20 mm",
+   "prix": 41.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita TCT NEMESIS Foret SDS+ 12x215",
+   "descr": "",
+   "prix": 7.19
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita TD001GD201",
+   "descr": "Visseuse à choc sans fil, 2,5 Ah, Éclairage LED",
+   "prix": 506.9
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita TD111DSAE",
+   "descr": "Visseuse à choc sans fil, 2 Ah, Emmanchement 6 pans",
+   "prix": 193.56
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita TMA060 Lame de Scie Plongeante Starlock 20x40mm (B-64945)",
+   "descr": "Lame de coupe en plongée, 20 pièce(s), Diamètre de la lame 20 mm",
+   "prix": 16.9
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita TMA077 HM/Riff Starlock Languette de Ponçage 32x50mm (B-65109)",
+   "descr": "Plaque de polissage, Pierre, Grain 100",
+   "prix": 13.7
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita TW004GD201",
+   "descr": "Visseuse à choc sans fil, 2,5 Ah, Temps de charge 28 min",
+   "prix": 414.44
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita TW007GM201",
+   "descr": "Visseuse à choc sans fil, 4 Ah, Éclairage LED",
+   "prix": 558.82
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Tronçonneuse sans fil DUC 302 Z (sans batterie ni chargeur)",
+   "descr": "",
+   "prix": 224.84
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Tronçonneuse sans fil DUC303 Z Solo",
+   "descr": "Tronçonneuse batterie, Système de batteries multi-appareil Makita 18 V Lithium-Ion, 2 x 18 V",
+   "prix": 304.61
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Tronçonneuse électrique UC3550A",
+   "descr": "Tronçonneuse électrique, Frein de chaîne Avec frein automatique de chaîne, 5,5 kg",
+   "prix": 189.68
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita UB001G M101 1x4.0Ah / Charger",
+   "descr": "Batterie, Souffler, 40 V",
+   "prix": 424.9
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita UC016",
+   "descr": "Tronçonneuse batterie, Système de batteries multi-appareil Makita 40 V, Frein de chaîne Avec frein automatique de chaîne",
+   "prix": 302
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita UD00UPC32SHSS 32 x 35 mm",
+   "descr": "Foret HSS, Diamètre du foret 32 mm",
+   "prix": 63.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita UP100DSMJ (1 x 2,0 Ah)",
+   "descr": "Sécateur électrique, 1 000 g, 1,5 Ah",
+   "prix": 681.47
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Universal-Set 22-127 mm (D-75764)",
+   "descr": "Jeu de scies-cloches, Acier, 6 côtés",
+   "prix": 88.24
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Vis en bande PH2 pour plaques de plâtre, bois et profilés 3,5x35mm, 1000 pcs (F-31230)",
+   "descr": "Vis autoforeuse, Quantité 1 000 Pièce(s), Diamètre de vis 3,5 mm",
+   "prix": 20.8
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita carpenter set",
+   "descr": "",
+   "prix": 36.7
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "2026 DEWALT DW089LG 12V360 degrés niveau de fil Surround de lumière verte infrarouge tri f",
+   "descr": "",
+   "prix": 80.69
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Aiguille vibrante PS Diamètre 59mm- Longueur 2m DEWALT",
+   "descr": "",
+   "prix": 862.9
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Batterie AKKU POWER RB336 pour DEWALT 24V 3AH Ni-Mh type DE0240",
+   "descr": "",
+   "prix": 84.5
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Batterie Dewalt originale 60V/20V, batterie 5AH 6AH 9AH, batterie pour outils électriques",
+   "descr": "",
+   "prix": 87.99
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Bosch Professional 18V System Perceuse sans fil GBH 18V-21 & 18V System Akku Kreissäge GKS 18V-57 G (Sägeblatt-Ø: 165 mm, Schnitttiefe: 57 mm, ohne Akkus und Ladegerät, in L-BOXX)",
+   "descr": "",
+   "prix": 521.96
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Chaussures de sécurité DeWalt Livingston S3 miel pointure 45",
+   "descr": "",
+   "prix": 79.99
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Chaussures de sécurité S3 DeWalt Phoenix havane pointure 46",
+   "descr": "",
+   "prix": 89.99
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Chaussures de sécurité montantes S3 DeWalt Hadley marron pointure 42",
+   "descr": "",
+   "prix": 89.99
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Chaussures de sécurités montantes S3 DeWalt Corinth miel pointure 46",
+   "descr": "",
+   "prix": 79.99
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Clous à tête refoulé 44mm A2 20° Cloueur sans fil DeWalt DCN660N DCN660NT DC618 DC610 BR-0",
+   "descr": "",
+   "prix": 79.2
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Câble de Charge Véhicule Électrique DEWALT 22kW, Type 2, 5m TPU, 32A 380V AC",
+   "descr": "",
+   "prix": 345.43
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT - Multi-Cutter XR 18V - DCS355NT-XJ - L'Outil Multifonctionnel Oscillant & Meuleuse",
+   "descr": "",
+   "prix": 336.35
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT - Scie Sabre Compact Brushless XR 18V Li-Ion - DCS367NT-XJ - Scie Électrique & Batt",
+   "descr": "",
+   "prix": 303.75
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT - Élagueuse sur Perche Brushless XR 18V 5AH Li-Ion - DCMPS567N-XJ & Tronçonneuse Él",
+   "descr": "",
+   "prix": 428.68
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT Carlisle Bottes de travail en cuir nubuck pour homme, pointe de sécurité en acier,",
+   "descr": "",
+   "prix": 83.14
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT DCF850 pilote d'impact pilote électrique 20V sans brosse sans fil 3250 tr/min tourn",
+   "descr": "",
+   "prix": 84.39
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT DEWDT7612M A- K Écrans",
+   "descr": "",
+   "prix": 417
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT DWASHRIR Impact Ready Embout pour cisaille à métaux",
+   "descr": "",
+   "prix": 83.14
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT DXPW002I - Nettoyeur haute pression semi-professionnel à eau froide - 160 bars - 450l/h",
+   "descr": "",
+   "prix": 350
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT Dewmem4029-tb Memphis Holster Pantalon pour Homme Tour de Taille 101,6 cm Jambe 73,6 cm Noir/Gris 40W 29L UK",
+   "descr": "",
+   "prix": 84.9
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT Gilet - M",
+   "descr": "",
+   "prix": 80.5
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT Martillo Electroneumático sin escobillas XR 18V SDS plus® 2,1J 2 baterías POWERSTAC",
+   "descr": "",
+   "prix": 520
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT Mixte Bottes de revendeur d'azote Marron Pointure 39, Brown, 6 UK",
+   "descr": "",
+   "prix": 107.16
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT PowerCoil ongles DNF 60 mm 7,5 KST. Bague Galv., 1 pièce, dnf28r60g12e",
+   "descr": "",
+   "prix": 120.68
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT PowerCoil ongles Dnn, galvanisé, 24,5 K Stück, DNN20R38G12E",
+   "descr": "",
+   "prix": 114.23
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT Riveter XR 18 V 4,8 mm",
+   "descr": "",
+   "prix": 655.41
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DEWALT Streifennagel 34Gr. Glatt 90mm 2200Stk",
+   "descr": "",
+   "prix": 145.85
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWALT CROS00400 Chaussures De Travail Crossfire - Noir - Basse Tige - Taille 40",
+   "descr": "",
+   "prix": 120.59
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWALT Clous 34º, Cranté G12, 90 mm, 2200 pièces - DNW31R90G12E",
+   "descr": "",
+   "prix": 96.85
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWALT DT5557-QZ foret",
+   "descr": "",
+   "prix": 108.19
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWALT Dw5258 6-1/5,1 cm par 48T Ultra Fine Finition Tracksaw Lame",
+   "descr": "",
+   "prix": 85.7
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWALT HADL00420 Chaussure De Travail Hadley - Noir - Haute - Taille 42",
+   "descr": "",
+   "prix": 100
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWALT HADL05430 Chaussure De Travail Hadley - Marron - Tige Haute - Pointure 43",
+   "descr": "",
+   "prix": 100
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWALT Ludlow Chaussure De Sécurité - Stone - Tige Haute - Taille 44",
+   "descr": "",
+   "prix": 112.19
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWALT Tube transparent pour pistolet à mastic Dewalt DCE5801",
+   "descr": "",
+   "prix": 163.33
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt 20V MAX* XR Brushless Cordless Compact Router (Tool Only) (DCW600B)",
+   "descr": "Défonceuse, Vitesse à vide max. 25 500 tr/min, Éclairage",
+   "prix": 242.3
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt AT-DXV30SAPTA",
+   "descr": "",
+   "prix": 133.09
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt Boa Light Boots",
+   "descr": "",
+   "prix": 138.83
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt Challenger Sympatex 6",
+   "descr": "",
+   "prix": 134.23
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt D25033",
+   "descr": "Perforateur, Vitesse à vide max. 1 550 tr/min, Secteur",
+   "prix": 107.18
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt D26500",
+   "descr": "Raboteuse, Largeur de rabotage 82 mm, Hobeltiefe 4 mm Note ∅ 19/20",
+   "prix": 217.26
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCB 1104 E3",
+   "descr": "",
+   "prix": 239.45
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCB 1104 M3",
+   "descr": "",
+   "prix": 220.17
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCB118T3-QW",
+   "descr": "Ensemble de batteries outillage",
+   "prix": 424.2
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCD100YP2T",
+   "descr": "Perceuse-visseuse à percussion sans fil, Vitesse à vide max. 1 650 tr/min, Couple max. (vissage en force) 68 Nm",
+   "prix": 300
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCD708D1T",
+   "descr": "Perceuse-visseuse sans fil, Vitesse à vide max. 1 650 tr/min, Couple max. (vissage en force) 65 Nm",
+   "prix": 147.08
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCD708S2T",
+   "descr": "Perceuse-visseuse sans fil, Vitesse à vide max. 1 650 tr/min, Couple max. (vissage en force) 65 Nm",
+   "prix": 183.97
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCD709P2T-QW",
+   "descr": "Perceuse-visseuse à percussion sans fil, 15 Positions de couple, Poignée Soft Grip",
+   "prix": 246.4
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCD740N (sans batterie)",
+   "descr": "Perceuse-visseuse d'angle sans fil, Vitesse à vide max. 2 000 tr/min, Couple max. (vissage en force) 33 Nm",
+   "prix": 144.36
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCD777M2",
+   "descr": "Perceuse-visseuse sans fil, Vitesse à vide max. 1 750 tr/min, Couple max. (vissage en force) 65 Nm",
+   "prix": 219.9
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCD791D2-QW",
+   "descr": "Perceuse-visseuse sans fil, Vitesse à vide max. 2 000 tr/min, Couple max. (vissage en force) 70 Nm",
+   "prix": 149.1
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCD795M1",
+   "descr": "Perceuse-visseuse à percussion sans fil, Vitesse à vide max. 2 000 tr/min, Couple max. (vissage en force) 60 Nm",
+   "prix": 228.23
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCD796P1TX",
+   "descr": "Perceuse-visseuse à percussion sans fil, Vitesse à vide max. 2 000 tr/min, Couple max. (vissage en force) 70 Nm",
+   "prix": 178.4
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCD800M2",
+   "descr": "Perceuse-visseuse sans fil, Vitesse à vide max. 2 000 tr/min, Couple max. (vissage en force) 27 Nm",
+   "prix": 286.04
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCD805E2T-QW",
+   "descr": "Perceuse-visseuse à percussion sans fil, Vitesse à vide max. 2 000 tr/min, Couple max. (vissage en force) 90 Nm",
+   "prix": 293.2
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCD991N",
+   "descr": "Perceuse-visseuse sans fil, Vitesse à vide max. 2 000 tr/min, Couple max. (vissage en force) 95 Nm",
+   "prix": 209.86
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCD996P3",
+   "descr": "Perceuse-visseuse à percussion sans fil, Vitesse à vide max. 2 000 tr/min, Couple max. (vissage en force) 95 Nm",
+   "prix": 379
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCE088D1G18-QW",
+   "descr": "Laser en croix, Portée max. (sans récepteur) 30 m, Auto-nivellement",
+   "prix": 293.99
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCE530P2-QW",
+   "descr": "Niveau de température 2, Débit d'air max. 190 l/min, Température min. 290 °C",
+   "prix": 279.9
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF 897",
+   "descr": "",
+   "prix": 269.69
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF503D1-QW",
+   "descr": "Clé à cliquet sans fil, Vitesse à vide max. 250 tr/min, Couple max. (vissage en force) 81 Nm",
+   "prix": 260.68
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF512EN Clé à Cliquet 1/2\" 18V (DCF512EN-XJ)",
+   "descr": "Clé à cliquet sans fil, Couple max. (vissage en force) 95 Nm, Moteur Brushless",
+   "prix": 249
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF620D2-QW",
+   "descr": "Perceuse-visseuse à percussion sans fil, Vitesse à vide max. 4 400 tr/min, Couple max. (vissage en force) 30 Nm",
+   "prix": 234.2
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF620M1T",
+   "descr": "Visseuse automatique sans fil, Vitesse à vide max. 4 400 tr/min, Couple max. (vissage en force) 30 Nm",
+   "prix": 290.86
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF622NT",
+   "descr": "Visseuse plaquiste sans fil, Vitesse à vide max. 2 000 tr/min, Couple max. (vissage en force) 34 Nm",
+   "prix": 204.79
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF892",
+   "descr": "Visseuse à choc sans fil, Couple de serrage max. 813 Nm",
+   "prix": 239.1
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCF921NT-XJ",
+   "descr": "Visseuse à choc sans fil, Emmanchement carré 1/2 pouce, Couple de serrage max. 406 Nm",
+   "prix": 162
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCG 405 M1",
+   "descr": "",
+   "prix": 283.7
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCG 405 P2",
+   "descr": "",
+   "prix": 275.54
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCG405P3-QW",
+   "descr": "Meuleuse d'angle sans fil, 18 V, Vitesse à vide max. 9 000 tr/min",
+   "prix": 344.05
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCG409VSN-XJ",
+   "descr": "Meuleuse d'angle sans fil, 18 V, Vitesse à vide max. 9 000 tr/min",
+   "prix": 244.79
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCG418N-XJ",
+   "descr": "Meuleuse d'angle sans fil",
+   "prix": 217.3
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCGG571",
+   "descr": "3,3 kg, 18 V",
+   "prix": 231.35
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCH072NT",
+   "descr": "Perforateur sans fil, Vitesse à vide max. 910 tr/min, Fréquence de frappe max. 4 280 coups/min",
+   "prix": 197.9
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCH133P2",
+   "descr": "Marteau perforateur combiné sans fil, Vitesse à vide max. 1 550 tr/min, Fréquence de frappe max. 5 680 coups/min",
+   "prix": 386.18
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCH253M2",
+   "descr": "Marteau perforateur combiné sans fil, Vitesse à vide max. 4 500 tr/min, Fréquence de frappe max. 4 500 coups/min Note ∅ 14/20",
+   "prix": 402.99
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCH273P2",
+   "descr": "Marteau perforateur combiné sans fil, Vitesse à vide max. 1 100 tr/min, Fréquence de frappe max. 4 600 coups/min",
+   "prix": 429.8
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCH333T2T",
+   "descr": "Marteau perforateur combiné sans fil, Vitesse à vide max. 1 000 tr/min, Fréquence de frappe max. 4 480 coups/min",
+   "prix": 700
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCK791D2KX",
+   "descr": "Perceuse-visseuse sans fil, Vitesse à vide max. 2 000 tr/min, Couple max. (vissage en force) 70 Nm",
+   "prix": 306.41
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCL077-P2",
+   "descr": "Projecteur de chantier LED, Batterie, Nombre de batteries 2",
+   "prix": 303.31
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCM565P1",
+   "descr": "Tronçonneuse batterie, 18 V, 3,6 kg Note ∅ 16/20",
+   "prix": 250.54
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCMBL777 N-XJ Solo",
+   "descr": "",
+   "prix": 219.46
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCMPP568P1-QW",
+   "descr": "Coupe-branches sans fil, Capacité de coupe 38 mm, À double tranchant",
+   "prix": 210.06
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCMST561P1-QW",
+   "descr": "Coupe-bordure, Batterie, Petites surfaces",
+   "prix": 243.59
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCN660D2-QW",
+   "descr": "Cloueuse sans fil, Capacité de stockage 110 pièces, Longueur des clous 32-63 mm Note ∅ 20/20",
+   "prix": 450.64
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCN662N",
+   "descr": "Cloueuse sans fil, Longueur des clous 32-64 mm, 18 V",
+   "prix": 447
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCN890N",
+   "descr": "Cloueuse sans fil, Longueur des clous 13-57 mm, 18 V",
+   "prix": 583.12
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS 334N",
+   "descr": "",
+   "prix": 178.02
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS 369 NT",
+   "descr": "",
+   "prix": 229.81
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS331P1",
+   "descr": "Scie sauteuse sans fil, 400 W, Profondeur de coupe max. (bois) 135 mm",
+   "prix": 288.28
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS353D2",
+   "descr": "Outil oscillant, 12 V, Vitesse d'oscillation max. à vide 18 000 tr/min",
+   "prix": 229.9
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS355P1T",
+   "descr": "Découpeur ponceur sans fil, 18 V, Vitesse d'oscillation max. à vide 20 000 tr/min",
+   "prix": 260
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS365M2 XR XPS Scie à Onglets sans Fil 184mm 18V (DCS365M2)",
+   "descr": "Scie à onglet, 2 batteries, Diamètre de la lame 184 mm",
+   "prix": 751.12
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS369E2",
+   "descr": "Scie sabre sans fil, SDS, Nombre de courses 2800 min-1",
+   "prix": 338.47
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS373M2 Scie Circulaire à Métaux 18,0 Volt sur Batterie",
+   "descr": "Scie circulaire portative, 460 W, 2 batteries Note ∅ 16/20",
+   "prix": 546.7
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS389",
+   "descr": "Scie sabre sans fil, Profondeur max. de coupe à 90° 160 mm, 54 V",
+   "prix": 267.5
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS512NT-XJ",
+   "descr": "Scie circulaire portative, Sans batterie, Diamètre de la lame 140 mm",
+   "prix": 179.94
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS565T1 Scie Circulaire sans Fil 54V/18V 6,0Ah (DCS565T1)",
+   "descr": "Scie circulaire portative, Diamètre de la lame 165 mm",
+   "prix": 391
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS571NT-XJ",
+   "descr": "Scie circulaire portative, 2,5 kg, Diamètre de la lame 165 mm",
+   "prix": 190.18
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS573H2T-QW",
+   "descr": "Scie circulaire portative, 2 batteries, 3,8 kg",
+   "prix": 492.85
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCS579",
+   "descr": "Scie circulaire portative, 3,7 kg, Profondeur max. de coupe à 90° 61 mm",
+   "prix": 278.42
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCV517N-XJ",
+   "descr": "",
+   "prix": 100.96
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCW200P2",
+   "descr": "Ponceuse vibrante, 18 V, Vitesse d'oscillation max. à vide 13 500 tr/min",
+   "prix": 312.19
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCW604D1",
+   "descr": "Défonceuse, Sans fil, Vitesse à vide max. 22 500 tr/min",
+   "prix": 498.8
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DCW682N",
+   "descr": "Affleureuse, Sans fil, 900 W",
+   "prix": 277.14
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DE7400",
+   "descr": "",
+   "prix": 184.97
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DPG17-BX Casque Protecteur Bluetooth 31dB (DPG17-BX EU)",
+   "descr": "",
+   "prix": 83.52
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DT4940-QZ",
+   "descr": "Foret à métaux, Diamètre du foret 9 mm, Nombre de pièces 10",
+   "prix": 81.61
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DW088KPOL",
+   "descr": "Laser en croix, Portée max. (sans récepteur) 10 m, Auto-nivellement",
+   "prix": 277
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DW621K-QS",
+   "descr": "Défonceuse, Secteur, 1 100 W",
+   "prix": 387.55
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DWE315KT",
+   "descr": "Découpeur ponceur, Vitesse d'oscillation max. à vide 22 000 tr/min, Secteur Note ∅ 19/20",
+   "prix": 139.01
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DWE492K",
+   "descr": "Meuleuse d'angle filaire, 2 200 W, Vitesse à vide max. 6 600 tr/min",
+   "prix": 152.21
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DWE7492-QS",
+   "descr": "",
+   "prix": 609.7
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DWS520",
+   "descr": "Scie circulaire portative, 1 300 W, 5,1 kg",
+   "prix": 322.89
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DXCMB3M100HE - Compresseur d'air électrique monophasé à courroie - Moteur 3 CV 100 L",
+   "descr": "",
+   "prix": 714.71
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DXCMB55T271HCE - Compresseur d'air électrique triphasé à courroie - Moteur 5,5 CV 270 L",
+   "descr": "",
+   "prix": 1593.16
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DXPW 003CE Nettoyeur Haute Pression à Eau Froide 150bar, 630l/h (26775)",
+   "descr": "",
+   "prix": 553.81
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DXSTAH025",
+   "descr": "Tabouret d'atelier, 8,6 kg, Roues pivotantes",
+   "prix": 117.04
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt DXV23GA Aspirateur Eau et Poussières 1100W 23L (DXV23GA)",
+   "descr": "Aspirateur eau et poussières, Noir, 1 100 W",
+   "prix": 267.7
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt Darlington Safety Trainers black blue",
+   "descr": "",
+   "prix": 91.77
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt Ensemble sécateur",
+   "descr": "",
+   "prix": 228.2
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt Jobsite Pro X-2 ANC",
+   "descr": "",
+   "prix": 118.99
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt Men's Krypton Safety Trainers black",
+   "descr": "",
+   "prix": 85.54
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt Newark noir",
+   "descr": "",
+   "prix": 100.5
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt Suction device DWH051-XJ",
+   "descr": "Système d'aspiration, 800 g, Jaune",
+   "prix": 98.98
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt Taille-haie DCMHT567P1-SK 18V, 5,0Ah (DCMHT567P1-SK)",
+   "descr": "Taille-haie sans fil, 18 V",
+   "prix": 325
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "DeWalt Toughsystem Chariot à roulettes Transp charge max. 150 kg (1-70-324)",
+   "descr": "",
+   "prix": 160.43
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt - Boîte à outils « Toughsystem 2.0 » AW2265 (taille unique) (noir/jaune)",
+   "descr": "",
+   "prix": 181.97
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt - Support Plat De Pce Dw777/71/11/07/01/00 Dewalt",
+   "descr": "",
+   "prix": 94.74
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCD796 13mm perceuse électrique à percussion sans brosse tournevis sans fil multifo",
+   "descr": "",
+   "prix": 96.69
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt DCS 334 P1",
+   "descr": "",
+   "prix": 317.66
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt Harwich Bottes de sécurité imperméables Marron clair, peau, 45 EU",
+   "descr": "",
+   "prix": 81.5
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt Murray Bottes de sécurité imperméables Noir Taille 40",
+   "descr": "",
+   "prix": 98.97
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Dewalt Nitrogen 9 Bottes de sécurité Homme 42.5 Marron",
+   "descr": "",
+   "prix": 133.81
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Duo de meuleuses 125/230 mm DEWALT DWE492TWIN2-QS",
+   "descr": "",
+   "prix": 299.8
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Induit moteur n093107 pour Scie a onglets",
+   "descr": "",
+   "prix": 86.61
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Meuleuse compacte 76 mm XR 18V 1.7ah li-ion brushless powerstack - DEWALT - DCG430E2T-QW",
+   "descr": "",
+   "prix": 494.86
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Outils électriques multifonctionnels DEWALT sans fil, sans balais : Meuleuse d'angle, Cisa",
+   "descr": "",
+   "prix": 95.39
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Pointes pour cloueur 18GA en inox - 1,02 mm x 40 mm - 5000 pièces DEWALT",
+   "descr": "",
+   "prix": 92.16
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Spachtel DeWalt 2-910; 254 mm",
+   "descr": "",
+   "prix": 90.73
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Tournevis sans fil DeWALT DCF601D2",
+   "descr": "",
+   "prix": 191.51
+  },
+  {
+   "marque": "DEWALT",
+   "titre": "Visseuse à choc sans fil brushless DeWalt DCF787N-SFXJ 18V Li-ion XR - Sans batterie",
+   "descr": "",
+   "prix": 99.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Disque abrasif, Makita BO6030, Grain 100",
+   "descr": "",
+   "prix": 4.42
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 0088381546287",
+   "descr": "Porte-embout",
+   "prix": 10.21
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 10261332",
+   "descr": "Groupe de produits Tondeuse à gazon, Largeur de travail 330 mm",
+   "prix": 5.78
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 120 mm x 5 m K180 (P-38152)",
+   "descr": "Papier abrasif, Métal, Grain 180",
+   "prix": 4.42
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 122703-7",
+   "descr": "Accessoires pour rail de guidage",
+   "prix": 4.58
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 122965-7",
+   "descr": "Butée parallèle, 1 pièce(s)",
+   "prix": 4.68
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 123486-2",
+   "descr": "Buse à aspirateur, Foyer, Makita",
+   "prix": 10.35
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 12V 2,5Ah (193100-4)",
+   "descr": "",
+   "prix": 74.91
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 140G26-3",
+   "descr": "Adaptateur pour aspirateur, Aspirateur, Makita",
+   "prix": 8.48
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 150 mm K320 10 pcs (P-32007)",
+   "descr": "Papier abrasif, BO6040, Métal",
+   "prix": 5.62
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 164834-6",
+   "descr": "Butée parallèle, 1 pièce(s)",
+   "prix": 17.02
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 19 26 94-6",
+   "descr": "",
+   "prix": 36.54
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 1910C7-9",
+   "descr": "Filtre HEPA, Makita, Blanc",
+   "prix": 10.61
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 1911BJ",
+   "descr": "Raboteuse, Largeur de rabotage 110 mm, 900 W",
+   "prix": 339.98
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 191A01-6",
+   "descr": "Roue pour brouette",
+   "prix": 104.98
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 191D50-1",
+   "descr": "Groupe de produits Tondeuse à gazon, Pour tondre, Largeur de travail 530 mm",
+   "prix": 33.4
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 191G06-2",
+   "descr": "Système d'aspiration, 1 pièce(s)",
+   "prix": 69.04
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 191G67-2",
+   "descr": "Rallonge, 1 pièce(s)",
+   "prix": 83.78
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 191L24-0",
+   "descr": "1 pièce(s), Bleu",
+   "prix": 68.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 191R02-6",
+   "descr": "Système d'aspiration, 1 pièce(s), Noir",
+   "prix": 9.66
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 191T92-1",
+   "descr": "Chaîne de tronçonneuse, Longueur de guide-chaîne 40 cm, Épaisseur du maillon entraîneur (jauge) 1,1 mm",
+   "prix": 20.24
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 191Y44-2",
+   "descr": "Lame de débroussailleuse, Type de lame Lame 8 dents, Largeur de coupe de la lame 200 mm",
+   "prix": 9.04
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 192557-6",
+   "descr": "Pare-éclats, 5 pièce(s), Argenté",
+   "prix": 6.7
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 193312-9",
+   "descr": "Butée parallèle",
+   "prix": 85.06
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 194044-1",
+   "descr": "Système d'aspiration, 1 pièce(s), Noir",
+   "prix": 198.17
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 194566-1",
+   "descr": "Sac à poussières, 5 pièce(s), Ouate",
+   "prix": 7.31
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 195136-9",
+   "descr": "Butée parallèle, 1 pièce(s)",
+   "prix": 36.11
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 195546-0",
+   "descr": "Adaptateur pour aspirateur, Aspirateur, Makita",
+   "prix": 2.27
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 196146-9",
+   "descr": "Tête de fil, Nombre de fils 1, Rond",
+   "prix": 4.3
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 197030-1",
+   "descr": "Tête de fil, Nombre de fils 2, Diamètre du fil de coupe 3 mm",
+   "prix": 30.7
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 197314-7",
+   "descr": "Plateau de ponçage, Meuleuse d'angle, 1 pièce(s)",
+   "prix": 33.04
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 197903-8",
+   "descr": "Sac filtre, 10 pièce(s), Ouate",
+   "prix": 16.79
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 198383-1",
+   "descr": "Lame de débroussailleuse, Type de lame Lame 3 dents, Plastique",
+   "prix": 15.36
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 198634-2",
+   "descr": "Adaptateur de batterie, Pour technologie de batterie Li-Ion, Nombre d'emplacements 1",
+   "prix": 28.67
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 198851-4",
+   "descr": "Lame de débroussailleuse, Plastique",
+   "prix": 6.74
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 198993-4",
+   "descr": "Accessoires pour foret",
+   "prix": 5.14
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 199232-5",
+   "descr": "Accessoires pour rail de guidage",
+   "prix": 31.05
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 199872-9",
+   "descr": "Lame de scie circulaire, 1 pièce(s), Diamètre de la lame 255 mm",
+   "prix": 17.64
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 24Z EFFICUT E-08682",
+   "descr": "Lame de scie circulaire, 1 pièce(s), Diamètre de la lame 185 mm",
+   "prix": 28.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 3712",
+   "descr": "Défonceuse, 530 W, Vitesse à vide max. 32 000 tr/min",
+   "prix": 92.98
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 415524-7",
+   "descr": "Pare-éclats, 1 pièce(s), Gris",
+   "prix": 1.49
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 4327",
+   "descr": "Scie sauteuse pendulaire, 500 W, Profondeur de coupe max. (bois) 65 mm",
+   "prix": 72.62
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 4351FCTJ",
+   "descr": "Scie sauteuse pendulaire, 720 W, Profondeur de coupe max. (bois) 135 mm Note ∅ 18/20",
+   "prix": 155
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 5008",
+   "descr": "Scie circulaire portative, 2 300 W, 5,1 kg",
+   "prix": 205
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 6413",
+   "descr": "Vitesse à vide max. 3 000 tr/min, Secteur, Mandrin autoserrant",
+   "prix": 64.93
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 7104L",
+   "descr": "",
+   "prix": 1365.39
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 763636-3",
+   "descr": "Nombre de pièces 1",
+   "prix": 9.13
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 79 43 84-3",
+   "descr": "",
+   "prix": 45
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 794560-9",
+   "descr": "Disque de polissage, Largeur 140 mm",
+   "prix": 12.98
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 824786-0",
+   "descr": "Caisse à outils, Vide, Verrouillable",
+   "prix": 34.13
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 831279-0",
+   "descr": "Sac à outils, Vide, Résistant",
+   "prix": 43.87
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 8357K1-6",
+   "descr": "Insert en mousse pour caisse à outils, Plastique, Vide",
+   "prix": 9.1
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 837647-5",
+   "descr": "Insert en mousse pour caisse à outils, Mécanique cycle, Noir",
+   "prix": 6.1
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 837678-4",
+   "descr": "Insert en mousse pour caisse à outils, Plastique, Vide",
+   "prix": 10.33
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 837914-8",
+   "descr": "Insert en mousse pour caisse à outils, Plastique, Vide",
+   "prix": 12.98
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 839252-4",
+   "descr": "Insert en mousse pour caisse à outils, Plastique, Résistant",
+   "prix": 8.19
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 839751-6",
+   "descr": "Insert en mousse pour caisse à outils, Plastique, Vide",
+   "prix": 8.44
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 9403J",
+   "descr": "",
+   "prix": 227.08
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 9565 PCV",
+   "descr": "Meuleuse d'angle une main, 1 400 W, Vitesse à vide max. 11 500 tr/min",
+   "prix": 161.44
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita 980008607",
+   "descr": "Huile pour 2 temps, Capacité 1 L",
+   "prix": 8.08
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita A-34096",
+   "descr": "Tuyau pour aspirateur, Foyer, Makita",
+   "prix": 37.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita A-85662",
+   "descr": "Lame de scie sauteuse, 5 pièce(s), Longueur de la lame 80 mm",
+   "prix": 2.71
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita A-85743",
+   "descr": "Lame de scie sauteuse, 5 pièce(s)",
+   "prix": 3.44
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita A-86315",
+   "descr": "Lame de scie sauteuse, 5 pièce(s), Longueur de la lame 181 mm",
+   "prix": 6.31
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita AN613",
+   "descr": "Cloueuse pneumatique, Pression de l'air 4,9 - 8,3 bars, Capacité de stockage 300 pièces",
+   "prix": 295.28
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita AS0AI154MK",
+   "descr": "Tuyau pour aspirateur, Aspirateur, Makita",
+   "prix": 34.78
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Adaptateur de douille 1/2\" carré (B-54673)",
+   "descr": "Adaptateur pour clé à douille, Emmanchement 1/2\"",
+   "prix": 2
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Assortiment de lames de scie sauteuse (A-86882)",
+   "descr": "Lame de scie sauteuse",
+   "prix": 16.97
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-06292",
+   "descr": "Lame de scie sauteuse, 3 pièce(s)",
+   "prix": 4.22
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-10986",
+   "descr": "Lame de scie sauteuse, 5 pièce(s)",
+   "prix": 10.79
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-14021",
+   "descr": "Burin pour carrelage, SDS-max, Longueur totale 300 mm",
+   "prix": 22.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-16689",
+   "descr": "Lame de scie à ruban, 1 pièce(s)",
+   "prix": 46.02
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-20105",
+   "descr": "Foret à percussion, Métal dur, Béton",
+   "prix": 53.95
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-20220",
+   "descr": "Foret à percussion, Métal dur, Béton",
+   "prix": 106.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-20404",
+   "descr": "Lame de scie sabre, Diamètre de la lame 100 mm",
+   "prix": 7.98
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-21618",
+   "descr": "Bois, 1 pièce(s)",
+   "prix": 1.96
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-21761",
+   "descr": "Pierre, Grain 400, 1 pièce(s)",
+   "prix": 2.71
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-31968",
+   "descr": "Lame de scie circulaire, Bois, 1 pièce(s)",
+   "prix": 15.01
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-32144",
+   "descr": "Lame de scie circulaire, 1 pièce(s), Diamètre de la lame 190 mm",
+   "prix": 17.3
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-32340",
+   "descr": "Lame de scie circulaire, 1 pièce(s), Diamètre de la lame 190 mm",
+   "prix": 25.6
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-32465",
+   "descr": "Lame de scie circulaire, 1 pièce(s), Diamètre de la lame 216 mm",
+   "prix": 46.74
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-32655",
+   "descr": "Lame de scie circulaire, 1 pièce(s), Diamètre de la lame 260 mm",
+   "prix": 100.19
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-32792",
+   "descr": "Lame de scie circulaire, 1 pièce(s), Diamètre de la lame 255 mm",
+   "prix": 40.51
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-32904",
+   "descr": "Lame de scie circulaire, 1 pièce(s), Diamètre de la lame 165 mm",
+   "prix": 20.39
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-33037",
+   "descr": "Lame de scie circulaire, 1 pièce(s), Diamètre de la lame 165 mm",
+   "prix": 28.28
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-33261",
+   "descr": "Lame de scie circulaire, 1 pièce(s), Diamètre de la lame 190 mm",
+   "prix": 52.2
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-33336",
+   "descr": "Lame de scie circulaire, 1 pièce(s), Diamètre de la lame 260 mm",
+   "prix": 56.1
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-33451",
+   "descr": "Lame de scie circulaire, 1 pièce(s), Diamètre de la lame 185 mm",
+   "prix": 41.58
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-33582",
+   "descr": "Lame de scie circulaire, 1 pièce(s), Diamètre de la lame 235 mm",
+   "prix": 69.5
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-33738",
+   "descr": "Lame de scie circulaire, 1 pièce(s), Diamètre de la lame 185 mm",
+   "prix": 95.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-33875",
+   "descr": "Lame de scie circulaire, 5 pièce(s), Diamètre de la lame 260 mm",
+   "prix": 83
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-42896",
+   "descr": "Foret à percussion, Métal dur, Béton",
+   "prix": 162.42
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-46517",
+   "descr": "Foret à béton, Métal dur, Béton",
+   "prix": 2.42
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-47036",
+   "descr": "Lame de scie circulaire, 1 pièce(s), Diamètre de la lame 150 mm",
+   "prix": 31.33
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-47690",
+   "descr": "Foret à béton, Métal dur, Béton",
+   "prix": 4.9
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-49052",
+   "descr": "Jeu de forets, Métal dur, Béton",
+   "prix": 11.23
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-49725 Jeu de forets (96 pièces)",
+   "descr": "Jeu de forets, Nombre de pièces 96",
+   "prix": 55.57
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-52124",
+   "descr": "Lame de scie sabre, 2 pièce(s), Longueur de la lame 300 mm",
+   "prix": 21.12
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-54025",
+   "descr": "Disque à tronçonner diamanté, Pierre, 1 pièce(s)",
+   "prix": 23.61
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-55572-10 TC L152 - 10 pieces",
+   "descr": "Lame de scie sauteuse, 10 pièce(s), Longueur de la lame 152 mm",
+   "prix": 97.05
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-56786",
+   "descr": "Lame de scie circulaire, 1 pièce(s), Diamètre de la lame 165 mm",
+   "prix": 51.09
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-58045",
+   "descr": "Foret à béton, Béton, SDS-plus",
+   "prix": 8.39
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-63672",
+   "descr": "Embout de vissage, Type de vis Torx, Nombre d'embouts de vissage 2",
+   "prix": 1.33
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-63806",
+   "descr": "Embout de vissage, Type de vis Torx, Nombre de pièces 2",
+   "prix": 2.01
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-65894",
+   "descr": "Clé Allen, Emmanchement 3/4\"",
+   "prix": 6.56
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-66793",
+   "descr": "Porte-embout",
+   "prix": 2.14
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-68317",
+   "descr": "Embout de vissage, Plastique, Type de vis Torx",
+   "prix": 18.39
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita B-69478 (65 pcs.)",
+   "descr": "Jeu d'embouts de vissage, SDS-plus, Diamètre du foret 4 mm",
+   "prix": 65.44
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita BL 40Vmax XGT 75cm (UH014GM101)",
+   "descr": "Taille-haie sans fil, Longueur de la lame 75 cm, Capacité de coupe 23 mm",
+   "prix": 799.85
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita BO004CG",
+   "descr": "Ponceuse excentrique, 40 V, 150 mm",
+   "prix": 225.64
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita BO4555",
+   "descr": "Ponceuse vibrante, 200 W, Vitesse d'oscillation max. à vide 14 000 tr/min",
+   "prix": 59.42
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita BO4565K",
+   "descr": "Ponceuse vibrante, 200 W, Vitesse d'oscillation max. à vide 14 000 tr/min",
+   "prix": 74.44
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita BO503",
+   "descr": "Ponceuse excentrique, 125 mm, 300 W",
+   "prix": 97.02
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita BO5041K",
+   "descr": "Ponceuse excentrique, 125 mm, 300 W",
+   "prix": 131
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Bac de transport pour brouette à batterie DCU180Z",
+   "descr": "",
+   "prix": 123.86
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Bi 100/6Z (B-20448)",
+   "descr": "Lame de scie sabre, 1 pièce(s), Longueur de la lame 100 mm",
+   "prix": 9.07
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Bonnet en Peau d'Agneau 180mm (D-74594)",
+   "descr": "Bonnet de polissage, Laque, Grain 180",
+   "prix": 12.01
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Brosse-tasse X-LOCK acier inoxydable 75mm 0,3mm (D-73346)",
+   "descr": "Brosse à décaper torsadée, Meuleuse d'angle, Acier inoxydable",
+   "prix": 9.62
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita CC301DSMJ",
+   "descr": "Mini scie circulaire, 2 batteries, 1,8 kg",
+   "prix": 259.91
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita CG100",
+   "descr": "2,6 kg, 10,8 V",
+   "prix": 147.05
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita CL108FDSAW",
+   "descr": "Aspirateur balai, Blanc, Technique de nettoyage Sèche",
+   "prix": 123.9
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita CP100DA1J",
+   "descr": "Cisaille à tôle sans fil, 1 batterie, Nombre de courses à vide 300 courses/min",
+   "prix": 129.08
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita CW001GZ",
+   "descr": "Glacière rigide, 20 Litres, 12 V",
+   "prix": 678.22
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Chainsaw 35cm 3/8\" 1,1mm (191H02-6)",
+   "descr": "",
+   "prix": 12.25
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Coupe-herbe DUR369APT2",
+   "descr": "Coupe-bordure, Batterie, Moyennes surfaces",
+   "prix": 604.87
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Couteau Inférieur (199169-6)",
+   "descr": "",
+   "prix": 74.04
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita D-039 03",
+   "descr": "Lame de scie HM, Diamètre de la lame 185 mm, Alésage 30 mm",
+   "prix": 10.39
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita D-06339",
+   "descr": "Foret HSS, ASR, Diamètre du foret 4 mm",
+   "prix": 7.08
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita D-07593",
+   "descr": "Foret à bois, 6 côtés, Diamètre du foret 16 mm",
+   "prix": 9.64
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita D-17354",
+   "descr": "Foret HSS, Diamètre du foret 5 mm",
+   "prix": 1.57
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita D-23802",
+   "descr": "Foret à pierre, Diamètre du foret 6 mm",
+   "prix": 1.64
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita D-31778",
+   "descr": "Jeu de forets, Bois, 6 côtés",
+   "prix": 39.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita D-33956",
+   "descr": "Foret à percussion, Métal dur, Béton",
+   "prix": 11.18
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita D-34126",
+   "descr": "Foret à percussion, Métal dur, Béton",
+   "prix": 41.48
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita D-39780",
+   "descr": "Brosse à décaper torsadée, Largeur 90 mm",
+   "prix": 4.45
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita D-41517",
+   "descr": "Jeu de clés à douille, Nombre de pièces 9, Emmanchement 1/2\"",
+   "prix": 29.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita D-46202",
+   "descr": "Jeu de forets, Diamètre du foret 3 mm Note ∅ 16/20",
+   "prix": 15.21
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita D-53073",
+   "descr": "Jeu de burins, SDS-plus, Béton",
+   "prix": 34.57
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita D-61690",
+   "descr": "Embout de vissage, Nombre de pièces 1",
+   "prix": 1.34
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita D-65713",
+   "descr": "Cutter, Adapté pour Universel, Matière des outils Plastique",
+   "prix": 4.05
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita D-66064",
+   "descr": "Groupe de produits Tondeuse à gazon, Largeur de travail 255 mm",
+   "prix": 9.19
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita D-72877",
+   "descr": "Foret à pierre, HM, Pierre",
+   "prix": 3.8
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita D-74011",
+   "descr": "Métal dur, Maçonnerie, SDS-plus",
+   "prix": 14.55
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DA00000180",
+   "descr": "Tête de fil, Diamètre du fil de coupe 2,4 mm, Plastique",
+   "prix": 16.24
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DA3011FJ",
+   "descr": "Perceuse d'angle, Vitesse à vide max. 2 400 tr/min, Secteur",
+   "prix": 287.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DA4000",
+   "descr": "Perceuse d'angle, Vitesse à vide max. 900 tr/min, Secteur",
+   "prix": 418.77
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DBN500Z",
+   "descr": "Cloueuse sans fil, Capacité de stockage 100 pièces, 18 V",
+   "prix": 421.95
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DBN601Z",
+   "descr": "Cloueuse sans fil, Capacité de stockage 110 pièces, Longueur des clous 19-64 mm",
+   "prix": 392.93
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DBN901ZK",
+   "descr": "Cloueuse sans fil, Capacité de stockage 41 pièces, Longueur des clous 50-90 mm",
+   "prix": 581.28
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DBO381RTJU",
+   "descr": "Ponceuse vibrante, Vitesse à vide max. 12 000 tr/min, Vitesse d'oscillation max. à vide 12 000 tr/min",
+   "prix": 437.98
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DBO481Z",
+   "descr": "Ponceuse vibrante, 18 V, Vitesse d'oscillation max. à vide 14 000 tr/min",
+   "prix": 87.79
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DCC501ZJ",
+   "descr": "",
+   "prix": 239.88
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DCL180ZB",
+   "descr": "Aspirateur balai, Noir, Technique de nettoyage Sèche",
+   "prix": 45
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DCL282FZ",
+   "descr": "Aspirateur balai, Bleu, Technique de nettoyage Sèche",
+   "prix": 101.48
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DCO180ZJ",
+   "descr": "",
+   "prix": 150.41
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DCU180Z (without battery)",
+   "descr": "Brouette motorisée, Charge max. 130 kg, 44 kg",
+   "prix": 859.11
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DDA450ZK",
+   "descr": "Perceuse-visseuse sans fil, Vitesse à vide max. 1 400 tr/min, Couple max. (vissage en force) 70 Nm",
+   "prix": 259.27
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DDF453SFX1",
+   "descr": "Perceuse-visseuse sans fil, Vitesse à vide max. 1 300 tr/min, Couple max. (vissage en force) 42 Nm 2 911",
+   "prix": 290.92
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DDF482RTJ",
+   "descr": "Perceuse-visseuse sans fil, Vitesse à vide max. 1 900 tr/min, Couple max. (vissage en force) 62 Nm",
+   "prix": 279.9
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DDF484RGJ",
+   "descr": "Perceuse-visseuse sans fil, Vitesse à vide max. 2 000 tr/min, Couple max. (vissage en force) 54 Nm",
+   "prix": 314.89
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DDF485RF3J",
+   "descr": "Perceuse-visseuse sans fil, Vitesse à vide max. 1 900 tr/min, Couple max. (vissage en force) 50 Nm",
+   "prix": 275.63
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DDF487RTJ",
+   "descr": "Perceuse-visseuse sans fil, Vitesse à vide max. 1 700 tr/min, Couple max. (vissage en force) 40 Nm",
+   "prix": 311.77
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DDF492",
+   "descr": "Perceuse-visseuse à percussion sans fil, Vitesse à vide max. 2 100 tr/min, Couple max. (vissage en force) 130 Nm",
+   "prix": 199.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DEADML805",
+   "descr": "Projecteur de chantier LED, Secteur, Puissance d'éclairage 750 lumen",
+   "prix": 99.9
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DEAWST07",
+   "descr": "",
+   "prix": 228.96
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DF002",
+   "descr": "Perceuse-visseuse sans fil, Vitesse à vide max. 2 200 tr/min, Couple max. (vissage en force) 64 Nm",
+   "prix": 123.92
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DF030DWE",
+   "descr": "Perceuse-visseuse sans fil, Vitesse à vide max. 1 300 tr/min, Couple max. (vissage en force) 24 Nm",
+   "prix": 128.79
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DF331DZ Solo",
+   "descr": "Perceuse-visseuse sans fil, Vitesse à vide max. 1 700 tr/min, Couple max. (vissage en force) 30 Nm",
+   "prix": 119.52
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DF333DSAE",
+   "descr": "Perceuse-visseuse sans fil, Vitesse à vide max. 1 700 tr/min, Couple max. (vissage en force) 30 Nm Note ∅ 17/20",
+   "prix": 137.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DFR452Z",
+   "descr": "Visseuse plaquiste sans fil, Vitesse à vide max. 6 000 tr/min, Moteur Brushless",
+   "prix": 295.15
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DFR551Z",
+   "descr": "Visseuse automatique sans fil, Vitesse à vide max. 6 000 tr/min, Moteur Brushless",
+   "prix": 269.7
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DFS251RTJ",
+   "descr": "Visseuse plaquiste sans fil, Vitesse à vide max. 2 500 tr/min, Rotation réversible",
+   "prix": 486.13
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DFS452Z Solo",
+   "descr": "Visseuse plaquiste sans fil, Vitesse à vide max. 4 000 tr/min, Couple max. (vissage en force) 60 Nm",
+   "prix": 162.53
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DGA504",
+   "descr": "Meuleuse d'angle sans fil",
+   "prix": 117.49
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DGA511",
+   "descr": "Meuleuse d'angle sans fil, 18 V, Vitesse à vide max. 8 500 tr/min",
+   "prix": 133.88
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DGA513Z",
+   "descr": "Meuleuse d'angle sans fil, 18 V, Vitesse à vide max. 8 500 tr/min",
+   "prix": 157
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DGA519",
+   "descr": "Meuleuse d'angle sans fil, 18 V, Vitesse à vide max. 8 500 tr/min",
+   "prix": 203.9
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DGA900",
+   "descr": "Meuleuse d'angle sans fil, 36 V, Vitesse à vide max. 6 000 tr/min",
+   "prix": 263.45
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DGP180",
+   "descr": "Pompe à graisse pneumatique",
+   "prix": 246.63
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DHK180",
+   "descr": "Perforateur sans fil, Vitesse à vide max. 3 200 tr/min, Batterie",
+   "prix": 353.98
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DHP453RFJ",
+   "descr": "",
+   "prix": 191.44
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DHP482ZJ",
+   "descr": "Perceuse-visseuse à percussion sans fil, Vitesse à vide max. 1 900 tr/min, Couple max. (vissage en force) 62 Nm",
+   "prix": 85.77
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DHP485RTJ",
+   "descr": "Perceuse-visseuse à percussion sans fil, Vitesse à vide max. 1 900 tr/min, Couple max. (vissage en force) 50 Nm",
+   "prix": 254.09
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DHP487ZJ Solo",
+   "descr": "Perceuse-visseuse à percussion sans fil, Vitesse à vide max. 1 700 tr/min, Couple max. (vissage en force) 40 Nm Note ∅ 15/20",
+   "prix": 135.77
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DHR 165 Z (sans batterie)",
+   "descr": "",
+   "prix": 118.9
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DHR182ZJ",
+   "descr": "Perforateur sans fil, Vitesse à vide max. 1 350 tr/min, Fréquence de frappe max. 5 000 coups/min",
+   "prix": 209.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DHR183RTWJ",
+   "descr": "Perforateur sans fil, Vitesse à vide max. 1 100 tr/min, Fréquence de frappe max. 5 000 coups/min",
+   "prix": 327.76
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DHR242ZJ",
+   "descr": "Perforateur sans fil, Vitesse à vide max. 1 100 tr/min, Fréquence de frappe max. 4 000 coups/min",
+   "prix": 256.64
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DHR280",
+   "descr": "Marteau perforateur combiné sans fil, Vitesse à vide max. 980 tr/min, Fréquence de frappe max. 5 000 coups/min",
+   "prix": 287
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DHR281ZJ",
+   "descr": "Marteau perforateur combiné sans fil, Vitesse à vide max. 980 tr/min, Fréquence de frappe max. 5 000 coups/min",
+   "prix": 351.98
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DHR400G2U",
+   "descr": "Marteau perforateur combiné sans fil, Vitesse à vide max. 500 tr/min, Fréquence de frappe max. 2 900 coups/min",
+   "prix": 991.04
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DHS661ZU",
+   "descr": "Scie circulaire portative, Sans batterie, 3,2 kg",
+   "prix": 311.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DHS783",
+   "descr": "Scie à onglet de précision, 5,1 kg, Diamètre de la lame 190 mm",
+   "prix": 402.19
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DJR183",
+   "descr": "Scie récipro, SDS, Nombre de courses 3000 min-1 Note ∅ 13/20",
+   "prix": 81.6
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DJR189",
+   "descr": "Nombre de courses 3100 min-1, Longueur de course 22 mm, 18 V",
+   "prix": 159.12
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DJS161RTJ",
+   "descr": "Cisaille à tôle sans fil, Épaisseur max. 2,5 mm, Rayon de coupe min. 250 mm",
+   "prix": 461
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DJV181",
+   "descr": "Scie sauteuse pendulaire, Profondeur de coupe max. (bois) 135 mm, 18 V",
+   "prix": 194.37
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DJV184ZJ",
+   "descr": "Scie sauteuse sans fil, Profondeur de coupe max. (bois) 135 mm, 18 V",
+   "prix": 189.72
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DKP180RTJ",
+   "descr": "Rabot sans fil, Largeur de rabotage 82 mm, 15 000 tours/min",
+   "prix": 335.34
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DLM382",
+   "descr": "Tondeuse batterie, Sans fil, Largeur de coupe 38 cm Note ∅ 19/20",
+   "prix": 191.18
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DLM463Z Solo",
+   "descr": "Tondeuse batterie, Sans fil, Largeur de coupe 46 cm",
+   "prix": 400.85
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DLM532",
+   "descr": "Tondeuse électrique, Mulching, Largeur de coupe 53 cm",
+   "prix": 755.44
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DLM537Z",
+   "descr": "Tondeuse batterie, Sans fil, Batterie",
+   "prix": 1415.59
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DLS714",
+   "descr": "Scie à tronçonner et à onglet, 13,5 kg, Diamètre de la lame 190 mm",
+   "prix": 608.8
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DMC300ZJ",
+   "descr": "Meuleuse d'angle sans fil, 18 V, Vitesse à vide max. 20 000 tr/min",
+   "prix": 168.96
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DML811",
+   "descr": "Projecteur de chantier LED, Batterie, 31 W",
+   "prix": 179.9
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DML817 (without battery)",
+   "descr": "Lampe torche LED, Rechargeable, Autonomie max. 49 h",
+   "prix": 42.73
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DMR055",
+   "descr": "Projecteur de chantier LED, Batterie, Puissance d'éclairage 260 lumen",
+   "prix": 68.08
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DMR202 noir",
+   "descr": "Enceinte portable, Autonomie 32 h, Puissance RMS 10 W",
+   "prix": 116.07
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DP4003",
+   "descr": "Perceuse à percussion, Vitesse à vide max. 600 tr/min, Secteur",
+   "prix": 165.18
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DPB183Z",
+   "descr": "Scie à ruban électrique sans fil, Vitesse de la bande 3 m/min",
+   "prix": 298.7
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DPO600",
+   "descr": "Polisseuse sans fil, 3,3 kg, 150 mm",
+   "prix": 279.9
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DRC300Z",
+   "descr": "Aspirateur robot sans lavage, Blanc, 18 V",
+   "prix": 1919.56
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DRT50ZJX9",
+   "descr": "Défonceuse, Sans fil, Vitesse à vide max. 30 000 tr/min",
+   "prix": 302.2
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DRV250",
+   "descr": "18 V, 2,4 kg",
+   "prix": 653.74
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DSC102ZJ",
+   "descr": "Coupe-tube, 3 000 g",
+   "prix": 575.4
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DSD180",
+   "descr": "Scie sauteuse sans fil, Profondeur de coupe max. (bois) 15 mm, 18 V",
+   "prix": 152.08
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DSP600Z (seul)",
+   "descr": "Scie plongeante, Sans batterie, 5,1 kg",
+   "prix": 374.08
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DSS 611 Z Solo",
+   "descr": "",
+   "prix": 157.12
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DST112Z",
+   "descr": "",
+   "prix": 232.43
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DTD 156 RTJ",
+   "descr": "",
+   "prix": 289.9
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DTD153",
+   "descr": "Visseuse à choc sans fil, Éclairage LED, Protection contre les surcharges",
+   "prix": 75.79
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DTD158",
+   "descr": "Visseuse à choc sans fil, Emmanchement carré 1/4 pouce, Éclairage LED",
+   "prix": 115.19
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DTD201Z",
+   "descr": "Visseuse à choc sans fil, Emmanchement 6 pans 1/4 pouce, 3 vitesses",
+   "prix": 147.41
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DTM51ZJ (without battery)",
+   "descr": "Découpeur ponceur sans fil, 18 V, Vitesse d'oscillation max. à vide 2 000 tr/min",
+   "prix": 151
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DTM52RTJX1",
+   "descr": "Outil multifonction sans fil, 18 V, Vitesse d'oscillation max. à vide 20 000 tr/min",
+   "prix": 468.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DTM53RTJX1",
+   "descr": "Outil multifonction sans fil, 18 V, Vitesse à vide max. 20 000 tr/min",
+   "prix": 420.47
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DTR181ZJ",
+   "descr": "",
+   "prix": 776.57
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DTW180",
+   "descr": "Visseuse à choc sans fil, 2 vitesses, Couple de serrage max. 180 Nm",
+   "prix": 92.18
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DTW300ZJ",
+   "descr": "Visseuse à choc sans fil, Emmanchement carré 1/2 pouce, Éclairage LED",
+   "prix": 216.9
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DUA200Z01",
+   "descr": "Élagueuse sur perche batterie, 18 V, Sans batterie",
+   "prix": 223.43
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DUB 187",
+   "descr": "",
+   "prix": 165.34
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DUB361",
+   "descr": "Batterie, Souffler, 18 V Note ∅ 15/20",
+   "prix": 134.6
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DUC101 SF01",
+   "descr": "Scie de jardin électrique, Longueur de la lame 10 cm, Lame fixe",
+   "prix": 233.29
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DUC150ZJ (machine seule)",
+   "descr": "Tronçonneuse batterie, Capacité du réservoir 550 ml, 18 V",
+   "prix": 216
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DUH483RT",
+   "descr": "Taille-haie sans fil, Longueur de la lame 88,8 cm, 18 V",
+   "prix": 204.12
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DUH507",
+   "descr": "Taille-haie sans fil, Longueur de la lame 15 cm, Longueur de coupe 50 cm",
+   "prix": 100.9
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DUH606",
+   "descr": "Taille-haie sans fil, Longueur de la lame 60 cm, Capacité de coupe 20 mm",
+   "prix": 198.28
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DUH752SF",
+   "descr": "Taille-haie sans fil, Longueur de coupe 75 cm, Capacité de coupe 18 mm",
+   "prix": 377.33
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DUN461WZ Solo",
+   "descr": "Taille-haie télescopique, Longueur de la lame 48 cm, Longueur de coupe 46 cm",
+   "prix": 151.12
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DUR189Z Solo",
+   "descr": "Coupe-bordure, Batterie, Petites surfaces",
+   "prix": 203
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DUR193",
+   "descr": "Coupe-bordure, Batterie, Petites surfaces",
+   "prix": 77.59
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DUR369AZX6 wthout battery",
+   "descr": "Coupe-bordure, Batterie, Bords de pelouse",
+   "prix": 479.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DUV320",
+   "descr": "Scarificateur sans fil, 108 W, Pour ramasser",
+   "prix": 227.02
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DUX60",
+   "descr": "Batterie, 36 V, Poignée en P",
+   "prix": 243.16
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DVC261ZX15",
+   "descr": "Aspirateur sac à dos, Turquoise, Capacité du réservoir 2 L",
+   "prix": 271.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DVC750LZX3 199827-4",
+   "descr": "Filtre pré-moteur pour aspirateur, Blanc",
+   "prix": 9.15
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DVR350 Aiguille Vibrante 18V LXT sans fil (DVR350Z)",
+   "descr": "Vibreur à béton, Batterie",
+   "prix": 351.43
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita DX08 (199581-0)",
+   "descr": "Système d'aspiration, 1 pièce(s)",
+   "prix": 108.98
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Disque Abrasif 50mm Grain 80, 25 Pièces (E-07456)",
+   "descr": "Disque abrasif, Polisseuse, Métal",
+   "prix": 28.54
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Disque diamant Comet Turbo à jante continue crenelée pour matériaux durs Ø150 mm (B-13007)",
+   "descr": "Disque à tronçonner diamanté, Marbre, 1 pièce(s)",
+   "prix": 38.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Disques fibre (P-010 74)",
+   "descr": "",
+   "prix": 5.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita E-02705",
+   "descr": "Fil pour coupe-bordures, Rond, Diamètre du fil de coupe 2 mm",
+   "prix": 2.15
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita E-02808",
+   "descr": "Fil pour coupe-bordures, Carré, Diamètre du fil de coupe 2,4 mm",
+   "prix": 3.24
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita E-02886",
+   "descr": "Fil pour coupe-bordures, Carré, Diamètre du fil de coupe 3 mm",
+   "prix": 10.64
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita E-03268",
+   "descr": "Jeu d'embouts de vissage, Nombre d'embouts de vissage 2, Nombre de pièces 2",
+   "prix": 4.49
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita E-03355",
+   "descr": "Embout de vissage, Nombre de pièces 2",
+   "prix": 3.9
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita E-03486",
+   "descr": "Embout de vissage, Nombre de pièces 1",
+   "prix": 5.21
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita E-05119",
+   "descr": "Ceinture à outils, Bleu",
+   "prix": 14.02
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita E-05365",
+   "descr": "Homme, Noir, Cuir",
+   "prix": 21.59
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita E-06323",
+   "descr": "Lame de scie circulaire, Aluminium, Diamètre de la lame 260 mm",
+   "prix": 60.9
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita E-07032",
+   "descr": "Jeu d'embouts de vissage, Pierre, Type de vis Torx",
+   "prix": 19.39
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita E-08919",
+   "descr": "Lame de scie circulaire, 1 pièce(s), Diamètre de la lame 216 mm",
+   "prix": 50.7
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita E-11782",
+   "descr": "Sac à outils",
+   "prix": 83.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita E-12223",
+   "descr": "Lame de scie circulaire, Plastique, 1 pièce(s)",
+   "prix": 29.56
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita E-12441",
+   "descr": "Jeu d'embouts de vissage, Nombre de pièces 33",
+   "prix": 15.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita E-13633",
+   "descr": "Mèches pour tarière, Diamètre de perçage 80 mm, Longueur de perçage 800 mm",
+   "prix": 59.84
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita E-14928",
+   "descr": "Foret à percussion, SDS-plus, Nombre de pièces 7",
+   "prix": 23.05
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita E-15213",
+   "descr": "Sac à outils, Vide",
+   "prix": 38.14
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita E-15300",
+   "descr": "Sac à outils, Vide, Résistant",
+   "prix": 10.3
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita E-15403",
+   "descr": "Sac à outils, Vide, Résistant",
+   "prix": 60.43
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita E-15497",
+   "descr": "Sac à outils, Vide, Mécanique cycle",
+   "prix": 21.68
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita E-15615",
+   "descr": "Genouillères protection",
+   "prix": 22.85
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita E-16601",
+   "descr": "Jeu de douilles, Nombre de pièces 8, Emmanchement 1/2\"",
+   "prix": 20.09
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita E-24826",
+   "descr": "Embout de vissage, Type de vis Torx, Nombre de pièces 100",
+   "prix": 54.94
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita ELM4120",
+   "descr": "Tondeuse électrique, Largeur de coupe 41 cm, Hauteur de tonte minimale 20 mm",
+   "prix": 204.41
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita EN 401 MP",
+   "descr": "",
+   "prix": 243
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Electric hedge trimmer UH6580",
+   "descr": "Taille-haie électrique, Longueur de la lame 65 cm, Longueur de coupe 65 cm",
+   "prix": 179.06
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Ezychange Scie Cloche BIM 152 mm (E-04064)",
+   "descr": "Scie-cloche, BiM, Nombre de pièces 1",
+   "prix": 45.32
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita F-30913",
+   "descr": "Vis autoforeuse, Quantité 1 000 Pièce(s), Diamètre de vis 3,9 mm",
+   "prix": 16.15
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita F-31854",
+   "descr": "Clous pour agrafeuse, 10 000 pièce(s), Gris",
+   "prix": 12.6
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita F-31928",
+   "descr": "Clous pour agrafeuse, 5 000 pièce(s), Gris",
+   "prix": 19.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita F-32676",
+   "descr": "Agrafes, 5 040 pièce(s), Gris",
+   "prix": 16.18
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita FN001",
+   "descr": "Longueur des clous 15-40 mm, 40 V",
+   "prix": 361.8
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita FS2700/1",
+   "descr": "Visseuse électrique, Vitesse à vide max. 2 500 tr/min, Secteur",
+   "prix": 134.09
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Fil de coupe carré (E-02892)",
+   "descr": "Fil pour coupe-bordures, Carré, Diamètre du fil de coupe 3 mm",
+   "prix": 29.2
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Foret métaux HSS revêtement cobalt 3 mm (D-17310)",
+   "descr": "Foret HSS, Diamètre du foret 3 mm",
+   "prix": 1.58
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Four Leaf 2,0mm/30m (E-01775)",
+   "descr": "Bobine de fil pour débroussailleuse, Nombre de fils 1, Carré",
+   "prix": 5.39
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Four Leaf 2mm/310 m (E-01781)",
+   "descr": "Fil pour coupe-bordures, Nombre de fils 1, Diamètre du fil de coupe 2 mm",
+   "prix": 33.89
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Fs4200",
+   "descr": "",
+   "prix": 119.09
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita GA013GZ",
+   "descr": "Meuleuse d'angle sans fil, 40 V, Vitesse à vide max. 8 500 tr/min",
+   "prix": 190.9
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita GA029M201",
+   "descr": "Meuleuse d'angle sans fil, 40 V, Vitesse à vide max. 8 500 tr/min",
+   "prix": 502.74
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita GA038GZ01",
+   "descr": "Meuleuse d'angle sans fil, 40 V, Vitesse à vide max. 6 600 tr/min",
+   "prix": 262.27
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita GA051GZ",
+   "descr": "Meuleuse d'angle sans fil, 40 V, Vitesse à vide max. 9 000 tr/min",
+   "prix": 236.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita GA5030",
+   "descr": "Meuleuse d'angle filaire, 720 W, Vitesse à vide max. 11 000 tr/min",
+   "prix": 51.46
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita GA5040R",
+   "descr": "Meuleuse d'angle filaire, 1 100 W, Vitesse à vide max. 11 000 tr/min",
+   "prix": 155.26
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita GA5080RX02",
+   "descr": "Meuleuse d'angle filaire, 1 400 W, Vitesse à vide max. 12 000 tr/min",
+   "prix": 99.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita GA9020 (sans batterie)",
+   "descr": "Meuleuse d'angle filaire, 2 200 W, Vitesse à vide max. 6 600 tr/min",
+   "prix": 119.98
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita GA9030RF01",
+   "descr": "Meuleuse d'angle filaire, 2 400 W, Vitesse à vide max. 6 600 tr/min",
+   "prix": 164.84
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita GA9050KX",
+   "descr": "Meuleuse d'angle filaire, 2 000 W, Vitesse à vide max. 6 600 tr/min",
+   "prix": 154.79
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita GD002GZ 40V cordless straight grinder",
+   "descr": "Meuleuse droite",
+   "prix": 208.79
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita GD0811C",
+   "descr": "Meuleuse droite, 750 W, Vitesse à vide max. 7 000 tr/min",
+   "prix": 241.45
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita GV5010",
+   "descr": "Ponceuse à disque, 125 mm, 440 W",
+   "prix": 160.25
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Guide-chaîne 45cm 1,3mm .325\" (191G40-2)",
+   "descr": "",
+   "prix": 15.7
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita HG6531CK",
+   "descr": "Décapeur thermique, Niveau de température 1, Puissance absorbée 2 000 W",
+   "prix": 138.06
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita HM drill bit NEMESIS II SDS-PLUS (5 pieces) (E-14803)",
+   "descr": "Foret à percussion, HM, Béton",
+   "prix": 45.98
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita HM1203C",
+   "descr": "Marteau de démolition, SDS-Max, 1 500 W",
+   "prix": 452.12
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita HM1812",
+   "descr": "Marteau de démolition, Emmanchement 6 pans 1/8 pouce, 2 000 W",
+   "prix": 1133.38
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita HP002GA202",
+   "descr": "Perceuse-visseuse à percussion sans fil, Vitesse à vide max. 2 200 tr/min, Couple max. (vissage en force) 64 Nm",
+   "prix": 465.98
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita HP1631",
+   "descr": "Perceuse à percussion, Vitesse à vide max. 3 200 tr/min, Fréquence de frappe max. 48 000 coups/min",
+   "prix": 97.7
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita HP1641K1X",
+   "descr": "Perceuse à percussion, Vitesse à vide max. 2 800 tr/min, Fréquence de frappe max. 44 800 coups/min",
+   "prix": 101.71
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita HP2071FJ",
+   "descr": "Perceuse à percussion, Vitesse à vide max. 2 900 tr/min, Fréquence de frappe max. 58 000 coups/min",
+   "prix": 191.98
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita HP333DWAE",
+   "descr": "Perceuse-visseuse à percussion sans fil, Vitesse à vide max. 1 700 tr/min, Couple max. (vissage en force) 30 Nm",
+   "prix": 158.24
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita HR 2811",
+   "descr": "",
+   "prix": 304.98
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita HR002GZ02 XGT",
+   "descr": "Marteau perforateur combiné sans fil, Vitesse à vide max. 980 tr/min, Fréquence de frappe max. 5 000 coups/min",
+   "prix": 399.9
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita HR006",
+   "descr": "Marteau perforateur combiné sans fil, Vitesse à vide max. 310 tr/min, Fréquence de frappe max. 2 250 coups/min",
+   "prix": 940
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita HR009GZ",
+   "descr": "Marteau perforateur combiné sans fil, Vitesse à vide max. 840 tr/min, Fréquence de frappe max. 4 500 coups/min",
+   "prix": 454.15
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita HR166DSMJ",
+   "descr": "Perforateur sans fil, Vitesse à vide max. 680 tr/min, Fréquence de frappe max. 4 800 coups/min",
+   "prix": 285.21
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita HR2600",
+   "descr": "Perforateur, Vitesse à vide max. 1 200 tr/min, Fréquence de frappe max. 4 600 coups/min",
+   "prix": 131.53
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita HR2631F",
+   "descr": "Marteau perforateur combiné, Vitesse à vide max. 1 200 tr/min, Fréquence de frappe max. 4 600 coups/min",
+   "prix": 157.14
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita HR2652",
+   "descr": "Marteau perforateur combiné, Vitesse à vide max. 1 200 tr/min, Fréquence de frappe max. 4 600 coups/min",
+   "prix": 198.96
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita HR3001CJ",
+   "descr": "Marteau perforateur combiné, Vitesse à vide max. 840 tr/min, Fréquence de frappe max. 4 500 coups/min",
+   "prix": 354.66
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita HR3210C",
+   "descr": "Marteau perforateur combiné, Vitesse à vide max. 630 tr/min, Fréquence de frappe max. 3 300 coups/min",
+   "prix": 541.79
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita HR5212",
+   "descr": "Marteau perforateur combiné, Vitesse à vide max. 310 tr/min, Fréquence de frappe max. 2 250 coups/min",
+   "prix": 718.64
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita HS012",
+   "descr": "Scie circulaire portative, 3,2 kg, Diamètre de la lame 165 mm",
+   "prix": 286.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita HS301DSMJ (sans batterie)",
+   "descr": "Scie circulaire portative, Sans batterie, 1,6 kg",
+   "prix": 77.9
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita HS7101 Basic",
+   "descr": "Scie circulaire portative, 1 400 W, 4 kg",
+   "prix": 238.42
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita HS7611K",
+   "descr": "Scie circulaire portative, 1 600 W, 3,9 kg",
+   "prix": 180.47
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita HW112",
+   "descr": "Nettoyeur haute pression électrique, 120 bars, 370 l/h Note ∅ 12/20",
+   "prix": 220.27
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Hotte d'extraction (198440-5)",
+   "descr": "",
+   "prix": 96.4
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Impact Black Douille SW8, 50mm (B-66830)",
+   "descr": "Embout de clé à douille, Emmanchement 1/4",
+   "prix": 2
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita JM27000202",
+   "descr": "Butée parallèle, 1 pièce(s)",
+   "prix": 17.88
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita JR001GZ sans batterie",
+   "descr": "Scie sabre sans fil, Nombre de courses 3000 min-1, Longueur de course 32 mm",
+   "prix": 170.45
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita JS1601",
+   "descr": "Cisaille à tôle électrique, Nombre de courses à vide 4 500 courses/min, Épaisseur max. 1,6 mm",
+   "prix": 260
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita JV0600J im MAKPAC",
+   "descr": "Scie sauteuse pendulaire, 650 W, Profondeur de coupe max. (bois) 135 mm",
+   "prix": 108.58
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita JV103",
+   "descr": "Scie sauteuse sans fil, Profondeur de coupe max. (bois) 90 mm, 12 V",
+   "prix": 69.9
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Joint universel 3/4\" 105mm pour clé à chocs (134998-0)",
+   "descr": "",
+   "prix": 77.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita KP0810",
+   "descr": "Rabot Guillaume, Largeur de rabotage 82 mm, 850 W",
+   "prix": 188.45
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Kreissägeblatt E-08903",
+   "descr": "Ensemble de lames pour scie, Bois, 1 pièce(s)",
+   "prix": 42.7
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita LDX1 (LE00855702)",
+   "descr": "Récepteur laser",
+   "prix": 183.8
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita LM001JM101",
+   "descr": "Tondeuse batterie, Sans fil, Largeur de coupe 48 cm",
+   "prix": 581.96
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita LS1040",
+   "descr": "Scie à onglet, 1 650 W, 11 kg",
+   "prix": 321.34
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Lame alternative HCS 2036-10Z-25",
+   "descr": "",
+   "prix": 56.49
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Lames de Rechange pour Mèche de Tarière Ø 100mm (E-07668)",
+   "descr": "Mèches pour tarière, 800 W, Acier",
+   "prix": 7.56
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita M196257-0",
+   "descr": "Capacité de coupe 22 mm, Longueur de guide 53,5 cm, Épaisseur de branche max. 2,2 cm",
+   "prix": 262.06
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita M3702B",
+   "descr": "Défonceuse, 530 W",
+   "prix": 89
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita MAKPAC Taille 1 (P-02369)",
+   "descr": "Systainer, Vide, Makita MAKPAC",
+   "prix": 35.67
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita MAKSTOR 4.5",
+   "descr": "",
+   "prix": 175.79
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita MDUH507RT",
+   "descr": "Taille-haie sans fil, Longueur de coupe 50 cm, 18 V",
+   "prix": 230.39
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita ML005G Solo",
+   "descr": "Projecteur de chantier LED, Batterie, Nombre de batteries 0",
+   "prix": 220.61
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita ML103 12V (solo)",
+   "descr": "Lampe torche LED, Autonomie max. 28 h, Bleu",
+   "prix": 14.38
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita MP001GZ",
+   "descr": "Compresseur sans fil, Pression max. 11,1 bars, 40 V",
+   "prix": 107.18
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita MR004GZ",
+   "descr": "Radio numérique, Stéréo, DAB",
+   "prix": 176.7
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Magnetic bit holder, 1 piece (300 mm (B-57766))",
+   "descr": "Porte-embout, Nombre de pièces 1",
+   "prix": 6.86
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Maktrak M P-91045",
+   "descr": "Boîte à outils, Vide, Empilable",
+   "prix": 79.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Meule diamantée 125mm grossière (D-41458)",
+   "descr": "Meule diamantée, Travaux de ponçage, Béton",
+   "prix": 37.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita NEMESIS II (E-14912)",
+   "descr": "Jeu de forets, Béton, SDS-plus",
+   "prix": 41.58
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita P-03800",
+   "descr": "Couronne de forage",
+   "prix": 97.9
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita P-044 22",
+   "descr": "Brosse abrasive, Grain 60",
+   "prix": 83.32
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita P-04905",
+   "descr": "Lame de scie sabre, 1 pièce(s), Diamètre de la lame 150 mm",
+   "prix": 7.98
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita P-04999",
+   "descr": "Lame de scie sabre, 1 pièce(s), Longueur de la lame 150 mm",
+   "prix": 6.31
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita P-05701",
+   "descr": "Burin large, Longueur totale 400 mm, Largeur de travail 80 mm",
+   "prix": 47.88
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita P-100 01",
+   "descr": "Couronne de forage, Diamètre du foret 131 mm",
+   "prix": 352.27
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita P-17005",
+   "descr": "",
+   "prix": 55.68
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita P-25074",
+   "descr": "Burin pour perforateur, SDS-plus, Longueur totale 200 mm",
+   "prix": 10.3
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita P-319 30",
+   "descr": "Disque abrasif, Makita BO6030, Grain 80",
+   "prix": 5.18
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita P-331 02",
+   "descr": "Papier abrasif, Makita BO4556/66, Grain 80",
+   "prix": 3.18
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita P-333 08",
+   "descr": "Papier abrasif, Makita BO4565, Grain 150",
+   "prix": 2.96
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita P-36055",
+   "descr": "Papier abrasif, Métal, Grain 40",
+   "prix": 10.39
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita P-369 24",
+   "descr": "Bande abrasive, Makita 9403, Grain 120",
+   "prix": 9.1
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita P-371 00",
+   "descr": "Bande abrasive, Makita 9910, Grain 60",
+   "prix": 5.11
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita P-373 12",
+   "descr": "Bande abrasive, Makita 9920, Grain 40",
+   "prix": 10.03
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita P-38124",
+   "descr": "Papier abrasif, Métal, Grain 80",
+   "prix": 4.91
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita P-435 49",
+   "descr": "Disque abrasif, Makita BO5010, Grain 60",
+   "prix": 4.15
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita P-43642",
+   "descr": "Papier abrasif, Métal, Grain 80",
+   "prix": 14.88
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita P-47058",
+   "descr": "Lame de scie sabre, 1 pièce(s), Diamètre de la lame 300 mm",
+   "prix": 18.19
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita P-47226",
+   "descr": "Lame de scie sauteuse, 1 pièce(s)",
+   "prix": 4.92
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita P-67804",
+   "descr": "Embout de vissage, Diamètre du foret 5 mm, Nombre de pièces 1",
+   "prix": 11
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita P-70384",
+   "descr": "Adaptateur pour aspirateur, Foyer, Makita",
+   "prix": 14.81
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita P-73352",
+   "descr": "Jeu d'embouts de vissage, 6 côtés",
+   "prix": 11.49
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita P-81290",
+   "descr": "Ensemble de lames pour scie, Bois, 30 pièce(s)",
+   "prix": 56.93
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita P-83705",
+   "descr": "Insert en mousse pour caisse à outils, Mousse synthétique, Résistant",
+   "prix": 14.69
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita P-84268",
+   "descr": "Insert en mousse pour caisse à outils, Mousse synthétique, Vide",
+   "prix": 11.78
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita PB002GZ",
+   "descr": "Scie à ruban électrique sans fil, Protection de surcharge, Vitesse de la bande 192 m/min",
+   "prix": 377.64
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita PF0800",
+   "descr": "Pompe immergée, Eaux claires, 13 200 L/h",
+   "prix": 102.79
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita PO5000C",
+   "descr": "Lustreuse voiture, 900 W, 2,8 kg Note ∅ 18/20",
+   "prix": 286.21
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita PV001GZ",
+   "descr": "Polisseuse sans fil, 3,1 kg, 180 mm",
+   "prix": 289.32
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Pince de serrage 1/2\" pour défonceuse (763622-4)",
+   "descr": "",
+   "prix": 11.54
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Plateau abrasif 210mm, ultra-doux (199939-3)",
+   "descr": "",
+   "prix": 38.1
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Plateau de ponçage diamant (travaux de dégrossissage) pour surfaceuse Ø 125 mm B-12",
+   "descr": "",
+   "prix": 57.76
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita RP1111",
+   "descr": "Défonceuse, Secteur, Vitesse à vide max. 24 000 tr/min",
+   "prix": 322.09
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita RS001",
+   "descr": "Scie circulaire portative, 4,3 kg, Diamètre de la lame 185 mm",
+   "prix": 276.16
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita RT0700",
+   "descr": "Affleureuse une main, Secteur, 710 W",
+   "prix": 125.6
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Rail de guidage Carving 25cm 1,3mm 1/4\" (1911A1-3)",
+   "descr": "",
+   "prix": 51.48
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita SC103DZ",
+   "descr": "Matière des outils Métal, 2,7 g",
+   "prix": 477.46
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita SDS-Plus Nemesis 2",
+   "descr": "",
+   "prix": 4.04
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita SH00000219",
+   "descr": "Batterie pour aspirateur, Aspirateur, Makita",
+   "prix": 114.04
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita SK312GDZ",
+   "descr": "Laser à ligne",
+   "prix": 1011.55
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita SP001GZ03",
+   "descr": "",
+   "prix": 401.24
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita ST113DSMJ",
+   "descr": "Cloueuse sans fil, Capacité de stockage 120 pièces, Cadence de frappe 30 cps/min",
+   "prix": 340
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Scarificateur électrique UV3200",
+   "descr": "Scarificateur électrique, 1 300 W, Pour ramasser",
+   "prix": 176.39
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Starlock Max Cutsaw 32mm MAM005 TC",
+   "descr": "Lame de coupe en plongée, Alésage 32 mm, Largeur de coupe 1,1 mm",
+   "prix": 19.71
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Suspenders (E-05402)",
+   "descr": "Bretelles, Unisexe, Bleu",
+   "prix": 17.72
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita TD001",
+   "descr": "Visseuse à choc sans fil, Éclairage LED, Protection contre les surcharges",
+   "prix": 154.11
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita TD0101F (230/240V)",
+   "descr": "Visseuse à choc électrique, Emmanchement 6 pans 1/4 pouce, 1 vitesse",
+   "prix": 120
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita TD112DMZ",
+   "descr": "Visseuse à choc sans fil, Emmanchement 6 pans, Éclairage LED",
+   "prix": 123.59
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita TM30",
+   "descr": "Découpeur ponceur sans fil, 10,8 V, Vitesse d'oscillation max. à vide 6 000 tr/min",
+   "prix": 77.93
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita TMA045 85 mm (B-64799)",
+   "descr": "Lame de scie segment, Longueur de la lame 85 mm",
+   "prix": 13.24
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita TMA050 24 mm (B-64842)",
+   "descr": "Lame de coupe en plongée, Longueur de la lame 24 mm",
+   "prix": 6.28
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita TMA054 32 mm 1 Pc. (B-64886)",
+   "descr": "Lame de coupe en plongée, Bois, 1 pièce(s)",
+   "prix": 10.45
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita TMA058 20 mm",
+   "descr": "Lame de coupe en plongée, Longueur de la lame 20 mm",
+   "prix": 28.4
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita TMA071 65 mm (B-65040)",
+   "descr": "Lame de scie segment, Longueur de la lame 65 mm",
+   "prix": 22.72
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita TMA083 Starlock G20 TC/HM/RIFF Mortier/Plaque abrasive 90mm (B-69799)",
+   "descr": "Plaque de polissage, Bois, 90 mm",
+   "prix": 10.98
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita TW002",
+   "descr": "Visseuse à choc sans fil, Emmanchement carré 1/2 pouce, Poignée Soft Grip",
+   "prix": 307.49
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita TW008",
+   "descr": "Visseuse à choc sans fil, Éclairage LED, Frein moteur",
+   "prix": 263
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita TW140DZ",
+   "descr": "Visseuse à choc sans fil, Emmanchement 6 pans 3/4 pouce, Éclairage LED",
+   "prix": 29.24
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Tap & Go 191Y39-5",
+   "descr": "",
+   "prix": 4.91
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Transmission grease 80 g (199450-5)",
+   "descr": "",
+   "prix": 9.83
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Tronçonneuse électrique UC4050A",
+   "descr": "Tronçonneuse électrique, Longueur de la lame 40 cm, 2 000 W",
+   "prix": 212.6
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita UB001G",
+   "descr": "Batterie, Souffler, 40 V",
+   "prix": 234.77
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita UB1103",
+   "descr": "Secteur, Aspirer, 600 W",
+   "prix": 71.09
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita UC011GZ",
+   "descr": "Tronçonneuse batterie, Système de batteries multi-appareil Makita 40 V, 36 V",
+   "prix": 250.56
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita UC030G",
+   "descr": "Tronçonneuse batterie, Système de batteries multi-appareil Makita XGT, 40 V",
+   "prix": 544.99
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita UH005GM201",
+   "descr": "Taille-haie sans fil, Longueur de la lame 75 cm, Capacité de coupe 23 mm",
+   "prix": 798.5
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita UH007GZ",
+   "descr": "Taille-haie sans fil, Longueur de la lame 75 cm, Capacité de coupe 25 mm",
+   "prix": 407.5
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita UH6570",
+   "descr": "Taille-haie électrique, Longueur de la lame 65 cm, Longueur de coupe 65 cm",
+   "prix": 114.31
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita UR002GZ01 Solo",
+   "descr": "Débroussailleuse, Batterie, Grandes surfaces",
+   "prix": 326.66
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita UR012GZ02 Solo",
+   "descr": "Débroussailleuse, Batterie, Grandes surfaces",
+   "prix": 759.9
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita UR201CZ",
+   "descr": "Coupe-bordure, Batterie, 4,9 kg",
+   "prix": 321.49
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita UT1401",
+   "descr": "Diamètre de l'hélice 140 mm, 1 300 W",
+   "prix": 237.64
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita VC003GLZ",
+   "descr": "Aspirateur eau et poussières, Turquoise, Capacité du réservoir 15 L",
+   "prix": 429.31
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita VC2000L",
+   "descr": "Aspirateur eau et poussières, 1 000 W, 72 dB",
+   "prix": 154.54
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita VC3210LX1",
+   "descr": "Aspirateur d'atelier, Vert, 1 050 W",
+   "prix": 507.83
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita Visseuse plaque de plâtre FS6300RXJ",
+   "descr": "Visseuse placo, Vitesse à vide max. 6 000 tr/min, Secteur",
+   "prix": 124.9
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita W107418661",
+   "descr": "Adaptateur pour aspirateur, Aspirateur, Makita",
+   "prix": 17.28
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita WR100",
+   "descr": "Clé à cliquet sans fil, Vitesse à vide max. 800 tr/min, Couple max. (vissage en force) 48 Nm",
+   "prix": 120.21
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita XGT HS009G",
+   "descr": "Scie circulaire portative, 5,7 kg, Diamètre de la lame 235 mm",
+   "prix": 402
+  },
+  {
+   "marque": "MAKITA",
+   "titre": "Makita it-51544",
+   "descr": "Aspirateur balai, Blanc, Technique de nettoyage Sèche",
+   "prix": 64.23
+  }
+ ],
+ "parMarque": {
+  "DEWALT": 296,
+  "MAKITA": 572
+ },
+ "plancherLues": 868,
+ "plafondLues": 868,
+ "noteBornes": "MAÎTRE-ÉTALON, pas une tolérance : plancher = plafond = le nombre exact de cartes lues au gel. Toute variation, dans un sens ou dans l'autre, est un CHANGEMENT DE COMPORTEMENT du parseur sur des cartes réelles — donc une décision, jamais un hasard. Si le changement est voulu et vérifié, on regèle le corpus et on écrit pourquoi.",
+ "plancherApparies": 8,
+ "noteApparies": "Mesuré au gel : 8 rapprochements, tous par apparierParRefRecollee, 0 hors-marque, 0 pack sur référence nue, 0 dérive de prix. ⚠️ C'est MINCE : les cartes du corpus sont jouées une par une, alors que apparierParConfiguration et apparierParNomSouple ont besoin du lot entier d'une page pour trancher. Ce plancher garantit que les invariants ⑦ TRAVERSENT quelque chose ; il ne prétend pas couvrir ces deux chemins-là. Dit, pas caché."
+}

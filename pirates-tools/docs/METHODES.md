@@ -1000,6 +1000,78 @@ préalable non rempli fait ÉCHOUER le banc** (code 2), jamais verdir à vide. U
 zéro imprimé au milieu d'un rapport se lit comme un fait ; un préalable rouge se
 lit comme ce qu'il est.
 
+### M-55 — Le sabotage CHOISI ne trouve que ce qu'on soupçonne ; il faut l'énumération
+
+`outils/sabotage.mjs` sabote un endroit que je désigne. Je désigne ce que je
+soupçonne ; je soupçonne ce à quoi j'ai pensé en écrivant la garde. **Les trous
+sont, par construction, là où je ne regarde pas.**
+
+⇒ `outils/sabotage-campagne.mjs` ne choisit rien : il retourne mécaniquement
+CHAQUE décision du code — comparaison, seuil, conjonction, négation — une à la
+fois, relance les portes, et classe le résultat en trois :
+
+| issue | ce que ça veut dire |
+|---|---|
+| **TUÉE** | une porte rougit — la décision est protégée ✅ |
+| **SURVIVANTE** | tout reste vert alors que le code a changé de sens ⛔ |
+| **INERTE** | la substitution n'a rien changé — ni preuve ni trou |
+
+Mesure du premier passage sur le calculateur de pack (13/08/2026) : **44 tuées,
+68 survivantes — 39 %**. Après tri et ajout de témoins : **61 tuées, 46
+survivantes — 57 %**, dont douze décisions d'argent nouvellement protégées.
+
+⛔ **Une survivante n'est PAS forcément un défaut du produit** : c'est un défaut
+du FILET. Le tri se fait une par une, et il y a trois verdicts honnêtes :
+① la décision compte → on lui écrit un témoin ; ② elle est inatteignable (repli
+défensif, quantificateur d'expression régulière, texte d'affichage) → on le dit ;
+③ **elle ne décide rien** → on SUPPRIME la condition. Le troisième cas est le
+plus instructif : une garde décorative se lit comme une garde.
+
+⚠️ La campagne se protège elle-même, sinon elle ment : empreinte avant/après
+(substitution sans effet ⇒ INERTE, jamais « survivante »), restauration
+vérifiée avec arrêt net en cas d'échec, contrôle de référence exigé vert AVANT
+de commencer, et « commande non lançable » distingué de « porte rouge ».
+
+---
+
+### M-56 — Une garde qui vit chez l'appelant n'est pas une garde
+
+Deux fonctions de rapprochement du parseur — dont celle qui décide **quelle
+fiche reçoit un prix**, la décision d'argent la plus lourde du projet —
+indexaient toutes les fiches reçues **sans regarder leur marque**. Elles étaient
+sûres tant que l'appelant ne leur passait que les fiches d'une marque. Mesuré :
+l'appelant réel leur passe le catalogue ENTIER, trois marques confondues.
+
+⇒ **Une fonction se protège elle-même, avec les arguments qu'elle reçoit.**
+« L'appelant fait attention » n'est pas une garantie : ce n'est pas testable,
+ça ne survit pas à un nouvel appelant, et rien ne le signale le jour où ça casse.
+
+⚠️ Et on mesure l'exposition RÉELLE avant de dramatiser : ici zéro (aucune
+référence portée par deux marques, zéro rapprochement hors-marque sur 1 117
+cartes réelles). Le défaut était **latent**. On le corrige quand même — mais on
+dit qu'il n'était pas en train de coûter, au lieu de laisser croire à un sauvetage.
+
+---
+
+### M-57 — Une porte qui lit un champ inexistant est verte pour toujours
+
+L'invariant « le prix rendu est le prix de la carte » lisait `it.srcTTC` puis
+`it.prix`. Le parseur rend le montant sous `price` ; les deux autres champs
+n'existent pas. `Number(undefined)` vaut NaN, `isFinite(NaN)` est faux : la
+comparaison ne s'exécutait **jamais**. Sabotage « +0,01 € sur chaque prix
+rendu » ⇒ porte restée VERTE.
+
+Même famille, le même jour : la porte passait `res.restants` aux fonctions de
+rapprochement, un champ que `parseIdealo` ne rend pas. Elle leur donnait un
+tableau vide et annonçait « 0 rapprochement, 0 défaut » — trois invariants
+d'argent verts **sans avoir rien traversé**.
+
+⇒ Deux parades, et il faut les deux :
+① **un préalable de traversée** — un plancher de « combien de fois cet
+invariant s'est-il seulement exécuté ? », qui fait ÉCHOUER la porte à zéro ;
+② **le sabotage**, qui seul distingue une porte qui marche d'une porte qui se
+tait. Une porte verte n'a jamais prouvé qu'elle regardait.
+
 ---
 
 ## Où ces méthodes sont déjà branchées
@@ -1040,3 +1112,6 @@ lit comme ce qu'il est.
 | M-51, M-52 | `scripts/banc-composants.js`, `scripts/check-composants.js` |
 | M-53 | `scripts/banc-valeur-bundle.js` (oracle indépendant), `scripts/banc-reconstitution.js` |
 | M-54 | préalables de `scripts/banc-composants.js` et `scripts/banc-valeur-bundle.js` |
+| M-55 | `outils/sabotage-campagne.mjs`, témoins de `scripts/check-reconstitution.js` |
+| M-56 | `api/_lib/price-parse.js` (gardes de marque des rapprochements), `scripts/check-price-watch.js` |
+| M-57 | `scripts/check-parseur-releves.js` (invariants + planchers de traversée) |

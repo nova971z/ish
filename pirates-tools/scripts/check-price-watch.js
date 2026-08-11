@@ -1702,7 +1702,12 @@ module.exports = async function () {
     var arr = pp.apparierParRefRecollee;
     ok(typeof arr === 'function', 'apparierParRefRecollee exportée');
     if (arr) {
-      var fichesR = [{ sku: 'ZZQ405N', price: 200 }, { sku: 'ZZV100-XJ', price: 150 }];
+      /* ⚠️ MARQUE OBLIGATOIRE SUR LES FICHES FACTICES : 1 708 fiches du
+         catalogue sur 1 708 en portent une (mesuré 13/08/2026). Un jeu d'essai
+         sans marque décrit une forme qui n'existe pas — et il a failli faire
+         reculer la garde de marque posée ce jour dans `apparierParRefRecollee`. */
+      var fichesR = [{ sku: 'ZZQ405N', brand: 'MARQUEZZ', price: 200 },
+        { sku: 'ZZV100-XJ', brand: 'MARQUEZZ', price: 150 }];
       var lot = [
         { titre: 'MarqueZZ ZZQ 405 N', prix: 116.90 },              // ← la moins chère
         { titre: 'MarqueZZ ZZQ 405 N + 1x 4,0Ah', prix: 216.96 },   // ← un LOT
@@ -1721,6 +1726,26 @@ module.exports = async function () {
       ok(parSkuR['ZZV100-XJ'] === 81.18,
         '⛔ et la référence rendue est celle du CATALOGUE (avec ses tirets), jamais '
         + 'notre recollage (' + JSON.stringify(rr.items.map(function (x) { return x.sku; })) + ')');
+
+      /* ⛔⛔ ARGENT — LA GARDE DE MARQUE (témoin neuf, 13/08/2026). Ce
+         rapprochement indexait TOUTES les fiches reçues sans regarder leur
+         marque : l'argument `marque` ne servait à rien ici. Mesuré ce jour-là,
+         et c'est la démonstration — la même annonce rendait le MÊME
+         rapprochement qu'on lui annonce l'une ou l'autre des marques suivies.
+         Et l'appelant réel lui passe le catalogue ENTIER (`api/admin.js` →
+         `catalog.loadCatalog()`, trois marques) : la sûreté ne tenait qu'à une
+         convention d'appelant que rien n'imposait. Rapprocher entre marques
+         fait BAISSER un coût (M-28) — donc vendre à perte. */
+      var rrHM = arr(lot, fichesR, 'UNEAUTREMARQUE');
+      ok(rrHM.items.length === 0,
+        '⛔⛔ ARGENT : aucune fiche n\'est rapprochée quand la marque balayée n\'est pas la '
+        + 'sienne (obtenu ' + rrHM.items.length + ' apparié(s)). Le balayage reçoit le '
+        + 'catalogue ENTIER : sans cette garde, le prix relevé pour une marque peut s\'écrire '
+        + 'sur la fiche d\'une autre — et dans le sens qui fait vendre à perte.');
+      ok(arr(lot, fichesR, '').items.length === 0,
+        '⛔ …et SANS marque, on n\'indexe rien : on ne saurait pas dans quelle table '
+        + 'chercher, et deviner est exactement l\'erreur qu\'on interdit.');
+
       /* ⛔⛔ LA GARDE INVERSE, ET C'EST ELLE QUI COÛTERAIT LE PLUS CHER. Sur la
          MÊME page, deux lots recollent vers la même racine. Écrire leur prix
          sur l'outil nu, c'est le défaut que le projet interdit depuis le
@@ -1749,7 +1774,8 @@ module.exports = async function () {
          ⛔ Et c'est sûr ICI et nulle part ailleurs : un nombre nu ressemble à
          tout — un prix, une cote, une année. Il n'est retenu que s'il est ÉGAL
          à une référence du catalogue. Le préalable ci-dessous le prouve. */
-      var fichesN = [{ sku: '997462-2', price: 30 }, { sku: '7994L', price: 1400 }];
+      var fichesN = [{ sku: '997462-2', brand: 'MARQUEZZ', price: 30 },
+        { sku: '7994L', brand: 'MARQUEZZ', price: 1400 }];
       var lotN = [
         { titre: 'MarqueZZ Adaptateur de rail (997462-2)', prix: 25.23 },
         { titre: 'MarqueZZ 7994L', prix: 1365.41 },
@@ -1780,8 +1806,8 @@ module.exports = async function () {
          pouvait retenir la PONCEUSE citée en compatibilité — 9,10 € écrits sur
          une machine vendue 332,68 €. En ne lisant QUE la parenthèse finale, le
          composant cesse d'être confondu avec l'article. */
-      var fichesP = [{ sku: 'ZZK-198458-6' }, { sku: 'ZZB1830B' }, { sku: 'ZZP9403J' },
-        { sku: 'ZZPATIN-421648' }];
+      var fichesP = [{ sku: 'ZZK-198458-6', brand: 'MARQUEZZ' }, { sku: 'ZZB1830B', brand: 'MARQUEZZ' },
+        { sku: 'ZZP9403J', brand: 'MARQUEZZ' }, { sku: 'ZZPATIN-421648', brand: 'MARQUEZZ' }];
       var lotP = [
         { titre: 'MarqueZZ Power Source Kit 5,0Ah (ZZK-198458-6)', prix: 329.18 },
         { titre: 'MarqueZZ Power Source Kit (2x ZZB1830B + ZZC18RC)', prix: 114.26 },
@@ -2271,7 +2297,12 @@ module.exports = async function () {
         var ahTxt = String(sufOk.c.ah).replace('.', ',');
         /* ⚠️ Référence ÉCLATÉE par des espaces — c'est la forme réelle du
            relevé, et c'est justement celle que le recollage traite. */
-        var fichesC2 = [{ sku: 'DZR450' + sufOk.s }, { sku: 'DZR450' + sufAutre.s }];
+        /* ⚠️ Et la MARQUE sur les fiches, pour la même raison qu'elle est
+           nommée à l'appel ci-dessous : depuis la garde de marque du
+           13/08/2026, une fiche sans marque n'est plus indexée — et c'est
+           voulu (1 708 fiches sur 1 708 en portent une en production). */
+        var fichesC2 = [{ sku: 'DZR450' + sufOk.s, brand: 'Makita' },
+          { sku: 'DZR450' + sufAutre.s, brand: 'Makita' }];
         var rc2 = arr([
           { titre: 'Makita DZR 450 ' + sufOk.s + ' 18 V + 2x ' + ahTxt + ' Ah + chargeur et coffret',
             prix: 278.04 },
@@ -2549,13 +2580,39 @@ module.exports = async function () {
     var apn = pp.apparierParNomSouple;
     ok(typeof apn === 'function', 'apparierParNomSouple exportée');
     if (apn) {
+      /* ⚠️ LES FICHES FACTICES PORTENT LEUR MARQUE, COMME LES VRAIES. Mesuré le
+         13/08/2026 : **1 708 fiches du catalogue sur 1 708** portent un champ
+         `brand`. Un jeu d'essai sans marque décrivait donc une forme qui
+         n'existe pas en production — et il a failli faire RECULER une garde
+         d'argent : le jour où la garde de marque a été posée dans
+         `apparierParNomSouple`, ces six assertions sont devenues rouges. La
+         tentation était d'assouplir la garde ; la vérité était que le jeu
+         d'essai mentait. On corrige le jeu d'essai, jamais la garde. */
       var fchs = [
-        { sku: 'ZZ-A1', srcNom: 'Raboteuse de chantier 1800 W 317 mm MARQUEZZ' },
-        { sku: 'ZZ-A2', srcNom: 'Raboteuse de chantier 2000 W 317 mm MARQUEZZ' },
-        { sku: 'ZZ-B1', srcNom: 'Lot de 5 lames 30x43 mm pour multi-cutter Métal MARQUEZZ' },
-        { sku: 'ZZ-B2', srcNom: 'Lame 30x43 mm pour multi-cutter Métal MARQUEZZ' }
+        { sku: 'ZZ-A1', brand: 'MARQUEZZ', srcNom: 'Raboteuse de chantier 1800 W 317 mm MARQUEZZ' },
+        { sku: 'ZZ-A2', brand: 'MARQUEZZ', srcNom: 'Raboteuse de chantier 2000 W 317 mm MARQUEZZ' },
+        { sku: 'ZZ-B1', brand: 'MARQUEZZ', srcNom: 'Lot de 5 lames 30x43 mm pour multi-cutter Métal MARQUEZZ' },
+        { sku: 'ZZ-B2', brand: 'MARQUEZZ', srcNom: 'Lame 30x43 mm pour multi-cutter Métal MARQUEZZ' }
       ];
       var dit = function (t) { return { titre: t, prix: 199 }; };
+
+      /* ⛔⛔ ARGENT — LA GARDE DE MARQUE, ET C'EST UN TÉMOIN NEUF (13/08/2026).
+         `apparierParNomSouple` et `apparierParRefRecollee` indexaient TOUTES
+         les fiches reçues sans regarder leur marque. Elles n'étaient sûres que
+         par une convention d'appelant que rien n'imposait — et l'appelant réel
+         ne la respecte pas : `api/admin.js` leur passe le catalogue ENTIER
+         (mesuré : trois marques) avec la marque balayée à côté. Rapprocher
+         entre marques fait BAISSER un coût, donc vendre à perte (M-28). */
+      var horsMarque = apn([dit('MarqueZZ raboteuse dégauchisseuse 1800W 317 mm')],
+        fchs, 'UNEAUTREMARQUE');
+      ok(horsMarque.items.length === 0,
+        '⛔⛔ ARGENT : une fiche n\'est JAMAIS rapprochée quand la marque balayée n\'est pas '
+        + 'la sienne (obtenu ' + horsMarque.items.length + ' apparié(s)). Le balayage reçoit '
+        + 'le catalogue entier : sans cette garde, le prix d\'une marque s\'écrirait sur la '
+        + 'fiche d\'une autre — et dans le sens qui fait vendre à perte.');
+      ok(apn([dit('MarqueZZ raboteuse dégauchisseuse 1800W 317 mm')], fchs, '').items.length === 0,
+        '⛔ …et SANS marque, on ne rapproche rien non plus : sans elle on ne sait pas dans '
+        + 'quelle table chercher, et deviner est exactement l\'erreur qu\'on interdit.');
 
       /* ⛔ CE QUI DOIT S'APPARIER : la même machine, écrite autrement. */
       var s1 = apn([dit('MarqueZZ raboteuse dégauchisseuse 1800W 317 mm')], fchs, 'MARQUEZZ');

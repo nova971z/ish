@@ -107,8 +107,19 @@ function contenuDuPack(titre, description) {
    supposition sur la référence. */
 function roleDuProduit(car, contenu) {
   var type = String((car && (car.type || car.rayon)) || '').toLowerCase();
-  var famille = String((car && car.famille) || '').toLowerCase();
-  var estBatterie = /batterie/.test(type) || (famille === 'energie' && /batterie/.test(type));
+  /* ⚠️ SIMPLIFIÉ LE 13/08/2026, SIGNALÉ PAR LA CAMPAGNE DE SABOTAGE. La forme
+     précédente était :
+        /batterie/.test(type) || (famille === 'energie' && /batterie/.test(type))
+     Le second terme est ENTIÈREMENT contenu dans le premier : il ne peut être
+     vrai que si le premier l'est déjà. Retourner son `===` en `!==` ne changeait
+     donc rien, et la campagne l'a rangé en « décision que rien ne vérifie ». La
+     bonne réponse n'était pas d'ajouter un témoin, mais de constater que cette
+     condition ne décidait RIEN. Une garde décorative se lit comme une garde :
+     elle fait croire qu'un cas est traité alors qu'il ne l'est pas.
+     ⚠️ La famille reste lue et RENDUE aux appelants qui la veulent, mais elle
+     ne pèse plus sur ce choix — si un jour elle doit peser, il faudra l'écrire
+     comme un vrai cas, pas comme une redondance. */
+  var estBatterie = /batterie/.test(type);
   var estChargeur = /chargeur/.test(type);
   var nb = contenu ? (contenu.nbBatteries || 0) : 0;
 
