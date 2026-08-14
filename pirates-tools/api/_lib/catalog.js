@@ -107,6 +107,41 @@ async function loadOverridesEtat() {
     } catch (eSnap) {
       console.error('[catalog] snapshot illisible, repli collection:', eSnap.message);
     }
+    /* ── LES FICHES RICHES SE LISENT DANS LEUR VRAI DOCUMENT ─────────────────
+       ⛔⛔ LA PANNE QUE CE BLOC FERME (14/08/2026) : les photos des fiches
+       créées à la main sont stockées en base64 (jusqu'à 6 × 700 Ko) — un shard
+       plafonné à 1 Mio ne peut PAS les porter. Avant, `majSnapshot` les y
+       recopiait quand même : l'écriture du shard échouait en silence et la
+       fiche DISPARAISSAIT à chaque rafraîchissement, alors que l'admin venait
+       de voir « ✅ ». Désormais le shard ne porte que les champs légers et
+       marque `_riche: 1` ; ici, on va chercher CES documents-là, nommément.
+       ⚠️ COÛT MESURABLE ET BORNÉ : +K lectures par chargement à froid, K étant
+       le nombre de fiches à contenu riche (créées/éditées à la main) — jamais
+       la collection entière (~1 700 lectures, la panne de quota du 01/08).
+       ⚠️ Si CETTE lecture échoue, on sert la fiche en version LÉGÈRE (sans
+       photo) plutôt que pas de fiche du tout — et la raison le dit. */
+    if (map !== null) {
+      var riches = Object.keys(map).filter(function (k) {
+        return map[k] && map[k]._riche;
+      });
+      if (riches.length) {
+        try {
+          var refsRiches = riches.map(function (k) {
+            return db.collection('product_overrides').doc(k);
+          });
+          var docsRiches = await db.getAll.apply(db, refsRiches);
+          docsRiches.forEach(function (d) {
+            if (!d || !d.exists) return;
+            var dataR = d.data() || {};
+            delete dataR.updatedAt;
+            map[d.id] = dataR;
+          });
+        } catch (eRiche) {
+          console.error('[catalog] fiches riches illisibles (servies allégées):', eRiche.message);
+          raisonLecture = 'snapshot-sans-riches';
+        }
+      }
+    }
     if (map === null) {
       raisonLecture = 'collection';
       var snap = await db.collection('product_overrides').get();

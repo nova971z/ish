@@ -2060,7 +2060,12 @@ function renderAjoutProduit() {
     btn.disabled = true;
     ajoutProduitMsg('Création\u2026');
     A.adminPostType('product-create', c).then(function (r) {
-      ajoutProduitMsg('\u2705 Fiche ' + r.sku + ' créée \u2014 prix de vente ' + Number(r.price).toFixed(2).replace('.', ',') + ' \u20AC TTC.' + (r.poidsSuppose ? ' Poids supposé à 2 kg : renseigne-le pour un prix juste.' : ''), 'ok');
+      if (r && r.visible === false) {
+        ajoutProduitMsg('\u26D4 ' + (r.erreur || 'fiche écrite mais NON visible au catalogue'), 'refus');
+        A.toast('Fiche NON visible : elle disparaîtrait au rafraîchissement', 'error');
+        return;
+      }
+      ajoutProduitMsg('\u2705 Fiche ' + r.sku + ' créée et VISIBLE au catalogue \u2014 prix de vente ' + Number(r.price).toFixed(2).replace('.', ',') + ' \u20AC TTC.' + (r.poidsSuppose ? ' Poids supposé à 2 kg : renseigne-le pour un prix juste.' : ''), 'ok');
       document.getElementById('apForm').reset();
       document.getElementById('apImageApercu').textContent = '';
       A._ajoutImage = '';
@@ -2528,7 +2533,13 @@ function adminBasculerFiche(row, btn) {
   if (p._light) {
     boite.hidden = false;
     boite.innerHTML = '<p class="lv-hint">Chargement de la fiche\u2026</p>';
-    A.ensureDetail(p).then(peindre);
+    A.ensureDetail(p).then(function () {
+      if (p._light) {
+        boite.innerHTML = '<p class="lv-hint">\u26D4 Fiche complète injoignable \u2014 ' + 'édition bloquée pour ne pas écraser la description existante. ' + 'Recharger et réessayer.</p>';
+        return;
+      }
+      peindre();
+    });
   } else {
     peindre();
   }
@@ -2759,8 +2770,16 @@ function adminEnregistrerFiche(row, btn) {
     etat.className = 'admin-fiche__status';
   }
   A.adminPostType('product-edit', corps).then(function (rep) {
+    if (rep && rep.visible === false) {
+      if (etat) {
+        etat.textContent = '\u26D4 ' + (rep.erreur || 'écrit mais NON visible au catalogue');
+        etat.className = 'admin-fiche__status admin-fiche__status--err';
+      }
+      A.toast('Modifications NON visibles : elles disparaîtraient au rafraîchissement', 'error');
+      return;
+    }
     if (etat) {
-      etat.textContent = 'Enregistré \u2014 ' + (rep.champs || []).length + ' champ(s)';
+      etat.textContent = 'Enregistré et VISIBLE \u2014 ' + (rep.champs || []).length + ' champ(s)';
       etat.className = 'admin-fiche__status admin-fiche__status--ok';
     }
     var p = adminProduitPar(id);

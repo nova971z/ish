@@ -15152,7 +15152,16 @@
       ajoutProduitMsg('Création…');
       adminPostType('product-create', c)
         .then(function (r) {
-          ajoutProduitMsg('✅ Fiche ' + r.sku + ' créée — prix de vente '
+          /* ⛔⛔ LA VISIBILITÉ EST PROUVÉE PAR LE SERVEUR, PAS PRÉSUMÉE (payé le
+             14/08/2026) : « ✅ » s'affichait alors que la fiche, écrite mais
+             jamais répercutée au catalogue servi, DISPARAISSAIT au
+             rafraîchissement. `visible:false` est un ÉCHEC et il crie. */
+          if (r && r.visible === false) {
+            ajoutProduitMsg('⛔ ' + (r.erreur || 'fiche écrite mais NON visible au catalogue'), 'refus');
+            toast('Fiche NON visible : elle disparaîtrait au rafraîchissement', 'error');
+            return;
+          }
+          ajoutProduitMsg('✅ Fiche ' + r.sku + ' créée et VISIBLE au catalogue — prix de vente '
             + Number(r.price).toFixed(2).replace('.', ',') + ' € TTC.'
             + (r.poidsSuppose ? ' Poids supposé à 2 kg : renseigne-le pour un prix juste.' : ''), 'ok');
           document.getElementById('apForm').reset();
@@ -15869,7 +15878,21 @@
     if (p._light) {
       boite.hidden = false;
       boite.innerHTML = '<p class="lv-hint">Chargement de la fiche…</p>';
-      ensureDetail(p).then(peindre);
+      /* ⛔⛔ UN DÉTAIL QUI N'EST PAS ARRIVÉ BLOQUE L'ÉDITION (14/08/2026).
+         `ensureDetail` rend le produit INCHANGÉ quand le réseau échoue : le
+         formulaire s'ouvrait alors avec la description longue VIDE, et
+         « Enregistrer » écrasait la vraie description par du vide — l'un des
+         mécanismes qui « effaçaient tout » chez l'user. On n'édite jamais une
+         fiche qu'on n'a pas pu lire. */
+      ensureDetail(p).then(function () {
+        if (p._light) {
+          boite.innerHTML = '<p class="lv-hint">⛔ Fiche complète injoignable — '
+            + 'édition bloquée pour ne pas écraser la description existante. '
+            + 'Recharger et réessayer.</p>';
+          return;
+        }
+        peindre();
+      });
     } else {
       peindre();
     }
@@ -16139,8 +16162,19 @@
     btn.disabled = true;
     if (etat) { etat.textContent = 'Envoi…'; etat.className = 'admin-fiche__status'; }
     adminPostType('product-edit', corps).then(function (rep) {
+      /* ⛔⛔ MÊME CONTRAT QUE LA CRÉATION (payé le 14/08/2026) : le serveur a
+         RELU la fiche par le chemin public. `visible:false` = ce qu'on vient
+         d'enregistrer disparaîtra au rafraîchissement — c'est un ÉCHEC. */
+      if (rep && rep.visible === false) {
+        if (etat) {
+          etat.textContent = '⛔ ' + (rep.erreur || 'écrit mais NON visible au catalogue');
+          etat.className = 'admin-fiche__status admin-fiche__status--err';
+        }
+        toast('Modifications NON visibles : elles disparaîtraient au rafraîchissement', 'error');
+        return;
+      }
       if (etat) {
-        etat.textContent = 'Enregistré — ' + (rep.champs || []).length + ' champ(s)';
+        etat.textContent = 'Enregistré et VISIBLE — ' + (rep.champs || []).length + ' champ(s)';
         etat.className = 'admin-fiche__status admin-fiche__status--ok';
       }
       /* On met à jour la fiche EN MÉMOIRE : sans ça, rouvrir le panneau

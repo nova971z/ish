@@ -1,0 +1,7 @@
+{
+ "_lisezmoi": "Poids EXPEDIE en kg par RACINE de reference DeWALT (machine nue) ou par REFERENCE COMPLETE (le poids expedie complet prime). REGLE DE GRAVAGE, ordre de l'user du 14/08/2026 : chaque poids est RECOUPE SUR TROIS SOURCES AU MINIMUM avant d'entrer ici — trois adresses consultees, trois valeurs relevees, et la valeur retenue est coherente avec les trois. Une reference dont les sources divergent n'entre PAS : elle reste au registre des non-resolues, dite. Une entree sans ses trois sources est INVALIDE — la porte scripts/check-poids-dewalt.js refuse.",
+ "_format": "poids[RACINE] = { kg, sources: [{url, kg}, {url, kg}, {url, kg}], note? } — kg retenu DANS l'intervalle des sources, jamais en dehors. En cas d'ecart entre poids nu et poids emballe, on retient l'EXPEDIE (le plus haut) : surestimer le port protege la marge (M-11).",
+ "_mesure_le": "2026-08-14",
+ "poids": {},
+ "nonResolues": {}
+}

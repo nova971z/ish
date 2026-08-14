@@ -35,22 +35,51 @@ function docShard(db, n) {
   return db.collection('config').doc(PREFIXE + n);
 }
 
-/* Répercute UNE écriture d'override dans son shard. `patch` = exactement ce qui
-   vient d'être écrit dans product_overrides/{id} (mêmes champs — le webhook lit
-   le COGS, le rendu lit les prix : rien ne doit manquer) ; null = suppression.
+/* ⛔⛔ LES CHAMPS LOURDS N'ENTRENT JAMAIS DANS UN SHARD — LA PANNE QUI EFFAÇAIT
+   LES FICHES DE L'USER (chaîne relue de bout en bout le 14/08/2026).
+   L'admin crée une fiche avec ses photos : elles sont stockées EN BASE64 dans
+   le document (jusqu'à 6 × 700 000 signes — api/admin.js). `majSnapshot`
+   recopiait ce document ENTIER dans son shard… qui plafonne à 1 Mio — le motif
+   même des 4 shards, écrit en tête de ce fichier. Résultat : l'écriture du
+   shard ÉCHOUE, l'échec est avalé (best-effort), l'admin voit « ✅ » — et au
+   rafraîchissement, le catalogue, qui lit le SNAPSHOT D'ABORD et ne retombe
+   sur la collection que si AUCUN shard n'existe, ne voit jamais la fiche.
+   Tout ce qu'il venait de faire avait « disparu ». Reproché à raison :
+   un travail annoncé fini sans jamais RELIRE ce qui était réellement servi.
+   ⇒ Un shard ne porte que les champs LÉGERS — les prix restent ENTIERS (J4 :
+   le snapshot porte les mêmes prix que les overrides, rien d'inventé). Les
+   champs lourds restent dans le document `product_overrides` (leur vraie
+   maison), et l'entrée de shard porte `_riche: 1` : le lecteur (catalog.js) va
+   chercher CES documents-là, nommément — quelques lectures ciblées, jamais la
+   collection entière. */
+var CHAMPS_LOURDS = ['img', 'images', 'description_long', 'specs', 'features'];
+
+function valeurPourShard(patch) {
+  var v = Object.assign({}, patch);
+  // updatedAt/createdAt ne servent qu'à l'audit de la collection : le
+  // lecteur du snapshot (rendu, paiement, webhook) ne les lit jamais.
+  delete v.updatedAt; delete v.createdAt;
+  var riche = false;
+  CHAMPS_LOURDS.forEach(function (c) {
+    if (c in v) { delete v[c]; riche = true; }
+  });
+  if (riche) v._riche = 1;
+  return v;
+}
+
+/* Répercute UNE écriture d'override dans son shard. `patch` = ce qui vient
+   d'être écrit dans product_overrides/{id}, MOINS les champs lourds (le webhook
+   lit le COGS, le rendu lit les prix : rien de LÉGER ne doit manquer) ;
+   null = suppression.
    Best-effort : une panne du snapshot ne doit JAMAIS faire échouer l'écriture
-   principale — le shard se rattrapera à la prochaine reconstruction. */
+   principale — mais l'appelant DOIT lire la valeur de retour et la dire :
+   `false` veut dire « la fiche est durable mais PAS visible au catalogue », et
+   un « ✅ » affiché là-dessus est un mensonge (payé le 14/08/2026). */
 async function majSnapshot(db, admin, id, patch) {
   try {
-    var valeur;
-    if (patch === null) {
-      valeur = admin.firestore.FieldValue.delete();
-    } else {
-      // updatedAt/createdAt ne servent qu'à l'audit de la collection : le
-      // lecteur du snapshot (rendu, paiement, webhook) ne les lit jamais.
-      valeur = Object.assign({}, patch);
-      delete valeur.updatedAt; delete valeur.createdAt;
-    }
+    var valeur = patch === null
+      ? admin.firestore.FieldValue.delete()
+      : valeurPourShard(patch);
     var corps = { _maj: admin.firestore.FieldValue.serverTimestamp() };
     corps[String(id)] = valeur;
     await docShard(db, shardDe(id)).set(corps, { merge: true });
@@ -79,9 +108,9 @@ async function majSnapshotBatch(db, admin, entries) {
       if (e.patch === null) {
         parShard[n][String(e.id)] = admin.firestore.FieldValue.delete();
       } else {
-        var v = Object.assign({}, e.patch);
-        delete v.updatedAt; delete v.createdAt;
-        parShard[n][String(e.id)] = v;
+        /* ⛔ Même dénudage que majSnapshot : un chemin qui garderait les champs
+           lourds referait déborder les shards par le balayage. */
+        parShard[n][String(e.id)] = valeurPourShard(e.patch);
       }
     });
     var ecritures = Object.keys(parShard).map(function (n) {
@@ -123,9 +152,10 @@ async function reconstruire(db, admin) {
   var parShard = [];
   for (var n = 0; n < NB_SHARDS; n++) parShard.push({ _maj: admin.firestore.FieldValue.serverTimestamp() });
   snap.forEach(function (doc) {
-    var data = doc.data() || {};
-    delete data.updatedAt;
-    parShard[shardDe(doc.id)][doc.id] = data;
+    /* ⛔ Même dénudage qu'à l'écriture : une reconstruction qui recopierait les
+       photos base64 referait déborder les shards — et elle tourne justement
+       quand on essaie de se rattraper. */
+    parShard[shardDe(doc.id)][doc.id] = valeurPourShard(doc.data() || {});
   });
   for (var m = 0; m < NB_SHARDS; m++) {
     await docShard(db, m).set(parShard[m], { merge: false });
@@ -134,5 +164,6 @@ async function reconstruire(db, admin) {
 }
 
 module.exports = { majSnapshot: majSnapshot, majSnapshotBatch: majSnapshotBatch,
+  valeurPourShard: valeurPourShard, CHAMPS_LOURDS: CHAMPS_LOURDS,
   lireSnapshot: lireSnapshot, reconstruire: reconstruire, shardDe: shardDe,
   NB_SHARDS: NB_SHARDS, PREFIXE: PREFIXE };

@@ -14,6 +14,7 @@ const plans = require('./_lib/traqueur-plans');
 // Snapshot des derniers prix vivants (4 docs agrégés) : CHAQUE écriture
 // d'override doit s'y répercuter, sinon le rendu servirait des prix d'avant.
 const snapshotLib = require('./_lib/snapshot');
+const limites = require('./_lib/limites');
 // Ce qu'on refuse d'acheter, et pourquoi. Un seul fichier, fait pour changer.
 const barriere = require('./_lib/barriere-achat');
 
@@ -1656,11 +1657,50 @@ module.exports = async function handler(req, res) {
       fiche.createdAt = admin.firestore.FieldValue.serverTimestamp();
       fiche.updatedAt = admin.firestore.FieldValue.serverTimestamp();
 
+      /* ⛔⛔ LE BUDGET DE TAILLE SE VÉRIFIE AVANT D'ÉCRIRE (14/08/2026). Un
+         document plafonne à 1 Mio et les photos base64 comptent PLEIN pot —
+         `img` recopiant `images[0]`, une photo compte DEUX fois. Sans cette
+         garde : soit un 500 sec, soit — pire — un shard qui déborde en silence
+         et une fiche qui « disparaît » au rafraîchissement. Le refus DIT les
+         chiffres. */
+      const budgetC = limites.docDansLeBudget(fiche);
+      if (!budgetC.ok) {
+        return res.status(400).json({ ok: false,
+          error: 'fiche trop lourde pour un document : ' + budgetC.octets + ' octets pour un '
+            + 'budget de ' + budgetC.budget + ' (dépassement ' + budgetC.depassement
+            + '). Retirer ou compresser des photos — la vignette compte une seconde fois. '
+            + 'Fiche NON créée.' });
+      }
       await db.collection('product_overrides').doc(id).set(fiche, { merge: false });
-      await snapshotLib.majSnapshot(db, admin, id, fiche);
+      /* ⛔⛔ NE JAMAIS SE FIER AU RETOUR D'UNE ÉCRITURE : RELIRE (règle gravée
+         du projet, payée le 14/08/2026). Ce point d'entrée répondait « ✅ »
+         depuis l'objet EN MÉMOIRE ; pendant ce temps la répercussion au
+         snapshot échouait en silence (photos base64 > plafond du shard) et la
+         fiche DISPARAISSAIT au rafraîchissement. L'user l'a constaté avant moi. */
+      const relu = await db.collection('product_overrides').doc(id).get();
+      if (!relu.exists) {
+        return res.status(500).json({ ok: false,
+          error: 'écrite puis introuvable à la relecture — fiche NON créée' });
+      }
+      const snapshotOk = await snapshotLib.majSnapshot(db, admin, id, fiche);
       catalog.invalidateOverrides();
-      return res.status(200).json({ ok: true, id, sku,
-        price: fiche.price, price_ht: fiche.price_ht, poidsSuppose: fiche.poidsSuppose });
+      /* La visibilité se prouve par le CHEMIN PUBLIC — celui que le
+         rafraîchissement empruntera — jamais par déduction. */
+      let visible = false;
+      try {
+        visible = (await catalog.loadCatalog()).some((p) => p && p.id === id);
+      } catch (eVis) { console.error('[api/admin] product-create relecture:', eVis.message); }
+      if (!visible) {
+        /* Durablement écrite mais PAS servie : on le DIT, on ne maquille pas. */
+        return res.status(200).json({ ok: true, id, sku, visible: false,
+          price: relu.data().price, price_ht: relu.data().price_ht,
+          erreur: 'fiche écrite mais NON VISIBLE au catalogue ('
+            + (snapshotOk ? 'relecture publique sans elle' : 'répercussion au snapshot échouée')
+            + ') — elle disparaîtra au rafraîchissement, à corriger avant de continuer' });
+      }
+      return res.status(200).json({ ok: true, id, sku, visible: true,
+        price: relu.data().price, price_ht: relu.data().price_ht,
+        poidsSuppose: relu.data().poidsSuppose });
     } catch (err) {
       console.error('[api/admin] product-create failed:', err.message);
       return res.status(500).json({ ok: false, error: 'création du produit échouée' });
@@ -1796,12 +1836,60 @@ module.exports = async function handler(req, res) {
       }
 
       patch.updatedAt = admin.firestore.FieldValue.serverTimestamp();
+      /* ⛔⛔ MÊME BUDGET QU'À LA CRÉATION — mais sur le document FUSIONNÉ :
+         l'écriture est en merge, c'est le RÉSULTAT qui doit tenir sous le
+         plafond, pas le patch seul. Une lecture avant l'écriture (1 lecture)
+         coûte moins cher qu'une fiche perdue. */
+      const avantE = await db.collection('product_overrides').doc(id).get();
+      const fusionE = Object.assign({}, avantE.exists ? avantE.data() : {}, patch);
+      const budgetE = limites.docDansLeBudget(fusionE);
+      if (!budgetE.ok) {
+        return res.status(400).json({ ok: false,
+          error: 'fiche trop lourde après fusion : ' + budgetE.octets + ' octets pour un budget '
+            + 'de ' + budgetE.budget + ' (dépassement ' + budgetE.depassement + '). Retirer ou '
+            + 'compresser des photos — la vignette compte une seconde fois. Rien n\'a été '
+            + 'enregistré.' });
+      }
       await db.collection('product_overrides').doc(id).set(patch, { merge: true });
-      await snapshotLib.majSnapshot(db, admin, id, patch);
+      /* ⛔⛔ RELIRE, PUIS PROUVER LA VISIBILITÉ PAR LE CHEMIN PUBLIC (payé le
+         14/08/2026) : la réponse d'avant était fabriquée depuis ce qu'on avait
+         ENVOYÉ — jamais depuis ce qui serait réellement servi. Les photos et
+         descriptions « enregistrées ✅ » disparaissaient au rafraîchissement. */
+      const reluE = await db.collection('product_overrides').doc(id).get();
+      const champsPatch = Object.keys(patch).filter(function (k) { return k !== 'updatedAt'; });
+      if (!reluE.exists) {
+        return res.status(500).json({ ok: false,
+          error: 'écrite puis introuvable à la relecture — fiche NON enregistrée' });
+      }
+      const dataRelue = reluE.data() || {};
+      const manquants = champsPatch.filter(function (k) {
+        return JSON.stringify(dataRelue[k]) !== JSON.stringify(patch[k]);
+      });
+      if (manquants.length) {
+        return res.status(500).json({ ok: false,
+          error: 'relecture différente de ce qui a été écrit (' + manquants.join(', ')
+            + ') — fiche NON enregistrée telle quelle' });
+      }
+      const snapshotOkE = await snapshotLib.majSnapshot(db, admin, id, patch);
       catalog.invalidateOverrides();
-      console.log('[api/admin] product-edit', id, Object.keys(patch).join(','));
-      return res.status(200).json({ ok: true, id: id,
-        champs: Object.keys(patch).filter(function (k) { return k !== 'updatedAt'; }) });
+      let visibleE = false;
+      try {
+        const cat = await catalog.loadCatalog();
+        const p = cat.find(function (x) { return x && (x.id === id || x.slug === id); });
+        /* la fiche est visible si elle est servie ET porte le patch — champ à
+           champ, sur ce que le public verra vraiment. */
+        visibleE = !!p && champsPatch.every(function (k) {
+          return JSON.stringify(p[k]) === JSON.stringify(patch[k]);
+        });
+      } catch (eVisE) { console.error('[api/admin] product-edit relecture:', eVisE.message); }
+      console.log('[api/admin] product-edit', id, champsPatch.join(','), 'visible=' + visibleE);
+      if (!visibleE) {
+        return res.status(200).json({ ok: true, id: id, champs: champsPatch, visible: false,
+          erreur: 'modifications écrites mais NON VISIBLES au catalogue ('
+            + (snapshotOkE ? 'relecture publique sans elles' : 'répercussion au snapshot échouée')
+            + ') — elles disparaîtront au rafraîchissement, à corriger avant de continuer' });
+      }
+      return res.status(200).json({ ok: true, id: id, champs: champsPatch, visible: true });
     } catch (err) {
       console.error('[api/admin] product-edit failed:', err.message);
       return res.status(500).json({ ok: false, error: 'enregistrement de la fiche échoué' });
