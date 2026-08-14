@@ -1,0 +1,6 @@
+{
+ "_lisezmoi": "Poids EXPEDIE en kg, par RACINE de reference (machine nue) ou par REFERENCE COMPLETE (config avec caisse : le poids expedie complet prime). Chaque entree porte sa source — une adresse consultee, jamais une supposition. Une racine absente fait REFUSER la fiche par generer-fiches-milwaukee.js : c'est voulu (un poids suppose = 60,50 EUR de marge perdue par vente, mesure sur le calculateur du site). Se remplit par recherches Web PAR VALEUR (M-03 : une recherche par produit, jamais groupee) a partir du CSV des manquants que rend le generateur.",
+ "_masses_batteries_mesurees": "2,0 Ah = 0,40 kg · 4,0 Ah = 0,70 kg · 5,0 Ah = 0,73 kg — fiches publiques recoupees a 2 sources chacune le 14/08/2026. Capacite non mesuree : MAJORANT 1,10 kg, dit comme tel dans le detail de la fiche.",
+ "_mesure_le": "2026-08-14",
+ "poids": {}
+}
