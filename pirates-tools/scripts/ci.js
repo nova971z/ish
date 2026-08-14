@@ -209,6 +209,7 @@ var reqCorpus = safeRequire('./check-parseur-releves', 'check-parseur-releves');
 var reqNomMw = safeRequire('./check-nomenclature-milwaukee', 'check-nomenclature-milwaukee');
 var reqPoidsDw = safeRequire('./check-poids-dewalt', 'check-poids-dewalt');
 var reqPersist = safeRequire('./check-fiches-persistees', 'check-fiches-persistees');
+var reqPoidsExp = safeRequire('./check-poids-expedie', 'check-poids-expedie');
 var modJur      = safeRequire('./juridique',         'check-juridique');
 var reqJur      = modJur && modJur.controle ? modJur.controle : null;
 // La porte d'O1 (hook Stop). Elle doit refuser le faux ET laisser passer le
@@ -359,6 +360,7 @@ var reqReconc   = safeRequire('./check-reconciliation', 'check-reconciliation');
   await runOne(reqNomMw, 'check-nomenclature-milwaukee');
   await runOne(reqPoidsDw, 'check-poids-dewalt');
   await runOne(reqPersist, 'check-fiches-persistees');
+  await runOne(reqPoidsExp, 'check-poids-expedie');
   await runOne(reqJur,      'check-juridique');
   await runOne(reqSortie,   'check-sortie');
   await runOne(reqFrais,    'check-fraicheur');

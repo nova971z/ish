@@ -1,0 +1,6 @@
+{
+ "_lisezmoi": "Masses des COMPOSANTS DeWALT en kg — batteries par (gamme, capacite), chargeurs par modele, coffrets par type. Cles : BATTERIE|GAMME|<n>AH, CHARGEUR|<modele>, COFFRET|<type>. MEMES REGLES que data/poids-dewalt.json : TROIS sources de TROIS sites minimum par entree, kg retenu dans l'intervalle des sources, coherence <= 60 % — la porte scripts/check-poids-dewalt.js valide les deux fichiers. Ces masses nourrissent api/_lib/poids-expedie.js : poids expedie = nu + batteries + chargeur (masse MAJORANTE de la table, M-11) + coffret + 1 kg d'emballage (ordre user 14/08/2026 : accessoires, manuels, carton).",
+ "_mesure_le": "2026-08-14",
+ "poids": {},
+ "nonResolues": {}
+}

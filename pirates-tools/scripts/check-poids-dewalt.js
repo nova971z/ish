@@ -129,15 +129,20 @@ module.exports = function checkPoidsDewalt() {
       + JSON.stringify(bonne) + ') : la table ne pourrait jamais se remplir.');
   }
 
-  /* ══ PUIS : LA VRAIE TABLE ════════════════════════════════════════════════ */
-  var table;
-  try { table = JSON.parse(fs.readFileSync(path.join(RACINE, 'data/poids-dewalt.json'), 'utf8')); }
-  catch (e) {
-    errors.push('[check-poids-dewalt] ⛔ table illisible : ' + e.message);
-    return errors;
-  }
-  fautesDeLaTable(table).forEach(function (f) {
-    errors.push('[check-poids-dewalt] ⛔⛔ ARGENT : ' + f);
+  /* ══ PUIS : LES VRAIES TABLES — racines nues ET composants ═══════════════
+     Les composants (batteries, chargeurs, coffrets) nourrissent la COMPOSITION
+     du poids expédié (api/_lib/poids-expedie.js) : une masse de composant non
+     recoupée contaminerait TOUS les packs qui l'utilisent. Mêmes règles. */
+  ['data/poids-dewalt.json', 'data/poids-composants-dewalt.json'].forEach(function (fch) {
+    var table;
+    try { table = JSON.parse(fs.readFileSync(path.join(RACINE, fch), 'utf8')); }
+    catch (e) {
+      errors.push('[check-poids-dewalt] ⛔ ' + fch + ' illisible : ' + e.message);
+      return;
+    }
+    fautesDeLaTable(table).forEach(function (f) {
+      errors.push('[check-poids-dewalt] ⛔⛔ ARGENT (' + fch + ') : ' + f);
+    });
   });
   return errors;
 };

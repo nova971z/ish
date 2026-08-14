@@ -67,6 +67,7 @@ const PORTES_RAPIDES = [
   'scripts/check-nomenclature-milwaukee.js',
   'scripts/check-poids-dewalt.js',
   'scripts/check-fiches-persistees.js',
+  'scripts/check-poids-expedie.js',
   'scripts/check-pricing-model.js'
 ].filter(function (p) { return fs.existsSync(path.join(RACINE, p)); });
 
