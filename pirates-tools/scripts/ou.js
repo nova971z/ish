@@ -88,6 +88,23 @@ var INDEX = [
     fini: 'plan9, plan10, plan11 et couriers verts, plus l\'émulateur Firestore.'
   },
   {
+    intention: 'Persistance des écritures admin — création de fiche, photos, descriptions',
+    mots: ['persistance', 'rafraichir', 'rafraîchir', 'disparait', 'disparaît', 'efface',
+      'snapshot', 'shard', 'override', 'visible', 'ajout manuel', 'photo', 'description'],
+    fichiers: ['api/admin.js', 'api/_lib/snapshot.js', 'api/_lib/catalog.js', 'api/_lib/limites.js'],
+    fonctions: ['majSnapshot', 'valeurPourShard', 'lireSnapshot', 'docDansLeBudget'],
+    protege: ['scripts/check-fiches-persistees.js'],
+    regles: ['.claude/rules/donnees.md'],
+    pieges: [
+      '⛔⛔ ARGENT — un document Firestore plafonne à 1 Mio et les photos base64 comptent PLEIN pot, la vignette recopiant images[0] compte DEUX fois. Le budget se vérifie AVANT d\'écrire (api/_lib/limites.js), le refus dit les chiffres.',
+      '⛔ Les champs LOURDS (img, images, description_long, specs, features) n\'entrent JAMAIS dans un shard de snapshot : entrée allégée + _riche, le catalogue lit les documents riches nommément.',
+      '⛔ Après toute écriture de fiche : RELIRE le document PUIS prouver la VISIBILITÉ par le chemin public (loadCatalog) — la réponse porte visible:true/false, et le client CRIE sur false.',
+      '⛔ Un formulaire d\'édition ne s\'ouvre JAMAIS sur un détail non chargé : il écraserait la vraie description par du vide (payé le 14/08/2026).',
+      'Le repli sur la collection n\'est pris que si AUCUN shard n\'existe : une entrée manquante dans un shard est invisible pour toujours — d\'où la relecture de visibilité.'
+    ],
+    fini: 'check-fiches-persistees vert (chaîne écriture→rafraîchissement→relecture rejouée sur base factice au plafond réel), et chaque garde neuve sabotée rouge.'
+  },
+  {
     intention: 'Fiche produit, catalogue, modèles 3D, posters',
     mots: ['produit', 'catalogue', 'fiche', 'poster', '3d', 'glb', 'pack', 'modele', 'modèle'],
     fichiers: ['products.json', 'app.js', 'images/posters', 'models/products'],
