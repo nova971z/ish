@@ -55,7 +55,18 @@ function lire(dossiers) {
       try { j = JSON.parse(fs.readFileSync(path.join(d, f), 'utf8')); } catch (e) { return; }
       var marque = String(j.brand || '');
       if (!marque) return;
-      ['unknown', 'sansRef', 'packsIgnores', 'applied'].forEach(function (seau) {
+      /* ⛔⛔ DEUX FORMES DE RELEVÉ, ET J'AI AFFIRMÉ FAUX POUR NE PAS L'AVOIR VU.
+         Un balayage en MODE À SEC (décision D-018 : aucune lecture ni écriture
+         de la base pour cette marque-là) ne range PAS ses cartes au même
+         endroit : `inconnus` et `sansRefDetail` au lieu de `unknown` et
+         `sansRef`. Mon geleur ne lisait que la seconde forme — le corpus est
+         donc sorti sans une seule carte d'une des trois marques, et j'en ai
+         conclu à voix haute « les trois relevés sont ceux des deux autres
+         marques ». C'était faux : le troisième relevé existait, avec 3 965
+         cartes exploitables. **Une lecture qui ne trouve rien rend une liste
+         vide, pas une erreur** — et un zéro se lit comme un fait. */
+      ['unknown', 'sansRef', 'packsIgnores', 'applied',
+        'inconnus', 'sansRefDetail'].forEach(function (seau) {
         (Array.isArray(j[seau]) ? j[seau] : []).forEach(function (x) {
           var titre = String(x.titre || x.titreCarte || x.name || '').trim();
           var descr = String(x.descr || '').replace(/\s+/g, ' ').trim();

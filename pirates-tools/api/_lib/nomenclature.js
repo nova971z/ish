@@ -1517,6 +1517,90 @@ function lireReferenceMilwaukee(titre) {
   return null;
 }
 
+/* ══ CE QUE LE SUFFIXE MILWAUKEE DIT DU CONTENU DE LA BOÎTE ═════════════════
+   *Écrit le 13/08/2026, après mesure sur le relevé de l'user ET recoupement
+   Web. C'est de l'ARGENT : ce que dit ce suffixe décide d'un coût.
+   Restauré à l'identique le lendemain, après la perte du bac de travail dans
+   une réinitialisation de session — le premier gravage n'avait pas été poussé.*
+
+   ⛔⛔ LE FAIT QUI COMMANDE TOUT, VÉRIFIÉ AVANT D'ÉCRIRE UNE LIGNE :
+   **cette marque ne publie AUCUNE légende officielle de ses suffixes.** Ce qui
+   fait foi, c'est la liste « In the Box » de chaque fiche. Encoder une
+   grammaire déduite « parce qu'elle a l'air logique » reviendrait à inventer
+   une règle qui décide d'un contenu, donc d'un coût, donc d'un prix de vente —
+   exactement ce que M-03 et M-04 interdisent.
+   ⇒ On n'encode QUE ce qui est recoupé. Tout le reste est REFUSÉ.
+
+   ── CE QUI EST RECOUPÉ, ET PAR COMBIEN DE SOURCES ────────────────────────
+   · `-502X` = **2 batteries 5,0 Ah + chargeur + HD Box** — cinq revendeurs
+     indépendants le décrivent identiquement (deux britanniques, un polonais,
+     deux français).
+   · `-502C` = **les mêmes 2 batteries 5,0 Ah + chargeur**, mais en **coffret
+     standard** au lieu du HD Box (deux revendeurs français).
+     ⇒ **LA LETTRE FINALE NE CHANGE QUE LA CAISSE, JAMAIS LES BATTERIES.**
+     C'est ce qui compte pour l'argent : un coffret est presque toujours fourni
+     avec la machine et ne se vend pas seul, alors qu'une batterie vaut des
+     dizaines d'euros pièce.
+   · `-0` = **outil NU** — et c'est de loin la forme la plus fréquente.
+
+   ── CE QUE SON RELEVÉ MESURE (67 pages, 3 929 produits distincts) ──────────
+   Sur les 747 produits dont la référence porte un conditionnement :
+     · `0` suivi d'une lettre .... 404 produits, 176 867 € — des outils NUS ;
+     · forme `<capacité>0<nombre>`  une centaine — 201, 202, 301, 302, 401,
+       402, 501, 502, 504, 602, 802… toutes cohérentes entre elles ;
+     · formes ambiguës ........... une trentaine — 422, 522, 523, 533, 624,
+       310, 506, 120, 121, 122, 820. Elles ne se lisent PAS avec la même règle
+       (deux capacités mêlées ? une capacité à deux chiffres ?) et **aucune
+       source ne tranche**. Elles sont REFUSÉES, et c'est dit.
+
+   ⛔ POURQUOI LE REFUS EST LE BON CHOIX : un suffixe mal lu invente des
+   batteries qui ne sont pas dans la boîte, ou en oublie. Dans un sens le coût
+   de la machine nue déduite s'effondre — vente à perte ; dans l'autre il
+   gonfle — ventes perdues. Refuser coûte une fiche non renseignée : ça se
+   voit, ça se corrige, et ça ne coûte pas d'argent (sens sûr, M-11).
+
+   ⚠️ ET LE TITRE GARDE LE DERNIER MOT (M-48). Mesuré sur son relevé : un outil
+   dont le suffixe dit NU est vendu « + 1 batterie 12 V 2 Ah + chargeur ». Le
+   suffixe dit ce que le FABRICANT met dans la boîte ; le titre dit ce que le
+   VENDEUR expédie, et c'est le titre qui engage. Cette fonction ne décrit donc
+   que la RÉFÉRENCE : elle ne contredit jamais le titre, et le parseur continue
+   d'écarter une annonce qui ajoute du contenu à une référence nue.
+
+   ⛔ SÉPARATION DES MARQUES (M-28) : cette table est celle de CETTE marque et
+   d'aucune autre. La garde est en tête de fonction, et la porte
+   `check-separation-marques` exige de la voir là où elle s'applique. */
+var MILWAUKEE_SUFFIXE_NU = /^0([A-Z])?$/;
+var MILWAUKEE_SUFFIXE_BATTERIES = /^([1-9])0([0-9])([A-Z])?$/;
+
+function lireSuffixeMilwaukee(suffixe, marque) {
+  /* ⛔ MARQUE OBLIGATOIRE : sans la garde, les suffixes d'une AUTRE marque
+     seraient lus avec cette table — et « 502 » n'y veut pas dire la même
+     chose. C'est le défaut M-28, et son sens fait vendre à perte. */
+  if (!/^milwaukee$/i.test(String(marque || '').replace(/[\s-]/g, ''))) return null;
+  var s = String(suffixe || '').toUpperCase().replace(/[\s-]/g, '');
+  if (!s) return null;
+
+  var nu = MILWAUKEE_SUFFIXE_NU.exec(s);
+  if (nu) {
+    return { nbBatteries: 0, ah: null, chargeur: false, nu: true,
+      coffret: nu[1] || null, suffixe: s, recoupe: true };
+  }
+  var b = MILWAUKEE_SUFFIXE_BATTERIES.exec(s);
+  if (b) {
+    var ah = parseInt(b[1], 10);
+    var nb = parseInt(b[2], 10);
+    /* ⚠️ Une capacité annoncée avec ZÉRO batterie n'a pas de sens : c'est le
+       signe qu'on est sur une autre grammaire (« 820 », « 120 »). On refuse,
+       plutôt que de rendre un contenu vide qui passerait pour un outil nu —
+       et un outil nu, c'est un coût bien plus bas. */
+    if (!(nb >= 1)) return null;
+    return { nbBatteries: nb, ah: ah, chargeur: true, nu: false,
+      coffret: b[3] || null, suffixe: s, recoupe: true };
+  }
+  /* ⛔ TOUT LE RESTE EST REFUSÉ — un refus se lit, il ne se devine pas. */
+  return null;
+}
+
 /* ── TÊTES CONNUES, TOUTES MARQUES ────────────────────────────────────────────
    L'union des tables de préfixes : le parseur (teteConnue) demande seulement
    « cette tête est-elle une famille de références connue ? » — la réponse doit
@@ -1814,6 +1898,9 @@ module.exports = {
   PREFIXES_MAKITA: PREFIXES_MAKITA, PREFIXES_MAKITA_ORDRE: PREFIXES_MAKITA_ORDRE,
   FORMES_MAKITA: FORMES_MAKITA, formeReferenceMakita: formeReferenceMakita,
   lireReferenceMilwaukee: lireReferenceMilwaukee,
+  lireSuffixeMilwaukee: lireSuffixeMilwaukee,
+  MILWAUKEE_SUFFIXE_NU: MILWAUKEE_SUFFIXE_NU,
+  MILWAUKEE_SUFFIXE_BATTERIES: MILWAUKEE_SUFFIXE_BATTERIES,
   PREFIXES_DISTRIBUTEUR_MAKITA: PREFIXES_DISTRIBUTEUR_MAKITA,
   refSansPrefixeDistributeur: refSansPrefixeDistributeur,
   TETES_CONNUES: TETES_CONNUES,
