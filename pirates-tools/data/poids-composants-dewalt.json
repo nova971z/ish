@@ -1,6 +1,234 @@
 {
  "_lisezmoi": "Masses des COMPOSANTS DeWALT en kg — batteries par (gamme, capacite), chargeurs par modele, coffrets par type. Cles : BATTERIE|GAMME|<n>AH, CHARGEUR|<modele>, COFFRET|<type>. MEMES REGLES que data/poids-dewalt.json : TROIS sources de TROIS sites minimum par entree, kg retenu dans l'intervalle des sources, coherence <= 60 % — la porte scripts/check-poids-dewalt.js valide les deux fichiers. Ces masses nourrissent api/_lib/poids-expedie.js : poids expedie = nu + batteries + chargeur (masse MAJORANTE de la table, M-11) + coffret + 1 kg d'emballage (ordre user 14/08/2026 : accessoires, manuels, carton).",
  "_mesure_le": "2026-08-14",
- "poids": {},
- "nonResolues": {}
+ "poids": {
+  "BATTERIE|XR|2AH": {
+   "kg": 0.4,
+   "sources": [
+    {
+     "url": "https://ffx.co.uk/Product/Get/Dewalt-Dcb183-5035048438886-Xr-Battery-Pack-18V-Li-Ion-2Ah",
+     "kg": 0.4
+    },
+    {
+     "url": "https://www.amazon.co.uk/Dewalt-DCB183-Li-Ion-Battery-Yellow/dp/B00EQCFYWM",
+     "kg": 0.4
+    },
+    {
+     "url": "https://www.svh24.de/dewalt-xr-ersatz-akku-dcb183.-18.0-v/2ah-10303",
+     "kg": 0.5
+    }
+   ],
+   "note": "Modèle confirmé sur dewalt.co.uk (page dcb183-xj). 3 sites, écart 25 %. 0,40 kg donné par 2 sites ; le 0,5 kg svh24 est un arrondi ou un poids emballé. Valeurs lues via recherches restreintes par doma"
+  },
+  "BATTERIE|XR|4AH": {
+   "kg": 0.61,
+   "sources": [
+    {
+     "url": "https://www.screwfix.com/p/dewalt-dcb182-xj-18v-4-0ah-li-ion-xr-battery/61372",
+     "kg": 0.61
+    },
+    {
+     "url": "https://ffx.co.uk/Product/Get/Dewalt-Dcb182-5035048392782-Xr-18V-Li-Ion-Battery-Pack-4.0Ah",
+     "kg": 0.61
+    },
+    {
+     "url": "https://docs.rs-online.com/de91/0900766b811a2300.pdf",
+     "kg": 0.61
+    }
+   ],
+   "note": "Modèle confirmé sur dewalt.co.uk (page dcb182-xj). 3 sites (Screwfix, FFX, fiche technique RS) parfaitement concordants à 0,61 kg."
+  },
+  "BATTERIE|XR|5AH": {
+   "kg": 0.62,
+   "sources": [
+    {
+     "url": "https://docs.rs-online.com/6560/0900766b81326170.pdf",
+     "kg": 0.62
+    },
+    {
+     "url": "https://ffx.co.uk/product/Get/Dewalt-Dcb184-5035048466933-18V-5Ah-Battery",
+     "kg": 0.62
+    },
+    {
+     "url": "https://www.svh24.de/DeWalt-Ersatz-Akku-18-0V/5-0-Ah-13663",
+     "kg": 0.6
+    }
+   ],
+   "note": "Modèle confirmé sur cee.dewalt.global (page dcb184-xj). Écart 3 %. 0,62 kg donné par la fiche technique RS et FFX ; svh24 arrondit à 0,6."
+  },
+  "BATTERIE|POWERSTACK|1.7AH": {
+   "kg": 0.31,
+   "sources": [
+    {
+     "url": "https://www.svh24.de/dewalt-powerstack-ersatz-akku-18v/1-7ah-1127731",
+     "kg": 0.3
+    },
+    {
+     "url": "https://www.howetools.co.uk/dewalt-dcbp034-18v-li-ion-powerstack-battery-1-7ah",
+     "kg": 0.31
+    },
+    {
+     "url": "https://www.toolnut.com/dewalt-dcbp034-20v-max-dewalt-powerstack-compact-battery.html",
+     "kg": 0.32
+    }
+   ],
+   "note": "Modèle confirmé sur dewalt.co.uk (page dcbp034-xj). 3 sites, écart 6 % (Tool Nut : 0,7 lb = 0,32 kg). Cohérent avec l'annonce fabricant « 15 % plus légère que la DCB183 ». Un 0,9 kg vu chez Mister Wor"
+  },
+  "CHARGEUR|DCB1104": {
+   "kg": 0.54,
+   "sources": [
+    {
+     "url": "https://its.co.uk/pd/DCB1104-GB-Dewalt-DCB1104-XR-4A-Battery-Charger-_DEWDCB1104.htm",
+     "kg": 0.54
+    },
+    {
+     "url": "https://www.svh24.de/dewalt-akku-kit-2x-18v/5ah-plus-dcb1104-1141726",
+     "kg": 0.5
+    },
+    {
+     "url": "https://www.manualslib.com/manual/2995050/Dewalt-Dcb1104.html",
+     "kg": 0.5
+    }
+   ],
+   "note": "3 sites concordants 0,50-0,54 kg (ecart 8 %) ; retenu le plus haut. 0,85 kg vu ailleurs = poids expedie emballe. Valeurs lues via extraits de recherche par site : le fetch direct des pages est bloque "
+  },
+  "CHARGEUR|DCB115": {
+   "kg": 0.5,
+   "sources": [
+    {
+     "url": "https://www.powertoolsdirect.com/dewalt-dcb115-xr-multi-voltage-charger-10-8-18v-li-ion",
+     "kg": 0.5
+    },
+    {
+     "url": "https://www.aabtools.com/p/dewalt/dcb115-gb/multi-voltage-battery-charger",
+     "kg": 0.5
+    },
+    {
+     "url": "https://www.bmsteel.co.uk/dewalt-dcb115-xr-multi-voltage-charger-108-54v-li-ion/p4253",
+     "kg": 0.5
+    }
+   ],
+   "note": "3 sites, meme valeur 0,5 kg (500 g / 1,1 lb), ecart 0 %. Valeurs lues via extraits de recherche par site (fetch direct bloque par proxy)."
+  },
+  "CHARGEUR|DCB107": {
+   "kg": 0.32,
+   "sources": [
+    {
+     "url": "https://www.powertoolworld.co.uk/dewalt-dcb107-battery-charger-for-10-8v-14-4v-18v-xr-li-ion-slide-batteries",
+     "kg": 0.29
+    },
+    {
+     "url": "https://www.aabtools.com/p/dewalt/dcb107-xj/multi-voltage-xr-compact-charger-10.8v-14.4-18v",
+     "kg": 0.32
+    },
+    {
+     "url": "https://todotaladros.com/gb/chargers/1822-charger-dewalt-dcb107-5035048464809.html",
+     "kg": 0.29
+    }
+   ],
+   "note": "3 sites concordants sur le poids nu 0,29-0,32 kg (ecart 10 %) ; retenu le plus haut. Discordances ecartees et dites : amazon.com 1,55 lb et raygrahams 1,00 kg = poids d'expedition ; un resume du manue"
+  },
+  "CHARGEUR|DCB118": {
+   "kg": 0.77,
+   "sources": [
+    {
+     "url": "https://us.amazon.com/Dewalt-DCB118-GB-DCB118-Multi-Voltage-Charger/dp/B01I08Z7JM",
+     "kg": 0.65
+    },
+    {
+     "url": "https://www.svh24.de/dewalt-54v-2x-akku-6-0ah-ladegeraet-dcb118-starter-set-flexvolt-dcb118t2-946687",
+     "kg": 0.65
+    },
+    {
+     "url": "https://www.tannerbolt.com/dew-dcb118-20v-60v-fast-charger-flexvolt",
+     "kg": 0.771
+    }
+   ],
+   "note": "3 sites, intervalle 0,65-0,77 kg (ecart 19 %). Fiche UE 0,650 kg (x2) ; source US 1,7 lb = 0,771 kg, doute nu/emballe -> retenu le PLUS HAUT de l'intervalle. Misterworker 1,5 kg ecarte (poids expedie)"
+  }
+ },
+ "nonResolues": {
+  "BATTERIE|XR|3AH": {
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.powertoolworld.co.uk/dewalt-dcb187-xj-18v-xr-slide-3-0ah-li-ion-battery",
+     "kg": 0.54
+    },
+    {
+     "url": "https://www.amazon.co.uk/DEWALT-3-0AH-LI-ION-BATTERY-DCB187-XJ/dp/B075FWGSL3",
+     "kg": 0.54
+    }
+   ],
+   "note": "Modèle confirmé sur dewalt.co.uk (page dcb187-xj). 2 URL sûres à 0,54 kg (Amazon précise 500 g anciennes cellules / 540 g nouvelles). Une 3e valeur, 0,48 kg, est attribuable au site tooled-up.com (rec"
+  },
+  "BATTERIE|XR|6AH": {
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.toolup.com/DeWalt-DCB206-20V-MAX-Premium-XR-6-0-AH-Lithium-Ion-Battery-Pack",
+     "kg": 1.02
+    }
+   ],
+   "note": "Identification : dewalt.co.uk ne liste AUCUNE batterie XR 18V 6,0 Ah « slide » ; en Europe le rôle 6 Ah est tenu par la FLEXVOLT DCB546 (clé séparée). Le seul pack 6 Ah de la plateforme est le DCB206 "
+  },
+  "BATTERIE|POWERSTACK|5AH": {
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.howetools.co.uk/dewalt-dcbp518-18v-li-ion-powerstack-battery-5-0ah",
+     "kg": 0.75
+    },
+    {
+     "url": "https://www.klium.com/en/dewalt-dcbp518-xj-18v-xr-powerstack-battery-50ah-122572",
+     "kg": 0.747
+    }
+   ],
+   "note": "Modèle confirmé sur dewalt.co.uk (page dcbp518-xj). 2 sites seulement, mais très concordants (0,747–0,75 kg) ; la 3e source n'a pas pu être obtenue avant épuisement du budget de recherche (200/200) et"
+  },
+  "BATTERIE|FLEXVOLT|6AH": {
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://ffx.co.uk/product/Get/Dewalt-Dcb546-5025537237250-18V-54V-6Ah-Li-Ion-Xr-Flexvolt-Convertible-Battery",
+     "kg": 1.46
+    },
+    {
+     "url": "https://cpc.farnell.com/dewalt/dcb546-xj/54-18v-flexvolt-6-0ah-battery/dp/TL22637",
+     "kg": 0.674
+    }
+   ],
+   "note": "Modèle confirmé sur dewalt.co.uk (page dcb546-xj). DISCORDANCE : FFX 1,46 kg (probable poids emballé) contre CPC 0,674 kg (aberrant : un pack 15 cellules 18650 pèse plus que ses seules cellules ~0,72 "
+  },
+  "BATTERIE|FLEXVOLT|9AH": {
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.ffx.co.uk/Product/Get/Dewalt-Dcb547-5035048646908-18V-54V-Li-Ion-Xr-Flexvolt-Convertible-Battery-9.0Ah",
+     "kg": 1.46
+    }
+   ],
+   "note": "Modèle confirmé (référencé DCB547-XJ chez Screwfix et les revendeurs officiels). 1 seule valeur attribuable : FFX 1,46 kg. Une recherche générale a aussi affiché « 1,1 kg sans capuchon de transport » "
+  },
+  "BATTERIE|FLEXVOLT|12AH": {
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://ffx.co.uk/product/Get/Dewalt-Dcb548-Xj-505048706794-18V-54V-Xr-12Ah-Li-Ion-Flexvolt-Battery-Pack",
+     "kg": 1.2
+    }
+   ],
+   "note": "Modèle confirmé sur my.dewalt.global (page dcb548-xj). 1 seule valeur attribuable : FFX 1,2 kg — douteuse pour un pack 15 cellules 21700 (attendu au-dessus de 1,4 kg, et incohérente avec le 1,46 kg qu"
+  },
+  "COFFRET|TSTAK": {
+   "motif": "statut non-resolue",
+   "sources": [],
+   "note": "0 source de poids collectee : le budget de recherches web de la session s'est epuise (200/200, mesure) avant cet article, et le fetch direct des sites (dewalt.co.uk, revendeurs) est bloque par le prox"
+  },
+  "COFFRET|KITBOX": {
+   "motif": "statut non-resolue",
+   "sources": [],
+   "note": "0 source de poids collectee, memes causes : budget de recherches epuise (200/200) et fetch direct bloque par proxy (CONNECT 403). Piste reelle relevee dans un titre de resultat : powertoolworld.co.uk "
+  }
+ }
 }

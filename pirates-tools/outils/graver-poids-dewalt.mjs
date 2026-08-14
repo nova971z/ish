@@ -28,6 +28,11 @@ const porte = require2(path.join(RACINE, 'scripts/check-poids-dewalt.js'));
 
 const FICHIER = process.argv[2];
 const ECRIRE = process.argv.includes('--ecrire');
+/* --table composants : vise data/poids-composants-dewalt.json (batteries,
+   chargeurs, coffrets) — mêmes règles, même porte, autre fichier. */
+const TABLE_CIBLE = process.argv.includes('--table')
+  ? String(process.argv[process.argv.indexOf('--table') + 1] || '')
+  : 'racines';
 if (!FICHIER || !fs.existsSync(FICHIER)) {
   console.error('usage: node outils/graver-poids-dewalt.mjs <recherches.json> [--ecrire]');
   process.exit(2);
@@ -40,7 +45,8 @@ if (!entrees.length) {
   process.exit(2);
 }
 
-const cible = path.join(RACINE, 'data/poids-dewalt.json');
+const cible = path.join(RACINE, TABLE_CIBLE === 'composants'
+  ? 'data/poids-composants-dewalt.json' : 'data/poids-dewalt.json');
 const table = JSON.parse(fs.readFileSync(cible, 'utf8'));
 table.poids = table.poids || {};
 table.nonResolues = table.nonResolues || {};
@@ -49,7 +55,7 @@ let gravees = 0, refusees = 0, deja = 0;
 const motifs = {};
 
 for (const e of entrees) {
-  const r = String(e.racine || '').toUpperCase().trim();
+  const r = String(e.racine || e.cle || '').toUpperCase().trim();
   if (!r) continue;
   if (table.poids[r]) { deja++; continue; }
 
@@ -87,7 +93,7 @@ if (!ECRIRE) {
 }
 table._mesure_le = new Date().toISOString().slice(0, 10);
 fs.writeFileSync(cible, JSON.stringify(table, null, 1) + '\n', 'utf8');
-console.log('\ngravé : data/poids-dewalt.json — relire par la porte…');
+console.log('\ngravé : ' + path.basename(cible) + ' — relire par la porte…');
 const errs = porte();
 if (errs.length) {
   errs.slice(0, 5).forEach((x) => console.error('  ❌ ' + x));
