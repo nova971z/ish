@@ -31,6 +31,7 @@ désigné ici, soit il est rangé.
 | `LECONS.md` | registre des pannes et de la porte que chacune a produite |
 | `ANALYSE-RAFALE-INSTANCE-FROIDE.md` | chaîne complète des hausses perdues par instance froide : mesures, 3 états mémoire, plan de la porte |
 | `VERIF-BALAYAGE-2.md` | vérification un par un du balayage n°2 : 542 entrées, 9 défauts, plan d'action |
+| `ARBITRAGE-D57.md` | les 203 hausses en attente (D-57) tranchées UNE PAR UNE le 15/08 : 42 caduques · 59 justifiées · 8 rejetées · 94 non confirmées, chaque verdict avec sa preuve |
 | `METHODE-VERIF-TRAQUEUR.md` | la méthode d'entraînement du traqueur, améliorée à chaque zip |
 | `DEMANDES.md` | **ce que l'user a demandé, et où ça en est** — trois états, et la CI REFUSE de livrer tant qu'une ligne est `OUVERT` (`scripts/check-demandes.js`) |
 | `ERREURS.md` | mes erreurs classées par **origine** — 7 mécanismes, lus par le sommaire seul (`scripts/erreurs.js`) |
