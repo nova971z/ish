@@ -1,7 +1,1184 @@
 {
  "_lisezmoi": "Poids EXPEDIE en kg par RACINE de reference DeWALT (machine nue) ou par REFERENCE COMPLETE (le poids expedie complet prime). REGLE DE GRAVAGE, ordre de l'user du 14/08/2026 : chaque poids est RECOUPE SUR TROIS SOURCES AU MINIMUM avant d'entrer ici — trois adresses consultees, trois valeurs relevees, et la valeur retenue est coherente avec les trois. Une reference dont les sources divergent n'entre PAS : elle reste au registre des non-resolues, dite. Une entree sans ses trois sources est INVALIDE — la porte scripts/check-poids-dewalt.js refuse.",
  "_format": "poids[RACINE] = { kg, sources: [{url, kg}, {url, kg}, {url, kg}], note? } — kg retenu DANS l'intervalle des sources, jamais en dehors. En cas d'ecart entre poids nu et poids emballe, on retient l'EXPEDIE (le plus haut) : surestimer le port protege la marge (M-11).",
- "_mesure_le": "2026-08-14",
- "poids": {},
- "nonResolues": {}
+ "_mesure_le": "2026-08-15",
+ "poids": {
+  "AR-DXPW008E": {
+   "kg": 35,
+   "sources": [
+    {
+     "url": "https://www.euro-expos.com/fr/nettoyeur-hp-dewalt-dxpw008e-43863.html",
+     "kg": 35
+    },
+    {
+     "url": "https://www.misterworker.com/en-us/annovi-reverberi/dxpw008e-pro-gas-engine-washers-dewalt-190bar-dxpw008e/17394.html",
+     "kg": 30
+    },
+    {
+     "url": "https://www.toolnation.com/dewalt-dxpw008e-cold-water-pressure-washer-190-bar-600lh-honda-gx160-gasoline-engine.html",
+     "kg": 35
+    }
+   ],
+   "note": "Nettoyeur haute pression thermique DeWALT DXPW008E (moteur Honda GX160, 190 bar). Poids net trouvé entre 30 et 35 kg selon les sites (écart 16.7%, sous le seuil de 60%). Retenu le plus haut de l'inter"
+  },
+  "AT-DXV15T": {
+   "kg": 8.27,
+   "sources": [
+    {
+     "url": "https://www.manomano.fr/p/aspirateur-eau-poussieres-dewalt-dxv15t-1100w-15l-ipx4-87072187",
+     "kg": 8.27
+    },
+    {
+     "url": "https://www.toolstation.com/dewalt-dxv15t-toolbox-15l-wet-dry-vacuum-cleaner/p67313",
+     "kg": 6
+    },
+    {
+     "url": "https://www.bricorama.fr/p/aspirateur-eau-poussieres-compact-et-robuste/6921183004354",
+     "kg": 8
+    }
+   ],
+   "note": "Aspirateur eau/poussière DXV15T (15L, boîte à outils). Écart entre poids net (Toolstation, mesure simplifiée) et poids produit/emballé (ManoMano, Bricorama). Écart max-min 38%, sous le seuil. Retenu l"
+  },
+  "AT-DXV20P": {
+   "kg": 7.52,
+   "sources": [
+    {
+     "url": "https://www.toolstation.com/dewalt-dxv20p-20l-wet-dry-vacuum-cleaner/p84454",
+     "kg": 6.17
+    },
+    {
+     "url": "https://www.digitec.ch/en/s1/product/dewalt-dxv20p-wet-dry-vacuum-cleaner-industrial-vacuum-cleaners-46441851",
+     "kg": 6.17
+    },
+    {
+     "url": "https://www.maxoutil.com/aspirateur-eau-et-poussieres-dewalt-dxv20p-1050w-20l-101262.html",
+     "kg": 7.52
+    }
+   ],
+   "note": "Aspirateur eau/poussière DXV20P (20L). Toolstation et Digitec s'accordent sur 6.17 kg (poids net simplifié), Maxoutil donne 7.52 kg (probable poids emballé/complet). Écart 22%, sous le seuil. Retenu l"
+  },
+  "AT-DXV20PC": {
+   "kg": 6.2,
+   "sources": [
+    {
+     "url": "https://www.ebay.co.uk/p/11085670644",
+     "kg": 6.2
+    },
+    {
+     "url": "https://www.mundoobd.com/productos/aspiradora-sopladora-liquidos-polvo-dewalt-20-litros-dxv20pc/",
+     "kg": 6.2
+    },
+    {
+     "url": "https://www.misaron.si/sesalnik-1050w-20l-za-suho-in-mokro-ciscenje-dewalt-DXV20PC",
+     "kg": 6.2
+    }
+   ],
+   "note": "Aspirateur eau/poussière DXV20PC (20L, roulettes). Trois sites indépendants (UK, Argentine, Slovénie) s'accordent exactement sur 6.2 kg."
+  },
+  "AT-DXV20PTA": {
+   "kg": 7.1,
+   "sources": [
+    {
+     "url": "https://www.diy.com/departments/dewalt-dxv20pta-1050w-wet-dry-vacuum-with-power-tool-activation/6921183001582_BQ.prd",
+     "kg": 6.2
+    },
+    {
+     "url": "https://www.toolnation.com/dewalt-dxv20pta-20l-wetdry-vacuum-cleaner-with-pta.html",
+     "kg": 6.2
+    },
+    {
+     "url": "https://its.co.uk/pd/dewalt-dxv20pta-20l-electric-wet-dry-vacuum-cleaner-with-power-tool-activation-_dewdwv20ptaa.htm",
+     "kg": 7.1
+    }
+   ],
+   "note": "Aspirateur eau/poussière DXV20PTA (20L, activation par l'outil). DIY.com et Toolnation donnent 6.2 kg, ITS.co.uk donne 7.1 kg. Écart 14.5%, sous le seuil. Retenu le plus haut."
+  },
+  "AT-DXV23P-QT": {
+   "kg": 6.7,
+   "sources": [
+    {
+     "url": "https://emin.asia/dewaltdxv23p-dewalt-dxv23p-wet-dry-vacuum-141887/pr.html",
+     "kg": 6.7
+    },
+    {
+     "url": "https://sydneytools.com.au/product/dewalt-dxv23p-1150w-23l-wet-dry-vacuum",
+     "kg": 6.7
+    },
+    {
+     "url": "https://www.mrfilter.com.au/dewalt-dxv23p-1150w-23l-wet-dry-vacuum",
+     "kg": 6.7
+    }
+   ],
+   "note": "Aspirateur eau/poussière DXV23P-QT (23L, super silencieux ; -QT = variante prise/cordon EU de la même machine DXV23P). Trois sites indépendants (Asie, Australie x2) s'accordent exactement sur 6.7 kg."
+  },
+  "AT-DXV30SAPTA": {
+   "kg": 7.5,
+   "sources": [
+    {
+     "url": "https://nout.am/en/product/phvoshekvoul-dewalt-dxv30sapta",
+     "kg": 7.5
+    },
+    {
+     "url": "https://www.gorciq.am/en/product/vacuum-cleaner-dewalt-dxv30sapta/",
+     "kg": 7.5
+    },
+    {
+     "url": "https://www.morele.net/odkurzacz-przemyslowy-dewalt-dxv30sapta-13231297/",
+     "kg": 7.5
+    }
+   ],
+   "note": "Aspirateur inox eau/poussière DXV30SAPTA (30L, PTA). Trois sites indépendants (Arménie x2, Pologne) s'accordent exactement sur 7.5 kg."
+  },
+  "AT-DXV34PTA": {
+   "kg": 9.3,
+   "sources": [
+    {
+     "url": "https://cibpartners.co.za/product/dewalt-portable-34l-wet-dry-vacuum-cleaner-dxv34pta/",
+     "kg": 9.3
+    },
+    {
+     "url": "https://25south.co.za/products/dewalt-portable-34l-wet-dry-vacuum-cleaner-dxv34pta",
+     "kg": 9.3
+    },
+    {
+     "url": "https://www.screwfix.com/p/dewalt-dxv34pta-1200w-34ltr-l-class-wet-dry-vacuum-cleaner-230v/150tw",
+     "kg": 9.3
+    }
+   ],
+   "note": "Aspirateur eau/poussière DXV34PTA (34L, PTA). Trois sites indépendants (Afrique du Sud x2, Royaume-Uni) s'accordent exactement sur 9.3 kg."
+  },
+  "D21441": {
+   "kg": 2.2,
+   "sources": [
+    {
+     "url": "https://www.manomano.fr/p/perceuse-rotative-dewalt-770-w-2-vitesses-et-mandrin-auto-serrant-d21441-7161",
+     "kg": 2.2
+    },
+    {
+     "url": "https://www.master-outillage.com/dewalt/51107-perceuse-rotative-dewalt-2-vitesses-770w-2700-tr-min-mandrin-autoserrant-13mm-d21441-5035048153536.html",
+     "kg": 2.2
+    },
+    {
+     "url": "https://www.123comparer.fr/perceuses/gwadgpjogohdnpjugw3uc.html",
+     "kg": 2.2
+    }
+   ],
+   "note": "Perceuse rotative DeWALT D21441 (770W, 2 vitesses) — et non une meuleuse comme une recherche groupée précédente le laissait croire. Trois sites indépendants s'accordent exactement sur 2.2 kg."
+  },
+  "D21520": {
+   "kg": 3.4,
+   "sources": [
+    {
+     "url": "https://icecat.biz/en-id/p/dewalt/d21520-qs/drills-d21520-14760634.html",
+     "kg": 3.4
+    },
+    {
+     "url": "https://www.stokker.com/mixer-rotary-drill-d21520-13mm-chuck-c-d21520-dw",
+     "kg": 3.4
+    },
+    {
+     "url": "https://sardco.com/en/dewalt-d21520-qs-710w-13mm-mixer-and-rotary-drill.html",
+     "kg": 3.4
+    }
+   ],
+   "note": "Machine nue (mixeur/perceuse 710W, mandrin 13mm). 3 sources convergent sur 3,4 kg."
+  },
+  "D21570": {
+   "kg": 3,
+   "sources": [
+    {
+     "url": "https://www.screwfix.com/p/dewalt-d21570k-gb-1300w-electric-silver-bullet-diamond-core-drill-230v/48374",
+     "kg": 3
+    },
+    {
+     "url": "https://its.co.uk/pd/D21570K-Dewalt-D21570K-Diamond-Core-Drill-_DEWD21570K.htm",
+     "kg": 3
+    },
+    {
+     "url": "https://www.toolstop.co.uk/dewalt-d21570k-1300w-127mm-diamond-drill-240v-p14557/",
+     "kg": 3
+    }
+   ],
+   "note": "Perceuse diamant 1300W 127mm (D21570K). 3 revendeurs UK concordants sur 3 kg."
+  },
+  "D24000": {
+   "kg": 31.3,
+   "sources": [
+    {
+     "url": "https://www.dewalt.com/en-us/product/d24000/10-heavy-duty-wet-tile-saw",
+     "kg": 31.3
+    },
+    {
+     "url": "https://www.toolnut.com/dewalt-d24000-10-wet-tile-saw.html",
+     "kg": 31.3
+    },
+    {
+     "url": "https://www.acmetools.com/dewalt-heavy-duty-10in-wet-tile-saw-d24000-d24000/028877414294.html",
+     "kg": 31.3
+    }
+   ],
+   "note": "Scie à carreaux 10\" (250mm), poids officiel 69 lbs converti (69 x 0,453592 = 31,3 kg). 3 sources concordantes."
+  },
+  "D25133": {
+   "kg": 2.6,
+   "sources": [
+    {
+     "url": "https://www.screwfix.com/p/dewalt-d25133k-gb-2-6kg-electric-sds-plus-drill-240v/2864j",
+     "kg": 2.6
+    },
+    {
+     "url": "https://www.lectura-specs.com/en/model/tools/power-tools-rotary-hammers-dewalt/d25133k-qs-11792891",
+     "kg": 2.6
+    },
+    {
+     "url": "https://www.klium.com/en/dewalt-d25133k-qs-sds-plus-combi-hammer-800-w-in-tstak-case-127356",
+     "kg": 2.6
+    }
+   ],
+   "note": "Perforateur SDS-Plus 800W 26mm (D25133K). 3 sources concordantes sur 2,6 kg."
+  },
+  "D25144": {
+   "kg": 3.1,
+   "sources": [
+    {
+     "url": "https://www.lectura-specs.com/en/model/tools/power-tools-rotary-hammers-dewalt/d25144k-qs-11792884",
+     "kg": 3.1
+    },
+    {
+     "url": "https://www.misterworker.com/en/dewalt/sds-plus-3-mode-rotary-hammer-28mm-900w-double-spindle-quick-coupling-d25144k-qs-new/40696.html",
+     "kg": 3.1
+    },
+    {
+     "url": "https://www.toolnation.com/dewalt-d25144k-qs-sds-plus-combination-hammer-900w-28mm-with-chipping-head.html",
+     "kg": 3.1
+    }
+   ],
+   "note": "Marteau perforateur SDS-Plus 900W 28mm 3 modes (D25144K-QS). 3 sources concordantes sur 3,1 kg."
+  },
+  "D25333": {
+   "kg": 3.7,
+   "sources": [
+    {
+     "url": "https://www.screwfix.com/p/dewalt-d25333k-gb-3-7kg-electric-sds-plus-drill-230v/700fx",
+     "kg": 3.7
+    },
+    {
+     "url": "https://www.toolnation.com/dewalt-d25333k-qs-d25333k-30mm-3kg-950w-sds-plus-combi-hammer.html",
+     "kg": 3
+    },
+    {
+     "url": "https://www.ohiopowertool.com/dewalt-d25333k",
+     "kg": 3.7
+    }
+   ],
+   "note": "Marteau perforateur SDS-Plus 950W 30mm (D25333K). 3 sources : 3,0 kg (Toolnation) à 3,7 kg (Screwfix, Ohio Power Tool) — écart 19%, dans la fourchette. Valeur retenue = la plus haute pour protéger la "
+  },
+  "D25334": {
+   "kg": 4,
+   "sources": [
+    {
+     "url": "https://www.powertoolworld.co.uk/dewalt-d25334k-sds-3-mode-brushless-hammer-drill-4kg-30mm-inc-qcc",
+     "kg": 4
+    },
+    {
+     "url": "https://www.aabtools.com/p/dewalt/d25334k-b5/220v-30mm-sds-plus-rotary-hammer-drill-with-quick-change-chuck-4.0kg-3-modes-950w",
+     "kg": 4
+    },
+    {
+     "url": "https://www.toolnation.fr/dewalt-d25334k-qs-perforateur-burineur-d25334k-sds-plus-30mm.html",
+     "kg": 3.9
+    }
+   ],
+   "note": "3 sites concordants (3.9-4.0 kg), machine avec coffret TSTAK. Valeur haute retenue."
+  },
+  "D25335": {
+   "kg": 5.1,
+   "sources": [
+    {
+     "url": "https://www.klium.com/en/dewalt-d25335k-qs-sds-plus-combi-hammer-950-w-quick-change-drill-head-d25304dh-dust-extraction-in-case-129552",
+     "kg": 5.1
+    },
+    {
+     "url": "https://emast.pl/dewalt-mlotowiertarka-sds-plus-30mm-950w-walizka-d25335k-qs",
+     "kg": 5.1
+    },
+    {
+     "url": "https://www.stahlmann.sk/dewalt-elektricke-3-5-j-sds-plus-kombi-kladivo-s-odsavacom-prachu-950-w-sklucovadlo-p132303",
+     "kg": 5.1
+    }
+   ],
+   "note": "3 sites concordants exactement à 5.1 kg (version avec aspiration de poussière intégrée D25304DH, plus lourde que le D25333K nu). Une mention isolée à 3.7 kg vue sur un comparateur tchèque n'a pas pu ê"
+  },
+  "D25413": {
+   "kg": 4.2,
+   "sources": [
+    {
+     "url": "https://eshop.elkov.cz/products/dewalt-kladivo-kombinovane-sds-d25413k-4kg-1000w-4-2j-avc-4-2-kg",
+     "kg": 4.2
+    },
+    {
+     "url": "https://cthardware.com/dewalt-d25413k-b1-l-shape-3-mode-sds-plus-rotary-hammer-32mm-900w-820rpm-4-2kg.html",
+     "kg": 4.2
+    },
+    {
+     "url": "https://www.aabtools.com/p/dewalt/d25413k-b5/32mm-heavy-duty-sds-plus-combination-hammer-220v",
+     "kg": 4
+    }
+   ],
+   "note": "3 sites concordants (4.0-4.2 kg selon variante B1/B5/QS). Valeur haute retenue."
+  },
+  "D25430": {
+   "kg": 4,
+   "sources": [
+    {
+     "url": "https://www.klium.com/en/dewalt-d25430k-qs-chisel-hammer-with-sds-plus-4kg-1000-w-in-carrying-case-128143",
+     "kg": 4
+    },
+    {
+     "url": "https://www.amazon.fr/DeWALT-D25430K-Marteau-Burineur-SDS-Plus/dp/B00H7Y11AU",
+     "kg": 4
+    },
+    {
+     "url": "https://www.toolteam.com/en-GB/dewalt-meisselhammer-sds-plus-4kg-1000watt-d25430k-qs-t-481549-5035048441725",
+     "kg": 4
+    },
+    {
+     "url": "https://carinet.pl/en/6087-dewalt-dewalt-mlot-udarowy-kujacy-sds-1000w-42j-4kg-d25430k-d25430k-qs.html",
+     "kg": 4
+    }
+   ],
+   "note": "4 sites concordants, tous à 4.0 kg pile."
+  },
+  "D25481": {
+   "kg": 5.9,
+   "sources": [
+    {
+     "url": "https://www.stokker.com/combi-hammer-d25481k-59-kg-61j-sds-max-c-d25481k-dw",
+     "kg": 5.9
+    },
+    {
+     "url": "https://shop.screwfix.eu/products/dewalt-d25481k-qs-5-9kg-electric-sds-max-drill-230v-267tr",
+     "kg": 5.9
+    },
+    {
+     "url": "https://www.toolnation.com/dewalt-d25481k-qs-d25481k-combination-hammer-6-kg-sds-max.html",
+     "kg": 6
+    }
+   ],
+   "note": "3 sites concordants (5.9-6.0 kg), écart négligeable (arrondi)."
+  },
+  "D25614": {
+   "kg": 6,
+   "sources": [
+    {
+     "url": "https://www.misterworker.com/en-us/dewalt/45mm-6-kilo-sds-max-rotary-hammer/39741.html",
+     "kg": 6
+    },
+    {
+     "url": "https://www.toolnation.com/dewalt-d25614k-qs-combi-hammer-6-kg-105j-sds-max.html",
+     "kg": 6
+    },
+    {
+     "url": "https://www.devcoshop.com/products/demo-perf-hammer-6-kg-sds-max-d25614k-qs-dewalt",
+     "kg": 6
+    }
+   ],
+   "note": "3 sites concordants, tous à 6.0 kg pile."
+  },
+  "D25733": {
+   "kg": 9.3,
+   "sources": [
+    {
+     "url": "https://www.toolnation.com/dewalt-d25733k-qs-breaker-9-3-kg-19-4-sds-max.html",
+     "kg": 9.3
+    },
+    {
+     "url": "https://www.kamody.fr/dewalt-d25733k-qs-perforateur-burineur-sds-max-1600w-133j-coffret-19473",
+     "kg": 9.3
+    },
+    {
+     "url": "https://www.zone-outillage.fr/fiche-produit/dewalt/perforateur-burineur-sds-max/d25733k-qs",
+     "kg": 9.3
+    }
+   ],
+   "note": "3 sites concordants exactement à 9.3 kg (variante QS/EU). Un revendeur (balitrand.fr) indique 8 kg et un autre (aabtools, variante B5 220V) 7 kg, écarts restant sous 60%."
+  },
+  "D25773": {
+   "kg": 10,
+   "sources": [
+    {
+     "url": "https://industrywaala.com/product/dewalt-d25773k-qs-10-kg-1700-w-sds-max-hammer-with-anti-rotation/",
+     "kg": 10
+    },
+    {
+     "url": "https://www.toolnation.com/dewalt-d25773k-qs-breaker-10-kg-194-sds-max.html",
+     "kg": 10
+    },
+    {
+     "url": "https://www.devcoshop.com/products/dewalt-hammer-demo-perf-10-kg-d25773k-qs",
+     "kg": 10
+    }
+   ],
+   "note": "4 sites concordants, tous à 10.0 kg pile."
+  },
+  "D25810": {
+   "kg": 5.6,
+   "sources": [
+    {
+     "url": "https://www.acmetools.com/dewalt-12-lb-56-kg-sds-max-chipping-hammer-d25810k/885911477512.html",
+     "kg": 5.6
+    },
+    {
+     "url": "https://www.dewalt.com/product/d25810k/12-lb-56kg-sds-max-chipping-hammer",
+     "kg": 5.6
+    },
+    {
+     "url": "https://toolup.com/products/dewalt-d25810k-12-lb-5-6-kg-sds-max-chipping-hammer-1",
+     "kg": 5.6
+    }
+   ],
+   "note": "3 sites concordants dont le site officiel DeWALT, tous à 5.6 kg (12 lb) pile."
+  },
+  "D25832": {
+   "kg": 7.3,
+   "sources": [
+    {
+     "url": "https://www.toolmarts.com/dewalt-d25832k-16-lbs-sds-max-chipping-hammer-kit",
+     "kg": 7.3
+    },
+    {
+     "url": "https://www.klium.com/en/dewalt-d25832k-qs-chisel-hammer-with-sds-max-6kg-1350-w-in-tstak-127561",
+     "kg": 6
+    },
+    {
+     "url": "https://www.stokker.com/chipping-hammer-d25832k-6-kg-105j-sds-max-dewalt-c-d25832k-dw",
+     "kg": 6
+    }
+   ],
+   "note": "Ecart net/emballe probable: sites US citent 16 lb = 7.3 kg (kit complet), sites EU citent 6.0 kg (outil). Ecart 21%, sous le seuil de 60%. Valeur haute retenue par prudence sur le port."
+  },
+  "D25871": {
+   "kg": 8,
+   "sources": [
+    {
+     "url": "https://www.dewalt.at/powertools/productdetails/catno/D25871K/info/specifications/",
+     "kg": 8
+    },
+    {
+     "url": "https://www.stokker.com/chipping-hammer-d25871k-8-kg-11j-sds-max-dewalt/-149348865",
+     "kg": 8
+    },
+    {
+     "url": "https://www.manomano.fr/p/marteau-piqueur-dewalt-sds-max-1400w-11-joules-epta-d25871k-2002413",
+     "kg": 8
+    }
+   ],
+   "note": "Burineur filaire (pas de batterie). 4 sources concordent exactement à 8,0 kg, dont le site officiel DeWALT (dewalt.at)."
+  },
+  "D25872": {
+   "kg": 8.8,
+   "sources": [
+    {
+     "url": "https://www.dewalt.fr/produit/d25872k-qs/burineur-sds-max-dewalt-133-j-8-kg",
+     "kg": 8
+    },
+    {
+     "url": "https://www.toolnation.com/dewalt-d25872k-qs-breaker-88-kg-133j-sds-max.html",
+     "kg": 8.8
+    },
+    {
+     "url": "https://www.homedepot.com/p/DEWALT-15-Amp-19-lbs-SDS-Max-Demolition-Hammer-D25872K/308821429",
+     "kg": 8.62
+    }
+   ],
+   "note": "Fabricant (dewalt.fr) annonce 8 kg (poids nu probable) ; revendeurs 8,6-8,8 kg (poids emballé probable). Écart 10%, sous le seuil ; retenu le plus haut par prudence port."
+  },
+  "D25881": {
+   "kg": 10,
+   "sources": [
+    {
+     "url": "https://cee.dewalt.global/product/d25881k-qs/1600w-10kg-sds-max-chipping-hammer",
+     "kg": 10
+    },
+    {
+     "url": "https://www.dewalt.ch/fr/produit/d25881k-qs/marteau-burineur-sds-max-1-600-watts-10-kg-175-joules",
+     "kg": 10
+    },
+    {
+     "url": "https://www.toolnation.com/dewalt-d25881k-qs-crushing-hammer-10-kg-175j-sds-max-1600w.html",
+     "kg": 10
+    }
+   ],
+   "note": "4 sources concordent exactement à 10,0 kg, dont deux sites officiels DeWALT (cee.dewalt.global, dewalt.ch)."
+  },
+  "D25899": {
+   "kg": 10,
+   "sources": [
+    {
+     "url": "https://www.travisperkins.co.uk/dewalt-power-tools/dewalt-d25899k-gb-240v-10kg-sds-max-demolition-hammer-drill/p/969042",
+     "kg": 10
+    },
+    {
+     "url": "https://www.screwfix.com/p/dewalt-d25899k-gb-9-9kg-sds-max-electric-concrete-breaker-240v/51963",
+     "kg": 9.9
+    },
+    {
+     "url": "https://www.misterworker.com/en-us/dewalt/sds-max-demolition-hammer-10-kg-dw198/2934.html",
+     "kg": 10
+    }
+   ],
+   "note": "Sources serrées entre 9,9 et 10,0 kg ; retenu 10,0 kg (le plus haut de l'intervalle)."
+  },
+  "D25902": {
+   "kg": 10,
+   "sources": [
+    {
+     "url": "https://www.stokker.com/chipping-hammer-d25902k-10-kg-19j-sds-max-dewalt-c-d25902k-dw",
+     "kg": 10
+    },
+    {
+     "url": "https://www.klium.com/en/dewalt-d25902k-qs-demolition-hammer-with-sds-max-10kg-1550-w-avc-in-carrying-case-8055",
+     "kg": 10
+    },
+    {
+     "url": "https://www.toolnation.com/dewalt-d25902k-qs-d25902k-breaker-10-kg-sds-max.html",
+     "kg": 10
+    }
+   ],
+   "note": "4 sources concordent exactement à 10,0 kg pour le marteau-piqueur SDS Max 1550W 19J."
+  },
+  "D25911": {
+   "kg": 11,
+   "sources": [
+    {
+     "url": "https://www.misterworker.com/en/dewalt/sds-max-demolition-hammer-1700-watts-11-kg-270-joules/96285.html",
+     "kg": 11
+    },
+    {
+     "url": "https://www.toolnation.com/dewalt-d25911k-qs-breaker-11-kg-27-j-sds-max-1700w.html",
+     "kg": 11
+    },
+    {
+     "url": "https://heenashaven.com/products/8-7",
+     "kg": 11
+    }
+   ],
+   "note": "3 sources distinctes concordent exactement à 11,0 kg. Une synthèse automatique mentionnait aussi 12,3/12,7 kg sans URL consultable citant précisément cette valeur — écarté, non retenu comme source."
+  },
+  "D25960": {
+   "kg": 18.1,
+   "sources": [
+    {
+     "url": "https://www.klium.com/en/dewalt-d25960k-qs-demolition-hammer-with-28-mm-hexagonal-head-1600-w-16-kg-in-carrying-case-128062",
+     "kg": 16
+    },
+    {
+     "url": "https://www.toolnation.com/dewalt-d25960k-qs-d25960k-breaker-16-kg-28mm-1600w.html",
+     "kg": 16
+    },
+    {
+     "url": "https://www.platt.com/p/0897622/dewalt/d25960k-40lb-demolition-hammer/885911241786/dewd25960k",
+     "kg": 18.14
+    }
+   ],
+   "note": "Revendeurs EU convergent à 16 kg (l'un précise explicitement 'in carrying case', donc déjà emballé) ; distributeurs US (Rexel/Platt/Gexpro) donnent 40 lb = 18,1 kg, probablement poids colis d'expéditi"
+  }
+ },
+ "nonResolues": {
+  "CPROF367": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "CPROF367 n'est pas une référence catalogue DeWALT publiée : c'est un code de kit interne à la boutique, assemblant la carotteuse D21583K, le support D215831 et trois forets diamant DT9762/DT9765/DT977"
+  },
+  "D215804": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Accessoire d'extraction de poussière pour perceuses diamant D21580K/D21582K. Aucune fiche (dewalt.fr/.com/.co.uk, revendeurs FR/UK) ne donne de poids malgré plusieurs recherches ciblées FR/EN."
+  },
+  "D25303": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Accessoire d'extraction de poussière 18V pour DCH273/DCH274. Le seul chiffre '2 kg' trouvé (RS Components) désigne la classe de marteaux compatibles ('18V XR SDS 2kg'), pas le poids de l'accessoire lu"
+  },
+  "D25304": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Accessoire d'extraction de poussière SDS-Plus pour DCH283/DCH333/D25323/D25324/D25333/D25334. Un chiffre '2,5 kg' est apparu une fois mais sans source univoque identifiable, et le contexte associé men"
+  },
+  "D25330": {
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.amazon.com/DEWALT-D25330K-L-Shaped-Compact-Chipping/dp/B000Q98A70",
+     "kg": 2.95
+    }
+   ],
+   "note": "Marteau-piqueur compact SDS-Plus (D25330K). Une seule source exploitable trouvée avec valeur chiffrée (Amazon : 6,5 lbs = 2,95 kg) ; aucune confirmation indépendante obtenue sur 2 autres sites malgré "
+  },
+  "D25961": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Recherche non effectuée : budget de recherche web de la session épuisé (200/200) avant d'atteindre cette référence. Aucune source consultée, donc aucune valeur inventée."
+  },
+  "D25966": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Recherche non effectuée : budget de recherche web de la session épuisé (200/200) avant d'atteindre cette référence. Aucune source consultée, donc aucune valeur inventée."
+  },
+  "D25981": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Recherche non effectuée : budget de recherche web de la session épuisé (200/200) avant d'atteindre cette référence. Aucune source consultée, donc aucune valeur inventée."
+  },
+  "D26203": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Aucune recherche possible : budget WebSearch de la session épuisé (200/200) avant la requête ; WebFetch bloqué par la politique d'egress sur tous les domaines testés (dewalt.co.uk, bing.com, duckduckg"
+  },
+  "D26204": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Aucune recherche possible : budget WebSearch de la session épuisé (200/200) avant la requête ; WebFetch bloqué par la politique d'egress sur tous les domaines testés. Zéro source consultée. À rejouer "
+  },
+  "D26414": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Aucune recherche possible : budget WebSearch de la session épuisé (200/200) avant la requête ; WebFetch bloqué par la politique d'egress sur tous les domaines testés. Zéro source consultée. À rejouer "
+  },
+  "D26441": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Aucune recherche possible : budget WebSearch de la session épuisé (200/200) avant la requête ; WebFetch bloqué par la politique d'egress sur tous les domaines testés. Zéro source consultée. À rejouer "
+  },
+  "D26500": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Aucune recherche possible : budget WebSearch de la session épuisé (200/200) avant la requête ; WebFetch bloqué par la politique d'egress sur tous les domaines testés. Zéro source consultée. À rejouer "
+  },
+  "D271055": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Aucune recherche possible : budget WebSearch de la session déjà épuisé (200/200) avant toute tentative pour cette référence ; WebFetch bloqué par la politique d'egress sur tous les domaines testés. Zé"
+  },
+  "D27107": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Aucune recherche possible : budget WebSearch de la session déjà épuisé (200/200) avant toute tentative pour cette référence ; WebFetch bloqué par la politique d'egress sur tous les domaines testés. Zé"
+  },
+  "D27111": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Recherche tentée (\"DeWALT D27111 weight kg\") : refusée, budget WebSearch de la session épuisé (200/200). WebFetch bloqué par la politique d'egress sur tous les domaines testés. Zéro source consultée. "
+  },
+  "D27112": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Aucune recherche possible : budget WebSearch de la session déjà épuisé (200/200) avant toute tentative pour cette référence ; WebFetch bloqué par la politique d'egress sur tous les domaines testés. Zé"
+  },
+  "D27113": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Aucune recherche possible : budget WebSearch de la session déjà épuisé (200/200) avant toute tentative pour cette référence ; WebFetch bloqué par la politique d'egress sur tous les domaines testés. Zé"
+  },
+  "D27300": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Aucune recherche possible cette session : WebSearch a signalé budget épuisé (200/200) dès la 1ère requête, et WebFetch a été bloqué par le proxy réseau (EGRESS_BLOCKED) pour TOUS les domaines testés, "
+  },
+  "D279017": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Même blocage total d'accès web (WebSearch épuisé, WebFetch EGRESS_BLOCKED sur tous les domaines testés). Aucune source consultée pour ce sac à poussière."
+  },
+  "D28492": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Même blocage total d'accès web (WebSearch épuisé, WebFetch EGRESS_BLOCKED sur tous les domaines testés). Aucune source consultée."
+  },
+  "D28710": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Même blocage total d'accès web (WebSearch épuisé, WebFetch EGRESS_BLOCKED sur tous les domaines testés). Aucune source consultée."
+  },
+  "D28715": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Même blocage total d'accès web (WebSearch épuisé, WebFetch EGRESS_BLOCKED sur tous les domaines testés). Aucune source consultée."
+  },
+  "D28730": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Même blocage total d'accès web (WebSearch épuisé, WebFetch EGRESS_BLOCKED sur tous les domaines testés). Aucune source consultée."
+  },
+  "D28885": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Même blocage total d'accès web (WebSearch épuisé, WebFetch EGRESS_BLOCKED sur tous les domaines testés). Aucune source consultée."
+  },
+  "DC528": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Même blocage total d'accès web (WebSearch épuisé, WebFetch EGRESS_BLOCKED sur tous les domaines testés). Aucune source consultée."
+  },
+  "DCB090": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Même blocage total d'accès web (WebSearch épuisé, WebFetch EGRESS_BLOCKED sur tous les domaines testés). Aucune source consultée pour ce câble USB."
+  },
+  "DCB094": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Même blocage total d'accès web (WebSearch épuisé, WebFetch EGRESS_BLOCKED sur tous les domaines testés). Aucune source consultée."
+  },
+  "DCB104": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Recherche impossible : WebSearch quota épuisé (200/200 dès le premier appel), WebFetch bloqué (EGRESS_BLOCKED, CONNECT 403) sur tous les domaines testés (bing, duckduckgo, screwfix, dewalt.com, dewalt"
+  },
+  "DCB1104": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Recherche impossible : WebSearch quota épuisé (200/200), WebFetch bloqué (EGRESS_BLOCKED, CONNECT 403) sur tous les domaines testés. Aucune source consultée, aucun kg inventé."
+  },
+  "DCB1104-12": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Recherche impossible : WebSearch quota épuisé (200/200), WebFetch bloqué (EGRESS_BLOCKED, CONNECT 403) sur tous les domaines testés. Aucune source consultée, aucun kg inventé."
+  },
+  "DCB1104-6": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Recherche impossible : WebSearch quota épuisé (200/200), WebFetch bloqué (EGRESS_BLOCKED, CONNECT 403) sur tous les domaines testés. Aucune source consultée, aucun kg inventé."
+  },
+  "DCB1106": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Recherche impossible : WebSearch quota épuisé (200/200), WebFetch bloqué (EGRESS_BLOCKED, CONNECT 403) sur tous les domaines testés. Aucune source consultée, aucun kg inventé."
+  },
+  "DCB112": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Recherche impossible : WebSearch quota épuisé (200/200), WebFetch bloqué (EGRESS_BLOCKED, CONNECT 403) sur tous les domaines testés. Aucune source consultée, aucun kg inventé."
+  },
+  "DCB115": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Recherche impossible : WebSearch quota épuisé (200/200), WebFetch bloqué (EGRESS_BLOCKED, CONNECT 403) sur tous les domaines testés. Aucune source consultée, aucun kg inventé."
+  },
+  "DCB116": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Recherche impossible : WebSearch quota épuisé (200/200), WebFetch bloqué (EGRESS_BLOCKED, CONNECT 403) sur tous les domaines testés. Aucune source consultée, aucun kg inventé."
+  },
+  "DCB117": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Recherche impossible : WebSearch quota épuisé (200/200), WebFetch bloqué (EGRESS_BLOCKED, CONNECT 403) sur tous les domaines testés. Aucune source consultée, aucun kg inventé."
+  },
+  "DCB124": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Recherche impossible : WebSearch quota épuisé (200/200), WebFetch bloqué (EGRESS_BLOCKED, CONNECT 403) sur tous les domaines testés (bing, duckduckgo, screwfix, dewalt.com, dewalt.co.uk, amazon.fr). A"
+  },
+  "DCB132": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Aucune recherche possible : budget WebSearch de la session déjà épuisé (200/200) avant toute requête pour ce lot ; WebFetch bloqué par le proxy de sortie réseau sur tous les domaines testés (screwfix."
+  },
+  "DCB1404": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Même blocage réseau que DCB132 (WebSearch épuisé, WebFetch bloqué par le proxy) : aucune recherche n'a pu être lancée."
+  },
+  "DCB182": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Même blocage réseau que DCB132 (WebSearch épuisé, WebFetch bloqué par le proxy) : aucune recherche n'a pu être lancée."
+  },
+  "DCB183": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Même blocage réseau que DCB132 (WebSearch épuisé, WebFetch bloqué par le proxy) : aucune recherche n'a pu être lancée."
+  },
+  "DCB1880": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Même blocage réseau que DCB132 (WebSearch épuisé, WebFetch bloqué par le proxy) : aucune recherche n'a pu être lancée."
+  },
+  "DCB189": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Même blocage réseau que DCB132 (WebSearch épuisé, WebFetch bloqué par le proxy) : aucune recherche n'a pu être lancée."
+  },
+  "DCB203": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Même blocage réseau que DCB132 (WebSearch épuisé, WebFetch bloqué par le proxy) : aucune recherche n'a pu être lancée."
+  },
+  "DCB283": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Même blocage réseau que DCB132 (WebSearch épuisé, WebFetch bloqué par le proxy) : aucune recherche n'a pu être lancée."
+  },
+  "DCB546": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Même blocage réseau que DCB132 (WebSearch épuisé, WebFetch bloqué par le proxy) : aucune recherche n'a pu être lancée."
+  },
+  "DCB547": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Même blocage réseau que DCB132 (WebSearch épuisé, WebFetch bloqué par le proxy) : aucune recherche n'a pu être lancée."
+  },
+  "DCB548": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Aucune recherche possible : budget WebSearch de session épuisé (200/200) avant la première requête, WebFetch bloqué (EGRESS_BLOCKED) sur tous les domaines testés (dewalt.co.uk, dewalt.fr, bing.com, du"
+  },
+  "DCB549": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Idem DCB548 : aucun accès web disponible pour cette session (WebSearch épuisé, WebFetch egress-blocked). À reprendre."
+  },
+  "DCBP034": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Idem DCB548 : aucun accès web disponible pour cette session (WebSearch épuisé, WebFetch egress-blocked). À reprendre."
+  },
+  "DCBP318": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Idem DCB548 : aucun accès web disponible pour cette session (WebSearch épuisé, WebFetch egress-blocked). À reprendre."
+  },
+  "DCBP518": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Idem DCB548 : aucun accès web disponible pour cette session (WebSearch épuisé, WebFetch egress-blocked). À reprendre."
+  },
+  "DCBPS0554": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Idem DCB548 : aucun accès web disponible pour cette session (WebSearch épuisé, WebFetch egress-blocked). À reprendre."
+  },
+  "DCBPSC0550": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Idem DCB548 : aucun accès web disponible pour cette session (WebSearch épuisé, WebFetch egress-blocked). À reprendre."
+  },
+  "DCC018": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Idem DCB548 : aucun accès web disponible pour cette session (WebSearch épuisé, WebFetch egress-blocked). À reprendre."
+  },
+  "DCC2520": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Idem DCB548 : aucun accès web disponible pour cette session (WebSearch épuisé, WebFetch egress-blocked). À reprendre."
+  },
+  "DCCS1100": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Idem DCB548 : aucun accès web disponible pour cette session (WebSearch épuisé, WebFetch egress-blocked). À reprendre."
+  },
+  "DCD1007": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Aucune recherche possible : quota WebSearch epuise (200/200) et WebFetch/curl bloques par la politique reseau (403 CONNECT) sur tous les domaines testes (dewalt.co.uk, bing.com, wikipedia.org, amazon."
+  },
+  "DCD150": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Meme blocage reseau que ci-dessus : ni WebSearch (quota epuise) ni WebFetch (403 policy) n'ont pu etre utilises. Aucune source consultee."
+  },
+  "DCD1623": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Meme blocage reseau que ci-dessus : ni WebSearch (quota epuise) ni WebFetch (403 policy) n'ont pu etre utilises. Aucune source consultee."
+  },
+  "DCD240": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Meme blocage reseau que ci-dessus : ni WebSearch (quota epuise) ni WebFetch (403 policy) n'ont pu etre utilises. Aucune source consultee."
+  },
+  "DCD460": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Meme blocage reseau que ci-dessus : ni WebSearch (quota epuise) ni WebFetch (403 policy) n'ont pu etre utilises. Aucune source consultee."
+  },
+  "DCD470": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Meme blocage reseau que ci-dessus : ni WebSearch (quota epuise) ni WebFetch (403 policy) n'ont pu etre utilises. Aucune source consultee."
+  },
+  "DCD701": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Meme blocage reseau que ci-dessus : ni WebSearch (quota epuise) ni WebFetch (403 policy) n'ont pu etre utilises. Aucune source consultee."
+  },
+  "DCD703": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Meme blocage reseau que ci-dessus : ni WebSearch (quota epuise) ni WebFetch (403 policy) n'ont pu etre utilises. Aucune source consultee."
+  },
+  "DCD706": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Meme blocage reseau que ci-dessus : ni WebSearch (quota epuise) ni WebFetch (403 policy) n'ont pu etre utilises. Aucune source consultee."
+  },
+  "DCD708": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Meme blocage reseau que ci-dessus : ni WebSearch (quota epuise) ni WebFetch (403 policy) n'ont pu etre utilises. Aucune source consultee."
+  },
+  "DCD709": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Aucune recherche possible ce lot : WebSearch budget épuisé (200/200, consommé par lots précédents), WebFetch EGRESS_BLOCKED sur tous domaines testés (dewalt.fr, screwfix, toolstation...). Panne d'outi"
+  },
+  "DCD710": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Même panne d'outillage réseau que DCD709 : WebSearch épuisé, WebFetch bloqué (EGRESS_BLOCKED) sur tous les domaines fabricant/revendeurs testés. Aucune source consultée."
+  },
+  "DCD716": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Même panne d'outillage réseau que DCD709 : WebSearch épuisé, WebFetch bloqué (EGRESS_BLOCKED) sur tous les domaines fabricant/revendeurs testés. Aucune source consultée."
+  },
+  "DCD732": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Même panne d'outillage réseau que DCD709 : WebSearch épuisé, WebFetch bloqué (EGRESS_BLOCKED) sur tous les domaines fabricant/revendeurs testés. Aucune source consultée."
+  },
+  "DCD740": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Même panne d'outillage réseau que DCD709 : WebSearch épuisé, WebFetch bloqué (EGRESS_BLOCKED) sur tous les domaines fabricant/revendeurs testés. Aucune source consultée."
+  },
+  "DCD771": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Même panne d'outillage réseau que DCD709 : WebSearch épuisé, WebFetch bloqué (EGRESS_BLOCKED) sur tous les domaines fabricant/revendeurs testés. Aucune source consultée."
+  },
+  "DCD776": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Même panne d'outillage réseau que DCD709 : WebSearch épuisé, WebFetch bloqué (EGRESS_BLOCKED) sur tous les domaines fabricant/revendeurs testés. Aucune source consultée."
+  },
+  "DCD777": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Même panne d'outillage réseau que DCD709 : WebSearch épuisé, WebFetch bloqué (EGRESS_BLOCKED) sur tous les domaines fabricant/revendeurs testés. Aucune source consultée."
+  },
+  "DCD778": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Même panne d'outillage réseau que DCD709 : WebSearch épuisé, WebFetch bloqué (EGRESS_BLOCKED) sur tous les domaines fabricant/revendeurs testés. Aucune source consultée."
+  },
+  "DCD790": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Même panne d'outillage réseau que DCD709 : WebSearch épuisé, WebFetch bloqué (EGRESS_BLOCKED) sur tous les domaines fabricant/revendeurs testés. Aucune source consultée."
+  },
+  "DCD791": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Aucune recherche possible : WebSearch budget épuisé (200/200), WebFetch bloqué EGRESS_BLOCKED sur tous les domaines testés (dewalt.co.uk, bing, duckduckgo, wikipedia, google) cette session."
+  },
+  "DCD792": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Idem DCD791 : aucun outil de recherche web disponible cette session (WebSearch épuisé, WebFetch bloqué par le proxy réseau)."
+  },
+  "DCD794": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Idem DCD791 : aucun outil de recherche web disponible cette session (WebSearch épuisé, WebFetch bloqué par le proxy réseau)."
+  },
+  "DCD795": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Idem DCD791 : aucun outil de recherche web disponible cette session (WebSearch épuisé, WebFetch bloqué par le proxy réseau)."
+  },
+  "DCD796": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Idem DCD791 : aucun outil de recherche web disponible cette session (WebSearch épuisé, WebFetch bloqué par le proxy réseau)."
+  },
+  "DCD799": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Idem DCD791 : aucun outil de recherche web disponible cette session (WebSearch épuisé, WebFetch bloqué par le proxy réseau)."
+  },
+  "DCD800": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Idem DCD791 : aucun outil de recherche web disponible cette session (WebSearch épuisé, WebFetch bloqué par le proxy réseau)."
+  },
+  "DCD803": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Idem DCD791 : aucun outil de recherche web disponible cette session (WebSearch épuisé, WebFetch bloqué par le proxy réseau)."
+  },
+  "DCD805": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Idem DCD791 : aucun outil de recherche web disponible cette session (WebSearch épuisé, WebFetch bloqué par le proxy réseau)."
+  },
+  "DCD81": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Idem DCD791 : aucun outil de recherche web disponible cette session (WebSearch épuisé, WebFetch bloqué par le proxy réseau). DCD81MP2T (McLaren) non recherché non plus."
+  },
+  "DCD85": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Recherche impossible cette session : quota WebSearch épuisé (200/200) + WebFetch bloqué 403 par le proxy sur tous les domaines testés (fabricant, revendeurs, moteurs de recherche). Aucune source consu"
+  },
+  "DCD86": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Recherche impossible cette session : quota WebSearch épuisé (200/200) + WebFetch bloqué 403 par le proxy sur tous les domaines testés. Aucune source consultée — pas un vrai \"rien trouvé\", à refaire."
+  },
+  "DCD990": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Recherche impossible cette session : quota WebSearch épuisé (200/200) + WebFetch bloqué 403 par le proxy sur tous les domaines testés. Aucune source consultée — pas un vrai \"rien trouvé\", à refaire."
+  },
+  "DCD991": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Recherche impossible cette session : quota WebSearch épuisé (200/200) + WebFetch bloqué 403 par le proxy sur tous les domaines testés (dewalt.co.uk, dewalt.fr, screwfix, google, bing, duckduckgo, amaz"
+  },
+  "DCD996": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Recherche impossible cette session : quota WebSearch épuisé (200/200) + WebFetch bloqué 403 par le proxy sur tous les domaines testés. Aucune source consultée — pas un vrai \"rien trouvé\", à refaire."
+  },
+  "DCD999": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Recherche impossible cette session : quota WebSearch épuisé (200/200) + WebFetch bloqué 403 par le proxy sur tous les domaines testés. Aucune source consultée — pas un vrai \"rien trouvé\", à refaire."
+  },
+  "DCDW101": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Recherche impossible cette session : quota WebSearch épuisé (200/200) + WebFetch bloqué 403 par le proxy sur tous les domaines testés. Aucune source consultée — pas un vrai \"rien trouvé\", à refaire."
+  },
+  "DCDW102": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Recherche impossible cette session : quota WebSearch épuisé (200/200) + WebFetch bloqué 403 par le proxy sur tous les domaines testés. Aucune source consultée — pas un vrai \"rien trouvé\", à refaire."
+  },
+  "DCDW103": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Recherche impossible cette session : quota WebSearch épuisé (200/200) + WebFetch bloqué 403 par le proxy sur tous les domaines testés. Aucune source consultée — pas un vrai \"rien trouvé\", à refaire."
+  },
+  "DCDW104": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Recherche impossible cette session : quota WebSearch épuisé (200/200) + WebFetch bloqué 403 par le proxy sur tous les domaines testés. Aucune source consultée — pas un vrai \"rien trouvé\", à refaire."
+  },
+  "DCDW105": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Aucune recherche possible : budget WebSearch de la session épuisé (200/200, partagé entre sous-agents) et WebFetch bloqué par le proxy réseau sortant pour tous les domaines testés (bing.com, google.co"
+  },
+  "DCDW106": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Aucune recherche possible : budget WebSearch de la session épuisé (200/200, partagé entre sous-agents) et WebFetch bloqué par le proxy réseau sortant pour tous les domaines testés. Zéro source consult"
+  },
+  "DCDW107": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Aucune recherche possible : budget WebSearch de la session épuisé (200/200, partagé entre sous-agents) et WebFetch bloqué par le proxy réseau sortant pour tous les domaines testés. Zéro source consult"
+  },
+  "DCDW108": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Aucune recherche possible : budget WebSearch de la session épuisé (200/200, partagé entre sous-agents) et WebFetch bloqué par le proxy réseau sortant pour tous les domaines testés. Zéro source consult"
+  },
+  "DCE050": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Aucune recherche possible : budget WebSearch de la session épuisé (200/200, partagé entre sous-agents) et WebFetch bloqué par le proxy réseau sortant pour tous les domaines testés. Zéro source consult"
+  },
+  "DCE079": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Aucune recherche possible : budget WebSearch de la session épuisé (200/200, partagé entre sous-agents) et WebFetch bloqué par le proxy réseau sortant pour tous les domaines testés. Zéro source consult"
+  },
+  "DCE080": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Aucune recherche possible : budget WebSearch de la session épuisé (200/200, partagé entre sous-agents) et WebFetch bloqué par le proxy réseau sortant pour tous les domaines testés. Zéro source consult"
+  },
+  "DCE0811": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Aucune recherche possible : budget WebSearch de la session épuisé (200/200, partagé entre sous-agents) et WebFetch bloqué par le proxy réseau sortant pour tous les domaines testés. Zéro source consult"
+  },
+  "DCE0822": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Aucune recherche possible : budget WebSearch de la session épuisé (200/200, partagé entre sous-agents) et WebFetch bloqué par le proxy réseau sortant pour tous les domaines testés. Zéro source consult"
+  },
+  "DCE0825": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Aucune recherche possible : budget WebSearch de la session épuisé (200/200, partagé entre sous-agents) et WebFetch bloqué par le proxy réseau sortant pour tous les domaines testés. Zéro source consult"
+  },
+  "DCE085": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Recherche impossible : WebSearch a signalé budget épuisé (200/200, partagé entre sous-agents de ce lot) et WebFetch a renvoyé EGRESS_BLOCKED sur tous les domaines testés (dewalt.com, screwfix.com, goo"
+  },
+  "DCE088": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Même blocage réseau que DCE085 — aucune recherche possible (WebSearch budget épuisé, WebFetch EGRESS_BLOCKED sur tous les domaines essayés)."
+  },
+  "DCE089": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Même blocage réseau — recherche non effectuée, aucune source consultée."
+  },
+  "DCE100": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Même blocage réseau — recherche non effectuée, aucune source consultée."
+  },
+  "DCE154": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Même blocage réseau — recherche non effectuée, aucune source consultée."
+  },
+  "DCE400": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Même blocage réseau — recherche non effectuée, aucune source consultée."
+  },
+  "DCE450078": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Même blocage réseau — recherche non effectuée, aucune source consultée."
+  },
+  "DCE512": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Même blocage réseau — recherche non effectuée, aucune source consultée."
+  },
+  "DCE530": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Même blocage réseau — recherche non effectuée, aucune source consultée."
+  },
+  "DCE531": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Même blocage réseau — recherche non effectuée, aucune source consultée."
+  }
+ }
 }
