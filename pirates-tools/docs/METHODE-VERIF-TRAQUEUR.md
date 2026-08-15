@@ -59,3 +59,34 @@ retenu vient des revendeurs classiques → les prix du site paraissent hauts.
   titres traduits), le coût descend, les prix aussi.
 - NON → le parseur est déjà au millimètre : il retient le moins cher des
   vendeurs achetables, et les prix actuels reflètent CE coût-là.
+
+## Tour 5 (zip 68–134) — décision user gravée + deux causes mesurées
+
+**DÉCISION USER (15/08/2026, mot pour mot)** : « on achète sur tous les sites
+présents sur idealo, ce sont tous des revendeurs européens, sauf AliExpress ;
+les prix AliExpress sont écartés par les délais, MAIS si le délai est ≤ 8
+jours on les garde s'ils sont les moins chers ; Amazon = revendeur européen. »
+⇒ Les tuiles de place de marché DOIVENT être lues. La barrière de délai
+existante (barriere.juger + delaiEnJours) implémente déjà la règle des 8 jours.
+
+**Cause n°1, MESURÉE** : la tuile « DEWALT DCF850 pilote d'impact… sans
+brosse… » est rejetée avec `rej: "brosse métallique"` — « sans brosse »
+(brushless mal traduit) déclenche le filtre d'accessoires sur le mot
+« brosse ». Correctif : le filtre accessoire ne mord pas quand le mot est
+précédé d'une négation (sans/without/ohne) ou fait partie de « sans
+brosse(s) » = brushless.
+
+**Cause n°2, PARTIELLEMENT mesurée** : les tuiles « DEWALT DCH273 perceuse à
+percussion rotative… » (84,99–95,99 €) et « DEWALT DCD805 tournevis
+électrique… » (88,99–111,99 €) sortent en sansRef avec `rej: null`, alors que
+`refUniqueDuTitre` ET la sélection de candidats rendent la bonne réf sur ces
+titres (testé). L'écartement se produit donc AVANT, dans l'ouverture des
+tuiles de la grille `parseIdealo` — le gabarit exact de ces tuiles (place de
+marché) diffère de « MARQUE RÉF » en tête. ⛔ Règle du projet : un balisage se
+lit sur une CAPTURE, jamais d'imagination. IL FAUT une capture d'écran d'une
+de ces tuiles pour corriger sans deviner.
+
+**Prochain tour** : ① corriger la négation « sans brosse » (+ témoin réel +
+sabotage) ; ② à réception de la capture, corriger l'ouverture de tuile ;
+③ rejouer le croisement site→zip — dcd805/dch273/dcf850/dcg405 doivent alors
+recevoir leurs coûts de place de marché et leurs prix descendre.
