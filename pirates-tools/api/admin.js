@@ -4589,6 +4589,22 @@ async function handlePriceWatch(req, res, admin, db) {
               + 'écriture refusée, fiche à renommer' });
           continue;
         }
+        /* ⛔⛔⛔ ARGENT — LE TITRE A LE DERNIER MOT SUR L'APPARIEMENT (15/08/2026).
+           Lu un par un sur les 400 tuiles appariées de SON balayage : des kits
+           « (1 x 5,0 Ah) » sur des fiches nues, des bundles « & » de machines
+           sur la fiche de la BATTERIE incluse, des « Lot 4 » sur la fiche d'une
+           unité — hausses annoncées jusqu'à +282 %. Toutes les voies
+           d'appariement passent par ICI : c'est le seul endroit où la garde
+           couvre l'exact, le recollé, le par-configuration et le souple à la
+           fois. Refusé = listé avec son motif, jamais jeté en silence. */
+        const motifTitre = priceParse.titreContreditFiche(
+          (item && (item.titre || item.name)) || '', p.sku, brand);
+        if (motifTitre) {
+          flagged.push({ sku: item.sku, id: p.id, srcTTC: item.price,
+            titreCarte: String((item && (item.titre || item.name)) || '').slice(0, 160),
+            reason: motifTitre });
+          continue;
+        }
         if (item.enStock === false) {
           enRupture.push({ sku: item.sku, id: p.id, name: p.title || p.name, srcTTC: item.price });
           if (!dryRun) {

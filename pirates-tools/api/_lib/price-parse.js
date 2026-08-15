@@ -837,6 +837,110 @@ function titreAjouteDuContenu(texte, portee) {
    tranche — jamais une autre, jamais la forme seule. Une marque sans grammaire
    déclarée rend `false` : on ne refuse alors rien, faute de savoir, et c'est
    dit plutôt que deviné. */
+/* ⛔⛔⛔ ARGENT — LE TITRE DE L'OFFRE PEUT CONTREDIRE LA FICHE, ET PERSONNE NE
+   LE VÉRIFIAIT. Lu UN PAR UN sur les 400 tuiles appariées du balayage du
+   15/08/2026 (66 pages idealo, listes relues à la main sur ordre de l'user) :
+     · « DCF850N (1 x 5,0 Ah) » à 218,56 € appariée à la fiche NUE — la vraie
+       tuile nue vaut 118,86 € ; la hausse différée annonçait 314,51 € ;
+     · « DCG426 P2 (2 x 5,0 Ah + chargeur) » et SEPT autres variantes kit,
+       toutes sur la fiche nue dcg426n-xj ;
+     · « Scie Circulaire … & Batterie XR 18V 4 Ah — DCB182-XJ » : CINQ machines
+       différentes en bundle, toutes appariées à la fiche de la BATTERIE
+       (216,70 € → 364,27 €) ;
+     · « Lot 4 batteries DCB184 », « 10 x DCB184 », « Lot de 5 » → la fiche
+       d'UNE batterie (130,68 € → 251,36 €) ;
+     · « Affleureuse & Coffret 22 Fraises DT90017-QZ » → la fiche du coffret
+       de fraises seul (158,70 € → 605,60 €, +282 %) ;
+     · « (DCH273S2T-QW) », « (DCS512P2-GB) », « (DCE555E2-SK) » : la réf du
+       KIT est écrite entre parenthèses DANS le titre, la racine du début de
+       titre partait quand même sur la fiche nue.
+   Le sens de l'erreur est toujours le même : un prix de PLUS (kit, lot,
+   bundle) écrit sur une fiche de MOINS (nue, unité) — donc un prix de vente
+   gonflé à tort, ou, au balayage suivant dans l'autre sens, une vente à
+   perte. La règle existait en toutes lettres (« un prix de PACK ne s'écrit
+   JAMAIS sur la réf d'un composant ») mais seule la voie sans-réf la vivait :
+   la voie PAR RÉFÉRENCE EXACTE — la plus fréquentée — ne relisait jamais le
+   titre. Cette fonction est appelée au POINT UNIQUE d'écriture : toutes les
+   voies d'appariement passent par elle.
+   ⚠️ J4 : le prix servi doit être exact — un coût de kit sur une fiche nue
+   fabrique un prix faux dans les deux sens. Rien ici n'invente de prix : on
+   REFUSE d'en écrire un dont le titre dit qu'il n'est pas celui de la fiche.
+   Rend un MOTIF (texte) si le titre contredit la fiche, null sinon. */
+function titreContreditFiche(titre, skuFiche, marque) {
+  var t = String(titre || '');
+  if (!t) return null;
+
+  /* ① BUNDLE « & » — deux produits dans une seule offre. Mesuré : cinq
+     bundles « machine & batterie DCB182 » et « défonceuse & coffret fraises ».
+     L'esperluette d'un bundle est entourée d'espaces ; « Black&Decker » ou
+     « S&P » n'en portent pas. */
+  if (/\s&\s/.test(t)) {
+    return 'bundle « & » : l\'offre réunit plusieurs produits, son prix ne '
+      + 'peut se poser sur aucune fiche seule';
+  }
+
+  /* ② LOT DE N UNITÉS — le prix du lot n'est jamais celui de l'unité.
+     « Lot 4 batteries », « 10 x DEWALT DCB184 », « Lot de 5 », « 2 pcs. »,
+     « Expositor x 12 ». ⚠️ Le conditionnement NORMAL d'un consommable
+     (« 2200 pièces » de clous) n'est pas un lot : on ne compte que les
+     multiplicateurs de l'ARTICLE (bornés à 50), jamais son contenu. */
+  var skuU = String(skuFiche || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  var mLot = t.match(/\b(?:lots?\s+(?:de\s+)?(\d{1,2})\b|(\d{1,2})\s*pcs\.?\b|x\s*(\d{1,2})\s*$)/i);
+  if (mLot) {
+    var nLot = parseInt(mLot[1] || mLot[2] || mLot[3], 10);
+    if (nLot > 1 && nLot <= 50) {
+      return 'lot de ' + nLot + ' annoncé dans le titre : le prix du lot ne '
+        + 's\'écrit pas sur la fiche d\'une unité';
+    }
+  }
+  if (skuU && new RegExp('\\b(\\d{1,2})\\s*[X×]\\s*(DEWALT\\s+)?' + skuU.slice(0, 6))
+      .test(t.toUpperCase())) {
+    return 'multiplicateur devant la référence : offre multi-unités';
+  }
+
+  /* ③ + ④ FICHE NUE : la réf de kit entre parenthèses, ou un contenu
+     batterie/chargeur annoncé, contredisent la nudité de la fiche. */
+  if (referenceEstNue(skuFiche, marque)) {
+    var mp = t.match(/\(([A-Z0-9][A-Z0-9-]{4,})\)\s*$/i);
+    /* ⛔ M-28 — chaque marque a sa table : la grammaire de suffixes DeWALT ne
+       lit JAMAIS une référence d'une autre marque (un « T » final y dirait
+       coffret là où l'autre marque dit batterie 5 Ah). */
+    var marqueEstDewalt = /^dewalt$/i.test(String(marque || '').replace(/[\s-]/g, ''));
+    if (mp && marqueEstDewalt) {
+      var lp = nomen.lireSuffixeDewalt(String(mp[1]).toUpperCase().replace(/[^A-Z0-9]/g, ''));
+      if (lp && lp.nbBatteries > 0) {
+        return 'la référence entre parenthèses (' + mp[1] + ') est un kit à '
+          + lp.nbBatteries + ' batterie(s), la fiche est nue';
+      }
+    }
+    /* Inclusion EXPLICITE : « (1 x 5,0 Ah) », « + 1x batterie 4,0 Ah »,
+       « avec 2 Batteries », « + chargeur », « chargeur inclus ».
+       ⚠️ « + TSTAK » n'est PAS une batterie (le NT est un coffret). */
+    var inclusion =
+      /\(\s*\d\s*[x×]\s*\d+[.,]?\d*\s*Ah\b/i.test(t)
+      || /\+\s*\d*\s*[x×]?\s*(batteries?|battery|akku|powerstack)\b/i.test(t)
+      || /\+\s*\d\s*[x×]\s*\d+[.,]?\d*\s*Ah/i.test(t)
+      || /avec\s+\d+\s+batteries?\b/i.test(t)
+      || /(chargeur|charger|ladeger[äa]t)\s+(inclus|included)/i.test(t)
+      || /\+\s*(chargeur|charger)\b/i.test(t)
+      || /\b\d\s*[x×]\s*\d+[.,]\d\s*Ah\b/i.test(t);
+    var negationBatterie =
+      /(sans|without|ohne|zonder|no)\s+(batteries?|battery|akku|accu)/i.test(t)
+      || /\b(solo|body\s*only|tool\s*only|bare|machine\s+nue|outil\s+nu|machine\s+seule)\b/i.test(t);
+    if (inclusion) {
+      return 'le titre annonce une batterie ou un chargeur inclus, la fiche est '
+        + 'nue — prix de kit refusé sur une machine nue';
+    }
+    /* Mention d'Ah SANS négation de batterie : « Aspirateur 18V 5Ah » — la
+       capacité décrit la batterie LIVRÉE. Une fiche nue n'a pas d'Ah. */
+    if (!negationBatterie && /\b\d+[.,]?\d*\s*Ah\b/i.test(t)) {
+      return 'le titre porte une capacité de batterie (Ah) sans dire « sans '
+        + 'batterie » : offre avec batterie, la fiche est nue';
+    }
+  }
+  return null;
+}
+
 function referenceEstNue(sku, marque) {
   /* ⛔ LA GARDE PORTE LE MOT « marque », ET CE N'EST PAS COSMÉTIQUE.
      Premier jet : la variable s'appelait `M`. `check-separation-marques` est
@@ -3747,7 +3851,7 @@ function detecterBlocage(rawText, httpStatus) {
   return null;
 }
 
-module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickoutil, parseIdealo: parseIdealo, parseAuto: parseAuto, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, raisonAucuneSource: raisonAucuneSource, enMillis: enMillis, SOURCE_FRESH_MS: SOURCE_FRESH_MS, SOURCES_ACTIVES: SOURCES_ACTIVES, sourceActive: sourceActive, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage, estMaPropreReponse: estMaPropreReponse, detecterBlocage: detecterBlocage, titresAttendus: titresAttendus, compterTuiles: compterTuiles, empreintePage: empreintePage, racineRef: racineRef, racineModele: racineModele,
+module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickoutil, parseIdealo: parseIdealo, parseAuto: parseAuto, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, raisonAucuneSource: raisonAucuneSource, enMillis: enMillis, SOURCE_FRESH_MS: SOURCE_FRESH_MS, SOURCES_ACTIVES: SOURCES_ACTIVES, sourceActive: sourceActive, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage, estMaPropreReponse: estMaPropreReponse, detecterBlocage: detecterBlocage, titresAttendus: titresAttendus, compterTuiles: compterTuiles, empreintePage: empreintePage, racineRef: racineRef, racineModele: racineModele, titreContreditFiche: titreContreditFiche, referenceEstNue: referenceEstNue,
   varianteProduit: varianteProduit, roleCoffret: roleCoffret,
   signatureBatteries: signatureBatteries, estPourAutreMachine: estPourAutreMachine,
   sansAccentsTitre: sansAccentsTitre, refUniqueDuTitre: refUniqueDuTitre,
