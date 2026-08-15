@@ -4508,8 +4508,41 @@ async function handlePriceWatch(req, res, admin, db) {
        ⚠️ Portes lues — J4 : rien n'est fabriqué ici, on rejoue une annonce déjà
        lue par le même code ; J3 : aucune donnée personnelle ; J5 : aucune
        fiscalité. */
+    /* ⛔⛔ L'ÉTAT DE RAFALE SE LIT D'ABORD DANS LE DOCUMENT DURABLE (15/08/2026,
+       analyse gravée : docs/ANALYSE-RAFALE-INSTANCE-FROIDE.md). Le compteur de
+       pages et le minimum de rafale vivaient en mémoire d'instance : une
+       instance froide repartait de zéro, la fin de rafale n'arrivait JAMAIS
+       (mesuré sur son zip : 415 hausses différées, 14 appliquées, couverture
+       marquée `instance-froide`). On lit le document UNE fois par page ; un
+       `_pages` plus vieux que PW_HAUSSE_TTL_MS appartient à une rafale morte
+       et compte pour zéro — sans ça, un compteur orphelin ferait déclarer la
+       fin d'une rafale neuve à sa première page. */
+    var pagesDurables = 0;
+    var docDurable = null;
+    if (scanMode && !dryRun) {
+      try {
+        const snapH = await pwHaussesDocRef(db, brand).get();
+        docDurable = snapH.exists ? (snapH.data() || {}) : {};
+        const pj = docDurable._pages;
+        if (pj && (nowMs - (pj.at || 0)) <= PW_HAUSSE_TTL_MS) pagesDurables = Number(pj.n) || 0;
+        /* Le minimum de rafale durable SÈME la mémoire : min des deux mondes.
+           Sans ça, l'instance froide oublie les tuiles moins chères déjà vues
+           et le sur-prix du 11/08 revient par le recyclage. */
+        const cm = docDurable._coutMin;
+        if (cm && pwCouv && pwCouv.brand === brand) {
+          const m = pwCouv.coutMin || (pwCouv.coutMin = Object.create(null));
+          Object.keys(cm).forEach((k) => {
+            const v = Number(cm[k]);
+            if (!isFinite(v) || v <= 0) return;
+            const a = Number(m[k]);
+            m[k] = (isFinite(a) && a > 0) ? Math.min(a, v) : v;
+          });
+        }
+      } catch (eL) { console.error('[price-watch] état durable illisible:', eL.message); }
+    }
     var rafaleFinieCettePage = !scanMode || !(pagesDuPlanCourant > 0)
-      || ((pwCouv && pwCouv.brand === brand ? pwCouv.pages : 0) + 1) >= pagesDuPlanCourant;
+      || (Math.max(pwCouv && pwCouv.brand === brand ? pwCouv.pages : 0, pagesDurables) + 1)
+        >= pagesDuPlanCourant;
     var fileRetenue = pwFileHausses(brand);
     var aTraiter = parsed;
     if (rafaleFinieCettePage && fileRetenue) {
@@ -4529,8 +4562,9 @@ async function handlePriceWatch(req, res, admin, db) {
        appartient à une rafale morte dont personne n'a vu la fin. */
     if (scanMode && !dryRun) {
       try {
-        const snapH = await pwHaussesDocRef(db, brand).get();
-        const durables = snapH.exists ? (snapH.data() || {}) : {};
+        /* Le document a déjà été lu plus haut pour `_pages`/`_coutMin` — on
+           réutilise la même lecture : une page = une lecture, jamais deux. */
+        const durables = docDurable || {};
         const cles = Object.keys(durables).filter((k) => durables[k] && durables[k].sku);
         const unePerimee = cles.some((k) => (nowMs - (durables[k].at || 0)) > PW_HAUSSE_TTL_MS);
         if (cles.length && (rafaleFinieCettePage || unePerimee)) {
@@ -4951,6 +4985,24 @@ async function handlePriceWatch(req, res, admin, db) {
        avant le snapshot (qui reflète ces mêmes écritures) et avant la réponse. */
     await lotFermer();
     if (snapPage.length) await snapshotLib.majSnapshotBatch(db, admin, snapPage);
+
+    /* ⛔⛔ L'ÉTAT DE RAFALE S'ÉCRIT EN FIN DE PAGE — compteur ET minimum,
+       durables (analyse gravée du 15/08/2026). Une écriture par page. En fin
+       de rafale on N'ÉCRIT PAS : le document vient d'être supprimé au rejeu,
+       la rafale suivante repart propre — réécrire ici ressusciterait un
+       compteur mort et ferait finir la rafale neuve à sa première page. */
+    if (scanMode && !dryRun && !rafaleFinieCettePage) {
+      try {
+        const etatR = { _pages: {
+          n: Math.max(pwCouv && pwCouv.brand === brand ? pwCouv.pages : 0, pagesDurables + 1),
+          at: nowMs } };
+        if (pwCouv && pwCouv.brand === brand && pwCouv.coutMin
+            && Object.keys(pwCouv.coutMin).length) {
+          etatR._coutMin = pwCouv.coutMin;
+        }
+        await pwHaussesDocRef(db, brand).set(etatR, { merge: true });
+      } catch (eE) { console.error('[price-watch] état durable inécrivable:', eE.message); }
+    }
 
     if (!dryRun && applied.length) catalog.invalidateOverrides();
 
