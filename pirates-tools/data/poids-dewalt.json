@@ -4105,6 +4105,220 @@
    "motif": "statut introuvable",
    "sources": [],
    "note": "3 recherches ciblees ne renvoient que des pages DCF620 (reference jumelle, meme manuel PDF DCF620/DCF621) ; aucune fiche produit ni revendeur ne donne un poids specifique a DCF621 seul. Pas de deducti"
+  },
+  "DCK246": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Aucune fiche DCK246 correspondant à un kit générique '2 outils 18V + 2 batteries 5Ah XR' trouvée avec poids. Seule référence proche trouvée est DCK246P2-QW (kit agrafeuses DCN930+DCN660, ebay/toolnati"
+  },
+  "DCK266": {
+   "motif": "statut non-resolue",
+   "sources": [],
+   "note": "DCK266NT = TSTAK sans batteries (bare). Extraits trouvés (eBay UK, todotaladros, manomano) donnent des poids d'outil seul (DCD796 ou DCF887) ou des plages génériques par capacité de batterie (~1,3-1,8"
+  },
+  "DCK268": {
+   "motif": "statut non-resolue",
+   "sources": [],
+   "note": "DCK268P2T-QW trouvé chez klium.com et toolnation.com mais la valeur de poids n'apparaît pas dans l'extrait (champ 'WEIGHT' vide dans le snippet). Seules données obtenues : poids des outils nus (DCD791"
+  },
+  "DCK276": {
+   "motif": "statut non-resolue",
+   "sources": [],
+   "note": "Valeur '~2 kg (batterie 1,5/2Ah) / ~2,2 kg (batterie 3/4/5Ah)' répétée à l'identique dans deux recherches distinctes (powertoolworld.co.uk, screwfix.com listés en résultats) mais sans attribution clai"
+  },
+  "DCK278": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "DCK278P2T-QW (DCH273 perfo + DCG405 meuleuse, coffret) trouvé chez amazon.de et klium (fiche DCH273P2T-QW voisine) mais aucune valeur de poids clairement rattachée à une URL ; un chiffre de '2,2 kg' e"
+  },
+  "DCK285": {
+   "motif": "statut non-resolue",
+   "sources": [],
+   "note": "Une valeur '9,2 kg' est apparue mais sans URL de rattachement claire, jugée non fiable (invraisemblable par rapport aux autres kits 2 outils qui pèsent 2-4 kg). Seules données rattachables sont des po"
+  },
+  "DCK304": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Kit DCK304E1H1 (perceuse DCD999 + scie circulaire DCS573 + lampe DCL040) identifié chez Home Depot mais sans poids total publié dans les extraits. Une addition des poids d'outils nus trouvés séparémen"
+  },
+  "DCK305": {
+   "motif": "statut non-resolue",
+   "sources": [],
+   "note": "DCK305P2T-GB (DCH273 perfo SDS + DCF887 visseuse à chocs + DCG405 meuleuse, coffret) identifié chez buyaparcel/powertoolworld/manomano mais poids total du kit non trouvé. Poids d'outils isolés seuleme"
+  },
+  "DCK308": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Aucune fiche produit DCK308 (édition limitée 3 outils 18V) trouvée dans les résultats de recherche, seulement des modèles homonymes sans rapport (DC308K scie sauteuse 36V). Recherche menée normalement"
+  },
+  "DCK3222": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Aucune fiche produit DCK3222 trouvée dans les résultats malgré plusieurs formulations de requête ; uniquement des pages catégorie TSTAK génériques sans rapport avec cette référence précise."
+  },
+  "DCK327": {
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.clef-en-ligne.com/137291-kit-3-outils-xr-18v-2x-50ah-li-ion-brushless-dck327p2t-dewalt-5035048752579.html",
+     "kg": 0.5
+    },
+    {
+     "url": "https://www.afdb.fr/dewalt-pack-3-outils-18v-dewalt-dck327p2t-dch263-dcg405-dcd791-2-batteries-5-ah-chargeur-coffret-tstak_SKUM135962.html",
+     "kg": 0.5
+    }
+   ],
+   "note": "Seule valeur trouvée (0,5 kg) est extraite par le résumé de recherche et physiquement incohérente pour un kit 3 outils + 2 batteries 5Ah + coffret TSTAK (bien trop léger) — aucune page ouverte, valeur"
+  },
+  "DCK329": {
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.gotools.de/fr/kit-d-outils-sans-fil-dck329p2t-dewalt-18-volts-dcd796-dcg405-dcs335-2x-5-0-ah-et-chargeur-en-tstak_176463_67375",
+     "kg": 1.6
+    },
+    {
+     "url": "https://www.manomano.de/p/dewalt-akku-schlagbohrschrauber-set-18v-5ah-dck329p2t-qw-36608047",
+     "kg": 1.75
+    },
+    {
+     "url": "https://todotaladros.com/fr/kits-d-outils-electroportatif/9619-dewalt-kit-dck329p2t-dcd796-dcg405-dcs335-2-x-50-ah-dcb115-tstak-ii-tstak-vi-5035048728642.html",
+     "kg": 1.3
+    }
+   ],
+   "note": "Pas de poids TOTAL du kit trouvé, seulement des poids d'outils isolés (drill ~1,6 kg, meuleuse ~1,3 kg, scie sauteuse ~1,75-2 kg) qui ne couvrent ni batteries ni coffret ni chargeur. Une valeur 0,5 kg"
+  },
+  "DCK330": {
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://bilder.dabag.ch/documents/kataloge/dewalt/dck330p2t-qw.pdf",
+     "kg": 10.66
+    },
+    {
+     "url": "https://www.manomano.fr/p/dewalt-dck330p2t-pack-3-outils-dcd800-dcg405-dch273-2-x-5ah-90094192",
+     "kg": 2.5
+    },
+    {
+     "url": "https://www.ab-outils.fr/outillage-a-batterie/2009-dewalt-dck330p2t-pack-3-outils-dcd800-dcg405-dch273-2-x-5ah-5054905329587.html",
+     "kg": 2.5
+    }
+   ],
+   "note": "Désaccord majeur entre deux recherches : une valeur de 10,66 kg (kit complet, source imprécise) contre 2,5 kg (somme d'outils isolés DCD800+DCG405). Écart >60 %, aucune des deux valeurs confirmée sur "
+  },
+  "DCK355": {
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.gotools.de/marken/dewalt/dewalt-kombopack-dck355p2t-3-geraete-2-akkus-18-volt-5-ah-ladegeraet-und-tstak_173224_64207",
+     "kg": 1.75
+    },
+    {
+     "url": "https://www.ahlsell.se/en/products/tools--machines/power-tools-and-machines/power-tools-battery-operated/machine-package/67787385---kombikit-dewalt-dck355p2t-18v-3-delar-2x5.0ah-tstak",
+     "kg": 1.6
+    },
+    {
+     "url": "https://zivtool.ro/seturi-de-scule-cu-acumulator/dewalt-dck355p2t-pachet-de-scule-in-tstak-p101607780",
+     "kg": 1.2
+    }
+   ],
+   "note": "Les valeurs trouvées (1,75 / 1,6 / 1,2 kg) correspondent au poids EPTA d'un seul outil du kit, pas au colis expédié complet (3 outils + 2 batteries + coffret TSTAK). Aucun poids total de kit identifié"
+  },
+  "DCK368": {
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.powertoolworld.co.uk/dewalt-dck368p3t-gb-brushless-18v-xr-3-piece-kit-inc-3x-5ah-batts",
+     "kg": 12
+    },
+    {
+     "url": "https://highlandfasteners.com/dewalt-dck368p3t-triple-kit-dcd796-dch273-dcf887-3-x-5-0ah-batteries-in-2-x-tstak-ii-boxes/",
+     "kg": 5.622
+    },
+    {
+     "url": "https://www.sanitino.se/en/dewalt-power-and-hand-tools-9-piece-set-of-cordless-tools-batteries-and-charger-dck368p3t",
+     "kg": 12
+    }
+   ],
+   "note": "Deux recherches donnent des poids de kit très différents : 12 kg contre 5,622 kg (écart >60 %), sans qu'aucune page ne soit ouverte pour trancher. Les poids d'outils isolés cités varient aussi (DCH273"
+  },
+  "DCK377": {
+   "motif": "statut introuvable",
+   "sources": [
+    {
+     "url": "https://www.homedepot.com/p/DEWALT-20-Volt-MAX-Lithium-Ion-Cordless-Brushless-Drill-Driver-Light-Combo-Kit-3-Tool-W-2-Batteries-1-3Ah-Charger-Bag-DCK377C2/304249419",
+     "kg": 0.9
+    }
+   ],
+   "note": "La référence demandée (kit 3 outils + 3 batteries 5Ah XR, coffret TSTAK, donc variante européenne type DCK377P3T) n'apparaît dans aucun résultat. Seul un modèle DIFFÉRENT et non demandé, le DCK377C2 a"
+  },
+  "DCK383": {
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://toolden.co.uk/power-tools/cordless-kits/dewalt-dck383p2t-18v-3-piece-tool-kit-with-2x-5-0ah-batteries",
+     "kg": 1.8
+    },
+    {
+     "url": "https://www.klium.com/en/dewalt-dck383p2t-qw-18v-xr-brushless-cordless-machine-kit-dcd796-dcf887-dcg412-in-tstak-2x-50ah-battery-charger-127337",
+     "kg": 1.56
+    },
+    {
+     "url": "https://www.buyaparcel.com/dewalt-dck383p2t-18v-xr-brushless-kit-dcd796-drill-dcf887-impact-dcg412-grinder/",
+     "kg": 2.2
+    }
+   ],
+   "note": "Seuls des poids d'outils isolés sont trouvés (perceuse 1,8 kg, visseuse à choc 1,56 kg, meuleuse 2,2 kg) ; une phrase du résumé attribue à tort le poids de la meuleuse seule (2,2 kg) au « kit complet "
+  },
+  "DCK384": {
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.stokker.com/en/cordless-tools/DCK384P2T&DW/dewalt-18v-combo-dck384p2t-18v-50ah",
+     "kg": 8
+    },
+    {
+     "url": "https://www.toolstoreuk.co.uk/dewalt-dck384p2t-18v-brushless-3-piece-kit-with-2x5ah-batteries/p22145",
+     "kg": 1.6
+    },
+    {
+     "url": "https://www.toolnation.com/dewalt-dck384p2t-qw-combo-set-18v-50ah-li-ion-dcd796-cordless-impact-drill-dcf887-impact-drill-dcg405-angle-grinder.html",
+     "kg": 2.5
+    }
+   ],
+   "note": "Une valeur de 8 kg pour le kit complet revient dans les deux recherches, mais toujours rattachée à la même origine (stokker.com) — ce n'est pas une corroboration par 3 sites distincts, seulement une s"
+  },
+  "DCK421": {
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.ez-tools.de/en/products/18v-3x5ah-akku-kombopack-dewalt-dck421p3t-qw",
+     "kg": 21.02
+    },
+    {
+     "url": "https://www.stokker.com/18v-combo-dck421p3t-18v-50ah-dewalt-c-dck421p3t-dw",
+     "kg": 21.02
+    }
+   ],
+   "note": "Piège de référence identifié et évité : le kit DCK421D2 (américain, 20V MAX, 2 batteries 2,0Ah, ~8,9 kg) qui remontait en premier N'EST PAS la référence demandée (européenne, 4 outils + 3 batteries 5A"
+  },
+  "DCK422": {
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.etrona.de/en/dewalt-dck422p3t-qw-18-volt/5-ah-battery-combo-pack.html",
+     "kg": 1.74
+    },
+    {
+     "url": "https://www.kuantokusta.pt/p/4410810/dewalt-dck422p3t-dcd796dcf887dch273dcg405",
+     "kg": 1.8
+    },
+    {
+     "url": "https://cajonherramientas.com/producto/kit-de-taladro-percutor-atornillador-de-impacto-amoladora-martillo-3-baterias-50ah-cargador-2-maletas-tstak-dewalt-dck422p3t/",
+     "kg": 1.5
+    }
+   ],
+   "note": "Seuls des poids d'outils isolés du kit sont trouvés (meuleuse 1,74 kg, perceuse 1,8 kg, autres outils 1,3-1,5 kg selon la batterie), aucun poids total du colis (4 outils + 3 batteries 5Ah + 2 coffrets"
   }
  }
 }
