@@ -15,6 +15,7 @@ const plans = require('./_lib/traqueur-plans');
 // d'override doit s'y répercuter, sinon le rendu servirait des prix d'avant.
 const snapshotLib = require('./_lib/snapshot');
 const limites = require('./_lib/limites');
+const verifVis = require('./_lib/verif-visibilite');
 // Ce qu'on refuse d'acheter, et pourquoi. Un seul fichier, fait pour changer.
 const barriere = require('./_lib/barriere-achat');
 
@@ -1682,19 +1683,30 @@ module.exports = async function handler(req, res) {
         return res.status(500).json({ ok: false,
           error: 'écrite puis introuvable à la relecture — fiche NON créée' });
       }
-      const snapshotOk = await snapshotLib.majSnapshot(db, admin, id, fiche);
+      /* ⛔ Même règle qu'à l'édition : l'état RELU fait foi, jamais l'objet
+         en mémoire — c'est lui qui a été réellement stocké. */
+      const snapshotOk = await snapshotLib.majSnapshot(db, admin, id, relu.data());
       catalog.invalidateOverrides();
       /* La visibilité se prouve par le CHEMIN PUBLIC — celui que le
          rafraîchissement empruntera — jamais par déduction. */
       let visible = false;
+      let absents = ['(vérification non exécutée)'];
       try {
-        visible = (await catalog.loadCatalog()).some((p) => p && p.id === id);
+        const catC = await catalog.loadCatalog();
+        const pC = catC.find((p) => p && (p.id === id || p.slug === id));
+        /* ⛔ On ne se contente pas de « la fiche est là » : on vérifie que ce
+           qui la rend ACHETABLE est bien servi — sans prix ni référence, une
+           carte présente au catalogue ne vaut rien. */
+        const vC = verifVis.verdictVisibilite(fiche, pC,
+          ['sku', 'title', 'price', 'category'], relu.data());
+        absents = vC.absents; visible = vC.visible;
       } catch (eVis) { console.error('[api/admin] product-create relecture:', eVis.message); }
       if (!visible) {
         /* Durablement écrite mais PAS servie : on le DIT, on ne maquille pas. */
         return res.status(200).json({ ok: true, id, sku, visible: false,
           price: relu.data().price, price_ht: relu.data().price_ht,
-          erreur: 'fiche écrite mais NON VISIBLE au catalogue ('
+          erreur: 'fiche écrite mais NON VISIBLE au catalogue — champ(s) absent(s) : '
+            + absents.join(', ') + ' ('
             + (snapshotOk ? 'relecture publique sans elle' : 'répercussion au snapshot échouée')
             + ') — elle disparaîtra au rafraîchissement, à corriger avant de continuer' });
       }
@@ -1875,34 +1887,65 @@ module.exports = async function handler(req, res) {
           error: 'écrite puis introuvable à la relecture — fiche NON enregistrée' });
       }
       const dataRelue = reluE.data() || {};
-      const manquants = champsPatch.filter(function (k) {
-        return JSON.stringify(dataRelue[k]) !== JSON.stringify(patch[k]);
-      });
+      /* ⛔ La relecture du DOCUMENT compare ce qui est stocké : les champs
+         dérivés n'y sont pas encore calculés, on les exclut ici — ils sont
+         éprouvés plus bas, sur ce que le public voit réellement. */
+      const manquants = champsPatch
+        .filter(function (k) { return !verifVis.DERIVES[k]; })
+        .filter(function (k) {
+          return verifVis.canonique(dataRelue[k]) !== verifVis.canonique(patch[k]);
+        });
       if (manquants.length) {
         return res.status(500).json({ ok: false,
           error: 'relecture différente de ce qui a été écrit (' + manquants.join(', ')
             + ') — fiche NON enregistrée telle quelle' });
       }
-      const snapshotOkE = await snapshotLib.majSnapshot(db, admin, id, patch);
+      /* ⛔⛔ ON RÉPERCUTE LE DOCUMENT RELU, PAS LE PATCH (15/08/2026).
+         Défaut trouvé par `scripts/banc-edition-fiche.js` : une SECONDE
+         édition qui ne touche pas aux photos (changer la description, par
+         exemple) produisait une entrée de shard SANS le marqueur `_riche` —
+         et sans ce marqueur, le catalogue cesse d'aller chercher le document
+         complet : la photo disparaît de la fiche servie.
+         Que le marqueur survive ou non dépendait alors d'une subtilité de la
+         fusion côté base. ⇒ On ne dépend plus d'une subtilité : on envoie
+         l'état RÉEL du document, relu à l'instant. L'entrée de shard reflète
+         toujours la vérité, quelle que soit la sémantique de fusion. */
+      const snapshotOkE = await snapshotLib.majSnapshot(db, admin, id, dataRelue);
       catalog.invalidateOverrides();
       let visibleE = false;
+      let absentsE = ['(vérification non exécutée)'];
+      let masqueeE = false;
       try {
         const cat = await catalog.loadCatalog();
         const p = cat.find(function (x) { return x && (x.id === id || x.slug === id); });
-        /* la fiche est visible si elle est servie ET porte le patch — champ à
-           champ, sur ce que le public verra vraiment. */
-        visibleE = !!p && champsPatch.every(function (k) {
-          return JSON.stringify(p[k]) === JSON.stringify(patch[k]);
-        });
+        /* ⛔⛔ LA COMPARAISON N'EST PAS UNE ÉGALITÉ LITTÉRALE (corrigé le
+           15/08/2026, sur sa capture d'écran). Trois pièges structurels, tous
+           payés par une FAUSSE alarme sur une écriture parfaite :
+             · la vignette est DÉRIVÉE (écrite `null`, servie comme `images[0]`) ;
+             · l'ordre des clés d'une table n'est pas garanti au retour de la base ;
+             · une fiche MASQUÉE est absente du catalogue par DÉCISION.
+           Les trois vivent dans `verif-visibilite.js` — une seule copie de la
+           règle, partagée avec `scripts/banc-edition-fiche.js` qui l'éprouve.
+           `dataRelue` en 4e argument : c'est le document, pas le patch, qui
+           dit si la fiche est masquée. */
+        const vE = verifVis.verdictVisibilite(patch, p, champsPatch, dataRelue);
+        absentsE = vE.absents; visibleE = vE.visible; masqueeE = vE.masquee;
       } catch (eVisE) { console.error('[api/admin] product-edit relecture:', eVisE.message); }
       console.log('[api/admin] product-edit', id, champsPatch.join(','), 'visible=' + visibleE);
       if (!visibleE) {
         return res.status(200).json({ ok: true, id: id, champs: champsPatch, visible: false,
-          erreur: 'modifications écrites mais NON VISIBLES au catalogue ('
+          erreur: 'modifications écrites mais NON VISIBLES au catalogue — champ(s) absent(s) : '
+            + absentsE.join(', ') + ' ('
             + (snapshotOkE ? 'relecture publique sans elles' : 'répercussion au snapshot échouée')
             + ') — elles disparaîtront au rafraîchissement, à corriger avant de continuer' });
       }
-      return res.status(200).json({ ok: true, id: id, champs: champsPatch, visible: true });
+      return res.status(200).json({ ok: true, id: id, champs: champsPatch, visible: true,
+        /* dit, jamais tu : « enregistré » sur une fiche que personne ne peut
+           voir laisserait croire qu'elle est en ligne. */
+        masquee: masqueeE,
+        note: masqueeE
+          ? 'enregistré — la fiche est MASQUÉE, elle n\'apparaît pas au catalogue tant qu\'elle le reste'
+          : undefined });
     } catch (err) {
       console.error('[api/admin] product-edit failed:', err.message);
       return res.status(500).json({ ok: false, error: 'enregistrement de la fiche échoué' });
@@ -2231,7 +2274,24 @@ module.exports = async function handler(req, res) {
       patch.updatedAt = admin.firestore.FieldValue.serverTimestamp();
 
       await db.collection('product_overrides').doc(productId).set(patch, { merge: true });
-      await snapshotLib.majSnapshot(db, admin, productId, patch);
+      /* ⛔⛔ ON RÉPERCUTE LE DOCUMENT RELU, PAS LE PATCH (15/08/2026).
+         Ce chemin-ci écrivait le patch dans le shard. Or `valeurPourShard` ne
+         pose le marqueur `_riche` que s'il VOIT un champ lourd : un patch qui
+         ne touche ni photo ni description produit une entrée sans marqueur —
+         et sans marqueur, le catalogue cesse d'aller chercher le document
+         complet. Changer un simple libellé faisait donc disparaître les photos
+         de la fiche. Que le marqueur survive dépendait d'une subtilité de
+         fusion côté base : on ne dépend plus d'une subtilité, on envoie l'état
+         RÉEL du document. (Les deux autres chemins d'écriture — product-create
+         et product-edit — étaient déjà alignés ; celui-ci restait en arrière,
+         et c'est le plus ancien, donc le plus emprunté.) */
+      const reluG = await db.collection('product_overrides').doc(productId).get();
+      if (!reluG.exists) {
+        return res.status(500).json({ ok: false,
+          error: 'écrit puis introuvable à la relecture — rien n\'est enregistré' });
+      }
+      await snapshotLib.majSnapshot(db, admin, productId, reluG.data());
+      catalog.invalidateOverrides();
 
       console.log('[api/admin] Updated override for', productId, Object.keys(patch).join(','));
       return res.status(200).json({ ok: true, id: productId, patch: patch });

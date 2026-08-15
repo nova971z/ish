@@ -16174,8 +16174,16 @@
         return;
       }
       if (etat) {
-        etat.textContent = 'Enregistré et VISIBLE — ' + (rep.champs || []).length + ' champ(s)';
-        etat.className = 'admin-fiche__status admin-fiche__status--ok';
+        /* ⛔ « VISIBLE » sur une fiche MASQUÉE serait faux : elle est bien
+           enregistrée, mais personne ne la voit tant qu'elle reste masquée.
+           Le serveur le dit (`masquee`), on le répète — un état qu'on tait
+           est un état que l'user découvre en se demandant si ça a marché. */
+        etat.textContent = rep.masquee
+          ? 'Enregistré — fiche MASQUÉE, elle n\'apparaît pas au catalogue ('
+            + (rep.champs || []).length + ' champ(s))'
+          : 'Enregistré et VISIBLE — ' + (rep.champs || []).length + ' champ(s)';
+        etat.className = 'admin-fiche__status admin-fiche__status--'
+          + (rep.masquee ? 'warn' : 'ok');
       }
       /* On met à jour la fiche EN MÉMOIRE : sans ça, rouvrir le panneau
          réafficherait les anciennes valeurs et on croirait l'écriture perdue. */

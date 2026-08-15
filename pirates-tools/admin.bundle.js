@@ -2779,8 +2779,8 @@ function adminEnregistrerFiche(row, btn) {
       return;
     }
     if (etat) {
-      etat.textContent = 'Enregistré et VISIBLE \u2014 ' + (rep.champs || []).length + ' champ(s)';
-      etat.className = 'admin-fiche__status admin-fiche__status--ok';
+      etat.textContent = rep.masquee ? 'Enregistré \u2014 fiche MASQUÉE, elle n\'apparaît pas au catalogue (' + (rep.champs || []).length + ' champ(s))' : 'Enregistré et VISIBLE \u2014 ' + (rep.champs || []).length + ' champ(s)';
+      etat.className = 'admin-fiche__status admin-fiche__status--' + (rep.masquee ? 'warn' : 'ok');
     }
     var p = adminProduitPar(id);
     if (p) {

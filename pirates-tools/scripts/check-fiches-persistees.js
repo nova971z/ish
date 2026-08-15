@@ -279,6 +279,25 @@ module.exports = async function checkFichesPersistees() {
       + 'précisément quand on essaie de se rattraper d\'une maj manquée.');
   }
 
+  /* ③bis — LE BANC : LA SÉQUENCE ENTIÈRE, SOUS LES DEUX SÉMANTIQUES DE FUSION.
+     ⛔ Les points ① à ③ éprouvent des MORCEAUX (le shard, la reconstruction).
+     Le banc éprouve ce que l'user vit : écrire → relire → répercuter → relire
+     par le chemin public → conclure. Il porte les six cycles, dont les DEUX
+     cas négatifs sans lesquels une garde bloquée sur « visible » traverserait
+     tout (mesuré le 15/08 : le sabotage « toujours visible » restait vert
+     avant qu'ils existent).
+     ⚠️ On l'exécute VRAIMENT, en processus séparé : lire sa source ne
+     prouverait rien — une porte qui ne fait que grep est une porte qui ment. */
+  var banc = require('child_process').spawnSync(process.execPath,
+    [path.join(RACINE, 'scripts/banc-edition-fiche.js')], { encoding: 'utf8' });
+  if (banc.status !== 0) {
+    errors.push('[check-fiches-persistees] ⛔ le banc d\'édition de fiche ÉCHOUE (code '
+      + banc.status + ') — la séquence écrire/relire/servir ne tient plus. Rejouer '
+      + '`node scripts/banc-edition-fiche.js` pour le détail :\n'
+      + String(banc.stdout || '').split('\n').filter(function (l) {
+        return /⛔|VERDICT|CYCLE/.test(l); }).join('\n'));
+  }
+
   /* ④ — LE SERVEUR RELIT ET RÉPOND `visible` (le motif exact dans la source). */
   var adminSrc = fs.readFileSync(path.join(RACINE, 'api/admin.js'), 'utf8');
   if (!/product_overrides'\)\.doc\(id\)\.get\(\)/.test(adminSrc.replace(/\s+/g, ' '))

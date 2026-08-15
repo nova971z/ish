@@ -5645,6 +5645,8 @@ scroll-margin-top: calc(var(--safe-top, 70px) + 14px);
 }
 .admin-fiche__status--ok { color: #4ade80; }
 .admin-fiche__status--err { color: #f87171; }
+/* Enregistré, mais la fiche est masquée : ni un succès plein, ni une erreur. */
+.admin-fiche__status--warn { color: #fbbf24; }
 
 /* Une caractéristique = un couple. La colonne de gauche est plus étroite : un
    nom de caractéristique est court, sa valeur ne l'est pas toujours. */

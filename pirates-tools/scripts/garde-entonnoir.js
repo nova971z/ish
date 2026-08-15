@@ -157,14 +157,16 @@ var LISTES = [
       'Preuve exigée : scripts/check-render.js vert + sabotages rouges.'
     ] },
   { nom: 'CATALOGUE ET VISUELS',
-    quand: /pirates-tools\/(products\.json|images\/|models\/|api\/products\.js$|api\/_lib\/(catalog|snapshot|limites|poids-expedie)\.js$)/,
+    quand: /pirates-tools\/(products\.json|images\/|models\/|api\/products\.js$|api\/_lib\/(catalog|snapshot|limites|poids-expedie|verif-visibilite)\.js$)/,
     points: [
       'priceLocked: true ⇒ le prix n\'est JAMAIS recalculé.',
       'Un produit sans coût d\'achat relevé ne reste pas au catalogue.',
       'Posters : fond sombre obligatoire. Les visuels sont le travail de l\'user.',
       'Orientation de pack validée = GRAVÉE : on ne la re-dérive jamais à l\'œil.',
       'Aucune image servie au-dessus de 871 Ko (D-002).',
-      'Preuve exigée : audit/p8-perf.js vert.'
+      'Une écriture de fiche se RELIT par le chemin public avant de dire « ✅ ».',
+      'La garde de visibilité doit savoir dire NON : un cas négatif la prouve faillible.',
+      'Preuve exigée : audit/p8-perf.js + check-fiches-persistees (banc, 6 cycles) verts.'
     ] }
 ];
 
