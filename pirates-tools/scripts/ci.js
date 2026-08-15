@@ -210,6 +210,7 @@ var reqNomMw = safeRequire('./check-nomenclature-milwaukee', 'check-nomenclature
 var reqPoidsDw = safeRequire('./check-poids-dewalt', 'check-poids-dewalt');
 var reqPersist = safeRequire('./check-fiches-persistees', 'check-fiches-persistees');
 var reqVisuel  = safeRequire('./check-visuel-produit', 'check-visuel-produit');
+var reqPrixCmp = safeRequire('./check-prix-compare', 'check-prix-compare');
 var reqPoidsExp = safeRequire('./check-poids-expedie', 'check-poids-expedie');
 var modJur      = safeRequire('./juridique',         'check-juridique');
 var reqJur      = modJur && modJur.controle ? modJur.controle : null;
@@ -362,6 +363,7 @@ var reqReconc   = safeRequire('./check-reconciliation', 'check-reconciliation');
   await runOne(reqPoidsDw, 'check-poids-dewalt');
   await runOne(reqPersist, 'check-fiches-persistees');
   await runOne(reqVisuel, 'check-visuel-produit');
+  await runOne(reqPrixCmp, 'check-prix-compare');
   await runOne(reqPoidsExp, 'check-poids-expedie');
   await runOne(reqJur,      'check-juridique');
   await runOne(reqSortie,   'check-sortie');

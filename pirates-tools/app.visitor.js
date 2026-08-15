@@ -318,16 +318,33 @@
     'dewalt-d25033k-qs': 262     // QEGS 262€
   };
 
+  /* ⛔⛔⛔ IL N'Y A PLUS DE REPLI PAR ESTIMATION — CORRECTION JURIDIQUE (J4),
+     gravée le 15/08/2026.
+
+     CE QUI ÉTAIT SERVI, MESURÉ SUR LE CATALOGUE ENTIER :
+       · 1 708 fiches sur 1 708 affichaient « Prix moyen local » + « Économisez
+         X % » ;
+       · 10 seulement s'appuyaient sur un relevé réel en magasin ;
+       · 1 698 s'appuyaient sur `prix HT × 1,60` — un nombre INVENTÉ, calculé
+         depuis NOTRE propre prix, et présenté au client comme le prix pratiqué
+         autour de lui ;
+       · économie moyenne annoncée : 25 %. Ce 25 % était arithmétique, pas
+         commercial : ttc ≈ ht × 1,2 et local = ht × 1,6 donnent toujours
+         (1,6 − 1,2) / 1,6 = 25 %. La « bonne affaire » était une identité
+         algébrique, identique pour tous les produits.
+
+     ⛔ Annoncer une économie contre un prix de référence qu'on a fabriqué
+     soi-même est une PRATIQUE COMMERCIALE TROMPEUSE. J4 l'écrit déjà pour le
+     « prix conseillé » gonflé (D-004) ; une estimation maison est pire, elle
+     n'a même pas de tiers pour l'énoncer.
+
+     ⇒ Pas de relevé, pas de comparaison. Rendre 0 fait taire le bandeau, et
+     c'est le comportement voulu : le silence est gratuit, l'invention coûte. */
   function calcLocalPrice(product) {
     if (!product) return 0;
-    // 1) prix concurrent réel relevé (le plus crédible) ; 2) champ localPrice
-    // éventuel sur la fiche ; 3) repli estimation HT × 1,60.
-    var real = LOCAL_PRICES[product.id] || Number(product.localPrice) || 0;
-    if (real > 0) return real;
-    var ht = Number(product.price_ht != null
-      ? product.price_ht
-      : (product.price / (1 + (product.vat || 0.2))));
-    return ht * 1.60;
+    // Un prix concurrent RELEVÉ, ou rien. `localPrice` porté par la fiche vaut
+    // relevé — il est saisi à la main depuis un constat, jamais calculé.
+    return LOCAL_PRICES[product.id] || Number(product.localPrice) || 0;
   }
 
   // ── Analytics (GA4 / Meta Pixel) + consent ─────────────────
@@ -13890,7 +13907,7 @@
     if (window.__PT_ADMIN) return Promise.resolve();
     if (__adminCharge) return __adminCharge;
     __adminCharge = new Promise(function (res, rej) {
-      var s = document.createElement('script'); s.src = 'admin.bundle.js?v=614';
+      var s = document.createElement('script'); s.src = 'admin.bundle.js?v=615';
       s.onload = res; s.onerror = function () { __adminCharge = null; rej(new Error('admin.bundle indisponible')); };
       document.head.appendChild(s);
     });
