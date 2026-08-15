@@ -2884,6 +2884,726 @@
     }
    ],
    "note": "Secateur sur perche XR 18V coupe 38mm, machine nue (sans batterie). Valeur convergente sur les 3 sites."
+  },
+  "DCMPH566N": {
+   "kg": 3.6,
+   "sources": [
+    {
+     "url": "https://www.alternate.fr/DeWalt/DCMPH566N-XJ-taille-haie-%C3%A9lectrique-3-6-kg-Taille-haies/html/product/1634415",
+     "kg": 3.6
+    },
+    {
+     "url": "https://www.e.leclerc/fp/dewalt-dcmph566n-xj-taille-haie-electrique-3-6-kg-5035048729427",
+     "kg": 3.6
+    },
+    {
+     "url": "https://www.zone-outillage.fr/fiche-produit/dewalt/taille-haies-sur-batterie/dcmph566n-xj",
+     "kg": 3.6
+    }
+   ],
+   "note": "Machine nue (sans batterie/chargeur), code DCMPH566N-XJ, confirmé par 3 sites différents à 3,6 kg. Cohérent avec la description catalogue."
+  },
+  "DCN692": {
+   "kg": 4.1,
+   "sources": [
+    {
+     "url": "https://www.kamody.fr/dewalt-dcn692n-xj-cloueur-de-charpente-90-mm-xr-18v-sans-batterie-19450",
+     "kg": 4.1
+    },
+    {
+     "url": "https://fr.rs-online.com/web/p/pistolets-agrafeurs/0173383",
+     "kg": 4.1
+    },
+    {
+     "url": "https://www.leroymerlin.fr/produits/outillage/tous-les-outils-sur-batterie-universelle/tous-les-outils-sur-batterie-universelle-dewalt/cloueur-de-charpente-sans-batterie-dewalt-dcn692n-xj-18-v-80139060.html",
+     "kg": 4.1
+    }
+   ],
+   "note": "Code DCN692N-XJ (machine nue 18V). Deux recherches dédiées et indépendantes donnent 4,1 kg avec les mêmes dimensions (34,5x12,5x33,8 cm), sur plusieurs sites distincts. Une première recherche groupée "
+  },
+  "DCN701": {
+   "kg": 2.1,
+   "sources": [
+    {
+     "url": "https://www.howetools.co.uk/dewalt-dcn701n-18v-electricians-stapler",
+     "kg": 2.1
+    },
+    {
+     "url": "https://www.powertoolmate.co.uk/power-tools/dewalt-store/cordless-nail-guns/dewalt-dcn701n-xr-18v-electricians-stapler-bare-unit.htm",
+     "kg": 2.1
+    },
+    {
+     "url": "https://www.powertoolhub.ie/products/dewalt-dcn701n-18v-xr-electricians-stapler-body-only",
+     "kg": 2.1
+    }
+   ],
+   "note": "Code DCN701N-XJ. La description catalogue ('cloueur') est fausse : c'est en réalité une agrafeuse d'électricien (18V, câbles, 25mm) — code fiable, description ignorée (piège 5). Poids nu confirmé à 2,"
+  },
+  "DCN8901": {
+   "kg": 0.18,
+   "sources": [
+    {
+     "url": "https://federatedtool.com/dewalt-dcn8901-replacement-driver-blade-for-dcn890/",
+     "kg": 0.18
+    },
+    {
+     "url": "https://www.hallmarksales.com/brand-dewalt/dewalt-replacement-driver-blade-for-dcn890/sku-V1152811-dcn8901",
+     "kg": 0.18
+    },
+    {
+     "url": "https://www.c4industrial.com/brand-dewalt/dewalt-replacement-driver-blade-for-dcn890/sku-V1152811-dcn8901",
+     "kg": 0.18
+    }
+   ],
+   "note": "Pièce de rechange (chasse-clou/lame d'entraînement) pour cloueur béton DCN890, pas une machine complète — cohérent avec la description catalogue. 0,40 lb = 0,18 kg confirmé sur 3 domaines distincts. U"
+  },
+  "DCP580": {
+   "kg": 2.5,
+   "sources": [
+    {
+     "url": "https://www.kamody.fr/dewalt-dcp580n-rabot-18v-82mm-sans-batterie-29568",
+     "kg": 2.5
+    },
+    {
+     "url": "https://www.jo-tools.com/rabot/730-rabot-sans-fil-dewalt-18v-dcp580n--5035048616253.html",
+     "kg": 2.5
+    },
+    {
+     "url": "https://www.manomano.fr/p/dewalt-dcp580nrabot-a-batteries-18v-li-ion-machine-seule-moteur-sans-charbon-36267043",
+     "kg": 2.5
+    }
+   ],
+   "note": "Code DCP580N/DCP580NT-XJ, machine nue (le NT ajoute juste le coffret TSTAK, même machine). Poids 2,5 kg confirmé sur au moins 3 sites distincts."
+  },
+  "DCPR320": {
+   "kg": 1.7,
+   "sources": [
+    {
+     "url": "https://federatedtool.com/dewalt-dcpr320b-20v-pruner-tool-only/",
+     "kg": 1.36
+    },
+    {
+     "url": "https://www.amazon.com/DEWALT-DCPR320B-20V-PRUNER-BARE/dp/B09YTM4F26",
+     "kg": 1.36
+    },
+    {
+     "url": "https://www.ohiopowertool.com/dewalt-power-tools-dcpr320b",
+     "kg": 1.7
+    }
+   ],
+   "note": "Code DCPR320B, sécateur nu 20V MAX, cohérent avec le catalogue. Sources donnent soit ~3 lb arrondi (1,36 kg) soit un poids précis de 3,748 lb (1,7 kg) — écart 25%, ≤60% donc résolu. Valeur la plus hau"
+  },
+  "DCPW550": {
+   "kg": 2.49,
+   "sources": [
+    {
+     "url": "https://toolup.com/products/dewalt-dcpw550b-20v-max-550-psi-cordless-power-cleaner-bare-tool",
+     "kg": 2.49
+    },
+    {
+     "url": "https://thepowertoolstore.com/products/dewalt-dcpw550b",
+     "kg": 2.49
+    },
+    {
+     "url": "https://www.coastaltool.com/products/dewalt-dcpw550b-20v-max-cordless-power-cleaner-washer-tool-only",
+     "kg": 2.49
+    }
+   ],
+   "note": "DCPW550B = nettoyeur Power Cleaner 20V, outil seul (tool only). 3 revendeurs distincts s'accordent sur 5.5 lb (~2,49 kg), sans batterie ni chargeur."
+  },
+  "DCR011": {
+   "kg": 1.8,
+   "sources": [
+    {
+     "url": "https://www.rapidonline.com/dewalt-dcr011-bluetooth-speaker-10-8-54v-li-ion-bare-unit-95-3915",
+     "kg": 1.8
+    },
+    {
+     "url": "https://www.datapowertools.co.uk/Products/DeWALT_Radios_Speakers/DEWDCR011-XJ",
+     "kg": 1.8
+    },
+    {
+     "url": "https://www.powertoolworld.co.uk/dewalt-dcr011-10-8v-18v-54v-xr-premium-bluetooth-speaker-body-only",
+     "kg": 1.8
+    }
+   ],
+   "note": "DCR011-XJ, enceinte bluetooth 10.8-54V, corps seul (body only). 3 revendeurs UK distincts s'accordent sur 1,8 kg."
+  },
+  "DCR017": {
+   "kg": 5.9,
+   "sources": [
+    {
+     "url": "https://gsworkwear.com/products/dewalt-dcr017-xr-dab-radio-charger-240v-li-ion-bare-unit",
+     "kg": 5.9
+    },
+    {
+     "url": "https://www.morgansltd.com/products/dewdcr017",
+     "kg": 5.9
+    },
+    {
+     "url": "https://www.mlperformanceusa.com/products/dewalt-dewdcr017-dcr017-xr-dab-radio-charger-240v-li-ion-bare-unit",
+     "kg": 5.9
+    }
+   ],
+   "note": "DCR017, radio-chargeur DAB+ 240V/XR Li-ion, unité nue. 3 sites distincts s'accordent sur 5,9 kg."
+  },
+  "DCR019": {
+   "kg": 2.8,
+   "sources": [
+    {
+     "url": "https://no.rs-online.com/web/p/site-radios/0440998",
+     "kg": 2.8
+    },
+    {
+     "url": "https://www.klium.com/en/dewalt-dcr019-qw-12-144v-18v-xr-compact-fm-am-battery-radio-without-battery-and-charger-127335",
+     "kg": 2.8
+    },
+    {
+     "url": "https://www.misterworker.com/en/dewalt/xr-li-ion-compact-fm-am-radio-dcr019-qw/2805.html",
+     "kg": 2.8
+    }
+   ],
+   "note": "DCR019-QW, radio compacte FM/AM 10.8-18V XR, sans batterie ni chargeur. RS Online cite explicitement 2,8 kg dans le titre de fiche ; deux autres sites indépendants confirment la même valeur."
+  },
+  "DCR027": {
+   "kg": 7.2,
+   "sources": [
+    {
+     "url": "https://www.zone-outillage.fr/fiche-produit/dewalt/radio/dcr027",
+     "kg": 7.2
+    },
+    {
+     "url": "https://www.briconews.net/bricolage/radio-de-chantier/dewalt/dcr027",
+     "kg": 7.2
+    },
+    {
+     "url": "https://www.csmegastore.com/i/4203338/dewalt-dcr027-qw-310-mm-7-2-kg-1-pc-s",
+     "kg": 7.2
+    }
+   ],
+   "note": "DCR027-QW, radio premium 12/18/54V XR double alimentation, sans batterie ni chargeur. 3 sites distincts s'accordent sur 7,2 kg. Écarté : une fiche RS Online (fr.rs-online.com) annonce '2,97 kg' pour u"
+  },
+  "DCS312": {
+   "kg": 1.38,
+   "sources": [
+    {
+     "url": "https://www.dewalt.com/product/dcs312b/xtreme-12v-max-brushless-one-handed-cordless-reciprocating-saw-tool-only",
+     "kg": 1.38
+    },
+    {
+     "url": "https://www.ohiopowertool.com/dewalt-dcs312b",
+     "kg": 1.38
+    },
+    {
+     "url": "https://www.toolnut.com/products/dewalt-dcs312b-xtreme-12v-max-brushless-one-handed-reciprocating-saw-tool-only",
+     "kg": 1.38
+    }
+   ],
+   "note": "DCS312B, scie récipro (reciprocating saw) une main XTREME 12V MAX, outil seul (bare tool) — le code correspond bien à une scie récipro et non à une 'scroll saw' comme traduit à tort par un revendeur ("
+  },
+  "DCS331": {
+   "kg": 2.4,
+   "sources": [
+    {
+     "url": "https://racetools.fr/products/scie-sauteuse-dewalt-dcs331n-18-v-li-ion-xr-machine-nue",
+     "kg": 2.4
+    },
+    {
+     "url": "https://www.cotebrico.fr/scie-sauteuse/3249-scie-sauteuse-dewalt-dcs331n-5035048356197.html",
+     "kg": 2.4
+    },
+    {
+     "url": "https://www.rotopino.fr/scie-sauteuse-sans-fil-dewalt-dcs331n,39087",
+     "kg": 2.3
+    }
+   ],
+   "note": "Scie sauteuse DCS331N machine nue. Écart 2,3-3,1 kg selon revendeurs (la valeur haute inclut probablement une config avec batterie/coffret) ; 2,4 kg est la valeur nue la plus citée, retenue en cohéren"
+  },
+  "DCS334": {
+   "kg": 2.1,
+   "sources": [
+    {
+     "url": "https://www.master-outillage.com/dewalt/98006-scie-sauteuse-a-poignee-superieure-xr-18v-sans-batterie-ni-chargeur-coffret-tstak-dewalt-dcs334nt-5035048710623.html",
+     "kg": 2.1
+    },
+    {
+     "url": "https://fr.rubix.com/fr/scie-sauteuse-brushless-18v-xr/p-G3515001110",
+     "kg": 2.1
+    },
+    {
+     "url": "https://www.ifd-outillage.fr/scie-sauteuse-xr-18v-machine-seule-dcs334nt-dewalt",
+     "kg": 2.1
+    }
+   ],
+   "note": "Scie sauteuse XR DCS334NT machine nue, valeur cohérente sur toutes les sources consultées."
+  },
+  "DCS335": {
+   "kg": 2.1,
+   "sources": [
+    {
+     "url": "https://outilslebricoleur.fr/product/dewalt-dcs335n-scie-sauteuse-18v-xr-135mm-sans-batterie-ni-chargeur/",
+     "kg": 2.1
+    },
+    {
+     "url": "https://www.sanitino.fr/dewalt-outillage-scie-sauteuse-aku-18v-sans-batterie-ni-chargeur-dcs335n",
+     "kg": 2.1
+    },
+    {
+     "url": "https://www.dewalt.fr/produit/dcs335nt-xj/scie-sauteuse-prise-par-le-corps-xr-18v-brushless-sans-batterie-ni-chargeur-coffret-tstak",
+     "kg": 2.1
+    }
+   ],
+   "note": "Scie sauteuse à corps DCS335N machine nue. Une agrégation isolée évoquait 1,62-2,68 kg (probablement des configurations différentes mélangées) ; les sources ciblées convergent sur 2,0-2,1 kg, dont le "
+  },
+  "DCS350": {
+   "kg": 4.1,
+   "sources": [
+    {
+     "url": "https://beyondtools.com/en-us/products/dewalt-18v-threaded-rod-cutter-bare-tool-only-dcs350n-xj",
+     "kg": 4.1
+    },
+    {
+     "url": "https://www.ebay.com/itm/275825218061",
+     "kg": 4.1
+    },
+    {
+     "url": "https://www.dewalt.com/en-us/product/dcs350b/20v-max-cordless-threaded-rod-cutter-tool-only",
+     "kg": 4.1
+    }
+   ],
+   "note": "Coupe-tiges filetées. Recherches dominées par la variante US 20V MAX (DCS350B/DCS350D1), qui est le même outil physique que la version EU 18V XR DCS350 (rebrand de tension DeWalt) ; poids machine nue "
+  },
+  "DCS3501": {
+   "kg": 0.08,
+   "sources": [
+    {
+     "url": "https://www.aftfasteners.com/dewalt-1-4-3-8-1-2-replacement-cutting-die-set-1-pkg-dcs3501/",
+     "kg": 0.08
+    },
+    {
+     "url": "https://www.grainger.com/product/DEWALT-Replacement-Cutting-Die-Set-52NA68",
+     "kg": 0.08
+    },
+    {
+     "url": "https://www.dewalt.com/en-us/product/dcs3501/dewalt-14-38-12-replacement-cutting-die-set",
+     "kg": 0.08
+    }
+   ],
+   "note": "Lot de matrices de découpe de rechange (accessoire, pas une machine motorisée) : 0,18 lb converti. Poids très faible cohérent avec la nature de l'article."
+  },
+  "DCS353": {
+   "kg": 0.84,
+   "sources": [
+    {
+     "url": "https://thepowertoolstore.com/products/dewalt-dcs353b",
+     "kg": 0.84
+    },
+    {
+     "url": "https://www.ohiopowertool.com/dewalt-dcs353b",
+     "kg": 0.84
+    },
+    {
+     "url": "https://www.acmetools.com/dewalt-xtreme-12v-max-brushless-cordless-oscillating-tool-bare-tool-dcs353b/885911760423.html",
+     "kg": 0.84
+    }
+   ],
+   "note": "Outil oscillant 12V MAX DCS353B, machine seule (bare tool) : 1,85 lb converti, valeur stable sur toutes les sources."
+  },
+  "DCS355": {
+   "kg": 1.1,
+   "sources": [
+    {
+     "url": "https://www.cotebrico.fr/outil-multifonctions-oscillants/3929-outil-multifonctions-dewalt-dcs355n-5035048440964.html",
+     "kg": 1.06
+    },
+    {
+     "url": "https://www.mtp33.com/wp-content/uploads/2020/04/Notice-dutilisation-Multi-Outil-Oscillant-DeWalt-DCS355.pdf",
+     "kg": 1.06
+    },
+    {
+     "url": "https://www.melcreationsbois.com/test-du-multi-cutter-dewalt-dcs355-loutil-multifonction-ultime",
+     "kg": 1.1
+    }
+   ],
+   "note": "Outil multifonction oscillant DCS355N/NT machine nue. Deux mentions isolées à 1,5-1,6 kg (probablement poids emballé) écartées ; retenu 1,1 kg, cohérent avec le poids net du DCS356NT (même gabarit)."
+  },
+  "DCS356": {
+   "kg": 1.1,
+   "sources": [
+    {
+     "url": "https://fr.rs-online.com/web/p/outils-multifonction/2610059",
+     "kg": 1.1
+    },
+    {
+     "url": "https://www.foussier.fr/scie-oscillante-18-v-xr-dcs356nt-xj-solo/sp43896",
+     "kg": 1.1
+    },
+    {
+     "url": "https://www.contorion.fr/p/outil-multifonctions-sans-fil-dewalt-18v-version-de-base-dcs356nt-xj-52708266",
+     "kg": 1.1
+    }
+   ],
+   "note": "Outil multifonction DCS356NT-XJ machine nue, valeur « poids net 1,1 kg » identique et répétée sur toutes les sources."
+  },
+  "DCS365": {
+   "kg": 11.5,
+   "sources": [
+    {
+     "url": "https://www.dewalt.fr/produit/dcs365n-xj/scie-onglets-radiale-xr-18v-184-mm-sans-batterie-ni-chargeur",
+     "kg": 11.5
+    },
+    {
+     "url": "https://racetools.fr/products/scie-a-onglets-dewalt-dcs365n-184-mm-18-v-xr-machine-nue",
+     "kg": 11.5
+    },
+    {
+     "url": "https://www.fixami.fr/dewalt-dcs365n-scie-a-onglets-a-batteries-18v-li-ion-machine-seule-184-x-16mm-dcs365n-xj.html",
+     "kg": 11.5
+    }
+   ],
+   "note": "Scie à onglet radiale DCS365N machine nue, fiche technique complète cohérente (590 W, lame 184 mm, dimensions 490x590x590 mm), dont le fabricant. Une mention isolée à 9,17 kg sans URL rattachable a ét"
+  },
+  "DCS367": {
+   "kg": 2.3,
+   "sources": [
+    {
+     "url": "https://www.dewalt.fr/produit/dcs367nt-xj/scie-sabre-compacte-xr-18v-sans-batterie-ni-chargeur-coffret-tstak",
+     "kg": 2.3
+    },
+    {
+     "url": "https://racetools.fr/products/scie-sabre-dewalt-dcs367nt-xr-18v-brushless-avec-coffret-t-stack",
+     "kg": 2.3
+    },
+    {
+     "url": "https://www.cogeferm.fr/4942-scie-sabre-sur-batterie-xr-18v-dcs367nt-xj-machine-seule-dewalt.html",
+     "kg": 2.3
+    }
+   ],
+   "note": "Scie sabre compacte XR DCS367NT machine nue, valeur constante sur toutes les sources dont le fabricant."
+  },
+  "DCS369": {
+   "kg": 1.43,
+   "sources": [
+    {
+     "url": "https://www.dewalt.fr/produit/dcs369nt-xj/scie-sabre-compacte-xr-18v-brushless-sans-batterie-ni-chargeur-coffret-tstak",
+     "kg": 1.4
+    },
+    {
+     "url": "https://www.sanitino.fr/dewalt-outillage-scie-sabre-compacte-sans-fil-18v-sans-batterie-dcs369n",
+     "kg": 1.43
+    },
+    {
+     "url": "https://www.cotebrico.fr/scie-sabre/5669-scie-sabre-18v-compacte-dewalt-dcs369nt-5035048723180.html",
+     "kg": 1.4
+    }
+   ],
+   "note": "Scie sabre compacte 18V DCS369N/NT, machine nue. Valeurs convergentes 1,4-1,43 kg sur plusieurs sites ; retenu 1,43 kg (valeur la plus précise/haute)."
+  },
+  "DCS373": {
+   "kg": 3.1,
+   "sources": [
+    {
+     "url": "https://www.klium.com/en/dewalt-dcs373nt-xj-18v-xr-metal-circular-saw-43mm-140mm-in-tstak-without-battery-and-charger-128171",
+     "kg": 2.9
+    },
+    {
+     "url": "https://www.idealo.fr/prix/3934504/dewalt-dcs373.html",
+     "kg": 3.1
+    },
+    {
+     "url": "https://www.screwfix.fr/scie-circulaire-a-metaux-sans-fil-dewalt-xr-dcs373n-xj-140mm-18v-li-ion-sans-batterie.html",
+     "kg": 3.1
+    }
+   ],
+   "note": "Scie circulaire à métaux DCS373N/NT, machine nue (poids kit DCS373M2 avec 2 batteries ~8,25 kg écarté, hors sujet). Deux lectures proches 2,9 et 3,1 kg ; retenu 3,1 kg (la plus haute dans l'intervalle"
+  },
+  "DCS377": {
+   "kg": 3,
+   "sources": [
+    {
+     "url": "https://www.dewalt.fr/produit/dcs377nt-xj/scie-ruban-ultra-compacte-xr-18v-brushless-sans-batterie-ni-chargeur",
+     "kg": 3
+    },
+    {
+     "url": "https://racetools.fr/products/scie-a-ruban-ultra-compacte-xr-18v-dcs377nt-xj",
+     "kg": 3
+    },
+    {
+     "url": "https://www.maxoutil.com/scie-a-ruban-ultra-compacte-xr-18v-dewalt-dcs377nt-xj.html",
+     "kg": 3
+    }
+   ],
+   "note": "Scie à ruban ultra compacte DCS377NT, machine nue. Valeur convergente ~3 kg (6,6 lbs) sur plusieurs sites dont le fabricant."
+  },
+  "DCS378": {
+   "kg": 3.8,
+   "sources": [
+    {
+     "url": "https://www.dewalt.fr/produit/dcs378n-xj/scie-ruban-xr-18v-brushless",
+     "kg": 3.8
+    },
+    {
+     "url": "https://www.ab-outils.fr/scie-a-ruban/1862-dewalt-dcs378n-scie-a-ruban-18v-nue-sans-batterie-5035048798683.html",
+     "kg": 3.8
+    },
+    {
+     "url": "https://www.misterworker.com/en/dewalt/compact-18v-brushless-metal-band-saw-without-batteries-and-charger-dcs378n-xj/108554.html",
+     "kg": 3.5
+    }
+   ],
+   "note": "Scie à ruban DCS378N, machine nue. Fiche fabricant dewalt.fr indique explicitement 'poids sans batterie : 3,8 kg' ; une source annexe indiquait 3,5 kg — retenu 3,8 kg (fabricant + plus haut de l'inter"
+  },
+  "DCS380": {
+   "kg": 2.7,
+   "sources": [
+    {
+     "url": "https://www.manomano.fr/p/scie-sabre-dewalt-18v-li-ion-machine-seule-dcs380n-1999792",
+     "kg": 2.7
+    },
+    {
+     "url": "https://racetools.fr/products/scie-sabre-dewalt-dcs380n-18-v-li-ion-xr-machine-nue",
+     "kg": 2.7
+    },
+    {
+     "url": "https://www.bricorama.fr/p/scie-sabre-dewalt-dcs380n-18-v-li-ion-xr-machine-nue-/5035048356203",
+     "kg": 2.7
+    }
+   ],
+   "note": "Scie sabre DCS380N, machine nue (sans batterie ni chargeur). Valeur convergente 2,7 kg sur plusieurs sites."
+  },
+  "DCS382": {
+   "kg": 2.3,
+   "sources": [
+    {
+     "url": "https://www.leroymerlin.fr/produits/scie-sabre-18v-160mm-produit-seul-dewalt-dcs382n-xj-84884374.html",
+     "kg": 2.3
+    },
+    {
+     "url": "https://www.sanitino.fr/dewalt-outillage-scie-sabre-sans-fil-18v-sans-batterie-ni-chargeur-dcs382n",
+     "kg": 2.3
+    },
+    {
+     "url": "https://www.idealo.fr/prix/201847358/dewalt-dcs382.html",
+     "kg": 2.3
+    }
+   ],
+   "note": "Scie sabre DCS382N, machine nue. Valeur convergente 2,3 kg sur plusieurs sites."
+  },
+  "DCS383": {
+   "kg": 4.9,
+   "sources": [
+    {
+     "url": "https://www.klium.com/en/dewalt-dcs383n-xj-18v-xr-brushless-cordless-metal-circular-saw-184mm-in-cardboard-box-without-battery-and-charger-173962",
+     "kg": 4.9
+    },
+    {
+     "url": "https://jabot.fr/boutique/produit/scie-circulaire-metal-dewalt-dcs383n-18v-xr/",
+     "kg": 4.9
+    },
+    {
+     "url": "https://www.clickoutil.com/scie-circulaire-dewalt/153491-productdcs383n-xj.html",
+     "kg": 4.9
+    }
+   ],
+   "note": "Scie circulaire à métaux DCS383N, 184 mm, machine nue — code cohérent avec la description. Valeur convergente 4,9 kg sur plusieurs sites."
+  },
+  "DCS387": {
+   "kg": 2.3,
+   "sources": [
+    {
+     "url": "https://www.leroymerlin.fr/produits/outillage/outillage-electroportatif/scie-electrique-portative/scie-sabre/dewalt-dcs-387-nt-18-v-scie-sabre-sans-fil-avec-boitier-tstak-solo-sans-accessoires-ni-batteries-ni-chargeur-80127583.html",
+     "kg": 2.3
+    },
+    {
+     "url": "https://www.materiel-de-pro.com/scie-sabre-18v-dcs387nt-nue-dewalt.html",
+     "kg": 2.3
+    },
+    {
+     "url": "https://www.fixami.fr/dewalt-dcs387n-scie-sabre-a-batteries-18v-li-ion-machine-seule-dcs387n-xj.html",
+     "kg": 2.3
+    }
+   ],
+   "note": "Scie sabre compacte DCS387N/NT, machine nue. Valeur convergente 2,3 kg sur plusieurs sites."
+  },
+  "DCS388": {
+   "kg": 3.6,
+   "sources": [
+    {
+     "url": "https://www.firm.fr/dewalt-flexvolt/1826-scie-sabre-sans-fil-dewalt-54v-xr-flexvolt-machine-nue-dcs388n-5035048645703.html",
+     "kg": 3.6
+    },
+    {
+     "url": "https://www.jo-tools.com/scie-sabre/70-scie-sabre-dewalt-54v-dcs388n-5035048645703.html",
+     "kg": 3.6
+    },
+    {
+     "url": "https://racetools.fr/products/scie-sabre-54v-dcs388n-xj-xr-moteur-brushless-machine-nue",
+     "kg": 3.6
+    }
+   ],
+   "note": "Scie sabre FLEXVOLT 54V machine nue (DCS388N-XJ). Convergence à 3,6 kg sur plusieurs sites ; une source isolée citait 4,2 kg, écartée (minoritaire, probable confusion de variante)."
+  },
+  "DCS389": {
+   "kg": 3.5,
+   "sources": [
+    {
+     "url": "https://www.dewalt.fr/produit/dcs389nt-xj/scie-sabre-xr-flexvolt-54v-sans-batterie-ni-chargeur",
+     "kg": 3.5
+    },
+    {
+     "url": "https://racetools.fr/products/scie-sabre-xr-flexvolt-dewalt-dcs389nt-xj-54v-brushless",
+     "kg": 3.6
+    },
+    {
+     "url": "https://www.kamody.fr/dewalt-dcs389n-xj-scie-sabre-xr-flexvolt-54v-sans-batterie-ni-chargeur-12362",
+     "kg": 3.5
+    }
+   ],
+   "note": "Scie sabre FLEXVOLT 54V machine nue (DCS389N/NT-XJ). Valeurs serrées entre sites (3,5 à 3,6 kg) ; retenu 3,5 kg (le plus fréquent, y compris page fabricant)."
+  },
+  "DCS397": {
+   "kg": 5.6,
+   "sources": [
+    {
+     "url": "https://www.powertoolsdirect.com/dewalt-dcs397n-flexvolt-xr-alligator-saw-54v-bare-unit",
+     "kg": 5.6
+    },
+    {
+     "url": "https://www.tooled-up.com/dewalt-dcs397-54v-xr-cordless-brushless-flexvolt-alligator-saw/prod/288156/",
+     "kg": 5.6
+    },
+    {
+     "url": "https://www.frasardirect.com/products/dewalt-dcs397-xr-flexvolt-alligator-saw",
+     "kg": 5.6
+    }
+   ],
+   "note": "Scie alligator 18/54V (FLEXVOLT) machine nue, lame 430 mm. Valeur 5,6 kg identique et stable sur deux recherches indépendantes."
+  },
+  "DCS398": {
+   "kg": 6.5,
+   "sources": [
+    {
+     "url": "https://www.chausson.fr/quincaillerie/scie-alligator-sans-fil-54v-xr-li-ion-flexvolt-lame-mm-2400-cps-min-p-372140-1",
+     "kg": 6.5
+    },
+    {
+     "url": "https://www.guedo-outillage.fr/21711-dewalt-scie-alligator-450mm-54v-2ah-xr-flexvolt-dcs398t2.html",
+     "kg": 6.5
+    },
+    {
+     "url": "https://www.ifd-outillage.fr/scie-alligator-xr-flexvolt-54v-2ah-li-ion-brushless-450-mm-dcs398t2-dewalt",
+     "kg": 6.5
+    }
+   ],
+   "note": "Scie alligator FLEXVOLT 54V, lame 450 mm. 6,5 kg majoritaire ; une source proche citait 6,65 kg pour le kit T2 (écart faible, cohérent)."
+  },
+  "DCS438": {
+   "kg": 0.93,
+   "sources": [
+    {
+     "url": "https://www.dewalt.fr/produit/dcs438n-xj/meuleuse-76-mm-xr-18v-brushless",
+     "kg": 0.93
+    },
+    {
+     "url": "https://racetools.fr/products/meuleuse-76-mm-xr-dewalt-dcs438n-xj-18v-brushless",
+     "kg": 0.93
+    },
+    {
+     "url": "https://www.leroymerlin.fr/produits/meuleuse-angle-sans-fil-76mm-dewalt-dcs438n-xj-18v-0-batteries-86616971.html",
+     "kg": 0.93
+    }
+   ],
+   "note": "Meuleuse 76 mm XR 18V (DCS438N-XJ), machine nue. Poids net EPTA officiel 0,93 kg ; une source citait 0,8 kg (arrondi commercial), écartée au profit de la valeur EPTA plus précise, cohérente entre fabr"
+  },
+  "DCS491": {
+   "kg": 1.8,
+   "sources": [
+    {
+     "url": "https://www.leroymerlin.fr/produits/cisaille-a-metaux-18v-dewalt-dcs491n-xj-82040921.html",
+     "kg": 1.8
+    },
+    {
+     "url": "https://racetools.fr/products/cisaille-a-metaux-dewalt-dcs491n-xr-18v-machine-nue",
+     "kg": 1.8
+    },
+    {
+     "url": "https://www.screwfix.fr/cisaille-a-metaux-sans-fil-dewalt-dcs491n-xj-18v-li-ion-xr-sans-batterie.html",
+     "kg": 1.8
+    }
+   ],
+   "note": "ATTENTION contradiction catalogue : DCS491 n'est PAS une scie circulaire métaux mais une CISAILLE À MÉTAUX (cisaille à tôle) DEWALT DCS491N-XJ 18V — le code fait foi (piège description). Poids 1,8 kg,"
+  },
+  "DCS496": {
+   "kg": 1.5,
+   "sources": [
+    {
+     "url": "https://www.maxoutil.com/cisaille-a-metaux-dewalt-xr-18v-sans-batterie-ni-chargeur-dcs496n-xj.html",
+     "kg": 1.5
+    },
+    {
+     "url": "https://www.leroymerlin.fr/produits/cisaille-a-metaux-dewalt-xr-18v-sans-batterie-ni-chargeur-dcs496n-xj-91917353.html",
+     "kg": 1.5
+    },
+    {
+     "url": "https://jabot.fr/boutique/produit/cisaille-a-metaux-dewalt-dcs496n-18v-xr/",
+     "kg": 1.5
+    }
+   ],
+   "note": "ATTENTION contradiction catalogue : DCS496 n'est PAS une scie circulaire métaux mais une CISAILLE À MÉTAUX DÉCALÉE DEWALT DCS496N-XJ 18V — le code fait foi (piège description). Poids 1,5 kg (corps mac"
+  },
+  "DCS512": {
+   "kg": 2.2,
+   "sources": [
+    {
+     "url": "https://www.kamody.fr/dewalt-dcs512n-scie-circulaire-140mm-xr-12v-sans-batterie-19989",
+     "kg": 2.2
+    },
+    {
+     "url": "https://www.quincaillerie-angles.fr/scie-circulaire-dewalt-o140-mm-xr-12v-brushless-sans-batterie-ni-chargeur-dcs512n-xj.html",
+     "kg": 2.2
+    },
+    {
+     "url": "https://www.comptoirdespros.com/scie-circulaire-140-mm-xr-12v-brushless-sans-batterie-ni-chargeur.html",
+     "kg": 2.2
+    }
+   ],
+   "note": "Scie circulaire 12V XR 140 mm, machine nue (DCS512N-XJ). 2,2 kg majoritaire et répété ; une source isolée citait 2,75 kg (écartée, minoritaire)."
+  },
+  "DCS520": {
+   "kg": 5.5,
+   "sources": [
+    {
+     "url": "https://www.sanitino.fr/dewalt-outillage-scie-plongeante-sans-fil-54v-165-mm-sans-batterie-ni-chargeur-dcs520nt",
+     "kg": 4.7
+    },
+    {
+     "url": "https://outilslebricoleur.fr/product/dewalt-dcs520nt-scie-plongeante-sans-fil-54v-li-ion-dans-tstak-20-x-165-mm-machine-seule/",
+     "kg": 5.1
+    },
+    {
+     "url": "https://www.zone-outillage.fr/fiche-produit/dewalt/scie-plongeante-sans-fil/dcs520-xr-flexvolt",
+     "kg": 5.5
+    }
+   ],
+   "note": "Scie plongeante FLEXVOLT 54V 165 mm, machine nue (DCS520N/NT-XJ). Désaccord entre sources : 4,7 kg (Sanitino), ~5,1 kg (Outilslebricoleur), 5,5 kg (Zone Outillage) — écart max/min ~17 %, sous le seuil"
+  },
+  "DCS565": {
+   "kg": 2.8,
+   "sources": [
+    {
+     "url": "https://www.sanitino.fr/dewalt-outillage-scie-circulaire-sans-fil-18v-165-mm-sans-batterie-ni-chargeur-dcs565n",
+     "kg": 2.8
+    },
+    {
+     "url": "https://www.brico.be/fr/outillage-machines-atelier/outillage-electrique/scies-electriques/scies-circulaires/scie-circulaire-dewalt-dcs565n-xj-18v-sans-fil-sans-batterie-moteur-brushless/10119521",
+     "kg": 2.8
+    },
+    {
+     "url": "https://jabot.fr/boutique/produit/scie-circulaire-dewalt-dcs565n-18v-xr/",
+     "kg": 2.8
+    }
+   ],
+   "note": "Scie circulaire 18V 165 mm, machine nue (DCS565N-XJ). 2,8 kg stable et confirmé sur deux recherches indépendantes."
   }
  },
  "nonResolues": {
@@ -5281,6 +6001,116 @@
    "motif": "statut bloque",
    "sources": [],
    "note": "Budget de recherche web de la session épuisé (200/200) — aucune requête tentée pour cette référence."
+  },
+  "DCN910": {
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.emmetistore.com/products/nailer-dewalt-dcn910n-xj-18v",
+     "kg": 4.2
+    },
+    {
+     "url": "https://www.nailgundepot.com/dewalt-dcn910b-20v-max-duplex-nailer-bare-tool",
+     "kg": 3.8
+    },
+    {
+     "url": "https://www.homedepot.com/p/DEWALT-20V-XR-3-1-2-in-21-Degree-Cordless-Duplex-Nailer-Tool-Only-DCN910B/339203311",
+     "kg": 3.8
+    }
+   ],
+   "note": "Budget de 3 recherches épuisé sans 3 sources concordantes. La description catalogue ('agrafeuse') est trompeuse : c'est un cloueur duplex (piège 5). Deux variantes trouvées : DCN910N-XJ (18V, code cor"
+  },
+  "DCN9301": {
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.powertoolsuk.co.uk/dewalt-dcn9301-replaceable-driver-blade.html",
+     "kg": 0.05
+    }
+   ],
+   "note": "Pièce de rechange (lame d'entraînement) pour cloueur DCN930, cohérent avec 'outil de fixation' du catalogue. Seul powertoolsuk.co.uk cite une valeur exploitable (0,05 kg), retrouvée de façon identique"
+  },
+  "DCN950": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Produit DCN950N-XJ existe (cloueur charpente 90mm 18V XR, clous à tête annulaire) mais aucune des 3 recherches menées n'a fait apparaître de poids chiffré. Attention : la description catalogue dit 'cl"
+  },
+  "DCPS151": {
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://manuals.plus/dewalt/dcps151-core-drill-stand-manual",
+     "kg": 20.3
+    }
+   ],
+   "note": "Support Powershift pour carotteuse, correspond bien à la description catalogue. Une seule source exploitable trouvée (manuel d'instructions) : 20,3 kg 'avec roues et poignée d'avance, sans batterie'. "
+  },
+  "DCPS330": {
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.seddonplant.co.uk/dewalt/powershift/dewalt-powershift-vibrating-screed-bare-unit-dcps330n-xj",
+     "kg": 14
+    }
+   ],
+   "note": "Une seule source exploitable trouvée avec URL citable : seddonplant.co.uk (DCPS330N-XJ, unité nue) = 14 kg. Aucune deuxième source distincte avec valeur+URL rattachable au code exact (une mention 'DCP"
+  },
+  "DCPS660": {
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.bunnings.co.nz/dewalt-60kg-powershift-rammer-dcps660n-xj-bare-unit_p0762032",
+     "kg": 65
+    },
+    {
+     "url": "https://www.dewalt.com/en-us/product/dcps660ag2/powershift-60kg-class-rammer-kit",
+     "kg": 73
+    }
+   ],
+   "note": "Une seule source fiable avec le code exact en version nue/solo (DCPS660N-XJ) : Bunnings NZ = 65 kg. Le kit DCPS660AG2 (2 batteries 554Wh + chargeur) pèse 161 lb (~73 kg, dewalt.com) mais ce n'est pas "
+  },
+  "DCPS7154": {
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.bunnings.co.nz/dewalt-powershift-plate-compactor-dcps7154n-xj-bare-unit_p0762033",
+     "kg": 94
+    }
+   ],
+   "note": "Une seule source fiable pour l'unité nue (DCPS7154N-XJ) : réseau Bunnings AU/NZ (même fiche produit p0762033 sur deux domaines = une seule source) = 94 kg. Une valeur de 100 kg circule (probablement l"
+  },
+  "DCR029": {
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://no.rs-online.com/web/p/site-radios/2610056",
+     "kg": 4.463
+    }
+   ],
+   "note": "DCR029-QW, radio de chantier bluetooth 12/18/54V, sans batterie ni chargeur. Une seule source distincte confirmée avec le code exact QW : RS Online = 4,463 kg (présent sur deux domaines régionaux .no/"
+  },
+  "DCS374": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "3 recherches ciblées menées. Le code EU 18V (DCS374N-XJ, scie à ruban métal) existe (ex. emmetistore.com) mais aucune page trouvée n'affiche son poids en kg. Les résultats se mélangent surtout avec le"
+  },
+  "DCS386": {
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.manomano.fr/p/dewalt-scie-sabre-xr-flexvolt-advantage-18v-sans-batterie-ni-chargeur-dcs386nt-xj-35049352",
+     "kg": 3.9
+    },
+    {
+     "url": "https://www.zone-outillage.fr/fiche-produit/dewalt/scie-sabre-sans-fil/xr-18-v-advantage-flexvolt-dcs386nt-xj",
+     "kg": 3.5
+    },
+    {
+     "url": "https://www.clickoutil.com/scie-sabre-dewalt/147113-productdcs386nt-xj.html",
+     "kg": 1.8
+    }
+   ],
+   "note": "Scie sabre XR FlexVolt Advantage DCS386NT, machine nue. Désaccord fort entre les lectures : 3,5 kg vs 1,8 kg pour le poids nu (écart bien >60%, la valeur 1,8 kg semble contaminée par une autre référen"
   }
  }
 }
