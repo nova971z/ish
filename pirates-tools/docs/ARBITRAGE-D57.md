@@ -263,19 +263,52 @@ et son prix étaient LÀ le 15/08, pas que la tuile est fautive.
 | 201 | D21570K | 481,34 → 481,40 (353,97) | aucune trace |
 | 203 | DWHT0-43172 | 157,57 → 157,60 (90,99) | aucune trace |
 
-## Les gestes qui restent, dans l'ordre de l'argent
+## Décision de l'user après lecture (15/08, mot pour mot)
 
-1. **Les 8 REJETÉES d'abord** : leur coût stocké est suspect — tout recalcul
-   global du catalogue doit les exclure tant qu'une tuile nue ne les a pas
-   réécrites (DCF894N-XJ, DCH273P1T-QW, DXV23PTA, DCM200N, DCS350NT-XJ,
-   P2LRT, DCG414, DCG409).
-2. **Les 59 JUSTIFIÉES** : recalcul depuis le coût stocké (écran admin) ou
-   attendre que le prochain balayage post-correctifs les applique seul —
-   la tuile de chacune a été revue le 15/08.
-3. **Les 94 NON CONFIRMÉES** : rien à la main. Balayages suivants + gel 14 j.
-4. La fiche **P2LRT** (réf tronquée) est un défaut de données à corriger
-   indépendamment des prix.
+**« Non, nous, on applique rien du tout, c'est le traqueur et le parseur qui
+doivent faire leur travail correctement ! »** — AUCUNE application manuelle,
+jamais. La colonne « geste » ci-dessus est donc amendée : le seul geste
+autorisé est de laisser tourner le traqueur, et de réparer le traqueur si lui
+ne fait pas son travail.
+
+## Constat sur le balayage suivant (zip n°7, pages 269-335, même soir)
+
+Le balayage d'après — parseur **identique au dépôt** (empreinte
+`14f44a28bfaa5c00-360255`, vérifiée localement) — mesure ceci sur 67 pages
+complètes :
+- `applied` **0** · `haussesDifferees` **0** · `unchanged` **1205** ·
+  `flagged` 167 · `unknown` 1491 · `sansRef` 925.
+- Or « unchanged » dans le code n'est PAS « coût inchangé » : c'est
+  **« prix modèle recalculé ≡ prix courant à 2 centimes près »**
+  (`api/admin.js`, test `Math.abs(newPrice - cur) < 0.02` — `newPrice` est
+  recalculé à CHAQUE lecture depuis le coût frais). Le traqueur répare donc
+  la dérive TOUT SEUL, par construction, pour toute fiche appariée.
+- **Conséquence mesurée : toute la population appariée est déjà au modèle.**
+  Les hausses justifiées dont la tuile s'apparie n'ont plus rien en attente —
+  le traqueur avait déjà fait son travail. Aucun écran, aucun geste.
+- Les 8 REJETÉES : aucune n'a écrit quoi que ce soit (0 applied, 0 différé) —
+  la garde tient, leurs coûts suspects restent inertes.
+- Les packs à chariot (fiches `DWK600T`…`DWK1203T`) restent `unknown` :
+  la tuile idealo s'écrit `DWK600` sans T. ⛔ **On ne recolle PAS T↔sans-T,
+  et c'est prouvé** : idealo porte À LA FOIS « DWK900T (3×5,0 Ah + 4×TSTAK
+  VI) » à 1743,00 € ET « DWK900 (3×5,0 Ah + caddy 3in1) » à 1903,00 € —
+  DEUX packs différents sous le même numéro. Recoller écrirait le prix du
+  mauvais pack (M-28 : rapprocher fabrique des faux jumeaux). Ces fiches
+  vivent de leur propre tuile T quand elle paraît ; sinon gel 14 j.
+- `rej:"chariot"` sur ces tuiles n'est PAS un refus : c'est le champ
+  `typeRejete` — le titre disait « chariot », la nomenclature (DWK = pack
+  d'outils) a gagné, l'écarté reste lisible. Comportement voulu.
+- Divers : 1 tuile au titre tronqué (« DeWalt DWK », 347 €) → sansRef, à
+  raison ; 1 id refusé connu (`d125/8`, décision user en attente) ;
+  1 fiche verrouillée relevée sans écriture.
+
+## Ce qui reste, dans l'ordre de l'argent — SANS geste manuel
+
+1. Les 8 REJETÉES : coût stocké suspect mais INERTE (rien ne l'applique) ;
+   une vraie tuile nue les réécrira, le gel 14 j couvre l'attente.
+2. Les 94 NON CONFIRMÉES : balayages suivants + gel 14 j. Rien d'autre.
+3. La fiche **P2LRT** (réf tronquée) et l'id **`d125/8`** : défauts de
+   DONNÉES à corriger un jour — indépendants des prix, décision user.
 
 *Ma session ne peut ni lire ni écrire Firestore (CONNECT 403, définitif) :
-cet arbitrage classe et prouve ; l'écriture passe par le traqueur ou
-l'écran admin.*
+ce registre classe et prouve ; l'écriture appartient au traqueur seul.*
