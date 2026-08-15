@@ -1822,10 +1822,23 @@ module.exports = async function handler(req, res) {
           });
           if (!refus.length) {
             patch.images = images;
-            /* La carte du catalogue montre TOUJOURS le premier visuel : les
-               laisser diverger afficherait un produit dans la grille et un
-               autre sur sa fiche. */
-            if (images.length) patch.img = images[0];
+            /* ⛔⛔ LA VIGNETTE NE RECOPIE PLUS LA PHOTO — ELLE SE DÉRIVE.
+               Constaté sur son écran le 15/08/2026 : « fiche trop lourde après
+               fusion : 1 395 441 octets pour un budget de 950 000 ». La cause
+               n'était pas sa photo (≈ 700 Ko, parfaitement raisonnable) mais le
+               fait qu'on la stockait DEUX FOIS dans le même document — une
+               fois dans `images[0]`, une fois dans `img`. Un document plafonne
+               à 1 Mio : la moitié du budget partait en doublon pur.
+               ⇒ On n'écrit plus que `images`. La vignette est calculée À LA
+               LECTURE (`applyOverrides`, api/_lib/catalog.js) : la carte du
+               catalogue montre TOUJOURS le premier visuel — invariant tenu —
+               et le document pèse deux fois moins.
+               ⚠️ `img` est mis à `null` EXPRÈS, jamais laissé tel quel : une
+               ancienne vignette (chemin de fichier) survivrait à la fusion et
+               la grille montrerait l'ancien visuel pendant que la fiche montre
+               le nouveau. Une valeur nulle coûte quelques octets et laisse la
+               dérivation faire son travail. */
+            if (images.length) patch.img = null;
           }
         }
       }

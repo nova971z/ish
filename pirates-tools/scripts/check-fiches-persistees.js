@@ -129,6 +129,70 @@ module.exports = async function checkFichesPersistees() {
       + 'compressée) doit PASSER le budget — sinon plus aucune fiche à photo n\'est possible '
       + 'et « tout refuser » satisferait le contrôle précédent.');
   }
+  /* ⓪ bis — LA VIGNETTE NE SE STOCKE PLUS EN DOUBLE (15/08/2026).
+     Mesuré sur l'écran de l'user : sa fiche était refusée à 1 395 441 octets
+     pour un budget de 950 000. Sa photo n'était pas trop lourde — elle était
+     écrite DEUX FOIS dans le même document (`images[0]` et `img`). Le doublon
+     mangeait la moitié du budget et rendait toute fiche à photo impossible. */
+  var catalogSrc = fs.readFileSync(path.join(RACINE, 'api/_lib/catalog.js'), 'utf8');
+  var adminSrcImg = fs.readFileSync(path.join(RACINE, 'api/admin.js'), 'utf8');
+  if (/patch\.img\s*=\s*images\[0\]/.test(adminSrcImg)) {
+    errors.push('[check-fiches-persistees] ⛔⛔ ARGENT : la vignette RECOPIE de nouveau le '
+      + 'premier visuel dans le même document. Une photo compte alors DEUX fois : la moitié du '
+      + 'budget part en doublon pur, et une fiche à photo redevient impossible à enregistrer.');
+  }
+  if (!/fusion\.img\s*=\s*fusion\.images\[0\]/.test(catalogSrc)) {
+    errors.push('[check-fiches-persistees] ⛔ …et la vignette doit être DÉRIVÉE à la lecture '
+      + '(api/_lib/catalog.js). Sans la dérivation, ne plus la stocker laisserait les cartes du '
+      + 'catalogue sans visuel — on aurait échangé un blocage contre une grille vide.');
+  }
+  /* Et la preuve chiffrée : le poids réel de sa fiche, avec et sans doublon. */
+  var PHOTO = 'data:image/webp;base64,' + new Array(697701 - 23).join('A');
+  var avecDoublon = limites.docDansLeBudget({ sku: 'ZZP2', title: 't', price: 1,
+    images: [PHOTO], img: PHOTO });
+  var sansDoublon = limites.docDansLeBudget({ sku: 'ZZP2', title: 't', price: 1,
+    images: [PHOTO], img: null });
+  if (avecDoublon.ok) {
+    errors.push('[check-fiches-persistees] ⛔ PRÉALABLE : le témoin du doublon doit DÉPASSER le '
+      + 'budget (obtenu ' + JSON.stringify(avecDoublon) + ') — sinon il ne prouve rien.');
+  }
+  if (!sansDoublon.ok) {
+    errors.push('[check-fiches-persistees] ⛔⛔ ARGENT : une photo de ~700 Ko stockée UNE SEULE '
+      + 'fois doit PASSER le budget (obtenu ' + JSON.stringify(sansDoublon) + '). Si elle ne '
+      + 'passe pas, l\'user ne peut toujours pas mettre de photo — le blocage qu\'il a '
+      + 'photographié le 15/08/2026.');
+  }
+
+  /* ⓪ ter — LA DÉRIVATION COMBLE UN VIDE, ELLE N'ÉCRASE JAMAIS.
+     Les fiches du fichier portent un chemin d'image (`images/posters/…`) qui
+     doit rester maître : une dérivation gourmande remplacerait le poster de
+     l'user par un visuel importé, sur TOUT le catalogue d'un coup. */
+  var appliquer = null;
+  try { appliquer = require(path.join(RACINE, 'api/_lib/catalog.js'))._internals.applyOverrides; }
+  catch (eA) { /* signalé juste après */ }
+  if (typeof appliquer !== 'function') {
+    errors.push('[check-fiches-persistees] ⛔ PRÉALABLE : `applyOverrides` n\'est pas atteignable '
+      + '— la dérivation de vignette n\'a pas pu être éprouvée sur le vrai chemin.');
+  } else {
+    var POSTER = 'images/posters/zz-temoin.webp';
+    var VISUEL = 'data:image/webp;base64,AAAA';
+    var avecPoster = appliquer([{ id: 'zz-a', img: POSTER }],
+      { 'zz-a': { images: [VISUEL] } })[0];
+    if (!avecPoster || avecPoster.img !== POSTER) {
+      errors.push('[check-fiches-persistees] ⛔⛔ la dérivation ÉCRASE une vignette existante '
+        + '(obtenu « ' + (avecPoster && avecPoster.img) + ' » au lieu du poster). Les visuels '
+        + 'sont le travail de l\'user : un poster remplacé sans qu\'il l\'ait demandé, c\'est '
+        + 'tout le catalogue qui change d\'apparence d\'un coup.');
+    }
+    var sansVignette = appliquer([{ id: 'zz-b', img: null }],
+      { 'zz-b': { images: [VISUEL] } })[0];
+    if (!sansVignette || sansVignette.img !== VISUEL) {
+      errors.push('[check-fiches-persistees] ⛔⛔ …et quand la vignette MANQUE, elle DOIT se '
+        + 'dériver du premier visuel (obtenu « ' + (sansVignette && sansVignette.img) + ' »). '
+        + 'Sans ça, les fiches enregistrées avec photo apparaîtraient sans visuel au catalogue.');
+    }
+  }
+
   var adminSrcBudget = fs.readFileSync(path.join(RACINE, 'api/admin.js'), 'utf8');
   if ((adminSrcBudget.match(/docDansLeBudget/g) || []).length < 2) {
     errors.push('[check-fiches-persistees] ⛔ le budget de document n\'est plus vérifié aux DEUX '

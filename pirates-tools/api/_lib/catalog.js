@@ -211,6 +211,20 @@ function applyOverrides(products, overrides) {
       var patch = overrides[p.id] || overrides[p.slug] || null;
       if (!patch) return p;
       var fusion = Object.assign({}, p, patch);
+      /* ⛔⛔ LA VIGNETTE SE DÉRIVE DU PREMIER VISUEL — elle n'est plus STOCKÉE.
+         Motif mesuré sur l'écran de l'user le 15/08/2026 : une fiche refusée à
+         « 1 395 441 octets pour un budget de 950 000 » parce que sa photo était
+         écrite DEUX FOIS dans le même document (`images[0]` et `img`). Un
+         document plafonne à 1 Mio : la moitié du budget partait en doublon.
+         ⇒ `api/admin.js` n'écrit plus que `images` ; la vignette se calcule
+         ici, à chaque lecture. L'invariant tient — la carte du catalogue montre
+         TOUJOURS le premier visuel de la fiche, elles ne peuvent plus diverger.
+         ⚠️ On ne remplace JAMAIS une vignette déjà renseignée : les fiches du
+         fichier portent un chemin d'image (`images/posters/…`) qui doit rester
+         maître. La dérivation ne comble qu'un vide. */
+      if (!fusion.img && Array.isArray(fusion.images) && fusion.images.length) {
+        fusion.img = fusion.images[0];
+      }
       /* ── L'ÉTIQUETTE « EN PROMO » EXPIRE À LA LECTURE ────────────────────
          Demande de l'user : au bout de deux mois au même prix, ce n'est plus
          une promotion, c'est le nouveau prix — on retire la mention.
