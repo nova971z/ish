@@ -2488,6 +2488,402 @@
     }
    ],
    "note": "4 sites distincts s'accordent dans un intervalle cohérent (écart 28%, < 60%) pour le DCM575X1(-QW) : castorama.fr et racetools.fr donnent 5,68 kg (poids en kit, avec batterie 9Ah) ; kamody.fr et beyon"
+  },
+  "DCM848N": {
+   "kg": 2.5,
+   "sources": [
+    {
+     "url": "https://my.dewalt.global/product/dcm848n-xj/18v-5-inches-brushless-dual-action-variable-speed-polisher-bare",
+     "kg": 2.5
+    },
+    {
+     "url": "https://www.screwfix.com/p/dewalt-dcm848n-xj-125mm-18v-li-ion-xr-brushless-cordless-dual-action-polisher-bare/942xk",
+     "kg": 2.5
+    },
+    {
+     "url": "https://www.klium.com/en/dewalt-dcm848n-xj-18v-xr-brushless-cordless-angle-polisher-excentric-125mm-without-battery-and-charger-127566",
+     "kg": 2.5
+    }
+   ],
+   "note": "Polisseuse orbitale DCM848N-XJ, machine nue (sans batterie). Poids sans batterie = 2,5 kg (avec batterie = 3,1 kg), valeur identique sur le site fabricant et deux revendeurs distincts."
+  },
+  "DCM849N": {
+   "kg": 1.9,
+   "sources": [
+    {
+     "url": "https://my.dewalt.global/product/dcm849n-xj/18v-7-brushless-variable-speed-rotary-polisher-tool-only",
+     "kg": 1.9
+    },
+    {
+     "url": "https://www.screwfix.com/p/dewalt-dcm849n-xj-180mm-18v-li-ion-xr-brushless-cordless-rotary-polisher-bare/993xk",
+     "kg": 1.9
+    },
+    {
+     "url": "https://www.toolstation.com/dewalt-dcm849n-xj-18v-xr-brushless-rotary-polisher/p99081",
+     "kg": 1.9
+    }
+   ],
+   "note": "Polisseuse excentrique (rotary) DCM849N-XJ, machine nue. Poids = 1,9 kg, valeur identique sur le site fabricant et deux revendeurs distincts."
+  },
+  "DCMAS5713": {
+   "kg": 5.4,
+   "sources": [
+    {
+     "url": "https://www.leroymerlin.fr/produits/bloc-moteur-xr-flexvolt-54v-combisysteme-solo-dewalt-dcmas5713n-xj-90823574.html",
+     "kg": 5.4
+    },
+    {
+     "url": "https://www.cotebrico.fr/accessoires-pour-debroussailleuse/9900-bloc-moteur-xr-flexvolt-54v-combisysteme-solo-dewalt-dcmas5713n-xj-5035048737019.html",
+     "kg": 5.4
+    },
+    {
+     "url": "https://www.bricomarche.com/p/combisysteme-dewalt-dcmas5713n-xj-xr-flexvolt-54v-bloc-moteur-vendu-sans-batterie-/5035048737019",
+     "kg": 5.4
+    }
+   ],
+   "note": "Bloc moteur combisysteme DCMAS5713N-XJ, machine nue (sans batterie/chargeur). Poids du bloc moteur seul = 5,4 kg, valeur concordante sur trois enseignes francaises independantes. Deux valeurs isolees "
+  },
+  "DCMBA572": {
+   "kg": 3.1,
+   "sources": [
+    {
+     "url": "https://www.dewalt.com.au/product/dcmba572n-xe/54v-xr-flexvolt-blower-tool-only",
+     "kg": 3.1
+    },
+    {
+     "url": "https://racetools.fr/products/souffleur-dewalt-dcmba572n-54v-xr-machine-nue",
+     "kg": 3.1
+    },
+    {
+     "url": "https://www.klium.com/en/dewalt-dcmba572n-xj-54v-xr-flexvolt-axial-battery-blower-without-battery-and-charger-127543",
+     "kg": 3.1
+    }
+   ],
+   "note": "Souffleur axial DCMBA572N-XJ, machine nue 54V (sans batterie/chargeur). Poids = 3,1 kg confirme par le site fabricant (DeWALT Australie) et deux revendeurs francais independants. Des valeurs isolees p"
+  },
+  "DCMBBL800": {
+   "kg": 8.9,
+   "sources": [
+    {
+     "url": "https://www.kingvert.fr/produit/souffleur-dorsal-a-batterie-dewalt-dcmbbl800n-xj-dewalt/37331",
+     "kg": 8.9
+    },
+    {
+     "url": "https://www.contorion.fr/p/dewalt-souffleur-sans-fil-dcmbbl800n-xj-flexvolt-54v-76131356",
+     "kg": 8.9
+    },
+    {
+     "url": "https://www.manomano.fr/p/dewalt-dcmbbl800n-xj-souffleur-de-feuilles-sans-fil-54v-xr-flexvolt-brushless-sac-a-dos-sans-batterie-ni-chargeur-93440053",
+     "kg": 8.9
+    }
+   ],
+   "note": "Souffleur dorsal 2x54V, poids du corps machine seule (sans batterie ni chargeur)."
+  },
+  "DCMBC723": {
+   "kg": 7.6,
+   "sources": [
+    {
+     "url": "https://www.kingvert.fr/produit/debroussailleuse-forestiere-a-batterie-dewalt-dcmbc723n-xj-dewalt/37316",
+     "kg": 7.6
+    },
+    {
+     "url": "https://jabot.fr/boutique/produit/debroussailleuse-forestiere-dewalt-dcmbc723-54v-xr-flexvolt/",
+     "kg": 7.6
+    },
+    {
+     "url": "https://www.manomano.fr/p/debroussailleuse-dewalt-dcmbc723n-xj-54v-95047991",
+     "kg": 7.6
+    }
+   ],
+   "note": "Débroussailleuse forestière 54V, poids machine nue sans batterie."
+  },
+  "DCMBC823": {
+   "kg": 7.2,
+   "sources": [
+    {
+     "url": "https://www.dewalt.fr/produit/dcmbc823n-xj/debroussailleuse-lame-xr-flexvolt-54v-brushless-sans-batterie-ni-chargeur",
+     "kg": 7.2
+    },
+    {
+     "url": "https://jabot.fr/boutique/produit/debroussailleuse-a-lame-dewalt-dcmbc823-54v-flexvolt/",
+     "kg": 7.2
+    },
+    {
+     "url": "https://www.kingvert.fr/produit/debroussailleuse-a-batterie-dewalt-dcmbc823n-xj-dewalt/31994",
+     "kg": 7.2
+    }
+   ],
+   "note": "Débroussailleuse à lame 54V, poids machine nue sans batterie, source constructeur incluse."
+  },
+  "DCMBL562": {
+   "kg": 3.1,
+   "sources": [
+    {
+     "url": "https://www.dewalt.fr/produit/dcmbl562n-xj/souffleur-xr-18v-sans-batterie-ni-chargeur",
+     "kg": 3.1
+    },
+    {
+     "url": "https://www.kingvert.fr/produit/souffleur-a-batterie-dewalt-dcmbl562n-xj-dewalt/31997",
+     "kg": 3.1
+    },
+    {
+     "url": "https://jabot.fr/boutique/produit/souffleur-a-batterie-dewalt-dcmbl562-18v-xr-advantage/",
+     "kg": 3.1
+    }
+   ],
+   "note": "Souffleur 18V XR machine nue (DCMBL562N-XJ), source constructeur incluse."
+  },
+  "DCMBL777": {
+   "kg": 3.2,
+   "sources": [
+    {
+     "url": "https://www.dewalt.fr/produit/dcmbl777x1-qw/souffleur-axial-xr-flexvolt-54v-3-ah-li-ion-brushless",
+     "kg": 3.2
+    },
+    {
+     "url": "https://www.kamody.fr/dewalt-dcmbl777x1-qw-souffleur-axial-flexvolt-xr-54v-44156",
+     "kg": 3.2
+    },
+    {
+     "url": "https://www.bati-avenue.com/souffleur-axial-xr-flexvolt-54v-3ah-li-ion-brushless-dcmbl777x1-qw-dewalt-s032dcmbl777x1qw.html",
+     "kg": 3.2
+    }
+   ],
+   "note": "Souffleur axial 54V, poids machine seule sans batterie ; source constructeur incluse."
+  },
+  "DCMCS565": {
+   "kg": 3.6,
+   "sources": [
+    {
+     "url": "https://www.bati-avenue.com/tronconneuse-compacte-30-cm-xr-18v-brushless-dcmcs565n-xj-dewalt-s032dcmcs565nxj.html",
+     "kg": 3.5
+    },
+    {
+     "url": "https://www.clickoutil.com/tronconneuse-dewalt/152531-productdcmcs565n-xj.html",
+     "kg": 3.6
+    },
+    {
+     "url": "https://www.brikum.fr/products/tronconneuse-compacte-dewalt-dcmcs565n-18-v-xr-30-cm",
+     "kg": 3.7
+    }
+   ],
+   "note": "Tronçonneuse élagueuse 18V 30cm, code exact DCMCS565N-XJ vérifié sur chaque source (une variante proche DCM565N existe sous un autre nom, écartée) ; léger écart 3.5-3.7 kg entre revendeurs, valeur méd"
+  },
+  "DCMCS574": {
+   "kg": 5,
+   "sources": [
+    {
+     "url": "https://www.sanitino.fr/dewalt-outillage-tronconneuse-sans-fil-54-v-45-cm-dcmcs574n",
+     "kg": 5
+    },
+    {
+     "url": "https://jabot.fr/boutique/produit/tronconneuse-dewalt-dcmcs574-54v-xr-flexvolt/",
+     "kg": 5
+    },
+    {
+     "url": "https://www.kamody.fr/dewalt-dcmcs574n-tronconneuse-45cm-xr-flexvolt-54v-sans-batterie-20016",
+     "kg": 5
+    }
+   ],
+   "note": "Tronçonneuse 54V 45cm, poids machine nue sans batterie."
+  },
+  "DCMCS575": {
+   "kg": 5.5,
+   "sources": [
+    {
+     "url": "https://www.kamody.fr/dewalt-dcmcs575x1-tronconneuse-50cm-xr-flexvolt-54v-1x90ah-25177",
+     "kg": 5
+    },
+    {
+     "url": "https://jabot.fr/boutique/produit/tronconneuse-dewalt-dcmcs575-54v-xr-flexvolt/",
+     "kg": 5.7
+    },
+    {
+     "url": "https://www.sanitino.fr/dewalt-outillage-tronconneuse-54v-aku-50-cm-1x-batterie-9-0-ah-flexvolt-chargeur-dcmcs575x1",
+     "kg": 5.5
+    }
+   ],
+   "note": "Tronçonneuse 54V 50cm, poids machine nue ; écart 5.0-5.7 kg selon les sources, valeur médiane/plausible retenue (plus lourde que la DCMCS574 45cm, cohérent)."
+  },
+  "DCMCST632": {
+   "kg": 3.1,
+   "sources": [
+    {
+     "url": "https://www.dewalt.fr/produit/dcmcst632n-xj/tronconneuse-delagage-30-cm-xr-flexvolt-54v-brushless-sans-batterie-ni-chargeur",
+     "kg": 3.1
+    },
+    {
+     "url": "https://www.perdriset.fr/tronconneuse-delaguage-dewalt-dcmcst632n-30cm-xr-54v-bruhless-xml-378_379_384-2003.html",
+     "kg": 3.1
+    },
+    {
+     "url": "https://www.kingvert.fr/produit/elagueuse-a-batterie-dewalt-dcmcst632n-xj-dewalt/37339",
+     "kg": 3.1
+    }
+   ],
+   "note": "Tronçonneuse top-handle 30cm, poids machine nue 3.1 kg (distinct du poids avec batterie annoncé à 4.06 kg) ; source constructeur incluse."
+  },
+  "DCMHT520": {
+   "kg": 1.4,
+   "sources": [
+    {
+     "url": "https://jabot.fr/boutique/produit/cisaille-a-arbustes-dewalt-dcmht520-18v-xr/",
+     "kg": 1.4
+    },
+    {
+     "url": "https://www.fixami.fr/dewalt-dcmht520n-xj-corps-de-taille-haie-sans-fil-li-ion-18-v-20-cm.html",
+     "kg": 1.4
+    },
+    {
+     "url": "https://www.clickoutil.com/taille-haie-dewalt/155639-productdcmht520n-xj.html",
+     "kg": 1.4
+    }
+   ],
+   "note": "Taille-haie compact 18V 20cm, machine nue. Valeur convergente sur les 3 sites (aucune valeur discordante rencontree)."
+  },
+  "DCMHT562": {
+   "kg": 3.2,
+   "sources": [
+    {
+     "url": "https://www.screwfix.com/p/dewalt-dcmht562n-xj-55cm-18v-li-ion-xr-brushless-cordless-hedge-trimmer-bare/920yw",
+     "kg": 2.9
+    },
+    {
+     "url": "https://www.powertoolworld.co.uk/dewalt-dcmht562n-xj-55cm-hedge-trimmer-18v-body-only",
+     "kg": 3.2
+    },
+    {
+     "url": "https://www.axminstertools.com/dewalt-dcmht562n-hedge-trimmer-250mm-18v-body-only-113482",
+     "kg": 3.5
+    }
+   ],
+   "note": "Taille-haie 18V 55cm machine nue. Ecart 2,9-3,5 kg selon revendeurs (~21%, sous le seuil de 60%). Valeur retenue au plus plausible dans l'intervalle."
+  },
+  "DCMHT563": {
+   "kg": 2.9,
+   "sources": [
+    {
+     "url": "https://www.misterworker.com/en-us/dewalt/18v-xr-body-only-hedge-trimmer-25mm-gap-no-batteries-no-charger/39754.html",
+     "kg": 2.9
+    },
+    {
+     "url": "https://www.klium.com/en/dewalt-dcmht563n-xj-18v-xr-cordless-hedge-trimmer-55cm-without-battery-and-charger-127116",
+     "kg": 2.9
+    },
+    {
+     "url": "https://todotaladros.com/gb/garden/9382-hedge-trimmer-dewalt-dcmht563n-body-only-5035048728826.html",
+     "kg": 2.9
+    }
+   ],
+   "note": "Taille-haie 18V 55cm machine nue. Valeur convergente sur les 3 sites."
+  },
+  "DCMHT564": {
+   "kg": 3.2,
+   "sources": [
+    {
+     "url": "https://www.screwfix.com/p/dewalt-dcmht564n-xj-55mm-18v-li-ion-xr-brushless-cordless-hedge-trimmer-bare/794yw",
+     "kg": 3.2
+    },
+    {
+     "url": "https://www.diy.com/departments/dewalt-dcmht564n-18v-hedge-trimmer/5035048838655_BQ.prd",
+     "kg": 3.2
+    },
+    {
+     "url": "https://cnspowertools.co.uk/dewalt-dcmht564n-xj-18v-xr-55cm-hedge-trimmer-body.html",
+     "kg": 2.9
+    }
+   ],
+   "note": "Taille-haie 18V 55cm machine nue. Ecart 2,9-3,2 kg (~10%), sous le seuil. Valeur la plus citee retenue."
+  },
+  "DCMHT567": {
+   "kg": 3.53,
+   "sources": [
+    {
+     "url": "https://www.diy.com/departments/dewalt-dcmht567n-xj-xr-hedge-trimmer-18v-bare-unit-dewdcmht567n/5035048842454_BQ.prd",
+     "kg": 3.53
+    },
+    {
+     "url": "https://www.powertoolsdirect.com/dewalt-power-tools-dcmht567n-xj-dcmht567n-xr-hedge-trimmer-18v-bare-unit-5035048842454",
+     "kg": 3.53
+    },
+    {
+     "url": "https://www.lawson-his.co.uk/dewalt-dcmht567n-xj-xr-body-only-brushless-18v-hedge-trimmer",
+     "kg": 3.53
+    }
+   ],
+   "note": "Taille-haie 18V machine nue. Valeur convergente sur les 3 sites."
+  },
+  "DCMHT573": {
+   "kg": 3.5,
+   "sources": [
+    {
+     "url": "https://www.screwfix.com/p/dewalt-dcmht573n-xj-65cm-54v-li-ion-xr-flexvolt-brushless-cordless-hedge-trimmer-bare/269pg",
+     "kg": 3.4
+    },
+    {
+     "url": "https://www.misterworker.com/en-us/dewalt/54v-xr-flexvolt-hedge-trimmer-with-31-mm-clearance-without-battery-and-charger-dcmht573n-xj/108567.html",
+     "kg": 3.73
+    },
+    {
+     "url": "https://www.klium.com/en/dewalt-dcmht573n-xj-54v-xr-flexvolt-cordless-hedge-trimmer-65cm-without-battery-and-charger-129880",
+     "kg": 3.5
+    }
+   ],
+   "note": "Taille-haie 54V FlexVolt 65cm machine nue. Ecart 3,4-4,1 kg selon revendeurs (~21%, sous le seuil). Valeur mediane retenue."
+  },
+  "DCMPH566": {
+   "kg": 3.6,
+   "sources": [
+    {
+     "url": "https://www.misterworker.com/en-us/dewalt/18v-xr-pole-hedge-tr-50ah-no-batteries-no-charger/39756.html",
+     "kg": 3.6
+    },
+    {
+     "url": "https://www.klium.com/en/dewalt-dcmph566n-xj-18v-xr-brushless-cordless-hedge-trimmer-55cm-on-handle-without-battery-and-charger-129715",
+     "kg": 3.6
+    },
+    {
+     "url": "https://www.powertoolworld.co.uk/dewalt-dcmph566n-xj-18v-xr-pole-hedge-trimmer-body-only",
+     "kg": 4
+    }
+   ],
+   "note": "Taille-haie sur perche orientable 18V machine nue. Ecart 3,6-4 kg (~11%), sous le seuil. Valeur la plus citee retenue."
+  },
+  "DCMPP568": {
+   "kg": 1.37,
+   "sources": [
+    {
+     "url": "https://www.powertoolsdirect.com/dewalt-dcmpp568n-xj-dcmpp568n-xr-pruner-18v-bare-unit-5035048788547",
+     "kg": 1.3
+    },
+    {
+     "url": "https://www.powertoolworld.co.uk/dewalt-dcmpp568n-18v-xr-cordless-38mm-pruner-body-only",
+     "kg": 1.37
+    },
+    {
+     "url": "https://www.misterworker.com/en/dewalt/18v-xr-hand-pruner-without-batteries-or-charger-dcmpp568n-xj/75765.html",
+     "kg": 1.4
+    }
+   ],
+   "note": "Secateur 18V machine nue. Ecart 1,3-1,4 kg (~7%), tres serre. Valeur de fiche technique retenue."
+  },
+  "DCMPP569": {
+   "kg": 3.3,
+   "sources": [
+    {
+     "url": "https://its.co.uk/pd/dewalt-dcmpp569n-xj-18v-xr-brushless-pole-pruner-body-_dewdcmpp569n.htm",
+     "kg": 3.3
+    },
+    {
+     "url": "https://www.dm-tools.co.uk/DeWALT-Power-Tools-DCMPP569N-XR-Pole-Pruner-18V-Bare-Unit/P28128/emapr180425",
+     "kg": 3.3
+    },
+    {
+     "url": "https://www.ukplanettools.co.uk/dewalt-dcmpp569n-18v-xr-pole-pruner-bare-unit-dcmpp569n-xj.html",
+     "kg": 3.3
+    }
+   ],
+   "note": "Secateur sur perche XR 18V coupe 38mm, machine nue (sans batterie). Valeur convergente sur les 3 sites."
   }
  },
  "nonResolues": {
@@ -4713,6 +5109,178 @@
    "motif": "statut introuvable",
    "sources": [],
    "note": "Aucune référence DCM586 « souffleur 54V » n'apparaît dans les résultats de recherche (2 recherches dédiées). Seuls des produits voisins mais DIFFÉRENTS existent : DCV586 (aspirateur eau/poussières 54V"
+  },
+  "DCLE14201": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Niveau laser DCLE14201G/GB : specifications (portee, precision, autonomie) trouvees sur plusieurs sites (dewalt.com, ManualsLib, Home Depot) mais aucun extrait ne cite le poids en kg. Le manuel PDF of"
+  },
+  "DCM651PB": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Aucune fiche produit retrouvee sous ce code exact apres 3 recherches ; seuls des voisins (DCM561PB coupe-bordure, DCM563PB taille-haie) apparaissent, et un seul listing prix (~706 EUR, revendeur FR) s"
+  },
+  "DCMASBC1": {
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.misterworker.com/en/dewalt/54v-xr-brushcutter-attachment-head-for-multifunction-dcmasbc1n-xj/52143.html",
+     "kg": 3
+    },
+    {
+     "url": "https://www.cef.co.uk/catalogue/products/5052031-dcmasbc1n-xj-brush-cutter-attachment",
+     "kg": 4.15
+    }
+   ],
+   "note": "Tete debroussailleuse DCMASBC1N-XJ (accessoire combisysteme). Valeurs trouvees tres discordantes selon les sources : ~2,55 kg (variante XE citee comme poids net), ~3 kg (estimation Mister Worker), 4,1"
+  },
+  "DCMASED57": {
+   "motif": "statut introuvable",
+   "sources": [
+    {
+     "url": "https://www.mitre10.com.au/dewalt-edger-split-boom-54v-9ah-kit-dcmased57x1-xe-7665318",
+     "kg": 11.35
+    }
+   ],
+   "note": "Le code correspond a une tete/kit edger (dresse-bordures) DCMASED57X1, pas a un taille-haie comme indique dans la description fournie. Seule valeur de poids trouvee = 11,35 kg pour le KIT complet DCMA"
+  },
+  "DCMASED9": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Le code correspond a une tete d'accessoire EDGER (dresse-bordures pour combisysteme DCMAS5713), pas a une 'tete de coupe a bras articule' comme indique dans la description fournie. Produit confirme ex"
+  },
+  "DCMASPS5": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Tete elagueuse sur perche DCMASPS5N-XJ (accessoire combisysteme). Produit confirme sur le site fabricant dewalt.fr et plusieurs revendeurs (Maxoutil, Bricomarche, Zone Outillage, Distriartisan) avec d"
+  },
+  "DCMBC812": {
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.dewalt.fr/produit/dcmbc812n-xj/coupe-bordures-lame-xr-flexvolt-54v-brushless-sans-batterie-ni-chargeur",
+     "kg": 6.8
+    },
+    {
+     "url": "https://www.emmetistore.nl/products/bosmaaier-dewalt-dcmbc812n-xj-54v",
+     "kg": 6.8
+    }
+   ],
+   "note": "Seulement 2 sources distinctes retrouvées portant le code exact DCMBC812N-XJ (une 3e recherche ciblée n'a rien renvoyé de pertinent) ; valeur 6.8 kg à confirmer."
+  },
+  "DCMCST635": {
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.jardimax.com/p/301300-elagueuse-a-batterie-dewalt-dcmcst635n-xj-xr-flexvolt-54v.html",
+     "kg": 5.3
+    },
+    {
+     "url": "https://www.fixami.fr/dewalt-dcmcst635x1-54v-xr-flexvolt-ensemble-de-tronconneuse-a-manche-superieur-sans-fil-1x-batterie-9.0ah-moteur-sans-balais-35cm.html",
+     "kg": 3.3
+    }
+   ],
+   "note": "DCMCST635N tronconneuse 54V 35cm machine nue. Fort desaccord entre sources: 5,3 kg (majoritaire) vs 3,3 kg (une source, page qui melange peut-etre le kit DCMCST635X1 avec batterie 9Ah). Ecart >60%. Bu"
+  },
+  "DCMPS567": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la campagne épuisé (200/200) avant la 1ère recherche pour cette référence — aucune recherche n'a pu être exécutée."
+  },
+  "DCMPS635": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la campagne épuisé (200/200) avant la 1ère recherche pour cette référence — aucune recherche n'a pu être exécutée."
+  },
+  "DCMPW1600": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la campagne épuisé (200/200) avant la 1ère recherche pour cette référence — aucune recherche n'a pu être exécutée."
+  },
+  "DCMST561": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la campagne épuisé (200/200) avant la 1ère recherche pour cette référence — aucune recherche n'a pu être exécutée."
+  },
+  "DCMST901": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la campagne épuisé (200/200) avant la 1ère recherche pour cette référence — aucune recherche n'a pu être exécutée."
+  },
+  "DCMST911": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la campagne épuisé (200/200) — aucune recherche tentée (arrêt après échecs des 5 premières références du lot)."
+  },
+  "DCMST922": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la campagne épuisé (200/200) — aucune recherche tentée (arrêt après échecs des 5 premières références du lot)."
+  },
+  "DCMW564": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la campagne épuisé (200/200) — aucune recherche tentée (arrêt après échecs des 5 premières références du lot)."
+  },
+  "DCMWP134": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la campagne épuisé (200/200) — aucune recherche tentée (arrêt après échecs des 5 premières références du lot)."
+  },
+  "DCMWP500": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la campagne épuisé (200/200) — aucune recherche tentée (arrêt après échecs des 5 premières références du lot)."
+  },
+  "DCMWSP156": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget de recherche web de la session épuisé (200/200) avant toute recherche exploitable — aucune requête n'a pu être exécutée pour cette référence."
+  },
+  "DCMWSP550": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget de recherche web de la session épuisé (200/200) avant toute recherche exploitable — aucune requête n'a pu être exécutée pour cette référence."
+  },
+  "DCMWSP660": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget de recherche web de la session épuisé (200/200) avant toute recherche exploitable — aucune requête n'a pu être exécutée pour cette référence."
+  },
+  "DCN45": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget de recherche web de la session épuisé (200/200) avant toute recherche exploitable — aucune requête n'a pu être exécutée pour cette référence."
+  },
+  "DCN650": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget de recherche web de la session épuisé (200/200) avant toute recherche exploitable — aucune requête n'a pu être exécutée pour cette référence."
+  },
+  "DCN660": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget de recherche web de la session épuisé (200/200) — aucune requête tentée pour cette référence (arrêt après les 5 premiers échecs simultanés pour ne pas gaspiller de tentatives sur un budget déjà"
+  },
+  "DCN662": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget de recherche web de la session épuisé (200/200) — aucune requête tentée pour cette référence."
+  },
+  "DCN680": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget de recherche web de la session épuisé (200/200) — aucune requête tentée pour cette référence."
+  },
+  "DCN681": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget de recherche web de la session épuisé (200/200) — aucune requête tentée pour cette référence."
+  },
+  "DCN682": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget de recherche web de la session épuisé (200/200) — aucune requête tentée pour cette référence."
   }
  }
 }
