@@ -6266,6 +6266,42 @@ module.exports = async function () {
 
   }
 
+  /* ── LE DOUBLON DE CARTE SE COMPTE, IL NE DISPARAÎT PLUS EN SILENCE ──────
+     Mesuré le 15/08/2026 sur DEUX balayages complets : 57-58 tuiles par
+     balayage « comptées, jamais lues » (98,6 %), pertes IDENTIQUES sur les
+     mêmes pages (p4 : 8, p5 : 8, p26 : 5…) — donc systématiques, pas du
+     réseau. Cause : `seen[sku]` jetait la carte revue sans trace (ni items,
+     ni sansRef, ni perdus), alors que la grille répète les produits. Le
+     compteur accusait une PERTE là où le parseur faisait un CHOIX. */
+  (function () {
+    var tuile = 'DeWalt DCS999X9\nPerceuse test\nEn stock\n12 offres\nà partir de 199,00 €\n';
+    var page2 = tuile + tuile;   // la MÊME carte, deux fois — comme sur la vraie grille
+    var r = pp.parseIdealo(page2, 'DEWALT');
+    ok((r.items || []).length === 1,
+      '⛔ deux cartes identiques doivent produire UN seul item (le doublon s\'écarte) — '
+      + 'mesuré : ' + (r.items || []).length);
+    ok(r.doublons === 1,
+      '⛔ le doublon écarté doit être COMPTÉ (`doublons: 1`) — sans ce compte, le '
+      + 'balayage annonce « 60 tuiles, 52 lues » et accuse le parseur d\'une perte '
+      + 'qui est un choix délibéré. Mesuré : ' + JSON.stringify(r.doublons));
+    var ct = pp.compterTuiles ? pp.compterTuiles(page2) : null;
+    ok(!ct || ct.total === (r.items || []).length + (r.sansRef || []).length + (r.doublons || 0),
+      '⛔ l\'arithmétique doit fermer : tuiles comptées = lues + doublons '
+      + '(mesuré : ' + (ct && ct.total) + ' ≠ ' + ((r.items || []).length
+      + (r.sansRef || []).length + (r.doublons || 0)) + ')');
+    /* ⚠️ ON VÉRIFIE L'EXPRESSION EFFECTIVE, PAS LE MOT (M-29) — sabotage du
+       15/08 resté VERT sur `+ 0;` : le compte du parseur était juste, mais
+       `lues` côté admin ne l'additionnait plus, et le « 1,4 % perdu »
+       renaissait dans la réponse. Les deux compteurs de `lues` doivent
+       additionner `auto.doublons`. */
+    var srcAdm = require('fs').readFileSync(
+      require('path').join(__dirname, '..', 'api', 'admin.js'), 'utf8');
+    ok(/const luesBrutes = parsed\.length[\s\S]{0,600}?\+ \(\(auto && auto\.doublons\) \|\| 0\);/.test(srcAdm),
+      '⛔ `luesBrutes` (balayage réel) n\'additionne plus `auto.doublons` : le '
+      + 'compte de tuiles perdues redevient faux dans la réponse');
+    ok(/lues: parsed\.length \+ \(auto\.sansRef \|\| \[\]\)\.length \+ \(auto\.doublons \|\| 0\)/.test(srcAdm),
+      '⛔ le mode à sec n\'additionne plus `auto.doublons` dans `lues`');
+  })();
 
   return errors;
 };

@@ -3871,7 +3871,7 @@ async function handlePriceWatch(req, res, admin, db) {
       const fichesMarqueSec = fichesDeLaMarqueSec.length;
       const couvSec = pwCouvAjouter(brand, parsed.map((x) => x.sku),
         (auto.sansRef || []).map((e) => e.titre),
-        tuiles.total, parsed.length + (auto.sansRef || []).length,
+        tuiles.total, parsed.length + (auto.sansRef || []).length + (auto.doublons || 0),
         planCourant && planCourant.pages,
         { empreinte: empreinteSec, reconnus: reconnusSec.map((r) => r.ficheSku),
           /* Les baisses se cumulent AUSSI à sec : c'est tout l'intérêt de la
@@ -4052,7 +4052,8 @@ async function handlePriceWatch(req, res, admin, db) {
            ont été lus au total ». Le compteur d'instance reste utile pour
            voir un balayage en direct — il ne fait pas foi. */
         page: { empreinte: empreinteSec, tuiles: tuiles.total,
-          lues: parsed.length + (auto.sansRef || []).length },
+          lues: parsed.length + (auto.sansRef || []).length + (auto.doublons || 0),
+          doublons: (auto.doublons || 0) || undefined },
         note: 'MODE À SEC : aucune lecture ni écriture Firestore, aucun prix calculé, '
           + 'aucun quota consommé. Sert à vérifier qu\'un raccourci envoie bien sa page. '
           + 'Retirer &sec=1 pour un vrai relevé.',
@@ -4392,7 +4393,12 @@ async function handlePriceWatch(req, res, admin, db) {
        un correctif qui casse un compteur, c'est E-406 à nouveau.
        ⚠️ `souple.restants` porte déjà ce que NI l'exact NI le souple n'ont placé :
        c'est le seul reste, et `parsed` + ce reste = les tuiles exploitées. */
-    const luesBrutes = parsed.length + ((souple && souple.restants) || []).length;
+    const luesBrutes = parsed.length + ((souple && souple.restants) || []).length
+      /* ⛔ Un doublon de carte est LU puis écarté exprès (même réf, page triée
+         prix croissant : la 1re occurrence est la moins chère). Le compter ici
+         ferme le faux « 1,4 % de tuiles perdues » mesuré sur deux balayages
+         complets du 15/08 — pertes identiques, mêmes pages, 57-58/4018. */
+      + ((auto && auto.doublons) || 0);
     /* ⛔⛔ ET ON BORNE, SANS MASQUER. Mesuré le 04/08 : une page sur 67 rendait
        `lues: 60` pour `tuiles: 59`. Ce n'est PAS le décompte des lignes qui est
        faux, c'est le compte d'ANCRES qui a raté une tuile — les 66 autres pages
@@ -5107,6 +5113,7 @@ async function handlePriceWatch(req, res, admin, db) {
       page: { empreinte: priceParse.empreintePage(text),
         tuiles: tuilesPage,
         lues: luesReelles,
+        doublons: ((auto && auto.doublons) || 0) || undefined,
         /* > 0 : le compte d'ancres a raté une tuile que le parseur, lui, a
            bien découpée. Rendu pour que ça ne se perde pas dans une borne. */
         ecartComptageTuiles: ecartComptageTuiles || undefined },

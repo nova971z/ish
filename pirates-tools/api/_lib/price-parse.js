@@ -1196,7 +1196,7 @@ function parseIdealo(rawText, brand) {
      avec leur titre et leur prix : l'user les VEUT au catalogue, ce qui est
      interdit c'est d'écrire leur prix sur la référence d'un composant. */
   var packs = [];
-  if (!rawText) return { items: out, packs: packs, sansRef: ecartes, perdus: perdus };
+  if (!rawText) return { items: out, packs: packs, sansRef: ecartes, perdus: perdus, doublons: 0 };
   brand = (brand || 'DEWALT');
   var lignes = stripHtml(rawText).split(/\n+/).map(function (l) {
     return l.replace(/[ \t   ]+/g, ' ').trim();
@@ -1254,6 +1254,7 @@ function parseIdealo(rawText, brand) {
      seules. Une règle de secours ne coûte rien ; son absence a coûté un
      relevé entier. */
   var bloc = [], seen = {}, titreOffre = null, vuNbOffres = false, vuVenduPar = false;
+  var doublons = 0;   // cartes revues (même réf, même page) — comptées, jamais muettes
   for (var i = 0; i < lignes.length; i++) {
     var l = lignes[i];
     if (VENDU_PAR.test(l)) {
@@ -1624,7 +1625,19 @@ function parseIdealo(rawText, brand) {
       }
       return;
     }
-    if (seen[sku]) return;
+    /* ⛔⛔ UN DOUBLON N'EST PAS UNE PERTE — MAIS IL SE COMPTE. Mesuré le
+       15/08/2026 sur DEUX balayages complets : 57-58 tuiles par balayage
+       « comptées mais jamais lues » (98,6 %), TOUJOURS sur les mêmes pages
+       (p4 : 8, p5 : 8, p26 : 5…). Cause : cette ligne jetait la carte revue
+       en silence — ni items, ni écartés, ni perdus — alors que la grille
+       répète les produits (l'user, 03/08 : « on peut même le retrouver
+       jusqu'à 10 fois »). `tuiles` les comptait, `lues` jamais : le compteur
+       accusait le parseur d'une perte qui était un choix délibéré.
+       ⚠️ Jeter le doublon reste CORRECT pour l'argent (J4 : aucun prix
+       fabriqué ici) : la page est triée prix croissant, la première
+       occurrence est la moins chère, et le minimum de rafale fait le reste.
+       Ce qui était faux, c'est le SILENCE du compteur. */
+    if (seen[sku]) { doublons++; return; }
     // Prix : on cherche APR\u00c8S le titre, du plus explicite au plus simple.
     var prix = null, iPrix = -1;
     for (var p = iTitre + 1; p < b.length; p++) {
@@ -1750,7 +1763,7 @@ function parseIdealo(rawText, brand) {
     });
   }
 
-  return { items: out, packs: packs, sansRef: ecartes, perdus: perdus };
+  return { items: out, packs: packs, sansRef: ecartes, perdus: perdus, doublons: doublons };
 }
 
 /* \u2500\u2500 AIGUILLAGE DE FORMAT \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
@@ -1777,9 +1790,9 @@ function parseAuto(rawText, brand) {
        ⛔ Une page reconnue, c'est une page dont on tire QUELQUE CHOSE : une
        fiche ou une annonce. Pas seulement une fiche. */
     if ((idea.sansRef || []).length) {
-      return { format: 'idealo', items: [], packs: idea.packs || [], sansRef: idea.sansRef, perdus: idea.perdus };
+      return { format: 'idealo', items: [], packs: idea.packs || [], sansRef: idea.sansRef, perdus: idea.perdus, doublons: idea.doublons || 0 };
     }
-    return { format: 'aucun', items: [], packs: clic.packs, sansRef: clic.sansRef, perdus: idea.perdus };
+    return { format: 'aucun', items: [], packs: clic.packs, sansRef: clic.sansRef, perdus: idea.perdus, doublons: idea.doublons || 0 };
   }
   // Le plus fécond gagne — trois gabarits mutuellement exclusifs sur les
   // vraies pages (mesuré : idealo rend 0 chez les deux autres, et vice versa).
@@ -1787,7 +1800,7 @@ function parseAuto(rawText, brand) {
     /* Les offres marchandes d'idealo (« Vendu par : ») sortent en `sansRef` :
        ce sont des LOTS, leur prix ne s'écrit sur aucune réf tant que l'user
        n'a pas créé la fiche et posé son `srcNom`. Listés, jamais devinés. */
-    return { format: 'idealo', items: idea.items, packs: idea.packs || [], sansRef: idea.sansRef, perdus: idea.perdus };
+    return { format: 'idealo', items: idea.items, packs: idea.packs || [], sansRef: idea.sansRef, perdus: idea.perdus, doublons: idea.doublons || 0 };
   }
   if (clic.items.length > cote.length) {
     return { format: 'clickoutil', items: clic.items, packs: clic.packs, sansRef: clic.sansRef };
