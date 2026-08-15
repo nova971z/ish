@@ -157,7 +157,7 @@ var LISTES = [
       'Preuve exigée : scripts/check-render.js vert + sabotages rouges.'
     ] },
   { nom: 'CATALOGUE ET VISUELS',
-    quand: /pirates-tools\/(products\.json|images\/|models\/|api\/products\.js$|api\/_lib\/(catalog|snapshot|limites|poids-expedie|verif-visibilite)\.js$)/,
+    quand: /pirates-tools\/(products\.json|images\/|models\/|api\/products\.js$|api\/_lib\/(catalog|snapshot|limites|poids-expedie|verif-visibilite|visuels-fiche)\.js$)/,
     points: [
       'priceLocked: true ⇒ le prix n\'est JAMAIS recalculé.',
       'Un produit sans coût d\'achat relevé ne reste pas au catalogue.',

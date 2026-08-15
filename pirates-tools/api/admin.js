@@ -16,6 +16,7 @@ const plans = require('./_lib/traqueur-plans');
 const snapshotLib = require('./_lib/snapshot');
 const limites = require('./_lib/limites');
 const verifVis = require('./_lib/verif-visibilite');
+const visuelsFiche = require('./_lib/visuels-fiche');
 // Ce qu'on refuse d'acheter, et pourquoi. Un seul fichier, fait pour changer.
 const barriere = require('./_lib/barriere-achat');
 
@@ -1861,6 +1862,35 @@ module.exports = async function handler(req, res) {
       }
 
       patch.updatedAt = admin.firestore.FieldValue.serverTimestamp();
+
+      /* ⛔⛔⛔ LES VISUELS QUITTENT LE DOCUMENT DE LA FICHE (15/08/2026).
+         Sa plainte : « je ne peux pas ajouter plus de deux PNG sur un seul
+         produit ». Mesuré : plafond 700 000 caractères par image, budget
+         950 000 octets pour le document entier — deux photos au plafond font
+         1 400 000, donc refus. Les photos vivaient EN BASE64 DANS la fiche, et
+         un document plafonne à 1 Mio. Le formulaire en promettait six.
+         ⇒ Chaque visuel part dans son propre document ; la fiche ne garde
+         qu'un compteur. Le mur disparaît, il ne recule pas.
+         ⚠️ `imagesEnvoyees` conserve ce qu'il a envoyé : c'est LUI qu'on
+         comparera à ce que le public voit, pas le compteur. Vérifier le
+         compteur prouverait qu'on a bien compté, pas qu'il verra ses photos. */
+      let imagesEnvoyees = null;
+      if (patch.images !== undefined) {
+        imagesEnvoyees = patch.images;
+        try {
+          const avantV = await db.collection('product_overrides').doc(id).get();
+          const nAvant = avantV.exists ? Number(avantV.data().nbVisuels || 0) : 0;
+          patch.nbVisuels = await visuelsFiche.ecrireVisuels(
+            db, admin, id, imagesEnvoyees, nAvant);
+          /* Le document de la fiche ne porte plus les octets : il porte le
+             compte. `null` efface proprement d'anciennes photos en clair. */
+          patch.images = patch.nbVisuels ? null : null;
+        } catch (eVis) {
+          return res.status(400).json({ ok: false,
+            error: 'visuels non enregistrés : ' + eVis.message + '. Rien n\'a été modifié.' });
+        }
+      }
+
       /* ⛔⛔ MÊME BUDGET QU'À LA CRÉATION — mais sur le document FUSIONNÉ :
          l'écriture est en merge, c'est le RÉSULTAT qui doit tenir sous le
          plafond, pas le patch seul. Une lecture avant l'écriture (1 lecture)
@@ -1928,7 +1958,18 @@ module.exports = async function handler(req, res) {
            règle, partagée avec `scripts/banc-edition-fiche.js` qui l'éprouve.
            `dataRelue` en 4e argument : c'est le document, pas le patch, qui
            dit si la fiche est masquée. */
-        const vE = verifVis.verdictVisibilite(patch, p, champsPatch, dataRelue);
+        /* ⛔ ON ÉPROUVE CE QU'IL A ENVOYÉ, PAS CE QU'ON A RANGÉ. Depuis que
+           les visuels partent dans leurs propres documents, `patch.images`
+           vaut `null` : comparer ça au public déclarerait « conforme » une
+           fiche dont les photos ne sont jamais revenues. On remet la liste
+           d'origine — c'est elle que l'user doit revoir à l'écran. */
+        const patchVu = imagesEnvoyees
+          ? Object.assign({}, patch, { images: imagesEnvoyees })
+          : patch;
+        const champsVus = imagesEnvoyees
+          ? champsPatch.filter(function (k) { return k !== 'nbVisuels'; })
+          : champsPatch;
+        const vE = verifVis.verdictVisibilite(patchVu, p, champsVus, dataRelue);
         absentsE = vE.absents; visibleE = vE.visible; masqueeE = vE.masquee;
       } catch (eVisE) { console.error('[api/admin] product-edit relecture:', eVisE.message); }
       console.log('[api/admin] product-edit', id, champsPatch.join(','), 'visible=' + visibleE);

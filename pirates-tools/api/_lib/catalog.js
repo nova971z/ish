@@ -10,6 +10,7 @@
 var fs = require('fs');
 var path = require('path');
 var priceParse = require('./price-parse');
+var visuelsFiche = require('./visuels-fiche');
 
 var _cache = null;
 var _cacheTime = 0;
@@ -136,6 +137,25 @@ async function loadOverridesEtat() {
             delete dataR.updatedAt;
             map[d.id] = dataR;
           });
+          /* ⛔⛔ LES VISUELS VIVENT DANS LEURS PROPRES DOCUMENTS (15/08/2026).
+             Une photo pesait jusqu'à 700 000 caractères et le document de la
+             fiche plafonne à 1 Mio : deux photos ne tenaient pas, alors que le
+             formulaire en promet six. Chaque visuel a donc son document, et la
+             fiche ne porte qu'un compteur `nbVisuels` — c'est ici qu'on les
+             recolle, juste avant de servir.
+             ⚠️ Coût borné et DIT : +`nbVisuels` lectures par fiche riche à
+             froid, jamais la collection entière (la panne de quota du 01/08).
+             ⚠️ Une lecture qui échoue laisse la fiche SANS ses photos plutôt
+             que sans fiche — et `lireVisuels` rend null, jamais un tableau
+             vide : on n'affirme pas qu'il n'y a pas de photo. */
+          for (var iR = 0; iR < docsRiches.length; iR++) {
+            var dR = docsRiches[iR];
+            if (!dR || !dR.exists) continue;
+            var nV = Number((map[dR.id] || {}).nbVisuels || 0);
+            if (!(nV > 0)) continue;
+            var vus = await visuelsFiche.lireVisuels(db, dR.id, nV);
+            if (vus && vus.length) map[dR.id].images = vus;
+          }
         } catch (eRiche) {
           console.error('[catalog] fiches riches illisibles (servies allégées):', eRiche.message);
           raisonLecture = 'snapshot-sans-riches';

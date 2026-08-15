@@ -305,6 +305,17 @@ module.exports = async function checkFichesPersistees() {
     errors.push('[check-fiches-persistees] ⛔ api/admin.js ne RELIT plus le document après '
       + 'l\'écriture : la réponse redeviendrait une promesse en l\'air.');
   }
+  /* ⛔ LA PRODUCTION DOIT VRAIMENT SORTIR LES VISUELS DU DOCUMENT. Le banc
+     rejoue la séquence mais ne charge pas `api/admin.js` : neutraliser l'appel
+     à `ecrireVisuels` là-bas le laissait VERT (sabotage du 15/08/2026). On lit
+     donc la source, exactement comme pour la relecture. */
+  if (!/patch\.nbVisuels = await visuelsFiche\.ecrireVisuels\(/.test(adminSrc)) {
+    errors.push('[check-fiches-persistees] ⛔ api/admin.js n\'envoie plus les visuels dans '
+      + 'leurs propres documents (`patch.nbVisuels = await visuelsFiche.ecrireVisuels(…)`). '
+      + 'Les photos repartiraient dans le document de la fiche : c\'est le mur des deux '
+      + 'photos, remonté à l\'identique.');
+  }
+
   ['product-create', 'product-edit'].forEach(function (typ) {
     var i = adminSrc.indexOf("'" + typ + "'");
     var bloc = i >= 0 ? adminSrc.slice(i, i + 12000) : '';

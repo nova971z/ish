@@ -151,6 +151,10 @@ service cloud.firestore {
     match /stripe_events/{eventId}     { allow read, write: if false; } // idempotence webhook
     match /rate_limits/{bucketId}      { allow read, write: if false; } // compteurs anti-abus (IP)
     match /product_overrides/{prodId}  { allow read, write: if false; } // prix/stock admin
+    // Visuels des fiches, un document par photo (api/_lib/visuels-fiche.js).
+    // Fermé au client comme le reste : seul l'Admin SDK écrit, et la lecture
+    // publique passe par le catalogue rendu côté serveur, jamais en direct.
+    match /product_images/{visuelId}   { allow read, write: if false; } // photos de fiche
     match /charges/{chargeId}          { allow read, write: if false; } // charges comptables (admin)
     match /refunds/{refundId}          { allow read, write: if false; } // remboursements saisis (admin) — ≠ charges : ils annulent du CA et de la TVA COLLECTÉE
     match /config/{docId}              { allow read, write: if false; } // config serveur (prix, facturation)

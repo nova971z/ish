@@ -52,6 +52,7 @@ async function check(label, promise) {
     await setDoc(doc(db, 'users/alice/orders/o1'), { status: 'quote', total: 10, items: 1, date: 1 });
     await setDoc(doc(db, 'payments/pay1'), { amountCents: 5000, uid: 'alice' });
     await setDoc(doc(db, 'product_overrides/p1'), { price: 100 });
+    await setDoc(doc(db, 'product_images/p1_0'), { data: 'x', rang: 0 });
     await setDoc(doc(db, 'stripe_events/e1'), { type: 'x' });
     await setDoc(doc(db, 'rate_limits/r1'), { count: 1 });
     await setDoc(doc(db, 'partners/artisan1'), { name: 'Menuiserie K', metier: 'Menuisier', tier: 'black', active: true, order: 1 });
@@ -119,6 +120,10 @@ async function check(label, promise) {
   await check('Alice NE lit PAS payments/', assertFails(getDoc(doc(alice, 'payments/pay1'))));
   await check('Alice NE écrit PAS payments/', assertFails(setDoc(doc(alice, 'payments/pay2'), { amountCents: 1 })));
   await check('Alice NE écrit PAS product_overrides/ (prix catalogue)', assertFails(setDoc(doc(alice, 'product_overrides/p1'), { price: 1 })));
+  // Visuels des fiches : fermés au client comme les overrides. Seul l'Admin
+  // SDK écrit, et la lecture publique passe par le catalogue rendu serveur.
+  await check('Alice NE lit PAS product_images/ (visuels de fiche)', assertFails(getDoc(doc(alice, 'product_images/p1_0'))));
+  await check('Alice NE écrit PAS product_images/ (visuels de fiche)', assertFails(setDoc(doc(alice, 'product_images/p1_0'), { data: 'y' })));
   await check('Alice NE lit PAS stripe_events/', assertFails(getDoc(doc(alice, 'stripe_events/e1'))));
   await check('Alice NE lit PAS rate_limits/', assertFails(getDoc(doc(alice, 'rate_limits/r1'))));
   await check('Alice NE lit PAS partner_applications/ (candidatures artisans)', assertFails(getDoc(doc(alice, 'partner_applications/app1'))));

@@ -25,6 +25,7 @@ var RACINE = path.join(__dirname, '..');
 var snap = require(path.join(RACINE, 'api/_lib/snapshot.js'));
 var verifVis = require(path.join(RACINE, 'api/_lib/verif-visibilite.js'));
 var limites = require(path.join(RACINE, 'api/_lib/limites.js'));
+var visuels = require(path.join(RACINE, 'api/_lib/visuels-fiche.js'));
 
 var PLAFOND_DOC = 1048576;
 
@@ -94,6 +95,15 @@ function baseFactice(profond) {
           data: function () {
             return d ? desordonner(JSON.parse(JSON.stringify(d))) : undefined;
           } });
+      },
+      /* ⛔ IL MANQUAIT, ET SON ABSENCE ÉTAIT INVISIBLE. Le nettoyage des rangs
+         abandonnés appelle `delete()` derrière un `catch` — un simulacre sans
+         `delete` faisait donc jeter chaque suppression, le catch l'avalait, et
+         le banc restait vert avec quatre documents orphelins en base. Un
+         simulacre incomplet ne rend pas le test indulgent : il le rend FAUX. */
+      delete: function () {
+        delete docs[cle];
+        return Promise.resolve();
       }
     };
   }
@@ -131,7 +141,12 @@ function derivationPresente() {
     /* le filtre des fiches masquées fait partie du chemin public rejoué ici :
        s'il disparaît, le cycle 4 ne prouverait plus rien (il serait vert par
        absence de la contrainte, pas par correction du code). */
-    && /\.filter\(function \(p\) \{ return !p\.hidden; \}\)/.test(src);
+    && /\.filter\(function \(p\) \{ return !p\.hidden; \}\)/.test(src)
+    /* ⛔ LE RECOLLAGE DES VISUELS DOIT EXISTER EN PRODUCTION. Sabotage du
+       15/08/2026 : je l'ai retiré de catalog.js et le banc est resté VERT,
+       parce qu'il en portait sa propre copie. Un banc qui s'auto-approuve ne
+       prouve rien — il faut que la disparition côté production le tue. */
+    && /if \(vus && vus\.length\) map\[dR\.id\]\.images = vus;/.test(src);
 }
 /* ⛔ LE CHEMIN PUBLIC REJOUÉ, FILTRE COMPRIS. `applyOverrides` écarte les
    fiches masquées (`catalog.js`, `.filter(… !p.hidden)`) : une fiche masquée
@@ -174,14 +189,34 @@ async function rejouerEdition(opts) {
     db.getAll = function () { return vraie.getAll.apply(vraie, arguments); };
   }
 
-  /* ① budget — refus AVANT d'écrire, avec les chiffres */
+  /* ⛔ L'ORDRE EST CELUI D'api/admin.js, ET IL DÉCIDE DU RÉSULTAT. Les visuels
+     sortent du document AVANT le contrôle de budget : sinon le budget pèse des
+     octets qui ne seront jamais écrits dans la fiche, et six photos sont
+     refusées alors qu'elles tiennent. Le banc l'a attrapé au premier essai —
+     il avait gardé l'ancien ordre, et le cycle 7 est sorti rouge. */
   var avant = await db.collection('product_overrides').doc(id).get();
+
+  /* ① les visuels partent dans leurs propres documents */
+  var imagesEnvoyees = null;
+  if (patch.images !== undefined) {
+    imagesEnvoyees = patch.images;
+    var nAvant = avant.exists ? Number(avant.data().nbVisuels || 0) : 0;
+    patch = Object.assign({}, patch);
+    try {
+      patch.nbVisuels = await visuels.ecrireVisuels(db, adminFactice, id, imagesEnvoyees, nAvant);
+    } catch (eV) {
+      return Object.assign({ etape: 'visuels', refuse: true, erreur: eV.message }, trace);
+    }
+    patch.images = null;
+  }
+
+  /* ② budget — sur ce qui sera RÉELLEMENT écrit dans la fiche */
   var fusionCandidate = Object.assign({}, avant.exists ? avant.data() : {}, patch);
   var budget = limites.docDansLeBudget(fusionCandidate);
   trace.budget = budget;
   if (!budget.ok) return Object.assign({ etape: 'budget', refuse: true }, trace);
 
-  /* ② écriture */
+  /* ③ écriture */
   try { await db.collection('product_overrides').doc(id).set(patch, { merge: true }); }
   catch (e) { return Object.assign({ etape: 'ecriture', refuse: true, erreur: e.message }, trace); }
 
@@ -211,6 +246,17 @@ async function rejouerEdition(opts) {
       var docsR = await db.getAll.apply(db, riches.map(function (k) {
         return db.collection('product_overrides').doc(k); }));
       docsR.forEach(function (d) { if (d.exists) carte[d.id] = d.data(); });
+      /* ⛔ MÊME RECOLLAGE QUE `api/_lib/catalog.js` : les visuels vivent dans
+         leurs propres documents depuis le 15/08/2026, la fiche ne porte qu'un
+         compteur. Un banc qui sauterait cette étape validerait une fiche que
+         le public verrait sans ses photos. */
+      for (var iR = 0; iR < docsR.length; iR++) {
+        if (!docsR[iR].exists) continue;
+        var nV = Number((carte[docsR[iR].id] || {}).nbVisuels || 0);
+        if (!(nV > 0)) continue;
+        var vus = await visuels.lireVisuels(db, docsR[iR].id, nV);
+        if (vus && vus.length) carte[docsR[iR].id].images = vus;
+      }
     }
   }
   /* ⛔ `absenteDuCatalogue` : le cas où `cat.find(...)` ne trouve RIEN alors
@@ -223,7 +269,11 @@ async function rejouerEdition(opts) {
   /* ⛔ LE VERDICT VIENT DU MODULE PARTAGÉ, PAS D'UNE COPIE LOCALE. Si le banc
      décidait lui-même, il validerait sa propre logique et non celle que sert
      `api/admin.js` — un banc qui s'auto-approuve ne prouve rien. */
-  var v = verifVis.verdictVisibilite(patch, servi, champs, relu.data());
+  var patchVu = imagesEnvoyees
+    ? Object.assign({}, patch, { images: imagesEnvoyees }) : patch;
+  var champsVus = imagesEnvoyees
+    ? champs.filter(function (k) { return k !== 'nbVisuels'; }) : champs;
+  var v = verifVis.verdictVisibilite(patchVu, servi, champsVus, relu.data());
   trace.absents = v.absents;
   trace.visible = v.visible;
   trace.masquee = v.masquee;
@@ -292,7 +342,7 @@ async function jouerCycles(profond) {
       patch: { images: [ENORME], img: null } });
     console.log('   étape ................. ' + r3.etape
       + '  -> ' + (r3.refuse ? 'REFUSÉ ✅' : 'accepté ⛔')
-      + (r3.budget ? ' (' + r3.budget.octets + ' octets, dépassement ' + r3.budget.depassement + ')' : ''));
+      + (r3.erreur ? '\n   motif ................. ' + r3.erreur : ''));
 
     console.log('');
     console.log('══ CYCLE 4 — éditer une fiche MASQUÉE ne doit pas crier à la panne');
@@ -329,7 +379,53 @@ async function jouerCycles(profond) {
       : 'VISIBLE ⛔ — UNE FICHE PERDUE PASSE POUR SERVIE')
       + '  absents : ' + JSON.stringify(r6.absents || []));
 
-    var ok = r1.visible && r2.visible && r3.refuse && r3.etape === 'budget'
+    console.log('');
+    console.log('\u2550\u2550 CYCLE 7 \u2014 SIX photos sur une m\u00eame fiche (impossible avant le 15/08)');
+    var IDS = 'zz-fiche-six';
+    var SIX = [];
+    for (var s6 = 0; s6 < 6; s6++) {
+      SIX.push('data:image/webp;base64,' + new Array(200001).join(String.fromCharCode(65 + s6)));
+    }
+    var poidsSix = SIX.reduce(function (a, x) { return a + x.length; }, 0);
+    var r7 = await rejouerEdition({ db: db, id: IDS,
+      ficheBase: { id: IDS, sku: 'ZZB5', title: 'Fiche six visuels', price: 259, category: 'ZZCAT' },
+      patch: { images: SIX, img: null, desc: 'six visuels' } });
+    console.log('   poids total des 6 .... ' + poidsSix + ' octets (budget d\'UN document : '
+      + limites.BUDGET_DOC_OCTETS + ')');
+    console.log('   \u00e9tape ................. ' + r7.etape
+      + (r7.refuse ? ' -> REFUS\u00c9 \u26d4' : ' -> accept\u00e9 \u2705'));
+    console.log('   VERDICT ............... ' + (r7.visible ? 'VISIBLE \u2705' : 'NON VISIBLE \u26d4')
+      + '  absents : ' + JSON.stringify(r7.absents || []));
+    console.log('   les 6 sont servies .... '
+      + (r7.servi && Array.isArray(r7.servi.images) && r7.servi.images.length === 6
+        ? 'oui \u2705' : 'NON \u26d4 (' + ((r7.servi && r7.servi.images) || []).length + ')'));
+
+    console.log('');
+    console.log('\u2550\u2550 CYCLE 8 \u2014 RETIRER des photos doit vraiment les retirer');
+    var r8 = await rejouerEdition({ db: db, id: IDS,
+      ficheBase: { id: IDS, sku: 'ZZB5', title: 'Fiche six visuels', price: 259, category: 'ZZCAT' },
+      patch: { images: SIX.slice(0, 2), img: null } });
+    var servies8 = (r8.servi && r8.servi.images) || [];
+    console.log('   6 visuels ramen\u00e9s \u00e0 2 . ' + servies8.length + ' servi(s) -> '
+      + (servies8.length === 2 ? 'les rangs retir\u00e9s ont disparu \u2705'
+        : 'des visuels RETIR\u00c9S sont revenus \u26d4'));
+    console.log('   VERDICT ............... ' + (r8.visible ? 'VISIBLE \u2705' : 'NON VISIBLE \u26d4'));
+    /* ⛔ ET LES DOCUMENTS EUX-M\u00caMES ? Le service ne les lit plus (le compteur
+       est retomb\u00e9 \u00e0 2), donc l'\u00e9cran ne dirait RIEN d'un rang laiss\u00e9 derri\u00e8re.
+       Mesur\u00e9 : saboter le nettoyage laissait le banc vert. Des documents
+       orphelins restent stock\u00e9s ET factur\u00e9s \u2014 on regarde la base, pas l'\u00e9cran. */
+    var orphelins = Object.keys(db._docs).filter(function (c) {
+      return c.indexOf(visuels.COLLECTION + '/' + IDS + '_') === 0
+        && Number(c.slice((visuels.COLLECTION + '/' + IDS + '_').length)) >= 2;
+    });
+    console.log('   documents orphelins ... ' + orphelins.length + ' -> '
+      + (orphelins.length === 0 ? 'aucun \u2705'
+        : 'RANGS ABANDONN\u00c9S en base, stock\u00e9s et factur\u00e9s \u26d4'));
+
+    var ok = r8.visible && servies8.length === 2 && orphelins.length === 0
+      && r7.visible && r7.servi && r7.servi.images && r7.servi.images.length === 6
+      && poidsSix > limites.BUDGET_DOC_OCTETS
+      && r1.visible && r2.visible && r3.refuse && r3.etape === 'visuels'
       && r4.visible && r4.masquee
       && r5.visible === false && r5.snapshotOk === false
       && r6.visible === false && r6.masquee === false;
