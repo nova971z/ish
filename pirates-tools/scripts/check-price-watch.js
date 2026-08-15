@@ -3937,10 +3937,31 @@ module.exports = async function () {
         for (var cb = 0; cb < prods.length; cb++) {
           if (String(prods[cb].id || '').indexOf('/') !== -1) { cibleBarre = prods[cb]; break; }
         }
-        ok(!!cibleBarre,
-          '⚠️ PRÉALABLE : le catalogue porte au moins une fiche dont l\'identifiant '
-          + 'contient une barre oblique — sans elle, ce cas ne serait pas éprouvé '
-          + 'et la garde pourrait mourir sans qu\'on le voie');
+        /* ⚠️ PRÉALABLE EN DEUX BRANCHES — même patron que D-140 (« soit le cas
+           se joue, soit l'absence est PROUVÉE, et il se réarme tout seul »).
+           Le 15/08 (D-165), l'user a fait corriger la DERNIÈRE fiche à « / »
+           (`dewalt-d125/8` → `dewalt-d125-8`) : exiger une fiche fautive au
+           catalogue reviendrait à exiger le défaut pour prouver la garde.
+           ⛔ Branche SANS fiche fautive : l'absence se COMPTE (zéro id à
+           « / ») ET la garde est vérifiée sur son expression effective au
+           point d'écriture (M-29 : la condition + le refus, pas le mot).
+           Le jour où une fiche à « / » revient, la branche complète
+           (bout en bout, base factice) se rejoue sans un geste. */
+        if (!cibleBarre) {
+          var nbBarres = 0;
+          for (var cb2 = 0; cb2 < prods.length; cb2++) {
+            if (String(prods[cb2].id || '').indexOf('/') !== -1) nbBarres++;
+          }
+          ok(nbBarres === 0,
+            '⚠️ PRÉALABLE : aucune fiche à « / » trouvée pour jouer le cas, mais le '
+            + 'compte n\'est pas zéro (' + nbBarres + ') — incohérence de sélection');
+          var srcAdmBarre = fs.readFileSync(path.join(__dirname, '..', 'api', 'admin.js'), 'utf8');
+          ok(/if \(String\(p\.id\)\.indexOf\('\/'\) !== -1\) \{\s*\n\s*idsRefuses\.push\(/.test(srcAdmBarre),
+            '⛔ la garde « id à barre oblique refusé et LISTÉ » a disparu du point '
+            + 'd\'écriture (api/admin.js) : le jour où une fiche à « / » reviendra, '
+            + 'sa page entière repartira en erreur — 60 relevés perdus pour 1 fiche '
+            + '(panne du 09/08/2026)');
+        }
         if (cibleBarre) {
           scanReset();
           var rBarre = fauxRes();

@@ -36286,7 +36286,7 @@
     "price": 247.06
   },
   {
-    "id": "dewalt-d125/8",
+    "id": "dewalt-d125-8",
     "slug": "dewalt-d125-8-stf-d125-8-125g-40-mm-200-pcs",
     "sku": "D125/8",
     "name": "D125/8",
@@ -48704,15 +48704,15 @@
     "sourceDescriptif": "nomenclature"
   },
   {
-    "id": "dewalt-p2lrt",
-    "slug": "dewalt-p2lrt-dcg-406-p2lrt",
-    "sku": "P2LRT",
-    "name": "P2LRT",
+    "id": "dewalt-dcg406p2lrt",
+    "slug": "dewalt-dcg406p2lrt-meuleuse-125-mm-xr-18v-2x5ah-chargeur-tstak",
+    "sku": "DCG406P2LRT",
+    "name": "DCG406P2LRT",
     "brand": "DeWALT",
     "category": "Meulage, découpe et polissage",
-    "title": "DeWALT P2LRT — DCG 406 P2LRT",
+    "title": "DeWALT DCG406P2LRT — Meuleuse 125 mm XR 18V Brushless (2 × 5 Ah + chargeur + TSTAK)",
     "tag": "Nouveau",
-    "desc": "DCG 406 P2LRT.",
+    "desc": "Meuleuse d’angle 125 mm XR 18V brushless, interrupteur à palette, lanière de sécurité (Lanyard Ready). Kit : 2 batteries 5,0 Ah XR, chargeur, coffret TSTAK.",
     "img": "images/placeholder.svg",
     "currency": "EUR",
     "vat": 0.2,
@@ -48727,7 +48727,7 @@
     "features": [],
     "specs": {
       "Marque": "DeWALT",
-      "Référence": "P2LRT"
+      "Référence": "DCG406P2LRT"
     },
     "weight_kg": 2,
     "poidsSuppose": true,

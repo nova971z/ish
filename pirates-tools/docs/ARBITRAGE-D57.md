@@ -160,7 +160,7 @@ et son prix étaient LÀ le 15/08, pas que la tuile est fautive.
 | 9 | DXV23PTA | 217,03 → 271,07 (183,15) | coût 183,15 ≈ DXV23PLPTA (183,63-183,93, autre modèle) ; la tuile propre est un bundle « & » refusé (259,42) |
 | 17 | DCM200N | 324,89 → 353,23 (249,99) | coût 249,99 = tuile DCM200NT-XJ (variante coffret) posé sur la fiche N — surestime la nue |
 | 84 | DCS350NT-XJ | 438,08 → 456,36 (333,84) | coût 333,84 = tuile famille DCS350 avec nBat=1 (une batterie) — prix de kit |
-| 99 | P2LRT | 490,56 → 508,19 (375,88) | réf de fiche invalide (« P2LRT » = suffixe tronqué de DCD800P2LRT) — corriger la fiche avant tout prix |
+| 99 | P2LRT | 490,56 → 508,19 (375,88) | réf de fiche invalide (« P2LRT » = suffixe tronqué). ⚠️ Corrigé le 15/08 (D-165) : le titre de la fiche disait « DCG 406 P2LRT » — la vraie réf est **DCG406P2LRT** (vérifiée sur dewalt.fr), PAS DCD800P2LRT comme ce registre l'a d'abord écrit. Fiche recollée : `dewalt-dcg406p2lrt` |
 | 107 | DCG414 | 392,47 → 409,30 (295,52) | coût 295,52 = tuile DCG414NT (variante coffret) posé sur la fiche de base — surestime |
 | 129 | DCG409 | 153,11 → 165,78 (97,69) | la seule tuile est un ENCART (titre traduit machinalement, 108,99, sansRef) — coût 97,69 du même acabit, jamais opposable (tour 6) |
 
@@ -307,8 +307,10 @@ complètes :
 1. Les 8 REJETÉES : coût stocké suspect mais INERTE (rien ne l'applique) ;
    une vraie tuile nue les réécrira, le gel 14 j couvre l'attente.
 2. Les 94 NON CONFIRMÉES : balayages suivants + gel 14 j. Rien d'autre.
-3. La fiche **P2LRT** (réf tronquée) et l'id **`d125/8`** : défauts de
-   DONNÉES à corriger un jour — indépendants des prix, décision user.
+3. ~~La fiche **P2LRT** (réf tronquée) et l'id **`d125/8`**~~ — **CORRIGÉS le
+   15/08 sur ordre de l'user (D-165)** : `dewalt-dcg406p2lrt` (réf vérifiée
+   sur dewalt.fr) et `dewalt-d125-8` (plus de « / » dans l'identifiant, le
+   traqueur peut enfin écrire).
 
 *Ma session ne peut ni lire ni écrire Firestore (CONNECT 403, définitif) :
 ce registre classe et prouve ; l'écriture appartient au traqueur seul.*
