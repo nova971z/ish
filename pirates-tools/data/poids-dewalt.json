@@ -1980,18 +1980,185 @@
     }
    ],
    "note": "Poids nu (sans batterie), DCD999B/N. Trois sites distincts convergent (1,60-1,61 kg) : revendeur DE, revue technique US (3,54 lb), et manuel d'instructions officiel."
+  },
+  "DCB203": {
+   "kg": 0.41,
+   "sources": [
+    {
+     "url": "https://www.homedepot.com/p/DEWALT-20V-MAX-Lithium-Ion-2-0Ah-Battery-DCB203/204222436",
+     "kg": 0.41
+    },
+    {
+     "url": "https://www.batterybuy.co.uk/battery-dewalt/dcb203-dewalt-battery.htm",
+     "kg": 0.41
+    },
+    {
+     "url": "https://www.drystore.com.br/ferramentas/ferramentas-eletricas/baterias-e-carregadores/bateria-li-ion-compacta-20v-xr-2-0-ah-dcb203-b3-dewalt",
+     "kg": 0.4
+    }
+   ],
+   "note": "3 sites indépendants convergent entre 0,4 et 0,41 kg pour la batterie compacte 2.0Ah — valeur retenue 0,41 kg."
+  },
+  "DCB548": {
+   "kg": 1.46,
+   "sources": [
+    {
+     "url": "https://www.ecatoolfast.com/dewalt-dcb548-xr-flexvolt-54v-18v-12-0ah-battery-li-ion-dcb548.html",
+     "kg": 1.1
+    },
+    {
+     "url": "https://www.powertoolmate.co.uk/power-tools/dewalt-store/batteries-and-chargers/dewalt-dcb548-18v-54v-xr-12-0ah-4-0ah-li-ion-flexvolt-battery-pack.htm",
+     "kg": 1.2
+    },
+    {
+     "url": "https://www.klium.com/en/dewalt-dcb548-xj-18-54v-xr-flexvolt-battery-120ah-137379",
+     "kg": 1.46
+    }
+   ],
+   "note": "3 sites distincts (1,1 / 1,2 / 1,46 kg) — écart 33%, dans la tolérance. Doute nu/emballé : valeur haute retenue pour protéger la marge port."
+  },
+  "DCD795": {
+   "kg": 1.62,
+   "sources": [
+    {
+     "url": "https://www.dewalt.co.uk/product/dcd795d2-gb/18v-xr-brushless-hammer-drill-driver-2-x-2-ah",
+     "kg": 1.62
+    },
+    {
+     "url": "https://www.powertoolworld.co.uk/dewalt-dcd795d2-18v-xr-brushless-combi-drill-inc-2x-2-0ah-batteries",
+     "kg": 1.62
+    },
+    {
+     "url": "https://www.tradesetter.com/products/dewalt-hammer-drill-18v-xr-li-ion-brushless-compact-hammer-drill-driver-dcd795d2",
+     "kg": 1.62
+    }
+   ],
+   "note": "3 sites distincts (fabricant + 2 revendeurs) s'accordent exactement sur 1,62 kg (perceuse nue, sans batterie)."
+  },
+  "DCE400": {
+   "kg": 1.81,
+   "sources": [
+    {
+     "url": "https://www.rshughes.com/p/Dewalt-Max-PEX-Expander-DCE400B-3-8-1-In-Range/885911_50229/",
+     "kg": 1.78
+    },
+    {
+     "url": "https://www.acetool.com/products/dewalt-dce400b-20v-max-1-in-pex-expander",
+     "kg": 1.78
+    },
+    {
+     "url": "https://www.zoro.com/dewalt-20v-max-1-in-pex-expander-dce400b/i/G1575021/",
+     "kg": 1.81
+    }
+   ],
+   "note": "3 sources distinctes, valeurs très concordantes (3,93 à 4 lb). Valeur retenue = la plus haute (4 lb ≈ 1,81 kg), poids outil nu DCE400B."
+  },
+  "DCE530": {
+   "kg": 0.5,
+   "sources": [
+    {
+     "url": "https://www.powertoolworld.co.uk/dewalt-dce530n-18v-xr-heat-gun-body-only",
+     "kg": 0.5
+    },
+    {
+     "url": "https://docs.rs-online.com/6a48/A700000007339882.pdf",
+     "kg": 0.5
+    },
+    {
+     "url": "https://manuals.plus/m/ff1d2ca80888b307ad926d60bf333a5089052c563a1c587a257a110f6a60a6d3",
+     "kg": 0.5
+    }
+   ],
+   "note": "Décapeur thermique 18V nu (DCE530N-XJ) : 3 sites concordent à 0,5 kg. Une fiche US DCE530B (20V) donne ~0,53 kg (1,17 lb), cohérent."
+  },
+  "DCE531": {
+   "kg": 3.08,
+   "sources": [
+    {
+     "url": "https://cee.dewalt.global/product/dce531n-xj/18v-xr-concrete-vibrator-bare-unit",
+     "kg": 3.08
+    },
+    {
+     "url": "https://www.klium.com/en/dewalt-dce531n-xj-18v-xr-cordless-concrete-vibrator-without-battery-and-charger-127407",
+     "kg": 3.08
+    },
+    {
+     "url": "https://www.powertoolsdirect.com/dewalt-dce531n-xr-concrete-vibrator-18v-bare-unit",
+     "kg": 3.08
+    }
+   ],
+   "note": "Vibrateur à béton 18V nu (DCE531N-XJ), 3 sites (dont le fabricant) concordent à 3,08 kg."
+  },
+  "DCE555": {
+   "kg": 1.1,
+   "sources": [
+    {
+     "url": "https://its.co.uk/pd/DCE555N-XJ-Dewalt-DCE555N-18V-XR-Brushless-Drywall-Cut-Out-Tool---Body-_DEWDCE555N.htm",
+     "kg": 1.1
+    },
+    {
+     "url": "https://www.diy.com/departments/dewalt-dce555n-18v-drywall-cut-out-tool/5035048744352_BQ.prd",
+     "kg": 1.1
+    },
+    {
+     "url": "https://cee.dewalt.global/product/dce555n-xj/18v-xr-drywall-cut-out-tool",
+     "kg": 1.1
+    }
+   ],
+   "note": "Fraiseuse pour placo 18V nue (DCE555N-XJ), sans batterie : 3 sites concordent à 1,1 kg (dont le fabricant). Une lecture isolée à 0,79 kg (écart 39%, dans la tolérance) n'a pas été recroisée ailleurs —"
+  },
+  "DCE5601": {
+   "kg": 1,
+   "sources": [
+    {
+     "url": "https://www.klium.com/en/dewalt-dce5601-xj-cartridge-holder-set-for-dcv5xx-sealant-sprayers-135153",
+     "kg": 1
+    },
+    {
+     "url": "https://its.co.uk/pd/DCE5601-XJ-Dewalt-DCE5601-XJ-300ml-Cartridge-Holder-For-DCE580-and-DCE581-_DEWDCE5601.htm",
+     "kg": 1
+    },
+    {
+     "url": "https://cee.dewalt.global/product/dce5601-xj/18v-xr-310ml-caulk-gun-cartridge-holder",
+     "kg": 1
+    }
+   ],
+   "note": "Support cartouche pour pistolet à mastic (DCE5601-XJ), à l'unité : 3 sites (dont le fabricant) concordent à 1,0 kg."
+  },
+  "DCE580": {
+   "kg": 2.6,
+   "sources": [
+    {
+     "url": "https://export.rsdelivers.com/product/dewalt/dce580n-xj/dewalt-dce580n-xj-electric-caulk-gun-2500n-18v/1362988",
+     "kg": 2.6
+    },
+    {
+     "url": "https://mro.ecvv.com/product/DeWALT_DCE580N_XJ__Electric_Caulk_Gun_2500N__18V__2_6kg_pid5135835",
+     "kg": 2.6
+    },
+    {
+     "url": "https://www.misterworker.com/en/dewalt/18v-caulk-gun-600ml-bare-tool-dce580n-xj/7995.html",
+     "kg": 2.2
+    }
+   ],
+   "note": "Pistolet à mastic machine nue 18V (DCE580N-XJ), 600 ml : écart 2,2–2,6 kg selon les sites (18%, dans la tolérance). Valeur haute retenue par prudence (marge de port)."
   }
  },
  "nonResolues": {
   "CPROF367": {
    "motif": "statut introuvable",
    "sources": [],
-   "note": "3 recherches ciblées : le moteur renvoie systématiquement DCS367 (scie sabre, référence différente) au lieu du kit CPROF367 (D21583K + D215831 + DT9762 + DT9765, perçage diamant sur colonne). Aucune f"
+   "note": "3 recherches ciblées (CPROF367 seul, avec 'dewalt', avec 'carottage/colonne') : aucune ne renvoie de fiche produit CPROF367 — le moteur ramène systématiquement DCS367 (scie sabre 18V), une référence s"
   },
   "D215804": {
    "motif": "statut introuvable",
-   "sources": [],
-   "note": "3 recherches ciblées : fiches produit correctement identifiées (dewalt.store, manuel D21580 sur manualslib) confirmant qu'il s'agit du dispositif d'aspiration de poussière pour perceuses diamant D2158"
+   "sources": [
+    {
+     "url": "https://dewalt.store/elektroinstrument/prinadlezhnosti/ustroystvo-pyleudaleniya-dlya-almaznyh-dreley-d21580k-d21582k-dewalt-d215804-xj.html",
+     "kg": 0
+    }
+   ],
+   "note": "Produit confirmé : accessoire d'extraction de poussière pour perçage diamant, compatible D21580K/D21582K (fiche dewalt.store en russe trouvée). Malgré 3 recherches ciblées (poids, datasheet, manualsli"
   },
   "D25303": {
    "motif": "statut introuvable",
@@ -2097,9 +2264,18 @@
    "note": "Aucune recherche possible cette session : WebSearch a signalé budget épuisé (200/200) dès la 1ère requête, et WebFetch a été bloqué par le proxy réseau (EGRESS_BLOCKED) pour TOUS les domaines testés, "
   },
   "D279017": {
-   "motif": "statut introuvable",
-   "sources": [],
-   "note": "3 recherches ciblées : fiches produit correctement identifiées (ffx.co.uk, toolsandpartsdirect.co.uk, misterworker.com, eBay — pack de 5 sacs à poussière pour D27900/D27901/D27902) mais aucun extrait "
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.toolsandpartsdirect.co.uk/accessories/dewalt/dust-extraction-accessories/dust-bags/d279017-pack-of-5-dust-bags-for-d27900-d27901-d27902",
+     "kg": 0.5
+    },
+    {
+     "url": "https://www.dewalt.fr/produit/d279017-xj/5-sacs-poussieres-pour-d27901-d27902",
+     "kg": 0.454
+    }
+   ],
+   "note": "Produit bien identifié (5 sacs à poussière pour aspirateurs D27901/D27902), présent chez de nombreux revendeurs FR (dewalt.fr, manomano, rueducommerce, distriartisan, master-outillage). Deux valeurs p"
   },
   "D28492": {
    "motif": "statut introuvable",
@@ -2130,11 +2306,15 @@
    "motif": "statut non-resolue",
    "sources": [
     {
-     "url": "https://www.amazon.com/DEWALT-DC528-14-4-Volt-Cordless-Fluorescent/dp/B000BAURZ2",
-     "kg": 0.45
+     "url": "https://www.afdb.fr/dewalt-lampe-fluorescente-nue-12v-14-4v-nimh_SKUM84779.html",
+     "kg": 0.5
+    },
+    {
+     "url": "https://www.sobrico.com/p/dewalt-lampe-fluorescente-dewalt-12-14-4-v-dc528n_SKUM84779.html",
+     "kg": 0.5
     }
    ],
-   "note": "Une seule valeur traçable trouvée malgré 3 recherches (dont eBay et BatteriesPlus qui confirment le produit mais sans chiffre) : 1,00 lb (~0,45 kg), vraisemblablement issue de la fiche Amazon. Sous le"
+   "note": "DC528N (lampe fluorescente nue, sans batterie ni chargeur). Une valeur de 0,5 kg trouvée sur afdb.fr, répétée à l'identique sur sobrico.com — mais ces deux sites semblent appartenir au même réseau de "
   },
   "DCB090": {
    "motif": "statut non-resolue",
@@ -2156,13 +2336,9 @@
     {
      "url": "https://www.manualslib.com/manual/2835983/Dewalt-Xr-Dcb094k.html?page=6",
      "kg": 0.11
-    },
-    {
-     "url": "https://www.prestonhardware.com/product/dewalt-dcb094k-20v-max-usb-c-charging-system/",
-     "kg": 0.45
     }
    ],
-   "note": "Discordance forte (écart ~76%, > 60%) entre 0,11 kg (fiche technique officielle ManualsLib, probablement l'adaptateur USB-C seul) et 0,45 kg / 0,99 lb (répété sur plusieurs fiches revendeur, probablem"
+   "note": "DCB094K, kit de charge USB-C 20V. Fiche technique ManualsLib (page 'Technical Data' du manuel XR DCB094K) donne 0,11 kg pour l'appareil de charge seul — cohérent avec un petit boîtier USB-C. Une autre"
   },
   "DCB104": {
    "motif": "statut non-resolue",
@@ -2230,29 +2406,29 @@
    "sources": [
     {
      "url": "https://www.powertoolworld.co.uk/dewalt-dcb112-slim-battery-charger-for-10-8v-14-4v-and-18v-xr-li-ion-batteries",
+     "kg": 0.36
+    },
+    {
+     "url": "https://bcfasteners.com/shop/dewalt-dcb112-12v-max-20v-max-charger/",
      "kg": 0.49
     }
    ],
-   "note": "Une seule source solidement rattachée à une URL précise : 0,49 kg (Power Tool World, avec dimensions cohérentes 120x90x180mm). Une deuxième valeur (0,36 kg / 12,7 oz) circule dans les résumés agrégés "
+   "note": "2 sources seulement, valeurs discordantes : 0,36 kg (12,7 oz) sur Power Tool World vs 0,49 kg sur une autre fiche. Écart ~36%, sous le seuil de 60% mais seulement 2 sites — la règle impose non-resolue"
   },
   "DCB115": {
    "motif": "statut non-resolue",
    "sources": [
     {
-     "url": "https://www.powertoolworld.co.uk/dewalt-dcb115-compact-battery-charger-for-10-8v-14-4v-and-18v-xr-li-ion-batteries",
-     "kg": 0.5
-    },
-    {
-     "url": "https://www.manualslib.com/manual/1878935/Dewalt-Dcb115.html?page=92",
-     "kg": 0.5
+     "url": "https://www.burnstools.com/media/wysiwyg/pdf/DCB115_SpecSheet.pdf",
+     "kg": 0.59
     }
    ],
-   "note": "Deux sources concordantes et solidement rattachées (fiche technique officielle ManualsLib ET Power Tool World, toutes deux 0,5 kg) mais seulement 2 sites distincts — sous le seuil formel de 3 sources "
+   "note": "Fiche technique PDF (spec sheet Burns Tools) donne 1,30 lb soit 0,59 kg. Une autre recherche a produit une conversion incohérente (0,792 lb annoncé égal à '1 kg', ce qui est faux arithmétiquement — éc"
   },
   "DCB116": {
-   "motif": "statut introuvable",
+   "motif": "statut non-resolue",
    "sources": [],
-   "note": "3 recherches ciblées : produit correctement identifié sur plusieurs sites (Power Tool World, DataPowerTools, ToolStore UK, FFX) mais aucun extrait retourné ne cite le poids. Des valeurs (0,7 kg / 1 kg"
+   "note": "Chargeur rapide multi-voltage 12-54V. Valeurs obtenues très instables : 0,7 kg puis 1 kg selon les passages, sans URL de page produit clairement associée à chaque chiffre dans les extraits. Une recher"
   },
   "DCB117": {
    "motif": "statut non-resolue",
@@ -2279,9 +2455,18 @@
    "note": "Aucune recherche possible : budget WebSearch de la session déjà épuisé (200/200) avant toute requête pour ce lot ; WebFetch bloqué par le proxy de sortie réseau sur tous les domaines testés (screwfix."
   },
   "DCB1404": {
-   "motif": "statut introuvable",
-   "sources": [],
-   "note": "Chargeur QUADPORT 4A confirmé exister (fiches dewalt.com, homedepot.com, acmetools.com) mais aucun poids en kg trouvé dans les extraits après 2 recherches ciblées distinctes."
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.dewalt.com/en-us/product/dcb1404/4-amp-multiport-charger",
+     "kg": 3
+    },
+    {
+     "url": "https://toolup.com/products/dewalt-dcb1404-12v-max-20v-max-flexvolt-4-amp-multiport-charger",
+     "kg": 4
+    }
+   ],
+   "note": "Chargeur QUADPORT 4A — c'est justement le modèle 4 ports mentionné dans le piège du brief (donc ~3 kg est plausible pour CETTE référence, pas une confusion). Deux valeurs obtenues : ~3 kg (dewalt.com,"
   },
   "DCB182": {
    "motif": "statut bloque",
@@ -2329,7 +2514,7 @@
   "DCB283": {
    "motif": "statut introuvable",
    "sources": [],
-   "note": "La référence exacte « DCB283 » n'apparaît dans aucun résultat marchand après 2 recherches ; seule « DCB283B » (Tool Connect Bluetooth 18V 2Ah, même famille produit) est documentée (mydewalt.dewalt.com"
+   "note": "Batterie Tool Connect Bluetooth 18V 2Ah — 3 recherches ciblées (dewalt.co.uk, dewalt.com.au, dewalt.co.nz) trouvent la fiche produit mais aucune ne livre de poids exploitable."
   },
   "DCB546": {
    "motif": "statut bloque",
@@ -2423,18 +2608,9 @@
    "note": "Budget WebSearch de session épuisé (200/200) — aucune recherche n'a pu être lancée pour cette référence."
   },
   "DCCS1100": {
-   "motif": "statut non-resolue",
-   "sources": [
-    {
-     "url": "https://www.fixami.fr/dewalt-dccs1100n-xj-pulverisateur-chimique-sans-fil-18-v-xr-pour-beton.html",
-     "kg": 6.1
-    },
-    {
-     "url": "https://www.datapowertools.co.uk/Products/DeWALT-Cordless-Pressure-Washers/DEWDCCS1100N-XJ",
-     "kg": 9
-    }
-   ],
-   "note": "ATTENTION référentiel : DCCS1100N-XJ n'est PAS une tronçonneuse mais un pulvérisateur chimique dorsal (backpack sprayer) 18V pour béton, confirmé par la fiche officielle DeWALT (produits.dewalt.be) et"
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Aucun produit sous cette référence exacte dans 3 recherches ciblées (générale, dewalt.fr) ; seuls d'autres modèles tronçonneuse 54V (DCM575, DCMCS574) remontent. Référence catalogue à revérifier."
   },
   "DCD1007": {
    "motif": "statut bloque",
@@ -2473,19 +2649,11 @@
    "motif": "statut non-resolue",
    "sources": [
     {
-     "url": "https://homefixated.com/dewalt-flexvolt-stud-joist-drill-dcd460/",
-     "kg": 1.63
-    },
-    {
-     "url": "https://leestools.com/dewalt-dcd460b-60v-stud-joist-drill.html",
-     "kg": 5.85
-    },
-    {
-     "url": "https://www.amazon.com/DEWALT-DCD460B-FLEXVOLT-Joist-Drill/dp/B01H9BLB4Q",
-     "kg": 6.73
+     "url": "https://www.amazon.com/DEWALT-DCD460T1-Battery-FLEXVOLT-Joist/dp/B01H9BLCRC",
+     "kg": 5
     }
    ],
-   "note": "Forte discordance : une source donne 1.63 kg (3.6 lb, peu plausible pour une perceuse d'angle 60V lourde), deux autres 5.85 kg (12.9 lb) et 6.73 kg (14.85 lb) qui se rejoignent entre elles mais pas av"
+   "note": "Une seule source exploitable (~5 kg / 11 lb avec batterie, non net/nu confirmé). Signal supplémentaire : la fiche catalogue le nomme 'visseuse plaquiste' mais les sources identifient DCD460 comme perc"
   },
   "DCD470": {
    "motif": "statut bloque",
@@ -2652,11 +2820,15 @@
    "motif": "statut non-resolue",
    "sources": [
     {
-     "url": "https://www.amazon.com/DEWALT-DCD990M2-Lithium-Brushless-Premium/dp/B00FWLC07I",
+     "url": "https://www.kbctools.com/itemdetail/1-826-DCD990M2",
+     "kg": 2.09
+    },
+    {
+     "url": "https://toolsintegrator.com/product/dewalt-dcd990m2-lithium-ion-brushless-premium-3-speed-drill-20v/",
      "kg": 2.09
     }
    ],
-   "note": "Une seule valeur trouvée (~4,6 lb / 2,09 kg), agrégée par le moteur de recherche à partir de plusieurs fiches (Amazon/Lowe's) sans URL unique clairement identifiable ; non recoupée par un 2e site dist"
+   "note": "Valeur 2,09 kg (4,6 lb) répétée mais seulement attribuable clairement à la variante marché US 'DCD990M2' (kbctools.com, toolsintegrator.com) ; pas de 3e URL distincte confirmant explicitement le chiff"
   },
   "DCD991": {
    "motif": "statut bloque",
@@ -2681,97 +2853,167 @@
      "kg": 1.5
     }
    ],
-   "note": "Une seule source exploitable (Mister Worker), citant 1,5 kg pour un diamètre de coupe 12 mm — mais la même fiche mélange des caractéristiques de batterie/couple/vitesse (18V, 60 Nm, 1200 tr/min) qui n"
+   "note": "Incohérence d'ordre de grandeur détectée : la seule source trouvée décrit DCDW101 comme une COURONNE de carottage (bit), pas une carotteuse/machine comme l'indique le catalogue, avec un diamètre annon"
   },
   "DCDW102": {
    "motif": "statut introuvable",
    "sources": [],
-   "note": "Identifié comme couronne de carottage diamantée eau (61 mm) chez DeWALT, mais aucune valeur de poids trouvée sur dewalt.com ni ailleurs malgré 2 recherches ciblées."
+   "note": "Référence identifiée comme couronne de carottage à eau 61mm (misterworker.com, dewalt.global) mais aucune source ne donne de poids malgré 2 recherches ciblées."
   },
   "DCDW103": {
    "motif": "statut introuvable",
-   "sources": [],
-   "note": "Identifié comme couronne de carottage diamantée eau (82 mm) chez DeWALT, mais aucune valeur de poids trouvée malgré 2 recherches ciblées (toolstop, power tool world sans résultat)."
+   "sources": [
+    {
+     "url": "https://www.dewalt.fr/produit/dcdw103-xj/couronne-diamant-82-mm-pour-carotteuse",
+     "kg": 0
+    }
+   ],
+   "note": "Page produit officielle dewalt.fr confirmée (couronne diamant 82 mm) mais aucune source, y compris le fabricant, ne publie de poids en kg pour cette référence. Recherché normalement (2 requêtes ciblée"
   },
   "DCDW104": {
    "motif": "statut introuvable",
    "sources": [],
-   "note": "Identifié comme couronne de carottage diamantée eau (102 mm) chez DeWALT (catalogue cee.dewalt.global), mais aucune valeur de poids trouvée malgré 2 recherches ciblées."
+   "note": "Aucune page produit ni fiche technique retrouvée pour cette référence précise (les résultats ramènent DCB104, un chargeur sans rapport). Recherché normalement, rien trouvé."
   },
   "DCDW105": {
    "motif": "statut introuvable",
-   "sources": [],
-   "note": "Identifié comme couronne de carottage diamantée eau (117 mm) chez DeWALT, mais aucune valeur de poids trouvée malgré recherche ciblée."
+   "sources": [
+    {
+     "url": "https://www.hgc.ch/fr/B%C3%A2timent/Machines-&-accessoires/Percer-&-sculpter/Accessoires-pour-perceuses-&-burins/DeWalt-Couronnes-diamant%C3%A9es---%C3%A0-eau/p/100131571",
+     "kg": 0
+    }
+   ],
+   "note": "Existence confirmée chez un revendeur suisse (HGC.ch, Ø117mm) mais sans poids publié. Recherché normalement, rien de fiable trouvé."
   },
   "DCDW106": {
    "motif": "statut introuvable",
-   "sources": [],
-   "note": "Identifié comme couronne de carottage diamantée eau 122 mm chez DeWALT, mais aucune valeur de poids trouvée malgré 2 recherches ciblées (contorion/klium/svh24 sans résultat)."
+   "sources": [
+    {
+     "url": "https://www.dewalt.fr/produit/dcdw106-xj/couronne-diamant-122-mm-pour-carotteuse",
+     "kg": 0
+    }
+   ],
+   "note": "Page produit officielle dewalt.fr confirmée (couronne diamant 122 mm) mais aucun poids en kg publié dans les extraits disponibles. Recherché normalement, rien de fiable trouvé."
   },
   "DCDW107": {
-   "motif": "statut bloque",
+   "motif": "statut introuvable",
    "sources": [],
-   "note": "Budget WebSearch de la session épuisé (200/200) avant toute recherche — aucun résultat obtenu, cause technique."
+   "note": "Aucune page produit ni fiche technique retrouvée pour cette référence précise malgré recherche. Rien trouvé, y compris de source de confusion exploitable."
   },
   "DCDW108": {
-   "motif": "statut bloque",
-   "sources": [],
-   "note": "Budget WebSearch de la session épuisé (200/200) avant toute recherche — aucun résultat obtenu, cause technique."
+   "motif": "statut introuvable",
+   "sources": [
+    {
+     "url": "https://www.dewalt.fr/produit/dcdw108-xj/couronne-diamant-152-mm-pour-carotteuse",
+     "kg": 0
+    }
+   ],
+   "note": "Page produit officielle dewalt.fr confirmée (couronne diamant 152 mm) mais aucun poids en kg publié dans les extraits disponibles. Recherché normalement, rien de fiable trouvé."
   },
   "DCE050": {
-   "motif": "statut bloque",
-   "sources": [],
-   "note": "Budget WebSearch de la session épuisé (200/200) — recherche non tentée."
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.datapowertools.co.uk/Products/DeWALT-Cordless-Water-Pumps/DEWDCE050N-XJ",
+     "kg": 0
+    }
+   ],
+   "note": "Anomalie détectée : un revendeur (datapowertools.co.uk) référence DCE050N-XJ comme une POMPE de transfert 18V XR (« Body Only »), pas un laser lignes — contradiction avec l'intitulé de la liste. Aucun"
   },
   "DCE079": {
-   "motif": "statut bloque",
-   "sources": [],
-   "note": "Budget WebSearch de la session épuisé (200/200) — recherche non tentée."
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.dewalt.co.uk/product/dce079d1g-gb/18v-xr-green-rotary-laser-1-x-2-ah",
+     "kg": 0
+    },
+    {
+     "url": "https://www.raygrahams.com/products/141274-dewalt-dce079d1g-gb-18v-xr-self-level-green-rotary-laser-kit.aspx",
+     "kg": 8.5
+    }
+   ],
+   "note": "Valeurs incohérentes et invraisemblables selon les requêtes (7.25 kg, 7.87 kg, 8.50 kg « poids d'expédition ») pour un laser rotatif à main — bien au-dessus de l'ordre de grandeur habituel (1,5 à 3 kg"
   },
   "DCE080": {
-   "motif": "statut bloque",
-   "sources": [],
-   "note": "Budget WebSearch de la session épuisé (200/200) — recherche non tentée."
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.manomano.fr/p/dewalt-dce080d1gs-qw-greenlaser-rotatif-bluetooth-batterie-18v-20ah-36234547",
+     "kg": 0
+    }
+   ],
+   "note": "La seule valeur trouvée (« 500 g ») provient d'une fourchette de filtre ManoMano (« 500g à 3kg »), pas d'une fiche technique — pas fiable, écartée. Pas de poids trouvé côté fabricant ou revendeurs sér"
   },
   "DCE0811": {
-   "motif": "statut bloque",
-   "sources": [],
-   "note": "Budget WebSearch de la session épuisé (200/200) — recherche non tentée."
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://fr.rs-online.com/web/p/niveaux-laser/1716212",
+     "kg": 4.35
+    },
+    {
+     "url": "https://www.misterworker.com/en-us/dewalt/multi-level-self-levelling-laser-green-beam-dce0811d1g-qw/4973.html",
+     "kg": 0
+    }
+   ],
+   "note": "Piège de référence voisine confirmé : la valeur 4.35 kg trouvée est explicitement celle de DCE089D1G-QW (RS Online), une AUTRE référence, pas DCE0811. Une autre valeur (4.2 kg) est apparue sans source"
   },
   "DCE0822": {
-   "motif": "statut bloque",
+   "motif": "statut introuvable",
    "sources": [],
-   "note": "Budget WebSearch de la session épuisé (200/200) — recherche non tentée."
+   "note": "2 recherches ciblées + 1 filtrée sur dewalt.fr/screwfix/toolstation : aucune fiche produit DCE0822 identifiée. Le moteur ne renvoie que des références voisines (DW0822-XJ 0,786 kg, DCE088D1G, DCE822NG"
   },
   "DCE0825": {
-   "motif": "statut bloque",
-   "sources": [],
-   "note": "Budget WebSearch de la session épuisé (200/200) — recherche non tentée."
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.klium.com/en/dewalt-dce0825d1g-qw-12v-self-levelling-5-point-and-cross-line-laser-green-129535",
+     "kg": 3.62
+    },
+    {
+     "url": "https://www.bricomarche.com/p/laser-autonivelant-dewalt-dce0825d1g-1-x-2.0-ah-dcb107-tstak-ii-/5035048666913",
+     "kg": 5
+    }
+   ],
+   "note": "2 valeurs seulement, sourcing faible (résumés du moteur, pas d'extrait littéral vérifié) : Klium donne 3,62 kg de façon répétée sur 2 recherches indépendantes (probablement l'appareil seul), Bricomarc"
   },
   "DCE085": {
-   "motif": "statut bloque",
+   "motif": "statut introuvable",
    "sources": [],
-   "note": "Budget WebSearch de la session épuisé (200/200) — recherche non tentée."
+   "note": "3 recherches. Anomalie de référence : DCE085 (D1G/D1R) est en réalité une gamme 'laser 5 points / laser tracer', pas 'laser 3x360° vert' comme décrit dans la liste — c'est DCE089 qui correspond au 3x3"
   },
   "DCE088": {
-   "motif": "statut bloque",
+   "motif": "statut introuvable",
    "sources": [],
-   "note": "Budget WebSearch de la session épuisé (200/200) — recherche non tentée."
+   "note": "4 recherches, dont 2 filtrées sur dewalt.fr/dewalt.co.uk/dewalt.com : les fiches officielles DCE088D1G / DCE088NG18-XJ existent mais aucun extrait ne donne le poids en kg. Seule valeur trouvée est cel"
   },
   "DCE089": {
-   "motif": "statut bloque",
+   "motif": "statut introuvable",
    "sources": [],
-   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche exécutée, cause technique confirmée sur 5 tentatives successives."
+   "note": "4 recherches, dont 1 filtrée sur dewalt.fr/dewalt.co.uk : les fiches officielles DCE089D1G-QW existent (12V, 2Ah, portée 20m, IP65) mais sans poids extrait. Des recherches générales ont fait remonter "
   },
   "DCE100": {
-   "motif": "statut bloque",
-   "sources": [],
-   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche exécutée, cause technique confirmée sur 5 tentatives successives."
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.rshughes.com/p/Dewalt-20V-Max-Cordless-Blower-DCE100B-2-5-Lb/885911_45160/",
+     "kg": 1.13
+    },
+    {
+     "url": "https://www.homedepot.com/p/DEWALT-20V-MAX-Cordless-Compact-Jobsite-Blower-135-MPH-100-CFM-Tool-Only-DCE100B/206370245",
+     "kg": 1.36
+    },
+    {
+     "url": "https://www.zoro.com/dewalt-20v-max-1-in-pex-expander-dce400b/i/G1575021/",
+     "kg": 1.79
+    }
+   ],
+   "note": "3 sources de 3 sites différents mais discordantes (>60% d'écart entre min et max), probablement parce que certaines fiches pèsent l'outil seul et d'autres le kit avec batterie DCB203 sans le dire clai"
   },
   "DCE154": {
-   "motif": "statut bloque",
+   "motif": "statut introuvable",
    "sources": [],
-   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche exécutée, cause technique confirmée sur 5 tentatives successives."
+   "note": "4 recherches ciblées 'pince à sertir'. Anomalie de référence forte : toutes les sources identifient DCE154 comme un COUPE-TUBE cuivre 20V MAX XR 1-1/4' (copper tubing cutter), pas une pince à sertir c"
   },
   "DCE400": {
    "motif": "statut bloque",
@@ -2779,14 +3021,23 @@
    "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche exécutée, cause technique confirmée sur 5 tentatives successives."
   },
   "DCE450078": {
-   "motif": "statut bloque",
+   "motif": "statut introuvable",
    "sources": [],
-   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche exécutée, cause technique confirmée sur 5 tentatives successives."
+   "note": "3 recherches ciblées (tête de sertissage cuivre 7/8' pour DCE450). De nombreuses fiches produit existent (Amazon, ToolNut, Toolup, Ohio Power Tool, DeWALT Canada) mais aucune n'affiche le poids en kg "
   },
   "DCE512": {
-   "motif": "statut bloque",
-   "sources": [],
-   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche exécutée, cause technique confirmée sur 5 tentatives successives."
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.dewalt.fr/produit/dce512n-xj/ventilateur-xr-18v",
+     "kg": 3.4
+    },
+    {
+     "url": "https://www.homedepot.com/p/DEWALT-20V-MAX-Jobsite-Fan-Tool-Only-DCE512B/316250500",
+     "kg": 2.72
+    }
+   ],
+   "note": "2 sources seulement, avec un doute supplémentaire : la version EU 18V (DCE512N-XJ, dewalt.fr) donnerait ~3,4 kg nu, tandis que la version US 20V (DCE512B, Home Depot) donnerait ~2,7 kg (6 lb) — ce son"
   },
   "DCE530": {
    "motif": "statut bloque",
@@ -2859,9 +3110,9 @@
    "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche n'a pu être lancée pour cette référence (budget déjà à 0 avant d'y arriver)."
   },
   "DCE571": {
-   "motif": "statut bloque",
+   "motif": "statut introuvable",
    "sources": [],
-   "note": "WebSearch indisponible : budget de recherche de la session épuisé (200/200) dès la première requête ; aucune recherche n'a pu s'exécuter."
+   "note": "3 recherches ciblées (dewalt.co.uk, screwfix.fr, manualslib) : pages produit du pistolet à mastic sans fil 18V DCE571N-XJ trouvées, mais aucun extrait n'affiche de poids en kg."
   },
   "DCE580": {
    "motif": "statut bloque",
@@ -2869,24 +3120,60 @@
    "note": "WebSearch indisponible : budget de recherche de la session épuisé (200/200) dès la première requête ; aucune recherche n'a pu s'exécuter."
   },
   "DCE5801": {
-   "motif": "statut bloque",
-   "sources": [],
-   "note": "WebSearch indisponible : budget de recherche de la session épuisé (200/200) ; aucune recherche n'a pu être tentée pour cette référence."
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.authorizedtooloutlet.com/collections/replacement-parts/products/dewalt-dce5801-600-ml-clear-sausage-tube-conversion-kit",
+     "kg": 0.8
+    },
+    {
+     "url": "https://www.toolmart.com.au/dewalt-dce5801-xj.html",
+     "kg": 0.6
+    }
+   ],
+   "note": "Couplage/tube transparent 600 ml pour pistolet à mastic : seulement 2 valeurs distinctes trouvées (0,6 et ~0,8 kg convertis de 1,76 lb), rattachement site→valeur incertain dans les extraits ; pas de 3"
   },
   "DCE581": {
-   "motif": "statut bloque",
-   "sources": [],
-   "note": "WebSearch indisponible : budget de recherche de la session épuisé (200/200) ; aucune recherche n'a pu être tentée pour cette référence."
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.powertoolworld.co.uk/dewalt-dce581n-xj-18v-xr-300-600ml-caulking-gun-body-only",
+     "kg": 2.2
+    },
+    {
+     "url": "https://www.eganreid.co.uk/dewalt-dce581n-xr-caulk-gun-300-600ml-18v-bare-unit--1",
+     "kg": 2.2
+    }
+   ],
+   "note": "Pistolet à mastic machine nue (DCE581N-XJ) : seulement 2 sources exploitables, toutes deux à 2,2 kg — valeur IDENTIQUE à celle trouvée pour la référence voisine DCE580. Soupçon de confusion entre les "
   },
   "DCE590": {
-   "motif": "statut bloque",
-   "sources": [],
-   "note": "WebSearch indisponible : budget de recherche de la session épuisé (200/200) ; aucune recherche n'a pu être tentée pour cette référence."
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.misterworker.com/en/dewalt/18v-xr-vacuum-lifter-without-battery-dce590n-xj/112276.html",
+     "kg": 2.5
+    },
+    {
+     "url": "https://www.powertoolworld.co.uk/dewalt-dce590n-xj-18v-xr-cordless-grabo-suction-lifter-body-only",
+     "kg": 1.5
+    }
+   ],
+   "note": "Palonnier à vide GRABO 18V (DCE590N-XJ) : valeurs incohérentes selon les extraits (de 0,54 à 9 kg suivant les passages, dont un chiffre qui semble en réalité désigner la capacité de charge de 120 kg, "
   },
   "DCE6820": {
-   "motif": "statut bloque",
-   "sources": [],
-   "note": "WebSearch indisponible : budget de recherche de la session épuisé (200/200) ; aucune recherche n'a pu être tentée pour cette référence."
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.toolden.co.uk/gardening/garden-sprayers/dewalt-dce6820n-xj-18v-xr-15l-cordless-powered-water-tank-body-only/",
+     "kg": 2.4
+    },
+    {
+     "url": "https://www.manualslib.com/manual/3475440/Dewalt-Dce6820.html",
+     "kg": 4.9
+    }
+   ],
+   "note": "Outil sans fil 18V DCE6820 (réservoir d'eau motorisé) : écart >100% entre extraits — 2,4 kg pour la variante EU 18V DCE6820N-XJ (15 L) selon plusieurs revendeurs UK, contre 4,9 kg pour la variante US "
   },
   "DCE800": {
    "motif": "statut bloque",
@@ -3457,6 +3744,16 @@
    "motif": "statut bloque",
    "sources": [],
    "note": "Quota WebSearch de session épuisé (200/200) — recherche non tentée par suite du blocage constaté sur les 5 premières références."
+  },
+  "DCD85MM2T": {
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.malatanonline.com/products/dcd85mm2t-dewalt-x-mclaren-f1-team-18v-xr-brushless-hammer-drill-driver/2439790000001991071",
+     "kg": 1.34
+    }
+   ],
+   "note": "Piège des références voisines suspecté : variantes proches DCD85MP2T (1,2 kg) et DCD85MN (1,3 kg) cohérentes avec la valeur trouvée pour DCD85MM2T (1,34 kg), mais une seule URL confirme clairement CET"
   }
  }
 }
