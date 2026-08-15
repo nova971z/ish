@@ -119,14 +119,30 @@ if (fs.existsSync(source)) {
       toutes.push({ r: r, t: String(p.title || '').slice(0, 70) });
     });
 }
+/* ⛔⛔ NE JAMAIS REPASSER SUR CE QU'ON VIENT D'ESSAYER, TANT QU'IL RESTE DU
+   NEUF. Défaut mesuré le 15/08/2026 : le paquet suivant reproposait mot pour
+   mot les références que la vague venait de rendre « introuvable » ou « non
+   résolue ». Or le budget de recherche est plafonné (~200 par campagne) : les
+   redonner en tête revient à brûler la campagne sur des impasses connues,
+   pendant que des centaines de références n'ont JAMAIS été tentées.
+   ⚠️ Ce n'est PAS un abandon — elles restent dans `nonResolues` avec leur
+   motif, et reviennent d'elles-mêmes en fin de file quand le neuf est épuisé.
+   Sceller serait le défaut d'en face, celui des 117 fausses « introuvable ». */
+const jamaisTentees = [];
+const dejaTentees = [];
 toutes.forEach((c) => {
   const r = c.r || c.racine;
-  if (!faites.has(r)) restantes.push({ r: r, t: c.t || c.titre || '' });
+  if (faites.has(r)) return;
+  (nonRes[r] ? dejaTentees : jamaisTentees).push({ r: r, t: c.t || c.titre || '' });
 });
+jamaisTentees.forEach((x) => restantes.push(x));
+dejaTentees.forEach((x) => restantes.push(x));
 
 console.log('');
 console.log('④ état : ' + nRac + ' racines gravées · ' + Object.keys(nonRes).length
   + ' non résolues gardées · ' + restantes.length + ' restantes');
+console.log('   dont JAMAIS tentées : ' + jamaisTentees.length
+  + ' · déjà tentées sans succès (repoussées en fin de file) : ' + dejaTentees.length);
 if (!restantes.length) {
   console.log('   ✅ PLUS RIEN À PESER — toutes les racines connues sont gravées.');
   process.exit(0);
