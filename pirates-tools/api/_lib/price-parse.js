@@ -869,56 +869,57 @@ function titreAjouteDuContenu(texte, portee) {
 function titreContreditFiche(titre, skuFiche, marque) {
   var t = String(titre || '');
   if (!t) return null;
+  var marqueEstDewalt = /^dewalt$/i.test(String(marque || '').replace(/[\s-]/g, ''));
+  var skuU = String(skuFiche || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  /* La nature de la FICHE décide des règles applicables (balayage n°2, lu un
+     par un : 9 défauts, docs/VERIF-BALAYAGE-2.md).
+       sansBatt : suffixe lisible et 0 batterie (N *ou NT* — D1 : quatre prix
+                  de kit APPLIQUÉS sur des fiches NT au balayage n°2) ;
+       ficheKit : la fiche est elle-même un kit — ses tuiles parlent
+                  légitimement d'Ah et de « N pcs » (D5 : « combo pack
+                  3 pcs. » refusé à tort sur DCK330P2T). */
+  /* marque vérifiée SUR la ligne d'appel (M-28) : la grammaire de suffixes
+     DeWALT ne lit jamais une référence d'une autre marque. */
+  var lu = (marqueEstDewalt && /^dewalt$/i.test(String(marque || '').replace(/[\s-]/g, '')))
+    ? nomen.lireSuffixeDewalt(skuU.replace(/(XJ|QW|XE|GB|LX|QS)$/,'')) : null;
+  var sansBatt = !!(lu && lu.suffixe && lu.nbBatteries === 0);
+  var ficheKit = !!(lu && lu.nbBatteries > 0) || /^DCK/.test(skuU);
+  var suffixeIllisible = marqueEstDewalt && !(lu && lu.suffixe);
 
-  /* ① BUNDLE « & » — deux produits dans une seule offre. Mesuré : cinq
-     bundles « machine & batterie DCB182 » et « défonceuse & coffret fraises ».
-     L'esperluette d'un bundle est entourée d'espaces ; « Black&Decker » ou
-     « S&P » n'en portent pas. */
-  if (/\s&\s/.test(t)) {
+  /* ① BUNDLE « & » — seulement si ce qui SUIT est une référence ou un objet
+     vendu séparément. D7 : « Aspirateur Eau & Poussières » et « Coffret
+     embouts & forets » sont UN produit — trois refus à tort au balayage n°2. */
+  var apresEsp = t.split(/\s&\s/).slice(1).join(' & ');
+  if (apresEsp && (/^\s*(?:DEWALT\s+|DeWalt\s+)?[A-Z]{2,4}\d{2,}/i.test(apresEsp)
+      || /^\s*(batteries?|battery|akku|coffret|lames?|meuleuse|scie|outil|laser|perforateur|visseuse|niveau|chargeur|set\s+de|jeu\s+de)\b/i.test(apresEsp))) {
     return 'bundle « & » : l\'offre réunit plusieurs produits, son prix ne '
       + 'peut se poser sur aucune fiche seule';
   }
 
-  /* ② LOT DE N UNITÉS — le prix du lot n'est jamais celui de l'unité.
-     « Lot 4 batteries », « 10 x DEWALT DCB184 », « Lot de 5 », « 2 pcs. »,
-     « Expositor x 12 ». ⚠️ Le conditionnement NORMAL d'un consommable
-     (« 2200 pièces » de clous) n'est pas un lot : on ne compte que les
-     multiplicateurs de l'ARTICLE (bornés à 50), jamais son contenu. */
-  var skuU = String(skuFiche || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
-  var mLot = t.match(/\b(?:lots?\s+(?:de\s+)?(\d{1,2})\b|(\d{1,2})\s*pcs\.?\b|x\s*(\d{1,2})\s*$)/i);
-  if (mLot) {
-    var nLot = parseInt(mLot[1] || mLot[2] || mLot[3], 10);
-    if (nLot > 1 && nLot <= 50) {
-      return 'lot de ' + nLot + ' annoncé dans le titre : le prix du lot ne '
-        + 's\'écrit pas sur la fiche d\'une unité';
-    }
-  }
-  if (skuU && new RegExp('\\b(\\d{1,2})\\s*[X×]\\s*(DEWALT\\s+)?' + skuU.slice(0, 6))
-      .test(t.toUpperCase())) {
-    return 'multiplicateur devant la référence : offre multi-unités';
-  }
-
-  /* ③ + ④ FICHE NUE : la réf de kit entre parenthèses, ou un contenu
-     batterie/chargeur annoncé, contredisent la nudité de la fiche. */
-  if (referenceEstNue(skuFiche, marque)) {
+  /* ② FICHE SANS BATTERIE (nue ou NT) : tout contenu annoncé contredit. */
+  if (sansBatt || suffixeIllisible) {
+    /* réf de kit en parenthèse finale (déjà éprouvé au balayage n°1) */
     var mp = t.match(/\(([A-Z0-9][A-Z0-9-]{4,})\)\s*$/i);
-    /* ⛔ M-28 — chaque marque a sa table : la grammaire de suffixes DeWALT ne
-       lit JAMAIS une référence d'une autre marque (un « T » final y dirait
-       coffret là où l'autre marque dit batterie 5 Ah). */
-    var marqueEstDewalt = /^dewalt$/i.test(String(marque || '').replace(/[\s-]/g, ''));
-    if (mp && marqueEstDewalt) {
+    /* marque vérifiée ICI même (M-28) : la grammaire DeWALT ne lit jamais
+       une référence d'une autre marque. */
+    if (mp && sansBatt && /^dewalt$/i.test(String(marque || '').replace(/[\s-]/g, ''))) {
       var lp = nomen.lireSuffixeDewalt(String(mp[1]).toUpperCase().replace(/[^A-Z0-9]/g, ''));
       if (lp && lp.nbBatteries > 0) {
         return 'la référence entre parenthèses (' + mp[1] + ') est un kit à '
           + lp.nbBatteries + ' batterie(s), la fiche est nue';
       }
     }
-    /* Inclusion EXPLICITE : « (1 x 5,0 Ah) », « + 1x batterie 4,0 Ah »,
-       « avec 2 Batteries », « + chargeur », « chargeur inclus ».
-       ⚠️ « + TSTAK » n'est PAS une batterie (le NT est un coffret). */
+    /* « (Nx …Ah) » explicite — seule règle appliquée aux suffixes illisibles
+       (D1, DCL074) : une fiche batterie sans suffixe dit « 5Ah » sans être
+       un kit, on ne juge alors que la parenthèse de contenu. */
+    if (/\(\s*\d\s*[x×]\s*(?:\w+\s+){0,2}?\d+[.,]?\d*\s*Ah\b/i.test(t)) {
+      return 'le titre annonce une batterie incluse (Nx …Ah), la fiche est '
+        + 'sans batterie — prix de kit refusé';
+    }
+  }
+  if (sansBatt) {
     var inclusion =
-      /\(\s*\d\s*[x×]\s*\d+[.,]?\d*\s*Ah\b/i.test(t)
-      || /\+\s*\d*\s*[x×]?\s*(batteries?|battery|akku|powerstack)\b/i.test(t)
+      /\+\s*\d*\s*[x×]?\s*(batteries?|battery|akku|powerstack)\b/i.test(t)
       || /\+\s*\d\s*[x×]\s*\d+[.,]?\d*\s*Ah/i.test(t)
       || /avec\s+\d+\s+batteries?\b/i.test(t)
       || /(chargeur|charger|ladeger[äa]t)\s+(inclus|included)/i.test(t)
@@ -931,16 +932,52 @@ function titreContreditFiche(titre, skuFiche, marque) {
       return 'le titre annonce une batterie ou un chargeur inclus, la fiche est '
         + 'nue — prix de kit refusé sur une machine nue';
     }
-    /* Mention d'Ah SANS négation de batterie : « Aspirateur 18V 5Ah » — la
-       capacité décrit la batterie LIVRÉE. Une fiche nue n'a pas d'Ah. */
     if (!negationBatterie && /\b\d+[.,]?\d*\s*Ah\b/i.test(t)) {
       return 'le titre porte une capacité de batterie (Ah) sans dire « sans '
         + 'batterie » : offre avec batterie, la fiche est nue';
     }
+    /* D3 — code kit ACCOLÉ à la racine, espaces ignorés : « DCS 369 E1 ». */
+    var racine = skuU.replace(/(XJ|QW|XE|GB|LX|QS)$/,'').replace(/NT?$/,'');
+    if (racine.length >= 5) {
+      /* la réf peut être ÉCLATÉE dans le titre (« DCS 369 E1 ») : chaque
+         caractère de la racine tolère un espace ou un tiret derrière lui,
+         et le code kit doit finir sur une frontière de mot. */
+      var motifRacine = racine.split('').join('[\\s-]?');
+      if (new RegExp('\\b' + motifRacine + '\\s*(E1|E2|M1|M2|P1|P2|H2|D2|T2|S2T)\\b')
+          .test(t.toUpperCase())) {
+        return 'le titre porte un code de kit accolé à la référence, la fiche '
+          + 'est nue — prix de kit refusé';
+      }
+    }
+    /* D2 + D8 — « + » suivi d\'une référence produit ou de « Nx <accessoire> » :
+       « DCH273N + D25303DH », « + 2x Toolbrothers SPIDER ». Réservé aux fiches
+       sans batterie : « (DCH072 + DCD706) » est LÉGITIME sur la fiche du kit. */
+    if (/\+\s*(?:DEWALT\s+)?[A-Z]{1,4}\s?\d{3,}/i.test(t)
+        || /\+\s*\d+\s*[x×]\s+[A-Za-z]/.test(t)) {
+      return 'le titre joint un autre produit ou accessoire (« + … ») : prix '
+        + 'de bundle refusé sur une fiche seule';
+    }
+  }
+
+  /* ③ LOTS — jamais sur une fiche qui est elle-même un kit (D5), et les
+     DIMENSIONS « 27 x 32 x 15 » ne sont pas des lots (D4). */
+  if (!ficheKit) {
+    var tLot = t.replace(/\b\d{1,4}\s*[x×]\s*\d{1,4}\s*[x×]\s*\d{1,4}\b/g, ' ');
+    var mLot = tLot.match(/\b(?:lots?\s+(?:de\s+)?(\d{1,2})\b|(\d{1,2})\s*pcs\.?\b|x\s*(\d{1,2})\s*$|quantit[éeè]y?\s*:?\s*(\d{1,2})\b|quantity\s*:?\s*(\d{1,2})\b)/i);
+    if (mLot) {
+      var nLot = parseInt(mLot[1] || mLot[2] || mLot[3] || mLot[4] || mLot[5], 10);
+      if (nLot > 1 && nLot <= 50) {
+        return 'lot de ' + nLot + ' annoncé dans le titre : le prix du lot ne '
+          + 's\'écrit pas sur la fiche d\'une unité';
+      }
+    }
+    if (skuU && new RegExp('\\b(\\d{1,2})\\s*[X×]\\s*(DEWALT\\s+)?' + skuU.slice(0, 6))
+        .test(t.toUpperCase())) {
+      return 'multiplicateur devant la référence : offre multi-unités';
+    }
   }
   return null;
 }
-
 function referenceEstNue(sku, marque) {
   /* ⛔ LA GARDE PORTE LE MOT « marque », ET CE N'EST PAS COSMÉTIQUE.
      Premier jet : la variable s'appelait `M`. `check-separation-marques` est

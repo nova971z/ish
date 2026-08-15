@@ -45,7 +45,15 @@ var DOIVENT_ETRE_REFUSES = [
   ['DEWALT DT70523TM-QZ Expositor Merchandiser DT70523T x 12', 'DT70523TM-QZ'],
   /* sans mention d'Ah : SEULE la branche « inclusion » l'attrape — c'est elle
      que ce témoin prouve faillible (sabotage du 15/08 resté vert sans lui). */
-  ['DeWalt DCE530N + 1x batterie - sans chargeur', 'DCE530N-XJ']
+  ['DeWalt DCE530N + 1x batterie - sans chargeur', 'DCE530N-XJ'],
+  /* ── Témoins du balayage n°2 (docs/VERIF-BALAYAGE-2.md), tous RÉELS ── */
+  ['DeWalt DCF620NT (1x Powerstack Akku 5,0 Ah + TSTAK - ohne Ladegerät)', 'DCF620NT-XJ'],
+  ['DeWalt DCH273NT (1x5.0 Ah + TSTAK)', 'DCH273NT-XJ'],
+  ['DeWalt DCL074 (1x 5Ah)', 'DCL074'],
+  ['DeWalt DCH273N Marteau Combiné sans Fil 18V 2,1J SDS Plus Brushless + D25303DH Aspiration des Poussières (DCH273N)', 'DCH273N-XJ'],
+  ['DeWalt DCW210N + 2x Toolbrothers SPIDER', 'DCW210N-XJ'],
+  ['DeWalt DCS 369 E1 Scie Sabre sans Fil 18V Brushless (DCS369N)', 'DCS369N-XJ'],
+  ['DeWalt DWST540601 Sac à outils 26 poches quantité 4', 'DWST540601']
 ];
 var DOIVENT_PASSER = [
   ['DeWalt DCF850N', 'DCF850N'],
@@ -55,7 +63,18 @@ var DOIVENT_PASSER = [
   ['DeWalt Batterie XR 18V 5Ah Li-Ion (DCB184)', 'DCB184'],
   ['DeWALT Clous 34º, lisse, 90 mm, 2200 pièces - DNW3190E', 'DNW3190E'],
   ['DeWalt DCH273NT-XJ', 'DCH273NT-XJ'],
-  ['DeWALT - Scie sabre compacte sans fil 18V, sans batterie DCS369N', 'DCS369N-XJ']
+  ['DeWALT - Scie sabre compacte sans fil 18V, sans batterie DCS369N', 'DCS369N-XJ'],
+  /* ── Faux positifs du balayage n°2, corrigés — ils doivent PASSER ── */
+  ['DEWALT DCK368P3T Triple Kit, 18 V, Jaune, 27 x 32 x 15', 'DCK368P3T'],
+  ['DeWalt 18V battery combo pack 3 pcs. (DCK330P2T-QW)', 'DCK330P2T-QW'],
+  ['DeWalt DXV23PTA Aspirateur Eau & Poussière 23L 1150W avec PTO (DXV23PTA)', 'DXV23PTA'],
+  ['DeWalt DT70777-QZ Coffret embouts & forets avec tête angulaire, 85 pièces (DT70777-QZ)', 'DT70777-QZ'],
+  ['DeWalt DCK2102L2T-QW (DCH072 + DCD706)', 'DCK2102L2T-QW'],
+  ['DeWalt DCF620NT (TSTAK + Magazinvorsatz - ohne Akku ohne Ladegerät)', 'DCF620NT-XJ'],
+  /* CONSTRUIT (pas du zip) : isole la branche « dimensions ≠ lot » sur une
+     fiche NON-kit — sans lui, saboter le nettoyage des dimensions restait
+     vert car DCK368P3T est déjà protégé par ficheKit (mesuré le 15/08). */
+  ['DeWalt DWST83395-1 Boîte à outils vide 44 x 33 x 12', 'DWST83395-1']
 ];
 
 module.exports = function () {
