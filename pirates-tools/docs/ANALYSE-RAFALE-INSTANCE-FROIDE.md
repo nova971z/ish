@@ -43,8 +43,8 @@ marge quasi nulle après port. « Le parseur ne fait pas son travail. »
 | état | rôle | risque si perdu | statut |
 |---|---|---|---|
 | `pwHaussesEnAttente` (l.2987) | file des hausses à rejouer | hausses jamais écrites → marge rongée | ✅ **RÉPARÉ** (a21a7a1) : doc durable `config/pw_hausses_<marque>`, rejeu fin de rafale OU entrée > 30 min (`PW_HAUSSE_TTL_MS`) |
-| `pwCouv.pages` (l.2967/3256) | détection de fin de rafale | la fin n'arrive jamais sur instance froide | ⛔ à persister — le TTL de 30 min du correctif ① borne le retard, mais la détection reste mémoire |
-| `pwCouv.coutMin` (`pwRafaleCoutMin`, l.3159) | minimum de rafale anti-hausses-fantômes | instance froide oublie les tuiles moins chères déjà vues → sur-prix temporaire en cours de balayage (le défaut du 11/08 revient par le recyclage) | ⛔ à persister |
+| `pwCouv.pages` (l.2967/3256) | détection de fin de rafale | la fin n'arrive jamais sur instance froide | ✅ **RÉPARÉ** (94d1098) : `_pages` durable, fin décidée sur max(mémoire, durable) |
+| `pwCouv.coutMin` (`pwRafaleCoutMin`, l.3159) | minimum de rafale anti-hausses-fantômes | instance froide oublie les tuiles moins chères déjà vues → sur-prix temporaire | ✅ **RÉPARÉ** (94d1098) : `_coutMin` durable, semé au chargement de chaque page |
 
 ## Le reste à faire, précisément
 
@@ -85,3 +85,16 @@ marge quasi nulle après port. « Le parseur ne fait pas son travail. »
   ancienne, prix absurde pour un accessoire.
 - `DCFS950N` : old 161,63 € contre tuiles à 685 € — l'un des deux est faux.
 - À traiter avec les 203 hausses en attente (D-57).
+
+## Clôture — 15/08/2026, même session
+
+Les trois états sont durables. La porte `check-instance-froide` (ddb01c1)
+prouve le cycle entier sur le vrai handler avec une vraie instance froide
+(`delete require.cache`) : différée page 1 → appliquée après recyclage + TTL
+→ file purgée → jamais de rejeu prématuré. Trois sabotages, trois rouges.
+⚠️ Sa CONSTRUCTION a trouvé un 4ᵉ défaut : sans le marqueur `rejoue`, une
+hausse rejouée par TTL se re-différait pour toujours — le rejeu de l'étape 1
+ne servait à rien. Une correction sans sa porte est un semblant : mesuré.
+Reste ouvert : anomalies DT50002-QZ (12 311,51 € servi) et DCFS950N, à
+arbitrer avec D-57. Le rétablissement des prix passe par UNE rafale du
+traqueur, lancée par l'user.
