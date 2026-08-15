@@ -217,6 +217,60 @@
     }
    ],
    "note": "3 sites identiques a 1,46 kg (ecart 0 %), chacun verifie par recherche restreinte au domaine (fetch direct bloque par le proxy). Discordant unique : powertoolworld.co.uk affiche 1,1 kg (ecart 33 %, so"
+  },
+  "COFFRET|TSTAK": {
+   "kg": 1.77,
+   "sources": [
+    {
+     "url": "https://uk.rs-online.com/web/p/tool-boxes/7932749",
+     "kg": 1.76
+    },
+    {
+     "url": "https://www.toolden.co.uk/accessories/tool-storage/tool-boxes/dewalt-dwst1-70703-tstak-ii-storage-box/",
+     "kg": 1.76
+    },
+    {
+     "url": "https://www.powertoolworld.co.uk/dewalt-xr-empty-case-tstak-kitbox-for-dewalt-combi-drill-or-impact-driver-kits",
+     "kg": 1.77
+    }
+   ],
+   "note": "Identification : DWST1-70703 est le boîtier TSTAK II 'Flat Top'/'Suitcase' sans tiroir, livré NU (sans batteries/outil) dans les kits perceuse-visseuse/visseuse à chocs XR — compatibilité confirmée po"
+  },
+  "BATTERIE|FLEXVOLT|12AH": {
+   "kg": 1.46,
+   "sources": [
+    {
+     "url": "https://www.fixami.fr/dewalt-dcb548-batterie-li-ion-18v-54v-xr-flexvolt-12-0ah-dcb548-xj.html",
+     "kg": 1.46
+    },
+    {
+     "url": "https://outilsdespros.fr/batteries-36v-54v/45401-batterie-xr-flexvolt-18v54v-12ah4ah-li-ion-dewalt-dcb548-xj-5035048706794.html",
+     "kg": 1.46
+    },
+    {
+     "url": "https://www.howetools.co.uk/dewalt-dcb548-54v-18v-flexvolt-li-ion-battery-4-0ah12-0ah",
+     "kg": 1.46
+    }
+   ],
+   "note": "Fetch direct bloqué par le proxy (screwfix.com, klium.com, contorion.de, dewalt.co.uk, manualslib.com, docs.rs-online.com tous en EGRESS_BLOCKED) : lu via recherches site:-restreintes (contenu indexé)"
+  },
+  "BATTERIE|XR|6AH": {
+   "kg": 1.02,
+   "sources": [
+    {
+     "url": "https://toolup.com/products/dewalt-dcb206-20v-max-premium-xr-6-0-ah-lithium-ion-battery-pack",
+     "kg": 1.02
+    },
+    {
+     "url": "https://bcfasteners.com/shop/dewalt-dcb206-20v-max-premium-xr-6-0ah-battery-pack/",
+     "kg": 0.91
+    },
+    {
+     "url": "https://woodworkingtoolshq.com/dewalt-dcb205-vs-dcb206-which-battery-is-better-for-your-power-tools/",
+     "kg": 0.77
+    }
+   ],
+   "note": "Point vérifié en premier : \"DCB196\" n'existe pas (aucun résultat DeWalt pour ce numéro). La gamme XR 18V \"slide\" européenne (dewalt.co.uk et revendeurs UK) s'arrête à la DCB184 5,0 Ah ; le rôle 6 Ah y"
   }
  },
  "nonResolues": {
@@ -247,8 +301,21 @@
   },
   "COFFRET|KITBOX": {
    "motif": "statut non-resolue",
-   "sources": [],
-   "note": "0 source de poids collectee, memes causes : budget de recherches epuise (200/200) et fetch direct bloque par proxy (CONNECT 403). Piste reelle relevee dans un titre de resultat : powertoolworld.co.uk "
+   "sources": [
+    {
+     "url": "https://www.cef.co.uk/catalogue/products/5451858-tstak-heavy-duty-kitbox-for-dcd796-drills",
+     "kg": 1.1
+    },
+    {
+     "url": "https://www.powertoolworld.co.uk/dewalt-xr-empty-heavy-duty-case-tstak-kitbox-for-dewalt-combi-drill-or-impact-driver-kits",
+     "kg": 1.77
+    },
+    {
+     "url": "https://unitedfixings.co.uk/products/dewalt-xr-empty-heavy-duty-case-tstak-kitbox-for-dewalt-combi-drill-or-impact-driver-kits",
+     "kg": 1.77
+    }
+   ],
+   "note": "Les deux références suggérées par la consigne ne se vérifient pas : 'N037860' introuvable dans tout catalogue pièces détachées consulté (ereplacementparts.com, fix.com, toolsandmore.us) ; 'DWST1-75522"
   }
  }
 }
