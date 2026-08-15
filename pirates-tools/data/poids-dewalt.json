@@ -582,18 +582,432 @@
     }
    ],
    "note": "Revendeurs EU convergent à 16 kg (l'un précise explicitement 'in carrying case', donc déjà emballé) ; distributeurs US (Rexel/Platt/Gexpro) donnent 40 lb = 18,1 kg, probablement poids colis d'expéditi"
+  },
+  "D25303": {
+   "kg": 2,
+   "sources": [
+    {
+     "url": "https://www.datapowertools.co.uk/Products/DeWALT_Dust_Extractors/DEWD25303DH-XJ",
+     "kg": 1.4
+    },
+    {
+     "url": "https://www.toolchimp.co.uk/dewalt-d25303dh-cordless-dust-extraction-system-18v-bare-unit-d25303dh-xj-and-dwh079d",
+     "kg": 1.4
+    },
+    {
+     "url": "https://www.powertoolworld.co.uk/dewalt-d25303dh-xj-cordless-dust-extractor-for-dch273-274",
+     "kg": 2
+    }
+   ],
+   "note": "3 sites distincts, écart 1,4-2,0 kg (42,9%, ≤60%) : retenu la valeur haute (doute possible entre poids nu affiché et poids incluant l'attache/le tuyau, marge protégée)."
+  },
+  "D25330": {
+   "kg": 2.95,
+   "sources": [
+    {
+     "url": "https://www.onlinediystore.co.uk/dewalt-d25330k-dedicated-chipping-hammers-295-kg-3138-p.asp",
+     "kg": 2.95
+    },
+    {
+     "url": "https://www.gexpro.com/p/775829/dewalt/compact-sds-chipping-hammer/d25330k",
+     "kg": 2.95
+    },
+    {
+     "url": "https://www.rexelusa.com/p/775829/dewalt/compact-sds-chipping-hammer/028877516271/d25330k",
+     "kg": 2.95
+    }
+   ],
+   "note": "3 sites distincts en accord exact (6,5 lb = 2,95 kg)."
+  },
+  "D25961": {
+   "kg": 16,
+   "sources": [
+    {
+     "url": "https://www.klium.com/en/dewalt-d25961k-qs-demolition-hammer-with-30-mm-hexagonal-head-16-kg-1600-w-in-carrying-case-128073",
+     "kg": 16
+    },
+    {
+     "url": "https://www.toolnation.com/dewalt-d25961k-qs-d25961k-breaker-16-kg-30mm-1600w.html",
+     "kg": 16
+    },
+    {
+     "url": "https://www.stokker.com/chipping-hammer-d25961k-17-kg-35j-30-mm-hex-c-d25961k-dw",
+     "kg": 17
+    }
+   ],
+   "note": "Majorité (Klium, Toolnation, Mister Worker, autres revendeurs) à 16 kg ; Stokker isolé à 17 kg (écart 6,25%, dans la bande). Retenu 16 kg, valeur la plus recoupée."
+  },
+  "D25966": {
+   "kg": 18.8,
+   "sources": [
+    {
+     "url": "https://www.klium.com/en/dewalt-d25966-qs-hex-breaker-1800w-157621",
+     "kg": 18.8
+    },
+    {
+     "url": "https://www.emmetistore.com/products/demolition-hammer-dewalt-d25966-qs-1800w",
+     "kg": 18.8
+    },
+    {
+     "url": "https://ph.rs-online.com/web/p/hammers/0134681",
+     "kg": 18.8
+    }
+   ],
+   "note": "3 sites distincts en accord exact ; la 3e source (RS) porte sur la variante D25966-LX (110V, même châssis) au même poids annoncé."
+  },
+  "D25981": {
+   "kg": 31,
+   "sources": [
+    {
+     "url": "https://www.lectura-specs.com/en/model/tools/power-tools-demolition-hammers-breakers-dewalt/d25981k-qs-11792828",
+     "kg": 31
+    },
+    {
+     "url": "https://www.seddonplant.co.uk/dewalt/110v-range/dewalt-d25981-lx-110v-30kg-pavement-breaker",
+     "kg": 31
+    },
+    {
+     "url": "https://www.toolnation.com/dewalt-d25981k-qs-d25981k-breaker-30-kg-28mm-2100w-trolley.html",
+     "kg": 30
+    }
+   ],
+   "note": "Titres marketing de plusieurs revendeurs arrondissent à 30 kg ; fiches techniques détaillées (Lectura Specs, Seddon Plant) donnent 31 kg. Écart 3,3%, retenu 31 kg (valeur la plus précise / la plus hau"
+  },
+  "D26203": {
+   "kg": 2.9,
+   "sources": [
+    {
+     "url": "https://www.manomano.fr/p/defonceuse-dewalt-8-mm-et-900-w-d26203-36363",
+     "kg": 2.9
+    },
+    {
+     "url": "https://www.amazon.es/DeWalt-D26203-QS-DeWALT-D26203-routers/dp/B007DZSN2W",
+     "kg": 2.9
+    },
+    {
+     "url": "https://www.klium.com/en/dewalt-d26203-qs-plunge-router-8mm-900w-in-box-127316",
+     "kg": 2.9
+    }
+   ],
+   "note": "3 sites distincts en accord exact."
+  },
+  "D26204": {
+   "kg": 2.9,
+   "sources": [
+    {
+     "url": "https://www.manomano.fr/p/dewalt-d26204k-defonceuse-affleureuse-pince-8-mm-900-watts-7324?product_id=7343",
+     "kg": 2.9
+    },
+    {
+     "url": "https://www.powertoolworld.co.uk/dewalt-d26204k-1-4-combination-plunge-fixed-base-router-900w",
+     "kg": 2.9
+    },
+    {
+     "url": "https://www.idealo.co.uk/compare/2717338/dewalt-d26204k.html",
+     "kg": 2.9
+    }
+   ],
+   "note": "3 sites distincts en accord exact."
+  },
+  "D26414": {
+   "kg": 0.85,
+   "sources": [
+    {
+     "url": "https://ffx.co.uk/tools/product/Dewalt-D26414-5035048290088-Lcd-Premium-Heat-Gun-240V",
+     "kg": 0.85
+    },
+    {
+     "url": "https://docs.rs-online.com/55c3/0900766b8127929f.pdf",
+     "kg": 0.85
+    },
+    {
+     "url": "https://www.manuals.co.uk/dewalt/d26414/specifications",
+     "kg": 0.71
+    }
+   ],
+   "note": "Poids appareil nu (pistolet à air chaud). Écart 0,71–0,85 kg selon les sources (manuel officiel vs revendeurs) ; valeur la plus haute retenue."
+  },
+  "D26441": {
+   "kg": 1.9,
+   "sources": [
+    {
+     "url": "https://www.bestomart.com/products/dewalt-1-4-sheet-orbit-palm-sander-d26441230-w-1-2-kg-1000000982",
+     "kg": 1.2
+    },
+    {
+     "url": "https://mans.io/item/Dewalt/D26441",
+     "kg": 1.4
+    },
+    {
+     "url": "https://store.gsfasteners.com/catalog/product/view/id/358/s/357/category/10/",
+     "kg": 1.9
+    }
+   ],
+   "note": "Poids nu ~1,2–1,4 kg selon les sources ; poids colis 1,9 kg (4,2 lb/pkg). Écart 58 % (limite du seuil 60 %) — retenu le poids le plus haut (doute net/emballé)."
+  },
+  "D26500": {
+   "kg": 4,
+   "sources": [
+    {
+     "url": "https://www.powertoolsdirect.com/dewalt-d26500k-planer-in-kit-box-1050w-240v",
+     "kg": 4
+    },
+    {
+     "url": "https://www.misterworker.com/en-us/dewalt/hand-planer-1050w-82x4mm-dw276/3012.html",
+     "kg": 4
+    },
+    {
+     "url": "https://www.dewalt.co.uk/product/d26500k-gb/4-mm-planer",
+     "kg": 4
+    }
+   ],
+   "note": "Raboteuse D26500K en coffret. Valeur constante sur 3 sites, dont le site officiel DeWALT UK."
+  },
+  "D271055": {
+   "kg": 27.6,
+   "sources": [
+    {
+     "url": "https://en.tooloutlet.fi/product/73001/dewalt-d271055-sliding-table",
+     "kg": 27.6
+    },
+    {
+     "url": "https://www.toolnation.com/dewalt-accessoires-d271055-xj-d-271055-sliding-table-d271057.html",
+     "kg": 27.6
+    },
+    {
+     "url": "https://www.amazon.nl/-/en/Dewalt-D271055-XJ-sliding-table-D27015/dp/B0013LCGLQ",
+     "kg": 27.6
+    }
+   ],
+   "note": "Table coulissante accessoire pour D27105/D27107. Poids identique (probablement poids colis/livraison) sur 3 sites indépendants."
+  },
+  "D27107": {
+   "kg": 40,
+   "sources": [
+    {
+     "url": "https://www.amazon.co.uk/Dewalt-D27107XPS-QS-Kapp-und-Gehrungss%C3%A4ge-D27107XPS/dp/B00BGP91O4",
+     "kg": 40
+    },
+    {
+     "url": "https://www.stokker.com/flip-over-saw-d27107xps-305mm-dewalt-c-d27107xps-dw",
+     "kg": 40
+    },
+    {
+     "url": "https://www.sanitino.es/dewalt-herramientas-sierra-ingletadora-combinada-de-305-mm-con-indicador-led-2000-w-d27107xps",
+     "kg": 40
+    }
+   ],
+   "note": "Scie combinée D27107XPS (établi/onglet/table). Valeur identique sur 3 sites."
+  },
+  "D27111": {
+   "kg": 26.5,
+   "sources": [
+    {
+     "url": "https://www.sanitino.fr/dewalt-outillage-scie-combinee-305-mm-1500-w-d27111",
+     "kg": 26.5
+    },
+    {
+     "url": "https://www.manua.ls/dewalt/d27111/manual",
+     "kg": 26.5
+    },
+    {
+     "url": "https://e-catalog.com/DEWALT-D27111.htm",
+     "kg": 26.5
+    }
+   ],
+   "note": "Scie combinée d'établi. Valeur identique sur 3 sites (dont manuel officiel)."
+  },
+  "D27112": {
+   "kg": 23,
+   "sources": [
+    {
+     "url": "https://www.klium.com/en/dewalt-d27112-qs-crosscut-mitre-and-table-saw-305-mm-1600-w-129264",
+     "kg": 23
+    },
+    {
+     "url": "https://www.stokker.com/table-top-mitresaw-d27112-305mm-c-d27112-dw",
+     "kg": 23
+    },
+    {
+     "url": "https://www.manua.ls/dewalt/d27112/manual",
+     "kg": 23
+    }
+   ],
+   "note": "Scie combinée d'établi. Valeur identique sur 3 sites (dont manuel officiel)."
+  },
+  "D27113": {
+   "kg": 20,
+   "sources": [
+    {
+     "url": "https://www.emmetistore.com/products/mitre-saw-dewalt-d27113-qs-1600w",
+     "kg": 19.5
+    },
+    {
+     "url": "https://www.devcoshop.com/products/dewalt-d27113-qs-cut-off-machine-with-table",
+     "kg": 19.5
+    },
+    {
+     "url": "https://www.manua.ls/dewalt/d27113/specifications",
+     "kg": 20
+    }
+   ],
+   "note": "Scie combinée d'établi avec XPS. Écart faible 19,5–20 kg (arrondi) — valeur haute retenue."
+  },
+  "D27300": {
+   "kg": 53,
+   "sources": [
+    {
+     "url": "https://www.sanitino.fr/dewalt-outillage-raboteuse-2100-w-d27300",
+     "kg": 53
+    },
+    {
+     "url": "https://www.klium.com/en/dewalt-d27300-planer-and-thicknesser-3mm-260mm-2100-w-d27300-qs-128137",
+     "kg": 53
+    },
+    {
+     "url": "https://www.dewalt.fr/produit/d27300-qs/raboteuse-degauchisseuse-2100-w-260-mm",
+     "kg": 53
+    }
+   ],
+   "note": "Raboteuse-dégauchisseuse. Valeur identique sur 3 sites, dont dewalt.fr (officiel)."
+  },
+  "D28492": {
+   "kg": 5.5,
+   "sources": [
+    {
+     "url": "https://www.manualslib.com/manual/903325/Dewalt-D28492.html?page=3",
+     "kg": 4.6
+    },
+    {
+     "url": "https://www.amazon.fr/DeWalt-D28492-D28492-DEWALT-meuleuse-dangle/dp/B0051UJT3S",
+     "kg": 5.5
+    },
+    {
+     "url": "https://toolz.ng/product/dewalt-d28492-230mm-9-110v-angle-grinder/",
+     "kg": 5.5
+    }
+   ],
+   "note": "Manuel officiel (net) 4,6 kg vs 2 revendeurs à 5,5 kg — écart <60%, doute nu/emballé, retenu le plus haut."
+  },
+  "D28710": {
+   "kg": 16.56,
+   "sources": [
+    {
+     "url": "https://www.manualslib.com/manual/1088065/Dewalt-D28710.html?page=7",
+     "kg": 16.56
+    },
+    {
+     "url": "https://www.rshughes.com/p/Dewalt-Chop-Saw-D28710-3800-SPM/885911_23611/",
+     "kg": 16.56
+    },
+    {
+     "url": "https://www.amazon.com/DEWALT-14-Inch-Abrasive-DWA8011-Purpose/dp/B07S9F63N8",
+     "kg": 16.56
+    }
+   ],
+   "note": "3 sources convergent exactement sur 36,5 lb (poids outil)."
+  },
+  "D28715": {
+   "kg": 20.8,
+   "sources": [
+    {
+     "url": "https://www.manualslib.com/manual/1966078/Dewalt-D28715-Series.html?page=24",
+     "kg": 18.5
+    },
+    {
+     "url": "https://www.imperialsupplies.com/item/9109922",
+     "kg": 20.81
+    },
+    {
+     "url": "https://www.acmetools.com/dewalt-heavy-duty-14in-55hp-chop-saw-with-quick-change-d28715-d28715/028877571041.html",
+     "kg": 20.79
+    }
+   ],
+   "note": "Manuel officiel 18,5 kg (nu) vs 2 revendeurs ~45,85-45,88 lb (poids expédition ~20,8 kg) — écart <60%, doute nu/emballé, retenu le plus haut."
+  },
+  "D28730": {
+   "kg": 17,
+   "sources": [
+    {
+     "url": "https://www.manualslib.com/manual/2345178/Dewalt-D28730.html",
+     "kg": 17
+    },
+    {
+     "url": "https://www.zoro.com/dewalt-14-in-355mm-chop-saw-d28730/i/G9661174/",
+     "kg": 15.88
+    },
+    {
+     "url": "https://www.toolmarts.com/dewalt-d28730-14-in-355mm-chop-saw",
+     "kg": 15.88
+    }
+   ],
+   "note": "Manuel officiel donne net 15,5 kg et emballé 17 kg ; 2 revendeurs confirment 35 lb (~15,9 kg) net — doute nu/emballé, retenu le plus haut (emballé, cité par le manuel)."
+  },
+  "D28885": {
+   "kg": 1.4,
+   "sources": [
+    {
+     "url": "https://www.devcoshop.com/products/500w-grinder-dewalt-d28885-qs",
+     "kg": 1.4
+    },
+    {
+     "url": "https://www.verkter.com/die-grinder-dewalt-d28885.html",
+     "kg": 1.4
+    },
+    {
+     "url": "https://www.magazin-unelte.ro/en/cumpara/biax-500w-27000rpm-penseta-6mm-dewalt-d28885-7754406",
+     "kg": 1.4
+    }
+   ],
+   "note": "3 revendeurs distincts s'accordent exactement sur 1,4 kg (meuleuse droite 500W)."
+  },
+  "DCB124": {
+   "kg": 0.27,
+   "sources": [
+    {
+     "url": "https://www.dewalt.com/product/dcb124g/12v-max-oil-resistant-3ah-battery",
+     "kg": 0.27
+    },
+    {
+     "url": "https://www.zoro.com/dewalt-12v-max-oil-resistant-30ah-battery-dcb124g/i/G7797234/",
+     "kg": 0.27
+    },
+    {
+     "url": "https://www.toolnut.com/dewalt-dcb124g-12v-max-battery.html",
+     "kg": 0.27
+    }
+   ],
+   "note": "3 sites distincts et concordants, dont le fabricant : dewalt.com, zoro.com, toolnut.com, tous à 0,6 lb (0,272 kg, arrondi 0,27 kg)."
+  },
+  "DCB132": {
+   "kg": 1.2,
+   "sources": [
+    {
+     "url": "https://www.dewalt.co.uk/product/dcb132-gb/xr-4a-dual-port-charger",
+     "kg": 1.2
+    },
+    {
+     "url": "https://www.manua.ls/dewalt/dcb132/manual",
+     "kg": 1.2
+    },
+    {
+     "url": "https://dw-ukraine.com/manual/dcb132.pdf",
+     "kg": 1.2
+    }
+   ],
+   "note": "3 sites distincts et concordants, dont le fabricant UK : dewalt.co.uk, manua.ls (notice), dw-ukraine.com (notice PDF), tous à 1,2 kg."
   }
  },
  "nonResolues": {
   "CPROF367": {
    "motif": "statut introuvable",
    "sources": [],
-   "note": "CPROF367 n'est pas une référence catalogue DeWALT publiée : c'est un code de kit interne à la boutique, assemblant la carotteuse D21583K, le support D215831 et trois forets diamant DT9762/DT9765/DT977"
+   "note": "CPROF367 est un code de KIT interne (D21583K + D215831 + DT9762 + DT9765), pas une référence catalogue DeWALT standard. Recherches ciblées (nom seul, puis avec 'kit'/'DeWALT') : aucune fiche produit n"
   },
   "D215804": {
    "motif": "statut introuvable",
    "sources": [],
-   "note": "Accessoire d'extraction de poussière pour perceuses diamant D21580K/D21582K. Aucune fiche (dewalt.fr/.com/.co.uk, revendeurs FR/UK) ne donne de poids malgré plusieurs recherches ciblées FR/EN."
+   "note": "D215804-XJ = extracteur de poussière pour perceuses diamant (D21580K/D21582K). Fiches produit repérées (dewalt.store, bati-avenue.com, supplyvan.com) mais aucune ne livre le poids dans les extraits ac"
   },
   "D25303": {
    "motif": "statut introuvable",
@@ -601,9 +1015,22 @@
    "note": "Accessoire d'extraction de poussière 18V pour DCH273/DCH274. Le seul chiffre '2 kg' trouvé (RS Components) désigne la classe de marteaux compatibles ('18V XR SDS 2kg'), pas le poids de l'accessoire lu"
   },
   "D25304": {
-   "motif": "statut introuvable",
-   "sources": [],
-   "note": "Accessoire d'extraction de poussière SDS-Plus pour DCH283/DCH333/D25323/D25324/D25333/D25334. Un chiffre '2,5 kg' est apparu une fois mais sans source univoque identifiable, et le contexte associé men"
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.datapowertools.co.uk/Products/DeWALT_Dust_Extractors/DEWD25304DH-XJ",
+     "kg": 1.4
+    },
+    {
+     "url": "https://beyondtools.com/en-us/products/dust-extractor-unit-d25304dh-xj-by-dewalt",
+     "kg": 1.4
+    },
+    {
+     "url": "https://www.misterworker.com/en-us/dewalt/integrated-hammer-drill-dust-extractor-d25304dh-xj/7970.html",
+     "kg": 2.5
+    }
+   ],
+   "note": "2 sources cohérentes à 1,4 kg (Datapowertools, Beyondtools) ; la 3e source (Mister Worker) donne 2,5 kg, écart 78,6% (>60%). Désaccord non tranché, référence à revérifier."
   },
   "D25330": {
    "motif": "statut non-resolue",
@@ -686,9 +1113,14 @@
    "note": "Aucune recherche possible cette session : WebSearch a signalé budget épuisé (200/200) dès la 1ère requête, et WebFetch a été bloqué par le proxy réseau (EGRESS_BLOCKED) pour TOUS les domaines testés, "
   },
   "D279017": {
-   "motif": "statut introuvable",
-   "sources": [],
-   "note": "Même blocage total d'accès web (WebSearch épuisé, WebFetch EGRESS_BLOCKED sur tous les domaines testés). Aucune source consultée pour ce sac à poussière."
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.amazon.fr/Sac-filtre-tissus-aspirateur-DeWalt-D27901/dp/B01N02CG05",
+     "kg": 0.454
+    }
+   ],
+   "note": "Accessoire (5 sacs à poussière pour aspirateur D27901/D27902). Une seule source fiable trouvée malgré plusieurs recherches ciblées (manomano.fr, rueducommerce.fr, master-outillage.com, dewalt.fr n'aff"
   },
   "D28492": {
    "motif": "statut introuvable",
@@ -718,62 +1150,125 @@
   "DC528": {
    "motif": "statut introuvable",
    "sources": [],
-   "note": "Même blocage total d'accès web (WebSearch épuisé, WebFetch EGRESS_BLOCKED sur tous les domaines testés). Aucune source consultée."
+   "note": "5 recherches ciblées (manuel, Amazon, fiches techniques) sur cette lampe fluo 18V ancienne — aucun extrait ne donne de poids en kg ; rien de fiable trouvé après recherche normale."
   },
   "DCB090": {
-   "motif": "statut introuvable",
-   "sources": [],
-   "note": "Même blocage total d'accès web (WebSearch épuisé, WebFetch EGRESS_BLOCKED sur tous les domaines testés). Aucune source consultée pour ce câble USB."
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.protoolreviews.com/dewalt-dcb090-usb-charger/",
+     "kg": 0.213
+    },
+    {
+     "url": "https://www.lowes.com/pd/DEWALT-20-Volt-Max-Power-Source-Adapter/50102394",
+     "kg": 0.213
+    }
+   ],
+   "note": "Seulement 2 sources distinctes trouvées, concordantes à 0,47 lb (~0,21 kg) ; budget de recherche web de la session épuisé avant d'obtenir une 3e source."
   },
   "DCB094": {
-   "motif": "statut introuvable",
-   "sources": [],
-   "note": "Même blocage total d'accès web (WebSearch épuisé, WebFetch EGRESS_BLOCKED sur tous les domaines testés). Aucune source consultée."
+   "motif": "statut bloque",
+   "sources": [
+    {
+     "url": "https://www.manualslib.com/manual/3123343/Dewalt-Xr-Dcb094.html?page=6",
+     "kg": 0.11
+    }
+   ],
+   "note": "Une seule source clairement rattachée à une URL (manuel technique, 0,11 kg = chargeur nu) ; une valeur de kit complet (~0,5 kg) évoquée mais non rattachée avec certitude à une source précise. Budget d"
   },
   "DCB104": {
-   "motif": "statut introuvable",
-   "sources": [],
-   "note": "Recherche impossible : WebSearch quota épuisé (200/200 dès le premier appel), WebFetch bloqué (EGRESS_BLOCKED, CONNECT 403) sur tous les domaines testés (bing, duckduckgo, screwfix, dewalt.com, dewalt"
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.misterworker.com/en/dewalt/12-18v-xr-8a-4-port-fast-charger-dcb104-qw/14738.html",
+     "kg": 2.9
+    },
+    {
+     "url": "https://media.tractorsupply.com/is/content/TractorSupplyCompany/tsc/product/1/86/84/94/1868494_Man1.pdf",
+     "kg": 2.9
+    }
+   ],
+   "note": "Seulement 2 sources distinctes trouvées, concordantes à 2,9 kg (poids sans batteries) ; budget de recherche web de la session épuisé avant d'obtenir une 3e source."
   },
   "DCB1104": {
-   "motif": "statut introuvable",
-   "sources": [],
-   "note": "Recherche impossible : WebSearch quota épuisé (200/200), WebFetch bloqué (EGRESS_BLOCKED, CONNECT 403) sur tous les domaines testés. Aucune source consultée, aucun kg inventé."
+   "motif": "DCB1104 : sources incohérentes entre elles (0.5 à 0.85 kg, plus de 60 % d'écart) — on n'a pas pesé la même chose ; cette référence va dans `nonResolues`, jamais dans `poids`",
+   "sources": [
+    {
+     "url": "https://device.report/manual/8098816",
+     "kg": 0.5
+    },
+    {
+     "url": "https://www.powertoolworld.co.uk/dewalt-dcb1104-gb-4a-12v-18v-multi-volt-battery-charger-240v",
+     "kg": 0.85
+    },
+    {
+     "url": "https://federatedtool.com/dewalt-dcb1104-12v-20v-max-li-ion-battery-charger/",
+     "kg": 0.77
+    }
+   ],
+   "note": "Manuel officiel 0,5 kg (nu, sans batterie) vs 2 revendeurs 0,85 kg et 1,70 lb (~0,77 kg) — écart limite, doute nu/emballé, retenu le plus haut par prudence sur le port."
   },
   "DCB1104-12": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Recherche impossible : WebSearch quota épuisé (200/200), WebFetch bloqué (EGRESS_BLOCKED, CONNECT 403) sur tous les domaines testés. Aucune source consultée, aucun kg inventé."
+   "note": "Produit spécial (pack revendeur de 12 chargeurs DCB1104). WebSearch n'a jamais rendu une valeur réellement lue sur une fiche produit : à chaque tentative (manomano.fr, bricocash.fr, todotaladros.com),"
   },
   "DCB1104-6": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Recherche impossible : WebSearch quota épuisé (200/200), WebFetch bloqué (EGRESS_BLOCKED, CONNECT 403) sur tous les domaines testés. Aucune source consultée, aucun kg inventé."
+   "note": "Même produit spécial que DCB1104-12 (pack de 6 chargeurs). Même échec : l'outil ne fait que multiplier 6 × 0,5 kg = 3 kg au lieu de lire un poids réel sur todotaladros.com / manomano.fr / bricocash.fr"
   },
   "DCB1106": {
-   "motif": "statut introuvable",
-   "sources": [],
-   "note": "Recherche impossible : WebSearch quota épuisé (200/200), WebFetch bloqué (EGRESS_BLOCKED, CONNECT 403) sur tous les domaines testés. Aucune source consultée, aucun kg inventé."
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.acmetools.com/dewalt-12v-20v-max-6a-charger-dcb1106/885911683289.html",
+     "kg": 0.77
+    },
+    {
+     "url": "https://www.dkhardware.com/dewalt-dcb1106-battery-charger-20v-max-dcb1106-20-v-lithium-ion-6-amp-product-5599389.html",
+     "kg": 0.78
+    }
+   ],
+   "note": "Seulement 2 sites distincts avec une valeur effectivement lue : acmetools.com (1,7 lb) et dkhardware.com (1,72 lb, dimensions 4,40×8,63×9,90 in) — cohérentes entre elles (~0,77-0,78 kg) mais sous le s"
   },
   "DCB112": {
-   "motif": "statut introuvable",
-   "sources": [],
-   "note": "Recherche impossible : WebSearch quota épuisé (200/200), WebFetch bloqué (EGRESS_BLOCKED, CONNECT 403) sur tous les domaines testés. Aucune source consultée, aucun kg inventé."
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.powertoolworld.co.uk/dewalt-dcb112-slim-battery-charger-for-10-8v-14-4v-and-18v-xr-li-ion-batteries",
+     "kg": 0.49
+    },
+    {
+     "url": "https://www.amazon.com/DEWALT-20V-Battery-Charger-DCB112/dp/B091YWLSRB",
+     "kg": 0.36
+    }
+   ],
+   "note": "2 sites seulement avec valeur lue : powertoolworld.co.uk (0,49 kg) et amazon.com (12,7 oz = 0,36 kg) — écart ~36 %, sous le seuil de 60 % mais nombre de sources insuffisant. Un 3e chiffre (1,08 kg, vi"
   },
   "DCB115": {
-   "motif": "statut introuvable",
-   "sources": [],
-   "note": "Recherche impossible : WebSearch quota épuisé (200/200), WebFetch bloqué (EGRESS_BLOCKED, CONNECT 403) sur tous les domaines testés. Aucune source consultée, aucun kg inventé."
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.manualslib.com/manual/1878935/Dewalt-Dcb115.html?page=19",
+     "kg": 0.5
+    },
+    {
+     "url": "https://docs.rs-online.com/902f/0900766b814c3f88.pdf",
+     "kg": 0.5
+    }
+   ],
+   "note": "2 sites concordants à 0,5 kg : manualslib.com (page « Technische Daten » de la notice officielle) et docs.rs-online.com (fiche technique PDF). Un 3e site distinct avec valeur lue n'a pas pu être obten"
   },
   "DCB116": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Recherche impossible : WebSearch quota épuisé (200/200), WebFetch bloqué (EGRESS_BLOCKED, CONNECT 403) sur tous les domaines testés. Aucune source consultée, aucun kg inventé."
+   "note": "Deux recherches ciblées sur le même jeu de domaines (todotaladros.com, toolnation.com, adafastfix.co.uk) ont donné des réponses contradictoires d'un appel à l'autre (0,7 kg puis 1 kg), sans citation e"
   },
   "DCB117": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Recherche impossible : WebSearch quota épuisé (200/200), WebFetch bloqué (EGRESS_BLOCKED, CONNECT 403) sur tous les domaines testés. Aucune source consultée, aucun kg inventé."
+   "note": "Deux chiffres candidats obtenus (0,9 kg puis 1,08 kg) sans attribution fiable à une page précise ; le second (1,08 kg) est identique à un chiffre douteux retrouvé pour DCB112, probablement issu de la "
   },
   "DCB124": {
    "motif": "statut introuvable",
@@ -786,159 +1281,159 @@
    "note": "Aucune recherche possible : budget WebSearch de la session déjà épuisé (200/200) avant toute requête pour ce lot ; WebFetch bloqué par le proxy de sortie réseau sur tous les domaines testés (screwfix."
   },
   "DCB1404": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Même blocage réseau que DCB132 (WebSearch épuisé, WebFetch bloqué par le proxy) : aucune recherche n'a pu être lancée."
+   "note": "5 recherches ciblées (dewalt.com, homedepot.com, acetool.com, manualslib.com, manua.ls) : aucune n'a permis de lire un poids sur une fiche réelle — les 2 dernières ont été refusées par l'outil (budget"
   },
   "DCB182": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Même blocage réseau que DCB132 (WebSearch épuisé, WebFetch bloqué par le proxy) : aucune recherche n'a pu être lancée."
+   "note": "Budget WebSearch de la session épuisé (200/200) avant toute recherche possible ; échec technique, pas une absence de donnée."
   },
   "DCB183": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Même blocage réseau que DCB132 (WebSearch épuisé, WebFetch bloqué par le proxy) : aucune recherche n'a pu être lancée."
+   "note": "Budget WebSearch de la session épuisé (200/200) avant toute recherche possible ; échec technique, pas une absence de donnée."
   },
   "DCB1880": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Même blocage réseau que DCB132 (WebSearch épuisé, WebFetch bloqué par le proxy) : aucune recherche n'a pu être lancée."
+   "note": "Budget WebSearch de la session épuisé (200/200) avant toute recherche possible ; échec technique, pas une absence de donnée."
   },
   "DCB189": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Même blocage réseau que DCB132 (WebSearch épuisé, WebFetch bloqué par le proxy) : aucune recherche n'a pu être lancée."
+   "note": "Budget WebSearch de la session épuisé (200/200) avant toute recherche possible ; échec technique, pas une absence de donnée."
   },
   "DCB203": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Même blocage réseau que DCB132 (WebSearch épuisé, WebFetch bloqué par le proxy) : aucune recherche n'a pu être lancée."
+   "note": "Budget WebSearch de la session épuisé (200/200) avant toute recherche possible ; échec technique, pas une absence de donnée."
   },
   "DCB283": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Même blocage réseau que DCB132 (WebSearch épuisé, WebFetch bloqué par le proxy) : aucune recherche n'a pu être lancée."
+   "note": "Budget WebSearch de la session épuisé (200/200), aucune recherche lancée pour cette référence."
   },
   "DCB546": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Même blocage réseau que DCB132 (WebSearch épuisé, WebFetch bloqué par le proxy) : aucune recherche n'a pu être lancée."
+   "note": "Budget WebSearch de la session épuisé (200/200), aucune recherche lancée pour cette référence."
   },
   "DCB547": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Même blocage réseau que DCB132 (WebSearch épuisé, WebFetch bloqué par le proxy) : aucune recherche n'a pu être lancée."
+   "note": "Budget WebSearch de la session épuisé (200/200), aucune recherche lancée pour cette référence."
   },
   "DCB548": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Aucune recherche possible : budget WebSearch de session épuisé (200/200) avant la première requête, WebFetch bloqué (EGRESS_BLOCKED) sur tous les domaines testés (dewalt.co.uk, dewalt.fr, bing.com, du"
+   "note": "Budget WebSearch de la session épuisé (200/200), aucune recherche lancée pour cette référence."
   },
   "DCB549": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Idem DCB548 : aucun accès web disponible pour cette session (WebSearch épuisé, WebFetch egress-blocked). À reprendre."
+   "note": "Budget WebSearch de la session épuisé (200/200), aucune recherche lancée pour cette référence."
   },
   "DCBP034": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Idem DCB548 : aucun accès web disponible pour cette session (WebSearch épuisé, WebFetch egress-blocked). À reprendre."
+   "note": "Budget WebSearch de session épuisé (200/200) avant toute recherche exploitable — aucune source consultée, aucun poids constaté."
   },
   "DCBP318": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Idem DCB548 : aucun accès web disponible pour cette session (WebSearch épuisé, WebFetch egress-blocked). À reprendre."
+   "note": "Budget WebSearch de session épuisé (200/200) avant toute recherche exploitable — aucune source consultée, aucun poids constaté."
   },
   "DCBP518": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Idem DCB548 : aucun accès web disponible pour cette session (WebSearch épuisé, WebFetch egress-blocked). À reprendre."
+   "note": "Budget WebSearch de session épuisé (200/200) avant toute recherche exploitable — aucune source consultée, aucun poids constaté."
   },
   "DCBPS0554": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Idem DCB548 : aucun accès web disponible pour cette session (WebSearch épuisé, WebFetch egress-blocked). À reprendre."
+   "note": "Budget WebSearch de session épuisé (200/200) — aucune recherche n'a pu être lancée pour cette référence."
   },
   "DCBPSC0550": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Idem DCB548 : aucun accès web disponible pour cette session (WebSearch épuisé, WebFetch egress-blocked). À reprendre."
+   "note": "Budget WebSearch de session épuisé (200/200) — aucune recherche n'a pu être lancée pour cette référence."
   },
   "DCC018": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Idem DCB548 : aucun accès web disponible pour cette session (WebSearch épuisé, WebFetch egress-blocked). À reprendre."
+   "note": "Budget WebSearch de session épuisé (200/200) — aucune recherche n'a pu être lancée pour cette référence."
   },
   "DCC2520": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Idem DCB548 : aucun accès web disponible pour cette session (WebSearch épuisé, WebFetch egress-blocked). À reprendre."
+   "note": "Budget WebSearch de session épuisé (200/200) — aucune recherche n'a pu être lancée pour cette référence."
   },
   "DCCS1100": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Idem DCB548 : aucun accès web disponible pour cette session (WebSearch épuisé, WebFetch egress-blocked). À reprendre."
+   "note": "Budget WebSearch de session épuisé (200/200) — aucune recherche n'a pu être lancée pour cette référence."
   },
   "DCD1007": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Aucune recherche possible : quota WebSearch epuise (200/200) et WebFetch/curl bloques par la politique reseau (403 CONNECT) sur tous les domaines testes (dewalt.co.uk, bing.com, wikipedia.org, amazon."
+   "note": "Budget WebSearch de session épuisé (200/200) — aucune recherche n'a pu être lancée pour cette référence."
   },
   "DCD150": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Meme blocage reseau que ci-dessus : ni WebSearch (quota epuise) ni WebFetch (403 policy) n'ont pu etre utilises. Aucune source consultee."
+   "note": "Budget WebSearch de session épuisé (200/200) — aucune recherche n'a pu être lancée pour cette référence."
   },
   "DCD1623": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Meme blocage reseau que ci-dessus : ni WebSearch (quota epuise) ni WebFetch (403 policy) n'ont pu etre utilises. Aucune source consultee."
+   "note": "WebSearch indisponible : quota de session épuisé (200/200) avant toute recherche exploitable. Aucune tentative de contournement (WebFetch/curl bloqués par le réseau)."
   },
   "DCD240": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Meme blocage reseau que ci-dessus : ni WebSearch (quota epuise) ni WebFetch (403 policy) n'ont pu etre utilises. Aucune source consultee."
+   "note": "WebSearch indisponible : quota de session épuisé (200/200) avant toute recherche exploitable."
   },
   "DCD460": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Meme blocage reseau que ci-dessus : ni WebSearch (quota epuise) ni WebFetch (403 policy) n'ont pu etre utilises. Aucune source consultee."
+   "note": "WebSearch indisponible : quota de session épuisé (200/200) avant toute recherche exploitable."
   },
   "DCD470": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Meme blocage reseau que ci-dessus : ni WebSearch (quota epuise) ni WebFetch (403 policy) n'ont pu etre utilises. Aucune source consultee."
+   "note": "WebSearch indisponible : quota de session épuisé (200/200) avant toute recherche exploitable."
   },
   "DCD701": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Meme blocage reseau que ci-dessus : ni WebSearch (quota epuise) ni WebFetch (403 policy) n'ont pu etre utilises. Aucune source consultee."
+   "note": "WebSearch indisponible : quota de session épuisé (200/200) avant toute recherche exploitable."
   },
   "DCD703": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Meme blocage reseau que ci-dessus : ni WebSearch (quota epuise) ni WebFetch (403 policy) n'ont pu etre utilises. Aucune source consultee."
+   "note": "WebSearch indisponible : quota de session épuisé (200/200), recherche non tentée faute de budget restant."
   },
   "DCD706": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Meme blocage reseau que ci-dessus : ni WebSearch (quota epuise) ni WebFetch (403 policy) n'ont pu etre utilises. Aucune source consultee."
+   "note": "WebSearch indisponible : quota de session épuisé (200/200), recherche non tentée faute de budget restant."
   },
   "DCD708": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Meme blocage reseau que ci-dessus : ni WebSearch (quota epuise) ni WebFetch (403 policy) n'ont pu etre utilises. Aucune source consultee."
+   "note": "WebSearch indisponible : quota de session épuisé (200/200), recherche non tentée faute de budget restant."
   },
   "DCD709": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Aucune recherche possible ce lot : WebSearch budget épuisé (200/200, consommé par lots précédents), WebFetch EGRESS_BLOCKED sur tous domaines testés (dewalt.fr, screwfix, toolstation...). Panne d'outi"
+   "note": "WebSearch indisponible : quota de session épuisé (200/200), recherche non tentée faute de budget restant."
   },
   "DCD710": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Même panne d'outillage réseau que DCD709 : WebSearch épuisé, WebFetch bloqué (EGRESS_BLOCKED) sur tous les domaines fabricant/revendeurs testés. Aucune source consultée."
+   "note": "WebSearch indisponible : quota de session épuisé (200/200) — confirmé par une dernière tentative dédiée à cette référence."
   },
   "DCD716": {
    "motif": "statut introuvable",
@@ -991,194 +1486,854 @@
    "note": "Idem DCD791 : aucun outil de recherche web disponible cette session (WebSearch épuisé, WebFetch bloqué par le proxy réseau)."
   },
   "DCD794": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Idem DCD791 : aucun outil de recherche web disponible cette session (WebSearch épuisé, WebFetch bloqué par le proxy réseau)."
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche exécutée, rien constaté."
   },
   "DCD795": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Idem DCD791 : aucun outil de recherche web disponible cette session (WebSearch épuisé, WebFetch bloqué par le proxy réseau)."
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche exécutée, rien constaté."
   },
   "DCD796": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Idem DCD791 : aucun outil de recherche web disponible cette session (WebSearch épuisé, WebFetch bloqué par le proxy réseau)."
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche exécutée, rien constaté."
   },
   "DCD799": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Idem DCD791 : aucun outil de recherche web disponible cette session (WebSearch épuisé, WebFetch bloqué par le proxy réseau)."
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche exécutée, rien constaté."
   },
   "DCD800": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Idem DCD791 : aucun outil de recherche web disponible cette session (WebSearch épuisé, WebFetch bloqué par le proxy réseau)."
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche exécutée, rien constaté."
   },
   "DCD803": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Idem DCD791 : aucun outil de recherche web disponible cette session (WebSearch épuisé, WebFetch bloqué par le proxy réseau)."
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche exécutée, rien constaté."
   },
   "DCD805": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Idem DCD791 : aucun outil de recherche web disponible cette session (WebSearch épuisé, WebFetch bloqué par le proxy réseau)."
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche exécutée, rien constaté."
   },
   "DCD81": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Idem DCD791 : aucun outil de recherche web disponible cette session (WebSearch épuisé, WebFetch bloqué par le proxy réseau). DCD81MP2T (McLaren) non recherché non plus."
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche exécutée, rien constaté."
   },
   "DCD85": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Recherche impossible cette session : quota WebSearch épuisé (200/200) + WebFetch bloqué 403 par le proxy sur tous les domaines testés (fabricant, revendeurs, moteurs de recherche). Aucune source consu"
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche exécutée, rien constaté."
   },
   "DCD86": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Recherche impossible cette session : quota WebSearch épuisé (200/200) + WebFetch bloqué 403 par le proxy sur tous les domaines testés. Aucune source consultée — pas un vrai \"rien trouvé\", à refaire."
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche exécutée, rien constaté."
   },
   "DCD990": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Recherche impossible cette session : quota WebSearch épuisé (200/200) + WebFetch bloqué 403 par le proxy sur tous les domaines testés. Aucune source consultée — pas un vrai \"rien trouvé\", à refaire."
+   "note": "WebSearch indisponible : budget de session épuisé (200/200 avant la première recherche pour ce lot). Aucune recherche effectuée — statut technique, pas un verdict."
   },
   "DCD991": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Recherche impossible cette session : quota WebSearch épuisé (200/200) + WebFetch bloqué 403 par le proxy sur tous les domaines testés (dewalt.co.uk, dewalt.fr, screwfix, google, bing, duckduckgo, amaz"
+   "note": "WebSearch indisponible : budget de session épuisé (200/200). Aucune recherche effectuée."
   },
   "DCD996": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Recherche impossible cette session : quota WebSearch épuisé (200/200) + WebFetch bloqué 403 par le proxy sur tous les domaines testés. Aucune source consultée — pas un vrai \"rien trouvé\", à refaire."
+   "note": "WebSearch indisponible : budget de session épuisé (200/200) avant de pouvoir lancer la recherche pour cette référence."
   },
   "DCD999": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Recherche impossible cette session : quota WebSearch épuisé (200/200) + WebFetch bloqué 403 par le proxy sur tous les domaines testés. Aucune source consultée — pas un vrai \"rien trouvé\", à refaire."
+   "note": "WebSearch indisponible : budget de session épuisé (200/200) avant de pouvoir lancer la recherche pour cette référence."
   },
   "DCDW101": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Recherche impossible cette session : quota WebSearch épuisé (200/200) + WebFetch bloqué 403 par le proxy sur tous les domaines testés. Aucune source consultée — pas un vrai \"rien trouvé\", à refaire."
+   "note": "WebSearch indisponible : budget de session épuisé (200/200) avant de pouvoir lancer la recherche pour cette référence."
   },
   "DCDW102": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Recherche impossible cette session : quota WebSearch épuisé (200/200) + WebFetch bloqué 403 par le proxy sur tous les domaines testés. Aucune source consultée — pas un vrai \"rien trouvé\", à refaire."
+   "note": "WebSearch indisponible : budget de session épuisé (200/200) avant de pouvoir lancer la recherche pour cette référence."
   },
   "DCDW103": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Recherche impossible cette session : quota WebSearch épuisé (200/200) + WebFetch bloqué 403 par le proxy sur tous les domaines testés. Aucune source consultée — pas un vrai \"rien trouvé\", à refaire."
+   "note": "WebSearch indisponible : budget de session épuisé (200/200) avant de pouvoir lancer la recherche pour cette référence."
   },
   "DCDW104": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Recherche impossible cette session : quota WebSearch épuisé (200/200) + WebFetch bloqué 403 par le proxy sur tous les domaines testés. Aucune source consultée — pas un vrai \"rien trouvé\", à refaire."
+   "note": "WebSearch indisponible : budget de session épuisé (200/200) avant de pouvoir lancer la recherche pour cette référence."
   },
   "DCDW105": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Aucune recherche possible : budget WebSearch de la session épuisé (200/200, partagé entre sous-agents) et WebFetch bloqué par le proxy réseau sortant pour tous les domaines testés (bing.com, google.co"
+   "note": "WebSearch indisponible : budget de session épuisé (200/200) avant de pouvoir lancer la recherche pour cette référence."
   },
   "DCDW106": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Aucune recherche possible : budget WebSearch de la session épuisé (200/200, partagé entre sous-agents) et WebFetch bloqué par le proxy réseau sortant pour tous les domaines testés. Zéro source consult"
+   "note": "WebSearch indisponible : budget de session épuisé (200/200) avant de pouvoir lancer la recherche pour cette référence."
   },
   "DCDW107": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Aucune recherche possible : budget WebSearch de la session épuisé (200/200, partagé entre sous-agents) et WebFetch bloqué par le proxy réseau sortant pour tous les domaines testés. Zéro source consult"
+   "note": "Budget WebSearch de la session épuisé (200/200) avant toute recherche — aucun résultat obtenu, cause technique."
   },
   "DCDW108": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Aucune recherche possible : budget WebSearch de la session épuisé (200/200, partagé entre sous-agents) et WebFetch bloqué par le proxy réseau sortant pour tous les domaines testés. Zéro source consult"
+   "note": "Budget WebSearch de la session épuisé (200/200) avant toute recherche — aucun résultat obtenu, cause technique."
   },
   "DCE050": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Aucune recherche possible : budget WebSearch de la session épuisé (200/200, partagé entre sous-agents) et WebFetch bloqué par le proxy réseau sortant pour tous les domaines testés. Zéro source consult"
+   "note": "Budget WebSearch de la session épuisé (200/200) — recherche non tentée."
   },
   "DCE079": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Aucune recherche possible : budget WebSearch de la session épuisé (200/200, partagé entre sous-agents) et WebFetch bloqué par le proxy réseau sortant pour tous les domaines testés. Zéro source consult"
+   "note": "Budget WebSearch de la session épuisé (200/200) — recherche non tentée."
   },
   "DCE080": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Aucune recherche possible : budget WebSearch de la session épuisé (200/200, partagé entre sous-agents) et WebFetch bloqué par le proxy réseau sortant pour tous les domaines testés. Zéro source consult"
+   "note": "Budget WebSearch de la session épuisé (200/200) — recherche non tentée."
   },
   "DCE0811": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Aucune recherche possible : budget WebSearch de la session épuisé (200/200, partagé entre sous-agents) et WebFetch bloqué par le proxy réseau sortant pour tous les domaines testés. Zéro source consult"
+   "note": "Budget WebSearch de la session épuisé (200/200) — recherche non tentée."
   },
   "DCE0822": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Aucune recherche possible : budget WebSearch de la session épuisé (200/200, partagé entre sous-agents) et WebFetch bloqué par le proxy réseau sortant pour tous les domaines testés. Zéro source consult"
+   "note": "Budget WebSearch de la session épuisé (200/200) — recherche non tentée."
   },
   "DCE0825": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Aucune recherche possible : budget WebSearch de la session épuisé (200/200, partagé entre sous-agents) et WebFetch bloqué par le proxy réseau sortant pour tous les domaines testés. Zéro source consult"
+   "note": "Budget WebSearch de la session épuisé (200/200) — recherche non tentée."
   },
   "DCE085": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Recherche impossible : WebSearch a signalé budget épuisé (200/200, partagé entre sous-agents de ce lot) et WebFetch a renvoyé EGRESS_BLOCKED sur tous les domaines testés (dewalt.com, screwfix.com, goo"
+   "note": "Budget WebSearch de la session épuisé (200/200) — recherche non tentée."
   },
   "DCE088": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Même blocage réseau que DCE085 — aucune recherche possible (WebSearch budget épuisé, WebFetch EGRESS_BLOCKED sur tous les domaines essayés)."
+   "note": "Budget WebSearch de la session épuisé (200/200) — recherche non tentée."
   },
   "DCE089": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Même blocage réseau — recherche non effectuée, aucune source consultée."
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche exécutée, cause technique confirmée sur 5 tentatives successives."
   },
   "DCE100": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Même blocage réseau — recherche non effectuée, aucune source consultée."
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche exécutée, cause technique confirmée sur 5 tentatives successives."
   },
   "DCE154": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Même blocage réseau — recherche non effectuée, aucune source consultée."
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche exécutée, cause technique confirmée sur 5 tentatives successives."
   },
   "DCE400": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Même blocage réseau — recherche non effectuée, aucune source consultée."
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche exécutée, cause technique confirmée sur 5 tentatives successives."
   },
   "DCE450078": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Même blocage réseau — recherche non effectuée, aucune source consultée."
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche exécutée, cause technique confirmée sur 5 tentatives successives."
   },
   "DCE512": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Même blocage réseau — recherche non effectuée, aucune source consultée."
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche exécutée, cause technique confirmée sur 5 tentatives successives."
   },
   "DCE530": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Même blocage réseau — recherche non effectuée, aucune source consultée."
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche n'a pu être lancée pour cette référence (budget déjà à 0 avant d'y arriver)."
   },
   "DCE531": {
-   "motif": "statut introuvable",
+   "motif": "statut bloque",
    "sources": [],
-   "note": "Même blocage réseau — recherche non effectuée, aucune source consultée."
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche n'a pu être lancée pour cette référence (budget déjà à 0 avant d'y arriver)."
+  },
+  "DCF901": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de la session épuisé (200/200) avant toute recherche exécutée — échec technique, aucune tentative n'a abouti."
+  },
+  "DCF902": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de la session épuisé (200/200) avant toute recherche exécutée — échec technique, aucune tentative n'a abouti."
+  },
+  "DCF903": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de la session épuisé (200/200) avant toute recherche exécutée — échec technique, aucune tentative n'a abouti."
+  },
+  "DCF913": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche tentée pour cette référence faute de budget."
+  },
+  "DCF92": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche tentée pour cette référence faute de budget."
+  },
+  "DCF921": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche tentée pour cette référence faute de budget."
+  },
+  "DCF922": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche tentée pour cette référence faute de budget."
+  },
+  "DCF923": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche tentée pour cette référence faute de budget."
+  },
+  "DCF961": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche tentée pour cette référence faute de budget."
+  },
+  "DCF964": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche tentée pour cette référence faute de budget."
+  },
+  "DCE555": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche n'a pu être lancée pour cette référence (budget déjà à 0 avant d'y arriver)."
+  },
+  "DCE5601": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche n'a pu être lancée pour cette référence (budget déjà à 0 avant d'y arriver)."
+  },
+  "DCE571": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de recherche de la session épuisé (200/200) dès la première requête ; aucune recherche n'a pu s'exécuter."
+  },
+  "DCE580": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de recherche de la session épuisé (200/200) dès la première requête ; aucune recherche n'a pu s'exécuter."
+  },
+  "DCE5801": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de recherche de la session épuisé (200/200) ; aucune recherche n'a pu être tentée pour cette référence."
+  },
+  "DCE581": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de recherche de la session épuisé (200/200) ; aucune recherche n'a pu être tentée pour cette référence."
+  },
+  "DCE590": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de recherche de la session épuisé (200/200) ; aucune recherche n'a pu être tentée pour cette référence."
+  },
+  "DCE6820": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de recherche de la session épuisé (200/200) ; aucune recherche n'a pu être tentée pour cette référence."
+  },
+  "DCE800": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de recherche de la session épuisé (200/200) ; aucune recherche n'a pu être tentée pour cette référence."
+  },
+  "DCE822": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de recherche de la session épuisé (200/200) ; aucune recherche n'a pu être tentée pour cette référence."
+  },
+  "DCE825": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de recherche de la session épuisé (200/200) ; aucune recherche n'a pu être tentée pour cette référence."
+  },
+  "DCF403": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de recherche de la session épuisé (200/200) ; aucune recherche n'a pu être tentée pour cette référence."
+  },
+  "DCF414": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la session épuisé (200/200) avant toute recherche — aucune requête exécutée pour cette référence."
+  },
+  "DCF500": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la session épuisé (200/200) avant toute recherche — aucune requête exécutée pour cette référence."
+  },
+  "DCF503": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la session épuisé (200/200) — aucune recherche n'a pu être tentée pour cette référence."
+  },
+  "DCF504": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la session épuisé (200/200) — aucune recherche n'a pu être tentée pour cette référence."
+  },
+  "DCF510": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la session épuisé (200/200) — aucune recherche n'a pu être tentée pour cette référence."
+  },
+  "DCF513": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la session épuisé (200/200) — aucune recherche n'a pu être tentée pour cette référence."
+  },
+  "DCF514": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la session épuisé (200/200) — aucune recherche n'a pu être tentée pour cette référence."
+  },
+  "DCF520": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la session épuisé (200/200) — aucune recherche n'a pu être tentée pour cette référence."
+  },
+  "DCF601": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la session épuisé (200/200) — aucune recherche n'a pu être tentée pour cette référence."
+  },
+  "DCF620": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la session épuisé (200/200) — aucune recherche n'a pu être tentée pour cette référence."
+  },
+  "DCF6201": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la session épuisé (200/200) avant toute recherche ; accès direct (curl/WebFetch) bloqué par le réseau. Aucune recherche exécutée."
+  },
+  "DCF622": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la session épuisé (200/200) avant toute recherche ; accès direct (curl/WebFetch) bloqué par le réseau. Aucune recherche exécutée."
+  },
+  "DCF787": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la session épuisé (200/200) avant toute recherche ; accès direct (curl/WebFetch) bloqué par le réseau. Aucune recherche exécutée."
+  },
+  "DCF801": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la session épuisé (200/200) avant toute recherche ; accès direct (curl/WebFetch) bloqué par le réseau. Aucune recherche exécutée."
+  },
+  "DCF809": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la session épuisé (200/200) ; aucune recherche n'a pu être lancée pour cette référence."
+  },
+  "DCF815": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la session épuisé (200/200) ; aucune recherche n'a pu être lancée pour cette référence."
+  },
+  "DCF840": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la session épuisé (200/200) ; aucune recherche n'a pu être lancée pour cette référence."
+  },
+  "DCF85": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la session épuisé (200/200) ; aucune recherche n'a pu être lancée pour cette référence."
+  },
+  "DCF850": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la session épuisé (200/200) ; aucune recherche n'a pu être lancée pour cette référence."
+  },
+  "DCF86": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la session épuisé (200/200) ; aucune recherche n'a pu être lancée pour cette référence."
+  },
+  "DCF860": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : quota de recherches web de la session épuisé (200/200) avant que la recherche ait pu s'exécuter. Aucune donnée obtenue — ce n'est pas un verdict d'absence."
+  },
+  "DCF870": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : quota de recherches web de la session épuisé (200/200) avant que la recherche ait pu s'exécuter. Aucune donnée obtenue — ce n'est pas un verdict d'absence."
+  },
+  "DCF880": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : quota de recherches web de la session épuisé (200/200), aucune recherche n'a pu être lancée pour cette référence."
+  },
+  "DCF887": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : quota de recherches web de la session épuisé (200/200), aucune recherche n'a pu être lancée pour cette référence."
+  },
+  "DCF891": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : quota de recherches web de la session épuisé (200/200), aucune recherche n'a pu être lancée pour cette référence."
+  },
+  "DCF892": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : quota de recherches web de la session épuisé (200/200), aucune recherche n'a pu être lancée pour cette référence."
+  },
+  "DCF894": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : quota de recherches web de la session épuisé (200/200), aucune recherche n'a pu être lancée pour cette référence."
+  },
+  "DCF897": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : quota de recherches web de la session épuisé (200/200), aucune recherche n'a pu être lancée pour cette référence."
+  },
+  "DCF899": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : quota de recherches web de la session épuisé (200/200), aucune recherche n'a pu être lancée pour cette référence."
+  },
+  "DCF900": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : quota de recherches web de la session épuisé (200/200), aucune recherche n'a pu être lancée pour cette référence."
+  },
+  "DCF99": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de recherche web de la session épuisé (200/200) avant la première requête pour cette référence. Aucune recherche n'a pu être exécutée."
+  },
+  "DCFS950": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de recherche web de la session épuisé (200/200) avant la première requête pour cette référence. Aucune recherche n'a pu être exécutée."
+  },
+  "DCG200": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de recherche web de la session épuisé (200/200) avant la première requête pour cette référence. Aucune recherche n'a pu être exécutée."
+  },
+  "DCG404": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de recherche web de la session épuisé (200/200) avant la première requête pour cette référence. Aucune recherche n'a pu être exécutée."
+  },
+  "DCG405": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de recherche web de la session épuisé (200/200), aucune requête tentée pour cette référence faute de quota restant."
+  },
+  "DCG406": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de recherche web de la session épuisé (200/200), aucune requête tentée pour cette référence faute de quota restant."
+  },
+  "DCG407": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de recherche web de la session épuisé (200/200), aucune requête tentée pour cette référence faute de quota restant."
+  },
+  "DCG408": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de recherche web de la session épuisé (200/200), aucune requête tentée pour cette référence faute de quota restant."
+  },
+  "DCG409": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de recherche web de la session épuisé (200/200), aucune requête tentée pour cette référence faute de quota restant."
+  },
+  "DCG412": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de recherche web de la session épuisé (200/200), aucune requête tentée pour cette référence faute de quota restant."
+  },
+  "DCG413": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de la session épuisé (200/200) avant toute recherche possible sur cette référence — panne technique, non tentée jusqu'au bout."
+  },
+  "DCG414": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche possible."
+  },
+  "DCG418": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche possible."
+  },
+  "DCG420": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche possible."
+  },
+  "DCG421": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche possible."
+  },
+  "DCG426": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche possible."
+  },
+  "DCG430": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche possible."
+  },
+  "DCG45": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche possible."
+  },
+  "DCG460": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche possible."
+  },
+  "DCG4610": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche possible."
+  },
+  "DCGG571": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la session épuisé (200/200) avant toute recherche pour cette référence — cause technique, pas absence de résultat."
+  },
+  "DCGG581": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la session épuisé (200/200) avant toute recherche pour cette référence — cause technique, pas absence de résultat."
+  },
+  "DCH033": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la session épuisé (200/200) avant toute recherche pour cette référence — cause technique, pas absence de résultat."
+  },
+  "DCH072": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la session épuisé (200/200) — aucune recherche tentée pour cette référence."
+  },
+  "DCH133": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la session épuisé (200/200) — aucune recherche tentée pour cette référence."
+  },
+  "DCH172": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la session épuisé (200/200) — aucune recherche tentée pour cette référence."
+  },
+  "DCH243": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la session épuisé (200/200) — aucune recherche tentée pour cette référence."
+  },
+  "DCH253": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la session épuisé (200/200) — aucune recherche tentée pour cette référence."
+  },
+  "DCH254": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la session épuisé (200/200) — aucune recherche tentée pour cette référence."
+  },
+  "DCH263": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Budget WebSearch de la session épuisé (200/200) — aucune recherche tentée pour cette référence."
+  },
+  "DCH273": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch épuisé pour la session (200/200) avant toute recherche possible sur cette référence — panne technique, pas une absence de résultat."
+  },
+  "DCH274": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch épuisé pour la session (200/200) avant toute recherche possible sur cette référence — panne technique, pas une absence de résultat."
+  },
+  "DCH275": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch épuisé pour la session (200/200) avant toute recherche possible sur cette référence — panne technique, pas une absence de résultat."
+  },
+  "DCH323": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch épuisé pour la session (200/200) — aucune recherche tentée ou possible sur cette référence."
+  },
+  "DCH333": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch épuisé pour la session (200/200) — aucune recherche tentée ou possible sur cette référence."
+  },
+  "DCH335": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch épuisé pour la session (200/200) — aucune recherche tentée ou possible sur cette référence."
+  },
+  "DCH416": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch épuisé pour la session (200/200) — aucune recherche tentée ou possible sur cette référence."
+  },
+  "DCH481": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch épuisé pour la session (200/200) — aucune recherche tentée ou possible sur cette référence."
+  },
+  "DCH614": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch épuisé pour la session (200/200) — aucune recherche tentée ou possible sur cette référence."
+  },
+  "DCH733": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch épuisé pour la session (200/200) — aucune recherche tentée ou possible sur cette référence."
+  },
+  "DCH735": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de recherches de la session épuisé (200/200) avant toute requête possible pour cette référence."
+  },
+  "DCH775": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de recherches de la session épuisé (200/200) avant toute requête possible pour cette référence."
+  },
+  "DCH832": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de recherches de la session épuisé (200/200) avant toute requête possible pour cette référence."
+  },
+  "DCH892": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de recherches de la session épuisé (200/200) avant toute requête possible pour cette référence."
+  },
+  "DCH911": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de recherches de la session épuisé (200/200) avant toute requête possible pour cette référence."
+  },
+  "DCH966": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de recherches de la session épuisé (200/200), aucune requête tentée."
+  },
+  "DCHJ067B-": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de recherches de la session épuisé (200/200), aucune requête tentée."
+  },
+  "DCHJ080B-X": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de recherches de la session épuisé (200/200), aucune requête tentée."
+  },
+  "DCK-FR834MP4": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de recherches de la session épuisé (200/200), aucune requête tentée."
+  },
+  "DCK1012": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de recherches de la session épuisé (200/200), aucune requête tentée."
+  },
+  "DCK200": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de la session épuisé (200/200) au tout premier appel — aucune recherche n'a pu être exécutée pour cette référence."
+  },
+  "DCK2012": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche possible pour cette référence."
+  },
+  "DCK2016": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche possible pour cette référence."
+  },
+  "DCK2020": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche possible pour cette référence."
+  },
+  "DCK2023": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche possible pour cette référence."
+  },
+  "DCK2026": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche possible pour cette référence."
+  },
+  "DCK2050": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche possible pour cette référence."
+  },
+  "DCK2051": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche possible pour cette référence."
+  },
+  "DCK2052": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche possible pour cette référence."
+  },
+  "DCK2060": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche possible pour cette référence."
+  },
+  "DCK2061": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de session épuisé (200/200 recherches utilisées) avant que la recherche ait pu être lancée pour cette référence."
+  },
+  "DCK2062": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de session épuisé (200/200 recherches utilisées) avant que la recherche ait pu être lancée pour cette référence."
+  },
+  "DCK2067": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de session épuisé (200/200 recherches utilisées) avant que la recherche ait pu être lancée pour cette référence."
+  },
+  "DCK2068": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de session épuisé (200/200 recherches utilisées) avant que la recherche ait pu être lancée pour cette référence."
+  },
+  "DCK207": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de session épuisé (200/200 recherches utilisées) ; aucune recherche n'a pu être tentée pour cette référence."
+  },
+  "DCK2077": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de session épuisé (200/200 recherches utilisées) ; aucune recherche n'a pu être tentée pour cette référence."
+  },
+  "DCK2080": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de session épuisé (200/200 recherches utilisées) ; aucune recherche n'a pu être tentée pour cette référence."
+  },
+  "DCK209": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de session épuisé (200/200 recherches utilisées) ; aucune recherche n'a pu être tentée pour cette référence."
+  },
+  "DCK2095": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de session épuisé (200/200 recherches utilisées) ; aucune recherche n'a pu être tentée pour cette référence."
+  },
+  "DCK2101": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "WebSearch indisponible : budget de session épuisé (200/200 recherches utilisées) ; aucune recherche n'a pu être tentée pour cette référence."
+  },
+  "DCK2102": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de session épuisé (200/200) avant toute recherche exécutée — aucune requête n'a pu aboutir."
+  },
+  "DCK211": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de session épuisé (200/200) avant toute recherche exécutée — aucune requête n'a pu aboutir."
+  },
+  "DCK2110": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de session épuisé (200/200) avant toute recherche exécutée — aucune requête n'a pu aboutir."
+  },
+  "DCK212": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de session épuisé (200/200) avant toute recherche exécutée — aucune requête n'a pu aboutir."
+  },
+  "DCK2200": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de session épuisé (200/200) avant toute recherche exécutée — aucune requête n'a pu aboutir."
+  },
+  "DCK2222": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de session épuisé (200/200) — recherche non tentée par suite du blocage constaté sur les 5 premières références."
+  },
+  "DCK2223": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de session épuisé (200/200) — recherche non tentée par suite du blocage constaté sur les 5 premières références."
+  },
+  "DCK2224": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de session épuisé (200/200) — recherche non tentée par suite du blocage constaté sur les 5 premières références."
+  },
+  "DCK2225": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de session épuisé (200/200) — recherche non tentée par suite du blocage constaté sur les 5 premières références."
+  },
+  "DCK229": {
+   "motif": "statut bloque",
+   "sources": [],
+   "note": "Quota WebSearch de session épuisé (200/200) — recherche non tentée par suite du blocage constaté sur les 5 premières références."
   }
  }
 }
