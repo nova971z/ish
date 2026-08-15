@@ -12680,6 +12680,25 @@
 
   
 
+  /* ⛔⛔⛔ CES TROIS NOMBRES SONT CEUX DE `outils/poser-visuel.mjs`, L'OUTIL AVEC
+     LEQUEL JE POSE LES VISUELS MOI-MÊME. Exigence de l'user, 15/08/2026 :
+     « quand moi j'ajoute des produits ou des images aux produits, je veux
+     EXACTEMENT la même méthode, celle qui marche et pas une autre ».
+     Il a raison, et l'écart mesuré expliquait ses DEUX plaintes d'un coup :
+       · mes posters, encodés en WebP 0,92 à 2000 px : médiane 146 Ko sur 310
+         fichiers — nets ET légers ;
+       · les siens montaient à 525 Ko parce qu'ils n'étaient PAS du WebP. Un
+         PNG de 2000 px est sans perte, donc énorme : l'ancienne boucle
+         rabotait alors la RÉSOLUTION jusqu'à tenir sous le plafond, et rendait
+         une image petite et floue. Un JPEG, lui, tenait le poids mais
+         repeignait le fond en noir. Une seule cause, deux symptômes.
+     ⛔ Toute divergence entre ces valeurs et celles de `poser-visuel.mjs` est
+     refusée par `scripts/check-visuel-produit.js`. Deux méthodes pour un même
+     geste, c'est la garantie que l'une des deux pourrira. */
+  var VISUEL_COTE = 2000;      // poser-visuel.mjs : le plus grand écran mesuré est 1674 px
+  var VISUEL_QUALITE = 0.92;   // poser-visuel.mjs : une seule qualité, jamais dégradée
+  var VISUEL_PLAFOND_KO = 871; // poser-visuel.mjs / audit p8-perf, décision user 28/07/2026
+
   
 
   
@@ -13811,6 +13830,8 @@
   Object.defineProperty(__A, 'LV_VEHICLES', { get: function () { return LV_VEHICLES; }, set: function (v) { LV_VEHICLES = v; }, configurable: true });
   Object.defineProperty(__A, 'PJ_PUB_LABEL', { get: function () { return PJ_PUB_LABEL; }, set: function (v) { PJ_PUB_LABEL = v; }, configurable: true });
   Object.defineProperty(__A, 'PJ_SITE_LABEL', { get: function () { return PJ_SITE_LABEL; }, set: function (v) { PJ_SITE_LABEL = v; }, configurable: true });
+  Object.defineProperty(__A, 'VISUEL_COTE', { get: function () { return VISUEL_COTE; }, set: function (v) { VISUEL_COTE = v; }, configurable: true });
+  Object.defineProperty(__A, 'VISUEL_QUALITE', { get: function () { return VISUEL_QUALITE; }, set: function (v) { VISUEL_QUALITE = v; }, configurable: true });
   Object.defineProperty(__A, '_adminClientsLoaded', { get: function () { return _adminClientsLoaded; }, set: function (v) { _adminClientsLoaded = v; }, configurable: true });
   Object.defineProperty(__A, '_adminGlobe', { get: function () { return _adminGlobe; }, set: function (v) { _adminGlobe = v; }, configurable: true });
   Object.defineProperty(__A, '_adminLogoBusy', { get: function () { return _adminLogoBusy; }, set: function (v) { _adminLogoBusy = v; }, configurable: true });
@@ -13869,7 +13890,7 @@
     if (window.__PT_ADMIN) return Promise.resolve();
     if (__adminCharge) return __adminCharge;
     __adminCharge = new Promise(function (res, rej) {
-      var s = document.createElement('script'); s.src = 'admin.bundle.js?v=613';
+      var s = document.createElement('script'); s.src = 'admin.bundle.js?v=614';
       s.onload = res; s.onerror = function () { __adminCharge = null; rej(new Error('admin.bundle indisponible')); };
       document.head.appendChild(s);
     });

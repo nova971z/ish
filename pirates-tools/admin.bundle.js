@@ -2663,6 +2663,7 @@ function adminPreparerImage(fichier, opts) {
           });
           return;
         }
+        var transparente = adminImageATransparence(img, wI, hI);
         var facteurs = [
           1,
           0.8,
@@ -2670,17 +2671,8 @@ function adminPreparerImage(fichier, opts) {
           0.5,
           0.4
         ];
-        var paliers = [
-          0.95,
-          0.92,
-          0.88,
-          0.84,
-          0.78,
-          0.72
-        ];
-        var transparente = adminImageATransparence(img, wI, hI);
         var c = document.createElement('canvas');
-        var dernier = null, largeurVue = 0, sansPerte = false;
+        var dernier = null, largeurVue = 0, aplati = false;
         for (var f = 0; f < facteurs.length; f++) {
           var cible = Math.max(320, Math.round(COTE * facteurs[f]));
           var k = Math.min(1, cible / Math.max(wI, hI));
@@ -2690,38 +2682,45 @@ function adminPreparerImage(fichier, opts) {
           largeurVue = lg;
           c.width = lg;
           c.height = Math.max(1, Math.round(hI * k));
-          var x = c.getContext('2d');
+          var x = c.getContext('2d', { willReadFrequently: true });
           x.imageSmoothingEnabled = true;
           x.imageSmoothingQuality = 'high';
+          x.clearRect(0, 0, c.width, c.height);
           x.drawImage(img, 0, 0, c.width, c.height);
-          for (var i = 0; i < paliers.length; i++) {
-            var sortie = adminEncoderSansPerdreLeFond(c, paliers[i], transparente);
-            sansPerte = sortie.indexOf('data:image/png') === 0;
-            dernier = {
-              l: sortie.length,
-              w: c.width,
-              h: c.height
-            };
-            if (sortie.length <= PLAFOND) {
-              resoudre({
-                dataUrl: sortie,
-                w: c.width,
-                h: c.height,
-                ko: Math.round(sortie.length * 0.75 / 1000),
-                intact: false,
-                qualite: sansPerte ? 1 : paliers[i],
-                transparente: transparente,
-                wSource: wI,
-                hSource: hI,
-                koSource: koSource
-              });
-              return;
-            }
-            if (sansPerte)
+          var sortie = adminEncoderSansPerdreLeFond(c, A.VISUEL_QUALITE, transparente);
+          if (transparente) {
+            var coin = x.getImageData(0, 0, 1, 1).data[3];
+            if (coin !== 0) {
+              aplati = true;
               break;
+            }
+          }
+          dernier = {
+            l: sortie.length,
+            w: c.width,
+            h: c.height
+          };
+          if (sortie.length <= PLAFOND) {
+            resoudre({
+              dataUrl: sortie,
+              w: c.width,
+              h: c.height,
+              ko: Math.round(sortie.length * 0.75 / 1000),
+              intact: false,
+              qualite: A.VISUEL_QUALITE,
+              transparente: transparente,
+              wSource: wI,
+              hSource: hI,
+              koSource: koSource
+            });
+            return;
           }
         }
-        rejeter(new Error('image impossible à faire tenir sous ' + Math.round(PLAFOND * 0.75 / 1000) + ' Ko : essayé jusqu\'à ' + (dernier ? dernier.w + '\xD7' + dernier.h + (sansPerte ? ' en PNG sans perte (transparence préservée, ' : ' en qualité 0,72 (') + Math.round(dernier.l * 0.75 / 1000) + ' Ko)' : 'aucun encodage') + ' \u2014 source ' + wI + '\xD7' + hI + ', ' + koSource + ' Ko' + (sansPerte ? '. Le fond est transparent : on refuse le JPEG, qui ' + 'le repeindrait en noir.' : '')));
+        if (aplati) {
+          rejeter(new Error('la conversion a APLATI la transparence de ' + fichier.name + ' \u2014 rien n\'a été ajouté. Ton PNG serait apparu ' + 'sur un carré noir. Ce navigateur ne sait pas encoder le WebP ' + 'en gardant le fond : envoie le visuel autrement, il sera posé ' + 'avec l\'outil qui produit les posters du site.'));
+          return;
+        }
+        rejeter(new Error('image impossible à faire tenir sous ' + Math.round(PLAFOND * 0.75 / 1000) + ' Ko : essayé jusqu\'à ' + (dernier ? dernier.w + '\xD7' + dernier.h + ' en WebP qualité ' + String(A.VISUEL_QUALITE).replace('.', ',') + ' (' + Math.round(dernier.l * 0.75 / 1000) + ' Ko)' : 'aucun encodage') + ' \u2014 source ' + wI + '\xD7' + hI + ', ' + koSource + ' Ko'));
       };
       img.src = source;
     };
@@ -2730,7 +2729,7 @@ function adminPreparerImage(fichier, opts) {
 }
 
 function adminReduireImage(fichier) {
-  return adminPreparerImage(fichier, { cote: 2000 }).then(function (r) {
+  return adminPreparerImage(fichier, { cote: A.VISUEL_COTE }).then(function (r) {
     return r.dataUrl;
   });
 }

@@ -16083,6 +16083,25 @@
     return canvas.toDataURL('image/jpeg', qualite);
   }
 
+  /* ⛔⛔⛔ CES TROIS NOMBRES SONT CEUX DE `outils/poser-visuel.mjs`, L'OUTIL AVEC
+     LEQUEL JE POSE LES VISUELS MOI-MÊME. Exigence de l'user, 15/08/2026 :
+     « quand moi j'ajoute des produits ou des images aux produits, je veux
+     EXACTEMENT la même méthode, celle qui marche et pas une autre ».
+     Il a raison, et l'écart mesuré expliquait ses DEUX plaintes d'un coup :
+       · mes posters, encodés en WebP 0,92 à 2000 px : médiane 146 Ko sur 310
+         fichiers — nets ET légers ;
+       · les siens montaient à 525 Ko parce qu'ils n'étaient PAS du WebP. Un
+         PNG de 2000 px est sans perte, donc énorme : l'ancienne boucle
+         rabotait alors la RÉSOLUTION jusqu'à tenir sous le plafond, et rendait
+         une image petite et floue. Un JPEG, lui, tenait le poids mais
+         repeignait le fond en noir. Une seule cause, deux symptômes.
+     ⛔ Toute divergence entre ces valeurs et celles de `poser-visuel.mjs` est
+     refusée par `scripts/check-visuel-produit.js`. Deux méthodes pour un même
+     geste, c'est la garantie que l'une des deux pourrira. */
+  var VISUEL_COTE = 2000;      // poser-visuel.mjs : le plus grand écran mesuré est 1674 px
+  var VISUEL_QUALITE = 0.92;   // poser-visuel.mjs : une seule qualité, jamais dégradée
+  var VISUEL_PLAFOND_KO = 871; // poser-visuel.mjs / audit p8-perf, décision user 28/07/2026
+
   function adminPreparerImage(fichier, opts) {
     var o = opts || {};
     var COTE = o.cote || 1000;
@@ -16103,77 +16122,80 @@
               qualite: 1, wSource: wI, hSource: hI, koSource: koSource });
             return;
           }
-          /* ⛔⛔ DÉFAUT MESURÉ LE 10/08/2026, ET C'EST LE MIEN. L'user, deuxième
-             fois : « j'ai ajouté les deux PNG […] ça ne marche toujours pas ».
-             Rejoué dans un vrai navigateur sur des images de synthèse denses :
-             2000×2000 → REFUS, 3000×3000 → REFUS. La cause : le côté était
-             FIXÉ à `COTE` et seule la QUALITÉ descendait. Sur une photo riche,
-             même à 0,72 de qualité, 2000 px dépassent le plafond — la fonction
-             jetait, le visuel n'était jamais ajouté, et la faute retombait sur
-             l'user (« recadre-la sur le produit »).
-             ⛔ « L'outil doit redimensionner correctement la photo que je lui
-             envoie », ce sont ses mots. Alors il la redimensionne : le côté
-             descend LUI AUSSI, par paliers, et la RÉSOLUTION est défendue
-             d'abord — on épuise les qualités à 2000 px avant de passer à 1600.
-             Un visuel plus grand légèrement plus compressé vaut mieux qu'un
-             visuel net et trop petit : la fiche le dessine sur 1674 px. */
-          var facteurs = [1, 0.8, 0.64, 0.5, 0.4];
-          var paliers = [0.95, 0.92, 0.88, 0.84, 0.78, 0.72];
-          /* ⛔ La transparence se constate UNE fois, sur la source, avant toute
-             réduction — c'est elle qui décide du format autorisé plus bas. */
+          /* ⛔⛔⛔ ICI ON FAIT EXACTEMENT CE QUE FAIT `outils/poser-visuel.mjs`,
+             et c'est la demande explicite de l'user (15/08/2026) : « je veux
+             EXACTEMENT la même méthode, celle qui marche et pas une autre ».
+
+             CE QUI DIFFÉRAIT, ET POURQUOI ÇA EXPLIQUE SES DEUX PLAINTES :
+             l'ancienne boucle descendait la QUALITÉ de 0,95 à 0,72 avant de
+             toucher à la taille. Mon outil, lui, n'a qu'UNE qualité — 0,92 —
+             et ne cède jamais dessus. Résultat mesuré sur les 310 posters que
+             j'ai posés : médiane 146 Ko, nets. Les siens montaient à 525 Ko et
+             sortaient flous, parce que sans WebP l'encodage retombait sur du
+             PNG sans perte (énorme, donc raboté en résolution) ou sur du JPEG
+             (léger, mais fond noir). Une seule cause, deux symptômes.
+
+             ⇒ QUALITÉ CONSTANTE, SEULE LA RÉSOLUTION CÈDE. Chaque pixel gardé
+             a la même finesse que sur mes posters. Un visuel un peu plus petit
+             mais net vaut mieux qu'un visuel grand et baveux — et à 0,92 il
+             faut une source énorme pour devoir descendre.
+
+             ⛔ ET LE CONTRÔLE QUE MON OUTIL FAIT ET QUE CELUI-CI N'AVAIT PAS :
+             on relit un pixel de coin APRÈS conversion. Si l'alpha n'est plus
+             nul, la conversion a aplati le fond — on REFUSE au lieu de livrer
+             un carré noir. `poser-visuel.mjs` refuse pour la même raison, avec
+             les mêmes mots. Un silence ici, c'est sa capture d'écran. */
           var transparente = adminImageATransparence(img, wI, hI);
-          /* ⛔ SI ON RETOMBE SUR DU PNG, LES PALIERS DE QUALITÉ NE SERVENT À
-             RIEN : le PNG est SANS PERTE, `toDataURL` ignore le second
-             argument. Réessayer six qualités sur la même taille produirait six
-             fois le MÊME octet et donnerait l'illusion d'avoir tout tenté avant
-             de réduire. Sur une image transparente, le poids ne se rattrape
-             donc que sur la RÉSOLUTION — et il faut le savoir avant de conclure
-             « impossible à faire tenir ». */
+          var facteurs = [1, 0.8, 0.64, 0.5, 0.4];
           var c = document.createElement('canvas');
-          var dernier = null, largeurVue = 0, sansPerte = false;
+          var dernier = null, largeurVue = 0, aplati = false;
           for (var f = 0; f < facteurs.length; f++) {
             var cible = Math.max(320, Math.round(COTE * facteurs[f]));
             var k = Math.min(1, cible / Math.max(wI, hI));   // jamais d'agrandissement
             var lg = Math.max(1, Math.round(wI * k));
-            /* ⚠️ Deux paliers peuvent rendre la MÊME taille (source déjà petite) :
-               réencoder à l'identique ne ferait que perdre du temps. */
+            /* ⚠️ Deux facteurs peuvent rendre la MÊME taille (source déjà
+               petite) : réencoder à l'identique ne ferait que perdre du temps. */
             if (lg === largeurVue) continue;
             largeurVue = lg;
             c.width = lg;
             c.height = Math.max(1, Math.round(hI * k));
-            var x = c.getContext('2d');
+            var x = c.getContext('2d', { willReadFrequently: true });
             x.imageSmoothingEnabled = true;
             x.imageSmoothingQuality = 'high';
+            x.clearRect(0, 0, c.width, c.height);
             x.drawImage(img, 0, 0, c.width, c.height);
-            /* La qualité descend par paliers SEULEMENT si le plafond l'exige, et
-               on rend celle qui a été retenue — l'appelant la montre. */
-            for (var i = 0; i < paliers.length; i++) {
-              var sortie = adminEncoderSansPerdreLeFond(c, paliers[i], transparente);
-              sansPerte = sortie.indexOf('data:image/png') === 0;
-              dernier = { l: sortie.length, w: c.width, h: c.height };
-              if (sortie.length <= PLAFOND) {
-                resoudre({ dataUrl: sortie, w: c.width, h: c.height,
-                  ko: Math.round(sortie.length * 0.75 / 1000), intact: false,
-                  qualite: sansPerte ? 1 : paliers[i], transparente: transparente,
-                  wSource: wI, hSource: hI, koSource: koSource });
-                return;
-              }
-              /* PNG : les paliers suivants rendraient le même octet. On passe
-                 directement à la taille en dessous. */
-              if (sansPerte) break;
+            var sortie = adminEncoderSansPerdreLeFond(c, VISUEL_QUALITE, transparente);
+            /* ⛔ LA TRANSPARENCE A-T-ELLE SURVÉCU ? Même contrôle, même refus
+               que `poser-visuel.mjs` : le coin doit rester à alpha 0. */
+            if (transparente) {
+              var coin = x.getImageData(0, 0, 1, 1).data[3];
+              if (coin !== 0) { aplati = true; break; }
             }
+            dernier = { l: sortie.length, w: c.width, h: c.height };
+            if (sortie.length <= PLAFOND) {
+              resoudre({ dataUrl: sortie, w: c.width, h: c.height,
+                ko: Math.round(sortie.length * 0.75 / 1000), intact: false,
+                qualite: VISUEL_QUALITE, transparente: transparente,
+                wSource: wI, hSource: hI, koSource: koSource });
+              return;
+            }
+          }
+          if (aplati) {
+            rejeter(new Error('la conversion a APLATI la transparence de '
+              + fichier.name + ' — rien n\'a été ajouté. Ton PNG serait apparu '
+              + 'sur un carré noir. Ce navigateur ne sait pas encoder le WebP '
+              + 'en gardant le fond : envoie le visuel autrement, il sera posé '
+              + 'avec l\'outil qui produit les posters du site.'));
+            return;
           }
           /* ⛔ UN REFUS DIT CE QU'IL A ESSAYÉ. Sans ces chiffres, « trop lourde »
              est un mur : on ne sait ni de combien, ni jusqu'où on est descendu. */
           rejeter(new Error('image impossible à faire tenir sous '
             + Math.round(PLAFOND * 0.75 / 1000) + ' Ko : essayé jusqu\'à '
-            + (dernier ? dernier.w + '×' + dernier.h
-              + (sansPerte ? ' en PNG sans perte (transparence préservée, '
-                : ' en qualité 0,72 (')
+            + (dernier ? dernier.w + '×' + dernier.h + ' en WebP qualité '
+              + String(VISUEL_QUALITE).replace('.', ',') + ' ('
               + Math.round(dernier.l * 0.75 / 1000) + ' Ko)' : 'aucun encodage')
-            + ' — source ' + wI + '×' + hI + ', ' + koSource + ' Ko'
-            + (sansPerte ? '. Le fond est transparent : on refuse le JPEG, qui '
-              + 'le repeindrait en noir.' : '')));
+            + ' — source ' + wI + '×' + hI + ', ' + koSource + ' Ko'));
         };
         img.src = source;
       };
@@ -16184,7 +16206,9 @@
   /* Ancien nom, conservé pour le chemin des visuels multiples : il ne rendait
      qu'une adresse de données. Il passe désormais par la fonction unique. */
   function adminReduireImage(fichier) {
-    return adminPreparerImage(fichier, { cote: 2000 }).then(function (r) { return r.dataUrl; });
+    /* Le côté vient de la constante partagée avec `poser-visuel.mjs` — un 2000
+       recopié ici se serait désynchronisé au premier changement là-bas. */
+    return adminPreparerImage(fichier, { cote: VISUEL_COTE }).then(function (r) { return r.dataUrl; });
   }
 
   function adminBrancherAjoutImage(row) {
