@@ -135,14 +135,31 @@ toutes.forEach((c) => {
   if (faites.has(r)) return;
   (nonRes[r] ? dejaTentees : jamaisTentees).push({ r: r, t: c.t || c.titre || '' });
 });
-jamaisTentees.forEach((x) => restantes.push(x));
+/* ⛔⛔ LES KITS MULTI-OUTILS PASSENT EN DERNIER, ET CE N'EST PAS UN ABANDON.
+   Mesuré sur la vague du 15/08 : 50 références de kits (DCK…) ont rendu 5
+   poids gravables — 10 %. Les vagues de machines seules tournent bien au-dessus.
+   La cause est structurelle : le poids d'un kit est celui d'un COLIS que peu de
+   revendeurs publient, alors que le poids d'une machine est une spécification
+   constructeur.
+   ⚠️ Et surtout : un kit n'a pas besoin d'être cherché. `poids-expedie.js` sait
+   COMPOSER — outil nu + batteries + chargeur + 1 kg d'emballage (l'ordre de
+   l'user du 14/08/2026). Il lui faut le poids des MACHINES. Chercher les kits
+   avant leurs machines, c'est payer des recherches pour un résultat qu'on
+   obtiendra gratuitement ensuite.
+   ⇒ Machines d'abord, kits ensuite. Le budget de recherche va là où il produit. */
+function estKit(r) { return /^DCK/i.test(String(r || '')); }
+const machines = jamaisTentees.filter((x) => !estKit(x.r));
+const kits = jamaisTentees.filter((x) => estKit(x.r));
+machines.forEach((x) => restantes.push(x));
+kits.forEach((x) => restantes.push(x));
 dejaTentees.forEach((x) => restantes.push(x));
 
 console.log('');
 console.log('④ état : ' + nRac + ' racines gravées · ' + Object.keys(nonRes).length
   + ' non résolues gardées · ' + restantes.length + ' restantes');
-console.log('   dont JAMAIS tentées : ' + jamaisTentees.length
-  + ' · déjà tentées sans succès (repoussées en fin de file) : ' + dejaTentees.length);
+console.log('   jamais tentées : ' + machines.length + ' machines + ' + kits.length
+  + ' kits (les kits passent en dernier, ils se COMPOSENT)');
+console.log('   déjà tentées sans succès, repoussées en fin de file : ' + dejaTentees.length);
 if (!restantes.length) {
   console.log('   ✅ PLUS RIEN À PESER — toutes les racines connues sont gravées.');
   process.exit(0);
