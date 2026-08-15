@@ -27974,7 +27974,7 @@
     "title": "DeWALT DCD794N-XJ — Perceuse-visseuse 18V DCD794N-XJ",
     "tag": "Nouveau",
     "desc": "Perceuse-visseuse 18V DCD794N-XJ.",
-    "img": "images/placeholder.svg",
+    "img": "images/posters/dcd794n-xj.webp",
     "currency": "EUR",
     "vat": 0.2,
     "stock_status": "in_stock",
@@ -27997,7 +27997,10 @@
     "price": 178.72,
     "variantGroup": "DCD794",
     "variantRole": "solo",
-    "coffretSku": "DCD794NT-XJ"
+    "coffretSku": "DCD794NT-XJ",
+    "images": [
+      "images/posters/dcd794n-xj.webp"
+    ]
   },
   {
     "id": "dewalt-dcs438n-xj",
@@ -28009,7 +28012,7 @@
     "title": "DeWALT DCS438N-XJ — Meuleuse Ø76 mm XR 18V DCS438N-XJ",
     "tag": "Nouveau",
     "desc": "Meuleuse Ø76 mm XR 18V DCS438N-XJ.",
-    "img": "images/placeholder.svg",
+    "img": "images/posters/dcs438n-xj.webp",
     "currency": "EUR",
     "vat": 0.2,
     "stock_status": "in_stock",
@@ -28029,7 +28032,10 @@
     "poidsSuppose": true,
     "ficheAcompleter": false,
     "price_ht": 196.93,
-    "price": 236.32
+    "price": 236.32,
+    "images": [
+      "images/posters/dcs438n-xj.webp"
+    ]
   },
   {
     "id": "dewalt-dcg405nt-xj",
@@ -37663,7 +37669,7 @@
     "title": "DeWALT D36000-QS — D36000-QS",
     "tag": "Nouveau",
     "desc": "D36000-QS. Envoi en lettre suivie — livraison 7 à 14 jours.",
-    "img": "images/placeholder.svg",
+    "img": "images/posters/d36000-qs.webp",
     "currency": "EUR",
     "vat": 0.2,
     "stock_status": "in_stock",
@@ -37683,7 +37689,10 @@
     "poidsSuppose": true,
     "ficheAcompleter": false,
     "price_ht": 1108.46,
-    "price": 1330.15
+    "price": 1330.15,
+    "images": [
+      "images/posters/d36000-qs.webp"
+    ]
   },
   {
     "id": "dewalt-fvk381t2-qw",
@@ -38824,7 +38833,7 @@
     "title": "DeWALT DCD708NT — Machine nue, sans batterie ni chargeur, coffret TSTAK",
     "tag": "Nouveau",
     "desc": "Référence constructeur DCD708NT. Configuration livrée d'après la nomenclature DeWALT : machine nue, sans batterie ni chargeur, coffret TSTAK. Le descriptif détaillé de l'outil reste à compléter.",
-    "img": "images/placeholder.svg",
+    "img": "images/posters/dcd708nt.webp",
     "currency": "EUR",
     "vat": 0.2,
     "stock_status": "in_stock",
@@ -38845,7 +38854,10 @@
     "ficheAcompleter": true,
     "price_ht": 114.3,
     "price": 137.16,
-    "sourceDescriptif": "nomenclature"
+    "sourceDescriptif": "nomenclature",
+    "images": [
+      "images/posters/dcd708nt.webp"
+    ]
   },
   {
     "id": "dewalt-dcs3501",
