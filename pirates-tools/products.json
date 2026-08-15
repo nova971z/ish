@@ -343,7 +343,7 @@
     "tag": "Ultra-compact",
     "new": true,
     "desc": "Ultra-compacte 100 mm, sans batterie/chargeur.",
-    "img": "images/posters/dcf850n-v3.webp",
+    "img": "images/posters/dcf850n.webp",
     "price": 149.82,
     "currency": "EUR",
     "vat": 0.2,
@@ -387,7 +387,10 @@
     ],
     "variantGroup": "DCF850",
     "variantRole": "solo",
-    "coffretSku": "DCF850NT-XJ"
+    "coffretSku": "DCF850NT-XJ",
+    "images": [
+      "images/posters/dcf850n.webp"
+    ]
   },
   {
     "id": "dewalt-dcf870n-xj",

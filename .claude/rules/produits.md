@@ -88,8 +88,20 @@ clair, le signaler **avant** de le poser.
 
 **« Machine seule » ou « outil nu » signifie sans batterie sur l'image.**
 
-⛔ Les visuels sont le travail de l'user : ne jamais les modifier sans qu'il
-l'ait demandé explicitement.
+⛔ Les visuels sont le travail de l'user : ne jamais les modifier **de sa
+propre initiative**.
+
+⛔⛔ **UN VISUEL QU'IL ENVOIE REMPLACE CELUI QUI EXISTE — SANS DEMANDER.**
+*Gravé le 15/08/2026, sur sa consigne : « Non tu remplaces s'il y a déjà un
+visuel ! »* Envoyer une photo EST la demande explicite : il ne l'aurait pas
+envoyée s'il voulait garder l'ancienne. Je lui avais posé la question sur
+`DCF850N` ; c'était une question de trop, exactement ce que la porte de sortie
+reproche (I-3 : on continue, on ne renvoie pas le choix).
+⇒ `poser-visuel.mjs --remplacer` est le mode **normal** quand il fournit
+l'image. Le garde-fou sans `--remplacer` reste utile pour tout autre appelant
+— un balayage, un import en masse — qui, lui, n'a rien demandé.
+⚠️ L'ancien fichier n'est jamais supprimé : il reste dans `images/posters/`,
+donc le retour en arrière coûte une ligne.
 
 ## Packs 3D — deux exigences non négociables
 
