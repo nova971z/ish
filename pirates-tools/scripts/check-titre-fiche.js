@@ -110,6 +110,25 @@ module.exports = function () {
         + 'le traqueur de ses relevés les moins chers.');
     }
   });
+  /* ②bis — « sans brosse » = brushless, jamais l'accessoire (tour 5, mesuré :
+     la tuile DCF850 à 107,99 € rejetée `rej: "brosse métallique"`). */
+  if (typeof pp.typerTitre === 'function') {
+    var tG = pp.typerTitre('dewalt dcf850 pilote d impact pilote electrique 20v sans brosse sans fil');
+    if (tG && /brosse/.test(String(tG.type))) {
+      errors.push('[check-titre-fiche] ⛔ « sans brosse » (brushless mal traduit) est '
+        + 'typé comme une BROSSE accessoire : l\'offre nue la moins chère redevient '
+        + 'invisible et les prix du site restent hauts.');
+    }
+    var tV = pp.typerTitre('brosse metallique 75mm pour meuleuse');
+    if (!tV || !/brosse/.test(String(tV.type))) {
+      errors.push('[check-titre-fiche] ⛔ une VRAIE brosse métallique n\'est plus typée '
+        + 'comme telle — la neutralisation de « sans brosse » a débordé.');
+    }
+  } else {
+    errors.push('[check-titre-fiche] ⛔ typerTitre n\'est plus exportée : le témoin '
+      + '« sans brosse » ne vérifie plus rien.');
+  }
+
   /* ③ le branchement : la fonction doit être APPELÉE au point d'écriture. */
   var adminSrc = fs.readFileSync(path.join(RACINE, 'api/admin.js'), 'utf8');
   /* ⚠️ ON CHERCHE L'APPEL EFFECTIF, PAS LE MOT. Sabotage du 15/08 :

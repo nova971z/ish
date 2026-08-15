@@ -3131,6 +3131,12 @@ function reMot(mot) {
    plus long est celui qui décrit vraiment l'article. */
 function typerTitre(bas) {
   var meilleur = null, vu = 0, nu = sansAccents(bas);
+  /* ⛔ « sans brosse(s) » = BRUSHLESS mal traduit (place de marché), pas une
+     brosse à vendre. Mesuré le 15/08/2026 : la tuile « DEWALT DCF850 pilote
+     d'impact … sans brosse … » à 107,99 € était rejetée `rej: "brosse
+     métallique"` — l'offre nue la moins chère devenait invisible et le prix
+     du site restait haut. Le mot nié est neutralisé AVANT le typage. */
+  nu = nu.replace(/\b(sans|without|ohne|sin|senza)\s+(brosses?|balais?|charbons?)\b/g, ' brushless ');
   for (var i = 0; i < nomen.INDEX.length; i++) {
     var e = nomen.INDEX[i];
     if (e.libelle.length <= vu) continue;          // déjà battu : inutile de tester
@@ -3896,7 +3902,7 @@ function detecterBlocage(rawText, httpStatus) {
   return null;
 }
 
-module.exports = { parseCotebrico: parseCotebrico, parseClickoutil: parseClickoutil, parseIdealo: parseIdealo, parseAuto: parseAuto, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, raisonAucuneSource: raisonAucuneSource, enMillis: enMillis, SOURCE_FRESH_MS: SOURCE_FRESH_MS, SOURCES_ACTIVES: SOURCES_ACTIVES, sourceActive: sourceActive, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage, estMaPropreReponse: estMaPropreReponse, detecterBlocage: detecterBlocage, titresAttendus: titresAttendus, compterTuiles: compterTuiles, empreintePage: empreintePage, racineRef: racineRef, racineModele: racineModele, titreContreditFiche: titreContreditFiche, referenceEstNue: referenceEstNue,
+module.exports = { typerTitre: typerTitre, parseCotebrico: parseCotebrico, parseClickoutil: parseClickoutil, parseIdealo: parseIdealo, parseAuto: parseAuto, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, raisonAucuneSource: raisonAucuneSource, enMillis: enMillis, SOURCE_FRESH_MS: SOURCE_FRESH_MS, SOURCES_ACTIVES: SOURCES_ACTIVES, sourceActive: sourceActive, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage, estMaPropreReponse: estMaPropreReponse, detecterBlocage: detecterBlocage, titresAttendus: titresAttendus, compterTuiles: compterTuiles, empreintePage: empreintePage, racineRef: racineRef, racineModele: racineModele, titreContreditFiche: titreContreditFiche, referenceEstNue: referenceEstNue,
   varianteProduit: varianteProduit, roleCoffret: roleCoffret,
   signatureBatteries: signatureBatteries, estPourAutreMachine: estPourAutreMachine,
   sansAccentsTitre: sansAccentsTitre, refUniqueDuTitre: refUniqueDuTitre,
