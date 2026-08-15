@@ -2394,6 +2394,100 @@
     }
    ],
    "note": "Visseuse a chocs 12V XR brushless. 1,75 lb (poids nu, sans batterie) = 0,79 kg, valeur identique et stable sur 3 recherches independantes (dont le site officiel DeWALT)."
+  },
+  "DCK623": {
+   "kg": 23,
+   "sources": [
+    {
+     "url": "https://www.toolstation.com/dewalt-dck623p3-gb-18v-xr-brushless-compact-6-piece-kit/p44264",
+     "kg": 23
+    },
+    {
+     "url": "https://www.wickes.co.uk/DEWALT-DCK623P3-GB-18V-XR-Brushless-Cordless-Compact-3-x-5-0Ah-6-Piece-Set/p/190474",
+     "kg": 23
+    },
+    {
+     "url": "https://ffx.co.uk/product/Get/Dewalt-Dck623P3-Gb-5035048679753-18V-3-X-5.0Ah-Brushless-Compact-6Pc-Kit",
+     "kg": 23
+    }
+   ],
+   "note": "Trois sites indépendants confirment 23 kg pour le kit expédié complet (DCK623P3-GB, 6 outils + 3 batteries 5Ah + 2 coffrets ToughSystem DS300)."
+  },
+  "DCL040": {
+   "kg": 0.6,
+   "sources": [
+    {
+     "url": "https://www.manomano.fr/p/dcl040-lampe-led-18v-7374",
+     "kg": 0.6
+    },
+    {
+     "url": "https://www.sobrico.com/p/dewalt-lampe-led-18v-dewalt-xr-li-ion-batterie-chargeur-dcl040-xj_SKUM133672.html",
+     "kg": 0.6
+    },
+    {
+     "url": "https://www.master-outillage.com/dewalt/399-lampe-led-dewalt-18-volts-li-ion-intensite-lumineuse-110-lumens-nue-sans-batterie-ni-chargeur-dcl040-5035048305560.html",
+     "kg": 0.6
+    }
+   ],
+   "note": "Reference nue (sans batterie ni chargeur) : poids de la lampe seule confirme par 3 sites distincts."
+  },
+  "DCL050": {
+   "kg": 0.6,
+   "sources": [
+    {
+     "url": "https://www.toolstation.com/dewalt-dcl050-xj-18v-xr-led-area-light/p44944",
+     "kg": 0.6
+    },
+    {
+     "url": "https://www.screwfix.com/p/dewalt-dcl050-xj-18v-li-ion-xr-cordless-led-work-light-bare/7730g",
+     "kg": 0.6
+    },
+    {
+     "url": "https://www.powertoolworld.co.uk/dewalt-dcl050-18v-xr-led-hand-held-area-light-body-only",
+     "kg": 0.6
+    }
+   ],
+   "note": "Reference nue (body only) : poids confirme a 0,6 kg par 3 revendeurs distincts. Avec batterie 18V le poids monte a ~1,1 kg, mais la reference demandee est la machine nue."
+  },
+  "DCL074": {
+   "kg": 3.8,
+   "sources": [
+    {
+     "url": "https://www.screwfix.com/p/dewalt-dcl074-xj-18v-li-ion-xr-cordless-area-light-bare/145hp",
+     "kg": 3.8
+    },
+    {
+     "url": "https://www.toolstation.com/dewalt-dcl074-xj-18v-xr-area-light/p13434",
+     "kg": 3.8
+    },
+    {
+     "url": "https://www.powertoolworld.co.uk/dewalt-dcl074-xj-18v-xr-tool-connect-area-light-body-only",
+     "kg": 3.8
+    }
+   ],
+   "note": "Poids confirme a 3,8 kg par 3 revendeurs distincts pour la reference nue (body only)."
+  },
+  "DCM575": {
+   "kg": 5.68,
+   "sources": [
+    {
+     "url": "https://www.castorama.fr/mkp/tron-onneuse-dewalt-dcm575x1-qw-xr-flexvolt-54v-9ah-40cm/5035048659083_CAFR.prd",
+     "kg": 5.68
+    },
+    {
+     "url": "https://racetools.fr/products/tronconneuse-dewalt-dcm575x1-qw-xr-flexvolt-54v-9ah-40cm",
+     "kg": 5.68
+    },
+    {
+     "url": "https://www.kamody.fr/dewalt-dcm575x1-tronconneuse-xr-flexvolt-54v-40cm-1x54v-30ah-23410",
+     "kg": 4.42
+    },
+    {
+     "url": "https://beyondtools.com/en-us/products/54v-9-0ah-brushless-chainsaw-kit-dcm575x1-xe-by-dewalt",
+     "kg": 4.42
+    }
+   ],
+   "note": "4 sites distincts s'accordent dans un intervalle cohérent (écart 28%, < 60%) pour le DCM575X1(-QW) : castorama.fr et racetools.fr donnent 5,68 kg (poids en kit, avec batterie 9Ah) ; kamody.fr et beyon"
   }
  },
  "nonResolues": {
@@ -4319,6 +4413,306 @@
     }
    ],
    "note": "Seuls des poids d'outils isolés du kit sont trouvés (meuleuse 1,74 kg, perceuse 1,8 kg, autres outils 1,3-1,5 kg selon la batterie), aucun poids total du colis (4 outils + 3 batteries 5Ah + 2 coffrets"
+  },
+  "DCK424": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Recherches dédiées au poids d'ensemble (kit combiné 18V 4 outils) : aucun résultat fiable. Les moteurs mélangent DCK422P3T et l'ancien DCK425 US (discontinué) ; aucune fiche produit avec poids trouvée"
+  },
+  "DCK428": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Poids des 4 outils NUS trouvés séparément (DCD796 1,3 kg ; DCF894 1,6 kg ; DCH273 2,5 kg ; DCG405 1,75 kg — profishop.de, gotools.de) mais aucun poids d'ENSEMBLE expédié (2 coffrets TSTAK + 3 batterie"
+  },
+  "DCK440": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Les résultats mélangent le DCK440X (ancien kit US NiCd 18V, discontinué) et l'éventuel DCK440P2T européen, absent des catalogues DeWALT UK/FR consultés. Aucune fiche poids fiable identifiée."
+  },
+  "DCK500": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Une valeur de 23 kg (poids de livraison) revient dans plusieurs résumés de recherche sur le DCK500P3T-QW, mais malgré 4 recherches ciblées (Amazon UK, k-bygg.se, byggshop.se, verktygsboden.se, toolout"
+  },
+  "DCK502": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Données incohérentes trouvées (0,5 kg pour le sac, 2,1-2,6 kg pour des outils isolés) ; aucun poids d'ensemble expédié fiable et citable pour ce kit 6 pièces en sac."
+  },
+  "DCK509": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Seul un poids d'outil isolé trouvé (perceuse DCD800 ~1,1-1,28 kg sans batterie, mensura.pl/morele.net) ; aucun poids d'ENSEMBLE (5 outils + 3 batteries 5Ah + sac) rattachable à une source citable."
+  },
+  "DCK551": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Poids d'outils isolés trouvés (1,3 à 3,8 kg selon l'outil, sources multiples) mais aucun poids d'ENSEMBLE expédié (5 outils + 2 coffrets TSTAK + 3 batteries 5Ah) rattachable à une URL précise malgré r"
+  },
+  "DCK607": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Seule valeur trouvée (0,5 kg) manifestement erronée/non pertinente pour un kit de 6 outils + 2 batteries 4Ah — écartée. Aucun poids d'ensemble fiable trouvé."
+  },
+  "DCK611": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Seul un poids d'outil isolé trouvé (~0,9 kg sans batterie) pour le kit DCK611P1D2 12V 6 pièces ; aucun poids d'ensemble du kit complet trouvé."
+  },
+  "DCK624": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Poids total du colis expédié introuvable en 3 recherches ciblées. Seuls des poids d'outils isolés sont apparus (perceuse à percussion DCD796 1,6 kg, visseuse à choc DCF840 0,88 kg, meuleuse multi-osci"
+  },
+  "DCK654": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "2 recherches. Le seul chiffre trouvé (1,6 kg avec batteries 1,5/2Ah, ou 1,8 kg avec batteries 3/4/5Ah, source powertoolworld.co.uk) correspond au poids de la perceuse hôte seule (valeur typique d'une "
+  },
+  "DCK663": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "2 recherches. Un résumé a cité 23,0 kg mais sans URL rattachable à un extrait précis (écarté, piège des valeurs non sourcées). Le seul chiffre avec URL (toolden.co.uk) est le poids de l'outil nu sans "
+  },
+  "DCK665": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "2 recherches ciblées (dont une restreinte à screwfix/powertoolworld/ffx) : aucune valeur de poids n'apparaît dans les extraits, ni pour le kit ni pour un composant."
+  },
+  "DCK685": {
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://ebart.pl/dewalt-tools-set-dck685p3t",
+     "kg": 25.85
+    }
+   ],
+   "note": "2 recherches. Une seule source citable avec URL (ebart.pl) donne 25,85 kg pour le colis complet (6 outils + 3 batteries 5Ah + coffrets TSTAK + chariot) — plausible vu la présence d'un chariot roulant "
+  },
+  "DCK690": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "2 recherches. Aucun poids total de colis trouvé ; seul un fragment de 1,3 kg pour un composant non identifié avec certitude est apparu (probablement un outil isolé du kit DCD796/DCF887/DCH273/DCS565/D"
+  },
+  "DCK699": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "2 recherches, résultat contradictoire et non fiable. Un résumé citait 18,4 kg (et une variante 18,3 kg) sans URL rattachable (écarté). Une autre recherche ciblée (rapidonline.com / powertoolsdirect.co"
+  },
+  "DCK706": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "2 recherches : la référence DCK706 elle-même n'apparaît dans aucun résultat — le moteur renvoie des références voisines mais distinctes (DCK755P3T, DCK700D1P1, DCKHS783M2). Aucune donnée exploitable t"
+  },
+  "DCK755": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "2 recherches. Seuls des poids d'outils isolés du kit sont apparus (perceuse DCD796 1,56 kg, multi-outil oscillant DCS355 1,06 kg, perforateur SDS+ DCH273 3,1 kg, meuleuse d'angle DCG405 2,5 kg, scie s"
+  },
+  "DCK791": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "2 recherches. Le seul chiffre trouvé (1,5 kg avec batterie, sans URL précise rattachable) correspond à la perceuse seule, pas au coffret complet (kit + 2x batteries 2Ah + 71 accessoires selon planeo.c"
+  },
+  "DCK795": {
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.dewalt.co.uk/product/dck795s2t-qw/18v-xr-brushless-hammer-drill-driver-accessories-2-x-15-ah",
+     "kg": 1.88
+    },
+    {
+     "url": "https://www.worldwidevoltage.com/dck795s2t.html",
+     "kg": 1.6
+    }
+   ],
+   "note": "Les valeurs trouvées (1,6 a 1,88 kg) correspondent au poids de l'outil DCD795/impact drill seul (avec ses 2 batteries), pas a un poids de colis complet en coffret TSTAK. Piege probable : confusion out"
+  },
+  "DCK796": {
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.idealo.fr/prix/5040849/dewalt-dck796d2t.html",
+     "kg": 1.6
+    },
+    {
+     "url": "https://www.ecatoolfast.com/dewalt-case-for-dcd796-tstak-type-casedcd796tstak.html",
+     "kg": 1.77
+    }
+   ],
+   "note": "Le code decrit un kit a 7 outils + 2 batteries 2Ah, mais les resultats ne renvoient que des variantes a UN seul outil sous ce code (DCK796D2T = perceuse + 2 batteries, 1,6 kg) ou le coffret TSTAK seul"
+  },
+  "DCK853": {
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.kamody.fr/dewalt-dck853p4-dcl050dcs355dcs367dcs570dch273dcd996dcf887dcg4054-xdcb184dcb115-26792",
+     "kg": 50.2
+    },
+    {
+     "url": "https://www.quincailleriegervais.fr/fr/p/coffret-de-machines-composition/pack-dck853p4-qw-8-outils-dck853p4-qw_ref-306845/pdf/",
+     "kg": 50.2
+    }
+   ],
+   "note": "Deux revendeurs distincts convergent sur 50,2 kg (kit complet : 8 outils + 4 batteries 5Ah + 3 coffrets TOUGHSYSTEM + chariot), mais risque de catalogue partage entre petits revendeurs francais (piege"
+  },
+  "DCK856": {
+   "motif": "statut non-resolue",
+   "sources": [],
+   "note": "Le moteur de recherche renvoie 35 kg pour le kit complet (8 outils + 4 batteries + coffrets), mais aucune URL individuelle n'a pu etre rattachee avec certitude a cette valeur precise (extrait de synth"
+  },
+  "DCK865": {
+   "motif": "statut non-resolue",
+   "sources": [],
+   "note": "Le moteur de recherche renvoie 31,00 kg pour le kit complet (8 outils + 4 batteries + coffret TSTAK), mais aucune URL individuelle n'a pu etre rattachee avec certitude a cette valeur precise ; une sec"
+  },
+  "DCK897": {
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://pricespy.co.uk/product.php?p=4453534",
+     "kg": 51.3
+    }
+   ],
+   "note": "Une seule source trouvee malgre 3 recherches ciblees : un agregateur de prix (pricespy.co.uk) donnant 51,3 kg pour le kit complet 8 outils + coffrets TOUGHSYSTEM. Aucune fiche technique de revendeur o"
+  },
+  "DCL045": {
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.dewalt.fr/produit/dcl045-xj/lampe-sous-capot-pliable-xr-12v-18v-54v",
+     "kg": 2.49
+    },
+    {
+     "url": "https://www.kamody.fr/dewalt-dcl045-lampe-led-pour-capot-machine-seule-7817",
+     "kg": 2.5
+    }
+   ],
+   "note": "Deux sources concordantes (2,49 kg site officiel DeWALT France, 2,5 kg kamody.fr) sur le poids nu (sans batterie) de la lampe sous capot. Troisieme source independante non confirmee dans le budget imp"
+  },
+  "DCL077": {
+   "motif": "statut non-resolue",
+   "sources": [],
+   "note": "Valeurs vues selon extraits : 1,1 à 1,3 kg / 2,0 kg / 3,5 kg — discordance >60%, aucune valeur rattachable avec certitude à une URL précise malgré 3 recherches (dewalt.fr, zone-outillage.fr, manualsli"
+  },
+  "DCL079": {
+   "motif": "statut non-resolue",
+   "sources": [],
+   "note": "« Tool Weight: 16 lbs » (~7,3 kg) revient sur plusieurs fiches DeWalt/revendeurs (motion.com, dewalt.com) mais impossible d'attribuer la valeur à 3 sites distincts avec certitude ; une mention isolée "
+  },
+  "DCLE05211": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Aucun poids trouvé sur 2 recherches ciblées (sydneytools.com.au, emmetistore.com, totaltools.com.au, dewalt.global consultés sans la donnée)."
+  },
+  "DCLE14201G": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Aucun poids dans les fiches consultées (acmetools.com, ohiopowertool.com, toolup.com, toolservicenet.com)."
+  },
+  "DCLE14251": {
+   "motif": "statut non-resolue",
+   "sources": [],
+   "note": "Deux valeurs incompatibles vues : ≈1,65 kg (3,63 lbs) et 5,1 kg (diy.com) — discordance >60%, seulement 2 sources exploitables, pas 3."
+  },
+  "DCLE14301": {
+   "motif": "statut non-resolue",
+   "sources": [],
+   "note": "1,06 kg (notice d'instruction) vs 1,4 kg (fiche produit) — écart ≤60% mais seulement 2 sources trouvées, pas 3 sites distincts."
+  },
+  "DCLE15211": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Aucun poids trouvé (mytoolshed.co.uk, emmetistore.com, careytools.com, dewalt.global sans la donnée) sur 2 recherches ciblées."
+  },
+  "DCLE15221": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Aucun poids trouvé (emmetistore.com, careytools.com, dewalt.global sans la donnée) sur 2 recherches ciblées."
+  },
+  "DCLE34021": {
+   "motif": "statut non-resolue",
+   "sources": [],
+   "note": "Valeurs très discordantes selon variante bare/kit : ≈0,5 kg (1,1 lb) / 1,1 kg (2,5 lb) / 1,8 kg (4 lb) — écart >60%, aucune attribution fiable valeur/URL malgré 3 recherches y compris dewalt.com et ma"
+  },
+  "DCLE34031": {
+   "motif": "statut non-resolue",
+   "sources": [],
+   "note": "3,9 kg cité pour un kit 18V (DCLE34031D1) vs ≈1 kg pour une variante 20V MAX bare — configurations différentes de la référence nue demandée, pas de valeur fiable isolée malgré 3 recherches (dewalt.fr,"
+  },
+  "DCLE34035": {
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.quincaillerieportalet.fr/fr/p/niveaux-laser/niveau-laser-vert-multilignes-3-x-360-xr-18-v-dcle34035d1-qw_ref-p28033/",
+     "kg": 4.7
+    }
+   ],
+   "note": "Une seule source exploitable pour le kit exact (DCLE34035D1-QW, avec 1 batterie 2Ah + chargeur + TSTAK) : quincaillerieportalet.fr donne 4,7 kg. dewalt.fr, screwfix et manomano référencent bien ce kit"
+  },
+  "DCM200": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Recherches menées (dewalt.fr, its.co.uk, dewalt.com) : deux valeurs vues (1,3 kg et 2,2 kg) mais aucune n'était rattachable à une URL précise citant le poids du DCM200N machine nue. Rien de fiable à g"
+  },
+  "DCM561": {
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.manomano.fr/p/coupe-bordures-sur-batterie-50-ah-dewalt-dcm561p1s-6520531",
+     "kg": 4.1
+    }
+   ],
+   "note": "Une seule source citable, pour la variante DCM561P1S (avec 1 batterie 5,0 Ah) : manomano.fr affiche « Poids léger 4,1 kg ». La référence demandée « DCM561 » ne précise pas la variante (nue ou en kit) "
+  },
+  "DCM562": {
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.amazon.fr/DeWalt-DCM562P1-QW-LI-ION-Souffleur-balais/dp/B0155WY7T2",
+     "kg": 3.2
+    }
+   ],
+   "note": "Une seule source citable pour la variante avec 1 batterie 5,0 Ah + chargeur (DCM562P1-QW), qui correspond à la référence demandée : Amazon.fr indique 3,2 kg dans le titre de l'annonce. Racetools et ma"
+  },
+  "DCM563": {
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.bradfords.co.uk/product-ptd268-dewalt-cordless-hedge-trimmer-22-hardened-steel-blade-xenoy-dcm563pb-xj",
+     "kg": 2.9
+    },
+    {
+     "url": "https://www.idealo.fr/prix/5033193/dewalt-dcm563pb-xj-sans-batterie-et-chargeur.html",
+     "kg": 3.4
+    }
+   ],
+   "note": "Désaccord entre 2 sources pour le DCM563PB-XJ (machine nue) : bradfords.co.uk distingue explicitement 2,9 kg sans batterie / 3,4 kg avec batterie (donc 2,9 kg attendu pour la référence nue) ; idealo.f"
+  },
+  "DCM571": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Recherches menées sur dewalt.co.uk, its.co.uk, toolstation, screwfix, zone-outillage : plusieurs valeurs vues (3,6 / 4,6 / 5,6 kg) mais aucune rattachable clairement à une URL précise avec la valeur e"
+  },
+  "DCM5713": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Recherches menées sur screwfix, powertoolworld, its.co.uk, dewalt.co.uk, manualslib : aucun extrait ne contenait le poids en kg du DCM5713(N). Les pages produit existent mais le poids n'apparaît pas d"
+  },
+  "DCM572": {
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://products.dewalt.fr/powertools/productdetails/catno/DCM572N/",
+     "kg": 3.33
+    }
+   ],
+   "note": "ATTENTION divergence d'intitulé : la liste dit « débroussailleuse » mais la référence DCM572N est en réalité un SOUFFLEUR (souffleur XR FlexVolt 54V, machine nue) selon dewalt.fr et tous les revendeur"
+  },
+  "DCM586": {
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "Aucune référence DCM586 « souffleur 54V » n'apparaît dans les résultats de recherche (2 recherches dédiées). Seuls des produits voisins mais DIFFÉRENTS existent : DCV586 (aspirateur eau/poussières 54V"
   }
  }
 }
