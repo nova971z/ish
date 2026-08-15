@@ -2990,6 +2990,29 @@ function pwFileHausses(brand) {
   if (!pwHaussesEnAttente[k]) pwHaussesEnAttente[k] = Object.create(null);
   return pwHaussesEnAttente[k];
 }
+/* ⛔⛔⛔ ARGENT — LA FILE DES HAUSSES DIFFÉRÉES DOIT SURVIVRE À L'INSTANCE.
+   MESURÉ SUR SON ZIP DU 15/08/2026 (67 pages, 68→134) : 415 hausses différées
+   annoncées, 14 appliquées — et la DERNIÈRE page différait encore au lieu de
+   rejouer. Sa couverture portait la cause noir sur blanc : `instance-froide`,
+   `pages: None`, instance âgée de 97 secondes. La détection de fin de rafale
+   compare un compteur EN MÉMOIRE au plan ; l'instance recyclée repart de zéro,
+   la fin n'arrive jamais, et la file — en mémoire elle aussi — meurt avec.
+   Conséquence qu'il subit : les prix ne REMONTENT jamais. DCF850N servi
+   149,82 € pour un coût du jour de 118,86 € — la hausse à 191,84 € était dans
+   la file, la file est morte, la marge est restée quasi nulle.
+   ⇒ Chaque hausse différée s'écrit AUSSI dans un document durable, UN par
+   marque. Rejeu : en fin de rafale détectée, OU dès qu'une entrée date de plus
+   de PW_HAUSSE_TTL_MS — une rafale ne dure pas 30 minutes ; une entrée plus
+   vieille appartient à une rafale finie dont la fin n'a pas été vue.
+   ⚠️ Coût mesurable et dit : +1 lecture par page de balayage, +1 écriture par
+   page qui diffère au moins une hausse — ~67 lectures par rafale, contre 415
+   hausses perdues sans elle. J4 : le rejeu fait passer une annonce déjà lue
+   par le MÊME chemin de calcul, rien n'est inventé. */
+const PW_HAUSSE_TTL_MS = 30 * 60 * 1000;
+function pwHaussesDocRef(db, brand) {
+  return db.collection('config').doc('pw_hausses_'
+    + String(brand || '').toLowerCase().replace(/[^a-z0-9]/g, ''));
+}
 /* ⛔⛔ QUI COMPTE ? L'INSTANCE ELLE-MÊME, ET ELLE NE LE DISAIT PAS. J'ai lu
    « pagesRefusees: 0 avec 14 manquantes » et j'en ai conclu « les POST ne nous
    atteignent jamais ». Cette conclusion suppose que les 67 requêtes tombent
@@ -4499,6 +4522,32 @@ async function handlePriceWatch(req, res, admin, db) {
       if (repris.length) aTraiter = parsed.concat(repris);
       pwHaussesEnAttente[String(brand || '').toUpperCase()] = Object.create(null);
     }
+    /* ⛔⛔ LA FILE DURABLE — celle qui survit aux instances froides (mesuré sur
+       son zip : 415 différées, 14 appliquées, cause `instance-froide`). On la
+       lit à CHAQUE page de balayage ; on la rejoue si la rafale est finie OU
+       si une entrée a dépassé PW_HAUSSE_TTL_MS — une entrée de 30 minutes
+       appartient à une rafale morte dont personne n'a vu la fin. */
+    if (scanMode && !dryRun) {
+      try {
+        const snapH = await pwHaussesDocRef(db, brand).get();
+        const durables = snapH.exists ? (snapH.data() || {}) : {};
+        const cles = Object.keys(durables).filter((k) => durables[k] && durables[k].sku);
+        const unePerimee = cles.some((k) => (nowMs - (durables[k].at || 0)) > PW_HAUSSE_TTL_MS);
+        if (cles.length && (rafaleFinieCettePage || unePerimee)) {
+          const deja = {};
+          aTraiter.forEach((x) => { if (x && x.sku) deja[String(x.sku).toUpperCase()] = 1; });
+          const reprisDurables = cles
+            .map((k) => durables[k])
+            .filter((e) => !deja[String(e.sku).toUpperCase()])
+            .map((e) => ({ sku: e.sku, price: e.price, titre: e.titre || null,
+              name: e.titre || (brand + ' ' + e.sku) }));
+          if (reprisDurables.length) aTraiter = aTraiter.concat(reprisDurables);
+          /* Rejouées = retirées : un rejeu qui laisse la file pleine rejouerait
+             les mêmes hausses à chaque page, écritures en boucle. */
+          await pwHaussesDocRef(db, brand).delete();
+        }
+      } catch (eH) { console.error('[price-watch] file durable illisible:', eH.message); }
+    }
     for (const item of aTraiter) {
       try {
         /* ⛔ Même règle que sur le chemin à sec : l'écriture exacte d'abord, la
@@ -4791,6 +4840,18 @@ async function handlePriceWatch(req, res, admin, db) {
              l'ANNONCE qu'il faut conserver, puisque c'est elle qui repasse par
              le chemin d'écriture sur la dernière page. */
           pwFileHausses(brand)[p.id] = item;
+          /* ⛔ ET DANS LE DOCUMENT DURABLE — la file mémoire meurt avec
+             l'instance (415 différées / 14 appliquées sur son zip). Champs
+             minimaux : de quoi rejouer par le même chemin, rien de plus. */
+          if (!dryRun) {
+            const persistH = {};
+            persistH[p.id] = { sku: item.sku,
+              price: (typeof item.price === 'number' ? item.price : src),
+              titre: String((item && (item.titre || item.name)) || '').slice(0, 160),
+              at: nowMs };
+            try { await pwHaussesDocRef(db, brand).set(persistH, { merge: true }); }
+            catch (eP) { console.error('[price-watch] file durable inécrivable:', eP.message); }
+          }
           continue;
         }
 
