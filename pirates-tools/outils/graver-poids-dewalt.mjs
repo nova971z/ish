@@ -38,8 +38,12 @@ if (!FICHIER || !fs.existsSync(FICHIER)) {
   process.exit(2);
 }
 
+/* ⛔ ACCEPTE AUSSI LE FICHIER DE SORTIE D'UNE CAMPAGNE (task-*.output) : il
+   enveloppe le résultat sous `result`. Sans ça, il faut extraire à la main —
+   et un geste manuel entre la mesure et le gravage est une occasion d'erreur. */
 const brut = JSON.parse(fs.readFileSync(FICHIER, 'utf8'));
-const entrees = Array.isArray(brut) ? brut : (brut.entrees || []);
+const noyau = (brut && brut.result && !brut.entrees) ? brut.result : brut;
+const entrees = Array.isArray(noyau) ? noyau : (noyau.entrees || []);
 if (!entrees.length) {
   console.error('⛔ PRÉALABLE : aucune entrée dans ' + FICHIER + ' — rien à graver.');
   process.exit(2);
