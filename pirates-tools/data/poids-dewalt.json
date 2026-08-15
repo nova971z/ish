@@ -1494,18 +1494,504 @@
     }
    ],
    "note": "Référence sans suffixe. Poids nu DCD740N = 1.3 kg vs kit DCD740C1 = 1.75 kg : doute nu/emballé, valeur la plus haute retenue conformément à la règle."
+  },
+  "DCB1106": {
+   "kg": 0.77,
+   "sources": [
+    {
+     "url": "https://www.acmetools.com/dewalt-12v-20v-max-6a-charger-dcb1106/885911683289.html",
+     "kg": 0.77
+    },
+    {
+     "url": "https://www.dkhardware.com/dewalt-dcb1106-battery-charger-20v-max-dcb1106-20-v-lithium-ion-6-amp-product-5599389.html",
+     "kg": 0.77
+    },
+    {
+     "url": "https://www.amazon.com/DeWALT-DCB1106-Corded-Compact-Charger/dp/B089FMLC3H",
+     "kg": 0.77
+    }
+   ],
+   "note": "3 sites distincts s'accordent sur 1,7 lb (0,77 kg) pour le chargeur DCB1106 12V/20V 6A seul."
+  },
+  "DCB117": {
+   "kg": 0.5,
+   "sources": [
+    {
+     "url": "https://www.manomano.fr/p/dewalt-chargeur-rapide-18v-dcb117-qw-17942039",
+     "kg": 0.5
+    },
+    {
+     "url": "https://www.cotebrico.fr/chargeurs-outillage/11887-chargeur-rapide-flexvolt-121854v-dewalt-dcb117-5035048729892.html",
+     "kg": 0.5
+    },
+    {
+     "url": "https://www.toomanytools.com/chargeur-batterie-dewalt/8660-dewalt-dcb117-qw-chargeur-rapide-12ah-xr-li-ion-18v-et-54v-5035048729892.html",
+     "kg": 0.5
+    }
+   ],
+   "note": "Chargeur rapide FlexVolt mono-port (DCB117-QW), à ne pas confondre avec DCB1404 (chargeur QUADPORT 4 emplacements, référence voisine dans cette même liste) — valeur vérifiée cohérente (pas de contamin"
+  },
+  "DCB189": {
+   "kg": 0.54,
+   "sources": [
+    {
+     "url": "https://www.manomano.co.uk/p/dewalt-dcb189-40ah-li-ion-18v-xr-battery-51653453",
+     "kg": 0.54
+    },
+    {
+     "url": "https://dvspowertools.co.uk/shop/power-tools/batteries-and-chargers/dewalt-dcb189-li-ion-battery-18v-xr-4-0ah/",
+     "kg": 0.54
+    },
+    {
+     "url": "https://www.misterworker.com/en/dewalt/18v-xr-litio-40-ah-compact-battery-dcb189-xj/14658.html",
+     "kg": 0.54
+    }
+   ],
+   "note": "Batterie rail XR 18V 4,0 Ah compacte."
+  },
+  "DCB547": {
+   "kg": 1.46,
+   "sources": [
+    {
+     "url": "https://www.klium.com/en/dewalt-dcb547-xj-18-54v-xr-flexvolt-battery-90ah-135502",
+     "kg": 1.46
+    },
+    {
+     "url": "https://www.howetools.co.uk/dewalt-dcb547-54v-18v-flexvolt-li-ion-battery-3-0ah9-0ah",
+     "kg": 1.46
+    },
+    {
+     "url": "https://www.ecatoolfast.com/dewalt-54v-xr-dcb547-9-0ah-battery-flexvolt-18v-54v-dcb547dc.html",
+     "kg": 1.46
+    }
+   ],
+   "note": "Batterie FlexVolt 18V/54V 9,0 Ah/3,0 Ah. Écart de valeurs vu selon revendeurs (~1,1 à 1,46 kg, <60%) — valeur haute retenue par prudence (protège la marge de port)."
+  },
+  "DCBP034": {
+   "kg": 0.32,
+   "sources": [
+    {
+     "url": "https://www.acehardware.com/departments/tools/power-tool-accessories/tool-battery-chargers/2003861",
+     "kg": 0.32
+    },
+    {
+     "url": "https://www.homedepot.com/p/DEWALT-20V-MAX-POWERSTACK-Compact-Battery-DCBP034/317977946",
+     "kg": 0.32
+    },
+    {
+     "url": "https://www.dewalt.com/product/dcbp034/20v-max-xr-powerstack-compact-battery",
+     "kg": 0.32
+    }
+   ],
+   "note": "Batterie Powerstack compacte 20V MAX XR 1,7 Ah. Valeur d'origine en livres (0,7 lb) convertie en kg."
+  },
+  "DCBP318": {
+   "kg": 0.8,
+   "sources": [
+    {
+     "url": "https://www.misterworker.com/en-us/dewalt/18v-xr-lithium-powerstack-35ah-battery-with-pouch-cells-dcbp318-xj/112273.html",
+     "kg": 0.8
+    },
+    {
+     "url": "https://www.dewalt.com.au/product/dcbp318-xj/18v-xr-powerstack-35ah-battery",
+     "kg": 0.8
+    },
+    {
+     "url": "https://www.emmetistore.com/products/xr-powerstack-battery-dewalt-dcbp318-xj-18v-3-5ah",
+     "kg": 0.8
+    }
+   ],
+   "note": "Batterie Powerstack XR 18V 3,5 Ah à cellules pouch."
+  },
+  "DCCS1100N": {
+   "kg": 9,
+   "sources": [
+    {
+     "url": "https://www.manomano.fr/p/pulverisateur-dewalt-dccs1100n-xj-18v-94652909",
+     "kg": 9
+    },
+    {
+     "url": "https://www.fixami.fr/dewalt-dccs1100n-xj-pulverisateur-chimique-sans-fil-18-v-xr-pour-beton.html",
+     "kg": 9
+    },
+    {
+     "url": "https://www.maxoutil.com/pulverisateur-chimique-dorsal-xr-18v-dewalt-dccs1100n-xj.html",
+     "kg": 9
+    }
+   ],
+   "note": "ALERTE CRITIQUE PRODUIT : DCCS1100N-XJ n'est PAS une tronçonneuse mais un PULVÉRISATEUR CHIMIQUE DORSAL pour béton 18V XR (réservoir 15L, pression 20-150 PSI) — la description « tronconneuse machine n"
+  },
+  "DCD240": {
+   "kg": 7.1,
+   "sources": [
+    {
+     "url": "https://www.powertoolsdirect.com/dewalt-dcd240n-xr-flexvolt-paddle-mixer-54v-bare-unit",
+     "kg": 5.1
+    },
+    {
+     "url": "https://uk.rs-online.com/web/p/rotary-tools/0173020",
+     "kg": 7.1
+    },
+    {
+     "url": "https://beyondtools.com/en-us/products/54v-flexvolt-paddle-mixer-bare-tool-only-dcd240n-xe-by-dewalt",
+     "kg": 5.8
+    }
+   ],
+   "note": "Machine nue (paddle mixer FlexVolt 54V, bare unit). 3 sites distincts convergent dans un intervalle 5.1-7.1 kg (écart 39%, ≤60%). Doute nu/emballé non tranché entre les sources : valeur haute retenue "
+  },
+  "DCD710": {
+   "kg": 0.91,
+   "sources": [
+    {
+     "url": "https://me.dewalt.global/product/DCD710D2/108v-li-ion-compact-drill-driv",
+     "kg": 0.91
+    },
+    {
+     "url": "https://www.powertoolsdirect.com/dewalt-dcd710-sub-compact-drill-driver-range",
+     "kg": 0.91
+    },
+    {
+     "url": "https://www.toolstoday.co.uk/dewalt-dcd710-sub-compact-10-8-volt-drill-driver",
+     "kg": 0.91
+    }
+   ],
+   "note": "10.8V sub-compact, poids outil seul (sans batterie) : 3 sources convergent exactement sur 0.91 kg, dont le site fabricant DeWALT (me.dewalt.global)."
+  },
+  "DCD771": {
+   "kg": 1.65,
+   "sources": [
+    {
+     "url": "https://www.manua.ls/dewalt/dcd771/manual",
+     "kg": 1.65
+    },
+    {
+     "url": "https://www.lectura-specs.com/en/model/tools/cordless-power-tools-cordless-drill-screw-drivers-dewalt/dcd771c2-11765765",
+     "kg": 1.63
+    },
+    {
+     "url": "https://thepowertoolstore.com/products/dewalt-dcd771c2",
+     "kg": 1.63
+    }
+   ],
+   "note": "Poids outil sans batterie. 3 sites distincts convergent étroitement (1.63-1.65 kg, écart 1%)."
+  },
+  "DCD776": {
+   "kg": 1.34,
+   "sources": [
+    {
+     "url": "https://www.manualslib.com/manual/3228496/Dewalt-Dcd776.html",
+     "kg": 1.34
+    },
+    {
+     "url": "https://www.kraftoolpvtltd.com/dewalt-1/dcd776",
+     "kg": 1.3
+    },
+    {
+     "url": "https://www.alliedtoolsinc.com/brand-dewalt/dewalt-dcd776/sku-V1152811-dcd776",
+     "kg": 1.5
+    }
+   ],
+   "note": "Poids sans batterie d'après le manuel officiel DeWALT (valeur précise à 2 décimales). Deux autres sites citent 1.3 et 1.5 kg, écart max-min 15%, dans la tolérance."
+  },
+  "DCD777": {
+   "kg": 1.15,
+   "sources": [
+    {
+     "url": "https://www.free-instruction-manuals.com/pdf/pa_2434389.pdf",
+     "kg": 1.15
+    },
+    {
+     "url": "https://www.lectura-specs.com/en/model/tools/cordless-power-tools-cordless-drill-screw-drivers-dewalt/dcd777c2-11765749",
+     "kg": 1.15
+    },
+    {
+     "url": "https://www.toolnerds.com/drills/cordless/dewalt-dcd777c2-review/",
+     "kg": 1.15
+    }
+   ],
+   "note": "Poids sans batterie, 18V brushless compact. 3 sources convergent exactement sur 1.15 kg, dont le manuel d'instructions officiel PDF."
+  },
+  "DCD778": {
+   "kg": 1.52,
+   "sources": [
+    {
+     "url": "https://www.leroymerlin.fr/produits/perceuse-a-percussion-18-v-dewalt-dcd778d2t-qw-65-nm-2-batteries-2ah-82040217.html",
+     "kg": 1.3
+    },
+    {
+     "url": "https://www.screwfix.fr/perceuse-visseuse-a-percussion-sans-fil-brushless-dcd778d2ta-li-ion-xr-dewalt-18v-2-x-2ah.html",
+     "kg": 1.52
+    },
+    {
+     "url": "https://versustools.com/en/versus/comparison-dewalt-dcd777-vs-dcd778/",
+     "kg": 1.7
+    }
+   ],
+   "note": "Perceuse à percussion 18V brushless (variante à percussion de la DCD777, donc logiquement un peu plus lourde : 1.15 kg vs 1.52 kg). Valeurs vues sur 3 sites dans l'intervalle 1.3-1.7 kg (écart 31%, ≤6"
+  },
+  "DCD790": {
+   "kg": 1.18,
+   "sources": [
+    {
+     "url": "https://versus.com/en/dewalt-dcd790b",
+     "kg": 1.18
+    },
+    {
+     "url": "https://www.newegg.com/p/05K-0001-000S7",
+     "kg": 1.18
+    },
+    {
+     "url": "https://www.bhid.com/catalog/products/tools-hand-and-power/power-tools/cordless-tools/cordless-drills/dewalt-spc-dcd790b",
+     "kg": 1.18
+    }
+   ],
+   "note": "20V MAX XR brushless compact, bare tool. Convergence exacte sur 1.18 kg (2.6 lb) sur 3 sites distincts."
+  },
+  "DCD791": {
+   "kg": 1.7,
+   "sources": [
+    {
+     "url": "https://www.toolstation.com/dewalt-dcd791d2-gb-18v-xr-brushless-compact-drill-driver/p49517",
+     "kg": 1.5
+    },
+    {
+     "url": "https://cee.dewalt.global/product/dcd791d2-qw/18v-xr-brushless-drill-driver-2-x-2ah",
+     "kg": 1.2
+    },
+    {
+     "url": "https://www.tooled-up.com/dewalt-dcd791-18v-xr-cordless-brushless-drill-driver/prod/222935/",
+     "kg": 1.7
+    }
+   ],
+   "note": "18V XR brushless. Valeurs vues entre 1.2 et 1.7 kg selon les sites (écart 42%, ≤60%), sans certitude nu/kit sur chaque source ; valeur haute retenue par prudence marge, dont une page fabricant DeWALT "
+  },
+  "DCD792": {
+   "kg": 1.54,
+   "sources": [
+    {
+     "url": "https://www.alliedtoolsinc.com/brand-dewalt/dewalt-20v-max-xr-brushless-drill-driver-with-tool-connect-bluetooth-bare-tool/sku-V1152811-dcd792b",
+     "kg": 1.54
+    },
+    {
+     "url": "https://www.toolbarn.com/products/dewalt-dcd792b",
+     "kg": 1.54
+    },
+    {
+     "url": "https://powertools.techreviewer.com/tool-specs/dewalt-dcd792-drill/",
+     "kg": 1.27
+    }
+   ],
+   "note": "20V MAX XR Tool Connect, machine nue (DCD792B). Deux valeurs vues : 1.27 kg (2.8 lb) et 1.54 kg (3.4 lb), écart 21% (≤60%), sur des sites distincts. Valeur haute retenue par prudence marge."
+  },
+  "DCD794": {
+   "kg": 1.12,
+   "sources": [
+    {
+     "url": "https://www.misterworker.com/en/dewalt/compact-18v-2-speed-xr-brushless-drill-driver-without-battery-and-charger-dcd794nt-xj/115156.html",
+     "kg": 1.12
+    },
+    {
+     "url": "https://jabot.fr/boutique/produit/perceuse-visseuse-compacte-dewalt-dcd794n-18v-xr/",
+     "kg": 1.1
+    },
+    {
+     "url": "https://www.clickoutil.com/perceuse-visseuse-dewalt/154121-productdcd794n-xj.html",
+     "kg": 1.1
+    }
+   ],
+   "note": "DCD794N-XJ/NT-XJ, poids nu (sans batterie ni chargeur) ; extraits convergents 1,1-1,12 kg sur 3 sites distincts."
+  },
+  "DCD796": {
+   "kg": 1.3,
+   "sources": [
+    {
+     "url": "https://www.toolstoreuk.co.uk/dewalt-dcd796n-18v-xr-brushless-combi-drill-body-only/p1834",
+     "kg": 1.3
+    },
+    {
+     "url": "https://www.powertoolworld.co.uk/dewalt-dcd796n-18v-xr-brushless-combi-drill-body-only",
+     "kg": 1.3
+    },
+    {
+     "url": "https://www.romfordtools.com/Dewalt-DCD796-18v-XR-Li-Ion-Brushless-Compact-Combi-Drill--Body-Only/P7233",
+     "kg": 1.3
+    }
+   ],
+   "note": "DCD796N, poids corps seul (body only) ; 3 revendeurs distincts s'accordent à 1,3 kg."
+  },
+  "DCD799": {
+   "kg": 1.17,
+   "sources": [
+    {
+     "url": "https://www.klium.com/en/dewalt-dcd799nt-xj-18v-xr-brushless-compact-cordless-hammer-drill-in-tstak-without-battery-and-charger-173978",
+     "kg": 1.17
+    },
+    {
+     "url": "https://www.misterworker.com/en-us/dewalt/xr-brushless-2-speed-2-speed-18v-compact-impact-drill-driver-without-battery-and-charger-dcd799nt-xj/115153.html",
+     "kg": 1.17
+    },
+    {
+     "url": "https://www.toolnation.com/dewalt-dcd799nt-xj-18v-xr-brushless-compact-screw-hammer-drill-excluding-batteries-and-charger-in-tstak-case.html",
+     "kg": 1.17
+    }
+   ],
+   "note": "DCD799NT-XJ, poids nu (TSTAK, sans batterie ni chargeur) ; 3 sites distincts s'accordent à 1,17 kg."
+  },
+  "DCD800": {
+   "kg": 1.28,
+   "sources": [
+    {
+     "url": "https://www.lectura-specs.com/en/model/tools/cordless-power-tools-cordless-drill-screw-drivers-dewalt/dcd800b-11765750",
+     "kg": 1.279
+    },
+    {
+     "url": "https://www.homedepot.com/p/DEWALT-20V-MAX-XR-Cordless-Compact-1-2-in-Drill-Driver-Tool-Only-DCD800B/318875485",
+     "kg": 1.28
+    },
+    {
+     "url": "https://www.toolnut.com/dewalt-dcd800b-20v-max-xr-brushless-compact-1-2-in-drill-driver-tool-only.html",
+     "kg": 1.28
+    }
+   ],
+   "note": "DCD800B, poids net outil seul ; 3 sites distincts s'accordent (1,279-1,28 kg)."
+  },
+  "DCD803": {
+   "kg": 0.97,
+   "sources": [
+    {
+     "url": "https://www.wickes.co.uk/DeWalt-DCD803NT-XJ-18V-Cordless-Brushless-XR-Multihead-Drill---Bare/p/346876",
+     "kg": 0.97
+    },
+    {
+     "url": "https://its.co.uk/pd/dewalt-dcd803nt-xj-18v-xr-brushless-multi-head-drill-driver-body-case-4x-interchangable-heads-_dewdcd803nt.htm",
+     "kg": 0.97
+    },
+    {
+     "url": "https://www.toolnation.com/dewalt-dcd803nt-xj-xr-multi-head-cordless-screwdriver-drill-excluding-battery-and-charger-in-tstak.html",
+     "kg": 0.97
+    }
+   ],
+   "note": "DCD803NT-XJ, poids nu (corps + tête, sans batterie) ; 3 revendeurs distincts s'accordent à 0,97 kg."
+  },
+  "DCD805": {
+   "kg": 1.34,
+   "sources": [
+    {
+     "url": "https://dvspowertools.co.uk/shop/power-tools/cordless-power-tools/cordless-combo-drills/dewalt-dcd805n-body-only/",
+     "kg": 1.34
+    },
+    {
+     "url": "https://www.powertoolworld.co.uk/dewalt-dcd805n-18v-xr-brushless-combi-hammer-drill-body-only",
+     "kg": 1.34
+    },
+    {
+     "url": "https://www.protoolreviews.com/dewalt-dcd805-20v-hammer-drill-driver-review/",
+     "kg": 1.34
+    }
+   ],
+   "note": "DCD805N, poids corps seul (body only) ; 3 sites distincts s'accordent à 1,34 kg."
+  },
+  "DCD81": {
+   "kg": 1.3,
+   "sources": [
+    {
+     "url": "https://www.idealo.fr/prix/209957032/dewalt-mclaren-dcd81mp2t.html",
+     "kg": 1.3
+    },
+    {
+     "url": "https://www.mensura.pl/wkretarka-2x5ah-mclaren-dewalt-dcd81mp2t",
+     "kg": 1.3
+    },
+    {
+     "url": "https://domitech.pl/product-pol-52208-Wiertarko-wkretarka-Dewalt-DCD81MP2T-QW.html",
+     "kg": 1.28
+    }
+   ],
+   "note": "DCD81MP2T-QW (McLaren), poids sans batterie ; sources à 1,28-1,3 kg, valeur haute retenue par prudence."
+  },
+  "DCD86": {
+   "kg": 1.2,
+   "sources": [
+    {
+     "url": "https://www.axminstertools.com/dewalt-dcd86mp1t-mclaren-f1-combi-drill-18v-5-0ah-114283",
+     "kg": 1.2
+    },
+    {
+     "url": "https://www.ecatoolfast.com/dewalt-dcd86mp1t-18v-combi-xr-drill-1-x-5-0ah-mclaren-dcd86mp1t.html",
+     "kg": 1.2
+    },
+    {
+     "url": "https://www.powertoolsdirect.com/dewalt-power-tools-dcd86mp1t-gb-dcd86mp1t-mclaren-f1-combi-drill-18v-1-x-5-0ah-li-ion-5054905332846",
+     "kg": 1.2
+    }
+   ],
+   "note": "DCD86MP1T(-QW) (McLaren), poids sans batterie ; 1,2 kg cité de façon répétée et convergente par plusieurs revendeurs distincts."
+  },
+  "DCD991": {
+   "kg": 1.5,
+   "sources": [
+    {
+     "url": "https://www.lectura-specs.com/en/model/tools/cordless-power-tools-cordless-drill-screw-drivers-dewalt/dcd991b-11765763",
+     "kg": 1.5
+    },
+    {
+     "url": "https://docs.rs-online.com/6648/A700000006719449.pdf",
+     "kg": 1.5
+    },
+    {
+     "url": "https://powertools.techreviewer.com/tool-specs/dewalt-dcd991-drill/",
+     "kg": 1.5
+    }
+   ],
+   "note": "Poids nu (sans batterie) ; avec batterie la même source donne ≈2,1 kg. Valeur convergente sur 2 recherches indépendantes citant systématiquement 1,5 kg."
+  },
+  "DCD996": {
+   "kg": 1.6,
+   "sources": [
+    {
+     "url": "https://www.manualslib.com/manual/1225991/Dewalt-Dcd996.html?page=5",
+     "kg": 1.6
+    },
+    {
+     "url": "https://de.rs-online.com/web/p/bohrmaschinen/1362885",
+     "kg": 1.6
+    },
+    {
+     "url": "https://www.powertoolworld.co.uk/dewalt-dcd996n-brushless-18v-xrp-combi-hammer-drill-body-only",
+     "kg": 1.6
+    }
+   ],
+   "note": "Poids nu (sans batterie) ; avec batterie 1,5/2Ah ≈2 kg, avec batterie 3/4/5Ah ≈2,2 kg selon la même fiche technique (manuel officiel scanné sur ManualsLib)."
+  },
+  "DCD999": {
+   "kg": 1.61,
+   "sources": [
+    {
+     "url": "https://www.svh24.de/dewalt-akku-kombopack-18v-5-ah/1-7-ah-dcd999-dcf850-1141693",
+     "kg": 1.6
+    },
+    {
+     "url": "https://www.toolboxbuzz.com/cordless-tools/drilldriver/dewalt-dcd999b-hammer-drill-and-driver/",
+     "kg": 1.61
+    },
+    {
+     "url": "https://www.free-instruction-manuals.com/pdf/pa_3575557.pdf",
+     "kg": 1.61
+    }
+   ],
+   "note": "Poids nu (sans batterie), DCD999B/N. Trois sites distincts convergent (1,60-1,61 kg) : revendeur DE, revue technique US (3,54 lb), et manuel d'instructions officiel."
   }
  },
  "nonResolues": {
   "CPROF367": {
    "motif": "statut introuvable",
    "sources": [],
-   "note": "Kit composite (D21583K + D215831 + DT9762 + DT9765). 3 recherches ciblées sur \"CPROF367\" n'ont rendu aucun résultat DeWALT pertinent (résultats hors-sujet : logiciel de profiling, compte Instagram, et"
+   "note": "3 recherches ciblées : le moteur renvoie systématiquement DCS367 (scie sabre, référence différente) au lieu du kit CPROF367 (D21583K + D215831 + DT9762 + DT9765, perçage diamant sur colonne). Aucune f"
   },
   "D215804": {
    "motif": "statut introuvable",
    "sources": [],
-   "note": "Accessoire d'extraction de poussière pour perceuses diamant D21580K/D21582K (confirmé par la fiche dewalt.store russe et le manuel D21580, sans poids). 3 recherches n'ont fait apparaître aucun poids e"
+   "note": "3 recherches ciblées : fiches produit correctement identifiées (dewalt.store, manuel D21580 sur manualslib) confirmant qu'il s'agit du dispositif d'aspiration de poussière pour perceuses diamant D2158"
   },
   "D25303": {
    "motif": "statut introuvable",
@@ -1611,14 +2097,9 @@
    "note": "Aucune recherche possible cette session : WebSearch a signalé budget épuisé (200/200) dès la 1ère requête, et WebFetch a été bloqué par le proxy réseau (EGRESS_BLOCKED) pour TOUS les domaines testés, "
   },
   "D279017": {
-   "motif": "statut non-resolue",
-   "sources": [
-    {
-     "url": "https://www.ebay.com/p/1309993169",
-     "kg": 0.5
-    }
-   ],
-   "note": "Lot de 5 sacs à poussière. Une seule source fiable trouvée (annonce eBay, 0,5 kg) après 3 recherches ; ambigu (poids total du lot de 5 ou poids unitaire). FFX et Toolstation référencent le produit mai"
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "3 recherches ciblées : fiches produit correctement identifiées (ffx.co.uk, toolsandpartsdirect.co.uk, misterworker.com, eBay — pack de 5 sacs à poussière pour D27900/D27901/D27902) mais aucun extrait "
   },
   "D28492": {
    "motif": "statut introuvable",
@@ -1646,9 +2127,14 @@
    "note": "Même blocage total d'accès web (WebSearch épuisé, WebFetch EGRESS_BLOCKED sur tous les domaines testés). Aucune source consultée."
   },
   "DC528": {
-   "motif": "statut introuvable",
-   "sources": [],
-   "note": "Lampe fluorescente sur batterie DC528N (pas un outil électroportatif standard). 3 recherches n'ont rendu que le poids d'une batterie de rechange seule (0,513 kg, hors sujet), une fourchette non fiable"
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.amazon.com/DEWALT-DC528-14-4-Volt-Cordless-Fluorescent/dp/B000BAURZ2",
+     "kg": 0.45
+    }
+   ],
+   "note": "Une seule valeur traçable trouvée malgré 3 recherches (dont eBay et BatteriesPlus qui confirment le produit mais sans chiffre) : 1,00 lb (~0,45 kg), vraisemblablement issue de la fiche Amazon. Sous le"
   },
   "DCB090": {
    "motif": "statut non-resolue",
@@ -1670,9 +2156,13 @@
     {
      "url": "https://www.manualslib.com/manual/2835983/Dewalt-Xr-Dcb094k.html?page=6",
      "kg": 0.11
+    },
+    {
+     "url": "https://www.prestonhardware.com/product/dewalt-dcb094k-20v-max-usb-c-charging-system/",
+     "kg": 0.45
     }
    ],
-   "note": "Kit de charge USB-C DCB094K-QW. Valeur 0,11 kg citée explicitement par la fiche technique ManualsLib (manuel officiel DCB094K) et reprise deux fois par la synthèse de recherche, mais sans confirmation"
+   "note": "Discordance forte (écart ~76%, > 60%) entre 0,11 kg (fiche technique officielle ManualsLib, probablement l'adaptateur USB-C seul) et 0,45 kg / 0,99 lb (répété sur plusieurs fiches revendeur, probablem"
   },
   "DCB104": {
    "motif": "statut non-resolue",
@@ -1712,14 +2202,18 @@
    "note": "Produit spécial (pack revendeur de 12 chargeurs DCB1104). WebSearch n'a jamais rendu une valeur réellement lue sur une fiche produit : à chaque tentative (manomano.fr, bricocash.fr, todotaladros.com),"
   },
   "DCB1104-6": {
-   "motif": "statut introuvable",
+   "motif": "statut non-resolue",
    "sources": [
     {
-     "url": "https://www.amazon.com/DEWALT-DeWalt-DCB1104-Battery-Charger/dp/B0CBSDPL2S",
+     "url": "https://www.manualslib.com/manual/3009128/Dewalt-Xr-Dcb1104.html",
      "kg": 0.5
+    },
+    {
+     "url": "https://www.powertoolworld.co.uk/dewalt-dcb1104-gb-4a-12v-18v-multi-volt-battery-charger-240v",
+     "kg": 0.85
     }
    ],
-   "note": "Poids du chargeur DCB1104 à l'unité recherché (pas le pack de 6, conformément à la règle 'batterie/chargeur = poids propre'). 3 recherches faites (générale, dewalt.com, manualslib.com) : aucune fiche "
+   "note": "Poids demandé À L'UNITÉ (un seul chargeur DCB1104, jamais le pack de 6). Deux sources concrètes mais seulement 2 sites distincts (budget épuisé) : 0,5 kg selon le manuel officiel DeWalt sur ManualsLib"
   },
   "DCB1106": {
    "motif": "statut introuvable",
@@ -1737,41 +2231,28 @@
     {
      "url": "https://www.powertoolworld.co.uk/dewalt-dcb112-slim-battery-charger-for-10-8v-14-4v-and-18v-xr-li-ion-batteries",
      "kg": 0.49
-    },
-    {
-     "url": "https://marsonequipment.com/products/dewalt-dcb112-12v-20v-max-charger",
-     "kg": 0.36
     }
    ],
-   "note": "Poids du chargeur DCB112 seul (le kit D2 inclut aussi 2 batteries 18V 2.0Ah, hors périmètre). 2 sources seulement, avec un écart : 0,49 kg vs 0,36 kg (écart ~26%, dans la limite des 60% mais seulement"
+   "note": "Une seule source solidement rattachée à une URL précise : 0,49 kg (Power Tool World, avec dimensions cohérentes 120x90x180mm). Une deuxième valeur (0,36 kg / 12,7 oz) circule dans les résumés agrégés "
   },
   "DCB115": {
    "motif": "statut non-resolue",
    "sources": [
     {
-     "url": "https://www.dewalt.co.uk/products/dcb115d2-qw--xr-multi-voltage-4a-charger",
+     "url": "https://www.powertoolworld.co.uk/dewalt-dcb115-compact-battery-charger-for-10-8v-14-4v-and-18v-xr-li-ion-batteries",
      "kg": 0.5
     },
     {
-     "url": "https://www.northerntool.com/products/dewalt-12-20v-max-lithium-ion-battery-charger-model-dcb115-53169",
-     "kg": 1
+     "url": "https://www.manualslib.com/manual/1878935/Dewalt-Dcb115.html?page=92",
+     "kg": 0.5
     }
    ],
-   "note": "Poids du chargeur DCB115 seul (le kit E2-QW inclut 2 batteries Powerstack, hors périmètre). 2 sources seulement, désaccord notable : 0,5 kg (fiche dewalt.co.uk du chargeur DCB115D2-QW, avec dimensions"
+   "note": "Deux sources concordantes et solidement rattachées (fiche technique officielle ManualsLib ET Power Tool World, toutes deux 0,5 kg) mais seulement 2 sites distincts — sous le seuil formel de 3 sources "
   },
   "DCB116": {
-   "motif": "statut non-resolue",
-   "sources": [
-    {
-     "url": "https://www.toolnation.com/dewalt-dcb116-battery-charger-108v-18v.html",
-     "kg": 0.7
-    },
-    {
-     "url": "https://www.datapowertools.co.uk/Products/DeWALT_Chargers/DEWDCB116",
-     "kg": 1
-    }
-   ],
-   "note": "2 sources seulement, valeurs proches mais divergentes : 0,7 kg (sans batterie) vs 1,0 kg. Écart ~30%, dans la limite des 60% mais seulement 2 sites distincts. Une 3e valeur (1,08 kg, service.dewalt.co"
+   "motif": "statut introuvable",
+   "sources": [],
+   "note": "3 recherches ciblées : produit correctement identifié sur plusieurs sites (Power Tool World, DataPowerTools, ToolStore UK, FFX) mais aucun extrait retourné ne cite le poids. Des valeurs (0,7 kg / 1 kg"
   },
   "DCB117": {
    "motif": "statut non-resolue",
@@ -1800,7 +2281,7 @@
   "DCB1404": {
    "motif": "statut introuvable",
    "sources": [],
-   "note": "3 recherches faites (générale, toolnut/toolup ciblé, dewalt.com/toolnut/toolup). Aucune fiche (DeWALT officiel, Toolup, Tool Nut, Acme) n'affiche le poids dans les extraits — confirmé explicitement pa"
+   "note": "Chargeur QUADPORT 4A confirmé exister (fiches dewalt.com, homedepot.com, acmetools.com) mais aucun poids en kg trouvé dans les extraits après 2 recherches ciblées distinctes."
   },
   "DCB182": {
    "motif": "statut bloque",
@@ -1835,20 +2316,20 @@
    "motif": "statut non-resolue",
    "sources": [
     {
-     "url": "https://www.dewalt.com/product/dcb203/20v-max-2ah-battery",
+     "url": "https://www.amazon.com/DEWALT-Battery-Compact-2-0Ah-DCB203/dp/B00BYKVMES",
      "kg": 0.41
     },
     {
-     "url": "https://www.amazon.com/DEWALT-DCB203-2-Compact-Lithium-Battery/dp/B00BYKVMSY",
-     "kg": 0.35
+     "url": "https://www.homedepot.com/p/DEWALT-20V-MAX-Compact-Lithium-Ion-2-0Ah-Battery-Pack-2-Pack-DCB203-2/204222440",
+     "kg": 0.39
     }
    ],
-   "note": "Deux valeurs distinctes relevées (0,41 kg soit 0,91 lb sur dewalt.com ; ~0,35 kg soit 0,77 lb sur un autre revendeur), écart dans la fourchette acceptable mais seulement 2 sources distinctes exploitab"
+   "note": "Deux conversions livre→kg discordantes et fragiles : une fiche Amazon donne 0,910 lb (≈0,41 kg) pour l'unité seule ; une dérivation à partir du pack de 2 (0,87 lb affiché) donne un calcul incohérent ("
   },
   "DCB283": {
    "motif": "statut introuvable",
    "sources": [],
-   "note": "4 recherches ciblées (DCB283 seul, DCB283BC, Bluetooth Tool Connect 2Ah, Powerstack) : aucune fiche fabricant ni revendeur n'affiche de poids pour cette référence. Produit peu documenté en ligne côté "
+   "note": "La référence exacte « DCB283 » n'apparaît dans aucun résultat marchand après 2 recherches ; seule « DCB283B » (Tool Connect Bluetooth 18V 2Ah, même famille produit) est documentée (mydewalt.dewalt.com"
   },
   "DCB546": {
    "motif": "statut bloque",
@@ -1877,11 +2358,15 @@
      "kg": 1.2
     },
     {
-     "url": "https://www.ecatoolfast.com/dewalt-dcb548-xr-flexvolt-54v-18v-12-0ah-battery-li-ion-dcb548.html",
+     "url": "https://www.powertoolworld.co.uk/dewalt-dcb548-xr-flexvolt-convertible-18v-54v-lithium-ion-12-0ah-battery",
+     "kg": 1.46
+    },
+    {
+     "url": "https://www.dewalt.co.uk/product/dcb548-xj/54v-xr-flexvolt-12ah-battery",
      "kg": 1.1
     }
    ],
-   "note": "Valeur la plus citée : 1,2 kg. Une valeur de 1,46 kg apparaît aussi mais est identique au chiffre trouvé pour le DCB547 (capacité différente, 9Ah vs 12Ah) — soupçon d'un poids générique/colis recopié "
+   "note": "PIÈGE RÉFÉRENCE VOISINE suspecté : les valeurs relevées (1,1 à 1,46 kg) chevauchent exactement celles trouvées pour DCB547 (9 Ah) — or DCB548 est le modèle 12 Ah, qui devrait peser PLUS que le 9 Ah, p"
   },
   "DCB549": {
    "motif": "statut bloque",
@@ -1988,15 +2473,19 @@
    "motif": "statut non-resolue",
    "sources": [
     {
-     "url": "https://www.protoolreviews.com/tools/power/cordless/drills-drivers-cordless/dewalt-flexvolt-60v-max-vsr-stud-and-joist-drill/24764/",
-     "kg": 4.85
+     "url": "https://homefixated.com/dewalt-flexvolt-stud-joist-drill-dcd460/",
+     "kg": 1.63
     },
     {
-     "url": "https://www.walmart.com/ip/DEWALT-DCD460T2-Joist-Drill-Kit-60V-Flexvolt-Lithium-Ion-Battery/335438478",
-     "kg": 5.9
+     "url": "https://leestools.com/dewalt-dcd460b-60v-stud-joist-drill.html",
+     "kg": 5.85
+    },
+    {
+     "url": "https://www.amazon.com/DEWALT-DCD460B-FLEXVOLT-Joist-Drill/dp/B01H9BLB4Q",
+     "kg": 6.73
     }
    ],
-   "note": "DCD460T2 = kit avec 2 batteries FLEXVOLT 6Ah, PAS une machine nue. Seul le poids de la perceuse seule sans batterie (4,85 kg) et perceuse + 1 batterie (~5,9 kg) ont été confirmés ; le poids TOTAL du k"
+   "note": "Forte discordance : une source donne 1.63 kg (3.6 lb, peu plausible pour une perceuse d'angle 60V lourde), deux autres 5.85 kg (12.9 lb) et 6.73 kg (14.85 lb) qui se rejoignent entre elles mais pas av"
   },
   "DCD470": {
    "motif": "statut bloque",
@@ -2102,9 +2591,22 @@
    "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche exécutée, rien constaté."
   },
   "DCD795": {
-   "motif": "statut bloque",
-   "sources": [],
-   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche exécutée, rien constaté."
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.powertoolworld.co.uk/dewalt-dcd795n-18v-xr-brushless-combi-drill-body-only",
+     "kg": 1.9
+    },
+    {
+     "url": "https://shop.screwfix.eu/en-se/products/dewalt-dcd795d2-qw-18v-2-x-2-0ah-li-ion-xr-brushless-cordless-combi-drill-143pf",
+     "kg": 1.7
+    },
+    {
+     "url": "https://www.tradesetter.com/products/dewalt-hammer-drill-18v-xr-li-ion-brushless-compact-hammer-drill-driver-dcd795d2",
+     "kg": 1.62
+    }
+   ],
+   "note": "Aucune source trouvée ne donne le poids NU (corps seul) : toutes donnent un poids AVEC batterie (1,7-1,9 kg selon capacité) ou en kit (1,62 kg) — bases de mesure différentes, pas de valeur nue fiable."
   },
   "DCD796": {
    "motif": "statut bloque",
@@ -2137,9 +2639,9 @@
    "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche exécutée, rien constaté."
   },
   "DCD85": {
-   "motif": "statut bloque",
+   "motif": "statut introuvable",
    "sources": [],
-   "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche exécutée, rien constaté."
+   "note": "Référence exacte 'DCD85MM2T' introuvable au catalogue DeWALT ni chez les revendeurs après recherches ciblées. Modèles proches existants (DCD85MP1T, DCD85MP2T, DCD85ME2GT, DCD85M) mais aucune correspon"
   },
   "DCD86": {
    "motif": "statut bloque",
@@ -2147,9 +2649,14 @@
    "note": "Quota WebSearch de la session épuisé (200/200) — aucune recherche exécutée, rien constaté."
   },
   "DCD990": {
-   "motif": "statut bloque",
-   "sources": [],
-   "note": "WebSearch indisponible : budget de session épuisé (200/200 avant la première recherche pour ce lot). Aucune recherche effectuée — statut technique, pas un verdict."
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.amazon.com/DEWALT-DCD990M2-Lithium-Brushless-Premium/dp/B00FWLC07I",
+     "kg": 2.09
+    }
+   ],
+   "note": "Une seule valeur trouvée (~4,6 lb / 2,09 kg), agrégée par le moteur de recherche à partir de plusieurs fiches (Amazon/Lowe's) sans URL unique clairement identifiable ; non recoupée par un 2e site dist"
   },
   "DCD991": {
    "motif": "statut bloque",
@@ -2167,34 +2674,39 @@
    "note": "WebSearch indisponible : budget de session épuisé (200/200) avant de pouvoir lancer la recherche pour cette référence."
   },
   "DCDW101": {
-   "motif": "statut bloque",
-   "sources": [],
-   "note": "WebSearch indisponible : budget de session épuisé (200/200) avant de pouvoir lancer la recherche pour cette référence."
+   "motif": "statut non-resolue",
+   "sources": [
+    {
+     "url": "https://www.misterworker.com/en/dewalt/diamond-core-bit-for-wet-drilling-dcdw101-xj/115198.html",
+     "kg": 1.5
+    }
+   ],
+   "note": "Une seule source exploitable (Mister Worker), citant 1,5 kg pour un diamètre de coupe 12 mm — mais la même fiche mélange des caractéristiques de batterie/couple/vitesse (18V, 60 Nm, 1200 tr/min) qui n"
   },
   "DCDW102": {
-   "motif": "statut bloque",
+   "motif": "statut introuvable",
    "sources": [],
-   "note": "WebSearch indisponible : budget de session épuisé (200/200) avant de pouvoir lancer la recherche pour cette référence."
+   "note": "Identifié comme couronne de carottage diamantée eau (61 mm) chez DeWALT, mais aucune valeur de poids trouvée sur dewalt.com ni ailleurs malgré 2 recherches ciblées."
   },
   "DCDW103": {
-   "motif": "statut bloque",
+   "motif": "statut introuvable",
    "sources": [],
-   "note": "WebSearch indisponible : budget de session épuisé (200/200) avant de pouvoir lancer la recherche pour cette référence."
+   "note": "Identifié comme couronne de carottage diamantée eau (82 mm) chez DeWALT, mais aucune valeur de poids trouvée malgré 2 recherches ciblées (toolstop, power tool world sans résultat)."
   },
   "DCDW104": {
-   "motif": "statut bloque",
+   "motif": "statut introuvable",
    "sources": [],
-   "note": "WebSearch indisponible : budget de session épuisé (200/200) avant de pouvoir lancer la recherche pour cette référence."
+   "note": "Identifié comme couronne de carottage diamantée eau (102 mm) chez DeWALT (catalogue cee.dewalt.global), mais aucune valeur de poids trouvée malgré 2 recherches ciblées."
   },
   "DCDW105": {
-   "motif": "statut bloque",
+   "motif": "statut introuvable",
    "sources": [],
-   "note": "WebSearch indisponible : budget de session épuisé (200/200) avant de pouvoir lancer la recherche pour cette référence."
+   "note": "Identifié comme couronne de carottage diamantée eau (117 mm) chez DeWALT, mais aucune valeur de poids trouvée malgré recherche ciblée."
   },
   "DCDW106": {
-   "motif": "statut bloque",
+   "motif": "statut introuvable",
    "sources": [],
-   "note": "WebSearch indisponible : budget de session épuisé (200/200) avant de pouvoir lancer la recherche pour cette référence."
+   "note": "Identifié comme couronne de carottage diamantée eau 122 mm chez DeWALT, mais aucune valeur de poids trouvée malgré 2 recherches ciblées (contorion/klium/svh24 sans résultat)."
   },
   "DCDW107": {
    "motif": "statut bloque",
