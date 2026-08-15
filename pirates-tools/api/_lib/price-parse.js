@@ -2121,8 +2121,28 @@ function apparierParRefRecollee(annonces, fiches, marque) {
      batteries — et un contenu inventé pose un prix de kit sur une machine
      nue. Ordre de l'user, 10/08/2026 : chaque marque, sa table. */
   function suffixeDitLeContenu(titre, sku, marque) {
-    if (!/^makita$/i.test(String(marque || '').replace(/[\s-]/g, ''))) return false;
-    var l = nomen.lireSuffixeMakita(String(sku || '').toUpperCase());
+    var mq = String(marque || '').replace(/[\s-]/g, '');
+    /* ⛔⛔ CHAQUE MARQUE OUVRE SA TABLE, ET SEULEMENT LA SIENNE (M-28).
+       Branche DEWALT ajoutée le 15/08/2026, mesurée sur SON balayage :
+       la tuile « DeWalt DCG 406 P2LRT Meuleuse d'angle… » (345,31 €)
+       sortait en `unknown` avec le sku tronqué « P2LRT » — la réf éclatée
+       recollée DCG406P2LRT existe au catalogue depuis D-165, le titre
+       ÉNONCE 2×5,0 Ah + TSTAK, et le suffixe P2LRT dit EXACTEMENT ça
+       (`lireSuffixeDewalt` : nbBatteries 2, ah 5, coffret TSTAK). Sans
+       cette branche, la fiche restait gelée sur un coût périmé.
+       ⚠️ J4 : la règle d'attribution ne se relâche pas — le titre doit
+       ÉNONCER le contenu ET concorder avec le suffixe, sinon écarté. */
+    if (/^dewalt$/i.test(mq)) {
+      var ld = /^dewalt$/i.test(String(marque || '').replace(/[\s-]/g, '')) ? nomen.lireSuffixeDewalt(String(sku || '').toUpperCase()) : null;
+      if (!ld || typeof ld.nbBatteries !== 'number' || !(ld.nbBatteries > 0)) return false;
+      var ditD = contenuAnnonce(titre);
+      if (!ditD) return false;
+      if (ditD.nb !== ld.nbBatteries) return false;
+      if (ditD.ah != null && ld.ah && Math.abs(ditD.ah - ld.ah) > 0.05) return false;
+      return true;
+    }
+    if (!/^makita$/i.test(mq)) return false;
+    var l = /^makita$/i.test(String(marque || '').replace(/[\s-]/g, '')) ? nomen.lireSuffixeMakita(String(sku || '').toUpperCase()) : null;
     if (!l || !l.config || typeof l.config.nbBatteries !== 'number') return false;
     var dit = contenuAnnonce(titre);
     if (!dit) return false;

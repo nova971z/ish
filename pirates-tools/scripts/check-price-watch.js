@@ -6332,6 +6332,58 @@ module.exports = async function () {
       + 'tuiles non ouvertes redeviennent muettes dans les zips du balayage');
   })();
 
+  /* ── LA RÉF ÉCLATÉE SE RECOLLE AUSSI QUAND UN FAUX SKU A ÉTÉ EXTRAIT ─────
+     Mesuré le 15/08/2026 (balayage pages 135-201) : « DeWalt DCG 406 P2LRT
+     Meuleuse d'angle… » à 345,31 € sortait en `unknown` avec `sku: "P2LRT"`
+     — le recollage ne recevait que les sans-réf, jamais les sku orphelins,
+     et la branche « le suffixe dit le contenu » n'existait que pour l'autre
+     marque. La fiche DCG406P2LRT restait gelée sur un coût périmé. */
+  (function () {
+    var fiches = [{ sku: 'DCG406P2LRT', brand: 'DeWALT' }];
+    /* Titre RÉEL du balayage (zip pages 135-201, admin-181, mot pour mot). */
+    var r1 = pp.apparierParRefRecollee([{ titre: 'DeWalt DCG 406 P2LRT', prix: 345.31 }],
+      fiches, 'DEWALT');
+    ok(r1.items.length === 1 && r1.items[0].sku === 'DCG406P2LRT'
+      && r1.items[0].price === 345.31,
+      '⛔ la réf éclatée « DCG 406 P2LRT » (titre réel du balayage) doit se '
+      + 'recoller sur la fiche DCG406P2LRT — le catalogue tranche. Mesuré : '
+      + JSON.stringify(r1.items));
+    /* Témoin de la branche DEWALT « le suffixe dit le contenu » : un titre qui
+       ÉNONCE 2×5,0 Ah + TSTAK concorde avec P2LRT (table DEWALT) → rapproché
+       avec `contenuConcordant`. (Forme réelle vue en sansRef : « Dcg406P2Lrt
+       Lame 125Mm 2X5.0Ah Tstak » — ici en capitales pour le chemin éclaté.) */
+    var r4 = pp.apparierParRefRecollee([{ titre: 'DeWalt DCG 406 P2LRT 2x5.0Ah Tstak',
+      prix: 345.31 }], fiches, 'DEWALT');
+    ok(r4.items.length === 1 && r4.items[0].contenuConcordant === true,
+      '⛔ un titre qui ÉNONCE 2×5,0 Ah + TSTAK doit se recoller sur P2LRT via la '
+      + 'branche DEWALT de « le suffixe dit le contenu » — mesuré : '
+      + JSON.stringify(r4.items));
+    /* Contre-témoin (CONSTRUIT, déclaré) : contenu DISCORDANT — 1×4,0 Ah
+       annoncé, le suffixe en dit 2×5,0 → jamais rapproché. Garde d'argent. */
+    var r2 = pp.apparierParRefRecollee([{ titre:
+      'DeWalt DCG 406 P2LRT Meuleuse d\'angle 18 V + 1x batterie 4,0 Ah', prix: 300 }],
+      fiches, 'DEWALT');
+    ok(r2.items.length === 0,
+      '⛔ un titre qui annonce 1×4,0 Ah ne doit JAMAIS se recoller sur un suffixe '
+      + 'qui en dit 2×5,0 — la concordance de contenu est la garde d\'argent');
+    /* Contre-témoin M-28 : un titre qui ANNONCE un contenu chez une AUTRE marque
+       n'ouvre pas la table DEWALT — sans table, pas de concordance, pas de
+       rapprochement. (Le chemin sans contenu annoncé, lui, ne lit aucune table :
+       l'égalité catalogue suffit, la marque de la fiche faisant foi.) */
+    var r3 = pp.apparierParRefRecollee([{ titre: 'DeWalt DCG 406 P2LRT 2x5.0Ah Tstak',
+      prix: 345.31 }], [{ sku: 'DCG406P2LRT', brand: 'BOSCH' }], 'BOSCH');
+    ok(r3.items.length === 0,
+      '⛔ M-28 : la table de suffixes DEWALT ne doit pas s\'ouvrir pour une autre '
+      + 'marque — un contenu inventé poserait un prix de kit sur une machine nue');
+    /* ③ le branchement : les annonces au sku orphelin passent par le recollage
+       au point réel (expression effective, M-29). */
+    var srcAdm2 = require('fs').readFileSync(
+      require('path').join(__dirname, '..', 'api', 'admin.js'), 'utf8');
+    ok(/const recolleNu = priceParse\.apparierParRefRecollee\(enveloppes, products, brand\);/.test(srcAdm2),
+      '⛔ api/admin.js ne passe plus les annonces au sku orphelin par le recollage '
+      + 'de réf éclatée : « DCG 406 P2LRT » redeviendrait un `unknown` muet');
+  })();
+
   return errors;
 };
 

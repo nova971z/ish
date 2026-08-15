@@ -4353,12 +4353,41 @@ async function handlePriceWatch(req, res, admin, db) {
        TVA, aucun octroi de mer — le territoire vient du code postal. */
     const sansFiche = parsed.filter((it) => !(bySku[it.sku]
       || bySku[priceParse.racineRef(it.sku)] || bySku[pwCleModele(it, brand)]));
-    const parConfigNu = priceParse.apparierParConfiguration(sansFiche, products, brand);
+    /* ⛔⛔ LE SKU EXTRAIT PEUT ÊTRE UN TRONÇON — LE TITRE, LUI, PORTE LA RÉF
+       ENTIÈRE. Mesuré le 15/08/2026 sur SON balayage (pages 135-201) : la
+       tuile « DeWalt DCG 406 P2LRT Meuleuse d'angle… » à 345,31 € sortait en
+       `unknown` avec `sku: "P2LRT"` — l'extraction avait retenu le seul mot
+       d'un seul tenant, et la réf éclatée « DCG 406 P2LRT » n'était jamais
+       recollée : `apparierParRefRecollee` ne recevait QUE les sans-réf,
+       jamais les annonces au sku orphelin. La fiche DCG406P2LRT (D-165)
+       restait donc gelée sur un coût périmé pendant que sa vraie tuile
+       passait à chaque balayage.
+       ⛔ Même règle, même fonction, zéro devinette : le recollage n'aboutit
+       que si la réf recollée EST une fiche du catalogue, et un titre qui
+       annonce un contenu doit CONCORDER avec le suffixe (table de la marque).
+       Il passe AVANT la configuration — l'exact d'abord, comme toute la
+       chaîne. ⚠️ J4 : le prix reste celui de la tuile ; seule la fiche visée
+       change, et c'est précisément l'erreur qu'on répare. J3 : des titres
+       publics d'outils. J5 : aucune fiscalité ici. */
+    const enveloppes = sansFiche.map((it) => ({
+      titre: String(it.titre || it.name || ''), prix: it.price, _orig: it }));
+    const recolleNu = priceParse.apparierParRefRecollee(enveloppes, products, brand);
+    if (recolleNu.items.length) {
+      const restees = new Set((recolleNu.restants || []).map((e) => e._orig));
+      const consommees = new Set(sansFiche.filter((it) => !restees.has(it)));
+      for (let i = parsed.length - 1; i >= 0; i--) {
+        if (consommees.has(parsed[i])) parsed.splice(i, 1);
+      }
+      recolleNu.items.forEach((it) => parsed.push(it));
+    }
+    const resteSansFiche = parsed.filter((it) => !(bySku[it.sku]
+      || bySku[priceParse.racineRef(it.sku)] || bySku[pwCleModele(it, brand)]));
+    const parConfigNu = priceParse.apparierParConfiguration(resteSansFiche, products, brand);
     if (parConfigNu.items.length) {
       /* Ce qui a été rapproché DISPARAÎT de `parsed` sous sa forme d'origine :
          laissé là, il repartirait dans `unknown` et la réponse dirait à la fois
          « reconnu » et « inconnu » pour la même annonce. */
-      const remplacees = new Set(sansFiche);
+      const remplacees = new Set(resteSansFiche);
       (parConfigNu.restants || []).forEach((e) => remplacees.delete(e));
       for (let i = parsed.length - 1; i >= 0; i--) {
         if (remplacees.has(parsed[i])) parsed.splice(i, 1);
