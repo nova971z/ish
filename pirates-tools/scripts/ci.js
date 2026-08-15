@@ -212,6 +212,7 @@ var reqPersist = safeRequire('./check-fiches-persistees', 'check-fiches-persiste
 var reqVisuel  = safeRequire('./check-visuel-produit', 'check-visuel-produit');
 var reqPrixCmp = safeRequire('./check-prix-compare', 'check-prix-compare');
 var reqTitreF  = safeRequire('./check-titre-fiche', 'check-titre-fiche');
+var reqInstFr  = safeRequire('./check-instance-froide', 'check-instance-froide');
 var reqPoidsExp = safeRequire('./check-poids-expedie', 'check-poids-expedie');
 var modJur      = safeRequire('./juridique',         'check-juridique');
 var reqJur      = modJur && modJur.controle ? modJur.controle : null;
@@ -366,6 +367,7 @@ var reqReconc   = safeRequire('./check-reconciliation', 'check-reconciliation');
   await runOne(reqVisuel, 'check-visuel-produit');
   await runOne(reqPrixCmp, 'check-prix-compare');
   await runOne(reqTitreF, 'check-titre-fiche');
+  await runOne(reqInstFr, 'check-instance-froide');
   await runOne(reqPoidsExp, 'check-poids-expedie');
   await runOne(reqJur,      'check-juridique');
   await runOne(reqSortie,   'check-sortie');

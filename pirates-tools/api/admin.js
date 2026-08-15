@@ -4574,7 +4574,14 @@ async function handlePriceWatch(req, res, admin, db) {
             .map((k) => durables[k])
             .filter((e) => !deja[String(e.sku).toUpperCase()])
             .map((e) => ({ sku: e.sku, price: e.price, titre: e.titre || null,
-              name: e.titre || (brand + ' ' + e.sku) }));
+              name: e.titre || (brand + ' ' + e.sku),
+              /* ⛔ SANS CE MARQUEUR, LE REJEU NE SERT À RIEN : sur une page non
+                 finale (rejeu par TTL), l'annonce rejouée retomberait dans la
+                 branche « différer » et repartirait dans la file — écrite,
+                 relue, re-différée, pour toujours. Trouvé en CONSTRUISANT la
+                 porte instance-froide, avant qu'elle tourne : le scénario
+                 « page 2 doit APPLIQUER » était inécrivable sans lui. */
+              rejoue: true }));
           if (reprisDurables.length) aTraiter = aTraiter.concat(reprisDurables);
           /* Rejouées = retirées : un rejeu qui laisse la file pleine rejouerait
              les mêmes hausses à chaque page, écritures en boucle. */
@@ -4861,7 +4868,7 @@ async function handlePriceWatch(req, res, admin, db) {
            pas, et le prix servi reste exact et complet. J3 : des références
            d'outils, aucune donnée personnelle. J5 : ni TVA ni octroi de mer,
            le territoire vient du code postal. */
-        if (scanMode && cur != null && newPrice > cur && !rafaleFinieCettePage) {
+        if (scanMode && cur != null && newPrice > cur && !rafaleFinieCettePage && !item.rejoue) {
           rec.reason = 'hausse differee : le balayage n est pas fini, une tuile moins '
             + 'chere du meme article peut encore arriver (mesure le 11/08/2026 : 11 fiches '
             + 'sur 15 affichees trop cher pendant 13 a 44 pages, jusqu a +312,59 EUR). '
