@@ -5110,6 +5110,16 @@ async function handlePriceWatch(req, res, admin, db) {
       /* La même ligne locale qu'à sec : trois valeurs, aucune mémoire. C'est
          elle qui se totalise sur le fichier des 67 réponses, quand le cumul
          d'instance, lui, peut avoir été tronqué par une instance neuve. */
+      /* ⛔ LE BALAYAGE RÉEL REND SES PERTES, COMME LE MODE À SEC. Mesuré le
+         15/08 après le comptage des doublons : 26 tuiles encore « comptées,
+         jamais lues » (p4 : 8, p5 : 8…) et `perdus` ABSENT de la réponse
+         réelle — le registre existait dans le parseur, seule la réponse à
+         sec le rendait. Un registre de pertes qu'on ne peut pas lire ne
+         mesure rien. Même borne que le mode à sec : 25 entrées.
+         ⚠️ J3 : des libellés publics d'outils, aucune donnée personnelle ;
+         J4 : aucun prix calculé ni annoncé, un diagnostic ; J5 : aucune
+         fiscalité. */
+      perdus: (auto.perdus || []).slice(0, 25),
       page: { empreinte: priceParse.empreintePage(text),
         tuiles: tuilesPage,
         lues: luesReelles,

@@ -6301,6 +6301,14 @@ module.exports = async function () {
       + 'compte de tuiles perdues redevient faux dans la réponse');
     ok(/lues: parsed\.length \+ \(auto\.sansRef \|\| \[\]\)\.length \+ \(auto\.doublons \|\| 0\)/.test(srcAdm),
       '⛔ le mode à sec n\'additionne plus `auto.doublons` dans `lues`');
+    /* ⛔ Et le registre des pertes doit être RENDU par les DEUX chemins.
+       Mesuré le 15/08 : le parseur notait les blocs perdus, mais seule la
+       réponse À SEC les émettait — sur le balayage réel, 26 tuiles muettes
+       et `perdus` absent des 66 pages du zip. Un registre invisible ne
+       mesure rien. */
+    ok((srcAdm.match(/perdus: \(auto\.perdus \|\| \[\]\)\.slice\(0, 25\),/g) || []).length >= 2,
+      '⛔ `perdus` n\'est plus émis par les deux réponses (réelle + à sec) : les '
+      + 'tuiles non ouvertes redeviennent muettes dans les zips du balayage');
   })();
 
   return errors;
