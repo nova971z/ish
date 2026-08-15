@@ -155,3 +155,25 @@ sabotage prouvé rouge. Ordre : argent d'abord (F1), faux positifs ensuite
 *Processus rejoué deux fois : passe 1 = 542 lignes une à une (sections
 appliquées, refusées, différées, refus d'id) ; passe 2 = relecture par fiche
 avec mesures croisées au catalogue. Méthode gravée ici même.*
+
+## Balayage n°3 (pages 2–67, parseur 29c77db8) — 267 entrées relues une à une
+
+**✅ Les correctifs 1–7 tournent en production, mesuré :**
+- 1 122 inchangés (stabilisation), 35 appliquées, 208 refus motivés ;
+- les tuiles NT-avec-batterie sont REFUSÉES (DCF620NT, DCH273NT, DCD800NT…) ;
+- « + D25303DH » et « + 2x Toolbrothers » refusés « joint un autre produit » ;
+- « DCS 369 E1 » refusé « code de kit accolé » (référence éclatée comprise) ;
+- DCK368P3T « 27 x 32 x 15 » APPLIQUÉ (dimensions ≠ lot) ;
+- DCF520 « 1/4" & 3/8" » APPLIQUÉ (le « & » lexical passe) ;
+- DCS334NT appliqué à 197,55 : l'« Éclairage LED » n'est plus un bundle.
+
+**⛔ DÉFAUT 10 — les PACKS MAISON refusés par la branche « nue » (41 fiches).**
+DWK200…DWK900T, PPACK0001/0002, DCB283BC : leurs titres annoncent des
+batteries parce que la fiche EN CONTIENT. Refus à tort = suivi de prix mort
+pour tous les packs du site. CORRIGÉ même session : ficheKit couvre
+DWK/PPACK/DCB…BC, neutralise sansBatt et suffixeIllisible ; 3 témoins
+ajoutés (36 au total), sabotage DWK rouge.
+
+**Restes connus, inchangés :** DT50002-QZ bloqué à la source mais fiche
+servie 12 311,51 € (D-57) · d125/8 (« / » dans l'id) · sku doublé
+DCMPH566N-XJ-XJ (décision user) · signalement baisses fortes (D-015, option).

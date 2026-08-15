@@ -883,8 +883,16 @@ function titreContreditFiche(titre, skuFiche, marque) {
   var lu = (marqueEstDewalt && /^dewalt$/i.test(String(marque || '').replace(/[\s-]/g, '')))
     ? nomen.lireSuffixeDewalt(skuU.replace(/(XJ|QW|XE|GB|LX|QS)$/,'')) : null;
   var sansBatt = !!(lu && lu.suffixe && lu.nbBatteries === 0);
-  var ficheKit = !!(lu && lu.nbBatteries > 0) || /^DCK/.test(skuU);
-  var suffixeIllisible = marqueEstDewalt && !(lu && lu.suffixe);
+  /* un pack par nature n'est JAMAIS « sans batterie », quoi que dise son suffixe */
+  /* Les PACKS MAISON (DWK…, PPACK…) et les packs de batteries (DCB…) sont
+     des kits par NATURE : leur tuile annonce des batteries parce que la
+     fiche EN CONTIENT — le titre confirme, il ne contredit pas. Mesuré au
+     balayage n°3 : 41 fiches pack refusées à tort par la branche « nue »,
+     leur suivi de prix serait mort (docs/VERIF-BALAYAGE-2.md, défaut 10). */
+  var ficheKit = !!(lu && lu.nbBatteries > 0) || /^(DCK|DWK|PPACK)/.test(skuU)
+    || /^DCB\d/.test(skuU) && /(BC|K)$/.test(skuU);
+  var suffixeIllisible = marqueEstDewalt && !(lu && lu.suffixe) && !ficheKit;
+  if (ficheKit) sansBatt = false;
 
   /* ① BUNDLE « & » — seulement si ce qui SUIT est une référence ou un objet
      vendu séparément. D7 : « Aspirateur Eau & Poussières » et « Coffret

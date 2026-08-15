@@ -74,7 +74,12 @@ var DOIVENT_PASSER = [
   /* CONSTRUIT (pas du zip) : isole la branche « dimensions ≠ lot » sur une
      fiche NON-kit — sans lui, saboter le nettoyage des dimensions restait
      vert car DCK368P3T est déjà protégé par ficheKit (mesuré le 15/08). */
-  ['DeWalt DWST83395-1 Boîte à outils vide 44 x 33 x 12', 'DWST83395-1']
+  ['DeWalt DWST83395-1 Boîte à outils vide 44 x 33 x 12', 'DWST83395-1'],
+  /* ── Balayage n°3, défaut 10 : les PACKS MAISON annoncent leurs batteries
+     LÉGITIMEMENT — 41 fiches refusées à tort avant ce correctif. ── */
+  ['DeWalt DWK200 (2 x 2,0 Ah + TSTAK VI)', 'DWK200'],
+  ['PowerPack visseuse à chocs et meuleuse d\'angle (2x5,0 Ah) - DEWALT PPACK0001', 'PPACK0001'],
+  ['DEWALT Pack 2 batteries bluetooth 18V 2Ah + Adapt USB - DCB283BC', 'DCB283BC']
 ];
 
 module.exports = function () {
