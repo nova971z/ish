@@ -12300,9 +12300,7 @@
 
   
 
-  // Déclenche l'envoi du rapport mensuel maintenant (test manuel). POST
-  // authentifié /api/cron-report → mail Resend + purge. Résout côté serveur.
-  
+
 
   // ── Dashboard : Clients ────────────────────────────────────
   var _adminClientsLoaded = false;
@@ -12370,91 +12368,34 @@
 
   
 
-  /* ── LE FILET SOUS LE WEBHOOK, côté écran ────────────────────────────────
-     Le seul bouton de cette page qui puisse retrouver de l'argent perdu.
-
-     ⛔ TROIS ÉTATS, ET LE TROISIÈME EST LE PLUS IMPORTANT :
-       · orphelins trouvés  → alerte rouge, montant et références ;
-       · aucun orphelin     → confirmation sobre ;
-       · ⛔ le contrôle N'A PAS TOURNÉ → ni l'un ni l'autre. Afficher « aucun
-         orphelin » quand l'appel a échoué serait le mensonge le plus cher de
-         l'interface : ça rassure sans avoir regardé. On dit « on ne sait pas ».
-
-     ⚠️ Passe par `adminGet` (jeton Firebase en en-tête). La même adresse tapée
-     dans la barre du navigateur se ferait refuser — constaté le 31/07/2026. */
   
 
-  /* Crée une commande de test dans le BAC À SABLE et rend son lien de paiement.
-     Le lien s'ouvre dans un nouvel onglet : c'est là qu'on paiera avec une
-     carte de test, ce qui prouvera la chaîne complète création → paiement. */
   
 
-  /* Enregistre le webhook chez Revolut et rend son secret de signature.
-
-     ⛔ LE SECRET NE S'AFFICHE QU'UNE FOIS — c'est Revolut qui en décide, pas
-     nous : il n'est jamais ré-obtenable. On l'affiche donc en clair, derrière
-     l'authentification admin, avec la consigne exacte, et on ne le journalise
-     nulle part. Le perdre oblige à supprimer le webhook et à recommencer.
-
-     ⚠️ Idempotent : si un webhook pointe déjà sur cette adresse, le serveur ne
-     crée rien. Deux abonnements identiques doubleraient chaque notification,
-     donc chaque tentative de traitement. */
   
 
   // Référence de la dernière commande de test créée — sert à la relire.
   var _revolutDerniereCommande = null;
 
-  /* Relit la commande de test chez Revolut, AVEC sa commission.
-
-     ⛔ POURQUOI CE BOUTON EXISTE : `depuisOrdre` et `commissionCents` n'ont
-     jamais tourné sur une VRAIE réponse Revolut — seulement sur des jeux
-     d'essai que j'ai écrits, donc conformes à ce que je CROIS de leur API. Un
-     champ nommé autrement donnerait un montant, une adresse ou une commission
-     faux. Le découvrir au moment où une facture est émise coûterait un numéro
-     de séquence, qui ne se rend pas. On le prouve avant, en lecture seule. */
-  
-
-  /* Le fournisseur nous parle-t-il, et sa signature est-elle acceptée ?
-
-     ⛔ TROIS ÉTATS, TROIS GESTES DIFFÉRENTS — les confondre coûterait des
-     heures de recherche du mauvais côté :
-       · rien reçu     → le webhook n'est pas déclaré, ou son adresse est fausse ;
-       · reçu ACCEPTÉ  → la chaîne est bonne ;
-       · reçu REFUSÉ   → le secret de signature ne correspond pas. Le cas le
-         plus vicieux : le fournisseur ET le site ont l'air corrects chacun de
-         leur côté, et pourtant aucune vente n'est enregistrée. */
-  
-
-  /* Diagnostic du fournisseur de paiement.
-     ⚠️ Passe par `adminGet`, qui attache le jeton Firebase. C'est LA raison
-     d'être de ce bouton : la même adresse tapée dans la barre du navigateur
-     n'envoie aucun en-tête et se fait refuser. */
-  
-
-  // Charge la synthèse comptable (revenus réels + résultat estimé).
-  
-
-  // ── Saisie des CHARGES (dépenses réelles : transport, octroi, CFE…) ──
   
 
   
 
-  /* ── Saisie des REMBOURSEMENTS ────────────────────────────────────────────
-     Séparé des charges À DESSEIN. Un remboursement annule une vente : il
-     retire du CA et de la TVA COLLECTÉE. Saisi comme une charge, il gonflerait
-     la TVA DÉDUCTIBLE — on réclamerait au fisc une taxe jamais payée.
-     Le site ne rembourse RIEN tout seul : on rembourse depuis le tableau de bord
-     du fournisseur, puis on
-     saisit ici ce qu'on a réellement constaté. Aucun champ n'est deviné. */
+  
+
+
+
+
+
+  
+
   
 
   
 
-  // Compte de résultat 100 % RÉEL + saisie des charges ET des remboursements.
-  
 
-  // Charge la config serveur puis construit le calculateur + prix automatiques.
-  
+
+
 
   
 
@@ -12509,16 +12450,6 @@
 
   // ── Marges nettes LIVE (branché sur les prix RÉELS du site) ─────────────
   var _marginsLoaded = false;
-  /* ── ÉCRAN « MOUVEMENT DES PRIX » ───────────────────────────────────────
-     Demandé par l'user le 01/08/2026 : un tableau des prix qui ont bougé, sur
-     un nombre de jours qu'il choisit, avec l'ancien ET le nouveau prix, la
-     vignette du produit, le nouveau prix en VERT lumineux s'il a baissé et en
-     ROUGE lumineux s'il a monté.
-
-     ⚠️ La couleur n'est PAS la seule information : la variation en pourcentage
-     est écrite, et une flèche donne le sens. Un tableau qui ne dirait le sens
-     que par la couleur serait illisible pour un daltonien — et c'est une part
-     non négligeable des artisans. */
   
 
   
@@ -12529,8 +12460,7 @@
 
   
 
-  // ── Factures (admin) : identité vendeur + génération / impression ──────────
-  
+
 
   
 
@@ -12625,8 +12555,7 @@
   var PJ_PUB_LABEL = { google: 'Google Ads', meta: 'Facebook / Instagram', aucun: 'À définir' };
   var PJ_SITE_LABEL = { neuf: 'Site vitrine neuf', refonte: 'Refonte de son site', portfolio: 'Page portfolio', 'pub-doublee': 'Pas de site — pub doublée', aucun: 'À définir' };
 
-  // ── Codes d'invitation (Black offert) ──────────────────────
-  
+
 
   
 
@@ -12636,18 +12565,12 @@
   var _lvAdminFuel = null;   // prix du litre chargé depuis le serveur
   
 
-  // ── Dashboard : Dossiers livreurs (service coursier — validation manuelle) ──
-  
-  // Un bloc titré + ses cartes (ou un message si la liste est vide).
-  
 
-  // DOSSIER à traiter (ou refusé) : les pièces, le contact, et les décisions.
-  
 
-  // LIVREUR ACTIF : sa carte telle que les clients la voient — photo, commune,
-  // véhicule, disponibilité, courses livrées, note — plus ce que l'admin seul
-  // doit savoir (email, téléphone) et le retrait d'accès.
-  
+
+
+
+
 
   
 
@@ -12713,10 +12636,6 @@
 
   
 
-  /* Aperçu de la photo déposée — et il DIT ce qui a été fait au fichier.
-     ⛔ Motif : l'user retravaille ses visuels lui-même (règle des posters). Une
-     conversion silencieuse le priverait du seul moyen de vérifier qu'on n'a pas
-     abîmé son travail. */
   
 
   
@@ -12745,16 +12664,6 @@
 
   
 
-  /* ══ FICHE COMPLÈTE DANS L'ADMINISTRATION ══════════════════════════════════
-     Demande de l'user, 08/08/2026 : « je dois pouvoir modifier la fiche produit
-     complète […] là ça affiche que le libellé et le prix, je veux pouvoir tout
-     modifier, description / fiche technique / png — je veux même pouvoir
-     rajouter des PNG pour qu'il y ait plusieurs visuels ».
-
-     ⚠️ LE PRIX N'EST PAS DANS CE PANNEAU, et ce n'est pas un oubli : il reste
-     dans la ligne du dessus, avec le calculateur. « Plus aucun prix n'est saisi
-     à la main » est une règle produit ; un champ prix noyé au milieu d'un
-     formulaire de description la contournerait sans qu'on s'en aperçoive. */
   
 
   
@@ -12767,36 +12676,12 @@
   
   
 
-  /* ⛔ L'IMAGE EST RÉDUITE ET RÉENCODÉE DANS LE NAVIGATEUR, PAS ENVOYÉE BRUTE.
-     Mesuré le 08/08/2026 : un PNG sorti de Photoroom pèse 10,6 Mo en 4001 px.
-     L'envoyer tel quel dépasserait de très loin la limite du serveur, et le
-     stocker tel quel ferait payer ces octets à chaque visiteur. 2000 px est la
-     taille MESURÉE comme nécessaire : la fiche produit dessine l'image sur
-     1674 pixels d'écran sur l'iPad de l'user — en dessous, elle est agrandie
-     et floue. `image/webp` conserve la transparence des visuels détourés. */
-  /* ══ PRÉPARATION D'UNE PHOTO PRODUIT — UNE SEULE IMPLÉMENTATION ═══════════
-     ⛔⛔ CORRIGÉE LE 09/08/2026. L'user : « lorsque je veux ajouter des PNG sur
-     un produit, ça ne marche pas ». Deux défauts, mesurés :
-       ① le formulaire de création REFUSAIT au-delà de 525 Ko (« réduis sa taille
-          avant de la déposer ») — il lui rendait le travail au lieu de le faire,
-          et un PNG de photo produit dépasse presque toujours ce plafond ;
-       ② cette fonction-ci, elle, réduisait bien… mais ne vérifiait AUCUN
-          plafond : une image de 2 000 px pouvait repasser au-dessus et se faire
-          refuser par le serveur ensuite. Deux chemins, deux comportements.
-     ⛔ On n'en écrit pas un troisième : les deux passent désormais ici.
-     ⚠️ Cible mesurée sur SES visuels : 780×780, quelques-uns à 1000 et 1024,
-     de 14 à 233 Ko en WebP. D'où 1000 px par défaut.
-     ⛔ TROIS PROMESSES TENUES ENVERS SON TRAVAIL :
-       · on n'AGRANDIT jamais (une petite image y perdrait sa netteté) ;
-       · on ne PEINT AUCUN FOND — la transparence d'un PNG détouré survit, sans
-         quoi le visuel serait inutilisable sur le fond sombre du site ;
-       · une image DÉJÀ conforme part INTACTE, octet pour octet, sans même être
-         ré-encodée. « Je ne veux pas perdre de qualité », ce sont ses mots.
-     Rend { dataUrl, w, h, ko, intact, qualite, wSource, hSource, koSource }. */
   
 
-  /* Ancien nom, conservé pour le chemin des visuels multiples : il ne rendait
-     qu'une adresse de données. Il passe désormais par la fonction unique. */
+  
+
+  
+
   
 
   
@@ -13984,7 +13869,7 @@
     if (window.__PT_ADMIN) return Promise.resolve();
     if (__adminCharge) return __adminCharge;
     __adminCharge = new Promise(function (res, rej) {
-      var s = document.createElement('script'); s.src = 'admin.bundle.js?v=612';
+      var s = document.createElement('script'); s.src = 'admin.bundle.js?v=613';
       s.onload = res; s.onerror = function () { __adminCharge = null; rej(new Error('admin.bundle indisponible')); };
       document.head.appendChild(s);
     });

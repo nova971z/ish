@@ -2602,6 +2602,34 @@ function adminAjouterLigneFeat(row) {
     z.insertAdjacentHTML('beforeend', adminLigneFeatHtml(''));
 }
 
+function adminImageATransparence(img, w, h) {
+  try {
+    var k = Math.min(1, 128 / Math.max(w, h));
+    var c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(w * k));
+    c.height = Math.max(1, Math.round(h * k));
+    var x = c.getContext('2d', { willReadFrequently: true });
+    x.clearRect(0, 0, c.width, c.height);
+    x.drawImage(img, 0, 0, c.width, c.height);
+    var d = x.getImageData(0, 0, c.width, c.height).data;
+    for (var i = 3; i < d.length; i += 4)
+      if (d[i] < 255)
+        return true;
+    return false;
+  } catch (_) {
+    return true;
+  }
+}
+
+function adminEncoderSansPerdreLeFond(canvas, qualite, transparente) {
+  var sortie = canvas.toDataURL('image/webp', qualite);
+  if (sortie.indexOf('data:image/webp') === 0)
+    return sortie;
+  if (transparente)
+    return canvas.toDataURL('image/png');
+  return canvas.toDataURL('image/jpeg', qualite);
+}
+
 function adminPreparerImage(fichier, opts) {
   var o = opts || {};
   var COTE = o.cote || 1000;
@@ -2650,8 +2678,9 @@ function adminPreparerImage(fichier, opts) {
           0.78,
           0.72
         ];
+        var transparente = adminImageATransparence(img, wI, hI);
         var c = document.createElement('canvas');
-        var dernier = null, largeurVue = 0;
+        var dernier = null, largeurVue = 0, sansPerte = false;
         for (var f = 0; f < facteurs.length; f++) {
           var cible = Math.max(320, Math.round(COTE * facteurs[f]));
           var k = Math.min(1, cible / Math.max(wI, hI));
@@ -2666,10 +2695,8 @@ function adminPreparerImage(fichier, opts) {
           x.imageSmoothingQuality = 'high';
           x.drawImage(img, 0, 0, c.width, c.height);
           for (var i = 0; i < paliers.length; i++) {
-            var sortie = c.toDataURL('image/webp', paliers[i]);
-            if (sortie.indexOf('data:image/webp') !== 0) {
-              sortie = c.toDataURL('image/jpeg', paliers[i]);
-            }
+            var sortie = adminEncoderSansPerdreLeFond(c, paliers[i], transparente);
+            sansPerte = sortie.indexOf('data:image/png') === 0;
             dernier = {
               l: sortie.length,
               w: c.width,
@@ -2682,16 +2709,19 @@ function adminPreparerImage(fichier, opts) {
                 h: c.height,
                 ko: Math.round(sortie.length * 0.75 / 1000),
                 intact: false,
-                qualite: paliers[i],
+                qualite: sansPerte ? 1 : paliers[i],
+                transparente: transparente,
                 wSource: wI,
                 hSource: hI,
                 koSource: koSource
               });
               return;
             }
+            if (sansPerte)
+              break;
           }
         }
-        rejeter(new Error('image impossible à faire tenir sous ' + Math.round(PLAFOND * 0.75 / 1000) + ' Ko : essayé jusqu\'à ' + (dernier ? dernier.w + '\xD7' + dernier.h + ' en qualité 0,72 (' + Math.round(dernier.l * 0.75 / 1000) + ' Ko)' : 'aucun encodage') + ' \u2014 source ' + wI + '\xD7' + hI + ', ' + koSource + ' Ko'));
+        rejeter(new Error('image impossible à faire tenir sous ' + Math.round(PLAFOND * 0.75 / 1000) + ' Ko : essayé jusqu\'à ' + (dernier ? dernier.w + '\xD7' + dernier.h + (sansPerte ? ' en PNG sans perte (transparence préservée, ' : ' en qualité 0,72 (') + Math.round(dernier.l * 0.75 / 1000) + ' Ko)' : 'aucun encodage') + ' \u2014 source ' + wI + '\xD7' + hI + ', ' + koSource + ' Ko' + (sansPerte ? '. Le fond est transparent : on refuse le JPEG, qui ' + 'le repeindrait en noir.' : '')));
       };
       img.src = source;
     };
@@ -3063,5 +3093,5 @@ function initAdminInstagram() {
   }
 }
 
-window.__PT_ADMIN = { adminFetch: adminFetch, loadAdminStats: loadAdminStats, renderAdminStats: renderAdminStats, buildAdminGlobe: buildAdminGlobe, sendAdminReport: sendAdminReport, loadAdminClients: loadAdminClients, renderAdminClients: renderAdminClients, comptaState: comptaState, comptaSetChecked: comptaSetChecked, comptaCopy: comptaCopy, comptaFallbackCopy: comptaFallbackCopy, renderAdminCompta: renderAdminCompta, comptaBrancherReconciliation: comptaBrancherReconciliation, comptaBrancherOrdreTest: comptaBrancherOrdreTest, comptaBrancherWebhook: comptaBrancherWebhook, comptaBrancherRelire: comptaBrancherRelire, comptaBrancherSante: comptaBrancherSante, comptaBrancherPing: comptaBrancherPing, comptaLoadAccounting: comptaLoadAccounting, comptaChargesHtml: comptaChargesHtml, comptaBrancherCharges: comptaBrancherCharges, comptaRemboursementsHtml: comptaRemboursementsHtml, comptaBrancherRemboursements: comptaBrancherRemboursements, comptaRenderAccounting: comptaRenderAccounting, comptaLoadCalc: comptaLoadCalc, comptaRenderCalc: comptaRenderCalc, ligneMouvementPrix: ligneMouvementPrix, loadAdminPriceMoves: loadAdminPriceMoves, loadAdminMargins: loadAdminMargins, renderAdminMargins: renderAdminMargins, renderAdminFisc: renderAdminFisc, renderAdminInvoices: renderAdminInvoices, comptaBuildInvoices: comptaBuildInvoices, loadAdminPartners: loadAdminPartners, adminPartnerFormHTML: adminPartnerFormHTML, renderAdminPartnerPhotos: renderAdminPartnerPhotos, bindAdminPartnerForm: bindAdminPartnerForm, renderAdminPartners: renderAdminPartners, loadAdminInviteCodes: loadAdminInviteCodes, bindAdminInviteCodeCreate: bindAdminInviteCodeCreate, loadAdminApplications: loadAdminApplications, renderAdminCourierBareme: renderAdminCourierBareme, loadAdminCouriers: loadAdminCouriers, adminCourierSection: adminCourierSection, adminCourierDossierHTML: adminCourierDossierHTML, adminCourierFicheHTML: adminCourierFicheHTML, reviewCourier: reviewCourier, ajoutProduitMsg: ajoutProduitMsg, adminApercuImage: adminApercuImage, ajoutProduitSpecs: ajoutProduitSpecs, ajoutProduitLigneSpec: ajoutProduitLigneSpec, ajoutProduitCorps: ajoutProduitCorps, renderAjoutProduit: renderAjoutProduit, renderAdmin: renderAdmin, adminBrancherSansReleve: adminBrancherSansReleve, loadAdminOrders: loadAdminOrders, adminProdFiltres: adminProdFiltres, renderAdminList: renderAdminList, adminProduitPar: adminProduitPar, adminBasculerFiche: adminBasculerFiche, adminFicheHtml: adminFicheHtml, adminLigneSpecHtml: adminLigneSpecHtml, adminLigneFeatHtml: adminLigneFeatHtml, adminVisuelHtml: adminVisuelHtml, adminAjouterLigneSpec: adminAjouterLigneSpec, adminAjouterLigneFeat: adminAjouterLigneFeat, adminPreparerImage: adminPreparerImage, adminReduireImage: adminReduireImage, adminBrancherAjoutImage: adminBrancherAjoutImage, adminEnregistrerFiche: adminEnregistrerFiche, adminOption: adminOption, initAdminInstagram: initAdminInstagram };
+window.__PT_ADMIN = { adminFetch: adminFetch, loadAdminStats: loadAdminStats, renderAdminStats: renderAdminStats, buildAdminGlobe: buildAdminGlobe, sendAdminReport: sendAdminReport, loadAdminClients: loadAdminClients, renderAdminClients: renderAdminClients, comptaState: comptaState, comptaSetChecked: comptaSetChecked, comptaCopy: comptaCopy, comptaFallbackCopy: comptaFallbackCopy, renderAdminCompta: renderAdminCompta, comptaBrancherReconciliation: comptaBrancherReconciliation, comptaBrancherOrdreTest: comptaBrancherOrdreTest, comptaBrancherWebhook: comptaBrancherWebhook, comptaBrancherRelire: comptaBrancherRelire, comptaBrancherSante: comptaBrancherSante, comptaBrancherPing: comptaBrancherPing, comptaLoadAccounting: comptaLoadAccounting, comptaChargesHtml: comptaChargesHtml, comptaBrancherCharges: comptaBrancherCharges, comptaRemboursementsHtml: comptaRemboursementsHtml, comptaBrancherRemboursements: comptaBrancherRemboursements, comptaRenderAccounting: comptaRenderAccounting, comptaLoadCalc: comptaLoadCalc, comptaRenderCalc: comptaRenderCalc, ligneMouvementPrix: ligneMouvementPrix, loadAdminPriceMoves: loadAdminPriceMoves, loadAdminMargins: loadAdminMargins, renderAdminMargins: renderAdminMargins, renderAdminFisc: renderAdminFisc, renderAdminInvoices: renderAdminInvoices, comptaBuildInvoices: comptaBuildInvoices, loadAdminPartners: loadAdminPartners, adminPartnerFormHTML: adminPartnerFormHTML, renderAdminPartnerPhotos: renderAdminPartnerPhotos, bindAdminPartnerForm: bindAdminPartnerForm, renderAdminPartners: renderAdminPartners, loadAdminInviteCodes: loadAdminInviteCodes, bindAdminInviteCodeCreate: bindAdminInviteCodeCreate, loadAdminApplications: loadAdminApplications, renderAdminCourierBareme: renderAdminCourierBareme, loadAdminCouriers: loadAdminCouriers, adminCourierSection: adminCourierSection, adminCourierDossierHTML: adminCourierDossierHTML, adminCourierFicheHTML: adminCourierFicheHTML, reviewCourier: reviewCourier, ajoutProduitMsg: ajoutProduitMsg, adminApercuImage: adminApercuImage, ajoutProduitSpecs: ajoutProduitSpecs, ajoutProduitLigneSpec: ajoutProduitLigneSpec, ajoutProduitCorps: ajoutProduitCorps, renderAjoutProduit: renderAjoutProduit, renderAdmin: renderAdmin, adminBrancherSansReleve: adminBrancherSansReleve, loadAdminOrders: loadAdminOrders, adminProdFiltres: adminProdFiltres, renderAdminList: renderAdminList, adminProduitPar: adminProduitPar, adminBasculerFiche: adminBasculerFiche, adminFicheHtml: adminFicheHtml, adminLigneSpecHtml: adminLigneSpecHtml, adminLigneFeatHtml: adminLigneFeatHtml, adminVisuelHtml: adminVisuelHtml, adminAjouterLigneSpec: adminAjouterLigneSpec, adminAjouterLigneFeat: adminAjouterLigneFeat, adminImageATransparence: adminImageATransparence, adminEncoderSansPerdreLeFond: adminEncoderSansPerdreLeFond, adminPreparerImage: adminPreparerImage, adminReduireImage: adminReduireImage, adminBrancherAjoutImage: adminBrancherAjoutImage, adminEnregistrerFiche: adminEnregistrerFiche, adminOption: adminOption, initAdminInstagram: initAdminInstagram };
 })(window.__PT_ADMIN_CTX);

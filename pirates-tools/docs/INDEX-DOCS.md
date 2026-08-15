@@ -46,6 +46,7 @@ désigné ici, soit il est rangé.
 | `PLAN-ABONNEMENTS.md` | fonctionnalité non lancée, spécification conservée |
 | `PLAN-SERVICE-COURSIER.md` | cadre du service de livraison, encore appliqué |
 | `PLAN-REVOLUT.md` | migration du paiement Stripe → Revolut : inventaire 1=1, correspondance des API, étapes, et **ce qui manque encore à lire à la source** |
+| `PLAN-PHOTOS-FICHES.md` | **les deux causes MESURÉES des photos de fiches** — le repli JPEG qui repeint un PNG détouré en noir (relevé navigateur à l'appui) et le plafond de 1 Mio du document qui interdit la 3ᵉ photo. Étapes et preuve exigée pour chacune |
 | `TRAQUEUR-URLS.md` | raccourcis du traqueur de prix, utilisés en production |
 | `NOMENCLATURE.md` | **comment les fournisseurs nomment outillage, quincaillerie et EPI** — 221 types, 1 075 écritures (français, espagnol, anglais), 39 rayons rangés en entonnoir ; **préfixes** ET suffixes de référence DeWALT, normes EPI, emmanchements, nuances, dentures. Contrepartie lisible de `api/_lib/nomenclature.js` |
 | `MAKITA-POSTERS-TODO.md` | posters restant à produire |

@@ -31,7 +31,12 @@ const NOYAU = [
   'accordE2E.mjs',       // l'accord de bout en bout
   // Un effacement mal gardé ne se répare pas après coup : la garde se prouve
   // avant, pas le jour où quelqu'un a vidé quelque chose par erreur.
-  'raz-deux-clics.mjs'
+  'raz-deux-clics.mjs',
+  // Trois livraisons ont rendu ses PNG détourés sur fond NOIR : le repli JPEG
+  // aplatit le canal alpha, et Safari iOS — son navigateur — tombe toujours
+  // dedans. Un visuel produit abîmé se voit sur toutes les cartes du catalogue
+  // et ne se rattrape qu'en réimportant à la main. Rapide, donc au noyau.
+  'photo-transparence.mjs'
 ];
 
 const args = process.argv.slice(2);

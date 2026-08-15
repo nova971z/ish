@@ -16015,6 +16015,74 @@
        · une image DÉJÀ conforme part INTACTE, octet pour octet, sans même être
          ré-encodée. « Je ne veux pas perdre de qualité », ce sont ses mots.
      Rend { dataUrl, w, h, ko, intact, qualite, wSource, hSource, koSource }. */
+  /* Cette image a-t-elle un fond transparent ? (motif détaillé dans le corps) */
+  function adminImageATransparence(img, w, h) {
+    /* ⛔⛔ LE COMMENTAIRE VIT DANS LE CORPS, ET CE N'EST PAS UN CAPRICE DE MISE
+       EN FORME. `scripts/extraire-admin.js` déplace les fonctions `admin*` vers
+       admin.bundle.js en coupant à partir du mot `function` : un pavé posé
+       AU-DESSUS reste donc dans app.visitor.js, téléchargé par CHAQUE visiteur
+       qui n'ouvrira jamais l'admin. Mesuré ici même : 0,8 Ko compressés de
+       commentaires admin échoués dans le bundle visiteur, assez pour crever le
+       plafond des 400 Ko (400,7). Et l'user navigue en privé : aucun cache,
+       chaque octet est repayé à chaque visite, la sienne et celle des clients.
+       ⇒ Explication à l'intérieur, une ligne de renvoi à l'extérieur.
+
+       POURQUOI CETTE FONCTION EXISTE. Sa TROISIÈME remontée, le 15/08/2026 :
+       « ça me met un carré noir autour du produit […] moi je n'envoie que des
+       PNG ». Il avait raison, et la faute était entièrement de mon côté — voir
+       `adminEncoderSansPerdreLeFond`.
+       On échantillonne sur une petite copie : un seul pixel d'alpha < 255
+       suffit à trancher, et 128 px de côté coûtent une fraction de milliseconde
+       même sur une photo de 12 Mpx. La réduction interpole, mais elle ne peut
+       pas FABRIQUER de l'opacité là où tout était transparent : un détourage
+       reste détecté. */
+    try {
+      var k = Math.min(1, 128 / Math.max(w, h));
+      var c = document.createElement('canvas');
+      c.width = Math.max(1, Math.round(w * k));
+      c.height = Math.max(1, Math.round(h * k));
+      var x = c.getContext('2d', { willReadFrequently: true });
+      x.clearRect(0, 0, c.width, c.height);
+      x.drawImage(img, 0, 0, c.width, c.height);
+      var d = x.getImageData(0, 0, c.width, c.height).data;
+      for (var i = 3; i < d.length; i += 4) if (d[i] < 255) return true;
+      return false;
+    } catch (_) {
+      /* Lecture de pixels refusée : on suppose la transparence. Se tromper
+         dans ce sens coûte quelques kilo-octets ; se tromper dans l'autre
+         repeint le fond en noir. */
+      return true;
+    }
+  }
+
+  /* Encode sans jamais aplatir un fond transparent (motif dans le corps). */
+  function adminEncoderSansPerdreLeFond(canvas, qualite, transparente) {
+    /* ⛔⛔ LE CARRÉ NOIR, ET POURQUOI IL A DURÉ TROIS LIVRAISONS.
+       L'ancien code demandait du WebP ; quand le navigateur ne sait pas encoder
+       ce format il rend du PNG SANS LE DIRE — le préfixe le trahit, c'était
+       bien vu — et le code basculait alors sur **JPEG**. Or JPEG n'a AUCUN
+       canal alpha : tout ce qui était transparent est aplati sur du noir.
+       Mesuré dans un vrai navigateur, un coin transparent après encodage :
+         image/webp → rgba(0,0,0,0)   · image/png → rgba(0,0,0,0)
+         image/jpeg → rgba(0,0,0,255) ← le carré noir de sa capture.
+       ⚠️ Safari iOS — SON navigateur — est précisément le cas qui tombe
+       toujours dans ce repli. D'où « ça marche chez moi » et pas chez lui.
+       Le raisonnement était à l'envers : à cet instant on tient DÉJÀ une image
+       transparente correcte, et le seul problème restant est le POIDS.
+       Basculer sur JPEG pour gagner des octets sacrifie la seule chose qu'on ne
+       peut pas récupérer.
+       ⇒ Image à canal alpha : JAMAIS de JPEG. WebP s'il est encodable (il
+       garde l'alpha ET compresse), PNG sinon — et le poids se rattrape sur la
+       RÉSOLUTION, jamais sur le format.
+       ⇒ Image pleinement opaque : rien ne change, JPEG reste légitime.
+       Porte : tests/photo-transparence.mjs (au noyau), 3 sabotages rouges. */
+    var sortie = canvas.toDataURL('image/webp', qualite);
+    if (sortie.indexOf('data:image/webp') === 0) return sortie;
+    /* Le navigateur n'a pas encodé en WebP : il a rendu du PNG. */
+    if (transparente) return canvas.toDataURL('image/png');
+    return canvas.toDataURL('image/jpeg', qualite);
+  }
+
   function adminPreparerImage(fichier, opts) {
     var o = opts || {};
     var COTE = o.cote || 1000;
@@ -16051,8 +16119,18 @@
              visuel net et trop petit : la fiche le dessine sur 1674 px. */
           var facteurs = [1, 0.8, 0.64, 0.5, 0.4];
           var paliers = [0.95, 0.92, 0.88, 0.84, 0.78, 0.72];
+          /* ⛔ La transparence se constate UNE fois, sur la source, avant toute
+             réduction — c'est elle qui décide du format autorisé plus bas. */
+          var transparente = adminImageATransparence(img, wI, hI);
+          /* ⛔ SI ON RETOMBE SUR DU PNG, LES PALIERS DE QUALITÉ NE SERVENT À
+             RIEN : le PNG est SANS PERTE, `toDataURL` ignore le second
+             argument. Réessayer six qualités sur la même taille produirait six
+             fois le MÊME octet et donnerait l'illusion d'avoir tout tenté avant
+             de réduire. Sur une image transparente, le poids ne se rattrape
+             donc que sur la RÉSOLUTION — et il faut le savoir avant de conclure
+             « impossible à faire tenir ». */
           var c = document.createElement('canvas');
-          var dernier = null, largeurVue = 0;
+          var dernier = null, largeurVue = 0, sansPerte = false;
           for (var f = 0; f < facteurs.length; f++) {
             var cible = Math.max(320, Math.round(COTE * facteurs[f]));
             var k = Math.min(1, cible / Math.max(wI, hI));   // jamais d'agrandissement
@@ -16070,29 +16148,32 @@
             /* La qualité descend par paliers SEULEMENT si le plafond l'exige, et
                on rend celle qui a été retenue — l'appelant la montre. */
             for (var i = 0; i < paliers.length; i++) {
-              var sortie = c.toDataURL('image/webp', paliers[i]);
-              /* ⚠️ Un navigateur qui ne sait pas encoder le WebP rend du PNG sans
-                 le dire : on le voit au préfixe et on bascule sur du JPEG plutôt
-                 que de croire à une conversion qui n'a pas eu lieu. */
-              if (sortie.indexOf('data:image/webp') !== 0) {
-                sortie = c.toDataURL('image/jpeg', paliers[i]);
-              }
+              var sortie = adminEncoderSansPerdreLeFond(c, paliers[i], transparente);
+              sansPerte = sortie.indexOf('data:image/png') === 0;
               dernier = { l: sortie.length, w: c.width, h: c.height };
               if (sortie.length <= PLAFOND) {
                 resoudre({ dataUrl: sortie, w: c.width, h: c.height,
                   ko: Math.round(sortie.length * 0.75 / 1000), intact: false,
-                  qualite: paliers[i], wSource: wI, hSource: hI, koSource: koSource });
+                  qualite: sansPerte ? 1 : paliers[i], transparente: transparente,
+                  wSource: wI, hSource: hI, koSource: koSource });
                 return;
               }
+              /* PNG : les paliers suivants rendraient le même octet. On passe
+                 directement à la taille en dessous. */
+              if (sansPerte) break;
             }
           }
           /* ⛔ UN REFUS DIT CE QU'IL A ESSAYÉ. Sans ces chiffres, « trop lourde »
              est un mur : on ne sait ni de combien, ni jusqu'où on est descendu. */
           rejeter(new Error('image impossible à faire tenir sous '
             + Math.round(PLAFOND * 0.75 / 1000) + ' Ko : essayé jusqu\'à '
-            + (dernier ? dernier.w + '×' + dernier.h + ' en qualité 0,72 ('
+            + (dernier ? dernier.w + '×' + dernier.h
+              + (sansPerte ? ' en PNG sans perte (transparence préservée, '
+                : ' en qualité 0,72 (')
               + Math.round(dernier.l * 0.75 / 1000) + ' Ko)' : 'aucun encodage')
-            + ' — source ' + wI + '×' + hI + ', ' + koSource + ' Ko'));
+            + ' — source ' + wI + '×' + hI + ', ' + koSource + ' Ko'
+            + (sansPerte ? '. Le fond est transparent : on refuse le JPEG, qui '
+              + 'le repeindrait en noir.' : '')));
         };
         img.src = source;
       };

@@ -103,10 +103,49 @@ function generer() {
     + 'window.__PT_ADMIN = { ' + expo + ' };\n'
     + '})(window.__PT_ADMIN_CTX);\n';
 
-  // ── app.js (visiteur) : source SANS les fonctions déplacées ──
+  /* ⛔⛔ LE COMMENTAIRE PART AVEC SA FONCTION — MESURÉ LE 15/08/2026.
+     On coupait à partir du mot `function` : le pavé de commentaire posé
+     JUSTE AU-DESSUS restait donc dans app.visitor.js, téléchargé par chaque
+     visiteur qui n'ouvrira jamais l'administration. Relevé sur le bundle
+     d'alors : 15 blocs orphelins, 69 402 octets bruts — et c'est ce qui a
+     crevé le plafond des 400 Ko (400,7) en ajoutant deux fonctions admin.
+     ⚠️ L'user navigue en privé : aucun cache, chaque octet est repayé à
+     CHAQUE visite, la sienne comme celles de ses clients.
+     On ne remonte que les commentaires COLLÉS à la fonction (rien d'autre que
+     des espaces entre les deux) : un commentaire séparé par une ligne vide
+     appartient au code d'avant, et l'emporter volerait sa documentation au
+     bundle visiteur. */
+  function debutAvecCommentaire(src, deb) {
+    var i = deb;
+    for (;;) {
+      var j = i;
+      while (j > 0 && /[ \t]/.test(src[j - 1])) j--;          // indentation
+      if (j > 0 && src[j - 1] === '\n') j--;                  // UNE fin de ligne, pas deux
+      else if (j !== i) return i;                             // pas en début de ligne
+      if (j >= 2 && src[j - 2] === '*' && src[j - 1] === '/') {
+        var o = src.lastIndexOf('/*', j - 2);
+        if (o < 0) return i;
+        i = o;
+        continue;
+      }
+      if (j > 0) {
+        var ligne = src.lastIndexOf('\n', j - 1) + 1;
+        var t = src.slice(ligne, j);
+        if (/^\s*\/\//.test(t)) { i = ligne; continue; }
+      }
+      return i;
+    }
+  }
+
+  // ── app.js (visiteur) : source SANS les fonctions déplacées ni leurs commentaires ──
   var moveSorted = c.move.slice().sort(function (a, b) { return a.range[0] - b.range[0]; });
   var vis = '', cur = 0;
-  moveSorted.forEach(function (n) { vis += c.src.slice(cur, n.range[0]); cur = n.range[1]; });
+  moveSorted.forEach(function (n) {
+    var deb = debutAvecCommentaire(c.src, n.range[0]);
+    if (deb < cur) deb = n.range[0];        // jamais reculer avant la coupe précédente
+    vis += c.src.slice(cur, deb);
+    cur = n.range[1];
+  });
   vis += c.src.slice(cur);
 
   // Contexte partagé + amorces : injectés à l'intérieur de l'IIFE, juste avant
