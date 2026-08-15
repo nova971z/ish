@@ -14,7 +14,7 @@
 
 | Origine | Mécanisme | Cas | Antidote | Porte |
 |---|---|---|---|---|
-| **O1** | Affirmer avant de mesurer | 14 | §3 · §8 | `garde-sortie.js` *(hook Stop)* |
+| **O1** | Affirmer avant de mesurer | 15 | §3 · §8 | `garde-sortie.js` *(hook Stop)* |
 | **O2** | L'instrument de mesure est faux | 28 | §4.3 | sabotage obligatoire |
 | **O3** | Réutiliser sans vérifier le contexte | 12 | §1.4 | `check-lecons.js` |
 | **O4** | Contrainte connue, non appliquée | 9 | §1 | `garde-entonnoir.js` |
@@ -22,7 +22,7 @@
 | **O6** | Copie périmée au lieu de la source vivante | 5 | §4.4 | `p7-architecture.js` |
 | **O7** | **Lire le silence comme un succès** | 8 | §3 · §4.3 | `sabotage.mjs` · `ci.js` · `check-ancres.js` |
 
-**77 erreurs, 7 mécanismes.** O1 et O2 en concentrent **43 à elles deux** :
+**78 erreurs, 7 mécanismes.** O1 et O2 en concentrent **44 à elles deux** :
 c'est là qu'il faut regarder en premier, toujours.
 
 ⚠️ **O7 est né le 01/08/2026** d'une règle qui existait déjà — « non exécuté
@@ -54,6 +54,7 @@ confiance dans tout ce que je dis.*
 | **E-108** | « les trois invariants tombent **par construction** » | faux : **1684 échecs sur 3000** | oracle de propriétés indépendant, manche 1 |
 | **E-114** | la page « Mouvement des prix » était livrée SANS AUCUNE PORTE — donc réputée bonne | le traqueur écrivait `at: serverTimestamp()` et la page faisait `Number(v.at)` + `where('at','>=', <nombre>)`. Relu de Firestore, le sentinel devient un **objet Timestamp** : `Number()` rend **NaN**, la date s'affiche vide, et dans l'ordre des types Firestore **tout timestamp est supérieur à n'importe quel nombre** — le choix « sur combien de jours » ne filtrait donc RIEN. La page paraissait marcher et mentait sur ses deux seules colonnes utiles | l'user : « la section mouvement des prix, il ne marche pas ». ⚠️ **E-228 pour la troisième fois**, après `priceCheckedAt` et `promoDepuis` : ce qui sera lu en arithmétique s'écrit en NOMBRE. Ce n'est plus une erreur de code, c'est une erreur de COUVERTURE — les deux premières récidives ont été gardées chacune à leur endroit, jamais en règle générale. Remède : écriture en ms, lecture par `enMillis`, période et tri REFAITS en mémoire (les anciennes entrées Timestamp passeraient sinon toutes le filtre), et 7 assertions neuves, 3 sabotages rouges |
 | **E-113** | « `pagesRefusees: 0` avec 14 manquantes ⇒ **les POST n'atteignent jamais le serveur** » — et je l'avais gravé dans le code, en commentaire, comme une règle de lecture | conclusion tirée d'un compteur dont la validité reposait sur une hypothèse **jamais mesurée** : que les 67 requêtes tombent dans la MÊME instance serverless. Le cumul vit dans la mémoire d'une instance ; une instance neuve en plein balayage repart de zéro et rend le nombre de pages **de la fin**, sans qu'une seule page ne se perde. 53 = 67 − 14 exactement, et 3 179 tuiles ÷ 53 = **59,98** — chaque page arrivée était complète | les chiffres eux-mêmes, relus : un reliquat rigoureusement égal à la queue du balayage n'est pas une signature de perte. ⚠️ **Le compteur ne disait pas QUI comptait** : sans identité d'instance, les deux causes sont indiscernables, et j'ai comblé le vide par une déduction. Remède : `instance` + `cause` rendus par le cumul (`_lib/diag-rafale.js`), et surtout un total qui **ne dépend plus d'aucune instance** — `scripts/bilan-balayage.js`, calculé sur le fichier des réponses |
+| **E-115** | « le parseur RATE les offres les moins chères » (tour 5, tuiles grises 84,99–111,99 € sur dcd805/dch273) — annoncé à l'user comme la cause de ses prix trop hauts, avec un plan pour « apprendre leur gabarit » | ces tuiles ne sont **pas des offres** : les deux captures user (pages produit idealo, 15/08) prouvent que le minimum réel de la famille DCD805 est **114,32 €** (17 offres) et DCH273 **198,91 €** — un « 88,99 € » n'existe dans aucune liste d'offres. Ce sont des encarts de grille (réf de famille sans variante, titres traduits machinalement) que le parseur lit (`sansRef`, prix connu) et refuse d'écrire — **à raison**. Les vrais minima (114,32/129,90/198,91/226,04) étaient DÉJÀ captés et appariés au centime près (zips n°1-2), invisibles ensuite car inchangés | ses captures + relecture des zips n°1-2. ⚠️ Ma « mesure » s'était arrêtée à la GRILLE : conclure « raté moins cher » sans vérifier la liste d'offres du produit, c'est affirmer sur un échantillon dont on ignore la nature. Remède (méthode, tour 6) : le croisement finit TOUJOURS sur la page produit — une tuile sous le « à partir de » de sa propre famille est un encart, pas une offre |
 
 **Antidote** : §3 — la commande **dans le même message**. §8 — un écran qui ne
 proteste pas ne prouve rien.

@@ -90,3 +90,62 @@ de ces tuiles pour corriger sans deviner.
 sabotage) ; ② à réception de la capture, corriger l'ouverture de tuile ;
 ③ rejouer le croisement site→zip — dcd805/dch273/dcf850/dcg405 doivent alors
 recevoir leurs coûts de place de marché et leurs prix descendre.
+
+## Tour 6 (deux captures user du 15/08 + zips n°5 p.135–201 et n°6 p.202–268) — le tour qui renverse le tour 5
+
+**Les captures demandées au tour 5 sont arrivées** — pages PRODUIT idealo,
+lues, jamais imaginées :
+- DCH273 : « 25 Variantes à partir de 198,91 € » — DCH273N-XJ **198,91 €**
+  (« Meilleur prix », vendeur côtébrico ; RACETOOLS 200,16 € « vendu sans
+  batterie »), DCH273NT-XJ **226,04 €**, P2T 388,00, H2T 484,48, P2 387,26,
+  M1 345,48.
+- DCD805 (page de la variante NT-XJ, « Comparez 17 offres », plage
+  114,32–320,90 €) : DCD805NT-XJ **114,32 €** (« Meilleur prix »),
+  DCD805N **129,90 €**, P2T 272,84, E2T-QW 293,20, H2T 371,95, E1T 248,32.
+
+**Verdict n°1 — le « 89 € » n'est pas inventé, mais ce n'est pas une offre.**
+La tuile existe mot pour mot dans SES zips : zip n°5 `admin-140` section
+`sansRef`, DEUX fois — `{"rej": null, "prix": 88.99, "titre": "DEWALT DCD805
+tournevis électrique Compact sans brosse perceuse à main perceuse à
+percussi…"}` — et encore zip n°3 `admin-6` (88,99), zip n°6 `admin-207`
+(88,99), plus les mêmes en DCH273 à 84,99–95,99 €. MAIS la capture prouve que
+le minimum idealo de TOUTE la famille DCD805 est **114,32 €** (« Toutes les
+Variantes à partir de 114,32 € », 17 offres) : un montant à 88,99 € n'existe
+dans aucune liste d'offres du produit. Ces tuiles grises — titres traduits
+machinalement, réf de FAMILLE sans suffixe de variante — sont des encarts de
+grille (publicité / produits similaires), pas des offres achetables.
+
+**Verdict n°2 — la « cause n°2 » du tour 5 était FAUSSE ; le plan ② est
+ANNULÉ.** J'avais conclu « le parseur rate les tuiles les moins chères » et
+proposé d'apprendre leur gabarit. Mesuré ce tour : le parseur LES LIT (elles
+sortent en `sansRef` avec leur prix) et refuse de les écrire — à raison
+double : réf de famille seule (impossible d'attribuer à une variante) et prix
+sous le minimum réel de toutes les offres. Leur apprendre un gabarit aurait
+ÉCRIT des prix inachetables sur des fiches précises. Erreur gravée : E-115
+(O1, affirmer avant de mesurer — la « mesure » s'était arrêtée à la grille).
+
+**Verdict n°3 — sur ces deux références, le parseur est au millimètre.**
+Croisement capture→zips, valeur par valeur :
+
+| variante (capture) | min idealo | vu et apparié par le parseur | où (page du zip) |
+|---|---|---|---|
+| DCH273N-XJ | 198,91 € | 198,91 € → `dewalt-dch273n-xj` | n°1 p.94 et 100, n°2 p.161 et 167 |
+| DCH273NT-XJ | 226,04 € | 226,04 € → `dewalt-dch273nt-xj` | n°1 p.98, n°2 p.165 |
+| famille DCD805 | 114,32 € | 114,32 € → `dewalt-dcd805n-xj` | n°1 p.81, n°2 p.148/151/152/168 |
+| DCD805N | 129,90 € | 129,90 € → `dewalt-dcd805n-xj` | n°1 p.84 et 85 |
+
+Dans les zips n°3 à 6 ces tuiles ne figurent plus : leur prix est stable, et
+les INCHANGÉS sont comptés (`counts.unchanged`, ex. 26 sur n°6 p.214) mais
+pas détaillés — limite de lecture déjà gravée au tour 4, confirmée ici.
+⚠️ Nuance dite, pas cachée : la tuile de famille « DeWalt DCD805 » à 114,32 €
+s'est appariée par NOM à la fiche N (nue) alors que ce minimum est porté par
+la variante NT-XJ (avec coffret TSTAK). Coût favorable et ACHETABLE (acheter
+la NT-XJ sert une commande de machine nue, coffret en plus) — jamais à perte.
+Les hausses différées DCH273N-XJ → 305,12 € et DCH273NT-XJ → 323,92 €
+(coûts 198,91/226,04, exacts au centime) attendent l'arbitrage D-57.
+
+**Amélioration de méthode (tour 6)** : une tuile de grille dont le prix est
+SOUS le « à partir de » de sa propre famille n'est pas une offre, c'est un
+encart. Le croisement site→zip se termine TOUJOURS sur la page produit idealo
+(carrousel de variantes + liste d'offres) — seule source du minimum opposable.
+La grille seule ne suffit jamais à déclarer « le parseur a raté moins cher ».
