@@ -182,6 +182,27 @@ async function pwJoindreRattrapage(plan, etapes, brand, source, db, adminFb) {
     bilan.repechees = bilan.repecheesListe.length;
     bilan.repecheesListe = bilan.repecheesListe.slice(0, 25);
     bilan.muettes = bilan.muettes.slice(0, 25);
+    /* ⛔ LE VERDICT PART AUSSI VERS LA PAGE — sinon il n'atteint personne
+       (Phase 0.2 : le raccourci n'enregistre pas la réponse du plan, mesuré
+       sur 3 zips → 0). `traqueur_etat` est le SEUL document que la page relit
+       déjà, pour le backoff : on s'y greffe, une écriture par plan, zéro
+       lecture de plus. Forme COMPACTE et bornée : ce qui compte est la liste
+       des muettes, pas un roman. */
+    try {
+      await db.collection('config').doc('traqueur_etat').set({
+        rattrapage: { [String(brand || '').toLowerCase()]: {
+          at: Date.now(), servies: bilan.ajoutees, restantes: bilan.restantes,
+          repechees: bilan.repechees,
+          muettes: bilan.muettes.slice(0, 25).map(function (m) {
+            return { racine: m.racine, fois: m.fois };
+          })
+        } }
+      }, { merge: true });
+    } catch (eEtat) {
+      bilan.note = (bilan.note ? bilan.note + ' · ' : '')
+        + 'verdict non déposé pour les pages (' + ((eEtat && eEtat.message) || 'erreur')
+        + ') — il reste dans cette réponse de plan, que le raccourci n\'enregistre pas';
+    }
     try {
       await memDoc.set({ at: Date.now(), racines: racinesNow,
         echecs: Object.assign({}, echecs) }, { merge: false });
@@ -4293,6 +4314,19 @@ async function handlePriceWatch(req, res, admin, db) {
        de relire tout le catalogue : une page en backoff ne dépense donc ni
        quota d'override ni écriture. dryRun n'écrit pas mais respecte le backoff
        aussi (inutile de calculer des hausses qu'on n'appliquera pas). */
+    /* ⛔⛔ ET C'EST ICI QUE LE VERDICT DU PLAN REMONTE — Phase 0.2 du plan
+       DeWALT. Payé le 16/08/2026 : la mémoire du rattrapage (racines `muettes`)
+       écrivait son verdict dans la réponse du PLAN, or le raccourci de l'user
+       n'enregistre que les réponses de PAGE — mesuré sur trois zips, **zéro
+       réponse de plan**. Un correctif livré la veille partait donc dans le
+       vide, et personne ne pouvait le savoir.
+       ⇒ Le plan dépose son verdict dans `config/traqueur_etat` (UNE écriture
+       par plan), et la page le recopie depuis l'état QU'ELLE LIT DÉJÀ pour le
+       backoff : **zéro lecture Firestore supplémentaire**, la liste voyage
+       jusqu'au presse-papier de l'user.
+       ⚠️ Portes lues — J4 : ni prix ni réduction, des références à relire ;
+       J3 : des références d'outils publiques ; J5 : aucune fiscalité. */
+    let verdictRattrapage = null;
     try {
       const etatDoc = await db.collection('config').doc('traqueur_etat').get();
       const etat = etatDoc && etatDoc.exists ? (etatDoc.data() || {}) : {};
@@ -4303,6 +4337,8 @@ async function handlePriceWatch(req, res, admin, db) {
           note: 'en backoff apres blocage — releve non applique jusqu\'a ' + new Date(Number(etat.backoffJusqu)).toISOString()
         });
       }
+      const vr = (etat.rattrapage || {})[String(brand || '').toLowerCase()];
+      if (vr && typeof vr === 'object') verdictRattrapage = vr;
     } catch (e) { /* état illisible : on ne bloque pas le traqueur pour ça */ }
 
     /* Overrides relus À LA SOURCE : le catalogue fusionné peut avoir jusqu'à
@@ -5404,6 +5440,40 @@ async function handlePriceWatch(req, res, admin, db) {
           + 'refaire un passage SANS &scan=1 sur la page voulue.'
         : undefined,
       applied, flagged,
+      /* ⛔⛔ LES FICHES INCHANGÉES SONT NOMMÉES — ET C'EST LE DÉFAUT LE PLUS
+         COÛTEUX QUE CE PROJET AIT EU. Mesuré le 16/08/2026 : `applied` et
+         `flagged` sortaient NOMMÉS, `unchanged` seulement COMPTÉ — 1 209 au
+         dernier balayage DeWALT, 15 361 cumulés sur 13 balayages, zéro nommé.
+         Conséquence : la question la plus importante qu'on puisse poser au
+         traqueur — **lesquelles de mes fiches ont un coût fournisseur frais ?**
+         — n'avait AUCUNE réponse possible.
+         ⛔ Ce n'est pas théorique, ça a produit deux fautes le même jour :
+           ① j'ai annoncé « DeWALT fini à 100 % » sur un chiffre venu du
+              balayage d'une AUTRE marque, parce que rien ne permettait de
+              vérifier le vrai ;
+           ② j'ai mesuré « 759 fiches jamais vues chez le fournisseur » en les
+              cherchant dans `unknown` — or une tuile APPARIÉE n'y va jamais
+              (198 réfs dans `applied`, 1 208 dans `unknown`, 0 dans les deux).
+              Je comptais comme invisibles exactement celles qui avaient été
+              trouvées.
+         ⇒ On rend les IDENTIFIANTS SEULS. Ni titre ni prix : `applied` et
+         `flagged` portent le détail, une fiche inchangée n'a rien de neuf à
+         raconter — son intérêt est d'EXISTER dans la liste.
+         ⚠️ AUCUN PLAFOND, ET C'EST VOLONTAIRE : la liste est bornée par
+         construction — une fiche inchangée vient d'une tuile de la page, et il
+         y en a 60 au plus. Mesuré : ~18 par page. Un plafond ici serait un
+         plafond muet, et la règle l'interdit.
+         ⚠️ Portes lues — J4 : aucun prix n'est calculé, rendu ni annoncé ici,
+         uniquement des identifiants de fiches ; aucune réduction ni prix de
+         référence (D-004). J3 : des identifiants de fiches PRODUIT, aucune
+         donnée personnelle, rien qui concerne une personne. J5 : aucune TVA,
+         aucun octroi de mer — le territoire fiscal continue de se dériver du
+         code postal, ce champ n'y touche pas. */
+      unchangedIds: unchanged.map((r) => r && r.id).filter(Boolean),
+      /* ⛔ LE VERDICT DU RATTRAPAGE, RECOPIÉ DEPUIS L'ÉTAT DÉJÀ LU (Phase 0.2).
+         `undefined` tant qu'aucun plan n'en a déposé : un champ vide vaut mieux
+         qu'un champ absent seulement quand il DIT quelque chose. */
+      rattrapageVerdict: verdictRattrapage || undefined,
       /* ⛔ LES HAUSSES RETENUES SORTENT EN ENTIER, comme `applied`. Une écriture
          retardée qu'on ne verrait pas serait une écriture perdue : c'est la
          seule façon de savoir, en fin de balayage, ce qui attendait encore. */

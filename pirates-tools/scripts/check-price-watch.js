@@ -3405,6 +3405,43 @@ module.exports = async function () {
           + 'aucune ré-écriture (écrits: ' + (dbS._compte.ecrituresParId[cible.id] || 0)
           + ', page 2: ' + JSON.stringify(rS2.out && rS2.out.counts) + ')');
 
+        /* ⛔⛔ LES FICHES INCHANGÉES SONT NOMMÉES — Phase 0.1 du plan DeWALT.
+           Payé le 16/08/2026 : `unchanged` était compté (15 361 appariements
+           cumulés sur 13 balayages DeWALT) et JAMAIS nommé. Deux fautes en
+           sont sorties le même jour — un « 100 % » annoncé sur le chiffre
+           d'une autre marque, et « 759 fiches jamais vues » mesuré en les
+           cherchant dans une liste où une fiche appariée ne va jamais.
+           ⚠️ PRÉALABLE : on n'assert que si le cas est RÉUNI (une fiche
+           inchangée existe). Sans lui, le témoin serait vert à vide — c'est
+           le « repli poli » que la règle mère interdit. */
+        ok(rS2.out && rS2.out.counts && rS2.out.counts.unchanged === 1,
+          '⛔ PRÉALABLE du témoin `unchangedIds` : la page 2 n\'a produit aucune '
+          + 'fiche inchangée, les assertions qui suivent seraient vertes à vide '
+          + '(counts: ' + JSON.stringify(rS2.out && rS2.out.counts) + ')');
+        ok(Array.isArray(rS2.out && rS2.out.unchangedIds),
+          '⛔ la réponse de balayage ne porte plus `unchangedIds` : la couverture '
+          + 'redevient inconnaissable, et c\'est le défaut qui a produit deux '
+          + 'chiffres faux le 16/08 (obtenu : '
+          + JSON.stringify(rS2.out && rS2.out.unchangedIds) + ')');
+        ok(rS2.out && rS2.out.unchangedIds
+          && rS2.out.unchangedIds.length === rS2.out.counts.unchanged,
+          '⛔ `unchangedIds` doit nommer AUTANT de fiches que `counts.unchanged` '
+          + 'en compte — une liste plus courte que son compteur est un plafond '
+          + 'muet (nommées ' + ((rS2.out.unchangedIds || []).length)
+          + ', comptées ' + rS2.out.counts.unchanged + ')');
+        ok(rS2.out && rS2.out.unchangedIds
+          && rS2.out.unchangedIds.indexOf(cible.id) !== -1,
+          '⛔ la fiche réellement inchangée doit être NOMMÉE dans `unchangedIds` — '
+          + 'un compteur juste avec la mauvaise liste ne vaut rien (attendu '
+          + cible.id + ', obtenu ' + JSON.stringify(rS2.out.unchangedIds) + ')');
+        /* ⛔ IDENTIFIANTS SEULS — ni titre ni prix. Un objet ici rouvrirait la
+           porte J4 (un prix rendu là où on n'en annonce aucun) et ferait
+           enfler la réponse que le raccourci recopie. */
+        ok(rS2.out && rS2.out.unchangedIds
+          && rS2.out.unchangedIds.every(function (x) { return typeof x === 'string'; }),
+          '⛔ `unchangedIds` ne porte QUE des identifiants (chaînes) : ni titre '
+          + 'ni prix — obtenu ' + JSON.stringify(rS2.out.unchangedIds));
+
         ok(appelsLoadCatalog === 0,
           '⛔ BALAYAGE : le catalogue se fusionne sur le relevé du cache (loadCatalogAvec) — '
           + 'loadCatalog appelé ' + appelsLoadCatalog + ' fois, or chaque appel relit la '
@@ -6512,8 +6549,14 @@ module.exports = async function () {
          · le 2e repêche tout ce que le 1er a servi, et ne déclare AUCUNE
            muette (un seul silence s'explique par la rotation de la grille) ;
          · le 3e déclare muettes les racines interrogées deux fois pour rien.
-       Et le coût est compté : une lecture, une écriture PAR PLAN. */
-    var memoire = { doc: null };
+       Et le coût est compté : une lecture, DEUX écritures PAR PLAN.
+       ⛔ LA BASE FACTICE RANGE PAR IDENTIFIANT DE DOCUMENT, pas en vrac : un
+       faux magasin qui confond deux documents ferait passer le dépôt du
+       verdict pour la mémoire des racines, et le témoin serait vert sans que
+       rien n'atteigne la page. */
+    var docs = Object.create(null);
+    var memoire = { get doc() { return docs['pw_rattrapage_makita'] || null; },
+      get etat() { return docs['traqueur_etat'] || null; } };
     var compteMem = { lectures: 0, ecritures: 0 };
     var dbMem = {
       collection: function (nom) {
@@ -6532,12 +6575,21 @@ module.exports = async function () {
               _id: id,
               get: function () {
                 compteMem.lectures++;
-                return Promise.resolve({ exists: !!memoire.doc,
-                  data: function () { return JSON.parse(JSON.stringify(memoire.doc || {})); } });
+                return Promise.resolve({ exists: docs[id] !== undefined,
+                  data: function () { return JSON.parse(JSON.stringify(docs[id] || {})); } });
               },
-              set: function (d) {
+              /* ⚠️ `merge:true` fusionne, `merge:false` remplace — la vraie
+                 base fait cette différence, le faux magasin doit la faire
+                 aussi : sans elle, le dépôt du verdict écraserait tout et le
+                 témoin mesurerait un comportement qui n'existe pas. */
+              set: function (d, opt) {
                 compteMem.ecritures++;
-                memoire.doc = JSON.parse(JSON.stringify(d));
+                var copie = JSON.parse(JSON.stringify(d));
+                if (opt && opt.merge && docs[id]) {
+                  docs[id] = Object.assign({}, docs[id], copie);
+                } else {
+                  docs[id] = copie;
+                }
                 return Promise.resolve();
               }
             };
@@ -6560,10 +6612,19 @@ module.exports = async function () {
     var m2 = await joindreFn(planMem, etM2, 'MAKITA', 'idealo', dbMem, null);
     var etM3 = [];
     var m3 = await joindreFn(planMem, etM3, 'MAKITA', 'idealo', dbMem, null);
-    ok(compteMem.lectures === 3 && compteMem.ecritures === 3,
-      '⛔ la mémoire du rattrapage doit coûter EXACTEMENT une lecture et une '
-      + 'écriture PAR PLAN — une fois par balayage, jamais par page (règle du '
-      + 'budget des services tiers) — mesuré sur 3 plans : ' + JSON.stringify(compteMem));
+    /* ⛔ LE BUDGET EST CHIFFRÉ ET STRICT : par PLAN, une lecture et DEUX
+       écritures — la mémoire des racines servies, et le dépôt du verdict dans
+       `traqueur_etat` pour que la PAGE puisse le rendre (Phase 0.2 : sans ce
+       dépôt le verdict n'atteint personne, le raccourci n'enregistrant pas la
+       réponse du plan — mesuré, 0 sur 3 zips).
+       ⚠️ Égalité STRICTE, jamais « au plus » : un « au plus » laisserait une
+       troisième écriture s'installer sans que rien ne sonne. Un plan pilote
+       134 pages ; deux écritures pour ça restent sans commune mesure. */
+    ok(compteMem.lectures === 3 && compteMem.ecritures === 6,
+      '⛔ la mémoire du rattrapage doit coûter EXACTEMENT une lecture et DEUX '
+      + 'écritures PAR PLAN (racines servies + dépôt du verdict pour les pages) '
+      + '— une fois par balayage, jamais par page (règle du budget des services '
+      + 'tiers) — mesuré sur 3 plans : ' + JSON.stringify(compteMem));
     ok(m1.repechees === 0,
       '⛔ au tout premier plan, rien n\'a encore été demandé : compter un '
       + 'repêchage accuserait de silence une recherche qui n\'a jamais eu lieu '
@@ -6583,7 +6644,43 @@ module.exports = async function () {
       + 'un coût que plus rien ne peut reconfirmer (mesuré : ' + m3.muettes.length
       + ' muettes sur ' + m1.ajoutees + ' servies)');
 
-    /* ⑤ LA MÉMOIRE QUI TOMBE NE FAIT PAS TOMBER LE PLAN — garantie d'origine. */
+    /* ⑤ ⛔⛔ LE VERDICT ATTEINT-IL VRAIMENT L'USER ? — Phase 0.2, et c'est LA
+       question. Payé le 16/08/2026 : la mémoire du rattrapage écrivait son
+       verdict dans la réponse du PLAN, que le raccourci n'enregistre pas
+       (mesuré : 0 réponse de plan sur 3 zips). Un correctif livré la veille
+       ne parvenait donc à personne — et rien ne le disait.
+       On vérifie ici la SEULE chose qui compte : après trois plans, le
+       document que la PAGE relit (`traqueur_etat`) porte les muettes. */
+    var depot = memoire.etat && memoire.etat.rattrapage
+      && memoire.etat.rattrapage.makita;
+    ok(!!depot,
+      '⛔ le plan ne dépose plus son verdict dans `traqueur_etat` : la réponse '
+      + 'de page ne pourra pas le rendre, et le verdict n\'atteindra PERSONNE — '
+      + 'le raccourci n\'enregistre pas la réponse du plan (mesuré, 0 sur 3 zips)');
+    ok(depot && Array.isArray(depot.muettes) && depot.muettes.length === m3.muettes.length,
+      '⛔ le dépôt doit porter AUTANT de muettes que le plan en a trouvé — sinon '
+      + 'la page rend un verdict amputé (déposées '
+      + ((depot && depot.muettes || []).length) + ', trouvées ' + m3.muettes.length + ')');
+    ok(depot && depot.muettes.every(function (x) {
+      return x && typeof x.racine === 'string' && x.fois >= 2; }),
+      '⛔ chaque muette déposée porte sa racine ET son nombre de silences : '
+      + 'un nom sans compte ne dit pas si c\'est un hasard de rotation (obtenu '
+      + JSON.stringify(depot && depot.muettes) + ')');
+    /* ⛔ ET LE BRANCHEMENT CÔTÉ PAGE — l'expression EFFECTIVE (M-29). Un dépôt
+       que la réponse de page ne recopie pas ne sert à rien. */
+    (function () {
+      var srcAdm6 = require('fs').readFileSync(
+        require('path').join(__dirname, '..', 'api', 'admin.js'), 'utf8');
+      ok(/const vr = \(etat\.rattrapage \|\| \{\}\)\[String\(brand \|\| ''\)\.toLowerCase\(\)\];/.test(srcAdm6),
+        '⛔ la page ne relit plus le verdict depuis l\'état qu\'elle lit DÉJÀ '
+        + 'pour le backoff : soit le verdict n\'atteint personne, soit il coûte '
+        + 'une lecture Firestore de plus PAR PAGE');
+      ok(/rattrapageVerdict: verdictRattrapage \|\| undefined,/.test(srcAdm6),
+        '⛔ la réponse de page ne rend plus `rattrapageVerdict` : le verdict '
+        + 'meurt côté serveur, exactement comme avant le correctif');
+    })();
+
+    /* ⑥ LA MÉMOIRE QUI TOMBE NE FAIT PAS TOMBER LE PLAN — garantie d'origine. */
     var dbMemKo = {
       collection: function (nom) {
         if (nom === 'product_overrides') {
