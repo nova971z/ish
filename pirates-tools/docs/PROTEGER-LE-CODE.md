@@ -93,20 +93,42 @@ restent actifs sur les fichiers SERVIS, où toute valeur en dur est une fuite.
 > ⛔ **Aucune de ces étapes n'est engagée.** Elles touchent le compte GitHub et
 > l'hébergeur : c'est la décision et le geste de l'user, jamais les miens.
 
-### Étape 1 — créer un dépôt PRIVÉ neuf *(user, ~2 min)*
-GitHub → **New repository** → nom au choix → cocher **Private** → **ne pas**
-initialiser avec un README.
-⚠️ Ne pas passer par « Fork » ni par « Import » depuis l'ancien : on repartirait
-d'un fork, et on retomberait sur la contrainte du §3.
+### ⛔ RECTIFICATIF (17/08/2026) — ma procédure d'origine était FAUSSE sur deux points
 
-### Étape 2 — y pousser l'historique *(moi, une commande)*
-```bash
-git remote add prive git@github.com:<compte>/<nouveau-nom>.git
-git push prive --all && git push prive --tags
-```
-⚠️ **L'historique complet part avec.** C'est voulu : les décisions et les
-mesures y vivent. Mais cela signifie qu'un secret qui aurait été poussé un jour
-serait recopié — d'où la vérification du §4, faite **avant**.
+**① « Ne pas passer par Import » : FAUX.** Vérifié auprès de la documentation
+GitHub : l'**Importer** crée un dépôt **INDÉPENDANT**, pas un fork — *« This is
+different from a fork […] we can't make pull requests to the original
+repository »* — il copie **tout l'historique des commits** et **on choisit sa
+visibilité**. C'est donc exactement l'outil qu'il faut, et j'avais écrit
+l'inverse.
+
+**② « Je pousse l'historique, une commande » : IMPOSSIBLE d'ici.** Mesuré :
+`.git/shallow` existe — **ma copie du dépôt est SUPERFICIELLE**. Elle ne
+contient que 125 commits, pas l'historique complet. Je ne peux donc pas
+transférer ce que je n'ai pas.
+
+⇒ **La bonne méthode ne demande AUCUNE commande, et aucune à moi.**
+
+### Étape 1 — importer, plutôt que créer puis pousser *(user, ~3 min)*
+GitHub → **New repository** → en haut de la page, le lien **« Import a
+repository »**.
+- **Your old repository's clone URL** : `https://github.com/nova971z/ish`
+  *(public, donc aucun identifiant à donner)*
+- **Owner** : `nova971z` · **Repository name** : au choix
+- **Privacy** : ⛔ **Private**
+
+⚠️ L'import copie AUSSI l'héritage du projet amont (`ish-app/ish`) : le dépôt
+sera lourd. Ce n'est pas grave — il est privé — mais c'est dit.
+⚠️ L'import ne reprend **ni les issues ni les pull requests**. Nous n'en avons
+pas : sans effet ici.
+
+### Étape 1 bis — l'autre voie, si l'import échoue *(secours)*
+Créer un dépôt **vide** et **privé** (README, .gitignore et licence sur
+« Off » / « No » : toute initialisation crée un commit qui gênerait le
+transfert), puis me le dire. ⚠️ **Je devrai d'abord vérifier que je peux y
+écrire** : aucun `credential.helper` ni clé SSH n'existe dans ma session, et mes
+accès sont limités au dépôt actuel. Si l'écriture est refusée, cette voie de
+secours ne mène nulle part — d'où l'import en premier.
 
 ### Étape 3 — rebrancher l'hébergeur *(user, ~3 min)*
 Vercel → le projet → **Settings → Git** → déconnecter l'ancien dépôt, connecter
