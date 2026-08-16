@@ -5,6 +5,38 @@ vaut tout. Code de niveau institutionnel, ou rien.
 **Ordre de priorité, non négociable** : argent · sécurité · fonctionnel ·
 structure · finition.
 
+## ⛔⛔ 0. AUCUN TRAVAIL À L'AVEUGLE — LIRE LA CHAÎNE AVANT DE LA TOUCHER
+*(ordre de l'user, gravé le 16/08/2026 : « avant de toucher quoi que ce soit,
+si tu ne sais pas exactement de quoi c'est composé, tu dois lire la totalité de
+la chaîne du code […] aucun travail à l'aveugle n'est toléré »)*
+
+**Avant la première modification d'un sous-système, je LIS la chaîne entière —
+de l'entrée de la donnée jusqu'à son écriture — et je dis ce que j'ai lu.**
+Pas le fichier : la **chaîne**. Pour le traqueur : la page reçue → le parseur →
+l'appariement → la garde → le choix du coût → le modèle de prix → l'écriture.
+
+**Où est la carte, dans cet ordre :**
+1. `node scripts/ou.js "<intention>"` — l'entonnoir : fichiers, portes, pièges,
+   décisions, et ce que « fini » veut dire à cet endroit ;
+2. `docs/CARTOGRAPHIE.md` — la carte de vol du dépôt ;
+3. `docs/CHAINE-TRAQUEUR.md` — **la chaîne traqueur / parseur / calculateur,
+   maillon par maillon, avec les fichiers et les numéros de ligne** ;
+4. `docs/DECISIONS.md`, `docs/LECONS.md`, `docs/ERREURS.md` — ce qui a déjà été
+   tranché, cassé, et payé.
+
+⛔ **Les quatre fautes que cette règle interdit, toutes commises le 16/08/2026 :**
+- appeler une fonction avec le MAUVAIS TYPE d'argument et conclure qu'elle ne
+  marche pas (`String({})` vaut « [object Object] ») — **fait 4 fois** ;
+- écrire un motif de recherche jetable au lieu de réutiliser celui du produit,
+  et se tromper 3 fois de suite sur la même tournure (« sans **fil** ») ;
+- annoncer un pourcentage lu sur une AUTRE marque ;
+- chercher une fiche dans une liste où, par construction, elle ne peut pas être.
+
+⛔ **Et une carte périmée est un travail à l'aveugle qui s'ignore.** Mesuré le
+16/08 : `CARTOGRAPHIE.md` annonçait **207 produits** pour **1 708** réels et
+**12 contrôles** pour **64**. Porte : `scripts/check-cartographie.js` — les
+chiffres de la carte se relisent sur le disque à chaque CI.
+
 ## 1. AVANT de réfléchir à une approche — quatre questions, dans cet ordre
 ```bash
 cd pirates-tools && node scripts/ou.js "<ce que je vais faire>"

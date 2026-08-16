@@ -37,6 +37,7 @@ désigné ici, soit il est rangé.
 | `AUDIT-DEWALT-2026-08-16.md` | la vérification complète de la marque DeWALT : pourquoi elle n'est PAS finie, chaîne par chaîne, et l'ordre de ce qui reste |
 | `PLAN-FINIR-DEWALT.md` | le plan numéroté pour finir DeWALT : 3 phases, 9 étapes, 2 balayages et 1 décision demandés à l'user |
 | `DEWALT-SUFFIXES-A-SOURCER.csv` | les 33 suffixes DeWALT dont le sens n'est PAS établi — tableau à remplir avec l'user, une ligne par fiche |
+| `CHAINE-TRAQUEUR.md` | **la chaîne traqueur · parseur · calculateur, maillon par maillon** — à lire AVANT de toucher un de ces fichiers (protocole §0) |
 | `DEMANDES.md` | **ce que l'user a demandé, et où ça en est** — trois états, et la CI REFUSE de livrer tant qu'une ligne est `OUVERT` (`scripts/check-demandes.js`) |
 | `ERREURS.md` | mes erreurs classées par **origine** — 7 mécanismes, lus par le sommaire seul (`scripts/erreurs.js`) |
 | `JURIDIQUE.md` | les 5 domaines qui engagent la responsabilité — porte à ouvrir avant d'éditer (`scripts/juridique.js`) |

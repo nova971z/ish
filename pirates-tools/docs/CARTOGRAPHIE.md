@@ -34,6 +34,62 @@
 
 ---
 
+## 0 bis. ⛔ AVANT DE TOUCHER — OÙ EST LA CARTE
+
+*Ajouté le 16/08/2026, ordre de l'user : « aucun travail à l'aveugle n'est
+toléré ». Règle opposable : `.claude/PROTOCOLE.md` §0.*
+
+1. `node scripts/ou.js "<intention>"` — **l'entonnoir, toujours en premier** :
+   fichiers concernés, portes, pièges déjà payés, décisions en vigueur.
+2. **Ce document** — la carte de vol du dépôt.
+3. **`docs/CHAINE-TRAQUEUR.md`** — la chaîne **traqueur · parseur ·
+   calculateur**, maillon par maillon, de la page reçue jusqu'à l'écriture du
+   prix. C'est LÀ qu'il faut aller avant de toucher `price-parse.js`,
+   `admin.js`, `nomenclature.js`, `pricing-model.js` ou `traqueur-plans.js`.
+4. `docs/DECISIONS.md` · `docs/LECONS.md` · `docs/ERREURS.md`.
+
+⛔ **Les chiffres de cette carte sont vérifiés à chaque CI** par
+`scripts/check-cartographie.js` : ils se relisent sur le disque, et un écart
+fait rougir. Motif — le 16/08/2026 elle annonçait **207 produits** pour 1 708
+réels et **12 contrôles** pour 65. *Une carte périmée est un travail à
+l'aveugle qui s'ignore : on lui fait confiance.*
+
+## 0 ter. api/_lib/ — les 26 modules partagés
+
+⚠️ Absents de cette carte jusqu'au 16/08/2026, alors que c'est là que vivent le
+parseur, le modèle de prix et les grammaires de référence.
+
+| module | lignes |
+|---|---:|
+| `api/_lib/accounting.js` | 328 |
+| `api/_lib/analytics.js` | 401 |
+| `api/_lib/auth.js` | 125 |
+| `api/_lib/barriere-achat.js` | 116 |
+| `api/_lib/catalog.js` | 379 |
+| `api/_lib/courses.js` | 569 |
+| `api/_lib/diag-rafale.js` | 152 |
+| `api/_lib/firebase.js` | 94 |
+| `api/_lib/http.js` | 67 |
+| `api/_lib/invoice.js` | 131 |
+| `api/_lib/limites.js` | 43 |
+| `api/_lib/loyalty.js` | 76 |
+| `api/_lib/nomenclature.js` | 2034 |
+| `api/_lib/paiement-meta.js` | 60 |
+| `api/_lib/poids-expedie.js` | 108 |
+| `api/_lib/postal.js` | 43 |
+| `api/_lib/price-parse.js` | 4115 |
+| `api/_lib/pricing-config.js` | 135 |
+| `api/_lib/pricing-model.js` | 339 |
+| `api/_lib/pricing.js` | 194 |
+| `api/_lib/ratelimit.js` | 62 |
+| `api/_lib/reconstitution.js` | 254 |
+| `api/_lib/snapshot.js` | 169 |
+| `api/_lib/traqueur-plans.js` | 211 |
+| `api/_lib/verif-visibilite.js` | 111 |
+| `api/_lib/visuels-fiche.js` | 125 |
+
+*Le détail de leur enchaînement est dans `docs/CHAINE-TRAQUEUR.md`.*
+
 ## 1. index.html — vues, routes, points de repère
 
 ### `<head>` (lignes ~3–131)
@@ -239,7 +295,7 @@ règles LIVE = ce fichier firestore.rules. Si le fichier évolue → re-publier
 
 ---
 
-## 6. scripts/ci.js — 12 contrôles (doit rester VERT)
+## 6. scripts/ci.js — 65 contrôles (doit rester VERT)
 
 `check-required-ids` (IDs DOM présents) · `check-paths` (images référencées existent) ·
 `check-products-json` (schéma catalogue) · **`check-pricing`** (parité pricing.js ↔
@@ -258,7 +314,7 @@ Autres scripts NON en CI : `set-admin-claim.js`, `test-rules.js` (émulateur Fir
 
 ---
 
-## 7. products.json — schéma produit (207 produits, tableau brut)
+## 7. products.json — schéma produit (1708 produits, tableau brut)
 
 **Champs** : `id` (clé), `slug`, `sku` (réf. traqueur), `title`, `name`, `brand`,
 `category`, `tag`, `desc`, `img` (`images/posters/*.webp`), **`price`** (TTC réf.),

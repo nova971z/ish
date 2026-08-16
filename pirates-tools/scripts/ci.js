@@ -276,6 +276,7 @@ var reqDeploi   = safeRequire('./check-deploiement', 'check-deploiement');
 // cote — et des couts d'achat qui ne descendent pas.
 var reqPlanTrq  = safeRequire('./check-plan-traqueur', 'check-plan-traqueur');
 var reqMarqSui  = safeRequire('./check-marques-suivies', 'check-marques-suivies');
+var reqCarto    = safeRequire('./check-cartographie', 'check-cartographie');
 var reqVisuels  = safeRequire('./check-visuels', 'check-visuels');
 var reqEssai    = safeRequire('./check-mode-essai', 'check-mode-essai');
 var reqClasser  = safeRequire('./check-classer-idealo', 'check-classer-idealo');
@@ -393,6 +394,7 @@ var reqReconc   = safeRequire('./check-reconciliation', 'check-reconciliation');
   await runOne(reqVarCof,   'check-variantes-coffret');
   await runOne(reqPlanTrq,  'check-plan-traqueur');
   await runOne(reqMarqSui,  'check-marques-suivies');
+  await runOne(reqCarto,    'check-cartographie');
   await runOne(reqRevolut,  'check-revolut');
   await runOne(reqReconc,   'check-reconciliation');
 
