@@ -31,6 +31,18 @@ Intention absente de l'index → **l'ajouter**, puis continuer.
 4. **Une hypothèse morte se déclare morte**, tout de suite, sans y revenir.
 5. **Remonter la chaîne** : symptôme → couche → cause. Ne jamais expliquer par
    du code qui n'a même pas été téléchargé.
+6. ⛔ **JAMAIS DE DÉTOUR, JAMAIS DE PETITE CORRECTION ISOLÉE — LA SOURCE,
+   TOUJOURS** *(ordre de l'user, gravé le 16/08/2026)* : « on ne règle jamais
+   un problème isolé, tu vas à la source et tu règles le problème. » On
+   RELIT, on ANALYSE, on CORRIGE là où le défaut naît — puis on vérifie
+   plusieurs fois (§4). Un contournement proposé est une faute au même titre
+   qu'un contournement codé.
+   *Payé le jour même, deux fois dans la même heure* : pour une fiche au coût
+   empoisonné que la grille ne servait plus, j'ai proposé ① une page produit
+   visée à la main puis ② un raccourci séparé — deux détours refusés. La
+   source était : le geste unique de l'user (balayer) doit couvrir ce que la
+   grille ne montre pas → le plan normal joint désormais le rattrapage
+   (D-172). Le détour aurait réglé UNE fiche ; la source les règle toutes.
 
 ## 3. MESURER avant d'affirmer
 - Aucun chiffre sans la commande qui l'a produit, dans le même message.
