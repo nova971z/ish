@@ -1,0 +1,67 @@
+référence;verdict;composition confirmée (source web);concordance avec la lecture du parseur
+DCK2050H2T-QW;CONFIRMÉE;DCD805+DCF850+2x5,0 PowerStack+DCB1104+TSTAK (cee.dewalt.global);exacte (nBat 2, refs)
+DCK2051H2T-QW;CONFIRMÉE;DCD800+DCF850+2x5,0 PowerStack+TSTAK (cee.dewalt.global);exacte
+DCK2051E2T-QW;CONFIRMÉE;DCD800+DCF850+2x1,7 PowerStack+TSTAK (Seger/Domitech);exacte
+DCK2052H1E1T-QW;CONFIRMÉE;DCD999+DCF850, 1x5,0+1x1,7 PowerStack (cee.dewalt.global);⚠️ la table lit nBat 1 sur le suffixe composé H1E1 (2 batteries réelles) — fiche absente du catalogue, aucun prix en jeu
+DCK2055T2T-QW;CONFIRMÉE;DCG414+DCD996+2x6,0 FlexVolt+2 TSTAK (dewalt.co.uk);exacte
+DCK2060L2T;CONFIRMÉE;DCD778+DCF787+2x3,0+TSTAK (Own4Less);exacte
+DCK2061P2T;CONFIRMÉE;DCD708+DCF809+2x5,0+DCB115+TSTAK II (cee.dewalt.global);exacte
+DCK2062E2T-QW;CONFIRMÉE;DCD709+DCF809+2x1,7 PowerStack (Klium/Toolnation);exacte (refs DCD709/DCF809 lues)
+DCK2062L2T-QW;CONFIRMÉE;DCD709+DCF809+2x3,0+TSTAK II (Amazon/ManoMano);exacte
+DCK2062M2T;CONFIRMÉE;DCD709+DCF809+2x4,0+TSTAK II (Cromwell/PowerToolWorld);exacte
+DCK2062P2T;CONFIRMÉE;DCD709+DCF809+2x5,0+TSTAK (Toolfix/Toolden);exacte
+DCK2078MDR-QW;CONFIRMÉE;DCD708+DCF787+1x4,0+1x2,0 (EmmetiStore);exacte (refs lues)
+DCK2225MP2T;CONFIRMÉE;McLaren DCF99M+DCG45M+2x5,0+DCB1104+TSTAK VI (todotaladros/tapshop);EXACTE — les 4 refs lues mot pour mot
+DCK246P2T-QW;CONFIRMÉE;cloueurs DCN930+DCN660+2x5,0 TSTAK (Toolnation);exacte
+DCK266D2;CONFIRMÉE;DCD796+DCF887+2x2,0+DCB113+DS150 (DVS/Buyaparcel);exacte
+DCK266M2T;CONFIRMÉE;DCD796+DCF887+2x4,0+TSTAK (cee.dewalt.global);exacte
+DCK266NDS;CONFIRMÉE;DCD796+DCF887 nus+DS150 (todotaladros);EXACTE — les 3 refs lues
+DCK266P2;CONFIRMÉE;DCD796+DCF887+2x5,0+DS150 (ept-irl);exacte
+DCK266P2-QW;CONFIRMÉE;idem, DS150 (LH Industrial);exacte
+DCK266P2T;CONFIRMÉE;DCD796+DCF887+2x5,0+DCB115+TSTAK II (todotaladros/Axminster);exacte
+DCK266P3-QW;CONFIRMÉE;3x5,0+DS150 (Klium);exacte
+DCK266P3T;CONFIRMÉE;3x5,0+TSTAK (Klium/Toolnation);exacte (nBat 3)
+DCK276P3;CONFIRMÉE;DCD996+DCF887+3x5,0+ToughSystem (Klium/Coolblue);exacte
+DCK276P3T;CONFIRMÉE;DCD996+DCF887+3x5,0+T-STAK (outilslebricoleur);exacte
+DCK278P2;CONFIRMÉE;DCD996+DCG412+2x5,0+DS300 (ept-irl/ECA);⚠️ tuile au titre pauvre → nBat lu 1 (réel 2) — fiche absente, aucun prix en jeu
+DCK376T2T;CONFIRMÉE;DCH333+DCG418+DCD996+2x6,0 FlexVolt+TSTAK II/VI (vernilo/todotaladros);EXACTE — refs et nBat lus
+DCK422P3-QW;CONFIRMÉE;4 machines+3x5,0+ToughSystem (cee.dewalt.global);exacte
+DCK422P3T;CONFIRMÉE;DCG405+DCH273+DCD796+DCF887+3x5,0+TSTAK (dewalt.fr);exacte
+DCK429P3T-QW;CONFIRMÉE;DCD805+DCG405+DCH273+DCF850+3x5,0+TSTAK II/VI (empik/vernilo/sacrofast);EXACTE — les 5 refs lues mot pour mot
+DCK694P3;CONFIRMÉE;6 outils+3x5,0+2 DS300 (PowerToolWorld/Screwfix);exacte (nBat 3)
+DCK791D2T;CONFIRMÉE;DCD791+71 accessoires+2x2,0+TSTAK I (dewalt.co.uk);exacte
+DCK791D2KX;PARTIELLE;existe (electrical-components), composition non détaillée par la recherche;rien à contredire — dit
+DCK795;CONFIRMÉE;DCD795+71 accessoires+2x1,5+TSTAK (dewalt.fr DCK795S2T);exacte
+DCK853P4T-QW;CONFIRMÉE;8 outils+4x5,0+TSTAK (Klium/Racetools);exacte (nBat 4)
+CPROF393;PARTIELLE;code distributeur espagnol non confirmé (recherche US) ; contenu « = DCH273P2 » confirmé (dewalt.com : 2x5,0+chargeur);tuile inattribuable, aucun prix en jeu
+DSET1;CONFIRMÉE;DCS391N+DCS331N+DCG405N+DCD796N+DCF887N+DCH273N+3x5,0+sac (outilslebricoleur);EXACTE — les 7 refs lues mot pour mot
+DWE492TWIN2;CONFIRMÉE;DWE492 230mm + DWE4157 125mm (racetools/distriartisan);EXACTE — les 3 refs lues
+DWK600;CONFIRMÉE;6 machines+3x5,0+chariot 3en1 (Amazon.es);exacte (nBat 3)
+DWK601;CONFIRMÉE;DCD996+DCH273+DCG405+DCF887+DCS334+DCS570+3x5,0+chariot;exacte
+DWK700;CONFIRMÉE;7 machines dont DCP580+3x5,0+chariot;exacte
+DWK701;CONFIRMÉE;7 machines+3x5,0+chariot (Amazon.fr);exacte
+DWK702;CONFIRMÉE;7 machines dont DCS369+3x5,0+chariot;exacte
+DWK800;CONFIRMÉE;8 machines nommées+3x5,0+chariot (todotaladros/ManoMano);exacte
+DWK801;CONFIRMÉE;8 machines (DCD996, DCF894…)+3x5,0+chariot (Amazon.fr);exacte
+DWK802;CONFIRMÉE;8 machines+3x5,0+chariot (todotaladros);exacte
+DWK803;CONFIRMÉE;8 machines+3x5,0+chariot (Amazon.fr);exacte
+DWK804;CONFIRMÉE;8 machines+3x5,0+chariot (todotaladros);exacte
+DWK805;CONFIRMÉE;8 machines+3x5,0+chariot (todotaladros);exacte
+DWK900;CONFIRMÉE;9 machines+3x5,0+chariot (todotaladros);exacte
+DWK901;CONFIRMÉE;9 machines+3x5,0+chariot (distriartisan/todotaladros);exacte
+DWK1100;CONFIRMÉE;11 machines+3x5,0+chariot (todotaladros);exacte
+DWK1101;CONFIRMÉE;11 machines+3x5,0+chariot (todotaladros);exacte
+DWK1102;CONFIRMÉE;11 machines+3x5,0+chariot (ManoMano/todotaladros);exacte
+DWK1103;CONFIRMÉE;11 machines+3x5,0+chariot (todotaladros);exacte
+DWK1200;CONFIRMÉE;12 machines+3x5,0+chariot (Amazon.it/todotaladros);exacte
+DWK1201;CONFIRMÉE;12 machines+3x5,0+chariot (Amazon.fr/todotaladros);exacte
+DWK1202;CONFIRMÉE;12 machines+3x5,0+chariot (todotaladros/Amazon.fr);exacte
+DWK1203;CONFIRMÉE;12 machines+3x5,0+chariot (ManoMano);exacte
+FVK271X2-QW;CONFIRMÉE;DCH333+DCG414+2x9,0+DCB118+TSTAK II/VI (Amazon.nl/todotaladros);exacte
+FVK381T2HD-QW;CONFIRMÉE;DCH333+DCD996+DCG418+2x6,0 (todotaladros);exacte
+FVK381T3-QW;CONFIRMÉE;DCH333+DCD796+DCG418+3x6,0+DCB118+TSTAKs (todotaladros);EXACTE — refs de la tuile mot pour mot
+FVK381T3HD-QW;CONFIRMÉE;DCH333+DCD996+DCG414/418+3x6,0 (todotaladros);exacte
+FVK381TST2HD-QW;CONFIRMÉE;DCH333+DCD996+DCG414+2x6,0+DS450 (todotaladros);exacte
+FVK381TST3HD-QW;CONFIRMÉE;DCH333+DCD996+DCG414+3x6,0+DS450 (Leroy Merlin/Bricomarché);exacte
+FVK381TSX2HD-QW;CONFIRMÉE;DCH333+DCD996+DCG414+2x9,0+DS450 (todotaladros);exacte
+FVK381X3HD-QW;CONFIRMÉE;DCH333+DCD996+DCG414+3x9,0+TSTAKs (ManoMano/Cdiscount);exacte
