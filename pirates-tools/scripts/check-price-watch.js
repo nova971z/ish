@@ -6422,6 +6422,37 @@ module.exports = async function () {
       + 'composition des packs redevient invisible dans les zips');
   })();
 
+  /* ── UN RELEVÉ FRAIS MAIS D'AVANT LE CALIBRAGE SE RECONFIRME (16/08) ─────
+     Le coût volé de makita-dlm330rt (141,08, écrit ~02h40 par le parseur
+     d'avant correctif) est FRAIS et « en stock » : aucun des quatre motifs
+     classiques ne le voit, et la fiche vendait à perte en silence. */
+  var admRt = require('../api/admin.js');
+  var pwRattrapageEtapesRef = admRt._internals && admRt._internals.pwRattrapageEtapes;
+  if (typeof pwRattrapageEtapesRef === 'function') {
+    var planRc = { patronRecherche: 'https://exemple.test/rech?q={ref}' };
+    var nowRc = Date.UTC(2026, 7, 16, 12, 0, 0);
+    var avant = Date.UTC(2026, 7, 16, 2, 40, 0);   // pendant l'incident
+    var apres = Date.UTC(2026, 7, 16, 6, 0, 0);    // après le déploiement
+    function fiches1(id) { return [{ id: id, sku: 'RC1', title: 't', price: 100 }]; }
+    function ov(at) { return { x: { priceSources: { idealo: { ttc: 50, at: at, enStock: true } } } }; }
+    var rIncident = pwRattrapageEtapesRef(planRc, fiches1('x'), ov(avant), 'idealo', nowRc, 'MAKITA');
+    ok(rIncident.length === 1 && /calibrage/.test(String(rIncident[0].motif)),
+      '⛔ un relevé Makita FRAIS mais daté d\'AVANT le calibrage du 16/08 doit '
+      + 'entrer au rattrapage avec son motif — sans ça, un coût volé frais reste '
+      + 'invisible et la fiche vend à perte (mesuré : ' + JSON.stringify(rIncident) + ')');
+    var rApres = pwRattrapageEtapesRef(planRc, fiches1('x'), ov(apres), 'idealo', nowRc, 'MAKITA');
+    ok(rApres.length === 0,
+      '⛔ un relevé Makita d\'APRÈS le correctif ne doit PAS être reconfirmé — '
+      + 'sinon la liste ne se vide jamais');
+    var rAutre = pwRattrapageEtapesRef(planRc, fiches1('x'), ov(avant), 'idealo', nowRc, 'DEWALT');
+    ok(rAutre.length === 0,
+      '⛔ l\'incident est celui de SA marque : un relevé DeWALT de la même heure '
+      + 'reste sain (M-28 — un motif de marque ne déborde pas)');
+  } else {
+    errors.push('[check-price-watch] ⛔ pwRattrapageEtapes n\'est pas atteignable '
+      + 'par le harnais : le motif « à reconfirmer » ne vérifie plus rien.');
+  }
+
   return errors;
 };
 

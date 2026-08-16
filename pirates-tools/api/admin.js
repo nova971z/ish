@@ -72,9 +72,26 @@ async function lireOverrides(db, admin) {
    yeux, et rien n'en fait un prix de référence ni une réduction (D-004).
    J3 : des références et des libellés d'outils, aucune donnée personnelle.
    J5 : aucune TVA, aucun octroi de mer — le territoire vient du code postal. */
-function pwRattrapageEtapes(plan, fiches, overrides, source, nowMs) {
+/* ⛔⛔ RELEVÉS À RECONFIRMER — L'INCIDENT EST DATÉ, LE MOTIF S'ÉPUISE SEUL.
+   Mesuré le 16/08/2026 : le balayage Makita de ~02h40 (parseur d'AVANT le
+   calibrage de la marque) a pu attribuer des coûts par famille→variante —
+   cas prouvé : makita-dlm330rt, coût 141,08 € (celui de la machine NUE)
+   écrit sur le KIT, vendu 219,24 € quand sa vraie tuile vaut 228,45 €.
+   Un tel relevé est FRAIS et « en stock » : les quatre motifs classiques ne
+   le voient pas. On reconfirme donc PAR RECHERCHE tout relevé de la marque
+   antérieur au déploiement du correctif (mesuré : build corrigé en service
+   à 05h19 UTC ; seuil 05h00). À mesure que les relevés se renouvellent, la
+   liste se vide — le motif meurt de lui-même.
+   ⚠️ J4 : rien n'est écrit ici — on désigne QUOI relire, le traqueur relit.
+   J3 : des références d'outils. J5 : aucune fiscalité. */
+const PW_RELEVES_A_RECONFIRMER = {
+  MAKITA: Date.UTC(2026, 7, 16, 5, 0, 0)
+};
+
+function pwRattrapageEtapes(plan, fiches, overrides, source, nowMs, brand) {
   if (!plan || !plan.patronRecherche) return [];
   const now = (typeof nowMs === 'number' && nowMs > 0) ? nowMs : Date.now();
+  const seuilReconfirme = PW_RELEVES_A_RECONFIRMER[String(brand || '').toUpperCase()] || 0;
   const sortie = [];
   (fiches || []).forEach((pr) => {
     if (!pr || !pr.sku) return;
@@ -92,6 +109,8 @@ function pwRattrapageEtapes(plan, fiches, overrides, source, nowMs) {
         motif = at > 0
           ? ('releve perime — ' + Math.floor((now - at) / 86400000) + ' jours')
           : 'releve sans date';
+      } else if (seuilReconfirme && at < seuilReconfirme) {
+        motif = 'releve d avant le calibrage de la marque (16/08) — a reconfirmer par recherche';
       }
     }
     if (!motif) return;
@@ -249,7 +268,7 @@ module.exports = async function handler(req, res) {
       const ovR = await lireOverrides(fb2.db, fb2.admin);
       const fichesR = catalog.loadCatalogAvec(ovR)
         .filter((pr) => String(pr.brand || '').toUpperCase() === brand);
-      const etapesR = pwRattrapageEtapes(p, fichesR, ovR, source, Date.now());
+      const etapesR = pwRattrapageEtapes(p, fichesR, ovR, source, Date.now(), brand);
       /* ⛔ `&format=csv` : LE TABLEAU, PAS DU JSON. L'user travaille sur iPad —
          une réponse JSON ne s'ouvre pas dans un tableur. Le nom de fichier part
          dans l'en-tête pour que le téléchargement arrive nommé, pas en
