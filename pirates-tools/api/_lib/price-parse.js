@@ -780,6 +780,20 @@ function titreAnnonceUneQuantiteMultiple(texte) {
   if (m) return parseInt(m[1], 10);
   m = s.match(/\b([2-9]|[1-9]\d)\s*[xX]\s+[A-Za-zÀ-ÖØ-öø-ÿ]{3,}/);
   if (m) return parseInt(m[1], 10);
+  /* ⛔⛔ LES FORMES ALLEMANDE ET ANGLAISE DU LOT — mesurées le 16/08/2026 sur
+     SON balayage Makita, et elles ont failli coûter cher : « Makita 3er Set
+     BL1830B » (154,14 € POUR TROIS batteries) est parti en hausse différée
+     sur la fiche d'UNE batterie — 84,95 € → 226,43 €, presque le triple du
+     juste prix. Idem « 2er Set BL1850B » (132,90 €) et « BL1860B 2-Pack »
+     (158 €). Le multiplicateur y est un SUFFIXE (« 2er », « 2-Pack »), pas
+     un préfixe — aucun des trois motifs ci-dessus ne le voyait.
+     ⚠️ « Doppelpack »/« Twin Pack » = 2, sans chiffre écrit. J4 : détecter le
+     lot rend le prix unitaire exact — rien n'est fabriqué. */
+  m = s.match(/\b([2-9])\s*er[\s-]*(?:Set|Pack)\b/i);
+  if (m) return parseInt(m[1], 10);
+  m = s.match(/\b([2-9])[\s-]*Pack\b/i);
+  if (m) return parseInt(m[1], 10);
+  if (/\b(?:doppelpack|twin[\s-]?pack|zweierpack)\b/i.test(s)) return 2;
   return 0;
 }
 
@@ -928,6 +942,23 @@ function titreContreditFiche(titre, skuFiche, marque) {
   var lu = (marqueEstDewalt && /^dewalt$/i.test(String(marque || '').replace(/[\s-]/g, '')))
     ? nomen.lireSuffixeDewalt(skuU.replace(/(XJ|QW|XE|GB|LX|QS)$/,'')) : null;
   var sansBatt = !!(lu && lu.suffixe && lu.nbBatteries === 0);
+  /* ⛔⛔ LA BRANCHE MAKITA — mesurée le 16/08/2026 sur SON balayage : la garde
+     était DeWALT-seulement, et « Makita DMR115 avec 1x batterie 18V 3Ah et
+     chargeur DC18RC » (334,90 €) est parti en hausse différée 457,81 € sur
+     la fiche de la radio NUE ; « Makita AF506 + 5000x Clou » pareil sur le
+     cloueur nu. Sauvés cette fois par le minimum de rafale (les tuiles nues
+     existaient) — pas par une garde. La fiche nue Makita se lit dans SA
+     grammaire (D-142) : marque vérifiée SUR la ligne d'appel (M-28). */
+  var marqueEstMakita = /^makita$/i.test(String(marque || '').replace(/[\s-]/g, ''));
+  var luM = (marqueEstMakita && /^makita$/i.test(String(marque || '').replace(/[\s-]/g, '')))
+    ? nomen.lireSuffixeMakita(skuU) : null;
+  if (marqueEstMakita && luM && luM.config && luM.config.nbBatteries === 0) sansBatt = true;
+  if (marqueEstMakita && luM && luM.config && luM.config.nbBatteries > 0) sansBatt = false;
+  /* Réf Makita SANS suffixe lisible (DMR115, AF506…) : la grammaire se tait,
+     comme `suffixeIllisible` chez l'autre marque. On ne juge alors que les
+     signaux FORTS, impossibles sur la tuile propre d'une batterie — c'est la
+     leçon DCL074 transposée : une batterie dit « 3Ah » sans être un kit. */
+  var makitaSansSuffixe = marqueEstMakita && !(luM && luM.config) && !/^(DLX|DK)\d/.test(skuU);
   /* un pack par nature n'est JAMAIS « sans batterie », quoi que dise son suffixe */
   /* Les PACKS MAISON (DWK…, PPACK…) et les packs de batteries (DCB…) sont
      des kits par NATURE : leur tuile annonce des batteries parce que la
@@ -935,7 +966,11 @@ function titreContreditFiche(titre, skuFiche, marque) {
      balayage n°3 : 41 fiches pack refusées à tort par la branche « nue »,
      leur suivi de prix serait mort (docs/VERIF-BALAYAGE-2.md, défaut 10). */
   var ficheKit = !!(lu && lu.nbBatteries > 0) || /^(DCK|DWK|PPACK)/.test(skuU)
-    || /^DCB\d/.test(skuU) && /(BC|K)$/.test(skuU);
+    || /^DCB\d/.test(skuU) && /(BC|K)$/.test(skuU)
+    /* kits Makita : le suffixe de SA grammaire (D-142) dit les batteries,
+       et les packs maison DLX/DK annoncent leur contenu légitimement. */
+    || !!(luM && luM.config && luM.config.nbBatteries > 0)
+    || (marqueEstMakita && /^(DLX|DK)\d/.test(skuU));
   var suffixeIllisible = marqueEstDewalt && !(lu && lu.suffixe) && !ficheKit;
   if (ficheKit) sansBatt = false;
 
@@ -989,9 +1024,10 @@ function titreContreditFiche(titre, skuFiche, marque) {
       return 'le titre porte une capacité de batterie (Ah) sans dire « sans '
         + 'batterie » : offre avec batterie, la fiche est nue';
     }
-    /* D3 — code kit ACCOLÉ à la racine, espaces ignorés : « DCS 369 E1 ». */
+    /* D3 — code kit ACCOLÉ à la racine, espaces ignorés : « DCS 369 E1 ».
+       ⚠️ Codes de kit DeWALT : la règle ne s'applique qu'à SA marque (M-28). */
     var racine = skuU.replace(/(XJ|QW|XE|GB|LX|QS)$/,'').replace(/NT?$/,'');
-    if (racine.length >= 5) {
+    if (marqueEstDewalt && racine.length >= 5) {
       /* la réf peut être ÉCLATÉE dans le titre (« DCS 369 E1 ») : chaque
          caractère de la racine tolère un espace ou un tiret derrière lui,
          et le code kit doit finir sur une frontière de mot. */
@@ -1009,6 +1045,27 @@ function titreContreditFiche(titre, skuFiche, marque) {
         || /\+\s*\d+\s*[x×]\s+[A-Za-z]/.test(t)) {
       return 'le titre joint un autre produit ou accessoire (« + … ») : prix '
         + 'de bundle refusé sur une fiche seule';
+    }
+  }
+
+  /* ②bis — MAKITA SANS SUFFIXE LISIBLE : seuls les signaux FORTS jugent.
+     Mesurés le 16/08/2026 sur SON balayage : « Makita DMR115 avec 1x batterie
+     18V 3Ah et chargeur DC18RC » différé 457,81 € sur la radio NUE ;
+     « Makita AF506 + 5000x Clou à tête creuse » pareil sur le cloueur nu.
+     Une tuile propre de batterie (« BL1830B 18V 3Ah ») ne matche AUCUN des
+     deux motifs — c'est ce qui les rend sûrs. */
+  if (makitaSansSuffixe) {
+    /* ⚠️ PREMIER JET ATTRAPÉ PAR LA PORTE DU CORPUS AVANT LA PRODUCTION :
+       une règle « avec batteries + chargeur » refusait « Makita Coupe-herbe
+       UR100DWAE avec 2 batteries 1 chargeur » — un KIT dont le suffixe DWAE
+       est illisible par la table. C'est la leçon DCL074 : quand la grammaire
+       se tait, on ne juge PAS le contenu annoncé. Seul signal conservé :
+       « + Nx <accessoire> » avec N ≥ 10 — aucun kit n'inclut dix batteries,
+       seuls les consommables se comptent par milliers (« + 5000x Clou »). */
+    var mNx = t.match(/\+\s*(\d+)\s*[x×]\s+[A-Za-zÀ-ÖØ-öø-ÿ]/);
+    if (mNx && parseInt(mNx[1], 10) >= 10) {
+      return 'le titre joint « + ' + mNx[1] + 'x <accessoire> » : prix de '
+        + 'bundle refusé sur une fiche seule';
     }
   }
 
@@ -2664,8 +2721,26 @@ function nieApres(t, motif) {
    lettres veulent dire autre chose — et un contenu inventé, c'est un prix
    de kit posé sur une machine nue. */
 function signatureDepuisReference(sku, marque) {
-  if (!/^dewalt$/i.test(String(marque || '').replace(/[\s-]/g, ''))) return '';
-  var r = nomen.lireSuffixeDewalt(sku);
+  var mq = String(marque || '').replace(/[\s-]/g, '');
+  /* ⛔⛔ CHAQUE MARQUE A SA BRANCHE — ET UNE MARQUE SANS BRANCHE VEND À PERTE.
+     Mesuré le 16/08/2026 sur SON balayage Makita (pages 2-67) : cette
+     fonction, gated DEWALT-seulement depuis la séparation des marques
+     (D-158), rendait '' pour TOUTE référence Makita. Une fiche KIT au titre
+     muet (DLM330RT = 1×5,0 Ah selon SA grammaire D-142) devenait donc « NU »
+     dans l'index de modèle — et la tuile NUE de la famille (« Makita
+     DLM330 », 141,08 €) s'est écrite dessus : la tondeuse kit vendue
+     219,24 € quand sa vraie tuile vaut 243,58 €. VENTE À PERTE, appliquée.
+     ⛔ Le gate D-158 avait raison d'interdire le DÉBORDEMENT ; il n'autorisait
+     pas l'ABSENCE : la branche de la marque se construit avec SA table.
+     J4 : cette signature décide quelle fiche reçoit quel coût — elle rend le
+     prix affiché exact, elle n'en fabrique aucun. */
+  if (/^makita$/i.test(mq)) {
+    var rm = /^makita$/i.test(String(marque || '').replace(/[\s-]/g, '')) ? nomen.lireSuffixeMakita(String(sku || '').toUpperCase()) : null;
+    if (!rm || !rm.config || !(rm.config.nbBatteries > 0)) return '';
+    return rm.config.nbBatteries + 'X' + (rm.config.ah != null ? rm.config.ah : '?');
+  }
+  if (!/^dewalt$/i.test(mq)) return '';
+  var r = /^dewalt$/i.test(String(marque || '').replace(/[\s-]/g, '')) ? nomen.lireSuffixeDewalt(sku) : null;
   if (!r || !r.nbBatteries) return '';
   /* Une seule capacité : « 2X5 ». Plusieurs : on les écrit toutes, triées,
      pour que deux écritures du même contenu donnent la MÊME signature. */

@@ -82,6 +82,43 @@ var DOIVENT_PASSER = [
   ['DEWALT Pack 2 batteries bluetooth 18V 2Ah + Adapt USB - DCB283BC', 'DCB283BC']
 ];
 
+/* ── Témoins MAKITA (16/08/2026) — relus du balayage réel pages 2-67.
+   La garde était DeWALT-seulement : « DMR115 avec 1x batterie et chargeur »
+   (334,90 €) est parti en hausse différée 457,81 € sur la radio NUE, sauvé
+   par le seul minimum de rafale. Chaque marque a sa branche (M-28). */
+var MAKITA_REFUSES = [
+  ['Makita AF506 + 5000x Clou à tête creuse', 'AF506'],
+  /* CONSTRUIT (déclaré) : la branche « suffixe Z = nue » sur un titre à
+     batterie incluse — aucune tuile de ce gabarit dans le balayage du jour. */
+  ['Makita DHR202Z + 1x batterie 5,0 Ah - sans chargeur', 'DHR202Z']
+];
+var MAKITA_PASSENT = [
+  ['Makita DMR115 Standard', 'DMR115'],
+  /* ⚠️ Suffixe MUET (DMR115) + contenu annoncé : la grammaire se tait, on ne
+     juge PAS (leçon DCL074/UR100DWAE) — le minimum de rafale protège. */
+  ['Makita DMR115 avec 1x batterie 18V 3Ah et chargeur DC18RC', 'DMR115'],
+  /* Le cas RÉEL du corpus qui a mordu le premier jet : kit au suffixe
+     illisible par la table, contenu annoncé LÉGITIMEMENT. */
+  ['Makita Coupe-herbe UR100DWAE avec 2 batteries 1 chargeur', 'UR100DWAE'],
+  ['Makita BL1830B 18V 3Ah (197599-5)', 'BL1830B'],
+  ['Makita DTD152RTJ (1 x 5,0 Ah + chargeur rapide) avec Makpac', 'DTD152RTJ'],
+  ['Makita DLX2145TJ (DHP458 + DTD152 + 2x5,0 Ah 18V)', 'DLX2145TJ'],
+  ['Makita HR2470', 'HR2470']
+];
+/* Lots en formes allemande/anglaise — titres RÉELS du même balayage : le
+   « 3er Set » à 154,14 € (TROIS batteries) partait en hausse 84,95 → 226,43
+   sur la fiche d'UNE batterie. */
+var LOTS_DOIVENT_DETECTER = [
+  ['Makita 3er Set BL1830B 18V 3Ah', 3],
+  ['Makita 2er Set BL1850B 18V 5Ah (197280-2)', 2],
+  ['Makita Makstar 18V LXT Li-Ion 6.0 Ah BL1860B 2-Pack', 2]
+];
+var LOTS_DOIVENT_IGNORER = [
+  'Makita DLM480Z 2 x 18V Solo',          // machine bi-batterie, pas un lot
+  'Makita BL1850B',
+  'Pack 2 outils 18V XR (DCD791/DCG405)'  // « pack N outils », pas N unités
+];
+
 module.exports = function () {
   var errors = [];
   var pp;
@@ -110,6 +147,57 @@ module.exports = function () {
         + 'le traqueur de ses relevés les moins chers.');
     }
   });
+  /* ── Branche MAKITA de la garde (16/08/2026) ── */
+  MAKITA_REFUSES.forEach(function (c) {
+    if (!pp.titreContreditFiche(c[0], c[1], 'MAKITA')) {
+      errors.push('[check-titre-fiche] ⛔ tuile Makita FAUTIVE acceptée : « ' + c[0]
+        + ' » → fiche ' + c[1] + '. Un prix de kit/bundle repartirait sur une '
+        + 'fiche nue — la garde doit avoir une branche PAR marque (M-28).');
+    }
+  });
+  MAKITA_PASSENT.forEach(function (c) {
+    var mM = pp.titreContreditFiche(c[0], c[1], 'MAKITA');
+    if (mM) {
+      errors.push('[check-titre-fiche] ⛔ tuile Makita LÉGITIME refusée : « ' + c[0]
+        + ' » → ' + mM + '. Une garde qui crie sur les vraies tuiles prive le '
+        + 'traqueur de ses relevés.');
+    }
+  });
+  /* ── Formes de lot allemande/anglaise ── */
+  if (typeof pp.titreAnnonceUneQuantiteMultiple === 'function') {
+    LOTS_DOIVENT_DETECTER.forEach(function (c) {
+      var n = pp.titreAnnonceUneQuantiteMultiple(c[0]);
+      if (n !== c[1]) {
+        errors.push('[check-titre-fiche] ⛔ lot NON détecté : « ' + c[0] + ' » doit '
+          + 'rendre ' + c[1] + ' (mesuré : ' + n + '). Le prix de ' + c[1] + ' unités '
+          + 's\'écrirait sur la fiche d\'UNE seule — presque le triple du juste prix.');
+      }
+    });
+    LOTS_DOIVENT_IGNORER.forEach(function (titre) {
+      var n0 = pp.titreAnnonceUneQuantiteMultiple(titre);
+      if (n0 !== 0) {
+        errors.push('[check-titre-fiche] ⛔ faux lot détecté (' + n0 + ') sur « ' + titre
+          + ' » — une machine bi-batterie ou un pack d\'outils n\'est pas un lot d\'unités.');
+      }
+    });
+  } else {
+    errors.push('[check-titre-fiche] ⛔ titreAnnonceUneQuantiteMultiple n\'est plus '
+      + 'exportée : les témoins de lot ne vérifient plus rien.');
+  }
+  /* ── La signature Makita lit la table (défaut à perte du 16/08 : DLM330RT
+     indexée « NU », la tuile nue de la famille s\'y est écrite — kit vendu
+     219,24 € quand sa vraie tuile vaut 243,58 €). ── */
+  if (typeof pp.varianteProduit === 'function') {
+    var vRT = pp.varianteProduit('', null, 'DLM330RT', 'MAKITA');
+    var vZ = pp.varianteProduit('', null, 'DLM330Z', 'MAKITA');
+    if (vRT === 'NU' || vRT === vZ) {
+      errors.push('[check-titre-fiche] ⛔ la fiche Makita RT (kit 1×5,0 par SA '
+        + 'grammaire) est indexée « ' + vRT + ' » comme la nue (« ' + vZ + ' ») : '
+        + 'la tuile nue de la famille s\'écrirait sur le kit — VENTE À PERTE '
+        + '(mesuré le 16/08 : 219,24 € pour un kit dont la tuile vaut 243,58 €).');
+    }
+  }
+
   /* ②bis — « sans brosse » = brushless, jamais l'accessoire (tour 5, mesuré :
      la tuile DCF850 à 107,99 € rejetée `rej: "brosse métallique"`). */
   if (typeof pp.typerTitre === 'function') {

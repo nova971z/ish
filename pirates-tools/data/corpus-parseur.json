@@ -2,7 +2,7 @@
  "gele": "13/08/2026",
  "origine": "relevés du traqueur fournis par l'user (3 balayages)",
  "selection": "mécanique : toutes les cartes annonçant un ajout (échantillonnées si trop nombreuses), plus une carte ordinaire sur 7",
- "lues": 868,
+ "lues": 867,
  "uniques": 5671,
  "avecAjout": 1611,
  "ordinaires": 4060,
@@ -6712,11 +6712,11 @@
  ],
  "parMarque": {
   "DEWALT": 296,
-  "MAKITA": 572
+  "MAKITA": 571
  },
- "plancherLues": 868,
- "plafondLues": 868,
- "noteBornes": "MAÎTRE-ÉTALON, pas une tolérance : plancher = plafond = le nombre exact de cartes lues au gel. Toute variation, dans un sens ou dans l'autre, est un CHANGEMENT DE COMPORTEMENT du parseur sur des cartes réelles — donc une décision, jamais un hasard. Si le changement est voulu et vérifié, on regèle le corpus et on écrit pourquoi.",
+ "plancherLues": 867,
+ "plafondLues": 867,
+ "noteBornes": "MAÎTRE-ÉTALON, pas une tolérance : plancher = plafond = le nombre exact de cartes lues au gel. Toute variation, dans un sens ou dans l'autre, est un CHANGEMENT DE COMPORTEMENT du parseur sur des cartes réelles — donc une décision, jamais un hasard. Si le changement est voulu et vérifié, on regèle le corpus et on écrit pourquoi. | Regelé le 16/08/2026 (sélection de cartes INCHANGÉE) : -1 carte lue — « Makita E-12120 2er Set » devient un PACK (lot de 2 détecté par les formes allemandes « Ner Set », défaut mesuré sur le balayage Makita : le prix d'un lot de 3 batteries partait sur la fiche d'UNE batterie, 84,95 → 226,43 €). Refuser cette carte est le comportement JUSTE.",
  "plancherApparies": 8,
  "noteApparies": "Mesuré au gel : 8 rapprochements, tous par apparierParRefRecollee, 0 hors-marque, 0 pack sur référence nue, 0 dérive de prix. ⚠️ C'est MINCE : les cartes du corpus sont jouées une par une, alors que apparierParConfiguration et apparierParNomSouple ont besoin du lot entier d'une page pour trancher. Ce plancher garantit que les invariants ⑦ TRAVERSENT quelque chose ; il ne prétend pas couvrir ces deux chemins-là. Dit, pas caché."
 }
