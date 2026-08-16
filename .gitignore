@@ -20,3 +20,20 @@ fastlane/test_output
 e2e_out/
 pirates-tools/node_modules/
 pirates-tools/dist/
+
+# ── Pirates Tools — secrets et bacs de travail ────────────────────────────
+# ⛔ AJOUTÉ LE 16/08/2026, après avoir MESURÉ que ce dépôt est PUBLIC
+#    (github.com/nova971z/ish, fork de ish-app/ish → visibilité non modifiable).
+#    Un secret poussé ici est lisible par tout le monde, et l'effacer au commit
+#    suivant ne suffit pas : il reste dans l'historique. Il faut le RÉVOQUER.
+#    Ce .gitignore était celui du projet amont : il ne protégeait RIEN de nous.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+service-account*.json
+serviceAccountKey*.json
+firebase-adminsdk*.json
+.vercel
+pirates-tools/tests/_sortie/

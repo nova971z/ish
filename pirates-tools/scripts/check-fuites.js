@@ -161,6 +161,78 @@ module.exports = function () {
     });
   });
 
+  /* ══ LE DÉPÔT EST PUBLIC — TOUT FICHIER VERSIONNÉ EST UNE PAGE WEB ══════
+     ⛔⛔ MESURÉ LE 16/08/2026, et ça change la portée de cette porte. Jusqu'ici
+     elle ne fouillait que les fichiers SERVIS (`SERVIS` ci-dessus), parce que
+     la menace supposée était « le visiteur regarde le code source de la page ».
+     C'est FAUX : `github.com/nova971z/ish` est **public**, et n'importe qui y
+     lit les 12 459 lignes du moteur, les 15 498 lignes de méthode dans `docs/`,
+     et les 1 708 fiches avec leurs coûts.
+     ⇒ La surface d'exposition n'est pas « ce qui est servi », c'est **tout ce
+     qui est versionné**. Un secret déposé dans un script d'atelier, un test ou
+     une archive est aussi public qu'un secret dans `app.js`.
+     ⚠️ Ce balayage ne remplace PAS la mise au privé du dépôt (procédure :
+     `docs/PROTEGER-LE-CODE.md`) — il empêche le dégât le plus irréversible :
+     un secret publié reste publié, même effacé au commit suivant.
+     ⚠️ On lit ce que `git ls-files` déclare, jamais le disque : un fichier non
+     versionné n'est pas publié, et l'accuser ferait crier la porte pour rien. */
+  (function balayageDepotEntier() {
+    var cp = require('child_process');
+    var liste;
+    try {
+      liste = cp.execFileSync('git', ['ls-files', '-z'],
+        { cwd: RACINE, encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 })
+        .split('\0').filter(Boolean);
+    } catch (e) {
+      /* ⛔ PRÉALABLE : sans la liste, ce balayage n'a rien vérifié — il le DIT
+         au lieu de laisser croire que le dépôt est propre. */
+      errors.push('[check-fuites] ⛔ PRÉALABLE : impossible de lister les '
+        + 'fichiers versionnés (' + ((e && e.message) || 'git indisponible')
+        + ') — le balayage du dépôt PUBLIC n\'a rien vérifié.');
+      return;
+    }
+    if (liste.length < 50) {
+      errors.push('[check-fuites] ⛔ PRÉALABLE : seulement ' + liste.length
+        + ' fichiers versionnés vus — trop peu pour que ce balayage ait un sens.');
+      return;
+    }
+    /* Binaires et dépendances : rien à y lire, et les parcourir coûte. */
+    var IGNORER = /\.(png|jpe?g|webp|gif|ico|glb|gltf|bin|zip|pdf|woff2?|ttf|mp4|mov)$/i;
+    liste.forEach(function (rel) {
+      if (IGNORER.test(rel)) return;
+      var abs = path.join(RACINE, rel);
+      var txt;
+      try {
+        if (fs.statSync(abs).size > 4 * 1024 * 1024) return;
+        txt = fs.readFileSync(abs, 'utf8');
+      } catch (_) { return; }
+      /* ⛔⛔ ON NE RETIENT QUE LES MOTIFS QUI IDENTIFIENT UN SECRET PAR SA
+         FORME, JAMAIS PAR LE NOM D'UNE VARIABLE.
+         Mesuré au premier essai : les deux motifs « ADMIN_SECRET = "…" » et
+         « WATCH_SECRET = "…" » ont crié sur QUATRE fichiers — et les quatre
+         étaient des harnais qui posent une valeur d'essai dans
+         `process.env` pour éprouver l'authentification, puis la restaurent.
+         Aucune n'était un secret de production.
+         ⚠️ Une porte qui crie à tort est pire qu'une porte absente : on
+         apprend à l'ignorer, et le jour du vrai secret elle ne sera pas lue.
+         Un nom de variable ne peut pas distinguer un montage d'essai d'une
+         fuite ; une EMPREINTE de format, si — `sk_live_`, `whsec_`, une clé
+         PEM, un compte de service, une clé AWS ne sont jamais des valeurs
+         d'essai. Ces deux motifs restent en vigueur sur les fichiers SERVIS,
+         où toute valeur en dur est une fuite par construction. */
+      SECRETS.forEach(function (s) {
+        if (/^secret (?:admin|de surveillance) en dur$/.test(s[0])) return;
+        if (s[1].test(txt)) {
+          errors.push('[check-fuites] ⛔⛔ SECRET DANS UN FICHIER VERSIONNÉ — '
+            + rel + ' : ' + s[0] + '. **Le dépôt est PUBLIC** : ce secret est '
+            + 'déjà lisible par tout le monde. L\'effacer au prochain commit ne '
+            + 'suffit PAS — il reste dans l\'historique. Il faut le RÉVOQUER '
+            + 'chez son émetteur, puis en émettre un neuf.');
+        }
+      });
+    });
+  })();
+
   return errors;
 };
 
