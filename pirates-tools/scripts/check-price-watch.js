@@ -6384,6 +6384,44 @@ module.exports = async function () {
       + 'de réf éclatée : « DCG 406 P2LRT » redeviendrait un `unknown` muet');
   })();
 
+  /* ── TOUTES LES RÉFÉRENCES D'UN PACK, ET SON CONTENU — ordre du 15/08 ────
+     « le parseur doit savoir lire absolument toutes les références des packs
+     et savoir ce qu'il y a dedans ». Témoins = titres RÉELS des balayages. */
+  (function () {
+    ok(typeof pp.refsDuTitre === 'function',
+      '⛔ `refsDuTitre` n\'est plus exportée : la composition des packs redevient illisible');
+    if (typeof pp.refsDuTitre !== 'function') return;
+    var kit = pp.refsDuTitre(
+      'Kit DeWALT DCK2225MP2T McLaren (DCF99M + DCG45M + 2 batteries de 5,0 Ah + DCB1104 + TSTAK', 'DEWALT');
+    ok(JSON.stringify(kit) === JSON.stringify(['DCK2225MP2T', 'DCF99M', 'DCG45M', 'DCB1104']),
+      '⛔ le kit McLaren doit rendre SES QUATRE références, dans l\'ordre du titre '
+      + '(mesuré : ' + JSON.stringify(kit) + ')');
+    var combo = pp.refsDuTitre(
+      'DeWalt Combination set DCD805 + DCG405 + DCH273 + DCF850 18 V (DCK429P3T-QW)', 'DEWALT');
+    ok(combo.length === 5 && combo[4] === 'DCK429P3T-QW',
+      '⛔ un set à 4 machines + réf de pack en parenthèse doit rendre les CINQ '
+      + '(mesuré : ' + JSON.stringify(combo) + ')');
+    var glues = pp.refsDuTitre(
+      'PACK 5 OUTILS DEWALT ,4 batteries 5Ah 18v,2 chargeurs + disque.DCD800/DCF887/DCH273/DCG405', 'DEWALT');
+    ok(JSON.stringify(glues) === JSON.stringify(['DCD800', 'DCF887', 'DCH273', 'DCG405']),
+      '⛔ une énumération jointe par « / » se scinde en réfs distinctes '
+      + '(mesuré : ' + JSON.stringify(glues) + ')');
+    var entiere = pp.refsDuTitre('DeWALT D125/8 — STF D125/8 125G 40 mm (200 pcs)', 'DEWALT');
+    ok(JSON.stringify(entiere) === JSON.stringify(['D125/8']),
+      '⛔ une réf qui CONTIENT un « / » (D125/8, ⌀125 mm 8 trous) reste ENTIÈRE — '
+      + 'la scinder fabriquerait deux fausses réfs (mesuré : ' + JSON.stringify(entiere) + ')');
+    var bruit = pp.refsDuTitre('DeWALT SDS-max 25x920x790 mm DT60826-QZ', 'DEWALT');
+    ok(JSON.stringify(bruit) === JSON.stringify(['DT60826-QZ']),
+      '⛔ ni « SDS-max » ni une dimension ne sont des références '
+      + '(mesuré : ' + JSON.stringify(bruit) + ')');
+    /* Le branchement : les deux émetteurs sansRef rendent `refs` (M-29). */
+    var srcAdm3 = require('fs').readFileSync(
+      require('path').join(__dirname, '..', 'api', 'admin.js'), 'utf8');
+    ok((srcAdm3.match(/refs: \(e\.refs && e\.refs\.length\) \? e\.refs : undefined/g) || []).length >= 2,
+      '⛔ les émetteurs sansRef (balayage + à sec) ne rendent plus `refs` : la '
+      + 'composition des packs redevient invisible dans les zips');
+  })();
+
   return errors;
 };
 

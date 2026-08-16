@@ -784,6 +784,51 @@ function titreAnnonceUneQuantiteMultiple(texte) {
 }
 
 
+/* ══ TOUTES LES RÉFÉRENCES D'UN TITRE — POUR LIRE UN PACK EN ENTIER ════════
+   Ordre de l'user, 15/08/2026 : « je veux que le parseur sache lire absolument
+   toutes les références des packs et savoir ce qu'il y a dedans ». Un pack
+   idealo écrit souvent TOUTES ses références (« Kit DCK2225MP2T (DCF99M +
+   DCG45M + DCB1104 + TSTAK) », « DCD805 + DCG405 + DCH273 + DCF850
+   (DCK429P3T-QW) ») — jusqu'ici le parseur n'en gardait qu'UNE au mieux,
+   et le pack sortait en sansRef sans qu'on puisse lire sa composition.
+   ⛔ DIAGNOSTIC, JAMAIS UNE ATTRIBUTION : cette liste se REND (packs,
+   sansRef), elle n'écrit aucun prix sur aucune fiche — les règles
+   d'appariement ne bougent pas d'un iota (J4 : un titre multi-réfs reste
+   inattribuable, l'ambiguïté ne s'arbitre jamais).
+   ⚠️ Mêmes filtres de crédibilité que `titrePlausible` — le bon outil existe
+   déjà : capitales telles qu'écrites (une vraie réf s'écrit en majuscules),
+   un chiffre obligatoire, longueur ≥ 5, jamais une unité (18V, 25X920X790),
+   jamais le mot de la marque. Borné à 8, dédoublonné, ordre du titre. */
+function refsDuTitre(titre, marque) {
+  var s = String(titre || '');
+  if (!s) return [];
+  var mq = String(marque || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  var vus = Object.create(null), out = [];
+  function credible(r) {
+    return /^[A-Z]/.test(r) && /\d/.test(r) && r.length >= 5 && !UNITE_RE.test(r);
+  }
+  function pousser(r) {
+    var nu = r.replace(/[^A-Z0-9]/g, '');
+    if (!credible(r) || nu === mq || vus[nu] || out.length >= 8) return;
+    vus[nu] = 1;
+    out.push(r);
+  }
+  var m = s.match(/\b[A-Z][A-Z0-9]{2,}(?:[-\/.][A-Z0-9]+)*\b/g) || [];
+  for (var i = 0; i < m.length; i++) {
+    var r = m[i].toUpperCase();
+    /* Une énumération jointe par « / » (« DCD800/DCF887/DCH273 ») se scinde —
+       mais SEULEMENT si chaque segment est une réf crédible à lui seul :
+       « D125/8 » (⌀125 mm, 8 trous) reste entier, ses segments ne tiennent
+       pas debout séparément. */
+    if (r.indexOf('/') !== -1) {
+      var segs = r.split('/');
+      if (segs.length >= 2 && segs.every(credible)) { segs.forEach(pousser); continue; }
+    }
+    pousser(r);
+  }
+  return out;
+}
+
 function titreAjouteDuContenu(texte, portee) {
   var s = String(texte || '');
   if (!s) return false;
@@ -1500,6 +1545,7 @@ function parseIdealo(rawText, brand) {
             venuDOffre: true });
         } else {
           ecartes.push({ titre: titre, prix: px, delaiJours: delai,
+            refs: refsDuTitre(titre, brand),
             car: extraireCaracteristiques(titre, brand) });
         }
         titreOffre = null;
@@ -1610,7 +1656,8 @@ function parseIdealo(rawText, brand) {
            toujours pas de `sku`, mais on QUALIFIE \u2014 c'est ce qui permettra de
            rapprocher l'annonce d'une fiche sans jamais \u00e9crire son prix. */
         var descEc = b.slice(iTit, Math.min(b.length, iTit + 4)).join(' ');
-        ecartes.push({ titre: b[iTit], prix: pxx, car: extraireCaracteristiques(descEc, brand) });
+        ecartes.push({ titre: b[iTit], prix: pxx, refs: refsDuTitre(descEc, brand),
+          car: extraireCaracteristiques(descEc, brand) });
       } else {
         /* ⚠️ LA RAISON DOIT NOMMER LE VRAI MOTIF. Premier jet : la garde de
            plausibilité mordait, mais le registre annonçait « sans la marque »
@@ -1718,6 +1765,7 @@ function parseIdealo(rawText, brand) {
     if (quantiteMultiple || (ajoutAnnonce && referenceEstNue(sku, brand))) {
       packs.push({ titre: String(b[iTitre] || '').slice(0, 200), prix: prix,
         skuRefuse: sku,
+        refs: refsDuTitre(desc, brand),
         /* ⛔⛔ LE TITRE DIT LA VÉRITÉ — ORDRE DE L'USER, 13/08/2026, mot pour
            mot : « s'il y a écrit lot de cinq batteries, c'est qu'il y en a
            cinq […] le titre dit toujours la vérité. S'il ne dit pas la vérité,
@@ -3935,7 +3983,7 @@ function detecterBlocage(rawText, httpStatus) {
   return null;
 }
 
-module.exports = { typerTitre: typerTitre, parseCotebrico: parseCotebrico, parseClickoutil: parseClickoutil, parseIdealo: parseIdealo, parseAuto: parseAuto, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, raisonAucuneSource: raisonAucuneSource, enMillis: enMillis, SOURCE_FRESH_MS: SOURCE_FRESH_MS, SOURCES_ACTIVES: SOURCES_ACTIVES, sourceActive: sourceActive, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage, estMaPropreReponse: estMaPropreReponse, detecterBlocage: detecterBlocage, titresAttendus: titresAttendus, compterTuiles: compterTuiles, empreintePage: empreintePage, racineRef: racineRef, racineModele: racineModele, titreContreditFiche: titreContreditFiche, referenceEstNue: referenceEstNue,
+module.exports = { refsDuTitre: refsDuTitre, typerTitre: typerTitre, parseCotebrico: parseCotebrico, parseClickoutil: parseClickoutil, parseIdealo: parseIdealo, parseAuto: parseAuto, parsePriceFR: parsePriceFR, stripHtml: stripHtml, pickCheapestSource: pickCheapestSource, choisirCoutSource: choisirCoutSource, raisonAucuneSource: raisonAucuneSource, enMillis: enMillis, SOURCE_FRESH_MS: SOURCE_FRESH_MS, SOURCES_ACTIVES: SOURCES_ACTIVES, sourceActive: sourceActive, RUPTURE_RE: RUPTURE_RE, diagnostiquerPage: diagnostiquerPage, estMaPropreReponse: estMaPropreReponse, detecterBlocage: detecterBlocage, titresAttendus: titresAttendus, compterTuiles: compterTuiles, empreintePage: empreintePage, racineRef: racineRef, racineModele: racineModele, titreContreditFiche: titreContreditFiche, referenceEstNue: referenceEstNue,
   varianteProduit: varianteProduit, roleCoffret: roleCoffret,
   signatureBatteries: signatureBatteries, estPourAutreMachine: estPourAutreMachine,
   sansAccentsTitre: sansAccentsTitre, refUniqueDuTitre: refUniqueDuTitre,

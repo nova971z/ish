@@ -3845,7 +3845,8 @@ async function handlePriceWatch(req, res, admin, db) {
          caractéristiques disent de quoi il s'agit, et c'est ce qui permettra
          de la rapprocher d'une fiche au lieu de la jeter. */
       const sansRefSec = (auto.sansRef || []).slice(0, 40).map((e) => ({
-        titre: String(e.titre || '').slice(0, 120), prix: e.prix, car: e.car || null
+        titre: String(e.titre || '').slice(0, 120), prix: e.prix,
+        refs: (e.refs && e.refs.length) ? e.refs : undefined, car: e.car || null
       }));
       /* ⛔ LA COUVERTURE SE CUMULE, MÊME À SEC. C'est ce qui permet de mesurer
          les 67 pages sans dépenser un seul quota : chaque page ajoute ses réfs
@@ -5245,7 +5246,14 @@ async function handlePriceWatch(req, res, admin, db) {
              245 titres distincts reçoivent une famille et un type. */
           ? apparie.restants.slice(0, 200).map((e) => {
             const cS = priceParse.extraireCaracteristiques(e.titre, brand) || {};
+            /* ⛔ TOUTES les références du titre + le contenu lu — ordre de
+               l'user du 15/08 : « le parseur doit savoir lire absolument
+               toutes les références des packs et savoir ce qu'il y a
+               dedans ». Diagnostic : rien ici n'attribue un prix. */
             return { titre: String(e.titre || '').slice(0, 90), prix: e.prix,
+              refs: (e.refs && e.refs.length) ? e.refs : undefined,
+              nBat: (typeof cS.nbBatteries === 'number') ? cS.nbBatteries : undefined,
+              cof: cS.coffret || undefined,
               fam: cS.famille || null, typ: cS.type || null, rej: cS.typeRejete || null };
           })
           : [])
