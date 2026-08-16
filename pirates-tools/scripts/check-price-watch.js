@@ -6453,6 +6453,38 @@ module.exports = async function () {
       + 'par le harnais : le motif « à reconfirmer » ne vérifie plus rien.');
   }
 
+  /* ── LE PLAN NORMAL JOINT LE RATTRAPAGE — la source du 16/08 ─────────────
+     Le geste unique de l'user (balayer) doit couvrir ce que la grille ne
+     montre plus. Et la garantie d'origine tient : sans Firestore, le plan de
+     grille sort quand même. */
+  var joindreFn = admRt._internals && admRt._internals.pwJoindreRattrapage;
+  if (typeof joindreFn === 'function') {
+    var planJ = { patronRecherche: 'https://exemple.test/rech?q={ref}' };
+    /* ① Firestore ABSENT : le plan survit, la raison est écrite. */
+    var etapesJ1 = [{ page: 1, url: 'https://exemple.test/grille-1' }];
+    var b1 = await joindreFn(planJ, etapesJ1, 'MAKITA', 'idealo', null, null);
+    ok(etapesJ1.length === 1 && b1.ajoutees === 0 && /Firestore/.test(String(b1.note)),
+      '⛔ sans Firestore, le plan de grille doit sortir INTACT avec la raison '
+      + 'écrite — mesuré : ' + JSON.stringify(b1) + ', étapes ' + etapesJ1.length);
+    /* ② un plan sans patronRecherche rend un bilan noté, jamais une exception. */
+    var b2 = await joindreFn({}, [], 'MAKITA', 'idealo', null, null);
+    ok(!!(b2 && b2.ajoutees === 0 && b2.note),
+      '⛔ un plan sans patronRecherche doit rendre un bilan noté, jamais une '
+      + 'exception (mesuré : ' + JSON.stringify(b2) + ')');
+    /* ③ le branchement RÉEL : le plan normal porte la jointure (M-29). */
+    var srcAdm4 = require('fs').readFileSync(
+      require('path').join(__dirname, '..', 'api', 'admin.js'), 'utf8');
+    ok(/const joint = await pwJoindreRattrapage\(p, etapes, brand, source, fbPlan\.db, fbPlan\.admin\);/.test(srcAdm4),
+      '⛔ le plan normal n\'appelle plus pwJoindreRattrapage : le balayage habituel '
+      + 'de l\'user cesse de couvrir ce que la grille ne montre plus — le problème '
+      + 'du 16/08 (fiche à perte invisible pendant 4 balayages) revit');
+    ok(/rattrapageRestant: joint\.restantes/.test(srcAdm4),
+      '⛔ le reste non joint doit être COMPTÉ dans la réponse (pas de plafond muet)');
+  } else {
+    errors.push('[check-price-watch] ⛔ pwJoindreRattrapage n\'est plus exposée : '
+      + 'la jointure du rattrapage au plan normal ne vérifie plus rien.');
+  }
+
   return errors;
 };
 

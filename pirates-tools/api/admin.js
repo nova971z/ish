@@ -88,6 +88,41 @@ const PW_RELEVES_A_RECONFIRMER = {
   MAKITA: Date.UTC(2026, 7, 16, 5, 0, 0)
 };
 
+/* ⛔ LE PLAN NORMAL APPELLE CETTE JOINTURE — best-effort par CONSTRUCTION :
+   toute panne (Firestore absent, lecture qui jette) rend un bilan avec sa
+   note, jamais une exception — le plan de grille ne doit JAMAIS tomber pour
+   une raison qui ne le concerne pas (garantie d'origine du plan, 09/08). */
+async function pwJoindreRattrapage(plan, etapes, brand, source, db, adminFb) {
+  const bilan = { ajoutees: 0, restantes: 0, note: null };
+  if (!plan || !plan.patronRecherche) {
+    bilan.note = 'rattrapage non joint : aucune adresse de recherche par référence au plan';
+    return bilan;
+  }
+  if (!db) {
+    bilan.note = 'rattrapage non joint : Firestore indisponible — plan de grille seul';
+    return bilan;
+  }
+  try {
+    const ov = await lireOverrides(db, adminFb);
+    const fiches = catalog.loadCatalogAvec(ov)
+      .filter((pr) => String(pr.brand || '').toUpperCase() === String(brand || '').toUpperCase());
+    const et = pwRattrapageEtapes(plan, fiches, ov, source, Date.now(), brand);
+    /* Le plus urgent d'abord : un relevé « à reconfirmer » est un prix
+       possiblement FAUX en vitrine ; un « jamais relevé » n'a pas de suivi. */
+    et.sort((a, b) => ((/calibrage/.test(String(b.motif)) ? 1 : 0)
+      - (/calibrage/.test(String(a.motif)) ? 1 : 0)));
+    const PLAFOND_RATTRAPAGE = 67;
+    const prises = et.slice(0, PLAFOND_RATTRAPAGE);
+    prises.forEach((e) => etapes.push({
+      page: null, url: e.url, rattrapage: true, sku: e.sku, motif: e.motif }));
+    bilan.ajoutees = prises.length;
+    bilan.restantes = et.length - prises.length;
+  } catch (e) {
+    bilan.note = 'rattrapage non joint : ' + ((e && e.message) || 'erreur de lecture');
+  }
+  return bilan;
+}
+
 function pwRattrapageEtapes(plan, fiches, overrides, source, nowMs, brand) {
   if (!plan || !plan.patronRecherche) return [];
   const now = (typeof nowMs === 'number' && nowMs > 0) ? nowMs : Date.now();
@@ -302,17 +337,43 @@ module.exports = async function handler(req, res) {
       });
     }
 
+    /* ⛔⛔ LE PLAN NORMAL JOINT LE RATTRAPAGE — LE PROBLÈME RÉGLÉ À LA SOURCE
+       (ordre de l'user, 16/08/2026 : « le traqueur doit pouvoir lire cette
+       tondeuse — on ne règle jamais un problème isolé »). La grille ne peut
+       pas donner 100 % (mesuré le 10/08 : 69,2 %) et sa rotation fait
+       disparaître des tuiles pendant des balayages entiers (mesuré le 16/08 :
+       DLM330RT absente de QUATRE balayages consécutifs pendant que sa fiche
+       vendait à perte). Le raccourci demande déjà son plan et boucle dessus
+       (« Rien à éditer ») : les pages de recherche par référence des fiches
+       sans relevé exploitable rejoignent donc le MÊME plan — le geste unique
+       de l'user couvre la grille ET ce qu'elle ne montre plus.
+       ⛔ La garantie d'origine TIENT : sur panne Firestore, le plan de grille
+       sort quand même (le rattrapage se dit « non joint », jamais un 503).
+       ⚠️ Plafond par balayage : 67 pages de rattrapage — le reste est COMPTÉ
+       (`rattrapageRestant`), jamais tu (règle « pas de plafond muet »), et la
+       liste se draine de balayage en balayage à mesure des relevés neufs.
+       ⚠️ Portes lues — J4 : des adresses, aucun prix n'est produit ni barré
+       (D-004) ; J3 : des références d'outils publiques, rien de conservé ;
+       J5 : aucune TVA ni octroi de mer, le territoire vient du code postal. */
+    const fbPlan = firebase.getFirebase();
+    const joint = await pwJoindreRattrapage(p, etapes, brand, source, fbPlan.db, fbPlan.admin);
     return res.status(200).json({
       ok: true,
       brand: brand, source: source,
       pages: p.pages, parPage: p.parPage, ordre: p.ordre,
+      pagesGrille: p.pages,
+      rattrapage: joint.ajoutees,
+      rattrapageRestant: joint.restantes,
+      noteRattrapage: joint.note,
       /* ⚠️ Ce que le plan SUPPOSE encore, écrit noir sur blanc plutôt que tu
          (E-112 : une grammaire déduite de deux points est une invention). */
       aVerifier: p.aVerifier || null,
       note: p.note || null,
       postUrl: postUrl,
       /* Les adresses, DANS L'ORDRE DE BALAYAGE — décroissant ⇒ on part de la
-         dernière page, là où les prix bougent le plus. */
+         dernière page, là où les prix bougent le plus ; les pages de
+         rattrapage suivent la grille (leurs hausses s'appliquent en fin de
+         rafale, comme toutes les autres). */
       urls: etapes.map((e) => e.url),
       etapes: etapes
     });
@@ -5312,5 +5373,6 @@ module.exports._internals = {
   // le handler avec une base factice qui compte lectures et écritures.
   handlePriceWatch: handlePriceWatch, pwMajLocale: pwMajLocale, pwScanReset: pwScanReset,
   // Ce que « il en reste » veut dire — fonction pure, testée et sabotée.
-  pwRattrapageEtapes: pwRattrapageEtapes, pwRattrapageCsv: pwRattrapageCsv
+  pwRattrapageEtapes: pwRattrapageEtapes, pwRattrapageCsv: pwRattrapageCsv,
+  pwJoindreRattrapage: pwJoindreRattrapage
 };
