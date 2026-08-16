@@ -1555,3 +1555,124 @@ La saisie manuelle de la clé n'est donc PAS un repli pour lui, c'est LE chemin.
 ### ⏭️ RESTE À FAIRE (user)
 Activer la 2FA sur le compte admin depuis Mon compte → 🔐, **après** avoir
 vérifié son adresse e-mail. Garder `scripts/mfa-unlock.js` sous la main.
+
+---
+
+# 📓 SESSION DES 48 HEURES — 15 et 16/08/2026 (57 commits, 55 fichiers, +12 721 / −1 349 lignes)
+
+> Mesuré : `git log --since="2026-08-14 20:00" --oneline | wc -l` → 57 ·
+> `--numstat` agrégé → +12 721 / −1 349 · `--name-only | sort -u` → 55 fichiers.
+> Cette section existe parce que l'user a dû réclamer DEUX FOIS un journal de
+> bord qu'il n'avait jamais vu passer. Le défaut est à moi : je gravais dans
+> les documents thématiques (`LECONS`, `DEMANDES`, `ERREURS`, `ARBITRAGE-D57`)
+> et jamais dans l'histoire du projet. **Un travail non journalisé est un
+> travail que personne ne peut relire.**
+
+## 1. Ce qui a été RÉPARÉ — les défauts d'ARGENT d'abord
+
+| # | Le défaut | Ce qu'il coûtait | La réparation | Preuve |
+|---|---|---|---|---|
+| A1 | 1 698 fiches annonçaient une « économie » contre un prix de référence **inventé** | Pratique commerciale trompeuse (J4, D-004) | l'économie retirée partout | `11bee15` |
+| A2 | Makita : une **vente à perte APPLIQUÉE** en production, plus 2 coûts faux | marge négative, silencieuse | grammaire des suffixes Makita branchée sur l'appariement | `e13e7c3` |
+| A3 | fiche `P2LRT` : référence tronquée, coût d'un autre article | 345,31 € au lieu de 470,65 € | recollage `DCG406P2LRT`, vérifié sur dewalt.fr | `86191c7`, `274b8c9` |
+| A4 | fiche `d125/8` : identifiant non écrivable, jamais repricée | prix figé | id rendu écrivable, marque tranchée sur la capture de l'user | `86191c7`, `e043a80` |
+| A5 | 203 hausses en attente jamais arbitrées (D-57) | prix sous-évalués en vitrine | **arbitrées une par une**, 203 verdicts au registre | `e619aca`, `docs/ARBITRAGE-D57.md` |
+| A6 | les hausses différées mouraient avec l'instance serveur | 415 hausses perdues par rafale | file rendue **durable** (`config/pw_hausses_<marque>`) | `a21a7a1`, `94d1098`, `ddb01c1` |
+| A7 | la vignette recopiait `images[0]` en base64 | **la moitié** du budget du document Firestore | vignette dérivée, plus stockée | `98e92bd` |
+
+## 2. Ce qui a été RÉPARÉ — la LECTURE du fournisseur
+
+- **« 1,4 % de tuiles perdues » était faux** : c'étaient des **doublons de
+  carte** jamais comptés. Comptés → 98,56 %, puis 99,34 %, puis **100 %**
+  (`1068b2e`, `1d2b738`). Chaque tuile d'un balayage est désormais lue,
+  comptée **ou nommée**.
+- Le balayage réel émet son **registre de pertes** (`perdus`) : les blocs
+  illisibles sortent avec leurs lignes et leur motif, au lieu de disparaître
+  (`6a0cb33`). Mesuré ensuite sur un vrai balayage : 96 blocs nommés, **zéro**
+  référence DeWALT parmi eux.
+- Le **titre de l'offre a le dernier mot** sur la fiche : 400 appariements
+  relus à la main, garde `titreContreditFiche` posée (`1cde9ef`), puis étendue
+  à la grammaire Makita (`e13e7c3`).
+- Le parseur lit **toutes** les références d'un pack (`refsDuTitre`, D-168,
+  `c15b5c0`) ; les 66 références de packs ont été **recoupées sur le web une
+  par une** → 97,0 % (`3ac1d81`, D-169).
+- « sans brosse » = brushless, jamais un accessoire (`d14314a`) — sans ça
+  l'offre nue la moins chère devenait illisible.
+- Mesure posée, pas devinée : **1 204 références vues chez le fournisseur sans
+  fiche au catalogue** (`43b1ec7`, `archives/idealo/absents-du-catalogue-balayage7.csv`).
+
+## 3. La chaîne du RATTRAPAGE — quatre marches, une seule cause
+
+L'user a refusé **deux détours** ce jour-là, et il avait raison les deux fois
+(ses mots sont dans `.claude/PROTOCOLE.md` §2.6). La cause était toujours la
+même : *une fiche que la grille ne montre plus n'est jamais relue.*
+
+1. **D-171** (`fcf95a7`) — un relevé **frais mais d'avant le calibrage** entre
+   au rattrapage. Fini « on attend 14 jours ».
+2. **D-172** (`e593d1f`) — le **plan normal joint le rattrapage** : le geste
+   unique de l'user couvre la grille ET ce qu'elle ne montre plus. Sur panne
+   Firestore le plan de grille sort quand même.
+3. **D-173** (`e1a96ca`) — une reconfirmation est un **acte daté**, sinon la
+   file tourne en rond (mesuré : 46 des 49 références re-cherchées étaient les
+   mêmes d'un balayage à l'autre).
+4. **D-174** (`1c9072e`) — la recherche se fait **par racine**, pas par
+   variante : `q=DLM330` rend toutes les variantes, `q=DLM330RT` rendait une
+   coquille de 935 octets.
+
+## 4. La règle que l'user a fait graver
+
+> « on ne règle jamais un problème isolé, tu vas à la source et tu règles ce
+> putain de problème »
+
+Gravée dans `.claude/PROTOCOLE.md` §2.6 (injectée à chaque message) et repliée
+en une ligne dans `CLAUDE.md` (`00ea5ba`, `799a0a4`). L'exemple payé du jour y
+figure : **deux détours proposés pour une seule fiche**.
+
+## 5. Mes propres erreurs, nommées
+
+- **E-115** — j'ai présenté un « 89 € » comme une offre ratée alors que c'était
+  un **encart de grille**. Ses captures ont prouvé que le minimum réel de la
+  famille était 114,32 €. Un chiffre lu hors de son cadre est une invention
+  (`e155aac`, tour 6 de `docs/METHODE-VERIF-TRAQUEUR.md`).
+- J'ai écrit que `P2LRT` était « tronqué de DCD800P2LRT » : **faux**, c'était
+  `DCG406P2LRT`, vérifié sur le site du fabricant. Corrigé au registre.
+- `check-separation-marques` m'a mordu **deux fois** : une variable
+  intermédiaire masquait le test de marque. La règle M-28 exige le test **sur
+  la ligne d'appel** — pas vingt lignes plus haut.
+- Un premier jet de la garde Makita **refusait un vrai kit** du corpus. Attrapé
+  par `check-parseur-releves` **avant** la production, pas après.
+- Trois refus du garde-sortie pour des formulations de report (« je corrigerai
+  au prochain passage ») : chaque fois remplacées par une **mesure**.
+
+## 6. Le 16/08 au soir — le silence du rattrapage rendu audible
+
+Le balayage de 15h51 (110 pages, **4 430 tuiles, 4 430 lues, 100 %**, empreinte
+de parseur identique à celle du dépôt) n'a rien changé pour `makita-dlm330rt`.
+En remontant la trace, la cause est **datée et close** :
+
+- **15/08, parseur `779a09fe…`** : une tuile intitulée « Makita DLM330 » (sans
+  suffixe, 141,08 € — le prix de la machine **nue**) a été écrite sur la fiche
+  du **kit** `makita-dlm330rt`. C'est la vente à perte.
+- **16/08, parseur `4d399fb2…`** (celui qui sert aujourd'hui, mesuré) : le même
+  titre ne rapproche **plus rien** — vérifié en rejouant les trois appariements
+  sur ce titre exact. **La cause est fermée à la source.**
+- Ce qui restait : le **résidu** en base, et l'impossibilité de savoir si le
+  rattrapage l'avait cherché. Les réponses de page sont **anonymes** (le
+  raccourci poste le texte de la page, pas son adresse) : dans 110 réponses,
+  rien ne disait ce qu'on avait cherché.
+
+⇒ Correctif posé le 16/08 : **la mémoire du rattrapage**. Le plan retient les
+racines qu'il a servies ; toute racine **redemandée** est une racine que le
+balayage précédent n'a pas reconfirmée, et **deux silences d'affilée** la
+déclarent `muette` — nommée dans la réponse, jamais laissée à vendre en
+silence. Coût compté : **1 lecture + 1 écriture par plan** (pas par page).
+Porte : `check-price-watch` — **cinq sabotages, cinq rouges**.
+
+## 7. Où en est la marque Makita
+
+- DeWALT : **bouclée**, 100 % des tuiles lues.
+- Makita : calibrage du parseur fait (suffixes, packs, lots germaniques), trois
+  défauts d'argent corrigés. Reste la **traîne** des fiches que la grille ne
+  montre pas : la file de rattrapage en comptait **305 au-delà du plafond de
+  67** lors du dernier essai sur base factice — elle se draine de balayage en
+  balayage, et l'on saura désormais **lesquelles** ne reviennent jamais.

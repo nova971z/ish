@@ -6499,6 +6499,109 @@ module.exports = async function () {
       + 'du 16/08 (fiche à perte invisible pendant 4 balayages) revit');
     ok(/rattrapageRestant: joint\.restantes/.test(srcAdm4),
       '⛔ le reste non joint doit être COMPTÉ dans la réponse (pas de plafond muet)');
+    ok(/rattrapageRepechees: joint\.repechees/.test(srcAdm4)
+      && /rattrapageMuettes: joint\.muettes/.test(srcAdm4),
+      '⛔ la réponse du plan ne porte plus le repêchage : une recherche qui ne '
+      + 'trouve rien redevient MUETTE, et l\'on ne peut plus distinguer « jamais '
+      + 'demandée » de « demandée et sans réponse » — c\'est exactement ce qui a '
+      + 'coûté une session entière le 16/08 sur une fiche qui vendait à perte');
+
+    /* ④ ⛔⛔ LA MÉMOIRE DU RATTRAPAGE, SUR BASE FACTICE COMPTÉE. Trois plans
+       successifs, catalogue et relevés INCHANGÉS entre les trois :
+         · le 1er ne repêche RIEN — rien n'a encore été demandé ;
+         · le 2e repêche tout ce que le 1er a servi, et ne déclare AUCUNE
+           muette (un seul silence s'explique par la rotation de la grille) ;
+         · le 3e déclare muettes les racines interrogées deux fois pour rien.
+       Et le coût est compté : une lecture, une écriture PAR PLAN. */
+    var memoire = { doc: null };
+    var compteMem = { lectures: 0, ecritures: 0 };
+    var dbMem = {
+      collection: function (nom) {
+        if (nom === 'product_overrides') {
+          /* Aucun override : toutes les fiches de la marque sont « jamais
+             relevées » — le motif le plus simple, et il suffit à produire une
+             file. ⛔ Aucune donnée du catalogue n'est NOMMÉE ici : la liste
+             attendue se lit à l'exécution (`m1.ajoutees`), jamais en dur. */
+          return { get: function () {
+            return Promise.resolve({ forEach: function () {} });
+          } };
+        }
+        if (nom === 'config') {
+          return { doc: function (id) {
+            return {
+              _id: id,
+              get: function () {
+                compteMem.lectures++;
+                return Promise.resolve({ exists: !!memoire.doc,
+                  data: function () { return JSON.parse(JSON.stringify(memoire.doc || {})); } });
+              },
+              set: function (d) {
+                compteMem.ecritures++;
+                memoire.doc = JSON.parse(JSON.stringify(d));
+                return Promise.resolve();
+              }
+            };
+          } };
+        }
+        throw new Error('collection inattendue dans le témoin de mémoire : ' + nom);
+      }
+    };
+    var planMem = { patronRecherche: 'https://exemple.test/r?q={ref}' };
+    var etM1 = [];
+    var m1 = await joindreFn(planMem, etM1, 'MAKITA', 'idealo', dbMem, null);
+    /* ⛔ PRÉALABLE — sans file, tout ce qui suit serait vert À VIDE : « 0
+       repêchée sur 0 servie » ne vérifie rien. Une condition sans laquelle le
+       harnais ne vérifie rien ÉCHOUE, elle ne s'ignore pas poliment. */
+    ok(m1.ajoutees > 0,
+      '⛔ PRÉALABLE du témoin de mémoire : la jointure n\'a servi AUCUNE page de '
+      + 'rattrapage sur base factice — les assertions de repêchage seraient '
+      + 'vertes à vide (bilan mesuré : ' + JSON.stringify(m1) + ')');
+    var etM2 = [];
+    var m2 = await joindreFn(planMem, etM2, 'MAKITA', 'idealo', dbMem, null);
+    var etM3 = [];
+    var m3 = await joindreFn(planMem, etM3, 'MAKITA', 'idealo', dbMem, null);
+    ok(compteMem.lectures === 3 && compteMem.ecritures === 3,
+      '⛔ la mémoire du rattrapage doit coûter EXACTEMENT une lecture et une '
+      + 'écriture PAR PLAN — une fois par balayage, jamais par page (règle du '
+      + 'budget des services tiers) — mesuré sur 3 plans : ' + JSON.stringify(compteMem));
+    ok(m1.repechees === 0,
+      '⛔ au tout premier plan, rien n\'a encore été demandé : compter un '
+      + 'repêchage accuserait de silence une recherche qui n\'a jamais eu lieu '
+      + '(mesuré : ' + m1.repechees + ')');
+    ok(m2.repechees === m1.ajoutees,
+      '⛔ au plan suivant, à relevés INCHANGÉS, chaque racine servie au tour '
+      + 'd\'avant doit être comptée comme repêchée — sinon le silence de la '
+      + 'recherche reste invisible (mesuré : servies ' + m1.ajoutees
+      + ', repêchées ' + m2.repechees + ')');
+    ok(m2.muettes.length === 0,
+      '⛔ UN seul repêchage n\'est pas une preuve : la rotation de la grille '
+      + 'suffit à l\'expliquer. « Muette » ne se déclare qu\'au DEUXIÈME silence '
+      + '(mesuré : ' + JSON.stringify(m2.muettes) + ')');
+    ok(m3.muettes.length > 0 && m3.muettes.every(function (x) { return x.fois >= 2; }),
+      '⛔ au TROISIÈME plan, une racine interrogée deux fois sans réponse doit '
+      + 'être déclarée MUETTE et NOMMÉE : sans ça la fiche continue de vendre sur '
+      + 'un coût que plus rien ne peut reconfirmer (mesuré : ' + m3.muettes.length
+      + ' muettes sur ' + m1.ajoutees + ' servies)');
+
+    /* ⑤ LA MÉMOIRE QUI TOMBE NE FAIT PAS TOMBER LE PLAN — garantie d'origine. */
+    var dbMemKo = {
+      collection: function (nom) {
+        if (nom === 'product_overrides') {
+          return { get: function () { return Promise.resolve({ forEach: function () {} }); } };
+        }
+        return { doc: function () {
+          return { get: function () { return Promise.reject(new Error('ZZMEM-TEMOIN')); },
+            set: function () { return Promise.reject(new Error('ZZMEM-TEMOIN')); } };
+        } };
+      }
+    };
+    var etKo = [{ page: 1, url: 'https://exemple.test/grille-1' }];
+    var mKo = await joindreFn(planMem, etKo, 'MAKITA', 'idealo', dbMemKo, null);
+    ok(etKo.length > 1 && mKo.ajoutees > 0 && /mémoire/.test(String(mKo.note || '')),
+      '⛔ une mémoire du rattrapage en panne doit rendre une NOTE et laisser le '
+      + 'plan ENTIER (grille + rattrapage) — jamais une exception, jamais un plan '
+      + 'amputé (mesuré : ajoutées ' + mKo.ajoutees + ', étapes ' + etKo.length
+      + ', note ' + JSON.stringify(mKo.note) + ')');
   } else {
     errors.push('[check-price-watch] ⛔ pwJoindreRattrapage n\'est plus exposée : '
       + 'la jointure du rattrapage au plan normal ne vérifie plus rien.');

@@ -45,9 +45,23 @@ Dernière mise à jour : **28/07/2026**
 
 ## ▶️ REPRENDRE ICI
 
-**Prochain geste** : `CLAUDE.md` — plan mémoire, étape 2.
-La copie verbatim dans `docs/JOURNAL.md` **avant toute coupe**, puis
-l'extraction des **55 règles enfouies**. Plus rien ne bloque.
+**Au 16/08/2026 — chantier en cours : calibrage du parseur, marque par marque.**
+Les fiches (descriptions, caractéristiques techniques) viennent **après** :
+ordre donné par l'user le 15/08.
+
+| Marque | État | Ce qui reste |
+|---|---|---|
+| DeWALT | ✅ bouclée | rien — 100 % des tuiles lues, prouvé sur son balayage |
+| **Makita** | 🔄 en cours | la traîne des fiches absentes de la grille se draine par le rattrapage ; surveiller les racines déclarées `muettes` |
+| Milwaukee | ⏸️ pas commencée | plan d'URLs prêt (`api/_lib/traqueur-plans.js`), jamais balayée |
+
+**Prochain geste** : au balayage suivant, lire `rattrapageMuettes` dans la
+réponse du plan — ce sont les références que la recherche du fournisseur ne
+rend **jamais**. Elles ont besoin d'un autre chemin, pas d'un balayage de plus.
+L'histoire détaillée des 48 h (15–16/08) est au `docs/JOURNAL.md`, section
+« SESSION DES 48 HEURES ».
+
+*Chantier fondations & mémoire : terminé le 29/07/2026, historique ci-dessous.*
 
 ```bash
 cd pirates-tools

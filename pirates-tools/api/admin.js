@@ -88,12 +88,38 @@ const PW_RELEVES_A_RECONFIRMER = {
   MAKITA: Date.UTC(2026, 7, 16, 5, 0, 0)
 };
 
+/* ⛔⛔ UNE RECHERCHE QUI NE TROUVE RIEN DOIT LE DIRE — SINON LA CHAÎNE ENTIÈRE
+   EST INFALSIFIABLE. Payé le 16/08/2026, une session entière : la fiche
+   makita-dlm330rt vendait à perte, le rattrapage était censé la relire, et le
+   relevé rendu ne permettait de trancher AUCUNE des trois hypothèses — jamais
+   demandée · demandée et la page vide · demandée et la page illisible. Les
+   réponses de page sont anonymes (le raccourci poste le TEXTE de la page, pas
+   son adresse) : rien, dans 110 réponses, ne disait ce qu'on avait cherché.
+   ⇒ La mémoire tient CÔTÉ PLAN, là où l'on sait ce qu'on a demandé : la liste
+   des racines servies au balayage précédent est relue, et toute racine
+   REDEMANDÉE aujourd'hui est une racine que le balayage d'hier n'a pas
+   reconfirmée. Deux repêchages d'affilée = une référence que la recherche ne
+   ramène pas. Un fait mesuré, plus une hypothèse.
+   ⚠️ Coût borné et écrit (règle du budget des services tiers) : 1 lecture +
+   1 écriture par PLAN — une fois par balayage, pas par page ; le plan pilote
+   67 pages, la mémoire en coûte deux accès.
+   ⛔ Best-effort comme le reste : la mémoire qui tombe rend une note, jamais
+   une exception — le plan de grille ne tombe pas pour ce qui ne le regarde pas.
+   ⚠️ Portes lues — J4 : aucun prix n'est calculé ni annoncé, on note QUELLES
+   adresses ont été demandées ; J3 : des références d'outils publiques, aucune
+   donnée personnelle, rien qui concerne une personne ; J5 : ni TVA ni octroi
+   de mer, le territoire continue de se dériver du code postal. */
+function pwMemoireRattrapage(db, brand) {
+  return db.collection('config').doc('pw_rattrapage_' + String(brand || '').toLowerCase());
+}
+
 /* ⛔ LE PLAN NORMAL APPELLE CETTE JOINTURE — best-effort par CONSTRUCTION :
    toute panne (Firestore absent, lecture qui jette) rend un bilan avec sa
    note, jamais une exception — le plan de grille ne doit JAMAIS tomber pour
    une raison qui ne le concerne pas (garantie d'origine du plan, 09/08). */
 async function pwJoindreRattrapage(plan, etapes, brand, source, db, adminFb) {
-  const bilan = { ajoutees: 0, restantes: 0, note: null };
+  const bilan = { ajoutees: 0, restantes: 0, note: null,
+    repechees: 0, repecheesListe: [], muettes: [] };
   if (!plan || !plan.patronRecherche) {
     bilan.note = 'rattrapage non joint : aucune adresse de recherche par référence au plan';
     return bilan;
@@ -114,9 +140,56 @@ async function pwJoindreRattrapage(plan, etapes, brand, source, db, adminFb) {
     const PLAFOND_RATTRAPAGE = 67;
     const prises = et.slice(0, PLAFOND_RATTRAPAGE);
     prises.forEach((e) => etapes.push({
-      page: null, url: e.url, rattrapage: true, sku: e.sku, motif: e.motif }));
+      page: null, url: e.url, rattrapage: true, sku: e.sku, racine: e.racine,
+      motif: e.motif }));
     bilan.ajoutees = prises.length;
     bilan.restantes = et.length - prises.length;
+    /* ── LA MÉMOIRE : ce qu'on redemande est ce qu'on n'a pas obtenu ────────
+       ⛔ On ne compare QU'AVEC les racines effectivement SERVIES au balayage
+       précédent, jamais avec celles restées sous le plafond : une racine
+       jamais demandée n'a rien à prouver, et la compter ferait dire « la
+       recherche ne la ramène pas » d'une recherche qui n'a pas eu lieu. */
+    const memDoc = pwMemoireRattrapage(db, brand);
+    let avant = { racines: [], echecs: {} };
+    try {
+      const snap = await memDoc.get();
+      if (snap && snap.exists) avant = Object.assign(avant, snap.data() || {});
+    } catch (eLec) {
+      bilan.note = 'mémoire du rattrapage illisible ('
+        + ((eLec && eLec.message) || 'erreur') + ') — le plan reste entier, '
+        + 'mais le repêchage n\'est pas compté ce tour-ci';
+    }
+    const serviesAvant = Object.create(null);
+    (Array.isArray(avant.racines) ? avant.racines : []).forEach((r) => { serviesAvant[r] = 1; });
+    const echecs = Object.create(null);
+    const racinesNow = [];
+    prises.forEach((e) => {
+      const r = String(e.racine || e.sku || '');
+      if (!r) return;
+      racinesNow.push(r);
+      if (!serviesAvant[r]) { echecs[r] = 0; return; }
+      const n = (Number((avant.echecs || {})[r]) || 0) + 1;
+      echecs[r] = n;
+      bilan.repecheesListe.push({ racine: r, fois: n, motif: e.motif });
+      /* ⛔ DEUX SILENCES D'AFFILÉE NE SONT PLUS UN HASARD DE ROTATION. Sur la
+         grille, une tuile peut manquer un balayage ; une RECHERCHE par
+         référence, elle, interroge nommément — deux silences de suite disent
+         que le site ne rend pas cette référence, et que cette fiche ne sera
+         JAMAIS reconfirmée par ce chemin. Elle est NOMMÉE pour qu'on lui
+         trouve un autre chemin, jamais laissée à vendre en silence. */
+      if (n >= 2) bilan.muettes.push({ racine: r, fois: n, sku: e.sku, motif: e.motif });
+    });
+    bilan.repechees = bilan.repecheesListe.length;
+    bilan.repecheesListe = bilan.repecheesListe.slice(0, 25);
+    bilan.muettes = bilan.muettes.slice(0, 25);
+    try {
+      await memDoc.set({ at: Date.now(), racines: racinesNow,
+        echecs: Object.assign({}, echecs) }, { merge: false });
+    } catch (eEcr) {
+      bilan.note = (bilan.note ? bilan.note + ' · ' : '')
+        + 'mémoire du rattrapage non écrite (' + ((eEcr && eEcr.message) || 'erreur')
+        + ') — le prochain balayage ne pourra pas compter les repêchages';
+    }
   } catch (e) {
     bilan.note = 'rattrapage non joint : ' + ((e && e.message) || 'erreur de lecture');
   }
@@ -386,6 +459,14 @@ module.exports = async function handler(req, res) {
       rattrapage: joint.ajoutees,
       rattrapageRestant: joint.restantes,
       noteRattrapage: joint.note,
+      /* ⛔ CE QU'ON REDEMANDE EST CE QU'ON N'A PAS OBTENU. `repechees` compte
+         les racines déjà servies au balayage précédent et toujours en file ;
+         `muettes` nomme celles qu'on a interrogées DEUX fois ou plus sans que
+         le site les rende jamais — ces fiches-là ne seront pas reconfirmées
+         par ce chemin, et vendre en silence n'est pas une option. */
+      rattrapageRepechees: joint.repechees,
+      rattrapageRepecheesListe: joint.repecheesListe,
+      rattrapageMuettes: joint.muettes,
       /* ⚠️ Ce que le plan SUPPOSE encore, écrit noir sur blanc plutôt que tu
          (E-112 : une grammaire déduite de deux points est une invention). */
       aVerifier: p.aVerifier || null,
