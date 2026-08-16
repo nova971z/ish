@@ -608,6 +608,23 @@ var MARQUEURS_DEWALT = {
   T: { coffret: 'TSTAK', note: 'livré en coffret TSTAK (T FINAL, sans chiffre)' },
   M: { editionLimitee: true, note: 'édition limitée McLaren — vu sur DCK2223MP2T et DCK200MP2T' },
   G: { note: 'faisceau VERT sur un laser (DCE079D1G) — ailleurs, sens non établi' },
+  /* ⛔ « R » = FAISCEAU ROUGE, symétrique exact du « G » ci-dessus. SOURCÉ le
+     16/08/2026 (recherche Web, enfin possible) : la fiche du DCE079D1R
+     s'intitule « Laser rotatif faisceau ROUGE », celle du DCE079D1G « faisceau
+     vert ». Même famille, même position, sens opposé.
+     ⚠️ Aucune affirmation sur le CONTENU de la boîte : une couleur de faisceau
+     n'est ni une batterie ni un coffret. On l'inscrit pour qu'elle cesse d'être
+     « inconnue » — une lettre inconnue laisse la garde aveugle. */
+  R: { note: 'faisceau ROUGE sur un laser (DCE079D1R, symétrique de G) — '
+    + 'ailleurs sens non établi ; ne dit RIEN du contenu de la boîte' },
+  /* ⛔ « L » = CLASSE DE POUSSIÈRE L sur un aspirateur. SOURCÉ le 16/08/2026 :
+     la page officielle du DWV901L-QS s'intitule « Aspirateur eau et poussières
+     30L - **Classe L** », et le DCV584L est vendu partout comme « Classe L ».
+     ⚠️ C'est une NORME, pas un conditionnement — elle ne dit rien de ce qu'il y
+     a dans la boîte, et c'est justement pour ça qu'elle doit être connue :
+     sinon la lettre tombe dans `inconnus` et la fiche paraît illisible. */
+  L: { note: 'classe de poussière L (aspirateurs DWV901L, DCV584L) — une NORME, '
+    + 'pas un conditionnement ; ne dit RIEN du contenu de la boîte' },
   /* ⛔⛔ « K » = COFFRET — MESURÉ SUR LE CATALOGUE, PAS SOURCÉ CHEZ LE
      FABRICANT, ET C'EST DIT (16/08/2026).
      ⚠️ Ma session ne joint AUCUN site externe (`dewalt.fr`, `dewalt.co.uk`,
@@ -655,10 +672,54 @@ function lireSuffixeDewalt(sku) {
   if (!m) return res;
   var reste = sansRegion.slice(m[0].length);
   res.suffixe = reste;
+  /* ⛔⛔ « B » SEUL = MACHINE NUE (bare tool). SOURCÉ le 16/08/2026 : le site du
+     fabricant intitule le DCE100B « Cordless Compact Jobsite Blower (**Tool
+     Only**) » et le DCS353B « Bare Tool Only » — c'est la nomenclature de sa
+     gamme nord-américaine (20V MAX), présente dans notre catalogue à côté de
+     l'européenne (XR 18V).
+     ⛔ ET C'EST UN CAS DE SUFFIXE ENTIER, JAMAIS UNE LETTRE DU LECTEUR. Mis
+     dans la table des marqueurs, ce « B » ferait de `DFS9150B1G` — une boîte
+     d'AGRAFES — une « machine nue » : exactement la faute payée le 07/08/2026
+     quand un FORET ressortait `nu: true`. Le drapeau part sur les fiches
+     produit ; l'écrire sur un consommable est une bêtise visible par le client.
+     ⇒ On ne l'accepte donc que si le suffixe vaut EXACTEMENT « B », ce qui est
+     la forme des deux références sourcées. Ailleurs, le « B » reste inconnu et
+     le dit. */
+  if (reste === 'B') {
+    res.nu = true;
+    return res;
+  }
   var i = 0;
   while (i < reste.length) {
     var lettre = reste[i];
     var chiffre = reste[i + 1];
+    /* ⛔⛔ UNE TENSION EN FIN DE SUFFIXE N'EST PAS UN CODE DE BATTERIE — ET
+       CELLE-CI FAISAIT NAÎTRE UNE BATTERIE QUI N'EXISTE PAS.
+       Mesuré le 16/08/2026 : `DCE089NG18` ressortait « 1 batterie de 3 Ah »
+       parce que le lecteur voyait « G » suivi de « 1 » et lisait un code de
+       batterie XR 3 Ah. Or la SOURCE dit l'inverse — « DCE089 NG18 3 x 360°
+       Green MultiLine Laser 12/18V **Bare Unit** », « sans batterie ni
+       chargeur », « Machine seule ». Le suffixe se lit N (nue) + G (vert) +
+       **18 (la tension)**.
+       ⛔ Sens de l'erreur : une batterie inventée sur une machine NUE fait
+       accepter un prix de kit sur une fiche nue — coût trop haut, donc prix
+       trop haut (J4) — et fait refuser la vraie tuile nue. Les deux à la fois.
+       ⚠️ Le test porte sur TOUT ce qui reste après la lettre, et la liste des
+       tensions est FERMÉE : « P2 » reste deux batteries de 5 Ah, « G1 » suivi
+       d'autre chose reste un code de batterie. */
+    if (/^(12|18|54|108)$/.test(reste.slice(i + 1))) {
+      if (MARQUEURS_DEWALT[lettre]) {
+        var mkv = MARQUEURS_DEWALT[lettre];
+        if (mkv.nu) res.nu = true;
+        if (mkv.coffret) res.coffret = mkv.coffret;
+        if (mkv.editionLimitee) res.editionLimitee = true;
+      } else {
+        res.inconnus.push(lettre);
+      }
+      res.voltage = parseInt(reste.slice(i + 1), 10);
+      i = reste.length;
+      continue;
+    }
     if (chiffre >= '0' && chiffre <= '9' && BATTERIES_DEWALT[lettre]) {
       var n = parseInt(chiffre, 10);
       res.batteries.push({ nb: n, ah: BATTERIES_DEWALT[lettre].ah,
@@ -673,6 +734,21 @@ function lireSuffixeDewalt(sku) {
       if (mk.coffret) res.coffret = mk.coffret;
       if (mk.editionLimitee) res.editionLimitee = true;
       i += 1;
+      continue;
+    }
+    /* ⛔⛔ UN VOLTAGE EN FIN DE SUFFIXE N'EST PAS UN NOMBRE DE BATTERIES.
+       SOURCÉ le 16/08/2026 : « DCE089**NG18**-XJ — DCE089 NG18 3 x 360° Green
+       MultiLine Laser **12/18V** Bare Unit », et partout ailleurs « sans
+       batterie ni chargeur » / « Machine seule ». Le suffixe se lit donc
+       N (nue) + G (vert) + **18 = la tension**, pas un contenu de boîte.
+       ⛔ SANS CETTE LIGNE, le « 8 » tombait dans `inconnus` et quatre lasers
+       paraissaient illisibles alors que leur référence dit tout : machine nue.
+       ⚠️ Liste FERMÉE aux tensions réelles de la gamme (12, 18, 54, 108) et
+       seulement en FIN de suffixe : « 18 » ailleurs pourrait compter autre
+       chose, et deviner coûterait un contenu de boîte inventé. */
+    if (/^(12|18|54|108)$/.test(reste.slice(i))) {
+      res.voltage = parseInt(reste.slice(i), 10);
+      i = reste.length;
       continue;
     }
     res.inconnus.push(lettre);

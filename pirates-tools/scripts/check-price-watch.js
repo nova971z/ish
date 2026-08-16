@@ -1889,6 +1889,48 @@ module.exports = async function () {
         ok(lireDw('ZZD791P2').coffret === null,
           '⛔ une référence sans marqueur de boîte ne doit JAMAIS rendre un '
           + 'coffret : l\'user le facture, l\'inventer se voit sur la facture');
+
+        /* ══ CE QUE LA RECHERCHE WEB A PERMIS DE SOURCER (16/08/2026) ═══════
+           Jusque-là, aucun site n'était joignable et ces lettres restaient
+           « inconnues ». Chacune ci-dessous a une SOURCE, citée dans la table. */
+        /* ⛔⛔ LE PLUS GRAVE DES QUATRE : une TENSION en fin de suffixe était
+           lue comme un code de batterie. `ZZE089NG18` ressortait « 1 batterie
+           3 Ah » alors que la source dit « Bare Unit — No Battery or Charger ».
+           Une batterie inventée sur une machine nue fait accepter un prix de
+           kit sur une fiche nue ET refuser la vraie tuile nue : les deux à la
+           fois. */
+        var ng = lireDw('ZZE089NG18');
+        ok(ng.nbBatteries === 0 && ng.nu === true && ng.voltage === 18
+          && ng.inconnus.length === 0,
+          '⛔⛔ ARGENT : « NG18 » = nue + vert + 18 V, ZÉRO batterie. Lire le '
+          + '« G1 » comme un code de batterie invente une batterie sur une '
+          + 'machine nue (obtenu ' + JSON.stringify(ng) + ')');
+        /* ⛔ CONTRE-ÉPREUVES — la tension ne doit RIEN manger d'autre. */
+        ok(lireDw('ZZE079G1').nbBatteries === 1,
+          '⛔ « G1 » suivi de rien reste UN code de batterie : la règle de '
+          + 'tension ne vaut qu\'en FIN de suffixe et sur une liste fermée');
+        ok(lireDw('ZZD791P2').nbBatteries === 2 && lireDw('ZZE079D1G').nbBatteries === 1,
+          '⛔ les codes de batterie normaux survivent intacts à la règle de tension');
+        /* ⛔ « B » seul = machine nue (sourcé « Tool Only » chez le fabricant),
+           mais JAMAIS une lettre du lecteur : sinon une boîte d'agrafes
+           « ZZS9150B1G » deviendrait une machine nue — la faute du 07/08. */
+        ok(lireDw('ZZS353B').nu === true,
+          '⛔ un suffixe valant exactement « B » est une machine NUE (bare tool)');
+        ok(lireDw('ZZS9150B1G').nu === false,
+          '⛔⛔ CONTRE-ÉPREUVE : un « B » AU MILIEU d\'un suffixe ne rend PAS la '
+          + 'fiche nue — sinon un consommable serait annoncé « machine nue, sans '
+          + 'batterie ni chargeur » au client (faute déjà payée le 07/08/2026)');
+        /* ⛔ Deux lettres SOURCÉES qui ne disent RIEN du contenu : elles doivent
+           sortir d'`inconnus` sans rien affirmer sur la boîte. */
+        var rr = lireDw('ZZE079D1R'), ll = lireDw('ZZV901L');
+        ok(rr.inconnus.length === 0 && rr.nbBatteries === 1 && rr.coffret === null,
+          '⛔ « R » (faisceau rouge) est connu et n\'invente ni batterie ni '
+          + 'coffret (obtenu ' + JSON.stringify(rr) + ')');
+        ok(ll.inconnus.length === 0 && ll.nbBatteries === 0 && ll.coffret === null
+          && ll.nu === false,
+          '⛔ « L » (classe de poussière) est connu et n\'invente RIEN — surtout '
+          + 'pas « machine nue », qui est une affirmation (obtenu '
+          + JSON.stringify(ll) + ')');
       }
 
       var lireSuf = pp.nomenclature && pp.nomenclature.lireSuffixeMakita;
