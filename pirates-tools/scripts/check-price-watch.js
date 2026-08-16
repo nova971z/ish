@@ -1852,6 +1852,45 @@ module.exports = async function () {
          écrit un coût de kit sur un outil nu, ou l'inverse.
          ⚠️ Références SYNTHÉTIQUES — un harnais ne grave jamais une donnée du
          catalogue ; c'est la GRAMMAIRE qui est testée, pas un produit. */
+      /* ══ « K » = COFFRET CHEZ DEWALT — mesuré, pas sourcé, et c'est dit
+             (16/08/2026, Phase 1 du plan DeWALT) ═══════════════════════════
+         ⛔ Sans lui, `ZZ25033K` et `ZZ25033` étaient INDISCERNABLES : coffret et
+         machine nue interchangeables pour l'appariement. Preuve retenue : sur
+         30 fiches machine du catalogue portant un K non lu, 4 titres écrivent
+         « (coffret) » et AUCUN ne dit le contraire.
+         ⚠️ Sens de l'erreur choisi et assumé : si le K voulait dire autre
+         chose, l'effet serait un REFUS de trop — jamais un prix de coffret
+         écrit sur une fiche nue. On préfère distinguer à tort que confondre.
+         ⚠️ Références SYNTHÉTIQUES : c'est la grammaire qu'on teste. */
+      var lireDw = pp.nomenclature && pp.nomenclature.lireSuffixeDewalt;
+      ok(typeof lireDw === 'function', 'lireSuffixeDewalt exportée');
+      if (lireDw) {
+        var kSeul = lireDw('ZZ25033K'), nuSeul = lireDw('ZZ25033');
+        ok(kSeul.coffret && !nuSeul.coffret,
+          '⛔⛔ ARGENT : un « K » final doit RENDRE un coffret, sinon la version '
+          + 'en coffret et la machine nue signent pareil et deviennent '
+          + 'interchangeables pour l\'appariement (obtenu K→'
+          + JSON.stringify(kSeul.coffret) + ', nue→' + JSON.stringify(nuSeul.coffret) + ')');
+        ok(kSeul.inconnus.length === 0,
+          '⛔ le « K » ne doit plus tomber dans `inconnus` : une lettre non lue '
+          + 'est une configuration inconnue, donc une garde aveugle (obtenu '
+          + JSON.stringify(kSeul.inconnus) + ')');
+        /* ⛔ CONTRE-ÉPREUVE — le K ne doit pas EFFACER ce qui l'accompagne :
+           « NK » reste une machine NUE, et « KT » garde le coffret nommé. */
+        var nk = lireDw('ZZG571NK');
+        ok(nk.nu === true && nk.nbBatteries === 0 && !!nk.coffret,
+          '⛔ « NK » = machine NUE **et** coffret : lire le K ne doit pas effacer '
+          + 'le N (obtenu ' + JSON.stringify(nk) + ')');
+        var kt = lireDw('ZZS520KT');
+        ok(kt.coffret === 'TSTAK',
+          '⛔ quand la boîte est NOMMÉE (T), son nom prime sur le générique — '
+          + 'l\'user facture le coffret à part (obtenu ' + JSON.stringify(kt.coffret) + ')');
+        /* ⛔ CONTRE-ÉPREUVE FINALE : une référence sans K n'invente aucun coffret. */
+        ok(lireDw('ZZD791P2').coffret === null,
+          '⛔ une référence sans marqueur de boîte ne doit JAMAIS rendre un '
+          + 'coffret : l\'user le facture, l\'inventer se voit sur la facture');
+      }
+
       var lireSuf = pp.nomenclature && pp.nomenclature.lireSuffixeMakita;
       ok(typeof lireSuf === 'function', 'lireSuffixeMakita exportée');
       if (lireSuf) {

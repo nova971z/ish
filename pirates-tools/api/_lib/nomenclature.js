@@ -607,7 +607,34 @@ var MARQUEURS_DEWALT = {
   N: { nu: true,  note: 'machine nue, sans batterie ni chargeur' },
   T: { coffret: 'TSTAK', note: 'livré en coffret TSTAK (T FINAL, sans chiffre)' },
   M: { editionLimitee: true, note: 'édition limitée McLaren — vu sur DCK2223MP2T et DCK200MP2T' },
-  G: { note: 'faisceau VERT sur un laser (DCE079D1G) — ailleurs, sens non établi' }
+  G: { note: 'faisceau VERT sur un laser (DCE079D1G) — ailleurs, sens non établi' },
+  /* ⛔⛔ « K » = COFFRET — MESURÉ SUR LE CATALOGUE, PAS SOURCÉ CHEZ LE
+     FABRICANT, ET C'EST DIT (16/08/2026).
+     ⚠️ Ma session ne joint AUCUN site externe (`dewalt.fr`, `dewalt.co.uk`,
+     `wikipedia` → curl 000, mesuré) : la nomenclature officielle est hors de
+     portée, et je ne l'invente pas. Méthode employée : celle de l'autre marque
+     — on COMPTE sur nos propres fiches.
+     ⛔ CE QUI EST MESURÉ, exactement : 30 fiches MACHINE portent un « K » que
+     la table ne lisait pas ; **4 de leurs titres écrivent explicitement
+     « (coffret) »**, et **AUCUN ne dit le contraire** — les 26 autres se
+     taisent. Les quatre explicites sont des outils FILAIRES (710 W, 800 W,
+     600 W) : aucune batterie en jeu, donc aucune ambiguïté sur ce que le K
+     décrit. Quatre confirmations, zéro contradiction : mince pour affirmer,
+     assez pour DISTINGUER.
+     ⛔ POURQUOI ON L'AJOUTE QUAND MÊME — LE SENS DE L'ERREUR, ET IL EST
+     INVERSE DE M-28. Sans lui, `D25033K` et `D25033` rendaient la MÊME
+     signature « NU » : coffret et machine nue étaient interchangeables pour
+     l'appariement, et la garde titre↔fiche ne voyait aucune contradiction.
+     Avec lui, les deux se DISTINGUENT ; si le K voulait dire autre chose,
+     l'effet serait un REFUS de trop — jamais un prix de coffret écrit sur une
+     fiche nue. On choisit l'erreur qui ne coûte pas d'argent.
+     ⚠️ Coffret rendu GÉNÉRIQUE, jamais « TSTAK » : les titres ne disent pas
+     quelle boîte, et nommer la marque de la boîte serait exactement
+     l'invention que ces lignes évitent. */
+  K: { coffret: 'COFFRET', note: 'coffret — mesuré sur 30 fiches machine du '
+    + 'catalogue : 4 titres disent « (coffret) », 0 dit le contraire. NON '
+    + 'sourcé chez le fabricant (aucun site joignable) ; sens de l\'erreur '
+    + 'choisi : distinguer plutôt que confondre.' }
 };
 
 /* ⛔⛔ UN LECTEUR, PAS UNE LISTE. Les références combinent les codes :
