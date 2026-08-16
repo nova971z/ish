@@ -125,6 +125,16 @@ douce : soit la borne monte pour cette famille, soit la fiche part.
 
 ---
 
+## ⛔ RECTIFICATIF (même jour, après contre-mesure)
+
+Une mesure ajoutée après coup à cet audit — « 759 fiches DeWALT (72,5 %) n'ont
+jamais été vues chez le fournisseur » — est **FAUSSE et retirée**. Je cherchais
+les fiches dans `unknown`, or **une tuile appariée n'y va jamais** : test
+discriminant, 198 réfs dans `applied`, 1 208 dans `unknown`, **0 dans les
+deux**. Je comptais donc comme « jamais vues » exactement celles qui avaient
+été appariées. Cause racine : DW-6 ci-dessous. Le plan est dans
+`docs/PLAN-FINIR-DEWALT.md`.
+
 ## DW-6 — on ne peut pas savoir quelles fiches ont un coût frais
 
 Les 871 réponses DeWALT sont **toutes en mode balayage** (`scan: true`), et ce

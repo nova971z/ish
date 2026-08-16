@@ -35,6 +35,7 @@ désigné ici, soit il est rangé.
 | `METHODE-VERIF-TRAQUEUR.md` | la méthode d'entraînement du traqueur, améliorée à chaque zip |
 | `AUDIT-TRAQUEUR-PARSEUR-2026-08-16.md` | l'audit profond du traqueur et du parseur : 5 défauts mesurés, l'ordre de réparation imposé, et ce qui est confirmé sain |
 | `AUDIT-DEWALT-2026-08-16.md` | la vérification complète de la marque DeWALT : pourquoi elle n'est PAS finie, chaîne par chaîne, et l'ordre de ce qui reste |
+| `PLAN-FINIR-DEWALT.md` | le plan numéroté pour finir DeWALT : 3 phases, 9 étapes, 2 balayages et 1 décision demandés à l'user |
 | `DEMANDES.md` | **ce que l'user a demandé, et où ça en est** — trois états, et la CI REFUSE de livrer tant qu'une ligne est `OUVERT` (`scripts/check-demandes.js`) |
 | `ERREURS.md` | mes erreurs classées par **origine** — 7 mécanismes, lus par le sommaire seul (`scripts/erreurs.js`) |
 | `JURIDIQUE.md` | les 5 domaines qui engagent la responsabilité — porte à ouvrir avant d'éditer (`scripts/juridique.js`) |
