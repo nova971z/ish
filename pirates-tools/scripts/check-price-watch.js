@@ -2832,6 +2832,42 @@ module.exports = async function () {
     ok(par.type === 'marteau perforateur' && par.nbBatteries === 1 && par.chargeur === true,
       'une parenthèse joue le même rôle qu\'un « + » : elle décrit le lot, pas l\'article');
 
+    /* ══ « SANS CHARGEUR » N'EST PAS « AVEC CHARGEUR » — ET « SANS FIL » NE NIE
+           RIEN DU TOUT (16/08/2026, calibrage DeWALT) ══════════════════════
+       ⛔ Deux défauts empilés, trouvés le même jour :
+         ① `extraireCaracteristiques` lisait le MOT « chargeur » sans regarder la
+            négation qui le gouverne — « sans batterie ni chargeur » rendait
+            `chargeur: true`. Un mensonge dans la donnée que la garde titre↔fiche
+            relit ensuite pour refuser un prix.
+         ② en corrigeant ①, la fenêtre de négation attrapait « sans **fil** » et
+            « sans **balais** » : « Perceuse sans fil 18V + chargeur » ressortait
+            SANS chargeur. Ce second défaut était LATENT depuis toujours sur
+            l'autre chemin de lecture.
+       ⚠️ Les quatre CONTRE-ÉPREUVES comptent autant que les six refus : une
+       garde qui nie toujours ne vaut pas mieux qu'une garde qui n'a jamais nié.
+       ⛔ Libellés synthétiques : aucune donnée du catalogue n'est nommée. */
+    [['ZZMARQUE ZZC100N sans batterie ni chargeur', false],
+     ['ZZMARQUE ZZC100N sans chargeur', false],
+     ['ZZMARQUE ZZC100N (sans batterie, sans chargeur)', false],
+     ['ZZMARQUE ZZC100N without battery and charger', false],
+     ['ZZMARQUE ZZC100N ohne Akku und Ladegerät', false],
+     ['ZZMARQUE scie sans fil, sans chargeur', false],
+     ['ZZMARQUE ZZC100P2 avec 2 batteries et chargeur', true],
+     ['ZZMARQUE perceuse sans fil 18V + chargeur', true],
+     ['ZZMARQUE meuleuse sans balais 18V avec chargeur', true],
+     ['ZZMARQUE visseuse sans-fil brushless + chargeur ZZB115', true]
+    ].forEach(function (cas) {
+      var lu = ec(cas[0], 'DEWALT');
+      ok((!!lu.chargeur) === cas[1],
+        '⛔ lecture du chargeur : attendu ' + cas[1] + ', obtenu ' + (!!lu.chargeur)
+        + ' — « ' + cas[0] + ' ». ' + (cas[1]
+          ? 'Une FAUSSE négation (« sans fil », « sans balais ») ne doit jamais '
+            + 'effacer un chargeur réellement annoncé : le coût d\'un kit tomberait '
+            + 'sur une fiche nue.'
+          : 'Une négation explicite doit être LUE : sinon la garde titre↔fiche '
+            + 'décide de refuser un prix sur un fait faux.'));
+    });
+
     /* ⚠️ Deux préfixes ne sont PAS fiables : DeWALT range sa radio sous DWST
        et son télémètre sous DWHT. Ils ne doivent donc jamais contredire un mot. */
     var rad = ec('DEWALT DWST9-99999 Radio de chantier Bluetooth 18V', 'DEWALT');

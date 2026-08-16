@@ -2694,13 +2694,33 @@ function roleCoffret(titre, sku, marque) {
    lire, sinon ça ne sert à rien ». */
 const NEGATION = /\b(sans|ni|ohne|without|excl\.?|non fourni|non inclus|nu|nue|solo|body only|bare tool|machine seule|outil seul|appareil seul)\b/;
 
+/* ⛔⛔ « SANS FIL » ET « SANS BALAIS » NE NIENT RIEN — CE SONT DES QUALITÉS.
+   Trouvé le 16/08/2026, et il était LATENT depuis toujours : « Perceuse sans
+   fil 18V + chargeur » ressortait `chargeur: false`, et « Meuleuse sans balais
+   18V avec chargeur » aussi. La fenêtre de 34 signes attrape le « sans » de
+   « sans fil », qui ne parle pas du chargeur mais de l'absence de câble.
+   ⚠️ CE N'EST PAS UNE SUPPOSITION SUR MOI-MÊME : en cherchant l'ampleur du
+   défaut de lecture du chargeur, TROIS de mes propres mesures ont été faussées
+   d'affilée par exactement ces deux tournures. Le code avait la même faiblesse
+   que mes motifs jetables — sauf que lui décide de l'argent.
+   ⛔ Sens de l'erreur : nier à tort fait lire « pas de chargeur » sur une offre
+   qui EN A UN, donc rapprocher un prix de kit d'une fiche nue — un coût trop
+   haut, donc un prix trop haut (J4). L'inverse serait pire, mais celui-ci ment
+   déjà au client.
+   ⚠️ On neutralise les COLLOCATIONS, pas le mot : « sans » garde tout son sens
+   partout ailleurs. La liste est fermée et courte — chaque entrée est une
+   tournure vue dans le corpus, jamais une invention. */
+const FAUSSES_NEGATIONS = /\b(sans|ohne|without)[\s-]+(fil|c[âa]ble|cord|balais|brosses?|brush|kohle)\w*/gi;
+
 function nieApres(t, motif) {
   const m = t.match(motif);
   if (!m) return false;
   /* La négation porte sur ce qui SUIT : on regarde les 34 signes qui précèdent
      le mot, bornés à la ponctuation forte qui fermerait la proposition. */
   const avant = t.slice(Math.max(0, m.index - 34), m.index).split(/[.;(]/).pop();
-  return NEGATION.test(avant);
+  /* ⛔ Les fausses négations sont retirées AVANT le test — sinon « sans fil »
+     nierait le chargeur qui le suit. */
+  return NEGATION.test(String(avant).replace(FAUSSES_NEGATIONS, ' '));
 }
 
 /* ⛔⛔ « 2x batterie 2,0 Ah » VAUT DEUX BATTERIES, PAS UNE.
@@ -3655,7 +3675,27 @@ function extraireCaracteristiques(titre, brand) {
     }
   }
 
-  car.chargeur = /\bchargeurs?\b|\bcharger\b/.test(bas);
+  /* ⛔⛔ « SANS CHARGEUR » N'EST PAS « AVEC CHARGEUR ». Mesuré le 16/08/2026 en
+     calibrant DeWALT : ce test lisait le MOT et ignorait la négation qui le
+     gouverne — `extraireCaracteristiques('… sans batterie ni chargeur')`
+     rendait `chargeur: true`, idem « sans chargeur » et « without battery and
+     charger ». Seule la forme allemande passait, par accident : le mot y est
+     « Ladegerät », que ce motif ne connaissait pas.
+     ⛔ C'est un MENSONGE DANS LA DONNÉE que la garde titre↔fiche relit ensuite
+     pour refuser un prix : elle décidait sur un fait faux.
+     ⚠️ MESURÉ AUSSI, ET DIT : sur les 794 refus DeWALT « batterie ou chargeur
+     inclus » des 13 balayages archivés, ce défaut n'en change **AUCUN** — dans
+     tous les cas la tuile annonce une batterie par ailleurs, ce qui justifie le
+     refus à lui seul. On corrige parce que c'est FAUX, pas parce que ça coûte :
+     annoncer un gain non mesuré serait une invention.
+     ⛔ ON RÉUTILISE `nieApres`, JAMAIS UN MOTIF NEUF. En cherchant l'ampleur de
+     ce défaut, TROIS de mes propres mesures ont été faussées d'affilée par des
+     motifs de négation écrits à la main qui attrapaient « sans **fil** » et
+     « sans **balais** ». `nieApres` borne la fenêtre à 34 signes et s'arrête à
+     la ponctuation forte ; il est déjà éprouvé sur l'autre chemin (ligne 2810),
+     et un second motif maison serait un second endroit où se tromper. */
+  car.chargeur = /\bchargeurs?\b|\bcharger\b|\blader\b/.test(bas)
+    && !nieApres(bas, /chargeur|charger|lader/);
 
   /* ── Coffret. Sa MARQUE compte (l'user facture le coffret à part), et le mot
      générique « coffret » précède souvent la marque dans le titre — « en
