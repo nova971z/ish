@@ -4903,8 +4903,24 @@ async function handlePriceWatch(req, res, admin, db) {
 
         // Cette source a-t-elle DÉJÀ ce relevé, et le coût effectif est-il déjà bon ?
         const entreeSrc = (oW.priceSources || {})[sourceSlug];
+        /* ⛔⛔ UNE RECONFIRMATION EST UN ACTE DATÉ — sinon la file de
+           rattrapage tourne en rond. Mesuré le 16/08/2026 sur DEUX balayages
+           consécutifs : 46 des 49 références re-cherchées étaient LES MÊMES.
+           Cause : quand la page de recherche confirmait un relevé déjà bon,
+           `dejaAJour` évitait l'écriture (économie de quota, légitime) — mais
+           la DATE du relevé restait antérieure au seuil « à reconfirmer », et
+           le motif repêchait la même fiche à chaque balayage. Boucle infinie :
+           la file ne se vidait jamais, les fiches suivantes jamais atteintes.
+           ⛔ Un relevé antérieur au seuil de reconfirmation de SA marque
+           s'écrit donc MÊME s'il est identique : c'est la date qui compte —
+           « revérifié aujourd'hui, toujours vrai ». Une écriture par fiche et
+           par incident, puis plus jamais. J4 : aucun prix ne change ici ;
+           J3 : rien de personnel ; J5 : aucune fiscalité. */
+        const seuilMarque = PW_RELEVES_A_RECONFIRMER[String(brand || '').toUpperCase()] || 0;
+        const atSrc = entreeSrc ? priceParse.enMillis(entreeSrc.at) : 0;
         const dejaAJour = !!entreeSrc && Math.abs((entreeSrc.ttc || 0) - srcRetenu) < 0.01
-          && Math.abs((oW.priceSrcTTC || 0) - effSrc) < 0.01 && entreeSrc.enStock !== false;
+          && Math.abs((oW.priceSrcTTC || 0) - effSrc) < 0.01 && entreeSrc.enStock !== false
+          && !(seuilMarque && atSrc > 0 && atSrc < seuilMarque);
 
         if (cur != null && Math.abs(newPrice - cur) < 0.02) {
           unchanged.push(rec);

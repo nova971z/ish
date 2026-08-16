@@ -6485,6 +6485,21 @@ module.exports = async function () {
       + 'la jointure du rattrapage au plan normal ne vérifie plus rien.');
   }
 
+  /* ── UNE RECONFIRMATION EST UN ACTE DATÉ (16/08) — la file doit se vider.
+     Mesuré : 46/49 références re-cherchées identiques entre deux balayages,
+     parce que `dejaAJour` évitait l'écriture et gardait la date d'avant le
+     seuil. On vérifie l'expression EFFECTIVE (M-29) : la condition de
+     non-écriture doit exclure un relevé antérieur au seuil de reconfirmation. */
+  (function () {
+    var srcAdm5 = require('fs').readFileSync(
+      require('path').join(__dirname, '..', 'api', 'admin.js'), 'utf8');
+    ok(/const dejaAJour = [\s\S]{0,300}?&& !\(seuilMarque && atSrc > 0 && atSrc < seuilMarque\);/.test(srcAdm5),
+      '⛔ `dejaAJour` ne rafraîchit plus la DATE d\'un relevé d\'avant le seuil de '
+      + 'reconfirmation : la file de rattrapage repêche les mêmes fiches pour '
+      + 'toujours (mesuré : 46/49 identiques entre deux balayages) et les '
+      + 'suivantes ne sont jamais atteintes.');
+  })();
+
   return errors;
 };
 
