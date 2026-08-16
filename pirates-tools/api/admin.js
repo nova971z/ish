@@ -128,6 +128,7 @@ function pwRattrapageEtapes(plan, fiches, overrides, source, nowMs, brand) {
   const now = (typeof nowMs === 'number' && nowMs > 0) ? nowMs : Date.now();
   const seuilReconfirme = PW_RELEVES_A_RECONFIRMER[String(brand || '').toUpperCase()] || 0;
   const sortie = [];
+  const parRacine = Object.create(null);
   (fiches || []).forEach((pr) => {
     if (!pr || !pr.sku) return;
     const o = (overrides || {})[pr.id] || {};
@@ -149,12 +150,32 @@ function pwRattrapageEtapes(plan, fiches, overrides, source, nowMs, brand) {
       }
     }
     if (!motif) return;
-    sortie.push({
-      sku: pr.sku, motif: motif,
+    /* ⛔⛔ LA RECHERCHE SE FAIT PAR RACINE DE MODÈLE, PAS PAR RÉFÉRENCE
+       COMPLÈTE — mesuré le 16/08/2026 sur cinq vagues de rattrapage : la
+       recherche d'une VARIANTE (q=DLM330RT) renvoie chez idealo une coquille
+       de redirection de ~935 octets sans même le mot de la marque — illisible,
+       donc aucune écriture, donc la fiche restait dans la file pour toujours.
+       La page FAMILLE (q=DLM330), elle, rend toutes les tuiles de variantes
+       (« DLM330 Z Solo », « DLM330 RT »…) que l'appariement calibré sait
+       attribuer une par une — et UNE recherche sert PLUSIEURS fiches d'un
+       coup. Déduplication par racine : la première fiche pose l'entrée, un
+       motif « à reconfirmer » (calibrage) prime sur les autres motifs.
+       J4 : rien ici ne touche un prix — on choisit une page à relire. */
+    var racine = priceParse.racineModele(String(pr.sku).toUpperCase()) || String(pr.sku).toUpperCase();
+    var deja = parRacine[racine];
+    if (deja) {
+      deja.fiches.push(pr.sku);
+      if (/calibrage/.test(motif) && !/calibrage/.test(deja.motif)) deja.motif = motif;
+      return;
+    }
+    var entree = {
+      sku: pr.sku, racine: racine, fiches: [pr.sku], motif: motif,
       titre: pr.title || pr.name || '',
       prix: (typeof pr.price === 'number') ? pr.price : null,
-      url: plan.patronRecherche.replace('{ref}', encodeURIComponent(String(pr.sku)))
-    });
+      url: plan.patronRecherche.replace('{ref}', encodeURIComponent(racine))
+    };
+    parRacine[racine] = entree;
+    sortie.push(entree);
   });
   return sortie;
 }

@@ -6448,6 +6448,25 @@ module.exports = async function () {
     ok(rAutre.length === 0,
       '⛔ l\'incident est celui de SA marque : un relevé DeWALT de la même heure '
       + 'reste sain (M-28 — un motif de marque ne déborde pas)');
+    /* ── LA RECHERCHE SE FAIT PAR RACINE, DÉDUPLIQUÉE (16/08) — la recherche
+       d'une variante rend une coquille de ~935 octets illisible, la fiche
+       restait en file pour toujours. Deux variantes d'une même racine =
+       UNE seule recherche, et le motif « calibrage » prime. */
+    var deuxVariantes = [
+      { id: 'x', sku: 'RC900RT', title: 't', price: 100 },
+      { id: 'y', sku: 'RC900ZJ', title: 't', price: 100 }
+    ];
+    var ovDeux = {
+      x: { priceSources: { idealo: { ttc: 50, at: avant, enStock: true } } },
+      y: {}
+    };
+    var rRac = pwRattrapageEtapesRef(planRc, deuxVariantes, ovDeux, 'idealo', nowRc, 'MAKITA');
+    ok(rRac.length === 1 && /q=RC900$/.test(String(rRac[0].url))
+      && /calibrage/.test(String(rRac[0].motif)) && rRac[0].fiches.length === 2,
+      '⛔ deux variantes d\'une même racine doivent produire UNE recherche par '
+      + 'RACINE (q=RC900, jamais q=RC900RT — la recherche de variante rend une '
+      + 'coquille illisible et la file ne se vide jamais), motif calibrage '
+      + 'prioritaire — mesuré : ' + JSON.stringify(rRac));
   } else {
     errors.push('[check-price-watch] ⛔ pwRattrapageEtapes n\'est pas atteignable '
       + 'par le harnais : le motif « à reconfirmer » ne vérifie plus rien.');
