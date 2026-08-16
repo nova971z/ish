@@ -82,6 +82,31 @@ qu'il a posée : s'améliorer en permanence, et laisser la trace.
 - Fichier servi modifié → bumper `sw.js` (`VERSION`, `ASSET_VER`) + `?v=` HTML.
 - Rien n'est « fait » sans preuve produite **et montrée**.
 
+### ⛔⛔ 5 bis. MA SESSION EST ÉPHÉMÈRE — UN TRAVAIL NON POUSSÉ N'EXISTE PAS
+*(gravé le 16/08/2026, sur ordre de l'user : « ça, ça ne doit plus arriver »)*
+Je tourne dans un **conteneur jetable**, reconstruit depuis le dernier commit
+poussé. Tout ce qui n'est pas poussé — code, corpus, relevés décompressés,
+mesures — **disparaît sans avertissement** : réinitialisation de session,
+changement d'abonnement, inactivité. Ce n'est pas un risque, c'est le
+fonctionnement normal.
+**Payé le 14/08/2026** *(`docs/LECONS.md`)* : toute une préparation Milwaukee —
+nomenclature, porte, banc, corpus regelé — **perdue d'un coup**. Je gravais, je
+sabotais, je mesurais, sans commiter. Le code a pu être reconstitué depuis la
+trace de session et ses quatre sabotages **rejoués** ; le corpus enrichi, lui,
+était irrécupérable.
+**La règle, sans exception :**
+1. **Un lot fini se pousse IMMÉDIATEMENT** — jamais « je pousserai à la fin ».
+   Un lot, c'est une correction avec sa porte et son sabotage, pas une journée.
+2. **Avant toute commande longue, tout enchaînement de portes, toute campagne**
+   de sabotage : commiter ce qui tient debout d'abord.
+3. **Ce qui vit hors du dépôt n'existe pas** — le bac temporaire n'est pas une
+   sauvegarde. Une mesure qui compte se grave dans `docs/`, pas dans un fichier
+   de travail.
+4. Fin de lot : `node outils/verifier-pousse.mjs`, puis les mots exacts
+   « **poussé, build non prouvé** ».
+⚠️ Aucune porte n'attrape un travail jamais commité — c'est un **geste**, et
+c'est pour ça qu'il est écrit ici, réinjecté à chaque message.
+
 ## 6. RÉPONDRE
 - **Jamais de pavé.** Ordonné, chiffré. Le tableau bat le paragraphe.
 - Séparer **mesuré** / **supposé** / **inconnu**. Ne jamais mélanger les trois.

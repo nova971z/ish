@@ -685,6 +685,21 @@ function lireSuffixeDewalt(sku) {
      ⇒ On ne l'accepte donc que si le suffixe vaut EXACTEMENT « B », ce qui est
      la forme des deux références sourcées. Ailleurs, le « B » reste inconnu et
      le dit. */
+  /* ⛔⛔ UN SÉPARATEUR ORPHELIN EN FIN DE SUFFIXE FAISAIT RENAÎTRE UNE BATTERIE
+     FANTÔME. Mesuré le 16/08/2026, et c'est la garde d'argent elle-même qui le
+     provoquait : `titreContreditFiche` retire le marquage régional avec
+     `.replace(/(XJ|QW|XE|GB|LX|QS)$/,'')` — sur `DCE089NG18-XJ`, ça laisse
+     `DCE089NG18-`. Le tiret survivant empêche la règle de tension de
+     reconnaître « 18 » en FIN de suffixe : le lecteur retombe sur « G » + « 1 »
+     et rend **1 batterie de 3 Ah** là où la source dit « Bare Unit ».
+     ⇒ Effet mesuré : la fiche cessait d'être « sans batterie » aux yeux de la
+     garde, qui laissait donc PASSER une tuile de kit sur une machine NUE.
+     ⛔ On nettoie ICI, dans le lecteur, jamais chez l'appelant : le même
+     découpage existe à plusieurs endroits, et corriger un seul appelant
+     laisserait les autres exposés. Un lecteur robuste vaut mieux que trois
+     appelants disciplinés. */
+  reste = reste.replace(/[\s\-_.]+$/, '');
+  res.suffixe = reste;
   if (reste === 'B') {
     res.nu = true;
     return res;

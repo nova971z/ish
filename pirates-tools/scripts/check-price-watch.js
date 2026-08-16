@@ -1905,6 +1905,22 @@ module.exports = async function () {
           '⛔⛔ ARGENT : « NG18 » = nue + vert + 18 V, ZÉRO batterie. Lire le '
           + '« G1 » comme un code de batterie invente une batterie sur une '
           + 'machine nue (obtenu ' + JSON.stringify(ng) + ')');
+        /* ⛔ UN SÉPARATEUR ORPHELIN NE DOIT PAS FAIRE RENAÎTRE LA BATTERIE
+           FANTÔME. La garde d'argent découpe le marquage régional avec
+           `.replace(/(XJ|QW|…)$/,'')`, ce qui laisse « ZZE089NG18- ». Le tiret
+           empêchait la règle de tension d'agir et le lecteur rendait 1 batterie
+           de 3 Ah.
+           ⚠️ HONNÊTETÉ : je n'ai PAS réussi à construire un cas où ce défaut
+           change le verdict de `titreContreditFiche` — d'autres règles y
+           attrapent les tuiles d'essai. On le corrige parce que le lecteur
+           rendait un fait FAUX, pas sur une promesse de gain non mesurée. */
+        ok(lireDw('ZZE089NG18-').nbBatteries === 0
+          && lireDw('ZZE089NG18-').suffixe === 'NG18',
+          '⛔ un séparateur orphelin en fin de référence ne doit pas ressusciter '
+          + 'une batterie : le lecteur doit rendre le MÊME contenu avec ou sans '
+          + 'le tiret laissé par un découpage (obtenu '
+          + JSON.stringify(lireDw('ZZE089NG18-')) + ')');
+
         /* ⛔ CONTRE-ÉPREUVES — la tension ne doit RIEN manger d'autre. */
         ok(lireDw('ZZE079G1').nbBatteries === 1,
           '⛔ « G1 » suivi de rien reste UN code de batterie : la règle de '

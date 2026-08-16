@@ -1,0 +1,34 @@
+﻿suffixe;lettres_non_lues;reference;famille;type_lu;prix_de_vente_eur;titre_de_la_fiche;ce_que_je_soupconne_SANS_PREUVE
+A;A;DXV15A;machine;aspirateur;150,29;Aspirateur de chantier;
+P;P;DXV20P;machine;aspirateur;187,42;Aspirateur de chantier;
+P;P;DXV234P;machine;aspirateur;244,93;Aspirateur de chantier;
+P;P;DXV34P-QT;machine;aspirateur;304,07;Aspirateur de chantier;
+PTA;PA;DXV23PTA;machine;aspirateur;217,03;Aspirateur eau et poussières 1150W - cuve 23L + prise asservie - DXV23PTA DEWALT;
+SAPTA;SAPA;DXV30SAPTA;machine;aspirateur;237,85;Aspirateur de chantier;
+BC;BC;DCB283BC;energie;batterie;358,27;Pack 2 batteries bluetooth 18V 2Ah + Adapt USB - DCB283BC;
+D1RS;S;DCE080D1RS;energie;batterie;1578,65;1 batterie de 2 Ah XR;
+XN;X;DCH832XN-XJ;energie;batterie;605,59;Machine nue, sans batterie ni chargeur;le titre dit deja machine nue
+M100HE;00HE;DXCMB3M100HE;machine;compresseur;925,58;DXCMB3M100HE - Compresseur d'air électrique monophasé à courroie - Moteur 3 CV 100 L;code de modele compresseur
+M50HE;0HE;DXCMB2M50HE;machine;compresseur;697,98;DeWalt DXCMB2M50HE - Compresseur d'air électrique monophasé à courroie - Moteur 2 CV 50 L;code de modele compresseur
+MRC;C;DPC6MRC-QS;machine;compresseur;284,38;DEWALT Compresseur de montage DPC6MRC-QS Quantité:1;
+QTC;QC;DPC10QTC-QS;machine;compresseur;384,16;Compresseur silencieux 10 L, 13,8 bar, 69 dB(A), sans huile;
+RC;C;DPC10RC-QS;machine;compresseur;384,16;Compresseur 10L DPC10RC-QS ROLLCAGE;
+T200HE;00HE;DXCMB4T200HE;machine;compresseur;1268,26;DXCMB4T200HE - Compresseur d'air électrique triphasé par courroie - Moteur 4 CV 200 L;code de modele compresseur
+T270HCE;70HCE;DXCMB75T270HCE;machine;compresseur;2104,87;DXCMB75T270HCE - Compresseur d'air électrique triphasé par courroie - Moteur 7,5 CV 270 L;code de modele compresseur
+T271HCE;71HCE;DXCMB55T271HCE;machine;compresseur;2007,42;DXCMB55T271HCE - Compresseur d'air électrique triphasé à courroie - Moteur 5,5 CV 270 L;code de modele compresseur
+VSN;VS;DCG416VSN-XJ;machine;meuleuse d'angle;288,14;Meuleuse d'angle 125 mm 18V XR Advantage Brushless, vitesse variable (machine nue);
+CE;CE;DXPW003CE;machine;nettoyeur haute pression;727,15;DXPW 003CE Nettoyeur Haute Pression à Eau Froide 150bar, 630l/h (26775);
+E;E;DXPW006E;machine;nettoyeur haute pression;1477,8;DXPW 006E - Nettoyeur haute pression Triphasé professionnel - 170 bars max- 900 l/h;
+E;E;DXPW007E;machine;nettoyeur haute pression;1609,32;DXPW 007E - Nettoyeur haute pression triphasé professionnel - 230 bars max - 840 l/h;
+U;U;DXPW001U;machine;nettoyeur haute pression;304,78;DXPW001U - Nettoyeur haute pression à eau froide - 160 bars - 480 l/h;
+U;U;DXPW002U-QS;machine;nettoyeur haute pression;402,52;DEWALT DXPW002I - Nettoyeur haute pression semi-professionnel à eau froide - 160 bars - 45;
+CG;C;DW088CG-XJ;machine;niveau laser;178,52;Niveau laser croix DW088CG-XJ;
+GB;B;DCLE14201GB-XJ;machine;niveau laser;340,25;Niveau laser croix faisceau vert DCLE14201GB-XJ;
+RB;B;DCLE14201RB-XJ;machine;niveau laser;280,13;Niveau laser croix faisceau rouge DCLE14201RB-XJ;
+KS;S;DWD024KS;machine;perceuse à percussion;167,3;Perceuse à percussion DEWALT dwd024Puissance 650W Professionnelle de travail;
+DH;DH;D25304DH;machine;perforateur;206,44;Perforateur ou burineur;extracteur de poussiere (accessoire, pas une machine)
+DH;DH;D25303DH-XJ;machine;perforateur;236,36;Perforateur ou burineur;extracteur de poussiere (accessoire, pas une machine)
+PK;P;DWE305PK-QS;machine;scie sabre;223,88;Scie sabre 1100 W DWE305PK-QS;
+N-XJ;-XJ;DCMPH566N-XJ-XJ;machine;taille-haie;281,71;Taille haie sur perche orientable 18V DCMPH566N-XJ-XJ;reference DOUBLEE dans le catalogue : -XJ-XJ
+PB;PB;DCM563PB-XJ;machine;taille-haie;223,36;Taille haie 18V 55 cm DCM563PB-XJ;
+N-SFXJ;-SFXJ;DCF787N-SFXJ;machine;visseuse à chocs;168,68;Visseuse à choc sans fil brushless DeWalt DCF787N-SFXJ 18V Li-ion XR - Sans batterie;marquage commercial apres le N (nue)
