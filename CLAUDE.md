@@ -49,10 +49,7 @@ cellulaires** : jamais de test en 4G, ni de code à scanner depuis un autre appa
 **Ne jamais se fier au retour d'une écriture : relire.** Une configuration se vérifie par une lecture séparée, jamais par un message de succès.
 
 **« Ça ne marche pas » veut dire : chercher la cause en amont.** Griser un
-bouton ou contourner, c'est masquer le symptôme ; le défaut, lui, reste.
-⛔ **Jamais de détour ni de correction isolée — LA SOURCE, toujours** *(gravé
-16/08/2026)* : relire, analyser, corriger où le défaut naît, puis vérifier
-plusieurs fois — règle complète : `.claude/PROTOCOLE.md` §2.6.
+bouton ou contourner, c'est masquer le symptôme ; le défaut, lui, reste. ⛔ **Jamais de détour ni de correction isolée — LA SOURCE, toujours**, puis vérifier plusieurs fois *(gravé 16/08/2026, `.claude/PROTOCOLE.md` §2.6)*.
 
 **Jamais de béquille de test dans le produit.** Devant une impossibilité, on la signale ; on ne la contourne pas dans ce que verront les clients.
 
