@@ -275,6 +275,7 @@ var reqDeploi   = safeRequire('./check-deploiement', 'check-deploiement');
 // seule tapee a la main. Si le plan est faux, ce sont 67 pages qui partent a
 // cote — et des couts d'achat qui ne descendent pas.
 var reqPlanTrq  = safeRequire('./check-plan-traqueur', 'check-plan-traqueur');
+var reqMarqSui  = safeRequire('./check-marques-suivies', 'check-marques-suivies');
 var reqVisuels  = safeRequire('./check-visuels', 'check-visuels');
 var reqEssai    = safeRequire('./check-mode-essai', 'check-mode-essai');
 var reqClasser  = safeRequire('./check-classer-idealo', 'check-classer-idealo');
@@ -391,6 +392,7 @@ var reqReconc   = safeRequire('./check-reconciliation', 'check-reconciliation');
   await runOne(reqPrixConf, 'check-prix-confirmes');
   await runOne(reqVarCof,   'check-variantes-coffret');
   await runOne(reqPlanTrq,  'check-plan-traqueur');
+  await runOne(reqMarqSui,  'check-marques-suivies');
   await runOne(reqRevolut,  'check-revolut');
   await runOne(reqReconc,   'check-reconciliation');
 

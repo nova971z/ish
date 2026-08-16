@@ -33,6 +33,7 @@ désigné ici, soit il est rangé.
 | `VERIF-BALAYAGE-2.md` | vérification un par un du balayage n°2 : 542 entrées, 9 défauts, plan d'action |
 | `ARBITRAGE-D57.md` | les 203 hausses en attente (D-57) tranchées UNE PAR UNE le 15/08 : 42 caduques · 59 justifiées · 8 rejetées · 94 non confirmées, chaque verdict avec sa preuve |
 | `METHODE-VERIF-TRAQUEUR.md` | la méthode d'entraînement du traqueur, améliorée à chaque zip |
+| `AUDIT-TRAQUEUR-PARSEUR-2026-08-16.md` | l'audit profond du traqueur et du parseur : 5 défauts mesurés, l'ordre de réparation imposé, et ce qui est confirmé sain |
 | `DEMANDES.md` | **ce que l'user a demandé, et où ça en est** — trois états, et la CI REFUSE de livrer tant qu'une ligne est `OUVERT` (`scripts/check-demandes.js`) |
 | `ERREURS.md` | mes erreurs classées par **origine** — 7 mécanismes, lus par le sommaire seul (`scripts/erreurs.js`) |
 | `JURIDIQUE.md` | les 5 domaines qui engagent la responsabilité — porte à ouvrir avant d'éditer (`scripts/juridique.js`) |
