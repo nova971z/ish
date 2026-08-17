@@ -39,6 +39,7 @@ désigné ici, soit il est rangé.
 | `DEWALT-SUFFIXES-A-SOURCER.csv` | les 33 suffixes DeWALT dont le sens n'est PAS établi — tableau à remplir avec l'user, une ligne par fiche |
 | `CHAINE-TRAQUEUR.md` | **la chaîne traqueur · parseur · calculateur, maillon par maillon** — à lire AVANT de toucher un de ces fichiers (protocole §0) |
 | `PROTEGER-LE-CODE.md` | **le dépôt est PUBLIC et c'est un fork** — ce qui est exposé, mesuré, et la procédure pour arrêter la fuite |
+| `REPRISE-SESSION-17-08.md` | **À LIRE EN PREMIER après le déménagement** — tout ce que la conversation du 16-17/08 contenait : état, chantier DeWALT, mes 7 fautes, ce qui est perdu |
 | `DEMANDES.md` | **ce que l'user a demandé, et où ça en est** — trois états, et la CI REFUSE de livrer tant qu'une ligne est `OUVERT` (`scripts/check-demandes.js`) |
 | `ERREURS.md` | mes erreurs classées par **origine** — 7 mécanismes, lus par le sommaire seul (`scripts/erreurs.js`) |
 | `JURIDIQUE.md` | les 5 domaines qui engagent la responsabilité — porte à ouvrir avant d'éditer (`scripts/juridique.js`) |
