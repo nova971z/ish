@@ -1,281 +1,415 @@
-# 🔁 REPRISE — tout ce que la prochaine session doit savoir
+# 🔁 REPRISE — TOUT ce que la prochaine session doit savoir
 
-> **Écrit le 17/08/2026 à la demande de l'user**, avant la bascule vers le dépôt
-> privé `nova971z/PIRATES-TOOLS-COM`. Cette conversation ne suit pas le
-> déménagement : tout ce qu'elle contient est ici.
+> **Écrit le 17/08/2026**, à la demande de l'user, avant la bascule vers le
+> dépôt privé `nova971z/PIRATES-TOOLS-COM`. La conversation des 16–17/08 ne suit
+> pas le déménagement : **son contenu intégral est ici**.
 >
-> ⛔ **À lire EN ENTIER avant la première action.** Puis appliquer le protocole
-> §0 : `node scripts/ou.js "<intention>"`, `docs/CARTOGRAPHIE.md`,
-> `docs/CHAINE-TRAQUEUR.md`, `docs/DECISIONS.md` · `LECONS.md` · `ERREURS.md`.
+> ⛔ **Ce document est le point d'entrée. Le lire EN ENTIER avant toute action.**
 
 ---
 
-## 0. L'ÉTAT, EN UN COUP D'ŒIL *(mesuré le 17/08/2026)*
+# PARTIE I — L'ORDRE DE LECTURE, ET RIEN D'AUTRE AVANT
+
+**Ne rien faire tant que les six points ne sont pas lus, dans cet ordre.**
+
+| # | quoi | pourquoi celui-là, à ce rang |
+|---|---|---|
+| **1** | **ce document** | l'état, le chantier, mes fautes, ce qui est perdu |
+| **2** | `CLAUDE.md` *(racine du dépôt)* | la mémoire d'entrée — 80 lignes, plafond imposé par une porte |
+| **3** | `.claude/PROTOCOLE.md` | réinjecté à **chaque** message ; §0 aveugle, §2.6 la source, §5 bis l'éphémère |
+| **4** | `docs/CARTOGRAPHIE.md` | la carte de vol du dépôt — ses chiffres sont vérifiés par une porte |
+| **5** | `docs/CHAINE-TRAQUEUR.md` | **la chaîne traqueur · parseur · calculateur, en 10 maillons** |
+| **6** | `docs/PLAN-FINIR-DEWALT.md` | le chantier en cours, 12 défauts numérotés, ordre imposé |
+
+**Puis, avant CHAQUE intervention, sans exception :**
+
+```bash
+cd pirates-tools && node scripts/ou.js "<ce que je vais faire>"
+```
+
+L'entonnoir rend six blocs : où intervenir · ce qui protège · les règles
+applicables · les pièges déjà payés · les décisions en vigueur · ce que « fini »
+veut dire à cet endroit. **Interdit de proposer quoi que ce soit avant de l'avoir
+lu.** Intention absente de l'index → l'ajouter, puis continuer.
+
+**Les registres à consulter selon le besoin :**
+
+| besoin | document |
+|---|---|
+| ce qui reste à faire, avec sa preuve | `docs/ETAT.md` |
+| pourquoi tel choix, et ce qu'il a renversé | `docs/DECISIONS.md` |
+| une panne, sa cause, la porte posée | `docs/LECONS.md` |
+| d'où viennent mes erreurs, par mécanisme | `docs/ERREURS.md` (`node scripts/erreurs.js`) |
+| ce que l'user a demandé, et où ça en est | `docs/DEMANDES.md` (`check-demandes`) |
+| ce qui engage juridiquement | `docs/JURIDIQUE.md` (`node scripts/juridique.js J3`…) |
+| les techniques nommées, M-01 à M-57 | `docs/METHODES.md` |
+| l'histoire du projet | `docs/JOURNAL.md` |
+| la liste de tous les documents | `docs/INDEX-DOCS.md` |
+
+---
+
+# PARTIE II — L'ÉTAT MESURÉ *(17/08/2026)*
 
 | | |
 |---|---|
-| dernier commit | **`01d67c2`** — « Rectificatif : l'import GitHub crée un dépôt indépendant… » |
-| commits de cette session | **22** (16 et 17/08) |
+| dernier commit avant ce document | **`8d9a86b`** |
+| commits des 16–17/08 | **22** |
 | empreinte du parseur | **`4d76627672f01800-380463`** |
 | CI | **6 demandes ouvertes**, aucune autre erreur |
 | noyau | **151/151 assertions, 9/9 harnais** |
-| catalogue | **1 708 fiches** — DEWALT 1 047 · MAKITA 611 · FESTOOL 50 |
-| lignes écrites à la main | **128 412** (107 789 code + 20 623 doc) |
+| catalogue | **1 708 fiches** — DEWALT **1 047** · MAKITA **611** · FESTOOL **50** |
+| lignes écrites à la main | **128 412** — 107 789 code + 20 623 doc |
 | portes de contrôle | **65** (`scripts/check-*.js`) |
+| balayages archivés | **25 relevés, 2 056 réponses de page** |
 
 **Les 6 demandes ouvertes** : `D-180` (appliquer le plan DeWALT) · `D-184`
 (protéger le code) · `D-54` (descriptifs de fiches) · `D-56` (audit admin) ·
 `D-61` (photos floues) · `D-64` (référencement).
-⚠️ D-180 et D-184 ont été laissées **OUVERTES exprès** : le travail n'est pas
-fini, et la CI doit le rappeler à chaque exécution.
+⚠️ **D-180 et D-184 sont OUVERTES exprès** : le travail n'est pas fini, et la CI
+doit le rappeler à chaque exécution. Ne pas les fermer pour faire verdir.
+
+**Les commandes de vérification, à lancer au démarrage :**
+
+```bash
+cd pirates-tools
+node scripts/ci.js              # attendu : 6 demandes ouvertes, rien d'autre
+node tests/lancer.mjs --noyau   # attendu : 151/151, 9/9
+node outils/verifier-pousse.mjs # fin de lot, toujours
+```
 
 ---
 
-## 1. ⛔ LE DÉMÉNAGEMENT EN COURS — À FINIR EN PREMIER
+# PARTIE III — LES DONNÉES BRUTES, ENFIN VERSÉES
 
-**Où on en est, exactement :**
+⛔ **Elles ont failli disparaître.** Les 25 balayages vivaient dans un bac
+temporaire hors dépôt. Ils sont désormais dans
+**`archives/balayages/`** — c'est exactement ce que la règle
+`.claude/PROTOCOLE.md` §5 bis impose.
+
+**`archives/balayages/INDEX.md`** dit, pour chaque relevé : la marque, le nombre
+de réponses, les pages, les tuiles vues et lues, le pourcentage, **l'empreinte
+du parseur qui a servi**, et les compteurs cumulés.
+
+**Comment s'en servir :**
+
+```bash
+# le bilan tout fait d'un balayage :
+node scripts/bilan-balayage.js archives/balayages/25-makita
+
+# chercher une référence à travers TOUS les relevés :
+grep -rl "DLM330" archives/balayages/
+
+# rejouer une mesure : lire les rubriques d'une réponse
+#   applied · flagged · unchanged(Ids) · unknown · sansRef · perdus
+#   packsIgnores · absents · rupture · counts · couverture · page
+#   versionParseur · rattrapageVerdict
+```
+
+⚠️ **Les 14 relevés `*-dewalt` sont ANTÉRIEURS au parseur actuel.** Ils portent
+les empreintes `9dd79f7e…`, `609bf288…`, `779a09fe…`. Aucune conclusion tirée
+d'eux ne vaut pour le code en service — c'est le défaut **DW-3**.
+
+⚠️ **Piège mortel, déjà payé** : en mode balayage, la liste `unchanged` n'était
+**pas nommée** avant le correctif 0.1 du 16/08. Une fiche appariée ne figure
+donc **jamais** dans `unknown`. La chercher là produit le faux « 759 fiches
+jamais vues ». **Test qui tranche** : 198 réfs dans `applied`, 1 208 dans
+`unknown`, **0 dans les deux**.
+
+---
+
+# PARTIE IV — LES MÉTHODES, EN ENTIER
+
+*C'est ce qui vaut le plus. Un correctif se refait ; une méthode perdue se
+repaye en pannes.*
+
+## IV.1 — Comment on MESURE
+
+1. **Aucun chiffre sans la commande qui l'a produit, DANS LE TOUR COURANT.**
+   Le garde-sortie (`scripts/garde-sortie.js`) refuse la réponse sinon. Il m'a
+   repris **trois fois** le 17/08 pour des chiffres pourtant mesurés au tour
+   d'avant. **Un chiffre du tour précédent se remesure.**
+2. **Un exemple non exécuté est une invention.** Jamais « par exemple, ça
+   rendrait… » sans l'avoir lancé.
+3. **Choisir LA mesure la plus discriminante**, pas la plus facile — celle qui
+   élimine le plus d'hypothèses d'un coup.
+4. **Dire d'avance ce qui TUERAIT l'hypothèse.** Une hypothèse qu'aucune
+   observation ne peut réfuter n'est pas une hypothèse.
+5. **Une hypothèse morte se déclare morte tout de suite**, et on n'y revient pas.
+6. **Vérifier la FORME avant de conclure.** Quatre fois le 16/08 j'ai appelé une
+   fonction avec le mauvais type et conclu qu'elle était cassée. `String({})`
+   vaut « [object Object] ». **Inspecter la valeur de retour avant de l'asserter.**
+7. **Ne jamais écrire un motif de recherche jetable** quand le produit en a
+   déjà un. Trois de mes mesures d'affilée ont été faussées par « sans **fil** »
+   et « sans **balais** » attrapés par mes propres expressions.
+
+## IV.2 — Comment on POSE UNE PORTE
+
+1. Une correction sans porte n'est pas finie. La porte se pose **avant** de
+   clore, jamais après.
+2. **La règle mère** : *une vérification qu'on ne parvient pas à faire échouer
+   ne vérifie rien.* Une porte verte au premier essai est **suspecte**.
+3. **Le sabotage se fait avec l'outil, jamais à la main :**
+   ```bash
+   node outils/sabotage.mjs --fichier <f> --cherche "<s>" --remplace "<s>" \
+        --commande "node scripts/check-xxx.js"
+   ```
+   Il refuse de conclure si la substitution n'a rien changé, refuse de conclure
+   si la commande n'a pas tourné, restaure et **vérifie** la restauration.
+4. **Un sabotage qui ne casse rien ne prouve rien** — vérifier d'abord qu'il
+   était réel ; il tombe souvent dans un `try/catch`.
+5. **Un préalable** : une condition sans laquelle la porte ne vérifie rien doit
+   la faire **ÉCHOUER**, jamais la laisser verdir « poliment ».
+6. **Une contre-épreuve** : une porte qui refuse toujours ne vaut pas mieux
+   qu'une porte qui accepte toujours. Toujours un cas qui doit PASSER.
+7. **Jamais un nombre du produit recopié dans une porte** — on relit la valeur
+   à l'exécution, ou on teste l'invariant.
+8. **Jamais une donnée du catalogue nommée dans un harnais** — références
+   synthétiques (`ZZ…`), le sujet se choisit à l'exécution.
+9. **Vérifier l'expression EFFECTIVE, pas le vocabulaire** (M-29) : un détecteur
+   qui cherche un mot détecte du vocabulaire. Il m'a déjà menti deux fois.
+
+## IV.3 — Comment on VÉRIFIE UN BALAYAGE
+
+Méthode complète : `docs/METHODE-VERIF-TRAQUEUR.md` (6 tours). En résumé :
+
+1. `node scripts/bilan-balayage.js <dossier>` — pages, tuiles, lues, instances.
+2. **Vérifier l'empreinte du parseur** : `versionParseur` doit être celle du
+   dépôt. Sinon le relevé décrit un code qui n'existe plus.
+3. **Lire les rubriques une par une**, jamais en bloc : `applied` (écrit),
+   `flagged` (**refusé, avec le motif**), `unchangedIds` (inchangé, nommé depuis
+   le 16/08), `unknown`, `sansRef`, `perdus`, `packsIgnores`.
+4. **Un refus n'est pas un défaut** — 168 des 169 refus du dernier balayage
+   DeWALT étaient justes. **Le défaut, c'est le refus SILENCIEUX et PERMANENT.**
+5. **Croiser avec le catalogue** pour savoir ce qui n'a pas été vu, jamais de
+   mémoire.
+
+## IV.4 — Les règles d'ARGENT, non négociables
+
+1. **Le sens de l'erreur décide de tout.** Rapprocher deux références fait
+   **baisser** le coût → **vendre à perte**. C'est la faute la plus chère.
+2. **M-28 — chaque marque a SA table**, et le test de marque se met **sur la
+   ligne d'appel** (`check-separation-marques` l'exige).
+3. **L'ambiguïté ne s'arbitre JAMAIS** : deux fiches compatibles ⇒ on ne
+   rapproche rien.
+4. **Un prix de PACK ne s'écrit jamais sur la référence d'un composant.**
+5. **Un coût fournisseur se LIT, jamais ne s'infère.**
+6. **On n'applique jamais un prix à la main** — ordre de l'user. C'est au
+   traqueur de faire son travail.
+7. **Bornes absolues seulement** : `PW.MIN_TTC` = 1 €, `PW.MAX_TTC` = 8 000 €.
+   ⛔ **Le plafond de VARIATION a été retiré à raison (D-015) : ne pas le
+   réintroduire.**
+8. **Une donnée périmée (14 j) est NON OPPOSABLE** : gel du prix, bandeau
+   « prix en actualisation », saisie de carte bloquée.
+
+## IV.5 — Comment on LIVRE
+
+1. **Un lot = une correction + sa porte + son sabotage.** Pas une journée.
+2. **On pousse IMMÉDIATEMENT** : la session est éphémère, un travail non poussé
+   n'existe pas (§5 bis, payé le 14/08 par la perte d'une préparation entière).
+3. Toucher un fichier servi impose d'aligner `sw.js` (`VERSION`, `ASSET_VER`) et
+   les `?v=` de `index.html` — la CI le vérifie.
+4. `node scripts/ci.js` **et** `node tests/lancer.mjs --noyau` avant de pousser.
+5. Fin de lot : `node outils/verifier-pousse.mjs`, puis les mots **exacts**
+   « **poussé, build non prouvé** ». ⛔ Jamais « déployé ».
+6. **Graver dans les registres** : `DEMANDES.md` pour la demande, `DECISIONS.md`
+   si un choix est tranché, `LECONS.md` si une panne a été payée, `ERREURS.md`
+   si la faute est de moi.
+
+## IV.6 — Le FORMAT de chaque message à l'user
+
+⛔ **Imposé, non négociable :**
+1. Un bloc **CSV** en premier — séparateur `;`, une ligne d'en-tête, une ligne
+   par point.
+2. **En dessous**, des explications **numérotées**, en **mots simples**,
+   **courtes**. Jamais un pavé.
+3. Le doute est une cellule du tableau, jamais une invention.
+4. ⛔ Ne **jamais** commenter son état — sommeil, fatigue, heure chez lui.
+5. Aucun secret ne sort : filtrer toute sortie de commande.
+
+## IV.7 — Qui est l'user *(gravé, à ne jamais redéduire)*
+
+- Il est **au MAROC**. L'entreprise est en **GUADELOUPE**. ⛔ Ne jamais déduire
+  l'un de l'autre.
+- **iPad, navigation privée exclusive** : aucun service worker, aucun cache,
+  stockage local vide entre deux visites. Aucun diagnostic ne peut s'appuyer
+  dessus.
+- **Ni téléphone ni données cellulaires** : jamais de test en 4G, jamais de code
+  à scanner depuis un autre appareil.
+- Ses achats fournisseurs sont livrés en **France métropolitaine** ; l'acheminement
+  vers la Guadeloupe relève du modèle de prix.
+- **Jamais par lot.** Un par un, toujours.
+
+---
+
+# PARTIE V — LE DÉMÉNAGEMENT, À FINIR EN PREMIER
 
 | étape | état |
 |---|---|
-| l'ancien dépôt `nova971z/ish` est **PUBLIC** et c'est un **fork** de `ish-app/ish` | constaté |
-| GitHub interdit de rendre un fork privé | vérifié en doc |
-| l'user a **importé** le dépôt vers `nova971z/PIRATES-TOOLS-COM` | ✅ fait |
-| le nouveau dépôt est **PRIVÉ** | ✅ vérifié : **404** pour un visiteur non connecté |
-| le nouveau dépôt est **indépendant** (pas de « forked from ») | ✅ vérifié à l'écran |
-| Vercel pointe encore sur l'**ancien** dépôt | ⛔ **pas encore basculé** |
+| l'ancien `nova971z/ish` est **PUBLIC** et c'est un **fork** de `ish-app/ish` | constaté |
+| GitHub interdit de rendre un fork privé | vérifié en documentation |
+| import vers `nova971z/PIRATES-TOOLS-COM` | ✅ fait |
+| le nouveau dépôt est **PRIVÉ** | ✅ **404** pour un visiteur non connecté |
+| il est **indépendant** (pas de « forked from ») | ✅ vérifié |
+| Vercel pointe encore sur l'**ancien** | ⛔ **pas encore basculé** |
 | l'ancien dépôt public existe toujours | ⛔ **à trancher** |
 
-**⛔ CE QU'IL RESTE À FAIRE, DANS CET ORDRE — ne pas inverser :**
-1. Vérifier que cette nouvelle session voit bien le code (elle le voit si vous
-   lisez ceci depuis le nouveau dépôt).
-2. **Vercel** → Settings → Git → déconnecter l'ancien, connecter
-   `PIRATES-TOOLS-COM`. Les variables d'environnement **ne bougent pas**, elles
-   vivent chez Vercel. ⚠️ Vérifier sur place que la branche de production reste
-   **`master`** et que le dossier racine reste **`pirates-tools`**.
-3. **Trancher le sort de l'ancien dépôt** : le supprimer (le plus net) ou le
-   vider. ⛔ Rappel dit à l'user : **ce qui a été public l'a été** ; si quelqu'un
-   a cloné, on n'y peut rien. L'objectif est d'arrêter, pas d'effacer le passé.
-4. Optionnel, à sa main : preuve de date (enveloppe Soleau INPI — **à confirmer
-   auprès de l'INPI, je ne suis pas une source de droit**) et un `LICENSE`
-   propriétaire.
+**Ordre à respecter — ne pas inverser :**
+1. Confirmer que la nouvelle session voit le code.
+2. **Vercel** → Settings → Git → déconnecter l'ancien, connecter le nouveau.
+   Les variables d'environnement **ne bougent pas**. ⚠️ Vérifier que la branche
+   de production reste **`master`** et le dossier racine **`pirates-tools`**.
+3. Trancher le sort de l'ancien dépôt. ⛔ **Ce qui a été public l'a été** — si
+   quelqu'un a cloné, on n'y peut rien. On arrête, on n'efface pas le passé.
+4. À sa main : preuve de date (**enveloppe Soleau INPI — à confirmer auprès de
+   l'INPI, je ne suis pas une source de droit**) et un `LICENSE` propriétaire.
 
-Le détail complet est dans **`docs/PROTEGER-LE-CODE.md`**.
-
----
-
-## 2. CE QUI A ÉTÉ MESURÉ SUR L'EXPOSITION DU CODE
-
-- Les **8 fichiers servis** au navigateur ont été fouillés pour **16
-  identifiants** du moteur. **Deux occurrences, aucune n'est l'algorithme** :
-  `calcPrice` (app.js:178) ne calcule que TVA + octroi de mer — des taux publics
-  de l'État — et `recommend` n'apparaît que dans un commentaire.
-- ⇒ **Obfusquer le code servi ne protégerait rien.** Le traqueur, le parseur,
-  les grammaires et le calcul de majoration sont **100 % côté serveur**.
-- Ce qui était public sur GitHub : **12 459 lignes de moteur**, **15 498 lignes
-  de méthode** dans `docs/`, **57 998 lignes de catalogue** avec les coûts.
-- ⚠️ **Le pire n'était pas le code, c'est la documentation** : elle livre le
-  raisonnement.
-- ✅ **Aucun vrai secret n'a été trouvé** dans le dépôt. Les `sk_test_…` des docs
-  sont des exemples ; la clé Firebase web est publique par conception.
-- `.gitignore` protège désormais `.env`, `*.pem`, `*.key`, comptes de service,
-  `.vercel` — il ne contenait **que** les règles du projet amont.
-- `check-fuites.js` balaie maintenant **tout fichier versionné**, plus seulement
-  les servis. ⚠️ Deux motifs basés sur un **nom de variable**
-  (`ADMIN_SECRET = "…"`) ont été **retirés du balayage global** : ils criaient
-  sur 4 harnais qui posent une valeur d'essai. Une porte qui crie à tort finit
-  ignorée. Ils restent actifs sur les fichiers SERVIS.
+**Ce qui a été mesuré sur l'exposition** *(détail : `docs/PROTEGER-LE-CODE.md`)* :
+- 8 fichiers servis fouillés pour 16 identifiants du moteur → **2 occurrences,
+  aucune n'est l'algorithme**. `calcPrice` ne fait que TVA + octroi de mer (taux
+  publics), `recommend` n'est qu'un commentaire.
+- ⇒ **Obfusquer le code servi ne protégerait rien.**
+- Étaient publics : **12 459 lignes de moteur**, **15 498 lignes de méthode**,
+  **57 998 lignes de catalogue** avec les coûts.
+- ✅ **Aucun vrai secret** dans le dépôt.
+- `.gitignore` protège désormais `.env`, `*.pem`, `*.key`, comptes de service.
+- `check-fuites.js` balaie **tout fichier versionné**. ⚠️ Deux motifs par **nom
+  de variable** ont été retirés du balayage global : ils criaient sur 4 harnais
+  d'essai. Une porte qui crie à tort finit ignorée.
 
 ---
 
-## 3. ⛔ CE QUI DISPARAÎT AVEC CETTE SESSION — ET C'EST IMPORTANT
+# PARTIE VI — LE CHANTIER DEWALT
 
-**Les 25 balayages archivés (2 056 réponses de page) vivaient dans un bac
-temporaire, hors dépôt. Ils sont PERDUS.**
+Plan complet : **`docs/PLAN-FINIR-DEWALT.md`** (v2, défauts D-01→D-12).
 
-Conséquence directe : **aucune mesure sur l'historique des balayages n'est plus
-rejouable.** Tous les chiffres de ce document qui viennent de ces zips sont
-désormais **des faits écrits, pas des mesures reproductibles** — les traiter
-comme tels, et ne jamais les représenter comme fraîchement mesurés.
-
-⚠️ `archives/idealo/` contient **535 fichiers**, mais ce sont des **extraits**
-que j'ai fabriqués, pas les relevés bruts.
-
-⇒ **Le prochain zip que l'user enverra est le nouveau point de départ.**
-
----
-
-## 4. LE CHANTIER PRINCIPAL — FINIR DEWALT
-
-Le plan complet, numéroté, est dans **`docs/PLAN-FINIR-DEWALT.md`** (v2, 12
-défauts D-01→D-12, 6 phases). Voici où on en est réellement.
-
-### ✅ FAIT ET POUSSÉ
+## VI.1 — Fait et poussé
 
 | étape | ce qui a été fait | preuve |
 |---|---|---|
-| **0.1** | la réponse de balayage rend `unchangedIds` — les fiches inchangées sont **NOMMÉES** | 4 assertions dont un préalable, **3 sabotages rouges** |
-| **0.2** | le verdict du rattrapage est déposé dans `config/traqueur_etat` et **recopié dans la réponse de page** | 5 assertions, **3 sabotages rouges** |
-| **D-13** | « sans chargeur » était lu « avec chargeur » — corrigé via `nieApres` | 12/12 dont 4 contre-épreuves |
-| **D-14** | `nieApres` se laissait berner par « sans **fil** » et « sans **balais** » — corrigé par `FAUSSES_NEGATIONS` | **3 sabotages rouges** |
-| **grammaire** | `K` = coffret · `B` seul = machine nue · `R` = faisceau rouge · `L` = classe de poussière · `NG18` = nue+vert+18 V | **4 sabotages rouges** |
-| **tension** | une tension en fin de suffixe n'est plus lue comme un code de batterie | voir §5 |
-| **tiret** | un séparateur orphelin ne ressuscite plus une batterie fantôme | 1 sabotage rouge |
+| **0.1** | la réponse rend `unchangedIds` — les fiches inchangées sont **NOMMÉES** | 4 assertions dont un préalable, **3 sabotages rouges** |
+| **0.2** | le verdict du rattrapage est déposé dans `config/traqueur_etat` puis **recopié dans la réponse de page** | 5 assertions, **3 sabotages rouges** |
+| **D-13** | « sans chargeur » lu « avec chargeur » — corrigé via `nieApres` | 12/12 dont 4 contre-épreuves |
+| **D-14** | `nieApres` berné par « sans fil » / « sans balais » — `FAUSSES_NEGATIONS` | **3 sabotages rouges** |
+| grammaire | `K`=coffret · `B` seul=nue · `R`=rouge · `L`=classe poussière · `NG18`=nue+vert+18 V | **4 sabotages rouges** |
+| tension | une tension en fin de suffixe n'est plus un code de batterie | témoin + contre-épreuves |
+| tiret | un séparateur orphelin ne ressuscite plus une batterie fantôme | 1 sabotage rouge |
 
-**Effet mesuré du calibrage** : fiches DeWALT au suffixe illisible
-**202 → 126** ; dont **machines ou énergie : 92 → 37**.
+**Effet mesuré** : suffixes illisibles **202 → 126** ; machines/énergie **92 → 37**.
 
-### ⛔ CE QUI RESTE — dans l'ordre imposé par la mesure
+## VI.2 — Ce qui reste, dans l'ordre IMPOSÉ
 
-> **L'ordre n'est pas négociable** : D-05 avant D-06, et D-06 avant tout
-> appariement souple DeWALT. Inverser fait vendre à perte sur 202 fiches.
+> ⛔ **D-05 avant D-06, et D-06 avant tout appariement souple DeWALT.**
+> Inverser fait vendre à perte sur 202 fiches. Mesuré, pas supposé.
 
-1. **33 suffixes sans source** → `docs/DEWALT-SUFFIXES-A-SOURCER.csv`.
-   L'user a proposé d'aider. Familles : aspirateurs (`A`,`P`,`PTA`,`SAPTA`),
-   nettoyeurs haute pression (`U`,`E`,`CE`), compresseurs
-   (`M50HE`,`T200HE`,`T270HCE`,`QTC`,`RC`,`MRC`), lasers
-   (`CG`,`GB`,`RB`,`D1RS`).
-   ⚠️ **Correction déjà faite auprès de l'user** : j'avais dit « 9 fiches »,
-   c'est **33**. Mon 9 ne comptait que `P`,`U`,`E`,`DH`.
-2. **D-06** — coffret et machine nue rendent encore la MÊME signature dans
-   `varianteProduit`. Latent aujourd'hui **parce que DeWALT n'a aucun
-   appariement par configuration** (garde M-28, Makita seulement).
-   ⛔⛔ **Ajouter cet appariement à DeWALT — l'idée la plus évidente pour
-   augmenter la couverture — serait une vente à perte immédiate sur 202 fiches.**
-3. **D-07** — un titre à plusieurs lots de batteries n'est lu qu'en partie :
-   « 1 x 5,0 + 2 x 2,0 » → **1** au lieu de 3.
-4. **D-08** — 8 fiches où notre propre titre contredit notre propre référence.
-5. **D-11** — les trois grammaires de marque rendent **trois formes de retour
-   différentes**. C'est ce qui m'a fait publier « 0 sur 1 047 » à tort.
-6. **Phase 3** — un balayage DeWALT **avec le rattrapage joint** : c'est un
-   geste de l'user, et c'est ce qui donnera enfin la vraie couverture.
-7. **Phase 4** — les **59 fiches refusées ≥ 5 fois sans une seule application**
-   (record `dewalt-dcg426n-xj`, **103 refus**) ; les **10 fiches à préfixe de
-   distributeur** (`AT-`, `AR-`, `TD.`) dont **`AT-DXV20PTA`** — vendue
-   196,09 €, le fournisseur affiche `DXV20PTA` à **190,57 €**, jamais appariée
-   en 13 balayages ; et **`dewalt-dt50002-qz`**, refusée 13 fois sur 13
-   (coût lu 10 000 € > borne 8 000 €) et **vendue 12 311,51 €** —
-   ⛔ **décision de l'user, jamais une correction en douce**.
+1. **33 suffixes sans source** → `docs/DEWALT-SUFFIXES-A-SOURCER.csv`. L'user a
+   proposé son aide. ⚠️ **Correction déjà faite auprès de lui** : j'avais dit
+   « 9 fiches », c'est **33**.
+2. **D-06** — coffret et machine nue signent encore pareil. Latent **parce que
+   DeWALT n'a aucun appariement par configuration**. ⛔⛔ **Ajouter cet
+   appariement — l'idée la plus évidente pour augmenter la couverture — serait
+   une vente à perte immédiate.**
+3. **D-07** — « 1 x 5,0 + 2 x 2,0 » lu **1** au lieu de 3.
+4. **D-08** — 8 fiches où notre titre contredit notre référence.
+5. **D-11** — trois grammaires, **trois formes de retour différentes**.
+6. **Phase 3** — un balayage DeWALT **avec rattrapage** *(geste de l'user)*.
+7. **Phase 4** — 59 fiches refusées ≥ 5 fois sans une seule application (record
+   `dewalt-dcg426n-xj`, **103 refus**) · 10 fiches à préfixe distributeur, dont
+   **`AT-DXV20PTA`** vendue 196,09 € quand le fournisseur affiche `DXV20PTA` à
+   **190,57 €**, jamais appariée en 13 balayages · **`dewalt-dt50002-qz`**
+   refusée 13/13 et **vendue 12 311,51 €** — ⛔ **décision de l'user**.
 8. **Phase 5** — une **porte de couverture par marque**. C'est la cause racine
-   de ma faute : aucune porte ne mesurait la couverture, donc mon « 100 % »
-   venait de ma tête.
+   de ma faute : aucune porte ne la mesurait, donc mon « 100 % » venait de ma tête.
 
-### Le dossier Makita, laissé en plan
+## VI.3 — Makita, laissé en plan
 
-- `makita-dlm330rt` **vend toujours à perte**. Cause **datée et fermée** : le
+- **`makita-dlm330rt` vend toujours à perte.** Cause **datée et fermée** : le
   balayage n°15 (parseur `779a09fe…`) a écrit le prix de la machine **nue**
   (141,08 €) sur la fiche du **kit**. Le parseur actuel ne rapproche plus rien
-  sur ce titre — **la cause est réparée**, le résidu en base ne l'est pas.
-- Depuis, **0 tuile DLM330 propre sur 4 430** : le fournisseur ne la montre
-  plus. Le correctif « mémoire du rattrapage » la **nommera** `muette` au
-  prochain balayage. **Nommer n'est pas réparer** — le dire à l'user.
-- **FESTOOL** : 50 fiches, **aucun plan de traqueur**, et leurs **50 références
-  sont numériques** — le parseur rend `null`. Déclarées non suivies dans
-  `check-marques-suivies.js`. L'user a dit : « on ne s'occupe pas de Festool
-  pour l'instant ».
-- **MILWAUKEE** : un plan existe pour **0 fiche**.
+  sur ce titre. **Le résidu en base, lui, n'est pas corrigé.**
+- Depuis, **0 tuile DLM330 propre sur 4 430**. Le correctif la **nommera**
+  `muette`. **Nommer n'est pas réparer** — le dire à l'user.
+- **FESTOOL** : 50 fiches, **aucun plan**, et **50 références numériques** que le
+  parseur rend `null`. Déclarées non suivies. L'user : « on ne s'occupe pas de
+  Festool pour l'instant ».
+- **MILWAUKEE** : un plan pour **0 fiche**.
 
 ---
 
-## 5. ⛔ MES SEPT FAUTES DE CETTE SESSION — À NE PAS REFAIRE
+# PARTIE VII — MES SEPT FAUTES, NOMMÉES
 
-*Elles sont listées ici parce que ce sont elles, plus que les correctifs, qui
-doivent survivre. Le protocole §0 les cite déjà.*
+*Elles comptent plus que les correctifs. Le protocole §0 en cite quatre.*
 
-1. **« DeWALT est fini à 100 % »** — le chiffre venait du balayage **MAKITA**.
-   DeWALT était à 99,34 %, sur un balayage qui datait. **C'est la faute qui a
-   déclenché tout le reste.**
-2. **« 759 fiches DeWALT jamais vues »** — je les cherchais dans `unknown`, or
-   une tuile **appariée n'y va jamais**. Test discriminant : 198 réfs dans
-   `applied`, 1 208 dans `unknown`, **0 dans les deux**. Je comptais comme
-   invisibles exactement celles qui avaient été trouvées.
-3. **« l'instrument de complétude surestime »** — faux, `admin.js` additionne
-   déjà `doublons` dans `luesBrutes` avant bornage. Ma formule comptait deux fois.
-4. **Le mauvais TYPE d'argument, quatre fois.** `titreContreditFiche` prend le
-   sku en **CHAÎNE** ; je lui passais l'objet fiche. `String({})` vaut
-   « [object Object] ». J'ai conclu « le parseur n'est pas alimenté » — faux.
-5. **Trois motifs de recherche jetables faux d'affilée** — 75,1 %, puis 6,3 %,
-   puis 39 « refus dus au bogue ». Les trois contaminés par « sans **fil** » et
-   « sans **balais** ». **Mesure propre et définitive : sur les 794 refus, le
-   bogue n'en change AUCUN.**
-6. **« je pousse l'historique en une commande »** — impossible : `.git/shallow`
-   existe, ma copie ne contenait que 125 commits.
-7. **« ne pas passer par Import »** — faux, l'Importer GitHub crée un dépôt
-   **indépendant**, pas un fork.
+1. **« DeWALT est fini à 100 % »** — chiffre pris sur le balayage **MAKITA**.
+   DeWALT était à **99,34 %**. C'est la faute qui a déclenché tout le reste.
+2. **« 759 fiches jamais vues »** — cherchées dans `unknown`, où une fiche
+   appariée ne va **jamais**.
+3. **« l'instrument de complétude surestime »** — faux, `doublons` est déjà dans
+   `luesBrutes` avant bornage.
+4. **Le mauvais TYPE d'argument, quatre fois.** `titreContreditFiche` prend une
+   **chaîne**, pas la fiche.
+5. **Trois motifs jetables faux d'affilée** — 75,1 %, puis 6,3 %, puis 39.
+   **Mesure propre : sur les 794 refus, le bogue n'en change AUCUN.**
+6. **« je pousse l'historique en une commande »** — impossible, clone superficiel.
+7. **« ne pas passer par Import »** — faux, l'Importer crée un dépôt indépendant.
 
-⚠️ **Le garde-sortie m'a repris trois fois** pour avoir donné un chiffre non
-mesuré **dans le tour courant** (107 789, 65, 107 600). Un chiffre mesuré au
-tour précédent doit être **remesuré** avant d'être cité.
+⚠️ **Le garde-sortie m'a repris trois fois** pour un chiffre non mesuré **dans le
+tour courant**.
 
 ---
 
-## 6. CE QUI EST CONFIRMÉ SAIN — ne pas rouvrir
+# PARTIE VIII — CE QUI EST CONFIRMÉ SAIN, à ne pas rouvrir
 
 | maillon | mesure |
 |---|---|
 | unicité des sku / racines / identifiants DeWALT | **0** collision sur 1 047 |
 | appariement exact | **0** rate sur 3 273 références inconnues |
 | appariements souples en production | **0** attribution hasardeuse en attente |
-| les gardes de refus | **168 / 169** refus justifiés |
-| `choisirCoutSource` | minimum sur sources **fraîches ET en stock** seulement |
+| les gardes de refus | **168 / 169** justifiés |
+| `choisirCoutSource` | minimum sur sources **fraîches ET en stock** |
 | instrument de complétude | borne et rend l'écart — **ne surestime pas** |
 | absence de plafond de variation | **voulu** (D-015). ⛔ **Ne pas réintroduire** |
 
 ---
 
-## 7. LES RÈGLES DE L'USER GRAVÉES CETTE SESSION
+# PARTIE IX — LES RÈGLES GRAVÉES CETTE SESSION
 
 1. **`.claude/PROTOCOLE.md` §0 — AUCUN TRAVAIL À L'AVEUGLE.** Lire la chaîne
-   entière avant de la toucher, dans l'ordre nommé.
-2. **`.claude/PROTOCOLE.md` §5 bis — MA SESSION EST ÉPHÉMÈRE.** Un travail non
-   poussé n'existe pas. Pousser dès qu'un lot est fini, commiter **avant** toute
-   campagne longue, ne rien laisser d'important hors du dépôt.
-3. **`.claude/PROTOCOLE.md` §2.6** *(déjà là)* — jamais de détour, jamais de
-   petite correction isolée : **la source, toujours**.
+   entière avant de la toucher, dans l'ordre nommé. Cite les quatre fautes
+   qu'elle interdit.
+2. **§5 bis — MA SESSION EST ÉPHÉMÈRE.** Un travail non poussé n'existe pas.
+   Pousser dès qu'un lot est fini, commiter avant toute campagne longue, ne rien
+   laisser d'important hors du dépôt.
+3. **§2.6** *(du 16/08)* — jamais de détour ni de correction isolée : **la
+   source, toujours**.
 
-**Ses ordres permanents, rappelés :**
-- ⛔ **Jamais par lot** — un par un, toujours.
-- ⛔ **Format de chaque message** : un bloc **CSV** d'abord, puis des
-  explications **numérotées, courtes, en mots simples**. Jamais de pavé.
-- ⛔ **Aucun chiffre sans la commande qui l'a produit, dans le tour courant.**
-- ⛔ Fin de lot : `node outils/verifier-pousse.mjs` puis les mots exacts
-  **« poussé, build non prouvé »** — jamais « déployé ».
-- ⛔ **On n'applique jamais un prix à la main.** C'est au traqueur de faire son
-  travail.
-- ⛔ Ne jamais commenter son état (sommeil, fatigue, heure).
-- Il est **au Maroc**, l'entreprise est en **Guadeloupe**. iPad, navigation
-  privée exclusive, **pas de téléphone**.
+**Documents et portes créés :**
 
----
-
-## 8. LES DOCUMENTS NEUFS DE CETTE SESSION
-
-| document | ce qu'il contient |
+| fichier | rôle |
 |---|---|
-| `docs/PLAN-FINIR-DEWALT.md` | le plan v2 — 12 défauts, 6 phases, 2 balayages et 1 décision demandés à l'user |
-| `docs/AUDIT-DEWALT-2026-08-16.md` | la vérification chaîne par chaîne, avec ses rectificatifs |
-| `docs/AUDIT-TRAQUEUR-PARSEUR-2026-08-16.md` | l'audit profond, 5 défauts dont deux qui s'annulent |
-| `docs/CHAINE-TRAQUEUR.md` | **la chaîne en 10 maillons** — à lire avant de toucher au traqueur |
-| `docs/PROTEGER-LE-CODE.md` | l'exposition mesurée et la procédure de déménagement |
-| `docs/DEWALT-SUFFIXES-A-SOURCER.csv` | les 33 suffixes sans source, à remplir avec l'user |
+| `docs/PLAN-FINIR-DEWALT.md` | le plan v2 — 12 défauts, 6 phases |
+| `docs/AUDIT-DEWALT-2026-08-16.md` | la vérification chaîne par chaîne + rectificatifs |
+| `docs/AUDIT-TRAQUEUR-PARSEUR-2026-08-16.md` | 5 défauts dont deux qui s'annulent |
+| `docs/CHAINE-TRAQUEUR.md` | la chaîne en 10 maillons |
+| `docs/PROTEGER-LE-CODE.md` | l'exposition mesurée et la procédure |
+| `docs/DEWALT-SUFFIXES-A-SOURCER.csv` | les 33 suffixes sans source |
+| `archives/balayages/` + `INDEX.md` | **les 2 056 réponses brutes, enfin versées** |
 | `scripts/check-marques-suivies.js` | une marque vendue sans plan fait rougir la CI |
 | `scripts/check-cartographie.js` | les chiffres de la carte se relisent sur le disque |
 
-⚠️ `docs/CARTOGRAPHIE.md` a été remise à jour : elle annonçait **207 produits**
-pour 1 708 réels et **12 contrôles** pour 65. Deux sections ajoutées : « où est
-la carte avant de toucher » et les **26 modules de `api/_lib/`**.
+⚠️ `docs/CARTOGRAPHIE.md` remise à jour : elle annonçait **207 produits** pour
+1 708 et **12 contrôles** pour 65.
 
 ---
 
-## 9. LA PREMIÈRE CHOSE À FAIRE DANS LA NOUVELLE SESSION
+# PARTIE X — LA PREMIÈRE CHOSE À FAIRE
 
-1. Lire ce fichier en entier. *(fait, si vous lisez ceci)*
-2. `cd pirates-tools && node scripts/ci.js` — attendu : **6 demandes ouvertes**,
-   rien d'autre.
-3. `node tests/lancer.mjs --noyau` — attendu : **151/151, 9/9**.
-4. Confirmer à l'user que la nouvelle session voit le code, **puis** le laisser
-   basculer Vercel.
-5. Reprendre le plan à **`docs/PLAN-FINIR-DEWALT.md`**, phase 1.1 — les 33
-   suffixes, avec son aide.
+1. Lire ce document en entier. *(fait, si vous lisez ceci)*
+2. Lire `CLAUDE.md`, puis `.claude/PROTOCOLE.md`.
+3. `cd pirates-tools && node scripts/ci.js` → **6 demandes ouvertes**, rien d'autre.
+4. `node tests/lancer.mjs --noyau` → **151/151, 9/9**.
+5. Dire à l'user que la session voit le code, **puis** le laisser basculer Vercel.
+6. Reprendre à `docs/PLAN-FINIR-DEWALT.md`, **phase 1.1** — les 33 suffixes,
+   avec son aide.
 
 ⛔ **Ne rien annoncer comme mesuré sans avoir relancé la commande dans le tour
 courant.** C'est la faute la plus fréquente de cette session, et le garde-sortie
