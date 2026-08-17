@@ -295,7 +295,7 @@ règles LIVE = ce fichier firestore.rules. Si le fichier évolue → re-publier
 
 ---
 
-## 6. scripts/ci.js — 65 contrôles (doit rester VERT)
+## 6. scripts/ci.js — 66 contrôles (doit rester VERT)
 
 `check-required-ids` (IDs DOM présents) · `check-paths` (images référencées existent) ·
 `check-products-json` (schéma catalogue) · **`check-pricing`** (parité pricing.js ↔

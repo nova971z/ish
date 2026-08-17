@@ -114,6 +114,27 @@ qu'il a posée : s'améliorer en permanence, et laisser la trace.
 - Fichier servi modifié → bumper `sw.js` (`VERSION`, `ASSET_VER`) + `?v=` HTML.
 - Rien n'est « fait » sans preuve produite **et montrée**.
 
+### ⛔⛔ 5 ter. ON NE CODE QUE DANS LE DÉPÔT DE RÉFÉRENCE
+*(ordre de l'user, gravé le 17/08/2026, mot pour mot : « ne jamais rien coder
+dans ish ! Toujours pousser en master sur PIRATES-TOOLS-COM »)*
+
+**Dépôt de référence : `nova971z/PIRATES-TOOLS-COM`, branche `master`.**
+Privé, indépendant, c'est celui que l'hébergeur déploie.
+
+⛔ **`nova971z/ish` est PUBLIC, et c'est un FORK** — GitHub interdit d'en changer
+la visibilité. Tout commit poussé là est **republié en clair** et **n'arrive pas
+là où le site est déployé**.
+
+⚠️ **Mais on le GARDE accessible, et c'est voulu** : l'user l'a délibérément
+laissé branché pour qu'on puisse **vérifier** que le nouveau dépôt possède bien
+tout, et **rapatrier** ce que l'import n'a pas emporté (il photographie à un
+instant T ; ce qui suit n'y est pas).
+⇒ **On le LIT. On n'y ÉCRIT jamais.**
+
+*Porte* : `scripts/check-depot-de-reference.js` — elle lit `origin` et rougit
+sur tout autre dépôt. Elle ne peut pas intercepter un `git push` : elle rend
+l'erreur visible à chaque CI, et c'est le seul levier disponible — dit, pas caché.
+
 ### ⛔⛔ 5 bis. MA SESSION EST ÉPHÉMÈRE — UN TRAVAIL NON POUSSÉ N'EXISTE PAS
 *(gravé le 16/08/2026, sur ordre de l'user : « ça, ça ne doit plus arriver »)*
 Je tourne dans un **conteneur jetable**, reconstruit depuis le dernier commit

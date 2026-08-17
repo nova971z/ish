@@ -91,6 +91,32 @@ les données brutes sont bien arrivées.
 
 ---
 
+# PARTIE I ter — ⛔ LA RÈGLE DU DÉPÔT
+
+*Ordre de l'user, 17/08/2026, mot pour mot :*
+> « **ne jamais rien coder dans ish ! Toujours pousser en master sur
+> PIRATES-TOOLS-COM** »
+
+| | |
+|---|---|
+| dépôt de référence | **`nova971z/PIRATES-TOOLS-COM`**, branche **`master`** |
+| l'ancien `nova971z/ish` | **PUBLIC**, et c'est un **fork** — visibilité non modifiable |
+| ce qu'on y fait | ⛔ **on le LIT, on n'y ÉCRIT jamais** |
+| pourquoi il reste branché | l'user l'a voulu : **vérifier** que le nouveau a tout, et **rapatrier** ce que l'import n'a pas emporté |
+
+**Porte** : `scripts/check-depot-de-reference.js`, branchée dans la CI. Elle lit
+`origin` et **rougit sur tout autre dépôt** que celui de référence. Tant que la
+session tourne sur l'ancien, la CI est rouge — c'est le comportement juste, et
+elle redevient verte d'elle-même dans le bon dépôt.
+⚠️ Elle **ne peut pas** intercepter un `git push` : une porte de CI n'arrête pas
+une commande. Elle rend l'erreur visible à chaque exécution — dit, pas caché.
+
+**Aussi gravé dans** : `.claude/PROTOCOLE.md` §5 ter *(réinjecté à chaque
+message)* et dans l'entonnoir, intention « **Où pousser — dépôt de référence,
+branche, déménagement** ».
+
+---
+
 # PARTIE II — L'ÉTAT MESURÉ *(17/08/2026)*
 
 | | |

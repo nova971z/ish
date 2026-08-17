@@ -277,6 +277,7 @@ var reqDeploi   = safeRequire('./check-deploiement', 'check-deploiement');
 var reqPlanTrq  = safeRequire('./check-plan-traqueur', 'check-plan-traqueur');
 var reqMarqSui  = safeRequire('./check-marques-suivies', 'check-marques-suivies');
 var reqCarto    = safeRequire('./check-cartographie', 'check-cartographie');
+var reqDepotRef = safeRequire('./check-depot-de-reference', 'check-depot-de-reference');
 var reqVisuels  = safeRequire('./check-visuels', 'check-visuels');
 var reqEssai    = safeRequire('./check-mode-essai', 'check-mode-essai');
 var reqClasser  = safeRequire('./check-classer-idealo', 'check-classer-idealo');
@@ -395,6 +396,7 @@ var reqReconc   = safeRequire('./check-reconciliation', 'check-reconciliation');
   await runOne(reqPlanTrq,  'check-plan-traqueur');
   await runOne(reqMarqSui,  'check-marques-suivies');
   await runOne(reqCarto,    'check-cartographie');
+  await runOne(reqDepotRef, 'check-depot-de-reference');
   await runOne(reqRevolut,  'check-revolut');
   await runOne(reqReconc,   'check-reconciliation');
 

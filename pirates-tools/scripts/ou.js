@@ -325,6 +325,25 @@ var INDEX = [
     fini: 'le harnais rend PLUS d\'assertions qu\'avant, check-ancres vert, et la correction est prouvée par sabotage.'
   },
   {
+    intention: 'Où pousser — dépôt de référence, branche, déménagement',
+    mots: ['pousser', 'push', 'dépôt', 'depot', 'repo', 'remote', 'origin',
+           'branche', 'branch', 'master', 'github', 'ish', 'pirates-tools-com',
+           'commit', 'livrer', 'déménagement', 'demenagement', 'privé', 'prive'],
+    fichiers: ['docs/PROTEGER-LE-CODE.md', 'docs/REPRISE-SESSION-17-08.md'],
+    fonctions: [],
+    protege: ['scripts/check-depot-de-reference.js', 'outils/verifier-pousse.mjs',
+              'scripts/check-fuites.js'],
+    regles: ['.claude/rules/build.md'],
+    pieges: ['\u26d4\u26d4 R\u00c8GLE DE L\'USER, 17/08/2026, MOT POUR MOT : « ne jamais rien coder dans ish ! Toujours pousser en master sur PIRATES-TOOLS-COM ». Le d\u00e9p\u00f4t de r\u00e9f\u00e9rence est **PIRATES-TOOLS-COM**, priv\u00e9 et ind\u00e9pendant. Porte : check-depot-de-reference.',
+             '\u26a0\ufe0f L\'ancien d\u00e9p\u00f4t `ish` reste LISIBLE, et c\'est VOULU : l\'user l\'a laiss\u00e9 accessible pour qu\'on v\u00e9rifie que le nouveau poss\u00e8de bien tout, et qu\'on rapatrie ce que l\'import n\'a pas emport\u00e9. On le LIT, on n\'y \u00c9CRIT jamais.',
+             '\u26d4 `ish` est PUBLIC et c\'est un FORK : GitHub interdit d\'en changer la visibilit\u00e9 (« You cannot change the visibility of a fork »). Tout commit pouss\u00e9 l\u00e0 est republi\u00e9 en clair, et n\'arrive pas l\u00e0 o\u00f9 l\'h\u00e9bergeur d\u00e9ploie.',
+             '\u26d4 Un travail non pouss\u00e9 n\'existe pas : la session est \u00e9ph\u00e9m\u00e8re, le conteneur repart du dernier commit (PROTOCOLE \u00a75 bis, pay\u00e9 le 14/08 par la perte d\'une pr\u00e9paration enti\u00e8re).',
+             '\u26d4 Fin de lot : `node outils/verifier-pousse.mjs` puis les mots EXACTS « pouss\u00e9, build non prouv\u00e9 ». Jamais « d\u00e9ploy\u00e9 » : la session ne voit ni le site ni l\'API de l\'h\u00e9bergeur (CONNECT 403, mesur\u00e9 et d\u00e9finitif).',
+             '\u26a0\ufe0f L\'import GitHub photographie le d\u00e9p\u00f4t \u00e0 un instant T : ce qui est pouss\u00e9 apr\u00e8s n\'y est pas. V\u00e9rifier `git log --oneline HEAD..ancien/master` avant de conclure que tout est arriv\u00e9.'],
+    decisions: [],
+    fini: 'check-depot-de-reference vert (donc `origin` = PIRATES-TOOLS-COM), CI et noyau verts, `verifier-pousse` lanc\u00e9, et la formulation « pouss\u00e9, build non prouv\u00e9 ».'
+  },
+  {
     intention: 'Traqueur de prix — sources fournisseur, ruptures, relevés',
     mots: ['traqueur', 'tracker', 'relevé', 'releve', 'rupture', 'stock',
            'cotebrico', 'clickoutil', 'source', 'fournisseur', 'price-watch', 'coût', 'cout',
