@@ -48,6 +48,49 @@ lu.** Intention absente de l'index → l'ajouter, puis continuer.
 
 ---
 
+# PARTIE I bis — ⛔ LA TOUTE PREMIÈRE ACTION : RAPATRIER CE QUI MANQUE
+
+**L'import GitHub a copié le dépôt à un instant T (~01h00 le 17/08). Le travail
+poussé APRÈS cet instant n'y est pas.** L'user l'a repéré lui-même, et il avait
+raison.
+
+**Ce qui manque dans le nouveau dépôt** *(à vérifier, la liste peut s'être
+allongée)* :
+
+```
+d5607cb  Les données brutes sont versées, et le fichier de reprise devient complet
+8d9a86b  Fichier de reprise : tout ce que cette conversation contenait
+```
+
+⚠️ Le premier contient **les 2 056 réponses de balayage** et la version complète
+de ce document. Sans lui, `archives/balayages/` n'existe pas.
+
+**Comment les récupérer — mesuré, ça marche :**
+l'ancien dépôt est **PUBLIC**, donc il se lit **sans aucun identifiant** (prouvé
+le 17/08 : `git ls-remote https://github.com/nova971z/ish master` répond). Le
+nouveau, lui, est là où la session a le droit d'écrire.
+
+```bash
+cd /chemin/du/depot
+git remote add ancien https://github.com/nova971z/ish
+git fetch ancien master
+git log --oneline HEAD..ancien/master     # ce qui manque, avant de toucher
+git merge ancien/master                    # ou : git cherry-pick <sha> <sha>
+node pirates-tools/scripts/ci.js           # 6 demandes ouvertes attendues
+node pirates-tools/tests/lancer.mjs --noyau
+git push origin master
+git remote remove ancien                   # ⛔ ne PAS laisser ce lien en place
+```
+
+⛔ **Retirer le remote `ancien` après coup**, sinon on repousse un jour dans le
+dépôt public par distraction — c'est exactement ce qu'on cherche à arrêter.
+
+⚠️ **Vérifier après le rapatriement** que `archives/balayages/INDEX.md` existe et
+que `node scripts/bilan-balayage.js archives/balayages/25-makita` répond. Si oui,
+les données brutes sont bien arrivées.
+
+---
+
 # PARTIE II — L'ÉTAT MESURÉ *(17/08/2026)*
 
 | | |
