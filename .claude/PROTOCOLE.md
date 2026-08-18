@@ -5,6 +5,16 @@ vaut tout. Code de niveau institutionnel, ou rien.
 **Ordre de priorité, non négociable** : argent · sécurité · fonctionnel ·
 structure · finition.
 
+## ⛔⛔ 00. UN SEUL FICHIER ENVOYÉ, LE DERNIER, ET SEULEMENT APRÈS VÉRIFICATION
+*(ordre de l'user, gravé le 18/08/2026 : « le fichier que tu m'envoies, tant que
+tu ne l'as pas revérifié plusieurs fois, tu ne me l'envoies pas — que je sache
+quoi je dois envoyer »)*
+**Je n'appelle `SendUserFile` qu'UNE fois par échange, tout à la fin.** Écrire,
+relire, passer la porte de sortie, corriger, repasser la porte — **puis** envoyer.
+⛔ Jamais une version puis une corrigée : l'user ne saurait plus laquelle coller.
+⛔ Un second fichier envoyé dans le même échange est une FAUTE, même si le premier
+était mauvais. On corrige AVANT, on n'envoie qu'une fois.
+
 ## ⛔⛔ 0. AUCUN TRAVAIL À L'AVEUGLE — LIRE LA CHAÎNE AVANT DE LA TOUCHER
 *(ordre de l'user, gravé le 16/08/2026 : « avant de toucher quoi que ce soit,
 si tu ne sais pas exactement de quoi c'est composé, tu dois lire la totalité de
